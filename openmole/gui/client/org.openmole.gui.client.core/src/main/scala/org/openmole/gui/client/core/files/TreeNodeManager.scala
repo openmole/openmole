@@ -17,6 +17,7 @@ package org.openmole.gui.client.core.files
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import org.openmole.gui.client.core.files.FileToolBar.SelectedTool
 import org.openmole.gui.client.core.{ CoreUtils, AlertPanel }
 import org.openmole.gui.ext.data.SafePath
 import rx._
@@ -38,7 +39,7 @@ class TreeNodeManager {
 
   val comment: Var[Option[TreeNodeComment]] = Var(None)
 
-  val selectionMode: Var[Boolean] = Var(false)
+  val selectionMode: Var[Option[SelectedTool]] = Var(None)
 
   val selected: Var[Seq[TreeNode]] = Var(Seq())
 
@@ -72,12 +73,16 @@ class TreeNodeManager {
 
   def setSelectedAsCopied = {
     copied() = selected()
-    selectionMode() = false
+    selectionMode() = None
+
   }
 
   def emptyCopied = copied() = Seq()
 
-  def setSelection = selectionMode() = true
+  def setSelection(selectedTool: SelectedTool) = selectionMode() = selectionMode() match {
+    case Some(s: SelectedTool) ⇒ if (s == selectedTool) None else Some(selectedTool)
+    case _                     ⇒ Some(selectedTool)
+  }
 
   def setFilesInError(question: String, files: Seq[SafePath], okaction: () ⇒ Unit, cancelaction: () ⇒ Unit) = error() = Some(TreeNodeError(question, files, okaction, cancelaction))
 
@@ -89,7 +94,7 @@ class TreeNodeManager {
   }
 
   def switchOffSelection = {
-    selectionMode() = false
+    selectionMode() = None
     resetSelection
   }
 
@@ -121,8 +126,4 @@ class TreeNodeManager {
 
   def isProjectsEmpty = sons().getOrElse(root, Seq()).isEmpty
 
-  private def selection = selectionMode() match {
-    case true ⇒ Some(false)
-    case _    ⇒ None
-  }
 }

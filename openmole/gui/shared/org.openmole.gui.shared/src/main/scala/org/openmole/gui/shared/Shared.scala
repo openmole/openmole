@@ -41,11 +41,13 @@ trait Api {
   def deleteFiles(safePath: Seq[SafePath], context: ServerFileSytemContext): Unit
   def temporaryFile(): SafePath
   def exists(safePath: SafePath): Boolean
+  def existsExcept(exception: TreeNodeData, exceptItSelf: Boolean): Boolean
   def extractAndTestExistence(safePathToTest: SafePath, in: SafePath): Seq[SafePath]
   def treeNodeData(safePaths: Seq[TreeNodeData]): Seq[TreeNodeData]
   def listFiles(path: SafePath): Seq[TreeNodeData]
   def mdToHtml(safePath: SafePath): String
   def move(from: SafePath, to: SafePath): Unit
+  def replicate(treeNodeData: TreeNodeData): TreeNodeData
   def copyAllTmpTo(tmpSafePath: SafePath, to: SafePath): Unit
   def testExistenceAndCopyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Seq[SafePath]
   def copyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Unit

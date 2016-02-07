@@ -90,9 +90,9 @@ object OMTags {
       todo
     }))
 
-  def glyphSpan(rxString: Rx[String])(todo: ⇒ Unit): TypedTag[HTMLSpanElement] =
+  def glyphSpan(rxString: Rx[String])(todo: () ⇒ Unit): TypedTag[HTMLSpanElement] =
     tags.span(cursor := "pointer", `class` := rxString, onclick := { () ⇒
-      todo
+      todo()
     })
 
   private def cbSpan(name: String) = tags.span(name, style := "position: relative; margin-right:5px; margin-left:5px; top: -3px;")

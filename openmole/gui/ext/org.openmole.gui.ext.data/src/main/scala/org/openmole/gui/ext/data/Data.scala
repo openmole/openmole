@@ -234,7 +234,6 @@ case class TreeNodeData(
                          name: String,
                          safePath: SafePath,
                          isDirectory: Boolean,
-                         isPlugin: Boolean,
                          size: Long,
                          readableSize: String)
 

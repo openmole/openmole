@@ -1,15 +1,14 @@
 package org.openmole.gui.client.core.files
 
 import org.openmole.gui.client.core.AbsolutePositioning.FileZone
-import org.openmole.gui.client.core.{ panels, AlertPanel, PanelTriggerer, OMPost }
+import org.openmole.gui.client.core.{ AlertPanel, PanelTriggerer, OMPost }
 import org.openmole.gui.client.core.CoreUtils
 import org.openmole.gui.ext.data._
 import org.openmole.gui.misc.utils.Utils
 import org.openmole.gui.shared._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs, ClassKeyAggregator }
 import org.scalajs.dom.html.{ Input }
-import org.scalajs.dom.raw.{ HTMLTableElement, HTMLDivElement, DragEvent }
-import scala.concurrent.Future
+import org.scalajs.dom.raw.{ HTMLDivElement, DragEvent }
 import scalatags.JsDom.all._
 import scalatags.JsDom.{ TypedTag, tags ⇒ tags }
 import org.openmole.gui.misc.js.{ _ }
@@ -40,7 +39,8 @@ import bs._
  */
 
 class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
-  val toBeEdited: Var[Option[TreeNode]] = Var(None)
+  case class NodeEdition(node: TreeNode, replicateMode: Boolean = false)
+  val toBeEdited: Var[Option[NodeEdition]] = Var(None)
   val dragState: Var[String] = Var("")
   val draggedNode: Var[Option[TreeNode]] = Var(None)
   val fileDisplayer = new FileDisplayer
@@ -106,7 +106,9 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
 
   def computeAndDraw = manager.computeCurrentSons(() ⇒ drawTree)
 
-  def refreshAndDraw = CoreUtils.refreshCurrentDirectory(() ⇒ drawTree)
+  def refreshAndDraw = refreshAnd(() ⇒ drawTree)
+
+  def refreshAnd(todo: () ⇒ Unit) = CoreUtils.refreshCurrentDirectory(todo)
 
   def drawTree: Unit = {
     manager.computeAndGetCurrentSons.map { sons ⇒
@@ -155,10 +157,10 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
 
   def clickableElement(tn: TreeNode,
                        classType: String,
-                       todo: () ⇒ Unit) =
+                       todo: () ⇒ Unit) = {
     toBeEdited() match {
-      case Some(etn: TreeNode) ⇒
-        if (etn == tn) {
+      case Some(etn: NodeEdition) ⇒
+        if (etn.node.path == tn.path) {
           editNodeInput.value = tn.name()
           tags.tr(
             tags.div(`class` := "edit-node",
@@ -167,7 +169,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
                 onsubmit := {
                   () ⇒
                     {
-                      renameNode(tn, editNodeInput.value)
+                      renameNode(tn, editNodeInput.value, etn.replicateMode)
                       false
                     }
                 }
@@ -178,10 +180,15 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
         else ReactiveLine(tn, classType, todo).render
       case _ ⇒ ReactiveLine(tn, classType, todo).render
     }
+  }
+
+  def stringAlert(message: String, okaction: () ⇒ Unit) =
+    AlertPanel.string(message, okaction, zone = FileZone()
+    )
 
   def trashNode(treeNode: TreeNode): Unit = {
     fileDisplayer.tabs -- treeNode
-    AlertPanel.string(s"Do you really want to delete ${
+    stringAlert(s"Do you really want to delete ${
       treeNode.name()
     }?",
       () ⇒ {
@@ -190,20 +197,25 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
             fileDisplayer.tabs.checkTabs
             refreshAndDraw
         }
-      }, zone = FileZone()
-    )
+      })
   }
 
-  def renameNode(treeNode: TreeNode, newName: String) =
-    fileDisplayer.tabs.saveAllTabs(() ⇒
-      OMPost[Api].renameFile(treeNode, newName).call().foreach {
-        newNode ⇒
-          fileDisplayer.tabs.rename(treeNode, newNode)
-          refreshAndDraw
-          toBeEdited() = None
-          fileDisplayer.tabs.checkTabs
+  def renameNode(treeNode: TreeNode, newName: String, replicateMode: Boolean) = {
+    def rename = OMPost[Api].renameFile(treeNode, newName).call().foreach { newNode ⇒
+      fileDisplayer.tabs.rename(treeNode, newNode)
+      toBeEdited() = None
+      refreshAndDraw
+      fileDisplayer.tabs.checkTabs
+    }
+
+    fileDisplayer.tabs.saveAllTabs(() ⇒ {
+      OMPost[Api].existsExcept(treeNode.cloneWithName(newName), replicateMode).call().foreach { b ⇒
+        if (b) stringAlert(s"${newName} already exists, overwrite ?", () ⇒ rename)
+        else rename
       }
+    }
     )
+  }
 
   def dropAction(tn: TreeNode) = {
     (e: DragEvent) ⇒
@@ -275,7 +287,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
       ).tooltip(tn.name(), condition = () ⇒ tn.name().length > 24),
       Rx {
         manager.selectionMode() match {
-          case true ⇒
+          case Some(_) ⇒
             tags.div(`class` := "file-info")(checkbox.onlyBox)
           case _ ⇒ tags.div(`class` := "file-info")(
             tags.span(`class` := "file-size")(tags.i(tn.readableSize)),
@@ -285,7 +297,10 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
               }
             })(
               glyphSpan(glyph_trash, () ⇒ trashNode(tn))(id := "glyphtrash", `class` := "glyphitem file-glyph"),
-              glyphSpan(glyph_edit, () ⇒ toBeEdited() = Some(tn))(`class` := "glyphitem file-glyph"),
+              glyphSpan(glyph_edit, () ⇒ {
+                toBeEdited() = Some(NodeEdition(tn))
+                drawTree
+              })(`class` := "glyphitem file-glyph"),
               a(glyphSpan(glyph_download_alt, () ⇒ Unit)(`class` := "glyphitem file-glyph"),
                 href := s"downloadFile?path=${Utils.toURI(tn.safePath().path)}"),
               tn.safePath().extension match {
@@ -295,11 +310,21 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
                   }
                 })(`class` := "glyphitem file-glyph")
                 case _ ⇒
-              } /*,
-              if (tn.isPlugin) glyphSpan(OMTags.glyph_plug, () ⇒
-                OMPost[Api].autoAddPlugins(tn.safePath()).call().foreach { p ⇒
-                  panels.pluginTriggerer.open
-                })(`class` := "glyphitem file-glyph")*/
+              },
+              glyphSpan(OMTags.glyph_arrow_right_and_left, () ⇒ CoreUtils.replicate(tn, (replicated: TreeNodeData) ⇒ {
+                refreshAnd(() ⇒ {
+                  toBeEdited() = Some(NodeEdition(replicated, true))
+                  drawTree
+                }
+                )
+              })
+              )(`class` := "glyphitem file-glyph")
+
+            /*,
+                    if (tn.isPlugin) glyphSpan(OMTags.glyph_plug, () ⇒
+                      OMPost[Api].autoAddPlugins(tn.safePath()).call().foreach { p ⇒
+                        panels.pluginTriggerer.open
+                      })(`class` := "glyphitem file-glyph")*/
             )
           )
         }

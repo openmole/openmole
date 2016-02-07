@@ -130,6 +130,8 @@ object ApiImpl extends Api {
 
   def exists(safePath: SafePath): Boolean = Utils.exists(safePath)
 
+  def existsExcept(exception: TreeNodeData, exceptItSelf: Boolean): Boolean = Utils.existsExcept(exception, exceptItSelf)
+
   def copyFromTmp(tmpSafePath: SafePath, filesToBeMovedTo: Seq[SafePath]): Unit = Utils.copyFromTmp(tmpSafePath, filesToBeMovedTo)
 
   def copyAllTmpTo(tmpSafePath: SafePath, to: SafePath): Unit = Utils.copyAllTmpTo(tmpSafePath, to)
@@ -204,6 +206,8 @@ object ApiImpl extends Api {
     Utils.move(fromFile, toFile)
   }
 
+  def replicate(treeNodeData: TreeNodeData): TreeNodeData = Utils.replicate(treeNodeData)
+
   def mdToHtml(safePath: SafePath): String = {
     import org.openmole.gui.ext.data.ServerFileSytemContext.project
 
@@ -220,7 +224,7 @@ object ApiImpl extends Api {
     val targetFile = new File(filePath.parent, name)
 
     Files.move(safePathToFile(filePath), targetFile, StandardCopyOption.REPLACE_EXISTING)
-    TreeNodeData(name, targetFile, false, false, 0L, "")
+    TreeNodeData(name, targetFile, false, 0L, "")
   }
 
   def renameKey(keyName: String, newName: String): Unit =
