@@ -18,6 +18,7 @@
 package org.openmole.plugin.tool.sftpserver
 
 import java.io.File
+import java.util.concurrent.atomic.AtomicBoolean
 import org.apache.sshd.common.file.root.{ RootedFileSystemProvider }
 import org.apache.sshd.server.SshServer
 import org.apache.sshd.common.file._
@@ -37,13 +38,14 @@ object SFTPServer extends Logger
 import SFTPServer.Log._
 
 class SFTPServer(path: File, login: String, password: String, port: Int) {
-  logger.fine(s"Starting sftp server on port $port with path $path")
 
-  def fileSystem = new RootedFileSystemProvider().newFileSystem(path.toPath, Map.empty[String, Object])
+  @volatile var started = false
 
-  val sshd = SshServer.setUpDefaultServer
+  lazy val sshd = {
+    val sshd = SshServer.setUpDefaultServer
 
-  {
+    def fileSystem = new RootedFileSystemProvider().newFileSystem(path.toPath, Map.empty[String, Object])
+
     sshd.setPort(port)
     sshd.setSubsystemFactories(List(new SftpSubsystemFactory))
     sshd.setCommandFactory(new ScpCommandFactory)
@@ -57,14 +59,13 @@ class SFTPServer(path: File, login: String, password: String, port: Int) {
       }
     })
     sshd.setKeyPairProvider(new SimpleGeneratorHostKeyProvider)
-
-    start
+    sshd
   }
 
   override def finalize = background { stop }
 
-  def start = sshd.start
-
-  def stop = sshd.stop
+  def startIfNeeded = sshd.synchronized { if (!started) start; started = true }
+  def start = sshd.synchronized { sshd.start }
+  def stop = sshd.synchronized { if (started) sshd.stop; started = false }
 
 }
