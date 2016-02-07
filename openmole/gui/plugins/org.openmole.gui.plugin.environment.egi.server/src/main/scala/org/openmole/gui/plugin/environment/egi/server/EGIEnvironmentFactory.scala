@@ -17,17 +17,16 @@ package org.openmole.gui.plugin.environment.egi.server
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.core.workspace.Workspace
+import org.openmole.core.workspace.Workspace._
 import org.openmole.gui.plugin.environment.egi.ext.EGIEnvironmentData
-import org.openmole.plugin.environment.egi.EGIEnvironment
+import org.openmole.plugin.environment.egi._
 import org.openmole.gui.ext.data.CoreObjectFactory
 
 import scala.util.Try
 
 class EGIEnvironmentFactory(val data: EGIEnvironmentData) extends CoreObjectFactory{
   def coreObject(): Try[Any] = Try {
-    EGIEnvironment(""
-    )(Workspace.authenticationProvider)
+    EGIEnvironment("")
   }
 
 }

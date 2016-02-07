@@ -23,9 +23,7 @@ import fr.iscpif.gridscale.ssh.SSHHost
 import java.net.URI
 import org.openmole.core.batch.control.LimitedAccess
 import org.openmole.core.batch.environment._
-import org.openmole.core.batch.storage.PersistentStorageService
-import org.openmole.core.batch.storage.StorageService
-import org.openmole.core.workspace.AuthenticationProvider
+import org.openmole.core.workspace._
 import org.openmole.plugin.environment.gridscale._
 import org.openmole.plugin.environment.ssh._
 
@@ -50,7 +48,7 @@ object SLURMEnvironment {
     workDirectory: Option[String] = None,
     threads: Option[Int] = None,
     storageSharedLocally: Boolean = false,
-    name: Option[String] = None)(implicit authentications: AuthenticationProvider) =
+    name: Option[String] = None)(implicit decrypt: Decrypt) =
     new SLURMEnvironment(
       user = user,
       host = host,
@@ -68,7 +66,7 @@ object SLURMEnvironment {
       workDirectory = workDirectory,
       threads = threads,
       storageSharedLocally = storageSharedLocally,
-      name = name)
+      name = name)(SSHAuthentication(user, host, port).apply)
 }
 
 import SLURMEnvironment._
@@ -90,11 +88,9 @@ class SLURMEnvironment(
     val workDirectory: Option[String],
     override val threads: Option[Int],
     val storageSharedLocally: Boolean,
-    override val name: Option[String])(implicit authentications: AuthenticationProvider) extends ClusterEnvironment with MemoryRequirement { env ⇒
+    override val name: Option[String])(val credential: fr.iscpif.gridscale.ssh.SSHAuthentication) extends ClusterEnvironment with MemoryRequirement { env ⇒
 
   type JS = SLURMJobService
-
-  @transient lazy val credential = SSHAuthentication(user, host, port)(authentications)(authentications)
 
   @transient lazy val jobService = new SLURMJobService with ThisHost {
     def queue = env.queue

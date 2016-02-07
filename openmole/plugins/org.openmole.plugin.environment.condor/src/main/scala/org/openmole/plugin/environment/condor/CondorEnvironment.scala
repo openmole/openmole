@@ -24,9 +24,7 @@ import fr.iscpif.gridscale.ssh.SSHHost
 import java.net.URI
 import org.openmole.core.batch.control.LimitedAccess
 import org.openmole.core.batch.environment._
-import org.openmole.core.batch.storage.PersistentStorageService
-import org.openmole.core.batch.storage.StorageService
-import org.openmole.core.workspace.AuthenticationProvider
+import org.openmole.core.workspace._
 import org.openmole.plugin.environment.gridscale._
 import org.openmole.plugin.environment.ssh._
 
@@ -50,7 +48,7 @@ object CondorEnvironment {
     requirements: Option[CondorRequirement] = None,
     threads: Option[Int] = None,
     storageSharedLocally: Boolean = false,
-    name: Option[String] = None)(implicit authentications: AuthenticationProvider) =
+    name: Option[String] = None)(implicit decrypt: Decrypt) =
     new CondorEnvironment(
       user = user,
       host = host,
@@ -64,7 +62,7 @@ object CondorEnvironment {
       requirements = requirements,
       threads = threads,
       storageSharedLocally = storageSharedLocally,
-      name = name)
+      name = name)(SSHAuthentication(user, host, port).apply)
 }
 
 class CondorEnvironment(
@@ -84,11 +82,9 @@ class CondorEnvironment(
     val requirements: Option[CondorRequirement],
     override val threads: Option[Int],
     val storageSharedLocally: Boolean,
-    override val name: Option[String])(implicit authentications: AuthenticationProvider) extends ClusterEnvironment with MemoryRequirement { env ⇒
+    override val name: Option[String])(val credential: fr.iscpif.gridscale.ssh.SSHAuthentication) extends ClusterEnvironment with MemoryRequirement { env ⇒
 
   type JS = CondorJobService
-
-  @transient lazy val credential = SSHAuthentication(user, host, port)(authentications)(authentications)
 
   @transient lazy val jobService = new CondorJobService with ThisHost {
     // TODO not available in the GridScale plugin yet

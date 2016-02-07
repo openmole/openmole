@@ -17,12 +17,8 @@
 
 package org.openmole.plugin.environment
 
-import org.openmole.core.workspace.Workspace
+import org.openmole.core.exception._
 
 package object egi {
-  private implicit def auth = Workspace.instance.authenticationProvider
-
-  lazy val complexsystems = EGIEnvironment("vo.complex-systems.eu")
-  lazy val biomed = EGIEnvironment("biomed")
-  lazy val francegrilles = EGIEnvironment("vo.france-grilles.fr")
+  implicit def egiAuthentication: EGIAuthentication = EGIAuthentication().getOrElse(throw new UserBadDataError("No authentication was found"))
 }

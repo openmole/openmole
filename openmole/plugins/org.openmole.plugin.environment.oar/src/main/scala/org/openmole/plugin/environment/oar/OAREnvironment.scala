@@ -21,7 +21,7 @@ import java.net.URI
 
 import org.openmole.core.batch.control.LimitedAccess
 import org.openmole.core.batch.environment._
-import org.openmole.core.workspace.AuthenticationProvider
+import org.openmole.core.workspace._
 import org.openmole.plugin.environment.ssh._
 
 import scala.concurrent.duration.Duration
@@ -42,7 +42,7 @@ object OAREnvironment {
     threads: Option[Int] = None,
     storageSharedLocally: Boolean = false,
     name: Option[String] = None,
-    bestEffort: Boolean = true)(implicit authentications: AuthenticationProvider) =
+    bestEffort: Boolean = true)(implicit decrypt: Decrypt) =
     new OAREnvironment(
       user = user,
       host = host,
@@ -57,7 +57,7 @@ object OAREnvironment {
       threads = threads,
       storageSharedLocally = storageSharedLocally,
       name = name,
-      bestEffort = bestEffort)
+      bestEffort = bestEffort)(SSHAuthentication(user, host, port).apply)
 }
 
 class OAREnvironment(
@@ -74,11 +74,9 @@ class OAREnvironment(
     override val threads: Option[Int],
     val storageSharedLocally: Boolean,
     override val name: Option[String],
-    val bestEffort: Boolean)(implicit authentications: AuthenticationProvider) extends ClusterEnvironment { env ⇒
+    val bestEffort: Boolean)(val credential: fr.iscpif.gridscale.ssh.SSHAuthentication) extends ClusterEnvironment { env ⇒
 
   type JS = OARJobService
-
-  @transient lazy val credential = SSHAuthentication(user, host, port)(authentications)(authentications)
 
   @transient lazy val jobService = new OARJobService with ThisHost {
     def queue = env.queue
