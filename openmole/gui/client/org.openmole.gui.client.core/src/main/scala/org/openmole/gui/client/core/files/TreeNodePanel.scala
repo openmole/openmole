@@ -1,15 +1,14 @@
 package org.openmole.gui.client.core.files
 
 import org.openmole.gui.client.core.AbsolutePositioning.FileZone
-import org.openmole.gui.client.core.{ panels, AlertPanel, PanelTriggerer, OMPost }
+import org.openmole.gui.client.core.{ AlertPanel, PanelTriggerer, OMPost }
 import org.openmole.gui.client.core.CoreUtils
 import org.openmole.gui.ext.data._
 import org.openmole.gui.misc.utils.Utils
 import org.openmole.gui.shared._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs, ClassKeyAggregator }
 import org.scalajs.dom.html.{ Input }
-import org.scalajs.dom.raw.{ HTMLTableElement, HTMLDivElement, DragEvent }
-import scala.concurrent.Future
+import org.scalajs.dom.raw.{ HTMLDivElement, DragEvent }
 import scalatags.JsDom.all._
 import scalatags.JsDom.{ TypedTag, tags ⇒ tags }
 import org.openmole.gui.misc.js.{ _ }
@@ -40,7 +39,8 @@ import bs._
  */
 
 class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
-  val toBeEdited: Var[Option[TreeNode]] = Var(None)
+  case class NodeEdition(node: TreeNode, replicateMode: Boolean = false)
+  val toBeEdited: Var[Option[NodeEdition]] = Var(None)
   val dragState: Var[String] = Var("")
   val draggedNode: Var[Option[TreeNode]] = Var(None)
   val fileDisplayer = new FileDisplayer
@@ -159,8 +159,8 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
                        classType: String,
                        todo: () ⇒ Unit) = {
     toBeEdited() match {
-      case Some(etn: TreeNode) ⇒
-        if (etn.path == tn.path) {
+      case Some(etn: NodeEdition) ⇒
+        if (etn.node.path == tn.path) {
           editNodeInput.value = tn.name()
           tags.tr(
             tags.div(`class` := "edit-node",
@@ -169,7 +169,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
                 onsubmit := {
                   () ⇒
                     {
-                      renameNode(tn, editNodeInput.value)
+                      renameNode(tn, editNodeInput.value, etn.replicateMode)
                       false
                     }
                 }
@@ -182,9 +182,13 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
     }
   }
 
+  def stringAlert(message: String, okaction: () ⇒ Unit) =
+    AlertPanel.string(message, okaction, zone = FileZone()
+    )
+
   def trashNode(treeNode: TreeNode): Unit = {
     fileDisplayer.tabs -- treeNode
-    AlertPanel.string(s"Do you really want to delete ${
+    stringAlert(s"Do you really want to delete ${
       treeNode.name()
     }?",
       () ⇒ {
@@ -193,19 +197,25 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
             fileDisplayer.tabs.checkTabs
             refreshAndDraw
         }
-      }, zone = FileZone()
-    )
+      })
   }
 
-  def renameNode(treeNode: TreeNode, newName: String) =
-    fileDisplayer.tabs.saveAllTabs(() ⇒
-      OMPost[Api].renameFile(treeNode, newName).call().foreach { newNode ⇒
-        fileDisplayer.tabs.rename(treeNode, newNode)
-        refreshAndDraw
-        toBeEdited() = None
-        fileDisplayer.tabs.checkTabs
+  def renameNode(treeNode: TreeNode, newName: String, replicateMode: Boolean) = {
+    def rename = OMPost[Api].renameFile(treeNode, newName).call().foreach { newNode ⇒
+      fileDisplayer.tabs.rename(treeNode, newNode)
+      toBeEdited() = None
+      refreshAndDraw
+      fileDisplayer.tabs.checkTabs
+    }
+
+    fileDisplayer.tabs.saveAllTabs(() ⇒ {
+      OMPost[Api].existsExcept(treeNode.cloneWithName(newName), replicateMode).call().foreach { b ⇒
+        if (b) stringAlert(s"${newName} already exists, overwrite ?", () ⇒ rename)
+        else rename
       }
+    }
     )
+  }
 
   def dropAction(tn: TreeNode) = {
     (e: DragEvent) ⇒
@@ -288,7 +298,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
             })(
               glyphSpan(glyph_trash, () ⇒ trashNode(tn))(id := "glyphtrash", `class` := "glyphitem file-glyph"),
               glyphSpan(glyph_edit, () ⇒ {
-                toBeEdited() = Some(tn)
+                toBeEdited() = Some(NodeEdition(tn))
                 drawTree
               })(`class` := "glyphitem file-glyph"),
               a(glyphSpan(glyph_download_alt, () ⇒ Unit)(`class` := "glyphitem file-glyph"),
@@ -303,7 +313,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
               },
               glyphSpan(OMTags.glyph_arrow_right_and_left, () ⇒ CoreUtils.replicate(tn, (replicated: TreeNodeData) ⇒ {
                 refreshAnd(() ⇒ {
-                  toBeEdited() = Some(replicated)
+                  toBeEdited() = Some(NodeEdition(replicated, true))
                   drawTree
                 }
                 )

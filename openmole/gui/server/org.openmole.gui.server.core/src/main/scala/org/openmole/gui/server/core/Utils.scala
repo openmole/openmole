@@ -269,6 +269,15 @@ object Utils {
     safePathToFile(safePath).exists
   }
 
+  def existsExcept(in: TreeNodeData, exceptItSelf: Boolean): Boolean = {
+    import org.openmole.gui.ext.data.ServerFileSytemContext.project
+    val li = listFiles(in.safePath.parent)
+    val count = li.count(_.safePath.path == in.safePath.path)
+
+    val bound = if (exceptItSelf) 1 else 0
+    if (count > bound) true else false
+  }
+
   def existsIn(safePaths: Seq[SafePath], to: SafePath): Seq[SafePath] = {
     safePaths.map { sp ⇒
       to ++ sp.name

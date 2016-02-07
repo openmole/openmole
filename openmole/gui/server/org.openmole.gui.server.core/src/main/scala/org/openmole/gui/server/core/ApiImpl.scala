@@ -130,6 +130,8 @@ object ApiImpl extends Api {
 
   def exists(safePath: SafePath): Boolean = Utils.exists(safePath)
 
+  def existsExcept(exception: TreeNodeData, exceptItSelf: Boolean): Boolean = Utils.existsExcept(exception, exceptItSelf)
+
   def copyFromTmp(tmpSafePath: SafePath, filesToBeMovedTo: Seq[SafePath]): Unit = Utils.copyFromTmp(tmpSafePath, filesToBeMovedTo)
 
   def copyAllTmpTo(tmpSafePath: SafePath, to: SafePath): Unit = Utils.copyAllTmpTo(tmpSafePath, to)

@@ -41,6 +41,7 @@ trait Api {
   def deleteFiles(safePath: Seq[SafePath], context: ServerFileSytemContext): Unit
   def temporaryFile(): SafePath
   def exists(safePath: SafePath): Boolean
+  def existsExcept(exception: TreeNodeData, exceptItSelf: Boolean): Boolean
   def extractAndTestExistence(safePathToTest: SafePath, in: SafePath): Seq[SafePath]
   def treeNodeData(safePaths: Seq[TreeNodeData]): Seq[TreeNodeData]
   def listFiles(path: SafePath): Seq[TreeNodeData]

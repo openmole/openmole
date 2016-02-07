@@ -57,6 +57,9 @@ sealed trait TreeNode {
   val size: Long
 
   val readableSize: String
+
+  def cloneWithName(newName: String) = FileNode(newName, Var(SafePath.sp(safePath().path.dropRight(1) :+ newName)), size, readableSize)
+
 }
 
 object TreeNode {
