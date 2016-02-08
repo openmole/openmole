@@ -125,7 +125,9 @@ object ApiImpl extends Api {
 
   def temporaryFile(): SafePath = {
     import org.openmole.gui.ext.data.ServerFileSytemContext.absolute
-    Files.createTempDirectory("openmoleGUI").toFile
+    val dir = Workspace.instance.newDir("openmoleGUI")
+    dir.mkdirs()
+    dir
   }
 
   def exists(safePath: SafePath): Boolean = Utils.exists(safePath)
