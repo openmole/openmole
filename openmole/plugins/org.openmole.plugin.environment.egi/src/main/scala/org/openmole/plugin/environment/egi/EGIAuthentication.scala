@@ -25,7 +25,7 @@ import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import java.nio.file.FileSystems
 import java.util.zip.GZIPInputStream
 import org.openmole.tool.file._
-import org.openmole.core.workspace.{ Workspace, AuthenticationProvider }
+import org.openmole.core.workspace._
 import EGIEnvironment._
 import org.globus.gsi.gssapi.GlobusGSSCredentialImpl
 import org.openmole.tool.logger.Logger
@@ -132,19 +132,24 @@ object EGIAuthentication extends Logger {
   }
 
   def update(a: EGIAuthentication) = Workspace.authentications.set(a)
-  def apply()(implicit authentications: AuthenticationProvider) = authentications(classOf[EGIAuthentication]).headOption
+
+  def apply() =
+    Workspace.authentications.allByCategory.
+      getOrElse(classOf[EGIAuthentication].getName, Seq.empty).
+      map(_.asInstanceOf[EGIAuthentication]).headOption
+
   def clear() = Workspace.authentications.clear[EGIAuthentication]
 
   def initialise(a: EGIAuthentication)(
     serverURLs: Seq[String],
     voName: String,
-    fqan: Option[String])(implicit authenticationProvider: AuthenticationProvider): () ⇒ GlobusAuthentication.Proxy =
+    fqan: Option[String])(implicit decrypt: Decrypt): () ⇒ GlobusAuthentication.Proxy =
     a match {
       case a: P12Certificate ⇒
         VOMSAuthentication.setCARepository(EGIAuthentication.CACertificatesDir)
         val p12 =
           P12VOMSAuthentication(
-            P12Authentication(a.certificate, a.password(authenticationProvider)),
+            P12Authentication(a.certificate, a.password),
             EGIEnvironment.proxyTime,
             serverURLs,
             voName,

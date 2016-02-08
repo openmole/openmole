@@ -27,7 +27,7 @@ import org.openmole.core.fileservice.FileService
 import org.openmole.core.updater.Updater
 import org.openmole.core.workflow.execution.ExecutionJob
 import org.openmole.core.workflow.job.Job
-import org.openmole.core.workspace.{ Workspace, ConfigurationLocation, AuthenticationProvider }
+import org.openmole.core.workspace._
 import fr.iscpif.gridscale.egi._
 import fr.iscpif.gridscale.egi.{ DIRACJobService ⇒ GSDIRACJobService }
 import concurrent.duration._
@@ -52,7 +52,7 @@ object DIRACEnvironment {
     cpuTime: Option[Duration] = None,
     openMOLEMemory: Option[Int] = None,
     debug: Boolean = false,
-    name: Option[String] = None)(implicit authentications: AuthenticationProvider) =
+    name: Option[String] = None)(implicit authentication: EGIAuthentication, decrypt: Decrypt) =
     new DIRACEnvironment(
       voName = voName,
       service = service,
@@ -65,7 +65,7 @@ object DIRACEnvironment {
       openMOLEMemory = openMOLEMemory,
       debug = debug,
       name = name
-    )(authentications)
+    )(authentication, decrypt)
 
 }
 
@@ -91,7 +91,7 @@ class DIRACEnvironment(
     val cpuTime: Option[Duration],
     override val openMOLEMemory: Option[Int],
     val debug: Boolean,
-    override val name: Option[String])(implicit authentications: AuthenticationProvider) extends BatchEnvironment with BDIIStorageServers with EGIEnvironmentId { env ⇒
+    override val name: Option[String])(implicit a: EGIAuthentication, decrypt: Decrypt) extends BatchEnvironment with BDIIStorageServers with EGIEnvironmentId { env ⇒
 
   type JS = DIRACJobService
 
@@ -109,15 +109,13 @@ class DIRACEnvironment(
 
   def executionJob(job: Job) = new DiracBatchExecutionJob(job, this)
 
-  def getAuthentication = authentications(classOf[EGIAuthentication]).headOption.getOrElse(throw new UserBadDataError("No authentication found for DIRAC"))
-
-  @transient lazy val authentication: P12Authentication = DIRACAuthentication.initialise(getAuthentication)(authentications)
+  @transient lazy val authentication: P12Authentication = DIRACAuthentication.initialise(a)(decrypt)
 
   @transient lazy val proxyCreator = {
-    EGIAuthentication.initialise(getAuthentication)(
+    EGIAuthentication.initialise(a)(
       vomsURLs,
       voName,
-      fqan)(authentications)
+      fqan)(decrypt)
   }
 
   @transient lazy val jobService = new DIRACJobService {

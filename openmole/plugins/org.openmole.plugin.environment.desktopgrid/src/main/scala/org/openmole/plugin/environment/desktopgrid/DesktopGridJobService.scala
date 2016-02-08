@@ -50,6 +50,7 @@ trait DesktopGridJobService extends JobService { js ⇒
   def results(jobId: String) = resultsDir.listFilesSafe.filter { _.getName.startsWith(jobId) }
 
   protected def _submit(serializedJob: SerializedJob): BatchJob = {
+    environment.server.startIfNeeded
     val jobId = new File(serializedJob.path).getName
     import serializedJob._
     val desktopJobMessage = new DesktopGridJobMessage(runtime.runtime, runtime.environmentPlugins, environment.openMOLEMemoryValue, inputFile)
@@ -81,6 +82,7 @@ trait DesktopGridJobService extends JobService { js ⇒
     jobSubmissionFile(j).delete
     timeStemps(j).foreach { _.delete }
     results(j).foreach { _.delete }
+    if (environment.submitted + environment.running == 0) environment.server.stop
   }
 
 }

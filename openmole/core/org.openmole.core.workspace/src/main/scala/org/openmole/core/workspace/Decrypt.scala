@@ -17,16 +17,14 @@
 
 package org.openmole.core.workspace
 
-object AuthenticationProvider {
+object Decrypt {
 
-  def apply(authentications: Map[String, Seq[Any]], password: String) = new AuthenticationProvider {
-    def apply[T](clazz: Class[T]) = authentications.getOrElse(clazz.getName, Seq.empty).map(_.asInstanceOf[T])
+  def apply(password: String) = new Decrypt {
     def decrypt(s: String) = Workspace.decrypt(s, password)
   }
 
 }
 
-trait AuthenticationProvider {
-  def apply[T](clazz: Class[T]): Seq[T]
+trait Decrypt {
   def decrypt(s: String): String
 }

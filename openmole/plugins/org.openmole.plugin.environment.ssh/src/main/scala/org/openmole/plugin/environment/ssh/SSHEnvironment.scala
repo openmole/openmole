@@ -21,7 +21,7 @@ import java.net.URI
 import org.openmole.core.batch.control._
 import org.openmole.core.batch.environment._
 import org.openmole.core.batch.storage.PersistentStorageService
-import org.openmole.core.workspace.{ Workspace, ConfigurationLocation, AuthenticationProvider }
+import org.openmole.core.workspace._
 import concurrent.duration._
 
 object SSHEnvironment {
@@ -47,7 +47,7 @@ object SSHEnvironment {
     openMOLEMemory: Option[Int] = None,
     threads: Option[Int] = None,
     storageSharedLocally: Boolean = false,
-    name: Option[String] = None)(implicit authentications: AuthenticationProvider) =
+    name: Option[String] = None)(implicit decrypt: Decrypt) =
     new SSHEnvironment(
       user = user,
       host = host,
@@ -58,7 +58,7 @@ object SSHEnvironment {
       openMOLEMemory = openMOLEMemory,
       threads = threads,
       storageSharedLocally = storageSharedLocally,
-      name = name)
+      name = name)(SSHAuthentication(user, host, port).apply)
 }
 
 import SSHEnvironment._
@@ -73,11 +73,10 @@ class SSHEnvironment(
     override val openMOLEMemory: Option[Int],
     override val threads: Option[Int],
     val storageSharedLocally: Boolean,
-    override val name: Option[String])(implicit authentications: AuthenticationProvider) extends SimpleBatchEnvironment with SSHPersistentStorage { env ⇒
+    override val name: Option[String])(val credential: fr.iscpif.gridscale.ssh.SSHAuthentication) extends SimpleBatchEnvironment with SSHPersistentStorage { env ⇒
 
   type JS = SSHJobService
 
-  @transient lazy val credential = SSHAuthentication(user, host, port)(authentications)(authentications)
   def id = new URI("ssh", env.user, env.host, env.port, null, null, null).toString
 
   val usageControl =

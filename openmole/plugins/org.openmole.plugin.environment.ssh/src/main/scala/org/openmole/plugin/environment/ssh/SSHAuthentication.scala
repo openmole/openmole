@@ -20,22 +20,24 @@ package org.openmole.plugin.environment.ssh
 import java.util.UUID
 
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.workspace.{ Workspace, AuthenticationProvider }
+import org.openmole.core.workspace._
+
+import scala.util.{ Success, Try }
 
 object SSHAuthentication {
 
   def address(login: String, host: String, port: Int) = s"$login@$host:$port"
 
-  def apply()(implicit authentications: AuthenticationProvider) = authentications(classOf[SSHAuthentication])
+  def apply() =
+    Workspace.authentications.allByCategory.getOrElse(classOf[SSHAuthentication].getName, Seq.empty).map(_.asInstanceOf[SSHAuthentication])
 
-  def apply(target: String)(implicit authentications: AuthenticationProvider): SSHAuthentication = {
-    val list = authentications(classOf[SSHAuthentication])
+  def apply(target: String): SSHAuthentication = {
+    val list = apply()
     val auth = list.reverse.find { e ⇒ target.matches(e.regexp) }
     auth.getOrElse(throw new UserBadDataError("No authentication method found for " + target))
   }
 
-  def apply(login: String, host: String, port: Int = 22)(implicit authentications: AuthenticationProvider): SSHAuthentication =
-    apply(address(login, host, port))(authentications)
+  def apply(login: String, host: String, port: Int = 22): SSHAuthentication = apply(address(login, host, port))
 
   def +=(a: SSHAuthentication) =
     Workspace.authentications.save[SSHAuthentication](a, eq)
@@ -46,6 +48,17 @@ object SSHAuthentication {
   def clear() = Workspace.authentications.clear[SSHAuthentication]
 
   private def eq(a1: SSHAuthentication, a2: SSHAuthentication) = (a1.login, a1.target) == (a2.login, a2.target)
+
+  def test(a: SSHAuthentication)(implicit authentications: Decrypt) = {
+    val targetFormat = "(.*):([0-9]*)".r
+
+    val (host, port) = a.target match {
+      case targetFormat(h, p) ⇒ h -> p.toInt
+      case h                  ⇒ (h, 22)
+    }
+
+    Try(fr.iscpif.gridscale.ssh.SSHJobService(host, port)(a.apply).home).map(_ ⇒ true)
+  }
 }
 
 trait SSHAuthentication {
@@ -53,7 +66,7 @@ trait SSHAuthentication {
   def login: String
   def regexp = ".*" + login + "@" + target + ".*"
 
-  def apply(implicit authenticationProvider: AuthenticationProvider): fr.iscpif.gridscale.ssh.SSHAuthentication
+  def apply(implicit decrypt: Decrypt): fr.iscpif.gridscale.ssh.SSHAuthentication
 
   override def toString = "Target = " + target
 }

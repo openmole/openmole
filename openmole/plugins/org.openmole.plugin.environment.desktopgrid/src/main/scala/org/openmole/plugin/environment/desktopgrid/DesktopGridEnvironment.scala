@@ -64,7 +64,7 @@ class DesktopGridEnvironment(
   type JS = DesktopGridJobService
 
   val path = Workspace.newDir()
-  new SFTPServer(path, login, password, port)
+  val server = new SFTPServer(path, login, password, port)
 
   val url = new URI("desktop", login, "localhost", port, null, null, null)
 

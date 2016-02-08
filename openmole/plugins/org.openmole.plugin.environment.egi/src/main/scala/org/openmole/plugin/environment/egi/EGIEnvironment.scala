@@ -178,7 +178,7 @@ object EGIEnvironment extends Logger {
     threads: Option[Int] = None,
     requirements: Option[String] = None,
     debug: Boolean = false,
-    name: Option[String] = None)(implicit authentications: AuthenticationProvider) =
+    name: Option[String] = None)(implicit authentication: EGIAuthentication, uncypher: Decrypt) =
     new EGIEnvironment(
       voName = voName,
       bdii = bdii.map(s => new URI(s)).getOrElse(new URI(Workspace.preference(EGIEnvironment.DefaultBDII))),
@@ -196,7 +196,7 @@ object EGIEnvironment extends Logger {
       threads = threads,
       requirements = requirements,
       debug = debug,
-      name = name)(authentications)
+      name = name)(authentication, uncypher)
 
   def proxyTime = Workspace.preferenceAsDuration(ProxyTime)
   def proxyRenewalRatio = Workspace.preferenceAsDouble(EGIEnvironment.ProxyRenewalRatio)
@@ -263,7 +263,7 @@ class EGIEnvironment(
     override val threads: Option[Int],
     val requirements: Option[String],
     val debug: Boolean,
-    override val name: Option[String])(implicit authentications: AuthenticationProvider) extends BatchEnvironment with MemoryRequirement with BDIIStorageServers with EGIEnvironmentId { env ⇒
+    override val name: Option[String])(implicit a: EGIAuthentication, decrypt: Decrypt) extends BatchEnvironment with MemoryRequirement with BDIIStorageServers with EGIEnvironmentId { env ⇒
 
   import EGIEnvironment._
 
@@ -285,14 +285,12 @@ class EGIEnvironment(
 
   def proxyCreator = authentication
 
-  @transient lazy val authentication = authentications(classOf[EGIAuthentication]).headOption match {
-    case Some(a) ⇒
+  @transient lazy val authentication =
       EGIAuthentication.initialise(a)(
         vomsURLs,
         voName,
-        fqan)(authentications)
-    case None ⇒ throw new UserBadDataError("No authentication has been initialized for EGI.")
-  }
+        fqan)(decrypt)
+
 
   @transient lazy val jobServices = {
     val bdiiWMS = bdiiServer.queryWMSLocations(voName)
