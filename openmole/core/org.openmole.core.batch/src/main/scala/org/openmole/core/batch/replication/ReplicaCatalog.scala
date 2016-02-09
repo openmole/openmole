@@ -182,7 +182,8 @@ object ReplicaCatalog extends Logger {
 
   def forPaths(paths: Seq[String]) = query { replicas.filter(_.path inSetBind paths).result }
 
-  def deleteReplicas(storage: StorageService) = query { replicas.filter { _.storage === storage.id }.delete }
+  def deleteReplicas(storage: StorageService): Unit = deleteReplicas(storage.id)
+  def deleteReplicas(storageId: String): Unit = query { replicas.filter { _.storage === storageId }.delete }
 
   def remove(id: Long) = query {
     logger.fine(s"Remove replica with id $id")

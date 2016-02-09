@@ -18,7 +18,6 @@
 package org.openmole.plugin.tool.sftpserver
 
 import java.io.File
-import java.util.concurrent.atomic.AtomicBoolean
 import org.apache.sshd.common.file.root.{ RootedFileSystemProvider }
 import org.apache.sshd.server.SshServer
 import org.apache.sshd.common.file._
@@ -35,9 +34,7 @@ import collection.JavaConversions._
 
 object SFTPServer extends Logger
 
-import SFTPServer.Log._
-
-class SFTPServer(path: File, login: String, password: String, port: Int) {
+class SFTPServer(path: File, port: Int, password: String) {
 
   @volatile var started = false
 
@@ -54,9 +51,8 @@ class SFTPServer(path: File, login: String, password: String, port: Int) {
     })
 
     sshd.setPasswordAuthenticator(new PasswordAuthenticator {
-      override def authenticate(username: String, pass: String, session: ServerSession) = {
-        username == login && pass == password
-      }
+      override def authenticate(username: String, pass: String, session: ServerSession) =
+        pass == password
     })
     sshd.setKeyPairProvider(new SimpleGeneratorHostKeyProvider)
     sshd
@@ -66,6 +62,6 @@ class SFTPServer(path: File, login: String, password: String, port: Int) {
 
   def startIfNeeded = sshd.synchronized { if (!started) start; started = true }
   def start = sshd.synchronized { sshd.start }
-  def stop = sshd.synchronized { if (started) sshd.stop; started = false }
+  def stop = sshd.synchronized { if (started) sshd.stop(true); started = false }
 
 }

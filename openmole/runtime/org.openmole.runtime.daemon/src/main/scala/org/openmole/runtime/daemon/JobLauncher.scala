@@ -62,21 +62,19 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
   val resultUploader = Executors.newSingleThreadScheduledExecutor(daemonThreadFactory)
 
   def launch(userHostPort: String, password: String, nbWorkers: Int) = {
-    val splitUser = userHostPort.split("@")
-    if (splitUser.size != 2) throw new UserBadDataError("Host must be formated as user@hostname")
-    val user = splitUser(0)
-    val splitHost = splitUser(1).split(":")
+    val host = userHostPort.split("@").last
+    val splitHost = host.split(":")
     val _port = if (splitHost.size == 2) splitHost(1).toInt else 22
     val _host = splitHost(0)
 
-    logger.info(s"Looking for jobs on ${_host} port ${_port} with user ${user}")
+    logger.info(s"Looking for jobs on ${_host} port ${_port}")
 
     val storage = new SimpleStorage with GridScaleStorage with CompressedTransfer {
 
       val storage = new SSHStorage {
         val host = _host
         override val port = _port
-        def credential = UserPassword(user, password)
+        def credential = UserPassword("", password)
         def timeout = Workspace.preferenceAsDuration(connectionTimeout)
       }
 
