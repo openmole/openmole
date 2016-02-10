@@ -43,7 +43,8 @@ object DIRACEnvironment {
 
   def apply(
     voName: String,
-    service: Option[(String, String)] = None,
+    service: Option[String] = None,
+    group: Option[String] = None,
     bdii: Option[String] = None,
     vomsURLs: Option[Seq[String]] = None,
     setup: Option[String] = None,
@@ -55,6 +56,7 @@ object DIRACEnvironment {
     new DIRACEnvironment(
       voName = voName,
       service = service,
+      group = group,
       bdii = bdii.map(new URI(_)).getOrElse(new URI(Workspace.preference(EGIEnvironment.DefaultBDII))),
       vomsURLs = vomsURLs.getOrElse(EGIAuthentication.getVMOSOrError(voName)),
       setup = setup.getOrElse("Dirac-Production"),
@@ -80,7 +82,8 @@ class DiracBatchExecutionJob(val job: Job, val environment: DIRACEnvironment) ex
 
 class DIRACEnvironment(
     val voName: String,
-    val service: Option[(String, String)],
+    val service: Option[String],
+    val group: Option[String],
     val bdii: URI,
     val vomsURLs: Seq[String],
     val setup: String,
