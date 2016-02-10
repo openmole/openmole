@@ -42,10 +42,13 @@ trait DIRACJobService extends GridScaleJobService { js ⇒
   def connections: Int
   def environment: DIRACEnvironment
 
-  @transient lazy val jobService: GSDIRACJobService =
-    GSDIRACJobService(
-      environment.service,
-      environment.group)(environment.authentication)
+  @transient lazy val jobService: GSDIRACJobService = {
+    val js = GSDIRACJobService(
+      environment.voName,
+      environment.service.map { case (service, group) ⇒ GSDIRACJobService.Service(service, group) })(environment.authentication)
+    js.delegate(environment.authentication.certificate, environment.authentication.password)
+    js
+  }
 
   @transient lazy val usageControl = new LimitedAccess(connections, Int.MaxValue)
 
