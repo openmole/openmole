@@ -46,8 +46,6 @@ object Core extends Defaults {
     (libraryDependencies ++= Seq(jasypt, xstream, apacheConfig, math)) dependsOn
     (exception, event, tools, replication, openmoleCrypto)
 
-  val fileDeleter = OsgiProject("filedeleter", imports = Seq("*")) dependsOn (tools)
-
   val macros = OsgiProject("macros", imports = Seq("*")) settings (libraryDependencies += scalaLang % "provided" /*, provided(scalaCompiler)*/ )
 
   val pluginManager = OsgiProject(
@@ -57,7 +55,7 @@ object Core extends Defaults {
 
   val updater = OsgiProject("updater", imports = Seq("*")) dependsOn (exception, tools, workspace)
 
-  val fileService = OsgiProject("fileservice", imports = Seq("*")) dependsOn (tools, updater, workspace, fileDeleter, openmoleTar % "provided")
+  val fileService = OsgiProject("fileservice", imports = Seq("*")) dependsOn (tools, updater, workspace, openmoleTar % "provided")
 
   val logging = OsgiProject(
     "logging",

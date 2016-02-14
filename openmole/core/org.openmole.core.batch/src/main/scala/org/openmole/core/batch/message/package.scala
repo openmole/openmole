@@ -19,7 +19,7 @@ package org.openmole.core.batch
 import java.io.File
 
 import org.openmole.core.exception.InternalProcessingError
-import org.openmole.core.filedeleter.FileDeleter
+import org.openmole.core.fileservice.FileDeleter
 import org.openmole.core.tools.service._
 import org.openmole.core.workflow.data.Context
 import org.openmole.core.workflow.execution.Environment.{ RuntimeLog }

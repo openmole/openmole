@@ -136,6 +136,12 @@ package file {
 
       def realPath = file.toPath.toRealPath()
 
+      def isDirectoryEmpty = {
+        val dirStream = Files.newDirectoryStream(file)
+        try !dirStream.iterator().hasNext()
+        finally dirStream.close
+      }
+
       def listFilesSafe = Option(file.listFiles).getOrElse(Array.empty)
 
       def listFilesSafe(filter: File ⇒ Boolean) = Option(file.listFiles(filter)).getOrElse(Array.empty)

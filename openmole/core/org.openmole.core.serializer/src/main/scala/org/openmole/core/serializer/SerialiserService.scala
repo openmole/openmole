@@ -17,7 +17,6 @@
 
 package org.openmole.core.serializer
 
-import com.thoughtworks
 import com.thoughtworks.xstream.XStream
 import java.io.File
 import java.io.FileInputStream
@@ -25,6 +24,7 @@ import java.io.InputStream
 import java.io.OutputStream
 import com.thoughtworks.xstream.core.ClassLoaderReference
 import com.thoughtworks.xstream.io.binary.BinaryStreamDriver
+import org.openmole.core.fileservice.FileDeleter
 import org.openmole.tool.file._
 import org.openmole.core.serializer.converter._
 import java.util.concurrent.locks.{ ReentrantReadWriteLock, ReadWriteLock }
@@ -102,7 +102,7 @@ object SerialiserService extends Logger {
     val contentFile = new File(archiveExtractDir, content)
     val obj = deserialiseReplaceFiles[T](contentFile, fileReplacement)
     contentFile.delete
-    archiveExtractDir.delete
+    FileDeleter.deleteWhenEmpty(archiveExtractDir)
     obj
   }
 

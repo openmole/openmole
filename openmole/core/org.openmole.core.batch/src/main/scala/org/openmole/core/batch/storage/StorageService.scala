@@ -21,12 +21,12 @@ import java.net.URI
 import java.nio.file._
 import java.util.concurrent.{ Callable, TimeUnit }
 import com.google.common.cache.CacheBuilder
+import org.openmole.core.fileservice.FileDeleter
 import org.openmole.core.tools.cache._
 import org.openmole.core.batch.control._
 import org.openmole.core.batch.environment._
 import org.openmole.core.batch.refresh._
 import org.openmole.core.batch.replication.ReplicaCatalog
-import org.openmole.core.filedeleter.FileDeleter
 import org.openmole.core.serializer._
 import org.openmole.core.workspace.{ Workspace, ConfigurationLocation }
 import fr.iscpif.gridscale.storage.{ ListEntry, FileType }

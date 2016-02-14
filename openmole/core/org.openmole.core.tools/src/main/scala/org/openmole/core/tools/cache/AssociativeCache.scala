@@ -23,26 +23,35 @@ import scala.collection.mutable.WeakHashMap
 
 class AssociativeCache[K, T] {
 
-  val cacheMaps = new WeakHashMap[Object, HashMap[K, T]] with SynchronizedMap[Object, HashMap[K, T]]
+  val cacheMaps = new WeakHashMap[Object, HashMap[K, T]]
 
-  def invalidateCache(cacheAssociation: Object, key: K) = {
-    val cache = cacheMaps.getOrElse(cacheAssociation, null)
-    if (cache != null) cache -= key
-  }
-
-  def cached(cacheAssociation: Object, key: K): Option[T] = {
-    cacheMaps.get(cacheAssociation) match {
-      case None      ⇒ None
-      case Some(map) ⇒ map.get(key)
+  def invalidateCache(cacheAssociation: Object, key: K) = cacheMaps.synchronized {
+    for { cache ← cacheMaps.get(cacheAssociation) } {
+      cache -= key
+      if (cache.isEmpty) cacheMaps.remove(cacheAssociation)
     }
   }
 
-  def cache(cacheAssociation: Object, key: K, cachable: ⇒ T): T = {
-    val cache = cacheMap(cacheAssociation)
-    return cache.getOrElseUpdate(key, cachable)
+  def cached(cacheAssociation: Object, key: K): Option[T] = cacheMaps.synchronized {
+    cacheMaps.get(cacheAssociation) match {
+      case None      ⇒ None
+      case Some(map) ⇒ map.synchronized { map.get(key) }
+    }
   }
 
-  def cacheMap(cacheAssociation: Object): HashMap[K, T] = {
-    cacheMaps.getOrElseUpdate(cacheAssociation, new HashMap[K, T] with SynchronizedMap[K, T])
+  def cache(cacheAssociation: Object, key: K, cacheable: ⇒ T): T = {
+    def cache = {
+      val computedCache = cacheable
+      cacheMaps.synchronized {
+        def cacheMap(cacheAssociation: Object): HashMap[K, T] =
+          cacheMaps.getOrElseUpdate(cacheAssociation, new HashMap[K, T])
+
+        val cache = cacheMap(cacheAssociation)
+        cache.getOrElseUpdate(key, computedCache)
+      }
+    }
+
+    cached(cacheAssociation, key).getOrElse(cache)
   }
+
 }

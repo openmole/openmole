@@ -21,8 +21,7 @@ import java.util.concurrent.TimeUnit
 
 import org.eclipse.osgi.service.environment.EnvironmentInfo
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
-import org.openmole.core.filedeleter.FileDeleter
-import org.openmole.core.fileservice.FileService
+import org.openmole.core.fileservice.{FileDeleter, FileService}
 import org.openmole.tool.file._
 import org.openmole.core.tools.service.{ Scaling, Random }
 import java.io.File

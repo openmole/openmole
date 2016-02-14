@@ -18,7 +18,6 @@
 package org.openmole.core.fileservice
 
 import java.io.File
-import org.openmole.core.filedeleter._
 import org.openmole.core.tools.cache.AssociativeCache
 import org.openmole.tool.hash._
 import org.openmole.core.updater.Updater
@@ -29,8 +28,6 @@ import org.openmole.tool.tar._
 object FileService {
   val GCInterval = new ConfigurationLocation("FileService", "GCInterval")
   Workspace += (GCInterval, "PT5M")
-
-  //class CachedArchiveForDir(file: File, val lastModified: Long) extends FileCacheDeleteOnFinalize(file)
 
   private[fileservice] val hashCache = new AssociativeCache[String, Hash]
   private[fileservice] val archiveCache = new AssociativeCache[String, FileCache]
@@ -47,8 +44,9 @@ object FileService {
   def hash(key: Object, file: File): Hash =
     hashCache.cache(
       key,
-      file.getAbsolutePath,
-      computeHash(if (file.isDirectory) archiveForDir(key, file).file else file))
+      file.getCanonicalPath,
+      computeHash(if (file.isDirectory) archiveForDir(key, file).file else file)
+    )
 
   def archiveForDir(key: Object, directory: File) = {
     archiveCache.cache(key, directory.getAbsolutePath, {

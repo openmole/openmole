@@ -22,8 +22,7 @@ import java.net.URI
 import fr.iscpif.gridscale.authentication.P12Authentication
 import org.openmole.core.batch.environment.{ BatchExecutionJob, BatchEnvironment }
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.filedeleter.FileDeleter
-import org.openmole.core.fileservice.FileService
+import org.openmole.core.fileservice.{ FileDeleter, FileService }
 import org.openmole.core.updater.Updater
 import org.openmole.core.workflow.execution.ExecutionJob
 import org.openmole.core.workflow.job.Job
