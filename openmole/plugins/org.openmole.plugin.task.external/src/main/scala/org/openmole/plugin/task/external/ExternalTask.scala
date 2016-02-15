@@ -101,8 +101,8 @@ trait ExternalTask extends Task {
     }
   }
 
-  protected def outputFileVariables(context: Context, tmpDir: File, workDirPath: String)(implicit rng: RandomProvider) = {
-    val workDir = new File(tmpDir, workDirPath)
+  protected def outputFileVariables(context: Context, tmpDir: File, workDirPath: Option[String])(implicit rng: RandomProvider) = {
+    val workDir = workDirPath.map(new File(tmpDir, _)).getOrElse(tmpDir)
 
     outputFiles.map {
       case OutputFile(name, prototype, inWorkDir) ⇒
@@ -123,8 +123,8 @@ trait ExternalTask extends Task {
 
   }
 
-  def prepareInputFiles(context: Context, tmpDir: File, workDirPath: String)(implicit rng: RandomProvider): Context = {
-    val workDir = new File(tmpDir, workDirPath)
+  def prepareInputFiles(context: Context, tmpDir: File, workDirPath: Option[String])(implicit rng: RandomProvider): Context = {
+    val workDir = workDirPath.map(new File(tmpDir, _)).getOrElse(tmpDir)
     workDir.mkdirs()
     def destination(f: ToPut) = if (f.inWorkDir) new File(workDir, f.name) else new File(tmpDir, f.name)
 
@@ -151,7 +151,7 @@ trait ExternalTask extends Task {
     context ++ copiedFiles ++ copiedArrayFiles
   }
 
-  def fetchOutputFiles(context: Context, tmpDir: File, workDirPath: String)(implicit rng: RandomProvider): Context = {
+  def fetchOutputFiles(context: Context, tmpDir: File, workDirPath: Option[String])(implicit rng: RandomProvider): Context = {
     val resultContext = context ++ outputFileVariables(context, tmpDir, workDirPath)
 
     def contextFiles =

@@ -35,10 +35,9 @@ trait JVMLanguageTask extends ExternalTask with Plugins {
 
   override def process(context: Context)(implicit rng: RandomProvider) = {
     val pwd = Workspace.newDir()
-    val workDir = ""
-    val preparedContext = prepareInputFiles(context, pwd.getCanonicalFile, workDir) + Variable(JVMLanguageTask.workDirectory, pwd)
+    val preparedContext = prepareInputFiles(context, pwd.getCanonicalFile, None) + Variable(JVMLanguageTask.workDirectory, pwd)
     val resultContext = processCode(preparedContext)
-    fetchOutputFiles(resultContext, pwd.getCanonicalFile, workDir)
+    fetchOutputFiles(resultContext, pwd.getCanonicalFile, None)
   }
 
   def processCode(context: Context)(implicit rng: RandomProvider): Context
