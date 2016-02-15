@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.filedeleter
+package org.openmole.core.fileservice
 
 import java.io.File
 

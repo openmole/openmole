@@ -21,8 +21,7 @@ import java.util.concurrent.TimeUnit
 
 import org.eclipse.osgi.service.environment.EnvironmentInfo
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
-import org.openmole.core.filedeleter.FileDeleter
-import org.openmole.core.fileservice.FileService
+import org.openmole.core.fileservice.{FileDeleter, FileService}
 import org.openmole.tool.file._
 import org.openmole.core.tools.service.{ Scaling, Random }
 import java.io.File
@@ -116,7 +115,7 @@ object EGIEnvironment extends Logger {
 
   Workspace += (ConnectionsBySRMSE, "10")
   Workspace += (ConnectionsByWMS, "10")
-  Workspace += (ConnectionsByWebDAVSE, "50")
+  Workspace += (ConnectionsByWebDAVSE, "10")
 
   Workspace += (ProxyRenewalRatio, "0.2")
   Workspace += (MinProxyRenewal, "PT5M")
@@ -164,7 +163,7 @@ object EGIEnvironment extends Logger {
   def apply(
     voName: String,
     bdii: Option[String] = None,
-    vomsURL: Option[String] = None,
+    vomsURLs: Option[Seq[String]] = None,
     fqan: Option[String] = None,
     openMOLEMemory: Option[Int] = None,
     memory: Option[Int] = None,
@@ -178,11 +177,11 @@ object EGIEnvironment extends Logger {
     threads: Option[Int] = None,
     requirements: Option[String] = None,
     debug: Boolean = false,
-    name: Option[String] = None)(implicit authentications: AuthenticationProvider) =
+    name: Option[String] = None)(implicit authentication: EGIAuthentication, uncypher: Decrypt) =
     new EGIEnvironment(
       voName = voName,
-      bdii = bdii.getOrElse(Workspace.preference(EGIEnvironment.DefaultBDII)),
-      vomsURL = vomsURL.getOrElse(EGIAuthentication.getVMOSOrError(voName)),
+      bdii = bdii.map(s => new URI(s)).getOrElse(new URI(Workspace.preference(EGIEnvironment.DefaultBDII))),
+      vomsURLs = vomsURLs.getOrElse(EGIAuthentication.getVMOSOrError(voName)),
       fqan = fqan,
       openMOLEMemory = openMOLEMemory,
       memory = memory,
@@ -196,7 +195,7 @@ object EGIEnvironment extends Logger {
       threads = threads,
       requirements = requirements,
       debug = debug,
-      name = name)(authentications)
+      name = name)(authentication, uncypher)
 
   def proxyTime = Workspace.preferenceAsDuration(ProxyTime)
   def proxyRenewalRatio = Workspace.preferenceAsDouble(EGIEnvironment.ProxyRenewalRatio)
@@ -248,8 +247,8 @@ class EGIBatchExecutionJob(val job: Job, val environment: EGIEnvironment) extend
 
 class EGIEnvironment(
     val voName: String,
-    val bdii: String,
-    val vomsURL: String,
+    val bdii: URI,
+    val vomsURLs: Seq[String],
     val fqan: Option[String],
     override val openMOLEMemory: Option[Int],
     val memory: Option[Int],
@@ -263,7 +262,7 @@ class EGIEnvironment(
     override val threads: Option[Int],
     val requirements: Option[String],
     val debug: Boolean,
-    override val name: Option[String])(implicit authentications: AuthenticationProvider) extends BatchEnvironment with MemoryRequirement with BDIIStorageServers with EGIEnvironmentId { env ⇒
+    override val name: Option[String])(implicit a: EGIAuthentication, decrypt: Decrypt) extends BatchEnvironment with MemoryRequirement with BDIIStorageServers with EGIEnvironmentId { env ⇒
 
   import EGIEnvironment._
 
@@ -285,17 +284,15 @@ class EGIEnvironment(
 
   def proxyCreator = authentication
 
-  @transient lazy val authentication = authentications(classOf[EGIAuthentication]).headOption match {
-    case Some(a) ⇒
+  @transient lazy val authentication =
       EGIAuthentication.initialise(a)(
-        vomsURL,
+        vomsURLs,
         voName,
-        fqan)(authentications)
-    case None ⇒ throw new UserBadDataError("No authentication has been initialized for EGI.")
-  }
+        fqan)(decrypt)
+
 
   @transient lazy val jobServices = {
-    val bdiiWMS = bdiiServer.queryWMSLocations(voName, Workspace.preferenceAsDuration(FetchResourcesTimeOut))
+    val bdiiWMS = bdiiServer.queryWMSLocations(voName)
     bdiiWMS.map {
       js ⇒
         new EGIJobService {
@@ -351,6 +348,6 @@ class EGIEnvironment(
     select(jss.toList, rate)
   }
 
-  def bdiiServer: BDII = new BDII(bdii)
+  def bdiiServer: BDII = BDII(bdii.getHost, bdii.getPort, Workspace.preferenceAsDuration(FetchResourcesTimeOut))
   override def runtimeSettings = super.runtimeSettings.copy(archiveResult = true)
 }

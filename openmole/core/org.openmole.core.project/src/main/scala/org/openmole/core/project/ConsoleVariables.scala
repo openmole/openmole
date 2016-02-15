@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 19/08/13 Romain Reuillon
+/**
+ * Created by Romain Reuillon on 22/01/16.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -9,24 +9,28 @@
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
  */
+package org.openmole.core.project
 
-package org.openmole.core.workspace
+import org.openmole.core.console._
+import org.openmole.tool.file._
 
-object AuthenticationProvider {
+object ConsoleVariables {
+  def empty = ConsoleVariables()
 
-  def apply(authentications: Map[String, Seq[Any]], password: String) = new AuthenticationProvider {
-    def apply[T](clazz: Class[T]) = authentications.getOrElse(clazz.getName, Seq.empty).map(_.asInstanceOf[T])
-    def decrypt(s: String) = Workspace.decrypt(s, password)
-  }
+  def bindVariables(loop: ScalaREPL, variables: ConsoleVariables, variablesName: String = "_variables_") =
+    loop.beQuietDuring {
+      loop.bind(variablesName, variables)
+      loop.eval(s"import $variablesName._")
+    }
 
 }
 
-trait AuthenticationProvider {
-  def apply[T](clazz: Class[T]): Seq[T]
-  def decrypt(s: String): String
-}
+case class ConsoleVariables(
+  args: Seq[String] = Seq.empty,
+  workDirectory: File = currentDirectory)

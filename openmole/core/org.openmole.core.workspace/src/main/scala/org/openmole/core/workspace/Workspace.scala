@@ -108,6 +108,8 @@ object Workspace {
 
   val instance = new Workspace(defaultLocation)
 
+  implicit def authenticationProvider = instance.authenticationProvider
+
 }
 
 class Workspace(val location: File) {
@@ -282,11 +284,7 @@ class Workspace(val location: File) {
 
   def persistent(name: String) = Persistent(persistentDir / name)
 
-  def authenticationProvider =
-    AuthenticationProvider(
-      authentications.allByCategory,
-      password
-    )
+  def authenticationProvider = Decrypt(password)
 
   lazy val authentications = new Persistent(persistentDir / Workspace.authenticationsLocation) with Authentication
 

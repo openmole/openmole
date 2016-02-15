@@ -1,6 +1,12 @@
 package org.openmole.gui.client.core
 
+import org.openmole.gui.client.core.files.{ TreeNode, DirNode }
 import org.openmole.gui.ext.data._
+import org.openmole.gui.shared.Api
+import autowire._
+import scala.concurrent.Future
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
 
 /*
  * Copyright (C) 22/12/15 // mathieu.leclaire@openmole.org
@@ -30,5 +36,64 @@ object CoreUtils {
 
     def updatedFirst(cond: T ⇒ Boolean, s: T): Seq[T] =
       sequence.find(cond).map { e ⇒ updatedFirst(e, s) }.getOrElse(sequence)
+  }
+
+  def withTmpFile(todo: SafePath ⇒ Unit): Unit = {
+    OMPost[Api].temporaryFile.call().foreach { tempFile ⇒
+      todo(tempFile)
+    }
+  }
+
+  def refreshCurrentDirectory(todo: () ⇒ Unit = () ⇒ {}) = manager.trashCache(todo)
+
+  def addDirectory(in: TreeNodeData, dirName: String, onadded: () ⇒ Unit = () ⇒ {}) =
+    OMPost[Api].addDirectory(in, dirName).call().foreach { b ⇒
+      if (b) {
+        refreshCurrentDirectory(onadded)
+      }
+    }
+
+  def addFile(in: TreeNodeData, fileName: String, onadded: () ⇒ Unit = () ⇒ {}) =
+    OMPost[Api].addFile(in, fileName).call().foreach { b ⇒
+      if (b) {
+        refreshCurrentDirectory(onadded)
+      }
+    }
+
+  def trashNode(path: SafePath)(ontrashed: () ⇒ Unit): Unit = {
+    OMPost[Api].deleteFile(path, ServerFileSytemContext.project).call().foreach { d ⇒
+      refreshAndSwitchSelection(ontrashed)
+    }
+  }
+
+  def trashNodes(paths: Seq[SafePath])(ontrashed: () ⇒ Unit): Unit = {
+    OMPost[Api].deleteFiles(paths, ServerFileSytemContext.project).call().foreach { d ⇒
+      refreshAndSwitchSelection(ontrashed)
+    }
+  }
+
+  def replicate(treeNode: TreeNode, onreplicated: (TreeNodeData) ⇒ Unit) = {
+    OMPost[Api].replicate(treeNode).call().foreach { r ⇒
+      onreplicated(r)
+    }
+  }
+
+  def refreshAndSwitchSelection(onrefreshed: () ⇒ Unit = () ⇒ {}) = {
+    refreshCurrentDirectory(onrefreshed)
+    manager.switchOffSelection
+  }
+
+  def testExistenceAndCopyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Future[Seq[SafePath]] =
+    OMPost[Api].testExistenceAndCopyProjectFilesTo(safePaths, to).call()
+
+  def copyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Future[Unit] =
+    OMPost[Api].copyProjectFilesTo(safePaths, to).call()
+
+  def updateSons(dirNode: DirNode, todo: () ⇒ Unit = () ⇒ {}) = {
+
+    OMPost[Api].listFiles(dirNode.safePath()).call().foreach { s ⇒
+      manager.updateSon(dirNode, s)
+      todo()
+    }
   }
 }

@@ -39,7 +39,7 @@ class Daemon extends IApplication {
 
       val parser = new OptionParser[Config]("OpenMOLE") {
         head("OpenMOLE deamon", "0.x")
-        opt[String]('h', "host") text ("user@hostname:port") action {
+        opt[String]('h', "host") text ("hostname:port") action {
           (v, c) ⇒ c.copy(host = Some(v))
         }
         opt[String]('p', "password") text ("password") action {

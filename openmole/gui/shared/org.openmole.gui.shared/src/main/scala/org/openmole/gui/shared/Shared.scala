@@ -37,18 +37,22 @@ trait Api {
   def addFile(treeNode: TreeNodeData, fileName: String): Boolean
   def extractTGZ(treeNodeData: TreeNodeData): Unit
   def deleteAuthenticationKey(keyName: String): Unit
-  def deleteFile(safePath: SafePath): Unit
+  def deleteFile(safePath: SafePath, context: ServerFileSytemContext): Unit
+  def deleteFiles(safePath: Seq[SafePath], context: ServerFileSytemContext): Unit
   def temporaryFile(): SafePath
   def exists(safePath: SafePath): Boolean
-  def existsIn(safePathToTest: SafePath, in: SafePath): Seq[SafePath]
+  def existsExcept(exception: TreeNodeData, exceptItSelf: Boolean): Boolean
+  def extractAndTestExistence(safePathToTest: SafePath, in: SafePath): Seq[SafePath]
   def treeNodeData(safePaths: Seq[TreeNodeData]): Seq[TreeNodeData]
-  def listFiles(path: TreeNodeData): Seq[TreeNodeData]
+  def listFiles(path: SafePath): Seq[TreeNodeData]
   def mdToHtml(safePath: SafePath): String
   def move(from: SafePath, to: SafePath): Unit
-  def moveAllTo(tmpSafePath: SafePath, to: SafePath): Unit
-  def moveFromTmp(tmpSafePath: SafePath, filesToBeMoved: Seq[SafePath]): Unit
+  def replicate(treeNodeData: TreeNodeData): TreeNodeData
+  def copyAllTmpTo(tmpSafePath: SafePath, to: SafePath): Unit
+  def testExistenceAndCopyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Seq[SafePath]
+  def copyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Unit
+  def copyFromTmp(tmpSafePath: SafePath, filesToBeMoved: Seq[SafePath]): Unit
   def uuid(): String = java.util.UUID.randomUUID.toString
-  def renameFileFromPath(filePath: SafePath, name: String): TreeNodeData
   def renameFile(treeNode: TreeNodeData, name: String): TreeNodeData
   def renameKey(keyName: String, newName: String): Unit
   def saveFile(path: SafePath, fileContent: String): Unit
@@ -77,6 +81,6 @@ trait Api {
   def models(archivePath: SafePath): Seq[SafePath]
   def classes(jarPath: SafePath): Seq[ClassTree]
   def methods(jarPath: SafePath, className: String): Seq[JarMethod]
-  def buildModelTask(executableName: String, scriptName: String, command: String, language: Language, inputs: Seq[ProtoTypePair], outputs: Seq[ProtoTypePair], path: SafePath, imports: Option[String], libraries: Option[String]): TreeNodeData
+  def buildModelTask(executableName: String, scriptName: String, command: String, language: Language, inputs: Seq[ProtoTypePair], outputs: Seq[ProtoTypePair], path: SafePath, imports: Option[String], libraries: Option[String], resources: Resources): TreeNodeData
   def expandResources(resources: Resources): Resources
 }

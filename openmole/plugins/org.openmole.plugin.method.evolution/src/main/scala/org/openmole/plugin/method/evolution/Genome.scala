@@ -36,8 +36,7 @@ object InputConverter {
       val input = scales.head
       val (variable, tail) =
         scaled(input, genome).map {
-          case ScaledScalar(p, v) ⇒
-            assert(!v.isNaN); Variable(p, v) -> genome.tail
+          case ScaledScalar(p, v)   ⇒ Variable(p, v) -> genome.tail
           case ScaledSequence(p, v) ⇒ Variable(p, v) -> genome.drop(input.size)
         }.from(context)(rng)
 

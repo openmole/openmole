@@ -17,15 +17,16 @@
 
 package org.openmole.plugin.environment.egi
 
+import java.net.URI
+
 import fr.iscpif.gridscale.authentication.P12Authentication
 import org.openmole.core.batch.environment.{ BatchExecutionJob, BatchEnvironment }
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.filedeleter.FileDeleter
-import org.openmole.core.fileservice.FileService
+import org.openmole.core.fileservice.{ FileDeleter, FileService }
 import org.openmole.core.updater.Updater
 import org.openmole.core.workflow.execution.ExecutionJob
 import org.openmole.core.workflow.job.Job
-import org.openmole.core.workspace.{ Workspace, ConfigurationLocation, AuthenticationProvider }
+import org.openmole.core.workspace._
 import fr.iscpif.gridscale.egi._
 import fr.iscpif.gridscale.egi.{ DIRACJobService ⇒ GSDIRACJobService }
 import concurrent.duration._
@@ -41,29 +42,29 @@ object DIRACEnvironment {
 
   def apply(
     voName: String,
-    service: String,
+    service: Option[String] = None,
     group: Option[String] = None,
     bdii: Option[String] = None,
-    vomsURL: Option[String] = None,
+    vomsURLs: Option[Seq[String]] = None,
     setup: Option[String] = None,
     fqan: Option[String] = None,
     cpuTime: Option[Duration] = None,
     openMOLEMemory: Option[Int] = None,
     debug: Boolean = false,
-    name: Option[String] = None)(implicit authentications: AuthenticationProvider) =
+    name: Option[String] = None)(implicit authentication: EGIAuthentication, decrypt: Decrypt) =
     new DIRACEnvironment(
       voName = voName,
       service = service,
-      group = group.getOrElse(voName + "_user"),
-      bdii = bdii.getOrElse(Workspace.preference(EGIEnvironment.DefaultBDII)),
-      vomsURL = vomsURL.getOrElse(EGIAuthentication.getVMOSOrError(voName)),
+      group = group,
+      bdii = bdii.map(new URI(_)).getOrElse(new URI(Workspace.preference(EGIEnvironment.DefaultBDII))),
+      vomsURLs = vomsURLs.getOrElse(EGIAuthentication.getVMOSOrError(voName)),
       setup = setup.getOrElse("Dirac-Production"),
       fqan = fqan,
       cpuTime = cpuTime,
       openMOLEMemory = openMOLEMemory,
       debug = debug,
       name = name
-    )(authentications)
+    )(authentication, decrypt)
 
 }
 
@@ -80,16 +81,16 @@ class DiracBatchExecutionJob(val job: Job, val environment: DIRACEnvironment) ex
 
 class DIRACEnvironment(
     val voName: String,
-    val service: String,
-    val group: String,
-    val bdii: String,
-    val vomsURL: String,
+    val service: Option[String],
+    val group: Option[String],
+    val bdii: URI,
+    val vomsURLs: Seq[String],
     val setup: String,
     val fqan: Option[String],
     val cpuTime: Option[Duration],
     override val openMOLEMemory: Option[Int],
     val debug: Boolean,
-    override val name: Option[String])(implicit authentications: AuthenticationProvider) extends BatchEnvironment with BDIIStorageServers with EGIEnvironmentId { env ⇒
+    override val name: Option[String])(implicit a: EGIAuthentication, decrypt: Decrypt) extends BatchEnvironment with BDIIStorageServers with EGIEnvironmentId { env ⇒
 
   type JS = DIRACJobService
 
@@ -103,19 +104,17 @@ class DIRACEnvironment(
     super.submit(job)
   }
 
-  def bdiiServer: BDII = new BDII(bdii)
+  def bdiiServer: BDII = BDII(bdii.getHost, bdii.getPort, Workspace.preferenceAsDuration(EGIEnvironment.FetchResourcesTimeOut))
 
   def executionJob(job: Job) = new DiracBatchExecutionJob(job, this)
 
-  def getAuthentication = authentications(classOf[EGIAuthentication]).headOption.getOrElse(throw new UserBadDataError("No authentication found for DIRAC"))
-
-  @transient lazy val authentication: P12Authentication = DIRACAuthentication.initialise(getAuthentication)(authentications)
+  @transient lazy val authentication: P12Authentication = DIRACAuthentication.initialise(a)(decrypt)
 
   @transient lazy val proxyCreator = {
-    EGIAuthentication.initialise(getAuthentication)(
-      vomsURL,
+    EGIAuthentication.initialise(a)(
+      vomsURLs,
       voName,
-      fqan)(authentications)
+      fqan)(decrypt)
   }
 
   @transient lazy val jobService = new DIRACJobService {

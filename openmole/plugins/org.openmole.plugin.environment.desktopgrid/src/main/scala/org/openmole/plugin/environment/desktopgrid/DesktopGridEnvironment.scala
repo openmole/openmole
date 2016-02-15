@@ -20,14 +20,11 @@ package org.openmole.plugin.environment.desktopgrid
 import java.io.File
 
 import org.openmole.core.batch.environment._
+import org.openmole.core.batch.jobservice.JobService
 import org.openmole.core.batch.storage._
 import org.openmole.core.batch.control._
-import org.openmole.core.workspace.Workspace
-import org.openmole.plugin.environment.gridscale.GridScaleStorage
 
-import org.openmole.plugin.tool.sftpserver.SFTPServer
-import java.net.URI
-import fr.iscpif.gridscale.storage.{ LocalStorage ⇒ GSLocalStorage, FileType }
+import org.openmole.tool.thread._
 
 object DesktopGridEnvironment {
   val timeStempsDirName = "timeStemps"
@@ -39,15 +36,11 @@ object DesktopGridEnvironment {
 
   def apply(
     port: Int,
-    login: String,
-    password: String,
     openMOLEMemory: Option[Int] = None,
     threads: Option[Int] = None,
     name: Option[String] = None) =
     new DesktopGridEnvironment(
       port = port,
-      login = login,
-      password = password,
       openMOLEMemory = openMOLEMemory,
       threads = threads,
       name = name)
@@ -55,32 +48,16 @@ object DesktopGridEnvironment {
 
 class DesktopGridEnvironment(
     val port: Int,
-    val login: String, password: String,
     override val openMOLEMemory: Option[Int],
     override val threads: Option[Int],
     override val name: Option[String]) extends SimpleBatchEnvironment { env ⇒
 
-  type SS = VolatileStorageService
-  type JS = DesktopGridJobService
+  type SS = StorageService
+  type JS = JobService
 
-  val path = Workspace.newDir()
-  new SFTPServer(path, login, password, port)
+  lazy val service = DesktopGridService.borrow(port)
 
-  val url = new URI("desktop", login, "localhost", port, null, null, null)
-
-  @transient override lazy val storage = new VolatileStorageService with GridScaleStorage with CompressedTransfer {
-    val usageControl = new UnlimitedAccess
-    def environment = env
-    val remoteStorage: RemoteStorage = new DumyStorage
-    def url = env.url
-    def root = "/"
-    val storage = new RelativeStorage(path)
-    val id = url.toString
-  }
-
-  @transient override lazy val jobService =
-    new DesktopGridJobService {
-      def environment = env
-    }
-
+  override def finalize() = background { DesktopGridService.release(port) }
+  override val storage = service.storage(this, port)
+  override val jobService = service.jobService(this, port)
 }

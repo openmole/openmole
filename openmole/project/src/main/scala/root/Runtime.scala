@@ -12,19 +12,19 @@ object Runtime extends Defaults(runtime.REST) {
     libraryDependencies ++= Seq(h2, slf4j, xstream))
 
   val runtime = OsgiProject("org.openmole.runtime.runtime", singleton = true, imports = Seq("*")) dependsOn (Core.workflow, Core.batch, Core.serializer, Core.logging, Core.event, Core.exception) settings
-    (includeOsgi, bundleType += "runtime", libraryDependencies ++= Seq(scalaLang, scopt, equinoxCommon, equinoxApp))
+    (bundleType += "runtime", libraryDependencies ++= Seq(scalaLang, scopt, equinoxCommon, equinoxApp, equinoxOSGi))
 
   val daemon = OsgiProject("org.openmole.runtime.daemon", singleton = true, imports = Seq("*")) dependsOn (Core.workflow, Core.workflow, Core.batch, Core.workspace,
     Core.fileService, Core.exception, Core.tools, Core.logging, plugin.Environment.desktopgrid) settings
-    (includeOsgi, bundleType += "daemon",
-      libraryDependencies ++= Seq(scalaLang, logging, jodaTime, scopt, equinoxCommon, equinoxApp, gridscaleSSH))
+    (bundleType += "daemon",
+      libraryDependencies ++= Seq(scalaLang, logging, jodaTime, scopt, equinoxCommon, equinoxApp, gridscaleSSH, equinoxOSGi))
 
-  lazy val console = OsgiProject("org.openmole.console", imports = Seq("*")) settings (
-    organization := "org.openmole.console",
+  lazy val console = OsgiProject("org.openmole.runtime.console", imports = Seq("*")) settings (
     libraryDependencies += upickle
   ) dependsOn (
       Core.workflow,
       Core.console,
+      Core.project,
       Core.dsl,
       Core.batch,
       Core.buildinfo

@@ -1,9 +1,8 @@
 package org.openmole.gui.server.core
 
 import org.openmole.gui.ext.data._
+import org.openmole.gui.ext.data.DataUtils._
 import scala.io.Source
-import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
-import scala.reflect.runtime.{ universe ⇒ ru }
 import org.openmole.gui.server.core.Utils._
 
 /*
@@ -127,7 +126,7 @@ object CodeParsing {
   }
 
   def netlogoParsing(safePath: SafePath): LaunchingCommand = {
-
+    import org.openmole.gui.ext.data.ServerFileSytemContext.project
     val lines = Source.fromFile(safePath).getLines.toArray
 
     def parse(lines: Seq[(String, Int)], args: Seq[ProtoTypePair], outputs: Seq[ProtoTypePair]): (Seq[ProtoTypePair], Seq[ProtoTypePair]) = {
@@ -140,13 +139,9 @@ object CodeParsing {
         else if (line.startsWith("INPUTBOX")) parse(tail, args :+ parseInputBox(index), outputs)
         else if (line.startsWith("CHOOSER")) parse(tail, args :+ parseChooser(index), outputs)
         else if (line.startsWith("MONITOR")) parse(tail, args, outputs ++ parseMonitor(index))
-        else if (line.startsWith("PLOT")) parse(tail, args, outputs ++ parsePlot(index))
+        // else if (line.startsWith("PLOT")) parse(tail, args, outputs ++ parsePlot(index))
         else parse(tail, args, outputs)
       }
-    }
-
-    implicit class CleanName(s: String) {
-      def clean = s.split('-').reduce(_ + _.capitalize).filterNot(Seq('?').contains)
     }
 
     def parseSlider(start: Int): ProtoTypePair = {
@@ -165,17 +160,9 @@ object CodeParsing {
     }
 
     def parseMonitor(start: Int): Seq[ProtoTypePair] = {
-      val name = lines(start + 6).clean.split(' ')
+      val name = lines(start + 6).split(' ')
       if (name.size == 1) Seq(ProtoTypePair(name.head.clean, ProtoTYPE.DOUBLE, mapping = Some(name.head)))
       else Seq()
-    }
-
-    def parsePlot(start: Int): Seq[ProtoTypePair] = (lines(start + 6).split(',') ++ lines(start + 7).split(',')).map {
-      _.replaceAll(" ", "")
-    }.filterNot { v ⇒
-      Seq("ticks", "time").contains(v)
-    }.map {
-      n ⇒ ProtoTypePair(n.clean, ProtoTYPE.DOUBLE, mapping = Some(n))
     }
 
     def parseChooser(start: Int): ProtoTypePair = {

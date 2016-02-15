@@ -45,19 +45,19 @@ trait BDIIStorageServers extends BatchEnvironment { env ⇒
 
   def bdiiServer: BDII
   def voName: String
+  def debug: Boolean
   def proxyCreator: () ⇒ GlobusAuthentication.Proxy
 
   @transient lazy val storages = {
-    def timeout = Workspace.preferenceAsDuration(EGIEnvironment.FetchResourcesTimeOut)
-    val webdavStorages = bdiiServer.queryWebDAVLocations(voName, timeout)
+    val webdavStorages = bdiiServer.queryWebDAVLocations(voName)
     if (!webdavStorages.isEmpty) {
       logger.fine("Use webdav storages:" + webdavStorages.mkString(","))
-      webdavStorages.map { s ⇒ EGIWebDAVStorageService(s, env, proxyCreator) }
+      webdavStorages.map { s ⇒ EGIWebDAVStorageService(s, env, voName, debug, proxyCreator) }
     }
     else {
-      val srmStorages = bdiiServer.querySRMLocations(voName, timeout)
+      val srmStorages = bdiiServer.querySRMLocations(voName)
       logger.fine("Use srm storages:" + srmStorages.mkString(","))
-      srmStorages.map { s ⇒ EGISRMStorageService(s, env, proxyCreator) }
+      srmStorages.map { s ⇒ EGISRMStorageService(s, env, voName, proxyCreator) }
     }
   }
 
@@ -71,7 +71,7 @@ trait BDIIStorageServers extends BatchEnvironment { env ⇒
     lazy val sizes = usedFileHashes.map { case (f, _) ⇒ f -> f.size }.toMap
     lazy val totalFileSize = sizes.values.sum
 
-    lazy val onStorage = ReplicaCatalog.withSession(ReplicaCatalog.inCatalog(_))
+    lazy val onStorage = ReplicaCatalog.inCatalog
     lazy val maxTime = nonEmpty.map(_.usageControl.time).max
     lazy val minTime = nonEmpty.map(_.usageControl.time).min
 

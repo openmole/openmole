@@ -18,7 +18,7 @@
 package org.openmole.plugin.environment.ssh
 
 import org.openmole.core.batch.authentication.CypheredPassword
-import org.openmole.core.workspace.AuthenticationProvider
+import org.openmole.core.workspace._
 
 object LoginPassword {
 
@@ -34,7 +34,7 @@ class LoginPassword(
     val cypheredPassword: String,
     val target: String) extends SSHAuthentication with CypheredPassword { a ⇒
 
-  def apply(implicit authenticationProvider: AuthenticationProvider) =
+  def apply(implicit decrypt: Decrypt) =
     fr.iscpif.gridscale.authentication.UserPassword(a.login, a.password)
 
   override def toString = super.toString + ", Login / password, login = " + login

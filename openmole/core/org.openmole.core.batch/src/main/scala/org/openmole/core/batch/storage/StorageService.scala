@@ -21,19 +21,17 @@ import java.net.URI
 import java.nio.file._
 import java.util.concurrent.{ Callable, TimeUnit }
 import com.google.common.cache.CacheBuilder
+import org.openmole.core.fileservice.FileDeleter
 import org.openmole.core.tools.cache._
 import org.openmole.core.batch.control._
 import org.openmole.core.batch.environment._
 import org.openmole.core.batch.refresh._
 import org.openmole.core.batch.replication.ReplicaCatalog
-import org.openmole.core.filedeleter.FileDeleter
 import org.openmole.core.serializer._
 import org.openmole.core.workspace.{ Workspace, ConfigurationLocation }
 import fr.iscpif.gridscale.storage.{ ListEntry, FileType }
 import java.io._
 import org.openmole.tool.logger.Logger
-
-import scala.slick.driver.H2Driver.simple._
 
 object StorageService extends Logger {
 
@@ -50,7 +48,7 @@ trait StorageService extends BatchService with Storage {
   val id: String
   val remoteStorage: RemoteStorage
 
-  def persistentDir(implicit token: AccessToken, session: Session): String
+  def persistentDir(implicit token: AccessToken): String
   def tmpDir(implicit token: AccessToken): String
 
   @transient private lazy val _directoryCache =
@@ -71,8 +69,8 @@ trait StorageService extends BatchService with Storage {
 
   protected implicit def callable[T](f: () ⇒ T): Callable[T] = new Callable[T]() { def call() = f() }
 
-  def clean(implicit token: AccessToken, session: Session) = {
-    ReplicaCatalog.onStorage(this).delete
+  def clean(implicit token: AccessToken) = {
+    ReplicaCatalog.deleteReplicas(this)
     rmDir(baseDir)
     directoryCache.invalidateAll
   }
@@ -110,8 +108,8 @@ trait StorageService extends BatchService with Storage {
   def rmDir(path: String)(implicit token: AccessToken): Unit = token.access { _rmDir(path) }
   def rmFile(path: String)(implicit token: AccessToken): Unit = token.access { _rmFile(path) }
   def mv(from: String, to: String)(implicit token: AccessToken) = token.access { _mv(from, to) }
-  def openInputStream(path: String)(implicit token: AccessToken): InputStream = token.access { _openInputStream(path) }
-  def openOutputStream(path: String)(implicit token: AccessToken): OutputStream = token.access { _openOutputStream(path) }
+  def downloadStream(path: String, options: TransferOptions = TransferOptions.default)(implicit token: AccessToken): InputStream = token.access { _downloadStream(path, options) }
+  def uploadStream(is: InputStream, path: String, options: TransferOptions = TransferOptions.default)(implicit token: AccessToken): Unit = token.access { _uploadStream(is, path, options) }
 
   def parent(path: String): Option[String] = _parent(path)
   def name(path: String) = _name(path)

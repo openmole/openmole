@@ -15,15 +15,12 @@ object Core extends Defaults {
   implicit val artifactPrefix = Some("org.openmole.core")
 
   lazy val workflow = OsgiProject("workflow", imports = Seq("*")) settings (
-    includeOsgi,
-    libraryDependencies ++= Seq(scalaLang, math, scalatest, scalaz)
+    libraryDependencies ++= Seq(scalaLang, math, scalatest, scalaz, equinoxOSGi)
   ) dependsOn
     (event, exception, tools, updater, workspace, macros, pluginManager, serializer, output, console, replication % "test")
 
   lazy val serializer = OsgiProject("serializer", global = true, imports = Seq("*")) settings
-    (includeOsgi,
-      libraryDependencies += xstream) dependsOn
-      (workspace, pluginManager, fileService, tools, openmoleTar)
+    (libraryDependencies += xstream, libraryDependencies += equinoxOSGi) dependsOn (workspace, pluginManager, fileService, tools, openmoleTar)
 
   lazy val batch = OsgiProject("batch", imports = Seq("*")) dependsOn (
     workflow, workspace, tools, event, replication, updater, exception,
@@ -35,9 +32,8 @@ object Core extends Defaults {
   val exception = OsgiProject("exception", imports = Seq("*"))
 
   val tools = OsgiProject("tools", global = true, imports = Seq("*")) settings
-    (includeOsgi,
-      libraryDependencies ++= Seq(xstream, exec, math, jodaTime, scalaLang, scalatest)) dependsOn
-      (exception, openmoleTar, openmoleFile, openmoleLock, openmoleThread, openmoleHash, openmoleLogger, openmoleStream, openmoleCollection, openmoleStatistics, openmoleTypes)
+    (libraryDependencies ++= Seq(xstream, exec, math, jodaTime, scalaLang, scalatest, equinoxOSGi)) dependsOn
+    (exception, openmoleTar, openmoleFile, openmoleLock, openmoleThread, openmoleHash, openmoleLogger, openmoleStream, openmoleCollection, openmoleStatistics, openmoleTypes)
 
   val event = OsgiProject("event", imports = Seq("*")) dependsOn (tools) settings (
     libraryDependencies += scalatest
@@ -47,22 +43,19 @@ object Core extends Defaults {
     libraryDependencies ++= Seq(slick, xstream))
 
   val workspace = OsgiProject("workspace", imports = Seq("*")) settings
-    (includeOsgi, libraryDependencies ++= Seq(jasypt, xstream, apacheConfig, math)) dependsOn
+    (libraryDependencies ++= Seq(jasypt, xstream, apacheConfig, math)) dependsOn
     (exception, event, tools, replication, openmoleCrypto)
-
-  val fileDeleter = OsgiProject("filedeleter", imports = Seq("*")) settings (includeOsgi) dependsOn (tools)
 
   val macros = OsgiProject("macros", imports = Seq("*")) settings (libraryDependencies += scalaLang % "provided" /*, provided(scalaCompiler)*/ )
 
   val pluginManager = OsgiProject(
     "pluginmanager",
     bundleActivator = Some("org.openmole.core.pluginmanager.internal.Activator"), imports = Seq("*")
-  ) settings
-    (includeOsgi) dependsOn (exception, tools, workspace)
+  ) dependsOn (exception, tools, workspace)
 
   val updater = OsgiProject("updater", imports = Seq("*")) dependsOn (exception, tools, workspace)
 
-  val fileService = OsgiProject("fileservice", imports = Seq("*")) settings (includeOsgi) dependsOn (tools, updater, workspace, fileDeleter, openmoleTar % "provided")
+  val fileService = OsgiProject("fileservice", imports = Seq("*")) dependsOn (tools, updater, workspace, openmoleTar % "provided")
 
   val logging = OsgiProject(
     "logging",
@@ -73,7 +66,9 @@ object Core extends Defaults {
   val output = OsgiProject("output", imports = Seq("*"))
 
   val console = OsgiProject("console", bundleActivator = Some("org.openmole.core.console.Activator"), global = true, imports = Seq("*")) dependsOn
-    (pluginManager) settings (includeOsgi, OsgiKeys.importPackage := Seq("*"), libraryDependencies += scalaLang)
+    (pluginManager) settings (OsgiKeys.importPackage := Seq("*"), libraryDependencies += scalaLang)
+
+  val project = OsgiProject("project", imports = Seq("*")) dependsOn (console, dsl) settings (OsgiKeys.importPackage := Seq("*"))
 
   val buildinfo = OsgiProject("buildinfo", imports = Seq("*")) enablePlugins (ScalaJSPlugin) settings (
     buildInfoSettings ++
@@ -93,6 +88,6 @@ object Core extends Defaults {
       ): _*
   )
 
-  override def settings = super.settings ++ Seq(libraryDependencies += Libraries.scalatest)
+  override def settings = super.settings ++ Seq(libraryDependencies += Libraries.scalatest, libraryDependencies += Libraries.equinoxOSGi)
   override def osgiSettings = super.osgiSettings ++ Seq(bundleType := Set("core", "runtime"), OSGi.openMOLEScope := Some("provided"))
 }

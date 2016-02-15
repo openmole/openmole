@@ -34,16 +34,15 @@ import collection.JavaConversions._
 
 object SFTPServer extends Logger
 
-import SFTPServer.Log._
+class SFTPServer(path: File, port: Int, password: String) {
 
-class SFTPServer(path: File, login: String, password: String, port: Int) {
-  logger.fine(s"Starting sftp server on port $port with path $path")
+  @volatile var started = false
 
-  def fileSystem = new RootedFileSystemProvider().newFileSystem(path.toPath, Map.empty[String, Object])
+  lazy val sshd = {
+    val sshd = SshServer.setUpDefaultServer
 
-  val sshd = SshServer.setUpDefaultServer
+    def fileSystem = new RootedFileSystemProvider().newFileSystem(path.toPath, Map.empty[String, Object])
 
-  {
     sshd.setPort(port)
     sshd.setSubsystemFactories(List(new SftpSubsystemFactory))
     sshd.setCommandFactory(new ScpCommandFactory)
@@ -52,19 +51,17 @@ class SFTPServer(path: File, login: String, password: String, port: Int) {
     })
 
     sshd.setPasswordAuthenticator(new PasswordAuthenticator {
-      override def authenticate(username: String, pass: String, session: ServerSession) = {
-        username == login && pass == password
-      }
+      override def authenticate(username: String, pass: String, session: ServerSession) =
+        pass == password
     })
     sshd.setKeyPairProvider(new SimpleGeneratorHostKeyProvider)
-
-    start
+    sshd
   }
 
   override def finalize = background { stop }
 
-  def start = sshd.start
-
-  def stop = sshd.stop
+  def startIfNeeded = sshd.synchronized { if (!started) start; started = true }
+  def start = sshd.synchronized { sshd.start }
+  def stop = sshd.synchronized { if (started) sshd.stop(true); started = false }
 
 }

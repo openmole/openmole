@@ -67,4 +67,8 @@ object DataUtils {
     case _                      ⇒ BINARY
   }
 
+  implicit class CleanName(s: String) {
+    def clean = s.split('-').reduce(_ + _.capitalize).filterNot(Seq('?', ' ').contains)
+  }
+
 }

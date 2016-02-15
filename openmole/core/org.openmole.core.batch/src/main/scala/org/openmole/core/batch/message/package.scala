@@ -19,6 +19,7 @@ package org.openmole.core.batch
 import java.io.File
 
 import org.openmole.core.exception.InternalProcessingError
+import org.openmole.core.fileservice.FileDeleter
 import org.openmole.core.tools.service._
 import org.openmole.core.workflow.data.Context
 import org.openmole.core.workflow.execution.Environment.{ RuntimeLog }
@@ -96,13 +97,24 @@ package object message {
 
   case class ReplicatedFile(originalPath: String, directory: Boolean, hash: String, path: String, mode: Int)
   case class RuntimeSettings(archiveResult: Boolean)
-  case class ExecutionMessage(plugins: Iterable[ReplicatedFile], files: Iterable[ReplicatedFile], jobs: FileMessage, communicationDirPath: String, runtimeSettings: RuntimeSettings)
+  case class ExecutionMessage(plugins: Iterable[ReplicatedFile], files: Iterable[ReplicatedFile], jobs: File, communicationDirPath: String, runtimeSettings: RuntimeSettings) {
+    FileDeleter.deleteWhenGarbageCollected(jobs)
+  }
 
   sealed trait SerializedContextResults
-  case class ArchiveContextResults(contextResults: FileMessage) extends SerializedContextResults
-  case class IndividualFilesContextResults(contextResults: FileMessage, files: Iterable[ReplicatedFile]) extends SerializedContextResults
+
+  case class ArchiveContextResults(contextResults: File) extends SerializedContextResults {
+    FileDeleter.deleteWhenGarbageCollected(contextResults)
+  }
+
+  case class IndividualFilesContextResults(contextResults: File, files: Iterable[ReplicatedFile]) extends SerializedContextResults {
+    FileDeleter.deleteWhenGarbageCollected(contextResults)
+  }
   case class ContextResults(results: PartialFunction[MoleJobId, Try[Context]])
 
-  case class RuntimeResult(stdOut: Option[FileMessage], stdErr: Option[FileMessage], result: Try[(SerializedContextResults, RuntimeLog)], info: RuntimeInfo)
+  case class RuntimeResult(stdOut: Option[File], stdErr: Option[File], result: Try[(SerializedContextResults, RuntimeLog)], info: RuntimeInfo) {
+    stdOut.foreach(FileDeleter.deleteWhenGarbageCollected)
+    stdErr.foreach(FileDeleter.deleteWhenGarbageCollected)
+  }
 
 }

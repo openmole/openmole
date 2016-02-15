@@ -20,11 +20,8 @@ package org.openmole.core.console
 import java.io.{ PrintStream, PrintWriter, Writer }
 import java.net.URLClassLoader
 import java.util.UUID
-import javax.management.remote.JMXPrincipal
-import javax.script.ScriptEngineManager
 
-import org.eclipse.osgi.internal.baseadaptor.DefaultClassLoader
-import org.openmole.core.exception.{ UserBadDataError, InternalProcessingError }
+import org.openmole.core.exception._
 import org.openmole.core.pluginmanager._
 import org.osgi.framework.Bundle
 

@@ -74,6 +74,7 @@ package data {
 
     implicit def buildPrototypeType[T: Manifest]: PrototypeType[T] = PrototypeType[T]
 
+    type Val[T] = Prototype[T]
   }
 
 }

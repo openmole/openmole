@@ -20,8 +20,8 @@ package org.openmole.gui.client.core
 import org.openmole.core.buildinfo.{MarketIndex, MarketIndexEntry}
 import org.openmole.gui.client.core.AbsolutePositioning.CenterTransform
 import fr.iscpif.scaladget.api.{BootstrapTags ⇒ bs}
-import org.openmole.gui.ext.data.{Standby, Processing, ProcessState}
-import org.openmole.gui.misc.js.{OMTags, InputFilter}
+import org.openmole.gui.ext.data.{Processing, ProcessState}
+import org.openmole.gui.misc.js.{InputFilter}
 import org.openmole.gui.misc.js.JsRxTags._
 import org.openmole.gui.shared.Api
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
@@ -43,7 +43,7 @@ class MarketPanel extends ModalPanel {
   val selectedEntry: Var[Option[MarketIndexEntry]] = Var(None)
   lazy val downloading: Var[Seq[(MarketIndexEntry, Var[_ <: ProcessState])]] = Var(marketIndex().map {
     _.entries.map {
-      (_, Var(Standby()))
+      (_, Var(Processed()))
     }
   }.getOrElse(Seq()))
   val overwriteAlert: Var[Option[MarketIndexEntry]] = Var(None)
@@ -95,7 +95,7 @@ class MarketPanel extends ModalPanel {
     OMPost[Api].getMarketEntry(entry, path).call().foreach { d ⇒
       downloading() = downloading().updatedFirst(_._1 == entry, (entry, Var(Processed())))
       downloading().headOption.foreach(_ ⇒ close)
-      panels.treeNodePanel.refreshCurrentDirectory
+      CoreUtils.refreshCurrentDirectory()
     }
   }
 
@@ -130,7 +130,7 @@ class MarketPanel extends ModalPanel {
             AlertPanel.string(e.name + " already exists. Overwrite ? ",
               () ⇒ {
                 overwriteAlert() = None
-                OMPost[Api].deleteFile(manager.current.safePath() ++ e.name).call().foreach { d ⇒
+                OMPost[Api].deleteFile(manager.current.safePath() ++ e.name, ServerFileSytemContext.project).call().foreach { d ⇒
                   download(e)
                 }
               }, () ⇒ {

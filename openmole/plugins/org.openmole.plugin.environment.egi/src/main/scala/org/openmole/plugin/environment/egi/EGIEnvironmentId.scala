@@ -19,6 +19,6 @@ package org.openmole.plugin.environment.egi
 
 trait EGIEnvironmentId {
   def voName: String
-  def vomsURL: String
-  @transient lazy val id = voName + "@" + vomsURL
+  def vomsURLs: Seq[String]
+  @transient lazy val id = voName + "@" + vomsURLs.head
 }

@@ -24,9 +24,12 @@ object Server extends GuiDefaults {
       openmoleFile,
       openmoleTar,
       openmoleCollection,
+      Core.project,
       root.Runtime.console,
+      Core.dsl,
+      Core.batch,
       Misc.utils,
-      root.ThirdParties.openmoleStream,
+      ThirdParties.openmoleStream,
       openmoleCrypto
     )
 

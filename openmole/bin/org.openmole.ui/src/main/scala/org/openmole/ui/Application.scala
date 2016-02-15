@@ -22,7 +22,7 @@ import java.io.{ FileOutputStream, File }
 import java.net.URI
 import org.eclipse.equinox.app.IApplication
 import org.eclipse.equinox.app.IApplicationContext
-import org.openmole.console.Console.ExitCodes
+import org.openmole.core.project._
 import org.openmole.core.console.ScalaREPL
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.logging.LoggerService
@@ -32,12 +32,11 @@ import org.openmole.core.tools.io.Network
 import org.openmole.core.workspace.Workspace
 import org.openmole.gui.bootstrap.js.BootstrapJS
 import org.openmole.core.workflow.task._
-import org.openmole.console.Console
 import org.openmole.rest.server.RESTServer
 import org.openmole.tool.logger.Logger
 import annotation.tailrec
 import org.openmole.gui.server.core._
-import org.openmole.console._
+import org.openmole.runtime.console._
 import org.openmole.tool.file._
 
 object Application extends Logger
@@ -169,15 +168,15 @@ class Application extends IApplication {
       config.launchMode match {
         case HelpMode ⇒
           println(usage)
-          ExitCodes.ok
+          Console.ExitCodes.ok
         case ServerConfigMode ⇒
           RESTServer.configure
-          ExitCodes.ok
+          Console.ExitCodes.ok
         case ServerMode ⇒
           if (!config.password.isDefined) Console.initPassword
           val server = new RESTServer(config.port, config.hostName)
           server.start()
-          ExitCodes.ok
+          Console.ExitCodes.ok
         case ConsoleMode ⇒
           print(consoleSplash)
           println(consoleUsage)
@@ -204,7 +203,7 @@ class Application extends IApplication {
             }
             else {
               browse(GUIServer.urlFile.content)
-              ExitCodes.ok
+              Console.ExitCodes.ok
             }
           }
       }

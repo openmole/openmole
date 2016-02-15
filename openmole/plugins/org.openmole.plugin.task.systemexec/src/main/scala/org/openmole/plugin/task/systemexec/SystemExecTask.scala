@@ -84,14 +84,14 @@ abstract class SystemExecTask(
         case Some(d) ⇒ new File(tmpDir, d)
       }
 
-    val preparedContext = prepareInputFiles(context, tmpDir, workDirPath)
+    val preparedContext = prepareInputFiles(context, tmpDir, directory)
 
     val osCommandLines: Seq[ExpandedSystemExecCommand] = command.find { _.os.compatible }.map {
       cmd ⇒ cmd.expanded map { expansion ⇒ ExpandedSystemExecCommand(expansion) }
     }.getOrElse(throw new UserBadDataError("Not command line found for " + OS.actualOS))
 
     val retCode = execAll(osCommandLines.toList, workDir, preparedContext)
-    val retContext: Context = fetchOutputFiles(preparedContext, workDir, workDirPath)
+    val retContext: Context = fetchOutputFiles(preparedContext, workDir, directory)
 
     retContext ++
       List(

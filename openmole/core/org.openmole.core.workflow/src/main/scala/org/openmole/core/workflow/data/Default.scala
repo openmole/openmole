@@ -21,7 +21,7 @@ object Default {
   //implicit def tuple2IterableToParameters(values: Iterable[(Prototype[T], T) forSome { type T }]) = values.map { case (p, v) ⇒ Default(p, v) }
 
   def value[T](prototype: Prototype[T], value: T, `override`: Boolean = false): Default[T] = apply(prototype, _ ⇒ value, `override`)
-  def delayed[T](prototype: Prototype[T], value: ⇒ T, `override`: Boolean = false): Default[T] = apply(prototype, _ ⇒ value, `override`)
+  //def delayed[T](prototype: Prototype[T], value: ⇒ T, `override`: Boolean = false): Default[T] = apply(prototype, _ ⇒ value, `override`)
 
   def apply[T](prototype: Prototype[T], value: Context ⇒ T, `override`: Boolean = false): Default[T] = {
     val (o, p, v) = (`override`, prototype, value)

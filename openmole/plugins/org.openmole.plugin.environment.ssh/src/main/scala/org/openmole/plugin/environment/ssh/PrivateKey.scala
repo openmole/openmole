@@ -19,7 +19,7 @@ package org.openmole.plugin.environment.ssh
 
 import java.io.File
 import org.openmole.core.batch.authentication.CypheredPassword
-import org.openmole.core.workspace.AuthenticationProvider
+import org.openmole.core.workspace._
 
 object PrivateKey {
   def apply(
@@ -36,7 +36,7 @@ class PrivateKey(
     val cypheredPassword: String,
     val target: String) extends SSHAuthentication with CypheredPassword { a ⇒
 
-  override def apply(implicit authenticationProvider: AuthenticationProvider) =
+  override def apply(implicit decrypt: Decrypt) =
     fr.iscpif.gridscale.authentication.PrivateKey(a.login, a.privateKey, a.password)
 
   override def toString =

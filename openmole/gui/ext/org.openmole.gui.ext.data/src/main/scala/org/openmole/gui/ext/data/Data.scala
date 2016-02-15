@@ -154,8 +154,20 @@ object SafePath {
 
 import org.openmole.gui.ext.data.SafePath._
 
+sealed trait ServerFileSytemContext
+
+object AbsoluteFileSystem extends ServerFileSytemContext
+
+object ProjectFileSystem extends ServerFileSytemContext
+
+object ServerFileSytemContext {
+  implicit val absolute: ServerFileSytemContext = AbsoluteFileSystem
+  implicit val project: ServerFileSytemContext = ProjectFileSystem
+}
+
+
 //The path it relative to the project root directory
-case class SafePath(path: Seq[String], extension: FileExtension) {
+case class SafePath(path: Seq[String], extension: FileExtension, context: ServerFileSytemContext = ProjectFileSystem) {
   def /(safePath: SafePath) = sp(this.path ++ safePath.path, safePath.extension)
 
   def ++(s: String) = sp(this.path :+ s, s)
@@ -167,6 +179,8 @@ case class SafePath(path: Seq[String], extension: FileExtension) {
   def toNoExtention = copy(path = path.dropRight(1) :+ nameWithNoExtension)
 
   def nameWithNoExtension = name.split('.').head
+
+  def normalizedPathString = path.tail.mkString("/")
 }
 
 sealed trait AuthenticationData extends Data {
@@ -220,7 +234,6 @@ case class TreeNodeData(
                          name: String,
                          safePath: SafePath,
                          isDirectory: Boolean,
-                         isPlugin: Boolean,
                          size: Long,
                          readableSize: String)
 
@@ -468,7 +481,7 @@ sealed trait LaunchingCommand {
 
 case class BasicLaunchingCommand(language: Option[Language], codeName: String, arguments: Seq[CommandElement] = Seq(), outputs: Seq[VariableElement] = Seq()) extends LaunchingCommand {
   def fullCommand: String = language match {
-    case Some(NetLogoLanguage()) => "setup\ngo"
+    case Some(NetLogoLanguage()) => "setup\nwhile [any? turtles] [go];;You should set your stopping criteria here instead"
     case _ => (Seq(language.map {
       _.name
     }.getOrElse(""), codeName) ++ arguments.sortBy {
@@ -532,8 +545,6 @@ sealed trait ProcessState {
   def display: String = ""
 }
 
-case class Standby() extends ProcessState
-
 case class Processing(override val ratio: Int = 0) extends ProcessState {
   override def display: String = "Transferring... " + ratio + " %"
 }
@@ -547,8 +558,12 @@ case class JarMethod(methodName: String, argumentTypes: Seq[String], returnType:
   val name = methodName + "(" + argumentTypes.mkString(",") + "): " + returnType
 }
 
-case class Resources(paths: Seq[TreeNodeData], implicitPath: Option[TreeNodeData], number: Int) {
-  def withNoImplicit = copy(implicitPath = None)
+object Resources{
+  def empty = Resources(Seq(), Seq(), 0)
+}
+
+case class Resources(paths: Seq[TreeNodeData], implicits: Seq[TreeNodeData], number: Int) {
+  def withNoImplicit = copy(implicits = Seq())
 
   def withEmptyPaths = copy(paths = Seq())
 
@@ -556,5 +571,5 @@ case class Resources(paths: Seq[TreeNodeData], implicitPath: Option[TreeNodeData
 
   def withPath(p: TreeNodeData) = copy(paths = paths :+ p)
 
-  def size = paths.size + Seq(implicitPath).flatten.size
+  def size = paths.size + implicits.size
 }

@@ -126,13 +126,10 @@ package object evolution {
 
     val masterSlave = MasterSlave(randomGenomes, masterTask, t.populationPrototype, t.statePrototype)(scalingGenomeTask -- Strain(evaluation))
 
-    val firstTask = EmptyTask() set (
-      name := "first",
-      (inputs, outputs) += (t.populationPrototype, t.statePrototype),
-      _.setDefault(Default(t.statePrototype, ctx ⇒ t.operations.initialState(Task.buildRNG(ctx)))),
-      t.populationPrototype := Vector.empty)
+    val firstTask = InitialStateTask(algorithm) set (name := "first")
 
     val firstCapsule = Capsule(firstTask, strain = true)
+
     val last = EmptyTask() set (
       name := "last",
       (inputs, outputs) += (t.statePrototype, t.populationPrototype)
@@ -183,6 +180,8 @@ package object evolution {
 
     val reassingRNGTask = ReassignStateRNGTask(algorithm)
 
+    val fromIsland = FromIslandTask(algorithm)
+
     val populationToOffspring =
       AssignTask(t.populationPrototype -> t.offspringPrototype) set (
         name := "populationToOffspring"
@@ -220,7 +219,7 @@ package object evolution {
       (inputs, outputs) += (t.statePrototype, islandPopulationPrototype)
     )
 
-    val slave = slaveFist -- (islandPopulationToPopulation, reassingRNGTask) -- islandCapsule -- populationToOffspring
+    val slave = slaveFist -- (islandPopulationToPopulation, reassingRNGTask) -- islandCapsule -- fromIsland -- populationToOffspring
 
     val masterSlave = MasterSlave(generateInitialIslands, masterTask, t.populationPrototype, t.statePrototype)(slave)
 
@@ -229,12 +228,7 @@ package object evolution {
       outputs += t.populationPrototype
     )
 
-    val firstTask = EmptyTask() set (
-      name := "first",
-      (inputs, outputs) += (t.populationPrototype, t.statePrototype),
-      t.populationPrototype := Vector.empty,
-      _.setDefault(Default(t.statePrototype, ctx ⇒ t.operations.initialState(Task.buildRNG(ctx))))
-    )
+    val firstTask = InitialStateTask(algorithm) set (name := "first")
 
     val firstCapsule = Capsule(firstTask, strain = true)
 

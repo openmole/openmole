@@ -8,7 +8,7 @@ import javax.servlet.annotation.MultipartConfig
 import javax.servlet.http.HttpServletRequest
 import org.json4s.JsonDSL._
 import org.json4s._
-import org.openmole.console._
+import org.openmole.core.project._
 import org.openmole.core.event._
 import org.openmole.core.workflow.execution.Environment
 import org.openmole.core.workflow.execution.Environment.ExceptionRaised

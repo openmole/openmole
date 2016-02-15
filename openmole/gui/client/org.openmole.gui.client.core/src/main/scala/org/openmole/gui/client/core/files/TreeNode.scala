@@ -18,9 +18,11 @@ package org.openmole.gui.client.core.files
  */
 
 import org.openmole.gui.ext.data.{ SafePath, TreeNodeData }
-import TreeNodeTabs.TreeNodeTab
+import scala.concurrent.ExecutionContext.Implicits.global
 import org.openmole.gui.misc.utils.Utils._
 import rx._
+
+import scala.concurrent.Future
 
 sealed trait TreeNodeType {
   val uuid: String = getUUID
@@ -41,6 +43,10 @@ object TreeNodeType {
   def folder = new DirNodeType {}
 }
 
+case class TreeNodeError(message: String, filesInError: Seq[SafePath], okaction: () ⇒ Unit, cancelaction: () ⇒ Unit)
+
+case class TreeNodeComment(message: String, filesInError: Seq[SafePath], okaction: () ⇒ Unit)
+
 sealed trait TreeNode {
   val id = getUUID
 
@@ -48,33 +54,38 @@ sealed trait TreeNode {
 
   def safePath: Var[SafePath]
 
-  def hasSons: Boolean
-
   val size: Long
 
   val readableSize: String
 
-  def isPlugin: Boolean
+  def cloneWithName(newName: String) = FileNode(newName, Var(SafePath.sp(safePath().path.dropRight(1) :+ newName)), size, readableSize)
+
 }
 
 object TreeNode {
 
   implicit def treeNodeDataToTreeNode(tnd: TreeNodeData): TreeNode =
-    if (tnd.isDirectory) DirNode(tnd.name, tnd.safePath, tnd.size, tnd.readableSize, tnd.isPlugin, Var(Seq()))
-    else FileNode(tnd.name, tnd.safePath, tnd.size, tnd.isPlugin, tnd.readableSize)
+    if (tnd.isDirectory) DirNode(tnd.name, tnd.safePath, tnd.size, tnd.readableSize)
+    else FileNode(tnd.name, tnd.safePath, tnd.size, tnd.readableSize)
 
   implicit def treeNodeToTreeNodeData(tn: TreeNode): TreeNodeData = TreeNodeData(tn.name(), tn.safePath(), tn match {
-    case DirNode(_, _, _, _, _, _) ⇒ true
-    case _                         ⇒ false
-  }, tn.isPlugin, tn.size, tn.readableSize)
+    case DirNode(_, _, _, _) ⇒ true
+    case _                   ⇒ false
+  }, tn.size, tn.readableSize)
 
   implicit def seqTreeNodeToSeqTreeNodeData(tns: Seq[TreeNode]): Seq[TreeNodeData] = tns.map {
     treeNodeToTreeNodeData
   }
 
+  implicit def futureSeqTreeNodeDataToFutureSeqTreeNode(ftnds: Future[Seq[TreeNodeData]]): Future[Seq[TreeNode]] = ftnds.map(seqTreeNodeDataToSeqTreeNode)
+
   implicit def seqTreeNodeDataToSeqTreeNode(tnds: Seq[TreeNodeData]): Seq[TreeNode] = tnds.map(treeNodeDataToTreeNode(_))
 
-  implicit def safePathToPartialTreeNodeData(sPath: SafePath): TreeNodeData = TreeNodeData(sPath.name, sPath.parent, false, false, 0L, "")
+  implicit def treeNodeToSafePath(tn: TreeNode): SafePath = tn.safePath()
+
+  implicit def treeNodesToSafePaths(tns: Seq[TreeNode]): Seq[SafePath] = tns.map { treeNodeToSafePath }
+
+  implicit def safePathToDirNode(safePath: SafePath) = DirNode(safePath.name, safePath, 0, "")
 
   def fromFilePath(path: SafePath) = FileNode()
 
@@ -96,17 +107,9 @@ object TreeNodeOrdering extends Ordering[TreeNode] {
 case class DirNode(name: Var[String],
                    safePath: Var[SafePath],
                    size: Long,
-                   readableSize: String,
-                   isPlugin: Boolean = false,
-                   sons: Var[Seq[TreeNode]] = Var(Seq())) extends TreeNode {
-  def hasSons = sons().size > 0
-}
+                   readableSize: String) extends TreeNode
 
 case class FileNode(name: Var[String],
                     safePath: Var[SafePath],
                     size: Long,
-                    isPlugin: Boolean = false,
-                    readableSize: String) extends TreeNode {
-  def hasSons = false
-}
-
+                    readableSize: String) extends TreeNode

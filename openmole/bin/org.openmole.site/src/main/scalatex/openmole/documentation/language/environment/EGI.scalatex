@@ -13,10 +13,6 @@
    EGIAuthentication() = P12Certificate(encrypted, "/path/to/your/certificate.p12")""", header = """def encrypted = "" """)
 
    @p You need to execute this operation only once and for all. OpenMOLE persists this information in your preferences folder.
-   @p PEM certificates and X509 proxy files are the two other certificate types available:
-   @br @hl.openmole("""
-   //For pem
-   EGIAuthentication() = PEMCertificate(encrypted, "/path/to/the/cert", "/path/to/the/key")""", header = """def encrypted = "" """)
 
   @sect{Delegate tasks to EGI}
     To use EGI you must be registered in a Virtual Organisation (VO). The VO is the only compulsory parameter when creating an EGI environment:
@@ -55,15 +51,12 @@
   @sect{DIRAC}
     To use EGI through DIRAC you should setup and EGIAuthentication as explained above using a P12Certificates. Other methods are not supported by DIRAC.
 
-    @p Then you can declare a DIRAC environment by providing the VO name and the URL of the DIRAC REST endpoint:
-    @br @hl.openmole("""
-    val env =
-      DIRACEnvironment(
-        "biomed",
-        "https://ccdirac06.in2p3.fr:9178")""")
+    @p Then you can declare a DIRAC environment by providing the VO name:
+    @br @hl.openmole("""val env = DIRACEnvironment("vo.complex-systems.eu")""")
 
     @p Options available for DIRAC are:
     @ul
+      @li{service: a DIRAC REST API,}
       @li{group: the name of the DIRAC group,}
       @li{fqan, cpuTime, openMOLEMemory, bdii, vomsURL are also usable in the same way as for the EGI environment. Please note that the notion of cpuTime is different in the DIRAC standard (see DIRAC doc),}
       @li{setup: setup to use on the DIRAC server. It is set to "Dirac-Production" by default.}

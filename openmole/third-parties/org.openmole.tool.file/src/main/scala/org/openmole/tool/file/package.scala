@@ -35,6 +35,8 @@ import scala.util.{ Success, Failure, Try }
 
 package file {
 
+  import org.openmole.tool.stream.GZipedInputStream
+
   trait FilePackage {
     p ⇒
 
@@ -120,6 +122,7 @@ package file {
         }
       }
 
+      def toGZiped = new GZipedInputStream(is)
       def toGZ = new GZIPInputStream(is)
 
       // this one must have REPLACE_EXISTING enabled
@@ -132,6 +135,12 @@ package file {
       def realFile = file.toPath.toRealPath().toFile
 
       def realPath = file.toPath.toRealPath()
+
+      def isDirectoryEmpty = {
+        val dirStream = Files.newDirectoryStream(file)
+        try !dirStream.iterator().hasNext()
+        finally dirStream.close
+      }
 
       def listFilesSafe = Option(file.listFiles).getOrElse(Array.empty)
 
@@ -358,6 +367,7 @@ package file {
       /**
        * Try to create a symbolic link at the calling emplacement.
        * The function creates a copy of the target file on systems not supporting symlinks.
+ *
        * @param target Target of the link
        * @return
        */

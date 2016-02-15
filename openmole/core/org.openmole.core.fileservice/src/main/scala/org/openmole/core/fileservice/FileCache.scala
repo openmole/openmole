@@ -19,8 +19,6 @@ package org.openmole.core.fileservice
 
 import java.io.File
 
-import org.openmole.core.filedeleter.FileDeleter
-
 object FileCache {
   def apply(file: File) = new FileCache(file)
 }

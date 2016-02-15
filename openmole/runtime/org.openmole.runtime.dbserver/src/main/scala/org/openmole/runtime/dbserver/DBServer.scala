@@ -26,7 +26,9 @@ import java.io.FileOutputStream
 import java.util.UUID
 import org.h2.tools.Server
 import org.openmole.core.replication.{ DBServerRunning, replicas, DBServerInfo }
-import scala.slick.driver.H2Driver.simple._
+import slick.driver.H2Driver.api._
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 import scala.util.{ Success, Failure, Try }
 
 object DBServer extends App {
@@ -63,12 +65,17 @@ object DBServer extends App {
       Logger.getLogger(this.getClass.getName).info("Create BDD")
       fullDataBaseFile.delete
 
-      db(user, "").withSession { implicit s ⇒
-        replicas.ddl.create
-        s.withStatement() {
-          _.execute(s"SET PASSWORD '$password';")
-        }
+      val h2 = db(user, "")
+
+      Await.result(h2.run(replicas.schema.create), Duration.Inf)
+
+      val session = h2.createSession()
+
+      try session.withStatement() {
+        _.execute(s"SET PASSWORD '$password';")
       }
+      finally session.close()
+
     }
 
     val info =
@@ -81,10 +88,14 @@ object DBServer extends App {
       else DBServerInfo.load(DBServerInfo.dbInfoFile).copy(port = server.getPort)
 
     def dbWorks =
+
       Try {
-        db(info.user, info.password).withSession { implicit s ⇒
+        //DBIO.seq(replicas.size)
+        Await.result(db(info.user, info.password).run(replicas.length.result), Duration.Inf)
+        //db(info.user, info.password).run(replicas.size).result(Duration.Inf)
+        /* db(info.user, info.password).withSession { implicit s ⇒
           replicas.size.run
-        }
+        }*/
       } match {
         case Failure(_) ⇒ false
         case Success(_) ⇒ true

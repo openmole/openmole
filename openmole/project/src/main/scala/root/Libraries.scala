@@ -49,17 +49,15 @@ object Libraries extends Defaults {
 
   lazy val bouncyCastle = "org.bouncycastle" % "bcpkix-jdk15on" % bouncyCastleVersion
 
-  lazy val includeOsgi = libraryDependencies += "org.eclipse.core" % "org.eclipse.osgi" % "3.8.2.v20130124-134944"
-
   lazy val scalatra = "org.openmole" %% "org-scalatra" % "2.3.1"
 
   lazy val logback = "org.openmole" %% "ch-qos-logback" % "1.0.9"
 
-  lazy val h2 = "org.openmole" %% "org-h2" % "1.3.176"
+  lazy val h2 = "org.openmole" %% "org-h2" % "1.4.190"
 
   lazy val bonecp = "org.openmole" %% "com-jolbox-bonecp" % "0.8.0-rc1"
 
-  lazy val slick = "org.openmole" %% "com-typesafe-slick" % "2.1.0"
+  lazy val slick = "org.openmole" %% "com-typesafe-slick" % "3.1.1"
 
   lazy val slf4j = "org.openmole" %% "org-slf4j" % "1.7.10"
 
