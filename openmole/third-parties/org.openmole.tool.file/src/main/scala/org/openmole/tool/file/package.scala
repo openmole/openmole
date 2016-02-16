@@ -300,6 +300,10 @@ package file {
 
       def content = withSource(_.mkString)
 
+      def append(s: String) = Files.write(file, content.getBytes, StandardOpenOption.APPEND)
+
+      def lines = withSource(_.getLines.toSeq)
+
       def contentOption =
         try Some(file.content)
         catch {
