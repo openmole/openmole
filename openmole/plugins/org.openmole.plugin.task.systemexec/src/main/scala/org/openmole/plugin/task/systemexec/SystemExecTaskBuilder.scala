@@ -20,76 +20,35 @@ package org.openmole.plugin.task.systemexec
 import org.openmole.core.tools.service.OS
 import org.openmole.plugin.task.external._
 import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.builder.CanBuildTask
 
 import scala.collection.mutable.ListBuffer
 
-abstract class SystemExecTaskBuilder(commands: Command*) extends ExternalTaskBuilder { builder ⇒
+class SystemExecTaskBuilder(commands: Command*) extends ExternalTaskBuilder
+    with ReturnValue
+    with ErrorOnReturnCode
+    with StdOutErr
+    with EnvironmentVariables
+    with WorkDirectory { builder ⇒
 
-  protected val variables = new ListBuffer[(Prototype[_], String)]
   protected val _commands = new ListBuffer[OSCommands]
-  protected var errorOnReturnValue = true
-  protected var returnValue: Option[Prototype[Int]] = None
-  protected var stdOut: Option[Prototype[String]] = None
-  protected var stdErr: Option[Prototype[String]] = None
-  protected var workDirectory: Option[String] = None
 
   addCommand(OS(), commands: _*)
-
-  /**
-   * Add variable from openmole to the environment of the system exec task. The
-   * environment variable is set using a toString of the openmole variable content.
-   *
-   * @param prototype the prototype of the openmole variable to inject in the environment
-   * @param variable the name of the environment variable. By default the name of the environment
-   *                 variable is the same as the one of the openmole protoype.
-   */
-  def addEnvironmentVariable(prototype: Prototype[_], variable: Option[String] = None): this.type = {
-    variables += prototype -> variable.getOrElse(prototype.name)
-    addInput(prototype)
-    this
-  }
 
   def addCommand(os: OS, cmd: Command*): this.type = {
     _commands += OSCommands(os, cmd: _*)
     this
   }
 
-  def setErrorOnReturnValue(b: Boolean): this.type = {
-    errorOnReturnValue = b
-    this
-  }
-
-  def setReturnValue(p: Option[Prototype[Int]]): this.type = {
-    returnValue = p
-    this
-  }
-
-  def setStdOut(p: Option[Prototype[String]]): this.type = {
-    stdOut = p
-    this
-  }
-
-  def setStdErr(p: Option[Prototype[String]]): this.type = {
-    stdErr = p
-    this
-  }
-
-  def setWorkDirectory(s: Option[String]): this.type = {
-    workDirectory = s
-    this
-  }
-
-  implicit object canBuildTask extends CanBuildTask[SystemExecTask] {
-    def toTask: SystemExecTask = new SystemExecTask(_commands.toList, workDirectory, errorOnReturnValue, returnValue, stdOut, stdErr, variables.toList) with builder.Built {
+  def toTask: SystemExecTask =
+    new SystemExecTask(
+      builder._commands.toList,
+      builder.workDirectory,
+      builder.errorOnReturnValue,
+      builder.returnValue,
+      builder.stdOut,
+      builder.stdErr,
+      builder.environmentVariables.toList) with builder.Built {
       override val outputs: PrototypeSet = builder.outputs + List(stdOut, stdErr, returnValue).flatten
     }
-  }
-
-  //  implicit val systemExecMakeItTask = new MakeItTask[SystemExecTask] {
-  //    def toTask: SystemExecTask = new SystemExecTask(_commands.toList, workDirectory, errorOnReturnValue, returnValue, stdOut, stdErr, variables.toList) with builder.Built {
-  //      override val outputs: PrototypeSet = this.outputs + List(stdOut, stdErr, returnValue).flatten
-  //    }
-  //  }
 
 }

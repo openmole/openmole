@@ -30,8 +30,73 @@ import org.openmole.core.workflow.tools.VariableExpansion.Expansion
 import org.openmole.plugin.task.external.ExternalTask
 import org.openmole.tool.stream.StringOutputStream
 import org.openmole.tool.file._
+import collection.mutable.ListBuffer
 
 package systemexec {
+
+  import org.openmole.core.workflow.builder.InputOutputBuilder
+
+
+  trait ReturnValue {
+    protected var returnValue: Option[Prototype[Int]] = None
+
+    def setReturnValue(p: Option[Prototype[Int]]): this.type = {
+      returnValue = p
+      this
+    }
+  }
+
+  trait ErrorOnReturnCode {
+    protected var errorOnReturnValue = true
+
+    def setErrorOnReturnValue(b: Boolean): this.type = {
+      errorOnReturnValue = b
+      this
+    }
+  }
+
+  trait StdOutErr {
+    protected var stdOut: Option[Prototype[String]] = None
+    protected var stdErr: Option[Prototype[String]] = None
+
+    def setStdOut(p: Option[Prototype[String]]): this.type = {
+      stdOut = p
+      this
+    }
+
+    def setStdErr(p: Option[Prototype[String]]): this.type = {
+      stdErr = p
+      this
+    }
+  }
+
+  trait EnvironmentVariables <: InputOutputBuilder {
+    protected val environmentVariables = new ListBuffer[(Prototype[_], String)]
+
+    /**
+      * Add variable from openmole to the environment of the system exec task. The
+      * environment variable is set using a toString of the openmole variable content.
+      *
+      * @param prototype the prototype of the openmole variable to inject in the environment
+      * @param variable the name of the environment variable. By default the name of the environment
+      *                 variable is the same as the one of the openmole protoype.
+      */
+    def addEnvironmentVariable(prototype: Prototype[_], variable: Option[String] = None): this.type = {
+      environmentVariables += prototype -> variable.getOrElse(prototype.name)
+      addInput(prototype)
+      this
+    }
+  }
+
+  trait WorkDirectory {
+    protected var workDirectory: Option[String] = None
+
+    def setWorkDirectory(s: Option[String]): this.type = {
+      workDirectory = s
+      this
+    }
+  }
+
 
   trait SystemExecPackage {
 
@@ -66,23 +131,38 @@ package systemexec {
       implicit def seqOfStringToCommands(s: Seq[String]): OSCommands = OSCommands(OS(), s.map(s ⇒ Command(s)): _*)
     }
 
-    lazy val errorOnReturnCode = set[{ def setErrorOnReturnValue(b: Boolean) }]
+    lazy val errorOnReturnCode =
+      new {
+        def :=(b: Boolean) = (_: ErrorOnReturnCode).setErrorOnReturnValue(b)
+      }
 
-    lazy val returnValue = set[{ def setReturnValue(v: Option[Prototype[Int]]) }]
+    lazy val returnValue =
+      new {
+        def := (v: Option[Prototype[Int]]) = (_:ReturnValue).setReturnValue(v)
+      }
 
-    lazy val stdOut = set[{ def setStdOut(v: Option[Prototype[String]]) }]
+    lazy val stdOut =
+      new {
+        def := (v: Option[Prototype[String]]) = (_: StdOutErr).setStdOut(v)
+      }
 
-    lazy val stdErr = set[{ def setStdErr(v: Option[Prototype[String]]) }]
+    lazy val stdErr =
+      new {
+        def :=(v: Option[Prototype[String]]) = (_:StdOutErr).setStdErr(v)
+      }
 
     lazy val commands = add[{ def addCommand(os: OS, cmd: OSCommands*) }]
 
     lazy val environmentVariable =
       new {
         def +=(prototype: Prototype[_], variable: Option[String] = None) =
-          (_: SystemExecTaskBuilder).addEnvironmentVariable(prototype, variable)
+          (_: EnvironmentVariables).addEnvironmentVariable(prototype, variable)
       }
 
-    lazy val workDirectory = set[{ def setWorkDirectory(s: Option[String]) }]
+    lazy val workDirectory =
+      new {
+        def +=(s: Option[String]) = (_: WorkDirectory).setWorkDirectory(s)
+      }
 
   }
 }
@@ -148,7 +228,7 @@ package object systemexec extends external.ExternalPackage with SystemExecPackag
     }
     catch {
       case e: IOException ⇒ throw new InternalProcessingError(e,
-        s"""Error executing: ${command}
+        s"""Error executing: ${command.mkString(" ")}
 
             |The content of the working directory was:
             |${workDir.listRecursive(_ ⇒ true).map(_.getPath).mkString("\n")}

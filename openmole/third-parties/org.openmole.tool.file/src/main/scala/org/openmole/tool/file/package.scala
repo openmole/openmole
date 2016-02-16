@@ -302,7 +302,7 @@ package file {
 
       def append(s: String) = Files.write(file, content.getBytes, StandardOpenOption.APPEND)
 
-      def lines = withSource(_.getLines.toSeq)
+      def lines = withSource(_.getLines.toList)
 
       def contentOption =
         try Some(file.content)

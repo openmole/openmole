@@ -19,30 +19,23 @@ package org.openmole.plugin.task.care
 
 import java.io.File
 
-import org.openmole.core.workflow.builder.CanBuildTask
-import org.openmole.core.workflow.tools.ExpandedString
+import org.openmole.plugin.task.external.ExternalTaskBuilder
 import org.openmole.plugin.task.systemexec._
 import org.openmole.plugin.task.systemexec
 import org.openmole.core.workflow.data._
 
-// arguments to SystemExecTask not really matching the actual one -> set in toTask
-abstract class CARETaskBuilder(archiveLocation: File,
-                               command: systemexec.Command,
-                               archiveWorkDirectory: Option[String])
-    extends SystemExecTaskBuilder(Seq.empty: _*) { builder ⇒
+class CARETaskBuilder(archiveLocation: File, command: systemexec.Command)
+    extends ExternalTaskBuilder
+    with ReturnValue
+    with ErrorOnReturnCode
+    with StdOutErr
+    with EnvironmentVariables
+    with WorkDirectory { builder ⇒
 
-  // TODO handle shallow copies (bind to archive)
-  // one option would be to replace call line by bind + call line
-  //
-
-  // FIXME refactor
-  implicit object canBuildTask2 extends CanBuildTask[CARETask] {
-    override def toTask: CARETask = new CARETask(
-      archiveLocation, command, archiveWorkDirectory,
-      errorOnReturnValue, returnValue, stdOut, stdErr, variables.toList) with builder.Built {
-
-      override val outputs: PrototypeSet = builder.outputs + List(stdOut, stdErr, returnValue).flatten
-    }
+  override def toTask: CARETask = new CARETask(
+    archiveLocation, command, workDirectory,
+    errorOnReturnValue, returnValue, stdOut, stdErr, environmentVariables.toList) with builder.Built {
+    override val outputs: PrototypeSet = builder.outputs + List(stdOut, stdErr, returnValue).flatten
   }
 
 }

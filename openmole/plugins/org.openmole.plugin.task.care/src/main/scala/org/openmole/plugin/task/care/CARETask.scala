@@ -20,7 +20,6 @@ package org.openmole.plugin.task.care
 
 import java.io.File
 import org.openmole.core.exception.InternalProcessingError
-import org.openmole.core.workflow.builder.CanBuildTask
 import org.openmole.core.workflow.data.{ Context, Variable }
 import org.openmole.core.workflow.tools.VariableExpansion
 import org.openmole.plugin.task.external.ExternalTask
@@ -33,14 +32,9 @@ import org.openmole.core.workflow.data._
 
 object CARETask extends Logger {
 
-  // TODO command and archiveWorkDirectory should be optional now that we have the utilities to dig into the archive
-  def apply(archive: File, command: String, workDirectory: Option[String]) = {
+  def apply(archive: File, command: String) =
+    new CARETaskBuilder(archive, command)
 
-    // FIXME does it actually need archiveLocation => reuse archive / archive name?
-    new CARETaskBuilder(archive, command, workDirectory) with CanBuildTask[CARETask] {
-      def toTask = canBuildTask2.toTask
-    }
-  }
 }
 
 abstract class CARETask(
@@ -55,11 +49,8 @@ abstract class CARETask(
 
   archive.setExecutable(true)
 
-  lazy val packagingDirectory: String = getCareBinInfos(archive).workDirectory.getOrElse(
-    throw new InternalProcessingError(s"Could not find packaging path in ${archive}"))
-
   override protected def process(context: Context)(implicit rng: RandomProvider) = withWorkDir { taskWorkDirectory ⇒
-    def userWorkDirectory = workDirectory.getOrElse(packagingDirectory)
+    taskWorkDirectory.mkdirs()
 
     // unarchiving in task's work directory
     // no need to retrieve error => will throw exception if failing
@@ -68,6 +59,14 @@ abstract class CARETask(
     val extractedArchive = taskWorkDirectory.listFilesSafe.headOption.getOrElse(
       throw new InternalProcessingError("Work directory should contain extracted archive, but is empty"))
 
+    val reExecute = extractedArchive / "re-execute.sh"
+
+    val packagingDirectory: String = workDirectoryLine(reExecute.lines).getOrElse(
+      throw new InternalProcessingError(s"Could not find packaging path in ${archive}"))
+
+    def userWorkDirectory = workDirectory.getOrElse(packagingDirectory)
+
+    // FIXME fishy
     val preparedContext = prepareInputFiles(context, taskWorkDirectory / "inputs", Some(userWorkDirectory))
 
     val proot = extractedArchive / "proot"
@@ -80,7 +79,7 @@ abstract class CARETask(
         else file.listFilesSafe.flatMap(f ⇒ leafs(f, s"$bindingDestination/${f.getName}"))
       else Seq(file -> bindingDestination)
 
-    val bindings = leafs(taskWorkDirectory / "inputs", "").map { case (f, d) ⇒ s"-b ${f.getAbsolutePath}:$d" }.mkString(" \\ \n")
+    val bindings = leafs(taskWorkDirectory / "inputs", "").map { case (f, d) ⇒ s"""-b "${f.getAbsolutePath}:$d"""" }.mkString(" \\ \n")
 
     // replace original proot executable with a script that will first bind all the inputs in the guest rootfs before
     // calling the original proot
@@ -88,16 +87,19 @@ abstract class CARETask(
       s"""
         |#!/bin/bash
         |TRUEPROOT="$${PROOT-$$(dirname $$0)/proot.origin}"
-        |$${TRUEPROOT} \
-        | ${bindings} \
+        |$${TRUEPROOT} \\
+        | ${bindings} \\
         | $$@
       """.stripMargin
 
-    val reExecute = extractedArchive / "re-execute.sh"
+    proot.setExecutable(true)
+
     reExecute.content = reExecute.lines.map {
-      case line if line.trim.startsWith("-w") ⇒ s"-w $userWorkDirectory"
+      case line if line.trim.startsWith("-w") ⇒ s"-w '$userWorkDirectory' \\"
       case line                               ⇒ line
     }.mkString("\n")
+
+    reExecute.setExecutable(true)
 
     val expandedCommand = VariableExpansion(s"./${reExecute.getName} ${command.command}")
     val commandline = commandLine(expandedCommand, userWorkDirectory, preparedContext)
@@ -113,7 +115,6 @@ abstract class CARETask(
 
     retContext ++
       List(
-        // .GET => because!
         output.map { o ⇒ Variable(o, executionResult.output.get) },
         error.map { e ⇒ Variable(e, executionResult.errorOutput.get) },
         returnValue.map { r ⇒ Variable(r, executionResult.returnCode) }

@@ -18,7 +18,6 @@
 package org.openmole.plugin.task.systemexec
 
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
-import org.openmole.core.workflow.builder.CanBuildTask
 import org.openmole.core.workflow.tools.ExpandedString
 import org.openmole.core.workflow.tools.VariableExpansion.Expansion
 import org.openmole.tool.file._
@@ -43,9 +42,7 @@ object SystemExecTask extends Logger {
    * value of the process.
    */
   def apply(commands: Command*) =
-    new SystemExecTaskBuilder(commands: _*) with CanBuildTask[SystemExecTask] {
-      def toTask = canBuildTask.toTask
-    }
+    new SystemExecTaskBuilder(commands: _*)
 }
 
 case class ExpandedSystemExecCommand(expandedCommand: Expansion)

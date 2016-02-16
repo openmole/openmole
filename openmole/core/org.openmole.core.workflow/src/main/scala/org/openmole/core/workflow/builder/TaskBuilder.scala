@@ -20,13 +20,6 @@ package org.openmole.core.workflow.builder
 import org.openmole.core.workflow.task._
 
 trait TaskBuilder extends InputOutputBuilder with NameBuilder with Builder { builder ⇒
-
-  //  implicit def toTask[T: CanBuildTask] = new CanBuildTask[T] { def toTask = implicitly[CanBuildTask[T]].toTask }
   def toTask: Task
-
   trait Built extends super[InputOutputBuilder].Built with super[NameBuilder].Built
-}
-
-trait CanBuildTask[T] {
-  def toTask: T
 }

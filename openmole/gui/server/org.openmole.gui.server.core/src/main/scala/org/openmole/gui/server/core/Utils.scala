@@ -296,4 +296,56 @@ object Utils {
     }
   }
 
+  import resource._
+
+  def managedArchive(careArchive: File) = managed(new RandomAccessFile(careArchive, "r")) map (_.getChannel)
+
+  def extractArchiveStream(archive: ManagedResource[FileChannel]) = archive.map { fileChannel ⇒
+    //Get the tar.gz from the bin archive
+    val endMinus8Bytes = fileChannel.size - 8L
+    val archiveSize = fileChannel.map(FileChannel.MapMode.READ_ONLY, endMinus8Bytes, 8L).getLong.toInt
+    fileChannel.position(0L)
+    val srcArray = new Array[Byte](archiveSize)
+    fileChannel.map(FileChannel.MapMode.READ_ONLY, endMinus8Bytes - 13L - archiveSize, archiveSize).get(srcArray, 0, archiveSize)
+
+    //Extract and uncompress the tar.gz
+    val stream = managed(new TarInputStream(new GZIPInputStream(new ByteArrayInputStream(srcArray))))
+    stream
+  }.opt.get
+
+  case class CAREInfo(commandLine: Option[Seq[String]])
+
+  def getCareBinInfos(careArchive: File): CAREInfo = getCareBinInfos(extractArchiveStream(managedArchive(careArchive)))
+
+  /** The .opt.get at the end will force all operations to happen and close the managed resources */
+  def getCareBinInfos(extractedArchiveStream: ManagedResource[TarInputStream]) =
+    extractedArchiveStream.map { stream ⇒
+
+      Iterator.continually(stream.getNextEntry).dropWhile { te ⇒
+        val pathString = te.getName.split("/")
+        pathString.last != "re-execute.sh" || pathString.contains("rootfs")
+      }.toSeq.headOption.flatMap { _ ⇒
+
+        val linesManaged = managed(new StringOutputStream) map { stringW: StringOutputStream ⇒
+          stream copy stringW
+          stringW.toString.split("\n")
+        }
+        val lines = linesManaged.opt.get
+
+        val prootLine = lines.indexWhere(s ⇒ s.startsWith("PROOT="))
+        val commands =
+          if (prootLine != -1) {
+            // get only the command lines, and strip each component from its single quotes and final backslash
+            Some(lines.slice(7, prootLine - 1).map { l ⇒ l.dropRight(2) }.map {
+              _.drop(1)
+            }.map {
+              _.dropRight(1)
+            }.toSeq)
+          }
+          else None
+
+        Some(CAREInfo(commands))
+      }.get
+    }.opt.get
+
 }
