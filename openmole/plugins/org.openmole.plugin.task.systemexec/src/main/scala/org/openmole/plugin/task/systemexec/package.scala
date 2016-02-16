@@ -17,23 +17,21 @@
 
 package org.openmole.plugin.task
 
+import java.io.{ IOException, PrintStream, File }
+
+import org.apache.commons.exec.CommandLine
+import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.macros.Keyword._
 import org.openmole.core.tools.service.OS
-import org.openmole.core.workflow.data.Prototype
+import org.openmole.core.tools.service.ProcessUtil._
+import org.openmole.core.workflow.data.{ RandomProvider, Context, Variable, Prototype }
 import org.openmole.core.workflow.tools.VariableExpansion
+import org.openmole.core.workflow.tools.VariableExpansion.Expansion
+import org.openmole.plugin.task.external.ExternalTask
+import org.openmole.tool.stream.StringOutputStream
+import org.openmole.tool.file._
 
 package systemexec {
-
-  import java.io.{ IOException, PrintStream, File }
-
-  import org.apache.commons.exec.CommandLine
-  import org.openmole.core.exception.{ UserBadDataError, InternalProcessingError }
-  import org.openmole.core.tools.service.ProcessUtil._
-  import org.openmole.core.workflow.data.{ RandomProvider, Context, Variable }
-  import org.openmole.core.workflow.tools.VariableExpansion.Expansion
-  import org.openmole.plugin.task.external.ExternalTask
-  import org.openmole.tool.stream.StringOutputStream
-  import org.openmole.tool.file._
 
   trait SystemExecPackage {
 
@@ -52,7 +50,7 @@ package systemexec {
     /**
      * Sequence of commands for a particular OS
      *
-     * @param os target Operating System
+     * @param os    target Operating System
      * @param parts Sequence of commands to be executed
      * @see Command
      */
@@ -85,63 +83,77 @@ package systemexec {
       }
 
     lazy val workDirectory = set[{ def setWorkDirectory(s: Option[String]) }]
-  }
 
-  // FIXME keep on factorising and insert in CARETask/SystemExecTask
-  trait SystemExecutor[T] {
-
-    def directory: Option[String]
-    def output: Option[Prototype[String]]
-    def error: Option[Prototype[String]]
-    def variables: Seq[(Prototype[_], String)]
-
-    val outBuilder = new StringOutputStream
-    val errBuilder = new StringOutputStream
-
-    val out = output match {
-      case Some(_) ⇒ new PrintStream(outBuilder)
-      case None    ⇒ System.out
-    }
-    val err = error match {
-      case Some(_) ⇒ new PrintStream(errBuilder)
-      case None    ⇒ System.err
-    }
-
-    protected[systemexec] def workDirPath: String = directory.getOrElse("")
-
-    protected[systemexec] def commandLine(cmd: Expansion,
-                                          workDir: File,
-                                          preparedContext: Context)(implicit rng: RandomProvider): Array[String] =
-      CommandLine.parse(cmd.expand(preparedContext + Variable(ExternalTask.PWD, workDir.getAbsolutePath))).toStrings
-
-    protected[systemexec] def execute(command: Array[String],
-                                      out: PrintStream,
-                                      err: PrintStream,
-                                      workDir: File,
-                                      preparedContext: Context): Int = {
-      try {
-        val runtime = Runtime.getRuntime
-
-        //FIXES java.io.IOException: error=26
-        val process = runtime.synchronized {
-          runtime.exec(
-            command,
-            variables.map { case (p, v) ⇒ v + "=" + preparedContext(p).toString }.toArray,
-            workDir)
-        }
-
-        executeProcess(process, out, err)
-      }
-      catch {
-        case e: IOException ⇒ throw new InternalProcessingError(e,
-          s"""Error executing: ${command}
-            |The content of the working directory was:
-            |${workDir.listRecursive(_ ⇒ true).map(_.getPath).mkString("\n")}
-          """.stripMargin
-        )
-      }
-    }
   }
 }
 
-package object systemexec extends external.ExternalPackage with SystemExecPackage
+package object systemexec extends external.ExternalPackage with SystemExecPackage {
+
+  object ExecutionResult {
+    def empty = ExecutionResult(0, None, None)
+    def append(e1: ExecutionResult, e2: ExecutionResult) =
+      ExecutionResult(
+        e2.returnCode,
+        appendOption(e1.output, e2.output),
+        appendOption(e1.errorOutput, e2.errorOutput)
+      )
+
+    private def appendOption(o1: Option[String], o2: Option[String]) =
+      (o1, o2) match {
+        case (None, None)         ⇒ None
+        case (o1, None)           ⇒ o1
+        case (None, o2)           ⇒ o2
+        case (Some(v1), Some(v2)) ⇒ Some(v1 + v2)
+      }
+  }
+
+  case class ExecutionResult(returnCode: Int, output: Option[String], errorOutput: Option[String])
+
+  def commandLine(
+    cmd: Expansion,
+    workDir: String,
+    context: Context)(implicit rng: RandomProvider): Array[String] =
+    CommandLine.parse(cmd.expand(context + Variable(ExternalTask.PWD, workDir))).toStrings
+
+  def execute(
+    command: Array[String],
+    workDir: File,
+    environmentVariables: Seq[(Prototype[_], String)],
+    context: Context,
+    returnOutput: Boolean,
+    returnError: Boolean) = {
+    try {
+
+      val outBuilder = new StringOutputStream
+      val errBuilder = new StringOutputStream
+
+      val out = if (returnOutput) new PrintStream(outBuilder) else System.out
+      val err = if (returnError) new PrintStream(errBuilder) else System.err
+
+      val runtime = Runtime.getRuntime
+
+      //FIXES java.io.IOException: error=26
+      val process = runtime.synchronized {
+        runtime.exec(
+          command,
+          environmentVariables.map { case (p, v) ⇒ v + "=" + context(p).toString }.toArray,
+          workDir)
+      }
+
+      ExecutionResult(
+        executeProcess(process, out, err),
+        if (returnOutput) Some(outBuilder.toString) else None,
+        if (returnError) Some(errBuilder.toString) else None
+      )
+    }
+    catch {
+      case e: IOException ⇒ throw new InternalProcessingError(e,
+        s"""Error executing: ${command}
+
+            |The content of the working directory was:
+            |${workDir.listRecursive(_ ⇒ true).map(_.getPath).mkString("\n")}
+          """.stripMargin
+      )
+    }
+  }
+}

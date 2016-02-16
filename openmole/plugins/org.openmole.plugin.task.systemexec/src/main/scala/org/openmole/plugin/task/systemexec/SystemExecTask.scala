@@ -57,24 +57,22 @@ abstract class SystemExecTask(
     val returnValue: Option[Prototype[Int]],
     val output: Option[Prototype[String]],
     val error: Option[Prototype[String]],
-    val variables: Seq[(Prototype[_], String)],
-    val isRemote: Boolean = false) extends ExternalTask with SystemExecutor[RandomProvider] {
+    val environmentVariables: Seq[(Prototype[_], String)],
+    val isRemote: Boolean = false) extends ExternalTask {
 
   @tailrec
-  protected[systemexec] final def execAll(cmds: List[ExpandedSystemExecCommand], workDir: File, preparedContext: Context)(implicit rng: RandomProvider): Int =
+  protected[systemexec] final def execAll(cmds: List[ExpandedSystemExecCommand], workDir: File, preparedContext: Context, acc: ExecutionResult = ExecutionResult.empty)(implicit rng: RandomProvider): ExecutionResult =
     cmds match {
-      case Nil ⇒ 0
+      case Nil ⇒ acc
       case cmd :: t ⇒
-        val commandline = commandLine(cmd.expandedCommand, workDir, preparedContext)
+        val commandline = commandLine(cmd.expandedCommand, workDir.getAbsolutePath, preparedContext)
 
-        val retCode = execute(commandline, out, err, workDir, preparedContext)
-        if (errorOnReturnCode && retCode != 0)
+        val result = execute(commandline, workDir, environmentVariables, preparedContext, returnOutput = output.isDefined, returnError = error.isDefined)
+        if (errorOnReturnCode && result.returnCode != 0)
           throw new InternalProcessingError(
             s"""Error executing command"}:
-                 |[${commandline.mkString(" ")}] return code was not 0 but ${retCode}""".stripMargin)
-
-        if (t.isEmpty || retCode != 0) retCode
-        else execAll(t, workDir, preparedContext)
+                 |[${commandline.mkString(" ")}] return code was not 0 but ${result.returnCode}""".stripMargin)
+        else execAll(t, workDir, preparedContext, ExecutionResult.append(acc, result))
     }
 
   override protected def process(context: Context)(implicit rng: RandomProvider) = withWorkDir { tmpDir ⇒
@@ -90,14 +88,15 @@ abstract class SystemExecTask(
       cmd ⇒ cmd.expanded map { expansion ⇒ ExpandedSystemExecCommand(expansion) }
     }.getOrElse(throw new UserBadDataError("Not command line found for " + OS.actualOS))
 
-    val retCode = execAll(osCommandLines.toList, workDir, preparedContext)
+    val executionResult = execAll(osCommandLines.toList, workDir, preparedContext)
     val retContext: Context = fetchOutputFiles(preparedContext, workDir, directory)
 
     retContext ++
       List(
-        output.map { o ⇒ Variable(o, outBuilder.toString) },
-        error.map { e ⇒ Variable(e, errBuilder.toString) },
-        returnValue.map { r ⇒ Variable(r, retCode) }
+        // .GET => because!
+        output.map { o ⇒ Variable(o, executionResult.output.get) },
+        error.map { e ⇒ Variable(e, executionResult.errorOutput.get) },
+        returnValue.map { r ⇒ Variable(r, executionResult.returnCode) }
       ).flatten
   }
 

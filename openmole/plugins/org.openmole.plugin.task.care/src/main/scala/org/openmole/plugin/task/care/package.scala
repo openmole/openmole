@@ -47,10 +47,10 @@ package care {
       stream
     }.opt.get
 
-    def extractArchive(archive: File, destination: File) = {
-      val extractedStream = extractArchiveStream(managedArchive(archive))
-      extractedStream.map(_.extract(destination))
-    }.opt
+    //    def extractArchive(archive: File, destination: File) = {
+    //      val extractedStream = extractArchiveStream(managedArchive(archive))
+    //      extractedStream.map(_.extract(destination))
+    //    }.opt
 
     case class CAREInfo(commandLine: Option[Seq[String]], workDirectory: Option[String])
 

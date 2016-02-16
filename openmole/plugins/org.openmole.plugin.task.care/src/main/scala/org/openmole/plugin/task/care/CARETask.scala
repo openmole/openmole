@@ -1,6 +1,7 @@
 /*
  *  Copyright (C) 2015 Jonathan Passerat-Palmbach
- * 
+ *  Copyright (C) 2016 Romain Reuillon
+ *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
@@ -18,7 +19,6 @@
 package org.openmole.plugin.task.care
 
 import java.io.File
-import java.nio.file.Files
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.workflow.builder.CanBuildTask
 import org.openmole.core.workflow.data.{ Context, Variable }
@@ -34,100 +34,89 @@ import org.openmole.core.workflow.data._
 object CARETask extends Logger {
 
   // TODO command and archiveWorkDirectory should be optional now that we have the utilities to dig into the archive
-  def apply(archiveLocation: String, command: String, archiveWorkDirectory: String) = {
-
-    val archive = archiveLocation.split('/').last.split('.').head
-
-    def reExecuteCommand(commandline: String) = s"./${archive}/re-execute.sh ${commandline}"
+  def apply(archive: File, command: String, workDirectory: Option[String]) = {
 
     // FIXME does it actually need archiveLocation => reuse archive / archive name?
-    new CARETaskBuilder(archiveLocation, reExecuteCommand(command), archiveWorkDirectory) with CanBuildTask[CARETask] {
+    new CARETaskBuilder(archive, command, workDirectory) with CanBuildTask[CARETask] {
       def toTask = canBuildTask2.toTask
-    }.addResource(new File(archiveLocation))
-
+    }
   }
 }
 
 abstract class CARETask(
-    val archiveLocation: String,
+    val archive: File,
     val command: systemexec.Command,
-    val archiveWorkDirectory: String,
-    val directory: Option[String],
+    val workDirectory: Option[String],
     val errorOnReturnCode: Boolean,
     val returnValue: Option[Prototype[Int]],
     val output: Option[Prototype[String]],
     val error: Option[Prototype[String]],
-    val variables: Seq[(Prototype[_], String)]) extends ExternalTask with SystemExecutor[RandomProvider] {
+    val environmentVariables: Seq[(Prototype[_], String)]) extends ExternalTask {
 
-  override protected def process(context: Context)(implicit rng: RandomProvider) = withWorkDir { tmpDir ⇒
+  archive.setExecutable(true)
 
-    // FIXME this can be factorised between tasks
-    val workDir =
-      directory match {
-        case None    ⇒ tmpDir
-        case Some(d) ⇒ new File(tmpDir, d)
-      }
+  lazy val packagingDirectory: String = getCareBinInfos(archive).workDirectory.getOrElse(
+    throw new InternalProcessingError(s"Could not find packaging path in ${archive}"))
 
-    val preparedContext = prepareInputFiles(context, tmpDir, workDirPath)
+  override protected def process(context: Context)(implicit rng: RandomProvider) = withWorkDir { taskWorkDirectory ⇒
+    def userWorkDirectory = workDirectory.getOrElse(packagingDirectory)
 
-    val expandedCommand = VariableExpansion(command.command)
-    val commandline = commandLine(expandedCommand, workDir, preparedContext)
+    // unarchiving in task's work directory
+    // no need to retrieve error => will throw exception if failing
+    execute(Array(archive.getAbsolutePath), taskWorkDirectory, Seq.empty, Context.empty, true, true)
 
-    // prepare CARE archive and working environment
-    extract(workDir)
-    linkInputsOutputs(workDir)
+    val extractedArchive = taskWorkDirectory.listFilesSafe.headOption.getOrElse(
+      throw new InternalProcessingError("Work directory should contain extracted archive, but is empty"))
+
+    val preparedContext = prepareInputFiles(context, taskWorkDirectory / "inputs", Some(userWorkDirectory))
+
+    val proot = extractedArchive / "proot"
+    proot move (extractedArchive / "proot.origin")
+
+    /** Traverse directory hierarchy to retrieve terminal elements (files and empty directories) */
+    def leafs(file: File, bindingDestination: String): Seq[(File, String)] =
+      if (file.isDirectory)
+        if (file.isDirectoryEmpty) Seq(file -> bindingDestination)
+        else file.listFilesSafe.flatMap(f ⇒ leafs(f, s"$bindingDestination/${f.getName}"))
+      else Seq(file -> bindingDestination)
+
+    val bindings = leafs(taskWorkDirectory / "inputs", "").map { case (f, d) ⇒ s"-b ${f.getAbsolutePath}:$d" }.mkString(" \\ \n")
+
+    // replace original proot executable with a script that will first bind all the inputs in the guest rootfs before
+    // calling the original proot
+    proot.content =
+      s"""
+        |#!/bin/bash
+        |TRUEPROOT="$${PROOT-$$(dirname $$0)/proot.origin}"
+        |$${TRUEPROOT} \
+        | ${bindings} \
+        | $$@
+      """.stripMargin
+
+    val reExecute = extractedArchive / "re-execute.sh"
+    reExecute.content = reExecute.lines.map {
+      case line if line.trim.startsWith("-w") ⇒ s"-w $userWorkDirectory"
+      case line                               ⇒ line
+    }.mkString("\n")
+
+    val expandedCommand = VariableExpansion(s"./${reExecute.getName} ${command.command}")
+    val commandline = commandLine(expandedCommand, userWorkDirectory, preparedContext)
 
     // FIXME duplicated from SystemExecTask
-    val retCode = execute(commandline, out, err, workDir, preparedContext)
-    if (errorOnReturnCode && retCode != 0)
+    val executionResult = execute(commandline, extractedArchive, environmentVariables, preparedContext, output.isDefined, error.isDefined)
+    if (errorOnReturnCode && executionResult.returnCode != 0)
       throw new InternalProcessingError(
-        s"""Error executing command"}:
-                 |[${commandline.mkString(" ")}] return code was not 0 but ${retCode}""".stripMargin)
+        s"""Error executing command":
+                 |[${commandline.mkString(" ")}] return code was not 0 but ${executionResult.returnCode}""".stripMargin)
 
-    //    val retCode = execAll(osCommandLines.toList, workDir, preparedContext)
-    val retContext: Context = fetchOutputFiles(preparedContext, workDir, workDirPath)
+    val retContext: Context = fetchOutputFiles(preparedContext, extractedArchive / "rootfs", Some(userWorkDirectory))
 
     retContext ++
       List(
-        output.map { o ⇒ Variable(o, outBuilder.toString) },
-        error.map { e ⇒ Variable(e, errBuilder.toString) },
-        returnValue.map { r ⇒ Variable(r, retCode) }
+        // .GET => because!
+        output.map { o ⇒ Variable(o, executionResult.output.get) },
+        error.map { e ⇒ Variable(e, executionResult.errorOutput.get) },
+        returnValue.map { r ⇒ Variable(r, executionResult.returnCode) }
       ).flatten
   }
-
-  val archiveName = archiveLocation.split("/").last
-
-  /**
-   * Extract the CARE archive passed to the constructor to the task's working directory.
-   *
-   * @param workDir Task's working directory as defined in the context.
-   */
-  def extract(workDir: File) = {
-    val careArchive = workDir / archiveName
-    extractArchive(careArchive, workDir)
-  }
-
-  /** Create exchange directories between the task's work directory and the archive chrooted environment */
-  def linkInputsOutputs(workDir: File) = {
-
-    // cd ${archive}/rootfs/\\$$taskdir && ln \\-s \\-t . \\`readlink \\-f \\$$OLDPWD/${archive}/rootfs/inputs\\`/\\*;
-    // cd \\$$OLDPWD/${archive}/rootfs && ln \\-s \\$$taskdir ./outputs
-
-    // TODO factorise
-    val archiveFolder = archiveName.split('.').head
-
-    val inputSource = workDir / s"./${archiveFolder}/rootfs/${archiveWorkDirectory}/inputs"
-    val inputTarget = workDir / "./inputs"
-
-    val outputSource = workDir / s"./${archiveFolder}/rootfs/outputs"
-    val outputTarget = workDir / s"./${archiveFolder}/rootfs/${archiveWorkDirectory}/outputs"
-
-    Files.createDirectory(inputSource)
-    inputTarget.createLink(inputSource)
-    Files.createDirectory(outputSource)
-    outputTarget.createLink(outputSource)
-
-    (inputSource, outputSource)
-  }
-
 }

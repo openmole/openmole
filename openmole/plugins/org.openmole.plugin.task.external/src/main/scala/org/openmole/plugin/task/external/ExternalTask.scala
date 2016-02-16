@@ -124,6 +124,7 @@ trait ExternalTask extends Task {
   }
 
   def prepareInputFiles(context: Context, tmpDir: File, workDirPath: Option[String])(implicit rng: RandomProvider): Context = {
+
     val workDir = workDirPath.map(new File(tmpDir, _)).getOrElse(tmpDir)
     workDir.mkdirs()
     def destination(f: ToPut) = if (f.inWorkDir) new File(workDir, f.name) else new File(tmpDir, f.name)

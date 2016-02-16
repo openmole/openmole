@@ -26,32 +26,10 @@ import org.openmole.plugin.task.systemexec
 import org.openmole.core.workflow.data._
 
 // arguments to SystemExecTask not really matching the actual one -> set in toTask
-abstract class CARETaskBuilder(archiveLocation: String, command: systemexec.Command, archiveWorkDirectory: String) extends SystemExecTaskBuilder(Seq.empty: _*) { builder ⇒
-
-  /**
-   * Input files injection into the archive
-   * @param p OpenMOLE variable pointing to the file to inject from the dataflow into the archive
-   * @param toArchiveWorkDirectory When set to true, files are copied to the archive's working directory
-   *                         whereas a false value will copy from the root of the archive
-   */
-  override def addInputFile(p: Prototype[File], location: ExpandedString, link: Boolean, toArchiveWorkDirectory: Boolean) =
-    if (toArchiveWorkDirectory) super.addInputFile(p, s"rootfs/inputs/${location}", false, true)
-    else super.addInputFile(p, s"rootfs/${location}", false, true)
-
-  /**
-   * We manage outputs from the working directory of the archive (rootfs/....)
-   * @param location file location in the archive
-   * @param p  OpenMOLE Val[File] to assign the retrieved file to
-   * @param fromArchiveWorkDirectory when set to true, the output file will be retrieved from the working directory
-   *                                 of the archive (through a symlink to /outputs)
-   *                                 when false, the output file is considered from the root of the archive (rootfs/...)
-   */
-  override def addOutputFile(location: ExpandedString, p: Prototype[File], fromArchiveWorkDirectory: Boolean) =
-    if (fromArchiveWorkDirectory) super.addOutputFile(s"rootfs/outputs/${location}", p, true)
-    else super.addOutputFile(s"rootfs/${location}", p, true)
-
-  // TODO override resources
-  // same mechanism as inputFiles
+abstract class CARETaskBuilder(archiveLocation: File,
+                               command: systemexec.Command,
+                               archiveWorkDirectory: Option[String])
+    extends SystemExecTaskBuilder(Seq.empty: _*) { builder ⇒
 
   // TODO handle shallow copies (bind to archive)
   // one option would be to replace call line by bind + call line
@@ -61,7 +39,7 @@ abstract class CARETaskBuilder(archiveLocation: String, command: systemexec.Comm
   implicit object canBuildTask2 extends CanBuildTask[CARETask] {
     override def toTask: CARETask = new CARETask(
       archiveLocation, command, archiveWorkDirectory,
-      workDirectory, errorOnReturnValue, returnValue, stdOut, stdErr, variables.toList) with builder.Built {
+      errorOnReturnValue, returnValue, stdOut, stdErr, variables.toList) with builder.Built {
 
       override val outputs: PrototypeSet = builder.outputs + List(stdOut, stdErr, returnValue).flatten
     }
