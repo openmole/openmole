@@ -24,13 +24,9 @@ import org.openmole.tool.file._
 import org.openmole.core.tools.service.{ OS, ProcessUtil }
 import ProcessUtil._
 import java.io.File
-import java.io.IOException
-import java.io.PrintStream
-import org.apache.commons.exec.CommandLine
 import org.openmole.core.workflow.data._
 import org.openmole.plugin.task.external._
 import org.openmole.tool.logger.Logger
-import org.openmole.tool.stream.StringOutputStream
 
 import scala.annotation.tailrec
 
@@ -79,18 +75,19 @@ abstract class SystemExecTask(
         case Some(d) ⇒ new File(tmpDir, d)
       }
 
-    val preparedContext = prepareInputFiles(context, tmpDir, directory)
+    val preparedContext = prepareInputFiles(context, relativeResolver(workDir))
 
     val osCommandLines: Seq[ExpandedSystemExecCommand] = command.find { _.os.compatible }.map {
       cmd ⇒ cmd.expanded map { expansion ⇒ ExpandedSystemExecCommand(expansion) }
     }.getOrElse(throw new UserBadDataError("Not command line found for " + OS.actualOS))
 
     val executionResult = execAll(osCommandLines.toList, workDir, preparedContext)
-    val retContext: Context = fetchOutputFiles(preparedContext, workDir, directory)
+
+    val retContext: Context = fetchOutputFiles(preparedContext, relativeResolver(workDir))
+    checkAndClean(retContext, tmpDir)
 
     retContext ++
       List(
-        // .GET => because!
         output.map { o ⇒ Variable(o, executionResult.output.get) },
         error.map { e ⇒ Variable(e, executionResult.errorOutput.get) },
         returnValue.map { r ⇒ Variable(r, executionResult.returnCode) }

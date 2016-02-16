@@ -35,26 +35,22 @@ object ExternalTask {
   case class InputFile(
     prototype: Prototype[File],
     destination: ExpandedString,
-    link: Boolean,
-    toWorkDirectory: Boolean)
+    link: Boolean)
 
   case class InputFileArray(
     prototype: Prototype[Array[File]],
     prefix: ExpandedString,
     suffix: ExpandedString,
-    link: Boolean,
-    toWorkDirectory: Boolean)
+    link: Boolean)
 
   case class OutputFile(
     origin: ExpandedString,
-    prototype: Prototype[File],
-    fromWorkDirectory: Boolean)
+    prototype: Prototype[File])
 
   case class Resource(
     file: File,
     destination: ExpandedString,
     link: Boolean,
-    toWorkDirectory: Boolean,
     os: OS)
 }
 
@@ -67,11 +63,11 @@ trait ExternalTask extends Task {
   def outputFiles: Iterable[OutputFile]
   def resources: Iterable[Resource]
 
-  protected case class ToPut(file: File, name: String, link: Boolean, inWorkDir: Boolean)
+  protected case class ToPut(file: File, name: String, link: Boolean)
 
   protected def listInputFiles(context: Context)(implicit rng: RandomProvider): Iterable[(Prototype[File], ToPut)] =
     inputFiles.map {
-      case InputFile(prototype, name, link, toWorkDir) ⇒ prototype -> ToPut(context(prototype), name.from(context), link, toWorkDir)
+      case InputFile(prototype, name, link) ⇒ prototype -> ToPut(context(prototype), name.from(context), link)
     }
 
   protected def listInputFileArray(context: Context)(implicit rng: RandomProvider): Iterable[(Prototype[Array[File]], Seq[ToPut])] =
@@ -81,14 +77,14 @@ trait ExternalTask extends Task {
       (ifa.prototype,
         context(ifa.prototype).zipWithIndex.map {
           case (file, i) ⇒
-            ToPut(file, s"${ifa.prefix.from(context)}$i${ifa.suffix.from(context)}", link = ifa.link, inWorkDir = ifa.toWorkDirectory)
+            ToPut(file, s"${ifa.prefix.from(context)}$i${ifa.suffix.from(context)}", link = ifa.link)
         }.toSeq)
     }
 
-  protected def listResources(context: Context, tmpDir: File)(implicit rng: RandomProvider): Iterable[ToPut] = {
+  protected def listResources(context: Context, resolver: PathResolver)(implicit rng: RandomProvider): Iterable[ToPut] = {
     val byLocation =
       resources groupBy {
-        case Resource(_, name, _, _, _) ⇒ new File(tmpDir, name.from(context)).getCanonicalPath
+        case Resource(_, name, _, _) ⇒ resolver(name.from(context)).getCanonicalPath
       }
 
     val selectedOS =
@@ -97,30 +93,23 @@ trait ExternalTask extends Task {
       }
 
     selectedOS.map {
-      case Resource(file, name, link, toWorkDir, _) ⇒ ToPut(file, name.from(context), link, toWorkDir)
+      case Resource(file, name, link, _) ⇒ ToPut(file, name.from(context), link)
     }
   }
 
-  type OutputPathResolver = (File, File, Boolean, String) ⇒ File
+  type PathResolver = String ⇒ File
 
-  def absoluteResolve(rootDirectory: File, workDirectory: File, inWorkDirectory: Boolean, filePath: String): File = {
-    def resolved = if (inWorkDirectory) workDirectory.resolve(filePath) else rootDirectory.resolve(filePath)
+  def relativeResolver(workDirectory: File)(filePath: String): File = {
+    def resolved = workDirectory.resolve(filePath)
     resolved.toFile
   }
 
-  protected def outputFileVariables(context: Context, rootDirectory: File, workDirPath: Option[String], resolver: OutputPathResolver)(implicit rng: RandomProvider) = {
-    lazy val absoluteWorkDirectory =
-      workDirPath match {
-        case None    ⇒ rootDirectory
-        case Some(d) ⇒ new File(rootDirectory, d)
-      }
-
+  protected def outputFileVariables(context: Context, resolver: PathResolver)(implicit rng: RandomProvider) =
     outputFiles.map {
-      case OutputFile(name, prototype, inWorkDir) ⇒
+      case OutputFile(name, prototype) ⇒
         val fileName = name.from(context)
-        Variable(prototype, resolver(rootDirectory, absoluteWorkDirectory, inWorkDir, fileName))
+        Variable(prototype, resolver(fileName))
     }
-  }
 
   private def copy(f: ToPut, to: File) = {
     to.createParentDir
@@ -133,12 +122,10 @@ trait ExternalTask extends Task {
 
   }
 
-  def prepareInputFiles(context: Context, tmpDir: File, workDirPath: Option[String])(implicit rng: RandomProvider): Context = {
-    val workDir = workDirPath.map(new File(tmpDir, _)).getOrElse(tmpDir)
+  def prepareInputFiles(context: Context, resolver: PathResolver)(implicit rng: RandomProvider): Context = {
+    def destination(f: ToPut) = resolver(f.name)
 
-    def destination(f: ToPut) = if (f.inWorkDir) new File(workDir, f.name) else new File(tmpDir, f.name)
-
-    for { f ← listResources(context, tmpDir) } copy(f, destination(f))
+    for { f ← listResources(context, resolver) } copy(f, destination(f))
 
     val copiedFiles =
       for { (p, f) ← listInputFiles(context) } yield {
@@ -161,22 +148,22 @@ trait ExternalTask extends Task {
     context ++ copiedFiles ++ copiedArrayFiles
   }
 
-  def fetchOutputFiles(context: Context, tmpDir: File, workDirPath: Option[String], resolver: OutputPathResolver = absoluteResolve)(implicit rng: RandomProvider): Context = {
-    val resultContext = context ++ outputFileVariables(context, tmpDir, workDirPath, resolver)
+  def fetchOutputFiles(context: Context, resolver: PathResolver)(implicit rng: RandomProvider): Context =
+    context ++ outputFileVariables(context, resolver)
 
-    def contextFiles =
-      filterOutput(resultContext).values.map(_.value).collect { case f: File ⇒ f }
+  def checkAndClean(context: Context, rootDir: File) = {
+    lazy val contextFiles =
+      filterOutput(context).values.map(_.value).collect { case f: File ⇒ f }
 
     for {
       f ← contextFiles
       if !f.exists
     } throw new UserBadDataError("Output file " + f.getAbsolutePath + " for task " + this.toString + " doesn't exist")
 
-    tmpDir.applyRecursive(f ⇒ f.delete, contextFiles.toSet)
+    rootDir.applyRecursive(f ⇒ f.delete, contextFiles)
 
     // This delete the dir only if it is empty
-    tmpDir.delete
-    resultContext
+    rootDir.delete
   }
 
   def withWorkDir[T](f: File ⇒ T): T = {

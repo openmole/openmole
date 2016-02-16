@@ -66,8 +66,14 @@ abstract class CARETask(
 
     def userWorkDirectory = workDirectory.getOrElse(packagingDirectory)
 
-    val preparedContext = prepareInputFiles(context, taskWorkDirectory / "inputs", Some(userWorkDirectory))
+    def inputPathResolver(path: String) = {
+      if (new File(path).isAbsolute) taskWorkDirectory / "inputs" / path
+      else taskWorkDirectory / "inputs" / userWorkDirectory / path
+    }
 
+    val preparedContext = prepareInputFiles(context, inputPathResolver)
+
+    // Replace new proot with a version with user bindings
     val proot = extractedArchive / "proot"
     proot move (extractedArchive / "proot.origin")
 
@@ -110,17 +116,15 @@ abstract class CARETask(
         s"""Error executing command":
                  |[${commandline.mkString(" ")}] return code was not 0 but ${executionResult.returnCode}""".stripMargin)
 
-    def guestResolver(rootDirectory: File, workDirectory: File, inWorkDirectory: Boolean, filePath: String): File = {
+    def rootDirectory = extractedArchive / "rootfs"
+
+    def outputPathResolver(filePath: String): File = {
       def isAbsolute = new File(filePath).isAbsolute
-
-      def resolved =
-        if (inWorkDirectory) { if (isAbsolute) rootDirectory / filePath else workDirectory / filePath }
-        else rootDirectory / filePath
-
-      resolved.toFile
+      if (isAbsolute) rootDirectory / filePath else rootDirectory / userWorkDirectory / filePath
     }
 
-    val retContext: Context = fetchOutputFiles(preparedContext, extractedArchive / "rootfs", Some(userWorkDirectory), guestResolver)
+    val retContext = fetchOutputFiles(preparedContext, outputPathResolver)
+    checkAndClean(retContext, taskWorkDirectory)
 
     retContext ++
       List(

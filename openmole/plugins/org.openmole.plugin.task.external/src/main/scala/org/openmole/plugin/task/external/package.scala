@@ -28,22 +28,22 @@ package external {
   trait ExternalPackage {
 
     lazy val inputFiles = new {
-      def +=(p: Prototype[File], name: String, link: Boolean = false, toWorkDirectory: Boolean = true) = (_: ExternalTaskBuilder).addInputFile(p, name, link, toWorkDirectory)
+      def +=(p: Prototype[File], name: String, link: Boolean = false, toWorkDirectory: Boolean = true) = (_: ExternalTaskBuilder).addInputFile(p, name, link)
     }
 
     lazy val inputFileArrays = new {
-      def +=(p: Prototype[Array[File]], prefix: String, suffix: String = "", link: Boolean = false, toWorkDirectory: Boolean = true) =
-        (_: ExternalTaskBuilder).addInputFileArray(p, prefix, suffix, link, toWorkDirectory)
+      def +=(p: Prototype[Array[File]], prefix: String, suffix: String = "", link: Boolean = false) =
+        (_: ExternalTaskBuilder).addInputFileArray(p, prefix, suffix, link)
     }
 
     lazy val outputFiles = new {
-      def +=(name: String, p: Prototype[File], fromWorkDirectory: Boolean = true) = (_: ExternalTaskBuilder).addOutputFile(name, p, fromWorkDirectory)
+      def +=(name: String, p: Prototype[File]) = (_: ExternalTaskBuilder).addOutputFile(name, p)
     }
 
     lazy val resources =
       new {
-        def +=(file: File, name: Option[ExpandedString] = None, link: Boolean = false, fromWorkDirectory: Boolean = false, os: OS = OS()) =
-          (_: ExternalTaskBuilder).addResource(file, name, link, fromWorkDirectory, os)
+        def +=(file: File, name: Option[ExpandedString] = None, link: Boolean = false, os: OS = OS()) =
+          (_: ExternalTaskBuilder).addResource(file, name, link, os)
       }
   }
 }

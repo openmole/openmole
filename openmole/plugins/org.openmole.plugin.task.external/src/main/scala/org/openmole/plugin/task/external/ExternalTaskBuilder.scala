@@ -55,11 +55,10 @@ abstract class ExternalTaskBuilder extends TaskBuilder { builder ⇒
    * @param link tels if the entire content of the file should be copied or
    * if a symbolic link is suitable. In the case link is set to true openmole will
    * try to use a symbolic link if available on your system.
-   * @param toWorkDirectory if true resolve the name of the file relatively to the workdir of the task
    *
    */
-  def addResource(file: File, name: Option[ExpandedString] = None, link: Boolean = false, toWorkDirectory: Boolean = false, os: OS = OS()): ExternalTaskBuilder.this.type = {
-    _resources += Resource(file, name.getOrElse(file.getName), link, toWorkDirectory, os)
+  def addResource(file: File, name: Option[ExpandedString] = None, link: Boolean = false, os: OS = OS()): ExternalTaskBuilder.this.type = {
+    _resources += Resource(file, name.getOrElse(file.getName), link, os)
     this
   }
 
@@ -69,11 +68,10 @@ abstract class ExternalTaskBuilder extends TaskBuilder { builder ⇒
    * @param p the prototype of the data containing the file to be copied
    * @param name the destination name of the file in the task workspace
    * @param link @see addResource
-   * @param toWorkDirectory @see addResource
    *
    */
-  def addInputFile(p: Prototype[File], name: ExpandedString, link: Boolean = false, toWorkDirectory: Boolean = true): this.type = {
-    _inputFiles += InputFile(p, name, link, toWorkDirectory)
+  def addInputFile(p: Prototype[File], name: ExpandedString, link: Boolean = false): this.type = {
+    _inputFiles += InputFile(p, name, link)
     this addInput p
     this
   }
@@ -86,11 +84,10 @@ abstract class ExternalTaskBuilder extends TaskBuilder { builder ⇒
    * @param prefix the prefix for naming the files
    * @param suffix the suffix for naming the files
    * @param link @see addResource
-   * @param toWorkDirectory @see addResource
    *
    */
-  def addInputFileArray(p: Prototype[Array[File]], prefix: ExpandedString, suffix: ExpandedString = "", link: Boolean = false, toWorkDirectory: Boolean = true): this.type = {
-    _inputFileArrays += InputFileArray(prototype = p, prefix = prefix, suffix = suffix, link = link, toWorkDirectory = toWorkDirectory)
+  def addInputFileArray(p: Prototype[Array[File]], prefix: ExpandedString, suffix: ExpandedString = "", link: Boolean = false): this.type = {
+    _inputFileArrays += InputFileArray(prototype = p, prefix = prefix, suffix = suffix, link = link)
     this addInput p
     this
   }
@@ -102,8 +99,8 @@ abstract class ExternalTaskBuilder extends TaskBuilder { builder ⇒
    * @param p the prototype that is injected
    *
    */
-  def addOutputFile(name: ExpandedString, p: Prototype[File], fromWorkDirectory: Boolean = true): this.type = {
-    _outputFiles += OutputFile(name, p, fromWorkDirectory)
+  def addOutputFile(name: ExpandedString, p: Prototype[File]): this.type = {
+    _outputFiles += OutputFile(name, p)
     this addOutput p
     this
   }
