@@ -101,14 +101,24 @@ trait ExternalTask extends Task {
     }
   }
 
-  protected def outputFileVariables(context: Context, tmpDir: File, workDirPath: Option[String])(implicit rng: RandomProvider) = {
-    val workDir = workDirPath.map(new File(tmpDir, _)).getOrElse(tmpDir)
+  type OutputPathResolver = (File, File, Boolean, String) ⇒ File
+
+  def absoluteResolve(rootDirectory: File, workDirectory: File, inWorkDirectory: Boolean, filePath: String): File = {
+    def resolved = if (inWorkDirectory) workDirectory.resolve(filePath) else rootDirectory.resolve(filePath)
+    resolved.toFile
+  }
+
+  protected def outputFileVariables(context: Context, rootDirectory: File, workDirPath: Option[String], resolver: OutputPathResolver)(implicit rng: RandomProvider) = {
+    lazy val absoluteWorkDirectory =
+      workDirPath match {
+        case None    ⇒ rootDirectory
+        case Some(d) ⇒ new File(rootDirectory, d)
+      }
 
     outputFiles.map {
       case OutputFile(name, prototype, inWorkDir) ⇒
         val fileName = name.from(context)
-        val baseDir = if (inWorkDir) workDir else tmpDir
-        Variable(prototype, baseDir.resolve(fileName).toFile)
+        Variable(prototype, resolver(rootDirectory, absoluteWorkDirectory, inWorkDir, fileName))
     }
   }
 
@@ -151,8 +161,8 @@ trait ExternalTask extends Task {
     context ++ copiedFiles ++ copiedArrayFiles
   }
 
-  def fetchOutputFiles(context: Context, tmpDir: File, workDirPath: Option[String])(implicit rng: RandomProvider): Context = {
-    val resultContext = context ++ outputFileVariables(context, tmpDir, workDirPath)
+  def fetchOutputFiles(context: Context, tmpDir: File, workDirPath: Option[String], resolver: OutputPathResolver = absoluteResolve)(implicit rng: RandomProvider): Context = {
+    val resultContext = context ++ outputFileVariables(context, tmpDir, workDirPath, resolver)
 
     def contextFiles =
       filterOutput(resultContext).values.map(_.value).collect { case f: File ⇒ f }

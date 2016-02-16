@@ -66,7 +66,6 @@ abstract class CARETask(
 
     def userWorkDirectory = workDirectory.getOrElse(packagingDirectory)
 
-    // FIXME fishy
     val preparedContext = prepareInputFiles(context, taskWorkDirectory / "inputs", Some(userWorkDirectory))
 
     val proot = extractedArchive / "proot"
@@ -111,7 +110,17 @@ abstract class CARETask(
         s"""Error executing command":
                  |[${commandline.mkString(" ")}] return code was not 0 but ${executionResult.returnCode}""".stripMargin)
 
-    val retContext: Context = fetchOutputFiles(preparedContext, extractedArchive / "rootfs", Some(userWorkDirectory))
+    def guestResolver(rootDirectory: File, workDirectory: File, inWorkDirectory: Boolean, filePath: String): File = {
+      def isAbsolute = new File(filePath).isAbsolute
+
+      def resolved =
+        if (inWorkDirectory) { if (isAbsolute) rootDirectory / filePath else workDirectory / filePath }
+        else rootDirectory / filePath
+
+      resolved.toFile
+    }
+
+    val retContext: Context = fetchOutputFiles(preparedContext, extractedArchive / "rootfs", Some(userWorkDirectory), guestResolver)
 
     retContext ++
       List(
