@@ -35,7 +35,7 @@ import org.openmole.core.workspace.Workspace
 import org.openmole.core.tools.service._
 import org.openmole.core.batch.storage._
 import org.openmole.core.batch.storage._
-import org.openmole.core.workflow.execution.local._
+import org.openmole.core.workflow.execution._
 import org.openmole.core.batch.message._
 import org.openmole.core.serializer._
 import org.openmole.core.pluginmanager._

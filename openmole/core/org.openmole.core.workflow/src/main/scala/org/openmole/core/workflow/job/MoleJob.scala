@@ -19,7 +19,7 @@ package org.openmole.core.workflow.job
 
 import java.util.UUID
 
-import org.openmole.core.workflow.execution.local.{ LocalEnvironment, LocalExecutionJob }
+import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.job.State._
 import org.openmole.core.workflow.task.Task
 import org.openmole.core.workflow.data.{ Prototype, Variable, Context }

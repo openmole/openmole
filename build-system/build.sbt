@@ -30,6 +30,6 @@ libraryDependencies ++= Seq(
   "org.apache.commons" % "commons-compress" % "1.10")
 
 
-publishTo <<= isSnapshot(if(_) Some("Openmole Nexus" at "http://maven.openmole.org/snapshots") else Some("Openmole Nexus" at "http://maven.openmole.org/releases"))
+publishTo <<= isSnapshot(if(_) Some("Openmole Nexus" at "https://maven.openmole.org/snapshots") else Some("Openmole Nexus" at "https://maven.openmole.org/releases"))
 
 releaseSettings

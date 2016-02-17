@@ -33,7 +33,7 @@ import org.openmole.core.workflow.tools._
 import org.openmole.tool.logger.Logger
 import scala.collection.mutable.{ ListBuffer, Buffer }
 import scala.concurrent.stm._
-import org.openmole.core.workflow.execution.{ ExecutionJob, ExecutionState, JobList, Environment }
+import org.openmole.core.workflow.execution._
 import java.util.{ HashSet ⇒ JHashSet }
 
 object MoleExecution extends Logger {
@@ -147,7 +147,10 @@ class MoleExecution(
   private def submit(job: Job, capsule: Capsule) =
     if (!job.finished) {
       val env = environments.getOrElse(capsule, defaultEnvironment)
-      env.submit(job)
+      env match {
+        case env: SubmissionEnvironment ⇒ env.submit(job)
+        case env: LocalEnvironment      ⇒ env.submit(job)
+      }
       EventDispatcher.trigger(this, new MoleExecution.JobSubmitted(job, capsule, env))
     }
 
@@ -217,7 +220,7 @@ class MoleExecution(
 
     val runningSet: JHashSet[UUID] = {
       def executionJobs =
-        environments.values.toSeq.collect { case e: JobList ⇒ e }.toIterator.flatMap(_.jobs.toIterator)
+        environments.values.toSeq.collect { case e: SubmissionEnvironment ⇒ e }.toIterator.flatMap(_.jobs.toIterator)
 
       val set = new JHashSet[UUID](jobs.size + 1, 1.0f)
 

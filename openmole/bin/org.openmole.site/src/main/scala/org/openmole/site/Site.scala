@@ -66,7 +66,7 @@ class Site extends IApplication {
 
     Config.testScript = !args.contains("--no-test")
 
-    val dest = new File(args(0))
+    val dest = new File(args.filterNot(_.startsWith("-"))(0))
     dest.recursiveDelete
 
     val m = new Market(Market.entries, dest)
@@ -75,12 +75,16 @@ class Site extends IApplication {
 
     DocumentationPages.marketEntries = marketEntries
 
-    val site = new scalatex.site.Site {
-      override def siteCss = Set.empty
+    case class PageFrag(page: Page, frag: Frag)
 
-      override def headFrags =
+    val site = new scalatex.site.Site { site ⇒
+      override def siteCss = Set.empty
+      override def pageTitle: Option[String] = None
+
+      def headFrags(page: org.openmole.site.Page) =
         Seq(
-          meta(name := "description", all.content := "OpenMOLE: a workflow system for distributed computing and parameter tuning"),
+          scalatags.Text.tags2.title(page.title),
+          meta(name := "description", all.content := s"OpenMOLE: a workflow system for distributed computing and parameter tuning"),
           meta(name := "keywords", all.content := "Scientific Workflow Engine, Distributed Computing, Cluster, Grid, Parameter Tuning, Model Exploration, Design of Experiment, Sensitivity Analysis, Data Parallelism"),
           meta(name := "viewport", all.content := "width=device-width, initial-scale=1"),
 
@@ -95,10 +99,7 @@ class Site extends IApplication {
           script(src := Resource.highlightJS.file),
           script("hljs.initHighlightingOnLoad();"),
 
-          scalatags.Text.tags2.title("OpenMOLE: scientific workflow, distributed computing, parameter tuning"),
-
           meta(charset := "UTF-8"),
-          //script(src := "https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"),
           piwik
         )
 
@@ -112,12 +113,10 @@ class Site extends IApplication {
           ++ Seq(frag): _*
       )
 
-      case class PageFrag(page: Page, frag: Frag)
-
       lazy val pagesFrag = Pages.all.map { p ⇒ PageFrag(p, Pages.decorate(p)) }
       lazy val documentationFrags = pagesFrag.collect { case PageFrag(p: DocumentationPage, f) ⇒ f }.toSet
 
-      def content = pagesFrag.map { case PageFrag(p, f) ⇒ p.file -> f }.toMap
+      def content = pagesFrag.map { case PageFrag(p, f) ⇒ p.file -> (site.headFrags(p), f) }.toMap
     }
 
     lazy val bibPapers = Publication.papers ++ Communication.papers

@@ -73,7 +73,7 @@ object Libraries extends Defaults {
 
   lazy val netlogo4 = "org.openmole" % "ccl-northwestern-edu-netlogo4" % "4.1.3"
 
-  lazy val netLogo5Version = "5.2.0"
+  lazy val netLogo5Version = "5.3.0"
   lazy val netlogo5 = "org.openmole" % "ccl-northwestern-edu-netlogo5" % netLogo5Version
   lazy val netlogo5_noscala = "org.openmole" % "ccl-northwestern-edu-netlogo5-noscala" % netLogo5Version
 
@@ -148,7 +148,7 @@ object Libraries extends Defaults {
 
   lazy val scalatest = "org.scalatest" %% "scalatest" % "2.2.4" % "test"
 
-  lazy val scalatexSite = "org.openmole" %% "com-lihaoyi-scalatex-site" % "0.3.1"
+  lazy val scalatexSite = "org.openmole" %% "com-lihaoyi-scalatex-site" % "0.3.5"
 
   lazy val apacheConfig = "org.openmole" %% "org-apache-commons-configuration" % "1.10"
 

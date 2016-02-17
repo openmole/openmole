@@ -114,7 +114,7 @@ object OSGi extends Defaults {
         "org.objectweb" % "asm" % "3.1",
         "org.objectweb" % "asm-commons" % "3.1"), version := "4.1.3", scalaVersion := "2.8.0", crossPaths := false, bundleType := Set("plugin"))
 
-  lazy val netLogo5Version = "5.2.0"
+  lazy val netLogo5Version = "5.3.0"
   lazy val netlogo5_noscala = OsgiProject("ccl.northwestern.edu.netlogo5.noscala", exports = Seq("org.nlogo.*"),
     privatePackages = Seq("!scala.*", "*")) settings
     (libraryDependencies ++=
@@ -166,9 +166,9 @@ object OSGi extends Defaults {
     )
 
   lazy val scalatexSite =
-    OsgiProject("com.lihaoyi.scalatex-site", exports = Seq("scalatex.*", "ammonite.*", "fastparse.*"), privatePackages = Seq("!scala.*", "!scalatags.*", "*"), imports = Seq("*")) settings (
-      libraryDependencies += "com.lihaoyi" %% "scalatex-site" % "0.3.4",
-      version := "0.3.4"
+    OsgiProject("com.lihaoyi.scalatex-site", exports = Seq("scalatex.*", "ammonite.*", "fastparse.*"), privatePackages = Seq("!scala.*", "!scalatags.*", "META-INF.**", "*"), imports = Seq("*")) settings (
+      libraryDependencies += "com.lihaoyi" %% "scalatex-site" % "0.3.5",
+      version := "0.3.5"
       )
 
   lazy val rx = OsgiProject("rx", exports = Seq("rx.*", "*.sjsir")) settings(

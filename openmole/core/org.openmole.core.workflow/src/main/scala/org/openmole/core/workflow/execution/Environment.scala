@@ -18,7 +18,8 @@
 package org.openmole.core.workflow.execution
 
 import java.util.logging.Level
-import org.openmole.core.event.{ EventAccumulator, Event }
+import org.openmole.core.event.{EventDispatcher, EventAccumulator, Event}
+import org.openmole.core.workflow.execution.local.{LocalExecutionJob, ExecutorPool}
 import org.openmole.core.workflow.job.Job
 import org.openmole.core.workflow.job.MoleJob
 import ExecutionState._
@@ -27,6 +28,8 @@ import org.openmole.core.workspace.{ Workspace, ConfigurationLocation }
 import org.openmole.tool.collection.OrderedSlidingList
 import scala.concurrent.stm._
 import org.openmole.core.tools.service._
+
+import scala.ref.WeakReference
 
 object Environment {
   val maxExceptionsLog = ConfigurationLocation("Environment", "MaxExceptionsLog")
@@ -40,12 +43,11 @@ object Environment {
   case class JobCompleted(job: ExecutionJob, log: RuntimeLog, info: RuntimeInfo) extends Event[Environment]
 
   case class RuntimeLog(beginTime: Long, executionBeginTime: Long, executionEndTime: Long, endTime: Long)
-
 }
 
 import Environment._
 
-trait Environment <: Name {
+sealed trait Environment <: Name {
   private[execution] val _done = Ref(0L)
   private[execution] val _failed = Ref(0L)
 
@@ -62,9 +64,48 @@ trait Environment <: Name {
   def done: Long = _done.single()
   def failed: Long = _failed.single()
 
-  def submit(job: Job)
 }
 
-trait JobList <: Environment {
+trait SubmissionEnvironment <: Environment {
+  def submit(job: Job)
   def jobs: Iterable[ExecutionJob]
+}
+
+object LocalEnvironment {
+
+  val DefaultNumberOfThreads = new ConfigurationLocation("LocalExecutionEnvironment", "ThreadNumber")
+
+  Workspace += (DefaultNumberOfThreads, "1")
+  var defaultNumberOfThreads = Workspace.preferenceAsInt(DefaultNumberOfThreads)
+
+  def apply(
+             nbThreads: Int = defaultNumberOfThreads,
+             deinterleave: Boolean = false,
+             name: Option[String] = None) = new LocalEnvironment(nbThreads, deinterleave, name)
+
+}
+
+class LocalEnvironment(
+  val nbThreads: Int,
+  val deinterleave: Boolean,
+  override val name: Option[String]) extends Environment {
+
+  @transient lazy val pool = new ExecutorPool(nbThreads, WeakReference(this))
+
+  def nbJobInQueue = pool.waiting
+
+  def submit(job: Job): Unit =
+    submit(new LocalExecutionJob(this, job.moleJobs, Some(job.moleExecution)))
+
+  def submit(moleJob: MoleJob): Unit =
+    submit(new LocalExecutionJob(this, List(moleJob), None))
+
+  private def submit(ejob: LocalExecutionJob): Unit = {
+    pool.enqueue(ejob)
+    ejob.state = ExecutionState.SUBMITTED
+    EventDispatcher.trigger(this, new Environment.JobSubmitted(ejob))
+  }
+
+  def submitted: Long = pool.waiting
+  def running: Long = pool.running
 }

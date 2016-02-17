@@ -23,7 +23,7 @@ trait Classes {
 
   lazy val Prototype = org.openmole.core.workflow.data.Prototype
 
-  lazy val LocalEnvironment = org.openmole.core.workflow.execution.local.LocalEnvironment
+  lazy val LocalEnvironment = org.openmole.core.workflow.execution.LocalEnvironment
 
   lazy val EmptyTask = task.EmptyTask
   lazy val ExplorationTask = task.ExplorationTask
