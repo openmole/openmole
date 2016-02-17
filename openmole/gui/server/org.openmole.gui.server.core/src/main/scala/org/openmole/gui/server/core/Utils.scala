@@ -24,6 +24,7 @@ import java.util.logging.Level
 import java.util.zip.{ ZipInputStream, GZIPInputStream }
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.workspace.Workspace
+import org.openmole.gui.ext.data.FileType._
 import org.openmole.gui.ext.data._
 import java.io._
 import org.openmole.tool.file._
@@ -156,12 +157,14 @@ object Utils {
     f
   }
 
-  def launchinCommands(model: SafePath): Seq[LaunchingCommand] =
+  def launchinCommands(model: SafePath): Seq[LaunchingCommand] = {
+    import org.openmole.gui.ext.data.ServerFileSytemContext.project
     model.name.split('.').last match {
       case "nlogo" ⇒ Seq(CodeParsing.netlogoParsing(model))
       case "jar"   ⇒ Seq(JavaLaunchingCommand(JarMethod("", Seq(), "", true, ""), Seq(), Seq()))
-      //      case _       ⇒ CodeParsing.fromCommand(getCareBinInfos(model).commandLine.get)
+      case _       ⇒ Seq(CodeParsing.fromCommand(getCareBinInfos(model).commandLine.getOrElse(Seq())).get)
     }
+  }
 
   def jarClasses(jarPath: SafePath): Seq[ClassTree] = {
     import org.openmole.gui.ext.data.ServerFileSytemContext.project

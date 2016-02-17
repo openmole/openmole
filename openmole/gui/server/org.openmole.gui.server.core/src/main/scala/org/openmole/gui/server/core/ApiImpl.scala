@@ -487,22 +487,22 @@ object ApiImpl extends Api {
       val (ofilemappings, omappings) = rawomappings.partition(_.`type` == ProtoTYPE.FILE)
 
       val inString = ioString(ins, "inputs")
-      val imFileString = imapString(ifilemappings, "fileInputs")
+      val imFileString = imapString(ifilemappings, "inputFiles")
       val ouString = ioString(ous, "outputs")
-      val omFileString = omapString(ofilemappings, "fileOutputs")
-      val resourcesString = s"""  resources += (${resources.paths.map { r ⇒ s"workDirectory / ${(r.safePath.path.drop(1).mkString("/")).mkString(",")}" }})\n"""
+      val omFileString = omapString(ofilemappings, "outputFiles")
+      val resourcesString = if (resources.paths.nonEmpty) s"""  resources += (${resources.paths.map { r ⇒ s"workDirectory / ${(r.safePath.path.drop(1).mkString("/")).mkString(",")}" }}).\n""" else ""
       val defaults =
-        "  //Default values. Can be removed if OpenMOLE Vals are set by a value coming from the workflow\n" +
+        "  //Default values. Can be removed if OpenMOLE Vals are set by values coming from the workflow\n" +
           (inputs.map { p ⇒ (p.name, testBoolean(p)) } ++
-            ifilemappings.map { p ⇒ (p.name, "\"" + p.mapping.getOrElse("") + "\"") } ++
-            ofilemappings.map { p ⇒ (p.name, "\"" + p.mapping.getOrElse("") + "\"") }).filterNot {
+            ifilemappings.map { p ⇒ (p.name, " workDirectory / \"" + p.mapping.getOrElse("") + "\"") } ++
+            ofilemappings.map { p ⇒ (p.name, " workDirectory / \"" + p.mapping.getOrElse("") + "\"") }).filterNot {
               _._2.isEmpty
             }.map { p ⇒ default(p._1, p._2) }.mkString(",\n")
 
       language.taskType match {
         case ctt: CareTaskType ⇒
           os.write(
-            s"""\nval task = CareTask(workDirectory / "$executableName", "$command") set(\n""" +
+            s"""\nval task = CARETask(workDirectory / "$executableName", "$command") set(\n""" +
               inString + ouString + imFileString + omFileString + resourcesString + defaults
           )
         case ntt: NetLogoTaskType ⇒

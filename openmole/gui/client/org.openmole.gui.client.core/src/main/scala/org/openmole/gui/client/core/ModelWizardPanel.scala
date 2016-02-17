@@ -522,6 +522,7 @@ class ModelWizardPanel extends ModalPanel {
 
     val mappingInput: HTMLInputElement = bs.input(role.content.prototype.mapping.getOrElse(""))(oninput := { () ⇒
       saveWithoutTableUpdate
+      updateLaunchingCommand
     }).render
 
     val nameInput: HTMLInputElement = bs.input(role.content.prototype.name)(oninput := { () ⇒
