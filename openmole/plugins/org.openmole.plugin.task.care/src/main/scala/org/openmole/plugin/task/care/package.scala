@@ -21,7 +21,12 @@ package org.openmole.plugin.task
 import org.openmole.plugin.task.systemexec.SystemExecPackage
 
 package care {
-  trait CAREPackage extends SystemExecPackage
+  trait CAREPackage extends SystemExecPackage {
+    lazy val hostFiles = new {
+      def +=(hostFile: String, binding: Option[String] = None) =
+        (_: CARETaskBuilder).addHostFile(hostFile, binding)
+    }
+  }
 }
 
 package object care extends CAREPackage {

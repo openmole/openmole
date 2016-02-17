@@ -45,7 +45,8 @@ abstract class CARETask(
     val returnValue: Option[Prototype[Int]],
     val output: Option[Prototype[String]],
     val error: Option[Prototype[String]],
-    val environmentVariables: Seq[(Prototype[_], String)]) extends ExternalTask {
+    val environmentVariables: Seq[(Prototype[_], String)],
+    val hostFiles: Seq[(String, Option[String])]) extends ExternalTask {
 
   archive.setExecutable(true)
 
@@ -84,7 +85,9 @@ abstract class CARETask(
         else file.listFilesSafe.flatMap(f ⇒ leafs(f, s"$bindingDestination/${f.getName}"))
       else Seq(file -> bindingDestination)
 
-    val bindings = leafs(taskWorkDirectory / "inputs", "").map { case (f, d) ⇒ s"""-b "${f.getAbsolutePath}:$d"""" }.mkString(" \\ \n")
+    def bindings =
+      leafs(taskWorkDirectory / "inputs", "").map { case (f, b) ⇒ f.getAbsolutePath -> b } ++
+        hostFiles.map { case (f, b) ⇒ f -> b.getOrElse(f) }
 
     // replace original proot executable with a script that will first bind all the inputs in the guest rootfs before
     // calling the original proot
@@ -93,7 +96,7 @@ abstract class CARETask(
         |#!/bin/bash
         |TRUEPROOT="$${PROOT-$$(dirname $$0)/proot.origin}"
         |$${TRUEPROOT} \\
-        | ${bindings} \\
+        | ${bindings.map { case (f, d) ⇒ s"""-b "$f:$d"""" }.mkString(" \\ \n")} \\
         | $$@
       """.stripMargin
 

@@ -24,6 +24,8 @@ import org.openmole.plugin.task.systemexec._
 import org.openmole.plugin.task.systemexec
 import org.openmole.core.workflow.data._
 
+import scala.collection.mutable.ListBuffer
+
 class CARETaskBuilder(archiveLocation: File, command: systemexec.Command)
     extends ExternalTaskBuilder
     with ReturnValue
@@ -32,9 +34,23 @@ class CARETaskBuilder(archiveLocation: File, command: systemexec.Command)
     with EnvironmentVariables
     with WorkDirectory { builder ⇒
 
+  val hostFiles = ListBuffer[(String, Option[String])]()
+
+  def addHostFile(hostFile: String, binding: Option[String] = None): this.type = {
+    hostFiles.append(hostFile -> binding)
+    this
+  }
+
   override def toTask: CARETask = new CARETask(
-    archiveLocation, command, workDirectory,
-    errorOnReturnValue, returnValue, stdOut, stdErr, environmentVariables.toList) with builder.Built {
+    archiveLocation,
+    command,
+    workDirectory,
+    errorOnReturnValue,
+    returnValue,
+    stdOut,
+    stdErr,
+    environmentVariables.toList,
+    hostFiles.toList) with builder.Built {
     override val outputs: PrototypeSet = builder.outputs + List(stdOut, stdErr, returnValue).flatten
   }
 
