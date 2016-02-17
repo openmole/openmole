@@ -46,26 +46,31 @@ object Pages {
       div(`class` := "row")(p)
     )
 
-  def index = Page("index", scalatex.Index())
-  def gettingStarted = Page("getting_started", scalatex.GettingStarted())
-  def whoAreWe = Page("who_are_we", scalatex.WhoAreWe())
-  def communications = Page("communications", scalatex.Communications())
+  def index = Page("index", scalatex.Index(), title = Some("OpenMOLE: scientific workflow, distributed computing, parameter tuning"))
+  def gettingStarted = Page("getting_started", scalatex.GettingStarted(), title = Some("Getting started with OpenMOLE - introductory tutorial"))
+  def whoAreWe = Page("who_are_we", scalatex.WhoAreWe(), title = Some("Developers, reference publications, contact information - OpenMOLE"))
+  def communications = Page("communications", scalatex.Communications(), title = Some("Related papers, conference slides, videos, OpenMOLE in the news"))
 
   def all: Seq[Page] = DocumentationPages.allPages ++ Seq(index, gettingStarted, whoAreWe, communications)
 
 }
 
 object Page {
-  def apply(_name: String, _content: Frag) =
+  def apply(name: String, content: Frag, title: Option[String] = None) = {
+    val (_name, _content, _title) = (name, content, title)
+
     new Page {
       override def name: String = _name
       override def content: all.Frag = _content
+      override def title = _title
     }
+  }
 }
 
 trait Page {
   def content: Frag
   def name: String
+  def title: Option[String]
 
   def location = name
   def file = location + ".html"
@@ -80,6 +85,7 @@ abstract class DocumentationPage(implicit p: Parent[DocumentationPage] = Parent(
   def content: Frag
   def name: String
   def children: Seq[DocumentationPage]
+  def title = None
 
   def apply() = content
 
