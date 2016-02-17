@@ -17,7 +17,7 @@
 
 package org.openmole.core.workflow.puzzle
 
-import org.openmole.core.workflow.execution.local.LocalEnvironment
+import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._

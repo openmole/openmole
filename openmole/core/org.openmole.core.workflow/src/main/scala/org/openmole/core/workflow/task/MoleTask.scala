@@ -23,7 +23,7 @@ import org.openmole.core.event._
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.workflow.builder.TaskBuilder
 import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.execution.local.LocalEnvironment
+import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.puzzle._
 import org.openmole.tool.lock._

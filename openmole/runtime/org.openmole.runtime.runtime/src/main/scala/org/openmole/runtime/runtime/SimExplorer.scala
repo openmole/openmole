@@ -27,7 +27,6 @@ import scopt._
 import java.io.File
 import org.openmole.core.serializer.SerialiserService
 import org.openmole.core.batch.storage._
-import org.openmole.core.workflow.execution.local.LocalEnvironment
 import scala.util.{ Success, Failure }
 
 object SimExplorer extends Logger

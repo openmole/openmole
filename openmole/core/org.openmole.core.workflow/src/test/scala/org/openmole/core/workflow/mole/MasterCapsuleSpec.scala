@@ -17,8 +17,8 @@
 
 package org.openmole.core.workflow.mole
 
-import org.openmole.core.workflow.builder.InputOutputBuilder
-import org.openmole.core.workflow.execution.local.LocalEnvironment
+import org.openmole.core.workflow.builder._
+import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.transition._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.data._

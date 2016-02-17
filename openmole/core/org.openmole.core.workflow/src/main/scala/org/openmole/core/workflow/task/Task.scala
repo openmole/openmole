@@ -20,7 +20,7 @@ package org.openmole.core.workflow.task
 import org.openmole.core.tools.service
 import org.openmole.core.workflow.data._
 import org.openmole.core.serializer.plugin._
-import org.openmole.core.workflow.execution.local.LocalEnvironment
+import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workspace.{ Workspace, ConfigurationLocation }
 import org.openmole.core.tools.service._

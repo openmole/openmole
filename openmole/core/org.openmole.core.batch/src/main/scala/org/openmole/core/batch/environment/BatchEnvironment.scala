@@ -162,7 +162,7 @@ trait BatchExecutionJob extends ExecutionJob { bej ⇒
   def trySelectJobService(): Option[(JobService, AccessToken)]
 }
 
-trait BatchEnvironment extends Environment with JobList { env ⇒
+trait BatchEnvironment extends SubmissionEnvironment { env ⇒
   type SS <: StorageService
   type JS <: JobService
 

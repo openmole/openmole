@@ -19,7 +19,7 @@ package org.openmole.core.workflow.mole
 
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.execution.local.LocalEnvironment
+import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.job._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
