@@ -31,7 +31,7 @@ abstract class StatisticTask extends Task {
 
   def statistics: Iterable[(Prototype[Array[Double]], Prototype[Double], StatisticalAggregation[Double])]
 
-  override def process(context: Context)(implicit rng: RandomProvider) =
+  override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) =
     Context(
       statistics.map {
         case (sequence, statProto, agg) ⇒ Variable(statProto, agg(context(sequence)))

@@ -31,5 +31,5 @@ object EmptyTask {
 }
 
 sealed abstract class EmptyTask extends Task {
-  override def process(context: Context)(implicit rng: RandomProvider) = context
+  override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = context
 }

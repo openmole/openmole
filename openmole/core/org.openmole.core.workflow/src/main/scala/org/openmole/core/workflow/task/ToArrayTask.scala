@@ -39,7 +39,7 @@ object ToArrayTask {
 }
 sealed abstract class ToArrayTask(val prototypes: Prototype[T] forSome { type T }*) extends Task {
 
-  override def process(context: Context)(implicit rng: RandomProvider) =
+  override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) =
     prototypes.map {
       p ⇒ Variable.unsecure(p.toArray, Array(context(p))(ClassTag(p.`type`.runtimeClass)))
     }

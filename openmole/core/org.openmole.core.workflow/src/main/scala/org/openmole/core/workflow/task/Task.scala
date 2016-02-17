@@ -17,6 +17,8 @@
 
 package org.openmole.core.workflow.task
 
+import java.io.File
+
 import org.openmole.core.tools.service
 import org.openmole.core.workflow.data._
 import org.openmole.core.serializer.plugin._
@@ -40,6 +42,8 @@ object Task extends Logger {
 
 }
 
+case class TaskExecutionContext(tmpDirectory: File, localEnvironment: LocalEnvironment)
+
 trait Task <: InputOutputCheck with Name {
 
 
@@ -49,9 +53,9 @@ trait Task <: InputOutputCheck with Name {
    *
    * @param context the context in which the task will be executed
    */
-  def perform(context: Context, localEnvironment: LocalEnvironment)(rng: RandomProvider = RandomProvider(Task.buildRNG(context))): Context = perform(context, process(_)(rng))
+  def perform(context: Context, executionContext: TaskExecutionContext): Context = perform(context, process(_, executionContext))
 
-  protected def process(context: Context)(implicit rng: RandomProvider): Context
+  protected def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider = RandomProvider(Task.buildRNG(context))): Context
 
   /**
    *

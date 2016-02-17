@@ -38,7 +38,7 @@ object BreedTask {
 
       abstract class BreedTask extends Task {
 
-        override def process(context: Context)(implicit rng: RandomProvider) = {
+        override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = {
           val p = context(t.populationPrototype)
 
           if (p.isEmpty) {

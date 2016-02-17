@@ -39,7 +39,7 @@ object ElitismTask {
 
       abstract class ElitismTask extends Task {
 
-        override def process(context: Context)(implicit rng: RandomProvider) = {
+        override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = {
           val (newState, newPopulation) = t.integration.run(context(t.statePrototype), t.operations.elitism.run(context(t.populationPrototype) ++ context(t.offspringPrototype)))
 
           Context(

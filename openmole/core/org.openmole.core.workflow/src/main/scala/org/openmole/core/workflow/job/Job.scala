@@ -17,7 +17,7 @@
 
 package org.openmole.core.workflow.job
 
-import org.openmole.core.workflow.mole._
+import org.openmole.core.workflow.mole.MoleExecution
 
 class Job(val moleExecution: MoleExecution, val moleJobs: Iterable[MoleJob]) {
   def finished: Boolean = moleJobs.forall { _.finished }

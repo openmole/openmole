@@ -23,6 +23,8 @@ import org.openmole.core.workflow.execution.local.{LocalExecutionJob, ExecutorPo
 import org.openmole.core.workflow.job.Job
 import org.openmole.core.workflow.job.MoleJob
 import ExecutionState._
+import org.openmole.core.workflow.mole.MoleExecution
+import org.openmole.core.workflow.task.TaskExecutionContext
 import org.openmole.core.workflow.tools.{ Name, ExceptionEvent }
 import org.openmole.core.workspace.{ Workspace, ConfigurationLocation }
 import org.openmole.tool.collection.OrderedSlidingList
@@ -79,9 +81,9 @@ object LocalEnvironment {
   var defaultNumberOfThreads = Workspace.preferenceAsInt(DefaultNumberOfThreads)
 
   def apply(
-             nbThreads: Int = defaultNumberOfThreads,
-             deinterleave: Boolean = false,
-             name: Option[String] = None) = new LocalEnvironment(nbThreads, deinterleave, name)
+   nbThreads: Int = defaultNumberOfThreads,
+   deinterleave: Boolean = false,
+   name: Option[String] = None) = new LocalEnvironment(nbThreads, deinterleave, name)
 
 }
 
@@ -94,11 +96,11 @@ class LocalEnvironment(
 
   def nbJobInQueue = pool.waiting
 
-  def submit(job: Job): Unit =
-    submit(new LocalExecutionJob(this, job.moleJobs, Some(job.moleExecution)))
+  def submit(job: Job, executionContext: TaskExecutionContext): Unit =
+    submit(new LocalExecutionJob(executionContext, job.moleJobs, Some(job.moleExecution)))
 
-  def submit(moleJob: MoleJob): Unit =
-    submit(new LocalExecutionJob(this, List(moleJob), None))
+  def submit(moleJob: MoleJob, executionContext: TaskExecutionContext): Unit =
+    submit(new LocalExecutionJob(executionContext, List(moleJob), None))
 
   private def submit(ejob: LocalExecutionJob): Unit = {
     pool.enqueue(ejob)

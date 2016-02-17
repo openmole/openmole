@@ -37,7 +37,7 @@ object InitialStateTask {
       setDefault(Default.value(t.populationPrototype, Vector.empty))
 
       abstract class InitialStateTask extends Task {
-        override def process(context: Context)(implicit rng: RandomProvider) =
+        override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) =
           Context(
             Variable(t.statePrototype, t.operations.startTimeLens.set(System.currentTimeMillis)(context(t.statePrototype)))
           )

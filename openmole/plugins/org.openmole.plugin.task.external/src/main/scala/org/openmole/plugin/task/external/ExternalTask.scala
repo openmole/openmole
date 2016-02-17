@@ -166,8 +166,8 @@ trait ExternalTask extends Task {
     rootDir.delete
   }
 
-  def withWorkDir[T](f: File ⇒ T): T = {
-    val tmpDir = Workspace.newDir("externalTask")
+  def withWorkDir[T](executionContext: TaskExecutionContext)(f: File ⇒ T): T = {
+    val tmpDir = executionContext.tmpDirectory.newDir("externalTask")
     val res =
       try f(tmpDir)
       catch {

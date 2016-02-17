@@ -32,7 +32,7 @@ object ReassignStateRNGTask {
       addOutput(t.statePrototype)
 
       abstract class ReassignStateRNGTask extends Task {
-        override def process(context: Context)(implicit rng: RandomProvider) =
+        override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) =
           Context(Variable(t.statePrototype, t.operations.randomLens.set(Task.buildRNG(context))(context(t.statePrototype))))
       }
 

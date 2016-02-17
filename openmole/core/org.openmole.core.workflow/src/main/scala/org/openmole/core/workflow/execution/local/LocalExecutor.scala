@@ -80,7 +80,7 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
                         originalCallBack(job, oldState, newState)
                       }
 
-                    try moleJob.perform(environment)
+                    try moleJob.perform(executionJob.executionContext)
                     finally moleJob.stateChangedCallBack = originalCallBack
 
                     moleJob.exception match {

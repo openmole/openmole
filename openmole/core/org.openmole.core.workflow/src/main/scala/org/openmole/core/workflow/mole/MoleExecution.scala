@@ -17,12 +17,14 @@
 
 package org.openmole.core.workflow.mole
 
+import java.io.File
 import java.util.UUID
 import java.util.logging.Level
 import org.openmole.core.event.{ Event, EventDispatcher }
 import org.openmole.core.exception.{ UserBadDataError, MultipleException }
 import org.openmole.core.tools.service.{ Priority, Random }
 import org.openmole.core.workflow.mole.MoleExecution.{ MoleExecutionFailed, JobFailed, ExceptionRaised }
+import org.openmole.core.workflow.task.TaskExecutionContext
 import org.openmole.core.workflow.validation._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.job.State._
@@ -65,7 +67,8 @@ object MoleExecution extends Logger {
     grouping: Map[Capsule, Grouping] = Map.empty,
     implicits: Context = Context.empty,
     seed: Long = Workspace.newSeed,
-    defaultEnvironment: LocalEnvironment = LocalEnvironment())(implicit executionContext: ExecutionContext) =
+    defaultEnvironment: LocalEnvironment = LocalEnvironment(),
+    tmpDirectory: File = Workspace.newDir("execution"))(implicit executionContext: ExecutionContext) =
     new MoleExecution(
       mole,
       listOfTupleToMap(sources),
@@ -73,7 +76,8 @@ object MoleExecution extends Logger {
       environments,
       grouping,
       seed,
-      defaultEnvironment)(implicits, executionContext)
+      defaultEnvironment,
+      tmpDirectory)(implicits, executionContext)
 
 }
 
@@ -87,6 +91,7 @@ class MoleExecution(
     val grouping: Map[Capsule, Grouping],
     val seed: Long,
     val defaultEnvironment: LocalEnvironment,
+    val tmpDirectory: File,
     val id: String = UUID.randomUUID().toString)(val implicits: Context, val executionContext: ExecutionContext) {
 
   private val _started = Ref(false)
@@ -149,7 +154,7 @@ class MoleExecution(
       val env = environments.getOrElse(capsule, defaultEnvironment)
       env match {
         case env: SubmissionEnvironment ⇒ env.submit(job)
-        case env: LocalEnvironment      ⇒ env.submit(job)
+        case env: LocalEnvironment      ⇒ env.submit(job, TaskExecutionContext(tmpDirectory, env))
       }
       EventDispatcher.trigger(this, new MoleExecution.JobSubmitted(job, capsule, env))
     }

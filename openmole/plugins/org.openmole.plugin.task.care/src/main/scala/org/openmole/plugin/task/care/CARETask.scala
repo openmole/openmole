@@ -29,6 +29,7 @@ import org.openmole.tool.logger.Logger
 import org.openmole.plugin.task.systemexec._
 import org.openmole.plugin.task.systemexec
 import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.task._
 
 object CARETask extends Logger {
 
@@ -50,7 +51,7 @@ abstract class CARETask(
 
   archive.setExecutable(true)
 
-  override protected def process(context: Context)(implicit rng: RandomProvider) = withWorkDir { taskWorkDirectory ⇒
+  override protected def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = withWorkDir(executionContext) { taskWorkDirectory ⇒
     taskWorkDirectory.mkdirs()
 
     // unarchiving in task's work directory
