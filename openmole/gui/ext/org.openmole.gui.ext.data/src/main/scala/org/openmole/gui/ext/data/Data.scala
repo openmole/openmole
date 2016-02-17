@@ -458,7 +458,9 @@ sealed trait CommandElement {
 case class StaticElement(index: Int, expand: String) extends CommandElement
 
 case class VariableElement(index: Int, prototype: ProtoTypePair, taskType: TaskType) extends CommandElement {
-  def expand = taskType.preVariable + prototype.name + taskType.postVariable
+  def expand =
+    if (prototype.`type` == FILE) prototype.mapping.getOrElse("")
+    else taskType.preVariable + prototype.name + taskType.postVariable
 
   def clone(newPrototypePair: ProtoTypePair): VariableElement = copy(prototype = newPrototypePair)
 
@@ -558,7 +560,7 @@ case class JarMethod(methodName: String, argumentTypes: Seq[String], returnType:
   val name = methodName + "(" + argumentTypes.mkString(",") + "): " + returnType
 }
 
-object Resources{
+object Resources {
   def empty = Resources(Seq(), Seq(), 0)
 }
 
