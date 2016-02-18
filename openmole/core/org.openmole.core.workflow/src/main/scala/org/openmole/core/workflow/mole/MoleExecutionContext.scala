@@ -21,26 +21,8 @@ import java.io.{ PrintStream, File }
 import org.openmole.core.output.OutputManager
 import org.openmole.tool.file._
 
-object ExecutionContext {
-  def apply(out: PrintStream = OutputManager.systemOutput, directory: Option[File] = None) = {
-    val (_out, _directory) = (out, directory)
-    new ExecutionContext {
-      def out = _out
-      def directory = _directory
-    }
-  }
-
-  lazy val local = ExecutionContext()
+object MoleExecutionContext {
+  lazy val default = MoleExecutionContext(out = OutputManager.systemOutput)
 }
 
-trait ExecutionContext {
-  def out: PrintStream
-  def directory: Option[File]
-  def relativise(f: String): File =
-    directory.map(_./(f)).getOrElse(new File(f))
-
-  def copy(
-    out: PrintStream = out,
-    directory: Option[File] = directory) = ExecutionContext(out, directory)
-
-}
+case class MoleExecutionContext(out: PrintStream)

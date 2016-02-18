@@ -22,7 +22,7 @@ object TestSource {
   def apply() = new SourceBuilder {
 
     def toSource = new Source with Built {
-      def process(ctx: Context, executionContext: ExecutionContext)(implicit rng: RandomProvider) = Context.empty
+      def process(ctx: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider) = Context.empty
     }
   }
 }

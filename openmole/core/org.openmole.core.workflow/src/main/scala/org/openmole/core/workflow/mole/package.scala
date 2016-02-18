@@ -28,9 +28,7 @@ import org.openmole.core.workflow.transition._
 
 package mole {
 
-  trait MolePackage {
-    implicit lazy val localExecutionContext = ExecutionContext(System.out, None)
-  }
+  trait MolePackage
 
 }
 

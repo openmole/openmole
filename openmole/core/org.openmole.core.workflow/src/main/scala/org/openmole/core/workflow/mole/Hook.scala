@@ -29,6 +29,6 @@ trait Hook <: InputOutputCheck with Name {
   def inputs: PrototypeSet
   def outputs: PrototypeSet
   def defaults: DefaultSet
-  def perform(context: Context, executionContext: ExecutionContext)(implicit rng: RandomProvider): Context = perform(context, process(_, executionContext))
-  protected def process(context: Context, executionContext: ExecutionContext)(implicit rng: RandomProvider): Context
+  def perform(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider): Context = perform(context, process(_, executionContext))
+  protected def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider): Context
 }

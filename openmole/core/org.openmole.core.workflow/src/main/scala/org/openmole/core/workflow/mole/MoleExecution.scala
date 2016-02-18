@@ -68,7 +68,7 @@ object MoleExecution extends Logger {
     implicits: Context = Context.empty,
     seed: Long = Workspace.newSeed,
     defaultEnvironment: LocalEnvironment = LocalEnvironment(),
-    tmpDirectory: File = Workspace.newDir("execution"))(implicit executionContext: ExecutionContext) =
+    tmpDirectory: File = Workspace.newDir("execution"))(implicit executionContext: MoleExecutionContext = MoleExecutionContext.default) =
     new MoleExecution(
       mole,
       listOfTupleToMap(sources),
@@ -92,7 +92,7 @@ class MoleExecution(
     val seed: Long,
     val defaultEnvironment: LocalEnvironment,
     val tmpDirectory: File,
-    val id: String = UUID.randomUUID().toString)(val implicits: Context, val executionContext: ExecutionContext) {
+    val id: String = UUID.randomUUID().toString)(val implicits: Context, val executionContext: MoleExecutionContext) {
 
   private val _started = Ref(false)
   private val _canceled = Ref(false)
@@ -179,7 +179,6 @@ class MoleExecution(
     _started.single() = true
     _startTime.single() = Some(System.currentTimeMillis)
     EventDispatcher.trigger(this, new MoleExecution.Starting)
-    executionContext.directory.foreach(_.mkdirs)
     rootSubMoleExecution.newChild.submit(mole.root, context, nextTicket(rootTicket))
     if (allWaiting) submitAll
     this

@@ -21,7 +21,7 @@ import java.nio.file._
 import org.openmole.core.project._
 import org.osgi.framework.Bundle
 import scala.util.{ Failure, Success, Try }
-import org.openmole.core.workflow.mole.ExecutionContext
+import org.openmole.core.workflow.mole.MoleExecutionContext
 import org.openmole.tool.stream.StringPrintStream
 import scala.concurrent.stm._
 import org.openmole.tool.file._
@@ -308,7 +308,7 @@ object ApiImpl extends Api {
                     }
                   }
               }
-              Try(puzzle.toExecution(executionContext = ExecutionContext(out = outputStream))) match {
+              Try(puzzle.toExecution(executionContext = MoleExecutionContext(out = outputStream))) match {
                 case Success(ex) ⇒
                   Try(ex.start) match {
                     case Failure(e) ⇒ error(e)

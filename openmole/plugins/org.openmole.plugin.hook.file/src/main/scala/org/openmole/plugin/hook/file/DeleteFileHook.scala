@@ -23,7 +23,7 @@ import org.openmole.tool.file._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.mole.ExecutionContext
+import org.openmole.core.workflow.mole.MoleExecutionContext
 
 object DeleteFileHook {
 
@@ -37,7 +37,7 @@ object DeleteFileHook {
 
 abstract class DeleteFileHook(toDelete: Prototype[File]*) extends Hook {
 
-  override def process(context: Context, executionContext: ExecutionContext)(implicit rng: RandomProvider) = {
+  override def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider) = {
     toDelete.foreach {
       prototype ⇒
         context.option(prototype) match {

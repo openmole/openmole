@@ -32,7 +32,7 @@ import java.math._
 import collection.JavaConversions._
 import reflect.ClassTag
 import org.openmole.core.workflow.mole.{ SourceBuilder, Source }
-import org.openmole.core.workflow.mole.ExecutionContext
+import org.openmole.core.workflow.mole.MoleExecutionContext
 
 object CSVSource {
 
@@ -65,7 +65,7 @@ abstract class CSVSource extends Source with CSVToVariables {
 
   def path: ExpandedString
 
-  override def process(context: Context, executionContext: ExecutionContext)(implicit rng: RandomProvider): Context = {
+  override def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider): Context = {
     val file = new File(path.from(context))
     val transposed = toVariables(file, context).toSeq.transpose
 

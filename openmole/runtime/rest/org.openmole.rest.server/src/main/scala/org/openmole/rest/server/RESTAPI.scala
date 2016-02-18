@@ -12,7 +12,7 @@ import org.openmole.core.project._
 import org.openmole.core.event._
 import org.openmole.core.workflow.execution.Environment
 import org.openmole.core.workflow.execution.Environment.ExceptionRaised
-import org.openmole.core.workflow.mole.{ MoleExecution, ExecutionContext }
+import org.openmole.core.workflow.mole.{ MoleExecution, MoleExecutionContext }
 import org.openmole.core.workflow.puzzle._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workspace.{ Persistent, Workspace }
@@ -119,7 +119,7 @@ trait RESTAPI extends ScalatraServlet with GZipSupport
           case compiled: Compiled ⇒
             Try(compiled.eval) match {
               case Success(res) ⇒
-                Try(res.buildPuzzle.toExecution(executionContext = ExecutionContext(out = directory.outputStream))) match {
+                Try(res.buildPuzzle.toExecution(executionContext = MoleExecutionContext(out = directory.outputStream))) match {
                   case Success(ex) ⇒
                     ex listen { case (ex, ev: MoleExecution.Finished) ⇒ }
                     start(ex)

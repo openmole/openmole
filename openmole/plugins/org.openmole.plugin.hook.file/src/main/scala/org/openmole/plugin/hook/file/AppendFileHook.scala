@@ -25,7 +25,7 @@ import org.openmole.core.workflow.data._
 import java.io.File
 import org.openmole.core.workflow.tools.ExpandedString
 import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.mole.ExecutionContext
+import org.openmole.core.workflow.mole.MoleExecutionContext
 
 /**
  * Appends a variable content to an existing file.
@@ -47,11 +47,11 @@ object AppendFileHook {
 
 abstract class AppendFileHook(prototype: Prototype[File], outputFile: ExpandedString) extends Hook {
 
-  override def process(context: Context, executionContext: ExecutionContext)(implicit rng: RandomProvider) = {
+  override def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider) = {
     context.option(prototype) match {
       case Some(from) ⇒
 
-        val to = executionContext.relativise(outputFile.from(context))
+        val to = new File(outputFile.from(context))
         if (!from.exists) throw new UserBadDataError("The file " + from + " does not exist.")
 
         if (!to.exists) {
