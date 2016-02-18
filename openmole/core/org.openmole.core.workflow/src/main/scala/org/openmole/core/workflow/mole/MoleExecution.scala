@@ -36,7 +36,7 @@ import org.openmole.tool.logger.Logger
 import scala.collection.mutable.{ ListBuffer, Buffer }
 import scala.concurrent.stm._
 import org.openmole.core.workflow.execution._
-import java.util.{ HashSet ⇒ JHashSet }
+import org.openmole.tool.file._
 
 object MoleExecution extends Logger {
 
@@ -68,7 +68,8 @@ object MoleExecution extends Logger {
     implicits: Context = Context.empty,
     seed: Long = Workspace.newSeed,
     defaultEnvironment: LocalEnvironment = LocalEnvironment(),
-    tmpDirectory: File = Workspace.newDir("execution"))(implicit executionContext: MoleExecutionContext = MoleExecutionContext.default) =
+    tmpDirectory: File = Workspace.newDir("execution"),
+    cleanOnFinish: Boolean = true)(implicit executionContext: MoleExecutionContext = MoleExecutionContext.default) =
     new MoleExecution(
       mole,
       listOfTupleToMap(sources),
@@ -77,7 +78,8 @@ object MoleExecution extends Logger {
       grouping,
       seed,
       defaultEnvironment,
-      tmpDirectory)(implicits, executionContext)
+      tmpDirectory,
+      cleanOnFinish)(implicits, executionContext)
 
 }
 
@@ -92,6 +94,7 @@ class MoleExecution(
     val seed: Long,
     val defaultEnvironment: LocalEnvironment,
     val tmpDirectory: File,
+    val cleanOnFinish: Boolean,
     val id: String = UUID.randomUUID().toString)(val implicits: Context, val executionContext: MoleExecutionContext) {
 
   private val _started = Ref(false)
@@ -221,11 +224,11 @@ class MoleExecution(
   def jobStatuses: JobStatuses = {
     val jobs = moleJobs
 
-    val runningSet: JHashSet[UUID] = {
+    val runningSet: java.util.HashSet[UUID] = {
       def executionJobs =
         environments.values.toSeq.collect { case e: SubmissionEnvironment ⇒ e }.toIterator.flatMap(_.jobs.toIterator)
 
-      val set = new JHashSet[UUID](jobs.size + 1, 1.0f)
+      val set = new java.util.HashSet[UUID](jobs.size + 1, 1.0f)
 
       for {
         ej ← executionJobs
@@ -275,6 +278,7 @@ class MoleExecution(
   private def finish() = {
     _finished.single() = true
     _endTime.single() = Some(System.currentTimeMillis)
+    if (cleanOnFinish) tmpDirectory.recursiveDelete
   }
 
   def canceled: Boolean = _canceled.single()

@@ -71,7 +71,8 @@ sealed abstract class MoleTask(
         seed = rng().nextLong(),
         implicits = implicitsValues,
         defaultEnvironment = executionContext.localEnvironment,
-        tmpDirectory = executionContext.tmpDirectory.newDir("moletask"))
+        tmpDirectory = executionContext.tmpDirectory.newDir("moletask"),
+        cleanOnFinish = false)
 
     @volatile var lastContext: Option[Context] = None
     val lastContextLock = new ReentrantLock()
