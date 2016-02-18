@@ -84,8 +84,8 @@ class DesktopGridService(port: Int, path: File = Workspace.newDir()) { service â
     val id = storageId
     val url = service.url
 
-    def persistentDir(implicit token: AccessToken) = baseDir(token)
-    def tmpDir(implicit token: AccessToken) = baseDir(token)
+    override def persistentDir(implicit token: AccessToken) = baseDir(token)
+    override def tmpDir(implicit token: AccessToken) = baseDir(token)
   }
 
   def jobService(_environment: BatchEnvironment, port: Int) = new DesktopGridJobService {

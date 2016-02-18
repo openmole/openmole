@@ -32,7 +32,7 @@ import org.openmole.plugin.environment.gridscale.GridScaleStorage
 import scala.sys.process.{ Process, ProcessLogger }
 import scala.util.Try
 
-trait EGIStorageService extends PersistentStorageService with GridScaleStorage with CompressedTransfer {
+trait EGIStorageService extends StorageService with GridScaleStorage with CompressedTransfer {
   val usageControl: AvailabilityQuality
   import usageControl.quality
 
