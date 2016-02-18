@@ -202,8 +202,7 @@ class MoleExecution(
     if (!_canceled.getUpdate(_ ⇒ true)) {
       rootSubMoleExecution.cancel
       EventDispatcher.trigger(this, MoleExecution.Finished(canceled = true))
-      _finished.single() = true
-      _endTime.single() = Some(System.currentTimeMillis)
+      finish()
     }
     this
   }
@@ -269,10 +268,14 @@ class MoleExecution(
       if (allWaiting) submitAll
       if (numberOfJobs == 0) {
         EventDispatcher.trigger(this, MoleExecution.Finished(canceled = false))
-        _finished.single() = true
-        _endTime.single() = Some(System.currentTimeMillis)
+        finish()
       }
     }
+
+  private def finish() = {
+    _finished.single() = true
+    _endTime.single() = Some(System.currentTimeMillis)
+  }
 
   def canceled: Boolean = _canceled.single()
   def finished: Boolean = _finished.single()
@@ -280,12 +283,10 @@ class MoleExecution(
   def startTime: Option[Long] = _startTime.single()
 
   def nextTicket(parent: Ticket): Ticket = Ticket(parent, ticketNumber.next)
-
   def nextJobId = UUID.randomUUID
 
-  def newSeed = rng.nextLong
+  private val currentSeed = Ref(seed)
+  def newSeed = currentSeed.next
   def newRNG = Random.newRNG(newSeed).toScala
-
-  lazy val rng = Random.newRNG(seed)
 
 }

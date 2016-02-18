@@ -17,16 +17,10 @@
 
 package org.openmole.core.workflow
 
-import org.openmole.core.workflow.data.Context
-
 import scala.concurrent.stm._
 import scala.ref.WeakReference
-import org.openmole.tool.file._
-import scalaz._
 
 package tools {
-
-import org.openmole.core.workflow.data.Prototype
 
     trait ToolsPackage {
 
