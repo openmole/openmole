@@ -35,3 +35,9 @@ trait PanelUI {
 
   def save(onsave: () ⇒ Unit = () ⇒ {}): Unit
 }
+
+trait PanelWithID {
+  val uuid: String = java.util.UUID.randomUUID.toString
+  def name: String
+  def panel: PanelUI
+}

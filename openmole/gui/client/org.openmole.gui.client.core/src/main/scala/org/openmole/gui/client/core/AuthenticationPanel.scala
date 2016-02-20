@@ -17,7 +17,7 @@ package org.openmole.gui.client.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.ext.dataui.{ AuthenticationFactoryUI, PanelUI }
+import org.openmole.gui.ext.dataui.{ PanelWithID, AuthenticationFactoryUI, PanelUI }
 import org.openmole.gui.shared.Api
 import scalatags.JsDom.all._
 import org.openmole.gui.misc.js.Select
@@ -49,14 +49,13 @@ class AuthenticationPanel(onresetpassword: () ⇒ Unit) extends ModalPanel {
     }
   }
 
-  val factories = ClientService.authenticationFactories
-
-  val authenticationSelector: Select[AuthenticationFactoryUI] = Select("authentications",
-    factories.map { f ⇒ (f, emptyCK) },
-    factories.headOption,
-    btn_primary, onclickExtra = () ⇒ {
-      authenticationSelector.content().map { f ⇒ setting() = Some(f.panelUI) }
-    })
+  val authenticationSelector: Select[PanelWithID] =
+    Select("authentications",
+      authentications.all.map { f ⇒ (f, emptyCK) },
+      authentications.all.headOption,
+      btn_primary, onclickExtra = () ⇒ {
+        authenticationSelector.content().map { f ⇒ setting() = Some(f.panel) }
+      })
 
   lazy val authenticationTable = {
 
@@ -73,11 +72,11 @@ class AuthenticationPanel(onresetpassword: () ⇒ Unit) extends ModalPanel {
           })(
             bs.div(col_md_7)(
               tags.a(a.synthetic, `class` := "left docTitleEntry whiteBold", cursor := "pointer", onclick := { () ⇒
-                authenticationSelector.content() = Some(ClientService.authenticationUI(a))
-                setting() = Some(ClientService.panelUI(a))
+                authenticationSelector.content() = Some(authentications.panelWithID(a))
+                setting() = Some(authentications.panel(a))
               })
             ),
-            bs.div(col_md_4 + " spacer5")(bs.label(ClientService.authenticationUI(a).name, label_primary + " marketTag")),
+            bs.div(col_md_4 + " spacer5")(bs.label(a.synthetic, label_primary + " marketTag")),
             tags.span(
               id := Rx {
                 "treeline" + {
@@ -110,7 +109,7 @@ class AuthenticationPanel(onresetpassword: () ⇒ Unit) extends ModalPanel {
 
   val newButton = bs.glyphButton(glyph_plus, () ⇒ {
     authenticationSelector.content().map { f ⇒
-      setting() = Some(f.panelUI)
+      setting() = Some(f.panel)
     }
   })
 

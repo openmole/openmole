@@ -71,29 +71,6 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
     jsSrc
   }
 
-  get("/gui") {
-    contentType = "text/html"
-    tags.html(
-      tags.head(
-        tags.meta(tags.httpEquiv := "content-type", tags.content := "text/html; charset = ISO-8859-1"),
-        cssFiles.map { f ⇒ tags.link(tags.rel := "stylesheet", tags.`type` := "text/css", href := "css/" + f) },
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/jquery.min.js"),
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/ace.js"),
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/d3.min.js"),
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/ace.js"),
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/mode-scala.js"),
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/mode-sh.js"),
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/theme-github.js"),
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/bootstrap.min.js"),
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/plugins.js"),
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/pluginMapping.js")
-      ),
-      tags.body(
-        tags.onload := "fillMap();GUIClient().run();"
-      )
-    )
-  }
-
   post("/uploadfiles") {
     move(fileParams, params("fileType"))
   }

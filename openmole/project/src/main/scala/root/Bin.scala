@@ -65,8 +65,6 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
       Core.batch,
       gui.Server.core,
       gui.Client.core,
-      gui.Bootstrap.js,
-      gui.Bootstrap.osgi,
       Core.logging,
       runtime.REST.server,
       Core.console,
@@ -82,14 +80,14 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
     Project("openmole", dir / "openmole", settings = tarProject ++ assemblySettings ++ osgiApplicationSettings) settings (commonsSettings: _*) settings (
       setExecutable ++= Seq("openmole", "openmole.bat"),
       resourcesAssemble <+= (resourceDirectory in Compile, assemblyPath) map { case (r, p) ⇒ r → p },
-      resourcesAssemble <++= Seq(openmoleUI.project, Runtime.console.project, REST.server.project) sendTo {
+      /*resourcesAssemble <++= Seq(openmoleUI.project, Runtime.console.project, REST.server.project) sendTo {
         assemblyPath / "plugins"
-      },
+      },*/
       resourcesAssemble <+= (assemble in openmoleCore, assemblyPath) map { case (r, p) ⇒ r → (p / "plugins") },
       resourcesAssemble <+= (assemble in openmoleGUI, assemblyPath) map { case (r, p) ⇒ r → (p / "plugins") },
       resourcesAssemble <+= (assemble in dbServer, assemblyPath) map { case (r, p) ⇒ r → (p / "dbserver") },
       resourcesAssemble <+= (assemble in consolePlugins, assemblyPath) map { case (r, p) ⇒ r → (p / "openmole-plugins") },
-      resourcesAssemble <+= (assemble in guiPlugins, assemblyPath) map { case (r, p) ⇒ r → (p / "openmole-plugins-gui") },
+      //resourcesAssemble <+= (assemble in guiPlugins, assemblyPath) map { case (r, p) ⇒ r → (p / "openmole-plugins-gui") },
       resourcesAssemble <+= (Tar.tar in openmoleRuntime, assemblyPath) map { case (r, p) ⇒ r → (p / "runtime") },
       downloads := Seq(java368URL → "runtime/jvm-386.tar.gz", javax64URL → "runtime/jvm-x64.tar.gz"),
       libraryDependencies += Libraries.scalajHttp,
@@ -107,7 +105,6 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
       cleanFiles <++= cleanFiles in openmoleCore,
       cleanFiles <++= cleanFiles in openmoleGUI,
       cleanFiles <++= cleanFiles in consolePlugins,
-      cleanFiles <++= cleanFiles in guiPlugins,
       cleanFiles <++= cleanFiles in dbServer,
       cleanFiles <++= cleanFiles in openmoleRuntime
     )
@@ -202,12 +199,6 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
     ) ++ apacheHTTP map (_ intransitive ()),
       dependencyFilter := pluginFilter,
       dependencyName := rename
-  )
-
-  lazy val guiPlugins = Project("guiplugins", dir / "target" / "guiplugins", settings = assemblySettings) settings (commonsSettings: _*) settings (
-    resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a.contains("guiPlugin"), true) sendTo assemblyPath,
-    dependencyFilter := pluginFilter,
-    dependencyName := rename
   )
 
   lazy val dbServer = Project("dbserver", dir / "dbserver", settings = assemblySettings) settings (commonsSettings: _*) settings (

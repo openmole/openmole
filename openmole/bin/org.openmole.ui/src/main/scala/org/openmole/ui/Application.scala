@@ -18,7 +18,7 @@
 package org.openmole.ui
 
 import java.awt.Desktop
-import java.io.{ FileOutputStream, File }
+import java.io.{FileOutputStream, File}
 import java.net.URI
 import org.eclipse.equinox.app.IApplication
 import org.eclipse.equinox.app.IApplicationContext
@@ -48,11 +48,11 @@ class Application extends IApplication {
   lazy val consoleSplash =
     """  ___                   __  __  ___  _     _____   ____
  / _ \ _ __   ___ _ __ |  \/  |/ _ \| |   | ____| | ___|
-| | | | '_ \ / _ \ '_ \| |\/| | | | | |   |  _|   |___ \
-| |_| | |_) |  __/ | | | |  | | |_| | |___| |___   ___) |
+      | | | | '_ \ / _ \ '_ \| |\/| | | | | |   |  _|   |___ \
+      | |_| | |_) |  __/ | | | |  | | |_| | |___| |___   ___) |
  \___/| .__/ \___|_| |_|_|  |_|\___/|_____|_____| |____/
       |_|
-"""
+    """
 
   lazy val consoleUsage = "(Type :q to quit)"
 
@@ -66,33 +66,33 @@ class Application extends IApplication {
     object ServerConfigMode extends LaunchMode
 
     case class Config(
-      pluginsDirs: List[String] = Nil,
-      guiPluginsDirs: List[String] = Nil,
-      userPlugins: List[String] = Nil,
-      loadHomePlugins: Option[Boolean] = None,
-      workspaceDir: Option[String] = None,
-      scriptFile: Option[String] = None,
-      consoleWorkDirectory: Option[File] = None,
-      password: Option[String] = None,
-      hostName: Option[String] = None,
-      launchMode: LaunchMode = GUIMode,
-      ignored: List[String] = Nil,
-      port: Option[Int] = None,
-      loggerLevel: Option[String] = None,
-      unoptimizedJS: Boolean = false,
-      remote: Boolean = false,
-      args: List[String] = Nil)
+                       pluginsDirs: List[String] = Nil,
+                       guiPluginsDirs: List[String] = Nil,
+                       userPlugins: List[String] = Nil,
+                       loadHomePlugins: Option[Boolean] = None,
+                       workspaceDir: Option[String] = None,
+                       scriptFile: Option[String] = None,
+                       consoleWorkDirectory: Option[File] = None,
+                       password: Option[String] = None,
+                       hostName: Option[String] = None,
+                       launchMode: LaunchMode = GUIMode,
+                       ignored: List[String] = Nil,
+                       port: Option[Int] = None,
+                       loggerLevel: Option[String] = None,
+                       unoptimizedJS: Boolean = false,
+                       remote: Boolean = false,
+                       args: List[String] = Nil)
 
     def takeArg(args: List[String]) =
       args match {
         case h :: t ⇒ h
-        case Nil    ⇒ ""
+        case Nil ⇒ ""
       }
 
     def dropArg(args: List[String]) =
       args match {
         case h :: t ⇒ t
-        case Nil    ⇒ Nil
+        case Nil ⇒ Nil
       }
 
     def takeArgs(args: List[String]) = args.takeWhile(!_.startsWith("-"))
@@ -109,26 +109,26 @@ class Application extends IApplication {
 
     @tailrec def parse(args: List[String], c: Config = Config()): Config =
       args match {
-        case "-cp" :: tail                     ⇒ parse(dropArgs(tail), c.copy(pluginsDirs = takeArgs(tail)))
-        case "-gp" :: tail                     ⇒ parse(dropArgs(tail), c.copy(guiPluginsDirs = takeArgs(tail)))
-        case "-p" :: tail                      ⇒ parse(dropArgs(tail), c.copy(userPlugins = takeArgs(tail)))
-        case "-s" :: tail                      ⇒ parse(dropArg(tail), c.copy(scriptFile = Some(takeArg(tail)), launchMode = ConsoleMode))
-        case "-pw" :: tail                     ⇒ parse(dropArg(tail), c.copy(password = Some(takeArg(tail))))
-        case "-hn" :: tail                     ⇒ parse(tail.tail, c.copy(hostName = Some(tail.head)))
-        case "-c" :: tail                      ⇒ parse(tail, c.copy(launchMode = ConsoleMode))
-        case "-h" :: tail                      ⇒ parse(tail, c.copy(launchMode = HelpMode))
-        case "-ws" :: tail                     ⇒ parse(tail, c.copy(launchMode = ServerMode))
-        case "--load-homePlugins" :: tail      ⇒ parse(tail, c.copy(loadHomePlugins = Some(true)))
+        case "-cp" :: tail ⇒ parse(dropArgs(tail), c.copy(pluginsDirs = takeArgs(tail)))
+        case "-gp" :: tail ⇒ parse(dropArgs(tail), c.copy(guiPluginsDirs = takeArgs(tail)))
+        case "-p" :: tail ⇒ parse(dropArgs(tail), c.copy(userPlugins = takeArgs(tail)))
+        case "-s" :: tail ⇒ parse(dropArg(tail), c.copy(scriptFile = Some(takeArg(tail)), launchMode = ConsoleMode))
+        case "-pw" :: tail ⇒ parse(dropArg(tail), c.copy(password = Some(takeArg(tail))))
+        case "-hn" :: tail ⇒ parse(tail.tail, c.copy(hostName = Some(tail.head)))
+        case "-c" :: tail ⇒ parse(tail, c.copy(launchMode = ConsoleMode))
+        case "-h" :: tail ⇒ parse(tail, c.copy(launchMode = HelpMode))
+        case "-ws" :: tail ⇒ parse(tail, c.copy(launchMode = ServerMode))
+        case "--load-homePlugins" :: tail ⇒ parse(tail, c.copy(loadHomePlugins = Some(true)))
         case "--console-workDirectory" :: tail ⇒ parse(dropArg(tail), c.copy(consoleWorkDirectory = Some(new File(takeArg(tail)))))
-        case "--ws-configure" :: tail          ⇒ parse(tail, c.copy(launchMode = ServerConfigMode))
-        case "--port" :: tail                  ⇒ parse(tail.tail, c.copy(port = Some(tail.head.toInt))) // Server port
-        case "--logger-level" :: tail          ⇒ parse(tail.tail, c.copy(loggerLevel = Some(tail.head)))
-        case "--unoptimizedJS" :: tail         ⇒ parse(tail, c.copy(unoptimizedJS = true))
-        case "--webui-authentication" :: tail  ⇒ parse(tail, c.copy(remote = true))
-        case "--remote" :: tail                ⇒ parse(tail, c.copy(remote = true))
-        case "--" :: tail                      ⇒ parse(Nil, c.copy(args = tail))
-        case s :: tail                         ⇒ parse(tail, c.copy(ignored = s :: c.ignored))
-        case Nil                               ⇒ c
+        case "--ws-configure" :: tail ⇒ parse(tail, c.copy(launchMode = ServerConfigMode))
+        case "--port" :: tail ⇒ parse(tail.tail, c.copy(port = Some(tail.head.toInt))) // Server port
+        case "--logger-level" :: tail ⇒ parse(tail.tail, c.copy(loggerLevel = Some(tail.head)))
+        case "--unoptimizedJS" :: tail ⇒ parse(tail, c.copy(unoptimizedJS = true))
+        case "--webui-authentication" :: tail ⇒ parse(tail, c.copy(remote = true))
+        case "--remote" :: tail ⇒ parse(tail, c.copy(remote = true))
+        case "--" :: tail ⇒ parse(Nil, c.copy(args = tail))
+        case s :: tail ⇒ parse(tail, c.copy(ignored = s :: c.ignored))
+        case Nil ⇒ c
       }
 
     val args: Array[String] = context.getArguments.get("application.args").asInstanceOf[Array[String]].map(_.trim)
@@ -192,9 +192,12 @@ class Application extends IApplication {
               val port = config.port.getOrElse(Workspace.preferenceAsInt(GUIServer.port))
               val url = s"https://localhost:$port"
               GUIServer.urlFile.content = url
-              BootstrapJS.init(!config.unoptimizedJS)
               if (config.remote) GUIServer.initPassword
-              val server = new GUIServer(port, BootstrapJS.webapp, config.remote)
+              //The webapp location will then be somewhere in target
+              val webui = Workspace.file("webui")
+              val webapp = new File(webui, "webapp")
+              webui.mkdirs()
+              val server = new GUIServer(port, webapp, config.remote)
               server.start()
               browse(url)
               ScalaREPL.warmup
