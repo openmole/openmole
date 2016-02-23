@@ -45,4 +45,4 @@
 
     @p The site will be generated in the target directory passed as parameter to @i{./site}.
 
-    @p Optionally you can use @hl.highlight("./site /path/of/the/site -nc", "plain") in order to disable the tests of the scripts, which is (really) time-consuming.
+    @p Optionally you can use @hl.highlight("./site /path/to/the/site --no-test", "plain") in order to disable the tests of the scripts, which is (really) time-consuming.
