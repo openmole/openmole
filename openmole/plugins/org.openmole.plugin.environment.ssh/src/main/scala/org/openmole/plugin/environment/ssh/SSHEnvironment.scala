@@ -20,7 +20,6 @@ package org.openmole.plugin.environment.ssh
 import java.net.URI
 import org.openmole.core.batch.control._
 import org.openmole.core.batch.environment._
-import org.openmole.core.batch.storage.PersistentStorageService
 import org.openmole.core.workspace._
 import concurrent.duration._
 

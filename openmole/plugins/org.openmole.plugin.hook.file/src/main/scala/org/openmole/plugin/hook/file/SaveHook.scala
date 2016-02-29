@@ -41,9 +41,9 @@ object SaveHook {
 
 abstract class SaveHook(file: ExpandedString, prototypes: Prototype[_]*) extends Hook {
 
-  override def process(context: Context, executionContext: ExecutionContext)(implicit rng: RandomProvider) = {
+  override def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider) = {
     val saveContext: Context = prototypes.map(p ⇒ context.variable(p).getOrElse(throw new UserBadDataError(s"Variable $p has not been found")))
-    val to = executionContext.relativise(file.from(context))
+    val to = new File(file.from(context))
     to.createParentDir
     SerialiserService.serialiseAndArchiveFiles(saveContext, to)
     context

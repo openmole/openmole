@@ -39,7 +39,7 @@ object MergeTask {
 
 sealed abstract class MergeTask[S, T <: Array[S]](val prototypes: Iterable[Prototype[_ <: T]], val result: Prototype[Array[S]]) extends Task {
 
-  override def process(context: Context)(implicit rng: RandomProvider) = {
+  override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = {
     val flattened = prototypes.map { p ⇒ context(p) }.flatten.toArray[S](ClassTag(result.fromArray.`type`.runtimeClass))
     Variable(result, flattened)
   }

@@ -21,7 +21,7 @@ import java.util.UUID
 
 import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.job.State._
-import org.openmole.core.workflow.task.Task
+import org.openmole.core.workflow.task.{ TaskExecutionContext, Task }
 import org.openmole.core.workflow.data.{ Prototype, Variable, Context }
 
 object MoleJob {
@@ -93,11 +93,11 @@ class MoleJob(
 
   def state_=(state: State) = signalChanged(changeState(state))
 
-  def perform(localEnvironment: LocalEnvironment) =
+  def perform(executionContext: TaskExecutionContext) =
     if (!state.isFinal) {
       try {
         state = RUNNING
-        context = task.perform(context, localEnvironment)()
+        context = task.perform(context, executionContext)
         state = COMPLETED
       }
       catch {

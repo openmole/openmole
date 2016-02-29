@@ -51,7 +51,7 @@ object ExplorationTask {
 abstract class ExplorationTask(val sampling: Sampling) extends Task {
 
   //If input prototype as the same name as the output it is erased
-  override protected def process(context: Context)(implicit rng: RandomProvider) = {
+  override protected def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = {
     val variablesValues = TreeMap.empty[Prototype[_], ArrayBuffer[Any]] ++ sampling.prototypes.map { p ⇒ p -> ArrayBuffer[Any]() }
 
     for {

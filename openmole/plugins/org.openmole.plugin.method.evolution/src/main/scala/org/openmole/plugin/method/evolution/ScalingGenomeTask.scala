@@ -39,7 +39,7 @@ object ScalingGenomeTask {
       addOutput(t.genomePrototype)
 
       abstract class ScalingGenomeTask extends Task {
-        override def process(context: Context)(implicit rng: RandomProvider) =
+        override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) =
           context ++ t.genomeToVariables(context(t.genomePrototype)).from(context)
       }
 

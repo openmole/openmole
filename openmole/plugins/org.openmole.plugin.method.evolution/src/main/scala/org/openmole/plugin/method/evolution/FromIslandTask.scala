@@ -33,7 +33,7 @@ object FromIslandTask {
 
       abstract class FromIslandTask extends Task {
 
-        override def process(context: Context)(implicit rng: RandomProvider) = {
+        override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = {
           val population = t.operations.migrateFromIsland(context(t.populationPrototype))
           Variable(t.populationPrototype, population)
         }

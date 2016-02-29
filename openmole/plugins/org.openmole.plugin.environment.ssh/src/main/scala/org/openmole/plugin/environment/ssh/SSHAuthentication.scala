@@ -49,7 +49,7 @@ object SSHAuthentication {
 
   private def eq(a1: SSHAuthentication, a2: SSHAuthentication) = (a1.login, a1.target) == (a2.login, a2.target)
 
-  def test(a: SSHAuthentication)(implicit authentications: Decrypt) = {
+  def test(a: SSHAuthentication)(implicit decrypt: Decrypt) = {
     val targetFormat = "(.*):([0-9]*)".r
 
     val (host, port) = a.target match {

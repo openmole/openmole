@@ -27,7 +27,7 @@ import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools.ExpandedString
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.mole.ExecutionContext
+import org.openmole.core.workflow.mole.MoleExecutionContext
 import collection.mutable.ListBuffer
 
 object CopyFileHook {
@@ -71,19 +71,19 @@ abstract class CopyFileHook extends Hook {
 
   def copy: Iterable[(Prototype[File], ExpandedString, CopyOptions)]
 
-  override def process(context: Context, executionContext: ExecutionContext)(implicit rng: RandomProvider) = {
+  override def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider) = {
     val moved = for ((p, d, options) ← copy) yield copy(context, executionContext, p, d, options)
     context ++ moved.flatten
   }
 
   private def copy(
     context: Context,
-    executionContext: ExecutionContext,
+    executionContext: MoleExecutionContext,
     filePrototype: Prototype[File],
     destination: ExpandedString,
     options: CopyOptions)(implicit rng: RandomProvider): Option[Variable[File]] = {
     val from = context(filePrototype)
-    val to = executionContext.relativise(destination.from(context))
+    val to = new File(destination.from(context))
 
     to.createParentDir
     val ret: Option[Variable[File]] =

@@ -38,8 +38,8 @@ object FileSource {
 
 abstract class FileSource(path: ExpandedString, prototype: Prototype[File]) extends Source {
 
-  override def process(context: Context, executionContext: ExecutionContext)(implicit rng: RandomProvider) = {
-    val expandedPath = executionContext.relativise(path.from(context))
+  override def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider) = {
+    val expandedPath = new File(path.from(context))
     Variable(
       prototype,
       expandedPath

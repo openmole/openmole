@@ -21,7 +21,7 @@ import java.io.PrintStream
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.mole.ExecutionContext
+import org.openmole.core.workflow.mole.MoleExecutionContext
 
 object ToStringHook {
 
@@ -38,7 +38,7 @@ object ToStringHook {
 
 abstract class ToStringHook(prototypes: Prototype[_]*) extends Hook {
 
-  override def process(context: Context, executionContext: ExecutionContext)(implicit rng: RandomProvider) = {
+  override def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider) = {
     if (!prototypes.isEmpty) {
       val filtered = Context(prototypes.flatMap(p ⇒ context.variable(p.asInstanceOf[Prototype[Any]])))
       executionContext.out.println(filtered.toString)

@@ -23,7 +23,7 @@ import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools.ExpandedString
 import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.mole.ExecutionContext
+import org.openmole.core.workflow.mole.MoleExecutionContext
 
 object AppendArrayToFileHook {
 
@@ -39,8 +39,8 @@ abstract class AppendArrayToFileIHook(
     fileName: ExpandedString,
     content: Prototype[Array[_]]) extends Hook {
 
-  override def process(context: Context, executionContext: ExecutionContext)(implicit rng: RandomProvider) = {
-    val file = executionContext.relativise(fileName.from(context))
+  override def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider) = {
+    val file = new File(fileName.from(context))
     file.createParentDir
     val toWrite = context.option(content).getOrElse(Array("not found")).mkString(",")
     file.withLock(_.appendLine(toWrite))

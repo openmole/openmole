@@ -26,6 +26,7 @@ import ProcessUtil._
 import java.io.File
 import org.openmole.core.workflow.data._
 import org.openmole.plugin.task.external._
+import org.openmole.core.workflow.task._
 import org.openmole.tool.logger.Logger
 
 import scala.annotation.tailrec
@@ -68,7 +69,7 @@ abstract class SystemExecTask(
         else execAll(t, workDir, preparedContext, ExecutionResult.append(acc, result))
     }
 
-  override protected def process(context: Context)(implicit rng: RandomProvider) = withWorkDir { tmpDir ⇒
+  override protected def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = withWorkDir(executionContext) { tmpDir ⇒
     val workDir =
       directory match {
         case None    ⇒ tmpDir

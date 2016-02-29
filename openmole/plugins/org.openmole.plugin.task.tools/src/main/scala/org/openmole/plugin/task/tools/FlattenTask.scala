@@ -35,7 +35,7 @@ object FlattenTask {
 
 sealed abstract class FlattenTask[S](val flatten: Prototype[Array[Array[S]]], val in: Prototype[Array[S]]) extends Task {
 
-  override def process(context: Context)(implicit rng: RandomProvider) = {
+  override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = {
     implicit val sClassTag = ClassTag[S](in.fromArray.`type`.runtimeClass)
     Variable(in, context(flatten).flatten.toArray[S])
   }

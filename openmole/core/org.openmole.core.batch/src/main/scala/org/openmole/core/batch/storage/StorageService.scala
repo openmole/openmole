@@ -17,9 +17,9 @@
 
 package org.openmole.core.batch.storage
 
-import java.net.URI
+import java.net.{ SocketTimeoutException, URI }
 import java.nio.file._
-import java.util.concurrent.{ Callable, TimeUnit }
+import java.util.concurrent.{ TimeoutException, Callable, TimeUnit }
 import com.google.common.cache.CacheBuilder
 import org.openmole.core.fileservice.FileDeleter
 import org.openmole.core.tools.cache._
@@ -29,7 +29,7 @@ import org.openmole.core.batch.refresh._
 import org.openmole.core.batch.replication.ReplicaCatalog
 import org.openmole.core.serializer._
 import org.openmole.core.workspace.{ Workspace, ConfigurationLocation }
-import fr.iscpif.gridscale.storage.{ ListEntry, FileType }
+import fr.iscpif.gridscale.storage._
 import java.io._
 import org.openmole.tool.logger.Logger
 
@@ -38,8 +38,15 @@ object StorageService extends Logger {
   val DirRegenerate = new ConfigurationLocation("StorageService", "DirRegenerate")
   Workspace += (DirRegenerate, "P1D")
 
+  val TmpDirRemoval = new ConfigurationLocation("StorageService", "TmpDirRemoval")
+  Workspace += (TmpDirRemoval, "P30D")
+
+  val persistent = "persistent/"
+  val tmp = "tmp/"
+
 }
 
+import StorageService._
 import StorageService.Log._
 
 trait StorageService extends BatchService with Storage {
@@ -47,9 +54,6 @@ trait StorageService extends BatchService with Storage {
   def url: URI
   val id: String
   val remoteStorage: RemoteStorage
-
-  def persistentDir(implicit token: AccessToken): String
-  def tmpDir(implicit token: AccessToken): String
 
   @transient private lazy val _directoryCache =
     CacheBuilder.
@@ -93,10 +97,77 @@ trait StorageService extends BatchService with Storage {
         val childPath = child(path, name(file))
         try makeDir(childPath)
         catch {
-          case e: Throwable ⇒ logger.log(FINE, "Error creating base directory " + root, e)
+          case e: SocketTimeoutException ⇒ throw e
+          case e: TimeoutException       ⇒ throw e
+          case e: Throwable              ⇒ logger.log(FINE, "Error creating base directory " + root, e)
         }
         childPath
     }
+  }
+
+  def persistentDir(implicit token: AccessToken): String =
+    unwrap { directoryCache.get("persistentDir", () ⇒ createPersistentDir) }
+
+  private def createPersistentDir(implicit token: AccessToken) = {
+    val persistentPath = child(baseDir, persistent)
+    if (!exists(persistentPath)) makeDir(persistentPath)
+
+    def graceIsOver(name: String) =
+      ReplicaCatalog.timeOfPersistent(name).map {
+        _ + Workspace.preferenceAsDuration(ReplicaCatalog.ReplicaGraceTime).toMillis < System.currentTimeMillis
+      }.getOrElse(true)
+
+    val names = listNames(persistentPath)
+    val inReplica = ReplicaCatalog.forPaths(names.map { child(persistentPath, _) }).map(_.path).toSet
+
+    for {
+      name ← names
+      if graceIsOver(name)
+    } {
+      val path = child(persistentPath, name)
+      if (!inReplica.contains(path)) backgroundRmFile(path)
+    }
+    persistentPath
+  }
+
+  def tmpDir(implicit token: AccessToken) =
+    unwrap { directoryCache.get("tmpDir", () ⇒ createTmpDir) }
+
+  private def createTmpDir(implicit token: AccessToken) = {
+    val time = System.currentTimeMillis
+
+    val tmpNoTime = child(baseDir, tmp)
+    if (!exists(tmpNoTime)) makeDir(tmpNoTime)
+
+    val removalDate = System.currentTimeMillis - Workspace.preferenceAsDuration(TmpDirRemoval).toMillis
+
+    for (entry ← list(tmpNoTime)) {
+      val childPath = child(tmpNoTime, entry.name)
+
+      def rmDir =
+        try {
+          val timeOfDir = (if (entry.name.endsWith("/")) entry.name.substring(0, entry.name.length - 1) else entry.name).toLong
+          if (timeOfDir < removalDate) backgroundRmDir(childPath)
+        }
+        catch {
+          case (ex: NumberFormatException) ⇒ backgroundRmDir(childPath)
+        }
+
+      entry.`type` match {
+        case DirectoryType ⇒ rmDir
+        case FileType      ⇒ backgroundRmFile(childPath)
+        case LinkType      ⇒ backgroundRmFile(childPath)
+        case UnknownType ⇒
+          try rmDir
+          catch {
+            case e: Throwable ⇒ backgroundRmFile(childPath)
+          }
+      }
+    }
+
+    val tmpTimePath = child(tmpNoTime, time.toString)
+    if (!exists(tmpTimePath)) makeDir(tmpTimePath)
+    tmpTimePath
   }
 
   override def toString: String = id

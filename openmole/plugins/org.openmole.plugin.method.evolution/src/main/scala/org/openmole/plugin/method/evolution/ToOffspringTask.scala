@@ -39,7 +39,7 @@ object ToOffspringTask {
       addOutput(t.offspringPrototype)
 
       abstract class ToOffspringTask extends Task {
-        override def process(context: Context)(implicit rng: RandomProvider) = {
+        override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = {
           val i = t.buildIndividual(context(t.genomePrototype), context)
           Context(Variable(t.offspringPrototype, Vector(i)))
         }

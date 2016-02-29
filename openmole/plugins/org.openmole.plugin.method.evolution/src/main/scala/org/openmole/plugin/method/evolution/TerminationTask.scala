@@ -43,7 +43,7 @@ object TerminationTask {
 
       abstract class TerminationTask extends Task {
 
-        override def process(context: Context)(implicit rng: RandomProvider) = {
+        override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = {
           val (newState, te) = t.integration.run(context(t.statePrototype), term.run(context(t.populationPrototype)))
 
           Context(

@@ -42,7 +42,7 @@ class HookSpec extends FlatSpec with Matchers {
 
     val hook = new HookBuilder {
       def toHook = new Hook with Built {
-        override def process(context: Context, executionContext: ExecutionContext)(implicit rng: RandomProvider) = {
+        override def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider) = {
           context.contains(p) should equal(true)
           context(p) should equal("test")
           executed = true
@@ -71,7 +71,7 @@ class HookSpec extends FlatSpec with Matchers {
 
     val hook = new HookBuilder {
       def toHook = new Hook with Built {
-        override def process(context: Context, executionContext: ExecutionContext)(implicit rng: RandomProvider) = {
+        override def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider) = {
           context.contains(p) should equal(true)
           context(p) should equal("test")
           executed = true

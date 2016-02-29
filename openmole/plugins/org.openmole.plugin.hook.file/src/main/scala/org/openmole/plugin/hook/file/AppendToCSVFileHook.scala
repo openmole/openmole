@@ -26,7 +26,7 @@ import org.openmole.core.workflow.tools.ExpandedString
 import Prettifier._
 import scala.annotation.tailrec
 import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.mole.{ Hook, ExecutionContext }
+import org.openmole.core.workflow.mole.{ Hook, MoleExecutionContext }
 import scala.collection.mutable.ListBuffer
 
 object AppendToCSVFileHook {
@@ -42,8 +42,8 @@ abstract class AppendToCSVFileHook(
     singleRow: Boolean,
     prototypes: Prototype[_]*) extends Hook {
 
-  override def process(context: Context, executionContext: ExecutionContext)(implicit rng: RandomProvider) = {
-    val file = executionContext.relativise(fileName.from(context))
+  override def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider) = {
+    val file = new File(fileName.from(context))
     file.createParentDir
 
     val ps =

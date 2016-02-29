@@ -27,6 +27,7 @@ import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.puzzle._
 import org.openmole.tool.lock._
+import org.openmole.tool.file._
 
 import scala.collection.mutable.ListBuffer
 
@@ -61,12 +62,17 @@ sealed abstract class MoleTask(
     val last: Capsule,
     val implicits: Iterable[String]) extends Task {
 
-  override def perform(context: Context, localEnvironment: LocalEnvironment)(rng: RandomProvider): Context = perform(context, executeMole(_, localEnvironment, rng))
-
-  def executeMole(context: Context, localEnvironment: LocalEnvironment, rng: RandomProvider) = {
+  protected def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider): Context = {
     val implicitsValues = implicits.flatMap(i ⇒ context.get(i))
 
-    val execution = MoleExecution(mole, seed = rng().nextLong(), implicits = implicitsValues, defaultEnvironment = localEnvironment)
+    val execution =
+      MoleExecution(
+        mole,
+        seed = rng().nextLong(),
+        implicits = implicitsValues,
+        defaultEnvironment = executionContext.localEnvironment,
+        tmpDirectory = executionContext.tmpDirectory.newDir("moletask"),
+        cleanOnFinish = false)
 
     @volatile var lastContext: Option[Context] = None
     val lastContextLock = new ReentrantLock()
@@ -86,7 +92,5 @@ sealed abstract class MoleTask(
 
     context + lastContext.getOrElse(throw new UserBadDataError("Last capsule " + last + " has never been executed."))
   }
-
-  override def process(context: Context)(implicit rng: RandomProvider) = throw new InternalProcessingError("This method should never be called")
 
 }

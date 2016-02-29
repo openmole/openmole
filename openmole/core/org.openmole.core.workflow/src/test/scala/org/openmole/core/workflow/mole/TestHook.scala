@@ -22,7 +22,7 @@ object TestHook {
   def apply() = new HookBuilder {
 
     def toHook = new Hook with Built {
-      def process(ctx: Context, executionContext: ExecutionContext)(implicit rng: RandomProvider) = ctx
+      def process(ctx: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider) = ctx
     }
   }
 }

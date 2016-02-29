@@ -21,10 +21,7 @@ import java.util.UUID
 import org.apache.commons.math3.random.{ RandomGenerator, Well44497b, RandomAdaptor }
 
 object Random { random ⇒
-  implicit def uuid2long(uuid: UUID) = uuid.getMostSignificantBits ^ uuid.getLeastSignificantBits
-
-  val default = newRNG(UUID.randomUUID)
-
+  def uuid2long(uuid: UUID) = uuid.getMostSignificantBits ^ uuid.getLeastSignificantBits
   def newRNG(seed: Long) = new SynchronizedRandom(new Well44497b(seed))
 
   def newUnsychronizedRNG(seed: Long) = new RandomAdaptor(new Well44497b(seed))

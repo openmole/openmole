@@ -23,7 +23,7 @@ import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools.ExpandedString
 import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.mole.ExecutionContext
+import org.openmole.core.workflow.mole.MoleExecutionContext
 
 object AppendToFileHook {
 
@@ -38,8 +38,8 @@ abstract class AppendToFileHook(
     fileName: ExpandedString,
     content: ExpandedString) extends Hook {
 
-  override def process(context: Context, executionContext: ExecutionContext)(implicit rng: RandomProvider) = {
-    val file = executionContext.relativise(fileName.from(context))
+  override def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider) = {
+    val file = new File(fileName.from(context))
     file.createParentDir
     file.withLock(_.append(content.from(context)))
     context

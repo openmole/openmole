@@ -67,7 +67,7 @@ trait DSLPackage <: Commands
       c.Expr[Prototype[T]](q"Prototype[$wt](${n})")
     }
 
-    implicit lazy val executionContext = ExecutionContext.local
+    //implicit lazy val executionContext = MoleExecutionContext.default
     implicit lazy val implicits = Context.empty
 
     lazy val workspace = Workspace

@@ -137,8 +137,8 @@ class StrainerTaskDecorator(val task: Task) extends Task {
   override def inputs = task.inputs
   override def outputs = task.outputs
 
-  override def perform(context: Context, localEnvironment: LocalEnvironment)(rng: RandomProvider) = context + task.perform(context, localEnvironment)(rng)
-  override def process(context: Context)(implicit rng: RandomProvider) = throw new InternalProcessingError("This method should never be called")
+  override def perform(context: Context, executionContext: TaskExecutionContext) = context + task.perform(context, executionContext)
+  override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = throw new InternalProcessingError("This method should never be called")
 
   override def defaults = task.defaults
 

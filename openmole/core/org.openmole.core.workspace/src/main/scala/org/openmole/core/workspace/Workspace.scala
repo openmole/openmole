@@ -19,6 +19,7 @@ package org.openmole.core.workspace
 
 import java.io.File
 import java.util.UUID
+import java.util.concurrent.atomic.AtomicLong
 import java.util.logging.Level
 import java.util.logging.Logger
 import org.apache.commons.configuration._
@@ -127,9 +128,9 @@ class Workspace(val location: File) {
   val persistentDir = new File(location, persistentLocation)
   persistentDir.mkdirs
 
-  def newSeed = rng.nextLong
-
-  val rng = Random.newRNG(sessionUUID)
+  val rng = Random.newRNG(uuid2long(sessionUUID))
+  val currentSeed = new AtomicLong(rng.nextLong)
+  def newSeed = currentSeed.getAndIncrement()
 
   @transient private var _password: Option[String] = None
 

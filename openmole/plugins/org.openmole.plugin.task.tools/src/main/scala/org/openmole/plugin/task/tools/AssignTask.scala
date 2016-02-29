@@ -40,7 +40,7 @@ object AssignTask {
 }
 sealed abstract class AssignTask(val assignments: (Prototype[T], Prototype[T]) forSome { type T }*) extends Task {
 
-  override def process(context: Context)(implicit rng: RandomProvider) =
+  override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) =
     assignments.map { case (from, to) ⇒ Variable(to, context(from)) }
 
 }

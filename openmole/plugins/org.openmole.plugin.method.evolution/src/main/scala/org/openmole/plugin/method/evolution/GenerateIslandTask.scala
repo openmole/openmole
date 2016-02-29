@@ -35,7 +35,7 @@ object GenerateIslandTask {
 
       abstract class GenerateIslandTask extends Task {
 
-        override def process(context: Context)(implicit rng: RandomProvider) = {
+        override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = {
           val p = context(t.populationPrototype)
 
           def samples =

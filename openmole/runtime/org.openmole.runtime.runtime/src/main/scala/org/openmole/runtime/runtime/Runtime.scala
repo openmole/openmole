@@ -26,6 +26,7 @@ import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.output.OutputManager
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.serializer.structure.PluginClassAndFiles
+import org.openmole.core.workflow.task.TaskExecutionContext
 import org.openmole.tool.file._
 import org.openmole.tool.hash._
 import org.openmole.tool.logger.Logger
@@ -137,7 +138,8 @@ class Runtime {
       /* --- Submit all jobs to the local environment --*/
       logger.fine("Run the jobs")
       val environment = LocalEnvironment(nbThreads = threads)
-      for (toProcess ← allMoleJobs) environment.submit(toProcess)
+      val taskExecutionContext = TaskExecutionContext(Workspace.newDir("runtime"), environment)
+      for (toProcess ← allMoleJobs) environment.submit(toProcess, taskExecutionContext)
 
       saver.waitAllFinished
 
