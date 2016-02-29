@@ -80,6 +80,9 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
 .spacer5 {
     margin-top: 5px;
 }
+.spacer6 {
+     margin-top: 6px;
+ }
 .spacer7 {
     margin-top: 7px;
 }
@@ -670,6 +673,9 @@ label {
 .marginTop-20{
     margin-top: -20px;
 }
+.marginTop10{
+    margin-top: 10px;
+}
 
 .fileNameOverflow{
     color: white;
@@ -799,6 +805,10 @@ span.label.control-label{
     font-weight: bold;
 }
 
+.white{
+color: white;
+}
+
 .whiteBold{
     color: white;
     font-weight: bold;
@@ -848,6 +858,14 @@ top: -6px;
     margin-left: 100px;
 }
 
+.marginLeft10{
+    margin-left: 10px;
+}
+
+.marginLeft-20{
+    margin-left: -20px;
+}
+
 .marginRight20{
     margin-right: 20px;
 }
@@ -870,7 +888,9 @@ top: -6px;
     padding-right: 50px;
     padding-left: 50px;
 }
-
+.paddingLeft3{
+    padding-left: 3px;
+}
 .centerWidth250{
     max-width: 250px;
 }
@@ -1000,7 +1020,8 @@ border-top-right-radius: 0px;
 .toolPosition{
      display: inline-block;
      margin: 0 auto;
-     width: 220px; 
+     width: 220px;
+     margin-top: 15px;
 }
 
 .treePathItems{
@@ -1019,8 +1040,40 @@ border-top-right-radius: 0px;
     color: #333;
 }
 
-.input-group .form-control:first-child{
-border-bottom-right-radius: 4px;
-border-top-right-radius: 4px;
-margin-left: -2px;
+.smallInput{
+    width: 60px;
+    padding-top:5px;
+    padding-left: 3px;
+    text-align: center;
+    height: 28px;
+    font-size: 14px;
+}
+
+.filterLine{
+    overflow: auto;
+    width: 280px;
+}
+
+.filterElement{
+    float: left;
+    height: 30px;
+    padding-left: 4px;
+    font-size: 12px;
+}
+
+.exclusiveButtonSelected {
+    background-color: red;
+    border: 1px solid red;
+}
+
+.stringInGroup{
+    height: 28px;
+    padding-top: 3px;
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+.sortingBar{
+    left: 55px;
+    padding: 10px;
 }

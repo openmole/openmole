@@ -17,7 +17,7 @@ package org.openmole.gui.client.core.files
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.ext.data.{ SafePath, TreeNodeData }
+import org.openmole.gui.ext.data._
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.openmole.gui.misc.utils.Utils._
 import rx._
@@ -58,20 +58,24 @@ sealed trait TreeNode {
 
   val readableSize: String
 
-  def cloneWithName(newName: String) = FileNode(newName, Var(SafePath.sp(safePath().path.dropRight(1) :+ newName)), size, readableSize)
+  val time: Long
+
+  val readableTime: String
+
+  def cloneWithName(newName: String) = FileNode(newName, Var(SafePath.sp(safePath().path.dropRight(1) :+ newName)), size, readableSize, time, readableTime)
 
 }
 
 object TreeNode {
 
   implicit def treeNodeDataToTreeNode(tnd: TreeNodeData): TreeNode =
-    if (tnd.isDirectory) DirNode(tnd.name, tnd.safePath, tnd.size, tnd.readableSize)
-    else FileNode(tnd.name, tnd.safePath, tnd.size, tnd.readableSize)
+    if (tnd.isDirectory) DirNode(tnd.name, tnd.safePath, tnd.size, tnd.readableSize, tnd.time, tnd.readableTime)
+    else FileNode(tnd.name, tnd.safePath, tnd.size, tnd.readableSize, tnd.time, tnd.readableTime)
 
   implicit def treeNodeToTreeNodeData(tn: TreeNode): TreeNodeData = TreeNodeData(tn.name(), tn.safePath(), tn match {
-    case DirNode(_, _, _, _) ⇒ true
-    case _                   ⇒ false
-  }, tn.size, tn.readableSize)
+    case DirNode(_, _, _, _, _, _) ⇒ true
+    case _                         ⇒ false
+  }, tn.size, tn.readableSize, tn.time, tn.readableTime)
 
   implicit def seqTreeNodeToSeqTreeNodeData(tns: Seq[TreeNode]): Seq[TreeNodeData] = tns.map {
     treeNodeToTreeNodeData
@@ -83,15 +87,37 @@ object TreeNode {
 
   implicit def treeNodeToSafePath(tn: TreeNode): SafePath = tn.safePath()
 
-  implicit def treeNodesToSafePaths(tns: Seq[TreeNode]): Seq[SafePath] = tns.map { treeNodeToSafePath }
+  implicit def treeNodesToSafePaths(tns: Seq[TreeNode]): Seq[SafePath] = tns.map {
+    treeNodeToSafePath
+  }
 
-  implicit def safePathToDirNode(safePath: SafePath) = DirNode(safePath.name, safePath, 0, "")
+  implicit def safePathToDirNode(safePath: SafePath) = DirNode(safePath.name, safePath, 0, "", 0, "")
 
   def fromFilePath(path: SafePath) = FileNode()
 
 }
 
-object TreeNodeOrdering extends Ordering[TreeNode] {
+object FileSorting {
+  implicit def sortingToOrdering(fs: FileSorting): Ordering[TreeNode] =
+    fs match {
+      case AlphaSorting ⇒ AlphaOrdering
+      case SizeSorting  ⇒ FileSizeOrdering
+      case _            ⇒ TimeOrdering
+    }
+
+  implicit class reversableSeq[T](seq: Seq[T]) {
+    def order(fileOrdering: FileOrdering) = fileOrdering match {
+      case Ascending  ⇒ seq
+      case Descending ⇒ seq.reverse
+    }
+  }
+}
+
+object FileSizeOrdering extends Ordering[TreeNode] {
+  def compare(tn1: TreeNode, tn2: TreeNode) = tn1.size compare tn2.size
+}
+
+object AlphaOrdering extends Ordering[TreeNode] {
   def compare(tn1: TreeNode, tn2: TreeNode) = tn1 match {
     case dn1: DirNode ⇒ tn2 match {
       case dn2: DirNode ⇒ dn1.name() compare dn2.name()
@@ -104,12 +130,20 @@ object TreeNodeOrdering extends Ordering[TreeNode] {
   }
 }
 
+object TimeOrdering extends Ordering[TreeNode] {
+  def compare(tn1: TreeNode, tn2: TreeNode) = tn1.time compare tn2.time
+}
+
 case class DirNode(name: Var[String],
                    safePath: Var[SafePath],
                    size: Long,
-                   readableSize: String) extends TreeNode
+                   readableSize: String,
+                   time: Long,
+                   readableTime: String) extends TreeNode
 
 case class FileNode(name: Var[String],
                     safePath: Var[SafePath],
                     size: Long,
-                    readableSize: String) extends TreeNode
+                    readableSize: String,
+                    time: Long,
+                    readableTime: String) extends TreeNode

@@ -33,7 +33,7 @@ import org.openmole.gui.shared.Api
 import scalatags.JsDom.{ TypedTag, tags ⇒ tags }
 import scalatags.JsDom.all._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs, ClassKeyAggregator }
-import ClientProcessState._
+import Waiter._
 import org.openmole.gui.ext.data.DataUtils._
 import bs._
 
@@ -202,7 +202,7 @@ class ModelWizardPanel extends ModalPanel {
     bs.div("modelWizardDivs")(
       bs.div("centerWidth250")(
         tags.label(`class` := "inputFileStyle spacer5 certificate")(
-          transferring.withWaiter { _ ⇒
+          transferring.withTransferWaiter { _ ⇒
             tags.div(
               bs.fileInput((fInput: HTMLInputElement) ⇒ {
                 if (fInput.files.length > 0) {
@@ -301,7 +301,7 @@ class ModelWizardPanel extends ModalPanel {
             OMPost[Api].models(uploadPath).call().foreach { models ⇒
               fileToUploadPath() = models.headOption
               modelSelector.setContents(models, () ⇒ {
-                CoreUtils.refreshCurrentDirectory(() ⇒ onModelChange)
+                CoreUtils.refreshCurrentDirectory(() ⇒ onModelChange, panels.treeNodePanel.filter)
               })
               getResourceInfo
             }
@@ -348,7 +348,7 @@ class ModelWizardPanel extends ModalPanel {
   def setLaunchingCommand(filePath: SafePath) = {
     emptyJARSelectors
     OMPost[Api].launchingCommands(filePath).call().foreach { b ⇒
-      CoreUtils.refreshCurrentDirectory()
+      CoreUtils.refreshCurrentDirectory(fileFilter = panels.treeNodePanel.filter)
       launchingCommand() = b.headOption
       fileToUploadPath() = Some(filePath)
       launchingCommand().foreach { lc ⇒
@@ -436,7 +436,7 @@ class ModelWizardPanel extends ModalPanel {
                   b ⇒
                     panels.treeNodePanel.fileDisplayer.tabs -- b
                     panels.treeNodePanel.displayNode(b)
-                    CoreUtils.refreshCurrentDirectory()
+                    CoreUtils.refreshCurrentDirectory(fileFilter = panels.treeNodePanel.filter)
                 }
           }
       })

@@ -28,7 +28,7 @@ import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import org.openmole.gui.client.core.files.treenodemanager.{instance ⇒ manager}
 import org.openmole.gui.client.core.CoreUtils._
 import org.openmole.gui.ext.data._
-import ClientProcessState._
+import Waiter._
 import autowire._
 import rx._
 import scalatags.JsDom.{tags ⇒ tags}
@@ -95,7 +95,7 @@ class MarketPanel extends ModalPanel {
     OMPost[Api].getMarketEntry(entry, path).call().foreach { d ⇒
       downloading() = downloading().updatedFirst(_._1 == entry, (entry, Var(Processed())))
       downloading().headOption.foreach(_ ⇒ close)
-      CoreUtils.refreshCurrentDirectory()
+      CoreUtils.refreshCurrentDirectory(fileFilter = panels.treeNodePanel.filter)
     }
   }
 
@@ -104,7 +104,7 @@ class MarketPanel extends ModalPanel {
       _._1 == entry
     }.map {
       case (e, state: Var[ProcessState]) ⇒
-        state.withWaiter { _ ⇒
+        state.withTransferWaiter { _ ⇒
           if (selectedEntry() == Some(e)) bs.glyphButton(" Download", btn_success + " redBackground", glyph_download_alt, todo) else tags.div()
         }
     }.getOrElse(tags.div())

@@ -235,7 +235,9 @@ case class TreeNodeData(
                          safePath: SafePath,
                          isDirectory: Boolean,
                          size: Long,
-                         readableSize: String)
+                         readableSize: String,
+                         time: Long,
+                         readableTime: String)
 
 @JSExport
 case class ScriptData(scriptPath: SafePath)
@@ -574,4 +576,58 @@ case class Resources(paths: Seq[TreeNodeData], implicits: Seq[TreeNodeData], num
   def withPath(p: TreeNodeData) = copy(paths = paths :+ p)
 
   def size = paths.size + implicits.size
+}
+
+sealed trait FirstLast
+
+object First extends FirstLast
+
+object Last extends FirstLast
+
+sealed trait FileOrdering
+
+object Ascending extends FileOrdering
+
+object Descending extends FileOrdering
+
+sealed trait FileSorting
+
+object AlphaSorting extends FileSorting
+
+object SizeSorting extends FileSorting
+
+object TimeSorting extends FileSorting
+
+object FileSorting {
+  implicit def sortingToOrdering(fs: FileSorting): Ordering[TreeNodeData] =
+    fs match {
+      case AlphaSorting ⇒ AlphaOrdering
+      case SizeSorting ⇒ FileSizeOrdering
+      case _ ⇒ TimeOrdering
+    }
+}
+
+case class FileFilter(firstLast: FirstLast = First, threshold: Option[Int] = Some(20), nameFilter: String = "", fileSorting: FileSorting = AlphaSorting)
+
+case class TreeSorting(fileSorting: FileSorting = AlphaSorting, fileOrdering: FileOrdering = Ascending)
+
+object FileFilter {
+  def defaultFilter = FileFilter.this (First, Some(20), "", AlphaSorting)
+}
+
+object TreeSorting {
+  def defaultSorting = TreeSorting(AlphaSorting, Ascending)
+}
+
+
+object FileSizeOrdering extends Ordering[TreeNodeData] {
+  def compare(tnd1: TreeNodeData, tnd2: TreeNodeData) = tnd1.size compare tnd2.size
+}
+
+object AlphaOrdering extends Ordering[TreeNodeData] {
+  def compare(tnd1: TreeNodeData, tnd2: TreeNodeData) = tnd1.name compare tnd2.name
+}
+
+object TimeOrdering extends Ordering[TreeNodeData] {
+  def compare(tnd1: TreeNodeData, tnd2: TreeNodeData) = tnd1.time compare tnd2.time
 }

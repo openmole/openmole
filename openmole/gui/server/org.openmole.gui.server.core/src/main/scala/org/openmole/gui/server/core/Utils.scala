@@ -20,16 +20,20 @@ package org.openmole.gui.server.core
 import java.io.File
 import java.lang.reflect.Modifier
 import java.nio.channels.FileChannel
+import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.logging.Level
 import java.util.zip.{ ZipInputStream, GZIPInputStream }
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.workspace.Workspace
-import org.openmole.gui.ext.data.FileType._
+import org.openmole.gui.ext.data.{ FileFilter ⇒ fF }
 import org.openmole.gui.ext.data._
+import org.openmole.gui.ext.data.FileSorting._
 import java.io._
 import org.openmole.tool.file._
 import org.openmole.tool.stream.StringOutputStream
 import org.openmole.tool.tar._
+import java.nio.file.attribute._
 
 import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
 
@@ -81,9 +85,12 @@ object Utils {
     fileToSafePath
   }
 
-  implicit def fileToTreeNodeData(f: File)(implicit context: ServerFileSytemContext = ProjectFileSystem): TreeNodeData = TreeNodeData(f.getName, f, f.isDirectory, f.length, {
-    if (f.isFile) readableByteCount(FileDecorator(f).size) else ""
-  })
+  implicit def fileToTreeNodeData(f: File)(implicit context: ServerFileSytemContext = ProjectFileSystem): TreeNodeData = {
+    val time = java.nio.file.Files.readAttributes(f, classOf[BasicFileAttributes]).lastModifiedTime.toMillis
+    TreeNodeData(f.getName, f, f.isDirectory, f.length, {
+      if (f.isFile) readableByteCount(FileDecorator(f).size) else ""
+    }, time, (new SimpleDateFormat("dd/MM/yyyy HH:mm").format((new Date(time)))))
+  }
 
   implicit def seqfileToSeqTreeNodeData(fs: Seq[File])(implicit context: ServerFileSytemContext): Seq[TreeNodeData] = fs.map {
     fileToTreeNodeData(_)
@@ -136,7 +143,25 @@ object Utils {
     getFile0(paths, root)
   }
 
-  def listFiles(path: SafePath)(implicit context: ServerFileSytemContext): Seq[TreeNodeData] = safePathToFile(path).listFilesSafe.toSeq
+  def listFiles(path: SafePath, fileFilter: fF)(implicit context: ServerFileSytemContext): Seq[TreeNodeData] = {
+
+    val list = safePathToFile(path).listFilesSafe.toSeq
+
+    val filteredByName: Seq[TreeNodeData] = {
+      if (fileFilter.nameFilter.isEmpty) list
+      else list.filter { f ⇒ f.getName.contains(fileFilter.nameFilter) }
+    }
+
+    val sorted = filteredByName.sorted(fileFilter.fileSorting)
+
+    fileFilter.threshold.map { th ⇒
+      fileFilter.firstLast match {
+        case First ⇒ sorted.take(th)
+        case _     ⇒ sorted.takeRight(th)
+      }
+    }.getOrElse(sorted)
+
+  }
 
   def replicate(treeNodeData: TreeNodeData): TreeNodeData = {
     import org.openmole.gui.ext.data.ServerFileSytemContext.project
@@ -234,7 +259,7 @@ object Utils {
 
   def existsExcept(in: TreeNodeData, exceptItSelf: Boolean): Boolean = {
     import org.openmole.gui.ext.data.ServerFileSytemContext.project
-    val li = listFiles(in.safePath.parent)
+    val li = listFiles(in.safePath.parent, fF.defaultFilter)
     val count = li.count(_.safePath.path == in.safePath.path)
 
     val bound = if (exceptItSelf) 1 else 0

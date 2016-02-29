@@ -16,6 +16,7 @@ import org.openmole.gui.misc.js.JsRxTags._
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import org.openmole.gui.misc.js.Tooltip._
+import FileSorting._
 import TreeNode._
 import autowire._
 import rx._
@@ -39,12 +40,14 @@ import bs._
  */
 
 class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
+
   case class NodeEdition(node: TreeNode, replicateMode: Boolean = false)
+
   val toBeEdited: Var[Option[NodeEdition]] = Var(None)
   val dragState: Var[String] = Var("")
   val draggedNode: Var[Option[TreeNode]] = Var(None)
   val fileDisplayer = new FileDisplayer
-  val fileTooBar = new FileToolBar(() ⇒ refreshAndDraw)
+  val fileToolBar = new FileToolBar(() ⇒ drawTree, () ⇒ refreshAndDraw)
   val tree: Var[TypedTag[HTMLDivElement]] = Var(tags.div())
 
   val editNodeInput: Input = bs.input("")(
@@ -55,9 +58,9 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
   ).render
 
   lazy val view = {
-    manager.computeCurrentSons(() ⇒ drawTree)
+    manager.computeCurrentSons(() ⇒ drawTree, filter)
     tags.div(
-      fileTooBar.div, Rx {
+      fileToolBar.div, Rx {
         val toDraw = manager.drop(1)
         val dirNodeLineSize = toDraw.size
         bs.div("tree-path")(
@@ -65,17 +68,23 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
           toDraw.drop(dirNodeLineSize - 2).takeRight(2).map { dn ⇒ goToDirButton(dn, "treePathItems", s"| ${dn.name()}") }
         )
 
-      }, Rx {
+      },
+      fileToolBar.sortingGroup.div,
+      Rx {
         tree()
       }
     )
   }
 
+  def filter: FileFilter = fileToolBar.fileFilter()
+
+  def sorting: TreeSorting = fileToolBar.treeSorting()
+
   def downloadFile(treeNode: TreeNode, saveFile: Boolean, onLoaded: String ⇒ Unit = (s: String) ⇒ {}) =
     FileManager.download(
       treeNode,
       (p: ProcessState) ⇒ {
-        fileTooBar.transferring() = p
+        fileToolBar.transferring() = p
       },
       onLoaded
     )
@@ -83,6 +92,8 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
   def goToDirButton(dn: DirNode, ck: ClassKeyAggregator, name: String = "") = bs.span(ck)(name)(
     onclick := {
       () ⇒
+        if (fileToolBar.hasFilter) CoreUtils.refreshCurrentDirectory(fileFilter = FileFilter.defaultFilter)
+        fileToolBar.resetFilter
         manager.switch(dn)
         computeAndDraw
     }, dropPairs(dn)
@@ -104,14 +115,14 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
     }
   )
 
-  def computeAndDraw = manager.computeCurrentSons(() ⇒ drawTree)
+  def computeAndDraw = manager.computeCurrentSons(() ⇒ drawTree, filter)
 
   def refreshAndDraw = refreshAnd(() ⇒ drawTree)
 
-  def refreshAnd(todo: () ⇒ Unit) = CoreUtils.refreshCurrentDirectory(todo)
+  def refreshAnd(todo: () ⇒ Unit) = CoreUtils.refreshCurrentDirectory(todo, filter)
 
   def drawTree: Unit = {
-    manager.computeAndGetCurrentSons.map { sons ⇒
+    manager.computeAndGetCurrentSons(filter).map { sons ⇒
       tree() = tags.div(
         if (manager.isRootCurrent && manager.isProjectsEmpty) {
           tags.div("Create a first OpenMOLE script (.oms)")(`class` := "message")
@@ -121,7 +132,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
             tags.tr(
               tags.div(
                 tags.table(`class` := "file-list")(
-                  for (tn ← sons.sorted(TreeNodeOrdering)) yield {
+                  for (tn ← sons.sorted(fileToolBar.treeSorting().fileSorting).order(fileToolBar.treeSorting().fileOrdering)) yield {
                     drawNode(tn)
                   }
                 )
@@ -192,7 +203,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
       treeNode.name()
     }?",
       () ⇒ {
-        CoreUtils.trashNode(treeNode.safePath()) {
+        CoreUtils.trashNode(treeNode.safePath(), filter) {
           () ⇒
             fileDisplayer.tabs.checkTabs
             refreshAndDraw
@@ -259,6 +270,11 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
       `class` := classType
     )
 
+    def timeOrSize(tn: TreeNode): String = fileToolBar.treeSorting().fileSorting match {
+      case TimeSorting ⇒ tn.readableTime
+      case _           ⇒ tn.readableSize
+    }
+
     val render = tags.tr(
       onmouseover := { () ⇒ lineHovered() = true },
       onmouseout := { () ⇒ lineHovered() = false }, ondragstart := { (e: DragEvent) ⇒
@@ -290,7 +306,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
           case Some(_) ⇒
             tags.div(`class` := "file-info")(checkbox.onlyBox)
           case _ ⇒ tags.div(`class` := "file-info")(
-            tags.span(`class` := "file-size")(tags.i(tn.readableSize)),
+            tags.span(`class` := "file-size")(tags.i(timeOrSize(tn))),
             tags.span(id := Rx {
               "treeline" + {
                 if (lineHovered()) "-hover" else ""
@@ -321,10 +337,10 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
               )(`class` := "glyphitem file-glyph")
 
             /*,
-                    if (tn.isPlugin) glyphSpan(OMTags.glyph_plug, () ⇒
-                      OMPost[Api].autoAddPlugins(tn.safePath()).call().foreach { p ⇒
-                        panels.pluginTriggerer.open
-                      })(`class` := "glyphitem file-glyph")*/
+                      if (tn.isPlugin) glyphSpan(OMTags.glyph_plug, () ⇒
+                        OMPost[Api].autoAddPlugins(tn.safePath()).call().foreach { p ⇒
+                          panels.pluginTriggerer.open
+                        })(`class` := "glyphitem file-glyph")*/
             )
           )
         }

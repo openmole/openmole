@@ -2,8 +2,10 @@ package org.openmole.gui.client.core.files
 
 import org.openmole.gui.client.core.CoreUtils
 import org.openmole.gui.ext.data._
+import org.openmole.gui.misc.js.OMTags.ExclusiveButton
 import org.openmole.gui.misc.js.{ Select, OMTags }
 import org.scalajs.dom.html.Input
+import scala.util.Try
 import scalatags.JsDom.{ tags ⇒ tags }
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
@@ -15,7 +17,7 @@ import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import bs._
 import org.scalajs.dom.raw.{ HTMLSpanElement, HTMLInputElement }
 import rx._
-import org.openmole.gui.client.core.ClientProcessState._
+import org.openmole.gui.client.core.Waiter._
 
 /*
  * Copyright (C) 20/01/16 // mathieu.leclaire@openmole.org
@@ -68,10 +70,25 @@ object FileToolBar {
 
 import FileToolBar._
 
-class FileToolBar(onrefreshed: () ⇒ Unit) {
+class FileToolBar(redraw: () ⇒ Unit, refreshAndRedraw: () ⇒ Unit) {
 
   val selectedTool: Var[Option[SelectedTool]] = Var(None)
   val transferring: Var[ProcessState] = Var(Processed())
+  val fileFilter = Var(FileFilter.defaultFilter)
+  val treeSorting = Var(TreeSorting.defaultSorting)
+
+  implicit def someIntToString(i: Option[Int]): String = i.map {
+    _.toString
+  }.getOrElse("")
+
+  def hasFilter = fileFilter() != FileFilter.defaultFilter
+
+  def resetFilter = {
+    fileFilter() = FileFilter.defaultFilter
+    byNameInput.value = fileFilter().nameFilter
+    thresholdInput.value = fileFilter().threshold
+    firstLastGroup.reset
+  }
 
   def rxClass(sTool: SelectedTool) = Rx {
     "glyphicon " + sTool.glyph + " glyphmenu " + selectedTool().filter(_ == sTool).map { _ ⇒ "selectedTool" }.getOrElse("")
@@ -97,21 +114,22 @@ class FileToolBar(onrefreshed: () ⇒ Unit) {
     )
 
   private val upButton = upbtn((fileInput: HTMLInputElement) ⇒ {
-    FileManager.upload(fileInput, manager.current.safePath(), (p: ProcessState) ⇒ transferring() = p, UploadProject(), onrefreshed)
+    FileManager.upload(fileInput, manager.current.safePath(), (p: ProcessState) ⇒ transferring() = p, UploadProject(), refreshAndRedraw)
   })
 
   // New file tool
   val newNodeInput: Input = bs.input("")(
     placeholder := "File name",
     width := "130px",
+    left := "-2px",
     autofocus
   ).render
 
   val addRootDirButton: Select[TreeNodeType] = {
-    val content = Seq((TreeNodeType.file, key(glyph_file)), (TreeNodeType.folder, key(glyph_folder_close)))
+    val content = Seq((TreeNodeType.file, key(glyph_file) + "paddingLeft3"), (TreeNodeType.folder, key(glyph_folder_close) + "paddingLeft3"))
     Select("fileOrFolder", content, content.map {
       _._1
-    }.headOption, btn_success + "borderRightFlat", () ⇒ {
+    }.headOption, btn_default + "borderRightFlat", () ⇒ {
       addRootDirButton.content().map { c ⇒ newNodeInput.placeholder = c.name + " name" }
     })
   }
@@ -124,8 +142,8 @@ class FileToolBar(onrefreshed: () ⇒ Unit) {
         val currentDirNode = manager.current
         addRootDirButton.content().map {
           _ match {
-            case dt: DirNodeType  ⇒ CoreUtils.addDirectory(currentDirNode, newFile, () ⇒ unselectAndRefreshTree)
-            case ft: FileNodeType ⇒ CoreUtils.addFile(currentDirNode, newFile, () ⇒ unselectAndRefreshTree)
+            case dt: DirNodeType  ⇒ CoreUtils.addDirectory(currentDirNode, newFile, fileFilter(), () ⇒ unselectAndRefreshTree)
+            case ft: FileNodeType ⇒ CoreUtils.addFile(currentDirNode, newFile, fileFilter(), () ⇒ unselectAndRefreshTree)
           }
         }
       }
@@ -136,13 +154,13 @@ class FileToolBar(onrefreshed: () ⇒ Unit) {
   def unselectAndRefreshTree: Unit = {
     unselectTool
     newNodeInput.value = ""
-    onrefreshed()
+    refreshAndRedraw
   }
 
   def unselectTool = selectedTool() = None
 
   val deleteButton = bs.button("Delete", btn_danger, () ⇒ {
-    CoreUtils.trashNodes(manager.selected()) { () ⇒
+    CoreUtils.trashNodes(manager.selected(), fileFilter()) { () ⇒
       unselectAndRefreshTree
     }
   })
@@ -152,13 +170,82 @@ class FileToolBar(onrefreshed: () ⇒ Unit) {
     selectedTool() = Some(PasteTool)
   })
 
-  val pasteButton = bs.button("Paste", btn_success, () ⇒ {
+  val pasteButton = bs.button("Paste", btn_primary, () ⇒ {
     paste(manager.copied(), manager.current)
   })
 
   val pluginButton = bs.button("Get plugins", btn_default, () ⇒ {
     unselectAndRefreshTree
   })
+
+  //Filter
+  implicit def stringToIntOption(s: String): Option[Int] = Try(thresholdInput.value.toInt).toOption
+
+  def updateFilter(filterChange: () ⇒ FileFilter) = {
+    val previous = fileFilter()
+    fileFilter() = filterChange()
+    if (previous != fileFilter()) refreshAndRedraw()
+    else redraw()
+  }
+
+  def updateSorting(sortingChange: () ⇒ TreeSorting) = {
+    treeSorting() = sortingChange()
+    redraw()
+  }
+
+  lazy val byNameInput = bs.input(fileFilter().nameFilter, "smallInput")(placeholder := "Name").render
+
+  lazy val byNameForm = bs.form("filterElement")(byNameInput,
+    onsubmit := { () ⇒
+      updateFilter(() ⇒ fileFilter().copy(nameFilter = byNameInput.value))
+      false
+    })
+
+  lazy val thresholdInput = bs.input(fileFilter().threshold, "smallInput")(placeholder := "Size").render
+
+  lazy val thresholdForm = bs.form("filterElement")(thresholdInput,
+    onsubmit := { () ⇒
+      updateFilter(() ⇒ fileFilter().copy(threshold = thresholdInput.value))
+      false
+    })
+
+  val firstLastGroup = OMTags.buttonGroupExclusive("filterElement")(
+    ExclusiveButton.string("first", () ⇒ updateFilter(() ⇒ fileFilter().copy(firstLast = First))),
+    ExclusiveButton.string("last", () ⇒ updateFilter(() ⇒ fileFilter().copy(firstLast = Last)))
+  )
+
+  val sortingGroupInFilter = OMTags.buttonGroupExclusive("filterElement")(
+    ExclusiveButton.glyph(OMTags.glyph_alph_sorting, () ⇒ updateFilter(() ⇒ fileFilter().copy(fileSorting = AlphaSorting))),
+    ExclusiveButton.string("Ko", () ⇒ updateFilter(() ⇒ fileFilter().copy(fileSorting = SizeSorting))),
+    ExclusiveButton.glyph(OMTags.glyph_time, () ⇒ updateFilter(() ⇒ fileFilter().copy(fileSorting = TimeSorting)))
+  )
+
+  val sortingGroup = OMTags.buttonGroupExclusive("sortingBar")(
+    ExclusiveButton.glyph(OMTags.glyph_alph_sorting, () ⇒ updateSorting(() ⇒ treeSorting().copy(fileSorting = AlphaSorting))),
+    ExclusiveButton.string("Ko", () ⇒ updateSorting(() ⇒ treeSorting().copy(fileSorting = SizeSorting))),
+    ExclusiveButton.glyph(OMTags.glyph_time, () ⇒ updateSorting(() ⇒ treeSorting().copy(fileSorting = TimeSorting))),
+    ExclusiveButton.twoGlyphStates(
+      OMTags.glyph_triangle_bottom,
+      OMTags.glyph_triangle_top,
+      () ⇒ updateSorting(() ⇒ treeSorting().copy(fileOrdering = Ascending)),
+      () ⇒ updateSorting(() ⇒ treeSorting().copy(fileOrdering = Descending))
+    )
+  )
+
+  lazy val filterDiv =
+    bs.div("")(
+      bs.div("filterLine marginLeft10")(
+        bs.div("white filterElement spacer6")("Take"),
+        firstLastGroup.div,
+        thresholdForm
+      ),
+      bs.div("filterLine marginLeft-20")(
+        bs.div("white filterElement spacer6")("filtered by"),
+        sortingGroupInFilter.div,
+        bs.div("white filterElement spacer6")("and by"),
+        byNameForm
+      )
+    )
 
   val fileToolDiv = bs.div("toolPosition")(
     Rx {
@@ -168,38 +255,44 @@ class FileToolBar(onrefreshed: () ⇒ Unit) {
         case Some(CopyTool)         ⇒ copyButton
         case Some(PasteTool)        ⇒ pasteButton
         case Some(PluginTool)       ⇒ pluginButton
+        case Some(FilterTool)       ⇒ filterDiv
         case _                      ⇒ tags.div()
       }
     },
-    transferring.withWaiter { _ ⇒
+    transferring.withTransferWaiter { _ ⇒
       tags.div()
     }
   )
 
   val div = bs.div("centerFileTool")(
     tags.div(
-      glyphSpan(glyph_refresh + " glyphmenu", () ⇒ {
-        CoreUtils.refreshCurrentDirectory(onrefreshed)
-      }),
+      glyphSpan(glyph_refresh + " glyphmenu", refreshAndRedraw),
       upButton,
       buildSpan(PluginTool, () ⇒ setSelection(PluginTool)),
       buildSpan(TrashTool, () ⇒ setSelection(TrashTool)),
       buildSpan(CopyTool, () ⇒ setSelection(CopyTool)),
       buildSpan(FileCreationTool),
-      buildSpan(FilterTool, () ⇒ println("filter"))
+      buildSpan(FilterTool)
     ),
     fileToolDiv
   )
 
   private def setSelection(selectedTool: SelectedTool) = {
     manager.setSelection(selectedTool)
-    onrefreshed()
+    //onrefreshed()
   }
+
+  //inTreanodepanel
+  /*private def filter( in: TreeNodeData, fileFilter: FileFilter) = {
+    CoreUtils.filter(in, fileFilter).withFutureWaiter { _ ⇒
+      tags.div("filtering...")
+    }("Searching...", (s: Seq[TreeNodeData]) ⇒ println("success " + s))
+  }*/
 
   private def paste(safePaths: Seq[SafePath], to: SafePath) = {
     def refreshWithNoError = {
       manager.noError
-      CoreUtils.refreshAndSwitchSelection(onrefreshed)
+      refreshAndRedraw()
     }
 
     def onpasted = {

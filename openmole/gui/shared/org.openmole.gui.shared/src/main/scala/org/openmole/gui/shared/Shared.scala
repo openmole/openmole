@@ -44,7 +44,7 @@ trait Api {
   def existsExcept(exception: TreeNodeData, exceptItSelf: Boolean): Boolean
   def extractAndTestExistence(safePathToTest: SafePath, in: SafePath): Seq[SafePath]
   def treeNodeData(safePaths: Seq[TreeNodeData]): Seq[TreeNodeData]
-  def listFiles(path: SafePath): Seq[TreeNodeData]
+  def listFiles(path: SafePath, fileFilter: FileFilter = FileFilter()): Seq[TreeNodeData]
   def mdToHtml(safePath: SafePath): String
   def move(from: SafePath, to: SafePath): Unit
   def replicate(treeNodeData: TreeNodeData): TreeNodeData

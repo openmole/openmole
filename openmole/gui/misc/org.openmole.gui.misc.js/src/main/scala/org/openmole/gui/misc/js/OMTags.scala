@@ -2,7 +2,7 @@ package org.openmole.gui.misc.js
 
 import fr.iscpif.scaladget.api.ClassKeyAggregator
 import org.scalajs.dom.html._
-import org.scalajs.dom.raw.{ HTMLDivElement, HTMLButtonElement, HTMLElement, HTMLSpanElement }
+import org.scalajs.dom.raw._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import scalatags.JsDom.{ tags ⇒ tags }
 import org.openmole.gui.misc.js.JsRxTags._
@@ -54,6 +54,10 @@ object OMTags {
   val glyph_filter = "glyphicon-filter"
   val glyph_copy = "glyphicon-copy"
   val glyph_paste = "glyphicon-paste"
+  val glyph_time = "glyphicon-time"
+  val glyph_alph_sorting = "glyphicon-sort-by-alphabet"
+  val glyph_triangle_bottom = "glyphicon-triangle-bottom"
+  val glyph_triangle_top = "glyphicon-triangle-top"
 
   def buttonGroup(keys: ClassKeyAggregator = emptyCK) = bs.div("btn-group " + keys.key)
 
@@ -112,4 +116,97 @@ object OMTags {
       cbSpan(name)
     )
   }
+
+  def glyphButton(text: String, buttonCB: ClassKeyAggregator, glyCA: Var[ClassKeyAggregator], todo: () ⇒ Unit): TypedTag[HTMLSpanElement] =
+    bs.span("btn " + buttonCB.key)(cursor := "pointer", `type` := "button")(Rx { glyph(glyCA()) })(text)(onclick := {
+      () ⇒ todo()
+    })
+
+  def twoStatesGlyphButton(glyph1: ClassKeyAggregator,
+                           glyph2: ClassKeyAggregator,
+                           todo1: () ⇒ Unit,
+                           todo2: () ⇒ Unit) = new TwoStatesGlyphButton(glyph1, glyph2, todo1, todo2)
+
+  sealed trait ExclusiveButton {
+    def action: () ⇒ Unit
+  }
+
+  object ExclusiveButton {
+    def string(t: String, a: () ⇒ Unit) = new ExclusiveStringButton {
+      def title = t
+
+      def action = a
+    }
+
+    def glyph(g: ClassKeyAggregator, a: () ⇒ Unit) = new ExclusiveGlyphButton {
+      def glyph = g
+
+      def action = a
+    }
+
+    def twoGlyphStates(glyph1: ClassKeyAggregator,
+                       glyph2: ClassKeyAggregator,
+                       todo1: () ⇒ Unit,
+                       todo2: () ⇒ Unit) = twoStatesGlyphButton(glyph1, glyph2, todo1, todo2)
+  }
+
+  trait ExclusiveStringButton extends ExclusiveButton {
+    def title: String
+  }
+
+  trait ExclusiveGlyphButton extends ExclusiveButton {
+    def glyph: ClassKeyAggregator
+  }
+
+  case class TwoStatesGlyphButton(glyph: ClassKeyAggregator,
+                                  glyph2: ClassKeyAggregator,
+                                  action: () ⇒ Unit,
+                                  action2: () ⇒ Unit) extends ExclusiveButton {
+    val selected = Var(glyph)
+
+    val div =
+      glyphButton("", btn_default, selected, () ⇒ {
+        if (selected() == glyph) {
+          selected() = glyph2
+          action2()
+        }
+        else {
+          selected() = glyph
+          action()
+        }
+      })
+  }
+
+  class ExclusiveGroup(keys: ClassKeyAggregator, buttons: Seq[ExclusiveButton]) {
+    val selected = Var(buttons.head)
+
+    val div = bs.div(keys + "btn-group")(
+      for (b ← buttons) yield {
+        buildButton(b)
+      }
+    )
+
+    def buildButton(b: ExclusiveButton) = {
+      def action(a: () ⇒ Unit) = () ⇒ {
+        selected() = b
+        a()
+      }
+
+      Rx {
+        b match {
+          case s: ExclusiveStringButton ⇒ bs.button(s.title, {
+            if (b == selected()) btn_primary else btn_default
+          } + "stringInGroup", action(s.action))
+          case g: ExclusiveGlyphButton  ⇒ bs.glyphButton("", if (b == selected()) btn_primary else btn_default, g.glyph, action(g.action))
+          case ts: TwoStatesGlyphButton ⇒ twoStatesGlyphButton(ts.glyph, ts.glyph2, ts.action, ts.action2).div
+          case _                        ⇒ bs.button("??")
+        }
+      }
+    }
+
+    def reset = selected() = buttons.head
+  }
+
+  def buttonGroupExclusive(keys: ClassKeyAggregator = emptyCK)(buttons: ExclusiveButton*) = new ExclusiveGroup(keys, buttons)
+
 }

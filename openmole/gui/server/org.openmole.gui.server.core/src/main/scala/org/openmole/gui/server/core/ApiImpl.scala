@@ -15,6 +15,7 @@ import org.openmole.gui.server.core.Runnings.RunningEnvironment
 import org.openmole.gui.server.core.Utils._
 import org.openmole.core.workspace.Workspace
 import org.openmole.gui.shared._
+import org.openmole.gui.ext.data.{ FileFilter ⇒ fF }
 import org.openmole.gui.ext.data._
 import java.io._
 import java.nio.file._
@@ -199,7 +200,7 @@ object ApiImpl extends Api {
     }
   }
 
-  def listFiles(sp: SafePath): Seq[TreeNodeData] = Utils.listFiles(sp)(org.openmole.gui.ext.data.ServerFileSytemContext.project)
+  def listFiles(sp: SafePath, fileFilter: fF): Seq[TreeNodeData] = Utils.listFiles(sp, fileFilter)(org.openmole.gui.ext.data.ServerFileSytemContext.project)
 
   def move(from: SafePath, to: SafePath): Unit = {
     import org.openmole.gui.ext.data.ServerFileSytemContext.project
@@ -226,7 +227,7 @@ object ApiImpl extends Api {
     val targetFile = new File(filePath.parent, name)
 
     Files.move(safePathToFile(filePath), targetFile, StandardCopyOption.REPLACE_EXISTING)
-    TreeNodeData(name, targetFile, false, 0L, "")
+    TreeNodeData(name, targetFile, false, 0L, "", 0L, "")
   }
 
   def renameKey(keyName: String, newName: String): Unit =

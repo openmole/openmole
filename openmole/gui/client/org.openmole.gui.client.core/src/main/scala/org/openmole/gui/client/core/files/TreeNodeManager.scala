@@ -19,7 +19,7 @@ package org.openmole.gui.client.core.files
 
 import org.openmole.gui.client.core.files.FileToolBar.SelectedTool
 import org.openmole.gui.client.core.{ CoreUtils, AlertPanel }
-import org.openmole.gui.ext.data.SafePath
+import org.openmole.gui.ext.data.{ FileFilter, SafePath }
 import rx._
 
 package object treenodemanager {
@@ -29,7 +29,7 @@ package object treenodemanager {
 }
 
 class TreeNodeManager {
-  val root = DirNode(Var("projects"), Var(SafePath.sp(Seq("projects"))), 0L, "")
+  val root = DirNode(Var("projects"), Var(SafePath.sp(Seq("projects"))), 0L, "", 0L, "")
 
   val dirNodeLine: Var[Seq[DirNode]] = Var(Seq(root))
 
@@ -53,12 +53,12 @@ class TreeNodeManager {
     comment().map(AlertPanel.treeNodeCommentDiv)
   }
 
-  def computeAndGetCurrentSons = {
-    computeCurrentSons()
+  def computeAndGetCurrentSons(fileFilter: FileFilter) = {
+    computeCurrentSons(fileFilter = fileFilter)
     sons().get(current)
   }
 
-  def trashCache(ontrashed: () ⇒ Unit) = CoreUtils.updateSons(current, ontrashed)
+  def trashCache(ontrashed: () ⇒ Unit, fileFilter: FileFilter = FileFilter()) = CoreUtils.updateSons(current, ontrashed, fileFilter)
 
   def updateSon(dirNode: DirNode, newSons: Seq[TreeNode]) = sons() = sons().updated(dirNode, newSons)
 
@@ -113,11 +113,11 @@ class TreeNodeManager {
       case (dn, index) ⇒ take(index + 1)
     }.getOrElse(dirNodeLine())
 
-  def computeCurrentSons(oncomputed: () ⇒ Unit = () ⇒ {}): Unit = {
+  def computeCurrentSons(oncomputed: () ⇒ Unit = () ⇒ {}, fileFilter: FileFilter): Unit = {
     current match {
       case dirNode: DirNode ⇒
         if (sons().contains(dirNode)) oncomputed()
-        else CoreUtils.updateSons(dirNode, oncomputed)
+        else CoreUtils.updateSons(dirNode, oncomputed, fileFilter)
       case _ ⇒
     }
   }
