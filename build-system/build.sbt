@@ -22,7 +22,7 @@ resolvers += Classpaths.sbtPluginSnapshots
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-osgi" % "0.8.0")
 
-addSbtPlugin("com.typesafe.sbt" % "sbt-scalariform" % "1.2.0")
+addSbtPlugin("com.typesafe.sbt" % "sbt-scalariform" % "1.6.0")
 
 
 libraryDependencies ++= Seq(
