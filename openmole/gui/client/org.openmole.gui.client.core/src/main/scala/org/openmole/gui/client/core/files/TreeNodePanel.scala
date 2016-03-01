@@ -302,9 +302,8 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
         tn.name()
       ).tooltip(tn.name(), condition = () ⇒ tn.name().length > 24),
       Rx {
-        manager.selectionMode() match {
-          case Some(_) ⇒
-            tags.div(`class` := "file-info")(checkbox.onlyBox)
+        manager.checkMode match {
+          case true ⇒ tags.div(`class` := "file-info")(checkbox.onlyBox)
           case _ ⇒ tags.div(`class` := "file-info")(
             tags.span(`class` := "file-size")(tags.i(timeOrSize(tn))),
             tags.span(id := Rx {

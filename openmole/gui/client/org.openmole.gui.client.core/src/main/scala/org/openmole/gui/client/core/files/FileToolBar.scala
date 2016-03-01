@@ -40,30 +40,37 @@ object FileToolBar {
 
   sealed trait SelectedTool {
     def glyph: String
+    def checkMode: Boolean
   }
 
   object TrashTool extends SelectedTool {
     val glyph = glyph_trash
+    val checkMode = true
   }
 
   object FilterTool extends SelectedTool {
     val glyph = OMTags.glyph_filter
+    val checkMode = false
   }
 
   object FileCreationTool extends SelectedTool {
     val glyph = glyph_plus
+    val checkMode = false
   }
 
   object PluginTool extends SelectedTool {
     val glyph = OMTags.glyph_plug
+    val checkMode = false
   }
 
   object CopyTool extends SelectedTool {
     val glyph = OMTags.glyph_copy
+    val checkMode = true
   }
 
   object PasteTool extends SelectedTool {
     val glyph = OMTags.glyph_copy
+    val checkMode = false
   }
 
 }
@@ -81,6 +88,8 @@ class FileToolBar(redraw: () ⇒ Unit, refreshAndRedraw: () ⇒ Unit) {
     _.toString
   }.getOrElse("")
 
+  implicit def toolToSetSelection(t: SelectedTool): () ⇒ Unit = () ⇒ manager.setSelection(t)
+
   def hasFilter = fileFilter() != FileFilter.defaultFilter
 
   def resetFilter = {
@@ -94,10 +103,11 @@ class FileToolBar(redraw: () ⇒ Unit, refreshAndRedraw: () ⇒ Unit) {
     "glyphicon " + sTool.glyph + " glyphmenu " + selectedTool().filter(_ == sTool).map { _ ⇒ "selectedTool" }.getOrElse("")
   }
 
-  def buildSpan(tool: SelectedTool, action: () ⇒ Unit = () ⇒ {}) = OMTags.glyphSpan(rxClass(tool)) { () ⇒
+  def buildSpan(tool: SelectedTool) = OMTags.glyphSpan(rxClass(tool)) { () ⇒
     if (selectedTool() == Some(tool)) unselectTool
     else selectedTool() = Some(tool)
-    action()
+    val a: () ⇒ Unit = tool
+    a()
   }
 
   def fInputMultiple(todo: HTMLInputElement ⇒ Unit) = {
@@ -268,19 +278,14 @@ class FileToolBar(redraw: () ⇒ Unit, refreshAndRedraw: () ⇒ Unit) {
     tags.div(
       glyphSpan(glyph_refresh + " glyphmenu", refreshAndRedraw),
       upButton,
-      buildSpan(PluginTool, () ⇒ setSelection(PluginTool)),
-      buildSpan(TrashTool, () ⇒ setSelection(TrashTool)),
-      buildSpan(CopyTool, () ⇒ setSelection(CopyTool)),
+      buildSpan(PluginTool),
+      buildSpan(TrashTool),
+      buildSpan(CopyTool),
       buildSpan(FileCreationTool),
       buildSpan(FilterTool)
     ),
     fileToolDiv
   )
-
-  private def setSelection(selectedTool: SelectedTool) = {
-    manager.setSelection(selectedTool)
-    //onrefreshed()
-  }
 
   //inTreanodepanel
   /*private def filter( in: TreeNodeData, fileFilter: FileFilter) = {

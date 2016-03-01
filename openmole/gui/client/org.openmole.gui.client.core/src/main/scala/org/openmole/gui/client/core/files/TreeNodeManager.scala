@@ -126,4 +126,6 @@ class TreeNodeManager {
 
   def isProjectsEmpty = sons().getOrElse(root, Seq()).isEmpty
 
+  def checkMode = selectionMode().map { _.checkMode }.getOrElse(false)
+
 }
