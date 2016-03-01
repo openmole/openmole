@@ -24,8 +24,7 @@ trait BuildSystemDefaults extends Build with OsgiBundler with Assembly {
 
   lazy val commonsSettings =
     Seq(scalacOptions ++= Seq("-feature", "-language:reflectiveCalls", "-language:implicitConversions",
-      "-language:existentials", "-language:postfixOps", "-Yinline-warnings")
-    ) ++ (if (credential.exists()) Seq(credentials += Credentials(credential)) else Seq.empty) ++ scalariformDefaults
+      "-language:existentials", "-language:postfixOps", "-Yinline-warnings")) ++ (if (credential.exists()) Seq(credentials += Credentials(credential)) else Seq.empty) ++ scalariformDefaults
 
   protected lazy val scalariformDefaults =
     Seq(
@@ -35,8 +34,7 @@ trait BuildSystemDefaults extends Build with OsgiBundler with Assembly {
           .setPreference(AlignParameters, true)
           .setPreference(AlignSingleLineCaseStatements, true)
           .setPreference(CompactControlReadability, true)
-          .setPreference(PreserveDanglingCloseParenthesis, true)
-      )
+          .setPreference(PreserveDanglingCloseParenthesis, true))
     ) ++ scalariformSettings
 
 }
