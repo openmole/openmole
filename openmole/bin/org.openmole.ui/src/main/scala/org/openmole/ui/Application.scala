@@ -81,6 +81,7 @@ class Application extends IApplication {
       loggerLevel: Option[String] = None,
       unoptimizedJS: Boolean = false,
       remote: Boolean = false,
+      browse: Boolean = true,
       args: List[String] = Nil)
 
     def takeArg(args: List[String]) =
@@ -126,6 +127,7 @@ class Application extends IApplication {
         case "--unoptimizedJS" :: tail         ⇒ parse(tail, c.copy(unoptimizedJS = true))
         case "--webui-authentication" :: tail  ⇒ parse(tail, c.copy(remote = true))
         case "--remote" :: tail                ⇒ parse(tail, c.copy(remote = true))
+        case "--headless" :: tail              ⇒ parse(tail, c.copy(browse = false))
         case "--" :: tail                      ⇒ parse(Nil, c.copy(args = tail))
         case s :: tail                         ⇒ parse(tail, c.copy(ignored = s :: c.ignored))
         case Nil                               ⇒ c
@@ -185,7 +187,7 @@ class Application extends IApplication {
           console.run(variables, config.consoleWorkDirectory)
         case GUIMode ⇒
           def browse(url: String) =
-            if (Desktop.isDesktopSupported) Desktop.getDesktop.browse(new URI(url))
+            if (config.browse && Desktop.isDesktopSupported) Desktop.getDesktop.browse(new URI(url))
           GUIServer.lockFile.withFileOutputStream { fos ⇒
             val launch = (config.remote || fos.getChannel.tryLock != null)
             if (launch) {
