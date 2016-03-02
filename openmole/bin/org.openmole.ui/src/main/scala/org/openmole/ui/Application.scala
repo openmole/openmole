@@ -127,7 +127,7 @@ class Application extends IApplication {
         case "--unoptimizedJS" :: tail         ⇒ parse(tail, c.copy(unoptimizedJS = true))
         case "--webui-authentication" :: tail  ⇒ parse(tail, c.copy(remote = true))
         case "--remote" :: tail                ⇒ parse(tail, c.copy(remote = true))
-        case "--headless" :: tail              ⇒ parse(tail, c.copy(browse = false))
+        case "--no-browser" :: tail            ⇒ parse(tail, c.copy(browse = false))
         case "--" :: tail                      ⇒ parse(Nil, c.copy(args = tail))
         case s :: tail                         ⇒ parse(tail, c.copy(ignored = s :: c.ignored))
         case Nil                               ⇒ c
@@ -187,7 +187,7 @@ class Application extends IApplication {
           console.run(variables, config.consoleWorkDirectory)
         case GUIMode ⇒
           def browse(url: String) =
-            if (config.browse && Desktop.isDesktopSupported) Desktop.getDesktop.browse(new URI(url))
+            if (Desktop.isDesktopSupported) Desktop.getDesktop.browse(new URI(url))
           GUIServer.lockFile.withFileOutputStream { fos ⇒
             val launch = (config.remote || fos.getChannel.tryLock != null)
             if (launch) {
@@ -198,7 +198,7 @@ class Application extends IApplication {
               if (config.remote) GUIServer.initPassword
               val server = new GUIServer(port, BootstrapJS.webapp, config.remote)
               server.start()
-              browse(url)
+              if (config.browse && !config.remote) browse(url)
               ScalaREPL.warmup
               logger.info(s"Server listening on port $port.")
               server.join()
