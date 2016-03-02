@@ -144,7 +144,7 @@ object OSGi extends Defaults {
   lazy val scalaJQueryVersion = "0.8.0"
   lazy val scalaUpickleVersion = "0.2.6"
   lazy val scalaAutowireVersion = "0.2.5"
-  lazy val scalajsVersion = "0.6.5"
+  lazy val scalajsVersion = "0.6.7"
   lazy val jsSuffix = "_sjs0.6"
 
   lazy val scalajsDom = OsgiProject("scalajs-dom", exports = Seq("org.scalajs.dom.*")) settings(

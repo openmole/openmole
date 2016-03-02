@@ -17,7 +17,8 @@ import com.typesafe.sbt.osgi.OsgiKeys._
  * Date: 6/5/13
  * Time: 3:42 PM
  */
-trait Assembly { self: BuildSystemDefaults ⇒
+trait Assembly {
+  self: BuildSystemDefaults ⇒
 
   lazy val tarProject: Seq[Setting[_]] = Seq(
     Tar.name := "assemble.tar.gz",
@@ -48,7 +49,9 @@ trait Assembly { self: BuildSystemDefaults ⇒
   private def rename(srcPath: File, depMap: Map[Regex, String ⇒ String]) =
     depMap.keys.find(
       _.findFirstIn(srcPath.getName).isDefined
-    ).map(k ⇒ depMap(k)(srcPath.getName)).getOrElse { srcPath.getName }
+    ).map(k ⇒ depMap(k)(srcPath.getName)).getOrElse {
+        srcPath.getName
+      }
 
   private def copyLibraryDependencies(
     cp: Seq[Attributed[File]],
@@ -104,8 +107,8 @@ trait Assembly { self: BuildSystemDefaults ⇒
     }
     def content =
       s"""
-        |$header
-        |osgi.bundles=${plugins.listFiles().filter(!_.getName.startsWith("org.eclipse.osgi")).map(line).mkString(",")}
+         |$header
+         |osgi.bundles=${plugins.listFiles().filter(!_.getName.startsWith("org.eclipse.osgi")).map(line).mkString(",")}
       """.stripMargin
     config.getParentFile.mkdirs
     IO.write(config, content)
@@ -158,7 +161,9 @@ trait Assembly { self: BuildSystemDefaults ⇒
 
           os.putArchiveEntry(entry)
 
-          for (c ← is.iter) { os.write(c.toByte) }
+          for (c ← is.iter) {
+            os.write(c.toByte)
+          }
 
           os.closeArchiveEntry()
         }
@@ -207,12 +212,16 @@ object Assembly {
     val ret = Def.Initialize.join(s map { p ⇒ (key in p).?(i ⇒ i -> p) })(_ filter {
       case (None, _)    ⇒ false
       case (Some(v), _) ⇒ filter(v)
-    })(_ map { _._2 })
+    })(_ map {
+      _._2
+    })
 
     lazy val ret2 = Def.bind(ret) { r ⇒
       val x = r.map(expandToDependencies)
       val y = Def.Initialize.join(x)
-      y { _.flatten.toSet.toSeq } //make sure all references are unique
+      y {
+        _.flatten.toSet.toSeq
+      } //make sure all references are unique
     }
 
     if (intransitive) ret else ret2
@@ -220,7 +229,9 @@ object Assembly {
 
   //recursively explores the dependency tree of pr and adds all dependencies to the list of projects to be copied
   def expandToDependencies(pr: ProjectReference): Def.Initialize[Seq[ProjectReference]] = {
-    val r = (thisProject in pr) { _.dependencies.map(_.project) }
+    val r = (thisProject in pr) {
+      _.dependencies.map(_.project)
+    }
     val r3 = Def.bind(Def.bind(r) { ret ⇒ Def.Initialize.join(ret map expandToDependencies) }) { ret ⇒ r(first ⇒ pr +: ret.flatten) }
     r3
   }
@@ -231,6 +242,7 @@ object Assembly {
 
   class RichProjectSeq(s: Def.Initialize[Seq[ProjectReference]]) {
     def keyFilter[T](key: SettingKey[T], filter: (T) ⇒ Boolean, intransitive: Boolean = false) = projFilter(s, key, filter, intransitive)
+
     def sendTo(to: Def.Initialize[File]) = sendBundles(s zip to) //TODO: This function is specific to OSGI bundled projects. Make it less specific?
   }
 
@@ -247,6 +259,14 @@ object Assembly {
       val seqOTasks: Def.Initialize[Seq[Task[Seq[(File, File)]]]] = Def.Initialize.join(projs.map(p ⇒ (bundle in p) map {
         f ⇒ Seq(f -> to)
       }))
-      seqOTasks { seq ⇒ seq.reduceLeft[Task[Seq[(File, File)]]] { case (a, b) ⇒ a flatMap { i ⇒ b map { _ ++ i } } } }
+      seqOTasks { seq ⇒
+        seq.reduceLeft[Task[Seq[(File, File)]]] {
+          case (a, b) ⇒ a flatMap { i ⇒
+            b map {
+              _ ++ i
+            }
+          }
+        }
+      }
   }
 }

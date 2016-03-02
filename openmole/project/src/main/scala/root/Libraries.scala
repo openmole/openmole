@@ -23,6 +23,16 @@ object Libraries extends Defaults {
 
   val bouncyCastleVersion = "1.50"
 
+  val jqueryVersion = "2.2.1"
+
+  val aceVersion = "01.08.2014"
+
+  val bootsrapVersion = "3.3.6"
+
+  val d3Version = "3.5.12"
+
+  val tooltipserVersion = "3.3.0"
+
   lazy val gridscale = "fr.iscpif.gridscale.bundle" %% "gridscale" % gridscaleVersion
 
   lazy val gridscaleSSH = "fr.iscpif.gridscale.bundle" %% "ssh" % gridscaleVersion
@@ -96,7 +106,7 @@ object Libraries extends Defaults {
 
   lazy val rx = "org.openmole" %% "rx" % rxVersion
 
-  lazy val scalajsVersion = "0.6.5"
+  lazy val scalajsVersion = "0.6.7"
   lazy val scalajsTools = "org.openmole" %% "scalajs-tools" % scalajsVersion
   lazy val scalajsLibrary = "org.openmole" %% "scalajs-library" % scalajsVersion
   lazy val scalajsDom = "org.openmole" %% "scalajs-dom" % scalaJSDomVersion
@@ -110,13 +120,15 @@ object Libraries extends Defaults {
 
   lazy val scaladget = "org.openmole" %% "scaladget" % "0.8.0-SNAPSHOT"
 
-  lazy val d3 = "org.webjars.bower" % "d3" % "3.5.5"
+  lazy val d3 = "org.webjars" % "d3js" % d3Version
 
-  lazy val bootstrap = "org.webjars.bower" % "bootstrap" % "3.3.4"
+  lazy val bootstrap = "org.webjars" % "bootstrap" % bootsrapVersion
 
-  lazy val jquery = "org.webjars.bower" % "jquery" % "2.1.3"
+  lazy val jquery = "org.webjars" % "jquery" % jqueryVersion
 
-  lazy val ace = "org.webjars" % "ace" % "01.08.2014"
+  lazy val ace = "org.webjars" % "ace" % aceVersion
+
+  lazy val tooltipster = "org.webjars" % "tooltipster" % tooltipserVersion
 
   lazy val opencsv = "org.openmole" %% "au-com-bytecode-opencsv" % "2.3"
 

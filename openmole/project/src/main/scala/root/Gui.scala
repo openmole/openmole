@@ -1,5 +1,7 @@
 package root
 
+import org.scalajs.sbtplugin.ScalaJSPlugin.AutoImport._
+import sbt.Keys._
 import sbt._
 import org.openmole.buildsystem.OMKeys._
 
@@ -12,6 +14,7 @@ object Gui extends GuiDefaults(gui.Client, gui.Ext, gui.Misc, gui.Server, gui.Sh
 
 abstract class GuiDefaults(subBuilds: Defaults*) extends Defaults(subBuilds: _*) {
   def dir = file("gui")
-  override def osgiSettings = super.osgiSettings ++ Seq(bundleType := Set("gui"))
+  override def osgiSettings = super.osgiSettings ++ Seq(
+    bundleType := Set("gui")
+  )
 }
-

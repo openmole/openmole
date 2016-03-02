@@ -134,8 +134,7 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
         tags.script(tags.`type` := "text/javascript", tags.src := "js/theme-github.js"),
         tags.script(tags.`type` := "text/javascript", tags.src := "js/bootstrap.min.js"),
         tags.script(tags.`type` := "text/javascript", tags.src := "js/tooltipster.min.js"),
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/plugins.js"),
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/pluginMapping.js")
+        tags.script(tags.`type` := "text/javascript", tags.src := "js/plugins.js")
       ),
       tags.body(
         tags.onload := "fillMap();ScriptClient().run();")

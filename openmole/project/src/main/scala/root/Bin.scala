@@ -1,19 +1,17 @@
 package root
 
-import root.runtime.REST
+import org.scalajs.sbtplugin.ScalaJSPlugin
+import org.scalajs.sbtplugin.ScalaJSPlugin.AutoImport._
 import sbt._
 import Keys._
 
 import org.openmole.buildsystem.OMKeys._
 import org.openmole.buildsystem._, Assembly._
 import root.Libraries._
-import com.typesafe.sbt.osgi.{ SbtOsgi, OsgiKeys }
+import com.typesafe.sbt.osgi.OsgiKeys
 import sbt.inc.Analysis
 import sbtunidoc.Plugin._
 import UnidocKeys._
-
-import scala.util.matching.Regex
-import sbtbuildinfo.Plugin._
 
 object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties, root.Doc) {
   val dir = file("bin")
@@ -80,14 +78,13 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
     Project("openmole", dir / "openmole", settings = tarProject ++ assemblySettings ++ osgiApplicationSettings) settings (commonsSettings: _*) settings (
       setExecutable ++= Seq("openmole", "openmole.bat"),
       resourcesAssemble <+= (resourceDirectory in Compile, assemblyPath) map { case (r, p) ⇒ r → p },
-      /*resourcesAssemble <++= Seq(openmoleUI.project, Runtime.console.project, REST.server.project) sendTo {
-        assemblyPath / "plugins"
-      },*/
+      buildJS <<= (fullOptJS in openmoleGUI in Compile) map { _.data },
+      resourcesAssemble <+= (buildJS, assemblyPath) map { case (js, p) ⇒ js → (p / "webapp") },
+      resourcesAssemble <+= (buildJS, assemblyPath) map { case (js, p) ⇒ new File(js.getParent, js.getName.replace("opt.js", "jsdeps.min.js")) → (p / "webapp") },
       resourcesAssemble <+= (assemble in openmoleCore, assemblyPath) map { case (r, p) ⇒ r → (p / "plugins") },
       resourcesAssemble <+= (assemble in openmoleGUI, assemblyPath) map { case (r, p) ⇒ r → (p / "plugins") },
       resourcesAssemble <+= (assemble in dbServer, assemblyPath) map { case (r, p) ⇒ r → (p / "dbserver") },
       resourcesAssemble <+= (assemble in consolePlugins, assemblyPath) map { case (r, p) ⇒ r → (p / "openmole-plugins") },
-      //resourcesAssemble <+= (assemble in guiPlugins, assemblyPath) map { case (r, p) ⇒ r → (p / "openmole-plugins-gui") },
       resourcesAssemble <+= (Tar.tar in openmoleRuntime, assemblyPath) map { case (r, p) ⇒ r → (p / "runtime") },
       downloads := Seq(java368URL → "runtime/jvm-386.tar.gz", javax64URL → "runtime/jvm-x64.tar.gz"),
       libraryDependencies += Libraries.scalajHttp,
@@ -147,10 +144,6 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
     rx,
     scalatra intransitive (),
     scalajHttp,
-    d3,
-    bootstrap,
-    jquery,
-    ace,
     txtmark,
     scaladget,
     clapper
@@ -171,8 +164,13 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
     resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "doc") sendTo assemblyPath,
     libraryDependencies ++= guiCoreDependencies,
     dependencyFilter := filter,
-    dependencyName := rename
-  )
+    dependencyName := rename,
+    jsDependencies += ace / s"$aceVersion/src-min/ace.js",
+    jsDependencies += bootstrap / s"$bootsrapVersion/js/bootstrap.min.js",
+    jsDependencies += d3 / s"$d3Version/d3.min.js",
+    jsDependencies += tooltipster / s"$tooltipserVersion/js/jquery.tooltipster.min.js",
+    jsDependencies += jquery / s"$jqueryVersion/jquery.min.js"
+  ) enablePlugins (ScalaJSPlugin)
 
   lazy val consolePlugins = Project("consoleplugins", dir / "target" / "consoleplugins", settings = assemblySettings) settings (commonsSettings: _*) settings (
     resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "plugin", true) sendTo assemblyPath,
