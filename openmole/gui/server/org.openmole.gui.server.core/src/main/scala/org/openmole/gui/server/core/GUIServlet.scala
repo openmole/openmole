@@ -127,17 +127,12 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
       tags.head(
         tags.meta(tags.httpEquiv := "content-type", tags.content := "text/html; charset = ISO-8859-1"),
         cssFiles.map { f ⇒ tags.link(tags.rel := "stylesheet", tags.`type` := "text/css", href := "css/" + f) },
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/jquery.min.js"),
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/ace.js"),
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/mode-sh.js"),
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/mode-nlogo.js"),
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/theme-github.js"),
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/bootstrap.min.js"),
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/tooltipster.min.js"),
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/plugins.js")
+        tags.script(tags.`type` := "text/javascript", tags.src := "js/openmolegui-opt.js"),
+        tags.script(tags.`type` := "text/javascript", tags.src := "js/openmolegui-jsdeps.min.js")
       ),
       tags.body(
-        tags.onload := "fillMap();ScriptClient().run();")
+        tags.onload := "fillMap();ScriptClient().run();"
+      )
     )
   }
 

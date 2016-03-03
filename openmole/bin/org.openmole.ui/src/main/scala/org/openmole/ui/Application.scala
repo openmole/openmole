@@ -194,9 +194,8 @@ class Application extends IApplication {
               if (config.remote) GUIServer.initPassword
               //The webapp location will then be somewhere in target
               val webui = Workspace.file("webui")
-              val webapp = new File(webui, "webapp")
               webui.mkdirs()
-              val server = new GUIServer(port, webapp, config.remote)
+              val server = new GUIServer(port, config.remote)
               server.start()
               browse(url)
               ScalaREPL.warmup

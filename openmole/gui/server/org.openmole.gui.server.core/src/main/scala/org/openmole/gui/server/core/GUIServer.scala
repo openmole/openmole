@@ -60,7 +60,7 @@ object GUIServer {
 
 import GUIServer._
 
-class GUIServer(port: Int, webapp: File, authentication: Boolean) {
+class GUIServer(port: Int, authentication: Boolean) {
 
   val server = new Server()
   var exitCode = Console.ExitCodes.ok
@@ -89,7 +89,7 @@ class GUIServer(port: Int, webapp: File, authentication: Boolean) {
     )
   context.setAttribute(GUIServer.servletArguments, GUIServer.ServletArguments(authenticationMethod, applicationControl))
   context.setContextPath("/")
-  context.setResourceBase(webapp.getAbsolutePath)
+  context.setResourceBase("webapp")
   context.setClassLoader(classOf[GUIServer].getClassLoader)
   context.setInitParameter(ScalatraListener.LifeCycleKey, classOf[ScalatraBootstrap].getCanonicalName)
   context.addEventListener(new ScalatraListener)
