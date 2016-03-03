@@ -1,5 +1,6 @@
 package root
 
+import root.runtime.REST
 import org.scalajs.sbtplugin.ScalaJSPlugin
 import org.scalajs.sbtplugin.ScalaJSPlugin.AutoImport._
 import sbt._
@@ -78,11 +79,11 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
     Project("openmole", dir / "openmole", settings = tarProject ++ assemblySettings ++ osgiApplicationSettings) settings (commonsSettings: _*) settings (
       setExecutable ++= Seq("openmole", "openmole.bat"),
       resourcesAssemble <+= (resourceDirectory in Compile, assemblyPath) map { case (r, p) ⇒ r → p },
+      resourcesAssemble <++= Seq(openmoleUI.project, Runtime.console.project, REST.server.project) sendTo { assemblyPath / "plugins" },
       buildJS <<= (fullOptJS in openmoleGUI in Compile) map { _.data },
       resourcesAssemble <+= (buildJS, assemblyPath) map { case (js, p) ⇒ js → (p / "webapp") },
       resourcesAssemble <+= (buildJS, assemblyPath) map { case (js, p) ⇒ new File(js.getParent, js.getName.replace("opt.js", "jsdeps.min.js")) → (p / "webapp") },
       resourcesAssemble <+= (assemble in openmoleCore, assemblyPath) map { case (r, p) ⇒ r → (p / "plugins") },
-      resourcesAssemble <+= (assemble in openmoleGUI, assemblyPath) map { case (r, p) ⇒ r → (p / "plugins") },
       resourcesAssemble <+= (assemble in dbServer, assemblyPath) map { case (r, p) ⇒ r → (p / "dbserver") },
       resourcesAssemble <+= (assemble in consolePlugins, assemblyPath) map { case (r, p) ⇒ r → (p / "openmole-plugins") },
       resourcesAssemble <+= (Tar.tar in openmoleRuntime, assemblyPath) map { case (r, p) ⇒ r → (p / "runtime") },
