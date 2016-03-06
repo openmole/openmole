@@ -67,7 +67,8 @@ object ReplicaCatalog extends Logger {
       driver = new org.h2.Driver,
       url = s"jdbc:h2:tcp://localhost:${info.port}/${DBServerInfo.dbDirectory}/${DBServerInfo.urlDBPath}",
       user = info.user,
-      password = info.password)
+      password = info.password
+    )
 
     Await.result(db.run { sqlu"""SET DEFAULT_LOCK_TIMEOUT ${Workspace.preferenceAsDuration(LockTimeout).toMillis}""" }, Duration.Inf)
     db
@@ -89,10 +90,11 @@ object ReplicaCatalog extends Logger {
   }
 
   def uploadAndGet(
-    upload: ⇒ String,
+    upload:  ⇒ String,
     srcPath: File,
-    hash: String,
-    storage: StorageService)(implicit token: AccessToken): Replica = {
+    hash:    String,
+    storage: StorageService
+  )(implicit token: AccessToken): Replica = {
 
     val cacheKey = (srcPath.getCanonicalPath, hash, storage.id)
 
@@ -154,7 +156,8 @@ object ReplicaCatalog extends Logger {
                         storage = storage.id,
                         path = newFile,
                         hash = hash,
-                        lastCheckExists = System.currentTimeMillis)
+                        lastCheckExists = System.currentTimeMillis
+                      )
                       replicas += newReplica
                       (newReplica, Option.empty[String])
                   }.transactionally

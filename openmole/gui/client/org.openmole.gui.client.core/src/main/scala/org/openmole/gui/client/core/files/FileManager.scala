@@ -31,11 +31,13 @@ object FileManager {
     nameList
   }
 
-  def upload(inputElement: HTMLInputElement,
-             destinationPath: SafePath,
-             fileTransferState: ProcessState ⇒ Unit,
-             uploadType: UploadType,
-             onloaded: () ⇒ Unit = () ⇒ {}) = {
+  def upload(
+    inputElement:      HTMLInputElement,
+    destinationPath:   SafePath,
+    fileTransferState: ProcessState ⇒ Unit,
+    uploadType:        UploadType,
+    onloaded:          () ⇒ Unit           = () ⇒ {}
+  ) = {
     val fileList = inputElement.files
     val formData = new FormData
 
@@ -66,9 +68,11 @@ object FileManager {
     xhr.send(formData)
   }
 
-  def download(treeNode: TreeNode,
-               fileTransferState: ProcessState ⇒ Unit,
-               onLoadEnded: String ⇒ Unit) = {
+  def download(
+    treeNode:          TreeNode,
+    fileTransferState: ProcessState ⇒ Unit,
+    onLoadEnded:       String ⇒ Unit
+  ) = {
 
     val xhr = new XMLHttpRequest
 

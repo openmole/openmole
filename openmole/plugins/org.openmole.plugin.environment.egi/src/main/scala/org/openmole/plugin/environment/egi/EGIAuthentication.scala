@@ -70,7 +70,7 @@ object EGIAuthentication extends Logger {
               val dest = new File(dir, destForName.getName)
 
               if (dest.exists) dest.delete
-              if (!tarEntry.getLinkName.isEmpty) Some(dest -> tarEntry.getLinkName)
+              if (!tarEntry.getLinkName.isEmpty) Some(dest → tarEntry.getLinkName)
               else {
                 tis.copy(dest)
                 None
@@ -97,7 +97,8 @@ object EGIAuthentication extends Logger {
       voCards ⇒
         HTTPStorage.withConnection(
           new URI(Workspace.preference(EGIEnvironment.VOInformationSite)),
-          Workspace.preferenceAsDuration(EGIEnvironment.VOCardDownloadTimeOut)) { http ⇒
+          Workspace.preferenceAsDuration(EGIEnvironment.VOCardDownloadTimeOut)
+        ) { http ⇒
             val is: InputStream = http.getInputStream
             try is.copy(voCards)
             finally is.close
@@ -142,8 +143,9 @@ object EGIAuthentication extends Logger {
 
   def initialise(a: EGIAuthentication)(
     serverURLs: Seq[String],
-    voName: String,
-    fqan: Option[String])(implicit decrypt: Decrypt): () ⇒ GlobusAuthentication.Proxy =
+    voName:     String,
+    fqan:       Option[String]
+  )(implicit decrypt: Decrypt): () ⇒ GlobusAuthentication.Proxy =
     a match {
       case a: P12Certificate ⇒
         VOMSAuthentication.setCARepository(EGIAuthentication.CACertificatesDir)
@@ -154,7 +156,8 @@ object EGIAuthentication extends Logger {
             serverURLs,
             voName,
             EGIEnvironment.proxyRenewalRatio,
-            fqan)
+            fqan
+          )
 
         () ⇒ implicitly[GlobusAuthenticationProvider[P12VOMSAuthentication]].apply(p12)
     }

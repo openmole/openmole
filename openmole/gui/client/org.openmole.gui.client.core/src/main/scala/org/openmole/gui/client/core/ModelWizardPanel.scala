@@ -224,7 +224,8 @@ class ModelWizardPanel extends ModalPanel {
           }
         ), {
           fileToUploadPath().map { _ ⇒ bs.span("right grey")(codeSelector.selector) }.getOrElse(tags.div())
-        }), {
+        }
+      ), {
         bs.span("grey")(
           if (modelSelector.isContentsEmpty) tags.div() else modelSelector.selector,
           if (classSelector.isContentsEmpty) tags.div() else classSelector.selectorWithFilter,
@@ -234,11 +235,13 @@ class ModelWizardPanel extends ModalPanel {
             case _                       ⇒ tags.div()
           }
         )
-      }).render
+      }
+    ).render
 
   def moveFilesAndBuildForm(fInput: HTMLInputElement, fileName: String, uploadPath: SafePath) =
     CoreUtils.withTmpFile { tempFile ⇒
-      FileManager.upload(fInput,
+      FileManager.upload(
+        fInput,
         tempFile,
         (p: ProcessState) ⇒ {
           transferring() = p
@@ -269,18 +272,22 @@ class ModelWizardPanel extends ModalPanel {
             }
             else {
               val optionsDiv = OptionsDiv(existing)
-              AlertPanel.div(tags.div(
+              AlertPanel.div(
+                tags.div(
                 "Some files already exist, overwrite ?",
-                optionsDiv.div),
+                optionsDiv.div
+              ),
                 () ⇒ {
                   OMPost[Api].copyFromTmp(tempFile, optionsDiv.result /*, fp ++ fileName*/ ).call().foreach { b ⇒
                     buildForm(uploadPath, fileType)
                     OMPost[Api].deleteFile(tempFile, ServerFileSytemContext.absolute).call()
                   }
-                }, () ⇒ {}, buttonGroupClass = "right")
+                }, () ⇒ {}, buttonGroupClass = "right"
+              )
             }
           }
-        })
+        }
+      )
     }
 
   def buildForm(uploadPath: SafePath, fileType: FileType) = {
@@ -377,7 +384,8 @@ class ModelWizardPanel extends ModalPanel {
 
   val step1 = tags.div(
     tags.h4("Step 1: Code import"),
-    bs.div("grey rightBlock")("Pick your code up among jar archive, netlogo scripts, or any code packaged on linux with Care ( like Python, C, C++ " +
+    bs.div("grey rightBlock")(
+      "Pick your code up among jar archive, netlogo scripts, or any code packaged on linux with Care ( like Python, C, C++ " +
       "R, etc). In the case of a Care archive, the packaging has to be done with the",
       tags.b(" -o yourmodel.tar.gz.bin."),
       " option."
@@ -388,8 +396,7 @@ class ModelWizardPanel extends ModalPanel {
     bs.div("grey")("The systems detects automatically the launching command and propose you the creation of some OpenMOLE Variables so that" +
       " your model will be able to be feeded with variable values coming from the workflow you will build afterwards. In the case of Java, Scala, Netlogo" +
       "(ie codes working on the JVM) the OpenMOLE variables can be set directly in the command line. Otherwise, they have to be set inside ${} statements." +
-      " By default he systems detects automatically your Variable changes and update the launching command. However, this option can be desactivated."
-    )
+      " By default he systems detects automatically your Variable changes and update the launching command. However, this option can be desactivated.")
   )
 
   val autoModeTag = bs.div("onecolumn spacer20")(
@@ -404,7 +411,8 @@ class ModelWizardPanel extends ModalPanel {
   val buildModelTaskButton = {
     bs.button(
       "Build",
-      btn_primary)(onclick := {
+      btn_primary
+    )(onclick := {
         () ⇒
           save
           close
@@ -432,7 +440,8 @@ class ModelWizardPanel extends ModalPanel {
                   _.name
                 }, fileToUploadPath().map {
                   _.name
-                }, resources()).call().foreach {
+                }, resources()
+              ).call().foreach {
                   b ⇒
                     panels.treeNodePanel.fileDisplayer.tabs -- b
                     panels.treeNodePanel.displayNode(b)
@@ -528,8 +537,7 @@ class ModelWizardPanel extends ModalPanel {
     val nameInput: HTMLInputElement = bs.input(role.content.prototype.name)(oninput := { () ⇒
       saveWithoutTableUpdate
       updateLaunchingCommand
-    }
-    ).render
+    }).render
 
     val line = {
       tags.tr(
@@ -567,8 +575,7 @@ class ModelWizardPanel extends ModalPanel {
     val topButtons = bs.div("spacer20")(
       Rx {
         bs.badge("I/O", s"$nbInputs/$nbOutputs",
-          buttonStyle(0)
-        )(onclick := {
+          buttonStyle(0))(onclick := {
             () ⇒
               currentTab() = 0
               setBodyContent
@@ -606,23 +613,29 @@ class ModelWizardPanel extends ModalPanel {
               val head = thead(tags.tr(
                 for (h ← Seq("Name", "Type", "Default", "Mapped with", "", "")) yield {
                   tags.th(h)
-                }))
+                }
+              ))
 
               bs.div("spacer50")(
                 bs.div("twocolumns right10")(
-                  bs.form("paddingLeftRight50")(iinput,
+                  bs.form("paddingLeftRight50")(
+                    iinput,
                     onsubmit := {
                       () ⇒
                         addVariableElement(Input(VariableElement(-1, ProtoTypePair(iinput.value, ProtoTYPE.DOUBLE), CareTaskType())))
                         iinput.value = ""
                         false
-                    }),
+                    }
+                  ),
                   bs.table(striped)(
                     head,
                     tbody(
                       for (ip ← inputs(reactives)) yield {
                         ip.line
-                      }))),
+                      }
+                    )
+                  )
+                ),
                 tags.div(`class` := "twocolumns")(
                   bs.form("paddingLeftRight50")(oinput, onsubmit := {
                     () ⇒
@@ -661,7 +674,8 @@ class ModelWizardPanel extends ModalPanel {
 
   lazy val dialog = {
     setBodyContent
-    bs.modalDialog(modalID,
+    bs.modalDialog(
+      modalID,
       headerDialog(
         tags.span(tags.b("Model import"))
       ),
@@ -672,8 +686,7 @@ class ModelWizardPanel extends ModalPanel {
         inputGroupButton(closeButton),
         inputGroupButton(scriptNameInput),
         inputGroupButton(buildModelTaskButton)
-      )
-      )
+      ))
     )
   }
 

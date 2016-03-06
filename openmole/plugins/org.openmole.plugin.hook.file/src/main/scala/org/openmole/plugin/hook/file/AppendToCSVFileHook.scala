@@ -37,10 +37,11 @@ object AppendToCSVFileHook {
 }
 
 abstract class AppendToCSVFileHook(
-    fileName: ExpandedString,
-    header: Option[ExpandedString],
-    singleRow: Boolean,
-    prototypes: Prototype[_]*) extends Hook {
+    fileName:   ExpandedString,
+    header:     Option[ExpandedString],
+    singleRow:  Boolean,
+    prototypes: Prototype[_]*
+) extends Hook {
 
   override def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider) = {
     val file = new File(fileName.from(context))

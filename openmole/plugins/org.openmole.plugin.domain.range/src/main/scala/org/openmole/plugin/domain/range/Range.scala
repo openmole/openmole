@@ -32,18 +32,21 @@ object Range {
 
   def apply[T](
     min: FromContext[T],
-    max: FromContext[T])(implicit integral: Integral[T]) = new Range[T](min, max)
+    max: FromContext[T]
+  )(implicit integral: Integral[T]) = new Range[T](min, max)
 
   def apply[T](
-    min: FromContext[T],
-    max: FromContext[T],
-    step: FromContext[T])(implicit integral: Integral[T]): StepRange[T] =
+    min:  FromContext[T],
+    max:  FromContext[T],
+    step: FromContext[T]
+  )(implicit integral: Integral[T]): StepRange[T] =
     StepRange[T](Range[T](min, max), step)
 
   def size[T](
-    min: FromContext[T],
-    max: FromContext[T],
-    size: FromContext[Int])(implicit integral: Integral[T]): SizeRange[T] =
+    min:  FromContext[T],
+    max:  FromContext[T],
+    size: FromContext[Int]
+  )(implicit integral: Integral[T]): SizeRange[T] =
     SizeRange[T](Range[T](min, max), size)
 
 }

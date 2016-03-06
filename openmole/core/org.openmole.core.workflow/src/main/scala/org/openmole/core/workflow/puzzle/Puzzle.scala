@@ -76,14 +76,16 @@ object Puzzle {
       p1.sources.toList ::: p2.sources.toList,
       p1.hooks.toList ::: p2.hooks.toList,
       p1.environments ++ p2.environments,
-      p1.grouping ++ p2.grouping)
+      p1.grouping ++ p2.grouping
+    )
 
   def merge(
-    first: Slot,
-    lasts: Iterable[Capsule],
-    puzzles: Iterable[Puzzle],
-    transitions: Iterable[ITransition] = Iterable.empty,
-    dataChannels: Iterable[DataChannel] = Iterable.empty) =
+    first:        Slot,
+    lasts:        Iterable[Capsule],
+    puzzles:      Iterable[Puzzle],
+    transitions:  Iterable[ITransition] = Iterable.empty,
+    dataChannels: Iterable[DataChannel] = Iterable.empty
+  ) =
     new Puzzle(
       first,
       lasts,
@@ -92,7 +94,8 @@ object Puzzle {
       puzzles.flatMap(_.sources),
       puzzles.flatMap(_.hooks),
       puzzles.flatMap { _.environments }.toMap,
-      puzzles.flatMap { _.grouping }.toMap)
+      puzzles.flatMap { _.grouping }.toMap
+    )
 
 }
 
@@ -103,11 +106,12 @@ object PuzzlePiece {
 }
 
 case class PuzzlePiece(
-    slot: Slot,
-    sources: Iterable[Source] = Iterable.empty,
-    hooks: Iterable[Hook] = Iterable.empty,
+    slot:        Slot,
+    sources:     Iterable[Source]    = Iterable.empty,
+    hooks:       Iterable[Hook]      = Iterable.empty,
     environment: Option[Environment] = None,
-    grouping: Option[Grouping] = None) {
+    grouping:    Option[Grouping]    = None
+) {
   def capsule = slot.capsule
 
   def buildPuzzle: Puzzle =
@@ -116,23 +120,24 @@ case class PuzzlePiece(
       Seq(capsule),
       Iterable.empty,
       Iterable.empty,
-      sources.map(capsule -> _),
-      hooks.map(capsule -> _),
-      Map() ++ environment.map(capsule -> _),
-      Map() ++ grouping.map(capsule -> _)
+      sources.map(capsule → _),
+      hooks.map(capsule → _),
+      Map() ++ environment.map(capsule → _),
+      Map() ++ grouping.map(capsule → _)
     )
 
 }
 
 case class Puzzle(
-    firstSlot: Slot,
-    lasts: Iterable[Capsule] = Iterable.empty,
-    transitions: Iterable[ITransition] = Iterable.empty,
-    dataChannels: Iterable[DataChannel] = Iterable.empty,
-    sources: Iterable[(Capsule, Source)] = Iterable.empty,
-    hooks: Iterable[(Capsule, Hook)] = Iterable.empty,
-    environments: Map[Capsule, Environment] = Map.empty,
-    grouping: Map[Capsule, Grouping] = Map.empty) {
+    firstSlot:    Slot,
+    lasts:        Iterable[Capsule]           = Iterable.empty,
+    transitions:  Iterable[ITransition]       = Iterable.empty,
+    dataChannels: Iterable[DataChannel]       = Iterable.empty,
+    sources:      Iterable[(Capsule, Source)] = Iterable.empty,
+    hooks:        Iterable[(Capsule, Hook)]   = Iterable.empty,
+    environments: Map[Capsule, Environment]   = Map.empty,
+    grouping:     Map[Capsule, Grouping]      = Map.empty
+) {
 
   def this(p: Puzzle) =
     this(
@@ -143,7 +148,8 @@ case class Puzzle(
       p.sources,
       p.hooks,
       p.environments,
-      p.grouping)
+      p.grouping
+    )
 
   def toMole = new Mole(firstSlot.capsule, transitions, dataChannels)
 
@@ -151,10 +157,11 @@ case class Puzzle(
     MoleExecution(toMole, sources, hooks, environments, grouping)
 
   def toExecution(
-    implicits: Context = Context.empty,
-    seed: Long = Workspace.newSeed,
-    executionContext: MoleExecutionContext = MoleExecutionContext.default,
-    defaultEnvironment: LocalEnvironment = LocalEnvironment()): MoleExecution =
+    implicits:          Context              = Context.empty,
+    seed:               Long                 = Workspace.newSeed,
+    executionContext:   MoleExecutionContext = MoleExecutionContext.default,
+    defaultEnvironment: LocalEnvironment     = LocalEnvironment()
+  ): MoleExecution =
     MoleExecution(
       toMole,
       sources,
@@ -163,7 +170,8 @@ case class Puzzle(
       grouping,
       implicits,
       seed,
-      defaultEnvironment)(executionContext)
+      defaultEnvironment
+    )(executionContext)
 
   def slots: Set[Slot] = (firstSlot :: transitions.map(_.end).toList).toSet
 

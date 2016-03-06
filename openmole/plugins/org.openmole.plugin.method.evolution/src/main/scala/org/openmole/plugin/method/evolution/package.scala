@@ -72,11 +72,13 @@ package object evolution {
       )
 
     val scalingGenomeTask = ScalingGenomeTask(algorithm) set (
-      name := "scalingGenome")
+      name := "scalingGenome"
+    )
 
     val toOffspring =
       ToOffspringTask(algorithm) set (
-        name := "toOffspring")
+        name := "toOffspring"
+      )
 
     val elitismTask = ElitismTask(algorithm) set (name := "elitism")
 
@@ -174,7 +176,7 @@ package object evolution {
     val terminationTask = TerminationTask(algorithm, termination) set (name := "termination")
 
     val islandPopulationToPopulation =
-      AssignTask(islandPopulationPrototype -> t.populationPrototype) set (
+      AssignTask(islandPopulationPrototype → t.populationPrototype) set (
         name := "islandPopulationToPopulation"
       )
 
@@ -183,7 +185,7 @@ package object evolution {
     val fromIsland = FromIslandTask(algorithm)
 
     val populationToOffspring =
-      AssignTask(t.populationPrototype -> t.offspringPrototype) set (
+      AssignTask(t.populationPrototype → t.offspringPrototype) set (
         name := "populationToOffspring"
       )
 

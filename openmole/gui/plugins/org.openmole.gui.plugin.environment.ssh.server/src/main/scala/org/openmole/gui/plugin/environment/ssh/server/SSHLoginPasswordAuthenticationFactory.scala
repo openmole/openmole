@@ -2,9 +2,9 @@ package org.openmole.gui.plugin.environment.ssh.server
 
 import org.openmole.core.workspace.Workspace
 import org.openmole.gui.ext.data.LoginPasswordAuthenticationData
-import org.openmole.gui.ext.data.{AuthenticationData, AuthenticationFactory}
+import org.openmole.gui.ext.data.{ AuthenticationData, AuthenticationFactory }
 import org.openmole.gui.server.core.Utils._
-import org.openmole.plugin.environment.ssh.{SSHAuthentication, LoginPassword, PrivateKey}
+import org.openmole.plugin.environment.ssh.{ SSHAuthentication, LoginPassword, PrivateKey }
 
 /*
  * Copyright (C) 25/06/15 // mathieu.leclaire@openmole.org
@@ -33,24 +33,26 @@ class SSHLoginPasswordAuthenticationFactory extends AuthenticationFactory {
   }
 
   def allAuthenticationData: Seq[AuthenticationData] = SSHAuthentication().flatMap {
-      _ match {
-        case lp: LoginPassword => Some(LoginPasswordAuthenticationData(
-          lp.login,
-          Workspace.decrypt(lp.cypheredPassword),
-          lp.target))
-        case _ => None
-      }
+    _ match {
+      case lp: LoginPassword => Some(LoginPasswordAuthenticationData(
+        lp.login,
+        Workspace.decrypt(lp.cypheredPassword),
+        lp.target
+      ))
+      case _ => None
     }
-
+  }
 
   def coreObject(data: AuthenticationData): Option[LoginPassword] = data match {
     case lp: LoginPasswordAuthenticationData => Some(LoginPassword(
       lp.login,
       Workspace.encrypt(lp.cypheredPassword),
-      lp.target))
+      lp.target
+    ))
     case _ => None
   }
 
-  def removeAuthentication(data: AuthenticationData) = coreObject(data).map{e=>
-    SSHAuthentication -= e}
+  def removeAuthentication(data: AuthenticationData) = coreObject(data).map { e =>
+    SSHAuthentication -= e
+  }
 }

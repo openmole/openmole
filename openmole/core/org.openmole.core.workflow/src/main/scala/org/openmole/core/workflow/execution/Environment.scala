@@ -18,8 +18,8 @@
 package org.openmole.core.workflow.execution
 
 import java.util.logging.Level
-import org.openmole.core.event.{EventDispatcher, EventAccumulator, Event}
-import org.openmole.core.workflow.execution.local.{LocalExecutionJob, ExecutorPool}
+import org.openmole.core.event.{ EventDispatcher, EventAccumulator, Event }
+import org.openmole.core.workflow.execution.local.{ LocalExecutionJob, ExecutorPool }
 import org.openmole.core.workflow.job.Job
 import org.openmole.core.workflow.job.MoleJob
 import ExecutionState._
@@ -55,7 +55,8 @@ sealed trait Environment <: Name {
 
   private lazy val _errors =
     new OrderedSlidingList[ExceptionEvent](
-      Workspace.preferenceAsInt(maxExceptionsLog))(Ordering.by[ExceptionEvent, Int](_.level.intValue()))
+      Workspace.preferenceAsInt(maxExceptionsLog)
+    )(Ordering.by[ExceptionEvent, Int](_.level.intValue()))
 
   def error(e: ExceptionEvent) = _errors += e
   def errors: List[ExceptionEvent] = _errors.values
@@ -81,16 +82,18 @@ object LocalEnvironment {
   var defaultNumberOfThreads = Workspace.preferenceAsInt(DefaultNumberOfThreads)
 
   def apply(
-   nbThreads: Int = defaultNumberOfThreads,
-   deinterleave: Boolean = false,
-   name: Option[String] = None) = new LocalEnvironment(nbThreads, deinterleave, name)
+    nbThreads:    Int            = defaultNumberOfThreads,
+    deinterleave: Boolean        = false,
+    name:         Option[String] = None
+  ) = new LocalEnvironment(nbThreads, deinterleave, name)
 
 }
 
 class LocalEnvironment(
-  val nbThreads: Int,
-  val deinterleave: Boolean,
-  override val name: Option[String]) extends Environment {
+    val nbThreads:     Int,
+    val deinterleave:  Boolean,
+    override val name: Option[String]
+) extends Environment {
 
   @transient lazy val pool = new ExecutorPool(nbThreads, WeakReference(this))
 

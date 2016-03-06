@@ -19,7 +19,7 @@ package org.openmole.plugin.environment.ssh
 
 import java.net.URI
 
-import org.openmole.core.batch.control.{UsageControl, UnlimitedAccess, LimitedAccess}
+import org.openmole.core.batch.control.{ UsageControl, UnlimitedAccess, LimitedAccess }
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.core.batch.storage._
 import org.openmole.core.workspace.Workspace

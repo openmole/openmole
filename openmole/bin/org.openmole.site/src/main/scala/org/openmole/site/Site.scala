@@ -116,7 +116,7 @@ class Site extends IApplication {
       lazy val pagesFrag = Pages.all.map { p ⇒ PageFrag(p, Pages.decorate(p)) }
       lazy val documentationFrags = pagesFrag.collect { case PageFrag(p: DocumentationPage, f) ⇒ f }.toSet
 
-      def content = pagesFrag.map { case PageFrag(p, f) ⇒ p.file -> (site.headFrags(p), f) }.toMap
+      def content = pagesFrag.map { case PageFrag(p, f) ⇒ p.file → (site.headFrags(p), f) }.toMap
     }
 
     lazy val bibPapers = Publication.papers ++ Communication.papers

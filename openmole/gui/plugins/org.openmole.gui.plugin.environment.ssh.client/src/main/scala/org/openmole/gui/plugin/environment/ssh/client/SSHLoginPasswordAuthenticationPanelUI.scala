@@ -8,8 +8,8 @@ import org.openmole.gui.ext.dataui.PanelUI
 import org.openmole.gui.shared.Api
 import scala.scalajs.js.annotation.JSExport
 import scalatags.JsDom.all._
-import fr.iscpif.scaladget.api.{BootstrapTags => bs}
-import scalatags.JsDom.{tags ⇒ tags}
+import fr.iscpif.scaladget.api.{ BootstrapTags => bs }
+import scalatags.JsDom.{ tags ⇒ tags }
 import bs._
 
 /*
@@ -34,17 +34,19 @@ class SSHLoginPasswordAuthenticationPanelUI(data: LoginPasswordAuthenticationDat
 
   val login = bs.input(data.login, key("spacer5"))(
     placeholder := "Login",
-    width := "130px").render
+    width := "130px"
+  ).render
 
   val target = bs.input(data.target, key("spacer5"))(
     placeholder := "Host",
-    width := "130px").render
+    width := "130px"
+  ).render
 
   val password = bs.input(data.cypheredPassword, key("spacer5"))(
     placeholder := "Password",
     `type` := "password",
-    width := "130px").render
-
+    width := "130px"
+  ).render
 
   @JSExport
   val view = {

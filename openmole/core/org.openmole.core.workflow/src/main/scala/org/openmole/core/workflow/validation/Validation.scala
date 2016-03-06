@@ -35,17 +35,17 @@ object Validation {
       mole.capsules.flatMap(
         c ⇒
           c.task match {
-            case mt: MoleTask ⇒ Some(mt.mole -> Some(mt -> c))
+            case mt: MoleTask ⇒ Some(mt.mole → Some(mt → c))
             case _            ⇒ None
           }
       ).toList
 
   private def paramsToMap(params: Iterable[Default[_]]) =
     params.map {
-      p ⇒ p.prototype.name -> p.prototype
+      p ⇒ p.prototype.name → p.prototype
     }.toMap[String, Prototype[_]]
 
-  private def prototypesToMap(prototypes: Iterable[Prototype[_]]) = prototypes.map { i ⇒ i.name -> i }.toMap[String, Prototype[_]]
+  private def prototypesToMap(prototypes: Iterable[Prototype[_]]) = prototypes.map { i ⇒ i.name → i }.toMap[String, Prototype[_]]
 
   private def separateDefaults(p: DefaultSet) = {
     val (po, pno) = p.partition(_.`override`)
@@ -63,10 +63,10 @@ object Validation {
 
     (for {
       c ← capsules
-      sourcesOutputs = TreeMap(sources(c).flatMap((os: Source) ⇒ os.outputs.toSet).map(o ⇒ o.name -> o).toSeq: _*)
+      sourcesOutputs = TreeMap(sources(c).flatMap((os: Source) ⇒ os.outputs.toSet).map(o ⇒ o.name → o).toSeq: _*)
       s ← mole.slots(c)
       computedTypes = TypeUtil.validTypes(mole, sources, hooks)(s)
-      receivedInputs = TreeMap(computedTypes.map { p ⇒ p.name -> p }.toSeq: _*)
+      receivedInputs = TreeMap(computedTypes.map { p ⇒ p.name → p }.toSeq: _*)
       (defaultsOverride, defaultsNonOverride) = separateDefaults(c.task.defaults)
       input ← c.task.inputs
     } yield {
@@ -101,7 +101,7 @@ object Validation {
       (so: Source) ← sources.getOrElse(c, List.empty)
       (defaultsOverride, defaultsNonOverride) = separateDefaults(so.defaults)
       sl ← mole.slots(c)
-      receivedInputs = TreeMap(TypeUtil.validTypes(mole, sources, hooks)(sl).map { p ⇒ p.name -> p }.toSeq: _*)
+      receivedInputs = TreeMap(TypeUtil.validTypes(mole, sources, hooks)(sl).map { p ⇒ p.name → p }.toSeq: _*)
       i ← so.inputs
     } yield {
       def checkPrototypeMatch(p: Prototype[_]) =
@@ -137,7 +137,7 @@ object Validation {
     val toProcess = new Queue[(Capsule, Int, List[Capsule])]
 
     toProcess.enqueue((mole.root, 0, List.empty))
-    seen(mole.root) = List((List.empty -> 0))
+    seen(mole.root) = List((List.empty → 0))
 
     while (!toProcess.isEmpty) {
       val (capsule, level, path) = toProcess.dequeue
@@ -145,7 +145,7 @@ object Validation {
       Mole.nextCapsules(mole)(capsule, level).foreach {
         case (nCap, nLvl) ⇒
           if (!seen.contains(nCap)) toProcess.enqueue((nCap, nLvl, capsule :: path))
-          seen(nCap) = ((capsule :: path) -> nLvl) :: seen.getOrElse(nCap, List.empty)
+          seen(nCap) = ((capsule :: path) → nLvl) :: seen.getOrElse(nCap, List.empty)
       }
     }
 
@@ -162,7 +162,7 @@ object Validation {
     for {
       end ← mole.capsules
       slot ← mole.slots(end)
-      (_, transitions) ← mole.inputTransitions(slot).toList.map { t ⇒ t.start -> t }.groupBy { case (c, _) ⇒ c }
+      (_, transitions) ← mole.inputTransitions(slot).toList.map { t ⇒ t.start → t }.groupBy { case (c, _) ⇒ c }
       if (transitions.size > 1)
     } yield DuplicatedTransition(transitions.unzip._2)
 
@@ -203,7 +203,7 @@ object Validation {
 
   private def moleTaskInputMaps(moleTask: MoleTask) =
     (moleTask.mole.root.inputs(moleTask.mole, Sources.empty, Hooks.empty).toList ++
-      moleTask.inputs).map(i ⇒ i.name -> i).toMap[String, Prototype[_]]
+      moleTask.inputs).map(i ⇒ i.name → i).toMap[String, Prototype[_]]
 
   def moleTaskImplicitsErrors(moleTask: MoleTask, capsule: Capsule) = {
     val inputs = moleTaskInputMaps(moleTask)
@@ -245,7 +245,7 @@ object Validation {
 
   def dataChannelErrors(mole: Mole) = {
     val noTransitionProblems =
-      mole.dataChannels.flatMap { dc ⇒ List(dc -> dc.start, dc -> dc.end.capsule) }.flatMap {
+      mole.dataChannels.flatMap { dc ⇒ List(dc → dc.start, dc → dc.end.capsule) }.flatMap {
         case (dc, capsule) ⇒
           Try(mole.level(capsule)) match {
             case Success(_) ⇒ None

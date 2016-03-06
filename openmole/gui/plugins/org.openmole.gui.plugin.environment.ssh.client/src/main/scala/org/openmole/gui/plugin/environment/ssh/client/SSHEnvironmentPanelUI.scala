@@ -19,15 +19,15 @@ package org.openmole.gui.plugin.environment.ssh.client
 
 import org.openmole.gui.ext.dataui.PanelUI
 import scala.scalajs.js.annotation.JSExport
-import fr.iscpif.scaladget.api.{BootstrapTags => bs}
+import fr.iscpif.scaladget.api.{ BootstrapTags => bs }
 import rx._
 @JSExport("org.openmole.gui.plugin.environment.ssh.client.SSHEnvironmentPanelUI")
 class SSHEnvironmentPanelUI(dataUI: SSHEnvironmentDataUI) extends PanelUI {
 
-@JSExport
-val view = bs.div()
+  @JSExport
+  val view = bs.div()
 
-def save(onsave: ()=> Unit) = {
-}
+  def save(onsave: () => Unit) = {
+  }
 
 }

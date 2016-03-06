@@ -106,7 +106,7 @@ class GetResultActor(jobManager: JobManager) {
           val fileReplacement =
             serializedResults.files.map {
               replicated ⇒
-                replicated.originalPath -> replicated.download((p, f) ⇒ signalDownload(storage.download(p, f, TransferOptions(forceCopy = true, canMove = true)), p, storage, f))
+                replicated.originalPath → replicated.download((p, f) ⇒ signalDownload(storage.download(p, f, TransferOptions(forceCopy = true, canMove = true)), p, storage, f))
             }.toMap
 
           val res = SerialiserService.deserialiseReplaceFiles[ContextResults](serializedResults.contextResults, fileReplacement)

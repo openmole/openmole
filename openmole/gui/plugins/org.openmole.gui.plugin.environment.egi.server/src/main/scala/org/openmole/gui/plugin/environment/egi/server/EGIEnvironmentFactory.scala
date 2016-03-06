@@ -24,7 +24,7 @@ import org.openmole.gui.ext.data.CoreObjectFactory
 
 import scala.util.Try
 
-class EGIEnvironmentFactory(val data: EGIEnvironmentData) extends CoreObjectFactory{
+class EGIEnvironmentFactory(val data: EGIEnvironmentData) extends CoreObjectFactory {
   def coreObject(): Try[Any] = Try {
     EGIEnvironment("")
   }

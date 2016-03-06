@@ -69,7 +69,7 @@ trait Storage {
   protected def _downloadStream(src: String, options: TransferOptions): InputStream
 
   protected def _upload(src: File, dest: String, options: TransferOptions): Unit =
-    src.withInputStream(is => _uploadStream(is, dest, options))
+    src.withInputStream(is ⇒ _uploadStream(is, dest, options))
 
   protected def _download(src: String, dest: File, options: TransferOptions): Unit = {
     val is = _downloadStream(src, options)

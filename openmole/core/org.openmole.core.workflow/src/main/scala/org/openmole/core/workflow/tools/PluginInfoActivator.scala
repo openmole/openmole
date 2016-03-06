@@ -34,7 +34,7 @@ trait PluginInfoActivator extends BundleActivator {
   def info = PluginInfo(List(this.getClass.getPackage.getName), keyWordTraits.map(_.getCanonicalName))
 
   override def start(bundleContext: BundleContext): Unit =
-    PluginInfo.plugins += this.getClass -> info
+    PluginInfo.plugins += this.getClass → info
 
   override def stop(bundleContext: BundleContext): Unit =
     PluginInfo.plugins -= this.getClass

@@ -62,10 +62,11 @@ trait Seeder {
 }
 
 case class Replication[A[_]: Functor](
-    seed: Seeder = Seeder.empty,
-    max: Int = 100,
-    reevaluate: Double = 0.2,
-    aggregation: Option[A[String]] = None) {
+    seed:        Seeder            = Seeder.empty,
+    max:         Int               = 100,
+    reevaluate:  Double            = 0.2,
+    aggregation: Option[A[String]] = None
+) {
   val aggregationClosures = aggregation.map { _.map { s ⇒ TextClosure[Seq[Double], Double](s) } }
 }
 
@@ -142,9 +143,10 @@ object WorkflowIntegration {
     }
 
   case class DeterministicGA[AG](
-    ag: AG,
-    genome: Genome,
-    objectives: Objectives)(implicit val algorithm: mgo.openmole.Integration[AG, Vector[Double], Vector[Double]])
+    ag:         AG,
+    genome:     Genome,
+    objectives: Objectives
+  )(implicit val algorithm: mgo.openmole.Integration[AG, Vector[Double], Vector[Double]])
 
   object DeterministicGA {
     implicit def deterministicGAIntegration[AG] = new WorkflowIntegration[DeterministicGA[AG]] {
@@ -153,11 +155,14 @@ object WorkflowIntegration {
   }
 
   case class StochasticGA[AG](
-    ag: AG,
-    genome: Genome,
-    objectives: Objectives,
-    replication: Replication[Seq])(
-      implicit val algorithm: mgo.openmole.Integration[AG, Vector[Double], Vector[Double]] with mgo.openmole.Stochastic)
+    ag:          AG,
+    genome:      Genome,
+    objectives:  Objectives,
+    replication: Replication[Seq]
+  )(
+    implicit
+    val algorithm: mgo.openmole.Integration[AG, Vector[Double], Vector[Double]] with mgo.openmole.Stochastic
+  )
 
   object StochasticGA {
     implicit def stochasticGAIntegration[AG] = new WorkflowIntegration[StochasticGA[AG]] {
@@ -244,10 +249,11 @@ object GAIntegration {
     }
 
   def populationToVariables[I](
-    genome: Genome,
-    objectives: Objectives,
-    genomeValues: I ⇒ Vector[Double],
-    phenotypeValues: I ⇒ Vector[Double])(population: Vector[I]) =
+    genome:          Genome,
+    objectives:      Objectives,
+    genomeValues:    I ⇒ Vector[Double],
+    phenotypeValues: I ⇒ Vector[Double]
+  )(population: Vector[I]) =
     GAIntegration.genomesOfPopulationToVariables(genome, population, genomeValues).map {
       _ ++ GAIntegration.objectivesOfPopulationToVariables(objectives, population, phenotypeValues)
     }
@@ -266,19 +272,21 @@ object StochasticGAIntegration {
   def genomeToVariables(
     genome: Genome,
     values: Seq[Double],
-    seed: Seeder) =
+    seed:   Seeder
+  ) =
     for {
       variables ← GAIntegration.scaled(genome, values)
       s ← FromContext { (_, rng) ⇒ seed(rng()) }
     } yield variables ++ s
 
   def populationToVariables[I](
-    genome: Genome,
-    objectives: Objectives,
-    genomeValues: I ⇒ Vector[Double],
-    phenotypeValues: I ⇒ Vector[Double],
+    genome:           Genome,
+    objectives:       Objectives,
+    genomeValues:     I ⇒ Vector[Double],
+    phenotypeValues:  I ⇒ Vector[Double],
     samplesPrototype: Prototype[Long],
-    samples: I ⇒ Long)(population: Vector[I]) =
+    samples:          I ⇒ Long
+  )(population: Vector[I]) =
     GAIntegration.populationToVariables[I](genome, objectives, genomeValues, phenotypeValues)(population).map {
       _ ++ Seq(Variable(samplesPrototype.toArray, population.map(samples).toArray))
     }

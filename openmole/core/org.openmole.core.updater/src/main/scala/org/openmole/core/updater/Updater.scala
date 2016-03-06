@@ -49,7 +49,8 @@ object Updater {
     scheduler.schedule(
       new Runnable {
         override def run = pool.submit(updaterTask)
-      }, updaterTask.updatable.delay.length, updaterTask.updatable.delay.unit)
+      }, updaterTask.updatable.delay.length, updaterTask.updatable.delay.unit
+    )
   }
 
 }

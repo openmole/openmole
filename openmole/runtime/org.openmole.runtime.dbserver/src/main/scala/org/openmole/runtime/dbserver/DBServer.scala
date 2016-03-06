@@ -54,7 +54,8 @@ object DBServer extends App {
           str.close
           server.stop
         }
-      })
+      }
+    )
 
     val fullDataBaseFile = new File(base.getPath, DBServerInfo.dbName + ".h2.db")
 

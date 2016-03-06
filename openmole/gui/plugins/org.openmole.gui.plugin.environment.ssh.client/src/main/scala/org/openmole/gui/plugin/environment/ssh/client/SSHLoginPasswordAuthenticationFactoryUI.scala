@@ -2,8 +2,7 @@ package org.openmole.gui.plugin.environment.ssh.client
 
 import org.openmole.gui.ext.data.LoginPasswordAuthenticationData
 import scala.scalajs.js.annotation.JSExport
-import org.openmole.gui.ext.dataui.{AuthenticationFactoryUI, PanelUI}
-
+import org.openmole.gui.ext.dataui.{ AuthenticationFactoryUI, PanelUI }
 
 /*
  * Copyright (C) 16/06/15 // mathieu.leclaire@openmole.org
@@ -23,7 +22,7 @@ import org.openmole.gui.ext.dataui.{AuthenticationFactoryUI, PanelUI}
  */
 
 @JSExport("org.openmole.gui.plugin.environment.ssh.client.SSHLoginPasswordAuthenticationFactoryUI")
-class SSHLoginPasswordAuthenticationFactoryUI extends AuthenticationFactoryUI{
+class SSHLoginPasswordAuthenticationFactoryUI extends AuthenticationFactoryUI {
 
   val name = "SSH Password"
   type DATA = LoginPasswordAuthenticationData

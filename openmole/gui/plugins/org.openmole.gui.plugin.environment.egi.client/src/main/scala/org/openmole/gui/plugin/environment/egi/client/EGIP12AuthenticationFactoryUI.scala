@@ -2,8 +2,7 @@ package org.openmole.gui.plugin.environment.egi.client
 
 import org.openmole.gui.ext.data.EGIP12AuthenticationData
 import scala.scalajs.js.annotation.JSExport
-import org.openmole.gui.ext.dataui.{AuthenticationFactoryUI, PanelUI}
-
+import org.openmole.gui.ext.dataui.{ AuthenticationFactoryUI, PanelUI }
 
 /*
  * Copyright (C) 02/07/15 // mathieu.leclaire@openmole.org
@@ -23,7 +22,7 @@ import org.openmole.gui.ext.dataui.{AuthenticationFactoryUI, PanelUI}
  */
 
 @JSExport("org.openmole.gui.plugin.environment.egi.client.EGIP12AuthenticationFactoryUI")
-class EGIP12AuthenticationFactoryUI extends AuthenticationFactoryUI{
+class EGIP12AuthenticationFactoryUI extends AuthenticationFactoryUI {
 
   val name = "EGI P12 certificate"
   type DATA = EGIP12AuthenticationData

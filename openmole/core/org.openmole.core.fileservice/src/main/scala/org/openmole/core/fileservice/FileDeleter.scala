@@ -52,7 +52,7 @@ object FileDeleter {
   def assynchonousRemove(file: File) = cleanFiles.add(file)
 
   def deleteWhenGarbageCollected(file: File): File = deleters.synchronized {
-    deleters += file -> new DeleteOnFinalize(file.getAbsolutePath)
+    deleters += file → new DeleteOnFinalize(file.getAbsolutePath)
     file
   }
 

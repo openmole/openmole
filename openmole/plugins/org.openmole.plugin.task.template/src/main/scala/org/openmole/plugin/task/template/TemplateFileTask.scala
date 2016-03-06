@@ -30,7 +30,8 @@ import org.openmole.tool.file._
 object TemplateFileTask {
   def apply(
     template: File,
-    output: Prototype[File]) = new TaskBuilder { builder ⇒
+    output:   Prototype[File]
+  ) = new TaskBuilder { builder ⇒
 
     addOutput(output)
 
@@ -40,7 +41,8 @@ object TemplateFileTask {
 
 sealed abstract class TemplateFileTask(
     val template: File,
-    val output: Prototype[File]) extends Task {
+    val output:   Prototype[File]
+) extends Task {
 
   @transient lazy val expanded = template.withInputStream { is ⇒
     VariableExpansion(is)
@@ -49,6 +51,6 @@ sealed abstract class TemplateFileTask(
   override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = {
     val file = executionContext.tmpDirectory.newFile(template.getName, ".tmp")
     file.content = expanded.expand(context)
-    context + (output -> file)
+    context + (output → file)
   }
 }

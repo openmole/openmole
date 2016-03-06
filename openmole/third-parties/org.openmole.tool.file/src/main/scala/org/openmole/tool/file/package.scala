@@ -371,7 +371,7 @@ package file {
       /**
        * Try to create a symbolic link at the calling emplacement.
        * The function creates a copy of the target file on systems not supporting symlinks.
- *
+       *
        * @param target Target of the link
        * @return
        */

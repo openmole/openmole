@@ -61,11 +61,14 @@ object IOPanelUIUtil {
   ) ++ mappingsTD(io)
 
   def clickablePrototypeTD(p: PrototypeDataBagUI, todo: () ⇒ Unit) = bs.td(col_md_2)(
-    tags.a(p.name(),
+    tags.a(
+      p.name(),
       cursor := "pointer",
       onclick := { () ⇒
         todo()
-      })).render
+      }
+    )
+  ).render
 
   def emptyTD(nb: Int) = for (i ← (0 to nb - 1)) yield {
     bs.td(col_md_1)("").render
@@ -87,15 +90,15 @@ object IOPanelUIUtil {
 
   def delButtonTD(todo: () ⇒ Unit) = bs.td(col_md_1)(bs.button(glyph(glyph_minus))(onclick := { () ⇒
     todo()
-  }
-  )).render
+  })).render
 
   def coloredTR(tds: Seq[TableCell], filter: () ⇒ Boolean, click: () ⇒ Unit = () ⇒ {}) = {
     bs.tr(
       if (filter()) warning
       else nothing
     )(if (filter()) {
-        Seq(cursor := "pointer",
+        Seq(
+          cursor := "pointer",
           onclick := { () ⇒ click() }
         )
       }

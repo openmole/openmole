@@ -18,7 +18,7 @@ package org.openmole.gui.plugin.task.exploration.server
  */
 
 import org.openmole.gui.plugin.task.exploration.ext.ExplorationTaskData
-import org.openmole.gui.ext.data.{CoreObjectFactory, Factory}
+import org.openmole.gui.ext.data.{ CoreObjectFactory, Factory }
 
 import org.openmole.core.workflow.task._
 import scala.util.Try

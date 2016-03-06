@@ -70,14 +70,15 @@ trait CSVToVariables {
   }
 
   val conveters = Map[Class[_], (String ⇒ _)](
-    classOf[BigInteger] -> (new BigInteger(_: String)),
-    classOf[BigDecimal] -> (new BigDecimal(_: String)),
-    classOf[Double] -> ((_: String).toDouble),
-    classOf[String] -> ((_: String).toString),
-    classOf[Boolean] -> ((_: String).toBoolean),
-    classOf[Int] -> ((_: String).toInt),
-    classOf[Float] -> ((_: String).toFloat),
-    classOf[Long] -> ((_: String).toLong))
+    classOf[BigInteger] → (new BigInteger(_: String)),
+    classOf[BigDecimal] → (new BigDecimal(_: String)),
+    classOf[Double] → ((_: String).toDouble),
+    classOf[String] → ((_: String).toString),
+    classOf[Boolean] → ((_: String).toBoolean),
+    classOf[Int] → ((_: String).toInt),
+    classOf[Float] → ((_: String).toFloat),
+    classOf[Long] → ((_: String).toLong)
+  )
 
   def converter[T](p: Prototype[_]): String ⇒ _ =
     conveters.getOrElse(p.`type`.runtimeClass, throw new UserBadDataError("Unmanaged type for csv sampling for column binded to prototype " + p))

@@ -25,7 +25,7 @@ object CoreFactory {
 
   def check(dataBag: Seq[DataBag]): Seq[ErrorData] = {
     dataBag.map { d ⇒
-      d -> ServerFactories.coreObject(d)
+      d → ServerFactories.coreObject(d)
     }.collect { case (data: DataBag, f: Failure[_]) ⇒ ErrorData(data, f.exception.getMessage, f.exception.getStackTrace.mkString("\n")) }
 
   }

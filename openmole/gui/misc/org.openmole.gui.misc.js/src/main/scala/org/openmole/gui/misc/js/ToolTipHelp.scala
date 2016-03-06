@@ -1,9 +1,9 @@
 package org.openmole.gui.misc.js
 
 import fr.iscpif.scaladget.api.BootstrapTags._
-import org.scalajs.dom.raw.{HTMLDivElement, HTMLElement}
+import org.scalajs.dom.raw.{ HTMLDivElement, HTMLElement }
 import org.scalajs.jquery
-import scalatags.JsDom.{tags, TypedTag}
+import scalatags.JsDom.{ tags, TypedTag }
 import scalatags.JsDom.all._
 import fr.iscpif.scaladget.mapping.tooltipster._
 import fr.iscpif.scaladget.tooltipster._
@@ -28,10 +28,12 @@ object Tooltip {
 
   implicit class TypedTagDecorator[T <: HTMLElement](typedTag: TypedTag[T]) {
 
-    def tooltip(message: String,
-                direction: Direction = BottomDirection(),
-                level: TooltipLevel = DefaultTooltipLevel(),
-                condition: () => Boolean = () => true): HTMLDivElement =
+    def tooltip(
+      message:   String,
+      direction: Direction    = BottomDirection(),
+      level:     TooltipLevel = DefaultTooltipLevel(),
+      condition: () ⇒ Boolean = () ⇒ true
+    ): HTMLDivElement =
       if (condition()) ToolTipHelp(message, direction, level)(typedTag)
       else tags.div(typedTag).render
   }
@@ -81,10 +83,14 @@ trait Help {
   }
 }
 
-case class ToolTipHelp(message: String,
-                   placement: Direction = BottomDirection(),
-                   level: TooltipLevel = DefaultTooltipLevel()) extends Help
+case class ToolTipHelp(
+  message:   String,
+  placement: Direction    = BottomDirection(),
+  level:     TooltipLevel = DefaultTooltipLevel()
+) extends Help
 
-case class NoHelp(message: String = "",
-                  placement: Direction = TopDirection(),
-                  level: TooltipLevel = DefaultTooltipLevel()) extends Help
+case class NoHelp(
+  message:   String       = "",
+  placement: Direction    = TopDirection(),
+  level:     TooltipLevel = DefaultTooltipLevel()
+) extends Help

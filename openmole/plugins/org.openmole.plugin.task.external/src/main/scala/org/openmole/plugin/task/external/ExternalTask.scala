@@ -33,25 +33,29 @@ object ExternalTask {
   val PWD = Prototype[String]("PWD")
 
   case class InputFile(
-    prototype: Prototype[File],
+    prototype:   Prototype[File],
     destination: ExpandedString,
-    link: Boolean)
+    link:        Boolean
+  )
 
   case class InputFileArray(
     prototype: Prototype[Array[File]],
-    prefix: ExpandedString,
-    suffix: ExpandedString,
-    link: Boolean)
+    prefix:    ExpandedString,
+    suffix:    ExpandedString,
+    link:      Boolean
+  )
 
   case class OutputFile(
-    origin: ExpandedString,
-    prototype: Prototype[File])
+    origin:    ExpandedString,
+    prototype: Prototype[File]
+  )
 
   case class Resource(
-    file: File,
+    file:        File,
     destination: ExpandedString,
-    link: Boolean,
-    os: OS)
+    link:        Boolean,
+    os:          OS
+  )
 }
 
 import ExternalTask._
@@ -67,18 +71,20 @@ trait ExternalTask extends Task {
 
   protected def listInputFiles(context: Context)(implicit rng: RandomProvider): Iterable[(Prototype[File], ToPut)] =
     inputFiles.map {
-      case InputFile(prototype, name, link) ⇒ prototype -> ToPut(context(prototype), name.from(context), link)
+      case InputFile(prototype, name, link) ⇒ prototype → ToPut(context(prototype), name.from(context), link)
     }
 
   protected def listInputFileArray(context: Context)(implicit rng: RandomProvider): Iterable[(Prototype[Array[File]], Seq[ToPut])] =
     for {
       ifa ← inputFileArrays
     } yield {
-      (ifa.prototype,
+      (
+        ifa.prototype,
         context(ifa.prototype).zipWithIndex.map {
           case (file, i) ⇒
             ToPut(file, s"${ifa.prefix.from(context)}$i${ifa.suffix.from(context)}", link = ifa.link)
-        }.toSeq)
+        }.toSeq
+      )
     }
 
   protected def listResources(context: Context, resolver: PathResolver)(implicit rng: RandomProvider): Iterable[ToPut] = {

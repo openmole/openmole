@@ -75,7 +75,8 @@ object GUIClient {
     // val settingsItem = dialogNavItem("settings", "Settings", () ⇒ settingsTriggerer.triggerOpen)
 
     topdiv.appendChild(
-      nav("mainNav",
+      nav(
+        "mainNav",
         nav_pills + nav_inverse + nav_staticTop
       //   settingsItem,
       //   execItem
@@ -98,7 +99,8 @@ object GUIClient {
       Graph.edge(nodes(0), nodes(1)),
       Graph.edge(nodes(0), nodes(2)),
       Graph.edge(nodes(3), nodes(1)),
-      Graph.edge(nodes(3), nodes(2)))
+      Graph.edge(nodes(3), nodes(2))
+    )
     val window = new Window(nodes, edges)
 
   }

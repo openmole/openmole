@@ -29,10 +29,11 @@ object MoleJob {
 
   type StateChangedCallBack = (MoleJob, State, State) ⇒ Unit
   def apply(
-    task: Task,
-    context: Context,
-    id: UUID,
-    stateChangedCallBack: MoleJob.StateChangedCallBack) = {
+    task:                 Task,
+    context:              Context,
+    id:                   UUID,
+    stateChangedCallBack: MoleJob.StateChangedCallBack
+  ) = {
     val (prototypes, values) = compressContext(context)
     new MoleJob(task, prototypes.toArray, values.toArray, id.getMostSignificantBits, id.getLeastSignificantBits, stateChangedCallBack)
   }
@@ -49,11 +50,12 @@ object MoleJob {
 import MoleJob._
 
 class MoleJob(
-    val task: Task,
+    val task:               Task,
     private var prototypes: Array[Prototype[Any]],
-    private var values: Array[Any],
-    mostSignificantBits: Long, leastSignificantBits: Long,
-    private[workflow] var stateChangedCallBack: MoleJob.StateChangedCallBack) {
+    private var values:     Array[Any],
+    mostSignificantBits:    Long, leastSignificantBits: Long,
+    private[workflow] var stateChangedCallBack: MoleJob.StateChangedCallBack
+) {
 
   var exception: Option[Throwable] = None
 

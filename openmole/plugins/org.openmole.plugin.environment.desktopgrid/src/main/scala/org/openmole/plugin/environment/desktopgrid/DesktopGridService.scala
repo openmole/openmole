@@ -120,8 +120,7 @@ class DesktopGridService(port: Int, path: File = Workspace.newDir()) { service â
 
     val tmpJobFile = tmpJobSubmissionFile(jobId)
     tmpJobFile.withGzippedOutputStream(os â‡’
-      SerialiserService.serialise(desktopJobMessage, os)
-    )
+      SerialiserService.serialise(desktopJobMessage, os))
 
     tmpJobFile.move(jobSubmissionFile(jobId))
 

@@ -34,8 +34,7 @@ class StatisticTaskDataUI(val name: Var[String] = Var("")) extends InAndOutTaskD
 
   def inAndOutMappingsFactory = IOMappingsFactory(Seq(
     selectField("Statistic", StatisticType.MEDIAN, StatisticType.ALL)
-  ),dimension1Filter, dimension0Filter
-  )
+  ), dimension1Filter, dimension0Filter)
 
   override def help = Help("Statistic help", "The statistic task map vectors into scalars. The output scalar represents the statistic made on the vector (average, median, sum, ...)")
 }

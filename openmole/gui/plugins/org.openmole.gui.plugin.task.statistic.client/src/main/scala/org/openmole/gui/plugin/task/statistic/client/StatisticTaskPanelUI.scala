@@ -18,16 +18,16 @@ package org.openmole.gui.plugin.task.statistic.client
  */
 
 import org.openmole.gui.ext.dataui.PanelUI
-import fr.iscpif.scaladget.api.{BootstrapTags => bs}
+import fr.iscpif.scaladget.api.{ BootstrapTags => bs }
 import scala.scalajs.js.annotation.JSExport
 
 @JSExport("org.openmole.gui.plugin.task.statistic.clientStatisticPanelUI")
 class StatisticTaskPanelUI(dataUI: StatisticTaskDataUI) extends PanelUI {
 
-@JSExport
-val view = bs.div()
+  @JSExport
+  val view = bs.div()
 
-def save(onsave: ()=> Unit) = {
-}
+  def save(onsave: () => Unit) = {
+  }
 
 }

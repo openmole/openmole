@@ -37,9 +37,10 @@ import scala.concurrent.stm._
 import scala.util.{ Failure, Success, Try }
 
 case class BundlesInfo(
-  files: Map[File, (Long, Long)],
+  files:                      Map[File, (Long, Long)],
   resolvedDirectDependencies: Map[Long, Set[Long]],
-  providedDependencies: Set[Long])
+  providedDependencies:       Set[Long]
+)
 
 object PluginManager extends Logger {
 
@@ -129,8 +130,8 @@ object PluginManager extends Logger {
     bundles.map {
       b ⇒
         logger.fine(s"Stating bundle ${b.getLocation}")
-        b -> Try(b.start)
-    }.collect { case (b: Bundle, Failure(e)) ⇒ b -> e }
+        b → Try(b.start)
+    }.collect { case (b: Bundle, Failure(e)) ⇒ b → e }
   }
 
   def load(files: Iterable[File]) = synchronized {
@@ -202,14 +203,14 @@ object PluginManager extends Logger {
                 db ⇒ dependencies.getOrElseUpdate(db.getBundleId, new MHashSet[Long]) += b.getBundleId
               }
           }
-          dependencies.map { case (k, v) ⇒ k -> v.toSet }.toMap
+          dependencies.map { case (k, v) ⇒ k → v.toSet }.toMap
         }
 
         val providedDependencies =
           dependencies(bs.filter(b ⇒ b.isProvided).map { _.getBundleId }, resolvedDirectDependencies).toSet ++
             dependencies(bs.filter(b ⇒ ecliseBundles.contains(b.getSymbolicName)).map(_.getBundleId), resolvedDirectDependencies)
 
-        val files = bundles.map(b ⇒ b.file.getCanonicalFile -> ((b.getBundleId, b.file.lastModification))).toMap
+        val files = bundles.map(b ⇒ b.file.getCanonicalFile → ((b.getBundleId, b.file.lastModification))).toMap
 
         val info = BundlesInfo(files, resolvedDirectDependencies, providedDependencies)
         bundlesInfo() = Some(info)
@@ -261,7 +262,7 @@ object PluginManager extends Logger {
         case _                                  ⇒ false
       }
     }.map {
-      b ⇒ b -> Try(b.start)
-    }.collect { case (b: Bundle, Failure(e)) ⇒ b -> e }
+      b ⇒ b → Try(b.start)
+    }.collect { case (b: Bundle, Failure(e)) ⇒ b → e }
 
 }

@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.environment.egi
 
-import fr.iscpif.gridscale.http.{HTTPSAuthentication, WebDAVLocation, DPMWebDAVStorage}
+import fr.iscpif.gridscale.http.{ HTTPSAuthentication, WebDAVLocation, DPMWebDAVStorage }
 import org.openmole.core.batch.storage._
 import org.openmole.core.batch.control._
 import org.openmole.core.workspace.Workspace
@@ -25,7 +25,7 @@ import org.openmole.tool.file._
 import fr.iscpif.gridscale.storage.{ Storage ⇒ GSStorage, ListEntry, FileType }
 import fr.iscpif.gridscale.egi.{ SRMLocation, GlobusAuthenticationProvider, SRMStorage }
 import java.net.URI
-import java.io.{IOException, File, InputStream, OutputStream}
+import java.io.{ IOException, File, InputStream, OutputStream }
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.plugin.environment.gridscale.GridScaleStorage
 
@@ -91,8 +91,9 @@ trait NativeCommandCopy {
         download(src, tmpFile)
         tmpFile.copyUncompressFile(dest)
       }
-    } catch {
-      case e: Throwable => throw new IOException(s"Error downloading $src to $dest from $url with option $options", e)
+    }
+    catch {
+      case e: Throwable ⇒ throw new IOException(s"Error downloading $src to $dest from $url with option $options", e)
     }
 
   private def download(src: String, dest: File): Unit = run(downloadCommand(url.resolve(src), dest.getAbsolutePath))
@@ -104,10 +105,10 @@ trait NativeCommandCopy {
         src.copyCompressFile(tmpFile)
         upload(tmpFile, dest)
       }
-    } catch {
-      case e: Throwable => throw new IOException(s"Error uploading $src to $dest from $url with option $options", e)
     }
-
+    catch {
+      case e: Throwable ⇒ throw new IOException(s"Error uploading $src to $dest from $url with option $options", e)
+    }
 
   private def upload(src: File, dest: String): Unit = run(uploadCommand(src.getAbsolutePath, url.resolve(dest)))
 
@@ -159,7 +160,7 @@ class CurlRemoteStorage(val host: String, val port: Int, val voName: String, val
   override def upload(src: File, dest: String, options: TransferOptions): Unit =
     try super.upload(src, dest, options)
     catch {
-      case t: Throwable =>
+      case t: Throwable ⇒
         Try(run(s"${curl.curl} -X DELETE ${url.resolve(dest)}"))
         throw t
     }

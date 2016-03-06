@@ -44,9 +44,9 @@ package dsl {
   import org.openmole.tool.file.FilePackage
   import org.openmole.tool.types.TypesPackage
 
-import scalaz.Functor
+  import scalaz.Functor
 
-trait DSLPackage <: Commands
+  trait DSLPackage <: Commands
       with Serializer
       with DataPackage
       with MolePackage
@@ -96,7 +96,7 @@ trait DSLPackage <: Commands
     implicit def bigIntAsIfIntegral = Numeric.BigIntIsIntegral
 
     implicit def seqIsFunctor = new Functor[Seq] {
-      override def map[A, B](fa: Seq[A])(f: (A) => B): Seq[B] = fa.map(f)
+      override def map[A, B](fa: Seq[A])(f: (A) ⇒ B): Seq[B] = fa.map(f)
     }
 
   }

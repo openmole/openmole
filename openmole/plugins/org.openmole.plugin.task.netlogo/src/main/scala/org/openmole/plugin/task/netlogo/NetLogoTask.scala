@@ -109,7 +109,8 @@ trait NetLogoTask extends ExternalTask {
               catch {
                 case e: Throwable ⇒
                   throw new UserBadDataError(
-                    s"Error when fetching netlogo output $name in variable $prototype:\n" + e.stackStringWithMargin)
+                    s"Error when fetching netlogo output $name in variable $prototype:\n" + e.stackStringWithMargin
+                  )
               }
           } ++ netLogoArrayOutputs.map {
             case (name, column, prototype) ⇒

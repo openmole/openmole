@@ -33,7 +33,7 @@ object Context {
   }
 
   def apply(v: Variable[_]*): Context = apply(v)
-  def apply(v: Traversable[Variable[_]]): Context = Context.fromMap(v.map { v ⇒ v.prototype.name -> v })
+  def apply(v: Traversable[Variable[_]]): Context = Context.fromMap(v.map { v ⇒ v.prototype.name → v })
 
   val empty = apply(Iterable.empty)
 
@@ -114,7 +114,7 @@ trait Context extends Map[String, Variable[_]] with MapLike[String, Variable[_],
    * @param value the value of the variable
    * @return the new context
    */
-  def +[T](p: Prototype[T], value: T) = Context.fromMap(variables + (p.name -> Variable[T](p, value)))
+  def +[T](p: Prototype[T], value: T) = Context.fromMap(variables + (p.name → Variable[T](p, value)))
 
   /**
    * Build a new context containing the variables of the current context plus the
@@ -125,7 +125,7 @@ trait Context extends Map[String, Variable[_]] with MapLike[String, Variable[_],
    */
   def +[T](tuple: (Prototype[T], T)): Context = this.+(tuple._1, tuple._2)
 
-  def +[T](v: Variable[T]) = Context.fromMap(variables + (v.prototype.name -> v))
+  def +[T](v: Variable[T]) = Context.fromMap(variables + (v.prototype.name → v))
 
   def +(ctx: Context) = Context.fromMap(variables ++ ctx)
 
@@ -139,7 +139,7 @@ trait Context extends Map[String, Variable[_]] with MapLike[String, Variable[_],
    * @return the new context
    */
 
-  def ++(vs: Traversable[Variable[_]]): Context = Context.fromMap(variables ++ (vs.map { v ⇒ v.prototype.name -> v }))
+  def ++(vs: Traversable[Variable[_]]): Context = Context.fromMap(variables ++ (vs.map { v ⇒ v.prototype.name → v }))
 
   /**
    * Build a new context containing the variables of the current context minus the

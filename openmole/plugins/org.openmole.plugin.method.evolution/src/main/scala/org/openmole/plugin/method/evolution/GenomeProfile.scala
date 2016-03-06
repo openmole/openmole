@@ -28,10 +28,11 @@ import Scalaz._
 object GenomeProfile {
 
   def apply(
-    x: Prototype[Double],
-    nX: Int,
-    genome: Genome,
-    objective: Objective) = {
+    x:         Prototype[Double],
+    nX:        Int,
+    genome:    Genome,
+    objective: Objective
+  ) = {
 
     val xIndex =
       genome.indexWhere(_.prototype == x) match {
@@ -51,12 +52,13 @@ object GenomeProfile {
   }
 
   def apply(
-    x: Prototype[Double],
-    nX: Int,
-    genome: Genome,
-    objective: Objective,
+    x:           Prototype[Double],
+    nX:          Int,
+    genome:      Genome,
+    objective:   Objective,
     replication: Replication[Id],
-    paretoSize: Int = 20) = {
+    paretoSize:  Int               = 20
+  ) = {
 
     val xIndex =
       genome.indexWhere(_.prototype == x) match {
@@ -90,7 +92,8 @@ object GenomeProfile {
       mgo.niche.genomeProfile[profile.Individual](
         values = (profile.Individual.genome composeLens profile.vectorValues).get,
         x = x,
-        nX = nX)
+        nX = nX
+      )
 
     implicit def workflowIntegration = new WorkflowIntegration[DeterministicGenomeProfile] {
       override def apply(a: DeterministicGenomeProfile): EvolutionWorkflow = new EvolutionWorkflow {
@@ -135,7 +138,8 @@ object GenomeProfile {
       mgo.niche.genomeProfile[Individual](
         values = (Individual.genome composeLens noisyprofile.vectorValues).get,
         x = x,
-        nX = nX)
+        nX = nX
+      )
 
     implicit def workflowIntegration = new WorkflowIntegration[StochasticGenomeProfile] {
       override def apply(a: StochasticGenomeProfile): EvolutionWorkflow = new EvolutionWorkflow {
@@ -176,9 +180,10 @@ object GenomeProfile {
   }
 
   case class StochasticGenomeProfile(
-    algo: noisyprofile.OpenMOLE,
-    genome: Genome,
-    objective: Objective,
-    replication: Replication[Id])
+    algo:        noisyprofile.OpenMOLE,
+    genome:      Genome,
+    objective:   Objective,
+    replication: Replication[Id]
+  )
 
 }

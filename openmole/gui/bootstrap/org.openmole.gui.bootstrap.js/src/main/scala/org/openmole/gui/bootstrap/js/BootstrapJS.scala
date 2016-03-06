@@ -65,8 +65,7 @@ object BootstrapJS {
         FilePath("src-min/", "theme-github.js"),
         FilePath("src-min/", "mode-scala.js"),
         FilePath("src-min/", "mode-sh.js"),
-        FilePath("src-min/", "mode-text.js")
-      )
+        FilePath("src-min/", "mode-text.js"))
 
       //All other resources
       copyURL(thisBundle.findEntries("/", "*.css", true).asScala)

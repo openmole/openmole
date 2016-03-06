@@ -19,12 +19,14 @@ package org.openmole.gui.plugin.environment.ssh.ext
 
 import org.openmole.gui.ext.data.EnvironmentData
 
-case class SSHEnvironmentData(val name: String = "",
-                              val login: String = "",
-                              val host: String = "",
-                              val nbSlots: Int = 1,
-                              val port: Int = 22,
-                              val dir: String = "/tmp/",
-                              val openMOLEMemory: Option[Int] = None,
-                              val threads: Option[Int] = None) extends EnvironmentData {
+case class SSHEnvironmentData(
+  val name: String = "",
+    val login: String = "",
+    val host: String = "",
+    val nbSlots: Int = 1,
+    val port: Int = 22,
+    val dir: String = "/tmp/",
+    val openMOLEMemory: Option[Int] = None,
+    val threads: Option[Int] = None
+) extends EnvironmentData {
 }

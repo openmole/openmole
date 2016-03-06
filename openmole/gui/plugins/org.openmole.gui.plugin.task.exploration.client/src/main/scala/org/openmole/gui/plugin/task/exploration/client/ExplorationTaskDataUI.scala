@@ -25,7 +25,7 @@ import scala.scalajs.js.annotation.JSExport
 import rx._
 class ExplorationTaskDataUI(val code: Var[String] = Var("")) extends TaskDataUI {
 
-def data = new ExplorationTaskData(inputDataUI().data.inputs, outputDataUI().data.outputs)
-def panelUI = new ExplorationTaskPanelUI(this)
-def dataType = "Exploration"
- }
+  def data = new ExplorationTaskData(inputDataUI().data.inputs, outputDataUI().data.outputs)
+  def panelUI = new ExplorationTaskPanelUI(this)
+  def dataType = "Exploration"
+}

@@ -95,13 +95,13 @@ class EditorPanelUI(bindings: Seq[(String, String, () ⇒ Any)], initCode: Strin
 
       editor.commands.addCommand(
         lit(
-          "name" -> name,
-          "bindKey" -> lit(
-            "win" -> binding,
-            "mac" -> binding,
-            "sender" -> "editor|cli"
+          "name" → name,
+          "bindKey" → lit(
+            "win" → binding,
+            "mac" → binding,
+            "sender" → "editor|cli"
           ),
-          "exec" -> func
+          "exec" → func
         )
       )
     }
@@ -132,13 +132,13 @@ class EditorPanelUI(bindings: Seq[(String, String, () ⇒ Any)], initCode: Strin
     }
 
     editor.completers = js.Array(lit(
-      "getCompletions" -> { (editor: Editor, session: IEditSession, pos: Dyn, prefix: Dyn, callback: Dyn) ⇒
+      "getCompletions" → { (editor: Editor, session: IEditSession, pos: Dyn, prefix: Dyn, callback: Dyn) ⇒
         async {
           val things = await(completions()).map {
             case (name, value) ⇒
               lit(
-                "value" -> value,
-                "caption" -> (value + name)
+                "value" → value,
+                "caption" → (value + name)
               ).value
           }
           callback(null, js.Array(things: _*))
@@ -161,8 +161,7 @@ object EditorPanelUI {
 
   def scala(initCode: String = "") = new EditorPanelUI(Seq(
     ("Compile", "Enter", () ⇒ println("Compile  !"))
-  ), initCode, SCALA
-  )
+  ), initCode, SCALA)
 
   def sh(initCode: String = "") = new EditorPanelUI(Seq(), initCode, SH)
 

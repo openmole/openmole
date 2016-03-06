@@ -161,7 +161,8 @@ class ScalaREPL(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.e
           new CompositeClassLoader(
             priorityBundles.map(_.classLoader) ++
               List(new URLClassLoader(jars.toArray.map(_.toURI.toURL))) ++
-              List(classOf[OSGiScalaCompiler].getClassLoader): _*)
+              List(classOf[OSGiScalaCompiler].getClassLoader): _*
+          )
         )
       }
       else super.classLoader

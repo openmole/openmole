@@ -19,15 +19,15 @@ package org.openmole.gui.plugin.environment.egi.client
 
 import org.openmole.gui.ext.dataui.PanelUI
 import scala.scalajs.js.annotation.JSExport
-import fr.iscpif.scaladget.api.{BootstrapTags => bs}
+import fr.iscpif.scaladget.api.{ BootstrapTags => bs }
 
 @JSExport("org.openmole.gui.plugin.environment.egi.client.EGIEnvironmentPanelUI")
 class EGIEnvironmentPanelUI(dataUI: EGIEnvironmentDataUI) extends PanelUI {
 
-@JSExport
-val view = bs.div()
+  @JSExport
+  val view = bs.div()
 
-def save(onsave: ()=> Unit) = {
-}
+  def save(onsave: () => Unit) = {
+  }
 
 }

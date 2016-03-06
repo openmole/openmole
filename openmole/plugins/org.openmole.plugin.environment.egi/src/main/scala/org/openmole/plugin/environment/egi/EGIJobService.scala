@@ -98,7 +98,7 @@ trait EGIJobService extends GridScaleJobService { js ⇒
       val inputSandbox = List(script) ++ proxy
       override def stdOutput = if (environment.debug) "out" else ""
       override def stdError = if (environment.debug) "err" else ""
-      def outputSandbox = if (environment.debug) Seq("out" -> Workspace.newFile("job", ".out"), "err" -> Workspace.newFile("job", ".err")) else Seq.empty
+      def outputSandbox = if (environment.debug) Seq("out" → Workspace.newFile("job", ".out"), "err" → Workspace.newFile("job", ".err")) else Seq.empty
 
       override val memory = Some(environment.requiredMemory)
       override val cpuTime = environment.cpuTime

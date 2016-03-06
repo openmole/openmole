@@ -276,7 +276,7 @@ object ApiImpl extends Api {
               val puzzle = o.buildPuzzle
               val outputStream = new StringPrintStream()
 
-              val envIds = puzzle.environments.values.toSeq.distinct.map { env ⇒ EnvironmentId(getUUID) -> env }
+              val envIds = puzzle.environments.values.toSeq.distinct.map { env ⇒ EnvironmentId(getUUID) → env }
               Runnings.add(execId, envIds, outputStream)
 
               envIds.foreach {
@@ -291,8 +291,8 @@ object ApiImpl extends Api {
                         re.copy(networkActivity = re.networkActivity.copy(
                           downloadingFiles = re.networkActivity.downloadingFiles - 1,
                           downloadedSize = size,
-                          readableDownloadedSize = readableByteCount(size))
-                        )
+                          readableDownloadedSize = readableByteCount(size)
+                        ))
                     }
                     case (env, bul: BeginUpload) ⇒ Runnings.update(envId) {
                       re ⇒ re.copy(networkActivity = re.networkActivity.copy(uploadingFiles = re.networkActivity.uploadingFiles + 1))
@@ -304,7 +304,8 @@ object ApiImpl extends Api {
                           networkActivity = re.networkActivity.copy(
                             uploadedSize = size,
                             readableUploadedSize = readableByteCount(size),
-                            uploadingFiles = re.networkActivity.uploadingFiles - 1)
+                            uploadingFiles = re.networkActivity.uploadingFiles - 1
+                          )
                         )
                     }
                   }
@@ -337,7 +338,7 @@ object ApiImpl extends Api {
           _.sortBy(_.date).last
         }.toSeq.sortBy(_.date).reverse
         count = errors.count(_.copy(date = 0L) == error.copy(date = 0L))
-      } yield error -> count
+      } yield error → count
 
     val envIds = Runnings.environmentIds
 
@@ -456,16 +457,18 @@ object ApiImpl extends Api {
 
   def methods(jarPath: SafePath, className: String): Seq[JarMethod] = Utils.jarMethods(jarPath, className)
 
-  def buildModelTask(executableName: String,
-                     scriptName: String,
-                     command: String,
-                     language: Language,
-                     inputs: Seq[ProtoTypePair],
-                     outputs: Seq[ProtoTypePair],
-                     path: SafePath,
-                     imports: Option[String],
-                     libraries: Option[String],
-                     resources: Resources): TreeNodeData = {
+  def buildModelTask(
+    executableName: String,
+    scriptName:     String,
+    command:        String,
+    language:       Language,
+    inputs:         Seq[ProtoTypePair],
+    outputs:        Seq[ProtoTypePair],
+    path:           SafePath,
+    imports:        Option[String],
+    libraries:      Option[String],
+    resources:      Resources
+  ): TreeNodeData = {
     import org.openmole.gui.ext.data.ServerFileSytemContext.project
     val modelTaskFile = new File(path, scriptName + ".oms")
 

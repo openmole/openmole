@@ -1,16 +1,16 @@
 package org.openmole.gui.client.core
 
 import fr.iscpif.scaladget.api.BootstrapTags._
-import fr.iscpif.scaladget.api.{BootstrapTags => bs}
+import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import fr.iscpif.scaladget.tools.JsRxTags._
 import org.openmole.gui.ext.data._
 import org.scalajs.dom.raw.HTMLElement
 import rx._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import scala.concurrent.Future
-import scala.util.{Success, Failure}
+import scala.util.{ Success, Failure }
 import scalatags.JsDom.all._
-import scalatags.JsDom.{TypedTag, tags}
+import scalatags.JsDom.{ TypedTag, tags }
 
 /*
  * Copyright (C) 22/12/15 // mathieu.leclaire@openmole.org
@@ -44,19 +44,20 @@ import Waiter._
 
 class ProcessStateWaiter(processingState: Var[ProcessState]) {
 
-  def withTransferWaiter[T <: HTMLElement](f: ProcessState => TypedTag[T]): TypedTag[HTMLElement] = {
+  def withTransferWaiter[T <: HTMLElement](f: ProcessState ⇒ TypedTag[T]): TypedTag[HTMLElement] = {
 
     tags.div(
       Rx {
         val ratio = processingState().ratio
-        val waiterSpan = tags.div(waiter,
+        val waiterSpan = tags.div(
+          waiter,
           if (ratio == 0 || ratio == 100) tags.span() else bs.span("spinner-wave-ratio")(ratio + " %")
         )
 
         processingState() match {
-          case x@(Processing(_) | Finalizing(_, _)) ⇒ waiterSpan
-          case y@(Processed(_)) ⇒ f(processingState())
-          case _ => tags.div()
+          case x @ (Processing(_) | Finalizing(_, _)) ⇒ waiterSpan
+          case y @ (Processed(_))                     ⇒ f(processingState())
+          case _                                      ⇒ tags.div()
         }
       }
     )
@@ -65,24 +66,26 @@ class ProcessStateWaiter(processingState: Var[ProcessState]) {
 
 class FutureWaiter[S](waitingForFuture: Future[S]) {
 
-  def withFutureWaiter[T <: HTMLElement](f: Future[S] => TypedTag[T])(
+  def withFutureWaiter[T <: HTMLElement](f: Future[S] ⇒ TypedTag[T])(
     waitingString: String,
-    onsuccess: (S) => Unit = s => {},
-    onfailure: () => Unit = () => {}): TypedTag[HTMLElement] = {
+    onsuccess:     (S) ⇒ Unit = s ⇒ {},
+    onfailure:     () ⇒ Unit  = () ⇒ {}
+  ): TypedTag[HTMLElement] = {
 
     val processing = Var(false)
     waitingForFuture.andThen {
-      case Success(s) =>
+      case Success(s) ⇒
         onsuccess(s)
         processing() = false
-      case Failure(_) =>
+      case Failure(_) ⇒
         onfailure()
         processing() = false
     }
 
     tags.div(
       Rx {
-        val waiterSpan = tags.div(waiter,
+        val waiterSpan = tags.div(
+          waiter,
           if (processing() == false) tags.span() else bs.span("spinner-wave-ratio")
         )
 

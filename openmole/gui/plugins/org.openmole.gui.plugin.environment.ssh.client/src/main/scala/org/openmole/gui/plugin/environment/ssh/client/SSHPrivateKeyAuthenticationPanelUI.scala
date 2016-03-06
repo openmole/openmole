@@ -9,8 +9,8 @@ import scala.scalajs.js.annotation.JSExport
 import scalatags.JsDom.all._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
-import fr.iscpif.scaladget.api.{BootstrapTags => bs}
-import scalatags.JsDom.{tags ⇒ tags}
+import fr.iscpif.scaladget.api.{ BootstrapTags => bs }
+import scalatags.JsDom.{ tags ⇒ tags }
 import bs._
 
 /*
@@ -33,19 +33,21 @@ import bs._
 @JSExport("org.openmole.gui.plugin.environment.ssh.client.SSHPrivateKeyAuthenticationPanelUI")
 class SSHPrivateKeyAuthenticationPanelUI(data: PrivateKeyAuthenticationData) extends PanelUI {
 
-
   val login = bs.input(data.login, key("spacer5"))(
     placeholder := "Login",
-    width := "130px").render
+    width := "130px"
+  ).render
 
   val target = bs.input(data.target, key("spacer5"))(
     placeholder := "Host",
-    width := "130px").render
+    width := "130px"
+  ).render
 
   val password = bs.input(data.cypheredPassword, key("spacer5"))(
     placeholder := "Password",
     `type` := "password",
-    width := "130px").render
+    width := "130px"
+  ).render
 
   lazy val privateKey = new AuthFileUploaderUI(data.privateKey.getOrElse(""), data.privateKey.isDefined)
 
@@ -62,12 +64,15 @@ class SSHPrivateKeyAuthenticationPanelUI(data: PrivateKeyAuthenticationData) ext
   def save(onsave: () => Unit) =
     OMPost[Api].removeAuthentication(data).call().foreach { d ⇒
       OMPost[Api].addAuthentication(
-        PrivateKeyAuthenticationData(Some(privateKey.fileName),
+        PrivateKeyAuthenticationData(
+          Some(privateKey.fileName),
           login.value,
           password.value,
-          target.value)).call().foreach { b =>
-        onsave()
-      }
+          target.value
+        )
+      ).call().foreach { b =>
+          onsave()
+        }
     }
 
 }

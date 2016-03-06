@@ -39,9 +39,9 @@ package object pluginmanager {
 
     def file = {
       val (ref, url) = if (b.getLocation.startsWith("reference:"))
-        true -> b.getLocation.substring("reference:".length)
-      else if (b.getLocation.startsWith("initial@reference:")) true -> b.getLocation.substring("initial@reference:".length)
-      else false -> b.getLocation
+        true → b.getLocation.substring("reference:".length)
+      else if (b.getLocation.startsWith("initial@reference:")) true → b.getLocation.substring("initial@reference:".length)
+      else false → b.getLocation
 
       val location = {
         val protocol = url.indexOf(':')

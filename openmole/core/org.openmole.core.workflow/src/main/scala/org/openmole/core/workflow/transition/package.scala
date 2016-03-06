@@ -35,9 +35,10 @@ import data._
 package transition {
 
   case class TransitionParameter(
-      puzzleParameter: Puzzle,
+      puzzleParameter:    Puzzle,
       conditionParameter: Condition = Condition.True,
-      filterParameter: BlockList = BlockList.empty) {
+      filterParameter:    BlockList = BlockList.empty
+  ) {
     def when(condition: Condition) = copy(conditionParameter = condition)
     def filter(filter: BlockList) = copy(filterParameter = filter)
     def keep(prototypes: Prototype[_]*) = filter(Keep(prototypes: _*))
@@ -53,10 +54,11 @@ package transition {
     def block(prototypes: Prototype[_]*) = filter(Block(prototypes: _*))
 
     def -<(
-      to: Puzzle,
-      condition: Condition = Condition.True,
-      filter: BlockList = BlockList.empty,
-      size: Option[FromContext[Int]] = None): Puzzle = {
+      to:        Puzzle,
+      condition: Condition                = Condition.True,
+      filter:    BlockList                = BlockList.empty,
+      size:      Option[FromContext[Int]] = None
+    ): Puzzle = {
 
       val transitions = from.lasts.map {
         c ⇒
@@ -79,9 +81,10 @@ package transition {
     }
 
     def -<-(
-      to: Puzzle,
+      to:        Puzzle,
       condition: Condition = Condition.True,
-      filter: BlockList = BlockList.empty) = {
+      filter:    BlockList = BlockList.empty
+    ) = {
 
       val transitions = from.lasts.map {
         c ⇒ new SlaveTransition(c, to.firstSlot, condition, filter)
@@ -100,10 +103,11 @@ package transition {
     }
 
     def >-(
-      to: Puzzle,
+      to:        Puzzle,
       condition: Condition = Condition.True,
-      filter: BlockList = BlockList.empty,
-      trigger: Condition = Condition.False): Puzzle = {
+      filter:    BlockList = BlockList.empty,
+      trigger:   Condition = Condition.False
+    ): Puzzle = {
       val transitions = from.lasts.map { c ⇒ new AggregationTransition(c, to.firstSlot, condition, filter, trigger) }
       Puzzle.merge(from.firstSlot, to.lasts, from :: to :: Nil, transitions)
     }
@@ -118,9 +122,10 @@ package transition {
     }
 
     def >|(
-      to: Puzzle,
+      to:      Puzzle,
       trigger: Condition,
-      filter: BlockList = BlockList.empty) = {
+      filter:  BlockList = BlockList.empty
+    ) = {
       val transitions = from.lasts.map { c ⇒ new EndExplorationTransition(c, to.firstSlot, trigger, filter) }
       Puzzle.merge(from.firstSlot, to.lasts, from :: to :: Nil, transitions)
     }

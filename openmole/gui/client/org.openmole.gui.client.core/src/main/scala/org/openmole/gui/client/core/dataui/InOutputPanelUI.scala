@@ -57,7 +57,8 @@ class InOutputPanelUI(val panel: SettingsPanel, val dataUI: InOutputDataUI) exte
         bs.inputGroup(col_md_6 + col_md_offset_3)(
           inputFilter.tag,
           bs.inputGroupButton(newGlyph)
-        )),
+        )
+      ),
       bs.formGroup(col_md_12)(Rx {
         (for ((headers, inputsUI) ← (filteredInputsUI ++ dataUI.inoutputsUI()).groupBy { i ⇒ dataUI.mappingKeys(i.protoDataBagUI) }) yield {
           bs.table(col_md_12 + striped)(
@@ -65,16 +66,13 @@ class InOutputPanelUI(val panel: SettingsPanel, val dataUI: InOutputDataUI) exte
             tbody(
               for (i ← inputsUI.sortBy(_.protoDataBagUI.name())) yield {
                 coloredTR((buildPrototypeTableView(i, () ⇒ setCurrent(i.protoDataBagUI)) :+
-                  delButtonTD(() ⇒ dataUI -= i)
-                ), () ⇒ !dataUI.inoutputsUI().contains(i),
+                  delButtonTD(() ⇒ dataUI -= i)), () ⇒ !dataUI.inoutputsUI().contains(i),
                   () ⇒ add(i))
               }
             )
           ).render
-        }
-        ).toSeq
-      }
-      )
+        }).toSeq
+      })
     )
   }
 

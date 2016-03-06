@@ -19,7 +19,7 @@ package org.openmole.gui.plugin.task.exploration.client
 
 import org.openmole.gui.client.core.files.EditorPanelUI
 import org.openmole.gui.ext.dataui.PanelUI
-import fr.iscpif.scaladget.api.{BootstrapTags => bs}
+import fr.iscpif.scaladget.api.{ BootstrapTags => bs }
 import scala.scalajs.js.annotation.JSExport
 
 @JSExport("org.openmole.gui.plugin.task.exploration.client.ExplorationTaskPanelUI")
@@ -34,7 +34,7 @@ class ExplorationTaskPanelUI(dataUI: ExplorationTaskDataUI) extends PanelUI {
     )
   }
 
-  def save(onsave: ()=> Unit) = {
+  def save(onsave: () => Unit) = {
     dataUI.code() = editor.code
   }
 

@@ -38,13 +38,14 @@ class InputFilter(initValue: String, pHolder: String, inputID: String, size: Str
   val nameFilter: Var[String] = Var("")
 
   val tag = bs.input(
-    initValue)(
-      id := inputID,
-      value := initValue,
-      placeholder := pHolder,
-      width := size,
-      autofocus
-    ).render
+    initValue
+  )(
+    id := inputID,
+    value := initValue,
+    placeholder := pHolder,
+    width := size,
+    autofocus
+  ).render
 
   tag.oninput = (e: Event) ⇒ nameFilter() = tag.value
 

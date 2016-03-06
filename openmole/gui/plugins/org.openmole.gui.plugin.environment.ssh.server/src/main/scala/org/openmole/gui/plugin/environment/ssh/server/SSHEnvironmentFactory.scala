@@ -24,7 +24,7 @@ import org.openmole.gui.ext.data.CoreObjectFactory
 
 import scala.util.Try
 
-class SSHEnvironmentFactory(val data: SSHEnvironmentData) extends CoreObjectFactory{
+class SSHEnvironmentFactory(val data: SSHEnvironmentData) extends CoreObjectFactory {
   def coreObject(): Try[Any] = Try {
     SSHEnvironment(
       data.login,
@@ -32,7 +32,7 @@ class SSHEnvironmentFactory(val data: SSHEnvironmentData) extends CoreObjectFact
       data.nbSlots,
       data.port,
       openMOLEMemory = data.openMOLEMemory,
-      threads=data.threads
+      threads = data.threads
     )(Workspace.authenticationProvider)
   }
 

@@ -60,16 +60,17 @@ object MoleExecution extends Logger {
   private def listOfTupleToMap[K, V](l: Traversable[(K, V)]): Map[K, Traversable[V]] = l.groupBy(_._1).mapValues(_.map(_._2))
 
   def apply(
-    mole: Mole,
-    sources: Iterable[(Capsule, Source)] = Iterable.empty,
-    hooks: Iterable[(Capsule, Hook)] = Iterable.empty,
-    environments: Map[Capsule, Environment] = Map.empty,
-    grouping: Map[Capsule, Grouping] = Map.empty,
-    implicits: Context = Context.empty,
-    seed: Long = Workspace.newSeed,
-    defaultEnvironment: LocalEnvironment = LocalEnvironment(),
-    tmpDirectory: File = Workspace.newDir("execution"),
-    cleanOnFinish: Boolean = true)(implicit executionContext: MoleExecutionContext = MoleExecutionContext.default) =
+    mole:               Mole,
+    sources:            Iterable[(Capsule, Source)] = Iterable.empty,
+    hooks:              Iterable[(Capsule, Hook)]   = Iterable.empty,
+    environments:       Map[Capsule, Environment]   = Map.empty,
+    grouping:           Map[Capsule, Grouping]      = Map.empty,
+    implicits:          Context                     = Context.empty,
+    seed:               Long                        = Workspace.newSeed,
+    defaultEnvironment: LocalEnvironment            = LocalEnvironment(),
+    tmpDirectory:       File                        = Workspace.newDir("execution"),
+    cleanOnFinish:      Boolean                     = true
+  )(implicit executionContext: MoleExecutionContext = MoleExecutionContext.default) =
     new MoleExecution(
       mole,
       listOfTupleToMap(sources),
@@ -79,23 +80,25 @@ object MoleExecution extends Logger {
       seed,
       defaultEnvironment,
       tmpDirectory,
-      cleanOnFinish)(implicits, executionContext)
+      cleanOnFinish
+    )(implicits, executionContext)
 
 }
 
 case class JobStatuses(ready: Long, running: Long, completed: Long)
 
 class MoleExecution(
-    val mole: Mole,
-    val sources: Sources,
-    val hooks: Hooks,
-    val environments: Map[Capsule, Environment],
-    val grouping: Map[Capsule, Grouping],
-    val seed: Long,
+    val mole:               Mole,
+    val sources:            Sources,
+    val hooks:              Hooks,
+    val environments:       Map[Capsule, Environment],
+    val grouping:           Map[Capsule, Grouping],
+    val seed:               Long,
     val defaultEnvironment: LocalEnvironment,
-    val tmpDirectory: File,
-    val cleanOnFinish: Boolean,
-    val id: String = UUID.randomUUID().toString)(val implicits: Context, val executionContext: MoleExecutionContext) {
+    val tmpDirectory:       File,
+    val cleanOnFinish:      Boolean,
+    val id:                 String                    = UUID.randomUUID().toString
+)(val implicits: Context, val executionContext: MoleExecutionContext) {
 
   private val _started = Ref(false)
   private val _canceled = Ref(false)
@@ -107,7 +110,7 @@ class MoleExecution(
   private val ticketNumber = Ref(0L)
 
   private val waitingJobs: TMap[Capsule, TMap[MoleJobGroup, Ref[List[MoleJob]]]] =
-    TMap(grouping.map { case (c, g) ⇒ c -> TMap.empty[MoleJobGroup, Ref[List[MoleJob]]] }.toSeq: _*)
+    TMap(grouping.map { case (c, g) ⇒ c → TMap.empty[MoleJobGroup, Ref[List[MoleJob]]] }.toSeq: _*)
 
   private val nbWaiting = Ref(0)
   private val _completed = Ref(0L)
@@ -135,7 +138,7 @@ class MoleExecution(
       grouping.get(capsule) match {
         case Some(strategy) ⇒
           val groups = waitingJobs(capsule)
-          val category = strategy(moleJob.context, TMap.asMap(groups).map { case (gr, jobs) ⇒ gr -> jobs() })
+          val category = strategy(moleJob.context, TMap.asMap(groups).map { case (gr, jobs) ⇒ gr → jobs() })
           val jobs = groups.getOrElseUpdate(category, Ref(List.empty))
           jobs() = moleJob :: jobs()
           nbWaiting += 1
@@ -143,12 +146,12 @@ class MoleExecution(
           if (strategy.complete(jobs())) {
             groups -= category
             nbWaiting -= jobs().size
-            Some(new Job(this, jobs()) -> capsule)
+            Some(new Job(this, jobs()) → capsule)
           }
           else None
         case None ⇒
           val job = new Job(this, List(moleJob))
-          Some(job -> capsule)
+          Some(job → capsule)
       }
     }.map { case (j, c) ⇒ submit(j, c) }
 
@@ -168,7 +171,7 @@ class MoleExecution(
         for {
           (capsule, groups) ← TMap.asMap(waitingJobs).toList
           (_, jobs) ← TMap.asMap(groups).toList
-        } yield capsule -> jobs()
+        } yield capsule → jobs()
       nbWaiting() = 0
       waitingJobs.clear
       jobs

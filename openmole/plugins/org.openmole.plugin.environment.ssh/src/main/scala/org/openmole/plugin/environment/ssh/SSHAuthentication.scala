@@ -53,7 +53,7 @@ object SSHAuthentication {
     val targetFormat = "(.*):([0-9]*)".r
 
     val (host, port) = a.target match {
-      case targetFormat(h, p) ⇒ h -> p.toInt
+      case targetFormat(h, p) ⇒ h → p.toInt
       case h                  ⇒ (h, 22)
     }
 

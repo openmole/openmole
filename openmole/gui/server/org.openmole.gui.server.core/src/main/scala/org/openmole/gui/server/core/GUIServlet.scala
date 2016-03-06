@@ -161,7 +161,8 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
         tags.script(tags.`type` := "text/javascript", tags.src := "js/pluginMapping.js")
       ),
       tags.body(
-        tags.onload := "fillMap();ScriptClient().run();")
+        tags.onload := "fillMap();ScriptClient().run();"
+      )
     )
   }
 
@@ -170,7 +171,7 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
     else {
       val testing = toTest.last
       Try(params(testing)) match {
-        case Success(p) ⇒ parseParams(toTest.dropRight(1), evaluated + (testing -> p), errors)
+        case Success(p) ⇒ parseParams(toTest.dropRight(1), evaluated + (testing → p), errors)
         case Failure(e) ⇒ parseParams(toTest.dropRight(1), evaluated, errors :+ e)
       }
     }
@@ -178,8 +179,10 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
 
   post(s"/$basePath/*") {
     Await.result(AutowireServer.route[Api](ApiImpl)(
-      autowire.Core.Request(basePath.split("/").toSeq ++ multiParams("splat").head.split("/"),
-        upickle.read[Map[String, String]](request.body))
+      autowire.Core.Request(
+        basePath.split("/").toSeq ++ multiParams("splat").head.split("/"),
+        upickle.read[Map[String, String]](request.body)
+      )
     ), Duration.Inf)
   }
 }

@@ -34,15 +34,16 @@ class TextPanel(_modalID: bs.ModalID, title: String) extends ModalPanel {
 
   def onClose() = {}
 
-  val dialog = bs.modalDialog(modalID,
+  val dialog = bs.modalDialog(
+    modalID,
     headerDialog(
       tags.span(tags.b(title))
     ),
     bodyDialog(
       tags.div(Rx {
         bs.textArea(30)(content())
-      }
-      )),
+      })
+    ),
     footerDialog(closeButton)
   )
 

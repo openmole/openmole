@@ -20,7 +20,7 @@ package org.openmole.gui.plugin.task.systemexec.client
 import org.openmole.gui.ext.dataui.PanelUI
 import scala.scalajs.js.annotation.JSExport
 import scalatags.JsDom.all._
-import fr.iscpif.scaladget.api.{BootstrapTags => bs}
+import fr.iscpif.scaladget.api.{ BootstrapTags => bs }
 
 @JSExport("org.openmole.gui.plugin.task.systemexec.client.SystemExecTaskPanelUI")
 class SystemExecTaskPanelUI(dataUI: SystemExecTaskDataUI) extends PanelUI {
@@ -32,7 +32,7 @@ class SystemExecTaskPanelUI(dataUI: SystemExecTaskDataUI) extends PanelUI {
     codeInput
   )
 
-  def save(onsave: ()=> Unit) = {
+  def save(onsave: () => Unit) = {
     dataUI.code() = codeInput.value
   }
 }

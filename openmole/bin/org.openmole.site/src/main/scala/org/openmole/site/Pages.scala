@@ -185,7 +185,7 @@ object DocumentationPages { index ⇒
     def up(p: DocumentationPage): Option[DocumentationPage] = p.parent
 
     table(id := "documentation-bottom-links")(
-      Seq("previous" -> previous(p), "up" -> up(p), "next" -> next(p)).map {
+      Seq("previous" → previous(p), "up" → up(p), "next" → next(p)).map {
         case (t, None)       ⇒ td(id := "documentation-bottom-link-unavailable")(t)
         case (item, Some(p)) ⇒ td(id := "documentation-bottom-link")(a(item, href := p.file))
       }

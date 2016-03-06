@@ -24,9 +24,11 @@ import org.openmole.gui.plugin.task.systemexec.ext.SystemExecTaskData
 import rx._
 
 class SystemExecTaskDataUI(val code: Var[String] = Var("")) extends TaskDataUI {
-  def data = new SystemExecTaskData(code,
-                                    inputDataUI().data.inputs,
-                                    outputDataUI().data.outputs)
+  def data = new SystemExecTaskData(
+    code,
+    inputDataUI().data.inputs,
+    outputDataUI().data.outputs
+  )
 
   def panelUI = new SystemExecTaskPanelUI(this)
 
@@ -37,14 +39,12 @@ class SystemExecTaskDataUI(val code: Var[String] = Var("")) extends TaskDataUI {
     stringField("Destination", fileFilter),
     booleanField("Workdir", true, fileFilter),
     booleanField("Link", false, fileFilter)
-  )
-  )
+  ))
 
   override lazy val outputMappingsFactory = IOMappingsFactory(Seq(
     stringField("Source", fileFilter),
     booleanField("Workdir", true, fileFilter),
     booleanField("StdOut", false, stringFilter),
     booleanField("StdErr", false, stringFilter)
-  )
-  )
+  ))
 }

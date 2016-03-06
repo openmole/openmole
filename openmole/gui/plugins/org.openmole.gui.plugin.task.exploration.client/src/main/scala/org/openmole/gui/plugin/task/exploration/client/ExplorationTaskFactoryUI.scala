@@ -23,7 +23,7 @@ import scala.scalajs.js.annotation.JSExport
 
 @JSExport("org.openmole.gui.plugin.task.exploration.client.ExplorationTaskFactoryUI")
 class ExplorationTaskFactoryUI extends FactoryWithDataUI {
-type DATAUI = TaskDataUI
-def dataUI = new ExplorationTaskDataUI
-val name = "Exploration"
+  type DATAUI = TaskDataUI
+  def dataUI = new ExplorationTaskDataUI
+  val name = "Exploration"
 }

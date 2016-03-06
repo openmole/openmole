@@ -46,7 +46,6 @@ case class TaskExecutionContext(tmpDirectory: File, localEnvironment: LocalEnvir
 
 trait Task <: InputOutputCheck with Name {
 
-
   /**
    *
    * Perform this task.

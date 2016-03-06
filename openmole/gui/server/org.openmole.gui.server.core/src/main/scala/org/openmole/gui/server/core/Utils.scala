@@ -221,7 +221,8 @@ object Utils {
         case (k, v) ⇒
           val flatV = v.flatten
           if (flatV.size == 1) classTrees :+ ClassLeaf(flatV.head)
-          else classTrees :+ ClassNode(k,
+          else classTrees :+ ClassNode(
+            k,
             build(v.map(_.tail), classTrees)
           )
       }.toSeq

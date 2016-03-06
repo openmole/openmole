@@ -47,7 +47,8 @@ class SystemExecTaskBuilder(commands: Command*) extends ExternalTaskBuilder
       builder.returnValue,
       builder.stdOut,
       builder.stdErr,
-      builder.environmentVariables.toList) with builder.Built {
+      builder.environmentVariables.toList
+    ) with builder.Built {
       override val outputs: PrototypeSet = builder.outputs + List(stdOut, stdErr, returnValue).flatten
     }
 

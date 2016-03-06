@@ -25,9 +25,9 @@ trait OutputBuilder { builder ⇒
 
   def addExploredOutput(ds: Prototype[_ <: Array[_]]*): this.type = {
     for {
-      d <- ds
+      d ← ds
     } {
-      if(!_outputs.contains(d)) addOutput(d)
+      if (!_outputs.contains(d)) addOutput(d)
       _outputs = _outputs.explore(d.name)
     }
     this

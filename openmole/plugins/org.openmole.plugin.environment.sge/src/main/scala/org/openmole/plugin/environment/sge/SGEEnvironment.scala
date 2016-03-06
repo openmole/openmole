@@ -30,18 +30,19 @@ import scala.concurrent.duration.Duration
 
 object SGEEnvironment {
   def apply(
-    user: String,
-    host: String,
-    port: Int = 22,
-    queue: Option[String] = None,
-    openMOLEMemory: Option[Int] = None,
-    wallTime: Option[Duration] = None,
-    memory: Option[Int] = None,
-    sharedDirectory: Option[String] = None,
-    workDirectory: Option[String] = None,
-    threads: Option[Int] = None,
-    storageSharedLocally: Boolean = false,
-    name: Option[String] = None)(implicit decrypt: Decrypt) =
+    user:                 String,
+    host:                 String,
+    port:                 Int              = 22,
+    queue:                Option[String]   = None,
+    openMOLEMemory:       Option[Int]      = None,
+    wallTime:             Option[Duration] = None,
+    memory:               Option[Int]      = None,
+    sharedDirectory:      Option[String]   = None,
+    workDirectory:        Option[String]   = None,
+    threads:              Option[Int]      = None,
+    storageSharedLocally: Boolean          = false,
+    name:                 Option[String]   = None
+  )(implicit decrypt: Decrypt) =
     new SGEEnvironment(
       user = user,
       host = host,
@@ -54,22 +55,24 @@ object SGEEnvironment {
       workDirectory = workDirectory,
       threads = threads,
       storageSharedLocally = storageSharedLocally,
-      name = name)(SSHAuthentication(user, host, port).apply)
+      name = name
+    )(SSHAuthentication(user, host, port).apply)
 }
 
 class SGEEnvironment(
-    val user: String,
-    val host: String,
-    override val port: Int,
-    val queue: Option[String],
+    val user:                    String,
+    val host:                    String,
+    override val port:           Int,
+    val queue:                   Option[String],
     override val openMOLEMemory: Option[Int],
-    val wallTime: Option[Duration],
-    val memory: Option[Int],
-    val sharedDirectory: Option[String],
-    val workDirectory: Option[String],
-    override val threads: Option[Int],
-    val storageSharedLocally: Boolean,
-    override val name: Option[String])(val credential: fr.iscpif.gridscale.ssh.SSHAuthentication) extends ClusterEnvironment with MemoryRequirement { env ⇒
+    val wallTime:                Option[Duration],
+    val memory:                  Option[Int],
+    val sharedDirectory:         Option[String],
+    val workDirectory:           Option[String],
+    override val threads:        Option[Int],
+    val storageSharedLocally:    Boolean,
+    override val name:           Option[String]
+)(val credential: fr.iscpif.gridscale.ssh.SSHAuthentication) extends ClusterEnvironment with MemoryRequirement { env ⇒
 
   type JS = SGEJobService
 

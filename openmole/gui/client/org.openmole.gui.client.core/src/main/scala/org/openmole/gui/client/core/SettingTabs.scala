@@ -73,8 +73,7 @@ object SettingTabs {
 
     case _                    ⇒ Seq()
 
-  }
-  )
+  })
 
   def apply(panel: SettingsPanel, dataUI: CapsuleDataUI): SettingTabs = new SettingTabs(Seq(
     dataUI.dataUI.map {
@@ -91,7 +90,8 @@ object SettingTabs {
     },
     Some(ioTab("Hooks", dataUI.hooks.map {
       _.panelUI
-    }))).flatten)
+    }))
+  ).flatten)
 }
 
 import SettingTabs.SettingTab._
@@ -107,16 +107,14 @@ class SettingTabs(tabs: Seq[SettingTab]) {
           navItem(c.id, c.name, () ⇒ {
             currentTab() = Some(c)
           }, active = currentTab() == Some(c))
-        }): _*
-      )
+        }): _*)
     },
     Rx {
       tags.div(id := "tabContent")(currentTab().map { t: SettingTab ⇒
         for (el ← t.panelUIs) yield {
           bs.div(spacer20)(el.view)
         }
-      }.getOrElse(Seq()).toSeq: _*
-      )
+      }.getOrElse(Seq()).toSeq: _*)
     }
   )
 

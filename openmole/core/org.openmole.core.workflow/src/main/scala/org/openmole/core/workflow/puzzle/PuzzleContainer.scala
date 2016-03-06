@@ -27,18 +27,20 @@ trait PuzzleContainer {
 case class OutputPuzzleContainer(
     puzzle: Puzzle,
     output: Capsule,
-    hooks: Seq[Hook] = Seq.empty) extends HookDecorator[OutputPuzzleContainer] with PuzzleContainer {
+    hooks:  Seq[Hook] = Seq.empty
+) extends HookDecorator[OutputPuzzleContainer] with PuzzleContainer {
   def hook(hs: Hook*) = copy(hooks = hooks ++ hs)
-  def buildPuzzle = puzzle.copy(hooks = puzzle.hooks ++ hooks.map(output -> _))
+  def buildPuzzle = puzzle.copy(hooks = puzzle.hooks ++ hooks.map(output → _))
 }
 
 case class OutputEnvironmentPuzzleContainer(
-    puzzle: Puzzle,
-    output: Capsule,
-    delegate: Capsule,
-    hooks: Seq[Hook] = Seq.empty,
+    puzzle:      Puzzle,
+    output:      Capsule,
+    delegate:    Capsule,
+    hooks:       Seq[Hook]           = Seq.empty,
     environment: Option[Environment] = None,
-    grouping: Option[Grouping] = None) extends HookDecorator[OutputEnvironmentPuzzleContainer] with EnvironmentDecorator[OutputEnvironmentPuzzleContainer] with PuzzleContainer {
+    grouping:    Option[Grouping]    = None
+) extends HookDecorator[OutputEnvironmentPuzzleContainer] with EnvironmentDecorator[OutputEnvironmentPuzzleContainer] with PuzzleContainer {
 
   def on(environment: Environment) = copy(environment = Some(environment))
   def by(strategy: Grouping): OutputEnvironmentPuzzleContainer = copy(grouping = Some(strategy))
@@ -46,8 +48,8 @@ case class OutputEnvironmentPuzzleContainer(
 
   def buildPuzzle: Puzzle =
     puzzle.copy(
-      hooks = puzzle.hooks ++ hooks.map(output -> _),
-      environments = puzzle.environments ++ environment.map(delegate -> _),
-      grouping = puzzle.grouping ++ grouping.map(delegate -> _)
+      hooks = puzzle.hooks ++ hooks.map(output → _),
+      environments = puzzle.environments ++ environment.map(delegate → _),
+      grouping = puzzle.grouping ++ grouping.map(delegate → _)
     )
 }

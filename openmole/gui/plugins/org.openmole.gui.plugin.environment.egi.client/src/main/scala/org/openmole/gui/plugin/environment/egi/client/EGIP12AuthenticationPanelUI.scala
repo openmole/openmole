@@ -9,8 +9,8 @@ import org.openmole.gui.ext.dataui.PanelUI
 import org.openmole.gui.shared.Api
 import scala.scalajs.js.annotation.JSExport
 import scalatags.JsDom.all._
-import fr.iscpif.scaladget.api.{BootstrapTags => bs}
-import scalatags.JsDom.{tags ⇒ tags}
+import fr.iscpif.scaladget.api.{ BootstrapTags => bs }
+import scalatags.JsDom.{ tags ⇒ tags }
 import bs._
 
 /*
@@ -36,8 +36,8 @@ class EGIP12AuthenticationPanelUI(data: EGIP12AuthenticationData) extends PanelU
   val password = bs.input(data.cypheredPassword, key("spacer5"))(
     placeholder := "Password",
     `type` := "password",
-    width := "130px").render
-
+    width := "130px"
+  ).render
 
   lazy val privateKey = new AuthFileUploaderUI(data.privateKey.getOrElse(""), data.privateKey.isDefined, Some("egi.p12"))
 
@@ -47,11 +47,12 @@ class EGIP12AuthenticationPanelUI(data: EGIP12AuthenticationData) extends PanelU
     bs.labeledField("Key file", privateKey.view)
   )
 
-
   def save(onsave: () => Unit) =
     OMPost[Api].removeAuthentication(data).call().foreach { d ⇒
-      OMPost[Api].addAuthentication(EGIP12AuthenticationData(password.value,
-        Some("egi.p12"))).call().foreach { b =>
+      OMPost[Api].addAuthentication(EGIP12AuthenticationData(
+        password.value,
+        Some("egi.p12")
+      )).call().foreach { b =>
         onsave()
       }
     }

@@ -63,7 +63,7 @@ trait Authentication <: Persistent {
     d.listFilesSafe { f: File ⇒ f.getName.matches(Authentication.pattern) }.flatMap {
       f ⇒
         Try(loadFile[Any](f)) match {
-          case Success(t) ⇒ Some(f.getName -> t)
+          case Success(t) ⇒ Some(f.getName → t)
           case Failure(e) ⇒
             Log.logger.log(Log.WARNING, "Error while deserialising an authentication", e)
             None
@@ -72,6 +72,6 @@ trait Authentication <: Persistent {
   }
 
   def allByCategory: Map[String, Seq[Any]] =
-    baseDir.listFilesSafe { f: File ⇒ f.isDirectory }.map { d ⇒ d.getName -> inCategory(d.getName).map(_._2) }.toMap
+    baseDir.listFilesSafe { f: File ⇒ f.isDirectory }.map { d ⇒ d.getName → inCategory(d.getName).map(_._2) }.toMap
 
 }

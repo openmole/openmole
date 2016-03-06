@@ -23,16 +23,15 @@ import org.openmole.plugin.task.systemexec._
 
 import scala.util.Try
 
-
 class SystemExecTaskFactory(val data: SystemExecTaskData) extends CoreObjectFactory {
 
-  def coreObject(): Try[Any] =  Try {
-      val syset = SystemExecTask("" /*data.name,
+  def coreObject(): Try[Any] = Try {
+    val syset = SystemExecTask("" /*data.name,
         data.directory ,
         data.returnValue.map{p=>ServerFactories.coreObject(p).flatten},
          data.output*/
-      )
-      //syset command data.command.filterNot(_ == '\n')
-    }
+    )
+    //syset command data.command.filterNot(_ == '\n')
+  }
 
 }

@@ -38,9 +38,10 @@ object LogRange {
   def apply[T](range: Range[T], steps: FromContext[T])(implicit lg: Log[T]) = new LogRange[T](range, steps)
 
   def apply[T](
-    min: FromContext[T],
-    max: FromContext[T],
-    steps: FromContext[T])(implicit integral: Integral[T], log: Log[T]): LogRange[T] =
+    min:   FromContext[T],
+    max:   FromContext[T],
+    steps: FromContext[T]
+  )(implicit integral: Integral[T], log: Log[T]): LogRange[T] =
     LogRange[T](Range[T](min, max), steps)
 
 }

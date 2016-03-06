@@ -3,7 +3,7 @@ package org.openmole.gui.plugin.environment.egi.server
 import org.openmole.core.workspace.Workspace
 import org.openmole.gui.ext.data._
 import org.openmole.gui.server.core.Utils._
-import org.openmole.plugin.environment.egi.{EGIAuthentication, P12Certificate}
+import org.openmole.plugin.environment.egi.{ EGIAuthentication, P12Certificate }
 
 /*
  * Copyright (C) 25/06/15 // mathieu.leclaire@openmole.org
@@ -38,18 +38,19 @@ class EGIP12AuthenticationFactory extends AuthenticationFactory {
       case Some(p12: P12Certificate) =>
         Seq(EGIP12AuthenticationData(
           Workspace.decrypt(p12.cypheredPassword),
-          Some(p12.certificate.getName)))
+          Some(p12.certificate.getName)
+        ))
       case x: Any => Seq()
     }
   }
-
 
   def coreObject(data: AuthenticationData): Option[P12Certificate] = data match {
     case p12: EGIP12AuthenticationData =>
       p12.privateKey match {
         case Some(pk: String) => Some(P12Certificate(
           Workspace.encrypt(p12.cypheredPassword),
-          authenticationFile(pk)))
+          authenticationFile(pk)
+        ))
         case _ => None
       }
     case _ => None

@@ -22,7 +22,7 @@ import scala.scalajs.js.annotation.JSExport
 
 @JSExport("org.openmole.gui.plugin.environment.ssh.client.SSHEnvironmentFactoryUI")
 class SSHEnvironmentFactoryUI extends FactoryWithDataUI {
-type DATAUI = SSHEnvironmentDataUI
-def dataUI = new SSHEnvironmentDataUI
-val name = "SSH"
+  type DATAUI = SSHEnvironmentDataUI
+  def dataUI = new SSHEnvironmentDataUI
+  val name = "SSH"
 }

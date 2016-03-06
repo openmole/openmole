@@ -89,14 +89,14 @@ class LimitedAccess(val nbTokens: Int, val maxByPeriod: Int) extends UsageContro
 
     allReadyHasAToken match {
       case Some((t, n)) ⇒
-        taken += (t -> (n + 1))
+        taken += (t → (n + 1))
         Some(t)
       case None ⇒
         val token = tryGet
         token.foreach {
           t ⇒
             tokens -= t
-            taken += (t -> 0)
+            taken += (t → 0)
         }
         token
     }

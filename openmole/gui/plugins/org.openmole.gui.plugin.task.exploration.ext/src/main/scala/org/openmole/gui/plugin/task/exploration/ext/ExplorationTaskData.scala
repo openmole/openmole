@@ -17,8 +17,10 @@ package org.openmole.gui.plugin.task.exploration.ext
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.ext.data.{TaskData, InOutput}
+import org.openmole.gui.ext.data.{ TaskData, InOutput }
 
-case class ExplorationTaskData(inputs: Seq[InOutput] = Seq(),
-outputs: Seq[InOutput] = Seq()) extends TaskData {
+case class ExplorationTaskData(
+  inputs: Seq[InOutput] = Seq(),
+    outputs: Seq[InOutput] = Seq()
+) extends TaskData {
 }

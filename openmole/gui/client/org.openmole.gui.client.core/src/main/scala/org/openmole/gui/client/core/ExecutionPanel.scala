@@ -25,7 +25,7 @@ import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import org.openmole.gui.misc.utils.Utils
 import org.openmole.gui.shared.Api
 import scala.concurrent.duration.Duration
-import scala.util.{Failure, Success}
+import scala.util.{ Failure, Success }
 import scalatags.JsDom.all._
 import org.openmole.gui.misc.js.{ _ }
 import org.openmole.gui.misc.js.Expander._
@@ -47,8 +47,9 @@ class ExecutionPanel extends ModalPanel {
 
   case class PanelInfo(
     executionInfos: Seq[(ExecutionId, StaticExecutionInfo, ExecutionInfo)],
-    outputsInfos: Seq[RunningOutputData],
-    envErrorsInfos: Seq[RunningEnvironmentData])
+    outputsInfos:   Seq[RunningOutputData],
+    envErrorsInfos: Seq[RunningEnvironmentData]
+  )
 
   val panelInfo = Var(PanelInfo(Seq(), Seq(), Seq()))
   val expander = new Expander
@@ -62,20 +63,21 @@ class ExecutionPanel extends ModalPanel {
       setTimeout(5000) { if (opened.get) updatePanelInfo }
     }
 
-    if(updating.compareAndSet(false, true)) {
+    if (updating.compareAndSet(false, true)) {
       OMPost[Api].allStates.call().andThen {
         case Success(executionInfos) ⇒
-          OMPost[Api].runningErrorEnvironmentAndOutputData (
+          OMPost[Api].runningErrorEnvironmentAndOutputData(
             lines = nbOutLineInput.value.toInt,
-            errorLevelSelector.content ().map { _.level }.getOrElse ( ErrorLevel () ) ).call ().andThen {
-            case Success(err) ⇒
-              panelInfo () = PanelInfo (executionInfos, err._2, err._1)
-              doScrolls
-              delay
-            case Failure(_) =>
-              delay
-          }
-        case Failure(_) => delay
+            errorLevelSelector.content().map { _.level }.getOrElse(ErrorLevel())
+          ).call().andThen {
+              case Success(err) ⇒
+                panelInfo() = PanelInfo(executionInfos, err._2, err._1)
+                doScrolls
+                delay
+              case Failure(_) ⇒
+                delay
+            }
+        case Failure(_) ⇒ delay
       }
     }
   }
@@ -95,11 +97,13 @@ class ExecutionPanel extends ModalPanel {
     }
   }
 
-  case class ExecutionDetails(ratio: String,
-                              running: Long,
-                              error: Option[ExecError] = None,
-                              envStates: Seq[EnvironmentState] = Seq(),
-                              outputs: String = "")
+  case class ExecutionDetails(
+    ratio:     String,
+    running:   Long,
+    error:     Option[ExecError]     = None,
+    envStates: Seq[EnvironmentState] = Seq(),
+    outputs:   String                = ""
+  )
 
   val scriptTextAreas: Var[Map[ExecutionId, ScrollableText]] = Var(Map())
   val errorTextAreas: Var[Map[ExecutionId, ScrollableText]] = Var(Map())
@@ -114,7 +118,7 @@ class ExecutionPanel extends ModalPanel {
     }
     else {
       val toBeAdded = builder()
-      panelMap() = panelMap() + (id -> toBeAdded)
+      panelMap() = panelMap() + (id → toBeAdded)
       toBeAdded
     }
   }
@@ -172,16 +176,16 @@ class ExecutionPanel extends ModalPanel {
             val outputLink = expander.getGlyph(glyph_list, "", id.id, outputStreamID, () ⇒ doScrolls)
 
             lazy val hiddenMap: Map[VisibleID, Modifier] = Map(
-              scriptID -> staticPanel(id, scriptTextAreas,
-                () ⇒ scrollableText(staticInfo.script)
-              ).view,
-              envID -> {
+              scriptID → staticPanel(id, scriptTextAreas,
+                () ⇒ scrollableText(staticInfo.script)).view,
+              envID → {
                 tags.div(
                   details.envStates.map { e ⇒
                     bs.table(striped)(`class` := "executionTable")(
                       thead,
                       tbody(
-                        Seq(bs.tr(row)(
+                        Seq(
+                          bs.tr(row)(
                           bs.td(col_md_3)(tags.span(e.taskName).tooltip("Environment name")),
                           bs.td(col_md_2)(tags.span(bs.glyph(bs.glyph_upload), s" ${e.networkActivity.uploadingFiles} ${displaySize(e.networkActivity.uploadedSize, e.networkActivity.readableUploadedSize)}").tooltip("Uploaded")),
                           bs.td(col_md_2)(tags.span(bs.glyph(bs.glyph_download), s" ${e.networkActivity.downloadingFiles} ${displaySize(e.networkActivity.downloadedSize, e.networkActivity.readableDownloadedSize)}").tooltip("Downloaded")),
@@ -195,9 +199,8 @@ class ExecutionPanel extends ModalPanel {
                             () ⇒
                               if (envErrorVisible().contains(e.envId)) envErrorVisible() = envErrorVisible().filterNot { _ == e.envId }
                               else envErrorVisible() = envErrorVisible() :+ e.envId
-                          }
-                          )("details")
-                          )),
+                          })("details"))
+                        ),
                           bs.tr(row)(
                             bs.td(col_md_12)(
                               `class` := { if (envErrorVisible().contains(e.envId)) "" else "displayNone" },
@@ -217,16 +220,16 @@ class ExecutionPanel extends ModalPanel {
                   }
                 )
               },
-              errorID ->
+              errorID →
                 monospace(
                   staticPanel(
-                    id,
-                    errorTextAreas,
-                    () ⇒ scrollableText(),
-                    (sT: ScrollableText) ⇒ sT.setContent(new String(details.error.map { _.stackTrace }.getOrElse("")))
-                  ).view
+                  id,
+                  errorTextAreas,
+                  () ⇒ scrollableText(),
+                  (sT: ScrollableText) ⇒ sT.setContent(new String(details.error.map { _.stackTrace }.getOrElse("")))
+                ).view
                 ),
-              outputStreamID -> staticPanel(
+              outputStreamID → staticPanel(
                 id,
                 outputTextAreas,
                 () ⇒ scrollableText("", BottomScroll()),
@@ -235,7 +238,8 @@ class ExecutionPanel extends ModalPanel {
                     _.id == id
                   }.map {
                     _.output
-                  }.mkString("\n"))
+                  }.mkString("\n")
+                )
               ).view
             )
 
@@ -259,11 +263,9 @@ class ExecutionPanel extends ModalPanel {
                 case Some(v: VisibleID) ⇒ tags.td(colspan := 12)(hiddenMap(v))
                 case _                  ⇒ tags.div()
               }
-            )
-            )
+            ))
           }
-        }
-        )
+        })
       }
     ).render
   }
@@ -276,7 +278,8 @@ class ExecutionPanel extends ModalPanel {
     "vert-align " + { if (expander.isVisible(expandID, visibleID)) "executionVisible" }
   }
 
-  val dialog = modalDialog(modalID,
+  val dialog = modalDialog(
+    modalID,
     headerDialog(
       bs.div("executionHeader")(
         tags.b("Executions"),
@@ -286,13 +289,15 @@ class ExecutionPanel extends ModalPanel {
             nbOutLineInput
           ),
           bs.div("width40")(
-            tags.label(`class` := "col-md-6 execLevel","Environment error level "),
-            bs.div( "col-md-1")(errorLevelSelector.selector)
+            tags.label(`class` := "col-md-6 execLevel", "Environment error level "),
+            bs.div("col-md-1")(errorLevelSelector.selector)
           )
         )
-      )),
+      )
+    ),
     bodyDialog(`class` := "executionTable")(
-      executionTable),
+      executionTable
+    ),
     footerDialog(
       closeButton
     )

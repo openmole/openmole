@@ -213,14 +213,14 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
     if (!jobs.isEmpty) {
       val timeStemps = storage.listNames(timeStempsDirName)
 
-      val groupedStemps = timeStemps.map { ts ⇒ ts.split(timeStempSeparator).head -> ts }.groupBy { _._1 }
-      val stempsByJob = jobs.map { j ⇒ j -> groupedStemps.getOrElse(j, Iterable.empty).map { _._2 } }
+      val groupedStemps = timeStemps.map { ts ⇒ ts.split(timeStempSeparator).head → ts }.groupBy { _._1 }
+      val stempsByJob = jobs.map { j ⇒ j → groupedStemps.getOrElse(j, Iterable.empty).map { _._2 } }
 
-      val possibleChoices = stempsByJob.map { case (j, s) ⇒ s.size -> j }.foldLeft(Int.MaxValue -> List.empty[String]) {
+      val possibleChoices = stempsByJob.map { case (j, s) ⇒ s.size → j }.foldLeft(Int.MaxValue → List.empty[String]) {
         (acc, cur) ⇒
-          if (cur._1 < acc._1) cur._1 -> List(cur._2)
+          if (cur._1 < acc._1) cur._1 → List(cur._2)
           else if (cur._1 > acc._1) acc
-          else acc._1 -> (cur._2 +: acc._2)
+          else acc._1 → (cur._2 +: acc._2)
       }
 
       logger.info("Choose between " + possibleChoices._2.size + " jobs with " + possibleChoices._1 + " timestemps ")
@@ -251,7 +251,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
         }
 
       logger.info("Job execution message is " + jobMessage.executionMessagePath)
-      Some(job -> jobMessage)
+      Some(job → jobMessage)
     }
     else None
   }
@@ -261,7 +261,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
     def download(fileMessage: FileMessage, raw: Boolean) = {
       val file = Workspace.newFile("cache", ".bin")
       storage.download(fileMessage.path, file, TransferOptions(raw = raw))
-      file -> fileMessage.hash
+      file → fileMessage.hash
     }
 
     selectAJob(id, storage) match {
@@ -278,8 +278,9 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
                 val (archive, hash) = download(msg, true)
                 logger.info("Extracting runtime.")
                 archive.extractUncompress(dir)
-                dir -> hash
-              })
+                dir → hash
+              }
+            )
           cached ::= jobMessage.runtime
 
           val pluginDir = Workspace.newDir()

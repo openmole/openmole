@@ -41,13 +41,13 @@ object ServerFactories {
   }
 
   def add(dataClass: Class[_], factory: Factory, factoryUI: FactoryWithDataUI) = instance.factories.synchronized {
-    instance.factories += dataClass -> factory
-    instance.factoriesUI += dataClass.getName -> factoryUI
+    instance.factories += dataClass → factory
+    instance.factoriesUI += dataClass.getName → factoryUI
   }
 
   def addAuthenticationFactory(dataClass: Class[_], factory: AuthenticationFactory, factoryUI: FactoryWithPanelUI) = instance.authenticationFactoriesUI.synchronized {
-    instance.authenticationFactories += dataClass -> factory
-    instance.authenticationFactoriesUI += dataClass.getName -> factoryUI
+    instance.authenticationFactories += dataClass → factory
+    instance.authenticationFactoriesUI += dataClass.getName → factoryUI
   }
 
   def remove(dataClass: Class[_]) = instance.factories.synchronized {

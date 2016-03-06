@@ -25,20 +25,20 @@ import scala.collection._
 object Mole {
 
   def nextCapsules(mole: Mole)(from: Capsule, lvl: Int) =
-    nextTransitions(mole)(from, lvl).map { case (t, lvl) ⇒ t.end.capsule -> lvl }
+    nextTransitions(mole)(from, lvl).map { case (t, lvl) ⇒ t.end.capsule → lvl }
 
   def nextTransitions(mole: Mole)(from: Capsule, lvl: Int) =
     mole.outputTransitions(from).map {
-      case t: IAggregationTransition    ⇒ t -> (lvl - 1)
-      case t: IEndExplorationTransition ⇒ t -> (lvl - 1)
-      case t: ISlaveTransition          ⇒ t -> lvl
-      case t: IExplorationTransition    ⇒ t -> (lvl + 1)
-      case t: ITransition               ⇒ t -> lvl
+      case t: IAggregationTransition    ⇒ t → (lvl - 1)
+      case t: IEndExplorationTransition ⇒ t → (lvl - 1)
+      case t: ISlaveTransition          ⇒ t → lvl
+      case t: IExplorationTransition    ⇒ t → (lvl + 1)
+      case t: ITransition               ⇒ t → lvl
     }
 
   def levels(mole: Mole) = {
-    val cache = mutable.HashMap(mole.root -> 0)
-    val toProceed = mutable.ListBuffer(mole.root -> 0)
+    val cache = mutable.HashMap(mole.root → 0)
+    val toProceed = mutable.ListBuffer(mole.root → 0)
 
     while (!toProceed.isEmpty) {
       val (capsule, level) = toProceed.remove(0)
@@ -47,7 +47,7 @@ object Mole {
           val continue = !cache.contains(c)
           val lvl = cache.getOrElseUpdate(c, l)
           if (lvl != l) throw new UserBadDataError("Inconsistent level found for capsule " + c)
-          if (continue) toProceed += (c -> l)
+          if (continue) toProceed += (c → l)
       }
     }
     cache
@@ -56,10 +56,11 @@ object Mole {
 }
 
 case class Mole(
-    val root: Capsule,
-    val transitions: Iterable[ITransition] = Iterable.empty,
+    val root:         Capsule,
+    val transitions:  Iterable[ITransition] = Iterable.empty,
     val dataChannels: Iterable[DataChannel] = Iterable.empty,
-    val inputs: PrototypeSet = PrototypeSet.empty) {
+    val inputs:       PrototypeSet          = PrototypeSet.empty
+) {
 
   lazy val slots = (Slot(root) :: transitions.map(_.end).toList).groupBy(_.capsule).mapValues(_.toSet).withDefault(c ⇒ Iterable.empty)
   lazy val capsules = slots.keys

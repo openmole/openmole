@@ -134,16 +134,20 @@ object TimeOrdering extends Ordering[TreeNode] {
   def compare(tn1: TreeNode, tn2: TreeNode) = tn1.time compare tn2.time
 }
 
-case class DirNode(name: Var[String],
-                   safePath: Var[SafePath],
-                   size: Long,
-                   readableSize: String,
-                   time: Long,
-                   readableTime: String) extends TreeNode
+case class DirNode(
+  name:         Var[String],
+  safePath:     Var[SafePath],
+  size:         Long,
+  readableSize: String,
+  time:         Long,
+  readableTime: String
+) extends TreeNode
 
-case class FileNode(name: Var[String],
-                    safePath: Var[SafePath],
-                    size: Long,
-                    readableSize: String,
-                    time: Long,
-                    readableTime: String) extends TreeNode
+case class FileNode(
+  name:         Var[String],
+  safePath:     Var[SafePath],
+  size:         Long,
+  readableSize: String,
+  time:         Long,
+  readableTime: String
+) extends TreeNode

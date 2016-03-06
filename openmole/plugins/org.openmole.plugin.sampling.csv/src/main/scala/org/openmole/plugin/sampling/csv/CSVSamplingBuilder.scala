@@ -35,7 +35,7 @@ class CSVSamplingBuilder(file: FromContext[File]) extends SamplingBuilder { buil
 
   def addColumn(proto: Prototype[_]): this.type = this.addColumn(proto.name, proto)
   def addColumn(name: String, proto: Prototype[_]): builder.type = {
-    _columns += (name -> proto)
+    _columns += (name → proto)
     this
   }
 

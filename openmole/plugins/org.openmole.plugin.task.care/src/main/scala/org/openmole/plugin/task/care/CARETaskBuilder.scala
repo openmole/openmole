@@ -37,7 +37,7 @@ class CARETaskBuilder(archiveLocation: File, command: systemexec.Command)
   val hostFiles = ListBuffer[(String, Option[String])]()
 
   def addHostFile(hostFile: String, binding: Option[String] = None): this.type = {
-    hostFiles.append(hostFile -> binding)
+    hostFiles.append(hostFile → binding)
     this
   }
 
@@ -50,7 +50,8 @@ class CARETaskBuilder(archiveLocation: File, command: systemexec.Command)
     stdOut,
     stdErr,
     environmentVariables.toList,
-    hostFiles.toList) with builder.Built {
+    hostFiles.toList
+  ) with builder.Built {
     override val outputs: PrototypeSet = builder.outputs + List(stdOut, stdErr, returnValue).flatten
   }
 

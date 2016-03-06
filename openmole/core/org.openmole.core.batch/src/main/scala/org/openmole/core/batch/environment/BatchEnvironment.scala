@@ -212,11 +212,11 @@ class SimpleBatchExecutionJob(val job: Job, val environment: SimpleBatchEnvironm
 
   def trySelectStorage() = {
     val s = environment.storage
-    s.tryGetToken.map(t => (s, t))
+    s.tryGetToken.map(t ⇒ (s, t))
   }
   def trySelectJobService() = {
     val js = environment.jobService
-    js.tryGetToken.map(t => (js, t))
+    js.tryGetToken.map(t ⇒ (js, t))
   }
 
 }

@@ -36,7 +36,6 @@ package systemexec {
 
   import org.openmole.core.workflow.builder.InputOutputBuilder
 
-
   trait ReturnValue {
     protected var returnValue: Option[Prototype[Int]] = None
 
@@ -74,15 +73,15 @@ package systemexec {
     protected val environmentVariables = new ListBuffer[(Prototype[_], String)]
 
     /**
-      * Add variable from openmole to the environment of the system exec task. The
-      * environment variable is set using a toString of the openmole variable content.
-      *
-      * @param prototype the prototype of the openmole variable to inject in the environment
-      * @param variable the name of the environment variable. By default the name of the environment
-      *                 variable is the same as the one of the openmole protoype.
-      */
+     * Add variable from openmole to the environment of the system exec task. The
+     * environment variable is set using a toString of the openmole variable content.
+     *
+     * @param prototype the prototype of the openmole variable to inject in the environment
+     * @param variable the name of the environment variable. By default the name of the environment
+     *                 variable is the same as the one of the openmole protoype.
+     */
     def addEnvironmentVariable(prototype: Prototype[_], variable: Option[String] = None): this.type = {
-      environmentVariables += prototype -> variable.getOrElse(prototype.name)
+      environmentVariables += prototype → variable.getOrElse(prototype.name)
       addInput(prototype)
       this
     }
@@ -96,7 +95,6 @@ package systemexec {
       this
     }
   }
-
 
   trait SystemExecPackage {
 
@@ -138,17 +136,17 @@ package systemexec {
 
     lazy val returnValue =
       new {
-        def := (v: Option[Prototype[Int]]) = (_:ReturnValue).setReturnValue(v)
+        def :=(v: Option[Prototype[Int]]) = (_: ReturnValue).setReturnValue(v)
       }
 
     lazy val stdOut =
       new {
-        def := (v: Option[Prototype[String]]) = (_: StdOutErr).setStdOut(v)
+        def :=(v: Option[Prototype[String]]) = (_: StdOutErr).setStdOut(v)
       }
 
     lazy val stdErr =
       new {
-        def :=(v: Option[Prototype[String]]) = (_:StdOutErr).setStdErr(v)
+        def :=(v: Option[Prototype[String]]) = (_: StdOutErr).setStdErr(v)
       }
 
     lazy val commands = add[{ def addCommand(os: OS, cmd: OSCommands*) }]
@@ -190,18 +188,20 @@ package object systemexec extends external.ExternalPackage with SystemExecPackag
   case class ExecutionResult(returnCode: Int, output: Option[String], errorOutput: Option[String])
 
   def commandLine(
-    cmd: Expansion,
+    cmd:     Expansion,
     workDir: String,
-    context: Context)(implicit rng: RandomProvider): Array[String] =
+    context: Context
+  )(implicit rng: RandomProvider): Array[String] =
     CommandLine.parse(cmd.expand(context + Variable(ExternalTask.PWD, workDir))).toStrings
 
   def execute(
-    command: Array[String],
-    workDir: File,
+    command:              Array[String],
+    workDir:              File,
     environmentVariables: Seq[(Prototype[_], String)],
-    context: Context,
-    returnOutput: Boolean,
-    returnError: Boolean) = {
+    context:              Context,
+    returnOutput:         Boolean,
+    returnError:          Boolean
+  ) = {
     try {
 
       val outBuilder = new StringOutputStream
@@ -217,7 +217,8 @@ package object systemexec extends external.ExternalPackage with SystemExecPackag
         runtime.exec(
           command,
           environmentVariables.map { case (p, v) ⇒ v + "=" + context(p).toString }.toArray,
-          workDir)
+          workDir
+        )
       }
 
       ExecutionResult(
@@ -227,7 +228,8 @@ package object systemexec extends external.ExternalPackage with SystemExecPackag
       )
     }
     catch {
-      case e: IOException ⇒ throw new InternalProcessingError(e,
+      case e: IOException ⇒ throw new InternalProcessingError(
+        e,
         s"""Error executing: ${command.mkString(" ")}
 
             |The content of the working directory was:

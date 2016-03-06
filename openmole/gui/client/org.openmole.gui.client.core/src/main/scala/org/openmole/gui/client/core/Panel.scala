@@ -44,7 +44,8 @@ object Panel {
 
     val ALL = ConceptState("All", ClientService.factories)
     val TASKS = ConceptState("Tasks", ClientService.taskFactories)
-    val PROTOTYPES = ConceptState("Prototypes",
+    val PROTOTYPES = ConceptState(
+      "Prototypes",
       PrototypeFactoryUI.doubleFactory +: ClientService.prototypeFactories filterNot (_.dataUI.dataType == DOUBLE)
     )
   }
@@ -70,7 +71,8 @@ class SettingsPanel(defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TA
     _.name()
   }.getOrElse(""))
 
-  val factorySelector: Select[FactoryWithDataUI] = Select("factories",
+  val factorySelector: Select[FactoryWithDataUI] = Select(
+    "factories",
     filter().factories.map { f ⇒ (f, emptyCK) },
     currentDataBagUI(),
     btn_primary, onclickExtra = () ⇒ {
@@ -81,7 +83,8 @@ class SettingsPanel(defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TA
         }.get
         resetSettingTabs
       }
-    })
+    }
+  )
 
   private val filters = Map[ConceptState, DataBagUI ⇒ Boolean](
     (ALL, db ⇒ inputFilter.contains(db.name())),
@@ -116,8 +119,7 @@ class SettingsPanel(defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TA
         }
         rows() = elements.size
         elements
-      }
-      )
+      })
     }
   ).render
 
@@ -163,8 +165,7 @@ class SettingsPanel(defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TA
       }, active = filter() == TASKS),
       navItem("envfilter", "Env", () ⇒ {
         println("not impl yet")
-      })
-    )
+      }))
   }
 
   def setCurrent(dbUI: DataBagUI) = {
@@ -203,7 +204,8 @@ class SettingsPanel(defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TA
 
   def onClose() = {}
 
-  val dialog = modalDialog(modalID,
+  val dialog = modalDialog(
+    modalID,
     headerDialog(
       Rx {
         tags.div(
@@ -222,8 +224,7 @@ class SettingsPanel(defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TA
                     inputGroupButton(bs.button("Help", btn_default)) //FIXME
                   },
                   inputGroupButton(saveHeaderButton)
-                )
-                )
+                ))
               }
               else bs.span(navbar_right)(conceptFilter),
               onsubmit := { () ⇒
@@ -232,7 +233,8 @@ class SettingsPanel(defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TA
                 false
               }
             )
-          ))
+          )
+        )
       }
     ),
     bodyDialog(
@@ -250,7 +252,8 @@ class SettingsPanel(defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TA
           inputFilter.tag.value = ""
           tags.div(conceptTable)
         }
-      }),
+      }
+    ),
     footerDialog(
       h2(saveButton)
     )
@@ -261,8 +264,10 @@ class SettingsPanel(defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TA
       case p: PrototypeDataUI ⇒
         if (editionState()) {
           dimInput.value = p.dimension().toString
-          Seq(inputGroupButton(attrs.style := "width:0px;"),
-            dimInput)
+          Seq(
+            inputGroupButton(attrs.style := "width:0px;"),
+            dimInput
+          )
         }
         else Seq()
       case _ ⇒ Seq()

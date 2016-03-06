@@ -1,8 +1,8 @@
 package org.openmole.gui.client.core.dataui
 
 import org.openmole.gui.ext.dataui.PanelUI
-import org.openmole.gui.misc.js.{Select, Displayable, Identifiable }
-import fr.iscpif.scaladget.api.{BootstrapTags ⇒ bs}
+import org.openmole.gui.misc.js.{ Select, Displayable, Identifiable }
+import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import org.openmole.gui.ext.data._
 import org.scalajs.dom.raw.HTMLElement
 import scalatags.JsDom.TypedTag
@@ -43,8 +43,10 @@ object IOMappingFactory {
 
   def defaultInputField = IOMappingFactory.stringField("Default")
 
-  def stringField(keyName: String,
-                  protoFilter: (PrototypeDataBagUI) ⇒ Boolean = (p: PrototypeDataBagUI) ⇒ true) = new IOMappingFactory[String] {
+  def stringField(
+    keyName:     String,
+    protoFilter: (PrototypeDataBagUI) ⇒ Boolean = (p: PrototypeDataBagUI) ⇒ true
+  ) = new IOMappingFactory[String] {
     def build = new IOMappingDataUI[String] {
 
       val key = keyName
@@ -63,9 +65,11 @@ object IOMappingFactory {
     }
   }
 
-  def booleanField(keyName: String,
-                   default: Boolean,
-                   protoFilter: (PrototypeDataBagUI) ⇒ Boolean = (p: PrototypeDataBagUI) ⇒ true) = new IOMappingFactory[Boolean] {
+  def booleanField(
+    keyName:     String,
+    default:     Boolean,
+    protoFilter: (PrototypeDataBagUI) ⇒ Boolean = (p: PrototypeDataBagUI) ⇒ true
+  ) = new IOMappingFactory[Boolean] {
     def build = new IOMappingDataUI[Boolean] {
 
       val key = keyName
@@ -84,10 +88,12 @@ object IOMappingFactory {
     }
   }
 
-  def selectField[T <: Displayable with Identifiable](keyName: String,
-                                                      default: T,
-                                                      options: Seq[T],
-                                                      protoFilter: (PrototypeDataBagUI) ⇒ Boolean = (p: PrototypeDataBagUI) ⇒ true) = new IOMappingFactory[T] {
+  def selectField[T <: Displayable with Identifiable](
+    keyName:     String,
+    default:     T,
+    options:     Seq[T],
+    protoFilter: (PrototypeDataBagUI) ⇒ Boolean = (p: PrototypeDataBagUI) ⇒ true
+  ) = new IOMappingFactory[T] {
     def build = new IOMappingDataUI[T] {
 
       val key = keyName
@@ -97,9 +103,11 @@ object IOMappingFactory {
       override def prototypeFilter(proto: PrototypeDataBagUI) = protoFilter(proto)
 
       val panelUI = new PanelUI {
-        val selectorT = Select("selectField",
+        val selectorT = Select(
+          "selectField",
           options.map { o ⇒ (o, bs.emptyCK) },
-          Some(default))
+          Some(default)
+        )
 
         val view: TypedTag[HTMLElement] = span(selectorT.selector)
 
@@ -129,9 +137,11 @@ import IOMappingFactory._
 
 object IOMappingsFactory {
 
-  def apply(mappingFactories: Seq[IOMappingFactory[_]],
-            iprotoFilter: PrototypeDataBagUI ⇒ Boolean = PrototypeDataBagUI ⇒ true,
-            oprotoFilter: PrototypeDataBagUI ⇒ Boolean = PrototypeDataBagUI ⇒ true) = new IOMappingsFactory {
+  def apply(
+    mappingFactories: Seq[IOMappingFactory[_]],
+    iprotoFilter:     PrototypeDataBagUI ⇒ Boolean = PrototypeDataBagUI ⇒ true,
+    oprotoFilter:     PrototypeDataBagUI ⇒ Boolean = PrototypeDataBagUI ⇒ true
+  ) = new IOMappingsFactory {
     def build: IOMappingsUI = new IOMappingsUI(mappingFactories.map {
       _.build
     })

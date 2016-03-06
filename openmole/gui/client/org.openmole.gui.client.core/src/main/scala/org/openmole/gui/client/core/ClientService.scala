@@ -102,7 +102,7 @@ object ClientService {
     }
   }
 
-  def +=(dataKey: String, factoryUI: FactoryWithDataUI) = uiFactories() += dataKey -> factoryUI
+  def +=(dataKey: String, factoryUI: FactoryWithDataUI) = uiFactories() += dataKey → factoryUI
 
   def +=(dataBagUI: DataBagUI) = {
     if (!exists(dataBagUI))
@@ -116,8 +116,7 @@ object ClientService {
   def existsPrototype(name: String) = prototypeDataBagUIs.exists(_.name() == name)
 
   def exists(dataBagUI: DataBagUI) = uiDataBags().exists(p ⇒
-    p.uuid == dataBagUI.uuid
-  )
+    p.uuid == dataBagUI.uuid)
 
   def taskData = taskDataBagUIs.map {
     _.dataUI().data
