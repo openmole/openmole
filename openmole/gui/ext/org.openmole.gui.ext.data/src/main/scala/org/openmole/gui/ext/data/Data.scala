@@ -191,25 +191,25 @@ trait PrivateKey {
 }
 
 case class LoginPasswordAuthenticationData(
-  login:            String = "",
-  cypheredPassword: String = "",
-  target:           String = ""
+    login:            String = "",
+    cypheredPassword: String = "",
+    target:           String = ""
 ) extends AuthenticationData {
   def synthetic = s"$login@$target"
 }
 
 case class PrivateKeyAuthenticationData(
-  privateKey:       Option[String] = None,
-  login:            String         = "",
-  cypheredPassword: String         = "",
-  target:           String         = ""
+    privateKey:       Option[String] = None,
+    login:            String         = "",
+    cypheredPassword: String         = "",
+    target:           String         = ""
 ) extends AuthenticationData with PrivateKey {
   def synthetic = s"$login@$target"
 }
 
 case class EGIP12AuthenticationData(
-  val cypheredPassword: String         = "",
-  val privateKey:       Option[String] = None
+    val cypheredPassword: String         = "",
+    val privateKey:       Option[String] = None
 ) extends AuthenticationData with PrivateKey {
   def synthetic = "egi.p12"
 }
@@ -324,19 +324,19 @@ case class Failed(error: Error, duration: Long = 0L, completed: Long = 0L) exten
 }
 
 case class Running(
-  ready:             Long,
-  running:           Long,
-  duration:          Long,
-  completed:         Long,
-  environmentStates: Seq[EnvironmentState]
+    ready:             Long,
+    running:           Long,
+    duration:          Long,
+    completed:         Long,
+    environmentStates: Seq[EnvironmentState]
 ) extends ExecutionInfo {
   def state: String = "running"
 }
 
 case class Finished(
-  duration:          Long                  = 0L,
-  completed:         Long                  = 0L,
-  environmentStates: Seq[EnvironmentState]
+    duration:          Long                  = 0L,
+    completed:         Long                  = 0L,
+    environmentStates: Seq[EnvironmentState]
 ) extends ExecutionInfo {
   def ready: Long = 0L
 
@@ -610,25 +610,25 @@ object SizeSorting extends FileSorting
 
 object TimeSorting extends FileSorting
 
+case class TreeSorting(fileSorting: FileSorting = AlphaSorting, fileOrdering: FileOrdering = Ascending)
+
+object TreeSorting {
+  def defaultSorting = TreeSorting(AlphaSorting, Ascending)
+}
+
+object FileSizeOrdering extends Ordering[TreeNodeData] {
+  def compare(tnd1: TreeNodeData, tnd2: TreeNodeData) = tnd1.size compare tnd2.size
+}
+
+object AlphaOrdering extends Ordering[TreeNodeData] {
+  def compare(tnd1: TreeNodeData, tnd2: TreeNodeData) = tnd1.name compare tnd2.name
+}
+
+object TimeOrdering extends Ordering[TreeNodeData] {
+  def compare(tnd1: TreeNodeData, tnd2: TreeNodeData) = tnd1.time compare tnd2.time
+}
+
 object FileSorting {
-
-  case class TreeSorting(fileSorting: FileSorting = AlphaSorting, fileOrdering: FileOrdering = Ascending)
-
-  object TreeSorting {
-    def defaultSorting = TreeSorting(AlphaSorting, Ascending)
-  }
-
-  object FileSizeOrdering extends Ordering[TreeNodeData] {
-    def compare(tnd1: TreeNodeData, tnd2: TreeNodeData) = tnd1.size compare tnd2.size
-  }
-
-  object AlphaOrdering extends Ordering[TreeNodeData] {
-    def compare(tnd1: TreeNodeData, tnd2: TreeNodeData) = tnd1.name compare tnd2.name
-  }
-
-  object TimeOrdering extends Ordering[TreeNodeData] {
-    def compare(tnd1: TreeNodeData, tnd2: TreeNodeData) = tnd1.time compare tnd2.time
-  }
 
   implicit def sortingToOrdering(fs: FileSorting): Ordering[TreeNodeData] =
     fs match {
