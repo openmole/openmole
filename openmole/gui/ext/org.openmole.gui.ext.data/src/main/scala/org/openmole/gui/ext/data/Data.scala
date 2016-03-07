@@ -611,6 +611,25 @@ object SizeSorting extends FileSorting
 object TimeSorting extends FileSorting
 
 object FileSorting {
+
+  case class TreeSorting(fileSorting: FileSorting = AlphaSorting, fileOrdering: FileOrdering = Ascending)
+
+  object TreeSorting {
+    def defaultSorting = TreeSorting(AlphaSorting, Ascending)
+  }
+
+  object FileSizeOrdering extends Ordering[TreeNodeData] {
+    def compare(tnd1: TreeNodeData, tnd2: TreeNodeData) = tnd1.size compare tnd2.size
+  }
+
+  object AlphaOrdering extends Ordering[TreeNodeData] {
+    def compare(tnd1: TreeNodeData, tnd2: TreeNodeData) = tnd1.name compare tnd2.name
+  }
+
+  object TimeOrdering extends Ordering[TreeNodeData] {
+    def compare(tnd1: TreeNodeData, tnd2: TreeNodeData) = tnd1.time compare tnd2.time
+  }
+
   implicit def sortingToOrdering(fs: FileSorting): Ordering[TreeNodeData] =
     fs match {
       case AlphaSorting ⇒ AlphaOrdering
@@ -621,24 +640,7 @@ object FileSorting {
 
 case class FileFilter(firstLast: FirstLast = First, threshold: Option[Int] = Some(20), nameFilter: String = "", fileSorting: FileSorting = AlphaSorting)
 
-case class TreeSorting(fileSorting: FileSorting = AlphaSorting, fileOrdering: FileOrdering = Ascending)
-
 object FileFilter {
   def defaultFilter = FileFilter.this(First, Some(20), "", AlphaSorting)
 }
 
-object TreeSorting {
-  def defaultSorting = TreeSorting(AlphaSorting, Ascending)
-}
-
-object FileSizeOrdering extends Ordering[TreeNodeData] {
-  def compare(tnd1: TreeNodeData, tnd2: TreeNodeData) = tnd1.size compare tnd2.size
-}
-
-object AlphaOrdering extends Ordering[TreeNodeData] {
-  def compare(tnd1: TreeNodeData, tnd2: TreeNodeData) = tnd1.name compare tnd2.name
-}
-
-object TimeOrdering extends Ordering[TreeNodeData] {
-  def compare(tnd1: TreeNodeData, tnd2: TreeNodeData) = tnd1.time compare tnd2.time
-}
