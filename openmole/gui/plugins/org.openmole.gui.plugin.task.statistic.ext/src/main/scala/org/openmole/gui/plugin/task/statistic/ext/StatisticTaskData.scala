@@ -29,7 +29,7 @@ object StatisticType extends Enumeration {
 }
 
 case class StatisticTaskData(
-  inputs: Seq[InOutput] = Seq(),
+    inputs: Seq[InOutput] = Seq(),
     outputs: Seq[InOutput] = Seq(),
     inAndOutputs: Seq[InAndOutput] = Seq()
 ) extends TaskData {

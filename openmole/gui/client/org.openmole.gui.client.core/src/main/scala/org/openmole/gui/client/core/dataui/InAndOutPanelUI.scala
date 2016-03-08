@@ -119,9 +119,9 @@ class InAndOutPanelUI(val panel: SettingsPanel, dataUI: InAndOutputDataUI) exten
                 for (iAo ← dataUI.inAndOutputsUI()) yield {
                   coloredTR(
                     ((buildPrototypeTableView(iAo.in, () ⇒ setCurrent(iAo.in.protoDataBagUI)) :+
-                    tags.td(iAo.mapping.panelUI.view).render) ++
-                    (buildPrototypeTableView(iAo.out, () ⇒ setCurrent(iAo.out.protoDataBagUI)) :+
-                      delButtonTD(() ⇒ dataUI -= iAo))),
+                      tags.td(iAo.mapping.panelUI.view).render) ++
+                      (buildPrototypeTableView(iAo.out, () ⇒ setCurrent(iAo.out.protoDataBagUI)) :+
+                        delButtonTD(() ⇒ dataUI -= iAo))),
                     () ⇒ false
                   )
                 },
@@ -130,7 +130,7 @@ class InAndOutPanelUI(val panel: SettingsPanel, dataUI: InAndOutputDataUI) exten
                     case idataUI: InputDataUI ⇒ for (i ← idataUI.inoutputsUI() ++ filteredInputsUI) yield {
                       coloredTR(
                         (buildPrototypeTableView(i, () ⇒ setCurrent(i.protoDataBagUI)) ++ emptyTD(4)) :+
-                        delButtonTD(() ⇒ idataUI -= i),
+                          delButtonTD(() ⇒ idataUI -= i),
                         () ⇒ filteredInputsUI.map {
                           _.id
                         }.contains(i.id),
@@ -140,7 +140,7 @@ class InAndOutPanelUI(val panel: SettingsPanel, dataUI: InAndOutputDataUI) exten
                     case odataUI: OutputDataUI ⇒ for (o ← odataUI.inoutputsUI() ++ filteredOutputsUI) yield {
                       coloredTR(
                         (emptyTD(5) ++ buildPrototypeTableView(o, () ⇒ setCurrent(o.protoDataBagUI)) :+
-                        delButtonTD(() ⇒ odataUI -= o)),
+                          delButtonTD(() ⇒ odataUI -= o)),
                         () ⇒ filteredOutputsUI.map {
                           _.id
                         }.contains(o.id),

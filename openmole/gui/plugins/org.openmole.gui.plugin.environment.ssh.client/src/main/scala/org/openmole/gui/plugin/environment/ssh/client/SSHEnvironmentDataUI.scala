@@ -25,7 +25,7 @@ import scala.scalajs.js.annotation.JSExport
 import rx._
 
 class SSHEnvironmentDataUI(
-  val name: Var[String] = Var(""),
+    val name: Var[String] = Var(""),
     val login: Var[String] = Var(""),
     val host: Var[String] = Var(""),
     val nbSlots: Var[Int] = Var(1),

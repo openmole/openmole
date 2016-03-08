@@ -20,7 +20,7 @@ package org.openmole.gui.plugin.environment.ssh.ext
 import org.openmole.gui.ext.data.EnvironmentData
 
 case class SSHEnvironmentData(
-  val name: String = "",
+    val name: String = "",
     val login: String = "",
     val host: String = "",
     val nbSlots: Int = 1,

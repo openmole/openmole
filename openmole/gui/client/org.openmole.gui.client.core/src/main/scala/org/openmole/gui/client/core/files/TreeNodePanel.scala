@@ -202,8 +202,8 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
     fileDisplayer.tabs -- treeNode
     stringAlert(
       s"Do you really want to delete ${
-      treeNode.name()
-    }?",
+        treeNode.name()
+      }?",
       () ⇒ {
         CoreUtils.trashNode(treeNode.safePath(), filter) {
           () ⇒

@@ -186,21 +186,21 @@ class ExecutionPanel extends ModalPanel {
                       tbody(
                         Seq(
                           bs.tr(row)(
-                          bs.td(col_md_3)(tags.span(e.taskName).tooltip("Environment name")),
-                          bs.td(col_md_2)(tags.span(bs.glyph(bs.glyph_upload), s" ${e.networkActivity.uploadingFiles} ${displaySize(e.networkActivity.uploadedSize, e.networkActivity.readableUploadedSize)}").tooltip("Uploaded")),
-                          bs.td(col_md_2)(tags.span(bs.glyph(bs.glyph_download), s" ${e.networkActivity.downloadingFiles} ${displaySize(e.networkActivity.downloadedSize, e.networkActivity.readableDownloadedSize)}").tooltip("Downloaded")),
-                          bs.td(col_md_1)(tags.span(bs.glyph(bs.glyph_road + " paddingBottom7"), " " + e.submitted).tooltip("Submitted jobs")),
-                          bs.td(col_md_1)(tags.span(bs.glyph(bs.glyph_flash + " paddingBottom7"), " " + e.running).tooltip("Running jobs")),
-                          bs.td(col_md_1)(tags.span(bs.glyph(bs.glyph_flag + " paddingBottom7"), " " + e.done).tooltip("Completed jobs")),
-                          bs.td(col_md_1)(tags.span(bs.glyph(bs.glyph_fire + " paddingBottom7"), " " + e.failed).tooltip("Failed jobs")),
-                          bs.td(col_md_3)(bs.span({
-                            "blue" + { if (envErrorVisible().contains(e.envId)) " executionVisible" else "" }
-                          })(cursor := "pointer", onclick := {
-                            () ⇒
-                              if (envErrorVisible().contains(e.envId)) envErrorVisible() = envErrorVisible().filterNot { _ == e.envId }
-                              else envErrorVisible() = envErrorVisible() :+ e.envId
-                          })("details"))
-                        ),
+                            bs.td(col_md_3)(tags.span(e.taskName).tooltip("Environment name")),
+                            bs.td(col_md_2)(tags.span(bs.glyph(bs.glyph_upload), s" ${e.networkActivity.uploadingFiles} ${displaySize(e.networkActivity.uploadedSize, e.networkActivity.readableUploadedSize)}").tooltip("Uploaded")),
+                            bs.td(col_md_2)(tags.span(bs.glyph(bs.glyph_download), s" ${e.networkActivity.downloadingFiles} ${displaySize(e.networkActivity.downloadedSize, e.networkActivity.readableDownloadedSize)}").tooltip("Downloaded")),
+                            bs.td(col_md_1)(tags.span(bs.glyph(bs.glyph_road + " paddingBottom7"), " " + e.submitted).tooltip("Submitted jobs")),
+                            bs.td(col_md_1)(tags.span(bs.glyph(bs.glyph_flash + " paddingBottom7"), " " + e.running).tooltip("Running jobs")),
+                            bs.td(col_md_1)(tags.span(bs.glyph(bs.glyph_flag + " paddingBottom7"), " " + e.done).tooltip("Completed jobs")),
+                            bs.td(col_md_1)(tags.span(bs.glyph(bs.glyph_fire + " paddingBottom7"), " " + e.failed).tooltip("Failed jobs")),
+                            bs.td(col_md_3)(bs.span({
+                              "blue" + { if (envErrorVisible().contains(e.envId)) " executionVisible" else "" }
+                            })(cursor := "pointer", onclick := {
+                              () ⇒
+                                if (envErrorVisible().contains(e.envId)) envErrorVisible() = envErrorVisible().filterNot { _ == e.envId }
+                                else envErrorVisible() = envErrorVisible() :+ e.envId
+                            })("details"))
+                          ),
                           bs.tr(row)(
                             bs.td(col_md_12)(
                               `class` := { if (envErrorVisible().contains(e.envId)) "" else "displayNone" },

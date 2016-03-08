@@ -251,9 +251,6 @@ object OSGi extends Defaults {
 	      exportPackage := Seq("scala.async.*")
        )
 
-  lazy val config = OsgiProject("org.apache.commons.configuration", privatePackages = Seq("org.apache.commons.*")) settings
-    (libraryDependencies += "commons-configuration" % "commons-configuration" % "1.10", version := "1.10")
-
   lazy val mathVersion = "3.5"
   lazy val math = OsgiProject("org.apache.commons.math", exports = Seq("org.apache.commons.math3.*"), privatePackages = Seq("assets.*")) settings
     (libraryDependencies += "org.apache.commons" % "commons-math3" % mathVersion, version := mathVersion)

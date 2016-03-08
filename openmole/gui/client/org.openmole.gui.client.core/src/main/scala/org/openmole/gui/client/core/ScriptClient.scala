@@ -138,8 +138,8 @@ object ScriptClient {
         shutdownButton,
         tags.div(
           `class` := Rx {
-          if (!passwordOK()) "centerPage" else ""
-        },
+            if (!passwordOK()) "centerPage" else ""
+          },
           Rx {
             tags.div(
               if (alert())

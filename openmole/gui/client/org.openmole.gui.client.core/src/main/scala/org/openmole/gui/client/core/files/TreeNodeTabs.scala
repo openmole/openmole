@@ -97,9 +97,9 @@ object TreeNodeTabs {
   }
 
   class LockedEditionNodeTab(
-    val treeNode: TreeNode,
-    val editor:   EditorPanelUI,
-    _editable:    Boolean       = false
+      val treeNode: TreeNode,
+      val editor:   EditorPanelUI,
+      _editable:    Boolean       = false
   ) extends TreeNodeTab with Save with Update {
     val editorElement = editor.view
     val editable = Var(_editable)

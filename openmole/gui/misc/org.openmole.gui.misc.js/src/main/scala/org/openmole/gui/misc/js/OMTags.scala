@@ -165,10 +165,10 @@ object OMTags {
   }
 
   case class TwoStatesGlyphButton(
-    glyph:   ClassKeyAggregator,
-    glyph2:  ClassKeyAggregator,
-    action:  () ⇒ Unit,
-    action2: () ⇒ Unit
+      glyph:   ClassKeyAggregator,
+      glyph2:  ClassKeyAggregator,
+      action:  () ⇒ Unit,
+      action2: () ⇒ Unit
   ) extends ExclusiveButton {
     val selected = Var(glyph)
 

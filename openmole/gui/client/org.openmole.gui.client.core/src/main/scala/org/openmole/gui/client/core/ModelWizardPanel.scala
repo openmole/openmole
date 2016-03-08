@@ -274,9 +274,9 @@ class ModelWizardPanel extends ModalPanel {
               val optionsDiv = OptionsDiv(existing)
               AlertPanel.div(
                 tags.div(
-                "Some files already exist, overwrite ?",
-                optionsDiv.div
-              ),
+                  "Some files already exist, overwrite ?",
+                  optionsDiv.div
+                ),
                 () ⇒ {
                   OMPost[Api].copyFromTmp(tempFile, optionsDiv.result /*, fp ++ fileName*/ ).call().foreach { b ⇒
                     buildForm(uploadPath, fileType)
@@ -386,7 +386,7 @@ class ModelWizardPanel extends ModalPanel {
     tags.h4("Step 1: Code import"),
     bs.div("grey rightBlock")(
       "Pick your code up among jar archive, netlogo scripts, or any code packaged on linux with Care ( like Python, C, C++ " +
-      "R, etc). In the case of a Care archive, the packaging has to be done with the",
+        "R, etc). In the case of a Care archive, the packaging has to be done with the",
       tags.b(" -o yourmodel.tar.gz.bin."),
       " option."
     )

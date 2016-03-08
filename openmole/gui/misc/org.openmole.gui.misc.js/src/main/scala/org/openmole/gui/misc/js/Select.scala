@@ -46,11 +46,11 @@ object Select {
 import Select._
 
 class Select[T <: Displayable](
-  autoID:               String,
-  private val contents: Var[Seq[(T, ClassKeyAggregator)]],
-  default:              Option[T]                         = None,
-  key:                  ClassKeyAggregator                = emptyCK,
-  onclickExtra:         () ⇒ Unit                         = () ⇒ {}
+    autoID:               String,
+    private val contents: Var[Seq[(T, ClassKeyAggregator)]],
+    default:              Option[T]                         = None,
+    key:                  ClassKeyAggregator                = emptyCK,
+    onclickExtra:         () ⇒ Unit                         = () ⇒ {}
 ) {
 
   val content: Var[Option[T]] = Var(contents().size match {

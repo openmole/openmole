@@ -13,7 +13,6 @@ import scala.scalajs.js.{ Dynamic ⇒ Dyn }
 import scalatags.JsDom.all._
 import scalatags.JsDom.tags
 import scala.async.Async.{ async, await }
-import fr.iscpif.scaladget.ace._
 import fr.iscpif.scaladget.mapping.ace._
 
 /*

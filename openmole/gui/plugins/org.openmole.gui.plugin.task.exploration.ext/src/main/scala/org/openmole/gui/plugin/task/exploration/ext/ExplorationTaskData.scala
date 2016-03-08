@@ -20,7 +20,7 @@ package org.openmole.gui.plugin.task.exploration.ext
 import org.openmole.gui.ext.data.{ TaskData, InOutput }
 
 case class ExplorationTaskData(
-  inputs: Seq[InOutput] = Seq(),
+    inputs: Seq[InOutput] = Seq(),
     outputs: Seq[InOutput] = Seq()
 ) extends TaskData {
 }
