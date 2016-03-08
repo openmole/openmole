@@ -46,7 +46,7 @@ object EGIAuthentication extends Logger {
   val updatedFile = ".updated"
 
   def CACertificatesDir: File =
-    Workspace.file("CACertificates").updateIfTooOld(Workspace.preferenceAsDuration(CACertificatesCacheTime)) {
+    Workspace.file("CACertificates").updateIfTooOld(Workspace.preference(CACertificatesCacheTime)) {
       caDir ⇒
         caDir.mkdir
         downloadCACertificates(Workspace.preference(EGIEnvironment.CACertificatesSite), caDir)
@@ -55,7 +55,7 @@ object EGIAuthentication extends Logger {
   def downloadCACertificates(address: String, dir: File) = {
     val fs = FileSystems.getDefault
 
-    val site = HTTPStorage(url = address, Workspace.preferenceAsDuration(EGIEnvironment.CACertificatesDownloadTimeOut))
+    val site = HTTPStorage(url = address, Workspace.preference(EGIEnvironment.CACertificatesDownloadTimeOut))
     for (tarUrl ← site.listNames("/")) {
       try {
         //val child = site.child(tarUrl)
@@ -93,11 +93,11 @@ object EGIAuthentication extends Logger {
   }
 
   def voCards =
-    Workspace.file("voCards.xml").updateIfTooOld(Workspace.preferenceAsDuration(VOCardCacheTime)) {
+    Workspace.file("voCards.xml").updateIfTooOld(Workspace.preference(VOCardCacheTime)) {
       voCards ⇒
         HTTPStorage.withConnection(
           new URI(Workspace.preference(EGIEnvironment.VOInformationSite)),
-          Workspace.preferenceAsDuration(EGIEnvironment.VOCardDownloadTimeOut)
+          Workspace.preference(EGIEnvironment.VOCardDownloadTimeOut)
         ) { http ⇒
             val is: InputStream = http.getInputStream
             try is.copy(voCards)

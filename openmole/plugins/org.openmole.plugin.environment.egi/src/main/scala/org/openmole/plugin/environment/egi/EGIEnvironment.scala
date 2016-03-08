@@ -49,116 +49,115 @@ import concurrent.duration._
 
 object EGIEnvironment extends Logger {
 
-  val ProxyTime = new ConfigurationLocation("EGIEnvironment", "ProxyTime")
-  val MyProxyTime = new ConfigurationLocation("EGIEnvironment", "MyProxyTime")
+  val ProxyTime = ConfigurationLocation("EGIEnvironment", "ProxyTime", Some(24 hours))
+  val MyProxyTime = ConfigurationLocation("EGIEnvironment", "MyProxyTime", Some(7 days))
 
-  val FetchResourcesTimeOut = new ConfigurationLocation("EGIEnvironment", "FetchResourcesTimeOut")
-  val CACertificatesSite = new ConfigurationLocation("EGIEnvironment", "CACertificatesSite")
-  val CACertificatesCacheTime = new ConfigurationLocation("EGIEnvironment", "CACertificatesCacheTime")
-  val CACertificatesDownloadTimeOut = new ConfigurationLocation("EGIEnvironment", "CACertificatesDownloadTimeOut")
-  val VOInformationSite = new ConfigurationLocation("EGIEnvironment", "VOInformationSite")
-  val VOCardDownloadTimeOut = new ConfigurationLocation("EGIEnvironment", "VOCardDownloadTimeOut")
-  val VOCardCacheTime = new ConfigurationLocation("EGIEnvironment", "VOCardCacheTime")
+  val FetchResourcesTimeOut = ConfigurationLocation("EGIEnvironment", "FetchResourcesTimeOut", Some(2 minutes))
+  val CACertificatesSite = ConfigurationLocation("EGIEnvironment", "CACertificatesSite", Some("http://dist.eugridpma.info/distribution/igtf/current/accredited/tgz/"))
+  val CACertificatesCacheTime = ConfigurationLocation("EGIEnvironment", "CACertificatesCacheTime", Some(7 days))
+  val CACertificatesDownloadTimeOut = ConfigurationLocation("EGIEnvironment", "CACertificatesDownloadTimeOut", Some(2 minutes))
+  val VOInformationSite = ConfigurationLocation("EGIEnvironment", "VOInformationSite", Some("http://operations-portal.egi.eu/xml/voIDCard/public/all/true"))
+  val VOCardDownloadTimeOut = ConfigurationLocation("EGIEnvironment", "VOCardDownloadTimeOut", Some(2 minutes))
+  val VOCardCacheTime = ConfigurationLocation("EGIEnvironment", "VOCardCacheTime", Some(6 hours))
 
-  val EagerSubmissionInterval = new ConfigurationLocation("EGIEnvironment", "EagerSubmissionInterval")
-  val EagerSubmissionMinNumberOfJob = new ConfigurationLocation("EGIEnvironment", "EagerSubmissionMinNumberOfJob")
-  val EagerSubmissionNumberOfJobUnderMin = new ConfigurationLocation("EGIEnvironment", "EagerSubmissionNumberOfJobUnderMin")
-  val EagerSubmissionNbSampling = new ConfigurationLocation("EGIEnvironment", "EagerSubmissionNbSampling")
-  val EagerSubmissionSamplingWindowFactor = new ConfigurationLocation("EGIEnvironment", "EagerSubmissionSamplingWindowFactor")
+  val EagerSubmissionInterval = ConfigurationLocation("EGIEnvironment", "EagerSubmissionInterval", Some(5 minutes))
+  val EagerSubmissionMinNumberOfJob = ConfigurationLocation("EGIEnvironment", "EagerSubmissionMinNumberOfJob", Some(100))
+  val EagerSubmissionNumberOfJobUnderMin = ConfigurationLocation("EGIEnvironment", "EagerSubmissionNumberOfJobUnderMin", Some(10))
+  val EagerSubmissionNbSampling = ConfigurationLocation("EGIEnvironment", "EagerSubmissionNbSampling", Some(10))
+  val EagerSubmissionSamplingWindowFactor = ConfigurationLocation("EGIEnvironment", "EagerSubmissionSamplingWindowFactor", Some(5))
 
-  val ConnectionsBySRMSE = new ConfigurationLocation("EGIEnvironment", "ConnectionsSRMSE")
-  val ConnectionsByWebDAVSE = new ConfigurationLocation("EGIEnvironment", "ConnectionsByWebDAVSE")
-  val ConnectionsByWMS = new ConfigurationLocation("EGIEnvironment", "ConnectionsByWMS")
+  val ConnectionsBySRMSE = ConfigurationLocation("EGIEnvironment", "ConnectionsSRMSE", Some(10))
+  val ConnectionsByWebDAVSE = ConfigurationLocation("EGIEnvironment", "ConnectionsByWebDAVSE", Some(10))
+  val ConnectionsByWMS = ConfigurationLocation("EGIEnvironment", "ConnectionsByWMS", Some(10))
 
-  val ProxyRenewalRatio = new ConfigurationLocation("EGIEnvironment", "ProxyRenewalRatio")
-  val MinProxyRenewal = new ConfigurationLocation("EGIEnvironment", "MinProxyRenewal")
-  val JobShakingHalfLife = new ConfigurationLocation("EGIEnvironment", "JobShakingHalfLife")
-  val JobShakingMaxReady = new ConfigurationLocation("EGIEnvironment", "JobShakingMaxReady")
+  val ProxyRenewalRatio = ConfigurationLocation("EGIEnvironment", "ProxyRenewalRatio", Some(0.2))
+  val MinProxyRenewal = ConfigurationLocation("EGIEnvironment", "MinProxyRenewal", Some(5 minutes))
+  val JobShakingHalfLife = ConfigurationLocation("EGIEnvironment", "JobShakingHalfLife", Some(30 minutes))
+  val JobShakingMaxReady = ConfigurationLocation("EGIEnvironment", "JobShakingMaxReady", Some(100))
 
-  val RemoteCopyTimeout = new ConfigurationLocation("EGIEnvironment", "RemoteCopyTimeout")
-  val QualityHysteresis = new ConfigurationLocation("EGIEnvironment", "QualityHysteresis")
-  val MinValueForSelectionExploration = new ConfigurationLocation("EGIEnvironment", "MinValueForSelectionExploration")
-  val ShallowWMSRetryCount = new ConfigurationLocation("EGIEnvironment", "ShallowWMSRetryCount")
+  val RemoteCopyTimeout = ConfigurationLocation("EGIEnvironment", "RemoteCopyTimeout", Some(10 minutes))
+  val QualityHysteresis = ConfigurationLocation("EGIEnvironment", "QualityHysteresis", Some(100))
+  val MinValueForSelectionExploration = ConfigurationLocation("EGIEnvironment", "MinValueForSelectionExploration", Some(0.001))
+  val ShallowWMSRetryCount = ConfigurationLocation("EGIEnvironment", "ShallowWMSRetryCount", Some(5))
 
-  val JobServiceFitnessPower = ConfigurationLocation("EGIEnvironment", "JobServiceFitnessPower")
-  val StorageFitnessPower = ConfigurationLocation("EGIEnvironment", "StorageFitnessPower")
+  val JobServiceFitnessPower = ConfigurationLocation("EGIEnvironment", "JobServiceFitnessPower", Some(2.0))
+  val StorageFitnessPower = ConfigurationLocation("EGIEnvironment", "StorageFitnessPower", Some(2.0))
 
-  val StorageSizeFactor = ConfigurationLocation("EGIEnvironment", "StorageSizeFactor")
-  val StorageTimeFactor = ConfigurationLocation("EGIEnvironment", "StorageTimeFactor")
-  val StorageAvailabilityFactor = ConfigurationLocation("EGIEnvironment", "StorageAvailabilityFactor")
-  val StorageSuccessRateFactor = ConfigurationLocation("EGIEnvironment", "StorageSuccessRateFactor")
+  val StorageSizeFactor = ConfigurationLocation("EGIEnvironment", "StorageSizeFactor", Some(5.0))
+  val StorageTimeFactor = ConfigurationLocation("EGIEnvironment", "StorageTimeFactor", Some(1.0))
+  val StorageAvailabilityFactor = ConfigurationLocation("EGIEnvironment", "StorageAvailabilityFactor", Some(10.0))
+  val StorageSuccessRateFactor = ConfigurationLocation("EGIEnvironment", "StorageSuccessRateFactor", Some(10.0))
 
-  val JobServiceJobFactor = ConfigurationLocation("EGIEnvironment", "JobServiceSizeFactor")
-  val JobServiceTimeFactor = ConfigurationLocation("EGIEnvironment", "JobServiceTimeFactor")
-  val JobServiceAvailabilityFactor = ConfigurationLocation("EGIEnvironment", "JobServiceAvailabilityFactor")
-  val JobServiceSuccessRateFactor = ConfigurationLocation("EGIEnvironment", "JobServiceSuccessRateFactor")
+  val JobServiceJobFactor = ConfigurationLocation("EGIEnvironment", "JobServiceSizeFactor", Some(1.0))
+  val JobServiceTimeFactor = ConfigurationLocation("EGIEnvironment", "JobServiceTimeFactor", Some(10.0))
+  val JobServiceAvailabilityFactor = ConfigurationLocation("EGIEnvironment", "JobServiceAvailabilityFactor", Some(10.0))
+  val JobServiceSuccessRateFactor = ConfigurationLocation("EGIEnvironment", "JobServiceSuccessRateFactor", Some(1.0))
 
-  val RunningHistoryDuration = ConfigurationLocation("EGIEnvironment", "RunningHistoryDuration")
-  val EagerSubmissionThreshold = ConfigurationLocation("EGIEnvironment", "EagerSubmissionThreshold")
+  val RunningHistoryDuration = ConfigurationLocation("EGIEnvironment", "RunningHistoryDuration", Some(12 hours))
+  val EagerSubmissionThreshold = ConfigurationLocation("EGIEnvironment", "EagerSubmissionThreshold", Some(0.5))
 
-  val DefaultBDII = ConfigurationLocation("EGIEnvironment", "DefaultBDII")
+  val DefaultBDII = ConfigurationLocation("EGIEnvironment", "DefaultBDII", Some("ldap://cclcgtopbdii02.in2p3.fr:2170"))
 
-  val EnvironmentCleaningThreads = ConfigurationLocation("EGIEnvironment", "EnvironmentCleaningThreads")
+  val EnvironmentCleaningThreads = ConfigurationLocation("EGIEnvironment", "EnvironmentCleaningThreads", Some(20))
 
-  val WMSRank = ConfigurationLocation("EGIEnvironment", "WMSRank")
+  val WMSRank = ConfigurationLocation("EGIEnvironment", "WMSRank", Some("""( other.GlueCEStateFreeJobSlots > 0 ? other.GlueCEStateFreeJobSlots : (-other.GlueCEStateWaitingJobs * 4 / ( other.GlueCEStateRunningJobs + 1 )) - 1 )"""))
 
-  Workspace += (ProxyTime, "PT24H")
-  Workspace += (MyProxyTime, "P7D")
+  Workspace setDefault ProxyTime
+  Workspace setDefault MyProxyTime
 
-  Workspace += (FetchResourcesTimeOut, "PT2M")
-  Workspace += (CACertificatesSite, "http://dist.eugridpma.info/distribution/igtf/current/accredited/tgz/")
-  Workspace += (CACertificatesCacheTime, "P7D")
-  Workspace += (CACertificatesDownloadTimeOut, "PT2M")
-  Workspace += (VOInformationSite, "http://operations-portal.egi.eu/xml/voIDCard/public/all/true")
-  Workspace += (VOCardDownloadTimeOut, "PT2M")
-  Workspace += (VOCardCacheTime, "PT6H")
+  Workspace setDefault FetchResourcesTimeOut
+  Workspace setDefault CACertificatesSite
+  Workspace setDefault CACertificatesCacheTime
+  Workspace setDefault CACertificatesDownloadTimeOut
+  Workspace setDefault VOInformationSite
+  Workspace setDefault VOCardDownloadTimeOut
+  Workspace setDefault VOCardCacheTime
 
-  Workspace += (ConnectionsBySRMSE, "10")
-  Workspace += (ConnectionsByWMS, "10")
-  Workspace += (ConnectionsByWebDAVSE, "10")
+  Workspace setDefault ConnectionsBySRMSE
+  Workspace setDefault ConnectionsByWMS
+  Workspace setDefault ConnectionsByWebDAVSE
 
-  Workspace += (ProxyRenewalRatio, "0.2")
-  Workspace += (MinProxyRenewal, "PT5M")
+  Workspace setDefault ProxyRenewalRatio
+  Workspace setDefault MinProxyRenewal
 
-  Workspace += (EagerSubmissionNbSampling, "10")
-  Workspace += (EagerSubmissionSamplingWindowFactor, "5")
+  Workspace setDefault EagerSubmissionNbSampling
+  Workspace setDefault EagerSubmissionSamplingWindowFactor
 
-  Workspace += (EagerSubmissionInterval, "PT5M")
+  Workspace setDefault EagerSubmissionInterval
 
-  Workspace += (EagerSubmissionMinNumberOfJob, "100")
-  Workspace += (EagerSubmissionNumberOfJobUnderMin, "10")
+  Workspace setDefault EagerSubmissionMinNumberOfJob
+  Workspace setDefault EagerSubmissionNumberOfJobUnderMin
 
-  Workspace += (JobShakingHalfLife, "PT30M")
-  Workspace += (JobShakingMaxReady, "100")
+  Workspace setDefault JobShakingHalfLife
+  Workspace setDefault JobShakingMaxReady
 
-  Workspace += (RemoteCopyTimeout, "PT10M")
+  Workspace setDefault RemoteCopyTimeout
 
-  Workspace += (MinValueForSelectionExploration, "0.001")
-  Workspace += (QualityHysteresis, "100")
+  Workspace setDefault MinValueForSelectionExploration
+  Workspace setDefault QualityHysteresis
 
-  Workspace += (ShallowWMSRetryCount, "5")
+  Workspace setDefault ShallowWMSRetryCount
+  Workspace setDefault JobServiceFitnessPower
+  Workspace setDefault StorageFitnessPower
 
-  Workspace += (JobServiceFitnessPower, "2")
-  Workspace += (StorageFitnessPower, "2")
+  Workspace setDefault StorageSizeFactor
+  Workspace setDefault StorageTimeFactor
+  Workspace setDefault StorageAvailabilityFactor
+  Workspace setDefault StorageSuccessRateFactor
 
-  Workspace += (StorageSizeFactor, "5")
-  Workspace += (StorageTimeFactor, "1")
-  Workspace += (StorageAvailabilityFactor, "10")
-  Workspace += (StorageSuccessRateFactor, "10")
+  Workspace setDefault JobServiceJobFactor
+  Workspace setDefault JobServiceTimeFactor
+  Workspace setDefault JobServiceAvailabilityFactor
+  Workspace setDefault JobServiceSuccessRateFactor
 
-  Workspace += (JobServiceJobFactor, "1")
-  Workspace += (JobServiceTimeFactor, "10")
-  Workspace += (JobServiceAvailabilityFactor, "10")
-  Workspace += (JobServiceSuccessRateFactor, "1")
+  Workspace setDefault RunningHistoryDuration
+  Workspace setDefault EagerSubmissionThreshold
 
-  Workspace += (RunningHistoryDuration, "PT12H")
-  Workspace += (EagerSubmissionThreshold, "0.5")
+  Workspace setDefault DefaultBDII
 
-  Workspace += (DefaultBDII, "ldap://cclcgtopbdii02.in2p3.fr:2170")
+  Workspace setDefault EnvironmentCleaningThreads
 
-  Workspace += (EnvironmentCleaningThreads, "20")
-
-  Workspace += (WMSRank, """( other.GlueCEStateFreeJobSlots > 0 ? other.GlueCEStateFreeJobSlots : (-other.GlueCEStateWaitingJobs * 4 / ( other.GlueCEStateRunningJobs + 1 )) - 1 )""")
+  Workspace setDefault WMSRank
 
   def apply(
     voName:         String,
@@ -199,11 +198,11 @@ object EGIEnvironment extends Logger {
       name = name
     )(authentication, uncypher)
 
-  def proxyTime = Workspace.preferenceAsDuration(ProxyTime)
-  def proxyRenewalRatio = Workspace.preferenceAsDouble(EGIEnvironment.ProxyRenewalRatio)
-  def proxyRenewalDelay = (proxyTime * proxyRenewalRatio) max Workspace.preferenceAsDuration(EGIEnvironment.MinProxyRenewal)
+  def proxyTime = Workspace.preference(ProxyTime)
+  def proxyRenewalRatio = Workspace.preference(EGIEnvironment.ProxyRenewalRatio)
+  def proxyRenewalDelay = (proxyTime * proxyRenewalRatio) max Workspace.preference(EGIEnvironment.MinProxyRenewal)
 
-  def normalizedFitness[T](fitness: ⇒ Iterable[(T, Double)], min: Double = Workspace.preferenceAsDouble(EGIEnvironment.MinValueForSelectionExploration)): Iterable[(T, Double)] = {
+  def normalizedFitness[T](fitness: ⇒ Iterable[(T, Double)], min: Double = Workspace.preference(EGIEnvironment.MinValueForSelectionExploration)): Iterable[(T, Double)] = {
     def orMinForExploration(v: Double) = math.max(v, min)
     val fit = fitness
     val maxFit = fit.map(_._2).max
@@ -268,7 +267,7 @@ class EGIEnvironment(
 
   import EGIEnvironment._
 
-  @transient lazy val connectionsByWMS = Workspace.preferenceAsInt(ConnectionsByWMS)
+  @transient lazy val connectionsByWMS = Workspace.preference(ConnectionsByWMS)
 
   type JS = EGIJobService
 
@@ -300,7 +299,7 @@ class EGIEnvironment(
         new EGIJobService {
           val usageControl = new AvailabilityQuality with JobServiceQualityControl {
             override val usageControl = new LimitedAccess(connectionsByWMS, Int.MaxValue)
-            override val hysteresis = Workspace.preferenceAsInt(EGIEnvironment.QualityHysteresis)
+            override val hysteresis = Workspace.preference(EGIEnvironment.QualityHysteresis)
           }
 
           val jobService = WMSJobService(js, connectionsByWMS, proxyRenewalDelay)(authentication)
@@ -340,17 +339,17 @@ class EGIEnvironment(
         else 0.0
 
       math.pow(
-        Workspace.preferenceAsDouble(JobServiceJobFactor) * jobFactor +
-          Workspace.preferenceAsDouble(JobServiceTimeFactor) * timeFactor +
-          Workspace.preferenceAsDouble(JobServiceAvailabilityFactor) * availability +
-          Workspace.preferenceAsDouble(JobServiceSuccessRateFactor) * js.usageControl.successRate,
-        Workspace.preferenceAsDouble(JobServiceFitnessPower)
+        Workspace.preference(JobServiceJobFactor) * jobFactor +
+          Workspace.preference(JobServiceTimeFactor) * timeFactor +
+          Workspace.preference(JobServiceAvailabilityFactor) * availability +
+          Workspace.preference(JobServiceSuccessRateFactor) * js.usageControl.successRate,
+        Workspace.preference(JobServiceFitnessPower)
       )
     }
 
     select(jss.toList, rate)
   }
 
-  def bdiiServer: BDII = BDII(bdii.getHost, bdii.getPort, Workspace.preferenceAsDuration(FetchResourcesTimeOut))
+  def bdiiServer: BDII = BDII(bdii.getHost, bdii.getPort, Workspace.preference(FetchResourcesTimeOut))
   override def runtimeSettings = super.runtimeSettings.copy(archiveResult = true)
 }

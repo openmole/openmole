@@ -44,7 +44,7 @@ trait SLURMJobService extends ClusterJobService { js ⇒
     def user = js.user
     def credential = js.credential
     override def port = js.port
-    override def timeout = Workspace.preferenceAsDuration(SSHService.timeout)
+    override def timeout = Workspace.preference(SSHService.timeout)
   }
 
   protected def _submit(serializedJob: SerializedJob) = {

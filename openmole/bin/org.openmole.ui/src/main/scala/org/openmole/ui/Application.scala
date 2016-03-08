@@ -192,7 +192,7 @@ class Application extends IApplication {
           GUIServer.lockFile.withFileOutputStream { fos ⇒
             val launch = (config.remote || fos.getChannel.tryLock != null)
             if (launch) {
-              val port = config.port.getOrElse(Workspace.preferenceAsInt(GUIServer.port))
+              val port = config.port.getOrElse(Workspace.preference(GUIServer.port))
               val url = s"https://localhost:$port"
               GUIServer.urlFile.content = url
               BootstrapJS.init(!config.unoptimizedJS)

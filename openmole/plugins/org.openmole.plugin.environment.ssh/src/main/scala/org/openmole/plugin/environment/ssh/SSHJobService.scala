@@ -44,7 +44,7 @@ trait SSHJobService extends GridScaleJobService with SharedStorage { js ⇒
   override def usageControl = environment.usageControl
 
   val jobService = new GSSSHJobService with environment.ThisHost with SSHConnectionCache {
-    override def timeout = Workspace.preferenceAsDuration(SSHService.timeout)
+    override def timeout = Workspace.preference(SSHService.timeout)
   }
 
   // replaced mutable.SynchronizedQueue according to recommendation in scala doc

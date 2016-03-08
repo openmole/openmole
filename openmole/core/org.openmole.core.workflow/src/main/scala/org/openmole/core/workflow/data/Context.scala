@@ -168,7 +168,7 @@ trait Context extends Map[String, Variable[_]] with MapLike[String, Variable[_],
 
   def prototypes = values.map { _.prototype }
 
-  def prettified(stripSize: Int = Workspace.preferenceAsInt(Workspace.ErrorArraySnipSize)) =
+  def prettified(stripSize: Int = Workspace.preference(Workspace.ErrorArraySnipSize)) =
     "{" + (if (variables.values.isEmpty) ""
     else variables.values.map(v ⇒ if (v != null) v.prettified(stripSize) else "null").mkString(", ")) + "}"
 

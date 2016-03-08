@@ -24,7 +24,7 @@ import org.openmole.core.workspace.Workspace
 trait CpCommands {
   def upload(from: String, to: URI): String
   def download(from: URI, to: String): String
-  def getTimeOut = Workspace.preferenceAsDuration(EGIEnvironment.RemoteCopyTimeout).toSeconds.toString
+  def getTimeOut = Workspace.preference(EGIEnvironment.RemoteCopyTimeout).toSeconds.toString
 }
 
 case class LCGCp(voName: String) extends CpCommands {

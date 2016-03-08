@@ -26,16 +26,16 @@ trait SSHAccess extends SSHHost { s ⇒
 
   def user: String
   def credential: SA
-  def maxConnections = Workspace.preferenceAsInt(SSHEnvironment.MaxConnections)
-  override def timeout = Workspace.preferenceAsDuration(SSHService.timeout)
+  def maxConnections = Workspace.preference(SSHEnvironment.MaxConnections)
+  override def timeout = Workspace.preference(SSHService.timeout)
 
   trait ThisHost extends SSHHost {
     def host = s.host
     override def port = s.port
     def user = s.user
     def credential = s.credential
-    override def timeout = Workspace.preferenceAsDuration(SSHService.timeout)
-    def maxConnections = Workspace.preferenceAsInt(SSHEnvironment.MaxConnections)
+    override def timeout = Workspace.preference(SSHService.timeout)
+    def maxConnections = Workspace.preference(SSHEnvironment.MaxConnections)
   }
 
 }

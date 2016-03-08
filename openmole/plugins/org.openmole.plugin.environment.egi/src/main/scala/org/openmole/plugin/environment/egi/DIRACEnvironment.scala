@@ -34,11 +34,11 @@ import scala.ref.WeakReference
 
 object DIRACEnvironment {
 
-  val Connections = new ConfigurationLocation("DIRACEnvironment", "Connections")
-  val EagerSubmissionThreshold = ConfigurationLocation("DIRACEnvironment", "EagerSubmissionThreshold")
+  val Connections = ConfigurationLocation("DIRACEnvironment", "Connections", Some(100))
+  val EagerSubmissionThreshold = ConfigurationLocation("DIRACEnvironment", "EagerSubmissionThreshold", Some(0.2))
 
-  Workspace += (Connections, "100")
-  Workspace += (EagerSubmissionThreshold, "0.2")
+  Workspace setDefault Connections
+  Workspace setDefault EagerSubmissionThreshold
 
   def apply(
     voName:         String,
@@ -106,7 +106,7 @@ class DIRACEnvironment(
     super.submit(job)
   }
 
-  def bdiiServer: BDII = BDII(bdii.getHost, bdii.getPort, Workspace.preferenceAsDuration(EGIEnvironment.FetchResourcesTimeOut))
+  def bdiiServer: BDII = BDII(bdii.getHost, bdii.getPort, Workspace.preference(EGIEnvironment.FetchResourcesTimeOut))
 
   def executionJob(job: Job) = new DiracBatchExecutionJob(job, this)
 
@@ -121,7 +121,7 @@ class DIRACEnvironment(
   }
 
   @transient lazy val jobService = new DIRACJobService {
-    val connections = Workspace.preferenceAsInt(DIRACEnvironment.Connections)
+    val connections = Workspace.preference(DIRACEnvironment.Connections)
     val environment = env
   }
 

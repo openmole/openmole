@@ -45,17 +45,17 @@ object ReplicaCatalog extends Logger {
 
   import Log._
 
-  val NoAccessCleanTime = new ConfigurationLocation("ReplicaCatalog", "NoAccessCleanTime")
-  val InCatalogCacheTime = new ConfigurationLocation("ReplicaCatalog", "InCatalogCacheTime")
-  val ReplicaCacheTime = new ConfigurationLocation("ReplicaCatalog", "ReplicaCacheTime")
-  val ReplicaGraceTime = new ConfigurationLocation("ReplicaCatalog", "ReplicaGraceTime")
-  val LockTimeout = new ConfigurationLocation("ReplicaCatalog", "LockTimeout")
+  val NoAccessCleanTime = ConfigurationLocation("ReplicaCatalog", "NoAccessCleanTime", Some(30 days))
+  val InCatalogCacheTime = ConfigurationLocation("ReplicaCatalog", "InCatalogCacheTime", Some(2 minutes))
+  val ReplicaCacheTime = ConfigurationLocation("ReplicaCatalog", "ReplicaCacheTime", Some(30 minutes))
+  val ReplicaGraceTime = ConfigurationLocation("ReplicaCatalog", "ReplicaGraceTime", Some(1 day))
+  val LockTimeout = ConfigurationLocation("ReplicaCatalog", "LockTimeout", Some(1 minute))
 
-  Workspace += (NoAccessCleanTime, "P30D")
-  Workspace += (InCatalogCacheTime, "PT2M")
-  Workspace += (ReplicaCacheTime, "PT30M")
-  Workspace += (ReplicaGraceTime, "P1D")
-  Workspace += (LockTimeout, "PT1M")
+  Workspace setDefault NoAccessCleanTime
+  Workspace setDefault InCatalogCacheTime
+  Workspace setDefault ReplicaCacheTime
+  Workspace setDefault ReplicaGraceTime
+  Workspace setDefault LockTimeout
 
   lazy val replicationPattern = Pattern.compile("(\\p{XDigit}*)_.*")
 
@@ -70,7 +70,7 @@ object ReplicaCatalog extends Logger {
       password = info.password
     )
 
-    Await.result(db.run { sqlu"""SET DEFAULT_LOCK_TIMEOUT ${Workspace.preferenceAsDuration(LockTimeout).toMillis}""" }, Duration.Inf)
+    Await.result(db.run { sqlu"""SET DEFAULT_LOCK_TIMEOUT ${Workspace.preference(LockTimeout).toMillis}""" }, Duration.Inf)
     db
   }
 
@@ -80,9 +80,9 @@ object ReplicaCatalog extends Logger {
 
   type ReplicaCacheKey = (String, String, String)
   val replicaCache = CacheBuilder.newBuilder.asInstanceOf[CacheBuilder[ReplicaCacheKey, Replica]].
-    expireAfterWrite(Workspace.preferenceAsDuration(ReplicaCacheTime).toSeconds, TimeUnit.SECONDS).build[ReplicaCacheKey, Replica]
+    expireAfterWrite(Workspace.preference(ReplicaCacheTime).toSeconds, TimeUnit.SECONDS).build[ReplicaCacheKey, Replica]
 
-  def inCatalog = inCatalogCache(inCatalogQuery, Workspace.preferenceAsDuration(InCatalogCacheTime).toMillis)
+  def inCatalog = inCatalogCache(inCatalogQuery, Workspace.preference(InCatalogCacheTime).toMillis)
 
   private def inCatalogQuery: Map[String, Set[String]] = {
     val all = query(replicas.map { replica ⇒ (replica.storage, replica.hash) }.result)
@@ -123,7 +123,7 @@ object ReplicaCatalog extends Logger {
           @tailrec def uploadAndInsertIfNotInCatalog: Replica = {
             //Remove deleted replicas
             def stillExists(r: Replica) =
-              if (r.lastCheckExists + Workspace.preferenceAsDuration(BatchEnvironment.CheckFileExistsInterval).toMillis < System.currentTimeMillis) {
+              if (r.lastCheckExists + Workspace.preference(BatchEnvironment.CheckFileExistsInterval).toMillis < System.currentTimeMillis) {
                 Try(storage.exists(r.path)) match {
                   case Success(e) ⇒ e
                   case _          ⇒ false

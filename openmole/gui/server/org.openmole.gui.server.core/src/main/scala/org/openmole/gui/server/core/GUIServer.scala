@@ -34,17 +34,17 @@ import org.eclipse.jetty.util.resource.{ Resource ⇒ Res }
 import org.openmole.tool.hash._
 
 object GUIServer {
-  val passwordHash = new ConfigurationLocation("GUIServer", "PasswordHash", true)
+  val passwordHash = ConfigurationLocation[String]("GUIServer", "PasswordHash", None, true)
   def setPassword(p: String) = Workspace.setPreference(passwordHash, p.hash.toString)
-  def isPasswordCorrect(p: String) = Workspace.preference(passwordHash) == p.hash.toString
+  def isPasswordCorrect(p: String) = Workspace.preferenceOption(passwordHash).map(_ == p.hash.toString).getOrElse(false)
 
   def initPassword = {
     Console.initPassword
-    if (!Workspace.isPreferenceSet(passwordHash)) setPassword(Console.askPassword("Authentication password"))
+    if (!Workspace.preferenceIsSet(passwordHash)) setPassword(Console.askPassword("Authentication password"))
   }
 
-  val port = new ConfigurationLocation("GUIServer", "Port")
-  Workspace += (port, Network.freePort.toString)
+  val port = ConfigurationLocation("GUIServer", "Port", Some(Network.freePort))
+  Workspace setDefault port
 
   lazy val lockFile = {
     val file = Workspace.file("GUI.lock")

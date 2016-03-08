@@ -41,6 +41,7 @@ import org.openmole.tool.hash.Hash
 import ref.WeakReference
 import scala.Predef.Set
 import scala.collection.mutable.{ MultiMap, Set, HashMap }
+import concurrent.duration._
 
 object BatchEnvironment extends Logger {
 
@@ -88,29 +89,29 @@ object BatchEnvironment extends Logger {
     res
   }
 
-  val MemorySizeForRuntime = new ConfigurationLocation("BatchEnvironment", "MemorySizeForRuntime")
+  val MemorySizeForRuntime = ConfigurationLocation("BatchEnvironment", "MemorySizeForRuntime", Some(1024))
 
-  val CheckInterval = new ConfigurationLocation("BatchEnvironment", "CheckInterval")
+  val CheckInterval = ConfigurationLocation("BatchEnvironment", "CheckInterval", Some(1 minute))
 
-  val CheckFileExistsInterval = new ConfigurationLocation("BatchEnvironment", "CheckFileExistsInterval")
+  val CheckFileExistsInterval = ConfigurationLocation("BatchEnvironment", "CheckFileExistsInterval", Some(1 hour))
 
-  val GetTokenInterval = new ConfigurationLocation("BatchEnvironment", "GetTokenInterval")
+  val GetTokenInterval = ConfigurationLocation("BatchEnvironment", "GetTokenInterval", Some(1 minute))
 
-  val MinUpdateInterval = new ConfigurationLocation("BatchEnvironment", "MinUpdateInterval")
-  val MaxUpdateInterval = new ConfigurationLocation("BatchEnvironment", "MaxUpdateInterval")
-  val IncrementUpdateInterval = new ConfigurationLocation("BatchEnvironment", "IncrementUpdateInterval")
-  val MaxUpdateErrorsInARow = ConfigurationLocation("BatchEnvironment", "MaxUpdateErrorsInARow")
+  val MinUpdateInterval = ConfigurationLocation("BatchEnvironment", "MinUpdateInterval", Some(1 minute))
+  val MaxUpdateInterval = ConfigurationLocation("BatchEnvironment", "MaxUpdateInterval", Some(10 minute))
+  val IncrementUpdateInterval = ConfigurationLocation("BatchEnvironment", "IncrementUpdateInterval", Some(1 minute))
+  val MaxUpdateErrorsInARow = ConfigurationLocation("BatchEnvironment", "MaxUpdateErrorsInARow", Some(3))
 
-  val JobManagementThreads = new ConfigurationLocation("BatchEnvironment", "JobManagementThreads")
+  val JobManagementThreads = ConfigurationLocation("BatchEnvironment", "JobManagementThreads", Some(200))
 
-  val StoragesGCUpdateInterval = new ConfigurationLocation("BatchEnvironment", "StoragesGCUpdateInterval")
-  val RuntimeMemoryMargin = ConfigurationLocation("BatchEnvironment", "RuntimeMemoryMargin")
+  val StoragesGCUpdateInterval = ConfigurationLocation("BatchEnvironment", "StoragesGCUpdateInterval", Some(1 hour))
+  val RuntimeMemoryMargin = ConfigurationLocation("BatchEnvironment", "RuntimeMemoryMargin", Some(400))
 
-  Workspace += (MinUpdateInterval, "PT1M")
-  Workspace += (MaxUpdateInterval, "PT10M")
-  Workspace += (IncrementUpdateInterval, "PT1M")
-  Workspace += (MaxUpdateErrorsInARow, "3")
-  Workspace += (GetTokenInterval, "PT1M")
+  Workspace setDefault MinUpdateInterval
+  Workspace setDefault MaxUpdateInterval
+  Workspace setDefault IncrementUpdateInterval
+  Workspace setDefault MaxUpdateErrorsInARow
+  Workspace setDefault GetTokenInterval
 
   private def runtimeDirLocation = Workspace.openMOLELocation.getOrElse(throw new InternalProcessingError("openmole.location not set"))./("runtime")
 
@@ -118,17 +119,17 @@ object BatchEnvironment extends Logger {
   @transient lazy val JVMLinuxI386Location = runtimeDirLocation./("jvm-386.tar.gz")
   @transient lazy val JVMLinuxX64Location = runtimeDirLocation./("jvm-x64.tar.gz")
 
-  Workspace += (MemorySizeForRuntime, "1024")
-  Workspace += (CheckInterval, "PT1M")
-  Workspace += (CheckFileExistsInterval, "PT1H")
-  Workspace += (JobManagementThreads, "200")
+  Workspace setDefault MemorySizeForRuntime
+  Workspace setDefault CheckInterval
+  Workspace setDefault CheckFileExistsInterval
+  Workspace setDefault JobManagementThreads
 
-  Workspace += (StoragesGCUpdateInterval, "PT1H")
+  Workspace setDefault StoragesGCUpdateInterval
 
-  Workspace += (RuntimeMemoryMargin, "400")
+  Workspace setDefault RuntimeMemoryMargin
 
-  def defaultRuntimeMemory = Workspace.preferenceAsInt(BatchEnvironment.MemorySizeForRuntime)
-  def getTokenInterval = Workspace.preferenceAsDuration(GetTokenInterval) * Workspace.rng.nextDouble
+  def defaultRuntimeMemory = Workspace.preference(BatchEnvironment.MemorySizeForRuntime)
+  def getTokenInterval = Workspace.preference(GetTokenInterval) * Workspace.rng.nextDouble
 
   lazy val jobManager = new JobManager
 }
@@ -172,7 +173,7 @@ trait BatchEnvironment extends SubmissionEnvironment { env ⇒
 
   def openMOLEMemory: Option[Int] = None
   def openMOLEMemoryValue = openMOLEMemory match {
-    case None    ⇒ Workspace.preferenceAsInt(MemorySizeForRuntime)
+    case None    ⇒ Workspace.preference(MemorySizeForRuntime)
     case Some(m) ⇒ m
   }
 
@@ -198,9 +199,9 @@ trait BatchEnvironment extends SubmissionEnvironment { env ⇒
 
   @transient lazy val plugins = PluginManager.pluginsForClass(this.getClass)
 
-  def minUpdateInterval = Workspace.preferenceAsDuration(MinUpdateInterval)
-  def maxUpdateInterval = Workspace.preferenceAsDuration(MaxUpdateInterval)
-  def incrementUpdateInterval = Workspace.preferenceAsDuration(IncrementUpdateInterval)
+  def minUpdateInterval = Workspace.preference(MinUpdateInterval)
+  def maxUpdateInterval = Workspace.preference(MaxUpdateInterval)
+  def incrementUpdateInterval = Workspace.preference(IncrementUpdateInterval)
 
   def submitted: Long = jobs.count { _.state == ExecutionState.SUBMITTED }
   def running: Long = jobs.count { _.state == ExecutionState.RUNNING }

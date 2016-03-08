@@ -34,9 +34,9 @@ import org.openmole.core.tools.service._
 import scala.ref.WeakReference
 
 object Environment {
-  val maxExceptionsLog = ConfigurationLocation("Environment", "MaxExceptionsLog")
+  val maxExceptionsLog = ConfigurationLocation("Environment", "MaxExceptionsLog", Some(1000))
 
-  Workspace += (maxExceptionsLog, "1000")
+  Workspace setDefault maxExceptionsLog
 
   case class JobSubmitted(job: ExecutionJob) extends Event[Environment]
   case class JobStateChanged(job: ExecutionJob, newState: ExecutionState, oldState: ExecutionState) extends Event[Environment]
@@ -55,7 +55,7 @@ sealed trait Environment <: Name {
 
   private lazy val _errors =
     new OrderedSlidingList[ExceptionEvent](
-      Workspace.preferenceAsInt(maxExceptionsLog)
+      Workspace.preference(maxExceptionsLog)
     )(Ordering.by[ExceptionEvent, Int](_.level.intValue()))
 
   def error(e: ExceptionEvent) = _errors += e
@@ -76,10 +76,10 @@ trait SubmissionEnvironment <: Environment {
 
 object LocalEnvironment {
 
-  val DefaultNumberOfThreads = new ConfigurationLocation("LocalExecutionEnvironment", "ThreadNumber")
+  val DefaultNumberOfThreads = ConfigurationLocation("LocalExecutionEnvironment", "ThreadNumber", Some(1))
 
-  Workspace += (DefaultNumberOfThreads, "1")
-  var defaultNumberOfThreads = Workspace.preferenceAsInt(DefaultNumberOfThreads)
+  Workspace setDefault DefaultNumberOfThreads
+  var defaultNumberOfThreads = Workspace.preference(DefaultNumberOfThreads)
 
   def apply(
     nbThreads:    Int            = defaultNumberOfThreads,

@@ -44,7 +44,7 @@ trait SharedStorage extends SSHService { js ⇒
     def host = js.host
     def user = js.user
     override def port = js.port
-    override def timeout = Workspace.preferenceAsDuration(SSHService.timeout)
+    override def timeout = Workspace.preference(SSHService.timeout)
   }
 
   @transient private var installed: Option[String] = None
@@ -58,7 +58,7 @@ trait SharedStorage extends SSHService { js ⇒
         val (workdir, scriptName) = {
           val installDir = sharedFS.child(sharedFS.root, "install")
           Try(sharedFS.makeDir(installDir))
-          val workdir = sharedFS.child(installDir, Workspace.preference(Workspace.uniqueID) + "_install")
+          val workdir = sharedFS.child(installDir, Workspace.preference(Workspace.uniqueIDLocation) + "_install")
           if (!sharedFS.exists(workdir)) sharedFS.makeDir(workdir)
 
           Workspace.withTmpFile("install", ".sh") { script ⇒

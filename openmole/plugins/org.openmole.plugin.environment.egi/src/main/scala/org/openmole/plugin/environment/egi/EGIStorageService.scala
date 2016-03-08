@@ -49,8 +49,8 @@ trait EGIStorageService extends StorageService with GridScaleStorage with Compre
 object EGISRMStorageService {
 
   def apply[A: GlobusAuthenticationProvider](s: SRMLocation, _environment: BatchEnvironment, voName: String, authentication: A) = new EGISRMStorageService {
-    def threads = Workspace.preferenceAsInt(EGIEnvironment.ConnectionsBySRMSE)
-    val usageControl = AvailabilityQuality(new LimitedAccess(threads, Int.MaxValue), Workspace.preferenceAsInt(EGIEnvironment.QualityHysteresis))
+    def threads = Workspace.preference(EGIEnvironment.ConnectionsBySRMSE)
+    val usageControl = AvailabilityQuality(new LimitedAccess(threads, Int.MaxValue), Workspace.preference(EGIEnvironment.QualityHysteresis))
     val storage = SRMStorage(s.copy(basePath = ""), threads)(authentication)
     val url = new URI("srm", null, s.host, s.port, null, null, null)
     val remoteStorage = new LCGCpRemoteStorage(s.host, s.port, voName)
@@ -127,8 +127,8 @@ class LCGCpRemoteStorage(val host: String, val port: Int, val voName: String) ex
 object EGIWebDAVStorageService {
 
   def apply[A: HTTPSAuthentication](s: WebDAVLocation, _environment: BatchEnvironment, voName: String, debug: Boolean, authentication: A) = new EGIWebDAVStorageService {
-    def threads = Workspace.preferenceAsInt(EGIEnvironment.ConnectionsByWebDAVSE)
-    val usageControl = AvailabilityQuality(new LimitedAccess(threads, Int.MaxValue), Workspace.preferenceAsInt(EGIEnvironment.QualityHysteresis))
+    def threads = Workspace.preference(EGIEnvironment.ConnectionsByWebDAVSE)
+    val usageControl = AvailabilityQuality(new LimitedAccess(threads, Int.MaxValue), Workspace.preference(EGIEnvironment.QualityHysteresis))
     val storage = DPMWebDAVStorage(s.copy(basePath = ""))(authentication)
     val url = new URI("https", null, s.host, s.port, null, null, null)
     val remoteStorage = new CurlRemoteStorage(s.host, s.port, voName, debug)

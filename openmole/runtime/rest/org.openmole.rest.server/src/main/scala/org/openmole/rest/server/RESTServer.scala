@@ -23,9 +23,9 @@ object RESTServer extends Logger {
     setPassword(Console.askPassword("Server password"))
   }
 
-  def passwordHash = ConfigurationLocation("REST", "PasswordHash", true)
+  def passwordHash = ConfigurationLocation[String]("REST", "PasswordHash", None, true)
   def setPassword(p: String) = Workspace.setPreference(passwordHash, p.hash.toString)
-  def isPasswordCorrect(p: String) = Workspace.preference(passwordHash) == p.hash.toString
+  def isPasswordCorrect(p: String) = Workspace.preferenceOption(passwordHash).map(_ == p.hash.toString).getOrElse(false)
 
 }
 

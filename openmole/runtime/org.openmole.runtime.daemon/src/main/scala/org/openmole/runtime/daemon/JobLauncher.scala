@@ -47,8 +47,8 @@ object JobLauncher extends Logger {
   val jobCheckInterval = new ConfigurationLocation("JobLauncher", "jobCheckInterval")
   val connectionTimeout = new ConfigurationLocation("JobLauncher", "connectionTimeout")
 
-  Workspace += (jobCheckInterval, "PT1M")
-  Workspace += (connectionTimeout, "PT1M")
+  Workspace setDefault (jobCheckInterval, "PT1M")
+  Workspace setDefault (connectionTimeout, "PT1M")
 }
 
 class JobLauncher(cacheSize: Long, debug: Boolean) {

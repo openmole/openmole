@@ -92,11 +92,11 @@ trait BDIIStorageServers extends BatchEnvironment { env ⇒
       val availabilityFactor = if (minAvailability == maxAvailability) 1.0 else 1.0 - availability.normalize(minTime, maxTime)
 
       math.pow(
-        Workspace.preferenceAsDouble(StorageSizeFactor) * sizeFactor +
-          Workspace.preferenceAsDouble(StorageTimeFactor) * timeFactor +
-          Workspace.preferenceAsDouble(StorageAvailabilityFactor) * availabilityFactor +
-          Workspace.preferenceAsDouble(StorageSuccessRateFactor) * ss.usageControl.successRate,
-        Workspace.preferenceAsDouble(StorageFitnessPower)
+        Workspace.preference(StorageSizeFactor) * sizeFactor +
+          Workspace.preference(StorageTimeFactor) * timeFactor +
+          Workspace.preference(StorageAvailabilityFactor) * availabilityFactor +
+          Workspace.preference(StorageSuccessRateFactor) * ss.usageControl.successRate,
+        Workspace.preference(StorageFitnessPower)
       )
     }
 

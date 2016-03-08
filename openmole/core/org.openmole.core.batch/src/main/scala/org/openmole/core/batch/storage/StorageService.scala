@@ -32,14 +32,15 @@ import org.openmole.core.workspace.{ Workspace, ConfigurationLocation }
 import fr.iscpif.gridscale.storage._
 import java.io._
 import org.openmole.tool.logger.Logger
+import concurrent.duration._
 
 object StorageService extends Logger {
 
-  val DirRegenerate = new ConfigurationLocation("StorageService", "DirRegenerate")
-  Workspace += (DirRegenerate, "P1D")
+  val DirRegenerate = ConfigurationLocation("StorageService", "DirRegenerate", Some(1 day))
+  Workspace setDefault DirRegenerate
 
-  val TmpDirRemoval = new ConfigurationLocation("StorageService", "TmpDirRemoval")
-  Workspace += (TmpDirRemoval, "P30D")
+  val TmpDirRemoval = ConfigurationLocation("StorageService", "TmpDirRemoval", Some(30 days))
+  Workspace setDefault TmpDirRemoval
 
   val persistent = "persistent/"
   val tmp = "tmp/"
@@ -58,7 +59,7 @@ trait StorageService extends BatchService with Storage {
   @transient private lazy val _directoryCache =
     CacheBuilder.
       newBuilder().
-      expireAfterWrite(Workspace.preferenceAsDuration(StorageService.DirRegenerate).toMillis, TimeUnit.MILLISECONDS).
+      expireAfterWrite(Workspace.preference(StorageService.DirRegenerate).toMillis, TimeUnit.MILLISECONDS).
       build[String, String]()
 
   @transient private lazy val _serializedRemoteStorage = {
@@ -114,7 +115,7 @@ trait StorageService extends BatchService with Storage {
 
     def graceIsOver(name: String) =
       ReplicaCatalog.timeOfPersistent(name).map {
-        _ + Workspace.preferenceAsDuration(ReplicaCatalog.ReplicaGraceTime).toMillis < System.currentTimeMillis
+        _ + Workspace.preference(ReplicaCatalog.ReplicaGraceTime).toMillis < System.currentTimeMillis
       }.getOrElse(true)
 
     val names = listNames(persistentPath)
@@ -139,7 +140,7 @@ trait StorageService extends BatchService with Storage {
     val tmpNoTime = child(baseDir, tmp)
     if (!exists(tmpNoTime)) makeDir(tmpNoTime)
 
-    val removalDate = System.currentTimeMillis - Workspace.preferenceAsDuration(TmpDirRemoval).toMillis
+    val removalDate = System.currentTimeMillis - Workspace.preference(TmpDirRemoval).toMillis
 
     for (entry ← list(tmpNoTime)) {
       val childPath = child(tmpNoTime, entry.name)
@@ -188,7 +189,7 @@ trait StorageService extends BatchService with Storage {
   def upload(src: File, dest: String, options: TransferOptions = TransferOptions.default)(implicit token: AccessToken) = token.access { _upload(src, dest, options) }
   def download(src: String, dest: File, options: TransferOptions = TransferOptions.default)(implicit token: AccessToken) = token.access { _download(src, dest, options) }
 
-  def baseDirName = Workspace.preference(Workspace.uniqueID) + '/'
+  def baseDirName = Workspace.preference(Workspace.uniqueIDLocation) + '/'
 
   def backgroundRmFile(path: String) = BatchEnvironment.jobManager ! DeleteFile(this, path, false)
   def backgroundRmDir(path: String) = BatchEnvironment.jobManager ! DeleteFile(this, path, true)

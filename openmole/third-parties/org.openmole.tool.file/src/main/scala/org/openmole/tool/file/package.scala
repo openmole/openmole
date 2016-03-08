@@ -296,11 +296,11 @@ package file {
         f.setExecutable(Files.isExecutable(o))
       }
 
-      def content_=(content: String) = Files.write(file, content.getBytes)
+      def content_=(content: String) = Files.write(file, content.getBytes, StandardOpenOption.TRUNCATE_EXISTING)
 
       def content = withSource(_.mkString)
 
-      def append(s: String) = Files.write(file, content.getBytes, StandardOpenOption.APPEND)
+      def append(s: String) = Files.write(file, s.getBytes, StandardOpenOption.APPEND)
 
       def lines = withSource(_.getLines.toList)
 
