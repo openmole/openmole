@@ -150,8 +150,6 @@ object Libraries extends Defaults {
 
   lazy val scalatexSite = "org.openmole" %% "com-lihaoyi-scalatex-site" % "0.3.5"
 
-  lazy val apacheConfig = "org.openmole" %% "org-apache-commons-configuration" % "1.10"
-
   lazy val math = "org.openmole" %% "org-apache-commons-math" % "3.5"
 
   lazy val exec = "org.openmole" %% "org-apache-commons-exec" % "1.1"

@@ -25,7 +25,7 @@ object Core extends Defaults {
   lazy val batch = OsgiProject("batch", imports = Seq("*")) dependsOn (
     workflow, workspace, tools, event, replication, updater, exception,
     serializer, fileService, pluginManager, openmoleTar
-  ) settings (libraryDependencies ++= Seq(gridscale, h2, guava, jasypt, slick, apacheConfig))
+  ) settings (libraryDependencies ++= Seq(gridscale, h2, guava, jasypt, slick))
 
   lazy val dsl = OsgiProject("dsl", imports = Seq("*")) dependsOn (workflow, logging)
 
@@ -43,7 +43,7 @@ object Core extends Defaults {
     libraryDependencies ++= Seq(slick, xstream))
 
   val workspace = OsgiProject("workspace", imports = Seq("*")) settings
-    (libraryDependencies ++= Seq(jasypt, xstream, apacheConfig, math)) dependsOn
+    (libraryDependencies ++= Seq(jasypt, xstream, math)) dependsOn
     (exception, event, tools, replication, openmoleCrypto)
 
   val macros = OsgiProject("macros", imports = Seq("*")) settings (libraryDependencies += scalaLang % "provided" /*, provided(scalaCompiler)*/ )
