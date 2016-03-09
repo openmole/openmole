@@ -82,6 +82,7 @@ class Application extends IApplication {
       unoptimizedJS:        Boolean         = false,
       remote:               Boolean         = false,
       browse:               Boolean         = true,
+      reset:                Boolean         = false,
       args:                 List[String]    = Nil
     )
 
@@ -129,6 +130,7 @@ class Application extends IApplication {
         case "--webui-authentication" :: tail  ⇒ parse(tail, c.copy(remote = true))
         case "--remote" :: tail                ⇒ parse(tail, c.copy(remote = true))
         case "--no-browser" :: tail            ⇒ parse(tail, c.copy(browse = false))
+        case "--reset" :: tail                 ⇒ parse(tail, c.copy(reset = true))
         case "--" :: tail                      ⇒ parse(Nil, c.copy(args = tail))
         case s :: tail                         ⇒ parse(tail, c.copy(ignored = s :: c.ignored))
         case Nil                               ⇒ c
@@ -140,78 +142,85 @@ class Application extends IApplication {
 
     config.loggerLevel.foreach(LoggerService.level)
 
-    val (existingUserPlugins, notExistingUserPlugins) = config.userPlugins.span(new File(_).exists)
-
-    if (!notExistingUserPlugins.isEmpty) logger.warning(s"""Some plugins or plugin folders don't exist: ${notExistingUserPlugins.mkString(",")}""")
-
-    val userPlugins =
-      existingUserPlugins.flatMap { p ⇒ PluginManager.plugins(new File(p)) } ++
-        (if (config.loadHomePlugins.getOrElse(config.launchMode != ConsoleMode)) Workspace.pluginDir.listFilesSafe.flatMap(PluginManager.plugins) else Nil)
-
-    logger.fine(s"Loading user plugins " + userPlugins)
-
-    val plugins: List[File] =
-      config.pluginsDirs.map(new File(_)) ++
-        userPlugins ++
-        (if (config.launchMode == GUIMode) config.guiPluginsDirs.map(new File(_)) else List.empty)
-
-    PluginManager.startAll.foreach { case (b, e) ⇒ logger.log(WARNING, s"Error staring bundle $b", e) }
-    PluginManager.tryLoad(plugins).foreach { case (b, e) ⇒ logger.log(WARNING, s"Error loading bundle $b", e) }
-
-    try config.password foreach Workspace.setPassword
-    catch {
-      case e: UserBadDataError ⇒
-        logger.severe("Wrong password!")
-        throw e
+    if (config.reset) {
+      Workspace.reset()
+      new Integer(Console.ExitCodes.ok)
     }
+    else {
+      val (existingUserPlugins, notExistingUserPlugins) = config.userPlugins.span(new File(_).exists)
 
-    if (!config.ignored.isEmpty) logger.warning("Ignored options: " + config.ignored.mkString(" "))
+      if (!notExistingUserPlugins.isEmpty) logger.warning(s"""Some plugins or plugin folders don't exist: ${notExistingUserPlugins.mkString(",")}""")
 
-    val retCode: Int =
-      config.launchMode match {
-        case HelpMode ⇒
-          println(usage)
-          Console.ExitCodes.ok
-        case ServerConfigMode ⇒
-          RESTServer.configure
-          Console.ExitCodes.ok
-        case ServerMode ⇒
-          if (!config.password.isDefined) Console.initPassword
-          val server = new RESTServer(config.port, config.hostName)
-          server.start()
-          Console.ExitCodes.ok
-        case ConsoleMode ⇒
-          print(consoleSplash)
-          println(consoleUsage)
-          val console = new Console(config.password, config.scriptFile)
-          val variables = ConsoleVariables(args = config.args)
-          console.run(variables, config.consoleWorkDirectory)
-        case GUIMode ⇒
-          def browse(url: String) =
-            if (Desktop.isDesktopSupported) Desktop.getDesktop.browse(new URI(url))
-          GUIServer.lockFile.withFileOutputStream { fos ⇒
-            val launch = (config.remote || fos.getChannel.tryLock != null)
-            if (launch) {
-              val port = config.port.getOrElse(Workspace.preference(GUIServer.port))
-              val url = s"https://localhost:$port"
-              GUIServer.urlFile.content = url
-              BootstrapJS.init(!config.unoptimizedJS)
-              if (config.remote) GUIServer.initPassword
-              val server = new GUIServer(port, BootstrapJS.webapp, config.remote)
-              server.start()
-              if (config.browse && !config.remote) browse(url)
-              ScalaREPL.warmup
-              logger.info(s"Server listening on port $port.")
-              server.join()
-            }
-            else {
-              browse(GUIServer.urlFile.content)
-              Console.ExitCodes.ok
-            }
-          }
+      val userPlugins =
+        existingUserPlugins.flatMap { p ⇒ PluginManager.plugins(new File(p)) } ++
+          (if (config.loadHomePlugins.getOrElse(config.launchMode != ConsoleMode)) Workspace.pluginDir.listFilesSafe.flatMap(PluginManager.plugins) else Nil)
+
+      logger.fine(s"Loading user plugins " + userPlugins)
+
+      val plugins: List[File] =
+        config.pluginsDirs.map(new File(_)) ++
+          userPlugins ++
+          (if (config.launchMode == GUIMode) config.guiPluginsDirs.map(new File(_)) else List.empty)
+
+      PluginManager.startAll.foreach { case (b, e) ⇒ logger.log(WARNING, s"Error staring bundle $b", e) }
+      PluginManager.tryLoad(plugins).foreach { case (b, e) ⇒ logger.log(WARNING, s"Error loading bundle $b", e) }
+
+      try config.password foreach Workspace.setPassword
+      catch {
+        case e: UserBadDataError ⇒
+          logger.severe("Wrong password!")
+          throw e
       }
 
-    new Integer(retCode)
+      if (!config.ignored.isEmpty) logger.warning("Ignored options: " + config.ignored.mkString(" "))
+
+      val retCode: Int =
+        config.launchMode match {
+          case HelpMode ⇒
+            println(usage)
+            Console.ExitCodes.ok
+          case ServerConfigMode ⇒
+            RESTServer.configure
+            Console.ExitCodes.ok
+          case ServerMode ⇒
+            if (!config.password.isDefined) Console.initPassword
+            val server = new RESTServer(config.port, config.hostName)
+            server.start()
+            Console.ExitCodes.ok
+          case ConsoleMode ⇒
+            print(consoleSplash)
+            println(consoleUsage)
+            val console = new Console(config.password, config.scriptFile)
+            val variables = ConsoleVariables(args = config.args)
+            console.run(variables, config.consoleWorkDirectory)
+          case GUIMode ⇒
+            def browse(url: String) =
+              if (Desktop.isDesktopSupported) Desktop.getDesktop.browse(new URI(url))
+            GUIServer.lockFile.withFileOutputStream { fos ⇒
+              val launch = (config.remote || fos.getChannel.tryLock != null)
+              if (launch) {
+                val port = config.port.getOrElse(Workspace.preference(GUIServer.port))
+                val url = s"https://localhost:$port"
+                GUIServer.urlFile.content = url
+                BootstrapJS.init(!config.unoptimizedJS)
+                if (config.remote) GUIServer.initPassword
+                val server = new GUIServer(port, BootstrapJS.webapp, config.remote)
+                server.start()
+                if (config.browse && !config.remote) browse(url)
+                ScalaREPL.warmup
+                logger.info(s"Server listening on port $port.")
+                server.join()
+              }
+              else {
+                browse(GUIServer.urlFile.content)
+                Console.ExitCodes.ok
+              }
+            }
+        }
+
+      new Integer(retCode)
+    }
+
   }
 
   override def stop = {}
