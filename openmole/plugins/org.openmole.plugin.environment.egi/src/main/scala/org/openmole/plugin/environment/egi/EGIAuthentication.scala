@@ -21,6 +21,7 @@ import java.io._
 import java.net.URI
 import java.util.UUID
 import fr.iscpif.gridscale.authentication.{ PEMAuthentication, P12Authentication }
+import org.openmole.core.batch.authentication.CypheredPassword
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import java.nio.file.FileSystems
 import java.util.zip.GZIPInputStream
@@ -162,6 +163,24 @@ object EGIAuthentication extends Logger {
         () ⇒ implicitly[GlobusAuthenticationProvider[P12VOMSAuthentication]].apply(p12)
     }
 
+  def testPassword(a: EGIAuthentication)(implicit decrypt: Decrypt) =
+    a match {
+      case a: P12Certificate ⇒
+        Try(P12Authentication.loadKeyStore(P12Authentication(a.certificate, a.password))).map(_ ⇒ true)
+    }
+
+  def testProxy(a: EGIAuthentication, voName: String)(implicit decrypt: Decrypt) = {
+    val vomses = EGIAuthentication.getVMOSOrError(voName)
+    Try(initialise(a)(vomses, voName, None)).map(_ ⇒ true)
+  }
+
 }
 
-trait EGIAuthentication
+sealed trait EGIAuthentication
+
+object P12Certificate {
+  def apply(cypheredPassword: String, certificate: File = new File(new File(System.getProperty("user.home")), ".globus/certificate.p12")) =
+    new P12Certificate(cypheredPassword, certificate)
+}
+
+class P12Certificate(val cypheredPassword: String, val certificate: File) extends EGIAuthentication with CypheredPassword
