@@ -13,7 +13,6 @@ import scala.scalajs.js.{ Dynamic ⇒ Dyn }
 import scalatags.JsDom.all._
 import scalatags.JsDom.tags
 import scala.async.Async.{ async, await }
-import fr.iscpif.scaladget.ace._
 import fr.iscpif.scaladget.mapping.ace._
 
 /*
@@ -69,7 +68,7 @@ class EditorPanelUI(bindings: Seq[(String, String, () ⇒ Any)], initCode: Strin
 
   def complete() = {
     if (editor.completer == null)
-      editor.completer = fr.iscpif.scaladget.ace.autocomplete
+      editor.completer = fr.iscpif.scaladget.mapping.ace.autocomplete //fr.iscpif.scaladget.ace.autocomplete
     js.Dynamic.global.window.ed = editor
     editor.completer.showPopup(editor)
 

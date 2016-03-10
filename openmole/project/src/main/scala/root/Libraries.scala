@@ -91,9 +91,8 @@ object Libraries extends Defaults {
 
   lazy val jawn = "org.openmole" %% "jawn" % "0.6.0"
 
-  lazy val scalaTagsVersion = "0.5.2"
-  lazy val scalaJSDomVersion = "0.8.0"
-  lazy val scalaJQueryVersion = "0.8.0"
+  lazy val scalaTagsVersion = "0.5.4"
+  lazy val scalaJSDomVersion = "0.9.0"
   lazy val rxVersion = "0.2.8"
   lazy val scalaUpickleVersion = "0.2.6"
   lazy val scalaAutowireVersion = "0.2.5"
@@ -110,7 +109,7 @@ object Libraries extends Defaults {
   lazy val scalajsTools = "org.openmole" %% "scalajs-tools" % scalajsVersion
   lazy val scalajsLibrary = "org.openmole" %% "scalajs-library" % scalajsVersion
   lazy val scalajsDom = "org.openmole" %% "scalajs-dom" % scalaJSDomVersion
-  lazy val scalajsJQuery = "org.openmole" %% "scalajs-jquery" % scalaJQueryVersion
+  //lazy val querkiJQuery = "org.openmole" %% "querki-jquery" % "0.11"
 
   lazy val mgo = "org.openmole" %% "fr-iscpif-mgo" % "2.0-SNAPSHOT"
 

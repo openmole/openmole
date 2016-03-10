@@ -79,13 +79,17 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
     Project("openmole", dir / "openmole", settings = tarProject ++ assemblySettings ++ osgiApplicationSettings) settings (commonsSettings: _*) settings (
       setExecutable ++= Seq("openmole", "openmole.bat"),
       resourcesAssemble <+= (resourceDirectory in Compile, assemblyPath) map { case (r, p) ⇒ r → p },
-      resourcesAssemble <++= Seq(openmoleUI.project, Runtime.console.project, REST.server.project) sendTo { assemblyPath / "plugins" },
-      resourcesAssemble <+= (resourceDirectory in gui.Server.core in Compile, assemblyPath) map { case (r, p) ⇒ (r / "webapp") → (p / "webapp") },
-      buildJS <<= (fullOptJS in openmoleGUI in Compile) map { _.data },
-      resourcesAssemble <+= (buildJS, assemblyPath) map { case (js, p) ⇒ js → (p / "webapp/js") },
-      resourcesAssemble <+= (buildJS, assemblyPath) map { case (js, p) ⇒ new File(js.getParent, js.getName.replace("opt.js", "jsdeps.min.js")) → (p / "webapp/js") },
+      resourcesAssemble <++= Seq(openmoleUI.project, Runtime.console.project, REST.server.project) sendTo {
+        assemblyPath / "plugins"
+      },
       resourcesAssemble <+= (assemble in openmoleCore, assemblyPath) map { case (r, p) ⇒ r → (p / "plugins") },
       resourcesAssemble <+= (assemble in openmoleGUI, assemblyPath) map { case (r, p) ⇒ r → (p / "plugins") },
+      resourcesAssemble <+= (resourceDirectory in gui.Server.core in Compile, assemblyPath) map { case (r, p) ⇒ (r / "webapp") → (p / "webapp") },
+      buildJS <<= (fullOptJS in gui.Client.core in Compile) map {
+        _.data
+      },
+      resourcesAssemble <+= (buildJS, assemblyPath) map { case (js, p) ⇒ rename(js, "openmole.js") → (p / "webapp/js") },
+      resourcesAssemble <+= (buildJS, assemblyPath) map { case (js, p) ⇒ rename(new File(js.getParent, "org-openmole-gui-client-core-jsdeps.min.js"), "deps.js") → (p / "webapp/js") },
       resourcesAssemble <+= (assemble in dbServer, assemblyPath) map { case (r, p) ⇒ r → (p / "dbserver") },
       resourcesAssemble <+= (assemble in consolePlugins, assemblyPath) map { case (r, p) ⇒ r → (p / "openmole-plugins") },
       resourcesAssemble <+= (Tar.tar in openmoleRuntime, assemblyPath) map { case (r, p) ⇒ r → (p / "runtime") },
@@ -108,6 +112,12 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
       cleanFiles <++= cleanFiles in dbServer,
       cleanFiles <++= cleanFiles in openmoleRuntime
     )
+
+  def rename(f: File, name: String) = {
+    val target = new File(f.getParent, name)
+    IO.move(f, target)
+    target
+  }
 
   lazy val webServerDependencies = Seq(
     scalatra intransitive (),
@@ -138,7 +148,6 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
   ) ++ webServerDependencies
 
   lazy val guiCoreDependencies = Seq(
-    scalajsLibrary,
     scalajsTools,
     scalajsDom,
     scalaTags,
@@ -149,7 +158,8 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
     scalajHttp,
     txtmark,
     scaladget,
-    clapper
+    clapper,
+    jquery
   )
 
   //FIXME separate web plugins from core ones
@@ -167,15 +177,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
     resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "doc") sendTo assemblyPath,
     libraryDependencies ++= guiCoreDependencies,
     dependencyFilter := filter,
-    dependencyName := rename,
-    jsDependencies += jquery / s"$jqueryVersion/jquery.min.js",
-    jsDependencies += ace / s"$aceVersion/src-min/ace.js",
-    //jsDependencies += ace / s"$aceVersion/src-min/mode-sh.js",
-    //jsDependencies += ace / s"$aceVersion/src-min/mode-scala.js",
-    //jsDependencies += ace / s"$aceVersion/src-min-noconflict/theme-github.js",
-    jsDependencies += bootstrap / s"$bootsrapVersion/js/bootstrap.min.js" dependsOn "jquery.min.js",
-    jsDependencies += d3 / s"$d3Version/d3.min.js",
-    jsDependencies += tooltipster / s"$tooltipserVersion/js/jquery.tooltipster.min.js"
+    dependencyName := rename
   ) enablePlugins (ScalaJSPlugin)
 
   lazy val consolePlugins = Project("consoleplugins", dir / "target" / "consoleplugins", settings = assemblySettings) settings (commonsSettings: _*) settings (

@@ -62,15 +62,6 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
     if (restart) arguments.applicationControl.restart() else arguments.applicationControl.stop()
   }
 
-  get("/plugins.js.map") {
-    contentType = "text/javascript"
-    val webui = Workspace.file("webui")
-    val webapp = new File(webui, "webapp")
-    val jsSrc = new File(webapp, "js/plugins.js.map")
-    response.setHeader("Content-Disposition", "attachment; filename=" + jsSrc.getName)
-    jsSrc
-  }
-
   post("/uploadfiles") {
     move(fileParams, params("fileType"))
   }
@@ -127,11 +118,11 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
       tags.head(
         tags.meta(tags.httpEquiv := "content-type", tags.content := "text/html; charset = ISO-8859-1"),
         cssFiles.map { f ⇒ tags.link(tags.rel := "stylesheet", tags.`type` := "text/css", href := "css/" + f) },
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/openmolegui-opt.js"),
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/openmolegui-jsdeps.min.js")
+        tags.script(tags.`type` := "text/javascript", tags.src := "js/openmole.js"),
+        tags.script(tags.`type` := "text/javascript", tags.src := "js/deps.js")
       ),
       tags.body(
-        tags.onload := "fillMap();ScriptClient().run();"
+        tags.onload := "ScriptClient().run();"
       )
     )
   }

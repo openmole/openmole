@@ -44,11 +44,11 @@ package object panels {
   }
 
   def environmentStackTriggerer = new PanelTriggerer {
-    val modalPanel: ModalPanel = environmentStackPanel
+    val modalPanel = environmentStackPanel
   }
 
   def docTriggerer = new PanelTriggerer {
-    val modalPanel: ModalPanel = docPanel
+    val modalPanel = docPanel
   }
 
   val treeNodePanel = new TreeNodePanel()(executionTriggerer)
