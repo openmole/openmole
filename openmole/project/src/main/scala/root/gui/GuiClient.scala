@@ -14,7 +14,7 @@ object Client extends GuiDefaults {
   val acePath = s"META-INF/resources/webjars/ace/$aceVersion/src-min/ace.js"
 
   lazy val core = OsgiProject("org.openmole.gui.client.core") enablePlugins (ScalaJSPlugin) dependsOn
-    (Ext.dataui, Shared.shared, Misc.utils, Misc.js /*, root.Doc.doc*/ ) settings (
+    (Ext.dataui, Shared.shared, Misc.utils, Misc.js , root.Doc.doc ) settings (
       libraryDependencies ++= Seq(autowire, upickle, scalaTags, rx, scalajsDom, scaladget, async),
       skip in packageJSDependencies := false,
       jsDependencies += jquery / jqueryPath,
