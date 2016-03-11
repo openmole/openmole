@@ -91,7 +91,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
       resourcesAssemble <+= (buildJS, assemblyPath) map { case (js, p) ⇒ rename(js, "openmole.js") → (p / "webapp/js") },
       resourcesAssemble <+= (buildJS, assemblyPath) map { case (js, p) ⇒ rename(new File(js.getParent, "org-openmole-gui-client-core-jsdeps.min.js"), "deps.js") → (p / "webapp/js") },
       resourcesAssemble <+= (assemble in dbServer, assemblyPath) map { case (r, p) ⇒ r → (p / "dbserver") },
-      resourcesAssemble <+= (assemble in consolePlugins, assemblyPath) map { case (r, p) ⇒ r → (p / "openmole-plugins") },
+      resourcesAssemble <+= (assemble in consolePlugins, assemblyPath) map { case (r, p) ⇒ r → (p / "plugins") },
       resourcesAssemble <+= (Tar.tar in openmoleRuntime, assemblyPath) map { case (r, p) ⇒ r → (p / "runtime") },
       downloads := Seq(java368URL → "runtime/jvm-386.tar.gz", javax64URL → "runtime/jvm-x64.tar.gz"),
       libraryDependencies += Libraries.scalajHttp,
@@ -312,7 +312,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
       header :=
       """|eclipse.application=org.openmole.site
           |osgi.bundles.defaultStartLevel=4""".stripMargin,
-      startLevels := openmoleStartLevels ++ Seq("openmole-plugin" → 3),
+      startLevels := openmoleStartLevels ++ Seq("plugin" → 3),
       pluginsDirectory := assemblyPath.value / "plugins",
       config := assemblyPath.value / "configuration/config.ini"
     ) dependsOn (siteGeneration, Core.tools)

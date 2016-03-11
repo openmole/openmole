@@ -60,7 +60,7 @@ function run {
 
   java -Dlogback.configurationFile=${LOCATION}/configuration/logback.xml -Xss1M -Dfile.encoding=UTF-8 -Djava.security.egd=file:/dev/./urandom -Dosgi.locking=none -Dopenmole.location="${LOCATION}" -Dosgi.classloader.singleThreadLoads=true  -Dosgi.configuration.area="${CONFIGDIR}" -Xmx${MEM} $FLAG -XX:+UseG1GC \
      -jar "$LOCATION/plugins/org.eclipse.equinox.launcher.jar" -consoleLog \
-     -cp "$LOCATION/openmole-plugins" -gp "$LOCATION/openmole-plugins-gui" "${ARGS[@]}"
+     "${ARGS[@]}"
 
   RET=$?
   rm -rf "${CONFIGDIR}"
