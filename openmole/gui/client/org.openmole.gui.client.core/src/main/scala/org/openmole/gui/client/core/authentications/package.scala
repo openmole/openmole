@@ -29,7 +29,11 @@ package object authentications {
   }
 
   def panelWithID(data: AuthenticationData) = new PanelWithID {
-    val name = data.synthetic
+    val name = data match {
+      case e: EGIP12AuthenticationData         ⇒ "EGI P12 certificate"
+      case lp: LoginPasswordAuthenticationData ⇒ "SSH login/password"
+      case _                                   ⇒ "SSH key"
+    }
     val panel: PanelUI = authentications.panel(data)
   }
 

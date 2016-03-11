@@ -31,7 +31,6 @@ import scalatags.JsDom.tags
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-@JSExport("org.openmole.gui.plugin.environment.egi.client.EGIP12AuthenticationPanelUI")
 class EGIP12AuthenticationPanel(data: EGIP12AuthenticationData) extends PanelUI {
 
   val password = bs.input(data.cypheredPassword, key("spacer5"))(

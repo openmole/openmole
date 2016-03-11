@@ -52,13 +52,11 @@ object ApiImpl extends Api {
   implicit def authProvider = Workspace.authenticationProvider
 
   //AUTHENTICATIONS
-  def addAuthentication(data: AuthenticationData): Unit = ServerFactories.authenticationFactories(data.getClass).buildAuthentication(data)
+  def addAuthentication(data: AuthenticationData): Unit = AuthenticationFactories.addAuthentication(data)
 
-  def authentications(): Seq[AuthenticationData] = ServerFactories.authenticationFactories.values.flatMap {
-    _.allAuthenticationData
-  }.toSeq
+  def authentications(): Seq[AuthenticationData] = AuthenticationFactories.allAuthentications
 
-  def removeAuthentication(data: AuthenticationData) = ServerFactories.authenticationFactories(data.getClass).removeAuthentication(data)
+  def removeAuthentication(data: AuthenticationData) = AuthenticationFactories.removeAuthentication(data)
 
   //WORKSPACE
   def isPasswordCorrect(pass: String): Boolean = Workspace.passwordIsCorrect(pass)
