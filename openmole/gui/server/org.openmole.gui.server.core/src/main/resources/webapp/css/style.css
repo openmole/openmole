@@ -1074,6 +1074,7 @@ border-top-right-radius: 0px;
 }
 
 .sortingBar{
-    left: 55px;
-    padding: 10px;
+    width: 100%;
+    left: 75px;
+    top: -4px;
 }
