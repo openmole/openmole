@@ -90,11 +90,10 @@ object ReplicaCatalog extends Logger {
   }
 
   def uploadAndGet(
-    upload:  ⇒ String,
+    upload: ⇒ String,
     srcPath: File,
-    hash:    String,
-    storage: StorageService
-  )(implicit token: AccessToken): Replica = {
+    hash: String,
+    storage: StorageService)(implicit token: AccessToken): Replica = {
 
     val cacheKey = (srcPath.getCanonicalPath, hash, storage.id)
 

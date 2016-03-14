@@ -22,12 +22,11 @@ import fr.iscpif.scalabc._
 
 object Lenormand {
   def apply(
-    priors:                      Seq[((Prototype[Double], (Double, Double)))],
-    targets:                     Seq[(Prototype[Double], Double)],
-    simulations:                 Int,
-    minimumProportionOfAccepted: Double                                       = 0.05,
-    alpha:                       Double                                       = 0.5
-  ) = {
+    priors: Seq[((Prototype[Double], (Double, Double)))],
+    targets: Seq[(Prototype[Double], Double)],
+    simulations: Int,
+    minimumProportionOfAccepted: Double = 0.05,
+    alpha: Double = 0.5) = {
     val (_priors, _simulations, _alpha, _targets, _minimumProportionOfAccepted) = (priors, simulations, alpha, targets, minimumProportionOfAccepted)
 
     new algorithm.Lenormand with sampling.JabotMover with distance.DefaultDistance with ABC {

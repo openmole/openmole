@@ -39,12 +39,11 @@ object CopyFileHook {
   }
 
   def apply(
-    prototype:   Prototype[File],
+    prototype: Prototype[File],
     destination: ExpandedString,
-    remove:      Boolean         = false,
-    compress:    Boolean         = false,
-    move:        Boolean         = false
-  ): CopyFileHookBuilder = {
+    remove: Boolean = false,
+    compress: Boolean = false,
+    move: Boolean = false): CopyFileHookBuilder = {
     val builder = apply()
     builder addCopy (prototype, destination, remove, compress, move)
     builder
@@ -78,12 +77,11 @@ abstract class CopyFileHook extends Hook {
   }
 
   private def copy(
-    context:          Context,
+    context: Context,
     executionContext: MoleExecutionContext,
-    filePrototype:    Prototype[File],
-    destination:      ExpandedString,
-    options:          CopyOptions
-  )(implicit rng: RandomProvider): Option[Variable[File]] = {
+    filePrototype: Prototype[File],
+    destination: ExpandedString,
+    options: CopyOptions)(implicit rng: RandomProvider): Option[Variable[File]] = {
     val from = context(filePrototype)
     val to = new File(destination.from(context))
 

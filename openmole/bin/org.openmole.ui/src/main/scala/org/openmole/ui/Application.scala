@@ -65,25 +65,24 @@ class Application extends IApplication {
     object ServerConfigMode extends LaunchMode
 
     case class Config(
-      pluginsDirs:          List[String]    = Nil,
-      guiPluginsDirs:       List[String]    = Nil,
-      userPlugins:          List[String]    = Nil,
-      loadHomePlugins:      Option[Boolean] = None,
-      workspaceDir:         Option[String]  = None,
-      scriptFile:           Option[String]  = None,
-      consoleWorkDirectory: Option[File]    = None,
-      password:             Option[String]  = None,
-      hostName:             Option[String]  = None,
-      launchMode:           LaunchMode      = GUIMode,
-      ignored:              List[String]    = Nil,
-      port:                 Option[Int]     = None,
-      loggerLevel:          Option[String]  = None,
-      unoptimizedJS:        Boolean         = false,
-      remote:               Boolean         = false,
-      browse:               Boolean         = true,
-      reset:                Boolean         = false,
-      args:                 List[String]    = Nil
-    )
+      pluginsDirs: List[String] = Nil,
+      guiPluginsDirs: List[String] = Nil,
+      userPlugins: List[String] = Nil,
+      loadHomePlugins: Option[Boolean] = None,
+      workspaceDir: Option[String] = None,
+      scriptFile: Option[String] = None,
+      consoleWorkDirectory: Option[File] = None,
+      password: Option[String] = None,
+      hostName: Option[String] = None,
+      launchMode: LaunchMode = GUIMode,
+      ignored: List[String] = Nil,
+      port: Option[Int] = None,
+      loggerLevel: Option[String] = None,
+      unoptimizedJS: Boolean = false,
+      remote: Boolean = false,
+      browse: Boolean = true,
+      reset: Boolean = false,
+      args: List[String] = Nil)
 
     def takeArg(args: List[String]) =
       args match {

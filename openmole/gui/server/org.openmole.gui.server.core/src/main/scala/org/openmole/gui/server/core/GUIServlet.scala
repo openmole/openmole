@@ -49,7 +49,7 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
   val basePath = "org/openmole/gui/shared"
 
   // Get all the css files in the workspace (it is not working with js because of the order)
-  val cssFiles = new File("webapp/css").listFilesSafe.map {
+  val cssFiles = new File(GUIServer.resourcePath, "css").listFilesSafe.map {
     _.getName
   }.sorted
 

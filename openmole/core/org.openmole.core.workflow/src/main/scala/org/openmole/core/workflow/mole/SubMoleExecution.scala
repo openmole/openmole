@@ -46,9 +46,8 @@ object SubMoleExecution extends Logger {
 import SubMoleExecution.Log._
 
 class SubMoleExecution(
-    val parent:        Option[SubMoleExecution],
-    val moleExecution: MoleExecution
-) {
+    val parent: Option[SubMoleExecution],
+    val moleExecution: MoleExecution) {
 
   @transient lazy val transitionLock = new locks.ReentrantLock()
 

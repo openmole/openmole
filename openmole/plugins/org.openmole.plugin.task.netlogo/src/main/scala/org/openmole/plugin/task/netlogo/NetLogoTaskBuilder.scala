@@ -23,11 +23,10 @@ import org.openmole.plugin.task.external.ExternalTaskBuilder
 import scala.collection.mutable.ListBuffer
 
 abstract class NetLogoTaskBuilder(
-    private val workspace:         NetLogoTask.Workspace,
+    private val workspace: NetLogoTask.Workspace,
     private val launchingCommands: Seq[String],
-    private val seed:              Option[Prototype[Int]],
-    private val netLogoFactory:    NetLogoFactory
-) extends ExternalTaskBuilder { builder ⇒
+    private val seed: Option[Prototype[Int]],
+    private val netLogoFactory: NetLogoFactory) extends ExternalTaskBuilder { builder ⇒
 
   seed.foreach(p ⇒ addInput(p))
 

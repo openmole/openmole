@@ -36,10 +36,9 @@ object OMTags {
     )
 
   def glyphBorderButton(
-    text:     String,
+    text: String,
     buttonCB: ClassKeyAggregator,
-    glyCA:    ClassKeyAggregator, todo: () ⇒ Unit
-  ): TypedTag[HTMLButtonElement] = {
+    glyCA: ClassKeyAggregator, todo: () ⇒ Unit): TypedTag[HTMLButtonElement] = {
     tags.button(`type` := "button", `class` := "btn " + buttonCB.key, onclick := { () ⇒ todo() })(
       tags.span(aria.hidden := true)(glyph(glyCA))
     )
@@ -127,9 +126,8 @@ object OMTags {
   def twoStatesGlyphButton(
     glyph1: ClassKeyAggregator,
     glyph2: ClassKeyAggregator,
-    todo1:  () ⇒ Unit,
-    todo2:  () ⇒ Unit
-  ) = new TwoStatesGlyphButton(glyph1, glyph2, todo1, todo2)
+    todo1: () ⇒ Unit,
+    todo2: () ⇒ Unit) = new TwoStatesGlyphButton(glyph1, glyph2, todo1, todo2)
 
   sealed trait ExclusiveButton {
     def action: () ⇒ Unit
@@ -151,9 +149,8 @@ object OMTags {
     def twoGlyphStates(
       glyph1: ClassKeyAggregator,
       glyph2: ClassKeyAggregator,
-      todo1:  () ⇒ Unit,
-      todo2:  () ⇒ Unit
-    ) = twoStatesGlyphButton(glyph1, glyph2, todo1, todo2)
+      todo1: () ⇒ Unit,
+      todo2: () ⇒ Unit) = twoStatesGlyphButton(glyph1, glyph2, todo1, todo2)
   }
 
   trait ExclusiveStringButton extends ExclusiveButton {
@@ -165,11 +162,10 @@ object OMTags {
   }
 
   case class TwoStatesGlyphButton(
-      glyph:   ClassKeyAggregator,
-      glyph2:  ClassKeyAggregator,
-      action:  () ⇒ Unit,
-      action2: () ⇒ Unit
-  ) extends ExclusiveButton {
+      glyph: ClassKeyAggregator,
+      glyph2: ClassKeyAggregator,
+      action: () ⇒ Unit,
+      action2: () ⇒ Unit) extends ExclusiveButton {
     val selected = Var(glyph)
 
     val div =

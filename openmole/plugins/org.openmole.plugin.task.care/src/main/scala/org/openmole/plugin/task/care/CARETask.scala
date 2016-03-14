@@ -39,16 +39,15 @@ object CARETask extends Logger {
 }
 
 abstract class CARETask(
-    val archive:              File,
-    val command:              systemexec.Command,
-    val workDirectory:        Option[String],
-    val errorOnReturnCode:    Boolean,
-    val returnValue:          Option[Prototype[Int]],
-    val output:               Option[Prototype[String]],
-    val error:                Option[Prototype[String]],
+    val archive: File,
+    val command: systemexec.Command,
+    val workDirectory: Option[String],
+    val errorOnReturnCode: Boolean,
+    val returnValue: Option[Prototype[Int]],
+    val output: Option[Prototype[String]],
+    val error: Option[Prototype[String]],
     val environmentVariables: Seq[(Prototype[_], String)],
-    val hostFiles:            Seq[(String, Option[String])]
-) extends ExternalTask {
+    val hostFiles: Seq[(String, Option[String])]) extends ExternalTask {
 
   archive.setExecutable(true)
 

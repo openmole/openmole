@@ -144,9 +144,8 @@ object EGIAuthentication extends Logger {
 
   def initialise(a: EGIAuthentication)(
     serverURLs: Seq[String],
-    voName:     String,
-    fqan:       Option[String]
-  )(implicit decrypt: Decrypt): () ⇒ GlobusAuthentication.Proxy =
+    voName: String,
+    fqan: Option[String])(implicit decrypt: Decrypt): () ⇒ GlobusAuthentication.Proxy =
     a match {
       case a: P12Certificate ⇒
         VOMSAuthentication.setCARepository(EGIAuthentication.CACertificatesDir)

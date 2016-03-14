@@ -28,8 +28,7 @@ import scala.concurrent.stm._
 
 case class DynamicExecutionInfo(
   moleExecution: MoleExecution,
-  outputStream:  StringPrintStream
-)
+  outputStream: StringPrintStream)
 
 class Execution {
 

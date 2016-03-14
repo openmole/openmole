@@ -38,10 +38,9 @@ package object stochastic extends StatisticPackage {
   def StatisticsTask = org.openmole.plugin.task.statistic.StatisticTask
 
   def Replicate(
-    model:       Puzzle,
-    sampling:    Sampling,
-    aggregation: Puzzle
-  ): Puzzle = {
+    model: Puzzle,
+    sampling: Sampling,
+    aggregation: Puzzle): Puzzle = {
     val name = "replicate"
 
     val exploration = ExplorationTask(sampling) set { _.setName(name + "Exploration") }
@@ -58,9 +57,8 @@ package object stochastic extends StatisticPackage {
   }
 
   def Replicate(
-    model:    Puzzle,
-    sampling: Sampling
-  ) = {
+    model: Puzzle,
+    sampling: Sampling) = {
     val name = "replicate"
 
     val exploration = ExplorationTask(sampling) set { _.setName(name + "Exploration") }

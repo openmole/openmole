@@ -28,9 +28,8 @@ object MasterSlave {
 
   def apply(
     bootstrap: Puzzle,
-    master:    Task,
-    state:     Prototype[_]*
-  )(slave: Puzzle) = {
+    master: Task,
+    state: Prototype[_]*)(slave: Puzzle) = {
 
     val masterCapsule = MasterCapsule(master, state: _*)
     val masterSlot = Slot(masterCapsule)

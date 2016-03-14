@@ -30,8 +30,7 @@ import org.openmole.tool.file._
 object TemplateFileTask {
   def apply(
     template: File,
-    output:   Prototype[File]
-  ) = new TaskBuilder { builder ⇒
+    output: Prototype[File]) = new TaskBuilder { builder ⇒
 
     addOutput(output)
 
@@ -41,8 +40,7 @@ object TemplateFileTask {
 
 sealed abstract class TemplateFileTask(
     val template: File,
-    val output:   Prototype[File]
-) extends Task {
+    val output: Prototype[File]) extends Task {
 
   @transient lazy val expanded = template.withInputStream { is ⇒
     VariableExpansion(is)

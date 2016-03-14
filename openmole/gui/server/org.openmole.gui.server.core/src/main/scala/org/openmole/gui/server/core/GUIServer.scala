@@ -32,11 +32,13 @@ import javax.servlet.ServletContext
 import org.scalatra._
 import org.eclipse.jetty.util.resource.{ Resource ⇒ Res }
 import org.openmole.tool.hash._
+import org.openmole.tool.file._
 
 object GUIServer {
   val passwordHash = ConfigurationLocation[String]("GUIServer", "PasswordHash", None, true)
   def setPassword(p: String) = Workspace.setPreference(passwordHash, p.hash.toString)
   def isPasswordCorrect(p: String) = Workspace.preferenceOption(passwordHash).map(_ == p.hash.toString).getOrElse(false)
+  def resourcePath = (Workspace.openMOLELocation / "webapp").getAbsolutePath
 
   def initPassword = {
     Console.initPassword
@@ -90,7 +92,7 @@ class GUIServer(port: Int, authentication: Boolean) {
     )
   context.setAttribute(GUIServer.servletArguments, GUIServer.ServletArguments(authenticationMethod, applicationControl))
   context.setContextPath("/")
-  context.setResourceBase("webapp")
+  context.setResourceBase(resourcePath)
   context.setClassLoader(classOf[GUIServer].getClassLoader)
   context.setInitParameter(ScalatraListener.LifeCycleKey, classOf[ScalatraBootstrap].getCanonicalName)
   context.addEventListener(new ScalatraListener)

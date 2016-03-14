@@ -40,11 +40,10 @@ object OpenMOLEREPL {
     )
 
   def newREPL(
-    args:               ConsoleVariables,
-    quiet:              Boolean          = false,
-    intialisation:      ScalaREPL ⇒ Unit = _ ⇒ {},
-    additionnalImports: Seq[String]      = Seq.empty
-  ) = {
+    args: ConsoleVariables,
+    quiet: Boolean = false,
+    intialisation: ScalaREPL ⇒ Unit = _ ⇒ {},
+    additionnalImports: Seq[String] = Seq.empty) = {
 
     def initialise(loop: ScalaREPL) = {
       args.workDirectory.mkdirs()

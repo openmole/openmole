@@ -27,9 +27,8 @@ package object file {
     def files: ListFilesDomain = files()
     def files(
       directory: Option[ExpandedString] = None,
-      recursive: Boolean                = false,
-      filter:    Option[ExpandedString] = None
-    ): ListFilesDomain = ListFilesDomain(f, directory, recursive, filter)
+      recursive: Boolean = false,
+      filter: Option[ExpandedString] = None): ListFilesDomain = ListFilesDomain(f, directory, recursive, filter)
     def select(path: ExpandedString) = SelectFileDomain(f, path)
   }
 

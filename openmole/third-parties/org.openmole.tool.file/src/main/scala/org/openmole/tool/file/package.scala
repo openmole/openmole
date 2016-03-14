@@ -52,7 +52,7 @@ package file {
     val WRITE_MODE = 2 + 16 + 128
     val READ_MODE = 4 + 32 + 256
 
-    lazy val jvmLevelFileLock = new LockRepository[String]
+     val jvmLevelFileLock = new LockRepository[String]
 
     def copy(source: FileChannel, destination: FileChannel): Unit = source.transferTo(0, source.size, destination)
 

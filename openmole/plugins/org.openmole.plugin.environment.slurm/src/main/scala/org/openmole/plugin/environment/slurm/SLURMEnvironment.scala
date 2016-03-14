@@ -32,24 +32,23 @@ import scala.concurrent.duration.Duration
 object SLURMEnvironment {
 
   def apply(
-    user:                 String,
-    host:                 String,
-    port:                 Int              = 22,
-    queue:                Option[String]   = None,
-    openMOLEMemory:       Option[Int]      = None,
-    wallTime:             Option[Duration] = None,
-    memory:               Option[Int]      = None,
-    qos:                  Option[String]   = None,
-    gres:                 List[Gres]       = List(),
-    constraints:          List[String]     = List(),
-    nodes:                Option[Int]      = None,
-    coresByNode:          Option[Int]      = None,
-    sharedDirectory:      Option[String]   = None,
-    workDirectory:        Option[String]   = None,
-    threads:              Option[Int]      = None,
-    storageSharedLocally: Boolean          = false,
-    name:                 Option[String]   = None
-  )(implicit decrypt: Decrypt) =
+    user: String,
+    host: String,
+    port: Int = 22,
+    queue: Option[String] = None,
+    openMOLEMemory: Option[Int] = None,
+    wallTime: Option[Duration] = None,
+    memory: Option[Int] = None,
+    qos: Option[String] = None,
+    gres: List[Gres] = List(),
+    constraints: List[String] = List(),
+    nodes: Option[Int] = None,
+    coresByNode: Option[Int] = None,
+    sharedDirectory: Option[String] = None,
+    workDirectory: Option[String] = None,
+    threads: Option[Int] = None,
+    storageSharedLocally: Boolean = false,
+    name: Option[String] = None)(implicit decrypt: Decrypt) =
     new SLURMEnvironment(
       user = user,
       host = host,
@@ -74,24 +73,23 @@ object SLURMEnvironment {
 import SLURMEnvironment._
 
 class SLURMEnvironment(
-    val user:                    String,
-    val host:                    String,
-    override val port:           Int,
-    val queue:                   Option[String],
+    val user: String,
+    val host: String,
+    override val port: Int,
+    val queue: Option[String],
     override val openMOLEMemory: Option[Int],
-    val wallTime:                Option[Duration],
-    val memory:                  Option[Int],
-    val qos:                     Option[String],
-    val gres:                    List[Gres],
-    val constraints:             List[String],
-    val nodes:                   Option[Int],
-    val coresByNode:             Option[Int],
-    val sharedDirectory:         Option[String],
-    val workDirectory:           Option[String],
-    override val threads:        Option[Int],
-    val storageSharedLocally:    Boolean,
-    override val name:           Option[String]
-)(val credential: fr.iscpif.gridscale.ssh.SSHAuthentication) extends ClusterEnvironment with MemoryRequirement { env ⇒
+    val wallTime: Option[Duration],
+    val memory: Option[Int],
+    val qos: Option[String],
+    val gres: List[Gres],
+    val constraints: List[String],
+    val nodes: Option[Int],
+    val coresByNode: Option[Int],
+    val sharedDirectory: Option[String],
+    val workDirectory: Option[String],
+    override val threads: Option[Int],
+    val storageSharedLocally: Boolean,
+    override val name: Option[String])(val credential: fr.iscpif.gridscale.ssh.SSHAuthentication) extends ClusterEnvironment with MemoryRequirement { env ⇒
 
   type JS = SLURMJobService
 
