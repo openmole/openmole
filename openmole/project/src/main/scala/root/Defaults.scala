@@ -16,7 +16,7 @@ abstract class Defaults(subBuilds: Defaults*) extends BuildSystemDefaults {
 
   override def settings = super.settings ++
     Seq(
-      scalaVersion in Global := "2.11.7",
+      scalaVersion in Global := "2.11.8",
       scalacOptions ++= Seq("-target:jvm-1.7", "-language:higherKinds"),
       javacOptions in (Compile, compile) ++= Seq("-source", "1.7", "-target", "1.7"),
       publishArtifact in (packageDoc in install) := false,

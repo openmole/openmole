@@ -65,8 +65,6 @@ class Application extends IApplication {
     object ServerConfigMode extends LaunchMode
 
     case class Config(
-      pluginsDirs:          List[String]    = Nil,
-      guiPluginsDirs:       List[String]    = Nil,
       userPlugins:          List[String]    = Nil,
       loadHomePlugins:      Option[Boolean] = None,
       workspaceDir:         Option[String]  = None,
@@ -111,8 +109,6 @@ class Application extends IApplication {
 
     @tailrec def parse(args: List[String], c: Config = Config()): Config =
       args match {
-        case "-cp" :: tail                     ⇒ parse(dropArgs(tail), c.copy(pluginsDirs = takeArgs(tail)))
-        case "-gp" :: tail                     ⇒ parse(dropArgs(tail), c.copy(guiPluginsDirs = takeArgs(tail)))
         case "-p" :: tail                      ⇒ parse(dropArgs(tail), c.copy(userPlugins = takeArgs(tail)))
         case "-s" :: tail                      ⇒ parse(dropArg(tail), c.copy(scriptFile = Some(takeArg(tail)), launchMode = ConsoleMode))
         case "-pw" :: tail                     ⇒ parse(dropArg(tail), c.copy(password = Some(takeArg(tail))))
@@ -155,10 +151,7 @@ class Application extends IApplication {
 
       logger.fine(s"Loading user plugins " + userPlugins)
 
-      val plugins: List[File] =
-        config.pluginsDirs.map(new File(_)) ++
-          userPlugins ++
-          (if (config.launchMode == GUIMode) config.guiPluginsDirs.map(new File(_)) else List.empty)
+      val plugins: List[File] = userPlugins
 
       PluginManager.startAll.foreach { case (b, e) ⇒ logger.log(WARNING, s"Error staring bundle $b", e) }
       PluginManager.tryLoad(plugins).foreach { case (b, e) ⇒ logger.log(WARNING, s"Error loading bundle $b", e) }
