@@ -53,7 +53,7 @@ package object pluginmanager {
       val decodedLocation = URLDecoder.decode(location, "UTF-8")
 
       if (ref)
-        Workspace.openMOLELocation match {
+        Workspace.openMOLELocationOption match {
           case Some(oMLoc) ⇒ new File(oMLoc, decodedLocation)
           case None        ⇒ new File(decodedLocation)
         }

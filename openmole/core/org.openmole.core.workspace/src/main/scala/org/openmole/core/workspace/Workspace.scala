@@ -94,8 +94,11 @@ object Workspace {
 
   def OpenMOLELocationProperty = "openmole.location"
 
-  def openMOLELocation =
+  def openMOLELocationOption =
     Option(System.getProperty(OpenMOLELocationProperty, null)).map(new File(_))
+
+  def openMOLELocation =
+    openMOLELocationOption.getOrElse(throw new InternalProcessingError("openmole.location not set"))
 
   lazy val instance = new Workspace(defaultLocation)
 
