@@ -124,7 +124,6 @@ class Application extends IApplication {
         case "--ws-configure" :: tail          ⇒ parse(tail, c.copy(launchMode = ServerConfigMode))
         case "--port" :: tail                  ⇒ parse(tail.tail, c.copy(port = Some(tail.head.toInt))) // Server port
         case "--logger-level" :: tail          ⇒ parse(tail.tail, c.copy(loggerLevel = Some(tail.head)))
-        case "--unoptimizedJS" :: tail         ⇒ parse(tail, c.copy(unoptimizedJS = true))
         case "--webui-authentication" :: tail  ⇒ parse(tail, c.copy(remote = true))
         case "--remote" :: tail                ⇒ parse(tail, c.copy(remote = true))
         case "--no-browser" :: tail            ⇒ parse(tail, c.copy(browse = false))
