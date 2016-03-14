@@ -48,7 +48,8 @@ class SSHLoginPasswordAuthenticationPanel(data: LoginPasswordAuthenticationData)
   val password = bs.input(data.cypheredPassword, key("spacer5"))(
     placeholder := "Password",
     `type` := "password",
-    width := "130px").render
+    width := "130px"
+  ).render
 
   @JSExport
   val view = {

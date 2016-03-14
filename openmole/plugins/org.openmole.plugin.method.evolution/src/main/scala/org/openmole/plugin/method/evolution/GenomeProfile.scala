@@ -28,10 +28,11 @@ import Scalaz._
 object GenomeProfile {
 
   def apply(
-    x: Prototype[Double],
-    nX: Int,
-    genome: Genome,
-    objective: Objective) = {
+    x:         Prototype[Double],
+    nX:        Int,
+    genome:    Genome,
+    objective: Objective
+  ) = {
 
     val xIndex =
       genome.indexWhere(_.prototype == x) match {
@@ -51,12 +52,13 @@ object GenomeProfile {
   }
 
   def apply(
-    x: Prototype[Double],
-    nX: Int,
-    genome: Genome,
-    objective: Objective,
+    x:           Prototype[Double],
+    nX:          Int,
+    genome:      Genome,
+    objective:   Objective,
     replication: Replication[Id],
-    paretoSize: Int = 20) = {
+    paretoSize:  Int               = 20
+  ) = {
 
     val xIndex =
       genome.indexWhere(_.prototype == x) match {
@@ -178,9 +180,10 @@ object GenomeProfile {
   }
 
   case class StochasticGenomeProfile(
-    algo: noisyprofile.OpenMOLE,
-    genome: Genome,
-    objective: Objective,
-    replication: Replication[Id])
+    algo:        noisyprofile.OpenMOLE,
+    genome:      Genome,
+    objective:   Objective,
+    replication: Replication[Id]
+  )
 
 }

@@ -50,8 +50,8 @@ trait Assembly {
     depMap.keys.find(
       _.findFirstIn(srcPath.getName).isDefined
     ).map(k ⇒ depMap(k)(srcPath.getName)).getOrElse {
-        srcPath.getName
-      }
+      srcPath.getName
+    }
 
   private def copyLibraryDependencies(
     cp:        Seq[Attributed[File]],

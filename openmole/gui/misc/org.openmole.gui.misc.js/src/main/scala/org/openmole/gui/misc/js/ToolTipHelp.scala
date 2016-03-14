@@ -1,8 +1,8 @@
 package org.openmole.gui.misc.js
 
 import fr.iscpif.scaladget.api.BootstrapTags._
-import org.scalajs.dom.raw.{HTMLDivElement, HTMLElement}
-import scalatags.JsDom.{tags, TypedTag}
+import org.scalajs.dom.raw.{ HTMLDivElement, HTMLElement }
+import scalatags.JsDom.{ tags, TypedTag }
 
 import scalatags.JsDom.all._
 import fr.iscpif.scaladget.mapping.tooltipster._

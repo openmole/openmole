@@ -37,9 +37,10 @@ import scala.concurrent.stm._
 import scala.util.{ Failure, Success, Try }
 
 case class BundlesInfo(
-  files: Map[File, (Long, Long)],
+  files:                      Map[File, (Long, Long)],
   resolvedDirectDependencies: Map[Long, Set[Long]],
-  providedDependencies: Set[Long])
+  providedDependencies:       Set[Long]
+)
 
 object PluginManager extends Logger {
 

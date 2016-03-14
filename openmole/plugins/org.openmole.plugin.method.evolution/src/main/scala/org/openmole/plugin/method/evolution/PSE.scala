@@ -35,8 +35,9 @@ object PSE {
   case class PatternAxe(p: Prototype[Double], scale: Vector[Double])
 
   def apply(
-    genome: Genome,
-    objectives: Seq[PatternAxe]) = {
+    genome:     Genome,
+    objectives: Seq[PatternAxe]
+  ) = {
     WorkflowIntegration.DeterministicGA(
       pse.OpenMOLE(mgo.niche.irregularGrid(objectives.map(_.scale).toVector), Genome.size(genome), operatorExploration),
       genome,
@@ -45,9 +46,10 @@ object PSE {
   }
 
   def apply(
-    genome: Genome,
-    objectives: Seq[PatternAxe],
-    replication: Replication[Seq]) = {
+    genome:      Genome,
+    objectives:  Seq[PatternAxe],
+    replication: Replication[Seq]
+  ) = {
 
     WorkflowIntegration.StochasticGA(
       noisypse.OpenMOLE(

@@ -35,10 +35,11 @@ object DesktopGridEnvironment {
   val timeStempSeparator = '@'
 
   def apply(
-    port: Int,
-    openMOLEMemory: Option[Int] = None,
-    threads: Option[Int] = None,
-    name: Option[String] = None) =
+    port:           Int,
+    openMOLEMemory: Option[Int]    = None,
+    threads:        Option[Int]    = None,
+    name:           Option[String] = None
+  ) =
     new DesktopGridEnvironment(
       port = port,
       openMOLEMemory = openMOLEMemory,
@@ -48,10 +49,11 @@ object DesktopGridEnvironment {
 }
 
 class DesktopGridEnvironment(
-    val port: Int,
+    val port:                    Int,
     override val openMOLEMemory: Option[Int],
-    override val threads: Option[Int],
-    override val name: Option[String]) extends SimpleBatchEnvironment { env ⇒
+    override val threads:        Option[Int],
+    override val name:           Option[String]
+) extends SimpleBatchEnvironment { env ⇒
 
   type SS = StorageService
   type JS = JobService

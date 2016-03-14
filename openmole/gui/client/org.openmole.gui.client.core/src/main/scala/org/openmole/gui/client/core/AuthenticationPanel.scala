@@ -50,12 +50,14 @@ class AuthenticationPanel(onresetpassword: () ⇒ Unit) extends ModalPanel {
   }
 
   val authenticationSelector: Select[PanelWithID] =
-    Select("authentications",
+    Select(
+      "authentications",
       authentications.all.map { f ⇒ (f, emptyCK) },
       authentications.all.headOption,
       btn_primary, onclickExtra = () ⇒ {
         authenticationSelector.content().map { f ⇒ setting() = Some(f.panel) }
-      })
+      }
+    )
 
   lazy val authenticationTable = {
 

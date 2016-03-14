@@ -33,25 +33,29 @@ object ExternalTask {
   val PWD = Prototype[String]("PWD")
 
   case class InputFile(
-    prototype: Prototype[File],
+    prototype:   Prototype[File],
     destination: ExpandedString,
-    link: Boolean)
+    link:        Boolean
+  )
 
   case class InputFileArray(
     prototype: Prototype[Array[File]],
-    prefix: ExpandedString,
-    suffix: ExpandedString,
-    link: Boolean)
+    prefix:    ExpandedString,
+    suffix:    ExpandedString,
+    link:      Boolean
+  )
 
   case class OutputFile(
-    origin: ExpandedString,
-    prototype: Prototype[File])
+    origin:    ExpandedString,
+    prototype: Prototype[File]
+  )
 
   case class Resource(
-    file: File,
+    file:        File,
     destination: ExpandedString,
-    link: Boolean,
-    os: OS)
+    link:        Boolean,
+    os:          OS
+  )
 }
 
 import ExternalTask._

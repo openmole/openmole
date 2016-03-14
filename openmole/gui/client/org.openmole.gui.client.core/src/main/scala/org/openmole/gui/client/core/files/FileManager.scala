@@ -32,11 +32,12 @@ object FileManager {
   }
 
   def upload(
-    inputElement: HTMLInputElement,
-    destinationPath: SafePath,
+    inputElement:      HTMLInputElement,
+    destinationPath:   SafePath,
     fileTransferState: ProcessState ⇒ Unit,
-    uploadType: UploadType,
-    onloaded: () ⇒ Unit = () ⇒ {}) = {
+    uploadType:        UploadType,
+    onloaded:          () ⇒ Unit           = () ⇒ {}
+  ) = {
     val fileList = inputElement.files
     val formData = new FormData
 
@@ -68,9 +69,10 @@ object FileManager {
   }
 
   def download(
-    treeNode: TreeNode,
+    treeNode:          TreeNode,
     fileTransferState: ProcessState ⇒ Unit,
-    onLoadEnded: String ⇒ Unit) = {
+    onLoadEnded:       String ⇒ Unit
+  ) = {
 
     val xhr = new XMLHttpRequest
 

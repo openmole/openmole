@@ -41,15 +41,19 @@ object Graph {
   def edge(source: Task, target: Task) = new Edge(Var(source), Var(target))
 }
 
-class Task(val id: String,
-           val title: Var[String] = Var(""),
-           val location: Var[(Double, Double)] = Var((0.0, 0.0))) extends GraphElement {
-  def literal = lit("id" -> id, "title" -> title(), "x" -> location()._1, "y" -> location()._2)
+class Task(
+  val id:       String,
+  val title:    Var[String]           = Var(""),
+  val location: Var[(Double, Double)] = Var((0.0, 0.0))
+) extends GraphElement {
+  def literal = lit("id" → id, "title" → title(), "x" → location()._1, "y" → location()._2)
 }
 
-class Edge(val source: Var[Task],
-           val target: Var[Task]) extends GraphElement {
-  def literal = lit("source" -> source().literal, "target" -> target().literal)
+class Edge(
+  val source: Var[Task],
+  val target: Var[Task]
+) extends GraphElement {
+  def literal = lit("source" → source().literal, "target" → target().literal)
 }
 
 class Window(nodes: Array[Task] = Array(), edges: Array[Edge] = Array()) {
@@ -60,18 +64,21 @@ class Window(nodes: Array[Task] = Array(), edges: Array[Edge] = Array()) {
     .attr("width", "2500px")
     .attr("height", "2500px")
 
-  val graph = new GraphCreator(svg,
+  val graph = new GraphCreator(
+    svg,
     nodes,
     edges
   )
 }
 
-case class Consts(selectedClass: String = "selected",
-                  circleGClass: String = "conceptG",
-                  graphClass: String = "graph",
-                  activeEditId: String = "active-editing",
-                  DELETE_KEY: Double = 46,
-                  nodeRadius: Double = 50)
+case class Consts(
+  selectedClass: String = "selected",
+  circleGClass:  String = "conceptG",
+  graphClass:    String = "graph",
+  activeEditId:  String = "active-editing",
+  DELETE_KEY:    Double = 46,
+  nodeRadius:    Double = 50
+)
 
 class GraphCreator(svgSelection: Selection, _tasks: Array[Task], _edges: Array[Edge]) {
 
@@ -245,9 +252,7 @@ class GraphCreator(svgSelection: Selection, _tasks: Array[Task], _edges: Array[E
               addEdge(mdt, t())
             }
           }
-        }
-
-        )
+        })
       mysel.exit().remove()
     }
   }
@@ -277,8 +282,7 @@ class GraphCreator(svgSelection: Selection, _tasks: Array[Task], _edges: Array[E
         newPath.style("marker-end", "url(#end-arrow)")
           .classed(consts.selectedClass, (edge: Var[Edge], n: Number) ⇒ {
             edge().selected()
-          }
-          )
+          })
 
         newPath.on("mousedown", (edge: Var[Edge], n: Double) ⇒ {
           unselectTasks

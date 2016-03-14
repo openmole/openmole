@@ -59,7 +59,7 @@ class ExecutionPanel extends ModalPanel {
   def updatePanelInfo: Unit = {
     def delay = {
       updating.set(false)
-      setTimeout(5000) {if(isVisible) updatePanelInfo }
+      setTimeout(5000) { if (isVisible) updatePanelInfo }
     }
 
     if (updating.compareAndSet(false, true)) {
