@@ -123,6 +123,7 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
     background-color: #3086b5;
     padding-bottom: 5px;
     word-wrap: break-word;
+    box-shadow: 1px 1px 10px #808080;
 }
 .tree-path .btn-group .btn.btn-primary{
     background-color: #3086b5;
