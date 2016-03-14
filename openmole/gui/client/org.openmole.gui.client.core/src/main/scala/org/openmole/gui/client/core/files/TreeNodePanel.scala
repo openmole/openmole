@@ -61,14 +61,14 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
     manager.computeCurrentSons(() ⇒ drawTree, filter)
     tags.div(
       fileToolBar.div, Rx {
-        val toDraw = manager.drop(1)
-        val dirNodeLineSize = toDraw.size
-        bs.div("tree-path")(
-          goToDirButton(manager.head, OMTags.glyphString(glyph_home) + " left treePathItems"),
-          toDraw.drop(dirNodeLineSize - 2).takeRight(2).map { dn ⇒ goToDirButton(dn, "treePathItems", s"| ${dn.name()}") }
-        )
+      val toDraw = manager.drop(1)
+      val dirNodeLineSize = toDraw.size
+      bs.div("tree-path")(
+        goToDirButton(manager.head, OMTags.glyphString(glyph_home) + " left treePathItems"),
+        toDraw.drop(dirNodeLineSize - 2).takeRight(2).map { dn ⇒ goToDirButton(dn, "treePathItems", s"| ${dn.name()}") }
+      )
 
-      },
+    },
       fileToolBar.sortingGroup.div,
       Rx {
         tree()
@@ -166,9 +166,10 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
   }
 
   def clickableElement(
-    tn: TreeNode,
+    tn:        TreeNode,
     classType: String,
-    todo: () ⇒ Unit) = {
+    todo:      () ⇒ Unit
+  ) = {
     toBeEdited() match {
       case Some(etn: NodeEdition) ⇒
         if (etn.node.path == tn.path) {

@@ -34,21 +34,22 @@ object CondorEnvironment {
   def apply(
     user: String,
     host: String,
-    port: Int = 22,
+    port: Int    = 22,
     // TODO not available in the GridScale plugin yet
     //  queue: Option[String] = None,
     openMOLEMemory: Option[Int] = None,
     // TODO not available in the GridScale plugin yet
     //wallTime: Option[Duration] = None,
-    memory: Option[Int] = None,
-    nodes: Option[Int] = None,
-    coresByNode: Option[Int] = None,
-    sharedDirectory: Option[String] = None,
-    workDirectory: Option[String] = None,
-    requirements: Option[CondorRequirement] = None,
-    threads: Option[Int] = None,
-    storageSharedLocally: Boolean = false,
-    name: Option[String] = None)(implicit decrypt: Decrypt) =
+    memory:               Option[Int]               = None,
+    nodes:                Option[Int]               = None,
+    coresByNode:          Option[Int]               = None,
+    sharedDirectory:      Option[String]            = None,
+    workDirectory:        Option[String]            = None,
+    requirements:         Option[CondorRequirement] = None,
+    threads:              Option[Int]               = None,
+    storageSharedLocally: Boolean                   = false,
+    name:                 Option[String]            = None
+  )(implicit decrypt: Decrypt) =
     new CondorEnvironment(
       user = user,
       host = host,
@@ -67,23 +68,24 @@ object CondorEnvironment {
 }
 
 class CondorEnvironment(
-    val user: String,
-    val host: String,
+    val user:          String,
+    val host:          String,
     override val port: Int,
     // TODO not available in the GridScale plugin yet
     //val queue: Option[String],
     override val openMOLEMemory: Option[Int],
     // TODO not available in the GridScale plugin yet
     //val wallTime: Option[Duration],
-    val memory: Option[Int],
-    val nodes: Option[Int] = None,
-    val coresByNode: Option[Int] = None,
-    val sharedDirectory: Option[String],
-    val workDirectory: Option[String],
-    val requirements: Option[CondorRequirement],
-    override val threads: Option[Int],
+    val memory:               Option[Int],
+    val nodes:                Option[Int]               = None,
+    val coresByNode:          Option[Int]               = None,
+    val sharedDirectory:      Option[String],
+    val workDirectory:        Option[String],
+    val requirements:         Option[CondorRequirement],
+    override val threads:     Option[Int],
     val storageSharedLocally: Boolean,
-    override val name: Option[String])(val credential: fr.iscpif.gridscale.ssh.SSHAuthentication) extends ClusterEnvironment with MemoryRequirement { env ⇒
+    override val name:        Option[String]
+)(val credential: fr.iscpif.gridscale.ssh.SSHAuthentication) extends ClusterEnvironment with MemoryRequirement { env ⇒
 
   type JS = CondorJobService
 

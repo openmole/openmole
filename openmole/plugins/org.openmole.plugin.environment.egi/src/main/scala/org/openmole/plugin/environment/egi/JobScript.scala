@@ -28,10 +28,11 @@ case class JobScript(voName: String, memory: Int, threads: Int, debug: Boolean) 
 
   def apply(
     serializedJob: SerializedJob,
-    resultPath: String,
-    runningPath: Option[String] = None,
-    finishedPath: Option[String] = None,
-    proxy: Option[String] = None) = {
+    resultPath:    String,
+    runningPath:   Option[String] = None,
+    finishedPath:  Option[String] = None,
+    proxy:         Option[String] = None
+  ) = {
     import serializedJob._
 
     def cpCommand =

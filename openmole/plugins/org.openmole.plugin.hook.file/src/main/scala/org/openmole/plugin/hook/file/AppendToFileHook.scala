@@ -36,7 +36,8 @@ object AppendToFileHook {
 
 abstract class AppendToFileHook(
     fileName: ExpandedString,
-    content: ExpandedString) extends Hook {
+    content:  ExpandedString
+) extends Hook {
 
   override def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider) = {
     val file = new File(fileName.from(context))

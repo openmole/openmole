@@ -34,10 +34,11 @@ import scala.util.Random
 object Transition extends Logger
 
 class Transition(
-    val start: Capsule,
-    val end: Slot,
+    val start:     Capsule,
+    val end:       Slot,
     val condition: Condition = Condition.True,
-    val filter: BlockList = BlockList.empty) extends ITransition {
+    val filter:    BlockList = BlockList.empty
+) extends ITransition {
 
   override def perform(context: Context, ticket: Ticket, subMole: SubMoleExecution)(implicit rng: RandomProvider) =
     if (condition().from(context)) submitNextJobsIfReady(filtered(context).values, ticket, subMole)

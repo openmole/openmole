@@ -27,11 +27,12 @@ import org.openmole.core.workflow.task._
 object LenormandAnalyseTask {
 
   def apply(
-    lenormand: algorithm.Lenormand with ABC,
-    state: Prototype[algorithm.Lenormand#STATE],
+    lenormand:  algorithm.Lenormand with ABC,
+    state:      Prototype[algorithm.Lenormand#STATE],
     terminated: Prototype[Boolean],
-    iteration: Prototype[Int],
-    accepted: Prototype[Double]) = {
+    iteration:  Prototype[Int],
+    accepted:   Prototype[Double]
+  ) = {
     val (_lenormand, _state, _terminated, _iteration, _accepted) = (lenormand, state, terminated, iteration, accepted)
 
     new TaskBuilder() { builder ⇒

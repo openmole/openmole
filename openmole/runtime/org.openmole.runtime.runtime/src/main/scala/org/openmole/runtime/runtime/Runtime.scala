@@ -57,12 +57,13 @@ class Runtime {
   import Log._
 
   def apply(
-    storage: RemoteStorage,
+    storage:              RemoteStorage,
     communicationDirPath: String,
-    inputMessagePath: String,
-    outputMessagePath: String,
-    threads: Int,
-    debug: Boolean) = {
+    inputMessagePath:     String,
+    outputMessagePath:    String,
+    threads:              Int,
+    debug:                Boolean
+  ) = {
 
     /*--- get execution message and job for runtime---*/
     val usedFiles = new HashMap[String, File]

@@ -42,16 +42,16 @@ object Graph {
 }
 
 class Task(
-  val id:       String,
-  val title:    Var[String]           = Var(""),
-  val location: Var[(Double, Double)] = Var((0.0, 0.0))
+    val id:       String,
+    val title:    Var[String]           = Var(""),
+    val location: Var[(Double, Double)] = Var((0.0, 0.0))
 ) extends GraphElement {
   def literal = lit("id" → id, "title" → title(), "x" → location()._1, "y" → location()._2)
 }
 
 class Edge(
-  val source: Var[Task],
-  val target: Var[Task]
+    val source: Var[Task],
+    val target: Var[Task]
 ) extends GraphElement {
   def literal = lit("source" → source().literal, "target" → target().literal)
 }

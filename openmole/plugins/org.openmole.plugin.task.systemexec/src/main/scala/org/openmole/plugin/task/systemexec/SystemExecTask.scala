@@ -45,14 +45,15 @@ object SystemExecTask extends Logger {
 case class ExpandedSystemExecCommand(expandedCommand: Expansion)
 
 abstract class SystemExecTask(
-    val command: Seq[OSCommands],
-    val directory: Option[String],
-    val errorOnReturnCode: Boolean,
-    val returnValue: Option[Prototype[Int]],
-    val output: Option[Prototype[String]],
-    val error: Option[Prototype[String]],
+    val command:              Seq[OSCommands],
+    val directory:            Option[String],
+    val errorOnReturnCode:    Boolean,
+    val returnValue:          Option[Prototype[Int]],
+    val output:               Option[Prototype[String]],
+    val error:                Option[Prototype[String]],
     val environmentVariables: Seq[(Prototype[_], String)],
-    val isRemote: Boolean = false) extends ExternalTask {
+    val isRemote:             Boolean                     = false
+) extends ExternalTask {
 
   @tailrec
   protected[systemexec] final def execAll(cmds: List[ExpandedSystemExecCommand], workDir: File, preparedContext: Context, acc: ExecutionResult = ExecutionResult.empty)(implicit rng: RandomProvider): ExecutionResult =

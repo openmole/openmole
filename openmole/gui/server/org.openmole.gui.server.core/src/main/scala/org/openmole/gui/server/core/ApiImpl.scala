@@ -457,15 +457,16 @@ object ApiImpl extends Api {
 
   def buildModelTask(
     executableName: String,
-    scriptName: String,
-    command: String,
-    language: Language,
-    inputs: Seq[ProtoTypePair],
-    outputs: Seq[ProtoTypePair],
-    path: SafePath,
-    imports: Option[String],
-    libraries: Option[String],
-    resources: Resources): TreeNodeData = {
+    scriptName:     String,
+    command:        String,
+    language:       Language,
+    inputs:         Seq[ProtoTypePair],
+    outputs:        Seq[ProtoTypePair],
+    path:           SafePath,
+    imports:        Option[String],
+    libraries:      Option[String],
+    resources:      Resources
+  ): TreeNodeData = {
     import org.openmole.gui.ext.data.ServerFileSytemContext.project
     val modelTaskFile = new File(path, scriptName + ".oms")
 

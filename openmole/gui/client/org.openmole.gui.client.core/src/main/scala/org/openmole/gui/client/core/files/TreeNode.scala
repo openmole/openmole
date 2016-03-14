@@ -135,17 +135,19 @@ object TimeOrdering extends Ordering[TreeNode] {
 }
 
 case class DirNode(
-  name: Var[String],
-  safePath: Var[SafePath],
-  size: Long,
+  name:         Var[String],
+  safePath:     Var[SafePath],
+  size:         Long,
   readableSize: String,
-  time: Long,
-  readableTime: String) extends TreeNode
+  time:         Long,
+  readableTime: String
+) extends TreeNode
 
 case class FileNode(
-  name: Var[String],
-  safePath: Var[SafePath],
-  size: Long,
+  name:         Var[String],
+  safePath:     Var[SafePath],
+  size:         Long,
   readableSize: String,
-  time: Long,
-  readableTime: String) extends TreeNode
+  time:         Long,
+  readableTime: String
+) extends TreeNode

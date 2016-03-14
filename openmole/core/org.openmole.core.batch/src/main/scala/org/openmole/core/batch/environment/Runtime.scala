@@ -20,8 +20,9 @@ package org.openmole.core.batch.environment
 import org.openmole.core.batch.message.FileMessage
 
 case class Runtime(
-  storage: FileMessage,
-  runtime: FileMessage,
+  storage:            FileMessage,
+  runtime:            FileMessage,
   environmentPlugins: Iterable[FileMessage],
-  jvmLinuxI386: FileMessage,
-  jvmLinuxX64: FileMessage)
+  jvmLinuxI386:       FileMessage,
+  jvmLinuxX64:        FileMessage
+)
