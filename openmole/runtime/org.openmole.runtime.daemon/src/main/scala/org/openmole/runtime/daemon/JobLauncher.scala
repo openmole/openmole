@@ -42,13 +42,14 @@ import fr.iscpif.gridscale.ssh._
 import org.openmole.core.batch.message.FileMessage._
 import scala.annotation.tailrec
 import util.{ Failure, Success }
+import concurrent.duration._
 
 object JobLauncher extends Logger {
-  val jobCheckInterval = new ConfigurationLocation("JobLauncher", "jobCheckInterval")
-  val connectionTimeout = new ConfigurationLocation("JobLauncher", "connectionTimeout")
+  val jobCheckInterval = ConfigurationLocation("JobLauncher", "jobCheckInterval", Some(1 minute))
+  val connectionTimeout = ConfigurationLocation("JobLauncher", "connectionTimeout", Some(1 minute))
 
-  Workspace setDefault (jobCheckInterval, "PT1M")
-  Workspace setDefault (connectionTimeout, "PT1M")
+  Workspace setDefault jobCheckInterval
+  Workspace setDefault connectionTimeout
 }
 
 class JobLauncher(cacheSize: Long, debug: Boolean) {
@@ -75,7 +76,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
         val host = _host
         override val port = _port
         def credential = UserPassword("", password)
-        def timeout = Workspace.preferenceAsDuration(connectionTimeout)
+        def timeout = Workspace.preference(connectionTimeout)
       }
 
       val root = ""
@@ -148,14 +149,14 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
             next
           case None ⇒
             logger.info("Job list is empty on the remote host.")
-            Thread.sleep(Workspace.preferenceAsDuration(jobCheckInterval).toMillis)
+            Thread.sleep(Workspace.preference(jobCheckInterval).toMillis)
             background { fetchAJob(id, storage) }
         }
       }
       catch {
         case e: Exception ⇒
-          logger.log(WARNING, s"Error while looking for jobs, it might happen if the jobs have not yep been made on the server side. Automatic retry in ${Workspace.preferenceAsDuration(jobCheckInterval)}.", e)
-          Thread.sleep(Workspace.preferenceAsDuration(jobCheckInterval).toMillis)
+          logger.log(WARNING, s"Error while looking for jobs, it might happen if the jobs have not yep been made on the server side. Automatic retry in ${Workspace.preference(jobCheckInterval)}.", e)
+          Thread.sleep(Workspace.preference(jobCheckInterval).toMillis)
           background { fetchAJob(id, storage) }
       }
       processJob(next)
