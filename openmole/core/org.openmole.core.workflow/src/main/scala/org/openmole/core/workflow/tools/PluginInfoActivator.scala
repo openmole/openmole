@@ -24,6 +24,8 @@ import org.osgi.framework.{ BundleContext, BundleActivator }
 
 object PluginInfo {
   val plugins = new ConcurrentHashMap[Class[_], PluginInfo]().asScala
+  def addPlugin(c: Class[_], info: PluginInfo) = plugins += c → info
+  def removePlugin(c: Class[_]) = plugins -= c
   def pluginsInfo = plugins.values
 }
 
@@ -32,10 +34,6 @@ case class PluginInfo(namespaces: List[String], keywordTraits: List[String])
 trait PluginInfoActivator extends BundleActivator {
   def keyWordTraits: List[Class[_]] = Nil
   def info = PluginInfo(List(this.getClass.getPackage.getName), keyWordTraits.map(_.getCanonicalName))
-
-  override def start(bundleContext: BundleContext): Unit =
-    PluginInfo.plugins += this.getClass → info
-
-  override def stop(bundleContext: BundleContext): Unit =
-    PluginInfo.plugins -= this.getClass
+  override def start(bundleContext: BundleContext): Unit = PluginInfo.addPlugin(this.getClass, info)
+  override def stop(bundleContext: BundleContext): Unit = PluginInfo.removePlugin(this.getClass)
 }

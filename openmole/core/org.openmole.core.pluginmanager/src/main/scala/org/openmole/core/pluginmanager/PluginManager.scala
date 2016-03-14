@@ -258,8 +258,8 @@ object PluginManager extends Logger {
   def startAll: Seq[(Bundle, Throwable)] =
     Activator.contextOrException.getBundles.filter {
       _.getState match {
-        case Bundle.INSTALLED | Bundle.RESOLVED ⇒ true
-        case _                                  ⇒ false
+        case Bundle.INSTALLED | Bundle.RESOLVED | Bundle.STARTING ⇒ true
+        case _ ⇒ false
       }
     }.map {
       b ⇒ b → Try(b.start)
