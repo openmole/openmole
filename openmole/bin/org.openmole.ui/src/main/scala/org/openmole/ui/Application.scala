@@ -205,7 +205,7 @@ class Application extends IApplication {
                 webui.mkdirs()
                 val server = new GUIServer(port, config.remote)
                 server.start()
-                browse(url)
+                if (config.browse && !config.remote) browse(url)
                 ScalaREPL.warmup
                 logger.info(s"Server listening on port $port.")
                 server.join()
