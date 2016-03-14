@@ -43,8 +43,9 @@ object GUIServer {
     if (!Workspace.preferenceIsSet(passwordHash)) setPassword(Console.askPassword("Authentication password"))
   }
 
-  val port = ConfigurationLocation("GUIServer", "Port", Some(Network.freePort))
-  Workspace setDefault port
+  val portValue = Network.freePort
+  val port = ConfigurationLocation("GUIServer", "Port", Some(portValue))
+  Workspace setPreferenceIfNotSet (port, portValue)
 
   lazy val lockFile = {
     val file = Workspace.file("GUI.lock")

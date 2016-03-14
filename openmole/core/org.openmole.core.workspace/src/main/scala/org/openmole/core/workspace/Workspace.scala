@@ -149,9 +149,14 @@ class Workspace(val location: File) {
     preferenceOption(location) getOrElse (throw new UserBadDataError(s"No value found for $location and no default is defined for this property."))
   }
 
-  def setPreference[T](location: ConfigurationLocation[T], value: String) = synchronized {
-    val prop = if (location.cyphered) encrypt(value) else value
+  def setPreference[T](location: ConfigurationLocation[T], value: T)(implicit configurationString: ConfigurationString[T]) = synchronized {
+    val v = configurationString.toString(value)
+    val prop = if (location.cyphered) encrypt(v) else v
     configurationFile.setValue(location.group, location.name, prop)
+  }
+
+  def setPreferenceIfNotSet[T](location: ConfigurationLocation[T], value: T)(implicit configurationString: ConfigurationString[T]) = synchronized {
+    if (!preferenceIsSet(location)) setPreference(location, value)
   }
 
   def setDefaultPreference[T](location: ConfigurationLocation[T])(implicit configurationString: ConfigurationString[T]) = synchronized {
