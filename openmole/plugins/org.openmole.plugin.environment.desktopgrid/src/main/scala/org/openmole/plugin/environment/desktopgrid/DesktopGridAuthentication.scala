@@ -20,7 +20,7 @@ package org.openmole.plugin.environment.desktopgrid
 import org.openmole.core.workspace._
 
 object DesktopGridAuthentication {
-  val desktopGridPassword = new ConfigurationLocation("desktopgrid", "password")
+  val desktopGridPassword = ConfigurationLocation[String]("desktopgrid", "password", None)
   def update(cypheredPassword: String) = Workspace.setPreference(desktopGridPassword, cypheredPassword)
   def password = Workspace.decrypt(Workspace.preference(desktopGridPassword))
 }

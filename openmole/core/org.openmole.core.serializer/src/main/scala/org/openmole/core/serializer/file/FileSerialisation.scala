@@ -88,7 +88,7 @@ trait FileSerialisation extends Serialiser {
             dest
           }
 
-        originalPath -> fileContent
+        originalPath → fileContent
     }
 
   }

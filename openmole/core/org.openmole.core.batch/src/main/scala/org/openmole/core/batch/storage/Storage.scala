@@ -24,6 +24,7 @@ import fr.iscpif.gridscale.storage._
 import org.openmole.core.workspace._
 import org.openmole.tool.thread._
 import org.openmole.tool.file._
+import concurrent.duration._
 
 object TransferOptions {
   implicit def default = TransferOptions()
@@ -32,12 +33,12 @@ object TransferOptions {
 case class TransferOptions(raw: Boolean = false, forceCopy: Boolean = false, canMove: Boolean = false)
 
 object Storage {
-  val BufferSize = new ConfigurationLocation("Storage", "BufferSize")
-  val CopyTimeout = new ConfigurationLocation("Storage", "CopyTimeout")
-  val CloseTimeout = new ConfigurationLocation("Storage", "CloseTimeout")
-  Workspace += (BufferSize, "65535")
-  Workspace += (CopyTimeout, "PT1M")
-  Workspace += (CloseTimeout, "PT1M")
+  val BufferSize = ConfigurationLocation("Storage", "BufferSize", Some(65535))
+  val CopyTimeout = ConfigurationLocation("Storage", "CopyTimeout", Some(1 minute))
+  val CloseTimeout = ConfigurationLocation("Storage", "CloseTimeout", Some(1 minute))
+  Workspace setDefault BufferSize
+  Workspace setDefault CopyTimeout
+  Workspace setDefault CloseTimeout
 
   def uniqName(prefix: String, sufix: String) = prefix + "_" + UUID.randomUUID.toString + sufix
 
@@ -69,7 +70,7 @@ trait Storage {
   protected def _downloadStream(src: String, options: TransferOptions): InputStream
 
   protected def _upload(src: File, dest: String, options: TransferOptions): Unit =
-    src.withInputStream(is => _uploadStream(is, dest, options))
+    src.withInputStream(is ⇒ _uploadStream(is, dest, options))
 
   protected def _download(src: String, dest: File, options: TransferOptions): Unit = {
     val is = _downloadStream(src, options)
@@ -77,7 +78,7 @@ trait Storage {
     finally is.close()
   }
 
-  protected def bufferSize = Workspace.preferenceAsInt(Storage.BufferSize)
-  protected def copyTimeout = Workspace.preferenceAsDuration(Storage.CopyTimeout)
-  protected def closeTimeout = Workspace.preferenceAsDuration(Storage.CloseTimeout)
+  protected def bufferSize = Workspace.preference(Storage.BufferSize)
+  protected def copyTimeout = Workspace.preference(Storage.CopyTimeout)
+  protected def closeTimeout = Workspace.preference(Storage.CloseTimeout)
 }

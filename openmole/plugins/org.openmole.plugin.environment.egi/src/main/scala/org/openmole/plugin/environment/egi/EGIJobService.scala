@@ -52,7 +52,7 @@ trait EGIJobService extends GridScaleJobService { js ⇒
   def authentication = environment.authentication
 
   lazy val id = jobService.url.toString
-  def hysteresis = Workspace.preferenceAsInt(EGIEnvironment.QualityHysteresis)
+  def hysteresis = Workspace.preference(EGIEnvironment.QualityHysteresis)
 
   override protected def _purge(j: J) = quality { super._purge(j) }
 
@@ -98,7 +98,7 @@ trait EGIJobService extends GridScaleJobService { js ⇒
       val inputSandbox = List(script) ++ proxy
       override def stdOutput = if (environment.debug) "out" else ""
       override def stdError = if (environment.debug) "err" else ""
-      def outputSandbox = if (environment.debug) Seq("out" -> Workspace.newFile("job", ".out"), "err" -> Workspace.newFile("job", ".err")) else Seq.empty
+      def outputSandbox = if (environment.debug) Seq("out" → Workspace.newFile("job", ".out"), "err" → Workspace.newFile("job", ".err")) else Seq.empty
 
       override val memory = Some(environment.requiredMemory)
       override val cpuTime = environment.cpuTime
@@ -107,7 +107,7 @@ trait EGIJobService extends GridScaleJobService { js ⇒
       override val jobType = environment.jobType
       override val smpGranularity = environment.smpGranularity orElse environment.threads
       override val retryCount = Some(0)
-      override val shallowRetryCount = Some(Workspace.preferenceAsInt(EGIEnvironment.ShallowWMSRetryCount))
+      override val shallowRetryCount = Some(Workspace.preference(EGIEnvironment.ShallowWMSRetryCount))
       override val myProxyServer = environment.myProxy.map(_.url)
       override val architecture = environment.architecture
       override val fuzzy = true

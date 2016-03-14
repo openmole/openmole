@@ -54,7 +54,8 @@ object TypeUtil {
     val (varNames, direct, toArray, fromArray) =
       computeTransmissions(mole, sources, hooks)(
         mole.inputTransitions(slot),
-        mole.inputDataChannels(slot))
+        mole.inputDataChannels(slot)
+      )
 
     varNames.toSeq.map {
       import scala.collection.mutable.ListBuffer.empty

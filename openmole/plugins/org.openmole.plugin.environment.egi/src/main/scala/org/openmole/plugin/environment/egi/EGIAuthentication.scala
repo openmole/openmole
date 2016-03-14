@@ -21,6 +21,7 @@ import java.io._
 import java.net.URI
 import java.util.UUID
 import fr.iscpif.gridscale.authentication.{ PEMAuthentication, P12Authentication }
+import org.openmole.core.batch.authentication.CypheredPassword
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import java.nio.file.FileSystems
 import java.util.zip.GZIPInputStream
@@ -46,7 +47,7 @@ object EGIAuthentication extends Logger {
   val updatedFile = ".updated"
 
   def CACertificatesDir: File =
-    Workspace.file("CACertificates").updateIfTooOld(Workspace.preferenceAsDuration(CACertificatesCacheTime)) {
+    Workspace.file("CACertificates").updateIfTooOld(Workspace.preference(CACertificatesCacheTime)) {
       caDir ⇒
         caDir.mkdir
         downloadCACertificates(Workspace.preference(EGIEnvironment.CACertificatesSite), caDir)
@@ -55,7 +56,7 @@ object EGIAuthentication extends Logger {
   def downloadCACertificates(address: String, dir: File) = {
     val fs = FileSystems.getDefault
 
-    val site = HTTPStorage(url = address, Workspace.preferenceAsDuration(EGIEnvironment.CACertificatesDownloadTimeOut))
+    val site = HTTPStorage(url = address, Workspace.preference(EGIEnvironment.CACertificatesDownloadTimeOut))
     for (tarUrl ← site.listNames("/")) {
       try {
         //val child = site.child(tarUrl)
@@ -70,7 +71,7 @@ object EGIAuthentication extends Logger {
               val dest = new File(dir, destForName.getName)
 
               if (dest.exists) dest.delete
-              if (!tarEntry.getLinkName.isEmpty) Some(dest -> tarEntry.getLinkName)
+              if (!tarEntry.getLinkName.isEmpty) Some(dest → tarEntry.getLinkName)
               else {
                 tis.copy(dest)
                 None
@@ -93,11 +94,12 @@ object EGIAuthentication extends Logger {
   }
 
   def voCards =
-    Workspace.file("voCards.xml").updateIfTooOld(Workspace.preferenceAsDuration(VOCardCacheTime)) {
+    Workspace.file("voCards.xml").updateIfTooOld(Workspace.preference(VOCardCacheTime)) {
       voCards ⇒
         HTTPStorage.withConnection(
           new URI(Workspace.preference(EGIEnvironment.VOInformationSite)),
-          Workspace.preferenceAsDuration(EGIEnvironment.VOCardDownloadTimeOut)) { http ⇒
+          Workspace.preference(EGIEnvironment.VOCardDownloadTimeOut)
+        ) { http ⇒
             val is: InputStream = http.getInputStream
             try is.copy(voCards)
             finally is.close
@@ -142,8 +144,9 @@ object EGIAuthentication extends Logger {
 
   def initialise(a: EGIAuthentication)(
     serverURLs: Seq[String],
-    voName: String,
-    fqan: Option[String])(implicit decrypt: Decrypt): () ⇒ GlobusAuthentication.Proxy =
+    voName:     String,
+    fqan:       Option[String]
+  )(implicit decrypt: Decrypt): () ⇒ GlobusAuthentication.Proxy =
     a match {
       case a: P12Certificate ⇒
         VOMSAuthentication.setCARepository(EGIAuthentication.CACertificatesDir)
@@ -154,11 +157,30 @@ object EGIAuthentication extends Logger {
             serverURLs,
             voName,
             EGIEnvironment.proxyRenewalRatio,
-            fqan)
+            fqan
+          )
 
         () ⇒ implicitly[GlobusAuthenticationProvider[P12VOMSAuthentication]].apply(p12)
     }
 
+  def testPassword(a: EGIAuthentication)(implicit decrypt: Decrypt) =
+    a match {
+      case a: P12Certificate ⇒
+        Try(P12Authentication.loadKeyStore(P12Authentication(a.certificate, a.password))).map(_ ⇒ true)
+    }
+
+  def testProxy(a: EGIAuthentication, voName: String)(implicit decrypt: Decrypt) = {
+    val vomses = EGIAuthentication.getVMOSOrError(voName)
+    Try(initialise(a)(vomses, voName, None)).map(_ ⇒ true)
+  }
+
 }
 
-trait EGIAuthentication
+sealed trait EGIAuthentication
+
+object P12Certificate {
+  def apply(cypheredPassword: String, certificate: File = new File(new File(System.getProperty("user.home")), ".globus/certificate.p12")) =
+    new P12Certificate(cypheredPassword, certificate)
+}
+
+class P12Certificate(val cypheredPassword: String, val certificate: File) extends EGIAuthentication with CypheredPassword

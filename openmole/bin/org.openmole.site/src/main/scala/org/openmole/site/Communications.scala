@@ -20,7 +20,8 @@ object Communication {
   def papers: Seq[Publication] = {
     // TODO complete entries
     Seq(
-      Article("Delay.et.al.2015",
+      Article(
+        "Delay.et.al.2015",
         Authors("Etienne Delay", "Cyril Piou", "Hervé Quénol"),
         Title("The mountain environment, a driver for adaptation to climate change"),
         BookTitle("Land Use Policy"),

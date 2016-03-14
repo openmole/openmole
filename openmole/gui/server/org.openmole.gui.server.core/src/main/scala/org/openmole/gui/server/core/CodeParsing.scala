@@ -37,7 +37,8 @@ object CodeParsing {
       BasicLaunchingCommand(
         language,
         codeName,
-        commandElements)
+        commandElements
+      )
     )
   }
 
@@ -67,8 +68,7 @@ object CodeParsing {
           }
           else None
         }
-        indexArgs(args.drop(2), indexed :+ (keyName(Some(head), value, nextIndex), value, nextIndex)
-        )
+        indexArgs(args.drop(2), indexed :+ (keyName(Some(head), value, nextIndex), value, nextIndex))
       }
       else indexArgs(args.drop(1), indexed :+ (keyName(None, Some(head), nextIndex), Some(head), nextIndex))
     }
@@ -101,7 +101,8 @@ object CodeParsing {
 
   private def toVariableElement(key: String, value: Option[String], index: Int, taskType: TaskType): VariableElement = {
     val isFile = isFileString(value)
-    VariableElement(index, ProtoTypePair(key,
+    VariableElement(index, ProtoTypePair(
+      key,
       value match {
         case Some(a: String) ⇒ if (isFile) ProtoTYPE.FILE else ProtoTYPE.DOUBLE
         case _               ⇒ ProtoTYPE.DOUBLE
@@ -109,8 +110,7 @@ object CodeParsing {
       if (isFile) "" else value.getOrElse(""),
       if (isFile) value else None
     ),
-      taskType
-    )
+      taskType)
   }
 
   private def rParsing(args: Seq[String], taskType: TaskType): Seq[CommandElement] = {

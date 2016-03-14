@@ -65,22 +65,25 @@ class Application extends IApplication {
     object ServerConfigMode extends LaunchMode
 
     case class Config(
-      pluginsDirs: List[String] = Nil,
-      guiPluginsDirs: List[String] = Nil,
-      userPlugins: List[String] = Nil,
-      loadHomePlugins: Option[Boolean] = None,
-      workspaceDir: Option[String] = None,
-      scriptFile: Option[String] = None,
-      consoleWorkDirectory: Option[File] = None,
-      password: Option[String] = None,
-      hostName: Option[String] = None,
-      launchMode: LaunchMode = GUIMode,
-      ignored: List[String] = Nil,
-      port: Option[Int] = None,
-      loggerLevel: Option[String] = None,
-      unoptimizedJS: Boolean = false,
-      remote: Boolean = false,
-      args: List[String] = Nil)
+      pluginsDirs:          List[String]    = Nil,
+      guiPluginsDirs:       List[String]    = Nil,
+      userPlugins:          List[String]    = Nil,
+      loadHomePlugins:      Option[Boolean] = None,
+      workspaceDir:         Option[String]  = None,
+      scriptFile:           Option[String]  = None,
+      consoleWorkDirectory: Option[File]    = None,
+      password:             Option[String]  = None,
+      hostName:             Option[String]  = None,
+      launchMode:           LaunchMode      = GUIMode,
+      ignored:              List[String]    = Nil,
+      port:                 Option[Int]     = None,
+      loggerLevel:          Option[String]  = None,
+      unoptimizedJS:        Boolean         = false,
+      remote:               Boolean         = false,
+      browse:               Boolean         = true,
+      reset:                Boolean         = false,
+      args:                 List[String]    = Nil
+    )
 
     def takeArg(args: List[String]) =
       args match {
@@ -125,6 +128,8 @@ class Application extends IApplication {
         case "--unoptimizedJS" :: tail         ⇒ parse(tail, c.copy(unoptimizedJS = true))
         case "--webui-authentication" :: tail  ⇒ parse(tail, c.copy(remote = true))
         case "--remote" :: tail                ⇒ parse(tail, c.copy(remote = true))
+        case "--no-browser" :: tail            ⇒ parse(tail, c.copy(browse = false))
+        case "--reset" :: tail                 ⇒ parse(tail, c.copy(reset = true))
         case "--" :: tail                      ⇒ parse(Nil, c.copy(args = tail))
         case s :: tail                         ⇒ parse(tail, c.copy(ignored = s :: c.ignored))
         case Nil                               ⇒ c
@@ -136,30 +141,35 @@ class Application extends IApplication {
 
     config.loggerLevel.foreach(LoggerService.level)
 
-    val (existingUserPlugins, notExistingUserPlugins) = config.userPlugins.span(new File(_).exists)
-
-    if (!notExistingUserPlugins.isEmpty) logger.warning(s"""Some plugins or plugin folders don't exist: ${notExistingUserPlugins.mkString(",")}""")
-
-    val userPlugins =
-      existingUserPlugins.flatMap { p ⇒ PluginManager.plugins(new File(p)) } ++
-        (if (config.loadHomePlugins.getOrElse(config.launchMode != ConsoleMode)) Workspace.pluginDir.listFilesSafe.flatMap(PluginManager.plugins) else Nil)
-
-    logger.fine(s"Loading user plugins " + userPlugins)
-
-    val plugins: List[File] =
-      config.pluginsDirs.map(new File(_)) ++
-        userPlugins ++
-        (if (config.launchMode == GUIMode) config.guiPluginsDirs.map(new File(_)) else List.empty)
-
-    PluginManager.startAll.foreach { case (b, e) ⇒ logger.log(WARNING, s"Error staring bundle $b", e) }
-    PluginManager.tryLoad(plugins).foreach { case (b, e) ⇒ logger.log(WARNING, s"Error loading bundle $b", e) }
-
-    try config.password foreach Workspace.setPassword
-    catch {
-      case e: UserBadDataError ⇒
-        logger.severe("Wrong password!")
-        throw e
+    if (config.reset) {
+      Workspace.reset()
+      new Integer(Console.ExitCodes.ok)
     }
+    else {
+      val (existingUserPlugins, notExistingUserPlugins) = config.userPlugins.span(new File(_).exists)
+
+      if (!notExistingUserPlugins.isEmpty) logger.warning(s"""Some plugins or plugin folders don't exist: ${notExistingUserPlugins.mkString(",")}""")
+
+      val userPlugins =
+        existingUserPlugins.flatMap { p ⇒ PluginManager.plugins(new File(p)) } ++
+          (if (config.loadHomePlugins.getOrElse(config.launchMode != ConsoleMode)) Workspace.pluginDir.listFilesSafe.flatMap(PluginManager.plugins) else Nil)
+
+      logger.fine(s"Loading user plugins " + userPlugins)
+
+      val plugins: List[File] =
+        config.pluginsDirs.map(new File(_)) ++
+          userPlugins ++
+          (if (config.launchMode == GUIMode) config.guiPluginsDirs.map(new File(_)) else List.empty)
+
+      PluginManager.startAll.foreach { case (b, e) ⇒ logger.log(WARNING, s"Error staring bundle $b", e) }
+      PluginManager.tryLoad(plugins).foreach { case (b, e) ⇒ logger.log(WARNING, s"Error loading bundle $b", e) }
+
+      try config.password foreach Workspace.setPassword
+      catch {
+        case e: UserBadDataError ⇒
+          logger.severe("Wrong password!")
+          throw e
+      }
 
     if (!config.ignored.isEmpty) logger.warning("Ignored options: " + config.ignored.mkString(" "))
 
@@ -206,10 +216,11 @@ class Application extends IApplication {
               browse(GUIServer.urlFile.content)
               Console.ExitCodes.ok
             }
-          }
-      }
+        }
 
-    new Integer(retCode)
+      new Integer(retCode)
+    }
+
   }
 
   override def stop = {}

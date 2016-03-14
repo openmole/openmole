@@ -33,7 +33,8 @@ class DivPanel(_modalID: ModalID, title: String, div: HTMLDivElement) extends Mo
 
   def onClose() = {}
 
-  val dialog = bs.modalDialog(modalID,
+  val dialog = bs.modalDialog(
+    modalID,
     headerDialog(
       tags.span(tags.b(title))
     ),

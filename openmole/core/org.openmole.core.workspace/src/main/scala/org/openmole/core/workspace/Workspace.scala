@@ -22,49 +22,43 @@ import java.util.UUID
 import java.util.concurrent.atomic.AtomicLong
 import java.util.logging.Level
 import java.util.logging.Logger
-import org.apache.commons.configuration._
-import org.apache.commons.configuration.reloading._
 import org.jasypt.util.text._
 import org.openmole.core.event.{ Event, EventDispatcher }
-import org.openmole.core.exception.UserBadDataError
+import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.replication.DBServerInfo
+import org.openmole.core.tools.io.FromString
 import org.openmole.tool.crypto.Certificate
 import org.openmole.tool.file._
 import org.openmole.core.tools.service._
 import Random._
-import scala.collection.mutable.HashMap
-import scala.concurrent.duration.FiniteDuration
-import scala.util.Try
 
 object Workspace {
 
   case object PasswordRequired extends Event[Workspace]
 
-  val sessionUUID = UUID.randomUUID
+  lazy val sessionUUID = UUID.randomUUID
 
-  val preferences = "preferences"
-  val globalGroup = "Global"
-  val tmpLocation = ".tmp"
-  val persistentLocation = "persistent"
-  val authenticationsLocation = "authentications"
-  val pluginLocation = "plugins"
-  val uniqueID = new ConfigurationLocation(globalGroup, "UniqueID")
+  def preferences = "preferences"
+  def globalGroup = "Global"
+  def tmpLocation = ".tmp"
+  def persistentLocation = "persistent"
+  def authenticationsLocation = "authentications"
+  def pluginLocation = "plugins"
+
+  lazy val uniqueIDLocation = ConfigurationLocation[String](globalGroup, "UniqueID", Some(UUID.randomUUID.toString))
 
   private val group = "Workspace"
-  val fixedPrefix = "file"
-  val fixedPostfix = ".bin"
-  val fixedDir = "dir"
+  def fixedPrefix = "file"
+  def fixedPostfix = ".bin"
+  def fixedDir = "dir"
 
-  private val passwordTest = new ConfigurationLocation(group, "passwordTest", true)
-  private val passwordTestString = "test"
+  private def passwordTestString = "test"
+  private def passwordTest = ConfigurationLocation[String](group, "passwordTest", Some(passwordTestString), true)
 
-  private val configurations = new HashMap[ConfigurationLocation, () ⇒ String]
+  def ErrorArraySnipSize = ConfigurationLocation[Int](group, "ErrorArraySnipSize", Some(10))
 
-  val ErrorArraySnipSize = new ConfigurationLocation(group, "ErrorArraySnipSize")
-
-  this += (uniqueID, UUID.randomUUID.toString)
-  this += (passwordTest, passwordTestString)
-  this += (ErrorArraySnipSize, "10")
+  this setDefault uniqueIDLocation
+  this setDefault ErrorArraySnipSize
 
   lazy val defaultLocation = DBServerInfo.base
 
@@ -74,12 +68,8 @@ object Workspace {
     }
   })
 
-  def +=(location: ConfigurationLocation, defaultValue: () ⇒ String) = synchronized {
-    configurations(location) = defaultValue
-  }
-
-  def +=(location: ConfigurationLocation, defaultValue: String) = synchronized {
-    configurations(location) = () ⇒ defaultValue
+  def setDefault[T: ConfigurationString](location: ConfigurationLocation[T]) = synchronized {
+    instance.setDefaultPreference(location)
   }
 
   def allTmpDir(location: File) = new File(location, tmpLocation)
@@ -102,12 +92,12 @@ object Workspace {
     if (s.isEmpty) s
     else Workspace.textEncryptor(password).decrypt(s)
 
-  val OpenMOLELocationProperty = "openmole.location"
+  def OpenMOLELocationProperty = "openmole.location"
 
   def openMOLELocation =
     Option(System.getProperty(OpenMOLELocationProperty, null)).map(new File(_))
 
-  val instance = new Workspace(defaultLocation)
+  lazy val instance = new Workspace(defaultLocation)
 
   implicit def authenticationProvider = instance.authenticationProvider
 
@@ -115,8 +105,7 @@ object Workspace {
 
 class Workspace(val location: File) {
 
-  import Workspace._ //{ textEncryptor, decrypt, NoneTextEncryptor, persistentLocation, authenticationsLocation, pluginLocation, fixedPrefix, fixedPostfix, fixedDir, passwordTest, passwordTestString, tmpLocation, preferences, configurations, sessionUUID, uniqueID }
-
+  import Workspace._
   location.mkdirs
 
   val tmpDir = new File(Workspace.allTmpDir(location), sessionUUID.toString)
@@ -134,19 +123,11 @@ class Workspace(val location: File) {
 
   @transient private var _password: Option[String] = None
 
-  @transient private lazy val configurationFile: File = {
+  @transient private lazy val configurationFile: ConfigurationFile = {
     val file = new File(location, preferences)
     file.createNewFile
-    file
+    new ConfigurationFile(file)
   }
-
-  @transient private lazy val configuration: FileConfiguration = synchronized {
-    val configuration = new PropertiesConfiguration(configurationFile)
-    configuration.setReloadingStrategy(new FileChangedReloadingStrategy)
-    configuration
-  }
-
-  lazy val overridden = collection.mutable.HashMap[String, String]()
 
   def clean = {
     tmpDir.recursiveDelete
@@ -156,65 +137,36 @@ class Workspace(val location: File) {
 
   def newFile(prefix: String = fixedPrefix, suffix: String = fixedPostfix): File = tmpDir.newFile(prefix, suffix)
 
-  def defaultValue(location: ConfigurationLocation): String = {
-    configurations.get(location) match {
-      case None ⇒ ""
-      case Some(cf) ⇒
-        val ret = cf()
-        if (ret == null) ""
-        else ret
-    }
+  def preferenceOption[T](location: ConfigurationLocation[T])(implicit fromString: FromString[T]): Option[T] = synchronized {
+    val confVal = configurationFile.value(location.group, location.name)
+    def v =
+      if (!location.cyphered) confVal
+      else confVal.map(decrypt(_, password))
+    v.map(fromString.apply) orElse location.default
   }
 
-  def overridePreference(preference: ConfigurationLocation, value: String): Unit =
-    overridePreference(preference.toString, value)
-
-  def overridePreference(preference: String, value: String): Unit = synchronized {
-    overridden(preference) = value
+  def preference[T: FromString](location: ConfigurationLocation[T]): T = synchronized {
+    preferenceOption(location) getOrElse (throw new UserBadDataError(s"No value found for $location and no default is defined for this property."))
   }
 
-  def unsetOverridePreference(preference: String) = synchronized {
-    overridden.remove(preference)
-  }
-
-  def rawPreference(location: ConfigurationLocation): String = synchronized {
-    overridden.getOrElse(location.toString, configuration.subset(location.group).getString(location.name))
-  }
-
-  def preference(location: ConfigurationLocation): String = synchronized {
-    if (!isPreferenceSet(location)) setToDefaultValue(location)
-    val confVal = rawPreference(location)
-
-    if (!location.cyphered) confVal
-    else decrypt(confVal, password)
-  }
-
-  def setToDefaultValue(location: ConfigurationLocation) = synchronized {
-    configurations.get(location) match {
-      case None ⇒ null
-      case Some(value) ⇒
-        val default = value()
-        setPreference(location, default)
-        default
-    }
-  }
-
-  def setPreference(location: ConfigurationLocation, value: String) = synchronized {
-    val conf = configuration.subset(location.group)
+  def setPreference[T](location: ConfigurationLocation[T], value: String) = synchronized {
     val prop = if (location.cyphered) encrypt(value) else value
-    conf.setProperty(location.name, prop)
-    configuration.save
+    configurationFile.setValue(location.group, location.name, prop)
   }
 
-  def removePreference(location: ConfigurationLocation) = synchronized {
-    val conf = configuration.subset(location.group)
-    conf.clearProperty(location.name)
+  def setDefaultPreference[T](location: ConfigurationLocation[T])(implicit configurationString: ConfigurationString[T]) = synchronized {
+    if (!preferenceIsSet(location) && !commentedPreferenceSet(location)) {
+      def defaultOrException = location.default.getOrElse(throw new UserBadDataError(s"No default value set for location ${this}."))
+      def prop = if (location.cyphered) encrypt(configurationString.toString(defaultOrException)) else configurationString.toString(defaultOrException)
+      configurationFile.addCommentedValue(location.group, location.name, prop)
+    }
+  }
+
+  def removePreference[T](location: ConfigurationLocation[T]) = synchronized {
+    configurationFile.removeValue(location.group, location.name)
   }
 
   def file(name: String): File = new File(location, name)
-
-  def preferenceAsInt(location: ConfigurationLocation): Int = preference(location).toInt
-  def preferenceAsDouble(location: ConfigurationLocation): Double = preference(location).toDouble
 
   def withTmpFile[T](prefix: String, postfix: String)(f: File ⇒ T): T = {
     val file = newFile(prefix, postfix)
@@ -230,19 +182,16 @@ class Workspace(val location: File) {
 
   def reset() = synchronized {
     persistentDir.recursiveDelete
-    val uniqueId = preference(uniqueID)
-    configurationFile.content = ""
-    configuration.clear
+    val uniqueId = preference(uniqueIDLocation)
+    configurationFile.clear()
     _password = None
-    setPreference(uniqueID, uniqueId)
+    setPreference(uniqueIDLocation, uniqueId)
   }
-
-  def preferenceAsLong(location: ConfigurationLocation): Long = preference(location).toLong
 
   def setPassword(password: String): Unit = synchronized {
     if (!passwordIsCorrect(password)) throw new UserBadDataError("Password is incorrect.")
     this._password = Some(password)
-    if (!isPreferenceSet(passwordTest)) setToDefaultValue(passwordTest)
+    setPreference(Workspace.passwordTest, passwordTestString)
   }
 
   private def password = {
@@ -257,13 +206,10 @@ class Workspace(val location: File) {
 
   def passwordIsCorrect(password: String) = synchronized {
     try {
-      val test = rawPreference(passwordTest)
-      if (test == null && Workspace.passwordChosen) false
-      // allow password to be set initially
-      else if (!Workspace.passwordChosen) true
-      else {
-        val te = textEncryptor(password)
-        te.decrypt(test) == passwordTestString
+      configurationFile.value(passwordTest.group, passwordTest.name) match {
+        case None ⇒ true
+        case Some(t) ⇒
+          textEncryptor(password).decrypt(t) == passwordTestString
       }
     }
     catch {
@@ -273,15 +219,10 @@ class Workspace(val location: File) {
     }
   }
 
-  def passwordChosen = isPreferenceSet(passwordTest)
-  def passwordHasBeenSet =
-    passwordChosen && Try(preference(Workspace.passwordTest) == passwordTestString).getOrElse(false)
-
-  def preferenceAsDuration(location: ConfigurationLocation): FiniteDuration = preference(location)
-
-  def isPreferenceSet(location: ConfigurationLocation): Boolean = synchronized {
-    rawPreference(location) != null
-  }
+  def commentedPreferenceSet[T](configurationLocation: ConfigurationLocation[T]) = configurationFile.commentedValue(configurationLocation.group, configurationLocation.name).isDefined
+  def preferenceIsSet[T](configurationLocation: ConfigurationLocation[T]) = configurationFile.value(configurationLocation.group, configurationLocation.name).isDefined
+  def passwordChosen = configurationFile.value(passwordTest.group, passwordTest.name).isDefined
+  def passwordHasBeenSet = _password.map(passwordIsCorrect).getOrElse(false)
 
   def persistent(name: String) = Persistent(persistentDir / name)
 

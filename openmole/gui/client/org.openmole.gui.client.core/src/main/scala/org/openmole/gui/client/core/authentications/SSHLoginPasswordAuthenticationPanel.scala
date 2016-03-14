@@ -11,7 +11,10 @@ import org.openmole.gui.shared.Api
 
 import scala.scalajs.js.annotation.JSExport
 import scalatags.JsDom.all._
-import scalatags.JsDom.tags
+
+import fr.iscpif.scaladget.api.{ BootstrapTags => bs }
+import scalatags.JsDom.{ tags ⇒ tags }
+import bs._
 
 /*
  * Copyright (C) 16/06/15 // mathieu.leclaire@openmole.org
@@ -34,11 +37,13 @@ class SSHLoginPasswordAuthenticationPanel(data: LoginPasswordAuthenticationData)
 
   val login = bs.input(data.login, key("spacer5"))(
     placeholder := "Login",
-    width := "130px").render
+    width := "130px"
+  ).render
 
   val target = bs.input(data.target, key("spacer5"))(
     placeholder := "Host",
-    width := "130px").render
+    width := "130px"
+  ).render
 
   val password = bs.input(data.cypheredPassword, key("spacer5"))(
     placeholder := "Password",

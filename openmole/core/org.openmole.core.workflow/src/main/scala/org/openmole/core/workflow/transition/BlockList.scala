@@ -37,7 +37,6 @@ trait Keep extends BlockList {
   override def apply(t: Prototype[_]) = !kept.contains(t.name)
 }
 
-
 object Block {
 
   def apply(ts: Prototype[_]*): Block = new Block {

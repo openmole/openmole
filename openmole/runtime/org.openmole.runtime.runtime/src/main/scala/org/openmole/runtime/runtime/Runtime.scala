@@ -57,12 +57,13 @@ class Runtime {
   import Log._
 
   def apply(
-    storage: RemoteStorage,
+    storage:              RemoteStorage,
     communicationDirPath: String,
-    inputMessagePath: String,
-    outputMessagePath: String,
-    threads: Int,
-    debug: Boolean) = {
+    inputMessagePath:     String,
+    outputMessagePath:    String,
+    threads:              Int,
+    debug:                Boolean
+  ) = {
 
     /*--- get execution message and job for runtime---*/
     val usedFiles = new HashMap[String, File]
@@ -108,7 +109,7 @@ class Runtime {
       val plugins =
         for {
           plugin ← executionMessage.plugins
-        } yield plugin -> getReplicatedFile(plugin, TransferOptions(raw = true))
+        } yield plugin → getReplicatedFile(plugin, TransferOptions(raw = true))
 
       logger.fine("Plugins " + plugins.unzip._2)
 
@@ -177,7 +178,7 @@ class Runtime {
         if (executionMessage.runtimeSettings.archiveResult) uploadArchive else uploadIndividualFiles
 
       val endTime = System.currentTimeMillis
-      Success(result -> RuntimeLog(beginTime, beginExecutionTime, endExecutionTime, endTime))
+      Success(result → RuntimeLog(beginTime, beginExecutionTime, endExecutionTime, endTime))
 
     }
     catch {

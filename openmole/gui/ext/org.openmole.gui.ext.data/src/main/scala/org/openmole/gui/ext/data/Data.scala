@@ -40,7 +40,7 @@ object ProtoTYPE {
 
 }
 
-import java.io.{PrintWriter, StringWriter}
+import java.io.{ PrintWriter, StringWriter }
 
 import org.openmole.gui.ext.data.ProtoTYPE._
 
@@ -165,7 +165,6 @@ object ServerFileSytemContext {
   implicit val project: ServerFileSytemContext = ProjectFileSystem
 }
 
-
 //The path it relative to the project root directory
 case class SafePath(path: Seq[String], extension: FileExtension, context: ServerFileSytemContext = ProjectFileSystem) {
   def /(safePath: SafePath) = sp(this.path ++ safePath.path, safePath.extension)
@@ -191,21 +190,27 @@ trait PrivateKey {
   def privateKey: Option[String]
 }
 
-case class LoginPasswordAuthenticationData(login: String = "",
-                                           cypheredPassword: String = "",
-                                           target: String = "") extends AuthenticationData {
+case class LoginPasswordAuthenticationData(
+    login:            String = "",
+    cypheredPassword: String = "",
+    target:           String = ""
+) extends AuthenticationData {
   def synthetic = s"$login@$target"
 }
 
-case class PrivateKeyAuthenticationData(privateKey: Option[String] = None,
-                                        login: String = "",
-                                        cypheredPassword: String = "",
-                                        target: String = "") extends AuthenticationData with PrivateKey {
+case class PrivateKeyAuthenticationData(
+    privateKey:       Option[String] = None,
+    login:            String         = "",
+    cypheredPassword: String         = "",
+    target:           String         = ""
+) extends AuthenticationData with PrivateKey {
   def synthetic = s"$login@$target"
 }
 
-case class EGIP12AuthenticationData(val cypheredPassword: String = "",
-                                    val privateKey: Option[String] = None) extends AuthenticationData with PrivateKey {
+case class EGIP12AuthenticationData(
+    val cypheredPassword: String         = "",
+    val privateKey:       Option[String] = None
+) extends AuthenticationData with PrivateKey {
   def synthetic = "egi.p12"
 }
 
@@ -231,13 +236,14 @@ case class UploadAbsolute() extends UploadType {
 
 @JSExport
 case class TreeNodeData(
-                         name: String,
-                         safePath: SafePath,
-                         isDirectory: Boolean,
-                         size: Long,
-                         readableSize: String,
-                         time: Long,
-                         readableTime: String)
+  name:         String,
+  safePath:     SafePath,
+  isDirectory:  Boolean,
+  size:         Long,
+  readableSize: String,
+  time:         Long,
+  readableTime: String
+)
 
 @JSExport
 case class ScriptData(scriptPath: SafePath)
@@ -278,12 +284,14 @@ case class ErrorLevel() extends ErrorStateLevel {
 
 case class EnvironmentError(environmentId: EnvironmentId, errorMessage: String, stack: Error, date: Long, level: ErrorStateLevel)
 
-case class NetworkActivity(downloadingFiles: Int = 0,
-                           downloadedSize: Long = 0L,
-                           readableDownloadedSize: String = "",
-                           uploadingFiles: Int = 0,
-                           uploadedSize: Long = 0L,
-                           readableUploadedSize: String = "")
+case class NetworkActivity(
+  downloadingFiles:       Int    = 0,
+  downloadedSize:         Long   = 0L,
+  readableDownloadedSize: String = "",
+  uploadingFiles:         Int    = 0,
+  uploadedSize:           Long   = 0L,
+  readableUploadedSize:   String = ""
+)
 
 case class RunningEnvironmentData(id: ExecutionId, errors: Seq[(EnvironmentError, Int)])
 
@@ -315,17 +323,21 @@ case class Failed(error: Error, duration: Long = 0L, completed: Long = 0L) exten
   def ready: Long = 0L
 }
 
-case class Running(ready: Long,
-                   running: Long,
-                   duration: Long,
-                   completed: Long,
-                   environmentStates: Seq[EnvironmentState]) extends ExecutionInfo {
+case class Running(
+    ready:             Long,
+    running:           Long,
+    duration:          Long,
+    completed:         Long,
+    environmentStates: Seq[EnvironmentState]
+) extends ExecutionInfo {
   def state: String = "running"
 }
 
-case class Finished(duration: Long = 0L,
-                    completed: Long = 0L,
-                    environmentStates: Seq[EnvironmentState]) extends ExecutionInfo {
+case class Finished(
+    duration:          Long                  = 0L,
+    completed:         Long                  = 0L,
+    environmentStates: Seq[EnvironmentState]
+) extends ExecutionInfo {
   def ready: Long = 0L
 
   def running: Long = 0L
@@ -405,15 +417,14 @@ object FileType {
   }
 
   def isSupportedLanguage(safePath: SafePath): Boolean = apply(safePath) match {
-    case CodeFile(_) => true
-    case a: Archive => a.language match {
-      case UndefinedLanguage => false
-      case _ => true
+    case CodeFile(_) ⇒ true
+    case a: Archive ⇒ a.language match {
+      case UndefinedLanguage ⇒ false
+      case _                 ⇒ true
     }
-    case _ => false
+    case _ ⇒ false
   }
 }
-
 
 case class Binary() extends Language {
   val name: String = "Binary"
@@ -478,15 +489,15 @@ sealed trait LaunchingCommand {
 
   def fullCommand: String
 
-  def statics: Seq[StaticElement] = arguments.collect { case a: StaticElement => a }
+  def statics: Seq[StaticElement] = arguments.collect { case a: StaticElement ⇒ a }
 
   def updateVariables(variableArgs: Seq[VariableElement]): LaunchingCommand
 }
 
 case class BasicLaunchingCommand(language: Option[Language], codeName: String, arguments: Seq[CommandElement] = Seq(), outputs: Seq[VariableElement] = Seq()) extends LaunchingCommand {
   def fullCommand: String = language match {
-    case Some(NetLogoLanguage()) => "setup\nwhile [any? turtles] [go];;You should set your stopping criteria here instead"
-    case _ => (Seq(language.map {
+    case Some(NetLogoLanguage()) ⇒ "setup\nwhile [any? turtles] [go];;You should set your stopping criteria here instead"
+    case _ ⇒ (Seq(language.map {
       _.name
     }.getOrElse(""), codeName) ++ arguments.sortBy {
       _.index
@@ -508,17 +519,16 @@ case class JavaLaunchingCommand(jarMethod: JarMethod, arguments: Seq[CommandElem
       if (jarMethod.isStatic) jarMethod.clazz + "." else s"val constr = new ${jarMethod.clazz}() // You should initialize this constructor first\nconstr."
     } +
       jarMethod.methodName + "(" + arguments.sortBy {
-      _.index
-    }.map {
-      _.expand
-    }.mkString(", ") + ")"
+        _.index
+      }.map {
+        _.expand
+      }.mkString(", ") + ")"
   }
 
   def updateVariables(variableArgs: Seq[VariableElement]) = copy(arguments = statics ++ variableArgs)
 }
 
 case class ProtoTypePair(name: String, `type`: ProtoTYPE.ProtoTYPE, default: String = "", mapping: Option[String] = None)
-
 
 sealed trait ClassTree {
   def name: String
@@ -529,7 +539,7 @@ sealed trait ClassTree {
 }
 
 case class ClassNode(name: String, childs: Seq[ClassTree]) extends ClassTree {
-  def flatten(prefix: Seq[String]) = childs.flatMap { c => c.flatten(prefix :+ name) }
+  def flatten(prefix: Seq[String]) = childs.flatMap { c ⇒ c.flatten(prefix :+ name) }
 
   def flatten = flatten(Seq())
 }
@@ -553,8 +563,10 @@ case class Processing(override val ratio: Int = 0) extends ProcessState {
   override def display: String = "Transferring... " + ratio + " %"
 }
 
-case class Finalizing(override val ratio: Int = 100,
-                      override val display: String = "Finalizing...") extends ProcessState
+case class Finalizing(
+  override val ratio:   Int    = 100,
+  override val display: String = "Finalizing..."
+) extends ProcessState
 
 case class Processed(override val ratio: Int = 100) extends ProcessState
 
@@ -598,27 +610,11 @@ object SizeSorting extends FileSorting
 
 object TimeSorting extends FileSorting
 
-object FileSorting {
-  implicit def sortingToOrdering(fs: FileSorting): Ordering[TreeNodeData] =
-    fs match {
-      case AlphaSorting ⇒ AlphaOrdering
-      case SizeSorting ⇒ FileSizeOrdering
-      case _ ⇒ TimeOrdering
-    }
-}
-
-case class FileFilter(firstLast: FirstLast = First, threshold: Option[Int] = Some(20), nameFilter: String = "", fileSorting: FileSorting = AlphaSorting)
-
 case class TreeSorting(fileSorting: FileSorting = AlphaSorting, fileOrdering: FileOrdering = Ascending)
-
-object FileFilter {
-  def defaultFilter = FileFilter.this (First, Some(20), "", AlphaSorting)
-}
 
 object TreeSorting {
   def defaultSorting = TreeSorting(AlphaSorting, Ascending)
 }
-
 
 object FileSizeOrdering extends Ordering[TreeNodeData] {
   def compare(tnd1: TreeNodeData, tnd2: TreeNodeData) = tnd1.size compare tnd2.size
@@ -631,3 +627,20 @@ object AlphaOrdering extends Ordering[TreeNodeData] {
 object TimeOrdering extends Ordering[TreeNodeData] {
   def compare(tnd1: TreeNodeData, tnd2: TreeNodeData) = tnd1.time compare tnd2.time
 }
+
+object FileSorting {
+
+  implicit def sortingToOrdering(fs: FileSorting): Ordering[TreeNodeData] =
+    fs match {
+      case AlphaSorting ⇒ AlphaOrdering
+      case SizeSorting  ⇒ FileSizeOrdering
+      case _            ⇒ TimeOrdering
+    }
+}
+
+case class FileFilter(firstLast: FirstLast = First, threshold: Option[Int] = Some(20), nameFilter: String = "", fileSorting: FileSorting = AlphaSorting)
+
+object FileFilter {
+  def defaultFilter = FileFilter.this(First, Some(20), "", AlphaSorting)
+}
+

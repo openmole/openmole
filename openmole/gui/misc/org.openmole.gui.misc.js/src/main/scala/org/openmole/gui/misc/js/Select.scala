@@ -17,13 +17,13 @@ package org.openmole.gui.misc.js
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import fr.iscpif.scaladget.api.{BootstrapTags => bs, ClassKeyAggregator}
+import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs, ClassKeyAggregator }
 import bs._
-import org.scalajs.dom.raw.{HTMLDivElement, HTMLInputElement}
+import org.scalajs.dom.raw.{ HTMLDivElement, HTMLInputElement }
 import rx._
 import scalatags.JsDom.all._
 import org.openmole.gui.misc.js.JsRxTags._
-import scalatags.JsDom.{tags ⇒ tags}
+import scalatags.JsDom.{ tags ⇒ tags }
 
 object Select {
   implicit def seqToSeqOfEmptyPairs[T <: Displayable](s: Seq[T]): Seq[(T, ClassKeyAggregator)] = s.map {
@@ -34,20 +34,24 @@ object Select {
     _._1
   }
 
-  def apply[T <: Displayable](autoID: String,
-                              contents: Seq[(T, ClassKeyAggregator)],
-                              default: Option[T],
-                              key: ClassKeyAggregator = emptyCK,
-                              onclickExtra: () ⇒ Unit = () ⇒ {}) = new Select(autoID, Var(contents), default, key, onclickExtra)
+  def apply[T <: Displayable](
+    autoID:       String,
+    contents:     Seq[(T, ClassKeyAggregator)],
+    default:      Option[T],
+    key:          ClassKeyAggregator           = emptyCK,
+    onclickExtra: () ⇒ Unit                    = () ⇒ {}
+  ) = new Select(autoID, Var(contents), default, key, onclickExtra)
 }
 
 import Select._
 
-class Select[T <: Displayable](autoID: String,
-                               private val contents: Var[Seq[(T, ClassKeyAggregator)]],
-                               default: Option[T] = None,
-                               key: ClassKeyAggregator = emptyCK,
-                               onclickExtra: () ⇒ Unit = () ⇒ {}) {
+class Select[T <: Displayable](
+    autoID:               String,
+    private val contents: Var[Seq[(T, ClassKeyAggregator)]],
+    default:              Option[T]                         = None,
+    key:                  ClassKeyAggregator                = emptyCK,
+    onclickExtra:         () ⇒ Unit                         = () ⇒ {}
+) {
 
   val content: Var[Option[T]] = Var(contents().size match {
     case 0 ⇒ None
@@ -65,7 +69,7 @@ class Select[T <: Displayable](autoID: String,
   val filtered: Var[Seq[T]] = Var(contents())
   filtered() = contents().take(100)
 
-  lazy val inputFilter: HTMLInputElement = bs.input("", "selectFilter")(placeholder := "Filter", oninput := { () =>
+  lazy val inputFilter: HTMLInputElement = bs.input("", "selectFilter")(placeholder := "Filter", oninput := { () ⇒
     filtered() = contents().filter {
       _._1.name.toUpperCase.contains(inputFilter.value.toUpperCase)
     }
@@ -78,7 +82,7 @@ class Select[T <: Displayable](autoID: String,
     content() = None
   }
 
-  def setContents(cts: Seq[T], onset: () => Unit = () => {}) = {
+  def setContents(cts: Seq[T], onset: () ⇒ Unit = () ⇒ {}) = {
     contents() = cts
     content() = cts.headOption
     filtered() = contents().take(100)
@@ -97,27 +101,29 @@ class Select[T <: Displayable](autoID: String,
   lazy val selector = {
     lazy val bg: HTMLDivElement = bs.div("dropdown")(
       tags.span(
-        `class` := "btn " + key.key + " dropdown-toggle", `type` := "button", "data-toggle".attr := "dropdown", cursor := "pointer")(
-          Rx {
-            content().map { c ⇒
-              bs.glyph(glyphMap()(c))
-            }
-          },
-          Rx {
-            content().map {
-              _.name
-            }.getOrElse(contents()(0)._1.name) + " "
-          },
-          bs.span("caret")
-        ).render,
+      `class` := "btn " + key.key + " dropdown-toggle", `type` := "button", "data-toggle".attr := "dropdown", cursor := "pointer"
+    )(
+        Rx {
+          content().map { c ⇒
+            bs.glyph(glyphMap()(c))
+          }
+        },
+        Rx {
+          content().map {
+            _.name
+          }.getOrElse(contents()(0)._1.name) + " "
+        },
+        bs.span("caret")
+      ).render,
       ul(`class` := "dropdown-menu", id := autoID)(
         if (hasFilter())
           scalatags.JsDom.tags.li(
-            tags.form(inputFilter)(`type` := "submit", onsubmit := { () =>
-              content() = filtered().headOption
-              bg.click()
-              false
-            }))
+          tags.form(inputFilter)(`type` := "submit", onsubmit := { () ⇒
+            content() = filtered().headOption
+            bg.click()
+            false
+          })
+        )
         else tags.div,
         Rx {
           tags.div(
@@ -132,7 +138,8 @@ class Select[T <: Displayable](autoID: String,
                   onclickExtra()
                 })(c.name)
               }
-            } else scalatags.JsDom.tags.li("To many results, filter more !")
+            }
+            else scalatags.JsDom.tags.li("To many results, filter more !")
           )
         }
       )

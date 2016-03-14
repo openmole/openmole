@@ -24,8 +24,8 @@ trait ClusterEnvironment extends SimpleBatchEnvironment with SSHPersistentStorag
 
   val usageControl =
     new LimitedAccess(
-      Workspace.preferenceAsInt(SSHEnvironment.MaxConnections),
-      Workspace.preferenceAsInt(SSHEnvironment.MaxOperationsByMinute)
+      Workspace.preference(SSHEnvironment.MaxConnections),
+      Workspace.preference(SSHEnvironment.MaxOperationsByMinute)
     )
 
 }

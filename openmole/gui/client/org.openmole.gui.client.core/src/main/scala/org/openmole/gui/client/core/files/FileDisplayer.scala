@@ -59,8 +59,7 @@ class FileDisplayer(implicit executionTriggerer: PanelTriggerer) {
           OMPost[Api].runScript(ScriptData(tn.safePath())).call().foreach { execInfo ⇒
             overlaying() = false
             executionTriggerer.open
-          }
-        )
+          })
       }
     }
 

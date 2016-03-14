@@ -8,7 +8,7 @@ import com.typesafe.sbt.osgi.{ OsgiKeys, SbtOsgi }
 trait OsgiBundler {
   self: BuildSystemDefaults ⇒
 
-  protected val bundleMap = Map("Bundle-ActivationPolicy" -> "lazy")
+  protected val bundleMap = Map("Bundle-ActivationPolicy" → "lazy")
 
   protected def osgiSettings = SbtOsgi.autoImport.osgiSettings ++ Seq(
     OsgiKeys.bundleSymbolicName <<= (name, OSGi.singleton) { case (name, singleton) ⇒ name + ";singleton:=" + singleton },
@@ -28,16 +28,18 @@ trait OsgiBundler {
     publishTo <<= isSnapshot(if (_) Some("OpenMOLE Nexus" at "https://maven.openmole.org/snapshots") else Some("OpenMOLE Nexus" at "https://maven.openmole.org/releases"))
   ) ++ scalariformDefaults
 
-  def OsgiProject(artifactSuffix: String,
-                  pathFromDir: String = "",
-                  exports: Seq[String] = Seq(),
-                  privatePackages: Seq[String] = Seq(),
-                  singleton: Boolean = false,
-                  settings: Seq[Setting[_]] = Nil,
-                  bundleActivator: Option[String] = None,
-                  dynamicImports: Seq[String] = Seq(),
-                  imports: Seq[String] = Seq("*;resolution:=optional"),
-                  global: Boolean = false)(implicit artifactPrefix: Option[String] = None) = {
+  def OsgiProject(
+    artifactSuffix:  String,
+    pathFromDir:     String          = "",
+    exports:         Seq[String]     = Seq(),
+    privatePackages: Seq[String]     = Seq(),
+    singleton:       Boolean         = false,
+    settings:        Seq[Setting[_]] = Nil,
+    bundleActivator: Option[String]  = None,
+    dynamicImports:  Seq[String]     = Seq(),
+    imports:         Seq[String]     = Seq("*;resolution:=optional"),
+    global:          Boolean         = false
+  )(implicit artifactPrefix: Option[String] = None) = {
 
     require(artifactPrefix.forall(!_.endsWith(".")), "Do not end your artifact prefix with ., it will be added automatically.")
 
@@ -54,9 +56,9 @@ trait OsgiBundler {
         (OSGi.openMOLEScope) {
           omScope ⇒
             Map[String, String]() +
-              ("Bundle-ActivationPolicy" -> "lazy") ++
-              omScope.map(os ⇒ "OpenMOLE-Scope" -> os) ++
-              (if (global) Some("Eclipse-BuddyPolicy" -> "global") else None)
+              ("Bundle-ActivationPolicy" → "lazy") ++
+              omScope.map(os ⇒ "OpenMOLE-Scope" → os) ++
+              (if (global) Some("Eclipse-BuddyPolicy" → "global") else None)
         },
       OsgiKeys.privatePackage := privatePackages,
       OsgiKeys.dynamicImportPackage := dynamicImports,
@@ -66,9 +68,10 @@ trait OsgiBundler {
   }
 
   def OsgiGUIProject(
-    name: String,
-    ext: ClasspathDep[ProjectReference],
+    name:   String,
+    ext:    ClasspathDep[ProjectReference],
     client: ClasspathDep[ProjectReference],
-    server: ClasspathDep[ProjectReference]) = OsgiProject(name) dependsOn (ext, client, server)
+    server: ClasspathDep[ProjectReference]
+  ) = OsgiProject(name) dependsOn (ext, client, server)
 
 }

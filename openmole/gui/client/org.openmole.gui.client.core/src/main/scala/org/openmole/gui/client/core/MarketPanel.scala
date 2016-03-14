@@ -17,21 +17,21 @@ package org.openmole.gui.client.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.core.buildinfo.{MarketIndex, MarketIndexEntry}
+import org.openmole.core.buildinfo.{ MarketIndex, MarketIndexEntry }
 import org.openmole.gui.client.core.AbsolutePositioning.CenterTransform
-import fr.iscpif.scaladget.api.{BootstrapTags ⇒ bs}
-import org.openmole.gui.ext.data.{Processing, ProcessState}
-import org.openmole.gui.misc.js.{InputFilter}
+import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
+import org.openmole.gui.ext.data.{ Processing, ProcessState }
+import org.openmole.gui.misc.js.{ InputFilter }
 import org.openmole.gui.misc.js.JsRxTags._
 import org.openmole.gui.shared.Api
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
-import org.openmole.gui.client.core.files.treenodemanager.{instance ⇒ manager}
+import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
 import org.openmole.gui.client.core.CoreUtils._
 import org.openmole.gui.ext.data._
 import Waiter._
 import autowire._
 import rx._
-import scalatags.JsDom.{tags ⇒ tags}
+import scalatags.JsDom.{ tags ⇒ tags }
 import scalatags.JsDom.all._
 import bs._
 
@@ -48,7 +48,8 @@ class MarketPanel extends ModalPanel {
   }.getOrElse(Seq()))
   val overwriteAlert: Var[Option[MarketIndexEntry]] = Var(None)
 
-  lazy val marketTable = tags.div(`class` := "spacer20",
+  lazy val marketTable = tags.div(
+    `class` := "spacer20",
     Rx {
       marketIndex().map { mindex ⇒
         for {
@@ -63,7 +64,8 @@ class MarketPanel extends ModalPanel {
                     if (isSelected) None
                     else Some(entry)
                   }
-                })),
+                })
+              ),
               bs.div(bs.col_md_2)(downloadButton(entry, () ⇒ {
                 OMPost[Api].exists(manager.current.safePath() ++ entry.name).call().foreach { b ⇒
                   if (b) overwriteAlert() = Some(entry)
@@ -78,7 +80,8 @@ class MarketPanel extends ModalPanel {
                 },
                 selectedEntry().map { se ⇒
                   if (isSelected) tags.div(`class` := "mdRendering paddingTop40")(
-                    RawFrag(entry.readme.getOrElse("")))(colspan := 12)
+                    RawFrag(entry.readme.getOrElse(""))
+                  )(colspan := 12)
                   else tags.div()
                 }
               )
@@ -109,7 +112,6 @@ class MarketPanel extends ModalPanel {
         }
     }.getOrElse(tags.div())
 
-
   def onOpen() = marketIndex() match {
     case None ⇒ OMPost[Api].marketIndex.call().foreach { m ⇒
       marketIndex() = Some(m)
@@ -119,7 +121,8 @@ class MarketPanel extends ModalPanel {
 
   def onClose() = {}
 
-  val dialog = bs.modalDialog(modalID,
+  val dialog = bs.modalDialog(
+    modalID,
     headerDialog(
       tags.span(tags.b("Market place"))
     ),
@@ -127,7 +130,8 @@ class MarketPanel extends ModalPanel {
       Rx {
         overwriteAlert() match {
           case Some(e: MarketIndexEntry) ⇒
-            AlertPanel.string(e.name + " already exists. Overwrite ? ",
+            AlertPanel.string(
+              e.name + " already exists. Overwrite ? ",
               () ⇒ {
                 overwriteAlert() = None
                 OMPost[Api].deleteFile(manager.current.safePath() ++ e.name, ServerFileSytemContext.project).call().foreach { d ⇒
@@ -135,7 +139,8 @@ class MarketPanel extends ModalPanel {
                 }
               }, () ⇒ {
                 overwriteAlert() = None
-              }, CenterTransform())
+              }, CenterTransform()
+            )
             tags.div
           case _ ⇒
         }
@@ -144,8 +149,7 @@ class MarketPanel extends ModalPanel {
         tagFilter.tag,
         marketTable
       )
-    }
-    ),
+    }),
     footerDialog(closeButton)
   )
 

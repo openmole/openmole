@@ -73,7 +73,7 @@ class RegistryWithTicket[K, V] {
    * @param value the value to register
    */
   def register(key: K, ticket: Ticket, value: V) = synchronized {
-    registry(ticket) += (key -> value)
+    registry(ticket) += (key → value)
   }
 
   /**

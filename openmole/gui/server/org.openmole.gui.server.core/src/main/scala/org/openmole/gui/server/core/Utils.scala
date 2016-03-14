@@ -26,7 +26,7 @@ import java.util.logging.Level
 import java.util.zip.{ ZipInputStream, GZIPInputStream }
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.workspace.Workspace
-import org.openmole.gui.ext.data.{ FileFilter ⇒ fF }
+import org.openmole.gui.ext.data
 import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.data.FileSorting._
 import java.io._
@@ -143,21 +143,19 @@ object Utils {
     getFile0(paths, root)
   }
 
-  def listFiles(path: SafePath, fileFilter: fF)(implicit context: ServerFileSytemContext): Seq[TreeNodeData] = {
+  def listFiles(path: SafePath, fileFilter: data.FileFilter)(implicit context: ServerFileSytemContext): Seq[TreeNodeData] = {
+    def allFiles = safePathToFile(path).listFilesSafe.toSeq
 
-    val list = safePathToFile(path).listFilesSafe.toSeq
+    def filteredByName: Seq[TreeNodeData] =
+      if (fileFilter.nameFilter.isEmpty) allFiles
+      else allFiles.filter { f ⇒ f.getName.contains(fileFilter.nameFilter) }
 
-    val filteredByName: Seq[TreeNodeData] = {
-      if (fileFilter.nameFilter.isEmpty) list
-      else list.filter { f ⇒ f.getName.contains(fileFilter.nameFilter) }
-    }
-
-    val sorted = filteredByName.sorted(fileFilter.fileSorting)
+    def sorted = filteredByName.sorted(fileFilter.fileSorting)
 
     fileFilter.threshold.map { th ⇒
       fileFilter.firstLast match {
         case First ⇒ sorted.take(th)
-        case _     ⇒ sorted.takeRight(th)
+        case Last  ⇒ sorted.takeRight(th)
       }
     }.getOrElse(sorted)
 
@@ -221,7 +219,8 @@ object Utils {
         case (k, v) ⇒
           val flatV = v.flatten
           if (flatV.size == 1) classTrees :+ ClassLeaf(flatV.head)
-          else classTrees :+ ClassNode(k,
+          else classTrees :+ ClassNode(
+            k,
             build(v.map(_.tail), classTrees)
           )
       }.toSeq
@@ -259,7 +258,7 @@ object Utils {
 
   def existsExcept(in: TreeNodeData, exceptItSelf: Boolean): Boolean = {
     import org.openmole.gui.ext.data.ServerFileSytemContext.project
-    val li = listFiles(in.safePath.parent, fF.defaultFilter)
+    val li = listFiles(in.safePath.parent, data.FileFilter.defaultFilter)
     val count = li.count(_.safePath.path == in.safePath.path)
 
     val bound = if (exceptItSelf) 1 else 0

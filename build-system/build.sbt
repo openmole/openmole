@@ -1,4 +1,5 @@
 import scalariform.formatter.preferences._
+import com.typesafe.sbt.SbtScalariform.ScalariformKeys
 
 scalariformSettings
 
@@ -22,7 +23,7 @@ resolvers += Classpaths.sbtPluginSnapshots
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-osgi" % "0.8.0")
 
-addSbtPlugin("com.typesafe.sbt" % "sbt-scalariform" % "1.2.0")
+addSbtPlugin("org.scalariform" % "sbt-scalariform" % "1.6.0")
 
 
 libraryDependencies ++= Seq(

@@ -32,7 +32,7 @@ trait SSHStorageService extends StorageService with SSHService with GridScaleSto
 
   lazy val storage =
     new fr.iscpif.gridscale.ssh.SSHStorage with environment.ThisHost with SSHConnectionCache {
-      override def timeout = Workspace.preferenceAsDuration(SSHService.timeout)
+      override def timeout = Workspace.preference(SSHService.timeout)
     }
 
   lazy val home = storage.home

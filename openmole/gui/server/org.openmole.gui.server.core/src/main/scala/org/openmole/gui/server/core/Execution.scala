@@ -26,8 +26,10 @@ import org.openmole.tool.stream.StringPrintStream
 
 import scala.concurrent.stm._
 
-case class DynamicExecutionInfo(moleExecution: MoleExecution,
-                                outputStream: StringPrintStream)
+case class DynamicExecutionInfo(
+  moleExecution: MoleExecution,
+  outputStream:  StringPrintStream
+)
 
 class Execution {
 
@@ -95,7 +97,8 @@ class Execution {
           case _ ⇒
             if (moleExecution.canceled) Canceled(duration = moleExecution.duration.get)
             else if (moleExecution.finished)
-              Finished(duration = moleExecution.duration.get,
+              Finished(
+                duration = moleExecution.duration.get,
                 completed = moleExecution.jobStatuses.completed,
                 environmentStates = environmentState(key)
               )

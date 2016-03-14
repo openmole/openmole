@@ -45,7 +45,7 @@ trait OARJobService extends ClusterJobService { js ⇒
     def credential = js.credential
     def usageControl = environment.usageControl
     override def port = js.port
-    override def timeout = Workspace.preferenceAsDuration(SSHService.timeout)
+    override def timeout = Workspace.preference(SSHService.timeout)
   }
 
   protected def _submit(serializedJob: SerializedJob) = {

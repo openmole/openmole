@@ -61,14 +61,14 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
     manager.computeCurrentSons(() ⇒ drawTree, filter)
     tags.div(
       fileToolBar.div, Rx {
-        val toDraw = manager.drop(1)
-        val dirNodeLineSize = toDraw.size
-        bs.div("tree-path")(
-          goToDirButton(manager.head, OMTags.glyphString(glyph_home) + " left treePathItems"),
-          toDraw.drop(dirNodeLineSize - 2).takeRight(2).map { dn ⇒ goToDirButton(dn, "treePathItems", s"| ${dn.name()}") }
-        )
+      val toDraw = manager.drop(1)
+      val dirNodeLineSize = toDraw.size
+      bs.div("tree-path")(
+        goToDirButton(manager.head, OMTags.glyphString(glyph_home) + " left treePathItems"),
+        toDraw.drop(dirNodeLineSize - 2).takeRight(2).map { dn ⇒ goToDirButton(dn, "treePathItems", s"| ${dn.name()}") }
+      )
 
-      },
+    },
       fileToolBar.sortingGroup.div,
       Rx {
         tree()
@@ -151,8 +151,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
     case dn: DirNode ⇒ clickableElement(dn, "dir", () ⇒ {
       manager + dn
       computeAndDraw
-    }
-    )
+    })
   }
 
   def displayNode(tn: TreeNode) = tn match {
@@ -166,15 +165,18 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
     case _ ⇒
   }
 
-  def clickableElement(tn: TreeNode,
-                       classType: String,
-                       todo: () ⇒ Unit) = {
+  def clickableElement(
+    tn:        TreeNode,
+    classType: String,
+    todo:      () ⇒ Unit
+  ) = {
     toBeEdited() match {
       case Some(etn: NodeEdition) ⇒
         if (etn.node.path == tn.path) {
           editNodeInput.value = tn.name()
           tags.tr(
-            tags.div(`class` := "edit-node",
+            tags.div(
+              `class` := "edit-node",
               tags.form(
                 editNodeInput,
                 onsubmit := {
@@ -194,21 +196,22 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
   }
 
   def stringAlert(message: String, okaction: () ⇒ Unit) =
-    AlertPanel.string(message, okaction, zone = FileZone()
-    )
+    AlertPanel.string(message, okaction, zone = FileZone())
 
   def trashNode(treeNode: TreeNode): Unit = {
     fileDisplayer.tabs -- treeNode
-    stringAlert(s"Do you really want to delete ${
-      treeNode.name()
-    }?",
+    stringAlert(
+      s"Do you really want to delete ${
+        treeNode.name()
+      }?",
       () ⇒ {
         CoreUtils.trashNode(treeNode.safePath(), filter) {
           () ⇒
             fileDisplayer.tabs.checkTabs
             refreshAndDraw
         }
-      })
+      }
+    )
   }
 
   def renameNode(treeNode: TreeNode, newName: String, replicateMode: Boolean) = {
@@ -224,8 +227,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
         if (b) stringAlert(s"${newName} already exists, overwrite ?", () ⇒ rename)
         else rename
       }
-    }
-    )
+    })
   }
 
   def dropAction(tn: TreeNode) = {
@@ -241,8 +243,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
                     b ⇒
                       refreshAndDraw
                       fileDisplayer.tabs.checkTabs
-                  }
-                )
+                  })
               }
             case _ ⇒
           }
@@ -295,7 +296,8 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
         dropAction(tn)
       },
       tags.div(clickablePair(classType, todo))(
-        tags.i(id := "plusdir")),
+        tags.i(id := "plusdir")
+      ),
       tags.div(
         clickablePair(classType, todo),
         `class` := "fileNameOverflow " + classType + "Text",
@@ -316,8 +318,10 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
                 toBeEdited() = Some(NodeEdition(tn))
                 drawTree
               })(`class` := "glyphitem file-glyph"),
-              a(glyphSpan(glyph_download_alt, () ⇒ Unit)(`class` := "glyphitem file-glyph"),
-                href := s"downloadFile?path=${Utils.toURI(tn.safePath().path)}"),
+              a(
+                glyphSpan(glyph_download_alt, () ⇒ Unit)(`class` := "glyphitem file-glyph"),
+                href := s"downloadFile?path=${Utils.toURI(tn.safePath().path)}"
+              ),
               tn.safePath().extension match {
                 case FileExtension.TGZ ⇒ glyphSpan(glyph_archive, () ⇒ {
                   OMPost[Api].extractTGZ(tn).call().foreach { r ⇒
@@ -330,10 +334,8 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
                 refreshAnd(() ⇒ {
                   toBeEdited() = Some(NodeEdition(replicated, true))
                   drawTree
-                }
-                )
-              })
-              )(`class` := "glyphitem file-glyph")
+                })
+              }))(`class` := "glyphitem file-glyph")
 
             /*,
                       if (tn.isPlugin) glyphSpan(OMTags.glyph_plug, () ⇒

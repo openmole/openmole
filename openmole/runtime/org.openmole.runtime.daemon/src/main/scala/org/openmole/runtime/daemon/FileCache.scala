@@ -73,7 +73,7 @@ abstract class FileCache {
     if (overhead > 0) {
       val sortedFiles = cached.toList.
         filter { case (_, (_, _, usage, _)) ⇒ usage == 0 }.
-        sorted(Ordering.by { l: (String, (File, Long, Int, Long)) ⇒ l._2._2 }).map { case (hash, (file, _, _, _)) ⇒ hash -> file }
+        sorted(Ordering.by { l: (String, (File, Long, Int, Long)) ⇒ l._2._2 }).map { case (hash, (file, _, _, _)) ⇒ hash → file }
 
       def remove(files: List[(String, File)], overhead: Long): Unit =
         if (!(files.isEmpty || overhead <= 0)) {

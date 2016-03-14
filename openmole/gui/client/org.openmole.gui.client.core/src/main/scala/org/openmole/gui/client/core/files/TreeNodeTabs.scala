@@ -13,7 +13,7 @@ import org.scalajs.dom.raw.{ HTMLElement, HTMLDivElement }
 import rx._
 import bs._
 
-import scala.util.{Failure, Success}
+import scala.util.{ Failure, Success }
 import scalatags.JsDom.all._
 import scalatags.JsDom.{ TypedTag, tags }
 import scala.scalajs.js.timers._
@@ -64,17 +64,17 @@ object TreeNodeTabs {
 
   }
 
-  trait Save <: TreeNodeTab{
+  trait Save <: TreeNodeTab {
     val editor: EditorPanelUI
 
-    def save(afterSave: () => Unit) = editor.synchronized {
-      OMPost[Api].saveFile(treeNode.safePath(), editor.code).call().foreach(_ => afterSave())
+    def save(afterSave: () ⇒ Unit) = editor.synchronized {
+      OMPost[Api].saveFile(treeNode.safePath(), editor.code).call().foreach(_ ⇒ afterSave())
     }
   }
-  
+
   trait Update <: TreeNodeTab {
     val editor: EditorPanelUI
-    
+
     def update(afterUpdate: () ⇒ Unit) = editor.synchronized {
       FileManager.download(
         treeNode,
@@ -96,9 +96,11 @@ object TreeNodeTabs {
     def refresh(onsaved: () ⇒ Unit) = save(onsaved)
   }
 
-  class LockedEditionNodeTab(val treeNode: TreeNode,
-                             val editor: EditorPanelUI,
-                             _editable: Boolean = false) extends TreeNodeTab with Save with Update {
+  class LockedEditionNodeTab(
+      val treeNode: TreeNode,
+      val editor:   EditorPanelUI,
+      _editable:    Boolean       = false
+  ) extends TreeNodeTab with Save with Update {
     val editorElement = editor.view
     val editable = Var(_editable)
 
@@ -122,7 +124,7 @@ object TreeNodeTabs {
       if (editable()) save(afterRefresh)
       else {
         val scrollPosition = editor.getScrollPostion
-        update( () => {
+        update(() ⇒ {
           afterRefresh()
           editor.setScrollPosition(scrollPosition)
         })
@@ -130,7 +132,8 @@ object TreeNodeTabs {
   }
 
   class HTMLTab(val treeNode: TreeNode, htmlContent: String) extends TreeNodeTab {
-    val editorElement = tags.div(`class` := "mdRendering",
+    val editorElement = tags.div(
+      `class` := "mdRendering",
       RawFrag(htmlContent)
     )
 
@@ -212,7 +215,6 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
     removeTab
   }
 
-
   def alterables: Seq[AlterableFileContent] = tabs().map {
     _.fileContent
   }.collect {
@@ -251,16 +253,19 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
         //Headers
         tags.ul(`class` := "nav nav-tabs", role := "tablist")(
           for (t ← tabs()) yield {
-            tags.li(role := "presentation",
+            tags.li(
+              role := "presentation",
               `class` := {
                 if (isActive(t)) "active" else ""
-              })(
-                tags.a(href := "#" + t.id,
+              }
+            )(
+                tags.a(
+                  href := "#" + t.id,
                   aria.controls := t.id,
                   role := "tab",
-                  data("toggle") := "tab", onclick := { () ⇒ setActive(t) })(
-                    tags.button(`class` := "close", `type` := "button", onclick := { () ⇒ --(t) }
-                    )("x"),
+                  data("toggle") := "tab", onclick := { () ⇒ setActive(t) }
+                )(
+                    tags.button(`class` := "close", `type` := "button", onclick := { () ⇒ --(t) })("x"),
                     t.tabName()
                   )
               )
@@ -301,8 +306,7 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
                   }
                 }
               }
-              else tags.div()
-              )
+              else tags.div())
           }
         )
       )

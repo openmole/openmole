@@ -32,6 +32,7 @@ import org.openmole.core.serializer.SerialiserService
 import org.openmole.core.workflow.execution.ExecutionState._
 import org.openmole.tool.file._
 import org.openmole.tool.thread._
+import org.openmole.tool.hash._
 
 import DesktopGridEnvironment._
 
@@ -97,7 +98,7 @@ class DesktopGridService(port: Int, path: File = Workspace.newDir()) { service â
     override val usageControl = new UnlimitedAccess
   }
 
-  val server = new SFTPServer(path, port, DesktopGridAuthentication.password)
+  val server = new SFTPServer(path, port, DesktopGridAuthentication.password.hash)
 
   val timeStempsDir = new File(path, timeStempsDirName) { mkdirs }
   val jobsDir = new File(path, jobsDirName) { mkdirs }
@@ -120,8 +121,7 @@ class DesktopGridService(port: Int, path: File = Workspace.newDir()) { service â
 
     val tmpJobFile = tmpJobSubmissionFile(jobId)
     tmpJobFile.withGzippedOutputStream(os â‡’
-      SerialiserService.serialise(desktopJobMessage, os)
-    )
+      SerialiserService.serialise(desktopJobMessage, os))
 
     tmpJobFile.move(jobSubmissionFile(jobId))
 

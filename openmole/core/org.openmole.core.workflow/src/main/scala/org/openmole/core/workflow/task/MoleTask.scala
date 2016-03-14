@@ -58,9 +58,10 @@ object MoleTask {
  * @param implicits the implicit values for the inputs
  */
 sealed abstract class MoleTask(
-    val mole: Mole,
-    val last: Capsule,
-    val implicits: Iterable[String]) extends Task {
+    val mole:      Mole,
+    val last:      Capsule,
+    val implicits: Iterable[String]
+) extends Task {
 
   protected def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider): Context = {
     val implicitsValues = implicits.flatMap(i ⇒ context.get(i))
@@ -72,7 +73,8 @@ sealed abstract class MoleTask(
         implicits = implicitsValues,
         defaultEnvironment = executionContext.localEnvironment,
         tmpDirectory = executionContext.tmpDirectory.newDir("moletask"),
-        cleanOnFinish = false)
+        cleanOnFinish = false
+      )
 
     @volatile var lastContext: Option[Context] = None
     val lastContextLock = new ReentrantLock()

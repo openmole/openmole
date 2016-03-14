@@ -36,10 +36,10 @@ class Command(val console: ScalaREPL, val variables: ConsoleVariables) { command
   def print(environment: Environment): Unit = {
     for {
       (label, number) ← List(
-        "Submitted" -> environment.submitted,
-        "Running" -> environment.running,
-        "Done" -> environment.done,
-        "Failed" -> environment.failed
+        "Submitted" → environment.submitted,
+        "Running" → environment.running,
+        "Done" → environment.done,
+        "Failed" → environment.failed
       )
     } println(s"$label: $number")
     val errors = environment.errors

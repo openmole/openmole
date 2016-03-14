@@ -30,9 +30,9 @@ import org.openmole.tool.logger.Logger
 import scala.util.Random
 
 object Task extends Logger {
-  val OpenMOLEVariablePrefix = new ConfigurationLocation("Task", "OpenMOLEVariablePrefix")
+  val OpenMOLEVariablePrefix = ConfigurationLocation("Task", "OpenMOLEVariablePrefix", "oM")
 
-  Workspace += (OpenMOLEVariablePrefix, "oM")
+  Workspace setDefault OpenMOLEVariablePrefix
 
   def prefixedVariable(name: String) = Workspace.preference(OpenMOLEVariablePrefix) + name
 
@@ -45,7 +45,6 @@ object Task extends Logger {
 case class TaskExecutionContext(tmpDirectory: File, localEnvironment: LocalEnvironment)
 
 trait Task <: InputOutputCheck with Name {
-
 
   /**
    *

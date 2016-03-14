@@ -56,7 +56,7 @@ class JobManager { self ⇒
   lazy val delayedExecutor = Executors.newSingleThreadScheduledExecutor(daemonThreadFactory)
 
   for {
-    i ← 0 until Workspace.preferenceAsInt(JobManagementThreads)
+    i ← 0 until Workspace.preference(JobManagementThreads)
   } {
     val t =
       new Thread {

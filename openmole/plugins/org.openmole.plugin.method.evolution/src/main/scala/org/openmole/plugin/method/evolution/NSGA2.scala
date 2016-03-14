@@ -22,9 +22,10 @@ import fr.iscpif.mgo.algorithm.{ nsga2, noisynsga2 }
 object NSGA2 {
 
   def apply(
-    mu: Int,
-    genome: Genome,
-    objectives: Objectives) = {
+    mu:         Int,
+    genome:     Genome,
+    objectives: Objectives
+  ) = {
 
     new WorkflowIntegration.DeterministicGA(
       nsga2.OpenMOLE(mu, Genome.size(genome), operatorExploration),
@@ -34,10 +35,11 @@ object NSGA2 {
   }
 
   def apply(
-    mu: Int,
-    genome: Genome,
-    objectives: Objectives,
-    replication: Replication[Seq]) = {
+    mu:          Int,
+    genome:      Genome,
+    objectives:  Objectives,
+    replication: Replication[Seq]
+  ) = {
 
     def aggregation(h: Vector[Vector[Double]]) = StochasticGAIntegration.aggregateVector(replication.aggregationClosures, h)
 
@@ -45,7 +47,8 @@ object NSGA2 {
       noisynsga2.OpenMOLE(mu, operatorExploration, Genome.size(genome), replication.max, replication.reevaluate, aggregation),
       genome,
       objectives,
-      replication)
+      replication
+    )
   }
 
 }

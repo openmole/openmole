@@ -35,13 +35,15 @@ object AlertPanel {
 
   val alertDiv = panel.alertDiv
 
-  def div(messageDiv: TypedTag[HTMLDivElement],
-          okaction: () ⇒ Unit,
-          cancelaction: () ⇒ Unit = () ⇒ {},
-          transform: Transform = CenterTransform(),
-          zone: Zone = FullPage(),
-          alertType: ClassKeyAggregator = warning,
-          buttonGroupClass: ClassKeyAggregator = "right"): Unit = {
+  def div(
+    messageDiv:       TypedTag[HTMLDivElement],
+    okaction:         () ⇒ Unit,
+    cancelaction:     () ⇒ Unit                = () ⇒ {},
+    transform:        Transform                = CenterTransform(),
+    zone:             Zone                     = FullPage(),
+    alertType:        ClassKeyAggregator       = warning,
+    buttonGroupClass: ClassKeyAggregator       = "right"
+  ): Unit = {
     panel.popup(messageDiv, Seq(AlertAction(okaction), AlertAction(cancelaction)), transform, zone, alertType, buttonGroupClass)
   }
 
@@ -49,21 +51,25 @@ object AlertPanel {
     tags.div(
       error.message,
       OptionsDiv(error.filesInError).div
-    ), okaction = error.okaction, cancelaction = error.cancelaction, zone = FileZone())
+    ), okaction = error.okaction, cancelaction = error.cancelaction, zone = FileZone()
+  )
 
   def treeNodeCommentDiv(error: TreeNodeComment): Unit = panel.popup(
     tags.div(
       error.message,
       OptionsDiv(error.filesInError).div
-    ), Seq(AlertAction(error.okaction)), CenterTransform(), FileZone(), warning, "right")
+    ), Seq(AlertAction(error.okaction)), CenterTransform(), FileZone(), warning, "right"
+  )
 
-  def string(message: String,
-             okaction: () ⇒ Unit,
-             cancelaction: () ⇒ Unit = () ⇒ {},
-             transform: Transform = CenterTransform(),
-             zone: Zone = FullPage(),
-             alertType: ClassKeyAggregator = warning,
-             buttonGroupClass: ClassKeyAggregator = "left"): Unit = div(tags.div(message), okaction, cancelaction, transform, zone, alertType, buttonGroupClass)
+  def string(
+    message:          String,
+    okaction:         () ⇒ Unit,
+    cancelaction:     () ⇒ Unit          = () ⇒ {},
+    transform:        Transform          = CenterTransform(),
+    zone:             Zone               = FullPage(),
+    alertType:        ClassKeyAggregator = warning,
+    buttonGroupClass: ClassKeyAggregator = "left"
+  ): Unit = div(tags.div(message), okaction, cancelaction, transform, zone, alertType, buttonGroupClass)
 }
 
 class AlertPanel {
@@ -82,14 +88,16 @@ class AlertPanel {
     if (visible()) s"alertOverlay ${overlayZone().zoneClass}" else "displayNone"
   })(elementDiv)
 
-  def popup(messageDiv: TypedTag[HTMLDivElement],
-            actions: Seq[AlertAction],
-            /* okaction: () ⇒ Unit,
+  def popup(
+    messageDiv: TypedTag[HTMLDivElement],
+    actions:    Seq[AlertAction],
+    /* okaction: () ⇒ Unit,
             cancelaction: () ⇒ Unit,*/
-            transform: Transform,
-            zone: Zone = FullPage(),
-            alertType: ClassKeyAggregator = warning,
-            buttonGroupClass: ClassKeyAggregator = "left") = {
+    transform:        Transform,
+    zone:             Zone               = FullPage(),
+    alertType:        ClassKeyAggregator = warning,
+    buttonGroupClass: ClassKeyAggregator = "left"
+  ) = {
     alertElement() = OMTags.alert(alertType, messageDiv, actions.map { a ⇒ a.copy(action = actionWrapper(a.action)) }, buttonGroupClass)
     transform(elementDiv)
     overlayZone() = zone

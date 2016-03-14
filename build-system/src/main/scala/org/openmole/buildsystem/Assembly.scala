@@ -43,7 +43,7 @@ trait Assembly {
   private def copyFileTask(from: File, destinationDir: File, streams: TaskStreams, name: Option[String] = None) = {
     val to: File = if (from.isDirectory) destinationDir else destinationDir / name.getOrElse(from.getName)
     recursiveCopy(from, to, streams)
-    from -> to
+    from → to
   }
 
   private def rename(srcPath: File, depMap: Map[Regex, String ⇒ String]) =
@@ -54,15 +54,16 @@ trait Assembly {
       }
 
   private def copyLibraryDependencies(
-    cp: Seq[Attributed[File]],
-    out: File,
-    rename: ModuleID ⇒ String,
+    cp:        Seq[Attributed[File]],
+    out:       File,
+    rename:    ModuleID ⇒ String,
     depFilter: ModuleID ⇒ Boolean,
-    streams: TaskStreams) = {
+    streams:   TaskStreams
+  ) = {
 
     cp.flatMap { attributed ⇒
       attributed.get(Keys.moduleID.key) match {
-        case Some(moduleId) ⇒ if (depFilter(moduleId)) Some(moduleId -> attributed.data) else None
+        case Some(moduleId) ⇒ if (depFilter(moduleId)) Some(moduleId → attributed.data) else None
         case None           ⇒ None
       }
     }.map {
@@ -209,7 +210,7 @@ object Assembly {
   def projFilter[T](s: Seq[ProjectReference], key: SettingKey[T], filter: T ⇒ Boolean, intransitive: Boolean): Def.Initialize[Seq[ProjectReference]] = {
     // (key in p) ? returns Initialize[Option[T]]
     // Project.Initialize.join takes a Seq[Initialize[_]] and gives back an Initialize[Seq[_]]
-    val ret = Def.Initialize.join(s map { p ⇒ (key in p).?(i ⇒ i -> p) })(_ filter {
+    val ret = Def.Initialize.join(s map { p ⇒ (key in p).?(i ⇒ i → p) })(_ filter {
       case (None, _)    ⇒ false
       case (Some(v), _) ⇒ filter(v)
     })(_ map {
@@ -257,7 +258,7 @@ object Assembly {
     case (projs, to) ⇒
       require(projs.nonEmpty)
       val seqOTasks: Def.Initialize[Seq[Task[Seq[(File, File)]]]] = Def.Initialize.join(projs.map(p ⇒ (bundle in p) map {
-        f ⇒ Seq(f -> to)
+        f ⇒ Seq(f → to)
       }))
       seqOTasks { seq ⇒
         seq.reduceLeft[Task[Seq[(File, File)]]] {

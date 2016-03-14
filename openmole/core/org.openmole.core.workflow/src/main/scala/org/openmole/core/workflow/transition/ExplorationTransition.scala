@@ -82,15 +82,15 @@ class ExplorationTransition(val start: Capsule, val end: Slot, val condition: Co
 
         subMoleExecution.moleExecution.mole.outputTransitions(capsule).foreach {
           case t: IAggregationTransition ⇒
-            if (level > 0) toProcess += t.end.capsule -> (level - 1)
+            if (level > 0) toProcess += t.end.capsule → (level - 1)
             else if (level == 0) {
               subMoleExecution.aggregationTransitionRegistry.register(t, ticket, new ListBuffer)
               subMoleExecution listen {
                 case (se, ev: SubMoleExecution.Finished) ⇒ t.aggregate(se, ev.ticket)
               }
             }
-          case t: IExplorationTransition ⇒ toProcess += t.end.capsule -> (level + 1)
-          case t                         ⇒ toProcess += t.end.capsule -> level
+          case t: IExplorationTransition ⇒ toProcess += t.end.capsule → (level + 1)
+          case t                         ⇒ toProcess += t.end.capsule → level
         }
       }
     }

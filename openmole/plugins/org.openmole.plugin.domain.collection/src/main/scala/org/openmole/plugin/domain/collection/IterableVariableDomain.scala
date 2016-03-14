@@ -25,10 +25,10 @@ import scala.util.Random
 
 object IterableVariableDomain {
 
-  implicit def isDiscrete[T] = new Discrete[IterableVariableDomain[T], T] with DomainInputs[IterableVariableDomain[T]]{
+  implicit def isDiscrete[T] = new Discrete[IterableVariableDomain[T], T] with DomainInputs[IterableVariableDomain[T]] {
     override def inputs(domain: IterableVariableDomain[T]) = Seq(domain.variable)
     override def iterator(domain: IterableVariableDomain[T]) =
-      FromContext((context, rng) => context(domain.variable).iterator)
+      FromContext((context, rng) ⇒ context(domain.variable).iterator)
   }
 
   def apply[T](variable: Prototype[Iterable[_ <: T]]) =

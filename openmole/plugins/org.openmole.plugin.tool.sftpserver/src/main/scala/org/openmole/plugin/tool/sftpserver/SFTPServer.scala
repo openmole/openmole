@@ -30,11 +30,12 @@ import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider
 import org.apache.sshd.server.session.ServerSession
 import org.openmole.tool.logger.Logger
 import org.openmole.tool.thread._
+import org.openmole.tool.hash._
 import collection.JavaConversions._
 
 object SFTPServer extends Logger
 
-class SFTPServer(path: File, port: Int, password: String) {
+class SFTPServer(path: File, port: Int, passwordHash: Hash) {
 
   @volatile var started = false
 
@@ -52,7 +53,7 @@ class SFTPServer(path: File, port: Int, password: String) {
 
     sshd.setPasswordAuthenticator(new PasswordAuthenticator {
       override def authenticate(username: String, pass: String, session: ServerSession) =
-        pass == password
+        pass.hash == passwordHash
     })
     sshd.setKeyPairProvider(new SimpleGeneratorHostKeyProvider)
     sshd

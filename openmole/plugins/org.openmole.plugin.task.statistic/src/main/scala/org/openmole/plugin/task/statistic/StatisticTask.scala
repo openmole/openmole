@@ -35,6 +35,7 @@ abstract class StatisticTask extends Task {
     Context(
       statistics.map {
         case (sequence, statProto, agg) ⇒ Variable(statProto, agg(context(sequence)))
-      })
+      }
+    )
 
 }

@@ -62,7 +62,7 @@ object Runnings {
 
   def runningEnvironments(envIds: Seq[EnvironmentId]): Seq[(EnvironmentId, RunningEnvironment)] = atomic { implicit ctx ⇒
     envIds.flatMap {
-      id ⇒ instance.runningEnvironments.get(id).map(id -> _)
+      id ⇒ instance.runningEnvironments.get(id).map(id → _)
     }
   }
 

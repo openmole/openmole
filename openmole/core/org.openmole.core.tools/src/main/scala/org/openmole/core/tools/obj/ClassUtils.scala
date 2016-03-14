@@ -103,7 +103,8 @@ object ClassUtils {
       catch {
         case e: ClassNotFoundException ⇒ throw new UserBadDataError(e, "The class " + s + " has not been found")
       }
-    })
+    }
+  )
 
   def clazzOf(v: Any) = {
     v match {

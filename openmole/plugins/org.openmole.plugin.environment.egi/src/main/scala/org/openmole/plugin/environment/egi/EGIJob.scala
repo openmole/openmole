@@ -70,12 +70,12 @@ trait EGIJob extends BatchJob with BatchJobId { self ⇒
 
     //if (!state.isFinal && proxyExpired < System.currentTimeMillis) throw new InternalProcessingError("Proxy for this job has expired.")
     if (state == SUBMITTED) {
-      val maxNbReady = Workspace.preferenceAsInt(EGIEnvironment.JobShakingMaxReady)
+      val maxNbReady = Workspace.preference(EGIEnvironment.JobShakingMaxReady)
 
       def nbReady = jobService.environment.jobs.count(_.state == READY)
 
       if (nbReady < maxNbReady) {
-        val jobShakingAverageTime = Workspace.preferenceAsDuration(EGIEnvironment.JobShakingHalfLife)
+        val jobShakingAverageTime = Workspace.preference(EGIEnvironment.JobShakingHalfLife)
         val nbInterval = ((System.currentTimeMillis - lastShacked.toDouble) / jobShakingAverageTime.toMillis)
         val probability = 1 - math.pow(0.5, nbInterval)
 

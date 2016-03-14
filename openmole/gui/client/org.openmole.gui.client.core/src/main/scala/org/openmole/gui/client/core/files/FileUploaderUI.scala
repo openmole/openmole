@@ -30,9 +30,11 @@ import org.openmole.gui.shared.Api
 import org.scalajs.dom.raw.{ HTMLInputElement }
 import rx._
 
-class AuthFileUploaderUI(keyName: String,
-                         keySet: Boolean,
-                         renaming: Option[String] = None) {
+class AuthFileUploaderUI(
+    keyName:  String,
+    keySet:   Boolean,
+    renaming: Option[String] = None
+) {
 
   val fileName = if (keyName == "") renaming.getOrElse(Utils.getUUID) else keyName
   val pathSet: Var[Boolean] = Var(keySet)
@@ -41,7 +43,8 @@ class AuthFileUploaderUI(keyName: String,
 
   lazy val upButton = tags.label(`class` := "inputFileStyle spacer5 certificate")(
     bs.fileInput((fInput: HTMLInputElement) ⇒ {
-      FileManager.upload(fInput,
+      FileManager.upload(
+        fInput,
         SafePath.empty,
         (p: ProcessState) ⇒ {
         },
@@ -57,8 +60,7 @@ class AuthFileUploaderUI(keyName: String,
           }
         }
       )
-    }
-    ), Rx {
+    }), Rx {
       if (pathSet()) fileName else "No certificate"
     }
   )

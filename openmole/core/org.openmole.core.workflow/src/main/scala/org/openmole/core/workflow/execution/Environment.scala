@@ -18,8 +18,8 @@
 package org.openmole.core.workflow.execution
 
 import java.util.logging.Level
-import org.openmole.core.event.{EventDispatcher, EventAccumulator, Event}
-import org.openmole.core.workflow.execution.local.{LocalExecutionJob, ExecutorPool}
+import org.openmole.core.event.{ EventDispatcher, EventAccumulator, Event }
+import org.openmole.core.workflow.execution.local.{ LocalExecutionJob, ExecutorPool }
 import org.openmole.core.workflow.job.Job
 import org.openmole.core.workflow.job.MoleJob
 import ExecutionState._
@@ -34,9 +34,9 @@ import org.openmole.core.tools.service._
 import scala.ref.WeakReference
 
 object Environment {
-  val maxExceptionsLog = ConfigurationLocation("Environment", "MaxExceptionsLog")
+  val maxExceptionsLog = ConfigurationLocation("Environment", "MaxExceptionsLog", Some(1000))
 
-  Workspace += (maxExceptionsLog, "1000")
+  Workspace setDefault maxExceptionsLog
 
   case class JobSubmitted(job: ExecutionJob) extends Event[Environment]
   case class JobStateChanged(job: ExecutionJob, newState: ExecutionState, oldState: ExecutionState) extends Event[Environment]
@@ -55,7 +55,8 @@ sealed trait Environment <: Name {
 
   private lazy val _errors =
     new OrderedSlidingList[ExceptionEvent](
-      Workspace.preferenceAsInt(maxExceptionsLog))(Ordering.by[ExceptionEvent, Int](_.level.intValue()))
+      Workspace.preference(maxExceptionsLog)
+    )(Ordering.by[ExceptionEvent, Int](_.level.intValue()))
 
   def error(e: ExceptionEvent) = _errors += e
   def errors: List[ExceptionEvent] = _errors.values
@@ -75,22 +76,24 @@ trait SubmissionEnvironment <: Environment {
 
 object LocalEnvironment {
 
-  val DefaultNumberOfThreads = new ConfigurationLocation("LocalExecutionEnvironment", "ThreadNumber")
+  val DefaultNumberOfThreads = ConfigurationLocation("LocalExecutionEnvironment", "ThreadNumber", Some(1))
 
-  Workspace += (DefaultNumberOfThreads, "1")
-  var defaultNumberOfThreads = Workspace.preferenceAsInt(DefaultNumberOfThreads)
+  Workspace setDefault DefaultNumberOfThreads
+  var defaultNumberOfThreads = Workspace.preference(DefaultNumberOfThreads)
 
   def apply(
-   nbThreads: Int = defaultNumberOfThreads,
-   deinterleave: Boolean = false,
-   name: Option[String] = None) = new LocalEnvironment(nbThreads, deinterleave, name)
+    nbThreads:    Int            = defaultNumberOfThreads,
+    deinterleave: Boolean        = false,
+    name:         Option[String] = None
+  ) = new LocalEnvironment(nbThreads, deinterleave, name)
 
 }
 
 class LocalEnvironment(
-  val nbThreads: Int,
-  val deinterleave: Boolean,
-  override val name: Option[String]) extends Environment {
+    val nbThreads:     Int,
+    val deinterleave:  Boolean,
+    override val name: Option[String]
+) extends Environment {
 
   @transient lazy val pool = new ExecutorPool(nbThreads, WeakReference(this))
 

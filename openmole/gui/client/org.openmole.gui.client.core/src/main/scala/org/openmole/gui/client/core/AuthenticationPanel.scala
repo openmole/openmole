@@ -69,7 +69,8 @@ class AuthenticationPanel(onresetpassword: () ⇒ Unit) extends ModalPanel {
           },
           onmouseout := { () ⇒
             lineHovered() = false
-          })(
+          }
+        )(
             bs.div(col_md_7)(
               tags.a(a.synthetic, `class` := "left docTitleEntry whiteBold", cursor := "pointer", onclick := { () ⇒
                 authenticationSelector.content() = Some(authentications.panelWithID(a))
@@ -117,15 +118,18 @@ class AuthenticationPanel(onresetpassword: () ⇒ Unit) extends ModalPanel {
     save
   })
 
-  val dialog = modalDialog(modalID,
+  val dialog = modalDialog(
+    modalID,
     headerDialog(Rx {
-      tags.span(tags.b("Authentications"),
+      tags.span(
+        tags.b("Authentications"),
         inputGroup(navbar_right)(
           setting() match {
             case Some(_) ⇒ saveButton
             case _       ⇒ newButton
           }
-        ))
+        )
+      )
     }),
     bodyDialog(authenticationTable),
     footerDialog(
@@ -134,8 +138,8 @@ class AuthenticationPanel(onresetpassword: () ⇒ Unit) extends ModalPanel {
           tags.a("Reset password", cursor := "pointer", onclick := { () ⇒
             close
             onresetpassword()
-          }
-          )),
+          })
+        ),
         tags.br,
         tags.i(`class` := "left", "Caution: all your preferences will be erased!")
       ),

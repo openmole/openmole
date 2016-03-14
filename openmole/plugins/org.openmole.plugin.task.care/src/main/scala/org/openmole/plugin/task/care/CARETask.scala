@@ -39,15 +39,16 @@ object CARETask extends Logger {
 }
 
 abstract class CARETask(
-    val archive: File,
-    val command: systemexec.Command,
-    val workDirectory: Option[String],
-    val errorOnReturnCode: Boolean,
-    val returnValue: Option[Prototype[Int]],
-    val output: Option[Prototype[String]],
-    val error: Option[Prototype[String]],
+    val archive:              File,
+    val command:              systemexec.Command,
+    val workDirectory:        Option[String],
+    val errorOnReturnCode:    Boolean,
+    val returnValue:          Option[Prototype[Int]],
+    val output:               Option[Prototype[String]],
+    val error:                Option[Prototype[String]],
     val environmentVariables: Seq[(Prototype[_], String)],
-    val hostFiles: Seq[(String, Option[String])]) extends ExternalTask {
+    val hostFiles:            Seq[(String, Option[String])]
+) extends ExternalTask {
 
   archive.setExecutable(true)
 
@@ -59,12 +60,14 @@ abstract class CARETask(
     execute(Array(archive.getAbsolutePath), taskWorkDirectory, Seq.empty, Context.empty, true, true)
 
     val extractedArchive = taskWorkDirectory.listFilesSafe.headOption.getOrElse(
-      throw new InternalProcessingError("Work directory should contain extracted archive, but is empty"))
+      throw new InternalProcessingError("Work directory should contain extracted archive, but is empty")
+    )
 
     val reExecute = extractedArchive / "re-execute.sh"
 
     val packagingDirectory: String = workDirectoryLine(reExecute.lines).getOrElse(
-      throw new InternalProcessingError(s"Could not find packaging path in ${archive}"))
+      throw new InternalProcessingError(s"Could not find packaging path in ${archive}")
+    )
 
     def userWorkDirectory = workDirectory.getOrElse(packagingDirectory)
 
@@ -82,13 +85,13 @@ abstract class CARETask(
     /** Traverse directory hierarchy to retrieve terminal elements (files and empty directories) */
     def leafs(file: File, bindingDestination: String): Seq[(File, String)] =
       if (file.isDirectory)
-        if (file.isDirectoryEmpty) Seq(file -> bindingDestination)
+        if (file.isDirectoryEmpty) Seq(file → bindingDestination)
         else file.listFilesSafe.flatMap(f ⇒ leafs(f, s"$bindingDestination/${f.getName}"))
-      else Seq(file -> bindingDestination)
+      else Seq(file → bindingDestination)
 
     def bindings =
-      leafs(taskWorkDirectory / "inputs", "").map { case (f, b) ⇒ f.getAbsolutePath -> b } ++
-        hostFiles.map { case (f, b) ⇒ f -> b.getOrElse(f) }
+      leafs(taskWorkDirectory / "inputs", "").map { case (f, b) ⇒ f.getAbsolutePath → b } ++
+        hostFiles.map { case (f, b) ⇒ f → b.getOrElse(f) }
 
     // replace original proot executable with a script that will first bind all the inputs in the guest rootfs before
     // calling the original proot
@@ -118,7 +121,8 @@ abstract class CARETask(
     if (errorOnReturnCode && executionResult.returnCode != 0)
       throw new InternalProcessingError(
         s"""Error executing command":
-                 |[${commandline.mkString(" ")}] return code was not 0 but ${executionResult.returnCode}""".stripMargin)
+                 |[${commandline.mkString(" ")}] return code was not 0 but ${executionResult.returnCode}""".stripMargin
+      )
 
     def rootDirectory = extractedArchive / "rootfs"
 

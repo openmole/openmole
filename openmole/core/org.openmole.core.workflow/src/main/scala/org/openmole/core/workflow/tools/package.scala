@@ -22,22 +22,22 @@ import scala.ref.WeakReference
 
 package tools {
 
-    trait ToolsPackage {
+  trait ToolsPackage {
 
-      implicit def objectToSomeObjectConverter[T](v: T) = Some(v)
-      implicit def objectToWeakReferenceConverter[T <: AnyRef](v: T) = new WeakReference[T](v)
+    implicit def objectToSomeObjectConverter[T](v: T) = Some(v)
+    implicit def objectToWeakReferenceConverter[T <: AnyRef](v: T) = new WeakReference[T](v)
 
-      implicit class RefDecorator[T](r: Ref[T]) {
-        def getUpdate(t: T ⇒ T): T = atomic { implicit txn ⇒ val v = r(); r() = t(v); v }
-      }
-
-      implicit class RefLongDecorator(r: Ref[Long]) {
-        def next = r getUpdate (_ + 1)
-      }
-
-      type Condition = FromContext[Boolean]
-
+    implicit class RefDecorator[T](r: Ref[T]) {
+      def getUpdate(t: T ⇒ T): T = atomic { implicit txn ⇒ val v = r(); r() = t(v); v }
     }
+
+    implicit class RefLongDecorator(r: Ref[Long]) {
+      def next = r getUpdate (_ + 1)
+    }
+
+    type Condition = FromContext[Boolean]
+
+  }
 }
 
 package object tools extends ToolsPackage

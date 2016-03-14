@@ -95,7 +95,8 @@ object Resource {
     uiScreenshot,
     iscpif,
     geocite,
-    biomedia)
+    biomedia
+  )
 }
 
 sealed trait Resource

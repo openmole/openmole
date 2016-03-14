@@ -32,10 +32,11 @@ class Daemon extends IApplication {
       val args = context.getArguments.get(IApplicationContext.APPLICATION_ARGS).asInstanceOf[Array[String]]
 
       case class Config(
-        host: Option[String] = None,
-        password: Option[String] = None,
-        workers: Int = 1,
-        cacheSize: Int = 2000)
+        host:      Option[String] = None,
+        password:  Option[String] = None,
+        workers:   Int            = 1,
+        cacheSize: Int            = 2000
+      )
 
       val parser = new OptionParser[Config]("OpenMOLE") {
         head("OpenMOLE deamon", "0.x")
@@ -59,7 +60,8 @@ class Daemon extends IApplication {
         new JobLauncher(config.cacheSize * 1024 * 1024, debug).launch(
           config.host.getOrElse(throw new RuntimeException("Host undefined")),
           config.password.getOrElse(throw new RuntimeException("Password undefined")),
-          config.workers)
+          config.workers
+        )
       }
     }
     catch {

@@ -29,20 +29,21 @@ import scala.concurrent.duration.Duration
 object OAREnvironment {
 
   def apply(
-    user: String,
-    host: String,
-    port: Int = 22,
-    queue: Option[String] = None,
-    core: Option[Int] = None,
-    cpu: Option[Int] = None,
-    wallTime: Option[Duration] = None,
-    openMOLEMemory: Option[Int] = None,
-    sharedDirectory: Option[String] = None,
-    workDirectory: Option[String] = None,
-    threads: Option[Int] = None,
-    storageSharedLocally: Boolean = false,
-    name: Option[String] = None,
-    bestEffort: Boolean = true)(implicit decrypt: Decrypt) =
+    user:                 String,
+    host:                 String,
+    port:                 Int              = 22,
+    queue:                Option[String]   = None,
+    core:                 Option[Int]      = None,
+    cpu:                  Option[Int]      = None,
+    wallTime:             Option[Duration] = None,
+    openMOLEMemory:       Option[Int]      = None,
+    sharedDirectory:      Option[String]   = None,
+    workDirectory:        Option[String]   = None,
+    threads:              Option[Int]      = None,
+    storageSharedLocally: Boolean          = false,
+    name:                 Option[String]   = None,
+    bestEffort:           Boolean          = true
+  )(implicit decrypt: Decrypt) =
     new OAREnvironment(
       user = user,
       host = host,
@@ -57,24 +58,26 @@ object OAREnvironment {
       threads = threads,
       storageSharedLocally = storageSharedLocally,
       name = name,
-      bestEffort = bestEffort)(SSHAuthentication(user, host, port).apply)
+      bestEffort = bestEffort
+    )(SSHAuthentication(user, host, port).apply)
 }
 
 class OAREnvironment(
-    val user: String,
-    val host: String,
-    override val port: Int,
-    val queue: Option[String],
-    val core: Option[Int],
-    val cpu: Option[Int],
-    val wallTime: Option[Duration],
+    val user:                    String,
+    val host:                    String,
+    override val port:           Int,
+    val queue:                   Option[String],
+    val core:                    Option[Int],
+    val cpu:                     Option[Int],
+    val wallTime:                Option[Duration],
     override val openMOLEMemory: Option[Int],
-    val sharedDirectory: Option[String],
-    val workDirectory: Option[String],
-    override val threads: Option[Int],
-    val storageSharedLocally: Boolean,
-    override val name: Option[String],
-    val bestEffort: Boolean)(val credential: fr.iscpif.gridscale.ssh.SSHAuthentication) extends ClusterEnvironment { env ⇒
+    val sharedDirectory:         Option[String],
+    val workDirectory:           Option[String],
+    override val threads:        Option[Int],
+    val storageSharedLocally:    Boolean,
+    override val name:           Option[String],
+    val bestEffort:              Boolean
+)(val credential: fr.iscpif.gridscale.ssh.SSHAuthentication) extends ClusterEnvironment { env ⇒
 
   type JS = OARJobService
 

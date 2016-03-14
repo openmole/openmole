@@ -48,7 +48,7 @@ trait PriorityQueue[T] {
         case None ⇒
           val q = new Stack[T]
           q.push(e)
-          queues += p -> q
+          queues += p → q
       }
     }
     inQueue.release

@@ -1,7 +1,7 @@
 package org.openmole.gui.client.core.authentications
 
 import fr.iscpif.scaladget.api.BootstrapTags._
-import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
+import fr.iscpif.scaladget.api.{BootstrapTags ⇒ bs}
 import org.openmole.gui.client.core.OMPost
 import org.openmole.gui.client.core.files.AuthFileUploaderUI
 import org.openmole.gui.ext.data.PrivateKeyAuthenticationData
@@ -12,7 +12,13 @@ import org.openmole.gui.shared.Api
 
 import scala.scalajs.js.annotation.JSExport
 import scalatags.JsDom.all._
-import scalatags.JsDom.tags
+
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+import autowire._
+import fr.iscpif.scaladget.api.{BootstrapTags => bs}
+import scalatags.JsDom.{tags ⇒ tags}
+import bs._
+
 
 /*
  * Copyright (C) 01/07/15 // mathieu.leclaire@openmole.org
@@ -35,16 +41,19 @@ class SSHPrivateKeyAuthenticationPanel(data: PrivateKeyAuthenticationData) exten
 
   val login = bs.input(data.login, key("spacer5"))(
     placeholder := "Login",
-    width := "130px").render
+    width := "130px"
+  ).render
 
   val target = bs.input(data.target, key("spacer5"))(
     placeholder := "Host",
-    width := "130px").render
+    width := "130px"
+  ).render
 
   val password = bs.input(data.cypheredPassword, key("spacer5"))(
     placeholder := "Password",
     `type` := "password",
-    width := "130px").render
+    width := "130px"
+  ).render
 
   lazy val privateKey = new AuthFileUploaderUI(data.privateKey.getOrElse(""), data.privateKey.isDefined)
 
@@ -61,12 +70,15 @@ class SSHPrivateKeyAuthenticationPanel(data: PrivateKeyAuthenticationData) exten
   def save(onsave: () ⇒ Unit) =
     OMPost[Api].removeAuthentication(data).call().foreach { d ⇒
       OMPost[Api].addAuthentication(
-        PrivateKeyAuthenticationData(Some(privateKey.fileName),
+        PrivateKeyAuthenticationData(
+          Some(privateKey.fileName),
           login.value,
           password.value,
-          target.value)).call().foreach { b ⇒
-          onsave()
-        }
+          target.value
+        )
+      ).call().foreach { b =>
+        onsave()
+      }
     }
 
 }

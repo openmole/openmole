@@ -17,6 +17,8 @@
 
 package org.openmole.runtime.console
 
+import java.util
+
 import jline.console.ConsoleReader
 import org.openmole.core.console.ScalaREPL
 import org.openmole.core.exception.UserBadDataError
@@ -30,9 +32,15 @@ import scala.util._
 
 object Console {
 
+  private def passwordReader = {
+    val reader = new ConsoleReader()
+    reader.setExpandEvents(false)
+    reader
+  }
+
   @tailrec def askPassword(msg: String = "password"): String = {
-    val password = new ConsoleReader().readLine(s"$msg             :", '*')
-    val confirmation = new ConsoleReader().readLine(s"$msg confirmation:", '*')
+    val password = passwordReader.readLine(s"$msg             :", '*')
+    val confirmation = passwordReader.readLine(s"$msg confirmation:", '*')
     if (password != confirmation) {
       println("Password and confirmation don't match.")
       askPassword(msg)
@@ -55,7 +63,7 @@ object Console {
     if (Workspace.passwordChosen && Workspace.passwordIsCorrect("")) setPassword("")
     else {
       val password =
-        if (Workspace.passwordChosen) new ConsoleReader().readLine("Enter your OpenMOLE password (for preferences encryption): ", '*')
+        if (Workspace.passwordChosen) passwordReader.readLine("Enter your OpenMOLE password (for preferences encryption): ", '*')
         else {
           println("OpenMOLE Password for preferences encryption has not been set yet, choose a  password.")
           askPassword("Preferences password")

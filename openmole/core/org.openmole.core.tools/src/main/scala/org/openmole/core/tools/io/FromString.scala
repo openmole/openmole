@@ -22,6 +22,8 @@ import java.math.{ BigDecimal ⇒ JBigDecimal }
 import java.math.{ BigInteger ⇒ JBigInteger }
 import java.io.File
 
+import scala.concurrent.duration.{ FiniteDuration, Duration }
+
 object FromString {
 
   implicit val doubleFromString: FromString[Double] =
@@ -77,6 +79,11 @@ object FromString {
   implicit val booleanFromString: FromString[Boolean] =
     new FromString[Boolean] {
       override def apply(s: String): Boolean = s.toBoolean
+    }
+
+  implicit val finiteDurationFromString: FromString[FiniteDuration] =
+    new FromString[FiniteDuration] {
+      override def apply(s: String): FiniteDuration = org.openmole.core.tools.service.stringToDuration(s)
     }
 
   implicit val doubleAsIfIntegral = Numeric.DoubleAsIfIntegral

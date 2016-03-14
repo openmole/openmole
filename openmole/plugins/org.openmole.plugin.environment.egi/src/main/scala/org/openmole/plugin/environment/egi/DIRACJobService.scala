@@ -50,7 +50,8 @@ trait DIRACJobService extends GridScaleJobService { js ⇒
 
     val js = GSDIRACJobService(
       environment.voName,
-      service = Some(GSDIRACJobService.Service(serviceValue, groupValue)))(environment.authentication)
+      service = Some(GSDIRACJobService.Service(serviceValue, groupValue))
+    )(environment.authentication)
     js.delegate(environment.authentication.certificate, environment.authentication.password)
     js
   }
@@ -79,7 +80,7 @@ trait DIRACJobService extends GridScaleJobService { js ⇒
       val jobDescription = new GSDIRACJobDescription {
         override def stdOut = if (environment.debug) Some("out") else None
         override def stdErr = if (environment.debug) Some("err") else None
-        override def outputSandbox = if (environment.debug) Seq("out" -> Workspace.newFile("job", ".out"), "err" -> Workspace.newFile("job", ".err")) else Seq.empty
+        override def outputSandbox = if (environment.debug) Seq("out" → Workspace.newFile("job", ".out"), "err" → Workspace.newFile("job", ".err")) else Seq.empty
         override def inputSandbox = Seq(script)
         def arguments = script.getName
         def executable = "/bin/bash"

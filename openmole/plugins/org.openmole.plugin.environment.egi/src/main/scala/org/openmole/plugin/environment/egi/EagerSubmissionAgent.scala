@@ -49,11 +49,11 @@ object EagerSubmissionAgent extends Logger {
 import EagerSubmissionAgent._
 import Log._
 
-class EagerSubmissionAgent(environment: WeakReference[BatchEnvironment], thresholdPreference: ConfigurationLocation) extends IUpdatableWithVariableDelay {
+class EagerSubmissionAgent(environment: WeakReference[BatchEnvironment], thresholdPreference: ConfigurationLocation[Double]) extends IUpdatableWithVariableDelay {
 
   @transient lazy val runningHistory = new mutable.Queue[TimeInt]
 
-  override def delay = Workspace.preferenceAsDuration(EGIEnvironment.EagerSubmissionInterval)
+  override def delay = Workspace.preference(EGIEnvironment.EagerSubmissionInterval)
 
   override def update: Boolean = {
     try {
@@ -71,24 +71,24 @@ class EagerSubmissionAgent(environment: WeakReference[BatchEnvironment], thresho
       val stillRunning = jobs.count(_.state == RUNNING)
       val stillReady = jobs.count(_.state == READY)
 
-      runningHistory.enqueueFinite(TimeInt(stillRunning), Workspace.preferenceAsDuration(EGIEnvironment.RunningHistoryDuration).toMillis)
+      runningHistory.enqueueFinite(TimeInt(stillRunning), Workspace.preference(EGIEnvironment.RunningHistoryDuration).toMillis)
 
       logger.fine("still running " + stillRunning)
 
-      val maxRunning = runningHistory.map(_.value).max * Workspace.preferenceAsDouble(thresholdPreference)
+      val maxRunning = runningHistory.map(_.value).max * Workspace.preference(thresholdPreference)
 
       logger.fine(s"maxRunning $maxRunning, stillRunning $stillRunning, stillReady $stillReady")
 
-      val minOversub = Workspace.preferenceAsInt(EGIEnvironment.EagerSubmissionMinNumberOfJob)
+      val minOversub = Workspace.preference(EGIEnvironment.EagerSubmissionMinNumberOfJob)
 
       val jobSize = jobs.size
       var nbRessub =
         if (jobSize > minOversub) {
           if (maxRunning < minOversub) minOversub - jobSize else maxRunning - (stillRunning + stillReady)
         }
-        else Workspace.preferenceAsInt(EGIEnvironment.EagerSubmissionMinNumberOfJob) - jobSize
+        else Workspace.preference(EGIEnvironment.EagerSubmissionMinNumberOfJob) - jobSize
 
-      val numberOfSimultaneousExecutionForAJobWhenUnderMinJob = Workspace.preferenceAsInt(EGIEnvironment.EagerSubmissionNumberOfJobUnderMin)
+      val numberOfSimultaneousExecutionForAJobWhenUnderMinJob = Workspace.preference(EGIEnvironment.EagerSubmissionNumberOfJobUnderMin)
 
       logger.fine("resubmit " + nbRessub)
 

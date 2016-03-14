@@ -24,15 +24,16 @@ import org.openmole.core.updater.Updater
 import org.openmole.core.workspace.{ Workspace, ConfigurationLocation }
 import org.openmole.tool.hash.Hash
 import org.openmole.tool.tar._
+import concurrent.duration._
 
 object FileService {
-  val GCInterval = new ConfigurationLocation("FileService", "GCInterval")
-  Workspace += (GCInterval, "PT5M")
+  val GCInterval = ConfigurationLocation("FileService", "GCInterval", Some(5 minutes))
+  Workspace setDefault GCInterval
 
   private[fileservice] val hashCache = new AssociativeCache[String, Hash]
   private[fileservice] val archiveCache = new AssociativeCache[String, FileCache]
 
-  Updater.delay(new FileServiceGC, Workspace.preferenceAsDuration(FileService.GCInterval))
+  Updater.delay(new FileServiceGC, Workspace.preference(FileService.GCInterval))
 
   def hash(file: File): Hash =
     hash(file, if (file.isDirectory) archiveForDir(file).file else file)

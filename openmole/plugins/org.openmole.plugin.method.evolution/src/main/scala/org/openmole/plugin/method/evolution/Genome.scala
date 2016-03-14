@@ -36,8 +36,8 @@ object InputConverter {
       val input = scales.head
       val (variable, tail) =
         scaled(input, genome).map {
-          case ScaledScalar(p, v)   ⇒ Variable(p, v) -> genome.tail
-          case ScaledSequence(p, v) ⇒ Variable(p, v) -> genome.drop(input.size)
+          case ScaledScalar(p, v)   ⇒ Variable(p, v) → genome.tail
+          case ScaledSequence(p, v) ⇒ Variable(p, v) → genome.drop(input.size)
         }.from(context)(rng)
 
       scaled(scales.tail, tail.toList, variable :: acc)({ context + variable }, rng)

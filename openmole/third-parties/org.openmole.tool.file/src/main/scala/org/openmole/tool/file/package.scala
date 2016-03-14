@@ -296,11 +296,11 @@ package file {
         f.setExecutable(Files.isExecutable(o))
       }
 
-      def content_=(content: String) = Files.write(file, content.getBytes)
+      def content_=(content: String) = Files.write(file, content.getBytes, StandardOpenOption.TRUNCATE_EXISTING)
 
       def content = withSource(_.mkString)
 
-      def append(s: String) = Files.write(file, content.getBytes, StandardOpenOption.APPEND)
+      def append(s: String) = Files.write(file, s.getBytes, StandardOpenOption.APPEND)
 
       def lines = withSource(_.getLines.toList)
 
@@ -371,7 +371,7 @@ package file {
       /**
        * Try to create a symbolic link at the calling emplacement.
        * The function creates a copy of the target file on systems not supporting symlinks.
- *
+       *
        * @param target Target of the link
        * @return
        */

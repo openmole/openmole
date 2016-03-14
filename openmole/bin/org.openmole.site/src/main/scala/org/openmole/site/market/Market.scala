@@ -73,7 +73,8 @@ object Market extends Logger {
   case class MarketEntry(name: String, directory: String, tags: Seq[Tag] = Seq.empty)
 
   def entries = Seq(
-    MarketRepository(githubMarket,
+    MarketRepository(
+      githubMarket,
       MarketEntry("Pi Computation", "pi", Seq(stochastic, simulation, scala)),
       MarketEntry("Random Forest", "randomforest", Seq(stochastic, machineLearning, native, data, python)),
       MarketEntry("Hello World in R", "R-hello", Seq(R, data, native)),
@@ -98,9 +99,10 @@ import Market._
 
 case class GeneratedMarketEntry(
     archive: String,
-    entry: MarketEntry,
-    readme: Option[String],
-    viewURL: Option[String]) {
+    entry:   MarketEntry,
+    readme:  Option[String],
+    viewURL: Option[String]
+) {
   def toDeployedMarketEntry =
     MarketIndexEntry(
       name = entry.name,

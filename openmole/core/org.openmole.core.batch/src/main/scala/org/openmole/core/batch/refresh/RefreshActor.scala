@@ -49,7 +49,7 @@ class RefreshActor(jobManager: JobManager) {
         case _: ResubmitException ⇒
           jobManager ! Resubmit(job, sj.storage)
         case e: Throwable ⇒
-          if (updateErrorsInARow >= Workspace.preferenceAsInt(MaxUpdateErrorsInARow)) {
+          if (updateErrorsInARow >= Workspace.preference(MaxUpdateErrorsInARow)) {
             jobManager ! Error(job, e)
             jobManager ! Kill(job)
           }

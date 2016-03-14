@@ -205,19 +205,23 @@ class FileToolBar(redraw: () ⇒ Unit, refreshAndRedraw: () ⇒ Unit) {
 
   lazy val byNameInput = bs.input(fileFilter().nameFilter, "smallInput")(placeholder := "Name").render
 
-  lazy val byNameForm = bs.form("filterElement")(byNameInput,
+  lazy val byNameForm = bs.form("filterElement")(
+    byNameInput,
     onsubmit := { () ⇒
       updateFilter(() ⇒ fileFilter().copy(nameFilter = byNameInput.value))
       false
-    })
+    }
+  )
 
   lazy val thresholdInput = bs.input(fileFilter().threshold, "smallInput")(placeholder := "Size").render
 
-  lazy val thresholdForm = bs.form("filterElement")(thresholdInput,
+  lazy val thresholdForm = bs.form("filterElement")(
+    thresholdInput,
     onsubmit := { () ⇒
       updateFilter(() ⇒ fileFilter().copy(threshold = thresholdInput.value))
       false
-    })
+    }
+  )
 
   val firstLastGroup = OMTags.buttonGroupExclusive("filterElement")(
     ExclusiveButton.string("first", () ⇒ updateFilter(() ⇒ fileFilter().copy(firstLast = First))),

@@ -37,7 +37,7 @@ trait ScalaCompilation {
   def openMOLEImports = Seq(s"${CodeTool.namespace}._")
 
   def addImports(code: String) =
-  s"""
+    s"""
     |${openMOLEImports.map("import " + _).mkString("\n")}
     |
     |$code""".stripMargin
@@ -70,10 +70,10 @@ trait ScalaCompilation {
 }
 
 case class TextClosure[I: Manifest, O: Manifest](code: String, plugins: Seq[File] = Seq.empty, libraries: Seq[File] = Seq.empty) extends ScalaCompilation {
-  def returnType = toScalaNativeType(PrototypeType(implicitly[Manifest[I => O]]))
+  def returnType = toScalaNativeType(PrototypeType(implicitly[Manifest[I ⇒ O]]))
   @transient lazy val compiled = compile(s"{$code}: $returnType")
   compiled.get
-  def apply(i: I) = compiled.get.asInstanceOf[I => O](i)
+  def apply(i: I) = compiled.get.asInstanceOf[I ⇒ O](i)
 }
 
 object ScalaWrappedCompilation {
@@ -96,7 +96,6 @@ object ScalaWrappedCompilation {
     compilation.functionCode.get
     compilation
   }
-
 
   def dynamic[R: Manifest](code: String, wrapping: OutputWrapping[R] = RawOutput[R]()) = {
     val _wrapping = wrapping
@@ -158,7 +157,7 @@ trait ScalaWrappedCompilation <: ScalaCompilation { compilation ⇒
     }
 
   def script(inputs: Seq[Prototype[_]]) =
-      s"""(${prefix}context: ${classOf[Context].getCanonicalName}, ${prefix}RNGProvider: ${classOf[RandomProvider].getCanonicalName}) => {
+    s"""(${prefix}context: ${classOf[Context].getCanonicalName}, ${prefix}RNGProvider: ${classOf[RandomProvider].getCanonicalName}) => {
           |  object $inputObject {
           |    ${inputs.toSeq.map(i ⇒ s"""var ${i.name} = ${prefix}context("${i.name}").asInstanceOf[${toScalaNativeType(i.`type`)}]""").mkString("; ")}
           |  }
@@ -169,13 +168,12 @@ trait ScalaWrappedCompilation <: ScalaCompilation { compilation ⇒
           |}: ${toScalaNativeType(returnType)}
           |""".stripMargin
 
-  def apply(): FromContext[RETURN] = FromContext { (context, rng) => compiled(context).get(context, rng) }
+  def apply(): FromContext[RETURN] = FromContext { (context, rng) ⇒ compiled(context).get(context, rng) }
 
   def compiled(context: Context): Try[ContextClosure[RETURN]]
 }
 
-
-trait DynamicHeader { this: ScalaWrappedCompilation =>
+trait DynamicHeader { this: ScalaWrappedCompilation ⇒
 
   @transient lazy val cache = collection.mutable.HashMap[Seq[Prototype[_]], Try[ContextClosure[RETURN]]]()
 
@@ -203,7 +201,7 @@ trait DynamicHeader { this: ScalaWrappedCompilation =>
     }
 }
 
-trait StaticHeader { this: ScalaWrappedCompilation =>
+trait StaticHeader { this: ScalaWrappedCompilation ⇒
   def inputs: Seq[Prototype[_]]
   @transient lazy val functionCode = closure(inputs)
   def compiled(context: Context): Try[ContextClosure[RETURN]] = functionCode

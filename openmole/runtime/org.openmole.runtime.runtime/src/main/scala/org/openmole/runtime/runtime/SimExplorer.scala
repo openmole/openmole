@@ -40,12 +40,13 @@ class SimExplorer extends IApplication {
       val args = context.getArguments.get(IApplicationContext.APPLICATION_ARGS).asInstanceOf[Array[String]]
 
       case class Config(
-        storage: Option[String] = None,
-        inputMessage: Option[String] = None,
+        storage:       Option[String] = None,
+        inputMessage:  Option[String] = None,
         outputMessage: Option[String] = None,
-        path: Option[String] = None,
-        pluginPath: Option[String] = None,
-        nbThread: Option[Int] = None)
+        path:          Option[String] = None,
+        pluginPath:    Option[String] = None,
+        nbThread:      Option[Int]    = None
+      )
 
       val parser = new OptionParser[Config]("OpenMOLE") {
         head("OpenMOLE runtime", "0.x")
@@ -87,7 +88,8 @@ class SimExplorer extends IApplication {
           config.inputMessage.get,
           config.outputMessage.get,
           config.nbThread.getOrElse(1),
-          debug)
+          debug
+        )
 
       }
     }

@@ -34,24 +34,25 @@ import scala.ref.WeakReference
 
 object DIRACEnvironment {
 
-  val Connections = new ConfigurationLocation("DIRACEnvironment", "Connections")
-  val EagerSubmissionThreshold = ConfigurationLocation("DIRACEnvironment", "EagerSubmissionThreshold")
+  val Connections = ConfigurationLocation("DIRACEnvironment", "Connections", Some(100))
+  val EagerSubmissionThreshold = ConfigurationLocation("DIRACEnvironment", "EagerSubmissionThreshold", Some(0.2))
 
-  Workspace += (Connections, "100")
-  Workspace += (EagerSubmissionThreshold, "0.2")
+  Workspace setDefault Connections
+  Workspace setDefault EagerSubmissionThreshold
 
   def apply(
-    voName: String,
-    service: Option[String] = None,
-    group: Option[String] = None,
-    bdii: Option[String] = None,
-    vomsURLs: Option[Seq[String]] = None,
-    setup: Option[String] = None,
-    fqan: Option[String] = None,
-    cpuTime: Option[Duration] = None,
-    openMOLEMemory: Option[Int] = None,
-    debug: Boolean = false,
-    name: Option[String] = None)(implicit authentication: EGIAuthentication, decrypt: Decrypt) =
+    voName:         String,
+    service:        Option[String]      = None,
+    group:          Option[String]      = None,
+    bdii:           Option[String]      = None,
+    vomsURLs:       Option[Seq[String]] = None,
+    setup:          Option[String]      = None,
+    fqan:           Option[String]      = None,
+    cpuTime:        Option[Duration]    = None,
+    openMOLEMemory: Option[Int]         = None,
+    debug:          Boolean             = false,
+    name:           Option[String]      = None
+  )(implicit authentication: EGIAuthentication, decrypt: Decrypt) =
     new DIRACEnvironment(
       voName = voName,
       service = service,
@@ -74,23 +75,24 @@ class DiracBatchExecutionJob(val job: Job, val environment: DIRACEnvironment) ex
 
   def trySelectJobService() = {
     val js = environment.jobService
-    js.tryGetToken.map(js -> _)
+    js.tryGetToken.map(js → _)
   }
 
 }
 
 class DIRACEnvironment(
-    val voName: String,
-    val service: Option[String],
-    val group: Option[String],
-    val bdii: URI,
-    val vomsURLs: Seq[String],
-    val setup: String,
-    val fqan: Option[String],
-    val cpuTime: Option[Duration],
+    val voName:                  String,
+    val service:                 Option[String],
+    val group:                   Option[String],
+    val bdii:                    URI,
+    val vomsURLs:                Seq[String],
+    val setup:                   String,
+    val fqan:                    Option[String],
+    val cpuTime:                 Option[Duration],
     override val openMOLEMemory: Option[Int],
-    val debug: Boolean,
-    override val name: Option[String])(implicit a: EGIAuthentication, decrypt: Decrypt) extends BatchEnvironment with BDIIStorageServers with EGIEnvironmentId { env ⇒
+    val debug:                   Boolean,
+    override val name:           Option[String]
+)(implicit a: EGIAuthentication, decrypt: Decrypt) extends BatchEnvironment with BDIIStorageServers with EGIEnvironmentId { env ⇒
 
   type JS = DIRACJobService
 
@@ -104,7 +106,7 @@ class DIRACEnvironment(
     super.submit(job)
   }
 
-  def bdiiServer: BDII = BDII(bdii.getHost, bdii.getPort, Workspace.preferenceAsDuration(EGIEnvironment.FetchResourcesTimeOut))
+  def bdiiServer: BDII = BDII(bdii.getHost, bdii.getPort, Workspace.preference(EGIEnvironment.FetchResourcesTimeOut))
 
   def executionJob(job: Job) = new DiracBatchExecutionJob(job, this)
 
@@ -114,11 +116,12 @@ class DIRACEnvironment(
     EGIAuthentication.initialise(a)(
       vomsURLs,
       voName,
-      fqan)(decrypt)
+      fqan
+    )(decrypt)
   }
 
   @transient lazy val jobService = new DIRACJobService {
-    val connections = Workspace.preferenceAsInt(DIRACEnvironment.Connections)
+    val connections = Workspace.preference(DIRACEnvironment.Connections)
     val environment = env
   }
 

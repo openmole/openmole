@@ -50,7 +50,8 @@ class PluginPanel extends ModalPanel {
     }
   }
 
-  val uploadPluginButton = tags.label(`class` := "inputFileStyle pluginRight uploadPlugin",
+  val uploadPluginButton = tags.label(
+    `class` := "inputFileStyle pluginRight uploadPlugin",
     uploadButton((fileInput: HTMLInputElement) ⇒ {
       fileInput.accept = ".jar"
       FileManager.upload(
@@ -60,7 +61,8 @@ class PluginPanel extends ModalPanel {
         UploadPlugin(),
         () ⇒ getPlugins
       )
-    })).tooltip("Upload plugin")
+    })
+  ).tooltip("Upload plugin")
 
   lazy val pluginTable = {
 
@@ -75,7 +77,8 @@ class PluginPanel extends ModalPanel {
           },
           onmouseout := { () ⇒
             lineHovered() = false
-          })(
+          }
+        )(
             tags.span(p.name, `class` := "left docTitleEntry"),
             tags.span(
               id := Rx {
@@ -117,10 +120,12 @@ class PluginPanel extends ModalPanel {
   val dialog = modalDialog(
     modalID,
     headerDialog(Rx {
-      tags.span(tags.b("Plugins"),
+      tags.span(
+        tags.b("Plugins"),
         inputGroup(navbar_right)(
           uploadPluginButton
-        ))
+        )
+      )
     }),
     bodyDialog(pluginTable),
     footerDialog(

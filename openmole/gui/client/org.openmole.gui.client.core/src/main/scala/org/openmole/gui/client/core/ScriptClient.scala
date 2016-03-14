@@ -41,19 +41,22 @@ object ScriptClient {
   def run(): Unit = {
 
     val shutdownButton =
-      a(`class` := "shutdownButton",
+      a(
+        `class` := "shutdownButton",
         bs.glyph(glyph_off),
         cursor := "pointer",
         onclick := { () ⇒
-          AlertPanel.string("This will stop the server, the application will no longer be usable. Halt anyway?",
+          AlertPanel.string(
+            "This will stop the server, the application will no longer be usable. Halt anyway?",
             () ⇒ {
               treeNodePanel.fileDisplayer.tabs.saveAllTabs(() ⇒
-                dom.window.location.href = "shutdown"
-              )
+                dom.window.location.href = "shutdown")
             },
             transform = RightTransform(),
-            zone = TopZone())
-        })
+            zone = TopZone()
+          )
+        }
+      )
 
     val passwordChosen = Var(true)
     val passwordOK = Var(false)
@@ -93,8 +96,7 @@ object ScriptClient {
 
     val authenticationPanel = new AuthenticationPanel(() ⇒ {
       resetPassword
-    }
-    )
+    })
 
     def setPassword(s: String) = OMPost[Api].setPassword(s).call().foreach { b ⇒
       passwordOK() = b
@@ -118,8 +120,7 @@ object ScriptClient {
       tags.form(i, `type` := "submit", onsubmit := { () ⇒
         connection
         false
-      }
-      ).render
+      }).render
 
     val alert: Var[Boolean] = Var(false)
 
@@ -135,26 +136,32 @@ object ScriptClient {
         tags.img(src := "img/openmole.png", `class` := "openmole-logo"),
         // openmoleText,
         shutdownButton,
-        tags.div(`class` := Rx {
-          if (!passwordOK()) "centerPage" else ""
-        },
+        tags.div(
+          `class` := Rx {
+            if (!passwordOK()) "centerPage" else ""
+          },
           Rx {
             tags.div(
               if (alert())
-                AlertPanel.string("Careful! Resetting your password will wipe out all your preferences! Reset anyway?",
+                AlertPanel.string(
+                "Careful! Resetting your password will wipe out all your preferences! Reset anyway?",
                 () ⇒ {
                   alert() = false
                   resetPassword
                 }, () ⇒ {
                   alert() = false
-                }, CenterTransform())
+                }, CenterTransform()
+              )
               else {
                 tags.div(
                   connectionForm(
-                    tags.span(passwordInput,
-                      tags.a(onclick := { () ⇒
-                        alert() = true
-                      }, cursor := "pointer")("Reset password")).render),
+                    tags.span(
+                    passwordInput,
+                    tags.a(onclick := { () ⇒
+                      alert() = true
+                    }, cursor := "pointer")("Reset password")
+                  ).render
+                  ),
                   if (!passwordChosen()) connectionForm(passwordAgainInput) else tags.div(),
                   connectButton
                 )
@@ -190,7 +197,8 @@ object ScriptClient {
     })
 
     maindiv.appendChild(
-      nav("mainNav",
+      nav(
+        "mainNav",
         nav_pills + nav_inverse + nav_staticTop,
         fileItem,
         modelWizardItem,
@@ -214,21 +222,22 @@ object ScriptClient {
     Settings.workspacePath.foreach { projectsPath ⇒
       maindiv.appendChild(
         tags.div(`class` := "fullpanel")(
-          tags.div(`class` := Rx {
-            "leftpanel " + {
-              if (openFileTree()) "open" else ""
-            }
-          })(treeNodePanel.view.render),
-          tags.div(`class` := Rx {
-            "centerpanel " + {
-              if (openFileTree()) "reduce" else ""
-            }
-          })(treeNodePanel.fileDisplayer.tabs.render,
-            tags.img(src := "img/version.svg", `class` := "logoVersion"),
-            tags.div("Loving Lobster", `class` := "textVersion")
-          )
+        tags.div(`class` := Rx {
+          "leftpanel " + {
+            if (openFileTree()) "open" else ""
+          }
+        })(treeNodePanel.view.render),
+        tags.div(`class` := Rx {
+          "centerpanel " + {
+            if (openFileTree()) "reduce" else ""
+          }
+        })(
+          treeNodePanel.fileDisplayer.tabs.render,
+          tags.img(src := "img/version.svg", `class` := "logoVersion"),
+          tags.div("Loving Lobster", `class` := "textVersion")
+        )
 
-        ).render
+      ).render
       )
     }
 

@@ -17,8 +17,10 @@
 
 package org.openmole.core.tools
 
+import org.joda.time._
 import org.joda.time.format.ISOPeriodFormat
 import concurrent.duration._
+import scala.concurrent.duration.Duration
 
 package object service {
 
@@ -28,7 +30,11 @@ package object service {
   def localHostName = LocalHostName.localHostName
   def newRNG(seed: Long) = Random.newRNG(seed)
 
-  implicit def stringToDuration(s: String): FiniteDuration = ISOPeriodFormat.standard.parsePeriod(s).toStandardSeconds.getSeconds seconds
+  def stringToDuration(s: String): FiniteDuration = ISOPeriodFormat.standard.parsePeriod(s).toStandardSeconds.getSeconds seconds
+  def stringFromDuration(d: Duration): String = {
+    val period: ReadablePeriod = new Period(d.toMillis)
+    ISOPeriodFormat.standard().print(period)
+  }
 
   implicit class StringDurationDecorator(s: String) {
     def toDuration = stringToDuration(s)

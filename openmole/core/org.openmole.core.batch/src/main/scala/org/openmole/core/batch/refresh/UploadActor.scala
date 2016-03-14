@@ -86,7 +86,8 @@ class UploadActor(jobManager: JobManager) {
       files,
       plugins,
       storage,
-      communicationPath)
+      communicationPath
+    )
 
     /* ---- upload the execution message ----*/
     Workspace.withTmpFile("job", ".tar") { executionMessageFile ⇒
@@ -123,9 +124,10 @@ class UploadActor(jobManager: JobManager) {
   }
 
   def replicateTheRuntime(
-    job: Job,
+    job:         Job,
     environment: BatchEnvironment,
-    storage: StorageService)(implicit token: AccessToken) = {
+    storage:     StorageService
+  )(implicit token: AccessToken) = {
 
     val environmentPluginPath = environment.plugins.map { p ⇒ toReplicatedFile(job, p, storage, TransferOptions(raw = true)) }.map { FileMessage(_) }
     val runtimeFileMessage = FileMessage(toReplicatedFile(job, environment.runtime, storage, TransferOptions(raw = true)))
@@ -139,16 +141,18 @@ class UploadActor(jobManager: JobManager) {
       runtimeFileMessage,
       environmentPluginPath,
       jvmLinuxI386FileMessage,
-      jvmLinuxX64FileMessage)
+      jvmLinuxX64FileMessage
+    )
   }
 
   def createExecutionMessage(
-    job: Job,
-    jobFile: File,
-    serializationFile: Iterable[File],
+    job:                 Job,
+    jobFile:             File,
+    serializationFile:   Iterable[File],
     serializationPlugin: Iterable[File],
-    storage: StorageService,
-    path: String)(implicit token: AccessToken): ExecutionMessage = {
+    storage:             StorageService,
+    path:                String
+  )(implicit token: AccessToken): ExecutionMessage = {
 
     val pluginReplicas = serializationPlugin.map { toReplicatedFile(job, _, storage, TransferOptions(raw = true)) }
     val files = serializationFile.map { toReplicatedFile(job, _, storage, TransferOptions()) }

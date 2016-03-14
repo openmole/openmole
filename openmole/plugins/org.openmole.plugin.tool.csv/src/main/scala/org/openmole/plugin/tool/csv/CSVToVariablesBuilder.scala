@@ -34,7 +34,7 @@ trait CSVToVariablesBuilder extends Builder { builder ⇒
 
   def addColumn(proto: Prototype[_]): this.type = this.addColumn(proto.name, proto)
   def addColumn(name: String, proto: Prototype[_]): this.type = {
-    _columns += (name -> proto)
+    _columns += (name → proto)
     this
   }
 

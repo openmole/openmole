@@ -37,7 +37,8 @@ object AppendArrayToFileHook {
 
 abstract class AppendArrayToFileIHook(
     fileName: ExpandedString,
-    content: Prototype[Array[_]]) extends Hook {
+    content:  Prototype[Array[_]]
+) extends Hook {
 
   override def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider) = {
     val file = new File(fileName.from(context))
