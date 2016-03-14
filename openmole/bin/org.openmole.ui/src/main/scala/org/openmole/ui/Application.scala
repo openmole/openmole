@@ -65,25 +65,24 @@ class Application extends IApplication {
     object ServerConfigMode extends LaunchMode
 
     case class Config(
-      pluginsDirs:          List[String]    = Nil,
-      guiPluginsDirs:       List[String]    = Nil,
-      userPlugins:          List[String]    = Nil,
-      loadHomePlugins:      Option[Boolean] = None,
-      workspaceDir:         Option[String]  = None,
-      scriptFile:           Option[String]  = None,
-      consoleWorkDirectory: Option[File]    = None,
-      password:             Option[String]  = None,
-      hostName:             Option[String]  = None,
-      launchMode:           LaunchMode      = GUIMode,
-      ignored:              List[String]    = Nil,
-      port:                 Option[Int]     = None,
-      loggerLevel:          Option[String]  = None,
-      unoptimizedJS:        Boolean         = false,
-      remote:               Boolean         = false,
-      browse:               Boolean         = true,
-      reset:                Boolean         = false,
-      args:                 List[String]    = Nil
-    )
+      pluginsDirs: List[String] = Nil,
+      guiPluginsDirs: List[String] = Nil,
+      userPlugins: List[String] = Nil,
+      loadHomePlugins: Option[Boolean] = None,
+      workspaceDir: Option[String] = None,
+      scriptFile: Option[String] = None,
+      consoleWorkDirectory: Option[File] = None,
+      password: Option[String] = None,
+      hostName: Option[String] = None,
+      launchMode: LaunchMode = GUIMode,
+      ignored: List[String] = Nil,
+      port: Option[Int] = None,
+      loggerLevel: Option[String] = None,
+      unoptimizedJS: Boolean = false,
+      remote: Boolean = false,
+      browse: Boolean = true,
+      reset: Boolean = false,
+      args: List[String] = Nil)
 
     def takeArg(args: List[String]) =
       args match {
@@ -171,50 +170,51 @@ class Application extends IApplication {
           throw e
       }
 
-    if (!config.ignored.isEmpty) logger.warning("Ignored options: " + config.ignored.mkString(" "))
+      if (!config.ignored.isEmpty) logger.warning("Ignored options: " + config.ignored.mkString(" "))
 
-    val retCode: Int =
-      config.launchMode match {
-        case HelpMode ⇒
-          println(usage)
-          Console.ExitCodes.ok
-        case ServerConfigMode ⇒
-          RESTServer.configure
-          Console.ExitCodes.ok
-        case ServerMode ⇒
-          if (!config.password.isDefined) Console.initPassword
-          val server = new RESTServer(config.port, config.hostName)
-          server.start()
-          Console.ExitCodes.ok
-        case ConsoleMode ⇒
-          print(consoleSplash)
-          println(consoleUsage)
-          val console = new Console(config.password, config.scriptFile)
-          val variables = ConsoleVariables(args = config.args)
-          console.run(variables, config.consoleWorkDirectory)
-        case GUIMode ⇒
-          def browse(url: String) =
-            if (Desktop.isDesktopSupported) Desktop.getDesktop.browse(new URI(url))
-          GUIServer.lockFile.withFileOutputStream { fos ⇒
-            val launch = (config.remote || fos.getChannel.tryLock != null)
-            if (launch) {
-              val port = config.port.getOrElse(Workspace.preferenceAsInt(GUIServer.port))
-              val url = s"https://localhost:$port"
-              GUIServer.urlFile.content = url
-              if (config.remote) GUIServer.initPassword
-              //The webapp location will then be somewhere in target
-              val webui = Workspace.file("webui")
-              webui.mkdirs()
-              val server = new GUIServer(port, config.remote)
-              server.start()
-              browse(url)
-              ScalaREPL.warmup
-              logger.info(s"Server listening on port $port.")
-              server.join()
-            }
-            else {
-              browse(GUIServer.urlFile.content)
-              Console.ExitCodes.ok
+      val retCode: Int =
+        config.launchMode match {
+          case HelpMode ⇒
+            println(usage)
+            Console.ExitCodes.ok
+          case ServerConfigMode ⇒
+            RESTServer.configure
+            Console.ExitCodes.ok
+          case ServerMode ⇒
+            if (!config.password.isDefined) Console.initPassword
+            val server = new RESTServer(config.port, config.hostName)
+            server.start()
+            Console.ExitCodes.ok
+          case ConsoleMode ⇒
+            print(consoleSplash)
+            println(consoleUsage)
+            val console = new Console(config.password, config.scriptFile)
+            val variables = ConsoleVariables(args = config.args)
+            console.run(variables, config.consoleWorkDirectory)
+          case GUIMode ⇒
+            def browse(url: String) =
+              if (Desktop.isDesktopSupported) Desktop.getDesktop.browse(new URI(url))
+            GUIServer.lockFile.withFileOutputStream { fos ⇒
+              val launch = (config.remote || fos.getChannel.tryLock != null)
+              if (launch) {
+                val port = config.port.getOrElse(Workspace.preference(GUIServer.port))
+                val url = s"https://localhost:$port"
+                GUIServer.urlFile.content = url
+                if (config.remote) GUIServer.initPassword
+                //The webapp location will then be somewhere in target
+                val webui = Workspace.file("webui")
+                webui.mkdirs()
+                val server = new GUIServer(port, config.remote)
+                server.start()
+                browse(url)
+                ScalaREPL.warmup
+                logger.info(s"Server listening on port $port.")
+                server.join()
+              }
+              else {
+                browse(GUIServer.urlFile.content)
+                Console.ExitCodes.ok
+              }
             }
         }
 

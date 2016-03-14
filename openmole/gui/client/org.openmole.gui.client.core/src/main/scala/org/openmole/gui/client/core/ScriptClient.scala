@@ -156,11 +156,11 @@ object ScriptClient {
                 tags.div(
                   connectionForm(
                     tags.span(
-                    passwordInput,
-                    tags.a(onclick := { () ⇒
-                      alert() = true
-                    }, cursor := "pointer")("Reset password")
-                  ).render
+                      passwordInput,
+                      tags.a(onclick := { () ⇒
+                        alert() = true
+                      }, cursor := "pointer")("Reset password")
+                    ).render
                   ),
                   if (!passwordChosen()) connectionForm(passwordAgainInput) else tags.div(),
                   connectButton
@@ -222,22 +222,22 @@ object ScriptClient {
     Settings.workspacePath.foreach { projectsPath ⇒
       maindiv.appendChild(
         tags.div(`class` := "fullpanel")(
-        tags.div(`class` := Rx {
-          "leftpanel " + {
-            if (openFileTree()) "open" else ""
-          }
-        })(treeNodePanel.view.render),
-        tags.div(`class` := Rx {
-          "centerpanel " + {
-            if (openFileTree()) "reduce" else ""
-          }
-        })(
-          treeNodePanel.fileDisplayer.tabs.render,
-          tags.img(src := "img/version.svg", `class` := "logoVersion"),
-          tags.div("Loving Lobster", `class` := "textVersion")
-        )
+          tags.div(`class` := Rx {
+            "leftpanel " + {
+              if (openFileTree()) "open" else ""
+            }
+          })(treeNodePanel.view.render),
+          tags.div(`class` := Rx {
+            "centerpanel " + {
+              if (openFileTree()) "reduce" else ""
+            }
+          })(
+            treeNodePanel.fileDisplayer.tabs.render,
+            tags.img(src := "img/version.svg", `class` := "logoVersion"),
+            tags.div("Loving Lobster", `class` := "textVersion")
+          )
 
-      ).render
+        ).render
       )
     }
 

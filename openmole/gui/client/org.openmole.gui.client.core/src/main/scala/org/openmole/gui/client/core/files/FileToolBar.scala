@@ -164,7 +164,7 @@ class FileToolBar(redraw: () ⇒ Unit, refreshAndRedraw: () ⇒ Unit) {
   def unselectAndRefreshTree: Unit = {
     unselectTool
     newNodeInput.value = ""
-    refreshAndRedraw
+    refreshAndRedraw()
   }
 
   def unselectTool = selectedTool() = None

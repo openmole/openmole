@@ -37,11 +37,10 @@ object NetLogo5Task {
   }
 
   def workspace(
-    workspace:         File,
-    script:            String,
+    workspace: File,
+    script: String,
     launchingCommands: Seq[String],
-    seed:              Option[Prototype[Int]]
-  ): NetLogoTaskBuilder = {
+    seed: Option[Prototype[Int]]): NetLogoTaskBuilder = {
 
     new NetLogoTaskBuilder(new Workspace(workspace, script), launchingCommands, seed, factory) { builder ⇒
       addResource(workspace)
@@ -50,10 +49,9 @@ object NetLogo5Task {
   }
 
   def file(
-    script:            File,
+    script: File,
     launchingCommands: Seq[String],
-    seed:              Option[Prototype[Int]] = None
-  ): NetLogoTaskBuilder = {
+    seed: Option[Prototype[Int]] = None): NetLogoTaskBuilder = {
     new NetLogoTaskBuilder(new Workspace(script), launchingCommands, seed, factory) {
       builder ⇒
 
@@ -64,11 +62,10 @@ object NetLogo5Task {
   }
 
   def apply(
-    script:            File,
+    script: File,
     launchingCommands: Seq[String],
-    embedWorkspace:    Boolean                = false,
-    seed:              Option[Prototype[Int]] = None
-  ): NetLogoTaskBuilder =
+    embedWorkspace: Boolean = false,
+    seed: Option[Prototype[Int]] = None): NetLogoTaskBuilder =
     if (embedWorkspace) workspace(script.getCanonicalFile.getParentFile, script.getName, launchingCommands, seed)
     else file(script, launchingCommands, seed)
 

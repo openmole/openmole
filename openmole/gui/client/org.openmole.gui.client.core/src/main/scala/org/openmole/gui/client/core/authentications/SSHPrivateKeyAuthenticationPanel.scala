@@ -1,7 +1,7 @@
 package org.openmole.gui.client.core.authentications
 
 import fr.iscpif.scaladget.api.BootstrapTags._
-import fr.iscpif.scaladget.api.{BootstrapTags ⇒ bs}
+import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import org.openmole.gui.client.core.OMPost
 import org.openmole.gui.client.core.files.AuthFileUploaderUI
 import org.openmole.gui.ext.data.PrivateKeyAuthenticationData
@@ -15,10 +15,9 @@ import scalatags.JsDom.all._
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
-import fr.iscpif.scaladget.api.{BootstrapTags => bs}
-import scalatags.JsDom.{tags ⇒ tags}
+import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
+import scalatags.JsDom.{ tags ⇒ tags }
 import bs._
-
 
 /*
  * Copyright (C) 01/07/15 // mathieu.leclaire@openmole.org
@@ -76,9 +75,9 @@ class SSHPrivateKeyAuthenticationPanel(data: PrivateKeyAuthenticationData) exten
           password.value,
           target.value
         )
-      ).call().foreach { b =>
-        onsave()
-      }
+      ).call().foreach { b ⇒
+          onsave()
+        }
     }
 
 }

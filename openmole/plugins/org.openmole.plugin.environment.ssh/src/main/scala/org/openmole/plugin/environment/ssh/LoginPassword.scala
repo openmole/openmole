@@ -23,18 +23,16 @@ import org.openmole.core.workspace._
 object LoginPassword {
 
   def apply(
-    login:            String,
+    login: String,
     cypheredPassword: String,
-    target:           String
-  ) = new LoginPassword(login, cypheredPassword, target)
+    target: String) = new LoginPassword(login, cypheredPassword, target)
 
 }
 
 class LoginPassword(
-    val login:            String,
+    val login: String,
     val cypheredPassword: String,
-    val target:           String
-) extends SSHAuthentication with CypheredPassword { a ⇒
+    val target: String) extends SSHAuthentication with CypheredPassword { a ⇒
 
   def apply(implicit decrypt: Decrypt) =
     fr.iscpif.gridscale.authentication.UserPassword(a.login, a.password)

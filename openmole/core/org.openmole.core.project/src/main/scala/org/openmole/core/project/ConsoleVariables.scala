@@ -32,6 +32,5 @@ object ConsoleVariables {
 }
 
 case class ConsoleVariables(
-  args:          Seq[String] = Seq.empty,
-  workDirectory: File        = currentDirectory
-)
+  args: Seq[String] = Seq.empty,
+  workDirectory: File = currentDirectory)

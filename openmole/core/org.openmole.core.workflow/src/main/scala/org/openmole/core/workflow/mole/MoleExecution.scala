@@ -60,17 +60,16 @@ object MoleExecution extends Logger {
   private def listOfTupleToMap[K, V](l: Traversable[(K, V)]): Map[K, Traversable[V]] = l.groupBy(_._1).mapValues(_.map(_._2))
 
   def apply(
-    mole:               Mole,
-    sources:            Iterable[(Capsule, Source)] = Iterable.empty,
-    hooks:              Iterable[(Capsule, Hook)]   = Iterable.empty,
-    environments:       Map[Capsule, Environment]   = Map.empty,
-    grouping:           Map[Capsule, Grouping]      = Map.empty,
-    implicits:          Context                     = Context.empty,
-    seed:               Long                        = Workspace.newSeed,
-    defaultEnvironment: LocalEnvironment            = LocalEnvironment(),
-    tmpDirectory:       File                        = Workspace.newDir("execution"),
-    cleanOnFinish:      Boolean                     = true
-  )(implicit executionContext: MoleExecutionContext = MoleExecutionContext.default) =
+    mole: Mole,
+    sources: Iterable[(Capsule, Source)] = Iterable.empty,
+    hooks: Iterable[(Capsule, Hook)] = Iterable.empty,
+    environments: Map[Capsule, Environment] = Map.empty,
+    grouping: Map[Capsule, Grouping] = Map.empty,
+    implicits: Context = Context.empty,
+    seed: Long = Workspace.newSeed,
+    defaultEnvironment: LocalEnvironment = LocalEnvironment(),
+    tmpDirectory: File = Workspace.newDir("execution"),
+    cleanOnFinish: Boolean = true)(implicit executionContext: MoleExecutionContext = MoleExecutionContext.default) =
     new MoleExecution(
       mole,
       listOfTupleToMap(sources),
@@ -88,17 +87,16 @@ object MoleExecution extends Logger {
 case class JobStatuses(ready: Long, running: Long, completed: Long)
 
 class MoleExecution(
-    val mole:               Mole,
-    val sources:            Sources,
-    val hooks:              Hooks,
-    val environments:       Map[Capsule, Environment],
-    val grouping:           Map[Capsule, Grouping],
-    val seed:               Long,
+    val mole: Mole,
+    val sources: Sources,
+    val hooks: Hooks,
+    val environments: Map[Capsule, Environment],
+    val grouping: Map[Capsule, Grouping],
+    val seed: Long,
     val defaultEnvironment: LocalEnvironment,
-    val tmpDirectory:       File,
-    val cleanOnFinish:      Boolean,
-    val id:                 String                    = UUID.randomUUID().toString
-)(val implicits: Context, val executionContext: MoleExecutionContext) {
+    val tmpDirectory: File,
+    val cleanOnFinish: Boolean,
+    val id: String = UUID.randomUUID().toString)(val implicits: Context, val executionContext: MoleExecutionContext) {
 
   private val _started = Ref(false)
   private val _canceled = Ref(false)

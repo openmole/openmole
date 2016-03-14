@@ -29,8 +29,7 @@ object LenormandSampling {
 
   def apply(
     lenormand: Lenormand with ABC,
-    state:     Prototype[Lenormand#STATE]
-  ) = {
+    state: Prototype[Lenormand#STATE]) = {
     val (_lenormand, _state) = (lenormand, state)
     new LenormandSampling {
       val lenormand = _lenormand

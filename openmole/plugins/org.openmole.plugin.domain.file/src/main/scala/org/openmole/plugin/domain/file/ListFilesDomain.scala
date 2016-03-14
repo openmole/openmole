@@ -36,22 +36,20 @@ object ListFilesDomain extends Logger {
   }
 
   def apply(
-    base:      File,
+    base: File,
     directory: Option[ExpandedString] = None,
-    recursive: Boolean                = false,
-    filter:    Option[ExpandedString] = None
-  ) = new ListFilesDomain(base, directory, recursive, filter)
+    recursive: Boolean = false,
+    filter: Option[ExpandedString] = None) = new ListFilesDomain(base, directory, recursive, filter)
 
 }
 
 import ListFilesDomain.Log._
 
 sealed class ListFilesDomain(
-    base:      File,
+    base: File,
     directory: Option[ExpandedString] = None,
-    recursive: Boolean                = false,
-    filter:    Option[ExpandedString] = None
-) {
+    recursive: Boolean = false,
+    filter: Option[ExpandedString] = None) {
 
   def computeValues(context: Context)(implicit rng: RandomProvider): Iterable[File] = {
     def toFilter(f: File) =

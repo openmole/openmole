@@ -31,8 +31,7 @@ case class EnvironmentException(environment: Environment, error: Error)
 
 case class Execution(
   workDirectory: WorkDirectory,
-  moleExecution: MoleExecution
-)
+  moleExecution: MoleExecution)
 
 case class WorkDirectory(workDirectory: File) {
 

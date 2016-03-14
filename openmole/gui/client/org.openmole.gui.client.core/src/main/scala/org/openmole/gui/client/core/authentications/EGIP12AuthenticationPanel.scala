@@ -13,7 +13,7 @@ import org.openmole.gui.shared.Api
 import scala.scalajs.js.annotation.JSExport
 import scalatags.JsDom.all._
 
-import fr.iscpif.scaladget.api.{ BootstrapTags => bs }
+import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import scalatags.JsDom.{ tags ⇒ tags }
 import bs._
 
@@ -49,13 +49,13 @@ class EGIP12AuthenticationPanel(data: EGIP12AuthenticationData) extends PanelUI 
     bs.labeledField("Key file", privateKey.view)
   )
 
-  def save(onsave: () => Unit) =
+  def save(onsave: () ⇒ Unit) =
     OMPost[Api].removeAuthentication(data).call().foreach { d ⇒
       OMPost[Api].addAuthentication(EGIP12AuthenticationData(
         password.value,
         Some("egi.p12")
-      )).call().foreach { b =>
-      onsave()
+      )).call().foreach { b ⇒
+        onsave()
       }
     }
 

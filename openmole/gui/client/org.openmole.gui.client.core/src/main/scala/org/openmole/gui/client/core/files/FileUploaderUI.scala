@@ -31,10 +31,9 @@ import org.scalajs.dom.raw.{ HTMLInputElement }
 import rx._
 
 class AuthFileUploaderUI(
-    keyName:  String,
-    keySet:   Boolean,
-    renaming: Option[String] = None
-) {
+    keyName: String,
+    keySet: Boolean,
+    renaming: Option[String] = None) {
 
   val fileName = if (keyName == "") renaming.getOrElse(Utils.getUUID) else keyName
   val pathSet: Var[Boolean] = Var(keySet)

@@ -23,20 +23,18 @@ import org.openmole.core.workspace._
 
 object PrivateKey {
   def apply(
-    privateKey:       File,
-    login:            String,
+    privateKey: File,
+    login: String,
     cypheredPassword: String,
-    target:           String
-  ) = new PrivateKey(privateKey, login, cypheredPassword, target)
+    target: String) = new PrivateKey(privateKey, login, cypheredPassword, target)
 
 }
 
 class PrivateKey(
-    val privateKey:       File,
-    val login:            String,
+    val privateKey: File,
+    val login: String,
     val cypheredPassword: String,
-    val target:           String
-) extends SSHAuthentication with CypheredPassword { a ⇒
+    val target: String) extends SSHAuthentication with CypheredPassword { a ⇒
 
   override def apply(implicit decrypt: Decrypt) =
     fr.iscpif.gridscale.authentication.PrivateKey(a.login, a.privateKey, a.password)
