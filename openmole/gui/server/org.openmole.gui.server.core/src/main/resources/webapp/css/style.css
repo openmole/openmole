@@ -115,15 +115,15 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
     position: relative;
     min-height: 27px;
     padding-bottom: auto;
-    height: auto;
+    height: 30px;
     left: -10px;
     padding-left: 10px;
     padding-right: 18px;
     width: 105%;
-    background-color: #3086b5;
+    background-color: #f8f8f8;
     padding-bottom: 5px;
     word-wrap: break-word;
-    box-shadow: 1px 1px 10px #808080;
+    box-shadow: -2px 2px 15px #808080;
 }
 .tree-path .btn-group .btn.btn-primary{
     background-color: #3086b5;
@@ -337,7 +337,7 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
     transition: all 0.1s ease-out 0s;
     width: 99%;
     height: calc(100% - 140px);
-  
+
 }
 .fullpanel .open {
     left: 0;
@@ -1029,7 +1029,7 @@ border-top-right-radius: 0px;
     position: relative;
     top: 2px;
     font-size: 15px;
-    color: white;
+    color: #828082;
     cursor: pointer;
     padding-top: 6px;
     font-weight: bold;
@@ -1070,12 +1070,12 @@ border-top-right-radius: 0px;
 .stringInGroup{
     height: 28px;
     padding-top: 3px;
-    padding-left: 8px;
-    padding-right: 8px;
+    padding-left: 6px;
+    padding-right: 6px;
 }
 
 .sortingBar{
     width: 100%;
-    left: 75px;
-    top: -4px;
+    right: -149px;
+    top: 15px;
 }
