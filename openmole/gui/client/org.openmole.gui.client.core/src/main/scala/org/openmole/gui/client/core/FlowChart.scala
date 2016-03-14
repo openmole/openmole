@@ -22,7 +22,6 @@ import org.scalajs.dom
 import scala.scalajs.js
 import js.Dynamic.{ literal ⇒ lit }
 import rx._
-import fr.iscpif.scaladget.d3._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
 import org.openmole.gui.shared._

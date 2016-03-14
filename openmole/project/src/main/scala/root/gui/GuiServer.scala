@@ -7,7 +7,6 @@ import sbt._
 import root._
 import root.Libraries._
 import sbt.Keys._
-import com.typesafe.sbt.osgi.OsgiKeys._
 import ThirdParties._
 
 object Server extends GuiDefaults {
@@ -28,6 +27,8 @@ object Server extends GuiDefaults {
       root.Runtime.console,
       Core.dsl,
       Core.batch,
+      _root_.plugin.Environment.egi,
+      _root_.plugin.Environment.ssh,
       Misc.utils,
       ThirdParties.openmoleStream,
       openmoleCrypto

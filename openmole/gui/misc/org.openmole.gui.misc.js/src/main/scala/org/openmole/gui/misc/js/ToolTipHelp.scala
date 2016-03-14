@@ -2,10 +2,10 @@ package org.openmole.gui.misc.js
 
 import fr.iscpif.scaladget.api.BootstrapTags._
 import org.scalajs.dom.raw.{HTMLDivElement, HTMLElement}
-import org.scalajs.jquery
 import scalatags.JsDom.{tags, TypedTag}
 import scalatags.JsDom.all._
 import fr.iscpif.scaladget.mapping.tooltipster._
+import fr.iscpif.scaladget.mapping.tooltipster.TooltipsterOptions
 import fr.iscpif.scaladget.tooltipster._
 
 /*
@@ -76,7 +76,8 @@ trait Help {
       delay(400).
       theme(level.level)
 
-    jquery.jQuery(ttdiv).tooltipster(options)
+    toolTip(ttdiv, options)
+   // jquery.jQuery(ttdiv).tooltipster(options)
     ttdiv
   }
 }

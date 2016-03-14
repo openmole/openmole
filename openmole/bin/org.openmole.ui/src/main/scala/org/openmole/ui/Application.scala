@@ -30,7 +30,6 @@ import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.replication.DBServerRunning
 import org.openmole.core.tools.io.Network
 import org.openmole.core.workspace.Workspace
-import org.openmole.gui.bootstrap.js.BootstrapJS
 import org.openmole.core.workflow.task._
 import org.openmole.rest.server.RESTServer
 import org.openmole.tool.logger.Logger
@@ -48,11 +47,11 @@ class Application extends IApplication {
   lazy val consoleSplash =
     """  ___                   __  __  ___  _     _____   ____
  / _ \ _ __   ___ _ __ |  \/  |/ _ \| |   | ____| | ___|
-| | | | '_ \ / _ \ '_ \| |\/| | | | | |   |  _|   |___ \
-| |_| | |_) |  __/ | | | |  | | |_| | |___| |___   ___) |
+      | | | | '_ \ / _ \ '_ \| |\/| | | | | |   |  _|   |___ \
+      | |_| | |_) |  __/ | | | |  | | |_| | |___| |___   ___) |
  \___/| .__/ \___|_| |_|_|  |_|\___/|_____|_____| |____/
       |_|
-"""
+    """
 
   lazy val consoleUsage = "(Type :q to quit)"
 
@@ -192,9 +191,11 @@ class Application extends IApplication {
               val port = config.port.getOrElse(Workspace.preferenceAsInt(GUIServer.port))
               val url = s"https://localhost:$port"
               GUIServer.urlFile.content = url
-              BootstrapJS.init(!config.unoptimizedJS)
               if (config.remote) GUIServer.initPassword
-              val server = new GUIServer(port, BootstrapJS.webapp, config.remote)
+              //The webapp location will then be somewhere in target
+              val webui = Workspace.file("webui")
+              webui.mkdirs()
+              val server = new GUIServer(port, config.remote)
               server.start()
               browse(url)
               ScalaREPL.warmup

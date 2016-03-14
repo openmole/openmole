@@ -54,12 +54,11 @@ class ExecutionPanel extends ModalPanel {
   val expander = new Expander
 
   val updating = new AtomicBoolean(false)
-  val opened = new AtomicBoolean(false)
 
   def updatePanelInfo: Unit = {
     def delay = {
       updating.set(false)
-      setTimeout(5000) { if (opened.get) updatePanelInfo }
+      setTimeout(5000) {if(isVisible) updatePanelInfo }
     }
 
     if(updating.compareAndSet(false, true)) {
@@ -81,10 +80,9 @@ class ExecutionPanel extends ModalPanel {
   }
 
   def onOpen() = {
-    opened.set(true)
     setTimeout(0) { updatePanelInfo }
   }
-  def onClose() = { opened.set(false) }
+  def onClose() = {}
 
   def doScrolls = {
     Seq(outputTextAreas(), scriptTextAreas(), errorTextAreas()).map {

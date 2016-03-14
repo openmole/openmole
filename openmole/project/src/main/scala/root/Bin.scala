@@ -1,19 +1,18 @@
 package root
 
 import root.runtime.REST
+import org.scalajs.sbtplugin.ScalaJSPlugin
+import org.scalajs.sbtplugin.ScalaJSPlugin.AutoImport._
 import sbt._
 import Keys._
 
 import org.openmole.buildsystem.OMKeys._
 import org.openmole.buildsystem._, Assembly._
 import root.Libraries._
-import com.typesafe.sbt.osgi.{ SbtOsgi, OsgiKeys }
+import com.typesafe.sbt.osgi.OsgiKeys
 import sbt.inc.Analysis
 import sbtunidoc.Plugin._
 import UnidocKeys._
-
-import scala.util.matching.Regex
-import sbtbuildinfo.Plugin._
 
 object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties, root.Doc) {
   val dir = file("bin")
@@ -65,8 +64,6 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
       Core.batch,
       gui.Server.core,
       gui.Client.core,
-      gui.Bootstrap.js,
-      gui.Bootstrap.osgi,
       Core.logging,
       runtime.REST.server,
       Core.console,
@@ -87,9 +84,14 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
       },
       resourcesAssemble <+= (assemble in openmoleCore, assemblyPath) map { case (r, p) ⇒ r → (p / "plugins") },
       resourcesAssemble <+= (assemble in openmoleGUI, assemblyPath) map { case (r, p) ⇒ r → (p / "plugins") },
+      resourcesAssemble <+= (resourceDirectory in gui.Server.core in Compile, assemblyPath) map { case (r, p) ⇒ (r / "webapp") → (p / "webapp") },
+      buildJS <<= (fullOptJS in gui.Client.core in Compile) map {
+        _.data
+      },
+      resourcesAssemble <+= (buildJS, assemblyPath) map { case (js, p) ⇒ rename(js, "openmole.js") → (p / "webapp/js") },
+      resourcesAssemble <+= (buildJS, assemblyPath) map { case (js, p) ⇒ rename(new File(js.getParent, "org-openmole-gui-client-core-jsdeps.min.js"), "deps.js") → (p / "webapp/js") },
       resourcesAssemble <+= (assemble in dbServer, assemblyPath) map { case (r, p) ⇒ r → (p / "dbserver") },
-      resourcesAssemble <+= (assemble in consolePlugins, assemblyPath) map { case (r, p) ⇒ r → (p / "openmole-plugins") },
-      resourcesAssemble <+= (assemble in guiPlugins, assemblyPath) map { case (r, p) ⇒ r → (p / "openmole-plugins-gui") },
+      resourcesAssemble <+= (assemble in consolePlugins, assemblyPath) map { case (r, p) ⇒ r → (p / "plugins") },
       resourcesAssemble <+= (Tar.tar in openmoleRuntime, assemblyPath) map { case (r, p) ⇒ r → (p / "runtime") },
       downloads := Seq(java368URL → "runtime/jvm-386.tar.gz", javax64URL → "runtime/jvm-x64.tar.gz"),
       libraryDependencies += Libraries.scalajHttp,
@@ -107,10 +109,15 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
       cleanFiles <++= cleanFiles in openmoleCore,
       cleanFiles <++= cleanFiles in openmoleGUI,
       cleanFiles <++= cleanFiles in consolePlugins,
-      cleanFiles <++= cleanFiles in guiPlugins,
       cleanFiles <++= cleanFiles in dbServer,
       cleanFiles <++= cleanFiles in openmoleRuntime
     )
+
+  def rename(f: File, name: String) = {
+    val target = new File(f.getParent, name)
+    IO.move(f, target)
+    target
+  }
 
   lazy val webServerDependencies = Seq(
     scalatra intransitive (),
@@ -141,7 +148,6 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
   ) ++ webServerDependencies
 
   lazy val guiCoreDependencies = Seq(
-    scalajsLibrary,
     scalajsTools,
     scalajsDom,
     scalaTags,
@@ -150,13 +156,10 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
     rx,
     scalatra intransitive (),
     scalajHttp,
-    d3,
-    bootstrap,
-    jquery,
-    ace,
     txtmark,
     scaladget,
-    clapper
+    clapper,
+    jquery
   )
 
   //FIXME separate web plugins from core ones
@@ -175,7 +178,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
     libraryDependencies ++= guiCoreDependencies,
     dependencyFilter := filter,
     dependencyName := rename
-  )
+  ) enablePlugins (ScalaJSPlugin)
 
   lazy val consolePlugins = Project("consoleplugins", dir / "target" / "consoleplugins", settings = assemblySettings) settings (commonsSettings: _*) settings (
     resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "plugin", true) sendTo assemblyPath,
@@ -202,12 +205,6 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
     ) ++ apacheHTTP map (_ intransitive ()),
       dependencyFilter := pluginFilter,
       dependencyName := rename
-  )
-
-  lazy val guiPlugins = Project("guiplugins", dir / "target" / "guiplugins", settings = assemblySettings) settings (commonsSettings: _*) settings (
-    resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a.contains("guiPlugin"), true) sendTo assemblyPath,
-    dependencyFilter := pluginFilter,
-    dependencyName := rename
   )
 
   lazy val dbServer = Project("dbserver", dir / "dbserver", settings = assemblySettings) settings (commonsSettings: _*) settings (
@@ -315,7 +312,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
       header :=
       """|eclipse.application=org.openmole.site
           |osgi.bundles.defaultStartLevel=4""".stripMargin,
-      startLevels := openmoleStartLevels ++ Seq("openmole-plugin" → 3),
+      startLevels := openmoleStartLevels ++ Seq("plugin" → 3),
       pluginsDirectory := assemblyPath.value / "plugins",
       config := assemblyPath.value / "configuration/config.ini"
     ) dependsOn (siteGeneration, Core.tools)

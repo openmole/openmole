@@ -45,6 +45,8 @@ object OMKeys {
 
   val junitVersion = SettingKey[String]("junit-version", "Version of junit.")
 
+  val buildJS = TaskKey[File]("buildJS", "The js File containing the aggregation of all the partial sjsir from the client side.")
+
   object Tar {
     val tar = TaskKey[File]("tar", "Tar file produced by the assembly project")
     val innerFolder = SettingKey[String]("tar-inner-folder", "All files in tar will be put under this folder")

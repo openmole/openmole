@@ -49,7 +49,7 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
   val basePath = "org/openmole/gui/shared"
 
   // Get all the css files in the workspace (it is not working with js because of the order)
-  val cssFiles = new File(Workspace.file("webui"), "webapp/css").listFilesSafe.map {
+  val cssFiles = new File("webapp/css").listFilesSafe.map {
     _.getName
   }.sorted
 
@@ -60,38 +60,6 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
   get("/shutdown") {
     val restart = Try(params("restart").toBoolean).getOrElse(false)
     if (restart) arguments.applicationControl.restart() else arguments.applicationControl.stop()
-  }
-
-  get("/plugins.js.map") {
-    contentType = "text/javascript"
-    val webui = Workspace.file("webui")
-    val webapp = new File(webui, "webapp")
-    val jsSrc = new File(webapp, "js/plugins.js.map")
-    response.setHeader("Content-Disposition", "attachment; filename=" + jsSrc.getName)
-    jsSrc
-  }
-
-  get("/gui") {
-    contentType = "text/html"
-    tags.html(
-      tags.head(
-        tags.meta(tags.httpEquiv := "content-type", tags.content := "text/html; charset = ISO-8859-1"),
-        cssFiles.map { f ⇒ tags.link(tags.rel := "stylesheet", tags.`type` := "text/css", href := "css/" + f) },
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/jquery.min.js"),
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/ace.js"),
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/d3.min.js"),
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/ace.js"),
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/mode-scala.js"),
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/mode-sh.js"),
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/theme-github.js"),
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/bootstrap.min.js"),
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/plugins.js"),
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/pluginMapping.js")
-      ),
-      tags.body(
-        tags.onload := "fillMap();GUIClient().run();"
-      )
-    )
   }
 
   post("/uploadfiles") {
@@ -150,18 +118,12 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
       tags.head(
         tags.meta(tags.httpEquiv := "content-type", tags.content := "text/html; charset = ISO-8859-1"),
         cssFiles.map { f ⇒ tags.link(tags.rel := "stylesheet", tags.`type` := "text/css", href := "css/" + f) },
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/jquery.min.js"),
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/ace.js"),
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/mode-sh.js"),
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/mode-nlogo.js"),
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/theme-github.js"),
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/bootstrap.min.js"),
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/tooltipster.min.js"),
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/plugins.js"),
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/pluginMapping.js")
+        tags.script(tags.`type` := "text/javascript", tags.src := "js/openmole.js"),
+        tags.script(tags.`type` := "text/javascript", tags.src := "js/deps.js")
       ),
       tags.body(
-        tags.onload := "fillMap();ScriptClient().run();")
+        tags.onload := "ScriptClient().run();"
+      )
     )
   }
 
