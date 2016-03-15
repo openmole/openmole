@@ -59,7 +59,7 @@ object OAREnvironment {
       storageSharedLocally = storageSharedLocally,
       name = name,
       bestEffort = bestEffort
-    )(SSHAuthentication(user, host, port).apply)
+    )(SSHAuthentication.find(user, host, port).apply)
 }
 
 class OAREnvironment(

@@ -64,7 +64,7 @@ object CondorEnvironment {
       threads = threads,
       storageSharedLocally = storageSharedLocally,
       name = name
-    )(SSHAuthentication(user, host, port).apply)
+    )(SSHAuthentication.find(user, host, port).apply)
 }
 
 class CondorEnvironment(

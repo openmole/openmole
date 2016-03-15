@@ -17,8 +17,10 @@
 
 package org.openmole.plugin.environment.ssh
 
+import java.io.File
 import java.util.UUID
 
+import org.openmole.core.batch.authentication.CypheredPassword
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.workspace._
 
@@ -26,18 +28,14 @@ import scala.util.{ Success, Try }
 
 object SSHAuthentication {
 
-  def address(login: String, host: String, port: Int) = s"$login@$host:$port"
-
   def apply() =
     Workspace.authentications.allByCategory.getOrElse(classOf[SSHAuthentication].getName, Seq.empty).map(_.asInstanceOf[SSHAuthentication])
 
-  def apply(target: String): SSHAuthentication = {
+  def find(login: String, host: String, port: Int = 22): SSHAuthentication = {
     val list = apply()
-    val auth = list.reverse.find { e ⇒ target.matches(e.regexp) }
-    auth.getOrElse(throw new UserBadDataError("No authentication method found for " + target))
+    val auth = list.reverse.find { a ⇒ (a.login, a.host, a.port) == (login, host, port) }
+    auth.getOrElse(throw new UserBadDataError(s"No authentication method found for $login@$host:$port"))
   }
-
-  def apply(login: String, host: String, port: Int = 22): SSHAuthentication = apply(address(login, host, port))
 
   def +=(a: SSHAuthentication) =
     Workspace.authentications.save[SSHAuthentication](a, eq)
@@ -47,26 +45,49 @@ object SSHAuthentication {
 
   def clear() = Workspace.authentications.clear[SSHAuthentication]
 
-  private def eq(a1: SSHAuthentication, a2: SSHAuthentication) = (a1.login, a1.target) == (a2.login, a2.target)
+  private def eq(a1: SSHAuthentication, a2: SSHAuthentication) = (a1.login, a1.host, a1.port) == (a2.login, a2.host, a2.port)
 
   def test(a: SSHAuthentication)(implicit decrypt: Decrypt) = {
-    val targetFormat = "(.*):([0-9]*)".r
-
-    val (host, port) = a.target match {
-      case targetFormat(h, p) ⇒ h → p.toInt
-      case h                  ⇒ (h, 22)
-    }
-
-    Try(fr.iscpif.gridscale.ssh.SSHJobService(host, port)(a.apply).home).map(_ ⇒ true)
+    Try(fr.iscpif.gridscale.ssh.SSHJobService(a.host, a.port)(a.apply).home).map(_ ⇒ true)
   }
 }
 
 trait SSHAuthentication {
-  def target: String
+  def host: String
+  def port: Int
   def login: String
-  def regexp = ".*" + login + "@" + target + ".*"
-
   def apply(implicit decrypt: Decrypt): fr.iscpif.gridscale.ssh.SSHAuthentication
-
-  override def toString = "Target = " + target
+  override def toString = s"$login@$host:$port"
 }
+
+case class LoginPassword(
+    val login:            String,
+    val cypheredPassword: String,
+    val host:             String,
+    val port:             Int    = 22
+) extends SSHAuthentication with CypheredPassword { a ⇒
+
+  def apply(implicit decrypt: Decrypt) =
+    fr.iscpif.gridscale.authentication.UserPassword(a.login, a.password)
+
+  override def toString = super.toString + ", Login / password, login = " + login
+}
+
+case class PrivateKey(
+    val privateKey:       File,
+    val login:            String,
+    val cypheredPassword: String,
+    val host:             String,
+    val port:             Int    = 22
+) extends SSHAuthentication with CypheredPassword { a ⇒
+
+  override def apply(implicit decrypt: Decrypt) =
+    fr.iscpif.gridscale.authentication.PrivateKey(a.login, a.privateKey, a.password)
+
+  override def toString =
+    super.toString +
+      ", PrivateKey = " + privateKey +
+      ", Login = " + login
+
+}
+
