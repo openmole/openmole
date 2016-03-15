@@ -56,7 +56,7 @@ object SSHEnvironment {
       threads = threads,
       storageSharedLocally = storageSharedLocally,
       name = name
-    )(SSHAuthentication(user, host, port).apply)
+    )(SSHAuthentication.find(user, host, port).apply)
 }
 
 import SSHEnvironment._
