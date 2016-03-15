@@ -193,7 +193,8 @@ trait PrivateKey {
 case class LoginPasswordAuthenticationData(
     login:            String = "",
     cypheredPassword: String = "",
-    target:           String = ""
+    target:           String = "",
+    port:             String = "22"
 ) extends AuthenticationData {
   def synthetic = s"$login@$target"
 }
@@ -202,7 +203,8 @@ case class PrivateKeyAuthenticationData(
     privateKey:       Option[String] = None,
     login:            String         = "",
     cypheredPassword: String         = "",
-    target:           String         = ""
+    target:           String         = "",
+    port:             String         = "22"
 ) extends AuthenticationData with PrivateKey {
   def synthetic = s"$login@$target"
 }

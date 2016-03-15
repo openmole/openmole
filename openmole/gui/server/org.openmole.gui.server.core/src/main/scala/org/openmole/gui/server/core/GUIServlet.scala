@@ -74,6 +74,7 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
         destination.setWritable(true)
         val stream = file._2.getInputStream
         try {
+          println("cop to " + destination.getAbsolutePath)
           stream.copy(destination)
           destination.setExecutable(true)
         }
@@ -82,10 +83,12 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
       }
 
     fileType match {
-      case "project"        ⇒ moveTo(Utils.webUIProjectFile)
-      case "authentication" ⇒ moveTo(Utils.authenticationKeysFile)
-      case "plugin"         ⇒ ApiImpl.addPlugins(moveTo(Workspace.pluginDir))
-      case "absolute"       ⇒ moveTo(new File(""))
+      case "project" ⇒ moveTo(Utils.webUIProjectFile)
+      case "authentication" ⇒
+        println("move to " + Utils.authenticationKeysFile)
+        moveTo(Utils.authenticationKeysFile)
+      case "plugin"   ⇒ ApiImpl.addPlugins(moveTo(Workspace.pluginDir))
+      case "absolute" ⇒ moveTo(new File(""))
     }
 
   }

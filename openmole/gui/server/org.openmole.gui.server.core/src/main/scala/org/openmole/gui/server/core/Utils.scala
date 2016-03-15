@@ -116,7 +116,12 @@ object Utils {
     }
   }
 
-  def authenticationFile(keyFileName: String): File = new File(authenticationKeysFile, keyFileName)
+  def authenticationFile(keyFileName: String): File = {
+
+    val oo = new File(authenticationKeysFile, keyFileName)
+    println("AUth file " + oo)
+    oo
+  }
 
   def getPathArray(f: File, until: File): Seq[String] = {
     def getParentsArray0(f: File, computedParents: Seq[String]): Seq[String] = {

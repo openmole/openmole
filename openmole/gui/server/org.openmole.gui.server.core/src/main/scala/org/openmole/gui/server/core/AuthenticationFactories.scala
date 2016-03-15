@@ -96,7 +96,8 @@ object AuthenticationFactories {
         case lp: LoginPassword ⇒ Some(LoginPasswordAuthenticationData(
           lp.login,
           Workspace.decrypt(lp.cypheredPassword),
-          lp.host //FIXME SUPPORT port lp.port
+          lp.host,
+          lp.port.toString
         ))
         case _ ⇒ None
       }
@@ -131,8 +132,10 @@ object AuthenticationFactories {
           Some(key.privateKey.getName),
           key.login,
           Workspace.decrypt(key.cypheredPassword),
-          key.host //FIXME SUPPORT port key.port
+          key.host,
+          key.port.toString
         ))
+
         case _ ⇒ None
       }
     }
