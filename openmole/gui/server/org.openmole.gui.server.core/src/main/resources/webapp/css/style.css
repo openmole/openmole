@@ -1013,7 +1013,7 @@ border-top-right-radius: 0px;
 
 .centerFileTool{
     padding-right: 50px;
-    padding-bottom: 10px;
+    padding-top: 10px;
     text-align: center;
 
 }
@@ -1022,7 +1022,8 @@ border-top-right-radius: 0px;
      display: inline-block;
      margin: 0 auto;
      width: 220px;
-     margin-top: 15px;
+     margin-top: 5px;
+     margin-bottom: 10px;
 }
 
 .treePathItems{
