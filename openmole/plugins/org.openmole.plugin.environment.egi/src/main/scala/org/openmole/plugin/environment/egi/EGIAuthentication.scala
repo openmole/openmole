@@ -133,7 +133,10 @@ object EGIAuthentication extends Logger {
     }
   }
 
-  def update(a: EGIAuthentication) = Workspace.authentications.set(a)
+  def update(a: EGIAuthentication)(implicit decrypt: Decrypt) = {
+    testPassword(a).get
+    Workspace.authentications.set(a)
+  }
 
   def apply() =
     Workspace.authentications.allByCategory.
