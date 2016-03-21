@@ -296,7 +296,7 @@ package file {
         f.setExecutable(Files.isExecutable(o))
       }
 
-      def content_=(content: String) = Files.write(file, content.getBytes, StandardOpenOption.TRUNCATE_EXISTING)
+      def content_=(content: String) = Files.write(file, content.getBytes, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)
 
       def content = withSource(_.mkString)
 
