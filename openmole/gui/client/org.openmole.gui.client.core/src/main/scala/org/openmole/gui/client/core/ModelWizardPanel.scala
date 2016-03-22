@@ -600,15 +600,15 @@ class ModelWizardPanel extends ModalPanel {
         case _             ⇒ upButton()
       },
       fileToUploadPath().map { _ ⇒
-        bs.div("spacer50")(
+        bs.div("spacer20")(
           tags.h4("Step2: Task configuration"), step2,
           topButtons,
           if (currentTab() == 0) {
             tags.div({
 
-              val iinput: HTMLInputElement = bs.input("")(placeholder := "Add Input").render
+              val idiv = bs.div("modelIO")(tags.h3("Inputs")).render
 
-              val oinput: HTMLInputElement = bs.input("")(placeholder := "Add Output").render
+              val odiv = bs.div("modelIO")(tags.h3("Outputs")).render
 
               val head = thead(tags.tr(
                 for (h ← Seq("Name", "Type", "Default", "Mapped with", "", "")) yield {
@@ -616,17 +616,9 @@ class ModelWizardPanel extends ModalPanel {
                 }
               ))
 
-              bs.div("spacer50")(
+              bs.div("spacer30")(
                 bs.div("twocolumns right10")(
-                  bs.form("paddingLeftRight50")(
-                    iinput,
-                    onsubmit := {
-                      () ⇒
-                        addVariableElement(Input(VariableElement(-1, ProtoTypePair(iinput.value, ProtoTYPE.DOUBLE), CareTaskType())))
-                        iinput.value = ""
-                        false
-                    }
-                  ),
+                  idiv,
                   bs.table(striped)(
                     head,
                     tbody(
@@ -637,12 +629,7 @@ class ModelWizardPanel extends ModalPanel {
                   )
                 ),
                 tags.div(`class` := "twocolumns")(
-                  bs.form("paddingLeftRight50")(oinput, onsubmit := {
-                    () ⇒
-                      addVariableElement(Output(VariableElement(-1, ProtoTypePair(oinput.value, ProtoTYPE.DOUBLE), CareTaskType())))
-                      oinput.value = ""
-                      false
-                  }),
+                  odiv,
                   bs.table(striped)(
                     head,
                     tbody(
