@@ -45,7 +45,7 @@ object Workspace {
   def authenticationsLocation = "authentications"
   def pluginLocation = "plugins"
 
-  lazy val uniqueIDLocation = ConfigurationLocation[String](globalGroup, "UniqueID", Some(UUID.randomUUID.toString))
+  lazy val uniqueIDLocation = ConfigurationLocation[String](globalGroup, "UniqueID", None)
 
   private val group = "Workspace"
   def fixedPrefix = "file"
@@ -57,9 +57,6 @@ object Workspace {
 
   def ErrorArraySnipSize = ConfigurationLocation[Int](group, "ErrorArraySnipSize", Some(10))
 
-  this setDefault uniqueIDLocation
-  this setDefault ErrorArraySnipSize
-
   lazy val defaultLocation = DBServerInfo.base
 
   Runtime.getRuntime.addShutdownHook(new Thread {
@@ -69,7 +66,7 @@ object Workspace {
   })
 
   def setDefault[T: ConfigurationString](location: ConfigurationLocation[T]) = synchronized {
-    instance.setDefaultPreference(location)
+    instance.setDefault(location)
   }
 
   def allTmpDir(location: File) = new File(location, tmpLocation)
@@ -101,6 +98,9 @@ object Workspace {
     openMOLELocationOption.getOrElse(throw new InternalProcessingError("openmole.location not set"))
 
   lazy val instance = new Workspace(defaultLocation)
+
+  instance setPreferenceIfNotSet (uniqueIDLocation, UUID.randomUUID.toString)
+  instance setDefault ErrorArraySnipSize
 
   implicit def authenticationProvider = instance.authenticationProvider
 
@@ -162,7 +162,7 @@ class Workspace(val location: File) {
     if (!preferenceIsSet(location)) setPreference(location, value)
   }
 
-  def setDefaultPreference[T](location: ConfigurationLocation[T])(implicit configurationString: ConfigurationString[T]) = synchronized {
+  def setDefault[T](location: ConfigurationLocation[T])(implicit configurationString: ConfigurationString[T]) = synchronized {
     if (!preferenceIsSet(location) && !commentedPreferenceSet(location)) {
       def defaultOrException = location.default.getOrElse(throw new UserBadDataError(s"No default value set for location ${this}."))
       def prop = if (location.cyphered) encrypt(configurationString.toString(defaultOrException)) else configurationString.toString(defaultOrException)
