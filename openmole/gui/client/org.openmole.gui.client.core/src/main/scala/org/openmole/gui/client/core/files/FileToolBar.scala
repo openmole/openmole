@@ -230,13 +230,13 @@ class FileToolBar(redraw: () ⇒ Unit, refreshAndRedraw: () ⇒ Unit) {
 
   val sortingGroupInFilter = OMTags.buttonGroupExclusive("filterElement")(
     ExclusiveButton.glyph(OMTags.glyph_alph_sorting, () ⇒ updateFilter(() ⇒ fileFilter().copy(fileSorting = AlphaSorting))),
-    ExclusiveButton.string("Ko", () ⇒ updateFilter(() ⇒ fileFilter().copy(fileSorting = SizeSorting))),
+    ExclusiveButton.string("KB", () ⇒ updateFilter(() ⇒ fileFilter().copy(fileSorting = SizeSorting))),
     ExclusiveButton.glyph(OMTags.glyph_time, () ⇒ updateFilter(() ⇒ fileFilter().copy(fileSorting = TimeSorting)))
   )
 
   val sortingGroup = OMTags.buttonGroupExclusive("sortingBar")(
     ExclusiveButton.glyph(OMTags.glyph_alph_sorting, () ⇒ updateSorting(() ⇒ treeSorting().copy(fileSorting = AlphaSorting))),
-    ExclusiveButton.string("Ko", () ⇒ updateSorting(() ⇒ treeSorting().copy(fileSorting = SizeSorting))),
+    ExclusiveButton.string("KB", () ⇒ updateSorting(() ⇒ treeSorting().copy(fileSorting = SizeSorting))),
     ExclusiveButton.glyph(OMTags.glyph_time, () ⇒ updateSorting(() ⇒ treeSorting().copy(fileSorting = TimeSorting))),
     ExclusiveButton.twoGlyphStates(
       OMTags.glyph_triangle_bottom,
