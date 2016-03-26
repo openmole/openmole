@@ -18,22 +18,20 @@
 package org.openmole.core.pluginmanager
 
 import java.io.File
-import java.io.FileFilter
-import java.io.FileInputStream
+
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.pluginmanager.internal.Activator
 import org.openmole.tool.file._
 import org.openmole.tool.logger.Logger
 import org.osgi.framework._
+import org.osgi.framework.wiring.BundleWiring
 
-import scala.collection.immutable.{ HashSet, HashMap }
+import scala.collection.immutable.{ HashMap, HashSet }
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
-
 import scala.collection.JavaConversions._
-import util.Try
-import scala.concurrent.stm._
 
+import scala.concurrent.stm._
 import scala.util.{ Failure, Success, Try }
 
 case class BundlesInfo(
@@ -73,23 +71,21 @@ object PluginManager extends Logger {
     resolvedPluginDependenciesCache.clear()
   }
 
-  def refresh(bundles: Seq[Bundle]) = Activator.packageAdmin.refreshPackages(bundles.toArray)
-
   def bundles = Activator.contextOrException.getBundles.filter(!_.isSystem).toSeq
   def bundleFiles = infos.files.keys
   def dependencies(file: File): Option[Iterable[File]] =
     infos.files.get(file).map { case (id, _) ⇒ allPluginDependencies(id).map { l ⇒ Activator.contextOrException.getBundle(l).file } }
 
   def isClassProvidedByAPlugin(c: Class[_]) = {
-    val b = Activator.packageAdmin.getBundle(c)
-    if (b != null) !infos.providedDependencies.contains(b.getBundleId)
+    val b = FrameworkUtil.getBundle(c)
+    if (b != null) !infos.providedDependencies.contains(b.getBundleId())
     else false
   }
 
   def fileProviding(c: Class[_]) =
-    Option(Activator.packageAdmin.getBundle(c)).map(b ⇒ Activator.contextOrException.getBundle(b.getBundleId).file.getCanonicalFile)
+    Option(FrameworkUtil.getBundle(c)).map(b ⇒ Activator.contextOrException.getBundle(b.getBundleId).file.getCanonicalFile)
 
-  def bundleForClass(c: Class[_]): Bundle = Activator.packageAdmin.getBundle(c)
+  def bundleForClass(c: Class[_]): Bundle = FrameworkUtil.getBundle(c)
 
   def bundlesForClass(c: Class[_]): Iterable[Bundle] = synchronized {
     allDependencies(bundleForClass(c).getBundleId).map { Activator.contextOrException.getBundle }
@@ -193,18 +189,7 @@ object PluginManager extends Logger {
       case None ⇒
         val bs = bundles
 
-        val resolvedDirectDependencies: Map[Long, Set[Long]] = {
-          import collection.mutable.{ HashMap ⇒ MHashMap, HashSet ⇒ MHashSet }
-
-          val dependencies = new MHashMap[Long, MHashSet[Long]]
-          bs.foreach {
-            b ⇒
-              dependingBundles(b).foreach {
-                db ⇒ dependencies.getOrElseUpdate(db.getBundleId, new MHashSet[Long]) += b.getBundleId
-              }
-          }
-          dependencies.map { case (k, v) ⇒ k → v.toSet }.toMap
-        }
+        val resolvedDirectDependencies: Map[Long, Set[Long]] = bs.map(b ⇒ b.getBundleId → directDependencies(b).map(_.getBundleId).toSet).toMap
 
         val providedDependencies =
           dependencies(bs.filter(b ⇒ b.isProvided).map { _.getBundleId }, resolvedDirectDependencies).toSet ++
@@ -229,7 +214,7 @@ object PluginManager extends Logger {
     while (!toProcess.isEmpty) {
       val current = toProcess.remove(0)
       for {
-        b ← dependingBundles(current).filter(filter)
+        b ← directDependingBundles(current).filter(filter)
       } if (!seen(b)) {
         seen += b
         toProcess += b
@@ -239,21 +224,8 @@ object PluginManager extends Logger {
     seen.toList
   }
 
-  private def dependingBundles(b: Bundle): Iterable[Bundle] = {
-    val exportedPackages = Activator.packageAdmin.getExportedPackages(b)
-
-    def requiredBundles = Activator.packageAdmin.getRequiredBundles(null).toSeq
-
-    val requiering = requiredBundles.find(_.getBundle.getBundleId == b.getBundleId).map(_.getRequiringBundles.toSeq).getOrElse(Seq.empty)
-
-    val fromPackages: Seq[Bundle] =
-      if (exportedPackages != null) {
-        for (exportedPackage ← exportedPackages; ib ← exportedPackage.getImportingBundles) yield ib
-      }
-      else Seq.empty
-
-    (fromPackages ++ requiering).distinct
-  }
+  def directDependencies(b: Bundle) = b.adapt(classOf[BundleWiring]).getRequiredWires(null).map(_.getProvider.getBundle).filter(_.getBundleId != 0).distinct
+  def directDependingBundles(b: Bundle) = b.adapt(classOf[BundleWiring]).getProvidedWires(null).map(_.getRequirer.getBundle).filter(_.getBundleId != 0).distinct
 
   def startAll: Seq[(Bundle, Throwable)] =
     Activator.contextOrException.getBundles.filter {
