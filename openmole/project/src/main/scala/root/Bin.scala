@@ -21,7 +21,8 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
     m.organization.startsWith("org.eclipse") ||
       m.organization == "fr.iscpif.gridscale.bundle" ||
       m.organization == "org.bouncycastle" ||
-      m.organization.contains("org.openmole")
+      m.organization.contains("org.openmole") ||
+      m.organization == "org.osgi"
 
   def pluginFilter(m: ModuleID) = m.name != "osgi" && m.name != "scala-library"
 
@@ -40,7 +41,8 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
     equinoxLauncher intransitive (),
     equinoxRegistry intransitive (),
     equinoxPreferences intransitive (),
-    equinoxOSGi intransitive ()
+    equinoxOSGi intransitive (),
+    osgiCompendium intransitive ()
   )
 
   def rename(m: ModuleID): String =

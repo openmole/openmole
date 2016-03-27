@@ -51,8 +51,7 @@ object Libraries extends Defaults {
 
   lazy val apacheHTTP = Seq(
     "org.apache.httpcomponents" % "httpclient-osgi" % "4.5.1",
-    "org.apache.httpcomponents" % "httpcore-osgi" % "4.4.4",
-    "org.osgi" % "org.osgi.compendium" % "4.2.0"
+    "org.apache.httpcomponents" % "httpcore-osgi" % "4.4.4"
   )
 
   lazy val gridscaleOAR = "fr.iscpif.gridscale.bundle" %% "oar" % gridscaleVersion
@@ -155,6 +154,8 @@ object Libraries extends Defaults {
   lazy val equinoxRuntime = "org.eclipse.core" % "runtime" % "3.10.0-v20140318-2214"
 
   lazy val equinoxOSGi = "org.eclipse" % "osgi" % "3.10.0-v20140606-1445"
+
+  lazy val osgiCompendium = "org.osgi" % "org.osgi.compendium" % "4.2.0"
 
   lazy val scalatest = "org.scalatest" %% "scalatest" % "2.2.4" % "test"
 

@@ -88,7 +88,7 @@ trait DIRACJobService extends GridScaleJobService { js ⇒
       }
 
       val jid = jobService.submit(jobDescription)
-      Log.logger.fine(s"""DIRACGLite job [${jid}], description: \n${jobDescription}""")
+      Log.logger.fine(s"""DIRAC job [${jid}], description: \n${jobDescription}""")
 
       new DIRACJob {
         val jobService = js
@@ -99,4 +99,6 @@ trait DIRACJobService extends GridScaleJobService { js ⇒
     }
     finally script.delete
   }
+
+  override protected def _purge(j: J) = if (!environment.debug) super._purge(j)
 }

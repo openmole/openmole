@@ -60,7 +60,7 @@ object EGIEnvironment extends Logger {
   val VOCardDownloadTimeOut = ConfigurationLocation("EGIEnvironment", "VOCardDownloadTimeOut", Some(2 minutes))
   val VOCardCacheTime = ConfigurationLocation("EGIEnvironment", "VOCardCacheTime", Some(6 hours))
 
-  val EagerSubmissionInterval = ConfigurationLocation("EGIEnvironment", "EagerSubmissionInterval", Some(5 minutes))
+  val EagerSubmissionInterval = ConfigurationLocation("EGIEnvironment", "EagerSubmissionInterval", Some(2 minutes))
   val EagerSubmissionMinNumberOfJob = ConfigurationLocation("EGIEnvironment", "EagerSubmissionMinNumberOfJob", Some(100))
   val EagerSubmissionNumberOfJobUnderMin = ConfigurationLocation("EGIEnvironment", "EagerSubmissionNumberOfJobUnderMin", Some(10))
   val EagerSubmissionNbSampling = ConfigurationLocation("EGIEnvironment", "EagerSubmissionNbSampling", Some(10))
