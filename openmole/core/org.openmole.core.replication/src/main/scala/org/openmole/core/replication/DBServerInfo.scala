@@ -44,7 +44,8 @@ object DBServerInfo {
   val dbInfoName = s"$dbName.info"
   val dbLock = s"$dbName.lock"
 
-  lazy val xstream = new XStream
+  lazy val xstream = new XStream()
+  xstream.setClassLoader(classOf[DBServerInfo].getClassLoader)
   xstream.alias("org.openmole.misc.replication.DBServerInfo", classOf[DBServerInfo])
   xstream.alias("DBServerInfo", classOf[DBServerInfo])
 

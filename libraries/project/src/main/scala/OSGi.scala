@@ -49,7 +49,6 @@ object OSGi extends Defaults {
 
   lazy val xstream = OsgiProject(
     "com.thoughtworks.xstream",
-    global = true,
     imports = Seq(
       "!com.bea.xml.stream.*",
       "!com.ctc.wstx.stax.*",
@@ -141,7 +140,6 @@ object OSGi extends Defaults {
   lazy val scalaTagsVersion = "0.5.4"
   lazy val scalaRxVersion = "0.2.8"
   lazy val scalaDomVersion = "0.9.0"
-//  lazy val scalaJQueryVersion = "0.9.0"
   lazy val querkiJSQueryVersion = "0.11"
   lazy val scalaUpickleVersion = "0.2.6"
   lazy val scalaAutowireVersion = "0.2.5"
@@ -153,9 +151,6 @@ object OSGi extends Defaults {
 
   lazy val querkijQuery = OsgiProject("querki-jquery", exports = Seq("org.querki.*")) settings(
       libraryDependencies += "org.querki" %%% ("jquery-facade"+jsSuffix) % "0.11", version := querkiJSQueryVersion)
-
-  /*lazy val scalajsQuery = OsgiProject("scalajs-jquery", exports = Seq("org.scalajs.jquery.*")) settings(
-    libraryDependencies += "be.doeraene" %%% ("scalajs-jquery" + jsSuffix) % scalaJQueryVersion, version := scalaJQueryVersion)*/
 
   lazy val scalajsTools = OsgiProject("scalajs-tools", exports = Seq("org.scalajs.core.tools.*", "org.scalajs.core.ir.*", "com.google.javascript.*", "com.google.common.*", "rhino_ast.java.com.google.javascript.rhino.*", "org.json.*")) settings(
     libraryDependencies += "org.scala-js" %% "scalajs-tools" % scalajsVersion, version := scalajsVersion)
