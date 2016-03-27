@@ -43,7 +43,7 @@ class SSHPrivateKeyAuthenticationPanel(data: PrivateKeyAuthenticationData) exten
       bs.labeledField("Password", password),
       bs.labeledField("Host", target),
       bs.labeledField("Port", port),
-      bs.labeledField("Key file", privateKey.view)
+      bs.labeledField("Private key file", privateKey.view)
     )
   }
 
