@@ -10,5 +10,3 @@ ScalariformKeys.preferences <<= ScalariformKeys.preferences (p =>
   .setPreference(AlignSingleLineCaseStatements, true)
   .setPreference(CompactControlReadability, true)
   .setPreference(PreserveDanglingCloseParenthesis, true))
-
-libraryDependencies += "com.jsuereth" %% "scala-arm" % "1.3"
