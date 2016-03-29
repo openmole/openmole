@@ -33,16 +33,19 @@ trait Assembly {
         f ← from.listFiles()
       } recursiveCopy(f, new File(to, f.getName), streams)
     }
-    else if (!to.exists() || from.lastModified() > to.lastModified) {
+    else copy(from, to, streams)
+  }
+
+  private def copy(from: File, to: File, streams: TaskStreams) =
+    if (!to.exists() || from.lastModified() > to.lastModified) {
       streams.log.info(s"Copy file $from to $to ")
       from.getParentFile.mkdirs
       IO.copyFile(from, to, preserveLastModified = true)
     }
-  }
 
-  private def copyFileTask(from: File, destinationDir: File, streams: TaskStreams, name: Option[String] = None) = {
-    val to: File = if (from.isDirectory) destinationDir else destinationDir / name.getOrElse(from.getName)
-    recursiveCopy(from, to, streams)
+  private def copyFileTask(from: File, to: File, streams: TaskStreams) = {
+    if (from.isDirectory) recursiveCopy(from, to, streams)
+    else copy(from, to, streams)
     from → to
   }
 
@@ -69,7 +72,8 @@ trait Assembly {
     }.map {
       case (module, srcPath) ⇒
         val name = rename(module)
-        copyFileTask(srcPath, out, streams, name = Some(name))
+        val to = new File(out, name)
+        copyFileTask(srcPath, to, streams)
     }
   }
 
@@ -92,7 +96,7 @@ trait Assembly {
     copyResources <<=
       (resourcesAssemble, streams) map {
         case (resources, s) ⇒
-          resources.toSeq.map { case (from, to) ⇒ copyFileTask(from, to, s) }
+          resources.map { case (from, to) ⇒ copyFileTask(from, to, s) }
       },
     copyResources <++= (externalDependencyClasspath in Compile, assemblyDependenciesPath, dependencyName, dependencyFilter, streams) map copyLibraryDependencies
   )
@@ -143,10 +147,7 @@ trait Assembly {
       fileSet ⇒
         s.log.info("Zipping:\n\t")
 
-        val lCP = folder //targetFolders reduceLeft findLeastCommonPath
-
-        // s.log.info(lCP.getAbsolutePath)
-        // s.log.info(targetFolders.last.relativeTo(lCP).get.getPath)
+        val lCP = folder
 
         for {
           os ← tgzOS
@@ -243,7 +244,6 @@ object Assembly {
 
   class RichProjectSeq(s: Def.Initialize[Seq[ProjectReference]]) {
     def keyFilter[T](key: SettingKey[T], filter: (T) ⇒ Boolean, intransitive: Boolean = false) = projFilter(s, key, filter, intransitive)
-
     def sendTo(to: Def.Initialize[File]) = sendBundles(s zip to) //TODO: This function is specific to OSGI bundled projects. Make it less specific?
   }
 
@@ -257,17 +257,9 @@ object Assembly {
   def sendBundles(bundles: Def.Initialize[(Seq[ProjectReference], File)]): Def.Initialize[Task[Seq[(File, File)]]] = Def.bind(bundles) {
     case (projs, to) ⇒
       require(projs.nonEmpty)
-      val seqOTasks: Def.Initialize[Seq[Task[Seq[(File, File)]]]] = Def.Initialize.join(projs.map(p ⇒ (bundle in p) map {
-        f ⇒ Seq(f → to)
-      }))
+      val seqOTasks: Def.Initialize[Seq[Task[Seq[(File, File)]]]] = Def.Initialize.join(projs.map(p ⇒ (bundle in p) map { f ⇒ Seq(f → (to / f.getName)) }))
       seqOTasks { seq ⇒
-        seq.reduceLeft[Task[Seq[(File, File)]]] {
-          case (a, b) ⇒ a flatMap { i ⇒
-            b map {
-              _ ++ i
-            }
-          }
-        }
+        seq.reduceLeft[Task[Seq[(File, File)]]] { case (a, b) ⇒ a flatMap { i ⇒ b map { _ ++ i } } }
       }
   }
 }
