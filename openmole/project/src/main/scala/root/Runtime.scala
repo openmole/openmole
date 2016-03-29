@@ -30,6 +30,10 @@ object Runtime extends Defaults(runtime.REST) {
       Core.buildinfo
     )
 
+  lazy val launcher = OsgiProject("org.openmole.runtime.launcher", imports = Seq("*")) settings (
+    libraryDependencies += equinoxOSGi
+  )
+
   override def osgiSettings = super.osgiSettings ++ Seq(bundleType := Set())
 
 }

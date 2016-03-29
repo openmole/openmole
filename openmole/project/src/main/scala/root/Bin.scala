@@ -77,19 +77,21 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
 
   import OMKeys.OSGiApplication._
 
+  lazy val launcher = Project("launcher", dir / "launcher", settings = assemblySettings) settings (
+    assemblyDependenciesPath := assemblyPath.value / "lib",
+    resourcesAssemble <+= (resourceDirectory in Compile, assemblyPath) map { case (r, p) ⇒ r → (p / "bin") },
+    resourcesAssemble <+= (OsgiKeys.bundle in Runtime.launcher, assemblyPath) map { case (r, p) ⇒ r → (p / "lib") }
+  )
+
   lazy val openmole =
     Project("openmole", dir / "openmole", settings = tarProject ++ assemblySettings ++ osgiApplicationSettings) settings (commonsSettings: _*) settings (
       setExecutable ++= Seq("openmole", "openmole.bat"),
-      resourcesAssemble <+= (resourceDirectory in Compile, assemblyPath) map { case (r, p) ⇒ r → p },
-      resourcesAssemble <++= Seq(openmoleUI.project, Runtime.console.project, REST.server.project) sendTo {
-        assemblyPath / "plugins"
-      },
+      resourcesAssemble <+= (resourceDirectory in Compile, assemblyPath).identityMap,
+      resourcesAssemble <++= Seq(openmoleUI.project, Runtime.console.project, REST.server.project) sendTo { assemblyPath / "plugins" },
       resourcesAssemble <+= (assemble in openmoleCore, assemblyPath) map { case (r, p) ⇒ r → (p / "plugins") },
       resourcesAssemble <+= (assemble in openmoleGUI, assemblyPath) map { case (r, p) ⇒ r → (p / "plugins") },
       resourcesAssemble <+= (resourceDirectory in gui.Server.core in Compile, assemblyPath) map { case (r, p) ⇒ (r / "webapp") → (p / "webapp") },
-      buildJS <<= (fullOptJS in gui.Client.core in Compile) map {
-        _.data
-      },
+      buildJS <<= (fullOptJS in gui.Client.core in Compile) map { _.data },
       resourcesAssemble <+= (buildJS, assemblyPath) map { case (js, p) ⇒ rename(js, "openmole.js") → (p / "webapp/js") },
       resourcesAssemble <+= (buildJS, assemblyPath) map { case (js, p) ⇒ rename(new File(js.getParent, "org-openmole-gui-client-core-jsdeps.min.js"), "deps.js") → (p / "webapp/js") },
       resourcesAssemble <+= (assemble in dbServer, assemblyPath) map { case (r, p) ⇒ r → (p / "dbserver") },
