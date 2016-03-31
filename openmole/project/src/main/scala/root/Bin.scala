@@ -209,18 +209,21 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
     dependencyName := rename
   )
 
-  lazy val openmoleRuntime = Project("runtime", dir / "runtime", settings = tarProject ++ assemblySettings) settings (commonsSettings: _*) settings (
-    assemblyDependenciesPath := assemblyPath.value / "plugins",
-    resourcesAssemble <+= (resourceDirectory in Compile, assemblyPath) map { case (r, p) ⇒ r → p },
-    resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "runtime") sendTo (assemblyPath / "plugins"),
-    resourcesAssemble <+= (assemble in launcher, assemblyPath) map { case (r, p) ⇒ r → (p / "launcher") },
-    setExecutable ++= Seq("run.sh"),
-    Tar.name := "runtime.tar.gz",
-    libraryDependencies ++= coreDependencies,
-    dependencyFilter := filter,
-    dependencyName := rename,
-    pluginsDirectory := assemblyPath.value / "plugins"
-  )
+  lazy val openmoleRuntime =
+    OsgiProject("org.openmole.runtime", singleton = true, imports = Seq("*"), settings = tarProject ++ assemblySettings) dependsOn (Core.workflow, Core.batch, Core.serializer, Core.logging, Core.event, Core.exception) settings (commonsSettings: _*) settings (
+      assemblyDependenciesPath := assemblyPath.value / "plugins",
+      resourcesAssemble <+= (resourceDirectory in Compile, assemblyPath) map { case (r, p) ⇒ r → p },
+      resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "runtime") sendTo (assemblyPath / "plugins"),
+      resourcesAssemble <+= (assemble in launcher, assemblyPath) map { case (r, p) ⇒ r → (p / "launcher") },
+      resourcesAssemble <+= (OsgiKeys.bundle, assemblyPath) map { case (r, p) ⇒ r → (p / "plugins" / r.getName) },
+      setExecutable ++= Seq("run.sh"),
+      Tar.name := "runtime.tar.gz",
+      libraryDependencies ++= coreDependencies,
+      libraryDependencies += scopt,
+      dependencyFilter := filter,
+      dependencyName := rename,
+      pluginsDirectory := assemblyPath.value / "plugins"
+    )
 
   lazy val daemon = Project("daemon", dir / "daemon", settings = tarProject ++ assemblySettings ++ osgiApplicationSettings) settings (commonsSettings: _*) settings (
     assemblyDependenciesPath := assemblyPath.value / "plugins",

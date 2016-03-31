@@ -26,7 +26,7 @@ export LC_ALL="en_US.UTF-8"
 export LANG="en_US.UTF-8"
 
 java -Dfile.encoding=UTF-8 -Xss1M -Xms64m -Xmx${MEMORY} -Dosgi.locking=none -Dosgi.configuration.area=${CONFIGDIR} $FLAG -XX:ReservedCodeCacheSize=128m -XX:MaxMetaspaceSize=128m -XX:CompressedClassSpaceSize=128m -XX:+UseG1GC -XX:ParallelGCThreads=1 \
-  -cp "launcher/*" org.openmole.runtime.launcher.Launcher  --plugins plugins/ --run org.openmole.runtime.runtime.SimExplorer --osgi-directory ${CONFIGDIR} -- $@
+  -cp "launcher/*" org.openmole.runtime.launcher.Launcher  --plugins plugins/ --run org.openmole.runtime.SimExplorer --osgi-directory ${CONFIGDIR} -- $@
 
 RETURNCODE=$?
 

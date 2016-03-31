@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.runtime.runtime
+package org.openmole.runtime
 
 import java.io.File
 import java.io.FileInputStream

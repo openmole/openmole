@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.runtime.runtime
+package org.openmole.runtime
 
 import org.openmole.core.logging.LoggerService
 import org.openmole.core.pluginmanager.PluginManager
