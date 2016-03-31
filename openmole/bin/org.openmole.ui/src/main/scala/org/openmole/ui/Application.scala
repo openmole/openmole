@@ -18,31 +18,30 @@
 package org.openmole.ui
 
 import java.awt.Desktop
-import java.io.{ FileOutputStream, File }
+import java.io.{ File, FileOutputStream }
 import java.net.URI
+
+import com.sun.awt.AWTUtilities
 import org.eclipse.equinox.app.IApplication
-import org.eclipse.equinox.app.IApplicationContext
+import org.eclipse.osgi.launch.Equinox
 import org.openmole.core.project._
 import org.openmole.core.console.ScalaREPL
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.logging.LoggerService
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.replication.DBServerRunning
-import org.openmole.core.tools.io.Network
 import org.openmole.core.workspace.Workspace
-import org.openmole.core.workflow.task._
 import org.openmole.rest.server.RESTServer
 import org.openmole.tool.logger.Logger
+
 import annotation.tailrec
 import org.openmole.gui.server.core._
 import org.openmole.runtime.console._
 import org.openmole.tool.file._
 
-object Application extends Logger
+object Application extends Logger {
 
-import Application.Log._
-
-class Application extends IApplication {
+  import Log._
 
   lazy val consoleSplash =
     """  ___                   __  __  ___  _     _____    __
@@ -55,7 +54,7 @@ class Application extends IApplication {
 
   lazy val consoleUsage = "(Type :q to quit)"
 
-  override def start(context: IApplicationContext) = DBServerRunning.useDB {
+  def run(args: Array[String]): Int = DBServerRunning.useDB {
 
     sealed trait LaunchMode
     object ConsoleMode extends LaunchMode
@@ -130,9 +129,7 @@ class Application extends IApplication {
         case Nil                               ⇒ c
       }
 
-    val args: Array[String] = context.getArguments.get("application.args").asInstanceOf[Array[String]].map(_.trim)
-
-    val config = parse(args.toList)
+    val config = parse(args.map(_.trim).toList)
 
     config.loggerLevel.foreach(LoggerService.level)
 
@@ -211,10 +208,9 @@ class Application extends IApplication {
             }
         }
 
-      new Integer(retCode)
+      retCode
     }
 
   }
 
-  override def stop = {}
 }

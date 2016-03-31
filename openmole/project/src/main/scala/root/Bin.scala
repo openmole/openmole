@@ -18,11 +18,11 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
   val dir = file("bin")
 
   def filter(m: ModuleID) =
-    m.organization.startsWith("org.eclipse") ||
+    (m.organization.startsWith("org.eclipse") ||
       m.organization == "fr.iscpif.gridscale.bundle" ||
       m.organization == "org.bouncycastle" ||
       m.organization.contains("org.openmole") ||
-      m.organization == "org.osgi"
+      m.organization == "org.osgi") && m.name != "osgi"
 
   def pluginFilter(m: ModuleID) = m.name != "osgi" && m.name != "scala-library"
 
@@ -78,7 +78,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
   import OMKeys.OSGiApplication._
 
   lazy val openmole =
-    Project("openmole", dir / "openmole", settings = tarProject ++ assemblySettings ++ osgiApplicationSettings) settings (commonsSettings: _*) settings (
+    Project("openmole", dir / "openmole", settings = tarProject ++ assemblySettings) settings (commonsSettings: _*) settings (
       setExecutable ++= Seq("openmole", "openmole.bat"),
       resourcesAssemble <+= (resourceDirectory in Compile, assemblyPath).identityMap,
       resourcesAssemble <++= Seq(openmoleUI.project, Runtime.console.project, REST.server.project) sendTo { assemblyPath / "plugins" },
@@ -90,19 +90,16 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
       resourcesAssemble <+= (assemble in dbServer, assemblyPath) map { case (r, p) ⇒ r → (p / "dbserver") },
       resourcesAssemble <+= (assemble in consolePlugins, assemblyPath) map { case (r, p) ⇒ r → (p / "plugins") },
       resourcesAssemble <+= (Tar.tar in openmoleRuntime, assemblyPath) map { case (r, p) ⇒ r → (p / "runtime" / r.getName) },
+      resourcesAssemble <+= (assemble in launcher, assemblyPath) map { case (r, p) ⇒ r → (p / "launcher") },
       downloads := Seq(java368URL → "runtime/jvm-386.tar.gz", javax64URL → "runtime/jvm-x64.tar.gz"),
       libraryDependencies += Libraries.scalajHttp,
+      libraryDependencies += Libraries.osgiCompendium,
       dependencyFilter := filter,
       dependencyName := rename,
       assemblyDependenciesPath := assemblyPath.value / "plugins",
       Tar.name := "openmole.tar.gz",
       Tar.innerFolder := "openmole",
       pluginsDirectory := assemblyPath.value / "plugins",
-      header :=
-      """|eclipse.application=org.openmole.ui
-         |osgi.bundles.defaultStartLevel=4""".stripMargin,
-      startLevels := openmoleStartLevels,
-      config := assemblyPath.value / "configuration/config.ini",
       cleanFiles <++= cleanFiles in openmoleCore,
       cleanFiles <++= cleanFiles in openmoleGUI,
       cleanFiles <++= cleanFiles in consolePlugins,
@@ -307,17 +304,9 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
       config := assemblyPath.value / "configuration/config.ini"
     ) dependsOn (siteGeneration, Core.tools)
 
-  lazy val launcher = Project("launcher", dir / "launcher", settings = assemblySettings) settings (
-    setExecutable ++= Seq("launcher", "launcher.bat"),
-    assemblyDependenciesPath := assemblyPath.value / "lib",
-    resourcesAssemble <+= (resourceDirectory in Compile, assemblyPath).identityMap,
-    resourcesAssemble <+= (OsgiKeys.bundle in Runtime.launcher, assemblyPath) map { case (r, p) ⇒ r → (p / "lib" / r.getName) },
-    resourcesAssemble <+= (assemble in application, assemblyPath) map { case (r, p) ⇒ r → (p / "plugins") }
-  )
-
-  lazy val application = OsgiProject("org.openmole.application", singleton = true, settings = commonsSettings ++ assemblySettings) settings (
-    resourcesAssemble <+= (OsgiKeys.bundle, assemblyPath).map { case (r, p) ⇒ r → (p / r.getName) },
-    dependencyFilter := { d ⇒ d.name != "osgi" }
+  lazy val launcher = Project("launcher", dir / "target/launcher", settings = assemblySettings) settings (
+    autoScalaLibrary := false,
+    resourcesAssemble <+= (OsgiKeys.bundle in Runtime.launcher, assemblyPath) map { case (f, d) ⇒ f → (d / f.getName) }
   )
 
 }

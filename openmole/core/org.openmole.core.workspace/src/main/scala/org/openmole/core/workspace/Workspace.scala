@@ -18,10 +18,12 @@
 package org.openmole.core.workspace
 
 import java.io.File
+import java.security.Security
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicLong
 import java.util.logging.Level
 import java.util.logging.Logger
+
 import org.jasypt.util.text._
 import org.openmole.core.event.{ Event, EventDispatcher }
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }

@@ -224,8 +224,8 @@ object PluginManager extends Logger {
     seen.toList
   }
 
-  def directDependencies(b: Bundle) = b.adapt(classOf[BundleWiring]).getRequiredWires(null).map(_.getProvider.getBundle).filter(_.getBundleId != 0).distinct
-  def directDependingBundles(b: Bundle) = b.adapt(classOf[BundleWiring]).getProvidedWires(null).map(_.getRequirer.getBundle).filter(_.getBundleId != 0).distinct
+  def directDependencies(b: Bundle) = b.adapt(classOf[BundleWiring]).getRequiredWires(null).map(_.getProvider.getBundle).filter(_.getBundleId != Constants.SYSTEM_BUNDLE_ID).distinct
+  def directDependingBundles(b: Bundle) = b.adapt(classOf[BundleWiring]).getProvidedWires(null).map(_.getRequirer.getBundle).filter(_.getBundleId != Constants.SYSTEM_BUNDLE_ID).distinct
 
   def startAll: Seq[(Bundle, Throwable)] =
     Activator.contextOrException.getBundles.filter {
