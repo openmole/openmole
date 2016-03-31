@@ -22,63 +22,100 @@ import java.util.ServiceLoader
 
 import org.osgi.framework.Constants
 import org.osgi.framework.launch._
-import collection.JavaConversions._
 
+import collection.JavaConversions._
 import scala.annotation.tailrec
+import scala.util.{ Success, Try, Failure }
 
 object Launcher {
 
   def main(args: Array[String]): Unit = {
     case class Config(
-      directory: Option[File] = None,
-      ignored:   List[String] = Nil,
-      args:      List[String] = Nil
+      directory:     Option[File]   = None,
+      run:           Option[String] = None,
+      osgiDirectory: Option[String] = None,
+      ignored:       List[String]   = Nil,
+      args:          List[String]   = Nil
     )
 
-    def takeArg(args: List[String]) =
-      args match {
-        case h :: t ⇒ h
-        case Nil    ⇒ ""
-      }
-
-    def dropArg(args: List[String]) =
-      args match {
-        case h :: t ⇒ t
-        case Nil    ⇒ Nil
-      }
-
-    def takeArgs(args: List[String]) = args.takeWhile(!_.startsWith("-"))
-    def dropArgs(args: List[String]) = args.dropWhile(!_.startsWith("-"))
+    //    def takeArg(args: List[String]) =
+    //      args match {
+    //        case h :: t ⇒ h
+    //        case Nil    ⇒ ""
+    //      }
+    //
+    //    def dropArg(args: List[String]) =
+    //      args match {
+    //        case h :: t ⇒ t
+    //        case Nil    ⇒ Nil
+    //      }
+    //
+    //    def takeArgs(args: List[String]) = args.takeWhile(!_.startsWith("-"))
+    //    def dropArgs(args: List[String]) = args.dropWhile(!_.startsWith("-"))
 
     @tailrec def parse(args: List[String], c: Config = Config()): Config = args match {
-      case "-d" :: tail ⇒ parse(tail.tail, c.copy(directory = Some(new File(tail.head))))
-      case "--" :: tail ⇒ parse(Nil, c.copy(args = tail))
-      case s :: tail    ⇒ parse(tail, c.copy(ignored = s :: c.ignored))
-      case Nil          ⇒ c
+      case "--plugins" :: tail        ⇒ parse(tail.tail, c.copy(directory = tail.headOption.map(new File(_))))
+      case "--run" :: tail            ⇒ parse(tail.tail, c.copy(run = Some(tail.head)))
+      case "--osgi-directory" :: tail ⇒ parse(tail.tail, c.copy(osgiDirectory = tail.headOption))
+      case "--" :: tail               ⇒ parse(Nil, c.copy(args = tail))
+      case s :: tail                  ⇒ parse(tail, c.copy(ignored = s :: c.ignored))
+      case Nil                        ⇒ c
     }
+
+    val config = parse(args.toList)
 
     val frameworkFactory = ServiceLoader.load(classOf[FrameworkFactory]).iterator().next()
 
     val osgiConfig = Map[String, String](
       (Constants.FRAMEWORK_STORAGE, ""),
       (Constants.FRAMEWORK_STORAGE_CLEAN, "true")
-    )
+    ) ++ config.osgiDirectory.map(Constants.FRAMEWORK_STORAGE → _)
 
     val framework = frameworkFactory.newFramework(osgiConfig)
     framework.init()
-    val context = framework.getBundleContext
 
-    val config = parse(args.toList)
+    val ret = try {
 
-    val bundles =
-      for {
-        f ← Option(config.directory.get.listFiles()).getOrElse(Array.empty)
-      } yield context.installBundle(f.toURI.toString)
+      val context = framework.getBundleContext
 
-    bundles.foreach { _.start }
+      val bundles =
+        for {
+          f ← Option(config.directory.get.listFiles()).getOrElse(Array.empty)
+        } yield context.installBundle(f.toURI.toString)
 
-    framework.waitForStop(0)
-    sys.exit(0)
+      bundles.foreach {
+        _.start
+      }
+
+      def mains(clazz: String) =
+        bundles.flatMap { b ⇒
+          Try(b.loadClass(clazz).asInstanceOf[Class[Any]]).toOption
+        }
+
+      val mainClass =
+        config.run match {
+          case None ⇒ throw new RuntimeException(s"You should pass a run class argument")
+          case Some(m) ⇒
+            mains(m).toList match {
+              case Nil      ⇒ throw new RuntimeException(s"Main class $m not found")
+              case h :: Nil ⇒ h
+              case _        ⇒ throw new RuntimeException(s"${m.size} run class $m have been found")
+            }
+        }
+
+      Try(mainClass.getDeclaredMethod("run", classOf[Array[String]])) match {
+        case Failure(_) ⇒ throw new RuntimeException(s"No run method with signature int run(s: Array[String]) has been found in ${mainClass.getCanonicalName}")
+        case Success(m) ⇒
+          if (java.lang.reflect.Modifier.isStatic(m.getModifiers)) {
+            if (!classOf[Int].isAssignableFrom(m.getReturnType)) throw new RuntimeException(s"Method run should return an int instead of ${m.getReturnType}")
+            m.invoke(null, config.args.toArray).asInstanceOf[Int]
+          }
+          else throw new RuntimeException(s"Method run should be static")
+      }
+    }
+    finally framework.stop()
+
+    sys.exit(ret)
   }
 
 }

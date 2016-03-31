@@ -77,12 +77,6 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
 
   import OMKeys.OSGiApplication._
 
-  lazy val launcher = Project("launcher", dir / "launcher", settings = assemblySettings) settings (
-    assemblyDependenciesPath := assemblyPath.value / "lib",
-    resourcesAssemble <+= (resourceDirectory in Compile, assemblyPath) map { case (r, p) ⇒ r → (p / "bin") },
-    resourcesAssemble <+= (OsgiKeys.bundle in Runtime.launcher, assemblyPath) map { case (r, p) ⇒ r → (p / "lib" / r.getName) }
-  )
-
   lazy val openmole =
     Project("openmole", dir / "openmole", settings = tarProject ++ assemblySettings ++ osgiApplicationSettings) settings (commonsSettings: _*) settings (
       setExecutable ++= Seq("openmole", "openmole.bat"),
@@ -312,5 +306,17 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
       pluginsDirectory := assemblyPath.value / "plugins",
       config := assemblyPath.value / "configuration/config.ini"
     ) dependsOn (siteGeneration, Core.tools)
+
+  lazy val launcher = Project("launcher", dir / "launcher", settings = assemblySettings) settings (
+    setExecutable ++= Seq("launcher", "launcher.bat"),
+    assemblyDependenciesPath := assemblyPath.value / "lib",
+    resourcesAssemble <+= (resourceDirectory in Compile, assemblyPath).identityMap,
+    resourcesAssemble <+= (OsgiKeys.bundle in Runtime.launcher, assemblyPath) map { case (r, p) ⇒ r → (p / "lib" / r.getName) },
+    resourcesAssemble <+= (assemble in application, assemblyPath) map { case (r, p) ⇒ r → (p / "plugins") }
+  )
+
+  lazy val application = OsgiProject("org.openmole.application", singleton = true, settings = commonsSettings ++ assemblySettings) settings (
+    resourcesAssemble <+= (OsgiKeys.bundle, assemblyPath).map { case (r, p) ⇒ r → (p / r.getName) }
+  )
 
 }
