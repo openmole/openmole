@@ -209,21 +209,17 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
     dependencyName := rename
   )
 
-  lazy val openmoleRuntime = Project("runtime", dir / "runtime", settings = tarProject ++ assemblySettings ++ osgiApplicationSettings) settings (commonsSettings: _*) settings (
+  lazy val openmoleRuntime = Project("runtime", dir / "runtime", settings = tarProject ++ assemblySettings) settings (commonsSettings: _*) settings (
     assemblyDependenciesPath := assemblyPath.value / "plugins",
     resourcesAssemble <+= (resourceDirectory in Compile, assemblyPath) map { case (r, p) ⇒ r → p },
     resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "runtime") sendTo (assemblyPath / "plugins"),
+    resourcesAssemble <+= (assemble in launcher, assemblyPath) map { case (r, p) ⇒ r → (p / "launcher") },
     setExecutable ++= Seq("run.sh"),
     Tar.name := "runtime.tar.gz",
-    libraryDependencies ++= coreDependencies ++ equinox,
+    libraryDependencies ++= coreDependencies,
     dependencyFilter := filter,
     dependencyName := rename,
-    pluginsDirectory := assemblyPath.value / "plugins",
-    header :=
-    """ |eclipse.application=org.openmole.runtime.runtime
-        |osgi.bundles.defaultStartLevel=4""".stripMargin,
-    startLevels := openmoleStartLevels,
-    config := assemblyPath.value / "configuration/config.ini"
+    pluginsDirectory := assemblyPath.value / "plugins"
   )
 
   lazy val daemon = Project("daemon", dir / "daemon", settings = tarProject ++ assemblySettings ++ osgiApplicationSettings) settings (commonsSettings: _*) settings (

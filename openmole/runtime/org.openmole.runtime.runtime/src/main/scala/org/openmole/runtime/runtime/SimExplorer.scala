@@ -17,7 +17,6 @@
 
 package org.openmole.runtime.runtime
 
-import org.eclipse.equinox.app._
 import org.openmole.core.logging.LoggerService
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.tool.file._
@@ -29,15 +28,12 @@ import org.openmole.core.serializer.SerialiserService
 import org.openmole.core.batch.storage._
 import scala.util.{ Success, Failure }
 
-object SimExplorer extends Logger
+object SimExplorer extends Logger {
 
-import SimExplorer.Log._
+  import Log._
 
-class SimExplorer extends IApplication {
-
-  override def start(context: IApplicationContext) = {
+  def run(args: Array[String]): Int = {
     try {
-      val args = context.getArguments.get(IApplicationContext.APPLICATION_ARGS).asInstanceOf[Array[String]]
 
       case class Config(
         storage:       Option[String] = None,
@@ -99,9 +95,7 @@ class SimExplorer extends IApplication {
         throw t
     }
 
-    IApplication.EXIT_OK
-
+    0
   }
-  override def stop = {}
 
 }
