@@ -316,7 +316,8 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
   )
 
   lazy val application = OsgiProject("org.openmole.application", singleton = true, settings = commonsSettings ++ assemblySettings) settings (
-    resourcesAssemble <+= (OsgiKeys.bundle, assemblyPath).map { case (r, p) ⇒ r → (p / r.getName) }
+    resourcesAssemble <+= (OsgiKeys.bundle, assemblyPath).map { case (r, p) ⇒ r → (p / r.getName) },
+    dependencyFilter := { d ⇒ d.name != "osgi" }
   )
 
 }

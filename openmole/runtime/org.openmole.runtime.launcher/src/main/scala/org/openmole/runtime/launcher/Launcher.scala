@@ -38,21 +38,6 @@ object Launcher {
       args:          List[String]   = Nil
     )
 
-    //    def takeArg(args: List[String]) =
-    //      args match {
-    //        case h :: t ⇒ h
-    //        case Nil    ⇒ ""
-    //      }
-    //
-    //    def dropArg(args: List[String]) =
-    //      args match {
-    //        case h :: t ⇒ t
-    //        case Nil    ⇒ Nil
-    //      }
-    //
-    //    def takeArgs(args: List[String]) = args.takeWhile(!_.startsWith("-"))
-    //    def dropArgs(args: List[String]) = args.dropWhile(!_.startsWith("-"))
-
     @tailrec def parse(args: List[String], c: Config = Config()): Config = args match {
       case "--plugins" :: tail        ⇒ parse(tail.tail, c.copy(directory = tail.headOption.map(new File(_))))
       case "--run" :: tail            ⇒ parse(tail.tail, c.copy(run = Some(tail.head)))
