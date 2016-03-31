@@ -1,4 +1,4 @@
-package org.openmole.runtime.launcher;
+package org.openmole.launcher;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -7,7 +7,6 @@ import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
 
 import java.io.File;
-import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.*;
 

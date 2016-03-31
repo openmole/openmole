@@ -303,9 +303,10 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
       config := assemblyPath.value / "configuration/config.ini"
     ) dependsOn (siteGeneration, Core.tools)
 
-  lazy val launcher = Project("launcher", dir / "target/launcher", settings = assemblySettings) settings (
+  lazy val launcher = OsgiProject("org.openmole.launcher", imports = Seq("*"), settings = assemblySettings) settings (
     autoScalaLibrary := false,
-    resourcesAssemble <+= (OsgiKeys.bundle in Runtime.launcher, assemblyPath) map { case (f, d) ⇒ f → (d / f.getName) }
+    libraryDependencies += equinoxOSGi,
+    resourcesAssemble <+= (OsgiKeys.bundle, assemblyPath) map { case (f, d) ⇒ f → (d / f.getName) }
   )
 
 }
