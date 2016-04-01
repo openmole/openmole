@@ -269,40 +269,30 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
       imports = Seq("*"),
       settings = commonsSettings ++ scalatex.SbtPlugin.projectSettings ++ assemblySettings
     ) settings (
-        OsgiKeys.bundle <<= OsgiKeys.bundle dependsOn (assemble),
         organization := "org.openmole.site",
         OsgiKeys.exportPackage := Seq("scalatex.openmole.*") ++ OsgiKeys.exportPackage.value,
         libraryDependencies += Libraries.xstream,
         libraryDependencies += Libraries.scalatexSite,
         libraryDependencies += Libraries.scalaLang,
-        libraryDependencies ++= equinox,
         libraryDependencies += Libraries.jgit intransitive (),
         libraryDependencies += Libraries.txtmark,
         libraryDependencies += Libraries.toolxitBibtex intransitive (),
-        resourcesAssemble <+= (Tar.tar in openmole, resourceManaged in Compile) map { case (f, d) ⇒ f → (d / f.getName) },
-        resourcesAssemble <+= (Tar.tar in daemon, resourceManaged in Compile) map { case (f, d) ⇒ f → (d / f.getName) },
-        resourcesAssemble <+= (Tar.tar in api, resourceManaged in Compile) map { case (doc, d) ⇒ doc → (d / doc.getName) },
-        dependencyFilter := { _ ⇒ false }
+        setExecutable ++= Seq("site"),
+        assemblyDependenciesPath := assemblyPath.value / "plugins",
+        resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "doc") sendTo (assemblyPath / "plugins"),
+        resourcesAssemble <+= (resourceDirectory in Compile, assemblyPath) map { case (r, p) ⇒ (r / "site") → (p / "site") },
+        resourcesAssemble <+= (resourceDirectory in Compile, assemblyPath) map { case (r, p) ⇒ r → (p / "resources") },
+        resourcesAssemble <+= (OsgiKeys.bundle, assemblyPath) map { case (r, p) ⇒ r → (p / "plugins" / r.getName) },
+        resourcesAssemble <+= (assemble in openmoleCore, assemblyPath) map { case (r, p) ⇒ r → (p / "plugins") },
+        resourcesAssemble <+= (assemble in consolePlugins, assemblyPath) map { case (r, p) ⇒ r → (p / "plugins") },
+        resourcesAssemble <+= (assemble in launcher, assemblyPath) map { case (r, p) ⇒ r → (p / "launcher") },
+        resourcesAssemble <+= (Tar.tar in openmole, assemblyPath) map { case (f, d) ⇒ f → (d / "resources" / f.getName) },
+        resourcesAssemble <+= (Tar.tar in daemon, assemblyPath) map { case (f, d) ⇒ f → (d / "resources" / f.getName) },
+        resourcesAssemble <+= (Tar.tar in api, assemblyPath) map { case (doc, d) ⇒ doc → (d / "resources" / doc.getName) },
+        dependencyFilter := filter,
+        dependencyName := rename
       ) dependsOn (Core.project, Core.buildinfo, root.Doc.doc)
 
-  lazy val site =
-    Project("site", dir / "site", settings = assemblySettings ++ osgiApplicationSettings) settings (commonsSettings: _*) settings (
-      setExecutable ++= Seq("site"),
-      resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "doc") sendTo (assemblyPath / "plugins"),
-      resourcesAssemble <+= (resourceDirectory in Compile, assemblyPath) map { case (r, p) ⇒ r → p },
-      resourcesAssemble <++= Seq(siteGeneration.project) sendTo (assemblyPath / "plugins"),
-      resourcesAssemble <+= (assemble in openmoleCore, assemblyPath) map { case (r, p) ⇒ r → (p / "plugins") },
-      resourcesAssemble <+= (assemble in consolePlugins, assemblyPath) map { case (r, p) ⇒ r → (p / "plugins") },
-      dependencyFilter := filter,
-      assemblyDependenciesPath := assemblyPath.value / "plugins",
-      dependencyName := rename,
-      header :=
-      """|eclipse.application=org.openmole.site
-          |osgi.bundles.defaultStartLevel=4""".stripMargin,
-      startLevels := openmoleStartLevels ++ Seq("plugin" → 3),
-      pluginsDirectory := assemblyPath.value / "plugins",
-      config := assemblyPath.value / "configuration/config.ini"
-    ) dependsOn (siteGeneration, Core.tools)
 
   lazy val launcher = OsgiProject("org.openmole.launcher", imports = Seq("*"), settings = assemblySettings) settings (
     autoScalaLibrary := false,

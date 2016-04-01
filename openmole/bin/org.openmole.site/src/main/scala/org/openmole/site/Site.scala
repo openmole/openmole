@@ -17,22 +17,24 @@
 
 package org.openmole.site
 
-import java.io.File
+import java.io.{ File, FileInputStream }
 import java.util.zip.GZIPInputStream
+
 import ammonite.ops.Path
-import com.thoughtworks.xstream.XStream
-import org.eclipse.equinox.app._
 import org.openmole.core.buildinfo.MarketIndex
 import org.openmole.core.serializer.SerialiserService
 import org.openmole.core.workspace.Workspace
 import org.openmole.site.market.Market
 import org.openmole.tool.file._
 import org.openmole.tool.tar._
+
 import scalatags.Text.all
 import scalatags.Text.all._
 import scala.sys.process.BasicIO
 import org.openmole.site.credits._
 import org.openmole.core.buildinfo
+
+import scala.annotation.tailrec
 
 object Site {
 
@@ -55,18 +57,28 @@ object Site {
         |<noscript><p><img src="//piwik.iscpif.fr/piwik.php?idsite=1" style="border:0;" alt="" /></p></noscript>
         |<!-- End Piwik Code -->
       """.stripMargin)
-}
 
-import Site._
+  def run(args: Array[String]): Int = {
+    case class Parameters(
+      target:    Option[File] = None,
+      test:      Boolean      = true,
+      resources: Option[File] = None,
+      ignored:   List[String] = Nil
+    )
 
-class Site extends IApplication {
+    @tailrec def parse(args: List[String], c: Parameters = Parameters()): Parameters = args match {
+      case "--target" :: tail    ⇒ parse(tail.tail, c.copy(target = tail.headOption.map(new File(_))))
+      case "--no-test" :: tail   ⇒ parse(tail, c.copy(test = false))
+      case "--resources" :: tail ⇒ parse(tail.tail, c.copy(resources = tail.headOption.map(new File(_))))
+      case s :: tail             ⇒ parse(tail, c.copy(ignored = s :: c.ignored))
+      case Nil                   ⇒ c
+    }
 
-  override def start(context: IApplicationContext) = {
-    val args: Array[String] = context.getArguments.get("application.args").asInstanceOf[Array[String]].map(_.trim)
+    val parameters = parse(args.toList.map(_.trim))
 
-    Config.testScript = !args.contains("--no-test")
+    Config.testScript = !parameters.test
 
-    val dest = new File(args.filterNot(_.startsWith("-"))(0))
+    val dest = parameters.target.get
     dest.recursiveDelete
 
     val m = new Market(Market.entries, dest)
@@ -131,7 +143,8 @@ class Site extends IApplication {
         val f = new File(dest, destination)
         f.createParentDir
         f.withOutputStream { os ⇒
-          withClosable(getClass.getClassLoader.getResourceAsStream(source)) { is ⇒
+          val resource = parameters.resources.get / source
+          resource.withInputStream { is ⇒
             assert(is != null, s"Resource $source doesn't exist")
             BasicIO.transferFully(is, os)
           }
@@ -139,16 +152,15 @@ class Site extends IApplication {
       case ArchiveResource(name, dir) ⇒
         val f = new File(dest, dir)
         f.mkdirs
-        withClosable(new TarInputStream(new GZIPInputStream(getClass.getClassLoader.getResourceAsStream(name)))) {
+        val resource = parameters.resources.get / name
+        withClosable(new TarInputStream(new GZIPInputStream(new FileInputStream(resource)))) {
           _.extract(f)
         }
     }
 
     DSLTest.runTest.get
 
-    IApplication.EXIT_OK
+    0
   }
-
-  override def stop() = {}
 
 }

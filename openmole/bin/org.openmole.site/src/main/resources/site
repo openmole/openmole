@@ -27,7 +27,9 @@ cd "$CURDIR"
 
 CONFIGDIR=/tmp/site_`date +%s`_$RANDOM
 
-java -Dosgi.configuration.area="${CONFIGDIR}" -Dfile.encoding=UTF-8 -Xmx3G -Xss10m -jar "$LOCATION/plugins/org.eclipse.equinox.launcher.jar" -consoleLog $@
+java -Dfile.encoding=UTF-8 -Xmx3G -Xss10m \
+   -cp "${LOCATION}/launcher/*" org.openmole.launcher.Launcher  --plugins ${LOCATION}/plugins/ --run org.openmole.site.Site --osgi-directory ${CONFIGDIR} -- \
+   --resources ${LOCATION}/resources $@
 
 RETURNCODE=$?
 
