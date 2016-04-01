@@ -15,22 +15,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.runtime.daemon
+package org.openmole.daemon
 
-import org.eclipse.equinox.app._
-import org.openmole.core.logging.LoggerService
-import org.openmole.tool.logger.Logger
+import org.openmole.core.logging._
+import org.openmole.tool.logger._
 import scopt._
 
-object Daemon extends Logger
+object Daemon extends Logger {
 
-import Daemon.Log._
+  import Log._
 
-class Daemon extends IApplication {
-  override def start(context: IApplicationContext) = {
+  def run(args: Array[String]) = {
     try {
-      val args = context.getArguments.get(IApplicationContext.APPLICATION_ARGS).asInstanceOf[Array[String]]
-
       case class Config(
         host:      Option[String] = None,
         password:  Option[String] = None,
@@ -67,9 +63,8 @@ class Daemon extends IApplication {
     catch {
       case t: Throwable ⇒ logger.log(SEVERE, "Error during daemon execution", t)
     }
-    IApplication.EXIT_OK
-  }
 
-  override def stop = {}
+    0
+  }
 
 }

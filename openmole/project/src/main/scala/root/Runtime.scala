@@ -11,10 +11,10 @@ object Runtime extends Defaults(runtime.REST) {
   val dbserver = OsgiProject("org.openmole.runtime.dbserver", imports = Seq("*")) dependsOn (Core.replication) settings (bundleType += "dbserver",
     libraryDependencies ++= Seq(h2, slf4j, xstream))
 
-  val daemon = OsgiProject("org.openmole.runtime.daemon", singleton = true, imports = Seq("*")) dependsOn (Core.workflow, Core.workflow, Core.batch, Core.workspace,
-    Core.fileService, Core.exception, Core.tools, Core.logging, plugin.Environment.desktopgrid) settings
-    (bundleType += "daemon",
-      libraryDependencies ++= Seq(scalaLang, logging, jodaTime, scopt, equinoxCommon, equinoxApp, gridscaleSSH, equinoxOSGi))
+  //  val daemon = OsgiProject("org.openmole.runtime.daemon", singleton = true, imports = Seq("*")) dependsOn (Core.workflow, Core.workflow, Core.batch, Core.workspace,
+  //    Core.fileService, Core.exception, Core.tools, Core.logging, plugin.Environment.desktopgrid) settings
+  //    (bundleType += "daemon",
+  //      libraryDependencies ++= Seq(scalaLang, logging, jodaTime, scopt, equinoxCommon, equinoxApp, gridscaleSSH, equinoxOSGi))
 
   lazy val console = OsgiProject("org.openmole.runtime.console", imports = Seq("*")) settings (
     libraryDependencies += upickle

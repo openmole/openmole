@@ -225,32 +225,33 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
       pluginsDirectory := assemblyPath.value / "plugins"
     )
 
-  lazy val daemon = Project("daemon", dir / "daemon", settings = tarProject ++ assemblySettings ++ osgiApplicationSettings) settings (commonsSettings: _*) settings (
-    assemblyDependenciesPath := assemblyPath.value / "plugins",
-    resourcesAssemble <++=
-    Seq(Runtime.daemon.project, plugin.Environment.gridscale.project, plugin.Environment.desktopgrid.project, plugin.Tool.sftpserver.project) sendTo (assemblyPath / "plugins"),
-    resourcesAssemble <+= (assemble in openmoleCore, assemblyPath) map { case (r, p) ⇒ r → (p / "plugins") },
-    resourcesAssemble <+= (resourceDirectory in Compile, assemblyPath) map { case (r, p) ⇒ r → p },
-    libraryDependencies ++= Seq(
-      Libraries.sshd,
-      gridscale,
-      gridscaleSSH,
-      bouncyCastle
-    ) ++ equinox ++ coreDependencies,
-    assemblyDependenciesPath := assemblyPath.value / "plugins",
-    dependencyFilter := filter,
-    dependencyName := rename,
-    setExecutable ++= Seq("openmole-daemon", "openmole-daemon.bat"),
-    dependencyName := rename,
-    Tar.name := "openmole-daemon.tar.gz",
-    Tar.innerFolder := "openmole-daemon",
-    pluginsDirectory := assemblyPath.value / "plugins",
-    header :=
-    """|eclipse.application=org.openmole.runtime.daemon
-        |osgi.bundles.defaultStartLevel=4""".stripMargin,
-    startLevels := openmoleStartLevels,
-    config := assemblyPath.value / "configuration/config.ini"
-  )
+  lazy val daemon = OsgiProject("org.openmole.daemon", settings = tarProject ++ assemblySettings) settings (commonsSettings: _*) dependsOn (Core.workflow, Core.workflow, Core.batch, Core.workspace,
+    Core.fileService, Core.exception, Core.tools, Core.logging, plugin.Environment.desktopgrid) settings (
+      assemblyDependenciesPath := assemblyPath.value / "plugins",
+      resourcesAssemble <++=
+      Seq(plugin.Environment.gridscale.project, plugin.Environment.desktopgrid.project, plugin.Tool.sftpserver.project) sendTo (assemblyPath / "plugins"),
+      resourcesAssemble <+= (assemble in openmoleCore, assemblyPath) map { case (r, p) ⇒ r → (p / "plugins") },
+      resourcesAssemble <+= (OsgiKeys.bundle, assemblyPath) map { case (r, p) ⇒ r → (p / "plugins" / r.getName) },
+      resourcesAssemble <+= (resourceDirectory in Compile, assemblyPath) map { case (r, p) ⇒ r → p },
+      resourcesAssemble <+= (assemble in launcher, assemblyPath) map { case (r, p) ⇒ r → (p / "launcher") },
+      libraryDependencies ++= Seq(
+        Libraries.sshd,
+        gridscale,
+        gridscaleSSH,
+        bouncyCastle,
+        scalaLang,
+        logging,
+        jodaTime,
+        scopt
+      ) ++ coreDependencies,
+      assemblyDependenciesPath := assemblyPath.value / "plugins",
+      dependencyFilter := filter,
+      dependencyName := rename,
+      setExecutable ++= Seq("openmole-daemon", "openmole-daemon.bat"),
+      dependencyName := rename,
+      Tar.name := "openmole-daemon.tar.gz",
+      Tar.innerFolder := "openmole-daemon"
+    )
 
   lazy val api = Project("api", dir / "target" / "api") settings (commonsSettings: _*) settings (
     unidocSettings: _*

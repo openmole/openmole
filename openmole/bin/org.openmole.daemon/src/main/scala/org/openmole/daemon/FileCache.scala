@@ -15,7 +15,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.runtime.daemon
+package org.openmole.daemon
+
+import java.io.File
 
 import java.io.File
 import org.openmole.core.batch.message.FileMessage
