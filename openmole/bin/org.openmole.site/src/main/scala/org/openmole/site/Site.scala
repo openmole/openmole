@@ -76,7 +76,7 @@ object Site {
 
     val parameters = parse(args.toList.map(_.trim))
 
-    Config.testScript = !parameters.test
+    Config.testScript = parameters.test
 
     val dest = parameters.target.get
     dest.recursiveDelete
