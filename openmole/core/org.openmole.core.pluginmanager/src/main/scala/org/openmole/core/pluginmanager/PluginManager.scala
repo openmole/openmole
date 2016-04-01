@@ -35,24 +35,13 @@ import scala.concurrent.stm._
 import scala.util.{ Failure, Success, Try }
 
 case class BundlesInfo(
-  files:                      Map[File, (Long, Long)],
-  resolvedDirectDependencies: Map[Long, Set[Long]],
-  providedDependencies:       Set[Long]
+  files:                Map[File, (Long, Long)],
+  providedDependencies: Set[Long]
 )
 
 object PluginManager extends Logger {
 
   import Log._
-
-  def ecliseBundles = Set(
-    "org.eclipse.equinox.common",
-    "org.eclipse.core.contenttype",
-    "org.eclipse.core.jobs",
-    "org.eclipse.core.runtime",
-    "org.eclipse.equinox.app",
-    "org.eclipse.equinox.registry",
-    "org.eclipse.equinox.preferences"
-  )
 
   private val bundlesInfo = Ref(None: Option[BundlesInfo])
   private val resolvedPluginDependenciesCache = TMap[Long, Iterable[Long]]()
@@ -73,8 +62,9 @@ object PluginManager extends Logger {
 
   def bundles = Activator.contextOrException.getBundles.filter(!_.isSystem).toSeq
   def bundleFiles = infos.files.keys
+
   def dependencies(file: File): Option[Iterable[File]] =
-    infos.files.get(file).map { case (id, _) ⇒ allPluginDependencies(id).map { l ⇒ Activator.contextOrException.getBundle(l).file } }
+    infos.files.get(file).map { case (id, _) ⇒ allPluginDependencies(Activator.contextOrException.getBundle(id)).map { l ⇒ Activator.contextOrException.getBundle(l).file } }
 
   def isClassProvidedByAPlugin(c: Class[_]) = {
     val b = FrameworkUtil.getBundle(c)
@@ -87,20 +77,17 @@ object PluginManager extends Logger {
 
   def bundleForClass(c: Class[_]): Bundle = FrameworkUtil.getBundle(c)
 
-  def bundlesForClass(c: Class[_]): Iterable[Bundle] = synchronized {
-    allDependencies(bundleForClass(c).getBundleId).map { Activator.contextOrException.getBundle }
-  }
+  def bundlesForClass(c: Class[_]): Iterable[Bundle] =
+    allDependencies(bundleForClass(c))
 
-  def pluginsForClass(c: Class[_]): Iterable[File] = synchronized {
-    allPluginDependencies(bundleForClass(c).getBundleId).map { l ⇒ Activator.contextOrException.getBundle(l).file }
-  }
+  def pluginsForClass(c: Class[_]): Iterable[File] =
+    allPluginDependencies(bundleForClass(c)).map { l ⇒ Activator.contextOrException.getBundle(l).file }
 
-  def allDepending(file: File, filter: Bundle ⇒ Boolean): Iterable[File] = synchronized {
+  def allDepending(file: File, filter: Bundle ⇒ Boolean): Iterable[File] =
     bundle(file) match {
       case Some(b) ⇒ allDependingBundles(b, filter).map { _.file }
       case None    ⇒ Iterable.empty
     }
-  }
 
   def isPlugin(file: File) = {
     def isDirectoryPlugin(file: File) = file.isDirectory && file./("META-INF")./("MANIFEST.MF").exists
@@ -152,10 +139,12 @@ object PluginManager extends Logger {
 
   def bundle(file: File) = infos.files.get(file.getCanonicalFile).map { id ⇒ Activator.contextOrException.getBundle(id._1) }
 
-  private def allDependencies(b: Long) = synchronized { dependencies(List(b)) }
+  private def allDependencies(b: Bundle) = dependencies(List(b))
 
-  private def allPluginDependencies(b: Long) = atomic { implicit ctx ⇒
-    resolvedPluginDependenciesCache.getOrElseUpdate(b, dependencies(List(b)).filter(b ⇒ !infos.providedDependencies.contains(b)))
+  private def allPluginDependencies(b: Bundle) = atomic { implicit ctx ⇒
+    resolvedPluginDependenciesCache.
+      getOrElseUpdate(b.getBundleId, dependencies(List(b)).map(_.getBundleId)).
+      filter(b ⇒ !infos.providedDependencies.contains(b))
   }
 
   private def installBundle(f: File) =
@@ -168,36 +157,29 @@ object PluginManager extends Logger {
       case t: Throwable ⇒ throw new InternalProcessingError(t, "Installing bundle " + f)
     }
 
-  private def dependencies(bundles: Iterable[Long]): Iterable[Long] =
-    dependencies(bundles, infos.resolvedDirectDependencies)
-
-  private def dependencies(bundles: Iterable[Long], resolvedDirectDependencies: Map[Long, Set[Long]]): Iterable[Long] = {
-    val ret = new ListBuffer[Long]
-    var toProceed = new ListBuffer[Long] ++ bundles
+  private def dependencies(bundles: Iterable[Bundle]): Iterable[Bundle] = {
+    val seen = mutable.Set[Bundle]() ++ bundles
+    var toProceed = new ListBuffer[Bundle] ++ bundles
 
     while (!toProceed.isEmpty) {
-      val cur = toProceed.remove(0)
-      ret += cur
-      toProceed ++= resolvedDirectDependencies.getOrElse(cur, Iterable.empty).filter(b ⇒ !ret.contains(b))
+      val current = toProceed.remove(0)
+      for {
+        b ← directDependencies(current)
+      } if (!seen(b)) {
+        seen += b
+        toProceed += b
+      }
     }
-
-    ret.distinct
+    seen.toList
   }
 
   private def infos: BundlesInfo = atomic { implicit ctx ⇒
     bundlesInfo() match {
       case None ⇒
         val bs = bundles
-
-        val resolvedDirectDependencies: Map[Long, Set[Long]] = bs.map(b ⇒ b.getBundleId → directDependencies(b).map(_.getBundleId).toSet).toMap
-
-        val providedDependencies =
-          dependencies(bs.filter(b ⇒ b.isProvided).map { _.getBundleId }, resolvedDirectDependencies).toSet ++
-            dependencies(bs.filter(b ⇒ ecliseBundles.contains(b.getSymbolicName)).map(_.getBundleId), resolvedDirectDependencies)
-
-        val files = bundles.map(b ⇒ b.file.getCanonicalFile → ((b.getBundleId, b.file.lastModification))).toMap
-
-        val info = BundlesInfo(files, resolvedDirectDependencies, providedDependencies)
+        val providedDependencies = dependencies(bs.filter(b ⇒ b.isProvided)).map(_.getBundleId).toSet
+        val files = bs.map(b ⇒ b.file.getCanonicalFile → ((b.getBundleId, b.file.lastModification))).toMap
+        val info = BundlesInfo(files, providedDependencies)
         bundlesInfo() = Some(info)
         info
       case Some(bundlesInfo) ⇒ bundlesInfo
@@ -224,8 +206,12 @@ object PluginManager extends Logger {
     seen.toList
   }
 
-  def directDependencies(b: Bundle) = b.adapt(classOf[BundleWiring]).getRequiredWires(null).map(_.getProvider.getBundle).filter(_.getBundleId != Constants.SYSTEM_BUNDLE_ID).distinct
-  def directDependingBundles(b: Bundle) = b.adapt(classOf[BundleWiring]).getProvidedWires(null).map(_.getRequirer.getBundle).filter(_.getBundleId != Constants.SYSTEM_BUNDLE_ID).distinct
+  def directDependencies(b: Bundle) =
+    if (b.isFullDynamic) List.empty
+    else b.adapt(classOf[BundleWiring]).getRequiredWires(null).map(_.getProvider.getBundle).filter(_.getBundleId != Constants.SYSTEM_BUNDLE_ID).distinct
+
+  def directDependingBundles(b: Bundle) =
+    b.adapt(classOf[BundleWiring]).getProvidedWires(null).map(_.getRequirer.getBundle).filter(b ⇒ b.getBundleId != Constants.SYSTEM_BUNDLE_ID && !b.isFullDynamic).distinct
 
   def startAll: Seq[(Bundle, Throwable)] =
     Activator.contextOrException.getBundles.filter {

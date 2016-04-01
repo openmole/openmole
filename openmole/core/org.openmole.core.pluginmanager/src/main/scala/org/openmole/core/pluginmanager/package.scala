@@ -37,6 +37,9 @@ package object pluginmanager {
     def isProvided =
       b.getHeaders.toMap.exists { case (k, v) ⇒ k.toString.toLowerCase.contains("openmole-scope") && v.toString.toLowerCase.contains("provided") }
 
+    def isFullDynamic =
+      b.getHeaders.toMap.exists { case (k, v) ⇒ k.toString.contains("DynamicImport-Package") && v.toString.split(",").toSet.contains("*") }
+
     def file = {
       val (ref, url) = if (b.getLocation.startsWith("reference:"))
         true → b.getLocation.substring("reference:".length)

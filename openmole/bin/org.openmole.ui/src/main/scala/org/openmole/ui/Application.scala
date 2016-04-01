@@ -33,7 +33,7 @@ import org.openmole.tool.logger.Logger
 
 import annotation.tailrec
 import org.openmole.gui.server.core._
-import org.openmole.runtime.console._
+import org.openmole.console._
 import org.openmole.tool.file._
 import org.openmole.tool.hash._
 

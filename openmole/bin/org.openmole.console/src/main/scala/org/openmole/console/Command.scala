@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.runtime.console
+package org.openmole.console
 
 import java.io.{ File, IOException }
 import java.util.logging.Level

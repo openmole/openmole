@@ -108,22 +108,21 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
             val localResultFile =
               try {
                 val localResultFile = Workspace.newFile("job", ".res")
-                val configurationDir = Workspace.newDir("configuration")
                 val workspaceDir = Workspace.newDir("workspace")
                 val osgiDir = new File(runtime, UUID.randomUUID.toString)
 
                 def quote(s: String) = if (OS.actualOS.isWindows) '"' + s + '"' else s.replace(" ", "\\ ")
                 val ptrFlag = if (OS.actualOS.is64Bit) "-XX:+UseCompressedOops" else ""
 
-                val cmd = s"java -Xmx${memory}m -Dosgi.locking=none -XX:+UseG1GC $ptrFlag -Dosgi.configuration.area=${osgiDir.getName} -Dosgi.classloader.singleThreadLoads=true -jar plugins/org.eclipse.equinox.launcher.jar -configuration ${quote(configurationDir.getAbsolutePath)} -s ${quote(storageFile.getAbsolutePath)} -i ${quote(localExecutionMessage.getAbsolutePath)} -o ${quote(localResultFile.getAbsolutePath)} -c ${localCommunicationDirPath} -p ${quote(pluginDir.getAbsolutePath)}" + (if (debug) " -d " else "")
+                val launcher = s"""-cp ${quote("launcher/*")} org.openmole.launcher.Launcher --plugins ${quote("plugins/")} --run org.openmole.runtime.SimExplorer --osgi-directory ${quote(osgiDir.getAbsolutePath)}"""
+                val cmd = s"java -Xmx${memory}m -Dosgi.locking=none -XX:+UseG1GC $ptrFlag -Dosgi.configuration.area=${osgiDir.getName} -Dosgi.classloader.singleThreadLoads=true ${launcher} -- -s ${quote(storageFile.getAbsolutePath)} -i ${quote(localExecutionMessage.getAbsolutePath)} -o ${quote(localResultFile.getAbsolutePath)} -c ${localCommunicationDirPath} -p ${quote(pluginDir.getAbsolutePath)}" + (if (debug) " -d " else "")
 
-                logger.info("Executing runtime: " + cmd)
+                logger.info("Executing runtime: " + cmd + " in directory " + runtime)
                 //val commandLine = CommandLine.parse(cmd)
                 val process = Runtime.getRuntime.exec(cmd, Array("OPENMOLE_HOME=" + workspaceDir.getAbsolutePath), runtime) //commandLine.toString, null, runtimeLocation)
                 executeProcess(process, System.out, System.err)
                 logger.info("Process finished.")
 
-                configurationDir.recursiveDelete
                 workspaceDir.recursiveDelete
                 osgiDir.recursiveDelete
                 pluginDir.recursiveDelete

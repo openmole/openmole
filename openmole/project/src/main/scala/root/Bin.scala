@@ -17,42 +17,19 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
   val dir = file("bin")
 
   def filter(m: ModuleID) =
-    (m.organization.startsWith("org.eclipse") ||
-      m.organization == "fr.iscpif.gridscale.bundle" ||
+    (m.organization == "fr.iscpif.gridscale.bundle" ||
       m.organization == "org.bouncycastle" ||
       m.organization.contains("org.openmole") ||
-      m.organization == "org.osgi") && m.name != "osgi"
+      (m.organization == "org.osgi" && m.name != "osgi"))
 
   def pluginFilter(m: ModuleID) = m.name != "osgi" && m.name != "scala-library"
 
-  lazy val openmoleStartLevels =
-    Seq(
-      "org.eclipse.core.runtime" → 1,
-      "org-openmole-core-logging" → 2
-    )
-
-  lazy val equinox = Seq(
-    equinoxApp intransitive (),
-    equinoxContenttype intransitive (),
-    equinoxJobs intransitive (),
-    equinoxRuntime intransitive (),
-    equinoxCommon intransitive (),
-    equinoxLauncher intransitive (),
-    equinoxRegistry intransitive (),
-    equinoxPreferences intransitive (),
-    equinoxOSGi intransitive (),
-    osgiCompendium intransitive ()
-  )
-
   def rename(m: ModuleID): String =
-    if (m.name.startsWith("org.eclipse.equinox.launcher")) "org.eclipse.equinox.launcher.jar"
-    else if (m.organization.startsWith("org.eclipse")) s"${m.organization}.${m.name}_${m.revision}.jar"
-    else if (m.name.exists(_ == '-') == false) s"${m.organization.replaceAllLiterally(".", "-")}-${m.name}_${m.revision}.jar"
+    if (m.name.exists(_ == '-') == false) s"${m.organization.replaceAllLiterally(".", "-")}-${m.name}_${m.revision}.jar"
     else s"${m.name}_${m.revision}.jar"
 
   lazy val openmoleUI = OsgiProject("org.openmole.ui", singleton = true, imports = Seq("*")) settings (
-    organization := "org.openmole.ui",
-    libraryDependencies += equinoxApp
+    organization := "org.openmole.ui"
   ) dependsOn (
       console,
       Core.workspace,
@@ -74,8 +51,6 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
   lazy val java368URL = new URL("https://maven.openmole.org/thirdparty/com/oracle/java-jre-linux-386/8-u45/java-jre-linux-386-8-u45.tgz")
   lazy val javax64URL = new URL("https://maven.openmole.org/thirdparty/com/oracle/java-jre-linux-x64/8-u45/java-jre-linux-x64-8-u45.tgz")
 
-  import OMKeys.OSGiApplication._
-
   lazy val openmole =
     Project("openmole", dir / "openmole", settings = tarProject ++ assemblySettings) settings (commonsSettings: _*) settings (
       setExecutable ++= Seq("openmole", "openmole.bat"),
@@ -92,13 +67,11 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
       resourcesAssemble <+= (assemble in launcher, assemblyPath) map { case (r, p) ⇒ r → (p / "launcher") },
       downloads := Seq(java368URL → "runtime/jvm-386.tar.gz", javax64URL → "runtime/jvm-x64.tar.gz"),
       libraryDependencies += Libraries.scalajHttp,
-      libraryDependencies += Libraries.osgiCompendium,
       dependencyFilter := filter,
       dependencyName := rename,
       assemblyDependenciesPath := assemblyPath.value / "plugins",
       Tar.name := "openmole.tar.gz",
       Tar.innerFolder := "openmole",
-      pluginsDirectory := assemblyPath.value / "plugins",
       cleanFiles <++= cleanFiles in openmoleCore,
       cleanFiles <++= cleanFiles in openmoleGUI,
       cleanFiles <++= cleanFiles in consolePlugins,
@@ -153,7 +126,6 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
     resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "core") sendTo assemblyPath,
     resourcesAssemble <++= Seq(console.project) sendTo assemblyPath,
     libraryDependencies ++= coreDependencies,
-    libraryDependencies ++= equinox,
     dependencyFilter := filter,
     dependencyName := rename
   )
@@ -187,7 +159,8 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
       gridscaleCondor intransitive (),
       gridscalePBS intransitive (),
       gridscaleOAR intransitive (),
-      gridscaleSSH intransitive ()
+      gridscaleSSH intransitive (),
+      osgiCompendium intransitive ()
     ) ++ apacheHTTP map (_ intransitive ()),
       dependencyFilter := pluginFilter,
       dependencyName := rename
@@ -221,8 +194,7 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
       libraryDependencies ++= coreDependencies,
       libraryDependencies += scopt,
       dependencyFilter := filter,
-      dependencyName := rename,
-      pluginsDirectory := assemblyPath.value / "plugins"
+      dependencyName := rename
     )
 
   lazy val daemon = OsgiProject("org.openmole.daemon", settings = tarProject ++ assemblySettings) settings (commonsSettings: _*) dependsOn (Core.workflow, Core.workflow, Core.batch, Core.workspace,
@@ -262,7 +234,7 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
       Tar.folder <<= (unidoc in Compile).map(_.head)
     )
 
-  lazy val siteGeneration =
+  lazy val site =
     OsgiProject(
       "org.openmole.site",
       singleton = true,
@@ -292,7 +264,6 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
         dependencyFilter := filter,
         dependencyName := rename
       ) dependsOn (Core.project, Core.buildinfo, root.Doc.doc)
-
 
   lazy val launcher = OsgiProject("org.openmole.launcher", imports = Seq("*"), settings = assemblySettings) settings (
     autoScalaLibrary := false,

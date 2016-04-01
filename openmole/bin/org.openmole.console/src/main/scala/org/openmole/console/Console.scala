@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.runtime.console
+package org.openmole.console
 
 import java.util
 
@@ -84,7 +84,7 @@ object Console {
 
 }
 
-import org.openmole.runtime.console.Console._
+import org.openmole.console.Console._
 
 class Console(password: Option[String] = None, script: Option[String] = None) {
   console ⇒

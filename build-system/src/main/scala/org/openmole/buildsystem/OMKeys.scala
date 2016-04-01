@@ -52,13 +52,6 @@ object OMKeys {
     val folder = TaskKey[File]("tar-folder", "The folder to tar.")
   }
 
-  object OSGiApplication {
-    val pluginsDirectory = SettingKey[File]("osgi-plugins-directory")
-    val config = SettingKey[File]("osgi-config")
-    val startLevels = SettingKey[Seq[(String, Int)]]("osgi-start-levels")
-    val header = SettingKey[String]("osgi-header")
-  }
-
   object OSGi {
     val singleton = SettingKey[Boolean]("osgi-singleton")
     val openMOLEScope = SettingKey[Option[String]]("openmole-scope")

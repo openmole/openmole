@@ -101,35 +101,6 @@ trait Assembly {
     copyResources <++= (externalDependencyClasspath in Compile, assemblyDependenciesPath, dependencyName, dependencyFilter, streams) map copyLibraryDependencies
   )
 
-  def generateConfigImpl(plugins: File, header: String, config: File, startLevels: Seq[(String, Int)]): File = {
-    def line(file: File) = {
-      val name = file.getName
-      val level = startLevels.find { case (s, _) ⇒ name.contains(s) }.map { case (_, l) ⇒ l }
-      level match {
-        case None    ⇒ name
-        case Some(l) ⇒ s"$name@$l:start"
-      }
-    }
-    def content =
-      s"""
-         |$header
-         |osgi.bundles=${plugins.listFiles().filter(!_.getName.startsWith("org.eclipse.osgi")).map(line).mkString(",")}
-      """.stripMargin
-    config.getParentFile.mkdirs
-    IO.write(config, content)
-    config
-  }
-
-  import OMKeys.OSGiApplication._
-
-  def osgiApplicationSettings =
-    Seq(
-      startLevels := Seq.empty,
-      assemble <<= assemble dependsOn {
-        (pluginsDirectory, header, config, startLevels) map generateConfigImpl dependsOn (copyResources)
-      }
-    )
-
   def tarImpl(folder: File, s: TaskStreams, t: File, name: String, innerFolder: String, streams: TaskStreams): File = {
     val out = t / name
 

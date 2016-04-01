@@ -137,22 +137,6 @@ object Libraries extends Defaults {
 
   lazy val scalabc = "org.openmole" %% "fr-iscpif-scalabc" % "0.4"
 
-  lazy val equinoxApp = "org.eclipse.equinox" % "app" % "1.3.200-v20130910-1609"
-
-  lazy val equinoxCommon = "org.eclipse.equinox" % "common" % "3.6.200-v20130402-1505"
-
-  lazy val equinoxLauncher = "org.eclipse.core" % "org.eclipse.equinox.launcher" % "1.3.0.v20120522-1813"
-
-  lazy val equinoxRegistry = "org.eclipse.equinox" % "registry" % "3.5.400-v20140428-1507"
-
-  lazy val equinoxPreferences = "org.eclipse.equinox" % "preferences" % "3.5.200-v20140224-1527"
-
-  lazy val equinoxContenttype = "org.eclipse.core" % "contenttype" % "3.4.200-v20140207-1251"
-
-  lazy val equinoxJobs = "org.eclipse.core" % "jobs" % "3.6.0-v20140424-0053"
-
-  lazy val equinoxRuntime = "org.eclipse.core" % "runtime" % "3.10.0-v20140318-2214"
-
   lazy val equinoxOSGi = "org.eclipse" % "osgi" % "3.10.0-v20140606-1445"
 
   lazy val osgiCompendium = "org.osgi" % "org.osgi.compendium" % "4.2.0"

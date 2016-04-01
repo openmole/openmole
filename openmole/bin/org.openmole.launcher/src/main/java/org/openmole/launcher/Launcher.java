@@ -67,7 +67,7 @@ public class Launcher {
         Map<String, String> osgiConfig = new HashMap<String, String>();
         osgiConfig.put(Constants.FRAMEWORK_STORAGE, "");
         osgiConfig.put(Constants.FRAMEWORK_STORAGE_CLEAN, "true");
-        osgiConfig.put(Constants.FRAMEWORK_BOOTDELEGATION, "sun.*, com.sun.*");
+        osgiConfig.put(Constants.FRAMEWORK_BOOTDELEGATION, "*");
         if(osgiDirectory.isPresent()) osgiConfig.put(Constants.FRAMEWORK_STORAGE, osgiDirectory.get());
 
         Framework framework = frameworkFactory.newFramework(osgiConfig);
