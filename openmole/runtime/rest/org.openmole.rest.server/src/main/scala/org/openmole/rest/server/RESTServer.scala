@@ -13,20 +13,12 @@ import org.scalatra.servlet.ScalatraListener
 
 import org.eclipse.jetty.security.{ ConstraintMapping, ConstraintSecurityHandler }
 import org.scalatra._
-import org.openmole.runtime.console._
 import org.openmole.tool.hash._
 
 object RESTServer extends Logger {
-
-  def configure = {
-    Console.initPassword
-    setPassword(Console.askPassword("Server password"))
-  }
-
   def passwordHash = ConfigurationLocation[String]("REST", "PasswordHash", None, true)
   def setPassword(p: String) = Workspace.setPreference(passwordHash, p.hash.toString)
   def isPasswordCorrect(p: String) = Workspace.preferenceOption(passwordHash).map(_ == p.hash.toString).getOrElse(false)
-
 }
 
 import RESTServer.Log._

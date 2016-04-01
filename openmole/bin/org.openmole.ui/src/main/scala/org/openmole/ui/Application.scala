@@ -21,9 +21,6 @@ import java.awt.Desktop
 import java.io.{ File, FileOutputStream }
 import java.net.URI
 
-import com.sun.awt.AWTUtilities
-import org.eclipse.equinox.app.IApplication
-import org.eclipse.osgi.launch.Equinox
 import org.openmole.core.project._
 import org.openmole.core.console.ScalaREPL
 import org.openmole.core.exception.UserBadDataError
@@ -38,6 +35,7 @@ import annotation.tailrec
 import org.openmole.gui.server.core._
 import org.openmole.runtime.console._
 import org.openmole.tool.file._
+import org.openmole.tool.hash._
 
 object Application extends Logger {
 
@@ -168,7 +166,7 @@ object Application extends Logger {
             println(usage)
             Console.ExitCodes.ok
           case ServerConfigMode ⇒
-            RESTServer.configure
+            configureRestServer()
             Console.ExitCodes.ok
           case ServerMode ⇒
             if (!config.password.isDefined) Console.initPassword
@@ -190,7 +188,7 @@ object Application extends Logger {
                 val port = config.port.getOrElse(Workspace.preference(GUIServer.port))
                 val url = s"https://localhost:$port"
                 GUIServer.urlFile.content = url
-                if (config.remote) GUIServer.initPassword
+                if (config.remote) initGUIPassword()
                 //The webapp location will then be somewhere in target
                 val webui = Workspace.file("webui")
                 webui.mkdirs()
@@ -199,7 +197,10 @@ object Application extends Logger {
                 if (config.browse && !config.remote) browse(url)
                 ScalaREPL.warmup
                 logger.info(s"Server listening on port $port.")
-                server.join()
+                server.join() match {
+                  case GUIServer.Ok      ⇒ Console.ExitCodes.ok
+                  case GUIServer.Restart ⇒ Console.ExitCodes.restart
+                }
               }
               else {
                 browse(GUIServer.urlFile.content)
@@ -210,7 +211,16 @@ object Application extends Logger {
 
       retCode
     }
+  }
 
+  def initGUIPassword() = {
+    Console.initPassword
+    if (!Workspace.preferenceIsSet(GUIServer.passwordHash)) GUIServer.setPassword(Console.askPassword("Authentication password"))
+  }
+
+  def configureRestServer() = {
+    Console.initPassword
+    RESTServer.setPassword(Console.askPassword("Server password"))
   }
 
 }

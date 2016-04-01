@@ -23,7 +23,6 @@ import javax.servlet.http.{ HttpServletResponse, HttpServletRequest }
 import org.eclipse.jetty.server.{ ServerConnector, Server }
 import org.eclipse.jetty.servlet.DefaultServlet
 import org.eclipse.jetty.webapp._
-import org.openmole.runtime.console._
 import org.openmole.core.tools.io.Network
 import org.openmole.core.workspace.{ ConfigurationLocation, Workspace }
 import org.scalatra.auth.strategy.{ BasicAuthStrategy, BasicAuthSupport }
@@ -36,14 +35,10 @@ import org.openmole.tool.file._
 
 object GUIServer {
   val passwordHash = ConfigurationLocation[String]("GUIServer", "PasswordHash", None, true)
-  def setPassword(p: String) = Workspace.setPreference(passwordHash, p.hash.toString)
+
   def isPasswordCorrect(p: String) = Workspace.preferenceOption(passwordHash).map(_ == p.hash.toString).getOrElse(false)
   def resourcePath = (Workspace.openMOLELocation / "webapp").getAbsolutePath
-
-  def initPassword = {
-    Console.initPassword
-    if (!Workspace.preferenceIsSet(passwordHash)) setPassword(Console.askPassword("Authentication password"))
-  }
+  def setPassword(p: String) = Workspace.setPreference(GUIServer.passwordHash, p.hash.toString)
 
   val portValue = Network.freePort
   val port = ConfigurationLocation("GUIServer", "Port", Some(portValue))
@@ -54,11 +49,17 @@ object GUIServer {
     file.createNewFile
     file
   }
+
   lazy val urlFile = Workspace.file("GUI.url")
 
   val servletArguments = "servletArguments"
   case class ServletArguments(passwordCorrect: Option[String ⇒ Boolean] = None, applicationControl: ApplicationControl)
   case class ApplicationControl(restart: () ⇒ Unit, stop: () ⇒ Unit)
+
+  sealed trait ExitStatus
+  case object Restart extends ExitStatus
+  case object Ok extends ExitStatus
+
 }
 
 import GUIServer._
@@ -66,7 +67,7 @@ import GUIServer._
 class GUIServer(port: Int, authentication: Boolean) {
 
   val server = new Server()
-  var exitCode = Console.ExitCodes.ok
+  var exitStatus: GUIServer.ExitStatus = GUIServer.Ok
   val semaphore = new Semaphore(0)
 
   val contextFactory = new org.eclipse.jetty.util.ssl.SslContextFactory()
@@ -87,7 +88,7 @@ class GUIServer(port: Int, authentication: Boolean) {
   val authenticationMethod = if (authentication) Some(GUIServer.isPasswordCorrect _) else None
   val applicationControl =
     ApplicationControl(
-      () ⇒ { exitCode = Console.ExitCodes.restart; stop() },
+      () ⇒ { exitStatus = GUIServer.Restart; stop() },
       () ⇒ stop()
     )
   context.setAttribute(GUIServer.servletArguments, GUIServer.ServletArguments(authenticationMethod, applicationControl))
@@ -103,10 +104,10 @@ class GUIServer(port: Int, authentication: Boolean) {
     server.start
   }
 
-  def join(): Int = {
+  def join(): GUIServer.ExitStatus = {
     semaphore.acquire()
     semaphore.release()
-    exitCode
+    exitStatus
   }
 
   def stop() = {
