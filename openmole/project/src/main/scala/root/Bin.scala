@@ -1,20 +1,19 @@
 package root
 
-import root.runtime.REST
 import org.scalajs.sbtplugin.ScalaJSPlugin
 import org.scalajs.sbtplugin.ScalaJSPlugin.AutoImport._
 import sbt._
 import Keys._
-
 import org.openmole.buildsystem.OMKeys._
-import org.openmole.buildsystem._, Assembly._
+import org.openmole.buildsystem._
+import Assembly._
 import root.Libraries._
 import com.typesafe.sbt.osgi.OsgiKeys
 import sbt.inc.Analysis
 import sbtunidoc.Plugin._
 import UnidocKeys._
 
-object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties, root.Doc) {
+object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, root.Doc) {
   val dir = file("bin")
 
   def filter(m: ModuleID) =
@@ -55,7 +54,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
     organization := "org.openmole.ui",
     libraryDependencies += equinoxApp
   ) dependsOn (
-      Runtime.console,
+      console,
       Core.workspace,
       Core.replication,
       Core.exception,
@@ -67,7 +66,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
       gui.Server.core,
       gui.Client.core,
       Core.logging,
-      runtime.REST.server,
+      REST.server,
       Core.console,
       Core.dsl
     )
@@ -81,7 +80,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
     Project("openmole", dir / "openmole", settings = tarProject ++ assemblySettings) settings (commonsSettings: _*) settings (
       setExecutable ++= Seq("openmole", "openmole.bat"),
       resourcesAssemble <+= (resourceDirectory in Compile, assemblyPath).identityMap,
-      resourcesAssemble <++= Seq(openmoleUI.project, Runtime.console.project, REST.server.project) sendTo { assemblyPath / "plugins" },
+      resourcesAssemble <++= Seq(openmoleUI.project, console.project, REST.server.project) sendTo { assemblyPath / "plugins" },
       resourcesAssemble <+= (assemble in openmoleCore, assemblyPath) map { case (r, p) ⇒ r → (p / "plugins") },
       resourcesAssemble <+= (assemble in openmoleGUI, assemblyPath) map { case (r, p) ⇒ r → (p / "plugins") },
       resourcesAssemble <+= (resourceDirectory in gui.Server.core in Compile, assemblyPath) map { case (r, p) ⇒ (r / "webapp") → (p / "webapp") },
@@ -152,7 +151,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
   //FIXME separate web plugins from core ones
   lazy val openmoleCore = Project("openmolecore", dir / "target" / "openmolecore", settings = assemblySettings) settings (commonsSettings: _*) settings (
     resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "core") sendTo assemblyPath,
-    resourcesAssemble <++= Seq(Runtime.console.project) sendTo assemblyPath,
+    resourcesAssemble <++= Seq(console.project) sendTo assemblyPath,
     libraryDependencies ++= coreDependencies,
     libraryDependencies ++= equinox,
     dependencyFilter := filter,
@@ -310,5 +309,16 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
     libraryDependencies += equinoxOSGi,
     resourcesAssemble <+= (OsgiKeys.bundle, assemblyPath) map { case (f, d) ⇒ f → (d / f.getName) }
   )
+
+  lazy val console = OsgiProject("org.openmole.console", imports = Seq("*")) settings (
+    libraryDependencies += upickle
+  ) dependsOn (
+      Core.workflow,
+      Core.console,
+      Core.project,
+      Core.dsl,
+      Core.batch,
+      Core.buildinfo
+    )
 
 }

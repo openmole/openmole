@@ -15,18 +15,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package root.runtime
+package root
 
-import root.{ Defaults, _ }
 import sbt.Keys._
 import sbt._
-import org.openmole.buildsystem.OMKeys._
 
 object REST extends Defaults {
   import Libraries._
   import ThirdParties._
 
-  val dir = file("runtime/rest")
+  val dir = file("rest")
   implicit val artifactPrefix = Some("org.openmole.rest")
 
   lazy val message = Project("org-openmole-rest-message", dir / "message") settings (scalariformDefaults: _*)
