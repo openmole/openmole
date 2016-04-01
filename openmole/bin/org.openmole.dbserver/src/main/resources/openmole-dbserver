@@ -16,4 +16,4 @@ done
 PRGDIR=`dirname "$PRG"`
 BASEDIR=`cd "$PRGDIR/.." >/dev/null; pwd`
 
-java $EXTRA_JVM_ARGUMENTS -Djava.ext.dirs=$BASEDIR/lib -Dapp.pid="$$" org.openmole.runtime.dbserver.DBServer "$@"
+java $EXTRA_JVM_ARGUMENTS -Djava.ext.dirs=$BASEDIR/lib -Dapp.pid="$$" org.openmole.dbserver.DBServer "$@"

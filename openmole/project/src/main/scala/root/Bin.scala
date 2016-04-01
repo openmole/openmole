@@ -194,10 +194,11 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
       dependencyName := rename
   )
 
-  lazy val dbServer = Project("dbserver", dir / "dbserver", settings = assemblySettings) settings (commonsSettings: _*) settings (
+  lazy val dbServer = OsgiProject("org.openmole.dbserver", settings = assemblySettings) settings (commonsSettings: _*) dependsOn (Core.replication) settings (
     assemblyDependenciesPath := assemblyPath.value / "lib",
     resourcesAssemble <+= (resourceDirectory in Compile, assemblyPath) map { case (r, p) ⇒ r → (p / "bin") },
-    resourcesAssemble <++= Seq(Core.replication.project, Runtime.dbserver.project) sendTo (assemblyPath / "lib"),
+    resourcesAssemble <++= Seq(Core.replication.project) sendTo (assemblyPath / "lib"),
+    resourcesAssemble <+= (OsgiKeys.bundle, assemblyPath) map { case (r, p) ⇒ r → (p / "lib" / r.getName) },
     libraryDependencies ++= Seq(
       Libraries.xstream,
       Libraries.slick,
