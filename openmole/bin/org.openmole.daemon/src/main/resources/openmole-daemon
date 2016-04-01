@@ -32,6 +32,6 @@ case "$JVMVERSION" in
 esac 
 
 java -Xmx92m $FLAG -Dfile.encoding=UTF-8 -Djava.security.egd=file:/dev/./urandom -XX:+CMSClassUnloadingEnabled -XX:+UseParallelGC \
-     -cp "${LOCATION}/launcher/*" org.openmole.launcher.Launcher  --plugins ${LOCATION}/plugins/ --run org.openmole.daemon.Daemon --osgi-directory ${CONFIGDIR} -- $@
+     -cp "${LOCATION}/launcher/*" org.openmole.launcher.Launcher  --plugins "${LOCATION}/plugins/" --run org.openmole.daemon.Daemon --osgi-directory "${CONFIGDIR}" -- $@
 
 rm -rf "${CONFIGDIR}"
