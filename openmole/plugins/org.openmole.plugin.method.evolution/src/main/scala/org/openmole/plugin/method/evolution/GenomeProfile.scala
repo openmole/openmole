@@ -33,20 +33,21 @@ object GenomeProfile {
     genome:    Genome,
     objective: Objective
   ) = {
+    val ug = UniqueGenome(genome)
 
     val xIndex =
-      genome.inputs.indexWhere(_.prototype == x) match {
+      ug.inputs.indexWhere(_.prototype == x) match {
         case -1 ⇒ throw new UserBadDataError(s"Variable $x not found in the genome")
         case x  ⇒ x
       }
 
     DeterministicGenomeProfile(
       profile.OpenMOLE(
-        genomeSize = Genome.size(genome),
+        genomeSize = UniqueGenome.size(ug),
         niche = DeterministicGenomeProfile.niche(xIndex, nX),
         operatorExploration = operatorExploration
       ),
-      genome,
+      ug,
       objective
     )
   }
@@ -59,9 +60,10 @@ object GenomeProfile {
     replication: Replication[Id],
     paretoSize:  Int               = 20
   ) = {
+    val ug = UniqueGenome(genome)
 
     val xIndex =
-      genome.indexWhere(_.prototype == x) match {
+      ug.indexWhere(_.prototype == x) match {
         case -1 ⇒ throw new UserBadDataError(s"Variable $x not found in the genome")
         case x  ⇒ x
       }
@@ -73,12 +75,12 @@ object GenomeProfile {
         mu = paretoSize,
         niche = StochasticGenomeProfile.niche(xIndex, nX),
         operatorExploration = operatorExploration,
-        genomeSize = Genome.size(genome),
+        genomeSize = UniqueGenome.size(ug),
         historySize = replication.max,
         cloneProbability = replication.reevaluate,
         aggregation = aggregation
       ),
-      genome,
+      ug,
       objective,
       replication
     )
@@ -128,7 +130,7 @@ object GenomeProfile {
     }
   }
 
-  case class DeterministicGenomeProfile(algo: profile.OpenMOLE, genome: Genome, objective: Objective)
+  case class DeterministicGenomeProfile(algo: profile.OpenMOLE, genome: UniqueGenome, objective: Objective)
 
   object StochasticGenomeProfile {
     import fr.iscpif.mgo
@@ -181,7 +183,7 @@ object GenomeProfile {
 
   case class StochasticGenomeProfile(
     algo:        noisyprofile.OpenMOLE,
-    genome:      Genome,
+    genome:      UniqueGenome,
     objective:   Objective,
     replication: Replication[Id]
   )

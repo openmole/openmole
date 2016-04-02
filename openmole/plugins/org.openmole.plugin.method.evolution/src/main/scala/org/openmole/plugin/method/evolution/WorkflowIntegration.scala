@@ -144,7 +144,7 @@ object WorkflowIntegration {
 
   case class DeterministicGA[AG](
     ag:         AG,
-    genome:     Genome,
+    genome:     UniqueGenome,
     objectives: Objectives
   )(implicit val algorithm: mgo.openmole.Integration[AG, Vector[Double], Vector[Double]])
 
@@ -156,7 +156,7 @@ object WorkflowIntegration {
 
   case class StochasticGA[AG](
     ag:          AG,
-    genome:      Genome,
+    genome:      UniqueGenome,
     objectives:  Objectives,
     replication: Replication[Seq]
   )(
@@ -222,21 +222,15 @@ trait EvolutionWorkflow {
 
 object GAIntegration {
 
-  def scaled(inputs: Genome, values: Seq[Double]) = FromContext { (context, rng) ⇒
+  def scaled(inputs: UniqueGenome, values: Seq[Double]) = FromContext { (context, rng) ⇒
     InputConverter.scaled(inputs.inputs.toList, values.toList)(context, rng)
   }
 
-  def genomesOfPopulationToVariables[I](inputs: Genome, population: Vector[I], genomeValues: I ⇒ Vector[Double]) =
+  def genomesOfPopulationToVariables[I](inputs: UniqueGenome, population: Vector[I], genomeValues: I ⇒ Vector[Double]) =
     for {
       scaledValues ← population.traverse[FromContext, List[Variable[_]]](i ⇒ scaled(inputs, genomeValues(i)))
     } yield {
-      inputs.zipWithIndex.map {
-        case (input, i) ⇒
-          input match {
-            case Scalar(prototype, _, _)   ⇒ Variable(prototype.toArray, scaledValues.map(_(i).value.asInstanceOf[Double]).toArray[Double])
-            case Sequence(prototype, _, _) ⇒ Variable(prototype.toArray, scaledValues.map(_(i).value.asInstanceOf[Array[Double]]).toArray[Array[Double]])
-          }
-      }.toList
+      inputs.zipWithIndex.map { case (input, i) ⇒ input.toVariable(scaledValues.map(_(i).value)) }.toList
     }
 
   def objectivesOfPopulationToVariables[I](objectives: Objectives, population: Vector[I], phenotypeValues: I ⇒ Vector[Double]) =
@@ -249,7 +243,7 @@ object GAIntegration {
     }
 
   def populationToVariables[I](
-    genome:          Genome,
+    genome:          UniqueGenome,
     objectives:      Objectives,
     genomeValues:    I ⇒ Vector[Double],
     phenotypeValues: I ⇒ Vector[Double]
@@ -270,7 +264,7 @@ object StochasticGAIntegration {
   def aggregate(aggregation: Option[FitnessAggregation], values: Seq[Double]): Double = aggregation.map(_(values)).getOrElse(values.median)
 
   def genomeToVariables(
-    genome: Genome,
+    genome: UniqueGenome,
     values: Seq[Double],
     seed:   Seeder
   ) =
@@ -280,7 +274,7 @@ object StochasticGAIntegration {
     } yield variables ++ s
 
   def populationToVariables[I](
-    genome:           Genome,
+    genome:           UniqueGenome,
     objectives:       Objectives,
     genomeValues:     I ⇒ Vector[Double],
     phenotypeValues:  I ⇒ Vector[Double],

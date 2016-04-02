@@ -38,9 +38,11 @@ object PSE {
     genome:     Genome,
     objectives: Seq[PatternAxe]
   ) = {
+    val ug = UniqueGenome(genome)
+
     WorkflowIntegration.DeterministicGA(
-      pse.OpenMOLE(mgo.niche.irregularGrid(objectives.map(_.scale).toVector), Genome.size(genome), operatorExploration),
-      genome,
+      pse.OpenMOLE(mgo.niche.irregularGrid(objectives.map(_.scale).toVector), UniqueGenome.size(ug), operatorExploration),
+      ug,
       objectives.map(_.p)
     )
   }
@@ -50,17 +52,18 @@ object PSE {
     objectives:  Seq[PatternAxe],
     replication: Replication[Seq]
   ) = {
+    val ug = UniqueGenome(genome)
 
     WorkflowIntegration.StochasticGA(
       noisypse.OpenMOLE(
         pattern = mgo.niche.irregularGrid(objectives.map(_.scale).toVector),
         aggregation = StochasticGAIntegration.aggregateVector(replication.aggregationClosures, _),
-        genomeSize = Genome.size(genome),
+        genomeSize = UniqueGenome.size(ug),
         historySize = replication.max,
         cloneProbability = replication.reevaluate,
         operatorExploration = operatorExploration
       ),
-      genome,
+      ug,
       objectives.map(_.p),
       replication
     )
