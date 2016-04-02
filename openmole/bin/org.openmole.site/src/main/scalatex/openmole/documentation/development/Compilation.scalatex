@@ -16,6 +16,7 @@
     cd ../libraries
     sbt publish-local
     cd ../openmole
+    optionally: sbt clean
     sbt assemble""", "plain")
     @p You can now find the application in bin/openmole/target/assemble/.
     @p To compile offline (plain / train...) you should use: @hl.highlight("""set offline in Global := true""", "plain") when in the sbt shell, or start sbt with the @i{-offline} option.
