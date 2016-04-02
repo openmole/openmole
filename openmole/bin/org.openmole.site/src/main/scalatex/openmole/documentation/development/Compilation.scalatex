@@ -11,8 +11,10 @@
   @sect{Compile}
     In order to compile OpenMOLE, you should have @a("SBT", href := "http://www.scala-sbt.org/") and a JDK of version 7 or greater (we strongly recommend the use of the OpenJDK as its corresponding Runtime Environment embeds all the tools required by OpenMOLE). Here are the steps to compile OpenMOLE from a fresh clone:
     @br @hl.highlight("""
-    cd libraries
-    sbt install
+    cd build-system
+    sbt publish-local
+    cd ../libraries
+    sbt publish-local
     cd ../openmole
     sbt assemble""", "plain")
     @p You can now find the application in bin/openmole/target/assemble/.
