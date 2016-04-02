@@ -104,7 +104,7 @@ object Genome {
   def size(g: Genome) = g.inputs.map(_.size).sum
 
   def apply(inputs: Input*): Genome = {
-    val prototypes = inputs.map(_.prototype)
+    val prototypes = inputs.map(_.prototype).distinct
     new Genome(prototypes.map(p ⇒ inputs.reverse.find(_.prototype == p).get))
   }
 
