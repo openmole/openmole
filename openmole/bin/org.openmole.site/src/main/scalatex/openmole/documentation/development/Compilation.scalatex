@@ -42,9 +42,9 @@
 
     @hl.highlight("""
     cd openmole
-    sbt "project site" assemble
-    cd bin/site/target/assemble
-    ./site /path/of/the/site
+    sbt "project org-openmole-site" assemble
+    cd bin/org.openmole.site/target/assemble
+    ./site --target /path/of/the/site
     """, "plain")
 
     @p The site will be generated in the target directory passed as parameter to @i{./site}.
