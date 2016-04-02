@@ -101,5 +101,15 @@ case class Sequence(prototype: Prototype[Array[Double]], min: Seq[FromContext[Do
 }
 
 object Genome {
-  def size(inputs: Seq[Input]) = Try(inputs.map(_.size).sum).getOrElse(0)
+  def size(g: Genome) = g.inputs.map(_.size).sum
+
+  def apply(inputs: Input*): Genome = {
+    val prototypes = inputs.map(_.prototype)
+    new Genome(prototypes.map(p ⇒ inputs.reverse.find(_.prototype == p).get))
+  }
+
+  implicit def seqOfInputToGenome(s: Seq[Input]) = Genome(s: _*)
+  implicit def genomeToSeqOfInput(g: Genome): Seq[Input] = g.inputs
 }
+
+class Genome(val inputs: Seq[Input]) extends AnyVal

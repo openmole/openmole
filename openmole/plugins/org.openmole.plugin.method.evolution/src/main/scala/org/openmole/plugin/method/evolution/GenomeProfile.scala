@@ -35,7 +35,7 @@ object GenomeProfile {
   ) = {
 
     val xIndex =
-      genome.indexWhere(_.prototype == x) match {
+      genome.inputs.indexWhere(_.prototype == x) match {
         case -1 ⇒ throw new UserBadDataError(s"Variable $x not found in the genome")
         case x  ⇒ x
       }
@@ -108,7 +108,7 @@ object GenomeProfile {
         def buildIndividual(genome: G, context: Context): I =
           operations.buildIndividual(genome, variablesToPhenotype(context))
 
-        def inputPrototypes = a.genome.map(_.prototype)
+        def inputPrototypes = a.genome.inputs.map(_.prototype)
         def outputPrototypes = Seq(a.objective)
         def resultPrototypes = (inputPrototypes ++ outputPrototypes).distinct
 
