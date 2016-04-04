@@ -109,7 +109,6 @@ object Application extends Logger {
         case "-p" :: tail                      ⇒ parse(dropArgs(tail), c.copy(userPlugins = takeArgs(tail)))
         case "-s" :: tail                      ⇒ parse(dropArg(tail), c.copy(scriptFile = Some(takeArg(tail)), launchMode = ConsoleMode))
         case "-pw" :: tail                     ⇒ parse(dropArg(tail), c.copy(password = Some(takeArg(tail))))
-        case "-hn" :: tail                     ⇒ parse(tail.tail, c.copy(hostName = Some(tail.head)))
         case "-c" :: tail                      ⇒ parse(tail, c.copy(launchMode = ConsoleMode))
         case "-h" :: tail                      ⇒ parse(tail, c.copy(launchMode = HelpMode))
         case "-ws" :: tail                     ⇒ parse(tail, c.copy(launchMode = ServerMode))
@@ -118,10 +117,10 @@ object Application extends Logger {
         case "--ws-configure" :: tail          ⇒ parse(tail, c.copy(launchMode = ServerConfigMode))
         case "--port" :: tail                  ⇒ parse(tail.tail, c.copy(port = Some(tail.head.toInt))) // Server port
         case "--logger-level" :: tail          ⇒ parse(tail.tail, c.copy(loggerLevel = Some(tail.head)))
-        case "--webui-authentication" :: tail  ⇒ parse(tail, c.copy(remote = true))
         case "--remote" :: tail                ⇒ parse(tail, c.copy(remote = true))
         case "--no-browser" :: tail            ⇒ parse(tail, c.copy(browse = false))
         case "--reset" :: tail                 ⇒ parse(tail, c.copy(reset = true))
+        case "--host-name" :: tail             ⇒ parse(tail.tail, c.copy(hostName = Some(tail.head)))
         case "--" :: tail                      ⇒ parse(Nil, c.copy(args = tail))
         case s :: tail                         ⇒ parse(tail, c.copy(ignored = s :: c.ignored))
         case Nil                               ⇒ c
