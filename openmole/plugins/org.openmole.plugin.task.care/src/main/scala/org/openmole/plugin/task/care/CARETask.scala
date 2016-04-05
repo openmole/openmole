@@ -118,7 +118,7 @@ abstract class CARETask(
 
     // FIXME duplicated from SystemExecTask
     val executionResult = execute(commandline, extractedArchive, environmentVariables, preparedContext, output.isDefined, error.isDefined)
-    if (errorOnReturnCode && executionResult.returnCode != 0)
+    if (errorOnReturnCode && !returnValue.isDefined && executionResult.returnCode != 0)
       throw new InternalProcessingError(
         s"""Error executing command":
                  |[${commandline.mkString(" ")}] return code was not 0 but ${executionResult.returnCode}""".stripMargin

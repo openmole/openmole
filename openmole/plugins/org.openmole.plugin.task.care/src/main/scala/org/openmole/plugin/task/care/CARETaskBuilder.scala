@@ -29,7 +29,7 @@ import scala.collection.mutable.ListBuffer
 class CARETaskBuilder(archiveLocation: File, command: systemexec.Command)
     extends ExternalTaskBuilder
     with ReturnValue
-    with ErrorOnReturnCode
+    with ErrorOnReturnValue
     with StdOutErr
     with EnvironmentVariables
     with WorkDirectory { builder ⇒

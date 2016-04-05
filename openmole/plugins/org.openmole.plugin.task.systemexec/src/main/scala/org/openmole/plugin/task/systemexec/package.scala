@@ -45,7 +45,7 @@ package systemexec {
     }
   }
 
-  trait ErrorOnReturnCode {
+  trait ErrorOnReturnValue {
     protected var errorOnReturnValue = true
 
     def setErrorOnReturnValue(b: Boolean): this.type = {
@@ -129,9 +129,9 @@ package systemexec {
       implicit def seqOfStringToCommands(s: Seq[String]): OSCommands = OSCommands(OS(), s.map(s ⇒ Command(s)): _*)
     }
 
-    lazy val errorOnReturnCode =
+    lazy val errorOnReturnValue =
       new {
-        def :=(b: Boolean) = (_: ErrorOnReturnCode).setErrorOnReturnValue(b)
+        def :=(b: Boolean) = (_: ErrorOnReturnValue).setErrorOnReturnValue(b)
       }
 
     lazy val returnValue =

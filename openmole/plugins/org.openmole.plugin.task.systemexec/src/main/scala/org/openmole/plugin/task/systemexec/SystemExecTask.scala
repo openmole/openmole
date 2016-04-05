@@ -63,7 +63,7 @@ abstract class SystemExecTask(
         val commandline = commandLine(cmd.expandedCommand, workDir.getAbsolutePath, preparedContext)
 
         val result = execute(commandline, workDir, environmentVariables, preparedContext, returnOutput = output.isDefined, returnError = error.isDefined)
-        if (errorOnReturnCode && result.returnCode != 0)
+        if (errorOnReturnCode && !returnValue.isDefined && result.returnCode != 0)
           throw new InternalProcessingError(
             s"""Error executing command"}:
                  |[${commandline.mkString(" ")}] return code was not 0 but ${result.returnCode}""".stripMargin

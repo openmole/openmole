@@ -25,7 +25,7 @@ import scala.collection.mutable.ListBuffer
 
 class SystemExecTaskBuilder(commands: Command*) extends ExternalTaskBuilder
     with ReturnValue
-    with ErrorOnReturnCode
+    with ErrorOnReturnValue
     with StdOutErr
     with EnvironmentVariables
     with WorkDirectory { builder ⇒
