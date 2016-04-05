@@ -219,7 +219,7 @@ object DocumentationPages { index ⇒
 
         def task = new DocumentationPage {
           def name = "Tasks"
-          def children = Seq(scala, systemExec, netLogo, mole)
+          def children = Seq(scala, native, netLogo, mole)
           def content = scalatex.documentation.language.Task()
 
           def scala = new DocumentationPage {
@@ -228,10 +228,10 @@ object DocumentationPages { index ⇒
             def content = scalatex.documentation.language.task.Scala()
           }
 
-          def systemExec = new DocumentationPage {
-            def name = "SystemExec"
+          def native = new DocumentationPage {
+            def name = "Native"
             def children = Seq()
-            def content = scalatex.documentation.language.task.SystemExec()
+            def content = scalatex.documentation.language.task.Native()
           }
 
           def netLogo = new DocumentationPage {
