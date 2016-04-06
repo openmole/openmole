@@ -43,5 +43,6 @@
       @li{@a("Multi-thread", href := root.language.environment.multithread.file), to execute the tasks concurrently on your machine,}
       @li{@a("SSH", href := root.language.environment.ssh.file), to execute tasks on remote server through SSH,}
       @li{@a("Clusters", href := root.language.environment.cluster.file), to execute tasks on a cluster managed by @a("PBS/Torque", href := root.language.environment.cluster.file + "#PBS/Torque"), @a("SGE", href := root.language.environment.cluster.file + "#SGE"), @a("Slurm", href := root.language.environment.cluster.file + "#SLURM"), @a("Condor", href := root.language.environment.cluster.file + "#Condor"), or @a("OAR", href := root.language.environment.cluster.file + "#OAR").}
-      @li{@a("EGI", href := root.language.environment.egi.file), to execute tasks on the @a("EGI grid", href := root.language.environment.egi.file + "#DelegatetasksonEGI") or using @a("DIRAC", href := root.language.environment.egi.file + "#DIRAC").}
+      @li{@a("EGI", href := root.language.environment.egi.file), to execute tasks on the @a("EGI grid", href := "http://www.egi.eu/"),}
+      @li{@a("Ad-hoc Desktop Grid", href := root.language.environment.desktopGrid.file), to distribute your workflows on a set of desktop/laptop computers.}
 
