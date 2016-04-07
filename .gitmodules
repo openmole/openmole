@@ -1,0 +1,3 @@
+[submodule "openmole/bin/org.openmole.site/src/main/resources/openmole-market"]
+	path = openmole/bin/org.openmole.site/src/main/resources/openmole-market
+	url = https://github.com/openmole/openmole-market.git
