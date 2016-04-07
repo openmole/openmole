@@ -84,7 +84,7 @@ object Site {
     dest.recursiveDelete
 
     val m = new Market(Market.entries, dest)
-    val marketEntries = m.generate(Workspace.persistentDir / "market", parameters.test && parameters.marketTest)
+    val marketEntries = m.generate(parameters.resources.get, parameters.test && parameters.marketTest)
     SerialiserService.serialise(MarketIndex(marketEntries.map(_.toDeployedMarketEntry)), (dest / buildinfo.marketName))
 
     DocumentationPages.marketEntries = marketEntries

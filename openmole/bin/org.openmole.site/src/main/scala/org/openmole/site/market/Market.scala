@@ -17,8 +17,6 @@
 
 package org.openmole.site.market
 
-import org.eclipse.jgit.api.{ ResetCommand, CreateBranchCommand, Git }
-import org.eclipse.jgit.merge.MergeStrategy
 import org.openmole.core.project._
 import org.openmole.core.buildinfo.MarketIndexEntry
 import org.openmole.core.pluginmanager.PluginManager
@@ -65,6 +63,7 @@ object Market extends Logger {
   trait Repository {
     def url: String
     def viewURL(name: String, branch: String): Option[String]
+    def location(resourceDirectory: File) = resourceDirectory / "openmole-market"
   }
 
   import Tags._
@@ -117,18 +116,18 @@ class Market(repositories: Seq[MarketRepository], destination: File) {
   def branchName = buildinfo.version.takeWhile(_.isDigit) + "-dev"
   def archiveDirectoryName = "market"
 
-  def generate(cloneDirectory: File, testScript: Boolean = true): Seq[GeneratedMarketEntry] = {
+  def generate(resourceDirectory: File, testScript: Boolean = true): Seq[GeneratedMarketEntry] = {
     val archiveDirectory = destination / archiveDirectoryName
     archiveDirectory.mkdirs()
     for {
       marketRepository ← repositories
-      repository = update(marketRepository, cloneDirectory)
+      repository = marketRepository.repository
       project ← marketRepository.entries
-      if !testScript || test(repository, project, marketRepository.repository.url)
+      if !testScript || test(repository.location(resourceDirectory), project)
     } yield {
       val fileName = s"${project.name}.tgz".replace(" ", "_")
       val archive = archiveDirectory / fileName
-      val projectDirectory = repository / project.directory
+      val projectDirectory = repository.location(resourceDirectory) / project.directory
       projectDirectory archiveCompress archive
       val readme = projectDirectory / "README.md"
 
@@ -141,10 +140,10 @@ class Market(repositories: Seq[MarketRepository], destination: File) {
     }
   }
 
-  def test(clone: File, project: MarketEntry, repository: String): Boolean =
+  def test(directory: File, project: MarketEntry): Boolean =
     Try {
       PluginManager.synchronized {
-        val projectDirectory = clone / project.directory
+        val projectDirectory = directory / project.directory
         val consoleProject = new Project(projectDirectory)
         val plugins = consoleProject.loadPlugins
         try {
@@ -152,7 +151,7 @@ class Market(repositories: Seq[MarketRepository], destination: File) {
           def files = projectDirectory listRecursive (_.getName.endsWith(".oms"))
           Log.logger.info(s"Test ${project.name} containing ${files.map(_.getName).mkString(",")}")
 
-          def exclusion = s"Project ${project} of repository $repository has been excluded "
+          def exclusion = s"Project ${project} of repository $directory has been excluded "
 
           def compiles = for { file ← files } yield {
             consoleProject.compile(file, Seq.empty) match {
@@ -178,38 +177,5 @@ class Market(repositories: Seq[MarketRepository], destination: File) {
       case Success(_) ⇒ true
     }
 
-  def update(repository: MarketRepository, cloneDirectory: File): File = {
-    Log.logger.info(s"Update repository ${repository.repository.url}")
-    val directory = cloneDirectory / repository.repository.url.hash.toString
-
-    if (!(directory / ".git" exists)) {
-      val command = Git.cloneRepository
-      command.setDirectory(directory)
-      command.setURI(repository.repository.url)
-      command.call()
-    }
-
-    val repo = Git.open(directory)
-    repo.reset().setMode(ResetCommand.ResetType.HARD).call()
-    repo.fetch().call()
-
-    def branchingCommand = {
-      val exists = repo.branchList().call().exists(_.getName == s"refs/heads/$branchName")
-      repo.checkout().
-        setCreateBranch(!exists).
-        setName(branchName).
-        setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.TRACK).
-        setStartPoint("origin/" + branchName).
-        setForce(true)
-    }
-
-    branchingCommand.call()
-
-    val cmd = repo.pull()
-    cmd.setStrategy(MergeStrategy.THEIRS)
-    cmd.call()
-
-    directory
-  }
 }
 
