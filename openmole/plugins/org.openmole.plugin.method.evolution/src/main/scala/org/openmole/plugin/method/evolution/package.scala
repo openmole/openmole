@@ -65,6 +65,8 @@ package object evolution {
   def SteadyStateEvolution[T](algorithm: T, evaluation: Puzzle, termination: OMTermination, parallelism: Int = 1)(implicit wfi: WorkflowIntegration[T]) = {
     val t = wfi(algorithm)
 
+    val evaluationCapsule = Slot(MoleTask(evaluation))
+
     val randomGenomes =
       BreedTask(algorithm, parallelism) set (
         name := "randomGenome",
@@ -126,7 +128,7 @@ package object evolution {
 
     val masterTask = MoleTask(master) set (exploredOutputs += t.genomePrototype.toArray)
 
-    val masterSlave = MasterSlave(randomGenomes, masterTask, t.populationPrototype, t.statePrototype)(scalingGenomeTask -- Strain(evaluation))
+    val masterSlave = MasterSlave(randomGenomes, masterTask, t.populationPrototype, t.statePrototype)(scalingGenomeTask -- Strain(evaluationCapsule))
 
     val firstTask = InitialStateTask(algorithm) set (name := "first")
 
@@ -139,10 +141,10 @@ package object evolution {
 
     val puzzle =
       ((firstCapsule -- masterSlave -- scalingIndividualsSlot) >| (Capsule(last, strain = true), trigger = t.terminatedPrototype)) &
-        (firstCapsule oo evaluation)
+        (firstCapsule oo evaluationCapsule)
 
     val gaPuzzle =
-      new OutputPuzzleContainer(puzzle, scalingIndividualsSlot.capsule) {
+      new OutputEnvironmentPuzzleContainer(puzzle, scalingIndividualsSlot.capsule, evaluationCapsule) {
         def generation = t.generationPrototype
         def population = t.populationPrototype
         def state = t.statePrototype

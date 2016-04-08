@@ -13,19 +13,13 @@
       inputs += (x, y),
       outputs += (o1, o2)
     )
-
-  val modelCapsule = Capsule(model)
 """
 
 @sect{Automatic parameter exploration methods}
-  OpenMOLE provides advanced methods to help you explore your application's space of parameters. These methods
-  automatically generate workflows in order to solve exploration problems.
+  OpenMOLE provides advanced methods to help you explore your application's space of parameters. These methods automatically generate workflows in order to solve exploration problems.
 
   @sect{Genetic algorithms}
-    This workflow optimises a dummy model using the generational NSGA II multi-objective algorithm. You can replace the
-  instances of @i{modelCapsule} by your own model and adapt the variation range of its input variables. If you're not
-  familiar with parameter tuning using Genetic Algorithms (GA), you should first consult the
-  @a("tutorial explaining how to calibrate a NetLogo model with a GA", href := DocumentationPages.root.tutorial.netLogoGA.file).
+    This workflow optimises a dummy model using the generational NSGA II multi-objective algorithm. You can replace the instances of @i{model} by your own model and adapt the variation range of its input variables. If you're not familiar with parameter tuning using Genetic Algorithms (GA), you should first consult the @a("tutorial explaining how to calibrate a NetLogo model with a GA", href := DocumentationPages.root.tutorial.netLogoGA.file).
 
     @br @hl.openmole(s"""
   $model
@@ -46,18 +40,18 @@
           genome = Seq(x in (0.0, 1.0), y in (0.0, 1.0)),
           objectives = Seq(o1, o2)
         ),
-        evaluation = modelCapsule,
+        evaluation = model,
         parallelism = 10,
         termination = 100
     )
 
 
   // Definition of a hook to save the population of solutions to /tmp/evolution on the local machine running OpenMOLE
-  val savePopulation = SavePopulationHook(evolution, "/tmp/evolution/")
+  val savePopulation = SavePopulationHook(evolution, workDirectory / "evolution/")
 
   // Construction of the complete mole with the execution environment, and the hook.
   // Here the generated workflow will run using 4 threads of the local machine.
-  (evolution hook savePopulation) & (modelCapsule on LocalEnvironment(4))""")
+  (evolution hook savePopulation on LocalEnvironment(4))""")
 
   @p For distributed environments the island distribution scheme is well adapted. Islands of population evolve for a
   while on a remote node. When an island is finished, its final population is merged back into a global archive.
@@ -77,7 +71,7 @@
           genome = Seq(x in (0.0, 1.0), y in (0.0, 1.0)),
           objectives = Seq(o1, o2)
         ),
-      evaluation = modelCapsule,
+      evaluation = model,
       termination = 100
     )
 

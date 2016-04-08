@@ -309,7 +309,7 @@ object DocumentationPages { index ⇒
         }
 
         def method = new DocumentationPage {
-          def name = "Exploration Methods"
+          def name = "Methods"
           def children = Seq()
           def content = scalatex.documentation.language.Method()
         }
