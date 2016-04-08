@@ -17,34 +17,16 @@
 
 package org.openmole.plugin.environment.egi
 
-import java.util.concurrent.TimeUnit
-
-import org.eclipse.osgi.service.environment.EnvironmentInfo
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
-import org.openmole.core.fileservice.{ FileDeleter, FileService }
 import org.openmole.tool.file._
-import org.openmole.core.tools.service.{ Scaling, Random }
+import org.openmole.core.tools.service.Random
 import java.io.File
 import org.openmole.core.batch.environment._
-import org.openmole.core.batch.storage._
-import org.openmole.core.updater.Updater
-import org.openmole.core.workflow.job.Job
-import org.openmole.core.batch.jobservice._
 import org.openmole.core.batch.control._
 import org.openmole.core.workspace._
-import org.openmole.core.tools.service._
-import org.openmole.core.batch.replication._
 import org.openmole.tool.logger.Logger
-import org.openmole.tool.thread._
-import concurrent.stm._
 import annotation.tailrec
-import ref.WeakReference
-import Scaling._
 import Random._
-import org.openmole.core.tools.service._
-import fr.iscpif.gridscale.egi.{ GlobusAuthentication, WMSJobService, BDII }
-import fr.iscpif.gridscale.RenewDecorator
-import java.net.URI
 import concurrent.duration._
 
 object EGIEnvironment extends Logger {
@@ -159,45 +141,6 @@ object EGIEnvironment extends Logger {
 
   Workspace setDefault WMSRank
 
-  def apply(
-    voName:         String,
-    bdii:           Option[String]      = None,
-    vomsURLs:       Option[Seq[String]] = None,
-    fqan:           Option[String]      = None,
-    openMOLEMemory: Option[Int]         = None,
-    memory:         Option[Int]         = None,
-    cpuTime:        Option[Duration]    = None,
-    wallTime:       Option[Duration]    = None,
-    cpuNumber:      Option[Int]         = None,
-    jobType:        Option[String]      = None,
-    smpGranularity: Option[Int]         = None,
-    myProxy:        Option[MyProxy]     = None,
-    architecture:   Option[String]      = None,
-    threads:        Option[Int]         = None,
-    requirements:   Option[String]      = None,
-    debug:          Boolean             = false,
-    name:           Option[String]      = None
-  )(implicit authentication: EGIAuthentication, uncypher: Decrypt) =
-    new EGIEnvironment(
-      voName = voName,
-      bdii = bdii.map(s ⇒ new URI(s)).getOrElse(new URI(Workspace.preference(EGIEnvironment.DefaultBDII))),
-      vomsURLs = vomsURLs.getOrElse(EGIAuthentication.getVMOSOrError(voName)),
-      fqan = fqan,
-      openMOLEMemory = openMOLEMemory,
-      memory = memory,
-      cpuTime = cpuTime,
-      wallTime = wallTime,
-      cpuNumber = cpuNumber,
-      jobType = jobType,
-      smpGranularity = smpGranularity,
-      myProxy = myProxy,
-      architecture = architecture,
-      threads = threads,
-      requirements = requirements,
-      debug = debug,
-      name = name
-    )(authentication, uncypher)
-
   def proxyTime = Workspace.preference(ProxyTime)
   def proxyRenewalRatio = Workspace.preference(EGIEnvironment.ProxyRenewalRatio)
   def proxyRenewalDelay = (proxyTime * proxyRenewalRatio) max Workspace.preference(EGIEnvironment.MinProxyRenewal)
@@ -238,118 +181,31 @@ object EGIEnvironment extends Logger {
         selectedBS.tryGetToken.map(selectedBS → _)
     }
 
-}
+  def apply(
+    voName:         String,
+    service:        Option[String]      = None,
+    group:          Option[String]      = None,
+    bdii:           Option[String]      = None,
+    vomsURLs:       Option[Seq[String]] = None,
+    setup:          Option[String]      = None,
+    fqan:           Option[String]      = None,
+    cpuTime:        Option[Duration]    = None,
+    openMOLEMemory: Option[Int]         = None,
+    debug:          Boolean             = false,
+    name:           Option[String]      = None
+  )(implicit authentication: EGIAuthentication, decrypt: Decrypt) =
+    DIRACEnvironment(
+      voName = voName,
+      service = service,
+      group = group,
+      bdii = bdii,
+      vomsURLs = vomsURLs,
+      setup = setup,
+      fqan = fqan,
+      cpuTime = cpuTime,
+      openMOLEMemory = openMOLEMemory,
+      debug = debug,
+      name = name
+    )(authentication, decrypt)
 
-class EGIBatchExecutionJob(val job: Job, val environment: EGIEnvironment) extends BatchExecutionJob {
-  def trySelectStorage() = environment.trySelectAStorage(usedFileHashes)
-  def trySelectJobService() = environment.trySelectAJobService
-}
-
-class EGIEnvironment(
-    val voName:                  String,
-    val bdii:                    URI,
-    val vomsURLs:                Seq[String],
-    val fqan:                    Option[String],
-    override val openMOLEMemory: Option[Int],
-    val memory:                  Option[Int],
-    val cpuTime:                 Option[Duration],
-    val wallTime:                Option[Duration],
-    val cpuNumber:               Option[Int],
-    val jobType:                 Option[String],
-    val smpGranularity:          Option[Int],
-    val myProxy:                 Option[MyProxy],
-    val architecture:            Option[String],
-    override val threads:        Option[Int],
-    val requirements:            Option[String],
-    val debug:                   Boolean,
-    override val name:           Option[String]
-)(implicit a: EGIAuthentication, decrypt: Decrypt) extends BatchEnvironment with MemoryRequirement with BDIIStorageServers with EGIEnvironmentId { env ⇒
-
-  import EGIEnvironment._
-
-  @transient lazy val connectionsByWMS = Workspace.preference(ConnectionsByWMS)
-
-  type JS = EGIJobService
-
-  @transient lazy val registerAgents = {
-    Updater.delay(new EagerSubmissionAgent(WeakReference(this), EGIEnvironment.EagerSubmissionThreshold))
-    None
-  }
-
-  def executionJob(job: Job) = new EGIBatchExecutionJob(job, this)
-
-  override def submit(job: Job) = {
-    registerAgents
-    super.submit(job)
-  }
-
-  def proxyCreator = authentication
-
-  @transient lazy val authentication =
-    EGIAuthentication.initialise(a)(
-      vomsURLs,
-      voName,
-      fqan
-    )(decrypt)
-
-  @transient lazy val jobServices = {
-    val bdiiWMS = bdiiServer.queryWMSLocations(voName)
-    bdiiWMS.map {
-      js ⇒
-        new EGIJobService {
-          val usageControl = new AvailabilityQuality with JobServiceQualityControl {
-            override val usageControl = new LimitedAccess(connectionsByWMS, Int.MaxValue)
-            override val hysteresis = Workspace.preference(EGIEnvironment.QualityHysteresis)
-          }
-
-          val jobService = WMSJobService(js, connectionsByWMS, proxyRenewalDelay)(authentication)
-          def environment = env
-        }
-    }
-  }
-
-  def trySelectAJobService = {
-    val jss = jobServices
-    if (jss.isEmpty) throw new InternalProcessingError("No job service available for the environment.")
-
-    val nonEmpty = jss.filter(!_.usageControl.isEmpty)
-    def jobFactor(j: EGIJobService) = (j.usageControl.running.toDouble / j.usageControl.submitted) * (j.usageControl.totalDone.toDouble / j.usageControl.totalSubmitted)
-
-    lazy val times = nonEmpty.map(_.usageControl.time)
-    lazy val maxTime = times.max
-    lazy val minTime = times.min
-
-    lazy val availablities = nonEmpty.map(_.usageControl.availability)
-    lazy val maxAvailability = availablities.max
-    lazy val minAvailability = availablities.min
-
-    lazy val jobFactors = nonEmpty.map(jobFactor)
-    lazy val maxJobFactor = jobFactors.max
-    lazy val minJobFactor = jobFactors.min
-
-    def rate(js: EGIJobService) = {
-      val time = js.usageControl.time
-      val timeFactor = if (minTime == maxTime) 1.0 else 1.0 - time.normalize(minTime, maxTime)
-
-      val availability = js.usageControl.availability
-      val availabilityFactor = if (minAvailability == maxAvailability) 1.0 else 1.0 - availability.normalize(minTime, maxTime)
-
-      val jobFactor =
-        if (js.usageControl.submitted > 0 && js.usageControl.totalSubmitted > 0) ((js.usageControl.running.toDouble / js.usageControl.submitted) * (js.usageControl.totalDone / js.usageControl.totalSubmitted)).normalize(minJobFactor, maxJobFactor)
-        else 0.0
-
-      math.pow(
-        Workspace.preference(JobServiceJobFactor) * jobFactor +
-          Workspace.preference(JobServiceTimeFactor) * timeFactor +
-          Workspace.preference(JobServiceAvailabilityFactor) * availability +
-          Workspace.preference(JobServiceSuccessRateFactor) * js.usageControl.successRate,
-        Workspace.preference(JobServiceFitnessPower)
-      )
-    }
-
-    select(jss.toList, rate)
-  }
-
-  def bdiiServer: BDII = BDII(bdii.getHost, bdii.getPort, Workspace.preference(FetchResourcesTimeOut))
-  override def runtimeSettings = super.runtimeSettings.copy(archiveResult = true)
 }

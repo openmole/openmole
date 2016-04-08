@@ -16,6 +16,7 @@
     @p @b{Environments:}
     @ul
       @li{EGI: No more ProxyFile authentication, authentication is made through P12 or PEM}
+      @li{EGI: EGIEnvironment is a DIRACEnvironment now, to use the WMS services use the WMSEnvironment}
     @p @b{Methods:}
     @ul
       @li{Evolution: full API rewrite, see the doc}

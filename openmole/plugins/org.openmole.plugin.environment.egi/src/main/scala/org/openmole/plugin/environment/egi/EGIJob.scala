@@ -63,7 +63,7 @@ object EGIJob extends Logger {
 
 trait EGIJob extends BatchJob with BatchJobId { self ⇒
   var lastShacked = System.currentTimeMillis
-  val jobService: EGIJobService
+  val jobService: WMSJobService
 
   override def updateState(implicit token: AccessToken) = {
     state = super.updateState
