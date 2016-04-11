@@ -37,7 +37,6 @@
         EGIEnvironment(
           "biomed",
           cpuTime = 4 hours,
-          memory = 2000,
           openMOLEMemory = 200
         )""")
    @sect{Delegate tasks using WMS servers}
