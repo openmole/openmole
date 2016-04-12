@@ -205,7 +205,6 @@ object Application extends Logger {
                 val port = config.port.getOrElse(Workspace.preference(GUIServer.port))
                 val url = s"https://localhost:$port"
                 GUIServer.urlFile.content = url
-                if (config.remote && !password.isDefined) Console.initPassword
                 //The webapp location will then be somewhere in target
                 val webui = Workspace.file("webui")
                 webui.mkdirs()

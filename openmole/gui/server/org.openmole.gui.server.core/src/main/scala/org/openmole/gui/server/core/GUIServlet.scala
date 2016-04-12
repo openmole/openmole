@@ -54,7 +54,7 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
   }.sorted
 
   before() {
-    if (arguments.passwordCorrect.isDefined) basicAuth()
+    if (arguments.passwordCorrect.isDefined && Workspace.passwordChosen) basicAuth().foreach(u ⇒ Workspace.setPassword(u.password))
   }
 
   get("/shutdown") {
@@ -74,7 +74,6 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
         destination.setWritable(true)
         val stream = file._2.getInputStream
         try {
-          println("cop to " + destination.getAbsolutePath)
           stream.copy(destination)
           destination.setExecutable(true)
         }
@@ -151,7 +150,7 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
   }
 }
 
-case class User(id: String)
+case class User(id: String, password: String)
 
 trait AuthenticationSupport extends ScentrySupport[User] with BasicAuthSupport[User] {
   this: GUIServlet ⇒
@@ -159,7 +158,7 @@ trait AuthenticationSupport extends ScentrySupport[User] with BasicAuthSupport[U
   val realm = "OpenMOLE (user name doesn't matter)"
 
   protected def fromSession = {
-    case id: String ⇒ User(id)
+    case id: String ⇒ null
   }
 
   protected def toSession = {
@@ -181,8 +180,9 @@ trait AuthenticationSupport extends ScentrySupport[User] with BasicAuthSupport[U
   class OurBasicAuthStrategy(protected override val app: ScalatraBase, realm: String)
       extends BasicAuthStrategy[User](app, realm) {
 
-    override protected def validate(userName: String, password: String)(implicit request: HttpServletRequest, response: HttpServletResponse): Option[User] =
-      if (arguments.passwordCorrect.get(password)) Some(User(userName)) else None
+    override protected def validate(userName: String, password: String)(implicit request: HttpServletRequest, response: HttpServletResponse): Option[User] = {
+      if (arguments.passwordCorrect.get(password)) Some(User(userName, password)) else None
+    }
 
     override protected def getUserId(user: User)(implicit request: HttpServletRequest, response: HttpServletResponse): String = user.id
   }
