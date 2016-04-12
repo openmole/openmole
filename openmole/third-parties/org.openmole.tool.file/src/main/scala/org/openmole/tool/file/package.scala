@@ -35,6 +35,8 @@ import scala.util.{ Success, Failure, Try }
 
 package file {
 
+  import java.nio.file.attribute.PosixFilePermissions
+
   import org.openmole.tool.stream.GZipedInputStream
 
   trait FilePackage {
@@ -294,6 +296,17 @@ package file {
         f.setReadable(Files.isReadable(o))
         f.setWritable(Files.isWritable(o))
         f.setExecutable(Files.isExecutable(o))
+      }
+
+      def setPosixMode(m: String) = {
+        def isPosix = FileSystems.getDefault().supportedFileAttributeViews().contains("posix")
+
+        if (isPosix) {
+          val attrs = PosixFilePermissions.fromString(m)
+          Files.setPosixFilePermissions(file, attrs)
+          true
+        }
+        else false
       }
 
       def content_=(content: String) = Files.write(file, content.getBytes, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)

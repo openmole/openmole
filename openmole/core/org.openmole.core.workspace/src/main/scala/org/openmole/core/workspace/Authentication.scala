@@ -31,6 +31,11 @@ import Authentication.Log
 
 trait Authentication <: Persistent {
 
+  override def baseDir = {
+    if (_baseDir.mkdirs) _baseDir.setPosixMode("rwx------")
+    _baseDir
+  }
+
   override def /(name: String) = new Persistent(new File(baseDir, name)) with Authentication
 
   def category[T](implicit m: Manifest[T]): String = m.runtimeClass.getCanonicalName
