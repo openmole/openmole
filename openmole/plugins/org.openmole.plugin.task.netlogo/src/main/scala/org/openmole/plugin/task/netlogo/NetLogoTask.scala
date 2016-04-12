@@ -36,10 +36,7 @@ import Prettifier._
 
 object NetLogoTask {
 
-  case class Workspace(script: String, workspace: Option[String]) {
-    def this(workspace: File, script: String) = this(script, Some(workspace.getName))
-    def this(script: File) = this(script.getName, None)
-  }
+  case class Workspace(script: String, workspace: Option[String] = None)
 
 }
 
@@ -69,7 +66,7 @@ trait NetLogoTask extends ExternalTask {
         case Some(d) ⇒ tmpDir / d
       }
 
-    val preparedContext = prepareInputFiles(context, relativeResolver(workDir))
+    val preparedContext = prepareInputFiles(context, relativeResolver(tmpDir))
 
     val script = workDir / workspace.script
     val netLogo = netLogoFactory()

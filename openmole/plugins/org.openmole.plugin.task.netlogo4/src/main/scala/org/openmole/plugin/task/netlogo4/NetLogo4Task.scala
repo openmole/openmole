@@ -41,27 +41,22 @@ object NetLogo4Task {
     script:            String,
     launchingCommands: Seq[String],
     seed:              Option[Prototype[Int]]
-  ): NetLogoTaskBuilder = {
-
-    new NetLogoTaskBuilder(new Workspace(workspace, script), launchingCommands, seed, factory) { builder ⇒
+  ): NetLogoTaskBuilder =
+    new NetLogoTaskBuilder(Workspace(script = script, workspace = Some(workspace.getName)), launchingCommands, seed, factory) { builder ⇒
       addResource(workspace)
       def toTask = new NetLogo4Task with Built
     }
-  }
 
   def file(
     script:            File,
     launchingCommands: Seq[String],
     seed:              Option[Prototype[Int]] = None
-  ): NetLogoTaskBuilder = {
-    new NetLogoTaskBuilder(new Workspace(script), launchingCommands, seed, factory) {
+  ): NetLogoTaskBuilder =
+    new NetLogoTaskBuilder(Workspace(script = script.getName), launchingCommands, seed, factory) {
       builder ⇒
-
       addResource(script)
-
       def toTask = new NetLogo4Task with Built
     }
-  }
 
   def apply(
     script:            File,
