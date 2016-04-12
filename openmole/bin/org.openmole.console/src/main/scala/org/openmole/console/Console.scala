@@ -65,7 +65,7 @@ object Console {
       val password =
         if (Workspace.passwordChosen) passwordReader.readLine("Enter your OpenMOLE password (for preferences encryption): ", '*')
         else {
-          println("OpenMOLE Password for preferences encryption has not been set yet, choose a  password.")
+          println("OpenMOLE Password has not been set yet, choose a password.")
           askPassword("Preferences password")
         }
       if (!setPassword(password)) initPassword
