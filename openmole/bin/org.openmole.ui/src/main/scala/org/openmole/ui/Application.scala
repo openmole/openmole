@@ -111,7 +111,7 @@ object Application extends Logger {
       |[--console-work-directory] specify the workDirectory variable in console mode (it is set to the current dirrectory by default)
       |[--reset] reset all preferences and authentications
       |[--] end of options the remaining arguments are provided to the console in the args array
-      |[-h | --help] print help"""
+      |[-h | --help] print help""".stripMargin
 
     def parse(args: List[String], c: Config = Config()): Config = {
       def plugins(tail: List[String]) = parse(dropArgs(tail), c.copy(userPlugins = takeArgs(tail)))
