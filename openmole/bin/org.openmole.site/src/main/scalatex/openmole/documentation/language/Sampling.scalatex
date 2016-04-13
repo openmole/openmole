@@ -97,8 +97,31 @@
             outputs += (name, size)
           )
 
-          ExplorationTask((file in (workDirectory / "dir").files) withName name) -< (t hook ToStringHook())
-         """)
+          ExplorationTask(file in (workDirectory / "dir") withName name) -< (t hook ToStringHook())""")
+
+        @p If you need to go through several level of files you may use a sampling like this one:
+
+        @br @hl.openmole("""
+        val dir = Val[File]
+        val dirName = Val[String]
+        val file = Val[File]
+        val fileName = Val[String]
+        val name = Val[String]
+        val size = Val[Long]
+
+        val t = ScalaTask("""val size = file.length""") set (
+          inputs += file,
+          outputs += size,
+          (inputs, outputs) += (fileName, dirName)
+        )
+
+        val explo =
+          ExplorationTask(
+            (dir in (workDirectory / "test") withName dirName) x
+            (file in dir withName fileName)
+          )
+
+        explo -< (t hook ToStringHook())""")
 
   @sect{Shrink the initial Sampling with Take, Filter, Sample}
     You can modify a Sampling using various operations in OpenMOLE.
