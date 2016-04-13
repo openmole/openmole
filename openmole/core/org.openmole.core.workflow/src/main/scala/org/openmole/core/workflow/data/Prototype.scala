@@ -18,9 +18,11 @@
 package org.openmole.core.workflow.data
 
 import org.openmole.core.macros.ExtractValName
-import org.openmole.core.tools.obj.{ Id, ClassUtils }
+import org.openmole.core.tools.obj.{ ClassUtils, Id }
 import ClassUtils._
 import org.openmole.core.tools.obj.ClassUtils
+import org.openmole.core.workflow.tools.FromContext
+
 import scala.reflect._
 import scala.reflect.runtime.universe._
 
@@ -97,6 +99,8 @@ class Prototype[T](val simpleName: String, val `type`: PrototypeType[T], val nam
     obj == null || classAssignable(obj.getClass, `type`.runtimeClass)
 
   def withName(name: String) = Prototype[T](name)(`type`)
+
+  def from(context: ⇒ Context)(implicit rng: RandomProvider): T = context(this)
 
   override def id = (name, `type`)
   override def toString = s"($name: ${`type`.toString})"

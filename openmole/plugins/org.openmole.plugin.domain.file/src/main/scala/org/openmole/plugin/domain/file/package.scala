@@ -18,6 +18,9 @@
 package org.openmole.plugin.domain
 
 import java.io.File
+
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.tools._
 import org.openmole.tool.file._
 
@@ -31,6 +34,19 @@ package object file {
       filter:    Option[ExpandedString] = None
     ): ListFilesDomain = ListFilesDomain(f, directory, recursive, filter)
     def select(path: ExpandedString) = SelectFileDomain(f, path)
+  }
+
+  implicit def prototypeOfFileIsFinite = new Finite[Prototype[File], File] {
+    override def computeValues(prototype: Prototype[File]) = FromContext { (ctx, rng) ⇒ ctx(prototype).listFilesSafe }
+  }
+
+  implicit def fileIsFinite = new Finite[File, File] {
+    override def computeValues(f: File) = FromContext.value(f.listFilesSafe)
+  }
+
+  implicit def filePrototypeDecorator(f: Prototype[File]) = new {
+    def /(path: ExpandedString) =
+      FromContext { (ctx, rng) ⇒ (ctx(f) / path.from(ctx)(rng)).listFilesSafe }
   }
 
 }
