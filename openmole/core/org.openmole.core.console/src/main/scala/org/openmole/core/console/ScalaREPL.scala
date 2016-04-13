@@ -51,7 +51,7 @@ class ScalaREPL(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.e
   var loopExitCode = 0
 
   System.setProperty("jline.shutdownhook", "true")
-  override val prompt = "OpenMOLE>"
+  override val prompt = "\nOpenMOLE> "
 
   lazy val firstLine = "/*" + UUID.randomUUID().toString + "*/"
 
