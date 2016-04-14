@@ -29,11 +29,10 @@ object FromContext {
 
   implicit def fromTToContext[T](t: T): FromContext[T] = FromContext.value[T](t)
 
-  def codeToFromContext[T: Manifest](code: String)(implicit fromString: FromString[T]): FromContext[T] =
+  def codeToFromContext[T: Manifest](code: String): FromContext[T] =
     new FromContext[T] {
       @transient lazy val proxy = ScalaWrappedCompilation.dynamic[T](code)
-      override def from(context: ⇒ Context)(implicit rng: RandomProvider): T =
-        fromString(proxy().from(context).toString)
+      override def from(context: ⇒ Context)(implicit rng: RandomProvider): T = proxy().from(context)
     }
 
   implicit def codeToFromContextFloat(code: String) = codeToFromContext[Float](code)
@@ -43,6 +42,8 @@ object FromContext {
   implicit def codeToFromContextBigDecimal(code: String) = codeToFromContext[BigDecimal](code)
   implicit def codeToFromContextBigInt(code: String) = codeToFromContext[BigInt](code)
   implicit def codeToFromContextBoolean(condition: String) = codeToFromContext[Boolean](condition)
+  implicit def codeToFromContextFile(code: String) = codeToFromContext[File](code)
+  implicit def codeToFromContextString(code: String) = codeToFromContext[String](code)
 
   def value[T](t: T): FromContext[T] =
     new FromContext[T] {

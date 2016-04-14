@@ -109,7 +109,7 @@
         val name = Val[String]
         val size = Val[Long]
 
-        val t = ScalaTask("""val size = file.length""") set (
+        val t = ScalaTask("val size = file.length") set (
           inputs += file,
           outputs += size,
           (inputs, outputs) += (fileName, dirName)
@@ -305,15 +305,17 @@
             )""")
 
   @sect{The is keyword}
-    @p Until now with have only used the syntax @i{i in someDomain}, but some time you want to be able to store the full domain in an variable of type array in order to use it as a whole in a subsequent task. On way to achive that it to use the @i{is} keyword. For instance this exploration generates 10 array of 10 random numbers:
+    @p The is keyword can be use to assigned a value to variable in a sampling. For instance:
     @br @hl.openmole("""
     val i = Val[Int]
-    val d = Val[Array[Double]]
+    val j = Val[Int]
+    val k = Val[Int]
 
     val exploration =
       ExplorationTask(
         (i in (0 until 10)) x
-        (d is UniformDistribution[Double]().take(10))
+        (j is "i * 2") x
+        (k in Range[Int]("j", "j + 7"))
       )""")
 
 

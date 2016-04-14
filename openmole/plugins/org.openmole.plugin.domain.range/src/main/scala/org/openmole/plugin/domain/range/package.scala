@@ -17,9 +17,11 @@
 
 package org.openmole.plugin.domain
 
-import java.math.{ MathContext, RoundingMode, BigDecimal }
+import java.math.{ BigDecimal, MathContext, RoundingMode }
+
 import org.openmole.core.tools.io.FromString
 import org.openmole.core.tools.math.BigDecimalOperations
+import org.openmole.core.workflow.domain.{ Bounds, Center, Finite }
 import org.openmole.core.workflow.tools.FromContext
 
 package object range {
@@ -49,5 +51,12 @@ package object range {
     def size(s: FromContext[Int]) = SizeRange[T](r, s)
     def logSteps(s: FromContext[T])(implicit l: Log[T]) = LogRange[T](r, s)
   }
+
+  trait DefaultStep[T] {
+    def step: T
+  }
+
+  implicit def defaultStepInt = new DefaultStep[Int] { def step = 1 }
+  implicit def defaultStepLong = new DefaultStep[Long] { def step = 1 }
 
 }

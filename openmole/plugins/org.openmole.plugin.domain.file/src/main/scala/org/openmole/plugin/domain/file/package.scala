@@ -44,9 +44,4 @@ package object file {
     override def computeValues(f: File) = FromContext.value(f.listFilesSafe)
   }
 
-  implicit def filePrototypeDecorator(f: Prototype[File]) = new {
-    def /(path: ExpandedString) =
-      FromContext { (ctx, rng) ⇒ (ctx(f) / path.from(ctx)(rng)).listFilesSafe }
-  }
-
 }

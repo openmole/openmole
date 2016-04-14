@@ -52,7 +52,7 @@ package object combine {
     def s: Sampling = f
   }
 
-  implicit def zipWithNameFactorDecorator[D](factor: Factor[D, File])(implicit discrete: Discrete[D, File]) = new {
+  implicit def withNameFactorDecorator[D](factor: Factor[D, File])(implicit discrete: Discrete[D, File]) = new {
     @deprecated("Use withName", "5")
     def zipWithName(name: Prototype[String]): ZipWithNameSampling[D] = withName(name)
     def withName(name: Prototype[String]): ZipWithNameSampling[D] = new ZipWithNameSampling(factor, name)
