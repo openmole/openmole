@@ -51,8 +51,7 @@ abstract class SystemExecTask(
     val returnValue:          Option[Prototype[Int]],
     val output:               Option[Prototype[String]],
     val error:                Option[Prototype[String]],
-    val environmentVariables: Seq[(Prototype[_], String)],
-    val isRemote:             Boolean                     = false
+    val environmentVariables: Seq[(Prototype[_], String)]
 ) extends ExternalTask {
 
   @tailrec
@@ -78,11 +77,13 @@ abstract class SystemExecTask(
         case Some(d) ⇒ new File(tmpDir, d)
       }
 
+    workDir.mkdirs()
+
     val preparedContext = prepareInputFiles(context, relativeResolver(workDir))
 
     val osCommandLines: Seq[ExpandedSystemExecCommand] = command.find { _.os.compatible }.map {
       cmd ⇒ cmd.expanded map { expansion ⇒ ExpandedSystemExecCommand(expansion) }
-    }.getOrElse(throw new UserBadDataError("Not command line found for " + OS.actualOS))
+    }.getOrElse(throw new UserBadDataError("No command line found for " + OS.actualOS))
 
     val executionResult = execAll(osCommandLines.toList, workDir, preparedContext)
 
