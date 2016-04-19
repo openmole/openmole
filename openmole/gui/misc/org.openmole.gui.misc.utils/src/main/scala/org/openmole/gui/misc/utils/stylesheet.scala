@@ -348,7 +348,7 @@ package object stylesheet {
   lazy val fullPageZone: ModifierSeq = Seq(
     top := 0,
     height := "100%",
-    width := 100
+    width := "100%"
   )
 
   lazy val fileZone: ModifierSeq = Seq(
