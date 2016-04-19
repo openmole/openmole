@@ -113,9 +113,9 @@ object ApiImpl extends Api {
   private def extractTGZTo(safePath: SafePath, to: SafePath): Unit = {
     safePath.extension match {
       case FileExtension.TGZ ⇒
-        // val archiveFile = safePathToFile(safePath)
-        // val toFile: File = to
-        extractTGZTo(safePath, to)
+        val archiveFile = safePathToFile(safePath)(ServerFileSytemContext.project)
+        val toFile: File = safePathToFile(to)(ServerFileSytemContext.project)
+        extractTGZToFromFiles(archiveFile, toFile)
       case _ ⇒
     }
   }

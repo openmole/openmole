@@ -18,8 +18,8 @@
 package org.openmole.plugin.domain.range
 
 import org.openmole.core.tools.io.FromString
-import org.openmole.core.workflow.data.{ RandomProvider, Context }
-import org.openmole.core.workflow.domain.{ Center, Bounds }
+import org.openmole.core.workflow.data.{ Context, RandomProvider }
+import org.openmole.core.workflow.domain.{ Bounds, Center, Finite }
 import org.openmole.core.workflow.tools.FromContext
 
 object Range {
@@ -29,6 +29,14 @@ object Range {
     override def max(domain: Range[T]) = FromContext.apply((context, rng) ⇒ domain.max(context)(rng))
     override def center(domain: Range[T]) = FromContext.apply((context, rng) ⇒ domain.center(context)(rng))
   }
+
+  implicit def rangeWithDefaultStepIsFinite[T](implicit s: DefaultStep[T]) =
+    new Finite[Range[T], T] with Bounds[Range[T], T] with Center[Range[T], T] {
+      override def computeValues(domain: Range[T]) = StepRange.isFinite.computeValues(domain.step(s.step))
+      override def max(domain: Range[T]) = StepRange.isFinite.max(domain.step(s.step))
+      override def min(domain: Range[T]) = StepRange.isFinite.min(domain.step(s.step))
+      override def center(domain: Range[T]) = StepRange.isFinite.center(domain.step(s.step))
+    }
 
   def apply[T](
     min: FromContext[T],

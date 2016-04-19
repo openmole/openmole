@@ -16,9 +16,7 @@ import org.scalatra._
 import org.openmole.tool.hash._
 
 object RESTServer extends Logger {
-  def passwordHash = ConfigurationLocation[String]("REST", "PasswordHash", None, true)
-  def setPassword(p: String) = Workspace.setPreference(passwordHash, p.hash.toString)
-  def isPasswordCorrect(p: String) = Workspace.preferenceOption(passwordHash).map(_ == p.hash.toString).getOrElse(false)
+  def isPasswordCorrect(p: String) = Workspace.passwordIsCorrect(p)
 }
 
 import RESTServer.Log._

@@ -4,7 +4,7 @@
 @sect{Web Server}
   Warning: The REST API of OpenMOLE is still experimental, it might be subject to some backward incompatible changes in the future.
 
-  @p OpenMOLE ships with a web server providing a REST API to @b{start} workflows, @b{manage} their execution and @b{retrieve} their output data. You should first configure your web server by running openmole --ws-configure. Then you may start the OpenMOLE web server, run the command: "openmole -ws --port 8843" from the console.
+  @p OpenMOLE ships with a web server providing a REST API to @b{start} workflows, @b{manage} their execution and @b{retrieve} their output data. To start the OpenMOLE REST API, run the command: "openmole --rest --port 8843" from the console. If you need to launch it automatically in a deamon for instance you should also you the --password-file argument to provide the password for encryption of the preferences.
 
   @p The web server can be accessed at the URL https://localhost:8443. Replace @i{localhost} with the remote machine's hostname or IP address if the web server is not running on your local system.
 

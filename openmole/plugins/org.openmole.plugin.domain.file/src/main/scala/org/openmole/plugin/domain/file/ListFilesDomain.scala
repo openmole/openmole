@@ -46,7 +46,7 @@ object ListFilesDomain extends Logger {
 
 import ListFilesDomain.Log._
 
-sealed class ListFilesDomain(
+class ListFilesDomain(
     base:      File,
     directory: Option[ExpandedString] = None,
     recursive: Boolean                = false,

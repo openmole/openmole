@@ -24,20 +24,20 @@ import org.openmole.core.batch.environment.SerializedJob
 import org.openmole.core.workspace.Workspace
 import org.openmole.core.batch.storage._
 import org.openmole.plugin.environment.gridscale.GridScaleJobService
-import fr.iscpif.gridscale.egi.{ WMSJobService, WMSJobDescription }
+import fr.iscpif.gridscale.egi.{ WMSJobDescription }
 import StatusFiles._
 import org.openmole.tool.logger.Logger
 import scalax.io.Resource
 import org.openmole.tool.file._
 
-object EGIJobService extends Logger
+object WMSJobService extends Logger
 
-import EGIJobService._
+import WMSJobService._
 
-trait EGIJobService extends GridScaleJobService { js ⇒
+trait WMSJobService extends GridScaleJobService { js ⇒
 
-  val jobService: WMSJobService
-  def environment: EGIEnvironment
+  val jobService: fr.iscpif.gridscale.egi.WMSJobService
+  def environment: WMSEnvironment
 
   def jobScript =
     JobScript(

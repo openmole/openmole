@@ -25,9 +25,12 @@ object Persistent {
   @transient lazy val xstream = new XStream
 }
 
-case class Persistent(baseDir: File) {
+case class Persistent(_baseDir: File) {
 
-  baseDir.mkdirs
+  def baseDir = {
+    _baseDir.mkdirs
+    _baseDir
+  }
 
   def /(name: String) = Persistent(new File(baseDir, name))
 

@@ -17,24 +17,16 @@
 
 package org.openmole.plugin.environment.egi
 
-import java.util.concurrent.TimeUnit
-
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.tool.file._
-import org.openmole.core.tools.service.{ Scaling, Random }
 import org.openmole.core.batch.environment.BatchEnvironment
 import fr.iscpif.gridscale.egi.{ GlobusAuthentication, BDII }
 import org.openmole.core.batch.replication.ReplicaCatalog
-import org.openmole.core.batch.storage.StorageService
-import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.workspace._
 import org.openmole.tool.hash.Hash
 import org.openmole.tool.logger.Logger
-import org.openmole.tool.thread._
-import concurrent.stm._
 import java.io.File
-import Random._
-import Scaling._
+import org.openmole.core.tools.math._
 
 object BDIIStorageServers extends Logger
 

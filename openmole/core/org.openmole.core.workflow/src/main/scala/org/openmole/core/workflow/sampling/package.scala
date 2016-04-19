@@ -20,6 +20,8 @@ package org.openmole.core.workflow
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.tools.FromContext
+import scalaz._
+import Scalaz._
 
 package sampling {
 
@@ -32,11 +34,12 @@ package sampling {
 
     implicit class PrototypeFactorDecorator[T](p: Prototype[T]) {
       def in[D](d: D): Factor[D, T] = Factor(p, d)
+      def is(d: FromContext[T]) = Factor(p, d)
     }
 
-    implicit def arrayPrototypeFactorDecorator[T: Manifest](p: Prototype[Array[T]]) = new {
-      def is[D](d: D)(implicit discrete: Discrete[D, T], inputs: DomainInputs[D] = DomainInputs.empty) =
-        Factor[UnrolledDomain[D, T], Array[T]](p, new UnrolledDomain[D, T](d))
+    implicit def fromContextIsFinite[T] = new Finite[FromContext[T], T] {
+      override def computeValues(domain: FromContext[T]): FromContext[Iterable[T]] =
+        domain.map(v ⇒ Vector(v))
     }
 
     implicit def tupleOfStringToBoundOfDouble[T: FromString: Manifest] = new Bounds[(String, String), T] {

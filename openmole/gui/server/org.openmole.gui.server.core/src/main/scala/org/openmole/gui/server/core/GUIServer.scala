@@ -34,11 +34,8 @@ import org.openmole.tool.hash._
 import org.openmole.tool.file._
 
 object GUIServer {
-  val passwordHash = ConfigurationLocation[String]("GUIServer", "PasswordHash", None, true)
-
-  def isPasswordCorrect(p: String) = Workspace.preferenceOption(passwordHash).map(_ == p.hash.toString).getOrElse(false)
+  def isPasswordCorrect(p: String) = Workspace.passwordIsCorrect(p)
   def resourcePath = (Workspace.openMOLELocation / "webapp").getAbsolutePath
-  def setPassword(p: String) = Workspace.setPreference(GUIServer.passwordHash, p.hash.toString)
 
   val portValue = Network.freePort
   val port = ConfigurationLocation("GUIServer", "Port", Some(portValue))

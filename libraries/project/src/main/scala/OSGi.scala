@@ -94,7 +94,7 @@ object OSGi extends Defaults {
     )
 
   lazy val netlogo4_noscala = OsgiProject("ccl.northwestern.edu.netlogo4.noscala", exports = Seq("org.nlogo.*"),
-    privatePackages = Seq("!scala.*", "*")) settings
+    privatePackages = Seq("!scala.*", "**")) settings
     (libraryDependencies ++=
       Seq("ccl.northwestern.edu" % "netlogo" % "4.1.3",
         "org.picocontainer" % "picocontainer" % "2.8",
@@ -106,30 +106,30 @@ object OSGi extends Defaults {
 
 
   lazy val netlogo4 = OsgiProject("ccl.northwestern.edu.netlogo4", exports = Seq("org.nlogo.*"),
-    privatePackages = Seq("*")) settings
+    privatePackages = Seq("**")) settings
     (libraryDependencies ++=
       Seq("ccl.northwestern.edu" % "netlogo" % "4.1.3",
         "org.picocontainer" % "picocontainer" % "2.8",
         "org.objectweb" % "asm" % "3.1",
         "org.objectweb" % "asm-commons" % "3.1"), version := "4.1.3", scalaVersion := "2.8.0", crossPaths := false, bundleType := Set("plugin"))
 
-  lazy val netLogo5Version = "5.3.0"
+  lazy val netLogo5Version = "5.3.1"
   lazy val netlogo5_noscala = OsgiProject("ccl.northwestern.edu.netlogo5.noscala", exports = Seq("org.nlogo.*"),
-    privatePackages = Seq("!scala.*", "*")) settings
+    privatePackages = Seq("!scala.*", "**")) settings
     (libraryDependencies ++=
-      Seq("ccl.northwestern.edu" % "netlogo" % netLogo5Version,
-        "org.objectweb" % "asm-all" % "3.3.1",
-        "org.picocontainer" % "picocontainer" % "2.13.6"), version := netLogo5Version, autoScalaLibrary := false, bundleType := Set("all"), scalaVersion := "2.9.2", crossPaths := false,
+      Seq("ccl.northwestern.edu" % "netlogo" % netLogo5Version % "provided" from s"https://github.com/NetLogo/NetLogo/releases/download/$netLogo5Version/NetLogo.jar",
+        "org.objectweb" % "asm-all" % "3.3.1" % "provided",
+        "org.picocontainer" % "picocontainer" % "2.13.6" % "provided"), version := netLogo5Version, autoScalaLibrary := false, bundleType := Set("all"), scalaVersion := "2.9.2", crossPaths := false,
       ivyScala ~= { (is: Option[IvyScala]) ⇒ //See netlogo4_noscala
         for (i ← is) yield i.copy(checkExplicit = false)
       })
 
   lazy val netlogo5 = OsgiProject("ccl.northwestern.edu.netlogo5", exports = Seq("org.nlogo.*"),
-    privatePackages = Seq("*")) settings
-    (libraryDependencies ++= Seq("ccl.northwestern.edu" % "netlogo" % netLogo5Version,
-      "org.scala-lang" % "scala-library" % "2.9.2",
-      "org.objectweb" % "asm-all" % "3.3.1",
-      "org.picocontainer" % "picocontainer" % "2.13.6"), version := netLogo5Version, scalaVersion := "2.9.2", crossPaths := false, bundleType := Set("plugin"))
+    privatePackages = Seq("**")) settings
+    (libraryDependencies ++= Seq("ccl.northwestern.edu" % "netlogo" % netLogo5Version % "provided" from s"https://github.com/NetLogo/NetLogo/releases/download/$netLogo5Version/NetLogo.jar",
+      "org.scala-lang" % "scala-library" % "2.9.2" % "provided",
+      "org.objectweb" % "asm-all" % "3.3.1" % "provided",
+      "org.picocontainer" % "picocontainer" % "2.13.6" % "provided"), version := netLogo5Version, scalaVersion := "2.9.2", crossPaths := false, bundleType := Set("plugin"))
 
   lazy val guava = OsgiProject("com.google.guava",
     exports = Seq("com.google.common.*"), privatePackages = Seq("!scala.*", "*")) settings(libraryDependencies ++=

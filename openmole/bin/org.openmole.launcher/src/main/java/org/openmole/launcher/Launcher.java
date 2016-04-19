@@ -30,26 +30,28 @@ public class Launcher {
 
     public static void main(String[] args) {
 
-        Optional<File> directory = Optional.empty();
-        Optional<String> run = Optional.empty();
-        Optional<String> osgiDirectory = Optional.empty();
+        //FIXME: Use options when OpenMOLE will enforce java 8
+        File directory = null;
+        String run = null;
+        String osgiDirectory = null;
+
         String[] forwardAgs = new String[0];
 
         int i = 0;
         while(i < args.length) {
             if(args[i].contentEquals("--plugins")) {
                 i++;
-                directory = Optional.of(new File(args[i]));
+                directory = new File(args[i]);
                 i++;
                 continue;
             } else if(args[i].contentEquals("--run")) {
                 i++;
-                run = Optional.of(args[i]);
+                run = args[i];
                 i++;
                 continue;
             } else if (args[i].contentEquals("--osgi-directory")) {
                 i++;
-                osgiDirectory = Optional.of(args[i]);
+                osgiDirectory = args[i];
                 i++;
                 continue;
             } else if(args[i].contentEquals("--")) {
@@ -68,16 +70,17 @@ public class Launcher {
         osgiConfig.put(Constants.FRAMEWORK_STORAGE, "");
         osgiConfig.put(Constants.FRAMEWORK_STORAGE_CLEAN, "true");
         osgiConfig.put(Constants.FRAMEWORK_BOOTDELEGATION, "*");
-        if(osgiDirectory.isPresent()) osgiConfig.put(Constants.FRAMEWORK_STORAGE, osgiDirectory.get());
+        if(osgiDirectory !=  null) osgiConfig.put(Constants.FRAMEWORK_STORAGE, osgiDirectory);
 
         Framework framework = frameworkFactory.newFramework(osgiConfig);
 
 
         int ret = 0;
         try {
-            if(!directory.isPresent()) throw new RuntimeException("Missing plugin directory argument");
-            if(!run.isPresent()) throw new RuntimeException("Missing run class argument");
-            if(!directory.get().exists()) throw new RuntimeException("Plugin director does not exist");
+            if(directory == null) throw new RuntimeException("Missing plugin directory argument");
+            if(run == null) throw new RuntimeException("Missing run class argument");
+            if(directory == null) throw new RuntimeException("Missing plugin directory argument");
+            if(!directory.exists()) throw new RuntimeException("Plugin directory does not exist");
 
             framework.init();
 
@@ -85,7 +88,7 @@ public class Launcher {
 
             List<Bundle> bundles = new LinkedList<>();
 
-            for(File f: directory.get().listFiles()) {
+            for(File f: directory.listFiles()) {
                 bundles.add(context.installBundle(f.toURI().toString()));
             }
 
@@ -99,12 +102,12 @@ public class Launcher {
 
             for(Bundle b: bundles) {
                 try {
-                    Class c = b.loadClass(run.get());
+                    Class c = b.loadClass(run);
                     main = c;
                 } catch(Exception ignore) {}
             }
 
-            if(main == null) throw new RuntimeException("Class " + run.get() + " has not been found");
+            if(main == null) throw new RuntimeException("Class " + run + " has not been found");
 
             Method runMethod = main.getDeclaredMethod("run", String[].class);
             if(!java.lang.reflect.Modifier.isStatic(runMethod.getModifiers())) throw new RuntimeException("Run method should be static");

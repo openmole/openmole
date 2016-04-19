@@ -18,7 +18,7 @@ abstract class Defaults(subBuilds: Defaults*) extends BuildSystemDefaults {
     Seq(
       scalaVersion in Global := "2.11.8",
       scalacOptions ++= Seq("-target:jvm-1.7", "-language:higherKinds"),
-      javacOptions in (Compile, compile) ++= Seq("-source", "1.7", "-target", "1.7"),
+      javacOptions ++= Seq("-source", "1.7", "-target", "1.7"),
       publishArtifact in (packageDoc in install) := false,
       publishArtifact in (packageSrc in install) := false
     )

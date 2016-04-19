@@ -58,8 +58,8 @@ object Application extends Logger {
     object ConsoleMode extends LaunchMode
     object GUIMode extends LaunchMode
     object HelpMode extends LaunchMode
-    object ServerMode extends LaunchMode
-    object ServerConfigMode extends LaunchMode
+    object RESTMode extends LaunchMode
+    case class Reset(initialisePassword: Boolean) extends LaunchMode
 
     case class Config(
       userPlugins:          List[String]    = Nil,
@@ -68,6 +68,7 @@ object Application extends Logger {
       scriptFile:           Option[String]  = None,
       consoleWorkDirectory: Option[File]    = None,
       password:             Option[String]  = None,
+      passwordFile:         Option[File]    = None,
       hostName:             Option[String]  = None,
       launchMode:           LaunchMode      = GUIMode,
       ignored:              List[String]    = Nil,
@@ -76,7 +77,6 @@ object Application extends Logger {
       unoptimizedJS:        Boolean         = false,
       remote:               Boolean         = false,
       browse:               Boolean         = true,
-      reset:                Boolean         = false,
       args:                 List[String]    = Nil
     )
 
@@ -96,52 +96,68 @@ object Application extends Logger {
     def dropArgs(args: List[String]) = args.dropWhile(!_.startsWith("-"))
 
     def usage =
-      """openmole [options]
+      """Usage: openmole [options]
+      |
+      |[-p | --plugin list of arg] plugins list of jar or category containing jars to be loaded
+      |[-c | --console] console mode
+      |[--port port] specify the port for the GUI or REST API
+      |[--script path] a path of on OpenMOLE script to execute
+      |[--password password] openmole password
+      |[--password-file file containing a password] read the OpenMOLE password (--password option) in a file
+      |[--rest] run the REST server
+      |[--remote] enable remote connection to the web interface
+      |[--no-browser] don't automatically launch the browser in GUI mode
+      |[--load-workspace-plugins] load the plugins of the OpenMOLE workspace (these plugins are always loaded in GUI mode)
+      |[--console-work-directory] specify the workDirectory variable in console mode (it is set to the current dirrectory by default)
+      |[--reset] reset all preferences and authentications
+      |[--reset-password] reset all preferences and ask for the a password
+      |[--] end of options the remaining arguments are provided to the console in the args array
+      |[-h | --help] print help""".stripMargin
 
-[-p list of arg] plugins list of jar or category containing jars to be loaded
-[-s path] a path of script to execute
-[-pw password] openmole password
-[-c] console mode
-[-h] print help"""
-
-    @tailrec def parse(args: List[String], c: Config = Config()): Config =
+    def parse(args: List[String], c: Config = Config()): Config = {
+      def plugins(tail: List[String]) = parse(dropArgs(tail), c.copy(userPlugins = takeArgs(tail)))
+      def help(tail: List[String]) = parse(tail, c.copy(launchMode = HelpMode))
+      def script(tail: List[String]) = parse(dropArg(tail), c.copy(scriptFile = Some(takeArg(tail)), launchMode = ConsoleMode))
+      def console(tail: List[String]) = parse(tail, c.copy(launchMode = ConsoleMode))
       args match {
-        case "-p" :: tail                      ⇒ parse(dropArgs(tail), c.copy(userPlugins = takeArgs(tail)))
-        case "-s" :: tail                      ⇒ parse(dropArg(tail), c.copy(scriptFile = Some(takeArg(tail)), launchMode = ConsoleMode))
-        case "-pw" :: tail                     ⇒ parse(dropArg(tail), c.copy(password = Some(takeArg(tail))))
-        case "-c" :: tail                      ⇒ parse(tail, c.copy(launchMode = ConsoleMode))
-        case "-h" :: tail                      ⇒ parse(tail, c.copy(launchMode = HelpMode))
-        case "-ws" :: tail                     ⇒ parse(tail, c.copy(launchMode = ServerMode))
-        case "--load-homePlugins" :: tail      ⇒ parse(tail, c.copy(loadHomePlugins = Some(true)))
-        case "--console-workDirectory" :: tail ⇒ parse(dropArg(tail), c.copy(consoleWorkDirectory = Some(new File(takeArg(tail)))))
-        case "--ws-configure" :: tail          ⇒ parse(tail, c.copy(launchMode = ServerConfigMode))
-        case "--port" :: tail                  ⇒ parse(tail.tail, c.copy(port = Some(tail.head.toInt))) // Server port
-        case "--logger-level" :: tail          ⇒ parse(tail.tail, c.copy(loggerLevel = Some(tail.head)))
-        case "--remote" :: tail                ⇒ parse(tail, c.copy(remote = true))
-        case "--no-browser" :: tail            ⇒ parse(tail, c.copy(browse = false))
-        case "--reset" :: tail                 ⇒ parse(tail, c.copy(reset = true))
-        case "--host-name" :: tail             ⇒ parse(tail.tail, c.copy(hostName = Some(tail.head)))
-        case "--" :: tail                      ⇒ parse(Nil, c.copy(args = tail))
-        case s :: tail                         ⇒ parse(tail, c.copy(ignored = s :: c.ignored))
-        case Nil                               ⇒ c
+        case "-p" :: tail                       ⇒ plugins(tail)
+        case "--plugins" :: tail                ⇒ plugins(tail)
+        case "-c" :: tail                       ⇒ console(tail)
+        case "--console" :: tail                ⇒ console(tail)
+        case "-s" :: tail                       ⇒ script(tail)
+        case "--script" :: tail                 ⇒ script(tail)
+        case "--port" :: tail                   ⇒ parse(tail.tail, c.copy(port = Some(tail.head.toInt)))
+        case "--password" :: tail               ⇒ parse(dropArg(tail), c.copy(password = Some(takeArg(tail))))
+        case "--password-file" :: tail          ⇒ parse(dropArg(tail), c.copy(passwordFile = Some(new File(takeArg(tail)))))
+        case "--rest" :: tail                   ⇒ parse(tail, c.copy(launchMode = RESTMode))
+        case "--load-workspace-plugins" :: tail ⇒ parse(tail, c.copy(loadHomePlugins = Some(true)))
+        case "--console-work-directory" :: tail ⇒ parse(dropArg(tail), c.copy(consoleWorkDirectory = Some(new File(takeArg(tail)))))
+        case "--logger-level" :: tail           ⇒ parse(tail.tail, c.copy(loggerLevel = Some(tail.head)))
+        case "--remote" :: tail                 ⇒ parse(tail, c.copy(remote = true))
+        case "--no-browser" :: tail             ⇒ parse(tail, c.copy(browse = false))
+        case "--reset" :: tail                  ⇒ parse(tail, c.copy(launchMode = Reset(initialisePassword = false)))
+        case "--host-name" :: tail              ⇒ parse(tail.tail, c.copy(hostName = Some(tail.head)))
+        case "--reset-password" :: tail         ⇒ parse(tail, c.copy(launchMode = Reset(initialisePassword = true)))
+        case "--" :: tail                       ⇒ parse(Nil, c.copy(args = tail))
+        case "-h" :: tail                       ⇒ help(tail)
+        case "--help" :: tail                   ⇒ help(tail)
+        case s :: tail                          ⇒ parse(tail, c.copy(ignored = s :: c.ignored))
+        case Nil                                ⇒ c
       }
+    }
 
     val config = parse(args.map(_.trim).toList)
 
     config.loggerLevel.foreach(LoggerService.level)
 
-    if (config.reset) {
-      Workspace.reset()
-      new Integer(Console.ExitCodes.ok)
-    }
-    else {
+    def loadPlugins = {
       val (existingUserPlugins, notExistingUserPlugins) = config.userPlugins.span(new File(_).exists)
 
       if (!notExistingUserPlugins.isEmpty) logger.warning(s"""Some plugins or plugin folders don't exist: ${notExistingUserPlugins.mkString(",")}""")
 
       val userPlugins =
         existingUserPlugins.flatMap { p ⇒ PluginManager.plugins(new File(p)) } ++
-          (if (config.loadHomePlugins.getOrElse(config.launchMode != ConsoleMode)) Workspace.pluginDir.listFilesSafe.flatMap(PluginManager.plugins) else Nil)
+          (if (config.loadHomePlugins.getOrElse(config.launchMode == GUIMode)) Workspace.pluginDir.listFilesSafe.flatMap(PluginManager.plugins) else Nil)
 
       logger.fine(s"Loading user plugins " + userPlugins)
 
@@ -149,77 +165,75 @@ object Application extends Logger {
 
       PluginManager.startAll.foreach { case (b, e) ⇒ logger.log(WARNING, s"Error staring bundle $b", e) }
       PluginManager.tryLoad(plugins).foreach { case (b, e) ⇒ logger.log(WARNING, s"Error loading bundle $b", e) }
+    }
 
-      try config.password foreach Workspace.setPassword
+    def password =
+      config.password orElse config.passwordFile.map(_.lines.head)
+
+    def setPassword = {
+      try password foreach Workspace.setPassword
       catch {
         case e: UserBadDataError ⇒
           logger.severe("Wrong password!")
           throw e
       }
-
-      if (!config.ignored.isEmpty) logger.warning("Ignored options: " + config.ignored.mkString(" "))
-
-      val retCode: Int =
-        config.launchMode match {
-          case HelpMode ⇒
-            println(usage)
-            Console.ExitCodes.ok
-          case ServerConfigMode ⇒
-            configureRestServer()
-            Console.ExitCodes.ok
-          case ServerMode ⇒
-            if (!config.password.isDefined) Console.initPassword
-            val server = new RESTServer(config.port, config.hostName)
-            server.start()
-            Console.ExitCodes.ok
-          case ConsoleMode ⇒
-            print(consoleSplash)
-            println(consoleUsage)
-            val console = new Console(config.password, config.scriptFile)
-            val variables = ConsoleVariables(args = config.args)
-            console.run(variables, config.consoleWorkDirectory)
-          case GUIMode ⇒
-            def browse(url: String) =
-              if (Desktop.isDesktopSupported) Desktop.getDesktop.browse(new URI(url))
-            GUIServer.lockFile.withFileOutputStream { fos ⇒
-              val launch = (config.remote || fos.getChannel.tryLock != null)
-              if (launch) {
-                val port = config.port.getOrElse(Workspace.preference(GUIServer.port))
-                val url = s"https://localhost:$port"
-                GUIServer.urlFile.content = url
-                if (config.remote) initGUIPassword()
-                //The webapp location will then be somewhere in target
-                val webui = Workspace.file("webui")
-                webui.mkdirs()
-                val server = new GUIServer(port, config.remote)
-                server.start()
-                if (config.browse && !config.remote) browse(url)
-                ScalaREPL.warmup
-                logger.info(s"Server listening on port $port.")
-                server.join() match {
-                  case GUIServer.Ok      ⇒ Console.ExitCodes.ok
-                  case GUIServer.Restart ⇒ Console.ExitCodes.restart
-                }
-              }
-              else {
-                browse(GUIServer.urlFile.content)
-                Console.ExitCodes.ok
-              }
-            }
-        }
-
-      retCode
     }
-  }
 
-  def initGUIPassword() = {
-    Console.initPassword
-    if (!Workspace.preferenceIsSet(GUIServer.passwordHash)) GUIServer.setPassword(Console.askPassword("Authentication password"))
-  }
+    if (!config.ignored.isEmpty) logger.warning("Ignored options: " + config.ignored.mkString(" "))
 
-  def configureRestServer() = {
-    Console.initPassword
-    RESTServer.setPassword(Console.askPassword("Server password"))
+    config.launchMode match {
+      case HelpMode ⇒
+        println(usage)
+        Console.ExitCodes.ok
+      case Reset(initialisePassword) ⇒
+        Workspace.reset()
+        if (initialisePassword) Console.initPassword
+        Console.ExitCodes.ok
+      case RESTMode ⇒
+        setPassword
+        loadPlugins
+        if (!password.isDefined) Console.initPassword
+        val server = new RESTServer(config.port, config.hostName)
+        server.start()
+        Console.ExitCodes.ok
+      case ConsoleMode ⇒
+        setPassword
+        loadPlugins
+        print(consoleSplash)
+        println(consoleUsage)
+        val console = new Console(password, config.scriptFile)
+        val variables = ConsoleVariables(args = config.args)
+        console.run(variables, config.consoleWorkDirectory)
+      case GUIMode ⇒
+        setPassword
+        loadPlugins
+        def browse(url: String) =
+          if (Desktop.isDesktopSupported) Desktop.getDesktop.browse(new URI(url))
+        GUIServer.lockFile.withFileOutputStream { fos ⇒
+          val launch = (config.remote || fos.getChannel.tryLock != null)
+          if (launch) {
+            val port = config.port.getOrElse(Workspace.preference(GUIServer.port))
+            val url = s"https://localhost:$port"
+            GUIServer.urlFile.content = url
+            val webui = Workspace.file("webui")
+            webui.mkdirs()
+            val server = new GUIServer(port, config.remote)
+            server.start()
+            if (config.browse && !config.remote) browse(url)
+            ScalaREPL.warmup
+            logger.info(s"Server listening on port $port.")
+            server.join() match {
+              case GUIServer.Ok      ⇒ Console.ExitCodes.ok
+              case GUIServer.Restart ⇒ Console.ExitCodes.restart
+            }
+          }
+          else {
+            browse(GUIServer.urlFile.content)
+            Console.ExitCodes.ok
+          }
+        }
+    }
+
   }
 
 }

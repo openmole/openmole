@@ -130,7 +130,7 @@ class Workspace(val location: File) {
 
   @transient private lazy val configurationFile: ConfigurationFile = {
     val file = new File(location, preferences)
-    file.createNewFile
+    if (file.createNewFile) file.setPosixMode("rw-------")
     new ConfigurationFile(file)
   }
 
