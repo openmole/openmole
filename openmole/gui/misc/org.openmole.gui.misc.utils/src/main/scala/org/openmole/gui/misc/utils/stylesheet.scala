@@ -445,7 +445,7 @@ package object stylesheet {
   lazy val selectedTool: ModifierSeq = Seq(
     opacity := 1,
     svgAttrs.transform := "scale(1.2)",
-    color("#3086b5;")
+    color("#3086b5")
   )
 
   lazy val borderRightFlat: ModifierSeq = Seq(
@@ -471,7 +471,7 @@ package object stylesheet {
 
   lazy val selectedButton: ModifierSeq = Seq(
     sheet.btn,
-    backgroundColor := "#e3dbdb;"
+    backgroundColor := "#e3dbdb"
   )
 
 }
