@@ -407,13 +407,19 @@ object DocumentationPages { index ⇒
 
     def development = new DocumentationPage {
       def name = "Development"
-      def children = Seq(compilation, plugin, branching, webserver)
+      def children = Seq(compilation, documentationWebsite, plugin, branching, webserver)
       def content = scalatex.documentation.Development()
 
       def compilation = new DocumentationPage {
         def name = "Compilation"
         def children = Seq()
         def content = scalatex.documentation.development.Compilation()
+      }
+
+      def documentationWebsite = new DocumentationPage {
+        def name = "Documentation"
+        def children = Seq()
+        def content = scalatex.documentation.development.DocumentationWebsite()
       }
 
       def plugin = new DocumentationPage {
