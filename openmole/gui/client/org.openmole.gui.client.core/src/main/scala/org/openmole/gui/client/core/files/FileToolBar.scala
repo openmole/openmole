@@ -250,7 +250,7 @@ class FileToolBar(redraw: () ⇒ Unit, refreshAndRedraw: () ⇒ Unit) {
   )
 
   val fileToolDiv = Rx {
-    tags.div(toolPosition)(
+    tags.div(centerElement +++ sheet.marginTop(5) +++ sheet.marginBottom(15))(
       selectedTool() match {
         case Some(FileCreationTool) ⇒ createFileTool
         case Some(TrashTool)        ⇒ deleteButton
@@ -265,8 +265,8 @@ class FileToolBar(redraw: () ⇒ Unit, refreshAndRedraw: () ⇒ Unit) {
     )
   }
 
-  val div = tags.div(centerFileTool)(
-    tags.div(
+  val div = tags.div(
+    tags.div(centerElement)(
       buildSpan(RefreshTool, refreshAndRedraw),
       upButton,
       buildSpan(PluginTool),
