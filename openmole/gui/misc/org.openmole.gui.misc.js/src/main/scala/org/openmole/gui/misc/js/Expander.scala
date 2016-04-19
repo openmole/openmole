@@ -1,6 +1,8 @@
 package org.openmole.gui.misc.js
 
-import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs, ClassKeyAggregator }
+import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
+import org.openmole.gui.misc.utils.{ stylesheet ⇒ sheet }
+import fr.iscpif.scaladget.stylesheet.all._
 import bs._
 import rx._
 
@@ -74,9 +76,9 @@ class Expander {
 
   }
 
-  def getGlyph(glyph: ClassKeyAggregator, linkName: String, expandId: ExpandID, visibleId: VisibleID, todo: () ⇒ Unit = () ⇒ {}) = {
+  def getGlyph(glyph: ModifierSeq, linkName: String, expandId: ExpandID, visibleId: VisibleID, todo: () ⇒ Unit = () ⇒ {}) = {
     updateMaps(expandId, visibleId)
-    bs.glyphSpan(glyph + key("vert-align"), () ⇒ {
+    glyphSpan("vert-align", () ⇒ {
       setTarget(expandId, visibleId)
       todo()
     },

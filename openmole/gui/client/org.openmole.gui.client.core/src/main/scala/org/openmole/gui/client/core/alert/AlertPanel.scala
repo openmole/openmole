@@ -1,4 +1,4 @@
-package org.openmole.gui.client.core
+package org.openmole.gui.client.core.alert
 
 /*
  * Copyright (C) 04/08/15 // mathieu.leclaire@openmole.org
@@ -17,18 +17,19 @@ package org.openmole.gui.client.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.client.core.AbsolutePositioning._
-import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs, ClassKeyAggregator }
+import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
+import org.openmole.gui.client.core.alert.AbsolutePositioning._
 import org.openmole.gui.client.core.files.{ TreeNodeComment, TreeNodeError }
+import org.openmole.gui.misc.js.JsRxTags._
 import org.openmole.gui.misc.js.OMTags.AlertAction
-import org.openmole.gui.misc.js.{ OptionsDiv, OMTags }
+import org.openmole.gui.misc.js.{ OMTags, OptionsDiv }
+import org.openmole.gui.misc.utils.stylesheet._
 import org.scalajs.dom.html.Div
 import org.scalajs.dom.raw.HTMLDivElement
+import sheet._
+import rx._
 import scalatags.JsDom.all._
 import scalatags.JsDom.{ TypedTag, tags }
-import org.openmole.gui.misc.js.JsRxTags._
-import bs._
-import rx._
 
 object AlertPanel {
   private val panel = new AlertPanel
@@ -39,10 +40,10 @@ object AlertPanel {
     messageDiv:       TypedTag[HTMLDivElement],
     okaction:         () ⇒ Unit,
     cancelaction:     () ⇒ Unit                = () ⇒ {},
-    transform:        Transform                = CenterTransform(),
-    zone:             Zone                     = FullPage(),
-    alertType:        ClassKeyAggregator       = warning,
-    buttonGroupClass: ClassKeyAggregator       = "right"
+    transform:        Position                 = CenterPagePosition,
+    zone:             Zone                     = FullPage,
+    alertType:        ModifierSeq              = btn_danger,
+    buttonGroupClass: ModifierSeq              = floatRight
   ): Unit = {
     panel.popup(messageDiv, Seq(AlertAction(okaction), AlertAction(cancelaction)), transform, zone, alertType, buttonGroupClass)
   }
@@ -51,56 +52,60 @@ object AlertPanel {
     tags.div(
       error.message,
       OptionsDiv(error.filesInError).div
-    ), okaction = error.okaction, cancelaction = error.cancelaction, zone = FileZone()
+    ), okaction = error.okaction, cancelaction = error.cancelaction, zone = FileZone
   )
 
   def treeNodeCommentDiv(error: TreeNodeComment): Unit = panel.popup(
     tags.div(
       error.message,
       OptionsDiv(error.filesInError).div
-    ), Seq(AlertAction(error.okaction)), CenterTransform(), FileZone(), warning, "right"
+    ), Seq(AlertAction(error.okaction)), CenterPagePosition, FileZone, warning, floatRight
   )
 
   def string(
     message:          String,
     okaction:         () ⇒ Unit,
-    cancelaction:     () ⇒ Unit          = () ⇒ {},
-    transform:        Transform          = CenterTransform(),
-    zone:             Zone               = FullPage(),
-    alertType:        ClassKeyAggregator = warning,
-    buttonGroupClass: ClassKeyAggregator = "left"
+    cancelaction:     () ⇒ Unit   = () ⇒ {},
+    transform:        Position    = CenterPagePosition,
+    zone:             Zone        = FullPage,
+    alertType:        ModifierSeq = btn_danger,
+    buttonGroupClass: ModifierSeq = floatLeft +++ sheet.marginLeft(20)
   ): Unit = div(tags.div(message), okaction, cancelaction, transform, zone, alertType, buttonGroupClass)
 }
 
 class AlertPanel {
 
   val visible: Var[Boolean] = Var(false)
-  val overlayZone: Var[Zone] = Var(FullPage())
+  val zoneModifier: Var[ModifierSeq] = Var(FullPage.modifierClass)
+  val positionModifier: Var[ModifierSeq] = Var(CenterPagePosition.modifierClass)
   val alertElement: Var[TypedTag[Div]] = Var(tags.div)
 
-  val elementDiv = tags.div(
-    Rx {
+  val elementDiv = Rx {
+    div(
+      positionModifier(),
       alertElement()
-    }
-  ).render
+    )
+  }
 
-  val alertDiv = tags.div(`class` := Rx {
-    if (visible()) s"alertOverlay ${overlayZone().zoneClass}" else "displayNone"
-  })(elementDiv)
+  val alertDiv = Rx {
+    div(
+      if (visible()) alertOverlay +++ zoneModifier() else displayOff
+    )(elementDiv)
+  }
 
   def popup(
     messageDiv: TypedTag[HTMLDivElement],
     actions:    Seq[AlertAction],
     /* okaction: () ⇒ Unit,
-            cancelaction: () ⇒ Unit,*/
-    transform:        Transform,
-    zone:             Zone               = FullPage(),
-    alertType:        ClassKeyAggregator = warning,
-    buttonGroupClass: ClassKeyAggregator = "left"
+                                                         cancelaction: () ⇒ Unit,*/
+    position:         Position,
+    zone:             Zone        = FullPage,
+    alertType:        ModifierSeq = btn_danger,
+    buttonGroupClass: ModifierSeq = floatLeft
   ) = {
     alertElement() = OMTags.alert(alertType, messageDiv, actions.map { a ⇒ a.copy(action = actionWrapper(a.action)) }, buttonGroupClass)
-    transform(elementDiv)
-    overlayZone() = zone
+    zoneModifier() = zone.modifierClass
+    positionModifier() = position.modifierClass
     visible() = true
   }
 

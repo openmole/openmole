@@ -18,7 +18,8 @@ package org.openmole.gui.client.core.files
  */
 
 import org.openmole.gui.client.core.files.FileToolBar.SelectedTool
-import org.openmole.gui.client.core.{ CoreUtils, AlertPanel }
+import org.openmole.gui.client.core.alert.AlertPanel
+import org.openmole.gui.client.core.CoreUtils
 import org.openmole.gui.ext.data.{ FileFilter, SafePath }
 import rx._
 

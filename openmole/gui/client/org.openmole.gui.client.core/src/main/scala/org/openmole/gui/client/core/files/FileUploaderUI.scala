@@ -18,7 +18,7 @@ package org.openmole.gui.client.core.files
  */
 
 import org.openmole.gui.client.core.OMPost
-import org.openmole.gui.misc.utils.Utils
+import org.openmole.gui.misc.utils.{ stylesheet, Utils }
 import scalatags.JsDom.{ tags ⇒ tags }
 import org.openmole.gui.ext.data.{ ProcessState, UploadAuthentication, SafePath }
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
@@ -29,6 +29,8 @@ import scalatags.JsDom.all._
 import org.openmole.gui.shared.Api
 import org.scalajs.dom.raw.{ HTMLInputElement }
 import rx._
+import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
+import sheet._
 
 class AuthFileUploaderUI(
     keyName:  String,
@@ -39,9 +41,9 @@ class AuthFileUploaderUI(
   val fileName = if (keyName == "") renaming.getOrElse(Utils.getUUID) else keyName
   val pathSet: Var[Boolean] = Var(keySet)
 
-  val view = upButton.render
+  val view = upButton
 
-  lazy val upButton = tags.label(`class` := "inputFileStyle spacer5 certificate")(
+  lazy val upButton = label(
     bs.fileInput((fInput: HTMLInputElement) ⇒ {
       FileManager.upload(
         fInput,
@@ -63,5 +65,5 @@ class AuthFileUploaderUI(
     }), Rx {
       if (pathSet()) fileName else "No certificate"
     }
-  )
+  )(sheet.paddingTop(5) +++ stylesheet.certificate +++ "inputFileStyle")
 }

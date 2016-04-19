@@ -1,13 +1,14 @@
 package org.openmole.gui.client.core
 
-import org.openmole.gui.client.core.AbsolutePositioning.{ RightTransform, TopZone, CenterTransform }
+import org.openmole.gui.client.core.alert.{ AlertPanel, AbsolutePositioning }
+import AbsolutePositioning.{ RightPosition, TopZone, CenterPagePosition }
+import org.openmole.gui.misc.js.Tooltip._
 import org.openmole.gui.shared.Api
 import org.scalajs.dom.raw.{ HTMLElement, HTMLFormElement }
 import org.openmole.gui.client.core.panels._
 import scalatags.JsDom.{ tags ⇒ tags }
-import org.openmole.gui.misc.js.{ OMTags, ToolTipHelp }
+import org.openmole.gui.misc.js.OMTags
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
-import org.openmole.gui.misc.js.Tooltip._
 import bs._
 import scala.scalajs.js.annotation.JSExport
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
@@ -16,6 +17,9 @@ import org.openmole.gui.misc.js.JsRxTags._
 import org.scalajs.dom
 import rx._
 import scalatags.JsDom.all._
+import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
+import org.openmole.gui.misc.utils.{ stylesheet ⇒ omsheet }
+import sheet._
 
 /*
  * Copyright (C) 15/04/15 // mathieu.leclaire@openmole.org
@@ -40,23 +44,27 @@ object ScriptClient {
   @JSExport
   def run(): Unit = {
 
-    val shutdownButton =
+    val alert: Var[Boolean] = Var(false)
+
+    val shutdownButton = span(
+      omsheet.resetBlock,
+      a(onclick := { () ⇒
+        alert() = true
+      }, omsheet.resetPassword)("Reset password"),
       a(
-        `class` := "shutdownButton",
-        bs.glyph(glyph_off),
-        cursor := "pointer",
-        onclick := { () ⇒
+        omsheet.shutdownButton,
+        bs.glyphSpan(glyph_off, onclickAction = () ⇒
           AlertPanel.string(
             "This will stop the server, the application will no longer be usable. Halt anyway?",
             () ⇒ {
               treeNodePanel.fileDisplayer.tabs.saveAllTabs(() ⇒
                 dom.window.location.href = "shutdown")
             },
-            transform = RightTransform(),
-            zone = TopZone()
-          )
-        }
+            transform = RightPosition,
+            zone = TopZone
+          ))
       )
+    )
 
     val passwordChosen = Var(true)
     val passwordOK = Var(false)
@@ -94,18 +102,14 @@ object ScriptClient {
       cleanInputs
     }
 
-    val authenticationPanel = new AuthenticationPanel(() ⇒ {
-      resetPassword
-    })
+    val authenticationPanel = new AuthenticationPanel
 
     def setPassword(s: String) = OMPost[Api].setPassword(s).call().foreach { b ⇒
       passwordOK() = b
       cleanInputs
     }
 
-    lazy val connectButton = bs.button("Connect", btn_primary)(onclick := { () ⇒
-      connection
-    }).render
+    lazy val connectButton = bs.button("Connect", btn_primary, () ⇒ connection).render
 
     def connection: Unit = {
       if (passwordChosen()) setPassword(passwordInput.value)
@@ -122,26 +126,17 @@ object ScriptClient {
         false
       }).render
 
-    val alert: Var[Boolean] = Var(false)
-
-    /* val openmoleText = tags.div(
-      tags.h1(`class` := "openmole-connection openmole-pen")("pen"),
-      tags.h1(`class` := "openmole-connection openmole-mole")("MOLE")
-    )*/
-
-    val connectionDiv = tags.div(`class` := Rx {
-      if (!passwordOK()) "connectionTabOverlay" else "displayOff"
-    })(
-      tags.div(
-        tags.img(src := "img/openmole.png", `class` := "openmole-logo"),
-        // openmoleText,
-        shutdownButton,
-        tags.div(
-          `class` := Rx {
-            if (!passwordOK()) "centerPage" else ""
-          },
-          Rx {
-            tags.div(
+    val connectionDiv = Rx {
+      div(
+        if (!passwordOK()) omsheet.connectionTabOverlay
+        else omsheet.displayOff
+      )(div(
+          img(src := "img/openmole.png", omsheet.openmoleLogo),
+          // openmoleText,
+          shutdownButton,
+          div(
+            if (!passwordOK()) omsheet.centerPage else emptyMod,
+            div(
               if (alert())
                 AlertPanel.string(
                 "Careful! Resetting your password will wipe out all your preferences! Reset anyway?",
@@ -150,27 +145,20 @@ object ScriptClient {
                   resetPassword
                 }, () ⇒ {
                   alert() = false
-                }, CenterTransform()
+                }, CenterPagePosition
               )
               else {
-                tags.div(
-                  connectionForm(
-                    tags.span(
-                    passwordInput,
-                    tags.a(onclick := { () ⇒
-                      alert() = true
-                    }, cursor := "pointer")("Reset password")
-                  ).render
-                  ),
-                  if (!passwordChosen()) connectionForm(passwordAgainInput) else tags.div(),
+                div(
+                  omsheet.connectionBlock,
+                  connectionForm(passwordInput),
+                  if (!passwordChosen()) connectionForm(passwordAgainInput) else div(),
                   connectButton
                 )
               }
             )
-          }
-        )
-      )
-    )
+          )
+        ))
+    }
 
     val openFileTree = Var(true)
 
@@ -178,28 +166,28 @@ object ScriptClient {
       val modalPanel = authenticationPanel
     }
 
-    val execItem = dialogNavItem("executions", glyph(glyph_settings).tooltip("Executions"), () ⇒ executionTriggerer.triggerOpen)
+    val execItem = dialogNavItem("executions", glyphSpan(glyph_settings).tooltip("Executions"), () ⇒ executionTriggerer.triggerOpen)
 
-    val authenticationItem = dialogNavItem("authentications", glyph(glyph_lock).tooltip("Authentications"), () ⇒ authenticationTriggerer.triggerOpen)
+    val authenticationItem = dialogNavItem("authentications", glyphSpan(glyph_lock).tooltip("Authentications"), () ⇒ authenticationTriggerer.triggerOpen)
 
-    val marketItem = dialogNavItem("market", glyph(glyph_market).tooltip("Market place"), () ⇒ marketTriggerer.triggerOpen)
+    val marketItem = dialogNavItem("market", glyphSpan(glyph_market).tooltip("Market place"), () ⇒ marketTriggerer.triggerOpen)
 
-    val pluginItem = dialogNavItem("plugin", bs.div(OMTags.glyph_plug).tooltip("Plugins"), () ⇒ pluginTriggerer.triggerOpen)
+    val pluginItem = dialogNavItem("plugin", div(glyph_plug).tooltip("Plugins"), () ⇒ pluginTriggerer.triggerOpen)
 
-    val envItem = dialogNavItem("envError", glyph(glyph_exclamation).render, () ⇒ environmentStackTriggerer.open)
+    val envItem = dialogNavItem("envError", glyphSpan(glyph_exclamation).render, () ⇒ environmentStackTriggerer.open)
 
-    val docItem = dialogNavItem("doc", bs.div(OMTags.glyph_book).tooltip("Documentation"), () ⇒ docTriggerer.open)
+    val docItem = dialogNavItem("doc", div(OMTags.glyph_book).tooltip("Documentation"), () ⇒ docTriggerer.open)
 
-    val modelWizardItem = dialogNavItem("modelWizard", glyph(OMTags.glyph_upload_alt).tooltip("Model import"), () ⇒ modelWizardTriggerer.triggerOpen)
+    val modelWizardItem = dialogNavItem("modelWizard", glyphSpan(glyph_upload_alt).tooltip("Model import"), () ⇒ modelWizardTriggerer.triggerOpen)
 
-    val fileItem = dialogNavItem("files", glyph(glyph_file).tooltip("Files"), todo = () ⇒ {
+    val fileItem = dialogNavItem("files", glyphSpan(glyph_file).tooltip("Files"), todo = () ⇒ {
       openFileTree() = !openFileTree()
     })
 
     maindiv.appendChild(
-      nav(
+      bs.nav(
         "mainNav",
-        nav_pills + nav_inverse + nav_staticTop,
+        sheet.nav +++ nav_pills +++ nav_inverse +++ nav_staticTop,
         fileItem,
         modelWizardItem,
         execItem,
@@ -220,25 +208,20 @@ object ScriptClient {
     maindiv.appendChild(AlertPanel.alertDiv)
 
     Settings.workspacePath.foreach { projectsPath ⇒
-      maindiv.appendChild(
-        tags.div(`class` := "fullpanel")(
-        tags.div(`class` := Rx {
-          "leftpanel " + {
-            if (openFileTree()) "open" else ""
-          }
-        })(treeNodePanel.view.render),
-        tags.div(`class` := Rx {
-          "centerpanel " + {
-            if (openFileTree()) "reduce" else ""
-          }
-        })(
-          treeNodePanel.fileDisplayer.tabs.render,
-          tags.img(src := "img/version.svg", `class` := "logoVersion"),
-          tags.div("Loving Lobster", `class` := "textVersion")
+      maindiv.appendChild(Rx {
+        div(omsheet.fullpanel)(
+          div(
+            omsheet.leftpanel +++ (openFileTree(), omsheet.panelOpen, emptyMod)
+          )(treeNodePanel.view),
+          div(
+            omsheet.centerpanel +++ (openFileTree(), omsheet.panelReduce)
+          )(
+              treeNodePanel.fileDisplayer.tabs.render,
+              img(src := "img/version.svg", omsheet.logoVersion),
+              div("Loving Lobster", omsheet.textVersion)
+            )
         )
-
-      ).render
-      )
+      })
     }
 
     body.appendChild(connectionDiv)

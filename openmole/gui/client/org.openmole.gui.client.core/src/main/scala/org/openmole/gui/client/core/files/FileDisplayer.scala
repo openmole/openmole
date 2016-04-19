@@ -46,23 +46,25 @@ class FileDisplayer(implicit executionTriggerer: PanelTriggerer) {
     }
   }
 
+  class EditableNodeTabWithOMSTabControl(tn: TreeNode, ed: EditorPanelUI) /*extends EditableNodeTab(tn, ed)*/ extends OMSTabControl(tn, ed) {
+
+    val relativePath = SafePath.empty
+
+    lazy val node = tn
+
+    def onrun = {
+      overlaying() = true
+      refresh(() ⇒
+        OMPost[Api].runScript(ScriptData(tn.safePath())).call().foreach { execInfo ⇒
+          overlaying() = false
+          executionTriggerer.open
+        })
+    }
+  }
+
   def displayOMS(tn: TreeNode, content: String) = {
     val ed = editor(FileExtension.OMS, content)
-    tabs ++ new EditableNodeTab(tn, ed) with OMSTabControl {
-      val relativePath = SafePath.empty
-
-      lazy val node = tn
-
-      def onrun = () ⇒ {
-        overlaying() = true
-        refresh(() ⇒
-          OMPost[Api].runScript(ScriptData(tn.safePath())).call().foreach { execInfo ⇒
-            overlaying() = false
-            executionTriggerer.open
-          })
-      }
-    }
-
+    tabs ++ new EditableNodeTabWithOMSTabControl(tn, ed)
   }
 
   def display(tn: TreeNode, content: String) = {

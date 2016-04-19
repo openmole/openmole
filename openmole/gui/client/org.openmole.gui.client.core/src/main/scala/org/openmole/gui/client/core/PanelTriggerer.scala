@@ -1,12 +1,8 @@
 package org.openmole.gui.client.core
 
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
-import fr.iscpif.scaladget.mapping.bootstrap
-import fr.iscpif.scaladget.mapping.bootstrap._
-
-//import org.querki.jquery._
+import fr.iscpif.scaladget.stylesheet.bootstrap.bootstrap._
 import scalatags.JsDom.all._
-import bs._
 
 /*
  * Copyright (C) 28/05/15 // mathieu.leclaire@openmole.org
@@ -39,15 +35,15 @@ trait PanelTriggerer {
 }
 
 trait ModalPanel {
-  def modalID: ModalID
+  def modalID: bs.ModalID
 
-  def dialog: Dialog
+  def dialog: bs.Dialog
 
   def onOpen(): Unit
 
   def onClose(): Unit
 
-  val closeButton = bs.button("Close", btn_default)(data("dismiss") := "modal", onclick := { () ⇒ close })
+  val closeButton = button("Close", btn_default)(data("dismiss") := "modal", onclick := { () ⇒ close })
 
   def close: Unit = bs.hideModal(modalID)
 

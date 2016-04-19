@@ -1,0 +1,42 @@
+font-face {
+    font-family: 'Bevan';
+    src: url('../fonts/Bevan.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+div table tr {
+    text-align: left;
+}
+
+span.label.control-label{
+    color: black;
+    font-size: 0.9em;
+}
+
+
+.btn.btn-primary{
+    background-color: #3086b5;
+    border: #3086b5 solid 1px;
+    font-weight: bold;
+}
+.btn.btn-danger{
+    font-weight: bold;
+}
+.btn.btn-success{
+    color: white;
+    font-weight: bold;
+}
+
+.label.label-primary{
+    background-color: #3086b5;
+    border: #3086b5 solid 1px;
+    color: white;
+    font-weight: bold;
+}
+
+.btn.btn-default{
+    background-color: white;
+    color: #808080;
+    font-weight: bold;
+}

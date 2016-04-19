@@ -1,7 +1,5 @@
 package org.openmole.gui.client.core.authentications
 
-import fr.iscpif.scaladget.api.BootstrapTags._
-import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import org.openmole.gui.client.core.OMPost
 import org.openmole.gui.client.core.files.AuthFileUploaderUI
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
@@ -9,13 +7,12 @@ import autowire._
 import org.openmole.gui.ext.data.EGIP12AuthenticationData
 import org.openmole.gui.ext.dataui.PanelUI
 import org.openmole.gui.shared.Api
-
 import scala.scalajs.js.annotation.JSExport
 import scalatags.JsDom.all._
-
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
+import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
 import scalatags.JsDom.{ tags ⇒ tags }
-import bs._
+import AuthenticationUtils._
 
 /*
  * Copyright (C) 02/07/15 // mathieu.leclaire@openmole.org
@@ -34,26 +31,24 @@ import bs._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class EGIP12AuthenticationPanel(data: EGIP12AuthenticationData) extends PanelUI {
+class EGIP12AuthenticationPanel(data: EGIP12AuthenticationData = EGIP12AuthenticationData()) extends PanelUI {
 
-  val password = bs.input(data.cypheredPassword, key("spacer5"))(
-    placeholder := "Password",
-    `type` := "password",
-    width := "130px"
-  ).render
-  lazy val privateKey = new AuthFileUploaderUI(data.privateKey.getOrElse(""), data.privateKey.isDefined, Some("egi.p12"))
+  val password = passwordInput(data.cypheredPassword)
+  val privateKey = new AuthFileUploaderUI(data.privateKey.getOrElse(""), data.privateKey.isDefined, Some("egi.p12"))
 
-  @JSExport
-  val view = tags.div(
-    bs.labeledField("Password", password),
-    bs.labeledField("Key file", privateKey.view)
+  val view = form(sheet.formInline)(
+    div(sheet.formGroup)(
+      password.label,
+      password.input
+    ),
+    privateKey.view
   )
 
   def save(onsave: () ⇒ Unit) =
     OMPost[Api].removeAuthentication(data).call().foreach { d ⇒
       OMPost[Api].addAuthentication(EGIP12AuthenticationData(
-        password.value,
-        Some("egi.p12")
+        password.input.value,
+        if (privateKey.pathSet()) Some("egi.p12") else None
       )).call().foreach { b ⇒
         onsave()
       }

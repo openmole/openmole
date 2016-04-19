@@ -17,12 +17,14 @@ package org.openmole.gui.misc.js
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs, ClassKeyAggregator }
+import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
+import org.openmole.gui.misc.utils.{ stylesheet ⇒ omsheet }
+import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
 import org.scalajs.dom.html.Input
 import org.scalajs.dom.raw.HTMLInputElement
 import scalatags.JsDom.{ tags ⇒ tags }
 import scalatags.JsDom.all._
-import bs._
+import sheet._
 
 object OptionsDiv {
 
@@ -32,7 +34,7 @@ object OptionsDiv {
 }
 
 object CheckBox {
-  def apply(option: String = "", default: Boolean = false, classKey: ClassKeyAggregator = emptyCK)(onchecked: HTMLInputElement ⇒ Unit = HTMLInputElement ⇒ {}) =
+  def apply(option: String = "", default: Boolean = false, classKey: ModifierSeq = Seq())(onchecked: HTMLInputElement ⇒ Unit = HTMLInputElement ⇒ {}) =
     new CheckBox(option, default, classKey)(onchecked)
 }
 
@@ -44,11 +46,11 @@ class OptionsDiv[T <: Displayable](options: Seq[T]) {
     BoxedOption(o, bs.checkbox(true).render)
   }
 
-  val div = bs.div("spacer20")(
+  val div = tags.div(sheet.paddingTop(20))(
     for {
       bo ← boxedOptions
     } yield tags.div(
-      bs.span("options")(bo.option.name),
+      span(omsheet.optionsdiv)(bo.option.name),
       bo.checkBox
     )
   )
@@ -61,22 +63,22 @@ class OptionsDiv[T <: Displayable](options: Seq[T]) {
 
 }
 
-class CheckBox(name: String, default: Boolean, classKey: ClassKeyAggregator)(onchecked: HTMLInputElement ⇒ Unit) {
+class CheckBox(name: String, default: Boolean, classKey: ModifierSeq)(onchecked: HTMLInputElement ⇒ Unit) {
 
   private lazy val cb: Input = tags.input(`type` := "checkbox", if (default) checked := true else "", onclick := { () ⇒ onchecked(cb) }).render
   private val cbSpan = tags.span(name, style := "position: relative; margin-right:5px; margin-left:5px; top: -3px;")
 
-  lazy val withNameFirst = bs.div(classKey)(
+  lazy val withNameFirst = div(classKey)(
     cbSpan,
     cb
   )
 
-  lazy val withBoxFirst = bs.div(classKey)(
+  lazy val withBoxFirst = div(classKey)(
     cbSpan,
     cb
   )
 
-  lazy val onlyBox = bs.div(classKey)(
+  lazy val onlyBox = div(classKey)(
     cb
   )
 

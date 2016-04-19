@@ -1,7 +1,7 @@
 package org.openmole.gui.client.core
 
-import fr.iscpif.scaladget.api.BootstrapTags._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
+import fr.iscpif.scaladget.stylesheet.all._
 import fr.iscpif.scaladget.tools.JsRxTags._
 import org.openmole.gui.ext.data._
 import org.scalajs.dom.raw.HTMLElement
@@ -35,7 +35,7 @@ object Waiter {
   implicit def fTStateToClientTState[S](f: Future[S]): FutureWaiter[S] = new FutureWaiter(f)
 
   val waiter =
-    bs.div("spinner-wave")(
+    div(ms("spinner-wave"))(
       tags.div(), tags.div(), tags.div()
     )
 }
@@ -46,18 +46,18 @@ class ProcessStateWaiter(processingState: Var[ProcessState]) {
 
   def withTransferWaiter[T <: HTMLElement](f: ProcessState ⇒ TypedTag[T]): TypedTag[HTMLElement] = {
 
-    tags.div(
+    div(
       Rx {
         val ratio = processingState().ratio
-        val waiterSpan = tags.div(
+        val waiterSpan = div(
           waiter,
-          if (ratio == 0 || ratio == 100) tags.span() else bs.span("spinner-wave-ratio")(ratio + " %")
+          if (ratio == 0 || ratio == 100) span() else span("spinner-wave-ratio")(ratio + " %")
         )
 
         processingState() match {
           case x @ (Processing(_) | Finalizing(_, _)) ⇒ waiterSpan
           case y @ (Processed(_))                     ⇒ f(processingState())
-          case _                                      ⇒ tags.div()
+          case _                                      ⇒ div()
         }
       }
     )
@@ -82,11 +82,11 @@ class FutureWaiter[S](waitingForFuture: Future[S]) {
         processing() = false
     }
 
-    tags.div(
+    div(
       Rx {
-        val waiterSpan = tags.div(
+        val waiterSpan = div(
           waiter,
-          if (processing() == false) tags.span() else bs.span("spinner-wave-ratio")
+          if (processing() == false) span() else span(ms("spinner-wave-ratio"))
         )
 
       }

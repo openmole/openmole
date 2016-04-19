@@ -1,8 +1,12 @@
 package org.openmole.gui.client.core.authentications
 
+import org.scalajs.dom.html.{ Input, Label }
+
 import scalatags.JsDom.all._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
-import bs._
+import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
+import scalatags.JsDom.{ TypedTag, tags ⇒ tags }
+import sheet._
 
 /*
  * Copyright (C) 15/03/16 // mathieu.leclaire@openmole.org
@@ -23,21 +27,38 @@ import bs._
 
 object AuthenticationUtils {
 
-  def defaultInput(default: String, pHolder: String, w: String) = bs.input(default, key("spacer5"))(
+  case class LabeledInput(label: Label, input: Input)
+
+  def defaultLabeledInput(default: String, pHolder: String, w: Int) = LabeledInput(
+    label(pHolder)(`for` := pHolder, sheet.marginLeft(5)).render,
+    bs.input(default)(
+    id := pHolder,
+    formControl,
+    sheet.paddingTop(5) +++ sheet.marginLeft(5),
     placeholder := pHolder,
     width := w
   ).render
+  )
 
-  def loginInput(default: String) = defaultInput(default, "Login", "130px")
+  def loginInput(default: String) = defaultLabeledInput(default, "Login", 130)
 
-  def targetInput(default: String) = defaultInput(default, "Host", "130px")
+  def targetInput(default: String) = defaultLabeledInput(default, "Host", 130)
 
-  def portInput(default: String) = defaultInput(default, "Port", "60px")
+  def portInput(default: String) = defaultLabeledInput(default, "Port", 60)
 
-  def passwordInput(default: String) = bs.input(default, key("spacer5"))(
-    placeholder := "Password",
-    `type` := "password",
-    width := "130px"
-  ).render
+  def passwordInput(default: String) = {
+    val ID = "Password"
+    LabeledInput(
+      label(ID)(`for` := ID, sheet.marginLeft(5)).render,
+      bs.input(default)(
+      id := ID,
+      formControl,
+      sheet.paddingTop(5) +++ sheet.marginLeft(5),
+      placeholder := ID,
+      `type` := "password",
+      width := "130px"
+    ).render
+    )
+  }
 
 }

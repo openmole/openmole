@@ -17,6 +17,7 @@ package org.openmole.gui.client.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import org.openmole.gui.client.core.alert.AlertPanel
 import org.openmole.gui.client.core.files._
 import org.openmole.gui.ext.data._
 import org.openmole.gui.misc.js.{ OptionsDiv, Select, OMTags }
@@ -32,9 +33,12 @@ import rx._
 import org.openmole.gui.shared.Api
 import scalatags.JsDom.{ TypedTag, tags ⇒ tags }
 import scalatags.JsDom.all._
-import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs, ClassKeyAggregator }
+import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import Waiter._
 import org.openmole.gui.ext.data.DataUtils._
+import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
+import org.openmole.gui.misc.utils.stylesheet._
+import sheet._
 import bs._
 
 class ModelWizardPanel extends ModalPanel {
@@ -94,18 +98,18 @@ class ModelWizardPanel extends ModalPanel {
   val fileToUploadPath: Var[Option[SafePath]] = Var(None)
   val targetPath: Var[Option[SafePath]] = Var(None)
 
-  val modelSelector: Select[SafePath] = Select("modelSelector", Seq[(SafePath, ClassKeyAggregator)](), None, btn_default, () ⇒ {
+  val modelSelector: Select[SafePath] = Select( /*"modelSelector",*/ Seq[(SafePath, ModifierSeq)](), None, btn_default, () ⇒ {
     fileToUploadPath() = modelSelector.content()
     onModelChange
   })
 
-  val methodSelector: Select[JarMethod] = Select("methodSelector", Seq[(JarMethod, ClassKeyAggregator)](), None, btn_default, () ⇒ {
+  val methodSelector: Select[JarMethod] = Select( /*"methodSelector",*/ Seq[(JarMethod, ModifierSeq)](), None, btn_default, () ⇒ {
     methodSelector.content().foreach {
       setJavaLaunchingCommand(_)
     }
   })
 
-  val classSelector: Select[FullClass] = Select("classSelector", Seq[(FullClass, ClassKeyAggregator)](), None, btn_default, () ⇒ {
+  val classSelector: Select[FullClass] = Select( /*"classSelector",*/ Seq[(FullClass, ModifierSeq)](), None, btn_default, () ⇒ {
     classSelector.content().foreach {
       setMethodSelector(_)
     }
@@ -147,14 +151,14 @@ class ModelWizardPanel extends ModalPanel {
     setScritpName
   }
 
-  val commandArea: TextArea = bs.textArea(3)("").render
-  val autoModeCheckBox = bs.checkbox(autoMode())(onchange := { () ⇒
+  val commandArea: TextArea = textArea(3).render
+  val autoModeCheckBox = checkbox(autoMode())(onchange := { () ⇒
     autoMode() = !autoMode()
   })
 
-  val scriptNameInput = bs.input("", "modelNameInput")(placeholder := "Script name").render
+  val scriptNameInput = bs.input()(modelNameInput, placeholder := "Script name").render
   val languages = Seq(Binary(), JavaLikeLanguage(), PythonLanguage(), NetLogoLanguage(), RLanguage())
-  val codeSelector: Select[Language] = Select("selectLanguages", languages, Some(Binary()), btn_default)
+  val codeSelector: Select[Language] = Select( /*"selectLanguages",*/ languages, Some(Binary()), btn_default)
 
   Obs(launchingCommand, skipInitial = true) {
     if (autoMode()) {
@@ -168,10 +172,10 @@ class ModelWizardPanel extends ModalPanel {
     if (updatableTable()) setBodyContent
   }
 
-  def buttonStyle(i: Int): ClassKeyAggregator = {
+  def buttonStyle(i: Int): ModifierSeq = {
     if (i == currentTab()) btn_primary
     else btn_default
-  } + "marginRight20"
+  } +++ sheet.marginRight(20)
 
   def nbInputs = inputs(currentReactives()).size
 
@@ -199,12 +203,13 @@ class ModelWizardPanel extends ModalPanel {
   }.headOption
 
   def setUpButton = upButton() =
-    bs.div("modelWizardDivs")(
-      bs.div("centerWidth250")(
-        tags.label(`class` := "inputFileStyle spacer5 certificate")(
+    div(ms("modelWizardDivs"))(
+      div(maxWidth := 250)(
+        label(
+          sheet.paddingTop(5) +++ certificate +++ "inputFileStyle",
           transferring.withTransferWaiter { _ ⇒
-            tags.div(
-              bs.fileInput((fInput: HTMLInputElement) ⇒ {
+            div(
+              fileInput((fInput: HTMLInputElement) ⇒ {
                 if (fInput.files.length > 0) {
                   emptyJARSelectors
                   fileToUploadPath() = None
@@ -223,16 +228,16 @@ class ModelWizardPanel extends ModalPanel {
             )
           }
         ), {
-          fileToUploadPath().map { _ ⇒ bs.span("right grey")(codeSelector.selector) }.getOrElse(tags.div())
+          fileToUploadPath().map { _ ⇒ span(grey +++ floatRight)(codeSelector.selector) }.getOrElse(tags.div())
         }
       ), {
-        bs.span("grey")(
-          if (modelSelector.isContentsEmpty) tags.div() else modelSelector.selector,
-          if (classSelector.isContentsEmpty) tags.div() else classSelector.selectorWithFilter,
-          if (methodSelector.isContentsEmpty) tags.div() else methodSelector.selectorWithFilter,
+        span(grey)(
+          if (modelSelector.isContentsEmpty) div() else modelSelector.selector,
+          if (classSelector.isContentsEmpty) div() else classSelector.selectorWithFilter,
+          if (methodSelector.isContentsEmpty) div() else methodSelector.selectorWithFilter,
           codeSelector.content() match {
-            case Some(NetLogoLanguage()) ⇒ tags.div("If your Netlogo sript depends on plugins, you should upload an archive (tar.gz, tgz) containing the root workspace.")
-            case _                       ⇒ tags.div()
+            case Some(NetLogoLanguage()) ⇒ div("If your Netlogo sript depends on plugins, you should upload an archive (tar.gz, tgz) containing the root workspace.")
+            case _                       ⇒ div()
           }
         )
       }
@@ -384,7 +389,7 @@ class ModelWizardPanel extends ModalPanel {
 
   val step1 = tags.div(
     tags.h4("Step 1: Code import"),
-    bs.div("grey rightBlock")(
+    div(grey +++ rightBlock)(
       "Pick your code up among jar archive, netlogo scripts, or any code packaged on linux with Care ( like Python, C, C++ " +
         "R, etc). In the case of a Care archive, the packaging has to be done with the",
       tags.b(" -o yourmodel.tar.gz.bin."),
@@ -392,63 +397,60 @@ class ModelWizardPanel extends ModalPanel {
     )
   )
 
-  val step2 = tags.div(
-    bs.div("grey")("The systems detects automatically the launching command and propose you the creation of some OpenMOLE Variables so that" +
+  val step2 = div(
+    div(grey)("The systems detects automatically the launching command and propose you the creation of some OpenMOLE Variables so that" +
       " your model will be able to be feeded with variable values coming from the workflow you will build afterwards. In the case of Java, Scala, Netlogo" +
       "(ie codes working on the JVM) the OpenMOLE variables can be set directly in the command line. Otherwise, they have to be set inside ${} statements." +
       " By default he systems detects automatically your Variable changes and update the launching command. However, this option can be desactivated.")
   )
 
-  val autoModeTag = bs.div("onecolumn spacer20")(
+  val autoModeTag = div(onecolumn +++ sheet.paddingTop(20))(
     tags.b("Launching Command"),
-    bs.div("spacer4 right")(
+    div(sheet.paddingTop(4) +++ floatRight)(
       "Automatic ",
       autoModeCheckBox,
-      bs.span("grey")(" It is automatically updated (default), or it can be set manually")
+      span(grey)(" It is automatically updated (default), or it can be set manually")
     )
   )
 
   val buildModelTaskButton = {
-    bs.button(
-      "Build",
-      btn_primary
-    )(onclick := {
-        () ⇒
-          save
-          close
-          launchingCommand().foreach {
-            lc ⇒
-              val path = manager.current.safePath()
-              val scriptName = scriptNameInput.value.clean
-              val target = targetPath().map { tp ⇒
-                modelSelector.content().map { c ⇒
-                  tp.normalizedPathString + "/" + c.name
-                }.getOrElse(tp.normalizedPathString)
-              }.getOrElse("")
-              OMPost[Api].buildModelTask(
-                target,
-                scriptName,
-                commandArea.value,
-                codeSelector.content().getOrElse(Binary()),
-                inputs(currentReactives()).map {
-                  _.content.prototype
-                },
-                outputs(currentReactives()).map {
-                  _.content.prototype
-                },
-                path, classSelector.content().map {
-                  _.name
-                }, fileToUploadPath().map {
-                  _.name
-                }, resources()
-              ).call().foreach {
-                  b ⇒
-                    panels.treeNodePanel.fileDisplayer.tabs -- b
-                    panels.treeNodePanel.displayNode(b)
-                    CoreUtils.refreshCurrentDirectory(fileFilter = panels.treeNodePanel.filter)
-                }
-          }
-      })
+    tags.button("Build", btn_primary, onclick := {
+      () ⇒
+        save
+        close
+        launchingCommand().foreach {
+          lc ⇒
+            val path = manager.current.safePath()
+            val scriptName = scriptNameInput.value.clean
+            val target = targetPath().map { tp ⇒
+              modelSelector.content().map { c ⇒
+                tp.normalizedPathString + "/" + c.name
+              }.getOrElse(tp.normalizedPathString)
+            }.getOrElse("")
+            OMPost[Api].buildModelTask(
+              target,
+              scriptName,
+              commandArea.value,
+              codeSelector.content().getOrElse(Binary()),
+              inputs(currentReactives()).map {
+                _.content.prototype
+              },
+              outputs(currentReactives()).map {
+                _.content.prototype
+              },
+              path, classSelector.content().map {
+                _.name
+              }, fileToUploadPath().map {
+                _.name
+              }, resources()
+            ).call().foreach {
+                b ⇒
+                  panels.treeNodePanel.fileDisplayer.tabs -- b
+                  panels.treeNodePanel.displayNode(b)
+                  CoreUtils.refreshCurrentDirectory(fileFilter = panels.treeNodePanel.filter)
+              }
+        }
+    })
   }
 
   def save = {
@@ -495,9 +497,9 @@ class ModelWizardPanel extends ModalPanel {
     val lineHovered: Var[Boolean] = Var(false)
 
     val switchGlyph = role match {
-      case i: Input[_]         ⇒ OMTags.glyph_arrow_right
-      case ci: CommandInput[_] ⇒ OMTags.glyph_arrow_right
-      case _                   ⇒ OMTags.glyph_arrow_left
+      case i: Input[_]         ⇒ glyph_arrow_right
+      case ci: CommandInput[_] ⇒ glyph_arrow_right
+      case _                   ⇒ glyph_arrow_left
     }
 
     def updateLaunchingCommand =
@@ -540,6 +542,7 @@ class ModelWizardPanel extends ModalPanel {
     }).render
 
     val line = {
+      val glyphModifier = grey +++ sheet.paddingTop(2) +++ "glyphtrash glyphitem"
       tags.tr(
         onmouseover := { () ⇒
           lineHovered() = true
@@ -547,24 +550,22 @@ class ModelWizardPanel extends ModalPanel {
         onmouseout := { () ⇒
           lineHovered() = false
         },
-        bs.td(bs.col_md_3 + "spacer7")(nameInput),
-        bs.td(bs.col_md_2)(bs.label(role.content.prototype.`type`.name.split('.').last, label_primary)),
-        bs.td(bs.col_md_1 + "grey")(role.content.prototype.default),
-        bs.td(bs.col_md_3)(if (role.content.prototype.mapping.isDefined) mappingInput else tags.div()),
-        bs.td(bs.col_md_1 + "right")(
+        td(colMD(3) +++ sheet.paddingTop(7))(nameInput),
+        td(colMD(2))(label(role.content.prototype.`type`.name.split('.').last)(label_primary)),
+        td(colMD(1) +++ grey)(role.content.prototype.default),
+        td(colMD(3))(if (role.content.prototype.mapping.isDefined) mappingInput else tags.div()),
+        td(colMD(1) +++ floatRight)(
+          Rx {
+            if (lineHovered()) opaque
+            else transparent
+          }, glyphSpan(switchGlyph, () ⇒ switchPrototypePair(role))(glyphModifier),
+          glyphSpan(glyph_arrow_right_and_left, () ⇒ addSwitchedPrototypePair(role))(glyphModifier)
+        ), td(colMD(1) +++ floatRight)(
           id := Rx {
-            "treeline" + {
-              if (lineHovered()) "-hover" else ""
-            }
-          }, glyphSpan(switchGlyph, () ⇒ switchPrototypePair(role))(id := "glyphtrash", `class` := "glyphitem grey spacer2"),
-          glyphSpan(OMTags.glyph_arrow_right_and_left, () ⇒ addSwitchedPrototypePair(role))(id := "glyphtrash", `class` := "glyphitem grey spacer2")
-        ), bs.td(bs.col_md_1 + "right")(
-          id := Rx {
-            "treeline" + {
-              if (lineHovered()) "-hover" else ""
-            }
+            if (lineHovered()) opaque
+            else transparent
           },
-          glyphSpan(glyph_trash, () ⇒ removePrototypePair)(id := "glyphtrash", `class` := "glyphitem grey spacer2")
+          glyphSpan(glyph_trash, () ⇒ removePrototypePair)(glyphModifier)
         )
       )
     }
@@ -572,21 +573,19 @@ class ModelWizardPanel extends ModalPanel {
 
   def setBodyContent: Unit = bodyContent() = Some({
     val reactives = currentReactives()
-    val topButtons = bs.div("spacer20")(
+    val topButtons = div(sheet.paddingTop(20))(
       Rx {
-        bs.badge("I/O", s"$nbInputs/$nbOutputs",
-          buttonStyle(0))(onclick := {
-            () ⇒
-              currentTab() = 0
-              setBodyContent
+        badge("I/O", s"$nbInputs/$nbOutputs",
+          buttonStyle(0), () ⇒ {
+            currentTab() = 0
+            setBodyContent
           })
       }, Rx {
-        bs.badge("Resources", s"${
+        badge("Resources", s"${
           resources().number
-        }", buttonStyle(1))(onclick := {
-          () ⇒
-            currentTab() = 1
-            setBodyContent
+        }", buttonStyle(1), () ⇒ {
+          currentTab() = 1
+          setBodyContent
         })
       }
     )
@@ -600,26 +599,26 @@ class ModelWizardPanel extends ModalPanel {
         case _             ⇒ upButton()
       },
       fileToUploadPath().map { _ ⇒
-        bs.div("spacer20")(
+        div(sheet.paddingTop(20))(
           tags.h4("Step2: Task configuration"), step2,
           topButtons,
           if (currentTab() == 0) {
             tags.div({
 
-              val idiv = bs.div("modelIO")(tags.h3("Inputs")).render
+              val idiv = div(modelIO)(tags.h3("Inputs")).render
 
-              val odiv = bs.div("modelIO")(tags.h3("Outputs")).render
+              val odiv = div(modelIO)(tags.h3("Outputs")).render
 
               val head = thead(tags.tr(
                 for (h ← Seq("Name", "Type", "Default", "Mapped with", "", "")) yield {
-                  tags.th(h)
+                  th(h)
                 }
               ))
 
-              bs.div("spacer30")(
-                bs.div("twocolumns right10")(
+              div(sheet.paddingTop(30))(
+                div(sheet.paddingRight(10) +++ twocolumns)(
                   idiv,
-                  bs.table(striped)(
+                  tags.table(striped)(
                     head,
                     tbody(
                       for (ip ← inputs(reactives)) yield {
@@ -628,9 +627,9 @@ class ModelWizardPanel extends ModalPanel {
                     )
                   )
                 ),
-                tags.div(`class` := "twocolumns")(
+                div(twocolumns)(
                   odiv,
-                  bs.table(striped)(
+                  tags.table(striped)(
                     head,
                     tbody(
                       for (op ← outputs(reactives)) yield {
@@ -648,11 +647,11 @@ class ModelWizardPanel extends ModalPanel {
               i ← resources().implicits
             } yield {
               body.appendChild(tags.tr(
-                bs.td(bs.col_md_3)(i.name),
-                bs.td(bs.col_md_2)(i.readableSize)
+                td(colMD(3))(i.name),
+                td(colMD(2))(i.readableSize)
               ).render)
             }
-            bs.table(striped + spacer20)(body)
+            tags.table(striped +++ sheet.paddingTop(20))(body)
           }
         )
       }.getOrElse(tags.div())
@@ -663,16 +662,16 @@ class ModelWizardPanel extends ModalPanel {
     setBodyContent
     bs.modalDialog(
       modalID,
-      headerDialog(
+      bs.headerDialog(
         tags.span(tags.b("Model import"))
       ),
-      bodyDialog(Rx {
+      bs.bodyDialog(Rx {
         bodyContent().getOrElse(tags.div())
       }),
-      footerDialog(OMTags.buttonGroup("width200Right100")(
-        inputGroupButton(closeButton),
-        inputGroupButton(scriptNameInput),
-        inputGroupButton(buildModelTaskButton)
+      bs.footerDialog(buttonGroup(Seq(width := 200, right := 100))(
+        bs.inputGroupButton(closeButton),
+        bs.inputGroupButton(scriptNameInput),
+        bs.inputGroupButton(buildModelTaskButton)
       ))
     )
   }

@@ -2,14 +2,17 @@ package org.openmole.gui.client.core.files
 
 import org.openmole.gui.client.core.CoreUtils
 import org.openmole.gui.ext.data._
-import org.openmole.gui.misc.js.OMTags.ExclusiveButton
 import org.openmole.gui.misc.js.{ Select, OMTags }
+import org.openmole.gui.misc.utils.stylesheet
 import org.scalajs.dom.html.Input
 import scala.util.Try
 import scalatags.JsDom.{ tags ⇒ tags }
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
+import org.openmole.gui.misc.utils.stylesheet._
+import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
+import sheet._
 import org.openmole.gui.misc.js.JsRxTags._
 import org.openmole.gui.client.core.files.TreeNode._
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
@@ -39,18 +42,14 @@ import org.openmole.gui.client.core.Waiter._
 object FileToolBar {
 
   sealed trait SelectedTool {
-    def glyph: String
+    def glyph: Glyphicon
+
     def checkMode: Boolean
   }
 
   object TrashTool extends SelectedTool {
     val glyph = glyph_trash
     val checkMode = true
-  }
-
-  object FilterTool extends SelectedTool {
-    val glyph = OMTags.glyph_filter
-    val checkMode = false
   }
 
   object FileCreationTool extends SelectedTool {
@@ -64,12 +63,17 @@ object FileToolBar {
   }
 
   object CopyTool extends SelectedTool {
-    val glyph = OMTags.glyph_copy
+    val glyph = glyph_copy
     val checkMode = true
   }
 
   object PasteTool extends SelectedTool {
-    val glyph = OMTags.glyph_copy
+    val glyph = glyph_copy
+    val checkMode = false
+  }
+
+  object RefreshTool extends SelectedTool {
+    val glyph = glyph_refresh
     val checkMode = false
   }
 
@@ -82,7 +86,6 @@ class FileToolBar(redraw: () ⇒ Unit, refreshAndRedraw: () ⇒ Unit) {
   val selectedTool: Var[Option[SelectedTool]] = Var(None)
   val transferring: Var[ProcessState] = Var(Processed())
   val fileFilter = Var(FileFilter.defaultFilter)
-  val treeSorting = Var(TreeSorting.defaultSorting)
 
   implicit def someIntToString(i: Option[Int]): String = i.map {
     _.toString
@@ -96,22 +99,24 @@ class FileToolBar(redraw: () ⇒ Unit, refreshAndRedraw: () ⇒ Unit) {
     fileFilter() = FileFilter.defaultFilter
     byNameInput.value = fileFilter().nameFilter
     thresholdInput.value = fileFilter().threshold
-    firstLastGroup.reset
   }
 
-  def rxClass(sTool: SelectedTool) = Rx {
-    "glyphicon " + sTool.glyph + " glyphmenu " + selectedTool().filter(_ == sTool).map { _ ⇒ "selectedTool" }.getOrElse("")
+  def buildSpan(tool: SelectedTool, todo: () ⇒ Unit): Rx[TypedTag[HTMLSpanElement]] = Rx {
+    span(
+      tool.glyph +++ pointer +++ selectedTool().filter(_ == tool).map { _ ⇒ stylesheet.selectedTool }.getOrElse(emptyMod) +++ "glyphmenu",
+      onclick := todo
+    )
   }
 
-  def buildSpan(tool: SelectedTool) = OMTags.glyphSpan(rxClass(tool)) { () ⇒
+  def buildSpan(tool: SelectedTool): Rx[TypedTag[HTMLSpanElement]] = buildSpan(tool, { () ⇒
     if (selectedTool() == Some(tool)) unselectTool
     else selectedTool() = Some(tool)
     val a: () ⇒ Unit = tool
     a()
-  }
+  })
 
   def fInputMultiple(todo: HTMLInputElement ⇒ Unit) = {
-    lazy val input: HTMLInputElement = tags.input(`class` := "upload", `type` := "file", multiple := "")(onchange := { () ⇒
+    lazy val input: HTMLInputElement = bs.input()(ms("upload"), `type` := "file", multiple := "")(onchange := { () ⇒
       todo(input)
     }).render
     input
@@ -119,7 +124,7 @@ class FileToolBar(redraw: () ⇒ Unit, refreshAndRedraw: () ⇒ Unit) {
 
   //Upload tool
   def upbtn(todo: HTMLInputElement ⇒ Unit): TypedTag[HTMLSpanElement] =
-    glyph(glyph_upload + " fileUpload glyphmenu")(
+    span(aria.hidden := "true", glyph_upload +++ "fileUpload glyphmenu")(
       fInputMultiple(todo)
     )
 
@@ -128,7 +133,7 @@ class FileToolBar(redraw: () ⇒ Unit, refreshAndRedraw: () ⇒ Unit) {
   })
 
   // New file tool
-  val newNodeInput: Input = bs.input("")(
+  val newNodeInput: Input = bs.input()(
     placeholder := "File name",
     width := "130px",
     left := "-2px",
@@ -136,17 +141,17 @@ class FileToolBar(redraw: () ⇒ Unit, refreshAndRedraw: () ⇒ Unit) {
   ).render
 
   val addRootDirButton: Select[TreeNodeType] = {
-    val content = Seq((TreeNodeType.file, key(glyph_file) + "paddingLeft3"), (TreeNodeType.folder, key(glyph_folder_close) + "paddingLeft3"))
-    Select("fileOrFolder", content, content.map {
+    val content = Seq((TreeNodeType.file, glyph_file +++ sheet.paddingLeft(3)), (TreeNodeType.folder, glyph_folder_close +++ sheet.paddingLeft(3)))
+    Select( /*"fileOrFolder", */ content, content.map {
       _._1
-    }.headOption, btn_default + "borderRightFlat", () ⇒ {
+    }.headOption, btn_default +++ borderRightFlat, () ⇒ {
       addRootDirButton.content().map { c ⇒ newNodeInput.placeholder = c.name + " name" }
     })
   }
 
-  val createFileTool = inputGroup(navbar_left)(
-    inputGroupButton(addRootDirButton.selector),
-    tags.form(newNodeInput, onsubmit := { () ⇒
+  val createFileTool = bs.inputGroup(navbar_left)(
+    bs.inputGroupButton(addRootDirButton.selector),
+    form(newNodeInput, onsubmit := { () ⇒
       {
         val newFile = newNodeInput.value
         val currentDirNode = manager.current
@@ -198,14 +203,9 @@ class FileToolBar(redraw: () ⇒ Unit, refreshAndRedraw: () ⇒ Unit) {
     else redraw()
   }
 
-  def updateSorting(sortingChange: () ⇒ TreeSorting) = {
-    treeSorting() = sortingChange()
-    redraw()
-  }
+  lazy val byNameInput = bs.input(fileFilter().nameFilter)(smallInput, placeholder := "Name").render
 
-  lazy val byNameInput = bs.input(fileFilter().nameFilter, "smallInput")(placeholder := "Name").render
-
-  lazy val byNameForm = bs.form("filterElement")(
+  lazy val byNameForm = form(filterElement)(
     byNameInput,
     onsubmit := { () ⇒
       updateFilter(() ⇒ fileFilter().copy(nameFilter = byNameInput.value))
@@ -213,9 +213,9 @@ class FileToolBar(redraw: () ⇒ Unit, refreshAndRedraw: () ⇒ Unit) {
     }
   )
 
-  lazy val thresholdInput = bs.input(fileFilter().threshold, "smallInput")(placeholder := "Size").render
+  lazy val thresholdInput = bs.input(fileFilter().threshold)(smallInput, placeholder := "Size").render
 
-  lazy val thresholdForm = bs.form("filterElement")(
+  lazy val thresholdForm = form(filterElement)(
     thresholdInput,
     onsubmit := { () ⇒
       updateFilter(() ⇒ fileFilter().copy(threshold = thresholdInput.value))
@@ -223,70 +223,56 @@ class FileToolBar(redraw: () ⇒ Unit, refreshAndRedraw: () ⇒ Unit) {
     }
   )
 
-  val firstLastGroup = OMTags.buttonGroupExclusive("filterElement")(
-    ExclusiveButton.string("first", () ⇒ updateFilter(() ⇒ fileFilter().copy(firstLast = First))),
-    ExclusiveButton.string("last", () ⇒ updateFilter(() ⇒ fileFilter().copy(firstLast = Last)))
-  )
-
-  val sortingGroupInFilter = OMTags.buttonGroupExclusive("filterElement")(
-    ExclusiveButton.glyph(OMTags.glyph_alph_sorting, () ⇒ updateFilter(() ⇒ fileFilter().copy(fileSorting = AlphaSorting))),
-    ExclusiveButton.string("KB", () ⇒ updateFilter(() ⇒ fileFilter().copy(fileSorting = SizeSorting))),
-    ExclusiveButton.glyph(OMTags.glyph_time, () ⇒ updateFilter(() ⇒ fileFilter().copy(fileSorting = TimeSorting)))
-  )
-
-  val sortingGroup = OMTags.buttonGroupExclusive("sortingBar")(
-    ExclusiveButton.glyph(OMTags.glyph_alph_sorting, () ⇒ updateSorting(() ⇒ treeSorting().copy(fileSorting = AlphaSorting))),
-    ExclusiveButton.string("KB", () ⇒ updateSorting(() ⇒ treeSorting().copy(fileSorting = SizeSorting))),
-    ExclusiveButton.glyph(OMTags.glyph_time, () ⇒ updateSorting(() ⇒ treeSorting().copy(fileSorting = TimeSorting))),
+  val sortingGroup = bs.exclusiveButtonGroup(sortingBar, ms("sortingTool"), ms("selectedSortingTool"))(
     ExclusiveButton.twoGlyphStates(
-      OMTags.glyph_triangle_bottom,
-      OMTags.glyph_triangle_top,
-      () ⇒ updateSorting(() ⇒ treeSorting().copy(fileOrdering = Ascending)),
-      () ⇒ updateSorting(() ⇒ treeSorting().copy(fileOrdering = Descending))
+      glyph_triangle_bottom,
+      glyph_triangle_top,
+      () ⇒ updateFilter(() ⇒ fileFilter().copy(fileSorting = AlphaSorting, firstLast = First)),
+      () ⇒ updateFilter(() ⇒ fileFilter().copy(fileSorting = AlphaSorting, firstLast = Last)),
+      preString = "Aa",
+      twoGlyphButton
+    ),
+    ExclusiveButton.twoGlyphStates(
+      glyph_triangle_bottom,
+      glyph_triangle_top,
+      () ⇒ updateFilter(() ⇒ fileFilter().copy(fileSorting = TimeSorting, firstLast = First)),
+      () ⇒ updateFilter(() ⇒ fileFilter().copy(fileSorting = TimeSorting, firstLast = Last)),
+      preGlyph = twoGlyphButton +++ glyph_time
+    ),
+    ExclusiveButton.twoGlyphStates(
+      glyph_triangle_bottom,
+      glyph_triangle_top,
+      () ⇒ updateFilter(() ⇒ fileFilter().copy(fileSorting = SizeSorting, firstLast = First)),
+      () ⇒ updateFilter(() ⇒ fileFilter().copy(fileSorting = SizeSorting, firstLast = Last)),
+      preString = "Ko",
+      twoGlyphButton
     )
   )
 
-  lazy val filterDiv =
-    bs.div("")(
-      bs.div("filterLine marginLeft10")(
-        bs.div("white filterElement spacer6")("Take"),
-        firstLastGroup.div,
-        thresholdForm
-      ),
-      bs.div("filterLine marginLeft-20")(
-        bs.div("white filterElement spacer6")("filtered by"),
-        sortingGroupInFilter.div,
-        bs.div("white filterElement spacer6")("and by"),
-        byNameForm
-      )
-    )
-
-  val fileToolDiv = bs.div("toolPosition")(
-    Rx {
+  val fileToolDiv = Rx {
+    tags.div(toolPosition)(
       selectedTool() match {
         case Some(FileCreationTool) ⇒ createFileTool
         case Some(TrashTool)        ⇒ deleteButton
         case Some(CopyTool)         ⇒ copyButton
         case Some(PasteTool)        ⇒ pasteButton
         case Some(PluginTool)       ⇒ pluginButton
-        case Some(FilterTool)       ⇒ filterDiv
         case _                      ⇒ tags.div()
+      },
+      transferring.withTransferWaiter { _ ⇒
+        tags.div()
       }
-    },
-    transferring.withTransferWaiter { _ ⇒
-      tags.div()
-    }
-  )
+    )
+  }
 
-  val div = bs.div("centerFileTool")(
+  val div = tags.div(centerFileTool)(
     tags.div(
-      glyphSpan(glyph_refresh + " glyphmenu", refreshAndRedraw),
+      buildSpan(RefreshTool, refreshAndRedraw),
       upButton,
       buildSpan(PluginTool),
       buildSpan(TrashTool),
       buildSpan(CopyTool),
-      buildSpan(FileCreationTool),
-      buildSpan(FilterTool)
+      buildSpan(FileCreationTool)
     ),
     fileToolDiv
   )

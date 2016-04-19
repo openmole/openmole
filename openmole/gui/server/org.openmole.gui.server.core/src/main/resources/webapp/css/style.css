@@ -1,39 +1,34 @@
-@font-face {
-    font-family: 'Bevan';
-    src: url('../fonts/Bevan.ttf') format('truetype');
-    font-weight: normal;
-    font-style: normal;
-}
+/* ????????*/
+
+
+
+/* GENERAL*/
 a {
     font-weight: bold;
     color: #3086b5;
 }
 
-.colorGrey{
-    color: #333;
-}
-
-#mainNav {
-    background-color: #333333;
-    font-weight: bold;
-    padding-left: 320px;
-}
-.right2 {
-    padding-right: 2px;
-}
-.right5 {
-    padding-right: 5px;
-}
-.right10 {
-    padding-right: 10px;
-}
 a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-focus-inner, input[type="reset"]::-moz-focus-inner, input[type="button"]::-moz-focus-inner, input[type="submit"]::-moz-focus-inner, select::-moz-focus-inner {
     border: medium none;
     outline: medium none;
 }
-.black-label {
-    color: black;
+
+label {
+    display: block;
+    text-align: left;
+    width: 150px;
 }
+
+.opaque{
+opacity: 1;
+}
+
+.transparent{
+opacity: 0;
+}
+
+
+/* DIALOGS */
 #marketPanelID .modal-dialog, #executionsPanelID .modal-dialog, #modelWizardPanelID .modal-dialog  {
     width: 90%;
     max-width: 1250px;
@@ -47,69 +42,69 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
     max-width: 1250px;
     width: 60%;
 }
-.table tbody > tr > td.vert-align {
-    padding-top: 20px;
-    vertical-align: middle;
-    text-align: center;
-}
-.table th, tr {
-    text-align: center;
-    vertical-align: middle;
-}
-.table th span input {
-    max-width: 150px;
-    min-width: 20px;
-}
+
 #conceptPanelID .modal-footer {
     border-top: 0 none;
     padding: 15px;
     text-align: right;
 }
-.spacer20 {
-    margin-top: 20px;
-}
-.spacer30 {
-    margin-top: 30px;
-}
-.spacer50 {
-    margin-top: 50px;
-}
-.spacer80 {
-    margin-top: 80px;
-}
-.spacer5 {
-    margin-top: 5px;
-}
-.spacer6 {
-     margin-top: 6px;
- }
-.spacer7 {
-    margin-top: 7px;
-}
-.spacer9 {
-    margin-top: 9px;
-}
-.spacer4 {
-    margin-top: 4px;
-}
-.spacer2 {
-    margin-top: 2px;
+
+#authenticationsPanelID .modal-dialog{
+    max-width: 1250px;
+    width: 52%;
 }
 
 
+/* EDITOR */
 #editor {
     font-family: monospace;
     height: 95%;
 }
+
 .ace_gutter-layer {
     background-color: white;
 }
+
 #editor .ace_marker-layer .ace_active-line {
     background: #f2f2f2 none repeat scroll 0 0;
 }
+
 #editor .ace_marker-layer .ace_selection {
     background: #c8c8fa none repeat scroll 0 0;
 }
+
+
+/* TREENODE PANEL */
+.treePathItems{
+    position: relative;
+    top: 4px;
+    font-size: 15px;
+    color: #828082;
+    cursor: pointer;
+    padding-top: 5px;
+    font-weight: bold;
+    height: 5px;
+    margin-right: 5px;
+}
+
+.treePathItems:hover{
+    color: #333;
+}
+
+.tree {
+    margin-left: 3px;
+    margin-right: 15px;
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    top: 25px;
+}
+
+.tree.droppable {
+    border: 3px dashed white;
+    border-radius: 30px;
+}
+
 .tree-path {
     margin-left: 3px;
     position: relative;
@@ -125,62 +120,183 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
     word-wrap: break-word;
     box-shadow: -2px 2px 15px #808080;
 }
+
 .tree-path .btn-group .btn.btn-primary{
     background-color: #3086b5;
     border: #3086b5 solid 1px;
 }
+
 .tree-path .btn-group {
 }
-.tree-header {
-    margin-left: -4px;
-    margin-top: -23px;
-}
-.tree {
-    margin-left: 3px;
-    margin-right: 15px;
-    position: relative;
-    display: inline-block;
-    width: 100%;
-    top: 25px;
-}
-.tree.droppable {
-    border: 3px dashed white;
-    border-radius: 30px;
-}
-.file {
-    color: white;
-    display: inline-block;
-    margin-top: 2px;
-    margin-bottom: 3px;
-    text-decoration: none;
-}
-.file-info {
-    float: right;
-    position: absolute;
-    right: 2px;
-    margin-top: 1px;
-}
-.dir {
-    background-color: #3086b5;
-    color: white;
-    border-radius: 5px;
-    display: inline-block;
-    height: 22px;
-    margin-bottom: 5px;
-    padding: 3px 4px;
-    width: 22px;
-}
-.dirText{
-    padding-left: 27px;
-}
-.fileText{
-    padding-left: 0px;
-}
+
 .file-list {
     font-size: 14px;
     list-style-type: none;
     width: 100%;
 }
+
+.filelist li {
+    height: 30px;
+    width: 100%;
+}
+
+
+/* MARKET PANEL*/
+.mdRendering p {
+    text-align: left;
+}
+
+.whiteBold{
+    color: white;
+    font-weight: bold;
+}
+
+.whiteBold:hover{
+    color: white;
+    font-weight: bold;
+}
+
+
+/* AUTHENTICATION PANEL*/
+
+
+/* EXECUTION PANEL*/
+.executionTable {
+    border: medium none;
+    width: 100%;
+}
+
+.executionTable table td {
+    background-color: #333333;
+    color: #ddd;
+}
+
+.executionTable table td.runningState {
+    color: yellow;
+    font-weight: bold;
+}
+
+.executionTable table td.finishedState {
+    color: #a6bf26;
+    font-weight: bold;
+}
+
+.executionTable table td.cancelledState {
+    color: orange;
+    font-weight: bold;
+}
+
+.executionTable table td.failedState {
+    color: #CC3A36;
+    font-weight: bold;
+}
+
+.executionTable table td.executionVisible {
+    color: #3086b5;
+    font-weight: bold;
+}
+
+.removeExecution:hover {
+    color: #CC3A36;
+    display: inline-block;
+    transform: scale(1.2);
+    cursor: pointer;
+}
+
+.cancelExecution:hover {
+    color: orange;
+    display: inline-block;
+    transform: scale(1.2);
+    cursor: pointer;
+}
+
+.table tbody > tr > td.vert-align {
+    padding-top: 20px;
+    vertical-align: middle;
+    text-align: center;
+}
+.table th, tr {
+    text-align: center;
+    vertical-align: middle;
+}
+
+.table th span input {
+    max-width: 150px;
+    min-width: 20px;
+}
+
+.table tbody > tr > td.vert-align {
+    padding-top: 10px;
+}
+
+
+
+/* ALERT LOADING*/
+.loading {
+    font-weight: bold;
+    animation-duration: 4s;
+    animation-iteration-count: infinite;
+    animation-name: blinker;
+    animation-timing-function: linear;
+}
+
+@keyframes blinker {
+0% {
+    opacity: 1;
+}
+
+50% {
+    opacity: 0.4;
+}
+
+100% {
+    opacity: 1;
+}
+}
+
+@keyframes blinker {
+0% {
+    opacity: 1;
+}
+50% {
+    opacity: 0.4;
+}
+100% {
+    opacity: 1;
+}
+}
+
+
+/* INPUT FILES */
+.btn-file span {
+    font-size: 18px;
+    left: -6px;
+}
+
+.btn-file input[type="file"] {
+    height: 200px;
+    opacity: 0;
+    position: absolute;
+    right: 45px;
+    top: 0;
+    width: 30px;
+}
+
+
+/*SELECT */
+li.selectElement{
+    font-size: 14px;
+    color: grey;
+    margin-left: 15px;
+}
+
+/* GLYPHS */
+
+.glyphtrash:hover {
+    color: #CC3A36;
+}
+
+
 .glyphmenu {
     top: 5px;
     margin-bottom: 20px;
@@ -200,12 +316,6 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
     color: #3086b5;
 }
 
-.selectedTool{
-    opacity: 1;
-    transform: scale(1.2);
-    color: #3086b5;
-}
-
 .glyphitem {
     top: 0;
     color: white;
@@ -213,289 +323,28 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
     float: right;
     opacity: 0.2;
     padding-right: 5px;
+    cursor: pointer;
     transition: transform 0.1s ease-out 0s;
 }
+
 .glyphitem:hover {
     display: inline-block;
     opacity: 1;
     transform: scale(1.2);
 }
-.grey {
-    color: grey;
-    opacity: 0.8;
-}
-.filelist li {
-    height: 30px;
-    width: 100%;
-}
-#glyphtrash:hover {
-    color: #CC3A36;
-}
-#glyphmenu:hover {
-    color: #3086b5;
-}
-#adddir {
-    padding-left: 7px;
-    padding-top: 23px;
-}
-#adddir .glyphicon {
-    padding-right: 5px;
-}
-#adddir .btn {
-    width: 100px;
-}
-#plusdir {
-    padding-right: 3px;
-}
-.btn-file span {
-    font-size: 18px;
-    left: -6px;
-}
-.btn-file input[type="file"] {
-    height: 200px;
-    opacity: 0;
-    position: absolute;
-    right: 45px;
-    top: 0;
-    width: 30px;
-}
-#success-like {
-    float: left;
-    height: 20px;
-}
-#fileinput-addon {
-    background-color: #3086b5;
-    border: medium none #3086b5;
-    color: white;
-    float: left;
-    height: 34px;
-    width: 30px;
-}
-#fileinput-addon:hover {
-    color: #222;
-}
-#treeidle {
-    margin-top: 25px;
-}
-#treeprogress {
-    margin-top: 20px;
-    width: 100%;
-}
-#treeline {
-    opacity: 0;
-}
-#treeline-hover {
-    opacity: 1;
-}
-.tab-content {
-    margin-top: -2px;
-    position: relative;
-    width: 100%;
-}
-#editorContainer {
-    padding: 0;
-    width: 100%;
-}
-.nav-tabs {
-    width: 99%;
-}
-.nav-tabs > li .close {
-    font-size: 14px;
-    margin: 3px 0 0 15px;
-}
-.file-size {
-    color: lightgray;
-    float: right;
-    font-size: 12px;
-    padding-left: 3px;
-    padding-right: 7px;
-    padding-top: 3px;
-}
-.file-glyph {
-    margin-top: 2px;
-}
-.edit-node {
-    height: 26px;
-}
-.fullpanel {
-    height: 100%;
-    width: 100%;
-}
-.centerpanel {
-    height: 89%;
-    padding-left: 15px;
-    padding-right: 15px;
-    position: relative;
-    top: 30px;
-    width: 100%;
-}
-.fullpanel .reduce {
-    left: 330px;
-    padding-right: 340px;
-    position: fixed;
-    top: 60px;
-    transition: all 0.1s ease-out 0s;
-    width: 99%;
-    height: calc(100% - 140px);
 
+/* MODAL WIZARD PANEL*/
+.modelWizardDivs{
+    display: inline-block;
 }
-.fullpanel .open {
-    left: 0;
-}
-.leftpanel {
-    background: #333333 none repeat scroll 0 0;
-    height: 100%;
-    left: -320px;
-    opacity: 1;
-    overflow-y: auto;
-    padding-left: 7px;
-    position: absolute;
-    top: 37px;
-    transition: all 0.1s ease-out 0s;
-    width: 320px;
-}
-.playTabOverlay {
-    background: rgba(0, 0, 0, 0.6) none repeat scroll 0 0;
-    color: white;
-    height: 100%;
-    left: 0;
-    position: absolute;
-    width: 100%;
-    z-index: 20;
-}
-.editTabOverlay {
-    background: rgba(0, 0, 0, 0.1) none repeat scroll 0 0;
-    color: white;
-    height: 100%;
-    left: 0;
-    position: absolute;
-    width: 100%;
-    z-index: 800;
-}
-.overlayElement {
-    color: white;
-    font-size: 25px;
-    left: 50%;
-    position: absolute;
-    top: 50%;
-    transform: translateX(-50%) translateY(-50%);
-    z-index: 25;
-}
-.executionElement {
-    position: fixed;
-    right: 80px;
-    top: 150px;
-    width: 50px;
-    z-index: 18;
-}
-.editingElement {
-    font-size: 18px;
+
+.modelWizardDivs div{
+    margin-top: -1px;
     padding-left: 5px;
-    position: fixed;
-    right: 80px;
-    top: 150px;
-    width: 30px;
-    z-index: 800;
-}
-.executionSettings {
-    padding-left: 10px;
-}
-.displayOff {
-    display: none;
-}
-.executionSettingsOn {
-    margin: 10px 0 20px;
-}
-.executionTable table td {
-    background-color: #333333;
-    color: #ddd;
-}
-.executionTable table td.runningState {
-    color: yellow;
-    font-weight: bold;
-}
-.executionTable table td.finishedState {
-    color: #a6bf26;
-    font-weight: bold;
-}
-.executionTable table td.cancelledState {
-    color: orange;
-    font-weight: bold;
-}
-.executionTable table td.failedState {
-    color: #CC3A36;
-    font-weight: bold;
-}
-
-.monospace {
-    font-family: monospace;
-}
-
-.removeExecution:hover {
-    color: #CC3A36;
-    display: inline-block;
-    transform: scale(1.2);
-}
-.cancelExecution:hover {
-    color: orange;
-    display: inline-block;
-    transform: scale(1.2);
-}
-.executionTable {
-    border: medium none;
-    width: 100%;
-}
-.executionTable table td.executionVisible {
-    color: #3086b5;
-    font-weight: bold;
-}
-.connectionTabOverlay {
-    background: white none repeat scroll 0 0;
-    color: white;
-    height: 100%;
-    left: 0;
-    position: absolute;
-    width: 100%;
-    z-index: 998;
-}
-
-.centerPage {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    min-width: 250px;
-    -webkit-transform: translate(-50%, -50%);
-    transform: translate(-50%, -50%);
-}
-
-.rightPage{
-    right: 0;
-    margin: 10 20;
-}
-
-.message {
-    color: #999;
-    font-style: italic;
-    margin-left: 25px;
-    margin-top: 38px;
-}
-.left {
-    float: left;
-}
-.right {
-    float: right;
-}
-.authSave {
-    margin-right: 15px;
-    margin-top: -7px;
-}
-.inrowFirstElement {
     display: inline-block;
 }
-.inrow {
-    display: inline-block;
-    margin-left: 15px;
-}
+
+/* File management*/
 .inputFileStyle {
     position: relative;
     background-color: #3086b5;
@@ -521,410 +370,8 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
 .inputFileStyleSmall input[type="file"] {
     display: none;
 }
-.openMOLETitle {
-    color: white;
-    font-size: 18px;
-    margin-right: 50px;
-    position: absolute;
-    right: 0;
-    top: 5px;
-}
-.shutdownButton {
-    font-size: 20px;
-    margin-right: 10px;
-    position: absolute;
-    right: 0;
-    top: 7px;
-}
-.nav-pills > li > a {
-    font-size: 20px;
-    margin-top: -3px;
-    color: #a6bf26;
-}
-.mdRendering p {
-    text-align: left;
-}
-.mdgrey {
-    background-color: #222;
-    color: white;
-}
-.marketTag {
-    margin-left: 3px;
-    font-size: 14px;
-    position: relative;
-    top: 4px;
-}
 
-.loading {
-    font-weight: bold;
-    animation-duration: 4s;
-    animation-iteration-count: infinite;
-    animation-name: blinker;
-    animation-timing-function: linear;
-}
-@keyframes blinker {
-0% {
-    opacity: 1;
-}
-50% {
-    opacity: 0.4;
-}
-100% {
-    opacity: 1;
-}
-}
-@keyframes blinker {
-0% {
-    opacity: 1;
-}
-50% {
-    opacity: 0.4;
-}
-100% {
-    opacity: 1;
-}
-}
-.alertSettings {
-    min-width: 600px;
-    position: relative;
-}
-.environmentPanelError {
-    background-color: white;
-    margin: 10px 10px 0;
-    padding: 10px;
-}
-div table tr {
-    text-align: left;
-}
-.scrollable {
-    height: 100%;
-}
-.displayNone {
-    display: none;
-}
-.width40 {
-    float: right;
-    width: 250px;
-    margin-right: -40px;
-    margin-top: -5px;
-}
-
-.execLevel{
-margin-right:-25px;
-margin-top: -3px;
-}
-.execOutput{
-margin-right:-10px;
-margin-top: -5px;
-}
-.blue {
-    color: #3086b5;
-}
-.table tbody > tr > td.vert-align {
-    padding-top: 10px;
-}
-label {
-    display: block;
-    text-align: left;
-    width: 150px;
-}
-.executionHeader {
-    height: 55px;
-}
-
-.alertOverlay{
-    background: #333 none repeat scroll 0 0;
-    opacity: 0.95;
-    color: white;
-    height: 100%;
-    position: absolute;
-    width: 100%;
-    z-index: 1200;
-    text-align: right;
-}
-
-.fullPageZone{
-    top:0;
-    height: 100%;
-    width: 100%;
-}
-
-.fileZone{
-    top: 10px;
-    height: 100%;
-    width: 320px;
-}
-
-.topZone{
-    top: 0;
-    height: 100px;
-    width: 100%;
-}
-
-.pluginRight{
-    right: 20px;
-    margin-top: -8px;
-}
-
-.certificate{
-    width: 360px;
-    text-align: center;
-}
-
-.marginTop-20{
-    margin-top: -20px;
-}
-.marginTop10{
-    margin-top: 10px;
-}
-
-.fileNameOverflow{
-    color: white;
-    white-space: nowrap;
-    overflow: hidden;
-    width: 13em;
-    padding-top: 2px;
-    position: absolute;
-    text-overflow: ellipsis;
-}
-
-.bold{
-    font-weight: bold;
-}
-
-.paddingBottom7{
-    padding-bottom: 7px;
-}
-
-.paddingTop40{
-    padding-top: 40px;
-}
-
-span.label.control-label{
-    color: black;
-    font-size: 0.9em;
-}
-
-.openmole-logo{
-    position: fixed;
-    width: 600px;
-    top: -30px;
-    z-index: -1;
-    right: calc(50% - 250px) ;
-}
-
-.openmole-connection{
-    font-family: Bevan;
-    position: fixed;
-    font-size: 5em;
-    width: 200px;
-    top: 120px;
-    z-index: 10;
-}
-
-.openmole-pen{
-    color: #808080;
-    z-index: -1;
-    right: calc(50% - 70px);
-}
-
-.openmole-mole{
-    right: calc(50% - 210px);
-    z-index: -1;
-    color: #a6bf26;
-}
-
-.btn.btn-primary{
-    background-color: #3086b5;
-    border: #3086b5 solid 1px;
-    font-weight: bold;
-}
-.btn.btn-danger{
-    font-weight: bold;
-}
-.btn.btn-success{
-    color: white;
-    font-weight: bold;
-}
-
-.label.label-primary{
-    background-color: #3086b5;
-    border: #3086b5 solid 1px;
-    color: white;
-    font-weight: bold;
-}
-
-.btn.btn-default{
-    background-color: white;
-    color: #808080;
-    font-weight: bold;
-}
-
-.docText{
-    color: #444;
-}
-
-.glyphText{
-    color: #a6bf26;
-    font-size: 22px;
-    padding-right: 5px;
-}
-
-.docTitleEntry{
-    font-weight: bold;
-    cursor: pointer;
-    padding-top: 6px;
-}
-
-.docEntry{
-    color: white;
-    background-color: #333;
-    border-radius: 3px;
-    margin-top: 3px;
-    padding-top: 6px;
-    vertical-align: middle;
-    padding-bottom:4px;
-    padding-left: 5px;
-    min-height: 46px;
-}
-
-.docContent{
-    opacity: 0.95;
-    padding: 5 50;
-}
-
-.centerImg{
-    text-align: center;
-}
-
-.bottom-5{
-    margin-bottom: -5;
-}
-
-.greenBold{
-    color: #a6bf26;
-    font-weight: bold;
-}
-
-.white{
-color: white;
-}
-
-.whiteBold{
-    color: white;
-    font-weight: bold;
-}
-.greyBold{
-    color: #333;
-    font-weight: bold;
-}
-
-.whiteBold:hover{
-    color: white;
-    font-weight: bold;
-}
-.redBackground.btn{
-    background-color: #CC3A36;
-    border: 1px solid #CC3A36;
-}
-
-.labelInline{
-position: relative;
-display: inline;
-top: -6px;
-}
-
-.logoVersion{
-    width: 200px;
-    position: fixed;
-    bottom: 0;
-    right: 50;
-    z-index: -2;
-}
-
-.textVersion{
-    font-family: Bevan;
-    color: #ff5555;
-    position: fixed;
-    right: -40;
-    bottom: 0;
-    font-size: 2em;
-    width: 300px;
-    z-index: -1;
-    bottom: 7px;
-    height:30px;
-}
-
-.marginLeft100{
-    margin-left: 100px;
-}
-
-.marginLeft10{
-    margin-left: 10px;
-}
-
-.marginLeft-20{
-    margin-left: -20px;
-}
-
-.marginRight20{
-    margin-right: 20px;
-}
-
-.marginRight5{
-    margin-right: 5px;
-}
-
-.twocolumns{
-    float:left;
-    width:50%;
-}
-
-.onecolumn{
-    float: left;
-    width: 100%;
-}
-
-.paddingLeftRight50{
-    padding-right: 50px;
-    padding-left: 50px;
-}
-.paddingLeft3{
-    padding-left: 3px;
-}
-.centerWidth250{
-    max-width: 250px;
-}
-.modelNameInput{
-    height: 34px;
-    width: 150px;
-    border-radius: 1px;
-}
-
-.width200Right100{
-    width: 200px;
-    right: 100px;
-}
-
-.selectFilter{
-margin-top: -6px;
-font-size: 14px;
-padding-left: 5px;
-border-bottom-right-radius: 0px;
-border-bottom-left-radius: 0px;
-}
-
-li.selectElement{
-font-size: 14px;
-color: grey;
-margin-left: 15px;
-}
-
-.borderRightFlat{
-border-bottom-right-radius: 0px;
-border-top-right-radius: 0px;
-}
-
+/* WAITER */
 .spinner-wave {
     height: 30px;
     margin: 0 auto;
@@ -966,34 +413,31 @@ border-top-right-radius: 0px;
 	color: white;
 }
 
-.modelWizardDivs{
-    display: inline-block;
+
+/*NAV */
+#mainNav {
+    background-color: #333333;
+    font-weight: bold;
+    padding-left: 320px;
 }
 
-.modelWizardDivs div{
-    margin-top: -1px;
-    padding-left: 5px;
-    display: inline-block;
+.nav-tabs {
+    width: 99%;
 }
 
-.rightBlock{
-    width: 70%;
-    float: right;
+.nav-tabs > li .close {
+    font-size: 14px;
+    margin: 3px 0 0 15px;
 }
 
-.options{
-    position: relative;
-    margin-right:10px;
-    top: -3px;
-}
-
-.uploadPlugin {
-    margin-right: -110px;
-    padding-bottom: 30px;
+.nav-pills > li > a {
+    font-size: 20px;
+    margin-top: -3px;
+    color: #a6bf26;
 }
 
 
-
+/* FILE TOOL BAR*/
 .fileUpload {
     position: relative;
     overflow: hidden;
@@ -1011,79 +455,21 @@ border-top-right-radius: 0px;
     filter: alpha(opacity=0);
 }
 
-.centerFileTool{
-    padding-right: 50px;
-    padding-top: 10px;
-    text-align: center;
-
+.sortingTool{
+    color: white;
+    background-color: #333;
+    opacity: 0.5;
 }
 
-.toolPosition{
-     display: inline-block;
-     margin: 0 auto;
-     width: 220px;
-     margin-top: 5px;
-     margin-bottom: 10px;
+.sortingTool.btn:hover{
+    color: white;
+    background-color: #333;
+    opacity: 1;
 }
 
-.treePathItems{
-    position: relative;
-    top: 2px;
-    font-size: 15px;
-    color: #828082;
-    cursor: pointer;
-    padding-top: 5px;
+.selectedSortingTool.btn, .selectedSortingTool.btn:hover{
+    color: white;
+    background-color: #333;
+    opacity: 1;
     font-weight: bold;
-    height: 5px;
-    margin-right: 5px;
-}
-
-.treePathItems:hover{
-    color: #333;
-}
-
-.smallInput{
-    width: 60px;
-    padding-top:5px;
-    padding-left: 3px;
-    text-align: center;
-    height: 28px;
-    font-size: 14px;
-}
-
-.filterLine{
-    overflow: auto;
-    width: 300px;
-}
-
-.filterElement{
-    float: left;
-    height: 30px;
-    padding-left: 4px;
-    font-size: 12px;
-}
-
-.exclusiveButtonSelected {
-    background-color: red;
-    border: 1px solid red;
-}
-
-.stringInGroup{
-    height: 28px;
-    padding-top: 3px;
-    padding-left: 6px;
-    padding-right: 6px;
-}
-
-.sortingBar{
-    width: 100%;
-    right: -149px;
-    top: 15px;
-}
-
-.modelIO{
-    position: relative;
-    left: 50%;
-    margin-left: -60px;
-    padding-bottom: 20px;
-}
+    }

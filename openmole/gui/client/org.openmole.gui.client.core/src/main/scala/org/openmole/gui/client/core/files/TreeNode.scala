@@ -100,7 +100,7 @@ object TreeNode {
 object FileSorting {
   implicit def sortingToOrdering(fs: FileSorting): Ordering[TreeNode] =
     fs match {
-      case AlphaSorting ⇒ AlphaOrdering
+      case AlphaSorting ⇒ TreeNodeOrdering
       case SizeSorting  ⇒ FileSizeOrdering
       case _            ⇒ TimeOrdering
     }
@@ -117,7 +117,7 @@ object FileSizeOrdering extends Ordering[TreeNode] {
   def compare(tn1: TreeNode, tn2: TreeNode) = tn1.size compare tn2.size
 }
 
-object AlphaOrdering extends Ordering[TreeNode] {
+object TreeNodeOrdering extends Ordering[TreeNode] {
   def compare(tn1: TreeNode, tn2: TreeNode) = tn1 match {
     case dn1: DirNode ⇒ tn2 match {
       case dn2: DirNode ⇒ dn1.name() compare dn2.name()

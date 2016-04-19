@@ -22,20 +22,38 @@ import org.openmole.gui.ext.dataui.PanelWithID
  */
 
 package object authentications {
-  def panel(data: AuthenticationData): PanelUI = data match {
+  def panelUI(data: AuthenticationData): PanelUI = data match {
     case egi: EGIP12AuthenticationData                  ⇒ new EGIP12AuthenticationPanel(egi)
     case loginPassword: LoginPasswordAuthenticationData ⇒ new SSHLoginPasswordAuthenticationPanel(loginPassword)
     case privateKey: PrivateKeyAuthenticationData       ⇒ new SSHPrivateKeyAuthenticationPanel(privateKey)
   }
 
-  def panelWithID(data: AuthenticationData) = new PanelWithID {
-    val name = data match {
-      case e: EGIP12AuthenticationData         ⇒ "EGI P12 certificate"
-      case lp: LoginPasswordAuthenticationData ⇒ "SSH login/password"
-      case _                                   ⇒ "SSH key"
-    }
-    val panel: PanelUI = authentications.panel(data)
+  private def naming(data: AuthenticationData) = data match {
+    case e: EGIP12AuthenticationData         ⇒ "EGI certificate"
+    case lp: LoginPasswordAuthenticationData ⇒ "SSH login/password"
+    case _                                   ⇒ "SSH key"
   }
 
-  lazy val all = Seq(panelWithID(EGIP12AuthenticationData()), panelWithID(LoginPasswordAuthenticationData()), panelWithID(PrivateKeyAuthenticationData()))
+  private def emptyData(data: AuthenticationData) = data match {
+    case e: EGIP12AuthenticationData         ⇒ EGIP12AuthenticationData()
+    case lp: LoginPasswordAuthenticationData ⇒ LoginPasswordAuthenticationData()
+    case _                                   ⇒ PrivateKeyAuthenticationData()
+  }
+
+  case class AuthPanelWithID(data: AuthenticationData, name: String) extends PanelWithID {
+    type DATA = AuthenticationData
+
+    def panel: PanelUI = panelUI(data)
+
+    def emptyClone: AuthPanelWithID = copy(data = emptyData(data))
+  }
+
+  def panelWithID(authData: AuthenticationData): AuthPanelWithID = AuthPanelWithID(authData, naming(authData))
+
+  def factories: Seq[AuthPanelWithID] = Seq(
+    authentications.panelWithID(LoginPasswordAuthenticationData()),
+    authentications.panelWithID(PrivateKeyAuthenticationData()),
+    authentications.panelWithID(EGIP12AuthenticationData())
+  )
+
 }

@@ -116,12 +116,7 @@ object Utils {
     }
   }
 
-  def authenticationFile(keyFileName: String): File = {
-
-    val oo = new File(authenticationKeysFile, keyFileName)
-    println("AUth file " + oo)
-    oo
-  }
+  def authenticationFile(keyFileName: String): File = new File(authenticationKeysFile, keyFileName)
 
   def getPathArray(f: File, until: File): Seq[String] = {
     def getParentsArray0(f: File, computedParents: Seq[String]): Seq[String] = {
@@ -149,20 +144,25 @@ object Utils {
   }
 
   def listFiles(path: SafePath, fileFilter: data.FileFilter)(implicit context: ServerFileSytemContext): Seq[TreeNodeData] = {
-    def allFiles = safePathToFile(path).listFilesSafe.toSeq
 
-    def filteredByName: Seq[TreeNodeData] =
+    val filteredByName: Seq[TreeNodeData] = {
+      val allFiles = safePathToFile(path).listFilesSafe.toSeq
       if (fileFilter.nameFilter.isEmpty) allFiles
       else allFiles.filter { f ⇒ f.getName.contains(fileFilter.nameFilter) }
+    }
 
-    def sorted = filteredByName.sorted(fileFilter.fileSorting)
+    val sorted = filteredByName.sorted(fileFilter.fileSorting)
 
-    fileFilter.threshold.map { th ⇒
-      fileFilter.firstLast match {
-        case First ⇒ sorted.take(th)
-        case Last  ⇒ sorted.takeRight(th)
+    fileFilter.firstLast match {
+      case First ⇒ fileFilter.threshold match {
+        case Some(th: Int) ⇒ sorted.take(th)
+        case _             ⇒ sorted
       }
-    }.getOrElse(sorted)
+      case Last ⇒ (fileFilter.threshold match {
+        case Some(th: Int) ⇒ sorted.takeRight(th)
+        case _             ⇒ sorted
+      }).reverse
+    }
 
   }
 

@@ -1,18 +1,22 @@
 package org.openmole.gui.client.core
 
 import org.openmole.gui.client.core.files.FileManager
+import org.openmole.gui.misc.js.Tooltip._
 import org.openmole.gui.ext.data._
+import org.openmole.gui.misc.utils.stylesheet._
 import org.openmole.gui.shared.Api
 import org.scalajs.dom.raw.HTMLInputElement
 import scalatags.JsDom.all._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import scalatags.JsDom.{ tags ⇒ tags }
-import org.openmole.gui.misc.js.JsRxTags._
-import org.openmole.gui.misc.js.Tooltip._
+import org.openmole.gui.misc.js.OMTags
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+import org.openmole.gui.misc.js.JsRxTags._
 import autowire._
-import bs._
 import rx._
+import bs._
+import org.openmole.gui.misc.utils.{ stylesheet ⇒ sheet }
+import fr.iscpif.scaladget.stylesheet.all._
 
 /*
  * Copyright (C) 10/08/15 // mathieu.leclaire@openmole.org
@@ -51,8 +55,8 @@ class PluginPanel extends ModalPanel {
   }
 
   val uploadPluginButton = tags.label(
-    `class` := "inputFileStyle pluginRight uploadPlugin",
-    uploadButton((fileInput: HTMLInputElement) ⇒ {
+    pluginRight +++ uploadPlugin +++ "inputFileStyle",
+    OMTags.uploadButton((fileInput: HTMLInputElement) ⇒ {
       fileInput.accept = ".jar"
       FileManager.upload(
         fileInput,
@@ -79,12 +83,11 @@ class PluginPanel extends ModalPanel {
             lineHovered() = false
           }
         )(
-            tags.span(p.name, `class` := "left docTitleEntry"),
-            tags.span(
-              id := Rx {
-                "treeline" + {
-                  if (lineHovered()) "-hover" else ""
-                }
+            span(p.name, `class` := "left docTitleEntry"),
+            span(
+              Rx {
+                if (lineHovered()) opaque
+                else transparent
               },
               glyphSpan(glyph_trash, () ⇒ removePlugin(p))(id := "glyphtrash", `class` := "glyphitem grey spacer9")
             )
@@ -93,15 +96,15 @@ class PluginPanel extends ModalPanel {
     }
 
     Rx {
-      tags.div(
+      div(
         transferring() match {
           case _: Processed ⇒
             getPlugins
             transferring() = Processed()
           case _ ⇒
-            progressBar(transferring().display, transferring().ratio)(id := "treeprogress")
+            bs.progressBar(transferring().display, transferring().ratio)(treeprogress)
         },
-        tags.div(
+        div(
           plugins().map { aux ⇒
             for (a ← aux) yield {
               Seq(Reactive(a).render)
@@ -117,18 +120,18 @@ class PluginPanel extends ModalPanel {
       getPlugins
     }
 
-  val dialog = modalDialog(
+  val dialog = bs.modalDialog(
     modalID,
-    headerDialog(Rx {
+    bs.headerDialog(Rx {
       tags.span(
         tags.b("Plugins"),
-        inputGroup(navbar_right)(
+        bs.inputGroup(navbar_right)(
           uploadPluginButton
         )
       )
     }),
-    bodyDialog(pluginTable),
-    footerDialog(
+    bs.bodyDialog(pluginTable),
+    bs.footerDialog(
       tags.div(
         closeButton
       )

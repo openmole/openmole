@@ -2,11 +2,10 @@ package org.openmole.gui.client.core
 
 import org.openmole.gui.ext.data._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
-import org.openmole.gui.misc.utils.Utils
+import org.openmole.gui.misc.utils.{ stylesheet, Utils }
 import scalatags.JsDom.{ tags ⇒ tags }
 import scalatags.JsDom.all._
 import bs._
-import rx._
 
 /*
  * Copyright (C) 27/07/15 // mathieu.leclaire@openmole.org
@@ -49,7 +48,7 @@ class EnvironmentErrorPanel {
     }
   )
 
-  def setErrors(ers: Seq[(EnvironmentError, Int)]) = scrollable.setChild(bs.div("environmentPanelError")(entries(ers)).render)
+  def setErrors(ers: Seq[(EnvironmentError, Int)]) = scrollable.setChild(div(stylesheet.environmentPanelError)(entries(ers)).render)
 
   val view = scrollable.sRender
 

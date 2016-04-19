@@ -18,7 +18,8 @@ package org.openmole.gui.client.core
  */
 
 import org.openmole.core.buildinfo.{ MarketIndex, MarketIndexEntry }
-import org.openmole.gui.client.core.AbsolutePositioning.CenterTransform
+import org.openmole.gui.client.core.alert.{ AlertPanel, AbsolutePositioning }
+import AbsolutePositioning.CenterPagePosition
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import org.openmole.gui.ext.data.{ Processing, ProcessState }
 import org.openmole.gui.misc.js.{ InputFilter }
@@ -26,6 +27,9 @@ import org.openmole.gui.misc.js.JsRxTags._
 import org.openmole.gui.shared.Api
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
+import org.openmole.gui.misc.utils.{ stylesheet ⇒ omsheet }
+import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
+import sheet._
 import org.openmole.gui.client.core.CoreUtils._
 import org.openmole.gui.ext.data._
 import Waiter._
@@ -48,8 +52,8 @@ class MarketPanel extends ModalPanel {
   }.getOrElse(Seq()))
   val overwriteAlert: Var[Option[MarketIndexEntry]] = Var(None)
 
-  lazy val marketTable = tags.div(
-    `class` := "spacer20",
+  lazy val marketTable = div(
+    sheet.paddingTop(20),
     Rx {
       marketIndex().map { mindex ⇒
         for {
@@ -57,29 +61,27 @@ class MarketPanel extends ModalPanel {
         } yield {
           val isSelected = Some(entry) == selectedEntry()
           Seq(
-            bs.div("docEntry")(
-              bs.div(bs.col_md_3 + " spacer7")(
-                tags.a(entry.name, cursor := "pointer", `class` := "whiteBold", onclick := { () ⇒
+            div(omsheet.docEntry)(
+              div(colMD(3) +++ sheet.paddingTop(7))(
+                tags.a(entry.name, cursor := "pointer", ms("whiteBold"), onclick := { () ⇒
                   selectedEntry() = {
                     if (isSelected) None
                     else Some(entry)
                   }
                 })
               ),
-              bs.div(bs.col_md_2)(downloadButton(entry, () ⇒ {
+              div(colMD(2))(downloadButton(entry, () ⇒ {
                 OMPost[Api].exists(manager.current.safePath() ++ entry.name).call().foreach { b ⇒
                   if (b) overwriteAlert() = Some(entry)
                   else download(entry)
                 }
               })),
-              bs.div(bs.col_md_7 + " spacer7")(
-                entry.tags.map { e ⇒ bs.label(e, label_primary + "marketTag") }
+              div(colMD(7) +++ sheet.paddingTop(7))(
+                entry.tags.map { e ⇒ tags.label(e)(sheet.label_primary +++ omsheet.tableTag) }
               ), tags.div(
-                `class` := {
-                  if (isSelected) "docEntry" else ""
-                },
+                if (isSelected) omsheet.docEntry else emptyMod,
                 selectedEntry().map { se ⇒
-                  if (isSelected) tags.div(`class` := "mdRendering paddingTop40")(
+                  if (isSelected) div(ms("mdRendering"))(sheet.paddingTop(40))(
                     RawFrag(entry.readme.getOrElse(""))
                   )(colspan := 12)
                   else tags.div()
@@ -108,7 +110,7 @@ class MarketPanel extends ModalPanel {
     }.map {
       case (e, state: Var[ProcessState]) ⇒
         state.withTransferWaiter { _ ⇒
-          if (selectedEntry() == Some(e)) bs.glyphButton(" Download", btn_success + " redBackground", glyph_download_alt, todo) else tags.div()
+          if (selectedEntry() == Some(e)) bs.glyphButton(" Download", btn_warning, glyph_download_alt, todo) else tags.div()
         }
     }.getOrElse(tags.div())
 
@@ -139,7 +141,7 @@ class MarketPanel extends ModalPanel {
                 }
               }, () ⇒ {
                 overwriteAlert() = None
-              }, CenterTransform()
+              }, CenterPagePosition
             )
             tags.div
           case _ ⇒

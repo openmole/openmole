@@ -1,8 +1,6 @@
 package org.openmole.gui.client.core.files
 
-import org.openmole.gui.ext
 import org.openmole.gui.ext.dataui.PanelUI
-
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import org.openmole.gui.ext.data.{ DisplayableOnDemandFile, DisplayableFile, FileExtension }
@@ -14,6 +12,8 @@ import scalatags.JsDom.all._
 import scalatags.JsDom.tags
 import scala.async.Async.{ async, await }
 import fr.iscpif.scaladget.mapping.ace._
+import org.openmole.gui.misc.utils.stylesheet
+import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
 
 /*
  * Copyright (C) 07/04/15 // mathieu.leclaire@openmole.org
@@ -43,9 +43,10 @@ class EditorPanelUI(bindings: Seq[(String, String, () ⇒ Any)], initCode: Strin
   initEditor
 
   val view = {
-    tags.div(id := "editorContainer", `class` := "container")(
-      tags.div(`class` := "panel panel-default")(
-        tags.div(`class` := "panel-body")(
+    import sheet._
+    div(stylesheet.editorContainer +++ container)(
+      div(panel +++ panelDefault)(
+        div(sheet.panelBody)(
           editor.container
         )
       )

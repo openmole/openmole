@@ -7,16 +7,16 @@ import org.openmole.gui.shared._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
 import org.openmole.gui.misc.utils.Utils._
-import org.openmole.gui.misc.js.JsRxTags._
+import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
+import org.openmole.gui.misc.utils.stylesheet._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import org.scalajs.dom.raw.{ HTMLElement, HTMLDivElement }
+import sheet._
 import rx._
-import bs._
-
-import scala.util.{ Failure, Success }
 import scalatags.JsDom.all._
 import scalatags.JsDom.{ TypedTag, tags }
 import scala.scalajs.js.timers._
+import org.openmole.gui.misc.js.JsRxTags._
 
 /*
  * Copyright (C) 11/05/15 // mathieu.leclaire@openmole.org
@@ -46,17 +46,19 @@ object TreeNodeTabs {
     val active: Var[Option[SetIntervalHandle]] = Var(None)
 
     def desactivate = {
-      active().foreach { clearInterval }
+      active().foreach {
+        clearInterval
+      }
       active() = None
     }
 
     def activate = {
-      active() = Some(setInterval(15000) { refresh() })
+      active() = Some(setInterval(15000) {
+        refresh()
+      })
     }
 
     val editorElement: TypedTag[HTMLDivElement]
-
-    val tabElement = tags.div()
 
     def fileContent: FileContent
 
@@ -87,14 +89,14 @@ object TreeNodeTabs {
     }
   }
 
-  class EditableNodeTab(val treeNode: TreeNode, val editor: EditorPanelUI) extends TreeNodeTab with Save {
+  /* class EditableNodeTab(val treeNode: TreeNode, val editor: EditorPanelUI) extends TreeNodeTab with Save {
 
-    val editorElement = editor.view
+     val editorElement = editor.view
 
-    def fileContent = AlterableFileContent(treeNode.safePath(), editor.code)
+     def fileContent = AlterableFileContent(treeNode.safePath(), editor.code)
 
-    def refresh(onsaved: () ⇒ Unit) = save(onsaved)
-  }
+     def refresh(onsaved: () ⇒ Unit) = save(onsaved)
+   }*/
 
   class LockedEditionNodeTab(
       val treeNode: TreeNode,
@@ -108,7 +110,7 @@ object TreeNodeTabs {
       editor.setReadOnly(!editable())
     }
 
-    val editButton = OMTags.glyphBorderButton("", btn_primary + "editingElement", glyph_edit, () ⇒ {
+    val editButton = OMTags.glyphBorderButton("", btn_primary +++ editingElement, glyph_edit, () ⇒ {
       editable() = !editable()
     })
 
@@ -118,9 +120,15 @@ object TreeNodeTabs {
 
     lazy val overlayElement = tags.div
 
+    def block = div(
+      editorElement,
+      controlElement,
+      overlayElement
+    )
+
     def fileContent = AlterableOnDemandFileContent(treeNode.safePath(), editor.code, () ⇒ editable())
 
-    def refresh(afterRefresh: () ⇒ Unit) =
+    def refresh(afterRefresh: () ⇒ Unit) = {
       if (editable()) save(afterRefresh)
       else {
         val scrollPosition = editor.getScrollPostion
@@ -129,6 +137,7 @@ object TreeNodeTabs {
           editor.setScrollPosition(scrollPosition)
         })
       }
+    }
   }
 
   class HTMLTab(val treeNode: TreeNode, htmlContent: String) extends TreeNodeTab {
@@ -143,35 +152,40 @@ object TreeNodeTabs {
   }
 
   def apply(tabs: TreeNodeTab*) = new TreeNodeTabs(tabs.toSeq)
-}
 
-trait TabControl {
-  def controlElement: TypedTag[HTMLElement]
-}
+  trait TabControl {
+    def controlElement: TypedTag[HTMLElement]
+  }
 
-trait OMSTabControl <: TabControl {
+  abstract class OMSTabControl(val treeNode: TreeNode, val editor: EditorPanelUI) extends TabControl with TreeNodeTab with Save {
 
-  def node: TreeNode
+    val editorElement = editor.view
 
-  val runButton = bs.button("Play", btn_primary)(onclick := { () ⇒
-    onrun()
-  })
+    def fileContent = AlterableFileContent(treeNode.safePath(), editor.code)
 
-  lazy val controlElement = tags.div(`class` := "executionElement")(
-    runButton
-  )
+    def refresh(onsaved: () ⇒ Unit) = save(onsaved)
 
-  val overlayTabElement = tags.div(`class` := "playTabOverlay")
+    def node: TreeNode
 
-  val overlayElement: TypedTag[HTMLDivElement] = tags.div(`class` := "overlayElement")(
-    s"Starting ${node.name()}, please wait ..."
-  )
+    val runButton = tags.button("Play", btn_primary)(onclick := { () ⇒ onrun })
 
-  val overlaying: Var[Boolean] = Var(false)
+    val controlElement = div(executionElement)(runButton)
 
-  def onrun: () ⇒ Unit
+    val overlaying: Var[Boolean] = Var(false)
 
-  def relativePath: SafePath
+    def onrun: Unit
+
+    def relativePath: SafePath
+
+    def block = div(
+      div(if (overlaying()) playTabOverlay else emptyMod),
+      if (overlaying()) div(overlayElement)(s"Starting ${node.name()}, please wait ...")
+      else div,
+      editorElement,
+      controlElement
+    )
+  }
+
 }
 
 import org.openmole.gui.client.core.files.TreeNodeTabs._
@@ -247,19 +261,19 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
 
   def active = tabs().find { t ⇒ isActive(t) }
 
-  val render = Rx {
-    tags.div(
-      tags.div(role := "tabpanel")(
-        //Headers
-        tags.ul(`class` := "nav nav-tabs", role := "tablist")(
+  val render = div( /*Rx*/ {
+    div(role := "tabpanel")(
+      //Headers
+      Rx {
+        ul(sheet.nav +++ sheet.navTabs, role := "tablist")(
           for (t ← tabs()) yield {
-            tags.li(
+            li(
               role := "presentation",
               `class` := {
                 if (isActive(t)) "active" else ""
               }
             )(
-                tags.a(
+                a(
                   href := "#" + t.id,
                   aria.controls := t.id,
                   role := "tab",
@@ -270,47 +284,34 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
                   )
               )
           }
-        ),
-        //Panes
-        tags.div(`class` := "tab-content")(
+        )
+      },
+      //Panes
+      div(tabContent)(
+        Rx {
           for (t ← tabs()) yield {
             val isTabActive = isActive(t)
-            tags.div(
+
+            div(
               role := "tabpanel",
-              `class` := "tab-pane " + {
+              ms("tab-pane " + {
                 if (isTabActive) "active" else ""
-              }, id := t.id
+              }), id := t.id
             )(if (isTabActive) {
                 active.map { tab ⇒
                   tab match {
-                    case oms: OMSTabControl ⇒
-                      tags.div(
-                        if (oms.overlaying()) oms.overlayTabElement else oms.tabElement,
-                        tags.div(
-                          oms.editorElement,
-                          oms.controlElement,
-                          if (oms.overlaying()) oms.overlayElement else tags.div
-                        )
-                      )
-                    case etc: LockedEditionNodeTab ⇒
-                      println("ETC " + etc.editable() + " " + etc.controlElement.toString)
-                      tags.div(
-                        etc.tabElement,
-                        tags.div(
-                          etc.overlayElement,
-                          etc.editorElement,
-                          etc.controlElement
-                        )
-                      )
-                    case _ ⇒ tags.div(tab.editorElement)
+                    case oms: OMSTabControl        ⇒ oms.block
+                    case etc: LockedEditionNodeTab ⇒ etc.block
+                    case _                         ⇒ div(tab.editorElement)
                   }
                 }
               }
-              else tags.div())
+              else div())
+
           }
-        )
+        }
       )
     )
-  }
+  })
 
 }

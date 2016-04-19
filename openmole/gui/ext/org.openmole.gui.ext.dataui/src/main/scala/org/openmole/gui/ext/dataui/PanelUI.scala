@@ -1,5 +1,6 @@
 package org.openmole.gui.ext.dataui
 
+import org.openmole.gui.ext.data.Data
 import org.scalajs.dom.raw.HTMLElement
 
 import scalatags.JsDom.TypedTag
@@ -37,7 +38,10 @@ trait PanelUI {
 }
 
 trait PanelWithID {
+  type DATA <: Data
   val uuid: String = java.util.UUID.randomUUID.toString
   def name: String
   def panel: PanelUI
+  def data: DATA
+  def emptyClone: PanelWithID
 }
