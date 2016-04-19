@@ -51,6 +51,11 @@ package object stylesheet {
 
   lazy val fixedPosition: ModifierSeq = position := "fixed"
 
+  lazy val centerElement: ModifierSeq = Seq(
+    display := "table",
+    margin := "0 auto"
+  )
+
   // SCRIPT CLIENT
   lazy val connectionTabOverlay: ModifierSeq = Seq(
     background := "white none repeat scroll 0 0",
@@ -348,7 +353,7 @@ package object stylesheet {
   lazy val fullPageZone: ModifierSeq = Seq(
     top := 0,
     height := "100%",
-    width := 100
+    width := "100%"
   )
 
   lazy val fileZone: ModifierSeq = Seq(
@@ -440,7 +445,7 @@ package object stylesheet {
   lazy val selectedTool: ModifierSeq = Seq(
     opacity := 1,
     svgAttrs.transform := "scale(1.2)",
-    color("#3086b5;")
+    color("#3086b5")
   )
 
   lazy val borderRightFlat: ModifierSeq = Seq(
@@ -466,21 +471,7 @@ package object stylesheet {
 
   lazy val selectedButton: ModifierSeq = Seq(
     sheet.btn,
-    backgroundColor := "#e3dbdb;"
-  )
-
-  lazy val toolPosition: ModifierSeq = Seq(
-    display := "inline-block",
-    margin := "0 auto",
-    width := 220,
-    sheet.marginTop(5),
-    sheet.marginBottom(10)
-  )
-
-  lazy val centerFileTool: ModifierSeq = Seq(
-    sheet.paddingRight(50),
-    sheet.paddingTop(10),
-    textAlign := "center"
+    backgroundColor := "#e3dbdb"
   )
 
 }
