@@ -275,7 +275,7 @@ class FileToolBar(refreshAndRedraw: () ⇒ Unit) {
   )
 
   val fileToolDiv = Rx {
-    tags.div(centerElement +++ sheet.marginBottom(10) )(
+    tags.div(centerElement +++ sheet.marginBottom(10))(
       selectedTool() match {
         case Some(FilterTool)       ⇒ filterTool
         case Some(FileCreationTool) ⇒ createFileTool
