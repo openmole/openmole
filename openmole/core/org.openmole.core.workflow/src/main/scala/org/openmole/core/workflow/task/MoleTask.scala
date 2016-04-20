@@ -92,7 +92,7 @@ sealed abstract class MoleTask(
     catch {
       case e: InterruptedException ⇒
         execution.cancel
-        throw e
+        throw execution.exception.map(_.exception) getOrElse e
     }
 
     context + lastContext.getOrElse(throw new UserBadDataError("Last capsule " + last + " has never been executed."))
