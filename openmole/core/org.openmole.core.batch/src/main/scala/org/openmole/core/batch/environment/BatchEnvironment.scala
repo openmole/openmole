@@ -102,7 +102,7 @@ object BatchEnvironment extends Logger {
   val IncrementUpdateInterval = ConfigurationLocation("BatchEnvironment", "IncrementUpdateInterval", Some(1 minute))
   val MaxUpdateErrorsInARow = ConfigurationLocation("BatchEnvironment", "MaxUpdateErrorsInARow", Some(3))
 
-  val JobManagementThreads = ConfigurationLocation("BatchEnvironment", "JobManagementThreads", Some(200))
+  val JobManagementThreads = ConfigurationLocation("BatchEnvironment", "JobManagementThreads", Some(100))
 
   val StoragesGCUpdateInterval = ConfigurationLocation("BatchEnvironment", "StoragesGCUpdateInterval", Some(1 hour))
   val RuntimeMemoryMargin = ConfigurationLocation("BatchEnvironment", "RuntimeMemoryMargin", Some(400))
