@@ -46,18 +46,14 @@ object CoreUtils {
 
   def refreshCurrentDirectory(todo: () ⇒ Unit = () ⇒ {}, fileFilter: FileFilter) = manager.trashCache(todo, fileFilter)
 
-  def addDirectory(in: TreeNodeData, dirName: String, fileFilter: FileFilter, onadded: () ⇒ Unit = () ⇒ {}) =
+  def addDirectory(in: TreeNodeData, dirName: String, onadded: () ⇒ Unit = () ⇒ {}) =
     OMPost[Api].addDirectory(in, dirName).call().foreach { b ⇒
-      if (b) {
-        refreshCurrentDirectory(onadded, fileFilter)
-      }
+      if (b) onadded
     }
 
-  def addFile(in: TreeNodeData, fileName: String, fileFilter: FileFilter, onadded: () ⇒ Unit = () ⇒ {}) =
+  def addFile(in: TreeNodeData, fileName: String, onadded: () ⇒ Unit = () ⇒ {}) =
     OMPost[Api].addFile(in, fileName).call().foreach { b ⇒
-      if (b) {
-        refreshCurrentDirectory(onadded, fileFilter)
-      }
+      if (b) onadded()
     }
 
   def trashNode(path: SafePath, fileFilter: FileFilter)(ontrashed: () ⇒ Unit): Unit = {

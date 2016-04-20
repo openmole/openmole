@@ -163,7 +163,6 @@ object Utils {
         case _             ⇒ sorted
       }).reverse
     }
-
   }
 
   def replicate(treeNodeData: TreeNodeData): TreeNodeData = {

@@ -97,43 +97,6 @@ object TreeNode {
 
 }
 
-object FileSorting {
-  implicit def sortingToOrdering(fs: FileSorting): Ordering[TreeNode] =
-    fs match {
-      case AlphaSorting ⇒ TreeNodeOrdering
-      case SizeSorting  ⇒ FileSizeOrdering
-      case _            ⇒ TimeOrdering
-    }
-
-  implicit class reversableSeq[T](seq: Seq[T]) {
-    def order(fileOrdering: FileOrdering) = fileOrdering match {
-      case Ascending  ⇒ seq
-      case Descending ⇒ seq.reverse
-    }
-  }
-}
-
-object FileSizeOrdering extends Ordering[TreeNode] {
-  def compare(tn1: TreeNode, tn2: TreeNode) = tn1.size compare tn2.size
-}
-
-object TreeNodeOrdering extends Ordering[TreeNode] {
-  def compare(tn1: TreeNode, tn2: TreeNode) = tn1 match {
-    case dn1: DirNode ⇒ tn2 match {
-      case dn2: DirNode ⇒ dn1.name() compare dn2.name()
-      case _            ⇒ -1
-    }
-    case _ ⇒ tn2 match {
-      case dn2: DirNode ⇒ 1
-      case _            ⇒ tn1.name() compare tn2.name()
-    }
-  }
-}
-
-object TimeOrdering extends Ordering[TreeNode] {
-  def compare(tn1: TreeNode, tn2: TreeNode) = tn1.time compare tn2.time
-}
-
 case class DirNode(
   name:         Var[String],
   safePath:     Var[SafePath],

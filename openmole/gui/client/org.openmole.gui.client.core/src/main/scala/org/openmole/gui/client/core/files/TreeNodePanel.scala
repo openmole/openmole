@@ -50,7 +50,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
   val dragState: Var[String] = Var("")
   val draggedNode: Var[Option[TreeNode]] = Var(None)
   val fileDisplayer = new FileDisplayer
-  val fileToolBar = new FileToolBar(() ⇒ drawTree, () ⇒ refreshAndDraw)
+  val fileToolBar = new FileToolBar(() ⇒ refreshAndDraw)
   val tree: Var[TypedTag[HTMLDivElement]] = Var(tags.div())
 
   val editNodeInput: Input = bs.input()(
@@ -131,12 +131,10 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
         else
           tags.table(ms("tree" + dragState()))(
             tr(
-              div(
-                tags.table(ms("file-list"))(
-                  for (tn ← sons.sorted(fileToolBar.fileFilter().fileSorting)) yield {
-                    drawNode(tn)
-                  }
-                )
+              tags.table(ms("file-list"))(
+                for (tn ← sons /*.sorted(fileToolBar.fileFilter().fileSorting)*/ ) yield {
+                  drawNode(tn)
+                }
               )
             )
           )
@@ -352,10 +350,10 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
               })(arrow_right_and_left)
 
             /*,
-                            if (tn.isPlugin) glyphSpan(OMTags.glyph_plug, () ⇒
-                              OMPost[Api].autoAddPlugins(tn.safePath()).call().foreach { p ⇒
-                                panels.pluginTriggerer.open
-                              })(`class` := "glyphitem file-glyph")*/
+                                if (tn.isPlugin) glyphSpan(OMTags.glyph_plug, () ⇒
+                                  OMPost[Api].autoAddPlugins(tn.safePath()).call().foreach { p ⇒
+                                    panels.pluginTriggerer.open
+                                  })(`class` := "glyphitem file-glyph")*/
             )
           )
         }

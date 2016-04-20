@@ -81,7 +81,7 @@ object FileToolBar {
 
 import FileToolBar._
 
-class FileToolBar(redraw: () ⇒ Unit, refreshAndRedraw: () ⇒ Unit) {
+class FileToolBar(refreshAndRedraw: () ⇒ Unit) {
 
   val selectedTool: Var[Option[SelectedTool]] = Var(None)
   val transferring: Var[ProcessState] = Var(Processed())
@@ -157,8 +157,8 @@ class FileToolBar(redraw: () ⇒ Unit, refreshAndRedraw: () ⇒ Unit) {
         val currentDirNode = manager.current
         addRootDirButton.content().map {
           _ match {
-            case dt: DirNodeType  ⇒ CoreUtils.addDirectory(currentDirNode, newFile, fileFilter(), () ⇒ unselectAndRefreshTree)
-            case ft: FileNodeType ⇒ CoreUtils.addFile(currentDirNode, newFile, fileFilter(), () ⇒ unselectAndRefreshTree)
+            case dt: DirNodeType  ⇒ CoreUtils.addDirectory(currentDirNode, newFile, () ⇒ unselectAndRefreshTree)
+            case ft: FileNodeType ⇒ CoreUtils.addFile(currentDirNode, newFile, () ⇒ unselectAndRefreshTree)
           }
         }
       }
@@ -196,11 +196,9 @@ class FileToolBar(redraw: () ⇒ Unit, refreshAndRedraw: () ⇒ Unit) {
   //Filter
   implicit def stringToIntOption(s: String): Option[Int] = Try(thresholdInput.value.toInt).toOption
 
-  def updateFilter(filterChange: () ⇒ FileFilter) = {
-    val previous = fileFilter()
-    fileFilter() = filterChange()
-    if (previous != fileFilter()) refreshAndRedraw()
-    else redraw()
+  def updateFilter(newFilter: FileFilter) = {
+    fileFilter() = newFilter
+    refreshAndRedraw()
   }
 
   lazy val byNameInput = bs.input(fileFilter().nameFilter)(smallInput, placeholder := "Name").render
@@ -208,7 +206,7 @@ class FileToolBar(redraw: () ⇒ Unit, refreshAndRedraw: () ⇒ Unit) {
   lazy val byNameForm = form(filterElement)(
     byNameInput,
     onsubmit := { () ⇒
-      updateFilter(() ⇒ fileFilter().copy(nameFilter = byNameInput.value))
+      updateFilter(fileFilter().copy(nameFilter = byNameInput.value))
       false
     }
   )
@@ -218,33 +216,37 @@ class FileToolBar(redraw: () ⇒ Unit, refreshAndRedraw: () ⇒ Unit) {
   lazy val thresholdForm = form(filterElement)(
     thresholdInput,
     onsubmit := { () ⇒
-      updateFilter(() ⇒ fileFilter().copy(threshold = thresholdInput.value))
+      updateFilter(fileFilter().copy(threshold = thresholdInput.value))
       false
     }
   )
 
+  def switchAlphaSorting = updateFilter(fileFilter().copy(fileSorting = AlphaSorting).switch)
+  def switchTimeSorting = updateFilter(fileFilter().copy(fileSorting = TimeSorting).switch)
+  def switchSizeSorting = updateFilter(fileFilter().copy(fileSorting = SizeSorting).switch)
+
   val sortingGroup = bs.exclusiveButtonGroup(sortingBar, ms("sortingTool"), ms("selectedSortingTool"))(
     ExclusiveButton.twoGlyphStates(
-      glyph_triangle_bottom,
       glyph_triangle_top,
-      () ⇒ updateFilter(() ⇒ fileFilter().copy(fileSorting = AlphaSorting, firstLast = First)),
-      () ⇒ updateFilter(() ⇒ fileFilter().copy(fileSorting = AlphaSorting, firstLast = Last)),
+      glyph_triangle_bottom,
+      () ⇒ switchAlphaSorting,
+      () ⇒ switchAlphaSorting,
       preString = "Aa",
       twoGlyphButton
     ),
     ExclusiveButton.twoGlyphStates(
-      glyph_triangle_bottom,
       glyph_triangle_top,
-      () ⇒ updateFilter(() ⇒ fileFilter().copy(fileSorting = TimeSorting, firstLast = First)),
-      () ⇒ updateFilter(() ⇒ fileFilter().copy(fileSorting = TimeSorting, firstLast = Last)),
+      glyph_triangle_bottom,
+      () ⇒ switchTimeSorting,
+      () ⇒ switchTimeSorting,
       preGlyph = twoGlyphButton +++ glyph_time
     ),
     ExclusiveButton.twoGlyphStates(
-      glyph_triangle_bottom,
       glyph_triangle_top,
-      () ⇒ updateFilter(() ⇒ fileFilter().copy(fileSorting = SizeSorting, firstLast = First)),
-      () ⇒ updateFilter(() ⇒ fileFilter().copy(fileSorting = SizeSorting, firstLast = Last)),
-      preString = "Ko",
+      glyph_triangle_bottom,
+      () ⇒ switchSizeSorting,
+      () ⇒ switchSizeSorting,
+      preString = "Kb",
       twoGlyphButton
     )
   )

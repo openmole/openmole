@@ -623,7 +623,15 @@ object FileSizeOrdering extends Ordering[TreeNodeData] {
 }
 
 object AlphaOrdering extends Ordering[TreeNodeData] {
-  def compare(tnd1: TreeNodeData, tnd2: TreeNodeData) = tnd1.name compare tnd2.name
+  def compare(tn1: TreeNodeData, tn2: TreeNodeData) =
+    if (tn1.isDirectory) {
+      if (tn2.isDirectory) tn1.name compare tn2.name
+      else -1
+    }
+    else {
+      if (tn2.isDirectory) 1
+      else tn1.name compare tn2.name
+    }
 }
 
 object TimeOrdering extends Ordering[TreeNodeData] {
@@ -640,7 +648,14 @@ object FileSorting {
     }
 }
 
-case class FileFilter(firstLast: FirstLast = First, threshold: Option[Int] = Some(20), nameFilter: String = "", fileSorting: FileSorting = AlphaSorting)
+case class FileFilter(firstLast: FirstLast = First, threshold: Option[Int] = Some(20), nameFilter: String = "", fileSorting: FileSorting = AlphaSorting) {
+  private def switchFirstLast: FirstLast = firstLast match {
+    case First ⇒ Last
+    case _     ⇒ First
+  }
+
+  def switch = copy(firstLast = switchFirstLast)
+}
 
 object FileFilter {
   def defaultFilter = FileFilter.this(First, Some(20), "", AlphaSorting)
