@@ -480,4 +480,17 @@ package object stylesheet {
     top := "15px"
   )
 
+  val labelStyle: ModifierSeq = Seq(
+    sheet.marginTop(-8),
+    color("white"),
+    (width := "auto"),
+    fontSize := 14
+  )
+
+  val tdStyle: ModifierSeq = Seq(
+    colMD(2),
+    sheet.paddingLeft(5),
+    width := "auto",
+    height := 25
+  )
 }

@@ -1,5 +1,6 @@
 package org.openmole.gui.client.core.authentications
 
+import org.openmole.gui.misc.js.OMTags.LabeledInput
 import org.scalajs.dom.html.{ Input, Label }
 
 import scalatags.JsDom.all._
@@ -26,8 +27,6 @@ import sheet._
  */
 
 object AuthenticationUtils {
-
-  case class LabeledInput(label: Label, input: Input)
 
   def defaultLabeledInput(default: String, pHolder: String, w: Int) = LabeledInput(
     label(pHolder)(`for` := pHolder, sheet.marginLeft(5)).render,

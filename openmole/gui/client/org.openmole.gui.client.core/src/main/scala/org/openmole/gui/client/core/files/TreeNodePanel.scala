@@ -93,8 +93,8 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
   def goToDirButton(dn: DirNode, ck: ModifierSeq, name: String = "") = span(ck)(name)(
     onclick := {
       () ⇒
-        if (fileToolBar.hasFilter) CoreUtils.refreshCurrentDirectory(fileFilter = FileFilter.defaultFilter)
         fileToolBar.resetFilter
+        CoreUtils.refreshCurrentDirectory(fileFilter = fileToolBar.fileFilter())
         manager.switch(dn)
         computeAndDraw
     }, dropPairs(dn)

@@ -10,8 +10,9 @@ import scalatags.JsDom.{ tags ⇒ tags }
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
-import org.openmole.gui.misc.utils.stylesheet._
+import org.openmole.gui.misc.utils.{ stylesheet ⇒ omsheet }
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
+import omsheet._
 import sheet._
 import org.openmole.gui.misc.js.JsRxTags._
 import org.openmole.gui.client.core.files.TreeNode._
@@ -45,6 +46,11 @@ object FileToolBar {
     def glyph: Glyphicon
 
     def checkMode: Boolean
+  }
+
+  object FilterTool extends SelectedTool {
+    val glyph = glyph_filter
+    val checkMode = false
   }
 
   object TrashTool extends SelectedTool {
@@ -93,12 +99,11 @@ class FileToolBar(refreshAndRedraw: () ⇒ Unit) {
 
   implicit def toolToSetSelection(t: SelectedTool): () ⇒ Unit = () ⇒ manager.setSelection(t)
 
-  def hasFilter = fileFilter() != FileFilter.defaultFilter
-
   def resetFilter = {
-    fileFilter() = FileFilter.defaultFilter
-    byNameInput.value = fileFilter().nameFilter
-    thresholdInput.value = fileFilter().threshold
+    selectedTool() = None
+    nameInput.value = ""
+    thresholdInput.value = "20"
+    filterSubmit()
   }
 
   def buildSpan(tool: SelectedTool, todo: () ⇒ Unit): Rx[TypedTag[HTMLSpanElement]] = Rx {
@@ -142,12 +147,45 @@ class FileToolBar(refreshAndRedraw: () ⇒ Unit) {
 
   val addRootDirButton: Select[TreeNodeType] = {
     val content = Seq((TreeNodeType.file, glyph_file +++ sheet.paddingLeft(3)), (TreeNodeType.folder, glyph_folder_close +++ sheet.paddingLeft(3)))
-    Select( /*"fileOrFolder", */ content, content.map {
+    Select(content, content.map {
       _._1
     }.headOption, btn_default +++ borderRightFlat, () ⇒ {
       addRootDirButton.content().map { c ⇒ newNodeInput.placeholder = c.name + " name" }
     })
   }
+
+  // Filter tool
+  val thresholdTag = "threshold"
+  val nameTag = "names"
+
+  val thresholdInput = bs.input("20")(
+    id := thresholdTag,
+    width := "50px",
+    autofocus
+  ).render
+
+  val nameInput = bs.input("")(
+    id := nameTag,
+    width := "70px",
+    autofocus
+  ).render
+
+  def filterSubmit = () ⇒ {
+    updateFilter(fileFilter().copy(threshold = thresholdInput.value, nameFilter = nameInput.value))
+    false
+  }
+
+  val filterTool = tags.table(centerElement)(
+    thead,
+    tbody(
+      tr(row)(
+        tags.td(tdStyle)(label("# of entries ")(labelStyle)),
+        tags.td(tdStyle)(form(thresholdInput, onsubmit := filterSubmit)),
+        tags.td(tdStyle)(label("name ")(`for` := nameTag, labelStyle)),
+        tags.td(tdStyle)(form(nameInput, onsubmit := filterSubmit))
+      )
+    )
+  )
 
   val createFileTool = bs.inputGroup(navbar_left)(
     bs.inputGroupButton(addRootDirButton.selector),
@@ -172,7 +210,10 @@ class FileToolBar(refreshAndRedraw: () ⇒ Unit) {
     refreshAndRedraw()
   }
 
-  def unselectTool = selectedTool() = None
+  def unselectTool = {
+    resetFilter
+    selectedTool() = None
+  }
 
   val deleteButton = bs.button("Delete", btn_danger, () ⇒ {
     CoreUtils.trashNodes(manager.selected(), fileFilter()) { () ⇒
@@ -194,35 +235,17 @@ class FileToolBar(refreshAndRedraw: () ⇒ Unit) {
   })
 
   //Filter
-  implicit def stringToIntOption(s: String): Option[Int] = Try(thresholdInput.value.toInt).toOption
+  implicit def stringToIntOption(s: String): Option[Int] = Try(s.toInt).toOption
 
   def updateFilter(newFilter: FileFilter) = {
     fileFilter() = newFilter
     refreshAndRedraw()
   }
 
-  lazy val byNameInput = bs.input(fileFilter().nameFilter)(smallInput, placeholder := "Name").render
-
-  lazy val byNameForm = form(filterElement)(
-    byNameInput,
-    onsubmit := { () ⇒
-      updateFilter(fileFilter().copy(nameFilter = byNameInput.value))
-      false
-    }
-  )
-
-  lazy val thresholdInput = bs.input(fileFilter().threshold)(smallInput, placeholder := "Size").render
-
-  lazy val thresholdForm = form(filterElement)(
-    thresholdInput,
-    onsubmit := { () ⇒
-      updateFilter(fileFilter().copy(threshold = thresholdInput.value))
-      false
-    }
-  )
-
   def switchAlphaSorting = updateFilter(fileFilter().copy(fileSorting = AlphaSorting).switch)
+
   def switchTimeSorting = updateFilter(fileFilter().copy(fileSorting = TimeSorting).switch)
+
   def switchSizeSorting = updateFilter(fileFilter().copy(fileSorting = SizeSorting).switch)
 
   val sortingGroup = bs.exclusiveButtonGroup(stylesheet.sortingBar, ms("sortingTool"), ms("selectedSortingTool"))(
@@ -252,8 +275,9 @@ class FileToolBar(refreshAndRedraw: () ⇒ Unit) {
   )
 
   val fileToolDiv = Rx {
-    tags.div(centerElement +++ sheet.marginTop(5) +++ sheet.marginBottom(15))(
+    tags.div(centerElement +++ sheet.marginBottom(10) )(
       selectedTool() match {
+        case Some(FilterTool)       ⇒ filterTool
         case Some(FileCreationTool) ⇒ createFileTool
         case Some(TrashTool)        ⇒ deleteButton
         case Some(CopyTool)         ⇒ copyButton
@@ -274,7 +298,8 @@ class FileToolBar(refreshAndRedraw: () ⇒ Unit) {
       buildSpan(PluginTool),
       buildSpan(TrashTool),
       buildSpan(CopyTool),
-      buildSpan(FileCreationTool)
+      buildSpan(FileCreationTool),
+      buildSpan(FilterTool)
     ),
     fileToolDiv
   )
