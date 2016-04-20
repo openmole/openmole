@@ -225,7 +225,7 @@ class FileToolBar(refreshAndRedraw: () ⇒ Unit) {
   def switchTimeSorting = updateFilter(fileFilter().copy(fileSorting = TimeSorting).switch)
   def switchSizeSorting = updateFilter(fileFilter().copy(fileSorting = SizeSorting).switch)
 
-  val sortingGroup = bs.exclusiveButtonGroup(sortingBar, ms("sortingTool"), ms("selectedSortingTool"))(
+  val sortingGroup = bs.exclusiveButtonGroup(stylesheet.sortingBar, ms("sortingTool"), ms("selectedSortingTool"))(
     ExclusiveButton.twoGlyphStates(
       glyph_triangle_top,
       glyph_triangle_bottom,

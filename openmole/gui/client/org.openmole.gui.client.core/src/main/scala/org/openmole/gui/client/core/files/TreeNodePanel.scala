@@ -132,7 +132,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
           tags.table(ms("tree" + dragState()))(
             tr(
               tags.table(ms("file-list"))(
-                for (tn ← sons /*.sorted(fileToolBar.fileFilter().fileSorting)*/ ) yield {
+                for (tn ← sons) yield {
                   drawNode(tn)
                 }
               )

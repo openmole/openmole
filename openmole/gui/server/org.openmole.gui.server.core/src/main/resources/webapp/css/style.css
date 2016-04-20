@@ -459,6 +459,7 @@ li.selectElement{
     color: white;
     background-color: #333;
     opacity: 0.5;
+    width : 35px;
 }
 
 .sortingTool.btn:hover{
@@ -472,4 +473,5 @@ li.selectElement{
     background-color: #333;
     opacity: 1;
     font-weight: bold;
+    width : 50px;
     }

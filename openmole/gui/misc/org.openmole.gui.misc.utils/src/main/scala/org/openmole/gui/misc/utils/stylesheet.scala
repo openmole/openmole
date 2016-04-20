@@ -474,4 +474,10 @@ package object stylesheet {
     backgroundColor := "#e3dbdb"
   )
 
+  def sortingBar: ModifierSeq = Seq(
+    width := "100%",
+    right := "-190px",
+    top := "15px"
+  )
+
 }
