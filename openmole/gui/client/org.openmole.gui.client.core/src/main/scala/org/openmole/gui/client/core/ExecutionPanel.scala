@@ -50,47 +50,45 @@ class ExecutionPanel extends ModalPanel {
 
   case class PanelInfo(
     executionInfos: Seq[(ExecutionId, StaticExecutionInfo, ExecutionInfo)],
-    outputsInfos:   Seq[RunningOutputData],
-    envErrorsInfos: Seq[RunningEnvironmentData]
+    outputsInfos:   Seq[RunningOutputData]
   )
 
-  val panelInfo = Var(PanelInfo(Seq(), Seq(), Seq()))
+  val execInfo = Var(PanelInfo(Seq(), Seq()))
+  var envError: Var[Seq[RunningEnvironmentData]] = Var(Seq())
   val expander = new Expander
 
   val updating = new AtomicBoolean(false)
 
-  def updatePanelInfo: Unit = {
+  def updateExecutionInfo: Unit = {
     def delay = {
       updating.set(false)
       setTimeout(5000) {
-        if (isVisible) updatePanelInfo
+        if (isVisible) updateExecutionInfo
       }
     }
 
     if (updating.compareAndSet(false, true)) {
-      OMPost[Api].allStates.call().andThen {
-        case Success(executionInfos) ⇒
-          OMPost[Api].runningErrorEnvironmentAndOutputData(
-            lines = nbOutLineInput.value.toInt,
-            errorLevelSelector.content().map {
-              _.level
-            }.getOrElse(ErrorLevel())
-          ).call().andThen {
-              case Success(err) ⇒
-                panelInfo() = PanelInfo(executionInfos, err._2, err._1)
-                doScrolls
-                delay
-              case Failure(_) ⇒
-                delay
-            }
+      OMPost[Api].allStates(nbOutLineInput.value.toInt).call().andThen {
+        case Success((executionInfos, runningOutputData)) ⇒
+          execInfo() = PanelInfo(executionInfos, runningOutputData)
+          doScrolls
+          delay
         case Failure(_) ⇒ delay
       }
     }
   }
 
+  def updateEnvError = OMPost[Api].runningErrorEnvironmentAndOutputData(
+    errorLevelSelector.content().map {
+      _.level
+    }.getOrElse(ErrorLevel())
+  ).call().foreach { err ⇒
+      envError() = err
+    }
+
   def onOpen() = {
     setTimeout(0) {
-      updatePanelInfo
+      updateExecutionInfo
     }
   }
 
@@ -151,7 +149,7 @@ class ExecutionPanel extends ModalPanel {
       Rx {
         tbody({
           for {
-            (id, staticInfo, executionInfo) ← panelInfo().executionInfos.sortBy(_._2.startDate).reverse
+            (id, staticInfo, executionInfo) ← execInfo().executionInfos.sortBy(_._2.startDate).reverse
           } yield {
 
             val duration: Duration = (executionInfo.duration milliseconds)
@@ -205,6 +203,7 @@ class ExecutionPanel extends ModalPanel {
                             td(colMD(1))(tags.span(glyph_fire +++ sheet.paddingBottom(7))(" " + e.failed).tooltip("Failed jobs")),
                             td(colMD(3))(tags.span(omsheet.color("#3086b5") +++ ((envErrorVisible().contains(e.envId)), ms(" executionVisible"), emptyMod))(
                               sheet.pointer, onclick := { () ⇒
+                              updateEnvError
                               if (envErrorVisible().contains(e.envId)) envErrorVisible() = envErrorVisible().filterNot {
                                 _ == e.envId
                               }
@@ -213,17 +212,20 @@ class ExecutionPanel extends ModalPanel {
                             )("details"))
                           ),
                           tr(row)(
-                            td(colMD(12) +++ (!envErrorVisible().contains(e.envId), omsheet.displayOff, emptyMod))(
-                              colspan := 12,
-                              staticPanel(e.envId, envErrorPanels,
-                                () ⇒ new EnvironmentErrorPanel,
-                                (ep: EnvironmentErrorPanel) ⇒ {
-                                  ep.setErrors(panelInfo().envErrorsInfos.flatMap {
-                                    _.errors
-                                  }.filter {
-                                    _._1.environmentId == e.envId
-                                  })
-                                }).view
+                            td(colMD(12))(
+                              td(colMD(12) +++ (!envErrorVisible().contains(e.envId), omsheet.displayOff, emptyMod))(
+                                colspan := 12,
+                                bs.button("Update", () ⇒ updateEnvError),
+                                staticPanel(e.envId, envErrorPanels,
+                                  () ⇒ new EnvironmentErrorPanel,
+                                  (ep: EnvironmentErrorPanel) ⇒ {
+                                    ep.setErrors(envError().flatMap {
+                                      _.errors
+                                    }.filter {
+                                      _._1.environmentId == e.envId
+                                    })
+                                  }).view
+                              )
                             )
                           )
                         )
@@ -249,7 +251,7 @@ class ExecutionPanel extends ModalPanel {
                 outputTextAreas,
                 () ⇒ scrollableText("", BottomScroll),
                 (sT: ScrollableText) ⇒ sT.setContent(
-                  panelInfo().outputsInfos.filter {
+                  execInfo().outputsInfos.filter {
                     _.id == id
                   }.map {
                     _.output
@@ -270,12 +272,12 @@ class ExecutionPanel extends ModalPanel {
                 td(colMD(1))(visibleClass(id.id, outputStreamID))(outputLink.tooltip("Execution outputs")),
                 td(colMD(1))(tags.span(glyph_remove +++ ms("removeExecution"), onclick := { () ⇒
                   OMPost[Api].cancelExecution(id).call().foreach { r ⇒
-                    updatePanelInfo
+                    updateExecutionInfo
                   }
                 }).tooltip("Cancel execution", level = WarningTooltipLevel())),
                 td(colMD(1))(tags.span(glyph_trash +++ ms("removeExecution"), onclick := { () ⇒
                   OMPost[Api].removeExecution(id).call().foreach { r ⇒
-                    updatePanelInfo
+                    updateExecutionInfo
                   }
                 }).tooltip("Remove execution", level = WarningTooltipLevel()))
               ),
@@ -296,11 +298,8 @@ class ExecutionPanel extends ModalPanel {
     if (size == 0L) ""
     else s"($readable)"
 
-  def visibleClass(expandID: ExpandID, visibleID: VisibleID): Modifier = ms(
-    "vert-align " + {
-      if (expander.isVisible(expandID, visibleID)) "executionVisible" else ""
-    }
-  )
+  def visibleClass(expandID: ExpandID, visibleID: VisibleID): ModifierSeq =
+    ms("vert-align") +++ (expander.isVisible(expandID, visibleID), ms("executionVisible"))
 
   val dialog = bs.modalDialog(
     modalID,
