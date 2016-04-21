@@ -177,6 +177,9 @@ object EGIAuthentication extends Logger {
     Try(initialise(a)(vomses, voName, None)).map(_ ⇒ true)
   }
 
+  def testDIRACAccess(a: EGIAuthentication, voName: String)(implicit decrypt: Decrypt) =
+    Try(DIRACEnvironment(voName).jobService.jobService.token).map(_ ⇒ true)
+
 }
 
 sealed trait EGIAuthentication
