@@ -191,7 +191,7 @@ class ExecutionPanel extends ModalPanel {
               envID → {
                 div(
                   details.envStates.map { e ⇒
-                    tags.table("executionTable")(
+                    tags.table(ms("executionTable"))(
                       thead,
                       tbody(
                         Seq(
@@ -203,30 +203,28 @@ class ExecutionPanel extends ModalPanel {
                             td(colMD(1))(tags.span(glyph_flash +++ sheet.paddingBottom(7))(" " + e.running).tooltip("Running jobs")),
                             td(colMD(1))(tags.span(glyph_flag +++ sheet.paddingBottom(7))(" " + e.done).tooltip("Completed jobs")),
                             td(colMD(1))(tags.span(glyph_fire +++ sheet.paddingBottom(7))(" " + e.failed).tooltip("Failed jobs")),
-                            td(colMD(3))(tags.span(omsheet.color("#3086b5") +++ {
-                              if (envErrorVisible().contains(e.envId)) " executionVisible" else ""
-                            })(sheet.pointer, onclick := {
-                              () ⇒
-                                if (envErrorVisible().contains(e.envId)) envErrorVisible() = envErrorVisible().filterNot {
-                                  _ == e.envId
-                                }
-                                else envErrorVisible() = envErrorVisible() :+ e.envId
-                            })("details"))
+                            td(colMD(3))(tags.span(omsheet.color("#3086b5") +++ ((envErrorVisible().contains(e.envId)), ms(" executionVisible"), emptyMod))(
+                              sheet.pointer, onclick := { () ⇒
+                              if (envErrorVisible().contains(e.envId)) envErrorVisible() = envErrorVisible().filterNot {
+                                _ == e.envId
+                              }
+                              else envErrorVisible() = envErrorVisible() :+ e.envId
+                            }
+                            )("details"))
                           ),
                           tr(row)(
-                            td(colMD(12))({
-                              if (!envErrorVisible().contains(e.envId)) omsheet.displayOff else emptyMod
-                            }),
-                            colspan := 12,
-                            staticPanel(e.envId, envErrorPanels,
-                              () ⇒ new EnvironmentErrorPanel,
-                              (ep: EnvironmentErrorPanel) ⇒ {
-                                ep.setErrors(panelInfo().envErrorsInfos.flatMap {
-                                  _.errors
-                                }.filter {
-                                  _._1.environmentId == e.envId
-                                })
-                              }).view
+                            td(colMD(12) +++ (!envErrorVisible().contains(e.envId), omsheet.displayOff, emptyMod))(
+                              colspan := 12,
+                              staticPanel(e.envId, envErrorPanels,
+                                () ⇒ new EnvironmentErrorPanel,
+                                (ep: EnvironmentErrorPanel) ⇒ {
+                                  ep.setErrors(panelInfo().envErrorsInfos.flatMap {
+                                    _.errors
+                                  }.filter {
+                                    _._1.environmentId == e.envId
+                                  })
+                                }).view
+                            )
                           )
                         )
                       )

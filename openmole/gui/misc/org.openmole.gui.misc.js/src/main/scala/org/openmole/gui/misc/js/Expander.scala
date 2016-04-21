@@ -78,10 +78,12 @@ class Expander {
 
   def getGlyph(glyph: ModifierSeq, linkName: String, expandId: ExpandID, visibleId: VisibleID, todo: () ⇒ Unit = () ⇒ {}) = {
     updateMaps(expandId, visibleId)
-    glyphSpan("vert-align", () ⇒ {
-      setTarget(expandId, visibleId)
-      todo()
-    },
-      linkName)
+    tags.span(glyph +++ ms("vert-align"), onclick := {
+      () ⇒
+        {
+          setTarget(expandId, visibleId)
+          todo()
+        }
+    }, linkName)
   }
 }
