@@ -51,7 +51,8 @@ class ProcessStateWaiter(processingState: Var[ProcessState]) {
         val ratio = processingState().ratio
         val waiterSpan = div(
           waiter,
-          if (ratio == 0 || ratio == 100) span() else span("spinner-wave-ratio")(ratio + " %")
+          if (ratio == 0 || ratio == 100) span()
+          else span(ms("spinner-wave-ratio"))(ratio + " %")
         )
 
         processingState() match {
