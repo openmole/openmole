@@ -200,17 +200,24 @@ class MoleExecution(
   }
 
   def cancel(t: MoleExecutionFailed): this.type = {
-    _exception.single() = Some(t)
-    cancel
+    val allReadyCanceled =
+      atomic { implicit ctx ⇒
+        if (!_canceled()) _exception() = Some(t)
+        _canceled.getUpdate(_ ⇒ true)
+      }
+    if (!allReadyCanceled) cancelAction
+    this
   }
 
   def cancel: this.type = {
-    if (!_canceled.getUpdate(_ ⇒ true)) {
-      rootSubMoleExecution.cancel
-      EventDispatcher.trigger(this, MoleExecution.Finished(canceled = true))
-      finish()
-    }
+    if (!_canceled.getUpdate(_ ⇒ true)) cancelAction
     this
+  }
+
+  private def cancelAction = {
+    rootSubMoleExecution.cancel
+    EventDispatcher.trigger(this, MoleExecution.Finished(canceled = true))
+    finish()
   }
 
   def moleJobs = rootSubMoleExecution.jobs
