@@ -28,6 +28,8 @@ import org.openmole.core.workflow.tools.ExpandedString
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.mole.MoleExecutionContext
+import org.openmole.core.workflow.validation.ValidateHook
+
 import collection.mutable.ListBuffer
 
 object CopyFileHook {
@@ -60,17 +62,14 @@ object CopyFileHook {
         if (move) addOutput(prototype)
       }
 
-      def toHook =
-        new CopyFileHook with Built {
-          val copy = hook.copy
-        }
+      def toHook = new CopyFileHook(copy) with Built
     }
 
 }
 
-abstract class CopyFileHook extends Hook {
+abstract class CopyFileHook(copy: Iterable[(Prototype[File], ExpandedString, CopyOptions)]) extends Hook with ValidateHook {
 
-  def copy: Iterable[(Prototype[File], ExpandedString, CopyOptions)]
+  override def validate(inputs: Seq[Val[_]]) = copy.flatMap(_._2.validate(inputs)).toSeq
 
   override def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider) = {
     val moved = for ((p, d, options) ← copy) yield copy(context, executionContext, p, d, options)

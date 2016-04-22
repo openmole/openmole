@@ -17,19 +17,20 @@
 
 package org.openmole.plugin.task
 
-import java.io.{ IOException, PrintStream, File }
+import java.io.{ File, IOException, PrintStream }
 
 import org.apache.commons.exec.CommandLine
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.macros.Keyword._
 import org.openmole.core.tools.service.OS
 import org.openmole.core.tools.service.ProcessUtil._
-import org.openmole.core.workflow.data.{ RandomProvider, Context, Variable, Prototype }
-import org.openmole.core.workflow.tools.VariableExpansion
+import org.openmole.core.workflow.data.{ Context, Prototype, RandomProvider, Variable }
+import org.openmole.core.workflow.tools.{ FromContext, VariableExpansion }
 import org.openmole.core.workflow.tools.VariableExpansion.Expansion
 import org.openmole.plugin.task.external.ExternalTask
 import org.openmole.tool.stream.StringOutputStream
 import org.openmole.tool.file._
+
 import collection.mutable.ListBuffer
 
 package systemexec {
@@ -188,11 +189,11 @@ package object systemexec extends external.ExternalPackage with SystemExecPackag
   case class ExecutionResult(returnCode: Int, output: Option[String], errorOutput: Option[String])
 
   def commandLine(
-    cmd:     Expansion,
+    cmd:     FromContext[String],
     workDir: String,
     context: Context
   )(implicit rng: RandomProvider): Array[String] =
-    CommandLine.parse(cmd.expand(context + Variable(ExternalTask.PWD, workDir))).toStrings
+    CommandLine.parse(cmd.from(context + Variable(ExternalTask.PWD, workDir))).toStrings
 
   def execute(
     command:              Array[String],

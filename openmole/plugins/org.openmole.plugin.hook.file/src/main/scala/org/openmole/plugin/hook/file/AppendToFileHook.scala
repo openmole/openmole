@@ -18,12 +18,14 @@
 package org.openmole.plugin.hook.file
 
 import java.io.File
+
 import org.openmole.tool.file._
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools.ExpandedString
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.mole.MoleExecutionContext
+import org.openmole.core.workflow.validation.ValidateHook
 
 object AppendToFileHook {
 
@@ -37,7 +39,10 @@ object AppendToFileHook {
 abstract class AppendToFileHook(
     fileName: ExpandedString,
     content:  ExpandedString
-) extends Hook {
+) extends Hook with ValidateHook {
+
+  override def validate(inputs: Seq[Val[_]]): Seq[Throwable] =
+    fileName.validate(inputs) ++ content.validate(inputs)
 
   override def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider) = {
     val file = new File(fileName.from(context))

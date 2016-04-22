@@ -23,9 +23,11 @@ import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.data._
 import java.io.File
+
 import org.openmole.core.workflow.tools.ExpandedString
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.mole.MoleExecutionContext
+import org.openmole.core.workflow.validation.ValidateHook
 
 /**
  * Appends a variable content to an existing file.
@@ -45,7 +47,9 @@ object AppendFileHook {
 
 }
 
-abstract class AppendFileHook(prototype: Prototype[File], outputFile: ExpandedString) extends Hook {
+abstract class AppendFileHook(prototype: Prototype[File], outputFile: ExpandedString) extends Hook with ValidateHook {
+
+  override def validate(inputs: Seq[Val[_]]): Seq[Throwable] = outputFile.validate(inputs)
 
   override def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider) = {
     context.option(prototype) match {

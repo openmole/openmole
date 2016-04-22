@@ -97,23 +97,3 @@ trait FromContext[+T] {
   def from(context: ⇒ Context)(implicit rng: RandomProvider): T
 }
 
-object ExpandedString {
-
-  implicit def fromStringToExpandedString(s: String) = ExpandedString(s)
-  implicit def fromStringToExpandedStringOption(s: String) = Some[ExpandedString](s)
-  implicit def fromTraversableOfStringToTraversableOfExpandedString[T <: Traversable[String]](t: T) = t.map(ExpandedString(_))
-  implicit def fromFileToExpandedString(f: File) = ExpandedString(f.getPath)
-
-  def apply(s: String) =
-    new ExpandedString {
-      override def string = s
-    }
-}
-
-trait ExpandedString <: FromContext[String] {
-  @transient lazy val expansion = VariableExpansion(string)
-  def +(s: ExpandedString): ExpandedString = string + s.string
-  def string: String
-  def from(context: ⇒ Context)(implicit rng: RandomProvider) = expansion.expand(context)
-}
-
