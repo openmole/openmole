@@ -243,7 +243,7 @@ class FileToolBar(refreshAndRedraw: () ⇒ Unit) {
     refreshAndRedraw()
   }
 
-  def switchAlphaSorting = updateFilter(fileFilter().copy(fileSorting = AlphaSorting).switch)
+  def switchAlphaSorting = updateFilter(fileFilter().copy(fileSorting = AlphaSorting, firstLast = First).switch)
 
   def switchTimeSorting = updateFilter(fileFilter().copy(fileSorting = TimeSorting).switch)
 
