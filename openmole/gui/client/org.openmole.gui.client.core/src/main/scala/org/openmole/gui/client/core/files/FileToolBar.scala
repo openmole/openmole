@@ -269,8 +269,7 @@ class FileToolBar(refreshAndRedraw: () ⇒ Unit) {
       glyph_triangle_bottom,
       () ⇒ switchSizeSorting,
       () ⇒ switchSizeSorting,
-      preString = "Kb",
-      twoGlyphButton
+      preGlyph = twoGlyphButton +++ OMTags.glyph_data +++ sheet.paddingTop(10) +++ Seq(fontSize := 12)
     )
   )
 

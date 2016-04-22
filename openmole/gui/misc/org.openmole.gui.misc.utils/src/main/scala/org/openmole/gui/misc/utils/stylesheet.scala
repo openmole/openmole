@@ -476,7 +476,7 @@ package object stylesheet {
 
   def sortingBar: ModifierSeq = Seq(
     width := "100%",
-    right := "-190px",
+    right := "-185px",
     top := "15px"
   )
 
