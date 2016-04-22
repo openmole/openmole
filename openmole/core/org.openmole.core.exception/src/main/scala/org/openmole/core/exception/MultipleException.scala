@@ -17,7 +17,12 @@
 
 package org.openmole.core.exception
 
-import java.io.{ PrintStream, PrintWriter }
+object MultipleException {
+  def apply(exceptions: Iterable[Throwable]): Throwable = {
+    if (exceptions.size == 1) exceptions.head
+    else new MultipleException(exceptions)
+  }
+}
 
 class MultipleException(exceptions: Iterable[Throwable]) extends Exception with Iterable[Throwable] {
 

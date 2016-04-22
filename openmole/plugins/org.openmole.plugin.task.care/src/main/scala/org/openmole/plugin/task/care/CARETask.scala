@@ -19,17 +19,20 @@
 package org.openmole.plugin.task.care
 
 import java.io.File
+
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.workflow.data.{ Context, Variable }
 import org.openmole.core.workflow.tools.VariableExpansion
 import org.openmole.plugin.task.external.ExternalTask
 import org.openmole.tool.file._
-
 import org.openmole.tool.logger.Logger
 import org.openmole.plugin.task.systemexec._
 import org.openmole.plugin.task.systemexec
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.validation._
+import scalaz._
+import Scalaz._
 
 object CARETask extends Logger {
 
@@ -48,7 +51,11 @@ abstract class CARETask(
     val error:                Option[Prototype[String]],
     val environmentVariables: Seq[(Prototype[_], String)],
     val hostFiles:            Seq[(String, Option[String])]
-) extends ExternalTask {
+) extends ExternalTask with ValidateTask {
+
+  lazy val expandedCommand = VariableExpansion(command.command)
+
+  override def validate = expandedCommand.validate(inputs.toSeq)
 
   archive.setExecutable(true)
 
@@ -113,8 +120,7 @@ abstract class CARETask(
 
     reExecute.setExecutable(true)
 
-    val expandedCommand = VariableExpansion(s"./${reExecute.getName} ${command.command}")
-    val commandline = commandLine(expandedCommand, userWorkDirectory, preparedContext)
+    val commandline = commandLine(expandedCommand.map(s"./${reExecute.getName} " + _), userWorkDirectory, preparedContext)
 
     // FIXME duplicated from SystemExecTask
     val executionResult = execute(commandline, extractedArchive, environmentVariables, preparedContext, output.isDefined, error.isDefined)

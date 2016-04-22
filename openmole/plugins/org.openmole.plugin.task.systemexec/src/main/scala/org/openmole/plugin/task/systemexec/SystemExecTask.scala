@@ -17,16 +17,18 @@
 
 package org.openmole.plugin.task.systemexec
 
-import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
+import org.openmole.core.exception.{ InternalProcessingError, MultipleException, UserBadDataError }
 import org.openmole.core.workflow.tools.ExpandedString
 import org.openmole.core.workflow.tools.VariableExpansion.Expansion
 import org.openmole.tool.file._
 import org.openmole.core.tools.service.{ OS, ProcessUtil }
 import ProcessUtil._
 import java.io.File
+
 import org.openmole.core.workflow.data._
 import org.openmole.plugin.task.external._
 import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.validation._
 import org.openmole.tool.logger.Logger
 
 import scala.annotation.tailrec
@@ -52,7 +54,14 @@ abstract class SystemExecTask(
     val output:               Option[Prototype[String]],
     val error:                Option[Prototype[String]],
     val environmentVariables: Seq[(Prototype[_], String)]
-) extends ExternalTask {
+) extends ExternalTask with ValidateTask {
+
+  override def validate =
+    for {
+      c ← command
+      exp ← c.expanded
+      e ← exp.validate(inputs.toSeq)
+    } yield e
 
   @tailrec
   protected[systemexec] final def execAll(cmds: List[ExpandedSystemExecCommand], workDir: File, preparedContext: Context, acc: ExecutionResult = ExecutionResult.empty)(implicit rng: RandomProvider): ExecutionResult =

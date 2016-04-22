@@ -23,6 +23,7 @@ import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.validation.DataflowProblem._
 import org.openmole.core.workflow.validation.TopologyProblem._
 import org.openmole.core.workflow.validation.TypeUtil._
+import org.openmole.core.workflow.validation.ValidationProblem.TaskValidationProblem
 
 import scala.collection.immutable.TreeMap
 import scala.collection.mutable.{ HashMap, Queue }
@@ -263,6 +264,16 @@ object Validation {
     noTransitionProblems ++ negativeLevelProblem
   }
 
+  def checkValidates(mole: Mole, sources: Sources, hooks: Hooks) = {
+    def taskValidates = mole.capsules.map(_.task).collect { case v: ValidateTask ⇒ v }
+    taskValidates.flatMap { t ⇒
+      t.validate.toList match {
+        case Nil ⇒ None
+        case e   ⇒ Some(TaskValidationProblem(t, e))
+      }
+    }
+  }
+
   def apply(mole: Mole, implicits: Context = Context.empty, sources: Sources = Sources.empty, hooks: Hooks = Hooks.empty) = {
     allMoles(mole).flatMap {
       case (m, mt) ⇒
@@ -285,7 +296,8 @@ object Validation {
           duplicatedName(m, sources, hooks) ++
           dataChannelErrors(m) ++
           incoherentTypeAggregation(m, sources, hooks) ++
-          incoherentTypeBetweenSlots(m, sources, hooks)
+          incoherentTypeBetweenSlots(m, sources, hooks) ++
+          checkValidates(m, sources, hooks)
     }
   }
 

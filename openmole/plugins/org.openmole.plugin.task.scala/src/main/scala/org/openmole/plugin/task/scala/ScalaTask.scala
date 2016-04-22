@@ -21,7 +21,9 @@ import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.tools._
+import org.openmole.core.workflow.validation._
 import org.openmole.plugin.task.jvm._
+import scala.util._
 
 object ScalaTask {
 
@@ -32,10 +34,15 @@ object ScalaTask {
 
 }
 
-abstract class ScalaTask(val source: String) extends JVMLanguageTask {
+abstract class ScalaTask(val source: String) extends JVMLanguageTask with ValidateTask {
 
   @transient lazy val scalaCompilation = ScalaWrappedCompilation.static(source, inputs.toSeq, ScalaWrappedCompilation.WrappedOutput(outputs))(manifest[java.util.Map[String, Any]])
-  scalaCompilation
+
+  override def validate =
+    Try(scalaCompilation) match {
+      case Success(_) ⇒ Seq.empty
+      case Failure(e) ⇒ Seq(e)
+    }
 
   override def processCode(context: Context)(implicit rng: RandomProvider) = {
     val map = scalaCompilation().from(context)(rng)

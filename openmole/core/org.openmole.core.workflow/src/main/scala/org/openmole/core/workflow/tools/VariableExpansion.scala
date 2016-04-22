@@ -20,12 +20,11 @@ package org.openmole.core.workflow.tools
 import java.io.{ InputStream, OutputStream, OutputStreamWriter }
 
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.tool.stream.{ StringOutputStream, StringInputStream }
+import org.openmole.tool.stream.{ StringInputStream, StringOutputStream }
 import org.openmole.core.workflow.data._
 
 import scala.collection.mutable.ListBuffer
-import scala.util.{ Try }
-import scalaz.Scalaz._
+import scala.util.{ Failure, Success, Try }
 
 object VariableExpansion {
 
@@ -78,19 +77,28 @@ object VariableExpansion {
     }
     if (dollar) os.write('$')
     expandedElements += UnexpandedElement(os.read)
-    Expansion(expandedElements)
+    ElementsExpansion(expandedElements)
   }
 
-  case class Expansion(elements: Seq[ExpansionElement]) {
+  trait Expansion extends FromContext[String] {
+    def expand(context: ⇒ Context)(implicit rng: RandomProvider): String
+    def validate(inputs: Seq[Prototype[_]]): Seq[Throwable]
+    def from(context: ⇒ Context)(implicit rng: RandomProvider) = expand(context)
+  }
+
+  case class ElementsExpansion(elements: Seq[ExpansionElement]) extends Expansion {
     def expand(context: ⇒ Context)(implicit rng: RandomProvider) = elements.map(_.expand(context)).mkString
+    def validate(inputs: Seq[Prototype[_]]): Seq[Throwable] = elements.flatMap(_.validate(inputs))
   }
 
   trait ExpansionElement {
     def expand(context: ⇒ Context)(implicit rng: RandomProvider): String
+    def validate(inputs: Seq[Prototype[_]]): Seq[Throwable]
   }
 
   case class UnexpandedElement(string: String) extends ExpansionElement {
     def expand(context: ⇒ Context)(implicit rng: RandomProvider): String = string
+    def validate(inputs: Seq[Prototype[_]]): Seq[Throwable] = Seq.empty
   }
 
   object ExpandedElement {
@@ -108,6 +116,7 @@ object VariableExpansion {
 
   case class ValueElement(v: String) extends ExpansionElement {
     def expand(context: ⇒ Context)(implicit rng: RandomProvider): String = v
+    def validate(inputs: Seq[Prototype[_]]): Seq[Throwable] = Seq.empty
   }
 
   case class CodeElement(code: String) extends ExpansionElement {
@@ -117,6 +126,15 @@ object VariableExpansion {
         case Some(value) ⇒ value.value.toString
         case None        ⇒ proxy().from(context).toString
       }
+    }
+    def validate(inputs: Seq[Prototype[_]]): Seq[Throwable] = {
+      implicit def m = manifest[Any]
+      if (inputs.exists(_.name == code)) Seq.empty
+      else
+        Try[Any](ScalaWrappedCompilation.static[Any](code, inputs)) match {
+          case Success(_) ⇒ Seq.empty
+          case Failure(t) ⇒ Seq(t)
+        }
     }
   }
 
