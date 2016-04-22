@@ -225,9 +225,7 @@ object Validation {
   def hookErrors(m: Mole, implicits: Iterable[Prototype[_]], sources: Sources, hooks: Hooks): Iterable[Problem] = {
     val implicitMap = prototypesToMap(implicits)
 
-    case class ComputedInput(input: Prototype[_], computed: Option[Prototype[_]], capsule: Capsule, hook: Hook)
-
-    lazy val computedInputs =
+    def inputsErrors =
       for {
         c ← m.capsules
         outputs = c.outputs(m, sources, Hooks.empty).toMap
@@ -253,32 +251,30 @@ object Validation {
             case (None, None, None, None)        ⇒ None
           }
 
-        ComputedInput(i, computed, c, h)
+        def checkPrototypeMatch(p: Prototype[_]) =
+          if (!i.isAssignableFrom(p)) Some(WrongHookType(c, h, i, p)) else None
+
+        computed match {
+          case None    ⇒ Some(MissingHookInput(c, h, i))
+          case Some(c) ⇒ checkPrototypeMatch(c)
+        }
       }
 
-    def inputsErrors =
-      computedInputs.flatMap {
-        case ComputedInput(i, computed, c, h) ⇒
-          def checkPrototypeMatch(p: Prototype[_]) =
-            if (!i.isAssignableFrom(p)) Some(WrongHookType(c, h, i, p)) else None
-
-          computed match {
-            case None    ⇒ Some(MissingHookInput(c, h, i))
-            case Some(c) ⇒ checkPrototypeMatch(c)
-          }
+    def validationErrors =
+      for {
+        c ← m.capsules
+        outputs = c.outputs(m, sources, Hooks.empty).toMap
+        h ← hooks(c).collect { case v: ValidateHook ⇒ v }
+        (defaultsOverride, defaultsNonOverride) = separateDefaults(h.defaults)
+      } yield {
+        val inputs = (defaultsNonOverride ++ implicitMap ++ outputs ++ defaultsOverride).toSeq.map(_._2)
+        h.validate(inputs).toList match {
+          case Nil ⇒ None
+          case e   ⇒ Some(HookValidationProblem(h, e))
+        }
       }
 
-    def hookValidates = hooks.toSeq.flatMap(_._2).collect { case v: ValidateHook ⇒ v }
-    lazy val inputs = computedInputs.flatMap(_.computed).toSeq
-
-    def validationErrors = hookValidates.flatMap { h ⇒
-      h.validate(inputs).toList match {
-        case Nil ⇒ None
-        case e   ⇒ Some(HookValidationProblem(h, e))
-      }
-    }
-
-    inputsErrors ++ validationErrors
+    inputsErrors.flatten ++ validationErrors.flatten
   }
 
   def dataChannelErrors(mole: Mole) = {
