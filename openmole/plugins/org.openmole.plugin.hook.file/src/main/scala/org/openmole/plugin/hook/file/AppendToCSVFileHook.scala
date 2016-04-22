@@ -21,13 +21,10 @@ import org.openmole.core.tools.io.{ Prettifier }
 import org.openmole.tool.file._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools._
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.tools.ExpandedString
+import org.openmole.core.workflow.validation._
 import Prettifier._
 import scala.annotation.tailrec
 import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.mole.{ Hook, MoleExecutionContext }
-import scala.collection.mutable.ListBuffer
 
 object AppendToCSVFileHook {
 
@@ -41,7 +38,10 @@ abstract class AppendToCSVFileHook(
     header:     Option[ExpandedString],
     singleRow:  Boolean,
     prototypes: Prototype[_]*
-) extends Hook {
+) extends Hook with ValidateHook {
+
+  override def validate(inputs: Seq[Val[_]]): Seq[Throwable] =
+    fileName.validate(inputs) ++ header.toSeq.flatMap(_.validate(inputs))
 
   override def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider) = {
     val file = new File(fileName.from(context))

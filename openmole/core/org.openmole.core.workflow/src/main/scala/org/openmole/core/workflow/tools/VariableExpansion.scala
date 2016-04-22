@@ -22,6 +22,7 @@ import java.io.{ InputStream, OutputStream, OutputStreamWriter }
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.tool.stream.{ StringInputStream, StringOutputStream }
 import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.tools.VariableExpansion.Expansion
 
 import scala.collection.mutable.ListBuffer
 import scala.util.{ Failure, Success, Try }
@@ -138,4 +139,25 @@ object VariableExpansion {
     }
   }
 
+}
+
+object ExpandedString {
+
+  implicit def fromStringToExpandedString(s: String) = ExpandedString(s)
+  implicit def fromStringToExpandedStringOption(s: String) = Some[ExpandedString](s)
+  implicit def fromTraversableOfStringToTraversableOfExpandedString[T <: Traversable[String]](t: T) = t.map(ExpandedString(_))
+  implicit def fromFileToExpandedString(f: java.io.File) = ExpandedString(f.getPath)
+
+  def apply(s: String) =
+    new ExpandedString {
+      override def string = s
+    }
+}
+
+trait ExpandedString <: Expansion {
+  @transient lazy val expansion = VariableExpansion(string)
+  def +(s: ExpandedString): ExpandedString = string + s.string
+  def string: String
+  def expand(context: ⇒ Context)(implicit rng: RandomProvider) = expansion.expand(context)
+  def validate(inputs: Seq[Prototype[_]]) = expansion.validate(inputs)
 }

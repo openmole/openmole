@@ -22,6 +22,7 @@ import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.tools.ExpandedString
+import org.openmole.core.workflow.validation.ValidateHook
 
 object DisplayHook {
 
@@ -32,7 +33,9 @@ object DisplayHook {
 
 }
 
-abstract class DisplayHook(toDisplay: ExpandedString) extends Hook {
+abstract class DisplayHook(toDisplay: ExpandedString) extends Hook with ValidateHook {
+
+  override def validate(inputs: Seq[Val[_]]): Seq[Throwable] = toDisplay.validate(inputs)
 
   override def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider) = {
     executionContext.out.println(toDisplay.from(context))

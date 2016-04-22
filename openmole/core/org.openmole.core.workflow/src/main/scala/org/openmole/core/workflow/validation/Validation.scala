@@ -23,7 +23,7 @@ import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.validation.DataflowProblem._
 import org.openmole.core.workflow.validation.TopologyProblem._
 import org.openmole.core.workflow.validation.TypeUtil._
-import org.openmole.core.workflow.validation.ValidationProblem.TaskValidationProblem
+import org.openmole.core.workflow.validation.ValidationProblem.{ HookValidationProblem, TaskValidationProblem }
 
 import scala.collection.immutable.TreeMap
 import scala.collection.mutable.{ HashMap, Queue }
@@ -92,6 +92,17 @@ object Validation {
         case (None, None, None, None, None)              ⇒ Some(MissingInput(s, input))
       }
     }).flatten
+  }
+
+  def taskValidationErrors(mole: Mole) = {
+    def taskValidates = mole.capsules.map(_.task).collect { case v: ValidateTask ⇒ v }
+
+    taskValidates.flatMap { t ⇒
+      t.validate.toList match {
+        case Nil ⇒ None
+        case e   ⇒ Some(TaskValidationProblem(t, e))
+      }
+    }
   }
 
   def sourceTypeErrors(mole: Mole, implicits: Iterable[Prototype[_]], sources: Sources, hooks: Hooks) = {
@@ -214,34 +225,60 @@ object Validation {
   def hookErrors(m: Mole, implicits: Iterable[Prototype[_]], sources: Sources, hooks: Hooks): Iterable[Problem] = {
     val implicitMap = prototypesToMap(implicits)
 
-    (for {
-      c ← m.capsules
-      outputs = c.outputs(m, sources, Hooks.empty).toMap
-      h ← hooks(c)
-      (defaultsOverride, defaultsNonOverride) = separateDefaults(h.defaults)
-      i ← h.inputs
-    } yield {
-      def checkPrototypeMatch(p: Prototype[_]) =
-        if (!i.isAssignableFrom(p)) Some(WrongHookType(c, h, i, p))
-        else None
+    case class ComputedInput(input: Prototype[_], computed: Option[Prototype[_]], capsule: Capsule, hook: Hook)
 
-      val inputName = i.name
+    lazy val computedInputs =
+      for {
+        c ← m.capsules
+        outputs = c.outputs(m, sources, Hooks.empty).toMap
+        h ← hooks(c)
+        (defaultsOverride, defaultsNonOverride) = separateDefaults(h.defaults)
+        i ← h.inputs
+      } yield {
+        val inputName = i.name
 
-      val defaultOverride = defaultsOverride.get(inputName)
-      val receivedInput = outputs.get(inputName)
-      val receivedImplicit = implicitMap.get(inputName)
-      val defaultNonOverride = defaultsNonOverride.get(inputName)
+        val defaultOverride = defaultsOverride.get(inputName)
+        val receivedInput = outputs.get(inputName)
+        val receivedImplicit = implicitMap.get(inputName)
+        val defaultNonOverride = defaultsNonOverride.get(inputName)
 
-      (defaultOverride, receivedInput, receivedImplicit, defaultNonOverride)
+        (defaultOverride, receivedInput, receivedImplicit, defaultNonOverride)
 
-      (defaultOverride, receivedInput, receivedImplicit, defaultNonOverride) match {
-        case (Some(parameter), _, _, _)          ⇒ checkPrototypeMatch(parameter)
-        case (None, Some(received), impl, param) ⇒ checkPrototypeMatch(received)
-        case (None, None, Some(impl), _)         ⇒ checkPrototypeMatch(impl)
-        case (None, None, None, Some(param))     ⇒ checkPrototypeMatch(param)
-        case (None, None, None, None)            ⇒ Some(MissingHookInput(c, h, i))
+        val computed =
+          (defaultOverride, receivedInput, receivedImplicit, defaultNonOverride) match {
+            case (Some(parameter), _, _, _)      ⇒ Some(parameter)
+            case (None, Some(received), _, _)    ⇒ Some(received)
+            case (None, None, Some(impl), _)     ⇒ Some(impl)
+            case (None, None, None, Some(param)) ⇒ Some(param)
+            case (None, None, None, None)        ⇒ None
+          }
+
+        ComputedInput(i, computed, c, h)
       }
-    }).flatten
+
+    def inputsErrors =
+      computedInputs.flatMap {
+        case ComputedInput(i, computed, c, h) ⇒
+          def checkPrototypeMatch(p: Prototype[_]) =
+            if (!i.isAssignableFrom(p)) Some(WrongHookType(c, h, i, p)) else None
+
+          computed match {
+            case None    ⇒ Some(MissingHookInput(c, h, i))
+            case Some(c) ⇒ checkPrototypeMatch(c)
+          }
+      }
+
+    def hookValidates = hooks.toSeq.flatMap(_._2).collect { case v: ValidateHook ⇒ v }
+    lazy val inputs = computedInputs.flatMap(_.computed).toSeq
+
+    def validationErrors = hookValidates.flatMap { h ⇒
+      h.validate(inputs).toList match {
+        case Nil ⇒ None
+        case e   ⇒ Some(HookValidationProblem(h, e))
+      }
+    }
+
+    inputsErrors ++ validationErrors
   }
 
   def dataChannelErrors(mole: Mole) = {
@@ -262,16 +299,6 @@ object Validation {
       }.map(DataChannelNegativeLevelProblem(_))
 
     noTransitionProblems ++ negativeLevelProblem
-  }
-
-  def checkValidates(mole: Mole, sources: Sources, hooks: Hooks) = {
-    def taskValidates = mole.capsules.map(_.task).collect { case v: ValidateTask ⇒ v }
-    taskValidates.flatMap { t ⇒
-      t.validate.toList match {
-        case Nil ⇒ None
-        case e   ⇒ Some(TaskValidationProblem(t, e))
-      }
-    }
   }
 
   def apply(mole: Mole, implicits: Context = Context.empty, sources: Sources = Sources.empty, hooks: Hooks = Hooks.empty) = {
@@ -297,7 +324,7 @@ object Validation {
           dataChannelErrors(m) ++
           incoherentTypeAggregation(m, sources, hooks) ++
           incoherentTypeBetweenSlots(m, sources, hooks) ++
-          checkValidates(m, sources, hooks)
+          taskValidationErrors(m)
     }
   }
 

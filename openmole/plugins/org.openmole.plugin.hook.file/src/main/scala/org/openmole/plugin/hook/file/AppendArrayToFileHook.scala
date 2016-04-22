@@ -24,6 +24,7 @@ import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools.ExpandedString
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.mole.MoleExecutionContext
+import org.openmole.core.workflow.validation.ValidateHook
 
 object AppendArrayToFileHook {
 
@@ -38,7 +39,9 @@ object AppendArrayToFileHook {
 abstract class AppendArrayToFileIHook(
     fileName: ExpandedString,
     content:  Prototype[Array[_]]
-) extends Hook {
+) extends Hook with ValidateHook {
+
+  override def validate(inputs: Seq[Val[_]]): Seq[Throwable] = fileName.validate(inputs)
 
   override def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider) = {
     val file = new File(fileName.from(context))

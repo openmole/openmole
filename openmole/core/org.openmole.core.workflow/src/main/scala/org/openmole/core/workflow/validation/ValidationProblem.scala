@@ -18,16 +18,26 @@
 package org.openmole.core.workflow.validation
 
 import org.openmole.core.tools.io.Prettifier
+import org.openmole.core.workflow.data.Prototype
+import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.task._
 
 trait ValidateTask {
   def validate: Seq[Throwable]
 }
 
+trait ValidateHook {
+  def validate(inputs: Seq[Prototype[_]]): Seq[Throwable]
+}
+
 object ValidationProblem {
 
-  case class TaskValidationProblem(task: Task, errors: Seq[Throwable]) extends TopologyProblem {
+  case class TaskValidationProblem(task: Task, errors: Seq[Throwable]) extends ValidationProblem {
     override def toString = s"Errors in validation of task $task:\n" + errors.map(e ⇒ Prettifier.ExceptionPretiffier(e).stackStringWithMargin).mkString("\n")
+  }
+
+  case class HookValidationProblem(hook: Hook, errors: Seq[Throwable]) extends ValidationProblem {
+    override def toString = s"Errors in validation of hook $hook:\n" + errors.map(e ⇒ Prettifier.ExceptionPretiffier(e).stackStringWithMargin).mkString("\n")
   }
 
 }

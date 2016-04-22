@@ -23,11 +23,14 @@ import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.tools.ExpandedString
+
 import collection.mutable.ListBuffer
 import org.openmole.core.workflow.mole._
 import org.openmole.core.serializer._
 import org.openmole.core.workflow.tools._
 import java.io.File
+
+import org.openmole.core.workflow.validation._
 
 object SaveHook {
 
@@ -39,7 +42,9 @@ object SaveHook {
     }
 }
 
-abstract class SaveHook(file: ExpandedString, prototypes: Prototype[_]*) extends Hook {
+abstract class SaveHook(file: ExpandedString, prototypes: Prototype[_]*) extends Hook with ValidateHook {
+
+  override def validate(inputs: Seq[Val[_]]) = file.validate(inputs)
 
   override def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider) = {
     val saveContext: Context = prototypes.map(p ⇒ context.variable(p).getOrElse(throw new UserBadDataError(s"Variable $p has not been found")))
