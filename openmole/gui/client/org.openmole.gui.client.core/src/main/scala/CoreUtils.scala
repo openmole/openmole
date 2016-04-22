@@ -48,7 +48,7 @@ object CoreUtils {
 
   def addDirectory(in: TreeNodeData, dirName: String, onadded: () ⇒ Unit = () ⇒ {}) =
     OMPost[Api].addDirectory(in, dirName).call().foreach { b ⇒
-      if (b) onadded
+      if (b) onadded()
     }
 
   def addFile(in: TreeNodeData, fileName: String, onadded: () ⇒ Unit = () ⇒ {}) =

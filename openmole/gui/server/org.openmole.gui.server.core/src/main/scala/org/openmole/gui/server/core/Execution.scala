@@ -118,10 +118,19 @@ class Execution {
     }
   }
 
-  def allStates: Seq[(ExecutionId, StaticExecutionInfo, ExecutionInfo)] = atomic { implicit ctx ⇒
-    for {
+  def allStates(lines: Int): (Seq[(ExecutionId, StaticExecutionInfo, ExecutionInfo)], Seq[RunningOutputData]) = atomic { implicit ctx ⇒
+
+    val envIds = Runnings.environmentIds
+
+    val outputs = envIds.keys.toSeq.map {
+      Runnings.outputsDatas(_, lines)
+    }
+
+    val executions = for {
       (k, s) ← staticExecutionInfo.toSeq
     } yield (k, s, executionInfo(k))
+
+    (executions, outputs)
   }
 
 }

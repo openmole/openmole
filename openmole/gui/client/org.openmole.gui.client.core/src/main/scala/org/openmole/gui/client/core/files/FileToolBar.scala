@@ -92,6 +92,7 @@ class FileToolBar(refreshAndRedraw: () ⇒ Unit) {
   val selectedTool: Var[Option[SelectedTool]] = Var(None)
   val transferring: Var[ProcessState] = Var(Processed())
   val fileFilter = Var(FileFilter.defaultFilter)
+  val fileNumberThreshold = 100
 
   implicit def someIntToString(i: Option[Int]): String = i.map {
     _.toString
@@ -102,7 +103,7 @@ class FileToolBar(refreshAndRedraw: () ⇒ Unit) {
   def resetFilter = {
     selectedTool() = None
     nameInput.value = ""
-    thresholdInput.value = "20"
+    thresholdInput.value = fileNumberThreshold.toString
     filterSubmit()
   }
 
@@ -158,7 +159,7 @@ class FileToolBar(refreshAndRedraw: () ⇒ Unit) {
   val thresholdTag = "threshold"
   val nameTag = "names"
 
-  val thresholdInput = bs.input("20")(
+  val thresholdInput = bs.input(fileNumberThreshold.toString)(
     id := thresholdTag,
     width := "50px",
     autofocus
@@ -242,11 +243,11 @@ class FileToolBar(refreshAndRedraw: () ⇒ Unit) {
     refreshAndRedraw()
   }
 
-  def switchAlphaSorting = updateFilter(fileFilter().copy(fileSorting = AlphaSorting).switch)
+  def switchAlphaSorting = updateFilter(fileFilter().switchTo(AlphaSorting))
 
-  def switchTimeSorting = updateFilter(fileFilter().copy(fileSorting = TimeSorting).switch)
+  def switchTimeSorting = updateFilter(fileFilter().switchTo(TimeSorting))
 
-  def switchSizeSorting = updateFilter(fileFilter().copy(fileSorting = SizeSorting).switch)
+  def switchSizeSorting = updateFilter(fileFilter().switchTo(SizeSorting))
 
   val sortingGroup = bs.exclusiveButtonGroup(stylesheet.sortingBar, ms("sortingTool"), ms("selectedSortingTool"))(
     ExclusiveButton.twoGlyphStates(
@@ -269,8 +270,7 @@ class FileToolBar(refreshAndRedraw: () ⇒ Unit) {
       glyph_triangle_bottom,
       () ⇒ switchSizeSorting,
       () ⇒ switchSizeSorting,
-      preString = "Kb",
-      twoGlyphButton
+      preGlyph = twoGlyphButton +++ OMTags.glyph_data +++ sheet.paddingTop(10) +++ Seq(fontSize := 12)
     )
   )
 

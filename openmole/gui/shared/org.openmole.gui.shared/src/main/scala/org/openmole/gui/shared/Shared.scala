@@ -59,11 +59,11 @@ trait Api {
   def saveFiles(fileContents: Seq[AlterableFileContent]): Unit
 
   //EXECUTIONS
-  def allStates(): Seq[(ExecutionId, StaticExecutionInfo, ExecutionInfo)]
+  def allStates(lines: Int): (Seq[(ExecutionId, StaticExecutionInfo, ExecutionInfo)], Seq[RunningOutputData])
   def cancelExecution(id: ExecutionId): Unit
   def removeExecution(id: ExecutionId): Unit
   def runScript(scriptData: ScriptData): Unit
-  def runningErrorEnvironmentAndOutputData(lines: Int, level: ErrorStateLevel): (Seq[RunningEnvironmentData], Seq[RunningOutputData])
+  def runningErrorEnvironmentAndOutputData(level: ErrorStateLevel): Seq[RunningEnvironmentData]
 
   //MARKET
   def marketIndex(): MarketIndex
