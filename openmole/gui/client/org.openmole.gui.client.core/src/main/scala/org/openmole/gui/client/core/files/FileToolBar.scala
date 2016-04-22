@@ -92,6 +92,7 @@ class FileToolBar(refreshAndRedraw: () ⇒ Unit) {
   val selectedTool: Var[Option[SelectedTool]] = Var(None)
   val transferring: Var[ProcessState] = Var(Processed())
   val fileFilter = Var(FileFilter.defaultFilter)
+  val fileNumberThreshold = 100
 
   implicit def someIntToString(i: Option[Int]): String = i.map {
     _.toString
@@ -102,7 +103,7 @@ class FileToolBar(refreshAndRedraw: () ⇒ Unit) {
   def resetFilter = {
     selectedTool() = None
     nameInput.value = ""
-    thresholdInput.value = "20"
+    thresholdInput.value = fileNumberThreshold.toString
     filterSubmit()
   }
 
@@ -158,7 +159,7 @@ class FileToolBar(refreshAndRedraw: () ⇒ Unit) {
   val thresholdTag = "threshold"
   val nameTag = "names"
 
-  val thresholdInput = bs.input("20")(
+  val thresholdInput = bs.input(fileNumberThreshold.toString)(
     id := thresholdTag,
     width := "50px",
     autofocus
