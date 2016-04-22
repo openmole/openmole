@@ -181,7 +181,11 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
                 onsubmit := {
                   () ⇒
                     {
-                      renameNode(tn, editNodeInput.value, etn.replicateMode)
+                      if (etn.node.name() == editNodeInput.value) {
+                        toBeEdited() = None
+                        drawTree
+                      }
+                      else renameNode(tn, editNodeInput.value, etn.replicateMode)
                       false
                     }
                 }
