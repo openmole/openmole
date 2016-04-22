@@ -243,11 +243,11 @@ class FileToolBar(refreshAndRedraw: () ⇒ Unit) {
     refreshAndRedraw()
   }
 
-  def switchAlphaSorting = updateFilter(fileFilter().copy(fileSorting = AlphaSorting, firstLast = First).switch)
+  def switchAlphaSorting = updateFilter(fileFilter().switchTo(AlphaSorting))
 
-  def switchTimeSorting = updateFilter(fileFilter().copy(fileSorting = TimeSorting).switch)
+  def switchTimeSorting = updateFilter(fileFilter().switchTo(TimeSorting))
 
-  def switchSizeSorting = updateFilter(fileFilter().copy(fileSorting = SizeSorting).switch)
+  def switchSizeSorting = updateFilter(fileFilter().switchTo(SizeSorting))
 
   val sortingGroup = bs.exclusiveButtonGroup(stylesheet.sortingBar, ms("sortingTool"), ms("selectedSortingTool"))(
     ExclusiveButton.twoGlyphStates(

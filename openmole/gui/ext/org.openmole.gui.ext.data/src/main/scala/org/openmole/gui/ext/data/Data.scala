@@ -649,15 +649,22 @@ object FileSorting {
 }
 
 case class FileFilter(firstLast: FirstLast = First, threshold: Option[Int] = Some(20), nameFilter: String = "", fileSorting: FileSorting = AlphaSorting) {
-  private def switchFirstLast: FirstLast = firstLast match {
-    case First ⇒ Last
-    case _     ⇒ First
-  }
 
-  def switch = copy(firstLast = switchFirstLast)
+  def switchTo(newFileSorting: FileSorting) = {
+    val fl = {
+      if (fileSorting == newFileSorting) {
+        firstLast match {
+          case First ⇒ Last
+          case _     ⇒ First
+        }
+      }
+      else First
+    }
+    copy(fileSorting = newFileSorting, firstLast = fl)
+  }
 }
 
 object FileFilter {
-  def defaultFilter = FileFilter.this(First, Some(20), "", AlphaSorting)
+  def defaultFilter = FileFilter.this(First, Some(100), "", AlphaSorting)
 }
 
