@@ -90,11 +90,22 @@ class Project(workDirectory: File, newREPL: (ConsoleVariables) ⇒ ScalaREPL = P
         try Compiled(loop.compile(content))
         catch {
           case ce: ScalaREPL.CompilationError ⇒
-            def adjusted =
-              (ScalaREPL.CompilationError.errorMessages composeTraversal
+            def positionLens =
+              ScalaREPL.CompilationError.errorMessages composeTraversal
                 each composeLens
-                ScalaREPL.ErrorMessage.line).modify(_ - header.split("\n").size)(ce)
-            CompilationError(adjusted)
+                ScalaREPL.ErrorMessage.position composePrism
+                some
+
+            def headerOffset = header.size + 1
+
+            import ScalaREPL.ErrorPosition
+
+            def adjusted =
+              (positionLens composeLens ErrorPosition.line modify { _ - header.split("\n").size }) andThen
+                (positionLens composeLens ErrorPosition.start modify { _ - headerOffset }) andThen
+                (positionLens composeLens ErrorPosition.end modify { _ - headerOffset })
+
+            CompilationError(adjusted(ce))
           case e: Throwable ⇒ CompilationError(e)
         }
         finally loop.close()

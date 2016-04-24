@@ -38,15 +38,15 @@ object ScalaREPL {
   @Lenses case class CompilationError(errorMessages: List[ErrorMessage], code: String, parent: Throwable) extends Exception(parent) {
     override def toString() = {
       def readableErrorMessages(error: ErrorMessage) =
-        s"""${error.error}
-           |on line ${error.line}""".stripMargin
+        error.position.map(p ⇒ s"(line ${p.line}) ").getOrElse("") + error.decoratedMessage
 
       errorMessages.map(readableErrorMessages).mkString("\n") + "\n" +
         s"""Compiling code:
             |${code}""".stripMargin
     }
   }
-  @Lenses case class ErrorMessage(error: String, line: Int)
+  @Lenses case class ErrorMessage(decoratedMessage: String, rawMessage: String, position: Option[ErrorPosition])
+  @Lenses case class ErrorPosition(line: Int, start: Int, end: Int)
 
   def warmup = new ScalaREPL().eval("def warmup() = {}")
   case class HeaderInfo(file: String)
@@ -66,7 +66,7 @@ class ScalaREPL(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.e
   System.setProperty("jline.shutdownhook", "true")
   override val prompt = "\nOpenMOLE> "
 
-  lazy val firstLine = "/*" + UUID.randomUUID().toString + "*/"
+  lazy val firstLineTag = "/*" + UUID.randomUUID().toString + "*/"
 
   super.getClass.getMethods.find(_.getName.contains("globalFuture_$eq")).get.invoke(this, Future { true }.asInstanceOf[AnyRef])
 
@@ -81,7 +81,7 @@ class ScalaREPL(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.e
 
   def eval(code: String) = synchronized {
     errorMessage = Nil
-    try intp.eval(firstLine + "\n" + code)
+    try intp.eval(firstLineTag + "\n" + code)
     catch {
       case e: Throwable ⇒
         throw messageToException(e, errorMessage, code)
@@ -90,7 +90,7 @@ class ScalaREPL(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.e
 
   def compile(code: String) = synchronized {
     errorMessage = Nil
-    try intp.compile(firstLine + "\n" + code)
+    try intp.compile(firstLineTag + "\n" + code)
     catch {
       case e: Throwable ⇒
         throw messageToException(e, errorMessage, code)
@@ -122,14 +122,23 @@ class ScalaREPL(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.e
 
       override def error(pos: Position, msg: String): Unit = {
         if (storeErrors) {
-          val compiled = new String(pos.source.content).split("\n")
-          val first = compiled.zipWithIndex.find { case (l, _) ⇒ l.contains(firstLine) }.map(_._2 + 1).getOrElse(0)
-          val error = ErrorMessage(Position.formatMessage(pos, msg, true), pos.line - first)
-          /*pos match {
-            case NoPosition ⇒ ErrorMessage(msg, pos.line - first)
-            case _ ⇒
-              ErrorMessage(Position.formatMessage(pos, msg, true), pos.line - first)
-          }*/
+          val error =
+            pos match {
+              case NoPosition ⇒ ErrorMessage(msg, msg, None)
+              case _ ⇒
+                val compiled = new String(pos.source.content).split("\n")
+                val firstLine = compiled.zipWithIndex.find { case (l, _) ⇒ l.contains(firstLineTag) }.map(_._2 + 1).getOrElse(0)
+                val offset = compiled.take(firstLine).map(_.length + 1).sum
+                def errorPos = ErrorPosition(pos.line - firstLine, pos.start - offset, pos.end - offset)
+                def decoratedMessage = {
+                  val offsetOfError = pos.point - compiled.take(pos.line - 1).map(_.length + 1).sum
+                  s"""$msg
+                  |${compiled(pos.line - 1)}
+                  |${(" " * offsetOfError)}^""".stripMargin
+                }
+
+                ErrorMessage(decoratedMessage, msg, Some(errorPos))
+            }
 
           errorMessage ::= error
         }
