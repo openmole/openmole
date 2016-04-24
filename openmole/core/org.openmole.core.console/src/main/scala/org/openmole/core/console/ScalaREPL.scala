@@ -46,7 +46,7 @@ object ScalaREPL {
     }
   }
   @Lenses case class ErrorMessage(decoratedMessage: String, rawMessage: String, position: Option[ErrorPosition])
-  @Lenses case class ErrorPosition(line: Int, start: Int, end: Int)
+  @Lenses case class ErrorPosition(line: Int, start: Int, end: Int, point: Int)
 
   def warmup = new ScalaREPL().eval("def warmup() = {}")
   case class HeaderInfo(file: String)
@@ -129,7 +129,7 @@ class ScalaREPL(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.e
                 val compiled = new String(pos.source.content).split("\n")
                 val firstLine = compiled.zipWithIndex.find { case (l, _) ⇒ l.contains(firstLineTag) }.map(_._2 + 1).getOrElse(0)
                 val offset = compiled.take(firstLine).map(_.length + 1).sum
-                def errorPos = ErrorPosition(pos.line - firstLine, pos.start - offset, pos.end - offset)
+                def errorPos = ErrorPosition(pos.line - firstLine, pos.start - offset, pos.end - offset, pos.point - offset)
                 def decoratedMessage = {
                   val offsetOfError = pos.point - compiled.take(pos.line - 1).map(_.length + 1).sum
                   s"""$msg
