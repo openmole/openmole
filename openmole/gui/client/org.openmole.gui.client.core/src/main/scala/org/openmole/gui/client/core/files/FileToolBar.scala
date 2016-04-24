@@ -249,30 +249,34 @@ class FileToolBar(refreshAndRedraw: () ⇒ Unit) {
 
   def switchSizeSorting = updateFilter(fileFilter().switchTo(SizeSorting))
 
-  val sortingGroup = bs.exclusiveButtonGroup(stylesheet.sortingBar, ms("sortingTool"), ms("selectedSortingTool"))(
-    ExclusiveButton.twoGlyphStates(
-      glyph_triangle_top,
-      glyph_triangle_bottom,
-      () ⇒ switchAlphaSorting,
-      () ⇒ switchAlphaSorting,
-      preString = "Aa",
-      twoGlyphButton
-    ),
-    ExclusiveButton.twoGlyphStates(
-      glyph_triangle_top,
-      glyph_triangle_bottom,
-      () ⇒ switchTimeSorting,
-      () ⇒ switchTimeSorting,
-      preGlyph = twoGlyphButton +++ glyph_time
-    ),
-    ExclusiveButton.twoGlyphStates(
-      glyph_triangle_top,
-      glyph_triangle_bottom,
-      () ⇒ switchSizeSorting,
-      () ⇒ switchSizeSorting,
-      preGlyph = twoGlyphButton +++ OMTags.glyph_data +++ sheet.paddingTop(10) +++ Seq(fontSize := 12)
+  val sortingGroup = {
+    val topTriangle = glyph_triangle_top +++ (fontSize := 10)
+    val bottomTriangle = glyph_triangle_bottom +++ (fontSize := 10)
+    bs.exclusiveButtonGroup(stylesheet.sortingBar, ms("sortingTool"), ms("selectedSortingTool"))(
+      ExclusiveButton.twoGlyphStates(
+        topTriangle,
+        bottomTriangle,
+        () ⇒ switchAlphaSorting,
+        () ⇒ switchAlphaSorting,
+        preString = "Aa",
+        twoGlyphButton
+      ),
+      ExclusiveButton.twoGlyphStates(
+        topTriangle,
+        bottomTriangle,
+        () ⇒ switchTimeSorting,
+        () ⇒ switchTimeSorting,
+        preGlyph = twoGlyphButton +++ glyph_time
+      ),
+      ExclusiveButton.twoGlyphStates(
+        topTriangle,
+        bottomTriangle,
+        () ⇒ switchSizeSorting,
+        () ⇒ switchSizeSorting,
+        preGlyph = twoGlyphButton +++ OMTags.glyph_data +++ sheet.paddingTop(10) +++ (fontSize := 12)
+      )
     )
-  )
+  }
 
   val fileToolDiv = Rx {
     tags.div(centerElement +++ sheet.marginBottom(10))(
