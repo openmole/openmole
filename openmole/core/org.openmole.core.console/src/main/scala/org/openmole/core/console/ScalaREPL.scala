@@ -31,11 +31,23 @@ import scala.tools.nsc._
 import scala.tools.nsc.reporters._
 import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.util.Try
-import java.io.PrintWriter
 import scala.tools.nsc.interpreter._
+import monocle.macros._
 
 object ScalaREPL {
+  @Lenses case class CompilationError(errorMessages: List[ErrorMessage], code: String, parent: Throwable) extends Exception(parent) {
+    override def toString() = {
+      def readableErrorMessages(error: ErrorMessage) =
+        s"""${error.error}
+           |on line ${error.line}""".stripMargin
+
+      errorMessages.map(readableErrorMessages).mkString("\n") + "\n" +
+        s"""Compiling code:
+            |${code}""".stripMargin
+    }
+  }
+  @Lenses case class ErrorMessage(error: String, line: Int)
+
   def warmup = new ScalaREPL().eval("def warmup() = {}")
   case class HeaderInfo(file: String)
   def firstLine(file: String) = HeaderInfo(file)
@@ -43,9 +55,10 @@ object ScalaREPL {
 
 }
 
+import ScalaREPL._
+
 class ScalaREPL(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.empty, quiet: Boolean = true) extends ILoop {
 
-  case class ErrorMessage(error: String, line: Int)
   var storeErrors: Boolean = true
   var errorMessage: List[ErrorMessage] = Nil
   var loopExitCode = 0
@@ -63,22 +76,8 @@ class ScalaREPL(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.e
 
   in = chooseReader(settings)
 
-  private def messageToException(e: Throwable, messages: List[ErrorMessage], code: String): Throwable = {
-    def readableErrorMessages(error: ErrorMessage) =
-      s"""${error.error}
-         |on line ${error.line}""".stripMargin
-
-    errorMessage match {
-      case Nil ⇒ e
-      case l ⇒
-        def messages =
-          l.reverse.map(readableErrorMessages).mkString("\n") + "\n" +
-            s"""Compiling code:
-                |${code}
-                |""".stripMargin
-        new UserBadDataError(messages)
-    }
-  }
+  private def messageToException(e: Throwable, messages: List[ErrorMessage], code: String): Throwable =
+    CompilationError(messages.reverse, code, e)
 
   def eval(code: String) = synchronized {
     errorMessage = Nil
@@ -124,12 +123,13 @@ class ScalaREPL(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.e
       override def error(pos: Position, msg: String): Unit = {
         if (storeErrors) {
           val compiled = new String(pos.source.content).split("\n")
-          val first = compiled.zipWithIndex.find { case (l, _) ⇒ l.contains(firstLine) }.map(_._2).getOrElse(0)
-          val error = pos match {
+          val first = compiled.zipWithIndex.find { case (l, _) ⇒ l.contains(firstLine) }.map(_._2 + 1).getOrElse(0)
+          val error = ErrorMessage(Position.formatMessage(pos, msg, true), pos.line - first)
+          /*pos match {
             case NoPosition ⇒ ErrorMessage(msg, pos.line - first)
             case _ ⇒
               ErrorMessage(Position.formatMessage(pos, msg, true), pos.line - first)
-          }
+          }*/
 
           errorMessage ::= error
         }

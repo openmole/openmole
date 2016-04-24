@@ -6,6 +6,11 @@ import OMKeys._
 import sbt._
 import Keys._
 
+object Defaults {
+  def macroParadise =
+    addCompilerPlugin("org.scalamacros" %% "paradise" % "2.1.0" cross CrossVersion.full)
+}
+
 abstract class Defaults(subBuilds: Defaults*) extends BuildSystemDefaults {
 
   override def subProjects = subBuilds flatMap (_.projectRefs)
