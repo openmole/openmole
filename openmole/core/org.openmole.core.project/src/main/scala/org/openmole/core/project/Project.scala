@@ -103,7 +103,8 @@ class Project(workDirectory: File, newREPL: (ConsoleVariables) ⇒ ScalaREPL = P
             def adjusted =
               (positionLens composeLens ErrorPosition.line modify { _ - header.split("\n").size }) andThen
                 (positionLens composeLens ErrorPosition.start modify { _ - headerOffset }) andThen
-                (positionLens composeLens ErrorPosition.end modify { _ - headerOffset })
+                (positionLens composeLens ErrorPosition.end modify { _ - headerOffset }) andThen
+                (positionLens composeLens ErrorPosition.point modify { _ - headerOffset })
 
             CompilationError(adjusted(ce))
           case e: Throwable ⇒ CompilationError(e)
