@@ -27,6 +27,7 @@ import org.openmole.core.workflow.puzzle._
 import org.openmole.tool.file._
 import monocle.function.all._
 import monocle.std.all._
+import org.openmole.core.exception.UserBadDataError
 
 object Project {
   def scriptExtension = ".oms"
@@ -58,7 +59,11 @@ sealed trait CompileResult
 case class ScriptFileDoesNotExists() extends CompileResult
 case class CompilationError(exception: Throwable) extends CompileResult
 case class Compiled(result: CompiledScript) extends CompileResult {
-  def eval = result.eval().asInstanceOf[Puzzle]
+  def eval =
+    result.eval() match {
+      case p: Puzzle ⇒ p
+      case e         ⇒ throw new UserBadDataError(s"Script should end with a workflow (it ends with ${if (e == null) null else e.getClass}).")
+    }
 }
 
 class Project(workDirectory: File, newREPL: (ConsoleVariables) ⇒ ScalaREPL = Project.newREPL) {
