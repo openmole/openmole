@@ -35,7 +35,7 @@ object ProcessUtil {
       pump.start
       try process.waitFor
       catch {
-        case e: InterruptedException ⇒
+        case e: Throwable ⇒
           process.destroy
           throw e
       }
