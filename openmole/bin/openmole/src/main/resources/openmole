@@ -58,7 +58,7 @@ function run {
   mkdir -p "$HOME/.openmole/.tmp/"
   CONFIGDIR=$HOME/.openmole/.tmp/`date +%s`_$RANDOM
 
-  java -Dlogback.configurationFile=${LOCATION}/configuration/logback.xml -Xss1M -Dfile.encoding=UTF-8 -Djava.security.egd=file:/dev/./urandom -Dosgi.locking=none -Dopenmole.location="${LOCATION}" -Dosgi.classloader.singleThreadLoads=true  -Dosgi.configuration.area="${CONFIGDIR}" -Xmx${MEM} $FLAG -XX:+UseG1GC \
+  java -Dlogback.configurationFile=${LOCATION}/configuration/logback.xml -Xss2M -Dfile.encoding=UTF-8 -Djava.security.egd=file:/dev/./urandom -Dosgi.locking=none -Dopenmole.location="${LOCATION}" -Dosgi.classloader.singleThreadLoads=true  -Dosgi.configuration.area="${CONFIGDIR}" -Xmx${MEM} $FLAG -XX:+UseG1GC \
      -cp "${LOCATION}/launcher/*" org.openmole.launcher.Launcher  --plugins "${LOCATION}/plugins/" --run org.openmole.ui.Application --osgi-directory "${CONFIGDIR}" -- \
      "${ARGS[@]}"
 
