@@ -1,11 +1,15 @@
 package org.openmole.gui.client.core
 
+import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
 import org.openmole.gui.ext.data._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import org.openmole.gui.misc.utils.{ stylesheet, Utils }
 import scalatags.JsDom.{ tags ⇒ tags }
+import org.openmole.gui.misc.js.JsRxTags._
 import scalatags.JsDom.all._
+import sheet._
 import bs._
+import rx._
 
 /*
  * Copyright (C) 27/07/15 // mathieu.leclaire@openmole.org
@@ -25,31 +29,90 @@ import bs._
  */
 
 object EnvironmentErrorPanel {
-
-  case class SelectableLevel(level: ErrorStateLevel, name: String, uuid: String = Utils.getUUID)
-
-  implicit def errorStateLevelToSelectableLevel(level: ErrorStateLevel): SelectableLevel = SelectableLevel(level, level.name)
-
+  def apply = new EnvironmentErrorPanel
 }
 
 class EnvironmentErrorPanel {
 
   val scrollable = scrollableDiv()
+  val sortingAndOrdering: Var[ListSortingAndOrdering] = Var(ListSortingAndOrdering(TimeSorting, Descending))
+  val errors: Var[EnvironmentErrorData] = Var(EnvironmentErrorData(Seq()))
 
-  private def entries(errors: Seq[(EnvironmentError, Int)]) = tags.table(
-    for { (error, nb) ← errors } yield {
-      tags.tr(
-        tags.a(s"${error.errorMessage} ($nb, ${Utils.longToDate(error.date)})", cursor := "pointer", onclick := {
-          () ⇒
-            panels.environmentStackPanel.content() = error.stack.stackTrace
-            panels.environmentStackTriggerer.open
-        })
-      )
+  val topTriangle = glyph_triangle_top +++ (fontSize := 10)
+  val bottomTriangle = glyph_triangle_bottom +++ (fontSize := 10)
+
+  def exclusiveButton(title: String, action1: () ⇒ Unit, action2: () ⇒ Unit) = exclusiveButtonGroup(emptyMod)(
+    ExclusiveButton.twoGlyphSpan(
+      topTriangle,
+      bottomTriangle,
+      action1,
+      action2,
+      preString = title
+    )
+  ).div
+
+  def setSorting(sorting: ListSorting, ordering: ListOrdering) = sortingAndOrdering() = ListSortingAndOrdering(sorting, ordering)
+
+  def sort(datedErrors: EnvironmentErrorData, sortingAndOrdering: ListSortingAndOrdering): Seq[(String, Long, String)] = {
+
+    val lines = for {
+      errors ← datedErrors.datedErrors
+      (error, dates) = (errors._1, errors._2)
+      date ← dates
+    } yield {
+      (error.errorMessage, date, error.level.name)
     }
-  )
 
-  def setErrors(ers: Seq[(EnvironmentError, Int)]) = scrollable.setChild(div(stylesheet.environmentPanelError)(entries(ers)).render)
+    val sorted = sortingAndOrdering.fileSorting match {
+      case AlphaSorting ⇒ lines.sortBy(_._1)
+      case TimeSorting  ⇒ lines.sortBy(_._2)
+      case _            ⇒ lines.sortBy(_._3)
+    }
 
-  val view = scrollable.sRender
+    sortingAndOrdering.fileOrdering match {
+      case Ascending ⇒ sorted
+      case _         ⇒ sorted.reverse
+    }
+  }
+
+  private val entries = {
+    tags.table(
+      thead(
+        tr(
+          th(exclusiveButton("Error", () ⇒ setSorting(AlphaSorting, Ascending), () ⇒ setSorting(AlphaSorting, Descending))),
+          th(exclusiveButton("Date", () ⇒ setSorting(TimeSorting, Ascending), () ⇒ setSorting(TimeSorting, Descending))),
+          th(exclusiveButton("Level", () ⇒ setSorting(LevelSorting, Ascending), () ⇒ setSorting(LevelSorting, Descending)))
+        )
+      ),
+      tbody(
+        Rx {
+          val stacks = errors().datedErrors.map(_._1).groupBy(_.errorMessage).map { case (k, v) ⇒ k → v.head.stack }
+          for {
+            error ← sort(errors(), sortingAndOrdering())
+          } yield {
+            tags.tr(row)(
+              tags.td(colMD(10))(
+                tags.a(error._1, cursor := "pointer", onclick := {
+                  () ⇒
+                    panels.environmentStackPanel.content() = stacks(error._1).stackTrace
+                    panels.environmentStackTriggerer.open
+                })
+              ),
+              tags.td(colMD(1))(Utils.longToDate(error._2)),
+              tags.td(colMD(1))(error._3)
+            )
+          }
+        }
+      )
+    )
+  }
+
+  def setErrors(ers: EnvironmentErrorData) = errors() = ers
+
+  val view = {
+    scrollable.setChild(div(stylesheet.environmentPanelError)(entries).render)
+    scrollable.sRender
+  }
 
 }
+

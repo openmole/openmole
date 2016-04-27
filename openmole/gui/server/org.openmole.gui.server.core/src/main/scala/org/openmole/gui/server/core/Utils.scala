@@ -28,7 +28,7 @@ import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.workspace.Workspace
 import org.openmole.gui.ext.data
 import org.openmole.gui.ext.data._
-import org.openmole.gui.ext.data.FileSorting._
+import org.openmole.gui.ext.data.ListSorting._
 import java.io._
 import org.openmole.tool.file._
 import org.openmole.tool.stream.StringOutputStream

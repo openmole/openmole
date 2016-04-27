@@ -253,22 +253,22 @@ class FileToolBar(refreshAndRedraw: () ⇒ Unit) {
     val topTriangle = glyph_triangle_top +++ (fontSize := 10)
     val bottomTriangle = glyph_triangle_bottom +++ (fontSize := 10)
     bs.exclusiveButtonGroup(stylesheet.sortingBar, ms("sortingTool"), ms("selectedSortingTool"))(
-      ExclusiveButton.twoGlyphStates(
+      ExclusiveButton.twoGlyphSpan(
         topTriangle,
         bottomTriangle,
         () ⇒ switchAlphaSorting,
         () ⇒ switchAlphaSorting,
         preString = "Aa",
-        twoGlyphButton
+        ms("sortingTool")
       ),
-      ExclusiveButton.twoGlyphStates(
+      ExclusiveButton.twoGlyphButtonStates(
         topTriangle,
         bottomTriangle,
         () ⇒ switchTimeSorting,
         () ⇒ switchTimeSorting,
         preGlyph = twoGlyphButton +++ glyph_time
       ),
-      ExclusiveButton.twoGlyphStates(
+      ExclusiveButton.twoGlyphButtonStates(
         topTriangle,
         bottomTriangle,
         () ⇒ switchSizeSorting,

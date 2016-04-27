@@ -274,6 +274,11 @@ package object stylesheet {
     zIndex := 18
   )
 
+  lazy val executionTable: ModifierSeq = Seq(
+    backgroundColor := "#333",
+    color("white")
+  )
+
   lazy val monospace: ModifierSeq = fontFamily := "monospace"
 
   //EDITOR
