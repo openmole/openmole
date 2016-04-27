@@ -33,6 +33,7 @@ import org.openmole.core.serializer.plugin.{ Plugins, PluginClassConverter, Plug
 import org.openmole.core.serializer.structure.PluginClassAndFiles
 import org.openmole.tool.file._
 import org.openmole.tool.stream.NullOutputStream
+import org.openmole.core.console._
 
 import scala.collection.immutable.{ HashSet, TreeSet }
 import scala.collection.mutable
@@ -45,14 +46,22 @@ trait PluginAndFilesListing { this: Serialiser ⇒
   private var plugins: TreeSet[File] = null
   private var listedFiles: TreeSet[File] = null
   private var seenClasses: HashSet[Class[_]] = null
+  private var replClasses: HashSet[Class[_]] = null
 
   xStream.registerConverter(new FileConverterNotifier(this))
   xStream.registerConverter(new PluginConverter(this, reflectionConverter))
   xStream.registerConverter(new PluginClassConverter(this))
 
   def classUsed(c: Class[_]) = {
-    if (!seenClasses.contains(c) && PluginManager.isClassProvidedByAPlugin(c)) {
-      PluginManager.pluginsForClass(c).foreach(pluginUsed)
+    if (!seenClasses.contains(c)) {
+      if (PluginManager.isClassProvidedByAPlugin(c)) {
+        PluginManager.pluginsForClass(c).foreach(pluginUsed)
+      }
+
+      if (c.getClassLoader != null && classOf[REPLClassloader].isAssignableFrom(c.getClassLoader.getClass)) {
+        replClasses += c
+      }
+
       seenClasses += c
     }
   }
@@ -65,13 +74,16 @@ trait PluginAndFilesListing { this: Serialiser ⇒
     plugins = TreeSet[File]()(fileOrdering)
     listedFiles = TreeSet[File]()(fileOrdering)
     seenClasses = HashSet()
+    replClasses = HashSet()
     xStream.toXML(obj, new NullOutputStream())
     val retPlugins = plugins
     val retFile = listedFiles
+    val retReplClasses = replClasses
     seenClasses = null
     plugins = null
     listedFiles = null
-    PluginClassAndFiles(retFile.toVector, retPlugins.toVector)
+    replClasses = null
+    PluginClassAndFiles(retFile.toVector, retPlugins.toVector, retReplClasses.toVector)
   }
 
 }

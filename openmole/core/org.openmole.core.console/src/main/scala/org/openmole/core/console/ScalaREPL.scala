@@ -17,7 +17,7 @@
 
 package org.openmole.core.console
 
-import java.io.{ PrintStream, PrintWriter, Writer, File }
+import java.io.{ File, PrintStream, PrintWriter, Writer }
 import java.net.URLClassLoader
 import java.util.UUID
 
@@ -34,7 +34,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.tools.nsc.interpreter._
 import monocle.macros._
 
-import scala.reflect.io.{ PlainFile }
+import scala.reflect.io.PlainFile
+import scala.tools.nsc.io.AbstractFile
 
 object ScalaREPL {
   @Lenses case class CompilationError(errorMessages: List[ErrorMessage], code: String, parent: Throwable) extends Exception(parent) {
@@ -56,9 +57,13 @@ object ScalaREPL {
 
 }
 
+class REPLClassloader(file: AbstractFile, parent: ClassLoader) extends scala.reflect.internal.util.AbstractFileClassLoader(file, parent)
+
 import ScalaREPL._
 
 class ScalaREPL(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.empty, quiet: Boolean = true, classDirectory: Option[File] = None) extends ILoop { repl ⇒
+
+  classDirectory.foreach(_.mkdirs)
 
   val virtualDirectory = classDirectory.map(new PlainFile(_))
   var storeErrors: Boolean = true
@@ -170,7 +175,7 @@ class ScalaREPL(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.e
 
     override lazy val classLoader =
       if (Activator.osgi) {
-        new scala.reflect.internal.util.AbstractFileClassLoader(
+        new REPLClassloader(
           repl.virtualDirectory getOrElse replOutput.dir,
           new CompositeClassLoader(
             priorityBundles.map(_.classLoader) ++

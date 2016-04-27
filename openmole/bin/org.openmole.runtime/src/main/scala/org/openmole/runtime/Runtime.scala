@@ -159,10 +159,10 @@ class Runtime {
       def uploadIndividualFiles = {
         val contextResultFile = Workspace.newFile("contextResult", "res")
         SerialiserService.serialise(contextResults, contextResultFile)
-        val PluginClassAndFiles(files, _) = SerialiserService.pluginsAndFiles(contextResults)
+        val pac = SerialiserService.pluginsAndFiles(contextResults)
 
         val replicated =
-          files.map {
+          pac.files.map {
             _.upload {
               f ⇒
                 val name = storage.child(communicationDirPath, Storage.uniqName("resultFile", ".bin"))
