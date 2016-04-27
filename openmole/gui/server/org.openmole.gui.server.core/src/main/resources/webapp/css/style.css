@@ -29,7 +29,7 @@ opacity: 0;
 
 /* DIALOGS */
 #marketPanelID .modal-dialog, #executionsPanelID .modal-dialog, #modelWizardPanelID .modal-dialog  {
-    width: 90%;
+    width: 92%;
     max-width: 1250px;
 }
 
