@@ -17,7 +17,7 @@
 
 package org.openmole.core.console
 
-import java.io.{ PrintStream, PrintWriter, Writer }
+import java.io.{ File, PrintStream, PrintWriter, Writer }
 import java.net.URLClassLoader
 import java.util.UUID
 
@@ -31,21 +31,41 @@ import scala.tools.nsc._
 import scala.tools.nsc.reporters._
 import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.util.Try
-import java.io.PrintWriter
 import scala.tools.nsc.interpreter._
+import monocle.macros._
+
+import scala.reflect.io.PlainFile
+import scala.tools.nsc.io.AbstractFile
 
 object ScalaREPL {
+  @Lenses case class CompilationError(errorMessages: List[ErrorMessage], code: String, parent: Throwable) extends Exception(parent) {
+    override def toString() = {
+      def readableErrorMessages(error: ErrorMessage) =
+        error.position.map(p ⇒ s"(line ${p.line}) ").getOrElse("") + error.decoratedMessage
+
+      errorMessages.map(readableErrorMessages).mkString("\n") + "\n" +
+        s"""Compiling code:
+            |${code}""".stripMargin
+    }
+  }
+  @Lenses case class ErrorMessage(decoratedMessage: String, rawMessage: String, position: Option[ErrorPosition])
+  @Lenses case class ErrorPosition(line: Int, start: Int, end: Int, point: Int)
+
   def warmup = new ScalaREPL().eval("def warmup() = {}")
   case class HeaderInfo(file: String)
   def firstLine(file: String) = HeaderInfo(file)
-  lazy val firstLinePrefix = "##header"
 
 }
 
-class ScalaREPL(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.empty, quiet: Boolean = true) extends ILoop {
+class REPLClassloader(file: AbstractFile, parent: ClassLoader) extends scala.reflect.internal.util.AbstractFileClassLoader(file, parent)
 
-  case class ErrorMessage(error: String, line: Int)
+import ScalaREPL._
+
+class ScalaREPL(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.empty, quiet: Boolean = true, classDirectory: Option[File] = None) extends ILoop { repl ⇒
+
+  classDirectory.foreach(_.mkdirs)
+
+  val virtualDirectory = classDirectory.map(new PlainFile(_))
   var storeErrors: Boolean = true
   var errorMessage: List[ErrorMessage] = Nil
   var loopExitCode = 0
@@ -53,36 +73,24 @@ class ScalaREPL(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.e
   System.setProperty("jline.shutdownhook", "true")
   override val prompt = "\nOpenMOLE> "
 
-  lazy val firstLine = "/*" + UUID.randomUUID().toString + "*/"
+  lazy val firstLineTag = "/*" + UUID.randomUUID().toString + "*/"
 
   super.getClass.getMethods.find(_.getName.contains("globalFuture_$eq")).get.invoke(this, Future { true }.asInstanceOf[AnyRef])
 
   settings = new Settings
+  //settings.Yreplclassbased.value = true
   settings.Yreplsync.value = true
   settings.verbose.value = false
+  virtualDirectory.foreach(settings.outputDirs setSingleOutput)
 
   in = chooseReader(settings)
 
-  private def messageToException(e: Throwable, messages: List[ErrorMessage], code: String): Throwable = {
-    def readableErrorMessages(error: ErrorMessage) =
-      s"""${error.error}
-         |on line ${error.line}""".stripMargin
-
-    errorMessage match {
-      case Nil ⇒ e
-      case l ⇒
-        def messages =
-          l.reverse.map(readableErrorMessages).mkString("\n") + "\n" +
-            s"""Compiling code:
-                |${code}
-                |""".stripMargin
-        new UserBadDataError(messages)
-    }
-  }
+  private def messageToException(e: Throwable, messages: List[ErrorMessage], code: String): Throwable =
+    CompilationError(messages.reverse, code, e)
 
   def eval(code: String) = synchronized {
     errorMessage = Nil
-    try intp.eval(firstLine + "\n" + code)
+    try intp.eval("\n" + firstLineTag + "\n" + code)
     catch {
       case e: Throwable ⇒
         throw messageToException(e, errorMessage, code)
@@ -91,7 +99,7 @@ class ScalaREPL(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.e
 
   def compile(code: String) = synchronized {
     errorMessage = Nil
-    try intp.compile(firstLine + "\n" + code)
+    try intp.compile("\n" + firstLineTag + "\n" + code)
     catch {
       case e: Throwable ⇒
         throw messageToException(e, errorMessage, code)
@@ -123,13 +131,23 @@ class ScalaREPL(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.e
 
       override def error(pos: Position, msg: String): Unit = {
         if (storeErrors) {
-          val compiled = new String(pos.source.content).split("\n")
-          val first = compiled.zipWithIndex.find { case (l, _) ⇒ l.contains(firstLine) }.map(_._2).getOrElse(0)
-          val error = pos match {
-            case NoPosition ⇒ ErrorMessage(msg, pos.line - first)
-            case _ ⇒
-              ErrorMessage(Position.formatMessage(pos, msg, true), pos.line - first)
-          }
+          val error =
+            pos match {
+              case NoPosition ⇒ ErrorMessage(msg, msg, None)
+              case _ ⇒
+                val compiled = new String(pos.source.content).split("\n")
+                val firstLine = compiled.zipWithIndex.find { case (l, _) ⇒ l.contains(firstLineTag) }.map(_._2 + 1).getOrElse(0)
+                val offset = compiled.take(firstLine).map(_.length + 1).sum
+                def errorPos = ErrorPosition(pos.line - firstLine, pos.start - offset, pos.end - offset, pos.point - offset)
+                def decoratedMessage = {
+                  val offsetOfError = pos.point - compiled.take(pos.line - 1).map(_.length + 1).sum
+                  s"""$msg
+                  |${compiled(pos.line - 1)}
+                  |${(" " * offsetOfError)}^""".stripMargin
+                }
+
+                ErrorMessage(decoratedMessage, msg, Some(errorPos))
+            }
 
           errorMessage ::= error
         }
@@ -141,10 +159,11 @@ class ScalaREPL(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.e
     }
 
     override protected def newCompiler(settings: Settings, reporter: Reporter) = {
+      //settings.Yreplclassbased.value = true
       settings.exposeEmptyPackage.value = true
+      settings.outputDirs setSingleOutput (repl.virtualDirectory getOrElse replOutput.dir)
       if (Activator.osgi) {
-        settings.outputDirs setSingleOutput replOutput.dir
-        new OSGiScalaCompiler(settings, reporter, replOutput.dir, priorityBundles, jars)
+        new OSGiScalaCompiler(settings, reporter, repl.virtualDirectory getOrElse replOutput.dir, priorityBundles, jars)
       }
       else {
         case class Plop()
@@ -156,8 +175,8 @@ class ScalaREPL(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.e
 
     override lazy val classLoader =
       if (Activator.osgi) {
-        new scala.reflect.internal.util.AbstractFileClassLoader(
-          replOutput.dir,
+        new REPLClassloader(
+          repl.virtualDirectory getOrElse replOutput.dir,
           new CompositeClassLoader(
             priorityBundles.map(_.classLoader) ++
               List(new URLClassLoader(jars.toArray.map(_.toURI.toURL))) ++

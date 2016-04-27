@@ -18,11 +18,16 @@
 package org.openmole.core.project
 
 import javax.script.CompiledScript
+
+import monocle.function.Each
 import org.openmole.core.console._
 import org.openmole.core.pluginmanager._
 import org.openmole.core.project.Imports.Tree
 import org.openmole.core.workflow.puzzle._
 import org.openmole.tool.file._
+import monocle.function.all._
+import monocle.std.all._
+import org.openmole.core.exception.UserBadDataError
 
 object Project {
   def scriptExtension = ".oms"
@@ -32,22 +37,16 @@ object Project {
   def scriptsObjects(script: File) = makeScript(Imports.importTree(script))
 
   def makeScript(tree: Tree): String =
-    s"""
-       |${tree.files.map(makeObject).mkString("\n")}
-       |
-       |${tree.children.map(c ⇒ makePackage(c.name, c.tree)).mkString("\n")}
-     """.stripMargin
+    (tree.files.map(makeObject) ++ tree.children.map(c ⇒ makePackage(c.name, c.tree))).mkString("\n")
 
   def makePackage(name: String, tree: Tree): String =
-    s"""
-     |object $name {
+    s"""object $name {
      |${tree.children.map(c ⇒ makeScript(tree)).mkString("\n")}
      |}
    """.stripMargin
 
   def makeObject(script: File): String =
-    s"""
-       |class ${script.getName.dropRight(Project.scriptExtension.size)}Class {
+    s"""class ${script.getName.dropRight(Project.scriptExtension.size)}Class {
        |${script.content}
        |}
        |
@@ -60,7 +59,11 @@ sealed trait CompileResult
 case class ScriptFileDoesNotExists() extends CompileResult
 case class CompilationError(exception: Throwable) extends CompileResult
 case class Compiled(result: CompiledScript) extends CompileResult {
-  def eval = result.eval().asInstanceOf[Puzzle]
+  def eval =
+    result.eval() match {
+      case p: Puzzle ⇒ p
+      case e         ⇒ throw new UserBadDataError(s"Script should end with a workflow (it ends with ${if (e == null) null else e.getClass}).")
+    }
 }
 
 class Project(workDirectory: File, newREPL: (ConsoleVariables) ⇒ ScalaREPL = Project.newREPL) {
@@ -73,25 +76,49 @@ class Project(workDirectory: File, newREPL: (ConsoleVariables) ⇒ ScalaREPL = P
   def compile(script: File, args: Seq[String]): CompileResult = {
     if (!script.exists) ScriptFileDoesNotExists()
     else {
-      def compileContent =
+      def header =
         s"""${scriptsObjects(script)}
            |
-           |def runOMSScript(): ${classOf[Puzzle].getCanonicalName} = {
+           |def runOMSScript(): ${classOf[Puzzle].getCanonicalName} = {""".stripMargin
+
+      def footer =
+        s"""}
+           |runOMSScript()""".stripMargin
+
+      def compileContent =
+        s"""$header
            |${script.content}
-           |}
-           |runOMSScript()
-       """.stripMargin
+           |$footer""".stripMargin
+
+      def compile(content: String, args: Seq[String]): CompileResult = {
+        val loop = newREPL(ConsoleVariables(args, workDirectory))
+        try Compiled(loop.compile(content))
+        catch {
+          case ce: ScalaREPL.CompilationError ⇒
+            def positionLens =
+              ScalaREPL.CompilationError.errorMessages composeTraversal
+                each composeLens
+                ScalaREPL.ErrorMessage.position composePrism
+                some
+
+            def headerOffset = header.size + 1
+
+            import ScalaREPL.ErrorPosition
+
+            def adjusted =
+              (positionLens composeLens ErrorPosition.line modify { _ - header.split("\n").size }) andThen
+                (positionLens composeLens ErrorPosition.start modify { _ - headerOffset }) andThen
+                (positionLens composeLens ErrorPosition.end modify { _ - headerOffset }) andThen
+                (positionLens composeLens ErrorPosition.point modify { _ - headerOffset })
+
+            CompilationError(adjusted(ce))
+          case e: Throwable ⇒ CompilationError(e)
+        }
+        finally loop.close()
+      }
+
       compile(compileContent, args)
     }
-  }
-
-  private def compile(content: String, args: Seq[String]): CompileResult = {
-    val loop = newREPL(ConsoleVariables(args, workDirectory))
-    try Compiled(loop.compile(content))
-    catch {
-      case e: Throwable ⇒ CompilationError(e)
-    }
-    finally loop.close()
   }
 
   def scriptsObjects(script: File) = Project.scriptsObjects(script)

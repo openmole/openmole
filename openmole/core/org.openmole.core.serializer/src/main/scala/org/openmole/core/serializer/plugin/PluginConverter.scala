@@ -25,7 +25,7 @@ import com.thoughtworks.xstream.converters.reflection.ReflectionConverter
 import com.thoughtworks.xstream.io.HierarchicalStreamReader
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter
 import org.openmole.core.pluginmanager.PluginManager
-import java.io.File
+import org.openmole.core.console._
 
 import org.openmole.core.serializer.PluginAndFilesListing
 import org.openmole.tool.logger.Logger
@@ -47,7 +47,10 @@ class PluginConverter(serializer: PluginAndFilesListing, reflectionConverter: Re
   }
 
   override def canConvert(c: Class[_]): Boolean = {
-    classOf[Plugins].isAssignableFrom(c) || PluginManager.isClassProvidedByAPlugin(c)
+
+    classOf[Plugins].isAssignableFrom(c) ||
+      PluginManager.isClassProvidedByAPlugin(c) ||
+      (c.getClassLoader != null && classOf[REPLClassloader].isAssignableFrom(c.getClassLoader.getClass))
   }
 
 }

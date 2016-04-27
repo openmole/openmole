@@ -20,7 +20,7 @@ object Core extends Defaults {
     (event, exception, tools, updater, workspace, macros, pluginManager, serializer, output, console, replication % "test")
 
   lazy val serializer = OsgiProject("serializer", global = true, imports = Seq("*")) settings
-    (libraryDependencies += xstream, libraryDependencies += equinoxOSGi) dependsOn (workspace, pluginManager, fileService, tools, openmoleTar)
+    (libraryDependencies += xstream, libraryDependencies += equinoxOSGi) dependsOn (workspace, pluginManager, fileService, tools, openmoleTar, console)
 
   lazy val batch = OsgiProject("batch", imports = Seq("*")) dependsOn (
     workflow, workspace, tools, event, replication, updater, exception,
@@ -65,7 +65,12 @@ object Core extends Defaults {
   val output = OsgiProject("output", imports = Seq("*"))
 
   val console = OsgiProject("console", bundleActivator = Some("org.openmole.core.console.Activator"), global = true, imports = Seq("*")) dependsOn
-    (pluginManager) settings (OsgiKeys.importPackage := Seq("*"), libraryDependencies += scalaLang)
+    (pluginManager) settings (
+      OsgiKeys.importPackage := Seq("*"),
+      libraryDependencies += scalaLang,
+      libraryDependencies += monocle,
+      Defaults.macroParadise
+    )
 
   val project = OsgiProject("project", imports = Seq("*")) dependsOn (console, dsl) settings (OsgiKeys.importPackage := Seq("*"))
 
@@ -87,6 +92,12 @@ object Core extends Defaults {
       ): _*
   )
 
-  override def settings = super.settings ++ Seq(libraryDependencies += Libraries.scalatest, libraryDependencies += Libraries.equinoxOSGi)
+  override def settings =
+    super.settings ++
+      Seq(
+        libraryDependencies += Libraries.scalatest,
+        libraryDependencies += Libraries.equinoxOSGi
+      )
+
   override def osgiSettings = super.osgiSettings ++ Seq(bundleType := Set("core", "runtime"), OSGi.openMOLEScope := Some("provided"))
 }

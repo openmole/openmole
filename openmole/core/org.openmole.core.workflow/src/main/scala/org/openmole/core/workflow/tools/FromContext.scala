@@ -68,9 +68,7 @@ object FromContext {
   implicit def booleanToCondition(b: Boolean) = FromContext.value(b)
 
   implicit def booleanPrototypeIsCondition(p: Prototype[Boolean]) = new FromContext[Boolean] {
-    @transient lazy val proxy = ScalaWrappedCompilation.static[Boolean](p.name, Seq(p))(manifest[Boolean])
-    proxy
-    override def from(context: ⇒ Context)(implicit rng: RandomProvider) = proxy().from(context)
+    override def from(context: ⇒ Context)(implicit rng: RandomProvider) = context(p)
   }
 
   implicit class ConditionDecorator(f: Condition) {

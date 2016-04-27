@@ -50,9 +50,8 @@ object OpenMOLEREPL {
       args.workDirectory.mkdirs()
       loop.beQuietDuring {
         intialisation(loop)
-        initialisationCommands(dslImport ++ additionnalImports).foreach {
-          loop.interpret
-        }
+        def imports = initialisationCommands(dslImport ++ additionnalImports).mkString("\n")
+        loop interpret (imports)
         ConsoleVariables.bindVariables(loop, args)
       }
       loop

@@ -12,7 +12,7 @@ set FLAG="-XX:+UseCompressedOops"
 :is32bit
 
 :run
-java -Dlogback.configurationFile="%PWD%/configuration/logback.xml" -Xss1M -Dfile.encoding=UTF-8 -Dosgi.locking=none -Dopenmole.location="%PWD%" -Dosgi.classloader.singleThreadLoads=true -Dosgi.configuration.area=%ran% -XX:MaxPermSize=128M -XX:+UseG1GC -Xmx1G  -XX:MaxPermSize=128M %FLAG% -cp "%PWD%/launcher/*" org.openmole.launcher.Launcher  --plugins %PWD%/plugins/ --run org.openmole.ui.Application --osgi-directory %ran% -- %*
+java -Dlogback.configurationFile="%PWD%/configuration/logback.xml" -Xss2M -Dfile.encoding=UTF-8 -Dosgi.locking=none -Dopenmole.location="%PWD%" -Dosgi.classloader.singleThreadLoads=true -Dosgi.configuration.area=%ran% -XX:MaxPermSize=128M -XX:+UseG1GC -Xmx1G  -XX:MaxPermSize=128M %FLAG% -cp "%PWD%/launcher/*" org.openmole.launcher.Launcher  --plugins %PWD%/plugins/ --run org.openmole.ui.Application --osgi-directory %ran% -- %*
 set ret=%errorlevel%
 rmdir /s /q %ran%
 
