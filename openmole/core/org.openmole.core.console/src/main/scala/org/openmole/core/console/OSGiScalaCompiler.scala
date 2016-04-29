@@ -30,11 +30,14 @@ import scala.tools.nsc.reporters.Reporter
 import scala.tools.nsc.util._
 import scala.util.parsing.input.OffsetPosition
 import collection.mutable.ListBuffer
-import java.io.{ PrintWriter, StringWriter, File }
+import java.io.{ File, PrintWriter, StringWriter }
+import java.net.URL
+
 import scala.tools.nsc.symtab.SymbolLoaders
 import scala.tools.nsc.backend.JavaPlatform
 import scala.tools.util.PathResolver
 import scala.tools.nsc._
+
 
 class OSGiScalaCompiler(settings: Settings, reporter: Reporter, virtualDirectory: AbstractFile, priorityBundles: Seq[Bundle], jars: Seq[File]) extends Global(settings, reporter) with ReplGlobal { g ⇒
 
