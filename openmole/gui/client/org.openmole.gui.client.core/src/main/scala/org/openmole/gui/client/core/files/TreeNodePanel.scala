@@ -19,7 +19,7 @@ import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import org.openmole.gui.misc.js.Tooltip._
 import TreeNode._
-import FileSorting._
+import ListSorting._
 import autowire._
 import rx._
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }

@@ -295,7 +295,7 @@ case class NetworkActivity(
   readableUploadedSize:   String = ""
 )
 
-case class RunningEnvironmentData(id: ExecutionId, errors: Seq[(EnvironmentError, Int)])
+case class EnvironmentErrorData(datedErrors: Seq[(EnvironmentError, Seq[Long])])
 
 case class RunningOutputData(id: ExecutionId, output: String)
 
@@ -598,24 +598,26 @@ object First extends FirstLast
 
 object Last extends FirstLast
 
-sealed trait FileOrdering
+sealed trait ListOrdering
 
-object Ascending extends FileOrdering
+object Ascending extends ListOrdering
 
-object Descending extends FileOrdering
+object Descending extends ListOrdering
 
-sealed trait FileSorting
+sealed trait ListSorting
 
-object AlphaSorting extends FileSorting
+object AlphaSorting extends ListSorting
 
-object SizeSorting extends FileSorting
+object SizeSorting extends ListSorting
 
-object TimeSorting extends FileSorting
+object TimeSorting extends ListSorting
 
-case class TreeSorting(fileSorting: FileSorting = AlphaSorting, fileOrdering: FileOrdering = Ascending)
+object LevelSorting extends ListSorting
 
-object TreeSorting {
-  def defaultSorting = TreeSorting(AlphaSorting, Ascending)
+case class ListSortingAndOrdering(fileSorting: ListSorting = AlphaSorting, fileOrdering: ListOrdering = Ascending)
+
+object ListSortingAndOrdering {
+  def defaultSorting = ListSortingAndOrdering(AlphaSorting, Ascending)
 }
 
 object FileSizeOrdering extends Ordering[TreeNodeData] {
@@ -638,9 +640,9 @@ object TimeOrdering extends Ordering[TreeNodeData] {
   def compare(tnd1: TreeNodeData, tnd2: TreeNodeData) = tnd1.time compare tnd2.time
 }
 
-object FileSorting {
+object ListSorting {
 
-  implicit def sortingToOrdering(fs: FileSorting): Ordering[TreeNodeData] =
+  implicit def sortingToOrdering(fs: ListSorting): Ordering[TreeNodeData] =
     fs match {
       case AlphaSorting ⇒ AlphaOrdering
       case SizeSorting  ⇒ FileSizeOrdering
@@ -648,9 +650,9 @@ object FileSorting {
     }
 }
 
-case class FileFilter(firstLast: FirstLast = First, threshold: Option[Int] = Some(20), nameFilter: String = "", fileSorting: FileSorting = AlphaSorting) {
+case class FileFilter(firstLast: FirstLast = First, threshold: Option[Int] = Some(20), nameFilter: String = "", fileSorting: ListSorting = AlphaSorting) {
 
-  def switchTo(newFileSorting: FileSorting) = {
+  def switchTo(newFileSorting: ListSorting) = {
     val fl = {
       if (fileSorting == newFileSorting) {
         firstLast match {

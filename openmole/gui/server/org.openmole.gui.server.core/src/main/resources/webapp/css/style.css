@@ -4,7 +4,6 @@
 
 /* GENERAL*/
 a {
-    font-weight: bold;
     color: #3086b5;
 }
 
@@ -30,7 +29,7 @@ opacity: 0;
 
 /* DIALOGS */
 #marketPanelID .modal-dialog, #executionsPanelID .modal-dialog, #modelWizardPanelID .modal-dialog  {
-    width: 90%;
+    width: 92%;
     max-width: 1250px;
 }
 
@@ -161,39 +160,32 @@ opacity: 0;
 
 
 /* EXECUTION PANEL*/
-.executionTable {
-    border: medium none;
-    width: 100%;
-}
 
-.executionTable table td {
-    background-color: #333333;
-    color: #ddd;
-}
 
-.executionTable table td.runningState {
+table td.runningState {
     color: yellow;
     font-weight: bold;
 }
 
-.executionTable table td.finishedState {
+table td.finishedState {
     color: #a6bf26;
     font-weight: bold;
 }
 
-.executionTable table td.cancelledState {
+table td.cancelledState {
     color: orange;
     font-weight: bold;
 }
 
-.executionTable table td.failedState {
+table td.failedState {
     color: #CC3A36;
     font-weight: bold;
 }
 
-.executionTable table td.executionVisible {
+table td.executionVisible {
     color: #3086b5;
     font-weight: bold;
+    cursor: pointer;
 }
 
 .removeExecution:hover {

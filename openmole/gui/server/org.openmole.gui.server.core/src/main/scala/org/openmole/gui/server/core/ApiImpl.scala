@@ -328,37 +328,28 @@ object ApiImpl extends Api {
 
   def allStates(lines: Int) = execution.allStates(lines)
 
-  def runningErrorEnvironmentAndOutputData(level: ErrorStateLevel): Seq[RunningEnvironmentData] = atomic { implicit ctx ⇒
-
-    def group(errors: Seq[EnvironmentError]) =
-      for {
-        error ← errors.groupBy(_.copy(date = 0L)).values.map {
-          _.sortBy(_.date).last
-        }.toSeq.sortBy(_.date).reverse
-        count = errors.count(_.copy(date = 0L) == error.copy(date = 0L))
-      } yield error → count
-
+  def runningErrorEnvironmentData: EnvironmentErrorData = atomic { implicit ctx ⇒
     val envIds = Runnings.environmentIds
 
-    //val envData =
-    envIds.map {
+    EnvironmentErrorData(
+      envIds.flatMap {
       case (id, envIds) ⇒
         val errors =
           for {
             (envId, info) ← Runnings.runningEnvironments(envIds)
             error ← info.environmentErrors(envId)
-            if error.level == level
           } yield error
 
-        RunningEnvironmentData(id, group(errors))
+        errors.groupBy {
+          _.errorMessage
+        }.map {
+          case (msg, err) ⇒
+            (err.head, err.map {
+              _.date
+            })
+        }.toSeq
     }.toSeq
-
-    /*val outputs = envIds.keys.toSeq.map {
-      Runnings.outputsDatas(_, lines)
-    }*/
-
-    //(envData, outputs)
-    // envData
+    )
   }
 
   def marketIndex() = {

@@ -19,7 +19,6 @@ package org.openmole.gui.client.core
 
 import java.util.concurrent.atomic.AtomicBoolean
 
-import org.openmole.gui.client.core.EnvironmentErrorPanel.SelectableLevel
 import fr.iscpif.scaladget.api.BootstrapTags.ScrollableTextArea.BottomScroll
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import org.openmole.gui.misc.utils.Utils
@@ -54,7 +53,7 @@ class ExecutionPanel extends ModalPanel {
   )
 
   val execInfo = Var(PanelInfo(Seq(), Seq()))
-  var envError: Var[Seq[RunningEnvironmentData]] = Var(Seq())
+  var envError: Var[EnvironmentErrorData] = Var(EnvironmentErrorData(Seq()))
   val expander = new Expander
 
   val updating = new AtomicBoolean(false)
@@ -77,14 +76,6 @@ class ExecutionPanel extends ModalPanel {
       }
     }
   }
-
-  def updateEnvError = OMPost[Api].runningErrorEnvironmentAndOutputData(
-    errorLevelSelector.content().map {
-      _.level
-    }.getOrElse(ErrorLevel())
-  ).call().foreach { err ⇒
-      envError() = err
-    }
 
   def onOpen() = {
     setTimeout(0) {
@@ -133,18 +124,19 @@ class ExecutionPanel extends ModalPanel {
 
   val envLevel: Var[ErrorStateLevel] = Var(ErrorLevel())
 
-  val errorLevelSelector: Select[SelectableLevel] = Select( /*"errorLevel",*/ Seq(ErrorLevel(), DebugLevel()).map { level ⇒
-    (SelectableLevel(level, level.name), emptyMod)
-  }, Some(envLevel()), btn_primary, () ⇒ errorLevelSelector.content().map { l ⇒ envLevel() = l.level })
-
   val nbOutLineInput = bs.input("500")(colMD(1) +++ (width := 60)).render
 
   def ratio(completed: Long, running: Long, ready: Long) = s"${completed} / ${completed + running + ready}"
 
   val envErrorVisible: Var[Seq[EnvironmentId]] = Var(Seq())
 
+  def glyphAndText(mod: ModifierSeq, text: String) = tags.span(
+    tags.span(mod),
+    s" $text"
+  )
+
   lazy val executionTable = {
-    tags.table(sheet.table +++ striped +++ ms("executionTable"))(
+    tags.table(sheet.table)(
       thead,
       Rx {
         tbody({
@@ -187,52 +179,49 @@ class ExecutionPanel extends ModalPanel {
               scriptID → staticPanel(id, scriptTextAreas,
                 () ⇒ scrollableText(staticInfo.script)).view,
               envID → {
-                div(
-                  details.envStates.map { e ⇒
-                    tags.table(ms("executionTable"))(
-                      thead,
-                      tbody(
-                        Seq(
-                          tr(row)(
-                            td(colMD(3))(tags.span(e.taskName).tooltip("Environment name")),
-                            td(colMD(2))(tags.span(glyph_upload)(s" ${e.networkActivity.uploadingFiles} ${displaySize(e.networkActivity.uploadedSize, e.networkActivity.readableUploadedSize)}").tooltip("Uploaded")),
-                            td(colMD(2))(tags.span(glyph_download)(s" ${e.networkActivity.downloadingFiles} ${displaySize(e.networkActivity.downloadedSize, e.networkActivity.readableDownloadedSize)}").tooltip("Downloaded")),
-                            td(colMD(2))(tags.span(glyph_road +++ sheet.paddingBottom(7))(" " + e.submitted).tooltip("Submitted jobs")),
-                            td(colMD(1))(tags.span(glyph_flash +++ sheet.paddingBottom(7))(" " + e.running).tooltip("Running jobs")),
-                            td(colMD(1))(tags.span(glyph_flag +++ sheet.paddingBottom(7))(" " + e.done).tooltip("Completed jobs")),
-                            td(colMD(1))(tags.span(glyph_fire +++ sheet.paddingBottom(7))(" " + e.failed).tooltip("Failed jobs")),
-                            td(colMD(3))(tags.span(omsheet.color("#3086b5") +++ ((envErrorVisible().contains(e.envId)), ms(" executionVisible"), emptyMod))(
-                              sheet.pointer, onclick := { () ⇒
-                              updateEnvError
-                              if (envErrorVisible().contains(e.envId)) envErrorVisible() = envErrorVisible().filterNot {
-                                _ == e.envId
-                              }
-                              else envErrorVisible() = envErrorVisible() :+ e.envId
+                details.envStates.map { e ⇒
+                  tags.table(sheet.table)(
+                    thead,
+                    tbody(
+                      Seq(
+                        tr(row)(
+                          td(colMD(3))(tags.span(e.taskName).tooltip("Environment name")),
+                          td(colMD(2))(glyphAndText(glyph_upload, s" ${e.networkActivity.uploadingFiles} ${displaySize(e.networkActivity.uploadedSize, e.networkActivity.readableUploadedSize)}").tooltip("Uploaded")),
+                          td(colMD(2))(glyphAndText(glyph_download, s" ${e.networkActivity.downloadingFiles} ${displaySize(e.networkActivity.downloadedSize, e.networkActivity.readableDownloadedSize)}").tooltip("Downloaded")),
+                          td(colMD(2))(glyphAndText(glyph_road +++ sheet.paddingBottom(7), e.submitted.toString).tooltip("Submitted jobs")),
+                          td(colMD(1))(glyphAndText(glyph_flash +++ sheet.paddingBottom(7), e.running.toString).tooltip("Running jobs")),
+                          td(colMD(1))(glyphAndText(glyph_flag +++ sheet.paddingBottom(7), e.done.toString).tooltip("Completed jobs")),
+                          td(colMD(1))(glyphAndText(glyph_fire +++ sheet.paddingBottom(7), e.failed.toString).tooltip("Failed jobs")),
+                          td(colMD(3))(tags.span(omsheet.color("#3086b5") +++ ((envErrorVisible().contains(e.envId)), ms(" executionVisible"), emptyMod))(
+                            sheet.pointer, onclick := { () ⇒
+                            if (envErrorVisible().contains(e.envId)) envErrorVisible() = envErrorVisible().filterNot {
+                              _ == e.envId
                             }
-                            )("details"))
-                          ),
-                          tr(row)(
-                            td(colMD(12))(
-                              td(colMD(12) +++ (!envErrorVisible().contains(e.envId), omsheet.displayOff, emptyMod))(
-                                colspan := 12,
-                                bs.button("Update", () ⇒ updateEnvError),
-                                staticPanel(e.envId, envErrorPanels,
-                                  () ⇒ new EnvironmentErrorPanel,
-                                  (ep: EnvironmentErrorPanel) ⇒ {
-                                    ep.setErrors(envError().flatMap {
-                                      _.errors
-                                    }.filter {
-                                      _._1.environmentId == e.envId
-                                    })
-                                  }).view
-                              )
+                            else envErrorVisible() = envErrorVisible() :+ e.envId
+                          }
+                          )("details"))
+                        ),
+                        tr(row)(
+                          {
+                            td(colMD(12) +++ (!envErrorVisible().contains(e.envId), omsheet.displayOff, emptyMod))(
+                              colspan := 12,
+                              bs.button("Update", () ⇒ {
+                                OMPost[Api].runningErrorEnvironmentData.call().foreach { err ⇒
+                                  envError() = err
+                                }
+                              }),
+                              staticPanel(e.envId, envErrorPanels,
+                                () ⇒ new EnvironmentErrorPanel,
+                                (ep: EnvironmentErrorPanel) ⇒ {
+                                  ep.setErrors(EnvironmentErrorData(envError().datedErrors.filter { enverr ⇒ enverr._1.environmentId == e.envId }))
+                                }).view
                             )
-                          )
+                          }
                         )
                       )
                     )
-                  }
-                )
+                  )
+                }
               },
               errorID →
                 div(
@@ -261,13 +250,13 @@ class ExecutionPanel extends ModalPanel {
             )
 
             Seq(
-              tr(row)(
+              tr(row +++ omsheet.executionTable, colspan := 12)(
                 td(colMD(2))(visibleClass(id.id, scriptID))(scriptLink.tooltip("Show script")),
-                td(colMD(2) +++ "small")(div(Utils.longToDate(staticInfo.startDate)).tooltip("Start time")),
-                td(colMD(2))(tags.span(glyph_flash)(" " + details.running).tooltip("Running jobs")),
-                td(colMD(2))(tags.span(glyph_flag)(" " + details.ratio).tooltip("Jobs progression")),
+                td(colMD(2))(div(Utils.longToDate(staticInfo.startDate)).tooltip("Start time")),
+                td(colMD(2))(glyphAndText(glyph_flash, details.running.toString).tooltip("Running jobs")),
+                td(colMD(2))(glyphAndText(glyph_flag, details.ratio.toString).tooltip("Jobs progression")),
                 td(colMD(1))(div(durationString).tooltip("Execution duration")),
-                td(colMD(1))(stateLink.tooltip("Execution state"))(ms(executionInfo.state + "State vert-align")),
+                td(colMD(1))(stateLink.tooltip("Execution state"))(ms(executionInfo.state + "State")),
                 td(colMD(1))(visibleClass(id.id, envID))(envLink),
                 td(colMD(1))(visibleClass(id.id, outputStreamID))(outputLink.tooltip("Execution outputs")),
                 td(colMD(1))(tags.span(glyph_remove +++ ms("removeExecution"), onclick := { () ⇒
@@ -298,8 +287,7 @@ class ExecutionPanel extends ModalPanel {
     if (size == 0L) ""
     else s"($readable)"
 
-  def visibleClass(expandID: ExpandID, visibleID: VisibleID): ModifierSeq =
-    ms("vert-align") +++ (expander.isVisible(expandID, visibleID), ms("executionVisible"))
+  def visibleClass(expandID: ExpandID, visibleID: VisibleID): ModifierSeq = (expander.isVisible(expandID, visibleID), ms("executionVisible"))
 
   val dialog = bs.modalDialog(
     modalID,
@@ -310,10 +298,6 @@ class ExecutionPanel extends ModalPanel {
           div(omsheet.executionHeader)(
             tags.label(colMD(4) +++ omsheet.execOutput, "Output history"),
             nbOutLineInput
-          ),
-          div(omsheet.executionHeader)(
-            tags.label(colMD(6) +++ omsheet.execLevel, "Environment error level "),
-            div(colMD(1))(errorLevelSelector.selector)
           )
         )
       )
