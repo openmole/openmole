@@ -108,9 +108,10 @@ object Application extends Logger {
       |[--remote] enable remote connection to the web interface
       |[--no-browser] don't automatically launch the browser in GUI mode
       |[--load-workspace-plugins] load the plugins of the OpenMOLE workspace (these plugins are always loaded in GUI mode)
-      |[--console-work-directory] specify the workDirectory variable in console mode (it is set to the current dirrectory by default)
+      |[--console-work-directory] specify the workDirectory variable in console mode (it is set to the current directory by default)
       |[--reset] reset all preferences and authentications
       |[--reset-password] reset all preferences and ask for the a password
+      |[--mem memory] allocate more memory to the JVM (not supported on windows yes), for instance --mem 2G
       |[--] end of options the remaining arguments are provided to the console in the args array
       |[-h | --help] print help""".stripMargin
 
