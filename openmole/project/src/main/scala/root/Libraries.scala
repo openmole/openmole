@@ -58,7 +58,7 @@ object Libraries extends Defaults {
 
   lazy val bouncyCastle = "org.bouncycastle" % "bcpkix-jdk15on" % bouncyCastleVersion
 
-  lazy val scalatra = "org.openmole" %% "org-scalatra" % "2.3.1"
+  lazy val scalatra = "org.openmole" %% "org-scalatra" % "2.4.0"
 
   lazy val logback = "org.openmole" %% "ch-qos-logback" % "1.0.9"
 

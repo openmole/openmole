@@ -18,14 +18,13 @@ import org.openmole.core.workflow.task._
 import org.openmole.core.workspace.{ Persistent, Workspace }
 import org.openmole.tool.tar.{ TarOutputStream, TarInputStream }
 import org.scalatra._
-import org.scalatra.json.JacksonJsonSupport
 import org.scalatra.servlet.FileUploadSupport
 import org.openmole.rest.message._
 import org.openmole.tool.file._
 import org.openmole.tool.tar._
-import sun.awt.EventListenerAggregate
 import scala.util.{ Try, Failure, Success }
 import org.openmole.tool.collection._
+import org.json4s.jackson.JsonMethods._
 
 case class EnvironmentException(environment: Environment, error: Error)
 
@@ -55,7 +54,6 @@ case class WorkDirectory(workDirectory: File) {
 trait RESTAPI extends ScalatraServlet with GZipSupport
     with FileUploadSupport
     with FlashMapSupport
-    with JacksonJsonSupport
     with Authentication {
 
   protected implicit val jsonFormats: Formats = DefaultFormats.withBigDecimal

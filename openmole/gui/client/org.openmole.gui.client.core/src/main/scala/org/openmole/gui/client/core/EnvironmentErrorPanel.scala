@@ -1,10 +1,10 @@
 package org.openmole.gui.client.core
 
-import fr.iscpif.scaladget.stylesheet.{all ⇒ sheet}
+import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
 import org.openmole.gui.ext.data._
-import fr.iscpif.scaladget.api.{BootstrapTags ⇒ bs}
-import org.openmole.gui.misc.utils.{stylesheet, Utils}
-import scalatags.JsDom.{tags ⇒ tags}
+import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
+import org.openmole.gui.misc.utils.{ stylesheet, Utils }
+import scalatags.JsDom.{ tags ⇒ tags }
 import org.openmole.gui.misc.js.JsRxTags._
 import scalatags.JsDom.all._
 import sheet._
@@ -65,13 +65,13 @@ class EnvironmentErrorPanel {
 
     val sorted = sortingAndOrdering.fileSorting match {
       case AlphaSorting ⇒ lines.sortBy(_._1)
-      case TimeSorting ⇒ lines.sortBy(_._2)
-      case _ ⇒ lines.sortBy(_._3)
+      case TimeSorting  ⇒ lines.sortBy(_._2)
+      case _            ⇒ lines.sortBy(_._3)
     }
 
     sortingAndOrdering.fileOrdering match {
       case Ascending ⇒ sorted
-      case _ ⇒ sorted.reverse
+      case _         ⇒ sorted.reverse
     }
   }
 

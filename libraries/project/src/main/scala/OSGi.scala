@@ -12,8 +12,8 @@ object OSGi extends Defaults {
 
   val dir = file("target/libraries")
 
-  lazy val scalatraVersion = "2.3.1"
-  lazy val jettyVersion = "9.2.10.v20150310"
+  lazy val scalatraVersion = "2.4.0"
+  lazy val jettyVersion = "9.3.8.v20160314"
 
   lazy val scalatra = OsgiProject("org.scalatra",
     exports = Seq("org.scalatra.*, org.fusesource.*", "grizzled.*", "com.fasterxml.jackson.*", "org.json4s.*", "org.eclipse.jetty.*", "javax.*"),

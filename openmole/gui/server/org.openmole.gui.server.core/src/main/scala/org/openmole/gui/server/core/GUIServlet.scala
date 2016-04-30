@@ -98,14 +98,15 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
     else {
       if (f.isDirectory) {
         response.setHeader("Content-Disposition", s"""attachment; filename="${f.getName + ".tgz"}"""")
-        val os = new BufferedOutputStream(response.getOutputStream())
+        val os = response.getOutputStream()
         val tos = new TarOutputStream(os.toGZ)
         try tos.archive(f, includeTopDirectoryName = true)
         finally tos.close
       }
       else {
         response.setHeader("Content-Disposition", s"""attachment; filename="${f.getName}"""")
-        val os = new BufferedOutputStream(response.getOutputStream())
+        response.setContentLengthLong(f.length)
+        val os = response.getOutputStream()
         try f.copy(os)
         finally os.close
       }

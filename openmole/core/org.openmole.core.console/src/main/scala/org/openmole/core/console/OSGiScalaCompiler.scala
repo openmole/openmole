@@ -38,7 +38,6 @@ import scala.tools.nsc.backend.JavaPlatform
 import scala.tools.util.PathResolver
 import scala.tools.nsc._
 
-
 class OSGiScalaCompiler(settings: Settings, reporter: Reporter, virtualDirectory: AbstractFile, priorityBundles: Seq[Bundle], jars: Seq[File]) extends Global(settings, reporter) with ReplGlobal { g ⇒
 
   //settings.bootclasspath.value = ClassPathBuilder.getClassPathFrom(classOf[scala.App].getClassLoader).mkString(":")
