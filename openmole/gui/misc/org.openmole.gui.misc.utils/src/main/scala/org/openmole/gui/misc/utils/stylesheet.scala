@@ -20,7 +20,7 @@ package org.openmole.gui.misc.utils
 import scalatags.JsDom.all._
 import scalatags.JsDom.styles
 import scalatags.JsDom.svgAttrs
-import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
+import fr.iscpif.scaladget.stylesheet.{all ⇒ sheet}
 import sheet._
 
 package object stylesheet {
@@ -322,6 +322,15 @@ package object stylesheet {
   lazy val execLevel: ModifierSeq = Seq(
     sheet.marginRight(-25),
     sheet.marginTop(-3)
+  )
+
+  lazy val errorTable: ModifierSeq = Seq(
+    lineHeight := 30,
+    borderWidth := "0.1em",
+    borderStyle := "solid",
+    borderColor := "#ccc",
+    borderLeft := 0,
+    borderRight := 0
   )
 
   //OPTON DIVS

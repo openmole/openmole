@@ -1,10 +1,10 @@
 package org.openmole.gui.client.core
 
-import fr.iscpif.scaladget.stylesheet.{all ⇒ sheet}
+import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
 import org.openmole.gui.ext.data._
-import fr.iscpif.scaladget.api.{BootstrapTags ⇒ bs}
-import org.openmole.gui.misc.utils.{stylesheet, Utils}
-import scalatags.JsDom.{tags ⇒ tags}
+import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
+import org.openmole.gui.misc.utils.{ stylesheet, Utils }
+import scalatags.JsDom.{ tags ⇒ tags }
 import org.openmole.gui.misc.js.JsRxTags._
 import scalatags.JsDom.all._
 import sheet._
@@ -65,29 +65,31 @@ class EnvironmentErrorPanel {
 
     val sorted = sortingAndOrdering.fileSorting match {
       case AlphaSorting ⇒ lines.sortBy(_._1)
-      case TimeSorting ⇒ lines.sortBy(_._2)
-      case _ ⇒ lines.sortBy(_._3)
+      case TimeSorting  ⇒ lines.sortBy(_._2)
+      case _            ⇒ lines.sortBy(_._3)
     }
 
     sortingAndOrdering.fileOrdering match {
       case Ascending ⇒ sorted
-      case _ ⇒ sorted.reverse
+      case _         ⇒ sorted.reverse
     }
   }
 
   private val entries = Rx {
     val stacks = errors().datedErrors.map(_._1).groupBy(_.errorMessage).map { case (k, v) ⇒ k → v.head.stack }
     tags.table(fontSize := "0.96em", width := "100%")(
-      tbody(
+      thead(
         tr(row)(
           th(exclusiveButton("Error", () ⇒ setSorting(AlphaSorting, Ascending), () ⇒ setSorting(AlphaSorting, Descending))),
           th(exclusiveButton("Date", () ⇒ setSorting(TimeSorting, Ascending), () ⇒ setSorting(TimeSorting, Descending))),
           th(exclusiveButton("Level", () ⇒ setSorting(LevelSorting, Ascending), () ⇒ setSorting(LevelSorting, Descending)))
-        ),
+        )
+      ),
+      tbody(
         for {
           error ← sort(errors(), sortingAndOrdering())
         } yield {
-          tags.tr(row)(
+          tags.tr(row +++ stylesheet.errorTable)(
             tags.td(colMD(12))(
               tags.a(error._1, cursor := "pointer", onclick := {
                 () ⇒
