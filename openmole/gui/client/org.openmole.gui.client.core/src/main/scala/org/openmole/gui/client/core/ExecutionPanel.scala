@@ -287,7 +287,7 @@ class ExecutionPanel extends ModalPanel {
     if (size == 0L) ""
     else s"($readable)"
 
-  def visibleClass(expandID: ExpandID, visibleID: VisibleID): ModifierSeq = (expander.isVisible(expandID, visibleID), ms("executionVisible"))
+  def visibleClass(expandID: ExpandID, visibleID: VisibleID): ModifierSeq = (expander.isVisible(expandID, visibleID), omsheet.executionVisible, pointer)
 
   val dialog = bs.modalDialog(
     modalID,

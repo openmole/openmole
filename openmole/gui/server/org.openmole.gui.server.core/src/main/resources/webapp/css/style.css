@@ -182,12 +182,6 @@ table td.failedState {
     font-weight: bold;
 }
 
-table td.executionVisible {
-    color: #3086b5;
-    font-weight: bold;
-    cursor: pointer;
-}
-
 .removeExecution:hover {
     color: #CC3A36;
     display: inline-block;

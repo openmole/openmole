@@ -333,6 +333,12 @@ package object stylesheet {
     borderRight := 0
   )
 
+  lazy val executionVisible: ModifierSeq = Seq(
+    color("#3086b5"),
+    fontWeight := "bold",
+    pointer
+  )
+
   //OPTON DIVS
   lazy val optionsdiv: ModifierSeq = Seq(
     relativePosition,
