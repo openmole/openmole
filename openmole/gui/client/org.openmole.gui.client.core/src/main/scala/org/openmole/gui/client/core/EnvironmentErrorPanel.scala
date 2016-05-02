@@ -75,7 +75,7 @@ class EnvironmentErrorPanel {
     }
   }
 
-  private val entries = Rx {
+  private val entries = {
     val stacks = errors().datedErrors.map(_._1).groupBy(_.errorMessage).map { case (k, v) ⇒ k → v.head.stack }
     tags.table(fontSize := "0.96em", width := "100%")(
       thead(
@@ -84,24 +84,25 @@ class EnvironmentErrorPanel {
           th(exclusiveButton("Date", () ⇒ setSorting(TimeSorting, Ascending), () ⇒ setSorting(TimeSorting, Descending))),
           th(exclusiveButton("Level", () ⇒ setSorting(LevelSorting, Ascending), () ⇒ setSorting(LevelSorting, Descending)))
         )
-      ),
-      tbody(
-        for {
-          error ← sort(errors(), sortingAndOrdering())
-        } yield {
-          tags.tr(row +++ stylesheet.errorTable)(
-            tags.td(colMD(12))(
-              tags.a(error._1, cursor := "pointer", onclick := {
-                () ⇒
-                  panels.environmentStackPanel.content() = stacks(error._1).stackTrace
-                  panels.environmentStackTriggerer.open
-              })
-            ),
-            tags.td(colMD(1))(Utils.longToDate(error._2).split(",").last),
-            tags.td(colMD(1))(label(error._3)(label_default))
-          )
-        }
-      )
+      ), Rx {
+        tbody(
+          for {
+            error ← sort(errors(), sortingAndOrdering())
+          } yield {
+            tags.tr(row +++ stylesheet.errorTable)(
+              tags.td(colMD(12))(
+                tags.a(error._1, cursor := "pointer", onclick := {
+                  () ⇒
+                    panels.environmentStackPanel.content() = stacks(error._1).stackTrace
+                    panels.environmentStackTriggerer.open
+                })
+              ),
+              tags.td(colMD(1))(Utils.longToDate(error._2).split(",").last),
+              tags.td(colMD(1))(label(error._3)(label_default))
+            )
+          }
+        )
+      }
     )
   }
 
