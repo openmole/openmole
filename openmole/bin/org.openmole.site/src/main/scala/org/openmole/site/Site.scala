@@ -27,6 +27,7 @@ import org.openmole.core.workspace.Workspace
 import org.openmole.site.market.Market
 import org.openmole.tool.file._
 import org.openmole.tool.tar._
+import org.openmole.tool.stream._
 
 import scalatags.Text.all
 import scalatags.Text.all._
