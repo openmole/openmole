@@ -17,34 +17,51 @@
  */
 package org.openmole.tool
 
-import java.io.File
-import java.util.jar.JarOutputStream
+import java.io.{ ByteArrayInputStream, File }
+import java.util.jar._
 import java.util.zip.ZipEntry
 
 import org.openmole.tool.file._
+import org.openmole.tool.stream._
+import org.osgi.framework.Constants
 
 package object osgi {
 
   case class ClassByteCode(name: String, byteCode: Array[Byte])
+  case class VersionedPackage(name: String, version: Option[String])
 
-  //  def createBundle(
-  //    name: String,
-  //    version: String,
-  //    exportedClasses: Vector[ClassByteCode],
-  //    importedClasses: Vector[String],
-  //    bundle: File) = {
-  //
-  //    val os = new JarOutputStream(bundle.bufferedOutputStream())
-  //    try {
-  //      for {
-  //        cbc <- exportedClasses
-  //      } {
-  //        os.putNextEntry(new ZipEntry(cbc.name))
-  //        copy()
-  //      }
-  //
-  //
-  //    } finally os.close
-  //  }
+  def createBundle(
+    name:             String,
+    version:          String,
+    classes:          Seq[ClassByteCode],
+    exportedPackages: Seq[String],
+    importedPackages: Seq[VersionedPackage],
+    bundle:           File
+  ) = {
+    def versionedToString(p: VersionedPackage) = s"${p.name}${p.version.map(v ⇒ s""";${Constants.VERSION_ATTRIBUTE}="$v"""").getOrElse("")}"
+
+    val manifest =
+      s"""${Attributes.Name.MANIFEST_VERSION}: 1.0
+        |${Constants.BUNDLE_SYMBOLICNAME}: $name
+        |${Constants.BUNDLE_NAME}: $name
+        |${Constants.BUNDLE_VERSION}: $version
+        |${Constants.EXPORT_PACKAGE}: ${exportedPackages.mkString(",")}
+        |${Constants.IMPORT_PACKAGE}: ${importedPackages.map(p ⇒ versionedToString(p)).mkString(",")}""".stripMargin
+
+    val os = new JarOutputStream(bundle.bufferedOutputStream())
+    try {
+      os.putNextEntry(new ZipEntry("META-INF/MANIFEST.MF"))
+      copy(new StringInputStream(manifest), os)
+      os.closeEntry()
+      for {
+        cbc ← classes
+      } {
+        os.putNextEntry(new ZipEntry(cbc.name))
+        copy(new ByteArrayInputStream(cbc.byteCode), os)
+        os.closeEntry()
+      }
+    }
+    finally os.close
+  }
 
 }

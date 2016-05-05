@@ -73,15 +73,20 @@ object PluginManager extends Logger {
   }
 
   def fileProviding(c: Class[_]) =
-    Option(FrameworkUtil.getBundle(c)).map(b ⇒ Activator.contextOrException.getBundle(b.getBundleId).file.getCanonicalFile)
+    bundleForClass(c).map(b ⇒ Activator.contextOrException.getBundle(b.getBundleId).file.getCanonicalFile)
 
-  def bundleForClass(c: Class[_]): Bundle = FrameworkUtil.getBundle(c)
+  def bundleForClass(c: Class[_]): Option[Bundle] =
+    Option(FrameworkUtil.getBundle(c))
 
-  def bundlesForClass(c: Class[_]): Iterable[Bundle] =
-    allDependencies(bundleForClass(c))
+  def bundlesForClass(c: Class[_]): Iterable[Bundle] = {
+    val bundle = bundleForClass(c).toSeq
+    bundle.flatMap(allDependencies)
+  }
 
-  def pluginsForClass(c: Class[_]): Iterable[File] =
-    allPluginDependencies(bundleForClass(c)).map { l ⇒ Activator.contextOrException.getBundle(l).file }
+  def pluginsForClass(c: Class[_]): Iterable[File] = {
+    val bundle = bundleForClass(c)
+    (bundle.toSeq.flatMap(allPluginDependencies)).map { l ⇒ Activator.contextOrException.getBundle(l).file }
+  }
 
   def allDepending(file: File, filter: Bundle ⇒ Boolean): Iterable[File] =
     bundle(file) match {
@@ -141,7 +146,7 @@ object PluginManager extends Logger {
 
   private def allDependencies(b: Bundle) = dependencies(List(b))
 
-  private def allPluginDependencies(b: Bundle) = atomic { implicit ctx ⇒
+  def allPluginDependencies(b: Bundle) = atomic { implicit ctx ⇒
     resolvedPluginDependenciesCache.
       getOrElseUpdate(b.getBundleId, dependencies(List(b)).map(_.getBundleId)).
       filter(b ⇒ !infos.providedDependencies.contains(b))

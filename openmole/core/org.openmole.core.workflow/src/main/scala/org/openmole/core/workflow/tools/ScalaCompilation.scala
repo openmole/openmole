@@ -43,7 +43,7 @@ trait ScalaCompilation {
     |$code""".stripMargin
 
   def compile(code: String) = Try[Any] {
-    val interpreter = new ScalaREPL(plugins.flatMap(PluginManager.bundle) ++ Seq(PluginManager.bundleForClass(this.getClass)), libraries)
+    val interpreter = new ScalaREPL(plugins.flatMap(PluginManager.bundle) ++ PluginManager.bundleForClass(this.getClass), libraries)
 
     val evaluated = interpreter.eval(addImports(code))
 

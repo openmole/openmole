@@ -55,7 +55,7 @@ package file {
 
     val jvmLevelFileLock = new LockRepository[String]
 
-    def copy(source: FileChannel, destination: FileChannel): Unit = source.transferTo(0, source.size, destination)
+    def copyChannel(source: FileChannel, destination: FileChannel): Unit = source.transferTo(0, source.size, destination)
 
     // glad you were there...
     implicit def file2Path(file: File) = file.toPath
@@ -96,7 +96,7 @@ package file {
         val ic = new FileInputStream(file).getChannel
         try {
           val oc = new FileOutputStream(destination).getChannel
-          try p.copy(ic, oc)
+          try p.copyChannel(ic, oc)
           finally oc.close()
         }
         finally ic.close()
@@ -396,7 +396,7 @@ package file {
           val channelO = new FileOutputStream(file, true).getChannel
           try {
             val lock = channelO.lock
-            try p.copy(channelI, channelO)
+            try p.copyChannel(channelI, channelO)
             finally lock.release
           }
           finally channelO.close

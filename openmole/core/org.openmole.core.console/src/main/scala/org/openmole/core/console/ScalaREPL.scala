@@ -34,6 +34,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.tools.nsc.interpreter._
 import monocle.macros._
 import scala.tools.nsc.io.AbstractFile
+import org.openmole.tool.osgi._
 
 object ScalaREPL {
   @Lenses case class CompilationError(errorMessages: List[ErrorMessage], code: String, parent: Throwable) extends Exception(parent) {
@@ -49,12 +50,12 @@ object ScalaREPL {
   @Lenses case class ErrorMessage(decoratedMessage: String, rawMessage: String, position: Option[ErrorPosition])
   @Lenses case class ErrorPosition(line: Int, start: Int, end: Int, point: Int)
 
-  def warmup = new ScalaREPL().eval("(i: Int) => {case class Test(i: Int); Test(i)}")
+  def warmup = new ScalaREPL().eval("(i: Int) => { case class Test(i: Int); Test(i) }")
   case class HeaderInfo(file: String)
   def firstLine(file: String) = HeaderInfo(file)
 }
 
-class REPLClassloader(val file: AbstractFile, parent: ClassLoader) extends scala.reflect.internal.util.AbstractFileClassLoader(file, parent) {
+class REPLClassloader(val file: AbstractFile, parent: ClassLoader) extends scala.reflect.internal.util.AbstractFileClassLoader(file, parent) { cl ⇒
 
   def classFiles = {
     def all(fs: AbstractFile): List[AbstractFile] = {
@@ -64,11 +65,13 @@ class REPLClassloader(val file: AbstractFile, parent: ClassLoader) extends scala
     all(file).filterNot(_.isDirectory)
   }
 
-  def toClassPath(c: String) = s"(memory)/${c.replace('.', '/')}.class"
-  def findClassFile(name: String): Option[AbstractFile] = classFiles.find(_.path == toClassPath(name))
+  def toClassPath(c: String) = s"${c.replace('.', '/')}.class"
+  def toAbsoluteClassPath(c: String) = s"${file.name}/${toClassPath(c)}"
+  def findClassFile(name: String): Option[AbstractFile] = classFiles.find(_.path == toAbsoluteClassPath(name))
   def findClassFile(c: Class[_]): Option[AbstractFile] = findClassFile(c.getClass.getName)
 
-  case class ReferencedClasses(repl: Vector[String], other: Vector[String])
+  case class BundledClass(name: String, bundle: Option[Bundle])
+  case class ReferencedClasses(repl: Vector[String], other: Vector[BundledClass])
 
   def referencedClasses(classes: Class[_]*) = {
     import org.openmole.tool.bytecode._
@@ -91,7 +94,36 @@ class REPLClassloader(val file: AbstractFile, parent: ClassLoader) extends scala
     }
 
     val (repl, other) = seen.toVector.partition(c ⇒ findClassFile(c).isDefined)
-    ReferencedClasses(repl, other)
+
+    val bundledOther = other.map { c ⇒
+      val bundle = tryToLoadClass(c).flatMap(PluginManager.bundleForClass)
+      BundledClass(name = c, bundle = bundle)
+    }
+
+    ReferencedClasses(repl, bundledOther)
+  }
+
+  def bundleFromReferencedClass(ref: ReferencedClasses, bundleName: String, bundleVersion: String, bundle: java.io.File) = {
+    val classByteCode = ref.repl.map(c ⇒ ClassByteCode(cl.toClassPath(c), cl.findClassFile(c).get.toByteArray))
+
+    def packageName(c: String) = c.reverse.dropWhile(_ != '.').drop(1).reverse
+    def importPackages = ref.other.filter(_.bundle.isDefined).groupBy(_.bundle).toSeq.flatMap {
+      case (b, cs) ⇒
+        for {
+          c ← cs
+          p = packageName(c.name)
+          if !p.isEmpty
+        } yield VersionedPackage(p, b.map(_.getVersion.toString))
+    }.distinct
+
+    createBundle(
+      name = bundleName,
+      version = bundleVersion,
+      classes = classByteCode,
+      exportedPackages = ref.repl.map(packageName).distinct.filter(p ⇒ !p.isEmpty),
+      importedPackages = importPackages,
+      bundle = bundle
+    )
   }
 }
 
