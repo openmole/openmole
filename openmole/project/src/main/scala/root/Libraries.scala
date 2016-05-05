@@ -171,4 +171,6 @@ object Libraries extends Defaults {
 
   lazy val clapper = "org.openmole" %% "org-clapper" % "1.0.5"
 
+  lazy val asm = "org.openmole" %% "org-objectweb-asm" % "5.1"
+
 }

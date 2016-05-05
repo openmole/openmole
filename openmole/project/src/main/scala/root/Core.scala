@@ -19,8 +19,10 @@ object Core extends Defaults {
   ) dependsOn
     (event, exception, tools, updater, workspace, macros, pluginManager, serializer, output, console, replication % "test")
 
-  lazy val serializer = OsgiProject("serializer", global = true, imports = Seq("*")) settings
-    (libraryDependencies += xstream, libraryDependencies += equinoxOSGi) dependsOn (workspace, pluginManager, fileService, tools, openmoleTar, console)
+  lazy val serializer = OsgiProject("serializer", global = true, imports = Seq("*")) settings (
+    libraryDependencies += xstream,
+    libraryDependencies += equinoxOSGi
+  ) dependsOn (workspace, pluginManager, fileService, tools, openmoleTar, console)
 
   lazy val batch = OsgiProject("batch", imports = Seq("*")) dependsOn (
     workflow, workspace, tools, event, replication, updater, exception,
@@ -70,7 +72,7 @@ object Core extends Defaults {
       libraryDependencies += scalaLang,
       libraryDependencies += monocle,
       Defaults.macroParadise
-    )
+    ) dependsOn (ThirdParties.openmoleByteCode)
 
   val project = OsgiProject("project", imports = Seq("*")) dependsOn (console, dsl) settings (OsgiKeys.importPackage := Seq("*"))
 

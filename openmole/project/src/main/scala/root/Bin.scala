@@ -103,7 +103,8 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
     Libraries.jodaTime,
     Libraries.scalaLang,
     Libraries.slf4j,
-    Libraries.scalaz
+    Libraries.scalaz,
+    Libraries.asm
   ) ++ webServerDependencies
 
   lazy val guiCoreDependencies = Seq(

@@ -17,8 +17,8 @@
 
 package org.openmole.core.console
 
-import java.io.{ File, PrintStream, PrintWriter, Writer }
 import java.net.URLClassLoader
+import java.util
 import java.util.UUID
 
 import org.openmole.core.exception._
@@ -33,8 +33,6 @@ import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.tools.nsc.interpreter._
 import monocle.macros._
-
-import scala.reflect.io.PlainFile
 import scala.tools.nsc.io.AbstractFile
 
 object ScalaREPL {
@@ -51,21 +49,56 @@ object ScalaREPL {
   @Lenses case class ErrorMessage(decoratedMessage: String, rawMessage: String, position: Option[ErrorPosition])
   @Lenses case class ErrorPosition(line: Int, start: Int, end: Int, point: Int)
 
-  def warmup = new ScalaREPL().eval("def warmup() = {}")
+  def warmup = new ScalaREPL().eval("def warmup = {}")
   case class HeaderInfo(file: String)
   def firstLine(file: String) = HeaderInfo(file)
-
 }
 
-class REPLClassloader(file: AbstractFile, parent: ClassLoader) extends scala.reflect.internal.util.AbstractFileClassLoader(file, parent)
+class REPLClassloader(val file: AbstractFile, parent: ClassLoader) extends scala.reflect.internal.util.AbstractFileClassLoader(file, parent) {
+
+  def classFiles = {
+    def all(fs: AbstractFile): List[AbstractFile] = {
+      if (fs.isDirectory) fs :: fs.iterator.flatMap(all).toList
+      else List(fs)
+    }
+    all(file).filterNot(_.isDirectory)
+  }
+
+  def toClassPath(c: String) = s"(memory)/${c.replace('.', '/')}.class"
+  def findClassFile(name: String): Option[AbstractFile] = classFiles.find(_.path == toClassPath(name))
+  def findClassFile(c: Class[_]): Option[AbstractFile] = findClassFile(c.getClass.getName)
+
+  case class ReferencedClasses(repl: Vector[String], other: Vector[String])
+
+  def referencedClasses(classes: Class[_]*) = {
+    import org.openmole.tool.bytecode._
+
+    val seen = collection.mutable.HashSet[String]()
+    val toProcess = collection.mutable.Stack[String]()
+
+    classes.foreach(c ⇒ toProcess.push(c.getName))
+
+    while (!toProcess.isEmpty) {
+      val processing = toProcess.pop
+      for {
+        classFile ← findClassFile(processing).toSeq
+        refClass ← listAllClasses(classFile.toByteArray)
+        if !seen.contains(refClass.getClassName)
+      } {
+        seen += refClass.getClassName
+        toProcess push refClass.getClassName
+      }
+    }
+
+    val (repl, other) = seen.toVector.partition(c ⇒ findClassFile(c).isDefined)
+    ReferencedClasses(repl, other)
+  }
+}
 
 import ScalaREPL._
 
-class ScalaREPL(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.empty, quiet: Boolean = true, classDirectory: Option[File] = None) extends ILoop { repl ⇒
+class ScalaREPL(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.empty, quiet: Boolean = true) extends ILoop { repl ⇒
 
-  classDirectory.foreach(_.mkdirs)
-
-  val virtualDirectory = classDirectory.map(new PlainFile(_))
   var storeErrors: Boolean = true
   var errorMessage: List[ErrorMessage] = Nil
   var loopExitCode = 0
@@ -81,7 +114,6 @@ class ScalaREPL(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.e
   //settings.Yreplclassbased.value = true
   settings.Yreplsync.value = true
   settings.verbose.value = false
-  virtualDirectory.foreach(settings.outputDirs setSingleOutput)
 
   in = chooseReader(settings)
 
@@ -161,9 +193,9 @@ class ScalaREPL(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.e
     override protected def newCompiler(settings: Settings, reporter: Reporter) = {
       //settings.Yreplclassbased.value = true
       settings.exposeEmptyPackage.value = true
-      settings.outputDirs setSingleOutput (repl.virtualDirectory getOrElse replOutput.dir)
+      settings.outputDirs setSingleOutput replOutput.dir
       if (Activator.osgi) {
-        new OSGiScalaCompiler(settings, reporter, repl.virtualDirectory getOrElse replOutput.dir, priorityBundles, jars)
+        new OSGiScalaCompiler(settings, reporter, replOutput.dir, priorityBundles, jars)
       }
       else {
         case class Plop()
@@ -176,7 +208,7 @@ class ScalaREPL(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.e
     override lazy val classLoader =
       if (Activator.osgi) {
         new REPLClassloader(
-          repl.virtualDirectory getOrElse replOutput.dir,
+          replOutput.dir,
           new CompositeClassLoader(
             priorityBundles.map(_.classLoader) ++
               List(new URLClassLoader(jars.toArray.map(_.toURI.toURL))) ++

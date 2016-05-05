@@ -295,8 +295,13 @@ object OSGi extends Defaults {
       "org.scalaz" %% "scalaz-core" % scalazVersion,
       "org.scalaz" %% "scalaz-effect" % scalazVersion
     ),
-    version := scalazVersion
-    )
+    version := scalazVersion)
+
+  val asmVersion = "5.1"
+
+  lazy val asm = OsgiProject("org.objectweb.asm") settings (
+    libraryDependencies += "org.ow2.asm" % "asm" % asmVersion,
+    version := asmVersion)
 
 
 }
