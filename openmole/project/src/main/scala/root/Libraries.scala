@@ -97,26 +97,28 @@ object Libraries extends Defaults {
   lazy val scalaAutowireVersion = "0.2.5"
 
   lazy val upickle = "org.openmole" %% "upickle" % scalaUpickleVersion
-
   lazy val autowire = "org.openmole" %% "autowire" % scalaAutowireVersion
-
   lazy val scalaTags = "org.openmole" %% "com-scalatags" % scalaTagsVersion
-
   lazy val rx = "org.openmole" %% "rx" % rxVersion
 
+  lazy val scaladgetVersion = "0.8.0-SNAPSHOT"
+  lazy val jsSuffix = ""
+
   lazy val scalajsVersion = "0.6.8"
+  lazy val scaladgetJS = libraryDependencies += "fr.iscpif" %%% ("scaladget" + jsSuffix) % scaladgetVersion
+  lazy val scalajsDomJS = libraryDependencies += "org.scala-js" %%% ("scalajs-dom" + jsSuffix) % scalaJSDomVersion
+  lazy val rxJS = libraryDependencies += "com.lihaoyi" %%% ("scalarx" + jsSuffix) % rxVersion
+  lazy val scalaTagsJS = libraryDependencies += "com.lihaoyi" %%% ("scalatags" + jsSuffix) % scalaTagsVersion
+  lazy val autowireJS = libraryDependencies += "com.lihaoyi" %%% ("autowire" + jsSuffix) % scalaAutowireVersion
+  lazy val upickleJS = libraryDependencies += "com.lihaoyi" %%% ("upickle" + jsSuffix) % scalaUpickleVersion
+
   lazy val scalajsTools = "org.openmole" %% "scalajs-tools" % scalajsVersion
   lazy val scalajsLibrary = "org.openmole" %% "scalajs-library" % scalajsVersion
-  lazy val scalajsDom = "org.openmole" %% "scalajs-dom" % scalaJSDomVersion
   lazy val scalajs = "org.openmole" %% "scalajs" % scalajsVersion
 
   lazy val mgo = "org.openmole" %% "fr-iscpif-mgo" % "2.0"
-
   lazy val family = "org.openmole" %% "fr-iscpif-family" % "1.3"
-
   lazy val monocle = "org.openmole" %% "monocle" % "1.2.0"
-
-  lazy val scaladget = "org.openmole" %% "scaladget" % "0.8.0-SNAPSHOT"
 
   lazy val d3 = "org.webjars" % "d3js" % d3Version
 

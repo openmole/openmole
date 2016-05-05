@@ -15,7 +15,13 @@ object Client extends GuiDefaults {
 
   lazy val core = OsgiProject("org.openmole.gui.client.core") enablePlugins (ScalaJSPlugin) dependsOn
     (Ext.dataui, Shared.shared, Misc.utils, Misc.js, root.Doc.doc) settings (
-      libraryDependencies ++= Seq(autowire, upickle, scalaTags, rx, scalajsDom, scaladget, async),
+      upickleJS,
+      autowireJS,
+      rxJS,
+      scalajsDomJS,
+      scaladgetJS,
+      scalaTagsJS,
+      libraryDependencies += async,
       skip in packageJSDependencies := false,
       jsDependencies += jquery / jqueryPath minified jqueryPath.replace(".js", ".min.js"),
       jsDependencies += ace / acePath,

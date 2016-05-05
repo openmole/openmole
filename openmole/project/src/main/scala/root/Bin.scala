@@ -109,7 +109,6 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
 
   lazy val guiCoreDependencies = Seq(
     scalajsTools,
-    scalajsDom,
     scalaTags,
     autowire,
     upickle,
@@ -117,7 +116,6 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
     scalatra intransitive (),
     scalajHttp,
     txtmark,
-    scaladget,
     clapper,
     jquery,
     scalajs

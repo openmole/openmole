@@ -144,13 +144,7 @@ object OSGi extends Defaults {
   lazy val scalaUpickleVersion = "0.2.6"
   lazy val scalaAutowireVersion = "0.2.5"
   lazy val scalajsVersion = "0.6.8"
-  lazy val jsSuffix = "_sjs0.6"
 
-  lazy val scalajsDom = OsgiProject("scalajs-dom", exports = Seq("org.scalajs.dom.*")) settings(
-      libraryDependencies += "org.scala-js" %%% ("scalajs-dom" + jsSuffix) % scalaDomVersion, version := scalaDomVersion)
-
-  lazy val querkijQuery = OsgiProject("querki-jquery", exports = Seq("org.querki.*")) settings(
-      libraryDependencies += "org.querki" %%% ("jquery-facade"+jsSuffix) % "0.11", version := querkiJSQueryVersion)
 
   lazy val scalajsTools = OsgiProject("scalajs-tools", exports = Seq("scala.scalajs.*", "org.scalajs.core.tools.*", "org.scalajs.core.ir.*", "com.google.javascript.*", "com.google.common.*", "rhino_ast.java.com.google.javascript.rhino.*", "org.json.*")) settings(
     libraryDependencies += "org.scala-js" %% "scalajs-tools" % scalajsVersion, version := scalajsVersion)
@@ -160,44 +154,30 @@ object OSGi extends Defaults {
     version := scalajsVersion
   )
 
-
   lazy val scalaTags = OsgiProject("com.scalatags", exports = Seq("scalatags.*", "*.sjsir")) settings(
-    libraryDependencies ++= Seq("com.lihaoyi" %% "scalatags" % scalaTagsVersion,
-      "com.lihaoyi" %%% ("scalatags" + jsSuffix) % scalaTagsVersion),
-    version := scalaTagsVersion
-    )
+    libraryDependencies ++= Seq("com.lihaoyi" %% "scalatags" % scalaTagsVersion),
+    version := scalaTagsVersion)
 
   lazy val scalatexSite =
     OsgiProject("com.lihaoyi.scalatex-site", exports = Seq("scalatex.*", "ammonite.*", "fastparse.*"), privatePackages = Seq("!scala.*", "!scalatags.*", "META-INF.**", "*"), imports = Seq("*")) settings (
       libraryDependencies += "com.lihaoyi" %% "scalatex-site" % "0.3.5",
-      version := "0.3.5"
-      )
+      version := "0.3.5")
 
-  lazy val rx = OsgiProject("rx", exports = Seq("rx.*", "*.sjsir")) settings(
-    libraryDependencies ++= Seq("com.lihaoyi" %% "scalarx" % scalaRxVersion,
-      "com.lihaoyi" %%% ("scalarx" + jsSuffix) % scalaRxVersion),
-    version := scalaRxVersion
-    )
+  lazy val rx = OsgiProject("rx", exports = Seq("rx.*")) settings(
+    libraryDependencies ++= Seq("com.lihaoyi" %% "scalarx" % scalaRxVersion),
+    version := scalaRxVersion)
 
-  lazy val upickle = OsgiProject("upickle", exports = Seq("upickle.*", "jawn.*", "*.sjsir"), imports = Seq("*")) settings(
-    libraryDependencies ++= Seq("com.lihaoyi" %% "upickle" % scalaUpickleVersion,
-      "com.lihaoyi" %%% ("upickle" + jsSuffix) % scalaUpickleVersion),
-    version := scalaUpickleVersion
-    )
+  lazy val upickle = OsgiProject("upickle", exports = Seq("upickle.*", "jawn.*"), imports = Seq("*")) settings(
+    libraryDependencies ++= Seq("com.lihaoyi" %% "upickle" % scalaUpickleVersion),
+    version := scalaUpickleVersion)
 
-  lazy val autowire = OsgiProject("autowire", exports = Seq("autowire.*", "*.sjsir")) settings(
-    libraryDependencies ++= Seq("com.lihaoyi" %% "autowire" % scalaAutowireVersion,
-      "com.lihaoyi" %%% ("autowire" + jsSuffix) % scalaAutowireVersion),
-    version := scalaAutowireVersion
-    )
+  lazy val autowire = OsgiProject("autowire", exports = Seq("autowire.*")) settings(
+    libraryDependencies ++= Seq("com.lihaoyi" %% "autowire" % scalaAutowireVersion),
+    version := scalaAutowireVersion)
 
   lazy val jawnVersion = "0.6.0"
   lazy val jawn = OsgiProject("jawn", exports = Seq("jawn.*", "utf8.json")) settings(
     libraryDependencies += "org.spire-math" %% "jawn-parser" % jawnVersion, version := jawnVersion)
-
-  lazy val scaladgetVersion = "0.8.0-SNAPSHOT"
-  lazy val scaladget = OsgiProject("scaladget", exports = Seq("fr.iscpif.scaladget.*", "org.querki.jsext.*","*.sjsir")) settings(
-    libraryDependencies += "fr.iscpif" %%% ("scaladget" + jsSuffix) % scaladgetVersion, version := scaladgetVersion)
 
   lazy val jsonSimpleVersion = "1.1.1"
   lazy val jsonSimple = OsgiProject("json-simple", exports = Seq("org.json.simple.*")) settings(
@@ -250,8 +230,7 @@ object OSGi extends Defaults {
      OsgiProject("scala-async") settings (
        libraryDependencies += "org.scala-lang.modules" %% "scala-async" % "0.9.1",
        version := "0.9.1",
-	      exportPackage := Seq("scala.async.*")
-       )
+       exportPackage := Seq("scala.async.*"))
 
   lazy val mathVersion = "3.5"
   lazy val math = OsgiProject("org.apache.commons.math", exports = Seq("org.apache.commons.math3.*"), privatePackages = Seq("assets.*")) settings

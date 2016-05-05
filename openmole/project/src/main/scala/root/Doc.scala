@@ -11,7 +11,10 @@ object Doc extends Defaults {
   override def dir = file("doc")
 
   lazy val doc = OsgiProject("org.openmole.doc") enablePlugins (ScalaJSPlugin) settings (
-    libraryDependencies ++= Seq(scalajsDom, scalaTags, scaladget, rx)
+    scalajsDomJS,
+    scalaTagsJS,
+    scaladgetJS,
+    rxJS
   )
   override def osgiSettings = super.osgiSettings ++ Seq(bundleType := Set("doc"))
 

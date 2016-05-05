@@ -11,10 +11,15 @@ object Ext extends GuiDefaults {
   override val dir = super.dir / "ext"
 
   lazy val data = OsgiProject("org.openmole.gui.ext.data") enablePlugins (ScalaJSPlugin) dependsOn (Core.workflow) settings (
-    libraryDependencies ++= Seq(upickle)
+    //libraryDependencies ++= Seq(upickle),
+    upickleJS
   )
 
   lazy val dataui: Project = OsgiProject("org.openmole.gui.ext.dataui") dependsOn (data, Misc.js) enablePlugins (ScalaJSPlugin) settings (
-    libraryDependencies ++= Seq(rx, scalaTags, scalajsDom)
+    //libraryDependencies ++= Seq(scalaTags),
+    rxJS,
+    scalaTagsJS,
+    scalajsDomJS
   )
+
 }
