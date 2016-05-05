@@ -49,7 +49,7 @@ object ScalaREPL {
   @Lenses case class ErrorMessage(decoratedMessage: String, rawMessage: String, position: Option[ErrorPosition])
   @Lenses case class ErrorPosition(line: Int, start: Int, end: Int, point: Int)
 
-  def warmup = new ScalaREPL().eval("def warmup = {}")
+  def warmup = new ScalaREPL().eval("(i: Int) => {case class Test(i: Int); Test(i)}")
   case class HeaderInfo(file: String)
   def firstLine(file: String) = HeaderInfo(file)
 }

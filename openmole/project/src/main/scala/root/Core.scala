@@ -72,7 +72,7 @@ object Core extends Defaults {
       libraryDependencies += scalaLang,
       libraryDependencies += monocle,
       Defaults.macroParadise
-    ) dependsOn (ThirdParties.openmoleByteCode)
+    ) dependsOn (ThirdParties.openmoleByteCode, ThirdParties.openmoleOSGi)
 
   val project = OsgiProject("project", imports = Seq("*")) dependsOn (console, dsl) settings (OsgiKeys.importPackage := Seq("*"))
 
