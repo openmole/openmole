@@ -19,8 +19,7 @@ package org.openmole.tool
 import java.io.{ IOException, File }
 import java.nio.file._
 import org.openmole.tool.file._
-import org.openmole.tool.tar.{ TarConstants, TarInputStream, TarEntry, TarOutputStream }
-
+import org.openmole.tool.stream._
 import scala.collection.mutable.{ Stack, ListBuffer }
 import collection.JavaConversions._
 

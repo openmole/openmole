@@ -22,8 +22,8 @@ import java.util.UUID
 
 import fr.iscpif.gridscale.storage._
 import org.openmole.core.workspace._
-import org.openmole.tool.thread._
 import org.openmole.tool.file._
+import org.openmole.tool.stream._
 import concurrent.duration._
 
 object TransferOptions {

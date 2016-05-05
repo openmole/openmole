@@ -26,6 +26,7 @@ import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import java.nio.file.FileSystems
 import java.util.zip.GZIPInputStream
 import org.openmole.tool.file._
+import org.openmole.tool.stream._
 import org.openmole.core.workspace._
 import EGIEnvironment._
 import org.globus.gsi.gssapi.GlobusGSSCredentialImpl

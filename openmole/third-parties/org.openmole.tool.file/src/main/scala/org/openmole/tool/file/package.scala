@@ -32,6 +32,7 @@ import scala.collection.mutable.ListBuffer
 import scala.concurrent.duration.Duration
 import scala.io.Source
 import scala.util.{ Success, Failure, Try }
+import org.openmole.tool.stream._
 
 package file {
 
@@ -47,8 +48,6 @@ package file {
     def File(s: String): File = new File(s)
 
     def currentDirectory = new File(".")
-
-    val DefaultBufferSize = 8 * 1024
 
     val EXEC_MODE = 1 + 8 + 64
     val WRITE_MODE = 2 + 16 + 128
@@ -67,69 +66,6 @@ package file {
 
     implicit def predicateToFileFilter(predicate: File ⇒ Boolean) = new FileFilter {
       def accept(p1: File) = predicate(p1)
-    }
-
-    implicit class OutputStreamDecorator(os: OutputStream) {
-      def flushClose = {
-        try os.flush
-        finally os.close
-      }
-
-      def toGZ = new GZIPOutputStream(os)
-
-      def append(content: String) = new PrintWriter(os).append(content).flush
-
-      def appendLine(line: String) = append(line + "\n")
-    }
-
-    implicit class InputStreamDecorator(is: InputStream) {
-
-      // FIXME useful?
-      def copy(to: OutputStream): Unit = {
-        val buffer = new Array[Byte](DefaultBufferSize)
-        Iterator.continually(is.read(buffer)).takeWhile(_ != -1).foreach {
-          to.write(buffer, 0, _)
-        }
-      }
-
-      def copy(to: File, maxRead: Int, timeout: Duration): Unit =
-        withClosable(to.bufferedOutputStream()) {
-          copy(_, maxRead, timeout)
-        }
-
-      def copy(to: OutputStream, maxRead: Int, timeout: Duration) = {
-        val buffer = new Array[Byte](maxRead)
-        val executor = defaultExecutor
-        val reader = new ReaderRunnable(buffer, is, maxRead)
-
-        Iterator.continually {
-          val futureRead = executor.submit(reader)
-
-          try futureRead.get(timeout.length, timeout.unit)
-          catch {
-            case (e: TimeoutException) ⇒
-              futureRead.cancel(true)
-              throw new IOException(s"Timeout on reading $maxRead bytes, read was longer than $timeout ms.", e)
-          }
-        }.takeWhile(_ != -1).foreach {
-          count ⇒
-            val futureWrite = executor.submit(new WritterRunnable(buffer, to, count))
-
-            try futureWrite.get(timeout.length, timeout.unit)
-            catch {
-              case (e: TimeoutException) ⇒
-                futureWrite.cancel(true)
-                throw new IOException(s"Timeout on writing $count bytes, write was longer than $timeout ms.", e)
-            }
-        }
-      }
-
-      def toGZiped = new GZipedInputStream(is)
-      def toGZ = new GZIPInputStream(is)
-
-      // this one must have REPLACE_EXISTING enabled
-      // but does not support COPY_ATTRIBUTES, nor NOFOLLOW_LINKS
-      def copy(file: File) = Files.copy(is, file, StandardCopyOption.REPLACE_EXISTING)
     }
 
     implicit class FileDecorator(file: File) {
@@ -474,12 +410,6 @@ package file {
 
       def applyRecursive(operation: File ⇒ Unit, stopPath: Iterable[File]): Unit =
         recurse(file)(operation, stopPath)
-    }
-
-    def withClosable[C <: { def close() }, T](open: ⇒ C)(f: C ⇒ T): T = {
-      val c = open
-      try f(c)
-      finally c.close()
     }
 
     private def block(file: File, stopPath: Iterable[File]) =

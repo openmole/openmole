@@ -34,6 +34,7 @@ import scalatags.Text.all._
 import scalatags.Text.{ all ⇒ tags }
 import java.io.{ BufferedOutputStream, File }
 import org.openmole.tool.file._
+import org.openmole.tool.stream._
 import org.openmole.tool.tar._
 import scala.util.{ Failure, Success, Try }
 

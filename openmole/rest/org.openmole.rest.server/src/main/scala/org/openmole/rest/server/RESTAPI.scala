@@ -21,6 +21,7 @@ import org.scalatra._
 import org.scalatra.servlet.FileUploadSupport
 import org.openmole.rest.message._
 import org.openmole.tool.file._
+import org.openmole.tool.stream._
 import org.openmole.tool.tar._
 import scala.util.{ Try, Failure, Success }
 import org.openmole.tool.collection._

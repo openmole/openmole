@@ -31,6 +31,7 @@ import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.data.ListSorting._
 import java.io._
 import org.openmole.tool.file._
+import org.openmole.tool.stream._
 import org.openmole.tool.stream.StringOutputStream
 import org.openmole.tool.tar._
 import java.nio.file.attribute._

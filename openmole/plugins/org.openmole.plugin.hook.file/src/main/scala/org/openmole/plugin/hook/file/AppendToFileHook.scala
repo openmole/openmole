@@ -20,6 +20,7 @@ package org.openmole.plugin.hook.file
 import java.io.File
 
 import org.openmole.tool.file._
+import org.openmole.tool.stream._
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools.ExpandedString
