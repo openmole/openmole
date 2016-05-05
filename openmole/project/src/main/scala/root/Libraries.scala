@@ -102,15 +102,14 @@ object Libraries extends Defaults {
   lazy val rx = "org.openmole" %% "rx" % rxVersion
 
   lazy val scaladgetVersion = "0.8.0-SNAPSHOT"
-  lazy val jsSuffix = ""
 
   lazy val scalajsVersion = "0.6.8"
-  lazy val scaladgetJS = libraryDependencies += "fr.iscpif" %%% ("scaladget" + jsSuffix) % scaladgetVersion
-  lazy val scalajsDomJS = libraryDependencies += "org.scala-js" %%% ("scalajs-dom" + jsSuffix) % scalaJSDomVersion
-  lazy val rxJS = libraryDependencies += "com.lihaoyi" %%% ("scalarx" + jsSuffix) % rxVersion
-  lazy val scalaTagsJS = libraryDependencies += "com.lihaoyi" %%% ("scalatags" + jsSuffix) % scalaTagsVersion
-  lazy val autowireJS = libraryDependencies += "com.lihaoyi" %%% ("autowire" + jsSuffix) % scalaAutowireVersion
-  lazy val upickleJS = libraryDependencies += "com.lihaoyi" %%% ("upickle" + jsSuffix) % scalaUpickleVersion
+  lazy val scaladgetJS = libraryDependencies += "fr.iscpif" %%% "scaladget" % scaladgetVersion
+  lazy val scalajsDomJS = libraryDependencies += "org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion
+  lazy val rxJS = libraryDependencies += "com.lihaoyi" %%% "scalarx" % rxVersion
+  lazy val scalaTagsJS = libraryDependencies += "com.lihaoyi" %%% "scalatags" % scalaTagsVersion
+  lazy val autowireJS = libraryDependencies += "com.lihaoyi" %%% "autowire" % scalaAutowireVersion
+  lazy val upickleJS = libraryDependencies += "com.lihaoyi" %%% "upickle" % scalaUpickleVersion
 
   lazy val scalajsTools = "org.openmole" %% "scalajs-tools" % scalajsVersion
   lazy val scalajsLibrary = "org.openmole" %% "scalajs-library" % scalajsVersion
