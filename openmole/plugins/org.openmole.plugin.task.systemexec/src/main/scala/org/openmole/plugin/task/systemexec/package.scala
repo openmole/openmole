@@ -158,9 +158,9 @@ package systemexec {
           (_: EnvironmentVariables).addEnvironmentVariable(prototype, variable)
       }
 
-    lazy val workDirectory =
+    lazy val customWorkDirectory =
       new {
-        def +=(s: Option[String]) = (_: WorkDirectory).setWorkDirectory(s)
+        def :=(s: Option[String]) = (_: WorkDirectory).setWorkDirectory(s)
       }
 
   }
