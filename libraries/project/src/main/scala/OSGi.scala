@@ -13,7 +13,7 @@ object OSGi extends Defaults {
   val dir = file("target/libraries")
 
   lazy val scalatraVersion = "2.4.0"
-  lazy val jettyVersion = "9.3.8.v20160314"
+  lazy val jettyVersion = "9.2.14.v20151106"
 
   lazy val scalatra = OsgiProject("org.scalatra",
     exports = Seq("org.scalatra.*, org.fusesource.*", "grizzled.*", "com.fasterxml.jackson.*", "org.json4s.*", "org.eclipse.jetty.*", "javax.*"),
@@ -23,7 +23,7 @@ object OSGi extends Defaults {
       libraryDependencies += "org.scalatra" %% "scalatra-auth" % scalatraVersion,
       libraryDependencies += "org.eclipse.jetty" % "jetty-webapp" % jettyVersion,
       libraryDependencies += "org.eclipse.jetty" % "jetty-server" % jettyVersion,
-      libraryDependencies +=  "org.json4s" %% "json4s-jackson" % "3.2.11",
+      libraryDependencies +=  "org.json4s" %% "json4s-jackson" % "3.3.0",
       version := scalatraVersion)
 
 
@@ -143,7 +143,7 @@ object OSGi extends Defaults {
   lazy val querkiJSQueryVersion = "0.11"
   lazy val scalaUpickleVersion = "0.2.6"
   lazy val scalaAutowireVersion = "0.2.5"
-  lazy val scalajsVersion = "0.6.7"
+  lazy val scalajsVersion = "0.6.8"
   lazy val jsSuffix = "_sjs0.6"
 
   lazy val scalajsDom = OsgiProject("scalajs-dom", exports = Seq("org.scalajs.dom.*")) settings(
@@ -152,8 +152,14 @@ object OSGi extends Defaults {
   lazy val querkijQuery = OsgiProject("querki-jquery", exports = Seq("org.querki.*")) settings(
       libraryDependencies += "org.querki" %%% ("jquery-facade"+jsSuffix) % "0.11", version := querkiJSQueryVersion)
 
-  lazy val scalajsTools = OsgiProject("scalajs-tools", exports = Seq("org.scalajs.core.tools.*", "org.scalajs.core.ir.*", "com.google.javascript.*", "com.google.common.*", "rhino_ast.java.com.google.javascript.rhino.*", "org.json.*")) settings(
+  lazy val scalajsTools = OsgiProject("scalajs-tools", exports = Seq("scala.scalajs.*", "org.scalajs.core.tools.*", "org.scalajs.core.ir.*", "com.google.javascript.*", "com.google.common.*", "rhino_ast.java.com.google.javascript.rhino.*", "org.json.*")) settings(
     libraryDependencies += "org.scala-js" %% "scalajs-tools" % scalajsVersion, version := scalajsVersion)
+
+  lazy val scalaJS = OsgiProject("scalajs", exports = Seq("scala.scalajs.*"), imports = Seq("*")) settings (
+    libraryDependencies += "org.scala-js" %% "scalajs-library" % scalajsVersion,
+    version := scalajsVersion
+  )
+
 
   lazy val scalaTags = OsgiProject("com.scalatags", exports = Seq("scalatags.*", "*.sjsir")) settings(
     libraryDependencies ++= Seq("com.lihaoyi" %% "scalatags" % scalaTagsVersion,
@@ -173,7 +179,7 @@ object OSGi extends Defaults {
     version := scalaRxVersion
     )
 
-  lazy val upickle = OsgiProject("upickle", exports = Seq("upickle.*", "jawn.*", "*.sjsir")) settings(
+  lazy val upickle = OsgiProject("upickle", exports = Seq("upickle.*", "jawn.*", "*.sjsir"), imports = Seq("*")) settings(
     libraryDependencies ++= Seq("com.lihaoyi" %% "upickle" % scalaUpickleVersion,
       "com.lihaoyi" %%% ("upickle" + jsSuffix) % scalaUpickleVersion),
     version := scalaUpickleVersion

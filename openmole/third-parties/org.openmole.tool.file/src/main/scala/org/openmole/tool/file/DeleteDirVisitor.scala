@@ -17,7 +17,7 @@
 
 package org.openmole.tool.file
 
-import java.io.{ File, IOException }
+import java.io.{ IOException }
 import java.nio.file.attribute.BasicFileAttributes
 import java.nio.file.{ FileVisitResult, Files, Path, SimpleFileVisitor }
 
