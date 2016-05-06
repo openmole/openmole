@@ -14,7 +14,8 @@ object Doc extends Defaults {
     scalajsDomJS,
     scalaTagsJS,
     scaladgetJS,
-    rxJS
+    rxJS,
+    libraryDependencies += scalaTags
   )
   override def osgiSettings = super.osgiSettings ++ Seq(bundleType := Set("doc"))
 
