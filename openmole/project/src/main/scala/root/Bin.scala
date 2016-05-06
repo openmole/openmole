@@ -116,7 +116,7 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
     scalajHttp,
     txtmark,
     clapper,
-    //jquery,
+    rx,
     scalajs
   )
 
