@@ -194,17 +194,15 @@
         // This code compute 10 couples (for f1 and f2) of medians among 5 samples picked at random in f1 x f2
         val p1 = Val[Double]
         val p2 = Val[Double]
-        val p1Median = Val[Double]
-        val p2Median = Val[Double]
 
         val f1 = p1 in (0.0 to 1.0 by 0.1)
         val f2 = p2 in (0.0 to 1.0 by 0.1)
 
         val e1 = ExplorationTask((f1 x f2) bootstrap (5, 10))
 
-        val stat = ScalaTask("val p1Median = p1.median; val p2Median = p2.median") set (
+        val stat = ScalaTask("val p1 = input.p1.median; val p2 = input.p2.median") set (
           inputs += (p1.toArray, p2.toArray),
-          outputs += (p1Median, p2Median)
+          outputs += (p1, p2)
         )
 
         val mole = e1 -< (stat hook ToStringHook())""")
