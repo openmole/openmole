@@ -2,9 +2,9 @@ package org.openmole.gui.misc.js
 
 import org.scalajs.dom.html._
 import org.scalajs.dom.raw._
-import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
-import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
-import scalatags.JsDom.{ tags ⇒ tags }
+import fr.iscpif.scaladget.api.{BootstrapTags ⇒ bs}
+import fr.iscpif.scaladget.stylesheet.{all ⇒ sheet}
+import scalatags.JsDom.{tags ⇒ tags}
 import org.openmole.gui.misc.js.JsRxTags._
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
@@ -36,10 +36,10 @@ object OMTags {
     )
 
   def glyphBorderButton(
-    text:     String,
-    buttonCB: ModifierSeq,
-    glyCA:    ModifierSeq, todo: () ⇒ Unit
-  ): TypedTag[HTMLButtonElement] = {
+                         text: String,
+                         buttonCB: ModifierSeq,
+                         glyCA: ModifierSeq, todo: () ⇒ Unit
+                       ): TypedTag[HTMLButtonElement] = {
     tags.button(`type` := "button", buttonCB, onclick := { () ⇒ todo() })(
       tags.span(aria.hidden := true)(glyCA)
     )
@@ -80,24 +80,6 @@ object OMTags {
       todo
     })
 
-  private def cbSpan(name: String) = tags.span(name, style := "position: relative; margin-right:5px; margin-left:5px; top: -3px;")
-
-  def checkbox(name: String, default: Boolean)(todo: Input ⇒ Unit) = {
-    lazy val cb: Input = tags.input(`type` := "checkbox", checked := default.toString, onclick := { () ⇒ todo(cb) }).render
-    tags.div(
-      cbSpan(name),
-      cb
-    )
-  }
-
-  def checkbox(default: Boolean, name: String = "")(todo: Input ⇒ Unit) = {
-    lazy val cb: Input = tags.input(`type` := "checkbox", checked := default.toString, onclick := { () ⇒ todo(cb) }).render
-    tags.div(
-      cb,
-      cbSpan(name)
-    )
-  }
-
   def uploadButton(todo: HTMLInputElement ⇒ Unit): TypedTag[HTMLSpanElement] = {
     span(ms("btn-file"), cursor := "pointer", id := "success-like")(
       glyphSpan(glyph_upload),
@@ -105,11 +87,6 @@ object OMTags {
     )
   }
 
-  def uploadGlyphSpan(todo: HTMLInputElement ⇒ Unit): TypedTag[HTMLSpanElement] =
-    span(ms("btn-file"))(
-      glyphSpan(glyph_upload),
-      bs.fileInputMultiple(todo)
-    )
-
   case class LabeledInput(label: Label, input: Input)
+
 }
