@@ -2,9 +2,9 @@ package org.openmole.gui.misc.js
 
 import org.scalajs.dom.html._
 import org.scalajs.dom.raw._
-import fr.iscpif.scaladget.api.{BootstrapTags ⇒ bs}
-import fr.iscpif.scaladget.stylesheet.{all ⇒ sheet}
-import scalatags.JsDom.{tags ⇒ tags}
+import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
+import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
+import scalatags.JsDom.{ tags ⇒ tags }
 import org.openmole.gui.misc.js.JsRxTags._
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
@@ -36,10 +36,10 @@ object OMTags {
     )
 
   def glyphBorderButton(
-                         text: String,
-                         buttonCB: ModifierSeq,
-                         glyCA: ModifierSeq, todo: () ⇒ Unit
-                       ): TypedTag[HTMLButtonElement] = {
+    text:     String,
+    buttonCB: ModifierSeq,
+    glyCA:    ModifierSeq, todo: () ⇒ Unit
+  ): TypedTag[HTMLButtonElement] = {
     tags.button(`type` := "button", buttonCB, onclick := { () ⇒ todo() })(
       tags.span(aria.hidden := true)(glyCA)
     )

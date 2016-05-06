@@ -42,8 +42,6 @@ object Task extends PluginDefaults {
     libraryDependencies += Libraries.scalatest
   )
 
-  lazy val statistic = OsgiProject("statistic", imports = Seq("*")) dependsOn (Core.workflow)
-
   lazy val tools = OsgiProject("tools", imports = Seq("*")) dependsOn (Core.workflow)
 
 }

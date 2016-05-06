@@ -20,7 +20,6 @@ package org.openmole.plugin.method
 import fr.iscpif.mgo._
 import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.builder._
-import org.openmole.core.workflow.execution.Environment
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.puzzle._
 import org.openmole.core.workflow.task._
@@ -44,7 +43,7 @@ package object evolution {
 
   type Objective = Prototype[Double]
   type Objectives = Seq[Objective]
-  type FitnessAggregation = TextClosure[Seq[Double], Double]
+  type FitnessAggregation = Seq[Double] ⇒ Double
   type Genome = Seq[Input[_]]
 
   implicit def intToCounterTerminationConverter(n: Long) = AfterGeneration(n)

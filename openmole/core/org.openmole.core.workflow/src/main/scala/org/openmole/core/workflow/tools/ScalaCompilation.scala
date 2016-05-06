@@ -69,13 +69,6 @@ trait ScalaCompilation {
 
 }
 
-case class TextClosure[I: Manifest, O: Manifest](code: String, plugins: Seq[File] = Seq.empty, libraries: Seq[File] = Seq.empty) extends ScalaCompilation {
-  def returnType = toScalaNativeType(PrototypeType(implicitly[Manifest[I ⇒ O]]))
-  @transient lazy val compiled = compile(s"{$code}: $returnType")
-  compiled.get
-  def apply(i: I) = compiled.get.asInstanceOf[I ⇒ O](i)
-}
-
 object ScalaWrappedCompilation {
   def inputObject = "input"
 
