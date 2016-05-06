@@ -386,7 +386,7 @@ object ApiImpl extends Api {
   def addPlugin(path: SafePath): Unit = {
     import org.openmole.gui.ext.data.ServerFileSytemContext.project
     val file = safePathToFile(path)
-    addPlugins(PluginManager.plugins(file))
+    addPlugins(PluginManager.listBundles(file))
   }
 
   def autoAddPlugins(path: SafePath) = {
@@ -395,7 +395,7 @@ object ApiImpl extends Api {
 
     def recurse(f: File): List[File] = {
       val subPlugins: List[File] = if (f.isDirectory) f.listFilesSafe.toList.flatMap(recurse) else Nil
-      PluginManager.plugins(f).toList ::: subPlugins
+      PluginManager.listBundles(f).toList ::: subPlugins
     }
 
     addPlugins(recurse(file))

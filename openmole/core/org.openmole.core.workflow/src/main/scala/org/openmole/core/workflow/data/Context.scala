@@ -162,6 +162,8 @@ trait Context extends Map[String, Variable[_]] with MapLike[String, Variable[_],
 
   def get(key: String) = variables.get(key)
 
+  def update[T](p: Prototype[T], v: T) = this + Variable(p, v)
+
   override def iterator = variables.iterator
 
   override def toString = prettified(Int.MaxValue)

@@ -66,10 +66,8 @@ class UploadActor(jobManager: JobManager) {
   private def initCommunication(job: BatchExecutionJob, storage: StorageService)(implicit token: AccessToken): SerializedJob = Workspace.withTmpFile("job", ".tar") { jobFile ⇒
     SerialiserService.serialise(job.runnableTasks, jobFile)
 
-    val pluginAndFiles = job.pluginsAndFiles
-
-    val plugins = new TreeSet[File]()(fileOrdering) ++ pluginAndFiles.plugins
-    val files = (new TreeSet[File]()(fileOrdering) ++ pluginAndFiles.files) diff plugins
+    val plugins = new TreeSet[File]()(fileOrdering) ++ job.plugins
+    val files = (new TreeSet[File]()(fileOrdering) ++ job.files) diff plugins
 
     val communicationPath = storage.child(storage.tmpDir, UUID.randomUUID.toString)
     storage.makeDir(communicationPath)

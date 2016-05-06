@@ -60,7 +60,7 @@ object Utils {
 
   def isPlugin(path: SafePath): Boolean = {
     import org.openmole.gui.ext.data.ServerFileSytemContext.project
-    !PluginManager.plugins(safePathToFile(path)).isEmpty
+    !PluginManager.listBundles(safePathToFile(path)).isEmpty
   }
 
   implicit def fileToSafePath(f: File)(implicit context: ServerFileSytemContext): SafePath = {

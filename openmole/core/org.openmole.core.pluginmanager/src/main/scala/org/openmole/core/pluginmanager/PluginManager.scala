@@ -64,7 +64,7 @@ object PluginManager extends Logger {
   def bundleFiles = infos.files.keys
 
   def dependencies(file: File): Option[Iterable[File]] =
-    infos.files.get(file).map { case (id, _) ⇒ allPluginDependencies(Activator.contextOrException.getBundle(id)).map { l ⇒ Activator.contextOrException.getBundle(l).file } }
+    infos.files.get(file).map { case (id, _) ⇒ allPluginDependencies(Activator.contextOrException.getBundle(id)).map { _.file } }
 
   def isClassProvidedByAPlugin(c: Class[_]) = {
     val b = FrameworkUtil.getBundle(c)
@@ -85,7 +85,7 @@ object PluginManager extends Logger {
 
   def pluginsForClass(c: Class[_]): Iterable[File] = {
     val bundle = bundleForClass(c)
-    (bundle.toSeq.flatMap(allPluginDependencies)).map { l ⇒ Activator.contextOrException.getBundle(l).file }
+    bundle.toSeq.flatMap(allPluginDependencies).map(_.file)
   }
 
   def allDepending(file: File, filter: Bundle ⇒ Boolean): Iterable[File] =
@@ -94,19 +94,19 @@ object PluginManager extends Logger {
       case None    ⇒ Iterable.empty
     }
 
-  def isPlugin(file: File) = {
+  def isBundle(file: File) = {
     def isDirectoryPlugin(file: File) = file.isDirectory && file./("META-INF")./("MANIFEST.MF").exists
     isDirectoryPlugin(file) || (!file.isDirectory && file.isJar)
   }
 
-  def plugins(path: File): Iterable[File] =
-    if (isPlugin(path)) List(path)
-    else if (path.isDirectory) path.listFilesSafe.filter(isPlugin)
+  def listBundles(path: File): Iterable[File] =
+    if (isBundle(path)) List(path)
+    else if (path.isDirectory) path.listFilesSafe.filter(isBundle)
     else Nil
 
   def tryLoad(files: Iterable[File]): Seq[(Bundle, Throwable)] = synchronized {
     val bundles =
-      files.flatMap { plugins }.flatMap {
+      files.flatMap { listBundles }.flatMap {
         b ⇒
           Try(installBundle(b)) match {
             case Success(r) ⇒ Some(r)
@@ -123,7 +123,7 @@ object PluginManager extends Logger {
   }
 
   def load(files: Iterable[File]) = synchronized {
-    val bundles = files.flatMap { plugins }.map { installBundle }.toList
+    val bundles = files.flatMap { listBundles }.map { installBundle }.toList
     bundles.foreach {
       b ⇒
         logger.fine(s"Stating bundle ${b.getLocation}")
@@ -140,16 +140,19 @@ object PluginManager extends Logger {
   def load(path: File): Unit = load(List(path))
 
   def loadDir(path: File): Unit =
-    if (path.exists && path.isDirectory) load(plugins(path))
+    if (path.exists && path.isDirectory) load(listBundles(path))
 
   def bundle(file: File) = infos.files.get(file.getCanonicalFile).map { id ⇒ Activator.contextOrException.getBundle(id._1) }
 
   private def allDependencies(b: Bundle) = dependencies(List(b))
 
+  def isPlugin(b: Bundle): Boolean = isPlugin(b.getBundleId)
+  def isPlugin(id: Long): Boolean = !infos.providedDependencies.contains(id)
+
   def allPluginDependencies(b: Bundle) = atomic { implicit ctx ⇒
     resolvedPluginDependenciesCache.
       getOrElseUpdate(b.getBundleId, dependencies(List(b)).map(_.getBundleId)).
-      filter(b ⇒ !infos.providedDependencies.contains(b))
+      filter(isPlugin).map(l ⇒ Activator.contextOrException.getBundle(l))
   }
 
   private def installBundle(f: File) =

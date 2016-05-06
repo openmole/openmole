@@ -39,9 +39,9 @@ class AssociativeCache[K, T] {
     }
   }
 
-  def cache(cacheAssociation: Object, key: K, cacheable: ⇒ T): T = {
+  def cache(cacheAssociation: Object, key: K)(cacheable: K ⇒ T): T = {
     def cache = {
-      val computedCache = cacheable
+      val computedCache = cacheable(key)
       cacheMaps.synchronized {
         def cacheMap(cacheAssociation: Object): HashMap[K, T] =
           cacheMaps.getOrElseUpdate(cacheAssociation, new HashMap[K, T])
