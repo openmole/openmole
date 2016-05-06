@@ -163,10 +163,6 @@ object OSGi extends Defaults {
       libraryDependencies += "com.lihaoyi" %% "scalatex-site" % "0.3.5",
       version := "0.3.5")
 
-  lazy val rx = OsgiProject("rx", exports = Seq("rx.*")) settings(
-    libraryDependencies ++= Seq("com.lihaoyi" %% "scalarx" % scalaRxVersion),
-    version := scalaRxVersion)
-
   lazy val upickle = OsgiProject("upickle", exports = Seq("upickle.*", "jawn.*"), imports = Seq("*")) settings(
     libraryDependencies ++= Seq("com.lihaoyi" %% "upickle" % scalaUpickleVersion),
     version := scalaUpickleVersion)
@@ -174,10 +170,6 @@ object OSGi extends Defaults {
   lazy val autowire = OsgiProject("autowire", exports = Seq("autowire.*")) settings(
     libraryDependencies ++= Seq("com.lihaoyi" %% "autowire" % scalaAutowireVersion),
     version := scalaAutowireVersion)
-
-  lazy val jawnVersion = "0.6.0"
-  lazy val jawn = OsgiProject("jawn", exports = Seq("jawn.*", "utf8.json")) settings(
-    libraryDependencies += "org.spire-math" %% "jawn-parser" % jawnVersion, version := jawnVersion)
 
   lazy val jsonSimpleVersion = "1.1.1"
   lazy val jsonSimple = OsgiProject("json-simple", exports = Seq("org.json.simple.*")) settings(

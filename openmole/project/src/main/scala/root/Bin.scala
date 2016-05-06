@@ -112,12 +112,11 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
     scalaTags,
     autowire,
     upickle,
-    rx,
     scalatra intransitive (),
     scalajHttp,
     txtmark,
     clapper,
-    jquery,
+    //jquery,
     scalajs
   )
 

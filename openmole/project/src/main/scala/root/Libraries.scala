@@ -88,8 +88,6 @@ object Libraries extends Defaults {
 
   lazy val guava = "org.openmole" %% "com-google-guava" % "18.0"
 
-  lazy val jawn = "org.openmole" %% "jawn" % "0.6.0"
-
   lazy val scalaTagsVersion = "0.5.4"
   lazy val scalaJSDomVersion = "0.9.0"
   lazy val rxVersion = "0.2.8"
@@ -99,7 +97,6 @@ object Libraries extends Defaults {
   lazy val upickle = "org.openmole" %% "upickle" % scalaUpickleVersion
   lazy val autowire = "org.openmole" %% "autowire" % scalaAutowireVersion
   lazy val scalaTags = "org.openmole" %% "com-scalatags" % scalaTagsVersion
-  lazy val rx = "org.openmole" %% "rx" % rxVersion
 
   lazy val scaladgetVersion = "0.8.0-SNAPSHOT"
 
