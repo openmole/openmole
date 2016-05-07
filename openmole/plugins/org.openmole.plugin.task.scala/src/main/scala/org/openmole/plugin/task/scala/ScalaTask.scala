@@ -32,6 +32,9 @@ object ScalaTask {
       def toTask = new ScalaTask(source) with Built
     }
 
+  def apply(closure: (Context, ⇒ Random) ⇒ Seq[Variable[_]]) =
+    ClosureTask((ctx, rng) ⇒ Context(closure(ctx, rng)))
+
 }
 
 abstract class ScalaTask(val source: String) extends JVMLanguageTask with ValidateTask {

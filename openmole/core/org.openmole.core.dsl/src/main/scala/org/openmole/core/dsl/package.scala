@@ -58,9 +58,8 @@ package dsl {
       with TransitionPackage
       with BuilderPackage
       with Classes
-      with FilePackage
       with TypesPackage
-      with StatisticsPackage {
+      with CodePackage {
 
     def valImpl[T: c.WeakTypeTag](c: MContext): c.Expr[Prototype[T]] = {
       import c.universe._

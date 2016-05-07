@@ -34,7 +34,7 @@ trait ScalaCompilation {
 
   def plugins: Seq[File]
   def libraries: Seq[File]
-  def openMOLEImports = Seq(s"${CodeTool.namespace}._")
+  def openMOLEImports = Seq(s"${CodePackage.namespace}._")
 
   def addImports(code: String) =
     s"""

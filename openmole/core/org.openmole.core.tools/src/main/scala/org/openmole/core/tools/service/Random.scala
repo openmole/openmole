@@ -22,7 +22,11 @@ import org.apache.commons.math3.random.{ RandomGenerator, Well44497b, RandomAdap
 
 object Random { random ⇒
   def uuid2long(uuid: UUID) = uuid.getMostSignificantBits ^ uuid.getLeastSignificantBits
-  def newRNG(seed: Long) = new SynchronizedRandom(new Well44497b(seed))
+
+  def apply(seed: Long) = new SynchronizedRandom(new Well44497b(seed))
+
+  @deprecated("6.0", "use apply(seed)")
+  def newRNG(seed: Long) = apply(seed)
 
   def newUnsychronizedRNG(seed: Long) = new RandomAdaptor(new Well44497b(seed))
 

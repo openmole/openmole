@@ -15,10 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package org.openmole.core.workflow.task
+package org.openmole.plugin.task.scala
 
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.task.{ Task, TaskExecutionContext }
 
 import scala.util.Random
 

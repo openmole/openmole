@@ -16,15 +16,15 @@
  */
 package org.openmole.core.workflow.tools
 
-import org.openmole.core.tools.service.Random
+import org.openmole.core.tools.service
 import org.openmole.core.workspace.Workspace
 import org.openmole.tool.file.FilePackage
 import org.openmole.tool.statistics.StatisticsPackage
 
-object CodeTool extends FilePackage with StatisticsPackage {
-  def namespace = s"${this.getClass.getPackage.getName}.CodeTool"
+trait CodePackage extends FilePackage with StatisticsPackage {
+  def Random(seed: Long) = service.Random.apply(seed)
+  def newRNG(seed: Long) = Random(seed)
 
-  def newRNG(seed: Long) = Random.newRNG(seed)
   def newFile(prefix: String = Workspace.fixedPrefix, suffix: String = Workspace.fixedPostfix) = Workspace.newFile(prefix, suffix)
   def newDir(prefix: String = Workspace.fixedDir) = Workspace.newDir(prefix)
   def mkDir(prefix: String = Workspace.fixedDir) = {
@@ -32,4 +32,8 @@ object CodeTool extends FilePackage with StatisticsPackage {
     dir.mkdirs
     dir
   }
+}
+
+object CodePackage extends CodePackage {
+  def namespace = s"${this.getClass.getPackage.getName}.${classOf[CodePackage].getSimpleName}"
 }
