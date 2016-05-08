@@ -32,8 +32,11 @@ object ScalaTask {
       def toTask = new ScalaTask(source) with Built
     }
 
-  def apply(closure: (Context, ⇒ Random) ⇒ Seq[Variable[_]]) =
-    ClosureTask((ctx, rng) ⇒ Context(closure(ctx, rng)))
+  def apply(f: (Context, ⇒ Random) ⇒ Seq[Variable[_]]) =
+    ClosureTask((ctx, rng) ⇒ Context(f(ctx, rng)))
+
+  def apply(f: Context ⇒ Seq[Variable[_]]) =
+    ClosureTask((ctx, _) ⇒ Context(f(ctx)))
 
 }
 
