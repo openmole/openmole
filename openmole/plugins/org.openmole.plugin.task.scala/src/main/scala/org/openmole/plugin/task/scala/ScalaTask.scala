@@ -42,7 +42,14 @@ object ScalaTask {
 
 abstract class ScalaTask(val source: String) extends JVMLanguageTask with ValidateTask {
 
-  @transient lazy val scalaCompilation = ScalaWrappedCompilation.static(source, inputs.toSeq, ScalaWrappedCompilation.WrappedOutput(outputs))(manifest[java.util.Map[String, Any]])
+  @transient lazy val scalaCompilation =
+    ScalaWrappedCompilation.static(
+      source,
+      inputs.toSeq,
+      ScalaWrappedCompilation.WrappedOutput(outputs),
+      libraries = libraries,
+      plugins = plugins
+    )(manifest[java.util.Map[String, Any]])
 
   override def validate =
     Try(scalaCompilation) match {

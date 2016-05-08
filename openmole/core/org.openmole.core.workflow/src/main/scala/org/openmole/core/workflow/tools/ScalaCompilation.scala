@@ -72,8 +72,14 @@ trait ScalaCompilation {
 object ScalaWrappedCompilation {
   def inputObject = "input"
 
-  def static[R](code: String, _inputs: Seq[Prototype[_]], wrapping: OutputWrapping[R] = RawOutput())(implicit m: Manifest[_ <: R]) = {
-    val _wrapping = wrapping
+  def static[R](
+    code:      String,
+    inputs:    Seq[Prototype[_]],
+    wrapping:  OutputWrapping[R] = RawOutput(),
+    libraries: Seq[File]         = Seq.empty,
+    plugins:   Seq[File]         = Seq.empty
+  )(implicit m: Manifest[_ <: R]) = {
+    val (_inputs, _wrapping, _libraries, _plugins) = (inputs, wrapping, libraries, plugins)
 
     val compilation =
       new ScalaWrappedCompilation with StaticHeader {
@@ -82,8 +88,8 @@ object ScalaWrappedCompilation {
         override def inputs = _inputs
         override val wrapping = _wrapping
         override def source: String = code
-        override def plugins: Seq[File] = Seq.empty
-        override def libraries: Seq[File] = Seq.empty
+        override def plugins: Seq[File] = _plugins
+        override def libraries: Seq[File] = _libraries
       }
 
     compilation.functionCode.get
