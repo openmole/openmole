@@ -34,6 +34,7 @@ package data {
 
     implicit class PrototypeTypeDecorator[T](p: PrototypeType[T]) {
       def toArray = PrototypeType[Array[T]](p.manifest.toArray)
+      def array = toArray
       def isArray = p.manifest.isArray
       def asArray = p.asInstanceOf[PrototypeType[Array[T]]]
     }
@@ -57,6 +58,10 @@ package data {
       }
 
       def toArray: Prototype[Array[T]] = Prototype(prototype.name)(prototype.`type`.toArray)
+
+      def array(level: Int) = toArray(level)
+      def array = toArray
+
       def unsecureType = prototype.`type`.asInstanceOf[Manifest[Any]]
     }
 
