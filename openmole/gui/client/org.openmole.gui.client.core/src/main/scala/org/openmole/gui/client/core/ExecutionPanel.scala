@@ -138,10 +138,6 @@ class ExecutionPanel extends ModalPanel {
     tags.table(sheet.table)(
       thead,
       Rx {
-        println("In RX exeTable " + envError())
-        println("In RX exeTable 1 " + envErrorVisible())
-        println("In RX exeTable 2 " + execInfo())
-
         tbody({
           for {
             (id, staticInfo, executionInfo) ← execInfo().executionInfos.sortBy(_._2.startDate).reverse
@@ -168,7 +164,6 @@ class ExecutionPanel extends ModalPanel {
             val envID: VisibleID = "env"
             val errorID: VisibleID = "error"
             val outputStreamID: VisibleID = "outputStream"
-            val envErrorID: VisibleID = "envError"
 
             val scriptLink = expander.getLink(staticInfo.path.name, id.id, scriptID)
             val envLink = expander.getGlyph(glyph_stats, "Env", id.id, envID)

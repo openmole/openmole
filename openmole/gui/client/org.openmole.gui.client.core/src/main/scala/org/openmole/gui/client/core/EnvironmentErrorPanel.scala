@@ -4,7 +4,9 @@ import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
 import org.openmole.gui.ext.data._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import org.openmole.gui.misc.utils.{ stylesheet, Utils }
-import scalatags.JsDom.{ tags ⇒ tags }
+import org.scalajs.dom.html.TableSection
+import org.scalajs.dom.raw.HTMLTableElement
+import scalatags.JsDom.{ TypedTag, tags ⇒ tags }
 import org.openmole.gui.misc.js.JsRxTags._
 import scalatags.JsDom.all._
 import sheet._
@@ -36,7 +38,7 @@ class EnvironmentErrorPanel {
 
   val scrollable = scrollableDiv()
   val sortingAndOrdering: Var[ListSortingAndOrdering] = Var(ListSortingAndOrdering(TimeSorting, Descending))
-  val errors: Var[EnvironmentErrorData] = Var(EnvironmentErrorData(Seq()))
+  val entries: Var[TypedTag[TableSection]] = Var(tbody)
 
   val topTriangle = glyph_triangle_top +++ (fontSize := 10)
   val bottomTriangle = glyph_triangle_bottom +++ (fontSize := 10)
@@ -75,9 +77,29 @@ class EnvironmentErrorPanel {
     }
   }
 
-  private val entries = {
-    val stacks = errors().datedErrors.map(_._1).groupBy(_.errorMessage).map { case (k, v) ⇒ k → v.head.stack }
-    tags.table(fontSize := "0.96em", width := "100%")(
+  def setErrors(ers: EnvironmentErrorData) = {
+    val stacks = ers.datedErrors.map(_._1).groupBy(_.errorMessage).map { case (k, v) ⇒ k → v.head.stack }
+    entries() = tbody(
+      for {
+        error ← sort(ers, sortingAndOrdering())
+      } yield {
+        tags.tr(row +++ stylesheet.errorTable)(
+          tags.td(colMD(12))(
+            tags.a(error._1, cursor := "pointer", onclick := {
+              () ⇒
+                panels.environmentStackPanel.content() = stacks(error._1).stackTrace
+                panels.environmentStackTriggerer.open
+            })
+          ),
+          tags.td(colMD(1))(Utils.longToDate(error._2).split(",").last),
+          tags.td(colMD(1))(label(error._3)(label_default))
+        )
+      }
+    )
+  }
+
+  val view = {
+    val errorTable = tags.table(fontSize := "0.96em", width := "100%")(
       thead(
         tr(row)(
           th(exclusiveButton("Error", () ⇒ setSorting(AlphaSorting, Ascending), () ⇒ setSorting(AlphaSorting, Descending))),
@@ -85,31 +107,11 @@ class EnvironmentErrorPanel {
           th(exclusiveButton("Level", () ⇒ setSorting(LevelSorting, Ascending), () ⇒ setSorting(LevelSorting, Descending)))
         )
       ), Rx {
-        tbody(
-          for {
-            error ← sort(errors(), sortingAndOrdering())
-          } yield {
-            tags.tr(row +++ stylesheet.errorTable)(
-              tags.td(colMD(12))(
-                tags.a(error._1, cursor := "pointer", onclick := {
-                  () ⇒
-                    panels.environmentStackPanel.content() = stacks(error._1).stackTrace
-                    panels.environmentStackTriggerer.open
-                })
-              ),
-              tags.td(colMD(1))(Utils.longToDate(error._2).split(",").last),
-              tags.td(colMD(1))(label(error._3)(label_default))
-            )
-          }
-        )
+        entries()
       }
     )
-  }
 
-  def setErrors(ers: EnvironmentErrorData) = errors() = ers
-
-  val view = {
-    scrollable.setChild(div(stylesheet.environmentPanelError)(entries).render)
+    scrollable.setChild(div(stylesheet.environmentPanelError)(errorTable).render)
     scrollable.sRender
   }
 
