@@ -59,7 +59,8 @@ trait Api {
   def saveFiles(fileContents: Seq[AlterableFileContent]): Unit
 
   //EXECUTIONS
-  def allStates(lines: Int): (Seq[(ExecutionId, StaticExecutionInfo, ExecutionInfo)], Seq[RunningOutputData])
+  def allStates(lines: Int): (Seq[(ExecutionId, ExecutionInfo)], Seq[RunningOutputData])
+  def staticInfos(): Seq[(ExecutionId, StaticExecutionInfo)]
   def cancelExecution(id: ExecutionId): Unit
   def removeExecution(id: ExecutionId): Unit
   def runScript(scriptData: ScriptData): Unit

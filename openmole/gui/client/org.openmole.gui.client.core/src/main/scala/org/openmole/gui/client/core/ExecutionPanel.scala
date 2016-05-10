@@ -29,7 +29,6 @@ import scalatags.JsDom.all._
 import org.openmole.gui.misc.js.{ _ }
 import org.openmole.gui.misc.js.Expander._
 import scalatags.JsDom._
-import org.openmole.gui.misc.js.Tooltip._
 import org.openmole.gui.misc.js.JsRxTags._
 import scala.scalajs.js.timers._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
@@ -41,17 +40,17 @@ import org.openmole.gui.ext.data._
 import bs._
 import rx._
 import concurrent.duration._
-import style._
 
 class ExecutionPanel extends ModalPanel {
   lazy val modalID = "executionsPanelID"
 
   case class PanelInfo(
-    executionInfos: Seq[(ExecutionId, StaticExecutionInfo, ExecutionInfo)],
+    executionInfos: Seq[(ExecutionId, ExecutionInfo)],
     outputsInfos:   Seq[RunningOutputData]
   )
 
   val execInfo = Var(PanelInfo(Seq(), Seq()))
+  val staticInfo: Var[Map[ExecutionId, StaticExecutionInfo]] = Var(Map())
   var envError: Var[EnvironmentErrorData] = Var(EnvironmentErrorData(Seq()))
   val expander = new Expander
 
@@ -76,10 +75,15 @@ class ExecutionPanel extends ModalPanel {
     }
   }
 
-  def onOpen() = {
+  def updateStaticInfos = OMPost[Api].staticInfos.call().foreach { s ⇒
+    staticInfo() = s.toMap
     setTimeout(0) {
       updateExecutionInfo
     }
+  }
+
+  def onOpen() = {
+    updateStaticInfos
   }
 
   def onClose() = {}
@@ -135,12 +139,16 @@ class ExecutionPanel extends ModalPanel {
   )
 
   lazy val executionTable = {
+    val scriptID: VisibleID = "script"
+    val envID: VisibleID = "env"
+    val errorID: VisibleID = "error"
+    val outputStreamID: VisibleID = "outputStream"
     tags.table(sheet.table)(
       thead,
       Rx {
         tbody({
           for {
-            (id, staticInfo, executionInfo) ← execInfo().executionInfos.sortBy(_._2.startDate).reverse
+            (id, executionInfo) ← execInfo().executionInfos.sortBy { case (execId, _) ⇒ staticInfo()(execId).startDate }.reverse
           } yield {
 
             val duration: Duration = (executionInfo.duration milliseconds)
@@ -160,22 +168,17 @@ class ExecutionPanel extends ModalPanel {
               case r: Ready    ⇒ ExecutionDetails("0", 0)
             }
 
-            val scriptID: VisibleID = "script"
-            val envID: VisibleID = "env"
-            val errorID: VisibleID = "error"
-            val outputStreamID: VisibleID = "outputStream"
-
-            val scriptLink = expander.getLink(staticInfo.path.name, id.id, scriptID)
+            val scriptLink = expander.getLink(staticInfo()(id).path.name, id.id, scriptID)
             val envLink = expander.getGlyph(glyph_stats, "Env", id.id, envID)
             val stateLink = executionInfo match {
-              case f: Failed ⇒ expander.getLink(executionInfo.state, id.id, errorID)
-              case _         ⇒ tags.span(executionInfo.state)
+              case f: Failed ⇒ expander.getLink(executionInfo.state, id.id, errorID).render
+              case _         ⇒ tags.span(executionInfo.state).render
             }
             val outputLink = expander.getGlyph(glyph_list, "", id.id, outputStreamID, () ⇒ doScrolls)
 
             lazy val hiddenMap: Map[VisibleID, Modifier] = Map(
               scriptID → staticPanel(id, scriptTextAreas,
-                () ⇒ scrollableText(staticInfo.script)).view,
+                () ⇒ scrollableText(staticInfo()(id).script)).view,
               envID → {
                 details.envStates.map { e ⇒
                   tags.table(sheet.table)(
@@ -183,13 +186,13 @@ class ExecutionPanel extends ModalPanel {
                     tbody(
                       Seq(
                         tr(row)(
-                          td(colMD(3))(tags.span(e.taskName).tooltip(tags.span("Environment name"))),
-                          td(colMD(2))(glyphAndText(glyph_upload, s" ${e.networkActivity.uploadingFiles} ${displaySize(e.networkActivity.uploadedSize, e.networkActivity.readableUploadedSize)}").tooltip(tags.span("Uploaded"))),
-                          td(colMD(2))(glyphAndText(glyph_download, s" ${e.networkActivity.downloadingFiles} ${displaySize(e.networkActivity.downloadedSize, e.networkActivity.readableDownloadedSize)}").tooltip(tags.span("Downloaded"))),
-                          td(colMD(2))(glyphAndText(glyph_road +++ sheet.paddingBottom(7), e.submitted.toString).tooltip(tags.span("Submitted jobs"))),
-                          td(colMD(1))(glyphAndText(glyph_flash +++ sheet.paddingBottom(7), e.running.toString).tooltip(tags.span("Running jobs"))),
-                          td(colMD(1))(glyphAndText(glyph_flag +++ sheet.paddingBottom(7), e.done.toString).tooltip(tags.span("Completed jobs"))),
-                          td(colMD(1))(glyphAndText(glyph_fire +++ sheet.paddingBottom(7), e.failed.toString).tooltip(tags.span("Failed jobs"))),
+                          td(colMD(3))(tags.span(e.taskName)),
+                          td(colMD(2))(glyphAndText(glyph_upload, s" ${e.networkActivity.uploadingFiles} ${displaySize(e.networkActivity.uploadedSize, e.networkActivity.readableUploadedSize)}")),
+                          td(colMD(2))(glyphAndText(glyph_download, s" ${e.networkActivity.downloadingFiles} ${displaySize(e.networkActivity.downloadedSize, e.networkActivity.readableDownloadedSize)}")),
+                          td(colMD(2))(glyphAndText(glyph_road +++ sheet.paddingBottom(7), e.submitted.toString)),
+                          td(colMD(1))(glyphAndText(glyph_flash +++ sheet.paddingBottom(7), e.running.toString)),
+                          td(colMD(1))(glyphAndText(glyph_flag +++ sheet.paddingBottom(7), e.done.toString)),
+                          td(colMD(1))(glyphAndText(glyph_fire +++ sheet.paddingBottom(7), e.failed.toString)),
                           td(colMD(3))(tags.span(omsheet.color("#3086b5") +++ ((envErrorVisible().contains(e.envId)), ms(" executionVisible"), emptyMod))(
                             sheet.pointer, onclick := { () ⇒
                             if (envErrorVisible().contains(e.envId)) envErrorVisible() = envErrorVisible().filterNot {
@@ -249,24 +252,24 @@ class ExecutionPanel extends ModalPanel {
 
             Seq(
               tr(row +++ omsheet.executionTable, colspan := 12)(
-                td(colMD(2))(visibleClass(id.id, scriptID))(scriptLink.tooltip(tags.span("Show script"))),
-                td(colMD(2))(div(Utils.longToDate(staticInfo.startDate)).tooltip(tags.span("Start time"))),
-                td(colMD(2))(glyphAndText(glyph_flash, details.running.toString).tooltip(tags.span("Running jobs"))),
-                td(colMD(2))(glyphAndText(glyph_flag, details.ratio.toString).tooltip(tags.span("Jobs progression"))),
-                td(colMD(1))(div(durationString).tooltip(tags.span("Execution duration"))),
-                td(colMD(1))(stateLink.tooltip((tags.span("Execution state"))))(ms(executionInfo.state + "State")),
+                td(colMD(2))(visibleClass(id.id, scriptID))(scriptLink),
+                td(colMD(2))(div(Utils.longToDate(staticInfo()(id).startDate))),
+                td(colMD(2))(glyphAndText(glyph_flash, details.running.toString)),
+                td(colMD(2))(glyphAndText(glyph_flag, details.ratio.toString)),
+                td(colMD(1))(div(durationString)),
+                td(colMD(1))(ms(executionInfo.state + "State"))(stateLink),
                 td(colMD(1))(visibleClass(id.id, envID))(envLink),
-                td(colMD(1))(visibleClass(id.id, outputStreamID))(outputLink.tooltip(tags.span("Execution outputs"))),
+                td(colMD(1))(visibleClass(id.id, outputStreamID))(outputLink),
                 td(colMD(1))(tags.span(glyph_remove +++ ms("removeExecution"), onclick := { () ⇒
                   OMPost[Api].cancelExecution(id).call().foreach { r ⇒
                     updateExecutionInfo
                   }
-                }).tooltip(tags.span("Cancel execution"), popupStyle = omsheet.warningTooltip)),
+                })),
                 td(colMD(1))(tags.span(glyph_trash +++ ms("removeExecution"), onclick := { () ⇒
                   OMPost[Api].removeExecution(id).call().foreach { r ⇒
                     updateExecutionInfo
                   }
-                }).tooltip(tags.span("Remove execution"), popupStyle = omsheet.warningTooltip))
+                }))
               ),
               tr(row)(
                 expander.getVisible(id.id) match {

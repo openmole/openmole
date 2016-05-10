@@ -118,7 +118,13 @@ class Execution {
     }
   }
 
-  def allStates(lines: Int): (Seq[(ExecutionId, StaticExecutionInfo, ExecutionInfo)], Seq[RunningOutputData]) = atomic { implicit ctx ⇒
+  def staticInfos(): Seq[(ExecutionId, StaticExecutionInfo)] = atomic { implicit ctx ⇒
+    for {
+      (k, s) ← staticExecutionInfo.toSeq
+    } yield (k, s)
+  }
+
+  def allStates(lines: Int): (Seq[(ExecutionId, ExecutionInfo)], Seq[RunningOutputData]) = atomic { implicit ctx ⇒
 
     val envIds = Runnings.environmentIds
 
@@ -128,7 +134,7 @@ class Execution {
 
     val executions = for {
       (k, s) ← staticExecutionInfo.toSeq
-    } yield (k, s, executionInfo(k))
+    } yield (k, executionInfo(k))
 
     (executions, outputs)
   }

@@ -328,6 +328,8 @@ object ApiImpl extends Api {
 
   def allStates(lines: Int) = execution.allStates(lines)
 
+  def staticInfos() = execution.staticInfos()
+
   def runningErrorEnvironmentData: EnvironmentErrorData = atomic { implicit ctx ⇒
     val envIds = Runnings.environmentIds
 

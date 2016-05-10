@@ -1,13 +1,14 @@
 package org.openmole.gui.misc.js
 
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
-import org.openmole.gui.misc.utils.{ stylesheet ⇒ sheet }
 import fr.iscpif.scaladget.stylesheet.all._
 import bs._
+import org.scalajs.dom.raw.{ HTMLDivElement, HTMLSpanElement }
 import rx._
 
 import scalatags.JsDom.{ tags ⇒ tags }
 import scalatags.JsDom.all._
+import scalatags.JsDom.TypedTag
 
 /*
  * Copyright (C) 09/06/15 // mathieu.leclaire@openmole.org
@@ -78,12 +79,11 @@ class Expander {
 
   def getGlyph(glyph: ModifierSeq, linkName: String, expandId: ExpandID, visibleId: VisibleID, todo: () ⇒ Unit = () ⇒ {}) = {
     updateMaps(expandId, visibleId)
-    tags.span(glyph +++ ms("vert-align"), onclick := {
+    tags.span(glyph, onclick := {
       () ⇒
-        {
-          setTarget(expandId, visibleId)
-          todo()
-        }
+        setTarget(expandId, visibleId)
+        todo()
     }, linkName)
   }
+
 }
