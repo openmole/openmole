@@ -32,11 +32,24 @@ object ScalaTask {
       def toTask = new ScalaTask(source) with Built
     }
 
+  def apply(f: (Context, ⇒ Random) ⇒ Seq[Variable[_]]) =
+    ClosureTask((ctx, rng) ⇒ Context(f(ctx, rng)))
+
+  def apply(f: Context ⇒ Seq[Variable[_]]) =
+    ClosureTask((ctx, _) ⇒ Context(f(ctx)))
+
 }
 
 abstract class ScalaTask(val source: String) extends JVMLanguageTask with ValidateTask {
 
-  @transient lazy val scalaCompilation = ScalaWrappedCompilation.static(source, inputs.toSeq, ScalaWrappedCompilation.WrappedOutput(outputs))(manifest[java.util.Map[String, Any]])
+  @transient lazy val scalaCompilation =
+    ScalaWrappedCompilation.static(
+      source,
+      inputs.toSeq,
+      ScalaWrappedCompilation.WrappedOutput(outputs),
+      libraries = libraries,
+      plugins = plugins
+    )(manifest[java.util.Map[String, Any]])
 
   override def validate =
     Try(scalaCompilation) match {

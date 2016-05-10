@@ -145,6 +145,9 @@ object OSGi extends Defaults {
   lazy val scalaAutowireVersion = "0.2.5"
   lazy val scalajsVersion = "0.6.8"
 
+  lazy val rx = OsgiProject("rx", exports = Seq("rx.*")) settings(
+    libraryDependencies ++= Seq("com.lihaoyi" %% "scalarx" % scalaRxVersion),
+    version := scalaRxVersion)
 
   lazy val scalajsTools = OsgiProject("scalajs-tools", exports = Seq("scala.scalajs.*", "org.scalajs.core.tools.*", "org.scalajs.core.ir.*", "com.google.javascript.*", "com.google.common.*", "rhino_ast.java.com.google.javascript.rhino.*", "org.json.*")) settings(
     libraryDependencies += "org.scala-js" %% "scalajs-tools" % scalajsVersion, version := scalajsVersion)

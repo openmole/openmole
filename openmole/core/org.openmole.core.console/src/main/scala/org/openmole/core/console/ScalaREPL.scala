@@ -33,8 +33,11 @@ import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.tools.nsc.interpreter._
 import monocle.macros._
+
 import scala.tools.nsc.io.AbstractFile
 import org.openmole.tool.osgi._
+
+import scalaz.Foldable
 
 object ScalaREPL {
   @Lenses case class CompilationError(errorMessages: List[ErrorMessage], code: String, parent: Throwable) extends Exception(parent) {
@@ -53,7 +56,46 @@ object ScalaREPL {
   def warmup = new ScalaREPL().eval("(i: Int) => { case class Test(i: Int); Test(i) }")
   case class HeaderInfo(file: String)
   def firstLine(file: String) = HeaderInfo(file)
+
+  case class BundledClass(name: String, bundle: Option[Bundle])
+  case class REPLClass(name: String, path: String, classLoader: REPLClassloader) {
+    def byteCode = classLoader.findClassFile(name).getOrElse(throw new InternalProcessingError("Class not found in this classloader")).toByteArray
+  }
+  case class ReferencedClasses(repl: Vector[REPLClass], other: Vector[BundledClass]) {
+    def plugins = other.flatMap(_.bundle).flatMap(PluginManager.allPluginDependencies).distinct.map(_.file)
+  }
+
+  object ReferencedClasses {
+    def merge(rc1: ReferencedClasses, rc2: ReferencedClasses) =
+      ReferencedClasses(rc1.repl ++ rc2.repl, rc1.other ++ rc2.other)
+    def empty = ReferencedClasses(Vector.empty, Vector.empty)
+  }
+
+  def bundleFromReferencedClass(ref: ReferencedClasses, bundleName: String, bundleVersion: String, bundle: java.io.File) = {
+    val classByteCode = ref.repl.map(c ⇒ ClassByteCode(c.path, c.byteCode))
+
+    def packageName(c: String) = c.reverse.dropWhile(_ != '.').drop(1).reverse
+    def importPackages = ref.other.filter(_.bundle.isDefined).groupBy(_.bundle).toSeq.flatMap {
+      case (b, cs) ⇒
+        for {
+          c ← cs
+          p = packageName(c.name)
+          if !p.isEmpty
+        } yield VersionedPackage(p, b.map(_.getVersion.toString))
+    }.distinct
+
+    createBundle(
+      name = bundleName,
+      version = bundleVersion,
+      classes = classByteCode,
+      exportedPackages = ref.repl.map(c ⇒ packageName(c.name)).distinct.filter(p ⇒ !p.isEmpty),
+      importedPackages = importPackages,
+      bundle = bundle
+    )
+  }
 }
+
+import ScalaREPL._
 
 class REPLClassloader(val file: AbstractFile, parent: ClassLoader) extends scala.reflect.internal.util.AbstractFileClassLoader(file, parent) { cl ⇒
 
@@ -69,9 +111,6 @@ class REPLClassloader(val file: AbstractFile, parent: ClassLoader) extends scala
   def toAbsoluteClassPath(c: String) = s"${file.name}/${toClassPath(c)}"
   def findClassFile(name: String): Option[AbstractFile] = classFiles.find(_.path == toAbsoluteClassPath(name))
   def findClassFile(c: Class[_]): Option[AbstractFile] = findClassFile(c.getClass.getName)
-
-  case class BundledClass(name: String, bundle: Option[Bundle])
-  case class ReferencedClasses(repl: Vector[String], other: Vector[BundledClass])
 
   def referencedClasses(classes: Class[_]*) = {
     import org.openmole.tool.bytecode._
@@ -95,39 +134,19 @@ class REPLClassloader(val file: AbstractFile, parent: ClassLoader) extends scala
 
     val (repl, other) = seen.toVector.partition(c ⇒ findClassFile(c).isDefined)
 
+    val replClasses = repl.map { c ⇒
+      REPLClass(c, cl.toClassPath(c), cl)
+    }
+
     val bundledOther = other.map { c ⇒
       val bundle = tryToLoadClass(c).flatMap(PluginManager.bundleForClass)
       BundledClass(name = c, bundle = bundle)
     }
 
-    ReferencedClasses(repl, bundledOther)
+    ReferencedClasses(replClasses, bundledOther)
   }
 
-  def bundleFromReferencedClass(ref: ReferencedClasses, bundleName: String, bundleVersion: String, bundle: java.io.File) = {
-    val classByteCode = ref.repl.map(c ⇒ ClassByteCode(cl.toClassPath(c), cl.findClassFile(c).get.toByteArray))
-
-    def packageName(c: String) = c.reverse.dropWhile(_ != '.').drop(1).reverse
-    def importPackages = ref.other.filter(_.bundle.isDefined).groupBy(_.bundle).toSeq.flatMap {
-      case (b, cs) ⇒
-        for {
-          c ← cs
-          p = packageName(c.name)
-          if !p.isEmpty
-        } yield VersionedPackage(p, b.map(_.getVersion.toString))
-    }.distinct
-
-    createBundle(
-      name = bundleName,
-      version = bundleVersion,
-      classes = classByteCode,
-      exportedPackages = ref.repl.map(packageName).distinct.filter(p ⇒ !p.isEmpty),
-      importedPackages = importPackages,
-      bundle = bundle
-    )
-  }
 }
-
-import ScalaREPL._
 
 class ScalaREPL(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.empty, quiet: Boolean = true) extends ILoop { repl ⇒
 

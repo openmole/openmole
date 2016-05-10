@@ -200,9 +200,9 @@
 
         val e1 = ExplorationTask((f1 x f2) bootstrap (5, 10))
 
-        val stat = StatisticTask() set (
-          statistics += (p1.toArray, p1, median),
-          statistics += (p2.toArray, p2, median)
+        val stat = ScalaTask("val p1 = input.p1.median; val p2 = input.p2.median") set (
+          inputs += (p1.toArray, p2.toArray),
+          outputs += (p1, p2)
         )
 
         val mole = e1 -< (stat hook ToStringHook())""")

@@ -42,6 +42,7 @@ package dsl {
   import org.openmole.core.logging.LoggerService
   import org.openmole.core.workspace.Workspace
   import org.openmole.tool.file.FilePackage
+  import org.openmole.tool.statistics.StatisticsPackage
   import org.openmole.tool.types.TypesPackage
 
   import scalaz.Functor
@@ -57,8 +58,8 @@ package dsl {
       with TransitionPackage
       with BuilderPackage
       with Classes
-      with FilePackage
-      with TypesPackage {
+      with TypesPackage
+      with CodePackage {
 
     def valImpl[T: c.WeakTypeTag](c: MContext): c.Expr[Prototype[T]] = {
       import c.universe._

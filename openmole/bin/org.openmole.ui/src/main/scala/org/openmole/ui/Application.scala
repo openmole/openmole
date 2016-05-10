@@ -157,8 +157,8 @@ object Application extends Logger {
       if (!notExistingUserPlugins.isEmpty) logger.warning(s"""Some plugins or plugin folders don't exist: ${notExistingUserPlugins.mkString(",")}""")
 
       val userPlugins =
-        existingUserPlugins.flatMap { p ⇒ PluginManager.plugins(new File(p)) } ++
-          (if (config.loadHomePlugins.getOrElse(config.launchMode == GUIMode)) Workspace.pluginDir.listFilesSafe.flatMap(PluginManager.plugins) else Nil)
+        existingUserPlugins.flatMap { p ⇒ PluginManager.listBundles(new File(p)) } ++
+          (if (config.loadHomePlugins.getOrElse(config.launchMode == GUIMode)) Workspace.pluginDir.listFilesSafe.flatMap(PluginManager.listBundles) else Nil)
 
       logger.fine(s"Loading user plugins " + userPlugins)
 

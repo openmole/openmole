@@ -12,7 +12,7 @@ object Method extends PluginDefaults {
     Core.exception, Core.workflow, Core.workspace, Hook.fileHook, plugin.Task.tools, plugin.Tool.pattern
   ) settings (libraryDependencies += mgo)
 
-  lazy val stochastic = OsgiProject("stochastic", imports = Seq("*")) dependsOn (Core.workflow, plugin.Task.statistic, Domain.distribution, plugin.Tool.pattern)
+  lazy val stochastic = OsgiProject("stochastic", imports = Seq("*")) dependsOn (Core.workflow, Domain.distribution, plugin.Tool.pattern)
 
   lazy val abc = OsgiProject("abc", imports = Seq("*")) dependsOn (Core.exception, Core.workflow, Core.workspace, Hook.fileHook, plugin.Task.tools) settings
     (libraryDependencies += scalabc)

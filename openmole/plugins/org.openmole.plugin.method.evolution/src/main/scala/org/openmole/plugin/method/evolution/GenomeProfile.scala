@@ -68,7 +68,7 @@ object GenomeProfile {
         case x  ⇒ x
       }
 
-    def aggregation(h: Vector[Double]) = StochasticGAIntegration.aggregate(replication.aggregationClosures, h)
+    def aggregation(h: Vector[Double]) = StochasticGAIntegration.aggregate(replication.aggregation, h)
 
     StochasticGenomeProfile(
       noisyprofile.OpenMOLE(

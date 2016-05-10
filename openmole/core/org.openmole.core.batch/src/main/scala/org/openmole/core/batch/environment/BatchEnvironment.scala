@@ -18,15 +18,18 @@
 package org.openmole.core.batch.environment
 
 import java.io.File
+import java.util.UUID
+
 import org.openmole.core.event.{ Event, EventDispatcher }
 import java.util.concurrent.atomic.AtomicLong
+
 import org.openmole.core.batch.control._
 import org.openmole.core.batch.storage._
 import org.openmole.core.batch.jobservice._
 import org.openmole.core.batch.refresh._
 import org.openmole.core.batch.replication._
 import org.openmole.core.exception.InternalProcessingError
-import org.openmole.core.fileservice.FileService
+import org.openmole.core.fileservice.{ FileCache, FileService }
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.serializer.SerialiserService
 import org.openmole.tool.file._
@@ -34,13 +37,17 @@ import org.openmole.tool.logger.Logger
 import org.openmole.tool.thread._
 import org.openmole.core.updater.Updater
 import org.openmole.core.workflow.job._
-import org.openmole.core.workspace.{ Workspace, ConfigurationLocation }
+import org.openmole.core.workspace.{ ConfigurationLocation, Workspace }
 import org.openmole.core.workflow.execution._
 import org.openmole.core.batch.message._
+import org.openmole.core.console.ScalaREPL.ReferencedClasses
+import org.openmole.core.console.{ REPLClassloader, ScalaREPL }
+import org.openmole.core.tools.cache.AssociativeCache
 import org.openmole.tool.hash.Hash
+
 import ref.WeakReference
 import scala.Predef.Set
-import scala.collection.mutable.{ MultiMap, Set, HashMap }
+import scala.collection.mutable.{ HashMap, MultiMap, Set }
 import concurrent.duration._
 
 object BatchEnvironment extends Logger {
@@ -136,6 +143,10 @@ object BatchEnvironment extends Logger {
 
 import BatchEnvironment._
 
+object BatchExecutionJob {
+  val replBundleCache = new AssociativeCache[ScalaREPL.ReferencedClasses, FileCache]()
+}
+
 trait BatchExecutionJob extends ExecutionJob { bej ⇒
   def job: Job
   var serializedJob: Option[SerializedJob] = None
@@ -144,16 +155,40 @@ trait BatchExecutionJob extends ExecutionJob { bej ⇒
   def moleJobs = job.moleJobs
   def runnableTasks = job.moleJobs.map(RunnableTask(_))
 
-  @transient lazy val pluginsAndFiles = SerialiserService.pluginsAndFiles(runnableTasks)
+  def plugins = pluginsAndFiles.plugins ++ closureBundle.map(_.file) ++ referencedClosures.toSeq.flatMap(_.plugins)
+  def files = pluginsAndFiles.files
 
-  def usedFiles: Iterable[File] = {
-    val pf = pluginsAndFiles
-    import pf._
-    files ++
-      Seq(environment.runtime, environment.jvmLinuxI386, environment.jvmLinuxX64) ++
-      environment.plugins ++
-      plugins
+  @transient private lazy val pluginsAndFiles = SerialiserService.pluginsAndFiles(runnableTasks)
+  @transient private lazy val referencedClosures: Option[ReferencedClasses] = {
+    if (pluginsAndFiles.replClasses.isEmpty) None
+    else {
+      def referenced =
+        pluginsAndFiles.replClasses.map { c ⇒
+          val replClassloader = c.getClassLoader.asInstanceOf[REPLClassloader]
+          replClassloader.referencedClasses(c)
+        }.fold(ReferencedClasses.empty)(ReferencedClasses.merge)
+      Some(referenced)
+    }
   }
+
+  def closureBundle =
+    referencedClosures map { rc ⇒
+      BatchExecutionJob.replBundleCache.cache(job.moleExecution, rc) { rc ⇒
+        val bundle = Workspace.newFile("closureBundle", ".jar")
+        try ScalaREPL.bundleFromReferencedClass(rc, "closure-" + UUID.randomUUID.toString, "1.0", bundle)
+        catch {
+          case e: Throwable ⇒
+            bundle.delete()
+            throw e
+        }
+        FileCache(bundle)
+      }
+    }
+
+  def usedFiles: Iterable[File] =
+    (files ++
+      Seq(environment.runtime, environment.jvmLinuxI386, environment.jvmLinuxX64) ++
+      environment.plugins ++ plugins).distinct
 
   def usedFileHashes = usedFiles.map(f ⇒ (f, FileService.hash(job.moleExecution, f)))
 

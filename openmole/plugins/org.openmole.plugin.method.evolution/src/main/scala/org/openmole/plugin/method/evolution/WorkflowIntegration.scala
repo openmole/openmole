@@ -62,13 +62,11 @@ trait Seeder {
 }
 
 case class Replication[A[_]: Functor](
-    seed:        Seeder            = Seeder.empty,
-    max:         Int               = 100,
-    reevaluate:  Double            = 0.2,
-    aggregation: Option[A[String]] = None
-) {
-  val aggregationClosures = aggregation.map { _.map { s ⇒ TextClosure[Seq[Double], Double](s) } }
-}
+  seed:        Seeder                        = Seeder.empty,
+  max:         Int                           = 100,
+  reevaluate:  Double                        = 0.2,
+  aggregation: Option[A[FitnessAggregation]] = None
+)
 
 object WorkflowIntegration {
 

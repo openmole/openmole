@@ -43,7 +43,7 @@ object NSGA2 {
   ) = {
     val ug = UniqueGenome(genome)
 
-    def aggregation(h: Vector[Vector[Double]]) = StochasticGAIntegration.aggregateVector(replication.aggregationClosures, h)
+    def aggregation(h: Vector[Vector[Double]]) = StochasticGAIntegration.aggregateVector(replication.aggregation, h)
 
     WorkflowIntegration.StochasticGA(
       noisynsga2.OpenMOLE(mu, operatorExploration, UniqueGenome.size(ug), replication.max, replication.reevaluate, aggregation),

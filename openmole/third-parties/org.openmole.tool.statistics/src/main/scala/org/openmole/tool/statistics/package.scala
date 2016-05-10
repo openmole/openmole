@@ -18,16 +18,17 @@ package org.openmole.tool
 
 package statistics {
 
-  trait StatisticsPackage {
-    implicit class StatisticIterableOfDoubleDecorator(s: Iterable[Double]) {
-      def median: Double = Stat.median(s)
-      def medianAbsoluteDeviation = Stat.medianAbsoluteDeviation(s)
-      def average = Stat.average(s)
-      def meanSquaredError = Stat.meanSquaredError(s)
-      def rootMeanSquaredError = Stat.rootMeanSquaredError(s)
+  trait StatisticsPackage extends Stat { stat ⇒
+
+    implicit class StatisticIterableOfDoubleDecorator(s: Seq[Double]) {
+      def median: Double = stat.median(s)
+      def medianAbsoluteDeviation = stat.medianAbsoluteDeviation(s)
+      def average = stat.average(s)
+      def meanSquaredError = stat.meanSquaredError(s)
+      def rootMeanSquaredError = stat.rootMeanSquaredError(s)
     }
 
-    implicit def statisticArrayOfDoubleDecorator(s: Array[Double]) = new StatisticIterableOfDoubleDecorator(s)
+    implicit def statisticArrayOfDoubleDecorator(s: Array[Double]) = new StatisticIterableOfDoubleDecorator(s.toVector)
   }
 
 }

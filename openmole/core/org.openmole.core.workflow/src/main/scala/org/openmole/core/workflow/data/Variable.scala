@@ -21,6 +21,8 @@ import org.openmole.core.tools.io.Prettifier
 import Prettifier._
 
 object Variable {
+  implicit def tupleToVariable[T](t: (Prototype[T], T)) = apply(t._1, t._2)
+
   def apply[T](p: Prototype[T], v: T) = new Variable[T] {
     val prototype = p
     val value = v

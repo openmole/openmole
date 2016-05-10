@@ -57,7 +57,7 @@ object PSE {
     WorkflowIntegration.StochasticGA(
       noisypse.OpenMOLE(
         pattern = mgo.niche.irregularGrid(objectives.map(_.scale).toVector),
-        aggregation = StochasticGAIntegration.aggregateVector(replication.aggregationClosures, _),
+        aggregation = StochasticGAIntegration.aggregateVector(replication.aggregation, _),
         genomeSize = UniqueGenome.size(ug),
         historySize = replication.max,
         cloneProbability = replication.reevaluate,

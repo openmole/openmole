@@ -45,16 +45,15 @@ object FileService {
   def hash(key: Object, file: File): Hash =
     hashCache.cache(
       key,
-      file.getCanonicalPath,
-      computeHash(if (file.isDirectory) archiveForDir(key, file).file else file)
-    )
+      file.getCanonicalPath
+    ) { _ ⇒ computeHash(if (file.isDirectory) archiveForDir(key, file).file else file) }
 
   def archiveForDir(key: Object, directory: File) = {
-    archiveCache.cache(key, directory.getAbsolutePath, {
+    archiveCache.cache(key, directory.getAbsolutePath) { _ ⇒
       val ret = Workspace.newFile("archive", ".tar")
       directory.archive(ret, time = false)
       FileCache(ret)
-    })
+    }
   }
 
 }

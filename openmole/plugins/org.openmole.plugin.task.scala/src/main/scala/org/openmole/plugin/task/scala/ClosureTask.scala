@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2014 Romain Reuillon
+/**
+ * Created by Romain Reuillon on 06/05/16.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -13,28 +13,27 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
  */
-
-package org.openmole.plugin.task.statistic
+package org.openmole.plugin.task.scala
 
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.task.{ Task, TaskExecutionContext }
 
-import scala.collection.mutable.ListBuffer
+import scala.util.Random
 
-class StatisticTaskBuilder extends TaskBuilder { builder ⇒
-  private var _sequences = new ListBuffer[(Prototype[Array[Double]], Prototype[Double], StatisticalAggregation[Double])]
+object ClosureTask {
 
-  def sequences = _sequences.toList
+  def apply(closure: (Context, ⇒ Random) ⇒ Context) =
+    new TaskBuilder { builder ⇒
+      def toTask =
+        new ClosureTask(closure) with builder.Built
+    }
 
-  def addStatistic(sequence: Prototype[Array[Double]], stat: Prototype[Double], agg: StatisticalAggregation[Double]): this.type = {
-    if (!sequences.exists(_._1 == sequence)) this addInput sequence
-    this addOutput stat
-    _sequences += ((sequence, stat, agg))
-    this
-  }
+}
 
-  def toTask = new StatisticTask with super.Built {
-    val statistics = builder.sequences
-  }
+abstract class ClosureTask(closure: (Context, ⇒ Random) ⇒ Context) extends Task {
+  override protected def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider): Context =
+    closure(context, rng())
 }
