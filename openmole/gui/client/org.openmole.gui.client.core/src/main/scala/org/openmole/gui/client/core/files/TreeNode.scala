@@ -62,15 +62,15 @@ sealed trait TreeNode {
 
   val readableTime: String
 
-  def cloneWithName(newName: String) = FileNode(newName, Var(SafePath.sp(safePath().path.dropRight(1) :+ newName)), size, readableSize, time, readableTime)
+  def cloneWithName(newName: String) = FileNode(Var(newName), Var(SafePath.sp(safePath().path.dropRight(1) :+ newName)), size, readableSize, time, readableTime)
 
 }
 
 object TreeNode {
 
   implicit def treeNodeDataToTreeNode(tnd: TreeNodeData): TreeNode =
-    if (tnd.isDirectory) DirNode(tnd.name, tnd.safePath, tnd.size, tnd.readableSize, tnd.time, tnd.readableTime)
-    else FileNode(tnd.name, tnd.safePath, tnd.size, tnd.readableSize, tnd.time, tnd.readableTime)
+    if (tnd.isDirectory) DirNode(Var(tnd.name), Var(tnd.safePath), tnd.size, tnd.readableSize, tnd.time, tnd.readableTime)
+    else FileNode(Var(tnd.name), Var(tnd.safePath), tnd.size, tnd.readableSize, tnd.time, tnd.readableTime)
 
   implicit def treeNodeToTreeNodeData(tn: TreeNode): TreeNodeData = TreeNodeData(tn.name(), tn.safePath(), tn match {
     case DirNode(_, _, _, _, _, _) ⇒ true
@@ -91,9 +91,7 @@ object TreeNode {
     treeNodeToSafePath
   }
 
-  implicit def safePathToDirNode(safePath: SafePath) = DirNode(safePath.name, safePath, 0, "", 0, "")
-
-  def fromFilePath(path: SafePath) = FileNode()
+  implicit def safePathToDirNode(safePath: SafePath) = DirNode(Var(safePath.name), Var(safePath), 0, "", 0, "")
 
 }
 

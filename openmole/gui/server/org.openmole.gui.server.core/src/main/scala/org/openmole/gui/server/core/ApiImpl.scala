@@ -268,7 +268,7 @@ object ApiImpl extends Api {
         case ScriptFileDoesNotExists() ⇒ message("Script file does not exist")
         case CompilationError(e)       ⇒ error(e)
         case compiled: Compiled ⇒
-          Try(compiled.eval()) match {
+          Try(compiled.eval) match {
             case Failure(e) ⇒ error(e)
             case Success(o) ⇒
               val puzzle = o.buildPuzzle
@@ -504,7 +504,7 @@ object ApiImpl extends Api {
           val imString = imapString(imappings, "netLogoInputs")
           val omString = omapString(omappings, "netLogoOutputs")
           os.write(
-            s"""\nval task = NetLogo5Task(workDirectory / "$executableName", List("${command.split('\n').mkString("\",\"")}"), embedWorkspace = ${!resources().implicits.isEmpty}) set(\n""" +
+            s"""\nval task = NetLogo5Task(workDirectory / "$executableName", List("${command.split('\n').mkString("\",\"")}"), embedWorkspace = ${!resources.implicits.isEmpty}) set(\n""" +
               inString + ouString + imString + omString + imFileString + omFileString + defaults
           )
         case st: ScalaTaskType ⇒

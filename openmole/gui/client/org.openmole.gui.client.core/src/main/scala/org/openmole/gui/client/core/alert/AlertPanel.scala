@@ -20,6 +20,7 @@ package org.openmole.gui.client.core.alert
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
 import org.openmole.gui.client.core.alert.AbsolutePositioning._
 import org.openmole.gui.client.core.files.{ TreeNodeComment, TreeNodeError }
+import org.openmole.gui.ext.data.SafePath
 import org.openmole.gui.misc.js.JsRxTags._
 import org.openmole.gui.misc.js.OMTags.AlertAction
 import org.openmole.gui.misc.js.{ OMTags, OptionsDiv }
@@ -51,14 +52,14 @@ object AlertPanel {
   def treeNodeErrorDiv(error: TreeNodeError): Unit = div(
     tags.div(
       error.message,
-      OptionsDiv(error.filesInError).div
+      OptionsDiv(error.filesInError, SafePath.naming).div
     ), okaction = error.okaction, cancelaction = error.cancelaction, zone = FileZone
   )
 
   def treeNodeCommentDiv(error: TreeNodeComment): Unit = panel.popup(
     tags.div(
       error.message,
-      OptionsDiv(error.filesInError).div
+      OptionsDiv(error.filesInError, SafePath.naming).div
     ), Seq(AlertAction(error.okaction)), CenterPagePosition, FileZone, warning, floatRight
   )
 

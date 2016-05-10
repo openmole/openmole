@@ -1,6 +1,5 @@
 package org.openmole.gui.client.core.files
 
-import org.openmole.gui.client.core.alert.AbsolutePositioning
 import org.openmole.gui.client.core.alert.AbsolutePositioning.{ RelativeCenterPosition, FileZone }
 import org.openmole.gui.client.core.alert.AlertPanel
 import org.openmole.gui.client.core.{ PanelTriggerer, OMPost }
@@ -22,6 +21,7 @@ import TreeNode._
 import ListSorting._
 import autowire._
 import rx._
+import bs._
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
 import sheet._
 
@@ -317,7 +317,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
           span(stylesheet.fileNameOverflow +++ fileIndent)(
             tn.name()
           )
-        ).tooltip(tn.name(), condition = () ⇒ tn.name().length > 24),
+        ).tooltip(tags.span(tn.name()), condition = () ⇒ tn.name().length > 24),
         manager.checkMode match {
           case true ⇒ div(stylesheet.fileInfo)(checkbox.onlyBox)
           case _ ⇒ div(stylesheet.fileInfo)(
@@ -354,10 +354,10 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
               })(arrow_right_and_left)
 
             /*,
-                                if (tn.isPlugin) glyphSpan(OMTags.glyph_plug, () ⇒
-                                  OMPost[Api].autoAddPlugins(tn.safePath()).call().foreach { p ⇒
-                                    panels.pluginTriggerer.open
-                                  })(`class` := "glyphitem file-glyph")*/
+                                  if (tn.isPlugin) glyphSpan(OMTags.glyph_plug, () ⇒
+                                    OMPost[Api].autoAddPlugins(tn.safePath()).call().foreach { p ⇒
+                                      panels.pluginTriggerer.open
+                                    })(`class` := "glyphitem file-glyph")*/
             )
           )
         }

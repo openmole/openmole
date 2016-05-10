@@ -36,12 +36,3 @@ trait PanelUI {
 
   def save(onsave: () ⇒ Unit = () ⇒ {}): Unit
 }
-
-trait PanelWithID {
-  type DATA <: Data
-  val uuid: String = java.util.UUID.randomUUID.toString
-  def name: String
-  def panel: PanelUI
-  def data: DATA
-  def emptyClone: PanelWithID
-}

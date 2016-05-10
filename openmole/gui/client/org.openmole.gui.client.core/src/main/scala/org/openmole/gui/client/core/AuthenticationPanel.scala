@@ -18,10 +18,9 @@ package org.openmole.gui.client.core
  */
 
 import org.openmole.gui.client
-import org.openmole.gui.ext.dataui.{ PanelWithID, PanelUI }
+import org.openmole.gui.ext.dataui.PanelUI
 import org.openmole.gui.shared.Api
 import scalatags.JsDom.all._
-import org.openmole.gui.misc.js.Select
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import scalatags.JsDom.{ tags ⇒ tags }
 import org.openmole.gui.misc.js.JsRxTags._
@@ -32,6 +31,7 @@ import autowire._
 import org.openmole.gui.ext.data._
 import sheet._
 import rx._
+import bs._
 import org.openmole.gui.client.core.authentications._
 
 class AuthenticationPanel extends ModalPanel {
@@ -53,17 +53,12 @@ class AuthenticationPanel extends ModalPanel {
     }
   }
 
-  lazy val authenticationSelector: Select[AuthPanelWithID] = {
+  lazy val authenticationSelector = {
     val fs = authentications.factories
-    Select(
-      //Utils.getUUID,
-      fs.map { f ⇒ (f, emptyMod) },
-      fs.headOption,
-      btn_primary, onclickExtra = () ⇒ newPanel
-    )
+    fs.select(fs.headOption, (auth: AuthPanelWithID) ⇒ auth.name, btn_primary, onclickExtra = () ⇒ newPanel)
   }
 
-  def newPanel = authenticationSelector.content().foreach { f ⇒ setting() = Some(f.emptyClone.panel) }
+  def newPanel: Unit = authenticationSelector.content().foreach { f ⇒ setting() = Some(f.emptyClone.panel) }
 
   lazy val authenticationTable = {
 

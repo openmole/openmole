@@ -41,7 +41,7 @@ object TreeNodeTabs {
 
     val treeNode: TreeNode
 
-    val tabName: Var[String] = treeNode.name()
+    val tabName = Var(treeNode.name())
     val id: String = getUUID
     val active: Var[Option[SetIntervalHandle]] = Var(None)
 
@@ -151,7 +151,7 @@ object TreeNodeTabs {
     def refresh(onsaved: () ⇒ Unit) = onsaved()
   }
 
-  def apply(tabs: TreeNodeTab*) = new TreeNodeTabs(tabs.toSeq)
+  def apply(tabs: TreeNodeTab*) = new TreeNodeTabs(Var(tabs.toSeq))
 
   trait TabControl {
     def controlElement: TypedTag[HTMLElement]

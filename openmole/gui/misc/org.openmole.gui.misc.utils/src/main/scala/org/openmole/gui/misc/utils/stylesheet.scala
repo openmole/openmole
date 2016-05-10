@@ -494,23 +494,38 @@ package object stylesheet {
     backgroundColor := "#e3dbdb"
   )
 
-  def sortingBar: ModifierSeq = Seq(
+  lazy val sortingBar: ModifierSeq = Seq(
     width := "100%",
     right := "-185px",
     top := "15px"
   )
 
-  val labelStyle: ModifierSeq = Seq(
+  lazy val labelStyle: ModifierSeq = Seq(
     sheet.marginTop(-8),
     color("white"),
     (width := "auto"),
     fontSize := 14
   )
 
-  val tdStyle: ModifierSeq = Seq(
+  lazy val tdStyle: ModifierSeq = Seq(
     colMD(2),
     sheet.paddingLeft(5),
     width := "auto",
     height := 25
   )
+
+  //TOOLTIP
+  lazy val warningTooltip: ModifierSeq = Seq(
+    absolutePosition,
+    display := "inline-block",
+    width := "auto",
+    maxWidth := 200,
+    height := "auto",
+    padding := 8,
+    borderRadius := "4px",
+    backgroundColor := "pink",
+    color("red"),
+    boxShadow := "0 8px 6px -6px black"
+  )
+
 }

@@ -2,7 +2,7 @@ package org.openmole.gui.client.core.files
 
 import org.openmole.gui.client.core.CoreUtils
 import org.openmole.gui.ext.data._
-import org.openmole.gui.misc.js.{ Select, OMTags }
+import org.openmole.gui.misc.js.OMTags
 import org.openmole.gui.misc.utils.stylesheet
 import org.scalajs.dom.html.Input
 import scala.util.Try
@@ -12,6 +12,7 @@ import scalatags.JsDom.all._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import org.openmole.gui.misc.utils.{ stylesheet ⇒ omsheet }
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
+import fr.iscpif.scaladget.api._
 import omsheet._
 import sheet._
 import org.openmole.gui.misc.js.JsRxTags._
@@ -146,12 +147,12 @@ class FileToolBar(refreshAndRedraw: () ⇒ Unit) {
     autofocus
   ).render
 
-  val addRootDirButton: Select[TreeNodeType] = {
-    val content = Seq((TreeNodeType.file, glyph_file +++ sheet.paddingLeft(3)), (TreeNodeType.folder, glyph_folder_close +++ sheet.paddingLeft(3)))
-    Select(content, content.map {
-      _._1
-    }.headOption, btn_default +++ borderRightFlat, () ⇒ {
-      addRootDirButton.content().map { c ⇒ newNodeInput.placeholder = c.name + " name" }
+  lazy val addRootDirButton: Select[TreeNodeType] = {
+    val contents: Seq[(TreeNodeType, ModifierSeq)] = Seq((TreeNodeType.file, glyph_file +++ sheet.paddingRight(3)), (TreeNodeType.folder, glyph_folder_close +++ sheet.paddingRight(3)))
+    contents.select(Some(TreeNodeType.file), (tnt: TreeNodeType) ⇒ tnt.name, btn_default +++ borderRightFlat, onclickExtra = () ⇒ {
+      addRootDirButton.content().foreach { c ⇒
+        newNodeInput.placeholder = c.name + " name"
+      }
     })
   }
 
@@ -188,7 +189,7 @@ class FileToolBar(refreshAndRedraw: () ⇒ Unit) {
     )
   )
 
-  val createFileTool = bs.inputGroup(navbar_left)(
+  lazy val createFileTool = bs.inputGroup()(
     bs.inputGroupButton(addRootDirButton.selector),
     form(newNodeInput, onsubmit := { () ⇒
       {

@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 import fr.iscpif.scaladget.api.BootstrapTags.ScrollableTextArea.BottomScroll
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
-import org.openmole.gui.misc.utils.Utils
+import org.openmole.gui.misc.utils.{ stylesheet ⇒ omsheet, Utils }
 import org.openmole.gui.shared.Api
 import scala.concurrent.duration.Duration
 import scala.util.{ Failure, Success }
@@ -33,7 +33,6 @@ import org.openmole.gui.misc.js.Tooltip._
 import org.openmole.gui.misc.js.JsRxTags._
 import scala.scalajs.js.timers._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
-import org.openmole.gui.misc.utils.{ stylesheet ⇒ omsheet }
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
 import sheet._
 import autowire._
@@ -139,6 +138,10 @@ class ExecutionPanel extends ModalPanel {
     tags.table(sheet.table)(
       thead,
       Rx {
+        println("In RX exeTable " + envError())
+        println("In RX exeTable 1 " + envErrorVisible())
+        println("In RX exeTable 2 " + execInfo())
+
         tbody({
           for {
             (id, staticInfo, executionInfo) ← execInfo().executionInfos.sortBy(_._2.startDate).reverse
@@ -185,13 +188,13 @@ class ExecutionPanel extends ModalPanel {
                     tbody(
                       Seq(
                         tr(row)(
-                          td(colMD(3))(tags.span(e.taskName).tooltip("Environment name")),
-                          td(colMD(2))(glyphAndText(glyph_upload, s" ${e.networkActivity.uploadingFiles} ${displaySize(e.networkActivity.uploadedSize, e.networkActivity.readableUploadedSize)}").tooltip("Uploaded")),
-                          td(colMD(2))(glyphAndText(glyph_download, s" ${e.networkActivity.downloadingFiles} ${displaySize(e.networkActivity.downloadedSize, e.networkActivity.readableDownloadedSize)}").tooltip("Downloaded")),
-                          td(colMD(2))(glyphAndText(glyph_road +++ sheet.paddingBottom(7), e.submitted.toString).tooltip("Submitted jobs")),
-                          td(colMD(1))(glyphAndText(glyph_flash +++ sheet.paddingBottom(7), e.running.toString).tooltip("Running jobs")),
-                          td(colMD(1))(glyphAndText(glyph_flag +++ sheet.paddingBottom(7), e.done.toString).tooltip("Completed jobs")),
-                          td(colMD(1))(glyphAndText(glyph_fire +++ sheet.paddingBottom(7), e.failed.toString).tooltip("Failed jobs")),
+                          td(colMD(3))(tags.span(e.taskName).tooltip(tags.span("Environment name"))),
+                          td(colMD(2))(glyphAndText(glyph_upload, s" ${e.networkActivity.uploadingFiles} ${displaySize(e.networkActivity.uploadedSize, e.networkActivity.readableUploadedSize)}").tooltip(tags.span("Uploaded"))),
+                          td(colMD(2))(glyphAndText(glyph_download, s" ${e.networkActivity.downloadingFiles} ${displaySize(e.networkActivity.downloadedSize, e.networkActivity.readableDownloadedSize)}").tooltip(tags.span("Downloaded"))),
+                          td(colMD(2))(glyphAndText(glyph_road +++ sheet.paddingBottom(7), e.submitted.toString).tooltip(tags.span("Submitted jobs"))),
+                          td(colMD(1))(glyphAndText(glyph_flash +++ sheet.paddingBottom(7), e.running.toString).tooltip(tags.span("Running jobs"))),
+                          td(colMD(1))(glyphAndText(glyph_flag +++ sheet.paddingBottom(7), e.done.toString).tooltip(tags.span("Completed jobs"))),
+                          td(colMD(1))(glyphAndText(glyph_fire +++ sheet.paddingBottom(7), e.failed.toString).tooltip(tags.span("Failed jobs"))),
                           td(colMD(3))(tags.span(omsheet.color("#3086b5") +++ ((envErrorVisible().contains(e.envId)), ms(" executionVisible"), emptyMod))(
                             sheet.pointer, onclick := { () ⇒
                             if (envErrorVisible().contains(e.envId)) envErrorVisible() = envErrorVisible().filterNot {
@@ -251,24 +254,24 @@ class ExecutionPanel extends ModalPanel {
 
             Seq(
               tr(row +++ omsheet.executionTable, colspan := 12)(
-                td(colMD(2))(visibleClass(id.id, scriptID))(scriptLink.tooltip("Show script")),
-                td(colMD(2))(div(Utils.longToDate(staticInfo.startDate)).tooltip("Start time")),
-                td(colMD(2))(glyphAndText(glyph_flash, details.running.toString).tooltip("Running jobs")),
-                td(colMD(2))(glyphAndText(glyph_flag, details.ratio.toString).tooltip("Jobs progression")),
-                td(colMD(1))(div(durationString).tooltip("Execution duration")),
-                td(colMD(1))(stateLink.tooltip("Execution state"))(ms(executionInfo.state + "State")),
+                td(colMD(2))(visibleClass(id.id, scriptID))(scriptLink.tooltip(tags.span("Show script"))),
+                td(colMD(2))(div(Utils.longToDate(staticInfo.startDate)).tooltip(tags.span("Start time"))),
+                td(colMD(2))(glyphAndText(glyph_flash, details.running.toString).tooltip(tags.span("Running jobs"))),
+                td(colMD(2))(glyphAndText(glyph_flag, details.ratio.toString).tooltip(tags.span("Jobs progression"))),
+                td(colMD(1))(div(durationString).tooltip(tags.span("Execution duration"))),
+                td(colMD(1))(stateLink.tooltip((tags.span("Execution state"))))(ms(executionInfo.state + "State")),
                 td(colMD(1))(visibleClass(id.id, envID))(envLink),
-                td(colMD(1))(visibleClass(id.id, outputStreamID))(outputLink.tooltip("Execution outputs")),
+                td(colMD(1))(visibleClass(id.id, outputStreamID))(outputLink.tooltip(tags.span("Execution outputs"))),
                 td(colMD(1))(tags.span(glyph_remove +++ ms("removeExecution"), onclick := { () ⇒
                   OMPost[Api].cancelExecution(id).call().foreach { r ⇒
                     updateExecutionInfo
                   }
-                }).tooltip("Cancel execution", level = WarningTooltipLevel())),
+                }).tooltip(tags.span("Cancel execution"), popupStyle = omsheet.warningTooltip)),
                 td(colMD(1))(tags.span(glyph_trash +++ ms("removeExecution"), onclick := { () ⇒
                   OMPost[Api].removeExecution(id).call().foreach { r ⇒
                     updateExecutionInfo
                   }
-                }).tooltip("Remove execution", level = WarningTooltipLevel()))
+                }).tooltip(tags.span("Remove execution"), popupStyle = omsheet.warningTooltip))
               ),
               tr(row)(
                 expander.getVisible(id.id) match {

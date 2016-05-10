@@ -1,13 +1,13 @@
 package org.openmole.gui.misc.js
 
-import fr.iscpif.scaladget.api.BootstrapTags._
+/*import fr.iscpif.scaladget.api.BootstrapTags._
 import org.scalajs.dom.raw.{ HTMLDivElement, HTMLElement }
 import scalatags.JsDom.{ tags, TypedTag }
 
 import scalatags.JsDom.all._
 import fr.iscpif.scaladget.mapping.tooltipster._
 import fr.iscpif.scaladget.mapping.tooltipster.TooltipsterOptions
-import fr.iscpif.scaladget.tooltipster._
+import fr.iscpif.scaladget.tooltipster._*/
 
 /*
  * Copyright (C) 11/08/15 // mathieu.leclaire@openmole.org
@@ -26,7 +26,7 @@ import fr.iscpif.scaladget.tooltipster._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 object Tooltip {
-
+  /*
   implicit class TypedTagDecorator[T <: HTMLElement](typedTag: TypedTag[T]) {
 
     def tooltip(
@@ -95,3 +95,5 @@ case class NoHelp(
   placement: Direction    = TopDirection(),
   level:     TooltipLevel = DefaultTooltipLevel()
 ) extends Help
+*/
+}

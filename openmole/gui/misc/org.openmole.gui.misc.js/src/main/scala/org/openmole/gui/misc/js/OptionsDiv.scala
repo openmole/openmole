@@ -28,9 +28,9 @@ import sheet._
 
 object OptionsDiv {
 
-  case class BoxedOption[T <: Displayable](option: T, checkBox: HTMLInputElement)
+  case class BoxedOption[T](option: T, naming: T ⇒ String, checkBox: HTMLInputElement)
 
-  def apply[T <: Displayable](options: Seq[T]) = new OptionsDiv(options)
+  def apply[T](options: Seq[T], naming: T ⇒ String) = new OptionsDiv(options, naming)
 }
 
 object CheckBox {
@@ -40,17 +40,17 @@ object CheckBox {
 
 import OptionsDiv._
 
-class OptionsDiv[T <: Displayable](options: Seq[T]) {
+class OptionsDiv[T](options: Seq[T], naming: T ⇒ String) {
 
   val boxedOptions = options.map { o ⇒
-    BoxedOption(o, bs.checkbox(true).render)
+    BoxedOption(o, naming, bs.checkbox(true).render)
   }
 
   val div = tags.div(sheet.paddingTop(20))(
     for {
       bo ← boxedOptions
     } yield tags.div(
-      span(omsheet.optionsdiv)(bo.option.name),
+      span(omsheet.optionsdiv)(naming(bo.option)),
       bo.checkBox
     )
   )

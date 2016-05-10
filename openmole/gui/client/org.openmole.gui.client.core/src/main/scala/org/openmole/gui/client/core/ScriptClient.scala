@@ -166,21 +166,21 @@ object ScriptClient {
       val modalPanel = authenticationPanel
     }
 
-    val execItem = dialogNavItem("executions", glyphSpan(glyph_settings).tooltip("Executions"), () ⇒ executionTriggerer.triggerOpen)
+    val execItem = dialogNavItem("executions", glyphSpan(glyph_settings).tooltip(span("Executions")), () ⇒ executionTriggerer.triggerOpen)
 
-    val authenticationItem = dialogNavItem("authentications", glyphSpan(glyph_lock).tooltip("Authentications"), () ⇒ authenticationTriggerer.triggerOpen)
+    val authenticationItem = dialogNavItem("authentications", glyphSpan(glyph_lock).tooltip(span("Authentications")), () ⇒ authenticationTriggerer.triggerOpen)
 
-    val marketItem = dialogNavItem("market", glyphSpan(glyph_market).tooltip("Market place"), () ⇒ marketTriggerer.triggerOpen)
+    val marketItem = dialogNavItem("market", glyphSpan(glyph_market).tooltip(span("Market place")), () ⇒ marketTriggerer.triggerOpen)
 
-    val pluginItem = dialogNavItem("plugin", div(glyph_plug).tooltip("Plugins"), () ⇒ pluginTriggerer.triggerOpen)
+    val pluginItem = dialogNavItem("plugin", div(glyph_plug).tooltip(span("Plugins")), () ⇒ pluginTriggerer.triggerOpen)
 
     val envItem = dialogNavItem("envError", glyphSpan(glyph_exclamation).render, () ⇒ environmentStackTriggerer.open)
 
-    val docItem = dialogNavItem("doc", div(OMTags.glyph_book).tooltip("Documentation"), () ⇒ docTriggerer.open)
+    val docItem = dialogNavItem("doc", div(OMTags.glyph_book).tooltip(span("Documentation")), () ⇒ docTriggerer.open)
 
-    val modelWizardItem = dialogNavItem("modelWizard", glyphSpan(glyph_upload_alt).tooltip("Model import"), () ⇒ modelWizardTriggerer.triggerOpen)
+    val modelWizardItem = dialogNavItem("modelWizard", glyphSpan(glyph_upload_alt).tooltip(span("Model import")), () ⇒ modelWizardTriggerer.triggerOpen)
 
-    val fileItem = dialogNavItem("files", glyphSpan(glyph_file).tooltip("Files"), todo = () ⇒ {
+    val fileItem = dialogNavItem("files", glyphSpan(glyph_file).tooltip(span("Files")), todo = () ⇒ {
       openFileTree() = !openFileTree()
     })
 

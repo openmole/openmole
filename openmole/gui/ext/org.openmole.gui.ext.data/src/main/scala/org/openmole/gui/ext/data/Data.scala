@@ -150,6 +150,8 @@ object SafePath {
   def leaf(name: String, extension: FileExtension) = sp(Seq(name), extension)
 
   def empty = leaf("", FileExtension.NO_EXTENSION)
+
+  def naming = (sp: SafePath) ⇒ sp.name
 }
 
 import org.openmole.gui.ext.data.SafePath._

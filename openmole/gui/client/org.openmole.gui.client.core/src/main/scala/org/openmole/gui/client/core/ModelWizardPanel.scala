@@ -20,8 +20,7 @@ package org.openmole.gui.client.core
 import org.openmole.gui.client.core.alert.AlertPanel
 import org.openmole.gui.client.core.files._
 import org.openmole.gui.ext.data._
-import org.openmole.gui.misc.js.{ OptionsDiv, Select, OMTags }
-import Select._
+import org.openmole.gui.misc.js.{ OptionsDiv, OMTags }
 import autowire._
 import org.scalajs.dom.html.TextArea
 import org.openmole.gui.client.core.files.TreeNode._
@@ -34,6 +33,7 @@ import org.openmole.gui.shared.Api
 import scalatags.JsDom.{ TypedTag, tags ⇒ tags }
 import scalatags.JsDom.all._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
+import fr.iscpif.scaladget.api.Select
 import Waiter._
 import org.openmole.gui.ext.data.DataUtils._
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
@@ -98,43 +98,52 @@ class ModelWizardPanel extends ModalPanel {
   val fileToUploadPath: Var[Option[SafePath]] = Var(None)
   val targetPath: Var[Option[SafePath]] = Var(None)
 
-  val modelSelector: Select[SafePath] = Select( /*"modelSelector",*/ Seq[(SafePath, ModifierSeq)](), None, btn_default, () ⇒ {
+  val modelSelector: Select[SafePath] = Seq[SafePath]().select(
+    None, SafePath.naming, btn_default, () ⇒ {
     fileToUploadPath() = modelSelector.content()
     onModelChange
-  })
+  }
+  )
 
-  val methodSelector: Select[JarMethod] = Select( /*"methodSelector",*/ Seq[(JarMethod, ModifierSeq)](), None, btn_default, () ⇒ {
+  val methodSelector: Select[JarMethod] = Seq[JarMethod]().select(
+    None, (jm: JarMethod) ⇒ jm.name, btn_default, () ⇒ {
     methodSelector.content().foreach {
       setJavaLaunchingCommand(_)
     }
-  })
+  }
+  )
 
-  val classSelector: Select[FullClass] = Select( /*"classSelector",*/ Seq[(FullClass, ModifierSeq)](), None, btn_default, () ⇒ {
+  val classSelector: Select[FullClass] = Seq[FullClass]().select(
+    None, (fc: FullClass) ⇒ fc.name, btn_default, () ⇒ {
     classSelector.content().foreach {
       setMethodSelector(_)
     }
-  })
+  }
+  )
 
   def onModelChange = {
-    fileToUploadPath().foreach { m ⇒
-      val fileType: FileType = m
-      fileType match {
-        case _: CodeFile ⇒ setLaunchingCommand(m)
-        case a: Archive ⇒
-          if (a.language == JavaLikeLanguage()) getJarClasses(m)
-        case _ ⇒
-      }
+    fileToUploadPath().foreach {
+      m ⇒
+        val fileType: FileType = m
+        fileType match {
+          case _: CodeFile ⇒ setLaunchingCommand(m)
+          case a: Archive ⇒
+            if (a.language == JavaLikeLanguage()) getJarClasses(m)
+          case _ ⇒
+        }
     }
   }
 
   def setMethodSelector(classContent: FullClass) = {
-    fileToUploadPath().map { fn ⇒
-      OMPost[Api].methods(fn, classContent.name).call().foreach { b ⇒
-        methodSelector.setContents(b)
-        b.headOption.map {
-          setJavaLaunchingCommand
+    fileToUploadPath().map {
+      fn ⇒
+        OMPost[Api].methods(fn, classContent.name).call().foreach {
+          b ⇒
+            methodSelector.setContents(b)
+            b.headOption.map {
+              setJavaLaunchingCommand
+            }
         }
-      }
     }
   }
 
@@ -152,13 +161,14 @@ class ModelWizardPanel extends ModalPanel {
   }
 
   val commandArea: TextArea = textArea(3).render
-  val autoModeCheckBox = checkbox(autoMode())(onchange := { () ⇒
-    autoMode() = !autoMode()
+  val autoModeCheckBox = checkbox(autoMode())(onchange := {
+    () ⇒
+      autoMode() = !autoMode()
   })
 
   val scriptNameInput = bs.input()(modelNameInput, placeholder := "Script name").render
-  val languages = Seq(Binary(), JavaLikeLanguage(), PythonLanguage(), NetLogoLanguage(), RLanguage())
-  val codeSelector: Select[Language] = Select( /*"selectLanguages",*/ languages, Some(Binary()), btn_default)
+  val languages: Seq[Language] = Seq(Binary(), JavaLikeLanguage(), PythonLanguage(), NetLogoLanguage(), RLanguage())
+  val codeSelector: Select[Language] = languages.select(Some(Binary()), (l: Language) ⇒ l.name, btn_default)
 
   Obs(launchingCommand, skipInitial = true) {
     if (autoMode()) {
@@ -207,28 +217,32 @@ class ModelWizardPanel extends ModalPanel {
       div(maxWidth := 250)(
         label(
           sheet.paddingTop(5) +++ certificate +++ "inputFileStyle",
-          transferring.withTransferWaiter { _ ⇒
-            div(
-              fileInput((fInput: HTMLInputElement) ⇒ {
-                if (fInput.files.length > 0) {
-                  emptyJARSelectors
-                  fileToUploadPath() = None
-                  resources() = Resources.empty
-                  val fileName = fInput.files.item(0).name
-                  labelName() = Some(fileName)
-                  filePath() = Some(manager.current.safePath() ++ fileName)
-                  filePath().map { fp ⇒
-                    moveFilesAndBuildForm(fInput, fileName, fp)
+          transferring.withTransferWaiter {
+            _ ⇒
+              div(
+                fileInput((fInput: HTMLInputElement) ⇒ {
+                  if (fInput.files.length > 0) {
+                    emptyJARSelectors
+                    fileToUploadPath() = None
+                    resources() = Resources.empty
+                    val fileName = fInput.files.item(0).name
+                    labelName() = Some(fileName)
+                    filePath() = Some(manager.current.safePath() ++ fileName)
+                    filePath().map {
+                      fp ⇒
+                        moveFilesAndBuildForm(fInput, fileName, fp)
+                    }
                   }
+                }), labelName() match {
+                  case Some(s: String) ⇒ s
+                  case _               ⇒ "Your Model"
                 }
-              }), labelName() match {
-                case Some(s: String) ⇒ s
-                case _               ⇒ "Your Model"
-              }
-            )
+              )
           }
         ), {
-          fileToUploadPath().map { _ ⇒ span(grey +++ floatRight)(codeSelector.selector) }.getOrElse(tags.div())
+          fileToUploadPath().map {
+            _ ⇒ span(grey +++ floatRight)(codeSelector.selector)
+          }.getOrElse(tags.div())
         }
       ), {
         span(grey)(
@@ -244,55 +258,61 @@ class ModelWizardPanel extends ModalPanel {
     ).render
 
   def moveFilesAndBuildForm(fInput: HTMLInputElement, fileName: String, uploadPath: SafePath) =
-    CoreUtils.withTmpFile { tempFile ⇒
-      FileManager.upload(
-        fInput,
-        tempFile,
-        (p: ProcessState) ⇒ {
-          transferring() = p
-        },
-        UploadAbsolute(),
-        () ⇒ {
-          OMPost[Api].extractAndTestExistence(tempFile ++ fileName, uploadPath.parent).call().foreach { existing ⇒
-            val fileType: FileType = uploadPath
+    CoreUtils.withTmpFile {
+      tempFile ⇒
+        FileManager.upload(
+          fInput,
+          tempFile,
+          (p: ProcessState) ⇒ {
+            transferring() = p
+          },
+          UploadAbsolute(),
+          () ⇒ {
+            OMPost[Api].extractAndTestExistence(tempFile ++ fileName, uploadPath.parent).call().foreach {
+              existing ⇒
+                val fileType: FileType = uploadPath
 
-            targetPath() = Some(fileType match {
-              case a: Archive ⇒
-                a.language match {
-                  case j: JavaLikeLanguage ⇒ uploadPath
-                  case _                   ⇒ uploadPath.toNoExtention
-                }
-              case codeFile: CodeFile ⇒ uploadPath
-              case _                  ⇒ uploadPath
-            })
+                targetPath() = Some(fileType match {
+                  case a: Archive ⇒
+                    a.language match {
+                      case j: JavaLikeLanguage ⇒ uploadPath
+                      case _                   ⇒ uploadPath.toNoExtention
+                    }
+                  case codeFile: CodeFile ⇒ uploadPath
+                  case _                  ⇒ uploadPath
+                })
 
-            // Move files from tmp to target path
-            if (existing.isEmpty) {
-              targetPath().map { tp ⇒
-                OMPost[Api].copyAllTmpTo(tempFile, tp).call().foreach { b ⇒
-                  buildForm(uploadPath, fileType)
-                  OMPost[Api].deleteFile(tempFile, ServerFileSytemContext.absolute).call()
-                }
-              }
-            }
-            else {
-              val optionsDiv = OptionsDiv(existing)
-              AlertPanel.div(
-                tags.div(
-                  "Some files already exist, overwrite ?",
-                  optionsDiv.div
-                ),
-                () ⇒ {
-                  OMPost[Api].copyFromTmp(tempFile, optionsDiv.result /*, fp ++ fileName*/ ).call().foreach { b ⇒
-                    buildForm(uploadPath, fileType)
-                    OMPost[Api].deleteFile(tempFile, ServerFileSytemContext.absolute).call()
+                // Move files from tmp to target path
+                if (existing.isEmpty) {
+                  targetPath().map {
+                    tp ⇒
+                      OMPost[Api].copyAllTmpTo(tempFile, tp).call().foreach {
+                        b ⇒
+                          buildForm(uploadPath, fileType)
+                          OMPost[Api].deleteFile(tempFile, ServerFileSytemContext.absolute).call()
+                      }
                   }
-                }, () ⇒ {}, buttonGroupClass = "right"
-              )
+                }
+                else {
+                  val optionsDiv = OptionsDiv(existing, SafePath.naming)
+                  AlertPanel.div(
+                    tags.div(
+                      "Some files already exist, overwrite ?",
+                      optionsDiv.div
+                    ),
+                    () ⇒ {
+                      OMPost[Api].copyFromTmp(tempFile, optionsDiv.result /*, fp ++ fileName*/ ).call().foreach {
+                        b ⇒
+                          buildForm(uploadPath, fileType)
+                          OMPost[Api].deleteFile(tempFile, ServerFileSytemContext.absolute).call()
+                      }
+                    }, () ⇒ {
+                    }, buttonGroupClass = "right"
+                  )
+                }
             }
           }
-        }
-      )
+        )
     }
 
   def buildForm(uploadPath: SafePath, fileType: FileType) = {
@@ -310,12 +330,13 @@ class ModelWizardPanel extends ModalPanel {
 
           // Other archive: tgz, tar.gz
           case UndefinedLanguage ⇒
-            OMPost[Api].models(uploadPath).call().foreach { models ⇒
-              fileToUploadPath() = models.headOption
-              modelSelector.setContents(models, () ⇒ {
-                CoreUtils.refreshCurrentDirectory(() ⇒ onModelChange, panels.treeNodePanel.filter)
-              })
-              getResourceInfo
+            OMPost[Api].models(uploadPath).call().foreach {
+              models ⇒
+                fileToUploadPath() = models.headOption
+                modelSelector.setContents(models, () ⇒ {
+                  CoreUtils.refreshCurrentDirectory(() ⇒ onModelChange, panels.treeNodePanel.filter)
+                })
+                getResourceInfo
             }
 
           case _ ⇒
@@ -330,44 +351,50 @@ class ModelWizardPanel extends ModalPanel {
   }
 
   def getResourceInfo = {
-    fileToUploadPath().foreach { mp ⇒
-      val modelName = mp.name
-      OMPost[Api].listFiles(mp.parent).call().foreach { b ⇒
-        val l = b.filterNot {
-          _.name == modelName
+    fileToUploadPath().foreach {
+      mp ⇒
+        val modelName = mp.name
+        OMPost[Api].listFiles(mp.parent).call().foreach {
+          b ⇒
+            val l = b.filterNot {
+              _.name == modelName
+            }
+            resources() = resources().copy(implicits = l, number = l.size)
+            OMPost[Api].expandResources(resources()).call().foreach {
+              lf ⇒
+                resources() = lf
+            }
         }
-        resources() = resources().copy(implicits = l, number = l.size)
-        OMPost[Api].expandResources(resources()).call().foreach { lf ⇒
-          resources() = lf
-        }
-      }
     }
   }
 
   def getJarClasses(jarPath: SafePath) = {
     codeSelector.content() = Some(JavaLikeLanguage())
-    OMPost[Api].classes(jarPath).call().foreach { b ⇒
-      val classContents = b.flatMap {
-        _.flatten
-      }
-      classSelector.setContents(classContents)
-      classContents.headOption.foreach {
-        setMethodSelector(_)
-      }
+    OMPost[Api].classes(jarPath).call().foreach {
+      b ⇒
+        val classContents = b.flatMap {
+          _.flatten
+        }
+        classSelector.setContents(classContents)
+        classContents.headOption.foreach {
+          setMethodSelector(_)
+        }
     }
   }
 
   def setLaunchingCommand(filePath: SafePath) = {
     emptyJARSelectors
-    OMPost[Api].launchingCommands(filePath).call().foreach { b ⇒
-      CoreUtils.refreshCurrentDirectory(fileFilter = panels.treeNodePanel.filter)
-      launchingCommand() = b.headOption
-      fileToUploadPath() = Some(filePath)
-      launchingCommand().foreach { lc ⇒
-        codeSelector.content() = lc.language
-        setScritpName
-        setReactives(lc)
-      }
+    OMPost[Api].launchingCommands(filePath).call().foreach {
+      b ⇒
+        CoreUtils.refreshCurrentDirectory(fileFilter = panels.treeNodePanel.filter)
+        launchingCommand() = b.headOption
+        fileToUploadPath() = Some(filePath)
+        launchingCommand().foreach {
+          lc ⇒
+            codeSelector.content() = lc.language
+            setScritpName
+            setReactives(lc)
+        }
     }
   }
 
@@ -422,10 +449,12 @@ class ModelWizardPanel extends ModalPanel {
           lc ⇒
             val path = manager.current.safePath()
             val scriptName = scriptNameInput.value.clean
-            val target = targetPath().map { tp ⇒
-              modelSelector.content().map { c ⇒
-                tp.normalizedPathString + "/" + c.name
-              }.getOrElse(tp.normalizedPathString)
+            val target = targetPath().map {
+              tp ⇒
+                modelSelector.content().map {
+                  c ⇒
+                    tp.normalizedPathString + "/" + c.name
+                }.getOrElse(tp.normalizedPathString)
             }.getOrElse("")
             OMPost[Api].buildModelTask(
               target,
@@ -592,68 +621,71 @@ class ModelWizardPanel extends ModalPanel {
     setUpButton
 
     tags.div(
-      fileToUploadPath().map { _ ⇒ tags.div() }.getOrElse(step1),
+      fileToUploadPath().map {
+        _ ⇒ tags.div()
+      }.getOrElse(step1),
       transferring() match {
         case _: Processing ⇒ OMTags.waitingSpan(" Uploading ...", btn_danger + "certificate")
         case _: Processed  ⇒ upButton()
         case _             ⇒ upButton()
       },
-      fileToUploadPath().map { _ ⇒
-        div(sheet.paddingTop(20))(
-          tags.h4("Step2: Task configuration"), step2,
-          topButtons,
-          if (currentTab() == 0) {
-            tags.div({
+      fileToUploadPath().map {
+        _ ⇒
+          div(sheet.paddingTop(20))(
+            tags.h4("Step2: Task configuration"), step2,
+            topButtons,
+            if (currentTab() == 0) {
+              tags.div({
 
-              val idiv = div(modelIO)(tags.h3("Inputs")).render
+                val idiv = div(modelIO)(tags.h3("Inputs")).render
 
-              val odiv = div(modelIO)(tags.h3("Outputs")).render
+                val odiv = div(modelIO)(tags.h3("Outputs")).render
 
-              val head = thead(tags.tr(
-                for (h ← Seq("Name", "Type", "Default", "Mapped with", "", "")) yield {
-                  th(h)
-                }
-              ))
+                val head = thead(tags.tr(
+                  for (h ← Seq("Name", "Type", "Default", "Mapped with", "", "")) yield {
+                    th(h)
+                  }
+                ))
 
-              div(sheet.paddingTop(30))(
-                div(sheet.paddingRight(10) +++ twocolumns)(
-                  idiv,
-                  tags.table(striped)(
-                    head,
-                    tbody(
-                      for (ip ← inputs(reactives)) yield {
-                        ip.line
-                      }
+                div(sheet.paddingTop(30))(
+                  div(sheet.paddingRight(10) +++ twocolumns)(
+                    idiv,
+                    tags.table(striped)(
+                      head,
+                      tbody(
+                        for (ip ← inputs(reactives)) yield {
+                          ip.line
+                        }
+                      )
                     )
-                  )
-                ),
-                div(twocolumns)(
-                  odiv,
-                  tags.table(striped)(
-                    head,
-                    tbody(
-                      for (op ← outputs(reactives)) yield {
-                        op.line
-                      }
+                  ),
+                  div(twocolumns)(
+                    odiv,
+                    tags.table(striped)(
+                      head,
+                      tbody(
+                        for (op ← outputs(reactives)) yield {
+                          op.line
+                        }
+                      )
                     )
                   )
                 )
-              )
-            }, autoModeTag, commandArea)
-          }
-          else {
-            val body = tbody.render
-            for {
-              i ← resources().implicits
-            } yield {
-              body.appendChild(tags.tr(
-                td(colMD(3))(i.name),
-                td(colMD(2))(i.readableSize)
-              ).render)
+              }, autoModeTag, commandArea)
             }
-            tags.table(striped +++ sheet.paddingTop(20))(body)
-          }
-        )
+            else {
+              val body = tbody.render
+              for {
+                i ← resources().implicits
+              } yield {
+                body.appendChild(tags.tr(
+                  td(colMD(3))(i.name),
+                  td(colMD(2))(i.readableSize)
+                ).render)
+              }
+              tags.table(striped +++ sheet.paddingTop(20))(body)
+            }
+          )
       }.getOrElse(tags.div())
     )
   })

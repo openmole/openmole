@@ -11,7 +11,6 @@ object Misc extends GuiDefaults {
   override val dir = super.dir / "misc"
 
   lazy val utils = OsgiProject("org.openmole.gui.misc.utils") enablePlugins (ScalaJSPlugin) settings (
-    rxJS,
     scalaTagsJS,
     scaladgetJS
   )

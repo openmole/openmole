@@ -17,12 +17,9 @@ package org.openmole.gui.misc.utils
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import rx._
-
 import scala.scalajs.js.Date
 
 object Utils {
-  implicit def tToVarT[T](t: T): Var[T] = Var(t)
   def getUUID: String = java.util.UUID.randomUUID.toString
   def toURI(path: Seq[String]): String = new java.net.URI(null, null, path.mkString("/"), null).toString
 
