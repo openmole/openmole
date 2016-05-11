@@ -7,7 +7,7 @@ import org.openmole.gui.client.core.CoreUtils
 import org.openmole.gui.ext.data._
 import org.openmole.gui.misc.utils.{ stylesheet, Utils }
 import org.openmole.gui.shared._
-import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
+import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs, Popup }
 import org.scalajs.dom.html.Input
 import org.scalajs.dom.raw.{ HTMLDivElement, DragEvent }
 import scalatags.JsDom.all._
@@ -318,7 +318,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
           span(stylesheet.fileNameOverflow +++ fileIndent)(
             tn.name()
           )
-        ).tooltip(tags.span(tn.name()), condition = () ⇒ tn.name().length > 24),
+        ).tooltip(tags.span(tn.name()), popupStyle = whitePopup, arrowStyle = Popup.whiteBottomArrow, condition = () ⇒ tn.name().length > 24),
         manager.checkMode match {
           case true ⇒ div(stylesheet.fileInfo)(checkbox.onlyBox)
           case _ ⇒ div(stylesheet.fileInfo)(
