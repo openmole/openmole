@@ -289,6 +289,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
       val trash = baseGlyph +++ glyph_trash
       val edit = baseGlyph +++ glyph_edit
       val download_alt = baseGlyph +++ glyph_download_alt
+      val archive = baseGlyph +++ glyph_archive
       val arrow_right_and_left = baseGlyph +++ glyph_arrow_right_and_left
       tr(
         onmouseover := { () ⇒ lineHovered() = true },
@@ -327,21 +328,20 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
             })(
               span(onclick := { () ⇒ trashNode(tn) }, trash),
               span(onclick := { () ⇒
-                {
-                  toBeEdited() = Some(NodeEdition(tn))
-                  drawTree
-                }
-              })(edit),
+                toBeEdited() = Some(NodeEdition(tn))
+                drawTree
+              }, edit),
               a(
                 span(onclick := { () ⇒ Unit })(download_alt),
                 href := s"downloadFile?path=${Utils.toURI(tn.safePath().path)}"
               ),
               tn.safePath().extension match {
-                case FileExtension.TGZ ⇒ bs.glyphSpan(glyph_archive, () ⇒ {
-                  OMPost[Api].extractTGZ(tn).call().foreach { r ⇒
-                    refreshAndDraw
-                  }
-                })(baseGlyph)
+                case FileExtension.TGZ ⇒
+                  span(archive, onclick := { () ⇒
+                    OMPost[Api].extractTGZ(tn).call().foreach { r ⇒
+                      refreshAndDraw
+                    }
+                  })
                 case _ ⇒
               },
               span(onclick := { () ⇒
@@ -354,10 +354,10 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
               })(arrow_right_and_left)
 
             /*,
-                                  if (tn.isPlugin) glyphSpan(OMTags.glyph_plug, () ⇒
-                                    OMPost[Api].autoAddPlugins(tn.safePath()).call().foreach { p ⇒
-                                      panels.pluginTriggerer.open
-                                    })(`class` := "glyphitem file-glyph")*/
+                                    if (tn.isPlugin) glyphSpan(OMTags.glyph_plug, () ⇒
+                                      OMPost[Api].autoAddPlugins(tn.safePath()).call().foreach { p ⇒
+                                        panels.pluginTriggerer.open
+                                      })(`class` := "glyphitem file-glyph")*/
             )
           )
         }
