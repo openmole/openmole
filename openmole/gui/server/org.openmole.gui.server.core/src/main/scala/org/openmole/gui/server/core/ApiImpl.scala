@@ -4,6 +4,7 @@ import java.io.File
 import java.net.URL
 import java.util.zip.GZIPInputStream
 
+import com.sun.org.apache.xalan.internal.xsltc.dom.LoadDocument
 import org.openmole.core.batch.environment.BatchEnvironment.{ EndUpload, BeginUpload, EndDownload, BeginDownload }
 import org.openmole.core.buildinfo.MarketIndex
 import org.openmole.core.event._
@@ -330,9 +331,8 @@ object ApiImpl extends Api {
 
   def staticInfos() = execution.staticInfos()
 
-  def runningErrorEnvironmentData: EnvironmentErrorData = atomic { implicit ctx ⇒
+  def runningErrorEnvironmentData(limitDates: Map[EnvironmentId, Long]): EnvironmentErrorData = atomic { implicit ctx ⇒
     val envIds = Runnings.environmentIds
-
     EnvironmentErrorData(
       envIds.flatMap {
       case (id, envIds) ⇒
@@ -340,6 +340,7 @@ object ApiImpl extends Api {
           for {
             (envId, info) ← Runnings.runningEnvironments(envIds)
             error ← info.environmentErrors(envId)
+            if (limitDates.get(envId).map { d ⇒ { error.date > d } }.getOrElse(true))
           } yield error
 
         errors.groupBy {
