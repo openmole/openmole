@@ -17,9 +17,10 @@
 
 package org.openmole.plugin.environment.ssh
 
+import java.io.File
 import java.net.URI
 
-import org.openmole.core.batch.control.{ UsageControl, UnlimitedAccess, LimitedAccess }
+import org.openmole.core.batch.control.{ LimitedAccess, UnlimitedAccess, UsageControl }
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.core.batch.storage._
 import org.openmole.core.workspace.Workspace
@@ -55,6 +56,9 @@ trait SSHPersistentStorage <: BatchEnvironment with SSHAccess { st ⇒
           val url = new URI("file", st.user, "localhost", -1, sharedDirectory.orNull, null, null)
           val id: String = url.toString
           val environment = st
+
+          override def parent(path: String) =
+            Option(new File(path).getCanonicalFile.getParentFile).map(_.getAbsolutePath)
         }
       case false ⇒
         new StorageService with SSHStorageService with StorageRoot with ThisHost {
