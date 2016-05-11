@@ -33,6 +33,14 @@ package object file {
       recursive: Boolean                = false,
       filter:    Option[ExpandedString] = None
     ): ListFilesDomain = ListFilesDomain(f, directory, recursive, filter)
+
+    def paths: ListPathsDomain = paths()
+    def paths(
+      directory: Option[ExpandedString] = None,
+      recursive: Boolean                = false,
+      filter:    Option[ExpandedString] = None
+    ): ListPathsDomain = ListPathsDomain(f, directory, recursive, filter)
+
     def select(path: ExpandedString) = SelectFileDomain(f, path)
   }
 
