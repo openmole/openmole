@@ -81,7 +81,7 @@ object Site {
 
     Config.testScript = parameters.test
 
-    val dest = parameters.target.get
+    val dest = parameters.target.getOrElse(new File("./openmole-doc-html"))
     dest.recursiveDelete
 
     val m = new Market(Market.entries, dest)
