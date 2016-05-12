@@ -28,8 +28,7 @@ object Client extends GuiDefaults {
       jsDependencies += ace / "src-min/mode-sh.js" dependsOn acePath,
       jsDependencies += ace / "src-min/mode-scala.js" dependsOn acePath,
       jsDependencies += ace / "src-min/theme-github.js" dependsOn acePath,
-      jsDependencies += bootstrap / "js/bootstrap.js" dependsOn jqueryPath minified "js/bootstrap.min.js",
-      //jsDependencies += d3 / "d3.js" dependsOn jqueryPath minified "d3.min.js",
-      jsDependencies += tooltipster / "js/jquery.tooltipster.js" dependsOn jqueryPath minified "js/jquery.tooltipster.min.js"
+      jsDependencies += bootstrap / "js/bootstrap.js" dependsOn jqueryPath minified "js/bootstrap.min.js"
+    //jsDependencies += d3 / "d3.js" dependsOn jqueryPath minified "d3.min.js",
     )
 }

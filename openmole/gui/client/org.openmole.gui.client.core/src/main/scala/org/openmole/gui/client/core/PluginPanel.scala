@@ -1,7 +1,6 @@
 package org.openmole.gui.client.core
 
 import org.openmole.gui.client.core.files.FileManager
-import org.openmole.gui.misc.js.Tooltip._
 import org.openmole.gui.ext.data._
 import org.openmole.gui.misc.utils.stylesheet._
 import org.openmole.gui.shared.Api

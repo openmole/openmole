@@ -2,7 +2,6 @@ package org.openmole.gui.client.core
 
 import org.openmole.gui.client.core.alert.{ AlertPanel, AbsolutePositioning }
 import AbsolutePositioning.{ RightPosition, TopZone, CenterPagePosition }
-import org.openmole.gui.misc.js.Tooltip._
 import org.openmole.gui.shared.Api
 import org.scalajs.dom.raw.{ HTMLElement, HTMLFormElement }
 import org.openmole.gui.client.core.panels._
