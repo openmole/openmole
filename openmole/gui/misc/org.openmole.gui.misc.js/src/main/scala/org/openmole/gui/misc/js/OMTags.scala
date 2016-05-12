@@ -86,7 +86,4 @@ object OMTags {
       bs.fileInputMultiple(todo)
     )
   }
-
-  case class LabeledInput(label: Label, input: Input)
-
 }

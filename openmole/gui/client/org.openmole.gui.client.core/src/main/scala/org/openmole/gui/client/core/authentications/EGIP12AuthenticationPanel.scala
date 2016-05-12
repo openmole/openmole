@@ -37,17 +37,14 @@ class EGIP12AuthenticationPanel(data: EGIP12AuthenticationData = EGIP12Authentic
   val privateKey = new AuthFileUploaderUI(data.privateKey.getOrElse(""), data.privateKey.isDefined, Some("egi.p12"))
 
   val view = form(sheet.formInline)(
-    div(sheet.formGroup)(
-      password.label,
-      password.input
-    ),
+    password.render,
     privateKey.view
   )
 
   def save(onsave: () ⇒ Unit) =
     OMPost[Api].removeAuthentication(data).call().foreach { d ⇒
       OMPost[Api].addAuthentication(EGIP12AuthenticationData(
-        password.input.value,
+        password.value,
         if (privateKey.pathSet()) Some("egi.p12") else None
       )).call().foreach { b ⇒
         onsave()

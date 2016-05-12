@@ -1,6 +1,5 @@
 package org.openmole.gui.client.core.authentications
 
-import org.openmole.gui.misc.js.OMTags.LabeledInput
 import org.scalajs.dom.html.{ Input, Label }
 
 import scalatags.JsDom.all._
@@ -28,36 +27,20 @@ import sheet._
 
 object AuthenticationUtils {
 
-  def defaultLabeledInput(default: String, pHolder: String, w: Int) = LabeledInput(
-    label(pHolder)(`for` := pHolder, sheet.marginLeft(5)).render,
-    bs.input(default)(
-    id := pHolder,
-    formControl,
-    sheet.paddingTop(5) +++ sheet.marginLeft(5),
-    placeholder := pHolder,
-    width := w
-  ).render
+  val passwordStyle: ModifierSeq = Seq(
+    width := 130,
+    passwordType
   )
 
-  def loginInput(default: String) = defaultLabeledInput(default, "Login", 130)
+  val basicStyle = width := 130
+  val portStyle = width := 130
 
-  def targetInput(default: String) = defaultLabeledInput(default, "Host", 130)
+  def loginInput(default: String) = bs.labeledInput("Login", default, "Login", inputStyle = basicStyle)
 
-  def portInput(default: String) = defaultLabeledInput(default, "Port", 60)
+  def targetInput(default: String) = bs.labeledInput("Host", default, "Host", inputStyle = basicStyle)
 
-  def passwordInput(default: String) = {
-    val ID = "Password"
-    LabeledInput(
-      label(ID)(`for` := ID, sheet.marginLeft(5)).render,
-      bs.input(default)(
-      id := ID,
-      formControl,
-      sheet.paddingTop(5) +++ sheet.marginLeft(5),
-      placeholder := ID,
-      `type` := "password",
-      width := "130px"
-    ).render
-    )
-  }
+  def portInput(default: String) = bs.labeledInput("Port", default, "Port", inputStyle = portStyle)
+
+  def passwordInput(default: String) = bs.labeledInput("Password", default, "Password", inputStyle = passwordStyle)
 
 }

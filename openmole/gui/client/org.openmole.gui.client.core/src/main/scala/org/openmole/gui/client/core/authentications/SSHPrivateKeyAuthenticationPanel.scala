@@ -40,10 +40,7 @@ class SSHPrivateKeyAuthenticationPanel(data: PrivateKeyAuthenticationData = Priv
     for {
       e ← Seq(login, password, target, port)
     } yield {
-      div(sheet.formGroup)(
-        e.label,
-        e.input
-      )
+      e.render
     },
     privateKey.view
   )
@@ -53,10 +50,10 @@ class SSHPrivateKeyAuthenticationPanel(data: PrivateKeyAuthenticationData = Priv
       OMPost[Api].addAuthentication(
         PrivateKeyAuthenticationData(
           Some(privateKey.fileName),
-          login.input.value,
-          password.input.value,
-          target.input.value,
-          port.input.value
+          login.value,
+          password.value,
+          target.value,
+          port.value
         )
       ).call().foreach { b ⇒
           onsave()
