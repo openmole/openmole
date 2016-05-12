@@ -286,7 +286,15 @@ case class ErrorLevel() extends ErrorStateLevel {
   val name = "ERROR"
 }
 
-case class EnvironmentError(environmentId: EnvironmentId, errorMessage: String, stack: Error, date: Long, level: ErrorStateLevel)
+case class EnvironmentError(
+    environmentId: EnvironmentId,
+    errorMessage:  String,
+    stack:         Error,
+    date:          Long,
+    level:         ErrorStateLevel
+) extends Ordered[EnvironmentError] {
+  def compare(that: EnvironmentError) = date compare that.date
+}
 
 case class NetworkActivity(
   downloadingFiles:       Int    = 0,

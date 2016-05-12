@@ -331,7 +331,7 @@ object ApiImpl extends Api {
 
   def staticInfos() = execution.staticInfos()
 
-  def runningErrorEnvironmentData(limitDates: Map[EnvironmentId, Long]): EnvironmentErrorData = atomic { implicit ctx ⇒
+  def runningErrorEnvironmentData(limitDates: Map[EnvironmentId, Long], lines: Int): EnvironmentErrorData = atomic { implicit ctx ⇒
     val envIds = Runnings.environmentIds
     EnvironmentErrorData(
       envIds.flatMap {
@@ -343,7 +343,7 @@ object ApiImpl extends Api {
             if (limitDates.get(envId).map { d ⇒ { error.date > d } }.getOrElse(true))
           } yield error
 
-        errors.groupBy {
+        errors.sorted.takeRight(lines).groupBy {
           _.errorMessage
         }.map {
           case (msg, err) ⇒

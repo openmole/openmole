@@ -310,9 +310,8 @@ package object stylesheet {
   //EXECUTION PANEL
   lazy val executionHeader: ModifierSeq = Seq(
     floatRight,
-    width := 250,
-    sheet.marginRight(40),
-    sheet.marginTop(5)
+    sheet.marginRight(130),
+    sheet.marginTop(-25)
   )
 
   lazy val execOutput: ModifierSeq = Seq(
@@ -338,6 +337,12 @@ package object stylesheet {
     color("#3086b5"),
     fontWeight := "bold",
     pointer
+  )
+
+  lazy val settingsButton: ModifierSeq = Seq(
+    width := 45,
+    height := 32,
+    padding := 5
   )
 
   //OPTON DIVS

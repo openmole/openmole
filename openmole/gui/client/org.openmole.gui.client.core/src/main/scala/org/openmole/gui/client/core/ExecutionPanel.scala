@@ -66,7 +66,7 @@ class ExecutionPanel extends ModalPanel {
     }
 
     if (updating.compareAndSet(false, true)) {
-      OMPost[Api].allStates(nbOutLineInput.value.toInt).call().andThen {
+      OMPost[Api].allStates(outputHistory.value.toInt).call().andThen {
         case Success((executionInfos, runningOutputData)) ⇒
           execInfo() = PanelInfo(executionInfos, runningOutputData)
           doScrolls
@@ -128,7 +128,8 @@ class ExecutionPanel extends ModalPanel {
 
   val envLevel: Var[ErrorStateLevel] = Var(ErrorLevel())
 
-  val nbOutLineInput = bs.input("500")(colMD(1) +++ (width := 60)).render
+  val outputHistory = bs.labeledInput("# outputs", "500", "# outputs", labelStyle = color := "#000")
+  val envErrorHistory = bs.labeledInput("# envirnoment errors", "500", "# envirnoment errors", labelStyle = color := "#000")
 
   def ratio(completed: Long, running: Long, ready: Long) = s"${completed} / ${completed + running + ready}"
 
@@ -287,7 +288,7 @@ class ExecutionPanel extends ModalPanel {
   }
 
   def updateEnvErrors = {
-    OMPost[Api].runningErrorEnvironmentData(envErrorLimitDates()).call().foreach { err ⇒
+    OMPost[Api].runningErrorEnvironmentData(envErrorLimitDates(), envErrorHistory.value.toInt).call().foreach { err ⇒
       envError() = err
     }
   }
@@ -298,16 +299,26 @@ class ExecutionPanel extends ModalPanel {
 
   def visibleClass(expandID: ExpandID, visibleID: VisibleID): ModifierSeq = (expander.isVisible(expandID, visibleID), omsheet.executionVisible, pointer)
 
+  val settingsButton = tags.span(
+    btn_primary +++ glyph_settings +++ omsheet.settingsButton
+  )(tags.span(caret))
+
+  val settingsDiv = tags.div(width := 200)(
+    outputHistory.render,
+    envErrorHistory.render
+  )
+
   val dialog = bs.modalDialog(
     modalID,
     headerDialog(
       div(height := 55)(
         b("Executions"),
-        div(
-          div(omsheet.executionHeader)(
-            tags.label(colMD(4) +++ omsheet.execOutput, "Output history"),
-            nbOutLineInput
-          )
+        div(omsheet.executionHeader)(
+          settingsButton
+        ).popup(
+          settingsDiv,
+          onclose = () ⇒ updateEnvErrors,
+          popupStyle = whitePopupWithBorder
         )
       )
     ),

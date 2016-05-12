@@ -64,7 +64,7 @@ trait Api {
   def cancelExecution(id: ExecutionId): Unit
   def removeExecution(id: ExecutionId): Unit
   def runScript(scriptData: ScriptData): Unit
-  def runningErrorEnvironmentData(limitDates: Map[EnvironmentId, Long]): EnvironmentErrorData
+  def runningErrorEnvironmentData(limitDates: Map[EnvironmentId, Long], lines: Int): EnvironmentErrorData
 
   //MARKET
   def marketIndex(): MarketIndex
