@@ -60,8 +60,7 @@ object ScriptClient {
               treeNodePanel.fileDisplayer.tabs.saveAllTabs(() ⇒
                 dom.window.location.href = "shutdown")
             },
-            transform = RightPosition,
-            zone = TopZone
+            transform = CenterPagePosition
           ))
       )
     )

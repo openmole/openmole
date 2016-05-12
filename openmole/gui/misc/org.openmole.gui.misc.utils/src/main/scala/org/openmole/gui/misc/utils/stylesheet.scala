@@ -131,6 +131,7 @@ package object stylesheet {
 
   lazy val resetBlock: ModifierSeq = Seq(
     absolutePosition,
+    pointer,
     top := 10,
     right := 10
   )
