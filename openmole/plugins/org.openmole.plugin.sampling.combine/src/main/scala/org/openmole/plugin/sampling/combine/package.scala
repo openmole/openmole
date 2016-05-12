@@ -18,7 +18,8 @@
 package org.openmole.plugin.sampling
 
 import java.io.File
-import java.util.Random
+import java.nio.file.Path
+
 import org.openmole.core.workflow.builder.SamplingBuilder
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.domain._
@@ -52,10 +53,17 @@ package object combine {
     def s: Sampling = f
   }
 
-  implicit def withNameFactorDecorator[D](factor: Factor[D, File])(implicit discrete: Discrete[D, File]) = new {
+  trait CanGetName[A] {
+    def getName(a: A): String
+  }
+
+  implicit val fileGetName = new CanGetName[File] { def getName(f: File) = f.getName }
+  implicit val pathGetName = new CanGetName[Path] { def getName(p: Path) = p.toFile.getName }
+
+  implicit def withNameFactorDecorator[D, T: CanGetName](factor: Factor[D, T])(implicit discrete: Discrete[D, T]) = new {
     @deprecated("Use withName", "5")
-    def zipWithName(name: Prototype[String]): ZipWithNameSampling[D] = withName(name)
-    def withName(name: Prototype[String]): ZipWithNameSampling[D] = new ZipWithNameSampling(factor, name)
+    def zipWithName(name: Prototype[String]): ZipWithNameSampling[D, T] = withName(name)
+    def withName(name: Prototype[String]): ZipWithNameSampling[D, T] = new ZipWithNameSampling(factor, name)
   }
 
 }
