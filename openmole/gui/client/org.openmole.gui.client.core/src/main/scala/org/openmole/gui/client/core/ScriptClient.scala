@@ -164,7 +164,7 @@ object ScriptClient {
       val modalPanel = authenticationPanel
     }
 
-    val execItem = dialogNavItem("executions", glyphSpan(glyph_settings).tooltip(span("Executions")), () ⇒ executionTriggerer.triggerOpen)
+    val execItem = dialogNavItem("executions", glyphSpan(glyph_flash).tooltip(span("Executions")), () ⇒ executionTriggerer.triggerOpen)
 
     val authenticationItem = dialogNavItem("authentications", glyphSpan(glyph_lock).tooltip(span("Authentications")), () ⇒ authenticationTriggerer.triggerOpen)
 

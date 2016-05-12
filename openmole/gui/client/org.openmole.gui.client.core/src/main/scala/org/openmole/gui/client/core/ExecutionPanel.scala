@@ -300,7 +300,7 @@ class ExecutionPanel extends ModalPanel {
   def visibleClass(expandID: ExpandID, visibleID: VisibleID): ModifierSeq = (expander.isVisible(expandID, visibleID), omsheet.executionVisible, pointer)
 
   val settingsButton = tags.span(
-    btn_primary +++ glyph_settings +++ omsheet.settingsButton
+    btn_default +++ glyph_settings +++ omsheet.settingsButton
   )(tags.span(caret))
 
   val settingsDiv = tags.div(width := 200)(
