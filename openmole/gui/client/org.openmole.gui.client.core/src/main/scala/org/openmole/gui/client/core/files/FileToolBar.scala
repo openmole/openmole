@@ -43,52 +43,43 @@ import org.openmole.gui.client.core.Waiter._
 
 object FileToolBar {
 
-  sealed trait SelectedTool {
+  trait SelectedTool {
     def glyph: Glyphicon
-
-    def checkMode: Boolean
   }
 
   object FilterTool extends SelectedTool {
     val glyph = glyph_filter
-    val checkMode = false
   }
 
   object TrashTool extends SelectedTool {
     val glyph = glyph_trash
-    val checkMode = true
   }
 
   object FileCreationTool extends SelectedTool {
     val glyph = glyph_plus
-    val checkMode = false
   }
 
   object PluginTool extends SelectedTool {
     val glyph = OMTags.glyph_plug
-    val checkMode = false
   }
 
   object CopyTool extends SelectedTool {
     val glyph = glyph_copy
-    val checkMode = true
   }
 
   object PasteTool extends SelectedTool {
     val glyph = glyph_copy
-    val checkMode = false
   }
 
   object RefreshTool extends SelectedTool {
     val glyph = glyph_refresh
-    val checkMode = false
   }
 
 }
 
 import FileToolBar._
 
-class FileToolBar(refreshAndRedraw: () ⇒ Unit) {
+class FileToolBar(treeNodePanel: TreeNodePanel) {
 
   val selectedTool: Var[Option[SelectedTool]] = Var(None)
   val transferring: Var[ProcessState] = Var(Processed())
@@ -98,8 +89,6 @@ class FileToolBar(refreshAndRedraw: () ⇒ Unit) {
   implicit def someIntToString(i: Option[Int]): String = i.map {
     _.toString
   }.getOrElse("")
-
-  implicit def toolToSetSelection(t: SelectedTool): () ⇒ Unit = () ⇒ manager.setSelection(t)
 
   def resetFilter = {
     selectedTool() = None
@@ -115,11 +104,18 @@ class FileToolBar(refreshAndRedraw: () ⇒ Unit) {
     )
   }
 
-  def buildSpan(tool: SelectedTool): Rx[TypedTag[HTMLSpanElement]] = buildSpan(tool, { () ⇒
-    if (selectedTool() == Some(tool)) unselectTool
-    else selectedTool() = Some(tool)
-    val a: () ⇒ Unit = tool
-    a()
+  def buildAndSelectSpan(tool: SelectedTool, todo: Boolean ⇒ Unit = (Boolean) ⇒ {}): Rx[TypedTag[HTMLSpanElement]] = buildSpan(tool, { () ⇒
+    val isSelectedTool = selectedTool() == Some(tool)
+    if (isSelectedTool) unselectTool
+    else {
+      selectedTool() = Some(tool)
+      selectedTool() match {
+        case Some(CopyTool | TrashTool) ⇒ treeNodePanel.turnSelectionTo(true)
+        case _                          ⇒
+      }
+
+    }
+    // todo(isSelectedTool)
   })
 
   def fInputMultiple(todo: HTMLInputElement ⇒ Unit) = {
@@ -136,7 +132,7 @@ class FileToolBar(refreshAndRedraw: () ⇒ Unit) {
     )
 
   private val upButton = upbtn((fileInput: HTMLInputElement) ⇒ {
-    FileManager.upload(fileInput, manager.current.safePath(), (p: ProcessState) ⇒ transferring() = p, UploadProject(), refreshAndRedraw)
+    FileManager.upload(fileInput, manager.current.safePath(), (p: ProcessState) ⇒ transferring() = p, UploadProject(), () ⇒ treeNodePanel.refreshAndDraw)
   })
 
   // New file tool
@@ -209,11 +205,12 @@ class FileToolBar(refreshAndRedraw: () ⇒ Unit) {
   def unselectAndRefreshTree: Unit = {
     unselectTool
     newNodeInput.value = ""
-    refreshAndRedraw()
+    treeNodePanel.refreshAndDraw
   }
 
   def unselectTool = {
     resetFilter
+    treeNodePanel.turnSelectionTo(false)
     selectedTool() = None
   }
 
@@ -241,7 +238,7 @@ class FileToolBar(refreshAndRedraw: () ⇒ Unit) {
 
   def updateFilter(newFilter: FileFilter) = {
     fileFilter() = newFilter
-    refreshAndRedraw()
+    treeNodePanel.refreshAndDraw
   }
 
   def switchAlphaSorting = updateFilter(fileFilter().switchTo(AlphaSorting))
@@ -298,13 +295,13 @@ class FileToolBar(refreshAndRedraw: () ⇒ Unit) {
 
   val div = tags.div(
     tags.div(centerElement)(
-      buildSpan(RefreshTool, refreshAndRedraw),
+      buildSpan(RefreshTool, () ⇒ treeNodePanel.refreshAndDraw),
       upButton,
-      buildSpan(PluginTool),
-      buildSpan(TrashTool),
-      buildSpan(CopyTool),
-      buildSpan(FileCreationTool),
-      buildSpan(FilterTool)
+      buildAndSelectSpan(PluginTool),
+      buildAndSelectSpan(TrashTool),
+      buildAndSelectSpan(CopyTool),
+      buildAndSelectSpan(FileCreationTool),
+      buildAndSelectSpan(FilterTool)
     ),
     fileToolDiv
   )
@@ -319,7 +316,7 @@ class FileToolBar(refreshAndRedraw: () ⇒ Unit) {
   private def paste(safePaths: Seq[SafePath], to: SafePath) = {
     def refreshWithNoError = {
       manager.noError
-      refreshAndRedraw()
+      treeNodePanel.refreshAndDraw
     }
 
     def onpasted = {

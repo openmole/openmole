@@ -16,12 +16,6 @@ package org.openmole.gui.misc.js
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-/*
-import scala.util.{ Failure, Success }
-import org.scalajs.dom
-import scalatags.JsDom.all._
-import rx._
-import org.scalajs.dom.Element*/
 
 import org.scalajs.dom.raw.{ SVGElement, Node }
 import scalatags.JsDom._

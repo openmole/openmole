@@ -200,7 +200,8 @@ package object stylesheet {
     display := "inline-block",
     height := 22,
     sheet.marginBottom(5),
-    padding := "3 4",
+    padding := 2,
+    top := 2,
     width := 22,
     borderRadius := "4px"
   )
@@ -228,6 +229,31 @@ package object stylesheet {
     sheet.marginLeft(25),
     sheet.marginTop(38)
   )
+
+  lazy val fileSelectionOverlay: ModifierSeq = Seq(
+    absolutePosition,
+    top := 0,
+    right := 0,
+    pointer,
+    width := "100%",
+    height := 24
+  )
+
+  lazy val fileSelected: ModifierSeq = Seq(
+    backgroundColor := "pink",
+    fontWeight := "bold"
+  ) +++ fileSelectionOverlay
+
+  lazy val fileSelectedForDeletion: ModifierSeq = Seq(
+    fontWeight := "bold",
+    backgroundColor := "red",
+    opacity := 0.7
+  ) +++ fileSelectionOverlay
+
+  lazy val fileSelectionMode: ModifierSeq = Seq(
+    backgroundColor := "green",
+    opacity := 0.7
+  ) +++ fileSelectionOverlay
 
   //TREENODE TABS
   lazy val editingElement: ModifierSeq = Seq(

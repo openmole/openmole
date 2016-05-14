@@ -40,8 +40,6 @@ class TreeNodeManager {
 
   val comment: Var[Option[TreeNodeComment]] = Var(None)
 
-  val selectionMode: Var[Option[SelectedTool]] = Var(None)
-
   val selected: Var[Seq[TreeNode]] = Var(Seq())
 
   val copied: Var[Seq[TreeNode]] = Var(Seq())
@@ -65,25 +63,18 @@ class TreeNodeManager {
 
   def isSelected(tn: TreeNode) = selected().contains(tn)
 
-  def resetSelection = selected() = Seq()
+  def clearSelection = selected() = Seq()
+
+  def clearSelectionExecpt(tn: TreeNode) = selected() = Seq(tn)
 
   def setSelected(tn: TreeNode, b: Boolean) = b match {
     case true  ⇒ selected() = (selected() :+ tn).distinct
     case false ⇒ selected() = selected().filterNot(_ == tn)
   }
 
-  def setSelectedAsCopied = {
-    copied() = selected()
-    selectionMode() = None
-
-  }
+  def setSelectedAsCopied = copied() = selected()
 
   def emptyCopied = copied() = Seq()
-
-  def setSelection(selectedTool: SelectedTool) = selectionMode() = selectionMode() match {
-    case Some(s: SelectedTool) ⇒ if (s == selectedTool) None else Some(selectedTool)
-    case _                     ⇒ Some(selectedTool)
-  }
 
   def setFilesInError(question: String, files: Seq[SafePath], okaction: () ⇒ Unit, cancelaction: () ⇒ Unit) = error() = Some(TreeNodeError(question, files, okaction, cancelaction))
 
@@ -92,11 +83,6 @@ class TreeNodeManager {
   def noError = {
     error() = None
     comment() = None
-  }
-
-  def switchOffSelection = {
-    selectionMode() = None
-    resetSelection
   }
 
   def head = dirNodeLine().head
@@ -126,7 +112,5 @@ class TreeNodeManager {
   def isRootCurrent = current == root
 
   def isProjectsEmpty = sons().getOrElse(root, Seq()).isEmpty
-
-  def checkMode = selectionMode().map { _.checkMode }.getOrElse(false)
 
 }

@@ -58,13 +58,13 @@ object CoreUtils {
 
   def trashNode(path: SafePath, fileFilter: FileFilter)(ontrashed: () ⇒ Unit): Unit = {
     OMPost[Api].deleteFile(path, ServerFileSytemContext.project).call().foreach { d ⇒
-      refreshAndSwitchSelection(fileFilter, ontrashed)
+      refresh(fileFilter, ontrashed)
     }
   }
 
   def trashNodes(paths: Seq[SafePath], fileFilter: FileFilter)(ontrashed: () ⇒ Unit): Unit = {
     OMPost[Api].deleteFiles(paths, ServerFileSytemContext.project).call().foreach { d ⇒
-      refreshAndSwitchSelection(fileFilter, ontrashed)
+      refresh(fileFilter, ontrashed)
     }
   }
 
@@ -74,9 +74,8 @@ object CoreUtils {
     }
   }
 
-  def refreshAndSwitchSelection(fileFilter: FileFilter, onrefreshed: () ⇒ Unit = () ⇒ {}) = {
+  def refresh(fileFilter: FileFilter, onrefreshed: () ⇒ Unit = () ⇒ {}) = {
     refreshCurrentDirectory(onrefreshed, fileFilter)
-    manager.switchOffSelection
   }
 
   def testExistenceAndCopyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Future[Seq[SafePath]] =
