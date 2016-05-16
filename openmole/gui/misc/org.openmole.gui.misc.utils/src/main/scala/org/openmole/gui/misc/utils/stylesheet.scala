@@ -237,30 +237,30 @@ package object stylesheet {
     right := 0,
     pointer,
     width := "110%",
-    height := 23,
-    opacity := 0.85
+    height := 23
   )
 
   lazy val fileSelectionMode: ModifierSeq = Seq(
-    backgroundColor := "yellow"
+    backgroundColor := "yellow",
+    opacity := 0.85
   ) +++ fileSelectionOverlay
 
   lazy val fileSelected: ModifierSeq = Seq(
-    backgroundColor := "pink",
-    fontWeight := "bold"
+    backgroundColor := "#a6bf26",
+    opacity := 0.65
   ) +++ fileSelectionOverlay
 
   lazy val fileSelectedForDeletion: ModifierSeq = Seq(
-    fontWeight := "bold",
-    backgroundColor := "#d9534f"
+    backgroundColor := "#d9534f",
+    opacity := 0.85
   ) +++ fileSelectionOverlay
 
   lazy val fileSelectionMessage: ModifierSeq = Seq(
     floatRight,
-    padding := 6,
+    padding := 4,
     fontSize := 13,
     right := 6,
-    color("#333")
+    color("white")
   )
 
   //TREENODE TABS

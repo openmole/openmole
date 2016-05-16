@@ -2,7 +2,7 @@ package org.openmole.gui.client.core.files
 
 import org.openmole.gui.client.core.alert.AbsolutePositioning.{ RelativeCenterPosition, FileZone }
 import org.openmole.gui.client.core.alert.AlertPanel
-import org.openmole.gui.client.core.files.FileToolBar.TrashTool
+import org.openmole.gui.client.core.files.FileToolBar.{ CopyTool, TrashTool }
 import org.openmole.gui.client.core.{ PanelTriggerer, OMPost }
 import org.openmole.gui.client.core.CoreUtils
 import org.openmole.gui.ext.data._
@@ -334,43 +334,50 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
           }
         ).tooltip(tags.span(tn.name()), popupStyle = whitePopup, arrowStyle = Popup.whiteBottomArrow, condition = () ⇒ tn.name().length > 24),
         div(stylesheet.fileInfo)(
-          span(stylesheet.fileSize)(tags.i(timeOrSize(tn))),
-          span(`class` := Rx {
-            if (lineHovered()) "opaque" else "transparent"
-          })(
-            span(onclick := { () ⇒ trashNode(tn) }, trash),
-            span(onclick := { () ⇒
-              toBeEdited() = Some(NodeEdition(tn))
-              drawTree
-            }, edit),
-            a(
-              span(onclick := { () ⇒ Unit })(download_alt),
-              href := s"downloadFile?path=${Utils.toURI(tn.safePath().path)}"
-            ),
-            tn.safePath().extension match {
-              case FileExtension.TGZ ⇒
-                span(archive, onclick := { () ⇒
-                  OMPost[Api].extractTGZ(tn).call().foreach { r ⇒
-                    refreshAndDraw
-                  }
-                })
-              case _ ⇒
-            },
-            span(onclick := { () ⇒
-              CoreUtils.replicate(tn, (replicated: TreeNodeData) ⇒ {
-                refreshAnd(() ⇒ {
-                  toBeEdited() = Some(NodeEdition(replicated, true))
-                  drawTree
-                })
-              })
-            })(arrow_right_and_left)
+          Rx {
+            if (selectionMode()) div
+            else {
+              div(
+                span(stylesheet.fileSize)(tags.i(timeOrSize(tn))),
+                span(`class` := Rx {
+                  if (lineHovered()) "opaque" else "transparent"
+                })(
+                  span(onclick := { () ⇒ trashNode(tn) }, trash),
+                  span(onclick := { () ⇒
+                    toBeEdited() = Some(NodeEdition(tn))
+                    drawTree
+                  }, edit),
+                  a(
+                    span(onclick := { () ⇒ Unit })(download_alt),
+                    href := s"downloadFile?path=${Utils.toURI(tn.safePath().path)}"
+                  ),
+                  tn.safePath().extension match {
+                    case FileExtension.TGZ ⇒
+                      span(archive, onclick := { () ⇒
+                        OMPost[Api].extractTGZ(tn).call().foreach { r ⇒
+                          refreshAndDraw
+                        }
+                      })
+                    case _ ⇒
+                  },
+                  span(onclick := { () ⇒
+                    CoreUtils.replicate(tn, (replicated: TreeNodeData) ⇒ {
+                      refreshAnd(() ⇒ {
+                        toBeEdited() = Some(NodeEdition(replicated, true))
+                        drawTree
+                      })
+                    })
+                  })(arrow_right_and_left)
 
-          /*,
-                                                                  if (tn.isPlugin) glyphSpan(OMTags.glyph_plug, () ⇒
-                                                                    OMPost[Api].autoAddPlugins(tn.safePath()).call().foreach { p ⇒
-                                                                      panels.pluginTriggerer.open
-                                                                    })(`class` := "glyphitem file-glyph")*/
-          )
+                /*,
+                                                                        if (tn.isPlugin) glyphSpan(OMTags.glyph_plug, () ⇒
+                                                                          OMPost[Api].autoAddPlugins(tn.safePath()).call().foreach { p ⇒
+                                                                            panels.pluginTriggerer.open
+                                                                          })(`class` := "glyphitem file-glyph")*/
+                )
+              )
+            }
+          }
         )
       )
       tr(
@@ -384,7 +391,6 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
                 }
               )({
                   if (selected()) {
-                    println("selected " + selected())
                     fileToolBar.selectedTool() match {
                       case Some(TrashTool) ⇒ stylesheet.fileSelectedForDeletion
                       case _               ⇒ stylesheet.fileSelected
@@ -393,10 +399,14 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
                   else stylesheet.fileSelectionMode
                 }, span(
                   stylesheet.fileSelectionMessage,
-                  fileToolBar.selectedTool() match {
-                    case Some(TrashTool) ⇒ glyph_trash
-                    case _               ⇒
+                  if (selected()) {
+                    fileToolBar.selectedTool() match {
+                      case Some(TrashTool) ⇒ glyph_trash
+                      case Some(CopyTool)  ⇒ glyph_copy
+                      case _               ⇒
+                    }
                   }
+                  else emptyMod
                 ))
             }
             else div(overflow := "hidden")
