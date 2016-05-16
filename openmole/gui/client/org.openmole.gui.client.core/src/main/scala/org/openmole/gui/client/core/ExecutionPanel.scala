@@ -208,12 +208,14 @@ class ExecutionPanel extends ModalPanel {
                           {
                             td(colMD(12) +++ (!envErrorVisible().contains(e.envId), omsheet.displayOff, emptyMod))(
                               colspan := 12,
-                              bs.button("Update", () ⇒ {
-                                updateEnvErrors
-                              }), bs.button("Reset", () ⇒ {
-                                envErrorLimitDates() = envErrorLimitDates().updated(e.envId, System.currentTimeMillis())
-                                updateEnvErrors
-                              }),
+                              bs.buttonGroup(omsheet.centerElement)(
+                                bs.button("Update", () ⇒ {
+                                  updateEnvErrors
+                                }), bs.button("Reset", () ⇒ {
+                                  envErrorLimitDates() = envErrorLimitDates().updated(e.envId, System.currentTimeMillis())
+                                  updateEnvErrors
+                                })
+                              ),
                               staticPanel(e.envId, envErrorPanels,
                                 () ⇒ new EnvironmentErrorPanel,
                                 (ep: EnvironmentErrorPanel) ⇒ {
