@@ -198,7 +198,7 @@ package object stylesheet {
     color("white"),
     borderRadius := 5,
     display := "inline-block",
-    height := 22,
+    height := 19,
     sheet.marginBottom(5),
     padding := 2,
     top := 2,
@@ -215,6 +215,7 @@ package object stylesheet {
     sheet.paddingLeft(3),
     floatLeft,
     pointer,
+    height := 19,
     textOverflow := "ellipsis"
   )
 
@@ -232,12 +233,17 @@ package object stylesheet {
 
   lazy val fileSelectionOverlay: ModifierSeq = Seq(
     absolutePosition,
-    top := 0,
+    top := -2,
     right := 0,
     pointer,
-    width := "100%",
-    height := 24
+    width := "110%",
+    height := 23,
+    opacity := 0.85
   )
+
+  lazy val fileSelectionMode: ModifierSeq = Seq(
+    backgroundColor := "yellow"
+  ) +++ fileSelectionOverlay
 
   lazy val fileSelected: ModifierSeq = Seq(
     backgroundColor := "pink",
@@ -246,14 +252,16 @@ package object stylesheet {
 
   lazy val fileSelectedForDeletion: ModifierSeq = Seq(
     fontWeight := "bold",
-    backgroundColor := "red",
-    opacity := 0.7
+    backgroundColor := "#d9534f"
   ) +++ fileSelectionOverlay
 
-  lazy val fileSelectionMode: ModifierSeq = Seq(
-    backgroundColor := "green",
-    opacity := 0.7
-  ) +++ fileSelectionOverlay
+  lazy val fileSelectionMessage: ModifierSeq = Seq(
+    floatRight,
+    padding := 6,
+    fontSize := 13,
+    right := 6,
+    color("#333")
+  )
 
   //TREENODE TABS
   lazy val editingElement: ModifierSeq = Seq(
@@ -368,6 +376,7 @@ package object stylesheet {
   lazy val settingsButton: ModifierSeq = Seq(
     width := 45,
     height := 32,
+    top := 10,
     padding := 5
   )
 

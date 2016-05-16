@@ -366,10 +366,10 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
             })(arrow_right_and_left)
 
           /*,
-                                                                if (tn.isPlugin) glyphSpan(OMTags.glyph_plug, () ⇒
-                                                                  OMPost[Api].autoAddPlugins(tn.safePath()).call().foreach { p ⇒
-                                                                    panels.pluginTriggerer.open
-                                                                  })(`class` := "glyphitem file-glyph")*/
+                                                                  if (tn.isPlugin) glyphSpan(OMTags.glyph_plug, () ⇒
+                                                                    OMPost[Api].autoAddPlugins(tn.safePath()).call().foreach { p ⇒
+                                                                      panels.pluginTriggerer.open
+                                                                    })(`class` := "glyphitem file-glyph")*/
           )
         )
       )
@@ -382,15 +382,22 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
                   addToSelection
                   if (e.ctrlKey) clearSelectionExecpt(tn)
                 }
-              )(
+              )({
                   if (selected()) {
+                    println("selected " + selected())
                     fileToolBar.selectedTool() match {
                       case Some(TrashTool) ⇒ stylesheet.fileSelectedForDeletion
                       case _               ⇒ stylesheet.fileSelected
                     }
                   }
                   else stylesheet.fileSelectionMode
-                )
+                }, span(
+                  stylesheet.fileSelectionMessage,
+                  fileToolBar.selectedTool() match {
+                    case Some(TrashTool) ⇒ glyph_trash
+                    case _               ⇒
+                  }
+                ))
             }
             else div(overflow := "hidden")
           }
