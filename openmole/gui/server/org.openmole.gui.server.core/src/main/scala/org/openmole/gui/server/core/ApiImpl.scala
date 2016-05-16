@@ -5,7 +5,7 @@ import java.net.URL
 import java.util.zip.GZIPInputStream
 
 import com.sun.org.apache.xalan.internal.xsltc.dom.LoadDocument
-import org.openmole.core.batch.environment.BatchEnvironment.{ EndUpload, BeginUpload, EndDownload, BeginDownload }
+import org.openmole.core.batch.environment.BatchEnvironment.{ BeginDownload, BeginUpload, EndDownload, EndUpload }
 import org.openmole.core.buildinfo.MarketIndex
 import org.openmole.core.event._
 import org.openmole.core.exception.UserBadDataError
@@ -20,15 +20,20 @@ import org.openmole.gui.ext.data
 import org.openmole.gui.ext.data._
 import java.io._
 import java.nio.file._
+
 import org.openmole.core.project._
 import org.osgi.framework.Bundle
+
 import scala.util.{ Failure, Success, Try }
 import org.openmole.core.workflow.mole.MoleExecutionContext
 import org.openmole.tool.stream.StringPrintStream
+
 import scala.concurrent.stm._
 import org.openmole.tool.file._
 import org.openmole.tool.tar._
 import org.openmole.core.buildinfo
+import org.openmole.core.output.OutputManager
+import org.openmole.gui.server.core
 
 /*
  * Copyright (C) 21/07/14 // mathieu.leclaire@openmole.org
@@ -270,46 +275,19 @@ object ApiImpl extends Api {
         case CompilationError(e)       ⇒ error(e)
         case compiled: Compiled ⇒
 
-          Try(compiled.eval) match {
+          val outputStream = new StringPrintStream()
+          Runnings.setOutput(execId, outputStream)
+
+          Try(OutputManager.withStreamOutputs(outputStream, outputStream)(compiled.eval)) match {
             case Failure(e) ⇒ error(e)
             case Success(o) ⇒
               val puzzle = o.buildPuzzle
-              val outputStream = new StringPrintStream()
 
               val envIds = puzzle.environments.values.toSeq.distinct.map { env ⇒ EnvironmentId(getUUID) → env }
-              Runnings.add(execId, envIds, outputStream)
+              Runnings.add(execId, envIds)
 
-              envIds.foreach {
-                case (envId, env) ⇒
-                  env.listen {
-                    case (env, bdl: BeginDownload) ⇒ Runnings.update(envId) {
-                      re ⇒ re.copy(networkActivity = re.networkActivity.copy(downloadingFiles = re.networkActivity.downloadingFiles + 1))
-                    }
-                    case (env, edl: EndDownload) ⇒ Runnings.update(envId) {
-                      re ⇒
-                        val size = re.networkActivity.downloadedSize + (if (edl.success) FileDecorator(edl.file).size else 0)
-                        re.copy(networkActivity = re.networkActivity.copy(
-                          downloadingFiles = re.networkActivity.downloadingFiles - 1,
-                          downloadedSize = size,
-                          readableDownloadedSize = readableByteCount(size)
-                        ))
-                    }
-                    case (env, bul: BeginUpload) ⇒ Runnings.update(envId) {
-                      re ⇒ re.copy(networkActivity = re.networkActivity.copy(uploadingFiles = re.networkActivity.uploadingFiles + 1))
-                    }
-                    case (env, eul: EndUpload) ⇒ Runnings.update(envId) {
-                      (re: RunningEnvironment) ⇒
-                        val size = re.networkActivity.uploadedSize + (if (eul.success) FileDecorator(eul.file).size else 0)
-                        re.copy(
-                          networkActivity = re.networkActivity.copy(
-                            uploadedSize = size,
-                            readableUploadedSize = readableByteCount(size),
-                            uploadingFiles = re.networkActivity.uploadingFiles - 1
-                          )
-                        )
-                    }
-                  }
-              }
+              envIds.foreach { case (envId, env) ⇒ env.listen(Runnings.environmentListener(envId)) }
+
               Try(puzzle.toExecution(executionContext = MoleExecutionContext(out = outputStream))) match {
                 case Success(ex) ⇒
                   Try(ex.start) match {
