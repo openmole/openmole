@@ -1,10 +1,13 @@
 package org.openmole.gui.server.core
 
+import org.openmole.core.batch.environment.BatchEnvironment
+import org.openmole.core.batch.environment.BatchEnvironment._
 import org.openmole.core.workflow.execution.Environment
 import org.openmole.gui.ext.data._
 import org.openmole.gui.server.core.Runnings.RunningEnvironment
 import org.openmole.tool.stream.StringPrintStream
-
+import org.openmole.tool.file._
+import org.openmole.core.event._
 import scala.concurrent.stm._
 
 /*
@@ -26,6 +29,35 @@ import scala.concurrent.stm._
 
 object Runnings {
 
+  def environmentListener(envId: EnvironmentId): Listner[Environment] = {
+    case (env, bdl: BeginDownload) ⇒ Runnings.update(envId) {
+      re ⇒ re.copy(networkActivity = re.networkActivity.copy(downloadingFiles = re.networkActivity.downloadingFiles + 1))
+    }
+    case (env, edl: EndDownload) ⇒ Runnings.update(envId) {
+      re ⇒
+        val size = re.networkActivity.downloadedSize + (if (edl.success) FileDecorator(edl.file).size else 0)
+        re.copy(networkActivity = re.networkActivity.copy(
+          downloadingFiles = re.networkActivity.downloadingFiles - 1,
+          downloadedSize = size,
+          readableDownloadedSize = readableByteCount(size)
+        ))
+    }
+    case (env, bul: BeginUpload) ⇒ Runnings.update(envId) {
+      re ⇒ re.copy(networkActivity = re.networkActivity.copy(uploadingFiles = re.networkActivity.uploadingFiles + 1))
+    }
+    case (env, eul: EndUpload) ⇒ Runnings.update(envId) {
+      (re: RunningEnvironment) ⇒
+        val size = re.networkActivity.uploadedSize + (if (eul.success) FileDecorator(eul.file).size else 0)
+        re.copy(
+          networkActivity = re.networkActivity.copy(
+            uploadedSize = size,
+            readableUploadedSize = readableByteCount(size),
+            uploadingFiles = re.networkActivity.uploadingFiles - 1
+          )
+        )
+    }
+  }
+
   object RunningEnvironment {
     def empty(environment: Environment) = RunningEnvironment(environment, NetworkActivity())
 
@@ -46,9 +78,12 @@ object Runnings {
     }
   }
 
-  def add(id: ExecutionId, envIds: Seq[(EnvironmentId, Environment)], printStream: StringPrintStream) = atomic { implicit ctx ⇒
-    instance.environmentIds(id) = Seq()
+  def setOutput(id: ExecutionId, printStream: StringPrintStream) = atomic { implicit ctx ⇒
     instance.outputs(id) = printStream
+  }
+
+  def add(id: ExecutionId, envIds: Seq[(EnvironmentId, Environment)]) = atomic { implicit ctx ⇒
+    instance.environmentIds(id) = Seq()
     envIds.foreach {
       case (envId, env) ⇒
         instance.environmentIds(id) = instance.environmentIds(id) :+ envId

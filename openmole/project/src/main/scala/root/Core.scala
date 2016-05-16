@@ -64,7 +64,7 @@ object Core extends Defaults {
     bundleActivator = Some("org.openmole.core.logging.internal.Activator"), imports = Seq("*")
   ) settings (libraryDependencies ++= Seq(log4j, logback, slf4j)) dependsOn (tools, workspace)
 
-  val output = OsgiProject("output", imports = Seq("*"))
+  val output = OsgiProject("output", imports = Seq("*")) dependsOn (ThirdParties.openmoleStream)
 
   val console = OsgiProject("console", bundleActivator = Some("org.openmole.core.console.Activator"), global = true, imports = Seq("*")) dependsOn
     (pluginManager) settings (

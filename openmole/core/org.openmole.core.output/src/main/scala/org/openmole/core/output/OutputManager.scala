@@ -16,9 +16,10 @@
  */
 package org.openmole.core.output
 
-import java.io.{ PrintStream, OutputStream }
+import java.io.{ OutputStream, PrintStream }
 
 import scala.collection.mutable
+import org.openmole.tool.stream._
 
 object OutputManager {
 
@@ -66,17 +67,42 @@ object OutputManager {
   redirectSystemOutput(new PrintStream(dispatchOutput))
   redirectSystemError(new PrintStream(dispatchError))
 
-  def unregister(thread: ThreadGroup) = {
+  private def unregister(thread: ThreadGroup) = {
     output.synchronized { output.remove(thread) }
     error.synchronized { error.remove(thread) }
   }
 
-  def redirectOutput(thread: ThreadGroup, stream: PrintStream) = output.synchronized {
+  private def redirectOutput(thread: ThreadGroup, stream: PrintStream) = output.synchronized {
     output.put(thread, stream)
   }
 
-  def redirectError(thread: ThreadGroup, stream: PrintStream) = error.synchronized {
+  private def redirectError(thread: ThreadGroup, stream: PrintStream) = error.synchronized {
     error.put(thread, stream)
+  }
+
+  case class Outputs(output: String, error: String)
+
+  def withStringOutput[T](f: ⇒ T): (T, Outputs) = {
+    val o = new StringPrintStream()
+    val e = new StringPrintStream()
+    redirectOutput(o, e)
+
+    val res =
+      try f
+      finally OutputManager.unregister(Thread.currentThread.getThreadGroup)
+
+    (res, Outputs(o.toString, e.toString))
+  }
+
+  def withStreamOutputs[T](out: PrintStream, err: PrintStream)(f: ⇒ T): T = {
+    redirectOutput(out, err)
+    try f
+    finally OutputManager.unregister(Thread.currentThread.getThreadGroup)
+  }
+
+  private def redirectOutput(output: PrintStream, error: PrintStream): Unit = {
+    OutputManager.redirectOutput(Thread.currentThread.getThreadGroup, output)
+    OutputManager.redirectError(Thread.currentThread.getThreadGroup, error)
   }
 
 }
