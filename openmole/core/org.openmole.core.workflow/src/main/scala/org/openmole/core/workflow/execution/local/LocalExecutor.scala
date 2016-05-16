@@ -30,8 +30,9 @@ import org.openmole.core.workflow.job._
 import org.openmole.core.workflow.task._
 import org.openmole.tool.logger.Logger
 import org.openmole.tool.stream._
+
 import ref.WeakReference
-import org.openmole.core.workflow.mole.{ StrainerTaskDecorator, StrainerCapsule }
+import org.openmole.core.workflow.mole.{ MoleExecution, StrainerCapsule, StrainerTaskDecorator }
 import org.openmole.core.event._
 
 object LocalExecutor extends Logger
@@ -53,7 +54,6 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
           }
 
           val executionJob = environment.pool.takeNextjob
-
           val beginTime = System.currentTimeMillis
 
           try {
@@ -98,8 +98,8 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
 
             output.foreach {
               case Output(stream, output, error) ⇒
-                display(stream, s"Output of local execution", output.read)
-                display(stream, s"Error of local execution", error.read)
+                display(stream, s"Output of local execution", output)
+                display(stream, s"Error of local execution", error)
             }
 
             EventDispatcher.trigger(environment: Environment, Environment.JobCompleted(executionJob, log, service.localRuntimeInfo))
@@ -118,34 +118,18 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
     }
   }
 
-  case class Output(stream: PrintStream, output: StringPrintStream, error: StringPrintStream)
+  case class Output(stream: PrintStream, output: String, error: String)
 
-  private def withRedirectedOutput[T](job: LocalExecutionJob, deinterleave: Boolean)(f: ⇒ T) = {
-    val output = redirectOutput(job, deinterleave)
-    val res =
-      try f finally OutputManager.unregister(Thread.currentThread.getThreadGroup)
-    (res, output)
-  }
-
-  private def redirectOutput(job: LocalExecutionJob, deinterleave: Boolean): Option[Output] = {
-    job.moleExecution match {
-      case None ⇒
-        OutputManager.unregister(Thread.currentThread.getThreadGroup)
-        None
-      case Some(ex) ⇒
-        if (deinterleave) {
-          val output = new StringPrintStream()
-          val error = new StringPrintStream()
-          OutputManager.redirectOutput(Thread.currentThread.getThreadGroup, output)
-          OutputManager.redirectError(Thread.currentThread.getThreadGroup, error)
-          Some(Output(ex.executionContext.out, output, error))
-        }
-        else {
-          OutputManager.redirectOutput(Thread.currentThread.getThreadGroup, ex.executionContext.out)
-          OutputManager.redirectError(Thread.currentThread.getThreadGroup, ex.executionContext.out)
-          None
-        }
+  private def withRedirectedOutput[T](executionJob: LocalExecutionJob, deinterleave: Boolean)(f: ⇒ T) =
+    executionJob.moleExecution match {
+      case Some(execution) if deinterleave ⇒
+        val (res, out) = OutputManager.withStringOutput(f)
+        res → Some(Output(execution.executionContext.out, out.output, out.error))
+      case Some(execution) ⇒
+        val res = OutputManager.withStreamOutputs(execution.executionContext.out, execution.executionContext.out)(f)
+        res → None
+      case _ ⇒
+        f → None
     }
-  }
 
 }

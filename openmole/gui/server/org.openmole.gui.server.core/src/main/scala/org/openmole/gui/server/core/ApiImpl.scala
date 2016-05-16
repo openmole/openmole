@@ -269,6 +269,7 @@ object ApiImpl extends Api {
         case ScriptFileDoesNotExists() ⇒ message("Script file does not exist")
         case CompilationError(e)       ⇒ error(e)
         case compiled: Compiled ⇒
+
           Try(compiled.eval) match {
             case Failure(e) ⇒ error(e)
             case Success(o) ⇒
