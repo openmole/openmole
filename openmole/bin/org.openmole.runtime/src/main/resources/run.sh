@@ -53,7 +53,7 @@ java -Djava.io.tmpdir="${TMPDIR}" -Dopenmole.home="${TMPDIR}" file.encoding=UTF-
 
 RETURNCODE=$?
 
-rm -rf ${TMPDIR}
+rm -rf "${TMPDIR}"
 
 exit $RETURNCODE
 
