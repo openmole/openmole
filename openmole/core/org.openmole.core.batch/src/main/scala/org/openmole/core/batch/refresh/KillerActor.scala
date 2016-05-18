@@ -27,7 +27,7 @@ object KillerActor extends Logger
 import KillerActor.Log._
 
 class KillerActor(jobManager: JobManager) {
-  def receive(msg: KillBatchJob) = withRunFinalization {
+  def receive(msg: KillBatchJob) = {
     val KillBatchJob(bj) = msg
     try bj.jobService.tryWithToken {
       case Some(t) ⇒ bj.kill(t)
