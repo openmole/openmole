@@ -29,7 +29,7 @@ import RefreshActor.Log._
 
 class RefreshActor(jobManager: JobManager) {
 
-  def receive(refresh: Refresh) = withRunFinalization {
+  def receive(refresh: Refresh) = {
     val Refresh(job, sj, bj, delay, updateErrorsInARow) = refresh
     if (!job.state.isFinal) {
       try bj.jobService.tryWithToken {

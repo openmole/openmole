@@ -43,7 +43,7 @@ import UploadActor._
 
 class UploadActor(jobManager: JobManager) {
 
-  def receive(msg: Upload) = withRunFinalization {
+  def receive(msg: Upload) = {
     val job = msg.job
     if (!job.state.isFinal) {
       try job.trySelectStorage match {

@@ -43,7 +43,7 @@ import GetResultActor.Log._
 
 class GetResultActor(jobManager: JobManager) {
 
-  def receive(msg: GetResult) = withRunFinalization {
+  def receive(msg: GetResult) = {
     val GetResult(job, sj, resultPath) = msg
     try sj.storage.tryWithToken {
       case Some(token) ⇒
