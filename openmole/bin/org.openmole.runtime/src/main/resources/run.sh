@@ -2,23 +2,23 @@
 
 
 #readlink -f does not work on mac, use alternate script
-TARGET_FILE=$0
+TARGET_FILE="$0"
 
-cd `dirname $TARGET_FILE`
-TARGET_FILE=`basename $TARGET_FILE`
+cd `dirname "$TARGET_FILE"`
+TARGET_FILE=`basename "$TARGET_FILE"`
 
 # Iterate down a (possible) chain of symlinks
 while [ -L "$TARGET_FILE" ]
 do
-    TARGET_FILE=`readlink $TARGET_FILE`
-    cd `dirname $TARGET_FILE`
-    TARGET_FILE=`basename $TARGET_FILE`
+    TARGET_FILE=`readlink "$TARGET_FILE"`
+    cd `dirname "$TARGET_FILE"`
+    TARGET_FILE=`basename "$TARGET_FILE"`
 done
 
-REALPATH=$TARGET_FILE
+REALPATH="$TARGET_FILE"
 #end of readlink -f
 
-LOCATION=$( cd $(dirname $REALPATH) ; pwd -P )
+LOCATION=$( cd $(dirname "$REALPATH") ; pwd -P )
 
 MEMORY=$1
 shift
@@ -35,10 +35,8 @@ case "$JVMVERSION" in
   *64-Bit*) FLAG="-XX:+UseCompressedOops";;
 esac
 
-CONFIGDIR=${TMPDIR}/config
+CONFIGDIR="${TMPDIR}/config"
 mkdir -p "${CONFIGDIR}"
-
-cp -r configuration ${TMPDIR}
 
 ulimit -S -v unlimited
 ulimit -S -s unlimited
