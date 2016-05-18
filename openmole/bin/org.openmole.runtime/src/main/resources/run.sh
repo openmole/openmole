@@ -23,8 +23,9 @@ LOCATION=$( cd $(dirname $REALPATH) ; pwd -P )
 MEMORY=$1
 shift
 
-CONFIGDIR=$1
+TMPDIR=$1
 shift
+mkdir -p "${TMPDIR}"
 
 FLAG=""
 
@@ -34,8 +35,10 @@ case "$JVMVERSION" in
   *64-Bit*) FLAG="-XX:+UseCompressedOops";;
 esac
 
+CONFIGDIR=${TMPDIR}/config
+mkdir -p "${CONFIGDIR}"
 
-cp -r configuration ${CONFIGDIR}
+cp -r configuration ${TMPDIR}
 
 ulimit -S -v unlimited
 ulimit -S -s unlimited
@@ -45,12 +48,12 @@ export MALLOC_ARENA_MAX=1
 export LC_ALL="en_US.UTF-8"
 export LANG="en_US.UTF-8"
 
-java -Dfile.encoding=UTF-8 -Xss2M -Xms64m -Xmx${MEMORY} -Dosgi.locking=none -Dosgi.configuration.area=${CONFIGDIR} $FLAG -XX:ReservedCodeCacheSize=128m -XX:MaxMetaspaceSize=128m -XX:CompressedClassSpaceSize=128m -XX:+UseG1GC -XX:ParallelGCThreads=1 \
-  -cp "${LOCATION}/launcher/*" org.openmole.launcher.Launcher --plugins ${LOCATION}/plugins/ --run org.openmole.runtime.SimExplorer --osgi-directory ${CONFIGDIR} -- $@
+java -Djava.io.tmpdir="${TMPDIR}" -Dopenmole.home="${TMPDIR}" file.encoding=UTF-8 -D -Xss2M -Xms64m -Xmx${MEMORY} -Dosgi.locking=none -Dosgi.configuration.area="${CONFIGDIR}" $FLAG -XX:ReservedCodeCacheSize=128m -XX:MaxMetaspaceSize=128m -XX:CompressedClassSpaceSize=128m -XX:+UseG1GC -XX:ParallelGCThreads=1 \
+  -cp "${LOCATION}/launcher/*" org.openmole.launcher.Launcher --plugins "${LOCATION}/plugins/" --run org.openmole.runtime.SimExplorer --osgi-directory "${CONFIGDIR}" -- $@
 
 RETURNCODE=$?
 
-rm -rf ${CONFIGDIR}
+rm -rf ${TMPDIR}
 
 exit $RETURNCODE
 
