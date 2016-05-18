@@ -28,7 +28,7 @@ import SubmitActor._
 
 class SubmitActor(jobManager: JobManager) {
 
-  def receive(submit: Submit) = {
+  def receive(submit: Submit) = withRunFinalization {
     val Submit(job, sj) = submit
     if (!job.state.isFinal) {
       try job.trySelectJobService match {
