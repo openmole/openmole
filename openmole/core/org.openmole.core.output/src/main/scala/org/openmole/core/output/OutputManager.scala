@@ -96,8 +96,9 @@ object OutputManager {
 
   def withStreamOutputs[T](out: PrintStream, err: PrintStream)(f: ⇒ T): T = {
     redirectOutput(out, err)
-    try f
+    val res = try f
     finally OutputManager.unregister(Thread.currentThread.getThreadGroup)
+    res
   }
 
   private def redirectOutput(output: PrintStream, error: PrintStream): Unit = {
