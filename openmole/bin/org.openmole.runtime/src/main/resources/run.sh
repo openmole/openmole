@@ -46,7 +46,7 @@ export MALLOC_ARENA_MAX=1
 export LC_ALL="en_US.UTF-8"
 export LANG="en_US.UTF-8"
 
-java -Djava.io.tmpdir="${TMPDIR}" -Dopenmole.home="${TMPDIR}" file.encoding=UTF-8 -D -Xss2M -Xms64m -Xmx${MEMORY} -Dosgi.locking=none -Dosgi.configuration.area="${CONFIGDIR}" $FLAG -XX:ReservedCodeCacheSize=128m -XX:MaxMetaspaceSize=128m -XX:CompressedClassSpaceSize=128m -XX:+UseG1GC -XX:ParallelGCThreads=1 \
+java -Djava.io.tmpdir="${TMPDIR}" -Dopenmole.home="${TMPDIR}" -Dfile.encoding=UTF-8 -Xss2M -Xms64m -Xmx${MEMORY} -Dosgi.locking=none -Dosgi.configuration.area="${CONFIGDIR}" $FLAG -XX:ReservedCodeCacheSize=128m -XX:MaxMetaspaceSize=128m -XX:CompressedClassSpaceSize=128m -XX:+UseG1GC -XX:ParallelGCThreads=1 \
   -cp "${LOCATION}/launcher/*" org.openmole.launcher.Launcher --plugins "${LOCATION}/plugins/" --run org.openmole.runtime.SimExplorer --osgi-directory "${CONFIGDIR}" -- $@
 
 RETURNCODE=$?
