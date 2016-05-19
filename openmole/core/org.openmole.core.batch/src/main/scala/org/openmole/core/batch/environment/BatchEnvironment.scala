@@ -144,7 +144,7 @@ object BatchEnvironment extends Logger {
 import BatchEnvironment._
 
 object BatchExecutionJob {
-  val replBundleCache = new AssociativeCache[ScalaREPL.ReferencedClasses, FileCache]()
+  val replBundleCache = new AssociativeCache[Seq[Class[_]], FileCache]()
 }
 
 trait BatchExecutionJob extends ExecutionJob { bej ⇒
@@ -159,6 +159,7 @@ trait BatchExecutionJob extends ExecutionJob { bej ⇒
   def files = pluginsAndFiles.files
 
   @transient private lazy val pluginsAndFiles = SerialiserService.pluginsAndFiles(runnableTasks)
+
   @transient private lazy val referencedClosures: Option[ReferencedClasses] = {
     if (pluginsAndFiles.replClasses.isEmpty) None
     else {
@@ -172,17 +173,28 @@ trait BatchExecutionJob extends ExecutionJob { bej ⇒
   }
 
   def closureBundle =
-    referencedClosures map { rc ⇒
-      BatchExecutionJob.replBundleCache.cache(job.moleExecution, rc, preCompute = false) { rc ⇒
-        val bundle = Workspace.newFile("closureBundle", ".jar")
-        try ScalaREPL.bundleFromReferencedClass(rc, "closure-" + UUID.randomUUID.toString, "1.0", bundle)
-        catch {
-          case e: Throwable ⇒
-            bundle.delete()
-            throw e
+    pluginsAndFiles.replClasses.toList match {
+      case Nil ⇒ None
+      case classes ⇒
+        val bundle = BatchExecutionJob.replBundleCache.cache(job.moleExecution, classes, preCompute = false) { rc ⇒
+          val allClasses =
+            classes.map { c ⇒
+              val replClassloader = c.getClassLoader.asInstanceOf[REPLClassloader]
+              replClassloader.referencedClasses(c)
+            }.fold(ReferencedClasses.empty)(ReferencedClasses.merge)
+
+          val bundle = Workspace.newFile("closureBundle", ".jar")
+
+          try ScalaREPL.bundleFromReferencedClass(allClasses, "closure-" + UUID.randomUUID.toString, "1.0", bundle)
+          catch {
+            case e: Throwable ⇒
+              e.printStackTrace()
+              bundle.delete()
+              throw e
+          }
+          FileCache(bundle)
         }
-        FileCache(bundle)
-      }
+        Some(bundle)
     }
 
   def usedFiles: Iterable[File] =

@@ -72,7 +72,7 @@ object ScalaREPL {
   }
 
   def bundleFromReferencedClass(ref: ReferencedClasses, bundleName: String, bundleVersion: String, bundle: java.io.File) = {
-    val classByteCode = ref.repl.map(c ⇒ ClassByteCode(c.path, c.byteCode))
+    val classByteCode = ref.repl.distinct.map(c ⇒ ClassByteCode(c.path, c.byteCode))
 
     def packageName(c: String) = c.reverse.dropWhile(_ != '.').drop(1).reverse
     def importPackages = ref.other.filter(_.bundle.isDefined).groupBy(_.bundle).toSeq.flatMap {
