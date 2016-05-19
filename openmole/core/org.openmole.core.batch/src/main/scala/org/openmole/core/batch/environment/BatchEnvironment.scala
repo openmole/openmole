@@ -173,7 +173,7 @@ trait BatchExecutionJob extends ExecutionJob { bej ⇒
 
   def closureBundle =
     referencedClosures map { rc ⇒
-      BatchExecutionJob.replBundleCache.cache(job.moleExecution, rc) { rc ⇒
+      BatchExecutionJob.replBundleCache.cache(job.moleExecution, rc, preCompute = false) { rc ⇒
         val bundle = Workspace.newFile("closureBundle", ".jar")
         try ScalaREPL.bundleFromReferencedClass(rc, "closure-" + UUID.randomUUID.toString, "1.0", bundle)
         catch {

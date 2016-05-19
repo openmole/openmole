@@ -39,15 +39,15 @@ class AssociativeCache[K, T] {
     }
   }
 
-  def cache(cacheAssociation: Object, key: K)(cacheable: K ⇒ T): T = {
+  def cache(cacheAssociation: Object, key: K, preCompute: Boolean = true)(cacheable: K ⇒ T): T = {
     def cache = {
-      val computedCache = cacheable(key)
+      val computedCache = if (preCompute) Some(cacheable(key)) else None
       cacheMaps.synchronized {
         def cacheMap(cacheAssociation: Object): HashMap[K, T] =
           cacheMaps.getOrElseUpdate(cacheAssociation, new HashMap[K, T])
 
         val cache = cacheMap(cacheAssociation)
-        cache.getOrElseUpdate(key, computedCache)
+        cache.getOrElseUpdate(key, computedCache.getOrElse(cacheable(key)))
       }
     }
 
