@@ -53,7 +53,7 @@ object ScalaREPL {
   @Lenses case class ErrorMessage(decoratedMessage: String, rawMessage: String, position: Option[ErrorPosition])
   @Lenses case class ErrorPosition(line: Int, start: Int, end: Int, point: Int)
 
-  def warmup = new ScalaREPL().eval("(i: Int) => { case class Test(i: Int); Test(i) }")
+  def warmup = new ScalaREPL().eval("(i: Int) => { i * 2 }")
   case class HeaderInfo(file: String)
   def firstLine(file: String) = HeaderInfo(file)
 
@@ -132,7 +132,7 @@ class REPLClassloader(val file: AbstractFile, parent: ClassLoader) extends scala
       }
     }
 
-    val (repl, other) = seen.toVector.partition(c ⇒ findClassFile(c).isDefined)
+    val (repl, other) = seen.toVector.sorted.partition(c ⇒ findClassFile(c).isDefined)
 
     val replClasses = repl.map { c ⇒
       REPLClass(c, cl.toClassPath(c), cl)
