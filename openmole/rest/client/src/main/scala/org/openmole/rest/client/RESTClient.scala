@@ -11,6 +11,7 @@ import org.apache.http.impl.client.{ CloseableHttpClient, HttpClients }
 import org.openmole.rest.message._
 import org.openmole.tool.tar._
 import org.openmole.tool.file._
+import org.openmole.tool.stream._
 
 import scala.concurrent.duration._
 import scala.io.Source
