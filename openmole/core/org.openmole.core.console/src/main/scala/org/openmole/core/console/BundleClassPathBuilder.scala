@@ -59,7 +59,7 @@ object BundleClassPathBuilder {
     require(bundle != null, "Bundle should not be null")
 
     abstract class BundleEntry(url: URL, parent: DirEntry) extends AbstractFile {
-      require(url != null, "url must not be null")
+      require(url != null, s"url must not be null: $bundle" )
       lazy val (path: String, name: String) = getPathAndName(url)
       lazy val fullName: String = (path :: name :: Nil).filter(n ⇒ !n.isEmpty).mkString("/")
 
