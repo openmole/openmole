@@ -38,16 +38,12 @@ import scala.util.Try
 object BundleClassPathBuilder {
 
   object Strings {
-
-    /**
-     * Avoid using the Java 6 specific String.isEmpty method
-     */
     def isEmpty(text: String) = text == null || text.length == 0
   }
 
-  def allBundles = Activator.bundleContext.get.getBundles.filterNot(_.getBundleId == 0).map(create)
+  def allBundles = Activator.bundleContext.get.getBundles.filterNot(_.getBundleId == 0).flatMap(create)
 
-  def bundles(c: Class[_]) = PluginManager.bundlesForClass(c).filterNot(_.getBundleId == 0).map(create)
+  def bundles(c: Class[_]) = PluginManager.bundlesForClass(c).filterNot(_.getBundleId == 0).flatMap(create)
 
   /**
    *  Create a new  { @link AbstractFile } instance representing an
@@ -55,11 +51,11 @@ object BundleClassPathBuilder {
    *
    * @param bundle the bundle
    */
-  def create(bundle: Bundle): AbstractFile = {
+  def create(bundle: Bundle): Option[AbstractFile] = {
     require(bundle != null, "Bundle should not be null")
 
     abstract class BundleEntry(url: URL, parent: DirEntry) extends AbstractFile {
-      require(url != null, s"url must not be null: $bundle" )
+      require(url != null, s"url must not be null: $bundle")
       lazy val (path: String, name: String) = getPathAndName(url)
       lazy val fullName: String = (path :: name :: Nil).filter(n ⇒ !n.isEmpty).mkString("/")
 
@@ -85,6 +81,7 @@ object BundleClassPathBuilder {
 
       /**
        * Not supported. Always throws an IOException.
+       *
        * @throws IOException
        */
       @throws(classOf[IOException])
@@ -108,10 +105,6 @@ object BundleClassPathBuilder {
 
     class DirEntry(url: URL, parent: DirEntry) extends BundleEntry(url, parent) {
 
-      //println("Create category entry " + url + " " + parent)
-      /**
-       * @return true
-       */
       def isDirectory: Boolean = true
 
       override def iterator: Iterator[AbstractFile] = {
@@ -191,9 +184,6 @@ object BundleClassPathBuilder {
     }
 
     class FileEntry(url: URL, parent: DirEntry) extends BundleEntry(url, parent) {
-
-      //println("Create file entry " + url + " " + parent)
-
       /**
        * @return false
        */
@@ -211,13 +201,16 @@ object BundleClassPathBuilder {
       def delete = unsupported("create() is unsupported")
     }
 
-    new DirEntry(bundle.getResource("/"), null) {
-      override def toString = "AbstractFile[" + bundle + "]"
+    Option(bundle.getResource("/")).map { url ⇒
+      new DirEntry(url, null) {
+        override def toString = "AbstractFile[" + bundle + "]"
+      }
     }
   }
 
   /**
    * Evaluate <code>f</code> on <code>s</code> if <code>s</code> is not null.
+   *
    * @param s
    * @param f
    * @return <code>f(s)</code> if s is not <code>null</code>, <code>null</code> otherwise.

@@ -45,9 +45,9 @@ class OSGiScalaCompiler(settings: Settings, reporter: Reporter, virtualDirectory
   lazy val cp = {
     val original = new PathResolver(settings).result
     def bundles: Iterable[AbstractFile] =
-      priorityBundles.map(BundleClassPathBuilder.create) ++
+      priorityBundles.flatMap(BundleClassPathBuilder.create) ++
         jars.map(f ⇒ ZipArchive.fromFile(f)) ++
-        PluginManager.bundlesForClass(classOf[OSGiScalaCompiler]).map(BundleClassPathBuilder.create) ++
+        PluginManager.bundlesForClass(classOf[OSGiScalaCompiler]).flatMap(BundleClassPathBuilder.create) ++
         BundleClassPathBuilder.allBundles
 
     val result = bundles.map { original.context.newClassPath }.toList
