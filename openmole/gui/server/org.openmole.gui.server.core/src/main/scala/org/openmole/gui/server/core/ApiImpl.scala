@@ -279,7 +279,16 @@ object ApiImpl extends Api {
           val outputStream = new StringPrintStream()
           Runnings.setOutput(execId, outputStream)
 
-          Try(OutputManager.withStreamOutputs(outputStream, outputStream)(compiled.eval)) match {
+          def catchAll[T](f: ⇒ T): Try[T] = {
+            val res =
+              try Success(f)
+              catch {
+                case t: Throwable ⇒ Failure(t)
+              }
+            res
+          }
+
+          catchAll(OutputManager.withStreamOutputs(outputStream, outputStream)(compiled.eval)) match {
             case Failure(e: ScalaREPL.CompilationError) ⇒ error(e)
             case Failure(e)                             ⇒ error(e)
             case Success(o) ⇒
