@@ -97,6 +97,7 @@ case class JobScript(voName: String, memory: Int, threads: Int, debug: Boolean) 
       val script = ListBuffer[String]()
 
       script += "export PATH=$PWD/jre/bin:$PATH"
+      script += "export HOME=$PWD"
       script += "/bin/sh run.sh " + memory + "m " + UUID.randomUUID + " -c " +
         path + " -s $CUR/storage.xml -p $CUR/envplugins/ -i " + inputFile + " -o " + resultPath +
         " -t " + threads + (if (debug) " -d 2>&1" else "")

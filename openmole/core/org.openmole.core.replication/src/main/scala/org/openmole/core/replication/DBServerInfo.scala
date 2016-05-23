@@ -28,7 +28,7 @@ import scala.util.Try
 
 object DBServerInfo {
   val base = {
-    val dir = Option(System.getenv("openmole.home")) match {
+    val dir = Option(System.getProperty("openmole.home")) match {
       case Some(path) ⇒ new File(path)
       case None       ⇒ new File(System.getProperty("user.home"), s".openmole/${hostName}/")
     }
