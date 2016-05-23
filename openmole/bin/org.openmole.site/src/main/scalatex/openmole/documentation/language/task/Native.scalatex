@@ -93,7 +93,8 @@
 
     @p The toy Python script for this test case is:
     @br @hl.highlight("""
-    import sys with open(sys.argv[2], 'w') as f:
+    import sys
+    f = open(sys.argv[2], 'w')
     f.write(sys.argv[1])
     exit(0)""", "python")
 
