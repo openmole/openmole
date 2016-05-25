@@ -23,9 +23,9 @@
         outputs += result
       )
 
-    val s = ListFilesSource("/some/directory", files)
+    val s = ListFilesSource(workDirectory / "directory", files)
 
-    val ex = (hello source s) start""")
+    (hello source s)""")
 
     @p The source @i{s} is plugged at the beginning of the task @i{hello}. The source is executed prior to
     @b{each execution} of @i{hello}. You can also plug multiple sources on the same task using the syntax:
@@ -39,10 +39,10 @@
     val txtFiles = Val[Array[File]]
     val files = Val[Array[File]]
 
-    val s1 = ListFilesSource("/some/directory", files)
+    val s1 = ListFilesSource(workDirectory / "directory", files)
 
     val s2 =
-      ListFilesSource("/my/directory/${someVariable}/", txtFiles, ".*\\.txt") set (
+      ListFilesSource(workDirectory / "/${someVariable}/", txtFiles, ".*\\.txt") set (
         inputs += someVariable
       )""")
 
@@ -52,18 +52,16 @@
     be matched against the names of the directories found.
 
     @br @hl.openmole("""
-    import org.openmole.plugin.source.file._
-
     val someVariable = Val[String]
     val dirs = Val[Array[File]]
     val aaaDirs = Val[Array[File]]
 
-    // will fill dirs with all the subdirectories of "/some/directory"
-    val s1 = ListDirectoriesSource("/some/directory", dirs)
+    // will fill dirs with all the subdirectories of "directory"
+    val s1 = ListDirectoriesSource(workDirectory "directory", dirs)
 
     val s2 =
-      // will fill aaaDirs with all the subdirectories of "/some/directory" starting with aaa
-      ListDirectoriesSource("/my/directory/${someVariable}/", aaaDirs, "^aaa.*") set (
+      // will fill aaaDirs with all the subdirectories of "directory" starting with aaa
+      ListDirectoriesSource(workDirectory / "${someVariable}", aaaDirs, "^aaa.*") set (
         inputs += someVariable
       )""")
 
@@ -79,13 +77,9 @@
     source.
 
     @br @hl.openmole("""
-    import org.openmole.plugin.domain.collection._
-    import org.openmole.plugin.task.systemexec._
-    import org.openmole.plugin.source.file._
-
     val directoriesToAnalyze  = Val[Array[File]]
 
-    val s = ListDirectoriesSource("/data/care_DoE", directoriesToAnalyze, "care_archive")
+    val s = ListDirectoriesSource(workDirectory / "data/care_DoE", directoriesToAnalyze, "care_archive")
 
     val inDir = Val[File]
     val myWorkDirectory = "care_archive"
@@ -97,5 +91,4 @@
 
     val exploration = ExplorationTask(inDir in directoriesToAnalyze)
 
-    val ex = (exploration source s) -< analysisTask start
-    """)
+    (exploration source s) -< analysisTask""")

@@ -70,7 +70,7 @@ object ScalaTask {
 }
 
 @Lenses case class ScalaTask(
-    source:          String,
+    sourceCode:      String,
     plugins:         Vector[File],
     libraries:       Vector[File],
     inputs:          PrototypeSet,
@@ -85,7 +85,7 @@ object ScalaTask {
 
   @transient lazy val scalaCompilation =
     ScalaWrappedCompilation.static(
-      source,
+      sourceCode,
       inputs.toSeq,
       ScalaWrappedCompilation.WrappedOutput(outputs),
       libraries = libraries,

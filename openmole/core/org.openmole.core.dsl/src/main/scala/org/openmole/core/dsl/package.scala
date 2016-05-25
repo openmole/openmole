@@ -100,5 +100,4 @@ package object dsl extends DSLPackage {
 
   def Val[T]: Prototype[T] = macro valImpl[T]
   def Val[T: Manifest](name: String): Prototype[T] = Prototype(name)
-
 }
