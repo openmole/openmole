@@ -262,6 +262,7 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
   def active = tabs().find { t ⇒ isActive(t) }
 
   val render = div( /*Rx*/ {
+    println("tab render")
     div(role := "tabpanel")(
       //Headers
       Rx {

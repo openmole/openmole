@@ -45,11 +45,11 @@ class TreeNodeManager {
   val copied: Var[Seq[TreeNode]] = Var(Seq())
 
   Obs(error) {
-    error().map(AlertPanel.treeNodeErrorDiv)
+    error().foreach(AlertPanel.treeNodeErrorDiv)
   }
 
   Obs(comment) {
-    comment().map(AlertPanel.treeNodeCommentDiv)
+    comment().foreach(AlertPanel.treeNodeCommentDiv)
   }
 
   def computeAndGetCurrentSons(fileFilter: FileFilter) = {

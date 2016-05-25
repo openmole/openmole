@@ -263,6 +263,14 @@ package object stylesheet {
     color("white")
   )
 
+  lazy val pasteLabel: ModifierSeq = Seq(
+    relativePosition,
+    top := 25,
+    pointer,
+    fontSize := 12,
+    width := 50
+  )
+
   //TREENODE TABS
   lazy val editingElement: ModifierSeq = Seq(
     fontSize := 18,
@@ -537,14 +545,14 @@ package object stylesheet {
 
   lazy val sortingBar: ModifierSeq = Seq(
     width := "100%",
-    right := "-185px",
-    top := "15px"
+    right := -185,
+    top := 0
   )
 
   lazy val labelStyle: ModifierSeq = Seq(
     sheet.marginTop(-8),
     color("white"),
-    (width := "auto"),
+    width := "auto",
     fontSize := 14
   )
 

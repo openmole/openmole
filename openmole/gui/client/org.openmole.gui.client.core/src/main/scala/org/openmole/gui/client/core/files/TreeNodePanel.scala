@@ -52,6 +52,10 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
   val tree: Var[TypedTag[HTMLDivElement]] = Var(tags.div())
   val selectionMode = Var(false)
 
+  Obs(selectionMode) {
+    if (!selectionMode()) manager.clearSelection
+  }
+
   val editNodeInput: Input = bs.input()(
     placeholder := "Name",
     width := "130px",
@@ -71,10 +75,54 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
         toDraw.drop(dirNodeLineSize - 2).takeRight(2).map { dn ⇒ goToDirButton(dn, "treePathItems", s"| ${dn.name()}") }
       )
     },
+      Rx {
+        if (manager.copied().isEmpty) tags.div
+        else tags.label("paste")(label_danger, stylesheet.pasteLabel, onclick := { () ⇒ paste(manager.copied(), manager.current) })
+      },
       fileToolBar.sortingGroup.div,
       Rx {
         tree()
       }
+    )
+  }
+
+  private def paste(safePaths: Seq[SafePath], to: SafePath) = {
+    def refreshWithNoError = {
+      manager.noError
+      refreshAndDraw
+    }
+
+    def onpasted = {
+      manager.emptyCopied
+      // unselectTool
+    }
+
+    val same = safePaths.filter { sp ⇒
+      sp == to
+    }
+    if (same.isEmpty) {
+      CoreUtils.testExistenceAndCopyProjectFilesTo(safePaths, to).foreach { existing ⇒
+        if (existing.isEmpty) {
+          refreshWithNoError
+          onpasted
+        }
+        else manager.setFilesInError(
+          "Some files already exists, overwrite ?",
+          existing,
+          () ⇒ CoreUtils.copyProjectFilesTo(safePaths, to).foreach { b ⇒
+            refreshWithNoError
+            onpasted
+          }, () ⇒ {
+            refreshWithNoError
+            // unselectTool
+          }
+        )
+      }
+    }
+    else manager.setFilesInComment(
+      "Paste a folder in itself is not allowed",
+      same,
+      () ⇒ manager.noError
     )
   }
 
@@ -93,6 +141,8 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
     onclick := {
       () ⇒
         fileToolBar.resetFilter
+        manager.clearSelection
+        turnSelectionTo(false)
         CoreUtils.refreshCurrentDirectory(fileFilter = fileToolBar.fileFilter())
         manager.switch(dn)
         computeAndDraw
@@ -335,7 +385,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
         ).tooltip(tags.span(tn.name()), popupStyle = whitePopup, arrowStyle = Popup.whiteBottomArrow, condition = () ⇒ tn.name().length > 24),
         div(stylesheet.fileInfo)(
           Rx {
-            if (selectionMode()) div
+            if (selectionMode()) div(color := "white")
             else {
               div(
                 span(stylesheet.fileSize)(tags.i(timeOrSize(tn))),
@@ -370,10 +420,10 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
                   })(arrow_right_and_left)
 
                 /*,
-                                                                        if (tn.isPlugin) glyphSpan(OMTags.glyph_plug, () ⇒
-                                                                          OMPost[Api].autoAddPlugins(tn.safePath()).call().foreach { p ⇒
-                                                                            panels.pluginTriggerer.open
-                                                                          })(`class` := "glyphitem file-glyph")*/
+                                                                                if (tn.isPlugin) glyphSpan(OMTags.glyph_plug, () ⇒
+                                                                                  OMPost[Api].autoAddPlugins(tn.safePath()).call().foreach { p ⇒
+                                                                                    panels.pluginTriggerer.open
+                                                                                  })(`class` := "glyphitem file-glyph")*/
                 )
               )
             }

@@ -20,7 +20,7 @@ import org.openmole.gui.client.core.files.TreeNode._
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import bs._
-import org.scalajs.dom.raw.{ HTMLSpanElement, HTMLInputElement }
+import org.scalajs.dom.raw.{ HTMLDivElement, HTMLSpanElement, HTMLInputElement }
 import rx._
 import org.openmole.gui.client.core.Waiter._
 
@@ -68,7 +68,7 @@ object FileToolBar {
   }
 
   object PasteTool extends SelectedTool {
-    val glyph = glyph_copy
+    val glyph = glyph_paste
   }
 
   object RefreshTool extends SelectedTool {
@@ -97,9 +97,9 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
     filterSubmit()
   }
 
-  def buildSpan(tool: SelectedTool, todo: () ⇒ Unit): Rx[TypedTag[HTMLSpanElement]] = Rx {
+  def buildSpan(tool: SelectedTool, todo: () ⇒ Unit, modifierSeq: ModifierSeq = emptyMod): Rx[TypedTag[HTMLSpanElement]] = Rx {
     span(
-      tool.glyph +++ pointer +++ selectedTool().filter(_ == tool).map { _ ⇒ stylesheet.selectedTool }.getOrElse(emptyMod) +++ "glyphmenu",
+      tool.glyph +++ pointer +++ selectedTool().filter(_ == tool).map { _ ⇒ modifierSeq +++ stylesheet.selectedTool }.getOrElse(emptyMod) +++ "glyphmenu",
       onclick := todo
     )
   }
@@ -222,11 +222,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
 
   val copyButton = bs.button("Copy", btn_default, () ⇒ {
     manager.setSelectedAsCopied
-    selectedTool() = Some(PasteTool)
-  })
-
-  val pasteButton = bs.button("Paste", btn_primary, () ⇒ {
-    paste(manager.copied(), manager.current)
+    unselectTool
   })
 
   val pluginButton = bs.button("Get plugins", btn_default, () ⇒ {
@@ -282,10 +278,11 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
         case Some(FilterTool)       ⇒ filterTool
         case Some(FileCreationTool) ⇒ createFileTool
         case Some(TrashTool)        ⇒ deleteButton
-        case Some(CopyTool)         ⇒ copyButton
-        case Some(PasteTool)        ⇒ pasteButton
         case Some(PluginTool)       ⇒ pluginButton
-        case _                      ⇒ tags.div()
+        case Some(CopyTool) ⇒
+          manager.emptyCopied
+          copyButton
+        case _ ⇒ tags.div()
       },
       transferring.withTransferWaiter { _ ⇒
         tags.div()
@@ -305,52 +302,5 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
     ),
     fileToolDiv
   )
-
-  //inTreanodepanel
-  /*private def filter( in: TreeNodeData, fileFilter: FileFilter) = {
-    CoreUtils.filter(in, fileFilter).withFutureWaiter { _ ⇒
-      tags.div("filtering...")
-    }("Searching...", (s: Seq[TreeNodeData]) ⇒ println("success " + s))
-  }*/
-
-  private def paste(safePaths: Seq[SafePath], to: SafePath) = {
-    def refreshWithNoError = {
-      manager.noError
-      treeNodePanel.refreshAndDraw
-    }
-
-    def onpasted = {
-      manager.emptyCopied
-      unselectTool
-    }
-
-    val same = safePaths.filter { sp ⇒
-      sp == to
-    }
-    if (same.isEmpty) {
-      CoreUtils.testExistenceAndCopyProjectFilesTo(safePaths, to).foreach { existing ⇒
-        if (existing.isEmpty) {
-          refreshWithNoError
-          onpasted
-        }
-        else manager.setFilesInError(
-          "Some files already exists, overwrite ?",
-          existing,
-          () ⇒ CoreUtils.copyProjectFilesTo(safePaths, to).foreach { b ⇒
-            refreshWithNoError
-            onpasted
-          }, () ⇒ {
-            refreshWithNoError
-            unselectTool
-          }
-        )
-      }
-    }
-    else manager.setFilesInComment(
-      "Paste a folder in itself is not allowed",
-      same,
-      () ⇒ manager.noError
-    )
-  }
 
 }

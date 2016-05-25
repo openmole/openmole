@@ -55,7 +55,7 @@ object JsRxTags {
     var last = rSafe
     Obs(r, skipInitial = true) {
       val newLast = rSafe
-      last.parentElement.replaceChild(newLast, last)
+      last.parentNode.replaceChild(newLast, last)
       last = newLast
     }
     last
