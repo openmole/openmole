@@ -21,7 +21,7 @@ import java.io.File
 
 import org.openmole.core.tools.io._
 import org.openmole.core.workflow.data._
-
+import org.openmole.core.workflow.dsl._
 import scalaz._
 import Scalaz._
 

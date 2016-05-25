@@ -25,36 +25,84 @@ import org.openmole.core.tools.service.{ OS, ProcessUtil }
 import ProcessUtil._
 import java.io.File
 
+import monocle.macros.Lenses
 import org.openmole.core.workflow.data._
 import org.openmole.plugin.task.external._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.validation._
-import org.openmole.tool.logger.Logger
+import org.openmole.plugin.task.external.ExternalTask._
+import org.openmole.core.workflow.dsl._
 
 import scala.annotation.tailrec
 
-object SystemExecTask extends Logger {
+object SystemExecTask {
+
+  case class ExpandedSystemExecCommand(expandedCommand: Expansion)
+
+  implicit def isBuilder[T] = new SystemExecTaskBuilder[SystemExecTask] {
+    override def commands = SystemExecTask.command
+    override def environmentVariables = SystemExecTask.environmentVariables
+    override def resources = SystemExecTask.resources
+    override def outputFiles = SystemExecTask.outputFiles
+    override def inputFileArrays = SystemExecTask.inputFileArrays
+    override def inputFiles = SystemExecTask.inputFiles
+    override def defaults = SystemExecTask.defaults
+    override def workDirectory = SystemExecTask.workDirectory
+    override def outputs = SystemExecTask._outputs
+    override def name = SystemExecTask.name
+    override def inputs = SystemExecTask.inputs
+    override def returnValue = SystemExecTask.returnValue
+    override def errorOnReturnValue = SystemExecTask.errorOnReturnValue
+    override def stdOut = SystemExecTask.stdOut
+    override def stdErr = SystemExecTask.stdErr
+  }
 
   /**
    * System exec task execute an external process.
    * To communicate with the dataflow the result should be either a file / category or the return
    * value of the process.
    */
-  def apply(commands: Command*) =
-    new SystemExecTaskBuilder(commands: _*)
+  def apply(commands: Command*): SystemExecTask =
+    new SystemExecTask(
+      command = Vector.empty,
+      workDirectory = None,
+      errorOnReturnValue = true,
+      returnValue = None,
+      stdOut = None,
+      stdErr = None,
+      environmentVariables = Vector.empty,
+      inputs = PrototypeSet.empty,
+      _outputs = PrototypeSet.empty,
+      defaults = DefaultSet.empty,
+      name = None,
+      inputFiles = Vector.empty,
+      inputFileArrays = Vector.empty,
+      outputFiles = Vector.empty,
+      resources = Vector.empty
+    ) set (pack.commands += (OS(), commands: _*))
 }
 
-case class ExpandedSystemExecCommand(expandedCommand: Expansion)
-
-abstract class SystemExecTask(
-    val command:              Seq[OSCommands],
-    val directory:            Option[String],
-    val errorOnReturnCode:    Boolean,
-    val returnValue:          Option[Prototype[Int]],
-    val output:               Option[Prototype[String]],
-    val error:                Option[Prototype[String]],
-    val environmentVariables: Seq[(Prototype[_], String)]
+@Lenses case class SystemExecTask(
+    command:              Vector[OSCommands],
+    workDirectory:        Option[String],
+    errorOnReturnValue:   Boolean,
+    returnValue:          Option[Prototype[Int]],
+    stdOut:               Option[Prototype[String]],
+    stdErr:               Option[Prototype[String]],
+    environmentVariables: Vector[(Prototype[_], String)],
+    inputs:               PrototypeSet,
+    _outputs:             PrototypeSet,
+    defaults:             DefaultSet,
+    name:                 Option[String],
+    inputFiles:           Vector[InputFile],
+    inputFileArrays:      Vector[InputFileArray],
+    outputFiles:          Vector[OutputFile],
+    resources:            Vector[Resource]
 ) extends ExternalTask with ValidateTask {
+
+  import SystemExecTask._
+
+  def outputs = _outputs ++ Seq(stdOut, stdErr, returnValue).flatten
 
   override def validate =
     for {
@@ -70,8 +118,8 @@ abstract class SystemExecTask(
       case cmd :: t ⇒
         val commandline = commandLine(cmd.expandedCommand, workDir.getAbsolutePath, preparedContext)
 
-        val result = execute(commandline, workDir, environmentVariables, preparedContext, returnOutput = output.isDefined, returnError = error.isDefined)
-        if (errorOnReturnCode && !returnValue.isDefined && result.returnCode != 0)
+        val result = execute(commandline, workDir, environmentVariables, preparedContext, returnOutput = stdOut.isDefined, returnError = stdErr.isDefined)
+        if (errorOnReturnValue && !returnValue.isDefined && result.returnCode != 0)
           throw new InternalProcessingError(
             s"""Error executing command"}:
                  |[${commandline.mkString(" ")}] return code was not 0 but ${result.returnCode}""".stripMargin
@@ -81,7 +129,7 @@ abstract class SystemExecTask(
 
   override protected def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = withWorkDir(executionContext) { tmpDir ⇒
     val workDir =
-      directory match {
+      workDirectory match {
         case None    ⇒ tmpDir
         case Some(d) ⇒ new File(tmpDir, d)
       }
@@ -101,8 +149,8 @@ abstract class SystemExecTask(
 
     retContext ++
       List(
-        output.map { o ⇒ Variable(o, executionResult.output.get) },
-        error.map { e ⇒ Variable(e, executionResult.errorOutput.get) },
+        stdOut.map { o ⇒ Variable(o, executionResult.output.get) },
+        stdErr.map { e ⇒ Variable(e, executionResult.errorOutput.get) },
         returnValue.map { r ⇒ Variable(r, executionResult.returnCode) }
       ).flatten
   }

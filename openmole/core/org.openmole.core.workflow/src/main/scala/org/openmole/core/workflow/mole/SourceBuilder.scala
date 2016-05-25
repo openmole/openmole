@@ -19,8 +19,5 @@ package org.openmole.core.workflow.mole
 
 import org.openmole.core.workflow.builder._
 
-abstract class SourceBuilder extends InputOutputBuilder with NameBuilder {
-  def toSource: Source
-  trait Built <: super[InputOutputBuilder].Built with super[NameBuilder].Built
-}
+trait SourceBuilder[T] extends Builder[T] with InputOutputBuilder[T] with NameBuilder[T]
 

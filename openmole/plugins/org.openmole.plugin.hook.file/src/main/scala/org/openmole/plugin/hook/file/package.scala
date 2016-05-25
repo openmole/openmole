@@ -22,18 +22,32 @@ import org.openmole.core.workflow.data.Prototype
 import org.openmole.core.workflow.tools.ExpandedString
 import org.openmole.plugin.hook.file.CopyFileHook.CopyFileHookBuilder
 import org.openmole.core.macros.Keyword._
+import org.openmole.core.dsl
+import dsl._
+import org.openmole.plugin.hook.file.CopyFileHook.CopyOptions
 
 package file {
+
   trait FilePackage {
+
     def copies = new {
-      def +=(prototype: Prototype[File], destination: ExpandedString, remove: Boolean = false, compress: Boolean = false, move: Boolean = false) =
-        (_: CopyFileHookBuilder).addCopy(prototype, destination, remove, compress, move)
+      def +=[T: CopyFileHookBuilder](prototype: Prototype[File], destination: ExpandedString, remove: Boolean = false, compress: Boolean = false, move: Boolean = false): T ⇒ T =
+        (implicitly[CopyFileHookBuilder[T]].copies add ((prototype, destination, CopyOptions(remove, compress, move)))) andThen
+          (dsl.inputs += prototype) andThen (if (move) (dsl.outputs += prototype) else identity)
     }
 
-    def csvHeader = set[{ def setCSVHeader(h: Option[ExpandedString]) }]
+    def csvHeader = new {
+      def :=[T: AppendToCSVFileHookBuilder](h: Option[ExpandedString]) =
+        implicitly[AppendToCSVFileHookBuilder[T]].csvHeader.set(h)
+    }
 
-    def singleRow = set[{ def setSingleRow(b: Boolean) }]
+    def arraysOnSingleRow = new {
+      def :=[T: AppendToCSVFileHookBuilder](b: Boolean) =
+        implicitly[AppendToCSVFileHookBuilder[T]].arraysOnSingleRow.set(b)
+    }
   }
 }
 
-package object file extends FilePackage
+package object file extends FilePackage {
+  private[file] def pack = this
+}

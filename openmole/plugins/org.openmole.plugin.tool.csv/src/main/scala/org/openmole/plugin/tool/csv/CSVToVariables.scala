@@ -29,16 +29,16 @@ import scala.util.Random
 
 trait CSVToVariables {
 
-  def columns: List[(String, Prototype[_])]
-  def fileColumns: List[(String, File, Prototype[File])]
-  def separator: Char
+  def columns: Vector[(String, Prototype[_])]
+  def fileColumns: Vector[(String, File, Prototype[File])]
+  def separator: Option[Char]
 
   /**
    * Builds the plan.
    *
    */
   def toVariables(file: File, context: Context): Iterator[Iterable[Variable[_]]] = {
-    val reader = new CSVReader(new FileReader(file), separator)
+    val reader = new CSVReader(new FileReader(file), separator.getOrElse(','))
     val headers = reader.readNext.toArray
 
     //test wether prototype names belong to header names
@@ -61,10 +61,10 @@ trait CSVToVariables {
       line ⇒
         (columns zip columnsIndexes).map {
           case ((_, p), i) ⇒ Variable.unsecure(p, converter(p)(line(i)))
-        } :::
+        } ++
           (fileColumns zip fileColumnsIndexes).map {
             case ((_, f, p), i) ⇒ Variable(p, new File(f, line(i)))
-          } ::: Nil
+          }
     }
 
   }

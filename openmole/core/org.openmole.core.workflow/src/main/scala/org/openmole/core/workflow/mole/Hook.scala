@@ -21,10 +21,6 @@ import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task.Task
 import org.openmole.core.workflow.tools._
 
-object Hook {
-  implicit def hookBuilderToHookConverter(hb: HookBuilder) = hb.toHook
-}
-
 trait Hook <: InputOutputCheck with Name {
   def inputs: PrototypeSet
   def outputs: PrototypeSet

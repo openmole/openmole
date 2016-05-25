@@ -20,7 +20,5 @@ package org.openmole.core.workflow.builder
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.data._
 
-trait InputOutputBuilder <: Builder with InputBuilder with OutputBuilder with DefaultBuilder {
-  trait Built <: super[InputBuilder].Built with super[OutputBuilder].Built with super[DefaultBuilder].Built
-}
+trait InputOutputBuilder[T] <: Builder[T] with InputBuilder[T] with OutputBuilder[T] with DefaultBuilder[T]
 

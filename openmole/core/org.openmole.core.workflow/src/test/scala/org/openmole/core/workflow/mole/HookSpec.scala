@@ -23,6 +23,8 @@ import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.job._
 import org.openmole.core.workflow.mole._
+import org.openmole.core.workflow.builder._
+import org.openmole.core.workflow.dsl._
 
 import org.scalatest._
 import org.scalatest.junit._
@@ -34,24 +36,22 @@ class HookSpec extends FlatSpec with Matchers {
 
     val p = Prototype[String]("p")
 
-    val t1 = TestTask { _ + (p -> "test") }
-    t1 setName "Test"
-    t1 addOutput p
+    val t1 =
+      TestTask { _ + (p → "test") } set (
+        name := "Test",
+        outputs += p
+      )
 
     val t1c = Capsule(t1)
 
-    val hook = new HookBuilder {
-      def toHook = new Hook with Built {
-        override def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider) = {
-          context.contains(p) should equal(true)
-          context(p) should equal("test")
-          executed = true
-          context
-        }
-      }
+    val hook = TestHook { context ⇒
+      context.contains(p) should equal(true)
+      context(p) should equal("test")
+      executed = true
+      context
     }
 
-    val ex = MoleExecution(Mole(t1c), hooks = List(t1c -> hook))
+    val ex = MoleExecution(Mole(t1c), hooks = List(t1c → hook))
 
     ex.start.waitUntilEnded
 
@@ -63,24 +63,22 @@ class HookSpec extends FlatSpec with Matchers {
 
     val p = Prototype[String]("p")
 
-    val t1 = TestTask { _ + (p -> "test") }
-    t1 setName "Test"
-    t1 addOutput p
+    val t1 =
+      TestTask { _ + (p → "test") } set (
+        name := "Test",
+        outputs += p
+      )
 
     val t1c = MasterCapsule(t1)
 
-    val hook = new HookBuilder {
-      def toHook = new Hook with Built {
-        override def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider) = {
-          context.contains(p) should equal(true)
-          context(p) should equal("test")
-          executed = true
-          context
-        }
-      }
+    val hook = TestHook { context ⇒
+      context.contains(p) should equal(true)
+      context(p) should equal("test")
+      executed = true
+      context
     }
 
-    val ex = MoleExecution(Mole(t1c), hooks = List(t1c -> hook))
+    val ex = MoleExecution(Mole(t1c), hooks = List(t1c → hook))
 
     ex.start.waitUntilEnded
 

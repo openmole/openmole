@@ -16,13 +16,28 @@
  */
 package org.openmole.core.workflow.mole
 
-import org.openmole.core.workflow.data.{ RandomProvider, Context }
+import monocle.macros.Lenses
+import org.openmole.core.workflow.builder._
+import org.openmole.core.workflow.data._
 
 object TestHook {
-  def apply() = new HookBuilder {
 
-    def toHook = new Hook with Built {
-      def process(ctx: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider) = ctx
-    }
+  implicit def isBuilder = new HookBuilder[TestHook] {
+    override def defaults = TestHook.defaults
+    override def inputs = TestHook.inputs
+    override def name = TestHook.name
+    override def outputs = TestHook.outputs
   }
+
+}
+
+@Lenses case class TestHook(
+    f:        Context ⇒ Context = identity[Context],
+    inputs:   PrototypeSet      = PrototypeSet.empty,
+    outputs:  PrototypeSet      = PrototypeSet.empty,
+    defaults: DefaultSet        = DefaultSet.empty,
+    name:     Option[String]    = None
+) extends Hook {
+  override protected def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider): Context =
+    f(context)
 }

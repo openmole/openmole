@@ -19,6 +19,7 @@ package org.openmole.core.workflow.data
 
 import scala.collection.{ IterableLike, TraversableLike, SetLike }
 import scala.collection.immutable.TreeMap
+import org.openmole.core.workflow.dsl._
 
 object PrototypeSet {
   implicit def traversableToProtoypeSet(ps: Traversable[Prototype[_]]) = PrototypeSet(ps.toSeq)

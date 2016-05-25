@@ -20,39 +20,11 @@ package org.openmole.plugin.tool.csv
 import java.io.File
 
 import org.openmole.core.workflow.builder.{ Builder, InputOutputBuilder, SamplingBuilder }
-import org.openmole.core.workflow.data.Prototype
+import monocle.Lens
+import org.openmole.core.dsl._
 
-import scala.collection.mutable.ListBuffer
-
-trait CSVToVariablesBuilder extends Builder { builder ⇒
-  private var _columns = new ListBuffer[(String, Prototype[_])]
-  private var _fileColumns = new ListBuffer[(String, File, Prototype[File])]
-  private var separator: Option[Char] = Some(',')
-
-  def columns = _columns.toList
-  def fileColumns = _fileColumns.toList
-
-  def addColumn(proto: Prototype[_]): this.type = this.addColumn(proto.name, proto)
-  def addColumn(name: String, proto: Prototype[_]): this.type = {
-    _columns += (name → proto)
-    this
-  }
-
-  def addFileColumn(name: String, dir: File, proto: Prototype[File]): builder.type = {
-    _fileColumns += ((name, dir, proto))
-    this
-  }
-
-  def addFileColumn(dir: File, proto: Prototype[File]): this.type = this.addFileColumn(proto.name, dir, proto)
-
-  def setSeparator(s: Option[Char]) = {
-    separator = s
-    this
-  }
-
-  trait BuiltCSVToVariables {
-    val columns = builder.columns
-    val fileColumns = builder.fileColumns
-    val separator = builder.separator.getOrElse(',')
-  }
+trait CSVToVariablesBuilder[T] extends Builder[T] with InputOutputBuilder[T] {
+  def columns: Lens[T, Vector[(String, Val[_])]]
+  def fileColumns: Lens[T, Vector[(String, File, Val[File])]]
+  def separator: Lens[T, Option[Char]]
 }

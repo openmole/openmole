@@ -17,28 +17,31 @@
 
 package org.openmole.plugin.task.tools
 
-import org.openmole.core.workflow.builder.TaskBuilder
+import monocle.macros.Lenses
+import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
-import scala.collection.mutable.ListBuffer
-import org.openmole.core.workflow.task._
+import org.openmole.core.dsl
+import dsl._
 
 object AssignTask {
 
-  def apply(assignments: (Prototype[T], Prototype[T]) forSome { type T }*) =
-    new TaskBuilder { builder ⇒
-      assignments.foreach {
-        case (i, o) ⇒
-          addInput(i)
-          addOutput(o)
-      }
+  implicit def isBuilder = TaskBuilder[AssignTask].from(this)
 
-      def toTask =
-        new AssignTask(assignments: _*) with builder.Built
-    }
+  def apply(assignments: (Prototype[T], Prototype[T]) forSome { type T }*): AssignTask =
+    new AssignTask(assignments.toVector) set (
+      dsl.inputs += (assignments.map(_._1): _*),
+      dsl.outputs += (assignments.map(_._2): _*)
+    )
 
 }
-sealed abstract class AssignTask(val assignments: (Prototype[T], Prototype[T]) forSome { type T }*) extends Task {
+@Lenses case class AssignTask(
+    assignments: Vector[(Prototype[T], Prototype[T]) forSome { type T }],
+    inputs:      PrototypeSet                                            = PrototypeSet.empty,
+    outputs:     PrototypeSet                                            = PrototypeSet.empty,
+    defaults:    DefaultSet                                              = DefaultSet.empty,
+    name:        Option[String]                                          = None
+) extends Task {
 
   override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) =
     assignments.map { case (from, to) ⇒ Variable(to, context(from)) }

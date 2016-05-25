@@ -20,15 +20,42 @@ package org.openmole.plugin.task
 import java.io.File
 
 import org.openmole.core.macros.Keyword._
-import org.openmole.core.workflow.builder._
+import org.openmole.core.dsl._
 
 package jvm {
 
+  import org.openmole.core.exception.UserBadDataError
   import org.openmole.core.pluginmanager.PluginManager
 
   trait JVMPackage extends external.ExternalPackage {
-    lazy val libraries = add[{ def addLibrary(l: File*) }]
-    lazy val plugins = add[{ def addPlugins(plugins: Seq[File]*) }]
+    lazy val libraries = new {
+      /**
+       * Add a library and make it available to the task
+       *
+       * For instance addLib("/tmp/malib.jar") in a groovy task make the content of the
+       * jar available to the task. This method support jars but has some limitation. The
+       * best way to use your own bytecode (java, scala, groovy, jython) in OpenMOLE is
+       * building an OpenMOLE plugin (see the section on openmole.org for details).
+       *
+       * @param l a jar file
+       *
+       */
+      def +=[T: JVMLanguageBuilder](l: File*) =
+        implicitly[JVMLanguageBuilder[T]].libraries.modify(_ ++ l)
+    }
+
+    lazy val plugins = new {
+      def +=[T: JVMLanguageBuilder](plugins: Seq[File]*) = {
+        plugins.flatten.foreach {
+          plugin ⇒
+            PluginManager.bundle(plugin) match {
+              case None ⇒ throw new UserBadDataError(s"Plugin $plugin is not loaded")
+              case _    ⇒
+            }
+        }
+        implicitly[JVMLanguageBuilder[T]].plugins.modify(_ ++ plugins.flatten)
+      }
+    }
     def pluginsOf(o: Any): Seq[File] = pluginsOf(o.getClass)
     def pluginsOf[T](implicit m: Manifest[T]): Seq[File] = pluginsOf(manifest[T].runtimeClass)
     def pluginsOf(clazz: Class[_]): Seq[File] = PluginManager.pluginsForClass(clazz).toSeq

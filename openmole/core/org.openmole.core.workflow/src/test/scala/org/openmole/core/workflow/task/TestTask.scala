@@ -17,15 +17,30 @@
 
 package org.openmole.core.workflow.task
 
+import monocle.macros.Lenses
 import org.openmole.core.workflow.builder.TaskBuilder
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
 
 object TestTask {
-  def apply(f: Context ⇒ Context) = new TaskBuilder {
-    override def toTask: Task = new Task with Built {
-      override protected def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider): Context = f(context)
-    }
+
+  implicit def isBuilder = new TaskBuilder[TestTask] {
+    override def defaults = TestTask.defaults
+    override def inputs = TestTask.inputs
+    override def name = TestTask.name
+    override def outputs = TestTask.outputs
   }
+
+}
+
+@Lenses case class TestTask(
+    f:         Context ⇒ Context,
+    implicits: Vector[String]    = Vector.empty,
+    inputs:    PrototypeSet      = PrototypeSet.empty,
+    outputs:   PrototypeSet      = PrototypeSet.empty,
+    defaults:  DefaultSet        = DefaultSet.empty,
+    name:      Option[String]    = None
+) extends Task {
+  override protected def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider): Context = f(context)
 }

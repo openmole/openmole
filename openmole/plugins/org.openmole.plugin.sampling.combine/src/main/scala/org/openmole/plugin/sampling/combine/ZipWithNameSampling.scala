@@ -20,7 +20,7 @@ package org.openmole.plugin.sampling.combine
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.sampling._
-
+import org.openmole.core.workflow.dsl._
 import scalaz._
 import Scalaz._
 

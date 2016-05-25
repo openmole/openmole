@@ -22,6 +22,7 @@ import org.openmole.core.workspace.Workspace
 
 import scala.collection.immutable.MapLike
 import scala.collection.immutable.TreeMap
+import org.openmole.core.workflow.dsl._
 
 object Context {
 

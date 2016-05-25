@@ -24,24 +24,28 @@ import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.transition._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.builder._
 import org.scalatest._
 import org.openmole.core.workflow.puzzle._
+import org.openmole.core.workflow.dsl._
 
 class TransitionSpec extends FlatSpec with Matchers {
 
   "A transition" should "enable variable values to be transmitted from a task to another" in {
     val p = Prototype[String]("p")
 
-    val t1 = TestTask { _ + (p -> "Test") }
-    t1 setName "Test write"
-    t1 addOutput p
+    val t1 = TestTask { _ + (p → "Test") } set (
+      name := "Test write",
+      outputs += p
+    )
 
     val t2 = TestTask { context ⇒
       context(p) should equal("Test")
       context
-    }
-    t2 setName "Test read"
-    t2 addInput p
+    } set (
+      name := "Test read",
+      inputs += p
+    )
 
     val t1c = Capsule(t1)
     val t2c = Capsule(t2)
@@ -55,21 +59,24 @@ class TransitionSpec extends FlatSpec with Matchers {
 
     val init = EmptyTask()
 
-    val t1 = TestTask { _ + (p1 -> "Test1") }
-    t1 setName "Test write 1"
-    t1 addOutput p1
+    val t1 = TestTask { _ + (p1 → "Test1") } set (
+      name := "Test write 1",
+      outputs += p1
+    )
 
-    val t2 = TestTask { _ + (p2 -> "Test2") }
-    t2 setName "Test write 2"
-    t2 addOutput p2
+    val t2 = TestTask { _ + (p2 → "Test2") } set (
+      name := "Test write 2",
+      outputs += p2
+    )
 
     val t3 = TestTask { context ⇒
       context(p1) should equal("Test1")
       context(p2) should equal("Test2")
       context
-    }
-    t3 setName "Test read"
-    t3 addInput (p1, p2)
+    } set (
+      name := "Test read",
+      inputs += (p1, p2)
+    )
 
     val initc = Capsule(init)
     val t1c = Capsule(t1)
@@ -89,13 +96,15 @@ class TransitionSpec extends FlatSpec with Matchers {
 
     val init = EmptyTask()
 
-    val t1 = TestTask { _ + (p1 -> "Test1") }
-    t1 setName "Test write 1 conjonctive"
-    t1 addOutput p1
+    val t1 = TestTask { _ + (p1 → "Test1") } set (
+      name := "Test write 1 conjonctive",
+      outputs += p1
+    )
 
-    val t2 = TestTask { _ + (p2 -> "Test2") }
-    t2 setName "Test write 2 conjonctive"
-    t2 addOutput p2
+    val t2 = TestTask { _ + (p2 → "Test2") } set (
+      name := "Test write 2 conjonctive",
+      outputs += p2
+    )
 
     val t3 = TestTask { context ⇒
       context(p1) should equal("Test1")
@@ -103,9 +112,10 @@ class TransitionSpec extends FlatSpec with Matchers {
       context(p2.toArray).size should equal(100)
       executed += 1
       context
-    }
-    t3 setName "Test read conjonctive"
-    t3 addInput (p1, p2.toArray)
+    } set (
+      name := "Test read conjonctive",
+      inputs += (p1, p2.array)
+    )
 
     val initc = Capsule(init)
     val t1c = Capsule(t1)

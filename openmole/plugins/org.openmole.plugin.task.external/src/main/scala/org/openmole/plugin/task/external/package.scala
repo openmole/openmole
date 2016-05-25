@@ -18,32 +18,76 @@
 package org.openmole.plugin.task
 
 import org.openmole.core.tools.service.OS
+import org.openmole.core.dsl._
 
 package external {
 
   import java.io._
+
   import org.openmole.core.workflow.data._
   import org.openmole.core.workflow.tools._
+  import org.openmole.plugin.task.external.ExternalTask._
 
   trait ExternalPackage {
 
     lazy val inputFiles = new {
-      def +=(p: Prototype[File], name: String, link: Boolean = false, toWorkDirectory: Boolean = true) = (_: ExternalTaskBuilder).addInputFile(p, name, link)
+      /**
+       * Copy a file or directory from the dataflow to the task workspace
+       *
+       * @param p the prototype of the data containing the file to be copied
+       * @param name the destination name of the file in the task workspace
+       * @param link @see addResource
+       *
+       */
+      def +=[T: ExternalTaskBuilder](p: Prototype[File], name: String, link: Boolean = false, toWorkDirectory: Boolean = true): T ⇒ T =
+        (implicitly[ExternalTaskBuilder[T]].inputFiles add InputFile(p, name, link)) andThen
+          (inputs += p)
     }
 
     lazy val inputFileArrays = new {
-      def +=(p: Prototype[Array[File]], prefix: String, suffix: String = "", link: Boolean = false) =
-        (_: ExternalTaskBuilder).addInputFileArray(p, prefix, suffix, link)
+      /**
+       * Copy an array of files or directory from the dataflow to the task workspace. The files
+       * in the array are named prefix$nSuffix where $n i the index of the file in the array.
+       *
+       * @param p the prototype of the data containing the array of files to be copied
+       * @param prefix the prefix for naming the files
+       * @param suffix the suffix for naming the files
+       * @param link @see addResource
+       *
+       */
+      def +=[T: ExternalTaskBuilder](p: Prototype[Array[File]], prefix: String, suffix: String = "", link: Boolean = false): T ⇒ T =
+        (implicitly[ExternalTaskBuilder[T]].inputFileArrays add InputFileArray(prototype = p, prefix = prefix, suffix = suffix, link = link)) andThen
+          (inputs += p)
     }
 
     lazy val outputFiles = new {
-      def +=(name: String, p: Prototype[File]) = (_: ExternalTaskBuilder).addOutputFile(name, p)
+      /**
+       * Get a file generate by the task and inject it in the dataflow
+       *
+       * @param name the name of the file to be injected
+       * @param p the prototype that is injected
+       *
+       */
+      def +=[T: ExternalTaskBuilder](name: String, p: Prototype[File]): T ⇒ T =
+        (implicitly[ExternalTaskBuilder[T]].outputFiles add OutputFile(name, p)) andThen
+          (outputs += p)
     }
 
     lazy val resources =
       new {
-        def +=(file: File, name: Option[ExpandedString] = None, link: Boolean = false, os: OS = OS()) =
-          (_: ExternalTaskBuilder).addResource(file, name, link, os)
+        /**
+         * Copy a file from your computer in the workspace of the task
+         *
+         * @param file the file or directory to copy in the task workspace
+         * @param name the destination name of the file in the task workspace, by
+         * default it is the same as the original file name
+         * @param link tels if the entire content of the file should be copied or
+         * if a symbolic link is suitable. In the case link is set to true openmole will
+         * try to use a symbolic link if available on your system.
+         *
+         */
+        def +=[T: ExternalTaskBuilder](file: File, name: Option[ExpandedString] = None, link: Boolean = false, os: OS = OS()): T ⇒ T =
+          implicitly[ExternalTaskBuilder[T]].resources add Resource(file, name.getOrElse(file.getName), link, os)
       }
   }
 }

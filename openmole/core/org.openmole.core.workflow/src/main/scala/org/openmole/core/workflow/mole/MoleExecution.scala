@@ -36,7 +36,7 @@ import org.openmole.tool.logger.Logger
 import scala.collection.mutable.{ ListBuffer, Buffer }
 import scala.concurrent.stm._
 import org.openmole.core.workflow.execution._
-import org.openmole.tool.file._
+import org.openmole.core.workflow.dsl._
 
 object MoleExecution extends Logger {
 

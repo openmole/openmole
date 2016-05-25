@@ -24,6 +24,8 @@ import org.scalatest._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.transition._
 import org.openmole.core.workflow.puzzle._
+import org.openmole.core.workflow.builder._
+import org.openmole.core.workflow.dsl._
 
 import scala.util.Try
 
@@ -31,24 +33,24 @@ class MoleTaskSpec extends FlatSpec with Matchers {
 
   "Implicits" should "work with mole task" in {
     val i = Prototype[String]("i")
-    val emptyT = EmptyTask()
-    emptyT.addInput(i)
-
+    val emptyT = EmptyTask() set (inputs += i)
     val emptyC = Capsule(emptyT)
 
     val moleTask =
-      MoleTask(Mole(emptyC), emptyC)
-
-    moleTask addImplicit i
-    moleTask setDefault (i, "test")
+      MoleTask(Mole(emptyC), emptyC) set (
+        implicits += i,
+        i := "test"
+      )
 
     MoleExecution(Mole(moleTask)).start.waitUntilEnded
   }
 
   "MoleTask" should "propagate errors" in {
+    val error =
+      TestTask { _ ⇒ throw new InternalProcessingError("Some error for test") } set (
+        name := "error"
+      )
 
-    val error = TestTask { _ ⇒ throw new InternalProcessingError("Some error for test") }
-    error setName "error"
     val moleTask = MoleTask(error)
 
     val ex = moleTask.start
@@ -63,14 +65,13 @@ class MoleTaskSpec extends FlatSpec with Matchers {
 
     val i = Prototype[String]("i")
 
-    val emptyT = EmptyTask()
-    emptyT.addInput(i)
+    val emptyT = EmptyTask() set (inputs += i, name := "EmptyT")
     val emptyC = Capsule(emptyT)
 
-    val moleTask = MoleTask(tm1 -- emptyC, emptyC)
-
-    moleTask addInput i
-    moleTask setDefault (i, "test")
+    val moleTask = MoleTask(tm1 -- emptyC, emptyC) set (
+      inputs += i,
+      i := "test"
+    )
 
     MoleExecution(Mole(moleTask)).start.waitUntilEnded
   }

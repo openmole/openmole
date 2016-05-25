@@ -19,13 +19,11 @@ package org.openmole.plugin.task.external
 
 import java.io.File
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.tool.file._
 import org.openmole.core.tools.service.OS
 import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.tools._
+import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.tools.ExpandedString
-import org.openmole.core.workspace.Workspace
 
 import scala.util.Random
 
@@ -56,25 +54,26 @@ object ExternalTask {
     link:        Boolean,
     os:          OS
   )
+
+  case class ToPut(file: File, name: String, link: Boolean)
+  type PathResolver = String ⇒ File
 }
 
 import ExternalTask._
 
 trait ExternalTask extends Task {
 
-  def inputFileArrays: Iterable[InputFileArray]
-  def inputFiles: Iterable[InputFile]
-  def outputFiles: Iterable[OutputFile]
-  def resources: Iterable[Resource]
+  def inputFileArrays: Vector[InputFileArray]
+  def inputFiles: Vector[InputFile]
+  def outputFiles: Vector[OutputFile]
+  def resources: Vector[Resource]
 
-  protected case class ToPut(file: File, name: String, link: Boolean)
-
-  protected def listInputFiles(context: Context)(implicit rng: RandomProvider): Iterable[(Prototype[File], ToPut)] =
+  protected def listInputFiles(context: Context)(implicit rng: RandomProvider): Vector[(Prototype[File], ToPut)] =
     inputFiles.map {
       case InputFile(prototype, name, link) ⇒ prototype → ToPut(context(prototype), name.from(context), link)
     }
 
-  protected def listInputFileArray(context: Context)(implicit rng: RandomProvider): Iterable[(Prototype[Array[File]], Seq[ToPut])] =
+  protected def listInputFileArray(context: Context)(implicit rng: RandomProvider): Vector[(Prototype[Array[File]], Seq[ToPut])] =
     for {
       ifa ← inputFileArrays
     } yield {
@@ -103,8 +102,6 @@ trait ExternalTask extends Task {
     }
   }
 
-  type PathResolver = String ⇒ File
-
   def relativeResolver(workDirectory: File)(filePath: String): File = {
     def resolved = workDirectory.resolve(filePath)
     resolved.toFile
@@ -117,7 +114,7 @@ trait ExternalTask extends Task {
         Variable(prototype, resolver(fileName))
     }
 
-  private def copy(f: ToPut, to: File) = {
+  private def copyFile(f: ToPut, to: File) = {
     to.createParentDir
 
     if (f.link) to.createLink(f.file.getCanonicalFile)
@@ -125,18 +122,17 @@ trait ExternalTask extends Task {
       f.file.realFile.copy(to)
       to.applyRecursive { _.deleteOnExit }
     }
-
   }
 
   def prepareInputFiles(context: Context, resolver: PathResolver)(implicit rng: RandomProvider): Context = {
     def destination(f: ToPut) = resolver(f.name)
 
-    for { f ← listResources(context, resolver) } copy(f, destination(f))
+    for { f ← listResources(context, resolver) } copyFile(f, destination(f))
 
     val copiedFiles =
       for { (p, f) ← listInputFiles(context) } yield {
         val d = destination(f)
-        copy(f, d)
+        copyFile(f, d)
         Variable(p, d)
       }
 
@@ -145,7 +141,7 @@ trait ExternalTask extends Task {
         val copied =
           fs.map { f ⇒
             val d = destination(f)
-            copy(f, d)
+            copyFile(f, d)
             d
           }
         Variable(p, copied.toArray)

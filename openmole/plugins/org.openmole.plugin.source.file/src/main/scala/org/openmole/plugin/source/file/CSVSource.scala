@@ -24,46 +24,58 @@ import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.task._
 import java.io._
+
 import org.openmole.core.workflow.tools.ExpandedString
-import org.openmole.plugin.tool.csv.{ CSVToVariablesBuilder, CSVToVariables }
+import org.openmole.plugin.tool.csv.{ CSVToVariables, CSVToVariablesBuilder }
 
 import collection.mutable.ListBuffer
 import java.math._
+
+import monocle.Lens
+import monocle.macros.Lenses
+
 import collection.JavaConversions._
 import reflect.ClassTag
-import org.openmole.core.workflow.mole.{ SourceBuilder, Source }
+import org.openmole.core.workflow.mole.{ Source, SourceBuilder }
 import org.openmole.core.workflow.mole.MoleExecutionContext
+import org.openmole.core.dsl._
 
 object CSVSource {
 
-  trait CSVSourceBuilder extends SourceBuilder with CSVToVariablesBuilder { builder ⇒
-    override def addColumn(name: String, proto: Prototype[_]): this.type = {
-      addOutput(proto.toArray)
-      super.addColumn(name, proto)
-    }
-
-    override def addFileColumn(name: String, dir: File, proto: Prototype[File]): this.type = {
-      addOutput(proto.toArray)
-      super.addFileColumn(name, dir, proto)
-    }
-
-    trait Built <: super.Built with BuiltCSVToVariables
+  implicit def isBuilder = new CSVToVariablesBuilder[CSVSource] with SourceBuilder[CSVSource] {
+    override def columns = CSVSource.columns
+    override def fileColumns = CSVSource.fileColumns
+    override def separator = CSVSource.separator
+    override def name = CSVSource.name
+    override def outputs = CSVSource.outputs
+    override def inputs = CSVSource.inputs
+    override def defaults = CSVSource.defaults
   }
 
-  def apply(path: ExpandedString) = {
-    val _path = path
-    new CSVSourceBuilder { builder ⇒
-      def toSource = new CSVSource with Built {
-        val path = _path
-      }
-    }
-  }
+  def apply(path: ExpandedString) =
+    new CSVSource(
+      path,
+      inputs = PrototypeSet.empty,
+      outputs = PrototypeSet.empty,
+      defaults = DefaultSet.empty,
+      name = None,
+      columns = Vector.empty,
+      fileColumns = Vector.empty,
+      separator = None
+    )
 
 }
 
-abstract class CSVSource extends Source with CSVToVariables {
-
-  def path: ExpandedString
+@Lenses case class CSVSource(
+    path:        ExpandedString,
+    inputs:      PrototypeSet,
+    outputs:     PrototypeSet,
+    defaults:    DefaultSet,
+    name:        Option[String],
+    columns:     Vector[(String, Prototype[_])],
+    fileColumns: Vector[(String, File, Prototype[File])],
+    separator:   Option[Char]
+) extends Source with CSVToVariables {
 
   override def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider): Context = {
     val file = new File(path.from(context))

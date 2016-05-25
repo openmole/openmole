@@ -17,35 +17,41 @@
  */
 package org.openmole.plugin.method.evolution
 
+import monocle.macros.Lenses
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.tools.FromContext
+import org.openmole.core.workflow.dsl
+import dsl._
 
 object InitialStateTask {
+
+  implicit def isBuilder = TaskBuilder[InitialStateTask].from(this)
 
   def apply[T](algorithm: T)(implicit wfi: WorkflowIntegration[T]) = {
     val t = wfi(algorithm)
 
-    new TaskBuilder {
-      builder ⇒
-      addInput(t.statePrototype)
-      addInput(t.populationPrototype)
-      addOutput(t.statePrototype)
-      addOutput(t.populationPrototype)
-
-      setDefault(Default(t.statePrototype, ctx ⇒ t.operations.initialState(Task.buildRNG(ctx))))
-      setDefault(Default.value(t.populationPrototype, Vector.empty))
-
-      abstract class InitialStateTask extends Task {
-        override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) =
-          Context(
-            Variable(t.statePrototype, t.operations.startTimeLens.set(System.currentTimeMillis)(context(t.statePrototype)))
-          )
-      }
-
-      def toTask = new InitialStateTask with Built
-    }
+    new InitialStateTask(t) set (
+      dsl.inputs += (t.statePrototype, t.populationPrototype),
+      dsl.outputs += (t.statePrototype, t.populationPrototype),
+      t.statePrototype := FromContext((ctx, rng) ⇒ t.operations.initialState(rng())),
+      t.populationPrototype := Vector.empty
+    )
 
   }
 
+}
+
+@Lenses case class InitialStateTask(
+    t:        EvolutionWorkflow,
+    inputs:   PrototypeSet      = PrototypeSet.empty,
+    outputs:  PrototypeSet      = PrototypeSet.empty,
+    defaults: DefaultSet        = DefaultSet.empty,
+    name:     Option[String]    = None
+) extends Task {
+  override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) =
+    Context(
+      Variable(t.statePrototype, t.operations.startTimeLens.set(System.currentTimeMillis)(context(t.statePrototype)))
+    )
 }

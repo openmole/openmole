@@ -24,7 +24,7 @@ import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools.ExpandedString
 import org.openmole.core.workflow.data.Prototype
 import org.openmole.plugin.task.external.ExternalTask._
-import scala.collection.mutable.ListBuffer
+import monocle.Lens
 
 /**
  * Builder for task using external files or directories
@@ -34,82 +34,11 @@ import scala.collection.mutable.ListBuffer
  * task after its execution.
  *
  */
-abstract class ExternalTaskBuilder extends TaskBuilder { builder ⇒
+trait ExternalTaskBuilder[T] extends TaskBuilder[T] { builder ⇒
 
-  private val _inputFiles = new ListBuffer[InputFile]
-  private val _inputFileArrays = new ListBuffer[InputFileArray]
-  private val _outputFiles = new ListBuffer[OutputFile]
-  private val _resources = new ListBuffer[Resource]
-
-  def inputFiles = _inputFiles.toList
-  def inputFileArrays = _inputFileArrays.toList
-  def outputFiles = _outputFiles.toList
-  def resources = _resources.toList
-
-  /**
-   * Copy a file from your computer in the workspace of the task
-   *
-   * @param file the file or directory to copy in the task workspace
-   * @param name the destination name of the file in the task workspace, by
-   * default it is the same as the original file name
-   * @param link tels if the entire content of the file should be copied or
-   * if a symbolic link is suitable. In the case link is set to true openmole will
-   * try to use a symbolic link if available on your system.
-   *
-   */
-  def addResource(file: File, name: Option[ExpandedString] = None, link: Boolean = false, os: OS = OS()): ExternalTaskBuilder.this.type = {
-    _resources += Resource(file, name.getOrElse(file.getName), link, os)
-    this
-  }
-
-  /**
-   * Copy a file or directory from the dataflow to the task workspace
-   *
-   * @param p the prototype of the data containing the file to be copied
-   * @param name the destination name of the file in the task workspace
-   * @param link @see addResource
-   *
-   */
-  def addInputFile(p: Prototype[File], name: ExpandedString, link: Boolean = false): this.type = {
-    _inputFiles += InputFile(p, name, link)
-    this addInput p
-    this
-  }
-
-  /**
-   * Copy an array of files or directory from the dataflow to the task workspace. The files
-   * in the array are named prefix$nSuffix where $n i the index of the file in the array.
-   *
-   * @param p the prototype of the data containing the array of files to be copied
-   * @param prefix the prefix for naming the files
-   * @param suffix the suffix for naming the files
-   * @param link @see addResource
-   *
-   */
-  def addInputFileArray(p: Prototype[Array[File]], prefix: ExpandedString, suffix: ExpandedString = "", link: Boolean = false): this.type = {
-    _inputFileArrays += InputFileArray(prototype = p, prefix = prefix, suffix = suffix, link = link)
-    this addInput p
-    this
-  }
-
-  /**
-   * Get a file generate by the task and inject it in the dataflow
-   *
-   * @param name the name of the file to be injected
-   * @param p the prototype that is injected
-   *
-   */
-  def addOutputFile(name: ExpandedString, p: Prototype[File]): this.type = {
-    _outputFiles += OutputFile(name, p)
-    this addOutput p
-    this
-  }
-
-  trait Built extends super.Built {
-    def inputFiles = builder.inputFiles.toList
-    def inputFileArrays = builder.inputFileArrays.toList
-    def outputFiles = builder.outputFiles.toList
-    def resources = builder.resources.toList
-  }
+  def inputFiles: Lens[T, Vector[InputFile]]
+  def inputFileArrays: Lens[T, Vector[InputFileArray]]
+  def outputFiles: Lens[T, Vector[OutputFile]]
+  def resources: Lens[T, Vector[Resource]]
 
 }

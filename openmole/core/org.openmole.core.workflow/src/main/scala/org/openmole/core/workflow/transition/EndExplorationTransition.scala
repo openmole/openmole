@@ -24,6 +24,7 @@ import org.openmole.core.workflow.tools.Condition
 import Condition._
 import scala.util.{ Random, Failure, Success, Try }
 import org.openmole.tool.lock._
+import org.openmole.core.workflow.dsl._
 
 class EndExplorationTransition(val start: Capsule, val end: Slot, val trigger: Condition, val filter: BlockList = BlockList.empty) extends IEndExplorationTransition {
 

@@ -21,35 +21,14 @@ import org.openmole.core.tools.service.OS
 import org.openmole.plugin.task.external._
 import org.openmole.core.workflow.data._
 
-import scala.collection.mutable.ListBuffer
+import monocle.Lens
 
-class SystemExecTaskBuilder(commands: Command*) extends ExternalTaskBuilder
-    with ReturnValue
-    with ErrorOnReturnValue
-    with StdOutErr
-    with EnvironmentVariables
-    with WorkDirectory { builder ⇒
+trait SystemExecTaskBuilder[T] extends ExternalTaskBuilder[T]
+    with ReturnValue[T]
+    with ErrorOnReturnValue[T]
+    with StdOutErr[T]
+    with EnvironmentVariables[T]
+    with WorkDirectory[T] { builder ⇒
 
-  protected val _commands = new ListBuffer[OSCommands]
-
-  addCommand(OS(), commands: _*)
-
-  def addCommand(os: OS, cmd: Command*): this.type = {
-    _commands += OSCommands(os, cmd: _*)
-    this
-  }
-
-  def toTask: SystemExecTask =
-    new SystemExecTask(
-      builder._commands.toList,
-      builder.workDirectory,
-      builder.errorOnReturnValue,
-      builder.returnValue,
-      builder.stdOut,
-      builder.stdErr,
-      builder.environmentVariables.toList
-    ) with builder.Built {
-      override val outputs: PrototypeSet = builder.outputs + List(stdOut, stdErr, returnValue).flatten
-    }
-
+  def commands: Lens[T, Vector[OSCommands]]
 }

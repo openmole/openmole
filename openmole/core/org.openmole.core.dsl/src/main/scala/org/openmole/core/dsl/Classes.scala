@@ -35,4 +35,6 @@ trait Classes {
 
   lazy val Slot = transition.Slot
 
+  lazy val Puzzle = puzzle.Puzzle
+
 }

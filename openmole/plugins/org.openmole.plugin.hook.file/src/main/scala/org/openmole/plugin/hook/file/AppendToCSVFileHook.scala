@@ -17,31 +17,56 @@
 
 package org.openmole.plugin.hook.file
 
-import org.openmole.core.tools.io.{ Prettifier }
-import org.openmole.tool.file._
+import org.openmole.core.tools.io.Prettifier
 import org.openmole.tool.stream._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.validation._
 import Prettifier._
+import monocle.macros.Lenses
+
 import scala.annotation.tailrec
 import org.openmole.core.workflow.mole._
+import org.openmole.core.dsl
+import dsl._
 
 object AppendToCSVFileHook {
 
+  implicit def isBuilder = new AppendToCSVFileHookBuilder[AppendToCSVFileHook] {
+    override def csvHeader = AppendToCSVFileHook.header
+    override def arraysOnSingleRow = AppendToCSVFileHook.arraysOnSingleRow
+    override def name = AppendToCSVFileHook.name
+    override def outputs = AppendToCSVFileHook.outputs
+    override def inputs = AppendToCSVFileHook.inputs
+    override def defaults = AppendToCSVFileHook.defaults
+  }
+
   def apply(fileName: ExpandedString, prototypes: Prototype[_]*) =
-    new AppendToCSVFileHookBuilder(fileName, prototypes: _*)
+    new AppendToCSVFileHook(
+      fileName,
+      prototypes.toVector,
+      header = None,
+      arraysOnSingleRow = false,
+      inputs = PrototypeSet.empty,
+      outputs = PrototypeSet.empty,
+      defaults = DefaultSet.empty,
+      name = None
+    ) set (dsl.inputs += (prototypes: _*))
 
 }
 
-abstract class AppendToCSVFileHook(
-    fileName:   ExpandedString,
-    header:     Option[ExpandedString],
-    singleRow:  Boolean,
-    prototypes: Prototype[_]*
+@Lenses case class AppendToCSVFileHook(
+    fileName:          ExpandedString,
+    prototypes:        Vector[Prototype[_]],
+    header:            Option[ExpandedString],
+    arraysOnSingleRow: Boolean,
+    inputs:            PrototypeSet,
+    outputs:           PrototypeSet,
+    defaults:          DefaultSet,
+    name:              Option[String]
 ) extends Hook with ValidateHook {
 
-  override def validate(inputs: Seq[Val[_]]): Seq[Throwable] =
+  override def validate(inputs: Seq[Prototype[_]]): Seq[Throwable] =
     fileName.validate(inputs) ++ header.toSeq.flatMap(_.validate(inputs))
 
   override def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider) = {
@@ -80,7 +105,7 @@ abstract class AppendToCSVFileHook(
         }
 
         @tailrec def write(lists: List[List[_]]): Unit =
-          if (singleRow || !lists.exists(moreThanOneElement))
+          if (arraysOnSingleRow || !lists.exists(moreThanOneElement))
             writeLine(lists.flatten(flatAny))
           else {
             writeLine(lists.map { _.head })

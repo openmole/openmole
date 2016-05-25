@@ -25,7 +25,7 @@ import org.openmole.core.workflow.tools.FromContext
 
 import scala.reflect._
 import scala.reflect.runtime.universe._
-import scalaz.Functor
+import org.openmole.core.workflow.dsl._
 
 object PrototypeType {
 

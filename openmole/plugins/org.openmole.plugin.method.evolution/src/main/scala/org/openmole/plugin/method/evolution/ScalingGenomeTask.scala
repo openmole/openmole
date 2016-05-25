@@ -17,36 +17,35 @@
 
 package org.openmole.plugin.method.evolution
 
-import fr.iscpif.mgo._
+import monocle.macros.Lenses
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.tools._
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.sampling._
-import org.openmole.core.workflow.domain._
+import org.openmole.core.workflow.dsl
+import dsl._
 
 object ScalingGenomeTask {
+
+  implicit def isBuilder = TaskBuilder[ScalingGenomeTask].from(this)
 
   def apply[T](algorithm: T)(implicit wfi: WorkflowIntegration[T]) = {
     val t = wfi(algorithm)
 
-    new TaskBuilder {
-      builder ⇒
-      t.inputPrototypes foreach { p ⇒ addOutput(p) }
-      addInput(t.genomePrototype)
-      addOutput(t.genomePrototype)
-
-      abstract class ScalingGenomeTask extends Task {
-        override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) =
-          context ++ t.genomeToVariables(context(t.genomePrototype)).from(context)
-      }
-
-      def toTask = new ScalingGenomeTask with Built
-
-    }
+    new ScalingGenomeTask(t) set (
+      dsl.inputs += (t.inputPrototypes: _*),
+      (dsl.inputs, dsl.outputs) += t.genomePrototype
+    )
   }
 
 }
 
+@Lenses case class ScalingGenomeTask(
+    t:        EvolutionWorkflow,
+    inputs:   PrototypeSet      = PrototypeSet.empty,
+    outputs:  PrototypeSet      = PrototypeSet.empty,
+    defaults: DefaultSet        = DefaultSet.empty,
+    name:     Option[String]    = None
+) extends Task {
+  override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) =
+    context ++ t.genomeToVariables(context(t.genomePrototype)).from(context)
+}

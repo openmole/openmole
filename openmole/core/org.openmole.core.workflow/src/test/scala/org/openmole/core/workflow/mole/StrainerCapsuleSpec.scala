@@ -24,25 +24,29 @@ import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task.EmptyTask
 import org.openmole.core.workflow.transition._
 import org.openmole.core.workflow.puzzle._
+import org.openmole.core.workflow.builder._
 import org.scalatest._
+import org.openmole.core.workflow.dsl._
 
 class StrainerCapsuleSpec extends FlatSpec with Matchers {
 
   "The strainer capsule" should "let the data pass through" in {
     val p = Prototype[String]("p")
 
-    val t1 = TestTask { _ + (p -> "Test") }
-    t1 setName "Test write"
-    t1 addOutput p
+    val t1 = TestTask { _ + (p → "Test") } set (
+      name := "Test write",
+      outputs += p
+    )
 
     val strainer = EmptyTask()
 
     val t2 = TestTask { context ⇒
       context(p) should equal("Test")
       context
-    }
-    t2 setName "Test read"
-    t2 addInput p
+    } set (
+      name := "Test read",
+      inputs += p
+    )
 
     val t1c = Capsule(t1)
     val strainerC = StrainerCapsule(strainer)
@@ -57,9 +61,11 @@ class StrainerCapsuleSpec extends FlatSpec with Matchers {
 
     val root = StrainerCapsule(EmptyTask())
 
-    val t1 = TestTask { _ + (p -> "Test") }
-    t1 setName "Test write"
-    t1 addOutput p
+    val t1 =
+      TestTask { _ + (p → "Test") } set (
+        name := "Test write",
+        outputs += p
+      )
 
     val tNone = StrainerCapsule(EmptyTask())
     val tNone2 = StrainerCapsule(EmptyTask())
@@ -69,9 +75,10 @@ class StrainerCapsuleSpec extends FlatSpec with Matchers {
     val t2 = TestTask { context ⇒
       context(p) should equal("Test")
       context
-    }
-    t2 setName "Test read"
-    t2 addInput p
+    } set (
+      name := "Test read",
+      inputs += p
+    )
 
     val strainerC = Slot(StrainerCapsule(strainer))
 

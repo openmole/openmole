@@ -29,7 +29,12 @@ package task {
     }
 
     def newRNG(context: Context) = Task.buildRNG(context)
+
+    def implicits = new {
+      def +=(p: Prototype[_]) = MoleTask.implicits.modify(_ ++ Seq(p.name))
+    }
+
   }
 }
 
-package object task extends TaskPackage
+package object task

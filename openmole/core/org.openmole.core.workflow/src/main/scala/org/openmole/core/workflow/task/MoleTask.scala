@@ -19,52 +19,58 @@ package org.openmole.core.workflow.task
 
 import java.util.concurrent.locks.ReentrantLock
 
+import monocle.macros.Lenses
 import org.openmole.core.event._
-import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
-import org.openmole.core.workflow.builder.TaskBuilder
 import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.execution._
+import org.openmole.core.workflow.builder
+import builder._
+import org.openmole.core.exception._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.puzzle._
 import org.openmole.tool.lock._
-import org.openmole.tool.file._
-
-import scala.collection.mutable.ListBuffer
+import org.openmole.core.workflow.dsl
+import dsl._
 
 object MoleTask {
 
-  def apply(puzzle: Puzzle): MoleTaskBuilder =
-    apply(puzzle toMole, puzzle.lasts.head)
-
-  def apply(mole: Mole, last: Capsule) = {
-    new MoleTaskBuilder {
-      builder ⇒
-      addInput(mole.root.inputs(mole, Sources.empty, Hooks.empty).toSeq: _*)
-      addOutput(last.outputs(mole, Sources.empty, Hooks.empty).toSeq: _*)
-      setDefault(mole.root.task.defaults.toSeq: _*)
-      def toTask = new MoleTask(mole.copy(inputs = builder.inputs), last, implicits) with builder.Built
-    }
+  implicit def isBuilder = new TaskBuilder[MoleTask] {
+    override def defaults = MoleTask.defaults
+    override def inputs = MoleTask.inputs
+    override def name = MoleTask.name
+    override def outputs = MoleTask.outputs
   }
 
-  trait MoleTaskBuilder extends TaskBuilder { builder ⇒
-    val implicits = ListBuffer[String]()
-    def addImplicit(p: String) = implicits += p
+  def apply(puzzle: Puzzle): MoleTask =
+    apply(puzzle toMole, puzzle.lasts.head)
+
+  /**
+   * *
+   * @param mole the mole executed by this task.
+   * @param last the capsule which returns the results
+   */
+  def apply(mole: Mole, last: Capsule): MoleTask = {
+    val mt = new MoleTask(_mole = mole, last = last)
+
+    mt set (
+      dsl.inputs += (mole.root.inputs(mole, Sources.empty, Hooks.empty).toSeq: _*),
+      dsl.outputs += (last.outputs(mole, Sources.empty, Hooks.empty).toSeq: _*),
+      defaults.set(mole.root.task.defaults)
+    )
   }
 
 }
 
-/**
- * *
- *
- * @param mole the mole executed by this task.
- * @param last the capsule which returns the results
- * @param implicits the implicit values for the inputs
- */
-sealed abstract class MoleTask(
-    val mole:      Mole,
-    val last:      Capsule,
-    val implicits: Iterable[String]
+@Lenses case class MoleTask(
+    _mole:     Mole,
+    last:      Capsule,
+    implicits: Vector[String] = Vector.empty,
+    inputs:    PrototypeSet   = PrototypeSet.empty,
+    outputs:   PrototypeSet   = PrototypeSet.empty,
+    defaults:  DefaultSet     = DefaultSet.empty,
+    name:      Option[String] = None
 ) extends Task {
+
+  def mole = _mole.copy(inputs = inputs)
 
   protected def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider): Context = {
     val implicitsValues = implicits.flatMap(i ⇒ context.get(i))

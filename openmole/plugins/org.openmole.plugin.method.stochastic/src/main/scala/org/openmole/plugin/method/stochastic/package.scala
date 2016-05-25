@@ -19,15 +19,11 @@ package org.openmole.plugin.method
 
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.puzzle._
-import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.tools._
-import org.openmole.core.workflow.transition._
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
+import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.validation.{ DataflowProblem, Validation }
 import DataflowProblem.MissingInput
 import org.openmole.plugin.tool.pattern._
@@ -39,17 +35,16 @@ package object stochastic {
     sampling:    Sampling,
     aggregation: Puzzle
   ): Puzzle = {
-    val name = "replicate"
+    val explorationSkel = ExplorationTask(sampling) set (
+      name := "replicateExploration"
+    )
 
-    val exploration = ExplorationTask(sampling) set { _.setName(name + "Exploration") }
+    val missing =
+      Validation(explorationSkel -< model).collect {
+        case MissingInput(_, d) ⇒ d
+      }
 
-    Validation(exploration -< model) foreach {
-      case MissingInput(_, d) ⇒
-        exploration.addInput(d)
-        exploration.addOutput(d)
-      case _ ⇒
-    }
-
+    val exploration = explorationSkel set ((inputs, outputs) += (missing: _*))
     val explorationCapsule = StrainerCapsule(exploration)
     Strain(explorationCapsule -< model >- aggregation)
   }
@@ -58,19 +53,21 @@ package object stochastic {
     model:    Puzzle,
     sampling: Sampling
   ) = {
-    val name = "replicate"
 
-    val exploration = ExplorationTask(sampling) set { _.setName(name + "Exploration") }
+    val explorationSkel = ExplorationTask(sampling) set (
+      name := "replicateExploration"
+    )
 
-    Validation(exploration -< model) foreach {
-      case MissingInput(_, d) ⇒
-        exploration.addInput(d)
-        exploration.addOutput(d)
-      case _ ⇒
-    }
+    val missing =
+      Validation(explorationSkel -< model).collect {
+        case MissingInput(_, d) ⇒ d
+      }
+
+    val exploration = explorationSkel set ((inputs, outputs) += (missing: _*))
+    val aggregation = EmptyTask() set (name := "replicateAggregation")
 
     val explorationCapsule = StrainerCapsule(exploration)
-    val aggregationCapsule = Slot(Capsule(EmptyTask() set { _.setName(name + "Aggregation") }))
+    val aggregationCapsule = Slot(aggregation)
     Strain(explorationCapsule -< model >- aggregationCapsule)
   }
 

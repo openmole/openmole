@@ -18,41 +18,43 @@
 package org.openmole.plugin.method.evolution
 
 import fr.iscpif.mgo._
+import monocle.macros.Lenses
 import org.openmole.core.workflow.builder.TaskBuilder
-
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.dsl
+import dsl._
 
 object ElitismTask {
+
+  implicit def isBuilder = TaskBuilder[ElitismTask].from(this)
 
   def apply[T](algorithm: T)(implicit wfi: WorkflowIntegration[T]) = {
     val t = wfi(algorithm)
 
-    new TaskBuilder {
-      addInput(t.statePrototype)
-      addInput(t.populationPrototype)
-      addInput(t.offspringPrototype)
-      addOutput(t.populationPrototype)
-      addOutput(t.statePrototype)
-
-      abstract class ElitismTask extends Task {
-
-        override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = {
-          val (newState, newPopulation) = t.integration.run(context(t.statePrototype), t.operations.elitism.run(context(t.populationPrototype) ++ context(t.offspringPrototype)))
-
-          Context(
-            Variable(t.populationPrototype, newPopulation),
-            Variable(t.statePrototype, newState)
-          )
-        }
-
-      }
-
-      def toTask = new ElitismTask with Built
-    }
+    new ElitismTask(t) set (
+      dsl.inputs += (t.statePrototype, t.populationPrototype, t.offspringPrototype),
+      dsl.outputs += (t.populationPrototype, t.statePrototype)
+    )
   }
 
 }
 
+@Lenses case class ElitismTask(
+    t:        EvolutionWorkflow,
+    inputs:   PrototypeSet      = PrototypeSet.empty,
+    outputs:  PrototypeSet      = PrototypeSet.empty,
+    defaults: DefaultSet        = DefaultSet.empty,
+    name:     Option[String]    = None
+) extends Task {
+
+  override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = {
+    val (newState, newPopulation) = t.integration.run(context(t.statePrototype), t.operations.elitism.run(context(t.populationPrototype) ++ context(t.offspringPrototype)))
+
+    Context(
+      Variable(t.populationPrototype, newPopulation),
+      Variable(t.statePrototype, newState)
+    )
+  }
+
+}

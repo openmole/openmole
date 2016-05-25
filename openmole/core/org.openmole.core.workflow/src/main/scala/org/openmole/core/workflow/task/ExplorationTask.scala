@@ -17,38 +17,49 @@
 
 package org.openmole.core.workflow.task
 
+import monocle.macros.Lenses
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.workflow.builder.TaskBuilder
+import org.openmole.core.workflow.builder
+import builder._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.mole.Capsule
 import org.openmole.core.workflow.sampling._
 
 import scala.collection.immutable.TreeMap
 import scala.collection.mutable.ArrayBuffer
-
+import monocle.Lens
+import org.openmole.core.workflow.dsl
+import dsl._
 object ExplorationTask {
   type SampledValues = Iterable[Iterable[Variable[_]]]
 
-  def apply(sampling: Sampling) = {
-    new TaskBuilder { builder ⇒
+  implicit def isBuilder = new TaskBuilder[ExplorationTask] {
+    override def defaults = ExplorationTask.defaults
+    override def inputs = ExplorationTask.inputs
+    override def name = ExplorationTask.name
+    override def outputs = ExplorationTask.outputs
+  }
 
-      addInput(sampling.inputs.toSeq: _*)
-      addOutput(sampling.prototypes.toSeq.map(_.toArray): _*)
+  def apply(sampling: Sampling): ExplorationTask = {
+    val explorationTask = new ExplorationTask(sampling = sampling)
 
-      def toTask =
-        new ExplorationTask(sampling) with builder.Built {
-          val explored = sampling.prototypes.map(_.name).toSet
-          override def outputs = super.outputs.copy(explore = sampling.prototypes.map(_.name).toSet)
-        }
-
-    }
+    explorationTask set (
+      dsl.inputs += (sampling.inputs.toSeq: _*),
+      dsl.exploredOutputs += (sampling.prototypes.toSeq.map(_.toArray): _*)
+    )
   }
 
   def explored(c: Capsule) = (p: Prototype[_]) ⇒ c.task.outputs.explored(p)
 
 }
 
-abstract class ExplorationTask(val sampling: Sampling) extends Task {
+@Lenses case class ExplorationTask(
+    inputs:   PrototypeSet   = PrototypeSet.empty,
+    outputs:  PrototypeSet   = PrototypeSet.empty,
+    defaults: DefaultSet     = DefaultSet.empty,
+    name:     Option[String] = None,
+    sampling: Sampling
+) extends Task {
 
   //If input prototype as the same name as the output it is erased
   override protected def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = {

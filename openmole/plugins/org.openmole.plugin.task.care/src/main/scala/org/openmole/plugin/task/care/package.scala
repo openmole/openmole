@@ -19,12 +19,13 @@
 package org.openmole.plugin.task
 
 import org.openmole.plugin.task.systemexec.SystemExecPackage
+import org.openmole.core.dsl._
 
 package care {
   trait CAREPackage extends SystemExecPackage {
     lazy val hostFiles = new {
-      def +=(hostFile: String, binding: Option[String] = None) =
-        (_: CARETaskBuilder).addHostFile(hostFile, binding)
+      def +=[T: CARETaskBuilder](hostFile: String, binding: Option[String] = None) =
+        implicitly[CARETaskBuilder[T]].hostFiles add (hostFile, binding)
     }
   }
 }

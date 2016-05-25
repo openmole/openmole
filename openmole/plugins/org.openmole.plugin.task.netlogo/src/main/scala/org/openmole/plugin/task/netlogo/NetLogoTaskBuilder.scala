@@ -21,15 +21,22 @@ import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.data.Prototype
 import org.openmole.plugin.task.external.ExternalTaskBuilder
 import scala.collection.mutable.ListBuffer
+import monocle.Lens
 
-abstract class NetLogoTaskBuilder(
+/*abstract class NetLogoTaskBuilder(
     private val workspace:         NetLogoTask.Workspace,
     private val launchingCommands: Seq[String],
     private val seed:              Option[Prototype[Int]],
     private val netLogoFactory:    NetLogoFactory
-) extends ExternalTaskBuilder { builder ⇒
+) extends ExternalTaskBuilder { builder ⇒*/
 
-  seed.foreach(p ⇒ addInput(p))
+trait NetLogoTaskBuilder[T] extends ExternalTaskBuilder[T] {
+
+  def netLogoInputs: Lens[T, Vector[(Prototype[_], String)]]
+  def netLogoOutputs: Lens[T, Vector[(String, Prototype[_])]]
+  def netLogoArrayOutputs: Lens[T, Vector[(String, Int, Prototype[_])]]
+
+  /*seed.foreach(p ⇒ addInput(p))
 
   private var _netLogoInputs = new ListBuffer[(Prototype[_], String)]
   private var _netLogoOutputs = new ListBuffer[(String, Prototype[_])]
@@ -73,6 +80,6 @@ abstract class NetLogoTaskBuilder(
     def netLogoArrayOutputs: Iterable[(String, Int, Prototype[_])] = builder.netLogoArrayOutputs
     def netLogoFactory: NetLogoFactory = builder.netLogoFactory
     def seed = builder.seed
-  }
+  }*/
 
 }

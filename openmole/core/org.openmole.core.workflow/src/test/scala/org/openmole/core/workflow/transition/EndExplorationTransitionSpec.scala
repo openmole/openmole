@@ -24,9 +24,11 @@ import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.builder._
 import org.scalatest._
 import scala.collection.mutable.ListBuffer
 import org.openmole.core.workflow.puzzle._
+import org.openmole.core.workflow.dsl._
 
 class EndExplorationTransitionSpec extends FlatSpec with Matchers {
 
@@ -40,9 +42,7 @@ class EndExplorationTransitionSpec extends FlatSpec with Matchers {
 
     val exc = Capsule(ExplorationTask(sampling))
 
-    val emptyT = EmptyTask()
-    emptyT addInput i
-    emptyT addOutput i
+    val emptyT = EmptyTask() set ((inputs, outputs) += i)
 
     val emptyC = Capsule(emptyT)
 
@@ -50,9 +50,10 @@ class EndExplorationTransitionSpec extends FlatSpec with Matchers {
       context.contains(i) should equal(true)
       endCapsExecuted += 1
       context
-    }
-    testT setName "Test"
-    testT addInput i
+    } set (
+      name := "Test",
+      inputs += i
+    )
 
     val testC = Capsule(testT)
 

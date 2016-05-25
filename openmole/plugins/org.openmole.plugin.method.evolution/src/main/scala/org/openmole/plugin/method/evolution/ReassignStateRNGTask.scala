@@ -19,26 +19,31 @@ package org.openmole.plugin.method.evolution
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
-import fr.iscpif.mgo._
+import monocle.macros.Lenses
+import org.openmole.core.dsl._
 
 object ReassignStateRNGTask {
 
   def apply[T](algorithm: T)(implicit wfi: WorkflowIntegration[T]) = {
     val t = wfi(algorithm)
 
-    new TaskBuilder {
-      builder ⇒
-      addInput(t.statePrototype)
-      addOutput(t.statePrototype)
-
-      abstract class ReassignStateRNGTask extends Task {
-        override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) =
-          Context(Variable(t.statePrototype, t.operations.randomLens.set(Task.buildRNG(context))(context(t.statePrototype))))
-      }
-
-      def toTask = new ReassignStateRNGTask with Built
+    object ReassignStateRNGTask {
+      implicit def isBuilder = TaskBuilder[ReassignStateRNGTask].from(this)
     }
 
+    @Lenses case class ReassignStateRNGTask(
+        inputs:   PrototypeSet   = PrototypeSet.empty,
+        outputs:  PrototypeSet   = PrototypeSet.empty,
+        defaults: DefaultSet     = DefaultSet.empty,
+        name:     Option[String] = None
+    ) extends Task {
+      override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) =
+        Context(Variable(t.statePrototype, t.operations.randomLens.set(Task.buildRNG(context))(context(t.statePrototype))))
+    }
+
+    ReassignStateRNGTask() set (
+      (inputs, outputs) += t.statePrototype
+    )
   }
 
 }

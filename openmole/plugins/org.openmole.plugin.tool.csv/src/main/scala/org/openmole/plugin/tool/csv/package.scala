@@ -19,20 +19,30 @@ package org.openmole.plugin.tool
 
 import java.io.File
 
-import org.openmole.core.macros.Keyword._
 import org.openmole.core.workflow.data.Prototype
+import org.openmole.core.dsl._
 
 package csv {
   trait CSVPackage {
-    lazy val columns = add[{
-      def addColumn(proto: Prototype[_])
-      def addColumn(name: String, proto: Prototype[_])
-    }]
-    lazy val fileColumns = add[{
-      def addFileColumn(name: String, dir: File, proto: Prototype[File])
-      def addFileColumn(dir: File, proto: Prototype[File])
-    }]
-    lazy val separator = set[{ def setSeparator(s: Option[Char]) }]
+    lazy val columns = new {
+      def +=[T: CSVToVariablesBuilder](proto: Prototype[_]): T ⇒ T = this.+=(proto.name, proto)
+      def +=[T: CSVToVariablesBuilder](name: String, proto: Val[_]): T ⇒ T =
+        (implicitly[CSVToVariablesBuilder[T]].columns add (name → proto)) andThen
+          (outputs += proto)
+    }
+    lazy val fileColumns = new {
+      def +=[T: CSVToVariablesBuilder](dir: File, proto: Prototype[File]): T ⇒ T =
+        this.+=(proto.name, dir, proto)
+
+      def +=[T: CSVToVariablesBuilder](name: String, dir: File, proto: Prototype[File]): T ⇒ T =
+        (implicitly[CSVToVariablesBuilder[T]].fileColumns add (name, dir, proto)) andThen
+          (outputs += proto)
+    }
+    lazy val separator = new {
+      def :=[T: CSVToVariablesBuilder](s: Option[Char]): T ⇒ T =
+        implicitly[CSVToVariablesBuilder[T]].separator.set(s)
+
+    }
   }
 }
 

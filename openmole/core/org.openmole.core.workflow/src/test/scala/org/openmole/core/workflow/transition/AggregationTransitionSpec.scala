@@ -30,6 +30,8 @@ import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.puzzle._
+import org.openmole.core.workflow.builder._
+import org.openmole.core.workflow.dsl._
 
 import org.scalatest._
 import scala.collection.mutable.ListBuffer
@@ -48,9 +50,7 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
 
     val exc = Capsule(ExplorationTask(sampling))
 
-    val emptyT = EmptyTask()
-    emptyT addInput i
-    emptyT addOutput i
+    val emptyT = EmptyTask() set ((inputs, outputs) += i)
 
     val emptyC = Capsule(emptyT)
 
@@ -59,9 +59,10 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
       context(i.toArray).sorted.deep should equal(data.toArray.deep)
       endCapsExecuted += 1
       context
-    }
-    testT setName "Test"
-    testT addInput (i.toArray)
+    } set (
+      name := "Test",
+      inputs += i.array
+    )
 
     val testC = Capsule(testT)
 
@@ -83,10 +84,7 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
 
     val exc = Capsule(ExplorationTask(sampling))
 
-    val emptyT = EmptyTask()
-    emptyT addInput i
-    emptyT addOutput i
-
+    val emptyT = EmptyTask() set ((inputs, outputs) += i)
     val emptyC = Capsule(emptyT)
 
     val testT = TestTask { context ⇒
@@ -95,9 +93,10 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
       context(i.toArray).sorted.deep should equal(data.sorted.toArray.deep)
       endCapsExecuted += 1
       context
-    }
-    testT setName "Test"
-    testT addInput i.toArray
+    } set (
+      name := "Test",
+      inputs += i.array
+    )
 
     val testC = Capsule(testT)
 
@@ -117,9 +116,7 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
 
     val exc = Capsule(ExplorationTask(sampling))
 
-    val emptyT = EmptyTask()
-    emptyT addInput i
-    emptyT addOutput i
+    val emptyT = EmptyTask() set ((inputs, outputs) += i)
 
     val emptyC = Capsule(emptyT)
 
@@ -128,12 +125,12 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
       context(i.toArray).sorted.deep should equal(data.toArray.deep)
       endCapsExecuted.incrementAndGet()
       context
-    }
-    testT setName "Test"
-    testT addInput i.toArray
+    } set (
+      name := "Test",
+      inputs += i.array
+    )
 
     val testC = Capsule(testT)
-
     val mole = exc -< emptyC >- testC toMole
 
     MoleExecution(mole).start.cancel
@@ -153,17 +150,18 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
       TestTask { context ⇒
         if (context(i) == 42) throw new InternalProcessingError("Some error for test")
         context
-      }
-    run setName "Run"
-    run addInput i
-    run addOutput i
+      } set (
+        name := "Run",
+        (inputs, outputs) += i
+      )
 
     val test = TestTask { context ⇒
       endCapsExecuted.incrementAndGet()
       context
-    }
-    test setName "Test"
-    test addInput i.toArray
+    } set (
+      name := "Test",
+      inputs += i.array
+    )
 
     val ex = (exploration -< run >- test).start
     Try { ex.waitUntilEnded }
@@ -182,15 +180,14 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
 
     def main =
       EmptyTask() set (
-        _ setName "main",
-        _ addInput v,
-        _ addOutput v
+        name := "main",
+        (inputs, outputs) += v
       )
 
     def test =
       TestTask { ctx ⇒ executed.incrementAndGet(); ctx } set (
-        _ setName "mean",
-        _ addInput v.toArray
+        name := "mean",
+        inputs += v.array
       )
 
     val ex = exploration -< main >- (test, test) start
@@ -209,15 +206,14 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
 
     def main =
       EmptyTask() set (
-        _ setName "main",
-        _ addInput v,
-        _ addOutput v
+        name := "main",
+        (inputs, outputs) += v
       )
 
     def test =
       TestTask { ctx ⇒ executed.incrementAndGet(); ctx(v.toArray).toSeq.sorted should equal(ctx(v.toArray).toSeq); ctx } set (
-        _ setName "mean",
-        _ addInput v.toArray
+        name := "mean",
+        inputs += v.array
       )
 
     val env = LocalEnvironment(100)

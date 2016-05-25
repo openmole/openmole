@@ -30,6 +30,7 @@ import org.openmole.tool.logger.Logger
 import scala.collection.mutable.Buffer
 import scala.collection.mutable.ListBuffer
 import scala.util.Random
+import org.openmole.core.workflow.dsl._
 
 object Transition extends Logger
 

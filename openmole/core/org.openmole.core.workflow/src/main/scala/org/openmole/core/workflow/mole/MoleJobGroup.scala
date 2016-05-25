@@ -19,6 +19,7 @@ package org.openmole.core.workflow.mole
 
 import org.openmole.core.workflow.tools._
 import scala.concurrent.stm._
+import org.openmole.core.workflow.dsl._
 
 object MoleJobGroup {
 
