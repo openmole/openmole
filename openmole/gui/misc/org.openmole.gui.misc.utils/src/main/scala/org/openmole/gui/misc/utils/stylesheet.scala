@@ -211,7 +211,7 @@ package object stylesheet {
     whiteSpace := "nowrap",
     overflow := "hidden",
     width := 310,
-    sheet.marginTop(-3),
+    sheet.marginTop(-1),
     sheet.paddingLeft(3),
     floatLeft,
     pointer,
