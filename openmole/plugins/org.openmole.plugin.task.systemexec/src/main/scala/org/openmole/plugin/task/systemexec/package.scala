@@ -29,8 +29,10 @@ import org.openmole.core.workflow.tools.{ FromContext, VariableExpansion }
 import org.openmole.core.workflow.tools.VariableExpansion.Expansion
 import org.openmole.plugin.task.external.ExternalTask
 import org.openmole.tool.stream.StringOutputStream
-import org.openmole.core.workflow.builder
+import org.openmole.core.workflow.builder._
+import org.openmole.core.workflow.dsl
 import org.openmole.core.workflow.dsl._
+import language.implicitConversions
 
 import collection.mutable.ListBuffer
 import monocle.Lens
@@ -195,11 +197,15 @@ package object systemexec extends external.ExternalPackage with SystemExecPackag
 
       val runtime = Runtime.getRuntime
 
+      import collection.JavaConversions._
+      val inheritedEnvironment = System.getenv.map { case (key, value) ⇒ s"$key=$value" }.toArray
+      val openmoleEnvironment = environmentVariables.map { case (p, v) ⇒ v + "=" + context(p).toString }.toArray
+
       //FIXES java.io.IOException: error=26
       val process = runtime.synchronized {
         runtime.exec(
           command,
-          environmentVariables.map { case (p, v) ⇒ v + "=" + context(p).toString }.toArray,
+          inheritedEnvironment ++ openmoleEnvironment,
           workDir
         )
       }
