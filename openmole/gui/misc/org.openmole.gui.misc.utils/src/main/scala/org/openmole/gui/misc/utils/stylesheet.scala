@@ -210,7 +210,7 @@ package object stylesheet {
     color("white"),
     whiteSpace := "nowrap",
     overflow := "hidden",
-    width := "13em",
+    width := 310,
     sheet.paddingTop(1),
     sheet.paddingLeft(3),
     floatLeft,
