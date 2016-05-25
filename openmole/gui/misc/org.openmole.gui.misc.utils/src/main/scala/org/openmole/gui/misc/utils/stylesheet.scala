@@ -546,7 +546,7 @@ package object stylesheet {
   lazy val sortingBar: ModifierSeq = Seq(
     width := "100%",
     right := -185,
-    top := 0
+    top := 10
   )
 
   lazy val labelStyle: ModifierSeq = Seq(
