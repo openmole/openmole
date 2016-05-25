@@ -21,6 +21,7 @@ import org.openmole.core.workflow.puzzle._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.transition._
+import org.openmole.core.workflow.dsl._
 
 object Skip {
 

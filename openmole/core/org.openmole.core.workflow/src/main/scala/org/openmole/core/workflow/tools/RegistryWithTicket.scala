@@ -20,6 +20,7 @@ package org.openmole.core.workflow.tools
 import org.openmole.core.workflow.mole._
 
 import scala.collection.mutable
+import org.openmole.core.workflow.dsl._
 
 /**
  *

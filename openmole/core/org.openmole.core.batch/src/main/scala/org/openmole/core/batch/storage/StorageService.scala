@@ -189,7 +189,7 @@ trait StorageService extends BatchService with Storage {
   def upload(src: File, dest: String, options: TransferOptions = TransferOptions.default)(implicit token: AccessToken) = token.access { _upload(src, dest, options) }
   def download(src: String, dest: File, options: TransferOptions = TransferOptions.default)(implicit token: AccessToken) = token.access { _download(src, dest, options) }
 
-  def baseDirName = Workspace.preference(Workspace.uniqueIDLocation) + '/'
+  def baseDirName = "openmole-" + Workspace.preference(Workspace.uniqueIDLocation) + '/'
 
   def backgroundRmFile(path: String) = BatchEnvironment.jobManager ! DeleteFile(this, path, false)
   def backgroundRmDir(path: String) = BatchEnvironment.jobManager ! DeleteFile(this, path, true)

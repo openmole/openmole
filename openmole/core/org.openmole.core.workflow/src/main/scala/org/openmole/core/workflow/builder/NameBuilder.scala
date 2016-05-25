@@ -16,15 +16,11 @@
  */
 package org.openmole.core.workflow.builder
 
-trait NameBuilder { builder ⇒
-  var name: Option[String] = None
+trait NameBuilder[T] { builder ⇒
 
-  def setName(name: String): this.type = {
-    builder.name = Some(name)
-    this
-  }
+  def name: monocle.Lens[T, Option[String]]
 
-  trait Built {
+  /* trait Built {
     lazy val name = builder.name.orElse(Some(s"${getClass.getSuperclass.getSimpleName}@$hashCode"))
-  }
+  }*/
 }

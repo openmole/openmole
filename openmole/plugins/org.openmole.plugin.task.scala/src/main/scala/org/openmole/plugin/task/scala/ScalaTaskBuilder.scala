@@ -17,11 +17,7 @@
 
 package org.openmole.plugin.task.scala
 
-import org.openmole.core.serializer.plugin.Plugins
+import org.openmole.core.workflow.builder._
 import org.openmole.plugin.task.jvm._
 
-trait ScalaBuilder extends JVMLanguageBuilder
-
-abstract class ScalaTaskBuilder extends JVMLanguageTaskBuilder with ScalaBuilder { builder ⇒
-  trait Built <: super.Built
-}
+trait ScalaTaskBuilder[T] extends JVMLanguageBuilder[T] with TaskBuilder[T]

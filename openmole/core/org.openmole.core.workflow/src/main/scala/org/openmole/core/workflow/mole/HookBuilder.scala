@@ -19,7 +19,4 @@ package org.openmole.core.workflow.mole
 
 import org.openmole.core.workflow.builder._
 
-abstract class HookBuilder extends InputOutputBuilder with NameBuilder {
-  def toHook: Hook
-  trait Built <: super[InputOutputBuilder].Built with super[NameBuilder].Built
-}
+trait HookBuilder[T] extends Builder[T] with InputOutputBuilder[T] with NameBuilder[T]

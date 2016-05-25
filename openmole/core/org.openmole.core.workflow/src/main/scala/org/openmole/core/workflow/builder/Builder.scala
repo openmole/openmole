@@ -17,11 +17,4 @@
 
 package org.openmole.core.workflow.builder
 
-trait Builder {
-
-  def set[T](ops: (this.type ⇒ T)*): this.type = {
-    ops.foreach(_(this))
-    this
-  }
-
-}
+trait Builder[T]

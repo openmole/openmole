@@ -17,25 +17,47 @@
 
 package org.openmole.plugin.source.file
 
-import org.openmole.tool.file._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.data._
 import java.io.File
+
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.tools.ExpandedString
-import scala.collection.mutable.ListBuffer
+import org.openmole.core.dsl
+import dsl._
+import monocle.macros.Lenses
 
 object ListDirectoriesSource {
 
+  implicit def isBuilder = new SourceBuilder[ListDirectoriesSource] {
+    override def name = ListDirectoriesSource.name
+    override def outputs = ListDirectoriesSource.outputs
+    override def inputs = ListDirectoriesSource.inputs
+    override def defaults = ListDirectoriesSource.defaults
+  }
+
   def apply(path: ExpandedString, prototype: Prototype[Array[File]], regExp: ExpandedString = ".*") =
-    new SourceBuilder {
-      addOutput(prototype)
-      override def toSource: Source = new ListDirectoriesSource(path, prototype, regExp) with Built
-    }
+    new ListDirectoriesSource(
+      path,
+      prototype,
+      regExp,
+      inputs = PrototypeSet.empty,
+      outputs = PrototypeSet.empty,
+      defaults = DefaultSet.empty,
+      name = None
+    ) set (dsl.outputs += prototype)
 }
 
-abstract class ListDirectoriesSource(path: ExpandedString, prototype: Prototype[Array[File]], regExp: ExpandedString) extends Source {
+@Lenses case class ListDirectoriesSource(
+    path:      ExpandedString,
+    prototype: Prototype[Array[File]],
+    regExp:    ExpandedString,
+    inputs:    PrototypeSet,
+    outputs:   PrototypeSet,
+    defaults:  DefaultSet,
+    name:      Option[String]
+) extends Source {
 
   override def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider) = {
     val expandedPath = new File(path.from(context))

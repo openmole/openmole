@@ -18,15 +18,7 @@ package org.openmole.core.workflow.builder
 
 import org.openmole.core.workflow.data._
 
-trait InputBuilder { builder ⇒
-
-  private var _inputs = PrototypeSet.empty
-
-  def addInput(d: Prototype[_]*): this.type = { _inputs ++= d; this }
-
-  def inputs = _inputs
-
-  trait Built {
-    def inputs = builder.inputs
-  }
+trait InputBuilder[T] {
+  def inputs: monocle.Lens[T, PrototypeSet]
 }
+

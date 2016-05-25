@@ -17,8 +17,4 @@
 
 package org.openmole.core.workflow.builder
 
-import org.openmole.core.workflow.sampling._
-
-trait SamplingBuilder <: Builder {
-  def toSampling: Sampling
-}
+trait SamplingBuilder[T] <: Builder[T]

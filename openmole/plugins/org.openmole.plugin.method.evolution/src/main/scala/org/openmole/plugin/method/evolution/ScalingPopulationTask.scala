@@ -18,33 +18,37 @@
 package org.openmole.plugin.method.evolution
 
 import fr.iscpif.mgo._
-import org.openmole.core.workflow.builder.TaskBuilder
+import monocle.macros.Lenses
+import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.sampling._
-import org.openmole.core.workflow.domain._
+import org.openmole.core.workflow.dsl
+import dsl._
 import org.openmole.core.workflow.task._
 
 object ScalingPopulationTask {
 
+  implicit def isBuilder = TaskBuilder[ScalingPopulationTask].from(this)
+
   def apply[T](algorithm: T)(implicit wfi: WorkflowIntegration[T]) = {
     val t = wfi(algorithm)
 
-    new TaskBuilder {
-      builder ⇒
-      addInput(t.populationPrototype)
-      t.resultPrototypes foreach { i ⇒ addOutput(i.toArray) }
+    new ScalingPopulationTask(t) set (
+      dsl.inputs += t.populationPrototype,
+      dsl.outputs += (t.resultPrototypes.map(_.array): _*)
+    )
 
-      abstract class ScalingPopulationTask extends Task {
-
-        override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) =
-          t.populationToVariables(context(t.populationPrototype)).from(context)
-
-      }
-
-      def toTask = new ScalingPopulationTask with Built
-    }
   }
 }
 
+@Lenses case class ScalingPopulationTask(
+    t:        EvolutionWorkflow,
+    inputs:   PrototypeSet      = PrototypeSet.empty,
+    outputs:  PrototypeSet      = PrototypeSet.empty,
+    defaults: DefaultSet        = DefaultSet.empty,
+    name:     Option[String]    = None
+) extends Task {
+
+  override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) =
+    t.populationToVariables(context(t.populationPrototype)).from(context)
+
+}

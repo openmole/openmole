@@ -21,22 +21,44 @@ import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.data._
 import java.io.File
+
+import monocle.Lens
+import monocle.macros.Lenses
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.tools.ExpandedString
-import scala.collection.mutable.ListBuffer
+import org.openmole.core.dsl
+import org.openmole.core.dsl._
 
 object FileSource {
 
+  implicit def isBuilder = new SourceBuilder[FileSource] {
+    override def name = FileSource.name
+    override def outputs = FileSource.outputs
+    override def inputs = FileSource.inputs
+    override def defaults = FileSource.defaults
+  }
+
   def apply(path: ExpandedString, prototype: Prototype[File]) =
-    new SourceBuilder {
-      addOutput(prototype)
-      def toSource = new FileSource(path, prototype) with Built
-    }
+    new FileSource(
+      path,
+      prototype,
+      inputs = PrototypeSet.empty,
+      outputs = PrototypeSet.empty,
+      defaults = DefaultSet.empty,
+      name = None
+    ) set (dsl.outputs += prototype)
 
 }
 
-abstract class FileSource(path: ExpandedString, prototype: Prototype[File]) extends Source {
+@Lenses case class FileSource(
+    path:      ExpandedString,
+    prototype: Prototype[File],
+    inputs:    PrototypeSet,
+    outputs:   PrototypeSet,
+    defaults:  DefaultSet,
+    name:      Option[String]
+) extends Source {
 
   override def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider) = {
     val expandedPath = new File(path.from(context))

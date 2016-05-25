@@ -26,6 +26,7 @@ import org.openmole.core.workspace.Workspace
 import org.openmole.core.workflow.execution._
 import scalaz._
 import Scalaz._
+import org.openmole.core.workflow.dsl._
 
 object ToPuzzle {
 

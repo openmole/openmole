@@ -28,6 +28,7 @@ import org.openmole.core.workflow.task.Task
 import org.openmole.core.workflow.validation.TypeUtil
 import org.openmole.core.workspace.Workspace
 import org.osgi.framework.Bundle
+import org.openmole.core.workflow.dsl._
 import scala.util.{ Random, Try }
 
 trait ScalaCompilation {

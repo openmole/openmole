@@ -26,45 +26,63 @@ import org.openmole.core.workflow.puzzle._
 
 package builder {
 
+  import org.openmole.core.workflow.tools.FromContext
+
   class Inputs {
-    def +=(d: Prototype[_]*) = (_: InputBuilder).addInput(d: _*)
+    def +=[T: InputBuilder](d: Prototype[_]*): T ⇒ T =
+      implicitly[InputBuilder[T]].inputs.modify(_ ++ d)
   }
 
   class Outputs {
-    def +=(d: Prototype[_]*) = (_: OutputBuilder).addOutput(d: _*)
+    def +=[T: OutputBuilder](d: Prototype[_]*): T ⇒ T =
+      implicitly[OutputBuilder[T]].outputs.modify(_ ++ d)
+
   }
 
   class ExploredOutputs {
-    def +=(d: Prototype[_ <: Array[_]]*) = (_: OutputBuilder).addExploredOutput(d: _*)
+    def +=[T: OutputBuilder](ds: Prototype[_ <: Array[_]]*): T ⇒ T = (t: T) ⇒ {
+      def outputs = implicitly[OutputBuilder[T]].outputs
+      def add = ds.filter(d ⇒ !outputs.get(t).contains(d))
+      (outputs.modify(_ ++ add) andThen outputs.modify(_.explore(ds.map(_.name): _*)))(t)
+    }
+  }
+
+  class AssignDefault[T](p: Prototype[T]) {
+    def :=[U: DefaultBuilder](v: T, `override`: Boolean): U ⇒ U =
+      implicitly[DefaultBuilder[U]].defaults.modify(_ + Default[T](p, v, `override`))
+    def :=[U: DefaultBuilder](v: T): U ⇒ U = this.:=(v, false)
+    def :=[U: DefaultBuilder](v: FromContext[T], `override`: Boolean): U ⇒ U =
+      implicitly[DefaultBuilder[U]].defaults.modify(_ + Default[T](p, v, `override`))
+    def :=[U: DefaultBuilder](v: FromContext[T]): U ⇒ U =
+      this.:=(v, false)
+  }
+
+  class Name {
+    def :=[T: NameBuilder](name: String): T ⇒ T =
+      implicitly[NameBuilder[T]].name.set(Some(name))
   }
 
   trait BuilderPackage {
-    implicit def samplingBuilderToSampling(s: SamplingBuilder) = s.toSampling
-    implicit def taskBuilderToTask[TB <: TaskBuilder](builder: TB) = builder.toTask
-    implicit def taskBuilderToCapsuleConverter[TB <: TaskBuilder](builder: TB) = Capsule(builder)
-    implicit def taskBuilderToCapsuleDecorator(task: TaskBuilder) = new TaskToCapsuleDecorator(task)
-    implicit def taskBuilderToPuzzleConverter(t: TaskBuilder) = t.toTask.toCapsule.toPuzzle
-
     final lazy val inputs: Inputs = new Inputs
     final lazy val outputs: Outputs = new Outputs
     final lazy val exploredOutputs: ExploredOutputs = new ExploredOutputs
 
     implicit class InputsOutputsDecorator(io: (Inputs, Outputs)) {
-      def +=(ps: Prototype[_]*) = (b: InputBuilder with OutputBuilder) ⇒ {
-        (io._1 += (ps: _*))(b)
-        (io._2 += (ps: _*))(b)
-      }
-    }
-
-    class AssignDefault[T](p: Prototype[T]) {
-      def :=[U <: DefaultBuilder](v: T, `override`: Boolean = false) =
-        (_: U).setDefault(p, v, `override`)
+      def +=[T: InputBuilder: OutputBuilder](ps: Prototype[_]*): T ⇒ T =
+        (inputs += (ps: _*)) andThen (outputs += (ps: _*))
     }
 
     implicit def prototypeToAssignDefault[T](p: Prototype[T]) = new AssignDefault[T](p)
 
-    final lazy val name = set[{ def setName(name: String) }]
+    final lazy val name = new Name
+
+    implicit class SetBuilder[T: Builder](t: T) {
+      def set(ops: (T ⇒ T)*): T =
+        ops.foldLeft(t) { (curT, op) ⇒ op(curT) }
+    }
   }
+
 }
 
-package object builder extends BuilderPackage
+package object builder
+

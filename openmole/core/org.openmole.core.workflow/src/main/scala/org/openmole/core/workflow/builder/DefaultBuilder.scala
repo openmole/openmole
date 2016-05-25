@@ -18,17 +18,6 @@ package org.openmole.core.workflow.builder
 
 import org.openmole.core.workflow.data.{ Default, Prototype, DefaultSet }
 
-trait DefaultBuilder <: Builder { builder ⇒
-  private var _defaults = DefaultSet.empty
-  def setDefault[T](p: Prototype[T], v: T, `override`: Boolean = false): this.type = setDefault(Default.value(p, v, `override`))
-  def setDefault(p: Default[_]*): this.type = { _defaults ++= p; this }
-
-  @deprecated("use setDefault instead", "4.0")
-  def addParameter(p: Default[_]) = { _defaults += p; this }
-
-  def defaults = _defaults
-
-  trait Built {
-    def defaults = builder.defaults
-  }
+trait DefaultBuilder[T] {
+  def defaults: monocle.Lens[T, DefaultSet]
 }

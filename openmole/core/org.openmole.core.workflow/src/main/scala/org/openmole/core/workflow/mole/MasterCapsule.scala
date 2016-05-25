@@ -19,6 +19,7 @@ package org.openmole.core.workflow.mole
 
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.dsl._
 
 object MasterCapsule {
   def apply(task: Task, persist: Seq[Prototype[_]], strainer: Boolean) = new MasterCapsule(task, persist.map(_.name), strainer)

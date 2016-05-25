@@ -17,9 +17,24 @@
 
 package org.openmole.core.workflow.builder
 
-import org.openmole.core.workflow.task._
+import monocle.Lens
+import org.openmole.core.workflow.data.{ DefaultSet, PrototypeSet }
 
-trait TaskBuilder extends InputOutputBuilder with NameBuilder with Builder { builder ⇒
-  def toTask: Task
-  trait Built extends super[InputOutputBuilder].Built with super[NameBuilder].Built
+object TaskBuilder {
+
+  def apply[U]() = new {
+    def from[T <: {
+      def name: Lens[U, Option[String]]
+      def inputs: Lens[U, PrototypeSet]
+      def outputs: Lens[U, PrototypeSet]
+      def defaults: Lens[U, DefaultSet]
+    }](t: T): TaskBuilder[U] = new TaskBuilder[U] {
+      override def name = t.name
+      override def outputs = t.outputs
+      override def inputs = t.inputs
+      override def defaults = t.defaults
+    }
+  }
 }
+
+trait TaskBuilder[T] extends InputOutputBuilder[T] with NameBuilder[T] with Builder[T]

@@ -20,11 +20,15 @@ package org.openmole.plugin.method.abc
 import org.openmole.core.workflow.builder.TaskBuilder
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.dsl
+import dsl._
 import fr.iscpif.scalabc._
+import monocle.macros.Lenses
 import org.openmole.core.workflow.task._
 
 object LenormandAnalyseTask {
+
+  implicit def isBuilder = TaskBuilder[LenormandAnalyseTask].from(this)
 
   def apply(
     lenormand:  algorithm.Lenormand with ABC,
@@ -32,37 +36,37 @@ object LenormandAnalyseTask {
     terminated: Prototype[Boolean],
     iteration:  Prototype[Int],
     accepted:   Prototype[Double]
-  ) = {
-    val (_lenormand, _state, _terminated, _iteration, _accepted) = (lenormand, state, terminated, iteration, accepted)
-
-    new TaskBuilder() { builder ⇒
-      addInput(state)
-      lenormand.priorPrototypes.foreach(t ⇒ addInput(t.toArray))
-      lenormand.targetPrototypes.foreach(s ⇒ addInput(s.toArray))
-      addOutput(state)
-      addOutput(terminated)
-      addOutput(iteration)
-      addOutput(accepted)
-
-      def toTask = new LenormandAnalyseTask() with Built {
-        val lenormand = _lenormand
-        val state = _state
-        val terminated = _terminated
-        val iteration = _iteration
-        val accepted = _accepted
-      }
-    }
-  }
+  ) =
+    new LenormandAnalyseTask(
+      lenormand,
+      state,
+      terminated,
+      iteration,
+      accepted,
+      inputs = PrototypeSet.empty,
+      outputs = PrototypeSet.empty,
+      defaults = DefaultSet.empty,
+      name = None
+    ) set (
+      dsl.inputs += state,
+      dsl.inputs += (lenormand.priorPrototypes: _*),
+      dsl.outputs += (lenormand.targetPrototypes: _*),
+      dsl.outputs += (state, terminated, iteration, accepted)
+    )
 
 }
 
-abstract class LenormandAnalyseTask() extends Task {
-
-  val lenormand: algorithm.Lenormand with ABC
-  def state: Prototype[algorithm.Lenormand#STATE]
-  def terminated: Prototype[Boolean]
-  def iteration: Prototype[Int]
-  def accepted: Prototype[Double]
+@Lenses case class LenormandAnalyseTask(
+    lenormand:  algorithm.Lenormand with ABC,
+    state:      Prototype[algorithm.Lenormand#STATE],
+    terminated: Prototype[Boolean],
+    iteration:  Prototype[Int],
+    accepted:   Prototype[Double],
+    inputs:     PrototypeSet,
+    outputs:    PrototypeSet,
+    defaults:   DefaultSet,
+    name:       Option[String]
+) extends Task {
 
   override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = {
     val thetasValue: Seq[Seq[Double]] = lenormand.priorPrototypes.map { p ⇒ context(p.toArray).toSeq }.transpose

@@ -27,10 +27,11 @@ import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.puzzle._
-
+import org.openmole.core.workflow.builder._
 import org.scalatest._
 import org.scalatest.junit._
 import scala.collection.mutable.ListBuffer
+import org.openmole.core.workflow.dsl._
 
 class MoleExecutionSpec extends FlatSpec with Matchers {
 
@@ -49,13 +50,11 @@ class MoleExecutionSpec extends FlatSpec with Matchers {
     val data = List("A", "A", "B", "C")
     val i = Prototype[String]("i")
 
-    val sampling = new ExplicitSampling(i, data)
+    val sampling = ExplicitSampling(i, data)
 
     val exc = Capsule(ExplorationTask(sampling))
 
-    val emptyT = EmptyTask()
-    emptyT.addInput(i)
-    emptyT.addOutput(i)
+    val emptyT = EmptyTask() set ((inputs, outputs) += i)
 
     val emptyC = Capsule(emptyT)
 
@@ -63,9 +62,10 @@ class MoleExecutionSpec extends FlatSpec with Matchers {
       context.contains(i.toArray) should equal(true)
       context(i.toArray).sorted.deep should equal(data.toArray.deep)
       context
-    }
-    testT setName "Test"
-    testT addInput (i.toArray)
+    } set (
+      name := "Test",
+      inputs += i.array
+    )
 
     val testC = Capsule(testT)
 
@@ -73,14 +73,13 @@ class MoleExecutionSpec extends FlatSpec with Matchers {
 
     MoleExecution(
       mole = ex,
-      grouping = Map(emptyC -> new JobGroupingBy2Test)).start.waitUntilEnded
+      grouping = Map(emptyC → new JobGroupingBy2Test)
+    ).start.waitUntilEnded
   }
 
   "Implicits" should "be used when input is missing" in {
     val i = Prototype[String]("i")
-    val emptyT = EmptyTask()
-    emptyT.addInput(i)
-
+    val emptyT = EmptyTask() set (inputs += i)
     val emptyC = Capsule(emptyT)
     MoleExecution(mole = Mole(emptyC), implicits = Context(Variable(i, "test"))).start.waitUntilEnded
   }

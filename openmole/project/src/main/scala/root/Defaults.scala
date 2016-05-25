@@ -19,12 +19,15 @@ abstract class Defaults(subBuilds: Defaults*) extends BuildSystemDefaults {
 
   def org = "org.openmole"
 
+  lazy val scalaVersionValue = "2.11.8"
+
   override def settings = super.settings ++
     Seq(
-      scalaVersion in Global := "2.11.8",
+      scalaVersion in Global := scalaVersionValue,
       scalacOptions ++= Seq("-target:jvm-1.7", "-language:higherKinds"),
       javacOptions ++= Seq("-source", "1.7", "-target", "1.7"),
       publishArtifact in (packageDoc in install) := false,
-      publishArtifact in (packageSrc in install) := false
+      publishArtifact in (packageSrc in install) := false,
+      addCompilerPlugin("org.scalamacros" %% "paradise" % "2.1.0" cross CrossVersion.fullMapped(_ ⇒ scalaVersionValue))
     )
 }

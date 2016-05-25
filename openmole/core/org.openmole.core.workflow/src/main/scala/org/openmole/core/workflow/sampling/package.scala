@@ -54,4 +54,4 @@ package sampling {
   }
 }
 
-package object sampling extends SamplingPackage
+package object sampling

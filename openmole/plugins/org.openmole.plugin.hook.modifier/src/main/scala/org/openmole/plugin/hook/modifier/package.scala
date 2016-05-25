@@ -18,7 +18,7 @@
 package org.openmole.plugin.hook
 
 import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.tools._
+import org.openmole.core.workflow.dsl._
 
 package object modifier {
 
@@ -29,10 +29,4 @@ package object modifier {
     def condition(condition: String) = when(condition)
   }
 
-  implicit class HookBuilderModifierDecorator(h: HookBuilder) {
-    def when(condition: Condition) = h.toHook.condition(condition)
-    def when(condition: String) = h.toHook.condition(condition)
-    def condition(condition: Condition) = when(condition)
-    def condition(condition: String) = when(condition)
-  }
 }

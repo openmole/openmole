@@ -18,13 +18,8 @@
 package org.openmole.core.workflow.tools
 
 import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.task.Task
-import org.openmole.core.workflow.tools._
 import org.scalatest._
-import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
+import org.openmole.core.workflow.dsl._
 
 import scala.util.Random
 

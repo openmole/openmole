@@ -21,19 +21,22 @@ import java.io.{ ByteArrayInputStream, ByteArrayOutputStream }
 
 import org.openmole.core.workflow.data._
 import org.openmole.core.serializer.SerialiserService
+import org.openmole.core.workflow.builder._
 import org.scalatest._
+import org.openmole.core.workflow.dsl._
 
 class SerializationSpec extends FlatSpec with Matchers {
   "Task " should "be the same after serialization and deserialization" in {
     val p = Prototype[Int]("p")
 
-    val t = EmptyTask()
-    t.addInput(p)
-    t.addOutput(p)
+    val t = EmptyTask() set (
+      inputs += p,
+      outputs += p
+    )
 
     val builder = new ByteArrayOutputStream()
 
-    SerialiserService.serialise(t.toTask, builder)
+    SerialiserService.serialise(t, builder)
     val t2 = SerialiserService.deserialise[EmptyTask](new ByteArrayInputStream(builder.toByteArray))
 
     t2.inputs.contains(p.name) should equal(true)

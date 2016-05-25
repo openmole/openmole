@@ -18,8 +18,7 @@
 package org.openmole.plugin.hook.file
 
 import java.io.File
-
-import org.openmole.tool.file._
+import monocle.macros.Lenses
 import org.openmole.tool.stream._
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.data._
@@ -27,19 +26,36 @@ import org.openmole.core.workflow.tools.ExpandedString
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.mole.MoleExecutionContext
 import org.openmole.core.workflow.validation.ValidateHook
+import org.openmole.core.workflow.dsl._
 
 object AppendToFileHook {
 
+  implicit def isBuilder = new HookBuilder[AppendToFileHook] {
+    override def name = AppendToFileHook.name
+    override def outputs = AppendToFileHook.outputs
+    override def inputs = AppendToFileHook.inputs
+    override def defaults = AppendToFileHook.defaults
+  }
+
   def apply(fileName: ExpandedString, content: ExpandedString) =
-    new HookBuilder {
-      def toHook = new AppendToFileHook(fileName, content) with Built
-    }
+    new AppendToFileHook(
+      fileName,
+      content,
+      inputs = PrototypeSet.empty,
+      outputs = PrototypeSet.empty,
+      defaults = DefaultSet.empty,
+      name = None
+    )
 
 }
 
-abstract class AppendToFileHook(
+@Lenses case class AppendToFileHook(
     fileName: ExpandedString,
-    content:  ExpandedString
+    content:  ExpandedString,
+    inputs:   PrototypeSet,
+    outputs:  PrototypeSet,
+    defaults: DefaultSet,
+    name:     Option[String]
 ) extends Hook with ValidateHook {
 
   override def validate(inputs: Seq[Val[_]]): Seq[Throwable] =

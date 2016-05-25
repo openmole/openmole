@@ -21,7 +21,7 @@ import fr.iscpif.mgo.algorithm.{ profile, noisyprofile }
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools.FromContext
-
+import org.openmole.core.workflow.dsl._
 import scalaz._
 import Scalaz._
 
@@ -157,6 +157,8 @@ object GenomeProfile {
 
         def buildIndividual(genome: G, context: Context): I =
           operations.buildIndividual(genome, variablesToPhenotype(context))
+
+        import UniqueGenome._
 
         def inputPrototypes = a.genome.map(_.prototype) ++ a.replication.seed.prototype
         def outputPrototypes = Vector(a.objective)

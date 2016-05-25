@@ -17,46 +17,47 @@
 
 package org.openmole.plugin.method.evolution
 
-import fr.iscpif.mgo
-import fr.iscpif.mgo._
+import monocle.macros.Lenses
 import org.openmole.core.workflow.builder.TaskBuilder
-
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
-
-import scalaz.Tag
+import org.openmole.core.workflow.dsl
+import dsl._
 
 object TerminationTask {
+
+  implicit def isBuilder = TaskBuilder[TerminationTask].from(this)
 
   def apply[T](algorithm: T, termination: OMTermination)(implicit wfi: WorkflowIntegration[T]) = {
     val t = wfi(algorithm)
 
+    new TerminationTask(t, termination) set (
+      dsl.inputs += (t.statePrototype, t.populationPrototype),
+      dsl.outputs += (t.statePrototype, t.terminatedPrototype, t.generationPrototype)
+    )
+  }
+
+}
+
+@Lenses case class TerminationTask(
+    t:           EvolutionWorkflow,
+    termination: OMTermination,
+    inputs:      PrototypeSet      = PrototypeSet.empty,
+    outputs:     PrototypeSet      = PrototypeSet.empty,
+    defaults:    DefaultSet        = DefaultSet.empty,
+    name:        Option[String]    = None
+) extends Task {
+
+  override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = {
     val term = OMTermination.toTermination(termination, t)
 
-    new TaskBuilder {
-      builder ⇒
-      addInput(t.statePrototype)
-      addInput(t.populationPrototype)
-      addOutput(t.statePrototype)
-      addOutput(t.terminatedPrototype)
-      addOutput(t.generationPrototype)
+    val (newState, te) = t.integration.run(context(t.statePrototype), term.run(context(t.populationPrototype)))
 
-      abstract class TerminationTask extends Task {
-
-        override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = {
-          val (newState, te) = t.integration.run(context(t.statePrototype), term.run(context(t.populationPrototype)))
-
-          Context(
-            Variable(t.terminatedPrototype, te),
-            Variable(t.statePrototype, newState),
-            Variable(t.generationPrototype, t.operations.generation(newState))
-          )
-        }
-
-      }
-
-      def toTask = new TerminationTask with Built
-    }
+    Context(
+      Variable(t.terminatedPrototype, te),
+      Variable(t.statePrototype, newState),
+      Variable(t.generationPrototype, t.operations.generation(newState))
+    )
   }
 
 }

@@ -18,6 +18,7 @@
 package org.openmole.core.workflow.tools
 
 import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.dsl._
 
 object Condition {
 

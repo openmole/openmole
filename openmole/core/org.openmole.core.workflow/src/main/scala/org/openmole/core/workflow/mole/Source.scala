@@ -20,10 +20,6 @@ package org.openmole.core.workflow.mole
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools._
 
-object Source {
-  implicit def sourceBuilderToSourceConverter(sb: SourceBuilder) = sb.toSource
-}
-
 trait Source <: InputOutputCheck with Name {
   def inputs: PrototypeSet
   def outputs: PrototypeSet

@@ -19,8 +19,9 @@ package org.openmole.plugin.hook.file
 
 import java.io.File
 
+import monocle.macros.Lenses
+import monocle.Lens
 import org.openmole.plugin.hook.file.CopyFileHook.CopyOptions
-import org.openmole.tool.file._
 import org.openmole.tool.tar._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.data._
@@ -29,15 +30,22 @@ import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.mole.MoleExecutionContext
 import org.openmole.core.workflow.validation.ValidateHook
-
-import collection.mutable.ListBuffer
+import org.openmole.core.dsl._
 
 object CopyFileHook {
 
   case class CopyOptions(remove: Boolean, compress: Boolean, move: Boolean)
 
-  trait CopyFileHookBuilder extends HookBuilder {
-    def addCopy(prototype: Prototype[File], destination: ExpandedString, remove: Boolean = false, compress: Boolean = false, move: Boolean = false)
+  trait CopyFileHookBuilder[T] extends HookBuilder[T] {
+    def copies: Lens[T, Vector[(Prototype[File], ExpandedString, CopyOptions)]]
+  }
+
+  implicit def isBuilder = new CopyFileHookBuilder[CopyFileHook] {
+    override def copies = CopyFileHook.copies
+    override def name = CopyFileHook.name
+    override def outputs = CopyFileHook.outputs
+    override def inputs = CopyFileHook.inputs
+    override def defaults = CopyFileHook.defaults
   }
 
   def apply(
@@ -46,37 +54,36 @@ object CopyFileHook {
     remove:      Boolean         = false,
     compress:    Boolean         = false,
     move:        Boolean         = false
-  ): CopyFileHookBuilder = {
-    val builder = apply()
-    builder addCopy (prototype, destination, remove, compress, move)
-    builder
-  }
+  ): CopyFileHook =
+    apply() set (pack.copies += (prototype, destination, remove, compress, move))
 
-  def apply(): CopyFileHookBuilder =
-    new CopyFileHookBuilder { hook ⇒
-      private val copy = ListBuffer[(Prototype[File], ExpandedString, CopyOptions)]()
-
-      def addCopy(prototype: Prototype[File], destination: ExpandedString, remove: Boolean = false, compress: Boolean = false, move: Boolean = false) = {
-        copy += ((prototype, destination, CopyOptions(remove, compress, move)))
-        addInput(prototype)
-        if (move) addOutput(prototype)
-      }
-
-      def toHook = new CopyFileHook(copy) with Built
-    }
+  def apply(): CopyFileHook =
+    new CopyFileHook(
+      Vector.empty,
+      inputs = PrototypeSet.empty,
+      outputs = PrototypeSet.empty,
+      defaults = DefaultSet.empty,
+      name = None
+    )
 
 }
 
-abstract class CopyFileHook(copy: Iterable[(Prototype[File], ExpandedString, CopyOptions)]) extends Hook with ValidateHook {
+@Lenses case class CopyFileHook(
+    copies:   Vector[(Prototype[File], ExpandedString, CopyOptions)],
+    inputs:   PrototypeSet,
+    outputs:  PrototypeSet,
+    defaults: DefaultSet,
+    name:     Option[String]
+) extends Hook with ValidateHook {
 
-  override def validate(inputs: Seq[Val[_]]) = copy.flatMap(_._2.validate(inputs)).toSeq
+  override def validate(inputs: Seq[Prototype[_]]) = copies.flatMap(_._2.validate(inputs)).toSeq
 
   override def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider) = {
-    val moved = for ((p, d, options) ← copy) yield copy(context, executionContext, p, d, options)
+    val moved = for ((p, d, options) ← copies) yield copyFile(context, executionContext, p, d, options)
     context ++ moved.flatten
   }
 
-  private def copy(
+  private def copyFile(
     context:          Context,
     executionContext: MoleExecutionContext,
     filePrototype:    Prototype[File],

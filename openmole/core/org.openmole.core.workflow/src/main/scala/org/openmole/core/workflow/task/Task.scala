@@ -28,6 +28,7 @@ import org.openmole.core.workspace.{ Workspace, ConfigurationLocation }
 import org.openmole.core.tools.service._
 import org.openmole.tool.logger.Logger
 import scala.util.Random
+import org.openmole.core.workflow.dsl._
 
 object Task extends Logger {
   val OpenMOLEVariablePrefix = ConfigurationLocation("Task", "OpenMOLEVariablePrefix", "oM")
@@ -52,9 +53,10 @@ trait Task <: InputOutputCheck with Name {
    *
    * @param context the context in which the task will be executed
    */
-  def perform(context: Context, executionContext: TaskExecutionContext): Context = perform(context, process(_, executionContext))
+  def perform(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider = RandomProvider(Task.buildRNG(context))): Context =
+    perform(context, process(_, executionContext))
 
-  protected def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider = RandomProvider(Task.buildRNG(context))): Context
+  protected def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider): Context
 
   /**
    *

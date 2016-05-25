@@ -19,28 +19,32 @@ package org.openmole.plugin.task.template
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.dsl
+import dsl._
 import java.io.File
 
-import org.openmole.tool.file._
-
+import monocle.macros.Lenses
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workspace._
 
 object TemplateTask {
+
+  implicit def isBuilder = TaskBuilder[TemplateTask].from(this)
+
   def apply(
     template: String,
     output:   Prototype[File]
-  ) = new TaskBuilder { builder ⇒
+  ) = new TemplateTask(template, output) set (dsl.outputs += output)
 
-    addOutput(output)
-
-    def toTask = new TemplateTask(template, output) with builder.Built
-  }
 }
 
-sealed abstract class TemplateTask(
-    val template: String,
-    val output:   Prototype[File]
+@Lenses case class TemplateTask(
+    template: String,
+    output:   Prototype[File],
+    inputs:   PrototypeSet    = PrototypeSet.empty,
+    outputs:  PrototypeSet    = PrototypeSet.empty,
+    defaults: DefaultSet      = DefaultSet.empty,
+    name:     Option[String]  = None
 ) extends Task {
 
   @transient lazy val expanded = VariableExpansion(template)

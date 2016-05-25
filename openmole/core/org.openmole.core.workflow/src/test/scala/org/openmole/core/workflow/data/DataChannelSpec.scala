@@ -27,6 +27,8 @@ import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
 import org.openmole.core.workflow.puzzle._
+import org.openmole.core.workflow.builder._
+import org.openmole.core.workflow.dsl._
 
 import org.scalatest._
 import org.scalatest.junit._
@@ -37,9 +39,11 @@ class DataChannelSpec extends FlatSpec with Matchers {
   "A datachannel" should "enable variable values to be transmitted from a task to another" in {
     val p = Prototype[String]("p")
 
-    val t1 = TestTask { _ + (p -> "Test") }
-    t1 setName "Test write"
-    t1 addOutput p
+    val t1 =
+      TestTask { _ + (p → "Test") } set (
+        name := "Test write",
+        outputs += p
+      )
 
     val t2 = EmptyTask()
 
@@ -47,9 +51,10 @@ class DataChannelSpec extends FlatSpec with Matchers {
       TestTask { context ⇒
         context(p) should equal("Test")
         context
-      }
-    t3 setName "Test read"
-    t3 addInput p
+      } set (
+        name := "Test read",
+        inputs += p
+      )
 
     val t1c = Capsule(t1)
     val t2c = Capsule(t2)
@@ -63,9 +68,11 @@ class DataChannelSpec extends FlatSpec with Matchers {
   "A data channel" should "be able to transmit the value to the multiple execution of an explored task" in {
 
     val j = Prototype[String]("j")
-    val tw = TestTask { _ + (j -> "J") }
-    tw setName "Test write"
-    tw addOutput j
+    val tw =
+      TestTask { _ + (j → "J") } set (
+        name := "Test write",
+        outputs += j
+      )
 
     val data = List("A", "B", "C")
     val i = Prototype[String]("i")
@@ -83,9 +90,10 @@ class DataChannelSpec extends FlatSpec with Matchers {
         res += context(i)
       }
       context
-    }
-    t setName "Test"
-    t addInput (i, j)
+    } set (
+      name := "Test",
+      inputs += (i, j)
+    )
 
     val twc = Capsule(tw)
     val tc = Slot(t)

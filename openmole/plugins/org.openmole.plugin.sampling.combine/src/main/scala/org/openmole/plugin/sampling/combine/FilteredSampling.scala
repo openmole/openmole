@@ -19,8 +19,8 @@ package org.openmole.plugin.sampling.combine
 
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.sampling._
-import org.openmole.core.workflow.tools.{ FromContext, Condition, ScalaWrappedCompilation }
-
+import org.openmole.core.workflow.tools.{ FromContext }
+import org.openmole.core.workflow.dsl._
 import scala.util.Random
 
 object FilteredSampling {

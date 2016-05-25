@@ -26,7 +26,7 @@ object CleanerActor extends Logger
 import CleanerActor.Log._
 
 class CleanerActor(jobManager: JobManager) {
-  def receive(msg: CleanSerializedJob) = withRunFinalization {
+  def receive(msg: CleanSerializedJob) = {
     val CleanSerializedJob(sj) = msg
     try
       sj.synchronized {

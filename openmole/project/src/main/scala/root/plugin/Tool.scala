@@ -26,12 +26,12 @@ object Tool extends PluginDefaults {
     libraryDependencies -= Libraries.scalatest
   )
 
-  lazy val csv = OsgiProject("csv", imports = Seq("*")) dependsOn (Core.exception, Core.workflow) settings (
+  lazy val csv = OsgiProject("csv", imports = Seq("*")) dependsOn (Core.exception, Core.dsl) settings (
     libraryDependencies += Libraries.opencsv,
     defaultActivator
   )
 
-  lazy val pattern = OsgiProject("pattern", imports = Seq("*")) dependsOn (Core.exception, Core.workflow, Core.dsl) settings (defaultActivator)
+  lazy val pattern = OsgiProject("pattern", imports = Seq("*")) dependsOn (Core.exception, Core.dsl) settings (defaultActivator)
 
   val sftpserver = OsgiProject("sftpserver", imports = Seq("*")) dependsOn (Core.tools) settings (libraryDependencies += Libraries.sshd)
 

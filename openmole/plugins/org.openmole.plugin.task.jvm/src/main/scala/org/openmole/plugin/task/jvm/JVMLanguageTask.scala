@@ -19,10 +19,10 @@ package org.openmole.plugin.task.jvm
 
 import org.openmole.core.serializer.plugin.Plugins
 import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.task.TaskExecutionContext
 import org.openmole.plugin.task.external.ExternalTask
 import java.io.File
-import org.openmole.tool.file._
 
 object JVMLanguageTask {
   lazy val workDirectory = Prototype[File]("workDirectory")

@@ -32,7 +32,7 @@ package mole {
 
 }
 
-package object mole extends MolePackage {
+package object mole {
 
   case class Hooks(map: Map[Capsule, Traversable[Hook]])
 

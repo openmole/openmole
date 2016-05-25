@@ -17,6 +17,8 @@
  */
 package org.openmole.plugin.task.scala
 
+import monocle.Lens
+import monocle.macros.Lenses
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task.{ Task, TaskExecutionContext }
@@ -25,15 +27,31 @@ import scala.util.Random
 
 object ClosureTask {
 
+  implicit def isBuilder = new TaskBuilder[ClosureTask] {
+    override def outputs: Lens[ClosureTask, PrototypeSet] = ClosureTask.outputs
+    override def inputs: Lens[ClosureTask, PrototypeSet] = ClosureTask.inputs
+    override def name: Lens[ClosureTask, Option[String]] = ClosureTask.name
+    override def defaults: Lens[ClosureTask, DefaultSet] = ClosureTask.defaults
+  }
+
   def apply(closure: (Context, ⇒ Random) ⇒ Context) =
-    new TaskBuilder { builder ⇒
-      def toTask =
-        new ClosureTask(closure) with builder.Built
-    }
+    new ClosureTask(
+      closure,
+      inputs = PrototypeSet.empty,
+      outputs = PrototypeSet.empty,
+      defaults = DefaultSet.empty,
+      name = None
+    )
 
 }
 
-abstract class ClosureTask(closure: (Context, ⇒ Random) ⇒ Context) extends Task {
+@Lenses case class ClosureTask(
+    closure:  (Context, ⇒ Random) ⇒ Context,
+    inputs:   PrototypeSet,
+    outputs:  PrototypeSet,
+    defaults: DefaultSet,
+    name:     Option[String]
+) extends Task {
   override protected def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider): Context =
     closure(context, rng())
 }

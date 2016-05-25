@@ -17,25 +17,31 @@
 
 package org.openmole.plugin.hook.file
 
-import org.openmole.core.workflow.mole.HookBuilder
-import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools.ExpandedString
+import monocle.Lens
 
-class AppendToCSVFileHookBuilder(fileName: ExpandedString, prototypes: Prototype[_]*) extends HookBuilder {
-  prototypes.foreach(p ⇒ addInput(p))
-  private var csvHeader: Option[ExpandedString] = None
-  private var singleRow: Boolean = false
+trait AppendToCSVFileHookBuilder[T] extends HookBuilder[T] {
 
-  def setCSVHeader(h: Option[ExpandedString]) = {
-    csvHeader = h
-    this
-  }
+  //(fileName: ExpandedString, prototypes: Prototype[_]*)
 
-  def setSingleRow(b: Boolean) = {
-    singleRow = b
-    this
-  }
+  def csvHeader: Lens[T, Option[ExpandedString]]
+  def arraysOnSingleRow: Lens[T, Boolean]
 
-  override def toHook = new AppendToCSVFileHook(fileName, csvHeader, singleRow, prototypes: _*) with Built
+  //  prototypes.foreach(p ⇒ addInput(p))
+  //  private var csvHeader: Option[ExpandedString] = None
+  //  private var singleRow: Boolean = false
+  //
+  //  def setCSVHeader(h: Option[ExpandedString]) = {
+  //    csvHeader = h
+  //    this
+  //  }
+  //
+  //  def setSingleRow(b: Boolean) = {
+  //    singleRow = b
+  //    this
+  //  }
+  //
+  //  override def toHook = new AppendToCSVFileHook(fileName, csvHeader, singleRow, prototypes: _*) with Built
 }

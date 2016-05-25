@@ -19,7 +19,6 @@
 package org.openmole.plugin.task.care
 
 import java.io.File
-
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.workflow.data.{ Context, Variable }
 import org.openmole.core.workflow.tools.VariableExpansion
@@ -31,27 +30,76 @@ import org.openmole.plugin.task.systemexec
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.validation._
+import org.openmole.plugin.task.external.ExternalTask._
+
 import scalaz._
 import Scalaz._
+import monocle.macros.Lenses
 
 object CARETask extends Logger {
 
-  def apply(archive: File, command: String) =
-    new CARETaskBuilder(archive, command)
+  implicit def isBuilder = new CARETaskBuilder[CARETask] {
+    override def hostFiles = CARETask.hostFiles
+    override def environmentVariables = CARETask.environmentVariables
+    override def resources = CARETask.resources
+    override def outputFiles = CARETask.outputFiles
+    override def inputFileArrays = CARETask.inputFileArrays
+    override def inputFiles = CARETask.inputFiles
+    override def defaults = CARETask.defaults
+    override def workDirectory = CARETask.workDirectory
+    override def outputs = CARETask._outputs
+    override def name = CARETask.name
+    override def inputs = CARETask.inputs
+    override def returnValue = CARETask.returnValue
+    override def errorOnReturnValue = CARETask.errorOnReturnValue
+    override def stdOut = CARETask.stdOut
+    override def stdErr = CARETask.stdErr
+  }
+
+  def apply(archive: File, command: String): CARETask =
+    new CARETask(
+      archive = archive,
+      command = command,
+      hostFiles = Vector.empty,
+      workDirectory = None,
+      errorOnReturnValue = true,
+      returnValue = None,
+      stdOut = None,
+      stdErr = None,
+      environmentVariables = Vector.empty,
+      inputs = PrototypeSet.empty,
+      _outputs = PrototypeSet.empty,
+      defaults = DefaultSet.empty,
+      name = None,
+      inputFiles = Vector.empty,
+      inputFileArrays = Vector.empty,
+      outputFiles = Vector.empty,
+      resources = Vector.empty
+    )
 
 }
 
-abstract class CARETask(
-    val archive:              File,
-    val command:              systemexec.Command,
-    val workDirectory:        Option[String],
-    val errorOnReturnCode:    Boolean,
-    val returnValue:          Option[Prototype[Int]],
-    val output:               Option[Prototype[String]],
-    val error:                Option[Prototype[String]],
-    val environmentVariables: Seq[(Prototype[_], String)],
-    val hostFiles:            Seq[(String, Option[String])]
+@Lenses case class CARETask(
+    archive:              File,
+    hostFiles:            Vector[(String, Option[String])],
+    command:              systemexec.Command,
+    workDirectory:        Option[String],
+    errorOnReturnValue:   Boolean,
+    returnValue:          Option[Prototype[Int]],
+    stdOut:               Option[Prototype[String]],
+    stdErr:               Option[Prototype[String]],
+    environmentVariables: Vector[(Prototype[_], String)],
+    inputs:               PrototypeSet,
+    _outputs:             PrototypeSet,
+    defaults:             DefaultSet,
+    name:                 Option[String],
+    inputFiles:           Vector[InputFile],
+    inputFileArrays:      Vector[InputFileArray],
+    outputFiles:          Vector[OutputFile],
+    resources:            Vector[Resource]
 ) extends ExternalTask with ValidateTask {
+
+  def outputs = _outputs ++ Seq(stdOut, stdErr, returnValue).flatten
 
   lazy val expandedCommand = VariableExpansion(command.command)
 
@@ -123,8 +171,8 @@ abstract class CARETask(
     val commandline = commandLine(expandedCommand.map(s"./${reExecute.getName} " + _), userWorkDirectory, preparedContext)
 
     // FIXME duplicated from SystemExecTask
-    val executionResult = execute(commandline, extractedArchive, environmentVariables, preparedContext, output.isDefined, error.isDefined)
-    if (errorOnReturnCode && !returnValue.isDefined && executionResult.returnCode != 0)
+    val executionResult = execute(commandline, extractedArchive, environmentVariables, preparedContext, stdOut.isDefined, stdErr.isDefined)
+    if (errorOnReturnValue && !returnValue.isDefined && executionResult.returnCode != 0)
       throw new InternalProcessingError(
         s"""Error executing command":
                  |[${commandline.mkString(" ")}] return code was not 0 but ${executionResult.returnCode}""".stripMargin
@@ -142,8 +190,8 @@ abstract class CARETask(
 
     retContext ++
       List(
-        output.map { o ⇒ Variable(o, executionResult.output.get) },
-        error.map { e ⇒ Variable(e, executionResult.errorOutput.get) },
+        stdOut.map { o ⇒ Variable(o, executionResult.output.get) },
+        stdErr.map { e ⇒ Variable(e, executionResult.errorOutput.get) },
         returnValue.map { r ⇒ Variable(r, executionResult.returnCode) }
       ).flatten
   }

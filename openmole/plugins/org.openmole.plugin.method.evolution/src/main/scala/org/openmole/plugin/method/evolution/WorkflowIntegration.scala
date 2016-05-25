@@ -19,11 +19,9 @@ package org.openmole.plugin.method.evolution
 
 import fr.iscpif.mgo
 import org.openmole.core.workflow.data._
-import org.openmole.tool.statistics._
-import scalaz._
+import org.openmole.core.workflow.dsl._
 import scala.util.Random
 import org.openmole.core.workflow.tools._
-import org.openmole.tool.types._
 import scalaz._
 import Scalaz._
 import scala.language.higherKinds

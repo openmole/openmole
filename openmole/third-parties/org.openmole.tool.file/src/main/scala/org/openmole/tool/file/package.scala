@@ -246,10 +246,12 @@ package file {
       }
 
       def content_=(content: String) = Files.write(file, content.getBytes, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)
+      def <(c: String) = content_=(c)
 
       def content = withSource(_.mkString)
 
       def append(s: String) = Files.write(file, s.getBytes, StandardOpenOption.APPEND)
+      def <<(s: String) = append(s)
 
       def lines = withSource(_.getLines.toList)
 

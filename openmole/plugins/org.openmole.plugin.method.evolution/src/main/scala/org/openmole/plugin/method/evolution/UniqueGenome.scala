@@ -22,6 +22,7 @@ import org.openmole.core.workflow.data.{ RandomProvider, Context, Prototype, Var
 import org.openmole.core.workflow.domain.Bounds
 import org.openmole.core.workflow.sampling.Factor
 import org.openmole.core.workflow.tools.FromContext
+import org.openmole.core.workflow.dsl._
 import util.Try
 
 import scala.annotation.tailrec

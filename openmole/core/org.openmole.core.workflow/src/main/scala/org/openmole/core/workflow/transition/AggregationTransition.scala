@@ -23,7 +23,7 @@ import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.tools._
 import Condition._
 import org.openmole.tool.lock._
-
+import org.openmole.core.workflow.dsl._
 import scala.collection.mutable.{ HashSet, ListBuffer }
 import scala.util.Random
 

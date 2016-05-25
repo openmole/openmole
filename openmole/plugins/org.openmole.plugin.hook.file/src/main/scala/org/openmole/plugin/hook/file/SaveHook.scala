@@ -18,31 +18,48 @@
 package org.openmole.plugin.hook.file
 
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.tool.file._
-import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.tools.ExpandedString
-
-import collection.mutable.ListBuffer
 import org.openmole.core.workflow.mole._
 import org.openmole.core.serializer._
 import org.openmole.core.workflow.tools._
 import java.io.File
 
+import monocle.Lens
+import monocle.macros.Lenses
 import org.openmole.core.workflow.validation._
+
+import org.openmole.core.workflow.dsl._
 
 object SaveHook {
 
+  implicit def isBuilder = new HookBuilder[SaveHook] {
+    override def name = SaveHook.name
+    override def outputs = SaveHook.outputs
+    override def inputs = SaveHook.inputs
+    override def defaults = SaveHook.defaults
+  }
+
   def apply(file: ExpandedString, prototypes: Prototype[_]*) =
-    new HookBuilder {
-      prototypes.foreach(p ⇒ addInput(p))
-      def toHook =
-        new SaveHook(file, prototypes: _*) with Built
-    }
+    new SaveHook(
+      file,
+      prototypes.toVector,
+      inputs = PrototypeSet.empty,
+      outputs = PrototypeSet.empty,
+      defaults = DefaultSet.empty,
+      name = None
+    )
 }
 
-abstract class SaveHook(file: ExpandedString, prototypes: Prototype[_]*) extends Hook with ValidateHook {
+@Lenses case class SaveHook(
+    file:       ExpandedString,
+    prototypes: Vector[Prototype[_]],
+    inputs:     PrototypeSet,
+    outputs:    PrototypeSet,
+    defaults:   DefaultSet,
+    name:       Option[String]
+) extends Hook with ValidateHook {
 
   override def validate(inputs: Seq[Val[_]]) = file.validate(inputs)
 

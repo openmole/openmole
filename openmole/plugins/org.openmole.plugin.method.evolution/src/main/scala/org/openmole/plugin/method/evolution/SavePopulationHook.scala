@@ -19,7 +19,8 @@ package org.openmole.plugin.method.evolution
 
 import org.openmole.core.workflow.data.{ Prototype, _ }
 import org.openmole.core.workflow.tools.ExpandedString
-import org.openmole.plugin.hook.file.AppendToCSVFileHookBuilder
+import org.openmole.core.workflow.dsl._
+import org.openmole.plugin.hook.file._
 
 object SavePopulationHook {
 
@@ -28,7 +29,7 @@ object SavePopulationHook {
 
     val fileName = dir + "/population${" + t.generationPrototype.name + "}.csv"
     val prototypes = Seq[Prototype[_]](t.generationPrototype) ++ t.resultPrototypes.map(_.toArray)
-    new AppendToCSVFileHookBuilder(fileName, prototypes: _*)
+    AppendToCSVFileHook(fileName, prototypes: _*)
   }
 
 }

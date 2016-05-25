@@ -18,24 +18,43 @@
 package org.openmole.plugin.hook.modifier
 
 import org.openmole.core.workflow.tools.Condition
-import org.openmole.core.workflow.transition._
-import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.mole._
+import org.openmole.core.dsl
+import dsl._
+import monocle.macros.Lenses
+import org.openmole.core.workflow.data._
 
 object ConditionHook {
 
+  implicit def isBuilder = new HookBuilder[ConditionHook] {
+    override def name = ConditionHook.name
+    override def outputs = ConditionHook.outputs
+    override def inputs = ConditionHook.inputs
+    override def defaults = ConditionHook.defaults
+  }
+
   def apply(hook: Hook, condition: Condition) =
-    new HookBuilder {
-      addInput(hook.inputs.toSeq: _*)
-      addOutput(hook.outputs.toSeq: _*)
-      def toHook = new ConditionHook(hook, condition) with Built
-    }
+    new ConditionHook(
+      hook,
+      condition,
+      inputs = PrototypeSet.empty,
+      outputs = PrototypeSet.empty,
+      defaults = DefaultSet.empty,
+      name = None
+    ) set (
+      dsl.inputs += (hook.inputs.toSeq: _*),
+      dsl.outputs += (hook.outputs.toSeq: _*)
+    )
 
 }
 
-abstract class ConditionHook(
-    val hook:      Hook,
-    val condition: Condition
+@Lenses case class ConditionHook(
+    hook:      Hook,
+    condition: Condition,
+    inputs:    PrototypeSet,
+    outputs:   PrototypeSet,
+    defaults:  DefaultSet,
+    name:      Option[String]
 ) extends Hook {
 
   override def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider) =

@@ -24,7 +24,7 @@ import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
 import org.openmole.core.tools.obj._
-
+import org.openmole.core.workflow.dsl._
 import scala.annotation.tailrec
 import scala.collection.mutable.{ HashMap, HashSet, ListBuffer }
 

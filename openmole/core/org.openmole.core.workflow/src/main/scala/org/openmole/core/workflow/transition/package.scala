@@ -27,7 +27,8 @@ import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.transition._
 import ToPuzzle._
-
+import dsl._
+import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.puzzle._
 import task._
 import data._
@@ -180,4 +181,4 @@ package transition {
   }
 }
 
-package object transition extends TransitionPackage
+package object transition

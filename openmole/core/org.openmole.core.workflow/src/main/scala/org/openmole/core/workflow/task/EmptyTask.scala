@@ -17,19 +17,31 @@
 
 package org.openmole.core.workflow.task
 
+import monocle.Lens
+import monocle.macros.Lenses
 import org.openmole.core.workflow.builder.TaskBuilder
 import org.openmole.core.workflow.data._
 
 object EmptyTask {
 
-  def apply() =
-    new TaskBuilder { builder ⇒
-      def toTask =
-        new EmptyTask with builder.Built
-    }
+  def apply() = new EmptyTask()
+
+  implicit def builder = new TaskBuilder[EmptyTask] {
+    override def defaults = EmptyTask.defaults
+    override def inputs = EmptyTask.inputs
+    override def name = EmptyTask.name
+    override def outputs = EmptyTask.outputs
+  }
 
 }
 
-sealed abstract class EmptyTask extends Task {
+@Lenses case class EmptyTask(
+    inputs:   PrototypeSet   = PrototypeSet.empty,
+    outputs:  PrototypeSet   = PrototypeSet.empty,
+    defaults: DefaultSet     = DefaultSet.empty,
+    name:     Option[String] = None
+) extends Task {
+
   override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = context
+
 }

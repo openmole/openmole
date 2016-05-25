@@ -23,6 +23,7 @@ import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.transition._
 import org.openmole.core.workflow.validation.TypeUtil
+import org.openmole.core.workflow.dsl._
 
 object Strain {
 

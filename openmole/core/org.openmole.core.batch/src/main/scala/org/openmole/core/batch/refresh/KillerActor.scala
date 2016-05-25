@@ -17,7 +17,6 @@
 
 package org.openmole.core.batch.refresh
 
-import org.openmole.core.workflow.tools.objectToSomeObjectConverter
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.core.workspace.Workspace
 import org.openmole.tool.logger.Logger
@@ -27,7 +26,7 @@ object KillerActor extends Logger
 import KillerActor.Log._
 
 class KillerActor(jobManager: JobManager) {
-  def receive(msg: KillBatchJob) = withRunFinalization {
+  def receive(msg: KillBatchJob) = {
     val KillBatchJob(bj) = msg
     try bj.jobService.tryWithToken {
       case Some(t) ⇒ bj.kill(t)

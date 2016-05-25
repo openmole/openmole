@@ -22,6 +22,8 @@ import scala.ref.WeakReference
 
 package tools {
 
+  import org.openmole.core.workflow.data.Context
+
   trait ToolsPackage {
 
     implicit def objectToSomeObjectConverter[T](v: T) = Some(v)
@@ -36,8 +38,14 @@ package tools {
     }
 
     type Condition = FromContext[Boolean]
+    implicit def functionToFromContext[T](f: Context ⇒ T) = FromContext((c, _) ⇒ f(c))
 
+    implicit class VectorLensDecorator[T, U](l: monocle.Lens[T, Vector[U]]) {
+      def add(u: U) = l.modify(_ ++ Seq(u))
+    }
+
+    def c(s: String): FromContext[String] = s
   }
 }
 
-package object tools extends ToolsPackage
+package object tools

@@ -29,144 +29,128 @@ import org.openmole.core.workflow.tools.{ FromContext, VariableExpansion }
 import org.openmole.core.workflow.tools.VariableExpansion.Expansion
 import org.openmole.plugin.task.external.ExternalTask
 import org.openmole.tool.stream.StringOutputStream
-import org.openmole.tool.file._
+import org.openmole.core.workflow.builder._
+import org.openmole.core.workflow.dsl
+import org.openmole.core.workflow.dsl._
+import language.implicitConversions
 
 import collection.mutable.ListBuffer
+import monocle.Lens
 
 package systemexec {
 
+  /**
+   * Command line representation
+   *
+   * @param command the actual command line to be executed
+   */
+  case class Command(command: String)
+
+  object Command {
+    /** Make commands non-remote by default */
+    implicit def stringToCommand(s: String) = Command(s)
+  }
+
+  /**
+   * Sequence of commands for a particular OS
+   *
+   * @param os    target Operating System
+   * @param parts Sequence of commands to be executed
+   * @see Command
+   */
+  case class OSCommands(os: OS, parts: Command*) {
+    @transient lazy val expanded = parts.map(c ⇒ (VariableExpansion(c.command)))
+  }
+
+  object OSCommands {
+    /** A single command can be a sequence  */
+    implicit def stringToCommands(s: String) = OSCommands(OS(), s)
+
+    /** A sequence of command lines is considered local (non-remote) by default */
+    implicit def seqOfStringToCommands(s: Seq[String]): OSCommands = OSCommands(OS(), s.map(s ⇒ Command(s)): _*)
+  }
+
   import org.openmole.core.workflow.builder.InputOutputBuilder
 
-  trait ReturnValue {
-    protected var returnValue: Option[Prototype[Int]] = None
-
-    def setReturnValue(p: Option[Prototype[Int]]): this.type = {
-      returnValue = p
-      this
-    }
+  trait ReturnValue[T] {
+    def returnValue: Lens[T, Option[Prototype[Int]]] // = None
   }
 
-  trait ErrorOnReturnValue {
-    protected var errorOnReturnValue = true
-
-    def setErrorOnReturnValue(b: Boolean): this.type = {
-      errorOnReturnValue = b
-      this
-    }
+  trait ErrorOnReturnValue[T] {
+    def errorOnReturnValue: Lens[T, Boolean] // = true
   }
 
-  trait StdOutErr {
-    protected var stdOut: Option[Prototype[String]] = None
-    protected var stdErr: Option[Prototype[String]] = None
-
-    def setStdOut(p: Option[Prototype[String]]): this.type = {
-      stdOut = p
-      this
-    }
-
-    def setStdErr(p: Option[Prototype[String]]): this.type = {
-      stdErr = p
-      this
-    }
+  trait StdOutErr[T] {
+    def stdOut: Lens[T, Option[Prototype[String]]] // = None
+    def stdErr: Lens[T, Option[Prototype[String]]] // = None
   }
 
-  trait EnvironmentVariables <: InputOutputBuilder {
-    protected val environmentVariables = new ListBuffer[(Prototype[_], String)]
-
-    /**
-     * Add variable from openmole to the environment of the system exec task. The
-     * environment variable is set using a toString of the openmole variable content.
-     *
-     * @param prototype the prototype of the openmole variable to inject in the environment
-     * @param variable the name of the environment variable. By default the name of the environment
-     *                 variable is the same as the one of the openmole protoype.
-     */
-    def addEnvironmentVariable(prototype: Prototype[_], variable: Option[String] = None): this.type = {
-      environmentVariables += prototype → variable.getOrElse(prototype.name)
-      addInput(prototype)
-      this
-    }
+  trait EnvironmentVariables[T] <: InputOutputBuilder[T] {
+    def environmentVariables: Lens[T, Vector[(Prototype[_], String)]]
   }
 
-  trait WorkDirectory {
-    protected var workDirectory: Option[String] = None
-
-    def setWorkDirectory(s: Option[String]): this.type = {
-      workDirectory = s
-      this
-    }
+  trait WorkDirectory[T] {
+    def workDirectory: Lens[T, Option[String]] // = None
   }
 
   trait SystemExecPackage {
 
-    /**
-     * Command line representation
-     *
-     * @param command the actual command line to be executed
-     */
-    case class Command(command: String)
-
-    object Command {
-      /** Make commands non-remote by default */
-      implicit def stringToCommand(s: String) = Command(s)
-    }
-
-    /**
-     * Sequence of commands for a particular OS
-     *
-     * @param os    target Operating System
-     * @param parts Sequence of commands to be executed
-     * @see Command
-     */
-    case class OSCommands(os: OS, parts: Command*) {
-      @transient lazy val expanded = parts.map(c ⇒ (VariableExpansion(c.command)))
-    }
-
-    object OSCommands {
-      /** A single command can be a sequence  */
-      implicit def stringToCommands(s: String) = OSCommands(OS(), s)
-
-      /** A sequence of command lines is considered local (non-remote) by default */
-      implicit def seqOfStringToCommands(s: Seq[String]): OSCommands = OSCommands(OS(), s.map(s ⇒ Command(s)): _*)
-    }
-
     lazy val errorOnReturnValue =
       new {
-        def :=(b: Boolean) = (_: ErrorOnReturnValue).setErrorOnReturnValue(b)
+        def :=[T: ErrorOnReturnValue](b: Boolean) =
+          implicitly[ErrorOnReturnValue[T]].errorOnReturnValue.set(b)
       }
 
     lazy val returnValue =
       new {
-        def :=(v: Option[Prototype[Int]]) = (_: ReturnValue).setReturnValue(v)
+        def :=[T: ReturnValue](v: Option[Prototype[Int]]) =
+          implicitly[ReturnValue[T]].returnValue.set(v)
       }
 
     lazy val stdOut =
       new {
-        def :=(v: Option[Prototype[String]]) = (_: StdOutErr).setStdOut(v)
+        def :=[T: StdOutErr](v: Option[Prototype[String]]) =
+          implicitly[StdOutErr[T]].stdOut.set(v)
       }
 
     lazy val stdErr =
       new {
-        def :=(v: Option[Prototype[String]]) = (_: StdOutErr).setStdErr(v)
+        def :=[T: StdOutErr](v: Option[Prototype[String]]) =
+          implicitly[StdOutErr[T]].stdErr.set(v)
       }
 
-    lazy val commands = add[{ def addCommand(os: OS, cmd: OSCommands*) }]
+    lazy val commands = new {
+      def +=[T: SystemExecTaskBuilder](os: OS, cmd: Command*): T ⇒ T =
+        (implicitly[SystemExecTaskBuilder[T]].commands add OSCommands(os, cmd: _*))
+    }
 
     lazy val environmentVariable =
       new {
-        def +=(prototype: Prototype[_], variable: Option[String] = None) =
-          (_: EnvironmentVariables).addEnvironmentVariable(prototype, variable)
+        /**
+         * Add variable from openmole to the environment of the system exec task. The
+         * environment variable is set using a toString of the openmole variable content.
+         *
+         * @param prototype the prototype of the openmole variable to inject in the environment
+         * @param variable the name of the environment variable. By default the name of the environment
+         *                 variable is the same as the one of the openmole protoype.
+         */
+        def +=[T: EnvironmentVariables](prototype: Prototype[_], variable: Option[String] = None): T ⇒ T =
+          (implicitly[EnvironmentVariables[T]].environmentVariables add prototype → variable.getOrElse(prototype.name)) andThen
+            (inputs += prototype)
       }
 
     lazy val customWorkDirectory =
       new {
-        def :=(s: Option[String]) = (_: WorkDirectory).setWorkDirectory(s)
+        def :=[T: WorkDirectory](s: Option[String]) =
+          implicitly[WorkDirectory[T]].workDirectory.set(s)
       }
 
   }
 }
 
 package object systemexec extends external.ExternalPackage with SystemExecPackage {
+
+  private[systemexec] def pack = this
 
   object ExecutionResult {
     def empty = ExecutionResult(0, None, None)
@@ -213,11 +197,15 @@ package object systemexec extends external.ExternalPackage with SystemExecPackag
 
       val runtime = Runtime.getRuntime
 
+      import collection.JavaConversions._
+      val inheritedEnvironment = System.getenv.map { case (key, value) ⇒ s"$key=$value" }.toArray
+      val openmoleEnvironment = environmentVariables.map { case (p, v) ⇒ v + "=" + context(p).toString }.toArray
+
       //FIXES java.io.IOException: error=26
       val process = runtime.synchronized {
         runtime.exec(
           command,
-          environmentVariables.map { case (p, v) ⇒ v + "=" + context(p).toString }.toArray,
+          inheritedEnvironment ++ openmoleEnvironment,
           workDir
         )
       }

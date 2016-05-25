@@ -31,22 +31,25 @@ import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
 import org.openmole.core.workflow.puzzle._
+import org.openmole.core.workflow.dsl._
 
 class MasterCapsuleSpec extends FlatSpec with Matchers {
 
   "A master capsule" should "execute tasks" in {
     val p = Prototype[String]("p")
 
-    val t1 = TestTask { _ + (p -> "Test") }
-    t1 setName "Test write"
-    t1 addOutput p
+    val t1 = TestTask { _ + (p → "Test") } set (
+      name := "Test write",
+      outputs += p
+    )
 
     val t2 = TestTask { context ⇒
       context(p) should equal("Test")
       context
-    }
-    t2 setName "Test read"
-    t2 addInput p
+    } set (
+      name := "Test read",
+      inputs += p
+    )
 
     val t1c = MasterCapsule(t1)
     val t2c = MasterCapsule(t2)
@@ -65,18 +68,20 @@ class MasterCapsuleSpec extends FlatSpec with Matchers {
 
     val exc = Capsule(ExplorationTask(sampling))
 
-    val emptyT = EmptyTask()
-    emptyT.addInput(i)
-    emptyT.addOutput(i)
+    val emptyT = EmptyTask() set (
+      inputs += i,
+      outputs += i
+    )
 
     val select = TestTask { context ⇒
       val nVal = context(n)
       context + Variable(n, nVal + 1) + Variable(i, (nVal + 1).toString)
-    }
-    select setName "select"
-    select addInput (n, i)
-    select addOutput (n, i)
-    select setDefault Default.value(n, 0)
+    } set (
+      name := "Select",
+      inputs += (n, i),
+      outputs += (n, i),
+      n := 0
+    )
 
     val emptyC = Capsule(emptyT)
     val slot1 = Slot(emptyC)
@@ -100,9 +105,11 @@ class MasterCapsuleSpec extends FlatSpec with Matchers {
 
     val exploration = ExplorationTask(sampling)
 
-    val model = EmptyTask()
-    model addInput i
-    model addOutput i
+    val model =
+      EmptyTask() set (
+        inputs += i,
+        outputs += i
+      )
 
     val modelCapsule = Capsule(model)
     val modelSlot1 = Slot(modelCapsule)
@@ -112,11 +119,12 @@ class MasterCapsuleSpec extends FlatSpec with Matchers {
       context.contains(archive) should equal(true)
       selectTaskExecuted += 1
       context + Variable(archive, (context(i) :: context(archive).toList) toArray)
-    }
-    select setName "select"
-    select addInput (archive, i)
-    select addOutput (archive, i)
-    select setDefault Default.value(archive, Array.empty[Int])
+    } set (
+      name := "select",
+      inputs += (archive, i),
+      outputs += (archive, i),
+      archive := Array.empty[Int]
+    )
 
     val selectCaps = MasterCapsule(select, archive)
 
@@ -125,9 +133,10 @@ class MasterCapsuleSpec extends FlatSpec with Matchers {
       context(archive).size should equal(1)
       endCapsExecuted += 1
       context
-    }
-    finalTask setName "final"
-    finalTask addInput (archive)
+    } set (
+      name := "final",
+      inputs += archive
+    )
 
     val skel = exploration -< modelSlot1 -- selectCaps
     val loop = selectCaps -- modelSlot2
@@ -142,18 +151,17 @@ class MasterCapsuleSpec extends FlatSpec with Matchers {
 
   "A master capsule" should "work with mole tasks" in {
 
-    val t1 = EmptyTask()
-    t1 setName "Test write"
+    val t1 = EmptyTask() set (name := "Test write")
 
     val mole = Mole(t1)
 
     val mt = MoleTask(mole, mole.root)
 
-    val t1c = MasterCapsule(mt.toTask)
+    val t1c = MasterCapsule(mt)
 
     val i = Prototype[Int]("i")
 
-    val explo = ExplorationTask(new ExplicitSampling(i, 0 to 100))
+    val explo = ExplorationTask(ExplicitSampling(i, 0 to 100))
 
     val ex = explo -< t1c
 

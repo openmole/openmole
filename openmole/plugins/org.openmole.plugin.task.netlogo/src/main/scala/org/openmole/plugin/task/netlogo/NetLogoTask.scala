@@ -35,9 +35,7 @@ import org.openmole.tool.file._
 import Prettifier._
 
 object NetLogoTask {
-
   case class Workspace(script: String, workspace: Option[String] = None)
-
 }
 
 trait NetLogoTask extends ExternalTask {

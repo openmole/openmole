@@ -23,6 +23,7 @@ import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.transition._
 import org.openmole.core.workflow.data._
 import scalaz._
+import org.openmole.core.workflow.dsl._
 
 object MasterSlave {
 

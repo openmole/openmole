@@ -17,22 +17,9 @@
 
 package org.openmole.core.workflow.data
 
-object Default {
-  //implicit def tuple2IterableToParameters(values: Iterable[(Prototype[T], T) forSome { type T }]) = values.map { case (p, v) ⇒ Default(p, v) }
-
-  def value[T](prototype: Prototype[T], value: T, `override`: Boolean = false): Default[T] = apply(prototype, _ ⇒ value, `override`)
-  //def delayed[T](prototype: Prototype[T], value: ⇒ T, `override`: Boolean = false): Default[T] = apply(prototype, _ ⇒ value, `override`)
-
-  def apply[T](prototype: Prototype[T], value: Context ⇒ T, `override`: Boolean = false): Default[T] = {
-    val (o, p, v) = (`override`, prototype, value)
-    new Default[T] {
-      val prototype = p
-      def value(ctx: Context) = v(ctx)
-      val `override` = o
-    }
-  }
-
-}
+import org.openmole.core.workflow.tools.FromContext
+import scalaz._
+import Scalaz._
 
 /**
  * The parameter is a variable wich is injected in the data flow during the
@@ -41,19 +28,6 @@ object Default {
  * task.
  *
  */
-trait Default[T] {
-
-  def prototype: Prototype[T]
-  def value(ctx: Context): T
-
-  /**
-   * Get if an existing value in the context should be overriden. If override
-   * is true the if a value with the same name is allready presentin the
-   * context when the parameter is injected the vaule will be discarded.
-   *
-   * @return true if an existing value should be overriden false otherwise
-   */
-  def `override`: Boolean
-
-  def toVariable(ctx: Context) = Variable(prototype, value(ctx))
+case class Default[T](prototype: Prototype[T], value: FromContext[T], `override`: Boolean) {
+  def toVariable = value.map(v ⇒ Variable(prototype, v))
 }

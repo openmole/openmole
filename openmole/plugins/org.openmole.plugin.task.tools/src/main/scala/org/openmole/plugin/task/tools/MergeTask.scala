@@ -17,27 +17,47 @@
 
 package org.openmole.plugin.task.tools
 
-import org.openmole.core.workflow.builder.TaskBuilder
+import monocle.macros.Lenses
+import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.task._
+import org.openmole.core.dsl
+import dsl._
+
 import reflect.ClassTag
 
 object MergeTask {
 
-  def apply[S, T <: Array[S]](result: Prototype[Array[S]], prototypes: Prototype[_ <: T]*) =
-    new TaskBuilder { builder ⇒
+  implicit def isBuilder[S] = new TaskBuilder[MergeTask[S]] {
+    override def name = MergeTask.name[S]
+    override def outputs = MergeTask.outputs[S]
+    override def inputs = MergeTask.inputs[S]
+    override def defaults = MergeTask.defaults[S]
+  }
 
-      for (p ← prototypes) addInput(p)
-      addOutput(result)
-
-      def toTask =
-        new MergeTask[S, T](prototypes, result) with builder.Built
-    }
+  def apply[S](result: Prototype[Array[S]], prototypes: Prototype[Array[S]]*) =
+    new MergeTask[S](
+      result,
+      prototypes.toVector,
+      inputs = PrototypeSet.empty,
+      outputs = PrototypeSet.empty,
+      defaults = DefaultSet.empty,
+      name = None
+    ) set (
+      dsl.inputs += (prototypes: _*),
+      dsl.outputs += result
+    )
 
 }
 
-sealed abstract class MergeTask[S, T <: Array[S]](val prototypes: Iterable[Prototype[_ <: T]], val result: Prototype[Array[S]]) extends Task {
+@Lenses case class MergeTask[S](
+    result:     Prototype[Array[S]],
+    prototypes: Vector[Prototype[Array[S]]],
+    inputs:     PrototypeSet,
+    outputs:    PrototypeSet,
+    defaults:   DefaultSet,
+    name:       Option[String]
+) extends Task {
 
   override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = {
     val flattened = prototypes.map { p ⇒ context(p) }.flatten.toArray[S](ClassTag(result.fromArray.`type`.runtimeClass))

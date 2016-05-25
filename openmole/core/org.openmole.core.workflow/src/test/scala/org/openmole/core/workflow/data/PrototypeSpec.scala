@@ -21,6 +21,7 @@ import org.openmole.core.workflow.data._
 import org.scalatest._
 import org.scalatest.junit._
 import scala.collection.mutable.ListBuffer
+import org.openmole.core.workflow.dsl._
 
 class PrototypeSpec extends FlatSpec with Matchers {
   "ToArray of dim 0" should "return the prototype itself" in {

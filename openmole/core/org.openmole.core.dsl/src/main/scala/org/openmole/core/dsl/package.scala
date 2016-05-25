@@ -49,17 +49,8 @@ package dsl {
 
   trait DSLPackage <: Commands
       with Serializer
-      with DataPackage
-      with MolePackage
-      with PuzzlePackage
-      with SamplingPackage
-      with TaskPackage
-      with ToolsPackage
-      with TransitionPackage
-      with BuilderPackage
       with Classes
-      with TypesPackage
-      with CodePackage {
+      with workflow.ExportedPackage {
 
     def valImpl[T: c.WeakTypeTag](c: MContext): c.Expr[Prototype[T]] = {
       import c.universe._
@@ -69,7 +60,7 @@ package dsl {
     }
 
     //implicit lazy val executionContext = MoleExecutionContext.default
-    implicit lazy val implicits = Context.empty
+    implicit lazy val implicitContext = Context.empty
 
     lazy val workspace = Workspace
     lazy val logger = LoggerService

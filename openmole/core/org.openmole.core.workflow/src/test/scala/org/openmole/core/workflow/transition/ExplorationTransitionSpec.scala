@@ -19,14 +19,13 @@ package org.openmole.core.workflow.transition
 
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.sampling._
-import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.builder._
 import org.scalatest._
 import scala.collection.mutable.ListBuffer
 import org.openmole.core.workflow.puzzle._
+import org.openmole.core.workflow.dsl._
 
 class ExplorationTransitionSpec extends FlatSpec with Matchers {
 
@@ -47,9 +46,10 @@ class ExplorationTransitionSpec extends FlatSpec with Matchers {
         res += context(i)
         context
       }
-    }
-    t setName "Test"
-    t addInput i
+    } set (
+      name := "Test",
+      inputs += i
+    )
 
     val ex = exc -< t
     ex.start.waitUntilEnded
@@ -57,9 +57,6 @@ class ExplorationTransitionSpec extends FlatSpec with Matchers {
   }
 
   "Exploration transition" should "work with the DSL interface" in {
-
-    println("Test")
-
     val data = List("A", "B", "C")
     val i = Prototype[String]("i")
 
@@ -73,9 +70,10 @@ class ExplorationTransitionSpec extends FlatSpec with Matchers {
         res += context(i)
         context
       }
-    }
-    t setName "Test"
-    t addInput i
+    } set (
+      name := "Test",
+      inputs += i
+    )
 
     (explo -< t).start.waitUntilEnded
     res.toArray.sorted.deep should equal(data.toArray.deep)

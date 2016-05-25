@@ -20,20 +20,37 @@ package org.openmole.plugin.task.tools
 import org.openmole.core.workflow.builder.TaskBuilder
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.task._
-import scala.collection.mutable.ListBuffer
+
 import scala.reflect.ClassTag
+import org.openmole.core.dsl
+import dsl._
+import monocle.macros.Lenses
 
 object FlattenTask {
 
+  implicit def isBuilder[S]: TaskBuilder[FlattenTask[S]] = new TaskBuilder[FlattenTask[S]] {
+    override def name = FlattenTask.name[S]
+    override def outputs = FlattenTask.outputs[S]
+    override def inputs = FlattenTask.inputs[S]
+    override def defaults = FlattenTask.defaults[S]
+  }
+
   def apply[S](flatten: Prototype[Array[Array[S]]], in: Prototype[Array[S]]) =
-    new TaskBuilder { builder ⇒ def toTask =
-        new FlattenTask(flatten, in) with builder.Built
-    }
+    new FlattenTask(flatten, in) set (
+      dsl.inputs += flatten,
+      dsl.outputs += in
+    )
 
 }
 
-sealed abstract class FlattenTask[S](val flatten: Prototype[Array[Array[S]]], val in: Prototype[Array[S]]) extends Task {
+@Lenses case class FlattenTask[S](
+    flatten:  Prototype[Array[Array[S]]],
+    in:       Prototype[Array[S]],
+    inputs:   PrototypeSet               = PrototypeSet.empty,
+    outputs:  PrototypeSet               = PrototypeSet.empty,
+    defaults: DefaultSet                 = DefaultSet.empty,
+    name:     Option[String]             = None
+) extends Task {
 
   override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = {
     implicit val sClassTag = ClassTag[S](in.fromArray.`type`.runtimeClass)

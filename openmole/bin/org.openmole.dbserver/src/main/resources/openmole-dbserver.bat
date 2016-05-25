@@ -72,7 +72,7 @@ if "%JAVACMD%"=="" set JAVACMD=java
 if "%REPO%"=="" set REPO=%BASEDIR%\lib
 
 set CLASSPATH="%BASEDIR%"\etc;"%REPO%"\*
-set EXTRA_JVM_ARGUMENTS="-XX:+UseG1GC"
+set EXTRA_JVM_ARGUMENTS="-XX:+UseG1GC -XX:CICompilerCount=2 -XX:ParallelGCThreads=2 -XX:ConcGCThreads=2 -XX:G1ConcRefinementThreads=2"
 goto endInit
 
 @REM Reaching here means variables are defined and arguments have been captured

@@ -21,52 +21,55 @@ import org.openmole.core.workflow.builder.TaskBuilder
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
 import fr.iscpif.mgo._
-
-import scala.util.Random
-import scalaz._
+import monocle.macros.Lenses
+import org.openmole.core.workflow.dsl
+import dsl._
 
 object BreedTask {
+  implicit def isBuilder = TaskBuilder[BreedTask].from(this)
 
-  def apply[T: WorkflowIntegration](algorithm: T, size: Int)(implicit wfi: WorkflowIntegration[T]) = {
+  def apply[T: WorkflowIntegration](algorithm: T, size: Int)(implicit wfi: WorkflowIntegration[T]): BreedTask = {
     val t = wfi(algorithm)
 
-    new TaskBuilder {
-      addInput(t.populationPrototype)
-      addInput(t.statePrototype)
-      addOutput(t.statePrototype)
-      addExploredOutput(t.genomePrototype.toArray)
-
-      abstract class BreedTask extends Task {
-
-        override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = {
-          val p = context(t.populationPrototype)
-
-          if (p.isEmpty) {
-            val s = context(t.statePrototype)
-            val (news, gs) = t.integration.run(s, t.operations.initialGenomes(size))
-
-            Context(
-              Variable(t.genomePrototype.toArray, gs.toArray(t.genomePrototype.`type`.manifest)),
-              Variable(t.statePrototype, news)
-            )
-          }
-          else {
-            val s = context(t.statePrototype)
-            val (newState, breeded) = t.integration.run(s, t.operations.breeding(size).run(p))
-
-            Context(
-              Variable(t.genomePrototype.toArray, breeded.toArray(t.genomePrototype.`type`.manifest)),
-              Variable(t.statePrototype, newState)
-            )
-          }
-        }
-
-      }
-
-      override def toTask: Task = new BreedTask with Built
-
-    }
+    new BreedTask(t, size) set (
+      dsl.inputs += (t.populationPrototype, t.statePrototype),
+      dsl.outputs += (t.statePrototype),
+      dsl.exploredOutputs += (t.genomePrototype.array)
+    )
   }
 
 }
 
+@Lenses case class BreedTask(
+    t:        EvolutionWorkflow,
+    size:     Int,
+    inputs:   PrototypeSet      = PrototypeSet.empty,
+    outputs:  PrototypeSet      = PrototypeSet.empty,
+    defaults: DefaultSet        = DefaultSet.empty,
+    name:     Option[String]    = None
+) extends Task {
+
+  override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = {
+    val p = context(t.populationPrototype)
+
+    if (p.isEmpty) {
+      val s = context(t.statePrototype)
+      val (news, gs) = t.integration.run(s, t.operations.initialGenomes(size))
+
+      Context(
+        Variable(t.genomePrototype.array, gs.toArray(t.genomePrototype.`type`.manifest)),
+        Variable(t.statePrototype, news)
+      )
+    }
+    else {
+      val s = context(t.statePrototype)
+      val (newState, breeded) = t.integration.run(s, t.operations.breeding(size).run(p))
+
+      Context(
+        Variable(t.genomePrototype.array, breeded.toArray(t.genomePrototype.`type`.manifest)),
+        Variable(t.statePrototype, newState)
+      )
+    }
+  }
+
+}

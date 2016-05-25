@@ -19,6 +19,7 @@ package org.openmole.core.workflow.tools
 
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.dsl._
 
 object ContextAggregator {
 

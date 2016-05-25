@@ -18,30 +18,25 @@
 package org.openmole.plugin.method
 
 import fr.iscpif.mgo._
-import org.openmole.core.workflow.sampling._
-import org.openmole.core.workflow.builder._
-import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.puzzle._
-import org.openmole.core.workflow.task._
+import org.openmole.core.workspace._
+import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.mole._
+import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.puzzle._
 import org.openmole.core.workflow.transition._
-import org.openmole.core.workflow.tools._
-import org.openmole.core.workspace.Workspace
-
 import org.openmole.plugin.task.tools._
 import org.openmole.plugin.tool.pattern._
-import org.openmole.tool.types._
 
+import scalaz.\&/
 import scala.concurrent.duration.Duration
 import scala.util.Random
-import scalaz._
-import Scalaz._
 
 package object evolution {
 
   val operatorExploration = 0.1
 
-  type Objective = Prototype[Double]
+  type Objective = Val[Double]
   type Objectives = Seq[Objective]
   type FitnessAggregation = Seq[Double] ⇒ Double
   type Genome = Seq[Input[_]]

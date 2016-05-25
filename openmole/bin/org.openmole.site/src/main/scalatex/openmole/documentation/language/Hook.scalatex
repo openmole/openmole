@@ -69,7 +69,7 @@
 
       val h = AppendToCSVFileHook("/path/to/a/file/or/dir${i}.csv", i, j) set (
         csvHeader := "i, j",
-        singleRow := true
+        arraysOnSingleRow := true
       )
       """)
 
@@ -82,16 +82,16 @@
 
     val h = CopyFileHook(file, "/path/to/copy/the/file${i}.txt")""")
   @sect{Append some content to a file}
-    Similarly to the @i{AppendToCSVFileHook}, any string can be appended to a file, using the more general
+    Similarly to the @i{AppendToFileHook}, any string can be appended to a file, using the more general
     @i{AppendToFileHook}. The appended strings can be a combination of variables from the dataflow and plain text.
     @br @hl.openmole("""
     val h = AppendToFileHook("/path/of/the/file.txt", "string ${i} to append")""")
 
   @sect{Append a file to another file}
-    The @i{AppendFileHook} appends a file from the dataflow to a file on your machine.
+    Use the @i{AppendFileFileHook} as well.
     @br @hl.openmole("""
     val file = Val[File]
-    val h = AppendFileHook(file, "/path/of/the/file")""")
+    val h = AppendToFileHook("${file.content}", "/path/of/the/file")""")
 
   @sect{Display variables}
     To display a variable in the console, use the @i{ToStringHook}:

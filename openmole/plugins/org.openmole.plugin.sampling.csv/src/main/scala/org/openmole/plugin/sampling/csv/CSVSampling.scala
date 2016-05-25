@@ -19,20 +19,56 @@ package org.openmole.plugin.sampling.csv
 
 import java.io.File
 
+import monocle.Lens
+import monocle.macros.Lenses
+import org.openmole.core.workflow.builder.SamplingBuilder
+import org.openmole.core.workflow.data.{ DefaultSet, Prototype, PrototypeSet }
 import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.tools._
-import org.openmole.plugin.tool.csv.CSVToVariables
+import org.openmole.plugin.tool.csv.{ CSVToVariables, CSVToVariablesBuilder }
 
 object CSVSampling {
-  def apply(file: File) = new CSVSamplingBuilder(file)
-  def apply(directory: File, name: ExpandedString) = new CSVSamplingBuilder(FileList(directory, name))
+
+  implicit def isBuilder = new CSVToVariablesBuilder[CSVSampling] with SamplingBuilder[CSVSampling] {
+    override def columns = CSVSampling.columns
+    override def fileColumns = CSVSampling.fileColumns
+    override def separator = CSVSampling.separator
+    override def outputs = CSVSampling.outputs
+    override def inputs = CSVSampling.inputs
+    override def defaults = CSVSampling.defaults
+  }
+
+  def apply(file: FromContext[File]): CSVSampling =
+    new CSVSampling(
+      file,
+      inputs = PrototypeSet.empty,
+      outputs = PrototypeSet.empty,
+      defaults = DefaultSet.empty,
+      name = None,
+      columns = Vector.empty,
+      fileColumns = Vector.empty,
+      separator = None
+    )
+
+  def apply(file: File): CSVSampling = apply(file)
+  def apply(directory: File, name: ExpandedString): CSVSampling = apply(FileList(directory, name))
+
 }
 
-abstract class CSVSampling(val file: FromContext[File]) extends Sampling with CSVToVariables {
+@Lenses case class CSVSampling(
+    file:                FromContext[File],
+    override val inputs: PrototypeSet,
+    outputs:             PrototypeSet,
+    defaults:            DefaultSet,
+    name:                Option[String],
+    columns:             Vector[(String, Prototype[_])],
+    fileColumns:         Vector[(String, File, Prototype[File])],
+    separator:           Option[Char]
+) extends Sampling with CSVToVariables {
 
-  override def prototypes =
-    columns.map { case (_, p) ⇒ p } :::
-      fileColumns.map { case (_, _, p) ⇒ p } ::: Nil
+  override def prototypes = outputs
+  //    columns.map { case (_, p) ⇒ p } :::
+  //      fileColumns.map { case (_, _, p) ⇒ p } ::: Nil
 
   override def apply() = FromContext { (context, rng) ⇒ toVariables(file.from(context)(rng), context) }
 

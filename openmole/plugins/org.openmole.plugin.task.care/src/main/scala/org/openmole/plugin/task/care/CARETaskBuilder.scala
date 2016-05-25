@@ -23,36 +23,39 @@ import org.openmole.plugin.task.external.ExternalTaskBuilder
 import org.openmole.plugin.task.systemexec._
 import org.openmole.plugin.task.systemexec
 import org.openmole.core.workflow.data._
+import monocle.Lens
 
-import scala.collection.mutable.ListBuffer
+trait CARETaskBuilder[T]
+    extends ExternalTaskBuilder[T]
+    with ReturnValue[T]
+    with ErrorOnReturnValue[T]
+    with StdOutErr[T]
+    with EnvironmentVariables[T]
+    with WorkDirectory[T] { builder ⇒
 
-class CARETaskBuilder(archiveLocation: File, command: systemexec.Command)
-    extends ExternalTaskBuilder
-    with ReturnValue
-    with ErrorOnReturnValue
-    with StdOutErr
-    with EnvironmentVariables
-    with WorkDirectory { builder ⇒
+  //(archiveLocation: File, command: systemexec.Command)
 
-  val hostFiles = ListBuffer[(String, Option[String])]()
+  def hostFiles: Lens[T, Vector[(String, Option[String])]]
+
+  /*val hostFiles = ListBuffer[(String, Option[String])]()
 
   def addHostFile(hostFile: String, binding: Option[String] = None): this.type = {
     hostFiles.append(hostFile → binding)
     this
-  }
+  }*/
 
-  override def toTask: CARETask = new CARETask(
-    archiveLocation,
-    command,
-    workDirectory,
-    errorOnReturnValue,
-    returnValue,
-    stdOut,
-    stdErr,
-    environmentVariables.toList,
-    hostFiles.toList
-  ) with builder.Built {
-    override val outputs: PrototypeSet = builder.outputs + List(stdOut, stdErr, returnValue).flatten
-  }
+  //  override def toTask: CARETask = new CARETask(
+  //    archiveLocation,
+  //    command,
+  //    workDirectory,
+  //    errorOnReturnValue,
+  //    returnValue,
+  //    stdOut,
+  //    stdErr,
+  //    environmentVariables.toList,
+  //    hostFiles.toList
+  //  ) with builder.Built {
+  //    override val outputs: PrototypeSet = builder.outputs + List(stdOut, stdErr, returnValue).flatten
+  //  }
 
 }

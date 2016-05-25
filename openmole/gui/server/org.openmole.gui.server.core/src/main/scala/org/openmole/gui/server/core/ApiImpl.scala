@@ -32,6 +32,7 @@ import scala.concurrent.stm._
 import org.openmole.tool.file._
 import org.openmole.tool.tar._
 import org.openmole.core.buildinfo
+import org.openmole.core.console.ScalaREPL
 import org.openmole.core.output.OutputManager
 import org.openmole.gui.server.core
 
@@ -278,8 +279,18 @@ object ApiImpl extends Api {
           val outputStream = new StringPrintStream()
           Runnings.setOutput(execId, outputStream)
 
-          Try(OutputManager.withStreamOutputs(outputStream, outputStream)(compiled.eval)) match {
-            case Failure(e) ⇒ error(e)
+          def catchAll[T](f: ⇒ T): Try[T] = {
+            val res =
+              try Success(f)
+              catch {
+                case t: Throwable ⇒ Failure(t)
+              }
+            res
+          }
+
+          catchAll(OutputManager.withStreamOutputs(outputStream, outputStream)(compiled.eval)) match {
+            case Failure(e: ScalaREPL.CompilationError) ⇒ error(e)
+            case Failure(e)                             ⇒ error(e)
             case Success(o) ⇒
               val puzzle = o.buildPuzzle
 

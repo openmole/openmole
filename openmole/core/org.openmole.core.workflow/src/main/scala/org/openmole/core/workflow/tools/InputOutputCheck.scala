@@ -74,15 +74,15 @@ trait InputOutputCheck {
   protected def filterOutput(context: Context): Context =
     Context(outputs.toList.flatMap(o ⇒ context.variable(o): Option[Variable[_]]))
 
-  protected def initializeInput(context: Context): Context =
+  protected def initializeInput(context: Context)(implicit randomProvider: RandomProvider): Context =
     context ++
       defaults.flatMap {
         parameter ⇒
-          if (parameter.`override` || !context.contains(parameter.prototype.name)) Some(parameter.toVariable(context))
+          if (parameter.`override` || !context.contains(parameter.prototype.name)) Some(parameter.toVariable.from(context))
           else Option.empty[Variable[_]]
       }
 
-  def perform(context: Context, process: (Context ⇒ Context)) = {
+  def perform(context: Context, process: (Context ⇒ Context))(implicit randomProvider: RandomProvider) = {
     val initializedContext = initializeInput(context)
     val inputErrors = verifyInput(initializedContext)
     if (!inputErrors.isEmpty) throw new InternalProcessingError(s"Input errors have been found in ${this}: ${inputErrors.mkString(", ")}.")

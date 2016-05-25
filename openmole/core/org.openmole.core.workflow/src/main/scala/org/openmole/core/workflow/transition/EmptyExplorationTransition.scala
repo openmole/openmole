@@ -20,9 +20,8 @@ package org.openmole.core.workflow.transition
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.tools._
-
+import org.openmole.core.workflow.dsl._
 import scala.collection.mutable.ListBuffer
-import scala.util.Random
 
 class EmptyExplorationTransition(start: Capsule, end: Slot, size: FromContext[Int], condition: Condition = Condition.True, filter: BlockList = BlockList.empty) extends ExplorationTransition(start, end, condition, filter) {
 

@@ -17,11 +17,7 @@
 
 package org.openmole.core.workflow.validation
 
-import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.sampling._
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.transition._
+import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
@@ -29,17 +25,15 @@ import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.validation.TypeUtil.{ ValidType, InvalidType }
 import org.scalatest._
 import org.openmole.core.workflow.puzzle._
+import org.openmole.core.workflow.dsl._
 
 class TypeUtilSpec extends FlatSpec with Matchers {
 
   "To array finder" should "not detect a toArray case" in {
     val p = Prototype[Int]("p")
 
-    val t1 = EmptyTask()
-    t1 addOutput p
-
-    val t2 = EmptyTask()
-    t2 addInput p
+    val t1 = EmptyTask() set (outputs += p)
+    val t2 = EmptyTask() set (inputs += p)
 
     val t1c = Capsule(t1)
     val t2c = Slot(t2)
@@ -59,14 +53,9 @@ class TypeUtilSpec extends FlatSpec with Matchers {
   "To array finder" should "detect a toArray case" in {
     val p = Prototype[Int]("p")
 
-    val t1 = EmptyTask()
-    t1 addOutput p
-
-    val t2 = EmptyTask()
-    t2 addOutput p
-
-    val t3 = EmptyTask()
-    t3 addInput p
+    val t1 = EmptyTask() set (outputs += p)
+    val t2 = EmptyTask() set (outputs += p)
+    val t3 = EmptyTask() set (inputs += p)
 
     val t1c = Capsule(t1)
     val t2c = Capsule(t2)

@@ -17,18 +17,16 @@
 
 package org.openmole.plugin.method
 
-import org.openmole.core.workflow.tools.Condition
+import org.openmole.core.workflow.tools.{ Condition, FromContext }
 import org.openmole.plugin.method.abc._
 import fr.iscpif.scalabc.algorithm.Lenormand
 import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.puzzle._
-import org.openmole.core.workflow.transition._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
+import org.openmole.core.workflow.dsl._
 
 package object abc {
 
@@ -41,19 +39,21 @@ package object abc {
     algorithm: Lenormand with ABC,
     model:     Puzzle
   ) = {
-    val name = "abc"
-    val acceptedPrototype = Prototype[Double](name + "Accepted")
-    val iterationPrototype = Prototype[Int](name + "Iteration")
-    val statePrototype = Prototype[Lenormand#STATE](name + "State")
-    val terminatedPrototype = Prototype[Boolean](name + "Terminated")
-    val preModel = StrainerCapsule(EmptyTask() set (_.setName(name + "PreModel")))
-    val postModel = Slot(StrainerCapsule(EmptyTask() set (_.setName(name + "PostModel"))))
-    val last = StrainerCapsule(EmptyTask() set (_.setName(name + "Last")))
+    val methodName = "abc"
+    val acceptedPrototype = Prototype[Double](methodName + "Accepted")
+    val iterationPrototype = Prototype[Int](methodName + "Iteration")
+    val statePrototype = Prototype[Lenormand#STATE](methodName + "State")
+    val terminatedPrototype = Prototype[Boolean](methodName + "Terminated")
+    val preModel = StrainerCapsule(EmptyTask() set (name := methodName + "PreModel"))
+    val postModel = Slot(StrainerCapsule(EmptyTask() set (name := methodName + "PostModel")))
+    val last = StrainerCapsule(EmptyTask() set (name := methodName + "Last"))
 
     val sampling = LenormandSampling(algorithm, statePrototype)
-    val explorationTask = ExplorationTask(sampling) set (_.setName(name + "Exploration"))
-    explorationTask setDefault Default(statePrototype, _ ⇒ algorithm.initialState)
-    explorationTask addOutput statePrototype
+    val explorationTask = ExplorationTask(sampling) set (
+      name := methodName + "Exploration",
+      statePrototype := FromContext((_, _) ⇒ algorithm.initialState),
+      outputs += statePrototype
+    )
 
     val exploration = StrainerCapsule(explorationTask)
 
