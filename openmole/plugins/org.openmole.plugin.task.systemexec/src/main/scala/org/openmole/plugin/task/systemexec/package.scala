@@ -213,11 +213,15 @@ package object systemexec extends external.ExternalPackage with SystemExecPackag
 
       val runtime = Runtime.getRuntime
 
+      import scala.collection.JavaConversions._
+      val inheritedEnvironment = System.getenv.map { case (key, value) ⇒ s"$key=$value" }.toArray
+      val openmoleEnvironment = environmentVariables.map { case (p, v) ⇒ v + "=" + context(p).toString }.toArray
+
       //FIXES java.io.IOException: error=26
       val process = runtime.synchronized {
         runtime.exec(
           command,
-          environmentVariables.map { case (p, v) ⇒ v + "=" + context(p).toString }.toArray,
+          inheritedEnvironment ++ openmoleEnvironment,
           workDir
         )
       }
