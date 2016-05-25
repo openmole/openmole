@@ -30,6 +30,7 @@ import org.openmole.core.workflow.tools.VariableExpansion.Expansion
 import org.openmole.plugin.task.external.ExternalTask
 import org.openmole.tool.stream.StringOutputStream
 import org.openmole.tool.file._
+import language.implicitConversions
 
 import collection.mutable.ListBuffer
 
@@ -213,7 +214,7 @@ package object systemexec extends external.ExternalPackage with SystemExecPackag
 
       val runtime = Runtime.getRuntime
 
-      import scala.collection.JavaConversions._
+      import collection.JavaConversions._
       val inheritedEnvironment = System.getenv.map { case (key, value) ⇒ s"$key=$value" }.toArray
       val openmoleEnvironment = environmentVariables.map { case (p, v) ⇒ v + "=" + context(p).toString }.toArray
 
