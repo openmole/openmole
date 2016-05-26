@@ -17,38 +17,24 @@
 
 package org.openmole.plugin.method.evolution
 
-import monocle.macros.Lenses
-import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.dsl
-import dsl._
+import org.openmole.core.workflow.dsl._
 
 object ToOffspringTask {
-
-  implicit def isBuilder = TaskBuilder[ToOffspringTask].from(this)
 
   def apply[T](algorithm: T)(implicit wfi: WorkflowIntegration[T]) = {
     val t = wfi(algorithm)
 
-    new ToOffspringTask(t) set (
-      dsl.inputs += (t.genomePrototype, t.statePrototype),
-      dsl.outputs += (t.statePrototype, t.offspringPrototype),
-      dsl.outputs += (t.outputPrototypes: _*)
+    ClosureTask("ToOffspringTask") { (context, _, _) ⇒
+      val i = t.buildIndividual(context(t.genomePrototype), context)
+      Context(Variable(t.offspringPrototype, Vector(i)))
+    } set (
+      inputs += (t.genomePrototype, t.statePrototype),
+      outputs += (t.statePrototype, t.offspringPrototype),
+      outputs += (t.outputPrototypes: _*)
     )
   }
 
 }
 
-@Lenses case class ToOffspringTask(
-    t:        EvolutionWorkflow,
-    inputs:   PrototypeSet      = PrototypeSet.empty,
-    outputs:  PrototypeSet      = PrototypeSet.empty,
-    defaults: DefaultSet        = DefaultSet.empty,
-    name:     Option[String]    = None
-) extends Task {
-  override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = {
-    val i = t.buildIndividual(context(t.genomePrototype), context)
-    Context(Variable(t.offspringPrototype, Vector(i)))
-  }
-}

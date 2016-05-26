@@ -17,46 +17,28 @@
 
 package org.openmole.plugin.method.evolution
 
-import monocle.macros.Lenses
-import org.openmole.core.workflow.builder.TaskBuilder
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.dsl
-import dsl._
+import org.openmole.core.workflow.dsl._
 
 object TerminationTask {
-
-  implicit def isBuilder = TaskBuilder[TerminationTask].from(this)
 
   def apply[T](algorithm: T, termination: OMTermination)(implicit wfi: WorkflowIntegration[T]) = {
     val t = wfi(algorithm)
 
-    new TerminationTask(t, termination) set (
-      dsl.inputs += (t.statePrototype, t.populationPrototype),
-      dsl.outputs += (t.statePrototype, t.terminatedPrototype, t.generationPrototype)
-    )
-  }
+    ClosureTask("TerminationTask") { (context, _, _) ⇒
+      val term = OMTermination.toTermination(termination, t)
 
-}
+      val (newState, te) = t.integration.run(context(t.statePrototype), term.run(context(t.populationPrototype)))
 
-@Lenses case class TerminationTask(
-    t:           EvolutionWorkflow,
-    termination: OMTermination,
-    inputs:      PrototypeSet      = PrototypeSet.empty,
-    outputs:     PrototypeSet      = PrototypeSet.empty,
-    defaults:    DefaultSet        = DefaultSet.empty,
-    name:        Option[String]    = None
-) extends Task {
-
-  override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = {
-    val term = OMTermination.toTermination(termination, t)
-
-    val (newState, te) = t.integration.run(context(t.statePrototype), term.run(context(t.populationPrototype)))
-
-    Context(
-      Variable(t.terminatedPrototype, te),
-      Variable(t.statePrototype, newState),
-      Variable(t.generationPrototype, t.operations.generation(newState))
+      Context(
+        Variable(t.terminatedPrototype, te),
+        Variable(t.statePrototype, newState),
+        Variable(t.generationPrototype, t.operations.generation(newState))
+      )
+    } set (
+      inputs += (t.statePrototype, t.populationPrototype),
+      outputs += (t.statePrototype, t.terminatedPrototype, t.generationPrototype)
     )
   }
 

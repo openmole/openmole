@@ -28,8 +28,8 @@ import org.openmole.core.workflow.dsl._
 object ExplorationTask {
 
   def apply(sampling: Sampling) =
-    ClosureTask(
-      (context, rng) ⇒ {
+    ClosureTask("ExplorationTask") {
+      (context, rng, _) ⇒
         implicit val implicitRNG = rng
         val variablesValues = TreeMap.empty[Prototype[_], ArrayBuffer[Any]] ++ sampling.prototypes.map { p ⇒ p → ArrayBuffer[Any]() }
 
@@ -53,12 +53,10 @@ object ExplorationTask {
               case e: ArrayStoreException ⇒ throw new UserBadDataError("Cannot fill factor values in " + k.toArray + ", values " + v)
             }
         }
-      },
-      "ExplorationTask"
-    ) set (
-        inputs += (sampling.inputs.toSeq: _*),
-        exploredOutputs += (sampling.prototypes.toSeq.map(_.toArray): _*)
-      )
+    } set (
+      inputs += (sampling.inputs.toSeq: _*),
+      exploredOutputs += (sampling.prototypes.toSeq.map(_.toArray): _*)
+    )
 
   def explored(c: Capsule) = (p: Prototype[_]) ⇒ c.task.outputs.explored(p)
 

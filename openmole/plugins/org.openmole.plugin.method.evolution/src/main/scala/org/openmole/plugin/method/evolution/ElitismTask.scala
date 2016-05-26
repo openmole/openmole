@@ -17,43 +17,24 @@
 
 package org.openmole.plugin.method.evolution
 
-import fr.iscpif.mgo._
-import monocle.macros.Lenses
-import org.openmole.core.workflow.builder.TaskBuilder
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.dsl
-import dsl._
+import org.openmole.core.workflow.dsl._
 
 object ElitismTask {
 
-  implicit def isBuilder = TaskBuilder[ElitismTask].from(this)
-
   def apply[T](algorithm: T)(implicit wfi: WorkflowIntegration[T]) = {
     val t = wfi(algorithm)
+    ClosureTask("ElitismTask") { (context, _, _) ⇒
+      val (newState, newPopulation) = t.integration.run(context(t.statePrototype), t.operations.elitism.run(context(t.populationPrototype) ++ context(t.offspringPrototype)))
 
-    new ElitismTask(t) set (
-      dsl.inputs += (t.statePrototype, t.populationPrototype, t.offspringPrototype),
-      dsl.outputs += (t.populationPrototype, t.statePrototype)
-    )
-  }
-
-}
-
-@Lenses case class ElitismTask(
-    t:        EvolutionWorkflow,
-    inputs:   PrototypeSet      = PrototypeSet.empty,
-    outputs:  PrototypeSet      = PrototypeSet.empty,
-    defaults: DefaultSet        = DefaultSet.empty,
-    name:     Option[String]    = None
-) extends Task {
-
-  override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = {
-    val (newState, newPopulation) = t.integration.run(context(t.statePrototype), t.operations.elitism.run(context(t.populationPrototype) ++ context(t.offspringPrototype)))
-
-    Context(
-      Variable(t.populationPrototype, newPopulation),
-      Variable(t.statePrototype, newState)
+      Context(
+        Variable(t.populationPrototype, newPopulation),
+        Variable(t.statePrototype, newState)
+      )
+    } set (
+      inputs += (t.statePrototype, t.populationPrototype, t.offspringPrototype),
+      outputs += (t.populationPrototype, t.statePrototype)
     )
   }
 

@@ -17,35 +17,21 @@
 
 package org.openmole.plugin.method.evolution
 
-import monocle.macros.Lenses
-import org.openmole.core.workflow.builder._
-import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.dsl
-import dsl._
+import org.openmole.core.workflow.dsl._
 
 object ScalingGenomeTask {
-
-  implicit def isBuilder = TaskBuilder[ScalingGenomeTask].from(this)
 
   def apply[T](algorithm: T)(implicit wfi: WorkflowIntegration[T]) = {
     val t = wfi(algorithm)
 
-    new ScalingGenomeTask(t) set (
-      dsl.inputs += (t.inputPrototypes: _*),
-      (dsl.inputs, dsl.outputs) += t.genomePrototype
+    ClosureTask("ScalingGenomeTask") { (context, rng, _) ⇒
+      context ++ t.genomeToVariables(context(t.genomePrototype)).from(context)(rng)
+
+    } set (
+      inputs += (t.inputPrototypes: _*),
+      (inputs, outputs) += t.genomePrototype
     )
   }
 
-}
-
-@Lenses case class ScalingGenomeTask(
-    t:        EvolutionWorkflow,
-    inputs:   PrototypeSet      = PrototypeSet.empty,
-    outputs:  PrototypeSet      = PrototypeSet.empty,
-    defaults: DefaultSet        = DefaultSet.empty,
-    name:     Option[String]    = None
-) extends Task {
-  override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) =
-    context ++ t.genomeToVariables(context(t.genomePrototype)).from(context)
 }

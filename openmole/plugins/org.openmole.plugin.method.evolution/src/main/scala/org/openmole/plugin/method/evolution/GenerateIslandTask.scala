@@ -17,55 +17,37 @@
 
 package org.openmole.plugin.method.evolution
 
-import monocle.macros.Lenses
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.builder._
-import org.openmole.core.workflow.dsl
-import dsl._
+import org.openmole.core.workflow.dsl._
 
 object GenerateIslandTask {
-
-  implicit def isBuilder = TaskBuilder[GenerateIslandTask].from(this)
 
   def apply[T](algorithm: T, sample: Option[Int], size: Int, outputPopulationName: String)(implicit wfi: WorkflowIntegration[T]) = {
     val t = wfi(algorithm)
 
     val outputPopulation = t.populationPrototype.withName(outputPopulationName)
 
-    new GenerateIslandTask(t, sample, size, outputPopulationName) set (
-      dsl.inputs += t.populationPrototype,
-      dsl.outputs += outputPopulation.toArray
+    ClosureTask("GenerateIslandTask") { (context, rng, _) ⇒
+      val outputPopulation = t.populationPrototype.withName(outputPopulationName)
+
+      val p = context(t.populationPrototype)
+
+      def samples =
+        if (p.isEmpty) Vector.empty
+        else sample match {
+          case Some(s) ⇒ Vector.fill(s) {
+            p(rng().nextInt(p.size))
+          }
+          case None ⇒ p
+        }
+
+      def populations = Array.fill(size)(t.operations.migrateToIsland(samples))
+      Variable(outputPopulation.toArray, populations)
+    } set (
+      inputs += t.populationPrototype,
+      outputs += outputPopulation.toArray
     )
-  }
-
-}
-
-@Lenses case class GenerateIslandTask(
-    t:                    EvolutionWorkflow,
-    sample:               Option[Int],
-    size:                 Int,
-    outputPopulationName: String,
-    inputs:               PrototypeSet      = PrototypeSet.empty,
-    outputs:              PrototypeSet      = PrototypeSet.empty,
-    defaults:             DefaultSet        = DefaultSet.empty,
-    name:                 Option[String]    = None
-) extends Task {
-
-  override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = {
-    val outputPopulation = t.populationPrototype.withName(outputPopulationName)
-
-    val p = context(t.populationPrototype)
-
-    def samples =
-      if (p.isEmpty) Vector.empty
-      else sample match {
-        case Some(s) ⇒ Vector.fill(s) { p(rng().nextInt(p.size)) }
-        case None    ⇒ p
-      }
-
-    def populations = Array.fill(size)(t.operations.migrateToIsland(samples))
-    Variable(outputPopulation.toArray, populations)
   }
 
 }

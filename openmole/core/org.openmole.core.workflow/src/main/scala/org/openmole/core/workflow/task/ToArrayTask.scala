@@ -24,16 +24,15 @@ import scala.reflect.ClassTag
 object ToArrayTask {
 
   def apply(prototypes: Prototype[T] forSome { type T }*) =
-    ClosureTask(
-      (context, _) ⇒
+    ClosureTask("ToArrayTask") {
+      (context, _, _) ⇒
         prototypes.map {
           p ⇒ Variable.unsecure(p.toArray, Array(context(p))(ClassTag(p.`type`.runtimeClass)))
-        },
-      "ToArrayTask"
-    ) set (
-        dsl.inputs += (prototypes: _*),
-        dsl.outputs += (prototypes.map(_.array): _*)
-      )
+        }
+    } set (
+      inputs += (prototypes: _*),
+      outputs += (prototypes.map(_.array): _*)
+    )
 
 }
 

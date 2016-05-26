@@ -20,24 +20,25 @@ package org.openmole.plugin.task.jvm
 import org.openmole.core.serializer.plugin.Plugins
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.dsl._
-import org.openmole.core.workflow.task.TaskExecutionContext
-import org.openmole.plugin.task.external.ExternalTask
+import org.openmole.core.workflow.task.{ Task, TaskExecutionContext }
+import org.openmole.plugin.task.external.{ External }
 import java.io.File
 
 object JVMLanguageTask {
   lazy val workDirectory = Prototype[File]("workDirectory")
 }
 
-trait JVMLanguageTask extends ExternalTask with Plugins {
+trait JVMLanguageTask extends Task with Plugins {
 
   def libraries: Seq[File]
+  def external: External
 
   override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = {
     val pwd = executionContext.tmpDirectory.newDir("jvmtask")
-    val preparedContext = prepareInputFiles(context, relativeResolver(pwd.getCanonicalFile)) + Variable(JVMLanguageTask.workDirectory, pwd)
+    val preparedContext = external.prepareInputFiles(context, external.relativeResolver(pwd.getCanonicalFile)) + Variable(JVMLanguageTask.workDirectory, pwd)
     val resultContext = processCode(preparedContext)
-    val resultContextWithFiles = fetchOutputFiles(resultContext, relativeResolver(pwd.getCanonicalFile))
-    checkAndClean(resultContextWithFiles, pwd.getCanonicalFile)
+    val resultContextWithFiles = external.fetchOutputFiles(resultContext, external.relativeResolver(pwd.getCanonicalFile))
+    external.checkAndClean(this, resultContextWithFiles, pwd.getCanonicalFile)
     resultContextWithFiles
   }
 

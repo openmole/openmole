@@ -30,22 +30,19 @@ import dsl._
 
 object TemplateFileTask {
 
-  implicit def isBuilder = TaskBuilder[TemplateFileTask].from(this)
+  implicit def isTask: TaskBuilder[TemplateFileTask] = TaskBuilder(TemplateFileTask.config)
 
   def apply(
     template: File,
     output:   Prototype[File]
-  ) = new TemplateFileTask(template, output) set (dsl.outputs += output)
+  ) = new TemplateFileTask(template, output, TaskConfig()) set (dsl.outputs += output)
 
 }
 
 @Lenses case class TemplateFileTask(
     template: File,
     output:   Prototype[File],
-    inputs:   PrototypeSet    = PrototypeSet.empty,
-    outputs:  PrototypeSet    = PrototypeSet.empty,
-    defaults: DefaultSet      = DefaultSet.empty,
-    name:     Option[String]  = None
+    config:   TaskConfig
 ) extends Task {
 
   @transient lazy val expanded = template.withInputStream { is ⇒

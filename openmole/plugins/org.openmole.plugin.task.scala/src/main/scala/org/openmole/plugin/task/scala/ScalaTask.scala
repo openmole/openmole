@@ -18,32 +18,26 @@
 package org.openmole.plugin.task.scala
 
 import java.io.File
-
-import monocle.Lens
 import monocle.macros.Lenses
 import org.openmole.core.exception.InternalProcessingError
+import org.openmole.core.workflow.builder.TaskBuilder
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.validation._
-import org.openmole.plugin.task.external.ExternalTask._
+import org.openmole.plugin.task.external.{ External, ExternalBuilder }
 import org.openmole.plugin.task.jvm._
 
 import scala.util._
 
 object ScalaTask {
 
-  implicit def isBuilder = new ScalaTaskBuilder[ScalaTask] {
-    override def inputs: Lens[ScalaTask, PrototypeSet] = ScalaTask.inputs
-    override def defaults: Lens[ScalaTask, DefaultSet] = ScalaTask.defaults
-    override def name: Lens[ScalaTask, Option[String]] = ScalaTask.name
-    override def outputs: Lens[ScalaTask, PrototypeSet] = ScalaTask.outputs
-    override def libraries: Lens[ScalaTask, Vector[File]] = ScalaTask.libraries
-    override def plugins: Lens[ScalaTask, Vector[File]] = ScalaTask.plugins
-    override def inputFiles: Lens[ScalaTask, Vector[InputFile]] = ScalaTask.inputFiles
-    override def resources: Lens[ScalaTask, Vector[Resource]] = ScalaTask.resources
-    override def outputFiles: Lens[ScalaTask, Vector[OutputFile]] = ScalaTask.outputFiles
-    override def inputFileArrays: Lens[ScalaTask, Vector[InputFileArray]] = ScalaTask.inputFileArrays
+  implicit def isTask: TaskBuilder[ScalaTask] = TaskBuilder(ScalaTask.config)
+  implicit def isExternal: ExternalBuilder[ScalaTask] = ExternalBuilder(ScalaTask.external)
+
+  implicit def isJVM: JVMLanguageBuilder[ScalaTask] = new JVMLanguageBuilder[ScalaTask] {
+    override def libraries = ScalaTask.libraries
+    override def plugins = ScalaTask.plugins
   }
 
   def apply(source: String) =
@@ -51,36 +45,24 @@ object ScalaTask {
       source,
       plugins = Vector.empty,
       libraries = Vector.empty,
-      inputs = PrototypeSet.empty,
-      outputs = PrototypeSet.empty,
-      defaults = DefaultSet.empty,
-      name = None,
-      inputFiles = Vector.empty,
-      inputFileArrays = Vector.empty,
-      outputFiles = Vector.empty,
-      resources = Vector.empty
+      config = TaskConfig(),
+      external = External()
     )
 
   def apply(f: (Context, ⇒ Random) ⇒ Seq[Variable[_]]) =
-    ClosureTask((ctx, rng) ⇒ Context(f(ctx, rng())))
+    ClosureTask("ScalaTask")((ctx, rng, _) ⇒ Context(f(ctx, rng())))
 
   def apply(f: Context ⇒ Seq[Variable[_]]) =
-    ClosureTask((ctx, _) ⇒ Context(f(ctx)))
+    ClosureTask("ScalaTask")((ctx, _, _) ⇒ Context(f(ctx)))
 
 }
 
 @Lenses case class ScalaTask(
-    sourceCode:      String,
-    plugins:         Vector[File],
-    libraries:       Vector[File],
-    inputs:          PrototypeSet,
-    outputs:         PrototypeSet,
-    defaults:        DefaultSet,
-    name:            Option[String],
-    inputFiles:      Vector[InputFile],
-    inputFileArrays: Vector[InputFileArray],
-    outputFiles:     Vector[OutputFile],
-    resources:       Vector[Resource]
+    sourceCode: String,
+    plugins:    Vector[File],
+    libraries:  Vector[File],
+    config:     TaskConfig,
+    external:   External
 ) extends JVMLanguageTask with ValidateTask {
 
   @transient lazy val scalaCompilation =

@@ -18,6 +18,8 @@
 package org.openmole.plugin.task.external
 
 import java.io.File
+
+import monocle.macros.Lenses
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.tools.service.OS
 import org.openmole.core.workflow.data._
@@ -27,7 +29,7 @@ import org.openmole.core.workflow.tools.ExpandedString
 
 import scala.util.Random
 
-object ExternalTask {
+object External {
   val PWD = Prototype[String]("PWD")
 
   case class InputFile(
@@ -59,14 +61,14 @@ object ExternalTask {
   type PathResolver = String ⇒ File
 }
 
-import ExternalTask._
+import External._
 
-trait ExternalTask extends Task {
-
-  def inputFileArrays: Vector[InputFileArray]
-  def inputFiles: Vector[InputFile]
-  def outputFiles: Vector[OutputFile]
-  def resources: Vector[Resource]
+@Lenses case class External(
+    inputFileArrays: Vector[External.InputFileArray] = Vector.empty,
+    inputFiles:      Vector[External.InputFile]      = Vector.empty,
+    outputFiles:     Vector[External.OutputFile]     = Vector.empty,
+    resources:       Vector[External.Resource]       = Vector.empty
+) {
 
   protected def listInputFiles(context: Context)(implicit rng: RandomProvider): Vector[(Prototype[File], ToPut)] =
     inputFiles.map {
@@ -153,9 +155,9 @@ trait ExternalTask extends Task {
   def fetchOutputFiles(context: Context, resolver: PathResolver)(implicit rng: RandomProvider): Context =
     context ++ outputFileVariables(context, resolver)
 
-  def checkAndClean(context: Context, rootDir: File) = {
+  def checkAndClean(task: Task, context: Context, rootDir: File) = {
     lazy val contextFiles =
-      filterOutput(context).values.map(_.value).collect { case f: File ⇒ f }
+      task.filterOutput(context).values.map(_.value).collect { case f: File ⇒ f }
 
     for {
       f ← contextFiles

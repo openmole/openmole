@@ -23,8 +23,7 @@ import org.openmole.core.workflow.data._
 
 import monocle.Lens
 
-trait SystemExecTaskBuilder[T] extends ExternalTaskBuilder[T]
-    with ReturnValue[T]
+trait SystemExecTaskBuilder[T] extends ReturnValue[T]
     with ErrorOnReturnValue[T]
     with StdOutErr[T]
     with EnvironmentVariables[T]

@@ -20,10 +20,8 @@ package org.openmole.plugin.task.netlogo4
 import org.openmole.core.tools.service.OS
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.tools.ExpandedString
-import org.openmole.plugin.task.external.ExternalTask._
-import org.openmole.plugin.task.netlogo._
 import org.openmole.plugin.task.external._
+import org.openmole.plugin.task.netlogo._
 import NetLogoTask.Workspace
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.dsl
@@ -33,6 +31,7 @@ import java.io.File
 
 import monocle.Lens
 import monocle.macros.Lenses
+import org.openmole.core.workflow.builder.TaskBuilder
 
 import collection.JavaConversions._
 import org.openmole.plugin.tool.netlogo4.NetLogo4
@@ -43,18 +42,13 @@ object NetLogo4Task {
     def apply = new NetLogo4
   }
 
-  implicit def isBuilder = new NetLogoTaskBuilder[NetLogo4Task] {
+  implicit def isTask: TaskBuilder[NetLogo4Task] = TaskBuilder(NetLogo4Task.config)
+  implicit def isExternal: ExternalBuilder[NetLogo4Task] = ExternalBuilder(NetLogo4Task.external)
+
+  implicit def isNetLogo: NetLogoTaskBuilder[NetLogo4Task] = new NetLogoTaskBuilder[NetLogo4Task] {
     override def netLogoInputs = NetLogo4Task.netLogoInputs
     override def netLogoArrayOutputs = NetLogo4Task.netLogoArrayOutputs
     override def netLogoOutputs = NetLogo4Task.netLogoOutputs
-    override def resources = NetLogo4Task.resources
-    override def outputFiles = NetLogo4Task.outputFiles
-    override def inputFileArrays = NetLogo4Task.inputFileArrays
-    override def inputFiles = NetLogo4Task.inputFiles
-    override def defaults = NetLogo4Task.defaults
-    override def outputs = NetLogo4Task.outputs
-    override def name = NetLogo4Task.name
-    override def inputs = NetLogo4Task.inputs
   }
 
   def workspace(
@@ -68,8 +62,8 @@ object NetLogo4Task {
       launchingCommands = launchingCommands,
       seed = seed
     ) set (
-        dsl.inputs += (seed.toSeq: _*),
-        external.resources += workspace
+        inputs += (seed.toSeq: _*),
+        resources += workspace
       )
 
   def file(
@@ -82,8 +76,8 @@ object NetLogo4Task {
       launchingCommands = launchingCommands,
       seed = seed
     ) set (
-        dsl.inputs += (seed.toSeq: _*),
-        external.resources += script
+        inputs += (seed.toSeq: _*),
+        resources += script
       )
 
   def apply(
@@ -101,39 +95,27 @@ object NetLogo4Task {
     seed:              Option[Prototype[Int]]
   ) =
     NetLogo4Task(
-      inputs = PrototypeSet.empty,
-      outputs = PrototypeSet.empty,
-      defaults = DefaultSet.empty,
-      name = None,
+      config = TaskConfig(),
+      external = External(),
       netLogoInputs = Vector.empty,
       netLogoOutputs = Vector.empty,
       netLogoArrayOutputs = Vector.empty,
       workspace = workspace,
       launchingCommands = launchingCommands,
-      seed = seed,
-      inputFiles = Vector.empty,
-      inputFileArrays = Vector.empty,
-      outputFiles = Vector.empty,
-      resources = Vector.empty
+      seed = seed
     )
 
 }
 
 @Lenses case class NetLogo4Task(
-    inputs:              PrototypeSet,
-    outputs:             PrototypeSet,
-    defaults:            DefaultSet,
-    name:                Option[String],
+    config:              TaskConfig,
+    external:            External,
     netLogoInputs:       Vector[(Prototype[_], String)],
     netLogoOutputs:      Vector[(String, Prototype[_])],
     netLogoArrayOutputs: Vector[(String, Int, Prototype[_])],
     workspace:           NetLogoTask.Workspace,
     launchingCommands:   Seq[String],
-    seed:                Option[Prototype[Int]],
-    inputFiles:          Vector[InputFile],
-    inputFileArrays:     Vector[InputFileArray],
-    outputFiles:         Vector[OutputFile],
-    resources:           Vector[Resource]
+    seed:                Option[Prototype[Int]]
 ) extends NetLogoTask {
   override def netLogoFactory: NetLogoFactory = NetLogo4Task.factory
 }

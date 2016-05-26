@@ -18,68 +18,10 @@
 package org.openmole.plugin.task.netlogo
 
 import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.data.Prototype
-import org.openmole.plugin.task.external.ExternalTaskBuilder
-import scala.collection.mutable.ListBuffer
 import monocle.Lens
 
-/*abstract class NetLogoTaskBuilder(
-    private val workspace:         NetLogoTask.Workspace,
-    private val launchingCommands: Seq[String],
-    private val seed:              Option[Prototype[Int]],
-    private val netLogoFactory:    NetLogoFactory
-) extends ExternalTaskBuilder { builder ⇒*/
-
-trait NetLogoTaskBuilder[T] extends ExternalTaskBuilder[T] {
-
+trait NetLogoTaskBuilder[T] {
   def netLogoInputs: Lens[T, Vector[(Prototype[_], String)]]
   def netLogoOutputs: Lens[T, Vector[(String, Prototype[_])]]
   def netLogoArrayOutputs: Lens[T, Vector[(String, Int, Prototype[_])]]
-
-  /*seed.foreach(p ⇒ addInput(p))
-
-  private var _netLogoInputs = new ListBuffer[(Prototype[_], String)]
-  private var _netLogoOutputs = new ListBuffer[(String, Prototype[_])]
-  private var _netLogoArrayOutputs = new ListBuffer[(String, Int, Prototype[_])]
-
-  def taskName = name.getOrElse("netLogoTask")
-
-  def netLogoInputs = _netLogoInputs.toList
-
-  def addNetLogoInput(p: Prototype[_], n: String): this.type = {
-    _netLogoInputs += p → n
-    this addInput p
-    this
-  }
-
-  def addNetLogoInput(p: Prototype[_]): this.type = this.addNetLogoInput(p, p.name)
-
-  def netLogoOutputs = _netLogoOutputs.toList
-
-  def addNetLogoOutput(n: String, p: Prototype[_]): this.type = {
-    _netLogoOutputs += n → p
-    this addOutput p
-    this
-  }
-
-  def addNetLogoOutput(p: Prototype[_]): this.type = this.addNetLogoOutput(p.name, p)
-
-  def addNetLogoOutput(name: String, column: Int, p: Prototype[_]): this.type = {
-    _netLogoArrayOutputs += ((name, column, p))
-    this addOutput p
-    this
-  }
-
-  def netLogoArrayOutputs = _netLogoArrayOutputs.toList
-
-  trait Built extends super.Built {
-    def workspace: NetLogoTask.Workspace = builder.workspace
-    def launchingCommands: Seq[String] = builder.launchingCommands
-    def netLogoInputs: Seq[(Prototype[_], String)] = builder.netLogoInputs
-    def netLogoOutputs: Iterable[(String, Prototype[_])] = builder.netLogoOutputs
-    def netLogoArrayOutputs: Iterable[(String, Int, Prototype[_])] = builder.netLogoArrayOutputs
-    def netLogoFactory: NetLogoFactory = builder.netLogoFactory
-    def seed = builder.seed
-  }*/
-
 }

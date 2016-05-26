@@ -71,10 +71,10 @@ trait InputOutputCheck {
         }
     }
 
-  protected def filterOutput(context: Context): Context =
+  def filterOutput(context: Context): Context =
     Context(outputs.toList.flatMap(o ⇒ context.variable(o): Option[Variable[_]]))
 
-  protected def initializeInput(context: Context)(implicit randomProvider: RandomProvider): Context =
+  def initializeInput(context: Context)(implicit randomProvider: RandomProvider): Context =
     context ++
       defaults.flatMap {
         parameter ⇒

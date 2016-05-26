@@ -17,13 +17,7 @@
 
 package org.openmole.plugin.task.external
 
-import java.io.File
-import org.openmole.core.tools.service.OS
-import org.openmole.core.workflow.builder.TaskBuilder
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.tools.ExpandedString
-import org.openmole.core.workflow.data.Prototype
-import org.openmole.plugin.task.external.ExternalTask._
+import org.openmole.plugin.task.external.External._
 import monocle.Lens
 
 /**
@@ -34,11 +28,21 @@ import monocle.Lens
  * task after its execution.
  *
  */
-trait ExternalTaskBuilder[T] extends TaskBuilder[T] { builder ⇒
 
+object ExternalBuilder {
+
+  def apply[T](l: Lens[T, External]): ExternalBuilder[T] = new ExternalBuilder[T] {
+    override def inputFiles = l composeLens External.inputFiles
+    override def resources = l composeLens External.resources
+    override def outputFiles = l composeLens External.outputFiles
+    override def inputFileArrays = l composeLens External.inputFileArrays
+  }
+
+}
+
+trait ExternalBuilder[T] { builder ⇒
   def inputFiles: Lens[T, Vector[InputFile]]
   def inputFileArrays: Lens[T, Vector[InputFileArray]]
   def outputFiles: Lens[T, Vector[OutputFile]]
   def resources: Lens[T, Vector[Resource]]
-
 }

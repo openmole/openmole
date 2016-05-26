@@ -19,6 +19,7 @@ package org.openmole.core.workflow.builder
 
 import monocle.Lens
 import org.openmole.core.workflow.data.{ DefaultSet, PrototypeSet }
+import org.openmole.core.workflow.task.{ ClosureTask, TaskConfig }
 
 object TaskBuilder {
 
@@ -35,6 +36,14 @@ object TaskBuilder {
       override def defaults = t.defaults
     }
   }
+
+  def apply[T](taskInfo: Lens[T, TaskConfig]) = new TaskBuilder[T] {
+    override def inputs: Lens[T, PrototypeSet] = taskInfo composeLens TaskConfig.inputs
+    override def defaults: Lens[T, DefaultSet] = taskInfo composeLens TaskConfig.defaults
+    override def name: Lens[T, Option[String]] = taskInfo composeLens TaskConfig.name
+    override def outputs: Lens[T, PrototypeSet] = taskInfo composeLens TaskConfig.outputs
+  }
+
 }
 
 trait TaskBuilder[T] extends InputOutputBuilder[T] with NameBuilder[T] with Builder[T]

@@ -19,14 +19,16 @@ package org.openmole.core.workflow.task
 
 import java.io.File
 
+import monocle.macros.Lenses
 import org.openmole.core.tools.service
 import org.openmole.core.workflow.data._
 import org.openmole.core.serializer.plugin._
 import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.tools._
-import org.openmole.core.workspace.{ Workspace, ConfigurationLocation }
+import org.openmole.core.workspace.{ ConfigurationLocation, Workspace }
 import org.openmole.core.tools.service._
 import org.openmole.tool.logger.Logger
+
 import scala.util.Random
 import org.openmole.core.workflow.dsl._
 
@@ -41,6 +43,13 @@ object Task extends Logger {
 
   def buildRNG(context: Context): Random = service.Random.newRNG(context(Task.openMOLESeed)).toScala
 }
+
+@Lenses case class TaskConfig(
+  inputs:   PrototypeSet   = PrototypeSet.empty,
+  outputs:  PrototypeSet   = PrototypeSet.empty,
+  defaults: DefaultSet     = DefaultSet.empty,
+  name:     Option[String] = None
+)
 
 case class TaskExecutionContext(tmpDirectory: File, localEnvironment: LocalEnvironment)
 
@@ -57,29 +66,12 @@ trait Task <: InputOutputCheck with Name {
 
   protected def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider): Context
 
-  /**
-   *
-   * Get the input data of the task.
-   *
-   * @return the input of the task
-   */
-  def inputs: PrototypeSet
+  def config: TaskConfig
 
-  /**
-   *
-   * Get the output data of the task.
-   *
-   * @return the output data of the task
-   */
-  def outputs: PrototypeSet
-
-  /**
-   *
-   * Get all the defaults configured for this task.
-   *
-   * @return the defaults configured for this task.
-   */
-  def defaults: DefaultSet
+  def inputs = config.inputs
+  def outputs = config.outputs
+  def defaults = config.defaults
+  def name = config.name
 
 }
 

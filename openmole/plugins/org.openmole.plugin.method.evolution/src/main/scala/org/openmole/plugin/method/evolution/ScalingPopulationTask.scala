@@ -17,38 +17,20 @@
 
 package org.openmole.plugin.method.evolution
 
-import fr.iscpif.mgo._
-import monocle.macros.Lenses
 import org.openmole.core.workflow.builder._
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.dsl
-import dsl._
+import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.task._
 
 object ScalingPopulationTask {
 
-  implicit def isBuilder = TaskBuilder[ScalingPopulationTask].from(this)
-
   def apply[T](algorithm: T)(implicit wfi: WorkflowIntegration[T]) = {
     val t = wfi(algorithm)
 
-    new ScalingPopulationTask(t) set (
-      dsl.inputs += t.populationPrototype,
-      dsl.outputs += (t.resultPrototypes.map(_.array): _*)
+    ClosureTask("ScalingPopulationTask") { (context, rng, _) ⇒
+      t.populationToVariables(context(t.populationPrototype)).from(context)(rng)
+    } set (
+      inputs += t.populationPrototype,
+      outputs += (t.resultPrototypes.map(_.array): _*)
     )
-
   }
-}
-
-@Lenses case class ScalingPopulationTask(
-    t:        EvolutionWorkflow,
-    inputs:   PrototypeSet      = PrototypeSet.empty,
-    outputs:  PrototypeSet      = PrototypeSet.empty,
-    defaults: DefaultSet        = DefaultSet.empty,
-    name:     Option[String]    = None
-) extends Task {
-
-  override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) =
-    t.populationToVariables(context(t.populationPrototype)).from(context)
-
 }

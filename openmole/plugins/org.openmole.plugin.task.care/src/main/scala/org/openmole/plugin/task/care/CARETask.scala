@@ -19,37 +19,32 @@
 package org.openmole.plugin.task.care
 
 import java.io.File
+
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.workflow.data.{ Context, Variable }
 import org.openmole.core.workflow.tools.VariableExpansion
-import org.openmole.plugin.task.external.ExternalTask
-import org.openmole.tool.file._
+import org.openmole.plugin.task.external.{ External, ExternalBuilder }
 import org.openmole.tool.logger.Logger
 import org.openmole.plugin.task.systemexec._
 import org.openmole.plugin.task.systemexec
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.validation._
-import org.openmole.plugin.task.external.ExternalTask._
+import org.openmole.core.workflow.dsl._
 
 import scalaz._
 import Scalaz._
 import monocle.macros.Lenses
+import org.openmole.core.workflow.builder.TaskBuilder
 
 object CARETask extends Logger {
+  implicit def isTask: TaskBuilder[CARETask] = TaskBuilder(CARETask._config)
+  implicit def isExternal: ExternalBuilder[CARETask] = ExternalBuilder(CARETask.external)
 
   implicit def isBuilder = new CARETaskBuilder[CARETask] {
     override def hostFiles = CARETask.hostFiles
     override def environmentVariables = CARETask.environmentVariables
-    override def resources = CARETask.resources
-    override def outputFiles = CARETask.outputFiles
-    override def inputFileArrays = CARETask.inputFileArrays
-    override def inputFiles = CARETask.inputFiles
-    override def defaults = CARETask.defaults
     override def workDirectory = CARETask.workDirectory
-    override def outputs = CARETask._outputs
-    override def name = CARETask.name
-    override def inputs = CARETask.inputs
     override def returnValue = CARETask.returnValue
     override def errorOnReturnValue = CARETask.errorOnReturnValue
     override def stdOut = CARETask.stdOut
@@ -67,14 +62,8 @@ object CARETask extends Logger {
       stdOut = None,
       stdErr = None,
       environmentVariables = Vector.empty,
-      inputs = PrototypeSet.empty,
-      _outputs = PrototypeSet.empty,
-      defaults = DefaultSet.empty,
-      name = None,
-      inputFiles = Vector.empty,
-      inputFileArrays = Vector.empty,
-      outputFiles = Vector.empty,
-      resources = Vector.empty
+      _config = TaskConfig(),
+      external = External()
     )
 
 }
@@ -89,17 +78,11 @@ object CARETask extends Logger {
     stdOut:               Option[Prototype[String]],
     stdErr:               Option[Prototype[String]],
     environmentVariables: Vector[(Prototype[_], String)],
-    inputs:               PrototypeSet,
-    _outputs:             PrototypeSet,
-    defaults:             DefaultSet,
-    name:                 Option[String],
-    inputFiles:           Vector[InputFile],
-    inputFileArrays:      Vector[InputFileArray],
-    outputFiles:          Vector[OutputFile],
-    resources:            Vector[Resource]
-) extends ExternalTask with ValidateTask {
+    _config:              TaskConfig,
+    external:             External
+) extends Task with ValidateTask {
 
-  def outputs = _outputs ++ Seq(stdOut, stdErr, returnValue).flatten
+  def config = TaskConfig.outputs.modify(_ ++ Seq(stdOut, stdErr, returnValue).flatten)(_config)
 
   lazy val expandedCommand = VariableExpansion(command.command)
 
@@ -107,7 +90,7 @@ object CARETask extends Logger {
 
   archive.setExecutable(true)
 
-  override protected def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = withWorkDir(executionContext) { taskWorkDirectory ⇒
+  override protected def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = external.withWorkDir(executionContext) { taskWorkDirectory ⇒
     taskWorkDirectory.mkdirs()
 
     // unarchiving in task's work directory
@@ -131,7 +114,7 @@ object CARETask extends Logger {
       else taskWorkDirectory / "inputs" / userWorkDirectory / path
     }
 
-    val preparedContext = prepareInputFiles(context, inputPathResolver)
+    val preparedContext = external.prepareInputFiles(context, inputPathResolver)
 
     // Replace new proot with a version with user bindings
     val proot = extractedArchive / "proot"
@@ -185,8 +168,8 @@ object CARETask extends Logger {
       if (isAbsolute) rootDirectory / filePath else rootDirectory / userWorkDirectory / filePath
     }
 
-    val retContext = fetchOutputFiles(preparedContext, outputPathResolver)
-    checkAndClean(retContext, taskWorkDirectory)
+    val retContext = external.fetchOutputFiles(preparedContext, outputPathResolver)
+    external.checkAndClean(this, retContext, taskWorkDirectory)
 
     retContext ++
       List(

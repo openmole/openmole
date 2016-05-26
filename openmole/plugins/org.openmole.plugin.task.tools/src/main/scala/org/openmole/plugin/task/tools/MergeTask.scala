@@ -28,40 +28,14 @@ import reflect.ClassTag
 
 object MergeTask {
 
-  implicit def isBuilder[S] = new TaskBuilder[MergeTask[S]] {
-    override def name = MergeTask.name[S]
-    override def outputs = MergeTask.outputs[S]
-    override def inputs = MergeTask.inputs[S]
-    override def defaults = MergeTask.defaults[S]
-  }
-
   def apply[S](result: Prototype[Array[S]], prototypes: Prototype[Array[S]]*) =
-    new MergeTask[S](
-      result,
-      prototypes.toVector,
-      inputs = PrototypeSet.empty,
-      outputs = PrototypeSet.empty,
-      defaults = DefaultSet.empty,
-      name = None
-    ) set (
+    ClosureTask("MergeTask") { (context, _, _) ⇒
+      val flattened = prototypes.map { p ⇒ context(p) }.flatten.toArray[S](ClassTag(result.fromArray.`type`.runtimeClass))
+      Variable(result, flattened)
+    } set (
       dsl.inputs += (prototypes: _*),
       dsl.outputs += result
     )
 
 }
 
-@Lenses case class MergeTask[S](
-    result:     Prototype[Array[S]],
-    prototypes: Vector[Prototype[Array[S]]],
-    inputs:     PrototypeSet,
-    outputs:    PrototypeSet,
-    defaults:   DefaultSet,
-    name:       Option[String]
-) extends Task {
-
-  override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = {
-    val flattened = prototypes.map { p ⇒ context(p) }.flatten.toArray[S](ClassTag(result.fromArray.`type`.runtimeClass))
-    Variable(result, flattened)
-  }
-
-}

@@ -33,12 +33,7 @@ import dsl._
 
 object MoleTask {
 
-  implicit def isBuilder = new TaskBuilder[MoleTask] {
-    override def defaults = MoleTask.defaults
-    override def inputs = MoleTask.inputs
-    override def name = MoleTask.name
-    override def outputs = MoleTask.outputs
-  }
+  implicit def isTask = TaskBuilder(MoleTask.config)
 
   def apply(puzzle: Puzzle): MoleTask =
     apply(puzzle toMole, puzzle.lasts.head)
@@ -54,7 +49,7 @@ object MoleTask {
     mt set (
       dsl.inputs += (mole.root.inputs(mole, Sources.empty, Hooks.empty).toSeq: _*),
       dsl.outputs += (last.outputs(mole, Sources.empty, Hooks.empty).toSeq: _*),
-      defaults.set(mole.root.task.defaults)
+      isTask.defaults.set(mole.root.task.defaults)
     )
   }
 
@@ -64,10 +59,7 @@ object MoleTask {
     _mole:     Mole,
     last:      Capsule,
     implicits: Vector[String] = Vector.empty,
-    inputs:    PrototypeSet   = PrototypeSet.empty,
-    outputs:   PrototypeSet   = PrototypeSet.empty,
-    defaults:  DefaultSet     = DefaultSet.empty,
-    name:      Option[String] = None
+    config:    TaskConfig     = TaskConfig()
 ) extends Task {
 
   def mole = _mole.copy(inputs = inputs)

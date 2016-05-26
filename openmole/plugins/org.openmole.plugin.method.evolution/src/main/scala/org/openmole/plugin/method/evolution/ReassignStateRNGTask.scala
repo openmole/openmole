@@ -27,21 +27,9 @@ object ReassignStateRNGTask {
   def apply[T](algorithm: T)(implicit wfi: WorkflowIntegration[T]) = {
     val t = wfi(algorithm)
 
-    object ReassignStateRNGTask {
-      implicit def isBuilder = TaskBuilder[ReassignStateRNGTask].from(this)
-    }
-
-    @Lenses case class ReassignStateRNGTask(
-        inputs:   PrototypeSet   = PrototypeSet.empty,
-        outputs:  PrototypeSet   = PrototypeSet.empty,
-        defaults: DefaultSet     = DefaultSet.empty,
-        name:     Option[String] = None
-    ) extends Task {
-      override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) =
-        Context(Variable(t.statePrototype, t.operations.randomLens.set(Task.buildRNG(context))(context(t.statePrototype))))
-    }
-
-    ReassignStateRNGTask() set (
+    ClosureTask("ReassignStateRNGTask") { (context, _, _) ⇒
+      Context(Variable(t.statePrototype, t.operations.randomLens.set(Task.buildRNG(context))(context(t.statePrototype))))
+    } set (
       (inputs, outputs) += t.statePrototype
     )
   }

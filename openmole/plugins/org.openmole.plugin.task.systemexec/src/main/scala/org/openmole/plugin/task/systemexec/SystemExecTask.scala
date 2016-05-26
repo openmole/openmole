@@ -25,12 +25,13 @@ import org.openmole.core.tools.service.{ OS, ProcessUtil }
 import ProcessUtil._
 import java.io.File
 
+import monocle.Lens
 import monocle.macros.Lenses
+import org.openmole.core.workflow.builder.TaskBuilder
 import org.openmole.core.workflow.data._
 import org.openmole.plugin.task.external._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.validation._
-import org.openmole.plugin.task.external.ExternalTask._
 import org.openmole.core.workflow.dsl._
 
 import scala.annotation.tailrec
@@ -39,22 +40,16 @@ object SystemExecTask {
 
   case class ExpandedSystemExecCommand(expandedCommand: Expansion)
 
-  implicit def isBuilder[T] = new SystemExecTaskBuilder[SystemExecTask] {
+  implicit def isTask: TaskBuilder[SystemExecTask] = TaskBuilder(SystemExecTask._config)
+  implicit def isExternal: ExternalBuilder[SystemExecTask] = ExternalBuilder(SystemExecTask.external)
+  implicit def isSystemExec = new SystemExecTaskBuilder[SystemExecTask] {
     override def commands = SystemExecTask.command
     override def environmentVariables = SystemExecTask.environmentVariables
-    override def resources = SystemExecTask.resources
-    override def outputFiles = SystemExecTask.outputFiles
-    override def inputFileArrays = SystemExecTask.inputFileArrays
-    override def inputFiles = SystemExecTask.inputFiles
-    override def defaults = SystemExecTask.defaults
-    override def workDirectory = SystemExecTask.workDirectory
-    override def outputs = SystemExecTask._outputs
-    override def name = SystemExecTask.name
-    override def inputs = SystemExecTask.inputs
     override def returnValue = SystemExecTask.returnValue
     override def errorOnReturnValue = SystemExecTask.errorOnReturnValue
     override def stdOut = SystemExecTask.stdOut
     override def stdErr = SystemExecTask.stdErr
+    override def workDirectory = SystemExecTask.workDirectory
   }
 
   /**
@@ -71,14 +66,8 @@ object SystemExecTask {
       stdOut = None,
       stdErr = None,
       environmentVariables = Vector.empty,
-      inputs = PrototypeSet.empty,
-      _outputs = PrototypeSet.empty,
-      defaults = DefaultSet.empty,
-      name = None,
-      inputFiles = Vector.empty,
-      inputFileArrays = Vector.empty,
-      outputFiles = Vector.empty,
-      resources = Vector.empty
+      _config = TaskConfig(),
+      external = External()
     ) set (pack.commands += (OS(), commands: _*))
 }
 
@@ -90,19 +79,13 @@ object SystemExecTask {
     stdOut:               Option[Prototype[String]],
     stdErr:               Option[Prototype[String]],
     environmentVariables: Vector[(Prototype[_], String)],
-    inputs:               PrototypeSet,
-    _outputs:             PrototypeSet,
-    defaults:             DefaultSet,
-    name:                 Option[String],
-    inputFiles:           Vector[InputFile],
-    inputFileArrays:      Vector[InputFileArray],
-    outputFiles:          Vector[OutputFile],
-    resources:            Vector[Resource]
-) extends ExternalTask with ValidateTask {
+    _config:              TaskConfig,
+    external:             External
+) extends Task with ValidateTask {
 
   import SystemExecTask._
 
-  def outputs = _outputs ++ Seq(stdOut, stdErr, returnValue).flatten
+  def config = TaskConfig.outputs.modify(_ ++ Seq(stdOut, stdErr, returnValue).flatten)(_config)
 
   override def validate =
     for {
@@ -127,7 +110,7 @@ object SystemExecTask {
         else execAll(t, workDir, preparedContext, ExecutionResult.append(acc, result))
     }
 
-  override protected def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = withWorkDir(executionContext) { tmpDir ⇒
+  override protected def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = external.withWorkDir(executionContext) { tmpDir ⇒
     val workDir =
       workDirectory match {
         case None    ⇒ tmpDir
@@ -136,7 +119,7 @@ object SystemExecTask {
 
     workDir.mkdirs()
 
-    val preparedContext = prepareInputFiles(context, relativeResolver(workDir))
+    val preparedContext = external.prepareInputFiles(context, external.relativeResolver(workDir))
 
     val osCommandLines: Seq[ExpandedSystemExecCommand] = command.find { _.os.compatible }.map {
       cmd ⇒ cmd.expanded map { expansion ⇒ ExpandedSystemExecCommand(expansion) }
@@ -144,8 +127,8 @@ object SystemExecTask {
 
     val executionResult = execAll(osCommandLines.toList, workDir, preparedContext)
 
-    val retContext: Context = fetchOutputFiles(preparedContext, relativeResolver(workDir))
-    checkAndClean(retContext, tmpDir)
+    val retContext: Context = external.fetchOutputFiles(preparedContext, external.relativeResolver(workDir))
+    external.checkAndClean(this, retContext, tmpDir)
 
     retContext ++
       List(

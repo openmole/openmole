@@ -28,33 +28,14 @@ import monocle.macros.Lenses
 
 object FlattenTask {
 
-  implicit def isBuilder[S]: TaskBuilder[FlattenTask[S]] = new TaskBuilder[FlattenTask[S]] {
-    override def name = FlattenTask.name[S]
-    override def outputs = FlattenTask.outputs[S]
-    override def inputs = FlattenTask.inputs[S]
-    override def defaults = FlattenTask.defaults[S]
-  }
-
   def apply[S](flatten: Prototype[Array[Array[S]]], in: Prototype[Array[S]]) =
-    new FlattenTask(flatten, in) set (
+    ClosureTask("FlattenTask") { (context, _, _) ⇒
+      implicit val sClassTag = ClassTag[S](in.fromArray.`type`.runtimeClass)
+      Variable(in, context(flatten).flatten.toArray[S])
+    } set (
       dsl.inputs += flatten,
       dsl.outputs += in
     )
 
 }
 
-@Lenses case class FlattenTask[S](
-    flatten:  Prototype[Array[Array[S]]],
-    in:       Prototype[Array[S]],
-    inputs:   PrototypeSet               = PrototypeSet.empty,
-    outputs:  PrototypeSet               = PrototypeSet.empty,
-    defaults: DefaultSet                 = DefaultSet.empty,
-    name:     Option[String]             = None
-) extends Task {
-
-  override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = {
-    implicit val sClassTag = ClassTag[S](in.fromArray.`type`.runtimeClass)
-    Variable(in, context(flatten).flatten.toArray[S])
-  }
-
-}

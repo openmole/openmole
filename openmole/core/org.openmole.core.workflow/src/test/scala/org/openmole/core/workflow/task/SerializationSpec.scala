@@ -37,9 +37,9 @@ class SerializationSpec extends FlatSpec with Matchers {
     val builder = new ByteArrayOutputStream()
 
     SerialiserService.serialise(t, builder)
-    val t2 = SerialiserService.deserialise[EmptyTask](new ByteArrayInputStream(builder.toByteArray))
+    val t2 = SerialiserService.deserialise[Task](new ByteArrayInputStream(builder.toByteArray))
 
-    t2.inputs.contains(p.name) should equal(true)
-    t2.outputs.contains(p.name) should equal(true)
+    t2.config.inputs.contains(p.name) should equal(true)
+    t2.config.outputs.contains(p.name) should equal(true)
   }
 }

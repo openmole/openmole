@@ -26,35 +26,19 @@ import scala.util.Random
 
 object ClosureTask {
 
-  def taskBuilder[T](closureTask: Lens[T, ClosureTask]) = new TaskBuilder[T] {
-    override def inputs: Lens[T, PrototypeSet] = closureTask composeLens ClosureTask.inputs
-    override def defaults: Lens[T, DefaultSet] = closureTask composeLens ClosureTask.defaults
-    override def name: Lens[T, Option[String]] = closureTask composeLens ClosureTask.name
-    override def outputs: Lens[T, PrototypeSet] = closureTask composeLens ClosureTask.outputs
-  }
+  implicit def isBuilder: TaskBuilder[ClosureTask] = TaskBuilder(ClosureTask.config)
 
-  implicit def isBuilder = taskBuilder(Lens.id)
-
-  def apply(closure: (Context, RandomProvider) ⇒ Context, className: String = "ClosureTask") =
-    new ClosureTask(
-      closure,
-      inputs = PrototypeSet.empty,
-      outputs = PrototypeSet.empty,
-      defaults = DefaultSet.empty,
-      name = None,
-      className = className
-    )
-
+  def apply(className: String)(closure: (Context, RandomProvider, TaskExecutionContext) ⇒ Context): ClosureTask = new ClosureTask(
+    closure,
+    className = className,
+    config = TaskConfig()
+  )
 }
 
 @Lenses case class ClosureTask(
-    closure:                (Context, RandomProvider) ⇒ Context,
-    inputs:                 PrototypeSet,
-    outputs:                PrototypeSet,
-    defaults:               DefaultSet,
-    name:                   Option[String],
-    override val className: String
+    closure:                (Context, RandomProvider, TaskExecutionContext) ⇒ Context,
+    override val className: String,
+    config:                 TaskConfig
 ) extends Task {
-  override protected def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider): Context =
-    closure(context, rng)
+  override protected def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider): Context = closure(context, rng, executionContext)
 }

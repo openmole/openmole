@@ -28,7 +28,7 @@ import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.tools.{ VariableExpansion, ExpandedString }
-import org.openmole.plugin.task.external.ExternalTask._
+import org.openmole.plugin.task.external.External._
 import org.openmole.plugin.task.external._
 import org.openmole.tool.file._
 
@@ -38,7 +38,7 @@ object NetLogoTask {
   case class Workspace(script: String, workspace: Option[String] = None)
 }
 
-trait NetLogoTask extends ExternalTask {
+trait NetLogoTask extends Task {
 
   def workspace: NetLogoTask.Workspace
   def launchingCommands: Seq[String]
@@ -47,6 +47,7 @@ trait NetLogoTask extends ExternalTask {
   def netLogoArrayOutputs: Iterable[(String, Int, Prototype[_])]
   def netLogoFactory: NetLogoFactory
   def seed: Option[Prototype[Int]]
+  def external: External
 
   private def wrapError[T](msg: String)(f: ⇒ T): T =
     try f
@@ -57,14 +58,14 @@ trait NetLogoTask extends ExternalTask {
 
   @transient lazy val expandedCommands = launchingCommands.map(VariableExpansion(_))
 
-  override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider): Context = withWorkDir(executionContext) { tmpDir ⇒
+  override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider): Context = external.withWorkDir(executionContext) { tmpDir ⇒
     val workDir =
       workspace.workspace match {
         case None    ⇒ tmpDir
         case Some(d) ⇒ tmpDir / d
       }
 
-    val preparedContext = prepareInputFiles(context, relativeResolver(tmpDir))
+    val preparedContext = external.prepareInputFiles(context, external.relativeResolver(tmpDir))
 
     val script = workDir / workspace.script
     val netLogo = netLogoFactory()
@@ -91,7 +92,7 @@ trait NetLogoTask extends ExternalTask {
         for (cmd ← expandedCommands) executeNetLogo(cmd.expand(context))
 
         val contextResult =
-          fetchOutputFiles(preparedContext, relativeResolver(workDir)) ++ netLogoOutputs.map {
+          external.fetchOutputFiles(preparedContext, external.relativeResolver(workDir)) ++ netLogoOutputs.map {
             case (name, prototype) ⇒
               try {
                 val outputValue = netLogo.report(name)
@@ -120,7 +121,7 @@ trait NetLogoTask extends ExternalTask {
               }
           }
 
-        checkAndClean(contextResult, tmpDir)
+        external.checkAndClean(this, contextResult, tmpDir)
         contextResult
       }
       finally netLogo.dispose

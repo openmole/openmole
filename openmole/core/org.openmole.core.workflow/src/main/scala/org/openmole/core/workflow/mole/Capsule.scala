@@ -134,15 +134,9 @@ class Capsule(_task: Task, val strainer: Boolean) {
 }
 
 class StrainerTaskDecorator(val task: Task) extends Task {
-  override def inputs = task.inputs
-  override def outputs = task.outputs
-
+  override def config = task.config
   override def perform(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = context + task.perform(context, executionContext)
   override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = throw new InternalProcessingError("This method should never be called")
-
-  override def defaults = task.defaults
-
-  override def name = task.name
 }
 
 object StrainerCapsule {

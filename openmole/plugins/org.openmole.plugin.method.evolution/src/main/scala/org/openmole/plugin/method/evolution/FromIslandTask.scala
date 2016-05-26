@@ -17,41 +17,22 @@
  */
 package org.openmole.plugin.method.evolution
 
-import monocle.macros.Lenses
-import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.dsl
-import dsl._
+import org.openmole.core.workflow.dsl._
 
 object FromIslandTask {
 
   def apply[T](algorithm: T)(implicit wfi: WorkflowIntegration[T]) = {
     val t = wfi(algorithm)
 
-    object FromIslandTask {
-      implicit def isBuilder = TaskBuilder[FromIslandTask].from(this)
-    }
-
-    @Lenses case class FromIslandTask(
-        inputs:   PrototypeSet   = PrototypeSet.empty,
-        outputs:  PrototypeSet   = PrototypeSet.empty,
-        defaults: DefaultSet     = DefaultSet.empty,
-        name:     Option[String] = None
-    ) extends Task {
-
-      override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = {
-        val population = t.operations.migrateFromIsland(context(t.populationPrototype))
-        Variable(t.populationPrototype, population)
-      }
-
-    }
-
-    FromIslandTask() set (
-      dsl.inputs += t.populationPrototype,
-      dsl.outputs += t.populationPrototype
+    ClosureTask("FromIslandTask") { (context, _, _) ⇒
+      val population = t.operations.migrateFromIsland(context(t.populationPrototype))
+      Variable(t.populationPrototype, population)
+    } set (
+      inputs += t.populationPrototype,
+      outputs += t.populationPrototype
     )
-
   }
 
 }

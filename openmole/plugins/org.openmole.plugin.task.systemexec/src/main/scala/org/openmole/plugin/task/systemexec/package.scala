@@ -27,15 +27,13 @@ import org.openmole.core.tools.service.ProcessUtil._
 import org.openmole.core.workflow.data.{ Context, Prototype, RandomProvider, Variable }
 import org.openmole.core.workflow.tools.{ FromContext, VariableExpansion }
 import org.openmole.core.workflow.tools.VariableExpansion.Expansion
-import org.openmole.plugin.task.external.ExternalTask
 import org.openmole.tool.stream.StringOutputStream
-import org.openmole.core.workflow.builder._
-import org.openmole.core.workflow.dsl
 import org.openmole.core.workflow.dsl._
-import language.implicitConversions
 
+import language.implicitConversions
 import collection.mutable.ListBuffer
 import monocle.Lens
+import org.openmole.plugin.task.external.External
 
 package systemexec {
 
@@ -85,7 +83,7 @@ package systemexec {
     def stdErr: Lens[T, Option[Prototype[String]]] // = None
   }
 
-  trait EnvironmentVariables[T] <: InputOutputBuilder[T] {
+  trait EnvironmentVariables[T] {
     def environmentVariables: Lens[T, Vector[(Prototype[_], String)]]
   }
 
@@ -134,7 +132,7 @@ package systemexec {
          * @param variable the name of the environment variable. By default the name of the environment
          *                 variable is the same as the one of the openmole protoype.
          */
-        def +=[T: EnvironmentVariables](prototype: Prototype[_], variable: Option[String] = None): T ⇒ T =
+        def +=[T: EnvironmentVariables: InputOutputBuilder](prototype: Prototype[_], variable: Option[String] = None): T ⇒ T =
           (implicitly[EnvironmentVariables[T]].environmentVariables add prototype → variable.getOrElse(prototype.name)) andThen
             (inputs += prototype)
       }
@@ -177,7 +175,7 @@ package object systemexec extends external.ExternalPackage with SystemExecPackag
     workDir: String,
     context: Context
   )(implicit rng: RandomProvider): Array[String] =
-    CommandLine.parse(cmd.from(context + Variable(ExternalTask.PWD, workDir))).toStrings
+    CommandLine.parse(cmd.from(context + Variable(External.PWD, workDir))).toStrings
 
   def execute(
     command:              Array[String],

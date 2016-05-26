@@ -19,44 +19,26 @@ package org.openmole.plugin.task.template
 
 import java.io.File
 
-import monocle.macros.Lenses
-import org.openmole.core.workflow.builder.TaskBuilder
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.dsl
 import dsl._
-import org.openmole.core.workflow.tools.VariableExpansion
+import org.openmole.core.workflow.tools._
 
 object TemplateFileFromInputTask {
-
-  implicit def isBuilder = TaskBuilder[TemplateFileFromInputTask].from(this)
 
   def apply(
     template: Prototype[File],
     output:   Prototype[File]
   ) =
-    new TemplateFileFromInputTask(template, output) set (
-      dsl.inputs += template,
-      dsl.outputs += output
+    ClosureTask("TemplateFileFromInputTask") { (context, rng, executionContext) ⇒
+      implicit val impRng = rng
+      val expanded = context(template).withInputStream { is ⇒ VariableExpansion(is).expand(context) }
+      val file = executionContext.tmpDirectory.newFile("template", ".tmp")
+      file.content = expanded
+      context + (output → file)
+    } set (
+      inputs += template,
+      outputs += output
     )
-}
-
-@Lenses case class TemplateFileFromInputTask(
-    template: Prototype[File],
-    output:   Prototype[File],
-    inputs:   PrototypeSet    = PrototypeSet.empty,
-    outputs:  PrototypeSet    = PrototypeSet.empty,
-    defaults: DefaultSet      = DefaultSet.empty,
-    name:     Option[String]  = None
-) extends Task {
-
-  override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = {
-    val expanded = context(template).withInputStream { is ⇒
-      VariableExpansion(is).expand(context)
-    }
-    val file = executionContext.tmpDirectory.newFile("template", ".tmp")
-    file.content = expanded
-    context + (output → file)
-  }
-
 }

@@ -19,43 +19,18 @@ package org.openmole.plugin.task.care
 
 import java.io.File
 
-import org.openmole.plugin.task.external.ExternalTaskBuilder
+import org.openmole.plugin.task.external.ExternalBuilder
 import org.openmole.plugin.task.systemexec._
 import org.openmole.plugin.task.systemexec
 import org.openmole.core.workflow.data._
 import monocle.Lens
 
-trait CARETaskBuilder[T]
-    extends ExternalTaskBuilder[T]
-    with ReturnValue[T]
+trait CARETaskBuilder[T] extends ReturnValue[T]
     with ErrorOnReturnValue[T]
     with StdOutErr[T]
     with EnvironmentVariables[T]
     with WorkDirectory[T] { builder ⇒
 
-  //(archiveLocation: File, command: systemexec.Command)
-
   def hostFiles: Lens[T, Vector[(String, Option[String])]]
-
-  /*val hostFiles = ListBuffer[(String, Option[String])]()
-
-  def addHostFile(hostFile: String, binding: Option[String] = None): this.type = {
-    hostFiles.append(hostFile → binding)
-    this
-  }*/
-
-  //  override def toTask: CARETask = new CARETask(
-  //    archiveLocation,
-  //    command,
-  //    workDirectory,
-  //    errorOnReturnValue,
-  //    returnValue,
-  //    stdOut,
-  //    stdErr,
-  //    environmentVariables.toList,
-  //    hostFiles.toList
-  //  ) with builder.Built {
-  //    override val outputs: PrototypeSet = builder.outputs + List(stdOut, stdErr, returnValue).flatten
-  //  }
 
 }
