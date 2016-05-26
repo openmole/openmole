@@ -83,8 +83,8 @@ object OutputManager {
   case class Outputs(output: String, error: String)
 
   def withStringOutput[T](f: ⇒ T): (T, Outputs) = {
-    val o = new StringPrintStream()
-    val e = new StringPrintStream()
+    val o = StringPrintStream()
+    val e = StringPrintStream()
     redirectOutput(o, e)
 
     val res =

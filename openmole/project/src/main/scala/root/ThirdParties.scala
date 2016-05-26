@@ -14,7 +14,7 @@ object ThirdParties extends Defaults {
   lazy val openmoleLogger = OsgiProject("org.openmole.tool.logger", imports = Seq("*")) settings (bundleType := Set("core"))
   lazy val openmoleThread = OsgiProject("org.openmole.tool.thread", imports = Seq("*")) settings (bundleType := Set("core")) dependsOn (openmoleLogger)
   lazy val openmoleHash = OsgiProject("org.openmole.tool.hash", imports = Seq("*")) settings (bundleType := Set("core")) dependsOn (openmoleFile, openmoleStream)
-  lazy val openmoleStream = OsgiProject("org.openmole.tool.stream", imports = Seq("*")) settings (bundleType := Set("core")) dependsOn (openmoleThread)
+  lazy val openmoleStream = OsgiProject("org.openmole.tool.stream", imports = Seq("*")) settings (bundleType := Set("core")) dependsOn (openmoleThread) settings (libraryDependencies += Libraries.collections)
   lazy val openmoleCollection = OsgiProject("org.openmole.tool.collection", imports = Seq("*")) settings (bundleType := Set("core")) settings (libraryDependencies += Libraries.scalaLang)
   lazy val openmoleCrypto = OsgiProject("org.openmole.tool.crypto", imports = Seq("*")) settings (bundleType := Set("core")) settings (libraryDependencies += Libraries.bouncyCastle)
   lazy val openmoleStatistics = OsgiProject("org.openmole.tool.statistics", imports = Seq("*")) settings (bundleType := Set("core")) dependsOn (openmoleLogger)

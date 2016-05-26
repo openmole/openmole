@@ -104,7 +104,8 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
     Libraries.scalaLang,
     Libraries.slf4j,
     Libraries.scalaz,
-    Libraries.asm
+    Libraries.asm,
+    Libraries.collections
   ) ++ webServerDependencies
 
   lazy val guiCoreDependencies = Seq(

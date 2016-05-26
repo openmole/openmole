@@ -14,7 +14,7 @@ import org.openmole.core.serializer.SerialiserService
 import org.openmole.gui.misc.utils.Utils._
 import org.openmole.gui.server.core.Runnings.RunningEnvironment
 import org.openmole.gui.server.core.Utils._
-import org.openmole.core.workspace.Workspace
+import org.openmole.core.workspace.{ ConfigurationLocation, Workspace }
 import org.openmole.gui.shared._
 import org.openmole.gui.ext.data
 import org.openmole.gui.ext.data._
@@ -54,6 +54,8 @@ import org.openmole.gui.server.core
  */
 
 object ApiImpl extends Api {
+
+  val outputSize = ConfigurationLocation[Int]("gui", "outputsize", Some(10 * 1024 * 1024))
 
   val execution = new Execution
 
@@ -276,7 +278,7 @@ object ApiImpl extends Api {
         case CompilationError(e)       ⇒ error(e)
         case compiled: Compiled ⇒
 
-          val outputStream = new StringPrintStream()
+          val outputStream = StringPrintStream(Some(Workspace.preference(outputSize)))
           Runnings.setOutput(execId, outputStream)
 
           def catchAll[T](f: ⇒ T): Try[T] = {

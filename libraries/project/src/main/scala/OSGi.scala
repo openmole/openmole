@@ -249,6 +249,9 @@ object OSGi extends Defaults {
   lazy val codec = OsgiProject("org.apache.commons.codec") settings
     (libraryDependencies += "commons-codec" % "commons-codec" % "1.10", version := "1.10")
 
+  lazy val collections = OsgiProject("org.apache.commons.collections", exports = Seq("org.apache.commons.collections4.*")) settings
+    (libraryDependencies += "org.apache.commons" % "commons-collections4" % "4.1", version := "4.1")
+
   lazy val jgit = OsgiProject("org.eclipse.jgit", privatePackages = Seq("!scala.*", "!org.slf4j.*", "*"))  settings (
     libraryDependencies += "org.eclipse.jgit" % "org.eclipse.jgit.java7" % "3.7.1.201504261725-r", version := "3.7.1" )
 

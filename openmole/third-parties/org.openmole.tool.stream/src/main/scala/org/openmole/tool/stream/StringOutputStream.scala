@@ -17,12 +17,21 @@
 
 package org.openmole.tool.stream
 
-import java.io.{ PrintStream, OutputStream }
+import java.io.{ OutputStream, PrintStream }
 
-class SynchronizedBuilder {
+import org.apache.commons.collections4.queue._
+import collection.JavaConversions._
+
+trait Builder {
+  def append(c: Char): Unit
+  def clear(): String
+  def toString: String
+}
+
+class SynchronizedBuilder() extends Builder {
   lazy val builder = new StringBuilder
   def append(c: Char) = builder.synchronized { builder.append(c) }
-  def read: String = builder.synchronized {
+  def clear(): String = builder.synchronized {
     val content = builder.mkString
     builder.clear()
     content
@@ -30,23 +39,50 @@ class SynchronizedBuilder {
   override def toString = builder.mkString
 }
 
-class StringOutputStream extends OutputStream {
-  lazy val builder = new SynchronizedBuilder
+class SynchronizedRingBuilder(size: Int) extends Builder {
+  lazy val buffer = new CircularFifoQueue[Char](size)
+
+  def append(c: Char) = buffer.synchronized { buffer.add(c) }
+
+  def clear(): String = buffer.synchronized {
+    val content = buffer.iterator().toArray.mkString
+    buffer.clear()
+    content
+  }
+
+  override def toString = buffer.iterator().toArray.mkString
+
+}
+
+class StringOutputStream(maxCharacters: Option[Int] = None) extends OutputStream {
+  lazy val builder =
+    maxCharacters match {
+      case None    ⇒ new SynchronizedBuilder
+      case Some(n) ⇒ new SynchronizedRingBuilder(n)
+    }
+
   override def write(b: Int) = builder.append(b.toChar)
 
-  def read: String = {
+  def clear(): String = {
     flush()
-    builder.read
+    builder.clear()
   }
 
   override def toString: String = builder.toString
 }
 
-class StringPrintStream(val os: StringOutputStream = new StringOutputStream) extends PrintStream(os) {
-  def read: String = {
-    flush()
-    os.read
-  }
+object StringPrintStream {
 
-  override def toString = os.toString
+  def apply(maxCharacters: Option[Int] = None) =
+    new StringPrintStream(new StringOutputStream(maxCharacters))
+
+}
+
+class StringPrintStream(os: StringOutputStream) extends PrintStream(os) {
+  def clear(): String = os.clear()
+
+  override def toString = {
+    flush()
+    os.toString
+  }
 }

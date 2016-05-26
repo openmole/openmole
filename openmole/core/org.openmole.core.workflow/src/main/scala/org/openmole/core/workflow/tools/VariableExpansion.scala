@@ -61,7 +61,7 @@ object VariableExpansion {
       c match {
         case '{' ⇒
           if (dollar) {
-            expandedElements += UnexpandedElement(os.read)
+            expandedElements += UnexpandedElement(os.clear())
             val toExpand = nextToExpand(it)
             expandedElements += ExpandedElement(toExpand)
           }
@@ -77,7 +77,7 @@ object VariableExpansion {
       }
     }
     if (dollar) os.write('$')
-    expandedElements += UnexpandedElement(os.read)
+    expandedElements += UnexpandedElement(os.clear())
     ElementsExpansion(expandedElements)
   }
 
