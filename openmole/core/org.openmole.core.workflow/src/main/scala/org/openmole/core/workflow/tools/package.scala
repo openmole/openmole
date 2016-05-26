@@ -44,6 +44,10 @@ package tools {
       def add(u: U) = l.modify(_ ++ Seq(u))
     }
 
+    implicit class SeqOfEndofunctorDecorator[T](f: Seq[T ⇒ T]) {
+      def sequence: T ⇒ T = { t: T ⇒ f.foldLeft(t)((a, f) ⇒ f(a)) }
+    }
+
     def c(s: String): FromContext[String] = s
   }
 }

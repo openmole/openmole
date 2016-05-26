@@ -17,8 +17,6 @@
 
 package org.openmole.plugin.task
 
-import java.io.File
-
 import org.openmole.core.tools.service.OS
 import org.openmole.core.dsl._
 import org.openmole.core.workflow.data._
@@ -90,6 +88,9 @@ package external {
          */
         def +=[T: ExternalBuilder](file: File, name: Option[ExpandedString] = None, link: Boolean = false, os: OS = OS()): T ⇒ T =
           implicitly[ExternalBuilder[T]].resources add External.Resource(file, name.getOrElse(file.getName), link, os)
+
+        def +=[T: ExternalBuilder](files: File*): T ⇒ T =
+          files.map(f ⇒ this.+=[T](f, f.getName)).sequence
       }
   }
 }
