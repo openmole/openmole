@@ -57,7 +57,7 @@
     val aaaDirs = Val[Array[File]]
 
     // will fill dirs with all the subdirectories of "directory"
-    val s1 = ListDirectoriesSource(workDirectory "directory", dirs)
+    val s1 = ListDirectoriesSource(workDirectory / "directory", dirs)
 
     val s2 =
       // will fill aaaDirs with all the subdirectories of "directory" starting with aaa
