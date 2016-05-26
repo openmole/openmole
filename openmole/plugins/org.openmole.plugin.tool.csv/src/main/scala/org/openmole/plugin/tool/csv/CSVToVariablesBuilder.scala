@@ -19,11 +19,11 @@ package org.openmole.plugin.tool.csv
 
 import java.io.File
 
-import org.openmole.core.workflow.builder.{ Builder, InputOutputBuilder, SamplingBuilder }
+import org.openmole.core.workflow.builder.InputOutputBuilder
 import monocle.Lens
 import org.openmole.core.dsl._
 
-trait CSVToVariablesBuilder[T] extends Builder[T] with InputOutputBuilder[T] {
+trait CSVToVariablesBuilder[T] {
   def columns: Lens[T, Vector[(String, Val[_])]]
   def fileColumns: Lens[T, Vector[(String, File, Val[File])]]
   def separator: Lens[T, Option[Char]]

@@ -17,31 +17,10 @@
 
 package org.openmole.plugin.hook.file
 
-import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools.ExpandedString
 import monocle.Lens
 
-trait AppendToCSVFileHookBuilder[T] extends HookBuilder[T] {
-
-  //(fileName: ExpandedString, prototypes: Prototype[_]*)
-
+trait AppendToCSVFileHookBuilder[T] {
   def csvHeader: Lens[T, Option[ExpandedString]]
   def arraysOnSingleRow: Lens[T, Boolean]
-
-  //  prototypes.foreach(p ⇒ addInput(p))
-  //  private var csvHeader: Option[ExpandedString] = None
-  //  private var singleRow: Boolean = false
-  //
-  //  def setCSVHeader(h: Option[ExpandedString]) = {
-  //    csvHeader = h
-  //    this
-  //  }
-  //
-  //  def setSingleRow(b: Boolean) = {
-  //    singleRow = b
-  //    this
-  //  }
-  //
-  //  override def toHook = new AppendToCSVFileHook(fileName, csvHeader, singleRow, prototypes: _*) with Built
 }

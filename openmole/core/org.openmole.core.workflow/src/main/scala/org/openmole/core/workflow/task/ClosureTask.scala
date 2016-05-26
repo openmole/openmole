@@ -26,19 +26,19 @@ import scala.util.Random
 
 object ClosureTask {
 
-  implicit def isBuilder: TaskBuilder[ClosureTask] = TaskBuilder(ClosureTask.config)
+  implicit def isBuilder: InputOutputBuilder[ClosureTask] = InputOutputBuilder(ClosureTask.config)
 
   def apply(className: String)(closure: (Context, RandomProvider, TaskExecutionContext) ⇒ Context): ClosureTask = new ClosureTask(
     closure,
     className = className,
-    config = TaskConfig()
+    config = InputOutputConfig()
   )
 }
 
 @Lenses case class ClosureTask(
     closure:                (Context, RandomProvider, TaskExecutionContext) ⇒ Context,
     override val className: String,
-    config:                 TaskConfig
+    config:                 InputOutputConfig
 ) extends Task {
   override protected def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider): Context = closure(context, rng, executionContext)
 }

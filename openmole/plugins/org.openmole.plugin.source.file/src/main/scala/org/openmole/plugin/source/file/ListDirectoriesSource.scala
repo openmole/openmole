@@ -17,46 +17,33 @@
 
 package org.openmole.plugin.source.file
 
-import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.data._
 import java.io.File
 
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.tools.ExpandedString
-import org.openmole.core.dsl
-import dsl._
+import org.openmole.core.dsl._
 import monocle.macros.Lenses
+import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
 
 object ListDirectoriesSource {
 
-  implicit def isBuilder = new SourceBuilder[ListDirectoriesSource] {
-    override def name = ListDirectoriesSource.name
-    override def outputs = ListDirectoriesSource.outputs
-    override def inputs = ListDirectoriesSource.inputs
-    override def defaults = ListDirectoriesSource.defaults
-  }
+  implicit def isIO = InputOutputBuilder(ListDirectoriesSource.config)
 
   def apply(path: ExpandedString, prototype: Prototype[Array[File]], regExp: ExpandedString = ".*") =
     new ListDirectoriesSource(
       path,
       prototype,
       regExp,
-      inputs = PrototypeSet.empty,
-      outputs = PrototypeSet.empty,
-      defaults = DefaultSet.empty,
-      name = None
-    ) set (dsl.outputs += prototype)
+      config = InputOutputConfig()
+    ) set (outputs += prototype)
 }
 
 @Lenses case class ListDirectoriesSource(
     path:      ExpandedString,
     prototype: Prototype[Array[File]],
     regExp:    ExpandedString,
-    inputs:    PrototypeSet,
-    outputs:   PrototypeSet,
-    defaults:  DefaultSet,
-    name:      Option[String]
+    config:    InputOutputConfig
 ) extends Source {
 
   override def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider) = {

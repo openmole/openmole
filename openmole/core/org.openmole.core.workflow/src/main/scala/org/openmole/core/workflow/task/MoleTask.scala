@@ -33,7 +33,7 @@ import dsl._
 
 object MoleTask {
 
-  implicit def isTask = TaskBuilder(MoleTask.config)
+  implicit def isTask = InputOutputBuilder(MoleTask.config)
 
   def apply(puzzle: Puzzle): MoleTask =
     apply(puzzle toMole, puzzle.lasts.head)
@@ -58,8 +58,8 @@ object MoleTask {
 @Lenses case class MoleTask(
     _mole:     Mole,
     last:      Capsule,
-    implicits: Vector[String] = Vector.empty,
-    config:    TaskConfig     = TaskConfig()
+    implicits: Vector[String]    = Vector.empty,
+    config:    InputOutputConfig = InputOutputConfig()
 ) extends Task {
 
   def mole = _mole.copy(inputs = inputs)

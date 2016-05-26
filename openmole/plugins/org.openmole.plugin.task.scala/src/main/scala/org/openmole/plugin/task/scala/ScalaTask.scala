@@ -18,9 +18,10 @@
 package org.openmole.plugin.task.scala
 
 import java.io.File
+
 import monocle.macros.Lenses
 import org.openmole.core.exception.InternalProcessingError
-import org.openmole.core.workflow.builder.TaskBuilder
+import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.tools._
@@ -32,7 +33,7 @@ import scala.util._
 
 object ScalaTask {
 
-  implicit def isTask: TaskBuilder[ScalaTask] = TaskBuilder(ScalaTask.config)
+  implicit def isTask: InputOutputBuilder[ScalaTask] = InputOutputBuilder(ScalaTask.config)
   implicit def isExternal: ExternalBuilder[ScalaTask] = ExternalBuilder(ScalaTask.external)
 
   implicit def isJVM: JVMLanguageBuilder[ScalaTask] = new JVMLanguageBuilder[ScalaTask] {
@@ -45,7 +46,7 @@ object ScalaTask {
       source,
       plugins = Vector.empty,
       libraries = Vector.empty,
-      config = TaskConfig(),
+      config = InputOutputConfig(),
       external = External()
     )
 
@@ -61,7 +62,7 @@ object ScalaTask {
     sourceCode: String,
     plugins:    Vector[File],
     libraries:  Vector[File],
-    config:     TaskConfig,
+    config:     InputOutputConfig,
     external:   External
 ) extends JVMLanguageTask with ValidateTask {
 

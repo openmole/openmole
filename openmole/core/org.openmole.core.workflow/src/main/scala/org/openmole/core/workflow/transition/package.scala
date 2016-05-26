@@ -17,7 +17,7 @@
 
 package org.openmole.core.workflow
 
-import org.openmole.core.workflow.builder.TaskBuilder
+import org.openmole.core.workflow.builder.InputOutputBuilder$
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.puzzle._
 import org.openmole.core.workflow.tools._

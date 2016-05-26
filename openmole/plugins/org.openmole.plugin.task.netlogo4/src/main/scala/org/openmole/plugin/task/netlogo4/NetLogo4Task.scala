@@ -31,7 +31,7 @@ import java.io.File
 
 import monocle.Lens
 import monocle.macros.Lenses
-import org.openmole.core.workflow.builder.TaskBuilder
+import org.openmole.core.workflow.builder._
 
 import collection.JavaConversions._
 import org.openmole.plugin.tool.netlogo4.NetLogo4
@@ -42,7 +42,7 @@ object NetLogo4Task {
     def apply = new NetLogo4
   }
 
-  implicit def isTask: TaskBuilder[NetLogo4Task] = TaskBuilder(NetLogo4Task.config)
+  implicit def isTask: InputOutputBuilder[NetLogo4Task] = InputOutputBuilder(NetLogo4Task.config)
   implicit def isExternal: ExternalBuilder[NetLogo4Task] = ExternalBuilder(NetLogo4Task.external)
 
   implicit def isNetLogo: NetLogoTaskBuilder[NetLogo4Task] = new NetLogoTaskBuilder[NetLogo4Task] {
@@ -95,7 +95,7 @@ object NetLogo4Task {
     seed:              Option[Prototype[Int]]
   ) =
     NetLogo4Task(
-      config = TaskConfig(),
+      config = InputOutputConfig(),
       external = External(),
       netLogoInputs = Vector.empty,
       netLogoOutputs = Vector.empty,
@@ -108,7 +108,7 @@ object NetLogo4Task {
 }
 
 @Lenses case class NetLogo4Task(
-    config:              TaskConfig,
+    config:              InputOutputConfig,
     external:            External,
     netLogoInputs:       Vector[(Prototype[_], String)],
     netLogoOutputs:      Vector[(String, Prototype[_])],

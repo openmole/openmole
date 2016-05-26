@@ -17,10 +17,5 @@
 package org.openmole.core.workflow.builder
 
 trait NameBuilder[T] { builder ⇒
-
   def name: monocle.Lens[T, Option[String]]
-
-  /* trait Built {
-    lazy val name = builder.name.orElse(Some(s"${getClass.getSuperclass.getSimpleName}@$hashCode"))
-  }*/
 }

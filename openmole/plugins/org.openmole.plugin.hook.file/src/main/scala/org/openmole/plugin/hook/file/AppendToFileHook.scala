@@ -18,7 +18,9 @@
 package org.openmole.plugin.hook.file
 
 import java.io.File
+
 import monocle.macros.Lenses
+import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
 import org.openmole.tool.stream._
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.data._
@@ -30,21 +32,13 @@ import org.openmole.core.workflow.dsl._
 
 object AppendToFileHook {
 
-  implicit def isBuilder = new HookBuilder[AppendToFileHook] {
-    override def name = AppendToFileHook.name
-    override def outputs = AppendToFileHook.outputs
-    override def inputs = AppendToFileHook.inputs
-    override def defaults = AppendToFileHook.defaults
-  }
+  implicit def isIO: InputOutputBuilder[AppendToFileHook] = InputOutputBuilder(AppendToFileHook.config)
 
   def apply(fileName: ExpandedString, content: ExpandedString) =
     new AppendToFileHook(
       fileName,
       content,
-      inputs = PrototypeSet.empty,
-      outputs = PrototypeSet.empty,
-      defaults = DefaultSet.empty,
-      name = None
+      config = InputOutputConfig()
     )
 
 }
@@ -52,10 +46,7 @@ object AppendToFileHook {
 @Lenses case class AppendToFileHook(
     fileName: ExpandedString,
     content:  ExpandedString,
-    inputs:   PrototypeSet,
-    outputs:  PrototypeSet,
-    defaults: DefaultSet,
-    name:     Option[String]
+    config:   InputOutputConfig
 ) extends Hook with ValidateHook {
 
   override def validate(inputs: Seq[Val[_]]): Seq[Throwable] =

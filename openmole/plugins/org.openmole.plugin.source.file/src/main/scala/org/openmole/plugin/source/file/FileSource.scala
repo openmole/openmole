@@ -29,24 +29,17 @@ import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.tools.ExpandedString
 import org.openmole.core.dsl
 import org.openmole.core.dsl._
+import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
 
 object FileSource {
 
-  implicit def isBuilder = new SourceBuilder[FileSource] {
-    override def name = FileSource.name
-    override def outputs = FileSource.outputs
-    override def inputs = FileSource.inputs
-    override def defaults = FileSource.defaults
-  }
+  implicit def isIO = InputOutputBuilder(FileSource.config)
 
   def apply(path: ExpandedString, prototype: Prototype[File]) =
     new FileSource(
       path,
       prototype,
-      inputs = PrototypeSet.empty,
-      outputs = PrototypeSet.empty,
-      defaults = DefaultSet.empty,
-      name = None
+      config = InputOutputConfig()
     ) set (dsl.outputs += prototype)
 
 }
@@ -54,10 +47,7 @@ object FileSource {
 @Lenses case class FileSource(
     path:      ExpandedString,
     prototype: Prototype[File],
-    inputs:    PrototypeSet,
-    outputs:   PrototypeSet,
-    defaults:  DefaultSet,
-    name:      Option[String]
+    config:    InputOutputConfig
 ) extends Source {
 
   override def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider) = {

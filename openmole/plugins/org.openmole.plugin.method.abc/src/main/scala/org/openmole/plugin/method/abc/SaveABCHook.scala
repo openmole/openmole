@@ -17,7 +17,6 @@
 
 package org.openmole.plugin.method.abc
 
-import org.openmole.core.workflow.mole.HookBuilder
 import org.openmole.core.workflow.tools.ExpandedString
 import org.openmole.plugin.hook.file._
 import org.openmole.core.workflow.data._

@@ -18,9 +18,6 @@
 package org.openmole.plugin.source.file
 
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.tool.file._
-import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.mole._
@@ -30,37 +27,26 @@ import monocle.macros.Lenses
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.tools.ExpandedString
 import org.openmole.core.serializer._
-import org.openmole.core.dsl
-import dsl._
+import org.openmole.core.dsl._
+import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
 
 object LoadSource {
 
-  implicit def isBuilder = new SourceBuilder[LoadSource] {
-    override def name = LoadSource.name
-    override def outputs = LoadSource.outputs
-    override def inputs = LoadSource.inputs
-    override def defaults = LoadSource.defaults
-  }
+  implicit def isIO = InputOutputBuilder(LoadSource.config)
 
   def apply(file: ExpandedString, prototypes: Prototype[_]*) =
     new LoadSource(
       file,
       prototypes.toVector,
-      inputs = PrototypeSet.empty,
-      outputs = PrototypeSet.empty,
-      defaults = DefaultSet.empty,
-      name = None
-    ) set (dsl.outputs += (prototypes: _*))
+      config = InputOutputConfig()
+    ) set (outputs += (prototypes: _*))
 
 }
 
 @Lenses case class LoadSource(
     file:       ExpandedString,
     prototypes: Vector[Prototype[_]],
-    inputs:     PrototypeSet,
-    outputs:    PrototypeSet,
-    defaults:   DefaultSet,
-    name:       Option[String]
+    config:     InputOutputConfig
 ) extends Source {
 
   override def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider) = {

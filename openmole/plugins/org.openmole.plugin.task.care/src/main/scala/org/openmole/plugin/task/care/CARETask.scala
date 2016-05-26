@@ -35,10 +35,10 @@ import org.openmole.core.workflow.dsl._
 import scalaz._
 import Scalaz._
 import monocle.macros.Lenses
-import org.openmole.core.workflow.builder.TaskBuilder
+import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputBuilder$, InputOutputConfig }
 
 object CARETask extends Logger {
-  implicit def isTask: TaskBuilder[CARETask] = TaskBuilder(CARETask._config)
+  implicit def isTask: InputOutputBuilder[CARETask] = InputOutputBuilder(CARETask._config)
   implicit def isExternal: ExternalBuilder[CARETask] = ExternalBuilder(CARETask.external)
 
   implicit def isBuilder = new CARETaskBuilder[CARETask] {
@@ -62,7 +62,7 @@ object CARETask extends Logger {
       stdOut = None,
       stdErr = None,
       environmentVariables = Vector.empty,
-      _config = TaskConfig(),
+      _config = InputOutputConfig(),
       external = External()
     )
 
@@ -78,11 +78,11 @@ object CARETask extends Logger {
     stdOut:               Option[Prototype[String]],
     stdErr:               Option[Prototype[String]],
     environmentVariables: Vector[(Prototype[_], String)],
-    _config:              TaskConfig,
+    _config:              InputOutputConfig,
     external:             External
 ) extends Task with ValidateTask {
 
-  def config = TaskConfig.outputs.modify(_ ++ Seq(stdOut, stdErr, returnValue).flatten)(_config)
+  def config = InputOutputConfig.outputs.modify(_ ++ Seq(stdOut, stdErr, returnValue).flatten)(_config)
 
   lazy val expandedCommand = VariableExpansion(command.command)
 

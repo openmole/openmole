@@ -23,29 +23,26 @@ import monocle.macros.Lenses
 import monocle.Lens
 import org.openmole.plugin.hook.file.CopyFileHook.CopyOptions
 import org.openmole.tool.tar._
-import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools.ExpandedString
-import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.mole.MoleExecutionContext
 import org.openmole.core.workflow.validation.ValidateHook
-import org.openmole.core.dsl._
+import org.openmole.core.workflow.dsl._
 
 object CopyFileHook {
 
   case class CopyOptions(remove: Boolean, compress: Boolean, move: Boolean)
 
-  trait CopyFileHookBuilder[T] extends HookBuilder[T] {
+  trait CopyFileHookBuilder[T] {
     def copies: Lens[T, Vector[(Prototype[File], ExpandedString, CopyOptions)]]
   }
 
-  implicit def isBuilder = new CopyFileHookBuilder[CopyFileHook] {
+  implicit def isIO: InputOutputBuilder[CopyFileHook] = InputOutputBuilder(CopyFileHook.config)
+
+  implicit def isCopy: CopyFileHookBuilder[CopyFileHook] = new CopyFileHookBuilder[CopyFileHook] {
     override def copies = CopyFileHook.copies
-    override def name = CopyFileHook.name
-    override def outputs = CopyFileHook.outputs
-    override def inputs = CopyFileHook.inputs
-    override def defaults = CopyFileHook.defaults
   }
 
   def apply(
@@ -60,20 +57,14 @@ object CopyFileHook {
   def apply(): CopyFileHook =
     new CopyFileHook(
       Vector.empty,
-      inputs = PrototypeSet.empty,
-      outputs = PrototypeSet.empty,
-      defaults = DefaultSet.empty,
-      name = None
+      config = InputOutputConfig()
     )
 
 }
 
 @Lenses case class CopyFileHook(
-    copies:   Vector[(Prototype[File], ExpandedString, CopyOptions)],
-    inputs:   PrototypeSet,
-    outputs:  PrototypeSet,
-    defaults: DefaultSet,
-    name:     Option[String]
+    copies: Vector[(Prototype[File], ExpandedString, CopyOptions)],
+    config: InputOutputConfig
 ) extends Hook with ValidateHook {
 
   override def validate(inputs: Seq[Prototype[_]]) = copies.flatMap(_._2.validate(inputs)).toSeq

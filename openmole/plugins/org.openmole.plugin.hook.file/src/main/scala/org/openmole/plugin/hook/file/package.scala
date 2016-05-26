@@ -21,9 +21,8 @@ import java.io.File
 import org.openmole.core.workflow.data.Prototype
 import org.openmole.core.workflow.tools.ExpandedString
 import org.openmole.plugin.hook.file.CopyFileHook.CopyFileHookBuilder
-import org.openmole.core.macros.Keyword._
-import org.openmole.core.dsl
-import dsl._
+import org.openmole.core.dsl._
+import org.openmole.core.workflow.builder._
 import org.openmole.plugin.hook.file.CopyFileHook.CopyOptions
 
 package file {
@@ -31,9 +30,9 @@ package file {
   trait FilePackage {
 
     def copies = new {
-      def +=[T: CopyFileHookBuilder](prototype: Prototype[File], destination: ExpandedString, remove: Boolean = false, compress: Boolean = false, move: Boolean = false): T ⇒ T =
+      def +=[T: CopyFileHookBuilder: InputOutputBuilder](prototype: Prototype[File], destination: ExpandedString, remove: Boolean = false, compress: Boolean = false, move: Boolean = false): T ⇒ T =
         (implicitly[CopyFileHookBuilder[T]].copies add ((prototype, destination, CopyOptions(remove, compress, move)))) andThen
-          (dsl.inputs += prototype) andThen (if (move) (dsl.outputs += prototype) else identity)
+          (inputs += prototype) andThen (if (move) (outputs += prototype) else identity)
     }
 
     def csvHeader = new {

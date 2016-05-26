@@ -19,8 +19,6 @@ package org.openmole.plugin.sampling
 
 import java.io.File
 import java.nio.file.Path
-
-import org.openmole.core.workflow.builder.SamplingBuilder
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.sampling._

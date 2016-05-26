@@ -27,18 +27,16 @@ import monocle.macros.Lenses
 
 import scala.annotation.tailrec
 import org.openmole.core.workflow.mole._
-import org.openmole.core.dsl
-import dsl._
+import org.openmole.core.workflow.dsl._
+import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
 
 object AppendToCSVFileHook {
 
-  implicit def isBuilder = new AppendToCSVFileHookBuilder[AppendToCSVFileHook] {
+  implicit def isIO: InputOutputBuilder[AppendToCSVFileHook] = InputOutputBuilder(AppendToCSVFileHook.config)
+
+  implicit def isBuilder: AppendToCSVFileHookBuilder[AppendToCSVFileHook] = new AppendToCSVFileHookBuilder[AppendToCSVFileHook] {
     override def csvHeader = AppendToCSVFileHook.header
     override def arraysOnSingleRow = AppendToCSVFileHook.arraysOnSingleRow
-    override def name = AppendToCSVFileHook.name
-    override def outputs = AppendToCSVFileHook.outputs
-    override def inputs = AppendToCSVFileHook.inputs
-    override def defaults = AppendToCSVFileHook.defaults
   }
 
   def apply(fileName: ExpandedString, prototypes: Prototype[_]*) =
@@ -47,11 +45,8 @@ object AppendToCSVFileHook {
       prototypes.toVector,
       header = None,
       arraysOnSingleRow = false,
-      inputs = PrototypeSet.empty,
-      outputs = PrototypeSet.empty,
-      defaults = DefaultSet.empty,
-      name = None
-    ) set (dsl.inputs += (prototypes: _*))
+      config = InputOutputConfig()
+    ) set (inputs += (prototypes: _*))
 
 }
 
@@ -60,10 +55,7 @@ object AppendToCSVFileHook {
     prototypes:        Vector[Prototype[_]],
     header:            Option[ExpandedString],
     arraysOnSingleRow: Boolean,
-    inputs:            PrototypeSet,
-    outputs:           PrototypeSet,
-    defaults:          DefaultSet,
-    name:              Option[String]
+    config:            InputOutputConfig
 ) extends Hook with ValidateHook {
 
   override def validate(inputs: Seq[Prototype[_]]): Seq[Throwable] =

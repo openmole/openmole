@@ -76,7 +76,7 @@ package builder {
 
     final lazy val name = new Name
 
-    implicit class SetBuilder[T: Builder](t: T) {
+    implicit class SetBuilder[T](t: T) {
       def set(ops: (T ⇒ T)*): T =
         ops.foldLeft(t) { (curT, op) ⇒ op(curT) }
     }

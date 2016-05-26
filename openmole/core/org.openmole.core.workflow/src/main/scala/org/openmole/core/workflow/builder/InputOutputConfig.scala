@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2014 Romain Reuillon
+/**
+ * Created by Romain Reuillon on 26/05/16.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -13,8 +13,16 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
  */
-
 package org.openmole.core.workflow.builder
 
-trait Builder[T]
+import monocle.macros.Lenses
+import org.openmole.core.workflow.data.{ DefaultSet, PrototypeSet }
+
+@Lenses case class InputOutputConfig(
+  inputs:   PrototypeSet   = PrototypeSet.empty,
+  outputs:  PrototypeSet   = PrototypeSet.empty,
+  defaults: DefaultSet     = DefaultSet.empty,
+  name:     Option[String] = None
+)

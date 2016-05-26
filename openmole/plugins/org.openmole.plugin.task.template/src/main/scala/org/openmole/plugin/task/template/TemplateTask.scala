@@ -27,7 +27,7 @@ import org.openmole.core.workflow.tools._
 
 object TemplateTask {
 
-  implicit def isBuilder: TaskBuilder[TemplateTask] = TaskBuilder(TemplateTask.config)
+  implicit def isBuilder: InputOutputBuilder[TemplateTask] = InputOutputBuilder(TemplateTask.config)
 
   def apply(
     template: String,
@@ -39,7 +39,7 @@ object TemplateTask {
 @Lenses case class TemplateTask(
     template: String,
     output:   Prototype[File],
-    config:   TaskConfig      = TaskConfig()
+    config:   InputOutputConfig = InputOutputConfig()
 ) extends Task {
 
   @transient lazy val expanded = VariableExpansion(template)

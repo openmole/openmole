@@ -28,37 +28,26 @@ import java.io.File
 
 import monocle.Lens
 import monocle.macros.Lenses
+import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
 import org.openmole.core.workflow.validation._
-
 import org.openmole.core.workflow.dsl._
 
 object SaveHook {
 
-  implicit def isBuilder = new HookBuilder[SaveHook] {
-    override def name = SaveHook.name
-    override def outputs = SaveHook.outputs
-    override def inputs = SaveHook.inputs
-    override def defaults = SaveHook.defaults
-  }
+  implicit def isIO = InputOutputBuilder(SaveHook.config)
 
   def apply(file: ExpandedString, prototypes: Prototype[_]*) =
     new SaveHook(
       file,
       prototypes.toVector,
-      inputs = PrototypeSet.empty,
-      outputs = PrototypeSet.empty,
-      defaults = DefaultSet.empty,
-      name = None
+      config = InputOutputConfig()
     )
 }
 
 @Lenses case class SaveHook(
     file:       ExpandedString,
     prototypes: Vector[Prototype[_]],
-    inputs:     PrototypeSet,
-    outputs:    PrototypeSet,
-    defaults:   DefaultSet,
-    name:       Option[String]
+    config:     InputOutputConfig
 ) extends Hook with ValidateHook {
 
   override def validate(inputs: Seq[Val[_]]) = file.validate(inputs)

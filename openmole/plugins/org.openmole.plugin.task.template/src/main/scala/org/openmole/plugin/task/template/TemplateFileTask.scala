@@ -20,7 +20,7 @@ package org.openmole.plugin.task.template
 import java.io.File
 
 import monocle.macros.Lenses
-import org.openmole.core.workflow.builder.TaskBuilder
+import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.tools.VariableExpansion
@@ -30,19 +30,19 @@ import dsl._
 
 object TemplateFileTask {
 
-  implicit def isTask: TaskBuilder[TemplateFileTask] = TaskBuilder(TemplateFileTask.config)
+  implicit def isTask: InputOutputBuilder[TemplateFileTask] = InputOutputBuilder(TemplateFileTask.config)
 
   def apply(
     template: File,
     output:   Prototype[File]
-  ) = new TemplateFileTask(template, output, TaskConfig()) set (dsl.outputs += output)
+  ) = new TemplateFileTask(template, output, InputOutputConfig()) set (dsl.outputs += output)
 
 }
 
 @Lenses case class TemplateFileTask(
     template: File,
     output:   Prototype[File],
-    config:   TaskConfig
+    config:   InputOutputConfig
 ) extends Task {
 
   @transient lazy val expanded = template.withInputStream { is ⇒

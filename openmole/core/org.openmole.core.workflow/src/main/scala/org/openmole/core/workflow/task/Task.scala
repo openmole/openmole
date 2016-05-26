@@ -27,6 +27,7 @@ import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workspace.{ ConfigurationLocation, Workspace }
 import org.openmole.core.tools.service._
+import org.openmole.core.workflow.builder.InputOutputConfig
 import org.openmole.tool.logger.Logger
 
 import scala.util.Random
@@ -44,13 +45,6 @@ object Task extends Logger {
   def buildRNG(context: Context): Random = service.Random.newRNG(context(Task.openMOLESeed)).toScala
 }
 
-@Lenses case class TaskConfig(
-  inputs:   PrototypeSet   = PrototypeSet.empty,
-  outputs:  PrototypeSet   = PrototypeSet.empty,
-  defaults: DefaultSet     = DefaultSet.empty,
-  name:     Option[String] = None
-)
-
 case class TaskExecutionContext(tmpDirectory: File, localEnvironment: LocalEnvironment)
 
 trait Task <: InputOutputCheck with Name {
@@ -66,7 +60,7 @@ trait Task <: InputOutputCheck with Name {
 
   protected def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider): Context
 
-  def config: TaskConfig
+  def config: InputOutputConfig
 
   def inputs = config.inputs
   def outputs = config.outputs

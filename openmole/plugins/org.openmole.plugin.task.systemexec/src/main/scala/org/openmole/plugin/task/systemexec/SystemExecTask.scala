@@ -27,7 +27,7 @@ import java.io.File
 
 import monocle.Lens
 import monocle.macros.Lenses
-import org.openmole.core.workflow.builder.TaskBuilder
+import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputBuilder$, InputOutputConfig }
 import org.openmole.core.workflow.data._
 import org.openmole.plugin.task.external._
 import org.openmole.core.workflow.task._
@@ -40,7 +40,7 @@ object SystemExecTask {
 
   case class ExpandedSystemExecCommand(expandedCommand: Expansion)
 
-  implicit def isTask: TaskBuilder[SystemExecTask] = TaskBuilder(SystemExecTask._config)
+  implicit def isTask: InputOutputBuilder[SystemExecTask] = InputOutputBuilder(SystemExecTask._config)
   implicit def isExternal: ExternalBuilder[SystemExecTask] = ExternalBuilder(SystemExecTask.external)
   implicit def isSystemExec = new SystemExecTaskBuilder[SystemExecTask] {
     override def commands = SystemExecTask.command
@@ -66,7 +66,7 @@ object SystemExecTask {
       stdOut = None,
       stdErr = None,
       environmentVariables = Vector.empty,
-      _config = TaskConfig(),
+      _config = InputOutputConfig(),
       external = External()
     ) set (pack.commands += (OS(), commands: _*))
 }
@@ -79,13 +79,13 @@ object SystemExecTask {
     stdOut:               Option[Prototype[String]],
     stdErr:               Option[Prototype[String]],
     environmentVariables: Vector[(Prototype[_], String)],
-    _config:              TaskConfig,
+    _config:              InputOutputConfig,
     external:             External
 ) extends Task with ValidateTask {
 
   import SystemExecTask._
 
-  def config = TaskConfig.outputs.modify(_ ++ Seq(stdOut, stdErr, returnValue).flatten)(_config)
+  def config = InputOutputConfig.outputs.modify(_ ++ Seq(stdOut, stdErr, returnValue).flatten)(_config)
 
   override def validate =
     for {

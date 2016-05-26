@@ -19,6 +19,7 @@ package org.openmole.plugin.hook.display
 
 import monocle.Lens
 import monocle.macros.Lenses
+import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.mole._
@@ -28,29 +29,18 @@ import org.openmole.core.workflow.validation.ValidateHook
 
 object DisplayHook {
 
-  implicit def isBuilder = new HookBuilder[DisplayHook] {
-    override def name = DisplayHook.name
-    override def outputs = DisplayHook.outputs
-    override def inputs = DisplayHook.inputs
-    override def defaults = DisplayHook.defaults
-  }
+  implicit def isIO: InputOutputBuilder[DisplayHook] = InputOutputBuilder(config)
 
   def apply(toDisplay: ExpandedString) =
     new DisplayHook(
       toDisplay,
-      inputs = PrototypeSet.empty,
-      outputs = PrototypeSet.empty,
-      defaults = DefaultSet.empty,
-      name = None
+      config = InputOutputConfig()
     )
 }
 
 @Lenses case class DisplayHook(
     toDisplay: ExpandedString,
-    inputs:    PrototypeSet,
-    outputs:   PrototypeSet,
-    defaults:  DefaultSet,
-    name:      Option[String]
+    config:    InputOutputConfig
 ) extends Hook with ValidateHook {
 
   override def validate(inputs: Seq[Val[_]]): Seq[Throwable] = toDisplay.validate(inputs)

@@ -20,17 +20,13 @@ package org.openmole.plugin.hook.display
 import java.io.PrintStream
 
 import monocle.macros.Lenses
+import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.data._
 
 object ToStringHook {
 
-  implicit def isBuilder = new HookBuilder[ToStringHook] {
-    override def name = ToStringHook.name
-    override def outputs = ToStringHook.outputs
-    override def inputs = ToStringHook.inputs
-    override def defaults = ToStringHook.defaults
-  }
+  implicit def isIO: InputOutputBuilder[ToStringHook] = InputOutputBuilder(ToStringHook.config)
 
   def apply(prototypes: Prototype[_]*): ToStringHook =
     apply(System.out, prototypes: _*)
@@ -38,20 +34,14 @@ object ToStringHook {
   def apply(out: PrintStream, prototypes: Prototype[_]*) =
     new ToStringHook(
       prototypes.toVector,
-      inputs = PrototypeSet.empty,
-      outputs = PrototypeSet.empty,
-      defaults = DefaultSet.empty,
-      name = None
+      config = InputOutputConfig()
     )
 
 }
 
 @Lenses case class ToStringHook(
     prototypes: Vector[Prototype[_]],
-    inputs:     PrototypeSet,
-    outputs:    PrototypeSet,
-    defaults:   DefaultSet,
-    name:       Option[String]
+    config:     InputOutputConfig
 ) extends Hook {
 
   override def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider) = {

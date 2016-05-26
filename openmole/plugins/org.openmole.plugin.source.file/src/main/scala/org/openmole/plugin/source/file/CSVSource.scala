@@ -36,29 +36,25 @@ import monocle.macros.Lenses
 
 import collection.JavaConversions._
 import reflect.ClassTag
-import org.openmole.core.workflow.mole.{ Source, SourceBuilder }
+import org.openmole.core.workflow.mole.Source
 import org.openmole.core.workflow.mole.MoleExecutionContext
 import org.openmole.core.dsl._
+import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
 
 object CSVSource {
 
-  implicit def isBuilder = new CSVToVariablesBuilder[CSVSource] with SourceBuilder[CSVSource] {
+  implicit def isIO = InputOutputBuilder(CSVSource.config)
+
+  implicit def isCSV = new CSVToVariablesBuilder[CSVSource] {
     override def columns = CSVSource.columns
     override def fileColumns = CSVSource.fileColumns
     override def separator = CSVSource.separator
-    override def name = CSVSource.name
-    override def outputs = CSVSource.outputs
-    override def inputs = CSVSource.inputs
-    override def defaults = CSVSource.defaults
   }
 
   def apply(path: ExpandedString) =
     new CSVSource(
       path,
-      inputs = PrototypeSet.empty,
-      outputs = PrototypeSet.empty,
-      defaults = DefaultSet.empty,
-      name = None,
+      config = InputOutputConfig(),
       columns = Vector.empty,
       fileColumns = Vector.empty,
       separator = None
@@ -68,10 +64,7 @@ object CSVSource {
 
 @Lenses case class CSVSource(
     path:        ExpandedString,
-    inputs:      PrototypeSet,
-    outputs:     PrototypeSet,
-    defaults:    DefaultSet,
-    name:        Option[String],
+    config:      InputOutputConfig,
     columns:     Vector[(String, Prototype[_])],
     fileColumns: Vector[(String, File, Prototype[File])],
     separator:   Option[Char]

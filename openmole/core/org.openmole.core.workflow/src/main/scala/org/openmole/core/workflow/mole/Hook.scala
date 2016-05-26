@@ -17,14 +17,16 @@
 
 package org.openmole.core.workflow.mole
 
+import org.openmole.core.workflow.builder.InputOutputConfig
 import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.task.Task
 import org.openmole.core.workflow.tools._
 
 trait Hook <: InputOutputCheck with Name {
-  def inputs: PrototypeSet
-  def outputs: PrototypeSet
-  def defaults: DefaultSet
+  def config: InputOutputConfig
+  def inputs = config.inputs
+  def outputs = config.outputs
+  def defaults = config.defaults
+  def name = config.name
   def perform(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider): Context = perform(context, process(_, executionContext))
   protected def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider): Context
 }
