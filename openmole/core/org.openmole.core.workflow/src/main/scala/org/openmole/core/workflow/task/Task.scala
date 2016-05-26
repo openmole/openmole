@@ -40,7 +40,6 @@ object Task extends Logger {
   val openMOLESeed = Prototype[Long](prefixedVariable("Seed"))
 
   def buildRNG(context: Context): Random = service.Random.newRNG(context(Task.openMOLESeed)).toScala
-
 }
 
 case class TaskExecutionContext(tmpDirectory: File, localEnvironment: LocalEnvironment)

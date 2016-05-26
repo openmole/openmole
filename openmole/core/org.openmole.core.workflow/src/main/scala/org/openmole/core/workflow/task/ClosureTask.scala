@@ -15,43 +15,46 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package org.openmole.plugin.task.scala
+package org.openmole.core.workflow.task
 
 import monocle.Lens
 import monocle.macros.Lenses
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.task.{ Task, TaskExecutionContext }
 
 import scala.util.Random
 
 object ClosureTask {
 
-  implicit def isBuilder = new TaskBuilder[ClosureTask] {
-    override def outputs: Lens[ClosureTask, PrototypeSet] = ClosureTask.outputs
-    override def inputs: Lens[ClosureTask, PrototypeSet] = ClosureTask.inputs
-    override def name: Lens[ClosureTask, Option[String]] = ClosureTask.name
-    override def defaults: Lens[ClosureTask, DefaultSet] = ClosureTask.defaults
+  def taskBuilder[T](closureTask: Lens[T, ClosureTask]) = new TaskBuilder[T] {
+    override def inputs: Lens[T, PrototypeSet] = closureTask composeLens ClosureTask.inputs
+    override def defaults: Lens[T, DefaultSet] = closureTask composeLens ClosureTask.defaults
+    override def name: Lens[T, Option[String]] = closureTask composeLens ClosureTask.name
+    override def outputs: Lens[T, PrototypeSet] = closureTask composeLens ClosureTask.outputs
   }
 
-  def apply(closure: (Context, ⇒ Random) ⇒ Context) =
+  implicit def isBuilder = taskBuilder(Lens.id)
+
+  def apply(closure: (Context, RandomProvider) ⇒ Context, className: String = "ClosureTask") =
     new ClosureTask(
       closure,
       inputs = PrototypeSet.empty,
       outputs = PrototypeSet.empty,
       defaults = DefaultSet.empty,
-      name = None
+      name = None,
+      className = className
     )
 
 }
 
 @Lenses case class ClosureTask(
-    closure:  (Context, ⇒ Random) ⇒ Context,
-    inputs:   PrototypeSet,
-    outputs:  PrototypeSet,
-    defaults: DefaultSet,
-    name:     Option[String]
+    closure:                (Context, RandomProvider) ⇒ Context,
+    inputs:                 PrototypeSet,
+    outputs:                PrototypeSet,
+    defaults:               DefaultSet,
+    name:                   Option[String],
+    override val className: String
 ) extends Task {
   override protected def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider): Context =
-    closure(context, rng())
+    closure(context, rng)
 }

@@ -21,6 +21,7 @@ import org.openmole.core.exception.InternalProcessingError
 import scala.util.Random
 
 object RandomProvider {
+
   def apply(_rng: ⇒ Random) = new RandomProvider {
     override lazy val rng: Random = _rng
   }

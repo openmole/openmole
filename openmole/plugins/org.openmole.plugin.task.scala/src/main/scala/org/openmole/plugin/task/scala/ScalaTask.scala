@@ -62,7 +62,7 @@ object ScalaTask {
     )
 
   def apply(f: (Context, ⇒ Random) ⇒ Seq[Variable[_]]) =
-    ClosureTask((ctx, rng) ⇒ Context(f(ctx, rng)))
+    ClosureTask((ctx, rng) ⇒ Context(f(ctx, rng())))
 
   def apply(f: Context ⇒ Seq[Variable[_]]) =
     ClosureTask((ctx, _) ⇒ Context(f(ctx)))

@@ -17,47 +17,23 @@
 
 package org.openmole.core.workflow.task
 
-import monocle._
-import monocle.macros.Lenses
 import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.builder
-import builder._
-import org.openmole.core.workflow.dsl
-import dsl._
-
+import org.openmole.core.workflow.dsl._
 import scala.reflect.ClassTag
 
 object ToArrayTask {
 
-  implicit def isBuilder = new TaskBuilder[ToArrayTask] {
-    override def defaults = ToArrayTask.defaults
-    override def inputs = ToArrayTask.inputs
-    override def name = ToArrayTask.name
-    override def outputs = ToArrayTask.outputs
-  }
-
-  def apply(prototypes: Prototype[T] forSome { type T }*) = {
-    val t = new ToArrayTask(prototypes)
-
-    t set (
-      dsl.inputs += (prototypes: _*),
-      dsl.outputs += (prototypes.map(_.array): _*)
-    )
-  }
+  def apply(prototypes: Prototype[T] forSome { type T }*) =
+    ClosureTask(
+      (context, _) ⇒
+        prototypes.map {
+          p ⇒ Variable.unsecure(p.toArray, Array(context(p))(ClassTag(p.`type`.runtimeClass)))
+        },
+      "ToArrayTask"
+    ) set (
+        dsl.inputs += (prototypes: _*),
+        dsl.outputs += (prototypes.map(_.array): _*)
+      )
 
 }
 
-@Lenses case class ToArrayTask(
-    prototypes: Seq[Prototype[T] forSome { type T }],
-    inputs:     PrototypeSet                         = PrototypeSet.empty,
-    outputs:    PrototypeSet                         = PrototypeSet.empty,
-    defaults:   DefaultSet                           = DefaultSet.empty,
-    name:       Option[String]                       = None
-) extends Task {
-
-  override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) =
-    prototypes.map {
-      p ⇒ Variable.unsecure(p.toArray, Array(context(p))(ClassTag(p.`type`.runtimeClass)))
-    }
-
-}
