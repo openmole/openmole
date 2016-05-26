@@ -48,6 +48,9 @@ package tools {
       def sequence: T ⇒ T = { t: T ⇒ f.foldLeft(t)((a, f) ⇒ f(a)) }
     }
 
+    implicit def seqOfFunction[T](s: Seq[T ⇒ T]) = s.sequence
+    implicit def arrayOfFunction[T](s: Array[T ⇒ T]) = s.toSeq.sequence
+
     def c(s: String): FromContext[String] = s
   }
 }
