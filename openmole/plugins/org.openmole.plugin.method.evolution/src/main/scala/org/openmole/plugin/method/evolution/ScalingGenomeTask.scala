@@ -27,9 +27,8 @@ object ScalingGenomeTask {
 
     ClosureTask("ScalingGenomeTask") { (context, rng, _) ⇒
       context ++ t.genomeToVariables(context(t.genomePrototype)).from(context)(rng)
-
     } set (
-      inputs += (t.inputPrototypes: _*),
+      outputs += (t.inputPrototypes: _*),
       (inputs, outputs) += t.genomePrototype
     )
   }
