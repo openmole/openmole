@@ -19,6 +19,8 @@ package org.openmole.plugin.method.evolution
 import org.openmole.core.workflow.validation.Validation
 import org.scalatest._
 import org.openmole.core.dsl._
+import org.openmole.plugin.method.evolution.PSE.PatternAxe
+import org.openmole.plugin.domain.collection._
 
 class WorkflowSpec extends FlatSpec with Matchers {
 
@@ -37,7 +39,7 @@ class WorkflowSpec extends FlatSpec with Matchers {
       algorithm =
         NSGA2(
           mu = 100,
-          genome = UniqueGenome(x in (0.0, 1.0), y in ("0.0", "1.0")),
+          genome = Seq(x in (0.0, 1.0), y in ("0.0", "1.0")),
           objectives = Seq(x, y),
           replication = Replication()
         ),
@@ -61,9 +63,12 @@ class WorkflowSpec extends FlatSpec with Matchers {
     SteadyStateEvolution(
       algorithm =
         PSE(
-          genome = UniqueGenome(population in (0.0, 1.0), state in ("0.0", "1.0")),
-          gridSize = Seq(0.1, 0.1),
-          objectives = Seq(population, state),
+          genome = Seq(population in (0.0, 1.0), state in ("0.0", "1.0")),
+          objectives =
+            Seq(
+              population in (0.0 to 1.0 by 0.1),
+              state in (0.0 to 1.0 by 0.1)
+            ),
           replication = Replication()
         ),
       evaluation = puzzle,

@@ -46,7 +46,7 @@ object GenerateIslandTask {
       Variable(outputPopulation.toArray, populations)
     } set (
       inputs += t.populationPrototype,
-      outputs += outputPopulation.toArray
+      exploredOutputs += outputPopulation.toArray
     )
   }
 

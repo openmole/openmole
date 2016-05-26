@@ -9,7 +9,7 @@ object Method extends PluginDefaults {
   implicit val artifactPrefix = Some("org.openmole.plugin.method")
 
   lazy val evolution = OsgiProject("evolution", imports = Seq("*")) dependsOn (
-    Core.dsl, Hook.fileHook, Task.tools, Tool.pattern
+    Core.dsl, Hook.fileHook, Task.tools, Tool.pattern, Domain.collection % "test"
   ) settings (libraryDependencies += mgo)
 
   lazy val stochastic = OsgiProject("stochastic", imports = Seq("*")) dependsOn (Core.dsl, Domain.distribution, Tool.pattern)

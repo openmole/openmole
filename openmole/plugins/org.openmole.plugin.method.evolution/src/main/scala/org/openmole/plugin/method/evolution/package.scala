@@ -214,6 +214,7 @@ package object evolution {
     val islandCapsule = Slot(MoleTask(island))
 
     val slaveFist = EmptyTask() set (
+      name := "slaveFirst",
       (inputs, outputs) += (t.statePrototype, islandPopulationPrototype)
     )
 
