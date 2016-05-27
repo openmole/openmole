@@ -323,23 +323,24 @@ object ApiImpl extends Api {
 
   def staticInfos() = execution.staticInfos()
 
-  def runningErrorEnvironmentData(limitDates: Map[EnvironmentId, Long], lines: Int): EnvironmentErrorData = atomic { implicit ctx ⇒
-    val envIds = Runnings.environmentIds
-    EnvironmentErrorData(
-      envIds.flatMap {
-      case (id, envIds) ⇒
-        val errors =
-          for {
-            (envId, info) ← Runnings.runningEnvironments(envIds)
-            error ← info.environmentErrors(envId)
-            if (limitDates.get(envId).map { d ⇒ { error.date > d } }.getOrElse(true))
-          } yield error
+  def clearEnvironmentErrors(environmentId: EnvironmentId): Unit = {
 
-        errors.sortBy(_.date).reverse.takeRight(lines).groupBy {
-          _.errorMessage
-        }.map {
-          case (msg, err) ⇒ (err.head, err.map { _.date })
-        }.toSeq
+  }
+
+  def runningErrorEnvironmentData(environmentId: EnvironmentId, lines: Int, reset: Boolean): EnvironmentErrorData = atomic { implicit ctx ⇒
+    val info = Runnings.runningEnvironments(Seq(environmentId)).toMap.get(environmentId).get
+    if (reset) info.environment.clearErrors
+
+    val environmentErrors =
+      info.environment.errors.map {
+        ex ⇒ EnvironmentError(environmentId, ex.exception.getMessage, ErrorBuilder(ex.exception), ex.creationTime, Utils.javaLevelToErrorLevel(ex.level))
+      }
+
+    EnvironmentErrorData(
+      environmentErrors.sortBy(_.date).reverse.takeRight(lines).groupBy {
+      _.errorMessage
+    }.map {
+      case (msg, err) ⇒ (err.head, err.map { _.date })
     }.toSeq
     )
   }

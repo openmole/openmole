@@ -305,6 +305,10 @@ case class NetworkActivity(
   readableUploadedSize:   String = ""
 )
 
+object EnvironmentErrorData {
+  def empty = EnvironmentErrorData(Seq())
+}
+
 case class EnvironmentErrorData(datedErrors: Seq[(EnvironmentError, Seq[Long])])
 
 case class RunningOutputData(id: ExecutionId, output: String)

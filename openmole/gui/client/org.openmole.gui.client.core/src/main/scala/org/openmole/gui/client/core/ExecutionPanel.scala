@@ -51,8 +51,7 @@ class ExecutionPanel extends ModalPanel {
 
   val execInfo = Var(PanelInfo(Seq(), Seq()))
   val staticInfo: Var[Map[ExecutionId, StaticExecutionInfo]] = Var(Map())
-  var envError: Var[EnvironmentErrorData] = Var(EnvironmentErrorData(Seq()))
-  val envErrorLimitDates: Var[Map[EnvironmentId, Long]] = Var(Map())
+  var envError: Var[Map[EnvironmentId, EnvironmentErrorData]] = Var(Map())
   val expander = new Expander
 
   val updating = new AtomicBoolean(false)
@@ -209,18 +208,13 @@ class ExecutionPanel extends ModalPanel {
                             td(colMD(12) +++ (!envErrorVisible().contains(e.envId), omsheet.displayOff, emptyMod))(
                               colspan := 12,
                               bs.buttonGroup(omsheet.centerElement)(
-                                bs.button("Update", () ⇒ {
-                                  updateEnvErrors
-                                }), bs.button("Reset", () ⇒ {
-                                  envErrorLimitDates() = envErrorLimitDates().updated(e.envId, System.currentTimeMillis())
-                                  updateEnvErrors
-                                })
+                                bs.button("Update", () ⇒ updateEnvErrors(e.envId, false)),
+                                bs.button("Reset", () ⇒ updateEnvErrors(e.envId, true))
                               ),
                               staticPanel(e.envId, envErrorPanels,
                                 () ⇒ new EnvironmentErrorPanel,
-                                (ep: EnvironmentErrorPanel) ⇒ {
-                                  ep.setErrors(EnvironmentErrorData(envError().datedErrors.filter { enverr ⇒ enverr._1.environmentId == e.envId }))
-                                }).view
+                                (ep: EnvironmentErrorPanel) ⇒
+                                  ep.setErrors(envError().getOrElse(e.envId, EnvironmentErrorData.empty))).view
                             )
                           }
                         )
@@ -289,9 +283,9 @@ class ExecutionPanel extends ModalPanel {
     ).render
   }
 
-  def updateEnvErrors = {
-    OMPost[Api].runningErrorEnvironmentData(envErrorLimitDates(), envErrorHistory.value.toInt).call().foreach { err ⇒
-      envError() = err
+  def updateEnvErrors(environmentId: EnvironmentId, reset: Boolean) = {
+    OMPost[Api].runningErrorEnvironmentData(environmentId, envErrorHistory.value.toInt, reset).call().foreach { err ⇒
+      envError() = envError() + (environmentId → err)
     }
   }
 
@@ -319,7 +313,7 @@ class ExecutionPanel extends ModalPanel {
           settingsButton
         ).popup(
           settingsDiv,
-          onclose = () ⇒ updateEnvErrors,
+          onclose = () ⇒ {},
           popupStyle = whitePopupWithBorder
         )
       )
