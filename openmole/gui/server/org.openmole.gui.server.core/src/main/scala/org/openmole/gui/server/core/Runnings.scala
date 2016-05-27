@@ -63,12 +63,7 @@ object Runnings {
 
   }
 
-  case class RunningEnvironment(environment: Environment, networkActivity: NetworkActivity) {
-    def environmentErrors(id: EnvironmentId) = environment.errors.map {
-      ex ⇒
-        EnvironmentError(id, ex.exception.getMessage, ErrorBuilder(ex.exception), ex.creationTime, Utils.javaLevelToErrorLevel(ex.level))
-    }
-  }
+  case class RunningEnvironment(environment: Environment, networkActivity: NetworkActivity)
 
   lazy private val instance = new Runnings
 
@@ -96,9 +91,7 @@ object Runnings {
   }
 
   def runningEnvironments(envIds: Seq[EnvironmentId]): Seq[(EnvironmentId, RunningEnvironment)] = atomic { implicit ctx ⇒
-    envIds.flatMap {
-      id ⇒ instance.runningEnvironments.get(id).map(id → _)
-    }
+    envIds.flatMap { id ⇒ instance.runningEnvironments.get(id).map(id → _) }
   }
 
   def outputsDatas(id: ExecutionId, lines: Int) = atomic { implicit ctx ⇒

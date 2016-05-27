@@ -40,7 +40,7 @@ class OrderedSlidingList[T](size: Int)(implicit o: Ordering[T]) {
     _values() = insertValue(List.empty, _values())
   }
 
-  def read() = atomic { implicit ctx ⇒
+  def clear() = atomic { implicit ctx ⇒
     val res = _values()
     _values() = List.empty
     res
