@@ -73,7 +73,7 @@ class Command(val console: ScalaREPL, val variables: ConsoleVariables) { command
   implicit def stringToLevel(s: String) = Level.parse(s.toUpperCase)
 
   def errors(environment: Environment, level: Level = Level.INFO) = {
-    def filtered = environment.readErrors.filter {
+    def filtered = environment.clearErrors.filter {
       e ⇒ e.level.intValue() >= level.intValue()
     }
 

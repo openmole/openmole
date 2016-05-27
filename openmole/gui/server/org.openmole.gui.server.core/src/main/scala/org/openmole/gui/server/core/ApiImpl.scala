@@ -335,13 +335,10 @@ object ApiImpl extends Api {
             if (limitDates.get(envId).map { d ⇒ { error.date > d } }.getOrElse(true))
           } yield error
 
-        errors.sorted.takeRight(lines).groupBy {
+        errors.sortBy(_.date).reverse.takeRight(lines).groupBy {
           _.errorMessage
         }.map {
-          case (msg, err) ⇒
-            (err.head, err.map {
-              _.date
-            })
+          case (msg, err) ⇒ (err.head, err.map { _.date })
         }.toSeq
     }.toSeq
     )

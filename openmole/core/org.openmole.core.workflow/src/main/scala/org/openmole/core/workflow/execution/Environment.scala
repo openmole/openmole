@@ -60,7 +60,7 @@ sealed trait Environment <: Name {
 
   def error(e: ExceptionEvent) = _errors += e
   def errors: List[ExceptionEvent] = _errors.values
-  def readErrors: List[ExceptionEvent] = _errors.read()
+  def clearErrors: List[ExceptionEvent] = _errors.clear()
 
   def submitted: Long
   def running: Long
