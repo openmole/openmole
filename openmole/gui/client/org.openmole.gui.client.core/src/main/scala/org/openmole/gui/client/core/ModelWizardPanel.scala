@@ -571,30 +571,16 @@ class ModelWizardPanel extends ModalPanel {
     }).render
 
     val line = {
-      val glyphModifier = grey +++ sheet.paddingTop(2) +++ "glyphtrash glyphitem"
+      val glyphModifier = grey +++ sheet.paddingTop(2) +++ pointer +++ (opacity := 0.5)
       tags.tr(
-        onmouseover := { () ⇒
-          lineHovered() = true
-        },
-        onmouseout := { () ⇒
-          lineHovered() = false
-        },
         td(colMD(3) +++ sheet.paddingTop(7))(nameInput),
         td(colMD(2))(label(role.content.prototype.`type`.name.split('.').last)(label_primary)),
         td(colMD(1) +++ grey)(role.content.prototype.default),
         td(colMD(3))(if (role.content.prototype.mapping.isDefined) mappingInput else tags.div()),
-        td(colMD(1) +++ floatRight)(
-          Rx {
-            if (lineHovered()) opaque
-            else transparent
-          }, glyphSpan(switchGlyph, () ⇒ switchPrototypePair(role))(glyphModifier),
-          glyphSpan(glyph_arrow_right_and_left, () ⇒ addSwitchedPrototypePair(role))(glyphModifier)
-        ), td(colMD(1) +++ floatRight)(
-          id := Rx {
-            if (lineHovered()) opaque
-            else transparent
-          },
-          glyphSpan(glyph_trash, () ⇒ removePrototypePair)(glyphModifier)
+        td(colMD(2) +++ floatRight)(
+          tags.span(onclick := { () ⇒ switchPrototypePair(role) })(glyphModifier +++ switchGlyph),
+          tags.span(onclick := { () ⇒ addSwitchedPrototypePair(role) })(glyphModifier +++ glyph_arrow_right_and_left),
+          tags.span(pointer, onclick := { () ⇒ removePrototypePair })(glyphModifier +++ glyph_trash)
         )
       )
     }
@@ -602,22 +588,22 @@ class ModelWizardPanel extends ModalPanel {
 
   def setBodyContent: Unit = bodyContent() = Some({
     val reactives = currentReactives()
-    val topButtons = div(sheet.paddingTop(20))(
-      Rx {
+    val topButtons = Rx {
+      div(sheet.paddingTop(20))(
         badge("I/O", s"$nbInputs/$nbOutputs",
           buttonStyle(0), () ⇒ {
             currentTab() = 0
             setBodyContent
-          })
-      }, Rx {
+          }),
         badge("Resources", s"${
           resources().number
         }", buttonStyle(1), () ⇒ {
           currentTab() = 1
           setBodyContent
         })
-      }
-    )
+      )
+    }
+
     setUpButton
 
     tags.div(
@@ -643,7 +629,7 @@ class ModelWizardPanel extends ModalPanel {
 
                 val head = thead(tags.tr(
                   for (h ← Seq("Name", "Type", "Default", "Mapped with", "", "")) yield {
-                    th(h)
+                    th(textAlign := "center", h)
                   }
                 ))
 
