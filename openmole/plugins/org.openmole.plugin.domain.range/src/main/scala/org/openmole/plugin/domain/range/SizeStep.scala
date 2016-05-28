@@ -28,7 +28,7 @@ trait SizeStep[T] {
   val range: Range[T]
 
   import range._
-  import integral._
+  import fractional._
 
   def stepAndSize(maxValue: T, minValue: T, context: Context)(implicit rng: RandomProvider): (T, Int)
 

@@ -31,7 +31,7 @@ object SizeRange {
     override def center(domain: SizeRange[T]) = FromContext.apply((context, rng) ⇒ domain.center(context)(rng))
   }
 
-  def apply[T](min: FromContext[T], max: FromContext[T], size: FromContext[Int])(implicit integral: Integral[T]): SizeRange[T] =
+  def apply[T: Fractional](min: FromContext[T], max: FromContext[T], size: FromContext[Int]): SizeRange[T] =
     apply(Range(min, max), size)
 
   def apply[T](range: Range[T], size: FromContext[Int]): SizeRange[T] =
@@ -42,7 +42,7 @@ class SizeRange[T](val range: Range[T], size: FromContext[Int]) extends SizeStep
   import range._
 
   def stepAndSize(minValue: T, maxValue: T, context: Context)(implicit rng: RandomProvider) = {
-    import integral._
+    import fractional._
     val s = size.from(context) - 1
     val step = (maxValue - minValue) / fromInt(s)
     (step, s.toInt)

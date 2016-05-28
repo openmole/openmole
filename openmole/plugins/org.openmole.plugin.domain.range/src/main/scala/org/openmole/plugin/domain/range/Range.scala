@@ -38,28 +38,28 @@ object Range {
       override def center(domain: Range[T]) = StepRange.isFinite.center(domain.step(s.step))
     }
 
-  def apply[T](
+  def apply[T: Fractional](
     min: FromContext[T],
     max: FromContext[T]
-  )(implicit integral: Integral[T]) = new Range[T](min, max)
+  ) = new Range[T](min, max)
 
-  def apply[T](
+  def apply[T: Fractional](
     min:  FromContext[T],
     max:  FromContext[T],
     step: FromContext[T]
-  )(implicit integral: Integral[T]): StepRange[T] =
+  ): StepRange[T] =
     StepRange[T](Range[T](min, max), step)
 
-  def size[T](
+  def size[T: Fractional](
     min:  FromContext[T],
     max:  FromContext[T],
     size: FromContext[Int]
-  )(implicit integral: Integral[T]): SizeRange[T] =
+  ): SizeRange[T] =
     SizeRange[T](Range[T](min, max), size)
 
 }
 
-class Range[T](val min: FromContext[T], val max: FromContext[T])(implicit val integral: Integral[T]) extends Bounded[T] {
+class Range[T](val min: FromContext[T], val max: FromContext[T])(implicit val fractional: Fractional[T]) extends Bounded[T] {
   lazy val range = this
 }
 

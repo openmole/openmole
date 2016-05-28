@@ -39,7 +39,7 @@ class StepRange[T](val range: Range[T], steps: FromContext[T]) extends SizeStep[
   import range._
 
   def stepAndSize(minValue: T, maxValue: T, context: Context)(implicit rng: RandomProvider) = {
-    import integral._
+    import fractional._
     val step = steps.from(context)
     val size = (maxValue - minValue).abs / step
     (step, size.toInt)

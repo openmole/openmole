@@ -35,40 +35,32 @@ object LogRange {
       override def min(domain: LogRange[T]) = FromContext.apply((context, rng) ⇒ domain.min(context)(rng))
     }
 
-  def apply[T](range: Range[T], steps: FromContext[T])(implicit lg: Log[T]) = new LogRange[T](range, steps)
+  def apply[T: Log](range: Range[T], steps: FromContext[Int]) =
+    new LogRange[T](range, steps)
 
-  def apply[T](
+  def apply[T: Fractional: Log](
     min:   FromContext[T],
     max:   FromContext[T],
-    steps: FromContext[T]
-  )(implicit integral: Integral[T], log: Log[T]): LogRange[T] =
+    steps: FromContext[Int]
+  ): LogRange[T] =
     LogRange[T](Range[T](min, max), steps)
 
 }
 
-sealed class LogRange[T](val range: Range[T], val steps: FromContext[T])(implicit lg: Log[T]) extends Bounded[T] {
+sealed class LogRange[T](val range: Range[T], val steps: FromContext[Int])(implicit lg: Log[T]) extends Bounded[T] {
 
   import range._
 
   def computeValues(context: Context)(implicit rng: RandomProvider): Iterable[T] = {
-    val mi: T = lg.log(min(context))
-    val ma: T = lg.log(max(context))
-    val nbst: T = nbStep(context)
+    val logMin: T = lg.log(min(context))
+    val logMax: T = lg.log(max(context))
+    val nbSteps = steps.from(context)
 
-    import integral._
+    import fractional._
 
-    val st = abs(minus(ma, mi)) / nbst
-
-    var cur = mi
-
-    for (i ← 0 to nbst.toInt) yield {
-      val ret = cur
-      cur = plus(ret, st)
-      lg.exp(ret)
-    }
+    val logStep = (logMax - logMin) / (fromInt(nbSteps - 1))
+    Iterator.iterate(logMin)(_ + logStep).map(lg.exp).take(nbSteps).toVector
   }
-
-  def nbStep(context: Context)(implicit rng: RandomProvider): T = steps.from(context)
 
   def max = range.max
   def min = range.min

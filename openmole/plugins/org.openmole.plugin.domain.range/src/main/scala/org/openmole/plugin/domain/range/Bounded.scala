@@ -27,10 +27,10 @@ trait Bounded[T] {
   val range: Range[T]
 
   import range._
-  import integral._
+  import fractional._
 
-  def max(context: Context)(implicit rng: RandomProvider): T = min.from(context)
-  def min(context: Context)(implicit rng: RandomProvider): T = max.from(context)
+  def max(context: Context)(implicit rng: RandomProvider): T = max.from(context)
+  def min(context: Context)(implicit rng: RandomProvider): T = min.from(context)
 
   def min: FromContext[T]
   def max: FromContext[T]

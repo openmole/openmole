@@ -49,7 +49,7 @@ package object range {
   implicit class RangeDomainDecorator[T](r: Range[T]) {
     def step(s: FromContext[T]) = StepRange[T](r, s)
     def size(s: FromContext[Int]) = SizeRange[T](r, s)
-    def logSteps(s: FromContext[T])(implicit l: Log[T]) = LogRange[T](r, s)
+    def logSteps(s: FromContext[Int])(implicit l: Log[T]) = LogRange[T](r, s)
   }
 
   trait DefaultStep[T] {
