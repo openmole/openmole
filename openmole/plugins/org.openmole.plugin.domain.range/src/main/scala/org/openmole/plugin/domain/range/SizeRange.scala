@@ -25,24 +25,25 @@ import org.openmole.core.workflow.tools._
 
 object SizeRange {
   implicit def isFinite[T] = new Finite[SizeRange[T], T] with Bounds[SizeRange[T], T] with Center[SizeRange[T], T] {
-    override def computeValues(domain: SizeRange[T]) = FromContext.apply((context, rng) ⇒ domain.computeValues(context)(rng))
-    override def max(domain: SizeRange[T]) = FromContext.apply((context, rng) ⇒ domain.max(context)(rng))
-    override def min(domain: SizeRange[T]) = FromContext.apply((context, rng) ⇒ domain.min(context)(rng))
-    override def center(domain: SizeRange[T]) = FromContext.apply((context, rng) ⇒ domain.center(context)(rng))
+    override def computeValues(domain: SizeRange[T]) = FromContext((context, rng) ⇒ domain.computeValues(context)(rng))
+    override def max(domain: SizeRange[T]) = FromContext((context, rng) ⇒ domain.max.from(context)(rng))
+    override def min(domain: SizeRange[T]) = FromContext((context, rng) ⇒ domain.min.from(context)(rng))
+    override def center(domain: SizeRange[T]) = Range.rangeCenter(domain.range)
   }
 
-  def apply[T: Fractional](min: FromContext[T], max: FromContext[T], size: FromContext[Int]): SizeRange[T] =
+  def apply[T: RangeValue](min: FromContext[T], max: FromContext[T], size: FromContext[Int]): SizeRange[T] =
     apply(Range(min, max), size)
 
   def apply[T](range: Range[T], size: FromContext[Int]): SizeRange[T] =
     new SizeRange[T](range, size)
+
 }
 
-class SizeRange[T](val range: Range[T], size: FromContext[Int]) extends SizeStep[T] with Bounded[T] {
+class SizeRange[T](val range: Range[T], size: FromContext[Int]) extends SizeStep[T] {
   import range._
 
   def stepAndSize(minValue: T, maxValue: T, context: Context)(implicit rng: RandomProvider) = {
-    import fractional._
+    import ops._
     val s = size.from(context) - 1
     val step = (maxValue - minValue) / fromInt(s)
     (step, s.toInt)

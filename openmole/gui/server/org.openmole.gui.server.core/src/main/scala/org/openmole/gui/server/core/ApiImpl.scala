@@ -337,11 +337,11 @@ object ApiImpl extends Api {
       }
 
     EnvironmentErrorData(
-        environmentErrors.sortBy(_.date).takeRight(lines).groupBy {
-        _.errorMessage
-      }.map {
-        case (msg, err) ⇒ (err.head, err.map { _.date })
-      }.toSeq
+      environmentErrors.sortBy(_.date).takeRight(lines).groupBy {
+      _.errorMessage
+    }.map {
+      case (msg, err) ⇒ (err.head, err.map { _.date })
+    }.toSeq
     )
   }
 

@@ -59,4 +59,43 @@ package object range {
   implicit def defaultStepInt = new DefaultStep[Int] { def step = 1 }
   implicit def defaultStepLong = new DefaultStep[Long] { def step = 1 }
 
+  object RangeValue {
+    implicit def fractionalIsRangeValue[T](implicit fractional: Fractional[T]) = new RangeValue[T] {
+
+      override def div(t1: T, t2: T): T = fractional.div(t1, t2)
+      override def plus(t1: T, t2: T): T = fractional.plus(t1, t2)
+      override def toInt(t: T): Int = fractional.toInt(t)
+      override def mult(t1: T, t2: T): T = fractional.times(t1, t2)
+      override def fromInt(i: Int): T = fractional.fromInt(i)
+      override def minus(t1: T, t2: T): T = fractional.minus(t1, t2)
+    }
+
+    implicit def integralIsRangeValue[T](implicit integral: Integral[T]) = new RangeValue[T] {
+      override def div(t1: T, t2: T): T = integral.quot(t1, t2)
+      override def plus(t1: T, t2: T): T = integral.plus(t1, t2)
+      override def toInt(t: T): Int = integral.toInt(t)
+      override def mult(t1: T, t2: T): T = integral.times(t1, t2)
+      override def fromInt(i: Int): T = integral.fromInt(i)
+      override def minus(t1: T, t2: T): T = integral.minus(t1, t2)
+    }
+
+  }
+
+  trait RangeValue[T] { v ⇒
+    def div(t1: T, t2: T): T
+    def mult(t1: T, t2: T): T
+    def plus(t1: T, t2: T): T
+    def minus(t1: T, t2: T): T
+    def fromInt(i: Int): T
+    def toInt(t: T): Int
+
+    implicit class ops(lhs: T) {
+      def +(rhs: T) = plus(lhs, rhs)
+      def -(rhs: T) = minus(lhs, rhs)
+      def /(rhs: T) = div(lhs, rhs)
+      def *(rhs: T) = mult(lhs, rhs)
+      def toInt = v.toInt(lhs)
+    }
+  }
+
 }

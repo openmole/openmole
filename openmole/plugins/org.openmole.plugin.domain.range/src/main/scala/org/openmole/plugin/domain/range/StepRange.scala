@@ -27,22 +27,22 @@ object StepRange {
 
   implicit def isFinite[T] = new Finite[StepRange[T], T] with Bounds[StepRange[T], T] with Center[StepRange[T], T] {
     override def computeValues(domain: StepRange[T]) = FromContext.apply((context, rng) ⇒ domain.computeValues(context)(rng))
-    override def max(domain: StepRange[T]) = FromContext.apply((context, rng) ⇒ domain.max(context)(rng))
-    override def min(domain: StepRange[T]) = FromContext.apply((context, rng) ⇒ domain.min(context)(rng))
-    override def center(domain: StepRange[T]) = FromContext.apply((context, rng) ⇒ domain.center(context)(rng))
+    override def max(domain: StepRange[T]) = FromContext.apply((context, rng) ⇒ domain.max.from(context)(rng))
+    override def min(domain: StepRange[T]) = FromContext.apply((context, rng) ⇒ domain.min.from(context)(rng))
+    override def center(domain: StepRange[T]) = Range.rangeCenter(domain.range)
   }
 
   def apply[T](range: Range[T], step: FromContext[T]) = new StepRange[T](range, step)
 }
 
-class StepRange[T](val range: Range[T], steps: FromContext[T]) extends SizeStep[T] with Bounded[T] {
+class StepRange[T](val range: Range[T], steps: FromContext[T]) extends SizeStep[T] {
   import range._
 
   def stepAndSize(minValue: T, maxValue: T, context: Context)(implicit rng: RandomProvider) = {
-    import fractional._
+    import ops._
     val step = steps.from(context)
-    val size = (maxValue - minValue).abs / step
-    (step, size.toInt)
+    val size = (maxValue - minValue) / step
+    (step, if (size.toInt < 0) 0 else size.toInt)
   }
 
   def min = range.min

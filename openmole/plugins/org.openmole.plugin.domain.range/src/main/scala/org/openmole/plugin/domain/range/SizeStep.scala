@@ -27,16 +27,15 @@ trait SizeStep[T] {
 
   val range: Range[T]
 
-  import range._
-  import fractional._
+  import range.ops._
 
   def stepAndSize(maxValue: T, minValue: T, context: Context)(implicit rng: RandomProvider): (T, Int)
 
   def computeValues(context: Context)(implicit rng: RandomProvider): Iterable[T] = {
-    val mi = range.min(context)
-    val ma = range.max(context)
+    val mi: T = range.min.from(context)
+    val ma: T = range.max.from(context)
     val (step, size) = stepAndSize(mi, ma, context)
-    for (i ← 0 to size) yield { mi + fromInt(i) * step }
+    for (i ← 0 to size) yield { mi + (fromInt(i) * step) }
   }
 
 }
