@@ -69,6 +69,7 @@ package systemexec {
   }
 
   import org.openmole.core.workflow.builder.InputOutputBuilder
+  import org.openmole.plugin.task.external.ExternalPackage
 
   trait ReturnValue[T] {
     def returnValue: Lens[T, Option[Prototype[Int]]] // = None
@@ -91,7 +92,7 @@ package systemexec {
     def workDirectory: Lens[T, Option[String]] // = None
   }
 
-  trait SystemExecPackage {
+  trait SystemExecPackage extends ExternalPackage {
 
     lazy val errorOnReturnValue =
       new {

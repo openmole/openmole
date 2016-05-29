@@ -45,7 +45,7 @@ class CopyFileHookSpec extends FlatSpec with Matchers {
       val inputs = PrototypeSet.empty
       val plugins = PluginSet.empty
       val defaults = DefaultSet.empty
-      override def process(context: Context) = context + (p -> f)
+      override def process(context: Context) = context + (p → f)
     }
 
     val t1c = new Capsule(t1)
@@ -54,7 +54,7 @@ class CopyFileHookSpec extends FlatSpec with Matchers {
 
     val hook = CopyFileHook(p, fDest.getAbsolutePath)
 
-    val ex = MoleExecution(Mole(t1c), hooks = List(t1c -> hook))
+    val ex = MoleExecution(Mole(t1c), hooks = List(t1c → hook))
 
     ex.start.waitUntilEnded
 

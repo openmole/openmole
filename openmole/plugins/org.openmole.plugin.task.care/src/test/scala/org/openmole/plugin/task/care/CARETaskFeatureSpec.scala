@@ -1,7 +1,6 @@
 package org.openmole.plugin.task.care
 
 import org.scalatest._
-import org.openmole.tool.file._
 import org.openmole.core.dsl._
 
 class CARETaskFeatureSpec extends FeatureSpec with GivenWhenThen {
@@ -17,10 +16,11 @@ class CARETaskFeatureSpec extends FeatureSpec with GivenWhenThen {
 
     val pyTask = CARETask(
       archive = s"${workDirectory}/python.bin",
-      command = "python matrix.py ${i}") set (
-        inputs += i,
-        outputs += i
-      ) toTask
+      command = "python matrix.py ${i}"
+    ) set (
+      inputs += i,
+      outputs += i
+    )
 
     Then("The archive can be extracted successfully")
     val extractedArchive = pyTask.extract
@@ -39,10 +39,11 @@ class CARETaskFeatureSpec extends FeatureSpec with GivenWhenThen {
 
     val pyTask = CARETask(
       archive = s"${workDirectory}/python.bin",
-      command = "python matrix.py ${i}") set (
-        inputs += i,
-        outputs += i
-      ) toTask
+      command = "python matrix.py ${i}"
+    ) set (
+      inputs += i,
+      outputs += i
+    )
 
     val extractedArchive = pyTask.extract
 
@@ -69,13 +70,14 @@ class CARETaskFeatureSpec extends FeatureSpec with GivenWhenThen {
 
     val pyTask = CARETask(
       archive = s"${workDirectory}/python.bin",
-      command = "python matrix.py data.csv ${i} out.csv") set (
-        inputFiles += (input, dataFilename),
-        inputFiles += (input, absoluteDataLocation),
-        outputFiles += (resultFilename, output),
-        inputs += i,
-        outputs += i
-      )
+      command = "python matrix.py data.csv ${i} out.csv"
+    ) set (
+      inputFiles += (input, dataFilename),
+      inputFiles += (input, absoluteDataLocation),
+      outputFiles += (resultFilename, output),
+      inputs += i,
+      outputs += i
+    )
 
     val extractedArchive = pyTask.extract
 
@@ -99,11 +101,12 @@ class CARETaskFeatureSpec extends FeatureSpec with GivenWhenThen {
 
     val pyTask = CARETask(
       archive = s"${workDirectory}/python.bin",
-      command = "python matrix.py ${i}") set (
-        inputs += i,
-        outputs += i,
-        returnValue := ret
-      )
+      command = "python matrix.py ${i}"
+    ) set (
+      inputs += i,
+      outputs += i,
+      returnValue := ret
+    )
 
     val extractedArchive = pyTask.extract
 
