@@ -69,7 +69,7 @@ trait SharedStorage extends SSHService { js ⇒
             val content =
               s"(if [ -d $runtimeInstall ]; then exit 0; fi) && " +
                 s"mkdir -p $tmpDirName && cd $tmpDirName && (if [ `uname -m` = x86_64 ]; then cp ${runtime.jvmLinuxX64.path} jvm.tar.gz; " +
-                s"else cp ${runtime.jvmLinuxI386.path} jvm.tar.gz; fi) && " +
+                """else echo "Unsupported architecture: " `uname -m`; exit 1; fi) && """" +
                 "gunzip jvm.tar.gz && tar -xf jvm.tar && rm jvm.tar && " +
                 s"cp ${runtime.runtime.path} runtime.tar.gz && gunzip runtime.tar.gz && tar -xf runtime.tar; rm runtime.tar && " +
                 s"mkdir envplugins && PLUGIN=0 && " +

@@ -128,7 +128,6 @@ class UploadActor(jobManager: JobManager) {
   )(implicit token: AccessToken) = {
     val environmentPluginPath = environment.plugins.map { p ⇒ toReplicatedFile(job, p, storage, TransferOptions(raw = true)) }.map { FileMessage(_) }
     val runtimeFileMessage = FileMessage(toReplicatedFile(job, environment.runtime, storage, TransferOptions(raw = true)))
-    val jvmLinuxI386FileMessage = FileMessage(toReplicatedFile(job, environment.jvmLinuxI386, storage, TransferOptions(raw = true)))
     val jvmLinuxX64FileMessage = FileMessage(toReplicatedFile(job, environment.jvmLinuxX64, storage, TransferOptions(raw = true)))
 
     val storageReplication = FileMessage(toReplicatedFile(job, storage.serializedRemoteStorage, storage, TransferOptions(raw = true, forceCopy = true)))
@@ -137,7 +136,6 @@ class UploadActor(jobManager: JobManager) {
       storageReplication,
       runtimeFileMessage,
       environmentPluginPath,
-      jvmLinuxI386FileMessage,
       jvmLinuxX64FileMessage
     )
   }

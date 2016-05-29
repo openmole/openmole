@@ -48,8 +48,7 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
       Core.dsl
     )
 
-  lazy val java368URL = new URL("https://maven.openmole.org/thirdparty/com/oracle/java-jre-linux-386/8-u45/java-jre-linux-386-8-u45.tgz")
-  lazy val javax64URL = new URL("https://maven.openmole.org/thirdparty/com/oracle/java-jre-linux-x64/8-u45/java-jre-linux-x64-8-u45.tgz")
+  lazy val javax64URL = new URL("https://maven.openmole.org/thirdparty/net/java/openjdk-jre-x64/8-u112-b00-20160529/openjdk-jre-x64-8-u112-b00-20160529.tgz")
 
   lazy val openmole =
     Project("openmole", dir / "openmole", settings = tarProject ++ assemblySettings) settings (commonsSettings: _*) settings (
@@ -65,7 +64,7 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
       resourcesAssemble <+= (assemble in consolePlugins, assemblyPath) map { case (r, p) ⇒ r → (p / "plugins") },
       resourcesAssemble <+= (Tar.tar in openmoleRuntime, assemblyPath) map { case (r, p) ⇒ r → (p / "runtime" / r.getName) },
       resourcesAssemble <+= (assemble in launcher, assemblyPath) map { case (r, p) ⇒ r → (p / "launcher") },
-      downloads := Seq(java368URL → "runtime/jvm-386.tar.gz", javax64URL → "runtime/jvm-x64.tar.gz"),
+      downloads := Seq(javax64URL → "runtime/jvm-x64.tar.gz"),
       libraryDependencies += Libraries.scalajHttp,
       dependencyFilter := filter,
       dependencyName := rename,
