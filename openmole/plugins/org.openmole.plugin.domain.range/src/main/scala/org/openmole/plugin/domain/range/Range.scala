@@ -30,6 +30,11 @@ object Range {
     override def center(domain: Range[T]) = Range.rangeCenter(domain)
   }
 
+  implicit def rangeWithDefaultStepIsFinite[T](implicit step: DefaultStep[T]) = new Finite[Range[T], T] {
+    override def computeValues(domain: Range[T]) =
+      FromContext((context, rng) ⇒ StepRange[T](domain, step.step).computeValues(context)(rng))
+  }
+
   def apply[T: RangeValue](
     min: FromContext[T],
     max: FromContext[T]
