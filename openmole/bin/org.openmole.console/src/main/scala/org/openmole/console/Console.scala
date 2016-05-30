@@ -123,8 +123,8 @@ class Console(password: Option[String] = None, script: Option[String] = None) {
               case ScriptFileDoesNotExists() ⇒
                 println("File " + scriptFile + " doesn't exist.")
                 ExitCodes.scriptDoesNotExist
-              case CompilationError(e) ⇒
-                println(e.stackString)
+              case e: CompilationError ⇒
+                println(e.error.stackString)
                 ExitCodes.compilationError
               case compiled: Compiled ⇒
                 Try(compiled.eval) match {

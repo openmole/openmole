@@ -156,7 +156,7 @@ class Market(repositories: Seq[MarketRepository], destination: File) {
           def compiles = for { file ← files } yield {
             consoleProject.compile(file, Seq.empty) match {
               case Compiled(_) ⇒ true
-              case CompilationError(e) ⇒
+              case e: CompilationError ⇒
                 Log.logger.log(Log.WARNING, exclusion + s" because there was an error during compilation of file ${file.getName}.", e)
                 false
               case e ⇒

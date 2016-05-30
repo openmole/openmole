@@ -275,7 +275,8 @@ object ApiImpl extends Api {
       val project = new Project(script.getParentFileSafe)
       project.compile(script, Seq.empty) match {
         case ScriptFileDoesNotExists() ⇒ message("Script file does not exist")
-        case CompilationError(e)       ⇒ error(e)
+        case ErrorInCode(e)            ⇒ error(e)
+        case ErrorInCompiler(e)        ⇒ error(e)
         case compiled: Compiled ⇒
 
           val outputStream = StringPrintStream(Some(Workspace.preference(outputSize)))
@@ -291,8 +292,7 @@ object ApiImpl extends Api {
           }
 
           catchAll(OutputManager.withStreamOutputs(outputStream, outputStream)(compiled.eval)) match {
-            case Failure(e: ScalaREPL.CompilationError) ⇒ error(e)
-            case Failure(e)                             ⇒ error(e)
+            case Failure(e) ⇒ error(e)
             case Success(o) ⇒
               val puzzle = o.buildPuzzle
 
