@@ -20,7 +20,7 @@ package org.openmole.core
 import java.io.File
 import java.util.concurrent.TimeUnit
 
-import org.openmole.core.macros.{ ExtractValName, Keyword }
+import org.openmole.core.macros.ExtractValName
 import ExtractValName._
 
 import org.openmole.core.serializer._

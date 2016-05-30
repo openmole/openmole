@@ -21,7 +21,6 @@ import java.io.{ File, IOException, PrintStream }
 
 import org.apache.commons.exec.CommandLine
 import org.openmole.core.exception.InternalProcessingError
-import org.openmole.core.macros.Keyword._
 import org.openmole.core.tools.service.OS
 import org.openmole.core.tools.service.ProcessUtil._
 import org.openmole.core.workflow.data.{ Context, Prototype, RandomProvider, Variable }
