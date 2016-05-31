@@ -517,6 +517,15 @@ package object stylesheet {
     borderRadius := "4px"
   )
 
+  lazy val dateStyle: ModifierSeq = Seq(
+    absolutePosition,
+    fontStyle := "italic",
+    sheet.paddingTop(6),
+    floatRight,
+    right := 50,
+    color("lightgrey")
+  )
+
   //FILE TOOL BAR
   lazy val selectedTool: ModifierSeq = Seq(
     opacity := 1,

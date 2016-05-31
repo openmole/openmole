@@ -81,6 +81,7 @@ class PluginPanel extends ModalPanel {
           docEntry
         )(
           span(p.name, docTitleEntry +++ floatLeft),
+          span(p.time, dateStyle),
           span(bs.glyphSpan(glyph_trash, () ⇒ removePlugin(p))(grey +++ sheet.paddingTop(9) +++ "glyphitem" +++ glyph_trash))
         )
     }

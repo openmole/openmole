@@ -2,6 +2,7 @@ package org.openmole.gui.server.core
 
 import java.io.File
 import java.net.URL
+import java.text.SimpleDateFormat
 import java.util.zip.GZIPInputStream
 
 import com.sun.org.apache.xalan.internal.xsltc.dom.LoadDocument
@@ -415,7 +416,7 @@ object ApiImpl extends Api {
   def allPluggableIn(path: SafePath): Seq[TreeNodeData] = Utils.allPluggableIn(path)
 
   def listPlugins(): Iterable[Plugin] =
-    Workspace.pluginDir.listFilesSafe.map(p ⇒ Plugin(p.getName))
+    Workspace.pluginDir.listFilesSafe.map(p ⇒ Plugin(p.getName, new SimpleDateFormat("dd/MM/yyyy HH:mm").format(p.lastModified)))
 
   def removePlugin(plugin: Plugin): Unit = synchronized {
     val file = Workspace.pluginDir / plugin.name

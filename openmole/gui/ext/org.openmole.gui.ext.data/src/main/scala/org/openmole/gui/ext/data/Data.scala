@@ -383,7 +383,7 @@ case class Ready() extends ExecutionInfo {
 
 case class PasswordState(chosen: Boolean, hasBeenSet: Boolean)
 
-case class Plugin(name: String)
+case class Plugin(name: String, time: String)
 
 sealed trait Language {
   def name: String
