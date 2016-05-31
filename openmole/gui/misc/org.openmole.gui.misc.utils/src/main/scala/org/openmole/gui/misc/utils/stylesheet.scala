@@ -507,8 +507,8 @@ package object stylesheet {
   )
 
   lazy val pluginRight: ModifierSeq = Seq(
-    right := 20,
-    sheet.marginTop(-8)
+    right := -5,
+    sheet.marginTop(-9)
   )
 
   lazy val spinnerStyle: ModifierSeq = Seq(
