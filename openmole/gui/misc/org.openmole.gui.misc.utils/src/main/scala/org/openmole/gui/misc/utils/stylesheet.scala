@@ -196,7 +196,6 @@ package object stylesheet {
   lazy val dir: ModifierSeq = Seq(
     backgroundColor := "#3086b5",
     color("white"),
-    borderRadius := 5,
     display := "inline-block",
     height := 19,
     sheet.marginBottom(5),
@@ -334,12 +333,12 @@ package object stylesheet {
   lazy val docEntry: ModifierSeq = Seq(
     color("white"),
     backgroundColor := "#333",
-    borderRadius := 3,
+    borderRadius := "4px",
     sheet.marginTop(3),
     sheet.paddingTop(6),
     verticalAlign := "middle",
     sheet.paddingBottom(4),
-    sheet.paddingLeft(5),
+    sheet.paddingLeft(15),
     minHeight := 46
   )
 
@@ -474,7 +473,7 @@ package object stylesheet {
   lazy val modelNameInput: ModifierSeq = Seq(
     height := 34,
     width := 150,
-    borderRadius := 1
+    borderRadius := "1px"
   )
 
   lazy val rightBlock: ModifierSeq = Seq(
@@ -501,13 +500,21 @@ package object stylesheet {
 
   // PLUGIN PANEL
   lazy val uploadPlugin: ModifierSeq = Seq(
-    sheet.marginRight(110),
-    sheet.paddingBottom(30)
+    sheet.marginRight(50),
+    sheet.paddingBottom(30),
+    width := 45,
+    height := 30
   )
 
   lazy val pluginRight: ModifierSeq = Seq(
     right := 20,
     sheet.marginTop(-8)
+  )
+
+  lazy val spinnerStyle: ModifierSeq = Seq(
+    backgroundColor := "#333",
+    textAlign := "center",
+    borderRadius := "4px"
   )
 
   //FILE TOOL BAR

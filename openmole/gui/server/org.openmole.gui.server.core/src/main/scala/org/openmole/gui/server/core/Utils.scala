@@ -66,7 +66,7 @@ object Utils {
   def allPluggableIn(path: SafePath): Seq[TreeNodeData] = {
     import org.openmole.gui.ext.data.ServerFileSytemContext.project
     path.listFiles().filter { f ⇒
-        PluginManager.isBundle(f)
+      PluginManager.isBundle(f)
     }.toSeq
   }
 

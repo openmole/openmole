@@ -1,6 +1,7 @@
 package org.openmole.gui.client.core
 
 import org.openmole.gui.client.core.files.FileManager
+import org.openmole.gui.client.core.Waiter._
 import org.openmole.gui.ext.data._
 import org.openmole.gui.misc.utils.stylesheet._
 import org.openmole.gui.shared.Api
@@ -14,8 +15,8 @@ import org.openmole.gui.misc.js.JsRxTags._
 import autowire._
 import rx._
 import bs._
-import org.openmole.gui.misc.utils.{ stylesheet ⇒ sheet }
-import fr.iscpif.scaladget.stylesheet.all._
+import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
+import sheet._
 
 /*
  * Copyright (C) 10/08/15 // mathieu.leclaire@openmole.org
@@ -37,10 +38,11 @@ import fr.iscpif.scaladget.stylesheet.all._
 class PluginPanel extends ModalPanel {
   lazy val modalID = "pluginPanelID"
 
-  private val plugins: Var[Option[Seq[Plugin]]] = Var(None)
-  val transferring: Var[ProcessState] = Var(Processed())
+  private lazy val plugins: Var[Option[Seq[Plugin]]] = Var(None)
+  lazy val transferring: Var[ProcessState] = Var(Processed())
 
   def onOpen() = {
+    println("Get on open")
     getPlugins
   }
 
@@ -60,7 +62,9 @@ class PluginPanel extends ModalPanel {
       FileManager.upload(
         fileInput,
         SafePath.empty,
-        (p: ProcessState) ⇒ { transferring() = p },
+        (p: ProcessState) ⇒ {
+          transferring() = p
+        },
         UploadPlugin(),
         () ⇒ getPlugins
       )
@@ -72,37 +76,22 @@ class PluginPanel extends ModalPanel {
     case class Reactive(p: Plugin) {
       val lineHovered: Var[Boolean] = Var(false)
 
-      val render = Rx {
+      lazy val render =
         tags.div(
-          `class` := "docEntry",
-          onmouseover := { () ⇒
-            lineHovered() = true
-          },
-          onmouseout := { () ⇒
-            lineHovered() = false
-          }
+          docEntry
         )(
-            span(p.name, `class` := "left docTitleEntry"),
-            span(
-              Rx {
-                if (lineHovered()) opaque
-                else transparent
-              },
-              glyphSpan(glyph_trash, () ⇒ removePlugin(p))(id := "glyphtrash", `class` := "glyphitem grey spacer9")
-            )
-          )
-      }
+          span(p.name, docTitleEntry +++ floatLeft),
+          span(bs.glyphSpan(glyph_trash, () ⇒ removePlugin(p))(grey +++ sheet.paddingTop(9) +++ "glyphitem" +++ glyph_trash))
+        )
     }
 
-    Rx {
-      div(
-        transferring() match {
-          case _: Processed ⇒
-            getPlugins
-            transferring() = Processed()
-          case _ ⇒
-            bs.progressBar(transferring().display, transferring().ratio)(treeprogress)
-        },
+    div(
+      div(spinnerStyle)(
+        transferring.withTransferWaiter { _ ⇒
+          tags.div()
+        }
+      ),
+      Rx {
         div(
           plugins().map { aux ⇒
             for (a ← aux) yield {
@@ -110,25 +99,27 @@ class PluginPanel extends ModalPanel {
             }
           }
         )
-      )
-    }
+      }
+    )
+
   }
 
   def removePlugin(plugin: Plugin) =
-    OMPost[Api].removePlugin(plugin).call().foreach { p ⇒
-      getPlugins
+    OMPost[Api].removePlugin(plugin).call().foreach {
+      p ⇒
+        getPlugins
     }
 
-  val dialog = bs.modalDialog(
+  lazy val dialog = bs.modalDialog(
     modalID,
-    bs.headerDialog(Rx {
+    bs.headerDialog(
       tags.span(
         tags.b("Plugins"),
         bs.inputGroup(navbar_right)(
           uploadPluginButton
         )
       )
-    }),
+    ),
     bs.bodyDialog(pluginTable),
     bs.footerDialog(
       tags.div(
