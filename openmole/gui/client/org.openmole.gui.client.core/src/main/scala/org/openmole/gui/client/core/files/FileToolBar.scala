@@ -122,6 +122,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
             //AlertPanel.string("No plugin has been found in this folder", okaction = { () ⇒ unselectTool }, cancelaction = { () ⇒ unselectTool }, transform = RelativeCenterPosition, zone = FileZone)
             else
               treeNodePanel.turnSelectionTo(true))
+        case _=>
       }
     }
     // todo(isSelectedTool)

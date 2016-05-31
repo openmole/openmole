@@ -462,6 +462,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
                       case Some(TrashTool)  ⇒ glyph_trash
                       case Some(CopyTool)   ⇒ glyph_copy
                       case Some(PluginTool) ⇒ glyph_plug
+                      case _=>
                     }
                   }
                   else emptyMod
