@@ -91,4 +91,9 @@ object CoreUtils {
       todo()
     }
   }
+
+  def pluggables(dirNode: DirNode, todo: () ⇒ Unit) = OMPost[Api].allPluggableIn(dirNode).call.foreach { p ⇒
+    manager.pluggables() = p
+    todo()
+  }
 }

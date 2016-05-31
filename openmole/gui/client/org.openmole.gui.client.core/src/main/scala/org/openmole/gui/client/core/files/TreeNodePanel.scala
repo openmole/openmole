@@ -2,7 +2,7 @@ package org.openmole.gui.client.core.files
 
 import org.openmole.gui.client.core.alert.AbsolutePositioning.{ RelativeCenterPosition, FileZone }
 import org.openmole.gui.client.core.alert.AlertPanel
-import org.openmole.gui.client.core.files.FileToolBar.{ CopyTool, TrashTool }
+import org.openmole.gui.client.core.files.FileToolBar.{ PluginTool, CopyTool, TrashTool }
 import org.openmole.gui.client.core.{ PanelTriggerer, OMPost }
 import org.openmole.gui.client.core.CoreUtils
 import org.openmole.gui.ext.data._
@@ -171,7 +171,13 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
 
   def refreshAnd(todo: () ⇒ Unit) = CoreUtils.refreshCurrentDirectory(todo, filter)
 
+  def computePluggables = fileToolBar.selectedTool() match {
+    case Some(PluginTool) ⇒ manager.computePluggables(() ⇒ if (!manager.pluggables().isEmpty) turnSelectionTo(true))
+    case _                ⇒
+  }
+
   def drawTree: Unit = {
+    computePluggables
     manager.computeAndGetCurrentSons(filter).map { sons ⇒
       tree() = div(
         if (manager.isRootCurrent && manager.isProjectsEmpty) {
@@ -420,10 +426,10 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
                   })(arrow_right_and_left)
 
                 /*,
-                                                                                if (tn.isPlugin) glyphSpan(OMTags.glyph_plug, () ⇒
-                                                                                  OMPost[Api].autoAddPlugins(tn.safePath()).call().foreach { p ⇒
-                                                                                    panels.pluginTriggerer.open
-                                                                                  })(`class` := "glyphitem file-glyph")*/
+                                                                                    if (tn.isPlugin) glyphSpan(OMTags.glyph_plug, () ⇒
+                                                                                      OMPost[Api].autoAddPlugins(tn.safePath()).call().foreach { p ⇒
+                                                                                        panels.pluginTriggerer.open
+                                                                                      })(`class` := "glyphitem file-glyph")*/
                 )
               )
             }
@@ -437,13 +443,15 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
               div(
                 onclick := { (e: MouseEvent) ⇒
                   addToSelection
+                  println("manager selec " + manager.selected())
                   if (e.ctrlKey) clearSelectionExecpt(tn)
                 }
               )({
                   if (selected()) {
                     fileToolBar.selectedTool() match {
                       case Some(TrashTool) ⇒ stylesheet.fileSelectedForDeletion
-                      case _               ⇒ stylesheet.fileSelected
+                      case Some(PluginTool) if manager.pluggables().contains(tn) ⇒ stylesheet.fileSelected
+                      case _ ⇒ stylesheet.fileSelected
                     }
                   }
                   else stylesheet.fileSelectionMode
@@ -451,9 +459,9 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
                   stylesheet.fileSelectionMessage,
                   if (selected()) {
                     fileToolBar.selectedTool() match {
-                      case Some(TrashTool) ⇒ glyph_trash
-                      case Some(CopyTool)  ⇒ glyph_copy
-                      case _               ⇒
+                      case Some(TrashTool)  ⇒ glyph_trash
+                      case Some(CopyTool)   ⇒ glyph_copy
+                      case Some(PluginTool) ⇒ glyph_plug
                     }
                   }
                   else emptyMod

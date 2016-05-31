@@ -17,7 +17,6 @@ package org.openmole.gui.client.core.files
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.client.core.files.FileToolBar.SelectedTool
 import org.openmole.gui.client.core.alert.AlertPanel
 import org.openmole.gui.client.core.CoreUtils
 import org.openmole.gui.ext.data.{ FileFilter, SafePath }
@@ -44,6 +43,8 @@ class TreeNodeManager {
 
   val copied: Var[Seq[TreeNode]] = Var(Seq())
 
+  val pluggables: Var[Seq[TreeNode]] = Var(Seq())
+
   Obs(error) {
     error().foreach(AlertPanel.treeNodeErrorDiv)
   }
@@ -59,7 +60,10 @@ class TreeNodeManager {
 
   def trashCache(ontrashed: () ⇒ Unit, fileFilter: FileFilter = FileFilter()) = CoreUtils.updateSons(current, ontrashed, fileFilter)
 
-  def updateSon(dirNode: DirNode, newSons: Seq[TreeNode]) = sons() = sons().updated(dirNode, newSons)
+  def updateSon(dirNode: DirNode, newSons: Seq[TreeNode]) = {
+    sons() = sons().updated(dirNode, newSons)
+
+  }
 
   def isSelected(tn: TreeNode) = selected().contains(tn)
 
@@ -107,6 +111,11 @@ class TreeNodeManager {
         else CoreUtils.updateSons(dirNode, oncomputed, fileFilter)
       case _ ⇒
     }
+  }
+
+  def computePluggables(todo: () ⇒ Unit) = current match {
+    case dirNode: DirNode ⇒ CoreUtils.pluggables(dirNode, todo)
+    case _                ⇒
   }
 
   def isRootCurrent = current == root

@@ -1,9 +1,12 @@
 package org.openmole.gui.client.core.files
 
-import org.openmole.gui.client.core.CoreUtils
+import org.openmole.gui.client.core.alert.AbsolutePositioning.{ FileZone, RelativeCenterPosition }
+import org.openmole.gui.client.core.alert.AlertPanel
+import org.openmole.gui.client.core.{ panels, OMPost, CoreUtils }
 import org.openmole.gui.ext.data._
 import org.openmole.gui.misc.js.OMTags
 import org.openmole.gui.misc.utils.stylesheet
+import org.openmole.gui.shared.Api
 import org.scalajs.dom.html.Input
 import scala.util.Try
 import scalatags.JsDom.{ tags ⇒ tags }
@@ -18,9 +21,10 @@ import sheet._
 import org.openmole.gui.misc.js.JsRxTags._
 import org.openmole.gui.client.core.files.TreeNode._
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
+import autowire._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import bs._
-import org.scalajs.dom.raw.{ HTMLDivElement, HTMLSpanElement, HTMLInputElement }
+import org.scalajs.dom.raw.{ HTMLButtonElement, HTMLDivElement, HTMLSpanElement, HTMLInputElement }
 import rx._
 import org.openmole.gui.client.core.Waiter._
 
@@ -111,9 +115,14 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
       selectedTool() = Some(tool)
       selectedTool() match {
         case Some(CopyTool | TrashTool) ⇒ treeNodePanel.turnSelectionTo(true)
-        case _                          ⇒
+        case Some(PluginTool) ⇒
+          manager.computePluggables(() ⇒
+            if (manager.pluggables().isEmpty)
+              println("Empty")
+            //AlertPanel.string("No plugin has been found in this folder", okaction = { () ⇒ unselectTool }, cancelaction = { () ⇒ unselectTool }, transform = RelativeCenterPosition, zone = FileZone)
+            else
+              treeNodePanel.turnSelectionTo(true))
       }
-
     }
     // todo(isSelectedTool)
   })
@@ -225,8 +234,10 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
     unselectTool
   })
 
-  val pluginButton = bs.button("Get plugins", btn_default, () ⇒ {
-    unselectAndRefreshTree
+  val pluginButton = bs.button("Plug", btn_default, () ⇒ {
+    OMPost[Api].addPlugins(manager.selected()).call().foreach { x ⇒
+      unselectAndRefreshTree
+    }
   })
 
   //Filter
@@ -272,16 +283,18 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
     )
   }
 
+  def getIfSelected(butt: TypedTag[HTMLButtonElement]) = if (manager.selected().isEmpty) tags.div else butt
+
   val fileToolDiv = Rx {
     tags.div(centerElement +++ sheet.marginBottom(10))(
       selectedTool() match {
         case Some(FilterTool)       ⇒ filterTool
         case Some(FileCreationTool) ⇒ createFileTool
-        case Some(TrashTool)        ⇒ deleteButton
-        case Some(PluginTool)       ⇒ pluginButton
+        case Some(TrashTool)        ⇒ getIfSelected(deleteButton)
+        case Some(PluginTool)       ⇒ getIfSelected(pluginButton)
         case Some(CopyTool) ⇒
           manager.emptyCopied
-          copyButton
+          getIfSelected(copyButton)
         case _ ⇒ tags.div()
       },
       transferring.withTransferWaiter { _ ⇒

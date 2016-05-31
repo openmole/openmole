@@ -63,6 +63,13 @@ object Utils {
     !PluginManager.listBundles(safePathToFile(path)).isEmpty
   }
 
+  def allPluggableIn(path: SafePath): Seq[TreeNodeData] = {
+    import org.openmole.gui.ext.data.ServerFileSytemContext.project
+    path.listFiles().filter { f ⇒
+        PluginManager.isBundle(f)
+    }.toSeq
+  }
+
   implicit def fileToSafePath(f: File)(implicit context: ServerFileSytemContext): SafePath = {
     context match {
       case ProjectFileSystem ⇒ SafePath(getPathArray(f, workspaceProjectFile), f)

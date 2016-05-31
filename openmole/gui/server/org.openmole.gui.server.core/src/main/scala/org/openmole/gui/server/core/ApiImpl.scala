@@ -337,11 +337,13 @@ object ApiImpl extends Api {
       }
 
     EnvironmentErrorData(
-        environmentErrors.sortBy(_.date).takeRight(lines).groupBy {
-        _.errorMessage
-      }.map {
-        case (msg, err) ⇒ (err.head, err.map { _.date })
-      }.toSeq
+      environmentErrors.sortBy(_.date).takeRight(lines).groupBy {
+      _.errorMessage
+    }.map {
+      case (msg, err) ⇒ (err.head, err.map {
+        _.date
+      })
+    }.toSeq
     )
   }
 
@@ -376,6 +378,10 @@ object ApiImpl extends Api {
   }
 
   //PLUGINS
+  def addPlugins(nodes: Seq[TreeNodeData]) = nodes.foreach { n ⇒
+    addPlugin(n.safePath)
+  }
+
   def addPlugin(path: SafePath): Unit = {
     import org.openmole.gui.ext.data.ServerFileSytemContext.project
     val file = safePathToFile(path)
@@ -405,6 +411,8 @@ object ApiImpl extends Api {
   }
 
   def isPlugin(path: SafePath): Boolean = Utils.isPlugin(path)
+
+  def allPluggableIn(path: SafePath): Seq[TreeNodeData] = Utils.allPluggableIn(path)
 
   def listPlugins(): Iterable[Plugin] =
     Workspace.pluginDir.listFilesSafe.map(p ⇒ Plugin(p.getName))
