@@ -29,46 +29,38 @@ object LogRange {
 
   implicit def isFinite[T] =
     new Finite[LogRange[T], T] with Center[LogRange[T], T] with Bounds[LogRange[T], T] {
-      override def computeValues(domain: LogRange[T]) = FromContext.apply((context, rng) ⇒ domain.computeValues(context)(rng))
-      override def center(domain: LogRange[T]) = FromContext.apply((context, rng) ⇒ domain.center(context)(rng))
-      override def max(domain: LogRange[T]) = FromContext.apply((context, rng) ⇒ domain.max(context)(rng))
-      override def min(domain: LogRange[T]) = FromContext.apply((context, rng) ⇒ domain.min(context)(rng))
+      override def computeValues(domain: LogRange[T]) = FromContext((context, rng) ⇒ domain.computeValues(context)(rng))
+      override def center(domain: LogRange[T]) = Range.rangeCenter(domain.range)
+      override def max(domain: LogRange[T]) = FromContext((context, rng) ⇒ domain.max.from(context)(rng))
+      override def min(domain: LogRange[T]) = FromContext((context, rng) ⇒ domain.min.from(context)(rng))
     }
 
-  def apply[T](range: Range[T], steps: FromContext[T])(implicit lg: Log[T]) = new LogRange[T](range, steps)
+  def apply[T: Log](range: Range[T], steps: FromContext[Int]) =
+    new LogRange[T](range, steps)
 
-  def apply[T](
+  def apply[T: RangeValue: Log](
     min:   FromContext[T],
     max:   FromContext[T],
-    steps: FromContext[T]
-  )(implicit integral: Integral[T], log: Log[T]): LogRange[T] =
+    steps: FromContext[Int]
+  ): LogRange[T] =
     LogRange[T](Range[T](min, max), steps)
 
 }
 
-sealed class LogRange[T](val range: Range[T], val steps: FromContext[T])(implicit lg: Log[T]) extends Bounded[T] {
+sealed class LogRange[T](val range: Range[T], val steps: FromContext[Int])(implicit lg: Log[T]) {
 
   import range._
 
   def computeValues(context: Context)(implicit rng: RandomProvider): Iterable[T] = {
-    val mi: T = lg.log(min(context))
-    val ma: T = lg.log(max(context))
-    val nbst: T = nbStep(context)
+    val logMin: T = lg.log(min.from(context))
+    val logMax: T = lg.log(max.from(context))
+    val nbSteps = steps.from(context)
 
-    import integral._
+    import ops._
 
-    val st = abs(minus(ma, mi)) / nbst
-
-    var cur = mi
-
-    for (i ← 0 to nbst.toInt) yield {
-      val ret = cur
-      cur = plus(ret, st)
-      lg.exp(ret)
-    }
+    val logStep = (logMax - logMin) / (fromInt(nbSteps - 1))
+    Iterator.iterate(logMin)(_ + logStep).map(lg.exp).take(nbSteps).toVector
   }
-
-  def nbStep(context: Context)(implicit rng: RandomProvider): T = steps.from(context)
 
   def max = range.max
   def min = range.min

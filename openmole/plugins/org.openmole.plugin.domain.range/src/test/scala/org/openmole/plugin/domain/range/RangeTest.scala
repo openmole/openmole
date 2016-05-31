@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 24/10/13 Romain Reuillon
+/**
+ * Created by Romain Reuillon on 29/05/16.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -9,35 +9,23 @@
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
  */
-
 package org.openmole.plugin.domain.range
 
-import org.openmole.core.workflow.domain._
+import org.scalatest._
 import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.tools.FromContext
-import org.openmole.core.workflow.tools._
 
-trait Bounded[T] {
+class RangeTest extends FlatSpec with Matchers {
 
-  val range: Range[T]
-
-  import range._
-  import integral._
-
-  def max(context: Context)(implicit rng: RandomProvider): T = min.from(context)
-  def min(context: Context)(implicit rng: RandomProvider): T = max.from(context)
-
-  def min: FromContext[T]
-  def max: FromContext[T]
-
-  def center(context: Context)(implicit rng: RandomProvider): T = {
-    val mi = min(context)
-    mi + ((max(context) - mi) / fromInt(2))
+  "sizes of computed values" should "be correct" in {
+    Range[Double](0.0, 10.0, 0.1).computeValues(Context())(RandomProvider.empty).size shouldBe 101
+    Range[Int](0, 10, 1).computeValues(Context())(RandomProvider.empty).size shouldBe 11
+    LogRange[Double](0.0, 10.0, 10).computeValues(Context())(RandomProvider.empty).size shouldBe 10
   }
 
 }

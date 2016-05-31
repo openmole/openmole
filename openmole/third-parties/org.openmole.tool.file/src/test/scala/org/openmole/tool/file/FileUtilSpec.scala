@@ -17,9 +17,8 @@
 
 package org.openmole.tool.file
 
-import java.io.File
-import java.io.FileWriter
-import scala.io.Source
+import java.nio.file.Files
+
 import org.openmole.tool.file._
 import org.openmole.tool.stream._
 import org.scalatest.FlatSpec
@@ -38,7 +37,7 @@ class FileUtilSpec extends FlatSpec with Matchers {
   }
 
   "A string" should "be append to the file" in {
-    val file = File.createTempFile("test", ".tmp")
+    val file = Files.createTempFile("test", ".tmp").toFile
     try {
       val t1 = "TestString"
       val t2 = "Test2String"

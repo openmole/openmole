@@ -17,7 +17,6 @@
 
 package org.openmole.plugin.task
 
-import org.openmole.core.macros.Keyword._
 import org.openmole.core.workflow.builder._
 
 package scala {

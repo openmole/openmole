@@ -21,7 +21,6 @@ import java.io.{ File, IOException, PrintStream }
 
 import org.apache.commons.exec.CommandLine
 import org.openmole.core.exception.InternalProcessingError
-import org.openmole.core.macros.Keyword._
 import org.openmole.core.tools.service.OS
 import org.openmole.core.tools.service.ProcessUtil._
 import org.openmole.core.workflow.data.{ Context, Prototype, RandomProvider, Variable }
@@ -69,6 +68,7 @@ package systemexec {
   }
 
   import org.openmole.core.workflow.builder.InputOutputBuilder
+  import org.openmole.plugin.task.external.ExternalPackage
 
   trait ReturnValue[T] {
     def returnValue: Lens[T, Option[Prototype[Int]]] // = None
@@ -91,7 +91,7 @@ package systemexec {
     def workDirectory: Lens[T, Option[String]] // = None
   }
 
-  trait SystemExecPackage {
+  trait SystemExecPackage extends ExternalPackage {
 
     lazy val errorOnReturnValue =
       new {

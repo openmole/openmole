@@ -71,7 +71,7 @@ case class JobScript(voName: String, memory: Int, threads: Int, debug: Boolean) 
       script +=
         "if [ `uname -m` = x86_64 ]; then " +
         cpCommand.download(storage.url.resolve(runtime.jvmLinuxX64.path), "$PWD/jvm.tar.gz") + "; else " +
-        cpCommand.download(storage.url.resolve(runtime.jvmLinuxI386.path), "$PWD/jvm.tar.gz") + "; fi"
+        """echo "Unsupported architecture: " `uname -m`; exit 1; fi"""
       script += "tar -xzf jvm.tar.gz >/dev/null"
       script += "rm -f jvm.tar.gz"
       script += cpCommand.download(storage.url.resolve(runtime.runtime.path), "$PWD/openmole.tar.gz")

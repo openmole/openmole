@@ -102,7 +102,7 @@ class Command(val console: ScalaREPL, val variables: ConsoleVariables) { command
         )
       project.compile(file, args) match {
         case ScriptFileDoesNotExists() ⇒ throw new IOException("File " + file + " doesn't exist.")
-        case CompilationError(e)       ⇒ throw e
+        case e: CompilationError       ⇒ throw e.error
         case Compiled(compiled)        ⇒ compiled.eval()
       }
     }

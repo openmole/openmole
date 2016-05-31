@@ -25,41 +25,41 @@ import org.openmole.core.workflow.tools.FromContext
 object Range {
 
   implicit def isBounded[T] = new Bounds[Range[T], T] with Center[Range[T], T] {
-    override def min(domain: Range[T]) = FromContext.apply((context, rng) ⇒ domain.min(context)(rng))
-    override def max(domain: Range[T]) = FromContext.apply((context, rng) ⇒ domain.max(context)(rng))
-    override def center(domain: Range[T]) = FromContext.apply((context, rng) ⇒ domain.center(context)(rng))
+    override def min(domain: Range[T]) = FromContext((context, rng) ⇒ domain.min.from(context)(rng))
+    override def max(domain: Range[T]) = FromContext((context, rng) ⇒ domain.max.from(context)(rng))
+    override def center(domain: Range[T]) = Range.rangeCenter(domain)
   }
 
-  implicit def rangeWithDefaultStepIsFinite[T](implicit s: DefaultStep[T]) =
-    new Finite[Range[T], T] with Bounds[Range[T], T] with Center[Range[T], T] {
-      override def computeValues(domain: Range[T]) = StepRange.isFinite.computeValues(domain.step(s.step))
-      override def max(domain: Range[T]) = StepRange.isFinite.max(domain.step(s.step))
-      override def min(domain: Range[T]) = StepRange.isFinite.min(domain.step(s.step))
-      override def center(domain: Range[T]) = StepRange.isFinite.center(domain.step(s.step))
-    }
+  implicit def rangeWithDefaultStepIsFinite[T](implicit step: DefaultStep[T]) = new Finite[Range[T], T] {
+    override def computeValues(domain: Range[T]) =
+      FromContext((context, rng) ⇒ StepRange[T](domain, step.step).computeValues(context)(rng))
+  }
 
-  def apply[T](
+  def apply[T: RangeValue](
     min: FromContext[T],
     max: FromContext[T]
-  )(implicit integral: Integral[T]) = new Range[T](min, max)
+  ): Range[T] = new Range[T](min, max)
 
-  def apply[T](
+  def apply[T: RangeValue](
     min:  FromContext[T],
     max:  FromContext[T],
     step: FromContext[T]
-  )(implicit integral: Integral[T]): StepRange[T] =
+  ): StepRange[T] =
     StepRange[T](Range[T](min, max), step)
 
-  def size[T](
+  def size[T: RangeValue](
     min:  FromContext[T],
     max:  FromContext[T],
     size: FromContext[Int]
-  )(implicit integral: Integral[T]): SizeRange[T] =
+  ): SizeRange[T] =
     SizeRange[T](Range[T](min, max), size)
 
+  def rangeCenter[T](r: Range[T]): FromContext[T] = FromContext { (context, rng) ⇒
+    import r.ops._
+    val mi = r.min.from(context)(rng)
+    mi + ((r.max.from(context)(rng) - mi) / fromInt(2))
+  }
+
 }
 
-class Range[T](val min: FromContext[T], val max: FromContext[T])(implicit val integral: Integral[T]) extends Bounded[T] {
-  lazy val range = this
-}
-
+class Range[T](val min: FromContext[T], val max: FromContext[T])(implicit val ops: RangeValue[T])

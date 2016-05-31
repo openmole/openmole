@@ -86,7 +86,7 @@ object FromString {
       override def apply(s: String): FiniteDuration = org.openmole.core.tools.service.stringToDuration(s)
     }
 
-  implicit val doubleAsIfIntegral = Numeric.DoubleAsIfIntegral
+  /*implicit val doubleAsIfIntegral = Numeric.DoubleAsIfIntegral
   implicit val bigDecimalAsIfIntegral = Numeric.BigDecimalAsIfIntegral
   implicit val floatAsIfIntegral = Numeric.FloatAsIfIntegral
 
@@ -118,7 +118,7 @@ object FromString {
     def quot(x: JBigInteger, y: JBigInteger): JBigInteger = x divide y
     def rem(x: JBigInteger, y: JBigInteger): JBigInteger = x mod y
     def compare(x: JBigInteger, y: JBigInteger): Int = x compareTo y
-  }
+  }*/
 
 }
 

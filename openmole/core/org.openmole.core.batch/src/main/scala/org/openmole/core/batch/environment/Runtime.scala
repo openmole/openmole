@@ -23,6 +23,5 @@ case class Runtime(
   storage:            FileMessage,
   runtime:            FileMessage,
   environmentPlugins: Iterable[FileMessage],
-  jvmLinuxI386:       FileMessage,
   jvmLinuxX64:        FileMessage
 )

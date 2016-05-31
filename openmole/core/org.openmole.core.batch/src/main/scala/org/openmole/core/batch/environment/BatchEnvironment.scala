@@ -123,7 +123,6 @@ object BatchEnvironment extends Logger {
   private def runtimeDirLocation = Workspace.openMOLELocation / "runtime"
 
   @transient lazy val runtimeLocation = runtimeDirLocation / "runtime.tar.gz"
-  @transient lazy val JVMLinuxI386Location = runtimeDirLocation / "jvm-386.tar.gz"
   @transient lazy val JVMLinuxX64Location = runtimeDirLocation / "jvm-x64.tar.gz"
 
   Workspace setDefault MemorySizeForRuntime
@@ -199,7 +198,7 @@ trait BatchExecutionJob extends ExecutionJob { bej ⇒
 
   def usedFiles: Iterable[File] =
     (files ++
-      Seq(environment.runtime, environment.jvmLinuxI386, environment.jvmLinuxX64) ++
+      Seq(environment.runtime, environment.jvmLinuxX64) ++
       environment.plugins ++ plugins).distinct
 
   def usedFileHashes = usedFiles.map(f ⇒ (f, FileService.hash(job.moleExecution, f)))
@@ -241,7 +240,6 @@ trait BatchEnvironment extends SubmissionEnvironment { env ⇒
   }
 
   def runtime = BatchEnvironment.runtimeLocation
-  def jvmLinuxI386 = BatchEnvironment.JVMLinuxI386Location
   def jvmLinuxX64 = BatchEnvironment.JVMLinuxX64Location
 
   @transient lazy val plugins = PluginManager.pluginsForClass(this.getClass)

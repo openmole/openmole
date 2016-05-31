@@ -57,7 +57,12 @@ object Project {
 
 sealed trait CompileResult
 case class ScriptFileDoesNotExists() extends CompileResult
-case class CompilationError(exception: Throwable) extends CompileResult
+sealed trait CompilationError extends CompileResult {
+  def error: Throwable
+}
+case class ErrorInCode(error: ScalaREPL.CompilationError) extends CompilationError
+case class ErrorInCompiler(error: Throwable) extends CompilationError
+
 case class Compiled(result: CompiledScript) extends CompileResult {
   def eval =
     result.eval() match {
@@ -111,8 +116,8 @@ class Project(workDirectory: File, newREPL: (ConsoleVariables) ⇒ ScalaREPL = P
                 (positionLens composeLens ErrorPosition.end modify { _ - headerOffset }) andThen
                 (positionLens composeLens ErrorPosition.point modify { _ - headerOffset })
 
-            CompilationError(adjusted(ce))
-          case e: Throwable ⇒ CompilationError(e)
+            ErrorInCode(adjusted(ce))
+          case e: Throwable ⇒ ErrorInCompiler(e)
         }
         finally loop.close()
       }

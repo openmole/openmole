@@ -20,7 +20,7 @@ package org.openmole.core
 import java.io.File
 import java.util.concurrent.TimeUnit
 
-import org.openmole.core.macros.{ ExtractValName, Keyword }
+import org.openmole.core.macros.ExtractValName
 import ExtractValName._
 
 import org.openmole.core.serializer._
@@ -76,16 +76,6 @@ package dsl {
     implicit def stringToDuration(s: String): FiniteDuration = org.openmole.core.tools.service.stringToDuration(s)
 
     def encrypt(s: String) = Workspace.encrypt(s)
-
-    implicit def byteIsIntegral = Numeric.ByteIsIntegral
-
-    implicit def floatAsIfIntegral = Numeric.FloatAsIfIntegral
-
-    implicit def doubleAsIfIntegral = Numeric.DoubleAsIfIntegral
-
-    implicit def bigDecimalAsIfIntegral = Numeric.BigDecimalAsIfIntegral
-
-    implicit def bigIntAsIfIntegral = Numeric.BigIntIsIntegral
 
     implicit def seqIsFunctor = new Functor[Seq] {
       override def map[A, B](fa: Seq[A])(f: (A) ⇒ B): Seq[B] = fa.map(f)
