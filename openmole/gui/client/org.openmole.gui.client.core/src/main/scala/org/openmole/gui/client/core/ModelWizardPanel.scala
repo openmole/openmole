@@ -449,13 +449,7 @@ class ModelWizardPanel extends ModalPanel {
           lc ⇒
             val path = manager.current.safePath()
             val scriptName = scriptNameInput.value.clean
-            val target = targetPath().map {
-              tp ⇒
-                modelSelector.content().map {
-                  c ⇒
-                    tp.normalizedPathString + "/" + c.name
-                }.getOrElse(tp.normalizedPathString)
-            }.getOrElse("")
+            val target = targetPath().map { _.name }.getOrElse("executable")
             OMPost[Api].buildModelTask(
               target,
               scriptName,
