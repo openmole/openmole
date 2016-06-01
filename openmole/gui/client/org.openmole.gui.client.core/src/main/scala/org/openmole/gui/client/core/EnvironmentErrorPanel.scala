@@ -55,15 +55,12 @@ class EnvironmentErrorPanel {
 
   def setSorting(sorting: ListSorting, ordering: ListOrdering) = sortingAndOrdering() = ListSortingAndOrdering(sorting, ordering)
 
-  def sort(datedErrors: EnvironmentErrorData, sortingAndOrdering: ListSortingAndOrdering): Seq[(String, Long, String)] = {
-
-    val lines = for {
-      errors ← datedErrors.datedErrors
-      (error, dates) = (errors._1, errors._2)
-      date ← dates
-    } yield {
-      (error.errorMessage, date, error.level.name)
-    }
+  def sort(datedErrors: EnvironmentErrorData, sortingAndOrdering: ListSortingAndOrdering): Seq[(String, Long, String, Error)] = {
+    val lines =
+      for {
+        (error, dates) ← datedErrors.datedErrors
+        date ← dates
+      } yield (error.errorMessage, date, error.level.name, error.stack)
 
     val sorted = sortingAndOrdering.fileSorting match {
       case AlphaSorting ⇒ lines.sortBy(_._1)
@@ -78,21 +75,20 @@ class EnvironmentErrorPanel {
   }
 
   def setErrors(ers: EnvironmentErrorData) = {
-    val stacks = ers.datedErrors.map(_._1).groupBy(_.errorMessage).map { case (k, v) ⇒ k → v.head.stack }
     entries() = tbody(
       for {
-        error ← sort(ers, sortingAndOrdering())
+        (message, date, level, stack) ← sort(ers, sortingAndOrdering())
       } yield {
         tags.tr(row +++ stylesheet.errorTable)(
           tags.td(colMD(12))(
-            tags.a(error._1, cursor := "pointer", onclick := {
+            tags.a(message, cursor := "pointer", onclick := {
               () ⇒
-                panels.environmentStackPanel.content() = stacks(error._1).stackTrace
+                panels.environmentStackPanel.content() = stack.stackTrace
                 panels.environmentStackTriggerer.open
             })
           ),
-          tags.td(colMD(1))(Utils.longToDate(error._2).split(",").last),
-          tags.td(colMD(1))(label(error._3)(label_default))
+          tags.td(colMD(1))(Utils.longToDate(date).split(",").last),
+          tags.td(colMD(1))(label(level)(label_default))
         )
       }
     )

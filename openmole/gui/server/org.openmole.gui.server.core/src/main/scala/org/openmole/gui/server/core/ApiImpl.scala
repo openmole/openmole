@@ -339,15 +339,12 @@ object ApiImpl extends Api {
         ex ⇒ EnvironmentError(environmentId, ex.exception.getMessage, ErrorBuilder(ex.exception), ex.creationTime, Utils.javaLevelToErrorLevel(ex.level))
       }
 
-    EnvironmentErrorData(
+    def groupedErrors =
       environmentErrors.sortBy(_.date).takeRight(lines).groupBy {
-      _.errorMessage
-    }.map {
-      case (msg, err) ⇒ (err.head, err.map {
-        _.date
-      })
-    }.toSeq
-    )
+        _.errorMessage
+      }.toSeq.map { case (msg, err) ⇒ (err.head, err.map { _.date }) }
+
+    EnvironmentErrorData(groupedErrors)
   }
 
   def marketIndex() = {
