@@ -19,8 +19,6 @@ package org.openmole.gui.ext.data
 
 import DataUtils._
 
-case class DataBag(uuid: String, name: String, data: Data)
-
 trait Data
 
 object ProtoTYPE {
@@ -95,8 +93,6 @@ trait TaskData extends Data with InputData with OutputData
 trait EnvironmentData extends Data
 
 trait HookData extends Data with InputData with OutputData
-
-case class ErrorData(data: DataBag, error: String, stack: String)
 
 case class IOMappingData[T](key: String, value: T)
 

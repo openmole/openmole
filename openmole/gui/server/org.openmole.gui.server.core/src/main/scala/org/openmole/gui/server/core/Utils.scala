@@ -283,6 +283,13 @@ object Utils {
     }.filter(exists)
   }
 
+  def copyToPluginDir(safePaths: Seq[SafePath]) = {
+    safePaths.map { sp ⇒
+      val from = safePathToFile(sp)(ServerFileSytemContext.project)
+      copy(from, Workspace.pluginDir)
+    }
+  }
+
   def copyFromTmp(tmpSafePath: SafePath, filesToBeMovedTo: Seq[SafePath]): Unit = {
     val tmp: File = safePathToFile(tmpSafePath)(ServerFileSytemContext.absolute)
 

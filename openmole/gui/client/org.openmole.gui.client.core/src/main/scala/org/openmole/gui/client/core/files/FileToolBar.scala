@@ -1,8 +1,6 @@
 package org.openmole.gui.client.core.files
 
-import org.openmole.gui.client.core.alert.AbsolutePositioning.{ FileZone, RelativeCenterPosition }
-import org.openmole.gui.client.core.alert.AlertPanel
-import org.openmole.gui.client.core.{ panels, OMPost, CoreUtils }
+import org.openmole.gui.client.core.{ OMPost, CoreUtils }
 import org.openmole.gui.ext.data._
 import org.openmole.gui.misc.js.OMTags
 import org.openmole.gui.misc.utils.stylesheet
@@ -21,10 +19,10 @@ import sheet._
 import org.openmole.gui.misc.js.JsRxTags._
 import org.openmole.gui.client.core.files.TreeNode._
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
-import autowire._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+import autowire._
 import bs._
-import org.scalajs.dom.raw.{ HTMLButtonElement, HTMLDivElement, HTMLSpanElement, HTMLInputElement }
+import org.scalajs.dom.raw.{ HTMLButtonElement, HTMLSpanElement, HTMLInputElement }
 import rx._
 import org.openmole.gui.client.core.Waiter._
 
@@ -236,8 +234,13 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
   })
 
   val pluginButton = bs.button("Plug", btn_default, () ⇒ {
-    OMPost[Api].addPlugins(manager.selected()).call().foreach { x ⇒
-      unselectAndRefreshTree
+    OMPost[Api].copyToPluginDir(manager.selected()).call().foreach { c ⇒
+      OMPost[Api].addPlugins(manager.selected().map {
+        _.name()
+      }).call().foreach { x ⇒
+        println("EXX " + x)
+        unselectAndRefreshTree
+      }
     }
   })
 

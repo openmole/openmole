@@ -66,7 +66,11 @@ class PluginPanel extends ModalPanel {
           transferring() = p
         },
         UploadPlugin(),
-        () ⇒ getPlugins
+        () ⇒
+          OMPost[Api].addPlugins(FileManager.fileNames(fileInput.files)).call().foreach { ex ⇒
+            println("Exection: " + ex)
+            getPlugins
+          }
       )
     })
   ).tooltip(span("Upload plugin"))

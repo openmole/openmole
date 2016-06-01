@@ -32,7 +32,7 @@ import org.openmole.tool.stream.StringPrintStream
 import scala.concurrent.stm._
 import org.openmole.tool.file._
 import org.openmole.tool.tar._
-import org.openmole.core.buildinfo
+import org.openmole.core.{ pluginmanager, buildinfo }
 import org.openmole.core.console.ScalaREPL
 import org.openmole.core.output.OutputManager
 import org.openmole.gui.server.core
@@ -148,6 +148,8 @@ object ApiImpl extends Api {
   def copyAllTmpTo(tmpSafePath: SafePath, to: SafePath): Unit = Utils.copyAllTmpTo(tmpSafePath, to)
 
   def copyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath) = Utils.copyProjectFilesTo(safePaths, to)
+
+  def copyToPluginDir(safePaths: Seq[SafePath]): Unit = Utils.copyToPluginDir(safePaths)
 
   def testExistenceAndCopyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Seq[SafePath] = Utils.testExistenceAndCopyProjectFilesTo(safePaths, to)
 
@@ -379,14 +381,14 @@ object ApiImpl extends Api {
   }
 
   //PLUGINS
-  def addPlugins(nodes: Seq[TreeNodeData]) = nodes.foreach { n ⇒
-    addPlugin(n.safePath)
+  def addPlugins(nodes: Seq[String]): Seq[Error] = nodes.flatMap { n ⇒
+    addPlugin(n)
   }
 
-  def addPlugin(path: SafePath): Unit = {
-    import org.openmole.gui.ext.data.ServerFileSytemContext.project
-    val file = safePathToFile(path)
-    addPlugins(PluginManager.listBundles(file))
+  def addPlugin(name: String): Seq[Error] = {
+    addPlugins(PluginManager.listBundles(Workspace.pluginDir / name)).map {
+      ErrorBuilder(_)
+    }
   }
 
   def autoAddPlugins(path: SafePath) = {
@@ -401,14 +403,16 @@ object ApiImpl extends Api {
     addPlugins(recurse(file))
   }
 
-  def addPlugins(files: Iterable[File]): Unit = {
+  def addPlugins(files: Iterable[File]): Seq[Throwable] = {
     val plugins =
       files.map { file ⇒
         val dest: File = Workspace.pluginDir / file.getName
         file copy dest
         dest
       }
-    PluginManager.tryLoad(plugins)
+    PluginManager.tryLoad(plugins).map {
+      _._2
+    }
   }
 
   def isPlugin(path: SafePath): Boolean = Utils.isPlugin(path)
