@@ -309,7 +309,7 @@ class ExecutionPanel extends ModalPanel {
     headerDialog(
       div(height := 55)(
         b("Executions"),
-        div(omsheet.executionHeader)(
+        div(omsheet.panelHeaderSettings)(
           settingsButton
         ).popup(
           settingsDiv,

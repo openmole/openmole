@@ -680,3 +680,7 @@ object FileFilter {
   def defaultFilter = FileFilter.this(First, Some(100), "", AlphaSorting)
 }
 
+//Configuration entries
+sealed trait ConfigData
+
+object VOTest extends ConfigData

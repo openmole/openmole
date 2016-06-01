@@ -31,6 +31,8 @@ trait Api {
   def resetPassword(): Unit
   def setPassword(pass: String): Boolean
   def workspacePath(): SafePath
+  def getConfigurationValue(configData: ConfigData): Option[String]
+  def setConfigurationValue(configData: ConfigData, value: String): Unit
 
   //FILES
   def addDirectory(treeNode: TreeNodeData, directoryName: String): Boolean

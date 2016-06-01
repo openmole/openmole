@@ -17,6 +17,7 @@ package org.openmole.gui.client.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import org.openmole.core.workspace.{ Workspace, ConfigurationLocation }
 import org.openmole.gui.client
 import org.openmole.gui.ext.dataui.PanelUI
 import org.openmole.gui.shared.Api
@@ -35,6 +36,7 @@ import bs._
 import org.openmole.gui.client.core.authentications._
 
 class AuthenticationPanel extends ModalPanel {
+
   lazy val modalID = "authenticationsPanelID"
   lazy val setting: Var[Option[PanelUI]] = Var(None)
   private lazy val auths: Var[Option[Seq[AuthPanelWithID]]] = Var(None)
@@ -116,9 +118,35 @@ class AuthenticationPanel extends ModalPanel {
     save
   })
 
+  val vosToBeTested = bs.labeledInput("Test EGI credential on", "", "VO names (vo1,vo2,...)", labelStyle = color := "#000")
+  OMPost[Api].getConfigurationValue(VOTest).call().foreach {
+    _.map {
+      vosToBeTested.setDefault
+    }
+  }
+
+  val settingsDiv = tags.div(width := 200)(
+    vosToBeTested.render
+  )
+
+  val settingsButton = tags.span(
+    btn_default +++ glyph_settings +++ omsheet.settingsButton
+  )(tags.span(caret))
+
   lazy val dialog = bs.modalDialog(
     modalID,
-    bs.headerDialog(tags.b("Authentications")),
+    bs.headerDialog(
+      div(height := 55)(
+        b("Authentications"),
+        div(omsheet.panelHeaderSettings)(
+          settingsButton
+        ).popup(
+          settingsDiv,
+          onclose = () ⇒ OMPost[Api].setConfigurationValue(VOTest, vosToBeTested.value).call(),
+          popupStyle = whitePopupWithBorder
+        )
+      )
+    ),
     bs.bodyDialog(authenticationTable),
     bs.footerDialog(Rx {
       bs.buttonGroup()(

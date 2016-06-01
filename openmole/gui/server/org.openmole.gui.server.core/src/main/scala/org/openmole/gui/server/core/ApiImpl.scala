@@ -257,6 +257,9 @@ object ApiImpl extends Api {
     Utils.workspaceProjectFile
   }
 
+  def getConfigurationValue(configData: ConfigData): Option[String] = Configurations(configData)
+
+  def setConfigurationValue(configData: ConfigData, value: String) = Configurations.set(configData, value)
   // EXECUTIONS
   def cancelExecution(id: ExecutionId): Unit = execution.cancel(id)
 
@@ -491,8 +494,7 @@ object ApiImpl extends Api {
       val defaults =
         "  //Default values. Can be removed if OpenMOLE Vals are set by values coming from the workflow\n" +
           (inputs.map { p ⇒ (p.name, testBoolean(p)) } ++
-            ifilemappings.map { p ⇒ (p.name, " workDirectory / \"" + p.mapping.getOrElse("") + "\"") } ++
-            ofilemappings.map { p ⇒ (p.name, " workDirectory / \"" + p.mapping.getOrElse("") + "\"") }).filterNot {
+            ifilemappings.map { p ⇒ (p.name, " workDirectory / \"" + p.mapping.getOrElse("") + "\"") }).filterNot {
               _._2.isEmpty
             }.map { p ⇒ default(p._1, p._2) }.mkString(",\n")
 

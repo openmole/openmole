@@ -349,7 +349,7 @@ package object stylesheet {
   )
 
   //EXECUTION PANEL
-  lazy val executionHeader: ModifierSeq = Seq(
+  lazy val panelHeaderSettings: ModifierSeq = Seq(
     floatRight,
     sheet.marginRight(130),
     sheet.marginTop(-25)
