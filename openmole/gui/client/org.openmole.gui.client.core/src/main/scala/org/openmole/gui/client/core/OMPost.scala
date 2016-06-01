@@ -22,20 +22,20 @@ import org.scalajs.dom._
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 
-object OMPost extends autowire.Client[String, upickle.Reader, upickle.Writer] {
+object OMPost extends autowire.Client[String, upickle.default.Reader, upickle.default.Writer] {
   override def doCall(req: Request): Future[String] = {
     val url = req.path.mkString("/")
     val host = window.document.location.host
 
     ext.Ajax.post(
       url = s"https://$host/$url",
-      data = upickle.write(req.args)
+      data = upickle.default.write(req.args)
     ).map {
         _.responseText
       }
   }
 
-  def read[Result: upickle.Reader](p: String) = upickle.read[Result](p)
+  def read[Result: upickle.default.Reader](p: String) = upickle.default.read[Result](p)
 
-  def write[Result: upickle.Writer](r: Result) = upickle.write(r)
+  def write[Result: upickle.default.Writer](r: Result) = upickle.default.write(r)
 }

@@ -91,7 +91,7 @@ object Libraries extends Defaults {
   lazy val scalaTagsVersion = "0.5.4"
   lazy val scalaJSDomVersion = "0.9.0"
   lazy val rxVersion = "0.2.8"
-  lazy val scalaUpickleVersion = "0.2.6"
+  lazy val scalaUpickleVersion = "0.4.0"
   lazy val scalaAutowireVersion = "0.2.5"
 
   lazy val upickle = "org.openmole" %% "upickle" % scalaUpickleVersion

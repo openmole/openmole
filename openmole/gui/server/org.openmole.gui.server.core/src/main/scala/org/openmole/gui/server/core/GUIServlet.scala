@@ -20,7 +20,6 @@ import javax.servlet.annotation.MultipartConfig
 import javax.servlet.http.{ HttpServletResponse, HttpServletRequest }
 
 import org.openmole.core.workspace.Workspace
-import org.openmole.gui.misc.utils.Utils._
 import org.scalatra._
 import org.scalatra.auth.{ ScentryConfig, ScentrySupport }
 import org.scalatra.auth.strategy.{ BasicAuthSupport, BasicAuthStrategy }
@@ -32,16 +31,16 @@ import scala.concurrent.duration._
 import scala.concurrent.Await
 import scalatags.Text.all._
 import scalatags.Text.{ all ⇒ tags }
-import java.io.{ BufferedOutputStream, File }
+import java.io.File
 import org.openmole.tool.file._
 import org.openmole.tool.stream._
 import org.openmole.tool.tar._
 import scala.util.{ Failure, Success, Try }
 
-object AutowireServer extends autowire.Server[String, upickle.Reader, upickle.Writer] {
-  def read[Result: upickle.Reader](p: String) = upickle.read[Result](p)
+object AutowireServer extends autowire.Server[String, upickle.default.Reader, upickle.default.Writer] {
+  def read[Result: upickle.default.Reader](p: String) = upickle.default.read[Result](p)
 
-  def write[Result: upickle.Writer](r: Result) = upickle.write(r)
+  def write[Result: upickle.default.Writer](r: Result) = upickle.default.write(r)
 }
 
 @MultipartConfig(fileSizeThreshold = 1024 * 1024)
@@ -85,7 +84,7 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
     fileType match {
       case "project"        ⇒ moveTo(Utils.webUIProjectFile)
       case "authentication" ⇒ moveTo(Utils.authenticationKeysFile)
-      case "plugin"         ⇒ ApiImpl.addPlugins(moveTo(Workspace.pluginDir))
+      case "plugin"         ⇒ moveTo(Workspace.pluginDir)
       case "absolute"       ⇒ moveTo(new File(""))
     }
 
@@ -144,7 +143,7 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
     Await.result(AutowireServer.route[Api](ApiImpl)(
       autowire.Core.Request(
         basePath.split("/").toSeq ++ multiParams("splat").head.split("/"),
-        upickle.read[Map[String, String]](request.body)
+        upickle.default.read[Map[String, String]](request.body)
       )
     ), Duration.Inf)
   }
