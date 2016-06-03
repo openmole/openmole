@@ -113,7 +113,7 @@ class Runtime {
 
       logger.fine("Plugins " + plugins.unzip._2)
 
-      PluginManager.tryLoad(plugins.unzip._2).foreach { case (b, e) ⇒ logger.log(WARNING, s"Error loading bundle $b", e) }
+      PluginManager.tryLoad(plugins.unzip._2).foreach { case (f, e) ⇒ logger.log(WARNING, s"Error loading bundle $f", e) }
 
       for { (p, f) ← plugins } usedFiles.put(p.originalPath, f)
 

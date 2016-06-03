@@ -387,7 +387,7 @@ object ApiImpl extends Api {
 
   def addPlugin(name: String): Seq[Error] = {
     addPlugins(PluginManager.listBundles(Workspace.pluginDir / name)).map {
-      ErrorBuilder(_)
+      case (file, e) ⇒ ErrorBuilder(e)
     }
   }
 
@@ -403,16 +403,14 @@ object ApiImpl extends Api {
     addPlugins(recurse(file))
   }
 
-  def addPlugins(files: Iterable[File]): Seq[Throwable] = {
+  def addPlugins(files: Iterable[File]): Seq[(File, Throwable)] = {
     val plugins =
       files.map { file ⇒
         val dest: File = Workspace.pluginDir / file.getName
         file copy dest
         dest
       }
-    PluginManager.tryLoad(plugins).map {
-      _._2
-    }
+    PluginManager.tryLoad(plugins).toSeq
   }
 
   def isPlugin(path: SafePath): Boolean = Utils.isPlugin(path)
