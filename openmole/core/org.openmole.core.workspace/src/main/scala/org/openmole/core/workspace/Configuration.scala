@@ -129,7 +129,7 @@ class ConfigurationFile(val file: File) {
         val kp = s.take(equalIndex)
         val v = s.takeRight(s.length - equalIndex - 1)
         val Array(g, k) = kp.split('.')
-        if (k.isEmpty || v.isEmpty) None
+        if (k.isEmpty) None
         else Some(Value(g.trim, k.trim, v.trim))
       }
     }
