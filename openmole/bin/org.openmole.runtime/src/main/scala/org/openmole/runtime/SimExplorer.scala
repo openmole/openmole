@@ -74,7 +74,7 @@ object SimExplorer extends Logger {
 
         PluginManager.startAll.foreach { case (b, e) ⇒ logger.log(WARNING, s"Error starting bundle $b", e) }
         logger.fine("plugins: " + config.pluginPath.get + " " + new File(config.pluginPath.get).listFilesSafe.mkString(","))
-        PluginManager.tryLoad(new File(config.pluginPath.get).listFilesSafe).foreach { case (b, e) ⇒ logger.log(WARNING, s"Error loading bundle $b", e) }
+        PluginManager.tryLoad(new File(config.pluginPath.get).listFilesSafe).foreach { case (f, e) ⇒ logger.log(WARNING, s"Error loading bundle $f", e) }
 
         val storage = SerialiserService.deserialiseAndExtractFiles[RemoteStorage](new File(config.storage.get))
 

@@ -165,7 +165,7 @@ object Application extends Logger {
       val plugins: List[File] = userPlugins
 
       PluginManager.startAll.foreach { case (b, e) ⇒ logger.log(WARNING, s"Error staring bundle $b", e) }
-      PluginManager.tryLoad(plugins).foreach { case (b, e) ⇒ logger.log(WARNING, s"Error loading bundle $b", e) }
+      PluginManager.tryLoad(plugins).foreach { case (f, e) ⇒ logger.log(WARNING, s"Error loading bundle $f", e) }
     }
 
     def password =
