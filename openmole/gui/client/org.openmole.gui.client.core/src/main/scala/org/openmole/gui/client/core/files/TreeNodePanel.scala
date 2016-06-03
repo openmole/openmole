@@ -391,8 +391,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
         ).tooltip(tags.span(tn.name()), popupStyle = whitePopup, arrowStyle = Popup.whiteBottomArrow, condition = () ⇒ tn.name().length > 24),
         div(stylesheet.fileInfo)(
           Rx {
-            if (selectionMode()) div(color := "white")
-            else {
+            if (!selectionMode()) {
               div(
                 span(stylesheet.fileSize)(tags.i(timeOrSize(tn))),
                 span(`class` := Rx {
@@ -424,29 +423,23 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
                       })
                     })
                   })(arrow_right_and_left)
-
-                /*,
-                                                                                    if (tn.isPlugin) glyphSpan(OMTags.glyph_plug, () ⇒
-                                                                                      OMPost[Api].autoAddPlugins(tn.safePath()).call().foreach { p ⇒
-                                                                                        panels.pluginTriggerer.open
-                                                                                      })(`class` := "glyphitem file-glyph")*/
                 )
               )
             }
+            else div()
           }
         )
       )
       tr(
-        rowDiv(
-          Rx {
-            if (selectionMode()) {
-              div(
-                onclick := { (e: MouseEvent) ⇒
-                  addToSelection
-                  println("manager selec " + manager.selected())
-                  if (e.ctrlKey) clearSelectionExecpt(tn)
-                }
-              )({
+        Rx {
+          if (selectionMode()) {
+            div(
+              onclick := { (e: MouseEvent) ⇒
+                addToSelection
+                if (e.ctrlKey) clearSelectionExecpt(tn)
+              }
+            )(
+                {
                   if (selected()) {
                     fileToolBar.selectedTool() match {
                       case Some(TrashTool) ⇒ stylesheet.fileSelectedForDeletion
@@ -455,22 +448,15 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
                     }
                   }
                   else stylesheet.fileSelectionMode
-                }, span(
-                  stylesheet.fileSelectionMessage,
-                  if (selected()) {
-                    fileToolBar.selectedTool() match {
-                      case Some(TrashTool)  ⇒ glyph_trash
-                      case Some(CopyTool)   ⇒ glyph_copy
-                      case Some(PluginTool) ⇒ glyph_plug
-                      case _                ⇒
-                    }
-                  }
-                  else emptyMod
-                ))
-            }
-            else div(overflow := "hidden")
+                },
+                span(stylesheet.fileSelectionMessage),
+                rowDiv
+              )
           }
-        )
+          else div(color := "#333")(
+            rowDiv.tooltip(tags.span(tn.name()), popupStyle = whitePopup, arrowStyle = Popup.whiteBottomArrow, condition = () ⇒ tn.name().length > 24)
+          )
+        }
       )
     }
 
