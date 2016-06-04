@@ -3,7 +3,7 @@ package org.openmole.gui.client.core
 import org.openmole.gui.client.core.alert.{ AlertPanel, AbsolutePositioning }
 import AbsolutePositioning.{ RightPosition, TopZone, CenterPagePosition }
 import org.openmole.gui.shared.Api
-import org.scalajs.dom.raw.{ HTMLElement, HTMLFormElement }
+import org.scalajs.dom.raw.{ KeyboardEvent, HTMLElement, HTMLFormElement }
 import org.openmole.gui.client.core.panels._
 import scalatags.JsDom.{ tags ⇒ tags }
 import org.openmole.gui.misc.js.OMTags
@@ -181,6 +181,14 @@ object ScriptClient {
     val fileItem = dialogNavItem("files", glyphSpan(glyph_file).tooltip(span("Files")), todo = () ⇒ {
       openFileTree() = !openFileTree()
     })
+
+    dom.window.onkeydown = (k: KeyboardEvent) ⇒ {
+      if ((k.keyCode == 83 && k.ctrlKey)) {
+        k.preventDefault
+        false
+
+      }
+    }
 
     maindiv.appendChild(
       bs.nav(
