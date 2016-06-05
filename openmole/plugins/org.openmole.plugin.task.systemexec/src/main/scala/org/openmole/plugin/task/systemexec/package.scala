@@ -101,19 +101,19 @@ package systemexec {
 
     lazy val returnValue =
       new {
-        def :=[T: ReturnValue](v: Option[Prototype[Int]]) =
+        def :=[T: ReturnValue](v: OptionalArgument[Prototype[Int]]) =
           implicitly[ReturnValue[T]].returnValue.set(v)
       }
 
     lazy val stdOut =
       new {
-        def :=[T: StdOutErr](v: Option[Prototype[String]]) =
+        def :=[T: StdOutErr](v: OptionalArgument[Prototype[String]]) =
           implicitly[StdOutErr[T]].stdOut.set(v)
       }
 
     lazy val stdErr =
       new {
-        def :=[T: StdOutErr](v: Option[Prototype[String]]) =
+        def :=[T: StdOutErr](v: OptionalArgument[Prototype[String]]) =
           implicitly[StdOutErr[T]].stdErr.set(v)
       }
 
@@ -132,14 +132,14 @@ package systemexec {
          * @param variable the name of the environment variable. By default the name of the environment
          *                 variable is the same as the one of the openmole protoype.
          */
-        def +=[T: EnvironmentVariables: InputOutputBuilder](prototype: Prototype[_], variable: Option[String] = None): T ⇒ T =
+        def +=[T: EnvironmentVariables: InputOutputBuilder](prototype: Prototype[_], variable: OptionalArgument[String] = None): T ⇒ T =
           (implicitly[EnvironmentVariables[T]].environmentVariables add prototype → variable.getOrElse(prototype.name)) andThen
             (inputs += prototype)
       }
 
     lazy val customWorkDirectory =
       new {
-        def :=[T: WorkDirectory](s: Option[String]) =
+        def :=[T: WorkDirectory](s: OptionalArgument[String]) =
           implicitly[WorkDirectory[T]].workDirectory.set(s)
       }
 

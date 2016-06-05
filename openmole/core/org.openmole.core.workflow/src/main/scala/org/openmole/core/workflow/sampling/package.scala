@@ -29,9 +29,6 @@ package sampling {
 
   trait SamplingPackage {
 
-    implicit def factorToDiscreteFactor[D, T](f: Factor[D, T])(implicit discrete: Discrete[D, T], domain: DomainInputs[D] = DomainInputs.empty): DiscreteFactor[D, T] =
-      DiscreteFactor(f)
-
     implicit class PrototypeFactorDecorator[T](p: Prototype[T]) {
       def in[D](d: D): Factor[D, T] = Factor(p, d)
       def is(d: FromContext[T]) = Factor(p, d)
@@ -51,6 +48,8 @@ package sampling {
       override def min(domain: (T, T)) = domain._1
       override def max(domain: (T, T)) = domain._2
     }
+
+    implicit def discreteFactorIsSampling[D, T](f: Factor[D, T])(implicit discrete: Discrete[D, T]) = FactorSampling(f)
   }
 }
 

@@ -59,7 +59,6 @@ package dsl {
       c.Expr[Prototype[T]](q"Prototype[$wt](${n})")
     }
 
-    //implicit lazy val executionContext = MoleExecutionContext.default
     implicit lazy val implicitContext = Context.empty
 
     lazy val workspace = Workspace
@@ -80,7 +79,6 @@ package dsl {
     implicit def seqIsFunctor = new Functor[Seq] {
       override def map[A, B](fa: Seq[A])(f: (A) ⇒ B): Seq[B] = fa.map(f)
     }
-
   }
 
 }

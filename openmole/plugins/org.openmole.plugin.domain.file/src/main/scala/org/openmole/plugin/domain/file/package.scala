@@ -22,23 +22,23 @@ import java.io.File
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.tools._
-import org.openmole.tool.file._
+import org.openmole.core.workflow.dsl._
 
 package object file {
 
   implicit def domainFileDecorator(f: File) = new {
     def files: ListFilesDomain = files()
     def files(
-      directory: Option[ExpandedString] = None,
-      recursive: Boolean                = false,
-      filter:    Option[ExpandedString] = None
+      directory: OptionalArgument[ExpandedString] = OptionalArgument(),
+      recursive: Boolean                          = false,
+      filter:    OptionalArgument[ExpandedString] = OptionalArgument()
     ): ListFilesDomain = ListFilesDomain(f, directory, recursive, filter)
 
     def paths: ListPathsDomain = paths()
     def paths(
-      directory: Option[ExpandedString] = None,
-      recursive: Boolean                = false,
-      filter:    Option[ExpandedString] = None
+      directory: OptionalArgument[ExpandedString] = OptionalArgument(),
+      recursive: Boolean                          = false,
+      filter:    OptionalArgument[ExpandedString] = OptionalArgument()
     ): ListPathsDomain = ListPathsDomain(f, directory, recursive, filter)
 
     def select(path: ExpandedString) = SelectFileDomain(f, path)

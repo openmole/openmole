@@ -25,6 +25,7 @@ import org.openmole.core.batch.environment.{ BatchEnvironment, BatchExecutionJob
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.updater.Updater
 import org.openmole.core.workflow.job.Job
+import org.openmole.core.workflow.dsl._
 import org.openmole.core.workspace.{ Decrypt, Workspace }
 
 import scala.concurrent.duration.Duration
@@ -35,22 +36,22 @@ object WMSEnvironment {
 
   def apply(
     voName:         String,
-    bdii:           Option[String]      = None,
-    vomsURLs:       Option[Seq[String]] = None,
-    fqan:           Option[String]      = None,
-    openMOLEMemory: Option[Int]         = None,
-    memory:         Option[Int]         = None,
-    cpuTime:        Option[Duration]    = None,
-    wallTime:       Option[Duration]    = None,
-    cpuNumber:      Option[Int]         = None,
-    jobType:        Option[String]      = None,
-    smpGranularity: Option[Int]         = None,
-    myProxy:        Option[MyProxy]     = None,
-    architecture:   Option[String]      = None,
-    threads:        Option[Int]         = None,
-    requirements:   Option[String]      = None,
-    debug:          Boolean             = false,
-    name:           Option[String]      = None
+    bdii:           OptionalArgument[String]      = None,
+    vomsURLs:       OptionalArgument[Seq[String]] = None,
+    fqan:           OptionalArgument[String]      = None,
+    openMOLEMemory: OptionalArgument[Int]         = None,
+    memory:         OptionalArgument[Int]         = None,
+    cpuTime:        OptionalArgument[Duration]    = None,
+    wallTime:       OptionalArgument[Duration]    = None,
+    cpuNumber:      OptionalArgument[Int]         = None,
+    jobType:        OptionalArgument[String]      = None,
+    smpGranularity: OptionalArgument[Int]         = None,
+    myProxy:        OptionalArgument[MyProxy]     = None,
+    architecture:   OptionalArgument[String]      = None,
+    threads:        OptionalArgument[Int]         = None,
+    requirements:   OptionalArgument[String]      = None,
+    debug:          Boolean                       = false,
+    name:           OptionalArgument[String]      = None
   )(implicit authentication: EGIAuthentication, uncypher: Decrypt) =
     new WMSEnvironment(
       voName = voName,

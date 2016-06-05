@@ -30,12 +30,12 @@ import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.tools.{ VariableExpansion, ExpandedString }
 import org.openmole.plugin.task.external.External._
 import org.openmole.plugin.task.external._
-import org.openmole.tool.file._
+import org.openmole.core.workflow.dsl._
 
 import Prettifier._
 
 object NetLogoTask {
-  case class Workspace(script: String, workspace: Option[String] = None)
+  case class Workspace(script: String, workspace: OptionalArgument[String] = None)
 }
 
 trait NetLogoTask extends Task {
@@ -60,7 +60,7 @@ trait NetLogoTask extends Task {
 
   override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider): Context = external.withWorkDir(executionContext) { tmpDir ⇒
     val workDir =
-      workspace.workspace match {
+      workspace.workspace.option match {
         case None    ⇒ tmpDir
         case Some(d) ⇒ tmpDir / d
       }

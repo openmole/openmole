@@ -60,10 +60,10 @@ trait Seeder {
 }
 
 case class Replication[A[_]: Functor](
-  seed:        Seeder                        = Seeder.empty,
-  max:         Int                           = 100,
-  reevaluate:  Double                        = 0.2,
-  aggregation: Option[A[FitnessAggregation]] = None
+  seed:        Seeder                                  = Seeder.empty,
+  max:         Int                                     = 100,
+  reevaluate:  Double                                  = 0.2,
+  aggregation: OptionalArgument[A[FitnessAggregation]] = None
 )
 
 object WorkflowIntegration {

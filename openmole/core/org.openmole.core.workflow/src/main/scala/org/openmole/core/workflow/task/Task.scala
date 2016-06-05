@@ -34,7 +34,7 @@ import scala.util.Random
 import org.openmole.core.workflow.dsl._
 
 object Task extends Logger {
-  val OpenMOLEVariablePrefix = ConfigurationLocation("Task", "OpenMOLEVariablePrefix", "oM")
+  val OpenMOLEVariablePrefix = ConfigurationLocation("Task", "OpenMOLEVariablePrefix", Some("oM"))
 
   Workspace setDefault OpenMOLEVariablePrefix
 

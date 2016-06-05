@@ -17,22 +17,9 @@
 
 package org.openmole.core.workflow.sampling
 
+import monocle.macros.Lenses
 import org.openmole.core.workflow.data._
+
 import scala.language.higherKinds
 
-object Factor {
-
-  def apply[D, T](prototype: Prototype[T], d: D): Factor[D, T] = {
-    val (_prototype) = (prototype)
-    new Factor[D, T] {
-      val domain = d
-      val prototype = _prototype
-    }
-  }
-
-}
-
-trait Factor[D, T] {
-  def domain: D
-  def prototype: Prototype[T]
-}
+@Lenses case class Factor[D, T](prototype: Prototype[T], domain: D)

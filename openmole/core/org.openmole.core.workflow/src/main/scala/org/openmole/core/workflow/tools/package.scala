@@ -26,7 +26,6 @@ package tools {
 
   trait ToolsPackage {
 
-    implicit def objectToSomeObjectConverter[T](v: T) = Some(v)
     implicit def objectToWeakReferenceConverter[T <: AnyRef](v: T) = new WeakReference[T](v)
 
     implicit class RefDecorator[T](r: Ref[T]) {
@@ -52,6 +51,17 @@ package tools {
     implicit def arrayOfFunction[T](s: Array[T ⇒ T]) = s.toSeq.sequence
 
     def c(s: String): FromContext[String] = s
+
+    object OptionalArgument {
+      implicit def valueToOptionalArgument[T](v: T) = OptionalArgument(Some(v))
+      implicit def noneToOptionalArgument[T](n: None.type) = OptionalArgument[T](n)
+    }
+
+    case class OptionalArgument[T](option: Option[T] = None)
+
+    implicit def optionalArgumentToOption[T](optionalArgument: OptionalArgument[T]) = optionalArgument.option
+    implicit def fromStringToExpandedStringOptionalArgument(s: String) = OptionalArgument[ExpandedString](Some(ExpandedString(s)))
+
   }
 }
 

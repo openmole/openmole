@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2015 Romain Reuillon
+/**
+ * Created by Romain Reuillon on 03/06/16.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -13,23 +13,29 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
  */
 package org.openmole.plugin.domain.modifier
 
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.domain._
-import org.openmole.core.tools.service.Random._
-import org.openmole.core.workflow.tools.FromContext
+import org.openmole.core.workflow.tools._
 
-object ShuffleDomain {
+object FilteredDomain {
 
-  implicit def isFinite[D, T] = new Finite[ShuffleDomain[D, T], T] with DomainInputs[ShuffleDomain[D, T]] {
-    override def computeValues(domain: ShuffleDomain[D, T]) = FromContext { (context, rng) ⇒
-      domain.finite.iterator(domain.domain).from(context)(rng).toSeq.shuffled(rng())
-    }
-    override def inputs(domain: ShuffleDomain[D, T]) = domain.inputs.inputs(domain.domain)
+  implicit def isDiscrete[D, I] = new Discrete[FilteredDomain[D, I], I] with DomainInputs[FilteredDomain[D, I]] {
+    override def iterator(domain: FilteredDomain[D, I]) = FromContext((context, rng) ⇒ domain.iterator(context)(rng))
+    override def inputs(domain: FilteredDomain[D, I]) = domain.inputs
   }
 
 }
 
-case class ShuffleDomain[D, +T](domain: D)(implicit val finite: Finite[D, T], val inputs: DomainInputs[D])
+case class FilteredDomain[D, I](domain: D, f: FromContext[I ⇒ Boolean])(implicit discrete: Discrete[D, I], domainInputs: DomainInputs[D]) { d ⇒
+
+  def inputs = domainInputs.inputs(domain)
+
+  def iterator(context: Context)(implicit rng: RandomProvider): Iterator[I] = {
+    val fVal = f.from(context)
+    discrete.iterator(domain).from(context).filter(fVal)
+  }
+}

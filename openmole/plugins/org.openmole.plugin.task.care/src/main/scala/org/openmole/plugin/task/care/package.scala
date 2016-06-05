@@ -24,7 +24,7 @@ import org.openmole.core.dsl._
 package care {
   trait CAREPackage extends SystemExecPackage {
     lazy val hostFiles = new {
-      def +=[T: CARETaskBuilder](hostFile: String, binding: Option[String] = None) =
+      def +=[T: CARETaskBuilder](hostFile: String, binding: OptionalArgument[String] = None) =
         implicitly[CARETaskBuilder[T]].hostFiles add (hostFile, binding)
     }
   }

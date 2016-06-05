@@ -18,18 +18,21 @@
 package org.openmole.core.workflow.execution
 
 import java.util.logging.Level
-import org.openmole.core.event.{ EventDispatcher, EventAccumulator, Event }
-import org.openmole.core.workflow.execution.local.{ LocalExecutionJob, ExecutorPool }
+
+import org.openmole.core.event.{ Event, EventAccumulator, EventDispatcher }
+import org.openmole.core.workflow.execution.local.{ ExecutorPool, LocalExecutionJob }
 import org.openmole.core.workflow.job.Job
 import org.openmole.core.workflow.job.MoleJob
 import ExecutionState._
 import org.openmole.core.workflow.mole.MoleExecution
 import org.openmole.core.workflow.task.TaskExecutionContext
-import org.openmole.core.workflow.tools.{ Name, ExceptionEvent }
-import org.openmole.core.workspace.{ Workspace, ConfigurationLocation }
+import org.openmole.core.workflow.tools.{ ExceptionEvent, Name }
+import org.openmole.core.workspace.{ ConfigurationLocation, Workspace }
 import org.openmole.tool.collection.OrderedSlidingList
+
 import scala.concurrent.stm._
 import org.openmole.core.tools.service._
+import org.openmole.core.workflow.dsl._
 
 import scala.ref.WeakReference
 
@@ -82,9 +85,9 @@ object LocalEnvironment {
   var defaultNumberOfThreads = Workspace.preference(DefaultNumberOfThreads)
 
   def apply(
-    nbThreads:    Int            = defaultNumberOfThreads,
-    deinterleave: Boolean        = false,
-    name:         Option[String] = None
+    nbThreads:    Int                      = defaultNumberOfThreads,
+    deinterleave: Boolean                  = false,
+    name:         OptionalArgument[String] = OptionalArgument()
   ) = new LocalEnvironment(nbThreads, deinterleave, name)
 
 }

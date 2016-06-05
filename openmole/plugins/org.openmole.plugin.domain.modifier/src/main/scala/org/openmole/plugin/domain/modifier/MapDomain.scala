@@ -33,15 +33,14 @@ object MapDomain {
     override def inputs(domain: MapDomain[D, I, O]) = domain.inputs
   }
 
-  def apply[D[_], I, O](domain: D[I], f: I ⇒ O)(implicit discrete: Discrete[D[I], I], domainInputs: DomainInputs[D[I]]): MapDomain[D[I], I, O] =
-    new MapDomain[D[I], I, O](domain, f)
-
 }
 
-class MapDomain[D, -I, +O](domain: D, f: I ⇒ O)(implicit discrete: Discrete[D, I], domainInputs: DomainInputs[D]) { d ⇒
+case class MapDomain[D, -I, +O](domain: D, f: FromContext[I ⇒ O])(implicit discrete: Discrete[D, I], domainInputs: DomainInputs[D]) { d ⇒
 
   def inputs = domainInputs.inputs(domain)
 
-  def iterator(context: Context)(implicit rng: RandomProvider): Iterator[O] =
-    discrete.iterator(domain).from(context).map { f }
+  def iterator(context: Context)(implicit rng: RandomProvider): Iterator[O] = {
+    val fVal = f.from(context)
+    discrete.iterator(domain).from(context).map { fVal }
+  }
 }

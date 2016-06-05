@@ -24,23 +24,20 @@ import org.openmole.core.workflow.tools.FromContext
 import scalaz._
 import Scalaz._
 
-object SortDomain {
+object SortedByDomain {
 
-  implicit def isFinite[D, T] = new Finite[SortDomain[D, T], T] with DomainInputs[SortDomain[D, T]] {
-    override def computeValues(domain: SortDomain[D, T]) = domain.computeValues()
-    override def inputs(domain: SortDomain[D, T]): PrototypeSet = domain.inputs
+  implicit def isFinite[D, T, S] = new Finite[SortedByDomain[D, T, S], T] with DomainInputs[SortedByDomain[D, T, S]] {
+    override def computeValues(domain: SortedByDomain[D, T, S]) = domain.computeValues()
+    override def inputs(domain: SortedByDomain[D, T, S]): PrototypeSet = domain.inputs
   }
-
-  def apply[D[_], T: scala.Ordering](domain: D[T])(implicit finite: Finite[D[T], T], domainInputs: DomainInputs[D[T]]) =
-    new SortDomain[D[T], T](domain)
 
 }
 
-class SortDomain[D, T: scala.Ordering](val domain: D)(implicit finite: Finite[D, T], domainInputs: DomainInputs[D]) {
+case class SortedByDomain[D, T, S: scala.Ordering](domain: D, s: T ⇒ S)(implicit finite: Finite[D, T], domainInputs: DomainInputs[D]) {
   def inputs = domainInputs.inputs(domain)
   def computeValues() =
     for {
       f ← finite.computeValues(domain)
-    } yield f.toList.sorted
+    } yield f.toList.sortBy(s)
 }
 

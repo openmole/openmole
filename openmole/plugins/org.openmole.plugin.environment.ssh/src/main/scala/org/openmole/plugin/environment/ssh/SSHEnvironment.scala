@@ -21,6 +21,7 @@ import java.net.URI
 import org.openmole.core.batch.control._
 import org.openmole.core.batch.environment._
 import org.openmole.core.workspace._
+import org.openmole.core.workflow.dsl._
 import concurrent.duration._
 
 object SSHEnvironment {
@@ -37,13 +38,13 @@ object SSHEnvironment {
     user:                 String,
     host:                 String,
     nbSlots:              Int,
-    port:                 Int            = 22,
-    sharedDirectory:      Option[String] = None,
-    workDirectory:        Option[String] = None,
-    openMOLEMemory:       Option[Int]    = None,
-    threads:              Option[Int]    = None,
-    storageSharedLocally: Boolean        = false,
-    name:                 Option[String] = None
+    port:                 Int                      = 22,
+    sharedDirectory:      OptionalArgument[String] = None,
+    workDirectory:        OptionalArgument[String] = None,
+    openMOLEMemory:       OptionalArgument[Int]    = None,
+    threads:              OptionalArgument[Int]    = None,
+    storageSharedLocally: Boolean                  = false,
+    name:                 OptionalArgument[String] = None
   )(implicit decrypt: Decrypt) =
     new SSHEnvironment(
       user = user,

@@ -18,29 +18,27 @@
 package org.openmole.plugin.domain.file
 
 import java.io.File
-import org.openmole.tool.file._
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.tools.ExpandedString
+import org.openmole.core.workflow.dsl._
 import org.openmole.tool.logger.Logger
 import scala.collection.JavaConversions._
 
-import scala.util.Random
-
 object ListFilesDomain extends Logger {
 
-  implicit def isFinite = new Finite[ListFilesDomain, File] {
+  implicit def isFinite: Finite[ListFilesDomain, File] = new Finite[ListFilesDomain, File] {
     override def computeValues(domain: ListFilesDomain) =
       FromContext((context, rng) ⇒ domain.computeValues(context)(rng))
   }
 
   def apply(
     base:      File,
-    directory: Option[ExpandedString] = None,
-    recursive: Boolean                = false,
-    filter:    Option[ExpandedString] = None
-  ) = new ListFilesDomain(base, directory, recursive, filter)
+    directory: OptionalArgument[ExpandedString] = OptionalArgument(),
+    recursive: Boolean                          = false,
+    filter:    OptionalArgument[ExpandedString] = OptionalArgument()
+  ): ListFilesDomain = new ListFilesDomain(base, directory, recursive, filter)
 
 }
 

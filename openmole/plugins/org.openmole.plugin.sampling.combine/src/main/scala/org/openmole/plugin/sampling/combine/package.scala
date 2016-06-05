@@ -19,11 +19,18 @@ package org.openmole.plugin.sampling
 
 import java.io.File
 import java.nio.file.Path
+
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.tools.FromContext
+import org.openmole.plugin.domain.collection._
+import org.openmole.plugin.domain.modifier._
+
+import scalaz._
+import Scalaz._
+import scala.reflect.runtime.universe._
 
 package object combine {
 
@@ -33,35 +40,37 @@ package object combine {
     def +(s2: Sampling) = x(s2)
     def x(s2: Sampling) = new CompleteSampling(s, s2)
     def ::(s2: Sampling) = new ConcatenateSampling(s, s2)
-    def filter(keep: Condition) = FilteredSampling(s, keep)
     def zip(s2: Sampling) = ZipSampling(s, s2)
     @deprecated("Use withIndex", "5")
     def zipWithIndex(index: Prototype[Int]) = withIndex(index)
     def withIndex(index: Prototype[Int]) = ZipWithIndexSampling(s, index)
-    def take(n: FromContext[Int]) = TakeSampling(s, n)
-    def shuffle = ShuffleSampling(s)
     def sample(n: FromContext[Int]) = SampleSampling(s, n)
     def repeat(n: FromContext[Int]) = RepeatSampling(s, n)
     def bootstrap(samples: FromContext[Int], number: FromContext[Int]) = s sample samples repeat number
   }
 
-  implicit class SamplingCombineDecorator(val s: Sampling) extends AbstractSamplingCombineDecorator
-
-  implicit class DiscreteFactorDecorator[D, T](f: Factor[D, T])(implicit discrete: Discrete[D, T]) extends AbstractSamplingCombineDecorator {
-    def s: Sampling = f
+  implicit class SamplingCombineDecorator(val s: Sampling) extends AbstractSamplingCombineDecorator {
+    def shuffle = ShuffleSampling(s)
+    def filter(keep: Condition) = FilteredSampling(s, keep)
+    def take(n: FromContext[Int]) = TakeSampling(s, n)
   }
 
-  trait CanGetName[A] {
-    def getName(a: A): String
+  implicit class DiscreteFactorDecorator[D, T](factor: Factor[D, T])(implicit discrete: Discrete[D, T]) extends AbstractSamplingCombineDecorator {
+    def s: Sampling = FactorSampling(factor)
   }
-
-  implicit val fileGetName = new CanGetName[File] { def getName(f: File) = f.getName }
-  implicit val pathGetName = new CanGetName[Path] { def getName(p: Path) = p.toFile.getName }
 
   implicit def withNameFactorDecorator[D, T: CanGetName](factor: Factor[D, T])(implicit discrete: Discrete[D, T]) = new {
     @deprecated("Use withName", "5")
     def zipWithName(name: Prototype[String]): ZipWithNameSampling[D, T] = withName(name)
     def withName(name: Prototype[String]): ZipWithNameSampling[D, T] = new ZipWithNameSampling(factor, name)
+  }
+
+  implicit class TupleToZipSampling[T1, T2](ps: (Prototype[T1], Prototype[T2])) {
+    def in[D](d: D)(implicit discrete: Discrete[D, (T1, T2)]) = {
+      val d1 = discrete.iterator(d).map(_.map(_._1))
+      val d2 = discrete.iterator(d).map(_.map(_._2))
+      ZipSampling(ps._1 in d1, ps._2 in d2)
+    }
   }
 
 }

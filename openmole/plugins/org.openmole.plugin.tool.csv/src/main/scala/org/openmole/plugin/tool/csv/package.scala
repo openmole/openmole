@@ -41,7 +41,7 @@ package csv {
           (outputs += proto)
     }
     lazy val separator = new {
-      def :=[T: CSVToVariablesBuilder](s: Option[Char]): T ⇒ T =
+      def :=[T: CSVToVariablesBuilder](s: OptionalArgument[Char]): T ⇒ T =
         implicitly[CSVToVariablesBuilder[T]].separator.set(s)
 
     }

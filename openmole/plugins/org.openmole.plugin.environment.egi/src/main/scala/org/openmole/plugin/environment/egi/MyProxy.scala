@@ -18,9 +18,10 @@
 package org.openmole.plugin.environment.egi
 
 import fr.iscpif.gridscale.egi.{ MyProxy ⇒ GSMyProxy }
+import org.openmole.core.workflow.dsl._
 
 object MyProxy {
-  def apply(time: String, host: String, port: Option[Int] = None) = new MyProxy(time, host, port)
+  def apply(time: String, host: String, port: OptionalArgument[Int] = None) = new MyProxy(time, host, port)
 }
 
 class MyProxy(val time: String, val host: String, override val port: Option[Int] = None) extends GSMyProxy {

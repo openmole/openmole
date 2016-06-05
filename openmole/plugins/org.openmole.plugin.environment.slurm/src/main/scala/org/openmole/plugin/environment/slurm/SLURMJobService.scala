@@ -59,8 +59,8 @@ trait SLURMJobService extends ClusterJobService { js ⇒
       override val nodes = environment.nodes
       override val coresByNode = environment.coresByNode orElse environment.threads
       override val qos = environment.qos
-      override val gres = environment.gres
-      override val constraints = environment.constraints
+      override val gres = environment.gres.toList
+      override val constraints = environment.constraints.toList
     }
 
     val job = js.jobService.submit(jobDescription)

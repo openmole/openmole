@@ -25,6 +25,7 @@ import org.openmole.core.batch.environment._
 import org.openmole.core.workspace._
 import org.openmole.plugin.environment.gridscale._
 import org.openmole.plugin.environment.ssh._
+import org.openmole.core.workflow.dsl._
 
 import scala.concurrent.duration.Duration
 
@@ -33,18 +34,18 @@ object PBSEnvironment {
   def apply(
     user:                 String,
     host:                 String,
-    port:                 Int              = 22,
-    queue:                Option[String]   = None,
-    openMOLEMemory:       Option[Int]      = None,
-    wallTime:             Option[Duration] = None,
-    memory:               Option[Int]      = None,
-    nodes:                Option[Int]      = None,
-    coreByNode:           Option[Int]      = None,
-    sharedDirectory:      Option[String]   = None,
-    workDirectory:        Option[String]   = None,
-    threads:              Option[Int]      = None,
-    storageSharedLocally: Boolean          = false,
-    name:                 Option[String]   = None
+    port:                 Int                        = 22,
+    queue:                OptionalArgument[String]   = None,
+    openMOLEMemory:       OptionalArgument[Int]      = None,
+    wallTime:             OptionalArgument[Duration] = None,
+    memory:               OptionalArgument[Int]      = None,
+    nodes:                OptionalArgument[Int]      = None,
+    coreByNode:           OptionalArgument[Int]      = None,
+    sharedDirectory:      OptionalArgument[String]   = None,
+    workDirectory:        OptionalArgument[String]   = None,
+    threads:              OptionalArgument[Int]      = None,
+    storageSharedLocally: Boolean                    = false,
+    name:                 OptionalArgument[String]   = None
   )(implicit decrypt: Decrypt) =
     new PBSEnvironment(
       user = user,
