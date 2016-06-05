@@ -45,8 +45,6 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
   case class NodeEdition(node: TreeNode, replicateMode: Boolean = false)
 
   val toBeEdited: Var[Option[NodeEdition]] = Var(None)
-  val dragState: Var[String] = Var("")
-  val draggedNode: Var[Option[TreeNode]] = Var(None)
   val fileDisplayer = new FileDisplayer
   val fileToolBar = new FileToolBar(this)
   val tree: Var[TypedTag[HTMLDivElement]] = Var(tags.div())
@@ -146,22 +144,6 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
         CoreUtils.refreshCurrentDirectory(fileFilter = fileToolBar.fileFilter())
         manager.switch(dn)
         computeAndDraw
-    }, dropPairs(dn)
-  )
-
-  def dropPairs(dn: DirNode) = Seq(
-    draggable := true, ondrop := {
-      dropAction(dn)
-    },
-    ondragenter := {
-      (e: DragEvent) ⇒
-        false
-    },
-    ondragover := {
-      (e: DragEvent) ⇒
-        e.dataTransfer.dropEffect = "move"
-        e.preventDefault
-        false
     }
   )
 
@@ -184,7 +166,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
           div("Create a first OpenMOLE script (.oms)")(ms("message"))
         }
         else
-          tags.table(ms("tree" + dragState()))(
+          tags.table(ms("tree"))(
             tr(
               tags.table(ms("file-list"))(
                 for (tn ← sons) yield {
@@ -288,28 +270,6 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
     })
   }
 
-  def dropAction(tn: TreeNode) = {
-    (e: DragEvent) ⇒
-      e.preventDefault
-      draggedNode().map {
-        sp ⇒
-          tn match {
-            case d: DirNode ⇒
-              if (sp.safePath().path != d.safePath().path) {
-                fileDisplayer.tabs.saveAllTabs(() ⇒
-                  OMPost[Api].move(sp.safePath(), tn.safePath()).call().foreach {
-                    b ⇒
-                      refreshAndDraw
-                      fileDisplayer.tabs.checkTabs
-                  })
-              }
-            case _ ⇒
-          }
-      }
-      draggedNode() = None
-      false
-  }
-
   def turnSelectionTo(b: Boolean) = selectionMode() = b
 
   object ReactiveLine {
@@ -325,7 +285,6 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
       case fn: FileNodeType ⇒ stylesheet.file
       case _                ⇒ stylesheet.dir
     }) +++ floatLeft +++ pointer +++ Seq(
-      draggable := true,
       onclick := { () ⇒ todo() }
     )
 
@@ -350,7 +309,6 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
     }
 
     def addToSelection: Unit = addToSelection(!selected())
-
     val render: Modifier = {
       val baseGlyph = sheet.marginTop(2) +++ "glyphitem"
       val trash = baseGlyph +++ glyph_trash
@@ -360,29 +318,11 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
       val arrow_right_and_left = baseGlyph +++ glyph_arrow_right_and_left
 
       val rowDiv = div(
-        relativePosition,
-        onmouseover := { () ⇒ lineHovered() = true },
+        onmouseover := { () ⇒ lineHovered() = { if (selectionMode()) false else true } },
         onmouseout := { () ⇒ lineHovered() = false },
-        ondragstart := { (e: DragEvent) ⇒
-          e.dataTransfer.setData("text/plain", "nothing") //  FIREFOX TRICK
-          draggedNode() match {
-            case Some(t: TreeNode) ⇒
-            case _                 ⇒ draggedNode() = Some(tn)
-          }
-          true
-        },
-        ondragenter := { (e: DragEvent) ⇒
-          false
-        },
-        ondragover := { (e: DragEvent) ⇒
-          e.dataTransfer.dropEffect = "move"
-          e.preventDefault
-          false
-        },
-        ondrop := {
-          dropAction(tn)
-        }, div(
+        div(
           clickablePair,
+          color := "#333",
           Rx {
             span(stylesheet.fileNameOverflow +++ fileIndent)(
               tn.name()
@@ -391,8 +331,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
         ).tooltip(tags.span(tn.name()), popupStyle = whitePopup, arrowStyle = Popup.whiteBottomArrow, condition = () ⇒ tn.name().length > 24),
         div(stylesheet.fileInfo)(
           Rx {
-            if (selectionMode()) div(color := "white")
-            else {
+            if (!selectionMode()) {
               div(
                 span(stylesheet.fileSize)(tags.i(timeOrSize(tn))),
                 span(`class` := Rx {
@@ -424,29 +363,23 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
                       })
                     })
                   })(arrow_right_and_left)
-
-                /*,
-                                                                                    if (tn.isPlugin) glyphSpan(OMTags.glyph_plug, () ⇒
-                                                                                      OMPost[Api].autoAddPlugins(tn.safePath()).call().foreach { p ⇒
-                                                                                        panels.pluginTriggerer.open
-                                                                                      })(`class` := "glyphitem file-glyph")*/
                 )
               )
             }
+            else div()
           }
         )
       )
       tr(
-        rowDiv(
-          Rx {
-            if (selectionMode()) {
-              div(
-                onclick := { (e: MouseEvent) ⇒
-                  addToSelection
-                  println("manager selec " + manager.selected())
-                  if (e.ctrlKey) clearSelectionExecpt(tn)
-                }
-              )({
+        Rx {
+          if (selectionMode()) {
+            div(
+              onclick := { (e: MouseEvent) ⇒
+                addToSelection
+                if (e.ctrlKey) clearSelectionExecpt(tn)
+              }
+            )(
+                {
                   if (selected()) {
                     fileToolBar.selectedTool() match {
                       case Some(TrashTool) ⇒ stylesheet.fileSelectedForDeletion
@@ -455,22 +388,14 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
                     }
                   }
                   else stylesheet.fileSelectionMode
-                }, span(
-                  stylesheet.fileSelectionMessage,
-                  if (selected()) {
-                    fileToolBar.selectedTool() match {
-                      case Some(TrashTool)  ⇒ glyph_trash
-                      case Some(CopyTool)   ⇒ glyph_copy
-                      case Some(PluginTool) ⇒ glyph_plug
-                      case _                ⇒
-                    }
-                  }
-                  else emptyMod
-                ))
-            }
-            else div(overflow := "hidden")
+                },
+                span(stylesheet.fileSelectionMessage),
+                rowDiv
+              )
           }
-        )
+          else
+            rowDiv
+        }
       )
     }
 

@@ -199,8 +199,9 @@ package object stylesheet {
     display := "inline-block",
     height := 19,
     sheet.marginBottom(5),
+    sheet.marginTop(2),
+    sheet.marginLeft(1),
     padding := 2,
-    top := 2,
     width := 22,
     borderRadius := "4px"
   )
@@ -209,10 +210,8 @@ package object stylesheet {
     color("white"),
     whiteSpace := "nowrap",
     overflow := "hidden",
-    width := 310,
-    sheet.marginTop(-1),
+    sheet.marginTop(-8),
     sheet.paddingLeft(3),
-    floatLeft,
     pointer,
     height := 19,
     textOverflow := "ellipsis"
@@ -231,27 +230,24 @@ package object stylesheet {
   )
 
   lazy val fileSelectionOverlay: ModifierSeq = Seq(
-    absolutePosition,
     top := -2,
     right := 0,
     pointer,
-    width := "110%",
-    height := 23
+    width := 300,
+    height := 23,
+    borderRadius := "2px"
   )
 
   lazy val fileSelectionMode: ModifierSeq = Seq(
-    backgroundColor := "yellow",
-    opacity := 0.85
+    backgroundColor := "#666"
   ) +++ fileSelectionOverlay
 
   lazy val fileSelected: ModifierSeq = Seq(
-    backgroundColor := "#a6bf26",
-    opacity := 0.65
+    backgroundColor := "#a6bf26"
   ) +++ fileSelectionOverlay
 
   lazy val fileSelectedForDeletion: ModifierSeq = Seq(
-    backgroundColor := "#d9534f",
-    opacity := 0.85
+    backgroundColor := "#d9534f"
   ) +++ fileSelectionOverlay
 
   lazy val fileSelectionMessage: ModifierSeq = Seq(
