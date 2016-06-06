@@ -38,9 +38,6 @@ object GroupDomain {
     override def inputs(domain: GroupDomain[D, T]) = domain.inputs.inputs(domain.d)
   }
 
-  def apply[D[_], T: Manifest](d: D[T], size: FromContext[Int])(implicit discrete: Discrete[D[T], T], inputs: DomainInputs[D[T]]) =
-    new GroupDomain[D[T], T](d, size)
-
 }
 
-class GroupDomain[D, T: Manifest](val d: D, val size: FromContext[Int])(implicit val discrete: Discrete[D, T], val inputs: DomainInputs[D])
+case class GroupDomain[D, T: Manifest](d: D, size: FromContext[Int])(implicit val discrete: Discrete[D, T], val inputs: DomainInputs[D])

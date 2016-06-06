@@ -86,7 +86,7 @@ package external {
          * try to use a symbolic link if available on your system.
          *
          */
-        def +=[T: ExternalBuilder](file: File, name: Option[ExpandedString] = None, link: Boolean = false, os: OS = OS()): T ⇒ T =
+        def +=[T: ExternalBuilder](file: File, name: OptionalArgument[ExpandedString] = None, link: Boolean = false, os: OS = OS()): T ⇒ T =
           implicitly[ExternalBuilder[T]].resources add External.Resource(file, name.getOrElse(file.getName), link, os)
       }
   }

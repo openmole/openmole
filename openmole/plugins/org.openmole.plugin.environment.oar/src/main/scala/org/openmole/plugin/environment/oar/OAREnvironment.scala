@@ -22,6 +22,7 @@ import java.net.URI
 import org.openmole.core.batch.control.LimitedAccess
 import org.openmole.core.batch.environment._
 import org.openmole.core.workspace._
+import org.openmole.core.workflow.dsl._
 import org.openmole.plugin.environment.ssh._
 
 import scala.concurrent.duration.Duration
@@ -31,18 +32,18 @@ object OAREnvironment {
   def apply(
     user:                 String,
     host:                 String,
-    port:                 Int              = 22,
-    queue:                Option[String]   = None,
-    core:                 Option[Int]      = None,
-    cpu:                  Option[Int]      = None,
-    wallTime:             Option[Duration] = None,
-    openMOLEMemory:       Option[Int]      = None,
-    sharedDirectory:      Option[String]   = None,
-    workDirectory:        Option[String]   = None,
-    threads:              Option[Int]      = None,
-    storageSharedLocally: Boolean          = false,
-    name:                 Option[String]   = None,
-    bestEffort:           Boolean          = true
+    port:                 Int                        = 22,
+    queue:                OptionalArgument[String]   = None,
+    core:                 OptionalArgument[Int]      = None,
+    cpu:                  OptionalArgument[Int]      = None,
+    wallTime:             OptionalArgument[Duration] = None,
+    openMOLEMemory:       OptionalArgument[Int]      = None,
+    sharedDirectory:      OptionalArgument[String]   = None,
+    workDirectory:        OptionalArgument[String]   = None,
+    threads:              OptionalArgument[Int]      = None,
+    storageSharedLocally: Boolean                    = false,
+    name:                 OptionalArgument[String]   = None,
+    bestEffort:           Boolean                    = true
   )(implicit decrypt: Decrypt) =
     new OAREnvironment(
       user = user,

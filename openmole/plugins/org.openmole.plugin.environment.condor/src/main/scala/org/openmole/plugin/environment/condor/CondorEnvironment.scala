@@ -25,6 +25,7 @@ import java.net.URI
 import org.openmole.core.batch.control.LimitedAccess
 import org.openmole.core.batch.environment._
 import org.openmole.core.workspace._
+import org.openmole.core.workflow.dsl._
 import org.openmole.plugin.environment.gridscale._
 import org.openmole.plugin.environment.ssh._
 
@@ -37,18 +38,18 @@ object CondorEnvironment {
     port: Int    = 22,
     // TODO not available in the GridScale plugin yet
     //  queue: Option[String] = None,
-    openMOLEMemory: Option[Int] = None,
+    openMOLEMemory: OptionalArgument[Int] = None,
     // TODO not available in the GridScale plugin yet
     //wallTime: Option[Duration] = None,
-    memory:               Option[Int]               = None,
-    nodes:                Option[Int]               = None,
-    coresByNode:          Option[Int]               = None,
-    sharedDirectory:      Option[String]            = None,
-    workDirectory:        Option[String]            = None,
-    requirements:         Option[CondorRequirement] = None,
-    threads:              Option[Int]               = None,
-    storageSharedLocally: Boolean                   = false,
-    name:                 Option[String]            = None
+    memory:               OptionalArgument[Int]               = None,
+    nodes:                OptionalArgument[Int]               = None,
+    coresByNode:          OptionalArgument[Int]               = None,
+    sharedDirectory:      OptionalArgument[String]            = None,
+    workDirectory:        OptionalArgument[String]            = None,
+    requirements:         OptionalArgument[CondorRequirement] = None,
+    threads:              OptionalArgument[Int]               = None,
+    storageSharedLocally: Boolean                             = false,
+    name:                 OptionalArgument[String]            = None
   )(implicit decrypt: Decrypt) =
     new CondorEnvironment(
       user = user,

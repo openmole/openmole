@@ -23,6 +23,7 @@ import java.nio.file.Path
 import org.openmole.core.workflow.data.{ Context, RandomProvider }
 import org.openmole.core.workflow.domain.Finite
 import org.openmole.core.workflow.tools.{ ExpandedString, FromContext }
+import org.openmole.core.workflow.dsl._
 
 object ListPathsDomain {
 
@@ -33,9 +34,9 @@ object ListPathsDomain {
 
   def apply(
     base:      File,
-    directory: Option[ExpandedString] = None,
-    recursive: Boolean                = false,
-    filter:    Option[ExpandedString] = None
+    directory: OptionalArgument[ExpandedString] = OptionalArgument(),
+    recursive: Boolean                          = false,
+    filter:    OptionalArgument[ExpandedString] = OptionalArgument()
   ) = new ListPathsDomain(base, directory, recursive, filter)
 
 }

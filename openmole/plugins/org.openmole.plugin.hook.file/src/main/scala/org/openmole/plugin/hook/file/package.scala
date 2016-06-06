@@ -36,7 +36,7 @@ package file {
     }
 
     def csvHeader = new {
-      def :=[T: AppendToCSVFileHookBuilder](h: Option[ExpandedString]) =
+      def :=[T: AppendToCSVFileHookBuilder](h: OptionalArgument[ExpandedString]) =
         implicitly[AppendToCSVFileHookBuilder[T]].csvHeader.set(h)
     }
 

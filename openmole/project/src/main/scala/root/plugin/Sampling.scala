@@ -8,7 +8,7 @@ import Keys._
 object Sampling extends root.PluginDefaults {
   implicit val artifactPrefix = Some("org.openmole.plugin.sampling")
 
-  lazy val combine = OsgiProject("combine", imports = Seq("*")) dependsOn (Core.exception, Domain.modifier, Core.workflow)
+  lazy val combine = OsgiProject("combine", imports = Seq("*")) dependsOn (Core.exception, Domain.modifier, Domain.collection, Core.workflow)
 
   lazy val csv = OsgiProject("csv", imports = Seq("*")) dependsOn (Core.exception, Core.workflow, Tool.csv) settings (
     libraryDependencies += Libraries.scalatest

@@ -19,6 +19,7 @@ package org.openmole.plugin.environment.desktopgrid
 
 import java.io.File
 
+import org.openmole.core.dsl._
 import org.openmole.core.batch.environment._
 import org.openmole.core.batch.jobservice.JobService
 import org.openmole.core.batch.storage._
@@ -36,9 +37,9 @@ object DesktopGridEnvironment {
 
   def apply(
     port:           Int,
-    openMOLEMemory: Option[Int]    = None,
-    threads:        Option[Int]    = None,
-    name:           Option[String] = None
+    openMOLEMemory: OptionalArgument[Int]    = None,
+    threads:        OptionalArgument[Int]    = None,
+    name:           OptionalArgument[String] = None
   ) =
     new DesktopGridEnvironment(
       port = port,

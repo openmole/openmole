@@ -33,6 +33,14 @@ package object collection {
     override def computeValues(domain: Array[T]) = domain.toIterable
   }
 
+  implicit def iteratorIsDiscrete[T] = new Discrete[Iterator[T], T] {
+    override def iterator(domain: Iterator[T]) = domain
+  }
+
+  implicit def fromContextIteratorIsDiscrete[T] = new Discrete[FromContext[Iterator[T]], T] {
+    override def iterator(domain: FromContext[Iterator[T]]) = domain
+  }
+
   implicit def booleanPrototypeIsFactor(p: Prototype[Boolean]) = Factor(p, List(true, false))
 
   implicit def arrayPrototypeIsFinite[T] = new Finite[Prototype[Array[T]], T] with DomainInputs[Prototype[Array[T]]] {

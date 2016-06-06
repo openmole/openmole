@@ -144,13 +144,13 @@
       val s2 = p2 in (0 to 100) // Code to build sampling 2
 
       // Create a sampling containing the 10 first values of s1
-      val s5 = s1 take 10
-
+      val s3 = s1 take 10
+      
       // Create a new sampling containing only the lines of s1 for which the given predicate is true
-      val s8 = s1 filter ("p1 + p2 < 100")
+      val s4 = (s1 x s2) filter ("p1 + p2 < 100")
 
       // Sample 5 values from s1
-      val s9 = s1 sample 5""")
+      val s5 = s1 sample 5""")
   @sect{Generate random Samplings}
     OpenMOLE can generate random samplings from an initial sampling using @hl.openmoleNoTest("shuffle") that creates
     a new sampling which is a randomly shuffled version of the initial one.
@@ -212,7 +212,7 @@
     program over a set of files in a subdirectory you may use:
     @br @hl.openmole("""
     val f = Val[File]
-    val explo = ExplorationTask (f in (workDirectory / "dir").files)""")
+    val explo = ExplorationTask (f in (workDirectory / "dir"))""")
     @p To explore files located in several directories:
     @br @hl.openmole("""
     val i = Val[Int]
@@ -221,19 +221,15 @@
     val explo =
       ExplorationTask (
         (i in (0 to 10)) x
-        (f in (workDirectory / "dir").files(directory = "subdir${i}"))
+        (f in (workDirectory / "dir").files("subdir${i}", recursive = true).filter(f => f.isDirectory && f.getName.startsWith("exp")))
       )""")
 
-    @p The @hl.openmoleNoTest("files") method provides a way an option to filter the results based on their name.
-        To do so, use @hl.openmoleNoTest("""files(filter = "pattern")""") where @i{pattern} can be any valid regular
-        expression matching a file name. The following example only injects files with the extension @i{.nii.gz}. Notice
-        how the dot @i{(.)} character is protected by a double slash @i{(\\)} to avoid it being interpreted as a
-        wildcard in the regular expression.
+    @p To fitter the files you want to list use the filter modifier. You can filter using any function from File (see javadoc) to Boolean.
     @br @hl.openmole("""
      val f = Val[File]
 
      val explo =
-       ExplorationTask ( (f in (workDirectory / "dir").files(filter = ".*\\.nii\\.gz")) )""")
+       ExplorationTask ( (f in (workDirectory / "dir") filter(_.getName.endsWith(".nii.gz")) ) )""")
 
     @p Searching in deep file trees can be very time consuming and irrelevant in some cases where you know how your data
     is organised. By default the file selector only explores the direct level under under the directory you've passed as

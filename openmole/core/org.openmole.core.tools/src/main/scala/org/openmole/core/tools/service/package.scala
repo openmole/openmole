@@ -28,7 +28,7 @@ package object service {
   case class RuntimeInfo(hostName: String)
 
   def localHostName = LocalHostName.localHostName
-  def newRNG(seed: Long) = Random.newRNG(seed)
+  def newRNG(seed: Long) = Random(seed)
 
   def stringToDuration(s: String): FiniteDuration = ISOPeriodFormat.standard.parsePeriod(s).toStandardSeconds.getSeconds seconds
   def stringFromDuration(d: Duration): String = {

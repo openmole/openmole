@@ -24,6 +24,8 @@ import java.io.File
 import org.openmole.core.batch.environment._
 import org.openmole.core.batch.control._
 import org.openmole.core.workspace._
+import org.openmole.core.workflow.dsl._
+
 import org.openmole.tool.logger.Logger
 import annotation.tailrec
 import Random._
@@ -183,16 +185,16 @@ object EGIEnvironment extends Logger {
 
   def apply(
     voName:         String,
-    service:        Option[String]      = None,
-    group:          Option[String]      = None,
-    bdii:           Option[String]      = None,
-    vomsURLs:       Option[Seq[String]] = None,
-    setup:          Option[String]      = None,
-    fqan:           Option[String]      = None,
-    cpuTime:        Option[Duration]    = None,
-    openMOLEMemory: Option[Int]         = None,
-    debug:          Boolean             = false,
-    name:           Option[String]      = None
+    service:        OptionalArgument[String]      = None,
+    group:          OptionalArgument[String]      = None,
+    bdii:           OptionalArgument[String]      = None,
+    vomsURLs:       OptionalArgument[Seq[String]] = None,
+    setup:          OptionalArgument[String]      = None,
+    fqan:           OptionalArgument[String]      = None,
+    cpuTime:        OptionalArgument[Duration]    = None,
+    openMOLEMemory: OptionalArgument[Int]         = None,
+    debug:          Boolean                       = false,
+    name:           OptionalArgument[String]      = None
   )(implicit authentication: EGIAuthentication, decrypt: Decrypt) =
     DIRACEnvironment(
       voName = voName,

@@ -50,7 +50,7 @@ class RegistryWithTicket[K, V] {
    * @return the value or null if not found
    */
   def consult(key: K, ticket: Ticket): Option[V] = synchronized {
-    registry(ticket)(key)
+    registry(ticket).get(key)
   }
 
   /**

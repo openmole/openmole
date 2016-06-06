@@ -26,6 +26,7 @@ import org.openmole.core.batch.environment._
 import org.openmole.core.workspace._
 import org.openmole.plugin.environment.gridscale._
 import org.openmole.plugin.environment.ssh._
+import org.openmole.core.workflow.dsl._
 
 import scala.concurrent.duration.Duration
 
@@ -34,21 +35,21 @@ object SLURMEnvironment {
   def apply(
     user:                 String,
     host:                 String,
-    port:                 Int              = 22,
-    queue:                Option[String]   = None,
-    openMOLEMemory:       Option[Int]      = None,
-    wallTime:             Option[Duration] = None,
-    memory:               Option[Int]      = None,
-    qos:                  Option[String]   = None,
-    gres:                 List[Gres]       = List(),
-    constraints:          List[String]     = List(),
-    nodes:                Option[Int]      = None,
-    coresByNode:          Option[Int]      = None,
-    sharedDirectory:      Option[String]   = None,
-    workDirectory:        Option[String]   = None,
-    threads:              Option[Int]      = None,
-    storageSharedLocally: Boolean          = false,
-    name:                 Option[String]   = None
+    port:                 Int                        = 22,
+    queue:                OptionalArgument[String]   = None,
+    openMOLEMemory:       OptionalArgument[Int]      = None,
+    wallTime:             OptionalArgument[Duration] = None,
+    memory:               OptionalArgument[Int]      = None,
+    qos:                  OptionalArgument[String]   = None,
+    gres:                 Seq[Gres]                  = List(),
+    constraints:          Seq[String]                = List(),
+    nodes:                OptionalArgument[Int]      = None,
+    coresByNode:          OptionalArgument[Int]      = None,
+    sharedDirectory:      OptionalArgument[String]   = None,
+    workDirectory:        OptionalArgument[String]   = None,
+    threads:              OptionalArgument[Int]      = None,
+    storageSharedLocally: Boolean                    = false,
+    name:                 OptionalArgument[String]   = None
   )(implicit decrypt: Decrypt) =
     new SLURMEnvironment(
       user = user,
@@ -82,8 +83,8 @@ class SLURMEnvironment(
     val wallTime:                Option[Duration],
     val memory:                  Option[Int],
     val qos:                     Option[String],
-    val gres:                    List[Gres],
-    val constraints:             List[String],
+    val gres:                    Seq[Gres],
+    val constraints:             Seq[String],
     val nodes:                   Option[Int],
     val coresByNode:             Option[Int],
     val sharedDirectory:         Option[String],

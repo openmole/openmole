@@ -55,36 +55,36 @@ object NetLogo4Task {
     workspace:         File,
     script:            String,
     launchingCommands: Seq[String],
-    seed:              Option[Prototype[Int]]
+    seed:              OptionalArgument[Prototype[Int]] = None
   ): NetLogo4Task =
     withDefaultArgs(
-      workspace = Workspace(script = script, workspace = Some(workspace.getName)),
+      workspace = Workspace(script = script, workspace = workspace.getName),
       launchingCommands = launchingCommands,
       seed = seed
     ) set (
-        inputs += (seed.toSeq: _*),
+        inputs += (seed.option.toSeq: _*),
         resources += workspace
       )
 
   def file(
     script:            File,
     launchingCommands: Seq[String],
-    seed:              Option[Prototype[Int]] = None
+    seed:              OptionalArgument[Prototype[Int]] = None
   ): NetLogo4Task =
     withDefaultArgs(
       workspace = Workspace(script = script.getName),
       launchingCommands = launchingCommands,
       seed = seed
     ) set (
-        inputs += (seed.toSeq: _*),
+        inputs += (seed.option.toSeq: _*),
         resources += script
       )
 
   def apply(
     script:            File,
     launchingCommands: Seq[String],
-    embedWorkspace:    Boolean                = false,
-    seed:              Option[Prototype[Int]] = None
+    embedWorkspace:    Boolean                          = false,
+    seed:              OptionalArgument[Prototype[Int]] = None
   ): NetLogo4Task =
     if (embedWorkspace) workspace(script.getCanonicalFile.getParentFile, script.getName, launchingCommands, seed)
     else file(script, launchingCommands, seed)

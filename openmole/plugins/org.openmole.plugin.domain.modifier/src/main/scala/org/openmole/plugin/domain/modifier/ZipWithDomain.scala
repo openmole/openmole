@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 19/12/12 Romain Reuillon
+/**
+ * Created by Romain Reuillon on 03/06/16.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -9,39 +9,31 @@
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
  */
-
 package org.openmole.plugin.domain.modifier
 
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.tools.FromContext
+import org.openmole.core.workflow.tools._
 
-import scalaz._
-import Scalaz._
+object ZipWithDomain {
 
-object SlidingDomain {
-
-  implicit def isDiscrete[D, T] = new Discrete[SlidingDomain[D, T], Array[T]] with DomainInputs[SlidingDomain[D, T]] {
-    override def iterator(domain: SlidingDomain[D, T]) = domain.iterator()
-    override def inputs(domain: SlidingDomain[D, T]) = domain.inputs
+  implicit def isDiscrete[D, I, O] = new Discrete[ZipWithDomain[D, I, O], (I, O)] with DomainInputs[ZipWithDomain[D, I, O]] {
+    override def iterator(domain: ZipWithDomain[D, I, O]) = FromContext((context, rng) ⇒ domain.iterator(context)(rng))
+    override def inputs(domain: ZipWithDomain[D, I, O]) = domain.inputs
   }
 
 }
 
-case class SlidingDomain[D, T: Manifest](domain: D, size: FromContext[Int], step: FromContext[Int] = 1)(implicit discrete: Discrete[D, T], domainInputs: DomainInputs[D]) {
+case class ZipWithDomain[D, I, O](domain: D, f: I ⇒ O)(implicit discrete: Discrete[D, I], domainInputs: DomainInputs[D]) { d ⇒
 
   def inputs = domainInputs.inputs(domain)
 
-  def iterator() =
-    for {
-      it ← discrete.iterator(domain)
-      si ← size
-      st ← step
-    } yield it.sliding(si, st).map(_.toArray)
-
+  def iterator(context: Context)(implicit rng: RandomProvider): Iterator[(I, O)] =
+    discrete.iterator(domain).from(context).map { e ⇒ e → f(e) }
 }

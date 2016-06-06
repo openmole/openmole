@@ -21,6 +21,7 @@ import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.dsl._
+import org.openmole.plugin.domain.modifier._
 import scalaz._
 import Scalaz._
 
@@ -32,7 +33,7 @@ object ZipWithNameSampling {
 
 class ZipWithNameSampling[D, T: CanGetName](val factor: Factor[D, T], val name: Prototype[String])(implicit discrete: Discrete[D, T]) extends Sampling {
 
-  override def inputs = factor.inputs
+  override def inputs = FactorSampling(factor).inputs
   override def prototypes = List(factor.prototype, name)
 
   override def apply() =

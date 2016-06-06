@@ -22,7 +22,8 @@ import java.net.URI
 import fr.iscpif.gridscale.authentication.P12Authentication
 import org.openmole.core.batch.environment.{ BatchExecutionJob, BatchEnvironment }
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.fileservice.{ FileDeleter, FileService }
+import org.openmole.core.fileservice._
+import org.openmole.core.workflow.dsl._
 import org.openmole.core.updater.Updater
 import org.openmole.core.workflow.execution.ExecutionJob
 import org.openmole.core.workflow.job.Job
@@ -42,16 +43,16 @@ object DIRACEnvironment {
 
   def apply(
     voName:         String,
-    service:        Option[String]      = None,
-    group:          Option[String]      = None,
-    bdii:           Option[String]      = None,
-    vomsURLs:       Option[Seq[String]] = None,
-    setup:          Option[String]      = None,
-    fqan:           Option[String]      = None,
-    cpuTime:        Option[Duration]    = None,
-    openMOLEMemory: Option[Int]         = None,
-    debug:          Boolean             = false,
-    name:           Option[String]      = None
+    service:        OptionalArgument[String]      = None,
+    group:          OptionalArgument[String]      = None,
+    bdii:           OptionalArgument[String]      = None,
+    vomsURLs:       OptionalArgument[Seq[String]] = None,
+    setup:          OptionalArgument[String]      = None,
+    fqan:           OptionalArgument[String]      = None,
+    cpuTime:        OptionalArgument[Duration]    = None,
+    openMOLEMemory: OptionalArgument[Int]         = None,
+    debug:          Boolean                       = false,
+    name:           OptionalArgument[String]      = None
   )(implicit authentication: EGIAuthentication, decrypt: Decrypt) =
     new DIRACEnvironment(
       voName = voName,

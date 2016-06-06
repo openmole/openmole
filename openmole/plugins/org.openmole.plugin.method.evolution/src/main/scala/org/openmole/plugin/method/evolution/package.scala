@@ -147,7 +147,12 @@ package object evolution {
     \&/(gaPuzzle, algorithm)
   }
 
-  def IslandEvolution[T](island: PuzzleContainer \&/ T, parallelism: Int, termination: OMTermination, sample: Option[Int] = None)(implicit wfi: WorkflowIntegration[T]) = {
+  def IslandEvolution[T](
+    island:      PuzzleContainer \&/ T,
+    parallelism: Int,
+    termination: OMTermination,
+    sample:      OptionalArgument[Int] = None
+  )(implicit wfi: WorkflowIntegration[T]) = {
     val algorithm: T = island
     val t = wfi(algorithm)
 

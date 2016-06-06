@@ -31,12 +31,9 @@ object TakeDomain {
     override def inputs(domain: TakeDomain[D, T]): PrototypeSet = domain.inputs
   }
 
-  def apply[D[_], T](domain: D[T], size: FromContext[Int])(implicit discrete: Discrete[D[T], T], domainInputs: DomainInputs[D[T]]) =
-    new TakeDomain[D[T], T](domain, size)
-
 }
 
-class TakeDomain[D, +T](val domain: D, val size: FromContext[Int])(implicit discrete: Discrete[D, T], domainInputs: DomainInputs[D]) {
+case class TakeDomain[D, +T](val domain: D, val size: FromContext[Int])(implicit discrete: Discrete[D, T], domainInputs: DomainInputs[D]) {
   def inputs = domainInputs.inputs(domain)
   def computeValues() =
     for {
