@@ -45,6 +45,8 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
   case class NodeEdition(node: TreeNode, replicateMode: Boolean = false)
 
   val toBeEdited: Var[Option[NodeEdition]] = Var(None)
+  val dragState: Var[String] = Var("")
+  val draggedNode: Var[Option[TreeNode]] = Var(None)
   val fileDisplayer = new FileDisplayer
   val fileToolBar = new FileToolBar(this)
   val tree: Var[TypedTag[HTMLDivElement]] = Var(tags.div())
@@ -144,6 +146,22 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
         CoreUtils.refreshCurrentDirectory(fileFilter = fileToolBar.fileFilter())
         manager.switch(dn)
         computeAndDraw
+    }, dropPairs(dn)
+  )
+
+  def dropPairs(dn: DirNode) = Seq(
+    draggable := true, ondrop := {
+      dropAction(dn)
+    },
+    ondragenter := {
+      (e: DragEvent) ⇒
+        false
+    },
+    ondragover := {
+      (e: DragEvent) ⇒
+        e.dataTransfer.dropEffect = "move"
+        e.preventDefault
+        false
     }
   )
 
@@ -166,7 +184,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
           div("Create a first OpenMOLE script (.oms)")(ms("message"))
         }
         else
-          tags.table(ms("tree"))(
+          tags.table(ms("tree" + dragState()))(
             tr(
               tags.table(ms("file-list"))(
                 for (tn ← sons) yield {
@@ -270,6 +288,28 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
     })
   }
 
+  def dropAction(tn: TreeNode) = {
+    (e: DragEvent) ⇒
+      e.preventDefault
+      draggedNode().map {
+        sp ⇒
+          tn match {
+            case d: DirNode ⇒
+              if (sp.safePath().path != d.safePath().path) {
+                fileDisplayer.tabs.saveAllTabs(() ⇒
+                  OMPost[Api].move(sp.safePath(), tn.safePath()).call().foreach {
+                    b ⇒
+                      refreshAndDraw
+                      fileDisplayer.tabs.checkTabs
+                  })
+              }
+            case _ ⇒
+          }
+      }
+      draggedNode() = None
+      false
+  }
+
   def turnSelectionTo(b: Boolean) = selectionMode() = b
 
   object ReactiveLine {
@@ -285,6 +325,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
       case fn: FileNodeType ⇒ stylesheet.file
       case _                ⇒ stylesheet.dir
     }) +++ floatLeft +++ pointer +++ Seq(
+      draggable := true,
       onclick := { () ⇒ todo() }
     )
 
@@ -309,6 +350,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
     }
 
     def addToSelection: Unit = addToSelection(!selected())
+
     val render: Modifier = {
       val baseGlyph = sheet.marginTop(2) +++ "glyphitem"
       val trash = baseGlyph +++ glyph_trash
@@ -318,56 +360,80 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
       val arrow_right_and_left = baseGlyph +++ glyph_arrow_right_and_left
 
       val rowDiv = div(
-        onmouseover := { () ⇒ lineHovered() = { if (selectionMode()) false else true } },
-        onmouseout := { () ⇒ lineHovered() = false },
-        div(
-          clickablePair,
-          color := "#333",
-          Rx {
-            span(stylesheet.fileNameOverflow +++ fileIndent)(
-              tn.name()
-            )
+        onmouseover := { () ⇒
+          lineHovered() = {
+            if (selectionMode()) false else true
           }
-        ).tooltip(tags.span(tn.name()), popupStyle = whitePopup, arrowStyle = Popup.whiteBottomArrow, condition = () ⇒ tn.name().length > 24),
-        div(stylesheet.fileInfo)(
-          Rx {
-            if (!selectionMode()) {
-              div(
-                span(stylesheet.fileSize)(tags.i(timeOrSize(tn))),
-                span(`class` := Rx {
-                  if (lineHovered()) "opaque" else "transparent"
-                })(
-                  span(onclick := { () ⇒ trashNode(tn) }, trash),
-                  span(onclick := { () ⇒
-                    toBeEdited() = Some(NodeEdition(tn))
-                    drawTree
-                  }, edit),
-                  a(
-                    span(onclick := { () ⇒ Unit })(download_alt),
-                    href := s"downloadFile?path=${Utils.toURI(tn.safePath().path)}"
-                  ),
-                  tn.safePath().extension match {
-                    case FileExtension.TGZ ⇒
-                      span(archive, onclick := { () ⇒
-                        OMPost[Api].extractTGZ(tn).call().foreach { r ⇒
-                          refreshAndDraw
-                        }
-                      })
-                    case _ ⇒
-                  },
-                  span(onclick := { () ⇒
-                    CoreUtils.replicate(tn, (replicated: TreeNodeData) ⇒ {
-                      refreshAnd(() ⇒ {
-                        toBeEdited() = Some(NodeEdition(replicated, true))
-                        drawTree
-                      })
-                    })
-                  })(arrow_right_and_left)
-                )
+        },
+        onmouseout := { () ⇒ lineHovered() = false },
+        ondragstart := { (e: DragEvent) ⇒
+          e.dataTransfer.setData("text/plain", "nothing") //  FIREFOX TRICK
+          draggedNode() match {
+            case Some(t: TreeNode) ⇒
+            case _                 ⇒ draggedNode() = Some(tn)
+          }
+          true
+        },
+        ondragenter := { (e: DragEvent) ⇒
+          false
+        },
+        ondragover := { (e: DragEvent) ⇒
+          e.dataTransfer.dropEffect = "move"
+          e.preventDefault
+          false
+        },
+        ondrop := {
+          dropAction(tn)
+        }, div(
+          div(
+            clickablePair,
+            color := "#333",
+            Rx {
+              span(stylesheet.fileNameOverflow +++ fileIndent)(
+                tn.name()
               )
             }
-            else div()
-          }
+          ).tooltip(tags.span(tn.name()), popupStyle = whitePopup, arrowStyle = Popup.whiteBottomArrow, condition = () ⇒ tn.name().length > 24),
+          div(stylesheet.fileInfo)(
+            Rx {
+              if (!selectionMode()) {
+                div(
+                  span(stylesheet.fileSize)(tags.i(timeOrSize(tn))),
+                  span(`class` := Rx {
+                    if (lineHovered()) "opaque" else "transparent"
+                  })(
+                    span(onclick := { () ⇒ trashNode(tn) }, trash),
+                    span(onclick := { () ⇒
+                      toBeEdited() = Some(NodeEdition(tn))
+                      drawTree
+                    }, edit),
+                    a(
+                      span(onclick := { () ⇒ Unit })(download_alt),
+                      href := s"downloadFile?path=${Utils.toURI(tn.safePath().path)}"
+                    ),
+                    tn.safePath().extension match {
+                      case FileExtension.TGZ ⇒
+                        span(archive, onclick := { () ⇒
+                          OMPost[Api].extractTGZ(tn).call().foreach { r ⇒
+                            refreshAndDraw
+                          }
+                        })
+                      case _ ⇒
+                    },
+                    span(onclick := { () ⇒
+                      CoreUtils.replicate(tn, (replicated: TreeNodeData) ⇒ {
+                        refreshAnd(() ⇒ {
+                          toBeEdited() = Some(NodeEdition(replicated, true))
+                          drawTree
+                        })
+                      })
+                    })(arrow_right_and_left)
+                  )
+                )
+              }
+              else div()
+            }
+          )
         )
       )
       tr(
