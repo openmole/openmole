@@ -22,6 +22,7 @@ import org.openmole.tool.file._
 
 object Imports {
 
+  lazy val parent = "_parent_"
   def separators = Array('\n', ';')
   def space = Set('\t', ' ')
   def removeHeadingSpaces(s: String) = s.dropWhile(space.contains)
@@ -104,7 +105,7 @@ object Imports {
       imp match {
         case Import(stableIdentifier, Alias(from, _)) ⇒
           val file = toFile(directory, stableIdentifier) / (from + Project.scriptExtension)
-          if (file.exists()) Seq(ImportedFile(stableIdentifier, file)) else Seq.empty
+          if (file.exists) Seq(ImportedFile(stableIdentifier, file)) else Seq.empty
         case Import(stableIdentifier, WildCard) ⇒
           listScripts(toFile(directory, stableIdentifier)) map {
             script ⇒ ImportedFile(stableIdentifier, script)
@@ -123,7 +124,7 @@ object Imports {
 
     def importedFiles0(script: File): Seq[ImportedFile] = {
       val imported = level1ImportedFiles(parseImports(script.content), script.getParentFileSafe)
-      val newlyImported = imported.filter(i ⇒ !alreadyImported.exists(_.getCanonicalFile == i.file.getCanonicalPath))
+      val newlyImported = imported.filter(i ⇒ !alreadyImported.exists(_.getCanonicalPath == i.file.getCanonicalPath))
       alreadyImported = newlyImported.map(_.file).toList ::: alreadyImported
       newlyImported ++ newlyImported.flatMap { i ⇒ importedFiles0(i.file) }
     }
@@ -142,7 +143,15 @@ object Imports {
 
   case class ImportedFile(stableIdentifier: Seq[String], file: File)
 
-  def toFile(dir: File, path: Seq[String]) = path.foldLeft(dir) { (d, n) ⇒ d / n }
+  def toFile(dir: File, path: Seq[String]) =
+    path.foldLeft(dir) {
+      (d, n) ⇒
+        n match {
+          case `parent` ⇒ d.getParentFile
+          case _        ⇒ d / n
+        }
+    }
+
   def listScripts(dir: File) = dir.listFilesSafe(Project.isScript _)
 
   object Tree {

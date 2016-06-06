@@ -41,12 +41,13 @@ object Project {
 
   def makePackage(name: String, tree: Tree): String =
     s"""object $name {
-     |${tree.children.map(c ⇒ makeScript(tree)).mkString("\n")}
+     |${makeScript(tree)}
      |}
    """.stripMargin
 
   def makeObject(script: File): String =
     s"""class ${script.getName.dropRight(Project.scriptExtension.size)}Class {
+       |private lazy val ${ConsoleVariables.workDirectory} = File("${script.getParentFileSafe.getCanonicalPath}")
        |${script.content}
        |}
        |

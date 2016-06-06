@@ -21,9 +21,13 @@ import org.openmole.core.console._
 import org.openmole.tool.file._
 
 object ConsoleVariables {
+
+  def variablesName = "_variables_"
+  def workDirectory = "workDirectory"
+
   def empty = ConsoleVariables()
 
-  def bindVariables(loop: ScalaREPL, variables: ConsoleVariables, variablesName: String = "_variables_") =
+  def bindVariables(loop: ScalaREPL, variables: ConsoleVariables, variablesName: String = variablesName) =
     loop.beQuietDuring {
       loop.bind(variablesName, variables)
       loop.eval(s"import $variablesName._")
