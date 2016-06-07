@@ -214,6 +214,24 @@ case class EGIP12AuthenticationData(
   def synthetic = "egi.p12"
 }
 
+sealed trait AuthenticationTest {
+  def passed: Boolean
+
+  def errorStack: Error
+}
+
+case class AuthenticationTestBase(passed: Boolean, errorStack: Error) extends AuthenticationTest
+
+case class EGIAuthenticationTest(message: String, password: AuthenticationTest, proxy: AuthenticationTest, dirac: AuthenticationTest) extends AuthenticationTest {
+  def errorStack = Error(s"${password.errorStack.stackTrace} \n\n ${proxy.errorStack.stackTrace} \n\n ${dirac.errorStack.stackTrace}")
+
+  def passed = password.passed && proxy.passed && dirac.passed
+}
+
+case class SSHAuthenticationTest(passed: Boolean, errorStack: Error) extends AuthenticationTest {
+  def message: String = if (passed) "OK" else "failed"
+}
+
 sealed trait UploadType {
   def typeName: String
 }
@@ -247,6 +265,10 @@ case class TreeNodeData(
 
 @JSExport
 case class ScriptData(scriptPath: SafePath)
+
+object Error {
+  def empty = Error("")
+}
 
 case class Error(stackTrace: String)
 

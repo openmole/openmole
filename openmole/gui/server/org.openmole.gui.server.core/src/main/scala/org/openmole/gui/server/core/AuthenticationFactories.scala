@@ -23,6 +23,8 @@ import org.openmole.gui.server.core.Utils._
 import org.openmole.plugin.environment.egi.{ EGIAuthentication, P12Certificate }
 import org.openmole.plugin.environment.ssh.{ PrivateKey, SSHAuthentication, LoginPassword }
 
+import scala.util.{ Try, Failure, Success }
+
 object AuthenticationFactories {
 
   implicit def dataToFactory(data: AuthenticationData): AuthenticationFactory = data match {
@@ -31,10 +33,19 @@ object AuthenticationFactories {
     case _                                  ⇒ SSHPrivateKeyFactory
 
   }
+
   def addAuthentication(data: AuthenticationData) = data.buildAuthentication(data)
+
   def allAuthentications(data: AuthenticationData) = data.allAuthenticationData
+
   def allAuthentications = EGIP12Factory.allAuthenticationData ++ SSHLoginPasswordFactory.allAuthenticationData ++ SSHPrivateKeyFactory.allAuthenticationData
+
   def removeAuthentication(data: AuthenticationData) = data.removeAuthentication(data)
+
+  implicit def toAuthenticationTest[T](t: Try[T]): AuthenticationTest = t match {
+    case Success(_) ⇒ AuthenticationTestBase(true, Error.empty)
+    case Failure(f) ⇒ AuthenticationTestBase(false, ErrorBuilder(f))
+  }
 
   trait AuthenticationFactory {
     def coreObject(data: AuthenticationData): Option[Any]
@@ -53,6 +64,7 @@ object AuthenticationFactories {
       val auth = coreObject(data)
       auth.foreach { a ⇒
         EGIAuthentication.update(a)
+        //        Workspace.authentications.set(a)
       }
     }
 
@@ -80,6 +92,20 @@ object AuthenticationFactories {
     }
 
     def removeAuthentication(data: AuthenticationData) = EGIAuthentication.clear
+
+    def testAuthentication(data: EGIP12AuthenticationData, voName: String): AuthenticationTest = coreObject(data).map { auth ⇒
+      EGIAuthenticationTest(
+        voName,
+        testPassword(data),
+        EGIAuthentication.testProxy(auth, voName),
+        EGIAuthentication.testDIRACAccess(auth, voName)
+      )
+    }.getOrElse(AuthenticationTestBase(false, ErrorBuilder(new Throwable("Unknown " + data.synthetic))))
+
+    def testPassword(data: AuthenticationData): AuthenticationTest = coreObject(data).map { d ⇒
+      toAuthenticationTest(EGIAuthentication.testPassword(d))
+    }.getOrElse(AuthenticationTestBase(false, Error("Unknown " + data.synthetic)))
+
   }
 
   object SSHLoginPasswordFactory extends AuthenticationFactory {
@@ -116,6 +142,12 @@ object AuthenticationFactories {
       SSHAuthentication -= e
     }
 
+    def testAuthentication(data: LoginPasswordAuthenticationData): Seq[AuthenticationTest] = Seq(coreObject(data).map { auth ⇒
+      SSHAuthentication.test(auth) match {
+        case Success(_) ⇒ SSHAuthenticationTest(true, Error.empty)
+        case Failure(f) ⇒ SSHAuthenticationTest(false, ErrorBuilder(f))
+      }
+    }.getOrElse(SSHAuthenticationTest(false, ErrorBuilder(new Throwable("Unknown " + data.synthetic)))))
   }
 
   object SSHPrivateKeyFactory extends AuthenticationFactory {
@@ -156,7 +188,23 @@ object AuthenticationFactories {
 
     def removeAuthentication(data: AuthenticationData) = coreObject(data).map { e ⇒ SSHAuthentication -= e }
 
+    def testAuthentication(data: PrivateKeyAuthenticationData): Seq[AuthenticationTest] = Seq(coreObject(data).map { auth ⇒
+      SSHAuthentication.test(auth) match {
+        case Success(_) ⇒ SSHAuthenticationTest(true, Error.empty)
+        case Failure(f) ⇒ SSHAuthenticationTest(false, ErrorBuilder(f))
+      }
+    }.getOrElse(SSHAuthenticationTest(false, ErrorBuilder(new Throwable("Unknown " + data.synthetic)))))
+
   }
+
+  def testEGIAuthentication(data: EGIP12AuthenticationData, vos: Seq[String]): Seq[AuthenticationTest] =
+    vos.map { vo ⇒ EGIP12Factory.testAuthentication(data, vo) }
+
+  def testLoginPasswordSSHAuthentication(data: LoginPasswordAuthenticationData): Seq[AuthenticationTest] =
+    SSHLoginPasswordFactory.testAuthentication(data)
+
+  def testPrivateKeySSHAuthentication(data: PrivateKeyAuthenticationData): Seq[AuthenticationTest] =
+    SSHPrivateKeyFactory.testAuthentication(data)
 
 }
 

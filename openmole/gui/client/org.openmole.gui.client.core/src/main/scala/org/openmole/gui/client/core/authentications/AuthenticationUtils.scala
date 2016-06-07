@@ -1,5 +1,6 @@
 package org.openmole.gui.client.core.authentications
 
+import org.openmole.gui.ext.data.{ EGIP12AuthenticationData, AuthenticationData }
 import org.scalajs.dom.html.{ Input, Label }
 
 import scalatags.JsDom.all._
