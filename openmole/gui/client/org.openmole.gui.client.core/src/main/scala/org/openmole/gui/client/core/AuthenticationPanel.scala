@@ -17,17 +17,17 @@ package org.openmole.gui.client.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.core.workspace.{Workspace, ConfigurationLocation}
+import org.openmole.core.workspace.{ Workspace, ConfigurationLocation }
 import org.openmole.gui.client
 import org.openmole.gui.ext.dataui.PanelUI
 import org.openmole.gui.shared.Api
 import scalatags.JsDom.all._
-import fr.iscpif.scaladget.api.{BootstrapTags ⇒ bs}
-import scalatags.JsDom.{tags ⇒ tags}
+import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
+import scalatags.JsDom.{ tags ⇒ tags }
 import org.openmole.gui.misc.js.JsRxTags._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
-import org.openmole.gui.misc.utils.{stylesheet ⇒ omsheet, Utils}
-import fr.iscpif.scaladget.stylesheet.{all ⇒ sheet}
+import org.openmole.gui.misc.utils.{ stylesheet ⇒ omsheet, Utils }
+import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
 import autowire._
 import org.openmole.gui.ext.data._
 import sheet._
@@ -77,32 +77,32 @@ class AuthenticationPanel extends ModalPanel {
             lineHovered() = false
           }
         )(
-          div(colMD(7))(
-            tags.a(pwID.data.synthetic, omsheet.docTitleEntry +++ floatLeft +++ omsheet.colorBold("white"), cursor := "pointer", onclick := { () ⇒
-              authenticationSelector.content() = Some(pwID.emptyClone)
-              setting() = Some(pwID.panel)
-            })
-          ),
-          for {
-            test ← pwID.authenticationTests
-          } yield {
-            test match {
-              case egi: EGIAuthenticationTest ⇒ label(egi.message, label_default +++ omsheet.tableTag)
-              case ssh: SSHAuthenticationTest ⇒ label(ssh.message, {
-                if (ssh.passed) label_success else label_danger
-              } +++ omsheet.tableTag)
-              case _ ⇒ label("pending", label_warning +++ omsheet.tableTag)
-            }
-          },
-          div(colMD(4) +++ sheet.paddingTop(5))(label(pwID.name, label_primary +++ omsheet.tableTag)),
-          span(
-            Rx {
-              if (lineHovered()) opaque
-              else transparent
+            div(colMD(7))(
+              tags.a(pwID.data.synthetic, omsheet.docTitleEntry +++ floatLeft +++ omsheet.colorBold("white"), cursor := "pointer", onclick := { () ⇒
+                authenticationSelector.content() = Some(pwID.emptyClone)
+                setting() = Some(pwID.panel)
+              })
+            ),
+            for {
+              test ← pwID.authenticationTests
+            } yield {
+              test match {
+                case egi: EGIAuthenticationTest ⇒ label(egi.message, label_default +++ omsheet.tableTag)
+                case ssh: SSHAuthenticationTest ⇒ label(ssh.message, {
+                  if (ssh.passed) label_success else label_danger
+                } +++ omsheet.tableTag)
+                case _ ⇒ label("pending", label_warning +++ omsheet.tableTag)
+              }
             },
-            bs.glyphSpan(glyph_trash, () ⇒ removeAuthentication(pwID.data))(omsheet.grey +++ sheet.paddingTop(9) +++ "glyphitem" +++ glyph_trash)
+            div(colMD(4) +++ sheet.paddingTop(5))(label(pwID.name, label_primary +++ omsheet.tableTag)),
+            span(
+              Rx {
+                if (lineHovered()) opaque
+                else transparent
+              },
+              bs.glyphSpan(glyph_trash, () ⇒ removeAuthentication(pwID.data))(omsheet.grey +++ sheet.paddingTop(9) +++ "glyphitem" +++ glyph_trash)
+            )
           )
-        )
       }
     }
 
@@ -162,7 +162,7 @@ class AuthenticationPanel extends ModalPanel {
       bs.buttonGroup()(
         setting() match {
           case Some(_) ⇒ saveButton
-          case _ ⇒ newButton
+          case _       ⇒ newButton
         },
         closeButton
       )
