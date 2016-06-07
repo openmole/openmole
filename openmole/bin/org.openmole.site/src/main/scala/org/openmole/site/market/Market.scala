@@ -87,8 +87,7 @@ object Market extends Logger {
       MarketEntry("Explore a GAMA Model", "gama", Seq(gama, stochastic, simulation)),
       MarketEntry("Introduction Tutorial", "tutorials/introduction", Seq(tutorial, scala, stochastic)),
       MarketEntry("Native Application Tutorial", "tutorials/native", Seq(tutorial, native, data, python)),
-      MarketEntry("Model Exploration Tutorial", "tutorials/method", Seq(netlogo, ga, simulation, calibration)),
-
+      MarketEntry("Model Exploration Tutorial", "tutorials/method", Seq(netlogo, ga, simulation, calibration))
     )
   )
 

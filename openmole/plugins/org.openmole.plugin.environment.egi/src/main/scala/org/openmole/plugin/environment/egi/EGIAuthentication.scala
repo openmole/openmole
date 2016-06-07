@@ -135,7 +135,7 @@ object EGIAuthentication extends Logger {
   }
 
   def update(a: EGIAuthentication, test: Boolean = true)(implicit decrypt: Decrypt) = {
-    if(test) testPassword(a).get
+    if (test) testPassword(a).get
     Workspace.authentications.set(a)
   }
 
