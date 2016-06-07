@@ -43,7 +43,7 @@ object Project {
       tree.children.map(c ⇒ makePackage(c.name, c.tree)).mkString("\n")
 
     def makePackage(name: String, tree: Tree): String =
-      if (!tree.files.isEmpty) tree.files.map(f ⇒ makeVal(name, f)).mkString("\n")
+      if (!tree.files.isEmpty) tree.files.distinct.map(f ⇒ makeVal(name, f)).mkString("\n")
       else
         s"""object $name {
             |${makeImportTree(tree)}
