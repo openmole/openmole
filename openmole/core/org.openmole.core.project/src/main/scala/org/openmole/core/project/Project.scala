@@ -45,7 +45,7 @@ object Project {
     def makePackage(name: String, tree: Tree): String =
       if (!tree.files.isEmpty) tree.files.distinct.map(f ⇒ makeVal(name, f)).mkString("\n")
       else
-        s"""object $name {
+        s"""lazy val $name = new {
             |${makeImportTree(tree)}
             |}""".stripMargin
 
@@ -58,11 +58,11 @@ object Project {
       val name = uniqueName(sourceFile.file)
 
       s"""class ${name}Class {
-           |object _ImportObject {
+           |lazy val _imports = new {
            |$imports
            |}
            |
-           |import _ImportObject._
+           |import _imports._
            |
            |private lazy val ${ConsoleVariables.workDirectory} = File("${sourceFile.file.getParentFileSafe.getCanonicalPath}")
            |${sourceFile.file.content}
@@ -113,7 +113,7 @@ class Project(workDirectory: File, newREPL: (ConsoleVariables) ⇒ ScalaREPL = P
         s"""${scriptsObjects(script)}
            |
            |def runOMSScript(): ${classOf[Puzzle].getCanonicalName} = {
-           |import ${Project.uniqueName(script)}._ImportObject._""".stripMargin
+           |import ${Project.uniqueName(script)}._imports._""".stripMargin
 
       def footer =
         s"""}
