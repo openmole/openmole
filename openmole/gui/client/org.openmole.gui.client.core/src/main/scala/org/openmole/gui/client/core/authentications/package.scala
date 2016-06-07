@@ -1,6 +1,6 @@
 package org.openmole.gui.client.core
 
-import org.openmole.gui.ext.data.{ PrivateKeyAuthenticationData, AuthenticationData, LoginPasswordAuthenticationData, EGIP12AuthenticationData }
+import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.dataui.PanelUI
 import fr.iscpif.scaladget.api.BootstrapTags.Displayable
 
@@ -40,7 +40,12 @@ package object authentications {
     case _                                   ⇒ PrivateKeyAuthenticationData()
   }
 
-  case class AuthPanelWithID(data: AuthenticationData, name: String) extends Displayable {
+  case class AuthPanelWithID(
+      data:                AuthenticationData,
+      name:                String,
+      authenticationTests: Seq[AuthenticationTest] = Seq(AuthenticationTestBase(false, Error("Authentication not tested yet")))
+
+  ) extends Displayable {
     type DATA = AuthenticationData
 
     def panel: PanelUI = panelUI(data)

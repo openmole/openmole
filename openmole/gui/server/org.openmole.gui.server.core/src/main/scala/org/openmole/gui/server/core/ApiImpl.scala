@@ -69,6 +69,14 @@ object ApiImpl extends Api {
 
   def removeAuthentication(data: AuthenticationData) = AuthenticationFactories.removeAuthentication(data)
 
+  def testAuthentication(data: AuthenticationData, vos: Seq[String] = Seq()): Seq[AuthenticationTest] =
+    data match {
+      case d: EGIP12AuthenticationData         ⇒ AuthenticationFactories.testEGIAuthentication(d, vos)
+      case lp: LoginPasswordAuthenticationData ⇒ AuthenticationFactories.testLoginPasswordSSHAuthentication(lp)
+      case pk: PrivateKeyAuthenticationData    ⇒ AuthenticationFactories.testPrivateKeySSHAuthentication(pk)
+      case _                                   ⇒ Seq(AuthenticationTestBase(false, Error("Cannot test this authentication")))
+    }
+
   //WORKSPACE
   def isPasswordCorrect(pass: String): Boolean = Workspace.passwordIsCorrect(pass)
 
@@ -260,6 +268,7 @@ object ApiImpl extends Api {
   def getConfigurationValue(configData: ConfigData): Option[String] = Configurations(configData)
 
   def setConfigurationValue(configData: ConfigData, value: String) = Configurations.set(configData, value)
+
   // EXECUTIONS
   def cancelExecution(id: ExecutionId): Unit = execution.cancel(id)
 
@@ -345,7 +354,11 @@ object ApiImpl extends Api {
     def groupedErrors =
       environmentErrors.sortBy(_.date).takeRight(lines).groupBy {
         _.errorMessage
-      }.toSeq.map { case (msg, err) ⇒ (err.head, err.map { _.date }) }
+      }.toSeq.map {
+        case (msg, err) ⇒ (err.head, err.map {
+          _.date
+        })
+      }
 
     EnvironmentErrorData(groupedErrors)
   }

@@ -24,6 +24,7 @@ trait Api {
   def authentications(): Seq[AuthenticationData]
   def addAuthentication(data: AuthenticationData): Unit
   def removeAuthentication(data: AuthenticationData): Unit
+  def testAuthentication(data: AuthenticationData, vos: Seq[String]): Seq[AuthenticationTest]
 
   //WORKSPACE
   def isPasswordCorrect(pass: String): Boolean

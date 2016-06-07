@@ -26,8 +26,11 @@ object Configurations {
     VOTest → ConfigurationLocation("AuthenicationPanel", "voTest", None)
   )
 
-  def apply(configData: ConfigData) = configs.get(configData).flatMap { _.default }
+  def apply(configData: ConfigData) =
+    configs.get(configData).flatMap { p ⇒ Workspace.preferenceOption(p) }
 
-  def set(configData: ConfigData, value: String) = configs.get(configData).map { cl ⇒ Workspace setPreference (cl, value) }
+
+  def set(configData: ConfigData, value: String) =
+    configs.get(configData).map { cl ⇒ Workspace setPreference (cl, value) }
 
 }
