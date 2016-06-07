@@ -96,9 +96,8 @@ object Imports {
     def matchingFileInStableIdentifier(imp: Import): Option[ImportedFile] =
       (1 to imp.stableIdentifier.size).map { i ⇒
         val part = imp.stableIdentifier.take(i)
-        val stableIdentifier = part.dropRight(1)
-        val path = toFile(directory, stableIdentifier ++ part.lastOption.map(_ + Project.scriptExtension))
-        ImportedFile(stableIdentifier, path)
+        val path = toFile(directory, part.dropRight(1) ++ part.lastOption.map(_ + Project.scriptExtension))
+        ImportedFile(part, path)
       }.find { importedFile ⇒ Project.isScript(importedFile.file) }
 
     def matchingFileInSelector(imp: Import): Seq[ImportedFile] =
@@ -119,20 +118,18 @@ object Imports {
     }
   }
 
-  def importedFiles(script: File): Seq[ImportedFile] = {
-    var alreadyImported = List.empty[File]
+  def importedFiles(script: File): Seq[SourceFile] = {
+    val alreadyImported = collection.mutable.Set[File]()
 
-    def importedFiles0(script: File): Seq[ImportedFile] = {
-      val imported = level1ImportedFiles(parseImports(script.content), script.getParentFileSafe)
-      val newlyImported = imported.filter(i ⇒ !alreadyImported.exists(_.getCanonicalPath == i.file.getCanonicalPath))
-      alreadyImported = newlyImported.map(_.file).toList ::: alreadyImported
-      newlyImported ++ newlyImported.flatMap { i ⇒ importedFiles0(i.file) }
+    def importedFiles0(source: File): List[SourceFile] = {
+      val imported = level1ImportedFiles(parseImports(source.content), source.getParentFileSafe)
+      val newlyImported = imported.filter(i ⇒ !alreadyImported.contains(i.file.getCanonicalFile))
+      newlyImported.foreach(f ⇒ alreadyImported.add(f.file.getCanonicalFile))
+      SourceFile(source, imported) :: newlyImported.toList.flatMap { i ⇒ importedFiles0(i.file) }
     }
 
     importedFiles0(script)
   }
-
-  def importTree(script: File) = Tree.insertAll(importedFiles(script))
 
   case class Import(stableIdentifier: Seq[String], importSelector: ImportSelector)
 
@@ -142,6 +139,7 @@ object Imports {
   case object WildCard extends ImportSelector
 
   case class ImportedFile(stableIdentifier: Seq[String], file: File)
+  case class SourceFile(file: File, importedFiles: Seq[ImportedFile])
 
   def toFile(dir: File, path: Seq[String]) =
     path.foldLeft(dir) {

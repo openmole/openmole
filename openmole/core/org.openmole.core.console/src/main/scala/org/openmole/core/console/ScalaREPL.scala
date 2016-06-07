@@ -45,9 +45,13 @@ object ScalaREPL {
       def readableErrorMessages(error: ErrorMessage) =
         error.position.map(p ⇒ s"(line ${p.line}) ").getOrElse("") + error.decoratedMessage
 
-      errorMessages.map(readableErrorMessages).mkString("\n") + "\n" +
-        s"""Compiling code:
-            |${code}""".stripMargin
+      val (importsErrors, codeErrors) = errorMessages.partition(e ⇒ e.position.map(_.line < 0).getOrElse(false))
+
+      s"""${codeErrors.map(readableErrorMessages).mkString("\n")}
+        |Error in imports:
+        |${importsErrors.map(readableErrorMessages).mkString("\n")}
+        |Compiling code:
+        |${code}""".stripMargin
     }
   }
   @Lenses case class ErrorMessage(decoratedMessage: String, rawMessage: String, position: Option[ErrorPosition])
