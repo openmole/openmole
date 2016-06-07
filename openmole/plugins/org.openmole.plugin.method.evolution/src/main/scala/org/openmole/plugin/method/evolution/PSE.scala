@@ -27,7 +27,7 @@ object PSE {
   object PatternAxe {
 
     // FIXME provide an evidence that the domain does'nt require a context
-    implicit def fromDomainToPatternAxe[D](f: Factor[D, Double])(implicit finite: Finite[D, Double]) =
+    implicit def fromDomainToPatternAxe[D](f: Factor[D, Double])(implicit finite: Finite[D, Double]): PatternAxe =
       PatternAxe(f.prototype, finite.computeValues(f.domain).from(Context.empty)(RandomProvider.empty).toVector)
 
   }

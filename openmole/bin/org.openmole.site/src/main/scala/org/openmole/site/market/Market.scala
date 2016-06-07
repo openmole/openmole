@@ -85,8 +85,10 @@ object Market extends Logger {
       MarketEntry("Metamimetic Networks", "metamimetic-networks", Seq(stochastic, simulation, netlogo)),
       MarketEntry("Segmentation with FSL", "fsl-fast", Seq(fsl, data, native, neuroscience)),
       MarketEntry("Explore a GAMA Model", "gama", Seq(gama, stochastic, simulation)),
-      MarketEntry("Introduction tutorial", "tutorials/introduction", Seq(tutorial, scala, stochastic)),
-      MarketEntry("Native application tutorial", "tutorials/native", Seq(tutorial, native, data, python))
+      MarketEntry("Introduction Tutorial", "tutorials/introduction", Seq(tutorial, scala, stochastic)),
+      MarketEntry("Native Application Tutorial", "tutorials/native", Seq(tutorial, native, data, python)),
+      MarketEntry("Model Exploration Tutorial", "tutorials/method", Seq(netlogo, ga, simulation, calibration)),
+
     )
   )
 

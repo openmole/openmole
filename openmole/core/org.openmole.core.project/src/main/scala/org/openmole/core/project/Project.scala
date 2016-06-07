@@ -19,40 +19,67 @@ package org.openmole.core.project
 
 import javax.script.CompiledScript
 
-import monocle.function.Each
 import org.openmole.core.console._
 import org.openmole.core.pluginmanager._
-import org.openmole.core.project.Imports.Tree
+import org.openmole.core.project.Imports.{ SourceFile, Tree }
 import org.openmole.core.workflow.puzzle._
 import org.openmole.tool.file._
 import monocle.function.all._
 import monocle.std.all._
 import org.openmole.core.exception.UserBadDataError
+import org.openmole.tool.hash._
 
 object Project {
+
   def scriptExtension = ".oms"
   def isScript(file: File) = file.exists() && file.getName.endsWith(scriptExtension)
   def newREPL(variables: ConsoleVariables) = OpenMOLEREPL.newREPL(variables, quiet = true)
 
-  def scriptsObjects(script: File) = makeScript(Imports.importTree(script))
+  def uniqueName(source: File) = s"_${source.getCanonicalPath.hash}"
 
-  def makeScript(tree: Tree): String =
-    (tree.files.map(makeObject) ++ tree.children.map(c ⇒ makePackage(c.name, c.tree))).mkString("\n")
+  def scriptsObjects(script: File) = {
 
-  def makePackage(name: String, tree: Tree): String =
-    s"""object $name {
-     |${makeScript(tree)}
-     |}
-   """.stripMargin
+    def makeImportTree(tree: Tree): String =
+      tree.children.map(c ⇒ makePackage(c.name, c.tree)).mkString("\n")
 
-  def makeObject(script: File): String =
-    s"""class ${script.getName.dropRight(Project.scriptExtension.size)}Class {
-       |private lazy val ${ConsoleVariables.workDirectory} = File("${script.getParentFileSafe.getCanonicalPath}")
-       |${script.content}
-       |}
-       |
-       |lazy val ${script.getName.dropRight(Project.scriptExtension.size)} = new ${script.getName.dropRight(".oms".size)}Class
+    def makePackage(name: String, tree: Tree): String =
+      if (!tree.files.isEmpty) tree.files.distinct.map(f ⇒ makeVal(name, f)).mkString("\n")
+      else
+        s"""lazy val $name = new {
+            |${makeImportTree(tree)}
+            |}""".stripMargin
+
+    def makeVal(identifier: String, file: File) =
+      s"""lazy val ${identifier} = ${uniqueName(file)}"""
+
+    def makeScript(sourceFile: SourceFile) = {
+      def imports = makeImportTree(Tree.insertAll(sourceFile.importedFiles))
+
+      val name = uniqueName(sourceFile.file)
+
+      s"""class ${name}Class {
+           |lazy val _imports = new {
+           |$imports
+           |}
+           |
+           |import _imports._
+           |
+           |private lazy val ${ConsoleVariables.workDirectory} = File("${sourceFile.file.getParentFileSafe.getCanonicalPath}")
+           |${sourceFile.file.content}
+           |}
+           |
+           |lazy val ${name} = new ${name}Class
+         """.stripMargin
+    }
+
+    val allImports = Imports.importedFiles(script)
+
+    def importHeader = allImports.map(makeScript).mkString("\n")
+
+    s"""
+       |$importHeader
      """.stripMargin
+  }
 
 }
 
@@ -85,7 +112,8 @@ class Project(workDirectory: File, newREPL: (ConsoleVariables) ⇒ ScalaREPL = P
       def header =
         s"""${scriptsObjects(script)}
            |
-           |def runOMSScript(): ${classOf[Puzzle].getCanonicalName} = {""".stripMargin
+           |def runOMSScript(): ${classOf[Puzzle].getCanonicalName} = {
+           |import ${Project.uniqueName(script)}._imports._""".stripMargin
 
       def footer =
         s"""}
