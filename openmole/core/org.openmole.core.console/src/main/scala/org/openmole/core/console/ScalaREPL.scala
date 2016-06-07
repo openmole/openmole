@@ -48,7 +48,7 @@ object ScalaREPL {
       val (importsErrors, codeErrors) = errorMessages.partition(e ⇒ e.position.map(_.line < 0).getOrElse(false))
 
       s"""${codeErrors.map(readableErrorMessages).mkString("\n")}
-        |Error in imports:
+        |Error in imports header:
         |${importsErrors.map(readableErrorMessages).mkString("\n")}
         |Compiling code:
         |${code}""".stripMargin

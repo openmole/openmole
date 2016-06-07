@@ -35,9 +35,9 @@ object Project {
   def isScript(file: File) = file.exists() && file.getName.endsWith(scriptExtension)
   def newREPL(variables: ConsoleVariables) = OpenMOLEREPL.newREPL(variables, quiet = true)
 
+  def uniqueName(source: File) = s"_${source.getCanonicalPath.hash}"
+
   def scriptsObjects(script: File) = {
-    def uniqueName(source: File) =
-      s"_${source.getCanonicalPath.hash}"
 
     def makeImportTree(tree: Tree): String =
       tree.children.map(c ⇒ makePackage(c.name, c.tree)).mkString("\n")
@@ -78,7 +78,6 @@ object Project {
 
     s"""
        |$importHeader
-       |import ${uniqueName(script)}._ImportObject._
      """.stripMargin
   }
 
@@ -113,7 +112,8 @@ class Project(workDirectory: File, newREPL: (ConsoleVariables) ⇒ ScalaREPL = P
       def header =
         s"""${scriptsObjects(script)}
            |
-           |def runOMSScript(): ${classOf[Puzzle].getCanonicalName} = {""".stripMargin
+           |def runOMSScript(): ${classOf[Puzzle].getCanonicalName} = {
+           |import ${Project.uniqueName(script)}._ImportObject._""".stripMargin
 
       def footer =
         s"""}
