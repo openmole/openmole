@@ -43,8 +43,9 @@ class AuthenticationPanel extends ModalPanel {
   lazy val initialCheck = Var(false)
 
   def onOpen() = {
-    getAuthentications
-    if (!initialCheck()) testAuthentications
+    if (!initialCheck()) {
+      getAuthentications
+    }
   }
 
   def onClose() = {
@@ -54,6 +55,7 @@ class AuthenticationPanel extends ModalPanel {
   def getAuthentications = {
     OMPost[Api].authentications.call().foreach { auth ⇒
       auths() = Some(auth.map { a ⇒ client.core.authentications.panelWithID(a) })
+      testAuthentications
     }
   }
 
@@ -160,7 +162,9 @@ class AuthenticationPanel extends ModalPanel {
           settingsButton
         ).popup(
           settingsDiv,
-          onclose = () ⇒ OMPost[Api].setConfigurationValue(VOTest, vosToBeTested.value).call(),
+          onclose = () ⇒ OMPost[Api].setConfigurationValue(VOTest, vosToBeTested.value).call().foreach { x ⇒
+          getAuthentications
+        },
           popupStyle = whitePopupWithBorder
         )
       )
@@ -192,10 +196,7 @@ class AuthenticationPanel extends ModalPanel {
 
   def save = {
     setting().map {
-      _.save(() ⇒ {
-        getAuthentications
-        testAuthentications
-      })
+      _.save(() ⇒ getAuthentications)
     }
     setting() = None
   }
