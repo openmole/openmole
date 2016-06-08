@@ -17,7 +17,6 @@ package org.openmole.gui.client.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.core.workspace.{ Workspace, ConfigurationLocation }
 import org.openmole.gui.client
 import org.openmole.gui.ext.dataui.PanelUI
 import org.openmole.gui.shared.Api
@@ -26,7 +25,7 @@ import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import scalatags.JsDom.{ tags ⇒ tags }
 import org.openmole.gui.misc.js.JsRxTags._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
-import org.openmole.gui.misc.utils.{ stylesheet ⇒ omsheet, Utils }
+import org.openmole.gui.misc.utils.{ stylesheet ⇒ omsheet }
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
 import autowire._
 import org.openmole.gui.ext.data._
