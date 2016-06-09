@@ -105,7 +105,8 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
     Libraries.scalaz,
     Libraries.asm,
     Libraries.collections,
-    Libraries.configuration
+    Libraries.configuration,
+    Libraries.logging
   ) ++ webServerDependencies
 
   lazy val guiCoreDependencies = Seq(
@@ -145,7 +146,6 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
       monocle intransitive (),
       sshd intransitive (),
       family intransitive (),
-      logging intransitive (),
       opencsv intransitive (),
       netlogo4 intransitive (),
       netlogo5 intransitive (),
