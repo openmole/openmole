@@ -233,7 +233,7 @@ package object stylesheet {
     top := -2,
     right := 0,
     pointer,
-    width := 300,
+    width := 306,
     height := 23,
     borderRadius := "2px"
   )
