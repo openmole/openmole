@@ -10,7 +10,7 @@ import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 
 object OSGi extends Defaults {
 
-  val dir = file("target/libraries")
+  val dir = file("bundles")
 
   lazy val scalatraVersion = "2.4.0"
   lazy val jettyVersion = "9.2.14.v20151106"
@@ -286,5 +286,9 @@ object OSGi extends Defaults {
     libraryDependencies += "org.ow2.asm" % "asm" % asmVersion,
     version := asmVersion)
 
+
+  lazy val config = OsgiProject("com.typesafe.config") settings (
+    libraryDependencies += "com.typesafe" % "config" % "1.3.0",
+    version := "1.3.0")
 
 }
