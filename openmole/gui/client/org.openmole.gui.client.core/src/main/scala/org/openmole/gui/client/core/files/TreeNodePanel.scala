@@ -326,7 +326,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
       case _                ⇒ stylesheet.dir
     }) +++ floatLeft +++ pointer +++ Seq(
       draggable := true,
-      onclick := { () ⇒ todo() }
+      onclick := { () ⇒ if (!selectionMode()) todo() }
     )
 
     def timeOrSize(tn: TreeNode): String = fileToolBar.fileFilter().fileSorting match {
