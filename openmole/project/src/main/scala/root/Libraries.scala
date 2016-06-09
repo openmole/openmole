@@ -175,4 +175,6 @@ object Libraries extends Defaults {
 
   lazy val asm = "org.openmole" %% "org-objectweb-asm" % "5.1"
 
+  lazy val configuration = "org.openmole" %% "org-apache-commons-configuration2" % "2.0"
+
 }

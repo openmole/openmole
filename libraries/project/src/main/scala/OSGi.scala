@@ -10,7 +10,7 @@ import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 
 object OSGi extends Defaults {
 
-  val dir = file("target/libraries")
+  val dir = file("bundles")
 
   lazy val scalatraVersion = "2.4.0"
   lazy val jettyVersion = "9.2.14.v20151106"
@@ -286,5 +286,10 @@ object OSGi extends Defaults {
     libraryDependencies += "org.ow2.asm" % "asm" % asmVersion,
     version := asmVersion)
 
+
+  lazy val config = OsgiProject("org.apache.commons.configuration2", privatePackages = Seq("!scala.*", "*")) settings (
+    libraryDependencies += "org.apache.commons" % "commons-configuration2" % "2.0",
+    libraryDependencies += "commons-beanutils" % "commons-beanutils" % "1.9.2",
+    version := "2.0")
 
 }
