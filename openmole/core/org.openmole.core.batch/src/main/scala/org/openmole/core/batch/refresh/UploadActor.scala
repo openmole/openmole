@@ -30,6 +30,7 @@ import org.openmole.core.fileservice.FileService
 import org.openmole.tool.file._
 import org.openmole.tool.hash._
 import org.openmole.core.workflow.job._
+import org.openmole.core.tools.service.Random._
 
 import org.openmole.core.serializer._
 import org.openmole.core.workspace.Workspace
@@ -126,7 +127,7 @@ class UploadActor(jobManager: JobManager) {
     environment: BatchEnvironment,
     storage:     StorageService
   )(implicit token: AccessToken) = {
-    val environmentPluginPath = environment.plugins.map { p ⇒ toReplicatedFile(job, p, storage, TransferOptions(raw = true)) }.map { FileMessage(_) }
+    val environmentPluginPath = shuffled(environment.plugins)(Workspace.rng).map { p ⇒ toReplicatedFile(job, p, storage, TransferOptions(raw = true)) }.map { FileMessage(_) }
     val runtimeFileMessage = FileMessage(toReplicatedFile(job, environment.runtime, storage, TransferOptions(raw = true)))
     val jvmLinuxX64FileMessage = FileMessage(toReplicatedFile(job, environment.jvmLinuxX64, storage, TransferOptions(raw = true)))
 
@@ -149,8 +150,8 @@ class UploadActor(jobManager: JobManager) {
     path:                String
   )(implicit token: AccessToken): ExecutionMessage = {
 
-    val pluginReplicas = serializationPlugin.map { toReplicatedFile(job, _, storage, TransferOptions(raw = true)) }
-    val files = serializationFile.map { toReplicatedFile(job, _, storage, TransferOptions()) }
+    val pluginReplicas = shuffled(serializationPlugin)(Workspace.rng).map { toReplicatedFile(job, _, storage, TransferOptions(raw = true)) }
+    val files = shuffled(serializationFile)(Workspace.rng).map { toReplicatedFile(job, _, storage, TransferOptions()) }
 
     ExecutionMessage(
       pluginReplicas,
