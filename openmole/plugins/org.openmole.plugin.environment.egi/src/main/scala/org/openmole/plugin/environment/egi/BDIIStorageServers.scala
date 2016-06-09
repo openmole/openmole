@@ -17,15 +17,16 @@
 
 package org.openmole.plugin.environment.egi
 
-import org.openmole.core.exception.InternalProcessingError
+import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.tool.file._
 import org.openmole.core.batch.environment.BatchEnvironment
-import fr.iscpif.gridscale.egi.{ GlobusAuthentication, BDII }
+import fr.iscpif.gridscale.egi.{ BDII, GlobusAuthentication }
 import org.openmole.core.batch.replication.ReplicaCatalog
 import org.openmole.core.workspace._
 import org.openmole.tool.hash.Hash
 import org.openmole.tool.logger.Logger
 import java.io.File
+
 import org.openmole.core.tools.math._
 
 object BDIIStorageServers extends Logger
@@ -46,11 +47,7 @@ trait BDIIStorageServers extends BatchEnvironment { env ⇒
       logger.fine("Use webdav storages:" + webdavStorages.mkString(","))
       webdavStorages.map { s ⇒ EGIWebDAVStorageService(s, env, voName, debug, proxyCreator) }
     }
-    else {
-      val srmStorages = bdiiServer.querySRMLocations(voName)
-      logger.fine("Use srm storages:" + srmStorages.mkString(","))
-      srmStorages.map { s ⇒ EGISRMStorageService(s, env, voName, proxyCreator) }
-    }
+    else throw new UserBadDataError("No WebDAV storage available for the VO")
   }
 
   def trySelectAStorage(usedFileHashes: Iterable[(File, Hash)]) = {
