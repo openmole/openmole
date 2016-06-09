@@ -21,12 +21,7 @@ import org.apache.log4j.{ Logger ⇒ L4JLogger, Level ⇒ L4JLevel, Appender ⇒
 import org.apache.log4j.BasicConfigurator
 import java.util.logging._
 
-import org.openmole.core.workspace.{ Workspace, ConfigurationLocation }
-
 object LoggerService {
-
-  private val LogLevel = ConfigurationLocation("LoggerService", "LogLevel", Some("INFO"))
-  Workspace setDefault LogLevel
 
   def level(levelLabel: String) = {
     val level = Level.parse(levelLabel)
@@ -46,7 +41,7 @@ object LoggerService {
     L4JLogger.getRootLogger.setLevel(L4JLevel.ERROR)
     val root = org.slf4j.LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME).asInstanceOf[ch.qos.logback.classic.Logger]
     root.setLevel(ch.qos.logback.classic.Level.ERROR)
-    level(Workspace.preference(LogLevel))
+    level("INFO")
   }
 
 }

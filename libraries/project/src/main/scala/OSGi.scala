@@ -287,7 +287,8 @@ object OSGi extends Defaults {
     version := asmVersion)
 
 
-  lazy val config = OsgiProject("org.apache.commons.configuration2", privatePackages = Seq("!scala.*", "*")) settings (
+  lazy val config = OsgiProject("org.apache.commons.configuration2",
+    privatePackages = Seq("!scala.*", "!org.apache.commons.logging.*","*")) settings (
     libraryDependencies += "org.apache.commons" % "commons-configuration2" % "2.0",
     libraryDependencies += "commons-beanutils" % "commons-beanutils" % "1.9.2",
     version := "2.0")
