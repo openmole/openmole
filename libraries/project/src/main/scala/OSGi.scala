@@ -287,8 +287,9 @@ object OSGi extends Defaults {
     version := asmVersion)
 
 
-  lazy val config = OsgiProject("com.typesafe.config") settings (
-    libraryDependencies += "com.typesafe" % "config" % "1.3.0",
-    version := "1.3.0")
+  lazy val config = OsgiProject("org.apache.commons.configuration2", privatePackages = Seq("!scala.*", "*")) settings (
+    libraryDependencies += "org.apache.commons" % "commons-configuration2" % "2.0",
+    libraryDependencies += "commons-beanutils" % "commons-beanutils" % "1.9.2",
+    version := "2.0")
 
 }

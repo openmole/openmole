@@ -19,8 +19,11 @@ package org.openmole.core.workspace
 
 import java.io.File
 
-import org.openmole.core.exception.{ UserBadDataError, InternalProcessingError }
+import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.tool.file._
+import org.apache.commons.configuration2._
+import org.apache.commons.configuration2.builder._
+import org.apache.commons.configuration2.builder.fluent._
 
 import scala.concurrent.duration._
 
@@ -40,121 +43,24 @@ class ConfigurationLocation[T](val group: String, val name: String, _default: �
 
 class ConfigurationFile(val file: File) {
 
-  var lastModificationTime: Long = _
-  var values: Map[String, Map[String, (Int, String)]] = _
-  var commentedValues: Map[String, Map[String, (Int, String)]] = _
+  val config = new Configurations().properties(file)
 
-  load()
+  val reloading = new ReloadingFileBasedConfigurationBuilder(classOf[PropertiesConfiguration])
+    .configure(new Parameters().fileBased().setFile(file))
 
-  def value(group: String, name: String): Option[String] = synchronized {
-    checkModified
-    val g = values.get(group)
-    val v = g.flatMap(_.get(name).map(_._2))
-    v
-  }
+  reloading.setAutoSave(true)
 
-  def commentedValue(group: String, name: String): Option[String] = synchronized {
-    checkModified
-    commentedValues.get(group).flatMap(_.get(name).map(_._2))
-  }
+  def value(group: String, name: String): Option[String] =
+    Option(config.getString(s"$group.$name"))
 
-  def setValue(group: String, name: String, value: String) = synchronized {
-    checkModified
-    values.get(group).flatMap(_.get(name)) match {
-      case Some((i, l)) ⇒ replace(i, Value(group, name, value).toString)
-      case None         ⇒ file.append(s"\n${Value(group, name, value)}")
-    }
-    load()
-  }
+  def setValue(group: String, name: String, value: String) =
+    config.setProperty(s"$group.$name", value)
 
-  def addCommentedValue(group: String, name: String, value: String) = synchronized {
-    checkModified
-    file.append(s"\n# ${Value(group, name, value)}")
-    load()
-  }
+  def setCommentedValue(group: String, name: String, value: String) =
+    config.setProperty(s"# $group.$name", value)
 
-  def removeValue(group: String, name: String) = synchronized {
-    val lineNumbers = values(activeLines).map(_._1).toSet
-    val content =
-      for {
-        (l, i) ← file.lines.zipWithIndex
-        if !lineNumbers.contains(i)
-      } yield l
-    file.content = content.mkString("\n")
-    load()
-  }
-
-  def clear() = synchronized {
+  def clear() = {
     file.content = ""
-    load()
-  }
-
-  private def replace(line: Int, content: String) = {
-    val lines = file.lines
-    val newLines = lines.take(line) ++ Seq(content) ++ lines.drop(line + 1)
-    file.content = newLines.mkString("\n")
-  }
-
-  private def checkModified =
-    if (file.lastModified() > lastModificationTime) load()
-
-  private def load() = {
-    lastModificationTime = file.lastModified()
-    values = readValues
-    commentedValues = readCommentedValues
-  }
-
-  private case class Value(group: String, name: String, value: String) {
-    override def toString = s"${group}.${name} = ${value}"
-  }
-
-  private def readValues: Map[String, Map[String, (Int, String)]] = linesToMap(activeLines)
-
-  private def readCommentedValues: Map[String, Map[String, (Int, String)]] = linesToMap(commentedLines)
-
-  private def commentedLines =
-    file.lines.zipWithIndex.map(_.swap).
-      filter { case (_, l) ⇒ isCommentedLine(l) }.
-      map { case (i, l) ⇒ i → l.trim.drop(1) }
-
-  private def activeLines =
-    file.lines.zipWithIndex.map(_.swap).
-      filter { case (_, l) ⇒ !isCommentedLine(l) }
-
-  private def parseValue(s: String) = {
-    def split(s: String) = {
-      val equalIndex = s.indexOf('=')
-      if (equalIndex == -1) None
-      else {
-        val kp = s.take(equalIndex)
-        val v = s.takeRight(s.length - equalIndex - 1)
-        val Array(g, k) = kp.split('.')
-        if (k.isEmpty) None
-        else Some(Value(g.trim, k.trim, v.trim))
-      }
-    }
-    split(s.trim)
-  }
-
-  private def isCommentedLine(s: String) =
-    s.trim.headOption.map(_ == '#').getOrElse(false)
-
-  private def linesToMap(lines: Seq[(Int, String)]) = toMap(values(lines))
-
-  private def values(lines: Seq[(Int, String)]) = lines.flatMap { case (i, l) ⇒ parseValue(l).map(i → _) }
-
-  private def toMap(vs: Seq[(Int, Value)]) = {
-    def content =
-      for {
-        (g, values) ← vs.groupBy(_._2.group).toSeq
-      } yield {
-        def content = for {
-          (n, inGroup) ← values.groupBy(_._2.name).toSeq
-        } yield n → (inGroup.last._1 → inGroup.last._2.value)
-        g → content.toMap
-      }
-
-    content.toMap
   }
 
 }

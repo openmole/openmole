@@ -165,15 +165,11 @@ class Workspace(val location: File) {
   }
 
   def setDefault[T](location: ConfigurationLocation[T])(implicit configurationString: ConfigurationString[T]) = synchronized {
-    if (!preferenceIsSet(location) && !commentedPreferenceSet(location)) {
+    if (!preferenceIsSet(location)) {
       def defaultOrException = location.default.getOrElse(throw new UserBadDataError(s"No default value set for location ${this}."))
       def prop = if (location.cyphered) encrypt(configurationString.toString(defaultOrException)) else configurationString.toString(defaultOrException)
-      configurationFile.addCommentedValue(location.group, location.name, prop)
+      configurationFile.setCommentedValue(location.group, location.name, prop)
     }
-  }
-
-  def removePreference[T](location: ConfigurationLocation[T]) = synchronized {
-    configurationFile.removeValue(location.group, location.name)
   }
 
   def file(name: String): File = new File(location, name)
@@ -229,7 +225,6 @@ class Workspace(val location: File) {
     }
   }
 
-  def commentedPreferenceSet[T](configurationLocation: ConfigurationLocation[T]) = configurationFile.commentedValue(configurationLocation.group, configurationLocation.name).isDefined
   def preferenceIsSet[T](configurationLocation: ConfigurationLocation[T]) = configurationFile.value(configurationLocation.group, configurationLocation.name).isDefined
   def passwordChosen = configurationFile.value(passwordTest.group, passwordTest.name).isDefined
   def passwordHasBeenSet = _password.map(passwordIsCorrect).getOrElse(false)

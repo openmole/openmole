@@ -45,7 +45,7 @@ object Core extends Defaults {
     libraryDependencies ++= Seq(slick, xstream))
 
   val workspace = OsgiProject("workspace", imports = Seq("*")) settings
-    (libraryDependencies ++= Seq(jasypt, xstream, math)) dependsOn
+    (libraryDependencies ++= Seq(jasypt, xstream, math, Libraries.configuration)) dependsOn
     (exception, event, tools, replication, openmoleCrypto)
 
   val macros = OsgiProject("macros", imports = Seq("*")) settings (libraryDependencies += scalaLang % "provided" /*, provided(scalaCompiler)*/ )
