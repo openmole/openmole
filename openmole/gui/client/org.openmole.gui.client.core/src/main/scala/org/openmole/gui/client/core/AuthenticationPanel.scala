@@ -17,7 +17,6 @@ package org.openmole.gui.client.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.core.workspace.{ Workspace, ConfigurationLocation }
 import org.openmole.gui.client
 import org.openmole.gui.ext.dataui.PanelUI
 import org.openmole.gui.shared.Api
@@ -26,7 +25,7 @@ import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import scalatags.JsDom.{ tags ⇒ tags }
 import org.openmole.gui.misc.js.JsRxTags._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
-import org.openmole.gui.misc.utils.{ stylesheet ⇒ omsheet, Utils }
+import org.openmole.gui.misc.utils.{ stylesheet ⇒ omsheet }
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
 import autowire._
 import org.openmole.gui.ext.data._
@@ -39,10 +38,13 @@ class AuthenticationPanel extends ModalPanel {
 
   lazy val modalID = "authenticationsPanelID"
   lazy val setting: Var[Option[PanelUI]] = Var(None)
-  private lazy val auths: Var[Seq[AuthPanelWithID]] = Var(Seq())
+  private lazy val auths: Var[Option[Seq[AuthPanelWithID]]] = Var(None)
+  lazy val initialCheck = Var(false)
 
   def onOpen() = {
-    getAuthentications
+    if (!initialCheck()) {
+      getAuthentications
+    }
   }
 
   def onClose() = {
@@ -51,7 +53,7 @@ class AuthenticationPanel extends ModalPanel {
 
   def getAuthentications = {
     OMPost[Api].authentications.call().foreach { auth ⇒
-      auths() = auth.map { a ⇒ client.core.authentications.panelWithID(a) }
+      auths() = Some(auth.map { a ⇒ client.core.authentications.panelWithID(a) })
       testAuthentications
     }
   }
@@ -68,6 +70,11 @@ class AuthenticationPanel extends ModalPanel {
     case class Reactive(pwID: AuthPanelWithID) {
       val lineHovered: Var[Boolean] = Var(false)
 
+      def toLabel(test: AuthenticationTest) = test.passed match {
+        case true  ⇒ label_success
+        case false ⇒ label_danger
+      }
+
       lazy val render = {
         div(omsheet.docEntry)(
           onmouseover := { () ⇒
@@ -77,24 +84,24 @@ class AuthenticationPanel extends ModalPanel {
             lineHovered() = false
           }
         )(
-            div(colMD(7))(
+            div(colMD(2))(
               tags.a(pwID.data.synthetic, omsheet.docTitleEntry +++ floatLeft +++ omsheet.colorBold("white"), cursor := "pointer", onclick := { () ⇒
                 authenticationSelector.content() = Some(pwID.emptyClone)
                 setting() = Some(pwID.panel)
               })
             ),
-            for {
-              test ← pwID.authenticationTests
-            } yield {
-              test match {
-                case egi: EGIAuthenticationTest ⇒ label(egi.message, label_default +++ omsheet.tableTag)
-                case ssh: SSHAuthenticationTest ⇒ label(ssh.message, {
-                  if (ssh.passed) label_success else label_danger
-                } +++ omsheet.tableTag)
-                case _ ⇒ label("pending", label_warning +++ omsheet.tableTag)
+            div(colMD(8))(
+              for {
+                test ← pwID.authenticationTests
+              } yield {
+                test match {
+                  case egi: EGIAuthenticationTest ⇒ label(egi.message, toLabel(egi) +++ omsheet.tableTag)
+                  case ssh: SSHAuthenticationTest ⇒ label(ssh.message, toLabel(ssh) +++ omsheet.tableTag)
+                  case _                          ⇒ label("pending", label_warning +++ omsheet.tableTag)
+                }
               }
-            },
-            div(colMD(4) +++ sheet.paddingTop(5))(label(pwID.name, label_primary +++ omsheet.tableTag)),
+            ),
+            div(colMD(2) +++ sheet.paddingTop(5))(label(pwID.name, label_primary +++ omsheet.tableTag)),
             span(
               Rx {
                 if (lineHovered()) opaque
@@ -114,8 +121,10 @@ class AuthenticationPanel extends ModalPanel {
             div(sheet.paddingTop(20))(p.view)
           )
           case _ ⇒
-            for (a ← auths()) yield {
-              Seq(Reactive(a).render)
+            auths().map { aux ⇒
+              for (a ← aux) yield {
+                Seq(Reactive(a).render)
+              }
             }
         }
       )
@@ -152,7 +161,9 @@ class AuthenticationPanel extends ModalPanel {
           settingsButton
         ).popup(
           settingsDiv,
-          onclose = () ⇒ OMPost[Api].setConfigurationValue(VOTest, vosToBeTested.value).call(),
+          onclose = () ⇒ OMPost[Api].setConfigurationValue(VOTest, vosToBeTested.value).call().foreach { x ⇒
+          getAuthentications
+        },
           popupStyle = whitePopupWithBorder
         )
       )
@@ -190,12 +201,18 @@ class AuthenticationPanel extends ModalPanel {
   }
 
   def testAuthentications = {
-    for {
-      auth ← auths()
-    } yield {
-      OMPost[Api].testAuthentication(auth.data, vosToBeTested.value.split(",").toSeq).call().foreach { t ⇒
-        auths() = auths().updated(auths().indexOf(auth), auth.copy(authenticationTests = t))
+    auths().foreach { aux ⇒
+      for (a ← aux) yield {
+        OMPost[Api].testAuthentication(a.data, vosToBeTested.value.split(",").toSeq).call().foreach { t ⇒
+          auths() = auths().map {
+            _.updated(auths().map {
+              _.indexOf(a)
+            }.getOrElse(-1), a.copy(authenticationTests = t))
+          }
+          initialCheck() = true
+        }
       }
     }
   }
+
 }
