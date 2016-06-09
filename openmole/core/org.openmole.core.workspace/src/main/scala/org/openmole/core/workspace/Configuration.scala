@@ -24,6 +24,7 @@ import org.openmole.tool.file._
 import org.apache.commons.configuration2._
 import org.apache.commons.configuration2.builder._
 import org.apache.commons.configuration2.builder.fluent._
+import org.openmole.core.tools.io.FromString
 
 import scala.concurrent.duration._
 
@@ -70,26 +71,36 @@ object ConfigurationString {
   implicit def stringConfigurationString: ConfigurationString[String] =
     new ConfigurationString[String] {
       def toString(t: String): String = t
+      def fromString(s: String) = implicitly[FromString[String]].apply(s)
     }
 
   implicit def intConfigurationString: ConfigurationString[Int] =
     new ConfigurationString[Int] {
       override def toString(t: Int): String = t.toString
+      override def fromString(s: String) = implicitly[FromString[Int]].apply(s)
     }
 
   implicit def finiteDurationConfigurationString: ConfigurationString[FiniteDuration] =
     new ConfigurationString[FiniteDuration] {
       override def toString(t: FiniteDuration): String = org.openmole.core.tools.service.stringFromDuration(t)
+      override def fromString(s: String) = implicitly[FromString[FiniteDuration]].apply(s)
     }
 
   implicit def doubleConfigurationString: ConfigurationString[Double] =
     new ConfigurationString[Double] {
       def toString(t: Double): String = t.toString
+      def fromString(s: String) = implicitly[FromString[Double]].apply(s)
     }
+
+  implicit def seqConfiguration[T](implicit cs: ConfigurationString[T]) = new ConfigurationString[Seq[T]] {
+    override def toString(t: Seq[T]): String = t.map(cs.toString).mkString(",")
+    override def fromString(s: String): Seq[T] = s.split(",").map(cs.fromString)
+  }
 
 }
 
-trait ConfigurationString[-T] {
+trait ConfigurationString[T] {
   def toString(t: T): String
+  def fromString(s: String): T
 }
 

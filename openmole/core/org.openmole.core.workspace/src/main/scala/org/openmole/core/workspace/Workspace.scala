@@ -142,15 +142,15 @@ class Workspace(val location: File) {
 
   def newFile(prefix: String = fixedPrefix, suffix: String = fixedPostfix): File = tmpDir.newFile(prefix, suffix)
 
-  def preferenceOption[T](location: ConfigurationLocation[T])(implicit fromString: FromString[T]): Option[T] = synchronized {
+  def preferenceOption[T](location: ConfigurationLocation[T])(implicit fromString: ConfigurationString[T]): Option[T] = synchronized {
     val confVal = configurationFile.value(location.group, location.name)
     def v =
       if (!location.cyphered) confVal
       else confVal.map(decrypt(_, password))
-    v.map(fromString.apply) orElse location.default
+    v.map(fromString.fromString) orElse location.default
   }
 
-  def preference[T: FromString](location: ConfigurationLocation[T]): T = synchronized {
+  def preference[T: ConfigurationString](location: ConfigurationLocation[T]): T = synchronized {
     preferenceOption(location) getOrElse (throw new UserBadDataError(s"No value found for $location and no default is defined for this property."))
   }
 
