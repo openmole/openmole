@@ -93,18 +93,6 @@ object OSGi extends Defaults {
     version := jasyptVersion
     )
 
-  lazy val netlogo4_noscala = OsgiProject("ccl.northwestern.edu.netlogo4.noscala", exports = Seq("org.nlogo.*"),
-    privatePackages = Seq("!scala.*", "**")) settings
-    (libraryDependencies ++=
-      Seq("ccl.northwestern.edu" % "netlogo" % "4.1.3",
-        "org.picocontainer" % "picocontainer" % "2.8",
-        "org.objectweb" % "asm" % "3.1",
-        "org.objectweb" % "asm-commons" % "3.1"), version := "4.1.3", autoScalaLibrary := false, bundleType := Set("all"), scalaVersion := "2.8.0", crossPaths := false,
-      ivyScala ~= { (is: Option[IvyScala]) ⇒ //should disable the binary compat warnings this causes
-        for (i ← is) yield i.copy(checkExplicit = false)
-      })
-
-
   lazy val netlogo4 = OsgiProject("ccl.northwestern.edu.netlogo4", exports = Seq("org.nlogo.*"),
     privatePackages = Seq("**")) settings
     (libraryDependencies ++=
@@ -114,15 +102,6 @@ object OSGi extends Defaults {
         "org.objectweb" % "asm-commons" % "3.1"), version := "4.1.3", scalaVersion := "2.8.0", crossPaths := false, bundleType := Set("plugin"))
 
   lazy val netLogo5Version = "5.3.1"
-  lazy val netlogo5_noscala = OsgiProject("ccl.northwestern.edu.netlogo5.noscala", exports = Seq("org.nlogo.*"),
-    privatePackages = Seq("!scala.*", "**")) settings
-    (libraryDependencies ++=
-      Seq("ccl.northwestern.edu" % "netlogo" % netLogo5Version % "provided" from s"https://github.com/NetLogo/NetLogo/releases/download/$netLogo5Version/NetLogo.jar",
-        "org.objectweb" % "asm-all" % "3.3.1" % "provided",
-        "org.picocontainer" % "picocontainer" % "2.13.6" % "provided"), version := netLogo5Version, autoScalaLibrary := false, bundleType := Set("all"), scalaVersion := "2.9.2", crossPaths := false,
-      ivyScala ~= { (is: Option[IvyScala]) ⇒ //See netlogo4_noscala
-        for (i ← is) yield i.copy(checkExplicit = false)
-      })
 
   lazy val netlogo5 = OsgiProject("ccl.northwestern.edu.netlogo5", exports = Seq("org.nlogo.*"),
     privatePackages = Seq("**")) settings

@@ -78,13 +78,10 @@ object Libraries extends Defaults {
 
   lazy val jasypt = "org.openmole" %% "org-jasypt-encryption" % "1.9.2"
 
-  lazy val netlogo4_noscala = "org.openmole" % "ccl-northwestern-edu-netlogo4-noscala" % "4.1.3"
-
   lazy val netlogo4 = "org.openmole" % "ccl-northwestern-edu-netlogo4" % "4.1.3"
 
   lazy val netLogo5Version = "5.3.1"
   lazy val netlogo5 = "org.openmole" % "ccl-northwestern-edu-netlogo5" % netLogo5Version
-  lazy val netlogo5_noscala = "org.openmole" % "ccl-northwestern-edu-netlogo5-noscala" % netLogo5Version
 
   lazy val guava = "org.openmole" %% "com-google-guava" % "18.0"
 
