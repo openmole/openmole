@@ -71,7 +71,9 @@ object ApiImpl extends Api {
 
   def testAuthentication(data: AuthenticationData, vos: Seq[String] = Seq()): Seq[AuthenticationTest] =
     data match {
-      case d: EGIP12AuthenticationData         ⇒ AuthenticationFactories.testEGIAuthentication(d, vos)
+      case d: EGIP12AuthenticationData ⇒
+        if (vos.isEmpty) Seq(EGIAuthenticationTest("empty VO", AuthenticationTest.empty, AuthenticationTest.empty, AuthenticationTest.empty))
+        else AuthenticationFactories.testEGIAuthentication(d, vos)
       case lp: LoginPasswordAuthenticationData ⇒ AuthenticationFactories.testLoginPasswordSSHAuthentication(lp)
       case pk: PrivateKeyAuthenticationData    ⇒ AuthenticationFactories.testPrivateKeySSHAuthentication(pk)
       case _                                   ⇒ Seq(AuthenticationTestBase(false, Error("Cannot test this authentication")))
@@ -394,14 +396,13 @@ object ApiImpl extends Api {
   }
 
   //PLUGINS
-  def addPlugins(nodes: Seq[String]): Seq[Error] = nodes.flatMap { n ⇒
-    addPlugin(n)
-  }
-
-  def addPlugin(name: String): Seq[Error] = {
-    addPlugins(PluginManager.listBundles(Workspace.pluginDir / name)).map {
-      case (file, e) ⇒ ErrorBuilder(e)
-    }
+  def addPlugins(nodes: Seq[String]): Seq[Error] = {
+    println("ADD  " + nodes)
+    PluginManager.tryLoad(nodes.map { n ⇒ new File(Workspace.pluginDir, n) }).map {
+      case (file, e) ⇒
+        println("EE " + e.getMessage)
+        ErrorBuilder(e)
+    }.toSeq
   }
 
   def autoAddPlugins(path: SafePath) = {
