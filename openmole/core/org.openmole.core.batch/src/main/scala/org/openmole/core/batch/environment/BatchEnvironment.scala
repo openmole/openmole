@@ -114,6 +114,8 @@ object BatchEnvironment extends Logger {
   val StoragesGCUpdateInterval = ConfigurationLocation("BatchEnvironment", "StoragesGCUpdateInterval", Some(1 hour))
   val RuntimeMemoryMargin = ConfigurationLocation("BatchEnvironment", "RuntimeMemoryMargin", Some(400))
 
+  val downloadResultRetry = ConfigurationLocation("BatchEnvironment", "DownloadResultRetry", Some(3))
+
   Workspace setDefault MinUpdateInterval
   Workspace setDefault MaxUpdateInterval
   Workspace setDefault IncrementUpdateInterval
