@@ -214,6 +214,10 @@ case class EGIP12AuthenticationData(
   def synthetic = "egi.p12"
 }
 
+object AuthenticationTest {
+  def empty = AuthenticationTestBase(false, Error(""))
+}
+
 sealed trait AuthenticationTest {
   def passed: Boolean
 
