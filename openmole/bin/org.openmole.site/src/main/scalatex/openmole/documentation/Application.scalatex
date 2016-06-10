@@ -9,7 +9,7 @@
   @img(src := Resource.uiScreenshot.file, `class` := "uiScreenshot").
 
 @sect{Remote Editor}
-  To run OpenMOLE on a remote machine and connect to using a web browser you should run: @hl.highlight("openmole --webui-authentication --port portnumber", "plain"). The first time you launch it, it asks you for a password. Then you can remotely connect to OpenMOLE using the url https://remotemachine:portnumber - @b("https:// is important"). When you connect it asks you for the password you've entered previously.
+  To run OpenMOLE on a remote machine and connect to using a web browser you should run: @hl.highlight("openmole --remote --port portnumber", "plain"). The first time you launch it, it asks you for a password. Then you can remotely connect to OpenMOLE using the url https://remotemachine:portnumber - @b("https:// is important"). When you connect it asks you for the password you've entered previously.
 
 @sect{Headless mode}
   OpenMOLE proposes a headless mode for running scripts. You can enable it thanks to the -s option: @hl.highlight("./openmole -s /path/to/you/mole/script", "plain")
@@ -23,5 +23,5 @@
   @p Using the ex and the env variables you can follow the progress of the execution by using the commands: print(ex) and print(env). To cancel the execution you should use: ex.cancel.
 
 @sect{Launching parameter}
-  OpenMOLE proposes several launching options. Execute openmole -h to list all the available options.
+  OpenMOLE proposes several launching options. Execute @hl.highlight("openmole -h to") list all the available options.
 
