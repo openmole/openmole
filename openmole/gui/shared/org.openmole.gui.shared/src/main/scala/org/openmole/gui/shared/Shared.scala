@@ -76,7 +76,6 @@ trait Api {
 
   //PLUGINS
   def addPlugins(nodes: Seq[String]): Seq[Error]
-  def addPlugin(pluginName: String): Seq[Error]
   def autoAddPlugins(path: SafePath): Unit
   def isPlugin(path: SafePath): Boolean
   def allPluggableIn(path: SafePath): Seq[TreeNodeData]
