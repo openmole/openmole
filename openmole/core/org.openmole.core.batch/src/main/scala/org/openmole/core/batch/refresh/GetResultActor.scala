@@ -36,6 +36,7 @@ import org.openmole.core.batch.environment.BatchEnvironment._
 import org.openmole.core.workspace.Workspace
 import org.openmole.tool.logger.Logger
 import util.{ Failure, Success }
+import org.openmole.core.tools.service.Retry._
 
 object GetResultActor extends Logger
 
@@ -88,7 +89,10 @@ class GetResultActor(jobManager: JobManager) {
   }
 
   private def getRuntimeResult(outputFilePath: String, storage: StorageService)(implicit token: AccessToken): RuntimeResult = Workspace.withTmpFile { resultFile ⇒
-    signalDownload(storage.download(outputFilePath, resultFile), outputFilePath, storage, resultFile)
+    retry(
+      signalDownload(storage.download(outputFilePath, resultFile), outputFilePath, storage, resultFile),
+      Workspace.preference(BatchEnvironment.downloadResultRetry)
+    )
     SerialiserService.deserialiseAndExtractFiles[RuntimeResult](resultFile)
   }
 
@@ -106,7 +110,13 @@ class GetResultActor(jobManager: JobManager) {
           val fileReplacement =
             serializedResults.files.map {
               replicated ⇒
-                replicated.originalPath → replicated.download((p, f) ⇒ signalDownload(storage.download(p, f, TransferOptions(forceCopy = true, canMove = true)), p, storage, f))
+                replicated.originalPath →
+                  replicated.download { (p, f) ⇒
+                    retry(
+                      signalDownload(storage.download(p, f, TransferOptions(forceCopy = true, canMove = true)), p, storage, f),
+                      Workspace.preference(BatchEnvironment.downloadResultRetry)
+                    )
+                  }
             }.toMap
 
           val res = SerialiserService.deserialiseReplaceFiles[ContextResults](serializedResults.contextResults, fileReplacement)
