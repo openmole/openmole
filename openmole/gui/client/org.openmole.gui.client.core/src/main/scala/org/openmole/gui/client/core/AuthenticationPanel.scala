@@ -76,7 +76,7 @@ class AuthenticationPanel extends ModalPanel {
       }
 
       lazy val render = {
-        div(omsheet.docEntry)(
+        tr(omsheet.docEntry +++ (lineHeight := "35px"))(
           onmouseover := { () ⇒
             lineHovered() = true
           },
@@ -84,25 +84,25 @@ class AuthenticationPanel extends ModalPanel {
             lineHovered() = false
           }
         )(
-            div(colMD(2))(
+            td(colMD(2))(
               tags.a(pwID.data.synthetic, omsheet.docTitleEntry +++ floatLeft +++ omsheet.colorBold("white"), cursor := "pointer", onclick := { () ⇒
                 authenticationSelector.content() = Some(pwID.emptyClone)
                 setting() = Some(pwID.panel)
               })
             ),
-            div(colMD(8))(
+            td(colMD(8))(
               for {
                 test ← pwID.authenticationTests
               } yield {
                 test match {
-                  case egi: EGIAuthenticationTest ⇒ label(egi.message, toLabel(egi) +++ omsheet.tableTag)
-                  case ssh: SSHAuthenticationTest ⇒ label(ssh.message, toLabel(ssh) +++ omsheet.tableTag)
-                  case _                          ⇒ label("pending", label_warning +++ omsheet.tableTag)
+                  case egi: EGIAuthenticationTest ⇒ label(egi.message, toLabel(egi))
+                  case ssh: SSHAuthenticationTest ⇒ label(ssh.message, toLabel(ssh))
+                  case _                          ⇒ label("pending", label_warning)
                 }
               }
             ),
-            div(colMD(2) +++ sheet.paddingTop(5))(label(pwID.name, label_primary +++ omsheet.tableTag)),
-            span(
+            td(colMD(2) +++ sheet.paddingTop(5))(label(pwID.name, label_primary)),
+            td(
               Rx {
                 if (lineHovered()) opaque
                 else transparent
@@ -121,11 +121,13 @@ class AuthenticationPanel extends ModalPanel {
             div(sheet.paddingTop(20))(p.view)
           )
           case _ ⇒
-            auths().map { aux ⇒
-              for (a ← aux) yield {
-                Seq(Reactive(a).render)
+            tags.table(
+              auths().map { aux ⇒
+                for (a ← aux) yield {
+                  Seq(Reactive(a).render)
+                }
               }
-            }
+            )
         }
       )
     }
