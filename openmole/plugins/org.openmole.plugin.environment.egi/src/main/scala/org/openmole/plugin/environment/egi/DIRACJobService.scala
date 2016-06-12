@@ -77,15 +77,15 @@ trait DIRACJobService extends GridScaleJobService { js ⇒
 
       Resource.fromFile(script).write(jobScript(serializedJob, outputFilePath, None, None))
 
-      val jobDescription = new GSDIRACJobDescription {
-        override def stdOut = if (environment.debug) Some("out") else None
-        override def stdErr = if (environment.debug) Some("err") else None
-        override def outputSandbox = if (environment.debug) Seq("out" → Workspace.newFile("job", ".out"), "err" → Workspace.newFile("job", ".err")) else Seq.empty
-        override def inputSandbox = Seq(script)
-        def arguments = script.getName
-        def executable = "/bin/bash"
-        override val cpuTime = environment.cpuTime
-      }
+      val jobDescription = GSDIRACJobDescription(
+        stdOut = if (environment.debug) Some("out") else None,
+        stdErr = if (environment.debug) Some("err") else None,
+        outputSandbox = if (environment.debug) Seq("out" → Workspace.newFile("job", ".out"), "err" → Workspace.newFile("job", ".err")) else Seq.empty,
+        inputSandbox = Seq(script),
+        arguments = script.getName,
+        executable = "/bin/bash",
+        cpuTime = environment.cpuTime
+      )
 
       val jid = jobService.submit(jobDescription)
       Log.logger.fine(s"""DIRAC job [${jid}], description: \n${jobDescription}""")

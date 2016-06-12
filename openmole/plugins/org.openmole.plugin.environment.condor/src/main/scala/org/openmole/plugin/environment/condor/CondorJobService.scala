@@ -50,20 +50,20 @@ trait CondorJobService extends GridScaleJobService with SSHHost with SharedStora
 
   protected def _submit(serializedJob: SerializedJob) = {
     val (remoteScript, result) = buildScript(serializedJob)
-    val jobDescription = new CondorJobDescription {
-      val executable = "/bin/bash"
-      val arguments = remoteScript
+    val jobDescription = CondorJobDescription(
+      executable = "/bin/bash",
+      arguments = remoteScript,
       // TODO not available in GridScale plugin yet
       //override val queue = environment.queue
-      val workDirectory = serializedJob.path
+      workDirectory = serializedJob.path,
       // TODO not available in GridScale plugin yet
       //override val wallTime = environment.wallTime
-      override val memory = Some(environment.requiredMemory)
-      override val nodes = environment.nodes
+      memory = Some(environment.requiredMemory),
+      nodes = environment.nodes,
       // TODO typo in coreByNode in GridScale -> should be coresByNode
-      override val coreByNode = environment.coresByNode orElse environment.threads
-      override val requirements = environment.requirements
-    }
+      coreByNode = environment.coresByNode orElse environment.threads,
+      requirements = environment.requirements
+    )
 
     val jid = js.jobService.submit(jobDescription)
     Log.logger.fine(s"Condor job [${jid.condorId}], description: \n ${jobDescription.toCondor}")

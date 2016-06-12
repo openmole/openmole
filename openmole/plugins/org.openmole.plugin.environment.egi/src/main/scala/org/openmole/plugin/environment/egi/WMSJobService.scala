@@ -92,27 +92,25 @@ trait WMSJobService extends GridScaleJobService { js ⇒
   }
 
   protected def buildJobDescription(script: File, proxy: Option[File] = None) =
-    new WMSJobDescription {
-      val executable = "/bin/bash"
-      val arguments = (if (environment.debug) " -x " else "") + script.getName
-      val inputSandbox = List(script) ++ proxy
-      override def stdOutput = if (environment.debug) "out" else ""
-      override def stdError = if (environment.debug) "err" else ""
-      def outputSandbox = if (environment.debug) Seq("out" → Workspace.newFile("job", ".out"), "err" → Workspace.newFile("job", ".err")) else Seq.empty
-
-      override val memory = Some(environment.requiredMemory)
-      override val cpuTime = environment.cpuTime
-      override val wallTime = environment.wallTime
-      override val cpuNumber = environment.cpuNumber orElse environment.threads
-      override val jobType = environment.jobType
-      override val smpGranularity = environment.smpGranularity orElse environment.threads
-      override val retryCount = Some(0)
-      override val shallowRetryCount = Some(Workspace.preference(EGIEnvironment.ShallowWMSRetryCount))
-      override val myProxyServer = environment.myProxy.map(_.url)
-      override val architecture = environment.architecture
-      override val fuzzy = true
-      override val requirements =
-        environment.requirements.map(super.requirements + " && (" + _ + ")").getOrElse(super.requirements)
-      override val rank = Workspace.preference(EGIEnvironment.WMSRank)
-    }
+    WMSJobDescription(
+      executable = "/bin/bash",
+      arguments = (if (environment.debug) " -x " else "") + script.getName,
+      inputSandbox = List(script) ++ proxy,
+      stdOutput = if (environment.debug) Some("out") else None,
+      stdError = if (environment.debug) Some("err") else None,
+      outputSandbox = if (environment.debug) Seq("out" → Workspace.newFile("job", ".out"), "err" → Workspace.newFile("job", ".err")) else Seq.empty,
+      memory = Some(environment.requiredMemory),
+      cpuTime = environment.cpuTime,
+      wallTime = environment.wallTime,
+      cpuNumber = environment.cpuNumber orElse environment.threads,
+      jobType = environment.jobType,
+      smpGranularity = environment.smpGranularity orElse environment.threads,
+      retryCount = Some(0),
+      shallowRetryCount = Some(Workspace.preference(EGIEnvironment.ShallowWMSRetryCount)),
+      myProxyServer = environment.myProxy.map(_.url),
+      architecture = environment.architecture,
+      fuzzy = true,
+      rank = Workspace.preference(EGIEnvironment.WMSRank),
+      extraRequirements = environment.requirements
+    )
 }

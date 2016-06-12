@@ -54,11 +54,11 @@ trait SSHJobService extends GridScaleJobService with SharedStorage { js ⇒
   protected def _submit(serializedJob: SerializedJob) = {
     val (remoteScript, result) = buildScript(serializedJob)
 
-    val _jobDescription = new SSHJobDescription {
-      val executable = "/bin/bash"
-      val arguments = remoteScript
-      val workDirectory = sharedFS.root
-    }
+    val _jobDescription = SSHJobDescription(
+      executable = "/bin/bash",
+      arguments = remoteScript,
+      workDirectory = sharedFS.root
+    )
 
     val sshBatchJob = new SSHBatchJob {
       val jobService = js

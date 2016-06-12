@@ -49,19 +49,19 @@ trait SLURMJobService extends ClusterJobService { js ⇒
 
   protected def _submit(serializedJob: SerializedJob) = {
     val (remoteScript, result) = buildScript(serializedJob)
-    val jobDescription = new SLURMJobDescription {
-      val executable = "/bin/bash"
-      val arguments = remoteScript
-      override val queue = environment.queue
-      val workDirectory = serializedJob.path
-      override val wallTime = environment.wallTime
-      override val memory = Some(environment.requiredMemory)
-      override val nodes = environment.nodes
-      override val coresByNode = environment.coresByNode orElse environment.threads
-      override val qos = environment.qos
-      override val gres = environment.gres.toList
-      override val constraints = environment.constraints.toList
-    }
+    val jobDescription = SLURMJobDescription(
+      executable = "/bin/bash",
+      arguments = remoteScript,
+      queue = environment.queue,
+      workDirectory = serializedJob.path,
+      wallTime = environment.wallTime,
+      memory = Some(environment.requiredMemory),
+      nodes = environment.nodes,
+      coresByNode = environment.coresByNode orElse environment.threads,
+      qos = environment.qos,
+      gres = environment.gres.toList,
+      constraints = environment.constraints.toList
+    )
 
     val job = js.jobService.submit(jobDescription)
     Log.logger.fine(s"SLURM job [${job.slurmId}], description: \n ${jobDescription.toSLURM}")

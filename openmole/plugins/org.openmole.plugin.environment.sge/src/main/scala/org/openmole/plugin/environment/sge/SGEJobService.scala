@@ -49,14 +49,14 @@ trait SGEJobService extends ClusterJobService with SSHHost with SharedStorage { 
 
   protected def _submit(serializedJob: SerializedJob) = {
     val (remoteScript, result) = buildScript(serializedJob)
-    val jobDescription = new SGEJobDescription {
-      val executable = "/bin/bash"
-      val arguments = remoteScript
-      override val queue = environment.queue
-      val workDirectory = serializedJob.path
-      override val wallTime = environment.wallTime
-      override val memory = Some(environment.requiredMemory)
-    }
+    val jobDescription = SGEJobDescription(
+      executable = "/bin/bash",
+      arguments = remoteScript,
+      queue = environment.queue,
+      workDirectory = serializedJob.path,
+      wallTime = environment.wallTime,
+      memory = Some(environment.requiredMemory)
+    )
 
     val jid = js.jobService.submit(jobDescription)
     Log.logger.fine(s"SGE job [${jid.sgeId}], description: \n ${jobDescription.toSGE}")
