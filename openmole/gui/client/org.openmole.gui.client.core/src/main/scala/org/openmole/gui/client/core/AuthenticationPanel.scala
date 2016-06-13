@@ -70,10 +70,21 @@ class AuthenticationPanel extends ModalPanel {
     case class Reactive(pwID: AuthPanelWithID) {
       val lineHovered: Var[Boolean] = Var(false)
 
-      def toLabel(test: AuthenticationTest) = test.passed match {
-        case true  ⇒ label_success
-        case false ⇒ label_danger
-      }
+      def toLabel(message: String, test: AuthenticationTest) =
+        label(
+          message,
+          scalatags.JsDom.all.marginLeft := 10,
+          test.passed match {
+            case true  ⇒ label_success
+            case false ⇒ label_danger
+          },
+          onclick := { () ⇒
+            if (!test.passed) {
+              panels.environmentStackPanel.content() = test.errorStack.stackTrace
+              panels.environmentStackTriggerer.open
+            }
+          }
+        )
 
       lazy val render = {
         tr(omsheet.docEntry +++ (lineHeight := "35px"))(
@@ -90,18 +101,18 @@ class AuthenticationPanel extends ModalPanel {
                 setting() = Some(pwID.panel)
               })
             ),
-            td(colMD(8))(
+            td(colMD(6) +++ sheet.paddingTop(5))(label(pwID.name, label_primary)),
+            td(colMD(2))(
               for {
                 test ← pwID.authenticationTests
               } yield {
                 test match {
-                  case egi: EGIAuthenticationTest ⇒ label(egi.message, toLabel(egi))
-                  case ssh: SSHAuthenticationTest ⇒ label(ssh.message, toLabel(ssh))
+                  case egi: EGIAuthenticationTest ⇒ toLabel(egi.message, egi)
+                  case ssh: SSHAuthenticationTest ⇒ toLabel(ssh.message, ssh)
                   case _                          ⇒ label("pending", label_warning)
                 }
               }
             ),
-            td(colMD(2) +++ sheet.paddingTop(5))(label(pwID.name, label_primary)),
             td(
               Rx {
                 if (lineHovered()) opaque
