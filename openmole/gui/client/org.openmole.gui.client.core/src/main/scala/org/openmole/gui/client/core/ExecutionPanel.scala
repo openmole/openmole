@@ -42,6 +42,7 @@ import rx._
 import concurrent.duration._
 
 class ExecutionPanel extends ModalPanel {
+  implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
   lazy val modalID = "executionsPanelID"
 
   case class PanelInfo(
@@ -89,12 +90,12 @@ class ExecutionPanel extends ModalPanel {
   def onClose() = {}
 
   def doScrolls = {
-    Seq(outputTextAreas(), scriptTextAreas(), errorTextAreas()).map {
+    Seq(outputTextAreas.now, scriptTextAreas.now, errorTextAreas.now).map {
       _.values.foreach {
         _.doScroll
       }
     }
-    envErrorPanels().values.foreach {
+    envErrorPanels.now.values.foreach {
       _.scrollable.doScroll
     }
   }
@@ -113,14 +114,14 @@ class ExecutionPanel extends ModalPanel {
   val envErrorPanels: Var[Map[EnvironmentId, EnvironmentErrorPanel]] = Var(Map())
 
   def staticPanel[T, I <: ID](id: I, panelMap: Var[Map[I, T]], builder: () ⇒ T, appender: T ⇒ Unit = (t: T) ⇒ {}): T = {
-    if (panelMap().isDefinedAt(id)) {
-      val t = panelMap()(id)
+    if (panelMap.now.isDefinedAt(id)) {
+      val t = panelMap.now(id)
       appender(t)
       t
     }
     else {
       val toBeAdded = builder()
-      panelMap() = panelMap() + (id → toBeAdded)
+      panelMap() = panelMap.now + (id → toBeAdded)
       toBeAdded
     }
   }
@@ -149,7 +150,7 @@ class ExecutionPanel extends ModalPanel {
       Rx {
         tbody({
           for {
-            (id, executionInfo) ← execInfo().executionInfos.sortBy { case (execId, _) ⇒ staticInfo()(execId).startDate }.reverse
+            (id, executionInfo) ← execInfo().executionInfos.sortBy { case (execId, _) ⇒ staticInfo.now(execId).startDate }.reverse
           } yield {
 
             val duration: Duration = (executionInfo.duration milliseconds)
@@ -169,7 +170,7 @@ class ExecutionPanel extends ModalPanel {
               case r: Ready    ⇒ ExecutionDetails("0", 0)
             }
 
-            val scriptLink = expander.getLink(staticInfo()(id).path.name, id.id, scriptID)
+            val scriptLink = expander.getLink(staticInfo.now(id).path.name, id.id, scriptID)
             val envLink = expander.getGlyph(glyph_stats, "Env", id.id, envID)
             val stateLink = executionInfo match {
               case f: Failed ⇒ expander.getLink(executionInfo.state, id.id, errorID).render
@@ -177,9 +178,9 @@ class ExecutionPanel extends ModalPanel {
             }
             val outputLink = expander.getGlyph(glyph_list, "", id.id, outputStreamID, () ⇒ doScrolls)
 
-            lazy val hiddenMap: Map[VisibleID, Modifier] = Map(
+            val hiddenMap: Map[VisibleID, Modifier] = Map(
               scriptID → staticPanel(id, scriptTextAreas,
-                () ⇒ scrollableText(staticInfo()(id).script)).view,
+                () ⇒ scrollableText(staticInfo.now(id).script)).view,
               envID → {
                 details.envStates.map { e ⇒
                   tags.table(sheet.table)(
@@ -252,7 +253,7 @@ class ExecutionPanel extends ModalPanel {
             Seq(
               tr(row +++ omsheet.executionTable, colspan := 12)(
                 td(colMD(2))(visibleClass(id.id, scriptID))(scriptLink),
-                td(colMD(2))(div(Utils.longToDate(staticInfo()(id).startDate))),
+                td(colMD(2))(div(Utils.longToDate(staticInfo.now(id).startDate))),
                 td(colMD(2))(glyphAndText(glyph_flash, details.running.toString)),
                 td(colMD(2))(glyphAndText(glyph_flag, details.ratio.toString)),
                 td(colMD(1))(div(durationString)),
@@ -260,14 +261,10 @@ class ExecutionPanel extends ModalPanel {
                 td(colMD(1))(visibleClass(id.id, envID))(envLink),
                 td(colMD(1))(visibleClass(id.id, outputStreamID))(outputLink),
                 td(colMD(1))(tags.span(glyph_remove +++ ms("removeExecution"), onclick := { () ⇒
-                  OMPost[Api].cancelExecution(id).call().foreach { r ⇒
-                    updateExecutionInfo
-                  }
+                  cancelExecution(id)
                 })),
                 td(colMD(1))(tags.span(glyph_trash +++ ms("removeExecution"), onclick := { () ⇒
-                  OMPost[Api].removeExecution(id).call().foreach { r ⇒
-                    updateExecutionInfo
-                  }
+                  removeExecution(id)
                 }))
               ),
               tr(row)(
@@ -283,9 +280,19 @@ class ExecutionPanel extends ModalPanel {
     ).render
   }
 
+  def cancelExecution(id: ExecutionId) =
+    OMPost[Api].cancelExecution(id).call().foreach { r ⇒
+      updateExecutionInfo
+    }
+
+  def removeExecution(id: ExecutionId) =
+    OMPost[Api].removeExecution(id).call().foreach { r ⇒
+      updateExecutionInfo
+    }
+
   def updateEnvErrors(environmentId: EnvironmentId, reset: Boolean) = {
     OMPost[Api].runningErrorEnvironmentData(environmentId, envErrorHistory.value.toInt, reset).call().foreach { err ⇒
-      envError() = envError() + (environmentId → err)
+      envError() = envError.now + (environmentId → err)
     }
   }
 

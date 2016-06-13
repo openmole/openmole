@@ -29,6 +29,7 @@ import org.scalajs.dom.{ Element }
  */
 object JsRxTags {
 
+  implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
   /**
    * Wraps reactive strings in spans, so they can be referenced/replaced
    * when the Rx changes.
@@ -53,7 +54,7 @@ object JsRxTags {
       case Failure(e) ⇒ span(e.toString, backgroundColor := "red").render
     }
     var last = rSafe
-    Obs(r, skipInitial = true) {
+    r.triggerLater {
       val newLast = rSafe
       last.parentNode.replaceChild(newLast, last)
       last = newLast
@@ -70,7 +71,7 @@ object JsRxTags {
       case Failure(e) ⇒ span(e.toString, backgroundColor := "red").render
     }
     var last = rSafe
-    Obs(r, skipInitial = true) {
+    r.triggerLater {
       val newLast = rSafe
       last.parentNode.replaceChild(newLast, last)
       last = newLast
@@ -78,17 +79,17 @@ object JsRxTags {
     last
   }
 
-  implicit def RxAttrValue[T: scalatags.JsDom.AttrValue] = new scalatags.JsDom.AttrValue[Rx[T]] {
+  implicit def RxAttrValue[T: scalatags.JsDom.AttrValue](implicit data: Ctx.Data) = new scalatags.JsDom.AttrValue[Rx[T]] {
     def apply(t: Element, a: Attr, r: Rx[T]): Unit = {
-      Obs(r) {
+      r.trigger {
         implicitly[scalatags.JsDom.AttrValue[T]].apply(t, a, r())
       }
     }
   }
 
-  implicit def RxStyleValue[T: scalatags.JsDom.StyleValue] = new scalatags.JsDom.StyleValue[Rx[T]] {
+  implicit def RxStyleValue[T: scalatags.JsDom.StyleValue](implicit data: Ctx.Data) = new scalatags.JsDom.StyleValue[Rx[T]] {
     def apply(t: Element, s: Style, r: Rx[T]): Unit = {
-      Obs(r) {
+      r.trigger {
         implicitly[scalatags.JsDom.StyleValue[T]].apply(t, s, r())
       }
     }

@@ -17,6 +17,7 @@ package org.openmole.gui.client.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import fr.iscpif.scaladget.api.Select.SelectElement
 import org.openmole.gui.client.core.alert.AlertPanel
 import org.openmole.gui.client.core.files._
 import org.openmole.gui.ext.data._
@@ -34,6 +35,7 @@ import scalatags.JsDom.{ TypedTag, tags ⇒ tags }
 import scalatags.JsDom.all._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import fr.iscpif.scaladget.api.Select
+import fr.iscpif.scaladget.api.Select._
 import Waiter._
 import org.openmole.gui.ext.data.DataUtils._
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
@@ -42,6 +44,7 @@ import sheet._
 import bs._
 
 class ModelWizardPanel extends ModalPanel {
+  implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
   lazy val modalID = "modelWizardPanelID"
 
   def onOpen() = {}
@@ -100,29 +103,29 @@ class ModelWizardPanel extends ModalPanel {
 
   val modelSelector: Select[SafePath] = Seq[SafePath]().select(
     None, SafePath.naming, btn_default, () ⇒ {
-    fileToUploadPath() = modelSelector.content()
+    fileToUploadPath() = modelSelector.content.now
     onModelChange
   }
   )
 
   val methodSelector: Select[JarMethod] = Seq[JarMethod]().select(
     None, (jm: JarMethod) ⇒ jm.name, btn_default, () ⇒ {
-    methodSelector.content().foreach {
-      setJavaLaunchingCommand(_)
+    methodSelector.content.now.foreach { s ⇒
+      setJavaLaunchingCommand(s.value)
     }
   }
   )
 
   val classSelector: Select[FullClass] = Seq[FullClass]().select(
     None, (fc: FullClass) ⇒ fc.name, btn_default, () ⇒ {
-    classSelector.content().foreach {
-      setMethodSelector(_)
+    classSelector.content.now.foreach { c ⇒
+      setMethodSelector(c.value)
     }
   }
   )
 
   def onModelChange = {
-    fileToUploadPath().foreach {
+    fileToUploadPath.now.foreach {
       m ⇒
         val fileType: FileType = m
         fileType match {
@@ -135,7 +138,7 @@ class ModelWizardPanel extends ModalPanel {
   }
 
   def setMethodSelector(classContent: FullClass) = {
-    fileToUploadPath().map {
+    fileToUploadPath.now.map {
       fn ⇒
         OMPost[Api].methods(fn, classContent.name).call().foreach {
           b ⇒
@@ -147,7 +150,7 @@ class ModelWizardPanel extends ModalPanel {
     }
   }
 
-  def setScritpName = scriptNameInput.value = filePath().map {
+  def setScritpName = scriptNameInput.value = filePath.now.map {
     _.name.split('.').head
   }.getOrElse("model")
 
@@ -161,35 +164,35 @@ class ModelWizardPanel extends ModalPanel {
   }
 
   val commandArea: TextArea = textArea(3).render
-  val autoModeCheckBox = checkbox(autoMode())(onchange := {
+  val autoModeCheckBox = checkbox(autoMode.now)(onchange := {
     () ⇒
-      autoMode() = !autoMode()
+      autoMode() = !autoMode.now
   })
 
   val scriptNameInput = bs.input()(modelNameInput, placeholder := "Script name").render
   val languages: Seq[Language] = Seq(Binary(), JavaLikeLanguage(), PythonLanguage(), NetLogoLanguage(), RLanguage())
   val codeSelector: Select[Language] = languages.select(Some(Binary()), (l: Language) ⇒ l.name, btn_default)
 
-  Obs(launchingCommand, skipInitial = true) {
-    if (autoMode()) {
-      commandArea.value = launchingCommand().map {
+  launchingCommand.triggerLater {
+    if (autoMode.now) {
+      commandArea.value = launchingCommand.now.map {
         _.fullCommand
       }.getOrElse("")
     }
   }
 
-  Obs(currentReactives, skipInitial = true) {
-    if (updatableTable()) setBodyContent
+  currentReactives.triggerLater {
+    if (updatableTable.now) setBodyContent
   }
 
   def buttonStyle(i: Int): ModifierSeq = {
-    if (i == currentTab()) btn_primary
+    if (i == currentTab.now) btn_primary
     else btn_default
   } +++ sheet.marginRight(20)
 
-  def nbInputs = inputs(currentReactives()).size
+  def nbInputs = inputs(currentReactives.now).size
 
-  def nbOutputs = currentReactives().size - nbInputs
+  def nbOutputs = currentReactives.now.size - nbInputs
 
   def inputs(reactives: Seq[Reactive]): Seq[VariableRole[VariableElement]] = {
     reactives.map {
@@ -208,7 +211,7 @@ class ModelWizardPanel extends ModalPanel {
       case x: CommandOutput[VariableElement] ⇒ x
     }
 
-  def getReactive(index: Int): Option[Reactive] = currentReactives().filter {
+  def getReactive(index: Int): Option[Reactive] = currentReactives.now.filter {
     _.index == index
   }.headOption
 
@@ -227,20 +230,20 @@ class ModelWizardPanel extends ModalPanel {
                     resources() = Resources.empty
                     val fileName = fInput.files.item(0).name
                     labelName() = Some(fileName)
-                    filePath() = Some(manager.current.safePath() ++ fileName)
-                    filePath().map {
+                    filePath() = Some(manager.current.now.safePath.now ++ fileName)
+                    filePath.now.map {
                       fp ⇒
                         moveFilesAndBuildForm(fInput, fileName, fp)
                     }
                   }
-                }), labelName() match {
+                }), labelName.now match {
                   case Some(s: String) ⇒ s
                   case _               ⇒ "Your Model"
                 }
               )
           }
         ), {
-          fileToUploadPath().map {
+          fileToUploadPath.now.map {
             _ ⇒ span(grey +++ floatRight)(codeSelector.selector)
           }.getOrElse(tags.div())
         }
@@ -249,9 +252,13 @@ class ModelWizardPanel extends ModalPanel {
           if (modelSelector.isContentsEmpty) div() else modelSelector.selector,
           if (classSelector.isContentsEmpty) div() else classSelector.selectorWithFilter,
           if (methodSelector.isContentsEmpty) div() else methodSelector.selectorWithFilter,
-          codeSelector.content() match {
-            case Some(NetLogoLanguage()) ⇒ div("If your Netlogo sript depends on plugins, you should upload an archive (tar.gz, tgz) containing the root workspace.")
-            case _                       ⇒ div()
+          codeSelector.content.now.value match {
+            case Some(se: SelectElement[_]) ⇒
+              se.value match {
+                case NetLogoLanguage() ⇒ div("If your Netlogo sript depends on plugins, you should upload an archive (tar.gz, tgz) containing the root workspace.")
+                case _                 ⇒ div
+              }
+            case _ ⇒ div()
           }
         )
       }
@@ -284,7 +291,7 @@ class ModelWizardPanel extends ModalPanel {
 
                 // Move files from tmp to target path
                 if (existing.isEmpty) {
-                  targetPath().map {
+                  targetPath.now.map {
                     tp ⇒
                       OMPost[Api].copyAllTmpTo(tempFile, tp).call().foreach {
                         b ⇒
@@ -324,7 +331,7 @@ class ModelWizardPanel extends ModalPanel {
           case JavaLikeLanguage() ⇒
             modelSelector.emptyContents
             fileToUploadPath() = Some(uploadPath)
-            fileToUploadPath().foreach {
+            fileToUploadPath.now.foreach {
               getJarClasses
             }
 
@@ -344,14 +351,14 @@ class ModelWizardPanel extends ModalPanel {
         }
       case codeFile: CodeFile ⇒
         modelSelector.emptyContents
-        resources() = resources().withNoImplicit
+        resources() = resources.now.withNoImplicit
         setLaunchingCommand(uploadPath)
       case _ ⇒
     }
   }
 
   def getResourceInfo = {
-    fileToUploadPath().foreach {
+    fileToUploadPath.now.foreach {
       mp ⇒
         val modelName = mp.name
         OMPost[Api].listFiles(mp.parent).call().foreach {
@@ -359,8 +366,8 @@ class ModelWizardPanel extends ModalPanel {
             val l = b.filterNot {
               _.name == modelName
             }
-            resources() = resources().copy(implicits = l, number = l.size)
-            OMPost[Api].expandResources(resources()).call().foreach {
+            resources() = resources.now.copy(implicits = l, number = l.size)
+            OMPost[Api].expandResources(resources.now).call().foreach {
               lf ⇒
                 resources() = lf
             }
@@ -389,9 +396,9 @@ class ModelWizardPanel extends ModalPanel {
         CoreUtils.refreshCurrentDirectory(fileFilter = panels.treeNodePanel.filter)
         launchingCommand() = b.headOption
         fileToUploadPath() = Some(filePath)
-        launchingCommand().foreach {
+        launchingCommand.now.foreach {
           lc ⇒
-            codeSelector.content() = lc.language
+            codeSelector.content() = lc.value.language.map { SelectElement(_) }
             setScritpName
             setReactives(lc)
         }
@@ -445,27 +452,27 @@ class ModelWizardPanel extends ModalPanel {
       () ⇒
         save
         close
-        launchingCommand().foreach {
+        launchingCommand.now.foreach {
           lc ⇒
-            val path = manager.current.safePath()
+            val path = manager.current.now.safePath.now
             val scriptName = scriptNameInput.value.clean
-            val target = targetPath().map { _.name }.getOrElse("executable")
+            val target = targetPath.now.map { _.name }.getOrElse("executable")
             OMPost[Api].buildModelTask(
               target,
               scriptName,
               commandArea.value,
-              codeSelector.content().getOrElse(Binary()),
-              inputs(currentReactives()).map {
+              codeSelector.content.now.map { _.value }.getOrElse(Binary()),
+              inputs(currentReactives.now).map {
                 _.content.prototype
               },
-              outputs(currentReactives()).map {
+              outputs(currentReactives.now).map {
                 _.content.prototype
               },
-              path, classSelector.content().map {
+              path, classSelector.content.now.map {
+                _.value.name
+              }, fileToUploadPath.now.map {
                 _.name
-              }, fileToUploadPath().map {
-                _.name
-              }, resources()
+              }, resources.now
             ).call().foreach {
                 b ⇒
                   panels.treeNodePanel.fileDisplayer.tabs -- b
@@ -477,7 +484,7 @@ class ModelWizardPanel extends ModalPanel {
   }
 
   def save = {
-    currentReactives().map {
+    currentReactives.now.map {
       _.save
     }
   }
@@ -485,17 +492,17 @@ class ModelWizardPanel extends ModalPanel {
   def buildReactive(role: VariableRole[VariableElement], index: Int): Reactive = Reactive(role, index)
 
   def buildReactive(role: VariableRole[VariableElement]): Reactive =
-    currentReactives().filter {
+    currentReactives.now.filter {
       _.role == role
     }.headOption.getOrElse(buildReactive(role, role.content.index))
 
   def addVariableElement(p: VariableRole[VariableElement]) = {
     save
-    currentReactives() = currentReactives() :+ buildReactive(p, -1)
+    currentReactives() = currentReactives.now :+ buildReactive(p, -1)
   }
 
   def applyOnPrototypePair(p: VariableRole[VariableElement], todo: (VariableRole[VariableElement], Int) ⇒ Unit) =
-    currentReactives().map {
+    currentReactives.now.map {
       _.role
     }.zipWithIndex.filter {
       case (ptp, index) ⇒ ptp == p
@@ -504,16 +511,16 @@ class ModelWizardPanel extends ModalPanel {
     }
 
   def updatePrototypePair(p: VariableRole[VariableElement], variableElement: VariableElement) =
-    applyOnPrototypePair(p, (role: VariableRole[VariableElement], index: Int) ⇒ currentReactives() = currentReactives().updated(index, buildReactive(role.clone(variableElement), index)))
+    applyOnPrototypePair(p, (role: VariableRole[VariableElement], index: Int) ⇒ currentReactives() = currentReactives.now.updated(index, buildReactive(role.clone(variableElement), index)))
 
   def switchPrototypePair(p: VariableRole[VariableElement]) = {
     save
-    applyOnPrototypePair(p, (role: VariableRole[VariableElement], index: Int) ⇒ currentReactives() = currentReactives().updated(index, buildReactive(role.switch, index)))
+    applyOnPrototypePair(p, (role: VariableRole[VariableElement], index: Int) ⇒ currentReactives() = currentReactives.now.updated(index, buildReactive(role.switch, index)))
   }
 
   def addSwitchedPrototypePair(p: VariableRole[VariableElement]) = {
     save
-    currentReactives() = (currentReactives() :+ buildReactive(p.switch, -1)) distinct
+    currentReactives() = (currentReactives.now :+ buildReactive(p.switch, -1)) distinct
   }
 
   case class Reactive(role: VariableRole[VariableElement], index: Int) {
@@ -528,8 +535,8 @@ class ModelWizardPanel extends ModalPanel {
     def updateLaunchingCommand =
       role match {
         case CommandInput(_) | CommandOutput(_) ⇒
-          launchingCommand() = launchingCommand().map { lc ⇒
-            lc.updateVariables(currentReactives().map {
+          launchingCommand() = launchingCommand.now.map { lc ⇒
+            lc.updateVariables(currentReactives.now.map {
               _.role
             }.collect {
               case x: CommandInput[_]  ⇒ x
@@ -544,7 +551,7 @@ class ModelWizardPanel extends ModalPanel {
     def save = getReactive(index).map { reactive ⇒ updatePrototypePair(reactive.role, reactive.role.content.clone(nameInput.value, role.content.prototype.`type`, mappingInput.value)) }
 
     def removePrototypePair = {
-      currentReactives() = currentReactives().filterNot(_.role == role)
+      currentReactives() = currentReactives.now.filterNot(_.role == role)
       ModelWizardPanel.this.save
     }
 
@@ -581,7 +588,7 @@ class ModelWizardPanel extends ModalPanel {
   }
 
   def setBodyContent: Unit = bodyContent() = Some({
-    val reactives = currentReactives()
+    val reactives = currentReactives.now
     val topButtons = Rx {
       div(sheet.paddingTop(20))(
         badge("I/O", s"$nbInputs/$nbOutputs",
@@ -601,20 +608,20 @@ class ModelWizardPanel extends ModalPanel {
     setUpButton
 
     tags.div(
-      fileToUploadPath().map {
+      fileToUploadPath.now.map {
         _ ⇒ tags.div()
       }.getOrElse(step1),
-      transferring() match {
+      transferring.now match {
         case _: Processing ⇒ OMTags.waitingSpan(" Uploading ...", btn_danger + "certificate")
-        case _: Processed  ⇒ upButton()
-        case _             ⇒ upButton()
+        case _: Processed  ⇒ upButton.now
+        case _             ⇒ upButton.now
       },
-      fileToUploadPath().map {
+      fileToUploadPath.now.map {
         _ ⇒
           div(sheet.paddingTop(20))(
             tags.h4("Step2: Task configuration"), step2,
             topButtons,
-            if (currentTab() == 0) {
+            if (currentTab.now == 0) {
               tags.div({
 
                 val idiv = div(modelIO)(tags.h3("Inputs")).render
@@ -656,7 +663,7 @@ class ModelWizardPanel extends ModalPanel {
             else {
               val body = tbody.render
               for {
-                i ← resources().implicits
+                i ← resources.now.implicits
               } yield {
                 body.appendChild(tags.tr(
                   td(colMD(3))(i.name),

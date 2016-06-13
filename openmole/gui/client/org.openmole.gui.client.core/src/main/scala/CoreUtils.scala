@@ -86,7 +86,7 @@ object CoreUtils {
 
   def updateSons(dirNode: DirNode, todo: () ⇒ Unit = () ⇒ {}, fileFilter: FileFilter) = {
 
-    OMPost[Api].listFiles(dirNode.safePath(), fileFilter).call().foreach { s ⇒
+    OMPost[Api].listFiles(dirNode.safePath.now, fileFilter).call().foreach { s ⇒
       manager.updateSon(dirNode, s)
       todo()
     }

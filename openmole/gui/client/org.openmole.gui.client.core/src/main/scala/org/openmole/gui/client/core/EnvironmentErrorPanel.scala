@@ -77,7 +77,7 @@ class EnvironmentErrorPanel {
   def setErrors(ers: EnvironmentErrorData) = {
     entries() = tbody(
       for {
-        (message, date, level, stack) ← sort(ers, sortingAndOrdering())
+        (message, date, level, stack) ← sort(ers, sortingAndOrdering.now)
       } yield {
         tags.tr(row +++ stylesheet.errorTable)(
           tags.td(colMD(12))(

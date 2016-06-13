@@ -49,7 +49,7 @@ class InputFilter(initValue: String, pHolder: String, inputID: String, size: Str
 
   tag.oninput = (e: Event) ⇒ nameFilter() = tag.value
 
-  def contains(st: String) = st.toUpperCase.contains(nameFilter().toUpperCase)
+  def contains(st: String) = st.toUpperCase.contains(nameFilter.now.toUpperCase)
 
   def exists(seqString: Seq[String]) = seqString.exists(contains)
 

@@ -42,7 +42,7 @@ class AuthenticationPanel extends ModalPanel {
   lazy val initialCheck = Var(false)
 
   def onOpen() = {
-    if (!initialCheck()) {
+    if (!initialCheck.now) {
       getAuthentications
     }
   }
@@ -63,7 +63,7 @@ class AuthenticationPanel extends ModalPanel {
     fs.select(fs.headOption, (auth: AuthPanelWithID) ⇒ auth.name, btn_primary, onclickExtra = () ⇒ newPanel)
   }
 
-  def newPanel: Unit = authenticationSelector.content().foreach { f ⇒ setting() = Some(f.emptyClone.panel) }
+  def newPanel: Unit = authenticationSelector.content.now.foreach { f ⇒ setting() = Some(f.value.emptyClone.panel) }
 
   lazy val authenticationTable = {
 
@@ -207,22 +207,22 @@ class AuthenticationPanel extends ModalPanel {
   }
 
   def save = {
-    setting().map {
+    setting.now.map {
       _.save(() ⇒ getAuthentications)
     }
     setting() = None
   }
 
   def testAuthentications = {
-    auths().foreach { aux ⇒
+    auths.now.foreach { aux ⇒
       for (a ← aux) yield {
         val vos = {
           if (vosToBeTested.value.isEmpty) Seq()
           else vosToBeTested.value.split(",").toSeq
         }
         OMPost[Api].testAuthentication(a.data, vos).call().foreach { t ⇒
-          auths() = auths().map {
-            _.updated(auths().map {
+          auths() = auths.now.map {
+            _.updated(auths.now.map {
               _.indexOf(a)
             }.getOrElse(-1), a.copy(authenticationTests = t))
           }
