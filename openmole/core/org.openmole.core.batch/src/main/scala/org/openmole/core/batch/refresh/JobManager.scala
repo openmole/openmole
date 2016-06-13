@@ -109,7 +109,7 @@ class JobManager { self ⇒
 
     case Submitted(job, sj, bj) ⇒
       job.batchJob = Some(bj)
-      self ! Delay(Refresh(job, sj, bj, job.environment.minUpdateInterval), job.environment.minUpdateInterval)
+      self ! Delay(Refresh(job, sj, bj, job.environment.updateInterval.minUpdateInterval), job.environment.updateInterval.minUpdateInterval)
 
     case Kill(job) ⇒
       job.state = ExecutionState.KILLED

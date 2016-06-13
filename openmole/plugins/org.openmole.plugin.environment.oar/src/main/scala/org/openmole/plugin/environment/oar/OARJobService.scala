@@ -50,16 +50,16 @@ trait OARJobService extends ClusterJobService { js ⇒
 
   protected def _submit(serializedJob: SerializedJob) = {
     val (remoteScript, result) = buildScript(serializedJob)
-    val jobDescription = new OARJobDescription {
-      val executable = "/bin/bash"
-      val arguments = remoteScript
-      override val queue = environment.queue
-      val workDirectory = serializedJob.path
-      override val cpu = environment.cpu
-      override val core = environment.core
-      override val wallTime = environment.wallTime
-      override def bestEffort = environment.bestEffort
-    }
+    val jobDescription = OARJobDescription(
+      executable = "/bin/bash",
+      arguments = remoteScript,
+      queue = environment.queue,
+      workDirectory = serializedJob.path,
+      cpu = environment.cpu,
+      core = environment.core,
+      wallTime = environment.wallTime,
+      bestEffort = environment.bestEffort
+    )
 
     val jid = js.jobService.submit(jobDescription)
     Log.logger.fine(s"OAR job [${jid.id}], description: \n ${jobDescription}")

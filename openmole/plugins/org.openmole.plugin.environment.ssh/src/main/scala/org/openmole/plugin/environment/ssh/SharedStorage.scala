@@ -87,11 +87,11 @@ trait SharedStorage extends SSHService { js ⇒
           }
         }
 
-        val jobDescription = new fr.iscpif.gridscale.ssh.SSHJobDescription {
-          val executable = "/bin/bash"
-          val arguments = scriptName
-          val workDirectory = workdir
-        }
+        val jobDescription = fr.iscpif.gridscale.ssh.SSHJobDescription(
+          executable = "/bin/bash",
+          arguments = scriptName,
+          workDirectory = workdir
+        )
 
         logger.fine("Begin install")
         installJobService.execute(jobDescription)

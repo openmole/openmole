@@ -60,8 +60,6 @@ object SSHEnvironment {
     )(SSHAuthentication.find(user, host, port).apply)
 }
 
-import SSHEnvironment._
-
 class SSHEnvironment(
     val user:                    String,
     val host:                    String,
@@ -92,8 +90,6 @@ class SSHEnvironment(
     def workDirectory = env.workDirectory
   }
 
-  override def minUpdateInterval = Workspace.preference(UpdateInterval)
-  override def maxUpdateInterval = Workspace.preference(UpdateInterval)
-  override def incrementUpdateInterval = 0 second
+  override def updateInterval = UpdateInterval.fixed(Workspace.preference(SSHEnvironment.UpdateInterval))
 
 }

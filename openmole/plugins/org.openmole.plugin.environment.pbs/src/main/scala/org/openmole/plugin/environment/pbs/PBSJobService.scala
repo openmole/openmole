@@ -49,16 +49,16 @@ trait PBSJobService extends ClusterJobService { js ⇒
 
   protected def _submit(serializedJob: SerializedJob) = {
     val (remoteScript, result) = buildScript(serializedJob)
-    val jobDescription = new PBSJobDescription {
-      val executable = "/bin/bash"
-      val arguments = remoteScript
-      override val queue = environment.queue
-      val workDirectory = serializedJob.path
-      override val wallTime = environment.wallTime
-      override val memory = Some(environment.requiredMemory)
-      override val nodes = environment.nodes
-      override val coreByNode = environment.coreByNode orElse environment.threads
-    }
+    val jobDescription = PBSJobDescription(
+      executable = "/bin/bash",
+      arguments = remoteScript,
+      queue = environment.queue,
+      workDirectory = serializedJob.path,
+      wallTime = environment.wallTime,
+      memory = Some(environment.requiredMemory),
+      nodes = environment.nodes,
+      coreByNode = environment.coreByNode orElse environment.threads
+    )
 
     val jid = js.jobService.submit(jobDescription)
     Log.logger.fine(s"PBS job [${jid.pbsId}], description: \n ${jobDescription}")
