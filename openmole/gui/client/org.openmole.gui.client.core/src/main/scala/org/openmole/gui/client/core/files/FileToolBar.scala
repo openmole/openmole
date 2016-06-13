@@ -118,6 +118,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
         case Some(PluginTool) ⇒
           manager.computePluggables(() ⇒
             if (manager.pluggables.now.isEmpty)
+              println("Empty")
             //AlertPanel.string("No plugin has been found in this folder", okaction = { () ⇒ unselectTool }, cancelaction = { () ⇒ unselectTool }, transform = RelativeCenterPosition, zone = FileZone)
             else
               treeNodePanel.turnSelectionTo(true))
