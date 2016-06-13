@@ -20,7 +20,7 @@ package org.openmole.plugin.environment.egi
 import java.net.URI
 
 import fr.iscpif.gridscale.authentication.P12Authentication
-import org.openmole.core.batch.environment.{ BatchExecutionJob, BatchEnvironment }
+import org.openmole.core.batch.environment.{ BatchEnvironment, BatchExecutionJob, UpdateInterval }
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.fileservice._
 import org.openmole.core.workflow.dsl._
@@ -30,6 +30,7 @@ import org.openmole.core.workflow.job.Job
 import org.openmole.core.workspace._
 import fr.iscpif.gridscale.egi._
 import fr.iscpif.gridscale.egi.{ DIRACJobService ⇒ GSDIRACJobService }
+
 import concurrent.duration._
 import scala.ref.WeakReference
 
@@ -37,6 +38,7 @@ object DIRACEnvironment {
 
   val Connections = ConfigurationLocation("DIRACEnvironment", "Connections", Some(100))
   val EagerSubmissionThreshold = ConfigurationLocation("DIRACEnvironment", "EagerSubmissionThreshold", Some(0.2))
+  val UpdateInterval = ConfigurationLocation("DIRACEnvironment", "UpdateInterval", Some(1 minute))
 
   Workspace setDefault Connections
   Workspace setDefault EagerSubmissionThreshold
@@ -126,5 +128,6 @@ class DIRACEnvironment(
     val environment = env
   }
 
+  override def updateInterval = UpdateInterval.fixed(Workspace.preference(DIRACEnvironment.UpdateInterval))
   override def runtimeSettings = super.runtimeSettings.copy(archiveResult = true)
 }

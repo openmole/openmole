@@ -32,6 +32,7 @@ import scalax.io.Resource
 import java.io.File
 import org.openmole.core.tools._
 import fr.iscpif.gridscale.egi._
+import scala.concurrent.duration._
 
 object DIRACJobService extends Logger
 
@@ -50,7 +51,8 @@ trait DIRACJobService extends GridScaleJobService { js ⇒
 
     val js = GSDIRACJobService(
       environment.voName,
-      service = Some(GSDIRACJobService.Service(serviceValue, groupValue))
+      service = Some(GSDIRACJobService.Service(serviceValue, groupValue)),
+      groupStatusQuery = Some(environment.updateInterval.minUpdateInterval)
     )(environment.authentication)
     js.delegate(environment.authentication.certificate, environment.authentication.password)
     js

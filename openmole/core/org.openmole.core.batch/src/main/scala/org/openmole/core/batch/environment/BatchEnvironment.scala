@@ -246,9 +246,12 @@ trait BatchEnvironment extends SubmissionEnvironment { env ⇒
 
   @transient lazy val plugins = PluginManager.pluginsForClass(this.getClass)
 
-  def minUpdateInterval = Workspace.preference(MinUpdateInterval)
-  def maxUpdateInterval = Workspace.preference(MaxUpdateInterval)
-  def incrementUpdateInterval = Workspace.preference(IncrementUpdateInterval)
+  def updateInterval =
+    UpdateInterval(
+      minUpdateInterval = Workspace.preference(MinUpdateInterval),
+      maxUpdateInterval = Workspace.preference(MaxUpdateInterval),
+      incrementUpdateInterval = Workspace.preference(IncrementUpdateInterval)
+    )
 
   def submitted: Long = jobs.count { _.state == ExecutionState.SUBMITTED }
   def running: Long = jobs.count { _.state == ExecutionState.RUNNING }
