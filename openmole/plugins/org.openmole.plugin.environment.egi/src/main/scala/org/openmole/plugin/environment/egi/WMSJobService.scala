@@ -54,9 +54,7 @@ trait WMSJobService extends GridScaleJobService { js ⇒
   lazy val id = jobService.url.toString
   def hysteresis = Workspace.preference(EGIEnvironment.QualityHysteresis)
 
-  override protected def _purge(j: J) = quality { super._purge(j) }
-
-  override protected def _cancel(j: J) = quality { super._cancel(j) }
+  override protected def _delete(j: J) = quality { super._delete(j) }
 
   override protected def _state(j: J) = quality { super._state(j) }
 

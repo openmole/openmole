@@ -40,16 +40,13 @@ trait JobService extends BatchService { js ⇒
 
   def state(j: J)(implicit token: AccessToken) = token.access { _state(j) }
 
-  def cancel(j: J)(implicit token: AccessToken) = {
-    token.synchronized { _cancel(j) }
+  def delete(j: J)(implicit token: AccessToken) = {
+    token.synchronized { _delete(j) }
     Log.logger.fine(s"Cancelled job: ${j}")
   }
 
-  def purge(j: J)(implicit token: AccessToken) = token.access { _purge(j) }
-
   protected def _submit(serializedJob: SerializedJob): BatchJob
   protected def _state(j: J): ExecutionState
-  protected def _cancel(j: J)
-  protected def _purge(j: J)
+  protected def _delete(j: J)
 
 }

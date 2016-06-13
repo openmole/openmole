@@ -102,5 +102,5 @@ trait DIRACJobService extends GridScaleJobService { js ⇒
     finally script.delete
   }
 
-  override protected def _purge(j: J) = if (!environment.debug) super._purge(j)
+  override protected def _delete(j: J) = if (!environment.debug) super._delete(j)
 }

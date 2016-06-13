@@ -90,10 +90,9 @@ class DesktopGridService(port: Int, path: File = Workspace.newDir()) { service â
   }
 
   def jobService(_environment: BatchEnvironment, port: Int) = new DesktopGridJobService {
-    override protected def _purge(j: J): Unit = service.purge(j)
+    override protected def _delete(j: J): Unit = service.delete(j)
     override protected def _submit(serializedJob: SerializedJob): BatchJob = service.submit(serializedJob, environment.openMOLEMemoryValue, this)
     override protected def _state(j: J): ExecutionState = service.state(j)
-    override protected def _cancel(j: J): Unit = service.cancel(j)
     override def environment: BatchEnvironment = _environment
     override val usageControl = new UnlimitedAccess
   }
@@ -138,9 +137,7 @@ class DesktopGridService(port: Int, path: File = Workspace.newDir()) { service â
     else DONE
   }
 
-  def cancel(j: J) = {}
-
-  def purge(j: J) = {
+  def delete(j: J) = {
     tmpJobSubmissionFile(j).delete
     jobSubmissionFile(j).delete
     timeStemps(j).foreach { _.delete }

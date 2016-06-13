@@ -28,8 +28,7 @@ trait GridScaleJobService extends JobService {
   type J = jobService.J
 
   protected def _state(j: J) = translateStatus(jobService.state(j))
-  protected def _cancel(j: J) = jobService.cancel(j)
-  protected def _purge(j: J) = jobService.purge(j)
+  protected def _delete(j: J) = jobService.delete(j).get
 
   private def translateStatus(state: JobState) =
     state match {

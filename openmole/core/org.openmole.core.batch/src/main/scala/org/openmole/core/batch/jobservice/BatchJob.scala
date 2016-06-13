@@ -50,10 +50,9 @@ trait BatchJob { bj ⇒
 
   def kill(id: jobService.J)(implicit token: AccessToken) = token.synchronized {
     synchronized {
-      val oldState = state
-      try if (state == SUBMITTED || state == RUNNING) jobService.cancel(id)
-      finally state = KILLED
-      if (oldState != KILLED) jobService.purge(id)
+      if (state != KILLED)
+        try jobService.delete(id)
+        finally state = KILLED
     }
   }
 
