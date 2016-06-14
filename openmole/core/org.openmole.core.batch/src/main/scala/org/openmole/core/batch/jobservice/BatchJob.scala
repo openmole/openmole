@@ -24,6 +24,7 @@ import org.openmole.core.workflow.execution.ExecutionState
 import org.openmole.core.workflow.execution.ExecutionState._
 import org.openmole.core.batch.control._
 import org.openmole.core.batch.environment._
+import org.openmole.tool.logger.Logger
 
 object BatchJob {
   case class StateChanged(newState: ExecutionState.ExecutionState, oldState: ExecutionState.ExecutionState) extends Event[BatchJob]
@@ -48,20 +49,17 @@ trait BatchJob { bj ⇒
   def kill(implicit token: AccessToken)
   def updateState(implicit token: AccessToken): ExecutionState
 
-  def kill(id: jobService.J)(implicit token: AccessToken) = token.synchronized {
+  def kill(id: jobService.J)(implicit token: AccessToken) =
     synchronized {
-      if (state != KILLED)
-        try jobService.delete(id)
-        finally state = KILLED
+      try if (state != KILLED) jobService.delete(id)
+      finally state = KILLED
     }
-  }
 
-  def updateState(id: jobService.J)(implicit token: AccessToken): ExecutionState = token.synchronized {
+  def updateState(id: jobService.J)(implicit token: AccessToken): ExecutionState =
     synchronized {
       state = jobService.state(id)
       state
     }
-  }
 
   def state: ExecutionState = _state
 
