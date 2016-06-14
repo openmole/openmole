@@ -84,8 +84,17 @@ object EGIEnvironment extends Logger {
   val RunningHistoryDuration = ConfigurationLocation("EGIEnvironment", "RunningHistoryDuration", Some(12 hours))
   val EagerSubmissionThreshold = ConfigurationLocation("EGIEnvironment", "EagerSubmissionThreshold", Some(0.5))
 
-  val DefaultBDIIs =
-    ConfigurationLocation("EGIEnvironment", "DefaultBDIIs", Some(Seq("topbdii.grif.fr", "bdii.ndgf.org", "lcg-bdii.cern.ch", "bdii-fzk.gridka.de", "topbdii.egi.cesga.es", "egee-bdii.cnaf.infn.it")))
+  val ldapURLs =
+    Seq(
+      "topbdii.grif.fr",
+      "bdii.ndgf.org",
+      "lcg-bdii.cern.ch",
+      "bdii-fzk.gridka.de",
+      "topbdii.egi.cesga.es",
+      "egee-bdii.cnaf.infn.it"
+    ).map(h ⇒ s"ldap://$h:2170")
+
+  val DefaultBDIIs = ConfigurationLocation("EGIEnvironment", "DefaultBDIIs", Some(ldapURLs))
 
   def toBDII(bdii: URI) = BDII(bdii.getHost, bdii.getPort, Workspace.preference(FetchResourcesTimeOut))
   def defaultBDIIs = Workspace.preference(EGIEnvironment.DefaultBDIIs).map(b ⇒ new URI(b)).map(toBDII)
