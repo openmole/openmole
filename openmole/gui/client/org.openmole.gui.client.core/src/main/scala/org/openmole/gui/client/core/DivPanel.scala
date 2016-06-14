@@ -1,13 +1,10 @@
 package org.openmole.gui.client.core
 
 import org.scalajs.dom.raw.HTMLDivElement
-import rx.core.Var
 import scalatags.JsDom.{ tags ⇒ tags }
 import scalatags.JsDom.all._
-import org.openmole.gui.misc.js.JsRxTags._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import bs._
-import rx._
 /*
  * Copyright (C) 26/08/15 // mathieu.leclaire@openmole.org
  *

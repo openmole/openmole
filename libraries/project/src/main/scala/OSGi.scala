@@ -117,10 +117,10 @@ object OSGi extends Defaults {
     )
 
   lazy val scalaTagsVersion = "0.5.4"
-  lazy val scalaRxVersion = "0.2.8"
+  lazy val scalaRxVersion = "0.3.1"
   lazy val scalaDomVersion = "0.9.0"
   lazy val querkiJSQueryVersion = "0.11"
-  lazy val scalaUpickleVersion = "0.4.0"
+  lazy val scalaUpickleVersion = "0.4.1"
   lazy val scalaAutowireVersion = "0.2.5"
   lazy val scalajsVersion = "0.6.8"
 

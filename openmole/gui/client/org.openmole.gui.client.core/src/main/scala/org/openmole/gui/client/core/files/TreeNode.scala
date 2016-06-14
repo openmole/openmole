@@ -62,7 +62,7 @@ sealed trait TreeNode {
 
   val readableTime: String
 
-  def cloneWithName(newName: String) = FileNode(Var(newName), Var(SafePath.sp(safePath().path.dropRight(1) :+ newName)), size, readableSize, time, readableTime)
+  def cloneWithName(newName: String) = FileNode(Var(newName), Var(SafePath.sp(safePath.now.path.dropRight(1) :+ newName)), size, readableSize, time, readableTime)
 
 }
 
@@ -72,7 +72,7 @@ object TreeNode {
     if (tnd.isDirectory) DirNode(Var(tnd.name), Var(tnd.safePath), tnd.size, tnd.readableSize, tnd.time, tnd.readableTime)
     else FileNode(Var(tnd.name), Var(tnd.safePath), tnd.size, tnd.readableSize, tnd.time, tnd.readableTime)
 
-  implicit def treeNodeToTreeNodeData(tn: TreeNode): TreeNodeData = TreeNodeData(tn.name(), tn.safePath(), tn match {
+  implicit def treeNodeToTreeNodeData(tn: TreeNode): TreeNodeData = TreeNodeData(tn.name.now, tn.safePath.now, tn match {
     case DirNode(_, _, _, _, _, _) ⇒ true
     case _                         ⇒ false
   }, tn.size, tn.readableSize, tn.time, tn.readableTime)
@@ -85,7 +85,7 @@ object TreeNode {
 
   implicit def seqTreeNodeDataToSeqTreeNode(tnds: Seq[TreeNodeData]): Seq[TreeNode] = tnds.map(treeNodeDataToTreeNode(_))
 
-  implicit def treeNodeToSafePath(tn: TreeNode): SafePath = tn.safePath()
+  implicit def treeNodeToSafePath(tn: TreeNode): SafePath = tn.safePath.now
 
   implicit def treeNodesToSafePaths(tns: Seq[TreeNode]): Seq[SafePath] = tns.map {
     treeNodeToSafePath

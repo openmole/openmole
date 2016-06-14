@@ -40,31 +40,31 @@ class Expander {
   private val visible: Var[Map[ExpandID, Var[VisibleID]]] = Var(Map())
 
   def updateMaps(expandId: ExpandID, visibleId: VisibleID) = {
-    if (!expanded().isDefinedAt(expandId)) expanded() = expanded().updated(expandId, Var(false))
-    if (!visible().isDefinedAt(expandId)) visible() = visible().updated(expandId, Var(visibleId))
+    if (!expanded.now.isDefinedAt(expandId)) expanded() = expanded.now.updated(expandId, Var(false))
+    if (!visible.now.isDefinedAt(expandId)) visible() = visible.now.updated(expandId, Var(visibleId))
   }
 
-  def isExpanded(id: ExpandID) = expanded().getOrElse(id, Var(false))()
+  def isExpanded(id: ExpandID) = expanded.now.getOrElse(id, Var(false)).now
 
   def isVisible(expandID: ExpandID, visibleID: VisibleID): Boolean = getVisible(expandID).exists { v ⇒ v == visibleID }
 
   def getVisible(expandId: ExpandID): Option[VisibleID] = if (isExpanded(expandId)) {
-    Some(visible()(expandId)())
+    Some(visible.now(expandId).now)
   }
   else None
 
   def setTarget(expandId: ExpandID, visibleId: VisibleID) = {
-    if (expanded()(expandId)()) {
-      if (visible()(expandId)() == visibleId) {
-        expanded()(expandId)() = false
+    if (expanded.now(expandId).now) {
+      if (visible.now(expandId).now == visibleId) {
+        expanded.now(expandId)() = false
       }
       else {
-        visible()(expandId)() = visibleId
+        visible.now(expandId)() = visibleId
       }
     }
     else {
-      visible()(expandId)() = visibleId
-      expanded()(expandId)() = true
+      visible.now(expandId)() = visibleId
+      expanded.now(expandId)() = true
     }
   }
 

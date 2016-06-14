@@ -1,6 +1,5 @@
 package org.openmole.gui.client.core
 
-import rx.core.Var
 import scalatags.JsDom.{ tags ⇒ tags }
 import scalatags.JsDom.all._
 import org.openmole.gui.misc.js.JsRxTags._

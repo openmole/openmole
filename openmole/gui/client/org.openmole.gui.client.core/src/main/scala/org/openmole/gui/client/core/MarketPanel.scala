@@ -45,7 +45,7 @@ class MarketPanel extends ModalPanel {
   private val marketIndex: Var[Option[MarketIndex]] = Var(None)
   val tagFilter = InputFilter(pHolder = "Filter")
   val selectedEntry: Var[Option[MarketIndexEntry]] = Var(None)
-  lazy val downloading: Var[Seq[(MarketIndexEntry, Var[_ <: ProcessState])]] = Var(marketIndex().map {
+  lazy val downloading: Var[Seq[(MarketIndexEntry, Var[_ <: ProcessState])]] = Var(marketIndex.now.map {
     _.entries.map {
       (_, Var(Processed()))
     }
@@ -71,10 +71,7 @@ class MarketPanel extends ModalPanel {
                 })
               ),
               div(colMD(2))(downloadButton(entry, () ⇒ {
-                OMPost[Api].exists(manager.current.safePath() ++ entry.name).call().foreach { b ⇒
-                  if (b) overwriteAlert() = Some(entry)
-                  else download(entry)
-                }
+                exists(manager.current.now.safePath() ++ entry.name, entry)
               })),
               div(colMD(7) +++ sheet.paddingTop(7))(
                 entry.tags.map { e ⇒ tags.label(e)(sheet.label_primary +++ omsheet.tableTag) }
@@ -94,27 +91,33 @@ class MarketPanel extends ModalPanel {
     }
   )
 
+  def exists(sp: SafePath, entry: MarketIndexEntry) =
+    OMPost[Api].exists(sp).call().foreach { b ⇒
+      if (b) overwriteAlert() = Some(entry)
+      else download(entry)
+    }
+
   def download(entry: MarketIndexEntry) = {
-    val path = manager.current.safePath() ++ entry.name
-    downloading() = downloading().updatedFirst(_._1 == entry, (entry, Var(Processing())))
+    val path = manager.current.now.safePath.now ++ entry.name
+    downloading() = downloading.now.updatedFirst(_._1 == entry, (entry, Var(Processing())))
     OMPost[Api].getMarketEntry(entry, path).call().foreach { d ⇒
-      downloading() = downloading().updatedFirst(_._1 == entry, (entry, Var(Processed())))
-      downloading().headOption.foreach(_ ⇒ close)
+      downloading() = downloading.now.updatedFirst(_._1 == entry, (entry, Var(Processed())))
+      downloading.now.headOption.foreach(_ ⇒ close)
       CoreUtils.refreshCurrentDirectory(fileFilter = panels.treeNodePanel.filter)
     }
   }
 
   def downloadButton(entry: MarketIndexEntry, todo: () ⇒ Unit = () ⇒ {}) =
-    downloading().find {
+    downloading.now.find {
       _._1 == entry
     }.map {
       case (e, state: Var[ProcessState]) ⇒
         state.withTransferWaiter { _ ⇒
-          if (selectedEntry() == Some(e)) bs.glyphButton(" Download", btn_warning, glyph_download_alt, todo) else tags.div()
+          if (selectedEntry.now == Some(e)) bs.glyphButton(" Download", btn_warning, glyph_download_alt, todo) else tags.div()
         }
     }.getOrElse(tags.div())
 
-  def onOpen() = marketIndex() match {
+  def onOpen() = marketIndex.now match {
     case None ⇒ OMPost[Api].marketIndex.call().foreach { m ⇒
       marketIndex() = Some(m)
     }
@@ -122,6 +125,11 @@ class MarketPanel extends ModalPanel {
   }
 
   def onClose() = {}
+
+  def deleteFile(sp: SafePath, marketIndexEntry: MarketIndexEntry) =
+    OMPost[Api].deleteFile(sp, ServerFileSytemContext.project).call().foreach { d ⇒
+      download(marketIndexEntry)
+    }
 
   val dialog = bs.modalDialog(
     modalID,
@@ -136,9 +144,7 @@ class MarketPanel extends ModalPanel {
               e.name + " already exists. Overwrite ? ",
               () ⇒ {
                 overwriteAlert() = None
-                OMPost[Api].deleteFile(manager.current.safePath() ++ e.name, ServerFileSytemContext.project).call().foreach { d ⇒
-                  download(e)
-                }
+                deleteFile(manager.current().safePath() ++ e.name, e)
               }, () ⇒ {
                 overwriteAlert() = None
               }, CenterPagePosition

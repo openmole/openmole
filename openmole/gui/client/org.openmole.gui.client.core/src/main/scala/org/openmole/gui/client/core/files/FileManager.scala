@@ -82,12 +82,12 @@ object FileManager {
 
     xhr.onloadend = (e: ProgressEvent) ⇒ {
       fileTransferState(Processed())
-      if (treeNode.safePath().extension.displayable) {
+      if (treeNode.safePath.now.extension.displayable) {
         onLoadEnded(xhr.responseText)
       }
     }
 
-    xhr.open("GET", s"downloadFile?path=${Utils.toURI(treeNode.safePath().path)}", true)
+    xhr.open("GET", s"downloadFile?path=${Utils.toURI(treeNode.safePath.now.path)}", true)
     xhr.send()
   }
 

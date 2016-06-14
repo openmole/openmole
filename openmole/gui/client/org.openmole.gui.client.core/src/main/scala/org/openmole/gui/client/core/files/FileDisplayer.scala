@@ -41,8 +41,8 @@ class FileDisplayer(implicit executionTriggerer: PanelTriggerer) {
   val tabs = TreeNodeTabs()
 
   def alreadyDisplayed(tn: TreeNode) = {
-    tabs.tabs().find {
-      _.treeNode.safePath().path == tn.safePath().path
+    tabs.tabs.now.find {
+      _.treeNode.safePath.now.path == tn.safePath.now.path
     }
   }
 
@@ -55,7 +55,7 @@ class FileDisplayer(implicit executionTriggerer: PanelTriggerer) {
     def onrun = {
       overlaying() = true
       refresh(() ⇒
-        OMPost[Api].runScript(ScriptData(tn.safePath())).call().foreach { execInfo ⇒
+        OMPost[Api].runScript(ScriptData(tn.safePath.now)).call().foreach { execInfo ⇒
           overlaying() = false
           executionTriggerer.open
         })
@@ -68,12 +68,12 @@ class FileDisplayer(implicit executionTriggerer: PanelTriggerer) {
   }
 
   def display(tn: TreeNode, content: String) = {
-    val fileType = tn.safePath().extension
+    val fileType = tn.safePath.now.extension
     alreadyDisplayed(tn) match {
       case Some(t: TreeNodeTab) ⇒ tabs.setActive(t)
       case _ ⇒ fileType match {
         case oms: OpenMOLEScript ⇒ displayOMS(tn, content)
-        case md: MDScript ⇒ OMPost[Api].mdToHtml(tn.safePath()).call.foreach { htmlString ⇒
+        case md: MDScript ⇒ OMPost[Api].mdToHtml(tn.safePath.now).call.foreach { htmlString ⇒
           tabs ++ new HTMLTab(tn, htmlString)
         }
         case dod: DisplayableOnDemandFile ⇒

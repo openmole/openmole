@@ -52,8 +52,8 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
   val tree: Var[TypedTag[HTMLDivElement]] = Var(tags.div())
   val selectionMode = Var(false)
 
-  Obs(selectionMode) {
-    if (!selectionMode()) manager.clearSelection
+  selectionMode.trigger {
+    if (!selectionMode.now) manager.clearSelection
   }
 
   val editNodeInput: Input = bs.input()(
@@ -68,16 +68,16 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
     val goToModifierSeq = glyph_home +++ floatLeft +++ "treePathItems"
     tags.div(
       fileToolBar.div, Rx {
-      val toDraw = manager.drop(1)
+      val toDraw = manager.drop(1)()
       val dirNodeLineSize = toDraw.size
       div(ms("tree-path"))(
-        goToDirButton(manager.head, goToModifierSeq),
+        goToDirButton(manager.head(), goToModifierSeq),
         toDraw.drop(dirNodeLineSize - 2).takeRight(2).map { dn ⇒ goToDirButton(dn, "treePathItems", s"| ${dn.name()}") }
       )
     },
       Rx {
         if (manager.copied().isEmpty) tags.div
-        else tags.label("paste")(label_danger, stylesheet.pasteLabel, onclick := { () ⇒ paste(manager.copied(), manager.current) })
+        else tags.label("paste")(label_danger, stylesheet.pasteLabel, onclick := { () ⇒ paste(manager.copied(), manager.current()) })
       },
       fileToolBar.sortingGroup.div,
       Rx {
@@ -126,7 +126,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
     )
   }
 
-  def filter: FileFilter = fileToolBar.fileFilter()
+  def filter: FileFilter = fileToolBar.fileFilter.now
 
   def downloadFile(treeNode: TreeNode, saveFile: Boolean, onLoaded: String ⇒ Unit = (s: String) ⇒ {}) =
     FileManager.download(
@@ -143,7 +143,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
         fileToolBar.resetFilter
         manager.clearSelection
         turnSelectionTo(false)
-        CoreUtils.refreshCurrentDirectory(fileFilter = fileToolBar.fileFilter())
+        CoreUtils.refreshCurrentDirectory(fileFilter = fileToolBar.fileFilter.now)
         manager.switch(dn)
         computeAndDraw
     }, dropPairs(dn)
@@ -171,8 +171,8 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
 
   def refreshAnd(todo: () ⇒ Unit) = CoreUtils.refreshCurrentDirectory(todo, filter)
 
-  def computePluggables = fileToolBar.selectedTool() match {
-    case Some(PluginTool) ⇒ manager.computePluggables(() ⇒ if (!manager.pluggables().isEmpty) turnSelectionTo(true))
+  def computePluggables = fileToolBar.selectedTool.now match {
+    case Some(PluginTool) ⇒ manager.computePluggables(() ⇒ if (!manager.pluggables.now.isEmpty) turnSelectionTo(true))
     case _                ⇒
   }
 
@@ -184,7 +184,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
           div("Create a first OpenMOLE script (.oms)")(ms("message"))
         }
         else
-          tags.table(ms("tree" + dragState()))(
+          tags.table(ms("tree" + dragState.now))(
             tr(
               tags.table(ms("file-list"))(
                 for (tn ← sons) yield {
@@ -210,7 +210,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
 
   def displayNode(tn: TreeNode) = tn match {
     case fn: FileNode ⇒
-      if (fn.safePath().extension.displayable) {
+      if (fn.safePath.now.extension.displayable) {
         downloadFile(fn, false, (content: String) ⇒ {
           fileDisplayer.display(fn, content)
           refreshAndDraw
@@ -224,10 +224,10 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
     treeNodeType: TreeNodeType,
     todo:         () ⇒ Unit
   ) = {
-    toBeEdited() match {
+    toBeEdited.now match {
       case Some(etn: NodeEdition) ⇒
         if (etn.node.path == tn.path) {
-          editNodeInput.value = tn.name()
+          editNodeInput.value = tn.name.now
           tr(
             div(
               height := 26,
@@ -236,7 +236,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
                 onsubmit := {
                   () ⇒
                     {
-                      if (etn.node.name() == editNodeInput.value) {
+                      if (etn.node.name.now == editNodeInput.value) {
                         toBeEdited() = None
                         drawTree
                       }
@@ -260,10 +260,10 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
     fileDisplayer.tabs -- treeNode
     stringAlert(
       s"Do you really want to delete ${
-        treeNode.name()
+        treeNode.name.now
       }?",
       () ⇒ {
-        CoreUtils.trashNode(treeNode.safePath(), filter) {
+        CoreUtils.trashNode(treeNode.safePath.now, filter) {
           () ⇒
             fileDisplayer.tabs.checkTabs
             refreshAndDraw
@@ -271,6 +271,11 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
       }
     )
   }
+
+  def extractTGZ(tnd: TreeNode) =
+    OMPost[Api].extractTGZ(tnd).call().foreach { r ⇒
+      refreshAndDraw
+    }
 
   def renameNode(treeNode: TreeNode, newName: String, replicateMode: Boolean) = {
     def rename = OMPost[Api].renameFile(treeNode, newName).call().foreach { newNode ⇒
@@ -291,13 +296,13 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
   def dropAction(tn: TreeNode) = {
     (e: DragEvent) ⇒
       e.preventDefault
-      draggedNode().map {
+      draggedNode.now.map {
         sp ⇒
           tn match {
             case d: DirNode ⇒
-              if (sp.safePath().path != d.safePath().path) {
+              if (sp.safePath.now.path != d.safePath.now.path) {
                 fileDisplayer.tabs.saveAllTabs(() ⇒
-                  OMPost[Api].move(sp.safePath(), tn.safePath()).call().foreach {
+                  OMPost[Api].move(sp.safePath.now, tn.safePath.now).call().foreach {
                     b ⇒
                       refreshAndDraw
                       fileDisplayer.tabs.checkTabs
@@ -326,10 +331,10 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
       case _                ⇒ stylesheet.dir
     }) +++ floatLeft +++ pointer +++ Seq(
       draggable := true,
-      onclick := { () ⇒ if (!selectionMode()) todo() }
+      onclick := { () ⇒ if (!selectionMode.now) todo() }
     )
 
-    def timeOrSize(tn: TreeNode): String = fileToolBar.fileFilter().fileSorting match {
+    def timeOrSize(tn: TreeNode): String = fileToolBar.fileFilter.now.fileSorting match {
       case TimeSorting ⇒ tn.readableTime
       case _           ⇒ tn.readableSize
     }
@@ -346,10 +351,10 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
 
     def addToSelection(b: Boolean): Unit = {
       selected() = b
-      manager.setSelected(tn, selected())
+      manager.setSelected(tn, selected.now)
     }
 
-    def addToSelection: Unit = addToSelection(!selected())
+    def addToSelection: Unit = addToSelection(!selected.now)
 
     val render: Modifier = {
       val baseGlyph = sheet.marginTop(2) +++ "glyphitem"
@@ -362,13 +367,13 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
       val rowDiv = div(
         onmouseover := { () ⇒
           lineHovered() = {
-            if (selectionMode()) false else true
+            if (selectionMode.now) false else true
           }
         },
         onmouseout := { () ⇒ lineHovered() = false },
         ondragstart := { (e: DragEvent) ⇒
           e.dataTransfer.setData("text/plain", "nothing") //  FIREFOX TRICK
-          draggedNode() match {
+          draggedNode.now match {
             case Some(t: TreeNode) ⇒
             case _                 ⇒ draggedNode() = Some(tn)
           }
@@ -393,42 +398,41 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
                 tn.name()
               )
             }
-          ).tooltip(tags.span(tn.name()), popupStyle = whitePopup, arrowStyle = Popup.whiteBottomArrow, condition = () ⇒ tn.name().length > 24),
+          ).tooltip(tags.span(tn.name.now), popupStyle = whitePopup, arrowStyle = Popup.whiteBottomArrow, condition = () ⇒ tn.name.now.length > 24),
           div(stylesheet.fileInfo)(
             Rx {
               if (!selectionMode()) {
                 div(
                   span(stylesheet.fileSize)(tags.i(timeOrSize(tn))),
-                  span(`class` := Rx {
-                    if (lineHovered()) "opaque" else "transparent"
-                  })(
-                    span(onclick := { () ⇒ trashNode(tn) }, trash),
-                    span(onclick := { () ⇒
-                      toBeEdited() = Some(NodeEdition(tn))
-                      drawTree
-                    }, edit),
-                    a(
-                      span(onclick := { () ⇒ Unit })(download_alt),
-                      href := s"downloadFile?path=${Utils.toURI(tn.safePath().path)}"
-                    ),
-                    tn.safePath().extension match {
-                      case FileExtension.TGZ ⇒
-                        span(archive, onclick := { () ⇒
-                          OMPost[Api].extractTGZ(tn).call().foreach { r ⇒
-                            refreshAndDraw
-                          }
+                  span(
+                    if (lineHovered()) ms("opaque")
+                    else ms("transparent")
+                  )(
+                      span(onclick := { () ⇒ trashNode(tn) }, trash),
+                      span(onclick := { () ⇒
+                        toBeEdited() = Some(NodeEdition(tn))
+                        drawTree
+                      }, edit),
+                      a(
+                        span(onclick := { () ⇒ Unit })(download_alt),
+                        href := s"downloadFile?path=${Utils.toURI(tn.safePath().path)}"
+                      ),
+                      tn.safePath().extension match {
+                        case FileExtension.TGZ ⇒
+                          span(archive, onclick := { () ⇒
+                            extractTGZ(tn)
+                          })
+                        case _ ⇒
+                      },
+                      span(onclick := { () ⇒
+                        CoreUtils.replicate(tn, (replicated: TreeNodeData) ⇒ {
+                          refreshAnd(() ⇒ {
+                            toBeEdited() = Some(NodeEdition(replicated, true))
+                            drawTree
+                          })
                         })
-                      case _ ⇒
-                    },
-                    span(onclick := { () ⇒
-                      CoreUtils.replicate(tn, (replicated: TreeNodeData) ⇒ {
-                        refreshAnd(() ⇒ {
-                          toBeEdited() = Some(NodeEdition(replicated, true))
-                          drawTree
-                        })
-                      })
-                    })(arrow_right_and_left)
-                  )
+                      })(arrow_right_and_left)
+                    )
                 )
               }
               else div()

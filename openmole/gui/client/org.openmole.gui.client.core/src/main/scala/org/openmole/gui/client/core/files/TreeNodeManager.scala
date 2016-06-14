@@ -29,6 +29,7 @@ package object treenodemanager {
 }
 
 class TreeNodeManager {
+  implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
   val root = DirNode(Var("projects"), Var(SafePath.sp(Seq("projects"))), 0L, "", 0L, "")
 
   val dirNodeLine: Var[Seq[DirNode]] = Var(Seq(root))
@@ -45,38 +46,38 @@ class TreeNodeManager {
 
   val pluggables: Var[Seq[TreeNode]] = Var(Seq())
 
-  Obs(error) {
-    error().foreach(AlertPanel.treeNodeErrorDiv)
+  error.trigger {
+    error.now.foreach(AlertPanel.treeNodeErrorDiv)
   }
 
-  Obs(comment) {
-    comment().foreach(AlertPanel.treeNodeCommentDiv)
+  comment.trigger {
+    comment.now.foreach(AlertPanel.treeNodeCommentDiv)
   }
 
   def computeAndGetCurrentSons(fileFilter: FileFilter) = {
     computeCurrentSons(fileFilter = fileFilter)
-    sons().get(current)
+    sons.now.get(current.now)
   }
 
-  def trashCache(ontrashed: () ⇒ Unit, fileFilter: FileFilter = FileFilter()) = CoreUtils.updateSons(current, ontrashed, fileFilter)
+  def trashCache(ontrashed: () ⇒ Unit, fileFilter: FileFilter = FileFilter()) = CoreUtils.updateSons(current.now, ontrashed, fileFilter)
 
   def updateSon(dirNode: DirNode, newSons: Seq[TreeNode]) = {
-    sons() = sons().updated(dirNode, newSons)
+    sons() = sons.now.updated(dirNode, newSons)
 
   }
 
-  def isSelected(tn: TreeNode) = selected().contains(tn)
+  def isSelected(tn: TreeNode) = selected.now.contains(tn)
 
   def clearSelection = selected() = Seq()
 
   def clearSelectionExecpt(tn: TreeNode) = selected() = Seq(tn)
 
   def setSelected(tn: TreeNode, b: Boolean) = b match {
-    case true  ⇒ selected() = (selected() :+ tn).distinct
-    case false ⇒ selected() = selected().filterNot(_ == tn)
+    case true  ⇒ selected() = (selected.now :+ tn).distinct
+    case false ⇒ selected() = selected.now.filterNot(_ == tn)
   }
 
-  def setSelectedAsCopied = copied() = selected()
+  def setSelectedAsCopied = copied() = selected.now
 
   def emptyCopied = copied() = Seq()
 
@@ -89,37 +90,38 @@ class TreeNodeManager {
     comment() = None
   }
 
-  def head = dirNodeLine().head
+  def head = dirNodeLine.map { _.head }
 
-  def current = dirNodeLine().last
+  def current = dirNodeLine.map { _.last }
 
-  def take(n: Int) = dirNodeLine().take(n)
+  def take(n: Int) = dirNodeLine.map { _.take(n) }
 
-  def drop(n: Int) = dirNodeLine().drop(n)
+  def drop(n: Int) = dirNodeLine.map { _.drop(n) }
 
-  def +(dn: DirNode) = dirNodeLine() = dirNodeLine() :+ dn
+  def +(dn: DirNode) = dirNodeLine() = dirNodeLine.now :+ dn
 
-  def switch(dn: DirNode) =
-    dirNodeLine() = dirNodeLine().zipWithIndex.filter(_._1 == dn).headOption.map {
-      case (dn, index) ⇒ take(index + 1)
-    }.getOrElse(dirNodeLine())
+  def switch(dn: DirNode) = {
+    dirNodeLine() = dirNodeLine.now.zipWithIndex.filter { d ⇒ d._1 == dn }.headOption.map {
+      case (dn, id) ⇒ take(id + 1)
+    }.getOrElse(dirNodeLine).now
+  }
 
   def computeCurrentSons(oncomputed: () ⇒ Unit = () ⇒ {}, fileFilter: FileFilter): Unit = {
-    current match {
+    current.now match {
       case dirNode: DirNode ⇒
-        if (sons().contains(dirNode)) oncomputed()
+        if (sons.now.contains(dirNode)) oncomputed()
         else CoreUtils.updateSons(dirNode, oncomputed, fileFilter)
       case _ ⇒
     }
   }
 
-  def computePluggables(todo: () ⇒ Unit) = current match {
+  def computePluggables(todo: () ⇒ Unit) = current.now match {
     case dirNode: DirNode ⇒ CoreUtils.pluggables(dirNode, todo)
     case _                ⇒
   }
 
-  def isRootCurrent = current == root
+  def isRootCurrent = current.now == root
 
-  def isProjectsEmpty = sons().getOrElse(root, Seq()).isEmpty
+  def isProjectsEmpty = sons.now.getOrElse(root, Seq()).isEmpty
 
 }

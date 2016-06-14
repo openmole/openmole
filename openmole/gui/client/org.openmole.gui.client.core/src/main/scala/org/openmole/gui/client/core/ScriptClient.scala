@@ -110,7 +110,7 @@ object ScriptClient {
     lazy val connectButton = bs.button("Connect", btn_primary, () ⇒ connection).render
 
     def connection: Unit = {
-      if (passwordChosen()) setPassword(passwordInput.value)
+      if (passwordChosen.now) setPassword(passwordInput.value)
       else if (passwordInput.value == passwordAgainInput.value) {
         passwordChosen() = true
         setPassword(passwordInput.value)
@@ -179,7 +179,7 @@ object ScriptClient {
     val modelWizardItem = dialogNavItem("modelWizard", glyphSpan(glyph_upload_alt).tooltip(span("Model import")), () ⇒ modelWizardTriggerer.triggerOpen)
 
     val fileItem = dialogNavItem("files", glyphSpan(glyph_file).tooltip(span("Files")), todo = () ⇒ {
-      openFileTree() = !openFileTree()
+      openFileTree() = !openFileTree.now
     })
 
     dom.window.onkeydown = (k: KeyboardEvent) ⇒ {

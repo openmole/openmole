@@ -1,5 +1,6 @@
 package org.openmole.gui.client.core.files
 
+import fr.iscpif.scaladget.api.Select.SelectElement
 import org.openmole.gui.client.core.{ OMPost, CoreUtils }
 import org.openmole.gui.ext.data._
 import org.openmole.gui.misc.js.OMTags
@@ -82,6 +83,7 @@ object FileToolBar {
 import FileToolBar._
 
 class FileToolBar(treeNodePanel: TreeNodePanel) {
+  implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
   val selectedTool: Var[Option[SelectedTool]] = Var(None)
   val transferring: Var[ProcessState] = Var(Processed())
@@ -107,15 +109,15 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
   }
 
   def buildAndSelectSpan(tool: SelectedTool, todo: Boolean ⇒ Unit = (Boolean) ⇒ {}): Rx[TypedTag[HTMLSpanElement]] = buildSpan(tool, { () ⇒
-    val isSelectedTool = selectedTool() == Some(tool)
+    val isSelectedTool = selectedTool.now == Some(tool)
     if (isSelectedTool) unselectTool
     else {
       selectedTool() = Some(tool)
-      selectedTool() match {
+      selectedTool.now match {
         case Some(CopyTool | TrashTool) ⇒ treeNodePanel.turnSelectionTo(true)
         case Some(PluginTool) ⇒
           manager.computePluggables(() ⇒
-            if (manager.pluggables().isEmpty)
+            if (manager.pluggables.now.isEmpty)
               println("Empty")
             //AlertPanel.string("No plugin has been found in this folder", okaction = { () ⇒ unselectTool }, cancelaction = { () ⇒ unselectTool }, transform = RelativeCenterPosition, zone = FileZone)
             else
@@ -140,7 +142,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
     )
 
   private val upButton = upbtn((fileInput: HTMLInputElement) ⇒ {
-    FileManager.upload(fileInput, manager.current.safePath(), (p: ProcessState) ⇒ transferring() = p, UploadProject(), () ⇒ treeNodePanel.refreshAndDraw)
+    FileManager.upload(fileInput, manager.current.now.safePath.now, (p: ProcessState) ⇒ transferring() = p, UploadProject(), () ⇒ treeNodePanel.refreshAndDraw)
   })
 
   // New file tool
@@ -152,10 +154,10 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
   ).render
 
   lazy val addRootDirButton: Select[TreeNodeType] = {
-    val contents: Seq[(TreeNodeType, ModifierSeq)] = Seq((TreeNodeType.file, glyph_file +++ sheet.paddingRight(3)), (TreeNodeType.folder, glyph_folder_close +++ sheet.paddingRight(3)))
+    val contents: Seq[SelectElement[TreeNodeType]] = Seq(SelectElement(TreeNodeType.file, glyph_file +++ sheet.paddingRight(3)), SelectElement(TreeNodeType.folder, glyph_folder_close +++ sheet.paddingRight(3)))
     contents.select(Some(TreeNodeType.file), (tnt: TreeNodeType) ⇒ tnt.name, btn_default +++ borderRightFlat, onclickExtra = () ⇒ {
-      addRootDirButton.content().foreach { c ⇒
-        newNodeInput.placeholder = c.name + " name"
+      addRootDirButton.content.now.foreach { c ⇒
+        newNodeInput.placeholder = c.value.name + " name"
       }
     })
   }
@@ -177,7 +179,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
   ).render
 
   def filterSubmit = () ⇒ {
-    updateFilter(fileFilter().copy(threshold = thresholdInput.value, nameFilter = nameInput.value))
+    updateFilter(fileFilter.now.copy(threshold = thresholdInput.value, nameFilter = nameInput.value))
     false
   }
 
@@ -199,10 +201,10 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
       {
         val newFile = newNodeInput.value
         val currentDirNode = manager.current
-        addRootDirButton.content().map {
+        addRootDirButton.content.now.map {
           _ match {
-            case dt: DirNodeType  ⇒ CoreUtils.addDirectory(currentDirNode, newFile, () ⇒ unselectAndRefreshTree)
-            case ft: FileNodeType ⇒ CoreUtils.addFile(currentDirNode, newFile, () ⇒ unselectAndRefreshTree)
+            case dt: DirNodeType  ⇒ CoreUtils.addDirectory(currentDirNode.now, newFile, () ⇒ unselectAndRefreshTree)
+            case ft: FileNodeType ⇒ CoreUtils.addFile(currentDirNode.now, newFile, () ⇒ unselectAndRefreshTree)
           }
         }
       }
@@ -223,7 +225,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
   }
 
   val deleteButton = bs.button("Delete", btn_danger, () ⇒ {
-    CoreUtils.trashNodes(manager.selected(), fileFilter()) { () ⇒
+    CoreUtils.trashNodes(manager.selected.now, fileFilter.now) { () ⇒
       unselectAndRefreshTree
     }
   })
@@ -234,11 +236,10 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
   })
 
   val pluginButton = bs.button("Plug", btn_default, () ⇒ {
-    OMPost[Api].copyToPluginDir(manager.selected()).call().foreach { c ⇒
-      OMPost[Api].addPlugins(manager.selected().map {
-        _.name()
+    OMPost[Api].copyToPluginDir(manager.selected.now).call().foreach { c ⇒
+      OMPost[Api].addPlugins(manager.selected.now.map {
+        _.name.now
       }).call().foreach { x ⇒
-        println("EXX " + x)
         unselectAndRefreshTree
       }
     }
@@ -252,11 +253,11 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
     treeNodePanel.refreshAndDraw
   }
 
-  def switchAlphaSorting = updateFilter(fileFilter().switchTo(AlphaSorting))
+  def switchAlphaSorting = updateFilter(fileFilter.now.switchTo(AlphaSorting))
 
-  def switchTimeSorting = updateFilter(fileFilter().switchTo(TimeSorting))
+  def switchTimeSorting = updateFilter(fileFilter.now.switchTo(TimeSorting))
 
-  def switchSizeSorting = updateFilter(fileFilter().switchTo(SizeSorting))
+  def switchSizeSorting = updateFilter(fileFilter.now.switchTo(SizeSorting))
 
   val sortingGroup = {
     val topTriangle = glyph_triangle_top +++ (fontSize := 10)
@@ -287,7 +288,9 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
     )
   }
 
-  def getIfSelected(butt: TypedTag[HTMLButtonElement]) = if (manager.selected().isEmpty) tags.div else butt
+  def getIfSelected(butt: TypedTag[HTMLButtonElement]) = manager.selected.map { m ⇒
+    if (m.isEmpty) tags.div else butt
+  }
 
   val fileToolDiv = Rx {
     tags.div(centerElement +++ sheet.marginBottom(10))(

@@ -41,12 +41,12 @@ object TreeNodeTabs {
 
     val treeNode: TreeNode
 
-    val tabName = Var(treeNode.name())
+    val tabName = Var(treeNode.name.now)
     val id: String = getUUID
     val active: Var[Option[SetIntervalHandle]] = Var(None)
 
     def desactivate = {
-      active().foreach {
+      active.now.foreach {
         clearInterval
       }
       active() = None
@@ -70,7 +70,7 @@ object TreeNodeTabs {
     val editor: EditorPanelUI
 
     def save(afterSave: () ⇒ Unit) = editor.synchronized {
-      OMPost[Api].saveFile(treeNode.safePath(), editor.code).call().foreach(_ ⇒ afterSave())
+      OMPost[Api].saveFile(treeNode.safePath.now, editor.code).call().foreach(_ ⇒ afterSave())
     }
   }
 
@@ -106,16 +106,16 @@ object TreeNodeTabs {
     val editorElement = editor.view
     val editable = Var(_editable)
 
-    Obs(editable) {
-      editor.setReadOnly(!editable())
+    editable.trigger {
+      editor.setReadOnly(!editable.now)
     }
 
     val editButton = OMTags.glyphBorderButton("", btn_primary +++ editingElement, glyph_edit, () ⇒ {
-      editable() = !editable()
+      editable() = !editable.now
     })
 
     def controlElement = tags.div(
-      if (editable()) tags.div else editButton
+      if (editable.now) tags.div else editButton
     )
 
     lazy val overlayElement = tags.div
@@ -126,10 +126,10 @@ object TreeNodeTabs {
       overlayElement
     )
 
-    def fileContent = AlterableOnDemandFileContent(treeNode.safePath(), editor.code, () ⇒ editable())
+    def fileContent = AlterableOnDemandFileContent(treeNode.safePath.now, editor.code, () ⇒ editable.now)
 
     def refresh(afterRefresh: () ⇒ Unit) = {
-      if (editable()) save(afterRefresh)
+      if (editable.now) save(afterRefresh)
       else {
         val scrollPosition = editor.getScrollPostion
         update(() ⇒ {
@@ -161,7 +161,7 @@ object TreeNodeTabs {
 
     val editorElement = editor.view
 
-    def fileContent = AlterableFileContent(treeNode.safePath(), editor.code)
+    def fileContent = AlterableFileContent(treeNode.safePath.now, editor.code)
 
     def refresh(onsaved: () ⇒ Unit) = save(onsaved)
 
@@ -178,8 +178,8 @@ object TreeNodeTabs {
     def relativePath: SafePath
 
     def block = div(
-      div(if (overlaying()) playTabOverlay else emptyMod),
-      if (overlaying()) div(overlayElement)(s"Starting ${node.name()}, please wait ...")
+      div(if (overlaying.now) playTabOverlay else emptyMod),
+      if (overlaying.now) div(overlayElement)(s"Starting ${node.name.now}, please wait ...")
       else div,
       editorElement,
       controlElement
@@ -197,28 +197,28 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
     tab.activate
   }
 
-  def unActiveAll = tabs().map { t ⇒
+  def unActiveAll = tabs.now.map { t ⇒
     t.refresh()
     t.desactivate
   }
 
-  def isActive(tab: TreeNodeTab) = tab.active() match {
+  def isActive(tab: TreeNodeTab) = tab.active.now match {
     case Some(handle: SetIntervalHandle) ⇒ true
     case _                               ⇒ false
   }
 
   def ++(tab: TreeNodeTab) = {
-    tabs() = tabs() :+ tab
+    tabs() = tabs.now :+ tab
     setActive(tab)
   }
 
   def removeTab(tab: TreeNodeTab) = {
     val isactive = isActive(tab)
     tab.desactivate
-    tabs() = tabs().filterNot {
+    tabs() = tabs.now.filterNot {
       _ == tab
     }
-    if (isactive) tabs().lastOption.map {
+    if (isactive) tabs.now.lastOption.map {
       setActive
     }
   }
@@ -229,7 +229,7 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
     removeTab
   }
 
-  def alterables: Seq[AlterableFileContent] = tabs().map {
+  def alterables: Seq[AlterableFileContent] = tabs.now.map {
     _.fileContent
   }.collect {
     case a: AlterableFileContent                               ⇒ a
@@ -242,24 +242,24 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
     }
   }
 
-  def checkTabs = tabs().foreach { t: TreeNodeTab ⇒
-    OMPost[Api].exists(t.treeNode.safePath()).call().foreach { e ⇒
+  def checkTabs = tabs.now.foreach { t: TreeNodeTab ⇒
+    OMPost[Api].exists(t.treeNode.safePath.now).call().foreach { e ⇒
       if (!e) removeTab(t)
     }
   }
 
   def rename(tn: TreeNode, newNode: TreeNode) = {
     find(tn).map { tab ⇒
-      tab.tabName() = newNode.name()
-      tab.treeNode.safePath() = newNode.safePath()
+      tab.tabName() = newNode.name.now
+      tab.treeNode.safePath() = newNode.safePath.now
     }
   }
 
-  def find(treeNode: TreeNode) = tabs().find { t ⇒
-    t.treeNode.safePath() == treeNode.safePath()
+  def find(treeNode: TreeNode) = tabs.now.find { t ⇒
+    t.treeNode.safePath.now == treeNode.safePath.now
   }
 
-  def active = tabs().find { t ⇒ isActive(t) }
+  def active = tabs.now.find { t ⇒ isActive(t) }
 
   val render = div( /*Rx*/ {
     println("tab render")

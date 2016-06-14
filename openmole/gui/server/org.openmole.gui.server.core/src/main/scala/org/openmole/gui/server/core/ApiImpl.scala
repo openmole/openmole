@@ -397,10 +397,8 @@ object ApiImpl extends Api {
 
   //PLUGINS
   def addPlugins(nodes: Seq[String]): Seq[Error] = {
-    println("ADD  " + nodes)
     PluginManager.tryLoad(nodes.map { n ⇒ new File(Workspace.pluginDir, n) }).map {
       case (file, e) ⇒
-        println("EE " + e.getMessage)
         ErrorBuilder(e)
     }.toSeq
   }
