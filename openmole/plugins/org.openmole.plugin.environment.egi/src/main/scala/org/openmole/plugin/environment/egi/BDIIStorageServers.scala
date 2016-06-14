@@ -20,6 +20,7 @@ package org.openmole.plugin.environment.egi
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.tool.file._
 import org.openmole.core.batch.environment.BatchEnvironment
+import fr.iscpif.gridscale.tools.findWorking
 import fr.iscpif.gridscale.egi.{ BDII, GlobusAuthentication }
 import org.openmole.core.batch.replication.ReplicaCatalog
 import org.openmole.core.workspace._
@@ -36,13 +37,13 @@ import BDIIStorageServers.Log._
 trait BDIIStorageServers extends BatchEnvironment { env ⇒
   type SS = EGIStorageService
 
-  def bdiiServer: BDII
+  def bdiis: Seq[BDII]
   def voName: String
   def debug: Boolean
   def proxyCreator: () ⇒ GlobusAuthentication.Proxy
 
   @transient lazy val storages = {
-    val webdavStorages = bdiiServer.queryWebDAVLocations(voName)
+    val webdavStorages = findWorking(bdiis, (b: BDII) ⇒ b.queryWebDAVLocations(voName))
     if (!webdavStorages.isEmpty) {
       logger.fine("Use webdav storages:" + webdavStorages.mkString(","))
       webdavStorages.map { s ⇒ EGIWebDAVStorageService(s, env, voName, debug, proxyCreator) }

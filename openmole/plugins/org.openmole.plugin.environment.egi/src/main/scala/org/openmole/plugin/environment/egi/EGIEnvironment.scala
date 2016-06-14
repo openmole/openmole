@@ -21,14 +21,18 @@ import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.tool.file._
 import org.openmole.core.tools.service.Random
 import java.io.File
+import java.net.URI
+import fr.iscpif.gridscale.egi.{ BDII }
+
 import org.openmole.core.batch.environment._
 import org.openmole.core.batch.control._
 import org.openmole.core.workspace._
 import org.openmole.core.workflow.dsl._
-
 import org.openmole.tool.logger.Logger
+
 import annotation.tailrec
 import Random._
+
 import concurrent.duration._
 
 object EGIEnvironment extends Logger {
@@ -80,7 +84,11 @@ object EGIEnvironment extends Logger {
   val RunningHistoryDuration = ConfigurationLocation("EGIEnvironment", "RunningHistoryDuration", Some(12 hours))
   val EagerSubmissionThreshold = ConfigurationLocation("EGIEnvironment", "EagerSubmissionThreshold", Some(0.5))
 
-  val DefaultBDII = ConfigurationLocation("EGIEnvironment", "DefaultBDII", Some("ldap://cclcgtopbdii02.in2p3.fr:2170"))
+  val DefaultBDIIs =
+    ConfigurationLocation("EGIEnvironment", "DefaultBDIIs", Some(Seq("topbdii.grif.fr", "bdii.ndgf.org", "lcg-bdii.cern.ch", "bdii-fzk.gridka.de", "topbdii.egi.cesga.es", "egee-bdii.cnaf.infn.it")))
+
+  def toBDII(bdii: URI) = BDII(bdii.getHost, bdii.getPort, Workspace.preference(FetchResourcesTimeOut))
+  def defaultBDIIs = Workspace.preference(EGIEnvironment.DefaultBDIIs).map(b ⇒ new URI(b)).map(toBDII)
 
   val EnvironmentCleaningThreads = ConfigurationLocation("EGIEnvironment", "EnvironmentCleaningThreads", Some(20))
 
@@ -137,7 +145,7 @@ object EGIEnvironment extends Logger {
   Workspace setDefault RunningHistoryDuration
   Workspace setDefault EagerSubmissionThreshold
 
-  Workspace setDefault DefaultBDII
+  Workspace setDefault DefaultBDIIs
 
   Workspace setDefault EnvironmentCleaningThreads
 

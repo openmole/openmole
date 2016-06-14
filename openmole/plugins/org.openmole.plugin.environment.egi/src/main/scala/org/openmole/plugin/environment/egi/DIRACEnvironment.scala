@@ -60,7 +60,7 @@ object DIRACEnvironment {
       voName = voName,
       service = service,
       group = group,
-      bdii = bdii.map(new URI(_)).getOrElse(new URI(Workspace.preference(EGIEnvironment.DefaultBDII))),
+      bdiis = bdii.map(b ⇒ Seq(EGIEnvironment.toBDII(new URI(b)))).getOrElse(EGIEnvironment.defaultBDIIs),
       vomsURLs = vomsURLs.getOrElse(EGIAuthentication.getVMOSOrError(voName)),
       setup = setup.getOrElse("Dirac-Production"),
       fqan = fqan,
@@ -87,7 +87,7 @@ class DIRACEnvironment(
     val voName:                  String,
     val service:                 Option[String],
     val group:                   Option[String],
-    val bdii:                    URI,
+    val bdiis:                   Seq[BDII],
     val vomsURLs:                Seq[String],
     val setup:                   String,
     val fqan:                    Option[String],
@@ -108,8 +108,6 @@ class DIRACEnvironment(
     registerAgents
     super.submit(job)
   }
-
-  def bdiiServer: BDII = BDII(bdii.getHost, bdii.getPort, Workspace.preference(EGIEnvironment.FetchResourcesTimeOut))
 
   def executionJob(job: Job) = new DiracBatchExecutionJob(job, this)
 

@@ -19,6 +19,7 @@ package org.openmole.plugin.environment.egi
 
 import java.net.URI
 
+import fr.iscpif.gridscale.tools.findWorking
 import fr.iscpif.gridscale.egi.{ BDII }
 import org.openmole.core.batch.control.LimitedAccess
 import org.openmole.core.batch.environment.{ BatchEnvironment, BatchExecutionJob, MemoryRequirement }
@@ -55,7 +56,7 @@ object WMSEnvironment {
   )(implicit authentication: EGIAuthentication, uncypher: Decrypt) =
     new WMSEnvironment(
       voName = voName,
-      bdii = bdii.map(s ⇒ new URI(s)).getOrElse(new URI(Workspace.preference(EGIEnvironment.DefaultBDII))),
+      bdiis = bdii.map(s ⇒ Seq(EGIEnvironment.toBDII(new URI(s)))).getOrElse(EGIEnvironment.defaultBDIIs),
       vomsURLs = vomsURLs.getOrElse(EGIAuthentication.getVMOSOrError(voName)),
       fqan = fqan,
       openMOLEMemory = openMOLEMemory,
@@ -81,7 +82,7 @@ class EGIBatchExecutionJob(val job: Job, val environment: WMSEnvironment) extend
 
 class WMSEnvironment(
     val voName:                  String,
-    val bdii:                    URI,
+    val bdiis:                   Seq[BDII],
     val vomsURLs:                Seq[String],
     val fqan:                    Option[String],
     override val openMOLEMemory: Option[Int],
@@ -127,7 +128,7 @@ class WMSEnvironment(
     )(decrypt)
 
   @transient lazy val jobServices = {
-    val bdiiWMS = bdiiServer.queryWMSLocations(voName)
+    val bdiiWMS = findWorking(bdiis, (b: BDII) ⇒ b.queryWMSLocations(voName))
     bdiiWMS.map {
       js ⇒
         new WMSJobService {
@@ -184,6 +185,5 @@ class WMSEnvironment(
     select(jss.toList, rate)
   }
 
-  def bdiiServer: BDII = BDII(bdii.getHost, bdii.getPort, Workspace.preference(FetchResourcesTimeOut))
   override def runtimeSettings = super.runtimeSettings.copy(archiveResult = true)
 }
