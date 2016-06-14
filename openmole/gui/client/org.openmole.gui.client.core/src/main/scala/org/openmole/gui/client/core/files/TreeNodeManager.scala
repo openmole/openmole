@@ -90,9 +90,9 @@ class TreeNodeManager {
     comment() = None
   }
 
-  def head = dirNodeLine.map { _.head }
+  val head = dirNodeLine.map { _.head }
 
-  def current = dirNodeLine.map { _.last }
+  val current = dirNodeLine.map { _.last }
 
   def take(n: Int) = dirNodeLine.map { _.take(n) }
 

@@ -120,10 +120,12 @@ object TreeNodeTabs {
 
     lazy val overlayElement = tags.div
 
-    def block = div(
-      editorElement,
-      controlElement,
-      overlayElement
+    val block = Var(
+      div(
+        editorElement,
+        controlElement,
+        overlayElement
+      )
     )
 
     def fileContent = AlterableOnDemandFileContent(treeNode.safePath.now, editor.code, () ⇒ editable.now)
@@ -177,13 +179,15 @@ object TreeNodeTabs {
 
     def relativePath: SafePath
 
-    def block = div(
-      div(if (overlaying.now) playTabOverlay else emptyMod),
-      if (overlaying.now) div(overlayElement)(s"Starting ${node.name.now}, please wait ...")
-      else div,
-      editorElement,
-      controlElement
-    )
+    val block = overlaying.map { o ⇒
+      div(
+        div(if (o) playTabOverlay else emptyMod),
+        if (o) div(overlayElement)(s"Starting ${node.name.now}, please wait ...")
+        else div,
+        editorElement,
+        controlElement
+      )
+    }
   }
 
 }
@@ -194,6 +198,7 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
 
   def setActive(tab: TreeNodeTab) = {
     unActiveAll
+    println("activate " + tab.tabName)
     tab.activate
   }
 
@@ -290,9 +295,10 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
       //Panes
       div(tabContent)(
         Rx {
+          println("Tabcontent RX")
           for (t ← tabs()) yield {
             val isTabActive = isActive(t)
-
+            println("Active " + t.tabName + " " + isTabActive)
             div(
               role := "tabpanel",
               ms("tab-pane " + {
@@ -300,10 +306,11 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
               }), id := t.id
             )(if (isTabActive) {
                 active.map { tab ⇒
+                  println("Tab::: " + tab)
                   tab match {
                     case oms: OMSTabControl        ⇒ oms.block
                     case etc: LockedEditionNodeTab ⇒ etc.block
-                    case _                         ⇒ div(tab.editorElement)
+                    case _                         ⇒ Var(div(tab.editorElement))
                   }
                 }
               }
