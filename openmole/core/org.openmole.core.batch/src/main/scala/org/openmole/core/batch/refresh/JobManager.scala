@@ -141,7 +141,7 @@ class JobManager { self ⇒
 
   }
 
-  def killAndClean(job: BatchExecutionJob) {
+  def killAndClean(job: BatchExecutionJob) = {
     job.batchJob.foreach(bj ⇒ self ! KillBatchJob(bj))
     job.batchJob = None
     job.serializedJob.foreach(j ⇒ self ! CleanSerializedJob(j))

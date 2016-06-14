@@ -25,5 +25,6 @@ trait BatchJobId extends BatchJob {
 
   def kill(implicit token: AccessToken) = super.kill(id)
   def updateState(implicit token: AccessToken): ExecutionState = super.updateState(id)
+
   override def toString = id.toString
 }
