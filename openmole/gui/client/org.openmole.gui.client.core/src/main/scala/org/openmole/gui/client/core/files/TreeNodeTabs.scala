@@ -46,8 +46,10 @@ object TreeNodeTabs {
     val active: Var[Option[SetIntervalHandle]] = Var(None)
 
     def desactivate = {
-      active.now.foreach {
-        clearInterval
+      active.map {
+        _.foreach {
+          clearInterval
+        }
       }
       active() = None
     }
@@ -88,15 +90,6 @@ object TreeNodeTabs {
       )
     }
   }
-
-  /* class EditableNodeTab(val treeNode: TreeNode, val editor: EditorPanelUI) extends TreeNodeTab with Save {
-
-     val editorElement = editor.view
-
-     def fileContent = AlterableFileContent(treeNode.safePath(), editor.code)
-
-     def refresh(onsaved: () ⇒ Unit) = save(onsaved)
-   }*/
 
   class LockedEditionNodeTab(
       val treeNode: TreeNode,
@@ -198,18 +191,23 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
 
   def setActive(tab: TreeNodeTab) = {
     unActiveAll
-    println("activate " + tab.tabName)
     tab.activate
   }
 
-  def unActiveAll = tabs.now.map { t ⇒
-    t.refresh()
-    t.desactivate
+  def unActiveAll = tabs.map {
+    _.foreach { t ⇒
+      t.refresh()
+      t.desactivate
+    }
   }
 
-  def isActive(tab: TreeNodeTab) = tab.active.now match {
-    case Some(handle: SetIntervalHandle) ⇒ true
-    case _                               ⇒ false
+  def isActive(tab: TreeNodeTab) = tab.active.map { t ⇒
+    t.map {
+      _ match {
+        case handle: SetIntervalHandle ⇒ true
+        case _                         ⇒ false
+      }
+    }.getOrElse(false)
   }
 
   def ++(tab: TreeNodeTab) = {
@@ -218,13 +216,14 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
   }
 
   def removeTab(tab: TreeNodeTab) = {
-    val isactive = isActive(tab)
     tab.desactivate
     tabs() = tabs.now.filterNot {
       _ == tab
     }
-    if (isactive) tabs.now.lastOption.map {
-      setActive
+    isActive(tab).map { act ⇒
+      if (act) tabs.now.lastOption.map {
+        setActive
+      }
     }
   }
 
@@ -264,10 +263,13 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
     t.treeNode.safePath.now == treeNode.safePath.now
   }
 
-  def active = tabs.now.find { t ⇒ isActive(t) }
+  val active = tabs.map {
+    _.find { t ⇒
+      isActive(t).now
+    }
+  }
 
-  val render = div( /*Rx*/ {
-    println("tab render")
+  val render = div({
     div(role := "tabpanel")(
       //Headers
       Rx {
@@ -276,7 +278,7 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
             li(
               role := "presentation",
               `class` := {
-                if (isActive(t)) "active" else ""
+                if (isActive(t)()) "active" else ""
               }
             )(
                 a(
@@ -295,27 +297,21 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
       //Panes
       div(tabContent)(
         Rx {
-          println("Tabcontent RX")
           for (t ← tabs()) yield {
             val isTabActive = isActive(t)
-            println("Active " + t.tabName + " " + isTabActive)
             div(
               role := "tabpanel",
-              ms("tab-pane " + {
-                if (isTabActive) "active" else ""
+              ms("tab-pane " + isTabActive.map { a ⇒
+                if (a) "active" else ""
               }), id := t.id
-            )(if (isTabActive) {
-                active.map { tab ⇒
-                  println("Tab::: " + tab)
-                  tab match {
-                    case oms: OMSTabControl        ⇒ oms.block
-                    case etc: LockedEditionNodeTab ⇒ etc.block
-                    case _                         ⇒ Var(div(tab.editorElement))
-                  }
+            )(if (isTabActive()) {
+                t match {
+                  case oms: OMSTabControl        ⇒ oms.block
+                  case etc: LockedEditionNodeTab ⇒ etc.block
+                  case _                         ⇒ Var(div(t.editorElement))
                 }
               }
               else div())
-
           }
         }
       )

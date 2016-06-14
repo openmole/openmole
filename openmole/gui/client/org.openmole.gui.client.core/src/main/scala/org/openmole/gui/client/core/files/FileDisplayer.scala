@@ -40,11 +40,10 @@ class FileDisplayer(implicit executionTriggerer: PanelTriggerer) {
 
   val tabs = TreeNodeTabs()
 
-  def alreadyDisplayed(tn: TreeNode) = {
-    tabs.tabs.now.find {
-      _.treeNode.safePath.now.path == tn.safePath.now.path
+  def alreadyDisplayed(tn: TreeNode) =
+    tabs.tabs.now.find { t ⇒
+      t.treeNode.safePath.now.path == tn.safePath.now.path
     }
-  }
 
   class EditableNodeTabWithOMSTabControl(tn: TreeNode, ed: EditorPanelUI) /*extends EditableNodeTab(tn, ed)*/ extends OMSTabControl(tn, ed) {
 
