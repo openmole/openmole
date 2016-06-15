@@ -252,14 +252,14 @@ class ExecutionPanel extends ModalPanel {
 
             Seq(
               tr(row +++ omsheet.executionTable, colspan := 12)(
-                td(colMD(2))(visibleClass(id.id, scriptID))(scriptLink),
+                td(colMD(2), pointer)(visibleClass(id.id, scriptID))(scriptLink),
                 td(colMD(2))(div(Utils.longToDate(staticInfo.now(id).startDate))),
                 td(colMD(2))(glyphAndText(glyph_flash, details.running.toString)),
                 td(colMD(2))(glyphAndText(glyph_flag, details.ratio.toString)),
                 td(colMD(1))(div(durationString)),
                 td(colMD(1))(ms(executionInfo.state + "State"))(stateLink),
-                td(colMD(1))(visibleClass(id.id, envID))(envLink),
-                td(colMD(1))(visibleClass(id.id, outputStreamID))(outputLink),
+                td(colMD(1), pointer)(visibleClass(id.id, envID))(envLink),
+                td(colMD(1), pointer)(visibleClass(id.id, outputStreamID))(outputLink),
                 td(colMD(1))(tags.span(glyph_remove +++ ms("removeExecution"), onclick := { () ⇒
                   cancelExecution(id)
                 })),
@@ -268,9 +268,11 @@ class ExecutionPanel extends ModalPanel {
                 }))
               ),
               tr(row)(
-                expander.getVisible(id.id) match {
-                  case Some(v: VisibleID) ⇒ td(colspan := 12)(hiddenMap(v))
-                  case _                  ⇒ div()
+                expander.getVisible(id.id).map {
+                  _ match {
+                    case Some(v: VisibleID) ⇒ td(colspan := 12)(hiddenMap(v))
+                    case _                  ⇒ div()
+                  }
                 }
               )
             )
@@ -300,7 +302,13 @@ class ExecutionPanel extends ModalPanel {
     if (size == 0L) ""
     else s"($readable)"
 
-  def visibleClass(expandID: ExpandID, visibleID: VisibleID): ModifierSeq = (expander.isVisible(expandID, visibleID), omsheet.executionVisible, pointer)
+  def visibleClass(expandID: ExpandID, visibleID: VisibleID) = {
+    expander.isVisible(expandID, visibleID).map { iv ⇒
+      tags.span(
+        if (iv) omsheet.executionVisible else emptyMod
+      )
+    }
+  }
 
   val settingsButton = tags.span(
     btn_default +++ glyph_settings +++ omsheet.settingsButton
