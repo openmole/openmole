@@ -34,6 +34,7 @@ public class Launcher {
         File directory = null;
         String run = null;
         String osgiDirectory = null;
+        List<String> priority = new LinkedList<String>();
 
         String[] forwardAgs = new String[0];
 
@@ -49,11 +50,15 @@ public class Launcher {
                 run = args[i];
                 i++;
                 continue;
-            } else if (args[i].contentEquals("--osgi-directory")) {
+            } else if(args[i].contentEquals("--osgi-directory")) {
                 i++;
                 osgiDirectory = args[i];
                 i++;
                 continue;
+            } else if(args[i].contentEquals("--priority")) {
+                i++;
+                priority.add(args[i]);
+                i++;
             } else if(args[i].contentEquals("--")) {
                 i++;
                 forwardAgs = Arrays.copyOfRange(args, i, args.length);
@@ -90,6 +95,12 @@ public class Launcher {
 
             for(File f: directory.listFiles()) {
                 bundles.add(context.installBundle(f.toURI().toString()));
+            }
+
+            for(String p: priority) {
+                for(Bundle b: bundles) {
+                    if(b.getSymbolicName().contains(p)) b.start();
+                }
             }
 
             framework.start();
