@@ -36,6 +36,7 @@ import Expander._
 
 class Expander {
 
+  implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
   private val expanded: Var[Map[ExpandID, Var[Boolean]]] = Var(Map())
   private val visible: Var[Map[ExpandID, Var[VisibleID]]] = Var(Map())
 
@@ -44,14 +45,14 @@ class Expander {
     if (!visible.now.isDefinedAt(expandId)) visible() = visible.now.updated(expandId, Var(visibleId))
   }
 
-  def isExpanded(id: ExpandID) = expanded.now.getOrElse(id, Var(false)).now
+  def isExpanded(id: ExpandID) = expanded.flatMap { _.getOrElse(id, Var(false)) }
 
-  def isVisible(expandID: ExpandID, visibleID: VisibleID): Boolean = getVisible(expandID).exists { v ⇒ v == visibleID }
+  def isVisible(expandID: ExpandID, visibleID: VisibleID) = getVisible(expandID).map { _.exists { v ⇒ v == visibleID } }
 
-  def getVisible(expandId: ExpandID): Option[VisibleID] = if (isExpanded(expandId)) {
-    Some(visible.now(expandId).now)
+  def getVisible(expandId: ExpandID) = isExpanded(expandId).map { ie ⇒
+    if (ie) Some(visible.now(expandId).now)
+    else None
   }
-  else None
 
   def setTarget(expandId: ExpandID, visibleId: VisibleID) = {
     if (expanded.now(expandId).now) {
