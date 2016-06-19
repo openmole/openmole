@@ -22,7 +22,7 @@ import java.nio.file._
 import java.util.concurrent.{ TimeoutException, Callable, TimeUnit }
 import com.google.common.cache.CacheBuilder
 import org.openmole.core.fileservice.FileDeleter
-import org.openmole.core.tools.cache._
+import org.openmole.tool.cache._
 import org.openmole.core.batch.control._
 import org.openmole.core.batch.environment._
 import org.openmole.core.batch.refresh._

@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 
-package org.openmole.core.tools.cache
+package org.openmole.tool.cache
 
 object Lazy {
 

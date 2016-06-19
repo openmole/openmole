@@ -15,11 +15,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.tools.cache
+package org.openmole.tool.cache
 
-import scala.collection.mutable.HashMap
-import scala.collection.mutable.SynchronizedMap
-import scala.collection.mutable.WeakHashMap
+import scala.collection.mutable.{ HashMap, WeakHashMap }
 
 class AssociativeCache[K, T] {
 

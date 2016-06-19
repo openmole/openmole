@@ -42,7 +42,7 @@ import org.openmole.core.workflow.execution._
 import org.openmole.core.batch.message._
 import org.openmole.core.console.ScalaREPL.ReferencedClasses
 import org.openmole.core.console.{ REPLClassloader, ScalaREPL }
-import org.openmole.core.tools.cache.AssociativeCache
+import org.openmole.tool.cache.AssociativeCache
 import org.openmole.tool.hash.Hash
 
 import ref.WeakReference
