@@ -10,7 +10,7 @@ object Lazy {
   /**
    * Build a lazy proxy from a function
    *
-   * @tparam the type of the lazily computed value
+   * @tparam T the type of the lazily computed value
    * @param f the function to compute the value
    */
   def apply[T](f: ⇒ T) = new Lazy(f)
@@ -25,16 +25,19 @@ object Lazy {
 /**
  * Proxy for lazy computation of values
  *
- * @tparam the type of the lazily computed value
+ * @tparam T the type of the lazily computed value
  * @param f a function to compute the value
  */
 class Lazy[T](f: ⇒ T) {
 
   /** Cache for value memoization */
-  lazy val value: T = f
+  @volatile @transient private var value: T = _
 
   /** Get the value */
-  def apply() = value
+  def apply(): T = {
+    if (value == null) this.synchronized { if (value == null) value = f }
+    value
+  }
 
-  override def toString() = value.toString
+  override def toString() = apply().toString
 }
