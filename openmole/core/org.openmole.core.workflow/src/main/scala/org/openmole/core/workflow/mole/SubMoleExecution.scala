@@ -34,10 +34,12 @@ import MoleJob._
 import org.openmole.tool.lock._
 import org.openmole.tool.logger.Logger
 import org.openmole.tool.thread._
-import scala.collection.mutable.Buffer
 
+import scala.collection.mutable.Buffer
 import scala.concurrent.stm._
-import java.util.concurrent.{ Semaphore, locks, Executors }
+import java.util.concurrent.{ Executors, Semaphore, locks }
+
+import org.openmole.tool.cache.Cache$
 
 object SubMoleExecution extends Logger {
   case class Finished(val ticket: Ticket, canceled: Boolean) extends Event[SubMoleExecution]
@@ -50,7 +52,8 @@ class SubMoleExecution(
     val moleExecution: MoleExecution
 ) {
 
-  @transient lazy val transitionLock = new locks.ReentrantLock()
+  @transient private lazy val _transitionLock = new locks.ReentrantLock()
+  def transitionLock = synchronized(_transitionLock)
 
   private val _nbJobs = Ref(0)
   private val _children = TSet.empty[SubMoleExecution]

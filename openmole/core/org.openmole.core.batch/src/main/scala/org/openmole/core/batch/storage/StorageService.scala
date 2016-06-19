@@ -53,24 +53,26 @@ import StorageService.Log._
 trait StorageService extends BatchService with Storage {
 
   def url: URI
-  val id: String
+  def id: String
+
   val remoteStorage: RemoteStorage
 
-  @transient private lazy val _directoryCache =
+  val _directoryCache = Cache {
     CacheBuilder.
       newBuilder().
       expireAfterWrite(Workspace.preference(StorageService.DirRegenerate).toMillis, TimeUnit.MILLISECONDS).
       build[String, String]()
+  }
 
-  @transient private lazy val _serializedRemoteStorage = {
+  val _serializedRemoteStorage = Cache {
     val file = Workspace.newFile("remoteStorage", ".xml")
     FileDeleter.deleteWhenGarbageCollected(file)
     SerialiserService.serialiseAndArchiveFiles(remoteStorage, file)
     file
   }
 
-  def serializedRemoteStorage = synchronized { _serializedRemoteStorage }
-  def directoryCache = synchronized { _directoryCache }
+  def serializedRemoteStorage = _serializedRemoteStorage()
+  def directoryCache = _directoryCache()
 
   protected implicit def callable[T](f: () ⇒ T): Callable[T] = new Callable[T]() { def call() = f() }
 

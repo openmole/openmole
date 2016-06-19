@@ -19,6 +19,7 @@ package org.openmole.plugin.task.netlogo
 
 import java.io.File
 import java.util.AbstractCollection
+
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.output.OutputManager
 import org.openmole.core.tools.io.Prettifier
@@ -27,12 +28,12 @@ import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.tools.{ VariableExpansion, ExpandedString }
+import org.openmole.core.workflow.tools.{ ExpandedString, VariableExpansion }
 import org.openmole.plugin.task.external.External._
 import org.openmole.plugin.task.external._
 import org.openmole.core.workflow.dsl._
-
 import Prettifier._
+import org.openmole.tool.cache.Cache
 
 object NetLogoTask {
   case class Workspace(script: String, workspace: OptionalArgument[String] = None)
@@ -56,7 +57,7 @@ trait NetLogoTask extends Task {
         throw new UserBadDataError(s"$msg:\n" + e.stackStringWithMargin)
     }
 
-  @transient lazy val expandedCommands = launchingCommands.map(VariableExpansion(_))
+  val expandedCommands = Cache(launchingCommands.map(VariableExpansion(_)))
 
   override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider): Context = external.withWorkDir(executionContext) { tmpDir ⇒
     val workDir =
@@ -89,7 +90,7 @@ trait NetLogoTask extends Task {
           executeNetLogo("set " + inBinding._2 + " " + v)
         }
 
-        for (cmd ← expandedCommands) executeNetLogo(cmd.expand(context))
+        for (cmd ← expandedCommands()) executeNetLogo(cmd.expand(context))
 
         val contextResult =
           external.fetchOutputFiles(preparedContext, external.relativeResolver(workDir)) ++ netLogoOutputs.map {

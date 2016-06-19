@@ -5,7 +5,7 @@
 
 package org.openmole.tool.cache
 
-object Lazy {
+object Cache {
 
   /**
    * Build a lazy proxy from a function
@@ -13,12 +13,12 @@ object Lazy {
    * @tparam T the type of the lazily computed value
    * @param f the function to compute the value
    */
-  def apply[T](f: ⇒ T) = new Lazy(f)
+  def apply[T](f: ⇒ T) = new Cache(f)
 
   /**
    * Defines ordering on lazy proxies
    */
-  implicit def lazyOrdering[T](implicit ord: Ordering[T]): Ordering[Lazy[T]] = Ordering.by(_.apply)
+  implicit def lazyOrdering[T](implicit ord: Ordering[T]): Ordering[Cache[T]] = Ordering.by(_.apply)
 
 }
 
@@ -28,7 +28,7 @@ object Lazy {
  * @tparam T the type of the lazily computed value
  * @param f a function to compute the value
  */
-class Lazy[T](f: ⇒ T) {
+class Cache[T](f: ⇒ T) {
 
   /** Cache for value memoization */
   @volatile @transient private var value: T = _
@@ -41,3 +41,4 @@ class Lazy[T](f: ⇒ T) {
 
   override def toString() = apply().toString
 }
+

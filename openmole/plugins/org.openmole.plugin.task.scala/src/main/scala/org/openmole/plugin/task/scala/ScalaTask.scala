@@ -28,6 +28,7 @@ import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.validation._
 import org.openmole.plugin.task.external.{ External, ExternalBuilder }
 import org.openmole.plugin.task.jvm._
+import org.openmole.tool.cache.Cache
 
 import scala.util._
 
@@ -66,7 +67,7 @@ object ScalaTask {
     external:   External
 ) extends JVMLanguageTask with ValidateTask {
 
-  @transient lazy val scalaCompilation =
+  val scalaCompilation = Cache {
     ScalaWrappedCompilation.static(
       sourceCode,
       inputs.toSeq,
@@ -74,15 +75,16 @@ object ScalaTask {
       libraries = libraries,
       plugins = plugins
     )(manifest[java.util.Map[String, Any]])
+  }
 
   override def validate =
-    Try(scalaCompilation) match {
+    Try(scalaCompilation()) match {
       case Success(_) ⇒ Seq.empty
       case Failure(e) ⇒ Seq(e)
     }
 
   override def processCode(context: Context)(implicit rng: RandomProvider) = {
-    val map = scalaCompilation().from(context)(rng)
+    val map = scalaCompilation()().from(context)(rng)
     outputs.toSeq.map {
       o ⇒ Variable.unsecure(o, Option(map.get(o.name)).getOrElse(new InternalProcessingError(s"Not found output $o")))
     }

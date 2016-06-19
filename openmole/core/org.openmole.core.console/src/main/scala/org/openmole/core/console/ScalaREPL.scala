@@ -143,6 +143,7 @@ class REPLClassloader(val file: AbstractFile, parent: ClassLoader) extends scala
     }
 
     val bundledOther = other.map { c ⇒
+      //TODO tryLoadClass is costly, could we cache it ?
       val bundle = tryToLoadClass(c).flatMap(PluginManager.bundleForClass)
       BundledClass(name = c, bundle = bundle)
     }

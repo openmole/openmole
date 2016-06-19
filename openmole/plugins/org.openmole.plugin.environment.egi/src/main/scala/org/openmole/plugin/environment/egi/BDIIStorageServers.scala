@@ -29,6 +29,7 @@ import org.openmole.tool.logger.Logger
 import java.io.File
 
 import org.openmole.core.tools.math._
+import org.openmole.tool.cache.Cache
 
 object BDIIStorageServers extends Logger
 
@@ -42,7 +43,8 @@ trait BDIIStorageServers extends BatchEnvironment { env ⇒
   def debug: Boolean
   def proxyCreator: () ⇒ GlobusAuthentication.Proxy
 
-  @transient lazy val storages = {
+  def storages = _storages()
+  val _storages = Cache {
     val webdavStorages = findWorking(bdiis, (b: BDII) ⇒ b.queryWebDAVLocations(voName))
     if (!webdavStorages.isEmpty) {
       logger.fine("Use webdav storages:" + webdavStorages.mkString(","))

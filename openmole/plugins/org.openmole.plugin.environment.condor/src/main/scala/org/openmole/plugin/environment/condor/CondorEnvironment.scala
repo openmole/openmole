@@ -19,15 +19,16 @@
 package org.openmole.plugin.environment.condor
 
 import fr.iscpif.gridscale.condor.CondorRequirement
-import fr.iscpif.gridscale.ssh.SSHStorage
-import fr.iscpif.gridscale.ssh.SSHHost
+import fr.iscpif.gridscale.ssh.{ SSHAuthentication, SSHHost, SSHStorage }
 import java.net.URI
+
 import org.openmole.core.batch.control.LimitedAccess
 import org.openmole.core.batch.environment._
 import org.openmole.core.workspace._
 import org.openmole.core.workflow.dsl._
 import org.openmole.plugin.environment.gridscale._
 import org.openmole.plugin.environment.ssh._
+import org.openmole.tool.cache.Cache
 
 import scala.concurrent.duration.Duration
 
@@ -90,13 +91,19 @@ class CondorEnvironment(
 
   type JS = CondorJobService
 
-  @transient lazy val jobService = new CondorJobService with ThisHost {
-    // TODO not available in the GridScale plugin yet
-    //def queue = env.queue
-    val environment = env
-    def sharedFS = storage
-    def workDirectory = env.workDirectory
-  }
+  val jobService =
+    new CondorJobService {
+      // TODO not available in the GridScale plugin yet
+      //def queue = env.queue
+      def environment = env
+      def sharedFS = storage
+      def workDirectory = env.workDirectory
+      def timeout = env.timeout
+      def credential = env.credential
+      def user = env.user
+      def host = env.host
+      def port = env.port
+    }
 
   def allJobServices = List(jobService)
 

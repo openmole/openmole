@@ -21,17 +21,21 @@ package org.openmole.plugin.environment.egi
 import org.openmole.core.batch.environment.SerializedJob
 import org.openmole.tool.file._
 import org.openmole.core.batch.storage._
-import fr.iscpif.gridscale.egi.{ DIRACJobService ⇒ GSDIRACJobService, DIRACJobDescription ⇒ GSDIRACJobDescription }
+import fr.iscpif.gridscale.egi.{ DIRACJobDescription ⇒ GSDIRACJobDescription, DIRACJobService ⇒ GSDIRACJobService }
 import org.openmole.core.workspace.Workspace
 import org.openmole.plugin.environment.gridscale.GridScaleJobService
-import org.openmole.core.batch.jobservice.{ BatchJobId, BatchJob }
-import org.openmole.core.batch.control.{ UnlimitedAccess, LimitedAccess }
+import org.openmole.core.batch.jobservice.{ BatchJob, BatchJobId }
+import org.openmole.core.batch.control.{ LimitedAccess, UnlimitedAccess }
 import StatusFiles._
 import org.openmole.tool.logger.Logger
+
 import scalax.io.Resource
 import java.io.File
+
 import org.openmole.core.tools._
 import fr.iscpif.gridscale.egi._
+import org.openmole.tool.cache.Cache
+
 import scala.concurrent.duration._
 
 object DIRACJobService extends Logger
@@ -43,22 +47,24 @@ trait DIRACJobService extends GridScaleJobService { js ⇒
   def connections: Int
   def environment: DIRACEnvironment
 
-  @transient lazy val jobService: GSDIRACJobService = {
+  val jobService = {
     lazy val GSDIRACJobService.Service(service, group) = GSDIRACJobService.getService(environment.voName)
 
     val serviceValue = environment.service.getOrElse(service)
     val groupValue = environment.group.getOrElse(group)
 
-    val js = GSDIRACJobService(
-      environment.voName,
-      service = Some(GSDIRACJobService.Service(serviceValue, groupValue)),
-      groupStatusQuery = Some(environment.updateInterval.minUpdateInterval)
-    )(environment.authentication)
+    val js =
+      GSDIRACJobService(
+        environment.voName,
+        service = Some(GSDIRACJobService.Service(serviceValue, groupValue)),
+        groupStatusQuery = Some(environment.updateInterval.minUpdateInterval)
+      )(environment.authentication)
+
     js.delegate(environment.authentication.certificate, environment.authentication.password)
     js
   }
 
-  @transient lazy val usageControl = new LimitedAccess(connections, Int.MaxValue)
+  val usageControl = new LimitedAccess(connections, Int.MaxValue)
 
   def jobScript =
     JobScript(
@@ -68,7 +74,7 @@ trait DIRACJobService extends GridScaleJobService { js ⇒
       debug = environment.debug
     )
 
-  @transient lazy val id = jobService.service
+  def id = jobService.service
 
   protected def _submit(serializedJob: SerializedJob) = {
     import serializedJob._
