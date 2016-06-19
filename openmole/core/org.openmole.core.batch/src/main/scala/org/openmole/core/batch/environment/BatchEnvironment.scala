@@ -144,7 +144,7 @@ object BatchEnvironment extends Logger {
 import BatchEnvironment._
 
 object BatchExecutionJob {
-  val replBundleCache = new AssociativeCache[Seq[Class[_]], FileCache]()
+  val replBundleCache = new AssociativeCache[ReferencedClasses, FileCache]()
 }
 
 trait BatchExecutionJob extends ExecutionJob { bej ⇒
@@ -168,35 +168,25 @@ trait BatchExecutionJob extends ExecutionJob { bej ⇒
       def referenced =
         pluginsAndFiles.replClasses.map { c ⇒
           val replClassloader = c.getClassLoader.asInstanceOf[REPLClassloader]
-          replClassloader.referencedClasses(c)
+          replClassloader.referencedClasses(Seq(c))
         }.fold(ReferencedClasses.empty)(ReferencedClasses.merge)
       Some(referenced)
     }
   }
 
   def closureBundle =
-    pluginsAndFiles.replClasses.toList match {
-      case Nil ⇒ None
-      case classes ⇒
-        val bundle = BatchExecutionJob.replBundleCache.cache(job.moleExecution, classes, preCompute = false) { rc ⇒
-          val allClasses =
-            classes.map { c ⇒
-              val replClassloader = c.getClassLoader.asInstanceOf[REPLClassloader]
-              replClassloader.referencedClasses(c)
-            }.fold(ReferencedClasses.empty)(ReferencedClasses.merge)
-
-          val bundle = Workspace.newFile("closureBundle", ".jar")
-
-          try ScalaREPL.bundleFromReferencedClass(allClasses, "closure-" + UUID.randomUUID.toString, "1.0", bundle)
-          catch {
-            case e: Throwable ⇒
-              e.printStackTrace()
-              bundle.delete()
-              throw e
-          }
-          FileCache(bundle)
+    referencedClosures.map { closures ⇒
+      BatchExecutionJob.replBundleCache.cache(job.moleExecution, closures, preCompute = false) { rc ⇒
+        val bundle = Workspace.newFile("closureBundle", ".jar")
+        try ScalaREPL.bundleFromReferencedClass(closures, "closure-" + UUID.randomUUID.toString, "1.0", bundle)
+        catch {
+          case e: Throwable ⇒
+            e.printStackTrace()
+            bundle.delete()
+            throw e
         }
-        Some(bundle)
+        FileCache(bundle)
+      }
     }
 
   def usedFiles: Iterable[File] =
