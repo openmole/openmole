@@ -28,61 +28,61 @@ import scalatags.JsDom.TypedTag
  */
 
 object Expander {
-  type VisibleID = String
+  type ColumnID = String
   type ExpandID = String
 }
 
 import Expander._
 
-class Expander {
+class Expander(val expandID: ExpandID) {
 
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
-  private val expanded: Var[Map[ExpandID, Var[Boolean]]] = Var(Map())
-  private val visible: Var[Map[ExpandID, Var[VisibleID]]] = Var(Map())
+  val expanded: Var[Boolean] = Var(false)
+  val visibleColumn: Var[Option[ColumnID]] = Var(None)
+  val currentColumn: Var[Option[ColumnID]] = Var(None)
 
-  def updateMaps(expandId: ExpandID, visibleId: VisibleID) = {
-    if (!expanded.now.isDefinedAt(expandId)) expanded() = expanded.now.updated(expandId, Var(false))
-    if (!visible.now.isDefinedAt(expandId)) visible() = visible.now.updated(expandId, Var(visibleId))
+  expanded.trigger {
+    setCurrentColumn
   }
 
-  def isExpanded(id: ExpandID) = expanded.flatMap { _.getOrElse(id, Var(false)) }
+  visibleColumn.trigger {
+    setCurrentColumn
+  }
 
-  def isVisible(expandID: ExpandID, visibleID: VisibleID) = getVisible(expandID).map { _.exists { v ⇒ v == visibleID } }
-
-  def getVisible(expandId: ExpandID) = isExpanded(expandId).map { ie ⇒
-    if (ie) Some(visible.now(expandId).now)
+  private def setCurrentColumn = currentColumn() = {
+    if (expanded.now) visibleColumn.now
     else None
   }
 
-  def setTarget(expandId: ExpandID, visibleId: VisibleID) = {
-    if (expanded.now(expandId).now) {
-      if (visible.now(expandId).now == visibleId) {
-        expanded.now(expandId)() = false
-      }
-      else {
-        visible.now(expandId)() = visibleId
-      }
+  def update(columnID: ColumnID) = {
+
+    val currExpanded = expanded.now
+    val currColumn = visibleColumn.now
+
+    if (currExpanded) {
+      if (Some(columnID) == currColumn) expanded() = false
     }
-    else {
-      visible.now(expandId)() = visibleId
-      expanded.now(expandId)() = true
-    }
+    else expanded() = true
+    visibleColumn() = Some(columnID)
+
   }
 
-  def getLink(linkName: String, expandId: ExpandID, visibleId: VisibleID, todo: () ⇒ Unit = () ⇒ {}) = {
-    updateMaps(expandId, visibleId)
+  def isVisible(columnID: ColumnID) =
+    visibleColumn.now.map { c ⇒
+      c == columnID
+    }.getOrElse(false)
+
+  def getLink(linkName: String, columnID: ColumnID, todo: () ⇒ Unit = () ⇒ {}) = {
     tags.span(cursor := "pointer", onclick := { () ⇒
-      setTarget(expandId, visibleId)
+      update(columnID)
       todo()
     })(linkName)
-
   }
 
-  def getGlyph(glyph: ModifierSeq, linkName: String, expandId: ExpandID, visibleId: VisibleID, todo: () ⇒ Unit = () ⇒ {}) = {
-    updateMaps(expandId, visibleId)
+  def getGlyph(glyph: ModifierSeq, linkName: String, columnID: ColumnID, todo: () ⇒ Unit = () ⇒ {}) = {
     tags.span(glyph, onclick := {
       () ⇒
-        setTarget(expandId, visibleId)
+        update(columnID)
         todo()
     }, linkName)
   }

@@ -372,8 +372,7 @@ package object stylesheet {
 
   lazy val executionVisible: ModifierSeq = Seq(
     color("#3086b5"),
-    fontWeight := "bold",
-    pointer
+    fontWeight := "bold"
   )
 
   lazy val settingsButton: ModifierSeq = Seq(

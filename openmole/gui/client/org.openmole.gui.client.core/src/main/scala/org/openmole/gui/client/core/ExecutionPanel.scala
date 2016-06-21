@@ -53,9 +53,18 @@ class ExecutionPanel extends ModalPanel {
   val execInfo = Var(PanelInfo(Seq(), Seq()))
   val staticInfo: Var[Map[ExecutionId, StaticExecutionInfo]] = Var(Map())
   var envError: Var[Map[EnvironmentId, EnvironmentErrorData]] = Var(Map())
-  val expander = new Expander
+  val expanders: Var[Map[ExpandID, Expander]] = Var(Map())
 
   val updating = new AtomicBoolean(false)
+
+  def expander[T](id: ExpandID, todo: Expander ⇒ T) = expanders.map { ex ⇒ todo(ex(id)) }
+
+  def expanderIfVisible[T](id: ExpandID, columnID: ColumnID, todo: Expander ⇒ T, otherwise: T) = {
+    expanders.map { ex ⇒
+      if (ex(id).isVisible(columnID)) todo(ex(id))
+      else otherwise
+    }
+  }
 
   def updateExecutionInfo: Unit = {
     def delay = {
@@ -141,10 +150,10 @@ class ExecutionPanel extends ModalPanel {
   )
 
   lazy val executionTable = {
-    val scriptID: VisibleID = "script"
-    val envID: VisibleID = "env"
-    val errorID: VisibleID = "error"
-    val outputStreamID: VisibleID = "outputStream"
+    val scriptID: ColumnID = "script"
+    val envID: ColumnID = "env"
+    val errorID: ColumnID = "error"
+    val outputStreamID: ColumnID = "outputStream"
     tags.table(sheet.table)(
       thead,
       Rx {
@@ -152,7 +161,7 @@ class ExecutionPanel extends ModalPanel {
           for {
             (id, executionInfo) ← execInfo().executionInfos.sortBy { case (execId, _) ⇒ staticInfo.now(execId).startDate }.reverse
           } yield {
-
+            if (!expanders().keys.exists(ex ⇒ ex == id.id)) expanders() = expanders() ++ Map(id.id → new Expander(id.id))
             val duration: Duration = (executionInfo.duration milliseconds)
             val h = (duration).toHours
             val m = ((duration) - (h hours)).toMinutes
@@ -170,15 +179,16 @@ class ExecutionPanel extends ModalPanel {
               case r: Ready    ⇒ ExecutionDetails("0", 0)
             }
 
-            val scriptLink = expander.getLink(staticInfo.now(id).path.name, id.id, scriptID)
-            val envLink = expander.getGlyph(glyph_stats, "Env", id.id, envID)
-            val stateLink = executionInfo match {
-              case f: Failed ⇒ expander.getLink(executionInfo.state, id.id, errorID).render
-              case _         ⇒ tags.span(executionInfo.state).render
-            }
-            val outputLink = expander.getGlyph(glyph_list, "", id.id, outputStreamID, () ⇒ doScrolls)
+            val scriptLink = expander(id.id, ex ⇒ ex.getLink(staticInfo.now(id).path.name, scriptID))
+            val envLink = expander(id.id, ex ⇒ ex.getGlyph(glyph_stats, "Env", envID))
+            val stateLink = expander(id.id, ex ⇒
+              executionInfo match {
+                case f: Failed ⇒ ex.getLink(executionInfo.state, errorID).render
+                case _         ⇒ tags.span(executionInfo.state).render
+              })
+            val outputLink = expander(id.id, ex ⇒ ex.getGlyph(glyph_list, "", outputStreamID, () ⇒ doScrolls))
 
-            val hiddenMap: Map[VisibleID, Modifier] = Map(
+            val hiddenMap: Map[ColumnID, Modifier] = Map(
               scriptID → staticPanel(id, scriptTextAreas,
                 () ⇒ scrollableText(staticInfo.now(id).script)).view,
               envID → {
@@ -257,7 +267,7 @@ class ExecutionPanel extends ModalPanel {
                 td(colMD(2))(glyphAndText(glyph_flash, details.running.toString)),
                 td(colMD(2))(glyphAndText(glyph_flag, details.ratio.toString)),
                 td(colMD(1))(div(durationString)),
-                td(colMD(1))(ms(executionInfo.state + "State"))(stateLink),
+                td(colMD(1))(visibleClass(id.id, errorID, ms(executionInfo.state + "State")))(stateLink),
                 td(colMD(1), pointer)(visibleClass(id.id, envID))(envLink),
                 td(colMD(1), pointer)(visibleClass(id.id, outputStreamID))(outputLink),
                 td(colMD(1))(tags.span(glyph_remove +++ ms("removeExecution"), onclick := { () ⇒
@@ -268,11 +278,10 @@ class ExecutionPanel extends ModalPanel {
                 }))
               ),
               tr(row)(
-                expander.getVisible(id.id).map {
-                  _ match {
-                    case Some(v: VisibleID) ⇒ td(colspan := 12)(hiddenMap(v))
-                    case _                  ⇒ div()
-                  }
+                expanders.map { ex ⇒
+                  ex(id.id).currentColumn().map { col ⇒
+                    tags.td(colspan := 12)(hiddenMap(col))
+                  }.getOrElse(tags.div())
                 }
               )
             )
@@ -302,12 +311,9 @@ class ExecutionPanel extends ModalPanel {
     if (size == 0L) ""
     else s"($readable)"
 
-  def visibleClass(expandID: ExpandID, visibleID: VisibleID) = {
-    expander.isVisible(expandID, visibleID).map { iv ⇒
-      tags.span(
-        if (iv) omsheet.executionVisible else emptyMod
-      )
-    }
+  def visibleClass(expandID: ExpandID, columnID: ColumnID, extraStyle: ModifierSeq = emptyMod) = {
+    expanderIfVisible(expandID, columnID, ex ⇒
+      tags.span(omsheet.executionVisible +++ extraStyle), tags.span(extraStyle))
   }
 
   val settingsButton = tags.span(
@@ -328,7 +334,8 @@ class ExecutionPanel extends ModalPanel {
           settingsButton
         ).popup(
           settingsDiv,
-          onclose = () ⇒ {},
+          onclose = () ⇒ {
+        },
           popupStyle = whitePopupWithBorder
         )
       )
