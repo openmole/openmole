@@ -161,7 +161,10 @@ class ExecutionPanel extends ModalPanel {
           for {
             (id, executionInfo) ← execInfo().executionInfos.sortBy { case (execId, _) ⇒ staticInfo.now(execId).startDate }.reverse
           } yield {
-            if (!expanders().keys.exists(ex ⇒ ex == id.id)) expanders() = expanders() ++ Map(id.id → new Expander(id.id))
+            if (!expanders().keys.exists(ex ⇒ ex == id.id)) {
+              expanders() = expanders() ++ Map(id.id → new Expander(id.id))
+            }
+            val theExpanders = expanders()
             val duration: Duration = (executionInfo.duration milliseconds)
             val h = (duration).toHours
             val m = ((duration) - (h hours)).toMinutes
@@ -278,11 +281,9 @@ class ExecutionPanel extends ModalPanel {
                 }))
               ),
               tr(row)(
-                expanders.map { ex ⇒
-                  ex(id.id).currentColumn().map { col ⇒
-                    tags.td(colspan := 12)(hiddenMap(col))
-                  }.getOrElse(tags.div())
-                }
+                theExpanders(id.id).currentColumn().map { col ⇒
+                  tags.td(colspan := 12)(hiddenMap(col))
+                }.getOrElse(tags.div())
               )
             )
           }
