@@ -24,6 +24,7 @@ import org.openmole.tool.stream.{ StringInputStream, StringOutputStream }
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.tools.VariableExpansion.Expansion
+import org.openmole.tool.cache.Cache
 
 import scala.collection.mutable.ListBuffer
 import scala.util.{ Failure, Success, Try }
@@ -155,9 +156,9 @@ object ExpandedString {
 }
 
 trait ExpandedString <: Expansion {
-  @transient lazy val expansion = VariableExpansion(string)
+  val expansion = Cache(VariableExpansion(string))
   def +(s: ExpandedString): ExpandedString = string + s.string
   def string: String
-  def expand(context: ⇒ Context)(implicit rng: RandomProvider) = expansion.expand(context)
-  def validate(inputs: Seq[Prototype[_]]) = expansion.validate(inputs)
+  def expand(context: ⇒ Context)(implicit rng: RandomProvider) = expansion().expand(context)
+  def validate(inputs: Seq[Prototype[_]]) = expansion().validate(inputs)
 }

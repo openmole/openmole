@@ -30,6 +30,7 @@ import org.openmole.core.workflow.job.Job
 import org.openmole.core.workspace._
 import fr.iscpif.gridscale.egi._
 import fr.iscpif.gridscale.egi.{ DIRACJobService ⇒ GSDIRACJobService }
+import org.openmole.tool.cache.Cache
 
 import concurrent.duration._
 import scala.ref.WeakReference
@@ -99,21 +100,23 @@ class DIRACEnvironment(
 
   type JS = DIRACJobService
 
-  @transient lazy val registerAgents = {
+  val registerAgents = Cache {
     Updater.delay(new EagerSubmissionAgent(WeakReference(this), DIRACEnvironment.EagerSubmissionThreshold))
     None
   }
 
   override def submit(job: Job) = {
-    registerAgents
+    registerAgents()
     super.submit(job)
   }
 
   def executionJob(job: Job) = new DiracBatchExecutionJob(job, this)
 
-  @transient lazy val authentication: P12Authentication = DIRACAuthentication.initialise(a)(decrypt)
+  def authentication = _authentication()
+  val _authentication = Cache(DIRACAuthentication.initialise(a)(decrypt))
 
-  @transient lazy val proxyCreator = {
+  def proxyCreator = _proxyCreator()
+  val _proxyCreator = Cache {
     EGIAuthentication.initialise(a)(
       vomsURLs,
       voName,
@@ -121,9 +124,12 @@ class DIRACEnvironment(
     )(decrypt)
   }
 
-  @transient lazy val jobService = new DIRACJobService {
-    val connections = Workspace.preference(DIRACEnvironment.Connections)
-    val environment = env
+  def jobService = _jobService()
+  val _jobService = Cache {
+    new DIRACJobService {
+      def connections = Workspace.preference(DIRACEnvironment.Connections)
+      def environment = env
+    }
   }
 
   override def updateInterval = UpdateInterval.fixed(Workspace.preference(DIRACEnvironment.UpdateInterval))

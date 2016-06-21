@@ -18,10 +18,13 @@
 package org.openmole.plugin.environment.ssh
 
 import java.net.URI
+
 import org.openmole.core.batch.control._
 import org.openmole.core.batch.environment._
 import org.openmole.core.workspace._
 import org.openmole.core.workflow.dsl._
+import org.openmole.tool.cache.Cache
+
 import concurrent.duration._
 
 object SSHEnvironment {
@@ -83,12 +86,17 @@ class SSHEnvironment(
       Workspace.preference(SSHEnvironment.MaxOperationsByMinute)
     )
 
-  @transient lazy val jobService = new SSHJobService with ThisHost {
-    def nbSlots = env.nbSlots
-    def sharedFS = storage
-    val environment = env
-    def workDirectory = env.workDirectory
-  }
+  val jobService =
+    new SSHJobService {
+      def nbSlots = env.nbSlots
+      def sharedFS = storage
+      def environment = env
+      def workDirectory = env.workDirectory
+      override def credential = environment.credential
+      override def host = environment.host
+      override def user: String = environment.user
+      override def port = environment.port
+    }
 
   override def updateInterval = UpdateInterval.fixed(Workspace.preference(SSHEnvironment.UpdateInterval))
 

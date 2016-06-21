@@ -33,6 +33,7 @@ import org.openmole.tool.collection._
 import scala.concurrent.stm._
 import org.openmole.core.tools.service._
 import org.openmole.core.workflow.dsl._
+import org.openmole.tool.cache._
 
 import scala.ref.WeakReference
 
@@ -94,9 +95,9 @@ class LocalEnvironment(
     override val name: Option[String]
 ) extends Environment {
 
-  @transient lazy val pool = new ExecutorPool(nbThreads, WeakReference(this))
+  val pool = Cache(new ExecutorPool(nbThreads, WeakReference(this)))
 
-  def nbJobInQueue = pool.waiting
+  def nbJobInQueue = pool().waiting
 
   def submit(job: Job, executionContext: TaskExecutionContext): Unit =
     submit(new LocalExecutionJob(executionContext, job.moleJobs, Some(job.moleExecution)))
@@ -105,11 +106,11 @@ class LocalEnvironment(
     submit(new LocalExecutionJob(executionContext, List(moleJob), None))
 
   private def submit(ejob: LocalExecutionJob): Unit = {
-    pool.enqueue(ejob)
+    pool().enqueue(ejob)
     ejob.state = ExecutionState.SUBMITTED
     EventDispatcher.trigger(this, new Environment.JobSubmitted(ejob))
   }
 
-  def submitted: Long = pool.waiting
-  def running: Long = pool.running
+  def submitted: Long = pool().waiting
+  def running: Long = pool().running
 }

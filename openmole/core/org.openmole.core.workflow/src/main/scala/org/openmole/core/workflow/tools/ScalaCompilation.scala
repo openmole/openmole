@@ -29,6 +29,8 @@ import org.openmole.core.workflow.validation.TypeUtil
 import org.openmole.core.workspace.Workspace
 import org.osgi.framework.Bundle
 import org.openmole.core.workflow.dsl._
+import org.openmole.tool.cache._
+
 import scala.util.{ Random, Try }
 
 trait ScalaCompilation {
@@ -175,7 +177,7 @@ trait ScalaWrappedCompilation <: ScalaCompilation { compilation ⇒
 
 trait DynamicHeader { this: ScalaWrappedCompilation ⇒
 
-  @transient lazy val cache = collection.mutable.HashMap[Seq[Prototype[_]], Try[ContextClosure[RETURN]]]()
+  val cache = Cache(collection.mutable.HashMap[Seq[Prototype[_]], Try[ContextClosure[RETURN]]]())
 
   def compiled(context: Context): Try[ContextClosure[RETURN]] = {
     val contextPrototypes = context.toSeq.map { case (_, v) ⇒ v.prototype }
@@ -183,7 +185,7 @@ trait DynamicHeader { this: ScalaWrappedCompilation ⇒
   }
 
   def compiled(inputs: Seq[Prototype[_]]): Try[ContextClosure[RETURN]] =
-    cache.synchronized {
+    cache().synchronized {
       val allInputMap = inputs.groupBy(_.name)
 
       val duplicatedInputs = allInputMap.filter { _._2.size > 1 }.map(_._2)
@@ -192,7 +194,7 @@ trait DynamicHeader { this: ScalaWrappedCompilation ⇒
         case Nil ⇒
           def sortedInputNames = inputs.map(_.name).distinct.sorted
           val scriptInputs = sortedInputNames.map(n ⇒ allInputMap(n).head)
-          cache.getOrElseUpdate(
+          cache().getOrElseUpdate(
             scriptInputs,
             closure(scriptInputs)
           )

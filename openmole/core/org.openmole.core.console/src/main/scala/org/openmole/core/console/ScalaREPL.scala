@@ -116,13 +116,19 @@ class REPLClassloader(val file: AbstractFile, parent: ClassLoader) extends scala
   def findClassFile(name: String): Option[AbstractFile] = classFiles.find(_.path == toAbsoluteClassPath(name))
   def findClassFile(c: Class[_]): Option[AbstractFile] = findClassFile(c.getClass.getName)
 
-  def referencedClasses(classes: Class[_]*) = {
+  def referencedClasses(
+    classes:           Seq[Class[_]],
+    additionalClasses: Seq[Class[_]] = Seq(classOf[scala.runtime.AbstractFunction1[_, _]])
+  ) = {
+
     import org.openmole.tool.bytecode._
 
     val seen = collection.mutable.HashSet[String]()
     val toProcess = collection.mutable.Stack[String]()
 
+    classes.foreach(c ⇒ seen.add(c.getName))
     classes.foreach(c ⇒ toProcess.push(c.getName))
+    additionalClasses.foreach(c ⇒ seen.add(c.getName))
 
     while (!toProcess.isEmpty) {
       val processing = toProcess.pop
@@ -143,11 +149,16 @@ class REPLClassloader(val file: AbstractFile, parent: ClassLoader) extends scala
     }
 
     val bundledOther = other.map { c ⇒
-      val bundle = tryToLoadClass(c).flatMap(PluginManager.bundleForClass)
+      val bundle = cachedTryLoadClass(c).flatMap(PluginManager.bundleForClass)
       BundledClass(name = c, bundle = bundle)
     }
 
     ReferencedClasses(replClasses, bundledOther)
+  }
+
+  val classCache = collection.mutable.HashMap[String, Option[Class[_]]]()
+  def cachedTryLoadClass(c: String) = classCache.synchronized {
+    classCache.getOrElseUpdate(c, tryToLoadClass(c))
   }
 
 }

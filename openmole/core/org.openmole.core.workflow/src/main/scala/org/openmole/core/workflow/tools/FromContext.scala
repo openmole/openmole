@@ -22,6 +22,8 @@ import java.io.File
 import org.openmole.core.tools.io._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.dsl._
+import org.openmole.tool.cache.Cache
+
 import scalaz._
 import Scalaz._
 
@@ -31,8 +33,8 @@ object FromContext {
 
   def codeToFromContext[T: Manifest](code: String): FromContext[T] =
     new FromContext[T] {
-      @transient lazy val proxy = ScalaWrappedCompilation.dynamic[T](code)
-      override def from(context: ⇒ Context)(implicit rng: RandomProvider): T = proxy().from(context)
+      val proxy = Cache(ScalaWrappedCompilation.dynamic[T](code))
+      override def from(context: ⇒ Context)(implicit rng: RandomProvider): T = proxy()().from(context)
     }
 
   implicit def codeToFromContextFloat(code: String) = codeToFromContext[Float](code)

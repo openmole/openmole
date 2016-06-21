@@ -25,7 +25,7 @@ import org.openmole.core.event._
 import org.openmole.core.workflow.execution.ExecutionState
 import org.openmole.core.workspace.Workspace
 import org.openmole.plugin.environment.gridscale._
-import fr.iscpif.gridscale.ssh.{ SSHJobService ⇒ GSSSHJobService, SSHConnectionCache, SSHJobDescription }
+import fr.iscpif.gridscale.ssh.{ SSHConnectionCache, SSHJobDescription, SSHJobService ⇒ GSSSHJobService }
 import java.util.concurrent.atomic.AtomicInteger
 
 import org.openmole.tool.logger.Logger
@@ -38,13 +38,16 @@ import SSHJobService._
 
 trait SSHJobService extends GridScaleJobService with SharedStorage { js ⇒
 
-  val environment: SSHEnvironment
+  def environment: SSHEnvironment
 
   def nbSlots: Int
   override def usageControl = environment.usageControl
 
-  val jobService = new GSSSHJobService with environment.ThisHost with SSHConnectionCache {
+  val jobService = new GSSSHJobService with SSHConnectionCache {
     override def timeout = Workspace.preference(SSHService.timeout)
+    override def credential = environment.credential
+    override def host = environment.host
+    override def port = environment.port
   }
 
   // replaced mutable.SynchronizedQueue according to recommendation in scala doc

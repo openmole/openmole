@@ -20,7 +20,7 @@ package org.openmole.plugin.environment.egi
 import java.net.URI
 
 import fr.iscpif.gridscale.tools.findWorking
-import fr.iscpif.gridscale.egi.{ BDII }
+import fr.iscpif.gridscale.egi.BDII
 import org.openmole.core.batch.control.LimitedAccess
 import org.openmole.core.batch.environment.{ BatchEnvironment, BatchExecutionJob, MemoryRequirement }
 import org.openmole.core.exception.InternalProcessingError
@@ -32,6 +32,7 @@ import org.openmole.core.workspace.{ Decrypt, Workspace }
 import scala.concurrent.duration.Duration
 import scala.ref.WeakReference
 import org.openmole.core.tools.math._
+import org.openmole.tool.cache.Cache
 
 object WMSEnvironment {
 
@@ -102,11 +103,11 @@ class WMSEnvironment(
 
   import EGIEnvironment._
 
-  @transient lazy val connectionsByWMS = Workspace.preference(ConnectionsByWMS)
+  def connectionsByWMS = Workspace.preference(ConnectionsByWMS)
 
   type JS = WMSJobService
 
-  @transient lazy val registerAgents = {
+  val registerAgents = Cache {
     Updater.delay(new EagerSubmissionAgent(WeakReference(this), EGIEnvironment.EagerSubmissionThreshold))
     None
   }
@@ -114,7 +115,7 @@ class WMSEnvironment(
   def executionJob(job: Job) = new EGIBatchExecutionJob(job, this)
 
   override def submit(job: Job) = {
-    registerAgents
+    registerAgents()
     super.submit(job)
   }
 
@@ -127,7 +128,8 @@ class WMSEnvironment(
       fqan
     )(decrypt)
 
-  @transient lazy val jobServices = {
+  def jobServices = _jobServices()
+  val _jobServices = Cache {
     val bdiiWMS = findWorking(bdiis, (b: BDII) ⇒ b.queryWMSLocations(voName))
     bdiiWMS.map {
       js ⇒

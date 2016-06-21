@@ -42,8 +42,7 @@ import org.openmole.core.workflow.execution._
 import org.openmole.core.batch.message._
 import org.openmole.core.console.ScalaREPL.ReferencedClasses
 import org.openmole.core.console.{ REPLClassloader, ScalaREPL }
-import org.openmole.core.tools.cache.AssociativeCache
-import org.openmole.tool.hash.Hash
+import org.openmole.tool.cache._
 
 import ref.WeakReference
 import scala.Predef.Set
@@ -124,8 +123,8 @@ object BatchEnvironment extends Logger {
 
   private def runtimeDirLocation = Workspace.openMOLELocation / "runtime"
 
-  @transient lazy val runtimeLocation = runtimeDirLocation / "runtime.tar.gz"
-  @transient lazy val JVMLinuxX64Location = runtimeDirLocation / "jvm-x64.tar.gz"
+  lazy val runtimeLocation = runtimeDirLocation / "runtime.tar.gz"
+  lazy val JVMLinuxX64Location = runtimeDirLocation / "jvm-x64.tar.gz"
 
   Workspace setDefault MemorySizeForRuntime
   Workspace setDefault CheckInterval
@@ -145,7 +144,7 @@ object BatchEnvironment extends Logger {
 import BatchEnvironment._
 
 object BatchExecutionJob {
-  val replBundleCache = new AssociativeCache[Seq[Class[_]], FileCache]()
+  val replBundleCache = new AssociativeCache[ReferencedClasses, FileCache]()
 }
 
 trait BatchExecutionJob extends ExecutionJob { bej ⇒
@@ -159,49 +158,41 @@ trait BatchExecutionJob extends ExecutionJob { bej ⇒
   def plugins = pluginsAndFiles.plugins ++ closureBundle.map(_.file) ++ referencedClosures.toSeq.flatMap(_.plugins)
   def files = pluginsAndFiles.files
 
-  @transient private lazy val pluginsAndFiles = SerialiserService.pluginsAndFiles(runnableTasks)
+  def pluginsAndFiles = synchronized(_pluginsAndFiles)
+  @transient private lazy val _pluginsAndFiles = SerialiserService.pluginsAndFiles(runnableTasks)
 
-  @transient private lazy val referencedClosures: Option[ReferencedClasses] = {
+  def referencedClosures = synchronized(_referencedClosures)
+  @transient private lazy val _referencedClosures = {
     if (pluginsAndFiles.replClasses.isEmpty) None
     else {
       def referenced =
         pluginsAndFiles.replClasses.map { c ⇒
           val replClassloader = c.getClassLoader.asInstanceOf[REPLClassloader]
-          replClassloader.referencedClasses(c)
+          replClassloader.referencedClasses(Seq(c))
         }.fold(ReferencedClasses.empty)(ReferencedClasses.merge)
       Some(referenced)
     }
   }
 
   def closureBundle =
-    pluginsAndFiles.replClasses.toList match {
-      case Nil ⇒ None
-      case classes ⇒
-        val bundle = BatchExecutionJob.replBundleCache.cache(job.moleExecution, classes, preCompute = false) { rc ⇒
-          val allClasses =
-            classes.map { c ⇒
-              val replClassloader = c.getClassLoader.asInstanceOf[REPLClassloader]
-              replClassloader.referencedClasses(c)
-            }.fold(ReferencedClasses.empty)(ReferencedClasses.merge)
-
-          val bundle = Workspace.newFile("closureBundle", ".jar")
-
-          try ScalaREPL.bundleFromReferencedClass(allClasses, "closure-" + UUID.randomUUID.toString, "1.0", bundle)
-          catch {
-            case e: Throwable ⇒
-              e.printStackTrace()
-              bundle.delete()
-              throw e
-          }
-          FileCache(bundle)
+    referencedClosures.map { closures ⇒
+      BatchExecutionJob.replBundleCache.cache(job.moleExecution, closures, preCompute = false) { rc ⇒
+        val bundle = Workspace.newFile("closureBundle", ".jar")
+        try ScalaREPL.bundleFromReferencedClass(closures, "closure-" + UUID.randomUUID.toString, "1.0", bundle)
+        catch {
+          case e: Throwable ⇒
+            e.printStackTrace()
+            bundle.delete()
+            throw e
         }
-        Some(bundle)
+        FileCache(bundle)
+      }
     }
 
   def usedFiles: Iterable[File] =
     (files ++
       Seq(environment.runtime, environment.jvmLinuxX64) ++
-      environment.plugins ++ plugins).distinct
+      environment.plugins() ++ plugins).distinct
 
   def usedFileHashes = usedFiles.map(f ⇒ (f, FileService.hash(job.moleExecution, f)))
 
@@ -215,7 +206,7 @@ trait BatchEnvironment extends SubmissionEnvironment { env ⇒
   type SS <: StorageService
   type JS <: JobService
 
-  def jobs = batchJobWatcher.executionJobs
+  def jobs = batchJobWatcher().executionJobs
 
   def executionJob(job: Job): BatchExecutionJob
 
@@ -225,7 +216,7 @@ trait BatchEnvironment extends SubmissionEnvironment { env ⇒
     case Some(m) ⇒ m
   }
 
-  @transient lazy val batchJobWatcher = {
+  @transient val batchJobWatcher = Cache {
     val watcher = new BatchJobWatcher(WeakReference(this))
     Updater.registerForUpdate(watcher)
     watcher
@@ -237,14 +228,14 @@ trait BatchEnvironment extends SubmissionEnvironment { env ⇒
   override def submit(job: Job) = {
     val bej = executionJob(job)
     EventDispatcher.trigger(this, new Environment.JobSubmitted(bej))
-    batchJobWatcher.register(bej)
+    batchJobWatcher().register(bej)
     jobManager ! Manage(bej)
   }
 
   def runtime = BatchEnvironment.runtimeLocation
   def jvmLinuxX64 = BatchEnvironment.JVMLinuxX64Location
 
-  @transient lazy val plugins = PluginManager.pluginsForClass(this.getClass)
+  @transient val plugins = Cache { PluginManager.pluginsForClass(this.getClass) }
 
   def updateInterval =
     UpdateInterval(

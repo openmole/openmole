@@ -18,12 +18,14 @@
 package org.openmole.core.fileservice
 
 import java.io.File
-import org.openmole.core.tools.cache.AssociativeCache
+
 import org.openmole.tool.hash._
 import org.openmole.core.updater.Updater
-import org.openmole.core.workspace.{ Workspace, ConfigurationLocation }
+import org.openmole.core.workspace.{ ConfigurationLocation, Workspace }
+import org.openmole.tool.cache.AssociativeCache
 import org.openmole.tool.hash.Hash
 import org.openmole.tool.tar._
+
 import concurrent.duration._
 
 object FileService {
