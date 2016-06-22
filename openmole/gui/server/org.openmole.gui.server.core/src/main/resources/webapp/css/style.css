@@ -161,27 +161,6 @@ opacity: 0;
 
 /* EXECUTION PANEL*/
 
-
-table td.runningState {
-    color: yellow;
-    font-weight: bold;
-}
-
-table td.finishedState {
-    color: #a6bf26;
-    font-weight: bold;
-}
-
-table td.cancelledState {
-    color: orange;
-    font-weight: bold;
-}
-
-table td.failedState {
-    color: #CC3A36;
-    font-weight: bold;
-}
-
 .removeExecution:hover {
     color: #CC3A36;
     display: inline-block;

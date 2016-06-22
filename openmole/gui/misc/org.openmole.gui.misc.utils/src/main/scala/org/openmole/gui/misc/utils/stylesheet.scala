@@ -375,6 +375,17 @@ package object stylesheet {
     fontWeight := "bold"
   )
 
+  def executionState(state: String): ModifierSeq = Seq(
+    state match {
+      case "failed"   ⇒ color("#CC3A36")
+      case "running"  ⇒ color("yellow")
+      case "finished" ⇒ color("#a6bf26")
+      case "canceled" ⇒ color("orange")
+      case _          ⇒ color("white")
+    },
+    fontWeight := "bold"
+  )
+
   lazy val settingsButton: ModifierSeq = Seq(
     width := 45,
     height := 32,

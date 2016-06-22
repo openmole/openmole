@@ -384,7 +384,7 @@ case class Finished(
 }
 
 case class Canceled(duration: Long = 0L, completed: Long = 0L) extends ExecutionInfo {
-  def state: String = "cancelled"
+  def state: String = "canceled"
 
   def running = 0L
 

@@ -265,14 +265,14 @@ class ExecutionPanel extends ModalPanel {
 
             Seq(
               tr(row +++ omsheet.executionTable, colspan := 12)(
-                td(colMD(2), pointer)(visibleClass(id.id, scriptID))(scriptLink),
+                td(colMD(2), pointer)(visibleClass(id.id, scriptID, scriptLink)),
                 td(colMD(2))(div(Utils.longToDate(staticInfo.now(id).startDate))),
                 td(colMD(2))(glyphAndText(glyph_flash, details.running.toString)),
                 td(colMD(2))(glyphAndText(glyph_flag, details.ratio.toString)),
                 td(colMD(1))(div(durationString)),
-                td(colMD(1))(visibleClass(id.id, errorID, ms(executionInfo.state + "State")))(stateLink),
-                td(colMD(1), pointer)(visibleClass(id.id, envID))(envLink),
-                td(colMD(1), pointer)(visibleClass(id.id, outputStreamID))(outputLink),
+                td(colMD(1))(visibleClass(id.id, errorID, stateLink, omsheet.executionState(executionInfo.state))),
+                td(colMD(1), pointer)(visibleClass(id.id, envID, envLink)),
+                td(colMD(1), pointer)(visibleClass(id.id, outputStreamID, outputLink)),
                 td(colMD(1))(tags.span(glyph_remove +++ ms("removeExecution"), onclick := { () ⇒
                   cancelExecution(id)
                 })),
@@ -312,10 +312,9 @@ class ExecutionPanel extends ModalPanel {
     if (size == 0L) ""
     else s"($readable)"
 
-  def visibleClass(expandID: ExpandID, columnID: ColumnID, extraStyle: ModifierSeq = emptyMod) = {
+  def visibleClass(expandID: ExpandID, columnID: ColumnID, modifier: Modifier, extraStyle: ModifierSeq = emptyMod) =
     expanderIfVisible(expandID, columnID, ex ⇒
-      tags.span(omsheet.executionVisible +++ extraStyle), tags.span(extraStyle))
-  }
+      tags.span(omsheet.executionVisible +++ extraStyle, modifier), tags.span(extraStyle, modifier))
 
   val settingsButton = tags.span(
     btn_default +++ glyph_settings +++ omsheet.settingsButton
