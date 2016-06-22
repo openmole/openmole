@@ -54,6 +54,12 @@ class Expander(val expandID: ExpandID) {
     else None
   }
 
+  def close = {
+    expanded() = false
+    visibleColumn() = None
+    currentColumn() = None
+  }
+
   def update(columnID: ColumnID) = {
 
     val currExpanded = expanded.now

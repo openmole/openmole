@@ -66,6 +66,8 @@ class ExecutionPanel extends ModalPanel {
     }
   }
 
+  def closeAllExpanders = expanders.now.values.map { _.close }
+
   def updateExecutionInfo: Unit = {
     def delay = {
       updating.set(false)
@@ -93,6 +95,7 @@ class ExecutionPanel extends ModalPanel {
   }
 
   def onOpen() = {
+    closeAllExpanders
     updateStaticInfos
   }
 
