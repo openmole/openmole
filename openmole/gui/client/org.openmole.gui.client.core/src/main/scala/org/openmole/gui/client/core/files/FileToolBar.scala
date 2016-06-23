@@ -195,22 +195,24 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
     )
   )
 
-  lazy val createFileTool = bs.inputGroup()(
+  def createNewNode = {
+    val newFile = newNodeInput.value
+    val currentDirNode = manager.current
+    addRootDirButton.content.now.foreach {
+      _.value match {
+        case dt: DirNodeType  ⇒ CoreUtils.addDirectory(currentDirNode.now, newFile, () ⇒ unselectAndRefreshTree)
+        case ft: FileNodeType ⇒ CoreUtils.addFile(currentDirNode.now, newFile, () ⇒ unselectAndRefreshTree)
+      }
+    }
+  }
+
+  val createFileTool = bs.inputGroup()(
     bs.inputGroupButton(addRootDirButton.selector),
     form(newNodeInput, onsubmit := { () ⇒
-      {
-        val newFile = newNodeInput.value
-        val currentDirNode = manager.current
-        addRootDirButton.content.now.map {
-          _ match {
-            case dt: DirNodeType  ⇒ CoreUtils.addDirectory(currentDirNode.now, newFile, () ⇒ unselectAndRefreshTree)
-            case ft: FileNodeType ⇒ CoreUtils.addFile(currentDirNode.now, newFile, () ⇒ unselectAndRefreshTree)
-          }
-        }
-      }
+      createNewNode
       false
     })
-  )
+  ).render
 
   def unselectAndRefreshTree: Unit = {
     unselectTool

@@ -53,6 +53,7 @@ object CoreUtils {
 
   def addFile(in: TreeNodeData, fileName: String, onadded: () ⇒ Unit = () ⇒ {}) =
     OMPost[Api].addFile(in, fileName).call().foreach { b ⇒
+      println("addfile ")
       if (b) onadded()
     }
 
