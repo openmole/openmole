@@ -173,7 +173,7 @@ package object stylesheet {
     sheet.floatRight,
     absolutePosition,
     right := 2,
-    sheet.marginTop(1)
+    sheet.paddingTop(5)
   )
 
   lazy val fileSize: ModifierSeq = Seq(
@@ -197,7 +197,7 @@ package object stylesheet {
     backgroundColor := "#3086b5",
     color("white"),
     display := "inline-block",
-    height := 19,
+    height := 22,
     sheet.marginBottom(5),
     sheet.marginTop(2),
     sheet.marginLeft(1),
@@ -210,10 +210,7 @@ package object stylesheet {
     color("white"),
     whiteSpace := "nowrap",
     overflow := "hidden",
-    sheet.marginTop(-8),
-    sheet.paddingLeft(3),
     pointer,
-    height := 19,
     textOverflow := "ellipsis"
   )
 
@@ -234,7 +231,7 @@ package object stylesheet {
     right := 0,
     pointer,
     width := 306,
-    height := 23,
+    height := 26,
     borderRadius := "2px"
   )
 
