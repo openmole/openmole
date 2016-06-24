@@ -205,6 +205,6 @@ trait DynamicHeader { this: ScalaWrappedCompilation ⇒
 
 trait StaticHeader { this: ScalaWrappedCompilation ⇒
   def inputs: Seq[Prototype[_]]
-  @transient lazy val functionCode = closure(inputs)
-  def compiled(context: Context): Try[ContextClosure[RETURN]] = functionCode
+  val functionCode = Cache { closure(inputs) }
+  def compiled(context: Context): Try[ContextClosure[RETURN]] = functionCode()
 }

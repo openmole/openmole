@@ -149,16 +149,11 @@ class REPLClassloader(val file: AbstractFile, parent: ClassLoader) extends scala
     }
 
     val bundledOther = other.map { c ⇒
-      val bundle = cachedTryLoadClass(c).flatMap(PluginManager.bundleForClass)
+      val bundle = tryToLoadClass(c).flatMap(PluginManager.bundleForClass)
       BundledClass(name = c, bundle = bundle)
     }
 
     ReferencedClasses(replClasses, bundledOther)
-  }
-
-  val classCache = collection.mutable.HashMap[String, Option[Class[_]]]()
-  def cachedTryLoadClass(c: String) = classCache.synchronized {
-    classCache.getOrElseUpdate(c, tryToLoadClass(c))
   }
 
 }
