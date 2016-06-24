@@ -64,7 +64,7 @@ object Project {
            |
            |import _imports._
            |
-           |private lazy val ${ConsoleVariables.workDirectory} = File("${sourceFile.file.getParentFileSafe.getCanonicalPath}")
+           |private lazy val ${ConsoleVariables.workDirectory} = File(new java.net.URI("${sourceFile.file.getParentFileSafe.toURI}").getPath)
            |${sourceFile.file.content}
            |}
            |
