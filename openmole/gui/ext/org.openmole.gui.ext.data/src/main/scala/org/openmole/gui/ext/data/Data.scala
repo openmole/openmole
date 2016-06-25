@@ -18,6 +18,7 @@ package org.openmole.gui.ext.data
  */
 
 import DataUtils._
+import monocle.macros.Lenses
 
 trait Data
 
@@ -318,7 +319,7 @@ case class EnvironmentError(
   def compare(that: EnvironmentError) = date compare that.date
 }
 
-case class NetworkActivity(
+@Lenses case class NetworkActivity(
   downloadingFiles:       Int    = 0,
   downloadedSize:         Long   = 0L,
   readableDownloadedSize: String = "",
