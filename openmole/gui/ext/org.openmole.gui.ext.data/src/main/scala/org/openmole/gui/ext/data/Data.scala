@@ -328,6 +328,8 @@ case class EnvironmentError(
   readableUploadedSize:   String = ""
 )
 
+@Lenses case class ExecutionActivity(executionTime: Long = 0)
+
 object EnvironmentErrorData {
   def empty = EnvironmentErrorData(Seq())
 }

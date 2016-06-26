@@ -61,15 +61,18 @@ object Runnings {
         )
       }
     }
-  }
 
-  object RunningEnvironment {
-    def empty(environment: Environment) = RunningEnvironment(environment, NetworkActivity())
+    case (env, j: Environment.JobCompleted) ⇒
+      Runnings.update(envId) {
+        RunningEnvironment.executionActivty composeLens ExecutionActivity.executionTime modify (_ + (j.log.executionEndTime - j.log.executionBeginTime))
+      }
   }
 
   @Lenses case class RunningEnvironment(
-    environment: Environment,
-    networkActivity: NetworkActivity)
+    environment:      Environment,
+    networkActivity:  NetworkActivity   = NetworkActivity(),
+    executionActivty: ExecutionActivity = ExecutionActivity()
+  )
 
   lazy private val instance = new Runnings
 
@@ -88,7 +91,7 @@ object Runnings {
     envIds.foreach {
       case (envId, env) ⇒
         instance.environmentIds(id) = instance.environmentIds(id) :+ envId
-        instance.runningEnvironments(envId) = RunningEnvironment.empty(env)
+        instance.runningEnvironments(envId) = RunningEnvironment(env)
     }
   }
 
