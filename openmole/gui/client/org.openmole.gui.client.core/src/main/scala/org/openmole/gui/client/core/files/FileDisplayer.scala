@@ -69,7 +69,8 @@ class FileDisplayer(implicit executionTriggerer: PanelTriggerer) {
   def display(tn: TreeNode, content: String) = {
     val fileType = tn.safePath.now.extension
     alreadyDisplayed(tn) match {
-      case Some(t: TreeNodeTab) ⇒ tabs.setActive(t)
+      case Some(t: TreeNodeTab) ⇒
+        tabs.setActive(t)
       case _ ⇒ fileType match {
         case oms: OpenMOLEScript ⇒ displayOMS(tn, content)
         case md: MDScript ⇒ OMPost[Api].mdToHtml(tn.safePath.now).call.foreach { htmlString ⇒

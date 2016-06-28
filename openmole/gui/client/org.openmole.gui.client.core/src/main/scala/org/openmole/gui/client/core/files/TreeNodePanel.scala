@@ -257,7 +257,6 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
     AlertPanel.string(message, okaction, transform = RelativeCenterPosition, zone = FileZone)
 
   def trashNode(treeNode: TreeNode): Unit = {
-    fileDisplayer.tabs -- treeNode
     stringAlert(
       s"Do you really want to delete ${
         treeNode.name.now
@@ -265,6 +264,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
       () ⇒ {
         CoreUtils.trashNode(treeNode.safePath.now, filter) {
           () ⇒
+            fileDisplayer.tabs -- treeNode
             fileDisplayer.tabs.checkTabs
             refreshAndDraw
         }
