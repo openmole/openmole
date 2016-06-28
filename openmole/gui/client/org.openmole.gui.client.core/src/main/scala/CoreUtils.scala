@@ -1,6 +1,6 @@
 package org.openmole.gui.client.core
 
-import org.openmole.gui.client.core.files.{ TreeNode, DirNode }
+import org.openmole.gui.client.core.files.{ TreeNodePanel, TreeNode, DirNode }
 import org.openmole.gui.ext.data._
 import org.openmole.gui.shared.Api
 import autowire._
@@ -44,8 +44,6 @@ object CoreUtils {
     }
   }
 
-  def refreshCurrentDirectory(todo: () ⇒ Unit = () ⇒ {}, fileFilter: FileFilter) = manager.trashCache(todo, fileFilter)
-
   def addDirectory(in: TreeNodeData, dirName: String, onadded: () ⇒ Unit = () ⇒ {}) =
     OMPost[Api].addDirectory(in, dirName).call().foreach { b ⇒
       if (b) onadded()
@@ -56,15 +54,15 @@ object CoreUtils {
       if (b) onadded()
     }
 
-  def trashNode(path: SafePath, fileFilter: FileFilter)(ontrashed: () ⇒ Unit): Unit = {
+  def trashNode(path: SafePath)(ontrashed: () ⇒ Unit): Unit = {
     OMPost[Api].deleteFile(path, ServerFileSytemContext.project).call().foreach { d ⇒
-      refresh(fileFilter, ontrashed)
+      TreeNodePanel.refreshAnd(ontrashed)
     }
   }
 
-  def trashNodes(paths: Seq[SafePath], fileFilter: FileFilter)(ontrashed: () ⇒ Unit): Unit = {
+  def trashNodes(paths: Seq[SafePath])(ontrashed: () ⇒ Unit): Unit = {
     OMPost[Api].deleteFiles(paths, ServerFileSytemContext.project).call().foreach { d ⇒
-      refresh(fileFilter, ontrashed)
+      TreeNodePanel.refreshAnd(ontrashed)
     }
   }
 
@@ -72,10 +70,6 @@ object CoreUtils {
     OMPost[Api].replicate(treeNode).call().foreach { r ⇒
       onreplicated(r)
     }
-  }
-
-  def refresh(fileFilter: FileFilter, onrefreshed: () ⇒ Unit = () ⇒ {}) = {
-    refreshCurrentDirectory(onrefreshed, fileFilter)
   }
 
   def testExistenceAndCopyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Future[Seq[SafePath]] =

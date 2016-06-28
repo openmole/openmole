@@ -227,7 +227,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
   }
 
   val deleteButton = bs.button("Delete", btn_danger, () ⇒ {
-    CoreUtils.trashNodes(manager.selected.now, fileFilter.now) { () ⇒
+    CoreUtils.trashNodes(manager.selected.now) { () ⇒
       unselectAndRefreshTree
     }
   })

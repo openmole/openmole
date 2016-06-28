@@ -1,16 +1,13 @@
 package org.openmole.gui.client.core.files
 
-import java.io.File
 import TreeNodeTabs._
-import org.openmole.gui.client.core.{ PanelTriggerer, OMPost }
-import org.openmole.gui.ext.data.FileExtension._
+import org.openmole.gui.client.core.OMPost
 import org.openmole.gui.ext.data.ScriptData
 import org.openmole.gui.shared.Api
 import org.openmole.gui.ext.data._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
-import scalatags.JsDom.tags
-import scalatags.JsDom.all._
+import org.openmole.gui.client.core.panels._
 
 /*
  * Copyright (C) 07/05/15 // mathieu.leclaire@openmole.org
@@ -36,7 +33,7 @@ object FileDisplayer {
 
 import FileDisplayer._
 
-class FileDisplayer(implicit executionTriggerer: PanelTriggerer) {
+class FileDisplayer {
 
   val tabs = TreeNodeTabs()
 

@@ -3,8 +3,7 @@ package org.openmole.gui.client.core.files
 import org.openmole.gui.client.core.alert.AbsolutePositioning.{ RelativeCenterPosition, FileZone }
 import org.openmole.gui.client.core.alert.AlertPanel
 import org.openmole.gui.client.core.files.FileToolBar.{ PluginTool, CopyTool, TrashTool }
-import org.openmole.gui.client.core.{ PanelTriggerer, OMPost }
-import org.openmole.gui.client.core.CoreUtils
+import org.openmole.gui.client.core.{ panels, OMPost, CoreUtils }
 import org.openmole.gui.ext.data._
 import org.openmole.gui.misc.utils.{ stylesheet, Utils }
 import org.openmole.gui.shared._
@@ -40,7 +39,18 @@ import sheet._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
+object TreeNodePanel {
+  val instance = new TreeNodePanel
+
+  def apply() = instance
+
+  def refreshAnd(todo: () ⇒ Unit) = instance.refreshAnd(todo)
+
+  def refreshAndDraw = instance.refreshAndDraw
+
+}
+
+class TreeNodePanel {
 
   case class NodeEdition(node: TreeNode, replicateMode: Boolean = false)
 
@@ -143,7 +153,6 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
         fileToolBar.resetFilter
         manager.clearSelection
         turnSelectionTo(false)
-        CoreUtils.refreshCurrentDirectory(fileFilter = fileToolBar.fileFilter.now)
         manager.switch(dn)
         computeAndDraw
     }, dropPairs(dn)
@@ -169,7 +178,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
 
   def refreshAndDraw = refreshAnd(() ⇒ drawTree)
 
-  def refreshAnd(todo: () ⇒ Unit) = CoreUtils.refreshCurrentDirectory(todo, filter)
+  def refreshAnd(todo: () ⇒ Unit) = manager.trashCache(todo)
 
   def computePluggables = fileToolBar.selectedTool.now match {
     case Some(PluginTool) ⇒ manager.computePluggables(() ⇒ if (!manager.pluggables.now.isEmpty) turnSelectionTo(true))
@@ -262,7 +271,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
         treeNode.name.now
       }?",
       () ⇒ {
-        CoreUtils.trashNode(treeNode.safePath.now, filter) {
+        CoreUtils.trashNode(treeNode.safePath.now) {
           () ⇒
             fileDisplayer.tabs -- treeNode
             fileDisplayer.tabs.checkTabs

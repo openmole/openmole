@@ -26,6 +26,7 @@ import org.openmole.gui.misc.js.{ InputFilter }
 import org.openmole.gui.misc.js.JsRxTags._
 import org.openmole.gui.shared.Api
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+import org.openmole.gui.client.core.files.TreeNodePanel
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
 import org.openmole.gui.misc.utils.{ stylesheet ⇒ omsheet }
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
@@ -103,7 +104,7 @@ class MarketPanel extends ModalPanel {
     OMPost[Api].getMarketEntry(entry, path).call().foreach { d ⇒
       downloading() = downloading.now.updatedFirst(_._1 == entry, (entry, Var(Processed())))
       downloading.now.headOption.foreach(_ ⇒ close)
-      CoreUtils.refreshCurrentDirectory(fileFilter = panels.treeNodePanel.filter)
+      TreeNodePanel.refreshAndDraw
     }
   }
 
