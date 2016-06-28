@@ -22,6 +22,9 @@ import org.openmole.gui.client.core.CoreUtils
 import org.openmole.gui.ext.data.{ FileFilter, SafePath }
 import rx._
 
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
+
 package object treenodemanager {
   val instance = new TreeNodeManager
 
@@ -54,16 +57,8 @@ class TreeNodeManager {
     comment.now.foreach(AlertPanel.treeNodeCommentDiv)
   }
 
-  def computeAndGetCurrentSons(fileFilter: FileFilter) = {
-    computeCurrentSons(fileFilter = fileFilter)
-    sons.now.get(current.now)
-  }
-
-  def trashCache(ontrashed: () ⇒ Unit, fileFilter: FileFilter = FileFilter()) = CoreUtils.updateSons(current.now, ontrashed, fileFilter)
-
   def updateSon(dirNode: DirNode, newSons: Seq[TreeNode]) = {
     sons() = sons.now.updated(dirNode, newSons)
-
   }
 
   def isSelected(tn: TreeNode) = selected.now.contains(tn)
@@ -90,13 +85,21 @@ class TreeNodeManager {
     comment() = None
   }
 
-  val head = dirNodeLine.map { _.head }
+  val head = dirNodeLine.map {
+    _.head
+  }
 
-  val current = dirNodeLine.map { _.last }
+  val current = dirNodeLine.map {
+    _.last
+  }
 
-  def take(n: Int) = dirNodeLine.map { _.take(n) }
+  def take(n: Int) = dirNodeLine.map {
+    _.take(n)
+  }
 
-  def drop(n: Int) = dirNodeLine.map { _.drop(n) }
+  def drop(n: Int) = dirNodeLine.map {
+    _.drop(n)
+  }
 
   def +(dn: DirNode) = dirNodeLine() = dirNodeLine.now :+ dn
 
@@ -106,12 +109,12 @@ class TreeNodeManager {
     }.getOrElse(dirNodeLine).now
   }
 
-  def computeCurrentSons(oncomputed: () ⇒ Unit = () ⇒ {}, fileFilter: FileFilter): Unit = {
+  def computeCurrentSons(fileFilter: FileFilter): Future[(Seq[TreeNode], Boolean)] = {
     current.now match {
       case dirNode: DirNode ⇒
-        if (sons.now.contains(dirNode)) oncomputed()
-        else CoreUtils.updateSons(dirNode, oncomputed, fileFilter)
-      case _ ⇒
+        if (sons.now.contains(dirNode)) Future((sons.now(dirNode), false))
+        else CoreUtils.getSons(dirNode, fileFilter).map { x ⇒ (x, true) }
+      case _ ⇒ Future(Seq(), false)
     }
   }
 

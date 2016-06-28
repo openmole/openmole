@@ -2,8 +2,9 @@ package org.openmole.gui.client.core.files
 
 import org.openmole.gui.client.core.alert.AbsolutePositioning.{ RelativeCenterPosition, FileZone }
 import org.openmole.gui.client.core.alert.AlertPanel
-import org.openmole.gui.client.core.files.FileToolBar.{ PluginTool, CopyTool, TrashTool }
-import org.openmole.gui.client.core.{ panels, OMPost, CoreUtils }
+import org.openmole.gui.client.core.files.FileToolBar.{ PluginTool, TrashTool }
+import org.openmole.gui.client.core.{ OMPost, CoreUtils }
+import org.openmole.gui.client.core.Waiter._
 import org.openmole.gui.ext.data._
 import org.openmole.gui.misc.utils.{ stylesheet, Utils }
 import org.openmole.gui.shared._
@@ -59,7 +60,7 @@ class TreeNodePanel {
   val draggedNode: Var[Option[TreeNode]] = Var(None)
   val fileDisplayer = new FileDisplayer
   val fileToolBar = new FileToolBar(this)
-  val tree: Var[TypedTag[HTMLDivElement]] = Var(tags.div())
+  val tree: Var[TypedTag[HTMLElement]] = Var(tags.div())
   val selectionMode = Var(false)
 
   selectionMode.trigger {
@@ -74,7 +75,7 @@ class TreeNodePanel {
   ).render
 
   lazy val view = {
-    manager.computeCurrentSons(() ⇒ drawTree, filter)
+    drawTree
     val goToModifierSeq = glyph_home +++ floatLeft +++ "treePathItems"
     tags.div(
       fileToolBar.div, Rx {
@@ -154,7 +155,7 @@ class TreeNodePanel {
         manager.clearSelection
         turnSelectionTo(false)
         manager.switch(dn)
-        computeAndDraw
+        drawTree
     }, dropPairs(dn)
   )
 
@@ -174,11 +175,9 @@ class TreeNodePanel {
     }
   )
 
-  def computeAndDraw = manager.computeCurrentSons(() ⇒ drawTree, filter)
-
   def refreshAndDraw = refreshAnd(() ⇒ drawTree)
 
-  def refreshAnd(todo: () ⇒ Unit) = manager.trashCache(todo)
+  def refreshAnd(todo: () ⇒ Unit) = CoreUtils.updateSons(manager.current.now, todo, filter)
 
   def computePluggables = fileToolBar.selectedTool.now match {
     case Some(PluginTool) ⇒ manager.computePluggables(() ⇒ if (!manager.pluggables.now.isEmpty) turnSelectionTo(true))
@@ -187,8 +186,9 @@ class TreeNodePanel {
 
   def drawTree: Unit = {
     computePluggables
-    manager.computeAndGetCurrentSons(filter).map { sons ⇒
-      tree() = div(
+    tree() = manager.computeCurrentSons(filter).withFutureWaiter("Get files", (sons: (Seq[TreeNode], Boolean)) ⇒ {
+      if (sons._2) manager.updateSon(manager.current.now, sons._1)
+      div(
         if (manager.isRootCurrent && manager.isProjectsEmpty) {
           div("Create a first OpenMOLE script (.oms)")(ms("message"))
         }
@@ -196,14 +196,15 @@ class TreeNodePanel {
           tags.table(ms("tree" + dragState.now))(
             tr(
               tags.table(ms("file-list"))(
-                for (tn ← sons) yield {
+                for (tn ← sons._1) yield {
                   drawNode(tn)
                 }
               )
             )
           )
       )
-    }
+    })
+
   }
 
   def drawNode(node: TreeNode) = node match {
@@ -213,7 +214,7 @@ class TreeNodePanel {
       })
     case dn: DirNode ⇒ clickableElement(dn, TreeNodeType.folder, () ⇒ {
       manager + dn
-      computeAndDraw
+      drawTree
     })
   }
 
