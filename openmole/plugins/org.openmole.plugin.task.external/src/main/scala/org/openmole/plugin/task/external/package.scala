@@ -39,7 +39,7 @@ package external {
        * @param link @see addResource
        *
        */
-      def +=[T: ExternalBuilder: InputOutputBuilder](p: Prototype[File], name: String, link: Boolean = false, toWorkDirectory: Boolean = true): T ⇒ T =
+      def +=[T: ExternalBuilder: InputOutputBuilder](p: Prototype[File], name: ExpandedString, link: Boolean = false, toWorkDirectory: Boolean = true): T ⇒ T =
         (implicitly[ExternalBuilder[T]].inputFiles add External.InputFile(p, name, link)) andThen
           (inputs += p)
     }
@@ -55,7 +55,7 @@ package external {
        * @param link @see addResource
        *
        */
-      def +=[T: ExternalBuilder: InputOutputBuilder](p: Prototype[Array[File]], prefix: String, suffix: String = "", link: Boolean = false): T ⇒ T =
+      def +=[T: ExternalBuilder: InputOutputBuilder](p: Prototype[Array[File]], prefix: ExpandedString, suffix: ExpandedString = "", link: Boolean = false): T ⇒ T =
         (implicitly[ExternalBuilder[T]].inputFileArrays add External.InputFileArray(prototype = p, prefix = prefix, suffix = suffix, link = link)) andThen
           (inputs += p)
     }
@@ -68,7 +68,7 @@ package external {
        * @param p the prototype that is injected
        *
        */
-      def +=[T: ExternalBuilder: InputOutputBuilder](name: String, p: Prototype[File]): T ⇒ T =
+      def +=[T: ExternalBuilder: InputOutputBuilder](name: ExpandedString, p: Prototype[File]): T ⇒ T =
         (implicitly[ExternalBuilder[T]].outputFiles add External.OutputFile(name, p)) andThen
           (outputs += p)
     }
