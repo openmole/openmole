@@ -55,7 +55,7 @@ package external {
        * @param link @see addResource
        *
        */
-      def +=[T: ExternalBuilder: InputOutputBuilder](p: Prototype[Array[File]], prefix: String, suffix: String = "", link: Boolean = false): T ⇒ T =
+      def +=[T: ExternalBuilder: InputOutputBuilder](p: Prototype[Array[File]], prefix: ExpandedString, suffix: ExpandedString = "", link: Boolean = false): T ⇒ T =
         (implicitly[ExternalBuilder[T]].inputFileArrays add External.InputFileArray(prototype = p, prefix = prefix, suffix = suffix, link = link)) andThen
           (inputs += p)
     }
