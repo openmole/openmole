@@ -55,17 +55,17 @@ class EnvironmentErrorPanel {
 
   def setSorting(sorting: ListSorting, ordering: ListOrdering) = sortingAndOrdering() = ListSortingAndOrdering(sorting, ordering)
 
-  def sort(datedErrors: EnvironmentErrorData, sortingAndOrdering: ListSortingAndOrdering): Seq[(String, Long, String, Error)] = {
+  def sort(datedErrors: EnvironmentErrorData, sortingAndOrdering: ListSortingAndOrdering): Seq[(String, Long, ErrorStateLevel, Error)] = {
     val lines =
       for {
         (error, dates) ← datedErrors.datedErrors
         date ← dates
-      } yield (error.errorMessage, date, error.level.name, error.stack)
+      } yield (error.errorMessage, date, error.level, error.stack)
 
     val sorted = sortingAndOrdering.fileSorting match {
       case AlphaSorting ⇒ lines.sortBy(_._1)
       case TimeSorting  ⇒ lines.sortBy(_._2)
-      case _            ⇒ lines.sortBy(_._3)
+      case _            ⇒ lines.sortBy(_._3.name)
     }
 
     sortingAndOrdering.fileOrdering match {
@@ -88,11 +88,16 @@ class EnvironmentErrorPanel {
             })
           ),
           tags.td(colMD(1))(Utils.longToDate(date).split(",").last),
-          tags.td(colMD(1))(label(level)(label_default))
+          tags.td(colMD(1))(levelLabel(level))
         )
       }
     )
   }
+
+  def levelLabel(level: ErrorStateLevel) = label(level.name)(level match {
+    case ErrorLevel() ⇒ label_danger
+    case _            ⇒ label_default
+  })
 
   val view = {
     val errorTable = tags.table(fontSize := "0.96em", width := "100%")(
