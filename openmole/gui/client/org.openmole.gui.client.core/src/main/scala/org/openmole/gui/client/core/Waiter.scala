@@ -67,29 +67,20 @@ class ProcessStateWaiter(processingState: Var[ProcessState]) {
 
 class FutureWaiter[S](waitingForFuture: Future[S]) {
 
-  def withFutureWaiter[T <: HTMLElement](f: Future[S] ⇒ TypedTag[T])(
-    waitingString: String,
-    onsuccess:     (S) ⇒ Unit = s ⇒ {},
-    onfailure:     () ⇒ Unit  = () ⇒ {}
+  def withFutureWaiter[T <: HTMLElement](
+    waitingString:    String,
+    onsuccessElement: S ⇒ TypedTag[HTMLElement]
   ): TypedTag[HTMLElement] = {
 
-    val processing = Var(false)
+    val processing: Var[TypedTag[HTMLElement]] = Var(waiter)
     waitingForFuture.andThen {
-      case Success(s) ⇒
-        onsuccess(s)
-        processing() = false
-      case Failure(_) ⇒
-        onfailure()
-        processing() = false
+      case Success(s) ⇒ processing() = onsuccessElement(s)
+      case Failure(_) ⇒ processing() = tags.div("Failed to load data")
     }
 
     div(
       Rx {
-        val waiterSpan = div(
-          waiter,
-          if (processing() == false) span() else span(ms("spinner-wave-ratio"))
-        )
-
+        processing()
       }
     )
   }

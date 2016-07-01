@@ -2,9 +2,9 @@ package org.openmole.gui.client.core.files
 
 import org.openmole.gui.client.core.alert.AbsolutePositioning.{ RelativeCenterPosition, FileZone }
 import org.openmole.gui.client.core.alert.AlertPanel
-import org.openmole.gui.client.core.files.FileToolBar.{ PluginTool, CopyTool, TrashTool }
-import org.openmole.gui.client.core.{ PanelTriggerer, OMPost }
-import org.openmole.gui.client.core.CoreUtils
+import org.openmole.gui.client.core.files.FileToolBar.{ PluginTool, TrashTool }
+import org.openmole.gui.client.core.{ OMPost, CoreUtils }
+import org.openmole.gui.client.core.Waiter._
 import org.openmole.gui.ext.data._
 import org.openmole.gui.misc.utils.{ stylesheet, Utils }
 import org.openmole.gui.shared._
@@ -40,7 +40,18 @@ import sheet._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
+object TreeNodePanel {
+  val instance = new TreeNodePanel
+
+  def apply() = instance
+
+  def refreshAnd(todo: () ⇒ Unit) = instance.refreshAnd(todo)
+
+  def refreshAndDraw = instance.refreshAndDraw
+
+}
+
+class TreeNodePanel {
 
   case class NodeEdition(node: TreeNode, replicateMode: Boolean = false)
 
@@ -49,7 +60,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
   val draggedNode: Var[Option[TreeNode]] = Var(None)
   val fileDisplayer = new FileDisplayer
   val fileToolBar = new FileToolBar(this)
-  val tree: Var[TypedTag[HTMLDivElement]] = Var(tags.div())
+  val tree: Var[TypedTag[HTMLElement]] = Var(tags.div())
   val selectionMode = Var(false)
 
   selectionMode.trigger {
@@ -64,7 +75,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
   ).render
 
   lazy val view = {
-    manager.computeCurrentSons(() ⇒ drawTree, filter)
+    drawTree
     val goToModifierSeq = glyph_home +++ floatLeft +++ "treePathItems"
     tags.div(
       fileToolBar.div, Rx {
@@ -143,9 +154,8 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
         fileToolBar.resetFilter
         manager.clearSelection
         turnSelectionTo(false)
-        CoreUtils.refreshCurrentDirectory(fileFilter = fileToolBar.fileFilter.now)
         manager.switch(dn)
-        computeAndDraw
+        drawTree
     }, dropPairs(dn)
   )
 
@@ -165,11 +175,9 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
     }
   )
 
-  def computeAndDraw = manager.computeCurrentSons(() ⇒ drawTree, filter)
-
   def refreshAndDraw = refreshAnd(() ⇒ drawTree)
 
-  def refreshAnd(todo: () ⇒ Unit) = CoreUtils.refreshCurrentDirectory(todo, filter)
+  def refreshAnd(todo: () ⇒ Unit) = CoreUtils.updateSons(manager.current.now, todo, filter)
 
   def computePluggables = fileToolBar.selectedTool.now match {
     case Some(PluginTool) ⇒ manager.computePluggables(() ⇒ if (!manager.pluggables.now.isEmpty) turnSelectionTo(true))
@@ -178,8 +186,9 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
 
   def drawTree: Unit = {
     computePluggables
-    manager.computeAndGetCurrentSons(filter).map { sons ⇒
-      tree() = div(
+    tree() = manager.computeCurrentSons(filter).withFutureWaiter("Get files", (sons: (Seq[TreeNode], Boolean)) ⇒ {
+      if (sons._2) manager.updateSon(manager.current.now, sons._1)
+      div(
         if (manager.isRootCurrent && manager.isProjectsEmpty) {
           div("Create a first OpenMOLE script (.oms)")(ms("message"))
         }
@@ -187,14 +196,15 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
           tags.table(ms("tree" + dragState.now))(
             tr(
               tags.table(ms("file-list"))(
-                for (tn ← sons) yield {
+                for (tn ← sons._1) yield {
                   drawNode(tn)
                 }
               )
             )
           )
       )
-    }
+    })
+
   }
 
   def drawNode(node: TreeNode) = node match {
@@ -204,7 +214,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
       })
     case dn: DirNode ⇒ clickableElement(dn, TreeNodeType.folder, () ⇒ {
       manager + dn
-      computeAndDraw
+      drawTree
     })
   }
 
@@ -257,14 +267,14 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
     AlertPanel.string(message, okaction, transform = RelativeCenterPosition, zone = FileZone)
 
   def trashNode(treeNode: TreeNode): Unit = {
-    fileDisplayer.tabs -- treeNode
     stringAlert(
       s"Do you really want to delete ${
         treeNode.name.now
       }?",
       () ⇒ {
-        CoreUtils.trashNode(treeNode.safePath.now, filter) {
+        CoreUtils.trashNode(treeNode.safePath.now) {
           () ⇒
+            fileDisplayer.tabs -- treeNode
             fileDisplayer.tabs.checkTabs
             refreshAndDraw
         }

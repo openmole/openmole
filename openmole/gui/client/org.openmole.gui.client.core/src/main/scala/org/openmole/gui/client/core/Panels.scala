@@ -51,5 +51,5 @@ package object panels {
     val modalPanel = docPanel
   }
 
-  val treeNodePanel = new TreeNodePanel()(executionTriggerer)
+  val treeNodePanel = TreeNodePanel()
 }

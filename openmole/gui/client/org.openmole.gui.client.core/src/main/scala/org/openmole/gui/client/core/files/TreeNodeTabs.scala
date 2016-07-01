@@ -190,8 +190,10 @@ import org.openmole.gui.client.core.files.TreeNodeTabs._
 class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
 
   def setActive(tab: TreeNodeTab) = {
-    unActiveAll
-    tab.activate
+    if (tabs.now.contains(tab)) {
+      unActiveAll
+      tab.activate
+    }
   }
 
   def unActiveAll = tabs.map {
@@ -217,20 +219,23 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
 
   def removeTab(tab: TreeNodeTab) = {
     tab.desactivate
-    tabs() = tabs.now.filterNot {
+    val newTabs = tabs.now.filterNot {
       _ == tab
     }
-    isActive(tab).map { act ⇒
-      if (act) tabs.now.lastOption.map {
-        setActive
-      }
+    tabs() = newTabs
+    newTabs.lastOption.map { t ⇒
+      setActive(t)
     }
   }
 
-  def --(tab: TreeNodeTab): Unit = tab.refresh(() ⇒ removeTab(tab))
+  def --(tab: TreeNodeTab): Unit = {
+    tab.refresh(() ⇒ removeTab(tab))
+  }
 
-  def --(treeNode: TreeNode): Unit = find(treeNode).map {
-    removeTab
+  def --(treeNode: TreeNode): Unit = {
+    find(treeNode).map {
+      removeTab
+    }
   }
 
   def alterables: Seq[AlterableFileContent] = tabs.now.map {
@@ -285,7 +290,9 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
                   href := "#" + t.id,
                   aria.controls := t.id,
                   role := "tab",
-                  data("toggle") := "tab", onclick := { () ⇒ setActive(t) }
+                  data("toggle") := "tab", onclick := { () ⇒
+                    setActive(t)
+                  }
                 )(
                     tags.button(`class` := "close", `type` := "button", onclick := { () ⇒ --(t) })("x"),
                     t.tabName()

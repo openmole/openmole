@@ -1,6 +1,6 @@
 package org.openmole.gui.client.core
 
-import org.openmole.gui.client.core.files.{ TreeNode, DirNode }
+import org.openmole.gui.client.core.files.{ TreeNodePanel, TreeNode, DirNode }
 import org.openmole.gui.ext.data._
 import org.openmole.gui.shared.Api
 import autowire._
@@ -44,8 +44,6 @@ object CoreUtils {
     }
   }
 
-  def refreshCurrentDirectory(todo: () ⇒ Unit = () ⇒ {}, fileFilter: FileFilter) = manager.trashCache(todo, fileFilter)
-
   def addDirectory(in: TreeNodeData, dirName: String, onadded: () ⇒ Unit = () ⇒ {}) =
     OMPost[Api].addDirectory(in, dirName).call().foreach { b ⇒
       if (b) onadded()
@@ -56,15 +54,15 @@ object CoreUtils {
       if (b) onadded()
     }
 
-  def trashNode(path: SafePath, fileFilter: FileFilter)(ontrashed: () ⇒ Unit): Unit = {
+  def trashNode(path: SafePath)(ontrashed: () ⇒ Unit): Unit = {
     OMPost[Api].deleteFile(path, ServerFileSytemContext.project).call().foreach { d ⇒
-      refresh(fileFilter, ontrashed)
+      TreeNodePanel.refreshAnd(ontrashed)
     }
   }
 
-  def trashNodes(paths: Seq[SafePath], fileFilter: FileFilter)(ontrashed: () ⇒ Unit): Unit = {
+  def trashNodes(paths: Seq[SafePath])(ontrashed: () ⇒ Unit): Unit = {
     OMPost[Api].deleteFiles(paths, ServerFileSytemContext.project).call().foreach { d ⇒
-      refresh(fileFilter, ontrashed)
+      TreeNodePanel.refreshAnd(ontrashed)
     }
   }
 
@@ -74,19 +72,17 @@ object CoreUtils {
     }
   }
 
-  def refresh(fileFilter: FileFilter, onrefreshed: () ⇒ Unit = () ⇒ {}) = {
-    refreshCurrentDirectory(onrefreshed, fileFilter)
-  }
-
   def testExistenceAndCopyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Future[Seq[SafePath]] =
     OMPost[Api].testExistenceAndCopyProjectFilesTo(safePaths, to).call()
 
   def copyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Future[Unit] =
     OMPost[Api].copyProjectFilesTo(safePaths, to).call()
 
-  def updateSons(dirNode: DirNode, todo: () ⇒ Unit = () ⇒ {}, fileFilter: FileFilter) = {
+  def getSons(dirNode: DirNode, fileFilter: FileFilter): Future[Seq[TreeNode]] =
+    OMPost[Api].listFiles(dirNode.safePath.now, fileFilter).call()
 
-    OMPost[Api].listFiles(dirNode.safePath.now, fileFilter).call().foreach { s ⇒
+  def updateSons(dirNode: DirNode, todo: () ⇒ Unit = () ⇒ {}, fileFilter: FileFilter) = {
+    getSons(dirNode, fileFilter).foreach { s ⇒
       manager.updateSon(dirNode, s)
       todo()
     }
