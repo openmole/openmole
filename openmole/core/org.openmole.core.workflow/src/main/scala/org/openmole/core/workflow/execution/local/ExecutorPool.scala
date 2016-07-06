@@ -53,6 +53,9 @@ class ExecutorPool(nbThreads: Int, environment: WeakReference[LocalEnvironment])
   def enqueue(job: LocalExecutionJob) = jobs.enqueue(job)
 
   def waiting: Int = jobs.size
-  def running: Int = executors.synchronized { executors.values.count(_.getState == Thread.State.RUNNABLE) }
+  def running: Int =
+    executors.synchronized {
+      executors.toList.count { case (e, t) ⇒ (t.getState == Thread.State.RUNNABLE) && !e.stop }
+    }
 
 }
