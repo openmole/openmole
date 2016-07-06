@@ -596,4 +596,26 @@ package object stylesheet {
     boxShadow := "0 8px 6px -6px black"
   )
 
+  //DOC 
+  lazy val greenBold: ModifierSeq = Seq(
+    color("#a6bf26"),
+    fontWeight := "bold"
+  )
+
+  lazy val labelInLine: ModifierSeq = Seq(
+    relativePosition,
+    display := "inline",
+    top := -6
+  )
+
+  lazy val glyphText: ModifierSeq = Seq(
+    color("#a6bf26"),
+    fontSize := "22px",
+    sheet.paddingRight(5)
+  )
+
+  lazy val docContent: ModifierSeq = Seq(
+    opacity := 0.95,
+    padding := "5 50"
+  )
 }

@@ -25,7 +25,7 @@ package object panels {
   val marketPanel = new MarketPanel
   val pluginPanel = new PluginPanel
   val environmentStackPanel = new TextPanel("envStackID", "Environment error stack")
-  val docPanel = new DivPanel("documentationID", "Documentation", tags.div.render)
+  val docPanel = new GUIDocPanel
 
   implicit val executionTriggerer = new PanelTriggerer {
     val modalPanel = new ExecutionPanel
