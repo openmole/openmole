@@ -42,7 +42,7 @@ sealed class RepeatSampling(val sampling: Sampling, val times: FromContext[Int])
         vs ← sampling().from(context)(rng).map(_.toSeq).toSeq.transpose
       } yield {
         val p = vs.head.prototype
-        Variable.unsecure(p.toArray, vs.map(_.value).toArray(p.`type`.asInstanceOf[Manifest[Any]]))
+        Variable.unsecure(p.toArray, vs.map(_.value).toArray(p.`type`.manifest.asInstanceOf[Manifest[Any]]))
       }
 
     Iterator.continually(sampled).take(times.from(context)(rng))
