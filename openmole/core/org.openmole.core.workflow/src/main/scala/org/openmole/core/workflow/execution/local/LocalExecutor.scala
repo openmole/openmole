@@ -64,8 +64,7 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
                 for (moleJob ← executionJob.moleJobs) {
                   if (moleJob.state != State.CANCELED) {
                     moleJob.task match {
-                      case _: MoleTask ⇒
-                        jobGoneIdle()
+                      case _: MoleTask ⇒ jobGoneIdle()
                       case t: StrainerTaskDecorator ⇒
                         if (classOf[MoleTask].isAssignableFrom(t.task.getClass)) jobGoneIdle()
                       case _ ⇒
