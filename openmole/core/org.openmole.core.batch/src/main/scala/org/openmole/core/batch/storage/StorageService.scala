@@ -36,7 +36,7 @@ import concurrent.duration._
 
 object StorageService extends Logger {
 
-  val DirRegenerate = ConfigurationLocation("StorageService", "DirRegenerate", Some(1 day))
+  val DirRegenerate = ConfigurationLocation("StorageService", "DirRegenerate", Some(1 hour))
   Workspace setDefault DirRegenerate
 
   val TmpDirRemoval = ConfigurationLocation("StorageService", "TmpDirRemoval", Some(30 days))
