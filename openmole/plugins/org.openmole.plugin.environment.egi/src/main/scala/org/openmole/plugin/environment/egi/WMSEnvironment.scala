@@ -139,7 +139,7 @@ class WMSEnvironment(
             override val hysteresis = Workspace.preference(EGIEnvironment.QualityHysteresis)
           }
 
-          val jobService = fr.iscpif.gridscale.egi.WMSJobService(js, connectionsByWMS, proxyRenewalDelay)(authentication)
+          val jobService = fr.iscpif.gridscale.egi.WMSJobService(js, connectionsByWMS, proxyRenewalTime)(authentication)
           def environment = env
         }
     }
