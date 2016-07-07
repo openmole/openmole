@@ -46,7 +46,7 @@ object CSVSampling {
       separator = None
     )
 
-  def apply(file: File): CSVSampling = apply(file)
+  def apply(file: File): CSVSampling = apply(file: FromContext[File])
   def apply(directory: File, name: ExpandedString): CSVSampling = apply(FileList(directory, name))
 
 }
