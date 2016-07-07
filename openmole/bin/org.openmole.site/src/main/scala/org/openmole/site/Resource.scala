@@ -74,6 +74,8 @@ object Resource {
 
   def api = ArchiveResource("openmole-api.tar.gz", "api")
 
+  def lunr = FileResource("lunr.min.js")
+
   def all = Seq[Resource](
     css,
     github,
@@ -98,7 +100,8 @@ object Resource {
     iscpif,
     geocite,
     biomedia,
-    img
+    img,
+    lunr
   )
 }
 
