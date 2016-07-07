@@ -247,6 +247,8 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
         libraryDependencies += Libraries.scalatexSite,
         libraryDependencies += Libraries.scalaLang,
         libraryDependencies += Libraries.txtmark,
+        libraryDependencies += Libraries.scalaTags,
+        libraryDependencies += Libraries.rx,
         libraryDependencies += Libraries.toolxitBibtex intransitive (),
         setExecutable ++= Seq("site"),
         assemblyDependenciesPath := assemblyPath.value / "plugins",
