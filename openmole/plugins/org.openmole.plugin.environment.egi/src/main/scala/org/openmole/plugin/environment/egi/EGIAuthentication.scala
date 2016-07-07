@@ -160,7 +160,7 @@ object EGIAuthentication extends Logger {
             EGIEnvironment.proxyTime,
             serverURLs,
             voName,
-            EGIEnvironment.proxyRenewalRatio,
+            EGIEnvironment.proxyRenewalTime,
             fqan
           )
 
