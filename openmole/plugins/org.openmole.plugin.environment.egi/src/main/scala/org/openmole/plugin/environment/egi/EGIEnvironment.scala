@@ -37,9 +37,6 @@ import concurrent.duration._
 
 object EGIEnvironment extends Logger {
 
-  val ProxyTime = ConfigurationLocation("EGIEnvironment", "ProxyTime", Some(24 hours))
-  val MyProxyTime = ConfigurationLocation("EGIEnvironment", "MyProxyTime", Some(7 days))
-
   val FetchResourcesTimeOut = ConfigurationLocation("EGIEnvironment", "FetchResourcesTimeOut", Some(2 minutes))
   val CACertificatesSite = ConfigurationLocation("EGIEnvironment", "CACertificatesSite", Some("http://dist.eugridpma.info/distribution/igtf/current/accredited/tgz/"))
   val CACertificatesCacheTime = ConfigurationLocation("EGIEnvironment", "CACertificatesCacheTime", Some(7 days))
@@ -58,8 +55,9 @@ object EGIEnvironment extends Logger {
   val ConnectionsByWebDAVSE = ConfigurationLocation("EGIEnvironment", "ConnectionsByWebDAVSE", Some(100))
   val ConnectionsByWMS = ConfigurationLocation("EGIEnvironment", "ConnectionsByWMS", Some(10))
 
-  val ProxyRenewalRatio = ConfigurationLocation("EGIEnvironment", "ProxyRenewalRatio", Some(0.2))
-  val MinProxyRenewal = ConfigurationLocation("EGIEnvironment", "MinProxyRenewal", Some(5 minutes))
+  val ProxyTime = ConfigurationLocation("EGIEnvironment", "ProxyTime", Some(24 hours))
+  val MyProxyTime = ConfigurationLocation("EGIEnvironment", "MyProxyTime", Some(7 days))
+  val ProxyRenewalTime = ConfigurationLocation("EGIEnvironment", "ProxyRenewalTime", Some(20 minutes))
   val JobShakingHalfLife = ConfigurationLocation("EGIEnvironment", "JobShakingHalfLife", Some(30 minutes))
   val JobShakingMaxReady = ConfigurationLocation("EGIEnvironment", "JobShakingMaxReady", Some(100))
 
@@ -118,8 +116,7 @@ object EGIEnvironment extends Logger {
   Workspace setDefault ConnectionsByWMS
   Workspace setDefault ConnectionsByWebDAVSE
 
-  Workspace setDefault ProxyRenewalRatio
-  Workspace setDefault MinProxyRenewal
+  Workspace setDefault ProxyRenewalTime
 
   Workspace setDefault EagerSubmissionNbSampling
   Workspace setDefault EagerSubmissionSamplingWindowFactor
@@ -161,8 +158,7 @@ object EGIEnvironment extends Logger {
   Workspace setDefault WMSRank
 
   def proxyTime = Workspace.preference(ProxyTime)
-  def proxyRenewalRatio = Workspace.preference(EGIEnvironment.ProxyRenewalRatio)
-  def proxyRenewalDelay = (proxyTime * proxyRenewalRatio) max Workspace.preference(EGIEnvironment.MinProxyRenewal)
+  def proxyRenewalTime = Workspace.preference(EGIEnvironment.ProxyRenewalTime)
 
   def normalizedFitness[T](fitness: ⇒ Iterable[(T, Double)], min: Double = Workspace.preference(EGIEnvironment.MinValueForSelectionExploration)): Iterable[(T, Double)] = {
     def orMinForExploration(v: Double) = math.max(v, min)
