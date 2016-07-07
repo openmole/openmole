@@ -147,10 +147,8 @@ object Site {
     } r match {
       case RenameFileResource(source, destination) ⇒
         val from = parameters.resources.get / source
-        if (from.exists) {
-          val f = new File(dest, destination)
-          from copy f
-        }
+        val f = new File(dest, destination)
+        from copy f
       case ArchiveResource(name, dir) ⇒
         val f = new File(dest, dir)
         f.mkdirs
