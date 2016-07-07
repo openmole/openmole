@@ -174,4 +174,6 @@ object Libraries extends Defaults {
 
   lazy val configuration = "org.openmole" %% "org-apache-commons-configuration2" % "2.0"
 
+  lazy val spray = "io.spray" %% "spray-json" % "1.3.2"
+
 }

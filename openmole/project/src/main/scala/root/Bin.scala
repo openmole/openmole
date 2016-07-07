@@ -20,6 +20,7 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
     (m.organization == "fr.iscpif.gridscale.bundle" ||
       m.organization == "org.bouncycastle" ||
       m.organization.contains("org.openmole") ||
+      m.organization == "io.spray" ||
       (m.organization == "org.osgi" && m.name != "osgi"))
 
   def pluginFilter(m: ModuleID) = m.name != "osgi" && m.name != "scala-library"
@@ -247,6 +248,7 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
         libraryDependencies += Libraries.scalatexSite,
         libraryDependencies += Libraries.scalaLang,
         libraryDependencies += Libraries.txtmark,
+        libraryDependencies += Libraries.spray,
         libraryDependencies += Libraries.toolxitBibtex intransitive (),
         setExecutable ++= Seq("site"),
         assemblyDependenciesPath := assemblyPath.value / "plugins",

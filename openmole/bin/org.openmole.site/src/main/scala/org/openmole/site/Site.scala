@@ -17,10 +17,11 @@
 
 package org.openmole.site
 
-import java.io.{ File, FileInputStream }
+import java.io.{ File, FileInputStream, PrintWriter }
+import java.nio.CharBuffer
 import java.util.zip.GZIPInputStream
 
-import ammonite.ops.Path
+import ammonite.ops.{ Path, write }
 import org.openmole.core.buildinfo.MarketIndex
 import org.openmole.core.serializer.SerialiserService
 import org.openmole.core.workspace.Workspace
@@ -34,6 +35,7 @@ import scalatags.Text.all._
 import scala.sys.process.BasicIO
 import org.openmole.site.credits._
 import org.openmole.core.buildinfo
+import spray.json.JsArray
 
 import scala.annotation.tailrec
 
@@ -127,6 +129,23 @@ object Site {
         ) ++ (if (documentationFrags.contains(frag)) Seq(id := "top-content-documentation") else Seq())
           ++ Seq(frag): _*
       )
+
+      override def generateHtml(outputRoot: Path) = {
+        val res = content map {
+          case (path, (pageHeaders, pageBody)) ⇒ {
+            val txt = html(
+              head(pageHeaders),
+              body(bodyFrag(pageBody))
+            ).render
+            val cb = CharBuffer.wrap("<!DOCTYPE html>" + txt)
+            val bytes = scala.io.Codec.UTF8.encoder.encode(cb)
+            val target = outputRoot / path
+            write.over(target, bytes.array())
+            LunrIndex.Index(path, txt)
+          }
+        }
+        write.over(outputRoot / "index.js", "var index = " + JsArray(res.toVector).compactPrint)
+      }
 
       lazy val pagesFrag = Pages.all.map { p ⇒ PageFrag(p, Pages.decorate(p)) }
       lazy val documentationFrags = pagesFrag.collect { case PageFrag(p: DocumentationPage, f) ⇒ f }.toSet
