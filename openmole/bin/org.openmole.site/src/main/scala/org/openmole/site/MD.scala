@@ -21,10 +21,13 @@ import java.lang.StringBuilder
 import java.util
 
 import com.github.rjeschke._
+import com.github.rjeschke.txtmark.DefaultDecorator
+import org.openmole.site.market.GeneratedMarketEntry
 import org.openmole.tool.file._
 
 import scala.collection.JavaConversions._
 import scalatags.Text.all._
+import scalaz._
 
 object MD {
 
@@ -38,13 +41,18 @@ object MD {
     }
   }
 
-  def apply(md: File): Frag = {
-    val configuration = txtmark.Configuration.builder().
-      setCodeBlockEmitter(emiter).
-      forceExtentedProfile().
-      build()
+  def apply(md: File): Frag = apply(md.content)
+
+  def apply(md: String): Frag = {
+    val configuration =
+      txtmark.Configuration.builder().
+        setCodeBlockEmitter(emiter).
+        forceExtentedProfile().build()
 
     div(RawFrag(txtmark.Processor.process(md, configuration)))
   }
+
+  def generatePage(entry: GeneratedMarketEntry)(implicit parent: Parent[DocumentationPage]) =
+    entry.readme.map { md ⇒ DocumentationPages(entry.entry.name, Reader(_ ⇒ apply(md))) }
 
 }

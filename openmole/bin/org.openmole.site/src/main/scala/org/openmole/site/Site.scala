@@ -130,7 +130,11 @@ object Site {
           ++ Seq(frag): _*
       )
 
-      lazy val pagesFrag = Pages.all.map { p ⇒ PageFrag(p, Pages.decorate(p).run(parameters.resources.get)) }
+      import scalaz._
+      import Scalaz._
+
+      lazy val pagesFrag =
+        Pages.all.toVector.traverseU { p ⇒ Pages.decorate(p).map(PageFrag(p, _)) }.run(parameters.resources.get)
 
       lazy val documentationFrags = pagesFrag.collect { case PageFrag(p: DocumentationPage, f) ⇒ f }.toSet
 
@@ -143,7 +147,7 @@ object Site {
     site.renderTo(Path(dest))
 
     for {
-      r ← Resource.all
+      r ← Resource.all ++ Resource.marketResources(marketEntries)
     } r match {
       case RenameFileResource(source, destination) ⇒
         val from = parameters.resources.get / source
@@ -154,6 +158,9 @@ object Site {
         f.mkdirs
         val resource = parameters.resources.get / name
         withClosable(new TarInputStream(new GZIPInputStream(new FileInputStream(resource)))) { _.extract(f) }
+      case MarketResource(entry) ⇒
+        val f = new File(dest, entry.entry.name)
+        entry.location copy f
     }
 
     DSLTest.runTest.get
