@@ -22,6 +22,7 @@ import org.openmole.site.market._
 
 import scalatags.Text.all._
 import com.github.rjeschke._
+import org.openmole.site.market.Market.Tags
 
 import scalatex.{ openmole ⇒ scalatex }
 import org.openmole.tool.file._
@@ -115,6 +116,15 @@ object DocumentationPages { index ⇒
 
   var marketEntries: Seq[GeneratedMarketEntry] = Seq()
 
+  def apply(name: String, content: Reader[File, Frag], children: Seq[DocumentationPage] = Seq.empty)(implicit p: Parent[DocumentationPage] = Parent(None)) = {
+    val (_name, _content, _children) = (name, content, children)
+    new DocumentationPage {
+      override def children = _children
+      override def name = _name
+      override def content = _content
+    }
+  }
+
   def tag(p: DocumentationPage): String = p.name + p.parent.map(pa ⇒ "-" + tag(pa)).getOrElse("")
 
   def decorate(p: DocumentationPage) =
@@ -131,7 +141,7 @@ object DocumentationPages { index ⇒
 
   def documentationMenu(root: DocumentationPage, currentPage: DocumentationPage): Frag = {
     def menuEntry(p: DocumentationPage) = {
-      def current = p == currentPage
+      def current = p.location == currentPage.location
       def idLabel = "documentation-menu-entry" + (if (current) "-current" else "")
       a(p.name, href := p.file)
     }
@@ -154,8 +164,8 @@ object DocumentationPages { index ⇒
         )
 
       if (p.children.isEmpty) contracted
-      else if (p == currentPage) expanded
-      else if (currentPageParents.contains(p)) expanded
+      else if (p.location == currentPage.location) expanded
+      else if (currentPageParents.exists(_.location == p.location)) expanded
       else contracted
     }
 
@@ -341,7 +351,10 @@ object DocumentationPages { index ⇒
     def tutorial = new DocumentationPage {
       def name = "Tutorials"
       override def title = Some(name)
-      def children = Seq(helloWorld, headlessNetLogo, netLogoGA, capsule)
+      def children =
+        Seq(helloWorld, headlessNetLogo, netLogoGA, capsule) ++
+          marketEntries.filter(_.tags.exists(_ == Tags.tutorial)).flatMap(MD.generatePage(_))
+
       def content = Reader(_ ⇒ scalatex.documentation.language.Tutorial())
 
       def helloWorld = new DocumentationPage {
@@ -371,12 +384,6 @@ object DocumentationPages { index ⇒
         def children = Seq()
         def content = Reader(_ ⇒ scalatex.documentation.language.tutorial.Capsule())
       }
-
-      //      def test = new DocumentationPage {
-      //        def name = "Test"
-      //        def children = Seq()
-      //        def content = Reader(resources ⇒ MD(resources / "md" / "Test.md"))
-      //      }
     }
 
     def market = new DocumentationPage {
