@@ -66,6 +66,8 @@ object Resource {
 
   def biomedia = FileResource("biomedia.png")
 
+  def img = FileResource("img")
+
   def openmole = RenameFileResource("openmole.tar.gz", s"openmole-${buildinfo.version}.tar.gz")
 
   def openmoleDaemon = RenameFileResource("openmole-daemon.tar.gz", s"openmole-daemon-${buildinfo.version}.tar.gz")
@@ -95,13 +97,13 @@ object Resource {
     uiScreenshot,
     iscpif,
     geocite,
-    biomedia
+    biomedia,
+    img
   )
 }
 
 sealed trait Resource
 
 case class RenameFileResource(source: String, file: String) extends Resource
-
 case class ArchiveResource(source: String, file: String) extends Resource
 

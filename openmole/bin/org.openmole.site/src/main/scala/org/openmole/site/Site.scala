@@ -92,6 +92,8 @@ object Site {
 
     case class PageFrag(page: Page, frag: Frag)
 
+    def mdFiles = (parameters.resources.get / "md").listFilesSafe.filter(_.getName.endsWith(".md"))
+
     val site = new scalatex.site.Site { site ⇒
       override def siteCss = Set.empty
       override def pageTitle: Option[String] = None
@@ -128,7 +130,8 @@ object Site {
           ++ Seq(frag): _*
       )
 
-      lazy val pagesFrag = Pages.all.map { p ⇒ PageFrag(p, Pages.decorate(p)) }
+      lazy val pagesFrag = Pages.all.map { p ⇒ PageFrag(p, Pages.decorate(p).run(parameters.resources.get)) }
+
       lazy val documentationFrags = pagesFrag.collect { case PageFrag(p: DocumentationPage, f) ⇒ f }.toSet
 
       def content = pagesFrag.map { case PageFrag(p, f) ⇒ p.file → (site.headFrags(p), f) }.toMap
@@ -143,22 +146,14 @@ object Site {
       r ← Resource.all
     } r match {
       case RenameFileResource(source, destination) ⇒
+        val from = parameters.resources.get / source
         val f = new File(dest, destination)
-        f.createParentDir
-        f.withOutputStream { os ⇒
-          val resource = parameters.resources.get / source
-          resource.withInputStream { is ⇒
-            assert(is != null, s"Resource $source doesn't exist")
-            BasicIO.transferFully(is, os)
-          }
-        }
+        from copy f
       case ArchiveResource(name, dir) ⇒
         val f = new File(dest, dir)
         f.mkdirs
         val resource = parameters.resources.get / name
-        withClosable(new TarInputStream(new GZIPInputStream(new FileInputStream(resource)))) {
-          _.extract(f)
-        }
+        withClosable(new TarInputStream(new GZIPInputStream(new FileInputStream(resource)))) { _.extract(f) }
     }
 
     DSLTest.runTest.get

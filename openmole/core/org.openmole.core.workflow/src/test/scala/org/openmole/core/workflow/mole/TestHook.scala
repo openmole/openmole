@@ -22,21 +22,13 @@ import org.openmole.core.workflow.data._
 
 object TestHook {
 
-  implicit def isBuilder = new HookBuilder[TestHook] {
-    override def defaults = TestHook.defaults
-    override def inputs = TestHook.inputs
-    override def name = TestHook.name
-    override def outputs = TestHook.outputs
-  }
+  implicit def isBuilder: InputOutputBuilder[TestHook] = InputOutputBuilder(config)
 
 }
 
 @Lenses case class TestHook(
-    f:        Context ⇒ Context = identity[Context],
-    inputs:   PrototypeSet      = PrototypeSet.empty,
-    outputs:  PrototypeSet      = PrototypeSet.empty,
-    defaults: DefaultSet        = DefaultSet.empty,
-    name:     Option[String]    = None
+    f:      Context ⇒ Context = identity[Context],
+    config: InputOutputConfig = InputOutputConfig()
 ) extends Hook {
   override protected def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider): Context =
     f(context)

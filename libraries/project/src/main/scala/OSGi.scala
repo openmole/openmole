@@ -30,7 +30,7 @@ object OSGi extends Defaults {
   lazy val logback = OsgiProject("ch.qos.logback", exports = Seq("ch.qos.logback.*", "org.slf4j.impl"), dynamicImports = Seq("*")) settings
     (libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.0.9", version := "1.0.9")
 
-  lazy val h2Version = "1.4.190"
+  lazy val h2Version = "1.4.192"
   lazy val h2 = OsgiProject("org.h2", dynamicImports = Seq("*"), privatePackages = Seq("META-INF.*")) settings
     (libraryDependencies += "com.h2database" % "h2" % h2Version, version := h2Version)
 

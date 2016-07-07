@@ -17,25 +17,16 @@
 package org.openmole.core.workflow.mole
 
 import monocle.macros.Lenses
+import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
 import org.openmole.core.workflow.data.{ Context, DefaultSet, PrototypeSet, RandomProvider }
 
 object TestSource {
-
-  implicit def isBuilder = new SourceBuilder[TestSource] {
-    override def defaults = TestSource.defaults
-    override def inputs = TestSource.inputs
-    override def name = TestSource.name
-    override def outputs = TestSource.outputs
-  }
-
+  implicit def isBuilder: InputOutputBuilder[TestSource] = InputOutputBuilder(config)
 }
 
 @Lenses case class TestSource(
-    f:        Context ⇒ Context = identity[Context],
-    inputs:   PrototypeSet      = PrototypeSet.empty,
-    outputs:  PrototypeSet      = PrototypeSet.empty,
-    defaults: DefaultSet        = DefaultSet.empty,
-    name:     Option[String]    = None
+    f:      Context ⇒ Context = identity[Context],
+    config: InputOutputConfig = InputOutputConfig()
 ) extends Source {
   override protected def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider): Context =
     f(context)
