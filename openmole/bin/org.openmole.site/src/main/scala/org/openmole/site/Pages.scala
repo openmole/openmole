@@ -57,6 +57,8 @@ object Pages {
 
   def all: Seq[Page] = DocumentationPages.allPages ++ Seq(index, gettingStarted, whoAreWe, communications)
 
+  def file(page: Page) = page.location.mkString("_") + ".html"
+
 }
 
 object Page {
@@ -76,8 +78,8 @@ trait Page {
   def name: String
   def title: Option[String]
 
-  def location = name
-  def file = location + ".html"
+  def location = Seq(name)
+  def file = Pages.file(this)
 }
 
 case class Parent[T](parent: Option[T])
@@ -91,10 +93,10 @@ abstract class DocumentationPage(implicit p: Parent[DocumentationPage] = Parent(
   def children: Seq[DocumentationPage]
   def title: Option[String] = None
 
-  override def location: String =
+  override def location: Seq[String] =
     parent match {
-      case None    ⇒ name
-      case Some(p) ⇒ p.location + "_" + name
+      case None    ⇒ Seq(name)
+      case Some(p) ⇒ p.location ++ Seq(name)
     }
 
   def allPages: Seq[DocumentationPage] = {
@@ -116,12 +118,18 @@ object DocumentationPages { index ⇒
 
   var marketEntries: Seq[GeneratedMarketEntry] = Seq()
 
-  def apply(name: String, content: Reader[File, Frag], children: Seq[DocumentationPage] = Seq.empty)(implicit p: Parent[DocumentationPage] = Parent(None)) = {
-    val (_name, _content, _children) = (name, content, children)
+  def apply(
+    name:     String,
+    content:  Reader[File, Frag],
+    children: Seq[DocumentationPage] = Seq.empty,
+    location: Option[Seq[String]]    = None
+  )(implicit p: Parent[DocumentationPage] = Parent(None)) = {
+    val (_name, _content, _children, _location) = (name, content, children, location)
     new DocumentationPage {
       override def children = _children
       override def name = _name
       override def content = _content
+      override def location = _location.getOrElse(super.location)
     }
   }
 

@@ -219,6 +219,9 @@ object OSGi extends Defaults {
   lazy val logging = OsgiProject("org.apache.commons.logging") settings
     (libraryDependencies += "commons-logging" % "commons-logging" % "1.2", version := "1.2")
 
+  lazy val lang3 = OsgiProject("org.apache.commons.lang3") settings (
+    libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.4", version := "3.4")
+
   lazy val sshd = OsgiProject("org.apache.sshd", exports = Seq("org.apache.sshd.*", "org.apache.mina.*"), dynamicImports = Seq("*"), privatePackages = Seq("META-INF.*")) settings
     (libraryDependencies += "org.apache.sshd" % "sshd-core" % "1.0.0", version := "1.0.0")
 

@@ -22,10 +22,13 @@ import java.util
 
 import com.github.rjeschke._
 import com.github.rjeschke.txtmark.DefaultDecorator
+import org.apache.commons.lang3.StringEscapeUtils
 import org.openmole.site.market.GeneratedMarketEntry
 import org.openmole.tool.file._
 
 import scala.collection.JavaConversions._
+import scala.xml.XML
+import scala.xml.parsing.XhtmlParser
 import scalatags.Text.all._
 import scalaz._
 
@@ -41,18 +44,49 @@ object MD {
     }
   }
 
-  def apply(md: File): Frag = apply(md.content)
-
-  def apply(md: String): Frag = {
+  def mdToHTML(md: String) = {
     val configuration =
       txtmark.Configuration.builder().
         setCodeBlockEmitter(emiter).
         forceExtentedProfile().build()
+    txtmark.Processor.process(md, configuration)
+  }
 
-    div(RawFrag(txtmark.Processor.process(md, configuration)))
+  def prefixLink(prefix: String)(n: Seq[scala.xml.Node]) = {
+    import scala.xml.transform._
+
+    val HTMLTransformer = new RuleTransformer(new RewriteRule {
+      override def transform(node: scala.xml.Node) =
+        node match {
+          case image @ <img/> ⇒
+            val newSrc = prefix + image \ "@src"
+            val alt = image \ "@alt"
+            <img src={ newSrc } style="max-width:100%;" alt={ alt }/>
+          case link @ <a>{ stuff }</a> ⇒
+            val uri = new java.net.URI(link \ "@href" text)
+            if (!uri.isAbsolute) {
+              val newTarget = prefix + link \ "@href"
+              <a href={ newTarget }>
+                { stuff }
+              </a>
+            }
+            else link
+          case passthrough ⇒ passthrough
+        }
+    })
+
+    HTMLTransformer.transform(n)
+  }
+
+  def relativiseLinks(md: String, prefix: String) = {
+    def escaped = s"<div>${StringEscapeUtils.unescapeHtml4(md)}</div>"
+    prefixLink(prefix)(XML.loadString(escaped)).mkString
   }
 
   def generatePage(entry: GeneratedMarketEntry)(implicit parent: Parent[DocumentationPage]) =
-    entry.readme.map { md ⇒ DocumentationPages(entry.entry.name, Reader(_ ⇒ apply(md))) }
+    entry.readme.map { md ⇒
+      def frag = RawFrag(relativiseLinks(MD.mdToHTML(md), entry.entry.name + "/"))
+      DocumentationPages(entry.entry.name, Reader(_ ⇒ frag), location = Some(Seq(entry.entry.name, entry.entry.name)))
+    }
 
 }
