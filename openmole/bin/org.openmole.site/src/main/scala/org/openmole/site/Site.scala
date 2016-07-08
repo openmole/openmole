@@ -18,9 +18,11 @@
 package org.openmole.site
 
 import java.io.{ File, FileInputStream }
+import java.nio.CharBuffer
+import java.nio.file.Paths
 import java.util.zip.GZIPInputStream
 
-import ammonite.ops.Path
+import ammonite.ops.{ Path, write }
 import org.openmole.core.buildinfo.MarketIndex
 import org.openmole.core.serializer.SerialiserService
 import org.openmole.core.workspace.Workspace
@@ -145,6 +147,7 @@ object Site {
       lazy val documentationFrags = pagesFrag.collect { case PageFrag(p: DocumentationPage, f) ⇒ f }.toSet
 
       def content = pagesFrag.map { case PageFrag(p, f) ⇒ p.file → (site.headFrags(p), f) }.toMap
+
     }
 
     lazy val bibPapers = Publication.papers ++ Communication.papers
