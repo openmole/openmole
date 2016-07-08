@@ -331,8 +331,8 @@ object DocumentationPages { index ⇒
     def tutorial = new DocumentationPage {
       def name = "Tutorials"
       def children =
-        Seq(helloWorld, headlessNetLogo, netLogoGA, capsule) ++
-          marketEntries.filter(_.tags.exists(_ == Tags.tutorial)).flatMap(MD.generatePage(_))
+        Seq(helloWorld, headlessNetLogo, netLogoGA, capsule) /*++
+          marketEntries.filter(_.tags.exists(_ == Tags.tutorial)).flatMap(MD.generatePage(_))*/
 
       def content = Reader(_ ⇒ scalatex.documentation.language.Tutorial())
 

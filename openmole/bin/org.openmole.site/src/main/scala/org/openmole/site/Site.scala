@@ -40,7 +40,8 @@ import scala.annotation.tailrec
 object Site {
 
   def piwik =
-    RawFrag("""
+    RawFrag(
+      """
         |<!-- Piwik -->
         |<script type="text/javascript">
         |  var _paq = _paq || [];
@@ -57,7 +58,8 @@ object Site {
         |</script>
         |<noscript><p><img src="//piwik.iscpif.fr/piwik.php?idsite=1" style="border:0;" alt="" /></p></noscript>
         |<!-- End Piwik Code -->
-      """.stripMargin)
+      """.stripMargin
+    )
 
   def run(args: Array[String]): Int = {
     case class Parameters(
@@ -94,8 +96,10 @@ object Site {
 
     def mdFiles = (parameters.resources.get / "md").listFilesSafe.filter(_.getName.endsWith(".md"))
 
-    val site = new scalatex.site.Site { site ⇒
+    val site = new scalatex.site.Site {
+      site ⇒
       override def siteCss = Set.empty
+
       override def pageTitle: Option[String] = None
 
       def headFrags(page: org.openmole.site.Page) =
@@ -114,6 +118,7 @@ object Site {
           script(src := scriptName),
           script(src := Resource.bootstrapJS.file),
           script(src := Resource.highlightJS.file),
+          script(src := Resource.siteJS.file),
           script("hljs.initHighlightingOnLoad();"),
 
           meta(charset := "UTF-8"),
@@ -125,7 +130,8 @@ object Site {
        */
       override def bodyFrag(frag: Frag): Frag = body(
         Seq(
-          cls := "scalatex-content"
+          cls := "scalatex-content",
+          onload := "Test().render();"
         ) ++ (if (documentationFrags.contains(frag)) Seq(id := "top-content-documentation") else Seq())
           ++ Seq(frag): _*
       )
@@ -157,7 +163,9 @@ object Site {
         val f = new File(dest, dir)
         f.mkdirs
         val resource = parameters.resources.get / name
-        withClosable(new TarInputStream(new GZIPInputStream(new FileInputStream(resource)))) { _.extract(f) }
+        withClosable(new TarInputStream(new GZIPInputStream(new FileInputStream(resource)))) {
+          _.extract(f)
+        }
       case MarketResource(entry) ⇒
         val f = new File(dest, entry.entry.name)
         entry.location copy f

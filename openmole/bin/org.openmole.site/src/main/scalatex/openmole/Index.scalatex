@@ -1,6 +1,7 @@
 
 @import org.openmole.site._
 
+@div(id := "openmoleTest")
 @p(style := "text-align: center")
   Need to tune parameters of your program?
   @br Need to execute your program against many datasets?

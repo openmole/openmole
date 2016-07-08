@@ -58,6 +58,8 @@ object Resource {
 
   def highlightJS = FileResource("highlight.pack.js")
 
+  def siteJS = FileResource("sitejs.js")
+
   def logo = FileResource("openmole.png")
 
   def uiScreenshot = FileResource("openmoleUI.png")
@@ -83,6 +85,7 @@ object Resource {
     css,
     github,
     highlightJS,
+    siteJS,
     bootstrapCss,
     bootstrapJS,
     logo,
