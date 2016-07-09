@@ -80,6 +80,8 @@ object Resource {
 
   def lunr = FileResource("lunr.min.js")
 
+  def index = FileResource("index.js")
+
   def marketResources(entries: Seq[GeneratedMarketEntry]) =
     entries.filter(_.tags.exists(_ == market.Market.Tags.tutorial)).map { tuto ⇒ MarketResource(tuto) }
 
@@ -109,7 +111,8 @@ object Resource {
     geocite,
     biomedia,
     img,
-    lunr
+    lunr,
+    index
   )
 }
 

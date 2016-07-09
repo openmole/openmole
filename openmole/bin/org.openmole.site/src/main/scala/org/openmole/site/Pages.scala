@@ -47,6 +47,7 @@ object Pages {
           li(a("Who are we?", `class` := "amenu", id := "section", href := whoAreWe.file))
         )
       ),
+      div(id := "openmoleSearch"),
       div(`class` := "row")(p)
     )
 

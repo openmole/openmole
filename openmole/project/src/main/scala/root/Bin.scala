@@ -273,7 +273,8 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
 
   lazy val siteJS = Project("siteJS", dir / "org.openmole.sitejs") settings (commonsSettings: _*) settings (
     scalaTagsJS,
-    rxJS
+    rxJS,
+    scaladgetJS
   ) enablePlugins (ScalaJSPlugin)
 
   lazy val launcher = OsgiProject("org.openmole.launcher", imports = Seq("*"), settings = assemblySettings) settings (
