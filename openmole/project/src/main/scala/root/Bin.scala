@@ -118,7 +118,6 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
     upickle,
     scalatra intransitive (),
     scalajHttp,
-    txtmark,
     clapper,
     rx,
     scalajs
@@ -248,7 +247,6 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
         libraryDependencies += Libraries.xstream,
         libraryDependencies += Libraries.scalatexSite,
         libraryDependencies += Libraries.scalaLang,
-        libraryDependencies += Libraries.txtmark,
         libraryDependencies += Libraries.lang3,
         libraryDependencies += Libraries.toolxitBibtex intransitive (),
         setExecutable ++= Seq("site"),
@@ -267,7 +265,7 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
         resourcesAssemble <+= (fullOptJS in siteJS in Compile, assemblyPath) map { case (js, d) ⇒ js.data → (d / "resources" / "sitejs.js") },
         dependencyFilter := filter,
         dependencyName := rename
-      ) dependsOn (Core.project, Core.buildinfo, root.Doc.doc, siteJS)
+      ) dependsOn (Core.project, Core.buildinfo, root.Doc.doc, siteJS, ThirdParties.txtmark)
 
   lazy val siteJS = Project("siteJS", dir / "org.openmole.sitejs") settings (commonsSettings: _*) settings (
     scalaTagsJS,
