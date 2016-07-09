@@ -1,0 +1,12 @@
+build/
+doc/
+release/
+.settings
+.classpath
+.project
+target/
+*~
+*.releaseBackup
+release.properties
+*.pyc
+

@@ -23,5 +23,7 @@ object ThirdParties extends Defaults {
   lazy val openmoleByteCode = OsgiProject("org.openmole.tool.bytecode", imports = Seq("*")) settings (bundleType := Set("core")) settings (libraryDependencies += Libraries.asm)
   lazy val openmoleOSGi = OsgiProject("org.openmole.tool.osgi", imports = Seq("*")) settings (bundleType := Set("core")) dependsOn (openmoleFile)
 
+  lazy val txtmark = OsgiProject("com.quandora.txtmark", exports = Seq("com.github.rjeschke.txtmark.*"), imports = Seq("*")) settings (bundleType := Set("core"))
+
   override def settings = super.settings ++ Seq(libraryDependencies += Libraries.scalatest)
 }

@@ -49,8 +49,7 @@ object Test {
         for { r ← results() } yield {
           tags.div(
             tags.span(
-              tags.a(r.ref, cursor := "pointer", href := r.ref, target := "_blank"),
-              r.score
+              tags.a(r.ref, cursor := "pointer", href := r.ref, target := "_blank")
             )
           )
         }
