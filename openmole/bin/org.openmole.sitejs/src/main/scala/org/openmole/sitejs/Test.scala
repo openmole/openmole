@@ -71,5 +71,4 @@ object Test {
       i.search(searchInput.value).toSeq
     }.getOrElse(Seq())
   }
-
 }
