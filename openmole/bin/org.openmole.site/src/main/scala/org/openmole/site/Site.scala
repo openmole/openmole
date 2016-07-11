@@ -154,7 +154,7 @@ object Site {
             LunrIndex.Index(path, txt)
           }
         }
-        write.over(outputRoot / "resources" / "index.js", "var index = " + JsArray(res.toVector).compactPrint)
+        write.over(outputRoot / "index.js", "var index = " + JsArray(res.toVector).compactPrint)
       }
 
       import scalaz._

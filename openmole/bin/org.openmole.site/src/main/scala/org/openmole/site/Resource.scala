@@ -111,8 +111,7 @@ object Resource {
     geocite,
     biomedia,
     img,
-    lunr,
-    index
+    lunr
   )
 }
 
