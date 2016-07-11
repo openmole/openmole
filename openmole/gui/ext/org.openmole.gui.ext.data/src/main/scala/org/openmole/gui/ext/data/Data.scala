@@ -121,6 +121,10 @@ case class TarGz() extends FileExtension {
   def displayable = false
 }
 
+case class Tar() extends FileExtension {
+  def displayable = false
+}
+
 object FileExtension {
   val OMS = OpenMOLEScript("scala")
   val SCALA = DisplayableOnDemandFile("scala")
@@ -129,6 +133,7 @@ object FileExtension {
   val TEXT = DisplayableOnDemandFile("text")
   val NO_EXTENSION = DisplayableFile("text")
   val TGZ = TarGz()
+  val TAR = Tar()
   val BINARY = BinaryFile()
 }
 
@@ -214,6 +219,12 @@ case class EGIP12AuthenticationData(
 ) extends AuthenticationData with PrivateKey {
   def synthetic = "egi.p12"
 }
+
+object ExtractResult {
+  def ok = ExtractResult(None)
+}
+
+case class ExtractResult(error: Option[Error])
 
 object AuthenticationTest {
   def empty = AuthenticationTestBase(false, Error(""))

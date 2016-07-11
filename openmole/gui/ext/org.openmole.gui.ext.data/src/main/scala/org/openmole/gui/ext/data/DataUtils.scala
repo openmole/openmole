@@ -56,6 +56,7 @@ object DataUtils {
     case x if x.endsWith(".scala")                       ⇒ SCALA
     case x if x.endsWith(".sh")                          ⇒ SH
     case x if x.endsWith(".tgz") | x.endsWith(".tar.gz") ⇒ TGZ
+    case x if x.endsWith(".tar")                         ⇒ TAR
     case x if x.endsWith(".csv") |
       x.endsWith(".nlogo") |
       x.endsWith(".gaml") |

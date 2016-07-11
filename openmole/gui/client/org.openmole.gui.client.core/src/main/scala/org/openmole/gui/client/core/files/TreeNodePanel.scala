@@ -284,7 +284,10 @@ class TreeNodePanel {
 
   def extractTGZ(tnd: TreeNode) =
     OMPost[Api].extractTGZ(tnd).call().foreach { r ⇒
-      refreshAndDraw
+      r.error match {
+        case Some(e: org.openmole.gui.ext.data.Error) ⇒ stringAlert("An error occured during extraction \n" + e.stackTrace, () ⇒ {})
+        case _                                        ⇒ refreshAndDraw
+      }
     }
 
   def renameNode(treeNode: TreeNode, newName: String, replicateMode: Boolean) = {
@@ -428,7 +431,7 @@ class TreeNodePanel {
                         href := s"downloadFile?path=${Utils.toURI(tn.safePath().path)}"
                       ),
                       tn.safePath().extension match {
-                        case FileExtension.TGZ ⇒
+                        case FileExtension.TGZ | FileExtension.TAR ⇒
                           span(archive, onclick := { () ⇒
                             extractTGZ(tn)
                           })
