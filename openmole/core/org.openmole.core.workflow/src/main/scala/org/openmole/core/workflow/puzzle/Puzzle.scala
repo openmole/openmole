@@ -164,15 +164,16 @@ case class Puzzle(
     defaultEnvironment: LocalEnvironment     = LocalEnvironment()
   ): MoleExecution =
     MoleExecution(
-      toMole,
-      sources,
-      hooks,
-      environments,
-      grouping,
-      implicits,
-      seed,
-      defaultEnvironment
-    )(executionContext)
+      mole = toMole,
+      sources = sources,
+      hooks = hooks,
+      environments = environments,
+      grouping = grouping,
+      implicits = implicits,
+      seed = seed,
+      defaultEnvironment = defaultEnvironment,
+      executionContext = executionContext
+    )
 
   def slots: Set[Slot] = (firstSlot :: transitions.map(_.end).toList).toSet
 

@@ -17,12 +17,17 @@
 
 package org.openmole.core.workflow.mole
 
-import java.io.{ PrintStream, File }
+import java.io.{ File, PrintStream }
+
 import org.openmole.core.output.OutputManager
+import org.openmole.core.workspace.Workspace
 import org.openmole.tool.file._
 
 object MoleExecutionContext {
-  lazy val default = MoleExecutionContext(out = OutputManager.systemOutput)
+  def default = MoleExecutionContext()
 }
 
-case class MoleExecutionContext(out: PrintStream)
+case class MoleExecutionContext(
+  out:          PrintStream = OutputManager.systemOutput,
+  tmpDirectory: File        = Workspace.newDir("execution")
+)
