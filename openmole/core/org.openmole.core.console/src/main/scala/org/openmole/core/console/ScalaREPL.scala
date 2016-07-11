@@ -47,11 +47,10 @@ object ScalaREPL {
 
       val (importsErrors, codeErrors) = errorMessages.partition(e ⇒ e.position.map(_.line < 0).getOrElse(false))
 
-      s"""${codeErrors.map(readableErrorMessages).mkString("\n")}
-        |Error in imports header:
-        |${importsErrors.map(readableErrorMessages).mkString("\n")}
-        |Compiling code:
-        |${code}""".stripMargin
+      (if (!codeErrors.isEmpty) codeErrors.map(readableErrorMessages).mkString("\n") + "\n" else "") +
+        (if (!importsErrors.isEmpty) "Error in imports header:\n" + importsErrors.map(readableErrorMessages).mkString("\n") + "\n" else "") +
+        s"""Compiling code:
+        |${code}.stripMargin"""
     }
   }
   @Lenses case class ErrorMessage(decoratedMessage: String, rawMessage: String, position: Option[ErrorPosition])
