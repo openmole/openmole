@@ -275,4 +275,9 @@ object OSGi extends Defaults {
     libraryDependencies += "commons-beanutils" % "commons-beanutils" % "1.9.2",
     version := "2.0")
 
+  lazy val casbah = OsgiProject("com.mongodb.casbah", exports = Seq("com.mongodb.*"), privatePackages = Seq("!scala.*", "*")) settings (
+    libraryDependencies += "org.mongodb" %% "casbah" % "3.1.1",
+    version := "3.1.1")
+
+
 }

@@ -9,5 +9,10 @@ object Source extends root.PluginDefaults {
   implicit val artifactPrefix = Some("org.openmole.plugin.source")
 
   lazy val fileSource = OsgiProject("file", imports = Seq("*")) dependsOn (Core.dsl, Core.serializer, Core.exception, Tool.csv)
+
+  lazy val DBSource = OsgiProject("db", imports = Seq("*")) dependsOn (Core.dsl, Core.exception) settings (
+    libraryDependencies += Libraries.casbah
+  )
+
 }
 
