@@ -63,12 +63,14 @@ object MongoDBSource {
 
   override def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider) = {
     val mongoClient = MongoClient(host.from(context), port)
-    val db = mongoClient(database.from(context))
-    val c = db(collection.from(context))
+    try {
+      val db = mongoClient(database.from(context))
+      val c = db(collection.from(context))
 
-    Variable(
-      prototype,
-      query(context, c)
-    )
+      Variable(
+        prototype,
+        query(context, c)
+      )
+    } finally mongoClient.close()
   }
 }
