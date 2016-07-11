@@ -47,6 +47,7 @@ object Pages {
           li(a("Who are we?", `class` := "amenu", id := "section", href := whoAreWe.file))
         )
       ),
+      div(id := "openmoleSearch"),
       div(`class` := "row")(p)
     )
 
@@ -91,7 +92,7 @@ abstract class DocumentationPage(implicit p: Parent[DocumentationPage] = Parent(
   def content: Reader[File, Frag]
   def name: String
   def children: Seq[DocumentationPage]
-  def title = None
+  def title: Option[String] = None
 
   override def location: Seq[String] =
     parent match {
@@ -217,17 +218,20 @@ object DocumentationPages { index ⇒
 
   def root = new DocumentationPage {
     def name = "Documentation"
+    override def title = Some(name)
     def content = Reader(_ ⇒ scalatex.documentation.Documentation())
     def children = Seq(application, language, tutorial, market, faq, development)
 
     def application = new DocumentationPage {
       def name = "Application"
+      override def title = Some(name)
       def children = Seq(migration)
       def content = Reader(_ ⇒ scalatex.documentation.Application())
 
       def migration = new DocumentationPage() {
         def children: Seq[DocumentationPage] = Seq()
         def name: String = "Migration"
+        override def title = Some(name)
         def content = Reader(_ ⇒ scalatex.documentation.application.Migration())
       }
     }
@@ -235,34 +239,40 @@ object DocumentationPages { index ⇒
     def language =
       new DocumentationPage {
         def name = "Language"
+        override def title = Some(name)
         def children = Seq(task, sampling, transition, hook, environment, source, method)
         def content = Reader(_ ⇒ scalatex.documentation.Language())
 
         def task = new DocumentationPage {
           def name = "Tasks"
+          override def title = Some(name)
           def children = Seq(scala, native, netLogo, mole)
           def content = Reader(_ ⇒ scalatex.documentation.language.Task())
 
           def scala = new DocumentationPage {
             def name = "Scala"
+            override def title = Some(name)
             def children = Seq()
             def content = Reader(_ ⇒ scalatex.documentation.language.task.Scala())
           }
 
           def native = new DocumentationPage {
             def name = "Native"
+            override def title = Some(name)
             def children = Seq()
             def content = Reader(_ ⇒ scalatex.documentation.language.task.Native())
           }
 
           def netLogo = new DocumentationPage {
             def name = "NetLogo"
+            override def title = Some(name)
             def children = Seq()
             def content = Reader(_ ⇒ scalatex.documentation.language.task.NetLogo())
           }
 
           def mole = new DocumentationPage {
             def name = "Mole"
+            override def title = Some(name)
             def children = Seq()
             def content = Reader(_ ⇒ scalatex.documentation.language.task.MoleTask())
           }
@@ -270,53 +280,62 @@ object DocumentationPages { index ⇒
 
         def sampling = new DocumentationPage {
           def name = "Samplings"
+          override def title = Some(name)
           def children = Seq()
           def content = Reader(_ ⇒ scalatex.documentation.language.Sampling())
         }
 
         def transition = new DocumentationPage {
           def name = "Transitions"
+          override def title = Some(name)
           def children = Seq()
           def content = Reader(_ ⇒ scalatex.documentation.language.Transition())
         }
 
         def hook = new DocumentationPage {
           def name = "Hooks"
+          override def title = Some(name)
           def children = Seq()
           def content = Reader(_ ⇒ scalatex.documentation.language.Hook())
         }
 
         def environment = new DocumentationPage {
           def name = "Environments"
+          override def title = Some(name)
           def children = Seq(multithread, ssh, egi, cluster, desktopGrid)
           def content = Reader(_ ⇒ scalatex.documentation.language.Environment())
 
           def multithread = new DocumentationPage {
             def name = "Multi-threads"
+            override def title = Some(name)
             def children = Seq()
             def content = Reader(_ ⇒ scalatex.documentation.language.environment.Multithread())
           }
 
           def ssh = new DocumentationPage {
             def name = "SSH"
+            override def title = Some(name)
             def children = Seq()
             def content = Reader(_ ⇒ scalatex.documentation.language.environment.SSH())
           }
 
           def egi = new DocumentationPage {
             def name = "EGI"
+            override def title = Some(name)
             def children = Seq()
             def content = Reader(_ ⇒ scalatex.documentation.language.environment.EGI())
           }
 
           def cluster = new DocumentationPage {
             def name = "Clusters"
+            override def title = Some(name)
             def children = Seq()
             def content = Reader(_ ⇒ scalatex.documentation.language.environment.Cluster())
           }
 
           def desktopGrid = new DocumentationPage {
             def name = "Desktop Grid"
+            override def title = Some(name)
             def children = Seq()
             def content = Reader(_ ⇒ scalatex.documentation.language.environment.DesktopGrid())
           }
@@ -325,12 +344,14 @@ object DocumentationPages { index ⇒
 
         def source = new DocumentationPage {
           def name = "Sources"
+          override def title = Some(name)
           def children = Seq()
           def content = Reader(_ ⇒ scalatex.documentation.language.Source())
         }
 
         def method = new DocumentationPage {
           def name = "Methods"
+          override def title = Some(name)
           def children = Seq()
           def content = Reader(_ ⇒ scalatex.documentation.language.Method())
         }
@@ -338,6 +359,7 @@ object DocumentationPages { index ⇒
 
     def tutorial = new DocumentationPage {
       def name = "Tutorials"
+      override def title = Some(name)
       def children =
         Seq(helloWorld, headlessNetLogo, netLogoGA, capsule) ++
           marketEntries.filter(_.tags.exists(_ == Tags.tutorial)).flatMap(MD.generatePage(_))
@@ -346,24 +368,28 @@ object DocumentationPages { index ⇒
 
       def helloWorld = new DocumentationPage {
         def name = "Hello World"
+        override def title = Some(name)
         def children = Seq()
         def content = Pages.gettingStarted.content
       }
 
       def headlessNetLogo = new DocumentationPage {
         def name = "NetLogo Headless"
+        override def title = Some(name)
         def children = Seq()
         def content = Reader(_ ⇒ scalatex.documentation.language.tutorial.HeadlessNetLogo())
       }
 
       def netLogoGA = new DocumentationPage {
         def name = "GA with NetLogo"
+        override def title = Some(name)
         def children = Seq()
         def content = Reader(_ ⇒ scalatex.documentation.language.tutorial.NetLogoGA())
       }
 
       def capsule = new DocumentationPage {
         def name = "Capsule"
+        override def title = Some(name)
         def children = Seq()
         def content = Reader(_ ⇒ scalatex.documentation.language.tutorial.Capsule())
       }
@@ -372,6 +398,7 @@ object DocumentationPages { index ⇒
     def market = new DocumentationPage {
       def children: Seq[DocumentationPage] = pages
       def name: String = "Market Place"
+      override def title = Some(name)
       def content = Reader(_ ⇒ scalatex.documentation.Market())
 
       def themes: Seq[Market.Tag] =
@@ -381,6 +408,7 @@ object DocumentationPages { index ⇒
         new DocumentationPage {
           def children: Seq[DocumentationPage] = Seq()
           def name: String = "All"
+          override def title = Some(name)
           def content = Reader(_ ⇒ tagContent("All", marketEntries))
         }
 
@@ -390,6 +418,7 @@ object DocumentationPages { index ⇒
         new DocumentationPage {
           def children: Seq[DocumentationPage] = Seq()
           def name: String = t.label
+          override def title = Some(name)
           def content = Reader(_ ⇒ tagContent(t.label, marketEntries.filter(_.entry.tags.contains(t))))
         }
 
@@ -422,41 +451,48 @@ object DocumentationPages { index ⇒
 
     def faq = new DocumentationPage {
       def name = "FAQ"
+      override def title = Some(name)
       def children = Seq()
       def content = Reader(_ ⇒ scalatex.documentation.FAQ())
     }
 
     def development = new DocumentationPage {
       def name = "Development"
+      override def title = Some(name)
       def children = Seq(compilation, documentationWebsite, plugin, branching, webserver)
       def content = Reader(_ ⇒ scalatex.documentation.Development())
 
       def compilation = new DocumentationPage {
         def name = "Compilation"
+        override def title = Some(name)
         def children = Seq()
         def content = Reader(_ ⇒ scalatex.documentation.development.Compilation())
       }
 
       def documentationWebsite = new DocumentationPage {
         def name = "Documentation"
+        override def title = Some(name)
         def children = Seq()
         def content = Reader(_ ⇒ scalatex.documentation.development.DocumentationWebsite())
       }
 
       def plugin = new DocumentationPage {
         def name = "Plugins"
+        override def title = Some(name)
         def children = Seq()
         def content = Reader(_ ⇒ scalatex.documentation.development.Plugin())
       }
 
       def branching = new DocumentationPage {
         def name = "Branching model"
+        override def title = Some(name)
         def children = Seq()
         def content = Reader(_ ⇒ scalatex.documentation.development.Branching())
       }
 
       def webserver = new DocumentationPage {
         def name = "Web Server"
+        override def title = Some(name)
         def children = Seq()
         def content = Reader(_ ⇒ scalatex.documentation.development.WebServer())
       }

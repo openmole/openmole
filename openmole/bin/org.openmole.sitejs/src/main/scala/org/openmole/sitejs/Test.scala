@@ -17,33 +17,58 @@ package org.openmole.sitejs
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import fr.iscpif.scaladget.mapping.lunr.{ IIndexSearchResult, Importedjs, Index }
 import JsRxTags._
+import scala.scalajs._
 import scala.scalajs.js.annotation.JSExport
 import scalatags.JsDom.all._
+import scalatags.JsDom.tags
 import org.scalajs.dom
 import rx._
+import scala.scalajs.js.Dynamic.{ literal ⇒ lit }
 
 @JSExport("Test")
 object Test {
-  val b: Var[Boolean] = Var(false)
-
-  val testDiv = div(
-    Rx {
-      span(
-        "Test div",
-        backgroundColor := {
-          if (b()) "green" else "red"
-        },
-        width := 200,
-        height := 200
-      )
-    }
-  )
-
-  // b() = true
+  val searchInput = input(placeholder := "Search").render
+  val lunrIndex: Var[Option[Index]] = Var(None)
+  val results: Var[Seq[IIndexSearchResult]] = Var(Seq())
 
   @JSExport
-  def render(): Unit = {
-    dom.document.getElementById("openmoleTest").appendChild(testDiv.render)
+  def loadIndex(indexArray: js.Array[js.Any]): Unit = {
+    val index = Importedjs.lunr((i: Index) ⇒ {
+      i.field("title", lit("boost" → 10).value)
+      i.field("body", lit("boost" → 1).value)
+      i.ref("url")
+      indexArray.foreach(p ⇒ {
+        i.add(p)
+      })
+    })
+    lunrIndex() = Some(index)
+    val resultList = tags.div(
+      Rx {
+        for { r ← results() } yield {
+          tags.div(
+            tags.span(
+              tags.a(r.ref, cursor := "pointer", href := r.ref, target := "_blank")
+            )
+          )
+        }
+      }
+    ).render
+    dom.document.getElementById("openmoleSearch").appendChild(
+      tags.div(
+      form(`type` := "submit", searchInput, textAlign := "center", onsubmit := { () ⇒
+        search()
+        false
+      }), resultList
+    ).render
+    )
+  }
+
+  @JSExport
+  def search(): Unit = {
+    results() = lunrIndex.now.map { i ⇒
+      i.search(searchInput.value).toSeq
+    }.getOrElse(Seq())
   }
 }

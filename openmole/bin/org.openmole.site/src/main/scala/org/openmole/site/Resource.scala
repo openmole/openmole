@@ -78,6 +78,10 @@ object Resource {
 
   def api = ArchiveResource("openmole-api.tar.gz", "api")
 
+  def lunr = FileResource("lunr.min.js")
+
+  def index = FileResource("index.js")
+
   def marketResources(entries: Seq[GeneratedMarketEntry]) =
     entries.filter(_.tags.exists(_ == market.Market.Tags.tutorial)).map { tuto ⇒ MarketResource(tuto) }
 
@@ -106,7 +110,8 @@ object Resource {
     iscpif,
     geocite,
     biomedia,
-    img
+    img,
+    lunr
   )
 }
 

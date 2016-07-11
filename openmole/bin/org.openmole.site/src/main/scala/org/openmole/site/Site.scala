@@ -36,6 +36,7 @@ import scalatags.Text.all._
 import scala.sys.process.BasicIO
 import org.openmole.site.credits._
 import org.openmole.core.buildinfo
+import spray.json.JsArray
 
 import scala.annotation.tailrec
 
@@ -121,6 +122,8 @@ object Site {
           script(src := Resource.bootstrapJS.file),
           script(src := Resource.highlightJS.file),
           script(src := Resource.siteJS.file),
+          script(src := Resource.lunr.file),
+          script(src := Resource.index.file),
           script("hljs.initHighlightingOnLoad();"),
 
           meta(charset := "UTF-8"),
@@ -132,11 +135,27 @@ object Site {
        */
       override def bodyFrag(frag: Frag): Frag = body(
         Seq(
-          cls := "scalatex-content",
-          onload := "Test().render();"
-        ) ++ (if (documentationFrags.contains(frag)) Seq(id := "top-content-documentation") else Seq())
+          cls := "scalatex-content"
+        ) ++ (if (documentationFrags.contains(frag)) Seq(id := "top-content-documentation", onload := "Test().loadIndex(index);") else Seq())
           ++ Seq(frag): _*
       )
+
+      override def generateHtml(outputRoot: Path) = {
+        val res = content map {
+          case (path, (pageHeaders, pageBody)) ⇒ {
+            val txt = html(
+              head(pageHeaders),
+              bodyFrag(pageBody)
+            ).render
+            val cb = CharBuffer.wrap("<!DOCTYPE html>" + txt)
+            val bytes = scala.io.Codec.UTF8.encoder.encode(cb)
+            val target = outputRoot / path
+            write.over(target, bytes.array())
+            LunrIndex.Index(path, txt)
+          }
+        }
+        write.over(outputRoot / "index.js", "var index = " + JsArray(res.toVector).compactPrint)
+      }
 
       import scalaz._
       import Scalaz._
