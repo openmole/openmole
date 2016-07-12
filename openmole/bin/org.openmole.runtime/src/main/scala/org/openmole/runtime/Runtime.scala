@@ -91,7 +91,7 @@ class Runtime {
     }
 
     def getReplicatedFile(replicatedFile: ReplicatedFile, transferOptions: TransferOptions) =
-      replicatedFile.download {
+      ReplicatedFile.download(replicatedFile) {
         (path, file) ⇒
           try retry(storage.download(path, file, transferOptions))
           catch {
