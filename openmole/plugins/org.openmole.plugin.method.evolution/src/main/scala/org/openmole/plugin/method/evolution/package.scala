@@ -41,8 +41,8 @@ package object evolution {
   type FitnessAggregation = Seq[Double] ⇒ Double
   type Genome = Seq[Input[_]]
 
-  implicit def intToCounterTerminationConverter(n: Long) = AfterGeneration(n)
-  implicit def durationToDurationTerminationConverter(d: Duration) = AfterDuration(d)
+  implicit def intToCounterTerminationConverter(n: Long): AfterGeneration = AfterGeneration(n)
+  implicit def durationToDurationTerminationConverter(d: Duration): AfterDuration = AfterDuration(d)
 
   object OMTermination {
     def toTermination(oMTermination: OMTermination, integration: EvolutionWorkflow) =
