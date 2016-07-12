@@ -88,13 +88,13 @@ class GetResultActor(jobManager: JobManager) {
     }
   }
 
-  private def getRuntimeResult(outputFilePath: String, storage: StorageService)(implicit token: AccessToken): RuntimeResult = Workspace.withTmpFile { resultFile ⇒
-    retry(
-      signalDownload(storage.download(outputFilePath, resultFile), outputFilePath, storage, resultFile),
-      Workspace.preference(BatchEnvironment.downloadResultRetry)
-    )
-    SerialiserService.deserialiseAndExtractFiles[RuntimeResult](resultFile)
-  }
+  private def getRuntimeResult(outputFilePath: String, storage: StorageService)(implicit token: AccessToken): RuntimeResult =
+    retry(Workspace.preference(BatchEnvironment.downloadResultRetry)) {
+      Workspace.withTmpFile { resultFile ⇒
+        signalDownload(storage.download(outputFilePath, resultFile), outputFilePath, storage, resultFile)
+        SerialiserService.deserialiseAndExtractFiles[RuntimeResult](resultFile)
+      }
+    }
 
   private def display(output: Option[File], description: String, storage: StorageService, stream: PrintStream)(implicit token: AccessToken) = {
     output.foreach { file ⇒
@@ -111,11 +111,10 @@ class GetResultActor(jobManager: JobManager) {
             serializedResults.files.map {
               replicated ⇒
                 replicated.originalPath →
-                  replicated.download { (p, f) ⇒
-                    retry(
-                      signalDownload(storage.download(p, f, TransferOptions(forceCopy = true, canMove = true)), p, storage, f),
-                      Workspace.preference(BatchEnvironment.downloadResultRetry)
-                    )
+                  ReplicatedFile.download(replicated) { (p, f) ⇒
+                    retry(Workspace.preference(BatchEnvironment.downloadResultRetry)) {
+                      signalDownload(storage.download(p, f, TransferOptions(forceCopy = true, canMove = true)), p, storage, f)
+                    }
                   }
             }.toMap
 

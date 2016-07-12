@@ -38,33 +38,6 @@ package object message {
     implicit def replicatedFile2FileMessage(r: ReplicatedFile) = FileMessage(r)
     def apply(replicatedFile: ReplicatedFile): FileMessage = apply(replicatedFile.path, replicatedFile.hash)
   }
-  implicit class ReplicatedFileDecorator(replicatedFile: ReplicatedFile) {
-    def download(download: (String, File) ⇒ Unit, verifyHash: Boolean = false) = {
-      val cache = Workspace.newFile()
-
-      download(replicatedFile.path, cache)
-
-      if (verifyHash) {
-        val cacheHash = cache.hash.toString
-        if (cacheHash != replicatedFile.hash) throw new InternalProcessingError("Hash is incorrect for file " + replicatedFile.originalPath + " replicated at " + replicatedFile.path)
-      }
-
-      val dl =
-        if (replicatedFile.directory) {
-          val local = Workspace.newDir("dirReplica")
-          cache.extract(local)
-          local.mode = replicatedFile.mode
-          cache.delete
-          local
-        }
-        else {
-          cache.mode = replicatedFile.mode
-          cache
-        }
-
-      dl
-    }
-  }
 
   implicit class FileToReplicatedFileDecorator(file: File) {
     def upload(upload: File ⇒ String) = {
@@ -94,6 +67,34 @@ package object message {
   }
 
   case class FileMessage(path: String, hash: String)
+
+  object ReplicatedFile {
+    def download(replicatedFile: ReplicatedFile)(download: (String, File) ⇒ Unit, verifyHash: Boolean = false) = {
+      val cache = Workspace.newFile()
+
+      download(replicatedFile.path, cache)
+
+      if (verifyHash) {
+        val cacheHash = cache.hash.toString
+        if (cacheHash != replicatedFile.hash) throw new InternalProcessingError("Hash is incorrect for file " + replicatedFile.originalPath + " replicated at " + replicatedFile.path)
+      }
+
+      val dl =
+        if (replicatedFile.directory) {
+          val local = Workspace.newDir("dirReplica")
+          cache.extract(local)
+          local.mode = replicatedFile.mode
+          cache.delete
+          local
+        }
+        else {
+          cache.mode = replicatedFile.mode
+          cache
+        }
+
+      dl
+    }
+  }
 
   case class ReplicatedFile(originalPath: String, directory: Boolean, hash: String, path: String, mode: Int)
   case class RuntimeSettings(archiveResult: Boolean)
