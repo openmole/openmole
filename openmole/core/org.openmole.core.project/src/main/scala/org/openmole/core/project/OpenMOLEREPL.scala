@@ -21,6 +21,8 @@ import org.openmole.core.console.ScalaREPL
 import org.openmole.core.dsl._
 import org.openmole.core.workflow.tools._
 
+import scala.reflect.internal.util.BatchSourceFile
+
 object OpenMOLEREPL {
 
   def autoImports: Seq[String] = PluginInfo.pluginsInfo.toSeq.flatMap(_.namespaces).map(n ⇒ s"$n._")
@@ -32,6 +34,7 @@ object OpenMOLEREPL {
      """.stripMargin
 
   def dslImport = Seq("org.openmole.core.dsl._") ++ autoImports
+  def imports = initialisationCommands(dslImport).mkString("\n")
 
   def initialisationCommands(imports: Seq[String]) =
     Seq(
@@ -39,19 +42,11 @@ object OpenMOLEREPL {
       keywordNamespaceCode
     )
 
-  def newREPL(
-    args:               ConsoleVariables,
-    quiet:              Boolean          = false,
-    intialisation:      ScalaREPL ⇒ Unit = _ ⇒ {},
-    additionnalImports: Seq[String]      = Seq.empty
-  ) = {
-
+  def newREPL(args: ConsoleVariables, quiet: Boolean = false) = {
     def initialise(loop: ScalaREPL) = {
       args.workDirectory.mkdirs()
       loop.beQuietDuring {
-        intialisation(loop)
-        def imports = initialisationCommands(dslImport ++ additionnalImports).mkString("\n")
-        loop interpret (imports)
+        loop interpret imports
         ConsoleVariables.bindVariables(loop, args)
       }
       loop

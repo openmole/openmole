@@ -160,10 +160,13 @@ class Console(password: Option[String] = None, script: Option[String] = None) {
     val loop =
       OpenMOLEREPL.newREPL(
         args,
-        quiet = false,
-        intialisation = loop ⇒ loop.bind(commandsName, new Command(loop, args)),
-        additionnalImports = Seq(s"$commandsName._")
+        quiet = false
       )
+
+    loop.beQuietDuring {
+      loop.bind(commandsName, new Command(loop, args))
+      loop interpret s"import $commandsName._"
+    }
 
     try f(loop)
     finally loop.close
