@@ -57,7 +57,7 @@ object CodeParsing {
     _._1.startsWith("-")
   } match {
     case Some((arg: String, ind: Int)) ⇒ ind
-    case _ ⇒ args.length
+    case _                             ⇒ args.length
   }
 
   private def indexArgs(args: Seq[String], indexed: Seq[IndexedArg]): Seq[IndexedArg] = {

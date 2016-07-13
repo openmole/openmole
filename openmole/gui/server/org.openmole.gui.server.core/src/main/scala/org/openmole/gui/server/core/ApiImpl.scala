@@ -534,7 +534,7 @@ object ApiImpl extends Api {
           val imString = imapString(imappings, "netLogoInputs")
           val omString = omapString(omappings, "netLogoOutputs")
           os.write(
-            s"""\nval task = NetLogo5Task(workDirectory / "$executableName", List("${command.split('\n').mkString("\",\"")}"), embedWorkspace = ${!resources.implicits.isEmpty}) set(\n""" +
+            s"""\nval task = NetLogo5Task(workDirectory / ${executableName.split('/').map { s ⇒ s"""\"$s\"""" }.mkString(" / ")}, List("${command.split('\n').mkString("\",\"")}"), embedWorkspace = ${!resources.implicits.isEmpty}) set(\n""" +
               inString + ouString + imString + omString + imFileString + omFileString + defaults
           )
         case st: ScalaTaskType ⇒
