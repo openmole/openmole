@@ -90,7 +90,7 @@ trait NetLogoTask extends Task {
           executeNetLogo("set " + inBinding._2 + " " + v)
         }
 
-        for (cmd ← expandedCommands()) executeNetLogo(cmd.expand(context))
+        for (cmd ← expandedCommands()) executeNetLogo(cmd.from(context))
 
         val contextResult =
           external.fetchOutputFiles(preparedContext, external.relativeResolver(workDir)) ++ netLogoOutputs.map {

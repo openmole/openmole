@@ -82,21 +82,16 @@ object ExpandedString {
     }
     if (dollar) os.write('$')
     expandedElements += UnexpandedElement(os.clear())
-    ElementsExpansion(expandedElements)
-  }
-
-  case class ElementsExpansion(elements: Seq[ExpansionElement]) extends ExpandedString {
-    def expand(context: ⇒ Context)(implicit rng: RandomProvider) = elements.map(_.expand(context)).mkString
-    def validate(inputs: Seq[Prototype[_]]): Seq[Throwable] = elements.flatMap(_.validate(inputs))
+    ExpandedString(expandedElements)
   }
 
   trait ExpansionElement {
-    def expand(context: ⇒ Context)(implicit rng: RandomProvider): String
+    def from(context: ⇒ Context)(implicit rng: RandomProvider): String
     def validate(inputs: Seq[Prototype[_]]): Seq[Throwable]
   }
 
   case class UnexpandedElement(string: String) extends ExpansionElement {
-    def expand(context: ⇒ Context)(implicit rng: RandomProvider): String = string
+    def from(context: ⇒ Context)(implicit rng: RandomProvider): String = string
     def validate(inputs: Seq[Prototype[_]]): Seq[Throwable] = Seq.empty
   }
 
@@ -114,13 +109,13 @@ object ExpandedString {
   }
 
   case class ValueElement(v: String) extends ExpansionElement {
-    def expand(context: ⇒ Context)(implicit rng: RandomProvider): String = v
+    def from(context: ⇒ Context)(implicit rng: RandomProvider): String = v
     def validate(inputs: Seq[Prototype[_]]): Seq[Throwable] = Seq.empty
   }
 
   case class CodeElement(code: String) extends ExpansionElement {
     @transient lazy val proxy = ScalaWrappedCompilation.dynamic[Any](code)
-    def expand(context: ⇒ Context)(implicit rng: RandomProvider): String = {
+    def from(context: ⇒ Context)(implicit rng: RandomProvider): String = {
       context.variable(code) match {
         case Some(value) ⇒ value.value.toString
         case None        ⇒ proxy().from(context).toString
@@ -137,36 +132,14 @@ object ExpandedString {
     }
   }
 
+  implicit class ExpandedStringOperations(s1: ExpandedString) {
+    def +(s2: ExpandedString) = ExpandedString(s1.elements ++ s2.elements)
+  }
+
 }
 
-trait ExpandedString extends FromContext[String] {
-  def expand(context: ⇒ Context)(implicit rng: RandomProvider): String
-  def validate(inputs: Seq[Prototype[_]]): Seq[Throwable]
-  def from(context: ⇒ Context)(implicit rng: RandomProvider) = expand(context)
-  //    def +(other: Expansion) =
-  //      for {
-  //        s1 <- this
-  //        s2 <- other
-  //      } yield s1 + s2
+case class ExpandedString(elements: Seq[ExpandedString.ExpansionElement]) extends FromContext[String] {
+  def from(context: ⇒ Context)(implicit rng: RandomProvider) = elements.map(_.from(context)).mkString
+  def validate(inputs: Seq[Prototype[_]]): Seq[Throwable] = elements.flatMap(_.validate(inputs))
 }
 
-//
-//object ExpandedString {
-//
-//  implicit def fromStringToExpandedString(s: String) = ExpandedString(s)
-//  implicit def fromTraversableOfStringToTraversableOfExpandedString[T <: Traversable[String]](t: T) = t.map(ExpandedString(_))
-//  implicit def fromFileToExpandedString(f: java.io.File) = ExpandedString(f.getPath)
-//
-//  def apply(s: String) =
-//    new ExpandedString {
-//      override def string = s
-//    }
-//}
-//
-//trait ExpandedString <: Expansion {
-//  val expansion = Cache(VariableExpansion(string))
-//  def +(s: ExpandedString): ExpandedString = string + s.string
-//  def string: String
-//  def expand(context: ⇒ Context)(implicit rng: RandomProvider) = expansion().expand(context)
-//  def validate(inputs: Seq[Prototype[_]]) = expansion().validate(inputs)
-//}

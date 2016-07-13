@@ -50,7 +50,7 @@ object TemplateFileTask {
 
   override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = {
     val file = executionContext.tmpDirectory.newFile(template.getName, ".tmp")
-    file.content = expanded.expand(context)
+    file.content = expanded.from(context)
     context + (output → file)
   }
 }
