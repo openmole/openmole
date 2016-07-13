@@ -53,10 +53,11 @@ object CodeParsing {
 
   case class IndexedArg(key: String, values: Seq[String], index: Int)
 
-  private def findFirstDash(args: Seq[String]): Option[Int] = args.zipWithIndex.find {
+  private def nbArgsUntilNextDash(args: Seq[String]): Int = args.zipWithIndex.find {
     _._1.startsWith("-")
-  }.map {
-    _._2
+  } match {
+    case Some((arg: String, ind: Int)) ⇒ ind
+    case _ ⇒ args.length
   }
 
   private def indexArgs(args: Seq[String], indexed: Seq[IndexedArg]): Seq[IndexedArg] = {
@@ -68,28 +69,23 @@ object CodeParsing {
       }.getOrElse(-1) + 1
       if (head.startsWith("-")) {
         //find next - option
-        val nbArgAfterDash = findFirstDash(args.tail)
+        val nbArg = nbArgsUntilNextDash(args.tail)
         //get all next corresponding values
-        val values = (nbArgAfterDash map { l ⇒ args.toList.slice(1, l + 1) }).getOrElse(List()).toSeq
-        indexArgs(args.drop(nbArgAfterDash.map {
-          _ + 1
-        }.getOrElse(1)), indexed :+ IndexedArg(keyName(Some(head), values.headOption, nextIndex), values, nextIndex))
+        val values = args.toList.slice(1, nbArg + 1).toSeq
+        indexArgs(args.drop(nbArg + 1), indexed :+ IndexedArg(keyName(Some(head), values, nextIndex), values, nextIndex))
       }
       else {
-        indexArgs(args.drop(1), indexed :+ IndexedArg(keyName(None, Some(head), nextIndex), Seq(head), nextIndex))
+        indexArgs(args.drop(1), indexed :+ IndexedArg(keyName(None, Seq(head), nextIndex), Seq(head), nextIndex))
       }
     }
   }
 
-  def keyName(key: Option[String], value: Option[String], index: Int): String = {
-    val isFile = isFileString(value.getOrElse(""))
+  def keyName(key: Option[String], values: Seq[String], index: Int): String = {
+    val isFile = isFileString(values.headOption.getOrElse(""))
     key match {
       case Some(k: String) ⇒ k
       case _ ⇒ if (isFile) {
-        value match {
-          case Some(v: String) ⇒ v.split('/').last.split('.').head
-          case _               ⇒ "i" + index
-        }
+        values.headOption.map { v ⇒ v.split('/').last.split('.').head }.getOrElse("i" + index)
       }
       else "i" + index
     }
@@ -98,36 +94,56 @@ object CodeParsing {
   def renameDoublon(args: Seq[IndexedArg]) = {
     val (doubled, fine) = args.groupBy {
       _.key
-    }.partition { case (k, v) ⇒ v.size > 1 }
-    fine.values.flatten ++ doubled.values.flatten.zipWithIndex.map { case (k, i) ⇒ IndexedArg(k.key + "_" + i, k.values, k.index) }
+    }.partition {
+      case (k, v) ⇒ v.size > 1
+    }
+    fine.values.flatten ++ doubled.values.flatten.zipWithIndex.map {
+      case (k, i) ⇒ IndexedArg(k.key + "_" + i, k.values, k.index)
+    }
   }
 
   private def mapToVariableElements(args: Seq[IndexedArg], taskType: TaskType) =
-    renameDoublon(args).flatMap { a ⇒ toVariableElements(a.key, a.values, a.index, taskType) }
-
-  private def toVariableElements(key: String, values: Seq[String], index: Int, taskType: TaskType): Seq[VariableElement] = {
-    values.map { value ⇒
-      val isFile = isFileString(value)
-      VariableElement(index, ProtoTypePair(
-        key,
-        if (isFile) ProtoTYPE.FILE else ProtoTYPE.DOUBLE,
-        if (isFile) "" else value,
-        if (isFile) Some(value) else None
-      ),
-        taskType)
+    renameDoublon(args).flatMap {
+      a ⇒ toVariableElements(a.key, a.values, a.index, taskType)
     }
+
+  private def toVariableElements(key: String, values: Seq[String], index: Int, taskType: TaskType): Seq[CommandElement] = {
+    {
+      if (key.startsWith("-")) Seq(StaticElement(index, key)) else Seq()
+    } ++
+      values.zipWithIndex.map {
+        case (value, valIndex) ⇒
+          val isFile = isFileString(value)
+          VariableElement(index, ProtoTypePair(
+            key.replaceAll("-", "") + { if (values.length > 1) valIndex + 1 else "" },
+            if (isFile) ProtoTYPE.FILE else ProtoTYPE.DOUBLE,
+            if (isFile) "" else value,
+            if (isFile) Some(value) else None
+          ),
+            taskType)
+      }
   }
 
   private def rParsing(args: Seq[String], taskType: TaskType): Seq[CommandElement] = {
     val indexed = indexArgs(args, Seq())
-    val (others, toBeParsed) = indexed.partition { p ⇒ Seq("--slave", "--args").contains(p.key) }
-    val (f, rest) = toBeParsed.partition { p ⇒ p.key == "-f" }
+    val (others, toBeParsed) = indexed.partition {
+      p ⇒ Seq("--slave").contains(p.key)
+    }
+    val (f, rest) = toBeParsed.partition {
+      p ⇒ p.key == "-f"
+    }
 
-    mapToVariableElements(rest, taskType).toSeq ++ others.map { o ⇒ StaticElement(o.index, o.key) } ++ f.map { x ⇒ StaticElement(x.index, "-f " + x.values.mkString(" ")) }
+    mapToVariableElements(rest, taskType).toSeq ++ others.map {
+      o ⇒ StaticElement(o.index, o.key)
+    } ++ f.map {
+      x ⇒ StaticElement(x.index, "-f " + x.values.mkString(" "))
+    }
   }
 
   def netlogoParsing(safePath: SafePath): LaunchingCommand = {
+
     import org.openmole.gui.ext.data.ServerFileSytemContext.project
+
     val lines = Source.fromFile(safePath).getLines.toArray
 
     def parse(lines: Seq[(String, Int)], args: Seq[ProtoTypePair], outputs: Seq[ProtoTypePair]): (Seq[ProtoTypePair], Seq[ProtoTypePair]) = {
@@ -175,8 +191,12 @@ object CodeParsing {
 
     BasicLaunchingCommand(
       Some(NetLogoLanguage()), "",
-      args.distinct.zipWithIndex.map { case (a, i) ⇒ VariableElement(i, a, NetLogoTaskType()) },
-      outputs.distinct.zipWithIndex.map { case (o, i) ⇒ VariableElement(i, o, NetLogoTaskType()) }
+      args.distinct.zipWithIndex.map {
+        case (a, i) ⇒ VariableElement(i, a, NetLogoTaskType())
+      },
+      outputs.distinct.zipWithIndex.map {
+        case (o, i) ⇒ VariableElement(i, o, NetLogoTaskType())
+      }
     )
   }
 
