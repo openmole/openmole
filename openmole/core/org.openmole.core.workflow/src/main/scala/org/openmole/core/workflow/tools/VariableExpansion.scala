@@ -23,17 +23,19 @@ import org.openmole.core.exception.UserBadDataError
 import org.openmole.tool.stream.{ StringInputStream, StringOutputStream }
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.dsl._
-import org.openmole.core.workflow.tools.VariableExpansion.Expansion
-import org.openmole.tool.cache.Cache
 
 import scala.collection.mutable.ListBuffer
 import scala.util.{ Failure, Success, Try }
 
-object VariableExpansion {
+object ExpandedString {
 
-  def apply(s: String): Expansion = apply(new StringInputStream(s))
+  implicit def fromStringToVariableExpansion(s: String) = ExpandedString(s)
+  implicit def fromTraversableOfStringToTraversableOfVariableExpansion[T <: Traversable[String]](t: T) = t.map(ExpandedString(_))
+  implicit def fromFileToExpandedString(f: java.io.File) = ExpandedString(f.getPath)
 
-  def apply(is: InputStream): Expansion = {
+  def apply(s: String): ExpandedString = apply(new StringInputStream(s))
+
+  def apply(is: InputStream): ExpandedString = {
     val expandedElements = ListBuffer[ExpansionElement]()
 
     val it = Iterator.continually(is.read).takeWhile(_ != -1)
@@ -83,13 +85,7 @@ object VariableExpansion {
     ElementsExpansion(expandedElements)
   }
 
-  trait Expansion extends FromContext[String] {
-    def expand(context: ⇒ Context)(implicit rng: RandomProvider): String
-    def validate(inputs: Seq[Prototype[_]]): Seq[Throwable]
-    def from(context: ⇒ Context)(implicit rng: RandomProvider) = expand(context)
-  }
-
-  case class ElementsExpansion(elements: Seq[ExpansionElement]) extends Expansion {
+  case class ElementsExpansion(elements: Seq[ExpansionElement]) extends ExpandedString {
     def expand(context: ⇒ Context)(implicit rng: RandomProvider) = elements.map(_.expand(context)).mkString
     def validate(inputs: Seq[Prototype[_]]): Seq[Throwable] = elements.flatMap(_.validate(inputs))
   }
@@ -143,22 +139,34 @@ object VariableExpansion {
 
 }
 
-object ExpandedString {
-
-  implicit def fromStringToExpandedString(s: String) = ExpandedString(s)
-  implicit def fromTraversableOfStringToTraversableOfExpandedString[T <: Traversable[String]](t: T) = t.map(ExpandedString(_))
-  implicit def fromFileToExpandedString(f: java.io.File) = ExpandedString(f.getPath)
-
-  def apply(s: String) =
-    new ExpandedString {
-      override def string = s
-    }
+trait ExpandedString extends FromContext[String] {
+  def expand(context: ⇒ Context)(implicit rng: RandomProvider): String
+  def validate(inputs: Seq[Prototype[_]]): Seq[Throwable]
+  def from(context: ⇒ Context)(implicit rng: RandomProvider) = expand(context)
+  //    def +(other: Expansion) =
+  //      for {
+  //        s1 <- this
+  //        s2 <- other
+  //      } yield s1 + s2
 }
 
-trait ExpandedString <: Expansion {
-  val expansion = Cache(VariableExpansion(string))
-  def +(s: ExpandedString): ExpandedString = string + s.string
-  def string: String
-  def expand(context: ⇒ Context)(implicit rng: RandomProvider) = expansion().expand(context)
-  def validate(inputs: Seq[Prototype[_]]) = expansion().validate(inputs)
-}
+//
+//object ExpandedString {
+//
+//  implicit def fromStringToExpandedString(s: String) = ExpandedString(s)
+//  implicit def fromTraversableOfStringToTraversableOfExpandedString[T <: Traversable[String]](t: T) = t.map(ExpandedString(_))
+//  implicit def fromFileToExpandedString(f: java.io.File) = ExpandedString(f.getPath)
+//
+//  def apply(s: String) =
+//    new ExpandedString {
+//      override def string = s
+//    }
+//}
+//
+//trait ExpandedString <: Expansion {
+//  val expansion = Cache(VariableExpansion(string))
+//  def +(s: ExpandedString): ExpandedString = string + s.string
+//  def string: String
+//  def expand(context: ⇒ Context)(implicit rng: RandomProvider) = expansion().expand(context)
+//  def validate(inputs: Seq[Prototype[_]]) = expansion().validate(inputs)
+//}

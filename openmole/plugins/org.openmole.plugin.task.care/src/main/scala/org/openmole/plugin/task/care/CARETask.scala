@@ -22,7 +22,7 @@ import java.io.File
 
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.workflow.data.{ Context, Variable }
-import org.openmole.core.workflow.tools.VariableExpansion
+import org.openmole.core.workflow.tools.ExpandedString
 import org.openmole.plugin.task.external.{ External, ExternalBuilder }
 import org.openmole.tool.logger.Logger
 import org.openmole.plugin.task.systemexec._
@@ -35,7 +35,7 @@ import org.openmole.core.workflow.dsl._
 import scalaz._
 import Scalaz._
 import monocle.macros.Lenses
-import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputBuilder$, InputOutputConfig }
+import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
 
 object CARETask extends Logger {
   implicit def isTask: InputOutputBuilder[CARETask] = InputOutputBuilder(CARETask._config)
@@ -84,7 +84,7 @@ object CARETask extends Logger {
 
   def config = InputOutputConfig.outputs.modify(_ ++ Seq(stdOut, stdErr, returnValue).flatten)(_config)
 
-  lazy val expandedCommand = VariableExpansion(command.command)
+  lazy val expandedCommand = ExpandedString(command.command)
 
   override def validate = expandedCommand.validate(inputs.toSeq)
 

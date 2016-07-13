@@ -23,8 +23,7 @@ import monocle.macros.Lenses
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.tools.VariableExpansion
-import org.openmole.core.workspace.Workspace
+import org.openmole.core.workflow.tools.ExpandedString
 import org.openmole.core.workflow.dsl
 import dsl._
 
@@ -46,7 +45,7 @@ object TemplateFileTask {
 ) extends Task {
 
   @transient lazy val expanded = template.withInputStream { is ⇒
-    VariableExpansion(is)
+    ExpandedString(is)
   }
 
   override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = {
