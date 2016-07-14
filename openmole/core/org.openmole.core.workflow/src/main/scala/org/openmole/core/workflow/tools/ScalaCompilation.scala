@@ -17,7 +17,6 @@
 package org.openmole.core.workflow.tools
 
 import java.io.File
-import java.lang.reflect.Method
 
 import org.openmole.core.console._
 import org.openmole.core.exception._
@@ -31,7 +30,7 @@ import org.osgi.framework.Bundle
 import org.openmole.core.workflow.dsl._
 import org.openmole.tool.cache._
 
-import scala.util.{ Random, Try }
+import scala.util._
 
 trait ScalaCompilation {
 
@@ -201,6 +200,13 @@ trait DynamicHeader { this: ScalaWrappedCompilation ⇒
         case duplicated ⇒ throw new UserBadDataError("Duplicated inputs: " + duplicated.mkString(", "))
       }
     }
+
+  def validate(inputs: Seq[Prototype[_]]): Option[Throwable] = {
+    compiled(inputs) match {
+      case Success(_) ⇒ None
+      case Failure(e) ⇒ Some(e)
+    }
+  }
 }
 
 trait StaticHeader { this: ScalaWrappedCompilation ⇒

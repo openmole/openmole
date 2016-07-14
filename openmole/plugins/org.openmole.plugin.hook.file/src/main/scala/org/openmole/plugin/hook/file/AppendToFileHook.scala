@@ -24,7 +24,7 @@ import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfi
 import org.openmole.tool.stream._
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.tools.ExpandedString
+import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.mole.MoleExecutionContext
 import org.openmole.core.workflow.validation.ValidateHook
@@ -34,7 +34,7 @@ object AppendToFileHook {
 
   implicit def isIO: InputOutputBuilder[AppendToFileHook] = InputOutputBuilder(AppendToFileHook.config)
 
-  def apply(fileName: ExpandedString, content: ExpandedString) =
+  def apply(fileName: FromContext[String], content: FromContext[String]) =
     new AppendToFileHook(
       fileName,
       content,
@@ -44,8 +44,8 @@ object AppendToFileHook {
 }
 
 @Lenses case class AppendToFileHook(
-    fileName: ExpandedString,
-    content:  ExpandedString,
+    fileName: FromContext[String],
+    content:  FromContext[String],
     config:   InputOutputConfig
 ) extends Hook with ValidateHook {
 

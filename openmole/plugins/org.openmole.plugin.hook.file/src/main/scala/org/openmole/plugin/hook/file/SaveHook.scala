@@ -20,7 +20,7 @@ package org.openmole.plugin.hook.file
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.tools.ExpandedString
+import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.serializer._
 import org.openmole.core.workflow.tools._
@@ -36,7 +36,7 @@ object SaveHook {
 
   implicit def isIO = InputOutputBuilder(SaveHook.config)
 
-  def apply(file: ExpandedString, prototypes: Prototype[_]*) =
+  def apply(file: FromContext[String], prototypes: Prototype[_]*) =
     new SaveHook(
       file,
       prototypes.toVector,
@@ -45,7 +45,7 @@ object SaveHook {
 }
 
 @Lenses case class SaveHook(
-    file:       ExpandedString,
+    file:       FromContext[String],
     prototypes: Vector[Prototype[_]],
     config:     InputOutputConfig
 ) extends Hook with ValidateHook {

@@ -17,7 +17,7 @@
 
 package org.openmole.core.workflow.tools
 
-import java.io.{ InputStream, OutputStream, OutputStreamWriter }
+import java.io.{ InputStream }
 
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.tool.stream.{ StringInputStream, StringOutputStream }
@@ -26,6 +26,8 @@ import org.openmole.core.workflow.dsl._
 
 import scala.collection.mutable.ListBuffer
 import scala.util.{ Failure, Success, Try }
+import scalaz._
+import Scalaz._
 
 object ExpandedString {
 
@@ -33,9 +35,9 @@ object ExpandedString {
   implicit def fromTraversableOfStringToTraversableOfVariableExpansion[T <: Traversable[String]](t: T) = t.map(ExpandedString(_))
   implicit def fromFileToExpandedString(f: java.io.File) = ExpandedString(f.getPath)
 
-  def apply(s: String): ExpandedString = apply(new StringInputStream(s))
+  def apply(s: String): Expansion = apply(new StringInputStream(s))
 
-  def apply(is: InputStream): ExpandedString = {
+  def apply(is: InputStream): Expansion = {
     val expandedElements = ListBuffer[ExpansionElement]()
 
     val it = Iterator.continually(is.read).takeWhile(_ != -1)
@@ -82,7 +84,12 @@ object ExpandedString {
     }
     if (dollar) os.write('$')
     expandedElements += UnexpandedElement(os.clear())
-    ExpandedString(expandedElements)
+    Expansion(expandedElements)
+  }
+
+  case class Expansion(elements: Seq[ExpandedString.ExpansionElement]) extends FromContext[String] {
+    def from(context: ⇒ Context)(implicit rng: RandomProvider) = elements.map(_.from(context)).mkString
+    def validate(inputs: Seq[Prototype[_]]): Seq[Throwable] = elements.flatMap(_.validate(inputs))
   }
 
   trait ExpansionElement {
@@ -121,25 +128,10 @@ object ExpandedString {
         case None        ⇒ proxy().from(context).toString
       }
     }
-    def validate(inputs: Seq[Prototype[_]]): Seq[Throwable] = {
-      implicit def m = manifest[Any]
+    def validate(inputs: Seq[Prototype[_]]): Seq[Throwable] =
       if (inputs.exists(_.name == code)) Seq.empty
-      else
-        Try[Any](ScalaWrappedCompilation.static[Any](code, inputs)) match {
-          case Success(_) ⇒ Seq.empty
-          case Failure(t) ⇒ Seq(t)
-        }
-    }
+      else proxy.validate(inputs).toSeq
   }
 
-  implicit class ExpandedStringOperations(s1: ExpandedString) {
-    def +(s2: ExpandedString) = ExpandedString(s1.elements ++ s2.elements)
-  }
-
-}
-
-case class ExpandedString(elements: Seq[ExpandedString.ExpansionElement]) extends FromContext[String] {
-  def from(context: ⇒ Context)(implicit rng: RandomProvider) = elements.map(_.from(context)).mkString
-  def validate(inputs: Seq[Prototype[_]]): Seq[Throwable] = elements.flatMap(_.validate(inputs))
 }
 

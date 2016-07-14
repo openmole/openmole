@@ -34,13 +34,13 @@ ${s"I am ${6*5} year old"}"""
 6
 I am 30 year old"""
 
-    val res = VariableExpansion(template).expand(Context.empty)(RandomProvider(new Random()))
+    val res = ExpandedString(template).from(Context.empty)(RandomProvider(new Random()))
     res should equal(expected)
   }
 
   "A expandData" should "preserve additionnal $ in the string" in {
     val test = "$$$etere{etsaesrn}etasriu$$$$eatsrn$"
-    val res = VariableExpansion(test).expand(Context.empty)(RandomProvider(new Random()))
+    val res = ExpandedString(test).from(Context.empty)(RandomProvider(new Random()))
     test should equal(res)
   }
 

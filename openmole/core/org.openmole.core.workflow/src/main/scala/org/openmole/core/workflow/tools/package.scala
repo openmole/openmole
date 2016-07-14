@@ -60,8 +60,7 @@ package tools {
     case class OptionalArgument[T](option: Option[T] = None)
 
     implicit def optionalArgumentToOption[T](optionalArgument: OptionalArgument[T]) = optionalArgument.option
-    implicit def fromStringToExpandedStringOptionalArgument(s: String) = OptionalArgument[ExpandedString](Some(ExpandedString(s)))
-
+    implicit def fromStringToExpandedStringOptionalArgument(s: String) = OptionalArgument[FromContext[String]](Some(ExpandedString(s)))
   }
 }
 

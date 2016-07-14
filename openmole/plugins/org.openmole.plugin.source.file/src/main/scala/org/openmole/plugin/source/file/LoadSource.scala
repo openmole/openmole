@@ -25,7 +25,6 @@ import java.io.File
 
 import monocle.macros.Lenses
 import org.openmole.core.workflow.tools._
-import org.openmole.core.workflow.tools.ExpandedString
 import org.openmole.core.serializer._
 import org.openmole.core.dsl._
 import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
@@ -34,7 +33,7 @@ object LoadSource {
 
   implicit def isIO = InputOutputBuilder(LoadSource.config)
 
-  def apply(file: ExpandedString, prototypes: Prototype[_]*) =
+  def apply(file: FromContext[String], prototypes: Prototype[_]*) =
     new LoadSource(
       file,
       prototypes.toVector,
@@ -44,7 +43,7 @@ object LoadSource {
 }
 
 @Lenses case class LoadSource(
-    file:       ExpandedString,
+    file:       FromContext[String],
     prototypes: Vector[Prototype[_]],
     config:     InputOutputConfig
 ) extends Source {

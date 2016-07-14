@@ -17,27 +17,24 @@
 
 package org.openmole.plugin.task.systemexec
 
-import org.openmole.core.exception.{ InternalProcessingError, MultipleException, UserBadDataError }
-import org.openmole.core.workflow.tools.ExpandedString
-import org.openmole.tool.file._
+import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.tools.service.{ OS, ProcessUtil }
-import ProcessUtil._
 import java.io.File
 
-import monocle.Lens
 import monocle.macros.Lenses
 import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
 import org.openmole.core.workflow.data._
 import org.openmole.plugin.task.external._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.validation._
+import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.dsl._
 
 import scala.annotation.tailrec
 
 object SystemExecTask {
 
-  case class ExpandedSystemExecCommand(expandedCommand: ExpandedString)
+  case class ExpandedSystemExecCommand(expandedCommand: FromContext[String])
 
   implicit def isTask: InputOutputBuilder[SystemExecTask] = InputOutputBuilder(SystemExecTask._config)
   implicit def isExternal: ExternalBuilder[SystemExecTask] = ExternalBuilder(SystemExecTask.external)

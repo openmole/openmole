@@ -34,18 +34,18 @@ object ListPathsDomain {
 
   def apply(
     base:      File,
-    directory: OptionalArgument[ExpandedString] = OptionalArgument(),
-    recursive: Boolean                          = false,
-    filter:    OptionalArgument[ExpandedString] = OptionalArgument()
+    directory: OptionalArgument[FromContext[String]] = OptionalArgument(),
+    recursive: Boolean                               = false,
+    filter:    OptionalArgument[FromContext[String]] = OptionalArgument()
   ) = new ListPathsDomain(base, directory, recursive, filter)
 
 }
 
 class ListPathsDomain(
     base:      File,
-    directory: Option[ExpandedString] = None,
-    recursive: Boolean                = false,
-    filter:    Option[ExpandedString] = None
+    directory: Option[FromContext[String]] = None,
+    recursive: Boolean                     = false,
+    filter:    Option[FromContext[String]] = None
 ) {
 
   def computeValues(context: Context)(implicit rng: RandomProvider): Iterable[Path] =

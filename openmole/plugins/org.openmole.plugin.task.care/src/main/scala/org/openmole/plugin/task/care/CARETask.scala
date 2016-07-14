@@ -21,8 +21,8 @@ package org.openmole.plugin.task.care
 import java.io.File
 
 import org.openmole.core.exception.InternalProcessingError
-import org.openmole.core.workflow.data.{ Context, Variable }
-import org.openmole.core.workflow.tools.ExpandedString
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.tools._
 import org.openmole.plugin.task.external.{ External, ExternalBuilder }
 import org.openmole.tool.logger.Logger
 import org.openmole.plugin.task.systemexec._

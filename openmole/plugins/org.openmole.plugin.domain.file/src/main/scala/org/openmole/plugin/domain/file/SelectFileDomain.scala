@@ -21,7 +21,6 @@ import java.io.File
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.tools._
-import org.openmole.core.workflow.tools.ExpandedString
 
 object SelectFileDomain {
 
@@ -31,7 +30,7 @@ object SelectFileDomain {
 
   }
 
-  def apply(base: File, path: ExpandedString) = new SelectFileDomain(FileList(base, path))
+  def apply(base: File, path: FromContext[String]) = new SelectFileDomain(FileList(base, path))
 }
 
 class SelectFileDomain(val provider: FromContext[File]) {

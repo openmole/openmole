@@ -17,14 +17,14 @@
 
 package org.openmole.plugin.method.abc
 
-import org.openmole.core.workflow.tools.ExpandedString
+import org.openmole.core.workflow.tools._
 import org.openmole.plugin.hook.file._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.dsl._
 
 object SaveABCHook {
 
-  def apply(puzzle: ABCPuzzle, dir: ExpandedString) = {
+  def apply(puzzle: ABCPuzzle, dir: FromContext[String]) = {
     val fileName = dir + "/abc${" + puzzle.iteration.name + "}.csv"
     val prototypes = Seq(puzzle.iteration) ++ puzzle.algorithm.priorPrototypes.map(_.toArray) ++ puzzle.algorithm.targetPrototypes.map(_.toArray)
     AppendToCSVFileHook(fileName, prototypes: _*)

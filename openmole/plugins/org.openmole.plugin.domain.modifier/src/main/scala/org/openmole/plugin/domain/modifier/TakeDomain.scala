@@ -36,8 +36,6 @@ object TakeDomain {
 case class TakeDomain[D, +T](val domain: D, val size: FromContext[Int])(implicit discrete: Discrete[D, T], domainInputs: DomainInputs[D]) {
   def inputs = domainInputs.inputs(domain)
   def computeValues() =
-    for {
-      d ← discrete.iterator(domain)
-      s ← size
-    } yield d.slice(0, s).toIterable
+    (discrete.iterator(domain) |@| size) apply
+      ((d, s) ⇒ d.slice(0, s).toIterable)
 }

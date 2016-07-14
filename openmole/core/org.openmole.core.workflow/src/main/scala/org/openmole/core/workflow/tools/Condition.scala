@@ -17,18 +17,8 @@
 
 package org.openmole.core.workflow.tools
 
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.dsl._
-
 object Condition {
-
-  lazy val True = new Condition {
-    override def from(context: ⇒ Context)(implicit rng: RandomProvider): Boolean = true
-  }
-
-  lazy val False = new Condition {
-    override def from(context: ⇒ Context)(implicit rng: RandomProvider): Boolean = false
-  }
-
+  lazy val True = FromContext.value(true)
+  lazy val False = FromContext.value(false)
 }
 

@@ -28,11 +28,7 @@ object GroupDomain {
   implicit def isDiscrete[D, T: Manifest] = new Discrete[GroupDomain[D, T], Array[T]] with DomainInputs[GroupDomain[D, T]] {
     override def iterator(domain: GroupDomain[D, T]) = {
       import domain._
-
-      for {
-        it ← discrete.iterator(d)
-        s ← size
-      } yield it.grouped(s) map (_.toArray)
+      (discrete.iterator(d) |@| size) apply ((it, s) ⇒ it.grouped(s) map (_.toArray))
     }
 
     override def inputs(domain: GroupDomain[D, T]) = domain.inputs.inputs(domain.d)

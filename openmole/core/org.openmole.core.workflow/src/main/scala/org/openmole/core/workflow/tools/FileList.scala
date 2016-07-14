@@ -19,7 +19,7 @@ package org.openmole.core.workflow.tools
 import java.io.File
 
 object FileList {
-  def apply(directory: File, name: ExpandedString) = FromContext.apply[File] { (context, rng) ⇒
+  def apply(directory: File, name: FromContext[String]) = FromContext { (context, rng) ⇒
     new File(directory, name.from(context)(rng))
   }
 }

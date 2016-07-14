@@ -24,14 +24,14 @@ import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.dsl._
-import org.openmole.core.workflow.tools.ExpandedString
+import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.validation.ValidateHook
 
 object DisplayHook {
 
   implicit def isIO: InputOutputBuilder[DisplayHook] = InputOutputBuilder(config)
 
-  def apply(toDisplay: ExpandedString) =
+  def apply(toDisplay: FromContext[String]) =
     new DisplayHook(
       toDisplay,
       config = InputOutputConfig()
@@ -39,7 +39,7 @@ object DisplayHook {
 }
 
 @Lenses case class DisplayHook(
-    toDisplay: ExpandedString,
+    toDisplay: FromContext[String],
     config:    InputOutputConfig
 ) extends Hook with ValidateHook {
 

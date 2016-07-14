@@ -39,7 +39,7 @@ object AppendToCSVFileHook {
     override def arraysOnSingleRow = AppendToCSVFileHook.arraysOnSingleRow
   }
 
-  def apply(fileName: ExpandedString, prototypes: Prototype[_]*) =
+  def apply(fileName: FromContext[String], prototypes: Prototype[_]*) =
     new AppendToCSVFileHook(
       fileName,
       prototypes.toVector,
@@ -51,9 +51,9 @@ object AppendToCSVFileHook {
 }
 
 @Lenses case class AppendToCSVFileHook(
-    fileName:          ExpandedString,
+    fileName:          FromContext[String],
     prototypes:        Vector[Prototype[_]],
-    header:            Option[ExpandedString],
+    header:            Option[FromContext[String]],
     arraysOnSingleRow: Boolean,
     config:            InputOutputConfig
 ) extends Hook with ValidateHook {

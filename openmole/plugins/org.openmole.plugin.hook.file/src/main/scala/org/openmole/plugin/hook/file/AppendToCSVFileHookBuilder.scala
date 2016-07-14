@@ -17,10 +17,10 @@
 
 package org.openmole.plugin.hook.file
 
-import org.openmole.core.workflow.tools.ExpandedString
+import org.openmole.core.workflow.tools._
 import monocle.Lens
 
 trait AppendToCSVFileHookBuilder[T] {
-  def csvHeader: Lens[T, Option[ExpandedString]]
+  def csvHeader: Lens[T, Option[FromContext[String]]]
   def arraysOnSingleRow: Lens[T, Boolean]
 }
