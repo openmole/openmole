@@ -37,11 +37,9 @@ import scala.ref.WeakReference
 
 object DIRACEnvironment {
 
-  val Connections = ConfigurationLocation("DIRACEnvironment", "Connections", Some(100))
   val EagerSubmissionThreshold = ConfigurationLocation("DIRACEnvironment", "EagerSubmissionThreshold", Some(0.2))
   val UpdateInterval = ConfigurationLocation("DIRACEnvironment", "UpdateInterval", Some(1 minute))
 
-  Workspace setDefault Connections
   Workspace setDefault EagerSubmissionThreshold
 
   def apply(
@@ -127,7 +125,6 @@ class DIRACEnvironment(
   def jobService = _jobService()
   val _jobService = Cache {
     new DIRACJobService {
-      def connections = Workspace.preference(DIRACEnvironment.Connections)
       def environment = env
     }
   }

@@ -51,7 +51,7 @@ trait SSHPersistentStorage <: BatchEnvironment with SSHAccess { st ⇒
     storageSharedLocally match {
       case true ⇒
         new StorageService with LogicalLinkStorage with StorageRoot {
-          def usageControl = new UnlimitedAccess
+          def usageControl = UnlimitedAccess
           lazy val remoteStorage: RemoteStorage = new RemoteLogicalLinkStorage(root)
           def url = new URI("file", st.user, "localhost", -1, sharedDirectory.orNull, null, null)
           def id: String = url.toString
