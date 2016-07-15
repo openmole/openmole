@@ -38,7 +38,7 @@ trait Api {
   //FILES
   def addDirectory(treeNode: TreeNodeData, directoryName: String): Boolean
   def addFile(treeNode: TreeNodeData, fileName: String): Boolean
-  def extractTGZ(treeNodeData: TreeNodeData): Unit
+  def extractTGZ(treeNodeData: TreeNodeData): ExtractResult
   def deleteAuthenticationKey(keyName: String): Unit
   def deleteFile(safePath: SafePath, context: ServerFileSytemContext): Unit
   def deleteFiles(safePath: Seq[SafePath], context: ServerFileSytemContext): Unit

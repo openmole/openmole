@@ -111,36 +111,51 @@ object ApiImpl extends Api {
 
   def deleteFiles(safePaths: Seq[SafePath], context: ServerFileSytemContext): Unit = Utils.deleteFiles(safePaths, context)
 
-  private def getExtractedTGZTo(from: File, to: File)(implicit context: ServerFileSytemContext): Seq[SafePath] = {
-    extractTGZToFromFiles(from, to)
+  private def getExtractedArchiveTo(from: File, to: File)(implicit context: ServerFileSytemContext): Seq[SafePath] = {
+    extractArchiveFromFiles(from, to)
     to.listFiles.toSeq
   }
 
-  private def extractTGZToFromFiles(from: File, to: File): Unit = {
-    from.extractUncompress(to, true)
-    to.applyRecursive((f: File) ⇒ f.setWritable(true))
+  def unknownFormat(name: String) = ExtractResult(Some(ErrorBuilder("Unknown compression format for " + name)))
+
+  private def extractArchiveFromFiles(from: File, to: File)(implicit context: ServerFileSytemContext): ExtractResult = {
+    Try {
+      val ext = from.extension
+      ext match {
+        case org.openmole.gui.ext.data.Tar() ⇒
+          from.extract(to)
+          to.applyRecursive((f: File) ⇒ f.setWritable(true))
+        case TarGz() ⇒
+          from.extractUncompress(to, true)
+          to.applyRecursive((f: File) ⇒ f.setWritable(true))
+        case _ ⇒ throw new Throwable("Unknown compression format for " + from.getName)
+      }
+    } match {
+      case Success(_) ⇒ ExtractResult.ok
+      case Failure(t) ⇒ ExtractResult(Some(ErrorBuilder(t)))
+    }
   }
 
-  private def extractTGZ(safePath: SafePath): Unit =
+  private def extractTGZ(safePath: SafePath): ExtractResult =
     safePath.extension match {
-      case FileExtension.TGZ ⇒
+      case FileExtension.TGZ | FileExtension.TAR ⇒
         // val archiveFile = safePathToFile(safePath)
         //  val parent: SafePath = archiveFile
         extractTGZTo(safePath, safePath.parent)
-      case _ ⇒
+      case _ ⇒ unknownFormat(safePath.name)
     }
 
-  private def extractTGZTo(safePath: SafePath, to: SafePath): Unit = {
+  private def extractTGZTo(safePath: SafePath, to: SafePath): ExtractResult = {
     safePath.extension match {
-      case FileExtension.TGZ ⇒
+      case FileExtension.TGZ | FileExtension.TAR ⇒
         val archiveFile = safePathToFile(safePath)(ServerFileSytemContext.project)
         val toFile: File = safePathToFile(to)(ServerFileSytemContext.project)
-        extractTGZToFromFiles(archiveFile, toFile)
-      case _ ⇒
+        extractArchiveFromFiles(archiveFile, toFile)(ServerFileSytemContext.project)
+      case _ ⇒ unknownFormat(safePath.name)
     }
   }
 
-  def extractTGZ(treeNodeData: TreeNodeData): Unit = extractTGZ(treeNodeData.safePath)
+  def extractTGZ(treeNodeData: TreeNodeData): ExtractResult = extractTGZ(treeNodeData.safePath)
 
   def temporaryFile(): SafePath = {
     import org.openmole.gui.ext.data.ServerFileSytemContext.absolute
@@ -192,7 +207,7 @@ object ApiImpl extends Api {
           // val emptyFile = new File("")
           val from: File = safePathToFile(safePathToTest)(ServerFileSytemContext.absolute)
           val to: File = safePathToFile(safePathToTest.parent)(ServerFileSytemContext.absolute)
-          val extracted = getExtractedTGZTo(from, to)(ServerFileSytemContext.absolute).filterNot {
+          val extracted = getExtractedArchiveTo(from, to)(ServerFileSytemContext.absolute).filterNot {
             _ == safePathToTest
           }
           val toTest = in ++ safePathToTest.nameWithNoExtension
@@ -519,7 +534,7 @@ object ApiImpl extends Api {
           val imString = imapString(imappings, "netLogoInputs")
           val omString = omapString(omappings, "netLogoOutputs")
           os.write(
-            s"""\nval task = NetLogo5Task(workDirectory / "$executableName", List("${command.split('\n').mkString("\",\"")}"), embedWorkspace = ${!resources.implicits.isEmpty}) set(\n""" +
+            s"""\nval task = NetLogo5Task(workDirectory / ${executableName.split('/').map { s ⇒ s"""\"$s\"""" }.mkString(" / ")}, List("${command.split('\n').mkString("\",\"")}"), embedWorkspace = ${!resources.implicits.isEmpty}) set(\n""" +
               inString + ouString + imString + omString + imFileString + omFileString + defaults
           )
         case st: ScalaTaskType ⇒
