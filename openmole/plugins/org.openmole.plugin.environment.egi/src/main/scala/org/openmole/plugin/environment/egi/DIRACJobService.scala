@@ -44,8 +44,8 @@ import DIRACJobService._
 
 trait DIRACJobService extends GridScaleJobService { js ⇒
 
-  def connections: Int
   def environment: DIRACEnvironment
+  def usageControl = UnlimitedAccess
 
   val jobService = {
     lazy val GSDIRACJobService.Service(service, group) = GSDIRACJobService.getService(environment.voName)
@@ -63,8 +63,6 @@ trait DIRACJobService extends GridScaleJobService { js ⇒
     js.delegate(environment.authentication.certificate, environment.authentication.password)
     js
   }
-
-  val usageControl = new LimitedAccess(connections, Int.MaxValue)
 
   def jobScript =
     JobScript(
