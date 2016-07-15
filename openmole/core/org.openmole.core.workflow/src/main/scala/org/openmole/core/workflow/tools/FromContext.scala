@@ -68,8 +68,7 @@ object FromContext {
       def validate(inputs: Seq[Val[_]]): Seq[Throwable] = Seq.empty
     }
 
-  implicit val monad = new Applicative[FromContext] {
-
+  implicit val applicative = new Applicative[FromContext] {
     override def ap[A, B](fa: ⇒ FromContext[A])(f: ⇒ FromContext[(A) ⇒ B]): FromContext[B] =
       new FromContext[B] {
         override def from(context: ⇒ Context)(implicit rng: RandomProvider): B = {

@@ -18,7 +18,10 @@
 package org.openmole.core.workflow
 
 import scala.concurrent.stm._
+import org.openmole.tool.file._
 import scala.ref.WeakReference
+import scalaz._
+import Scalaz._
 
 package tools {
 
@@ -50,7 +53,9 @@ package tools {
     implicit def seqOfFunction[T](s: Seq[T ⇒ T]) = s.sequence
     implicit def arrayOfFunction[T](s: Array[T ⇒ T]) = s.toSeq.sequence
 
-    def c(s: String): FromContext[String] = s
+    implicit class FromContextStringDecorator(s: String) {
+      def /(p: FromContext[String]) = p.map(p ⇒ (File(s) / p).getPath)
+    }
 
     object OptionalArgument {
       implicit def valueToOptionalArgument[T](v: T) = OptionalArgument(Some(v))
