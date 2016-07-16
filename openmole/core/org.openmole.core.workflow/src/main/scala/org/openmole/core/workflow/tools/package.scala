@@ -53,10 +53,6 @@ package tools {
     implicit def seqOfFunction[T](s: Seq[T ⇒ T]) = s.sequence
     implicit def arrayOfFunction[T](s: Array[T ⇒ T]) = s.toSeq.sequence
 
-    implicit class FromContextStringDecorator(s: String) {
-      def /(p: FromContext[String]) = p.map(p ⇒ (File(s) / p).getPath)
-    }
-
     object OptionalArgument {
       implicit def valueToOptionalArgument[T](v: T) = OptionalArgument(Some(v))
       implicit def noneToOptionalArgument[T](n: None.type) = OptionalArgument[T](n)
@@ -66,6 +62,11 @@ package tools {
 
     implicit def optionalArgumentToOption[T](optionalArgument: OptionalArgument[T]) = optionalArgument.option
     implicit def fromStringToExpandedStringOptionalArgument(s: String) = OptionalArgument[FromContext[String]](Some(ExpandedString(s)))
+
+    def expand[T] = new {
+      def apply[S](s: S)(implicit expandable: Expandable[S, T]) = expandable.expand(s)
+    }
+
   }
 }
 

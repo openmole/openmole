@@ -19,7 +19,7 @@ package org.openmole.core.workflow
 
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.domain._
-import org.openmole.core.workflow.tools.FromContext
+import org.openmole.core.workflow.tools._
 import scalaz._
 import Scalaz._
 

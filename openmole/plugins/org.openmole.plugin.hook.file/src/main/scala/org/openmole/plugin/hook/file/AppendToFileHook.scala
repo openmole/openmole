@@ -34,9 +34,9 @@ object AppendToFileHook {
 
   implicit def isIO: InputOutputBuilder[AppendToFileHook] = InputOutputBuilder(AppendToFileHook.config)
 
-  def apply(fileName: FromContext[String], content: FromContext[String]) =
+  def apply(file: FromContext[File], content: FromContext[String]) =
     new AppendToFileHook(
-      fileName,
+      file,
       content,
       config = InputOutputConfig()
     )
@@ -44,18 +44,18 @@ object AppendToFileHook {
 }
 
 @Lenses case class AppendToFileHook(
-    fileName: FromContext[String],
-    content:  FromContext[String],
-    config:   InputOutputConfig
+    file:    FromContext[File],
+    content: FromContext[String],
+    config:  InputOutputConfig
 ) extends Hook with ValidateHook {
 
   override def validate(inputs: Seq[Val[_]]): Seq[Throwable] =
-    fileName.validate(inputs) ++ content.validate(inputs)
+    file.validate(inputs) ++ content.validate(inputs)
 
   override def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider) = {
-    val file = new File(fileName.from(context))
-    file.createParentDir
-    file.withLock(_.append(content.from(context)))
+    val f = file.from(context)
+    f.createParentDir
+    f.withLock(_.append(content.from(context)))
     context
   }
 

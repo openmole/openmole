@@ -80,6 +80,10 @@ package file {
         finally dirStream.close
       }
 
+      def isEmpty =
+        if (file.isDirectory) isDirectoryEmpty
+        else file.size == 0L
+
       def listFilesSafe = Option(file.listFiles).getOrElse(Array.empty)
 
       def listFilesSafe(filter: File ⇒ Boolean) = Option(file.listFiles(filter)).getOrElse(Array.empty)

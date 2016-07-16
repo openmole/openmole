@@ -36,7 +36,7 @@ object SaveHook {
 
   implicit def isIO = InputOutputBuilder(SaveHook.config)
 
-  def apply(file: FromContext[String], prototypes: Prototype[_]*) =
+  def apply(file: FromContext[File], prototypes: Prototype[_]*) =
     new SaveHook(
       file,
       prototypes.toVector,
@@ -45,7 +45,7 @@ object SaveHook {
 }
 
 @Lenses case class SaveHook(
-    file:       FromContext[String],
+    file:       FromContext[File],
     prototypes: Vector[Prototype[_]],
     config:     InputOutputConfig
 ) extends Hook with ValidateHook {
@@ -54,7 +54,7 @@ object SaveHook {
 
   override def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider) = {
     val saveContext: Context = prototypes.map(p ⇒ context.variable(p).getOrElse(throw new UserBadDataError(s"Variable $p has not been found")))
-    val to = new File(file.from(context))
+    val to = file.from(context)
     to.createParentDir
     SerialiserService.serialiseAndArchiveFiles(saveContext, to)
     context

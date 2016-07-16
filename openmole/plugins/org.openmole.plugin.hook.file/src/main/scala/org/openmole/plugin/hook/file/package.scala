@@ -30,7 +30,7 @@ package file {
   trait FilePackage {
 
     def copies = new {
-      def +=[T: CopyFileHookBuilder: InputOutputBuilder](prototype: Prototype[File], destination: FromContext[String], remove: Boolean = false, compress: Boolean = false, move: Boolean = false): T ⇒ T =
+      def +=[T: CopyFileHookBuilder: InputOutputBuilder](prototype: Prototype[File], destination: FromContext[File], remove: Boolean = false, compress: Boolean = false, move: Boolean = false): T ⇒ T =
         (implicitly[CopyFileHookBuilder[T]].copies add ((prototype, destination, CopyOptions(remove, compress, move)))) andThen
           (inputs += prototype) andThen (if (move) (outputs += prototype) else identity)
     }

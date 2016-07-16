@@ -35,9 +35,9 @@ object ExpandedString {
   implicit def fromTraversableOfStringToTraversableOfVariableExpansion[T <: Traversable[String]](t: T) = t.map(ExpandedString(_))
   implicit def fromFileToExpandedString(f: java.io.File) = ExpandedString(f.getPath)
 
-  def apply(s: String): Expansion = apply(new StringInputStream(s))
+  def apply(s: String): FromContext[String] = apply(new StringInputStream(s))
 
-  def apply(is: InputStream): Expansion = {
+  def apply(is: InputStream): FromContext[String] = {
     val expandedElements = ListBuffer[ExpansionElement]()
 
     val it = Iterator.continually(is.read).takeWhile(_ != -1)
