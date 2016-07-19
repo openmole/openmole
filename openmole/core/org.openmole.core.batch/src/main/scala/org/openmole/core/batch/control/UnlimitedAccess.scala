@@ -17,7 +17,7 @@
 
 package org.openmole.core.batch.control
 
-class UnlimitedAccess extends UsageControl {
+object UnlimitedAccess extends UsageControl {
   def releaseToken(token: AccessToken) = {}
   def tryGetToken: Option[AccessToken] = Some(AccessToken())
   def waitAToken: AccessToken = AccessToken()
