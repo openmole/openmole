@@ -1,7 +1,7 @@
 package org.openmole.gui.client.core
 
 import org.openmole.gui.client.core.alert.{ AlertPanel, AbsolutePositioning }
-import AbsolutePositioning.{ RightPosition, TopZone, CenterPagePosition }
+import AbsolutePositioning.CenterPagePosition
 import org.openmole.gui.shared.Api
 import org.scalajs.dom.raw.{ KeyboardEvent, HTMLElement, HTMLFormElement }
 import org.openmole.gui.client.core.panels._
@@ -43,6 +43,7 @@ object ScriptClient {
   @JSExport
   def run(): Unit = {
 
+    implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
     val alert: Var[Boolean] = Var(false)
 
     val shutdownButton = span(
@@ -214,20 +215,29 @@ object ScriptClient {
     maindiv.appendChild(AlertPanel.alertDiv)
 
     Settings.workspacePath.foreach { projectsPath ⇒
-      maindiv.appendChild(Rx {
-        div(omsheet.fullpanel)(
-          div(
-            omsheet.leftpanel +++ (openFileTree(), omsheet.panelOpen, emptyMod)
-          )(treeNodePanel.view),
-          div(
-            omsheet.centerpanel +++ (openFileTree(), omsheet.panelReduce)
-          )(
-              treeNodePanel.fileDisplayer.tabs.render,
-              img(src := "img/version.svg", omsheet.logoVersion),
-              div("Loving Lobster", omsheet.textVersion)
-            )
-        )
-      })
+      maindiv.appendChild(
+        tags.div(`class` := "fullpanel")(
+        tags.div(
+          `class` := Rx {
+            "leftpanel " + {
+              if (openFileTree()) "open" else ""
+            }
+          }
+        )(treeNodePanel.view.render),
+        tags.div(
+          `class` := Rx {
+            "centerpanel " + {
+              if (openFileTree()) "reduce" else ""
+            }
+          }
+        )(
+            treeNodePanel.fileDisplayer.tabs.render,
+            tags.img(src := "img/version.svg", `class` := "logoVersion"),
+            tags.div("Loving Lobster", `class` := "textVersion")
+          )
+
+      ).render
+      )
     }
 
     body.appendChild(connectionDiv)

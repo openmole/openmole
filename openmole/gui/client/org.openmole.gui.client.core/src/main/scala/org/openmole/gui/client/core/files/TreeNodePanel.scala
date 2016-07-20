@@ -9,6 +9,7 @@ import org.openmole.gui.ext.data._
 import org.openmole.gui.misc.utils.{ stylesheet, Utils }
 import org.openmole.gui.shared._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs, Popup }
+import org.openmole.gui.misc.utils.{ stylesheet ⇒ omsheet }
 import org.scalajs.dom.html.Input
 import org.scalajs.dom.raw._
 import scalatags.JsDom.all._

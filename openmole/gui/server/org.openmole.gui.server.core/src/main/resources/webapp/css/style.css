@@ -452,3 +452,44 @@ li.selectElement{
     .aaa{
     background-color: red;
     }
+
+.fullpanel {
+    height: 100%;
+    width: 100%;
+}
+.centerpanel {
+    height: 89%;
+    padding-left: 15px;
+    padding-right: 15px;
+    position: relative;
+    top: 30px;
+    width: 100%;
+}
+
+.fullpanel .reduce {
+    left: 330px;
+    padding-right: 340px;
+    position: fixed;
+    top: 60px;
+    transition: all 0.1s ease-out 0s;
+    width: 99%;
+    height: calc(100% - 140px);
+
+}
+
+.fullpanel .open {
+    left: 0;
+}
+
+.leftpanel {
+    background: #333333 none repeat scroll 0 0;
+    height: 100%;
+    left: -320px;
+    opacity: 1;
+    overflow-y: auto;
+    padding-left: 7px;
+    position: absolute;
+    top: 37px;
+    transition: all 0.1s ease-out 0s;
+    width: 320px;
+}
