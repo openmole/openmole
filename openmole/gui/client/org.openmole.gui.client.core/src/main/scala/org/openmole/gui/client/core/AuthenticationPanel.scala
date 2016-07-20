@@ -76,7 +76,7 @@ class AuthenticationPanel extends ModalPanel {
           scalatags.JsDom.all.marginLeft := 10,
           test.passed match {
             case true  ⇒ label_success
-            case false ⇒ label_danger
+            case false ⇒ label_danger +++ pointer
           },
           onclick := { () ⇒
             if (!test.passed) {
@@ -221,6 +221,7 @@ class AuthenticationPanel extends ModalPanel {
           else vosToBeTested.value.split(",").toSeq
         }
         OMPost[Api].testAuthentication(a.data, vos).call().foreach { t ⇒
+          t.foreach { println }
           auths() = auths.now.map {
             _.updated(auths.now.map {
               _.indexOf(a)
