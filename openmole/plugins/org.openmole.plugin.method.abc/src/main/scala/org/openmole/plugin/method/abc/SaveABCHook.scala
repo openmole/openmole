@@ -24,8 +24,8 @@ import org.openmole.core.workflow.dsl._
 
 object SaveABCHook {
 
-  def apply(puzzle: ABCPuzzle, dir: FromContext[String]) = {
-    val fileName = dir + "/abc${" + puzzle.iteration.name + "}.csv"
+  def apply(puzzle: ABCPuzzle, dir: FromContext[File]) = {
+    val fileName = dir / ExpandedString("abc${" + puzzle.iteration.name + "}.csv")
     val prototypes = Seq(puzzle.iteration) ++ puzzle.algorithm.priorPrototypes.map(_.toArray) ++ puzzle.algorithm.targetPrototypes.map(_.toArray)
     AppendToCSVFileHook(fileName, prototypes: _*)
   }

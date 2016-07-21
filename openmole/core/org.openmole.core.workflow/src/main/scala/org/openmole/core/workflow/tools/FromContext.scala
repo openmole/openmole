@@ -110,6 +110,7 @@ object FromContext {
   implicit class FromContextFileDecorator(f: FromContext[File]) {
     def exists = f.map(_.exists)
     def isEmpty = f.map(_.isEmpty)
+    def /(path: FromContext[String]) = (f |@| path)(_ / _)
   }
 
 }
