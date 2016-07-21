@@ -43,17 +43,17 @@ class ConfigurationLocation[T](val group: String, val name: String, _default: â‡
 
 class ConfigurationFile(val file: File) {
 
-  val config = {
+  @transient lazy val builder = {
     val params = new Parameters
-
     val builder =
       new ReloadingFileBasedConfigurationBuilder[FileBasedConfiguration](classOf[PropertiesConfiguration])
         .configure(params.fileBased()
           .setFile(file))
-
     builder.setAutoSave(true)
-    builder.getConfiguration
+    builder
   }
+
+  def config = builder.getConfiguration
 
   def value(group: String, name: String): Option[String] =
     Option(config.getString(s"$group.$name"))
