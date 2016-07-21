@@ -54,8 +54,8 @@ object Environment {
 import Environment._
 
 sealed trait Environment <: Name {
-  private[execution] val _done = Ref(0L)
-  private[execution] val _failed = Ref(0L)
+  private[execution] var _done = 0L
+  private[execution] var _failed = 0L
 
   private lazy val _errors = new SlidingList[ExceptionEvent](() ⇒ Workspace.preference(maxExceptionsLog))
   def error(e: ExceptionEvent) = _errors.put(e)
@@ -64,8 +64,8 @@ sealed trait Environment <: Name {
 
   def submitted: Long
   def running: Long
-  def done: Long = _done.single()
-  def failed: Long = _failed.single()
+  def done: Long = _done
+  def failed: Long = _failed
 
 }
 

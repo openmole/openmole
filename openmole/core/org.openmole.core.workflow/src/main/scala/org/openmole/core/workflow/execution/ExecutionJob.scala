@@ -32,10 +32,10 @@ trait ExecutionJob {
   def state_=(state: ExecutionState) = synchronized {
     if (!this.state.isFinal) {
       state match {
-        case DONE ⇒ environment._done.single += 1
+        case DONE ⇒ environment._done += 1
         case FAILED ⇒
-          if (this.state == DONE) environment._done.single -= 1
-          environment._failed.single += 1
+          if (this.state == DONE) environment._done -= 1
+          environment._failed += 1
         case _ ⇒
       }
 
