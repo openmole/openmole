@@ -15,9 +15,9 @@ object Environment extends PluginDefaults {
   lazy val desktopgrid = OsgiProject("desktopgrid", imports = Seq("*")) dependsOn (
     Core.dsl,
     Core.batch, Tool.sftpserver, gridscale
-  ) //settings (bundleType += "daemon")
+  )
 
-  lazy val egi = OsgiProject("egi", imports = Seq("!org.apache.http.*", "!fr.iscpif.gridscale.libraries.srmstub", "!fr.iscpif.gridscale.libraries.lbstub", "!fr.iscpif.gridscale.libraries.wmsstub", "*")) dependsOn (Core.dsl, Core.updater, Core.batch,
+  lazy val egi = OsgiProject("egi", imports = Seq("!org.apache.http.*", "!fr.iscpif.gridscale.libraries.srmstub", "!fr.iscpif.gridscale.libraries.lbstub", "!fr.iscpif.gridscale.libraries.wmsstub", "!com.google.common.cache", "*")) dependsOn (Core.dsl, Core.updater, Core.batch,
     Core.workspace, Core.fileService, gridscale) settings (
       libraryDependencies ++= Seq(Libraries.gridscaleGlite, Libraries.gridscaleHTTP, Libraries.scalaLang)
     )
