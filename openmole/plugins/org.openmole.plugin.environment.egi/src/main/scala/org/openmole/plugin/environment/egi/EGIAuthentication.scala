@@ -179,7 +179,7 @@ object EGIAuthentication extends Logger {
   }
 
   def testDIRACAccess(a: EGIAuthentication, voName: String)(implicit decrypt: Decrypt) =
-    Try(DIRACEnvironment(voName).jobService.jobService.token).map(_ ⇒ true)
+    Try(DIRACEnvironment(voName).jobService.getToken).map(_ ⇒ true)
 
   def DIRACVos = fr.iscpif.gridscale.egi.DIRACJobService.supportedVOs()
 }

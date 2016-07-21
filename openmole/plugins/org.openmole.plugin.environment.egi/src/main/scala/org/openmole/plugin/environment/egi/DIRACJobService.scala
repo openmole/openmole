@@ -19,24 +19,15 @@
 package org.openmole.plugin.environment.egi
 
 import org.openmole.core.batch.environment.SerializedJob
-import org.openmole.tool.file._
 import org.openmole.core.batch.storage._
-import fr.iscpif.gridscale.egi.{ DIRACJobDescription ⇒ GSDIRACJobDescription, DIRACJobService ⇒ GSDIRACJobService }
 import org.openmole.core.workspace.Workspace
 import org.openmole.plugin.environment.gridscale.GridScaleJobService
 import org.openmole.core.batch.jobservice.{ BatchJob, BatchJobId }
-import org.openmole.core.batch.control.{ LimitedAccess, UnlimitedAccess }
-import StatusFiles._
+import org.openmole.core.batch.control.{ UnlimitedAccess }
 import org.openmole.tool.logger.Logger
-
-import scalax.io.Resource
-import java.io.File
-
-import org.openmole.core.tools._
+import fr.iscpif.gridscale.{ egi ⇒ gridscale }
 import fr.iscpif.gridscale.egi._
-import org.openmole.tool.cache.Cache
-
-import scala.concurrent.duration._
+import scalax.io.Resource
 
 object DIRACJobService extends Logger
 
@@ -44,20 +35,27 @@ import DIRACJobService._
 
 trait DIRACJobService extends GridScaleJobService { js ⇒
 
+  def getToken = jobService.jobService.token
+
   def environment: DIRACEnvironment
   def usageControl = UnlimitedAccess
 
-  val jobService = {
-    lazy val GSDIRACJobService.Service(service, group) = GSDIRACJobService.getService(environment.voName)
+  def diracService = {
+    lazy val gridscale.DIRACJobService.Service(service, group) = gridscale.DIRACJobService.getService(environment.voName)
 
     val serviceValue = environment.service.getOrElse(service)
     val groupValue = environment.group.getOrElse(group)
 
+    gridscale.DIRACJobService.Service(serviceValue, groupValue)
+  }
+
+  val jobService = {
     val js =
-      GSDIRACJobService(
+      gridscale.DIRACGroupedJobService(
         environment.voName,
-        service = Some(GSDIRACJobService.Service(serviceValue, groupValue)),
-        groupStatusQuery = Some(environment.updateInterval.minUpdateInterval)
+        service = Some(diracService),
+        statusQueryInterval = environment.updateInterval.minUpdateInterval,
+        jobsByGroup = Workspace.preference(DIRACEnvironment.JobsByGroup)
       )(environment.authentication)
 
     js.delegate(environment.authentication.certificate, environment.authentication.password)
@@ -72,7 +70,7 @@ trait DIRACJobService extends GridScaleJobService { js ⇒
       debug = environment.debug
     )
 
-  def id = jobService.service
+  def id = diracService
 
   protected def _submit(serializedJob: SerializedJob) = {
     import serializedJob._
@@ -83,7 +81,7 @@ trait DIRACJobService extends GridScaleJobService { js ⇒
 
       Resource.fromFile(script).write(jobScript(serializedJob, outputFilePath, None, None))
 
-      val jobDescription = GSDIRACJobDescription(
+      val jobDescription = gridscale.DIRACJobDescription(
         stdOut = if (environment.debug) Some("out") else None,
         stdErr = if (environment.debug) Some("err") else None,
         outputSandbox = if (environment.debug) Seq("out" → Workspace.newFile("job", ".out"), "err" → Workspace.newFile("job", ".err")) else Seq.empty,
