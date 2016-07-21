@@ -17,6 +17,7 @@
 
 package org.openmole.core.workflow.execution
 
+import java.util.concurrent.atomic.AtomicLong
 import java.util.logging.Level
 
 import org.openmole.core.event.{ Event, EventAccumulator, EventDispatcher }
@@ -54,8 +55,8 @@ object Environment {
 import Environment._
 
 sealed trait Environment <: Name {
-  private[execution] var _done = 0L
-  private[execution] var _failed = 0L
+  private[execution] val _done = new AtomicLong(0L)
+  private[execution] val _failed = new AtomicLong(0L)
 
   private lazy val _errors = new SlidingList[ExceptionEvent](() ⇒ Workspace.preference(maxExceptionsLog))
   def error(e: ExceptionEvent) = _errors.put(e)
@@ -64,8 +65,8 @@ sealed trait Environment <: Name {
 
   def submitted: Long
   def running: Long
-  def done: Long = _done
-  def failed: Long = _failed
+  def done: Long = _done.get()
+  def failed: Long = _failed.get()
 
 }
 
