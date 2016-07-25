@@ -26,6 +26,9 @@ opacity: 1;
 opacity: 0;
 }
 
+ul{
+    list-style-type: none;
+}
 
 /* DIALOGS */
 #marketPanelID .modal-dialog, #executionsPanelID .modal-dialog, #modelWizardPanelID .modal-dialog  {
@@ -39,7 +42,7 @@ opacity: 0;
 }
  #envStackID .modal-dialog, #documentationID .modal-dialog{
     max-width: 1250px;
-    width: 60%;
+    width: 65%;
 }
 
 #conceptPanelID .modal-footer {
