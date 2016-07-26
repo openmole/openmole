@@ -152,7 +152,7 @@ class GUIDocPanel extends ModalPanel {
         tags.div(spacer20 +++ bold, "Netlogo applications"),
         tags.div(" The Netlogo applications working with nls extensions should be previously archived. The system will exstract the archives and deal with the extensions as " +
           " Task resources (they appear in the resources tab"),
-        tags.div("A seed option (for the Netlogo random genarator) is proposed to automatically generate a seed variable and provhide it to the Netlogo Task"),
+        tags.div("A seed variable (for the Netlogo random genarator) is automatically generated and passed to the Netlogo Generator trought the Netlogo Task"),
         tags.div(spacer20 +++ bold, "Java applications"),
         tags.div(" Once the jar has been provided to the wizard, the classes contained in it are proposed in a dropdown button. Choose the class containing your main Class. " +
           "Then, another dropdown button will ask you for the function to be called in the preselected class.")

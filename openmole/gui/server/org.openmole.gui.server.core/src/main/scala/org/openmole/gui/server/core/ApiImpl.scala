@@ -530,11 +530,11 @@ object ApiImpl extends Api {
               inString + ouString + imFileString + omFileString + resourcesString + defaults
           )
         case ntt: NetLogoTaskType ⇒
-
           val imString = imapString(imappings, "netLogoInputs")
           val omString = omapString(omappings, "netLogoOutputs")
           os.write(
-            s"""\nval task = NetLogo5Task(workDirectory / ${executableName.split('/').map { s ⇒ s"""\"$s\"""" }.mkString(" / ")}, List("${command.split('\n').mkString("\",\"")}"), embedWorkspace = ${!resources.implicits.isEmpty}) set(\n""" +
+            s"""\nval launch = List("${(Seq("setup", "random-seed ${seed}") ++ (command.split('\n').toSeq)).mkString("\",\"")}")
+               \nval task = NetLogo5Task(workDirectory / ${executableName.split('/').map { s ⇒ s"""\"$s\"""" }.mkString(" / ")}, launch, embedWorkspace = ${!resources.implicits.isEmpty}) set(\n""".stripMargin +
               inString + ouString + imString + omString + imFileString + omFileString + defaults
           )
         case st: ScalaTaskType ⇒
