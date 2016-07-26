@@ -300,8 +300,8 @@ object ApiImpl extends Api {
 
     execution.addStaticInfo(execId, StaticExecutionInfo(scriptData.scriptPath, content, System.currentTimeMillis()))
 
-    def error(t: Throwable): Unit = execution.addError(execId, Failed(ErrorBuilder(t)))
-    def message(message: String): Unit = execution.addError(execId, Failed(Error(message)))
+    def error(t: Throwable): Unit = execution.addError(execId, Failed(ErrorBuilder(t), Seq()))
+    def message(message: String): Unit = execution.addError(execId, Failed(Error(message), Seq()))
 
     try {
       val project = new Project(script.getParentFileSafe)
