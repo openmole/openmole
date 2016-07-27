@@ -57,8 +57,6 @@ class TreeNodePanel {
   case class NodeEdition(node: TreeNode, replicateMode: Boolean = false)
 
   val toBeEdited: Var[Option[NodeEdition]] = Var(None)
-  val dragState: Var[String] = Var("")
-  val draggedNode: Var[Option[TreeNode]] = Var(None)
   val fileDisplayer = new FileDisplayer
   val fileToolBar = new FileToolBar(this)
   val tree: Var[TypedTag[HTMLElement]] = Var(tags.div())
@@ -157,22 +155,6 @@ class TreeNodePanel {
         turnSelectionTo(false)
         manager.switch(dn)
         drawTree
-    }, dropPairs(dn)
-  )
-
-  def dropPairs(dn: DirNode) = Seq(
-    draggable := true, ondrop := {
-      dropAction(dn)
-    },
-    ondragenter := {
-      (e: DragEvent) ⇒
-        false
-    },
-    ondragover := {
-      (e: DragEvent) ⇒
-        e.dataTransfer.dropEffect = "move"
-        e.preventDefault
-        false
     }
   )
 
@@ -194,7 +176,7 @@ class TreeNodePanel {
           div("Create a first OpenMOLE script (.oms)")(ms("message"))
         }
         else
-          tags.table(ms("tree" + dragState.now))(
+          tags.table(ms("tree"))(
             tr(
               tags.table(ms("file-list"))(
                 for (tn ← sons._1) yield {
@@ -307,28 +289,6 @@ class TreeNodePanel {
     })
   }
 
-  def dropAction(tn: TreeNode) = {
-    (e: DragEvent) ⇒
-      e.preventDefault
-      draggedNode.now.map {
-        sp ⇒
-          tn match {
-            case d: DirNode ⇒
-              if (sp.safePath.now.path != d.safePath.now.path) {
-                fileDisplayer.tabs.saveAllTabs(() ⇒
-                  OMPost[Api].move(sp.safePath.now, tn.safePath.now).call().foreach {
-                    b ⇒
-                      refreshAndDraw
-                      fileDisplayer.tabs.checkTabs
-                  })
-              }
-            case _ ⇒
-          }
-      }
-      draggedNode() = None
-      false
-  }
-
   def turnSelectionTo(b: Boolean) = selectionMode() = b
 
   object ReactiveLine {
@@ -344,8 +304,10 @@ class TreeNodePanel {
       case fn: FileNodeType ⇒ stylesheet.file
       case _                ⇒ stylesheet.dir
     }) +++ floatLeft +++ pointer +++ Seq(
-      draggable := true,
-      onclick := { () ⇒ if (!selectionMode.now) todo() }
+      onclick := { () ⇒
+        println("click")
+        if (!selectionMode.now) todo()
+      }
     )
 
     def timeOrSize(tn: TreeNode): String = fileToolBar.fileFilter.now.fileSorting match {
@@ -378,92 +340,69 @@ class TreeNodePanel {
       val archive = baseGlyph +++ glyph_archive
       val arrow_right_and_left = baseGlyph +++ glyph_arrow_right_and_left
 
-      val rowDiv = div(
-        onmouseover := { () ⇒
-          lineHovered() = {
-            if (selectionMode.now) false else true
-          }
-        },
-        onmouseout := { () ⇒ lineHovered() = false },
-        ondragstart := { (e: DragEvent) ⇒
-          e.dataTransfer.setData("text/plain", "nothing") //  FIREFOX TRICK
-          draggedNode.now match {
-            case Some(t: TreeNode) ⇒
-            case _                 ⇒ draggedNode() = Some(tn)
-          }
-          true
-        },
-        ondragenter := { (e: DragEvent) ⇒
-          false
-        },
-        ondragover := { (e: DragEvent) ⇒
-          e.dataTransfer.dropEffect = "move"
-          e.preventDefault
-          false
-        },
-        ondrop := {
-          dropAction(tn)
-        }, div(
+      {
+        tr(
           div(
-            clickablePair,
-            color := "#333",
+            onmouseover := { () ⇒ lineHovered() = if (selectionMode.now) false else true },
+            onmouseout := { () ⇒ lineHovered() = false },
+            width := 320,
+            height := 20,
             Rx {
-              span(stylesheet.fileNameOverflow +++ fileIndent)(
-                tn.name()
-              )
-            }
-          ).tooltip(tags.span(tn.name.now), popupStyle = whitePopup, arrowStyle = Popup.whiteBottomArrow, condition = () ⇒ tn.name.now.length > 24),
-          div(stylesheet.fileInfo)(
-            Rx {
-              if (!selectionMode()) {
-                div(
-                  span(stylesheet.fileSize)(tags.i(timeOrSize(tn))),
-                  span(
-                    if (lineHovered()) ms("opaque")
-                    else ms("transparent")
-                  )(
-                      span(onclick := { () ⇒ trashNode(tn) }, trash),
-                      span(onclick := { () ⇒
-                        toBeEdited() = Some(NodeEdition(tn))
-                        drawTree
-                      }, edit),
-                      a(
-                        span(onclick := { () ⇒ Unit })(download_alt),
-                        href := s"downloadFile?path=${Utils.toURI(tn.safePath().path)}"
-                      ),
-                      tn.safePath().extension match {
-                        case FileExtension.TGZ | FileExtension.TAR ⇒
-                          span(archive, onclick := { () ⇒
-                            extractTGZ(tn)
-                          })
-                        case _ ⇒
-                      },
-                      span(onclick := { () ⇒
-                        CoreUtils.replicate(tn, (replicated: TreeNodeData) ⇒ {
-                          refreshAnd(() ⇒ {
-                            toBeEdited() = Some(NodeEdition(replicated, true))
-                            drawTree
-                          })
-                        })
-                      })(arrow_right_and_left)
-                    )
+              div(
+                clickablePair,
+                color := "#333", {
+                  span(stylesheet.fileNameOverflow +++ fileIndent)(tn.name())
+                }
+              ).tooltip(
+                  tags.span(tn.name()), popupStyle = whitePopup, arrowStyle = Popup.whiteBottomArrow, condition = () ⇒ tn.name().length > 24
                 )
-              }
-              else div()
-            }
-          )
-        )
-      )
-      tr(
-        Rx {
-          if (selectionMode()) {
-            div(
-              onclick := { (e: MouseEvent) ⇒
-                addToSelection
-                if (e.ctrlKey) clearSelectionExecpt(tn)
-              }
-            )(
-                {
+            },
+            Rx {
+              div(stylesheet.fileInfo)(
+                if (!selectionMode()) {
+                  div(
+                    span(stylesheet.fileSize)(tags.i(timeOrSize(tn))),
+                    span(
+                      if (lineHovered()) ms("opaque")
+                      else ms("transparent")
+                    )(
+                        span(onclick := { () ⇒ trashNode(tn) }, trash),
+                        span(onclick := { () ⇒
+                          toBeEdited() = Some(NodeEdition(tn))
+                          drawTree
+                        }, edit),
+                        a(
+                          span(onclick := { () ⇒ Unit })(download_alt),
+                          href := s"downloadFile?path=${Utils.toURI(tn.safePath().path)}"
+                        ),
+                        tn.safePath().extension match {
+                          case FileExtension.TGZ | FileExtension.TAR ⇒
+                            span(archive, onclick := { () ⇒
+                              extractTGZ(tn)
+                            })
+                          case _ ⇒
+                        },
+                        span(onclick := { () ⇒
+                          CoreUtils.replicate(tn, (replicated: TreeNodeData) ⇒ {
+                            refreshAnd(() ⇒ {
+                              toBeEdited() = Some(NodeEdition(replicated, true))
+                              drawTree
+                            })
+                          })
+                        })(arrow_right_and_left)
+                      )
+                  )
+                }
+                else div()
+              )
+            },
+            Rx {
+              if (selectionMode()) {
+                div(
+                  onclick := { (e: MouseEvent) ⇒
+                    addToSelection
+                    if (e.ctrlKey) clearSelectionExecpt(tn)
+                  },
                   if (selected()) {
                     fileToolBar.selectedTool() match {
                       case Some(TrashTool) ⇒ stylesheet.fileSelectedForDeletion
@@ -471,18 +410,17 @@ class TreeNodePanel {
                       case _ ⇒ stylesheet.fileSelected
                     }
                   }
-                  else stylesheet.fileSelectionMode
-                },
-                span(stylesheet.fileSelectionMessage),
-                rowDiv
-              )
-          }
-          else
-            rowDiv
-        }
-      )
-    }
+                  else stylesheet.fileSelectionMode,
+                  span(stylesheet.fileSelectionMessage)
+                )
+              }
+              else div()
+            }
+          )
+        )
 
+      }
+    }
   }
 
 }

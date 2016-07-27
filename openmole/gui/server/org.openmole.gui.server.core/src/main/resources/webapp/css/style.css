@@ -134,7 +134,7 @@ ul{
 .file-list {
     font-size: 14px;
     list-style-type: none;
-    width: 100%;
+    width: 320px;
 }
 
 .filelist li {

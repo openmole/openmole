@@ -190,6 +190,7 @@ package object stylesheet {
     display := "inline-block",
     sheet.marginTop(2),
     sheet.marginBottom(3),
+    height := 20,
     textDecoration := "none"
   )
 
@@ -197,12 +198,12 @@ package object stylesheet {
     backgroundColor := "#3086b5",
     color("white"),
     display := "inline-block",
-    height := 22,
-    sheet.marginBottom(5),
-    sheet.marginTop(2),
+    height := 20,
+    sheet.marginBottom(3),
+    sheet.marginTop(1),
     sheet.marginLeft(1),
     padding := 2,
-    width := 22,
+    width := 20,
     borderRadius := "4px"
   )
 
@@ -227,16 +228,16 @@ package object stylesheet {
   )
 
   lazy val fileSelectionOverlay: ModifierSeq = Seq(
-    top := -2,
     right := 0,
     pointer,
-    width := 306,
-    height := 26,
+    width := 310,
+    height := 22,
+    sheet.marginLeft(-5),
     borderRadius := "2px"
   )
 
   lazy val fileSelectionMode: ModifierSeq = Seq(
-    backgroundColor := "#666"
+    backgroundColor := "rgb(152, 152, 152)"
   ) +++ fileSelectionOverlay
 
   lazy val fileSelected: ModifierSeq = Seq(
