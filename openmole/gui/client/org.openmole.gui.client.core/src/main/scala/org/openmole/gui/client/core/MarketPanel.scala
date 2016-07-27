@@ -108,8 +108,8 @@ class MarketPanel extends ModalPanel {
     }
   }
 
-  def downloadButton(entry: MarketIndexEntry, todo: () ⇒ Unit = () ⇒ {}) =
-    downloading.now.find {
+  def downloadButton(entry: MarketIndexEntry, todo: () ⇒ Unit = () ⇒ {}) = downloading.map {
+    _.find {
       _._1 == entry
     }.map {
       case (e, state: Var[ProcessState]) ⇒
@@ -117,6 +117,7 @@ class MarketPanel extends ModalPanel {
           if (selectedEntry.now == Some(e)) bs.glyphButton(" Download", btn_warning, glyph_download_alt, todo) else tags.div()
         }
     }.getOrElse(tags.div())
+  }
 
   def onOpen() = marketIndex.now match {
     case None ⇒ OMPost[Api].marketIndex.call().foreach { m ⇒

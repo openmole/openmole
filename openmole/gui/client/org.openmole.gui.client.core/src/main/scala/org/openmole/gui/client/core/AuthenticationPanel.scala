@@ -221,7 +221,6 @@ class AuthenticationPanel extends ModalPanel {
           else vosToBeTested.value.split(",").toSeq
         }
         OMPost[Api].testAuthentication(a.data, vos).call().foreach { t ⇒
-          t.foreach { println }
           auths() = auths.now.map {
             _.updated(auths.now.map {
               _.indexOf(a)

@@ -172,15 +172,18 @@ object TreeNodeTabs {
 
     def relativePath: SafePath
 
-    val block = overlaying.map { o ⇒
-      div(
-        div(if (o) playTabOverlay else emptyMod),
-        if (o) div(overlayElement)(s"Starting ${node.name.now}, please wait ...")
-        else div,
-        editorElement,
-        controlElement
-      )
+    val block = tabName.flatMap { n ⇒
+      overlaying.map { o ⇒
+        div(
+          div(if (o) playTabOverlay else emptyMod),
+          if (o) div(overlayElement)(s"Starting ${n}, please wait ...")
+          else div,
+          editorElement,
+          controlElement
+        )
+      }
     }
+
   }
 
 }

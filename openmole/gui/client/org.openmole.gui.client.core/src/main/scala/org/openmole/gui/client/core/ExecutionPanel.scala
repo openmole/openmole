@@ -178,11 +178,11 @@ class ExecutionPanel extends ModalPanel {
             val completed = executionInfo.completed
 
             val details = executionInfo match {
-              case f: Failed   ⇒ ExecutionDetails("0", 0, Some(f.error))
+              case f: Failed   ⇒ ExecutionDetails("0", 0, Some(f.error), f.environmentStates)
               case f: Finished ⇒ ExecutionDetails(ratio(f.completed, f.running, f.ready), f.running, envStates = f.environmentStates)
               case r: Running  ⇒ ExecutionDetails(ratio(r.completed, r.running, r.ready), r.running, envStates = r.environmentStates)
-              case c: Canceled ⇒ ExecutionDetails("0", 0)
-              case r: Ready    ⇒ ExecutionDetails("0", 0)
+              case c: Canceled ⇒ ExecutionDetails("0", 0, envStates = c.environmentStates)
+              case r: Ready    ⇒ ExecutionDetails("0", 0, envStates = r.environmentStates)
             }
 
             val scriptLink = expander(id.id, ex ⇒ ex.getLink(staticInfo.now(id).path.name, scriptID))
