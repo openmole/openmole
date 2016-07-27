@@ -26,7 +26,7 @@ import org.openmole.core.workflow.puzzle._
 import org.openmole.tool.file._
 import monocle.function.all._
 import monocle.std.all._
-import org.openmole.core.exception.UserBadDataError
+import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.tool.hash._
 
 object Project {
@@ -102,6 +102,7 @@ case class Compiled(result: CompiledScript) extends CompileResult {
 class Project(workDirectory: File, newREPL: (ConsoleVariables) ⇒ ScalaREPL = Project.newREPL) {
 
   def pluginsDirectory: File = workDirectory / "plugins"
+
   def plugins = pluginsDirectory.listFilesSafe
 
   def loadPlugins = PluginManager.load(plugins)
@@ -126,7 +127,12 @@ class Project(workDirectory: File, newREPL: (ConsoleVariables) ⇒ ScalaREPL = P
 
       def compile(content: String, args: Seq[String]): CompileResult = {
         val loop = newREPL(ConsoleVariables(args, workDirectory))
-        try Compiled(loop.compile(content))
+        try {
+          Option(loop.compile(content)) match {
+            case Some(compiled) ⇒ Compiled(compiled)
+            case None           ⇒ throw new InternalProcessingError("The compiler returned null instead of a compiled script, it may append if your script contains an unclosed comment block ('/*' without '*/').")
+          }
+        }
         catch {
           case ce: ScalaREPL.CompilationError ⇒
             def positionLens =
