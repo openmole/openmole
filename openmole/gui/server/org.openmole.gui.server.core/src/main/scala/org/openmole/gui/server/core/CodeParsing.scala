@@ -147,7 +147,7 @@ object CodeParsing {
     val lines = Source.fromFile(safePath).getLines.toArray
 
     def parse(lines: Seq[(String, Int)], args: Seq[ProtoTypePair], outputs: Seq[ProtoTypePair]): (Seq[ProtoTypePair], Seq[ProtoTypePair]) = {
-      if (lines.isEmpty) (args, outputs)
+      if (lines.isEmpty) (ProtoTypePair("seed", ProtoTYPE.INT, "0", None) +: args, outputs)
       else {
         val (line, index) = lines.head
         val tail = lines.tail

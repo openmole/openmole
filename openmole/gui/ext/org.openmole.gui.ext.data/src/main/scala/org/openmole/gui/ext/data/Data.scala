@@ -365,9 +365,16 @@ sealed trait ExecutionInfo {
   def running: Long
 
   def completed: Long
+
+  def environmentStates: Seq[EnvironmentState]
 }
 
-case class Failed(error: Error, duration: Long = 0L, completed: Long = 0L) extends ExecutionInfo {
+case class Failed(
+  error:             Error,
+  environmentStates: Seq[EnvironmentState],
+  duration:          Long                  = 0L,
+  completed:         Long                  = 0L
+) extends ExecutionInfo {
   def state: String = "failed"
 
   def running = 0L
@@ -397,7 +404,11 @@ case class Finished(
   def state: String = "finished"
 }
 
-case class Canceled(duration: Long = 0L, completed: Long = 0L) extends ExecutionInfo {
+case class Canceled(
+  environmentStates: Seq[EnvironmentState],
+  duration:          Long                  = 0L,
+  completed:         Long                  = 0L
+) extends ExecutionInfo {
   def state: String = "canceled"
 
   def running = 0L
@@ -415,6 +426,8 @@ case class Ready() extends ExecutionInfo {
   def ready: Long = 0L
 
   def running = 0L
+
+  def environmentStates: Seq[EnvironmentState] = Seq()
 }
 
 case class PasswordState(chosen: Boolean, hasBeenSet: Boolean)

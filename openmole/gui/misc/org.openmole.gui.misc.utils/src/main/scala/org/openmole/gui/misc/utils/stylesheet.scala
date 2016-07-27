@@ -604,8 +604,7 @@ package object stylesheet {
 
   lazy val labelInLine: ModifierSeq = Seq(
     relativePosition,
-    display := "inline",
-    top := -6
+    display := "inline"
   )
 
   lazy val glyphText: ModifierSeq = Seq(

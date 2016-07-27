@@ -300,8 +300,8 @@ object ApiImpl extends Api {
 
     execution.addStaticInfo(execId, StaticExecutionInfo(scriptData.scriptPath, content, System.currentTimeMillis()))
 
-    def error(t: Throwable): Unit = execution.addError(execId, Failed(ErrorBuilder(t)))
-    def message(message: String): Unit = execution.addError(execId, Failed(Error(message)))
+    def error(t: Throwable): Unit = execution.addError(execId, Failed(ErrorBuilder(t), Seq()))
+    def message(message: String): Unit = execution.addError(execId, Failed(Error(message), Seq()))
 
     try {
       val project = new Project(script.getParentFileSafe)
@@ -530,11 +530,11 @@ object ApiImpl extends Api {
               inString + ouString + imFileString + omFileString + resourcesString + defaults
           )
         case ntt: NetLogoTaskType ⇒
-
           val imString = imapString(imappings, "netLogoInputs")
           val omString = omapString(omappings, "netLogoOutputs")
           os.write(
-            s"""\nval task = NetLogo5Task(workDirectory / ${executableName.split('/').map { s ⇒ s"""\"$s\"""" }.mkString(" / ")}, List("${command.split('\n').mkString("\",\"")}"), embedWorkspace = ${!resources.implicits.isEmpty}) set(\n""" +
+            s"""\nval launch = List("${(Seq("setup", "random-seed ${seed}") ++ (command.split('\n').toSeq)).mkString("\",\"")}")
+               \nval task = NetLogo5Task(workDirectory / ${executableName.split('/').map { s ⇒ s"""\"$s\"""" }.mkString(" / ")}, launch, embedWorkspace = ${!resources.implicits.isEmpty}) set(\n""".stripMargin +
               inString + ouString + imString + omString + imFileString + omFileString + defaults
           )
         case st: ScalaTaskType ⇒

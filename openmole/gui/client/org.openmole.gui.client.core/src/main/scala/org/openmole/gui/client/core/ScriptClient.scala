@@ -171,7 +171,7 @@ object ScriptClient {
 
     val marketItem = dialogNavItem("market", glyphSpan(glyph_market).tooltip(span("Market place")), () ⇒ marketTriggerer.triggerOpen)
 
-    val pluginItem = dialogNavItem("plugin", div(glyph_plug).tooltip(span("Plugins")), () ⇒ pluginTriggerer.triggerOpen)
+    val pluginItem = dialogNavItem("plugin", div(OMTags.glyph_plug).tooltip(span("Plugins")), () ⇒ pluginTriggerer.triggerOpen)
 
     val envItem = dialogNavItem("envError", glyphSpan(glyph_exclamation).render, () ⇒ environmentStackTriggerer.open)
 

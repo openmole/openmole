@@ -93,9 +93,9 @@ class Execution {
 
         val d = moleExecution.duration.getOrElse(0L)
         moleExecution.exception match {
-          case Some(t) ⇒ Failed(ErrorBuilder(t.exception), duration = moleExecution.duration.getOrElse(0))
+          case Some(t) ⇒ Failed(ErrorBuilder(t.exception), environmentStates = environmentState(key), duration = moleExecution.duration.getOrElse(0))
           case _ ⇒
-            if (moleExecution.canceled) Canceled(duration = moleExecution.duration.get)
+            if (moleExecution.canceled) Canceled(environmentStates = environmentState(key), duration = moleExecution.duration.get)
             else if (moleExecution.finished)
               Finished(
                 duration = moleExecution.duration.get,
