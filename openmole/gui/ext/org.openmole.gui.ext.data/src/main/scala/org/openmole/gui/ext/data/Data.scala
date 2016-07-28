@@ -351,7 +351,16 @@ case class RunningOutputData(id: ExecutionId, output: String)
 
 case class StaticExecutionInfo(path: SafePath, script: String, startDate: Long = 0L)
 
-case class EnvironmentState(envId: EnvironmentId, taskName: String, running: Long, done: Long, submitted: Long, failed: Long, networkActivity: NetworkActivity)
+case class EnvironmentState(
+  envId:             EnvironmentId,
+  taskName:          String,
+  running:           Long,
+  done:              Long,
+  submitted:         Long,
+  failed:            Long,
+  networkActivity:   NetworkActivity,
+  executionActivity: ExecutionActivity
+)
 
 //case class Output(output: String)
 
@@ -370,10 +379,10 @@ sealed trait ExecutionInfo {
 }
 
 case class Failed(
-  error:             Error,
-  environmentStates: Seq[EnvironmentState],
-  duration:          Long                  = 0L,
-  completed:         Long                  = 0L
+    error:             Error,
+    environmentStates: Seq[EnvironmentState],
+    duration:          Long                  = 0L,
+    completed:         Long                  = 0L
 ) extends ExecutionInfo {
   def state: String = "failed"
 
@@ -405,9 +414,9 @@ case class Finished(
 }
 
 case class Canceled(
-  environmentStates: Seq[EnvironmentState],
-  duration:          Long                  = 0L,
-  completed:         Long                  = 0L
+    environmentStates: Seq[EnvironmentState],
+    duration:          Long                  = 0L,
+    completed:         Long                  = 0L
 ) extends ExecutionInfo {
   def state: String = "canceled"
 

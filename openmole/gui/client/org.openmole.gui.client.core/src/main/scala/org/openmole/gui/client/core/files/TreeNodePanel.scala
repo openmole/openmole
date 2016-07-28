@@ -305,7 +305,6 @@ class TreeNodePanel {
       case _                ⇒ stylesheet.dir
     }) +++ floatLeft +++ pointer +++ Seq(
       onclick := { () ⇒
-        println("click")
         if (!selectionMode.now) todo()
       }
     )
