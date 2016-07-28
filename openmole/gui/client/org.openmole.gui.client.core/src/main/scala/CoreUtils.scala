@@ -2,12 +2,14 @@ package org.openmole.gui.client.core
 
 import java.text.SimpleDateFormat
 import java.sql.Timestamp
-import scala.concurrent.duration._
 
+import scala.concurrent.duration._
 import org.openmole.gui.client.core.files.{ DirNode, TreeNode, TreeNodePanel }
 import org.openmole.gui.ext.data._
 import org.openmole.gui.shared.Api
 import autowire._
+import org.openmole.gui.client.core.alert.AbsolutePositioning.{ FileZone, RelativeCenterPosition }
+import org.openmole.gui.client.core.alert.AlertPanel
 
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
@@ -52,11 +54,14 @@ object CoreUtils {
   def addDirectory(in: TreeNodeData, dirName: String, onadded: () ⇒ Unit = () ⇒ {}) =
     OMPost[Api].addDirectory(in, dirName).call().foreach { b ⇒
       if (b) onadded()
+      else AlertPanel.string(s"$dirName already exists.", okaction = { () ⇒ {} }, transform = RelativeCenterPosition, zone = FileZone)
+
     }
 
   def addFile(in: TreeNodeData, fileName: String, onadded: () ⇒ Unit = () ⇒ {}) =
     OMPost[Api].addFile(in, fileName).call().foreach { b ⇒
       if (b) onadded()
+      else AlertPanel.string(s" $fileName already exists.", okaction = { () ⇒ {} }, transform = RelativeCenterPosition, zone = FileZone)
     }
 
   def trashNode(path: SafePath)(ontrashed: () ⇒ Unit): Unit = {
