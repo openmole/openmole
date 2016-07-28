@@ -249,6 +249,9 @@ class TreeNodePanel {
   def stringAlert(message: String, okaction: () ⇒ Unit) =
     AlertPanel.string(message, okaction, transform = RelativeCenterPosition, zone = FileZone)
 
+  def stringAlertWithDetails(message: String, detail: String) =
+    AlertPanel.detail(message, detail, transform = RelativeCenterPosition, zone = FileZone)
+
   def trashNode(treeNode: TreeNode): Unit = {
     stringAlert(
       s"Do you really want to delete ${
@@ -268,7 +271,7 @@ class TreeNodePanel {
   def extractTGZ(tnd: TreeNode) =
     OMPost[Api].extractTGZ(tnd).call().foreach { r ⇒
       r.error match {
-        case Some(e: org.openmole.gui.ext.data.Error) ⇒ stringAlert("An error occured during extraction \n" + e.stackTrace, () ⇒ {})
+        case Some(e: org.openmole.gui.ext.data.Error) ⇒ stringAlertWithDetails("An error occurred during extraction", e.stackTrace)
         case _                                        ⇒ refreshAndDraw
       }
     }

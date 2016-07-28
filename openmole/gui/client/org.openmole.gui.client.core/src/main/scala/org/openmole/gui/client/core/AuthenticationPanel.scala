@@ -80,7 +80,7 @@ class AuthenticationPanel extends ModalPanel {
           },
           onclick := { () ⇒
             if (!test.passed) {
-              panels.environmentStackPanel.content() = test.errorStack.stackTrace
+              panels.stackPanel.content() = test.errorStack.stackTrace
               panels.environmentStackTriggerer.open
             }
           }
