@@ -73,23 +73,27 @@ class TreeNodePanel {
     autofocus
   ).render
 
-  lazy val view = {
-    drawTree
-    val goToModifierSeq = glyph_home +++ floatLeft +++ "treePathItems"
-    tags.div(
-      fileToolBar.div, Rx {
-      val toDraw = manager.drop(1)()
-      val dirNodeLineSize = toDraw.size
-      div(ms("tree-path"))(
-        goToDirButton(manager.head(), goToModifierSeq),
-        toDraw.drop(dirNodeLineSize - 2).takeRight(2).map { dn ⇒ goToDirButton(dn, "treePathItems", s"| ${dn.name()}") }
-      )
-    },
+  lazy val fileControler = Rx {
+    val toDraw = manager.drop(1)()
+    val dirNodeLineSize = toDraw.size
+    div(ms("tree-path"))(
+      goToDirButton(manager.head(), glyph_home +++ floatLeft +++ "treePathItems"),
+      toDraw.drop(dirNodeLineSize - 2).takeRight(2).map { dn ⇒ goToDirButton(dn, "treePathItems", s"| ${dn.name()}") }
+    )
+  }
+
+  lazy val labelArea =
+    div(
       Rx {
         if (manager.copied().isEmpty) tags.div
         else tags.label("paste")(label_danger, stylesheet.pasteLabel, onclick := { () ⇒ paste(manager.copied(), manager.current()) })
       },
-      fileToolBar.sortingGroup.div,
+      fileToolBar.sortingGroup.div
+    )
+
+  lazy val view = {
+    drawTree
+    tags.div(
       Rx {
         tree()
       }
@@ -176,13 +180,11 @@ class TreeNodePanel {
           div("Create a first OpenMOLE script (.oms)")(ms("message"))
         }
         else
-          tags.table(ms("tree"))(
-            tr(
-              tags.table(ms("file-list"))(
-                for (tn ← sons._1) yield {
-                  drawNode(tn)
-                }
-              )
+          tags.table(ms("file-list"))(
+            tbody(overflowY := "auto")(
+              for (tn ← sons._1) yield {
+                drawNode(tn)
+              }
             )
           )
       )
@@ -222,7 +224,7 @@ class TreeNodePanel {
         if (etn.node.path == tn.path) {
           editNodeInput.value = tn.name.now
           tr(
-            div(
+            td(
               height := 26,
               form(
                 editNodeInput,
@@ -344,7 +346,7 @@ class TreeNodePanel {
 
       {
         tr(
-          div(
+          td(
             onmouseover := { () ⇒ lineHovered() = if (selectionMode.now) false else true },
             onmouseout := { () ⇒ lineHovered() = false },
             width := 320,

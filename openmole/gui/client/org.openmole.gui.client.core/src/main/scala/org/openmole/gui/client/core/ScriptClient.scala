@@ -130,6 +130,7 @@ object ScriptClient {
         if (!passwordOK()) omsheet.connectionTabOverlay
         else omsheet.displayOff
       )(div(
+          zIndex := 1101,
           img(src := "img/openmole.png", omsheet.openmoleLogo),
           // openmoleText,
           shutdownButton,
@@ -194,7 +195,7 @@ object ScriptClient {
     maindiv.appendChild(
       bs.nav(
         "mainNav",
-        sheet.nav +++ nav_pills +++ nav_inverse +++ nav_staticTop,
+        omsheet.fixed +++ sheet.nav +++ nav_pills +++ nav_inverse +++ nav_staticTop,
         fileItem,
         modelWizardItem,
         execItem,
@@ -223,7 +224,14 @@ object ScriptClient {
               if (openFileTree()) "open" else ""
             }
           }
-        )(treeNodePanel.view.render),
+        )(
+            tags.div(omsheet.fixedPosition)(
+              treeNodePanel.fileToolBar.div,
+              treeNodePanel.fileControler,
+              treeNodePanel.labelArea
+            ),
+            treeNodePanel.view.render
+          ),
         tags.div(
           `class` := Rx {
             "centerpanel " + {

@@ -64,7 +64,7 @@ package object stylesheet {
     styles.left := 0,
     absolutePosition,
     width := "100%",
-    zIndex := 998,
+    zIndex := 1100,
     top := 0
   )
 
@@ -134,6 +134,11 @@ package object stylesheet {
     pointer,
     top := 10,
     right := 10
+  )
+
+  lazy val fixed: ModifierSeq = Seq(
+    fixedPosition,
+    width := "100%"
   )
 
   lazy val shutdownButton: ModifierSeq = Seq(
@@ -564,13 +569,15 @@ package object stylesheet {
   )
 
   lazy val sortingBar: ModifierSeq = Seq(
+    fixedPosition,
     width := "100%",
-    right := -185,
-    top := 10
+    height := 20,
+    right := -180,
+    top := 20
   )
 
   lazy val labelStyle: ModifierSeq = Seq(
-    sheet.marginTop(-8),
+    sheet.marginTop(4),
     color("white"),
     width := "auto",
     fontSize := 14
@@ -578,6 +585,7 @@ package object stylesheet {
 
   lazy val tdStyle: ModifierSeq = Seq(
     colMD(2),
+    sheet.marginBottom(8),
     sheet.paddingLeft(5),
     width := "auto",
     height := 25

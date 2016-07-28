@@ -183,16 +183,11 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
     false
   }
 
-  val filterTool = tags.table(centerElement)(
-    thead,
-    tbody(
-      tr(row)(
-        tags.td(tdStyle)(label("# of entries ")(labelStyle)),
-        tags.td(tdStyle)(form(thresholdInput, onsubmit := filterSubmit)),
-        tags.td(tdStyle)(label("name ")(`for` := nameTag, labelStyle)),
-        tags.td(tdStyle)(form(nameInput, onsubmit := filterSubmit))
-      )
-    )
+  val filterTool = tags.div(centerElement)(
+    tags.span(tdStyle)(label("# of entries ")(labelStyle)),
+    tags.span(tdStyle)(form(thresholdInput, onsubmit := filterSubmit)),
+    tags.span(tdStyle)(label("name ")(`for` := nameTag, labelStyle)),
+    tags.span(tdStyle)(form(nameInput, onsubmit := filterSubmit))
   )
 
   def createNewNode = {

@@ -99,7 +99,6 @@ ul{
     position: relative;
     display: inline-block;
     width: 100%;
-    top: 25px;
 }
 
 .tree.droppable {
@@ -108,19 +107,15 @@ ul{
 }
 
 .tree-path {
-    margin-left: 3px;
     position: relative;
     min-height: 27px;
-    padding-bottom: auto;
     height: 30px;
     left: -10px;
     padding-left: 10px;
     padding-right: 18px;
-    width: 105%;
+    width: 327px;
     background-color: #f8f8f8;
-    padding-bottom: 5px;
     word-wrap: break-word;
-    box-shadow: -2px 2px 15px #808080;
 }
 
 .tree-path .btn-group .btn.btn-primary{
@@ -131,10 +126,28 @@ ul{
 .tree-path .btn-group {
 }
 
+tr {
+display: inline-table;
+table-layout: fixed;
+}
+
+table{
+ height:100%;              // <-- Select the height of the table
+ display: -moz-groupbox;    // Firefox Bad Effect
+}
+
+tbody{
+  overflow-y: scroll;
+  height: 100%;            //  <-- Select the height of the body
+  width: 100%;
+  position: absolute;
+}
+
 .file-list {
     font-size: 14px;
     list-style-type: none;
     width: 320px;
+    margin-top: 160px;
 }
 
 .filelist li {
@@ -436,6 +449,8 @@ li.selectElement{
     background-color: #333;
     opacity: 0.5;
     width : 35px;
+    position: fixed;
+    margin-top: 142px;
 }
 
 .sortingTool.btn:hover{
@@ -450,6 +465,7 @@ li.selectElement{
     opacity: 1;
     font-weight: bold;
     width : 50px;
+    margin-top: 142px;
     }
 
     .aaa{
@@ -489,9 +505,8 @@ li.selectElement{
     height: 100%;
     left: -320px;
     opacity: 1;
-    overflow-y: auto;
     padding-left: 7px;
-    position: absolute;
+    position: fixed;
     top: 37px;
     transition: all 0.1s ease-out 0s;
     width: 320px;
