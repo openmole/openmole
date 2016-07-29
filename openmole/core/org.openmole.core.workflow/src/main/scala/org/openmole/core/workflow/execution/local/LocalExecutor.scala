@@ -75,7 +75,10 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
 
                     moleJob.stateChangedCallBack =
                       (job: MoleJob, oldState: State.State, newState) ⇒ {
-                        if (newState == State.CANCELED) executionThread.stop() //interrupt()
+                        if (newState == State.CANCELED) {
+                          stop = true
+                          executionThread.stop()
+                        } //interrupt()
                         originalCallBack(job, oldState, newState)
                       }
 
