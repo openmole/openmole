@@ -64,7 +64,7 @@ package object stylesheet {
     styles.left := 0,
     absolutePosition,
     width := "100%",
-    zIndex := 998,
+    zIndex := 1100,
     top := 0
   )
 
@@ -130,16 +130,23 @@ package object stylesheet {
   )
 
   lazy val resetBlock: ModifierSeq = Seq(
-    absolutePosition,
+    fixedPosition,
     pointer,
-    top := 10,
-    right := 10
+    top := 8,
+    right := 10,
+    zIndex := 1101
+  )
+
+  lazy val fixed: ModifierSeq = Seq(
+    fixedPosition,
+    width := "100%"
   )
 
   lazy val shutdownButton: ModifierSeq = Seq(
     fontSize := 20,
     verticalAlign := "middle",
-    sheet.marginLeft(10)
+    sheet.marginLeft(10),
+    zIndex := 1101
   )
 
   lazy val resetPassword: ModifierSeq = Seq(
@@ -190,6 +197,7 @@ package object stylesheet {
     display := "inline-block",
     sheet.marginTop(2),
     sheet.marginBottom(3),
+    height := 20,
     textDecoration := "none"
   )
 
@@ -197,12 +205,12 @@ package object stylesheet {
     backgroundColor := "#3086b5",
     color("white"),
     display := "inline-block",
-    height := 22,
-    sheet.marginBottom(5),
-    sheet.marginTop(2),
+    height := 20,
+    sheet.marginBottom(3),
+    sheet.marginTop(1),
     sheet.marginLeft(1),
     padding := 2,
-    width := 22,
+    width := 20,
     borderRadius := "4px"
   )
 
@@ -227,16 +235,16 @@ package object stylesheet {
   )
 
   lazy val fileSelectionOverlay: ModifierSeq = Seq(
-    top := -2,
     right := 0,
     pointer,
-    width := 306,
-    height := 26,
+    width := 310,
+    height := 22,
+    sheet.marginLeft(-5),
     borderRadius := "2px"
   )
 
   lazy val fileSelectionMode: ModifierSeq = Seq(
-    backgroundColor := "#666"
+    backgroundColor := "rgb(152, 152, 152)"
   ) +++ fileSelectionOverlay
 
   lazy val fileSelected: ModifierSeq = Seq(
@@ -563,13 +571,15 @@ package object stylesheet {
   )
 
   lazy val sortingBar: ModifierSeq = Seq(
+    fixedPosition,
     width := "100%",
-    right := -185,
-    top := 10
+    height := 20,
+    right := -180,
+    top := 20
   )
 
   lazy val labelStyle: ModifierSeq = Seq(
-    sheet.marginTop(-8),
+    sheet.marginTop(4),
     color("white"),
     width := "auto",
     fontSize := 14
@@ -577,6 +587,7 @@ package object stylesheet {
 
   lazy val tdStyle: ModifierSeq = Seq(
     colMD(2),
+    sheet.marginBottom(8),
     sheet.paddingLeft(5),
     width := "auto",
     height := 25

@@ -351,7 +351,16 @@ case class RunningOutputData(id: ExecutionId, output: String)
 
 case class StaticExecutionInfo(path: SafePath, script: String, startDate: Long = 0L)
 
-case class EnvironmentState(envId: EnvironmentId, taskName: String, running: Long, done: Long, submitted: Long, failed: Long, networkActivity: NetworkActivity)
+case class EnvironmentState(
+  envId:             EnvironmentId,
+  taskName:          String,
+  running:           Long,
+  done:              Long,
+  submitted:         Long,
+  failed:            Long,
+  networkActivity:   NetworkActivity,
+  executionActivity: ExecutionActivity
+)
 
 //case class Output(output: String)
 

@@ -125,39 +125,40 @@ object ScriptClient {
         false
       }).render
 
-    val connectionDiv = Rx {
-      div(
-        if (!passwordOK()) omsheet.connectionTabOverlay
-        else omsheet.displayOff
-      )(div(
-          img(src := "img/openmole.png", omsheet.openmoleLogo),
-          // openmoleText,
-          shutdownButton,
-          div(
-            if (!passwordOK()) omsheet.centerPage else emptyMod,
+    val connectionDiv = div(
+      shutdownButton,
+      Rx {
+        div(
+          if (!passwordOK()) omsheet.connectionTabOverlay
+          else omsheet.displayOff
+        )(div(
+            img(src := "img/openmole.png", omsheet.openmoleLogo),
             div(
-              if (alert())
-                AlertPanel.string(
-                "Careful! Resetting your password will wipe out all your preferences! Reset anyway?",
-                () ⇒ {
-                  alert() = false
-                  resetPassword
-                }, () ⇒ {
-                  alert() = false
-                }, CenterPagePosition
-              )
-              else {
-                div(
-                  omsheet.connectionBlock,
-                  connectionForm(passwordInput),
-                  if (!passwordChosen()) connectionForm(passwordAgainInput) else div(),
-                  connectButton
+              if (!passwordOK()) omsheet.centerPage else emptyMod,
+              div(
+                if (alert())
+                  AlertPanel.string(
+                  "Careful! Resetting your password will wipe out all your preferences! Reset anyway?",
+                  () ⇒ {
+                    alert() = false
+                    resetPassword
+                  }, () ⇒ {
+                    alert() = false
+                  }, CenterPagePosition
                 )
-              }
+                else {
+                  div(
+                    omsheet.connectionBlock,
+                    connectionForm(passwordInput),
+                    if (!passwordChosen()) connectionForm(passwordAgainInput) else div(),
+                    connectButton
+                  )
+                }
+              )
             )
-          )
-        ))
-    }
+          ))
+      }
+    )
 
     val openFileTree = Var(true)
 
@@ -194,7 +195,7 @@ object ScriptClient {
     maindiv.appendChild(
       bs.nav(
         "mainNav",
-        sheet.nav +++ nav_pills +++ nav_inverse +++ nav_staticTop,
+        omsheet.fixed +++ sheet.nav +++ nav_pills +++ nav_inverse +++ nav_staticTop,
         fileItem,
         modelWizardItem,
         execItem,
@@ -223,7 +224,14 @@ object ScriptClient {
               if (openFileTree()) "open" else ""
             }
           }
-        )(treeNodePanel.view.render),
+        )(
+            tags.div(omsheet.fixedPosition)(
+              treeNodePanel.fileToolBar.div,
+              treeNodePanel.fileControler,
+              treeNodePanel.labelArea
+            ),
+            treeNodePanel.view.render
+          ),
         tags.div(
           `class` := Rx {
             "centerpanel " + {

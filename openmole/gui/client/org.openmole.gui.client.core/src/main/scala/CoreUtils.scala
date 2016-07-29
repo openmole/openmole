@@ -1,9 +1,16 @@
 package org.openmole.gui.client.core
 
-import org.openmole.gui.client.core.files.{ TreeNodePanel, TreeNode, DirNode }
+import java.text.SimpleDateFormat
+import java.sql.Timestamp
+
+import scala.concurrent.duration._
+import org.openmole.gui.client.core.files.{ DirNode, TreeNode, TreeNodePanel }
 import org.openmole.gui.ext.data._
 import org.openmole.gui.shared.Api
 import autowire._
+import org.openmole.gui.client.core.alert.AbsolutePositioning.{ FileZone, RelativeCenterPosition }
+import org.openmole.gui.client.core.alert.AlertPanel
+
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
@@ -47,11 +54,14 @@ object CoreUtils {
   def addDirectory(in: TreeNodeData, dirName: String, onadded: () ⇒ Unit = () ⇒ {}) =
     OMPost[Api].addDirectory(in, dirName).call().foreach { b ⇒
       if (b) onadded()
+      else AlertPanel.string(s"$dirName already exists.", okaction = { () ⇒ {} }, transform = RelativeCenterPosition, zone = FileZone)
+
     }
 
   def addFile(in: TreeNodeData, fileName: String, onadded: () ⇒ Unit = () ⇒ {}) =
     OMPost[Api].addFile(in, fileName).call().foreach { b ⇒
       if (b) onadded()
+      else AlertPanel.string(s" $fileName already exists.", okaction = { () ⇒ {} }, transform = RelativeCenterPosition, zone = FileZone)
     }
 
   def trashNode(path: SafePath)(ontrashed: () ⇒ Unit): Unit = {
@@ -92,4 +102,26 @@ object CoreUtils {
     manager.pluggables() = p
     todo()
   }
+
+  def approximatedYearMonthDay(duration: Long): String = {
+    val MINUTE = 60000L
+    val HOUR = 60L * MINUTE
+    val DAY = 24L * HOUR
+    val MONTH = 30L * DAY
+    val YEAR = 12L * MONTH
+
+    val y = duration / YEAR
+    val restInYear = duration - (y * YEAR)
+
+    val m = restInYear / MONTH
+    val restInMonth = restInYear - (m * MONTH)
+
+    val d = restInMonth / DAY
+    val restInDay = restInMonth - (d * DAY)
+
+    val h = restInDay / HOUR
+
+    s"$y y $m m $d d $h h"
+  }
+
 }

@@ -203,11 +203,12 @@ class ExecutionPanel extends ModalPanel {
                     thead,
                     tbody(
                       Seq(
-                        tr(row)(
-                          td(colMD(3))(tags.span(e.taskName)),
+                        tr(row +++ (fontSize := 14))(
+                          td(colMD(1))(tags.span(e.taskName)),
+                          td(colMD(2))(tags.span(CoreUtils.approximatedYearMonthDay(e.executionActivity.executionTime))),
                           td(colMD(2))(glyphAndText(glyph_upload, s" ${e.networkActivity.uploadingFiles} ${displaySize(e.networkActivity.uploadedSize, e.networkActivity.readableUploadedSize)}")),
                           td(colMD(2))(glyphAndText(glyph_download, s" ${e.networkActivity.downloadingFiles} ${displaySize(e.networkActivity.downloadedSize, e.networkActivity.readableDownloadedSize)}")),
-                          td(colMD(2))(glyphAndText(glyph_road +++ sheet.paddingBottom(7), e.submitted.toString)),
+                          td(colMD(1))(glyphAndText(glyph_road +++ sheet.paddingBottom(7), e.submitted.toString)),
                           td(colMD(1))(glyphAndText(glyph_flash +++ sheet.paddingBottom(7), e.running.toString)),
                           td(colMD(1))(glyphAndText(glyph_flag +++ sheet.paddingBottom(7), e.done.toString)),
                           td(colMD(1))(glyphAndText(glyph_fire +++ sheet.paddingBottom(7), e.failed.toString)),

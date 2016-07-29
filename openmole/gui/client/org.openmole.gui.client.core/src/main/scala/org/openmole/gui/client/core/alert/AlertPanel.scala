@@ -20,6 +20,7 @@ package org.openmole.gui.client.core.alert
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
 import org.openmole.gui.client.core.alert.AbsolutePositioning._
 import org.openmole.gui.client.core.files.{ TreeNodeComment, TreeNodeError }
+import org.openmole.gui.client.core.panels._
 import org.openmole.gui.ext.data.SafePath
 import org.openmole.gui.misc.js.JsRxTags._
 import org.openmole.gui.misc.js.OMTags.AlertAction
@@ -44,9 +45,10 @@ object AlertPanel {
     transform:        Position                 = CenterPagePosition,
     zone:             Zone                     = FullPage,
     alertType:        ModifierSeq              = btn_danger,
-    buttonGroupClass: ModifierSeq              = floatRight
+    buttonGroupClass: ModifierSeq              = floatRight,
+    okString:         String                   = "OK"
   ): Unit = {
-    panel.popup(messageDiv, Seq(AlertAction(okaction), AlertAction(cancelaction)), transform, zone, alertType, buttonGroupClass)
+    panel.popup(messageDiv, Seq(AlertAction(okaction), AlertAction(cancelaction)), transform, zone, alertType, buttonGroupClass, okString)
   }
 
   def treeNodeErrorDiv(error: TreeNodeError): Unit = div(
@@ -72,6 +74,23 @@ object AlertPanel {
     alertType:        ModifierSeq = btn_danger,
     buttonGroupClass: ModifierSeq = floatLeft +++ sheet.marginLeft(20)
   ): Unit = div(tags.div(message), okaction, cancelaction, transform, zone, alertType, buttonGroupClass)
+
+  def detail(
+    message:          String,
+    detail:           String,
+    cancelaction:     () ⇒ Unit   = () ⇒ {},
+    transform:        Position    = CenterPagePosition,
+    zone:             Zone        = FullPage,
+    alertType:        ModifierSeq = btn_danger,
+    buttonGroupClass: ModifierSeq = floatLeft +++ sheet.marginLeft(20)
+  ): Unit =
+    div(
+      tags.div(message),
+      () ⇒ {
+        stackPanel.content() = detail
+        environmentStackTriggerer.open
+      }, cancelaction, transform, zone, alertType, buttonGroupClass, "Details"
+    )
 }
 
 class AlertPanel {
@@ -95,16 +114,15 @@ class AlertPanel {
   }
 
   def popup(
-    messageDiv: TypedTag[HTMLDivElement],
-    actions:    Seq[AlertAction],
-    /* okaction: () ⇒ Unit,
-                                                         cancelaction: () ⇒ Unit,*/
+    messageDiv:       TypedTag[HTMLDivElement],
+    actions:          Seq[AlertAction],
     position:         Position,
-    zone:             Zone        = FullPage,
-    alertType:        ModifierSeq = btn_danger,
-    buttonGroupClass: ModifierSeq = floatLeft
+    zone:             Zone                     = FullPage,
+    alertType:        ModifierSeq              = btn_danger,
+    buttonGroupClass: ModifierSeq              = floatLeft,
+    okString:         String                   = "OK"
   ) = {
-    alertElement() = OMTags.alert(alertType, messageDiv, actions.map { a ⇒ a.copy(action = actionWrapper(a.action)) }, buttonGroupClass)
+    alertElement() = OMTags.alert(alertType, messageDiv, actions.map { a ⇒ a.copy(action = actionWrapper(a.action)) }, buttonGroupClass, okString)
     zoneModifier() = zone.modifierClass
     positionModifier() = position.modifierClass
     visible() = true

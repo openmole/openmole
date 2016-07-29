@@ -5,7 +5,6 @@ import org.openmole.gui.ext.data._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import org.openmole.gui.misc.utils.{ stylesheet, Utils }
 import org.scalajs.dom.html.TableSection
-import org.scalajs.dom.raw.HTMLTableElement
 import scalatags.JsDom.{ TypedTag, tags ⇒ tags }
 import org.openmole.gui.misc.js.JsRxTags._
 import scalatags.JsDom.all._
@@ -83,7 +82,7 @@ class EnvironmentErrorPanel {
           tags.td(colMD(12))(
             tags.a(message, cursor := "pointer", onclick := {
               () ⇒
-                panels.environmentStackPanel.content() = stack.stackTrace
+                panels.stackPanel.content() = stack.stackTrace
                 panels.environmentStackTriggerer.open
             })
           ),
