@@ -75,7 +75,7 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
 
                     moleJob.stateChangedCallBack =
                       (job: MoleJob, oldState: State.State, newState) ⇒ {
-                        if (newState == State.CANCELED) executionThread.interrupt()
+                        if (newState == State.CANCELED) executionThread.stop() //interrupt()
                         originalCallBack(job, oldState, newState)
                       }
 
@@ -105,6 +105,7 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
           }
           catch {
             case e: InterruptedException ⇒
+            case e: ThreadDeath          ⇒
             case e: Throwable ⇒
               val er = ExceptionRaised(executionJob, e, SEVERE)
               environment.error(er)
