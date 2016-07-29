@@ -1,29 +1,31 @@
 package org.openmole.gui.client.core.files
 
 import fr.iscpif.scaladget.api.Select.SelectElement
-import org.openmole.gui.client.core.{ OMPost, CoreUtils }
+import org.openmole.gui.client.core.{CoreUtils, OMPost}
 import org.openmole.gui.ext.data._
 import org.openmole.gui.misc.js.OMTags
 import org.openmole.gui.misc.utils.stylesheet
 import org.openmole.gui.shared.Api
 import org.scalajs.dom.html.Input
+
 import scala.util.Try
-import scalatags.JsDom.{ tags ⇒ tags }
+import scalatags.JsDom.tags
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
-import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
-import org.openmole.gui.misc.utils.{ stylesheet ⇒ omsheet }
-import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
+import fr.iscpif.scaladget.api.{BootstrapTags ⇒ bs}
+import bs._
+import org.openmole.gui.misc.utils.{stylesheet ⇒ omsheet}
+import fr.iscpif.scaladget.stylesheet.{all ⇒ sheet}
 import fr.iscpif.scaladget.api._
 import omsheet._
 import sheet._
 import org.openmole.gui.misc.js.JsRxTags._
 import org.openmole.gui.client.core.files.TreeNode._
-import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
+import org.openmole.gui.client.core.files.treenodemanager.{instance ⇒ manager}
+
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
-import bs._
-import org.scalajs.dom.raw.{ HTMLButtonElement, HTMLSpanElement, HTMLInputElement }
+import org.scalajs.dom.raw.{HTMLButtonElement, HTMLDivElement, HTMLInputElement, HTMLSpanElement}
 import rx._
 import org.openmole.gui.client.core.Waiter._
 
@@ -88,11 +90,14 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
   val selectedTool: Var[Option[SelectedTool]] = Var(None)
   val transferring: Var[ProcessState] = Var(Processed())
   val fileFilter = Var(FileFilter.defaultFilter)
+  val message = Var(tags.div)
   val fileNumberThreshold = 100
 
   implicit def someIntToString(i: Option[Int]): String = i.map {
     _.toString
   }.getOrElse("")
+
+  def clearMessage = message() = tags.div
 
   def resetFilter = {
     selectedTool() = None
@@ -118,10 +123,11 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
         case Some(PluginTool) ⇒
           manager.computePluggables(() ⇒
             if (manager.pluggables.now.isEmpty)
-              println("Empty")
-            //AlertPanel.string("No plugin has been found in this folder", okaction = { () ⇒ unselectTool }, cancelaction = { () ⇒ unselectTool }, transform = RelativeCenterPosition, zone = FileZone)
-            else
-              treeNodePanel.turnSelectionTo(true))
+              message() = tags.div(omsheet.color("white"), "No plugin has been found in this folder.")
+            else {
+              clearMessage
+              treeNodePanel.turnSelectionTo(true)
+            })
         case _ ⇒
       }
     }
@@ -137,9 +143,9 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
 
   //Upload tool
   def upbtn(todo: HTMLInputElement ⇒ Unit): TypedTag[HTMLSpanElement] =
-    span(aria.hidden := "true", glyph_upload +++ "fileUpload glyphmenu")(
-      fInputMultiple(todo)
-    )
+  span(aria.hidden := "true", glyph_upload +++ "fileUpload glyphmenu")(
+    fInputMultiple(todo)
+  )
 
   private val upButton = upbtn((fileInput: HTMLInputElement) ⇒ {
     FileManager.upload(fileInput, manager.current.now.safePath.now, (p: ProcessState) ⇒ transferring() = p, UploadProject(), () ⇒ treeNodePanel.refreshAndDraw)
@@ -195,7 +201,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
     val currentDirNode = manager.current
     addRootDirButton.content.now.foreach {
       _.value match {
-        case dt: DirNodeType  ⇒ CoreUtils.addDirectory(currentDirNode.now, newFile, () ⇒ unselectAndRefreshTree)
+        case dt: DirNodeType ⇒ CoreUtils.addDirectory(currentDirNode.now, newFile, () ⇒ unselectAndRefreshTree)
         case ft: FileNodeType ⇒ CoreUtils.addFile(currentDirNode.now, newFile, () ⇒ unselectAndRefreshTree)
       }
     }
@@ -210,6 +216,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
   ).render
 
   def unselectAndRefreshTree: Unit = {
+    clearMessage
     unselectTool
     newNodeInput.value = ""
     treeNodePanel.refreshAndDraw
@@ -291,11 +298,12 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
 
   val fileToolDiv = Rx {
     tags.div(centerElement +++ sheet.marginBottom(10))(
+      message(),
       selectedTool() match {
-        case Some(FilterTool)       ⇒ filterTool
+        case Some(FilterTool) ⇒ filterTool
         case Some(FileCreationTool) ⇒ createFileTool
-        case Some(TrashTool)        ⇒ getIfSelected(deleteButton)
-        case Some(PluginTool)       ⇒ getIfSelected(pluginButton)
+        case Some(TrashTool) ⇒ getIfSelected(deleteButton)
+        case Some(PluginTool) ⇒ getIfSelected(pluginButton)
         case Some(CopyTool) ⇒
           manager.emptyCopied
           getIfSelected(copyButton)

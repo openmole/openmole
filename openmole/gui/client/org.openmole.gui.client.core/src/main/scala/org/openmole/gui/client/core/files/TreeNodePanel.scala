@@ -155,6 +155,7 @@ class TreeNodePanel {
     onclick := {
       () ⇒
         fileToolBar.resetFilter
+        fileToolBar.clearMessage
         manager.clearSelection
         turnSelectionTo(false)
         manager.switch(dn)
@@ -199,6 +200,8 @@ class TreeNodePanel {
       })
     case dn: DirNode ⇒ clickableElement(dn, TreeNodeType.folder, () ⇒ {
       manager + dn
+      fileToolBar.clearMessage
+      fileToolBar.unselectTool
       drawTree
     })
   }
