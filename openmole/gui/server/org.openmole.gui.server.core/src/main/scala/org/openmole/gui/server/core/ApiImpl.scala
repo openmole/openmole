@@ -412,10 +412,10 @@ object ApiImpl extends Api {
 
   //PLUGINS
   def addPlugins(nodes: Seq[String]): Seq[Error] = {
-    PluginManager.tryLoad(nodes.map { n ⇒ new File(Workspace.pluginDir, n) }).map {
-      case (file, e) ⇒
-        ErrorBuilder(e)
-    }.toSeq
+    val plugins = nodes.map(Utils.pluginUpdoadDirectory / _)
+    val errors = addPluginsFiles(plugins, true)
+    plugins.foreach(_.recursiveDelete)
+    errors.map(e ⇒ ErrorBuilder(e._2))
   }
 
   def autoAddPlugins(path: SafePath) = {
@@ -427,17 +427,24 @@ object ApiImpl extends Api {
       PluginManager.listBundles(f).toList ::: subPlugins
     }
 
-    addPlugins(recurse(file))
+    addPluginsFiles(recurse(file), false)
   }
 
-  def addPlugins(files: Iterable[File]): Seq[(File, Throwable)] = {
-    val plugins =
-      files.map { file ⇒
-        val dest: File = Workspace.pluginDir / file.getName
-        file copy dest
-        dest
-      }
-    PluginManager.tryLoad(plugins).toSeq
+  private def addPluginsFiles(files: Seq[File], move: Boolean): Seq[(File, Throwable)] = synchronized {
+    val destinations = files.map { file ⇒ file → (Workspace.pluginDir / file.getName) }
+
+    destinations.filter(_._2.exists).toList match {
+      case Nil ⇒
+        val plugins =
+          destinations.map {
+            case (file, dest) ⇒
+              if (!move) file copy dest else file move dest
+              dest
+          }
+        PluginManager.tryLoad(plugins).toSeq
+      case l ⇒
+        l.map(l ⇒ l._1 → new FileAlreadyExistsException(s"Plugin with file name ${l._1.getName} is already present in the plugin directory"))
+    }
   }
 
   def isPlugin(path: SafePath): Boolean = Utils.isPlugin(path)
@@ -449,17 +456,11 @@ object ApiImpl extends Api {
 
   def removePlugin(plugin: Plugin): Unit = synchronized {
     val file = Workspace.pluginDir / plugin.name
-
-    val allFiles = PluginManager.allDepending(file, b ⇒ !b.isProvided)
-    for {
-      b ← (file :: allFiles.toList).flatMap(PluginManager.bundle)
-      if (b.getState == Bundle.ACTIVE)
-    } b.uninstall()
-
-    allFiles.foreach(_.recursiveDelete)
+    val allDependingFiles = PluginManager.allDepending(file, b ⇒ !b.isProvided)
+    val bundle = PluginManager.bundle(file)
+    bundle.foreach(PluginManager.remove)
+    allDependingFiles.filter(f ⇒ !PluginManager.bundle(f).isDefined).foreach(_.recursiveDelete)
     file.recursiveDelete
-
-    // FIXME: the bundles might not be fully unloaded, they might be dynamically imported by core.console
   }
 
   //MODEL WIZARDS

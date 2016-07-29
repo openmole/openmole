@@ -43,6 +43,7 @@ object Utils {
   implicit def fileToExtension(f: File): FileExtension = DataUtils.fileToExtension(f.getName)
 
   val webUIProjectFile = Workspace.file("webui")
+  val pluginUpdoadDirectory = Workspace.tmpDir.newDir("pluginUpload")
 
   def workspaceProjectFile = {
     val ws = new File(Workspace.file("webui"), "projects")

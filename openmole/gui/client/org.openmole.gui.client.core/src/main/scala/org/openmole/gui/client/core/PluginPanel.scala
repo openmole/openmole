@@ -62,9 +62,7 @@ class PluginPanel extends ModalPanel {
       FileManager.upload(
         fileInput,
         SafePath.empty,
-        (p: ProcessState) ⇒ {
-          transferring() = p
-        },
+        (p: ProcessState) ⇒ { transferring() = p },
         UploadPlugin(),
         () ⇒
           OMPost[Api].addPlugins(FileManager.fileNames(fileInput.files)).call().foreach { ex ⇒

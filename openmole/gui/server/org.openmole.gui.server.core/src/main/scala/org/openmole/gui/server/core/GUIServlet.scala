@@ -63,31 +63,31 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
   }
 
   post("/uploadfiles") {
-    move(fileParams, params("fileType"))
-  }
-
-  def move(fileParams: MultiMapHeadView[String, FileItem], fileType: String) = {
-    def moveTo(rootFile: File) =
-      for (file ← fileParams) yield {
-        val path = new java.net.URI(file._1).getPath
-        val destination = new File(rootFile, path)
-        destination.setWritable(true)
-        val stream = file._2.getInputStream
-        try {
-          stream.copy(destination)
-          destination.setExecutable(true)
+    def move(fileParams: MultiMapHeadView[String, FileItem], fileType: String) = {
+      def copyTo(rootFile: File) =
+        for (file ← fileParams) yield {
+          val path = new java.net.URI(file._1).getPath
+          val destination = new File(rootFile, path)
+          destination.getParentFile.mkdirs()
+          destination.setWritable(true)
+          val stream = file._2.getInputStream
+          try {
+            stream.copy(destination)
+            destination.setExecutable(true)
+          }
+          finally stream.close
+          destination
         }
-        finally stream.close
-        destination
-      }
 
-    fileType match {
-      case "project"        ⇒ moveTo(Utils.webUIProjectFile)
-      case "authentication" ⇒ moveTo(Utils.authenticationKeysFile)
-      case "plugin"         ⇒ moveTo(Workspace.pluginDir)
-      case "absolute"       ⇒ moveTo(new File(""))
+      fileType match {
+        case "project"        ⇒ copyTo(Utils.webUIProjectFile)
+        case "authentication" ⇒ copyTo(Utils.authenticationKeysFile)
+        case "plugin"         ⇒ copyTo(Utils.pluginUpdoadDirectory)
+        case "absolute"       ⇒ copyTo(new File(""))
+      }
     }
 
+    move(fileParams, params("fileType"))
   }
 
   get("/downloadFile") {
