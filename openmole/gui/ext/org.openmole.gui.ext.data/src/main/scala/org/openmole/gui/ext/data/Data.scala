@@ -370,10 +370,10 @@ sealed trait ExecutionInfo {
 }
 
 case class Failed(
-  error:             Error,
-  environmentStates: Seq[EnvironmentState],
-  duration:          Long                  = 0L,
-  completed:         Long                  = 0L
+    error:             Error,
+    environmentStates: Seq[EnvironmentState],
+    duration:          Long                  = 0L,
+    completed:         Long                  = 0L
 ) extends ExecutionInfo {
   def state: String = "failed"
 
@@ -405,9 +405,9 @@ case class Finished(
 }
 
 case class Canceled(
-  environmentStates: Seq[EnvironmentState],
-  duration:          Long                  = 0L,
-  completed:         Long                  = 0L
+    environmentStates: Seq[EnvironmentState],
+    duration:          Long                  = 0L,
+    completed:         Long                  = 0L
 ) extends ExecutionInfo {
   def state: String = "canceled"
 
