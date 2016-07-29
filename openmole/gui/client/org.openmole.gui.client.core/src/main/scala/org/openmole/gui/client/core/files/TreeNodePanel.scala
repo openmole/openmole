@@ -299,6 +299,12 @@ class TreeNodePanel {
 
   def turnSelectionTo(b: Boolean) = selectionMode() = b
 
+  val globalLineHovered: Var[Option[ReactiveLine]] = Var(None)
+
+  def unselectLineHovered = globalLineHovered.now.map {
+    _.lineHovered() = false
+  }
+
   object ReactiveLine {
     def apply(tn: TreeNode, treeNodeType: TreeNodeType, todo: () ⇒ Unit) = new ReactiveLine(tn, treeNodeType, todo)
   }
@@ -349,9 +355,15 @@ class TreeNodePanel {
 
       {
         tr(
+          onmouseout := { () ⇒
+            lineHovered() = false
+          },
+          onmouseover := { () ⇒
+            unselectLineHovered
+            globalLineHovered() = Some(this)
+            lineHovered() = if (selectionMode.now) false else true
+          },
           td(
-            onmouseover := { () ⇒ lineHovered() = if (selectionMode.now) false else true },
-            onmouseout := { () ⇒ lineHovered() = false },
             width := 320,
             height := 20,
             Rx {
