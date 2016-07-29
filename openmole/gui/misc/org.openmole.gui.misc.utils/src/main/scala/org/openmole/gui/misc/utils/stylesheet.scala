@@ -130,10 +130,11 @@ package object stylesheet {
   )
 
   lazy val resetBlock: ModifierSeq = Seq(
-    absolutePosition,
+    fixedPosition,
     pointer,
-    top := 10,
-    right := 10
+    top := 8,
+    right := 10,
+    zIndex := 1101
   )
 
   lazy val fixed: ModifierSeq = Seq(
@@ -144,7 +145,8 @@ package object stylesheet {
   lazy val shutdownButton: ModifierSeq = Seq(
     fontSize := 20,
     verticalAlign := "middle",
-    sheet.marginLeft(10)
+    sheet.marginLeft(10),
+    zIndex := 1101
   )
 
   lazy val resetPassword: ModifierSeq = Seq(
