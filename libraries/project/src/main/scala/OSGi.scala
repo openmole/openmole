@@ -116,7 +116,7 @@ object OSGi extends Defaults {
     version := "18.0"
     )
 
-  lazy val scalaTagsVersion = "0.5.4"
+  lazy val scalaTagsVersion = "0.6.0"
   lazy val scalaRxVersion = "0.3.1"
   lazy val scalaDomVersion = "0.9.0"
   lazy val querkiJSQueryVersion = "0.11"
