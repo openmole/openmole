@@ -126,17 +126,17 @@ ul{
 .tree-path .btn-group {
 }
 
-tr {
+.file-list tr {
 display: inline-table;
 table-layout: fixed;
 }
 
-table{
+.file-list table{
  height:100%;              // <-- Select the height of the table
  display: -moz-groupbox;    // Firefox Bad Effect
 }
 
-tbody{
+.file-list tbody{
   overflow-y: scroll;
   height: 100%;            //  <-- Select the height of the body
   width: 100%;
