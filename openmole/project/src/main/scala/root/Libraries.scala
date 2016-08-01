@@ -85,7 +85,7 @@ object Libraries extends Defaults {
 
   lazy val guava = "org.openmole" %% "com-google-guava" % "18.0"
 
-  lazy val scalaTagsVersion = "0.5.4"
+  lazy val scalaTagsVersion = "0.6.0"
   lazy val scalaJSDomVersion = "0.9.0"
   lazy val rxVersion = "0.3.1"
   lazy val scalaUpickleVersion = "0.4.1"

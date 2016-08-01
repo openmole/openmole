@@ -40,7 +40,7 @@ class TextPanel(_modalID: bs.ModalID, title: String) extends ModalPanel {
     ),
     bodyDialog(
       tags.div(Rx {
-        bs.textArea(30)(content())
+        bs.textArea(30)(scalatags.generic.Attr("wrap") := "off", content())
       })
     ),
     footerDialog(closeButton)
