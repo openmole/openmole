@@ -23,6 +23,7 @@ import org.openmole.tool.file._
 import org.apache.commons.configuration2._
 import org.apache.commons.configuration2.builder._
 import org.apache.commons.configuration2.builder.fluent._
+import org.apache.commons.configuration2.sync.ReadWriteSynchronizer
 import org.openmole.core.tools.io.FromString
 
 import scala.concurrent.duration._
@@ -53,7 +54,11 @@ class ConfigurationFile(val file: File) {
     builder
   }
 
-  def config = builder.getConfiguration
+  @transient lazy val config = {
+    val c = builder.getConfiguration
+    c.setSynchronizer(new ReadWriteSynchronizer())
+    c
+  }
 
   def value(group: String, name: String): Option[String] =
     Option(config.getString(s"$group.$name"))

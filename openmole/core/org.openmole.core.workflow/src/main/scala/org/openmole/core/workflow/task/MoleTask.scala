@@ -88,6 +88,9 @@ object MoleTask {
     execution.start(context)
     try execution.waitUntilEnded
     catch {
+      case e: ThreadDeath ⇒
+        execution.cancel
+        throw e
       case e: InterruptedException ⇒
         execution.cancel
         throw e
