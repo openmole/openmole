@@ -46,11 +46,12 @@ class JobManager { self ⇒
   }
 
   lazy val messageQueue = PriorityQueue[DispatchedMessage] {
-    case msg: Upload    ⇒ 10
-    case msg: Submit    ⇒ 50
-    case msg: Refresh   ⇒ 5
-    case msg: GetResult ⇒ 50
-    case _              ⇒ 1
+    case msg: Upload       ⇒ 10
+    case msg: Submit       ⇒ 50
+    case msg: Refresh      ⇒ 5
+    case msg: GetResult    ⇒ 50
+    case msg: KillBatchJob ⇒ 2
+    case _                 ⇒ 1
   }
 
   lazy val delayedExecutor = Executors.newSingleThreadScheduledExecutor(daemonThreadFactory)
