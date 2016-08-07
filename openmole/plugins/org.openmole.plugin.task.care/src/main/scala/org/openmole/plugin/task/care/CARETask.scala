@@ -155,7 +155,7 @@ object CARETask extends Logger {
 
     // FIXME duplicated from SystemExecTask
     val executionResult = execute(commandline, extractedArchive, environmentVariables, preparedContext, stdOut.isDefined, stdErr.isDefined)
-    if (errorOnReturnValue && !returnValue.isDefined && executionResult.returnCode != 0)
+    if (errorOnReturnValue && returnValue.isEmpty && executionResult.returnCode != 0)
       throw new InternalProcessingError(
         s"""Error executing command":
                  |[${commandline.mkString(" ")}] return code was not 0 but ${executionResult.returnCode}""".stripMargin
