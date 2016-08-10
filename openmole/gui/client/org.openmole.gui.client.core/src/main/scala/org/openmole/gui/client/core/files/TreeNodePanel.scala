@@ -299,11 +299,7 @@ class TreeNodePanel {
 
   def turnSelectionTo(b: Boolean) = selectionMode() = b
 
-  val globalLineHovered: Var[Option[ReactiveLine]] = Var(None)
-
-  def unselectLineHovered = globalLineHovered.now.map {
-    _.lineHovered() = false
-  }
+  val lineHovered: Var[Option[ReactiveLine]] = Var(None)
 
   object ReactiveLine {
     def apply(tn: TreeNode, treeNodeType: TreeNodeType, todo: () ⇒ Unit) = new ReactiveLine(tn, treeNodeType, todo)
@@ -311,7 +307,6 @@ class TreeNodePanel {
 
   class ReactiveLine(tn: TreeNode, treeNodeType: TreeNodeType, todo: () ⇒ Unit) {
 
-    val lineHovered: Var[Boolean] = Var(false)
     val selected: Var[Boolean] = Var(manager.isSelected(tn))
 
     val clickablePair = (treeNodeType match {
@@ -356,12 +351,10 @@ class TreeNodePanel {
       {
         tr(
           onmouseout := { () ⇒
-            lineHovered() = false
+            lineHovered() = None
           },
           onmouseover := { () ⇒
-            unselectLineHovered
-            globalLineHovered() = Some(this)
-            lineHovered() = if (selectionMode.now) false else true
+            lineHovered() = { if (selectionMode.now) None else Some(this) }
           },
           td(
             width := 320,
@@ -382,10 +375,12 @@ class TreeNodePanel {
                   div(
                     span(stylesheet.fileSize)(tags.i(timeOrSize(tn))),
                     span(
-                      if (lineHovered()) ms("opaque")
+                      if (lineHovered() == Some(this)) ms("opaque")
                       else ms("transparent")
                     )(
-                        span(onclick := { () ⇒ trashNode(tn) }, trash),
+                        tags.span(onclick := { () ⇒
+                          trashNode(tn)
+                        }, trash),
                         span(onclick := { () ⇒
                           toBeEdited() = Some(NodeEdition(tn))
                           drawTree
