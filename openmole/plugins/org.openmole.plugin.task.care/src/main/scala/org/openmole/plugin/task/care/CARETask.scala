@@ -131,6 +131,20 @@ object CARETask extends Logger {
       leafs(taskWorkDirectory / "inputs", "").map { case (f, b) ⇒ f.getAbsolutePath → b } ++
         hostFiles.map { case (f, b) ⇒ f → b.getOrElse(f) }
 
+    def createDestination(binding: (String, String), baseDir: String = "rootfs") = {
+      import org.openmole.tool.file.{ File ⇒ OMFile }
+      val (f, b) = binding
+
+      if (OMFile(f).isDirectory) (OMFile(baseDir) / b).mkdirs()
+      else {
+        val dest = OMFile(baseDir) / b
+        dest.getParentFileSafe.mkdirs()
+        dest.createNewFile()
+      }
+    }
+
+    for (binding ← bindings) createDestination(binding)
+
     // replace original proot executable with a script that will first bind all the inputs in the guest rootfs before
     // calling the original proot
     proot.content =
@@ -155,7 +169,7 @@ object CARETask extends Logger {
 
     // FIXME duplicated from SystemExecTask
     val executionResult = execute(commandline, extractedArchive, environmentVariables, preparedContext, stdOut.isDefined, stdErr.isDefined)
-    if (errorOnReturnValue && !returnValue.isDefined && executionResult.returnCode != 0)
+    if (errorOnReturnValue && returnValue.isEmpty && executionResult.returnCode != 0)
       throw new InternalProcessingError(
         s"""Error executing command":
                  |[${commandline.mkString(" ")}] return code was not 0 but ${executionResult.returnCode}""".stripMargin
