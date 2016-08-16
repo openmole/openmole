@@ -16,6 +16,7 @@ import autowire._
 import rx._
 import bs._
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
+import org.openmole.gui.client.core.alert.AlertPanel
 import sheet._
 
 /*
@@ -42,7 +43,6 @@ class PluginPanel extends ModalPanel {
   lazy val transferring: Var[ProcessState] = Var(Processed())
 
   def onOpen() = {
-    println("Get on open")
     getPlugins
   }
 
@@ -66,8 +66,8 @@ class PluginPanel extends ModalPanel {
         UploadPlugin(),
         () ⇒
           OMPost[Api].addPlugins(FileManager.fileNames(fileInput.files)).call().foreach { ex ⇒
-            println("Exection: " + ex)
-            getPlugins
+            if (ex.isEmpty) getPlugins
+            else AlertPanel.detail("Plugin import failed", ex.head.stackTrace)
           }
       )
     })
