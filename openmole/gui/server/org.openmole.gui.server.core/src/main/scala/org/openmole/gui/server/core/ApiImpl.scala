@@ -174,7 +174,7 @@ object ApiImpl extends Api {
 
   def copyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath) = Utils.copyProjectFilesTo(safePaths, to)
 
-  def copyToPluginDir(safePaths: Seq[SafePath]): Unit = Utils.copyToPluginDir(safePaths)
+  def copyToPluginUploadDir(safePaths: Seq[SafePath]): Unit = Utils.copyToPluginUploadDirectory(safePaths)
 
   def testExistenceAndCopyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Seq[SafePath] = Utils.testExistenceAndCopyProjectFilesTo(safePaths, to)
 

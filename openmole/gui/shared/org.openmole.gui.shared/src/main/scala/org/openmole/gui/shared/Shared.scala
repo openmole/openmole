@@ -54,7 +54,7 @@ trait Api {
   def copyAllTmpTo(tmpSafePath: SafePath, to: SafePath): Unit
   def testExistenceAndCopyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Seq[SafePath]
   def copyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Unit
-  def copyToPluginDir(safePaths: Seq[SafePath]): Unit
+  def copyToPluginUploadDir(safePaths: Seq[SafePath]): Unit
   def copyFromTmp(tmpSafePath: SafePath, filesToBeMoved: Seq[SafePath]): Unit
   def uuid(): String = java.util.UUID.randomUUID.toString
   def renameFile(treeNode: TreeNodeData, name: String): TreeNodeData

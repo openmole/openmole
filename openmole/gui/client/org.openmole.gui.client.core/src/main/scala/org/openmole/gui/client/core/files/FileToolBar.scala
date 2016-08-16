@@ -28,6 +28,9 @@ import autowire._
 import org.scalajs.dom.raw.{ HTMLButtonElement, HTMLDivElement, HTMLInputElement, HTMLSpanElement }
 import rx._
 import org.openmole.gui.client.core.Waiter._
+import org.openmole.gui.client.core.alert.AbsolutePositioning.{ FileZone, RelativeCenterPosition }
+import org.openmole.gui.client.core.alert.AlertPanel
+import org.openmole.gui.client.core.panels._
 
 /*
  * Copyright (C) 20/01/16 // mathieu.leclaire@openmole.org
@@ -240,11 +243,15 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
   })
 
   val pluginButton = bs.button("Plug", btn_default, () ⇒ {
-    OMPost[Api].copyToPluginDir(manager.selected.now).call().foreach { c ⇒
+    OMPost[Api].copyToPluginUploadDir(manager.selected.now).call().foreach { c ⇒
       OMPost[Api].addPlugins(manager.selected.now.map {
         _.name.now
-      }).call().foreach { x ⇒
-        unselectAndRefreshTree
+      }).call().foreach { errs ⇒
+        if (errs.isEmpty) {
+          unselectAndRefreshTree
+          pluginTriggerer.open
+        }
+        else AlertPanel.detail("Plugin import failed", errs.head.stackTrace, transform = RelativeCenterPosition, zone = FileZone)
       }
     }
   })
