@@ -38,6 +38,7 @@ class EnvironmentErrorPanel {
   val scrollable = scrollableDiv()
   val sortingAndOrdering: Var[ListSortingAndOrdering] = Var(ListSortingAndOrdering(TimeSorting, Descending))
   val entries: Var[TypedTag[TableSection]] = Var(tbody)
+  val currentData: Var[Option[EnvironmentErrorData]] = Var(None)
 
   val topTriangle = glyph_triangle_top +++ (fontSize := 10)
   val bottomTriangle = glyph_triangle_bottom +++ (fontSize := 10)
@@ -52,7 +53,10 @@ class EnvironmentErrorPanel {
     )
   ).div
 
-  def setSorting(sorting: ListSorting, ordering: ListOrdering) = sortingAndOrdering() = ListSortingAndOrdering(sorting, ordering)
+  def setSorting(sorting: ListSorting, ordering: ListOrdering) = {
+    sortingAndOrdering() = ListSortingAndOrdering(sorting, ordering)
+    currentData.now.foreach { setErrors }
+  }
 
   def sort(datedErrors: EnvironmentErrorData, sortingAndOrdering: ListSortingAndOrdering): Seq[(String, Long, ErrorStateLevel, Error)] = {
     val lines =
@@ -74,6 +78,7 @@ class EnvironmentErrorPanel {
   }
 
   def setErrors(ers: EnvironmentErrorData) = {
+    currentData() = Some(ers)
     entries() = tbody(
       for {
         (message, date, level, stack) ← sort(ers, sortingAndOrdering.now)
