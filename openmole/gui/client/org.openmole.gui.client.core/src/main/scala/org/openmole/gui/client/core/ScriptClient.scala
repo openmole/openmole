@@ -215,42 +215,40 @@ object ScriptClient {
     maindiv.appendChild(docTriggerer.modalPanel.dialog.render)
     maindiv.appendChild(AlertPanel.alertDiv)
 
-    Settings.workspacePath.foreach { projectsPath ⇒
-      OMPost[Api].version().call().foreach { v ⇒
-        maindiv.appendChild(
-          tags.div(`class` := "fullpanel")(
-          tags.div(
-            `class` := Rx {
-              "leftpanel " + {
-                if (openFileTree()) "open" else ""
-              }
+    Settings.settings.foreach { settings ⇒
+      maindiv.appendChild(
+        tags.div(`class` := "fullpanel")(
+        tags.div(
+          `class` := Rx {
+            "leftpanel " + {
+              if (openFileTree()) "open" else ""
             }
-          )(
-              tags.div(omsheet.fixedPosition)(
-                treeNodePanel.fileToolBar.div,
-                treeNodePanel.fileControler,
-                treeNodePanel.labelArea
-              ),
-              treeNodePanel.view.render
+          }
+        )(
+            tags.div(omsheet.fixedPosition)(
+              treeNodePanel.fileToolBar.div,
+              treeNodePanel.fileControler,
+              treeNodePanel.labelArea
             ),
-          tags.div(
-            `class` := Rx {
-              "centerpanel " + {
-                if (openFileTree()) "reduce" else ""
-              }
+            treeNodePanel.view.render
+          ),
+        tags.div(
+          `class` := Rx {
+            "centerpanel " + {
+              if (openFileTree()) "reduce" else ""
             }
-          )(
-              treeNodePanel.fileDisplayer.tabs.render,
-              tags.div(v, omsheet.textVersion)
-            )
+          }
+        )(
+            treeNodePanel.fileDisplayer.tabs.render,
+            tags.div(settings.version, omsheet.textVersion)
+          )
 
-        ).render
-        )
-      }
-
-      body.appendChild(connectionDiv)
-      body.appendChild(maindiv)
+      ).render
+      )
     }
+
+    body.appendChild(connectionDiv)
+    body.appendChild(maindiv)
   }
 
 }

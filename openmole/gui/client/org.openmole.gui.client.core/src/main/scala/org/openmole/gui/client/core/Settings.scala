@@ -17,14 +17,13 @@ package org.openmole.gui.client.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.client.core.files.DirNode
-import org.openmole.gui.ext.data.{ TreeNodeData, SafePath }
 import org.openmole.gui.shared.Api
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
-import rx._
+import org.openmole.gui.ext.data.OMSettings
 
 object Settings {
-  val workspacePath: Future[SafePath] = OMPost[Api].workspacePath().call()
+
+  val settings: Future[OMSettings] = OMPost[Api].settings().call()
 }

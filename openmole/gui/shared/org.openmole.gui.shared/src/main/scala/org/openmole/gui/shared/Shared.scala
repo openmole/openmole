@@ -22,7 +22,7 @@ import org.openmole.gui.ext.data._
 trait Api {
 
   //GENERAL
-  def version(): String
+  def settings(): OMSettings
 
   //AUTHENTICATIONS
   def authentications(): Seq[AuthenticationData]
@@ -35,7 +35,6 @@ trait Api {
   def passwordState(): PasswordState
   def resetPassword(): Unit
   def setPassword(pass: String): Boolean
-  def workspacePath(): SafePath
   def getConfigurationValue(configData: ConfigData): Option[String]
   def setConfigurationValue(configData: ConfigData, value: String): Unit
 
