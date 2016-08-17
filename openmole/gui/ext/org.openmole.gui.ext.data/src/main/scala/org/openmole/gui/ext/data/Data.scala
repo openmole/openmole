@@ -19,6 +19,7 @@ package org.openmole.gui.ext.data
 
 import DataUtils._
 import monocle.macros.Lenses
+import org.openmole.core.workspace.Workspace
 
 trait Data
 
@@ -746,3 +747,5 @@ object FileFilter {
 sealed trait ConfigData
 
 object VOTest extends ConfigData
+
+case class OMSettings(workspace: SafePath, version: String)

@@ -63,7 +63,15 @@ object ApiImpl extends Api {
   implicit def authProvider = Workspace.authenticationProvider
 
   //GENERAL
-  def version: String = buildinfo.version
+  def settings: OMSettings = {
+    import org.openmole.gui.ext.data.ServerFileSytemContext.project
+    val workspace = Utils.workspaceProjectFile
+
+    OMSettings(
+      workspace,
+      buildinfo.version
+    )
+  }
 
   //AUTHENTICATIONS
   def addAuthentication(data: AuthenticationData): Unit = AuthenticationFactories.addAuthentication(data)
@@ -278,11 +286,6 @@ object ApiImpl extends Api {
 
   def saveFiles(fileContents: Seq[AlterableFileContent]): Unit = fileContents.foreach { fc ⇒
     saveFile(fc.path, fc.content)
-  }
-
-  def workspacePath(): SafePath = {
-    import org.openmole.gui.ext.data.ServerFileSytemContext.project
-    Utils.workspaceProjectFile
   }
 
   def getConfigurationValue(configData: ConfigData): Option[String] = Configurations(configData)
