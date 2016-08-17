@@ -163,16 +163,13 @@ package object stylesheet {
   )
 
   lazy val textVersion: ModifierSeq = Seq(
-    fontFamily := "Bevan",
-    color("#ff5555"),
+    color("grey"),
     position := "fixed",
-    right := -40,
-    bottom := 0,
-    fontSize := "2em",
-    width := "300",
+    right := 27,
+    fontSize := "1em",
+    fontWeight := "bold",
     zIndex := -1,
-    bottom := 7,
-    height := 30
+    bottom := 5
   )
 
   //TREENODE PANEL

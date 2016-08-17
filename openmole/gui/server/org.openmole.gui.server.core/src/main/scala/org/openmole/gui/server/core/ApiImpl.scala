@@ -62,6 +62,9 @@ object ApiImpl extends Api {
 
   implicit def authProvider = Workspace.authenticationProvider
 
+  //GENERAL
+  def version: String = buildinfo.version
+
   //AUTHENTICATIONS
   def addAuthentication(data: AuthenticationData): Unit = AuthenticationFactories.addAuthentication(data)
 

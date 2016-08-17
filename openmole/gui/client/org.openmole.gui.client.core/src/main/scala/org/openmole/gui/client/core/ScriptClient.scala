@@ -216,40 +216,41 @@ object ScriptClient {
     maindiv.appendChild(AlertPanel.alertDiv)
 
     Settings.workspacePath.foreach { projectsPath ⇒
-      maindiv.appendChild(
-        tags.div(`class` := "fullpanel")(
-        tags.div(
-          `class` := Rx {
-            "leftpanel " + {
-              if (openFileTree()) "open" else ""
+      OMPost[Api].version().call().foreach { v ⇒
+        maindiv.appendChild(
+          tags.div(`class` := "fullpanel")(
+          tags.div(
+            `class` := Rx {
+              "leftpanel " + {
+                if (openFileTree()) "open" else ""
+              }
             }
-          }
-        )(
-            tags.div(omsheet.fixedPosition)(
-              treeNodePanel.fileToolBar.div,
-              treeNodePanel.fileControler,
-              treeNodePanel.labelArea
+          )(
+              tags.div(omsheet.fixedPosition)(
+                treeNodePanel.fileToolBar.div,
+                treeNodePanel.fileControler,
+                treeNodePanel.labelArea
+              ),
+              treeNodePanel.view.render
             ),
-            treeNodePanel.view.render
-          ),
-        tags.div(
-          `class` := Rx {
-            "centerpanel " + {
-              if (openFileTree()) "reduce" else ""
+          tags.div(
+            `class` := Rx {
+              "centerpanel " + {
+                if (openFileTree()) "reduce" else ""
+              }
             }
-          }
-        )(
-            treeNodePanel.fileDisplayer.tabs.render,
-            tags.img(src := "img/version.svg", `class` := "logoVersion"),
-            tags.div("Loving Lobster", `class` := "textVersion")
-          )
+          )(
+              treeNodePanel.fileDisplayer.tabs.render,
+              tags.div(v, omsheet.textVersion)
+            )
 
-      ).render
-      )
+        ).render
+        )
+      }
+
+      body.appendChild(connectionDiv)
+      body.appendChild(maindiv)
     }
-
-    body.appendChild(connectionDiv)
-    body.appendChild(maindiv)
   }
 
 }

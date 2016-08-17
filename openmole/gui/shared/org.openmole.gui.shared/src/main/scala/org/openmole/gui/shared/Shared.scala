@@ -20,6 +20,10 @@ import org.openmole.core.buildinfo._
 import org.openmole.gui.ext.data._
 
 trait Api {
+
+  //GENERAL
+  def version(): String
+
   //AUTHENTICATIONS
   def authentications(): Seq[AuthenticationData]
   def addAuthentication(data: AuthenticationData): Unit
