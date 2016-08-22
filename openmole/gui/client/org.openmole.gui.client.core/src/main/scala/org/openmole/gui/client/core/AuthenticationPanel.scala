@@ -152,8 +152,8 @@ class AuthenticationPanel extends ModalPanel {
 
   val vosToBeTested = bs.labeledInput("Test EGI credential on", "", "VO names (vo1,vo2,...)", labelStyle = color := "#000")
   OMPost[Api].getConfigurationValue(VOTest).call().foreach {
-    _.map {
-      vosToBeTested.setDefault
+    _.map { c ⇒
+      vosToBeTested.setDefault(c)
     }
   }
 

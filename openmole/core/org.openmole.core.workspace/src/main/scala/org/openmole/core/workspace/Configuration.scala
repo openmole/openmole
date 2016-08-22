@@ -44,20 +44,13 @@ class ConfigurationLocation[T](val group: String, val name: String, _default: â‡
 
 class ConfigurationFile(val file: File) {
 
-  @transient lazy val builder = {
+  @transient lazy val config = {
     val params = new Parameters
     val builder =
-      new ReloadingFileBasedConfigurationBuilder[FileBasedConfiguration](classOf[PropertiesConfiguration])
-        .configure(params.fileBased()
-          .setFile(file))
+      new ReloadingFileBasedConfigurationBuilder[FileBasedConfiguration](classOf[PropertiesConfiguration]).
+        configure(params.fileBased().setFile(file).setSynchronizer(new ReadWriteSynchronizer()))
     builder.setAutoSave(true)
-    builder
-  }
-
-  @transient lazy val config = {
-    val c = builder.getConfiguration
-    c.setSynchronizer(new ReadWriteSynchronizer())
-    c
+    builder.getConfiguration
   }
 
   def value(group: String, name: String): Option[String] =
