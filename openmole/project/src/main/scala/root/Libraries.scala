@@ -96,7 +96,7 @@ object Libraries extends Defaults {
   lazy val scalaTags = "org.openmole" %% "com-scalatags" % scalaTagsVersion
   lazy val rx = "org.openmole" %% "rx" % rxVersion
 
-  lazy val scaladgetVersion = "0.8.0"
+  lazy val scaladgetVersion = "0.8.1"
 
   lazy val scalajsVersion = "0.6.8"
   lazy val scaladgetJS = libraryDependencies += "fr.iscpif" %%% "scaladget" % scaladgetVersion
