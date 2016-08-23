@@ -122,7 +122,7 @@ object OSGi extends Defaults {
   lazy val querkiJSQueryVersion = "0.11"
   lazy val scalaUpickleVersion = "0.4.1"
   lazy val scalaAutowireVersion = "0.2.5"
-  lazy val scalajsVersion = "0.6.8"
+  lazy val scalajsVersion = "0.6.11"
 
   lazy val rx = OsgiProject("rx", exports = Seq("rx.*")) settings(
     libraryDependencies ++= Seq("com.lihaoyi" %% "scalarx" % scalaRxVersion),
