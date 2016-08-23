@@ -240,7 +240,7 @@ object ScriptClient {
           }
         )(
             treeNodePanel.fileDisplayer.tabs.render,
-            tags.div(settings.version, omsheet.textVersion)
+            tags.div(s"${settings.version}, built the ${settings.buildTime}", omsheet.textVersion)
           )
 
       ).render

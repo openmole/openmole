@@ -5,7 +5,6 @@ import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.zip.GZIPInputStream
 
-import com.sun.org.apache.xalan.internal.xsltc.dom.LoadDocument
 import org.openmole.core.batch.environment.BatchEnvironment.{ BeginDownload, BeginUpload, EndDownload, EndUpload }
 import org.openmole.core.buildinfo.MarketIndex
 import org.openmole.core.event._
@@ -13,7 +12,6 @@ import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.pluginmanager._
 import org.openmole.core.serializer.SerialiserService
 import org.openmole.gui.misc.utils.Utils._
-import org.openmole.gui.server.core.Runnings.RunningEnvironment
 import org.openmole.gui.server.core.Utils._
 import org.openmole.core.workspace.{ ConfigurationLocation, Workspace }
 import org.openmole.gui.shared._
@@ -23,7 +21,6 @@ import java.io._
 import java.nio.file._
 
 import org.openmole.core.project._
-import org.osgi.framework.Bundle
 
 import scala.util.{ Failure, Success, Try }
 import org.openmole.core.workflow.mole.MoleExecutionContext
@@ -33,9 +30,7 @@ import scala.concurrent.stm._
 import org.openmole.tool.file._
 import org.openmole.tool.tar._
 import org.openmole.core.{ pluginmanager, buildinfo }
-import org.openmole.core.console.ScalaREPL
 import org.openmole.core.output.OutputManager
-import org.openmole.gui.server.core
 
 /*
  * Copyright (C) 21/07/14 // mathieu.leclaire@openmole.org
@@ -69,7 +64,8 @@ object ApiImpl extends Api {
 
     OMSettings(
       workspace,
-      buildinfo.version
+      buildinfo.version,
+      new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(buildinfo.BuildInfo.buildTime)
     )
   }
 

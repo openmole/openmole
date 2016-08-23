@@ -748,4 +748,4 @@ sealed trait ConfigData
 
 object VOTest extends ConfigData
 
-case class OMSettings(workspace: SafePath, version: String)
+case class OMSettings(workspace: SafePath, version: String, buildTime: String)
