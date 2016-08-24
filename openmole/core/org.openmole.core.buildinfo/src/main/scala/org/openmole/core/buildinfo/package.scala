@@ -21,7 +21,7 @@ import java.util.{ Locale, Calendar }
 
 package object buildinfo {
 
-  def name = "L... L..."
+  def name = "M... M..."
 
   def version: String = buildinfo.BuildInfo.version
 

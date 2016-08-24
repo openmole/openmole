@@ -69,7 +69,9 @@ object ApiImpl extends Api {
 
     OMSettings(
       workspace,
-      buildinfo.version
+      buildinfo.version,
+      buildinfo.name,
+      new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(buildinfo.BuildInfo.buildTime)
     )
   }
 

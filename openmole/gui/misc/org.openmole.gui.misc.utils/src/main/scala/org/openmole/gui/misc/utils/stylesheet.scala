@@ -165,9 +165,8 @@ package object stylesheet {
   lazy val textVersion: ModifierSeq = Seq(
     color("grey"),
     position := "fixed",
+    textAlign := "center",
     right := 27,
-    fontSize := "1em",
-    fontWeight := "bold",
     zIndex := -1,
     bottom := 5
   )
