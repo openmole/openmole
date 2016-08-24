@@ -240,9 +240,14 @@ object ScriptClient {
           }
         )(
             treeNodePanel.fileDisplayer.tabs.render,
-            tags.div(s"${settings.version}, built the ${settings.buildTime}", omsheet.textVersion)
+            tags.div(omsheet.textVersion)(
+              tags.div(
+                fontSize := "1em",
+                fontWeight := "bold"
+              )(s"${settings.version} ${settings.versionName}"),
+              tags.div(fontSize := "0.8em")(s"built the ${settings.buildTime}")
+            )
           )
-
       ).render
       )
     }
