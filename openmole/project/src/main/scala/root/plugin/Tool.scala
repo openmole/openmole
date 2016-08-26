@@ -12,13 +12,6 @@ object Tool extends PluginDefaults {
 
   lazy val netLogoAPI = OsgiProject("netlogo", imports = Seq("*")) settings (autoScalaLibrary := false, crossPaths := false)
 
-  lazy val netLogo4API = OsgiProject("netlogo4", imports = Seq("*")) dependsOn (netLogoAPI) settings (
-    crossPaths := false,
-    autoScalaLibrary := false,
-    libraryDependencies += Libraries.netlogo4 intransitive (),
-    libraryDependencies -= Libraries.scalatest
-  )
-
   lazy val netLogo5API = OsgiProject("netlogo5", imports = Seq("*")) dependsOn (netLogoAPI) settings (
     crossPaths := false,
     autoScalaLibrary := false,

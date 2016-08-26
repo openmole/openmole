@@ -93,21 +93,13 @@ object OSGi extends Defaults {
     version := jasyptVersion
     )
 
-  lazy val netlogo4 = OsgiProject("ccl.northwestern.edu.netlogo4", exports = Seq("org.nlogo.*"),
-    privatePackages = Seq("**")) settings
-    (libraryDependencies ++=
-      Seq("ccl.northwestern.edu" % "netlogo" % "4.1.3",
-        "org.picocontainer" % "picocontainer" % "2.8",
-        "org.objectweb" % "asm" % "3.1",
-        "org.objectweb" % "asm-commons" % "3.1"), version := "4.1.3", scalaVersion := "2.8.0", crossPaths := false, bundleType := Set("plugin"))
-
   lazy val netLogo5Version = "5.3.1"
 
   lazy val netlogo5 = OsgiProject("ccl.northwestern.edu.netlogo5", exports = Seq("org.nlogo.*"),
     privatePackages = Seq("**")) settings
     (libraryDependencies ++= Seq("ccl.northwestern.edu" % "netlogo" % netLogo5Version % "provided" from s"https://github.com/NetLogo/NetLogo/releases/download/$netLogo5Version/NetLogo.jar",
       "org.scala-lang" % "scala-library" % "2.9.2" % "provided",
-      "org.objectweb" % "asm-all" % "3.3.1" % "provided",
+      "org.ow2.asm" % "asm-all" % "5.0.4" % "provided",
       "org.picocontainer" % "picocontainer" % "2.13.6" % "provided"), version := netLogo5Version, scalaVersion := "2.9.2", crossPaths := false, bundleType := Set("plugin"))
 
   lazy val guava = OsgiProject("com.google.guava",

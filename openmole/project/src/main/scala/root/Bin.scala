@@ -147,7 +147,6 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
       sshd intransitive (),
       family intransitive (),
       opencsv intransitive (),
-      netlogo4 intransitive (),
       netlogo5 intransitive (),
       mgo intransitive (),
       scalabc intransitive (),
