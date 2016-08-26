@@ -10,9 +10,8 @@ object Root extends Defaults(OSGi) {
 
   override def settings = super.settings ++ Seq(
     //make openmole repo the resolver of last resort
-   
     resolvers += DefaultMavenRepository,
-    resolvers += "openmole-public" at "https://maven.openmole.org/public",
+    //resolvers += "openmole-public" at "https://maven.openmole.org/public",
     resolvers += Resolver.sonatypeRepo("snapshots"),
     resolvers += Resolver.sonatypeRepo("releases")
   )

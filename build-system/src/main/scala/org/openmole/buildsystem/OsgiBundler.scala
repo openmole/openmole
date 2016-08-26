@@ -24,8 +24,7 @@ trait OsgiBundler {
     OsgiKeys.bundle <<= OsgiKeys.bundle tag Tags.Disk,
     (update in install) <<= update in install tag Tags.Network,
     bundleType := Set("default"),
-    test in (Test, test) <<= test in (Test, test) tag (Tags.Disk),
-    publishTo <<= isSnapshot(if (_) Some("OpenMOLE Nexus" at "https://maven.openmole.org/snapshots") else Some("OpenMOLE Nexus" at "https://maven.openmole.org/releases"))
+    test in (Test, test) <<= test in (Test, test) tag (Tags.Disk)
   ) ++ scalariformDefaults
 
   def OsgiProject(
