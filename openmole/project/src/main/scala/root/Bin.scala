@@ -245,6 +245,8 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
         OsgiKeys.exportPackage := Seq("scalatex.openmole.*") ++ OsgiKeys.exportPackage.value,
         libraryDependencies += Libraries.xstream,
         libraryDependencies += Libraries.scalatexSite,
+        libraryDependencies += Libraries.scalaTags,
+        libraryDependencies += Libraries.upickle,
         libraryDependencies += Libraries.scalaLang,
         libraryDependencies += Libraries.txtmark,
         libraryDependencies += Libraries.toolxitBibtex intransitive (),
