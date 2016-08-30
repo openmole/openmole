@@ -5,8 +5,6 @@ import Keys._
 import com.typesafe.sbt.osgi.OsgiKeys
 import OsgiKeys._
 import org.openmole.buildsystem.OMKeys._
-import org.scalajs.sbtplugin.ScalaJSPlugin
-import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 
 object OSGi extends Defaults {
 
