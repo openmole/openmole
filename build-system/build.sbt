@@ -30,7 +30,4 @@ libraryDependencies ++= Seq(
   "com.jsuereth" %% "scala-arm" % "1.3",
   "org.apache.commons" % "commons-compress" % "1.10")
 
-
-publishTo <<= isSnapshot(if(_) Some("Openmole Nexus" at "https://maven.openmole.org/snapshots") else Some("Openmole Nexus" at "https://maven.openmole.org/releases"))
-
 releaseSettings

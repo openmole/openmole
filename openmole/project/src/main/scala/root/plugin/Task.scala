@@ -15,12 +15,6 @@ object Task extends PluginDefaults {
 
   lazy val netLogo = OsgiProject("netlogo", imports = Seq("*")) dependsOn (Core.dsl, external, Tool.netLogoAPI)
 
-  //the imports disambiguates netlogo5 from netlogo4
-  lazy val netLogo4 = OsgiProject(
-    "netlogo4",
-    imports = Seq("org.nlogo.*;version=\"[4,5)\"", "*;resolution:=optional")
-  ) dependsOn (netLogo, Core.workflow, external, Tool.netLogo4API)
-
   lazy val netLogo5 = OsgiProject("netlogo5") dependsOn (netLogo, Core.dsl, external, Tool.netLogo5API)
 
   lazy val jvm = OsgiProject("jvm", imports = Seq("*")) dependsOn (Core.dsl, external, Core.workspace)

@@ -19,7 +19,7 @@ object Libraries extends Defaults {
 
   val dir = file("libraries")
 
-  val gridscaleVersion = "1.87-SNAPSHOT"
+  val gridscaleVersion = "1.87.0"
 
   val bouncyCastleVersion = "1.50"
 
@@ -77,8 +77,6 @@ object Libraries extends Defaults {
   lazy val jodaTime = "org.openmole" %% "org-joda-time" % "1.6"
 
   lazy val jasypt = "org.openmole" %% "org-jasypt-encryption" % "1.9.2"
-
-  lazy val netlogo4 = "org.openmole" % "ccl-northwestern-edu-netlogo4" % "4.1.3"
 
   lazy val netLogo5Version = "5.3.1"
   lazy val netlogo5 = "org.openmole" % "ccl-northwestern-edu-netlogo5" % netLogo5Version

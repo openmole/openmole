@@ -48,8 +48,6 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
       Core.dsl
     )
 
-  lazy val javax64URL = new URL("https://maven.openmole.org/thirdparty/net/java/openjdk-jre-x64/8-u112-b00-20160529/openjdk-jre-x64-8-u112-b00-20160529.tgz")
-
   lazy val openmole =
     Project("openmole", dir / "openmole", settings = tarProject ++ assemblySettings) settings (commonsSettings: _*) settings (
       setExecutable ++= Seq("openmole", "openmole.bat"),
@@ -64,7 +62,6 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
       resourcesAssemble <+= (assemble in consolePlugins, assemblyPath) map { case (r, p) ⇒ r → (p / "plugins") },
       resourcesAssemble <+= (Tar.tar in openmoleRuntime, assemblyPath) map { case (r, p) ⇒ r → (p / "runtime" / r.getName) },
       resourcesAssemble <+= (assemble in launcher, assemblyPath) map { case (r, p) ⇒ r → (p / "launcher") },
-      downloads := Seq(javax64URL → "runtime/jvm-x64.tar.gz"),
       libraryDependencies += Libraries.scalajHttp,
       dependencyFilter := filter,
       dependencyName := rename,
@@ -147,7 +144,6 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
       sshd intransitive (),
       family intransitive (),
       opencsv intransitive (),
-      netlogo4 intransitive (),
       netlogo5 intransitive (),
       mgo intransitive (),
       scalabc intransitive (),
@@ -245,6 +241,8 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
         OsgiKeys.exportPackage := Seq("scalatex.openmole.*") ++ OsgiKeys.exportPackage.value,
         libraryDependencies += Libraries.xstream,
         libraryDependencies += Libraries.scalatexSite,
+        libraryDependencies += Libraries.scalaTags,
+        libraryDependencies += Libraries.upickle,
         libraryDependencies += Libraries.scalaLang,
         libraryDependencies += Libraries.txtmark,
         libraryDependencies += Libraries.toolxitBibtex intransitive (),

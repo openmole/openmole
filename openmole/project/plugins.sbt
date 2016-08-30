@@ -1,7 +1,4 @@
 resolvers += Classpaths.sbtPluginSnapshots
-
-resolvers += "openmole-public" at "https://maven.openmole.org/public"
-
 resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/"
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-native-packager" % "0.6.0")
