@@ -21,7 +21,7 @@ organization := "org.openmole"
 
 resolvers += Classpaths.sbtPluginSnapshots
 
-addSbtPlugin("com.typesafe.sbt" % "sbt-osgi" % "0.8.0")
+addSbtPlugin("com.typesafe.sbt" % "sbt-osgi" % "0.9.1")
 
 addSbtPlugin("org.scalariform" % "sbt-scalariform" % "1.6.0")
 
