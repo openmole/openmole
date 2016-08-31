@@ -134,8 +134,8 @@ object OSGi extends Defaults {
 
   lazy val scalatexSite =
     OsgiProject("com.lihaoyi.scalatex-site", exports = Seq("scalatex.*", "ammonite.*", "fastparse.*"), privatePackages = Seq("META-INF.**", "pprint.*", "scalaj.*", "scalaparse.*"), imports = Seq("*")) settings (
-      libraryDependencies += "com.lihaoyi" %% "scalatex-site" % "0.3.5",
-      version := "0.3.5")
+      libraryDependencies += "com.lihaoyi" %% "scalatex-site" % "0.3.6",
+      version := "0.3.6")
 
   lazy val upickle = OsgiProject("upickle", exports = Seq("upickle.*", "jawn.*", "derive.*", "sourcecode.*"), imports = Seq("*")) settings(
     libraryDependencies ++= Seq("com.lihaoyi" %% "upickle" % scalaUpickleVersion),
