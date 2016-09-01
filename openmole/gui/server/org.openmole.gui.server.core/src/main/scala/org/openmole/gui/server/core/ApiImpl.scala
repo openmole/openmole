@@ -20,6 +20,7 @@ import org.openmole.gui.ext.data._
 import java.io._
 import java.nio.file._
 
+import fr.iscpif.gridscale.http.HTTPStorage
 import org.openmole.core.project._
 
 import scala.util.{ Failure, Success, Try }
@@ -29,7 +30,7 @@ import org.openmole.tool.stream.StringPrintStream
 import scala.concurrent.stm._
 import org.openmole.tool.file._
 import org.openmole.tool.tar._
-import org.openmole.core.{ pluginmanager, buildinfo }
+import org.openmole.core.{ buildinfo, pluginmanager }
 import org.openmole.core.output.OutputManager
 
 /*
@@ -385,8 +386,8 @@ object ApiImpl extends Api {
 
   def marketIndex() = {
     def download[T](action: InputStream ⇒ T): T = {
-      val url = new URL(buildinfo.marketAddress)
-      val is = url.openStream()
+      import concurrent.duration._
+      val is = HTTPStorage.toInputStream(new java.net.URI(buildinfo.marketAddress)) //, HTTPStorage.newClient(1 minute))
       try action(is)
       finally is.close
     }
