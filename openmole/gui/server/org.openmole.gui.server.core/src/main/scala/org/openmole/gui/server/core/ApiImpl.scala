@@ -386,8 +386,7 @@ object ApiImpl extends Api {
 
   def marketIndex() = {
     def download[T](action: InputStream ⇒ T): T = {
-      import concurrent.duration._
-      val is = HTTPStorage.toInputStream(new java.net.URI(buildinfo.marketAddress)) //, HTTPStorage.newClient(1 minute))
+      val is = HTTPStorage.toInputStream(new java.net.URI(buildinfo.marketAddress))
       try action(is)
       finally is.close
     }
