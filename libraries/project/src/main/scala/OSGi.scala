@@ -93,8 +93,11 @@ object OSGi extends Defaults {
 
   lazy val netLogo5Version = "5.3.1"
 
-  lazy val netlogo5 = OsgiProject("ccl.northwestern.edu.netlogo5", exports = Seq("org.nlogo.*"),
-    privatePackages = Seq("**")) settings
+  lazy val netlogo5 = OsgiProject(
+    "ccl.northwestern.edu.netlogo5",
+    exports = Seq("org.nlogo.*"),
+    privatePackages = Seq("**"),
+    imports = Seq("!*")) settings
     (libraryDependencies ++= Seq("ccl.northwestern.edu" % "netlogo" % netLogo5Version % "provided" from s"https://github.com/NetLogo/NetLogo/releases/download/$netLogo5Version/NetLogo.jar",
       "org.scala-lang" % "scala-library" % "2.9.2" % "provided",
       "asm" % "asm-all" % "3.3.1" % "provided",
