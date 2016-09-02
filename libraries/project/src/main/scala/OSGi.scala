@@ -5,8 +5,6 @@ import Keys._
 import com.typesafe.sbt.osgi.OsgiKeys
 import OsgiKeys._
 import org.openmole.buildsystem.OMKeys._
-import org.scalajs.sbtplugin.ScalaJSPlugin
-import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 
 object OSGi extends Defaults {
 
@@ -95,11 +93,14 @@ object OSGi extends Defaults {
 
   lazy val netLogo5Version = "5.3.1"
 
-  lazy val netlogo5 = OsgiProject("ccl.northwestern.edu.netlogo5", exports = Seq("org.nlogo.*"),
-    privatePackages = Seq("**")) settings
+  lazy val netlogo5 = OsgiProject(
+    "ccl.northwestern.edu.netlogo5",
+    exports = Seq("org.nlogo.*"),
+    privatePackages = Seq("**"),
+    imports = Seq("!*")) settings
     (libraryDependencies ++= Seq("ccl.northwestern.edu" % "netlogo" % netLogo5Version % "provided" from s"https://github.com/NetLogo/NetLogo/releases/download/$netLogo5Version/NetLogo.jar",
       "org.scala-lang" % "scala-library" % "2.9.2" % "provided",
-      "org.ow2.asm" % "asm-all" % "5.0.4" % "provided",
+      "asm" % "asm-all" % "3.3.1" % "provided",
       "org.picocontainer" % "picocontainer" % "2.13.6" % "provided"), version := netLogo5Version, scalaVersion := "2.9.2", crossPaths := false, bundleType := Set("plugin"))
 
   lazy val guava = OsgiProject("com.google.guava",
@@ -134,8 +135,8 @@ object OSGi extends Defaults {
 
   lazy val scalatexSite =
     OsgiProject("com.lihaoyi.scalatex-site", exports = Seq("scalatex.*", "ammonite.*", "fastparse.*"), privatePackages = Seq("META-INF.**", "pprint.*", "scalaj.*", "scalaparse.*"), imports = Seq("*")) settings (
-      libraryDependencies += "com.lihaoyi" %% "scalatex-site" % "0.3.5",
-      version := "0.3.5")
+      libraryDependencies += "com.lihaoyi" %% "scalatex-site" % "0.3.6",
+      version := "0.3.6")
 
   lazy val upickle = OsgiProject("upickle", exports = Seq("upickle.*", "jawn.*", "derive.*", "sourcecode.*"), imports = Seq("*")) settings(
     libraryDependencies ++= Seq("com.lihaoyi" %% "upickle" % scalaUpickleVersion),

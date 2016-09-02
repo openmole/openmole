@@ -20,6 +20,7 @@ import org.openmole.gui.ext.data._
 import java.io._
 import java.nio.file._
 
+import fr.iscpif.gridscale.http.HTTPStorage
 import org.openmole.core.project._
 
 import scala.util.{ Failure, Success, Try }
@@ -29,7 +30,7 @@ import org.openmole.tool.stream.StringPrintStream
 import scala.concurrent.stm._
 import org.openmole.tool.file._
 import org.openmole.tool.tar._
-import org.openmole.core.{ pluginmanager, buildinfo }
+import org.openmole.core.{ buildinfo, pluginmanager }
 import org.openmole.core.output.OutputManager
 
 /*
@@ -383,14 +384,13 @@ object ApiImpl extends Api {
     EnvironmentErrorData(groupedErrors)
   }
 
-  def marketIndex() = {
-    def download[T](action: InputStream ⇒ T): T = {
-      val url = new URL(buildinfo.marketAddress)
-      val is = url.openStream()
-      try action(is)
-      finally is.close
-    }
+  private def download[T](url: String)(action: InputStream ⇒ T): T = {
+    val is = HTTPStorage.toInputStream(new java.net.URI(url))
+    try action(is)
+    finally is.close
+  }
 
+  def marketIndex() = {
     def mapToMd(marketIndex: MarketIndex) =
       marketIndex.copy(entries = marketIndex.entries.map {
         e ⇒
@@ -399,18 +399,20 @@ object ApiImpl extends Api {
           })
       })
 
-    mapToMd(download(SerialiserService.deserialise[buildinfo.MarketIndex](_)))
+    mapToMd(download(buildinfo.marketAddress)(SerialiserService.deserialise[buildinfo.MarketIndex](_)))
   }
 
   def getMarketEntry(entry: buildinfo.MarketIndexEntry, path: SafePath) = {
     import org.openmole.gui.ext.data.ServerFileSytemContext.project
     val url = new URL(entry.url)
-    val is = new TarInputStream(new GZIPInputStream(url.openStream()))
-    try {
-      is.extract(safePathToFile(path))
-      autoAddPlugins(path)
+    download(entry.url) { is ⇒
+      val tis = new TarInputStream(new GZIPInputStream(is))
+      try {
+        tis.extract(safePathToFile(path))
+        autoAddPlugins(path)
+      }
+      finally tis.close
     }
-    finally is.close
   }
 
   //PLUGINS
