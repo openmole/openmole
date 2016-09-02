@@ -42,6 +42,10 @@ package object buildinfo {
 
   def marketName = "market.bin"
   def marketAddress = url(marketName)
+
+  def moduleListName = "modules.bin"
+  def moduleListAddress = url(moduleListName)
+
   def url(entry: String): String = siteURL + "/" + entry
 
   def info = OpenMOLEBuildInfo(version, name, generationDate)

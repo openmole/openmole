@@ -37,6 +37,7 @@ import scala.sys.process.BasicIO
 import org.openmole.site.credits._
 import org.openmole.core.buildinfo
 import spray.json.JsArray
+import module._
 
 import scala.annotation.tailrec
 
@@ -86,8 +87,12 @@ object Site {
 
     Config.testScript = parameters.test
 
-    val dest = parameters.target.getOrElse(new File("./openmole-doc-html"))
+    val dest = parameters.target.getOrElse(new File("./openmole-site"))
     dest.recursiveDelete
+
+    val moduleDirectory = dest / "modules"
+    val modules = generateModules(dest, f ⇒ s"modules/${f.getName}")
+    SerialiserService.serialise(modules, (dest / buildinfo.moduleListName))
 
     val m = new Market(Market.entries, dest)
     val marketEntries = m.generate(parameters.resources.get, parameters.test && parameters.marketTest)
@@ -196,6 +201,10 @@ object Site {
     DSLTest.runTest.get
 
     0
+  }
+
+  def generateModules(baseDirectory: File, moduleLocation: File ⇒ String) = {
+    Module.generate(Module.all, baseDirectory, moduleLocation)
   }
 
 }
