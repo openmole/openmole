@@ -175,8 +175,7 @@ package object stylesheet {
   lazy val fileInfo: ModifierSeq = Seq(
     sheet.floatRight,
     absolutePosition,
-    right := 2,
-    sheet.paddingTop(5)
+    right := 2
   )
 
   lazy val fileSize: ModifierSeq = Seq(
@@ -191,8 +190,6 @@ package object stylesheet {
   lazy val file: ModifierSeq = Seq(
     color("white"),
     display := "inline-block",
-    sheet.marginTop(2),
-    sheet.marginBottom(3),
     height := 20,
     textDecoration := "none"
   )
@@ -215,6 +212,7 @@ package object stylesheet {
     whiteSpace := "nowrap",
     overflow := "hidden",
     pointer,
+    width := 230,
     textOverflow := "ellipsis"
   )
 

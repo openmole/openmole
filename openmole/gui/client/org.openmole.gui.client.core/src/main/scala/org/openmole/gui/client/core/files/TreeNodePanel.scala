@@ -1,21 +1,23 @@
 package org.openmole.gui.client.core.files
 
-import org.openmole.gui.client.core.alert.AbsolutePositioning.{ RelativeCenterPosition, FileZone }
+import org.openmole.gui.client.core.alert.AbsolutePositioning.{ FileZone, RelativeCenterPosition }
 import org.openmole.gui.client.core.alert.AlertPanel
 import org.openmole.gui.client.core.files.FileToolBar.{ PluginTool, TrashTool }
-import org.openmole.gui.client.core.{ OMPost, CoreUtils }
+import org.openmole.gui.client.core.{ CoreUtils, OMPost }
 import org.openmole.gui.client.core.Waiter._
 import org.openmole.gui.ext.data._
-import org.openmole.gui.misc.utils.{ stylesheet, Utils }
+import org.openmole.gui.misc.utils.{ Utils, stylesheet }
 import org.openmole.gui.shared._
-import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs, Popup }
+import fr.iscpif.scaladget.api.{ Popup, BootstrapTags ⇒ bs }
 import org.openmole.gui.misc.utils.{ stylesheet ⇒ omsheet }
 import org.scalajs.dom.html.Input
 import org.scalajs.dom.raw._
+
 import scalatags.JsDom.all._
-import scalatags.JsDom.{ TypedTag, tags ⇒ tags }
+import scalatags.JsDom.{ TypedTag, tags }
 import org.openmole.gui.misc.js.JsRxTags._
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
+
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import TreeNode._
 import autowire._
@@ -182,7 +184,7 @@ class TreeNodePanel {
         }
         else
           tags.table(ms("file-list"))(
-            tbody(overflowY := "auto")(
+            tbody(overflowY := "auto", width := 313)(
               for (tn ← sons._1) yield {
                 drawNode(tn)
               }
@@ -324,7 +326,7 @@ class TreeNodePanel {
     }
 
     lazy val fileIndent: ModifierSeq = tn match {
-      case d: DirNode ⇒ sheet.paddingLeft(27)
+      case d: DirNode ⇒ sheet.paddingLeft(22)
       case _          ⇒ sheet.emptyMod
     }
 
@@ -354,17 +356,14 @@ class TreeNodePanel {
             lineHovered() = None
           },
           onmouseover := { () ⇒
-            lineHovered() = { if (selectionMode.now) None else Some(this) }
+            lineHovered() = {
+              if (selectionMode.now) None else Some(this)
+            }
           },
           td(
-            width := 320,
-            height := 20,
             Rx {
-              div(
-                clickablePair,
-                color := "#333", {
-                  span(stylesheet.fileNameOverflow +++ fileIndent)(tn.name())
-                }
+              span(clickablePair)(
+                div(stylesheet.fileNameOverflow +++ fileIndent)(tn.name())
               ).tooltip(
                   tags.span(tn.name()), popupStyle = whitePopup, arrowStyle = Popup.whiteBottomArrow, condition = () ⇒ tn.name().length > 24
                 )
