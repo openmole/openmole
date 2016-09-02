@@ -384,13 +384,13 @@ object ApiImpl extends Api {
     EnvironmentErrorData(groupedErrors)
   }
 
-  def marketIndex() = {
-    def download[T](action: InputStream ⇒ T): T = {
-      val is = HTTPStorage.toInputStream(new java.net.URI(buildinfo.marketAddress))
-      try action(is)
-      finally is.close
-    }
+  private def download[T](url: String)(action: InputStream ⇒ T): T = {
+    val is = HTTPStorage.toInputStream(new java.net.URI(url))
+    try action(is)
+    finally is.close
+  }
 
+  def marketIndex() = {
     def mapToMd(marketIndex: MarketIndex) =
       marketIndex.copy(entries = marketIndex.entries.map {
         e ⇒
@@ -399,18 +399,20 @@ object ApiImpl extends Api {
           })
       })
 
-    mapToMd(download(SerialiserService.deserialise[buildinfo.MarketIndex](_)))
+    mapToMd(download(buildinfo.marketAddress)(SerialiserService.deserialise[buildinfo.MarketIndex](_)))
   }
 
   def getMarketEntry(entry: buildinfo.MarketIndexEntry, path: SafePath) = {
     import org.openmole.gui.ext.data.ServerFileSytemContext.project
     val url = new URL(entry.url)
-    val is = new TarInputStream(new GZIPInputStream(url.openStream()))
-    try {
-      is.extract(safePathToFile(path))
-      autoAddPlugins(path)
+    download(entry.url) { is ⇒
+      val tis = new TarInputStream(new GZIPInputStream(is))
+      try {
+        tis.extract(safePathToFile(path))
+        autoAddPlugins(path)
+      }
+      finally tis.close
     }
-    finally is.close
   }
 
   //PLUGINS
