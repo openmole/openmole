@@ -264,7 +264,7 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
         resourcesAssemble <+= (fullOptJS in siteJS in Compile, assemblyPath) map { case (js, d) ⇒ js.data → (d / "resources" / "sitejs.js") },
         dependencyFilter := filter,
         dependencyName := rename
-      ) dependsOn (Core.project, Core.buildinfo, root.Doc.doc, siteJS, ThirdParties.txtmark)
+      ) dependsOn (Core.project, Core.buildinfo, root.Doc.doc, siteJS, ThirdParties.txtmark, plugin.Task.netLogo5)
 
   lazy val siteJS = Project("siteJS", dir / "org.openmole.sitejs") settings (commonsSettings: _*) settings (
     scalaTagsJS,
