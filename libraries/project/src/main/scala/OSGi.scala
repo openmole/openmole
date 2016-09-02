@@ -97,7 +97,7 @@ object OSGi extends Defaults {
     privatePackages = Seq("**")) settings
     (libraryDependencies ++= Seq("ccl.northwestern.edu" % "netlogo" % netLogo5Version % "provided" from s"https://github.com/NetLogo/NetLogo/releases/download/$netLogo5Version/NetLogo.jar",
       "org.scala-lang" % "scala-library" % "2.9.2" % "provided",
-      "org.ow2.asm" % "asm-all" % "5.0.4" % "provided",
+      "asm" % "asm-all" % "3.3.1" % "provided",
       "org.picocontainer" % "picocontainer" % "2.13.6" % "provided"), version := netLogo5Version, scalaVersion := "2.9.2", crossPaths := false, bundleType := Set("plugin"))
 
   lazy val guava = OsgiProject("com.google.guava",
