@@ -126,16 +126,6 @@ ul{
 .tree-path .btn-group {
 }
 
-.file-list tr {
-display: inline-table;
-table-layout: fixed;
-}
-
-.file-list table{
- height:100%;              // <-- Select the height of the table
- display: -moz-groupbox;    // Firefox Bad Effect
-}
-
 .file-list tbody{
   overflow-y: scroll;
   height: 100%;            //  <-- Select the height of the body
@@ -466,10 +456,6 @@ li.selectElement{
     font-weight: bold;
     width : 50px;
     margin-top: 142px;
-    }
-
-    .aaa{
-    background-color: red;
     }
 
 .fullpanel {
