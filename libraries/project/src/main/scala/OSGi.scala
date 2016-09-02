@@ -5,8 +5,6 @@ import Keys._
 import com.typesafe.sbt.osgi.OsgiKeys
 import OsgiKeys._
 import org.openmole.buildsystem.OMKeys._
-import org.scalajs.sbtplugin.ScalaJSPlugin
-import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 
 object OSGi extends Defaults {
 
@@ -30,7 +28,7 @@ object OSGi extends Defaults {
   lazy val logback = OsgiProject("ch.qos.logback", exports = Seq("ch.qos.logback.*", "org.slf4j.impl"), dynamicImports = Seq("*")) settings
     (libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.0.9", version := "1.0.9")
 
-  lazy val h2Version = "1.4.190"
+  lazy val h2Version = "1.4.192"
   lazy val h2 = OsgiProject("org.h2", dynamicImports = Seq("*"), privatePackages = Seq("META-INF.*")) settings
     (libraryDependencies += "com.h2database" % "h2" % h2Version, version := h2Version)
 
@@ -99,7 +97,7 @@ object OSGi extends Defaults {
     privatePackages = Seq("**")) settings
     (libraryDependencies ++= Seq("ccl.northwestern.edu" % "netlogo" % netLogo5Version % "provided" from s"https://github.com/NetLogo/NetLogo/releases/download/$netLogo5Version/NetLogo.jar",
       "org.scala-lang" % "scala-library" % "2.9.2" % "provided",
-      "org.ow2.asm" % "asm-all" % "5.0.4" % "provided",
+      "asm" % "asm-all" % "3.3.1" % "provided",
       "org.picocontainer" % "picocontainer" % "2.13.6" % "provided"), version := netLogo5Version, scalaVersion := "2.9.2", crossPaths := false, bundleType := Set("plugin"))
 
   lazy val guava = OsgiProject("com.google.guava",
@@ -134,8 +132,8 @@ object OSGi extends Defaults {
 
   lazy val scalatexSite =
     OsgiProject("com.lihaoyi.scalatex-site", exports = Seq("scalatex.*", "ammonite.*", "fastparse.*"), privatePackages = Seq("META-INF.**", "pprint.*", "scalaj.*", "scalaparse.*"), imports = Seq("*")) settings (
-      libraryDependencies += "com.lihaoyi" %% "scalatex-site" % "0.3.5",
-      version := "0.3.5")
+      libraryDependencies += "com.lihaoyi" %% "scalatex-site" % "0.3.6",
+      version := "0.3.6")
 
   lazy val upickle = OsgiProject("upickle", exports = Seq("upickle.*", "jawn.*", "derive.*", "sourcecode.*"), imports = Seq("*")) settings(
     libraryDependencies ++= Seq("com.lihaoyi" %% "upickle" % scalaUpickleVersion),
@@ -210,6 +208,9 @@ object OSGi extends Defaults {
 
   lazy val logging = OsgiProject("org.apache.commons.logging") settings
     (libraryDependencies += "commons-logging" % "commons-logging" % "1.2", version := "1.2")
+
+  lazy val lang3 = OsgiProject("org.apache.commons.lang3") settings (
+    libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.4", version := "3.4")
 
   lazy val sshd = OsgiProject("org.apache.sshd", exports = Seq("org.apache.sshd.*", "org.apache.mina.*"), dynamicImports = Seq("*"), privatePackages = Seq("META-INF.*")) settings
     (libraryDependencies += "org.apache.sshd" % "sshd-core" % "1.0.0", version := "1.0.0")
