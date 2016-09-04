@@ -22,14 +22,15 @@
 
     @p Options available for DIRAC are:
     @ul
-      @li{@envOption{cpuTime} the maximum duration for the job in terms of CPU consumption, for instance 1 hour,}
+      @li{@envEntryTitle{cpuTime} the maximum duration for the job in terms of CPU consumption, for instance 1 hour,}
       @li{@openMOLEMemory,}
-      @li{@envOption{service} a DIRAC REST API,}
-      @li{@envOption{group} the name of the DIRAC group,}
-      @li{@envOption{bdii} the BDII to use for listing resources accessible from this VO. The BDII in your preference file is used, when this field is left unspecified.}
-      @li{@envOption{vomsURL} the URL of the VOMS server used for the authentication,}
-      @li{@envOption{fqan} additional flags for authentication,}
-      @li{@envOption{setup} setup to use on the DIRAC server. It is set to "Dirac-Production" by default.}
+      @li{@envEntryTitle{service} a DIRAC REST API,}
+      @li{@envEntryTitle{group} the name of the DIRAC group,}
+      @li{@envEntryTitle{bdii} the BDII to use for listing resources accessible from this VO. The BDII in your preference file is used, when this field is left unspecified.}
+      @li{@envEntryTitle{vomsURL} the URL of the VOMS server used for the authentication,}
+      @li{@envEntryTitle{fqan} additional flags for authentication,}
+      @li{@envEntryTitle{setup} setup to use on the DIRAC server. It is set to "Dirac-Production" by default,}
+      @li{@name.}
 
     @p The @hl.openmoleNoTest{EGIEnvironment} can be tuned using the previous options as in this example:
     @br @hl.openmole("""
@@ -49,13 +50,13 @@
       @li{@port,}
       @li{@wallTime,}
       @li{@memory,}
-      @li{@envOption{architecture} could be "x86_64" for restricting your jobs to 64-bit systems,}
-      @li{@envOption{jobType} should be set to "MPI" for MPI jobs,}
-      @li{@envOption{cpuNumber} the number of CPU required for your job,}
-      @li{@envOption{smpGranularity} the number of cores linked to a shared memory machine (same as cpuNumber for multi-threaded processes),}
+      @li{@envEntryTitle{architecture} could be "x86_64" for restricting your jobs to 64-bit systems,}
+      @li{@envEntryTitle{jobType} should be set to "MPI" for MPI jobs,}
+      @li{@envEntryTitle{cpuNumber} the number of CPU required for your job,}
+      @li{@envEntryTitle{smpGranularity} the number of cores linked to a shared memory machine (same as cpuNumber for multi-threaded processes),}
       @li{@threads,}
-      @li{@envOption{requirements} a requirement string in accordance to the GLUE schema. It will be added to the other requirements,}
-      @li{@b{fqan, cpuTime, openMOLEMemory, bdii, vomsURL} are also usable in the same way as for the @a("EGI environment", href := DocumentationPages.root.language.environment.egi.file + "#SubmittingjobtoEGI").}
+      @li{@envEntryTitle{requirements} a requirement string in accordance to the GLUE schema. It will be added to the other requirements,}
+      @li{@b{fqan, cpuTime, openMOLEMemory, bdii, vomsURL, name} are also usable in the same way as for the @a("EGI environment", href := DocumentationPages.root.language.environment.egi.file + "#SubmittingjobtoEGI").}
 
     @p The @hl.openmoleNoTest{WMSEnvironment} can be tuned using the previous options as in this example:
     @br @hl.openmole("""
