@@ -14,7 +14,7 @@ object OSGi extends Defaults {
   lazy val jettyVersion = "9.2.14.v20151106"
 
   lazy val scalatra = OsgiProject("org.scalatra",
-    exports = Seq("org.scalatra.*, org.fusesource.*", "grizzled.*", "com.fasterxml.jackson.*", "org.eclipse.jetty.*", "javax.*"),
+    exports = Seq("org.scalatra.*, org.fusesource.*", "grizzled.*", "org.eclipse.jetty.*", "javax.*"),
     privatePackages = Seq("!scala.*", "!org.slf4j.*", "*")) settings(
       libraryDependencies += "org.scalatra" %% "scalatra" % scalatraVersion,
       libraryDependencies += "org.scalatra" %% "scalatra-auth" % scalatraVersion,
