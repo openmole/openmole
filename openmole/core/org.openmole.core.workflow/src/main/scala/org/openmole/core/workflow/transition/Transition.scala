@@ -17,19 +17,12 @@
 
 package org.openmole.core.workflow.transition
 
-import org.openmole.core.exception.InternalProcessingError
-import org.openmole.core.workflow.validation.TypeUtil
-import org.openmole.core.workflow.tools.ContextAggregator._
-import org.openmole.core.workflow.tools._
-import TypeUtil._
+import org.openmole.core.workflow.validation._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.tools._
-import org.openmole.core.workflow.transition._
 import org.openmole.tool.logger.Logger
-import scala.collection.mutable.Buffer
-import scala.collection.mutable.ListBuffer
-import scala.util.Random
+
 import org.openmole.core.workflow.dsl._
 
 object Transition extends Logger
@@ -39,7 +32,9 @@ class Transition(
     val end:       Slot,
     val condition: Condition = Condition.True,
     val filter:    BlockList = BlockList.empty
-) extends ITransition {
+) extends ITransition with ValidateTransition {
+
+  override def validate(inputs: Seq[Prototype[_]]) = condition.validate(inputs)
 
   override def perform(context: Context, ticket: Ticket, subMole: SubMoleExecution)(implicit rng: RandomProvider) =
     if (condition().from(context)) submitNextJobsIfReady(filtered(context).values, ticket, subMole)

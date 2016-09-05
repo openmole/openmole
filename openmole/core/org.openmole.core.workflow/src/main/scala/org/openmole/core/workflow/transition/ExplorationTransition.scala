@@ -25,10 +25,14 @@ import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.tools.Condition
 import org.openmole.tool.lock._
 import org.openmole.core.workflow.dsl._
+import org.openmole.core.workflow.validation.ValidateTransition
+
 import scala.collection.mutable.{ HashSet, ListBuffer }
 import scala.util.Random
 
-class ExplorationTransition(val start: Capsule, val end: Slot, val condition: Condition = Condition.True, val filter: BlockList = BlockList.empty) extends IExplorationTransition {
+class ExplorationTransition(val start: Capsule, val end: Slot, val condition: Condition = Condition.True, val filter: BlockList = BlockList.empty) extends IExplorationTransition with ValidateTransition {
+
+  override def validate(inputs: Seq[Prototype[_]]) = condition.validate(inputs)
 
   override def perform(context: Context, ticket: Ticket, subMole: SubMoleExecution)(implicit rng: RandomProvider) = {
     val subSubMole = subMole.newChild

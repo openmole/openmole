@@ -24,9 +24,13 @@ import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.transition._
 import org.openmole.core.workflow.dsl._
+import org.openmole.core.workflow.validation.ValidateTransition
+
 import scala.util.Random
 
-class SlaveTransition(start: Capsule, end: Slot, condition: Condition = Condition.True, filter: BlockList = BlockList.empty) extends ExplorationTransition(start, end, condition, filter) with ISlaveTransition {
+class SlaveTransition(start: Capsule, end: Slot, condition: Condition = Condition.True, filter: BlockList = BlockList.empty) extends ExplorationTransition(start, end, condition, filter) with ISlaveTransition with ValidateTransition {
+
+  override def validate(inputs: Seq[Prototype[_]]) = condition.validate(inputs)
 
   override def perform(context: Context, ticket: Ticket, subMole: SubMoleExecution)(implicit rng: RandomProvider) =
     if (condition.from(context))

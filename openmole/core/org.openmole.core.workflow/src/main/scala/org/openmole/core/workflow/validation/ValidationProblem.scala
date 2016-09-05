@@ -30,6 +30,10 @@ trait ValidateHook {
   def validate(inputs: Seq[Prototype[_]]): Seq[Throwable]
 }
 
+trait ValidateTransition {
+  def validate(inputs: Seq[Prototype[_]]): Seq[Throwable]
+}
+
 object ValidationProblem {
 
   case class TaskValidationProblem(task: Task, errors: Seq[Throwable]) extends ValidationProblem {

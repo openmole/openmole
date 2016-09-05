@@ -48,13 +48,22 @@ object TypeUtil {
       else Prototype(name)(`type`)
   }
 
-  def validTypes(mole: Mole, sources: Sources, hooks: Hooks)(slot: Slot): Iterable[ValidType] = computeTypes(mole, sources, hooks)(slot).collect { case x: ValidType ⇒ x }
+  def validTypes(mole: Mole, sources: Sources, hooks: Hooks)(
+    slot:        Slot,
+    transition:  ITransition ⇒ Boolean = _ ⇒ true,
+    dataChannel: DataChannel ⇒ Boolean = _ ⇒ true
+  ): Iterable[ValidType] =
+    computeTypes(mole, sources, hooks)(slot, transition).collect { case x: ValidType ⇒ x }
 
-  def computeTypes(mole: Mole, sources: Sources, hooks: Hooks)(slot: Slot): Iterable[ComputedType] = {
+  def computeTypes(mole: Mole, sources: Sources, hooks: Hooks)(
+    slot:        Slot,
+    transition:  ITransition ⇒ Boolean = _ ⇒ true,
+    dataChannel: DataChannel ⇒ Boolean = _ ⇒ true
+  ): Iterable[ComputedType] = {
     val (varNames, direct, toArray, fromArray) =
       computeTransmissions(mole, sources, hooks)(
-        mole.inputTransitions(slot),
-        mole.inputDataChannels(slot)
+        mole.inputTransitions(slot).filter(transition),
+        mole.inputDataChannels(slot).filter(dataChannel)
       )
 
     varNames.toSeq.map {
