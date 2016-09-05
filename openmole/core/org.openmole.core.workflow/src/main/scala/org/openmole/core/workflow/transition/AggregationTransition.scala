@@ -24,6 +24,8 @@ import org.openmole.core.workflow.tools._
 import Condition._
 import org.openmole.tool.lock._
 import org.openmole.core.workflow.dsl._
+import org.openmole.core.workflow.validation.ValidateTransition
+
 import scala.collection.mutable.{ HashSet, ListBuffer }
 import scala.util.Random
 
@@ -34,7 +36,10 @@ object AggregationTransition {
   }
 }
 
-class AggregationTransition(val start: Capsule, val end: Slot, val condition: Condition = Condition.True, val filter: BlockList = BlockList.empty, val trigger: Condition = Condition.False) extends IAggregationTransition {
+class AggregationTransition(val start: Capsule, val end: Slot, val condition: Condition = Condition.True, val filter: BlockList = BlockList.empty, val trigger: Condition = Condition.False) extends IAggregationTransition with ValidateTransition {
+
+  override def validate(inputs: Seq[Prototype[_]]) =
+    condition.validate(inputs) ++ trigger.validate(inputs)
 
   override def perform(context: Context, ticket: Ticket, subMole: SubMoleExecution)(implicit rng: RandomProvider) = {
     val moleExecution = subMole.moleExecution
