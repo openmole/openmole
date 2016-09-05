@@ -126,7 +126,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
         case Some(PluginTool) ⇒
           manager.computePluggables(() ⇒
             if (manager.pluggables.now.isEmpty)
-              message() = tags.div(omsheet.color("white"), "No plugin has been found in this folder.")
+              message() = tags.div(omsheet.color("white"), "No plugin could be found in this folder.")
             else {
               clearMessage
               treeNodePanel.turnSelectionTo(true)
