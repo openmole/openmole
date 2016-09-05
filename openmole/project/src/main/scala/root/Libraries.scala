@@ -162,8 +162,6 @@ object Libraries extends Defaults {
 
   lazy val jgit = "org.openmole" %% "org-eclipse-jgit" % "3.7.1"
 
-  //lazy val txtmark = "org.openmole" %% "com-github-rjeschke-txtmark" % "0.13"
-
   lazy val toolxitBibtex = "org.openmole" %% "toolxit-bibtex" % "0.1"
 
   lazy val scalaz = "org.openmole" %% "scalaz" % "7.2.0"
@@ -175,5 +173,7 @@ object Libraries extends Defaults {
   lazy val configuration = "org.openmole" %% "org-apache-commons-configuration2" % "2.0"
 
   lazy val spray = "io.spray" %% "spray-json" % "1.3.2"
+
+  lazy val json4s = "org.openmole" %% "org-json4s" % "3.4.0"
 
 }
