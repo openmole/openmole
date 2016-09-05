@@ -132,30 +132,30 @@ class GUIDocPanel extends ModalPanel {
 
   val modelWizardContent = {
     tags.div(
-      "The model wizard is a tool designed to quickly import your Model. It both uploads your model archive and prepares for you the OpenMOLE script to run it." +
-        "The wizard automatically detects your model programming language among JVM, Netlogo or native codes. Then it detects the potential inputs and outputs. It generates " +
-        "for each input/output a variable with a relevant name if possible. At the end of the import process, the ", button("Build", btn_primary +++ labelInLine), " should run your script !",
+      "The model wizard is a tool designed to quickly import your Model. It both uploads your model archive and prepares the OpenMOLE script for you." +
+        "The wizard automatically distinguishes your model's programming language among JVM, Netlogo or native codes. Then it detects the potential inputs and outputs. " +
+        "For each input/output, the wizard generates a variable with a relevant name if possible. At the end of the import process, the ", button("Build", btn_primary +++ labelInLine), " should run your script without you having to do anything!",
       tags.div(spacer20, "To import your model, click on the ", button("Your model", btn_primary +++ labelInLine), " button. A dialog box pops up. Set your model path in it. The system should now display " +
-        "the programming language, a list of detected inputs / outputs and the script command to launch your code. In many cases, you are almost done yet. Just press the ",
-        tags.b("Build"), " button at the bottom: the wizard dialog disappears and the OpenMOLE script is generated in the wordDirectory with your uploaded code !"),
+        "the programming language, a list of detected inputs / outputs and the command to launch your code. In most cases, you are almost done. Just press the ",
+        tags.b("Build"), " button at the bottom: the wizard dialog disappears and the OpenMOLE script is generated in the wordDirectory with your uploaded code!"),
       tags.div(
         spacer20,
-        "However, you may sometimes make some modifications if you observe the system did not correctly detect your code, its inputs/outputs or its launching command. " +
-          "For each input / output, three actions can be triggered thanks to icons located on the same line: ",
+        "However, you may sometimes want to make some modifications if you observe the system did not correctly detect your code, its inputs/outputs or its launching command. " +
+          "For each input / output, three actions can be triggered using the icons located on the same line: ",
         tags.ul(
           tags.li(span(glyph_trash +++ glyphStyle), " removes the current input/output"),
           tags.li(span(glyph_arrow_right_and_left +++ glyphStyle), " duplicates the current input/output, so that it is both defined as input and output"),
-          tags.li(span(glyph_arrow_right +++ glyphStyle), " or ", span(glyph_arrow_left +++ glyphStyle), " switches an input to output or an input to output")
+          tags.li(span(glyph_arrow_right +++ glyphStyle), " or ", span(glyph_arrow_left +++ glyphStyle), " switches an input to output and vice-versa.")
         ),
-        "The launching command uses the names of the previously defined input / output variables. It is reactive: if the name of input/output is changed, the launching command" +
-          " is changed with the corresponding name. For the native codes (C, C++, Python, R, ...), the following syntax is required (automatically used): ", tags.b("""${}."""),
+        "The launching command uses the names of the previously defined input / output variables. It is reactive: if the name of the input/output changes, the launching command" +
+          " is updated with the corresponding name. For the native codes (C, C++, Python, R, ...), the following syntax is required (automatically used): ", tags.b("""${}."""),
         tags.div(spacer20 +++ bold, "Netlogo applications"),
-        tags.div(" The Netlogo applications working with nls extensions should be previously archived. The system will exstract the archives and deal with the extensions as " +
-          " Task resources (they appear in the resources tab"),
-        tags.div("A seed variable (for the Netlogo random genarator) is automatically generated and passed to the Netlogo Generator trought the Netlogo Task"),
+        tags.div(" The Netlogo applications working with the ", tags.i(".nls"), " extension should be previously archived. The system will extract the archives and deal with the extensions as " +
+          " resources of the task (displayed in the resources tab"),
+        tags.div("A seed variable (for the Netlogo random genarator) is automatically generated and passed to the Netlogo Generator through the Netlogo Task"),
         tags.div(spacer20 +++ bold, "Java applications"),
-        tags.div(" Once the jar has been provided to the wizard, the classes contained in it are proposed in a dropdown button. Choose the class containing your main Class. " +
-          "Then, another dropdown button will ask you for the function to be called in the preselected class.")
+        tags.div(" Once the jar has been provided to the wizard, the classes it contains are proposed in a dropdown menu. Choose the class containing your main Class. " +
+          "Then, another dropdown menu will ask you for the function to be called in the preselected class.")
       )
     )
   }
