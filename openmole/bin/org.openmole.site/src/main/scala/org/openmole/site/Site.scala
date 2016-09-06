@@ -67,19 +67,19 @@ object Site {
   def run(args: Array[String]): Int = {
     case class Parameters(
       target:     Option[File] = None,
-      test:       Boolean      = true,
-      marketTest: Boolean      = true,
+      test:       Boolean      = false,
+      marketTest: Boolean      = false,
       resources:  Option[File] = None,
       ignored:    List[String] = Nil
     )
 
     @tailrec def parse(args: List[String], c: Parameters = Parameters()): Parameters = args match {
-      case "--target" :: tail         ⇒ parse(tail.tail, c.copy(target = tail.headOption.map(new File(_))))
-      case "--no-test" :: tail        ⇒ parse(tail, c.copy(test = false))
-      case "--no-market-test" :: tail ⇒ parse(tail, c.copy(marketTest = false))
-      case "--resources" :: tail      ⇒ parse(tail.tail, c.copy(resources = tail.headOption.map(new File(_))))
-      case s :: tail                  ⇒ parse(tail, c.copy(ignored = s :: c.ignored))
-      case Nil                        ⇒ c
+      case "--target" :: tail      ⇒ parse(tail.tail, c.copy(target = tail.headOption.map(new File(_))))
+      case "--test" :: tail        ⇒ parse(tail, c.copy(test = true))
+      case "--market-test" :: tail ⇒ parse(tail, c.copy(marketTest = true))
+      case "--resources" :: tail   ⇒ parse(tail.tail, c.copy(resources = tail.headOption.map(new File(_))))
+      case s :: tail               ⇒ parse(tail, c.copy(ignored = s :: c.ignored))
+      case Nil                     ⇒ c
     }
 
     val parameters = parse(args.toList.map(_.trim))
