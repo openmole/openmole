@@ -73,7 +73,8 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
       cleanFiles <++= cleanFiles in openmoleGUI,
       cleanFiles <++= cleanFiles in consolePlugins,
       cleanFiles <++= cleanFiles in dbServer,
-      cleanFiles <++= cleanFiles in openmoleRuntime
+      cleanFiles <++= cleanFiles in openmoleRuntime,
+      cleanFiles <++= cleanFiles in launcher
     )
 
   lazy val webServerDependencies = Seq(
