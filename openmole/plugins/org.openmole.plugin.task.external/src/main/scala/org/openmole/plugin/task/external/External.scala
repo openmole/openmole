@@ -179,7 +179,7 @@ import External._
           tmpDir.recursiveDelete
           throw e
       }
-    tmpDir.delete
+    tmpDir.recursiveDelete
     res
   }
 
