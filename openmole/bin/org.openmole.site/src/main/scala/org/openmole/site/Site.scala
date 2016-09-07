@@ -91,10 +91,7 @@ object Site {
     dest.recursiveDelete
 
     val modules = generateModules(dest, f ⇒ s"modules/${f.getName}", dest / buildinfo.moduleListName)
-
-    val m = new Market(Market.entries, dest)
-    val marketEntries = m.generate(parameters.resources.get, parameters.test && parameters.marketTest)
-    SerialiserService.serialise(MarketIndex(marketEntries.map(_.toDeployedMarketEntry)), (dest / buildinfo.marketName))
+    val marketEntries = generateMarket(parameters.resources.get, dest, dest / buildinfo.marketName, parameters.test && parameters.marketTest)
 
     DocumentationPages.marketEntries = marketEntries
 
@@ -208,6 +205,16 @@ object Site {
     val modules = Module.generate(Module.all, baseDirectory, moduleLocation)
     index.content = Serialization.writePretty(modules)
     modules
+  }
+
+  def generateMarket(resourceDirectory: File, dest: File, index: File, test: Boolean) = {
+    import org.json4s._
+    import org.json4s.jackson.Serialization
+    implicit val formats = Serialization.formats(NoTypeHints)
+    val m = new Market(Market.entries, dest)
+    val marketEntries = m.generate(resourceDirectory, test)
+    index.content = Serialization.writePretty(MarketIndex(marketEntries.map(_.toDeployedMarketEntry)))
+    marketEntries
   }
 
 }

@@ -399,7 +399,11 @@ object ApiImpl extends Api {
           })
       })
 
-    mapToMd(download(buildinfo.marketAddress)(SerialiserService.deserialise[buildinfo.MarketIndex](_)))
+    import org.json4s._
+    import org.json4s.jackson.Serialization
+    implicit val formats = Serialization.formats(NoTypeHints)
+
+    mapToMd(download(buildinfo.marketAddress)(Serialization.read[buildinfo.MarketIndex](_)))
   }
 
   def getMarketEntry(entry: buildinfo.MarketIndexEntry, path: SafePath) = {
