@@ -90,9 +90,7 @@ object Site {
     val dest = parameters.target.getOrElse(new File("./openmole-site"))
     dest.recursiveDelete
 
-    val moduleDirectory = dest / "modules"
-    val modules = generateModules(dest, f ⇒ s"modules/${f.getName}")
-    SerialiserService.serialise(modules, (dest / buildinfo.moduleListName))
+    val modules = generateModules(dest, f ⇒ s"modules/${f.getName}", dest / buildinfo.moduleListName)
 
     val m = new Market(Market.entries, dest)
     val marketEntries = m.generate(parameters.resources.get, parameters.test && parameters.marketTest)
@@ -203,8 +201,13 @@ object Site {
     0
   }
 
-  def generateModules(baseDirectory: File, moduleLocation: File ⇒ String) = {
-    Module.generate(Module.all, baseDirectory, moduleLocation)
+  def generateModules(baseDirectory: File, moduleLocation: File ⇒ String, index: File) = {
+    import org.json4s._
+    import org.json4s.jackson.Serialization
+    implicit val formats = Serialization.formats(NoTypeHints)
+    val modules = Module.generate(Module.all, baseDirectory, moduleLocation)
+    index.content = Serialization.writePretty(modules)
+    modules
   }
 
 }

@@ -249,6 +249,7 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
         libraryDependencies += Libraries.spray,
         libraryDependencies += Libraries.lang3,
         libraryDependencies += Libraries.toolxitBibtex intransitive (),
+        libraryDependencies += Libraries.json4s,
         setExecutable ++= Seq("site"),
         assemblyDependenciesPath := assemblyPath.value / "plugins",
         resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "doc") sendTo (assemblyPath / "plugins"),

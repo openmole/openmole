@@ -23,7 +23,7 @@ object OSGi extends Defaults {
       version := scalatraVersion)
 
   lazy val json4s = OsgiProject("org.json4s", exports = Seq("org.json4s.*"), privatePackages = Seq("!scala.*", "!org.slf4j.*", "*")) settings (
-    libraryDependencies +=  "org.json4s" %% "json4s-jackson" % "3.4.0",
+    libraryDependencies +=  "org.json4s" %% "json4s-jackson" % "3.4.0" % "provided",
     version := "3.4.0")
 
   lazy val logback = OsgiProject("ch.qos.logback", exports = Seq("ch.qos.logback.*", "org.slf4j.impl"), dynamicImports = Seq("*")) settings
