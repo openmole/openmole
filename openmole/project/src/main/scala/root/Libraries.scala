@@ -74,8 +74,6 @@ object Libraries extends Defaults {
 
   lazy val scalaLang = "org.openmole" %% "org-scala-lang-scala-library" % "2.11.8"
 
-  lazy val jodaTime = "org.openmole" %% "org-joda-time" % "1.6"
-
   lazy val jasypt = "org.openmole" %% "org-jasypt-encryption" % "1.9.2"
 
   lazy val netlogo4 = "org.openmole" % "ccl-northwestern-edu-netlogo4" % "4.1.3"

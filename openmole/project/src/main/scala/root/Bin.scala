@@ -99,7 +99,6 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
     Libraries.log4j,
     Libraries.h2,
     Libraries.jasypt,
-    Libraries.jodaTime,
     Libraries.scalaLang,
     Libraries.slf4j,
     Libraries.scalaz,
@@ -213,7 +212,6 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
         bouncyCastle,
         scalaLang,
         logging,
-        jodaTime,
         scopt
       ) ++ coreDependencies,
       assemblyDependenciesPath := assemblyPath.value / "plugins",

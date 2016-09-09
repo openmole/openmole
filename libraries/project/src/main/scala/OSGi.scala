@@ -82,11 +82,6 @@ object OSGi extends Defaults {
       )
     }, version := scalaVersion.value)
 
-  lazy val jodaTime = OsgiProject("org.joda.time") settings(
-    libraryDependencies += "joda-time" % "joda-time" % "1.6",
-    version := "1.6"
-    )
-
   lazy val jasyptVersion = "1.9.2"
   lazy val jasypt = OsgiProject("org.jasypt.encryption", exports = Seq("org.jasypt.*")) settings(
     libraryDependencies += "org.jasypt" % "jasypt" % jasyptVersion,

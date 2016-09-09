@@ -34,7 +34,7 @@ object Core extends Defaults {
   val exception = OsgiProject("exception", imports = Seq("*"))
 
   val tools = OsgiProject("tools", global = true, imports = Seq("*")) settings
-    (libraryDependencies ++= Seq(xstream, exec, math, jodaTime, scalaLang, scalatest, equinoxOSGi)) dependsOn
+    (libraryDependencies ++= Seq(xstream, exec, math, scalaLang, scalatest, equinoxOSGi)) dependsOn
     (exception, openmoleTar, openmoleFile, openmoleLock, openmoleThread, openmoleHash, openmoleLogger, openmoleStream, openmoleCollection, openmoleStatistics, openmoleTypes, openmoleCache)
 
   val event = OsgiProject("event", imports = Seq("*")) dependsOn (tools) settings (
