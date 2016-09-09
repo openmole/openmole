@@ -19,7 +19,7 @@
 package org.openmole.plugin.environment.egi
 
 import org.openmole.core.batch.environment.SerializedJob
-import org.openmole.core.batch.storage._
+import org.openmole.tool.file.uniqName
 import org.openmole.core.workspace.Workspace
 import org.openmole.plugin.environment.gridscale.GridScaleJobService
 import org.openmole.core.batch.jobservice.{ BatchJob, BatchJobId }
@@ -77,7 +77,7 @@ trait DIRACJobService extends GridScaleJobService { js ⇒
 
     val script = Workspace.newFile("script", ".sh")
     try {
-      val outputFilePath = storage.child(path, Storage.uniqName("job", ".out"))
+      val outputFilePath = storage.child(path, uniqName("job", ".out"))
 
       Resource.fromFile(script).write(jobScript(serializedJob, outputFilePath, None, None))
 

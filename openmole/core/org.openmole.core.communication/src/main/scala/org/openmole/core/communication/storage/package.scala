@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2014 Romain Reuillon
+/**
+ * Created by Romain Reuillon on 09/09/16.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -13,15 +13,15 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
  */
+package org.openmole.core.communication
 
-package org.openmole.core.batch.storage
+package object storage {
+  object TransferOptions {
+    implicit def default = TransferOptions()
+  }
 
-import java.io.File
+  case class TransferOptions(raw: Boolean = false, forceCopy: Boolean = false, canMove: Boolean = false)
 
-trait RemoteStorage {
-  def upload(src: File, dest: String, options: TransferOptions = TransferOptions.default): Unit
-  def download(src: String, dest: File, options: TransferOptions = TransferOptions.default): Unit
-  def child(parent: String, child: String): String
 }
-

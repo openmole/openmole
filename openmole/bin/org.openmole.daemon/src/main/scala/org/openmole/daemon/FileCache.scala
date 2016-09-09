@@ -20,8 +20,8 @@ package org.openmole.daemon
 import java.io.File
 
 import java.io.File
-import org.openmole.core.batch.message.FileMessage
-import org.openmole.core.batch.message.ReplicatedFile
+import org.openmole.core.communication.storage.message.FileMessage
+import org.openmole.core.communication.storage.message.ReplicatedFile
 import org.openmole.tool.file._
 import org.openmole.tool.logger.Logger
 import scala.collection.mutable.HashMap

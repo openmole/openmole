@@ -19,7 +19,8 @@ package org.openmole.core.batch.refresh
 
 import java.io.File
 import java.util.UUID
-import org.openmole.core.batch.message._
+import org.openmole.core.communication.message._
+import org.openmole.core.communication.storage._
 import org.openmole.core.batch.replication._
 import org.openmole.core.batch.storage._
 import org.openmole.core.batch.control._
@@ -31,6 +32,7 @@ import org.openmole.tool.file._
 import org.openmole.tool.hash._
 import org.openmole.core.workflow.job._
 import org.openmole.core.tools.service.Random._
+import org.openmole.tool.file.uniqName
 
 import org.openmole.core.serializer._
 import org.openmole.core.workspace.Workspace
@@ -73,11 +75,11 @@ class UploadActor(jobManager: JobManager) {
     val communicationPath = storage.child(storage.tmpDir, UUID.randomUUID.toString)
     storage.makeDir(communicationPath)
 
-    val inputPath = storage.child(communicationPath, Storage.uniqName("job", ".in"))
+    val inputPath = storage.child(communicationPath, uniqName("job", ".in"))
 
     val runtime = replicateTheRuntime(job.job, job.environment, storage)
 
-    val jobForRuntimePath = storage.child(communicationPath, Storage.uniqName("job", ".tgz"))
+    val jobForRuntimePath = storage.child(communicationPath, uniqName("job", ".tgz"))
 
     val executionMessage = createExecutionMessage(
       job.job,
@@ -111,7 +113,7 @@ class UploadActor(jobManager: JobManager) {
     val hash = FileService.hash(job.moleExecution, toReplicate).toString
 
     def upload = {
-      val name = Storage.uniqName(System.currentTimeMillis.toString, ".rep")
+      val name = uniqName(System.currentTimeMillis.toString, ".rep")
       val newFile = storage.child(storage.persistentDir, name)
       Log.logger.fine(s"Upload $toReplicate to $newFile on ${storage.id} mode $fileMode")
       signalUpload(storage.upload(toReplicate, newFile, options), toReplicate, newFile, storage)

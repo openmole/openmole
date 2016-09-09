@@ -63,7 +63,7 @@ trait WMSJobService extends GridScaleJobService { js ⇒
 
     val script = Workspace.newFile("script", ".sh")
     try {
-      val outputFilePath = storage.child(path, Storage.uniqName("job", ".out"))
+      val outputFilePath = storage.child(path, uniqName("job", ".out"))
       val _runningPath = storage.child(path, runningFile)
       val _finishedPath = storage.child(path, finishedFile)
 

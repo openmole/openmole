@@ -17,7 +17,7 @@
 
 package org.openmole.core.batch.environment
 
-import org.openmole.core.batch.message.FileMessage
+import org.openmole.core.communication.message._
 
 case class Runtime(
   storage:            FileMessage,

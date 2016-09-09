@@ -26,8 +26,10 @@ object Core extends Defaults {
 
   lazy val batch = OsgiProject("batch", imports = Seq("*")) dependsOn (
     workflow, workspace, tools, event, replication, updater, exception,
-    serializer, fileService, pluginManager, openmoleTar
+    serializer, fileService, pluginManager, openmoleTar, communication
   ) settings (libraryDependencies ++= Seq(gridscale, h2, guava, jasypt, slick))
+
+  lazy val communication = OsgiProject("communication", imports = Seq("*")) dependsOn (workflow, workspace)
 
   lazy val dsl = OsgiProject("dsl", imports = Seq("*")) dependsOn (workflow, logging)
 

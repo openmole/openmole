@@ -31,7 +31,7 @@ import org.openmole.core.tools.service.{ OS, ProcessUtil }
 import org.openmole.core.workspace.{ Workspace, ConfigurationLocation }
 import org.openmole.plugin.environment.desktopgrid._
 import DesktopGridEnvironment._
-import org.openmole.core.batch.message._
+import org.openmole.core.communication.storage.message._
 import org.openmole.core.batch.storage._
 import org.openmole.core.serializer._
 import org.openmole.tool.tar._
@@ -39,7 +39,7 @@ import org.openmole.tool.hash._
 import ProcessUtil._
 import fr.iscpif.gridscale.ssh._
 
-import org.openmole.core.batch.message.FileMessage._
+import org.openmole.core.communication.storage.message.FileMessage._
 import scala.annotation.tailrec
 import util.{ Failure, Success }
 import concurrent.duration._

@@ -18,7 +18,7 @@ package org.openmole.plugin.environment.gridscale
 
 import java.io.File
 import org.openmole.tool.file._
-import org.openmole.core.batch.storage.TransferOptions
+import org.openmole.core.communication.storage._
 
 object LogicalLinkStorage {
   def apply(root: String) = {

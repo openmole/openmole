@@ -19,6 +19,7 @@ package org.openmole.plugin.environment.desktopgrid
 
 import java.io.File
 import java.net.URI
+
 import org.openmole.core.batch.control._
 import org.openmole.core.batch.environment._
 import org.openmole.core.batch.replication.ReplicaCatalog
@@ -33,8 +34,8 @@ import org.openmole.core.workflow.execution.ExecutionState._
 import org.openmole.tool.file._
 import org.openmole.tool.thread._
 import org.openmole.tool.hash._
-
 import DesktopGridEnvironment._
+import org.openmole.core.communication.storage.RemoteStorage
 
 object DesktopGridService {
 

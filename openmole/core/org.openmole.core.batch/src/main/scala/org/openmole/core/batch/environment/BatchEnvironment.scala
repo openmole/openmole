@@ -39,7 +39,7 @@ import org.openmole.core.updater.Updater
 import org.openmole.core.workflow.job._
 import org.openmole.core.workspace.{ ConfigurationLocation, Workspace }
 import org.openmole.core.workflow.execution._
-import org.openmole.core.batch.message._
+import org.openmole.core.communication.message._
 import org.openmole.core.console.ScalaREPL.ReferencedClasses
 import org.openmole.core.console.{ REPLClassloader, ScalaREPL }
 import org.openmole.tool.cache._

@@ -17,10 +17,11 @@
 
 package org.openmole.plugin.environment.gridscale
 
-import java.io.{ InputStream, OutputStream }
+import java.io.{ InputStream }
 
 import fr.iscpif.gridscale.storage.{ Storage ⇒ GSStorage, ListEntry }
-import org.openmole.core.batch.storage.{ TransferOptions, Storage }
+import org.openmole.core.batch.storage.{ Storage }
+import org.openmole.core.communication.storage._
 
 trait GridScaleStorage <: Storage {
   val storage: GSStorage

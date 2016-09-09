@@ -20,7 +20,8 @@ package org.openmole.core.batch.refresh
 import java.io.{ PrintStream, FileInputStream, IOException }
 import org.openmole.core.batch.control._
 import org.openmole.core.batch.environment._
-import org.openmole.core.batch.message._
+import org.openmole.core.communication.message._
+import org.openmole.core.communication.storage._
 import org.openmole.core.batch.storage._
 import org.openmole.core.event.EventDispatcher
 import org.openmole.core.exception.InternalProcessingError

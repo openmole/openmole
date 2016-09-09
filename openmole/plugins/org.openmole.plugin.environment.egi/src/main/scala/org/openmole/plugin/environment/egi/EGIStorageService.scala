@@ -17,16 +17,18 @@
 
 package org.openmole.plugin.environment.egi
 
-import fr.iscpif.gridscale.http.{ HTTPSAuthentication, WebDAVLocation, DPMWebDAVStorage }
+import fr.iscpif.gridscale.http.{ DPMWebDAVStorage, HTTPSAuthentication, WebDAVLocation }
 import org.openmole.core.batch.storage._
 import org.openmole.core.batch.control._
 import org.openmole.core.workspace.Workspace
 import org.openmole.tool.file._
-import fr.iscpif.gridscale.storage.{ Storage ⇒ GSStorage, ListEntry, FileType }
-import fr.iscpif.gridscale.egi.{ SRMLocation, GlobusAuthenticationProvider, SRMStorage }
+import fr.iscpif.gridscale.storage.{ FileType, ListEntry, Storage ⇒ GSStorage }
+import fr.iscpif.gridscale.egi.{ GlobusAuthenticationProvider, SRMLocation, SRMStorage }
 import java.net.URI
-import java.io.{ IOException, File, InputStream, OutputStream }
+import java.io.{ File, IOException, InputStream, OutputStream }
+import org.openmole.core.communication.storage._
 import org.openmole.core.batch.environment.BatchEnvironment
+import org.openmole.core.communication.storage.RemoteStorage
 import org.openmole.plugin.environment.gridscale.GridScaleStorage
 
 import scala.sys.process.{ Process, ProcessLogger }

@@ -193,7 +193,7 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
   )
 
   lazy val openmoleRuntime =
-    OsgiProject("org.openmole.runtime", singleton = true, imports = Seq("*"), settings = tarProject ++ assemblySettings) dependsOn (Core.workflow, Core.batch, Core.serializer, Core.logging, Core.event, Core.exception) settings (commonsSettings: _*) settings (
+    OsgiProject("org.openmole.runtime", singleton = true, imports = Seq("*"), settings = tarProject ++ assemblySettings) dependsOn (Core.workflow, Core.communication, Core.serializer, Core.logging, Core.event, Core.exception) settings (commonsSettings: _*) settings (
       assemblyDependenciesPath := assemblyPath.value / "plugins",
       resourcesAssemble <+= (resourceDirectory in Compile, assemblyPath) map { case (r, p) ⇒ r → p },
       resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "runtime") sendTo (assemblyPath / "plugins"),

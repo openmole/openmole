@@ -25,12 +25,7 @@ import org.openmole.core.workspace._
 import org.openmole.tool.file._
 import org.openmole.tool.stream._
 import concurrent.duration._
-
-object TransferOptions {
-  implicit def default = TransferOptions()
-}
-
-case class TransferOptions(raw: Boolean = false, forceCopy: Boolean = false, canMove: Boolean = false)
+import org.openmole.core.communication.storage._
 
 object Storage {
   val BufferSize = ConfigurationLocation("Storage", "BufferSize", Some(65535))
@@ -39,9 +34,6 @@ object Storage {
   Workspace setDefault BufferSize
   Workspace setDefault CopyTimeout
   Workspace setDefault CloseTimeout
-
-  def uniqName(prefix: String, sufix: String) = prefix + "_" + UUID.randomUUID.toString + sufix
-
 }
 
 trait CompressedTransfer <: Storage {

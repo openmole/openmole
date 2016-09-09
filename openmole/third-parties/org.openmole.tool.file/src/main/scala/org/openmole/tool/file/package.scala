@@ -454,6 +454,8 @@ package file {
       else (doubleBytes / tB).formatted("%.2f").toString + "TB"
     }
 
+    def uniqName(prefix: String, sufix: String) = prefix + "_" + UUID.randomUUID.toString + sufix
+
   }
 
 }

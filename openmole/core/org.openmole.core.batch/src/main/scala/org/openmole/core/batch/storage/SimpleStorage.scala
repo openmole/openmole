@@ -19,6 +19,7 @@ package org.openmole.core.batch.storage
 
 import fr.iscpif.gridscale.storage.ListEntry
 import java.io.{ ByteArrayInputStream, File, InputStream }
+import org.openmole.core.communication.storage._
 
 trait SimpleStorage extends Storage {
   def exists(path: String): Boolean = _exists(path)
