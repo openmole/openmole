@@ -18,9 +18,9 @@
 
 package org.openmole.plugin.environment.ssh
 
-import org.openmole.core.batch.control.UsageControl
-import org.openmole.core.batch.environment._
-import org.openmole.core.batch.jobservice.BatchJob
+import org.openmole.plugin.environment.batch.control.UsageControl
+import org.openmole.plugin.environment.batch.environment._
+import org.openmole.plugin.environment.batch.jobservice.BatchJob
 import org.openmole.core.event._
 import org.openmole.core.workflow.execution.ExecutionState
 import org.openmole.core.workspace.Workspace

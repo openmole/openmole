@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.environment.egi
 
-import org.openmole.core.batch.environment.{ BatchEnvironment, BatchExecutionJob }
+import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, BatchExecutionJob }
 import org.openmole.core.updater.IUpdatableWithVariableDelay
 import org.openmole.core.workflow.mole.MoleExecution
 import org.openmole.core.workflow.execution.ExecutionState._

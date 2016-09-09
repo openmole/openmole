@@ -21,8 +21,8 @@ import java.net.URI
 
 import fr.iscpif.gridscale.tools.findWorking
 import fr.iscpif.gridscale.egi.BDII
-import org.openmole.core.batch.control.LimitedAccess
-import org.openmole.core.batch.environment.{ BatchEnvironment, BatchExecutionJob, MemoryRequirement }
+import org.openmole.plugin.environment.batch.control.LimitedAccess
+import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, BatchExecutionJob, MemoryRequirement }
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.updater.Updater
 import org.openmole.core.workflow.job.Job

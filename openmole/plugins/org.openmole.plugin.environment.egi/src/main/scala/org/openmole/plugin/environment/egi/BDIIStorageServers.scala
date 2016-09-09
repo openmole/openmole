@@ -19,10 +19,10 @@ package org.openmole.plugin.environment.egi
 
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.tool.file._
-import org.openmole.core.batch.environment.BatchEnvironment
+import org.openmole.plugin.environment.batch.environment.BatchEnvironment
 import fr.iscpif.gridscale.tools.findWorking
 import fr.iscpif.gridscale.egi.{ BDII, GlobusAuthentication }
-import org.openmole.core.batch.replication.ReplicaCatalog
+import org.openmole.plugin.environment.batch.replication.ReplicaCatalog
 import org.openmole.core.workspace._
 import org.openmole.tool.hash.Hash
 import org.openmole.tool.logger.Logger

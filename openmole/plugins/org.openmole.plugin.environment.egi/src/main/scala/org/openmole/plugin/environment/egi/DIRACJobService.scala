@@ -18,12 +18,12 @@
 
 package org.openmole.plugin.environment.egi
 
-import org.openmole.core.batch.environment.SerializedJob
+import org.openmole.plugin.environment.batch.environment.SerializedJob
 import org.openmole.tool.file.uniqName
 import org.openmole.core.workspace.Workspace
 import org.openmole.plugin.environment.gridscale.GridScaleJobService
-import org.openmole.core.batch.jobservice.{ BatchJob, BatchJobId }
-import org.openmole.core.batch.control.{ UnlimitedAccess }
+import org.openmole.plugin.environment.batch.jobservice.{ BatchJob, BatchJobId }
+import org.openmole.plugin.environment.batch.control.{ UnlimitedAccess }
 import org.openmole.tool.logger.Logger
 import fr.iscpif.gridscale.{ egi ⇒ gridscale }
 import fr.iscpif.gridscale.egi._

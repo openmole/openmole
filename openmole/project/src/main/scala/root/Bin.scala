@@ -40,7 +40,6 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
       Core.event,
       Core.pluginManager,
       Core.workflow,
-      Core.batch,
       gui.Server.core,
       gui.Client.core,
       Core.logging,
@@ -91,7 +90,6 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
   ) ++ Seq(Libraries.bouncyCastle)
 
   lazy val coreDependencies = Seq[sbt.ModuleID](
-    Libraries.gridscale,
     Libraries.osgiCompendium,
     Libraries.logback,
     Libraries.scopt,
@@ -129,6 +127,7 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
     clapper,
     rx,
     scalajs,
+    gridscale,
     gridscaleHTTP,
     gridscaleGlite,
     gridscaleSSH
@@ -160,6 +159,7 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
       netlogo5,
       mgo,
       scalabc,
+      gridscale,
       gridscalePBS,
       gridscaleSLURM,
       gridscaleSGE,
@@ -207,7 +207,7 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
       dependencyName := rename
     )
 
-  lazy val daemon = OsgiProject("org.openmole.daemon", settings = tarProject ++ assemblySettings) settings (commonsSettings: _*) dependsOn (Core.workflow, Core.workflow, Core.batch, Core.workspace,
+  lazy val daemon = OsgiProject("org.openmole.daemon", settings = tarProject ++ assemblySettings) settings (commonsSettings: _*) dependsOn (Core.workflow, Core.workflow, Core.communication, Core.workspace,
     Core.fileService, Core.exception, Core.tools, Core.logging, plugin.Environment.desktopgrid) settings (
       assemblyDependenciesPath := assemblyPath.value / "plugins",
       resourcesAssemble <++=
@@ -299,7 +299,7 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
       Core.console,
       Core.project,
       Core.dsl,
-      Core.batch,
+      //Core.batch,
       Core.buildinfo
     )
 

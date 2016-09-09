@@ -19,10 +19,10 @@
 package org.openmole.plugin.environment.egi
 
 import java.io.File
-import org.openmole.core.batch.control._
-import org.openmole.core.batch.environment.SerializedJob
+import org.openmole.plugin.environment.batch.control._
+import org.openmole.plugin.environment.batch.environment.SerializedJob
 import org.openmole.core.workspace.Workspace
-import org.openmole.core.batch.storage._
+import org.openmole.plugin.environment.batch.storage._
 import org.openmole.plugin.environment.gridscale.GridScaleJobService
 import fr.iscpif.gridscale.egi.{ WMSJobDescription }
 import StatusFiles._

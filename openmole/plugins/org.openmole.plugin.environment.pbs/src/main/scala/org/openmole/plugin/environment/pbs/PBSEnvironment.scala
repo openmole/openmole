@@ -21,8 +21,8 @@ import fr.iscpif.gridscale.ssh.SSHStorage
 import fr.iscpif.gridscale.ssh.SSHHost
 import java.net.URI
 
-import org.openmole.core.batch.control.LimitedAccess
-import org.openmole.core.batch.environment._
+import org.openmole.plugin.environment.batch.control.LimitedAccess
+import org.openmole.plugin.environment.batch.environment._
 import org.openmole.core.workspace._
 import org.openmole.plugin.environment.gridscale._
 import org.openmole.plugin.environment.ssh._

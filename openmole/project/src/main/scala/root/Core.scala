@@ -24,11 +24,6 @@ object Core extends Defaults {
     libraryDependencies += equinoxOSGi
   ) dependsOn (workspace, pluginManager, fileService, tools, openmoleTar, console)
 
-  lazy val batch = OsgiProject("batch", imports = Seq("*")) dependsOn (
-    workflow, workspace, tools, event, replication, updater, exception,
-    serializer, fileService, pluginManager, openmoleTar, communication
-  ) settings (libraryDependencies ++= Seq(gridscale, h2, guava, jasypt, slick))
-
   lazy val communication = OsgiProject("communication", imports = Seq("*")) dependsOn (workflow, workspace)
 
   lazy val dsl = OsgiProject("dsl", imports = Seq("*")) dependsOn (workflow, logging)

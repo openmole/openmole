@@ -16,7 +16,7 @@
  */
 package org.openmole.plugin.environment
 
-import org.openmole.core.batch.storage.SimpleStorage
+import org.openmole.plugin.environment.batch.storage.SimpleStorage
 import org.openmole.core.workspace._
 import org.openmole.plugin.environment.gridscale._
 

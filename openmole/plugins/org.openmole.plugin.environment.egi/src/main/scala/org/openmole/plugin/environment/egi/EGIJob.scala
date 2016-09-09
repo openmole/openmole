@@ -17,9 +17,9 @@
 
 package org.openmole.plugin.environment.egi
 
-import org.openmole.core.batch.environment._
-import org.openmole.core.batch.control.AccessToken
-import org.openmole.core.batch.jobservice.{ BatchJob, BatchJobId }
+import org.openmole.plugin.environment.batch.environment._
+import org.openmole.plugin.environment.batch.control.AccessToken
+import org.openmole.plugin.environment.batch.jobservice.{ BatchJob, BatchJobId }
 import org.openmole.core.workflow.execution.ExecutionState._
 import org.openmole.core.workspace.Workspace
 import fr.iscpif.gridscale.egi.WMSJobDescription

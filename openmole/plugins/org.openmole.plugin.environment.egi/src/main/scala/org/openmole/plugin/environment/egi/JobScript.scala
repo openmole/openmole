@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.environment.egi
 
-import org.openmole.core.batch.environment.{ BatchEnvironment, SerializedJob }
+import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, SerializedJob }
 import java.util.UUID
 import java.net.URI
 import org.openmole.core.workspace.Workspace

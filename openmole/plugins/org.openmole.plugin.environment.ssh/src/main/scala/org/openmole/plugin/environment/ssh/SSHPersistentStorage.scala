@@ -20,9 +20,9 @@ package org.openmole.plugin.environment.ssh
 import java.io.File
 import java.net.URI
 
-import org.openmole.core.batch.control.{ LimitedAccess, UnlimitedAccess, UsageControl }
-import org.openmole.core.batch.environment.BatchEnvironment
-import org.openmole.core.batch.storage._
+import org.openmole.plugin.environment.batch.control.{ LimitedAccess, UnlimitedAccess, UsageControl }
+import org.openmole.plugin.environment.batch.environment.BatchEnvironment
+import org.openmole.plugin.environment.batch.storage._
 import org.openmole.core.communication.storage.RemoteStorage
 import org.openmole.core.workspace.Workspace
 import org.openmole.plugin.environment.gridscale.{ LocalStorage, LogicalLinkStorage }

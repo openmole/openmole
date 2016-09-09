@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.environment.ssh
 
-import org.openmole.core.batch.environment._
+import org.openmole.plugin.environment.batch.environment._
 import java.net.URI
 import org.openmole.core.workspace.{ Workspace, ConfigurationLocation }
 import concurrent.duration._

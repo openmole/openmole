@@ -22,8 +22,8 @@ import fr.iscpif.gridscale.condor.CondorRequirement
 import fr.iscpif.gridscale.ssh.{ SSHAuthentication, SSHHost, SSHStorage }
 import java.net.URI
 
-import org.openmole.core.batch.control.LimitedAccess
-import org.openmole.core.batch.environment._
+import org.openmole.plugin.environment.batch.control.LimitedAccess
+import org.openmole.plugin.environment.batch.environment._
 import org.openmole.core.workspace._
 import org.openmole.core.workflow.dsl._
 import org.openmole.plugin.environment.gridscale._

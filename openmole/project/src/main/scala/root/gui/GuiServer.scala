@@ -24,7 +24,7 @@ object Server extends GuiDefaults {
       openmoleCollection,
       Core.project,
       Core.dsl,
-      Core.batch,
+      _root_.plugin.Environment.batch,
       _root_.plugin.Environment.egi,
       _root_.plugin.Environment.ssh,
       Misc.utils,

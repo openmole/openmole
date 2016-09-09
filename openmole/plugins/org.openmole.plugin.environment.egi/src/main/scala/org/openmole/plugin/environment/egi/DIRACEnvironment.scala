@@ -20,7 +20,7 @@ package org.openmole.plugin.environment.egi
 import java.net.URI
 
 import fr.iscpif.gridscale.authentication.P12Authentication
-import org.openmole.core.batch.environment.{ BatchEnvironment, BatchExecutionJob, UpdateInterval }
+import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, BatchExecutionJob, UpdateInterval }
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.fileservice._
 import org.openmole.core.workflow.dsl._
