@@ -153,8 +153,7 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
 
   lazy val consolePlugins = Project("consoleplugins", dir / "target" / "consoleplugins", settings = assemblySettings) settings (commonsSettings: _*) settings (
     resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "plugin", true) sendTo assemblyPath,
-    libraryDependencies ++=
-    Seq(
+    libraryDependencies ++= (Seq(
       sshd,
       family,
       opencsv,
@@ -167,8 +166,12 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
       gridscaleCondor,
       gridscalePBS,
       gridscaleOAR,
+      gridscalePBS,
+      gridscaleHTTP,
+      gridscaleGlite,
+      gridscaleSSH,
       osgiCompendium
-    ) map (_ intransitive ()),
+    ) ++ apacheHTTP) map (_ intransitive ()),
     dependencyFilter := pluginFilter,
     dependencyName := rename
   )
