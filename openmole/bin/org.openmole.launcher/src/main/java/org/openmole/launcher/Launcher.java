@@ -94,7 +94,9 @@ public class Launcher {
             List<Bundle> bundles = new LinkedList<>();
 
             for(File f: directory.listFiles()) {
-                bundles.add(context.installBundle(f.toURI().toString()));
+                Bundle b = context.installBundle(f.toURI().toString());
+                if(b.getSymbolicName() == null) throw new RuntimeException("Bundle " + f + " has no symbolic name");
+                bundles.add(b);
             }
 
             for(String p: priority) {
