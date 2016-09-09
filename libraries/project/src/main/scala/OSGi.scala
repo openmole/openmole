@@ -14,16 +14,17 @@ object OSGi extends Defaults {
   lazy val jettyVersion = "9.2.14.v20151106"
 
   lazy val scalatra = OsgiProject("org.scalatra",
-    exports = Seq("org.scalatra.*, org.fusesource.*", "grizzled.*", "com.fasterxml.jackson.*", "org.json4s.*", "org.eclipse.jetty.*", "javax.*"),
+    exports = Seq("org.scalatra.*, org.fusesource.*", "grizzled.*", "org.eclipse.jetty.*", "javax.*"),
     privatePackages = Seq("!scala.*", "!org.slf4j.*", "*")) settings(
       libraryDependencies += "org.scalatra" %% "scalatra" % scalatraVersion,
-      libraryDependencies += "org.scalatra" %% "scalatra-json" % scalatraVersion,
       libraryDependencies += "org.scalatra" %% "scalatra-auth" % scalatraVersion,
       libraryDependencies += "org.eclipse.jetty" % "jetty-webapp" % jettyVersion,
       libraryDependencies += "org.eclipse.jetty" % "jetty-server" % jettyVersion,
-      libraryDependencies +=  "org.json4s" %% "json4s-jackson" % "3.3.0",
       version := scalatraVersion)
 
+  lazy val json4s = OsgiProject("org.json4s", exports = Seq("org.json4s.*"), privatePackages = Seq("!scala.*", "!org.slf4j.*", "*")) settings (
+    libraryDependencies +=  "org.json4s" %% "json4s-jackson" % "3.4.0" % "provided",
+    version := "3.4.0")
 
   lazy val logback = OsgiProject("ch.qos.logback", exports = Seq("ch.qos.logback.*", "org.slf4j.impl"), dynamicImports = Seq("*")) settings
     (libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.0.9", version := "1.0.9")
@@ -41,8 +42,7 @@ object OSGi extends Defaults {
 
   lazy val slf4j = OsgiProject("org.slf4j") settings(
     libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.10",
-    version := "1.7.10"
-    )
+    version := "1.7.10")
 
   lazy val xstream = OsgiProject(
     "com.thoughtworks.xstream",

@@ -19,21 +19,26 @@ package org.openmole.core.project
 
 import org.openmole.core.console.ScalaREPL
 import org.openmole.core.dsl._
+import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.workflow.tools._
-
-import scala.reflect.internal.util.BatchSourceFile
 
 object OpenMOLEREPL {
 
   def autoImports: Seq[String] = PluginInfo.pluginsInfo.toSeq.flatMap(_.namespaces).map(n ⇒ s"$n._")
   def keywordNamespace = "om"
 
-  def keywordNamespaceCode =
+  def keywordNamespaceCode = {
+    def withPart = {
+      val keyWordTraits = PluginInfo.pluginsInfo.flatMap(_.keywordTraits)
+      if (keyWordTraits.isEmpty) ""
+      else s"""with ${PluginInfo.pluginsInfo.flatMap(_.keywordTraits).mkString(" with ")}"""
+    }
     s"""
-       |object $keywordNamespace extends ${classOf[DSLPackage].getCanonicalName} with ${PluginInfo.pluginsInfo.flatMap(_.keywordTraits).mkString(" with ")}
+       |object $keywordNamespace extends ${classOf[DSLPackage].getCanonicalName} $withPart
      """.stripMargin
+  }
 
-  def dslImport = Seq("org.openmole.core.dsl._") ++ autoImports
+  def dslImport = Seq(classOf[org.openmole.core.dsl.DSLPackage].getPackage.getName + "._") ++ autoImports
   def imports = initialisationCommands(dslImport).mkString("\n")
 
   def initialisationCommands(imports: Seq[String]) =
@@ -46,7 +51,11 @@ object OpenMOLEREPL {
     def initialise(loop: ScalaREPL) = {
       args.workDirectory.mkdirs()
       loop.beQuietDuring {
-        loop interpret imports
+        (loop interpret imports) match {
+          case scala.tools.nsc.interpreter.Results.Error ⇒
+            throw new InternalProcessingError(s"Error while interpreting imports: ${imports}")
+          case _ ⇒
+        }
         ConsoleVariables.bindVariables(loop, args)
       }
       loop

@@ -35,12 +35,12 @@ object REST extends Defaults {
     imports = Seq("org.h2", "!com.sun.*", "*")
   ) dependsOn
     (Core.workflow, openmoleTar, openmoleCollection, Core.project, message, openmoleCrypto) settings
-    (libraryDependencies ++= Seq(bouncyCastle, logback, scalatra, scalaLang, arm, codec))
+    (libraryDependencies ++= Seq(bouncyCastle, logback, scalatra, scalaLang, arm, codec, json4s))
 
   lazy val client = Project("org-openmole-rest-client", dir / "client") settings (
     libraryDependencies += "org.apache.httpcomponents" % "httpclient" % "4.3.5",
     libraryDependencies += "org.apache.httpcomponents" % "httpmime" % "4.3.5",
-    libraryDependencies += "org.json4s" %% "json4s-jackson" % "3.2.10"
+    libraryDependencies += "org.json4s" %% "json4s-jackson" % "3.4.0"
   ) dependsOn (message, openmoleTar) settings (scalariformDefaults: _*)
 
 }

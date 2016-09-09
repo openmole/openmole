@@ -37,6 +37,7 @@ import scala.sys.process.BasicIO
 import org.openmole.site.credits._
 import org.openmole.core.buildinfo
 import spray.json.JsArray
+import module._
 
 import scala.annotation.tailrec
 
@@ -86,12 +87,11 @@ object Site {
 
     Config.testScript = parameters.test
 
-    val dest = parameters.target.getOrElse(new File("./openmole-doc-html"))
+    val dest = parameters.target.getOrElse(new File("./openmole-site"))
     dest.recursiveDelete
 
-    val m = new Market(Market.entries, dest)
-    val marketEntries = m.generate(parameters.resources.get, parameters.test && parameters.marketTest)
-    SerialiserService.serialise(MarketIndex(marketEntries.map(_.toDeployedMarketEntry)), (dest / buildinfo.marketName))
+    val modules = generateModules(dest, f ⇒ s"modules/${f.getName}", dest / buildinfo.moduleListName)
+    val marketEntries = generateMarket(parameters.resources.get, dest, dest / buildinfo.marketName, parameters.test && parameters.marketTest)
 
     DocumentationPages.marketEntries = marketEntries
 
@@ -196,6 +196,25 @@ object Site {
     DSLTest.runTest.get
 
     0
+  }
+
+  def generateModules(baseDirectory: File, moduleLocation: File ⇒ String, index: File) = {
+    import org.json4s._
+    import org.json4s.jackson.Serialization
+    implicit val formats = Serialization.formats(NoTypeHints)
+    val modules = Module.generate(Module.all, baseDirectory, moduleLocation)
+    index.content = Serialization.writePretty(modules)
+    modules
+  }
+
+  def generateMarket(resourceDirectory: File, dest: File, index: File, test: Boolean) = {
+    import org.json4s._
+    import org.json4s.jackson.Serialization
+    implicit val formats = Serialization.formats(NoTypeHints)
+    val m = new Market(Market.entries, dest)
+    val marketEntries = m.generate(resourceDirectory, test)
+    index.content = Serialization.writePretty(MarketIndex(marketEntries.map(_.toDeployedMarketEntry)))
+    marketEntries
   }
 
 }

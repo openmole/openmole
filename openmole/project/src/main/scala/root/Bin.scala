@@ -49,8 +49,8 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
       Core.dsl
     )
 
-  lazy val openmole =
-    Project("openmole", dir / "openmole", settings = tarProject ++ assemblySettings) settings (commonsSettings: _*) settings (
+  lazy val openmoleNaked =
+    Project("openmole-naked", dir / "openmole-naked", settings = tarProject ++ assemblySettings) settings (commonsSettings: _*) settings (
       setExecutable ++= Seq("openmole", "openmole.bat"),
       resourcesAssemble <+= (resourceDirectory in Compile, assemblyPath).identityMap,
       resourcesAssemble <++= Seq(openmoleUI.project, console.project, REST.server.project) sendTo { assemblyPath / "plugins" },
@@ -60,14 +60,12 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
       resourcesAssemble <+= (fullOptJS in gui.Client.core in Compile, assemblyPath) map { case (js, p) ⇒ js.data → (p / "webapp/js/openmole.js") },
       resourcesAssemble <+= (packageMinifiedJSDependencies in gui.Client.core in Compile, assemblyPath) map { case (js, p) ⇒ js → (p / "webapp/js/deps.js") },
       resourcesAssemble <+= (assemble in dbServer, assemblyPath) map { case (r, p) ⇒ r → (p / "dbserver") },
-      resourcesAssemble <+= (assemble in consolePlugins, assemblyPath) map { case (r, p) ⇒ r → (p / "plugins") },
       resourcesAssemble <+= (Tar.tar in openmoleRuntime, assemblyPath) map { case (r, p) ⇒ r → (p / "runtime" / r.getName) },
       resourcesAssemble <+= (assemble in launcher, assemblyPath) map { case (r, p) ⇒ r → (p / "launcher") },
-      libraryDependencies += Libraries.scalajHttp,
-      dependencyFilter := filter,
+      dependencyFilter := pluginFilter,
       dependencyName := rename,
       assemblyDependenciesPath := assemblyPath.value / "plugins",
-      Tar.name := "openmole.tar.gz",
+      Tar.name := "openmole-naked.tar.gz",
       Tar.innerFolder := "openmole",
       cleanFiles <++= cleanFiles in openmoleCore,
       cleanFiles <++= cleanFiles in openmoleGUI,
@@ -77,13 +75,24 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
       cleanFiles <++= cleanFiles in launcher
     )
 
-  lazy val webServerDependencies = Seq(
-    scalatra intransitive (),
-    bouncyCastle
-  )
+  lazy val openmole =
+    Project("openmole", dir / "openmole", settings = tarProject ++ assemblySettings) settings (commonsSettings: _*) settings (
+      setExecutable ++= Seq("openmole", "openmole.bat"),
+      Tar.name := "openmole.tar.gz",
+      Tar.innerFolder := "openmole",
+      dependencyFilter := pluginFilter,
+      resourcesAssemble <+= (assemble in openmoleNaked, assemblyPath).identityMap,
+      resourcesAssemble <+= (assemble in consolePlugins, assemblyPath) map { case (r, p) ⇒ r → (p / "plugins") },
+      cleanFiles <++= cleanFiles in openmoleNaked
+    )
+
+  lazy val webServerDependencies = Seq[sbt.ModuleID](
+    scalatra intransitive ()
+  ) ++ Seq(Libraries.bouncyCastle)
 
   lazy val coreDependencies = Seq[sbt.ModuleID](
     Libraries.gridscale,
+    Libraries.osgiCompendium,
     Libraries.logback,
     Libraries.scopt,
     Libraries.guava,
@@ -105,27 +114,32 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
     Libraries.asm,
     Libraries.collections,
     Libraries.configuration,
-    Libraries.logging
-  ) ++ webServerDependencies
+    Libraries.logging,
+    Libraries.json4s,
+    Libraries.monocle
+  ).map(_ intransitive ()) ++ webServerDependencies
 
-  lazy val guiCoreDependencies = Seq(
+  lazy val guiCoreDependencies = (Seq(
     scalajsTools,
     scalaTags,
     autowire,
     upickle,
-    scalatra intransitive (),
+    scalatra,
     scalajHttp,
     clapper,
     rx,
-    scalajs
-  )
+    scalajs,
+    gridscaleHTTP,
+    gridscaleGlite,
+    gridscaleSSH
+  ) ++ apacheHTTP) map (_ intransitive ())
 
   //FIXME separate web plugins from core ones
   lazy val openmoleCore = Project("openmolecore", dir / "target" / "openmolecore", settings = assemblySettings) settings (commonsSettings: _*) settings (
     resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "core") sendTo assemblyPath,
     resourcesAssemble <++= Seq(console.project) sendTo assemblyPath,
     libraryDependencies ++= coreDependencies,
-    dependencyFilter := filter,
+    dependencyFilter := pluginFilter,
     dependencyName := rename
   )
 
@@ -133,34 +147,30 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
     resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "gui") sendTo assemblyPath,
     resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "doc") sendTo assemblyPath,
     libraryDependencies ++= guiCoreDependencies,
-    dependencyFilter := filter,
+    dependencyFilter := pluginFilter,
     dependencyName := rename
-  ) enablePlugins (ScalaJSPlugin)
+  )
 
   lazy val consolePlugins = Project("consoleplugins", dir / "target" / "consoleplugins", settings = assemblySettings) settings (commonsSettings: _*) settings (
     resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "plugin", true) sendTo assemblyPath,
     libraryDependencies ++=
     Seq(
-      monocle intransitive (),
-      sshd intransitive (),
-      family intransitive (),
-      opencsv intransitive (),
-      netlogo5 intransitive (),
-      mgo intransitive (),
-      scalabc intransitive (),
-      gridscaleHTTP intransitive (),
-      gridscalePBS intransitive (),
-      gridscaleSLURM intransitive (),
-      gridscaleGlite intransitive (),
-      gridscaleSGE intransitive (),
-      gridscaleCondor intransitive (),
-      gridscalePBS intransitive (),
-      gridscaleOAR intransitive (),
-      gridscaleSSH intransitive (),
-      osgiCompendium intransitive ()
-    ) ++ apacheHTTP map (_ intransitive ()),
-      dependencyFilter := pluginFilter,
-      dependencyName := rename
+      sshd,
+      family,
+      opencsv,
+      netlogo5,
+      mgo,
+      scalabc,
+      gridscalePBS,
+      gridscaleSLURM,
+      gridscaleSGE,
+      gridscaleCondor,
+      gridscalePBS,
+      gridscaleOAR,
+      osgiCompendium
+    ) map (_ intransitive ()),
+    dependencyFilter := pluginFilter,
+    dependencyName := rename
   )
 
   lazy val dbServer = OsgiProject("org.openmole.dbserver", settings = assemblySettings) settings (commonsSettings: _*) dependsOn (Core.replication) settings (
@@ -174,7 +184,7 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
       Libraries.h2,
       Libraries.slf4j,
       Libraries.scalaLang
-    ),
+    ) map (_ intransitive ()),
     dependencyFilter := filter,
     dependencyName := rename
   )
@@ -189,7 +199,7 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
       setExecutable ++= Seq("run.sh"),
       Tar.name := "runtime.tar.gz",
       libraryDependencies ++= coreDependencies,
-      libraryDependencies += scopt,
+      libraryDependencies += scopt intransitive (),
       dependencyFilter := filter,
       dependencyName := rename
     )
@@ -248,6 +258,7 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
         libraryDependencies += Libraries.spray,
         libraryDependencies += Libraries.lang3,
         libraryDependencies += Libraries.toolxitBibtex intransitive (),
+        libraryDependencies += Libraries.json4s,
         setExecutable ++= Seq("site"),
         assemblyDependenciesPath := assemblyPath.value / "plugins",
         resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "doc") sendTo (assemblyPath / "plugins"),
@@ -264,7 +275,7 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
         resourcesAssemble <+= (fullOptJS in siteJS in Compile, assemblyPath) map { case (js, d) ⇒ js.data → (d / "resources" / "sitejs.js") },
         dependencyFilter := filter,
         dependencyName := rename
-      ) dependsOn (Core.project, Core.buildinfo, root.Doc.doc, siteJS, ThirdParties.txtmark)
+      ) dependsOn (Core.project, Core.buildinfo, root.Doc.doc, siteJS, ThirdParties.txtmark, plugin.Task.netLogo5)
 
   lazy val siteJS = Project("siteJS", dir / "org.openmole.sitejs") settings (commonsSettings: _*) settings (
     scalaTagsJS,
