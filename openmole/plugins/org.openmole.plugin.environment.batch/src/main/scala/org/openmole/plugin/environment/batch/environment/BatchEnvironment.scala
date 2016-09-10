@@ -122,6 +122,10 @@ object BatchEnvironment extends Logger {
   Workspace setDefault MaxUpdateErrorsInARow
   Workspace setDefault GetTokenInterval
 
+  private def runtimeDirLocation = Workspace.openMOLELocation / "runtime"
+
+  lazy val runtimeLocation = runtimeDirLocation / "runtime.tar.gz"
+
   Workspace setDefault MemorySizeForRuntime
   Workspace setDefault CheckInterval
   Workspace setDefault CheckFileExistsInterval
@@ -137,17 +141,10 @@ object BatchEnvironment extends Logger {
   lazy val jobManager = new JobManager
 
   def jvmLinuxX64Location = "org/openmole/plugin/environment/batch/jvm-x64.tar.gz"
-  def runtimeLocation = "org/openmole/plugin/environment/batch/runtime.tar.gz"
 
   lazy val jvmLinuxX64 = {
     val cp = Workspace.newFile("jvm-x64", ".tar.gz")
     withClosable { this.getClass.getClassLoader.getResourceAsStream(jvmLinuxX64Location) } { is ⇒ is copy cp }
-    cp
-  }
-
-  lazy val runtime = {
-    val cp = Workspace.newFile("runtime", ".tar.gz")
-    withClosable { this.getClass.getClassLoader.getResourceAsStream(runtimeLocation) } { is ⇒ is copy cp }
     cp
   }
 
@@ -203,7 +200,7 @@ trait BatchExecutionJob extends ExecutionJob { bej ⇒
 
   def usedFiles: Iterable[File] =
     (files ++
-      Seq(BatchEnvironment.runtime, BatchEnvironment.jvmLinuxX64) ++
+      Seq(environment.runtime, BatchEnvironment.jvmLinuxX64) ++
       environment.plugins() ++ plugins).distinct
 
   def usedFileHashes = usedFiles.map(f ⇒ (f, FileService.hash(job.moleExecution, f)))
@@ -244,7 +241,7 @@ trait BatchEnvironment extends SubmissionEnvironment { env ⇒
     jobManager ! Manage(bej)
   }
 
-  def runtime = BatchEnvironment.runtime
+  def runtime = BatchEnvironment.runtimeLocation
   def jvmLinuxX64 = BatchEnvironment.jvmLinuxX64
 
   @transient val plugins = Cache { PluginManager.pluginsForClass(this.getClass) }
