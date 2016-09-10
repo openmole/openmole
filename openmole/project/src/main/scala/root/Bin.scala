@@ -59,7 +59,6 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
       resourcesAssemble <+= (fullOptJS in gui.Client.core in Compile, assemblyPath) map { case (js, p) ⇒ js.data → (p / "webapp/js/openmole.js") },
       resourcesAssemble <+= (packageMinifiedJSDependencies in gui.Client.core in Compile, assemblyPath) map { case (js, p) ⇒ js → (p / "webapp/js/deps.js") },
       resourcesAssemble <+= (assemble in dbServer, assemblyPath) map { case (r, p) ⇒ r → (p / "dbserver") },
-      resourcesAssemble <+= (Tar.tar in openmoleRuntime, assemblyPath) map { case (r, p) ⇒ r → (p / "runtime" / r.getName) },
       resourcesAssemble <+= (assemble in launcher, assemblyPath) map { case (r, p) ⇒ r → (p / "launcher") },
       dependencyFilter := pluginFilter,
       dependencyName := rename,
@@ -70,7 +69,6 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
       cleanFiles <++= cleanFiles in openmoleGUI,
       cleanFiles <++= cleanFiles in consolePlugins,
       cleanFiles <++= cleanFiles in dbServer,
-      cleanFiles <++= cleanFiles in openmoleRuntime,
       cleanFiles <++= cleanFiles in launcher
     )
 
@@ -192,11 +190,14 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
     dependencyName := rename
   )
 
+
+  def runtimePlugins = Core.projectRefs.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "runtime")
+
   lazy val openmoleRuntime =
     OsgiProject("org.openmole.runtime", singleton = true, imports = Seq("*"), settings = tarProject ++ assemblySettings) dependsOn (Core.workflow, Core.communication, Core.serializer, Core.logging, Core.event, Core.exception) settings (commonsSettings: _*) settings (
       assemblyDependenciesPath := assemblyPath.value / "plugins",
       resourcesAssemble <+= (resourceDirectory in Compile, assemblyPath) map { case (r, p) ⇒ r → p },
-      resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "runtime") sendTo (assemblyPath / "plugins"),
+      resourcesAssemble <++= runtimePlugins sendTo (assemblyPath / "plugins"),
       resourcesAssemble <+= (assemble in launcher, assemblyPath) map { case (r, p) ⇒ r → (p / "launcher") },
       resourcesAssemble <+= (OsgiKeys.bundle, assemblyPath) map { case (r, p) ⇒ r → (p / "plugins" / r.getName) },
       setExecutable ++= Seq("run.sh"),

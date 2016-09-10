@@ -1,26 +1,41 @@
 package plugin
 
+import java.nio.file.{ CopyOption, Files, StandardCopyOption }
+
 import root.Libraries
 import sbt._
 import Keys._
 import com.typesafe.sbt.osgi.OsgiKeys
+import org.openmole.buildsystem.OMKeys.{ Tar, _ }
 import root._
 
 object Environment extends PluginDefaults {
   implicit val artifactPrefix = Some("org.openmole.plugin.environment")
 
-  lazy val batch = OsgiProject("batch", imports = Seq("*")) dependsOn (
-    Core.workflow, Core.workspace, Core.tools, Core.event, Core.replication, Core.updater, Core.exception,
-    Core.serializer, Core.fileService, Core.pluginManager, ThirdParties.openmoleTar, Core.communication
-  ) settings (
-      libraryDependencies ++= Seq(
-        Libraries.gridscale,
-        Libraries.h2,
-        Libraries.guava,
-        Libraries.jasypt,
-        Libraries.slick
+  lazy val batch = {
+    lazy val copyRuntime = TaskKey[Unit]("copyRuntime")
+
+    OsgiProject("batch", imports = Seq("*")) dependsOn (
+      Core.workflow, Core.workspace, Core.tools, Core.event, Core.replication, Core.updater, Core.exception,
+      Core.serializer, Core.fileService, Core.pluginManager, ThirdParties.openmoleTar, Core.communication, Bin.openmoleRuntime
+    ) settings (
+        copyRuntime := (Tar.tar in Bin.openmoleRuntime, crossTarget).map {
+          (tar, target) ⇒
+            val dest = new File(target, "classes/org/openmole/plugin/environment/batch/")
+            dest.mkdirs()
+            Files.copy(tar.toPath, new File(dest, "runtime.tar.gz").toPath, StandardCopyOption.REPLACE_EXISTING)
+        }.value,
+        (copyResources in Compile) := ((copyResources in Compile) dependsOn copyRuntime).value,
+        cleanFiles <++= cleanFiles in Bin.openmoleRuntime,
+        libraryDependencies ++= Seq(
+          Libraries.gridscale,
+          Libraries.h2,
+          Libraries.guava,
+          Libraries.jasypt,
+          Libraries.slick
+        )
       )
-    )
+  }
 
   lazy val oar = OsgiProject("oar", imports = Seq("*")) dependsOn (Core.dsl, batch, gridscale, ssh) settings
     (libraryDependencies += Libraries.gridscaleOAR)
