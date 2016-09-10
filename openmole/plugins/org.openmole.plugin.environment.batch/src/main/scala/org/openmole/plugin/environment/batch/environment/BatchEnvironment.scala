@@ -43,6 +43,7 @@ import org.openmole.core.communication.message._
 import org.openmole.core.console.ScalaREPL.ReferencedClasses
 import org.openmole.core.console.{ REPLClassloader, ScalaREPL }
 import org.openmole.tool.cache._
+import org.openmole.tool.stream._
 
 import ref.WeakReference
 import scala.Predef.Set
@@ -124,7 +125,6 @@ object BatchEnvironment extends Logger {
   private def runtimeDirLocation = Workspace.openMOLELocation / "runtime"
 
   lazy val runtimeLocation = runtimeDirLocation / "runtime.tar.gz"
-  lazy val JVMLinuxX64Location = runtimeDirLocation / "jvm-x64.tar.gz"
 
   Workspace setDefault MemorySizeForRuntime
   Workspace setDefault CheckInterval
@@ -139,6 +139,15 @@ object BatchEnvironment extends Logger {
   def getTokenInterval = Workspace.preference(GetTokenInterval) * Workspace.rng.nextDouble
 
   lazy val jobManager = new JobManager
+
+  def jvmLinuxX64Location = "org/openmole/plugin/environment/batch/jvm-x64.tar.gz"
+
+  lazy val jvmLinuxX64 = {
+    val cp = Workspace.newFile("jvm-x64", ".tar.gz")
+    withClosable { this.getClass.getClassLoader.getResourceAsStream(jvmLinuxX64Location) } { is ⇒ is copy cp }
+    cp
+  }
+
 }
 
 import BatchEnvironment._
@@ -191,7 +200,7 @@ trait BatchExecutionJob extends ExecutionJob { bej ⇒
 
   def usedFiles: Iterable[File] =
     (files ++
-      Seq(environment.runtime, environment.jvmLinuxX64) ++
+      Seq(environment.runtime, BatchEnvironment.jvmLinuxX64) ++
       environment.plugins() ++ plugins).distinct
 
   def usedFileHashes = usedFiles.map(f ⇒ (f, FileService.hash(job.moleExecution, f)))
@@ -216,7 +225,7 @@ trait BatchEnvironment extends SubmissionEnvironment { env ⇒
     case Some(m) ⇒ m
   }
 
-  @transient val batchJobWatcher = Cache {
+  @transient lazy val batchJobWatcher = Cache {
     val watcher = new BatchJobWatcher(WeakReference(this))
     Updater.registerForUpdate(watcher)
     watcher
@@ -233,7 +242,7 @@ trait BatchEnvironment extends SubmissionEnvironment { env ⇒
   }
 
   def runtime = BatchEnvironment.runtimeLocation
-  def jvmLinuxX64 = BatchEnvironment.JVMLinuxX64Location
+  def jvmLinuxX64 = BatchEnvironment.jvmLinuxX64
 
   @transient val plugins = Cache { PluginManager.pluginsForClass(this.getClass) }
 
