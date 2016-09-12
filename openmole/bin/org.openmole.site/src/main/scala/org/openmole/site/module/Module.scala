@@ -21,6 +21,7 @@ import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.plugin.task.netlogo5.NetLogo5Task
 import org.openmole.tool.file._
 import org.openmole.tool.hash._
+import org.openmole.core.buildinfo._
 
 object Module {
 
@@ -52,7 +53,5 @@ object Module {
 
 }
 
-case class Component(location: String, hash: String)
 case class Module(name: String, description: String, components: Seq[File])
-case class ModuleEntry(name: String, description: String, components: Seq[Component])
-case class ModuleList(entries: Seq[ModuleEntry])
+
