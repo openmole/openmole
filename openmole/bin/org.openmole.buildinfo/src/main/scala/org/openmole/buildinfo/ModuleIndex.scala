@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2015 Romain Reuillon
+/**
+ * Created by Romain Reuillon on 12/09/16.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -13,12 +13,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
  */
-package org.openmole.core.buildinfo
+package org.openmole.buildinfo
 
-import org.openmole.core.buildinfo
-
-case class MarketIndexEntry(name: String, archive: String, readme: Option[String], tags: Seq[String]) {
-  def url: String = buildinfo.url(archive)
-}
-case class MarketIndex(entries: Seq[MarketIndexEntry])
+case class Component(location: String, hash: String)
+case class ModuleEntry(name: String, description: String, components: Seq[Component])
+case class ModuleList(entries: Seq[ModuleEntry])

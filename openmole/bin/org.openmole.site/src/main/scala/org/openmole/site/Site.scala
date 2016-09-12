@@ -17,12 +17,12 @@
 
 package org.openmole.site
 
-import java.io.{ File, FileInputStream }
+import java.io.{File, FileInputStream}
 import java.nio.CharBuffer
 import java.nio.file.Paths
 import java.util.zip.GZIPInputStream
 
-import ammonite.ops.{ Path, write }
+import ammonite.ops.{Path, write}
 import org.openmole.core.buildinfo.MarketIndex
 import org.openmole.core.serializer.SerialiserService
 import org.openmole.core.workspace.Workspace
@@ -35,9 +35,9 @@ import scalatags.Text.all
 import scalatags.Text.all._
 import scala.sys.process.BasicIO
 import org.openmole.site.credits._
-import org.openmole.core.buildinfo
 import spray.json.JsArray
 import module._
+import org.openmole.buildinfo
 
 import scala.annotation.tailrec
 

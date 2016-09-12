@@ -17,7 +17,7 @@
 
 package org.openmole.site
 
-import org.openmole.core.buildinfo
+import org.openmole.buildinfo
 import org.openmole.site.market.GeneratedMarketEntry
 import org.openmole.site.market.Market._
 

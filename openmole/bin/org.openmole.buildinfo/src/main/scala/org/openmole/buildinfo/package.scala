@@ -14,9 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.openmole.core
+package org.openmole
 
-import java.io.InputStream
 import java.text.DateFormat
 import java.util.{ Calendar, Locale }
 

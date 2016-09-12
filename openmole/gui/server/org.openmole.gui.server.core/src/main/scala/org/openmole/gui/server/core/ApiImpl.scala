@@ -6,11 +6,10 @@ import java.text.SimpleDateFormat
 import java.util.zip.GZIPInputStream
 
 import org.openmole.plugin.environment.batch.environment.BatchEnvironment.{ BeginDownload, BeginUpload, EndDownload, EndUpload }
-import org.openmole.core.buildinfo.MarketIndex
+import org.openmole.buildinfo
 import org.openmole.core.event._
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.pluginmanager._
-import org.openmole.core.serializer.SerialiserService
 import org.openmole.gui.misc.utils.Utils._
 import org.openmole.gui.server.core.Utils._
 import org.openmole.core.workspace.{ ConfigurationLocation, Workspace }
@@ -30,7 +29,7 @@ import org.openmole.tool.stream.StringPrintStream
 import scala.concurrent.stm._
 import org.openmole.tool.file._
 import org.openmole.tool.tar._
-import org.openmole.core.{ buildinfo, pluginmanager }
+import org.openmole.core.pluginmanager
 import org.openmole.core.output.OutputManager
 
 /*
@@ -385,7 +384,7 @@ object ApiImpl extends Api {
   }
 
   def marketIndex() = {
-    def mapToMd(marketIndex: MarketIndex) =
+    def mapToMd(marketIndex: buildinfo.MarketIndex) =
       marketIndex.copy(entries = marketIndex.entries.map {
         e ⇒ e.copy(readme = e.readme.map { MarkDownProcessor(_) })
       })

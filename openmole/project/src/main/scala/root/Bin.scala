@@ -12,6 +12,7 @@ import com.typesafe.sbt.osgi.OsgiKeys
 import sbt.inc.Analysis
 import sbtunidoc.Plugin._
 import UnidocKeys._
+import sbtbuildinfo.Plugin._
 
 object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, root.Doc) {
   val dir = file("bin")
@@ -278,7 +279,7 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
         resourcesAssemble <+= (fullOptJS in siteJS in Compile, assemblyPath) map { case (js, d) ⇒ js.data → (d / "resources" / "sitejs.js") },
         dependencyFilter := filter,
         dependencyName := rename
-      ) dependsOn (Core.project, Core.buildinfo, root.Doc.doc, siteJS, ThirdParties.txtmark, plugin.Task.netLogo5)
+      ) dependsOn (Core.project, buildinfo, Doc.doc, siteJS, ThirdParties.txtmark, plugin.Task.netLogo5)
 
   lazy val siteJS = Project("siteJS", dir / "org.openmole.sitejs") settings (commonsSettings: _*) settings (
     scalaTagsJS,
@@ -299,8 +300,22 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
       Core.console,
       Core.project,
       Core.dsl,
-      //Core.batch,
-      Core.buildinfo
+      buildinfo
     )
+
+  val buildinfo = OsgiProject("org.openmole.buildinfo", imports = Seq("*")) enablePlugins (ScalaJSPlugin) settings (buildInfoSettings: _*) settings (
+    sourceGenerators in Compile <+= buildInfo,
+    buildInfoKeys :=
+    Seq[BuildInfoKey](
+      name,
+      version,
+      scalaVersion,
+      sbtVersion,
+      BuildInfoKey.action("buildTime") { System.currentTimeMillis }
+    ),
+      buildInfoPackage := s"org.openmole.buildinfo",
+      libraryDependencies += Libraries.gridscaleHTTP,
+      libraryDependencies += Libraries.json4s
+  )
 
 }

@@ -2,12 +2,10 @@ package root
 
 import org.openmole.buildsystem.OMKeys._
 import com.typesafe.sbt.osgi.OsgiKeys
-import org.scalajs.sbtplugin.ScalaJSPlugin
 import root.Libraries._
 import root.ThirdParties._
 import sbt.Keys._
 import sbt._
-import sbtbuildinfo.Plugin._
 
 object Core extends Defaults {
   override def dir = file("core")
@@ -72,21 +70,6 @@ object Core extends Defaults {
     ) dependsOn (ThirdParties.openmoleByteCode, ThirdParties.openmoleOSGi)
 
   val project = OsgiProject("project", imports = Seq("*")) dependsOn (console, dsl) settings (OsgiKeys.importPackage := Seq("*"))
-
-  val buildinfo = OsgiProject("buildinfo", imports = Seq("*")) enablePlugins (ScalaJSPlugin) settings (buildInfoSettings: _*) settings (
-    sourceGenerators in Compile <+= buildInfo,
-    buildInfoKeys :=
-    Seq[BuildInfoKey](
-      name,
-      version,
-      scalaVersion,
-      sbtVersion,
-      BuildInfoKey.action("buildTime") { System.currentTimeMillis }
-    ),
-      buildInfoPackage := s"${artifactPrefix.get}.buildinfo",
-      libraryDependencies += Libraries.gridscaleHTTP,
-      libraryDependencies += Libraries.json4s
-  )
 
   override def settings =
     super.settings ++

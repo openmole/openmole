@@ -16,7 +16,7 @@
  */
 package org.openmole.gui.shared
 
-import org.openmole.core.buildinfo._
+import org.openmole.buildinfo._
 import org.openmole.gui.ext.data._
 
 trait Api {
