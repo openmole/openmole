@@ -384,32 +384,19 @@ object ApiImpl extends Api {
     EnvironmentErrorData(groupedErrors)
   }
 
-  private def download[T](url: String)(action: InputStream ⇒ T): T = {
-    val is = HTTPStorage.toInputStream(new java.net.URI(url))
-    try action(is)
-    finally is.close
-  }
-
   def marketIndex() = {
     def mapToMd(marketIndex: MarketIndex) =
       marketIndex.copy(entries = marketIndex.entries.map {
-        e ⇒
-          e.copy(readme = e.readme.map {
-            MarkDownProcessor(_)
-          })
+        e ⇒ e.copy(readme = e.readme.map { MarkDownProcessor(_) })
       })
 
-    import org.json4s._
-    import org.json4s.jackson.Serialization
-    implicit val formats = Serialization.formats(NoTypeHints)
-
-    mapToMd(download(buildinfo.marketAddress)(Serialization.read[buildinfo.MarketIndex](_)))
+    mapToMd(buildinfo.marketIndex)
   }
 
   def getMarketEntry(entry: buildinfo.MarketIndexEntry, path: SafePath) = {
     import org.openmole.gui.ext.data.ServerFileSytemContext.project
     val url = new URL(entry.url)
-    download(entry.url) { is ⇒
+    HTTPStorage.download(entry.url) { is ⇒
       val tis = new TarInputStream(new GZIPInputStream(is))
       try {
         tis.extract(safePathToFile(path))

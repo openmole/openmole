@@ -73,22 +73,19 @@ object Core extends Defaults {
 
   val project = OsgiProject("project", imports = Seq("*")) dependsOn (console, dsl) settings (OsgiKeys.importPackage := Seq("*"))
 
-  val buildinfo = OsgiProject("buildinfo", imports = Seq("*")) enablePlugins (ScalaJSPlugin) settings (
-    buildInfoSettings ++
-      Seq(
-        sourceGenerators in Compile <+= buildInfo,
-        buildInfoKeys :=
-          Seq[BuildInfoKey](
-            name,
-            version,
-            scalaVersion,
-            sbtVersion,
-            BuildInfoKey.action("buildTime") {
-              System.currentTimeMillis
-            }
-          ),
-        buildInfoPackage := s"${artifactPrefix.get}.buildinfo"
-      ): _*
+  val buildinfo = OsgiProject("buildinfo", imports = Seq("*")) enablePlugins (ScalaJSPlugin) settings (buildInfoSettings: _*) settings (
+    sourceGenerators in Compile <+= buildInfo,
+    buildInfoKeys :=
+    Seq[BuildInfoKey](
+      name,
+      version,
+      scalaVersion,
+      sbtVersion,
+      BuildInfoKey.action("buildTime") { System.currentTimeMillis }
+    ),
+      buildInfoPackage := s"${artifactPrefix.get}.buildinfo",
+      libraryDependencies += Libraries.gridscaleHTTP,
+      libraryDependencies += Libraries.json4s
   )
 
   override def settings =

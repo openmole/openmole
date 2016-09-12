@@ -16,8 +16,11 @@
  */
 package org.openmole.core
 
+import java.io.InputStream
 import java.text.DateFormat
-import java.util.{ Locale, Calendar }
+import java.util.{ Calendar, Locale }
+
+import fr.iscpif.gridscale.http.HTTPStorage
 
 package object buildinfo {
 
@@ -40,8 +43,13 @@ package object buildinfo {
       case false ⇒ s"http://www.openmole.org/all/$version"
     }
 
+  import org.json4s._
+  import org.json4s.jackson.Serialization
+  implicit val formats = Serialization.formats(NoTypeHints)
+
   def marketName = "market.json"
   def marketAddress = url(marketName)
+  def marketIndex = HTTPStorage.download(buildinfo.marketAddress)(Serialization.read[buildinfo.MarketIndex](_))
 
   def moduleListName = "modules.json"
   def moduleListAddress = url(moduleListName)

@@ -13,7 +13,7 @@ object Server extends GuiDefaults {
   override val dir = super.dir / "server"
 
   lazy val core = OsgiProject("org.openmole.gui.server.core") settings
-    (libraryDependencies ++= Seq(autowire, upickle, scalaTags, logback, scalatra, clapper, gridscaleHTTP, json4s)) dependsOn (
+    (libraryDependencies ++= Seq(autowire, upickle, scalaTags, logback, scalatra, clapper)) dependsOn (
       Shared.shared,
       Ext.dataui,
       Ext.data,
