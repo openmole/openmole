@@ -51,7 +51,8 @@ package object buildinfo {
   def marketIndex = HTTPStorage.download(buildinfo.marketAddress)(Serialization.read[buildinfo.MarketIndex](_))
 
   def moduleListName = "modules.json"
-  def moduleListAddress = url(moduleListName)
+  def moduleAddress = url(moduleListName)
+  def moduleIndex = HTTPStorage.download(buildinfo.moduleAddress)(Serialization.read[buildinfo.ModuleIndex](_))
 
   def url(entry: String): String = siteURL + "/" + entry
 

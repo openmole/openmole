@@ -19,4 +19,4 @@ package org.openmole.buildinfo
 
 case class Component(location: String, hash: String)
 case class ModuleEntry(name: String, description: String, components: Seq[Component])
-case class ModuleList(entries: Seq[ModuleEntry])
+case class ModuleIndex(entries: Seq[ModuleEntry])
