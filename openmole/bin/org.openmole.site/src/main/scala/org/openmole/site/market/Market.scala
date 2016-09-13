@@ -19,7 +19,7 @@ package org.openmole.site.market
 
 import org.openmole.{ buildinfo, site }
 import org.openmole.core.project._
-import org.openmole.core.buildinfo.MarketIndexEntry
+import org.openmole.buildinfo.MarketIndexEntry
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.site.{ Config, Page }
 import org.openmole.tool.file._

@@ -37,7 +37,7 @@ object OMKeys {
 
   val ignoreTransitive = SettingKey[Boolean]("ignoreTransitive")
 
-  val dependencyFilter = SettingKey[ModuleID ⇒ Boolean]("dependency-filter", "Tells copyDependencies to ignore certain dependencies.")
+  val dependencyFilter = SettingKey[(ModuleID, Artifact) ⇒ Boolean]("dependency-filter", "Tells copyDependencies to ignore certain dependencies.")
 
   val dependencyName = SettingKey[ModuleID ⇒ String]("dependency-map", "A map that is run against dependencies to be copied.")
 

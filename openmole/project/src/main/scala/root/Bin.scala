@@ -17,14 +17,16 @@ import sbtbuildinfo.Plugin._
 object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, root.Doc) {
   val dir = file("bin")
 
-  def filter(m: ModuleID) =
-    (m.organization == "fr.iscpif.gridscale.bundle" ||
-      m.organization == "org.bouncycastle" ||
-      m.organization.contains("org.openmole") ||
-      m.organization == "io.spray" ||
-      (m.organization == "org.osgi" && m.name != "osgi"))
+  def bundleFilter(m: ModuleID, artifact: Artifact) = {
+    def exclude =
+      (m.organization != "org.openmole" && m.name.contains("slick"))
 
-  def pluginFilter(m: ModuleID) = m.name != "osgi" && m.name != "scala-library"
+    def include = (artifact.`type` == "bundle" && m.name != "osgi") ||
+      m.organization == "org.bouncycastle" ||
+      (m.organization == "org.osgi" && m.name != "osgi")
+
+    include && !exclude
+  }
 
   def rename(m: ModuleID): String =
     if (m.name.exists(_ == '-') == false) s"${m.organization.replaceAllLiterally(".", "-")}-${m.name}_${m.revision}.jar"
@@ -62,7 +64,7 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
       resourcesAssemble <+= (assemble in dbServer, assemblyPath) map { case (r, p) ⇒ r → (p / "dbserver") },
       resourcesAssemble <+= (Tar.tar in openmoleRuntime, assemblyPath) map { case (r, p) ⇒ r → (p / "runtime" / r.getName) },
       resourcesAssemble <+= (assemble in launcher, assemblyPath) map { case (r, p) ⇒ r → (p / "launcher") },
-      dependencyFilter := pluginFilter,
+      dependencyFilter := bundleFilter,
       dependencyName := rename,
       assemblyDependenciesPath := assemblyPath.value / "plugins",
       Tar.name := "openmole-naked.tar.gz",
@@ -80,7 +82,7 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
       setExecutable ++= Seq("openmole", "openmole.bat"),
       Tar.name := "openmole.tar.gz",
       Tar.innerFolder := "openmole",
-      dependencyFilter := pluginFilter,
+      dependencyFilter := bundleFilter,
       resourcesAssemble <+= (assemble in openmoleNaked, assemblyPath).identityMap,
       resourcesAssemble <+= (assemble in consolePlugins, assemblyPath) map { case (r, p) ⇒ r → (p / "plugins") },
       cleanFiles <++= cleanFiles in openmoleNaked
@@ -139,7 +141,7 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
     resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "core") sendTo assemblyPath,
     resourcesAssemble <++= Seq(console.project) sendTo assemblyPath,
     libraryDependencies ++= coreDependencies,
-    dependencyFilter := pluginFilter,
+    dependencyFilter := bundleFilter,
     dependencyName := rename
   )
 
@@ -147,7 +149,7 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
     resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "gui") sendTo assemblyPath,
     resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "doc") sendTo assemblyPath,
     libraryDependencies ++= guiCoreDependencies,
-    dependencyFilter := pluginFilter,
+    dependencyFilter := bundleFilter,
     dependencyName := rename
   )
 
@@ -173,7 +175,7 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
       gridscaleSSH,
       osgiCompendium
     ) ++ apacheHTTP) map (_ intransitive ()),
-    dependencyFilter := pluginFilter,
+    dependencyFilter := bundleFilter,
     dependencyName := rename
   )
 
@@ -189,7 +191,7 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
       Libraries.slf4j,
       Libraries.scalaLang
     ) map (_ intransitive ()),
-    dependencyFilter := filter,
+    dependencyFilter := bundleFilter,
     dependencyName := rename
   )
 
@@ -204,7 +206,7 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
       Tar.name := "runtime.tar.gz",
       libraryDependencies ++= coreDependencies,
       libraryDependencies += scopt intransitive (),
-      dependencyFilter := filter,
+      dependencyFilter := bundleFilter,
       dependencyName := rename
     )
 
@@ -228,7 +230,7 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
         scopt
       ) ++ coreDependencies,
       assemblyDependenciesPath := assemblyPath.value / "plugins",
-      dependencyFilter := filter,
+      dependencyFilter := bundleFilter,
       dependencyName := rename,
       setExecutable ++= Seq("openmole-daemon", "openmole-daemon.bat"),
       dependencyName := rename,
@@ -277,7 +279,7 @@ object Bin extends Defaults(Core, Plugin, REST, Gui, Libraries, ThirdParties, ro
         resourcesAssemble <+= (Tar.tar in daemon, assemblyPath) map { case (f, d) ⇒ f → (d / "resources" / f.getName) },
         resourcesAssemble <+= (Tar.tar in api, assemblyPath) map { case (doc, d) ⇒ doc → (d / "resources" / doc.getName) },
         resourcesAssemble <+= (fullOptJS in siteJS in Compile, assemblyPath) map { case (js, d) ⇒ js.data → (d / "resources" / "sitejs.js") },
-        dependencyFilter := filter,
+        dependencyFilter := bundleFilter,
         dependencyName := rename
       ) dependsOn (Core.project, buildinfo, Doc.doc, siteJS, ThirdParties.txtmark, plugin.Task.netLogo5)
 

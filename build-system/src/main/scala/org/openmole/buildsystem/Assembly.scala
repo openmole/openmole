@@ -60,14 +60,14 @@ trait Assembly {
     cp:        Seq[Attributed[File]],
     out:       File,
     rename:    ModuleID ⇒ String,
-    depFilter: ModuleID ⇒ Boolean,
+    depFilter: (ModuleID, Artifact) ⇒ Boolean,
     streams:   TaskStreams
   ) = {
 
     cp.flatMap { attributed ⇒
-      attributed.get(Keys.moduleID.key) match {
-        case Some(moduleId) ⇒ if (depFilter(moduleId)) Some(moduleId → attributed.data) else None
-        case None           ⇒ None
+      (attributed.get(Keys.moduleID.key), attributed.get(Keys.artifact.key)) match {
+        case (Some(moduleId), Some(artifact)) ⇒ if (depFilter(moduleId, artifact)) Some(moduleId → attributed.data) else None
+        case _                                ⇒ None
       }
     }.map {
       case (module, srcPath) ⇒
@@ -92,7 +92,7 @@ trait Assembly {
     Tar.folder <<= assemble,
     bundleProj := false,
     dependencyName := { (_: ModuleID).name + ".jar" },
-    dependencyFilter := { _ ⇒ true },
+    dependencyFilter := { (_, _) ⇒ true },
     copyResources <<=
       (resourcesAssemble, streams) map {
         case (resources, s) ⇒
