@@ -35,11 +35,7 @@ case class JobScript(voName: String, memory: Int, threads: Int, debug: Boolean) 
   ) = {
     import serializedJob._
 
-    def cpCommand =
-      serializedJob.storage match {
-        case _: EGIWebDAVStorageService ⇒ Curl(voName, debug)
-        case _                          ⇒ LCGCp(voName)
-      }
+    def cpCommand = Curl(voName, debug)
 
     assert(runtime.runtime.path != null)
 

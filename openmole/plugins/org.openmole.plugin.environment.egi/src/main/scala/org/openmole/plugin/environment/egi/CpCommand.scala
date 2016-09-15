@@ -18,21 +18,12 @@
 package org.openmole.plugin.environment.egi
 
 import java.net.URI
-import fr.iscpif.gridscale.egi.SRMStorage
 import org.openmole.core.workspace.Workspace
 
 trait CpCommands {
   def upload(from: String, to: URI): String
   def download(from: URI, to: String): String
   def getTimeOut = Workspace.preference(EGIEnvironment.RemoteCopyTimeout).toSeconds.toString
-}
-
-case class LCGCp(voName: String) extends CpCommands {
-  @transient lazy val lcgCp =
-    s"lcg-cp --vo ${voName} --nobdii --defaultsetype srmv2 --connect-timeout $getTimeOut --sendreceive-timeout $getTimeOut --srm-timeout $getTimeOut "
-
-  def upload(from: String, to: URI) = s"$lcgCp file:$from ${SRMStorage.fullEndpoint(to.getHost, to.getPort, to.getPath)}"
-  def download(from: URI, to: String) = s"$lcgCp ${SRMStorage.fullEndpoint(from.getHost, from.getPort, from.getPath)} file:$to"
 }
 
 case class Curl(voName: String, debug: Boolean) extends CpCommands {

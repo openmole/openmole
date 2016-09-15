@@ -272,7 +272,8 @@ lazy val asm = OsgiProject(dir, "org.objectweb.asm") settings (
 
 
 lazy val config = OsgiProject(dir, "org.apache.commons.configuration2",
-  privatePackages = Seq("!scala.*", "!org.apache.commons.logging.*","*")) settings (
+  privatePackages = Seq("!scala.*", "!org.apache.commons.logging.*","*"),
+  imports = Seq("org.apache.commons.logging.*")) settings (
   libraryDependencies += "org.apache.commons" % "commons-configuration2" % "2.0",
   libraryDependencies += "commons-beanutils" % "commons-beanutils" % "1.9.2",
-  version := "2.0") settings(settings: _*)
+  version := "2.0") settings(settings: _*) dependsOn (logging)
