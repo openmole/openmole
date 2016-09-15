@@ -1,23 +1,8 @@
-package root
-
-import sbt._
-import Keys._
-import com.typesafe.sbt.osgi.OsgiKeys
-import OsgiKeys._
-import org.openmole.buildsystem.OMKeys._
-import org.scalajs.sbtplugin.ScalaJSPlugin
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
+import sbt.Keys._
+import sbt._
 
-/**
- * Created with IntelliJ IDEA.
- * User: luft
- * Date: 3/17/13
- * Time: 6:50 PM
- * To change this template use File | Settings | File Templates.
- */
-object Libraries extends Defaults {
-
-  val dir = file("libraries")
+object Libraries {
 
   val gridscaleVersion = "1.88-SNAPSHOT"
 
@@ -49,11 +34,6 @@ object Libraries extends Defaults {
 
   lazy val gridscaleHTTP = "fr.iscpif.gridscale.bundle" %% "http" % gridscaleVersion
 
-  lazy val apacheHTTP = Seq(
-    "org.apache.httpcomponents" % "httpclient-osgi" % "4.5.1",
-    "org.apache.httpcomponents" % "httpcore-osgi" % "4.4.4"
-  )
-
   lazy val gridscaleOAR = "fr.iscpif.gridscale.bundle" %% "oar" % gridscaleVersion
 
   lazy val bouncyCastle = "org.bouncycastle" % "bcpkix-jdk15on" % bouncyCastleVersion
@@ -81,7 +61,7 @@ object Libraries extends Defaults {
   lazy val netLogo5Version = "5.3.1"
   lazy val netlogo5 = "org.openmole" % "ccl-northwestern-edu-netlogo5" % netLogo5Version
 
-  lazy val guava = "org.openmole" %% "com-google-guava" % "18.0"
+  lazy val guava = "org.openmole" %% "com-google-guava" % "18.0" intransitive ()
 
   lazy val scalaTagsVersion = "0.6.0"
   lazy val scalaJSDomVersion = "0.9.0"
@@ -133,8 +113,6 @@ object Libraries extends Defaults {
   lazy val scalabc = "org.openmole" %% "fr-iscpif-scalabc" % "0.4"
 
   lazy val equinoxOSGi = "org.eclipse" % "osgi" % "3.10.0-v20140606-1445"
-
-  lazy val osgiCompendium = "org.osgi" % "org.osgi.compendium" % "4.2.0"
 
   lazy val scalatest = "org.scalatest" %% "scalatest" % "2.2.4" % "test"
 

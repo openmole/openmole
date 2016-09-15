@@ -17,7 +17,7 @@ package org.openmole.gui.client.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.buildinfo.{ MarketIndex, MarketIndexEntry }
+import org.openmole.core.buildinfo.{ MarketIndex, MarketIndexEntry }
 import org.openmole.gui.client.core.alert.{ AlertPanel, AbsolutePositioning }
 import AbsolutePositioning.CenterPagePosition
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }

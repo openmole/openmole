@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.openmole
+package org.openmole.core
 
 import java.text.DateFormat
 import java.util.{ Calendar, Locale }
@@ -25,11 +25,11 @@ package object buildinfo {
 
   def name = "M... M..."
 
-  def version: String = buildinfo.BuildInfo.version
+  def version: String = BuildInfo.version
 
   def generationDate = {
     val d = Calendar.getInstance()
-    d.setTimeInMillis(buildinfo.BuildInfo.buildTime)
+    d.setTimeInMillis(BuildInfo.buildTime)
     val format = DateFormat.getDateInstance(DateFormat.LONG, new Locale("EN", "en"))
     format.format(d.getTime)
   }

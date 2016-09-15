@@ -6,7 +6,7 @@ import java.text.SimpleDateFormat
 import java.util.zip.GZIPInputStream
 
 import org.openmole.plugin.environment.batch.environment.BatchEnvironment.{ BeginDownload, BeginUpload, EndDownload, EndUpload }
-import org.openmole.buildinfo
+import org.openmole.core.buildinfo
 import org.openmole.core.event._
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.pluginmanager._

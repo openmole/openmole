@@ -23,7 +23,7 @@ import java.nio.file.Paths
 import java.util.zip.GZIPInputStream
 
 import ammonite.ops.{ Path, write }
-import org.openmole.buildinfo.MarketIndex
+import org.openmole.core.buildinfo.MarketIndex
 import org.openmole.core.serializer.SerialiserService
 import org.openmole.core.workspace.Workspace
 import org.openmole.site.market.Market
@@ -37,7 +37,7 @@ import scala.sys.process.BasicIO
 import org.openmole.site.credits._
 import spray.json.JsArray
 import module._
-import org.openmole.buildinfo
+import org.openmole.core.buildinfo
 
 import scala.annotation.tailrec
 

@@ -20,7 +20,7 @@ package org.openmole.console
 import java.io.{ File, IOException }
 import java.util.logging.Level
 
-import org.openmole.buildinfo
+import org.openmole.core.buildinfo
 import org.openmole.core.console.ScalaREPL
 import org.openmole.core.dsl._
 import org.openmole.core.exception.UserBadDataError

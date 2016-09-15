@@ -21,15 +21,11 @@ import java.lang.StringBuilder
 import java.util
 
 import com.github.rjeschke._
-import com.github.rjeschke.txtmark.DefaultDecorator
 import org.apache.commons.lang3.StringEscapeUtils
 import org.openmole.site.market.GeneratedMarketEntry
-import org.openmole.tool.file._
 
 import scala.collection.JavaConversions._
-import scala.xml.XML
-import scala.xml.parsing.XhtmlParser
-import scalatags.Text.all._
+import scala.xml._
 import scalaz._
 
 object MD {
@@ -85,6 +81,7 @@ object MD {
 
   def generatePage(entry: GeneratedMarketEntry)(implicit parent: Parent[DocumentationPage]) =
     entry.readme.map { md ⇒
+      import scalatags.Text.all._
       def frag = RawFrag(relativiseLinks(MD.mdToHTML(md), entry.entry.name + "/"))
       DocumentationPages(entry.entry.name, Reader(_ ⇒ frag), location = Some(Seq(entry.entry.name, entry.entry.name)))
     }

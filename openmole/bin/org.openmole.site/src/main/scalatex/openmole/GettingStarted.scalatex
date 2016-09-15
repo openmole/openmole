@@ -1,7 +1,7 @@
 @import org.openmole.site._
 @import Resource._
 @import DocumentationPages._
-@import org.openmole.buildinfo._
+@import org.openmole.core.buildinfo._
 
 @def tasks = """
   // Define the variables that are transmitted between the tasks

@@ -21,11 +21,11 @@ import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.plugin.task.netlogo5.NetLogo5Task
 import org.openmole.tool.file._
 import org.openmole.tool.hash._
-import org.openmole.buildinfo._
+import org.openmole.core.buildinfo._
 
 object Module {
 
-  def all = Seq(
+  def all = Seq[Module](
     Module("NetLogo5", "Explore NetLogo 5 simulation models", components[NetLogo5Task])
   )
 
