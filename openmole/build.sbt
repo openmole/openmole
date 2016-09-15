@@ -7,6 +7,9 @@ import OMKeys._
 import sbt._
 import Keys._
 
+organization := "org.openmole"
+name := "openmole-root"
+
 def macroParadise =
   addCompilerPlugin("org.scalamacros" %% "paradise" % "2.1.0" cross CrossVersion.full)
 
