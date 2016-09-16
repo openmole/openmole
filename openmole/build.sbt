@@ -66,6 +66,7 @@ def coreSettings =
       libraryDependencies += Libraries.scalatest,
       libraryDependencies += Libraries.equinoxOSGi
     )
+
 def allCore = Seq(workflow, serializer, communication, openmoleDSL, exception, tools, event, replication, workspace, macros, pluginManager, updater, fileService, logging, output, console, project, buildinfo)
 
 

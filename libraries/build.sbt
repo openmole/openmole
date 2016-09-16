@@ -28,8 +28,11 @@ lazy val scalatra = OsgiProject(dir, "org.scalatra",
   libraryDependencies += "org.eclipse.jetty" % "jetty-server" % jettyVersion,
   version := scalatraVersion) settings(settings: _*)
 
-lazy val json4s = OsgiProject(dir, "org.json4s", exports = Seq("org.json4s.*"), privatePackages = Seq("!scala.*", "!org.slf4j.*", "*")) settings (
-  libraryDependencies +=  "org.json4s" %% "json4s-jackson" % "3.4.0" % "provided",
+lazy val json4s = OsgiProject(dir, "org.json4s",
+  exports = Seq("org.json4s.*"),
+  privatePackages = Seq("!scala.*", "!org.slf4j.*", "!com.thoughtworks.paranamer.*", "*"),
+  imports = Seq("scala.*", "org.slf4j.*", "com.thoughtworks.paranamer.*", "")) settings (
+  libraryDependencies +=  "org.json4s" %% "json4s-jackson" % "3.4.0",
   version := "3.4.0") settings(settings: _*)
 
 lazy val logback = OsgiProject(dir, "ch.qos.logback", exports = Seq("ch.qos.logback.*", "org.slf4j.impl"), dynamicImports = Seq("*")) settings
