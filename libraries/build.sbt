@@ -11,7 +11,8 @@ def settings = Seq(
   scalacOptions ++= Seq("-deprecation"),
   publishArtifact in (packageDoc in publishLocal) := false,
   publishArtifact in (packageSrc in publishLocal) := false,
-  organization := "org.openmole"
+  organization := "org.openmole",
+  isSnapshot := true
 ) ++ BuildSystem.settings
 
 
