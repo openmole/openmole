@@ -253,4 +253,8 @@ object PluginManager extends Logger {
     listener.lock.acquire()
   }
 
+  /* For debugging purposes */
+  def printBundles = println(Activator.contextOrException.getBundles.mkString("\n"))
+  def printDirectDependencies(b: Long) = println(directDependingBundles(Activator.contextOrException.getBundle(b)).mkString("\n"))
+
 }

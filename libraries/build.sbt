@@ -20,7 +20,8 @@ lazy val jettyVersion = "9.2.14.v20151106"
 
 lazy val scalatra = OsgiProject(dir, "org.scalatra",
   exports = Seq("org.scalatra.*, org.fusesource.*", "grizzled.*", "org.eclipse.jetty.*", "javax.*"),
-  privatePackages = Seq("!scala.*", "!org.slf4j.*", "*")) settings(
+  privatePackages = Seq("!scala.*", "!org.slf4j.*", "*"),
+  imports = Seq("scala.*", "org.slf4j.*")) settings(
   libraryDependencies += "org.scalatra" %% "scalatra" % scalatraVersion,
   libraryDependencies += "org.scalatra" %% "scalatra-auth" % scalatraVersion,
   libraryDependencies += "org.eclipse.jetty" % "jetty-webapp" % jettyVersion,
@@ -111,12 +112,6 @@ lazy val netlogo5 = OsgiProject(
     "org.scala-lang" % "scala-library" % "2.9.2" % "provided",
     "asm" % "asm-all" % "3.3.1" % "provided",
     "org.picocontainer" % "picocontainer" % "2.13.6" % "provided"), version := netLogo5Version, scalaVersion := "2.9.2", crossPaths := false) settings(settings: _*)
-
-lazy val guava = OsgiProject(dir, "com.google.guava",
-  exports = Seq("com.google.common.*"), privatePackages = Seq("!scala.*", "*")) settings(libraryDependencies ++=
-  Seq("com.google.guava" % "guava" % "18.0", "com.google.code.findbugs" % "jsr305" % "1.3.9"),
-  version := "18.0"
-  ) settings(settings: _*)
 
 lazy val scalaTagsVersion = "0.6.0"
 lazy val scalaRxVersion = "0.3.1"

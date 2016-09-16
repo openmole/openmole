@@ -61,7 +61,7 @@ object Libraries {
   lazy val netLogo5Version = "5.3.1"
   lazy val netlogo5 = "org.openmole" % "ccl-northwestern-edu-netlogo5" % netLogo5Version
 
-  lazy val guava = "org.openmole" %% "com-google-guava" % "18.0" intransitive ()
+  lazy val guava = "com.google.guava" % "guava" % "19.0"
 
   lazy val scalaTagsVersion = "0.6.0"
   lazy val scalaJSDomVersion = "0.9.0"
