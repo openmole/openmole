@@ -17,24 +17,36 @@
 
 package org.openmole.core.workflow.tools
 
-import java.io.File
-
-import org.openmole.core.tools.io._
+import org.openmole.core.exception._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.dsl._
-import org.openmole.tool.cache.Cache
+import org.openmole.tool.cache._
 
 import scalaz._
 import Scalaz._
 
 object FromContext {
 
-  implicit def fromTToContext[T](t: T): FromContext[T] = FromContext.value[T](t)
+  implicit val applicative: Applicative[FromContext] = new Applicative[FromContext] {
+    override def ap[A, B](fa: ⇒ FromContext[A])(f: ⇒ FromContext[(A) ⇒ B]): FromContext[B] =
+      new FromContext[B] {
+        override def from(context: ⇒ Context)(implicit rng: RandomProvider): B = {
+          val res = fa.from(context)(rng)
+          f.from(context)(rng)(res)
+        }
+
+        override def validate(inputs: Seq[Val[_]]): Seq[Throwable] =
+          fa.validate(inputs) ++ f.validate(inputs)
+      }
+
+    override def point[A](a: ⇒ A): FromContext[A] = FromContext.value(a)
+  }
 
   def codeToFromContext[T: Manifest](code: String): FromContext[T] =
     new FromContext[T] {
       val proxy = Cache(ScalaWrappedCompilation.dynamic[T](code))
       override def from(context: ⇒ Context)(implicit rng: RandomProvider): T = proxy()().from(context)
+      override def validate(inputs: Seq[Val[_]]): Seq[Throwable] = proxy().validate(inputs).toSeq
     }
 
   implicit def codeToFromContextFloat(code: String) = codeToFromContext[Float](code)
@@ -44,56 +56,81 @@ object FromContext {
   implicit def codeToFromContextBigDecimal(code: String) = codeToFromContext[BigDecimal](code)
   implicit def codeToFromContextBigInt(code: String) = codeToFromContext[BigInt](code)
   implicit def codeToFromContextBoolean(condition: String) = codeToFromContext[Boolean](condition)
-  implicit def codeToFromContextFile(code: String) = codeToFromContext[File](code)
-  implicit def codeToFromContextString(code: String) = codeToFromContext[String](code)
+
+  implicit def fileToString(f: File): FromContext[String] = ExpandedString(f.getPath)
+  implicit def stringToString(s: String): FromContext[String] = ExpandedString(s)
+  implicit def stringToFile(s: String): FromContext[File] = ExpandedString(s).map(s ⇒ File(s))
+  implicit def fileToFile(f: File): FromContext[File] = ExpandedString(f.getPath).map(s ⇒ File(s))
+
+  implicit def fromTToContext[T](t: T): FromContext[T] = FromContext.value[T](t)
+
+  def prototype[T](p: Prototype[T]) =
+    new FromContext[T] {
+      override def from(context: ⇒ Context)(implicit rng: RandomProvider) = context(p)
+      def validate(inputs: Seq[Val[_]]): Seq[Throwable] = {
+        if (inputs.exists(_ == p)) Seq.empty else Seq(new UserBadDataError(s"Prototype $p not found"))
+      }
+    }
 
   def value[T](t: T): FromContext[T] =
     new FromContext[T] {
       def from(context: ⇒ Context)(implicit rng: RandomProvider): T = t
+      def validate(inputs: Seq[Val[_]]): Seq[Throwable] = Seq.empty
     }
 
   def apply[T](f: (Context, RandomProvider) ⇒ T) =
     new FromContext[T] {
       def from(context: ⇒ Context)(implicit rng: RandomProvider) = f(context, rng)
+      def validate(inputs: Seq[Val[_]]): Seq[Throwable] = Seq.empty
     }
-
-  implicit val monad = new Functor[FromContext] with Monad[FromContext] {
-    override def bind[A, B](fa: FromContext[A])(f: (A) ⇒ FromContext[B]): FromContext[B] = FromContext {
-      (context, rng) ⇒
-        val res = fa.from(context)(rng)
-        f(res).from(context)(rng)
-    }
-
-    override def point[A](a: ⇒ A): FromContext[A] = FromContext.value(a)
-  }
 
   implicit def booleanToCondition(b: Boolean) = FromContext.value(b)
-
-  implicit def booleanPrototypeIsCondition(p: Prototype[Boolean]) = new FromContext[Boolean] {
-    override def from(context: ⇒ Context)(implicit rng: RandomProvider) = context(p)
-  }
+  implicit def booleanPrototypeIsCondition(p: Prototype[Boolean]) = prototype(p)
 
   implicit class ConditionDecorator(f: Condition) {
-
     def unary_! = f.map(v ⇒ !v)
 
-    def &&(d: Condition) =
-      for {
-        c1 ← f()
-        c2 ← d()
-      } yield c1 && c2
+    def &&(d: Condition): Condition =
+      new FromContext[Boolean] {
+        override def from(context: ⇒ Context)(implicit rng: RandomProvider): Boolean = f.from(context) && d.from(context)
+        override def validate(inputs: Seq[Val[_]]): Seq[Throwable] = f.validate(inputs) ++ d.validate(inputs)
+      }
 
-    def ||(d: Condition) =
-      for {
-        c1 ← f()
-        c2 ← d()
-      } yield c1 || c2
+    def ||(d: Condition): Condition =
+      new FromContext[Boolean] {
+        override def from(context: ⇒ Context)(implicit rng: RandomProvider): Boolean = f.from(context) || d.from(context)
+        override def validate(inputs: Seq[Val[_]]): Seq[Throwable] = f.validate(inputs) ++ d.validate(inputs)
+      }
+  }
 
+  implicit class ExpandedStringOperations(s1: FromContext[String]) {
+    def +(s2: FromContext[String]) = (s1 |@| s2) apply (_ + _)
+  }
+
+  implicit class FromContextFileDecorator(f: FromContext[File]) {
+    def exists = f.map(_.exists)
+    def isEmpty = f.map(_.isEmpty)
+    def /(path: FromContext[String]) = (f |@| path)(_ / _)
   }
 
 }
 
 trait FromContext[+T] {
   def from(context: ⇒ Context)(implicit rng: RandomProvider): T
+  def validate(inputs: Seq[Prototype[_]]): Seq[Throwable]
+}
+
+object Expandable {
+  def apply[S, T](f: S ⇒ FromContext[T]) = new Expandable[S, T] {
+    override def expand(s: S): FromContext[T] = f(s)
+  }
+
+  implicit def stringToString = Expandable[String, String](FromContext.stringToString)
+  implicit def stringToFile = Expandable[String, File](s ⇒ FromContext.stringToString(s).map(File(_)))
+  implicit def fileToFile = Expandable[File, File](FromContext.fileToFile)
+}
+
+trait Expandable[S, T] {
+  def expand(s: S): FromContext[T]
 }
 

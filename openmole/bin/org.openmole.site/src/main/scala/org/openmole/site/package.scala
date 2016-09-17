@@ -16,6 +16,9 @@
  */
 package org.openmole
 
+import java.nio.CharBuffer
+
+import scala.xml.MetaData
 import scalatex.site.{ Highlighter, Section }
 import scalatags.Text.all._
 
@@ -35,4 +38,5 @@ package object site {
     def toRow(p: Parameter) = li(p.name + ": " + p.`type` + ": " + p.description)
     ul(p.map(toRow))
   }
+
 }

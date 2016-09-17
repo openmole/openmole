@@ -29,19 +29,19 @@ package object file {
   implicit def domainFileDecorator(f: File) = new {
     def files: ListFilesDomain = files()
     def files(
-      directory: OptionalArgument[ExpandedString] = OptionalArgument(),
-      recursive: Boolean                          = false,
-      filter:    OptionalArgument[ExpandedString] = OptionalArgument()
+      directory: OptionalArgument[FromContext[String]] = OptionalArgument(),
+      recursive: Boolean                               = false,
+      filter:    OptionalArgument[FromContext[String]] = OptionalArgument()
     ): ListFilesDomain = ListFilesDomain(f, directory, recursive, filter)
 
     def paths: ListPathsDomain = paths()
     def paths(
-      directory: OptionalArgument[ExpandedString] = OptionalArgument(),
-      recursive: Boolean                          = false,
-      filter:    OptionalArgument[ExpandedString] = OptionalArgument()
+      directory: OptionalArgument[FromContext[String]] = OptionalArgument(),
+      recursive: Boolean                               = false,
+      filter:    OptionalArgument[FromContext[String]] = OptionalArgument()
     ): ListPathsDomain = ListPathsDomain(f, directory, recursive, filter)
 
-    def select(path: ExpandedString) = SelectFileDomain(f, path)
+    def select(path: FromContext[String]) = SelectFileDomain(f, path)
   }
 
   implicit def prototypeOfFileIsFinite = new Finite[Prototype[File], File] {

@@ -1,7 +1,7 @@
 package org.openmole.gui.client.core
 
 import org.openmole.gui.client.core.alert.{ AlertPanel, AbsolutePositioning }
-import AbsolutePositioning.{ RightPosition, TopZone, CenterPagePosition }
+import AbsolutePositioning.CenterPagePosition
 import org.openmole.gui.shared.Api
 import org.scalajs.dom.raw.{ KeyboardEvent, HTMLElement, HTMLFormElement }
 import org.openmole.gui.client.core.panels._
@@ -43,6 +43,7 @@ object ScriptClient {
   @JSExport
   def run(): Unit = {
 
+    implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
     val alert: Var[Boolean] = Var(false)
 
     val shutdownButton = span(
@@ -124,39 +125,40 @@ object ScriptClient {
         false
       }).render
 
-    val connectionDiv = Rx {
-      div(
-        if (!passwordOK()) omsheet.connectionTabOverlay
-        else omsheet.displayOff
-      )(div(
-          img(src := "img/openmole.png", omsheet.openmoleLogo),
-          // openmoleText,
-          shutdownButton,
-          div(
-            if (!passwordOK()) omsheet.centerPage else emptyMod,
+    val connectionDiv = div(
+      shutdownButton,
+      Rx {
+        div(
+          if (!passwordOK()) omsheet.connectionTabOverlay
+          else omsheet.displayOff
+        )(div(
+            img(src := "img/openmole.png", omsheet.openmoleLogo),
             div(
-              if (alert())
-                AlertPanel.string(
-                "Careful! Resetting your password will wipe out all your preferences! Reset anyway?",
-                () ⇒ {
-                  alert() = false
-                  resetPassword
-                }, () ⇒ {
-                  alert() = false
-                }, CenterPagePosition
-              )
-              else {
-                div(
-                  omsheet.connectionBlock,
-                  connectionForm(passwordInput),
-                  if (!passwordChosen()) connectionForm(passwordAgainInput) else div(),
-                  connectButton
+              if (!passwordOK()) omsheet.centerPage else emptyMod,
+              div(
+                if (alert())
+                  AlertPanel.string(
+                  "Careful! Resetting your password will wipe out all your preferences! Reset anyway?",
+                  () ⇒ {
+                    alert() = false
+                    resetPassword
+                  }, () ⇒ {
+                    alert() = false
+                  }, CenterPagePosition
                 )
-              }
+                else {
+                  div(
+                    omsheet.connectionBlock,
+                    connectionForm(passwordInput),
+                    if (!passwordChosen()) connectionForm(passwordAgainInput) else div(),
+                    connectButton
+                  )
+                }
+              )
             )
-          )
-        ))
-    }
+          ))
+      }
+    )
 
     val openFileTree = Var(true)
 
@@ -170,7 +172,7 @@ object ScriptClient {
 
     val marketItem = dialogNavItem("market", glyphSpan(glyph_market).tooltip(span("Market place")), () ⇒ marketTriggerer.triggerOpen)
 
-    val pluginItem = dialogNavItem("plugin", div(glyph_plug).tooltip(span("Plugins")), () ⇒ pluginTriggerer.triggerOpen)
+    val pluginItem = dialogNavItem("plugin", div(OMTags.glyph_plug).tooltip(span("Plugins")), () ⇒ pluginTriggerer.triggerOpen)
 
     val envItem = dialogNavItem("envError", glyphSpan(glyph_exclamation).render, () ⇒ environmentStackTriggerer.open)
 
@@ -193,7 +195,7 @@ object ScriptClient {
     maindiv.appendChild(
       bs.nav(
         "mainNav",
-        sheet.nav +++ nav_pills +++ nav_inverse +++ nav_staticTop,
+        omsheet.fixed +++ sheet.nav +++ nav_pills +++ nav_inverse +++ nav_staticTop,
         fileItem,
         modelWizardItem,
         execItem,
@@ -213,21 +215,41 @@ object ScriptClient {
     maindiv.appendChild(docTriggerer.modalPanel.dialog.render)
     maindiv.appendChild(AlertPanel.alertDiv)
 
-    Settings.workspacePath.foreach { projectsPath ⇒
-      maindiv.appendChild(Rx {
-        div(omsheet.fullpanel)(
-          div(
-            omsheet.leftpanel +++ (openFileTree(), omsheet.panelOpen, emptyMod)
-          )(treeNodePanel.view),
-          div(
-            omsheet.centerpanel +++ (openFileTree(), omsheet.panelReduce)
-          )(
-              treeNodePanel.fileDisplayer.tabs.render,
-              img(src := "img/version.svg", omsheet.logoVersion),
-              div("Loving Lobster", omsheet.textVersion)
+    Settings.settings.foreach { settings ⇒
+      maindiv.appendChild(
+        tags.div(`class` := "fullpanel")(
+        tags.div(
+          `class` := Rx {
+            "leftpanel " + {
+              if (openFileTree()) "open" else ""
+            }
+          }
+        )(
+            tags.div(omsheet.fixedPosition)(
+              treeNodePanel.fileToolBar.div,
+              treeNodePanel.fileControler,
+              treeNodePanel.labelArea
+            ),
+            treeNodePanel.view.render
+          ),
+        tags.div(
+          `class` := Rx {
+            "centerpanel " + {
+              if (openFileTree()) "reduce" else ""
+            }
+          }
+        )(
+            treeNodePanel.fileDisplayer.tabs.render,
+            tags.div(omsheet.textVersion)(
+              tags.div(
+                fontSize := "1em",
+                fontWeight := "bold"
+              )(s"${settings.version} ${settings.versionName}"),
+              tags.div(fontSize := "0.8em")(s"built the ${settings.buildTime}")
             )
-        )
-      })
+          )
+      ).render
+      )
     }
 
     body.appendChild(connectionDiv)

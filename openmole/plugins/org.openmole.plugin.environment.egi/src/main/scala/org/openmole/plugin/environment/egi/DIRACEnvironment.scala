@@ -20,7 +20,7 @@ package org.openmole.plugin.environment.egi
 import java.net.URI
 
 import fr.iscpif.gridscale.authentication.P12Authentication
-import org.openmole.core.batch.environment.{ BatchEnvironment, BatchExecutionJob, UpdateInterval }
+import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, BatchExecutionJob, UpdateInterval }
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.fileservice._
 import org.openmole.core.workflow.dsl._
@@ -37,12 +37,13 @@ import scala.ref.WeakReference
 
 object DIRACEnvironment {
 
-  val Connections = ConfigurationLocation("DIRACEnvironment", "Connections", Some(100))
   val EagerSubmissionThreshold = ConfigurationLocation("DIRACEnvironment", "EagerSubmissionThreshold", Some(0.2))
   val UpdateInterval = ConfigurationLocation("DIRACEnvironment", "UpdateInterval", Some(1 minute))
+  val JobsByGroup = ConfigurationLocation("DIRACEnvironment", "JobsByGroup", Some(10000))
 
-  Workspace setDefault Connections
   Workspace setDefault EagerSubmissionThreshold
+  Workspace setDefault UpdateInterval
+  Workspace setDefault JobsByGroup
 
   def apply(
     voName:         String,
@@ -112,25 +113,19 @@ class DIRACEnvironment(
 
   def executionJob(job: Job) = new DiracBatchExecutionJob(job, this)
 
-  def authentication = _authentication()
-  val _authentication = Cache(DIRACAuthentication.initialise(a)(decrypt))
+  @transient val authentication = DIRACAuthentication.initialise(a)(decrypt)
 
-  def proxyCreator = _proxyCreator()
-  val _proxyCreator = Cache {
+  @transient lazy val proxyCreator =
     EGIAuthentication.initialise(a)(
       vomsURLs,
       voName,
       fqan
     )(decrypt)
-  }
 
-  def jobService = _jobService()
-  val _jobService = Cache {
+  @transient lazy val jobService =
     new DIRACJobService {
-      def connections = Workspace.preference(DIRACEnvironment.Connections)
       def environment = env
     }
-  }
 
   override def updateInterval = UpdateInterval.fixed(Workspace.preference(DIRACEnvironment.UpdateInterval))
   override def runtimeSettings = super.runtimeSettings.copy(archiveResult = true)

@@ -39,9 +39,9 @@ object AppendToCSVFileHook {
     override def arraysOnSingleRow = AppendToCSVFileHook.arraysOnSingleRow
   }
 
-  def apply(fileName: ExpandedString, prototypes: Prototype[_]*) =
+  def apply(file: FromContext[File], prototypes: Prototype[_]*) =
     new AppendToCSVFileHook(
-      fileName,
+      file,
       prototypes.toVector,
       header = None,
       arraysOnSingleRow = false,
@@ -51,27 +51,27 @@ object AppendToCSVFileHook {
 }
 
 @Lenses case class AppendToCSVFileHook(
-    fileName:          ExpandedString,
+    file:              FromContext[File],
     prototypes:        Vector[Prototype[_]],
-    header:            Option[ExpandedString],
+    header:            Option[FromContext[String]],
     arraysOnSingleRow: Boolean,
     config:            InputOutputConfig
 ) extends Hook with ValidateHook {
 
   override def validate(inputs: Seq[Prototype[_]]): Seq[Throwable] =
-    fileName.validate(inputs) ++ header.toSeq.flatMap(_.validate(inputs))
+    file.validate(inputs) ++ header.toSeq.flatMap(_.validate(inputs))
 
   override def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider) = {
-    val file = new File(fileName.from(context))
-    file.createParentDir
+    val f = file.from(context)
+    f.createParentDir
 
     val ps =
       if (prototypes.isEmpty) context.values.map { _.prototype }
       else prototypes
 
-    file.withLock {
+    f.withLock {
       fos ⇒
-        if (file.size == 0)
+        if (f.size == 0)
           fos.appendLine {
             def defaultHeader = ps.map { _.name }.mkString(",")
             header.map(_.from(context)) getOrElse defaultHeader

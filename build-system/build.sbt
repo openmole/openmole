@@ -21,7 +21,7 @@ organization := "org.openmole"
 
 resolvers += Classpaths.sbtPluginSnapshots
 
-addSbtPlugin("com.typesafe.sbt" % "sbt-osgi" % "0.8.0")
+addSbtPlugin("com.typesafe.sbt" % "sbt-osgi" % "0.9.1")
 
 addSbtPlugin("org.scalariform" % "sbt-scalariform" % "1.6.0")
 
@@ -29,8 +29,5 @@ addSbtPlugin("org.scalariform" % "sbt-scalariform" % "1.6.0")
 libraryDependencies ++= Seq(
   "com.jsuereth" %% "scala-arm" % "1.3",
   "org.apache.commons" % "commons-compress" % "1.10")
-
-
-publishTo <<= isSnapshot(if(_) Some("Openmole Nexus" at "https://maven.openmole.org/snapshots") else Some("Openmole Nexus" at "https://maven.openmole.org/releases"))
 
 releaseSettings

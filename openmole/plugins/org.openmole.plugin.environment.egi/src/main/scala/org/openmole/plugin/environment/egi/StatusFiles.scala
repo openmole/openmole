@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.environment.egi
 
-import org.openmole.core.batch.storage.StorageService
+import org.openmole.plugin.environment.batch.storage.StorageService
 import org.openmole.core.workflow.execution.ExecutionState._
 
 object StatusFiles {

@@ -19,12 +19,13 @@ package org.openmole.plugin.environment.ssh
 
 import java.io.File
 
-import org.openmole.core.batch.control.AccessToken
-import org.openmole.core.batch.storage.{ RemoteStorage, SimpleStorage, StorageService, TransferOptions }
-import org.openmole.core.batch.environment.BatchEnvironment
+import org.openmole.plugin.environment.batch.control.AccessToken
+import org.openmole.plugin.environment.batch.storage.{ SimpleStorage, StorageService }
+import org.openmole.plugin.environment.batch.environment.BatchEnvironment
 import org.openmole.core.workspace.Workspace
 import org.openmole.plugin.environment.gridscale.{ GridScaleStorage, LocalStorage, LogicalLinkStorage }
-import fr.iscpif.gridscale.ssh.{ SSHConnectionCache }
+import fr.iscpif.gridscale.ssh.SSHConnectionCache
+import org.openmole.core.communication.storage.RemoteStorage
 
 trait SSHStorageService extends StorageService with SSHService with GridScaleStorage { ss ⇒
 

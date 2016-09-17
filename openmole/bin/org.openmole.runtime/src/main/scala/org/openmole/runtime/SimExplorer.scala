@@ -20,13 +20,14 @@ package org.openmole.runtime
 import org.openmole.core.logging.LoggerService
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.tool.file._
-import org.openmole.core.workspace.Workspace
 import org.openmole.tool.logger.Logger
 import scopt._
 import java.io.File
+
 import org.openmole.core.serializer.SerialiserService
-import org.openmole.core.batch.storage._
-import scala.util.{ Success, Failure }
+import org.openmole.core.communication.storage.RemoteStorage
+
+import scala.util.{ Failure, Success }
 
 object SimExplorer extends Logger {
 

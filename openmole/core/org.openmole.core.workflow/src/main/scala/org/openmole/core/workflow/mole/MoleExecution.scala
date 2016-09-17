@@ -68,9 +68,9 @@ object MoleExecution extends Logger {
     implicits:          Context                     = Context.empty,
     seed:               Long                        = Workspace.newSeed,
     defaultEnvironment: LocalEnvironment            = LocalEnvironment(),
-    tmpDirectory:       File                        = Workspace.newDir("execution"),
-    cleanOnFinish:      Boolean                     = true
-  )(implicit executionContext: MoleExecutionContext = MoleExecutionContext.default) =
+    cleanOnFinish:      Boolean                     = true,
+    executionContext:   MoleExecutionContext        = MoleExecutionContext.default
+  ) =
     new MoleExecution(
       mole,
       listOfTupleToMap(sources),
@@ -79,9 +79,10 @@ object MoleExecution extends Logger {
       grouping,
       seed,
       defaultEnvironment,
-      tmpDirectory,
-      cleanOnFinish
-    )(implicits, executionContext)
+      cleanOnFinish,
+      implicits,
+      executionContext
+    )
 
 }
 
@@ -95,10 +96,11 @@ class MoleExecution(
     val grouping:           Map[Capsule, Grouping],
     val seed:               Long,
     val defaultEnvironment: LocalEnvironment,
-    val tmpDirectory:       File,
     val cleanOnFinish:      Boolean,
+    val implicits:          Context,
+    val executionContext:   MoleExecutionContext,
     val id:                 String                    = UUID.randomUUID().toString
-)(val implicits: Context, val executionContext: MoleExecutionContext) {
+) {
 
   private val _started = Ref(false)
   private val _canceled = Ref(false)
@@ -160,7 +162,7 @@ class MoleExecution(
       val env = environments.getOrElse(capsule, defaultEnvironment)
       env match {
         case env: SubmissionEnvironment ⇒ env.submit(job)
-        case env: LocalEnvironment      ⇒ env.submit(job, TaskExecutionContext(tmpDirectory, env))
+        case env: LocalEnvironment      ⇒ env.submit(job, TaskExecutionContext(executionContext.tmpDirectory, env))
       }
       EventDispatcher.trigger(this, new MoleExecution.JobSubmitted(job, capsule, env))
     }
@@ -288,7 +290,7 @@ class MoleExecution(
   private def finish() = {
     _finished.single() = true
     _endTime.single() = Some(System.currentTimeMillis)
-    if (cleanOnFinish) tmpDirectory.recursiveDelete
+    if (cleanOnFinish) executionContext.tmpDirectory.recursiveDelete
   }
 
   def canceled: Boolean = _canceled.single()

@@ -51,25 +51,25 @@ object OMTags {
 
   case class AlertAction(action: () ⇒ Unit)
 
-  def alert(alertType: ModifierSeq, content: TypedTag[HTMLDivElement], actions: Seq[AlertAction], buttonGroupClass: ModifierSeq = sheet.floatLeft +++ sheet.marginLeft(20)): TypedTag[HTMLDivElement] =
+  def alert(alertType: ModifierSeq, content: TypedTag[HTMLDivElement], actions: Seq[AlertAction], buttonGroupClass: ModifierSeq = sheet.floatLeft +++ sheet.marginLeft(20), okString: String = "OK"): TypedTag[HTMLDivElement] =
     actions.size match {
-      case 1 ⇒ alert(alertType, content, actions.head.action, buttonGroupClass)
-      case 2 ⇒ alert(alertType, content, actions.head.action, actions(1).action, buttonGroupClass)
+      case 1 ⇒ alert(alertType, content, actions.head.action, buttonGroupClass, okString)
+      case 2 ⇒ alert(alertType, content, actions.head.action, actions(1).action, buttonGroupClass, okString)
       case _ ⇒ tags.div()
     }
 
-  def alert(alertType: ModifierSeq, content: TypedTag[HTMLDivElement], todook: () ⇒ Unit, buttonGroupClass: ModifierSeq): TypedTag[HTMLDivElement] =
+  def alert(alertType: ModifierSeq, content: TypedTag[HTMLDivElement], todook: () ⇒ Unit, buttonGroupClass: ModifierSeq, okString: String): TypedTag[HTMLDivElement] =
     tags.div(role := "alert")(
       content,
-      bs.button("OK", alertType +++ sheet.paddingTop(20), todook)
+      bs.button(okString, alertType +++ sheet.paddingTop(20), todook)
     )
 
-  def alert(alertType: ModifierSeq, content: TypedTag[HTMLDivElement], todook: () ⇒ Unit, todocancel: () ⇒ Unit, buttonGroupClass: ModifierSeq): TypedTag[HTMLDivElement] =
+  def alert(alertType: ModifierSeq, content: TypedTag[HTMLDivElement], todook: () ⇒ Unit, todocancel: () ⇒ Unit, buttonGroupClass: ModifierSeq, okString: String): TypedTag[HTMLDivElement] =
     tags.div(role := "alert")(
       content,
       div(sheet.paddingTop(20))(
         bs.buttonGroup(buttonGroupClass)(
-          bs.button("OK", alertType, todook),
+          bs.button(okString, alertType, todook),
           bs.button("Cancel", btn_default, todocancel)
         )
       )

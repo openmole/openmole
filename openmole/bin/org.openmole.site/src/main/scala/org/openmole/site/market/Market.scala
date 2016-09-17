@@ -17,18 +17,18 @@
 
 package org.openmole.site.market
 
+import org.openmole.core.buildinfo
 import org.openmole.core.project._
 import org.openmole.core.buildinfo.MarketIndexEntry
 import org.openmole.core.pluginmanager.PluginManager
-import org.openmole.site.Config
+import org.openmole.site.{ Config, Page }
 import org.openmole.tool.file._
 import org.openmole.tool.hash._
 import org.openmole.tool.logger.Logger
 import org.openmole.tool.tar._
-import org.openmole.core.buildinfo
-import collection.JavaConversions._
 
-import scala.util.{ Success, Failure, Try }
+import collection.JavaConversions._
+import scala.util.{ Failure, Success, Try }
 
 object Market extends Logger {
 
@@ -87,7 +87,7 @@ object Market extends Logger {
       MarketEntry("Explore a GAMA Model", "gama", Seq(gama, stochastic, simulation)),
       MarketEntry("Introduction Tutorial", "tutorials/introduction", Seq(tutorial, scala, stochastic)),
       MarketEntry("Native Application Tutorial", "tutorials/native", Seq(tutorial, native, data, python)),
-      MarketEntry("Model Exploration Tutorial", "tutorials/method", Seq(netlogo, ga, simulation, calibration))
+      MarketEntry("Model Exploration Tutorial", "tutorials/method", Seq(netlogo, ga, simulation, calibration, tutorial))
     )
   )
 
@@ -98,17 +98,21 @@ import java.io.File
 import Market._
 
 case class GeneratedMarketEntry(
-    archive: String,
-    entry:   MarketEntry,
-    readme:  Option[String],
-    viewURL: Option[String]
+    archive:  String,
+    entry:    MarketEntry,
+    location: File,
+    viewURL:  Option[String]
 ) {
+
+  def readme = (location / "README.md").contentOption
+  def tags = entry.tags
+
   def toDeployedMarketEntry =
     MarketIndexEntry(
       name = entry.name,
       archive = archive,
       readme = readme,
-      tags = entry.tags.map(_.label)
+      tags = tags.map(_.label)
     )
 }
 
@@ -130,12 +134,11 @@ class Market(repositories: Seq[MarketRepository], destination: File) {
       val archive = archiveDirectory / fileName
       val projectDirectory = repository.location(resourceDirectory) / project.directory
       projectDirectory archiveCompress archive
-      val readme = projectDirectory / "README.md"
 
       GeneratedMarketEntry(
         s"$archiveDirectoryName/$fileName",
         project,
-        readme.contentOption,
+        projectDirectory,
         marketRepository.repository.viewURL(project.directory, branchName)
       )
     }

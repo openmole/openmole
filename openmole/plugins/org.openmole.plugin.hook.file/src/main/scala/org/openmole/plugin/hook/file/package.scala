@@ -19,7 +19,7 @@ package org.openmole.plugin.hook
 
 import java.io.File
 import org.openmole.core.workflow.data.Prototype
-import org.openmole.core.workflow.tools.ExpandedString
+import org.openmole.core.workflow.tools._
 import org.openmole.plugin.hook.file.CopyFileHook.CopyFileHookBuilder
 import org.openmole.core.dsl._
 import org.openmole.core.workflow.builder._
@@ -30,13 +30,13 @@ package file {
   trait FilePackage {
 
     def copies = new {
-      def +=[T: CopyFileHookBuilder: InputOutputBuilder](prototype: Prototype[File], destination: ExpandedString, remove: Boolean = false, compress: Boolean = false, move: Boolean = false): T ⇒ T =
+      def +=[T: CopyFileHookBuilder: InputOutputBuilder](prototype: Prototype[File], destination: FromContext[File], remove: Boolean = false, compress: Boolean = false, move: Boolean = false): T ⇒ T =
         (implicitly[CopyFileHookBuilder[T]].copies add ((prototype, destination, CopyOptions(remove, compress, move)))) andThen
           (inputs += prototype) andThen (if (move) (outputs += prototype) else identity)
     }
 
     def csvHeader = new {
-      def :=[T: AppendToCSVFileHookBuilder](h: OptionalArgument[ExpandedString]) =
+      def :=[T: AppendToCSVFileHookBuilder](h: OptionalArgument[FromContext[String]]) =
         implicitly[AppendToCSVFileHookBuilder[T]].csvHeader.set(h)
     }
 

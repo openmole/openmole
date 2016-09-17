@@ -20,7 +20,7 @@ package org.openmole.plugin.environment.ssh
 import java.io.File
 import java.util.UUID
 
-import org.openmole.core.batch.authentication.CypheredPassword
+import org.openmole.plugin.environment.batch.authentication.CypheredPassword
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.workspace._
 

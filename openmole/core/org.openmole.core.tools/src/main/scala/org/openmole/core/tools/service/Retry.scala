@@ -39,4 +39,6 @@ object Retry {
         else throw t
     }
 
+  def retry[T](nbTry: Int)(f: ⇒ T): T = retry(f, nbTry)
+
 }

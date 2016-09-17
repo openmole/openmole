@@ -26,6 +26,9 @@ opacity: 1;
 opacity: 0;
 }
 
+ul{
+    list-style-type: none;
+}
 
 /* DIALOGS */
 #marketPanelID .modal-dialog, #executionsPanelID .modal-dialog, #modelWizardPanelID .modal-dialog  {
@@ -39,7 +42,7 @@ opacity: 0;
 }
  #envStackID .modal-dialog, #documentationID .modal-dialog{
     max-width: 1250px;
-    width: 60%;
+    width: 65%;
 }
 
 #conceptPanelID .modal-footer {
@@ -96,7 +99,6 @@ opacity: 0;
     position: relative;
     display: inline-block;
     width: 100%;
-    top: 25px;
 }
 
 .tree.droppable {
@@ -105,19 +107,15 @@ opacity: 0;
 }
 
 .tree-path {
-    margin-left: 3px;
     position: relative;
     min-height: 27px;
-    padding-bottom: auto;
     height: 30px;
     left: -10px;
     padding-left: 10px;
     padding-right: 18px;
-    width: 105%;
+    width: 327px;
     background-color: #f8f8f8;
-    padding-bottom: 5px;
     word-wrap: break-word;
-    box-shadow: -2px 2px 15px #808080;
 }
 
 .tree-path .btn-group .btn.btn-primary{
@@ -128,10 +126,18 @@ opacity: 0;
 .tree-path .btn-group {
 }
 
+.file-list tbody{
+  overflow-y: scroll;
+  height: 100%;            //  <-- Select the height of the body
+  width: 100%;
+  position: absolute;
+}
+
 .file-list {
     font-size: 14px;
     list-style-type: none;
-    width: 100%;
+    width: 320px;
+    margin-top: 160px;
 }
 
 .filelist li {
@@ -433,6 +439,8 @@ li.selectElement{
     background-color: #333;
     opacity: 0.5;
     width : 35px;
+    position: fixed;
+    margin-top: 142px;
 }
 
 .sortingTool.btn:hover{
@@ -447,8 +455,45 @@ li.selectElement{
     opacity: 1;
     font-weight: bold;
     width : 50px;
+    margin-top: 142px;
     }
 
-    .aaa{
-    background-color: red;
-    }
+.fullpanel {
+    height: 100%;
+    width: 100%;
+}
+.centerpanel {
+    height: 89%;
+    padding-left: 15px;
+    padding-right: 15px;
+    position: relative;
+    top: 30px;
+    width: 100%;
+}
+
+.fullpanel .reduce {
+    left: 330px;
+    padding-right: 340px;
+    position: fixed;
+    top: 60px;
+    transition: all 0.1s ease-out 0s;
+    width: 99%;
+    height: calc(100% - 140px);
+
+}
+
+.fullpanel .open {
+    left: 0;
+}
+
+.leftpanel {
+    background: #333333 none repeat scroll 0 0;
+    height: 100%;
+    left: -320px;
+    opacity: 1;
+    padding-left: 7px;
+    position: fixed;
+    top: 37px;
+    transition: all 0.1s ease-out 0s;
+    width: 320px;
+}

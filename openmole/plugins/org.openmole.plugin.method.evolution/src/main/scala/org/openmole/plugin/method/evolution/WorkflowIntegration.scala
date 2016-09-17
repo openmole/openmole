@@ -263,11 +263,7 @@ object StochasticGAIntegration {
     genome: UniqueGenome,
     values: Seq[Double],
     seed:   Seeder
-  ) =
-    for {
-      variables ← GAIntegration.scaled(genome, values)
-      s ← FromContext { (_, rng) ⇒ seed(rng()) }
-    } yield variables ++ s
+  ) = (GAIntegration.scaled(genome, values) |@| FromContext { (_, rng) ⇒ seed(rng()) }) apply (_ ++ _)
 
   def populationToVariables[I](
     genome:           UniqueGenome,

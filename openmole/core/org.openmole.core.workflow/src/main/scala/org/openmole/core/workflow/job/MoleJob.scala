@@ -106,7 +106,6 @@ class MoleJob(
         case t: Throwable ⇒
           exception = Some(t)
           state = FAILED
-          if (classOf[InterruptedException].isAssignableFrom(t.getClass)) throw t
       }
     }
 

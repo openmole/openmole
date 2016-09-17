@@ -21,7 +21,7 @@ import org.openmole.core.workflow.data._
 import java.io.File
 
 import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.tools.ExpandedString
+import org.openmole.core.workflow.tools._
 import org.openmole.core.dsl._
 import monocle.macros.Lenses
 import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
@@ -30,7 +30,7 @@ object ListDirectoriesSource {
 
   implicit def isIO = InputOutputBuilder(ListDirectoriesSource.config)
 
-  def apply(path: ExpandedString, prototype: Prototype[Array[File]], regExp: ExpandedString = ".*") =
+  def apply(path: FromContext[String], prototype: Prototype[Array[File]], regExp: FromContext[String] = ".*") =
     new ListDirectoriesSource(
       path,
       prototype,
@@ -40,9 +40,9 @@ object ListDirectoriesSource {
 }
 
 @Lenses case class ListDirectoriesSource(
-    path:      ExpandedString,
+    path:      FromContext[String],
     prototype: Prototype[Array[File]],
-    regExp:    ExpandedString,
+    regExp:    FromContext[String],
     config:    InputOutputConfig
 ) extends Source {
 

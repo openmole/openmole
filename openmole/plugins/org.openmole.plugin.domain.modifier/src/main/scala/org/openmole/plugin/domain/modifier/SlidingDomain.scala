@@ -38,10 +38,7 @@ case class SlidingDomain[D, T: Manifest](domain: D, size: FromContext[Int], step
   def inputs = domainInputs.inputs(domain)
 
   def iterator() =
-    for {
-      it ← discrete.iterator(domain)
-      si ← size
-      st ← step
-    } yield it.sliding(si, st).map(_.toArray)
+    (discrete.iterator(domain) |@| size |@| step) apply
+      ((it, si, st) ⇒ it.sliding(si, st).map(_.toArray))
 
 }

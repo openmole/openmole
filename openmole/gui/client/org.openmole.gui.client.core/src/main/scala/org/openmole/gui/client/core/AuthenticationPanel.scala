@@ -76,11 +76,11 @@ class AuthenticationPanel extends ModalPanel {
           scalatags.JsDom.all.marginLeft := 10,
           test.passed match {
             case true  ⇒ label_success
-            case false ⇒ label_danger
+            case false ⇒ label_danger +++ pointer
           },
           onclick := { () ⇒
             if (!test.passed) {
-              panels.environmentStackPanel.content() = test.errorStack.stackTrace
+              panels.stackPanel.content() = test.errorStack.stackTrace
               panels.environmentStackTriggerer.open
             }
           }
@@ -152,8 +152,8 @@ class AuthenticationPanel extends ModalPanel {
 
   val vosToBeTested = bs.labeledInput("Test EGI credential on", "", "VO names (vo1,vo2,...)", labelStyle = color := "#000")
   OMPost[Api].getConfigurationValue(VOTest).call().foreach {
-    _.map {
-      vosToBeTested.setDefault
+    _.map { c ⇒
+      vosToBeTested.setDefault(c)
     }
   }
 

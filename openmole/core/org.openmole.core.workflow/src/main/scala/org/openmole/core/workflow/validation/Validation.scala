@@ -189,6 +189,17 @@ object Validation {
     }
   }
 
+  def transitionValidationErrors(mole: Mole, sources: Sources, hooks: Hooks) = {
+    val errors =
+      for {
+        transition ← mole.transitions.collect { case x: ValidateTransition ⇒ x }
+      } yield {
+        val inputs = TypeUtil.validTypes(mole, sources, hooks)(transition.end, _ == transition)
+        transition.validate(inputs.toSeq.map(_.toPrototype))
+      }
+    errors.flatten
+  }
+
   def incoherentTypeAggregation(mole: Mole, sources: Sources, hooks: Hooks) =
     for {
       c ← mole.capsules
@@ -320,7 +331,8 @@ object Validation {
           dataChannelErrors(m) ++
           incoherentTypeAggregation(m, sources, hooks) ++
           incoherentTypeBetweenSlots(m, sources, hooks) ++
-          taskValidationErrors(m)
+          taskValidationErrors(m) ++
+          transitionValidationErrors(m, sources, hooks)
     }
   }
 

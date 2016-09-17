@@ -31,7 +31,7 @@
       @li{fqan: additional flags for authentication,}
       @li{setup: setup to use on the DIRAC server. It is set to "Dirac-Production" by default.}
 
-    @p The EHIEnvironment can be tuned using the previous options as in this example:
+    @p The EGIEnvironment can be tuned using the previous options as in this example:
     @br @hl.openmole("""
       val env =
         EGIEnvironment(
@@ -39,34 +39,5 @@
           cpuTime = 4 hours,
           openMOLEMemory = 200
         )""")
-   @sect{Delegate tasks using WMS servers}
 
-    @p If you want / need to use the submission using the legacy WMS servers of EGI you may use:
-    @br @hl.openmole("""val env = WMSEnvironment("vo.complex-systems.eu")""")
-
-    @p Many options are available to configure the WMS environment:
-    @ul
-      @li{@wallTime,}
-      @li{@memory,}
-      @li{architecture: could be "x86_64" for restricting your jobs to 64-bit systems,}
-      @li{jobType: should be set to "MPI" for MPI jobs,}
-      @li{cpuNumber: the number of CPU required for your job,}
-      @li{smpGranularity: the number of cores linked to a shared memory machine (same as cpuNumber for multi-threaded processes),}
-      @li{@threads,}
-      @li{requirements: a requirement string in accordance to the GLUE schema. It will be added to the other requirements,}
-      @li{fqan, cpuTime, openMOLEMemory, bdii, vomsURL are also usable in the same way as for the EGI environment.}
-
-    @p The WMSEnvironment can be tuned using the previous options as in this example:
-    @br @hl.openmole("""
-      val env =
-        WMSEnvironment(
-          "biomed",
-          cpuTime = 4 hours,
-          memory = 2000,
-          architecture = "x64_86",
-          jobType = "MPI",
-          cpuNumber = 8,
-          smpGranularity = 1,
-          openMOLEMemory = 200
-        )""")
 

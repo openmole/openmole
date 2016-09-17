@@ -21,7 +21,7 @@ import java.io._
 import java.net.URI
 import java.util.UUID
 import fr.iscpif.gridscale.authentication.{ PEMAuthentication, P12Authentication }
-import org.openmole.core.batch.authentication.CypheredPassword
+import org.openmole.plugin.environment.batch.authentication.CypheredPassword
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import java.nio.file.FileSystems
 import java.util.zip.GZIPInputStream
@@ -179,7 +179,7 @@ object EGIAuthentication extends Logger {
   }
 
   def testDIRACAccess(a: EGIAuthentication, voName: String)(implicit decrypt: Decrypt) =
-    Try(DIRACEnvironment(voName).jobService.jobService.token).map(_ ⇒ true)
+    Try(DIRACEnvironment(voName).jobService.getToken).map(_ ⇒ true)
 
   def DIRACVos = fr.iscpif.gridscale.egi.DIRACJobService.supportedVOs()
 }

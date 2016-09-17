@@ -80,6 +80,10 @@ package file {
         finally dirStream.close
       }
 
+      def isEmpty =
+        if (file.isDirectory) isDirectoryEmpty
+        else file.size == 0L
+
       def listFilesSafe = Option(file.listFiles).getOrElse(Array.empty)
 
       def listFilesSafe(filter: File ⇒ Boolean) = Option(file.listFiles(filter)).getOrElse(Array.empty)
@@ -449,6 +453,8 @@ package file {
       else if (bytes < tB) (doubleBytes / gB).formatted("%.2f").toString + "GB"
       else (doubleBytes / tB).formatted("%.2f").toString + "TB"
     }
+
+    def uniqName(prefix: String, sufix: String) = prefix + "_" + UUID.randomUUID.toString + sufix
 
   }
 

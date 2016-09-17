@@ -40,7 +40,7 @@ object ModelFamily {
     def toInput = Scalar(prototype, min, max)
   }
 
-  def apply(source: ExpandedString, combination: Combination[Class[_]]) = new ModelFamilyBuilder(source, combination)
+  def apply(source: FromContext[String], combination: Combination[Class[_]]) = new ModelFamilyBuilder(source, combination)
 
   def traitsVariable = Prototype[String]("traits")
   def attributesVariable = Prototype[String]("attributes")
@@ -53,7 +53,7 @@ object ModelFamilyBuilder {
   implicit def modelFamilyBuilderToModelFamily(builder: ModelFamilyBuilder) = builder.toModelFamily
 }
 
-class ModelFamilyBuilder(val source: ExpandedString, val combination: Combination[Class[_]]) extends Builder with ScalaBuilder with InputBuilder with OutputBuilder { builder ⇒
+class ModelFamilyBuilder(val source: FromContext[String], val combination: Combination[Class[_]]) extends Builder with ScalaBuilder with InputBuilder with OutputBuilder { builder ⇒
 
   def pluginsForTraits = combination.components.flatMap(PluginManager.pluginsForClass).distinct
   addPlugins(pluginsForTraits)
@@ -97,7 +97,7 @@ trait ModelFamily <: Plugins { f ⇒
   def inputs: PrototypeSet
   def outputs: PrototypeSet
   def imports: Seq[String]
-  def source: ExpandedString
+  def source: FromContext[String]
   def traits: Seq[Class[_]] = combination.components
   def attributes: Seq[Attribute]
   def objectives: Seq[Prototype[Double]]

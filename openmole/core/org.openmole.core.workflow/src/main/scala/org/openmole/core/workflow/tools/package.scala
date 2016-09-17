@@ -18,7 +18,10 @@
 package org.openmole.core.workflow
 
 import scala.concurrent.stm._
+import org.openmole.tool.file._
 import scala.ref.WeakReference
+import scalaz._
+import Scalaz._
 
 package tools {
 
@@ -50,8 +53,6 @@ package tools {
     implicit def seqOfFunction[T](s: Seq[T ⇒ T]) = s.sequence
     implicit def arrayOfFunction[T](s: Array[T ⇒ T]) = s.toSeq.sequence
 
-    def c(s: String): FromContext[String] = s
-
     object OptionalArgument {
       implicit def valueToOptionalArgument[T](v: T) = OptionalArgument(Some(v))
       implicit def noneToOptionalArgument[T](n: None.type) = OptionalArgument[T](n)
@@ -60,7 +61,11 @@ package tools {
     case class OptionalArgument[T](option: Option[T] = None)
 
     implicit def optionalArgumentToOption[T](optionalArgument: OptionalArgument[T]) = optionalArgument.option
-    implicit def fromStringToExpandedStringOptionalArgument(s: String) = OptionalArgument[ExpandedString](Some(ExpandedString(s)))
+    implicit def fromStringToExpandedStringOptionalArgument(s: String) = OptionalArgument[FromContext[String]](Some(ExpandedString(s)))
+
+    def Expression[T] = new {
+      def apply[S](s: S)(implicit expandable: Expandable[S, T]) = expandable.expand(s)
+    }
 
   }
 }

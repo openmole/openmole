@@ -32,7 +32,7 @@ object GenomeProfile {
     nX:        Int,
     genome:    Genome,
     objective: Objective
-  ) = {
+  ): DeterministicGenomeProfile = {
     val ug = UniqueGenome(genome)
 
     val xIndex =
@@ -59,7 +59,7 @@ object GenomeProfile {
     objective:   Objective,
     replication: Replication[Id],
     paretoSize:  Int               = 20
-  ) = {
+  ): StochasticGenomeProfile = {
     val ug = UniqueGenome(genome)
 
     val xIndex =
@@ -97,7 +97,7 @@ object GenomeProfile {
         nX = nX
       )
 
-    implicit def workflowIntegration = new WorkflowIntegration[DeterministicGenomeProfile] {
+    implicit def workflowIntegration: WorkflowIntegration[DeterministicGenomeProfile] = new WorkflowIntegration[DeterministicGenomeProfile] {
       override def apply(a: DeterministicGenomeProfile): EvolutionWorkflow = new EvolutionWorkflow {
         type MGOAG = profile.OpenMOLE
         def mgoAG = a.algo
@@ -143,7 +143,7 @@ object GenomeProfile {
         nX = nX
       )
 
-    implicit def workflowIntegration = new WorkflowIntegration[StochasticGenomeProfile] {
+    implicit def workflowIntegration: WorkflowIntegration[StochasticGenomeProfile] = new WorkflowIntegration[StochasticGenomeProfile] {
       override def apply(a: StochasticGenomeProfile): EvolutionWorkflow = new EvolutionWorkflow {
         type MGOAG = noisyprofile.OpenMOLE
         def mgoAG = a.algo

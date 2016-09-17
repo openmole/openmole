@@ -78,4 +78,30 @@ class ExplorationTransitionSpec extends FlatSpec with Matchers {
     (explo -< t).start.waitUntilEnded
     res.toArray.sorted.deep should equal(data.toArray.deep)
   }
+
+  "When keyword in exploration transition" should "should filter some values in the sampling" in {
+    val i = Prototype[Int]("i")
+    val data = (1 to 100)
+
+    val sampling = new ExplicitSampling(i, data)
+
+    val exc = Capsule(ExplorationTask(sampling))
+
+    val res = new ListBuffer[Int]
+
+    val t = TestTask { context ⇒
+      res.synchronized {
+        context.contains(i) should equal(true)
+        res += context(i)
+        context
+      }
+    } set (
+      name := "Test",
+      inputs += i
+    )
+
+    val ex = exc -< (t when "i % 2 != 0")
+    ex.start.waitUntilEnded
+    res.toArray.sorted.deep should equal(data.toArray.filter(_ % 2 != 0).deep)
+  }
 }

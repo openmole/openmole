@@ -43,7 +43,7 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
 
   var stop: Boolean = false
 
-  override def run = {
+  override def run = try {
     while (!stop) {
       environment.get match {
         case Some(environment) ⇒
@@ -75,7 +75,10 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
 
                     moleJob.stateChangedCallBack =
                       (job: MoleJob, oldState: State.State, newState) ⇒ {
-                        if (newState == State.CANCELED) executionThread.interrupt()
+                        if (newState == State.CANCELED) {
+                          stop = true
+                          executionThread.stop() //interrupt()
+                        }
                         originalCallBack(job, oldState, newState)
                       }
 
@@ -104,7 +107,8 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
             EventDispatcher.trigger(environment: Environment, Environment.JobCompleted(executionJob, log, service.localRuntimeInfo))
           }
           catch {
-            case e: InterruptedException ⇒
+            case e: InterruptedException ⇒ throw e
+            case e: ThreadDeath          ⇒ throw e
             case e: Throwable ⇒
               val er = ExceptionRaised(executionJob, e, SEVERE)
               environment.error(er)
@@ -115,6 +119,10 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
         case None ⇒ stop = true
       }
     }
+  }
+  catch {
+    case e: InterruptedException ⇒
+    case e: ThreadDeath          ⇒
   }
 
   case class Output(stream: PrintStream, output: String, error: String)

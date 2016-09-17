@@ -25,7 +25,7 @@ import org.openmole.core.tools.service.OS
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.tools.ExpandedString
+import org.openmole.core.workflow.tools._
 
 import scala.util.Random
 
@@ -34,25 +34,25 @@ object External {
 
   case class InputFile(
     prototype:   Prototype[File],
-    destination: ExpandedString,
+    destination: FromContext[String],
     link:        Boolean
   )
 
   case class InputFileArray(
     prototype: Prototype[Array[File]],
-    prefix:    ExpandedString,
-    suffix:    ExpandedString,
+    prefix:    FromContext[String],
+    suffix:    FromContext[String],
     link:      Boolean
   )
 
   case class OutputFile(
-    origin:    ExpandedString,
+    origin:    FromContext[String],
     prototype: Prototype[File]
   )
 
   case class Resource(
     file:        File,
-    destination: ExpandedString,
+    destination: FromContext[String],
     link:        Boolean,
     os:          OS
   )

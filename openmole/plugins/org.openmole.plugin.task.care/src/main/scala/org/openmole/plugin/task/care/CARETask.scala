@@ -21,8 +21,8 @@ package org.openmole.plugin.task.care
 import java.io.File
 
 import org.openmole.core.exception.InternalProcessingError
-import org.openmole.core.workflow.data.{ Context, Variable }
-import org.openmole.core.workflow.tools.VariableExpansion
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.tools._
 import org.openmole.plugin.task.external.{ External, ExternalBuilder }
 import org.openmole.tool.logger.Logger
 import org.openmole.plugin.task.systemexec._
@@ -35,7 +35,7 @@ import org.openmole.core.workflow.dsl._
 import scalaz._
 import Scalaz._
 import monocle.macros.Lenses
-import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputBuilder$, InputOutputConfig }
+import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
 
 object CARETask extends Logger {
   implicit def isTask: InputOutputBuilder[CARETask] = InputOutputBuilder(CARETask._config)
@@ -84,7 +84,7 @@ object CARETask extends Logger {
 
   def config = InputOutputConfig.outputs.modify(_ ++ Seq(stdOut, stdErr, returnValue).flatten)(_config)
 
-  lazy val expandedCommand = VariableExpansion(command.command)
+  lazy val expandedCommand = ExpandedString(command.command)
 
   override def validate = expandedCommand.validate(inputs.toSeq)
 
@@ -131,6 +131,20 @@ object CARETask extends Logger {
       leafs(taskWorkDirectory / "inputs", "").map { case (f, b) ⇒ f.getAbsolutePath → b } ++
         hostFiles.map { case (f, b) ⇒ f → b.getOrElse(f) }
 
+    def createDestination(binding: (String, String), baseDir: String = "rootfs") = {
+      import org.openmole.tool.file.{ File ⇒ OMFile }
+      val (f, b) = binding
+
+      if (OMFile(f).isDirectory) (OMFile(baseDir) / b).mkdirs()
+      else {
+        val dest = OMFile(baseDir) / b
+        dest.getParentFileSafe.mkdirs()
+        dest.createNewFile()
+      }
+    }
+
+    for (binding ← bindings) createDestination(binding)
+
     // replace original proot executable with a script that will first bind all the inputs in the guest rootfs before
     // calling the original proot
     proot.content =
@@ -155,7 +169,7 @@ object CARETask extends Logger {
 
     // FIXME duplicated from SystemExecTask
     val executionResult = execute(commandline, extractedArchive, environmentVariables, preparedContext, stdOut.isDefined, stdErr.isDefined)
-    if (errorOnReturnValue && !returnValue.isDefined && executionResult.returnCode != 0)
+    if (errorOnReturnValue && returnValue.isEmpty && executionResult.returnCode != 0)
       throw new InternalProcessingError(
         s"""Error executing command":
                  |[${commandline.mkString(" ")}] return code was not 0 but ${executionResult.returnCode}""".stripMargin

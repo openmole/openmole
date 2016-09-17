@@ -18,32 +18,26 @@
 package org.openmole.runtime
 
 import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
 import java.io.PrintStream
-import java.util.UUID
+
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.output.OutputManager
 import org.openmole.core.pluginmanager.PluginManager
-import org.openmole.core.serializer.structure.PluginClassAndFiles
 import org.openmole.core.workflow.task.TaskExecutionContext
-import org.openmole.tool.file._
-import org.openmole.tool.hash._
 import org.openmole.tool.logger.Logger
-import org.openmole.tool.tar._
-import org.openmole.core.tools.service.{ LocalHostName, Retry }
+import org.openmole.core.tools.service.Retry
 import org.openmole.core.workspace.Workspace
 import org.openmole.core.tools.service._
-import org.openmole.core.batch.storage._
-import org.openmole.core.batch.storage._
 import org.openmole.core.workflow.execution._
-import org.openmole.core.batch.message._
+import org.openmole.core.communication.message._
+import org.openmole.core.communication.storage._
 import org.openmole.core.serializer._
-import org.openmole.core.pluginmanager._
-import org.openmole.tool.tar.TarInputStream
+
+import org.openmole.tool.file.uniqName
+
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashMap
-import util.{ Success, Failure }
+import util.{ Failure, Success }
 import org.openmole.core.workflow.execution.Environment.RuntimeLog
 
 object Runtime extends Logger {
@@ -91,7 +85,7 @@ class Runtime {
     }
 
     def getReplicatedFile(replicatedFile: ReplicatedFile, transferOptions: TransferOptions) =
-      replicatedFile.download {
+      ReplicatedFile.download(replicatedFile) {
         (path, file) ⇒
           try retry(storage.download(path, file, transferOptions))
           catch {
@@ -165,7 +159,7 @@ class Runtime {
           pac.files.map {
             _.upload {
               f ⇒
-                val name = storage.child(communicationDirPath, Storage.uniqName("resultFile", ".bin"))
+                val name = storage.child(communicationDirPath, uniqName("resultFile", ".bin"))
                 retry(storage.upload(f, name, TransferOptions(forceCopy = true, canMove = true)))
                 name
             }

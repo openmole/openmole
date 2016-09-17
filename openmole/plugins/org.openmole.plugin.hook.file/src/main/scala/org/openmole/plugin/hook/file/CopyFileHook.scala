@@ -25,7 +25,7 @@ import org.openmole.plugin.hook.file.CopyFileHook.CopyOptions
 import org.openmole.tool.tar._
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.tools.ExpandedString
+import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.mole.MoleExecutionContext
 import org.openmole.core.workflow.validation.ValidateHook
@@ -36,7 +36,7 @@ object CopyFileHook {
   case class CopyOptions(remove: Boolean, compress: Boolean, move: Boolean)
 
   trait CopyFileHookBuilder[T] {
-    def copies: Lens[T, Vector[(Prototype[File], ExpandedString, CopyOptions)]]
+    def copies: Lens[T, Vector[(Prototype[File], FromContext[File], CopyOptions)]]
   }
 
   implicit def isIO: InputOutputBuilder[CopyFileHook] = InputOutputBuilder(CopyFileHook.config)
@@ -47,10 +47,10 @@ object CopyFileHook {
 
   def apply(
     prototype:   Prototype[File],
-    destination: ExpandedString,
-    remove:      Boolean         = false,
-    compress:    Boolean         = false,
-    move:        Boolean         = false
+    destination: FromContext[File],
+    remove:      Boolean           = false,
+    compress:    Boolean           = false,
+    move:        Boolean           = false
   ): CopyFileHook =
     apply() set (pack.copies += (prototype, destination, remove, compress, move))
 
@@ -63,7 +63,7 @@ object CopyFileHook {
 }
 
 @Lenses case class CopyFileHook(
-    copies: Vector[(Prototype[File], ExpandedString, CopyOptions)],
+    copies: Vector[(Prototype[File], FromContext[File], CopyOptions)],
     config: InputOutputConfig
 ) extends Hook with ValidateHook {
 
@@ -78,11 +78,11 @@ object CopyFileHook {
     context:          Context,
     executionContext: MoleExecutionContext,
     filePrototype:    Prototype[File],
-    destination:      ExpandedString,
+    destination:      FromContext[File],
     options:          CopyOptions
   )(implicit rng: RandomProvider): Option[Variable[File]] = {
     val from = context(filePrototype)
-    val to = new File(destination.from(context))
+    val to = destination.from(context)
 
     to.createParentDir
     val ret: Option[Variable[File]] =

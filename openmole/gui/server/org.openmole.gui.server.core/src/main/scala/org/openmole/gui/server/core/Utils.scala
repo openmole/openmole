@@ -43,6 +43,8 @@ object Utils {
   implicit def fileToExtension(f: File): FileExtension = DataUtils.fileToExtension(f.getName)
 
   val webUIProjectFile = Workspace.file("webui")
+  val pluginUpdoadDirectory = Workspace.tmpDir.newDir("pluginUpload")
+  pluginUpdoadDirectory.mkdir
 
   def workspaceProjectFile = {
     val ws = new File(Workspace.file("webui"), "projects")
@@ -283,10 +285,10 @@ object Utils {
     }.filter(exists)
   }
 
-  def copyToPluginDir(safePaths: Seq[SafePath]) = {
+  def copyToPluginUploadDirectory(safePaths: Seq[SafePath]) = {
     safePaths.map { sp ⇒
       val from = safePathToFile(sp)(ServerFileSytemContext.project)
-      copy(from, Workspace.pluginDir)
+      copy(from, pluginUpdoadDirectory)
     }
   }
 

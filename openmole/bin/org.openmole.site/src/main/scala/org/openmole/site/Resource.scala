@@ -18,6 +18,8 @@
 package org.openmole.site
 
 import org.openmole.core.buildinfo
+import org.openmole.site.market.GeneratedMarketEntry
+import org.openmole.site.market.Market._
 
 //TODO automatically generate this object as a managed source using sbt
 object Resource {
@@ -56,6 +58,8 @@ object Resource {
 
   def highlightJS = FileResource("highlight.pack.js")
 
+  def siteJS = FileResource("sitejs.js")
+
   def logo = FileResource("openmole.png")
 
   def uiScreenshot = FileResource("openmoleUI.png")
@@ -66,16 +70,26 @@ object Resource {
 
   def biomedia = FileResource("biomedia.png")
 
+  def img = FileResource("img")
+
   def openmole = RenameFileResource("openmole.tar.gz", s"openmole-${buildinfo.version}.tar.gz")
 
   def openmoleDaemon = RenameFileResource("openmole-daemon.tar.gz", s"openmole-daemon-${buildinfo.version}.tar.gz")
 
   def api = ArchiveResource("openmole-api.tar.gz", "api")
 
+  def lunr = FileResource("lunr.min.js")
+
+  def index = FileResource("index.js")
+
+  def marketResources(entries: Seq[GeneratedMarketEntry]) =
+    entries.filter(_.tags.exists(_ == market.Market.Tags.tutorial)).map { tuto ⇒ MarketResource(tuto) }
+
   def all = Seq[Resource](
     css,
     github,
     highlightJS,
+    siteJS,
     bootstrapCss,
     bootstrapJS,
     logo,
@@ -95,13 +109,14 @@ object Resource {
     uiScreenshot,
     iscpif,
     geocite,
-    biomedia
+    biomedia,
+    img,
+    lunr
   )
 }
 
 sealed trait Resource
-
 case class RenameFileResource(source: String, file: String) extends Resource
-
 case class ArchiveResource(source: String, file: String) extends Resource
+case class MarketResource(marketEntry: GeneratedMarketEntry) extends Resource
 

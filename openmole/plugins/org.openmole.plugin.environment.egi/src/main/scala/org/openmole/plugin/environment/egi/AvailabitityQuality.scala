@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.environment.egi
 
-import org.openmole.core.batch.control._
+import org.openmole.plugin.environment.batch.control._
 import org.openmole.core.tools.service.MovingAverage
 
 object AvailabilityQuality {

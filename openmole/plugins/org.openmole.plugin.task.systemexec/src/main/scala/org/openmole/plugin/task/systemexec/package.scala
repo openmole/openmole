@@ -24,13 +24,11 @@ import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.tools.service.OS
 import org.openmole.core.tools.service.ProcessUtil._
 import org.openmole.core.workflow.data.{ Context, Prototype, RandomProvider, Variable }
-import org.openmole.core.workflow.tools.{ FromContext, VariableExpansion }
-import org.openmole.core.workflow.tools.VariableExpansion.Expansion
+import org.openmole.core.workflow.tools.{ FromContext, ExpandedString }
 import org.openmole.tool.stream.StringOutputStream
 import org.openmole.core.workflow.dsl._
 
 import language.implicitConversions
-import collection.mutable.ListBuffer
 import monocle.Lens
 import org.openmole.plugin.task.external.External
 
@@ -56,7 +54,7 @@ package systemexec {
    * @see Command
    */
   case class OSCommands(os: OS, parts: Command*) {
-    @transient lazy val expanded = parts.map(c ⇒ (VariableExpansion(c.command)))
+    @transient lazy val expanded = parts.map(c ⇒ ExpandedString(c.command))
   }
 
   object OSCommands {

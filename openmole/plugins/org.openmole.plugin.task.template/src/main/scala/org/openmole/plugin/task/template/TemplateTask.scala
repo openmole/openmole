@@ -24,7 +24,6 @@ import java.io.File
 
 import monocle.macros.Lenses
 import org.openmole.core.workflow.tools._
-import org.openmole.tool.cache.Cache
 
 object TemplateTask {
 
@@ -43,11 +42,11 @@ object TemplateTask {
     config:   InputOutputConfig = InputOutputConfig()
 ) extends Task {
 
-  val expanded = Cache(VariableExpansion(template))
+  val expanded = ExpandedString(template)
 
   override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = {
     val outputFile = executionContext.tmpDirectory.newFile("output", "template")
-    outputFile.content = expanded().expand(context)
+    outputFile.content = expanded.from(context)
     Context.empty + (output, outputFile)
   }
 }

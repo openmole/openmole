@@ -20,13 +20,13 @@ package org.openmole.plugin.method.modelfamily
 import org.openmole.tool.file._
 import org.openmole.core.workflow.data.{ RandomProvider, Context }
 import org.openmole.core.workflow.mole.{ HookBuilder, ExecutionContext, Hook }
-import org.openmole.core.workflow.tools.ExpandedString
+import org.openmole.core.workflow.tools.FromContext[String]
 import org.openmole.plugin.method.evolution._
 import org.openmole.plugin.hook.file._
 
 object SaveModelFamilyHook {
 
-  def apply(parameters: GAParameters[ModelFamilyCalibration], dir: ExpandedString) = {
+  def apply(parameters: GAParameters[ModelFamilyCalibration], dir: FromContext[String]) = {
     val fileName = dir + "/population${" + parameters.generation.name + "}.csv"
     new HookBuilder {
       def toHook =
@@ -35,7 +35,7 @@ object SaveModelFamilyHook {
   }
 }
 
-abstract class SaveModelFamilyHook(parameters: GAParameters[ModelFamilyCalibration], path: ExpandedString) extends Hook {
+abstract class SaveModelFamilyHook(parameters: GAParameters[ModelFamilyCalibration], path: FromContext[String]) extends Hook {
 
   def mf = parameters.evolution
   def traitsHeader = mf.modelFamily.traits.map(_.getName).mkString(",")

@@ -28,7 +28,7 @@ import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.tools.{ ExpandedString, VariableExpansion }
+import org.openmole.core.workflow.tools.{ ExpandedString }
 import org.openmole.plugin.task.external.External._
 import org.openmole.plugin.task.external._
 import org.openmole.core.workflow.dsl._
@@ -57,7 +57,7 @@ trait NetLogoTask extends Task {
         throw new UserBadDataError(s"$msg:\n" + e.stackStringWithMargin)
     }
 
-  val expandedCommands = Cache(launchingCommands.map(VariableExpansion(_)))
+  val expandedCommands = Cache(launchingCommands.map(ExpandedString(_)))
 
   override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider): Context = external.withWorkDir(executionContext) { tmpDir ⇒
     val workDir =
@@ -90,7 +90,7 @@ trait NetLogoTask extends Task {
           executeNetLogo("set " + inBinding._2 + " " + v)
         }
 
-        for (cmd ← expandedCommands()) executeNetLogo(cmd.expand(context))
+        for (cmd ← expandedCommands()) executeNetLogo(cmd.from(context))
 
         val contextResult =
           external.fetchOutputFiles(preparedContext, external.relativeResolver(workDir)) ++ netLogoOutputs.map {

@@ -22,13 +22,15 @@ import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.tools.Condition
 import Condition._
-import scala.util.{ Random, Failure, Success, Try }
+
+import scala.util.{ Failure, Random, Success, Try }
 import org.openmole.tool.lock._
 import org.openmole.core.workflow.dsl._
+import org.openmole.core.workflow.validation.ValidateTransition
 
-class EndExplorationTransition(val start: Capsule, val end: Slot, val trigger: Condition, val filter: BlockList = BlockList.empty) extends IEndExplorationTransition {
+class EndExplorationTransition(val start: Capsule, val end: Slot, val trigger: Condition, val filter: BlockList = BlockList.empty) extends IEndExplorationTransition with ValidateTransition {
 
-  //def condition = Condition.True
+  override def validate(inputs: Seq[Prototype[_]]) = trigger.validate(inputs)
 
   override def perform(context: Context, ticket: Ticket, subMole: SubMoleExecution)(implicit rng: RandomProvider) = {
     def perform() {

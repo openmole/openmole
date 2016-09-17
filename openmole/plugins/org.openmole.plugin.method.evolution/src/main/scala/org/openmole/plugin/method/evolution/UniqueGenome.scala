@@ -59,10 +59,7 @@ object Scalable {
       val g = genomePart.head
       assert(!g.isNaN)
 
-      for {
-        min ← s.min
-        max ← s.max
-      } yield {
+      (s.min |@| s.max) apply { (min, max) ⇒
         val sc = g.scale(min, max)
         ScaledScalar(s.prototype, sc)
       }
@@ -77,11 +74,7 @@ object Scalable {
     override def scaled(s: Sequence)(genomePart: Seq[Double]): FromContext[Scaled] = {
       def scaled =
         (genomePart zip (s.min zip s.max)).toVector traverseU {
-          case (g, (min, max)) ⇒
-            for {
-              mi ← min
-              ma ← max
-            } yield g.scale(mi, ma)
+          case (g, (min, max)) ⇒ (min |@| max) apply (g.scale(_, _))
         }
 
       scaled.map { sc ⇒ ScaledSequence(s.prototype, sc.toArray) }

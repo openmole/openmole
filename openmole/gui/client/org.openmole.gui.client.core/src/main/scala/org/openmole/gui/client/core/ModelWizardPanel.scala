@@ -100,6 +100,7 @@ class ModelWizardPanel extends ModalPanel {
   val upButton: Var[HTMLDivElement] = Var(tags.div().render)
   val fileToUploadPath: Var[Option[SafePath]] = Var(None)
   val targetPath: Var[Option[SafePath]] = Var(None)
+  val fromArchive: Var[Boolean] = Var(false)
 
   val modelSelector: Select[SafePath] = Seq[SafePath]().select(
     None, SafePath.naming, btn_default, () ⇒ {
@@ -326,6 +327,7 @@ class ModelWizardPanel extends ModalPanel {
 
     fileType match {
       case archive: Archive ⇒
+        fromArchive() = true
         archive.language match {
           //Java case
           case JavaLikeLanguage() ⇒
@@ -347,6 +349,7 @@ class ModelWizardPanel extends ModalPanel {
             }
 
           case _ ⇒
+            fromArchive() = false
 
         }
       case codeFile: CodeFile ⇒
@@ -398,7 +401,9 @@ class ModelWizardPanel extends ModalPanel {
         fileToUploadPath() = Some(filePath)
         launchingCommand.now.foreach {
           lc ⇒
-            codeSelector.content() = lc.value.language.map { SelectElement(_) }
+            codeSelector.content() = lc.value.language.map {
+              SelectElement(_)
+            }
             setScritpName
             setReactives(lc)
         }
@@ -448,20 +453,35 @@ class ModelWizardPanel extends ModalPanel {
   )
 
   val buildModelTaskButton = {
+
     tags.button("Build", btn_primary, onclick := {
       () ⇒
         save
         close
+
+        val codeType = codeSelector.content.now.map {
+          _.value
+        }.getOrElse(Binary())
+
+        val targetSuffix = codeType match {
+          case NetLogoLanguage() ⇒
+            if (fromArchive.now) s"/${fileToUploadPath.now.map { _.name }.getOrElse("NetLogoMODEL")}"
+            else ""
+          case _ ⇒ ""
+        }
+
         launchingCommand.now.foreach {
           lc ⇒
             val path = manager.current.now.safePath.now
             val scriptName = scriptNameInput.value.clean
-            val target = targetPath.now.map { _.name }.getOrElse("executable")
+            val target = targetPath.now.map {
+              _.name
+            }.getOrElse("executable")
             OMPost[Api].buildModelTask(
-              target,
+              target + targetSuffix,
               scriptName,
               commandArea.value,
-              codeSelector.content.now.map { _.value }.getOrElse(Binary()),
+              codeType,
               inputs(currentReactives.now).map {
                 _.content.prototype
               },

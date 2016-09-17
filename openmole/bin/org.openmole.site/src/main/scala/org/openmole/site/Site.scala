@@ -18,9 +18,11 @@
 package org.openmole.site
 
 import java.io.{ File, FileInputStream }
+import java.nio.CharBuffer
+import java.nio.file.Paths
 import java.util.zip.GZIPInputStream
 
-import ammonite.ops.Path
+import ammonite.ops.{ Path, write }
 import org.openmole.core.buildinfo.MarketIndex
 import org.openmole.core.serializer.SerialiserService
 import org.openmole.core.workspace.Workspace
@@ -33,6 +35,8 @@ import scalatags.Text.all
 import scalatags.Text.all._
 import scala.sys.process.BasicIO
 import org.openmole.site.credits._
+import spray.json.JsArray
+import module._
 import org.openmole.core.buildinfo
 
 import scala.annotation.tailrec
@@ -40,7 +44,8 @@ import scala.annotation.tailrec
 object Site {
 
   def piwik =
-    RawFrag("""
+    RawFrag(
+      """
         |<!-- Piwik -->
         |<script type="text/javascript">
         |  var _paq = _paq || [];
@@ -57,43 +62,47 @@ object Site {
         |</script>
         |<noscript><p><img src="//piwik.iscpif.fr/piwik.php?idsite=1" style="border:0;" alt="" /></p></noscript>
         |<!-- End Piwik Code -->
-      """.stripMargin)
+      """.stripMargin
+    )
 
   def run(args: Array[String]): Int = {
     case class Parameters(
       target:     Option[File] = None,
-      test:       Boolean      = true,
-      marketTest: Boolean      = true,
+      test:       Boolean      = false,
+      marketTest: Boolean      = false,
       resources:  Option[File] = None,
       ignored:    List[String] = Nil
     )
 
     @tailrec def parse(args: List[String], c: Parameters = Parameters()): Parameters = args match {
-      case "--target" :: tail         ⇒ parse(tail.tail, c.copy(target = tail.headOption.map(new File(_))))
-      case "--no-test" :: tail        ⇒ parse(tail, c.copy(test = false))
-      case "--no-market-test" :: tail ⇒ parse(tail, c.copy(marketTest = false))
-      case "--resources" :: tail      ⇒ parse(tail.tail, c.copy(resources = tail.headOption.map(new File(_))))
-      case s :: tail                  ⇒ parse(tail, c.copy(ignored = s :: c.ignored))
-      case Nil                        ⇒ c
+      case "--target" :: tail      ⇒ parse(tail.tail, c.copy(target = tail.headOption.map(new File(_))))
+      case "--test" :: tail        ⇒ parse(tail, c.copy(test = true))
+      case "--market-test" :: tail ⇒ parse(tail, c.copy(marketTest = true))
+      case "--resources" :: tail   ⇒ parse(tail.tail, c.copy(resources = tail.headOption.map(new File(_))))
+      case s :: tail               ⇒ parse(tail, c.copy(ignored = s :: c.ignored))
+      case Nil                     ⇒ c
     }
 
     val parameters = parse(args.toList.map(_.trim))
 
     Config.testScript = parameters.test
 
-    val dest = parameters.target.getOrElse(new File("./openmole-doc-html"))
+    val dest = parameters.target.getOrElse(new File("./openmole-site"))
     dest.recursiveDelete
 
-    val m = new Market(Market.entries, dest)
-    val marketEntries = m.generate(parameters.resources.get, parameters.test && parameters.marketTest)
-    SerialiserService.serialise(MarketIndex(marketEntries.map(_.toDeployedMarketEntry)), (dest / buildinfo.marketName))
+    val modules = generateModules(dest, f ⇒ s"modules/${f.getName}", dest / buildinfo.moduleListName)
+    val marketEntries = generateMarket(parameters.resources.get, dest, dest / buildinfo.marketName, parameters.test && parameters.marketTest)
 
     DocumentationPages.marketEntries = marketEntries
 
     case class PageFrag(page: Page, frag: Frag)
 
-    val site = new scalatex.site.Site { site ⇒
+    def mdFiles = (parameters.resources.get / "md").listFilesSafe.filter(_.getName.endsWith(".md"))
+
+    val site = new scalatex.site.Site {
+      site ⇒
       override def siteCss = Set.empty
+
       override def pageTitle: Option[String] = None
 
       def headFrags(page: org.openmole.site.Page) =
@@ -112,6 +121,9 @@ object Site {
           script(src := scriptName),
           script(src := Resource.bootstrapJS.file),
           script(src := Resource.highlightJS.file),
+          script(src := Resource.siteJS.file),
+          script(src := Resource.lunr.file),
+          script(src := Resource.index.file),
           script("hljs.initHighlightingOnLoad();"),
 
           meta(charset := "UTF-8"),
@@ -124,14 +136,37 @@ object Site {
       override def bodyFrag(frag: Frag): Frag = body(
         Seq(
           cls := "scalatex-content"
-        ) ++ (if (documentationFrags.contains(frag)) Seq(id := "top-content-documentation") else Seq())
+        ) ++ (if (documentationFrags.contains(frag)) Seq(id := "top-content-documentation", onload := "Test().loadIndex(index);") else Seq())
           ++ Seq(frag): _*
       )
 
-      lazy val pagesFrag = Pages.all.map { p ⇒ PageFrag(p, Pages.decorate(p)) }
+      override def generateHtml(outputRoot: Path) = {
+        val res = content map {
+          case (path, (pageHeaders, pageBody)) ⇒ {
+            val txt = html(
+              head(pageHeaders),
+              bodyFrag(pageBody)
+            ).render
+            val cb = CharBuffer.wrap("<!DOCTYPE html>" + txt)
+            val bytes = scala.io.Codec.UTF8.encoder.encode(cb)
+            val target = outputRoot / path
+            write.over(target, bytes.array())
+            LunrIndex.Index(path, txt)
+          }
+        }
+        write.over(outputRoot / "index.js", "var index = " + JsArray(res.toVector).compactPrint)
+      }
+
+      import scalaz._
+      import Scalaz._
+
+      lazy val pagesFrag =
+        Pages.all.toVector.traverseU { p ⇒ Pages.decorate(p).map(PageFrag(p, _)) }.run(parameters.resources.get)
+
       lazy val documentationFrags = pagesFrag.collect { case PageFrag(p: DocumentationPage, f) ⇒ f }.toSet
 
       def content = pagesFrag.map { case PageFrag(p, f) ⇒ p.file → (site.headFrags(p), f) }.toMap
+
     }
 
     lazy val bibPapers = Publication.papers ++ Communication.papers
@@ -140,18 +175,12 @@ object Site {
     site.renderTo(Path(dest))
 
     for {
-      r ← Resource.all
+      r ← Resource.all ++ Resource.marketResources(marketEntries)
     } r match {
       case RenameFileResource(source, destination) ⇒
+        val from = parameters.resources.get / source
         val f = new File(dest, destination)
-        f.createParentDir
-        f.withOutputStream { os ⇒
-          val resource = parameters.resources.get / source
-          resource.withInputStream { is ⇒
-            assert(is != null, s"Resource $source doesn't exist")
-            BasicIO.transferFully(is, os)
-          }
-        }
+        from copy f
       case ArchiveResource(name, dir) ⇒
         val f = new File(dest, dir)
         f.mkdirs
@@ -159,11 +188,33 @@ object Site {
         withClosable(new TarInputStream(new GZIPInputStream(new FileInputStream(resource)))) {
           _.extract(f)
         }
+      case MarketResource(entry) ⇒
+        val f = new File(dest, entry.entry.name)
+        entry.location copy f
     }
 
     DSLTest.runTest.get
 
     0
+  }
+
+  def generateModules(baseDirectory: File, moduleLocation: File ⇒ String, index: File) = {
+    import org.json4s._
+    import org.json4s.jackson.Serialization
+    implicit val formats = Serialization.formats(NoTypeHints)
+    val modules = Module.generate(Module.all, baseDirectory, moduleLocation)
+    index.content = Serialization.writePretty(modules)
+    modules
+  }
+
+  def generateMarket(resourceDirectory: File, dest: File, index: File, test: Boolean) = {
+    import org.json4s._
+    import org.json4s.jackson.Serialization
+    implicit val formats = Serialization.formats(NoTypeHints)
+    val m = new Market(Market.entries, dest)
+    val marketEntries = m.generate(resourceDirectory, test)
+    index.content = Serialization.writePretty(MarketIndex(marketEntries.map(_.toDeployedMarketEntry)))
+    marketEntries
   }
 
 }

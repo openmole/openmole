@@ -18,16 +18,16 @@
 package org.openmole.plugin.method.evolution
 
 import org.openmole.core.workflow.data.{ Prototype, _ }
-import org.openmole.core.workflow.tools.ExpandedString
+import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.dsl._
 import org.openmole.plugin.hook.file._
 
 object SavePopulationHook {
 
-  def apply[T](algorithm: T, dir: ExpandedString)(implicit wfi: WorkflowIntegration[T]) = {
+  def apply[T](algorithm: T, dir: FromContext[File])(implicit wfi: WorkflowIntegration[T]) = {
     val t = wfi(algorithm)
 
-    val fileName = dir + "/population${" + t.generationPrototype.name + "}.csv"
+    val fileName = dir / ExpandedString("population${" + t.generationPrototype.name + "}.csv")
     val prototypes = Seq[Prototype[_]](t.generationPrototype) ++ t.resultPrototypes.map(_.toArray)
     AppendToCSVFileHook(fileName, prototypes: _*)
   }

@@ -20,6 +20,10 @@ import org.openmole.core.buildinfo._
 import org.openmole.gui.ext.data._
 
 trait Api {
+
+  //GENERAL
+  def settings(): OMSettings
+
   //AUTHENTICATIONS
   def authentications(): Seq[AuthenticationData]
   def addAuthentication(data: AuthenticationData): Unit
@@ -31,14 +35,13 @@ trait Api {
   def passwordState(): PasswordState
   def resetPassword(): Unit
   def setPassword(pass: String): Boolean
-  def workspacePath(): SafePath
   def getConfigurationValue(configData: ConfigData): Option[String]
   def setConfigurationValue(configData: ConfigData, value: String): Unit
 
   //FILES
   def addDirectory(treeNode: TreeNodeData, directoryName: String): Boolean
   def addFile(treeNode: TreeNodeData, fileName: String): Boolean
-  def extractTGZ(treeNodeData: TreeNodeData): Unit
+  def extractTGZ(treeNodeData: TreeNodeData): ExtractResult
   def deleteAuthenticationKey(keyName: String): Unit
   def deleteFile(safePath: SafePath, context: ServerFileSytemContext): Unit
   def deleteFiles(safePath: Seq[SafePath], context: ServerFileSytemContext): Unit
@@ -54,7 +57,7 @@ trait Api {
   def copyAllTmpTo(tmpSafePath: SafePath, to: SafePath): Unit
   def testExistenceAndCopyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Seq[SafePath]
   def copyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Unit
-  def copyToPluginDir(safePaths: Seq[SafePath]): Unit
+  def copyToPluginUploadDir(safePaths: Seq[SafePath]): Unit
   def copyFromTmp(tmpSafePath: SafePath, filesToBeMoved: Seq[SafePath]): Unit
   def uuid(): String = java.util.UUID.randomUUID.toString
   def renameFile(treeNode: TreeNodeData, name: String): TreeNodeData

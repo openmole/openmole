@@ -17,17 +17,19 @@
 package org.openmole.core
 
 import java.text.DateFormat
-import java.util.{ Locale, Calendar }
+import java.util.{ Calendar, Locale }
+
+import fr.iscpif.gridscale.http.HTTPStorage
 
 package object buildinfo {
 
-  def name = "L... L..."
+  def name = "M... M..."
 
-  def version: String = buildinfo.BuildInfo.version
+  def version: String = BuildInfo.version
 
   def generationDate = {
     val d = Calendar.getInstance()
-    d.setTimeInMillis(buildinfo.BuildInfo.buildTime)
+    d.setTimeInMillis(BuildInfo.buildTime)
     val format = DateFormat.getDateInstance(DateFormat.LONG, new Locale("EN", "en"))
     format.format(d.getTime)
   }
@@ -37,11 +39,21 @@ package object buildinfo {
   def siteURL =
     development match {
       case true  ⇒ "http://next.openmole.org"
-      case false ⇒ s"http://openmole.org/all/$version"
+      case false ⇒ s"http://www.openmole.org/all/$version"
     }
 
-  def marketName = "market.bin"
+  import org.json4s._
+  import org.json4s.jackson.Serialization
+  implicit val formats = Serialization.formats(NoTypeHints)
+
+  def marketName = "market.json"
   def marketAddress = url(marketName)
+  def marketIndex = HTTPStorage.download(buildinfo.marketAddress)(Serialization.read[buildinfo.MarketIndex](_))
+
+  def moduleListName = "modules.json"
+  def moduleAddress = url(moduleListName)
+  def moduleIndex = HTTPStorage.download(buildinfo.moduleAddress)(Serialization.read[buildinfo.ModuleIndex](_))
+
   def url(entry: String): String = siteURL + "/" + entry
 
   def info = OpenMOLEBuildInfo(version, name, generationDate)

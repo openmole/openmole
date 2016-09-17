@@ -18,19 +18,19 @@
 package org.openmole.core.pluginmanager
 
 import java.io.File
+import java.util.concurrent.Semaphore
 
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.pluginmanager.internal.Activator
 import org.openmole.tool.file._
 import org.openmole.tool.logger.Logger
 import org.osgi.framework._
-import org.osgi.framework.wiring.BundleWiring
+import org.osgi.framework.wiring.{ BundleWiring, FrameworkWiring }
 
 import scala.collection.immutable.{ HashMap, HashSet }
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.collection.JavaConversions._
-
 import scala.concurrent.stm._
 import scala.util.{ Failure, Success, Try }
 
@@ -49,8 +49,9 @@ object PluginManager extends Logger {
   Activator.contextOrException.addBundleListener(
     new BundleListener {
       override def bundleChanged(event: BundleEvent) = {
-        val b = event.getBundle
-        if (event.getType == BundleEvent.RESOLVED || event.getType == BundleEvent.UNRESOLVED || event.getType == BundleEvent.UPDATED) clearCaches()
+        if (event.getType == BundleEvent.RESOLVED ||
+          event.getType == BundleEvent.UNRESOLVED ||
+          event.getType == BundleEvent.UPDATED) clearCaches()
       }
     }
   )
@@ -105,7 +106,8 @@ object PluginManager extends Logger {
     else Nil
 
   def tryLoad(files: Iterable[File]): Iterable[(File, Throwable)] = synchronized {
-    val loaded = files.flatMap { listBundles }.map { b ⇒ b → Try(installBundle(b)) }
+    val bundleFiles = files.flatMap { listBundles }
+    val loaded = bundleFiles.map { b ⇒ b → Try(installBundle(b)) }
     def bundles = loaded.collect { case (f, Success(b)) ⇒ f → b }
     def loadError = loaded.collect { case (f, Failure(e)) ⇒ f → e }
     loadError ++ bundles.map { case (f, b) ⇒ f → Try(b.start) }.collect { case (f, Failure(e)) ⇒ f → e }
@@ -143,6 +145,15 @@ object PluginManager extends Logger {
       getOrElseUpdate(b.getBundleId, dependencies(List(b)).map(_.getBundleId)).
       filter(isPlugin).map(l ⇒ Activator.contextOrException.getBundle(l))
   }
+
+  def remove(b: Bundle) = synchronized {
+    val additionalBundles = Seq(b) ++ allDependingBundles(b, b ⇒ !b.isProvided)
+    additionalBundles.foreach(b ⇒ if (b.getState == Bundle.ACTIVE) b.uninstall())
+    updateBundles()
+  }
+
+  private def getBundle(f: File) =
+    Option(Activator.contextOrException.getBundle(f.toURI.toString))
 
   private def installBundle(f: File) =
     try {
@@ -208,7 +219,11 @@ object PluginManager extends Logger {
     else b.adapt(classOf[BundleWiring]).getRequiredWires(null).map(_.getProvider.getBundle).filter(_.getBundleId != Constants.SYSTEM_BUNDLE_ID).distinct
 
   def directDependingBundles(b: Bundle) =
-    b.adapt(classOf[BundleWiring]).getProvidedWires(null).map(_.getRequirer.getBundle).filter(b ⇒ b.getBundleId != Constants.SYSTEM_BUNDLE_ID && !b.isFullDynamic).distinct
+    b.adapt(classOf[BundleWiring]).
+      getProvidedWires(null).
+      map(_.getRequirer.getBundle).
+      filter(b ⇒ b.getBundleId != Constants.SYSTEM_BUNDLE_ID && !b.isFullDynamic).
+      distinct
 
   def startAll: Seq[(Bundle, Throwable)] =
     Activator.contextOrException.getBundles.filter {
@@ -219,5 +234,27 @@ object PluginManager extends Logger {
     }.map {
       b ⇒ b → Try(b.start)
     }.collect { case (b: Bundle, Failure(e)) ⇒ b → e }
+
+  def updateBundles(bundles: Option[Seq[Bundle]] = None) {
+    val listener = new FrameworkListener {
+      val lock = new Semaphore(0)
+
+      override def frameworkEvent(event: FrameworkEvent): Unit =
+        if (event.getType == FrameworkEvent.PACKAGES_REFRESHED) lock.release()
+    }
+
+    val wiring = Activator.contextOrException.getBundle(0).adapt(classOf[FrameworkWiring])
+
+    bundles match {
+      case Some(s) ⇒ wiring.refreshBundles(s, listener)
+      case None    ⇒ wiring.refreshBundles(null, listener)
+    }
+
+    listener.lock.acquire()
+  }
+
+  /* For debugging purposes */
+  def printBundles = println(Activator.contextOrException.getBundles.mkString("\n"))
+  def printDirectDependencies(b: Long) = println(directDependingBundles(Activator.contextOrException.getBundle(b)).mkString("\n"))
 
 }

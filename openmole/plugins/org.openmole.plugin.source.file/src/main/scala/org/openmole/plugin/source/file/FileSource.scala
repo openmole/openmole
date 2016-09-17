@@ -26,7 +26,6 @@ import monocle.Lens
 import monocle.macros.Lenses
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.tools._
-import org.openmole.core.workflow.tools.ExpandedString
 import org.openmole.core.dsl
 import org.openmole.core.dsl._
 import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
@@ -35,7 +34,7 @@ object FileSource {
 
   implicit def isIO = InputOutputBuilder(FileSource.config)
 
-  def apply(path: ExpandedString, prototype: Prototype[File]) =
+  def apply(path: FromContext[String], prototype: Prototype[File]) =
     new FileSource(
       path,
       prototype,
@@ -45,7 +44,7 @@ object FileSource {
 }
 
 @Lenses case class FileSource(
-    path:      ExpandedString,
+    path:      FromContext[String],
     prototype: Prototype[File],
     config:    InputOutputConfig
 ) extends Source {

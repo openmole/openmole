@@ -119,12 +119,14 @@ trait RESTAPI extends ScalatraServlet with GZipSupport
           case compiled: Compiled ⇒
             Try(compiled.eval) match {
               case Success(res) ⇒
-                Try(res.buildPuzzle.toExecution(executionContext = MoleExecutionContext(out = directory.outputStream))) match {
-                  case Success(ex) ⇒
-                    ex listen { case (ex, ev: MoleExecution.Finished) ⇒ }
-                    start(ex)
-                  case Failure(e) ⇒ error(e)
-                }
+                Try(
+                  res.buildPuzzle.toExecution(executionContext = MoleExecutionContext(out = directory.outputStream))
+                ) match {
+                    case Success(ex) ⇒
+                      ex listen { case (ex, ev: MoleExecution.Finished) ⇒ }
+                      start(ex)
+                    case Failure(e) ⇒ error(e)
+                  }
               case Failure(e) ⇒ error(e)
             }
 

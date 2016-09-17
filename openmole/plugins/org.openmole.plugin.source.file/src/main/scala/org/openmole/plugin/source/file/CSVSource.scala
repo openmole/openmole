@@ -25,7 +25,7 @@ import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.task._
 import java.io._
 
-import org.openmole.core.workflow.tools.ExpandedString
+import org.openmole.core.workflow.tools._
 import org.openmole.plugin.tool.csv.{ CSVToVariables, CSVToVariablesBuilder }
 
 import collection.mutable.ListBuffer
@@ -51,7 +51,7 @@ object CSVSource {
     override def separator = CSVSource.separator
   }
 
-  def apply(path: ExpandedString) =
+  def apply(path: FromContext[String]) =
     new CSVSource(
       path,
       config = InputOutputConfig(),
@@ -63,7 +63,7 @@ object CSVSource {
 }
 
 @Lenses case class CSVSource(
-    path:        ExpandedString,
+    path:        FromContext[String],
     config:      InputOutputConfig,
     columns:     Vector[(String, Prototype[_])],
     fileColumns: Vector[(String, File, Prototype[File])],

@@ -5,15 +5,12 @@ import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.zip.GZIPInputStream
 
-import com.sun.org.apache.xalan.internal.xsltc.dom.LoadDocument
-import org.openmole.core.batch.environment.BatchEnvironment.{ BeginDownload, BeginUpload, EndDownload, EndUpload }
-import org.openmole.core.buildinfo.MarketIndex
+import org.openmole.plugin.environment.batch.environment.BatchEnvironment.{ BeginDownload, BeginUpload, EndDownload, EndUpload }
+import org.openmole.core.buildinfo
 import org.openmole.core.event._
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.pluginmanager._
-import org.openmole.core.serializer.SerialiserService
 import org.openmole.gui.misc.utils.Utils._
-import org.openmole.gui.server.core.Runnings.RunningEnvironment
 import org.openmole.gui.server.core.Utils._
 import org.openmole.core.workspace.{ ConfigurationLocation, Workspace }
 import org.openmole.gui.shared._
@@ -22,8 +19,8 @@ import org.openmole.gui.ext.data._
 import java.io._
 import java.nio.file._
 
+import fr.iscpif.gridscale.http.HTTPStorage
 import org.openmole.core.project._
-import org.osgi.framework.Bundle
 
 import scala.util.{ Failure, Success, Try }
 import org.openmole.core.workflow.mole.MoleExecutionContext
@@ -32,10 +29,8 @@ import org.openmole.tool.stream.StringPrintStream
 import scala.concurrent.stm._
 import org.openmole.tool.file._
 import org.openmole.tool.tar._
-import org.openmole.core.{ pluginmanager, buildinfo }
-import org.openmole.core.console.ScalaREPL
+import org.openmole.core.pluginmanager
 import org.openmole.core.output.OutputManager
-import org.openmole.gui.server.core
 
 /*
  * Copyright (C) 21/07/14 // mathieu.leclaire@openmole.org
@@ -61,6 +56,19 @@ object ApiImpl extends Api {
   val execution = new Execution
 
   implicit def authProvider = Workspace.authenticationProvider
+
+  //GENERAL
+  def settings: OMSettings = {
+    import org.openmole.gui.ext.data.ServerFileSytemContext.project
+    val workspace = Utils.workspaceProjectFile
+
+    OMSettings(
+      workspace,
+      buildinfo.version,
+      buildinfo.name,
+      new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(buildinfo.BuildInfo.buildTime)
+    )
+  }
 
   //AUTHENTICATIONS
   def addAuthentication(data: AuthenticationData): Unit = AuthenticationFactories.addAuthentication(data)
@@ -111,36 +119,51 @@ object ApiImpl extends Api {
 
   def deleteFiles(safePaths: Seq[SafePath], context: ServerFileSytemContext): Unit = Utils.deleteFiles(safePaths, context)
 
-  private def getExtractedTGZTo(from: File, to: File)(implicit context: ServerFileSytemContext): Seq[SafePath] = {
-    extractTGZToFromFiles(from, to)
+  private def getExtractedArchiveTo(from: File, to: File)(implicit context: ServerFileSytemContext): Seq[SafePath] = {
+    extractArchiveFromFiles(from, to)
     to.listFiles.toSeq
   }
 
-  private def extractTGZToFromFiles(from: File, to: File): Unit = {
-    from.extractUncompress(to, true)
-    to.applyRecursive((f: File) ⇒ f.setWritable(true))
+  def unknownFormat(name: String) = ExtractResult(Some(ErrorBuilder("Unknown compression format for " + name)))
+
+  private def extractArchiveFromFiles(from: File, to: File)(implicit context: ServerFileSytemContext): ExtractResult = {
+    Try {
+      val ext = from.extension
+      ext match {
+        case org.openmole.gui.ext.data.Tar() ⇒
+          from.extract(to)
+          to.applyRecursive((f: File) ⇒ f.setWritable(true))
+        case TarGz() ⇒
+          from.extractUncompress(to, true)
+          to.applyRecursive((f: File) ⇒ f.setWritable(true))
+        case _ ⇒ throw new Throwable("Unknown compression format for " + from.getName)
+      }
+    } match {
+      case Success(_) ⇒ ExtractResult.ok
+      case Failure(t) ⇒ ExtractResult(Some(ErrorBuilder(t)))
+    }
   }
 
-  private def extractTGZ(safePath: SafePath): Unit =
+  private def extractTGZ(safePath: SafePath): ExtractResult =
     safePath.extension match {
-      case FileExtension.TGZ ⇒
+      case FileExtension.TGZ | FileExtension.TAR ⇒
         // val archiveFile = safePathToFile(safePath)
         //  val parent: SafePath = archiveFile
         extractTGZTo(safePath, safePath.parent)
-      case _ ⇒
+      case _ ⇒ unknownFormat(safePath.name)
     }
 
-  private def extractTGZTo(safePath: SafePath, to: SafePath): Unit = {
+  private def extractTGZTo(safePath: SafePath, to: SafePath): ExtractResult = {
     safePath.extension match {
-      case FileExtension.TGZ ⇒
+      case FileExtension.TGZ | FileExtension.TAR ⇒
         val archiveFile = safePathToFile(safePath)(ServerFileSytemContext.project)
         val toFile: File = safePathToFile(to)(ServerFileSytemContext.project)
-        extractTGZToFromFiles(archiveFile, toFile)
-      case _ ⇒
+        extractArchiveFromFiles(archiveFile, toFile)(ServerFileSytemContext.project)
+      case _ ⇒ unknownFormat(safePath.name)
     }
   }
 
-  def extractTGZ(treeNodeData: TreeNodeData): Unit = extractTGZ(treeNodeData.safePath)
+  def extractTGZ(treeNodeData: TreeNodeData): ExtractResult = extractTGZ(treeNodeData.safePath)
 
   def temporaryFile(): SafePath = {
     import org.openmole.gui.ext.data.ServerFileSytemContext.absolute
@@ -159,7 +182,7 @@ object ApiImpl extends Api {
 
   def copyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath) = Utils.copyProjectFilesTo(safePaths, to)
 
-  def copyToPluginDir(safePaths: Seq[SafePath]): Unit = Utils.copyToPluginDir(safePaths)
+  def copyToPluginUploadDir(safePaths: Seq[SafePath]): Unit = Utils.copyToPluginUploadDirectory(safePaths)
 
   def testExistenceAndCopyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Seq[SafePath] = Utils.testExistenceAndCopyProjectFilesTo(safePaths, to)
 
@@ -192,7 +215,7 @@ object ApiImpl extends Api {
           // val emptyFile = new File("")
           val from: File = safePathToFile(safePathToTest)(ServerFileSytemContext.absolute)
           val to: File = safePathToFile(safePathToTest.parent)(ServerFileSytemContext.absolute)
-          val extracted = getExtractedTGZTo(from, to)(ServerFileSytemContext.absolute).filterNot {
+          val extracted = getExtractedArchiveTo(from, to)(ServerFileSytemContext.absolute).filterNot {
             _ == safePathToTest
           }
           val toTest = in ++ safePathToTest.nameWithNoExtension
@@ -262,11 +285,6 @@ object ApiImpl extends Api {
     saveFile(fc.path, fc.content)
   }
 
-  def workspacePath(): SafePath = {
-    import org.openmole.gui.ext.data.ServerFileSytemContext.project
-    Utils.workspaceProjectFile
-  }
-
   def getConfigurationValue(configData: ConfigData): Option[String] = Configurations(configData)
 
   def setConfigurationValue(configData: ConfigData, value: String) = Configurations.set(configData, value)
@@ -285,8 +303,8 @@ object ApiImpl extends Api {
 
     execution.addStaticInfo(execId, StaticExecutionInfo(scriptData.scriptPath, content, System.currentTimeMillis()))
 
-    def error(t: Throwable): Unit = execution.addError(execId, Failed(ErrorBuilder(t)))
-    def message(message: String): Unit = execution.addError(execId, Failed(Error(message)))
+    def error(t: Throwable): Unit = execution.addError(execId, Failed(ErrorBuilder(t), Seq()))
+    def message(message: String): Unit = execution.addError(execId, Failed(Error(message), Seq()))
 
     try {
       val project = new Project(script.getParentFileSafe)
@@ -366,41 +384,33 @@ object ApiImpl extends Api {
   }
 
   def marketIndex() = {
-    def download[T](action: InputStream ⇒ T): T = {
-      val url = new URL(buildinfo.marketAddress)
-      val is = url.openStream()
-      try action(is)
-      finally is.close
-    }
-
-    def mapToMd(marketIndex: MarketIndex) =
+    def mapToMd(marketIndex: buildinfo.MarketIndex) =
       marketIndex.copy(entries = marketIndex.entries.map {
-        e ⇒
-          e.copy(readme = e.readme.map {
-            MarkDownProcessor(_)
-          })
+        e ⇒ e.copy(readme = e.readme.map { MarkDownProcessor(_) })
       })
 
-    mapToMd(download(SerialiserService.deserialise[buildinfo.MarketIndex](_)))
+    mapToMd(buildinfo.marketIndex)
   }
 
   def getMarketEntry(entry: buildinfo.MarketIndexEntry, path: SafePath) = {
     import org.openmole.gui.ext.data.ServerFileSytemContext.project
     val url = new URL(entry.url)
-    val is = new TarInputStream(new GZIPInputStream(url.openStream()))
-    try {
-      is.extract(safePathToFile(path))
-      autoAddPlugins(path)
+    HTTPStorage.download(entry.url) { is ⇒
+      val tis = new TarInputStream(new GZIPInputStream(is))
+      try {
+        tis.extract(safePathToFile(path))
+        autoAddPlugins(path)
+      }
+      finally tis.close
     }
-    finally is.close
   }
 
   //PLUGINS
   def addPlugins(nodes: Seq[String]): Seq[Error] = {
-    PluginManager.tryLoad(nodes.map { n ⇒ new File(Workspace.pluginDir, n) }).map {
-      case (file, e) ⇒
-        ErrorBuilder(e)
-    }.toSeq
+    val plugins = nodes.map(Utils.pluginUpdoadDirectory / _)
+    val errors = addPluginsFiles(plugins, true)
+    plugins.foreach(_.recursiveDelete)
+    errors.map(e ⇒ ErrorBuilder(e._2))
   }
 
   def autoAddPlugins(path: SafePath) = {
@@ -412,17 +422,24 @@ object ApiImpl extends Api {
       PluginManager.listBundles(f).toList ::: subPlugins
     }
 
-    addPlugins(recurse(file))
+    addPluginsFiles(recurse(file), false)
   }
 
-  def addPlugins(files: Iterable[File]): Seq[(File, Throwable)] = {
-    val plugins =
-      files.map { file ⇒
-        val dest: File = Workspace.pluginDir / file.getName
-        file copy dest
-        dest
-      }
-    PluginManager.tryLoad(plugins).toSeq
+  private def addPluginsFiles(files: Seq[File], move: Boolean): Seq[(File, Throwable)] = synchronized {
+    val destinations = files.map { file ⇒ file → (Workspace.pluginDir / file.getName) }
+
+    destinations.filter(_._2.exists).toList match {
+      case Nil ⇒
+        val plugins =
+          destinations.map {
+            case (file, dest) ⇒
+              if (!move) file copy dest else file move dest
+              dest
+          }
+        PluginManager.tryLoad(plugins).toSeq
+      case l ⇒
+        l.map(l ⇒ l._1 → new FileAlreadyExistsException(s"Plugin with file name ${l._1.getName} is already present in the plugin directory"))
+    }
   }
 
   def isPlugin(path: SafePath): Boolean = Utils.isPlugin(path)
@@ -434,17 +451,11 @@ object ApiImpl extends Api {
 
   def removePlugin(plugin: Plugin): Unit = synchronized {
     val file = Workspace.pluginDir / plugin.name
-
-    val allFiles = PluginManager.allDepending(file, b ⇒ !b.isProvided)
-    for {
-      b ← (file :: allFiles.toList).flatMap(PluginManager.bundle)
-      if (b.getState == Bundle.ACTIVE)
-    } b.uninstall()
-
-    allFiles.foreach(_.recursiveDelete)
+    val allDependingFiles = PluginManager.allDepending(file, b ⇒ !b.isProvided)
+    val bundle = PluginManager.bundle(file)
+    bundle.foreach(PluginManager.remove)
+    allDependingFiles.filter(f ⇒ !PluginManager.bundle(f).isDefined).foreach(_.recursiveDelete)
     file.recursiveDelete
-
-    // FIXME: the bundles might not be fully unloaded, they might be dynamically imported by core.console
   }
 
   //MODEL WIZARDS
@@ -515,11 +526,11 @@ object ApiImpl extends Api {
               inString + ouString + imFileString + omFileString + resourcesString + defaults
           )
         case ntt: NetLogoTaskType ⇒
-
           val imString = imapString(imappings, "netLogoInputs")
           val omString = omapString(omappings, "netLogoOutputs")
           os.write(
-            s"""\nval task = NetLogo5Task(workDirectory / "$executableName", List("${command.split('\n').mkString("\",\"")}"), embedWorkspace = ${!resources.implicits.isEmpty}) set(\n""" +
+            s"""\nval launch = List("${(Seq("setup", "random-seed ${seed}") ++ (command.split('\n').toSeq)).mkString("\",\"")}")
+               \nval task = NetLogo5Task(workDirectory / ${executableName.split('/').map { s ⇒ s"""\"$s\"""" }.mkString(" / ")}, launch, embedWorkspace = ${!resources.implicits.isEmpty}) set(\n""".stripMargin +
               inString + ouString + imString + omString + imFileString + omFileString + defaults
           )
         case st: ScalaTaskType ⇒

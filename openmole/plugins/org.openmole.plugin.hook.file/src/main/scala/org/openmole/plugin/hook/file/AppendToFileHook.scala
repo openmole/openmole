@@ -24,7 +24,7 @@ import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfi
 import org.openmole.tool.stream._
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.tools.ExpandedString
+import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.mole.MoleExecutionContext
 import org.openmole.core.workflow.validation.ValidateHook
@@ -34,9 +34,9 @@ object AppendToFileHook {
 
   implicit def isIO: InputOutputBuilder[AppendToFileHook] = InputOutputBuilder(AppendToFileHook.config)
 
-  def apply(fileName: ExpandedString, content: ExpandedString) =
+  def apply(file: FromContext[File], content: FromContext[String]) =
     new AppendToFileHook(
-      fileName,
+      file,
       content,
       config = InputOutputConfig()
     )
@@ -44,18 +44,18 @@ object AppendToFileHook {
 }
 
 @Lenses case class AppendToFileHook(
-    fileName: ExpandedString,
-    content:  ExpandedString,
-    config:   InputOutputConfig
+    file:    FromContext[File],
+    content: FromContext[String],
+    config:  InputOutputConfig
 ) extends Hook with ValidateHook {
 
   override def validate(inputs: Seq[Val[_]]): Seq[Throwable] =
-    fileName.validate(inputs) ++ content.validate(inputs)
+    file.validate(inputs) ++ content.validate(inputs)
 
   override def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider) = {
-    val file = new File(fileName.from(context))
-    file.createParentDir
-    file.withLock(_.append(content.from(context)))
+    val f = file.from(context)
+    f.createParentDir
+    f.withLock(_.append(content.from(context)))
     context
   }
 

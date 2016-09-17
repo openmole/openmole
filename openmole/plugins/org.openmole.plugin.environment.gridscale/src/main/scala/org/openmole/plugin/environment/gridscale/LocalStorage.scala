@@ -20,7 +20,7 @@ package org.openmole.plugin.environment.gridscale
 import java.io.File
 
 import fr.iscpif.gridscale.storage.{ LocalStorage ⇒ GSLocalStorage }
-import org.openmole.core.batch.storage.SimpleStorage
+import org.openmole.plugin.environment.batch.storage.SimpleStorage
 import org.openmole.tool.file._
 
 object LocalStorage {

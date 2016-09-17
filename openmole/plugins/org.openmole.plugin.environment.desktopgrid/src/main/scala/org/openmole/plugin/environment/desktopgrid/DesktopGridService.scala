@@ -19,22 +19,23 @@ package org.openmole.plugin.environment.desktopgrid
 
 import java.io.File
 import java.net.URI
-import org.openmole.core.batch.control._
-import org.openmole.core.batch.environment._
-import org.openmole.core.batch.replication.ReplicaCatalog
-import org.openmole.core.batch.storage._
+
+import org.openmole.plugin.environment.batch.control._
+import org.openmole.plugin.environment.batch.environment._
+import org.openmole.plugin.environment.batch.replication.ReplicaCatalog
+import org.openmole.plugin.environment.batch.storage._
 import org.openmole.core.workspace.Workspace
 import org.openmole.plugin.environment.gridscale.GridScaleStorage
 import org.openmole.plugin.tool.sftpserver.SFTPServer
 import org.openmole.tool.file._
-import org.openmole.core.batch.jobservice._
+import org.openmole.plugin.environment.batch.jobservice._
 import org.openmole.core.serializer.SerialiserService
 import org.openmole.core.workflow.execution.ExecutionState._
 import org.openmole.tool.file._
 import org.openmole.tool.thread._
 import org.openmole.tool.hash._
-
 import DesktopGridEnvironment._
+import org.openmole.core.communication.storage.RemoteStorage
 
 object DesktopGridService {
 
@@ -77,7 +78,7 @@ class DesktopGridService(port: Int, path: File = Workspace.newDir()) { service â
   val storageId = url.toString
 
   def storage(_environment: BatchEnvironment, port: Int) = new StorageService with GridScaleStorage with CompressedTransfer {
-    val usageControl = new UnlimitedAccess
+    def usageControl = UnlimitedAccess
     val remoteStorage: RemoteStorage = new DumyStorage
     val environment = _environment
     def root = "/"
@@ -94,7 +95,7 @@ class DesktopGridService(port: Int, path: File = Workspace.newDir()) { service â
     override protected def _submit(serializedJob: SerializedJob): BatchJob = service.submit(serializedJob, environment.openMOLEMemoryValue, this)
     override protected def _state(j: J): ExecutionState = service.state(j)
     override def environment: BatchEnvironment = _environment
-    override val usageControl = new UnlimitedAccess
+    override def usageControl = UnlimitedAccess
   }
 
   val server = new SFTPServer(path, port, DesktopGridAuthentication.password.hash)

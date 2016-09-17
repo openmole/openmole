@@ -33,7 +33,7 @@ object TemplateFileFromInputTask {
   ) =
     ClosureTask("TemplateFileFromInputTask") { (context, rng, executionContext) ⇒
       implicit val impRng = rng
-      val expanded = context(template).withInputStream { is ⇒ VariableExpansion(is).expand(context) }
+      val expanded = context(template).withInputStream { is ⇒ ExpandedString(is).from(context) }
       val file = executionContext.tmpDirectory.newFile("template", ".tmp")
       file.content = expanded
       context + (output → file)

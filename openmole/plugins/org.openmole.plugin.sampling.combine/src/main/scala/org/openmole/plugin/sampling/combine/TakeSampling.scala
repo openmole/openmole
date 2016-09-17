@@ -36,10 +36,6 @@ sealed class TakeSampling(val sampling: Sampling, val n: FromContext[Int]) exten
   override def inputs = sampling.inputs
   override def prototypes = sampling.prototypes
 
-  override def apply() =
-    for {
-      s ← sampling()
-      t ← n
-    } yield s.take(t)
+  override def apply() = (sampling() |@| n) apply ((s, t) ⇒ s.take(t))
 
 }

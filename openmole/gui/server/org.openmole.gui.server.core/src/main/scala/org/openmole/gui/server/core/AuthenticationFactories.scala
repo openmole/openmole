@@ -94,12 +94,17 @@ object AuthenticationFactories {
     def removeAuthentication(data: AuthenticationData) = EGIAuthentication.clear
 
     def testAuthentication(data: EGIP12AuthenticationData, voName: String): AuthenticationTest = coreObject(data).map { auth ⇒
-      EGIAuthenticationTest(
-        voName,
-        testPassword(data),
-        EGIAuthentication.testProxy(auth, voName),
-        EGIAuthentication.testDIRACAccess(auth, voName)
-      )
+      Try {
+        EGIAuthenticationTest(
+          voName,
+          testPassword(data),
+          EGIAuthentication.testProxy(auth, voName),
+          EGIAuthentication.testDIRACAccess(auth, voName)
+        )
+      } match {
+        case Success(a) ⇒ a
+        case Failure(f) ⇒ EGIAuthenticationTest("Error", AuthenticationTest.empty, AuthenticationTestBase(false, ErrorBuilder(f)), AuthenticationTest.empty)
+      }
     }.getOrElse(AuthenticationTestBase(false, ErrorBuilder(new Throwable("Unknown " + data.synthetic))))
 
     def testPassword(data: AuthenticationData): AuthenticationTest = coreObject(data).map { d ⇒

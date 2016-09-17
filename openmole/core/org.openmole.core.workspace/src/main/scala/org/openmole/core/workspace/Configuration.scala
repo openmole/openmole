@@ -19,11 +19,11 @@ package org.openmole.core.workspace
 
 import java.io.File
 
-import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.tool.file._
 import org.apache.commons.configuration2._
 import org.apache.commons.configuration2.builder._
 import org.apache.commons.configuration2.builder.fluent._
+import org.apache.commons.configuration2.sync.ReadWriteSynchronizer
 import org.openmole.core.tools.io.FromString
 
 import scala.concurrent.duration._
@@ -44,12 +44,14 @@ class ConfigurationLocation[T](val group: String, val name: String, _default: â‡
 
 class ConfigurationFile(val file: File) {
 
-  val config = new Configurations().properties(file)
-
-  val reloading = new ReloadingFileBasedConfigurationBuilder(classOf[PropertiesConfiguration])
-    .configure(new Parameters().fileBased().setFile(file))
-
-  reloading.setAutoSave(true)
+  @transient lazy val config = {
+    val params = new Parameters
+    val builder =
+      new ReloadingFileBasedConfigurationBuilder[FileBasedConfiguration](classOf[PropertiesConfiguration]).
+        configure(params.fileBased().setFile(file).setSynchronizer(new ReadWriteSynchronizer()))
+    builder.setAutoSave(true)
+    builder.getConfiguration
+  }
 
   def value(group: String, name: String): Option[String] =
     Option(config.getString(s"$group.$name"))
@@ -58,7 +60,7 @@ class ConfigurationFile(val file: File) {
     config.setProperty(s"$group.$name", value)
 
   def setCommentedValue(group: String, name: String, value: String) =
-    config.setProperty(s"# $group.$name", value)
+    config.setProperty(s"#$group.$name", value)
 
   def clear() = {
     file.content = ""

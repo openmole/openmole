@@ -19,6 +19,7 @@ package org.openmole.gui.ext.data
 
 import DataUtils._
 import monocle.macros.Lenses
+import org.openmole.core.workspace.Workspace
 
 trait Data
 
@@ -121,6 +122,10 @@ case class TarGz() extends FileExtension {
   def displayable = false
 }
 
+case class Tar() extends FileExtension {
+  def displayable = false
+}
+
 object FileExtension {
   val OMS = OpenMOLEScript("scala")
   val SCALA = DisplayableOnDemandFile("scala")
@@ -129,6 +134,7 @@ object FileExtension {
   val TEXT = DisplayableOnDemandFile("text")
   val NO_EXTENSION = DisplayableFile("text")
   val TGZ = TarGz()
+  val TAR = Tar()
   val BINARY = BinaryFile()
 }
 
@@ -214,6 +220,12 @@ case class EGIP12AuthenticationData(
 ) extends AuthenticationData with PrivateKey {
   def synthetic = "egi.p12"
 }
+
+object ExtractResult {
+  def ok = ExtractResult(None)
+}
+
+case class ExtractResult(error: Option[Error])
 
 object AuthenticationTest {
   def empty = AuthenticationTestBase(false, Error(""))
@@ -340,7 +352,16 @@ case class RunningOutputData(id: ExecutionId, output: String)
 
 case class StaticExecutionInfo(path: SafePath, script: String, startDate: Long = 0L)
 
-case class EnvironmentState(envId: EnvironmentId, taskName: String, running: Long, done: Long, submitted: Long, failed: Long, networkActivity: NetworkActivity)
+case class EnvironmentState(
+  envId:             EnvironmentId,
+  taskName:          String,
+  running:           Long,
+  done:              Long,
+  submitted:         Long,
+  failed:            Long,
+  networkActivity:   NetworkActivity,
+  executionActivity: ExecutionActivity
+)
 
 //case class Output(output: String)
 
@@ -354,9 +375,16 @@ sealed trait ExecutionInfo {
   def running: Long
 
   def completed: Long
+
+  def environmentStates: Seq[EnvironmentState]
 }
 
-case class Failed(error: Error, duration: Long = 0L, completed: Long = 0L) extends ExecutionInfo {
+case class Failed(
+    error:             Error,
+    environmentStates: Seq[EnvironmentState],
+    duration:          Long                  = 0L,
+    completed:         Long                  = 0L
+) extends ExecutionInfo {
   def state: String = "failed"
 
   def running = 0L
@@ -386,7 +414,11 @@ case class Finished(
   def state: String = "finished"
 }
 
-case class Canceled(duration: Long = 0L, completed: Long = 0L) extends ExecutionInfo {
+case class Canceled(
+    environmentStates: Seq[EnvironmentState],
+    duration:          Long                  = 0L,
+    completed:         Long                  = 0L
+) extends ExecutionInfo {
   def state: String = "canceled"
 
   def running = 0L
@@ -404,6 +436,8 @@ case class Ready() extends ExecutionInfo {
   def ready: Long = 0L
 
   def running = 0L
+
+  def environmentStates: Seq[EnvironmentState] = Seq()
 }
 
 case class PasswordState(chosen: Boolean, hasBeenSet: Boolean)
@@ -713,3 +747,5 @@ object FileFilter {
 sealed trait ConfigData
 
 object VOTest extends ConfigData
+
+case class OMSettings(workspace: SafePath, version: String, versionName: String, buildTime: String)

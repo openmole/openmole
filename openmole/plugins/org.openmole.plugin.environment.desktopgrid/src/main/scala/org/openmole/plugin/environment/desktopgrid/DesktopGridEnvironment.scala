@@ -20,10 +20,10 @@ package org.openmole.plugin.environment.desktopgrid
 import java.io.File
 
 import org.openmole.core.dsl._
-import org.openmole.core.batch.environment._
-import org.openmole.core.batch.jobservice.JobService
-import org.openmole.core.batch.storage._
-import org.openmole.core.batch.control._
+import org.openmole.plugin.environment.batch.environment._
+import org.openmole.plugin.environment.batch.jobservice.JobService
+import org.openmole.plugin.environment.batch.storage._
+import org.openmole.plugin.environment.batch.control._
 
 import org.openmole.tool.thread._
 

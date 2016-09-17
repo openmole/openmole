@@ -24,8 +24,8 @@ import java.io.File
 import java.net.URI
 import fr.iscpif.gridscale.egi.{ BDII }
 
-import org.openmole.core.batch.environment._
-import org.openmole.core.batch.control._
+import org.openmole.plugin.environment.batch.environment._
+import org.openmole.plugin.environment.batch.control._
 import org.openmole.core.workspace._
 import org.openmole.core.workflow.dsl._
 import org.openmole.tool.logger.Logger

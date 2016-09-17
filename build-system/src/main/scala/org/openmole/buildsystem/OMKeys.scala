@@ -13,8 +13,6 @@ object OMKeys {
 
   val bundleType = SettingKey[Set[String]]("bundle-type") //Default setting for osgiprojects is default.
 
-  val bundleProj = SettingKey[Boolean]("bundle-proj")
-
   val openMoleStandardVer = SettingKey[String]("openmole-version")
 
   val eclipseBuddyPolicy = SettingKey[Option[String]]("OSGi.eclipseBuddyPolicy", "The eclipse buddy policy thing.")
@@ -37,7 +35,7 @@ object OMKeys {
 
   val ignoreTransitive = SettingKey[Boolean]("ignoreTransitive")
 
-  val dependencyFilter = SettingKey[ModuleID ⇒ Boolean]("dependency-filter", "Tells copyDependencies to ignore certain dependencies.")
+  val dependencyFilter = SettingKey[(ModuleID, Artifact) ⇒ Boolean]("dependency-filter", "Tells copyDependencies to ignore certain dependencies.")
 
   val dependencyName = SettingKey[ModuleID ⇒ String]("dependency-map", "A map that is run against dependencies to be copied.")
 
@@ -52,9 +50,10 @@ object OMKeys {
     val folder = TaskKey[File]("tar-folder", "The folder to tar.")
   }
 
-  object OSGi {
+  object Osgi {
     val singleton = SettingKey[Boolean]("osgi-singleton")
     val openMOLEScope = SettingKey[Option[String]]("openmole-scope")
+    val bundleDependencies = TaskKey[Seq[File]]("bundle-dependencies")
   }
 
 }

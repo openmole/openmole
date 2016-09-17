@@ -18,13 +18,11 @@
 package org.openmole.plugin.environment.ssh
 
 import java.util.UUID
-import org.openmole.core.batch.control._
-import org.openmole.core.batch.environment._
+import org.openmole.plugin.environment.batch.environment._
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.tool.file._
 import org.openmole.core.workspace.Workspace
-import org.openmole.core.batch.jobservice._
-import org.openmole.core.batch.storage._
+import org.openmole.plugin.environment.batch.storage._
 import org.openmole.tool.logger.Logger
 
 import scala.util.Try
@@ -33,6 +31,7 @@ object SharedStorage extends Logger
 
 import SharedStorage._
 import Log._
+import org.openmole.core.communication.storage._
 
 trait SharedStorage extends SSHService { js ⇒
 
@@ -64,7 +63,7 @@ trait SharedStorage extends SSHService { js ⇒
           Workspace.withTmpFile("install", ".sh") { script ⇒
 
             val tmpDirName = runtimePrefix + UUID.randomUUID.toString
-            val scriptName = Storage.uniqName("install", ".sh")
+            val scriptName = uniqName("install", ".sh")
 
             val content =
               s"(if [ -d $runtimeInstall ]; then exit 0; fi) && " +
@@ -109,7 +108,7 @@ trait SharedStorage extends SSHService { js ⇒
 
   protected def buildScript(serializedJob: SerializedJob) = {
     val runtime = preparedRuntime(serializedJob.runtime)
-    val result = sharedFS.child(serializedJob.path, Storage.uniqName("result", ".bin"))
+    val result = sharedFS.child(serializedJob.path, uniqName("result", ".bin"))
 
     val remoteScript =
       Workspace.withTmpFile("run", ".sh") { script ⇒
@@ -127,7 +126,7 @@ trait SharedStorage extends SSHService { js ⇒
 
         script.content = content
 
-        val remoteScript = sharedFS.child(serializedJob.path, Storage.uniqName("run", ".sh"))
+        val remoteScript = sharedFS.child(serializedJob.path, uniqName("run", ".sh"))
         sharedFS.withToken { sharedFS.upload(script, remoteScript, options = TransferOptions(raw = true, forceCopy = true, canMove = true))(_) }
         remoteScript
       }

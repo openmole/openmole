@@ -178,11 +178,11 @@ class ExecutionPanel extends ModalPanel {
             val completed = executionInfo.completed
 
             val details = executionInfo match {
-              case f: Failed   ⇒ ExecutionDetails("0", 0, Some(f.error))
+              case f: Failed   ⇒ ExecutionDetails("0", 0, Some(f.error), f.environmentStates)
               case f: Finished ⇒ ExecutionDetails(ratio(f.completed, f.running, f.ready), f.running, envStates = f.environmentStates)
               case r: Running  ⇒ ExecutionDetails(ratio(r.completed, r.running, r.ready), r.running, envStates = r.environmentStates)
-              case c: Canceled ⇒ ExecutionDetails("0", 0)
-              case r: Ready    ⇒ ExecutionDetails("0", 0)
+              case c: Canceled ⇒ ExecutionDetails("0", 0, envStates = c.environmentStates)
+              case r: Ready    ⇒ ExecutionDetails("0", 0, envStates = r.environmentStates)
             }
 
             val scriptLink = expander(id.id, ex ⇒ ex.getLink(staticInfo.now(id).path.name, scriptID))
@@ -203,11 +203,12 @@ class ExecutionPanel extends ModalPanel {
                     thead,
                     tbody(
                       Seq(
-                        tr(row)(
-                          td(colMD(3))(tags.span(e.taskName)),
+                        tr(row +++ (fontSize := 14))(
+                          td(colMD(1))(tags.span(e.taskName)),
+                          td(colMD(2))(tags.span(CoreUtils.approximatedYearMonthDay(e.executionActivity.executionTime))),
                           td(colMD(2))(glyphAndText(glyph_upload, s" ${e.networkActivity.uploadingFiles} ${displaySize(e.networkActivity.uploadedSize, e.networkActivity.readableUploadedSize)}")),
                           td(colMD(2))(glyphAndText(glyph_download, s" ${e.networkActivity.downloadingFiles} ${displaySize(e.networkActivity.downloadedSize, e.networkActivity.readableDownloadedSize)}")),
-                          td(colMD(2))(glyphAndText(glyph_road +++ sheet.paddingBottom(7), e.submitted.toString)),
+                          td(colMD(1))(glyphAndText(glyph_road +++ sheet.paddingBottom(7), e.submitted.toString)),
                           td(colMD(1))(glyphAndText(glyph_flash +++ sheet.paddingBottom(7), e.running.toString)),
                           td(colMD(1))(glyphAndText(glyph_flag +++ sheet.paddingBottom(7), e.done.toString)),
                           td(colMD(1))(glyphAndText(glyph_fire +++ sheet.paddingBottom(7), e.failed.toString)),
