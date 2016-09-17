@@ -87,7 +87,7 @@ lazy val openmoleDSL = OsgiProject(coreDir, "org.openmole.core.dsl", imports = S
 lazy val exception = OsgiProject(coreDir, "org.openmole.core.exception", imports = Seq("*")) settings(coreSettings: _*)
 
 lazy val tools = OsgiProject(coreDir, "org.openmole.core.tools", global = true, imports = Seq("*")) settings
-  (libraryDependencies ++= Seq(Libraries.xstream, Libraries.exec, Libraries.math, Libraries.jodaTime, Libraries.scalaLang, Libraries.scalatest, Libraries.equinoxOSGi)) dependsOn
+  (libraryDependencies ++= Seq(Libraries.xstream, Libraries.exec, Libraries.math, Libraries.scalaLang, Libraries.scalatest, Libraries.equinoxOSGi)) dependsOn
   (exception, openmoleTar, openmoleFile, openmoleLock, openmoleThread, openmoleHash, openmoleLogger, openmoleStream, openmoleCollection, openmoleStatistics, openmoleTypes, openmoleCache) settings(coreSettings: _*)
 
 lazy val event = OsgiProject(coreDir, "org.openmole.core.event", imports = Seq("*")) dependsOn (tools) settings(coreSettings: _*)
@@ -597,7 +597,6 @@ lazy val daemon = OsgiProject(binDir, "org.openmole.daemon", settings = tarProje
       Libraries.bouncyCastle,
       Libraries.scalaLang,
       Libraries.logging,
-      Libraries.jodaTime,
       Libraries.scopt
     ),
     assemblyDependenciesPath := assemblyPath.value / "plugins",
