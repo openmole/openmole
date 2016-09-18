@@ -69,6 +69,7 @@ lazy val xstream = OsgiProject(
     "!org.w3c.*",
     "!org.xml.sax.*",
     "!sun.misc.*",
+    "!org.joda.time.*",
     "*"),
   privatePackages = Seq("!scala.*", "META-INF.*", "*")) settings(
   libraryDependencies ++= Seq("com.thoughtworks.xstream" % "xstream" % "1.4.8", "net.sf.kxml" % "kxml2" % "2.3.0"),
@@ -92,11 +93,6 @@ lazy val scalaLang = OsgiProject(
       "org.scala-lang.modules" %% "scala-xml" % "1.0.5"
     )
   }, version := scalaVersion.value) settings(settings: _*)
-
-lazy val jodaTime = OsgiProject(dir, "org.joda.time") settings(
-  libraryDependencies += "joda-time" % "joda-time" % "1.6",
-  version := "1.6"
-  ) settings(settings: _*)
 
 lazy val jasyptVersion = "1.9.2"
 lazy val jasypt = OsgiProject(dir, "org.jasypt.encryption", exports = Seq("org.jasypt.*")) settings(

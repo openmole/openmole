@@ -54,8 +54,6 @@ object Libraries {
 
   lazy val scalaLang = "org.openmole" %% "org-scala-lang-scala-library" % "2.11.8"
 
-  lazy val jodaTime = "org.openmole" %% "org-joda-time" % "1.6"
-
   lazy val jasypt = "org.openmole" %% "org-jasypt-encryption" % "1.9.2"
 
   lazy val netLogo5Version = "5.3.1"
