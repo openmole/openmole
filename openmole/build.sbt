@@ -15,7 +15,7 @@ def macroParadise =
 
 lazy val scalaVersionValue = "2.11.8"
 
-lazy val defaultSettings = BuildSystem.settings ++
+def defaultSettings = BuildSystem.settings ++
   Seq(
     organization := "org.openmole",
     resolvers += Resolver.sonatypeRepo("snapshots"),
@@ -26,8 +26,7 @@ lazy val defaultSettings = BuildSystem.settings ++
     publishArtifact in (packageDoc in install) := false,
     publishArtifact in (packageSrc in install) := false,
     addCompilerPlugin("org.scalamacros" %% "paradise" % "2.1.0" cross CrossVersion.fullMapped(_ ⇒ scalaVersionValue)),
-    //resolvers += "ipfs-iscpif" at "https://ipfs.iscpif.fr/ipns/QmXTLZWz1VQqv9nFKersuNnRgPmMEkiHuRnS8i1c8A9XSF/ivy/"
-    resolvers += Resolver.url("ipfs-iscpif", url("https://ipfs.iscpif.fr/ipns/QmXTLZWz1VQqv9nFKersuNnRgPmMEkiHuRnS8i1c8A9XSF/ivy/"))(Resolver.ivyStylePatterns)
+    resolvers += "ipfs-iscpif" at "https://ipfs.iscpif.fr/ipns/QmXTLZWz1VQqv9nFKersuNnRgPmMEkiHuRnS8i1c8A9XSF/ivy/"
   )
 
 
