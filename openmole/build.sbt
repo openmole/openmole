@@ -67,7 +67,7 @@ def coreSettings =
       libraryDependencies += Libraries.equinoxOSGi
     )
 
-def allCore = Seq(workflow, serializer, communication, openmoleDSL, exception, tools, event, replication, workspace, macros, pluginManager, updater, fileService, logging, output, console, project, buildinfo)
+def allCore = Seq(workflow, serializer, communication, openmoleDSL, exception, tools, event, replication, workspace, macros, pluginManager, updater, fileService, logging, output, console, project, buildinfo, module)
 
 
 lazy val workflow = OsgiProject(coreDir, "org.openmole.core.workflow", imports = Seq("*")) settings (
@@ -110,6 +110,10 @@ lazy val pluginManager = OsgiProject(
 lazy val updater = OsgiProject(coreDir, "org.openmole.core.updater", imports = Seq("*")) dependsOn (exception, tools, workspace) settings(coreSettings: _*)
 
 lazy val fileService = OsgiProject(coreDir, "org.openmole.core.fileservice", imports = Seq("*")) dependsOn (tools, updater, workspace, openmoleTar) settings(coreSettings: _*)
+
+lazy val module = OsgiProject(coreDir, "org.openmole.core.module", imports = Seq("*")) dependsOn (openmoleHash, openmoleFile, pluginManager) settings(coreSettings: _*) settings (
+  libraryDependencies += Libraries.gridscaleHTTP,
+  libraryDependencies += Libraries.json4s)
 
 lazy val logging = OsgiProject(
    coreDir,

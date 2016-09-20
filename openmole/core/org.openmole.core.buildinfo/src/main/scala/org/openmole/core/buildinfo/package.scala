@@ -18,7 +18,6 @@ package org.openmole.core
 
 import java.text.DateFormat
 import java.util.{ Calendar, Locale }
-
 import fr.iscpif.gridscale.http.HTTPStorage
 
 package object buildinfo {
@@ -52,7 +51,6 @@ package object buildinfo {
 
   def moduleListName = "modules.json"
   def moduleAddress = url(moduleListName)
-  def moduleIndex = HTTPStorage.download(buildinfo.moduleAddress)(Serialization.read[buildinfo.ModuleIndex](_))
 
   def url(entry: String): String = siteURL + "/" + entry
 

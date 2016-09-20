@@ -22,6 +22,7 @@ import org.openmole.plugin.task.netlogo5.NetLogo5Task
 import org.openmole.tool.file._
 import org.openmole.tool.hash._
 import org.openmole.core.buildinfo._
+import org.openmole.core.module.{Component, ModuleEntry}
 
 object Module {
 

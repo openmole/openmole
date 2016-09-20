@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package org.openmole.core.buildinfo
+package org.openmole.core.module
 
 case class Component(location: String, hash: String)
 case class ModuleEntry(name: String, description: String, components: Seq[Component])
