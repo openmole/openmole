@@ -158,7 +158,7 @@ object Application extends Logger {
 
       val userPlugins =
         existingUserPlugins.flatMap { p ⇒ PluginManager.listBundles(new File(p)) } ++
-          (if (config.loadHomePlugins.getOrElse(config.launchMode == GUIMode)) Workspace.pluginDir.listFilesSafe.flatMap(PluginManager.listBundles) else Nil)
+          Workspace.pluginDir.listFilesSafe.flatMap(PluginManager.listBundles)
 
       logger.fine(s"Loading user plugins " + userPlugins)
 

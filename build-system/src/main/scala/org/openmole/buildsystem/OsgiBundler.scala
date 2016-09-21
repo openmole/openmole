@@ -49,10 +49,11 @@ object OsgiProject {
         (Osgi.openMOLEScope) {
           omScope ⇒
             Map[String, String]() +
-              ("Bundle-ActivationPolicy" → "lazy") ++
+              ("Bundle-ActivationPolicy" → "lazy") +
               omScope.map(os ⇒ "OpenMOLE-Scope" → os) ++
               (if (global) Some("Eclipse-BuddyPolicy" → "global") else None)
         },
+      OsgiKeys.requireCapability := """osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))""""",
       OsgiKeys.privatePackage := privatePackages,
       OsgiKeys.dynamicImportPackage := dynamicImports,
       OsgiKeys.importPackage := imports,

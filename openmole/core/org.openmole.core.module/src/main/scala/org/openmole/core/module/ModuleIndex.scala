@@ -18,5 +18,4 @@
 package org.openmole.core.module
 
 case class Component(location: String, hash: String)
-case class ModuleEntry(name: String, description: String, components: Seq[Component])
-case class ModuleIndex(entries: Seq[ModuleEntry])
+case class Module(name: String, description: String, components: Seq[Component])

@@ -31,6 +31,7 @@ import org.openmole.tool.file._
 import org.openmole.tool.tar._
 import org.openmole.core.pluginmanager
 import org.openmole.core.output.OutputManager
+import org.openmole.core.module._
 
 /*
  * Copyright (C) 21/07/14 // mathieu.leclaire@openmole.org
@@ -423,23 +424,6 @@ object ApiImpl extends Api {
     }
 
     addPluginsFiles(recurse(file), false)
-  }
-
-  private def addPluginsFiles(files: Seq[File], move: Boolean): Seq[(File, Throwable)] = synchronized {
-    val destinations = files.map { file ⇒ file → (Workspace.pluginDir / file.getName) }
-
-    destinations.filter(_._2.exists).toList match {
-      case Nil ⇒
-        val plugins =
-          destinations.map {
-            case (file, dest) ⇒
-              if (!move) file copy dest else file move dest
-              dest
-          }
-        PluginManager.tryLoad(plugins).toSeq
-      case l ⇒
-        l.map(l ⇒ l._1 → new FileAlreadyExistsException(s"Plugin with file name ${l._1.getName} is already present in the plugin directory"))
-    }
   }
 
   def isPlugin(path: SafePath): Boolean = Utils.isPlugin(path)

@@ -186,6 +186,15 @@ class Workspace(val location: File) {
     finally file.delete
   }
 
+  def withTmpDir[T](f: File ⇒ T): T = {
+    val file = newFile()
+    try {
+      file.mkdir()
+      f(file)
+    }
+    finally file.recursiveDelete
+  }
+
   def reset() = synchronized {
     persistentDir.recursiveDelete
     val uniqueId = preference(uniqueIDLocation)

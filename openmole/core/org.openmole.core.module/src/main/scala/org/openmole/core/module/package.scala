@@ -17,13 +17,61 @@
  */
 package org.openmole.core
 
+import java.io.File
+import java.nio.file.FileAlreadyExistsException
+
+import fr.iscpif.gridscale.storage._
 import fr.iscpif.gridscale.http.HTTPStorage
+import org.openmole.core.pluginmanager.PluginManager
+import org.openmole.core.workspace.{ ConfigurationLocation, Workspace }
+import org.openmole.tool.file._
+import org.openmole.tool.stream._
+import org.openmole.core.buildinfo
 
 package object module {
+
+  val moduleIndexes = ConfigurationLocation("Module", "Indexes", Some(Seq[String](buildinfo.moduleAddress)))
+
+  Workspace setDefault moduleIndexes
 
   import org.json4s._
   import org.json4s.jackson.Serialization
   implicit val formats = Serialization.formats(NoTypeHints)
 
-  def moduleIndex(url: String) = HTTPStorage.download(url)(Serialization.read[ModuleIndex](_))
+  def modules(url: String) = HTTPStorage.download(url)(Serialization.read[Seq[Module]](_))
+  def selectableModules(url: String) = modules(url).map(m ⇒ SelectableModule(Storage.parent(url).get, m))
+
+  case class SelectableModule(baseURL: String, module: Module)
+
+  def install(modules: Seq[SelectableModule]) = Workspace.withTmpDir { dir ⇒
+    case class DownloadableComponent(baseURL: String, component: Component)
+    val downloadableComponents = modules.flatMap { m ⇒ m.module.components.map(c ⇒ DownloadableComponent(m.baseURL, c)) }
+    val hashes = downloadableComponents.map(_.component.hash).distinct.toSet -- PluginManager.bundleHashes.map(_.toString)
+    val files = downloadableComponents.filter(c ⇒ hashes.contains(c.component.hash)).map {
+      c ⇒
+        val f = dir / Storage.name(c.component.location)
+        HTTPStorage.download(Storage.child(c.baseURL, c.component.location))(_.copy(f))
+        f
+    }
+    addPluginsFiles(files, true)
+  }
+
+  def components[T](implicit m: Manifest[T]) = PluginManager.pluginsForClass(m.erasure).toSeq
+
+  def addPluginsFiles(files: Seq[File], move: Boolean): Seq[(File, Throwable)] = synchronized {
+    val destinations = files.map { file ⇒ file → (Workspace.pluginDir / file.getName) }
+
+    destinations.filter(_._2.exists).toList match {
+      case Nil ⇒
+        val plugins =
+          destinations.map {
+            case (file, dest) ⇒
+              if (!move) file copy dest else file move dest
+              dest
+          }
+        PluginManager.tryLoad(plugins).toSeq
+      case l ⇒
+        l.map(l ⇒ l._1 → new FileAlreadyExistsException(s"Plugin with file name ${l._1.getName} is already present in the plugin directory"))
+    }
+  }
 }

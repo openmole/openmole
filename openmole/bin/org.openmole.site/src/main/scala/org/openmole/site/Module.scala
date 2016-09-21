@@ -15,25 +15,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package org.openmole.site.module
+package org.openmole.site
 
-import org.openmole.core.pluginmanager.PluginManager
+import org.openmole.core.module._
 import org.openmole.plugin.task.netlogo5.NetLogo5Task
 import org.openmole.tool.file._
 import org.openmole.tool.hash._
-import org.openmole.core.buildinfo._
-import org.openmole.core.module.{Component, ModuleEntry}
 
-object Module {
+object module {
 
-  def all = Seq[Module](
-    Module("NetLogo5", "Explore NetLogo 5 simulation models", components[NetLogo5Task])
-  )
+  case class ModuleEntry(name: String, description: String, components: Seq[File])
 
-  def components[T](implicit m: Manifest[T]) =
-    PluginManager.pluginsForClass(m.erasure).toSeq
+  def allModules =
+    Seq[ModuleEntry](
+      ModuleEntry("NetLogo5", "Explore NetLogo 5 simulation models", components[NetLogo5Task])
+    )
 
-  def generate(modules: Seq[Module], baseDirectory: File, location: File ⇒ String) = {
+  def generate(modules: Seq[ModuleEntry], baseDirectory: File, location: File ⇒ String) = {
     def allFiles = modules.flatMap(_.components)
 
     for {
@@ -44,7 +42,7 @@ object Module {
     }
 
     modules.map { m ⇒
-      ModuleEntry(
+      Module(
         m.name,
         m.description,
         m.components.map(f ⇒ Component(location(f), f.hash.toString))
@@ -53,6 +51,4 @@ object Module {
   }
 
 }
-
-case class Module(name: String, description: String, components: Seq[File])
 

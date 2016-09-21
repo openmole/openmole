@@ -111,7 +111,7 @@ lazy val updater = OsgiProject(coreDir, "org.openmole.core.updater", imports = S
 
 lazy val fileService = OsgiProject(coreDir, "org.openmole.core.fileservice", imports = Seq("*")) dependsOn (tools, updater, workspace, openmoleTar) settings(coreSettings: _*)
 
-lazy val module = OsgiProject(coreDir, "org.openmole.core.module", imports = Seq("*")) dependsOn (openmoleHash, openmoleFile, pluginManager) settings(coreSettings: _*) settings (
+lazy val module = OsgiProject(coreDir, "org.openmole.core.module", imports = Seq("*")) dependsOn (buildinfo, openmoleHash, openmoleFile, pluginManager) settings(coreSettings: _*) settings (
   libraryDependencies += Libraries.gridscaleHTTP,
   libraryDependencies += Libraries.json4s)
 
@@ -466,7 +466,8 @@ lazy val serverGUI = OsgiProject(guiServerDir, "org.openmole.gui.server.core") s
     utilsGUI,
     openmoleStream,
     txtmark,
-    openmoleCrypto
+    openmoleCrypto,
+    module
   )settings (defaultSettings: _*)
 
 lazy val state = OsgiProject(guiServerDir, "org.openmole.gui.server.state") settings
@@ -682,5 +683,6 @@ lazy val consoleBin = OsgiProject(binDir, "org.openmole.console", imports = Seq(
     console,
     project,
     openmoleDSL,
-    buildinfo
+    buildinfo,
+    module
   ) settings (defaultSettings: _*)
