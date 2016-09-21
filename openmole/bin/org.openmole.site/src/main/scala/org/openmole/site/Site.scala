@@ -202,7 +202,7 @@ object Site {
     import org.json4s._
     import org.json4s.jackson.Serialization
     implicit val formats = Serialization.formats(NoTypeHints)
-    val modules = Module.generate(Module.all, baseDirectory, moduleLocation)
+    val modules = module.generate(module.allModules, baseDirectory, moduleLocation)
     index.content = Serialization.writePretty(modules)
     modules
   }
