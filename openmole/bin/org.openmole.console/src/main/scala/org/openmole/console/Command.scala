@@ -117,22 +117,18 @@ class Command(val console: ScalaREPL, val variables: ConsoleVariables) { command
       case x           ⇒ throw new UserBadDataError("The result is not a puzzle")
     }
 
-  def modules(urls: Seq[String] = Workspace.preference(module.moduleIndexes)): Unit =
-    urls.flatMap(url ⇒ module.modules(url).map(_.name)).sorted.foreach(println)
-
-  def installedModules(urls: Seq[String] = Workspace.preference(module.moduleIndexes)): Unit = {
+  def modules(urls: Seq[String] = Workspace.preference(module.moduleIndexes)): Unit = {
     val installedBundles = PluginManager.bundleHashes.map(_.toString).toSet
     def installed(components: Seq[String]) = (components.toSet -- installedBundles).isEmpty
 
-    def installedNames =
-      urls.flatMap {
-        url ⇒
-          module.modules(url).map { m ⇒
-            m.name → m.components.map(_.hash)
-          }
-      }.filter(m ⇒ installed(m._2)).map(_._1)
-
-    installedNames.sorted.foreach(println)
+    urls.flatMap {
+      url ⇒
+        module.modules(url).map {
+          m ⇒
+            def installedString = if (installed(m.components.map(_.hash))) " (installed)" else ""
+            m.name + installedString
+        }
+    }.sorted.foreach(println)
   }
 
   def install(name: String*): Unit = install(name)

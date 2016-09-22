@@ -20,6 +20,7 @@ package org.openmole.core.project
 import org.openmole.core.console.ScalaREPL
 import org.openmole.core.dsl._
 import org.openmole.core.exception.InternalProcessingError
+import org.openmole.core.pluginmanager.PluginInfo
 import org.openmole.core.workflow.tools._
 
 object OpenMOLEREPL {
