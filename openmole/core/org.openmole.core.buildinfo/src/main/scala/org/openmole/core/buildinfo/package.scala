@@ -24,16 +24,22 @@ package object buildinfo {
 
   def name = "M... M..."
 
-  def version: String = BuildInfo.version
-
-  def generationDate = {
-    val d = Calendar.getInstance()
-    d.setTimeInMillis(BuildInfo.buildTime)
-    val format = DateFormat.getDateInstance(DateFormat.LONG, new Locale("EN", "en"))
-    format.format(d.getTime)
+  case class Version(value: String, name: String, time: Long) {
+    override def toString = value
+    def major = value.takeWhile(_.isDigit)
+    def minor = value.drop(major.size + 1).takeWhile(_.isDigit)
+    def isDevelopment = value.toLowerCase.endsWith("snapshot")
+    def generationDate = {
+      val d = Calendar.getInstance()
+      d.setTimeInMillis(BuildInfo.buildTime)
+      val format = DateFormat.getDateInstance(DateFormat.LONG, new Locale("EN", "en"))
+      format.format(d.getTime)
+    }
   }
 
-  def development = version.toLowerCase.endsWith("snapshot")
+  def version = Version(BuildInfo.version, name, BuildInfo.buildTime)
+
+  def development = version.isDevelopment
 
   def siteURL =
     development match {
@@ -54,6 +60,6 @@ package object buildinfo {
 
   def url(entry: String): String = siteURL + "/" + entry
 
-  def info = OpenMOLEBuildInfo(version, name, generationDate)
+  //def info = OpenMOLEBuildInfo(version, name, generationDate)
 
 }

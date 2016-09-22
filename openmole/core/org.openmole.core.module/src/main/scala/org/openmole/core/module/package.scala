@@ -39,7 +39,7 @@ package object module {
 
   lazy val moduleDirectory =
     if (buildinfo.development) Workspace.newDir("modules")
-    else Workspace.location / "modules" / buildinfo.version
+    else Workspace.location / "modules" / buildinfo.version.major
 
   moduleDirectory.mkdirs
 

@@ -91,7 +91,7 @@ class Command(val console: ScalaREPL, val variables: ConsoleVariables) { command
 
   def version() =
     println(s"""You are running OpenMOLE ${buildinfo.version} - ${buildinfo.name}
-       |built on the ${buildinfo.generationDate}.""".stripMargin)
+       |built on the ${buildinfo.version.generationDate}.""".stripMargin)
 
   def loadAny(file: File, args: Seq[String] = Seq.empty): AnyRef =
     try {

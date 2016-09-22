@@ -118,7 +118,7 @@ case class GeneratedMarketEntry(
 
 class Market(repositories: Seq[MarketRepository], destination: File) {
 
-  def branchName = buildinfo.version.takeWhile(_.isDigit) + "-dev"
+  def branchName = buildinfo.version.major + "-dev"
   def archiveDirectoryName = "market"
 
   def generate(resourceDirectory: File, testScript: Boolean = true): Seq[GeneratedMarketEntry] = {
