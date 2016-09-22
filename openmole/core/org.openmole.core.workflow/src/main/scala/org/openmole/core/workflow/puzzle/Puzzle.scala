@@ -17,16 +17,15 @@
 
 package org.openmole.core.workflow.puzzle
 
+import org.openmole.core.context.Context
+import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.execution._
-import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
-import org.openmole.core.workflow.mole._
 import org.openmole.core.workspace.Workspace
-import org.openmole.core.workflow.execution._
+
 import scalaz._
-import Scalaz._
-import org.openmole.core.workflow.dsl._
 
 object ToPuzzle {
 

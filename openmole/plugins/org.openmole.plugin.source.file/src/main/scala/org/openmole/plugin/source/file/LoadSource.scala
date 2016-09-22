@@ -17,17 +17,17 @@
 
 package org.openmole.plugin.source.file
 
-import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.tools._
-import org.openmole.core.workflow.mole._
 import java.io.File
 
 import monocle.macros.Lenses
-import org.openmole.core.workflow.tools._
-import org.openmole.core.serializer._
+import org.openmole.core.context.{ Context, Prototype }
 import org.openmole.core.dsl._
+import org.openmole.core.exception.UserBadDataError
+import org.openmole.core.expansion.FromContext
+import org.openmole.core.serializer._
 import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
+import org.openmole.core.workflow.mole._
+import org.openmole.tool.random.RandomProvider
 
 object LoadSource {
 

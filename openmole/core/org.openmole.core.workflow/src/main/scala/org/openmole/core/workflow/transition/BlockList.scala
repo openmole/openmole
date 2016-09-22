@@ -17,7 +17,7 @@
 
 package org.openmole.core.workflow.transition
 
-import org.openmole.core.workflow.data._
+import org.openmole.core.context.Prototype
 
 object BlockList {
   def empty = new BlockList {

@@ -17,20 +17,18 @@
 
 package org.openmole.plugin.hook.file
 
-import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.tools._
-import org.openmole.core.workflow.mole._
-import org.openmole.core.serializer._
-import org.openmole.core.workflow.tools._
 import java.io.File
 
-import monocle.Lens
 import monocle.macros.Lenses
-import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
+import org.openmole.core.context._
+import org.openmole.core.exception._
+import org.openmole.core.expansion._
+import org.openmole.core.serializer._
+import org.openmole.core.workflow.builder._
+import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.validation._
-import org.openmole.core.workflow.dsl._
+import org.openmole.tool.random._
+import org.openmole.tool.file._
 
 object SaveHook {
 
@@ -50,7 +48,7 @@ object SaveHook {
     config:     InputOutputConfig
 ) extends Hook with ValidateHook {
 
-  override def validate(inputs: Seq[Val[_]]) = file.validate(inputs)
+  override def validate(inputs: Seq[Prototype[_]]) = file.validate(inputs)
 
   override def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider) = {
     val saveContext: Context = prototypes.map(p ⇒ context.variable(p).getOrElse(throw new UserBadDataError(s"Variable $p has not been found")))

@@ -18,12 +18,11 @@
 package org.openmole.plugin.environment.batch.refresh
 
 import org.openmole.plugin.environment.batch.environment.BatchEnvironment
-import org.openmole.core.workspace.Workspace
 import org.openmole.tool.logger.Logger
 
 object KillerActor extends Logger
 
-import KillerActor.Log._
+import org.openmole.plugin.environment.batch.refresh.KillerActor.Log._
 
 class KillerActor(jobManager: JobManager) {
   def receive(msg: KillBatchJob) = {

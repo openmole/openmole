@@ -19,10 +19,10 @@ package org.openmole.plugin.sampling.csv
 
 import java.io.File
 
-import monocle.Lens
 import monocle.macros.Lenses
+import org.openmole.core.context.Prototype
+import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
-import org.openmole.core.workflow.data.{ DefaultSet, Prototype, PrototypeSet }
 import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.tools._
 import org.openmole.plugin.tool.csv.{ CSVToVariables, CSVToVariablesBuilder }

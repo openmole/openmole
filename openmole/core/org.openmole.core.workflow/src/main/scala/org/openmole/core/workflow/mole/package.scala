@@ -19,13 +19,6 @@ package org.openmole.core.workflow
 
 import scala.language.implicitConversions
 
-import org.openmole.core.workflow.builder._
-import org.openmole.core.workflow.execution._
-import org.openmole.core.workflow.execution.local._
-import org.openmole.core.workflow.puzzle._
-import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.transition._
-
 package mole {
 
   trait MolePackage

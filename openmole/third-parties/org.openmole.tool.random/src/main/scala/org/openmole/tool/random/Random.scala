@@ -15,19 +15,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.workflow.data
+package org.openmole.tool.random
 
-import org.openmole.core.workflow.tools.FromContext
-import scalaz._
-import Scalaz._
+import java.util.UUID
 
-/**
- * The parameter is a variable wich is injected in the data flow during the
- * workflow execution just before the begining of a task execution. It can be
- * usefull for testing purposes and for defining default value of inputs of a
- * task.
- *
- */
-case class Default[T](prototype: Prototype[T], value: FromContext[T], `override`: Boolean) {
-  def toVariable = value.map(v ⇒ Variable(prototype, v))
+import org.apache.commons.math3.random.{ RandomAdaptor, RandomGenerator, Well44497b }
+
+object Random { random ⇒
+  def uuid2long(uuid: UUID) = uuid.getMostSignificantBits ^ uuid.getLeastSignificantBits
+
+  def apply(seed: Long) = new SynchronizedRandom(new Well44497b(seed))
+
+  @deprecated("6.0", "use apply(seed)")
+  def newRNG(seed: Long) = apply(seed)
+
+  def newUnsychronizedRNG(seed: Long) = new RandomAdaptor(new Well44497b(seed))
+
 }
+

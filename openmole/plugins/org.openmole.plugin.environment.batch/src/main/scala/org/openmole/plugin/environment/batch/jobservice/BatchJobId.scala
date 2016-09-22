@@ -17,8 +17,8 @@
 
 package org.openmole.plugin.environment.batch.jobservice
 
-import org.openmole.plugin.environment.batch.control._
 import org.openmole.core.workflow.execution.ExecutionState._
+import org.openmole.plugin.environment.batch.control._
 
 trait BatchJobId extends BatchJob {
   def id: jobService.J

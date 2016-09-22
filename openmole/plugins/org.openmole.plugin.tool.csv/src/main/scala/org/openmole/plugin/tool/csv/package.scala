@@ -19,7 +19,7 @@ package org.openmole.plugin.tool
 
 import java.io.File
 
-import org.openmole.core.workflow.data.Prototype
+import org.openmole.core.context.Prototype
 import org.openmole.core.dsl._
 import org.openmole.core.workflow.builder._
 

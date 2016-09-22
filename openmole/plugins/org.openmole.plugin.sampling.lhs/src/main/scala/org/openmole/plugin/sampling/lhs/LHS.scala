@@ -17,13 +17,12 @@
 
 package org.openmole.plugin.sampling.lhs
 
-import org.openmole.core.tools.service.Random._
+import org.openmole.core.context._
+import org.openmole.core.expansion._
 import org.openmole.core.tools.math._
-import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.tools._
-import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.sampling._
+import org.openmole.tool.random._
 
 object LHS {
 

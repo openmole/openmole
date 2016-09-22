@@ -17,13 +17,12 @@
 
 package org.openmole.core.workflow.mole
 
-import org.openmole.core.exception.InternalProcessingError
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.execution._
-import org.openmole.core.workflow.job._
+import org.openmole.core.context._
+import org.openmole.core.exception._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
-import org.openmole.core.workflow.validation.TypeUtil
+import org.openmole.core.workflow.validation._
+import org.openmole.tool.random._
 
 object Capsule {
 

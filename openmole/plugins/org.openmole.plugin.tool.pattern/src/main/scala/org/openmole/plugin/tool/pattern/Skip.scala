@@ -16,12 +16,12 @@
  */
 package org.openmole.plugin.tool.pattern
 
+import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.puzzle._
 import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.transition._
-import org.openmole.core.workflow.dsl._
+import org.openmole.core.expansion._
 
 object Skip {
 

@@ -17,13 +17,13 @@
 
 package org.openmole.core.workflow.transition
 
-import org.openmole.core.workflow.validation._
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.tools._
-import org.openmole.tool.logger.Logger
-
+import org.openmole.core.context.{ Context, Prototype }
+import org.openmole.core.expansion.Condition
 import org.openmole.core.workflow.dsl._
+import org.openmole.core.workflow.mole._
+import org.openmole.core.workflow.validation._
+import org.openmole.tool.logger.Logger
+import org.openmole.tool.random.RandomProvider
 
 object Transition extends Logger
 

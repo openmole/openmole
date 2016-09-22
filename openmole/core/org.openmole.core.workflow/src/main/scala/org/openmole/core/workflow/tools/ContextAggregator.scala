@@ -17,9 +17,8 @@
 
 package org.openmole.core.workflow.tools
 
-import org.openmole.core.exception.InternalProcessingError
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.dsl._
+import org.openmole.core.context._
+import org.openmole.core.exception._
 
 object ContextAggregator {
 
@@ -43,7 +42,7 @@ object ContextAggregator {
           Variable.unsecure(d, merging.head.value) :: acc
         }
         else acc
-    }.toContext
+    }
   }
 
 }

@@ -17,14 +17,12 @@
 
 package org.openmole.plugin.task.tools
 
-import monocle.macros.Lenses
-import org.openmole.core.workflow.builder._
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.task._
+import org.openmole.core.context.{ Prototype, Variable }
 import org.openmole.core.dsl
-import dsl._
+import org.openmole.core.dsl._
+import org.openmole.core.workflow.task._
 
-import reflect.ClassTag
+import scala.reflect.ClassTag
 
 object MergeTask {
 

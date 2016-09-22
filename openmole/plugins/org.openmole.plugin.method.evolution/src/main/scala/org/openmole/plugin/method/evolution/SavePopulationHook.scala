@@ -17,8 +17,8 @@
 
 package org.openmole.plugin.method.evolution
 
-import org.openmole.core.workflow.data.{ Prototype, _ }
-import org.openmole.core.workflow.tools._
+import org.openmole.core.context.Prototype
+import org.openmole.core.expansion.{ ExpandedString, FromContext }
 import org.openmole.core.workflow.dsl._
 import org.openmole.plugin.hook.file._
 

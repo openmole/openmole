@@ -17,9 +17,9 @@
  */
 package org.openmole.core.workflow.sampling
 
+import org.openmole.core.context._
+import org.openmole.core.expansion._
 import org.openmole.core.workflow.domain._
-import org.openmole.core.workflow.tools._
-import org.openmole.core.workflow.data._
 
 import scalaz._
 import Scalaz._

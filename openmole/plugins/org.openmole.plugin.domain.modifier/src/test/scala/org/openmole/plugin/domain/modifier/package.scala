@@ -17,7 +17,7 @@
  */
 package org.openmole.plugin.domain
 
-import org.openmole.core.workflow.domain.{ Finite }
+import org.openmole.core.workflow.domain.Finite
 
 package object modifier {
   implicit def iterableIsFinite[T] = new Finite[Iterable[T], T] {

@@ -19,22 +19,22 @@ package org.openmole.plugin.environment.batch.refresh
 
 import java.io.FileNotFoundException
 import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.{ TimeUnit, Executors }
+import java.util.concurrent.{ Executors, TimeUnit }
 
+import fr.iscpif.gridscale.authentication._
 import org.openmole.core.event.EventDispatcher
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.workflow.execution._
-import org.openmole.plugin.environment.batch.environment._
-import org.openmole.plugin.environment.batch.environment.BatchEnvironment.JobManagementThreads
 import org.openmole.core.workspace.Workspace
+import org.openmole.plugin.environment.batch.environment.BatchEnvironment.JobManagementThreads
+import org.openmole.plugin.environment.batch.environment._
 import org.openmole.tool.collection.PriorityQueue
 import org.openmole.tool.logger.Logger
 import org.openmole.tool.thread._
-import fr.iscpif.gridscale.authentication._
 
 object JobManager extends Logger
 
-import JobManager.Log._
+import org.openmole.plugin.environment.batch.refresh.JobManager.Log._
 
 class JobManager { self ⇒
 

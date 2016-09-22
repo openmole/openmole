@@ -14,21 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.openmole.core.workflow.tools
+package org.openmole.core.expansion
 
 import java.io.File
 
 import org.openmole.core.console._
+import org.openmole.core.context._
 import org.openmole.core.exception._
-import org.openmole.core.pluginmanager.PluginManager
+import org.openmole.core.pluginmanager._
 import org.openmole.core.tools.obj.ClassUtils._
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.task.Task
-import org.openmole.core.workflow.validation.TypeUtil
-import org.openmole.core.workspace.Workspace
-import org.osgi.framework.Bundle
-import org.openmole.core.workflow.dsl._
 import org.openmole.tool.cache._
+import org.openmole.tool.random._
 
 import scala.util._
 
@@ -59,7 +55,7 @@ trait ScalaCompilation {
 
   def toScalaNativeType(t: PrototypeType[_]): PrototypeType[_] = {
     def native = {
-      val (contentType, level) = TypeUtil.unArrayify(t)
+      val (contentType, level) = PrototypeType.unArrayify(t)
       for {
         m ← classEquivalence(contentType.runtimeClass).map(_.manifest)
       } yield (0 until level).foldLeft(PrototypeType.unsecure(m)) {
@@ -94,7 +90,7 @@ object ScalaWrappedCompilation {
         override def libraries: Seq[File] = _libraries
       }
 
-    compilation.functionCode.get
+    compilation.functionCode().get
     compilation
   }
 
@@ -133,7 +129,7 @@ object ScalaWrappedCompilation {
 
 }
 
-import ScalaWrappedCompilation._
+import org.openmole.core.expansion.ScalaWrappedCompilation._
 
 trait ScalaWrappedCompilation <: ScalaCompilation { compilation ⇒
 
@@ -163,7 +159,7 @@ trait ScalaWrappedCompilation <: ScalaCompilation { compilation ⇒
           |    ${inputs.toSeq.map(i ⇒ s"""var ${i.name} = ${prefix}context("${i.name}").asInstanceOf[${toScalaNativeType(i.`type`)}]""").mkString("; ")}
           |  }
           |  import ${inputObject}._
-          |  implicit lazy val ${Task.prefixedVariable("RNG")}: util.Random = ${prefix}RNGProvider()
+          |  implicit lazy val ${Variable.prefixedVariable("RNG")}: util.Random = ${prefix}RNGProvider()
           |  $source
           |  ${wrapping.wrapOutput}
           |}: ${toScalaNativeType(returnType)}

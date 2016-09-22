@@ -17,15 +17,12 @@
 
 package org.openmole.plugin.environment.ssh
 
-import java.io.File
-
-import org.openmole.plugin.environment.batch.control.AccessToken
-import org.openmole.plugin.environment.batch.storage.{ SimpleStorage, StorageService }
-import org.openmole.plugin.environment.batch.environment.BatchEnvironment
-import org.openmole.core.workspace.Workspace
-import org.openmole.plugin.environment.gridscale.{ GridScaleStorage, LocalStorage, LogicalLinkStorage }
 import fr.iscpif.gridscale.ssh.SSHConnectionCache
 import org.openmole.core.communication.storage.RemoteStorage
+import org.openmole.core.workspace.Workspace
+import org.openmole.plugin.environment.batch.environment.BatchEnvironment
+import org.openmole.plugin.environment.batch.storage.StorageService
+import org.openmole.plugin.environment.gridscale.GridScaleStorage
 
 trait SSHStorageService extends StorageService with SSHService with GridScaleStorage { ss ⇒
 

@@ -18,7 +18,8 @@
 package org.openmole.core.workflow.builder
 
 import monocle.macros.Lenses
-import org.openmole.core.workflow.data.{ DefaultSet, PrototypeSet }
+import org.openmole.core.context.PrototypeSet
+import org.openmole.core.workflow.tools.DefaultSet
 
 @Lenses case class InputOutputConfig(
   inputs:   PrototypeSet   = PrototypeSet.empty,

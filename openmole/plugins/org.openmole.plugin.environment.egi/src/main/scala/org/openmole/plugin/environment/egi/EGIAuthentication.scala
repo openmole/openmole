@@ -17,29 +17,25 @@
 
 package org.openmole.plugin.environment.egi
 
-import java.io._
+import java.io.{ File, _ }
 import java.net.URI
-import java.util.UUID
-import fr.iscpif.gridscale.authentication.{ PEMAuthentication, P12Authentication }
-import org.openmole.plugin.environment.batch.authentication.CypheredPassword
-import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import java.nio.file.FileSystems
 import java.util.zip.GZIPInputStream
-import org.openmole.tool.file._
-import org.openmole.tool.stream._
-import org.openmole.core.workspace._
-import EGIEnvironment._
-import org.globus.gsi.gssapi.GlobusGSSCredentialImpl
-import org.openmole.tool.logger.Logger
-import org.openmole.tool.tar.TarInputStream
-import scala.collection.JavaConversions._
+
+import fr.iscpif.gridscale.authentication.P12Authentication
 import fr.iscpif.gridscale.egi._
 import fr.iscpif.gridscale.http._
-import fr.iscpif.gridscale._
-import java.io.File
-import scala.util.{ Success, Failure, Try }
-import concurrent.duration._
+import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.fileservice._
+import org.openmole.core.workspace._
+import org.openmole.plugin.environment.batch.authentication.CypheredPassword
+import org.openmole.plugin.environment.egi.EGIEnvironment._
+import org.openmole.tool.file._
+import org.openmole.tool.logger.Logger
+import org.openmole.tool.stream._
+import org.openmole.tool.tar.TarInputStream
+
+import scala.util.Try
 
 object EGIAuthentication extends Logger {
 

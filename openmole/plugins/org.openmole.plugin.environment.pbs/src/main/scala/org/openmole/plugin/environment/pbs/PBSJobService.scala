@@ -18,22 +18,17 @@
 
 package org.openmole.plugin.environment.pbs
 
-import fr.iscpif.gridscale.ssh.{ SSHConnectionCache, SSHAuthentication, SSHJobService, SSHHost }
-import fr.iscpif.gridscale.pbs.{ PBSJobService ⇒ GSPBSJobService, PBSJobDescription }
-import java.net.URI
-import org.openmole.plugin.environment.batch.control._
+import fr.iscpif.gridscale.pbs.{ PBSJobDescription, PBSJobService ⇒ GSPBSJobService }
+import fr.iscpif.gridscale.ssh.SSHConnectionCache
+import org.openmole.core.workspace.Workspace
 import org.openmole.plugin.environment.batch.environment._
 import org.openmole.plugin.environment.batch.jobservice.{ BatchJob, BatchJobId }
-import org.openmole.core.workspace.Workspace
-import org.openmole.plugin.environment.ssh.{ ClusterJobService, SharedStorage, SSHService }
-import org.openmole.plugin.environment.batch.storage.SimpleStorage
-import org.openmole.plugin.environment.gridscale._
+import org.openmole.plugin.environment.ssh.{ ClusterJobService, SSHService }
 import org.openmole.tool.logger.Logger
-import concurrent.duration._
 
 object PBSJobService extends Logger
 
-import PBSJobService._
+import org.openmole.plugin.environment.pbs.PBSJobService._
 
 trait PBSJobService extends ClusterJobService { js ⇒
 

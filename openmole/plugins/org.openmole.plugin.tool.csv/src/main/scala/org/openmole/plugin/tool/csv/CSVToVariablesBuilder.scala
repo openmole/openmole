@@ -18,10 +18,8 @@
 package org.openmole.plugin.tool.csv
 
 import java.io.File
-
-import org.openmole.core.workflow.builder.InputOutputBuilder
-import monocle.Lens
 import org.openmole.core.dsl._
+import monocle.Lens
 
 trait CSVToVariablesBuilder[T] {
   def columns: Lens[T, Vector[(String, Val[_])]]

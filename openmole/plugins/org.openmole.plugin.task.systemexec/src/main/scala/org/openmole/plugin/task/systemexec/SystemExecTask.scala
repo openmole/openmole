@@ -17,18 +17,19 @@
 
 package org.openmole.plugin.task.systemexec
 
-import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
-import org.openmole.core.tools.service.{ OS, ProcessUtil }
 import java.io.File
 
 import monocle.macros.Lenses
+import org.openmole.core.context.{ Context, Prototype, Variable }
+import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
+import org.openmole.core.expansion.FromContext
+import org.openmole.core.tools.service.OS
 import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
-import org.openmole.core.workflow.data._
-import org.openmole.plugin.task.external._
+import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.validation._
-import org.openmole.core.workflow.tools._
-import org.openmole.core.workflow.dsl._
+import org.openmole.plugin.task.external._
+import org.openmole.tool.random._
 
 import scala.annotation.tailrec
 

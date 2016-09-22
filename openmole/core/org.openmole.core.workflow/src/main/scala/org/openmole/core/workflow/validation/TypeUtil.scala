@@ -17,25 +17,14 @@
 
 package org.openmole.core.workflow.validation
 
-import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.tools.obj.ClassUtils
-import org.openmole.core.workflow.data._
+import org.openmole.core.context.{ Prototype, PrototypeType }
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
-import org.openmole.core.tools.obj._
-import org.openmole.core.workflow.dsl._
-import scala.annotation.tailrec
+
 import scala.collection.mutable.{ HashMap, HashSet, ListBuffer }
 
 object TypeUtil {
-
-  def unArrayify(t: PrototypeType[_]): (PrototypeType[_], Int) = {
-    @tailrec def rec(c: PrototypeType[_], level: Int = 0): (PrototypeType[_], Int) =
-      if (!c.isArray) (c, level)
-      else rec(c.asArray.fromArray, level + 1)
-    rec(t)
-  }
 
   def receivedTypes(mole: Mole, sources: Sources, hooks: Hooks)(slot: Slot): Iterable[Prototype[_]] =
     validTypes(mole, sources, hooks)(slot).map { _.toPrototype }

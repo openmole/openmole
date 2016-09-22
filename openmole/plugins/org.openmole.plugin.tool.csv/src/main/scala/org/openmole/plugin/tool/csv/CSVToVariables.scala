@@ -21,11 +21,8 @@ import java.io.{ File, FileReader }
 import java.math.{ BigDecimal, BigInteger }
 
 import au.com.bytecode.opencsv.CSVReader
+import org.openmole.core.context.{ Context, Prototype, Variable }
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.sampling._
-
-import scala.util.Random
 
 trait CSVToVariables {
 

@@ -17,9 +17,6 @@
 
 package org.openmole.plugin.method.modelfamily.ga
 
-import fr.iscpif.mgo.genome.G
-import monocle._
-
 trait ModelId <: G {
   def modelId: Lens[G, Int]
 }

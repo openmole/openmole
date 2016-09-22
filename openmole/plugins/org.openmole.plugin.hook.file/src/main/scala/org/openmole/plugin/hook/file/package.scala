@@ -18,14 +18,15 @@
 package org.openmole.plugin.hook
 
 import java.io.File
-import org.openmole.core.workflow.data.Prototype
-import org.openmole.core.workflow.tools._
-import org.openmole.plugin.hook.file.CopyFileHook.CopyFileHookBuilder
+
+import org.openmole.core.context.Prototype
 import org.openmole.core.dsl._
 import org.openmole.core.workflow.builder._
-import org.openmole.plugin.hook.file.CopyFileHook.CopyOptions
+import org.openmole.plugin.hook.file.CopyFileHook.{ CopyFileHookBuilder, CopyOptions }
 
 package file {
+
+  import org.openmole.core.expansion.FromContext
 
   trait FilePackage {
 

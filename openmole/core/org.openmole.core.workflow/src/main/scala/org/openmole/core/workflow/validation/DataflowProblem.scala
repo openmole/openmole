@@ -17,7 +17,7 @@
 
 package org.openmole.core.workflow.validation
 
-import org.openmole.core.workflow.data._
+import org.openmole.core.context.{ Prototype, PrototypeType }
 import org.openmole.core.workflow.mole.{ Capsule, Hook, Source }
 import org.openmole.core.workflow.transition.Slot
 import org.openmole.core.workflow.validation.TypeUtil.InvalidType

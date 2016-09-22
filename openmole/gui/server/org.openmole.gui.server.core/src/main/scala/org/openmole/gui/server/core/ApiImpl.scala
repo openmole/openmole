@@ -31,7 +31,7 @@ import org.openmole.tool.file._
 import org.openmole.tool.tar._
 import org.openmole.core.pluginmanager
 import org.openmole.core.output.OutputManager
-import org.openmole.core.module._
+import org.openmole.core.module
 
 /*
  * Copyright (C) 21/07/14 // mathieu.leclaire@openmole.org
@@ -409,7 +409,7 @@ object ApiImpl extends Api {
   //PLUGINS
   def addPlugins(nodes: Seq[String]): Seq[Error] = {
     val plugins = nodes.map(Utils.pluginUpdoadDirectory / _)
-    val errors = addPluginsFiles(plugins, true)
+    val errors = module.addPluginsFiles(plugins, true)
     plugins.foreach(_.recursiveDelete)
     errors.map(e ⇒ ErrorBuilder(e._2))
   }
@@ -423,7 +423,7 @@ object ApiImpl extends Api {
       PluginManager.listBundles(f).toList ::: subPlugins
     }
 
-    addPluginsFiles(recurse(file), false)
+    module.addPluginsFiles(recurse(file), false)
   }
 
   def isPlugin(path: SafePath): Boolean = Utils.isPlugin(path)
@@ -431,10 +431,10 @@ object ApiImpl extends Api {
   def allPluggableIn(path: SafePath): Seq[TreeNodeData] = Utils.allPluggableIn(path)
 
   def listPlugins(): Iterable[Plugin] =
-    Workspace.pluginDir.listFilesSafe.map(p ⇒ Plugin(p.getName, new SimpleDateFormat("dd/MM/yyyy HH:mm").format(p.lastModified)))
+    module.pluginDirectory.listFilesSafe.map(p ⇒ Plugin(p.getName, new SimpleDateFormat("dd/MM/yyyy HH:mm").format(p.lastModified)))
 
   def removePlugin(plugin: Plugin): Unit = synchronized {
-    val file = Workspace.pluginDir / plugin.name
+    val file = module.pluginDirectory / plugin.name
     val allDependingFiles = PluginManager.allDepending(file, b ⇒ !b.isProvided)
     val bundle = PluginManager.bundle(file)
     bundle.foreach(PluginManager.remove)

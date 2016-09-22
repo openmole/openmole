@@ -18,12 +18,11 @@
 package org.openmole.plugin.task.template
 
 import java.io.File
-import org.openmole.tool.file._
+
+import org.openmole.core.context.{Context, Prototype}
+import org.openmole.plugin.task.template.TemplateData._
 import org.openmole.tool.hash._
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.task._
 import org.scalatest._
-import TemplateData._
 
 class TemplateFileGeneratorTaskSpec extends FlatSpec with Matchers {
   implicit val plugins = PluginSet.empty

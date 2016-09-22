@@ -17,8 +17,8 @@
 
 package org.openmole.plugin.task.netlogo
 
-import org.openmole.core.workflow.data._
 import monocle.Lens
+import org.openmole.core.context.Prototype
 
 trait NetLogoTaskBuilder[T] {
   def netLogoInputs: Lens[T, Vector[(Prototype[_], String)]]

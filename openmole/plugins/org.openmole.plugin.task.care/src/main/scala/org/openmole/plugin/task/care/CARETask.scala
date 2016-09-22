@@ -20,22 +20,22 @@ package org.openmole.plugin.task.care
 
 import java.io.File
 
+import monocle.macros.Lenses
+import org.openmole.core.context.{ Context, Prototype, Variable }
 import org.openmole.core.exception.InternalProcessingError
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.tools._
-import org.openmole.plugin.task.external.{ External, ExternalBuilder }
-import org.openmole.tool.logger.Logger
-import org.openmole.plugin.task.systemexec._
-import org.openmole.plugin.task.systemexec
-import org.openmole.core.workflow.data._
+import org.openmole.core.expansion.ExpandedString
+import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
+import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.validation._
-import org.openmole.core.workflow.dsl._
+import org.openmole.plugin.task.external.{ External, ExternalBuilder }
+import org.openmole.plugin.task.systemexec
+import org.openmole.plugin.task.systemexec._
+import org.openmole.tool.logger.Logger
+import org.openmole.tool.random.RandomProvider
 
+import scalaz.Scalaz._
 import scalaz._
-import Scalaz._
-import monocle.macros.Lenses
-import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
 
 object CARETask extends Logger {
   implicit def isTask: InputOutputBuilder[CARETask] = InputOutputBuilder(CARETask._config)

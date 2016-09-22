@@ -17,6 +17,7 @@
 
 package org.openmole.core.workflow.mole
 
+import org.openmole.core.context.{Context, Prototype, Variable}
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
 import org.openmole.core.workflow.sampling._
@@ -30,6 +31,7 @@ import org.openmole.core.workflow.puzzle._
 import org.openmole.core.workflow.builder._
 import org.scalatest._
 import org.scalatest.junit._
+
 import scala.collection.mutable.ListBuffer
 import org.openmole.core.workflow.dsl._
 

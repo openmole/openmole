@@ -17,8 +17,8 @@
 
 package org.openmole.plugin.task.external
 
-import org.openmole.plugin.task.external.External._
 import monocle.Lens
+import org.openmole.plugin.task.external.External._
 
 /**
  * Builder for task using external files or directories

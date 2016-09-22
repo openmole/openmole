@@ -20,14 +20,13 @@ package org.openmole.plugin.task.external
 import java.io.File
 
 import monocle.macros.Lenses
+import org.openmole.core.context.{ Context, Prototype, Variable }
 import org.openmole.core.exception.UserBadDataError
+import org.openmole.core.expansion.FromContext
 import org.openmole.core.tools.service.OS
-import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.tools._
-
-import scala.util.Random
+import org.openmole.tool.random.RandomProvider
 
 object External {
   val PWD = Prototype[String]("PWD")
@@ -61,7 +60,7 @@ object External {
   type PathResolver = String ⇒ File
 }
 
-import External._
+import org.openmole.plugin.task.external.External._
 
 @Lenses case class External(
     inputFileArrays: Vector[External.InputFileArray] = Vector.empty,

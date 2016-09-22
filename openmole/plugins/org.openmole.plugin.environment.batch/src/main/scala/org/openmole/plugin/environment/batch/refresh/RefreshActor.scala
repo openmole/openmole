@@ -18,14 +18,14 @@
 package org.openmole.plugin.environment.batch.refresh
 
 import org.openmole.core.workflow.execution.ExecutionState._
-import org.openmole.plugin.environment.batch.environment.BatchEnvironment._
-import org.openmole.plugin.environment.batch.environment.{ ResubmitException }
 import org.openmole.core.workspace.Workspace
+import org.openmole.plugin.environment.batch.environment.BatchEnvironment._
+import org.openmole.plugin.environment.batch.environment.ResubmitException
 import org.openmole.tool.logger.Logger
 
 object RefreshActor extends Logger
 
-import RefreshActor.Log._
+import org.openmole.plugin.environment.batch.refresh.RefreshActor.Log._
 
 class RefreshActor(jobManager: JobManager) {
 

@@ -17,9 +17,7 @@
 
 package org.openmole.core.workflow.domain
 
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.tools.FromContext
-
+import org.openmole.core.expansion._
 import scala.annotation.implicitNotFound
 
 @implicitNotFound("${D} is not a variation domain with a center of type ${T}")

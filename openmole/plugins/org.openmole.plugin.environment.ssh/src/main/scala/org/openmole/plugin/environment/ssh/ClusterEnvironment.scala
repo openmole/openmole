@@ -16,9 +16,9 @@
  */
 package org.openmole.plugin.environment.ssh
 
+import org.openmole.core.workspace.Workspace
 import org.openmole.plugin.environment.batch.control.LimitedAccess
 import org.openmole.plugin.environment.batch.environment.SimpleBatchEnvironment
-import org.openmole.core.workspace.Workspace
 
 trait ClusterEnvironment extends SimpleBatchEnvironment with SSHPersistentStorage {
 

@@ -16,16 +16,16 @@
  */
 package org.openmole.plugin.environment.batch.storage
 
-import java.io.{ File, OutputStream, InputStream }
+import java.io.{ File, InputStream }
 import java.nio.file.Files
-import java.util.UUID
 
 import fr.iscpif.gridscale.storage._
+import org.openmole.core.communication.storage._
 import org.openmole.core.workspace._
 import org.openmole.tool.file._
 import org.openmole.tool.stream._
-import concurrent.duration._
-import org.openmole.core.communication.storage._
+
+import scala.concurrent.duration._
 
 object Storage {
   val BufferSize = ConfigurationLocation("Storage", "BufferSize", Some(65535))

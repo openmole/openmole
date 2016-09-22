@@ -17,9 +17,9 @@
 
 package org.openmole.plugin.method.abc
 
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.dsl._
 import fr.iscpif.scalabc._
+import org.openmole.core.context.{ Context, Prototype, Variable }
+import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.task._
 
 object LenormandAnalyseTask {

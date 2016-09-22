@@ -17,29 +17,25 @@
 
 package org.openmole.plugin.environment.batch.replication
 
-import com.google.common.cache.CacheBuilder
 import java.io.File
-import org.h2.jdbc.JdbcSQLException
-import org.openmole.core.replication.{ replicas, Replica, DBServerInfo }
-import org.openmole.core.tools.service.TimeCache
-import org.openmole.core.workspace.{ Workspace, ConfigurationLocation }
+import java.util.concurrent.TimeUnit
 import java.util.regex.Pattern
+
+import com.google.common.cache.CacheBuilder
+import org.openmole.core.replication.{ DBServerInfo, Replica, replicas }
+import org.openmole.core.tools.service.TimeCache
+import org.openmole.core.workspace.{ ConfigurationLocation, Workspace }
 import org.openmole.plugin.environment.batch.control._
 import org.openmole.plugin.environment.batch.environment._
 import org.openmole.plugin.environment.batch.storage._
-import org.openmole.plugin.environment.batch.environment.BatchEnvironment._
-import java.util.concurrent.TimeUnit
-
 import org.openmole.tool.lock.LockRepository
 import org.openmole.tool.logger.Logger
-import slick.jdbc.SQLActionBuilder
-import slick.profile.SqlAction
+import slick.driver.H2Driver.api._
 
 import scala.annotation.tailrec
-import scala.concurrent.{ Future, Await }
+import scala.concurrent.Await
 import scala.concurrent.duration._
-import slick.driver.H2Driver.api._
-import scala.util.{ Success, Failure, Try }
+import scala.util.{ Success, Try }
 
 object ReplicaCatalog extends Logger {
 

@@ -17,13 +17,12 @@
 
 package org.openmole.plugin.environment.batch.refresh
 
-import org.openmole.core.workspace.Workspace
 import org.openmole.plugin.environment.batch.environment.BatchEnvironment
 import org.openmole.tool.logger.Logger
 
 object CleanerActor extends Logger
 
-import CleanerActor.Log._
+import org.openmole.plugin.environment.batch.refresh.CleanerActor.Log._
 
 class CleanerActor(jobManager: JobManager) {
   def receive(msg: CleanSerializedJob) = {

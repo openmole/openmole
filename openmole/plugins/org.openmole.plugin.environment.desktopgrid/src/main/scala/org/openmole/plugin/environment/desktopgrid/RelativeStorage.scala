@@ -16,7 +16,8 @@
  */
 package org.openmole.plugin.environment.desktopgrid
 
-import java.io.{ InputStream, File }
+import java.io.{ File, InputStream }
+
 import fr.iscpif.gridscale.storage.{ LocalStorage, Storage }
 
 class RelativeStorage(base: File) extends Storage {

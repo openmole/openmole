@@ -17,8 +17,9 @@
 
 package org.openmole.plugin.environment.batch.storage
 
-import fr.iscpif.gridscale.storage.ListEntry
 import java.io.{ ByteArrayInputStream, File, InputStream }
+
+import fr.iscpif.gridscale.storage.ListEntry
 import org.openmole.core.communication.storage._
 
 trait SimpleStorage extends Storage {

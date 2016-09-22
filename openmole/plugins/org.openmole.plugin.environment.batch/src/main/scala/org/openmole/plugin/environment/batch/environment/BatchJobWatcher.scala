@@ -21,8 +21,9 @@ import org.openmole.core.updater.IUpdatableWithVariableDelay
 import org.openmole.core.workflow.execution.ExecutionState._
 import org.openmole.core.workflow.job.Job
 import org.openmole.core.workspace.Workspace
+import org.openmole.plugin.environment.batch.refresh.Kill
 import org.openmole.tool.logger.Logger
-import org.openmole.plugin.environment.batch.refresh.{ Kill }
+
 import scala.concurrent.stm._
 import scala.ref._
 

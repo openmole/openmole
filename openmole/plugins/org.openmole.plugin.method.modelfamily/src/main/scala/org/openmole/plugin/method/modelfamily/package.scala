@@ -17,6 +17,4 @@
 
 package org.openmole.plugin.method
 
-import org.openmole.plugin.task.scala.ScalaPackage
-
 package object modelfamily extends ScalaPackage

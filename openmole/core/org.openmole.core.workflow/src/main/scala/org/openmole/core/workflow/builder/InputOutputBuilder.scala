@@ -18,8 +18,9 @@
 package org.openmole.core.workflow.builder
 
 import monocle.Lens
-import org.openmole.core.workflow.data.{ DefaultSet, PrototypeSet }
+import org.openmole.core.context.PrototypeSet
 import org.openmole.core.workflow.task.ClosureTask
+import org.openmole.core.workflow.tools.DefaultSet
 
 object InputOutputBuilder {
 

@@ -17,23 +17,18 @@
 
 package org.openmole.plugin.task.netlogo
 
-import java.io.File
 import java.util.AbstractCollection
 
+import org.openmole.core.context.{ Context, Prototype, Variable }
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.output.OutputManager
+import org.openmole.core.expansion.ExpandedString
 import org.openmole.core.tools.io.Prettifier
-import org.openmole.core.tools.service.OS
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.tools._
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.tools.{ ExpandedString }
-import org.openmole.plugin.task.external.External._
-import org.openmole.plugin.task.external._
+import org.openmole.core.tools.io.Prettifier._
 import org.openmole.core.workflow.dsl._
-import Prettifier._
+import org.openmole.core.workflow.task._
+import org.openmole.plugin.task.external._
 import org.openmole.tool.cache.Cache
+import org.openmole.tool.random.RandomProvider
 
 object NetLogoTask {
   case class Workspace(script: String, workspace: OptionalArgument[String] = None)

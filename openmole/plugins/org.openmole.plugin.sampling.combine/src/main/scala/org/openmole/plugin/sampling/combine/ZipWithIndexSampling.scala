@@ -17,12 +17,9 @@
 
 package org.openmole.plugin.sampling.combine
 
-import org.openmole.core.workflow.data._
+import org.openmole.core.context.{ Prototype, Variable }
+import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.sampling._
-import org.openmole.core.workflow.tools.FromContext
-
-import scalaz._
-import Scalaz._
 
 object ZipWithIndexSampling {
 

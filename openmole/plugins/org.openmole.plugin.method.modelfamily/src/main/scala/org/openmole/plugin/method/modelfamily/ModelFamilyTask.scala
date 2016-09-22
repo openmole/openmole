@@ -19,18 +19,9 @@ package org.openmole.plugin.method.modelfamily
 
 import java.io.File
 
-import org.openmole.core.exception.InternalProcessingError
-import org.openmole.core.pluginmanager.PluginManager
-import org.openmole.core.workflow.builder.TaskBuilder
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.tools.ScalaCompilation
-import org.openmole.plugin.task.jvm.JVMLanguageTask
-import org.openmole.plugin.task.scala._
-import org.osgi.framework.Bundle
+import fr.iscpif.family.{ModelFamily => FModelFamily}
 
 import scala.util.Try
-import fr.iscpif.family.{ ModelFamily ⇒ FModelFamily, Combination, TypedValue }
 
 object ModelFamilyTask {
 
@@ -44,8 +35,6 @@ object ModelFamilyTask {
     def toTask = new ModelFamilyTask(modelFamily) with Built
   }
 }
-
-import ModelFamily._
 
 abstract class ModelFamilyTask(val modelFamily: ModelFamily) extends Task { t ⇒
 

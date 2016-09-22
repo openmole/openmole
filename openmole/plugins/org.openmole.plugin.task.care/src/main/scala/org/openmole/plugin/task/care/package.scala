@@ -18,8 +18,8 @@
 
 package org.openmole.plugin.task
 
-import org.openmole.plugin.task.systemexec.SystemExecPackage
 import org.openmole.core.dsl._
+import org.openmole.plugin.task.systemexec.SystemExecPackage
 
 package care {
   trait CAREPackage extends SystemExecPackage {

@@ -18,6 +18,7 @@
 package org.openmole.core.workflow.task
 
 import monocle.macros.Lenses
+import org.openmole.core.context.Context
 import org.openmole.core.workflow.builder.InputOutputBuilder$
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.data._

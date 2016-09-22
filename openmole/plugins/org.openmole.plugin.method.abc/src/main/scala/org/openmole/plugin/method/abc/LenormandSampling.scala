@@ -17,13 +17,10 @@
 
 package org.openmole.plugin.method.abc
 
-import org.openmole.core.tools.service.Random._
-import org.openmole.core.workflow.sampling._
 import fr.iscpif.scalabc.algorithm._
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.tools.FromContext
-import util.Random
+import org.openmole.core.context.{ Prototype, Variable }
+import org.openmole.core.expansion.FromContext
+import org.openmole.core.workflow.sampling._
 
 object LenormandSampling {
 

@@ -18,11 +18,9 @@
 
 package org.openmole.plugin.grouping.onvariable
 
-import org.openmole.core.workflow.mole._
+import org.openmole.core.context._
 import org.openmole.core.workflow.job._
 import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.data._
 
 object OnVariableGrouping {
 

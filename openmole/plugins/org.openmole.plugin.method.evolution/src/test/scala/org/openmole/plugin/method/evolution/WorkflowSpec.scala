@@ -16,11 +16,10 @@
  */
 package org.openmole.plugin.method.evolution
 
-import org.openmole.core.workflow.validation.Validation
-import org.scalatest._
 import org.openmole.core.dsl._
-import org.openmole.plugin.method.evolution.PSE.PatternAxe
+import org.openmole.core.workflow.validation.Validation
 import org.openmole.plugin.domain.collection._
+import org.scalatest._
 
 class WorkflowSpec extends FlatSpec with Matchers {
 

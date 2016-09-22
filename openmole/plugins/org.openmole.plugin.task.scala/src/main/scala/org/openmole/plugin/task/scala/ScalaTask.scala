@@ -20,15 +20,16 @@ package org.openmole.plugin.task.scala
 import java.io.File
 
 import monocle.macros.Lenses
+import org.openmole.core.context.{ Context, Variable }
 import org.openmole.core.exception.InternalProcessingError
+import org.openmole.core.expansion.ScalaWrappedCompilation
 import org.openmole.core.workflow.builder._
-import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.validation._
 import org.openmole.plugin.task.external.{ External, ExternalBuilder }
 import org.openmole.plugin.task.jvm._
 import org.openmole.tool.cache.Cache
+import org.openmole.tool.random.RandomProvider
 
 import scala.util._
 

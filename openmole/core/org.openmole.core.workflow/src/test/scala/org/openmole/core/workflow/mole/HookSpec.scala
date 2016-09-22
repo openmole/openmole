@@ -17,6 +17,7 @@
 
 package org.openmole.core.workflow.hook
 
+import org.openmole.core.context.Prototype
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
@@ -25,7 +26,6 @@ import org.openmole.core.workflow.job._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.dsl._
-
 import org.scalatest._
 import org.scalatest.junit._
 

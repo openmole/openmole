@@ -15,19 +15,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.workflow.tools
+package org.openmole.core.expansion
 
-import java.io.{ InputStream }
+import java.io.InputStream
 
+import org.openmole.core.context.{ Context, Prototype }
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.tool.stream.{ StringInputStream, StringOutputStream }
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.dsl._
+import org.openmole.tool.random._
 
 import scala.collection.mutable.ListBuffer
-import scala.util.{ Failure, Success, Try }
-import scalaz._
-import Scalaz._
+import scala.util.Try
 
 object ExpandedString {
 

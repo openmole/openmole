@@ -17,18 +17,19 @@
 
 package org.openmole.core.workflow
 
-import org.openmole.core.workflow.puzzle._
-import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.mole._
 
 package task {
+
+  import org.openmole.core.context._
+
   trait TaskPackage {
     implicit class TaskToCapsuleDecorator(task: Task) {
       def toCapsule = Capsule(task)
       def toCapsule(strainer: Boolean) = Capsule(task, true)
     }
 
-    def newRNG(context: Context) = Task.buildRNG(context)
+    def newRNG(context: Context) = Context.buildRNG(context)
 
     def implicits = new {
       def +=(p: Prototype[_]) = MoleTask.implicits.modify(_ ++ Seq(p.name))

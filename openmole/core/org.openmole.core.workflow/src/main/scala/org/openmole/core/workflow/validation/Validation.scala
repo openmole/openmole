@@ -17,9 +17,10 @@
 
 package org.openmole.core.workflow.validation
 
-import org.openmole.core.workflow.data._
+import org.openmole.core.context._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.tools.{ Default, DefaultSet }
 import org.openmole.core.workflow.validation.DataflowProblem._
 import org.openmole.core.workflow.validation.TopologyProblem._
 import org.openmole.core.workflow.validation.TypeUtil._

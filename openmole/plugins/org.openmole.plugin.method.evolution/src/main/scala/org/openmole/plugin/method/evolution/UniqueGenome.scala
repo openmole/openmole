@@ -18,16 +18,15 @@
 package org.openmole.plugin.method.evolution
 
 import fr.iscpif.mgo.double2Scalable
-import org.openmole.core.workflow.data.{ RandomProvider, Context, Prototype, Variable }
+import org.openmole.core.context._
+import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.domain.Bounds
 import org.openmole.core.workflow.sampling.Factor
-import org.openmole.core.workflow.tools.FromContext
-import org.openmole.core.workflow.dsl._
-import util.Try
+import org.openmole.tool.random.RandomProvider
 
 import scala.annotation.tailrec
+import scalaz.Scalaz._
 import scalaz._
-import Scalaz._
 
 object InputConverter {
 

@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.workflow.data
+package org.openmole.core.workflow.tools
 
 import scala.collection.SetLike
 import scala.collection.immutable.TreeMap

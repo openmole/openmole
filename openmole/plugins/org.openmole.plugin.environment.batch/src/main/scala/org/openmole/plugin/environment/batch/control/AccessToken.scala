@@ -17,8 +17,6 @@
 
 package org.openmole.plugin.environment.batch.control
 
-import java.util.concurrent.locks.ReentrantLock
-
 trait AccessToken {
   def access[T](op: ⇒ T): T
 }

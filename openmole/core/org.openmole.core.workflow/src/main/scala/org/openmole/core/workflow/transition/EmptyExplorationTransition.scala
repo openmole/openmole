@@ -17,11 +17,11 @@
 
 package org.openmole.core.workflow.transition
 
-import org.openmole.core.workflow.data._
+import org.openmole.core.context.{ Context, Prototype }
+import org.openmole.core.expansion.{ Condition, FromContext }
 import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.tools._
-import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.validation.ValidateTransition
+import org.openmole.tool.random.RandomProvider
 
 import scala.collection.mutable.ListBuffer
 

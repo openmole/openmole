@@ -17,13 +17,14 @@
 
 package org.openmole.plugin.method.evolution
 
-import fr.iscpif.mgo.algorithm.{ profile, noisyprofile }
+import fr.iscpif.mgo.algorithm.{ noisyprofile, profile }
+import org.openmole.core.context.{ Context, Prototype, Variable }
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.tools.FromContext
+import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.dsl._
+
+import scalaz.Scalaz._
 import scalaz._
-import Scalaz._
 
 object GenomeProfile {
 

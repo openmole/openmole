@@ -17,10 +17,8 @@
 
 package org.openmole.core.workflow.sampling
 
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.tools.FromContext
-
-import scala.util.Random
+import org.openmole.core.context._
+import org.openmole.core.expansion._
 
 trait Sampling {
 

@@ -17,8 +17,8 @@
 
 package org.openmole.plugin.method.abc
 
-import org.openmole.core.workflow.data.Prototype
 import fr.iscpif.scalabc._
+import org.openmole.core.context.Prototype
 
 object Lenormand {
   def apply(

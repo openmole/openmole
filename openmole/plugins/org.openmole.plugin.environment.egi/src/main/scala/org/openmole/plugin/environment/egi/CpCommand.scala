@@ -18,6 +18,7 @@
 package org.openmole.plugin.environment.egi
 
 import java.net.URI
+
 import org.openmole.core.workspace.Workspace
 
 trait CpCommands {

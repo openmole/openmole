@@ -20,9 +20,9 @@ package org.openmole.plugin.domain
 import java.io.File
 import java.nio.file.Path
 
+import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.sampling._
-import org.openmole.core.workflow.tools._
 
 import scala.reflect.runtime.universe._
 

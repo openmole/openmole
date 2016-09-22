@@ -34,6 +34,18 @@ package object module {
 
   Workspace setDefault moduleIndexes
 
+  lazy val pluginDirectory = Workspace.location / "plugins"
+  pluginDirectory.mkdirs
+
+  lazy val moduleDirectory =
+    if (buildinfo.development) Workspace.newDir("modules")
+    else Workspace.location / "modules" / buildinfo.version
+
+  moduleDirectory.mkdirs
+
+  def allModules =
+    (pluginDirectory.listFilesSafe ++ moduleDirectory.listFilesSafe).flatMap(PluginManager.listBundles)
+
   import org.json4s._
   import org.json4s.jackson.Serialization
   implicit val formats = Serialization.formats(NoTypeHints)
@@ -58,8 +70,8 @@ package object module {
 
   def components[T](implicit m: Manifest[T]) = PluginManager.pluginsForClass(m.erasure).toSeq
 
-  def addPluginsFiles(files: Seq[File], move: Boolean): Seq[(File, Throwable)] = synchronized {
-    val destinations = files.map { file ⇒ file → (Workspace.pluginDir / file.getName) }
+  def addPluginsFiles(files: Seq[File], move: Boolean, directory: File = pluginDirectory): Seq[(File, Throwable)] = synchronized {
+    val destinations = files.map { file ⇒ file → (directory / file.getName) }
 
     destinations.filter(_._2.exists).toList match {
       case Nil ⇒

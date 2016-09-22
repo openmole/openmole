@@ -17,6 +17,7 @@
 
 package org.openmole.core.workflow.sampling
 
+import org.openmole.core.context.{Prototype, Variable}
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.sampling._
 

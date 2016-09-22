@@ -17,9 +17,6 @@
 
 package org.openmole.plugin.method.modelfamily.ga
 
-import fr.iscpif.mgo._
-import fr.iscpif.mgo.elitism.NonDominatedElitism
-
 import scala.util.Random
 
 trait ModelFamilyElitism <: Elitism with NicheElitism with ModelFamilyGenome with Ranking with Diversity {

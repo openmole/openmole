@@ -15,19 +15,35 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.workflow.data
+package org.openmole.core.context
 
-import org.openmole.core.macros.ExtractValName
+import org.openmole.core.tools.obj.ClassUtils._
 import org.openmole.core.tools.obj.{ ClassUtils, Id }
-import ClassUtils._
-import org.openmole.core.tools.obj.ClassUtils
-import org.openmole.core.workflow.tools.FromContext
 
+import scala.annotation.tailrec
 import scala.reflect._
-import scala.reflect.runtime.universe._
-import org.openmole.core.workflow.dsl._
 
 object PrototypeType {
+
+  def unArrayify(t: PrototypeType[_]): (PrototypeType[_], Int) = {
+    @tailrec def rec(c: PrototypeType[_], level: Int = 0): (PrototypeType[_], Int) =
+      if (!c.isArray) (c, level)
+      else rec(c.asArray.fromArray, level + 1)
+    rec(t)
+  }
+
+  implicit class PrototypeTypeDecorator[T](p: PrototypeType[T]) {
+    def toArray = PrototypeType[Array[T]](p.manifest.toArray)
+    def array = toArray
+    def isArray = p.manifest.isArray
+    def asArray = p.asInstanceOf[PrototypeType[Array[T]]]
+  }
+
+  implicit class PrototypeTypeArrayDecorator[T](p: PrototypeType[Array[T]]) {
+    def fromArray = PrototypeType[T](p.manifest.fromArray)
+  }
+
+  implicit def buildPrototypeType[T: Manifest]: PrototypeType[T] = PrototypeType[T]
 
   def apply[T](implicit m: Manifest[T]): PrototypeType[T] =
     new PrototypeType[T] {
@@ -46,6 +62,36 @@ trait PrototypeType[T] extends Id {
 }
 
 object Prototype {
+
+  implicit class PrototypeToArrayDecorator[T](prototype: Prototype[T]) {
+    def toArray(level: Int): Prototype[_] = {
+      def toArrayRecursive[A](prototype: Prototype[A], level: Int): Prototype[_] = {
+        if (level <= 0) prototype
+        else {
+          val arrayProto = Prototype(prototype.name)(prototype.`type`.toArray).asInstanceOf[Prototype[Array[_]]]
+          if (level <= 1) arrayProto
+          else toArrayRecursive(arrayProto, level - 1)
+        }
+      }
+
+      toArrayRecursive(prototype, level)
+    }
+
+    def toArray: Prototype[Array[T]] = Prototype(prototype.name)(prototype.`type`.toArray)
+
+    def array(level: Int) = toArray(level)
+    def array = toArray
+
+    def unsecureType = prototype.`type`.asInstanceOf[Manifest[Any]]
+  }
+
+  implicit class PrototypeFromArrayDecorator[T](prototype: Prototype[Array[T]]) {
+    def fromArray: Prototype[T] = Prototype(prototype.name)(prototype.`type`.fromArray)
+  }
+
+  implicit def prototypeDecorator[T](prototype: Prototype[T]) = new {
+    def withName(name: String) = Prototype[T](name)(prototype.`type`)
+  }
 
   implicit def prototypeToArrayConverter[T](p: Prototype[T]) = p.toArray
 

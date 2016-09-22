@@ -19,18 +19,10 @@
 package org.openmole.plugin.environment.condor
 
 import fr.iscpif.gridscale.condor.CondorRequirement
-import fr.iscpif.gridscale.ssh.{ SSHAuthentication, SSHHost, SSHStorage }
-import java.net.URI
-
-import org.openmole.plugin.environment.batch.control.LimitedAccess
-import org.openmole.plugin.environment.batch.environment._
-import org.openmole.core.workspace._
 import org.openmole.core.workflow.dsl._
-import org.openmole.plugin.environment.gridscale._
+import org.openmole.core.workspace._
+import org.openmole.plugin.environment.batch.environment._
 import org.openmole.plugin.environment.ssh._
-import org.openmole.tool.cache.Cache
-
-import scala.concurrent.duration.Duration
 
 object CondorEnvironment {
   def apply(

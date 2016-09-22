@@ -17,33 +17,19 @@
 
 package org.openmole.core
 
-import java.io.File
-import java.util.concurrent.TimeUnit
-
+import org.openmole.core.context.Prototype
 import org.openmole.core.macros.ExtractValName
-import ExtractValName._
+import org.openmole.core.macros.ExtractValName._
 
-import org.openmole.core.serializer._
-import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.execution._
-import org.openmole.core.workflow.puzzle._
-import org.openmole.core.workflow.sampling._
-import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.tools._
-import org.openmole.core.workflow.transition._
-import org.openmole.core.workflow.builder._
 import scala.concurrent.duration
 import scala.concurrent.duration.FiniteDuration
 import scala.reflect.macros.blackbox.{ Context ⇒ MContext }
 
 package dsl {
 
+  import org.openmole.core.context._
   import org.openmole.core.logging.LoggerService
   import org.openmole.core.workspace.Workspace
-  import org.openmole.tool.file.FilePackage
-  import org.openmole.tool.statistics.StatisticsPackage
-  import org.openmole.tool.types.TypesPackage
 
   import scalaz.Functor
 
@@ -85,7 +71,7 @@ package dsl {
 
 package object dsl extends DSLPackage {
   import scala.language.experimental.macros
-
+  type Val[T] = Prototype[T]
   def Val[T]: Prototype[T] = macro valImpl[T]
   def Val[T: Manifest](name: String): Prototype[T] = Prototype(name)
 }

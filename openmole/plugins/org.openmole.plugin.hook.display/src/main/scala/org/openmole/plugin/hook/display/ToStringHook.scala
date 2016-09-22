@@ -20,9 +20,10 @@ package org.openmole.plugin.hook.display
 import java.io.PrintStream
 
 import monocle.macros.Lenses
+import org.openmole.core.context.{ Context, Prototype }
 import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
 import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.data._
+import org.openmole.tool.random.RandomProvider
 
 object ToStringHook {
 

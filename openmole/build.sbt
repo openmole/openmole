@@ -10,6 +10,7 @@ import Keys._
 organization := "org.openmole"
 name := "openmole-root"
 
+
 def macroParadise =
   addCompilerPlugin("org.scalamacros" %% "paradise" % "2.1.0" cross CrossVersion.full)
 
@@ -18,6 +19,7 @@ lazy val scalaVersionValue = "2.11.8"
 def defaultSettings = BuildSystem.settings ++
   Seq(
     organization := "org.openmole",
+    updateOptions := updateOptions.value.withCachedResolution(true),
     resolvers += Resolver.sonatypeRepo("snapshots"),
     scalaVersion in Global := scalaVersionValue,
     scalacOptions ++= Seq("-target:jvm-1.8", "-language:higherKinds"),
@@ -36,7 +38,7 @@ publishTo in ThisBuild <<= isSnapshot(if (_) Some("OpenMOLE Nexus" at "https://m
 
 def thirdPartiesDir = file("third-parties")
 def thirdPartiesSettings = defaultSettings ++ Seq(libraryDependencies += Libraries.scalatest)
-def allThirdParties = Seq(openmoleCache, openmoleTar, openmoleFile, openmoleLock, openmoleLogger, openmoleThread, openmoleHash, openmoleStream, openmoleCollection, openmoleCrypto, openmoleStatistics, openmoleTypes, openmoleByteCode, openmoleOSGi, txtmark)
+def allThirdParties = Seq(openmoleCache, openmoleTar, openmoleFile, openmoleLock, openmoleLogger, openmoleThread, openmoleHash, openmoleStream, openmoleCollection, openmoleCrypto, openmoleStatistics, openmoleTypes, openmoleByteCode, openmoleOSGi, openmoleRandom, txtmark)
 
 lazy val openmoleCache = OsgiProject(thirdPartiesDir, "org.openmole.tool.cache", imports = Seq("*")) dependsOn (openmoleLogger) settings(thirdPartiesSettings: _*)
 lazy val openmoleTar = OsgiProject(thirdPartiesDir, "org.openmole.tool.tar", imports = Seq("*")) dependsOn (openmoleFile) settings(thirdPartiesSettings: _*)
@@ -52,6 +54,7 @@ lazy val openmoleStatistics = OsgiProject(thirdPartiesDir, "org.openmole.tool.st
 lazy val openmoleTypes = OsgiProject(thirdPartiesDir, "org.openmole.tool.types", imports = Seq("*")) settings (libraryDependencies += Libraries.scalaz) settings(thirdPartiesSettings: _*)
 lazy val openmoleByteCode = OsgiProject(thirdPartiesDir, "org.openmole.tool.bytecode", imports = Seq("*"))  settings (libraryDependencies += Libraries.asm) settings(thirdPartiesSettings: _*)
 lazy val openmoleOSGi = OsgiProject(thirdPartiesDir, "org.openmole.tool.osgi", imports = Seq("*"))  dependsOn (openmoleFile) settings(libraryDependencies += Libraries.equinoxOSGi) settings(thirdPartiesSettings: _*)
+lazy val openmoleRandom = OsgiProject(thirdPartiesDir, "org.openmole.tool.random", imports = Seq("*")) settings(thirdPartiesSettings: _*) settings(libraryDependencies += Libraries.math)
 lazy val txtmark = OsgiProject(thirdPartiesDir, "com.quandora.txtmark", exports = Seq("com.github.rjeschke.txtmark.*"), imports = Seq("*")) settings(thirdPartiesSettings: _*)
 
 
@@ -67,13 +70,53 @@ def coreSettings =
       libraryDependencies += Libraries.equinoxOSGi
     )
 
-def allCore = Seq(workflow, serializer, communication, openmoleDSL, exception, tools, event, replication, workspace, macros, pluginManager, updater, fileService, logging, output, console, project, buildinfo, module)
+def allCore = Seq(
+  workflow,
+  serializer,
+  communication,
+  openmoleDSL,
+  exception,
+  tools,
+  event,
+  replication,
+  workspace,
+  macros,
+  pluginManager,
+  updater,
+  fileService,
+  logging,
+  output,
+  console,
+  project,
+  buildinfo,
+  module,
+  context,
+  expansion)
 
+
+lazy val context = OsgiProject(coreDir, "org.openmole.core.context", imports = Seq("*")) settings (
+  libraryDependencies ++= Seq(Libraries.scalaz)
+) dependsOn (tools, workspace) settings(coreSettings: _*)
+
+lazy val expansion = OsgiProject(coreDir, "org.openmole.core.expansion", imports = Seq("*")) settings (
+  libraryDependencies ++= Seq(Libraries.scalaz)
+  ) dependsOn (context, tools, openmoleRandom, openmoleFile, pluginManager, console) settings(coreSettings: _*)
 
 lazy val workflow = OsgiProject(coreDir, "org.openmole.core.workflow", imports = Seq("*")) settings (
   libraryDependencies ++= Seq(Libraries.scalaLang, Libraries.math, Libraries.scalaz, Libraries.equinoxOSGi)
-) dependsOn
-  (event, exception, tools, updater, workspace, macros, pluginManager, serializer, output, console, replication % "test") settings(coreSettings: _*)
+) dependsOn(
+  event,
+  exception,
+  tools,
+  updater,
+  workspace,
+  macros,
+  pluginManager,
+  serializer,
+  output,
+  console,
+  context,
+  expansion) settings(coreSettings: _*)
 
 lazy val serializer = OsgiProject(coreDir, "org.openmole.core.serializer", global = true, imports = Seq("*")) settings (
   libraryDependencies += Libraries.xstream,
@@ -88,7 +131,7 @@ lazy val exception = OsgiProject(coreDir, "org.openmole.core.exception", imports
 
 lazy val tools = OsgiProject(coreDir, "org.openmole.core.tools", global = true, imports = Seq("*")) settings
   (libraryDependencies ++= Seq(Libraries.xstream, Libraries.exec, Libraries.math, Libraries.scalaLang, Libraries.scalatest, Libraries.equinoxOSGi)) dependsOn
-  (exception, openmoleTar, openmoleFile, openmoleLock, openmoleThread, openmoleHash, openmoleLogger, openmoleStream, openmoleCollection, openmoleStatistics, openmoleTypes, openmoleCache) settings(coreSettings: _*)
+  (exception, openmoleTar, openmoleFile, openmoleLock, openmoleThread, openmoleHash, openmoleLogger, openmoleStream, openmoleCollection, openmoleStatistics, openmoleTypes, openmoleCache, openmoleRandom) settings(coreSettings: _*)
 
 lazy val event = OsgiProject(coreDir, "org.openmole.core.event", imports = Seq("*")) dependsOn (tools) settings(coreSettings: _*)
 
@@ -630,7 +673,7 @@ lazy val site =
     singleton = true,
     imports = Seq("*"),
     settings = defaultSettings ++ scalatex.SbtPlugin.projectSettings ++ assemblySettings
-  ) settings (
+  )  settings (
       organization := "org.openmole.site",
       OsgiKeys.exportPackage := Seq("scalatex.openmole.*") ++ OsgiKeys.exportPackage.value,
       libraryDependencies += Libraries.scalaLang,

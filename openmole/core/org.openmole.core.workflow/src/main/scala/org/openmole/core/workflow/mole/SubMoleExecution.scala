@@ -17,35 +17,29 @@
 
 package org.openmole.core.workflow.mole
 
-import java.util.concurrent.locks.Lock
+import java.util.concurrent.{ Executors, locks }
 
-import org.openmole.core.event.{ Event, EventDispatcher }
-import org.openmole.core.exception.InternalProcessingError
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.transition._
+import org.openmole.core.context._
+import org.openmole.core.event._
+import org.openmole.core.exception._
+import org.openmole.core.workflow.job.State._
 import org.openmole.core.workflow.job._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.tools._
-import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.job._
-import org.openmole.core.workflow.job.State._
-import MoleJob._
+import org.openmole.core.workflow.transition._
 import org.openmole.tool.lock._
-import org.openmole.tool.logger.Logger
+import org.openmole.tool.logger._
+import org.openmole.tool.random._
 import org.openmole.tool.thread._
 
 import scala.collection.mutable.Buffer
 import scala.concurrent.stm._
-import java.util.concurrent.{ Executors, Semaphore, locks }
-
-import org.openmole.tool.cache.Cache$
 
 object SubMoleExecution extends Logger {
   case class Finished(val ticket: Ticket, canceled: Boolean) extends Event[SubMoleExecution]
 }
 
-import SubMoleExecution.Log._
+import org.openmole.core.workflow.mole.SubMoleExecution.Log._
 
 class SubMoleExecution(
     val parent:        Option[SubMoleExecution],
@@ -206,7 +200,7 @@ class SubMoleExecution(
                 throw new InternalProcessingError(t, s"Error in source execution that is plugged to $capsule")
             }
             a + ctx
-        } + Variable(Task.openMOLESeed, moleExecution.newSeed)
+        } + Variable(Variable.openMOLESeed, moleExecution.newSeed)
 
       capsule match {
         case c: MasterCapsule ⇒

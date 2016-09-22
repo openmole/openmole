@@ -17,9 +17,10 @@
 
 package org.openmole.core.workflow.mole
 
+import org.openmole.core.context.Context
 import org.openmole.core.workflow.builder.InputOutputConfig
-import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools._
+import org.openmole.tool.random.RandomProvider
 
 trait Hook <: InputOutputCheck with Name {
   def config: InputOutputConfig

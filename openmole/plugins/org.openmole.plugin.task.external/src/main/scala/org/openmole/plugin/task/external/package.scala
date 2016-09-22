@@ -17,16 +17,16 @@
 
 package org.openmole.plugin.task
 
-import org.openmole.core.tools.service.OS
 import org.openmole.core.dsl._
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.tools._
+import org.openmole.core.tools.service.OS
 
 package external {
 
   import java.io._
 
-  import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputBuilder$ }
+  import org.openmole.core.context.Prototype
+  import org.openmole.core.expansion.FromContext
+  import org.openmole.core.workflow.builder.InputOutputBuilder
 
   trait ExternalPackage {
 

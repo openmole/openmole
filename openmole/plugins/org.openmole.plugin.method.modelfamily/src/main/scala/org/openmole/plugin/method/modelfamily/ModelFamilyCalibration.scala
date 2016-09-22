@@ -17,11 +17,6 @@
 
 package org.openmole.plugin.method.modelfamily
 
-import fr.iscpif.mgo._
-import org.openmole.core.workflow.data._
-import org.openmole.plugin.method.evolution._
-import ga._
-
 import scala.util.Random
 
 object ModelFamilyCalibration {

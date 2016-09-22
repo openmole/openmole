@@ -16,11 +16,9 @@
  */
 package org.openmole.plugin.method.evolution
 
-import org.openmole.core.workflow.builder._
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.task._
-import monocle.macros.Lenses
+import org.openmole.core.context.{ Context, Variable }
 import org.openmole.core.dsl._
+import org.openmole.core.workflow.task._
 
 object ReassignStateRNGTask {
 
@@ -28,7 +26,7 @@ object ReassignStateRNGTask {
     val t = wfi(algorithm)
 
     ClosureTask("ReassignStateRNGTask") { (context, _, _) ⇒
-      Context(Variable(t.statePrototype, t.operations.randomLens.set(Task.buildRNG(context))(context(t.statePrototype))))
+      Context(Variable(t.statePrototype, t.operations.randomLens.set(Context.buildRNG(context))(context(t.statePrototype))))
     } set (
       (inputs, outputs) += t.statePrototype
     )

@@ -17,11 +17,8 @@
 
 package org.openmole.plugin.domain.range
 
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.domain._
-import org.openmole.core.workflow.tools._
-
-import scala.util.Random
+import org.openmole.core.context.Context
+import org.openmole.tool.random.RandomProvider
 
 trait SizeStep[T] {
 

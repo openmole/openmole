@@ -15,17 +15,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.workflow.tools
+package org.openmole.core.expansion
 
+import org.openmole.core.context._
 import org.openmole.core.exception._
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.dsl._
 import org.openmole.tool.cache._
+import org.openmole.tool.random._
+import org.openmole.tool.file._
 
+import scalaz.Scalaz._
 import scalaz._
-import Scalaz._
 
 object FromContext {
+
+  implicit def functionToFromContext[T](f: Context ⇒ T) = FromContext((c, _) ⇒ f(c))
 
   implicit val applicative: Applicative[FromContext] = new Applicative[FromContext] {
     override def ap[A, B](fa: ⇒ FromContext[A])(f: ⇒ FromContext[(A) ⇒ B]): FromContext[B] =
@@ -35,7 +38,7 @@ object FromContext {
           f.from(context)(rng)(res)
         }
 
-        override def validate(inputs: Seq[Val[_]]): Seq[Throwable] =
+        override def validate(inputs: Seq[Prototype[_]]): Seq[Throwable] =
           fa.validate(inputs) ++ f.validate(inputs)
       }
 
@@ -46,7 +49,7 @@ object FromContext {
     new FromContext[T] {
       val proxy = Cache(ScalaWrappedCompilation.dynamic[T](code))
       override def from(context: ⇒ Context)(implicit rng: RandomProvider): T = proxy()().from(context)
-      override def validate(inputs: Seq[Val[_]]): Seq[Throwable] = proxy().validate(inputs).toSeq
+      override def validate(inputs: Seq[Prototype[_]]): Seq[Throwable] = proxy().validate(inputs).toSeq
     }
 
   implicit def codeToFromContextFloat(code: String) = codeToFromContext[Float](code)
@@ -67,7 +70,7 @@ object FromContext {
   def prototype[T](p: Prototype[T]) =
     new FromContext[T] {
       override def from(context: ⇒ Context)(implicit rng: RandomProvider) = context(p)
-      def validate(inputs: Seq[Val[_]]): Seq[Throwable] = {
+      def validate(inputs: Seq[Prototype[_]]): Seq[Throwable] = {
         if (inputs.exists(_ == p)) Seq.empty else Seq(new UserBadDataError(s"Prototype $p not found"))
       }
     }
@@ -75,13 +78,13 @@ object FromContext {
   def value[T](t: T): FromContext[T] =
     new FromContext[T] {
       def from(context: ⇒ Context)(implicit rng: RandomProvider): T = t
-      def validate(inputs: Seq[Val[_]]): Seq[Throwable] = Seq.empty
+      def validate(inputs: Seq[Prototype[_]]): Seq[Throwable] = Seq.empty
     }
 
   def apply[T](f: (Context, RandomProvider) ⇒ T) =
     new FromContext[T] {
       def from(context: ⇒ Context)(implicit rng: RandomProvider) = f(context, rng)
-      def validate(inputs: Seq[Val[_]]): Seq[Throwable] = Seq.empty
+      def validate(inputs: Seq[Prototype[_]]): Seq[Throwable] = Seq.empty
     }
 
   implicit def booleanToCondition(b: Boolean) = FromContext.value(b)
@@ -93,13 +96,13 @@ object FromContext {
     def &&(d: Condition): Condition =
       new FromContext[Boolean] {
         override def from(context: ⇒ Context)(implicit rng: RandomProvider): Boolean = f.from(context) && d.from(context)
-        override def validate(inputs: Seq[Val[_]]): Seq[Throwable] = f.validate(inputs) ++ d.validate(inputs)
+        override def validate(inputs: Seq[Prototype[_]]): Seq[Throwable] = f.validate(inputs) ++ d.validate(inputs)
       }
 
     def ||(d: Condition): Condition =
       new FromContext[Boolean] {
         override def from(context: ⇒ Context)(implicit rng: RandomProvider): Boolean = f.from(context) || d.from(context)
-        override def validate(inputs: Seq[Val[_]]): Seq[Throwable] = f.validate(inputs) ++ d.validate(inputs)
+        override def validate(inputs: Seq[Prototype[_]]): Seq[Throwable] = f.validate(inputs) ++ d.validate(inputs)
       }
   }
 

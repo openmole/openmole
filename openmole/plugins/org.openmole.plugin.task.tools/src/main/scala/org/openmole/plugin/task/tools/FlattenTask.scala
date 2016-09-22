@@ -17,14 +17,12 @@
 
 package org.openmole.plugin.task.tools
 
-import org.openmole.core.workflow.builder.InputOutputBuilder$
-import org.openmole.core.workflow.data._
+import org.openmole.core.context.{ Prototype, Variable }
+import org.openmole.core.dsl
+import org.openmole.core.dsl._
 import org.openmole.core.workflow.task._
 
 import scala.reflect.ClassTag
-import org.openmole.core.dsl
-import dsl._
-import monocle.macros.Lenses
 
 object FlattenTask {
 

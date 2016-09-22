@@ -17,10 +17,11 @@
 package org.openmole.plugin.method.evolution
 
 import fr.iscpif.mgo
-import fr.iscpif.mgo.algorithm.{ pse, noisypse }
-import org.openmole.core.workflow.data._
+import fr.iscpif.mgo.algorithm.{ noisypse, pse }
+import org.openmole.core.context.{ Context, Prototype }
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.sampling._
+import org.openmole.tool.random.RandomProvider
 
 object PSE {
 

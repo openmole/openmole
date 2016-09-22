@@ -17,18 +17,19 @@
 
 package org.openmole.plugin.hook.file
 
-import org.openmole.core.tools.io.Prettifier
-import org.openmole.tool.stream._
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.tools._
-import org.openmole.core.workflow.validation._
-import Prettifier._
 import monocle.macros.Lenses
+import org.openmole.core.context.{ Context, Prototype }
+import org.openmole.core.expansion.FromContext
+import org.openmole.core.tools.io.Prettifier
+import org.openmole.core.tools.io.Prettifier._
+import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
+import org.openmole.core.workflow.dsl._
+import org.openmole.core.workflow.mole._
+import org.openmole.core.workflow.validation._
+import org.openmole.tool.random.RandomProvider
+import org.openmole.tool.stream._
 
 import scala.annotation.tailrec
-import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.dsl._
-import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
 
 object AppendToCSVFileHook {
 

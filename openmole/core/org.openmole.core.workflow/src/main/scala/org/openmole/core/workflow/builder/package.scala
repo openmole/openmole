@@ -17,15 +17,11 @@
 
 package org.openmole.core.workflow
 
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.puzzle._
-
 package builder {
 
-  import org.openmole.core.workflow.tools.FromContext
+  import org.openmole.core.context._
+  import org.openmole.core.expansion._
+  import org.openmole.core.workflow.tools._
 
   class Inputs {
     def +=[T: InputBuilder](d: Prototype[_]*): T ⇒ T =

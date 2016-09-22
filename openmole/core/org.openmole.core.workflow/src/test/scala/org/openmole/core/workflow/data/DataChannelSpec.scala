@@ -19,6 +19,7 @@ package org.openmole.core.workflow.data
 
 import java.util.concurrent.locks.ReentrantLock
 
+import org.openmole.core.context.Prototype
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
@@ -29,9 +30,9 @@ import org.openmole.core.workflow.transition._
 import org.openmole.core.workflow.puzzle._
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.dsl._
-
 import org.scalatest._
 import org.scalatest.junit._
+
 import scala.collection.mutable.ListBuffer
 
 class DataChannelSpec extends FlatSpec with Matchers {

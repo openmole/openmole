@@ -15,13 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.workflow.data
+package org.openmole.core.workflow.transition
 
+import org.openmole.core.context.{ Context, Variable }
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.transition._
-import org.openmole.core.workflow.tools._
 
 import scala.collection.mutable.ListBuffer
 

@@ -17,26 +17,24 @@
 
 package org.openmole.plugin.environment.batch.storage
 
+import java.io._
 import java.net.{ SocketTimeoutException, URI }
-import java.nio.file._
 import java.util.concurrent.{ Callable, TimeUnit, TimeoutException }
 
 import com.google.common.cache.CacheBuilder
+import fr.iscpif.gridscale.storage._
+import org.openmole.core.communication.storage._
 import org.openmole.core.fileservice.FileDeleter
-import org.openmole.tool.cache._
+import org.openmole.core.serializer._
+import org.openmole.core.workspace.{ ConfigurationLocation, Workspace }
 import org.openmole.plugin.environment.batch.control._
 import org.openmole.plugin.environment.batch.environment._
 import org.openmole.plugin.environment.batch.refresh._
 import org.openmole.plugin.environment.batch.replication.ReplicaCatalog
-import org.openmole.core.serializer._
-import org.openmole.core.workspace.{ ConfigurationLocation, Workspace }
-import fr.iscpif.gridscale.storage._
-import java.io._
-
-import org.openmole.core.communication.storage._
+import org.openmole.tool.cache._
 import org.openmole.tool.logger.Logger
 
-import concurrent.duration._
+import scala.concurrent.duration._
 
 object StorageService extends Logger {
 
@@ -51,8 +49,8 @@ object StorageService extends Logger {
 
 }
 
-import StorageService._
-import StorageService.Log._
+import org.openmole.plugin.environment.batch.storage.StorageService.Log._
+import org.openmole.plugin.environment.batch.storage.StorageService._
 
 trait StorageService extends BatchService with Storage {
 

@@ -18,7 +18,7 @@
 package org.openmole.core.workflow.sampling
 
 import monocle.macros.Lenses
-import org.openmole.core.workflow.data._
+import org.openmole.core.context._
 
 import scala.language.higherKinds
 

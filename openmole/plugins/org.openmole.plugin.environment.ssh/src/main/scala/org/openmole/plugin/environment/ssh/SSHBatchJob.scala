@@ -17,18 +17,17 @@
 
 package org.openmole.plugin.environment.ssh
 
-import java.util.concurrent.atomic.AtomicInteger
-import org.openmole.plugin.environment.batch.environment._
-import org.openmole.plugin.environment.batch.jobservice.BatchJob
+import fr.iscpif.gridscale.ssh.SSHJobDescription
 import org.openmole.core.workflow.execution.ExecutionState._
 import org.openmole.plugin.environment.batch.control._
-import fr.iscpif.gridscale.ssh.SSHJobDescription
+import org.openmole.plugin.environment.batch.jobservice.BatchJob
 import org.openmole.tool.logger.Logger
-import util.{ Failure, Success, Try }
+
+import scala.util.{ Failure, Success, Try }
 
 object SSHBatchJob extends Logger
 
-import SSHBatchJob.Log._
+import org.openmole.plugin.environment.ssh.SSHBatchJob.Log._
 
 trait SSHBatchJob extends BatchJob {
 

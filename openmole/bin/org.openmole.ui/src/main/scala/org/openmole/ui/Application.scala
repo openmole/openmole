@@ -36,6 +36,7 @@ import org.openmole.gui.server.core._
 import org.openmole.console._
 import org.openmole.tool.file._
 import org.openmole.tool.hash._
+import org.openmole.core.module
 
 object Application extends Logger {
 
@@ -157,8 +158,7 @@ object Application extends Logger {
       if (!notExistingUserPlugins.isEmpty) logger.warning(s"""Some plugins or plugin folders don't exist: ${notExistingUserPlugins.mkString(",")}""")
 
       val userPlugins =
-        existingUserPlugins.flatMap { p ⇒ PluginManager.listBundles(new File(p)) } ++
-          Workspace.pluginDir.listFilesSafe.flatMap(PluginManager.listBundles)
+        existingUserPlugins.flatMap { p ⇒ PluginManager.listBundles(new File(p)) } ++ module.allModules
 
       logger.fine(s"Loading user plugins " + userPlugins)
 

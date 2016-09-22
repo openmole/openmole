@@ -17,17 +17,16 @@
 
 package org.openmole.core.workflow.transition
 
+import org.openmole.core.context.{ Context, Prototype, PrototypeType, Variable }
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
-import org.openmole.core.workflow.data._
+import org.openmole.core.expansion.Condition
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.tools._
-import Condition._
-import org.openmole.tool.lock._
-import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.validation.ValidateTransition
+import org.openmole.tool.lock._
+import org.openmole.tool.random.RandomProvider
 
 import scala.collection.mutable.{ HashSet, ListBuffer }
-import scala.util.Random
 
 object AggregationTransition {
   def aggregateOutputs(moleExecution: MoleExecution, transition: IAggregationTransition, results: Iterable[(Long, Variable[_])]) = {

@@ -17,12 +17,10 @@
 
 package org.openmole.plugin.sampling.combine
 
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.data._
+import org.openmole.core.context.{ Context, Prototype, PrototypeSet, Variable }
+import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.sampling._
-import org.openmole.core.workflow.tools.FromContext
-
-import scala.util.Random
+import org.openmole.tool.random.RandomProvider
 
 object CompleteSampling {
   def apply(samplings: Sampling*) = new CompleteSampling(samplings: _*)

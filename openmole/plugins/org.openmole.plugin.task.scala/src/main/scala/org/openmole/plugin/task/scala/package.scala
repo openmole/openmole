@@ -17,8 +17,6 @@
 
 package org.openmole.plugin.task
 
-import org.openmole.core.workflow.builder._
-
 package scala {
   trait ScalaPackage <: jvm.JVMPackage
 }

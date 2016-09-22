@@ -18,23 +18,22 @@
 
 package org.openmole.plugin.environment.ssh
 
-import org.openmole.plugin.environment.batch.control.UsageControl
-import org.openmole.plugin.environment.batch.environment._
-import org.openmole.plugin.environment.batch.jobservice.BatchJob
+import java.util.concurrent.atomic.AtomicInteger
+
+import fr.iscpif.gridscale.ssh.{ SSHConnectionCache, SSHJobDescription, SSHJobService ⇒ GSSSHJobService }
 import org.openmole.core.event._
 import org.openmole.core.workflow.execution.ExecutionState
 import org.openmole.core.workspace.Workspace
+import org.openmole.plugin.environment.batch.environment._
+import org.openmole.plugin.environment.batch.jobservice.BatchJob
 import org.openmole.plugin.environment.gridscale._
-import fr.iscpif.gridscale.ssh.{ SSHConnectionCache, SSHJobDescription, SSHJobService ⇒ GSSSHJobService }
-import java.util.concurrent.atomic.AtomicInteger
-
 import org.openmole.tool.logger.Logger
 
 import scala.collection.mutable
 
 object SSHJobService extends Logger
 
-import SSHJobService._
+import org.openmole.plugin.environment.ssh.SSHJobService._
 
 trait SSHJobService extends GridScaleJobService with SharedStorage { js ⇒
 

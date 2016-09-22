@@ -17,16 +17,12 @@
 
 package org.openmole.core.workflow.transition
 
+import org.openmole.core.context.{ Context, Prototype }
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.workflow.tools._
-import org.openmole.core.workflow.data._
+import org.openmole.core.expansion.Condition
 import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.tools._
-import org.openmole.core.workflow.transition._
-import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.validation.ValidateTransition
-
-import scala.util.Random
+import org.openmole.tool.random.RandomProvider
 
 class SlaveTransition(start: Capsule, end: Slot, condition: Condition = Condition.True, filter: BlockList = BlockList.empty) extends ExplorationTransition(start, end, condition, filter) with ISlaveTransition with ValidateTransition {
 

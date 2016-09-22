@@ -16,10 +16,9 @@
  */
 package org.openmole.plugin.domain.modifier
 
-import org.openmole.core.workflow.data._
+import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.domain._
-import org.openmole.core.tools.service.Random._
-import org.openmole.core.workflow.tools.FromContext
+import org.openmole.tool.random._
 
 object ShuffleDomain {
 

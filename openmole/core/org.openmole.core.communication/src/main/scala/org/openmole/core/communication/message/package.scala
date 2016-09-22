@@ -18,15 +18,16 @@ package org.openmole.core.communication
 
 import java.io.File
 
+import org.openmole.core.context.Context
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.fileservice.FileDeleter
 import org.openmole.core.tools.service._
-import org.openmole.core.workflow.data.Context
-import org.openmole.core.workflow.execution.Environment.{ RuntimeLog }
+import org.openmole.core.workflow.execution.Environment.RuntimeLog
 import org.openmole.core.workflow.job.MoleJob._
 import org.openmole.core.workflow.job._
 import org.openmole.core.workflow.task.Task
 import org.openmole.core.workspace.Workspace
+
 import util.Try
 import org.openmole.tool.file._
 import org.openmole.tool.hash._

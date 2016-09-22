@@ -17,16 +17,14 @@
 
 package org.openmole.core.workflow
 
-import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.tools._
-import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.puzzle._
-import scalaz._
-import Scalaz._
+import org.openmole.core.workflow.task._
 
 package transition {
+
+  import org.openmole.core.context.Prototype
+  import org.openmole.core.expansion.{ Condition, FromContext }
 
   case class TransitionParameter(
       puzzleParameter:    Puzzle,

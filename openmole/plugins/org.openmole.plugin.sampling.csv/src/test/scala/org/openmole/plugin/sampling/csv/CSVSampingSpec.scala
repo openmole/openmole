@@ -17,14 +17,12 @@
 
 package org.openmole.plugin.sampling.csv
 
+import java.io.{File, FileReader}
+
 import au.com.bytecode.opencsv.CSVReader
-import java.io.File
-import java.io.FileReader
+import org.openmole.core.context.{Context, Prototype}
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.tools.io.FileUtil
-import org.openmole.core.workflow.data._
 import org.scalatest._
-import FileUtil._
 
 import scala.util.Random
 

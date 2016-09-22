@@ -17,9 +17,11 @@
 
 package org.openmole.core.workflow.data
 
+import org.openmole.core.context.Prototype
 import org.openmole.core.workflow.data._
 import org.scalatest._
 import org.scalatest.junit._
+
 import scala.collection.mutable.ListBuffer
 import org.openmole.core.workflow.dsl._
 

@@ -17,23 +17,19 @@
 
 package org.openmole.plugin.environment.egi
 
-import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
-import org.openmole.tool.file._
-import org.openmole.core.tools.service.Random
-import java.io.File
 import java.net.URI
-import fr.iscpif.gridscale.egi.{ BDII }
 
-import org.openmole.plugin.environment.batch.environment._
-import org.openmole.plugin.environment.batch.control._
-import org.openmole.core.workspace._
+import fr.iscpif.gridscale.egi.BDII
+import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.workflow.dsl._
+import org.openmole.core.workspace._
+import org.openmole.plugin.environment.batch.control._
+import org.openmole.plugin.environment.batch.environment._
 import org.openmole.tool.logger.Logger
+import org.openmole.tool.random._
 
-import annotation.tailrec
-import Random._
-
-import concurrent.duration._
+import scala.annotation.tailrec
+import scala.concurrent.duration._
 
 object EGIEnvironment extends Logger {
 

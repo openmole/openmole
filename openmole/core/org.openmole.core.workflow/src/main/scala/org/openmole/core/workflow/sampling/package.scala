@@ -17,15 +17,14 @@
 
 package org.openmole.core.workflow
 
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.domain._
-import org.openmole.core.workflow.tools._
-import scalaz._
-import Scalaz._
-
 package sampling {
 
-  import org.openmole.core.tools.io.FromString
+  import org.openmole.core.context._
+  import org.openmole.core.expansion._
+  import org.openmole.core.tools.io._
+  import org.openmole.core.workflow.domain._
+  import scalaz._
+  import Scalaz._
 
   trait SamplingPackage {
 

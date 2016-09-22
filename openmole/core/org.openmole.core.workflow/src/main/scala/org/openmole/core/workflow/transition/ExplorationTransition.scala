@@ -17,18 +17,18 @@
 
 package org.openmole.core.workflow.transition
 
+import org.openmole.core.context.{ Context, Prototype, Variable }
 import org.openmole.core.event._
 import org.openmole.core.exception._
-import org.openmole.core.workflow.data._
+import org.openmole.core.expansion.Condition
+import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.tools.Condition
-import org.openmole.tool.lock._
-import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.validation.ValidateTransition
+import org.openmole.tool.lock._
+import org.openmole.tool.random.RandomProvider
 
 import scala.collection.mutable.{ HashSet, ListBuffer }
-import scala.util.Random
 
 class ExplorationTransition(val start: Capsule, val end: Slot, val condition: Condition = Condition.True, val filter: BlockList = BlockList.empty) extends IExplorationTransition with ValidateTransition {
 

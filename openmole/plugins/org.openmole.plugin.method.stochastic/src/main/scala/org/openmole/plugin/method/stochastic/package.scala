@@ -17,15 +17,14 @@
 
 package org.openmole.plugin.method
 
+import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.puzzle._
-import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
-import org.openmole.core.workflow.dsl._
+import org.openmole.core.workflow.validation.DataflowProblem.MissingInput
 import org.openmole.core.workflow.validation.{ DataflowProblem, Validation }
-import DataflowProblem.MissingInput
 import org.openmole.plugin.tool.pattern._
 
 package object stochastic {

@@ -19,30 +19,28 @@ package org.openmole.plugin.environment.batch.refresh
 
 import java.io.File
 import java.util.UUID
+
 import org.openmole.core.communication.message._
 import org.openmole.core.communication.storage._
-import org.openmole.plugin.environment.batch.replication._
-import org.openmole.plugin.environment.batch.storage._
-import org.openmole.plugin.environment.batch.control._
-import org.openmole.plugin.environment.batch.environment._
-import org.openmole.plugin.environment.batch.environment.BatchEnvironment.{ signalUpload }
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.fileservice.FileService
-import org.openmole.tool.file._
-import org.openmole.tool.hash._
-import org.openmole.core.workflow.job._
-import org.openmole.core.tools.service.Random._
-import org.openmole.tool.file.uniqName
-
 import org.openmole.core.serializer._
+import org.openmole.core.workflow.job._
 import org.openmole.core.workspace.Workspace
+import org.openmole.plugin.environment.batch.control._
+import org.openmole.plugin.environment.batch.environment.BatchEnvironment.signalUpload
+import org.openmole.plugin.environment.batch.environment._
+import org.openmole.plugin.environment.batch.replication._
+import org.openmole.plugin.environment.batch.storage._
+import org.openmole.tool.file.{ uniqName, _ }
 import org.openmole.tool.logger.Logger
-import org.openmole.tool.tar.TarOutputStream
+import org.openmole.tool.random._
+
 import scala.collection.immutable.TreeSet
 
 object UploadActor extends Logger
 
-import UploadActor._
+import org.openmole.plugin.environment.batch.refresh.UploadActor._
 
 class UploadActor(jobManager: JobManager) {
 

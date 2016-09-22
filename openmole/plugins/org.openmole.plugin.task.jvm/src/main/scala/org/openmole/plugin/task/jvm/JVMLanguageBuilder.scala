@@ -20,7 +20,6 @@ package org.openmole.plugin.task.jvm
 import java.io.File
 
 import monocle.Lens
-import org.openmole.plugin.task.external._
 
 trait JVMLanguageBuilder[T] { builder ⇒
   def libraries: Lens[T, Vector[File]]

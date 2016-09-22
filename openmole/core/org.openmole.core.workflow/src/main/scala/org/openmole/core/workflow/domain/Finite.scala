@@ -17,7 +17,7 @@
 
 package org.openmole.core.workflow.domain
 
-import org.openmole.core.workflow.tools.FromContext
+import org.openmole.core.expansion._
 import scala.annotation.implicitNotFound
 import scalaz.Scalaz._
 import scala.language.higherKinds

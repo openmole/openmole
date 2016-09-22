@@ -17,11 +17,12 @@
 
 package org.openmole.core.dsl
 
+import org.openmole.core.context
 import org.openmole.core.workflow._
 
 trait Classes {
 
-  lazy val Prototype = org.openmole.core.workflow.data.Prototype
+  lazy val Prototype = context.Prototype
 
   lazy val LocalEnvironment = org.openmole.core.workflow.execution.LocalEnvironment
 

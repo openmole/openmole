@@ -17,14 +17,11 @@
 
 package org.openmole.plugin.environment.batch.refresh
 
-import org.openmole.plugin.environment.batch.control.UsageControl
-import org.openmole.plugin.environment.batch.environment.{ BatchExecutionJob, BatchEnvironment, SerializedJob }
 import org.openmole.core.workflow.execution.ExecutionState._
+import org.openmole.plugin.environment.batch.environment.BatchEnvironment
 import org.openmole.tool.logger.Logger
 
 object SubmitActor extends Logger
-
-import SubmitActor._
 
 class SubmitActor(jobManager: JobManager) {
 

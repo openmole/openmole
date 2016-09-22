@@ -19,6 +19,7 @@ package org.openmole.core.workflow.transition
 
 import java.util.concurrent.atomic.AtomicInteger
 
+import org.openmole.core.context.Prototype
 import org.openmole.core.exception._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.execution._
@@ -32,8 +33,8 @@ import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.puzzle._
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.dsl._
-
 import org.scalatest._
+
 import scala.collection.mutable.ListBuffer
 import scala.reflect.macros.whitebox
 import scala.util.Try

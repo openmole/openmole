@@ -17,11 +17,8 @@
 
 package org.openmole.plugin.domain.collection
 
-import org.openmole.core.workflow.data._
+import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.domain._
-import org.openmole.core.workflow.tools.FromContext
-
-import scala.util.Random
 
 object ListDomain {
   implicit def isFinite[T] = new Finite[ListDomain[T], T] {

@@ -17,13 +17,8 @@
 
 package org.openmole.plugin.task.care
 
-import java.io.File
-
-import org.openmole.plugin.task.external.ExternalBuilder
-import org.openmole.plugin.task.systemexec._
-import org.openmole.plugin.task.systemexec
-import org.openmole.core.workflow.data._
 import monocle.Lens
+import org.openmole.plugin.task.systemexec._
 
 trait CARETaskBuilder[T] extends ReturnValue[T]
     with ErrorOnReturnValue[T]

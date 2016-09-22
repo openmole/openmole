@@ -18,18 +18,19 @@
 package org.openmole.plugin.environment.ssh
 
 import java.util.UUID
-import org.openmole.plugin.environment.batch.environment._
+
 import org.openmole.core.exception.InternalProcessingError
-import org.openmole.tool.file._
 import org.openmole.core.workspace.Workspace
+import org.openmole.plugin.environment.batch.environment._
 import org.openmole.plugin.environment.batch.storage._
+import org.openmole.tool.file._
 import org.openmole.tool.logger.Logger
 
 import scala.util.Try
 
 object SharedStorage extends Logger
 
-import SharedStorage._
+import org.openmole.plugin.environment.ssh.SharedStorage._
 import Log._
 import org.openmole.core.communication.storage._
 

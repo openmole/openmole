@@ -17,9 +17,9 @@
 
 package org.openmole.plugin.task
 
-import org.openmole.core.workflow.data._
-
 package tools {
+
+  import org.openmole.core.context.Prototype
 
   trait ToolsPackage {
     lazy val assignments = new {

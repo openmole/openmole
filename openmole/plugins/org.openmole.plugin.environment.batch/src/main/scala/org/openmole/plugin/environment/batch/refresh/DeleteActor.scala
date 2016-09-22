@@ -18,12 +18,11 @@
 package org.openmole.plugin.environment.batch.refresh
 
 import org.openmole.plugin.environment.batch.environment.BatchEnvironment
-import org.openmole.core.workspace.Workspace
 import org.openmole.tool.logger.Logger
 
 object DeleteActor extends Logger
 
-import DeleteActor.Log._
+import org.openmole.plugin.environment.batch.refresh.DeleteActor.Log._
 
 class DeleteActor(jobManager: JobManager) {
   def receive(msg: DeleteFile) = {

@@ -20,15 +20,14 @@ package org.openmole.plugin.hook.file
 import java.io.File
 
 import monocle.macros.Lenses
+import org.openmole.core.context.Context
+import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
-import org.openmole.tool.stream._
-import org.openmole.core.workflow.tools._
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.tools._
-import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.mole.MoleExecutionContext
+import org.openmole.core.dsl._
+import org.openmole.core.workflow.mole.{ MoleExecutionContext, _ }
 import org.openmole.core.workflow.validation.ValidateHook
-import org.openmole.core.workflow.dsl._
+import org.openmole.tool.random.RandomProvider
+import org.openmole.tool.stream._
 
 object AppendToFileHook {
 

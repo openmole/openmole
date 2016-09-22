@@ -27,9 +27,9 @@ import org.openmole.core.workflow.transition._
 import org.openmole.core.workflow.puzzle._
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.dsl._
-
 import org.scalatest._
 import TopologyProblem.DataChannelNegativeLevelProblem
+import org.openmole.core.context.Prototype
 
 class ValidationSpec extends FlatSpec with Matchers {
 

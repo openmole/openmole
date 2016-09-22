@@ -17,8 +17,8 @@
  */
 package org.openmole.core.workflow.validation
 
+import org.openmole.core.context.Prototype
 import org.openmole.core.tools.io.Prettifier
-import org.openmole.core.workflow.data.Prototype
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.task._
 

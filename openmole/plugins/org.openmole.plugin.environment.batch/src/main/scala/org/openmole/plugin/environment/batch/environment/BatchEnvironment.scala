@@ -19,35 +19,29 @@ package org.openmole.plugin.environment.batch.environment
 
 import java.io.File
 import java.util.UUID
-
-import org.openmole.core.event.{ Event, EventDispatcher }
 import java.util.concurrent.atomic.AtomicLong
 
-import org.openmole.plugin.environment.batch.control._
-import org.openmole.plugin.environment.batch.storage._
-import org.openmole.plugin.environment.batch.jobservice._
-import org.openmole.plugin.environment.batch.refresh._
-import org.openmole.plugin.environment.batch.replication._
-import org.openmole.core.exception.InternalProcessingError
-import org.openmole.core.fileservice.{ FileCache, FileService }
-import org.openmole.core.pluginmanager.PluginManager
-import org.openmole.core.serializer.SerialiserService
-import org.openmole.tool.file._
-import org.openmole.tool.logger.Logger
-import org.openmole.tool.thread._
-import org.openmole.core.updater.Updater
-import org.openmole.core.workflow.job._
-import org.openmole.core.workspace.{ ConfigurationLocation, Workspace }
-import org.openmole.core.workflow.execution._
 import org.openmole.core.communication.message._
 import org.openmole.core.console.ScalaREPL.ReferencedClasses
 import org.openmole.core.console.{ REPLClassloader, ScalaREPL }
+import org.openmole.core.event.{ Event, EventDispatcher }
+import org.openmole.core.fileservice.{ FileCache, FileService }
+import org.openmole.core.pluginmanager.PluginManager
+import org.openmole.core.serializer.SerialiserService
+import org.openmole.core.updater.Updater
+import org.openmole.core.workflow.execution._
+import org.openmole.core.workflow.job._
+import org.openmole.core.workspace.{ ConfigurationLocation, Workspace }
+import org.openmole.plugin.environment.batch.control._
+import org.openmole.plugin.environment.batch.jobservice._
+import org.openmole.plugin.environment.batch.refresh._
+import org.openmole.plugin.environment.batch.storage._
 import org.openmole.tool.cache._
+import org.openmole.tool.file._
+import org.openmole.tool.logger.Logger
 
-import ref.WeakReference
-import scala.Predef.Set
-import scala.collection.mutable.{ HashMap, MultiMap, Set }
-import concurrent.duration._
+import scala.concurrent.duration._
+import scala.ref.WeakReference
 
 object BatchEnvironment extends Logger {
 
@@ -141,7 +135,7 @@ object BatchEnvironment extends Logger {
   lazy val jobManager = new JobManager
 }
 
-import BatchEnvironment._
+import org.openmole.plugin.environment.batch.environment.BatchEnvironment._
 
 object BatchExecutionJob {
   val replBundleCache = new AssociativeCache[ReferencedClasses, FileCache]()

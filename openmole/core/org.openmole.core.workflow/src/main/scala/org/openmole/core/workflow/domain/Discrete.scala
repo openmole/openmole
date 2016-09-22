@@ -17,7 +17,7 @@
 
 package org.openmole.core.workflow.domain
 
-import org.openmole.core.workflow.tools._
+import org.openmole.core.expansion._
 import scala.annotation.implicitNotFound
 
 @implicitNotFound("${D} is not a discrete variation domain of type ${T}")

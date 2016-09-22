@@ -19,17 +19,18 @@ package org.openmole.plugin.environment.batch.storage
 
 import java.io.File
 
-import org.openmole.plugin.environment.batch.replication._
 import org.openmole.core.replication.replicas
 import org.openmole.core.updater.IUpdatable
 import org.openmole.core.workspace.Workspace
+import org.openmole.plugin.environment.batch.replication._
 import org.openmole.tool.logger.Logger
-import scala.ref.WeakReference
 import slick.driver.H2Driver.api._
+
+import scala.ref.WeakReference
 
 object StoragesGC extends Logger
 
-import StoragesGC.Log._
+import org.openmole.plugin.environment.batch.storage.StoragesGC.Log._
 
 class StoragesGC(storagesRef: WeakReference[Iterable[StorageService]]) extends IUpdatable {
 

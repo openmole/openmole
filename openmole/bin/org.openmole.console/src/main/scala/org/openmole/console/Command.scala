@@ -139,7 +139,7 @@ class Command(val console: ScalaREPL, val variables: ConsoleVariables) { command
       module.install(toInstall) match {
         case Seq() ⇒ println("The module(s) has/have been successfully installed, please restart the console to enable it/them.")
         case e ⇒
-          println("There was some errors durring the installation: " + e)
+          println("There was some errors during the installation: " + e)
           println("Please restart the console to enable the installed module(s).")
       }
   }

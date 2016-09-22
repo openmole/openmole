@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.task
 
-import org.openmole.core.workflow.data.Prototype
+import org.openmole.core.context.Prototype
 import org.openmole.core.workflow.dsl._
 
 package netlogo {

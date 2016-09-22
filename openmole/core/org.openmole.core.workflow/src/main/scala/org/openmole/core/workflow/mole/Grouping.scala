@@ -17,7 +17,7 @@
 
 package org.openmole.core.workflow.mole
 
-import org.openmole.core.workflow.data.Context
+import org.openmole.core.context.Context
 import org.openmole.core.workflow.job.MoleJob
 
 trait Grouping {

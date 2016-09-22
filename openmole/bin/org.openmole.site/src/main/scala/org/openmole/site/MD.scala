@@ -25,7 +25,7 @@ import org.apache.commons.lang3.StringEscapeUtils
 import org.openmole.site.market.GeneratedMarketEntry
 
 import scala.collection.JavaConversions._
-import scala.xml._
+import scala.xml
 import scalaz._
 
 object MD {
@@ -49,22 +49,22 @@ object MD {
   }
 
   def prefixLink(prefix: String)(n: Seq[scala.xml.Node]) = {
-    import scala.xml.transform._
+    //import scala.xml.transform._
 
-    val HTMLTransformer = new RuleTransformer(new RewriteRule {
-      override def transform(node: scala.xml.Node) =
+    val HTMLTransformer = new xml.transform.RuleTransformer(new xml.transform.RewriteRule {
+      override def transform(node: xml.Node) =
         node match {
           case image @ <img/> ⇒
             val newSrc = prefix + image \ "@src"
             val alt = image \ "@alt"
-            <img src={ newSrc } style="max-width:100%;" alt={ alt }/>
+            xml.XML.loadString(s"""<img src="$newSrc" style="max-width:100%;" alt="$alt"/>""")
           case link @ <a>{ stuff }</a> ⇒
             val uri = new java.net.URI(link \ "@href" text)
             if (!uri.isAbsolute) {
               val newTarget = prefix + link \ "@href"
-              <a href={ newTarget }>
-                { stuff }
-              </a>
+              xml.XML.loadString(s"""<a href="$newTarget">
+                |$stuff
+                |</a>""".stripMargin)
             }
             else link
           case passthrough ⇒ passthrough
@@ -76,7 +76,7 @@ object MD {
 
   def relativiseLinks(md: String, prefix: String) = {
     def escaped = s"<div>${StringEscapeUtils.unescapeHtml4(md)}</div>"
-    prefixLink(prefix)(XML.loadString(escaped)).mkString
+    prefixLink(prefix)(xml.XML.loadString(escaped)).mkString
   }
 
   def generatePage(entry: GeneratedMarketEntry)(implicit parent: Parent[DocumentationPage]) =

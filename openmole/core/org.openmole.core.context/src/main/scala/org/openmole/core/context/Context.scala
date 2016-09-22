@@ -15,19 +15,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.workflow.data
+package org.openmole.core.context
 
-import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.workspace.Workspace
+import org.openmole.core.exception._
+import org.openmole.core.workspace._
+import org.openmole.tool.random
 
-import scala.collection.immutable.MapLike
+import scala.collection._
 import scala.collection.immutable.TreeMap
-import org.openmole.core.workflow.dsl._
 
 object Context {
 
   implicit def variableToContextConverter(variable: Variable[_]) = Context(variable)
-  implicit def variablesToContextConverter(variables: Traversable[Variable[_]]): Context = variables.toContext
+  implicit def variablesToContextConverter(variables: Traversable[Variable[_]]): Context = Context(variables)
 
   def fromMap(v: Traversable[(String, Variable[_])]) = new Context {
     val variables = TreeMap.empty[String, Variable[_]] ++ v
@@ -37,6 +37,8 @@ object Context {
   def apply(v: Traversable[Variable[_]]): Context = Context.fromMap(v.map { v ⇒ v.prototype.name → v })
 
   val empty = apply(Iterable.empty)
+
+  def buildRNG(context: Context): scala.util.Random = random.Random(context(Variable.openMOLESeed)).toScala
 
 }
 

@@ -17,6 +17,7 @@
 
 package org.openmole.core.workflow.task
 
+import org.openmole.core.context.Prototype
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.workflow.data._
 import org.scalatest._

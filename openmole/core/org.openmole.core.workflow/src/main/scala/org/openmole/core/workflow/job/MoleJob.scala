@@ -19,10 +19,9 @@ package org.openmole.core.workflow.job
 
 import java.util.UUID
 
-import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.job.State._
-import org.openmole.core.workflow.task.{ TaskExecutionContext, Task }
-import org.openmole.core.workflow.data.{ Prototype, Variable, Context }
+import org.openmole.core.workflow.task._
+import org.openmole.core.context._
 
 object MoleJob {
   implicit val moleJobOrdering = Ordering.by((_: MoleJob).id)

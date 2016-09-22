@@ -19,6 +19,8 @@ package org.openmole.core.tools
 
 import java.time.{ Duration ⇒ JDuration }
 
+import org.openmole.tool.random.Random
+
 import concurrent.duration._
 import scala.concurrent.duration.Duration
 

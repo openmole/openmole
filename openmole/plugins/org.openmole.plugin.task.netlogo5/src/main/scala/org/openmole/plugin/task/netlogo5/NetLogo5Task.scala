@@ -17,20 +17,15 @@
 
 package org.openmole.plugin.task.netlogo5
 
-import org.openmole.core.tools.service.OS
-import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.data._
-import org.openmole.plugin.task.netlogo._
-import org.openmole.plugin.task.external._
-import NetLogoTask.Workspace
-import org.openmole.core.workflow.task._
 import java.io.File
 
-import org.openmole.core.workflow.dsl._
 import monocle.macros.Lenses
+import org.openmole.core.context.Prototype
 import org.openmole.core.workflow.builder._
-
-import collection.JavaConversions._
+import org.openmole.core.workflow.dsl._
+import org.openmole.plugin.task.external._
+import org.openmole.plugin.task.netlogo.NetLogoTask.Workspace
+import org.openmole.plugin.task.netlogo._
 import org.openmole.plugin.tool.netlogo5.NetLogo5
 
 object NetLogo5Task {

@@ -17,12 +17,14 @@
 
 package org.openmole.plugin.task.jvm
 
+import java.io.File
+
+import org.openmole.core.context.{ Context, Prototype, Variable }
 import org.openmole.core.serializer.plugin.Plugins
-import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.task.{ Task, TaskExecutionContext }
-import org.openmole.plugin.task.external.{ External }
-import java.io.File
+import org.openmole.plugin.task.external.External
+import org.openmole.tool.random.RandomProvider
 
 object JVMLanguageTask {
   lazy val workDirectory = Prototype[File]("workDirectory")

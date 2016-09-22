@@ -32,7 +32,8 @@ import org.openmole.core.tools.io.FromString
 import org.openmole.tool.crypto.Certificate
 import org.openmole.tool.file._
 import org.openmole.core.tools.service._
-import Random._
+import org.openmole.tool.random.Random
+import org.openmole.tool.random.Random._
 
 object Workspace {
 
@@ -45,7 +46,6 @@ object Workspace {
   def tmpLocation = ".tmp"
   def persistentLocation = "persistent"
   def authenticationsLocation = "authentications"
-  def pluginLocation = "plugins"
 
   lazy val uniqueIDLocation = ConfigurationLocation[String](globalGroup, "UniqueID", None)
 
@@ -115,9 +115,6 @@ class Workspace(val location: File) {
 
   val tmpDir = new File(Workspace.allTmpDir(location), sessionUUID.toString)
   tmpDir.mkdirs
-
-  val pluginDir = new File(location, pluginLocation)
-  pluginDir.mkdirs
 
   val persistentDir = new File(location, persistentLocation)
   persistentDir.mkdirs

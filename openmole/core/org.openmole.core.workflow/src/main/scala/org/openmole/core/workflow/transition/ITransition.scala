@@ -17,14 +17,12 @@
 
 package org.openmole.core.workflow.transition
 
+import org.openmole.core.context._
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools.ContextAggregator._
-import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.validation.TypeUtil._
-
-import scala.util.Random
+import org.openmole.tool.random.RandomProvider
 
 trait ITransition {
 

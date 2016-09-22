@@ -17,12 +17,12 @@
 
 package org.openmole.plugin.environment.batch.refresh
 
+import org.openmole.core.workflow.job._
 import org.openmole.plugin.environment.batch.environment._
 import org.openmole.plugin.environment.batch.jobservice._
-import org.openmole.core.workflow.job._
 import org.openmole.plugin.environment.batch.storage._
 
-import scala.concurrent.duration.{ FiniteDuration, Duration }
+import scala.concurrent.duration.{ Duration, FiniteDuration }
 
 sealed trait JobMessage
 sealed trait DispatchedMessage

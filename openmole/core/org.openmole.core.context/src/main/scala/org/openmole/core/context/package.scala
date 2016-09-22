@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2015 Romain Reuillon
+/**
+ * Created by Romain Reuillon on 22/09/16.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -13,23 +13,12 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
  */
-package org.openmole.core.workflow.data
+package org.openmole.core
 
-import org.openmole.core.exception.InternalProcessingError
+import org.openmole.tool.random
 
-import scala.util.Random
+package object context {
 
-object RandomProvider {
-
-  def apply(_rng: ⇒ Random) = new RandomProvider {
-    override lazy val rng: Random = _rng
-  }
-
-  def empty = RandomProvider(throw new InternalProcessingError("No random number generator is available"))
-}
-
-trait RandomProvider <: (() ⇒ Random) {
-  def rng: Random
-  def apply() = rng
 }

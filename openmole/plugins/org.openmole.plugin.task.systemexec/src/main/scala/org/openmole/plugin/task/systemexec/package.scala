@@ -19,18 +19,18 @@ package org.openmole.plugin.task
 
 import java.io.{ File, IOException, PrintStream }
 
+import monocle.Lens
 import org.apache.commons.exec.CommandLine
-import org.openmole.core.exception.InternalProcessingError
+import org.openmole.core.context._
+import org.openmole.core.exception._
+import org.openmole.core.expansion.FromContext
 import org.openmole.core.tools.service.OS
 import org.openmole.core.tools.service.ProcessUtil._
-import org.openmole.core.workflow.data.{ Context, Prototype, RandomProvider, Variable }
-import org.openmole.core.workflow.tools.{ FromContext, ExpandedString }
-import org.openmole.tool.stream.StringOutputStream
 import org.openmole.core.workflow.dsl._
-
-import language.implicitConversions
-import monocle.Lens
-import org.openmole.plugin.task.external.External
+import org.openmole.plugin.task.external._
+import org.openmole.tool.random._
+import org.openmole.tool.stream._
+import org.openmole.core.expansion._
 
 package systemexec {
 
@@ -65,6 +65,7 @@ package systemexec {
     implicit def seqOfStringToCommands(s: Seq[String]): OSCommands = OSCommands(OS(), s.map(s ⇒ Command(s)): _*)
   }
 
+  import org.openmole.core.context.Prototype
   import org.openmole.core.workflow.builder.InputOutputBuilder
   import org.openmole.plugin.task.external.ExternalPackage
 

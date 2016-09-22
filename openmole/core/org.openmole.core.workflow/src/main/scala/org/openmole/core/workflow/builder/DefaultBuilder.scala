@@ -16,7 +16,7 @@
  */
 package org.openmole.core.workflow.builder
 
-import org.openmole.core.workflow.data.{ Default, Prototype, DefaultSet }
+import org.openmole.core.workflow.tools._
 
 trait DefaultBuilder[T] {
   def defaults: monocle.Lens[T, DefaultSet]

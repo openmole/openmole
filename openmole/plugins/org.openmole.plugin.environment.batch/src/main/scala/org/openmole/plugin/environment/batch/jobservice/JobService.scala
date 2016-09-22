@@ -18,14 +18,14 @@
 
 package org.openmole.plugin.environment.batch.jobservice
 
+import org.openmole.core.workflow.execution.ExecutionState._
 import org.openmole.plugin.environment.batch.control._
 import org.openmole.plugin.environment.batch.environment._
-import org.openmole.core.workflow.execution.ExecutionState._
 import org.openmole.tool.logger.Logger
 
 object JobService extends Logger
 
-import JobService._
+import org.openmole.plugin.environment.batch.jobservice.JobService._
 
 trait JobService extends BatchService { js ⇒
 

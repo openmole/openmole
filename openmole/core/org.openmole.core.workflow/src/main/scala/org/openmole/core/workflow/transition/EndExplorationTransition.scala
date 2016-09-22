@@ -17,16 +17,15 @@
 
 package org.openmole.core.workflow.transition
 
+import org.openmole.core.context.{ Context, Prototype }
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
-import org.openmole.core.workflow.data._
+import org.openmole.core.expansion.Condition
 import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.tools.Condition
-import Condition._
-
-import scala.util.{ Failure, Random, Success, Try }
-import org.openmole.tool.lock._
-import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.validation.ValidateTransition
+import org.openmole.tool.lock._
+import org.openmole.tool.random.RandomProvider
+
+import scala.util.{ Failure, Success, Try }
 
 class EndExplorationTransition(val start: Capsule, val end: Slot, val trigger: Condition, val filter: BlockList = BlockList.empty) extends IEndExplorationTransition with ValidateTransition {
 

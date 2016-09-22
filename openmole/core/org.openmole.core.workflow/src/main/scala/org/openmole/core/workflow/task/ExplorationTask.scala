@@ -17,14 +17,14 @@
 
 package org.openmole.core.workflow.task
 
+import org.openmole.core.context.{ Prototype, Variable }
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.mole.Capsule
 import org.openmole.core.workflow.sampling._
 
 import scala.collection.immutable.TreeMap
 import scala.collection.mutable.ArrayBuffer
-import org.openmole.core.workflow.dsl._
 object ExplorationTask {
 
   def apply(sampling: Sampling) =

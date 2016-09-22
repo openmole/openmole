@@ -15,32 +15,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.workflow.data
+package org.openmole.core.workflow.tools
 
-import org.openmole.core.tools.io.Prettifier
-import Prettifier._
+import org.openmole.core.context._
+import org.openmole.core.expansion._
 
-object Variable {
-  implicit def tupleToVariable[T](t: (Prototype[T], T)) = apply(t._1, t._2)
+import scalaz.Scalaz._
+import scalaz._
 
-  def apply[T](p: Prototype[T], v: T) = new Variable[T] {
-    val prototype = p
-    val value = v
-  }
-
-  def unsecure[T](p: Prototype[T], v: Any) = new Variable[T] {
-    val prototype = p
-    val value = v.asInstanceOf[T]
-  }
-
+/**
+ * The parameter is a variable wich is injected in the data flow during the
+ * workflow execution just before the begining of a task execution. It can be
+ * usefull for testing purposes and for defining default value of inputs of a
+ * task.
+ *
+ */
+case class Default[T](prototype: Prototype[T], value: FromContext[T], `override`: Boolean) {
+  def toVariable = value.map(v ⇒ Variable(prototype, v))
 }
-
-trait Variable[T] {
-  def prototype: Prototype[T]
-  def value: T
-
-  override def toString: String = prettified(Int.MaxValue)
-
-  def prettified(snipArray: Int) = prototype.name + "=" + (if (value != null) value.prettify(snipArray) else "null")
-}
-

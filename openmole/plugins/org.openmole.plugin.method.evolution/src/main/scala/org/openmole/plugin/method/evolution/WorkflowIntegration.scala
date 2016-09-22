@@ -18,13 +18,14 @@
 package org.openmole.plugin.method.evolution
 
 import fr.iscpif.mgo
-import org.openmole.core.workflow.data._
+import org.openmole.core.context._
+import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.dsl._
-import scala.util.Random
-import org.openmole.core.workflow.tools._
-import scalaz._
-import Scalaz._
+
 import scala.language.higherKinds
+import scala.util.Random
+import scalaz.Scalaz._
+import scalaz._
 
 object Seeder {
 
@@ -178,9 +179,9 @@ trait EvolutionWorkflow {
   def mgoAG: MGOAG
 
   val integration: mgo.openmole.Integration[MGOAG, V, P]
-  def operations = integration.operations(mgoAG)
-
   import integration._
+
+  def operations = integration.operations(mgoAG)
 
   type G = integration.G
   type I = integration.I

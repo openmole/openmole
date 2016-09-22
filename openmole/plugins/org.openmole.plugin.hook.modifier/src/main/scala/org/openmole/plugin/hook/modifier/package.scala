@@ -18,7 +18,7 @@
 package org.openmole.plugin.hook
 
 import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.dsl._
+import org.openmole.core.expansion._
 
 package object modifier {
 

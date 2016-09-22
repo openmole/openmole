@@ -17,8 +17,8 @@
 
 package org.openmole.plugin.method.evolution
 
-import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.dsl._
+import org.openmole.core.workflow.task._
 
 object ScalingGenomeTask {
 

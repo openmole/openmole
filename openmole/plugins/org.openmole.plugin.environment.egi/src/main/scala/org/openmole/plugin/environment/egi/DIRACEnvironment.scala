@@ -19,20 +19,15 @@ package org.openmole.plugin.environment.egi
 
 import java.net.URI
 
-import fr.iscpif.gridscale.authentication.P12Authentication
-import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, BatchExecutionJob, UpdateInterval }
-import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.fileservice._
-import org.openmole.core.workflow.dsl._
+import fr.iscpif.gridscale.egi.{ DIRACJobService ⇒ GSDIRACJobService, _ }
 import org.openmole.core.updater.Updater
-import org.openmole.core.workflow.execution.ExecutionJob
+import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.job.Job
 import org.openmole.core.workspace._
-import fr.iscpif.gridscale.egi._
-import fr.iscpif.gridscale.egi.{ DIRACJobService ⇒ GSDIRACJobService }
+import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, BatchExecutionJob, UpdateInterval }
 import org.openmole.tool.cache.Cache
 
-import concurrent.duration._
+import scala.concurrent.duration._
 import scala.ref.WeakReference
 
 object DIRACEnvironment {

@@ -14,15 +14,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.openmole.core.workflow.tools
+package org.openmole.core.expansion
 
 import org.openmole.core.tools.service
 import org.openmole.core.workspace.Workspace
 import org.openmole.tool.file.FilePackage
+import org.openmole.tool.random
 import org.openmole.tool.statistics.StatisticsPackage
 
 trait CodePackage extends FilePackage with StatisticsPackage {
-  def Random(seed: Long) = service.Random.apply(seed)
+  def Random(seed: Long) = random.Random.apply(seed)
   def newRNG(seed: Long) = Random(seed)
 
   def newFile(prefix: String = Workspace.fixedPrefix, suffix: String = Workspace.fixedPostfix) = Workspace.newFile(prefix, suffix)

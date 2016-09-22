@@ -17,6 +17,7 @@
 
 package org.openmole.core.workflow.transition
 
+import org.openmole.core.context.Prototype
 import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.task._
