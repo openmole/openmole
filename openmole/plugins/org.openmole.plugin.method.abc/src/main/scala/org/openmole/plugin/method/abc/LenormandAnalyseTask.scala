@@ -18,7 +18,7 @@
 package org.openmole.plugin.method.abc
 
 import fr.iscpif.scalabc._
-import org.openmole.core.context.{ Context, Prototype, Variable }
+import org.openmole.core.context.{ Context, Val, Variable }
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.task._
 
@@ -26,10 +26,10 @@ object LenormandAnalyseTask {
 
   def apply(
     lenormand:  algorithm.Lenormand with ABC,
-    state:      Prototype[algorithm.Lenormand#STATE],
-    terminated: Prototype[Boolean],
-    iteration:  Prototype[Int],
-    accepted:   Prototype[Double]
+    state:      Val[algorithm.Lenormand#STATE],
+    terminated: Val[Boolean],
+    iteration:  Val[Int],
+    accepted:   Val[Double]
   ) =
     ClosureTask("LenormandAnalyseTask") { (context, _, _) ⇒
       val thetasValue: Seq[Seq[Double]] = lenormand.priorPrototypes.map { p ⇒ context(p.toArray).toSeq }.transpose

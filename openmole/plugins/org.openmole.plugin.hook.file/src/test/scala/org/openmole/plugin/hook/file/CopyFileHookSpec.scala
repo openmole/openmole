@@ -19,7 +19,7 @@ package org.openmole.plugin.hook.file
 
 import java.io.{File, FileWriter}
 
-import org.openmole.core.context.{Context, Prototype, PrototypeSet}
+import org.openmole.core.context.{Context, Val, PrototypeSet}
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.tools.DefaultSet
@@ -34,7 +34,7 @@ class CopyFileHookSpec extends FlatSpec with Matchers {
     try fw.write("File contents!")
     finally fw.close
 
-    val p = Prototype[File]("p")
+    val p = Val[File]("p")
 
     val t1 = new Task {
       val name = "Test"

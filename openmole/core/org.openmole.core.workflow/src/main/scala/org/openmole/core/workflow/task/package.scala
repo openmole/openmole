@@ -32,7 +32,7 @@ package task {
     def newRNG(context: Context) = Context.buildRNG(context)
 
     def implicits = new {
-      def +=(p: Prototype[_]) = MoleTask.implicits.modify(_ ++ Seq(p.name))
+      def +=(p: Val[_]) = MoleTask.implicits.modify(_ ++ Seq(p.name))
     }
 
   }

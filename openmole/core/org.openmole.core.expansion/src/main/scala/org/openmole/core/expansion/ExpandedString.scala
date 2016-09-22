@@ -19,7 +19,7 @@ package org.openmole.core.expansion
 
 import java.io.InputStream
 
-import org.openmole.core.context.{ Context, Prototype }
+import org.openmole.core.context.{ Context, Val }
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.tool.stream.{ StringInputStream, StringOutputStream }
 import org.openmole.tool.random._
@@ -87,17 +87,17 @@ object ExpandedString {
 
   case class Expansion(elements: Seq[ExpandedString.ExpansionElement]) extends FromContext[String] {
     def from(context: ⇒ Context)(implicit rng: RandomProvider) = elements.map(_.from(context)).mkString
-    def validate(inputs: Seq[Prototype[_]]): Seq[Throwable] = elements.flatMap(_.validate(inputs))
+    def validate(inputs: Seq[Val[_]]): Seq[Throwable] = elements.flatMap(_.validate(inputs))
   }
 
   trait ExpansionElement {
     def from(context: ⇒ Context)(implicit rng: RandomProvider): String
-    def validate(inputs: Seq[Prototype[_]]): Seq[Throwable]
+    def validate(inputs: Seq[Val[_]]): Seq[Throwable]
   }
 
   case class UnexpandedElement(string: String) extends ExpansionElement {
     def from(context: ⇒ Context)(implicit rng: RandomProvider): String = string
-    def validate(inputs: Seq[Prototype[_]]): Seq[Throwable] = Seq.empty
+    def validate(inputs: Seq[Val[_]]): Seq[Throwable] = Seq.empty
   }
 
   object ExpandedElement {
@@ -115,7 +115,7 @@ object ExpandedString {
 
   case class ValueElement(v: String) extends ExpansionElement {
     def from(context: ⇒ Context)(implicit rng: RandomProvider): String = v
-    def validate(inputs: Seq[Prototype[_]]): Seq[Throwable] = Seq.empty
+    def validate(inputs: Seq[Val[_]]): Seq[Throwable] = Seq.empty
   }
 
   case class CodeElement(code: String) extends ExpansionElement {
@@ -126,7 +126,7 @@ object ExpandedString {
         case None        ⇒ proxy().from(context).toString
       }
     }
-    def validate(inputs: Seq[Prototype[_]]): Seq[Throwable] =
+    def validate(inputs: Seq[Val[_]]): Seq[Throwable] =
       if (inputs.exists(_.name == code)) Seq.empty
       else proxy.validate(inputs).toSeq
   }

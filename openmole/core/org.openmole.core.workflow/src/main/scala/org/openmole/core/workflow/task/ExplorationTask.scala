@@ -17,7 +17,7 @@
 
 package org.openmole.core.workflow.task
 
-import org.openmole.core.context.{ Prototype, Variable }
+import org.openmole.core.context.{ Val, Variable }
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.mole.Capsule
@@ -31,7 +31,7 @@ object ExplorationTask {
     ClosureTask("ExplorationTask") {
       (context, rng, _) ⇒
         implicit val implicitRNG = rng
-        val variablesValues = TreeMap.empty[Prototype[_], ArrayBuffer[Any]] ++ sampling.prototypes.map { p ⇒ p → ArrayBuffer[Any]() }
+        val variablesValues = TreeMap.empty[Val[_], ArrayBuffer[Any]] ++ sampling.prototypes.map { p ⇒ p → ArrayBuffer[Any]() }
 
         for {
           sample ← sampling().from(context)
@@ -58,6 +58,6 @@ object ExplorationTask {
       exploredOutputs += (sampling.prototypes.toSeq.map(_.toArray): _*)
     )
 
-  def explored(c: Capsule) = (p: Prototype[_]) ⇒ c.task.outputs.explored(p)
+  def explored(c: Capsule) = (p: Val[_]) ⇒ c.task.outputs.explored(p)
 
 }

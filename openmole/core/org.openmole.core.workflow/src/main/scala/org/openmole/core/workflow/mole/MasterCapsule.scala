@@ -17,12 +17,12 @@
 
 package org.openmole.core.workflow.mole
 
-import org.openmole.core.context.{ Context, Prototype }
+import org.openmole.core.context.{ Context, Val }
 import org.openmole.core.workflow.task._
 
 object MasterCapsule {
-  def apply(task: Task, persist: Seq[Prototype[_]], strainer: Boolean) = new MasterCapsule(task, persist.map(_.name), strainer)
-  def apply(t: Task, persist: Prototype[_]*): MasterCapsule = apply(t, persist, false)
+  def apply(task: Task, persist: Seq[Val[_]], strainer: Boolean) = new MasterCapsule(task, persist.map(_.name), strainer)
+  def apply(t: Task, persist: Val[_]*): MasterCapsule = apply(t, persist, false)
 }
 
 class MasterCapsule(task: Task, val persist: Seq[String] = Seq.empty, strainer: Boolean) extends Capsule(task, strainer) {

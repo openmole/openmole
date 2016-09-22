@@ -23,52 +23,52 @@ import org.openmole.core.tools.obj.{ ClassUtils, Id }
 import scala.annotation.tailrec
 import scala.reflect._
 
-object PrototypeType {
+object ValType {
 
-  def unArrayify(t: PrototypeType[_]): (PrototypeType[_], Int) = {
-    @tailrec def rec(c: PrototypeType[_], level: Int = 0): (PrototypeType[_], Int) =
+  def unArrayify(t: ValType[_]): (ValType[_], Int) = {
+    @tailrec def rec(c: ValType[_], level: Int = 0): (ValType[_], Int) =
       if (!c.isArray) (c, level)
       else rec(c.asArray.fromArray, level + 1)
     rec(t)
   }
 
-  implicit class PrototypeTypeDecorator[T](p: PrototypeType[T]) {
-    def toArray = PrototypeType[Array[T]](p.manifest.toArray)
+  implicit class ValTypeDecorator[T](p: ValType[T]) {
+    def toArray = ValType[Array[T]](p.manifest.toArray)
     def array = toArray
     def isArray = p.manifest.isArray
-    def asArray = p.asInstanceOf[PrototypeType[Array[T]]]
+    def asArray = p.asInstanceOf[ValType[Array[T]]]
   }
 
-  implicit class PrototypeTypeArrayDecorator[T](p: PrototypeType[Array[T]]) {
-    def fromArray = PrototypeType[T](p.manifest.fromArray)
+  implicit class ValTypeArrayDecorator[T](p: ValType[Array[T]]) {
+    def fromArray = ValType[T](p.manifest.fromArray)
   }
 
-  implicit def buildPrototypeType[T: Manifest]: PrototypeType[T] = PrototypeType[T]
+  implicit def buildValType[T: Manifest]: ValType[T] = ValType[T]
 
-  def apply[T](implicit m: Manifest[T]): PrototypeType[T] =
-    new PrototypeType[T] {
+  def apply[T](implicit m: Manifest[T]): ValType[T] =
+    new ValType[T] {
       val manifest = m
     }
 
-  def unsecure(c: Manifest[_]): PrototypeType[Any] = apply(c.asInstanceOf[Manifest[Any]])
+  def unsecure(c: Manifest[_]): ValType[Any] = apply(c.asInstanceOf[Manifest[Any]])
 
 }
 
-trait PrototypeType[T] extends Id {
+trait ValType[T] extends Id {
   def manifest: Manifest[T]
   override def toString = manifest.toString
   def id = manifest
   def runtimeClass = manifest.runtimeClass
 }
 
-object Prototype {
+object Val {
 
-  implicit class PrototypeToArrayDecorator[T](prototype: Prototype[T]) {
-    def toArray(level: Int): Prototype[_] = {
-      def toArrayRecursive[A](prototype: Prototype[A], level: Int): Prototype[_] = {
+  implicit class ValToArrayDecorator[T](prototype: Val[T]) {
+    def toArray(level: Int): Val[_] = {
+      def toArrayRecursive[A](prototype: Val[A], level: Int): Val[_] = {
         if (level <= 0) prototype
         else {
-          val arrayProto = Prototype(prototype.name)(prototype.`type`.toArray).asInstanceOf[Prototype[Array[_]]]
+          val arrayProto = Val(prototype.name)(prototype.`type`.toArray).asInstanceOf[Val[Array[_]]]
           if (level <= 1) arrayProto
           else toArrayRecursive(arrayProto, level - 1)
         }
@@ -77,7 +77,7 @@ object Prototype {
       toArrayRecursive(prototype, level)
     }
 
-    def toArray: Prototype[Array[T]] = Prototype(prototype.name)(prototype.`type`.toArray)
+    def toArray: Val[Array[T]] = Val(prototype.name)(prototype.`type`.toArray)
 
     def array(level: Int) = toArray(level)
     def array = toArray
@@ -85,23 +85,23 @@ object Prototype {
     def unsecureType = prototype.`type`.asInstanceOf[Manifest[Any]]
   }
 
-  implicit class PrototypeFromArrayDecorator[T](prototype: Prototype[Array[T]]) {
-    def fromArray: Prototype[T] = Prototype(prototype.name)(prototype.`type`.fromArray)
+  implicit class ValFromArrayDecorator[T](prototype: Val[Array[T]]) {
+    def fromArray: Val[T] = Val(prototype.name)(prototype.`type`.fromArray)
   }
 
-  implicit def prototypeDecorator[T](prototype: Prototype[T]) = new {
-    def withName(name: String) = Prototype[T](name)(prototype.`type`)
+  implicit def valDecorator[T](v: Val[T]) = new {
+    def withName(name: String) = Val[T](name)(v.`type`)
   }
 
-  implicit def prototypeToArrayConverter[T](p: Prototype[T]) = p.toArray
+  implicit def valToArrayConverter[T](p: Val[T]) = p.toArray
 
-  def apply[T](name: String, namespace: Namespace = Namespace.empty)(implicit t: PrototypeType[T]): Prototype[T] = {
+  def apply[T](name: String, namespace: Namespace = Namespace.empty)(implicit t: ValType[T]): Val[T] = {
     assert(t != null)
-    new Prototype[T](name, t, namespace)
+    new Val[T](name, t, namespace)
   }
 
-  implicit lazy val prototypeOrderingOnName = new Ordering[Prototype[_]] {
-    override def compare(left: Prototype[_], right: Prototype[_]) =
+  implicit lazy val valOrderingOnName = new Ordering[Val[_]] {
+    override def compare(left: Val[_], right: Val[_]) =
       left.name compare right.name
   }
 
@@ -125,7 +125,7 @@ case class Namespace(names: String*) {
  * @tparam T the type of the prototype. Values associated to this prototype should
  * always be a subtype of T.
  */
-class Prototype[T](val simpleName: String, val `type`: PrototypeType[T], val namespace: Namespace) extends Id {
+class Val[T](val simpleName: String, val `type`: ValType[T], val namespace: Namespace) extends Id {
   /**
    * Get the name of the prototype.
    *
@@ -140,12 +140,12 @@ class Prototype[T](val simpleName: String, val `type`: PrototypeType[T], val nam
    * @param p the prototype to test
    * @return true if the prototype is assignable from the given prototype
    */
-  def isAssignableFrom(p: Prototype[_]): Boolean = ClassUtils.assignable(p.`type`.manifest, `type`.manifest)
+  def isAssignableFrom(p: Val[_]): Boolean = ClassUtils.assignable(p.`type`.manifest, `type`.manifest)
 
   def accepts(obj: Any): Boolean =
     obj == null || classAssignable(obj.getClass, `type`.runtimeClass)
 
-  def withName(name: String) = Prototype[T](name)(`type`)
+  def withName(name: String) = Val[T](name)(`type`)
 
   def from(context: ⇒ Context): T = context(this)
 

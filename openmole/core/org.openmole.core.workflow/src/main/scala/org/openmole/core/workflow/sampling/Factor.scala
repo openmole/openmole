@@ -22,4 +22,4 @@ import org.openmole.core.context._
 
 import scala.language.higherKinds
 
-@Lenses case class Factor[D, T](prototype: Prototype[T], domain: D)
+@Lenses case class Factor[D, T](prototype: Val[T], domain: D)

@@ -17,7 +17,7 @@
  */
 package org.openmole.core.workflow.validation
 
-import org.openmole.core.context.Prototype
+import org.openmole.core.context.Val
 import org.openmole.core.tools.io.Prettifier
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.task._
@@ -27,11 +27,11 @@ trait ValidateTask {
 }
 
 trait ValidateHook {
-  def validate(inputs: Seq[Prototype[_]]): Seq[Throwable]
+  def validate(inputs: Seq[Val[_]]): Seq[Throwable]
 }
 
 trait ValidateTransition {
-  def validate(inputs: Seq[Prototype[_]]): Seq[Throwable]
+  def validate(inputs: Seq[Val[_]]): Seq[Throwable]
 }
 
 object ValidationProblem {

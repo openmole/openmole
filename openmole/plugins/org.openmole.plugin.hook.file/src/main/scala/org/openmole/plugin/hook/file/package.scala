@@ -19,7 +19,7 @@ package org.openmole.plugin.hook
 
 import java.io.File
 
-import org.openmole.core.context.Prototype
+import org.openmole.core.context.Val
 import org.openmole.core.dsl._
 import org.openmole.core.workflow.builder._
 import org.openmole.plugin.hook.file.CopyFileHook.{ CopyFileHookBuilder, CopyOptions }
@@ -31,7 +31,7 @@ package file {
   trait FilePackage {
 
     def copies = new {
-      def +=[T: CopyFileHookBuilder: InputOutputBuilder](prototype: Prototype[File], destination: FromContext[File], remove: Boolean = false, compress: Boolean = false, move: Boolean = false): T ⇒ T =
+      def +=[T: CopyFileHookBuilder: InputOutputBuilder](prototype: Val[File], destination: FromContext[File], remove: Boolean = false, compress: Boolean = false, move: Boolean = false): T ⇒ T =
         (implicitly[CopyFileHookBuilder[T]].copies add ((prototype, destination, CopyOptions(remove, compress, move)))) andThen
           (inputs += prototype) andThen (if (move) (outputs += prototype) else identity)
     }

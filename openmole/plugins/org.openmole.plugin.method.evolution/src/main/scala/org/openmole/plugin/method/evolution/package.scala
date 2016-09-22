@@ -33,7 +33,7 @@ package object evolution {
 
   val operatorExploration = 0.1
 
-  type Objective = Prototype[Double]
+  type Objective = Val[Double]
   type Objectives = Seq[Objective]
   type FitnessAggregation = Seq[Double] ⇒ Double
   type Genome = Seq[Input[_]]

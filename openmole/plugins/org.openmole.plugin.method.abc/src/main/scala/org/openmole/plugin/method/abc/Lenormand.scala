@@ -18,15 +18,15 @@
 package org.openmole.plugin.method.abc
 
 import fr.iscpif.scalabc._
-import org.openmole.core.context.Prototype
+import org.openmole.core.context.Val
 
 object Lenormand {
   def apply(
-    priors:                      Seq[((Prototype[Double], (Double, Double)))],
-    targets:                     Seq[(Prototype[Double], Double)],
+    priors:                      Seq[((Val[Double], (Double, Double)))],
+    targets:                     Seq[(Val[Double], Double)],
     simulations:                 Int,
-    minimumProportionOfAccepted: Double                                       = 0.05,
-    alpha:                       Double                                       = 0.5
+    minimumProportionOfAccepted: Double                                 = 0.05,
+    alpha:                       Double                                 = 0.5
   ) = {
     val (_priors, _simulations, _alpha, _targets, _minimumProportionOfAccepted) = (priors, simulations, alpha, targets, minimumProportionOfAccepted)
 

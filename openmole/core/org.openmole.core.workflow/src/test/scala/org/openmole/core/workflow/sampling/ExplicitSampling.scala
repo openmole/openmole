@@ -17,13 +17,13 @@
 
 package org.openmole.core.workflow.sampling
 
-import org.openmole.core.context.{Prototype, Variable}
+import org.openmole.core.context.{Val, Variable}
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.sampling._
 
 import scala.util.Random
 
-case class ExplicitSampling[T](prototype: Prototype[T], data: Iterable[T]) extends Sampling {
+case class ExplicitSampling[T](prototype: Val[T], data: Iterable[T]) extends Sampling {
   override def prototypes = List(prototype)
   override def apply() = data.map { v ⇒ List(Variable(prototype, v)) }.iterator
 }

@@ -19,7 +19,7 @@ package org.openmole.plugin.tool
 
 import java.io.File
 
-import org.openmole.core.context.Prototype
+import org.openmole.core.context.Val
 import org.openmole.core.dsl._
 import org.openmole.core.workflow.builder._
 
@@ -27,16 +27,16 @@ package csv {
 
   trait CSVPackage {
     lazy val columns = new {
-      def +=[T: CSVToVariablesBuilder: InputOutputBuilder](proto: Prototype[_]): T ⇒ T = this.+=(proto.name, proto)
+      def +=[T: CSVToVariablesBuilder: InputOutputBuilder](proto: Val[_]): T ⇒ T = this.+=(proto.name, proto)
       def +=[T: CSVToVariablesBuilder: InputOutputBuilder](name: String, proto: Val[_]): T ⇒ T =
         (implicitly[CSVToVariablesBuilder[T]].columns add (name → proto)) andThen
           (outputs += proto)
     }
     lazy val fileColumns = new {
-      def +=[T: CSVToVariablesBuilder: InputOutputBuilder](dir: File, proto: Prototype[File]): T ⇒ T =
+      def +=[T: CSVToVariablesBuilder: InputOutputBuilder](dir: File, proto: Val[File]): T ⇒ T =
         this.+=(proto.name, dir, proto)
 
-      def +=[T: CSVToVariablesBuilder: InputOutputBuilder](name: String, dir: File, proto: Prototype[File]): T ⇒ T =
+      def +=[T: CSVToVariablesBuilder: InputOutputBuilder](name: String, dir: File, proto: Val[File]): T ⇒ T =
         (implicitly[CSVToVariablesBuilder[T]].fileColumns add (name, dir, proto)) andThen
           (outputs += proto)
     }

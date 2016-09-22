@@ -106,7 +106,7 @@ trait ITransition {
         else moleExecution.nextTicket(ticket.parent.getOrElse(throw new InternalProcessingError("BUG should never reach root ticket")))
 
       val toArrayManifests =
-        validTypes(mole, moleExecution.sources, moleExecution.hooks)(end).filter(_.toArray).map(ct ⇒ ct.name → ct.`type`).toMap[String, PrototypeType[_]]
+        validTypes(mole, moleExecution.sources, moleExecution.hooks)(end).filter(_.toArray).map(ct ⇒ ct.name → ct.`type`).toMap[String, ValType[_]]
 
       val newContext = aggregate(end.capsule.inputs(mole, moleExecution.sources, moleExecution.hooks), toArrayManifests, combinasion.map(ticket.content → _))
 

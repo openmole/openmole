@@ -17,7 +17,7 @@
 
 package org.openmole.core.workflow.transition
 
-import org.openmole.core.context.{ Context, Prototype }
+import org.openmole.core.context.{ Context, Val }
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.expansion.Condition
 import org.openmole.core.workflow.mole._
@@ -29,7 +29,7 @@ import scala.util.{ Failure, Success, Try }
 
 class EndExplorationTransition(val start: Capsule, val end: Slot, val trigger: Condition, val filter: BlockList = BlockList.empty) extends IEndExplorationTransition with ValidateTransition {
 
-  override def validate(inputs: Seq[Prototype[_]]) = trigger.validate(inputs)
+  override def validate(inputs: Seq[Val[_]]) = trigger.validate(inputs)
 
   override def perform(context: Context, ticket: Ticket, subMole: SubMoleExecution)(implicit rng: RandomProvider) = {
     def perform() {

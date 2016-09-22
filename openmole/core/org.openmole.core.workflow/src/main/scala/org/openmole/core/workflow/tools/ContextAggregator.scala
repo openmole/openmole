@@ -22,7 +22,7 @@ import org.openmole.core.exception._
 
 object ContextAggregator {
 
-  def aggregate(prototypes: PrototypeSet, toArray: PartialFunction[String, PrototypeType[_]], toAggregateList: Iterable[(Long, Variable[_])]): Context = {
+  def aggregate(prototypes: PrototypeSet, toArray: PartialFunction[String, ValType[_]], toAggregateList: Iterable[(Long, Variable[_])]): Context = {
     val toAggregate = toAggregateList.groupBy { case (_, v) ⇒ v.prototype.name }
 
     prototypes.foldLeft(List.empty[Variable[_]]) {
@@ -35,7 +35,7 @@ object ContextAggregator {
           merging.zipWithIndex.foreach {
             e ⇒ java.lang.reflect.Array.set(array, e._2, e._1.value)
           }
-          Variable(Prototype(d.name)(`type`.toArray).asInstanceOf[Prototype[Any]], array) :: acc
+          Variable(Val(d.name)(`type`.toArray).asInstanceOf[Val[Any]], array) :: acc
         }
         else if (!merging.isEmpty) {
           if (merging.size > 1) throw new InternalProcessingError("Variable " + d + " has been found multiple times, it doesn't match data flow specification, " + toAggregateList)

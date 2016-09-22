@@ -18,7 +18,7 @@
 package org.openmole.plugin.hook.file
 
 import monocle.macros.Lenses
-import org.openmole.core.context.{ Context, Prototype }
+import org.openmole.core.context.{ Context, Val }
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.tools.io.Prettifier
 import org.openmole.core.tools.io.Prettifier._
@@ -40,7 +40,7 @@ object AppendToCSVFileHook {
     override def arraysOnSingleRow = AppendToCSVFileHook.arraysOnSingleRow
   }
 
-  def apply(file: FromContext[File], prototypes: Prototype[_]*) =
+  def apply(file: FromContext[File], prototypes: Val[_]*) =
     new AppendToCSVFileHook(
       file,
       prototypes.toVector,
@@ -53,13 +53,13 @@ object AppendToCSVFileHook {
 
 @Lenses case class AppendToCSVFileHook(
     file:              FromContext[File],
-    prototypes:        Vector[Prototype[_]],
+    prototypes:        Vector[Val[_]],
     header:            Option[FromContext[String]],
     arraysOnSingleRow: Boolean,
     config:            InputOutputConfig
 ) extends Hook with ValidateHook {
 
-  override def validate(inputs: Seq[Prototype[_]]): Seq[Throwable] =
+  override def validate(inputs: Seq[Val[_]]): Seq[Throwable] =
     file.validate(inputs) ++ header.toSeq.flatMap(_.validate(inputs))
 
   override def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider) = {

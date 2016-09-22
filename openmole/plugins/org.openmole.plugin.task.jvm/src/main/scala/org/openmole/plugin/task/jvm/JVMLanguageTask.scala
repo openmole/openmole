@@ -19,7 +19,7 @@ package org.openmole.plugin.task.jvm
 
 import java.io.File
 
-import org.openmole.core.context.{ Context, Prototype, Variable }
+import org.openmole.core.context.{ Context, Val, Variable }
 import org.openmole.core.serializer.plugin.Plugins
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.task.{ Task, TaskExecutionContext }
@@ -27,7 +27,7 @@ import org.openmole.plugin.task.external.External
 import org.openmole.tool.random.RandomProvider
 
 object JVMLanguageTask {
-  lazy val workDirectory = Prototype[File]("workDirectory")
+  lazy val workDirectory = Val[File]("workDirectory")
 }
 
 trait JVMLanguageTask extends Task with Plugins {

@@ -18,7 +18,7 @@
 package org.openmole.plugin.method.abc
 
 import fr.iscpif.scalabc.algorithm._
-import org.openmole.core.context.{ Prototype, Variable }
+import org.openmole.core.context.{ Val, Variable }
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.sampling._
 
@@ -26,7 +26,7 @@ object LenormandSampling {
 
   def apply(
     lenormand: Lenormand with ABC,
-    state:     Prototype[Lenormand#STATE]
+    state:     Val[Lenormand#STATE]
   ) = {
     val (_lenormand, _state) = (lenormand, state)
     new LenormandSampling {
@@ -40,7 +40,7 @@ object LenormandSampling {
 abstract class LenormandSampling extends Sampling {
 
   val lenormand: Lenormand with ABC
-  def state: Prototype[Lenormand#STATE]
+  def state: Val[Lenormand#STATE]
 
   def prototypes = lenormand.priorPrototypes
   override def inputs = Seq(state)

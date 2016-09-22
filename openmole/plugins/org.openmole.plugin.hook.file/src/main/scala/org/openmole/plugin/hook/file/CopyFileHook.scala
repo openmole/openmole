@@ -21,7 +21,7 @@ import java.io.File
 
 import monocle.Lens
 import monocle.macros.Lenses
-import org.openmole.core.context.{ Context, Prototype, Variable }
+import org.openmole.core.context.{ Context, Val, Variable }
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.dsl._
@@ -36,7 +36,7 @@ object CopyFileHook {
   case class CopyOptions(remove: Boolean, compress: Boolean, move: Boolean)
 
   trait CopyFileHookBuilder[T] {
-    def copies: Lens[T, Vector[(Prototype[File], FromContext[File], CopyOptions)]]
+    def copies: Lens[T, Vector[(Val[File], FromContext[File], CopyOptions)]]
   }
 
   implicit def isIO: InputOutputBuilder[CopyFileHook] = InputOutputBuilder(CopyFileHook.config)
@@ -46,7 +46,7 @@ object CopyFileHook {
   }
 
   def apply(
-    prototype:   Prototype[File],
+    prototype:   Val[File],
     destination: FromContext[File],
     remove:      Boolean           = false,
     compress:    Boolean           = false,
@@ -63,11 +63,11 @@ object CopyFileHook {
 }
 
 @Lenses case class CopyFileHook(
-    copies: Vector[(Prototype[File], FromContext[File], CopyOptions)],
+    copies: Vector[(Val[File], FromContext[File], CopyOptions)],
     config: InputOutputConfig
 ) extends Hook with ValidateHook {
 
-  override def validate(inputs: Seq[Prototype[_]]) = copies.flatMap(_._2.validate(inputs)).toSeq
+  override def validate(inputs: Seq[Val[_]]) = copies.flatMap(_._2.validate(inputs)).toSeq
 
   override def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider) = {
     val moved = for ((p, d, options) ← copies) yield copyFile(context, executionContext, p, d, options)
@@ -77,7 +77,7 @@ object CopyFileHook {
   private def copyFile(
     context:          Context,
     executionContext: MoleExecutionContext,
-    filePrototype:    Prototype[File],
+    filePrototype:    Val[File],
     destination:      FromContext[File],
     options:          CopyOptions
   )(implicit rng: RandomProvider): Option[Variable[File]] = {

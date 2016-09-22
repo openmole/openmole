@@ -17,7 +17,7 @@
 
 package org.openmole.core.workflow.hook
 
-import org.openmole.core.context.Prototype
+import org.openmole.core.context.Val
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
@@ -34,7 +34,7 @@ class HookSpec extends FlatSpec with Matchers {
   "A capsule execution misc" should "intercept the execution of a capsule" in {
     var executed = false
 
-    val p = Prototype[String]("p")
+    val p = Val[String]("p")
 
     val t1 =
       TestTask { _ + (p → "test") } set (
@@ -61,7 +61,7 @@ class HookSpec extends FlatSpec with Matchers {
   "A capsule execution misc" should "intercept the execution of a master capsule" in {
     var executed = false
 
-    val p = Prototype[String]("p")
+    val p = Val[String]("p")
 
     val t1 =
       TestTask { _ + (p → "test") } set (

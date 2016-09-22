@@ -21,13 +21,13 @@ import java.io.{ File, FileReader }
 import java.math.{ BigDecimal, BigInteger }
 
 import au.com.bytecode.opencsv.CSVReader
-import org.openmole.core.context.{ Context, Prototype, Variable }
+import org.openmole.core.context.{ Context, Val, Variable }
 import org.openmole.core.exception.UserBadDataError
 
 trait CSVToVariables {
 
-  def columns: Vector[(String, Prototype[_])]
-  def fileColumns: Vector[(String, File, Prototype[File])]
+  def columns: Vector[(String, Val[_])]
+  def fileColumns: Vector[(String, File, Val[File])]
   def separator: Option[Char]
 
   /**
@@ -77,7 +77,7 @@ trait CSVToVariables {
     classOf[Long] → ((_: String).toLong)
   )
 
-  def converter[T](p: Prototype[_]): String ⇒ _ =
+  def converter[T](p: Val[_]): String ⇒ _ =
     conveters.getOrElse(p.`type`.runtimeClass, throw new UserBadDataError("Unmanaged type for csv sampling for column binded to prototype " + p))
 
 }

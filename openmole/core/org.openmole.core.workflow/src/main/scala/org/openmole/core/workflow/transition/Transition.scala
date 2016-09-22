@@ -17,7 +17,7 @@
 
 package org.openmole.core.workflow.transition
 
-import org.openmole.core.context.{ Context, Prototype }
+import org.openmole.core.context.{ Context, Val }
 import org.openmole.core.expansion.Condition
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.mole._
@@ -34,7 +34,7 @@ class Transition(
     val filter:    BlockList = BlockList.empty
 ) extends ITransition with ValidateTransition {
 
-  override def validate(inputs: Seq[Prototype[_]]) = condition.validate(inputs)
+  override def validate(inputs: Seq[Val[_]]) = condition.validate(inputs)
 
   override def perform(context: Context, ticket: Ticket, subMole: SubMoleExecution)(implicit rng: RandomProvider) =
     if (condition().from(context)) submitNextJobsIfReady(filtered(context).values, ticket, subMole)

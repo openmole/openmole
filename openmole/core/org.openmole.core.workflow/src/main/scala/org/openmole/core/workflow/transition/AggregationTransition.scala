@@ -17,7 +17,7 @@
 
 package org.openmole.core.workflow.transition
 
-import org.openmole.core.context.{ Context, Prototype, PrototypeType, Variable }
+import org.openmole.core.context.{ Context, Val, ValType, Variable }
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.expansion.Condition
 import org.openmole.core.workflow.mole._
@@ -30,14 +30,14 @@ import scala.collection.mutable.{ HashSet, ListBuffer }
 
 object AggregationTransition {
   def aggregateOutputs(moleExecution: MoleExecution, transition: IAggregationTransition, results: Iterable[(Long, Variable[_])]) = {
-    val toArrayTypes = transition.start.outputs(moleExecution.mole, moleExecution.sources, moleExecution.hooks).toList.map { d ⇒ d.name → d.`type` }.toMap[String, PrototypeType[_]]
+    val toArrayTypes = transition.start.outputs(moleExecution.mole, moleExecution.sources, moleExecution.hooks).toList.map { d ⇒ d.name → d.`type` }.toMap[String, ValType[_]]
     ContextAggregator.aggregate(transition.start.outputs(moleExecution.mole, moleExecution.sources, moleExecution.hooks), toArrayTypes, results)
   }
 }
 
 class AggregationTransition(val start: Capsule, val end: Slot, val condition: Condition = Condition.True, val filter: BlockList = BlockList.empty, val trigger: Condition = Condition.False) extends IAggregationTransition with ValidateTransition {
 
-  override def validate(inputs: Seq[Prototype[_]]) =
+  override def validate(inputs: Seq[Val[_]]) =
     condition.validate(inputs) ++ trigger.validate(inputs)
 
   override def perform(context: Context, ticket: Ticket, subMole: SubMoleExecution)(implicit rng: RandomProvider) = {

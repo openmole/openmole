@@ -21,7 +21,7 @@ package org.openmole.plugin.task.care
 import java.io.File
 
 import monocle.macros.Lenses
-import org.openmole.core.context.{ Context, Prototype, Variable }
+import org.openmole.core.context.{ Context, Val, Variable }
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.expansion.ExpandedString
 import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
@@ -74,10 +74,10 @@ object CARETask extends Logger {
     command:              systemexec.Command,
     workDirectory:        Option[String],
     errorOnReturnValue:   Boolean,
-    returnValue:          Option[Prototype[Int]],
-    stdOut:               Option[Prototype[String]],
-    stdErr:               Option[Prototype[String]],
-    environmentVariables: Vector[(Prototype[_], String)],
+    returnValue:          Option[Val[Int]],
+    stdOut:               Option[Val[String]],
+    stdErr:               Option[Val[String]],
+    environmentVariables: Vector[(Val[_], String)],
     _config:              InputOutputConfig,
     external:             External
 ) extends Task with ValidateTask {

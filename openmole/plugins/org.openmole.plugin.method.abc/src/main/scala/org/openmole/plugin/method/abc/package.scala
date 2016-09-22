@@ -18,7 +18,7 @@
 package org.openmole.plugin.method
 
 import fr.iscpif.scalabc.algorithm.Lenormand
-import org.openmole.core.context.Prototype
+import org.openmole.core.context.Val
 import org.openmole.core.expansion.{ Condition, FromContext }
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.mole._
@@ -29,7 +29,7 @@ import org.openmole.core.workflow.transition._
 package object abc {
 
   trait ABCPuzzle {
-    def iteration: Prototype[Int]
+    def iteration: Val[Int]
     def algorithm: ABC
   }
 
@@ -38,10 +38,10 @@ package object abc {
     model:     Puzzle
   ) = {
     val methodName = "abc"
-    val acceptedPrototype = Prototype[Double](methodName + "Accepted")
-    val iterationPrototype = Prototype[Int](methodName + "Iteration")
-    val statePrototype = Prototype[Lenormand#STATE](methodName + "State")
-    val terminatedPrototype = Prototype[Boolean](methodName + "Terminated")
+    val acceptedPrototype = Val[Double](methodName + "Accepted")
+    val iterationPrototype = Val[Int](methodName + "Iteration")
+    val statePrototype = Val[Lenormand#STATE](methodName + "State")
+    val terminatedPrototype = Val[Boolean](methodName + "Terminated")
     val preModel = StrainerCapsule(EmptyTask() set (name := methodName + "PreModel"))
     val postModel = Slot(StrainerCapsule(EmptyTask() set (name := methodName + "PostModel")))
     val last = StrainerCapsule(EmptyTask() set (name := methodName + "Last"))

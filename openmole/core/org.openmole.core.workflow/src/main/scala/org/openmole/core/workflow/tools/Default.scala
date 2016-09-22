@@ -30,6 +30,6 @@ import scalaz._
  * task.
  *
  */
-case class Default[T](prototype: Prototype[T], value: FromContext[T], `override`: Boolean) {
+case class Default[T](prototype: Val[T], value: FromContext[T], `override`: Boolean) {
   def toVariable = value.map(v ⇒ Variable(prototype, v))
 }

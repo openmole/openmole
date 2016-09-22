@@ -24,14 +24,14 @@ import org.openmole.tool.random
 import scala.util.Random
 
 object Variable {
-  implicit def tupleToVariable[T](t: (Prototype[T], T)) = apply(t._1, t._2)
+  implicit def tupleToVariable[T](t: (Val[T], T)) = apply(t._1, t._2)
 
-  def apply[T](p: Prototype[T], v: T) = new Variable[T] {
+  def apply[T](p: Val[T], v: T) = new Variable[T] {
     val prototype = p
     val value = v
   }
 
-  def unsecure[T](p: Prototype[T], v: Any) = new Variable[T] {
+  def unsecure[T](p: Val[T], v: Any) = new Variable[T] {
     val prototype = p
     val value = v.asInstanceOf[T]
   }
@@ -42,12 +42,12 @@ object Variable {
 
   def prefixedVariable(name: String) = Workspace.preference(OpenMOLEVariablePrefix) + name
 
-  val openMOLESeed = Prototype[Long](prefixedVariable("Seed"))
+  val openMOLESeed = Val[Long](prefixedVariable("Seed"))
 
 }
 
 trait Variable[T] {
-  def prototype: Prototype[T]
+  def prototype: Val[T]
   def value: T
 
   override def toString: String = prettified(Int.MaxValue)

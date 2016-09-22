@@ -17,7 +17,7 @@
 
 package org.openmole.core.workflow.transition
 
-import org.openmole.core.context.Prototype
+import org.openmole.core.context.Val
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.sampling._
@@ -34,7 +34,7 @@ class ExplorationTransitionSpec extends FlatSpec with Matchers {
   "Exploration transition" should "submit one MoleJob for each value in the sampling" in {
 
     val data = List("A", "B", "C")
-    val i = Prototype[String]("i")
+    val i = Val[String]("i")
 
     val sampling = new ExplicitSampling(i, data)
 
@@ -60,7 +60,7 @@ class ExplorationTransitionSpec extends FlatSpec with Matchers {
 
   "Exploration transition" should "work with the DSL interface" in {
     val data = List("A", "B", "C")
-    val i = Prototype[String]("i")
+    val i = Val[String]("i")
 
     val explo = ExplorationTask(new ExplicitSampling(i, data))
 
@@ -82,7 +82,7 @@ class ExplorationTransitionSpec extends FlatSpec with Matchers {
   }
 
   "When keyword in exploration transition" should "should filter some values in the sampling" in {
-    val i = Prototype[Int]("i")
+    val i = Val[Int]("i")
     val data = (1 to 100)
 
     val sampling = new ExplicitSampling(i, data)

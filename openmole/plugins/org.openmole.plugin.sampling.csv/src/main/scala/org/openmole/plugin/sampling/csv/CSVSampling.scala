@@ -20,7 +20,7 @@ package org.openmole.plugin.sampling.csv
 import java.io.File
 
 import monocle.macros.Lenses
-import org.openmole.core.context.Prototype
+import org.openmole.core.context.Val
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
 import org.openmole.core.workflow.sampling._
@@ -54,8 +54,8 @@ object CSVSampling {
 @Lenses case class CSVSampling(
     file:        FromContext[File],
     config:      InputOutputConfig,
-    columns:     Vector[(String, Prototype[_])],
-    fileColumns: Vector[(String, File, Prototype[File])],
+    columns:     Vector[(String, Val[_])],
+    fileColumns: Vector[(String, File, Val[File])],
     separator:   Option[Char]
 ) extends Sampling with CSVToVariables {
 

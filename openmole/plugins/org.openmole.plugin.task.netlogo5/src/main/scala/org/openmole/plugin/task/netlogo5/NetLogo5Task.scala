@@ -20,7 +20,7 @@ package org.openmole.plugin.task.netlogo5
 import java.io.File
 
 import monocle.macros.Lenses
-import org.openmole.core.context.Prototype
+import org.openmole.core.context.Val
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.dsl._
 import org.openmole.plugin.task.external._
@@ -47,7 +47,7 @@ object NetLogo5Task {
     workspace:         File,
     script:            String,
     launchingCommands: Seq[String],
-    seed:              OptionalArgument[Prototype[Int]] = None
+    seed:              OptionalArgument[Val[Int]] = None
   ): NetLogo5Task =
     withDefaultArgs(
       workspace = Workspace(script = script, workspace = workspace.getName),
@@ -61,7 +61,7 @@ object NetLogo5Task {
   def file(
     script:            File,
     launchingCommands: Seq[String],
-    seed:              OptionalArgument[Prototype[Int]] = None
+    seed:              OptionalArgument[Val[Int]] = None
   ): NetLogo5Task =
     withDefaultArgs(
       workspace = Workspace(script = script.getName),
@@ -75,8 +75,8 @@ object NetLogo5Task {
   def apply(
     script:            File,
     launchingCommands: Seq[String],
-    embedWorkspace:    Boolean                          = false,
-    seed:              OptionalArgument[Prototype[Int]] = None
+    embedWorkspace:    Boolean                    = false,
+    seed:              OptionalArgument[Val[Int]] = None
   ): NetLogo5Task =
     if (embedWorkspace) workspace(script.getCanonicalFile.getParentFile, script.getName, launchingCommands, seed)
     else file(script, launchingCommands, seed)
@@ -84,7 +84,7 @@ object NetLogo5Task {
   private def withDefaultArgs(
     workspace:         NetLogoTask.Workspace,
     launchingCommands: Seq[String],
-    seed:              Option[Prototype[Int]]
+    seed:              Option[Val[Int]]
   ) =
     NetLogo5Task(
       config = InputOutputConfig(),
@@ -102,12 +102,12 @@ object NetLogo5Task {
 @Lenses case class NetLogo5Task(
     config:              InputOutputConfig,
     external:            External,
-    netLogoInputs:       Vector[(Prototype[_], String)],
-    netLogoOutputs:      Vector[(String, Prototype[_])],
-    netLogoArrayOutputs: Vector[(String, Int, Prototype[_])],
+    netLogoInputs:       Vector[(Val[_], String)],
+    netLogoOutputs:      Vector[(String, Val[_])],
+    netLogoArrayOutputs: Vector[(String, Int, Val[_])],
     workspace:           NetLogoTask.Workspace,
     launchingCommands:   Seq[String],
-    seed:                Option[Prototype[Int]]
+    seed:                Option[Val[Int]]
 ) extends NetLogoTask {
   override def netLogoFactory: NetLogoFactory = NetLogo5Task.factory
 }

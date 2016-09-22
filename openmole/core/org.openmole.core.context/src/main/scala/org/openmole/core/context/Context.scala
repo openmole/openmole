@@ -68,7 +68,7 @@ trait Context extends Map[String, Variable[_]] with MapLike[String, Variable[_],
    * @return Some(variable) if a variable with the given name is present None
    * otherwise
    */
-  def variable[T](p: Prototype[T]): Option[Variable[T]] = variables.get(p.name).map(_.asInstanceOf[Variable[T]])
+  def variable[T](p: Val[T]): Option[Variable[T]] = variables.get(p.name).map(_.asInstanceOf[Variable[T]])
 
   /**
    * Get a variable value given its name.
@@ -87,7 +87,7 @@ trait Context extends Map[String, Variable[_]] with MapLike[String, Variable[_],
    * @return Some(value) if a variable with the given name is present None
    * otherwise
    */
-  def option[T](proto: Prototype[T]): Option[T] = option[T](proto.name)
+  def option[T](proto: Val[T]): Option[T] = option[T](proto.name)
 
   /**
    * Get a variable valaue given a prototype name. This method get the variable by its
@@ -107,7 +107,7 @@ trait Context extends Map[String, Variable[_]] with MapLike[String, Variable[_],
    * @return value the value
    * @throws a UserBadDataError if the variable hasn't been found
    */
-  def apply[T](p: Prototype[T]): T = option(p).getOrElse(throw new UserBadDataError(s"Variable $p has not been found in the context"))
+  def apply[T](p: Val[T]): T = option(p).getOrElse(throw new UserBadDataError(s"Variable $p has not been found in the context"))
 
   /**
    * Build a new context containing the variables of the current context plus the
@@ -117,7 +117,7 @@ trait Context extends Map[String, Variable[_]] with MapLike[String, Variable[_],
    * @param value the value of the variable
    * @return the new context
    */
-  def +[T](p: Prototype[T], value: T) = Context.fromMap(variables + (p.name → Variable[T](p, value)))
+  def +[T](p: Val[T], value: T) = Context.fromMap(variables + (p.name → Variable[T](p, value)))
 
   /**
    * Build a new context containing the variables of the current context plus the
@@ -126,7 +126,7 @@ trait Context extends Map[String, Variable[_]] with MapLike[String, Variable[_],
    * @param tuple a tuple (prototype, value) to construct the variable
    * @return the new context
    */
-  def +[T](tuple: (Prototype[T], T)): Context = this.+(tuple._1, tuple._2)
+  def +[T](tuple: (Val[T], T)): Context = this.+(tuple._1, tuple._2)
 
   def +[T](v: Variable[T]) = Context.fromMap(variables + (v.prototype.name → v))
 
@@ -153,7 +153,7 @@ trait Context extends Map[String, Variable[_]] with MapLike[String, Variable[_],
    */
   def --(names: Traversable[String]): Context = Context.fromMap(variables -- names)
 
-  def contains(p: Prototype[_]): Boolean =
+  def contains(p: Val[_]): Boolean =
     variable(p.name) match {
       case None    ⇒ false
       case Some(v) ⇒ p.isAssignableFrom(v.prototype)
@@ -165,7 +165,7 @@ trait Context extends Map[String, Variable[_]] with MapLike[String, Variable[_],
 
   def get(key: String) = variables.get(key)
 
-  def update[T](p: Prototype[T], v: T) = this + Variable(p, v)
+  def update[T](p: Val[T], v: T) = this + Variable(p, v)
 
   override def iterator = variables.iterator
 

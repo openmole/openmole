@@ -65,12 +65,12 @@ package systemexec {
     implicit def seqOfStringToCommands(s: Seq[String]): OSCommands = OSCommands(OS(), s.map(s ⇒ Command(s)): _*)
   }
 
-  import org.openmole.core.context.Prototype
+  import org.openmole.core.context.Val
   import org.openmole.core.workflow.builder.InputOutputBuilder
   import org.openmole.plugin.task.external.ExternalPackage
 
   trait ReturnValue[T] {
-    def returnValue: Lens[T, Option[Prototype[Int]]] // = None
+    def returnValue: Lens[T, Option[Val[Int]]] // = None
   }
 
   trait ErrorOnReturnValue[T] {
@@ -78,12 +78,12 @@ package systemexec {
   }
 
   trait StdOutErr[T] {
-    def stdOut: Lens[T, Option[Prototype[String]]] // = None
-    def stdErr: Lens[T, Option[Prototype[String]]] // = None
+    def stdOut: Lens[T, Option[Val[String]]] // = None
+    def stdErr: Lens[T, Option[Val[String]]] // = None
   }
 
   trait EnvironmentVariables[T] {
-    def environmentVariables: Lens[T, Vector[(Prototype[_], String)]]
+    def environmentVariables: Lens[T, Vector[(Val[_], String)]]
   }
 
   trait WorkDirectory[T] {
@@ -100,19 +100,19 @@ package systemexec {
 
     lazy val returnValue =
       new {
-        def :=[T: ReturnValue](v: OptionalArgument[Prototype[Int]]) =
+        def :=[T: ReturnValue](v: OptionalArgument[Val[Int]]) =
           implicitly[ReturnValue[T]].returnValue.set(v)
       }
 
     lazy val stdOut =
       new {
-        def :=[T: StdOutErr](v: OptionalArgument[Prototype[String]]) =
+        def :=[T: StdOutErr](v: OptionalArgument[Val[String]]) =
           implicitly[StdOutErr[T]].stdOut.set(v)
       }
 
     lazy val stdErr =
       new {
-        def :=[T: StdOutErr](v: OptionalArgument[Prototype[String]]) =
+        def :=[T: StdOutErr](v: OptionalArgument[Val[String]]) =
           implicitly[StdOutErr[T]].stdErr.set(v)
       }
 
@@ -131,7 +131,7 @@ package systemexec {
          * @param variable the name of the environment variable. By default the name of the environment
          *                 variable is the same as the one of the openmole protoype.
          */
-        def +=[T: EnvironmentVariables: InputOutputBuilder](prototype: Prototype[_], variable: OptionalArgument[String] = None): T ⇒ T =
+        def +=[T: EnvironmentVariables: InputOutputBuilder](prototype: Val[_], variable: OptionalArgument[String] = None): T ⇒ T =
           (implicitly[EnvironmentVariables[T]].environmentVariables add prototype → variable.getOrElse(prototype.name)) andThen
             (inputs += prototype)
       }
@@ -179,7 +179,7 @@ package object systemexec extends external.ExternalPackage with SystemExecPackag
   def execute(
     command:              Array[String],
     workDir:              File,
-    environmentVariables: Seq[(Prototype[_], String)],
+    environmentVariables: Seq[(Val[_], String)],
     context:              Context,
     returnOutput:         Boolean,
     returnError:          Boolean

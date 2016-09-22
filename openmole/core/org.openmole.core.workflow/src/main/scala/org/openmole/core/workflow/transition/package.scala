@@ -23,7 +23,7 @@ import org.openmole.core.workflow.task._
 
 package transition {
 
-  import org.openmole.core.context.Prototype
+  import org.openmole.core.context.Val
   import org.openmole.core.expansion.{ Condition, FromContext }
 
   case class TransitionParameter(
@@ -33,8 +33,8 @@ package transition {
   ) {
     def when(condition: Condition) = copy(conditionParameter = condition)
     def filter(filter: BlockList) = copy(filterParameter = filter)
-    def keep(prototypes: Prototype[_]*) = filter(Keep(prototypes: _*))
-    def block(prototypes: Prototype[_]*) = filter(Block(prototypes: _*))
+    def keep(prototypes: Val[_]*) = filter(Keep(prototypes: _*))
+    def block(prototypes: Val[_]*) = filter(Block(prototypes: _*))
   }
 
   trait TransitionDecorator {
@@ -42,8 +42,8 @@ package transition {
 
     def when(condition: Condition) = TransitionParameter(from, condition)
     def filter(filter: BlockList) = TransitionParameter(from, filterParameter = filter)
-    def keep(prototypes: Prototype[_]*) = filter(Keep(prototypes: _*))
-    def block(prototypes: Prototype[_]*) = filter(Block(prototypes: _*))
+    def keep(prototypes: Val[_]*) = filter(Keep(prototypes: _*))
+    def block(prototypes: Val[_]*) = filter(Block(prototypes: _*))
 
     def -<(
       to:        Puzzle,
@@ -152,7 +152,7 @@ package transition {
       Puzzle.merge(from.firstSlot, puzzles.flatMap(_.lasts), puzzles)
     }
 
-    def oo(to: Puzzle, prototypes: Prototype[_]*): Puzzle = {
+    def oo(to: Puzzle, prototypes: Val[_]*): Puzzle = {
       def blockList: BlockList = if (prototypes.isEmpty) BlockList.empty else Keep(prototypes: _*)
       oo(to, filter = blockList)
     }

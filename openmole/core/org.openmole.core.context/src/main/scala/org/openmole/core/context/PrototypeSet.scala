@@ -20,14 +20,14 @@ package org.openmole.core.context
 import scala.collection.immutable.TreeMap
 
 object PrototypeSet {
-  implicit def traversableToProtoypeSet(ps: Traversable[Prototype[_]]) = PrototypeSet(ps.toSeq)
+  implicit def traversableToProtoypeSet(ps: Traversable[Val[_]]) = PrototypeSet(ps.toSeq)
   val empty = PrototypeSet(Seq.empty)
 }
 
-case class PrototypeSet(prototypes: Seq[Prototype[_]], explore: Set[String] = Set.empty) extends Iterable[Prototype[_]] { self ⇒
+case class PrototypeSet(prototypes: Seq[Val[_]], explore: Set[String] = Set.empty) extends Iterable[Val[_]] { self ⇒
 
-  @transient lazy val prototypeMap: Map[String, Prototype[_]] =
-    TreeMap.empty[String, Prototype[_]] ++ prototypes.map { d ⇒ (d.name, d) }
+  @transient lazy val prototypeMap: Map[String, Val[_]] =
+    TreeMap.empty[String, Val[_]] ++ prototypes.map { d ⇒ (d.name, d) }
 
   /**
    * Get the @link{Data} by its name as an Option.
@@ -35,7 +35,7 @@ case class PrototypeSet(prototypes: Seq[Prototype[_]], explore: Set[String] = Se
    * @param name the name of the @link{Data}
    * @return Some(data) if it is present in the data set None otherwise
    */
-  def apply(name: String): Option[Prototype[_]] = prototypeMap.get(name)
+  def apply(name: String): Option[Val[_]] = prototypeMap.get(name)
 
   /**
    * Test if a variable with a given name is present in the data set.
@@ -46,28 +46,28 @@ case class PrototypeSet(prototypes: Seq[Prototype[_]], explore: Set[String] = Se
    */
   def contains(name: String): Boolean = prototypeMap.contains(name)
 
-  def explored: Seq[Prototype[_]] = prototypes.filter(explored)
+  def explored: Seq[Val[_]] = prototypes.filter(explored)
 
-  def explored(p: Prototype[_]): Boolean = p.`type`.isArray && explore.contains(p.name)
+  def explored(p: Val[_]): Boolean = p.`type`.isArray && explore.contains(p.name)
 
-  override def iterator: Iterator[Prototype[_]] = prototypes.iterator
+  override def iterator: Iterator[Val[_]] = prototypes.iterator
 
   def explore(d: String*) = copy(explore = explore ++ d)
 
-  def ++(d: Traversable[Prototype[_]]) = copy(prototypes = d.toList ::: prototypes.toList)
+  def ++(d: Traversable[Val[_]]) = copy(prototypes = d.toList ::: prototypes.toList)
 
   def +(set: PrototypeSet): PrototypeSet = copy(prototypes = set.prototypes.toList ::: prototypes.toList)
 
-  def +(d: Prototype[_]) = copy(prototypes = d :: prototypes.toList)
+  def +(d: Val[_]) = copy(prototypes = d :: prototypes.toList)
 
-  def -(d: Prototype[_]) = copy(prototypes = prototypes.filter(_.name != d.name).toList)
+  def -(d: Val[_]) = copy(prototypes = prototypes.filter(_.name != d.name).toList)
 
-  def --(d: Traversable[Prototype[_]]) = {
+  def --(d: Traversable[Val[_]]) = {
     val dset = d.map(_.name).toSet
     copy(prototypes = prototypes.filter(p ⇒ !dset.contains(p.name)).toList)
   }
 
-  def contains(data: Prototype[_]) = prototypeMap.contains(data.name)
+  def contains(data: Val[_]) = prototypeMap.contains(data.name)
 
   def toMap = prototypeMap
 

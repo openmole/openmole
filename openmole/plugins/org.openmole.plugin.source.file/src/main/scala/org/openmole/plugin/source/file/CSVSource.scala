@@ -18,7 +18,7 @@
 package org.openmole.plugin.source.file
 
 import monocle.macros.Lenses
-import org.openmole.core.context.{ Context, Prototype, Variable }
+import org.openmole.core.context.{ Context, Val, Variable }
 import org.openmole.core.dsl._
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
@@ -52,8 +52,8 @@ object CSVSource {
 @Lenses case class CSVSource(
     path:        FromContext[String],
     config:      InputOutputConfig,
-    columns:     Vector[(String, Prototype[_])],
-    fileColumns: Vector[(String, File, Prototype[File])],
+    columns:     Vector[(String, Val[_])],
+    fileColumns: Vector[(String, File, Val[File])],
     separator:   Option[Char]
 ) extends Source with CSVToVariables {
 

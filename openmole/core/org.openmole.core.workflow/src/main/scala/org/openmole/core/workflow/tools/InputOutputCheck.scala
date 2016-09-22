@@ -26,21 +26,21 @@ object InputOutputCheck {
 
   trait InputError
 
-  case class InputNotFound(input: Prototype[_]) extends InputError {
+  case class InputNotFound(input: Val[_]) extends InputError {
     override def toString = s"Input data '$input' has not been found"
   }
 
-  case class InputTypeMismatch(input: Prototype[_], found: Prototype[_]) extends InputError {
+  case class InputTypeMismatch(input: Val[_], found: Val[_]) extends InputError {
     override def toString = s"Input data named '$found' is of an incompatible with the required '$input'"
   }
 
   trait OutputError
 
-  case class OutputNotFound(output: Prototype[_]) extends OutputError {
+  case class OutputNotFound(output: Val[_]) extends OutputError {
     override def toString = s"Output data '$output' has not been found"
   }
 
-  case class OutputTypeMismatch(output: Prototype[_], variable: Variable[_]) extends OutputError {
+  case class OutputTypeMismatch(output: Val[_], variable: Variable[_]) extends OutputError {
     override def toString = s"""Type mismatch the content of the output value '${output.name}' of type '${variable.value.getClass}' is incompatible with the output variable '${output}'."""
   }
 

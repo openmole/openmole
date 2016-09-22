@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.domain
 
-import org.openmole.core.context.{ Prototype, PrototypeSet }
+import org.openmole.core.context.{ Val, PrototypeSet }
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.sampling._
@@ -40,11 +40,11 @@ package object collection {
     override def iterator(domain: FromContext[Iterator[T]]) = domain
   }
 
-  implicit def booleanPrototypeIsFactor(p: Prototype[Boolean]) = Factor(p, List(true, false))
+  implicit def booleanPrototypeIsFactor(p: Val[Boolean]) = Factor(p, List(true, false))
 
-  implicit def arrayPrototypeIsFinite[T] = new Finite[Prototype[Array[T]], T] with DomainInputs[Prototype[Array[T]]] {
-    override def inputs(domain: Prototype[Array[T]]): PrototypeSet = Seq(domain)
-    override def computeValues(domain: Prototype[Array[T]]) = FromContext.apply { (context, rng) ⇒
+  implicit def arrayPrototypeIsFinite[T] = new Finite[Val[Array[T]], T] with DomainInputs[Val[Array[T]]] {
+    override def inputs(domain: Val[Array[T]]): PrototypeSet = Seq(domain)
+    override def computeValues(domain: Val[Array[T]]) = FromContext.apply { (context, rng) ⇒
       context(domain).toIterable
     }
   }

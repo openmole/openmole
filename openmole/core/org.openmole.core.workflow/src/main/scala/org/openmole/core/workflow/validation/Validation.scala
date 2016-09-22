@@ -45,21 +45,21 @@ object Validation {
   private def paramsToMap(params: Iterable[Default[_]]) =
     params.map {
       p ⇒ p.prototype.name → p.prototype
-    }.toMap[String, Prototype[_]]
+    }.toMap[String, Val[_]]
 
-  private def prototypesToMap(prototypes: Iterable[Prototype[_]]) = prototypes.map { i ⇒ i.name → i }.toMap[String, Prototype[_]]
+  private def prototypesToMap(prototypes: Iterable[Val[_]]) = prototypes.map { i ⇒ i.name → i }.toMap[String, Val[_]]
 
   private def separateDefaults(p: DefaultSet) = {
     val (po, pno) = p.partition(_.`override`)
     (paramsToMap(po), paramsToMap(pno))
   }
 
-  abstract class errorDetect(mole: Mole, implicits: Iterable[Prototype[_]], sources: Sources, hooks: Hooks) {
-    def checkPrototypeMatch(p: Prototype[_]): Problem
+  abstract class errorDetect(mole: Mole, implicits: Iterable[Val[_]], sources: Sources, hooks: Hooks) {
+    def checkPrototypeMatch(p: Val[_]): Problem
     val implicitMap = prototypesToMap(implicits)
   }
 
-  def taskTypeErrors(mole: Mole)(capsules: Iterable[Capsule], implicits: Iterable[Prototype[_]], sources: Sources, hooks: Hooks) = {
+  def taskTypeErrors(mole: Mole)(capsules: Iterable[Capsule], implicits: Iterable[Val[_]], sources: Sources, hooks: Hooks) = {
 
     val implicitMap = prototypesToMap(implicits)
 
@@ -72,7 +72,7 @@ object Validation {
       (defaultsOverride, defaultsNonOverride) = separateDefaults(c.task.defaults)
       input ← c.task.inputs
     } yield {
-      def checkPrototypeMatch(p: Prototype[_]) =
+      def checkPrototypeMatch(p: Val[_]) =
         if (!input.isAssignableFrom(p)) Some(WrongType(s, input, p))
         else None
 
@@ -106,7 +106,7 @@ object Validation {
     }
   }
 
-  def sourceTypeErrors(mole: Mole, implicits: Iterable[Prototype[_]], sources: Sources, hooks: Hooks) = {
+  def sourceTypeErrors(mole: Mole, implicits: Iterable[Val[_]], sources: Sources, hooks: Hooks) = {
     val implicitMap = prototypesToMap(implicits)
 
     val x = (for {
@@ -117,7 +117,7 @@ object Validation {
       receivedInputs = TreeMap(TypeUtil.validTypes(mole, sources, hooks)(sl).map { p ⇒ p.name → p }.toSeq: _*)
       i ← so.inputs
     } yield {
-      def checkPrototypeMatch(p: Prototype[_]) =
+      def checkPrototypeMatch(p: Val[_]) =
         if (!i.isAssignableFrom(p)) Some(WrongSourceType(sl, so, i, p))
         else None
 
@@ -139,10 +139,10 @@ object Validation {
     x.flatten
   }
 
-  def typeErrorsTopMole(mole: Mole, implicits: Iterable[Prototype[_]], sources: Sources, hooks: Hooks) =
+  def typeErrorsTopMole(mole: Mole, implicits: Iterable[Val[_]], sources: Sources, hooks: Hooks) =
     taskTypeErrors(mole)(mole.capsules, implicits, sources, hooks)
 
-  def typeErrorsMoleTask(mole: Mole, implicits: Iterable[Prototype[_]]) =
+  def typeErrorsMoleTask(mole: Mole, implicits: Iterable[Val[_]]) =
     taskTypeErrors(mole)(mole.capsules.filterNot(_ == mole.root), implicits, Sources.empty, Hooks.empty)
 
   def topologyErrors(mole: Mole) = {
@@ -227,14 +227,14 @@ object Validation {
 
   private def moleTaskInputMaps(moleTask: MoleTask) =
     (moleTask.mole.root.inputs(moleTask.mole, Sources.empty, Hooks.empty).toList ++
-      moleTask.inputs).map(i ⇒ i.name → i).toMap[String, Prototype[_]]
+      moleTask.inputs).map(i ⇒ i.name → i).toMap[String, Val[_]]
 
   def moleTaskImplicitsErrors(moleTask: MoleTask, capsule: Capsule) = {
     val inputs = moleTaskInputMaps(moleTask)
     moleTask.implicits.filterNot(inputs.contains).map(i ⇒ MissingMoleTaskImplicit(capsule, i))
   }
 
-  def hookErrors(m: Mole, implicits: Iterable[Prototype[_]], sources: Sources, hooks: Hooks): Iterable[Problem] = {
+  def hookErrors(m: Mole, implicits: Iterable[Val[_]], sources: Sources, hooks: Hooks): Iterable[Problem] = {
     val implicitMap = prototypesToMap(implicits)
 
     def inputsErrors =
@@ -263,7 +263,7 @@ object Validation {
             case (None, None, None, None)        ⇒ None
           }
 
-        def checkPrototypeMatch(p: Prototype[_]) =
+        def checkPrototypeMatch(p: Val[_]) =
           if (!i.isAssignableFrom(p)) Some(WrongHookType(c, h, i, p)) else None
 
         computed match {

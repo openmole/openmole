@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.sampling.combine
 
-import org.openmole.core.context.{ Context, Prototype, PrototypeSet, Variable }
+import org.openmole.core.context.{ Context, Val, PrototypeSet, Variable }
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.sampling._
 import org.openmole.tool.random.RandomProvider
@@ -29,7 +29,7 @@ object CompleteSampling {
 class CompleteSampling(val samplings: Sampling*) extends Sampling {
 
   override def inputs = PrototypeSet.empty ++ samplings.flatMap { _.inputs }
-  override def prototypes: Iterable[Prototype[_]] = samplings.flatMap { _.prototypes }
+  override def prototypes: Iterable[Val[_]] = samplings.flatMap { _.prototypes }
 
   override def apply() = FromContext.apply { (context, rng) ⇒
     if (samplings.isEmpty) Iterator.empty

@@ -16,7 +16,7 @@
  */
 package org.openmole.plugin.sampling.combine
 
-import org.openmole.core.context.{ Prototype, PrototypeSet }
+import org.openmole.core.context.{ Val, PrototypeSet }
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.sampling._
 
@@ -28,7 +28,7 @@ class ConcatenateSampling(val samplings: Sampling*) extends Sampling {
 
   override lazy val inputs = PrototypeSet.empty ++ samplings.flatMap { _.inputs }
 
-  override def prototypes: Iterable[Prototype[_]] = samplings.head.prototypes
+  override def prototypes: Iterable[Val[_]] = samplings.head.prototypes
 
   override def apply() = FromContext.apply {
     (context, rng) ⇒ samplings.toIterator.flatMap(_().from(context)(rng))

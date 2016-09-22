@@ -17,14 +17,14 @@
 
 package org.openmole.core.workflow.task
 
-import org.openmole.core.context.{ Prototype, Variable }
+import org.openmole.core.context.{ Val, Variable }
 import org.openmole.core.workflow.dsl._
 
 import scala.reflect.ClassTag
 
 object ToArrayTask {
 
-  def apply(prototypes: Prototype[T] forSome { type T }*) =
+  def apply(prototypes: Val[T] forSome { type T }*) =
     ClosureTask("ToArrayTask") {
       (context, _, _) ⇒
         prototypes.map {

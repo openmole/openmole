@@ -19,7 +19,7 @@ package org.openmole.plugin.task.template
 
 import java.io.File
 
-import org.openmole.core.context.Prototype
+import org.openmole.core.context.Val
 import org.openmole.core.expansion.ExpandedString
 import org.openmole.core.workflow.dsl
 import org.openmole.core.workflow.dsl._
@@ -28,8 +28,8 @@ import org.openmole.core.workflow.task._
 object TemplateFileFromInputTask {
 
   def apply(
-    template: Prototype[File],
-    output:   Prototype[File]
+    template: Val[File],
+    output:   Val[File]
   ) =
     ClosureTask("TemplateFileFromInputTask") { (context, rng, executionContext) ⇒
       implicit val impRng = rng

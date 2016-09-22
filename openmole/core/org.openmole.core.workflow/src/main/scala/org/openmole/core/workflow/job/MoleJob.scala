@@ -50,7 +50,7 @@ import MoleJob._
 
 class MoleJob(
     val task:               Task,
-    private var prototypes: Array[Prototype[Any]],
+    private var prototypes: Array[Val[Any]],
     private var values:     Array[Any],
     mostSignificantBits:    Long, leastSignificantBits: Long,
     private[workflow] var stateChangedCallBack: MoleJob.StateChangedCallBack

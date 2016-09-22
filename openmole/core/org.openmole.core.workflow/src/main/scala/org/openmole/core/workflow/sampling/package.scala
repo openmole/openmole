@@ -28,7 +28,7 @@ package sampling {
 
   trait SamplingPackage {
 
-    implicit class PrototypeFactorDecorator[T](p: Prototype[T]) {
+    implicit class PrototypeFactorDecorator[T](p: Val[T]) {
       def in[D](d: D): Factor[D, T] = Factor(p, d)
       def is(d: FromContext[T]) = Factor(p, d)
     }

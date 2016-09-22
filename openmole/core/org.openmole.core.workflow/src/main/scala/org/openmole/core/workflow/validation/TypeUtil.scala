@@ -17,7 +17,7 @@
 
 package org.openmole.core.workflow.validation
 
-import org.openmole.core.context.{ Prototype, PrototypeType }
+import org.openmole.core.context.{ Val, ValType }
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
@@ -26,15 +26,15 @@ import scala.collection.mutable.{ HashMap, HashSet, ListBuffer }
 
 object TypeUtil {
 
-  def receivedTypes(mole: Mole, sources: Sources, hooks: Hooks)(slot: Slot): Iterable[Prototype[_]] =
+  def receivedTypes(mole: Mole, sources: Sources, hooks: Hooks)(slot: Slot): Iterable[Val[_]] =
     validTypes(mole, sources, hooks)(slot).map { _.toPrototype }
 
   sealed trait ComputedType
-  case class InvalidType(name: String, direct: Seq[PrototypeType[_]], toArray: Seq[PrototypeType[_]], fromArray: Seq[PrototypeType[_]]) extends ComputedType
-  case class ValidType(name: String, `type`: PrototypeType[_], toArray: Boolean) extends ComputedType {
+  case class InvalidType(name: String, direct: Seq[ValType[_]], toArray: Seq[ValType[_]], fromArray: Seq[ValType[_]]) extends ComputedType
+  case class ValidType(name: String, `type`: ValType[_], toArray: Boolean) extends ComputedType {
     def toPrototype =
-      if (toArray) Prototype(name)(`type`.toArray)
-      else Prototype(name)(`type`)
+      if (toArray) Val(name)(`type`.toArray)
+      else Val(name)(`type`)
   }
 
   def validTypes(mole: Mole, sources: Sources, hooks: Hooks)(
@@ -74,9 +74,9 @@ object TypeUtil {
   }
 
   private def computeTransmissions(mole: Mole, sources: Sources, hooks: Hooks)(transitions: Iterable[ITransition], dataChannels: Iterable[DataChannel]) = {
-    val direct = new HashMap[String, ListBuffer[PrototypeType[_]]] // Direct transmission through transition or data channel
-    val toArray = new HashMap[String, ListBuffer[PrototypeType[_]]] // Transmission through exploration transition
-    val fromArray = new HashMap[String, ListBuffer[PrototypeType[_]]] // Transmission through aggregation transition
+    val direct = new HashMap[String, ListBuffer[ValType[_]]] // Direct transmission through transition or data channel
+    val toArray = new HashMap[String, ListBuffer[ValType[_]]] // Transmission through exploration transition
+    val fromArray = new HashMap[String, ListBuffer[ValType[_]]] // Transmission through aggregation transition
     val varNames = new HashSet[String]
 
     for (t ← transitions; d ← t.data(mole, sources, hooks)) {

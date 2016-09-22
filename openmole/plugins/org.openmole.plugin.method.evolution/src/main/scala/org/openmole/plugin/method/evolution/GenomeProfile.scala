@@ -18,7 +18,7 @@
 package org.openmole.plugin.method.evolution
 
 import fr.iscpif.mgo.algorithm.{ noisyprofile, profile }
-import org.openmole.core.context.{ Context, Prototype, Variable }
+import org.openmole.core.context.{ Context, Val, Variable }
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.dsl._
@@ -29,7 +29,7 @@ import scalaz._
 object GenomeProfile {
 
   def apply(
-    x:         Prototype[Double],
+    x:         Val[Double],
     nX:        Int,
     genome:    Genome,
     objective: Objective
@@ -54,12 +54,12 @@ object GenomeProfile {
   }
 
   def apply(
-    x:           Prototype[Double],
+    x:           Val[Double],
     nX:          Int,
     genome:      Genome,
     objective:   Objective,
     replication: Replication[Id],
-    paretoSize:  Int               = 20
+    paretoSize:  Int             = 20
   ): StochasticGenomeProfile = {
     val ug = UniqueGenome(genome)
 
@@ -154,7 +154,7 @@ object GenomeProfile {
 
         lazy val integration = implicitly[mgo.openmole.Integration[MGOAG, V, P] with mgo.openmole.Stochastic with mgo.openmole.Profile[MGOAG]]
 
-        def samples = Prototype[Long]("samples", namespace)
+        def samples = Val[Long]("samples", namespace)
 
         def buildIndividual(genome: G, context: Context): I =
           operations.buildIndividual(genome, variablesToPhenotype(context))

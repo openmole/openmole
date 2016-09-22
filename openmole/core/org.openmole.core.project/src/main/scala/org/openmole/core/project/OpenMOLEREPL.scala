@@ -39,7 +39,11 @@ object OpenMOLEREPL {
      """.stripMargin
   }
 
-  def dslImport = Seq(classOf[org.openmole.core.dsl.DSLPackage].getPackage.getName + "._") ++ autoImports
+  def dslImport = Seq(
+    classOf[org.openmole.core.dsl.DSLPackage].getPackage.getName + "._"
+  ) ++
+    autoImports
+
   def imports = initialisationCommands(dslImport).mkString("\n")
 
   def initialisationCommands(imports: Seq[String]) =

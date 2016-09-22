@@ -17,9 +17,9 @@
 
 package org.openmole.plugin.method.abc
 
-import org.openmole.core.context.Prototype
+import org.openmole.core.context.Val
 
 trait ABC {
-  def targetPrototypes: Seq[Prototype[Double]]
-  def priorPrototypes: Seq[Prototype[Double]]
+  def targetPrototypes: Seq[Val[Double]]
+  def priorPrototypes: Seq[Val[Double]]
 }

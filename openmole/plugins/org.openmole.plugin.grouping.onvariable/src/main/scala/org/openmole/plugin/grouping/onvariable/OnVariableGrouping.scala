@@ -24,11 +24,11 @@ import org.openmole.core.workflow.mole._
 
 object OnVariableGrouping {
 
-  def apply(prototypes: Prototype[_]*) = new OnVariableGrouping(None, prototypes: _*)
-  def apply(numberOfMoleJobs: Int, prototypes: Prototype[_]*) = new OnVariableGrouping(Some(numberOfMoleJobs), prototypes: _*)
+  def apply(prototypes: Val[_]*) = new OnVariableGrouping(None, prototypes: _*)
+  def apply(numberOfMoleJobs: Int, prototypes: Val[_]*) = new OnVariableGrouping(Some(numberOfMoleJobs), prototypes: _*)
 }
 
-class OnVariableGrouping(numberOfMoleJobs: Option[Int], prototypes: Prototype[_]*) extends Grouping {
+class OnVariableGrouping(numberOfMoleJobs: Option[Int], prototypes: Val[_]*) extends Grouping {
 
   def apply(context: Context, groups: Iterable[(MoleJobGroup, Iterable[MoleJob])]): MoleJobGroup =
     new MoleJobGroup(prototypes.flatMap { context.option(_) }.toSeq: _*)

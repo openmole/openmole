@@ -34,7 +34,7 @@ object SaveHook {
 
   implicit def isIO = InputOutputBuilder(SaveHook.config)
 
-  def apply(file: FromContext[File], prototypes: Prototype[_]*) =
+  def apply(file: FromContext[File], prototypes: Val[_]*) =
     new SaveHook(
       file,
       prototypes.toVector,
@@ -44,11 +44,11 @@ object SaveHook {
 
 @Lenses case class SaveHook(
     file:       FromContext[File],
-    prototypes: Vector[Prototype[_]],
+    prototypes: Vector[Val[_]],
     config:     InputOutputConfig
 ) extends Hook with ValidateHook {
 
-  override def validate(inputs: Seq[Prototype[_]]) = file.validate(inputs)
+  override def validate(inputs: Seq[Val[_]]) = file.validate(inputs)
 
   override def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider) = {
     val saveContext: Context = prototypes.map(p ⇒ context.variable(p).getOrElse(throw new UserBadDataError(s"Variable $p has not been found")))

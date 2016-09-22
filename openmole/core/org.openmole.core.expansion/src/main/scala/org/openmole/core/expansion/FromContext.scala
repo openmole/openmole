@@ -38,7 +38,7 @@ object FromContext {
           f.from(context)(rng)(res)
         }
 
-        override def validate(inputs: Seq[Prototype[_]]): Seq[Throwable] =
+        override def validate(inputs: Seq[Val[_]]): Seq[Throwable] =
           fa.validate(inputs) ++ f.validate(inputs)
       }
 
@@ -49,7 +49,7 @@ object FromContext {
     new FromContext[T] {
       val proxy = Cache(ScalaWrappedCompilation.dynamic[T](code))
       override def from(context: ⇒ Context)(implicit rng: RandomProvider): T = proxy()().from(context)
-      override def validate(inputs: Seq[Prototype[_]]): Seq[Throwable] = proxy().validate(inputs).toSeq
+      override def validate(inputs: Seq[Val[_]]): Seq[Throwable] = proxy().validate(inputs).toSeq
     }
 
   implicit def codeToFromContextFloat(code: String) = codeToFromContext[Float](code)
@@ -67,10 +67,10 @@ object FromContext {
 
   implicit def fromTToContext[T](t: T): FromContext[T] = FromContext.value[T](t)
 
-  def prototype[T](p: Prototype[T]) =
+  def prototype[T](p: Val[T]) =
     new FromContext[T] {
       override def from(context: ⇒ Context)(implicit rng: RandomProvider) = context(p)
-      def validate(inputs: Seq[Prototype[_]]): Seq[Throwable] = {
+      def validate(inputs: Seq[Val[_]]): Seq[Throwable] = {
         if (inputs.exists(_ == p)) Seq.empty else Seq(new UserBadDataError(s"Prototype $p not found"))
       }
     }
@@ -78,17 +78,17 @@ object FromContext {
   def value[T](t: T): FromContext[T] =
     new FromContext[T] {
       def from(context: ⇒ Context)(implicit rng: RandomProvider): T = t
-      def validate(inputs: Seq[Prototype[_]]): Seq[Throwable] = Seq.empty
+      def validate(inputs: Seq[Val[_]]): Seq[Throwable] = Seq.empty
     }
 
   def apply[T](f: (Context, RandomProvider) ⇒ T) =
     new FromContext[T] {
       def from(context: ⇒ Context)(implicit rng: RandomProvider) = f(context, rng)
-      def validate(inputs: Seq[Prototype[_]]): Seq[Throwable] = Seq.empty
+      def validate(inputs: Seq[Val[_]]): Seq[Throwable] = Seq.empty
     }
 
   implicit def booleanToCondition(b: Boolean) = FromContext.value(b)
-  implicit def booleanPrototypeIsCondition(p: Prototype[Boolean]) = prototype(p)
+  implicit def booleanPrototypeIsCondition(p: Val[Boolean]) = prototype(p)
 
   implicit class ConditionDecorator(f: Condition) {
     def unary_! = f.map(v ⇒ !v)
@@ -96,13 +96,13 @@ object FromContext {
     def &&(d: Condition): Condition =
       new FromContext[Boolean] {
         override def from(context: ⇒ Context)(implicit rng: RandomProvider): Boolean = f.from(context) && d.from(context)
-        override def validate(inputs: Seq[Prototype[_]]): Seq[Throwable] = f.validate(inputs) ++ d.validate(inputs)
+        override def validate(inputs: Seq[Val[_]]): Seq[Throwable] = f.validate(inputs) ++ d.validate(inputs)
       }
 
     def ||(d: Condition): Condition =
       new FromContext[Boolean] {
         override def from(context: ⇒ Context)(implicit rng: RandomProvider): Boolean = f.from(context) || d.from(context)
-        override def validate(inputs: Seq[Prototype[_]]): Seq[Throwable] = f.validate(inputs) ++ d.validate(inputs)
+        override def validate(inputs: Seq[Val[_]]): Seq[Throwable] = f.validate(inputs) ++ d.validate(inputs)
       }
   }
 
@@ -120,7 +120,7 @@ object FromContext {
 
 trait FromContext[+T] {
   def from(context: ⇒ Context)(implicit rng: RandomProvider): T
-  def validate(inputs: Seq[Prototype[_]]): Seq[Throwable]
+  def validate(inputs: Seq[Val[_]]): Seq[Throwable]
 }
 
 object Expandable {

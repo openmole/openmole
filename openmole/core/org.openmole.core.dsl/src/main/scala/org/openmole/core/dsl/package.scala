@@ -17,7 +17,7 @@
 
 package org.openmole.core
 
-import org.openmole.core.context.Prototype
+import org.openmole.core.context.Val
 import org.openmole.core.macros.ExtractValName
 import org.openmole.core.macros.ExtractValName._
 
@@ -38,11 +38,11 @@ package dsl {
       with Classes
       with workflow.ExportedPackage {
 
-    def valImpl[T: c.WeakTypeTag](c: MContext): c.Expr[Prototype[T]] = {
+    def valImpl[T: c.WeakTypeTag](c: MContext): c.Expr[Val[T]] = {
       import c.universe._
       val n = getValName(c)
       val wt = weakTypeTag[T].tpe
-      c.Expr[Prototype[T]](q"Prototype[$wt](${n})")
+      c.Expr[Val[T]](q"Prototype[$wt](${n})")
     }
 
     implicit lazy val implicitContext = Context.empty
@@ -65,13 +65,14 @@ package dsl {
     implicit def seqIsFunctor = new Functor[Seq] {
       override def map[A, B](fa: Seq[A])(f: (A) ⇒ B): Seq[B] = fa.map(f)
     }
+
+    type Val[T] = org.openmole.core.context.Val[T]
   }
 
 }
 
 package object dsl extends DSLPackage {
   import scala.language.experimental.macros
-  type Val[T] = Prototype[T]
-  def Val[T]: Prototype[T] = macro valImpl[T]
-  def Val[T: Manifest](name: String): Prototype[T] = Prototype(name)
+  def Val[T]: Val[T] = macro valImpl[T]
+  def Val[T: Manifest](name: String): Val[T] = Val(name)
 }

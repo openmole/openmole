@@ -114,8 +114,8 @@ class Capsule(_task: Task, val strainer: Boolean) {
       val allNames = bySlot.toSeq.flatMap(_.map(_.name)).distinct
       val byName = bySlot.map(_.toSeq.groupBy(_.name).withDefaultValue(Seq.empty))
 
-      def haveAllTheSameType(ps: Seq[Prototype[_]]) = ps.map(_.`type`).distinct.size == 1
-      def inAllSlots(ps: Seq[Prototype[_]]) = ps.size == noStrainer.size
+      def haveAllTheSameType(ps: Seq[Val[_]]) = ps.map(_.`type`).distinct.size == 1
+      def inAllSlots(ps: Seq[Val[_]]) = ps.size == noStrainer.size
 
       val prototypes =
         for {

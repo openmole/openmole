@@ -16,7 +16,7 @@
  */
 package org.openmole.plugin.tool.pattern
 
-import org.openmole.core.context.Prototype
+import org.openmole.core.context.Val
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.puzzle._
@@ -30,7 +30,7 @@ object MasterSlave {
   def apply(
     bootstrap: Puzzle,
     master:    Task,
-    state:     Prototype[_]*
+    state:     Val[_]*
   )(slave: Puzzle) = {
 
     val masterCapsule = MasterCapsule(master, state: _*)

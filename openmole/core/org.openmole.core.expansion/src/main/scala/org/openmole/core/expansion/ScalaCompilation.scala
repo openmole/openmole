@@ -53,13 +53,13 @@ trait ScalaCompilation {
     evaluated
   }
 
-  def toScalaNativeType(t: PrototypeType[_]): PrototypeType[_] = {
+  def toScalaNativeType(t: ValType[_]): ValType[_] = {
     def native = {
-      val (contentType, level) = PrototypeType.unArrayify(t)
+      val (contentType, level) = ValType.unArrayify(t)
       for {
         m ← classEquivalence(contentType.runtimeClass).map(_.manifest)
-      } yield (0 until level).foldLeft(PrototypeType.unsecure(m)) {
-        (c, _) ⇒ c.toArray.asInstanceOf[PrototypeType[Any]]
+      } yield (0 until level).foldLeft(ValType.unsecure(m)) {
+        (c, _) ⇒ c.toArray.asInstanceOf[ValType[Any]]
       }
     }
     native getOrElse t
@@ -72,7 +72,7 @@ object ScalaWrappedCompilation {
 
   def static[R](
     code:      String,
-    inputs:    Seq[Prototype[_]],
+    inputs:    Seq[Val[_]],
     wrapping:  OutputWrapping[R] = RawOutput(),
     libraries: Seq[File]         = Seq.empty,
     plugins:   Seq[File]         = Seq.empty
@@ -82,7 +82,7 @@ object ScalaWrappedCompilation {
     val compilation =
       new ScalaWrappedCompilation with StaticHeader {
         type RETURN = R
-        def returnType: PrototypeType[_ <: R] = PrototypeType(m)
+        def returnType: ValType[_ <: R] = ValType(m)
         override def inputs = _inputs
         override val wrapping = _wrapping
         override def source: String = code
@@ -99,7 +99,7 @@ object ScalaWrappedCompilation {
 
     new ScalaWrappedCompilation with DynamicHeader {
       type RETURN = R
-      def returnType = PrototypeType.apply[R]
+      def returnType = ValType.apply[R]
       override val wrapping = _wrapping
       override def source: String = code
       override def plugins: Seq[File] = Seq.empty
@@ -134,26 +134,26 @@ import org.openmole.core.expansion.ScalaWrappedCompilation._
 trait ScalaWrappedCompilation <: ScalaCompilation { compilation ⇒
 
   type RETURN
-  def returnType: PrototypeType[_ <: RETURN]
+  def returnType: ValType[_ <: RETURN]
 
   def wrapping: OutputWrapping[RETURN]
   def source: String
 
   def prefix = "_input_value_"
 
-  def function(inputs: Seq[Prototype[_]]) =
+  def function(inputs: Seq[Val[_]]) =
     compile(script(inputs)).map { evaluated ⇒
       (evaluated, evaluated.getClass.getMethod("apply", classOf[Context], classOf[RandomProvider]))
     }
 
-  def closure(inputs: Seq[Prototype[_]]) =
+  def closure(inputs: Seq[Val[_]]) =
     function(inputs).map {
       case (evaluated, method) ⇒
         val closure: ContextClosure[RETURN] = (context: Context, rng: RandomProvider) ⇒ method.invoke(evaluated, context, rng).asInstanceOf[RETURN]
         closure
     }
 
-  def script(inputs: Seq[Prototype[_]]) =
+  def script(inputs: Seq[Val[_]]) =
     s"""(${prefix}context: ${classOf[Context].getCanonicalName}, ${prefix}RNGProvider: ${classOf[RandomProvider].getCanonicalName}) => {
           |  object $inputObject {
           |    ${inputs.toSeq.map(i ⇒ s"""var ${i.name} = ${prefix}context("${i.name}").asInstanceOf[${toScalaNativeType(i.`type`)}]""").mkString("; ")}
@@ -172,14 +172,14 @@ trait ScalaWrappedCompilation <: ScalaCompilation { compilation ⇒
 
 trait DynamicHeader { this: ScalaWrappedCompilation ⇒
 
-  val cache = Cache(collection.mutable.HashMap[Seq[Prototype[_]], Try[ContextClosure[RETURN]]]())
+  val cache = Cache(collection.mutable.HashMap[Seq[Val[_]], Try[ContextClosure[RETURN]]]())
 
   def compiled(context: Context): Try[ContextClosure[RETURN]] = {
     val contextPrototypes = context.toSeq.map { case (_, v) ⇒ v.prototype }
     compiled(contextPrototypes)
   }
 
-  def compiled(inputs: Seq[Prototype[_]]): Try[ContextClosure[RETURN]] =
+  def compiled(inputs: Seq[Val[_]]): Try[ContextClosure[RETURN]] =
     cache().synchronized {
       val allInputMap = inputs.groupBy(_.name)
 
@@ -197,7 +197,7 @@ trait DynamicHeader { this: ScalaWrappedCompilation ⇒
       }
     }
 
-  def validate(inputs: Seq[Prototype[_]]): Option[Throwable] = {
+  def validate(inputs: Seq[Val[_]]): Option[Throwable] = {
     compiled(inputs) match {
       case Success(_) ⇒ None
       case Failure(e) ⇒ Some(e)
@@ -206,7 +206,7 @@ trait DynamicHeader { this: ScalaWrappedCompilation ⇒
 }
 
 trait StaticHeader { this: ScalaWrappedCompilation ⇒
-  def inputs: Seq[Prototype[_]]
+  def inputs: Seq[Val[_]]
   val functionCode = Cache { closure(inputs) }
   def compiled(context: Context): Try[ContextClosure[RETURN]] = functionCode()
 }

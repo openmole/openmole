@@ -17,7 +17,7 @@
 
 package org.openmole.core.workflow.validation
 
-import org.openmole.core.context.Prototype
+import org.openmole.core.context.Val
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
@@ -31,7 +31,7 @@ import org.openmole.core.workflow.dsl._
 class TypeUtilSpec extends FlatSpec with Matchers {
 
   "To array finder" should "not detect a toArray case" in {
-    val p = Prototype[Int]("p")
+    val p = Val[Int]("p")
 
     val t1 = EmptyTask() set (outputs += p)
     val t2 = EmptyTask() set (inputs += p)
@@ -52,7 +52,7 @@ class TypeUtilSpec extends FlatSpec with Matchers {
   }
 
   "To array finder" should "detect a toArray case" in {
-    val p = Prototype[Int]("p")
+    val p = Val[Int]("p")
 
     val t1 = EmptyTask() set (outputs += p)
     val t2 = EmptyTask() set (outputs += p)
