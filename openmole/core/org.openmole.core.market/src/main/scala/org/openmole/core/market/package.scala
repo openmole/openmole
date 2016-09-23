@@ -18,6 +18,10 @@
 package org.openmole.core
 
 import fr.iscpif.gridscale.http.HTTPStorage
+import org.openmole.core.context._
+import org.openmole.core.expansion._
+import org.openmole.core.workspace._
+import org.openmole.tool.random._
 
 package object market {
 
@@ -25,6 +29,14 @@ package object market {
   import org.json4s.jackson.Serialization
   implicit val formats = Serialization.formats(NoTypeHints)
 
-  def marketIndex = HTTPStorage.download(buildinfo.marketAddress)(Serialization.read[MarketIndex](_))
+  // FIXME support list of indexes
+  val marketIndexLocation = ConfigurationLocation("Market", "Index", Some(buildinfo.marketAddress))
+  Workspace setDefault marketIndexLocation
+
+  lazy val indexURL =
+    ExpandedString(Workspace.preference(marketIndexLocation)).
+      from(Context("version" → buildinfo.version))(RandomProvider.empty)
+
+  def marketIndex = HTTPStorage.download(indexURL)(Serialization.read[MarketIndex](_))
 
 }
