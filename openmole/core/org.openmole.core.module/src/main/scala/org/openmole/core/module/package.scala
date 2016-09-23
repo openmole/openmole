@@ -26,13 +26,18 @@ import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.workspace.{ ConfigurationLocation, Workspace }
 import org.openmole.tool.file._
 import org.openmole.tool.stream._
-import org.openmole.core.buildinfo
+import org.openmole.core.expansion._
+import org.openmole.core.context._
+import org.openmole.tool.random.RandomProvider
 
 package object module {
 
   val moduleIndexes = ConfigurationLocation("Module", "Indexes", Some(Seq[String](buildinfo.moduleAddress)))
-
   Workspace setDefault moduleIndexes
+
+  lazy val indexes =
+    Workspace.preference(moduleIndexes).
+      map(ExpandedString(_).from(Context("version" → buildinfo.version))(RandomProvider.empty))
 
   lazy val pluginDirectory = Workspace.location / "plugins"
   pluginDirectory.mkdirs

@@ -17,6 +17,7 @@
 package org.openmole.gui.shared
 
 import org.openmole.core.buildinfo._
+import org.openmole.core.market.{ MarketIndex, MarketIndexEntry }
 import org.openmole.gui.ext.data._
 
 trait Api {

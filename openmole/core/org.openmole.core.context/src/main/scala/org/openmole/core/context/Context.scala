@@ -27,16 +27,15 @@ import scala.collection.immutable.TreeMap
 object Context {
 
   implicit def variableToContextConverter(variable: Variable[_]) = Context(variable)
-  implicit def variablesToContextConverter(variables: Traversable[Variable[_]]): Context = Context(variables)
+  implicit def variablesToContextConverter(variables: Seq[Variable[_]]): Context = Context(variables: _*)
 
   def fromMap(v: Traversable[(String, Variable[_])]) = new Context {
     val variables = TreeMap.empty[String, Variable[_]] ++ v
   }
 
-  def apply(v: Variable[_]*): Context = apply(v)
-  def apply(v: Traversable[Variable[_]]): Context = Context.fromMap(v.map { v ⇒ v.prototype.name → v })
+  def apply(v: T forSome { type T <: Variable[_] }*): Context = Context.fromMap(v.map { v ⇒ v.prototype.name → v })
 
-  val empty = apply(Iterable.empty)
+  val empty = apply()
 
   def buildRNG(context: Context): scala.util.Random = random.Random(context(Variable.openMOLESeed)).toScala
 

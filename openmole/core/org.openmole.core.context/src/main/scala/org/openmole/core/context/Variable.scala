@@ -24,7 +24,8 @@ import org.openmole.tool.random
 import scala.util.Random
 
 object Variable {
-  implicit def tupleToVariable[T](t: (Val[T], T)) = apply(t._1, t._2)
+  implicit def tupleWithValToVariable[T](t: (Val[T], T)) = apply(t._1, t._2)
+  implicit def tubleToVariable[T: Manifest](t: (String, T)) = apply(Val[T](t._1), t._2)
 
   def apply[T](p: Val[T], v: T) = new Variable[T] {
     val prototype = p

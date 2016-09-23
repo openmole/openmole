@@ -90,6 +90,7 @@ def allCore = Seq(
   project,
   buildinfo,
   module,
+  market,
   context,
   expansion)
 
@@ -154,7 +155,11 @@ lazy val updater = OsgiProject(coreDir, "org.openmole.core.updater", imports = S
 
 lazy val fileService = OsgiProject(coreDir, "org.openmole.core.fileservice", imports = Seq("*")) dependsOn (tools, updater, workspace, openmoleTar) settings(coreSettings: _*)
 
-lazy val module = OsgiProject(coreDir, "org.openmole.core.module", imports = Seq("*")) dependsOn (buildinfo, openmoleHash, openmoleFile, pluginManager) settings(coreSettings: _*) settings (
+lazy val module = OsgiProject(coreDir, "org.openmole.core.module", imports = Seq("*")) dependsOn (buildinfo, expansion, openmoleHash, openmoleFile, pluginManager) settings(coreSettings: _*) settings (
+  libraryDependencies += Libraries.gridscaleHTTP,
+  libraryDependencies += Libraries.json4s)
+
+lazy val market = OsgiProject(coreDir, "org.openmole.core.market", imports = Seq("*")) enablePlugins (ScalaJSPlugin)  dependsOn (buildinfo, expansion, openmoleHash, openmoleFile, pluginManager) settings(coreSettings: _*) settings (
   libraryDependencies += Libraries.gridscaleHTTP,
   libraryDependencies += Libraries.json4s)
 
@@ -176,7 +181,7 @@ lazy val console = OsgiProject(coreDir, "org.openmole.core.console", bundleActiv
 
 lazy val project = OsgiProject(coreDir, "org.openmole.core.project", imports = Seq("*")) dependsOn (console, openmoleDSL) settings (OsgiKeys.importPackage := Seq("*")) settings(coreSettings: _*)
 
-lazy val buildinfo = OsgiProject(coreDir, "org.openmole.core.buildinfo", imports = Seq("*")) enablePlugins (ScalaJSPlugin) settings (buildInfoSettings: _*) settings (
+lazy val buildinfo = OsgiProject(coreDir, "org.openmole.core.buildinfo", imports = Seq("*")) settings (buildInfoSettings: _*) settings (
   sourceGenerators in Compile <+= buildInfo,
   buildInfoKeys :=
   Seq[BuildInfoKey](
@@ -465,13 +470,13 @@ lazy val datauiGUI: Project = OsgiProject(guiExt, "org.openmole.gui.ext.dataui")
   Libraries.scalaTagsJS,
   Libraries.scalajsDomJS) settings (defaultSettings: _*)
 
-lazy val sharedGUI = OsgiProject(guiDir / "shared", "org.openmole.gui.shared") dependsOn (dataGUI, buildinfo) settings (defaultSettings: _*)
+lazy val sharedGUI = OsgiProject(guiDir / "shared", "org.openmole.gui.shared") dependsOn (dataGUI, market) settings (defaultSettings: _*)
 
 val jqueryPath = s"META-INF/resources/webjars/jquery/${Libraries.jqueryVersion}/jquery.js"
 val acePath = s"META-INF/resources/webjars/ace/${Libraries.aceVersion}/src-min/ace.js"
 
 lazy val clientGUI = OsgiProject(guiDir / "client", "org.openmole.gui.client.core") enablePlugins (ScalaJSPlugin) dependsOn
-  (datauiGUI, sharedGUI, utilsGUI, jsGUI, docGUI) settings (
+  (datauiGUI, sharedGUI, utilsGUI, jsGUI, docGUI, market) settings (
     Libraries.upickleJS,
     Libraries.autowireJS,
     Libraries.rxJS,
@@ -510,7 +515,8 @@ lazy val serverGUI = OsgiProject(guiServerDir, "org.openmole.gui.server.core") s
     openmoleStream,
     txtmark,
     openmoleCrypto,
-    module
+    module,
+    market
   )settings (defaultSettings: _*)
 
 lazy val state = OsgiProject(guiServerDir, "org.openmole.gui.server.state") settings

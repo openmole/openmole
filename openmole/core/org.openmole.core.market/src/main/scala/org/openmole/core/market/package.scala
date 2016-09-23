@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2015 Romain Reuillon
+/**
+ * Created by Romain Reuillon on 22/09/16.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -13,10 +13,18 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
  */
-package org.openmole.core.buildinfo
+package org.openmole.core
 
-case class MarketIndexEntry(name: String, archive: String, readme: Option[String], tags: Seq[String]) {
-  def url: String = org.openmole.core.buildinfo.url(archive)
+import fr.iscpif.gridscale.http.HTTPStorage
+
+package object market {
+
+  import org.json4s._
+  import org.json4s.jackson.Serialization
+  implicit val formats = Serialization.formats(NoTypeHints)
+
+  def marketIndex = HTTPStorage.download(buildinfo.marketAddress)(Serialization.read[MarketIndex](_))
+
 }
-case class MarketIndex(entries: Seq[MarketIndexEntry])

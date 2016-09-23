@@ -47,7 +47,7 @@ object ToStringHook {
 
   override def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider) = {
     if (!prototypes.isEmpty) {
-      val filtered = Context(prototypes.flatMap(p ⇒ context.variable(p.asInstanceOf[Val[Any]])))
+      val filtered = Context(prototypes.flatMap(p ⇒ context.variable(p.asInstanceOf[Val[Any]])): _*)
       executionContext.out.println(filtered.toString)
     }
     else executionContext.out.println(context.toString)

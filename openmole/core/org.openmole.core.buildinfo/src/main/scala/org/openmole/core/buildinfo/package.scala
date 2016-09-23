@@ -44,7 +44,7 @@ package object buildinfo {
   def siteURL =
     development match {
       case true  ⇒ "http://next.openmole.org"
-      case false ⇒ s"http://www.openmole.org/all/$version"
+      case false ⇒ "http://www.openmole.org/all/${version.major}"
     }
 
   import org.json4s._
@@ -53,13 +53,10 @@ package object buildinfo {
 
   def marketName = "market.json"
   def marketAddress = url(marketName)
-  def marketIndex = HTTPStorage.download(buildinfo.marketAddress)(Serialization.read[buildinfo.MarketIndex](_))
 
   def moduleListName = "modules.json"
   def moduleAddress = url(moduleListName)
 
   def url(entry: String): String = siteURL + "/" + entry
-
-  //def info = OpenMOLEBuildInfo(version, name, generationDate)
 
 }

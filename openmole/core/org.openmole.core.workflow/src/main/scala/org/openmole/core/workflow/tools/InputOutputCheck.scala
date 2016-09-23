@@ -73,7 +73,7 @@ trait InputOutputCheck {
     }
 
   def filterOutput(context: Context): Context =
-    Context(outputs.toList.flatMap(o ⇒ context.variable(o): Option[Variable[_]]))
+    Context(outputs.toList.flatMap(o ⇒ context.variable(o): Option[Variable[_]]): _*)
 
   def initializeInput(context: Context)(implicit randomProvider: RandomProvider): Context =
     context ++

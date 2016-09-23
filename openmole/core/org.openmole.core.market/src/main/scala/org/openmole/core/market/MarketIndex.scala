@@ -14,6 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.openmole.core.buildinfo
+package org.openmole.core.market
 
-case class OpenMOLEBuildInfo(version: String, name: String, date: String)
+case class MarketIndexEntry(name: String, archive: String, readme: Option[String], tags: Seq[String]) {
+  def url: String = org.openmole.core.buildinfo.url(archive)
+}
+case class MarketIndex(entries: Seq[MarketIndexEntry])

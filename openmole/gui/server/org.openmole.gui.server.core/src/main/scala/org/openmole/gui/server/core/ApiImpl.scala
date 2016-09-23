@@ -20,6 +20,7 @@ import java.io._
 import java.nio.file._
 
 import fr.iscpif.gridscale.http.HTTPStorage
+import org.openmole.core.market.{ MarketIndex, MarketIndexEntry }
 import org.openmole.core.project._
 
 import scala.util.{ Failure, Success, Try }
@@ -29,9 +30,9 @@ import org.openmole.tool.stream.StringPrintStream
 import scala.concurrent.stm._
 import org.openmole.tool.file._
 import org.openmole.tool.tar._
-import org.openmole.core.pluginmanager
 import org.openmole.core.output.OutputManager
 import org.openmole.core.module
+import org.openmole.core.market
 
 /*
  * Copyright (C) 21/07/14 // mathieu.leclaire@openmole.org
@@ -385,15 +386,15 @@ object ApiImpl extends Api {
   }
 
   def marketIndex() = {
-    def mapToMd(marketIndex: buildinfo.MarketIndex) =
+    def mapToMd(marketIndex: MarketIndex) =
       marketIndex.copy(entries = marketIndex.entries.map {
         e ⇒ e.copy(readme = e.readme.map { MarkDownProcessor(_) })
       })
 
-    mapToMd(buildinfo.marketIndex)
+    mapToMd(market.marketIndex)
   }
 
-  def getMarketEntry(entry: buildinfo.MarketIndexEntry, path: SafePath) = {
+  def getMarketEntry(entry: MarketIndexEntry, path: SafePath) = {
     import org.openmole.gui.ext.data.ServerFileSytemContext.project
     val url = new URL(entry.url)
     HTTPStorage.download(entry.url) { is ⇒

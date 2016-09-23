@@ -63,7 +63,7 @@ class MoleJob(
 
   def state: State = _state
   def context: Context =
-    Context((prototypes zip values).map { case (p, v) ⇒ Variable(p, v) })
+    Context((prototypes zip values).map { case (p, v) ⇒ Variable(p, v) }: _*)
 
   private def context_=(ctx: Context) = {
     val (_prototypes, _values) = MoleJob.compressContext(ctx)
