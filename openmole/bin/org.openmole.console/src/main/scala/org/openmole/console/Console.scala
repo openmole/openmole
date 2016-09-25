@@ -81,13 +81,15 @@ object Console extends Logger {
     def restart = 254
   }
 
-  def dealWithLoadError(load: ⇒ Iterable[(File, Throwable)]) = {
+  def dealWithLoadError(load: ⇒ Iterable[(File, Throwable)], interactive: Boolean) = {
     val res = load
-    if (!res.isEmpty) {
-      res.foreach { case (f, e) ⇒ Log.logger.log(Log.WARNING, s"Error loading bundle $f", e) }
+    res.foreach { case (f, e) ⇒ Log.logger.log(Log.WARNING, s"Error loading bundle $f", e) }
+    if (interactive && !res.isEmpty) {
       print(s"Would you like to remove the failing bundles (${res.unzip._1.map(_.getName).mkString(", ")})? [y/N] ")
-      val c = System.in.read().asInstanceOf[Char]
+      val reader = new ConsoleReader()
+      val c = reader.readCharacter('y', 'n', 'Y', 'N').asInstanceOf[Char]
       if (c.toLower == 'y') res.unzip._1.foreach(_.delete())
+      println()
     }
     res
   }

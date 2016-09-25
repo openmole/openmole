@@ -148,6 +148,8 @@ object Application extends Logger {
       }
     }
 
+    PluginManager.startAll.foreach { case (b, e) ⇒ logger.log(WARNING, s"Error staring bundle $b", e) }
+
     val config = parse(args.map(_.trim).toList)
 
     config.loggerLevel.foreach(LoggerService.level)
@@ -162,7 +164,6 @@ object Application extends Logger {
 
       logger.fine(s"Loading user plugins " + userPlugins)
 
-      PluginManager.startAll.foreach { case (b, e) ⇒ logger.log(WARNING, s"Error staring bundle $b", e) }
       PluginManager.tryLoad(userPlugins)
     }
 
@@ -202,7 +203,7 @@ object Application extends Logger {
         setPassword
         print(consoleSplash)
         println(consoleUsage)
-        Console.dealWithLoadError(loadPlugins)
+        Console.dealWithLoadError(loadPlugins, !config.scriptFile.isDefined)
         val console = new Console(password, config.scriptFile)
         val variables = ConsoleVariables(args = config.args)
         console.run(variables, config.consoleWorkDirectory)
