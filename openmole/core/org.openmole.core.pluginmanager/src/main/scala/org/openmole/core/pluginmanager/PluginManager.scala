@@ -113,7 +113,15 @@ object PluginManager extends Logger {
     val loaded = bundleFiles.map { b ⇒ b → Try(installBundle(b)) }
     def bundles = loaded.collect { case (f, Success(b)) ⇒ f → b }
     def loadError = loaded.collect { case (f, Failure(e)) ⇒ f → e }
-    loadError ++ bundles.map { case (f, b) ⇒ f → Try(b.start) }.collect { case (f, Failure(e)) ⇒ f → e }
+    loadError ++ bundles.flatMap {
+      case (f, b) ⇒
+        Try(b.start) match {
+          case Success(_) ⇒ None
+          case Failure(e) ⇒
+            b.uninstall()
+            Some(f → e)
+        }
+    }
   }
 
   def load(files: Iterable[File]) = synchronized {
