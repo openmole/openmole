@@ -17,8 +17,6 @@
 
 package org.openmole.console
 
-import java.util
-
 import jline.console.ConsoleReader
 import org.openmole.core.console.ScalaREPL
 import org.openmole.core.exception.UserBadDataError
@@ -26,11 +24,12 @@ import org.openmole.core.project._
 import org.openmole.core.tools.io.Prettifier._
 import org.openmole.core.workspace._
 import org.openmole.tool.file._
+import org.openmole.tool.logger.Logger
 
 import scala.annotation.tailrec
 import scala.util._
 
-object Console {
+object Console extends Logger {
 
   private def passwordReader = {
     val reader = new ConsoleReader()
@@ -80,6 +79,17 @@ object Console {
     def validationError = 5
     def executionError = 6
     def restart = 254
+  }
+
+  def dealWithLoadError(load: ⇒ Iterable[(File, Throwable)]) = {
+    val res = load
+    if (!res.isEmpty) {
+      res.foreach { case (f, e) ⇒ Log.logger.log(Log.WARNING, s"Error loading bundle $f", e) }
+      print(s"Would you like to remove the failing bundles (${res.unzip._1.map(_.getName).mkString(", ")})? [y/N] ")
+      val c = System.in.read().asInstanceOf[Char]
+      if (c.toLower == 'y') res.unzip._1.foreach(_.delete())
+    }
+    res
   }
 
 }

@@ -162,11 +162,12 @@ object Application extends Logger {
 
       logger.fine(s"Loading user plugins " + userPlugins)
 
-      val plugins: List[File] = userPlugins
-
       PluginManager.startAll.foreach { case (b, e) ⇒ logger.log(WARNING, s"Error staring bundle $b", e) }
-      PluginManager.tryLoad(plugins).foreach { case (f, e) ⇒ logger.log(WARNING, s"Error loading bundle $f", e) }
+      PluginManager.tryLoad(userPlugins)
     }
+
+    def displayErrors(load: ⇒ Iterable[(File, Throwable)]) =
+      load.foreach { case (f, e) ⇒ logger.log(WARNING, s"Error loading bundle $f", e) }
 
     def password =
       config.password orElse config.passwordFile.map(_.lines.head)
@@ -192,22 +193,23 @@ object Application extends Logger {
         Console.ExitCodes.ok
       case RESTMode ⇒
         setPassword
-        loadPlugins
+        displayErrors(loadPlugins)
         if (!password.isDefined) Console.initPassword
         val server = new RESTServer(config.port, config.hostName)
         server.start()
         Console.ExitCodes.ok
       case ConsoleMode ⇒
         setPassword
-        loadPlugins
         print(consoleSplash)
         println(consoleUsage)
+        Console.dealWithLoadError(loadPlugins)
         val console = new Console(password, config.scriptFile)
         val variables = ConsoleVariables(args = config.args)
         console.run(variables, config.consoleWorkDirectory)
       case GUIMode ⇒
         setPassword
-        loadPlugins
+        // FIXME switch to a GUI display in the plugin panel
+        displayErrors(loadPlugins)
         def browse(url: String) =
           if (Desktop.isDesktopSupported) Desktop.getDesktop.browse(new URI(url))
         GUIServer.lockFile.withFileOutputStream { fos ⇒
