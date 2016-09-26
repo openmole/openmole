@@ -372,11 +372,8 @@ class TreeNodePanel {
               div(stylesheet.fileInfo)(
                 if (!selectionMode()) {
                   div(
-                    span(stylesheet.fileSize)(tags.i(timeOrSize(tn))),
-                    span(
-                      if (lineHovered() == Some(this)) ms("opaque")
-                      else ms("transparent")
-                    )(
+                    if (lineHovered() == Some(this)) {
+                      span(
                         tags.span(onclick := { () ⇒
                           trashNode(tn)
                         }, trash),
@@ -404,6 +401,9 @@ class TreeNodePanel {
                           })
                         })(arrow_right_and_left)
                       )
+                    }
+                    else
+                      span(stylesheet.fileSize)(tags.i(timeOrSize(tn)))
                   )
                 }
                 else div()

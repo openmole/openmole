@@ -176,15 +176,15 @@ package object stylesheet {
   lazy val fileInfo: ModifierSeq = Seq(
     sheet.floatRight,
     absolutePosition,
-    right := 2
+    width := 85,
+    right := 4,
+    textAlign := "right"
   )
 
   lazy val fileSize: ModifierSeq = Seq(
     color("lightgray"),
-    sheet.floatRight,
     fontSize := 12,
     sheet.paddingLeft(3),
-    sheet.paddingRight(7),
     sheet.paddingTop(3)
   )
 
@@ -328,7 +328,7 @@ package object stylesheet {
       sheet.marginTop(160),
       sheet.paddingBottom(30),
       overflowY := "auto",
-      width := 313
+      width := 333
     )
   }
 
