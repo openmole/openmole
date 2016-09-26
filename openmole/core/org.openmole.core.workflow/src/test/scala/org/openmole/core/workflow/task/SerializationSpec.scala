@@ -17,8 +17,9 @@
 
 package org.openmole.core.workflow.task
 
-import java.io.{ ByteArrayInputStream, ByteArrayOutputStream }
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
+import org.openmole.core.context.Val
 import org.openmole.core.workflow.data._
 import org.openmole.core.serializer.SerialiserService
 import org.openmole.core.workflow.builder._
@@ -27,7 +28,7 @@ import org.openmole.core.workflow.dsl._
 
 class SerializationSpec extends FlatSpec with Matchers {
   "Task " should "be the same after serialization and deserialization" in {
-    val p = Prototype[Int]("p")
+    val p = Val[Int]("p")
 
     val t = EmptyTask() set (
       inputs += p,

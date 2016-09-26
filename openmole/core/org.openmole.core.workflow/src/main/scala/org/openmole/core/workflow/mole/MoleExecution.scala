@@ -17,26 +17,27 @@
 
 package org.openmole.core.workflow.mole
 
-import java.io.File
 import java.util.UUID
 import java.util.logging.Level
+
+import org.openmole.core.context.{ Context, Variable }
 import org.openmole.core.event.{ Event, EventDispatcher }
-import org.openmole.core.exception.{ UserBadDataError, MultipleException }
-import org.openmole.core.tools.service.{ Priority, Random }
-import org.openmole.core.workflow.mole.MoleExecution.{ MoleExecutionFailed, JobFailed, ExceptionRaised }
-import org.openmole.core.workflow.task.TaskExecutionContext
-import org.openmole.core.workflow.validation._
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.job.State._
-import org.openmole.core.workflow.execution.local._
-import org.openmole.core.workspace.Workspace
-import org.openmole.core.workflow.job._
-import org.openmole.core.workflow.tools._
-import org.openmole.tool.logger.Logger
-import scala.collection.mutable.{ ListBuffer, Buffer }
-import scala.concurrent.stm._
-import org.openmole.core.workflow.execution._
+import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.workflow.dsl._
+import org.openmole.core.workflow.execution._
+import org.openmole.core.workflow.job.State._
+import org.openmole.core.workflow.job._
+import org.openmole.core.workflow.mole.MoleExecution.MoleExecutionFailed
+import org.openmole.core.workflow.task.TaskExecutionContext
+import org.openmole.core.workflow.tools._
+import org.openmole.core.workflow.transition.DataChannel
+import org.openmole.core.workflow.validation._
+import org.openmole.core.workspace.Workspace
+import org.openmole.tool.logger.Logger
+import org.openmole.tool.random
+
+import scala.collection.mutable.Buffer
+import scala.concurrent.stm._
 
 object MoleExecution extends Logger {
 
@@ -303,6 +304,6 @@ class MoleExecution(
 
   private val currentSeed = Ref(seed)
   def newSeed = currentSeed.next
-  def newRNG = Random.newRNG(newSeed).toScala
+  def newRNG = random.Random.newRNG(newSeed).toScala
 
 }

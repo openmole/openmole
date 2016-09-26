@@ -1,8 +1,8 @@
 package org.openmole.gui.server.core
 
 import monocle.macros.Lenses
-import org.openmole.core.batch.environment.BatchEnvironment
-import org.openmole.core.batch.environment.BatchEnvironment._
+import org.openmole.plugin.environment.batch.environment.BatchEnvironment
+import org.openmole.plugin.environment.batch.environment.BatchEnvironment._
 import org.openmole.core.workflow.execution.Environment
 import org.openmole.gui.ext.data._
 import org.openmole.gui.server.core.Runnings.RunningEnvironment

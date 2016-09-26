@@ -17,18 +17,16 @@
 
 package org.openmole.plugin.task.tools
 
-import org.openmole.core.workflow.builder.InputOutputBuilder$
-import org.openmole.core.workflow.data._
+import org.openmole.core.context.{ Val, Variable }
+import org.openmole.core.dsl
+import org.openmole.core.dsl._
 import org.openmole.core.workflow.task._
 
 import scala.reflect.ClassTag
-import org.openmole.core.dsl
-import dsl._
-import monocle.macros.Lenses
 
 object FlattenTask {
 
-  def apply[S](flatten: Prototype[Array[Array[S]]], in: Prototype[Array[S]]) =
+  def apply[S](flatten: Val[Array[Array[S]]], in: Val[Array[S]]) =
     ClosureTask("FlattenTask") { (context, _, _) ⇒
       implicit val sClassTag = ClassTag[S](in.fromArray.`type`.runtimeClass)
       Variable(in, context(flatten).flatten.toArray[S])

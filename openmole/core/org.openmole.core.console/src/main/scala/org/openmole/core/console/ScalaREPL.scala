@@ -40,19 +40,21 @@ import org.openmole.tool.osgi._
 import scalaz.Foldable
 
 object ScalaREPL {
-  @Lenses case class CompilationError(errorMessages: List[ErrorMessage], code: String, parent: Throwable) extends Exception(parent) {
-    override def toString() = {
-      def readableErrorMessages(error: ErrorMessage) =
-        error.position.map(p ⇒ s"(line ${p.line}) ").getOrElse("") + error.decoratedMessage
 
-      val (importsErrors, codeErrors) = errorMessages.partition(e ⇒ e.position.map(_.line < 0).getOrElse(false))
+  private def compilationMessage(errorMessages: List[ErrorMessage], code: String) = {
+    def readableErrorMessages(error: ErrorMessage) =
+      error.position.map(p ⇒ s"(line ${p.line}) ").getOrElse("") + error.decoratedMessage
 
-      (if (!codeErrors.isEmpty) codeErrors.map(readableErrorMessages).mkString("\n") + "\n" else "") +
-        (if (!importsErrors.isEmpty) "Error in imports header:\n" + importsErrors.map(readableErrorMessages).mkString("\n") + "\n" else "") +
-        s"""Compiling code:
+    val (importsErrors, codeErrors) = errorMessages.partition(e ⇒ e.position.map(_.line < 0).getOrElse(false))
+
+    (if (!codeErrors.isEmpty) codeErrors.map(readableErrorMessages).mkString("\n") + "\n" else "") +
+      (if (!importsErrors.isEmpty) "Error in imports header:\n" + importsErrors.map(readableErrorMessages).mkString("\n") + "\n" else "") +
+      s"""Compiling code:
         |${code}""".stripMargin
-    }
   }
+
+  @Lenses case class CompilationError(errorMessages: List[ErrorMessage], code: String, parent: Throwable) extends Exception(compilationMessage(errorMessages, code), parent)
+
   @Lenses case class ErrorMessage(decoratedMessage: String, rawMessage: String, position: Option[ErrorPosition])
   @Lenses case class ErrorPosition(line: Int, start: Int, end: Int, point: Int)
 

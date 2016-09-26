@@ -18,20 +18,21 @@
 package org.openmole.plugin.tool.sftpserver
 
 import java.io.File
-import org.apache.sshd.common.file.root.{ RootedFileSystemProvider }
-import org.apache.sshd.server.SshServer
-import org.apache.sshd.common.file._
-import org.apache.sshd.server.auth.password.PasswordAuthenticator
-import org.apache.sshd.server.subsystem.sftp.SftpSubsystemFactory
-import org.apache.sshd.common.session.Session
 
+import org.apache.sshd.common.file._
+import org.apache.sshd.common.file.root.RootedFileSystemProvider
+import org.apache.sshd.common.session.Session
+import org.apache.sshd.server.SshServer
+import org.apache.sshd.server.auth.password.PasswordAuthenticator
 import org.apache.sshd.server.command.ScpCommandFactory
 import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider
 import org.apache.sshd.server.session.ServerSession
+import org.apache.sshd.server.subsystem.sftp.SftpSubsystemFactory
+import org.openmole.tool.hash._
 import org.openmole.tool.logger.Logger
 import org.openmole.tool.thread._
-import org.openmole.tool.hash._
-import collection.JavaConversions._
+
+import scala.collection.JavaConversions._
 
 object SFTPServer extends Logger
 

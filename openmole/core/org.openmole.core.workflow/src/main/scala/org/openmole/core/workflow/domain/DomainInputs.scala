@@ -17,7 +17,7 @@
 
 package org.openmole.core.workflow.domain
 
-import org.openmole.core.workflow.data.PrototypeSet
+import org.openmole.core.context._
 
 object DomainInputs {
   implicit def empty[T] = new DomainInputs[T] {

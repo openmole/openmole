@@ -18,8 +18,6 @@
 package org.openmole.core.dsl
 
 import org.openmole.core.pluginmanager.PluginManager
-import org.openmole.core.serializer.SerialiserService
-import org.openmole.core.workspace.Workspace
 
 trait Commands {
   def bundles = PluginManager.bundleFiles

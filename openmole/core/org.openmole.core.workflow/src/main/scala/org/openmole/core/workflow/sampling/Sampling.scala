@@ -17,10 +17,8 @@
 
 package org.openmole.core.workflow.sampling
 
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.tools.FromContext
-
-import scala.util.Random
+import org.openmole.core.context._
+import org.openmole.core.expansion._
 
 trait Sampling {
 
@@ -36,7 +34,7 @@ trait Sampling {
    *
    * @return the factors prototypes
    */
-  def prototypes: Iterable[Prototype[_]]
+  def prototypes: Iterable[Val[_]]
 
   /**
    * This method builds the explored plan in the given {@code context}.

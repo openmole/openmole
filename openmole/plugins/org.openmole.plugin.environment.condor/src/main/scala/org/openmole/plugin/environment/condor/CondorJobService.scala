@@ -18,22 +18,18 @@
 
 package org.openmole.plugin.environment.condor
 
-import fr.iscpif.gridscale.ssh.{ SSHConnectionCache, SSHAuthentication, SSHJobService, SSHHost }
-import fr.iscpif.gridscale.condor.{ CondorJobService ⇒ GSCondorJobService, CondorJobDescription }
-import java.net.URI
-import org.openmole.core.batch.control._
-import org.openmole.core.batch.environment._
-import org.openmole.core.batch.jobservice.{ BatchJob, BatchJobId }
+import fr.iscpif.gridscale.condor.{ CondorJobDescription, CondorJobService ⇒ GSCondorJobService }
+import fr.iscpif.gridscale.ssh.{ SSHConnectionCache, SSHHost }
 import org.openmole.core.workspace.Workspace
-import org.openmole.plugin.environment.ssh.{ SharedStorage, SSHService }
-import org.openmole.core.batch.storage.SimpleStorage
+import org.openmole.plugin.environment.batch.environment._
+import org.openmole.plugin.environment.batch.jobservice.{ BatchJob, BatchJobId }
 import org.openmole.plugin.environment.gridscale._
+import org.openmole.plugin.environment.ssh.{ SSHService, SharedStorage }
 import org.openmole.tool.logger.Logger
-import concurrent.duration._
 
 object CondorJobService extends Logger
 
-import CondorJobService._
+import org.openmole.plugin.environment.condor.CondorJobService._
 
 trait CondorJobService extends GridScaleJobService with SSHHost with SharedStorage { js ⇒
 

@@ -21,7 +21,6 @@ import java.io.{ File, PrintStream }
 
 import org.openmole.core.output.OutputManager
 import org.openmole.core.workspace.Workspace
-import org.openmole.tool.file._
 
 object MoleExecutionContext {
   def default = MoleExecutionContext()

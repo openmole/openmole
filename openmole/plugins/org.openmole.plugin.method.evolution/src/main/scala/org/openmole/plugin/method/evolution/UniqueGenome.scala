@@ -18,16 +18,15 @@
 package org.openmole.plugin.method.evolution
 
 import fr.iscpif.mgo.double2Scalable
-import org.openmole.core.workflow.data.{ RandomProvider, Context, Prototype, Variable }
+import org.openmole.core.context._
+import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.domain.Bounds
 import org.openmole.core.workflow.sampling.Factor
-import org.openmole.core.workflow.tools.FromContext
-import org.openmole.core.workflow.dsl._
-import util.Try
+import org.openmole.tool.random.RandomProvider
 
 import scala.annotation.tailrec
+import scalaz.Scalaz._
 import scalaz._
-import Scalaz._
 
 object InputConverter {
 
@@ -49,11 +48,11 @@ object InputConverter {
 object Scalable {
 
   sealed trait Scaled
-  case class ScaledSequence(prototype: Prototype[Array[Double]], s: Array[Double]) extends Scaled
-  case class ScaledScalar(prototype: Prototype[Double], v: Double) extends Scaled
+  case class ScaledSequence(prototype: Val[Array[Double]], s: Array[Double]) extends Scaled
+  case class ScaledScalar(prototype: Val[Double], v: Double) extends Scaled
 
   implicit def scalarIsScalable = new Scalable[Scalar] {
-    override def prototype(t: Scalar): Prototype[_] = t.prototype
+    override def prototype(t: Scalar): Val[_] = t.prototype
     override def size(t: Scalar): Int = 1
     override def scaled(s: Scalar)(genomePart: Seq[Double]): FromContext[Scaled] = {
       val g = genomePart.head
@@ -69,7 +68,7 @@ object Scalable {
   }
 
   implicit def sequenceIsScalable = new Scalable[Sequence] {
-    override def prototype(t: Sequence): Prototype[_] = t.prototype
+    override def prototype(t: Sequence): Val[_] = t.prototype
     override def size(t: Sequence): Int = math.min(t.min.size, t.max.size)
     override def scaled(s: Sequence)(genomePart: Seq[Double]): FromContext[Scaled] = {
       def scaled =
@@ -88,7 +87,7 @@ object Scalable {
     Scalar(f.prototype, bounded.min(f.domain), bounded.max(f.domain))
 
   implicit def factorIsScalable[D](implicit bounded: Bounds[D, Double]) = new Scalable[Factor[D, Double]] {
-    override def prototype(t: Factor[D, Double]): Prototype[_] = scalarIsScalable.prototype(factorToScalar(t))
+    override def prototype(t: Factor[D, Double]): Val[_] = scalarIsScalable.prototype(factorToScalar(t))
     override def size(t: Factor[D, Double]): Int = scalarIsScalable.size(factorToScalar(t))
     override def scaled(t: Factor[D, Double])(genomePart: Seq[Double]): FromContext[Scaled] =
       scalarIsScalable.scaled(factorToScalar(t))(genomePart)
@@ -99,20 +98,20 @@ object Scalable {
 }
 
 trait Scalable[T] {
-  def prototype(t: T): Prototype[_]
+  def prototype(t: T): Val[_]
   def size(t: T): Int
   def scaled(t: T)(genomePart: Seq[Double]): FromContext[Scalable.Scaled]
   def toVariable(t: T)(value: Seq[Any]): Variable[_]
 }
 
-case class Scalar(prototype: Prototype[Double], min: FromContext[Double], max: FromContext[Double])
+case class Scalar(prototype: Val[Double], min: FromContext[Double], max: FromContext[Double])
 
 object Sequence {
-  def apply(prototype: Prototype[Array[Double]], min: FromContext[Double], max: FromContext[Double], size: Int): Sequence =
+  def apply(prototype: Val[Array[Double]], min: FromContext[Double], max: FromContext[Double], size: Int): Sequence =
     Sequence(prototype, Seq.fill(size)(min), Seq.fill(size)(max))
 }
 
-case class Sequence(prototype: Prototype[Array[Double]], min: Seq[FromContext[Double]], max: Seq[FromContext[Double]])
+case class Sequence(prototype: Val[Array[Double]], min: Seq[FromContext[Double]], max: Seq[FromContext[Double]])
 
 object Input {
   implicit def toInput[T: Scalable](t: T): Input[T] = new Input(t, implicitly[Scalable[T]])

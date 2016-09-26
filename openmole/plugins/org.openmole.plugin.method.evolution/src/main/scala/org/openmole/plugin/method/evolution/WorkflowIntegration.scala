@@ -18,13 +18,14 @@
 package org.openmole.plugin.method.evolution
 
 import fr.iscpif.mgo
-import org.openmole.core.workflow.data._
+import org.openmole.core.context._
+import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.dsl._
-import scala.util.Random
-import org.openmole.core.workflow.tools._
-import scalaz._
-import Scalaz._
+
 import scala.language.higherKinds
+import scala.util.Random
+import scalaz.Scalaz._
+import scalaz._
 
 object Seeder {
 
@@ -33,7 +34,7 @@ object Seeder {
     def prototype = None
   }
 
-  implicit def prototypeToSeeder[T](p: Prototype[T])(implicit seed: Seed[T]) = new Seeder {
+  implicit def prototypeToSeeder[T](p: Val[T])(implicit seed: Seed[T]) = new Seeder {
     def apply(rng: Random) = Some(Variable(p, seed(rng)))
     def prototype = Some(p)
   }
@@ -56,7 +57,7 @@ object Seeder {
 
 trait Seeder {
   def apply(rng: Random): Option[Variable[_]]
-  def prototype: Option[Prototype[_]]
+  def prototype: Option[Val[_]]
 }
 
 case class Replication[A[_]: Functor](
@@ -113,7 +114,7 @@ object WorkflowIntegration {
 
       lazy val integration = a.algorithm
 
-      def samples = Prototype[Long]("samples", namespace)
+      def samples = Val[Long]("samples", namespace)
 
       def buildIndividual(genome: G, context: Context): I =
         operations.buildIndividual(genome, variablesToPhenotype(context))
@@ -178,9 +179,9 @@ trait EvolutionWorkflow {
   def mgoAG: MGOAG
 
   val integration: mgo.openmole.Integration[MGOAG, V, P]
-  def operations = integration.operations(mgoAG)
-
   import integration._
+
+  def operations = integration.operations(mgoAG)
 
   type G = integration.G
   type I = integration.I
@@ -190,30 +191,30 @@ trait EvolutionWorkflow {
 
   type Pop = Vector[I]
 
-  def genomeType = PrototypeType[G]
-  def stateType = PrototypeType[S]
-  def individualType = PrototypeType[I]
+  def genomeType = ValType[G]
+  def stateType = ValType[S]
+  def individualType = ValType[I]
 
-  def populationType: PrototypeType[Pop] = PrototypeType[Pop]
+  def populationType: ValType[Pop] = ValType[Pop]
 
   def buildIndividual(genome: G, context: Context): I
 
-  def inputPrototypes: Seq[Prototype[_]]
-  def resultPrototypes: Seq[Prototype[_]]
-  def outputPrototypes: Seq[Prototype[_]]
+  def inputPrototypes: Seq[Val[_]]
+  def resultPrototypes: Seq[Val[_]]
+  def outputPrototypes: Seq[Val[_]]
 
   def genomeToVariables(genome: G): FromContext[Seq[Variable[_]]]
   def populationToVariables(population: Pop): FromContext[Seq[Variable[_]]]
 
   // Variables
   def namespace = Namespace("evolution")
-  def genomePrototype = Prototype[G]("genome", namespace)(genomeType)
-  def individualPrototype = Prototype[I]("individual", namespace)(individualType)
-  def populationPrototype = Prototype[Pop]("population", namespace)(populationType)
-  def offspringPrototype = Prototype[Pop]("offspring", namespace)(populationType)
-  def statePrototype = Prototype[S]("state", namespace)(stateType)
-  def generationPrototype = Prototype[Long]("generation", namespace)
-  def terminatedPrototype = Prototype[Boolean]("terminated", namespace)
+  def genomePrototype = Val[G]("genome", namespace)(genomeType)
+  def individualPrototype = Val[I]("individual", namespace)(individualType)
+  def populationPrototype = Val[Pop]("population", namespace)(populationType)
+  def offspringPrototype = Val[Pop]("offspring", namespace)(populationType)
+  def statePrototype = Val[S]("state", namespace)(stateType)
+  def generationPrototype = Val[Long]("generation", namespace)
+  def terminatedPrototype = Val[Boolean]("terminated", namespace)
 }
 
 object GAIntegration {
@@ -270,7 +271,7 @@ object StochasticGAIntegration {
     objectives:       Objectives,
     genomeValues:     I ⇒ Vector[Double],
     phenotypeValues:  I ⇒ Vector[Double],
-    samplesPrototype: Prototype[Long],
+    samplesPrototype: Val[Long],
     samples:          I ⇒ Long
   )(population: Vector[I]) =
     GAIntegration.populationToVariables[I](genome, objectives, genomeValues, phenotypeValues)(population).map {

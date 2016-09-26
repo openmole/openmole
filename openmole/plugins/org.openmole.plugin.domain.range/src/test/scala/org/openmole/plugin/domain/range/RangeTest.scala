@@ -17,8 +17,9 @@
  */
 package org.openmole.plugin.domain.range
 
+import org.openmole.core.context.Context
+import org.openmole.tool.random.RandomProvider
 import org.scalatest._
-import org.openmole.core.workflow.data._
 
 class RangeTest extends FlatSpec with Matchers {
 

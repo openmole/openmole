@@ -19,31 +19,11 @@ package org.openmole.core.workflow.task
 
 import java.io.File
 
-import monocle.macros.Lenses
-import org.openmole.core.tools.service
-import org.openmole.core.workflow.data._
-import org.openmole.core.serializer.plugin._
+import org.openmole.core.context._
+import org.openmole.core.workflow.builder.InputOutputConfig
 import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.tools._
-import org.openmole.core.workspace.{ ConfigurationLocation, Workspace }
-import org.openmole.core.tools.service._
-import org.openmole.core.workflow.builder.InputOutputConfig
-import org.openmole.tool.logger.Logger
-
-import scala.util.Random
-import org.openmole.core.workflow.dsl._
-
-object Task extends Logger {
-  val OpenMOLEVariablePrefix = ConfigurationLocation("Task", "OpenMOLEVariablePrefix", Some("oM"))
-
-  Workspace setDefault OpenMOLEVariablePrefix
-
-  def prefixedVariable(name: String) = Workspace.preference(OpenMOLEVariablePrefix) + name
-
-  val openMOLESeed = Prototype[Long](prefixedVariable("Seed"))
-
-  def buildRNG(context: Context): Random = service.Random.newRNG(context(Task.openMOLESeed)).toScala
-}
+import org.openmole.tool.random._
 
 case class TaskExecutionContext(tmpDirectory: File, localEnvironment: LocalEnvironment)
 
@@ -55,7 +35,7 @@ trait Task <: InputOutputCheck with Name {
    *
    * @param context the context in which the task will be executed
    */
-  def perform(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider = RandomProvider(Task.buildRNG(context))): Context =
+  def perform(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider = RandomProvider(Context.buildRNG(context))): Context =
     perform(context, process(_, executionContext))
 
   protected def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider): Context

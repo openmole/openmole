@@ -17,6 +17,7 @@
 
 package org.openmole.core.workflow.transition
 
+import org.openmole.core.context.Val
 import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.task._
@@ -32,7 +33,7 @@ import org.openmole.core.workflow.dsl._
 class TransitionSpec extends FlatSpec with Matchers {
 
   "A transition" should "enable variable values to be transmitted from a task to another" in {
-    val p = Prototype[String]("p")
+    val p = Val[String]("p")
 
     val t1 = TestTask { _ + (p → "Test") } set (
       name := "Test write",
@@ -54,8 +55,8 @@ class TransitionSpec extends FlatSpec with Matchers {
   }
 
   "A conjonctive pattern" should "enable variable values to be transmitted from a task to another" in {
-    val p1 = Prototype[String]("p1")
-    val p2 = Prototype[String]("p2")
+    val p1 = Val[String]("p1")
+    val p2 = Val[String]("p2")
 
     val init = EmptyTask()
 
@@ -91,8 +92,8 @@ class TransitionSpec extends FlatSpec with Matchers {
 
   "A conjonctive pattern" should "be robust to concurrent execution" in {
     @volatile var executed = 0
-    val p1 = Prototype[String]("p1")
-    val p2 = Prototype[String]("p2")
+    val p1 = Val[String]("p1")
+    val p2 = Val[String]("p2")
 
     val init = EmptyTask()
 

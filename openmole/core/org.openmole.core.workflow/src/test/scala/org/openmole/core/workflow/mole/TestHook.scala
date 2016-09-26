@@ -17,8 +17,10 @@
 package org.openmole.core.workflow.mole
 
 import monocle.macros.Lenses
+import org.openmole.core.context.Context
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.data._
+import org.openmole.tool.random.RandomProvider
 
 object TestHook {
 

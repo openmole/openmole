@@ -18,17 +18,10 @@
 
 package org.openmole.plugin.environment.slurm
 
-import fr.iscpif.gridscale.ssh.SSHStorage
-import fr.iscpif.gridscale.ssh.SSHHost
-import java.net.URI
-
-import org.openmole.core.batch.control.LimitedAccess
-import org.openmole.core.batch.environment._
-import org.openmole.core.workspace._
-import org.openmole.plugin.environment.gridscale._
-import org.openmole.plugin.environment.ssh._
 import org.openmole.core.workflow.dsl._
-import org.openmole.tool.cache.Cache
+import org.openmole.core.workspace._
+import org.openmole.plugin.environment.batch.environment._
+import org.openmole.plugin.environment.ssh._
 
 import scala.concurrent.duration.Duration
 
@@ -73,8 +66,6 @@ object SLURMEnvironment {
       name = name
     )(SSHAuthentication.find(user, host, port).apply)
 }
-
-import SLURMEnvironment._
 
 class SLURMEnvironment(
     val user:                    String,

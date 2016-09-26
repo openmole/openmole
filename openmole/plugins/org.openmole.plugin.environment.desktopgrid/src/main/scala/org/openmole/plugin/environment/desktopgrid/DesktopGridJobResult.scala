@@ -17,6 +17,6 @@
 
 package org.openmole.plugin.environment.desktopgrid
 
-import org.openmole.core.batch.message.FileMessage
+import org.openmole.core.communication.message._
 
 class DesktopGridJobResult(val result: FileMessage)

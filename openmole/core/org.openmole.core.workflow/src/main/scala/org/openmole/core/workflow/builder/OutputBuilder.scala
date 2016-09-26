@@ -16,7 +16,7 @@
  */
 package org.openmole.core.workflow.builder
 
-import org.openmole.core.workflow.data._
+import org.openmole.core.context._
 
 trait OutputBuilder[T] {
   def outputs: monocle.Lens[T, PrototypeSet]

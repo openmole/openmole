@@ -17,17 +17,18 @@
 
 package org.openmole.plugin.environment.egi
 
-import fr.iscpif.gridscale.http.{ HTTPSAuthentication, WebDAVLocation, DPMWebDAVStorage }
-import org.openmole.core.batch.storage._
-import org.openmole.core.batch.control._
-import org.openmole.core.workspace.Workspace
-import org.openmole.tool.file._
-import fr.iscpif.gridscale.storage.{ Storage ⇒ GSStorage, ListEntry, FileType }
-import fr.iscpif.gridscale.egi.{ SRMLocation, GlobusAuthenticationProvider, SRMStorage }
+import java.io.{ File, IOException, InputStream }
 import java.net.URI
-import java.io.{ IOException, File, InputStream, OutputStream }
-import org.openmole.core.batch.environment.BatchEnvironment
+
+import fr.iscpif.gridscale.http.{ DPMWebDAVStorage, HTTPSAuthentication, WebDAVLocation }
+import fr.iscpif.gridscale.storage.{ ListEntry, Storage ⇒ GSStorage }
+import org.openmole.core.communication.storage.{ RemoteStorage, _ }
+import org.openmole.core.workspace.Workspace
+import org.openmole.plugin.environment.batch.control._
+import org.openmole.plugin.environment.batch.environment.BatchEnvironment
+import org.openmole.plugin.environment.batch.storage._
 import org.openmole.plugin.environment.gridscale.GridScaleStorage
+import org.openmole.tool.file._
 
 import scala.sys.process.{ Process, ProcessLogger }
 import scala.util.Try
@@ -45,23 +46,6 @@ trait EGIStorageService extends StorageService with GridScaleStorage with Compre
   override def downloadStream(path: String, transferOptions: TransferOptions)(implicit token: AccessToken): InputStream = quality { super.downloadStream(path, transferOptions)(token) }
   override def uploadStream(is: InputStream, path: String, transferOptions: TransferOptions)(implicit token: AccessToken) = quality { super.uploadStream(is, path, transferOptions)(token) }
 }
-
-object EGISRMStorageService {
-
-  def apply[A: GlobusAuthenticationProvider](s: SRMLocation, _environment: BatchEnvironment, voName: String, authentication: A) = new EGISRMStorageService {
-    def threads = Workspace.preference(EGIEnvironment.ConnectionsBySRMSE)
-    val usageControl = AvailabilityQuality(new LimitedAccess(threads, Int.MaxValue), Workspace.preference(EGIEnvironment.QualityHysteresis))
-    val storage = SRMStorage(s.copy(basePath = ""), threads)(authentication)
-    val url = new URI("srm", null, s.host, s.port, null, null, null)
-    val remoteStorage = new LCGCpRemoteStorage(s.host, s.port, voName)
-    val environment = _environment
-    val root = s.basePath
-    override lazy val id = new URI("srm", voName, s.host, s.port, s.basePath, null, null).toString
-  }
-
-}
-
-trait EGISRMStorageService <: EGIStorageService
 
 trait NativeCommandCopy {
 
@@ -116,14 +100,6 @@ trait NativeCommandCopy {
   def uploadCommand(from: String, to: URI): String
 }
 
-class LCGCpRemoteStorage(val host: String, val port: Int, val voName: String) extends RemoteStorage with NativeCommandCopy { s ⇒
-  lazy val lcgcp = new LCGCp(voName)
-
-  @transient lazy val url = new URI("srm", null, host, port, null, null, null)
-  def downloadCommand(from: URI, to: String): String = lcgcp.download(from, to)
-  def uploadCommand(from: String, to: URI): String = lcgcp.upload(from, to)
-}
-
 object EGIWebDAVStorageService {
 
   def apply[A: HTTPSAuthentication](s: WebDAVLocation, _environment: BatchEnvironment, voName: String, debug: Boolean, authentication: A) = new EGIWebDAVStorageService {
@@ -139,17 +115,7 @@ object EGIWebDAVStorageService {
 
 }
 
-trait EGIWebDAVStorageService <: EGIStorageService /*{
-  override def upload(src: File, dest: String, options: TransferOptions)(implicit token: AccessToken): Unit = {
-    super.upload(src, dest, options)
-    val is =
-      try openInputStream(dest)
-      catch {
-        case e: Throwable => throw new IOException(s"File upload failed from $src to $dest")
-      }
-    is.close
-  }
-}*/
+trait EGIWebDAVStorageService <: EGIStorageService
 
 class CurlRemoteStorage(val host: String, val port: Int, val voName: String, val debug: Boolean) extends RemoteStorage with NativeCommandCopy { s ⇒
   lazy val curl = new Curl(voName, debug)

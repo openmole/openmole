@@ -17,20 +17,16 @@
 
 package org.openmole.plugin.sampling
 
-import java.io.File
-import java.nio.file.Path
-
-import org.openmole.core.workflow.data._
+import org.openmole.core.context.Val
+import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.domain._
-import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.dsl._
-import org.openmole.core.workflow.tools.FromContext
+import org.openmole.core.workflow.sampling._
 import org.openmole.plugin.domain.collection._
 import org.openmole.plugin.domain.modifier._
-
+import org.openmole.core.expansion._
+import scalaz.Scalaz._
 import scalaz._
-import Scalaz._
-import scala.reflect.runtime.universe._
 
 package object combine {
 
@@ -42,8 +38,8 @@ package object combine {
     def ::(s2: Sampling) = new ConcatenateSampling(s, s2)
     def zip(s2: Sampling) = ZipSampling(s, s2)
     @deprecated("Use withIndex", "5")
-    def zipWithIndex(index: Prototype[Int]) = withIndex(index)
-    def withIndex(index: Prototype[Int]) = ZipWithIndexSampling(s, index)
+    def zipWithIndex(index: Val[Int]) = withIndex(index)
+    def withIndex(index: Val[Int]) = ZipWithIndexSampling(s, index)
     def sample(n: FromContext[Int]) = SampleSampling(s, n)
     def repeat(n: FromContext[Int]) = RepeatSampling(s, n)
     def bootstrap(samples: FromContext[Int], number: FromContext[Int]) = s sample samples repeat number
@@ -61,11 +57,11 @@ package object combine {
 
   implicit def withNameFactorDecorator[D, T: CanGetName](factor: Factor[D, T])(implicit discrete: Discrete[D, T]) = new {
     @deprecated("Use withName", "5")
-    def zipWithName(name: Prototype[String]): ZipWithNameSampling[D, T] = withName(name)
-    def withName(name: Prototype[String]): ZipWithNameSampling[D, T] = new ZipWithNameSampling(factor, name)
+    def zipWithName(name: Val[String]): ZipWithNameSampling[D, T] = withName(name)
+    def withName(name: Val[String]): ZipWithNameSampling[D, T] = new ZipWithNameSampling(factor, name)
   }
 
-  implicit class TupleToZipSampling[T1, T2](ps: (Prototype[T1], Prototype[T2])) {
+  implicit class TupleToZipSampling[T1, T2](ps: (Val[T1], Val[T2])) {
     def in[D](d: D)(implicit discrete: Discrete[D, (T1, T2)]) = {
       val d1 = discrete.iterator(d).map(_.map(_._1))
       val d2 = discrete.iterator(d).map(_.map(_._2))

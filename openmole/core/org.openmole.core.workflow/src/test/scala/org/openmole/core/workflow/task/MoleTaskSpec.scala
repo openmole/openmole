@@ -17,6 +17,7 @@
 
 package org.openmole.core.workflow.task
 
+import org.openmole.core.context.Val
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.workflow.data._
 import org.scalatest._
@@ -31,7 +32,7 @@ import scala.util.Try
 class MoleTaskSpec extends FlatSpec with Matchers {
 
   "Implicits" should "work with mole task" in {
-    val i = Prototype[String]("i")
+    val i = Val[String]("i")
     val emptyT = EmptyTask() set (inputs += i)
     val emptyC = Capsule(emptyT)
 
@@ -62,7 +63,7 @@ class MoleTaskSpec extends FlatSpec with Matchers {
   "MoleTask" should "provide its inputs to the first capsule if it is a strainer" in {
     val tm1 = Capsule(EmptyTask(), strain = true)
 
-    val i = Prototype[String]("i")
+    val i = Val[String]("i")
 
     val emptyT = EmptyTask() set (inputs += i, name := "EmptyT")
     val emptyC = Capsule(emptyT)

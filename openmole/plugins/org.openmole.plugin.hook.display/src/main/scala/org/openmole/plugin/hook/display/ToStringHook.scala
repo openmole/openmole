@@ -20,18 +20,19 @@ package org.openmole.plugin.hook.display
 import java.io.PrintStream
 
 import monocle.macros.Lenses
+import org.openmole.core.context.{ Context, Val }
 import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
 import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.data._
+import org.openmole.tool.random.RandomProvider
 
 object ToStringHook {
 
   implicit def isIO: InputOutputBuilder[ToStringHook] = InputOutputBuilder(ToStringHook.config)
 
-  def apply(prototypes: Prototype[_]*): ToStringHook =
+  def apply(prototypes: Val[_]*): ToStringHook =
     apply(System.out, prototypes: _*)
 
-  def apply(out: PrintStream, prototypes: Prototype[_]*) =
+  def apply(out: PrintStream, prototypes: Val[_]*) =
     new ToStringHook(
       prototypes.toVector,
       config = InputOutputConfig()
@@ -40,13 +41,13 @@ object ToStringHook {
 }
 
 @Lenses case class ToStringHook(
-    prototypes: Vector[Prototype[_]],
+    prototypes: Vector[Val[_]],
     config:     InputOutputConfig
 ) extends Hook {
 
   override def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider) = {
     if (!prototypes.isEmpty) {
-      val filtered = Context(prototypes.flatMap(p ⇒ context.variable(p.asInstanceOf[Prototype[Any]])))
+      val filtered = Context(prototypes.flatMap(p ⇒ context.variable(p.asInstanceOf[Val[Any]])): _*)
       executionContext.out.println(filtered.toString)
     }
     else executionContext.out.println(context.toString)

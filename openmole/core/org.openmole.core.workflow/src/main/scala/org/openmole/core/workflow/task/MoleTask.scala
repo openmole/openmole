@@ -20,16 +20,16 @@ package org.openmole.core.workflow.task
 import java.util.concurrent.locks.ReentrantLock
 
 import monocle.macros.Lenses
+import org.openmole.core.context.Context
 import org.openmole.core.event._
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.builder
-import builder._
 import org.openmole.core.exception._
+import org.openmole.core.workflow.builder._
+import org.openmole.core.workflow.{ builder, dsl }
+import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.puzzle._
 import org.openmole.tool.lock._
-import org.openmole.core.workflow.dsl
-import dsl._
+import org.openmole.tool.random.RandomProvider
 
 object MoleTask {
 

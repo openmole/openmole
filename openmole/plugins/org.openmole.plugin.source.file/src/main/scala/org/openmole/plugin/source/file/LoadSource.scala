@@ -17,23 +17,23 @@
 
 package org.openmole.plugin.source.file
 
-import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.tools._
-import org.openmole.core.workflow.mole._
 import java.io.File
 
 import monocle.macros.Lenses
-import org.openmole.core.workflow.tools._
-import org.openmole.core.serializer._
+import org.openmole.core.context.{ Context, Val }
 import org.openmole.core.dsl._
+import org.openmole.core.exception.UserBadDataError
+import org.openmole.core.expansion.FromContext
+import org.openmole.core.serializer._
 import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
+import org.openmole.core.workflow.mole._
+import org.openmole.tool.random.RandomProvider
 
 object LoadSource {
 
   implicit def isIO = InputOutputBuilder(LoadSource.config)
 
-  def apply(file: FromContext[String], prototypes: Prototype[_]*) =
+  def apply(file: FromContext[String], prototypes: Val[_]*) =
     new LoadSource(
       file,
       prototypes.toVector,
@@ -44,7 +44,7 @@ object LoadSource {
 
 @Lenses case class LoadSource(
     file:       FromContext[String],
-    prototypes: Vector[Prototype[_]],
+    prototypes: Vector[Val[_]],
     config:     InputOutputConfig
 ) extends Source {
 

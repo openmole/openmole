@@ -17,8 +17,8 @@
 
 package org.openmole.core.workflow.transition
 
-import org.openmole.core.workflow.data.RandomProvider
 import org.openmole.core.workflow.mole._
+import org.openmole.tool.random.RandomProvider
 
 trait IAggregationTransition extends ITransition {
   def aggregate(subMole: SubMoleExecution, ticket: Ticket)(implicit rng: RandomProvider)

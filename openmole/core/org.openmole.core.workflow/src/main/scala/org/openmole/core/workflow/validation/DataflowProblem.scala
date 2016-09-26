@@ -17,7 +17,7 @@
 
 package org.openmole.core.workflow.validation
 
-import org.openmole.core.workflow.data._
+import org.openmole.core.context.{ Val, ValType }
 import org.openmole.core.workflow.mole.{ Capsule, Hook, Source }
 import org.openmole.core.workflow.transition.Slot
 import org.openmole.core.workflow.validation.TypeUtil.InvalidType
@@ -39,8 +39,8 @@ object DataflowProblem {
 
   case class WrongType(
       slot:     Slot,
-      expected: Prototype[_],
-      provided: Prototype[_]
+      expected: Val[_],
+      provided: Val[_]
   ) extends SlotDataflowProblem {
 
     override def toString = "Wrong type received at " + slot + ", " + expected + " is expected but " + provided + " is provided."
@@ -48,7 +48,7 @@ object DataflowProblem {
 
   case class MissingInput(
       slot: Slot,
-      data: Prototype[_]
+      data: Val[_]
   ) extends SlotDataflowProblem {
 
     override def toString = "Input " + data + " is missing when reaching the " + slot + "."
@@ -57,7 +57,7 @@ object DataflowProblem {
   case class DuplicatedName(
       capsule:   Capsule,
       name:      String,
-      prototype: Iterable[Prototype[_]],
+      prototype: Iterable[Val[_]],
       slotType:  SlotType
   ) extends DataflowProblem {
 
@@ -67,7 +67,7 @@ object DataflowProblem {
   case class IncoherentTypesBetweenSlots(
       capsule: Capsule,
       name:    String,
-      types:   Iterable[PrototypeType[_]]
+      types:   Iterable[ValType[_]]
   ) extends DataflowProblem {
 
     override def toString = name + " is present in multiple slot of capsule " + capsule + " but has different types: " + types.mkString(", ") + "."
@@ -85,7 +85,7 @@ object DataflowProblem {
   case class MissingSourceInput(
       slot:   Slot,
       source: Source,
-      input:  Prototype[_]
+      input:  Val[_]
   ) extends SourceProblem {
 
     override def toString = s"Input $input is missing for source $source at $slot"
@@ -94,8 +94,8 @@ object DataflowProblem {
   case class WrongSourceType(
       slot:     Slot,
       source:   Source,
-      expected: Prototype[_],
-      provided: Prototype[_]
+      expected: Val[_],
+      provided: Val[_]
   ) extends SourceProblem {
 
     override def toString = s"Wrong type received for source $source at $slot, $expected is expected but $provided is provided."
@@ -106,7 +106,7 @@ object DataflowProblem {
   case class MissingHookInput(
       capsule: Capsule,
       hook:    Hook,
-      input:   Prototype[_]
+      input:   Val[_]
   ) extends HookProblem {
 
     override def toString = s"Input $input is missing for misc $hook"
@@ -114,8 +114,8 @@ object DataflowProblem {
   case class WrongHookType(
       capsule: Capsule,
       hook:    Hook,
-      input:   Prototype[_],
-      found:   Prototype[_]
+      input:   Val[_],
+      found:   Val[_]
   ) extends HookProblem {
 
     override def toString = s"Input has incompatible type $found whereas $input was expected for hook $hook of capsule $capsule"

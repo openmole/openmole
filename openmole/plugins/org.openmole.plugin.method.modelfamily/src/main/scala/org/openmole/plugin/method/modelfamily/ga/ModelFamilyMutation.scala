@@ -17,8 +17,6 @@
 
 package org.openmole.plugin.method.modelfamily.ga
 
-import fr.iscpif.mgo._
-
 import scala.util.Random
 
 trait ModelFamilyMutation <: DynamicGAMutation with ModelFamilyGenome {

@@ -17,7 +17,7 @@
 
 package org.openmole.console
 
-import java.io.{ File, IOException }
+import java.io.{ File, IOException, StringReader }
 import java.util.logging.Level
 
 import org.openmole.core.buildinfo
@@ -30,6 +30,9 @@ import org.openmole.core.workflow.execution.Environment
 import org.openmole.core.workflow.mole.{ Mole, MoleExecution }
 import org.openmole.core.workflow.puzzle._
 import org.openmole.core.workflow.validation.Validation
+import org.openmole.core.module
+import org.openmole.core.pluginmanager.PluginManager
+import org.openmole.core.workspace.Workspace
 
 class Command(val console: ScalaREPL, val variables: ConsoleVariables) { commands ⇒
 
@@ -88,7 +91,7 @@ class Command(val console: ScalaREPL, val variables: ConsoleVariables) { command
 
   def version() =
     println(s"""You are running OpenMOLE ${buildinfo.version} - ${buildinfo.name}
-       |built on the ${buildinfo.generationDate}.""".stripMargin)
+       |built on the ${buildinfo.version.generationDate}.""".stripMargin)
 
   def loadAny(file: File, args: Seq[String] = Seq.empty): AnyRef =
     try {
@@ -113,6 +116,33 @@ class Command(val console: ScalaREPL, val variables: ConsoleVariables) { command
       case res: Puzzle ⇒ res
       case x           ⇒ throw new UserBadDataError("The result is not a puzzle")
     }
+
+  def modules(urls: Seq[String] = Workspace.preference(module.moduleIndexes)): Unit = {
+    val installedBundles = PluginManager.bundleHashes.map(_.toString).toSet
+    def installed(components: Seq[String]) = (components.toSet -- installedBundles).isEmpty
+
+    urls.flatMap {
+      url ⇒
+        module.modules(url).map {
+          m ⇒
+            def installedString = if (installed(m.components.map(_.hash))) " (installed)" else ""
+            m.name + installedString
+        }
+    }.sorted.foreach(println)
+  }
+
+  def install(name: String*): Unit = install(name)
+  def install(names: Seq[String], urls: Seq[String] = Workspace.preference(module.moduleIndexes)): Unit = {
+    val toInstall = urls.flatMap(url ⇒ module.selectableModules(url)).filter(sm ⇒ names.contains(sm.module.name))
+    if (toInstall.isEmpty) println("The module(s) is/are already installed.")
+    else
+      Console.dealWithLoadError(module.install(toInstall), interactive = true) match {
+        case Seq() ⇒
+          println("The module(s) has/have been successfully installed, please restart the console to enable it/them.")
+        case e ⇒
+          println("There was some errors during the installation, please restart the console to enable the installed module(s).")
+      }
+  }
 
 }
 

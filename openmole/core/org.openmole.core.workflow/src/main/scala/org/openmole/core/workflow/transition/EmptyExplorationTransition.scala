@@ -17,13 +17,17 @@
 
 package org.openmole.core.workflow.transition
 
-import org.openmole.core.workflow.data._
+import org.openmole.core.context.{ Context, Val }
+import org.openmole.core.expansion.{ Condition, FromContext }
 import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.tools._
-import org.openmole.core.workflow.dsl._
+import org.openmole.core.workflow.validation.ValidateTransition
+import org.openmole.tool.random.RandomProvider
+
 import scala.collection.mutable.ListBuffer
 
-class EmptyExplorationTransition(start: Capsule, end: Slot, size: FromContext[Int], condition: Condition = Condition.True, filter: BlockList = BlockList.empty) extends ExplorationTransition(start, end, condition, filter) {
+class EmptyExplorationTransition(start: Capsule, end: Slot, size: FromContext[Int], condition: Condition = Condition.True, filter: BlockList = BlockList.empty) extends ExplorationTransition(start, end, condition, filter) with ValidateTransition {
+
+  override def validate(inputs: Seq[Val[_]]) = condition.validate(inputs)
 
   override def submitIn(context: Context, ticket: Ticket, subMole: SubMoleExecution)(implicit rng: RandomProvider) =
     for (i ← 0 until size.from(context)) submitNextJobsIfReady(ListBuffer() ++ filtered(context).values, subMole.moleExecution.nextTicket(ticket), subMole)

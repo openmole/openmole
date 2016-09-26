@@ -17,10 +17,12 @@
 
 package org.openmole.plugin.environment.ssh
 
-import org.openmole.core.batch.environment._
 import java.net.URI
-import org.openmole.core.workspace.{ Workspace, ConfigurationLocation }
-import concurrent.duration._
+
+import org.openmole.core.workspace.{ ConfigurationLocation, Workspace }
+import org.openmole.plugin.environment.batch.environment._
+
+import scala.concurrent.duration._
 
 object SSHService {
   val timeout = ConfigurationLocation("SSH", "TimeOut", Some(2 minutes))

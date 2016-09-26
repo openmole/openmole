@@ -17,21 +17,21 @@
 
 package org.openmole.plugin.sampling.combine
 
-import org.openmole.core.workflow.data._
+import org.openmole.core.context.{ Val, Variable }
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.sampling._
-import org.openmole.core.workflow.dsl._
 import org.openmole.plugin.domain.modifier._
+
+import scalaz.Scalaz._
 import scalaz._
-import Scalaz._
 
 object ZipWithNameSampling {
 
-  def apply[D, T: CanGetName](factor: Factor[D, T], name: Prototype[String])(implicit discrete: Discrete[D, T]) =
+  def apply[D, T: CanGetName](factor: Factor[D, T], name: Val[String])(implicit discrete: Discrete[D, T]) =
     new ZipWithNameSampling(factor, name)
 }
 
-class ZipWithNameSampling[D, T: CanGetName](val factor: Factor[D, T], val name: Prototype[String])(implicit discrete: Discrete[D, T]) extends Sampling {
+class ZipWithNameSampling[D, T: CanGetName](val factor: Factor[D, T], val name: Val[String])(implicit discrete: Discrete[D, T]) extends Sampling {
 
   override def inputs = FactorSampling(factor).inputs
   override def prototypes = List(factor.prototype, name)

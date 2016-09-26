@@ -17,26 +17,24 @@
 
 package org.openmole.plugin.hook.file
 
-import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.tools._
-import org.openmole.core.workflow.mole._
-import org.openmole.core.serializer._
-import org.openmole.core.workflow.tools._
 import java.io.File
 
-import monocle.Lens
 import monocle.macros.Lenses
-import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
+import org.openmole.core.context._
+import org.openmole.core.exception._
+import org.openmole.core.expansion._
+import org.openmole.core.serializer._
+import org.openmole.core.workflow.builder._
+import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.validation._
-import org.openmole.core.workflow.dsl._
+import org.openmole.tool.random._
+import org.openmole.tool.file._
 
 object SaveHook {
 
   implicit def isIO = InputOutputBuilder(SaveHook.config)
 
-  def apply(file: FromContext[File], prototypes: Prototype[_]*) =
+  def apply(file: FromContext[File], prototypes: Val[_]*) =
     new SaveHook(
       file,
       prototypes.toVector,
@@ -46,7 +44,7 @@ object SaveHook {
 
 @Lenses case class SaveHook(
     file:       FromContext[File],
-    prototypes: Vector[Prototype[_]],
+    prototypes: Vector[Val[_]],
     config:     InputOutputConfig
 ) extends Hook with ValidateHook {
 

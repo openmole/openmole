@@ -19,6 +19,7 @@ package org.openmole.core.workflow.data
 
 import java.util.concurrent.locks.ReentrantLock
 
+import org.openmole.core.context.Val
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
@@ -29,15 +30,15 @@ import org.openmole.core.workflow.transition._
 import org.openmole.core.workflow.puzzle._
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.dsl._
-
 import org.scalatest._
 import org.scalatest.junit._
+
 import scala.collection.mutable.ListBuffer
 
 class DataChannelSpec extends FlatSpec with Matchers {
 
   "A datachannel" should "enable variable values to be transmitted from a task to another" in {
-    val p = Prototype[String]("p")
+    val p = Val[String]("p")
 
     val t1 =
       TestTask { _ + (p → "Test") } set (
@@ -67,7 +68,7 @@ class DataChannelSpec extends FlatSpec with Matchers {
 
   "A data channel" should "be able to transmit the value to the multiple execution of an explored task" in {
 
-    val j = Prototype[String]("j")
+    val j = Val[String]("j")
     val tw =
       TestTask { _ + (j → "J") } set (
         name := "Test write",
@@ -75,7 +76,7 @@ class DataChannelSpec extends FlatSpec with Matchers {
       )
 
     val data = List("A", "B", "C")
-    val i = Prototype[String]("i")
+    val i = Val[String]("i")
 
     val sampling = new ExplicitSampling(i, data)
 

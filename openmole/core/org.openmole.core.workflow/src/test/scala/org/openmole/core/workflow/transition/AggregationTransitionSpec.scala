@@ -19,6 +19,7 @@ package org.openmole.core.workflow.transition
 
 import java.util.concurrent.atomic.AtomicInteger
 
+import org.openmole.core.context.Val
 import org.openmole.core.exception._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.execution._
@@ -32,8 +33,8 @@ import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.puzzle._
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.dsl._
-
 import org.scalatest._
+
 import scala.collection.mutable.ListBuffer
 import scala.reflect.macros.whitebox
 import scala.util.Try
@@ -44,7 +45,7 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
     @volatile var endCapsExecuted = 0
 
     val data = List("A", "A", "B", "C")
-    val i = Prototype[String]("i")
+    val i = Val[String]("i")
 
     val sampling = new ExplicitSampling(i, data)
 
@@ -78,7 +79,7 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
     @volatile var endCapsExecuted = 0
 
     val data = List(1, 2, 3, 2)
-    val i = Prototype[Int]("i")
+    val i = Val[Int]("i")
 
     val sampling = new ExplicitSampling(i, data)
 
@@ -110,7 +111,7 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
     val endCapsExecuted = new AtomicInteger()
 
     val data = 0 to 1000
-    val i = Prototype[Int]("i")
+    val i = Val[Int]("i")
 
     val sampling = new ExplicitSampling(i, data)
 
@@ -141,7 +142,7 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
 
   "Aggregation transition" should "not be executed when a task failed in exploration" in {
     val data = 0 to 1000
-    val i = Prototype[Int]("i")
+    val i = Val[Int]("i")
     val sampling = new ExplicitSampling(i, data)
     val exploration = ExplorationTask(sampling)
     val endCapsExecuted = new AtomicInteger()
@@ -170,9 +171,9 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
   }
 
   "Multiple aggregation transition" should "all be executed" in {
-    val v = Prototype[Double]("v")
-    val m = Prototype[Double]("m")
-    val s = Prototype[Double]("s")
+    val v = Val[Double]("v")
+    val m = Val[Double]("m")
+    val s = Val[Double]("s")
 
     val executed = new AtomicInteger()
 
@@ -197,8 +198,8 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
   }
 
   "Order" should "be preserved" in {
-    val v = Prototype[Double]("v")
-    val s = Prototype[Double]("s")
+    val v = Val[Double]("v")
+    val s = Val[Double]("s")
 
     val executed = new AtomicInteger()
 

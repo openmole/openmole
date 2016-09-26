@@ -17,6 +17,6 @@
 
 package org.openmole.plugin.domain.range
 
-import org.openmole.core.workflow.tools.PluginInfoActivator
+import org.openmole.core.pluginmanager.PluginInfoActivator
 
 class Activator extends PluginInfoActivator

@@ -17,10 +17,11 @@
 package org.openmole.plugin.method.evolution
 
 import fr.iscpif.mgo
-import fr.iscpif.mgo.algorithm.{ pse, noisypse }
-import org.openmole.core.workflow.data._
+import fr.iscpif.mgo.algorithm.{ noisypse, pse }
+import org.openmole.core.context.{ Context, Val }
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.sampling._
+import org.openmole.tool.random.RandomProvider
 
 object PSE {
 
@@ -32,7 +33,7 @@ object PSE {
 
   }
 
-  case class PatternAxe(p: Prototype[Double], scale: Vector[Double])
+  case class PatternAxe(p: Val[Double], scale: Vector[Double])
 
   def apply(
     genome:     Genome,

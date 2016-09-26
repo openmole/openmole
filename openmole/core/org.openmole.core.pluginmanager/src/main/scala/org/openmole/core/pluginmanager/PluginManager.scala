@@ -24,6 +24,7 @@ import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.pluginmanager.internal.Activator
 import org.openmole.tool.file._
 import org.openmole.tool.logger.Logger
+import org.openmole.tool.hash._
 import org.osgi.framework._
 import org.osgi.framework.wiring.{ BundleWiring, FrameworkWiring }
 
@@ -35,9 +36,11 @@ import scala.concurrent.stm._
 import scala.util.{ Failure, Success, Try }
 
 case class BundlesInfo(
-  files:                Map[File, (Long, Long)],
-  providedDependencies: Set[Long]
-)
+    files:                Map[File, (Long, Long)],
+    providedDependencies: Set[Long]
+) {
+  lazy val hashes = files.keys.map(f ⇒ f → f.hash).toMap
+}
 
 object PluginManager extends Logger {
 
@@ -110,7 +113,15 @@ object PluginManager extends Logger {
     val loaded = bundleFiles.map { b ⇒ b → Try(installBundle(b)) }
     def bundles = loaded.collect { case (f, Success(b)) ⇒ f → b }
     def loadError = loaded.collect { case (f, Failure(e)) ⇒ f → e }
-    loadError ++ bundles.map { case (f, b) ⇒ f → Try(b.start) }.collect { case (f, Failure(e)) ⇒ f → e }
+    loadError ++ bundles.flatMap {
+      case (f, b) ⇒
+        Try(b.start) match {
+          case Success(_) ⇒ None
+          case Failure(e) ⇒
+            b.uninstall()
+            Some(f → e)
+        }
+    }
   }
 
   def load(files: Iterable[File]) = synchronized {
@@ -252,5 +263,11 @@ object PluginManager extends Logger {
 
     listener.lock.acquire()
   }
+
+  def bundleHashes = infos.hashes.values
+
+  /* For debugging purposes */
+  def printBundles = println(Activator.contextOrException.getBundles.mkString("\n"))
+  def printDirectDependencies(b: Long) = println(directDependingBundles(Activator.contextOrException.getBundle(b)).mkString("\n"))
 
 }

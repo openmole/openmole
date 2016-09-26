@@ -17,29 +17,16 @@
 
 package org.openmole.plugin.source.file
 
-import au.com.bytecode.opencsv.CSVReader
-import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.task._
-import java.io._
-
-import org.openmole.core.workflow.tools._
-import org.openmole.plugin.tool.csv.{ CSVToVariables, CSVToVariablesBuilder }
-
-import collection.mutable.ListBuffer
-import java.math._
-
-import monocle.Lens
 import monocle.macros.Lenses
-
-import collection.JavaConversions._
-import reflect.ClassTag
-import org.openmole.core.workflow.mole.Source
-import org.openmole.core.workflow.mole.MoleExecutionContext
+import org.openmole.core.context.{ Context, Val, Variable }
 import org.openmole.core.dsl._
+import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
+import org.openmole.core.workflow.mole.{ MoleExecutionContext, Source }
+import org.openmole.plugin.tool.csv.{ CSVToVariables, CSVToVariablesBuilder }
+import org.openmole.tool.random.RandomProvider
+
+import scala.reflect.ClassTag
 
 object CSVSource {
 
@@ -65,8 +52,8 @@ object CSVSource {
 @Lenses case class CSVSource(
     path:        FromContext[String],
     config:      InputOutputConfig,
-    columns:     Vector[(String, Prototype[_])],
-    fileColumns: Vector[(String, File, Prototype[File])],
+    columns:     Vector[(String, Val[_])],
+    fileColumns: Vector[(String, File, Val[File])],
     separator:   Option[Char]
 ) extends Source with CSVToVariables {
 

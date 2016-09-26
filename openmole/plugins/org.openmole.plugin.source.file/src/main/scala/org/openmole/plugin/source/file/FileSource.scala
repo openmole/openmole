@@ -17,24 +17,22 @@
 
 package org.openmole.plugin.source.file
 
-import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.data._
 import java.io.File
 
-import monocle.Lens
 import monocle.macros.Lenses
-import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.tools._
+import org.openmole.core.context.{ Context, Val, Variable }
 import org.openmole.core.dsl
 import org.openmole.core.dsl._
+import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
+import org.openmole.core.workflow.mole._
+import org.openmole.tool.random.RandomProvider
 
 object FileSource {
 
   implicit def isIO = InputOutputBuilder(FileSource.config)
 
-  def apply(path: FromContext[String], prototype: Prototype[File]) =
+  def apply(path: FromContext[String], prototype: Val[File]) =
     new FileSource(
       path,
       prototype,
@@ -45,7 +43,7 @@ object FileSource {
 
 @Lenses case class FileSource(
     path:      FromContext[String],
-    prototype: Prototype[File],
+    prototype: Val[File],
     config:    InputOutputConfig
 ) extends Source {
 

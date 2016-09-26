@@ -17,20 +17,21 @@
 
 package org.openmole.plugin.source.file
 
-import org.openmole.core.workflow.data._
 import java.io.File
 
-import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.tools._
-import org.openmole.core.dsl._
 import monocle.macros.Lenses
+import org.openmole.core.context.{ Context, Val, Variable }
+import org.openmole.core.dsl._
+import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
+import org.openmole.core.workflow.mole._
+import org.openmole.tool.random.RandomProvider
 
 object ListDirectoriesSource {
 
   implicit def isIO = InputOutputBuilder(ListDirectoriesSource.config)
 
-  def apply(path: FromContext[String], prototype: Prototype[Array[File]], regExp: FromContext[String] = ".*") =
+  def apply(path: FromContext[String], prototype: Val[Array[File]], regExp: FromContext[String] = ".*") =
     new ListDirectoriesSource(
       path,
       prototype,
@@ -41,7 +42,7 @@ object ListDirectoriesSource {
 
 @Lenses case class ListDirectoriesSource(
     path:      FromContext[String],
-    prototype: Prototype[Array[File]],
+    prototype: Val[Array[File]],
     regExp:    FromContext[String],
     config:    InputOutputConfig
 ) extends Source {

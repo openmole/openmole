@@ -17,15 +17,17 @@
 
 package org.openmole.core.workflow.data
 
+import org.openmole.core.context.Val
 import org.openmole.core.workflow.data._
 import org.scalatest._
 import org.scalatest.junit._
+
 import scala.collection.mutable.ListBuffer
 import org.openmole.core.workflow.dsl._
 
 class PrototypeSpec extends FlatSpec with Matchers {
   "ToArray of dim 0" should "return the prototype itself" in {
-    val a = Prototype[Int]("a")
+    val a = Val[Int]("a")
     a.toArray(0) should equal(a)
   }
 }

@@ -17,12 +17,11 @@
 
 package org.openmole.plugin.domain.modifier
 
+import org.openmole.core.context.PrototypeSet
 import org.openmole.core.workflow.domain._
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.tools.FromContext
 
+import scalaz.Scalaz._
 import scalaz._
-import Scalaz._
 
 object SortedByDomain {
 

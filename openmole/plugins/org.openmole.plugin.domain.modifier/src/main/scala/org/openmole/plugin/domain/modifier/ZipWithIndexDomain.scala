@@ -17,9 +17,10 @@
  */
 package org.openmole.plugin.domain.modifier
 
-import org.openmole.core.workflow.data.{ Context, RandomProvider }
+import org.openmole.core.context.Context
+import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.domain.{ Discrete, DomainInputs }
-import org.openmole.core.workflow.tools.FromContext
+import org.openmole.tool.random.RandomProvider
 
 object ZipWithIndexDomain {
 

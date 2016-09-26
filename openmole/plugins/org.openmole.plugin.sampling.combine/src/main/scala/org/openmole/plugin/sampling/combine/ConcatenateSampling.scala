@@ -16,13 +16,9 @@
  */
 package org.openmole.plugin.sampling.combine
 
-import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.workflow.data._
+import org.openmole.core.context.{ Val, PrototypeSet }
+import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.sampling._
-
-import org.openmole.core.tools.obj.ClassUtils._
-import org.openmole.core.workflow.tools.FromContext
-import scala.util.Random
 
 object ConcatenateSampling {
   def apply(samplings: Sampling*) = new ConcatenateSampling(samplings: _*)
@@ -32,7 +28,7 @@ class ConcatenateSampling(val samplings: Sampling*) extends Sampling {
 
   override lazy val inputs = PrototypeSet.empty ++ samplings.flatMap { _.inputs }
 
-  override def prototypes: Iterable[Prototype[_]] = samplings.head.prototypes
+  override def prototypes: Iterable[Val[_]] = samplings.head.prototypes
 
   override def apply() = FromContext.apply {
     (context, rng) ⇒ samplings.toIterator.flatMap(_().from(context)(rng))

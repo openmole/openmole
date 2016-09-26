@@ -17,9 +17,8 @@
 
 package org.openmole.core.workflow.validation
 
-import org.openmole.core.workflow.data.DataChannel
 import org.openmole.core.workflow.mole.Capsule
-import org.openmole.core.workflow.transition.ITransition
+import org.openmole.core.workflow.transition.{ DataChannel, ITransition }
 
 object TopologyProblem {
 

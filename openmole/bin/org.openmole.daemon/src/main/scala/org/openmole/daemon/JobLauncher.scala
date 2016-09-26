@@ -31,15 +31,15 @@ import org.openmole.core.tools.service.{ OS, ProcessUtil }
 import org.openmole.core.workspace.{ Workspace, ConfigurationLocation }
 import org.openmole.plugin.environment.desktopgrid._
 import DesktopGridEnvironment._
-import org.openmole.core.batch.message._
-import org.openmole.core.batch.storage._
+import org.openmole.plugin.environment.batch.storage._
 import org.openmole.core.serializer._
 import org.openmole.tool.tar._
-import org.openmole.tool.hash._
 import ProcessUtil._
 import fr.iscpif.gridscale.ssh._
 
-import org.openmole.core.batch.message.FileMessage._
+import org.openmole.core.communication.storage._
+import org.openmole.core.communication.message._
+import org.openmole.core.communication.message.FileMessage._
 import scala.annotation.tailrec
 import util.{ Failure, Success }
 import concurrent.duration._
@@ -169,7 +169,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
 
     def uploadFileMessage(msg: FileMessage) = {
       val localFile = new File(msg.path)
-      val uploadedFile = storage.child(communicationDir, Storage.uniqName("fileMsg", ".bin"))
+      val uploadedFile = storage.child(communicationDir, uniqName("fileMsg", ".bin"))
       logger.info("Uploading " + localFile + " to " + uploadedFile)
       try storage.upload(localFile, uploadedFile)
       finally localFile.delete
@@ -198,9 +198,9 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
     Workspace.withTmpFile { outputLocal ⇒
       logger.info("Uploading job results")
       SerialiserService.serialiseAndArchiveFiles(resultToSend, outputLocal)
-      val tmpResultFile = storage.child(tmpResultsDirName, Storage.uniqName(job, ".res"))
+      val tmpResultFile = storage.child(tmpResultsDirName, uniqName(job, ".res"))
       storage.upload(outputLocal, tmpResultFile)
-      val resultFile = storage.child(resultsDirName, Storage.uniqName(job, ".res"))
+      val resultFile = storage.child(resultsDirName, uniqName(job, ".res"))
       storage.mv(tmpResultFile, resultFile)
       logger.info("Job results uploaded at " + resultFile)
     }

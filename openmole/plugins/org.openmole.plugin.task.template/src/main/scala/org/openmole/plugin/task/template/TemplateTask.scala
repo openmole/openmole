@@ -16,14 +16,15 @@
  */
 package org.openmole.plugin.task.template
 
-import org.openmole.core.workflow.builder._
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.dsl._
 import java.io.File
 
 import monocle.macros.Lenses
-import org.openmole.core.workflow.tools._
+import org.openmole.core.context.{ Context, Val }
+import org.openmole.core.expansion.ExpandedString
+import org.openmole.core.workflow.builder._
+import org.openmole.core.workflow.dsl._
+import org.openmole.core.workflow.task._
+import org.openmole.tool.random.RandomProvider
 
 object TemplateTask {
 
@@ -31,14 +32,14 @@ object TemplateTask {
 
   def apply(
     template: String,
-    output:   Prototype[File]
+    output:   Val[File]
   ) = new TemplateTask(template, output) set (outputs += output)
 
 }
 
 @Lenses case class TemplateTask(
     template: String,
-    output:   Prototype[File],
+    output:   Val[File],
     config:   InputOutputConfig = InputOutputConfig()
 ) extends Task {
 

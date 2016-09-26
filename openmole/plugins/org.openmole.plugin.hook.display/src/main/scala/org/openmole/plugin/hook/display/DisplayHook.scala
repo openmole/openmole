@@ -17,15 +17,13 @@
 
 package org.openmole.plugin.hook.display
 
-import monocle.Lens
 import monocle.macros.Lenses
-import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.tools._
+import org.openmole.core.context._
+import org.openmole.core.expansion._
+import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.dsl._
-import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.validation.ValidateHook
+import org.openmole.tool.random.RandomProvider
 
 object DisplayHook {
 

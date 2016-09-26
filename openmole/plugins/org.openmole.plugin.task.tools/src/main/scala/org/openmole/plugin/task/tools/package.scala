@@ -17,13 +17,13 @@
 
 package org.openmole.plugin.task
 
-import org.openmole.core.workflow.data._
-
 package tools {
+
+  import org.openmole.core.context.Val
 
   trait ToolsPackage {
     lazy val assignments = new {
-      def +=[T, U <: { def addAssignment[T](from: Prototype[T], to: Prototype[T]): this.type }](from: Prototype[T], to: Prototype[T]) = (_: U).addAssignment(from, to)
+      def +=[T, U <: { def addAssignment[T](from: Val[T], to: Val[T]): this.type }](from: Val[T], to: Val[T]) = (_: U).addAssignment(from, to)
     }
   }
 }

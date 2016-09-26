@@ -18,7 +18,6 @@
 package org.openmole.plugin.task
 
 import java.io.File
-import org.openmole.core.dsl._
 
 package jvm {
 

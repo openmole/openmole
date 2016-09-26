@@ -17,8 +17,8 @@
 
 package org.openmole.plugin.environment.desktopgrid
 
-import org.openmole.core.batch.storage.{ RemoteStorage, SimpleStorage }
-import fr.iscpif.gridscale.storage.LocalStorage
+import org.openmole.core.communication.storage.RemoteStorage
+import org.openmole.plugin.environment.batch.storage.SimpleStorage
 import org.openmole.plugin.environment.gridscale._
 
 class LocalSimpleStorage extends LogicalLinkStorage with RemoteStorage with SimpleStorage {

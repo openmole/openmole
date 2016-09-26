@@ -17,15 +17,9 @@
 
 package org.openmole.plugin.grouping.batch
 
-import org.openmole.core.tools.service.newRNG
-import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.data._
+import org.openmole.core.context.Context
 import org.openmole.core.workflow.job._
 import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.task.Task
-import org.openmole.core.workspace.Workspace
-import org.openmole.core.tools.service._
-import Task._
 
 object ShuffledGrouping {
 
@@ -42,6 +36,6 @@ object ShuffledGrouping {
 class ShuffledGrouping(numberOfBatch: Int) extends Grouping {
 
   override def apply(context: Context, groups: Iterable[(MoleJobGroup, Iterable[MoleJob])]): MoleJobGroup =
-    new MoleJobGroup(newRNG(context(openMOLESeed)).nextInt(numberOfBatch))
+    new MoleJobGroup(Context.buildRNG(context).nextInt(numberOfBatch))
 
 }

@@ -18,7 +18,6 @@ package org.openmole.core.workflow.puzzle
 
 import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.transition.TransitionDecorator
 
 trait HookDecorator[T] {
   def hook(hook: Hook*): T

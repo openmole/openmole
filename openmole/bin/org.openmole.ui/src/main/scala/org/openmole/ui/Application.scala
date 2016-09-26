@@ -36,6 +36,7 @@ import org.openmole.gui.server.core._
 import org.openmole.console._
 import org.openmole.tool.file._
 import org.openmole.tool.hash._
+import org.openmole.core.module
 
 object Application extends Logger {
 
@@ -147,6 +148,8 @@ object Application extends Logger {
       }
     }
 
+    PluginManager.startAll.foreach { case (b, e) ⇒ logger.log(WARNING, s"Error staring bundle $b", e) }
+
     val config = parse(args.map(_.trim).toList)
 
     config.loggerLevel.foreach(LoggerService.level)
@@ -157,16 +160,15 @@ object Application extends Logger {
       if (!notExistingUserPlugins.isEmpty) logger.warning(s"""Some plugins or plugin folders don't exist: ${notExistingUserPlugins.mkString(",")}""")
 
       val userPlugins =
-        existingUserPlugins.flatMap { p ⇒ PluginManager.listBundles(new File(p)) } ++
-          (if (config.loadHomePlugins.getOrElse(config.launchMode == GUIMode)) Workspace.pluginDir.listFilesSafe.flatMap(PluginManager.listBundles) else Nil)
+        existingUserPlugins.flatMap { p ⇒ PluginManager.listBundles(new File(p)) } ++ module.allModules
 
       logger.fine(s"Loading user plugins " + userPlugins)
 
-      val plugins: List[File] = userPlugins
-
-      PluginManager.startAll.foreach { case (b, e) ⇒ logger.log(WARNING, s"Error staring bundle $b", e) }
-      PluginManager.tryLoad(plugins).foreach { case (f, e) ⇒ logger.log(WARNING, s"Error loading bundle $f", e) }
+      PluginManager.tryLoad(userPlugins)
     }
+
+    def displayErrors(load: ⇒ Iterable[(File, Throwable)]) =
+      load.foreach { case (f, e) ⇒ logger.log(WARNING, s"Error loading bundle $f", e) }
 
     def password =
       config.password orElse config.passwordFile.map(_.lines.head)
@@ -192,22 +194,23 @@ object Application extends Logger {
         Console.ExitCodes.ok
       case RESTMode ⇒
         setPassword
-        loadPlugins
+        displayErrors(loadPlugins)
         if (!password.isDefined) Console.initPassword
         val server = new RESTServer(config.port, config.hostName)
         server.start()
         Console.ExitCodes.ok
       case ConsoleMode ⇒
         setPassword
-        loadPlugins
         print(consoleSplash)
         println(consoleUsage)
+        Console.dealWithLoadError(loadPlugins, !config.scriptFile.isDefined)
         val console = new Console(password, config.scriptFile)
         val variables = ConsoleVariables(args = config.args)
         console.run(variables, config.consoleWorkDirectory)
       case GUIMode ⇒
         setPassword
-        loadPlugins
+        // FIXME switch to a GUI display in the plugin panel
+        displayErrors(loadPlugins)
         def browse(url: String) =
           if (Desktop.isDesktopSupported) Desktop.getDesktop.browse(new URI(url))
         GUIServer.lockFile.withFileOutputStream { fos ⇒

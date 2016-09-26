@@ -19,10 +19,9 @@ package org.openmole.core.workflow.job
 
 import java.util.UUID
 
-import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.job.State._
-import org.openmole.core.workflow.task.{ TaskExecutionContext, Task }
-import org.openmole.core.workflow.data.{ Prototype, Variable, Context }
+import org.openmole.core.workflow.task._
+import org.openmole.core.context._
 
 object MoleJob {
   implicit val moleJobOrdering = Ordering.by((_: MoleJob).id)
@@ -51,7 +50,7 @@ import MoleJob._
 
 class MoleJob(
     val task:               Task,
-    private var prototypes: Array[Prototype[Any]],
+    private var prototypes: Array[Val[Any]],
     private var values:     Array[Any],
     mostSignificantBits:    Long, leastSignificantBits: Long,
     private[workflow] var stateChangedCallBack: MoleJob.StateChangedCallBack
@@ -64,7 +63,7 @@ class MoleJob(
 
   def state: State = _state
   def context: Context =
-    Context((prototypes zip values).map { case (p, v) ⇒ Variable(p, v) })
+    Context((prototypes zip values).map { case (p, v) ⇒ Variable(p, v) }: _*)
 
   private def context_=(ctx: Context) = {
     val (_prototypes, _values) = MoleJob.compressContext(ctx)

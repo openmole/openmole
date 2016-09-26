@@ -19,9 +19,9 @@ package org.openmole.plugin.domain
 
 import java.io.File
 
-import org.openmole.core.workflow.data._
+import org.openmole.core.context.Val
+import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.domain._
-import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.dsl._
 
 package object file {
@@ -44,8 +44,8 @@ package object file {
     def select(path: FromContext[String]) = SelectFileDomain(f, path)
   }
 
-  implicit def prototypeOfFileIsFinite = new Finite[Prototype[File], File] {
-    override def computeValues(prototype: Prototype[File]) = FromContext { (ctx, rng) ⇒ ctx(prototype).listFilesSafe }
+  implicit def prototypeOfFileIsFinite = new Finite[Val[File], File] {
+    override def computeValues(prototype: Val[File]) = FromContext { (ctx, rng) ⇒ ctx(prototype).listFilesSafe }
   }
 
   implicit def fileIsFinite = new Finite[File, File] {

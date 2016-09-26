@@ -17,6 +17,7 @@
 
 package org.openmole.core.workflow.transition
 
+import org.openmole.core.context.Val
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
@@ -26,6 +27,7 @@ import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.builder._
 import org.scalatest._
+
 import scala.collection.mutable.ListBuffer
 import org.openmole.core.workflow.puzzle._
 import org.openmole.core.workflow.dsl._
@@ -36,7 +38,7 @@ class EndExplorationTransitionSpec extends FlatSpec with Matchers {
     @volatile var endCapsExecuted = 0
 
     val data = List("A", "A", "B", "C")
-    val i = Prototype[String]("i")
+    val i = Val[String]("i")
 
     val sampling = new ExplicitSampling(i, data)
 

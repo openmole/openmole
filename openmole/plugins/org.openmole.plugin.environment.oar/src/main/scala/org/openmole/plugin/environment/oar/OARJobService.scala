@@ -18,22 +18,17 @@
 
 package org.openmole.plugin.environment.oar
 
-import fr.iscpif.gridscale.ssh.{ SSHConnectionCache, SSHAuthentication, SSHJobService, SSHHost }
-import fr.iscpif.gridscale.oar.{ OARJobService ⇒ GSOARJobService, OARJobDescription }
-import java.net.URI
-import org.openmole.core.batch.control._
-import org.openmole.core.batch.environment._
-import org.openmole.core.batch.jobservice.{ BatchJob, BatchJobId }
+import fr.iscpif.gridscale.oar.{ OARJobDescription, OARJobService ⇒ GSOARJobService }
+import fr.iscpif.gridscale.ssh.SSHConnectionCache
 import org.openmole.core.workspace.Workspace
-import org.openmole.plugin.environment.ssh.{ ClusterJobService, SharedStorage, SSHService }
-import org.openmole.core.batch.storage.SimpleStorage
-import org.openmole.plugin.environment.gridscale._
+import org.openmole.plugin.environment.batch.environment._
+import org.openmole.plugin.environment.batch.jobservice.{ BatchJob, BatchJobId }
+import org.openmole.plugin.environment.ssh.{ ClusterJobService, SSHService }
 import org.openmole.tool.logger.Logger
-import concurrent.duration._
 
 object OARJobService extends Logger
 
-import OARJobService._
+import org.openmole.plugin.environment.oar.OARJobService._
 
 trait OARJobService extends ClusterJobService { js ⇒
 

@@ -17,18 +17,16 @@
 
 package org.openmole.plugin.task.tools
 
-import monocle.macros.Lenses
-import org.openmole.core.workflow.builder._
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.task._
+import org.openmole.core.context.{ Val, Variable }
 import org.openmole.core.dsl
-import dsl._
+import org.openmole.core.dsl._
+import org.openmole.core.workflow.task._
 
-import reflect.ClassTag
+import scala.reflect.ClassTag
 
 object MergeTask {
 
-  def apply[S](result: Prototype[Array[S]], prototypes: Prototype[Array[S]]*) =
+  def apply[S](result: Val[Array[S]], prototypes: Val[Array[S]]*) =
     ClosureTask("MergeTask") { (context, _, _) ⇒
       val flattened = prototypes.map { p ⇒ context(p) }.flatten.toArray[S](ClassTag(result.fromArray.`type`.runtimeClass))
       Variable(result, flattened)

@@ -17,8 +17,9 @@
 package org.openmole.core.workflow.mole
 
 import monocle.macros.Lenses
-import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
-import org.openmole.core.workflow.data.{ Context, DefaultSet, PrototypeSet, RandomProvider }
+import org.openmole.core.context.Context
+import org.openmole.core.workflow.builder.{InputOutputBuilder, InputOutputConfig}
+import org.openmole.tool.random.RandomProvider
 
 object TestSource {
   implicit def isBuilder: InputOutputBuilder[TestSource] = InputOutputBuilder(config)

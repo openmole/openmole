@@ -18,19 +18,20 @@
 package org.openmole.plugin.hook
 
 import java.io.File
-import org.openmole.core.workflow.data.Prototype
-import org.openmole.core.workflow.tools._
-import org.openmole.plugin.hook.file.CopyFileHook.CopyFileHookBuilder
+
+import org.openmole.core.context.Val
 import org.openmole.core.dsl._
 import org.openmole.core.workflow.builder._
-import org.openmole.plugin.hook.file.CopyFileHook.CopyOptions
+import org.openmole.plugin.hook.file.CopyFileHook.{ CopyFileHookBuilder, CopyOptions }
 
 package file {
+
+  import org.openmole.core.expansion.FromContext
 
   trait FilePackage {
 
     def copies = new {
-      def +=[T: CopyFileHookBuilder: InputOutputBuilder](prototype: Prototype[File], destination: FromContext[File], remove: Boolean = false, compress: Boolean = false, move: Boolean = false): T ⇒ T =
+      def +=[T: CopyFileHookBuilder: InputOutputBuilder](prototype: Val[File], destination: FromContext[File], remove: Boolean = false, compress: Boolean = false, move: Boolean = false): T ⇒ T =
         (implicitly[CopyFileHookBuilder[T]].copies add ((prototype, destination, CopyOptions(remove, compress, move)))) andThen
           (inputs += prototype) andThen (if (move) (outputs += prototype) else identity)
     }

@@ -19,20 +19,9 @@ package org.openmole.plugin.method.modelfamily
 
 import java.io.File
 
-import org.openmole.core.pluginmanager.PluginManager
-import org.openmole.core.serializer.plugin.Plugins
-import org.openmole.core.workflow.builder._
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.tools._
-import org.openmole.plugin.method.evolution.Scalar
-import org.openmole.plugin.task.jvm.{ JVMLanguageBuilder, JVMLanguageTaskBuilder }
-import org.openmole.plugin.task.scala._
+import fr.iscpif.family.{ModelFamily => FModelFamily}
 
-import scala.collection.BitSet
 import scala.collection.mutable.ListBuffer
-import scala.util.{ Try, Success }
-import fr.iscpif.family.{ ModelFamily ⇒ FModelFamily, Combination, TypedValue }
 
 object ModelFamily {
 
@@ -47,7 +36,7 @@ object ModelFamily {
 
 }
 
-import ModelFamily._
+import org.openmole.plugin.method.modelfamily.ModelFamily._
 
 object ModelFamilyBuilder {
   implicit def modelFamilyBuilderToModelFamily(builder: ModelFamilyBuilder) = builder.toModelFamily

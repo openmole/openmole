@@ -17,11 +17,11 @@
 
 package org.openmole.plugin.task.netlogo
 
-import org.openmole.core.workflow.data._
 import monocle.Lens
+import org.openmole.core.context.Val
 
 trait NetLogoTaskBuilder[T] {
-  def netLogoInputs: Lens[T, Vector[(Prototype[_], String)]]
-  def netLogoOutputs: Lens[T, Vector[(String, Prototype[_])]]
-  def netLogoArrayOutputs: Lens[T, Vector[(String, Int, Prototype[_])]]
+  def netLogoInputs: Lens[T, Vector[(Val[_], String)]]
+  def netLogoOutputs: Lens[T, Vector[(String, Val[_])]]
+  def netLogoArrayOutputs: Lens[T, Vector[(String, Int, Val[_])]]
 }

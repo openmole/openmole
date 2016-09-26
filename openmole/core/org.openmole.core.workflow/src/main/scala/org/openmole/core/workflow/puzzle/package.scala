@@ -17,10 +17,9 @@
 
 package org.openmole.core.workflow
 
-import org.openmole.core.workflow.transition._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.builder._
+import org.openmole.core.workflow.transition._
 
 package puzzle {
 

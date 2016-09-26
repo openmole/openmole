@@ -17,6 +17,7 @@
 
 package org.openmole.core.workflow.mole
 
+import org.openmole.core.context.{Context, Val, Variable}
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
 import org.openmole.core.workflow.sampling._
@@ -30,6 +31,7 @@ import org.openmole.core.workflow.puzzle._
 import org.openmole.core.workflow.builder._
 import org.scalatest._
 import org.scalatest.junit._
+
 import scala.collection.mutable.ListBuffer
 import org.openmole.core.workflow.dsl._
 
@@ -48,7 +50,7 @@ class MoleExecutionSpec extends FlatSpec with Matchers {
 
   "Grouping jobs" should "not impact a normal mole execution" in {
     val data = List("A", "A", "B", "C")
-    val i = Prototype[String]("i")
+    val i = Val[String]("i")
 
     val sampling = ExplicitSampling(i, data)
 
@@ -78,7 +80,7 @@ class MoleExecutionSpec extends FlatSpec with Matchers {
   }
 
   "Implicits" should "be used when input is missing" in {
-    val i = Prototype[String]("i")
+    val i = Val[String]("i")
     val emptyT = EmptyTask() set (inputs += i)
     val emptyC = Capsule(emptyT)
     MoleExecution(mole = Mole(emptyC), implicits = Context(Variable(i, "test"))).start.waitUntilEnded

@@ -18,13 +18,13 @@
 package org.openmole.plugin.domain.file
 
 import java.io.File
-import org.openmole.core.workflow.tools._
-import org.openmole.core.workflow.data._
+
+import org.openmole.core.context.Context
+import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.domain._
-import org.openmole.core.workflow.tools.ExpandedString
 import org.openmole.core.workflow.dsl._
 import org.openmole.tool.logger.Logger
-import scala.collection.JavaConversions._
+import org.openmole.tool.random.RandomProvider
 
 object ListFilesDomain extends Logger {
 
@@ -42,7 +42,7 @@ object ListFilesDomain extends Logger {
 
 }
 
-import ListFilesDomain.Log._
+import org.openmole.plugin.domain.file.ListFilesDomain.Log._
 
 class ListFilesDomain(
     base:      File,

@@ -19,10 +19,10 @@ package org.openmole.plugin.sampling.csv
 
 import java.io.File
 
-import monocle.Lens
 import monocle.macros.Lenses
+import org.openmole.core.context.Val
+import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
-import org.openmole.core.workflow.data.{ DefaultSet, Prototype, PrototypeSet }
 import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.tools._
 import org.openmole.plugin.tool.csv.{ CSVToVariables, CSVToVariablesBuilder }
@@ -54,8 +54,8 @@ object CSVSampling {
 @Lenses case class CSVSampling(
     file:        FromContext[File],
     config:      InputOutputConfig,
-    columns:     Vector[(String, Prototype[_])],
-    fileColumns: Vector[(String, File, Prototype[File])],
+    columns:     Vector[(String, Val[_])],
+    fileColumns: Vector[(String, File, Val[File])],
     separator:   Option[Char]
 ) extends Sampling with CSVToVariables {
 

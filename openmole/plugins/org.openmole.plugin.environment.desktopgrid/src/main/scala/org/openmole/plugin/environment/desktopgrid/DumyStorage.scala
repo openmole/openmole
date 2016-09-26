@@ -17,8 +17,8 @@
 
 package org.openmole.plugin.environment.desktopgrid
 
-import org.openmole.core.batch.storage._
 import fr.iscpif.gridscale.storage.LocalStorage
+import org.openmole.plugin.environment.batch.storage._
 import org.openmole.plugin.environment.gridscale.GridScaleStorage
 
 class DumyStorage extends SimpleStorage with GridScaleStorage {

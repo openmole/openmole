@@ -20,21 +20,17 @@ package org.openmole.core.workflow.execution
 import java.util.concurrent.atomic.AtomicLong
 import java.util.logging.Level
 
-import org.openmole.core.event.{ Event, EventAccumulator, EventDispatcher }
+import org.openmole.core.event.{ Event, EventDispatcher }
+import org.openmole.core.tools.service._
+import org.openmole.core.workflow.dsl._
+import org.openmole.core.workflow.execution.ExecutionState._
 import org.openmole.core.workflow.execution.local.{ ExecutorPool, LocalExecutionJob }
-import org.openmole.core.workflow.job.Job
-import org.openmole.core.workflow.job.MoleJob
-import ExecutionState._
-import org.openmole.core.workflow.mole.MoleExecution
+import org.openmole.core.workflow.job.{ Job, MoleJob }
 import org.openmole.core.workflow.task.TaskExecutionContext
 import org.openmole.core.workflow.tools.{ ExceptionEvent, Name }
 import org.openmole.core.workspace.{ ConfigurationLocation, Workspace }
-import org.openmole.tool.collection._
-
-import scala.concurrent.stm._
-import org.openmole.core.tools.service._
-import org.openmole.core.workflow.dsl._
 import org.openmole.tool.cache._
+import org.openmole.tool.collection._
 
 import scala.ref.WeakReference
 
@@ -52,7 +48,7 @@ object Environment {
   case class RuntimeLog(beginTime: Long, executionBeginTime: Long, executionEndTime: Long, endTime: Long)
 }
 
-import Environment._
+import org.openmole.core.workflow.execution.Environment._
 
 sealed trait Environment <: Name {
   private[execution] val _done = new AtomicLong(0L)

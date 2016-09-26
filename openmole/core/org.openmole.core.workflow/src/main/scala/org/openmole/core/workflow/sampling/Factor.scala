@@ -18,8 +18,8 @@
 package org.openmole.core.workflow.sampling
 
 import monocle.macros.Lenses
-import org.openmole.core.workflow.data._
+import org.openmole.core.context._
 
 import scala.language.higherKinds
 
-@Lenses case class Factor[D, T](prototype: Prototype[T], domain: D)
+@Lenses case class Factor[D, T](prototype: Val[T], domain: D)

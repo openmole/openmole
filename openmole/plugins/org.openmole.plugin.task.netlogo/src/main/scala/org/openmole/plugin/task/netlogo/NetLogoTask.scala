@@ -17,23 +17,18 @@
 
 package org.openmole.plugin.task.netlogo
 
-import java.io.File
 import java.util.AbstractCollection
 
+import org.openmole.core.context.{ Context, Val, Variable }
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.output.OutputManager
+import org.openmole.core.expansion.ExpandedString
 import org.openmole.core.tools.io.Prettifier
-import org.openmole.core.tools.service.OS
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.tools._
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.tools.{ ExpandedString }
-import org.openmole.plugin.task.external.External._
-import org.openmole.plugin.task.external._
+import org.openmole.core.tools.io.Prettifier._
 import org.openmole.core.workflow.dsl._
-import Prettifier._
+import org.openmole.core.workflow.task._
+import org.openmole.plugin.task.external._
 import org.openmole.tool.cache.Cache
+import org.openmole.tool.random.RandomProvider
 
 object NetLogoTask {
   case class Workspace(script: String, workspace: OptionalArgument[String] = None)
@@ -43,11 +38,11 @@ trait NetLogoTask extends Task {
 
   def workspace: NetLogoTask.Workspace
   def launchingCommands: Seq[String]
-  def netLogoInputs: Seq[(Prototype[_], String)]
-  def netLogoOutputs: Iterable[(String, Prototype[_])]
-  def netLogoArrayOutputs: Iterable[(String, Int, Prototype[_])]
+  def netLogoInputs: Seq[(Val[_], String)]
+  def netLogoOutputs: Iterable[(String, Val[_])]
+  def netLogoArrayOutputs: Iterable[(String, Int, Val[_])]
   def netLogoFactory: NetLogoFactory
-  def seed: Option[Prototype[Int]]
+  def seed: Option[Val[Int]]
   def external: External
 
   private def wrapError[T](msg: String)(f: ⇒ T): T =
@@ -97,7 +92,7 @@ trait NetLogoTask extends Task {
             case (name, prototype) ⇒
               try {
                 val outputValue = netLogo.report(name)
-                if (!prototype.`type`.runtimeClass.isArray) Variable(prototype.asInstanceOf[Prototype[Any]], outputValue)
+                if (!prototype.`type`.runtimeClass.isArray) Variable(prototype.asInstanceOf[Val[Any]], outputValue)
                 else {
                   val netLogoCollection = outputValue.asInstanceOf[AbstractCollection[Any]]
                   netLogoArrayToVariable(netLogoCollection, prototype)
@@ -114,7 +109,7 @@ trait NetLogoTask extends Task {
               try {
                 val netLogoCollection = netLogo.report(name)
                 val outputValue = netLogoCollection.asInstanceOf[AbstractCollection[Any]].toArray()(column)
-                if (!prototype.`type`.runtimeClass.isArray) Variable(prototype.asInstanceOf[Prototype[Any]], outputValue)
+                if (!prototype.`type`.runtimeClass.isArray) Variable(prototype.asInstanceOf[Val[Any]], outputValue)
                 else netLogoArrayToVariable(outputValue.asInstanceOf[AbstractCollection[Any]], prototype)
               }
               catch {
@@ -136,7 +131,7 @@ trait NetLogoTask extends Task {
     finally Thread.currentThread().setContextClassLoader(threadClassLoader)
   }
 
-  def netLogoArrayToVariable(netlogoCollection: AbstractCollection[Any], prototype: Prototype[_]) = {
+  def netLogoArrayToVariable(netlogoCollection: AbstractCollection[Any], prototype: Val[_]) = {
     val arrayType = prototype.`type`.runtimeClass.getComponentType
     val array = java.lang.reflect.Array.newInstance(arrayType, netlogoCollection.size)
     val it = netlogoCollection.iterator
@@ -147,7 +142,7 @@ trait NetLogoTask extends Task {
         case e: Throwable ⇒ throw new UserBadDataError(e, s"Error when adding a variable of type ${v.getClass} in an array of ${arrayType}")
       }
     }
-    Variable(prototype.asInstanceOf[Prototype[Any]], array)
+    Variable(prototype.asInstanceOf[Val[Any]], array)
   }
 
 }

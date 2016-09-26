@@ -18,20 +18,20 @@
 
 package org.openmole.plugin.environment.egi
 
-import org.openmole.core.batch.environment.SerializedJob
-import org.openmole.core.batch.storage._
-import org.openmole.core.workspace.Workspace
-import org.openmole.plugin.environment.gridscale.GridScaleJobService
-import org.openmole.core.batch.jobservice.{ BatchJob, BatchJobId }
-import org.openmole.core.batch.control.{ UnlimitedAccess }
-import org.openmole.tool.logger.Logger
-import fr.iscpif.gridscale.{ egi ⇒ gridscale }
 import fr.iscpif.gridscale.egi._
+import fr.iscpif.gridscale.{ egi ⇒ gridscale }
+import org.openmole.core.workspace.Workspace
+import org.openmole.plugin.environment.batch.control.UnlimitedAccess
+import org.openmole.plugin.environment.batch.environment.SerializedJob
+import org.openmole.plugin.environment.gridscale.GridScaleJobService
+import org.openmole.tool.file.uniqName
+import org.openmole.tool.logger.Logger
+
 import scalax.io.Resource
 
 object DIRACJobService extends Logger
 
-import DIRACJobService._
+import org.openmole.plugin.environment.egi.DIRACJobService._
 
 trait DIRACJobService extends GridScaleJobService { js ⇒
 
@@ -77,7 +77,7 @@ trait DIRACJobService extends GridScaleJobService { js ⇒
 
     val script = Workspace.newFile("script", ".sh")
     try {
-      val outputFilePath = storage.child(path, Storage.uniqName("job", ".out"))
+      val outputFilePath = storage.child(path, uniqName("job", ".out"))
 
       Resource.fromFile(script).write(jobScript(serializedJob, outputFilePath, None, None))
 

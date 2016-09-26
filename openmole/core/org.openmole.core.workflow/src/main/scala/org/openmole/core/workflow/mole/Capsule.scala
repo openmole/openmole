@@ -17,13 +17,12 @@
 
 package org.openmole.core.workflow.mole
 
-import org.openmole.core.exception.InternalProcessingError
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.execution._
-import org.openmole.core.workflow.job._
+import org.openmole.core.context._
+import org.openmole.core.exception._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
-import org.openmole.core.workflow.validation.TypeUtil
+import org.openmole.core.workflow.validation._
+import org.openmole.tool.random._
 
 object Capsule {
 
@@ -115,8 +114,8 @@ class Capsule(_task: Task, val strainer: Boolean) {
       val allNames = bySlot.toSeq.flatMap(_.map(_.name)).distinct
       val byName = bySlot.map(_.toSeq.groupBy(_.name).withDefaultValue(Seq.empty))
 
-      def haveAllTheSameType(ps: Seq[Prototype[_]]) = ps.map(_.`type`).distinct.size == 1
-      def inAllSlots(ps: Seq[Prototype[_]]) = ps.size == noStrainer.size
+      def haveAllTheSameType(ps: Seq[Val[_]]) = ps.map(_.`type`).distinct.size == 1
+      def inAllSlots(ps: Seq[Val[_]]) = ps.size == noStrainer.size
 
       val prototypes =
         for {

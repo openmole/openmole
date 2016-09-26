@@ -20,10 +20,11 @@ package org.openmole.plugin.domain.file
 import java.io.File
 import java.nio.file.Path
 
-import org.openmole.core.workflow.data.{ Context, RandomProvider }
+import org.openmole.core.context.Context
+import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.domain.Finite
-import org.openmole.core.workflow.tools.{ ExpandedString, FromContext }
 import org.openmole.core.workflow.dsl._
+import org.openmole.tool.random.RandomProvider
 
 object ListPathsDomain {
 

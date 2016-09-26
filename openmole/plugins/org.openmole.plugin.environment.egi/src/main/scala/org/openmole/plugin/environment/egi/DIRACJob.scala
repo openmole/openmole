@@ -17,7 +17,6 @@
 
 package org.openmole.plugin.environment.egi
 
-import org.openmole.core.batch.jobservice.{ BatchJobId, BatchJob }
-import org.openmole.core.batch.control.AccessToken
+import org.openmole.plugin.environment.batch.jobservice.{ BatchJob, BatchJobId }
 
 trait DIRACJob extends BatchJob with BatchJobId

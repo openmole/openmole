@@ -19,10 +19,8 @@ package org.openmole.plugin.domain
 
 import java.math.{ BigDecimal, MathContext, RoundingMode }
 
-import org.openmole.core.tools.io.FromString
+import org.openmole.core.expansion.FromContext
 import org.openmole.core.tools.math.BigDecimalOperations
-import org.openmole.core.workflow.domain.{ Bounds, Center, Finite }
-import org.openmole.core.workflow.tools.FromContext
 
 package object range {
 

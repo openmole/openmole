@@ -19,22 +19,21 @@ package org.openmole.plugin.environment.desktopgrid
 
 import java.io.File
 import java.net.URI
-import org.openmole.core.batch.control._
-import org.openmole.core.batch.environment._
-import org.openmole.core.batch.replication.ReplicaCatalog
-import org.openmole.core.batch.storage._
+
+import org.openmole.core.communication.storage.RemoteStorage
+import org.openmole.core.serializer.SerialiserService
+import org.openmole.core.workflow.execution.ExecutionState._
 import org.openmole.core.workspace.Workspace
+import org.openmole.plugin.environment.batch.control._
+import org.openmole.plugin.environment.batch.environment._
+import org.openmole.plugin.environment.batch.jobservice._
+import org.openmole.plugin.environment.batch.replication.ReplicaCatalog
+import org.openmole.plugin.environment.batch.storage._
+import org.openmole.plugin.environment.desktopgrid.DesktopGridEnvironment._
 import org.openmole.plugin.environment.gridscale.GridScaleStorage
 import org.openmole.plugin.tool.sftpserver.SFTPServer
 import org.openmole.tool.file._
-import org.openmole.core.batch.jobservice._
-import org.openmole.core.serializer.SerialiserService
-import org.openmole.core.workflow.execution.ExecutionState._
-import org.openmole.tool.file._
-import org.openmole.tool.thread._
 import org.openmole.tool.hash._
-
-import DesktopGridEnvironment._
 
 object DesktopGridService {
 

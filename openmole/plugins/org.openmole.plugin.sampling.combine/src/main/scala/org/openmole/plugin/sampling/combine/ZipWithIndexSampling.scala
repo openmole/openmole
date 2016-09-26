@@ -17,21 +17,18 @@
 
 package org.openmole.plugin.sampling.combine
 
-import org.openmole.core.workflow.data._
+import org.openmole.core.context.{ Val, Variable }
+import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.sampling._
-import org.openmole.core.workflow.tools.FromContext
-
-import scalaz._
-import Scalaz._
 
 object ZipWithIndexSampling {
 
-  def apply(sampling: Sampling, index: Prototype[Int]) =
+  def apply(sampling: Sampling, index: Val[Int]) =
     new ZipWithIndexSampling(sampling, index)
 
 }
 
-sealed class ZipWithIndexSampling(val sampling: Sampling, val index: Prototype[Int]) extends Sampling {
+sealed class ZipWithIndexSampling(val sampling: Sampling, val index: Val[Int]) extends Sampling {
 
   override def inputs = sampling.inputs
   override def prototypes = index :: sampling.prototypes.toList

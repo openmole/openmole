@@ -17,6 +17,7 @@
 
 package org.openmole.core.workflow.mole
 
+import org.openmole.core.context.Val
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
@@ -31,7 +32,7 @@ import org.openmole.core.workflow.dsl._
 class StrainerCapsuleSpec extends FlatSpec with Matchers {
 
   "The strainer capsule" should "let the data pass through" in {
-    val p = Prototype[String]("p")
+    val p = Val[String]("p")
 
     val t1 = TestTask { _ + (p → "Test") } set (
       name := "Test write",
@@ -57,7 +58,7 @@ class StrainerCapsuleSpec extends FlatSpec with Matchers {
   }
 
   "The strainer capsule" should "let the data pass through even if linked with a data channel to the root" in {
-    val p = Prototype[String]("p")
+    val p = Val[String]("p")
 
     val root = StrainerCapsule(EmptyTask())
 

@@ -18,9 +18,12 @@
 package org.openmole.plugin.domain.file
 
 import java.io.File
-import org.openmole.core.workflow.data._
+
+import org.openmole.core.context.Context
+import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.tools._
+import org.openmole.tool.random.RandomProvider
 
 object SelectFileDomain {
 

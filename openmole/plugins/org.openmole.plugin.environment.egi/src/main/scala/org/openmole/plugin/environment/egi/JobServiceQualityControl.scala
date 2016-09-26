@@ -17,7 +17,6 @@
 
 package org.openmole.plugin.environment.egi
 
-import org.openmole.core.batch.control._
 import java.util.concurrent.atomic._
 
 trait JobServiceQualityControl extends QualityControl {

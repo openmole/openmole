@@ -17,11 +17,13 @@
 
 package org.openmole.plugin.hook.modifier
 
-import org.openmole.core.workflow.mole._
-import org.openmole.core.dsl._
 import monocle.macros.Lenses
-import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
-import org.openmole.core.workflow.data._
+import org.openmole.core.context._
+import org.openmole.core.expansion._
+import org.openmole.core.dsl._
+import org.openmole.core.workflow.builder._
+import org.openmole.core.workflow.mole._
+import org.openmole.tool.random.RandomProvider
 
 object ConditionHook {
 

@@ -17,8 +17,8 @@
 
 package org.openmole.plugin.hook.file
 
-import org.openmole.core.workflow.tools._
 import monocle.Lens
+import org.openmole.core.expansion.FromContext
 
 trait AppendToCSVFileHookBuilder[T] {
   def csvHeader: Lens[T, Option[FromContext[String]]]

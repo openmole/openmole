@@ -1,7 +1,7 @@
 package org.openmole.plugin.task.care
 
-import org.scalatest._
 import org.openmole.core.dsl._
+import org.scalatest._
 
 class CARETaskFeatureSpec extends FeatureSpec with GivenWhenThen {
 

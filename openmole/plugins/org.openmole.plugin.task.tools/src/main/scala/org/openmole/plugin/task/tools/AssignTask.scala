@@ -17,13 +17,13 @@
 
 package org.openmole.plugin.task.tools
 
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.task._
+import org.openmole.core.context.{ Val, Variable }
 import org.openmole.core.workflow.dsl._
+import org.openmole.core.workflow.task._
 
 object AssignTask {
 
-  def apply(assignments: (Prototype[T], Prototype[T]) forSome { type T }*) =
+  def apply(assignments: (Val[T], Val[T]) forSome { type T }*) =
     ClosureTask("AssignTask") { (context, _, _) ⇒
       assignments.map { case (from, to) ⇒ Variable(to, context(from)) }
     } set (

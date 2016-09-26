@@ -16,21 +16,21 @@
  */
 package org.openmole.plugin.tool.pattern
 
+import org.openmole.core.context.Val
+import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.puzzle._
 import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.transition._
-import org.openmole.core.workflow.data._
+
 import scalaz._
-import org.openmole.core.workflow.dsl._
 
 object MasterSlave {
 
   def apply(
     bootstrap: Puzzle,
     master:    Task,
-    state:     Prototype[_]*
+    state:     Val[_]*
   )(slave: Puzzle) = {
 
     val masterCapsule = MasterCapsule(master, state: _*)

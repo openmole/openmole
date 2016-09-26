@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.task.tools
 
-import org.openmole.core.workflow.tools.PluginInfoActivator
+import org.openmole.core.pluginmanager.PluginInfoActivator
 
 class Activator extends PluginInfoActivator {
   override def keyWordTraits = List(classOf[ToolsPackage])

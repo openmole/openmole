@@ -16,8 +16,8 @@
  */
 package org.openmole.core.workflow.domain
 
-import org.openmole.core.workflow.data.PrototypeSet
-import org.openmole.core.workflow.tools.FromContext
+import org.openmole.core.context._
+import org.openmole.core.expansion._
 
 import scalaz._
 import Scalaz._

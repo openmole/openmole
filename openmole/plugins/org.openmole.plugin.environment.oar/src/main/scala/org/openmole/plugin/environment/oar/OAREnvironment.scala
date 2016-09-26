@@ -17,14 +17,9 @@
 
 package org.openmole.plugin.environment.oar
 
-import java.net.URI
-
-import org.openmole.core.batch.control.LimitedAccess
-import org.openmole.core.batch.environment._
-import org.openmole.core.workspace._
 import org.openmole.core.workflow.dsl._
+import org.openmole.core.workspace._
 import org.openmole.plugin.environment.ssh._
-import org.openmole.tool.cache.Cache
 
 import scala.concurrent.duration.Duration
 

@@ -5,12 +5,11 @@ import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.zip.GZIPInputStream
 
-import org.openmole.core.batch.environment.BatchEnvironment.{ BeginDownload, BeginUpload, EndDownload, EndUpload }
-import org.openmole.core.buildinfo.MarketIndex
+import org.openmole.plugin.environment.batch.environment.BatchEnvironment.{ BeginDownload, BeginUpload, EndDownload, EndUpload }
+import org.openmole.core.buildinfo
 import org.openmole.core.event._
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.pluginmanager._
-import org.openmole.core.serializer.SerialiserService
 import org.openmole.gui.misc.utils.Utils._
 import org.openmole.gui.server.core.Utils._
 import org.openmole.core.workspace.{ ConfigurationLocation, Workspace }
@@ -21,6 +20,7 @@ import java.io._
 import java.nio.file._
 
 import fr.iscpif.gridscale.http.HTTPStorage
+import org.openmole.core.market.{ MarketIndex, MarketIndexEntry }
 import org.openmole.core.project._
 
 import scala.util.{ Failure, Success, Try }
@@ -30,8 +30,9 @@ import org.openmole.tool.stream.StringPrintStream
 import scala.concurrent.stm._
 import org.openmole.tool.file._
 import org.openmole.tool.tar._
-import org.openmole.core.{ buildinfo, pluginmanager }
 import org.openmole.core.output.OutputManager
+import org.openmole.core.module
+import org.openmole.core.market
 
 /*
  * Copyright (C) 21/07/14 // mathieu.leclaire@openmole.org
@@ -65,7 +66,7 @@ object ApiImpl extends Api {
 
     OMSettings(
       workspace,
-      buildinfo.version,
+      buildinfo.version.value,
       buildinfo.name,
       new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(buildinfo.BuildInfo.buildTime)
     )
@@ -384,28 +385,19 @@ object ApiImpl extends Api {
     EnvironmentErrorData(groupedErrors)
   }
 
-  private def download[T](url: String)(action: InputStream ⇒ T): T = {
-    val is = HTTPStorage.toInputStream(new java.net.URI(url))
-    try action(is)
-    finally is.close
-  }
-
   def marketIndex() = {
     def mapToMd(marketIndex: MarketIndex) =
       marketIndex.copy(entries = marketIndex.entries.map {
-        e ⇒
-          e.copy(readme = e.readme.map {
-            MarkDownProcessor(_)
-          })
+        e ⇒ e.copy(readme = e.readme.map { MarkDownProcessor(_) })
       })
 
-    mapToMd(download(buildinfo.marketAddress)(SerialiserService.deserialise[buildinfo.MarketIndex](_)))
+    mapToMd(market.marketIndex)
   }
 
-  def getMarketEntry(entry: buildinfo.MarketIndexEntry, path: SafePath) = {
+  def getMarketEntry(entry: MarketIndexEntry, path: SafePath) = {
     import org.openmole.gui.ext.data.ServerFileSytemContext.project
     val url = new URL(entry.url)
-    download(entry.url) { is ⇒
+    HTTPStorage.download(entry.url) { is ⇒
       val tis = new TarInputStream(new GZIPInputStream(is))
       try {
         tis.extract(safePathToFile(path))
@@ -418,7 +410,7 @@ object ApiImpl extends Api {
   //PLUGINS
   def addPlugins(nodes: Seq[String]): Seq[Error] = {
     val plugins = nodes.map(Utils.pluginUpdoadDirectory / _)
-    val errors = addPluginsFiles(plugins, true)
+    val errors = module.addPluginsFiles(plugins, true)
     plugins.foreach(_.recursiveDelete)
     errors.map(e ⇒ ErrorBuilder(e._2))
   }
@@ -432,24 +424,7 @@ object ApiImpl extends Api {
       PluginManager.listBundles(f).toList ::: subPlugins
     }
 
-    addPluginsFiles(recurse(file), false)
-  }
-
-  private def addPluginsFiles(files: Seq[File], move: Boolean): Seq[(File, Throwable)] = synchronized {
-    val destinations = files.map { file ⇒ file → (Workspace.pluginDir / file.getName) }
-
-    destinations.filter(_._2.exists).toList match {
-      case Nil ⇒
-        val plugins =
-          destinations.map {
-            case (file, dest) ⇒
-              if (!move) file copy dest else file move dest
-              dest
-          }
-        PluginManager.tryLoad(plugins).toSeq
-      case l ⇒
-        l.map(l ⇒ l._1 → new FileAlreadyExistsException(s"Plugin with file name ${l._1.getName} is already present in the plugin directory"))
-    }
+    module.addPluginsFiles(recurse(file), false)
   }
 
   def isPlugin(path: SafePath): Boolean = Utils.isPlugin(path)
@@ -457,10 +432,10 @@ object ApiImpl extends Api {
   def allPluggableIn(path: SafePath): Seq[TreeNodeData] = Utils.allPluggableIn(path)
 
   def listPlugins(): Iterable[Plugin] =
-    Workspace.pluginDir.listFilesSafe.map(p ⇒ Plugin(p.getName, new SimpleDateFormat("dd/MM/yyyy HH:mm").format(p.lastModified)))
+    module.pluginDirectory.listFilesSafe.map(p ⇒ Plugin(p.getName, new SimpleDateFormat("dd/MM/yyyy HH:mm").format(p.lastModified)))
 
   def removePlugin(plugin: Plugin): Unit = synchronized {
-    val file = Workspace.pluginDir / plugin.name
+    val file = module.pluginDirectory / plugin.name
     val allDependingFiles = PluginManager.allDepending(file, b ⇒ !b.isProvided)
     val bundle = PluginManager.bundle(file)
     bundle.foreach(PluginManager.remove)

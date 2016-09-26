@@ -17,44 +17,42 @@
 
 package org.openmole.core.workflow.validation
 
-import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.tools.obj.ClassUtils
-import org.openmole.core.workflow.data._
+import org.openmole.core.context.{ Val, ValType }
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
-import org.openmole.core.tools.obj._
-import org.openmole.core.workflow.dsl._
-import scala.annotation.tailrec
+
 import scala.collection.mutable.{ HashMap, HashSet, ListBuffer }
 
 object TypeUtil {
 
-  def unArrayify(t: PrototypeType[_]): (PrototypeType[_], Int) = {
-    @tailrec def rec(c: PrototypeType[_], level: Int = 0): (PrototypeType[_], Int) =
-      if (!c.isArray) (c, level)
-      else rec(c.asArray.fromArray, level + 1)
-    rec(t)
-  }
-
-  def receivedTypes(mole: Mole, sources: Sources, hooks: Hooks)(slot: Slot): Iterable[Prototype[_]] =
+  def receivedTypes(mole: Mole, sources: Sources, hooks: Hooks)(slot: Slot): Iterable[Val[_]] =
     validTypes(mole, sources, hooks)(slot).map { _.toPrototype }
 
   sealed trait ComputedType
-  case class InvalidType(name: String, direct: Seq[PrototypeType[_]], toArray: Seq[PrototypeType[_]], fromArray: Seq[PrototypeType[_]]) extends ComputedType
-  case class ValidType(name: String, `type`: PrototypeType[_], toArray: Boolean) extends ComputedType {
+  case class InvalidType(name: String, direct: Seq[ValType[_]], toArray: Seq[ValType[_]], fromArray: Seq[ValType[_]]) extends ComputedType
+  case class ValidType(name: String, `type`: ValType[_], toArray: Boolean) extends ComputedType {
     def toPrototype =
-      if (toArray) Prototype(name)(`type`.toArray)
-      else Prototype(name)(`type`)
+      if (toArray) Val(name)(`type`.toArray)
+      else Val(name)(`type`)
   }
 
-  def validTypes(mole: Mole, sources: Sources, hooks: Hooks)(slot: Slot): Iterable[ValidType] = computeTypes(mole, sources, hooks)(slot).collect { case x: ValidType ⇒ x }
+  def validTypes(mole: Mole, sources: Sources, hooks: Hooks)(
+    slot:        Slot,
+    transition:  ITransition ⇒ Boolean = _ ⇒ true,
+    dataChannel: DataChannel ⇒ Boolean = _ ⇒ true
+  ): Iterable[ValidType] =
+    computeTypes(mole, sources, hooks)(slot, transition).collect { case x: ValidType ⇒ x }
 
-  def computeTypes(mole: Mole, sources: Sources, hooks: Hooks)(slot: Slot): Iterable[ComputedType] = {
+  def computeTypes(mole: Mole, sources: Sources, hooks: Hooks)(
+    slot:        Slot,
+    transition:  ITransition ⇒ Boolean = _ ⇒ true,
+    dataChannel: DataChannel ⇒ Boolean = _ ⇒ true
+  ): Iterable[ComputedType] = {
     val (varNames, direct, toArray, fromArray) =
       computeTransmissions(mole, sources, hooks)(
-        mole.inputTransitions(slot),
-        mole.inputDataChannels(slot)
+        mole.inputTransitions(slot).filter(transition),
+        mole.inputDataChannels(slot).filter(dataChannel)
       )
 
     varNames.toSeq.map {
@@ -76,9 +74,9 @@ object TypeUtil {
   }
 
   private def computeTransmissions(mole: Mole, sources: Sources, hooks: Hooks)(transitions: Iterable[ITransition], dataChannels: Iterable[DataChannel]) = {
-    val direct = new HashMap[String, ListBuffer[PrototypeType[_]]] // Direct transmission through transition or data channel
-    val toArray = new HashMap[String, ListBuffer[PrototypeType[_]]] // Transmission through exploration transition
-    val fromArray = new HashMap[String, ListBuffer[PrototypeType[_]]] // Transmission through aggregation transition
+    val direct = new HashMap[String, ListBuffer[ValType[_]]] // Direct transmission through transition or data channel
+    val toArray = new HashMap[String, ListBuffer[ValType[_]]] // Transmission through exploration transition
+    val fromArray = new HashMap[String, ListBuffer[ValType[_]]] // Transmission through aggregation transition
     val varNames = new HashSet[String]
 
     for (t ← transitions; d ← t.data(mole, sources, hooks)) {

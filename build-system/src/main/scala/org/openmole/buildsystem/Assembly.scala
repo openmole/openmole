@@ -3,22 +3,21 @@ package org.openmole.buildsystem
 import org.apache.commons.compress.archivers.tar.{ TarArchiveEntry, TarArchiveOutputStream }
 import sbt._
 import Keys._
+
 import scala.util.matching.Regex
 import OMKeys._
 import java.util.zip.GZIPOutputStream
+
 import resource._
 import java.io.{ BufferedOutputStream, FileOutputStream }
+
+import com.typesafe.sbt.osgi.OsgiKeys
+
 import scala.io.Source
 import com.typesafe.sbt.osgi.OsgiKeys._
+import org.json4s.jsonwritable
 
-/**
- * Created with IntelliJ IDEA.
- * User: luft
- * Date: 6/5/13
- * Time: 3:42 PM
- */
-trait Assembly {
-  self: BuildSystemDefaults ⇒
+object Assembly {
 
   lazy val tarProject: Seq[Setting[_]] = Seq(
     Tar.name := "assemble.tar.gz",
@@ -57,17 +56,17 @@ trait Assembly {
     }
 
   private def copyLibraryDependencies(
-    cp:        Seq[Attributed[File]],
-    out:       File,
-    rename:    ModuleID ⇒ String,
-    depFilter: ModuleID ⇒ Boolean,
-    streams:   TaskStreams
+    externalDependencies: Seq[Attributed[File]],
+    out:                  File,
+    rename:               ModuleID ⇒ String,
+    depFilter:            (ModuleID, Artifact) ⇒ Boolean,
+    streams:              TaskStreams
   ) = {
-
-    cp.flatMap { attributed ⇒
-      attributed.get(Keys.moduleID.key) match {
-        case Some(moduleId) ⇒ if (depFilter(moduleId)) Some(moduleId → attributed.data) else None
-        case None           ⇒ None
+    (externalDependencies).distinct.flatMap { attributed ⇒
+      (attributed.get(Keys.moduleID.key), attributed.get(Keys.artifact.key)) match {
+        case (Some(moduleId), Some(artifact)) ⇒
+          if (depFilter(moduleId, artifact)) Some(moduleId → attributed.data) else None
+        case _ ⇒ None
       }
     }.map {
       case (module, srcPath) ⇒
@@ -88,17 +87,16 @@ trait Assembly {
         (path, files) ⇒
           files.foreach(f ⇒ new File(path, f).setExecutable(true))
           path
-      } dependsOn (copyResources, (downloads, assemblyPath, ivyPaths, streams) map urlDownloader),
+      } dependsOn (copyResources in assemble, (downloads, assemblyPath, ivyPaths, streams) map urlDownloader),
     Tar.folder <<= assemble,
-    bundleProj := false,
     dependencyName := { (_: ModuleID).name + ".jar" },
-    dependencyFilter := { _ ⇒ true },
-    copyResources <<=
+    dependencyFilter := { (_, _) ⇒ true },
+    (copyResources in assemble) <<=
       (resourcesAssemble, streams) map {
         case (resources, s) ⇒
           resources.map { case (from, to) ⇒ copyFileTask(from, to, s) }
       },
-    copyResources <++= (externalDependencyClasspath in Compile, assemblyDependenciesPath, dependencyName, dependencyFilter, streams) map copyLibraryDependencies
+    (copyResources in assemble) <++= ( /*dependencyClasspath in Compile,*/ externalDependencyClasspath in Compile, assemblyDependenciesPath, dependencyName, dependencyFilter, streams) map copyLibraryDependencies
   )
 
   def tarImpl(folder: File, s: TaskStreams, t: File, name: String, innerFolder: String, streams: TaskStreams): File = {
@@ -177,60 +175,3 @@ trait Assembly {
 
 }
 
-object Assembly {
-  //checks to see if settingkey key exists for project p in Seq s. If it does, applies the filter function to key's value, and if that returns true, the project stays in the seq.
-  def projFilter[T](s: Seq[ProjectReference], key: SettingKey[T], filter: T ⇒ Boolean, intransitive: Boolean): Def.Initialize[Seq[ProjectReference]] = {
-    // (key in p) ? returns Initialize[Option[T]]
-    // Project.Initialize.join takes a Seq[Initialize[_]] and gives back an Initialize[Seq[_]]
-    val ret = Def.Initialize.join(s map { p ⇒ (key in p).?(i ⇒ i → p) })(_ filter {
-      case (None, _)    ⇒ false
-      case (Some(v), _) ⇒ filter(v)
-    })(_ map {
-      _._2
-    })
-
-    lazy val ret2 = Def.bind(ret) { r ⇒
-      val x = r.map(expandToDependencies)
-      val y = Def.Initialize.join(x)
-      y {
-        _.flatten.toSet.toSeq
-      } //make sure all references are unique
-    }
-
-    if (intransitive) ret else ret2
-  }
-
-  //recursively explores the dependency tree of pr and adds all dependencies to the list of projects to be copied
-  def expandToDependencies(pr: ProjectReference): Def.Initialize[Seq[ProjectReference]] = {
-    val r = (thisProject in pr) {
-      _.dependencies.map(_.project)
-    }
-    val r3 = Def.bind(Def.bind(r) { ret ⇒ Def.Initialize.join(ret map expandToDependencies) }) { ret ⇒ r(first ⇒ pr +: ret.flatten) }
-    r3
-  }
-
-  implicit def ProjRefs2RichProjectSeq(s: Seq[ProjectReference]) = new RichProjectSeq(Def.value(s))
-
-  implicit def InitProjRefs2RichProjectSeq(s: Def.Initialize[Seq[ProjectReference]]) = new RichProjectSeq(s)
-
-  class RichProjectSeq(s: Def.Initialize[Seq[ProjectReference]]) {
-    def keyFilter[T](key: SettingKey[T], filter: (T) ⇒ Boolean, intransitive: Boolean = false) = projFilter(s, key, filter, intransitive)
-    def sendTo(to: Def.Initialize[File]) = sendBundles(s zip to) //TODO: This function is specific to OSGI bundled projects. Make it less specific?
-  }
-
-  def projFilter[T](s: Def.Initialize[Seq[ProjectReference]], key: SettingKey[T], filter: T ⇒ Boolean, intransitive: Boolean): Def.Initialize[Seq[ProjectReference]] = {
-    Def.bind(s)(j ⇒ projFilter(j, key, filter, intransitive))
-  }
-
-  //TODO: New API makes this much simpler
-  //val bundles: Seq[FIle] = bundle.all( ScopeFilter( inDependencies(ref) ) ).value
-
-  def sendBundles(bundles: Def.Initialize[(Seq[ProjectReference], File)]): Def.Initialize[Task[Seq[(File, File)]]] = Def.bind(bundles) {
-    case (projs, to) ⇒
-      require(projs.nonEmpty)
-      val seqOTasks: Def.Initialize[Seq[Task[Seq[(File, File)]]]] = Def.Initialize.join(projs.map(p ⇒ (bundle in p) map { f ⇒ Seq(f → (to / f.getName)) }))
-      seqOTasks { seq ⇒
-        seq.reduceLeft[Task[Seq[(File, File)]]] { case (a, b) ⇒ a flatMap { i ⇒ b map { _ ++ i } } }
-      }
-  }
-}

@@ -17,29 +17,29 @@
 
 package org.openmole.core.workflow.transition
 
-import org.openmole.core.workflow.data._
+import org.openmole.core.context.Val
 
 object BlockList {
   def empty = new BlockList {
-    override def apply(t: Prototype[_]) = false
+    override def apply(t: Val[_]) = false
   }
 }
 
-trait BlockList <: (Prototype[_] ⇒ Boolean)
+trait BlockList <: (Val[_] ⇒ Boolean)
 
 trait Block extends BlockList {
   def filtered: Set[String]
-  override def apply(t: Prototype[_]) = filtered.contains(t.name)
+  override def apply(t: Val[_]) = filtered.contains(t.name)
 }
 
 trait Keep extends BlockList {
   def kept: Set[String]
-  override def apply(t: Prototype[_]) = !kept.contains(t.name)
+  override def apply(t: Val[_]) = !kept.contains(t.name)
 }
 
 object Block {
 
-  def apply(ts: Prototype[_]*): Block = new Block {
+  def apply(ts: Val[_]*): Block = new Block {
     val filtered: Set[String] = ts.map(_.name).toSet
   }
 
@@ -47,7 +47,7 @@ object Block {
 
 object Keep {
 
-  def apply(ts: Prototype[_]*): Keep = new Keep {
+  def apply(ts: Val[_]*): Keep = new Keep {
     val kept = ts.map(_.name).toSet
   }
 }

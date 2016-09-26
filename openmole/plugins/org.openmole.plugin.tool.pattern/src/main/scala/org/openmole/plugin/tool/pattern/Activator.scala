@@ -17,6 +17,6 @@
 
 package org.openmole.plugin.tool.pattern
 
-import org.openmole.core.workflow.tools.PluginInfoActivator
+import org.openmole.core.pluginmanager.PluginInfoActivator
 
 class Activator extends PluginInfoActivator

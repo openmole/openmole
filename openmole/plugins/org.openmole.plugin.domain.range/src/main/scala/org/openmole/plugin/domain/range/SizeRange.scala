@@ -17,11 +17,10 @@
 
 package org.openmole.plugin.domain.range
 
-import org.openmole.core.tools.io.FromString
+import org.openmole.core.context.Context
+import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.domain._
-import org.openmole.core.workflow.tools.FromContext
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.tools._
+import org.openmole.tool.random.RandomProvider
 
 object SizeRange {
   implicit def isFinite[T] = new Finite[SizeRange[T], T] with Bounds[SizeRange[T], T] with Center[SizeRange[T], T] {

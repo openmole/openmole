@@ -17,6 +17,7 @@
 
 package org.openmole.core.workflow.mole
 
+import org.openmole.core.context.{Val, Variable}
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.transition._
@@ -26,6 +27,7 @@ import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
 import org.scalatest._
 import org.scalatest.junit._
+
 import scala.collection.mutable.ListBuffer
 import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.task._
@@ -36,7 +38,7 @@ import org.openmole.core.workflow.dsl._
 class MasterCapsuleSpec extends FlatSpec with Matchers {
 
   "A master capsule" should "execute tasks" in {
-    val p = Prototype[String]("p")
+    val p = Val[String]("p")
 
     val t1 = TestTask { _ + (p → "Test") } set (
       name := "Test write",
@@ -61,8 +63,8 @@ class MasterCapsuleSpec extends FlatSpec with Matchers {
 
   "A master capsule" should "keep value of a variable from on execution to another" in {
     val data = List("A", "A", "B", "C")
-    val i = Prototype[String]("i")
-    val n = Prototype[Int]("n")
+    val i = Val[String]("i")
+    val n = Val[Int]("n")
 
     val sampling = new ExplicitSampling(i, data)
 
@@ -98,8 +100,8 @@ class MasterCapsuleSpec extends FlatSpec with Matchers {
     @volatile var selectTaskExecuted = 0
     @volatile var endCapsExecuted = 0
 
-    val i = Prototype[Int]("i")
-    val archive = Prototype[Array[Int]]("archive")
+    val i = Val[Int]("i")
+    val archive = Val[Array[Int]]("archive")
 
     val sampling = new ExplicitSampling(i, 0 until 10)
 
@@ -159,7 +161,7 @@ class MasterCapsuleSpec extends FlatSpec with Matchers {
 
     val t1c = MasterCapsule(mt)
 
-    val i = Prototype[Int]("i")
+    val i = Val[Int]("i")
 
     val explo = ExplorationTask(ExplicitSampling(i, 0 to 100))
 

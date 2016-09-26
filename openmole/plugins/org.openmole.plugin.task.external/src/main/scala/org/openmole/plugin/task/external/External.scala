@@ -20,26 +20,25 @@ package org.openmole.plugin.task.external
 import java.io.File
 
 import monocle.macros.Lenses
+import org.openmole.core.context.{ Context, Val, Variable }
 import org.openmole.core.exception.UserBadDataError
+import org.openmole.core.expansion.FromContext
 import org.openmole.core.tools.service.OS
-import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.tools._
-
-import scala.util.Random
+import org.openmole.tool.random.RandomProvider
 
 object External {
-  val PWD = Prototype[String]("PWD")
+  val PWD = Val[String]("PWD")
 
   case class InputFile(
-    prototype:   Prototype[File],
+    prototype:   Val[File],
     destination: FromContext[String],
     link:        Boolean
   )
 
   case class InputFileArray(
-    prototype: Prototype[Array[File]],
+    prototype: Val[Array[File]],
     prefix:    FromContext[String],
     suffix:    FromContext[String],
     link:      Boolean
@@ -47,7 +46,7 @@ object External {
 
   case class OutputFile(
     origin:    FromContext[String],
-    prototype: Prototype[File]
+    prototype: Val[File]
   )
 
   case class Resource(
@@ -61,7 +60,7 @@ object External {
   type PathResolver = String ⇒ File
 }
 
-import External._
+import org.openmole.plugin.task.external.External._
 
 @Lenses case class External(
     inputFileArrays: Vector[External.InputFileArray] = Vector.empty,
@@ -70,12 +69,12 @@ import External._
     resources:       Vector[External.Resource]       = Vector.empty
 ) {
 
-  protected def listInputFiles(context: Context)(implicit rng: RandomProvider): Vector[(Prototype[File], ToPut)] =
+  protected def listInputFiles(context: Context)(implicit rng: RandomProvider): Vector[(Val[File], ToPut)] =
     inputFiles.map {
       case InputFile(prototype, name, link) ⇒ prototype → ToPut(context(prototype), name.from(context), link)
     }
 
-  protected def listInputFileArray(context: Context)(implicit rng: RandomProvider): Vector[(Prototype[Array[File]], Seq[ToPut])] =
+  protected def listInputFileArray(context: Context)(implicit rng: RandomProvider): Vector[(Val[Array[File]], Seq[ToPut])] =
     for {
       ifa ← inputFileArrays
     } yield {

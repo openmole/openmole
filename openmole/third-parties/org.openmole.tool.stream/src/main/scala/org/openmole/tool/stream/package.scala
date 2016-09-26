@@ -86,9 +86,15 @@ package object stream {
     def copy(to: OutputStream, maxRead: Int, timeout: Duration) = stream.copy(is, to, maxRead, timeout)
     def toGZiped = new GZipedInputStream(is)
     def toGZ = new GZIPInputStream(is)
-    // this one must have REPLACE_EXISTING enabled
-    // but does not support COPY_ATTRIBUTES, nor NOFOLLOW_LINKS
-    def copy(file: File) = Files.copy(is, file.toPath, StandardCopyOption.REPLACE_EXISTING)
+
+    // this one must have REPLACE_EXISTING enabled but does not support COPY_ATTRIBUTES, nor NOFOLLOW_LINKS
+    def copy(file: File, replace: Boolean = true) =
+      Files.copy(
+        is,
+        file.toPath,
+        (if (replace) Seq(StandardCopyOption.REPLACE_EXISTING) else Seq()): _*
+      )
+
   }
 
   def withClosable[C <: { def close() }, T](open: ⇒ C)(f: C ⇒ T): T = {

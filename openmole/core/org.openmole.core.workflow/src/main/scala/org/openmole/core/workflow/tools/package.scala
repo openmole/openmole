@@ -25,7 +25,8 @@ import Scalaz._
 
 package tools {
 
-  import org.openmole.core.workflow.data.Context
+  import org.openmole.core.context.Context
+  import org.openmole.core.expansion.{ Expandable, ExpandedString, FromContext }
 
   trait ToolsPackage {
 
@@ -38,9 +39,6 @@ package tools {
     implicit class RefLongDecorator(r: Ref[Long]) {
       def next = r getUpdate (_ + 1)
     }
-
-    type Condition = FromContext[Boolean]
-    implicit def functionToFromContext[T](f: Context ⇒ T) = FromContext((c, _) ⇒ f(c))
 
     implicit class VectorLensDecorator[T, U](l: monocle.Lens[T, Vector[U]]) {
       def add(u: U) = l.modify(_ ++ Seq(u))

@@ -17,9 +17,10 @@
 
 package org.openmole.core.workflow.mole
 
+import org.openmole.core.context.PrototypeSet
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.workflow.transition._
-import org.openmole.core.workflow.data._
+
 import scala.collection._
 
 object Mole {

@@ -17,12 +17,10 @@
  */
 package org.openmole.core.workflow.task
 
-import monocle.Lens
 import monocle.macros.Lenses
+import org.openmole.core.context.Context
 import org.openmole.core.workflow.builder._
-import org.openmole.core.workflow.data._
-
-import scala.util.Random
+import org.openmole.tool.random.RandomProvider
 
 object ClosureTask {
 

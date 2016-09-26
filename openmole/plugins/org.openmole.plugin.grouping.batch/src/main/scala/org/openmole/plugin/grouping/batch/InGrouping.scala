@@ -17,8 +17,7 @@
 
 package org.openmole.plugin.grouping.batch
 
-import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.data._
+import org.openmole.core.context.Context
 import org.openmole.core.workflow.job._
 import org.openmole.core.workflow.mole._
 

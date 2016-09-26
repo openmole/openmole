@@ -17,14 +17,12 @@
 
 package org.openmole.core.workflow.transition
 
+import org.openmole.core.context._
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools.ContextAggregator._
-import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.validation.TypeUtil._
-
-import scala.util.Random
+import org.openmole.tool.random.RandomProvider
 
 trait ITransition {
 
@@ -108,7 +106,7 @@ trait ITransition {
         else moleExecution.nextTicket(ticket.parent.getOrElse(throw new InternalProcessingError("BUG should never reach root ticket")))
 
       val toArrayManifests =
-        validTypes(mole, moleExecution.sources, moleExecution.hooks)(end).filter(_.toArray).map(ct ⇒ ct.name → ct.`type`).toMap[String, PrototypeType[_]]
+        validTypes(mole, moleExecution.sources, moleExecution.hooks)(end).filter(_.toArray).map(ct ⇒ ct.name → ct.`type`).toMap[String, ValType[_]]
 
       val newContext = aggregate(end.capsule.inputs(mole, moleExecution.sources, moleExecution.hooks), toArrayManifests, combinasion.map(ticket.content → _))
 

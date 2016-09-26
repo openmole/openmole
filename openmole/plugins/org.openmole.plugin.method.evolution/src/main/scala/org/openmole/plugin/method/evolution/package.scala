@@ -17,20 +17,17 @@
 
 package org.openmole.plugin.method
 
-import fr.iscpif.mgo._
-import org.openmole.core.workspace._
 import org.openmole.core.workflow.dsl._
-import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.puzzle._
+import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
 import org.openmole.plugin.task.tools._
 import org.openmole.plugin.tool.pattern._
+import org.openmole.core.context._
 
-import scalaz.\&/
 import scala.concurrent.duration.Duration
-import scala.util.Random
+import scalaz.\&/
 
 package object evolution {
 
