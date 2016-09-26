@@ -26,9 +26,13 @@ import org.openmole.plugin.environment.pbs.PBSEnvironment
 import org.openmole.plugin.environment.sge.SGEEnvironment
 import org.openmole.plugin.environment.slurm.SLURMEnvironment
 import org.openmole.plugin.environment.ssh.SSHEnvironment
+import org.openmole.plugin.hook.file.AppendToCSVFileHook
+import org.openmole.plugin.method.evolution._
+import org.openmole.plugin.sampling.csv.CSVSampling
+import org.openmole.plugin.sampling.lhs.LHS
+import org.openmole.plugin.sampling.quasirandom.SobolSampling
 import org.openmole.plugin.task.care.CARETask
 import org.openmole.plugin.task.netlogo5.NetLogo5Task
-import org.openmole.plugin.task.scala.ScalaTask
 import org.openmole.plugin.task.systemexec.SystemExecTask
 import org.openmole.plugin.task.template.TemplateTask
 import org.openmole.tool.file._
@@ -50,9 +54,13 @@ object module {
       ModuleEntry("SSH", "Delegate workload to a server via SSH", components[SSHEnvironment]),
       ModuleEntry("CARE", "Execute CARE archive", components[CARETask]),
       ModuleEntry("NetLogo5", "Execute NetLogo 5 simulation models", components[NetLogo5Task]),
-      ModuleEntry("Scala", "Run scala code", components[ScalaTask]),
       ModuleEntry("SystemExec", "Execute system command", components[SystemExecTask]),
-      ModuleEntry("Template", "Generate files", components[TemplateTask])
+      ModuleEntry("Template", "Generate files", components[TemplateTask]),
+      ModuleEntry("CSVHook", "Save results in CSV files", components(AppendToCSVFileHook)),
+      ModuleEntry("CSVSampling", "Generate sampling using CSV files", components(CSVSampling)),
+      ModuleEntry("LHS", "Generate Latin Hypercube Sampling", components(LHS)),
+      ModuleEntry("QuasiRandom", "Generate sampling using low-discrepency sequences", components(SobolSampling)),
+      ModuleEntry("Evolution", "Explore/optimise models using evolutionary algorithms", components(NSGA2))
     )
 
   def generate(modules: Seq[ModuleEntry], baseDirectory: File, location: File ⇒ String) = {

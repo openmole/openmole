@@ -566,7 +566,20 @@ lazy val openmoleUI = OsgiProject(binDir,"org.openmole.ui", singleton = true, im
     openmoleDSL
   ) settings (defaultSettings: _*)
 
-def openmoleNakedDependencies = allCore ++ Seq(openmoleUI)
+def minimumPlugins =
+  Seq(
+    collectionDomain,
+    distributionDomain,
+    fileDomain,
+    modifierDomain,
+    rangeDomain,
+    combineSampling,
+    scala,
+    batchGrouping
+  )
+
+def openmoleNakedDependencies = allCore ++ Seq(openmoleUI) ++ minimumPlugins
+
 def openmoleDependencies = openmoleNakedDependencies ++ allPlugin
 
 lazy val openmoleNaked =

@@ -74,6 +74,7 @@ package object module {
   }
 
   def components[T](implicit m: Manifest[T]) = PluginManager.pluginsForClass(m.erasure).toSeq
+  def components(o: Object) = PluginManager.pluginsForClass(o.getClass).toSeq
 
   def addPluginsFiles(files: Seq[File], move: Boolean, directory: File = pluginDirectory): Seq[(File, Throwable)] = synchronized {
     val destinations = files.map { file ⇒ file → (directory / file.getName) }
