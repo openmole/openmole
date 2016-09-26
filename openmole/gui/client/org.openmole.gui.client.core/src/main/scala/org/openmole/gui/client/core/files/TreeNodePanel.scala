@@ -183,8 +183,8 @@ class TreeNodePanel {
           div("Create a first OpenMOLE script (.oms)")(ms("message"))
         }
         else
-          tags.table(ms("file-list"))(
-            tbody(overflowY := "auto", width := 313)(
+          tags.table(
+            tbody(omsheet.fileList)(
               for (tn ← sons._1) yield {
                 drawNode(tn)
               }

@@ -21,6 +21,7 @@ import scalatags.JsDom.all._
 import scalatags.JsDom.styles
 import scalatags.JsDom.svgAttrs
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
+import org.scalajs.dom
 import sheet._
 
 package object stylesheet {
@@ -317,6 +318,19 @@ package object stylesheet {
   )
 
   lazy val monospace: ModifierSeq = fontFamily := "monospace"
+
+  lazy val fileList: ModifierSeq = {
+    Seq(
+      height := dom.window.innerHeight - 195, //nbElements * 21, //  <-- Select the height of the body
+      absolutePosition,
+      fontSize := "14px",
+      listStyleType := "none",
+      sheet.marginTop(160),
+      sheet.paddingBottom(30),
+      overflowY := "auto",
+      width := 313
+    )
+  }
 
   //EDITOR
   lazy val editorContainer: ModifierSeq = Seq(
