@@ -18,7 +18,6 @@ package org.openmole.core
 
 import java.text.DateFormat
 import java.util.{ Calendar, Locale }
-import fr.iscpif.gridscale.http.HTTPStorage
 
 package object buildinfo {
 
@@ -46,10 +45,6 @@ package object buildinfo {
       case true  ⇒ "http://next.openmole.org"
       case false ⇒ "http://www.openmole.org/all/${version.major}"
     }
-
-  import org.json4s._
-  import org.json4s.jackson.Serialization
-  implicit val formats = Serialization.formats(NoTypeHints)
 
   def marketName = "market.json"
   def marketAddress = url(marketName)

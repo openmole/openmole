@@ -191,9 +191,7 @@ lazy val buildinfo = OsgiProject(coreDir, "org.openmole.core.buildinfo", imports
     sbtVersion,
     BuildInfoKey.action("buildTime") { System.currentTimeMillis }
   ),
-    buildInfoPackage := s"org.openmole.core.buildinfo",
-    libraryDependencies += Libraries.gridscaleHTTP,
-    libraryDependencies += Libraries.json4s
+    buildInfoPackage := s"org.openmole.core.buildinfo"
 ) settings(coreSettings: _*)
 
 
