@@ -136,7 +136,7 @@ class Command(val console: ScalaREPL, val variables: ConsoleVariables) { command
     val toInstall = urls.flatMap(url ⇒ module.selectableModules(url)).filter(sm ⇒ names.contains(sm.module.name))
     if (toInstall.isEmpty) println("The module(s) is/are already installed.")
     else
-      Console.dealWithLoadError(module.install(toInstall)) match {
+      Console.dealWithLoadError(module.install(toInstall), interactive = true) match {
         case Seq() ⇒
           println("The module(s) has/have been successfully installed, please restart the console to enable it/them.")
         case e ⇒
