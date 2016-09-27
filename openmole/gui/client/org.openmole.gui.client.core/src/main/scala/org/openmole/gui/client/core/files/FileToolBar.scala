@@ -261,14 +261,22 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
 
   def updateFilter(newFilter: FileFilter) = {
     fileFilter() = newFilter
+  }
+
+  def switchAlphaSorting = {
+    updateFilter(fileFilter.now.switchTo(AlphaSorting))
     treeNodePanel.refreshAndDraw
   }
 
-  def switchAlphaSorting = updateFilter(fileFilter.now.switchTo(AlphaSorting))
+  def switchTimeSorting = {
+    updateFilter(fileFilter.now.switchTo(TimeSorting))
+    treeNodePanel.refreshAndDraw
+  }
 
-  def switchTimeSorting = updateFilter(fileFilter.now.switchTo(TimeSorting))
-
-  def switchSizeSorting = updateFilter(fileFilter.now.switchTo(SizeSorting))
+  def switchSizeSorting = {
+    updateFilter(fileFilter.now.switchTo(SizeSorting))
+    treeNodePanel.refreshAndDraw
+  }
 
   val sortingGroup = {
     val topTriangle = glyph_triangle_top +++ (fontSize := 10)
