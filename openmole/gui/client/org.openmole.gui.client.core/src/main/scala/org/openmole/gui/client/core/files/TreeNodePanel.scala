@@ -70,8 +70,8 @@ class TreeNodePanel {
 
   val editNodeInput: Input = bs.input()(
     placeholder := "Name",
-    width := "130px",
-    height := "26px",
+    width := "240px",
+    height := "24px",
     autofocus
   ).render
 
@@ -304,7 +304,9 @@ class TreeNodePanel {
 
   def turnSelectionTo(b: Boolean) = selectionMode() = b
 
-  val lineHovered: Var[Option[ReactiveLine]] = Var(None)
+  val settingsSet: Var[Option[ReactiveLine]] = Var(None)
+
+  def unsetSettings = settingsSet() = None
 
   object ReactiveLine {
     def apply(tn: TreeNode, treeNodeType: TreeNodeType, todo: () ⇒ Unit) = new ReactiveLine(tn, treeNodeType, todo)
@@ -347,6 +349,7 @@ class TreeNodePanel {
 
     val render: Modifier = {
       val baseGlyph = sheet.marginTop(2) +++ "glyphitem"
+      val settingsGlyph = baseGlyph +++ glyph_settings +++ sheet.paddingLeft(4)
       val trash = baseGlyph +++ glyph_trash
       val edit = baseGlyph +++ glyph_edit
       val download_alt = baseGlyph +++ glyph_download_alt
@@ -355,14 +358,6 @@ class TreeNodePanel {
 
       {
         tr(
-          onmouseout := { () ⇒
-            lineHovered() = None
-          },
-          onmouseover := { () ⇒
-            lineHovered() = {
-              if (selectionMode.now) None else Some(this)
-            }
-          },
           td(
             Rx {
               span(clickablePair)(
@@ -375,17 +370,21 @@ class TreeNodePanel {
               div(stylesheet.fileInfo)(
                 if (!selectionMode()) {
                   div(
-                    if (lineHovered() == Some(this)) {
+                    if (settingsSet() == Some(this)) {
                       span(
+                        span(onclick := { () ⇒ unsetSettings }, baseGlyph)(
+                          raw("&#215")
+                        ),
                         tags.span(onclick := { () ⇒
                           trashNode(tn)
+                          unsetSettings
                         }, trash),
                         span(onclick := { () ⇒
                           toBeEdited() = Some(NodeEdition(tn))
                           drawTree
                         }, edit),
                         a(
-                          span(onclick := { () ⇒ Unit })(download_alt),
+                          span(onclick := { () ⇒ unsetSettings })(download_alt),
                           href := s"downloadFile?path=${Utils.toURI(tn.safePath().path)}"
                         ),
                         tn.safePath().extension match {
@@ -406,7 +405,12 @@ class TreeNodePanel {
                       )
                     }
                     else
-                      span(stylesheet.fileSize)(tags.i(timeOrSize(tn)))
+                      span(stylesheet.fileSize)(
+                        tags.i(timeOrSize(tn)),
+                        tags.span(onclick := { () ⇒
+                          settingsSet() = Some(this)
+                        }, settingsGlyph)
+                      )
                   )
                 }
                 else div()
