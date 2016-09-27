@@ -176,7 +176,7 @@ package object stylesheet {
   lazy val fileInfo: ModifierSeq = Seq(
     sheet.floatRight,
     absolutePosition,
-    width := 85,
+    width := 100,
     right := 4,
     textAlign := "right"
   )
@@ -582,7 +582,7 @@ package object stylesheet {
     fixedPosition,
     width := "100%",
     height := 20,
-    right := -180,
+    right := -210,
     top := 20
   )
 
