@@ -165,7 +165,9 @@ class TreeNodePanel {
     }
   )
 
-  def refreshAndDraw = refreshAnd(() ⇒ drawTree)
+  def refreshAndDraw = refreshAnd(() ⇒ {
+    drawTree
+  })
 
   def refreshAnd(todo: () ⇒ Unit) = CoreUtils.updateSons(manager.current.now, todo, filter)
 
@@ -204,6 +206,7 @@ class TreeNodePanel {
       manager + dn
       fileToolBar.clearMessage
       fileToolBar.unselectTool
+
       drawTree
     })
   }
