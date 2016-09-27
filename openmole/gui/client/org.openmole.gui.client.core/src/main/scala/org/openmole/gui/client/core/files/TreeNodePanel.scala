@@ -320,7 +320,7 @@ class TreeNodePanel {
       case fn: FileNodeType ⇒ stylesheet.file
       case _                ⇒ stylesheet.dir
     }) +++ floatLeft +++ pointer +++ Seq(
-      onclick := { () ⇒
+      onclick := { (e: MouseEvent) ⇒
         if (!selectionMode.now) todo()
       }
     )
@@ -359,6 +359,14 @@ class TreeNodePanel {
       {
         tr(
           td(
+            onclick := { (e: MouseEvent) ⇒
+              {
+                if (selectionMode.now) {
+                  addToSelection
+                  if (e.ctrlKey) clearSelectionExecpt(tn)
+                }
+              }
+            },
             Rx {
               span(clickablePair)(
                 div(stylesheet.fileNameOverflow +++ fileIndent)(tn.name())
@@ -418,11 +426,7 @@ class TreeNodePanel {
             },
             Rx {
               if (selectionMode()) {
-                div(
-                  onclick := { (e: MouseEvent) ⇒
-                    addToSelection
-                    if (e.ctrlKey) clearSelectionExecpt(tn)
-                  },
+                div(width := "100%",
                   if (selected()) {
                     fileToolBar.selectedTool() match {
                       case Some(TrashTool) ⇒ stylesheet.fileSelectedForDeletion
@@ -431,8 +435,7 @@ class TreeNodePanel {
                     }
                   }
                   else stylesheet.fileSelectionMode,
-                  span(stylesheet.fileSelectionMessage)
-                )
+                  span(stylesheet.fileSelectionMessage))
               }
               else div()
             }
