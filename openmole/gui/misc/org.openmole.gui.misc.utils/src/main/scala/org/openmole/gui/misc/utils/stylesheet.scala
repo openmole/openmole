@@ -178,14 +178,13 @@ package object stylesheet {
     absolutePosition,
     width := 100,
     right := 2,
+    sheet.marginTop(2),
     textAlign := "right"
   )
 
   lazy val fileSize: ModifierSeq = Seq(
     color("lightgray"),
-    fontSize := 12,
-    sheet.paddingLeft(3),
-    sheet.paddingTop(3)
+    fontSize := 10
   )
 
   lazy val file: ModifierSeq = Seq(
@@ -213,8 +212,9 @@ package object stylesheet {
     whiteSpace := "nowrap",
     overflow := "hidden",
     pointer,
-    width := 260,
-    textOverflow := "ellipsis"
+    width := 245,
+    textOverflow := "ellipsis",
+    sheet.paddingLeft(3)
   )
 
   lazy val treeprogress: ModifierSeq = Seq(
@@ -232,9 +232,10 @@ package object stylesheet {
   lazy val fileSelectionOverlay: ModifierSeq = Seq(
     right := 0,
     pointer,
-    width := 330,
+    width := 340,
     height := 22,
     sheet.marginLeft(-5),
+    sheet.marginBottom(2),
     borderRadius := "2px"
   )
 
@@ -323,12 +324,12 @@ package object stylesheet {
     Seq(
       height := dom.window.innerHeight - 195, //nbElements * 21, //  <-- Select the height of the body
       absolutePosition,
-      fontSize := "14px",
+      fontSize := 14,
       listStyleType := "none",
       sheet.marginTop(160),
       sheet.paddingBottom(30),
       overflowY := "auto",
-      width := 353
+      width := 363
     )
   }
 
@@ -446,7 +447,7 @@ package object stylesheet {
   lazy val fileZone: ModifierSeq = Seq(
     top := 10,
     height := "100%",
-    width := 360
+    width := 370
   )
 
   lazy val topZone: ModifierSeq = Seq(
@@ -582,7 +583,7 @@ package object stylesheet {
     fixedPosition,
     width := "100%",
     height := 20,
-    right := -210,
+    right := -235,
     top := 20
   )
 
@@ -628,7 +629,7 @@ package object stylesheet {
 
   lazy val glyphText: ModifierSeq = Seq(
     color("#a6bf26"),
-    fontSize := "22px",
+    fontSize := 22,
     sheet.paddingRight(5)
   )
 
