@@ -177,7 +177,7 @@ package object stylesheet {
     sheet.floatRight,
     absolutePosition,
     width := 100,
-    right := 4,
+    right := 2,
     textAlign := "right"
   )
 
@@ -213,7 +213,7 @@ package object stylesheet {
     whiteSpace := "nowrap",
     overflow := "hidden",
     pointer,
-    width := 230,
+    width := 260,
     textOverflow := "ellipsis"
   )
 
@@ -232,7 +232,7 @@ package object stylesheet {
   lazy val fileSelectionOverlay: ModifierSeq = Seq(
     right := 0,
     pointer,
-    width := 310,
+    width := 330,
     height := 22,
     sheet.marginLeft(-5),
     borderRadius := "2px"
@@ -328,7 +328,7 @@ package object stylesheet {
       sheet.marginTop(160),
       sheet.paddingBottom(30),
       overflowY := "auto",
-      width := 333
+      width := 353
     )
   }
 
@@ -446,7 +446,7 @@ package object stylesheet {
   lazy val fileZone: ModifierSeq = Seq(
     top := 10,
     height := "100%",
-    width := 320
+    width := 360
   )
 
   lazy val topZone: ModifierSeq = Seq(

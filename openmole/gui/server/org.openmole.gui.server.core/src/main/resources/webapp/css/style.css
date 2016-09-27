@@ -113,7 +113,7 @@ ul{
     left: -10px;
     padding-left: 10px;
     padding-right: 18px;
-    width: 347px;
+    width: 367px;
     background-color: #f8f8f8;
     word-wrap: break-word;
 }
@@ -136,7 +136,7 @@ ul{
 .file-list {
     font-size: 14px;
     list-style-type: none;
-    width: 340px;
+    width: 360px;
     margin-top: 160px;
 }
 
@@ -397,7 +397,7 @@ li.selectElement{
 #mainNav {
     background-color: #333333;
     font-weight: bold;
-    padding-left: 340px;
+    padding-left: 360px;
 }
 
 .nav-tabs {
@@ -472,8 +472,8 @@ li.selectElement{
 }
 
 .fullpanel .reduce {
-    left: 340px;
-    padding-right: 340px;
+    left: 360px;
+    padding-right: 360px;
     position: fixed;
     top: 60px;
     transition: all 0.1s ease-out 0s;
@@ -489,11 +489,11 @@ li.selectElement{
 .leftpanel {
     background: #333333 none repeat scroll 0 0;
     height: 100%;
-    left: -340px;
+    left: -360px;
     opacity: 1;
     padding-left: 7px;
     position: fixed;
     top: 37px;
     transition: all 0.1s ease-out 0s;
-    width: 340px;
+    width: 360px;
 }
