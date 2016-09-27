@@ -349,7 +349,7 @@ class TreeNodePanel {
 
     val render: Modifier = {
       val baseGlyph = sheet.marginTop(2) +++ "glyphitem"
-      val settingsGlyph = baseGlyph +++ glyph_settings +++ sheet.paddingLeft(4)
+      val settingsGlyph = ms("glyphitem") +++ glyph_settings +++ sheet.paddingLeft(4)
       val trash = baseGlyph +++ glyph_trash
       val edit = baseGlyph +++ glyph_edit
       val download_alt = baseGlyph +++ glyph_download_alt
