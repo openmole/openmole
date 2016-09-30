@@ -26,30 +26,17 @@
     Old versions of OpenMOLE software and documentation are available @a("here", href := "http://www.openmole.org/all/").
 
   @sect{OpenMOLE cannot connect to my environment using SSH}
-    @p When your workflow does not start to the remote environment you’re accessing through SSH, you can try these few
-    steps to identify the problems.
+    @p When one of the SSH authentications you've added to OpenMOLE is marked as failed, you can try these few steps to identify the problems.
 
     @p If you are using OpenMOLE in console mode, enable the @i{FINE} level of logging in the console using:
       @hl.openmole("""logger.level("FINE")""")
-
-    @p A typical SSH connection error will report as:
-      @hl.highlight("""
-      FINE: Error in job refresh
-      net.schmizz.sshj.userauth.UserAuthException: Exhausted available authentication methods
-      """, "bash")
-
-    @p or
-      @hl.highlight("""
-      FINE: Error in job refresh
-      net.schmizz.sshj.transport.TransportException: Incorrect identification: line too long
-      """, "bash")
 
     @sect{Password Authentication}
       @p If you are using the @hl.openmole("LoginPassword") authentication you might want to double check the user and
       password you entered since one of them is more than likely incorrect.
 
     @sect{SSH Keypair Authentication}
-      @p In such a case, we'll have to investigate multiple options, as SSH public key authentications are sensible to
+      @p In such a case, we'll have to investigate multiple options, as SSH public key authentications are sensitive to
         several configuration parameters.
 
       @p Public key authentication has usually a higher priority than password-based authentication when trying to
