@@ -62,7 +62,7 @@ object Libraries extends Defaults {
 
   lazy val logback = "org.openmole" %% "ch-qos-logback" % "1.0.9"
 
-  lazy val h2 = "org.openmole" %% "org-h2" % "1.4.190"
+  lazy val h2 = "org.openmole" %% "org-h2" % "1.4.192"
 
   lazy val bonecp = "org.openmole" %% "com-jolbox-bonecp" % "0.8.0-rc1"
 
