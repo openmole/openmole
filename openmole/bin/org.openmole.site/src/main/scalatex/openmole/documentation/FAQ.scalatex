@@ -101,6 +101,30 @@
 
     @p Moving your @i{.openmole} to a different location is also @b{strongly advised on remote execution hosts (typically clusters) on which you own a personal account} used with OpenMOLE. In the case of remote environments, the OpenMOLE runtime and the input files of your workflow will be copied to the @i{.openmole} folder, again leading to problematic over quotas on these systems.
 
+  @sect{My sampling generates a type error}
+    @p Combining samplings is straightforward in OpenMOLE, but can sometimes results in syntax errors a bit cryptic to new users.
+    Let's take the example of a combined sampling made of a file exploration sampling and an integer range exploration:
+
+    @hl.openmoleNoTest("""
+    (input in (workDirectory / "../data/").files withName inputName) x
+    i in (1 to 10)
+    """)
+
+    @p This combined sampling will generate the following error when compiling the workflow:
+
+    @hl.highlight("""
+    found   : org.openmole.core.workflow.data.Prototype[Int]
+    required: org.openmole.core.workflow.sampling.Sampling
+    """, "plain")
+
+    @p OpenMOLE cannot identify the integer range the valid sampling it is. Simply wrapping the expression in parenthesis
+     fixes the problem as shown in this correct version:
+
+    @hl.openmoleNoTest("""
+    (input in (workDirectory / "../data/").files withName inputName) x
+    (i in (1 to 10))
+    """)
+
   @sect{My problem is not listed here}
     @p If you could not resolve your problems, feel free to post your problem on the @a("mailing-list",
     href := "http://list.openmole.org").
