@@ -28,9 +28,10 @@
      @li{@wallTime,}
      @li{@memory,}
      @li{@openMOLEMemory,}
-     @li{nodes: Number of nodes requested,}
+     @li{@envEntryTitle{nodes} Number of nodes requested,}
      @li{@threads,}
-     @li{coreByNodes: An alternative to specifying the number of threads. @i{coreByNodes} takes the value of the @{threads} when not specified, or 1 if none of them is specified.}
+     @li{@envEntryTitle{coreByNodes} An alternative to specifying the number of threads. @hl.openmoleNoTest{coreByNodes} takes the value of the @hl.openmoleNoTest{threads} when not specified, or 1 if none of them is specified.}
+     @li{@name}
   @sect{SGE}
     To delegate some computation load to a @a("SGE", href := "https://en.wikipedia.org/wiki/Oracle_Grid_Engine") based cluster you can use the SGEEnvironment as follows:
     @br @hl.openmole("""
@@ -48,7 +49,8 @@
       @li{@wallTime,}
       @li{@memory,}
       @li{@openMOLEMemory,}
-      @li{@threads.}
+      @li{@threads,}
+      @li{@name.}
   @sect{Slurm}
     To delegate the workload to a @a("Slurm", href := "https://en.wikipedia.org/wiki/Simple_Linux_Utility_for_Resource_Management") based cluster you can use the Slurm environment as follows:
     @br @hl.openmole("""
@@ -69,12 +71,13 @@
       @li{@wallTime,}
       @li{@memory,}
       @li{@openMOLEMemory,}
-      @li{nodes: Number of nodes requested,}
+      @li{@envEntryTitle{nodes} Number of nodes requested,}
       @li{@threads,}
-      @li{coresByNodes: An alternative to specifying the number of threads. @i{coresByNodes} takes the value of the @{threads} when not specified, or 1 if none of them is specified.}
-      @li{qos: Quality of Service (QOS) as defined in the Slurm database}
-      @li{gres: a list of Generic Resource (GRES) requested. A Gres is a pair defined by the name of the resource and the number of resources requested (scalar).}
-      @li{constraints: a list of Slurm defined constraints which selected nodes must match.}
+      @li{@envEntryTitle{coresByNodes} An alternative to specifying the number of threads. @i{coresByNodes} takes the value of the @{threads} when not specified, or 1 if none of them is specified.}
+      @li{@envEntryTitle{qos} Quality of Service (QOS) as defined in the Slurm database}
+      @li{@envEntryTitle{gres} a list of Generic Resource (GRES) requested. A Gres is a pair defined by the name of the resource and the number of resources requested (scalar).}
+      @li{@envEntryTitle{constraints} a list of Slurm defined constraints which selected nodes must match,}
+      @li{@name.}
   @sect{Condor}
     @a("Condor", href := "https://en.wikipedia.org/wiki/HTCondor") clusters can be leveraged using the following syntax:
     @br @hl.openmole("""
@@ -90,7 +93,8 @@
       @li{@workDirectory,}
       @li{@memory,}
       @li{@openMOLEMemory,}
-      @li{@threads.}
+      @li{@threads,}
+      @li{@name.}
   @sect{OAR}
     Similarly, @a("OAR", href := "http://oar.imag.fr/dokuwiki/doku.php") clusters are reached as follows:
     @br @hl.openmole("""
@@ -108,6 +112,7 @@
       @li{@wallTime,}
       @li{@openMOLEMemory,}
       @li{@threads,}
-      @li{core: number of cores allocated for each job,}
-      @li{cpu: number of CPUs allocated for each job,}
-      @li{bestEffort: a boolean for setting the best effort mode (true by default).}
+      @li{@envEntryTitle{core} number of cores allocated for each job,}
+      @li{@envEntryTitle{cpu} number of CPUs allocated for each job,}
+      @li{@envEntryTitle{bestEffort} a boolean for setting the best effort mode (true by default),}
+      @li{@name.}

@@ -26,30 +26,17 @@
     Old versions of OpenMOLE software and documentation are available @a("here", href := "http://www.openmole.org/all/").
 
   @sect{OpenMOLE cannot connect to my environment using SSH}
-    @p When your workflow does not start to the remote environment you’re accessing through SSH, you can try these few
-    steps to identify the problems.
+    @p When one of the SSH authentications you've added to OpenMOLE is marked as failed, you can try these few steps to identify the problems.
 
     @p If you are using OpenMOLE in console mode, enable the @i{FINE} level of logging in the console using:
       @hl.openmole("""logger.level("FINE")""")
-
-    @p A typical SSH connection error will report as:
-      @hl.highlight("""
-      FINE: Error in job refresh
-      net.schmizz.sshj.userauth.UserAuthException: Exhausted available authentication methods
-      """, "bash")
-
-    @p or
-      @hl.highlight("""
-      FINE: Error in job refresh
-      net.schmizz.sshj.transport.TransportException: Incorrect identification: line too long
-      """, "bash")
 
     @sect{Password Authentication}
       @p If you are using the @hl.openmole("LoginPassword") authentication you might want to double check the user and
       password you entered since one of them is more than likely incorrect.
 
     @sect{SSH Keypair Authentication}
-      @p In such a case, we'll have to investigate multiple options, as SSH public key authentications are sensible to
+      @p In such a case, we'll have to investigate multiple options, as SSH public key authentications are sensitive to
         several configuration parameters.
 
       @p Public key authentication has usually a higher priority than password-based authentication when trying to
@@ -77,6 +64,66 @@
       @p Adding the @hl.highlight("-vvv", "bash") flag to your @i{ssh} command will give a lot more details on the
         communication between your client and the remote server. This will allow you to find out which authentication
       is successful as well as the order in which the authentication modes are tried.
+
+  @sect{Is OpenMOLE doing something?}
+    @p If you think OpenMOLE is crashed or stuck for some reason, here are a few things you can check from your system to decide whether it's just a temporary slow down or if the platform did actually crash.
+
+    @sect{Using tools from the Java Development Kit}
+      @p A simple call to @hl.highlight("jps", "plain") from your command line will list all the instrumented JVMs on your system. If OpenMOLE is running, it is among these processes.
+
+      @p Now that you know OpenMOLE's process id, you can use @hl.highlight("jstack", "plain") to print the eventual stack traces collected from OpenMOLE's threads. It's a bit low level but can at least give you enough material to thoroughly document your problem in the issue list or the mailing list.
+
+      @p The same procedure can be applied to the @hl.highlight("dbserver", "plain") running along OpenMOLE to manage the replica of the files copied to execution environments.
+
+    @sect{Inspecting the temporary folders}
+
+      @p OpenMOLE automatically creates temporary folders on the machine it's running in order to handle various inputs and outputs.
+
+      @p If you have access to the machine running OpenMOLE, change to your OpenMOLE's preferences folder down to the following path: @b{/home/user/.openmole/my_machine/.tmp}. List the content of this directory and change to the most recently created directory.
+
+      @p If you're using a remote environment, it should contain the tar archives used to populate new jobs on your remote computing environment, along with the input data files required by the task. The only presence of these files is a good indicator that OpenMOLE is functioning correctly and preparing the delegation of your workflow. Hardcore debuggers might want to go even deeper and extract the content of the tar archives to verify them, but this is out of scope.
+
+      @p However, touching on temporary file creation in OpenMOLE seamlessly leads us to our next entry...
+
+  @sect{I've reached my home folder size / file quota}
+    @p OpenMOLE generates a fair amount of @b{temporary files} in the @i{.openmole/mymachine/.tmp} folder associated to your machine. Although these are deleted at the end of an execution, they can lead to a significant increase of the space occupied by your .openmole folder and of the number of files present in the same folder.
+
+    @p Because some systems place stringent limitations on these two quotas, you might want to move your @i{.openmole} folder to a file system not restricted by quotas in order to run your OpenMOLE experiment successfully. The simplest way to do so is to create a destination folder in the unrestricted file system and then create a symbolic link name @i{.openmole} in your home directory that points to this newly created folder. On a UNIX system, this procedure translates into the following commands.
+
+    @hl.highlight("""
+    # assumes /data is not restricted by quotas
+    cp -r ~/.openmole /data/openmole_data
+    rm -rf ~/.openmole
+    ln -s /data/openmole_data ~/.openmole
+    """, "plain")
+
+    @p In order for this procedure to work, you'll want to ensure the target folder (@i{/data/openmole} in the example) can be reached from all the machines running your OpenMOLE installation.
+
+    @p Moving your @i{.openmole} to a different location is also @b{strongly advised on remote execution hosts (typically clusters) on which you own a personal account} used with OpenMOLE. In the case of remote environments, the OpenMOLE runtime and the input files of your workflow will be copied to the @i{.openmole} folder, again leading to problematic over quotas on these systems.
+
+  @sect{My sampling generates a type error}
+    @p Combining samplings is straightforward in OpenMOLE, but can sometimes results in syntax errors a bit cryptic to new users.
+    Let's take the example of a combined sampling made of a file exploration sampling and an integer range exploration:
+
+    @hl.openmoleNoTest("""
+    (input in (workDirectory / "../data/").files withName inputName) x
+    i in (1 to 10)
+    """)
+
+    @p This combined sampling will generate the following error when compiling the workflow:
+
+    @hl.highlight("""
+    found   : org.openmole.core.workflow.data.Prototype[Int]
+    required: org.openmole.core.workflow.sampling.Sampling
+    """, "plain")
+
+    @p OpenMOLE cannot identify the integer range the valid sampling it is. Simply @b{wrapping the expression in parentheses}
+     fixes the problem as shown in this correct version:
+
+    @hl.openmoleNoTest("""
+    (input in (workDirectory / "../data/").files withName inputName) x
+    (i in (1 to 10))
+    """)
 
   @sect{My problem is not listed here}
     @p If you could not resolve your problems, feel free to post your problem on the @a("mailing-list",
