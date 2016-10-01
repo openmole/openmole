@@ -426,7 +426,8 @@ class TreeNodePanel {
             },
             Rx {
               if (selectionMode()) {
-                div(width := "100%",
+                div(
+                  width := "100%",
                   if (selected()) {
                     fileToolBar.selectedTool() match {
                       case Some(TrashTool) ⇒ stylesheet.fileSelectedForDeletion
@@ -435,7 +436,8 @@ class TreeNodePanel {
                     }
                   }
                   else stylesheet.fileSelectionMode,
-                  span(stylesheet.fileSelectionMessage))
+                  span(stylesheet.fileSelectionMessage)
+                )
               }
               else div()
             }
