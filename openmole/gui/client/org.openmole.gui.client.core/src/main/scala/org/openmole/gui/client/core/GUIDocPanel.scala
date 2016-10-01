@@ -86,7 +86,7 @@ class GUIDocPanel extends ModalPanel {
       li(span(greenBold, "refreshing"), " the content of the current directory.")
     ),
 
-    div(spacer20, "The content of the current directory is listed at the bottom. Each row gives the name and size of each file or folder. Folders are marked by a ", span(glyph_folder_close), ". A ", span(glyph_plus), " symbol indicates that the folder is not empty."),
+    div(spacer20, "The content of the current directory is listed at the bottom. Each row gives the name and size of each file or folder. Folders are marked by a ", span(glyph_folder_close), "."),
     div(
       spacer20,
       "Hovering a file or a folder with the mouse pointer triggers new actions:",
