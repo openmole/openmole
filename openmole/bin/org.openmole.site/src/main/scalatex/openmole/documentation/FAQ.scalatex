@@ -69,7 +69,7 @@
     @p If you think OpenMOLE is crashed or stuck for some reason, here are a few things you can check from your system to decide whether it's just a temporary slow down or if the platform did actually crash.
 
     @sect{Using tools from the Java Development Kit}
-      @p A simple call to @hl.highlight("jps", "plain") from you command line will list all the instrumented JVMs on your system. If OpenMOLE is running, it is among these processes.
+      @p A simple call to @hl.highlight("jps", "plain") from your command line will list all the instrumented JVMs on your system. If OpenMOLE is running, it is among these processes.
 
       @p Now that you know OpenMOLE's process id, you can use @hl.highlight("jstack", "plain") to print the eventual stack traces collected from OpenMOLE's threads. It's a bit low level but can at least give you enough material to thoroughly document your problem in the issue list or the mailing list.
 
@@ -117,7 +117,7 @@
     required: org.openmole.core.workflow.sampling.Sampling
     """, "plain")
 
-    @p OpenMOLE cannot identify the integer range the valid sampling it is. Simply wrapping the expression in parenthesis
+    @p OpenMOLE cannot identify the integer range the valid sampling it is. Simply @b{wrapping the expression in parentheses}
      fixes the problem as shown in this correct version:
 
     @hl.openmoleNoTest("""
