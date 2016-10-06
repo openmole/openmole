@@ -746,3 +746,26 @@ lazy val consoleBin = OsgiProject(binDir, "org.openmole.console", imports = Seq(
     buildinfo,
     module
   ) settings (defaultSettings: _*)
+
+
+
+lazy val dockerBin = Project("docker", binDir / "docker") enablePlugins(sbtdocker.DockerPlugin) settings (
+  imageNames in docker := Seq(
+    ImageName(
+      namespace = Some("openmole"),
+      repository = "openmole",
+      tag = Some(version.value)
+    )
+  ),
+  dockerfile in docker := new Dockerfile {
+    from("openjdk:alpine")
+    runRaw("""apk update && apk add bash""")
+    runRaw("""adduser openmole -g "" -D -h /var/openmole/""")
+    copy((assemble in openmole).value, s"/usr/lib/openmole")
+    runRaw("chmod +x /usr/lib/openmole/openmole")
+    runRaw("cd /usr/bin/ && ln -s ../lib/openmole/openmole")
+    expose(443)
+    user("openmole")
+    cmdShell("openmole", "--port", "8443" ,"--remote")
+  }
+)
