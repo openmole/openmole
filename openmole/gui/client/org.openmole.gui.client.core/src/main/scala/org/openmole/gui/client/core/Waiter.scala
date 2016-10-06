@@ -84,4 +84,25 @@ class FutureWaiter[S](waitingForFuture: Future[S]) {
       }
     )
   }
+
+  def withFutureWaiterAndSideEffect[T <: HTMLElement](
+    waitingString:    String,
+    onsuccessElement: S ⇒ Any
+  ): TypedTag[HTMLElement] = {
+
+    val processing: Var[TypedTag[HTMLElement]] = Var(waiter)
+    waitingForFuture.andThen {
+      case Success(s) ⇒
+        onsuccessElement(s)
+        processing() = div()
+      case Failure(_) ⇒ processing() = tags.div("Failed to load data")
+    }
+
+    div(
+      Rx {
+        processing()
+      }
+    )
+  }
+
 }

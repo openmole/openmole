@@ -109,6 +109,10 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
     filterSubmit()
   }
 
+  def automaticGreaterThreshold = {
+    thresholdInput.value = (thresholdInput.value.toInt * 1.25).toInt.toString
+  }
+
   def buildSpan(tool: SelectedTool, todo: () ⇒ Unit, modifierSeq: ModifierSeq = emptyMod): Rx[TypedTag[HTMLSpanElement]] = Rx {
     span(
       tool.glyph +++ pointer +++ selectedTool().filter(_ == tool).map { _ ⇒ modifierSeq +++ stylesheet.selectedTool }.getOrElse(emptyMod) +++ "glyphmenu",
@@ -187,8 +191,12 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
     autofocus
   ).render
 
-  def filterSubmit = () ⇒ {
+  def updateFilter: Unit = updateFilter(fileFilter.now.copy(threshold = thresholdInput.value, nameFilter = nameInput.value))
+
+  def filterSubmit: () ⇒ Boolean = () ⇒ {
     updateFilter(fileFilter.now.copy(threshold = thresholdInput.value, nameFilter = nameInput.value))
+    println("filter submit")
+    treeNodePanel.refreshAndDraw
     false
   }
 

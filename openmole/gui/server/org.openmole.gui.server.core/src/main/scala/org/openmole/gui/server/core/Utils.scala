@@ -153,7 +153,9 @@ object Utils {
     getFile0(paths, root)
   }
 
-  def listFiles(path: SafePath, fileFilter: data.FileFilter)(implicit context: ServerFileSytemContext): Seq[TreeNodeData] = {
+  case class ListFiles(list: Seq[TreeNodeData], moreEntries: Seq[TreeNodeData])
+
+  def listFiles(path: SafePath, fileFilter: data.FileFilter)(implicit context: ServerFileSytemContext): ListFiles = {
 
     val filteredByName: Seq[TreeNodeData] = {
       val allFiles = safePathToFile(path).listFilesSafe.toSeq
@@ -165,13 +167,13 @@ object Utils {
 
     fileFilter.firstLast match {
       case First ⇒ fileFilter.threshold match {
-        case Some(th: Int) ⇒ sorted.take(th)
-        case _             ⇒ sorted
+        case Some(th: Int) ⇒ ListFiles(sorted.take(th), sorted.takeRight(sorted.size - th))
+        case _             ⇒ ListFiles(sorted, Seq())
       }
       case Last ⇒ (fileFilter.threshold match {
-        case Some(th: Int) ⇒ sorted.takeRight(th)
-        case _             ⇒ sorted
-      }).reverse
+        case Some(th: Int) ⇒ ListFiles(sorted.takeRight(th).reverse, sorted.take(sorted.size - th).reverse)
+        case _             ⇒ ListFiles(sorted.reverse, Seq())
+      })
     }
   }
 
@@ -273,7 +275,7 @@ object Utils {
   def existsExcept(in: TreeNodeData, exceptItSelf: Boolean): Boolean = {
     import org.openmole.gui.ext.data.ServerFileSytemContext.project
     val li = listFiles(in.safePath.parent, data.FileFilter.defaultFilter)
-    val count = li.count(_.safePath.path == in.safePath.path)
+    val count = li.list.count(_.safePath.path == in.safePath.path)
 
     val bound = if (exceptItSelf) 1 else 0
     if (count > bound) true else false

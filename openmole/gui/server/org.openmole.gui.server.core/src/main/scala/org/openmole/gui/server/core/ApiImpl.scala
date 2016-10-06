@@ -4,16 +4,12 @@ import java.io.File
 import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.zip.GZIPInputStream
-
-import com.sun.org.apache.xalan.internal.xsltc.dom.LoadDocument
-import org.openmole.core.batch.environment.BatchEnvironment.{ BeginDownload, BeginUpload, EndDownload, EndUpload }
 import org.openmole.core.buildinfo.MarketIndex
 import org.openmole.core.event._
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.pluginmanager._
 import org.openmole.core.serializer.SerialiserService
 import org.openmole.gui.misc.utils.Utils._
-import org.openmole.gui.server.core.Runnings.RunningEnvironment
 import org.openmole.gui.server.core.Utils._
 import org.openmole.core.workspace.{ ConfigurationLocation, Workspace }
 import org.openmole.gui.shared._
@@ -21,21 +17,16 @@ import org.openmole.gui.ext.data
 import org.openmole.gui.ext.data._
 import java.io._
 import java.nio.file._
-
 import org.openmole.core.project._
-import org.osgi.framework.Bundle
-
 import scala.util.{ Failure, Success, Try }
 import org.openmole.core.workflow.mole.MoleExecutionContext
 import org.openmole.tool.stream.StringPrintStream
-
 import scala.concurrent.stm._
 import org.openmole.tool.file._
 import org.openmole.tool.tar._
-import org.openmole.core.{ pluginmanager, buildinfo }
-import org.openmole.core.console.ScalaREPL
+import org.openmole.core.buildinfo
 import org.openmole.core.output.OutputManager
-import org.openmole.gui.server.core
+import rx._
 
 /*
  * Copyright (C) 21/07/14 // mathieu.leclaire@openmole.org
@@ -54,11 +45,17 @@ import org.openmole.gui.server.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-object ApiImpl extends Api {
+class ApiImpl extends Api {
 
   val outputSize = ConfigurationLocation[Int]("gui", "outputsize", Some(10 * 1024 * 1024))
 
   val execution = new Execution
+
+  private case class MoreEntries(default: Seq[TreeNodeData], currentIndex: Int = 0) {
+    def reset = MoreEntries(default, 0)
+  }
+
+  private val moreEntriesBuffer: Var[Map[SafePath, Var[MoreEntries]]] = Var(Map())
 
   implicit def authProvider = Workspace.authenticationProvider
 
@@ -248,7 +245,27 @@ object ApiImpl extends Api {
     }
   }
 
-  def listFiles(sp: SafePath, fileFilter: data.FileFilter): Seq[TreeNodeData] = Utils.listFiles(sp, fileFilter)(org.openmole.gui.ext.data.ServerFileSytemContext.project)
+  def listFiles(sp: SafePath, fileFilter: data.FileFilter): Seq[TreeNodeData] = {
+    val listFiles = Utils.listFiles(sp, fileFilter)(org.openmole.gui.ext.data.ServerFileSytemContext.project)
+    moreEntriesBuffer() = moreEntriesBuffer.now.updated(sp, Var(MoreEntries(listFiles.moreEntries)))
+    listFiles.list
+  }
+
+  def resetMoreEntriesBuffer(sp: SafePath): Unit = {
+    val entries = moreEntriesBuffer.now(sp).now
+    moreEntriesBuffer() = moreEntriesBuffer.now.updated(sp, Var(entries.reset))
+  }
+
+  def moreEntries(sp: SafePath, size: Int): Seq[TreeNodeData] = {
+    val thisMoreEntries = {
+      if (moreEntriesBuffer.now.isDefinedAt(sp)) moreEntriesBuffer.now(sp).now
+      else MoreEntries(Seq())
+    }
+
+    val more = thisMoreEntries.default.slice(thisMoreEntries.currentIndex, thisMoreEntries.currentIndex + size)
+    moreEntriesBuffer() = moreEntriesBuffer.now.updated(sp, Var(thisMoreEntries.copy(currentIndex = thisMoreEntries.currentIndex + size)))
+    more
+  }
 
   def move(from: SafePath, to: SafePath): Unit = {
     import org.openmole.gui.ext.data.ServerFileSytemContext.project
