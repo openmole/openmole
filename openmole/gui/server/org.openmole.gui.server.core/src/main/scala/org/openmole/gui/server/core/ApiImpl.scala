@@ -4,6 +4,7 @@ import java.io.File
 import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.zip.GZIPInputStream
+
 import org.openmole.plugin.environment.batch.environment.BatchEnvironment.{ BeginDownload, BeginUpload, EndDownload, EndUpload }
 import org.openmole.core.buildinfo
 import org.openmole.core.event._
@@ -17,17 +18,21 @@ import org.openmole.gui.ext.data
 import org.openmole.gui.ext.data._
 import java.io._
 import java.nio.file._
+
 import fr.iscpif.gridscale.http.HTTPStorage
 import org.openmole.core.market.{ MarketIndex, MarketIndexEntry }
+
 import scala.util.{ Failure, Success, Try }
 import org.openmole.core.workflow.mole.MoleExecutionContext
 import org.openmole.tool.stream.StringPrintStream
+
 import scala.concurrent.stm._
 import org.openmole.tool.file._
 import org.openmole.tool.tar._
 import org.openmole.core.output.OutputManager
 import org.openmole.core.module
 import org.openmole.core.market
+import org.openmole.core.project._
 import rx._
 
 /*
