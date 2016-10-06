@@ -29,9 +29,9 @@ package object authentications {
   }
 
   private def naming(data: AuthenticationData) = data match {
-    case e: EGIP12AuthenticationData         ⇒ "EGI certificate"
+    case e: EGIP12AuthenticationData         ⇒ "EGI P12 certificate"
     case lp: LoginPasswordAuthenticationData ⇒ "SSH login/password"
-    case _                                   ⇒ "SSH key"
+    case _                                   ⇒ "SSH private key"
   }
 
   private def emptyData(data: AuthenticationData) = data match {

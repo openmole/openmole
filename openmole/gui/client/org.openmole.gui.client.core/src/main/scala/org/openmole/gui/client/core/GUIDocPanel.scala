@@ -34,23 +34,6 @@ import scalatags.JsDom._
 import omsheet._
 import sheet._
 
-/*
- * Copyright (C) 27/08/15 // mathieu.leclaire@openmole.org
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 class GUIDocPanel extends ModalPanel {
 
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
@@ -87,23 +70,23 @@ class GUIDocPanel extends ModalPanel {
     "Resources are files, which can be used in OpenMOLE workflows. We distinguish multiple kinds of resources:",
     ul(
       li(b(".oms (for Open Mole Script)"), " is a file describing an OpenMOLE workflow according to the ", omLanguageLink),
-      li(b("external code"), " used in OpenMOLE scripts. Codes written with some specific programming languages (", javaLink, ", ", scalaLink, ", ", netlogoLink, ", ", rLink, ", ", pythonLink, ", ...) can be editer in the application. " +
-        "Any other types of external codes is also supported but as an immutable binary (C, C++, ...)."),
+      li(b("external code"), " used in OpenMOLE scripts. Codes written in some specific programming languages (", javaLink, ", ", scalaLink, ", ", netlogoLink, ", ", rLink, ", ", pythonLink, ", ...) can be edited in the application. " +
+        "Any other types of external codes is also supported but only as an immutable binary (C, C++, ...)."),
       li(b("Other external resources"), " used as input for a model are editable in the application (", csvLink, " files, text files, ...), while binary files like images cannot be modified.")
     ),
     "These files are managed in a file system located in the left sidebar. The filesystem can be shown or hidden using the ", span(glyph_file +++ glyphText), " button.",
     div(centerElement, img(src := "img/files.png", alt := "files")),
-    "The ", span(omsheet.greenBold, "current directory"), " shown at the top, on the right of the stack. A folder hierarchy too deep to fit in the bar will be replaced by \"...\". " +
-      "Clicking on one folder of the stack sets it as the current folder. On the image above, the current directory is for example ", tags.em("SimpopLocal"), ".",
-    div(spacer20, "Second from the top if a File management utility box. It enables: "),
+    "The ", span(omsheet.greenBold, "current directory"), " shown at the top, on the right of the stack. When the folder hierarchy is too deep to fit in the bar, it will be replaced by \"...\". " +
+      "Clicking on one folder of the stack sets it as the current folder. In the image above, the current directory is for example ", tags.em("Random Forest"), ".",
+    div(spacer20, "Second from the top if a file management utility box. It enables: "),
     ul(
       li("creating a new file or folder in the current directory. To do so, select ", tags.em("file"), " or ", tags.em("folder"), " thanks to the ", span(greenBold, "file or folder selector"), ". Then, type the new name in the ",
-        span(greenBold, "file or folder name input"), " and press enter. The freshly created file or folder appears in the list."),
+        span(greenBold, "file or folder name input"), " and press enter. The freshly created item appears in the list."),
       li(span(greenBold, "uploading a file"), " from your local machine to the current directory"),
       li(span(greenBold, "refreshing"), " the content of the current directory.")
     ),
 
-    div(spacer20, "The content of the current directory is listed at the bottom. Each row gives the name and size of each file or folder. Folders are marked by a ", tags.div(ms("dir bottom-5")), ". A ", span(glyph_plus), " symbol indicates that the folder is not empty."),
+    div(spacer20, "The content of the current directory is listed at the bottom. Each row gives the name and size of each file or folder. Folders are marked by a ", span(glyph_folder_close), "."),
     div(
       spacer20,
       "Hovering a file or a folder with the mouse pointer triggers new actions:",
@@ -111,7 +94,7 @@ class GUIDocPanel extends ModalPanel {
         li(span(glyph_download +++ glyphStyle), " download the hovered file or directory (as an archive for the latter) to the local machine."),
         li(span(glyph_edit +++ glyphStyle), " rename the hovered file or directory. An input field appears: just type the new name and press ", tags.em("enter"), " to validate."),
         li(span(glyph_trash +++ glyphStyle), " delete the hovered file or directory."),
-        li(span(glyph_archive +++ glyphStyle), " uncompress the hovered file (appears only in case of archive files (", tags.em(".tgz"), " or ", tags.em(".tar.gz"), ").")
+        li(span(glyph_archive +++ glyphStyle), " uncompress the hovered file (only for supported archive types (", tags.em(".tgz"), " or ", tags.em(".tar.gz"), ").")
       )
     ),
     div(spacer20, "The editable files can be modified in the central editor. To do so, simply click on the file to be edited."),
@@ -132,30 +115,30 @@ class GUIDocPanel extends ModalPanel {
 
   val modelWizardContent = {
     tags.div(
-      "The model wizard is a tool designed to quickly import your Model. It both uploads your model archive and prepares for you the OpenMOLE script to run it." +
-        "The wizard automatically detects your model programming language among JVM, Netlogo or native codes. Then it detects the potential inputs and outputs. It generates " +
-        "for each input/output a variable with a relevant name if possible. At the end of the import process, the ", button("Build", btn_primary +++ labelInLine), " should run your script !",
+      "The model wizard is a tool designed to quickly import your Model. It both uploads your model archive and prepares the OpenMOLE script for you." +
+        "The wizard automatically distinguishes your model's programming language among JVM, Netlogo or native codes. Then it detects the potential inputs and outputs. " +
+        "For each input/output, the wizard generates a variable with a relevant name if possible. At the end of the import process, the ", button("Build", btn_primary +++ labelInLine), " should run your script without you having to do anything!",
       tags.div(spacer20, "To import your model, click on the ", button("Your model", btn_primary +++ labelInLine), " button. A dialog box pops up. Set your model path in it. The system should now display " +
-        "the programming language, a list of detected inputs / outputs and the script command to launch your code. In many cases, you are almost done yet. Just press the ",
-        tags.b("Build"), " button at the bottom: the wizard dialog disappears and the OpenMOLE script is generated in the wordDirectory with your uploaded code !"),
+        "the programming language, a list of detected inputs / outputs and the command to launch your code. In most cases, you are almost done. Just press the ",
+        tags.b("Build"), " button at the bottom: the wizard dialog disappears and the OpenMOLE script is generated in the wordDirectory with your uploaded code!"),
       tags.div(
         spacer20,
-        "However, you may sometimes make some modifications if you observe the system did not correctly detect your code, its inputs/outputs or its launching command. " +
-          "For each input / output, three actions can be triggered thanks to icons located on the same line: ",
+        "However, you may sometimes want to make some modifications if you observe the system did not correctly detect your code, its inputs/outputs or its launching command. " +
+          "For each input / output, three actions can be triggered using the icons located on the same line: ",
         tags.ul(
           tags.li(span(glyph_trash +++ glyphStyle), " removes the current input/output"),
           tags.li(span(glyph_arrow_right_and_left +++ glyphStyle), " duplicates the current input/output, so that it is both defined as input and output"),
-          tags.li(span(glyph_arrow_right +++ glyphStyle), " or ", span(glyph_arrow_left +++ glyphStyle), " switches an input to output or an input to output")
+          tags.li(span(glyph_arrow_right +++ glyphStyle), " or ", span(glyph_arrow_left +++ glyphStyle), " switches an input to output and vice-versa.")
         ),
-        "The launching command uses the names of the previously defined input / output variables. It is reactive: if the name of input/output is changed, the launching command" +
-          " is changed with the corresponding name. For the native codes (C, C++, Python, R, ...), the following syntax is required (automatically used): ", tags.b("""${}."""),
+        "The launching command uses the names of the previously defined input / output variables. It is reactive: if the name of the input/output changes, the launching command" +
+          " is updated with the corresponding name. For the native codes (C, C++, Python, R, ...), the following syntax is required (automatically used): ", tags.b("""${}."""),
         tags.div(spacer20 +++ bold, "Netlogo applications"),
-        tags.div(" The Netlogo applications working with nls extensions should be previously archived. The system will exstract the archives and deal with the extensions as " +
-          " Task resources (they appear in the resources tab"),
-        tags.div("A seed variable (for the Netlogo random genarator) is automatically generated and passed to the Netlogo Generator trought the Netlogo Task"),
+        tags.div(" The Netlogo applications working with the ", tags.i(".nls"), " extension should be previously archived. The system will extract the archives and deal with the extensions as " +
+          " resources of the task (displayed in the resources tab"),
+        tags.div("A seed variable (for the Netlogo random genarator) is automatically generated and passed to the Netlogo Generator through the Netlogo Task"),
         tags.div(spacer20 +++ bold, "Java applications"),
-        tags.div(" Once the jar has been provided to the wizard, the classes contained in it are proposed in a dropdown button. Choose the class containing your main Class. " +
-          "Then, another dropdown button will ask you for the function to be called in the preselected class.")
+        tags.div(" Once the jar has been provided to the wizard, the classes it contains are proposed in a dropdown menu. Choose the class containing your main Class. " +
+          "Then, another dropdown menu will ask you for the function to be called in the preselected class.")
       )
     )
   }
@@ -163,17 +146,16 @@ class GUIDocPanel extends ModalPanel {
   lazy val fileToolsContent = {
     tags.div(
       spacer20,
-      "Several options on top help you to manage your files",
+      "The panel at the top offers several tools to manage your files:",
       tags.ul(
         tags.li(span(glyph_filter +++ glyphStyle), "Filtering: a directory can potentially contain a lot of files. By default the first 100 are displayed to prevent from network latency. However, you can change" +
-          " this value. You can also filter by name (and then press enter). The 3 icons on the top of the file list will then permit to sort results respectively by names ", span(glyph_alph_sorting +++ glyphStyle), " , file creation times ", span(glyph_time +++ glyphStyle), " or size ", span(OMTags.glyph_data +++ glyphStyle, " .")),
-        tags.li(span(glyph_plus +++ glyphStyle), "Create new file or directory: the dropdown button permits to choose among file or directory. Set a name and then press enter. A file or a directory will be " +
+          " this value. You can also filter by name (and then press enter). The 3 icons at the top of the file list will then permit to sort the results respectively by names ", span(glyph_alph_sorting +++ glyphStyle), ", file creation times ", span(glyph_time +++ glyphStyle), " or size ", span(OMTags.glyph_data +++ glyphStyle, " .")),
+        tags.li(span(glyph_plus +++ glyphStyle), "Create new file or directory: the dropdown menu permits to select what to create. Set a name and then press enter. A file or a directory will be " +
           "generated in the workDirectory."),
-        tags.li(span(glyph_copy +++ glyphStyle), " multiple copy / paste: each row is now selectable (grey color). Once you select one, it turns to green. Then press the copy button (on the tool area left side) to copy them ",
-          tags.label("paste")(label_danger +++ pasteLabel +++ labelStyle +++ (top := 0)), " appears. Navigate to the target destination and press the button to complete the paste action."),
-        tags.li(span(glyph_trash +++ glyphStyle), " multiple deletion: each row will be selectable (grey color). Once you select one, it turns to red. Then press the delete button (on the tool area left side) to remove them."),
-        tags.li(span(OMTags.glyph_plug +++ glyphStyle), "Plugins: scan all the files contained in the workDirectory and test whether it is an OpenMOLE plugin or not. If it is a plugin " +
-          ", its row appear in grey and can be selected. Click on it to select it and then on the button Plug, which poped up to activate the plugin (you will then find it in the plugin list)."),
+        tags.li(span(glyph_copy +++ glyphStyle), " multiple copy / paste: each row can now be selected (grey color). Selected rows are marked in green. Then press the copy button that just appeared in the tool area to copy them. Once you've clicked copy, the ",
+          tags.label("paste")(label_danger +++ pasteLabel +++ labelStyle +++ (top := 0)), " button appears. Navigate to the target destination and press the button to complete the paste action."),
+        tags.li(span(glyph_trash +++ glyphStyle), " multiple deletions: each row can be selected (grey color). Selected rows are marked in red. Then press the delete button that just appeared in the tool area to remove the selected items."),
+        tags.li(span(OMTags.glyph_plug +++ glyphStyle), "Plugins: scan all the files contained in the workDirectory and test whether it is an OpenMOLE plugin or not. Plugins are marked in grey and can be selected. Click the row to select and then click ", span(glyph_plug), " which just popped up to enable the plugin. Enabled plugins appear in the plugin list from the main menu."),
         tags.li(span(glyph_upload +++ glyphStyle), " upload a file in the workDirectory."),
         tags.li(span(glyph_refresh +++ glyphStyle), " refresh the workDirectory.")
       )

@@ -135,6 +135,12 @@
 
     @p Another default behaviour is to print the standard and error outputs of each task in the OpenMOLE console. Such raw prints might not be suitable when a very large number of tasks is involved or that further processing are to be performed on the outputs. A @i{CARETask}'s standard and error outputs can be assigned to OpenMOLE variable and thus injected in the dataflow by summoning respectively the @hl.openmoleNoTest("stdOut") and @hl.openmoleNoTest("stdErr") actions on the task.
 
+    @p As any other process, the applications contained in OpenMOLE's native tasks accept environment variables to influence their behaviour.
+    Variables from the dataflow can be injected as environment variables using the @hl.openmoleNoTest{environmentVariable += (variable, "variableName")} field.
+    If no name is specified, the environment variable is named after the OpenMOLE variable.
+    Environment variables injected from the dataflow are @b{inserted in the pre-existing set of environment variables from the execution host}. This shows particularly useful to preserve
+    the behaviour of some toolkits when executed on local environments (ssh, clusters, ...) where users control their work environment.
+
     @p The following snippet creates a task that employs the features described in this section:
     @br @hl.openmole("""
     // Declare the variable
@@ -147,10 +153,11 @@
       CARETask("hello.tgz.bin", "python hello.py") set (
         stdOut := output,
         stdErr := error,
-        returnValue := value
+        returnValue := value,
+        environmentVariable += (value, "I_AM_AN_ENV_VAR")
       )""")
 
-    @p You will note that these options are set using the @hl.openmoleNoTest(":=") operator. Also, the OpenMOLE variables containing the standard and error outputs are @b{automatically marked as outputs} of the task, and must not be added to the @hl.openmoleNoTest("outputs") list.
+    @p You will note that @b{options holding a single value} are set using the @hl.openmoleNoTest(":=") operator. Also, the OpenMOLE variables containing the standard and error outputs are @b{automatically marked as outputs} of the task, and must not be added to the @hl.openmoleNoTest("outputs") list.
 
   @sect{Using local resources}
     @p To access data present on the execution node (outside the CARE filesystem) you should use a dedicated option of the @i{CARETask}: @i{hostFiles}. This option takes the path of a file on the execution host and binds it to the same path in the CARE filesystem. Optionally you can provide a second argument to specify the path explicitly. For instance:

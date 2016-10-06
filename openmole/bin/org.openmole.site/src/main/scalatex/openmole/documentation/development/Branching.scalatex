@@ -2,12 +2,13 @@
 @import org.openmole.site._
 
 @sect{Branching model}
-  OpenMOLE applies the following branching model:
+  OpenMOLE applies a branching model derived from @a("Vincent Driessen's", href := "http://nvie.com/posts/a-successful-git-branching-model/"). Some slight differences should be noted:
   @ul
-	@li{the next version of OpenMOLE is in the master,}
-	@li{disrupting features are developed in branches,}
-    @li{new features are merged into the master branch as soon as they are working satisfyingly enough to be operational in the next release,}
-	@li{with each release, a maintenance branch is created to be able to patch the last released version, this branch is called version-dev.}
+	@li{The next version of OpenMOLE is in the master, it's our development branch;}
+	@li{Disrupting features are developed in branches, branching off master;}
+    @li{New features are merged into the master branch as soon as they are working satisfyingly enough to be operational in the next release;}
+	@li{With each release, a maintenance branch is created to be able to patch the last released version, this branch is called version-dev. These are the so-called stable branches for each release;}
+	@li{Hotfixes should be developed by branching off the corresponding version-dev branch and merged back into their upstream branch and master.}
 
   @p The advantage of this model is that new features are tested early in interaction with each others. This scheme serves an hybrid, date-based / feature-based release schedule.
 
