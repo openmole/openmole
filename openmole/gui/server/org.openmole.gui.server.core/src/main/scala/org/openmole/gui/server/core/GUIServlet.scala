@@ -47,6 +47,7 @@ object AutowireServer extends autowire.Server[String, upickle.default.Reader, up
 class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServlet with FileUploadSupport with AuthenticationSupport {
 
   val basePath = "org/openmole/gui/shared"
+  val apiImpl = new ApiImpl
 
   // Get all the css files in the workspace (it is not working with js because of the order)
   val cssFiles = new File(GUIServer.resourcePath, "css").listFilesSafe.map {
@@ -140,7 +141,7 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
   }
 
   post(s"/$basePath/*") {
-    Await.result(AutowireServer.route[Api](ApiImpl)(
+    Await.result(AutowireServer.route[Api](apiImpl)(
       autowire.Core.Request(
         basePath.split("/").toSeq ++ multiParams("splat").head.split("/"),
         upickle.default.read[Map[String, String]](request.body)

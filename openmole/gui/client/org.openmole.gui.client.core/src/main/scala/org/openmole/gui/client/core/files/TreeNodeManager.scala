@@ -18,10 +18,11 @@ package org.openmole.gui.client.core.files
  */
 
 import org.openmole.gui.client.core.alert.AlertPanel
-import org.openmole.gui.client.core.CoreUtils
+import org.openmole.gui.client.core.{ CoreUtils, OMPost }
 import org.openmole.gui.ext.data.{ FileFilter, SafePath }
+import org.openmole.gui.shared.Api
 import rx._
-
+import autowire._
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -112,7 +113,10 @@ class TreeNodeManager {
   def computeCurrentSons(fileFilter: FileFilter): Future[(Seq[TreeNode], Boolean)] = {
     current.now match {
       case dirNode: DirNode ⇒
-        if (sons.now.contains(dirNode)) Future((sons.now(dirNode), false))
+        if (sons.now.contains(dirNode)) {
+          OMPost[Api].resetMoreEntriesBuffer(dirNode.safePath.now).call()
+          Future((sons.now(dirNode), false))
+        }
         else CoreUtils.getSons(dirNode, fileFilter).map { x ⇒ (x, true) }
       case _ ⇒ Future(Seq(), false)
     }

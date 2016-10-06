@@ -2,7 +2,7 @@ package org.openmole.gui.client.core.files
 
 import org.openmole.gui.client.core.alert.AbsolutePositioning.{ FileZone, RelativeCenterPosition }
 import org.openmole.gui.client.core.alert.AlertPanel
-import org.openmole.gui.client.core.files.FileToolBar.{ PluginTool, TrashTool }
+import org.openmole.gui.client.core.files.FileToolBar.{ FilterTool, PluginTool, TrashTool }
 import org.openmole.gui.client.core.{ CoreUtils, OMPost }
 import org.openmole.gui.client.core.Waiter._
 import org.openmole.gui.ext.data._
@@ -169,6 +169,11 @@ class TreeNodePanel {
     drawTree
   })
 
+  def refreshAndDrawAnd(todo: () ⇒ Unit) = refreshAnd(() ⇒ {
+    drawTree
+    todo()
+  })
+
   def refreshAnd(todo: () ⇒ Unit) = CoreUtils.updateSons(manager.current.now, todo, filter)
 
   def computePluggables = fileToolBar.selectedTool.now match {
@@ -176,22 +181,45 @@ class TreeNodePanel {
     case _                ⇒
   }
 
+  val scrollHeight = Var(0)
+
+  import org.scalajs.dom
+
   def drawTree: Unit = {
     computePluggables
     tree() = manager.computeCurrentSons(filter).withFutureWaiter("Get files", (sons: (Seq[TreeNode], Boolean)) ⇒ {
+      lazy val moreEntries: HTMLAnchorElement = a(
+        pointer +++ (fontSize := 12),
+        onclick := { () ⇒
+          fileToolBar.fileFilter.now.threshold.map { th ⇒
+            OMPost[Api].moreEntries(manager.current.now.safePath.now, th).call().withFutureWaiterAndSideEffect("", (me: Seq[TreeNodeData]) ⇒ {
+              fileBody.removeChild(moreEntries)
+              me.foreach { e ⇒
+                fileBody.appendChild(drawNode(e).render)
+              }
+              fileBody.appendChild(moreEntries)
+            })
+          }
+        }, "More entries"
+      ).render
+
+      lazy val fileBody: HTMLTableSectionElement = tbody(omsheet.fileList)(
+        for (tn ← sons._1) yield {
+          drawNode(tn)
+        },
+        if (sons._1.length <= fileToolBar.fileNumberThreshold) {
+          moreEntries
+        }
+        else div()
+      ).render
       if (sons._2) manager.updateSon(manager.current.now, sons._1)
-      div(
+      tags.table(
         if (manager.isRootCurrent && manager.isProjectsEmpty) {
           div("Create a first OpenMOLE script (.oms)")(ms("message"))
         }
-        else
-          tags.table(
-            tbody(omsheet.fileList)(
-              for (tn ← sons._1) yield {
-                drawNode(tn)
-              }
-            )
-          )
+        else {
+          fileBody
+        }
       )
     })
 
@@ -226,7 +254,7 @@ class TreeNodePanel {
     tn:           TreeNode,
     treeNodeType: TreeNodeType,
     todo:         () ⇒ Unit
-  ) = {
+  ): TypedTag[dom.html.TableRow] = {
     toBeEdited.now match {
       case Some(etn: NodeEdition) ⇒
         if (etn.node.path == tn.path) {
@@ -347,7 +375,7 @@ class TreeNodePanel {
 
     def addToSelection: Unit = addToSelection(!selected.now)
 
-    val render: Modifier = {
+    val render: TypedTag[dom.html.TableRow] = {
       val baseGlyph = sheet.marginTop(2) +++ "glyphitem"
       val settingsGlyph = ms("glyphitem") +++ glyph_settings +++ sheet.paddingLeft(4)
       val trash = baseGlyph +++ glyph_trash
@@ -426,7 +454,8 @@ class TreeNodePanel {
             },
             Rx {
               if (selectionMode()) {
-                div(width := "100%",
+                div(
+                  width := "100%",
                   if (selected()) {
                     fileToolBar.selectedTool() match {
                       case Some(TrashTool) ⇒ stylesheet.fileSelectedForDeletion
@@ -435,7 +464,8 @@ class TreeNodePanel {
                     }
                   }
                   else stylesheet.fileSelectionMode,
-                  span(stylesheet.fileSelectionMessage))
+                  span(stylesheet.fileSelectionMessage)
+                )
               }
               else div()
             }
