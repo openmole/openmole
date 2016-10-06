@@ -224,7 +224,7 @@
         (f in (workDirectory / "dir").files("subdir${i}", recursive = true).filter(f => f.isDirectory && f.getName.startsWith("exp")))
       )""")
 
-    @p To fitter the files you want to list use the filter modifier. You can filter using any function from File (see javadoc) to Boolean.
+    @p To filter the files you want to list use the filter modifier. You can filter using any function from File (see javadoc) to Boolean.
     @br @hl.openmole("""
      val f = Val[File]
 

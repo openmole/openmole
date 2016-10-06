@@ -26,4 +26,5 @@
     @li{@port,}
     @li{@openMOLEMemory,}
     @li{@threads,}
-    @li{workDirectory}
+    @li{@workDirectory,}
+    @li{@name.}
