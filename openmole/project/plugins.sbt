@@ -13,3 +13,5 @@ addSbtPlugin("com.lihaoyi" % "scalatex-sbt-plugin" % "0.3.4")
 
 addSbtPlugin("com.eed3si9n" % "sbt-buildinfo" % "0.3.2")
 
+addSbtPlugin("se.marcuslonnberg" % "sbt-docker" % "1.4.0")
+
