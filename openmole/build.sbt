@@ -27,7 +27,8 @@ def defaultSettings = BuildSystem.settings ++
     javacOptions ++= Seq("-source", "1.8", "-target", "1.8"),
     publishArtifact in (packageDoc in install) := false,
     publishArtifact in (packageSrc in install) := false,
-    addCompilerPlugin("org.scalamacros" %% "paradise" % "2.1.0" cross CrossVersion.fullMapped(_ ⇒ scalaVersionValue))
+    addCompilerPlugin("org.scalamacros" %% "paradise" % "2.1.0" cross CrossVersion.fullMapped(_ ⇒ scalaVersionValue)),
+    shellPrompt := { s => Project.extract(s).currentProject.id + " > " }
   )
 
 
