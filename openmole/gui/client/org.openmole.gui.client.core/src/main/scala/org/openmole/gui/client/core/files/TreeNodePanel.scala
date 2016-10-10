@@ -24,6 +24,7 @@ import autowire._
 import rx._
 import bs._
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
+import org.scalajs.dom
 import sheet._
 
 /*
