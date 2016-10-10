@@ -687,7 +687,7 @@ class ModelWizardPanel extends ModalPanel {
               } yield {
                 body.appendChild(tags.tr(
                   td(colMD(3))(i.name),
-                  td(colMD(2))(i.readableSize)
+                  td(colMD(2))(CoreUtils.readableByteCount(i.size))
                 ).render)
               }
               tags.table(striped +++ sheet.paddingTop(20))(body)

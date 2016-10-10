@@ -34,7 +34,7 @@ package object treenodemanager {
 
 class TreeNodeManager {
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
-  val root = DirNode(Var("projects"), Var(SafePath.sp(Seq("projects"))), 0L, "", 0L, "")
+  val root = DirNode(Var("projects"), Var(SafePath.sp(Seq("projects"))), 0L, 0L)
 
   val dirNodeLine: Var[Seq[DirNode]] = Var(Seq(root))
 

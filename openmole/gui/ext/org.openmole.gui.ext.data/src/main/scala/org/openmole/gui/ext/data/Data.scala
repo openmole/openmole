@@ -172,7 +172,6 @@ object ServerFileSytemContext {
 
 //The path it relative to the project root directory
 case class SafePath(path: Seq[String], extension: FileExtension, context: ServerFileSytemContext = ProjectFileSystem) {
-  def /(safePath: SafePath) = sp(this.path ++ safePath.path, safePath.extension)
 
   def ++(s: String) = sp(this.path :+ s, s)
 
@@ -271,13 +270,11 @@ case class UploadAbsolute() extends UploadType {
 
 @JSExport
 case class TreeNodeData(
-  name:         String,
-  safePath:     SafePath,
-  isDirectory:  Boolean,
-  size:         Long,
-  readableSize: String,
-  time:         Long,
-  readableTime: String
+  name:        String,
+  safePath:    SafePath,
+  isDirectory: Boolean,
+  size:        Long,
+  time:        Long
 )
 
 @JSExport
