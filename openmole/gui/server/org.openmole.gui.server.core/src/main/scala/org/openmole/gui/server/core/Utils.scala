@@ -97,9 +97,7 @@ object Utils {
 
   implicit def fileToTreeNodeData(f: File)(implicit context: ServerFileSytemContext = ProjectFileSystem): TreeNodeData = {
     val time = java.nio.file.Files.readAttributes(f, classOf[BasicFileAttributes]).lastModifiedTime.toMillis
-    TreeNodeData(f.getName, f, f.isDirectory, f.length, {
-      if (f.isFile) readableByteCount(FileDecorator(f).size) else ""
-    }, time, (new SimpleDateFormat("dd/MM/yyyy HH:mm").format((new Date(time)))))
+    TreeNodeData(f.getName, f, f.isDirectory, f.length, time)
   }
 
   implicit def seqfileToSeqTreeNodeData(fs: Seq[File])(implicit context: ServerFileSytemContext): Seq[TreeNodeData] = fs.map {

@@ -124,4 +124,23 @@ object CoreUtils {
     s"$y y $m m $d d $h h"
   }
 
+  def longTimeToString(lg: Long): String = {
+    val date = new scalajs.js.Date(lg)
+    s"${date.toLocaleDateString} ${date.toLocaleTimeString.dropRight(3)}"
+  }
+
+  //Duplicated from server to optimize data transfer
+  def readableByteCount(bytes: Long): String = {
+    val kb = 1024L
+    val mB = kb * kb
+    val gB = mB * kb
+    val tB = gB * kb
+
+    val doubleBytes = bytes.toDouble
+    if (bytes < mB) (doubleBytes / kb).formatted("%.2f").toString() + "KB"
+    else if (bytes < gB) (doubleBytes / mB).formatted("%.2f").toString + "MB"
+    else if (bytes < tB) (doubleBytes / gB).formatted("%.2f").toString + "GB"
+    else (doubleBytes / tB).formatted("%.2f").toString + "TB"
+  }
+
 }

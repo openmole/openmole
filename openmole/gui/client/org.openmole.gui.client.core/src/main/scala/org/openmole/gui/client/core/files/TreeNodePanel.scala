@@ -1,5 +1,8 @@
 package org.openmole.gui.client.core.files
 
+import java.text.SimpleDateFormat
+import java.util.Date
+
 import org.openmole.gui.client.core.alert.AbsolutePositioning.{ FileZone, RelativeCenterPosition }
 import org.openmole.gui.client.core.alert.AlertPanel
 import org.openmole.gui.client.core.files.FileToolBar.{ FilterTool, PluginTool, TrashTool }
@@ -26,6 +29,8 @@ import bs._
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
 import org.scalajs.dom
 import sheet._
+
+import scala.scalajs.js
 
 /*
  * Copyright (C) 16/04/15 // mathieu.leclaire@openmole.org
@@ -355,8 +360,8 @@ class TreeNodePanel {
     )
 
     def timeOrSize(tn: TreeNode): String = fileToolBar.fileFilter.now.fileSorting match {
-      case TimeSorting ⇒ tn.readableTime
-      case _           ⇒ tn.readableSize
+      case TimeSorting ⇒ CoreUtils.longTimeToString(tn.time)
+      case _           ⇒ CoreUtils.readableByteCount(tn.size)
     }
 
     lazy val fileIndent: ModifierSeq = tn match {
