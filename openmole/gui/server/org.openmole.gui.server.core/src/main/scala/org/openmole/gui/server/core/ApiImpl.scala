@@ -58,11 +58,11 @@ class ApiImpl extends Api {
 
   val execution = new Execution
 
-  private case class MoreEntries(default: Seq[TreeNodeData], currentIndex: Int = 0) {
+  private case class MoreEntries(default: Seq[TreeNodeData] = Seq(), currentIndex: Int = 0) {
     def reset = MoreEntries(default, 0)
   }
 
-  private val moreEntriesBuffer: Var[Map[SafePath, Var[MoreEntries]]] = Var(Map())
+  private val moreEntriesBuffer = TMap[SafePath, MoreEntries]()
 
   implicit def authProvider = Workspace.authenticationProvider
 
@@ -252,25 +252,22 @@ class ApiImpl extends Api {
     }
   }
 
-  def listFiles(sp: SafePath, fileFilter: data.FileFilter): Seq[TreeNodeData] = {
+  def listFiles(sp: SafePath, fileFilter: data.FileFilter): Seq[TreeNodeData] = atomic { implicit ctx ⇒
     val listFiles = Utils.listFiles(sp, fileFilter)(org.openmole.gui.ext.data.ServerFileSytemContext.project)
-    moreEntriesBuffer() = moreEntriesBuffer.now.updated(sp, Var(MoreEntries(listFiles.moreEntries)))
+    moreEntriesBuffer(sp) = moreEntriesBuffer.getOrElse(sp, MoreEntries(listFiles.moreEntries))
     listFiles.list
   }
 
-  def resetMoreEntriesBuffer(sp: SafePath): Unit = {
-    val entries = moreEntriesBuffer.now(sp).now
-    moreEntriesBuffer() = moreEntriesBuffer.now.updated(sp, Var(entries.reset))
+  def resetMoreEntriesBuffer(sp: SafePath): Unit = atomic { implicit ctx ⇒
+    val entries = moreEntriesBuffer.getOrElse(sp, MoreEntries())
+    moreEntriesBuffer(sp) = entries.reset
   }
 
-  def moreEntries(sp: SafePath, size: Int): Seq[TreeNodeData] = {
-    val thisMoreEntries = {
-      if (moreEntriesBuffer.now.isDefinedAt(sp)) moreEntriesBuffer.now(sp).now
-      else MoreEntries(Seq())
-    }
+  def moreEntries(sp: SafePath, size: Int): Seq[TreeNodeData] = atomic { implicit ctx ⇒
+    val thisMoreEntries = moreEntriesBuffer.getOrElse(sp, MoreEntries())
 
     val more = thisMoreEntries.default.slice(thisMoreEntries.currentIndex, thisMoreEntries.currentIndex + size)
-    moreEntriesBuffer() = moreEntriesBuffer.now.updated(sp, Var(thisMoreEntries.copy(currentIndex = thisMoreEntries.currentIndex + size)))
+    moreEntriesBuffer(sp) = thisMoreEntries.copy(currentIndex = thisMoreEntries.currentIndex + size)
     more
   }
 
