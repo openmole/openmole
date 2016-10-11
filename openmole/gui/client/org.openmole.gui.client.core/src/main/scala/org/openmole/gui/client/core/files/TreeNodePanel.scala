@@ -3,30 +3,30 @@ package org.openmole.gui.client.core.files
 import java.text.SimpleDateFormat
 import java.util.Date
 
-import org.openmole.gui.client.core.alert.AbsolutePositioning.{ FileZone, RelativeCenterPosition }
+import org.openmole.gui.client.core.alert.AbsolutePositioning.{FileZone, RelativeCenterPosition}
 import org.openmole.gui.client.core.alert.AlertPanel
-import org.openmole.gui.client.core.files.FileToolBar.{ FilterTool, PluginTool, TrashTool }
-import org.openmole.gui.client.core.{ CoreUtils, OMPost }
+import org.openmole.gui.client.core.files.FileToolBar.{FilterTool, PluginTool, TrashTool}
+import org.openmole.gui.client.core.{CoreUtils, OMPost}
 import org.openmole.gui.client.core.Waiter._
 import org.openmole.gui.ext.data._
-import org.openmole.gui.misc.utils.{ Utils, stylesheet }
+import org.openmole.gui.misc.utils.{Utils, stylesheet}
 import org.openmole.gui.shared._
-import fr.iscpif.scaladget.api.{ Popup, BootstrapTags ⇒ bs }
-import org.openmole.gui.misc.utils.{ stylesheet ⇒ omsheet }
+import fr.iscpif.scaladget.api.{Popup, BootstrapTags ⇒ bs}
+import org.openmole.gui.misc.utils.{stylesheet ⇒ omsheet}
 import org.scalajs.dom.html.Input
 import org.scalajs.dom.raw._
 
 import scalatags.JsDom.all._
-import scalatags.JsDom.{ TypedTag, tags }
+import scalatags.JsDom.{TypedTag, tags}
 import org.openmole.gui.misc.js.JsRxTags._
-import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
+import org.openmole.gui.client.core.files.treenodemanager.{instance ⇒ manager}
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import TreeNode._
 import autowire._
 import rx._
 import bs._
-import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
+import fr.iscpif.scaladget.stylesheet.{all ⇒ sheet}
 import org.scalajs.dom
 import sheet._
 
@@ -62,7 +62,7 @@ object TreeNodePanel {
 
 class TreeNodePanel {
 
-  case class NodeEdition(node: TreeNode, replicateMode: Boolean = false)
+  case class NodeEdition(safePath: SafePath, replicateMode: Boolean = false)
 
   val toBeEdited: Var[Option[NodeEdition]] = Var(None)
   val fileDisplayer = new FileDisplayer
@@ -82,11 +82,14 @@ class TreeNodePanel {
   ).render
 
   lazy val fileControler = Rx {
-    val toDraw = manager.drop(1)()
-    val dirNodeLineSize = toDraw.size
+    val current = manager.current()
     div(ms("tree-path"))(
-      goToDirButton(manager.head(), glyph_home +++ floatLeft +++ "treePathItems"),
-      toDraw.drop(dirNodeLineSize - 2).takeRight(2).map { dn ⇒ goToDirButton(dn, "treePathItems", s"| ${dn.name()}") }
+      goToDirButton(manager.root, glyph_home +++ floatLeft +++ "treePathItems"),
+      Seq(current.parent, current).filterNot { sp ⇒
+        sp.isEmpty || sp == manager.root
+      }.map { sp ⇒
+        goToDirButton(sp, "treePathItems", s"| ${sp.name}")
+      }
     )
   }
 
@@ -150,23 +153,23 @@ class TreeNodePanel {
 
   def filter: FileFilter = fileToolBar.fileFilter.now
 
-  def downloadFile(treeNode: TreeNode, saveFile: Boolean, onLoaded: String ⇒ Unit = (s: String) ⇒ {}) =
+  def downloadFile(safePath: SafePath, saveFile: Boolean, onLoaded: String ⇒ Unit = (s: String) ⇒ {}) =
     FileManager.download(
-      treeNode,
+      safePath,
       (p: ProcessState) ⇒ {
         fileToolBar.transferring() = p
       },
       onLoaded
     )
 
-  def goToDirButton(dn: DirNode, ck: ModifierSeq, name: String = "") = span(ck)(name)(
+  def goToDirButton(safePath: SafePath, ck: ModifierSeq, name: String = "") = span(ck)(name)(
     onclick := {
       () ⇒
         fileToolBar.resetFilter
         fileToolBar.clearMessage
         manager.clearSelection
         turnSelectionTo(false)
-        manager.switch(dn)
+        manager.switch(safePath)
         drawTree
     }
   )
@@ -184,7 +187,7 @@ class TreeNodePanel {
 
   def computePluggables = fileToolBar.selectedTool.now match {
     case Some(PluginTool) ⇒ manager.computePluggables(() ⇒ if (!manager.pluggables.now.isEmpty) turnSelectionTo(true))
-    case _                ⇒
+    case _ ⇒
   }
 
   val scrollHeight = Var(0)
@@ -197,15 +200,15 @@ class TreeNodePanel {
       lazy val moreEntries: HTMLAnchorElement = a(
         pointer +++ (fontSize := 12),
         onclick := { () ⇒
-          fileToolBar.fileFilter.now.threshold.map { th ⇒
-            OMPost[Api].moreEntries(manager.current.now.safePath.now, th).call().withFutureWaiterAndSideEffect("", (me: Seq[TreeNodeData]) ⇒ {
+          /*fileToolBar.fileFilter.now.threshold.map { th ⇒
+            OMPost[Api].moreEntries(manager.current.now, th).call().withFutureWaiterAndSideEffect("", (me: Seq[TreeNodeData]) ⇒ {
               fileBody.removeChild(moreEntries)
               me.foreach { e ⇒
                 fileBody.appendChild(drawNode(e).render)
               }
               fileBody.appendChild(moreEntries)
             })
-          }
+          }*/-
         }, "More entries"
       ).render
 
@@ -213,10 +216,11 @@ class TreeNodePanel {
         for (tn ← sons._1) yield {
           drawNode(tn)
         },
-        if (sons._1.length <= fileToolBar.fileNumberThreshold) {
+        if (sons._1.length > fileToolBar.fileNumberThreshold) {
           moreEntries
         }
         else div()
+
       ).render
       if (sons._2) manager.updateSon(manager.current.now, sons._1)
       tags.table(
@@ -237,7 +241,7 @@ class TreeNodePanel {
         displayNode(fn)
       })
     case dn: DirNode ⇒ clickableElement(dn, TreeNodeType.folder, () ⇒ {
-      manager + dn
+      manager + dn.name.now
       fileToolBar.clearMessage
       fileToolBar.unselectTool
 
@@ -247,9 +251,11 @@ class TreeNodePanel {
 
   def displayNode(tn: TreeNode) = tn match {
     case fn: FileNode ⇒
-      if (fn.safePath.now.extension.displayable) {
-        downloadFile(fn, false, (content: String) ⇒ {
-          fileDisplayer.display(fn, content)
+      val ext = DataUtils.fileToExtension(tn.name.now)
+      val tnSafePath = manager.current.now ++ tn.name.now
+      if (ext.displayable) {
+        downloadFile(tnSafePath, false, (content: String) ⇒ {
+          fileDisplayer.display(tnSafePath, content, ext)
           refreshAndDraw
         })
       }
@@ -257,13 +263,14 @@ class TreeNodePanel {
   }
 
   def clickableElement(
-    tn:           TreeNode,
-    treeNodeType: TreeNodeType,
-    todo:         () ⇒ Unit
-  ): TypedTag[dom.html.TableRow] = {
+                        tn: TreeNode,
+                        treeNodeType: TreeNodeType,
+                        todo: () ⇒ Unit
+                      ): TypedTag[dom.html.TableRow] = {
+    val tnSafePath = manager.current.now ++ tn.name.now
     toBeEdited.now match {
       case Some(etn: NodeEdition) ⇒
-        if (etn.node.path == tn.path) {
+        if (etn.safePath.path == tnSafePath.path) {
           editNodeInput.value = tn.name.now
           tr(
             td(
@@ -271,15 +278,14 @@ class TreeNodePanel {
               form(
                 editNodeInput,
                 onsubmit := {
-                  () ⇒
-                    {
-                      if (etn.node.name.now == editNodeInput.value) {
-                        toBeEdited() = None
-                        drawTree
-                      }
-                      else renameNode(tn, editNodeInput.value, etn.replicateMode)
-                      false
+                  () ⇒ {
+                    if (etn.safePath.name == editNodeInput.value) {
+                      toBeEdited() = None
+                      drawTree
                     }
+                    else renameNode(tnSafePath, editNodeInput.value, etn.replicateMode)
+                    false
+                  }
                 }
               )
             )
@@ -296,15 +302,15 @@ class TreeNodePanel {
   def stringAlertWithDetails(message: String, detail: String) =
     AlertPanel.detail(message, detail, transform = RelativeCenterPosition, zone = FileZone)
 
-  def trashNode(treeNode: TreeNode): Unit = {
+  def trashNode(safePath: SafePath): Unit = {
     stringAlert(
       s"Do you really want to delete ${
-        treeNode.name.now
+        safePath.name
       }?",
       () ⇒ {
-        CoreUtils.trashNode(treeNode.safePath.now) {
+        CoreUtils.trashNode(safePath) {
           () ⇒
-            fileDisplayer.tabs -- treeNode
+            fileDisplayer.tabs -- safePath
             fileDisplayer.tabs.checkTabs
             refreshAndDraw
         }
@@ -312,24 +318,24 @@ class TreeNodePanel {
     )
   }
 
-  def extractTGZ(tnd: TreeNode) =
-    OMPost[Api].extractTGZ(tnd).call().foreach { r ⇒
+  def extractTGZ(safePath: SafePath) =
+    OMPost[Api].extractTGZ(safePath).call().foreach { r ⇒
       r.error match {
         case Some(e: org.openmole.gui.ext.data.Error) ⇒ stringAlertWithDetails("An error occurred during extraction", e.stackTrace)
-        case _                                        ⇒ refreshAndDraw
+        case _ ⇒ refreshAndDraw
       }
     }
 
-  def renameNode(treeNode: TreeNode, newName: String, replicateMode: Boolean) = {
-    def rename = OMPost[Api].renameFile(treeNode, newName).call().foreach { newNode ⇒
-      fileDisplayer.tabs.rename(treeNode, newNode)
+  def renameNode(safePath: SafePath, newName: String, replicateMode: Boolean) = {
+    def rename = OMPost[Api].renameFile(safePath, newName).call().foreach { newNode ⇒
+      fileDisplayer.tabs.rename(safePath, newNode)
       toBeEdited() = None
       refreshAndDraw
       fileDisplayer.tabs.checkTabs
     }
 
     fileDisplayer.tabs.saveAllTabs(() ⇒ {
-      OMPost[Api].existsExcept(treeNode.cloneWithName(newName), replicateMode).call().foreach { b ⇒
+      OMPost[Api].existsExcept(safePath.copy(path = safePath.path.dropRight(1) :+ newName), replicateMode).call().foreach { b ⇒
         if (b) stringAlert(s"${newName} already exists, overwrite ?", () ⇒ rename)
         else rename
       }
@@ -349,10 +355,11 @@ class TreeNodePanel {
   class ReactiveLine(tn: TreeNode, treeNodeType: TreeNodeType, todo: () ⇒ Unit) {
 
     val selected: Var[Boolean] = Var(manager.isSelected(tn))
+    val tnSafePath = manager.current.now ++ tn.name.now
 
     val clickablePair = (treeNodeType match {
       case fn: FileNodeType ⇒ stylesheet.file
-      case _                ⇒ stylesheet.dir
+      case _ ⇒ stylesheet.dir
     }) +++ floatLeft +++ pointer +++ Seq(
       onclick := { (e: MouseEvent) ⇒
         if (!selectionMode.now) todo()
@@ -361,22 +368,22 @@ class TreeNodePanel {
 
     def timeOrSize(tn: TreeNode): String = fileToolBar.fileFilter.now.fileSorting match {
       case TimeSorting ⇒ CoreUtils.longTimeToString(tn.time)
-      case _           ⇒ CoreUtils.readableByteCount(tn.size)
+      case _ ⇒ CoreUtils.readableByteCount(tn.size)
     }
 
     lazy val fileIndent: ModifierSeq = tn match {
       case d: DirNode ⇒ sheet.paddingLeft(22)
-      case _          ⇒ sheet.emptyMod
+      case _ ⇒ sheet.emptyMod
     }
 
-    def clearSelectionExecpt(tn: TreeNode) = {
+    def clearSelectionExecpt(safePath: SafePath) = {
       selected() = true
-      manager.clearSelectionExecpt(tn)
+      manager.clearSelectionExecpt(safePath)
     }
 
     def addToSelection(b: Boolean): Unit = {
       selected() = b
-      manager.setSelected(tn, selected.now)
+      manager.setSelected(tnSafePath, selected.now)
     }
 
     def addToSelection: Unit = addToSelection(!selected.now)
@@ -393,20 +400,19 @@ class TreeNodePanel {
       {
         tr(
           td(
-            onclick := { (e: MouseEvent) ⇒
-              {
-                if (selectionMode.now) {
-                  addToSelection
-                  if (e.ctrlKey) clearSelectionExecpt(tn)
-                }
+            onclick := { (e: MouseEvent) ⇒ {
+              if (selectionMode.now) {
+                addToSelection
+                if (e.ctrlKey) clearSelectionExecpt(tnSafePath)
               }
+            }
             },
             Rx {
               span(clickablePair)(
                 div(stylesheet.fileNameOverflow +++ fileIndent)(tn.name())
               ).tooltip(
-                  tags.span(tn.name()), popupStyle = whitePopup, arrowStyle = Popup.whiteBottomArrow, condition = () ⇒ tn.name().length > 24
-                )
+                tags.span(tn.name()), popupStyle = whitePopup, arrowStyle = Popup.whiteBottomArrow, condition = () ⇒ tn.name().length > 24
+              )
             },
             Rx {
               div(stylesheet.fileInfo)(
@@ -418,26 +424,26 @@ class TreeNodePanel {
                           raw("&#215")
                         ),
                         tags.span(onclick := { () ⇒
-                          trashNode(tn)
+                          trashNode(tnSafePath)
                           unsetSettings
                         }, trash),
                         span(onclick := { () ⇒
-                          toBeEdited() = Some(NodeEdition(tn))
+                          toBeEdited() = Some(NodeEdition(tnSafePath))
                           drawTree
                         }, edit),
                         a(
                           span(onclick := { () ⇒ unsetSettings })(download_alt),
-                          href := s"downloadFile?path=${Utils.toURI(tn.safePath().path)}"
+                          href := s"downloadFile?path=${Utils.toURI(tnSafePath.path)}"
                         ),
-                        tn.safePath().extension match {
+                        DataUtils.fileToExtension(tn.name.now) match {
                           case FileExtension.TGZ | FileExtension.TAR ⇒
                             span(archive, onclick := { () ⇒
-                              extractTGZ(tn)
+                              extractTGZ(tnSafePath)
                             })
                           case _ ⇒
                         },
                         span(onclick := { () ⇒
-                          CoreUtils.replicate(tn, (replicated: TreeNodeData) ⇒ {
+                          CoreUtils.replicate(tnSafePath, (replicated: SafePath) ⇒ {
                             refreshAnd(() ⇒ {
                               toBeEdited() = Some(NodeEdition(replicated, true))
                               drawTree

@@ -43,7 +43,6 @@ object ScriptClient {
   @JSExport
   def run(): Unit = {
 
-    println("ID " + uuID)
     implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
     val alert: Var[Boolean] = Var(false)
 

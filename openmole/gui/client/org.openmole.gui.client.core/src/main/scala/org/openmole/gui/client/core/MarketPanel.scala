@@ -72,7 +72,7 @@ class MarketPanel extends ModalPanel {
                 })
               ),
               div(colMD(2))(downloadButton(entry, () ⇒ {
-                exists(manager.current.now.safePath() ++ entry.name, entry)
+                exists(manager.current.now ++ entry.name, entry)
               })),
               div(colMD(7) +++ sheet.paddingTop(7))(
                 entry.tags.map { e ⇒ tags.label(e)(sheet.label_primary +++ omsheet.tableTag) }
@@ -99,7 +99,7 @@ class MarketPanel extends ModalPanel {
     }
 
   def download(entry: MarketIndexEntry) = {
-    val path = manager.current.now.safePath.now ++ entry.name
+    val path = manager.current.now ++ entry.name
     downloading() = downloading.now.updatedFirst(_._1 == entry, (entry, Var(Processing())))
     OMPost[Api].getMarketEntry(entry, path).call().foreach { d ⇒
       downloading() = downloading.now.updatedFirst(_._1 == entry, (entry, Var(Processed())))
@@ -146,7 +146,7 @@ class MarketPanel extends ModalPanel {
               e.name + " already exists. Overwrite ? ",
               () ⇒ {
                 overwriteAlert() = None
-                deleteFile(manager.current().safePath() ++ e.name, e)
+                deleteFile(manager.current() ++ e.name, e)
               }, () ⇒ {
                 overwriteAlert() = None
               }, CenterPagePosition

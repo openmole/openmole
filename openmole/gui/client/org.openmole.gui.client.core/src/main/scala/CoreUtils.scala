@@ -1,10 +1,6 @@
 package org.openmole.gui.client.core
 
-import java.text.SimpleDateFormat
-import java.sql.Timestamp
-
-import scala.concurrent.duration._
-import org.openmole.gui.client.core.files.{ DirNode, TreeNode, TreeNodePanel }
+import org.openmole.gui.client.core.files.TreeNodePanel
 import org.openmole.gui.ext.data._
 import org.openmole.gui.shared.Api
 import autowire._
@@ -51,15 +47,15 @@ object CoreUtils {
     }
   }
 
-  def addDirectory(in: TreeNodeData, dirName: String, onadded: () ⇒ Unit = () ⇒ {}) =
+  def addDirectory(in: SafePath, dirName: String, onadded: () ⇒ Unit = () ⇒ {}) =
     OMPost[Api].addDirectory(in, dirName).call().foreach { b ⇒
       if (b) onadded()
       else AlertPanel.string(s"$dirName already exists.", okaction = { () ⇒ {} }, transform = RelativeCenterPosition, zone = FileZone)
 
     }
 
-  def addFile(in: TreeNodeData, fileName: String, onadded: () ⇒ Unit = () ⇒ {}) =
-    OMPost[Api].addFile(in, fileName).call().foreach { b ⇒
+  def addFile(safePath: SafePath, fileName: String, onadded: () ⇒ Unit = () ⇒ {}) =
+    OMPost[Api].addFile(safePath, fileName).call().foreach { b ⇒
       if (b) onadded()
       else AlertPanel.string(s" $fileName already exists.", okaction = { () ⇒ {} }, transform = RelativeCenterPosition, zone = FileZone)
     }
@@ -76,8 +72,8 @@ object CoreUtils {
     }
   }
 
-  def replicate(treeNode: TreeNode, onreplicated: (TreeNodeData) ⇒ Unit) = {
-    OMPost[Api].replicate(treeNode).call().foreach { r ⇒
+  def replicate(safePath: SafePath, onreplicated: (SafePath) ⇒ Unit) = {
+    OMPost[Api].replicate(safePath).call().foreach { r ⇒
       onreplicated(r)
     }
   }
@@ -88,17 +84,17 @@ object CoreUtils {
   def copyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Future[Unit] =
     OMPost[Api].copyProjectFilesTo(safePaths, to).call()
 
-  def getSons(dirNode: DirNode, fileFilter: FileFilter): Future[Seq[TreeNode]] =
-    OMPost[Api].listFiles(dirNode.safePath.now, fileFilter).call()
+  def getSons(safePath: SafePath, fileFilter: FileFilter): Future[Seq[TreeNodeData]] =
+    OMPost[Api].listFiles(safePath, fileFilter).call()
 
-  def updateSons(dirNode: DirNode, todo: () ⇒ Unit = () ⇒ {}, fileFilter: FileFilter) = {
-    getSons(dirNode, fileFilter).foreach { s ⇒
-      manager.updateSon(dirNode, s)
+  def updateSons(safePath: SafePath, todo: () ⇒ Unit = () ⇒ {}, fileFilter: FileFilter) = {
+    getSons(safePath, fileFilter).foreach { s ⇒
+      manager.updateSon(safePath, s)
       todo()
     }
   }
 
-  def pluggables(dirNode: DirNode, todo: () ⇒ Unit) = OMPost[Api].allPluggableIn(dirNode).call.foreach { p ⇒
+  def pluggables(safePath: SafePath, todo: () ⇒ Unit) = OMPost[Api].allPluggableIn(safePath).call.foreach { p ⇒
     manager.pluggables() = p
     todo()
   }

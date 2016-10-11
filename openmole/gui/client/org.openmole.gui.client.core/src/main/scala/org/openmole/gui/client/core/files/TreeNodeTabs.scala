@@ -39,9 +39,9 @@ object TreeNodeTabs {
 
   sealed trait TreeNodeTab {
 
-    val treeNode: TreeNode
+    val safePathTab: Var[SafePath]
 
-    val tabName = Var(treeNode.name.now)
+    val tabName = Var(safePathTab.now.name)
     val id: String = getUUID
     val active: Var[Option[SetIntervalHandle]] = Var(None)
 
@@ -72,7 +72,7 @@ object TreeNodeTabs {
     val editor: EditorPanelUI
 
     def save(afterSave: () ⇒ Unit) = editor.synchronized {
-      OMPost[Api].saveFile(treeNode.safePath.now, editor.code).call().foreach(_ ⇒ afterSave())
+      OMPost[Api].saveFile(safePathTab.now, editor.code).call().foreach(_ ⇒ afterSave())
     }
   }
 
@@ -81,7 +81,7 @@ object TreeNodeTabs {
 
     def update(afterUpdate: () ⇒ Unit) = editor.synchronized {
       FileManager.download(
-        treeNode,
+        safePathTab.now,
         (p: ProcessState) ⇒ {},
         (content: String) ⇒ {
           editor.setCode(content)
@@ -92,9 +92,9 @@ object TreeNodeTabs {
   }
 
   class LockedEditionNodeTab(
-      val treeNode: TreeNode,
-      val editor:   EditorPanelUI,
-      _editable:    Boolean       = false
+      val safePathTab: Var[SafePath],
+      val editor:      EditorPanelUI,
+      _editable:       Boolean       = false
   ) extends TreeNodeTab with Save with Update {
     val editorElement = editor.view
     val editable = Var(_editable)
@@ -121,7 +121,7 @@ object TreeNodeTabs {
       )
     )
 
-    def fileContent = AlterableOnDemandFileContent(treeNode.safePath.now, editor.code, () ⇒ editable.now)
+    def fileContent = AlterableOnDemandFileContent(safePathTab.now, editor.code, () ⇒ editable.now)
 
     def refresh(afterRefresh: () ⇒ Unit) = {
       if (editable.now) save(afterRefresh)
@@ -135,7 +135,7 @@ object TreeNodeTabs {
     }
   }
 
-  class HTMLTab(val treeNode: TreeNode, htmlContent: String) extends TreeNodeTab {
+  class HTMLTab(val safePathTab: Var[SafePath], htmlContent: String) extends TreeNodeTab {
     val editorElement = tags.div(
       `class` := "mdRendering",
       RawFrag(htmlContent)
@@ -152,15 +152,13 @@ object TreeNodeTabs {
     def controlElement: TypedTag[HTMLElement]
   }
 
-  abstract class OMSTabControl(val treeNode: TreeNode, val editor: EditorPanelUI) extends TabControl with TreeNodeTab with Save {
+  abstract class OMSTabControl(val safePathTab: Var[SafePath], val editor: EditorPanelUI) extends TabControl with TreeNodeTab with Save {
 
     val editorElement = editor.view
 
-    def fileContent = AlterableFileContent(treeNode.safePath.now, editor.code)
+    def fileContent = AlterableFileContent(safePathTab.now, editor.code)
 
     def refresh(onsaved: () ⇒ Unit) = save(onsaved)
-
-    def node: TreeNode
 
     val runButton = tags.button("Play", btn_primary)(onclick := { () ⇒ onrun })
 
@@ -169,8 +167,6 @@ object TreeNodeTabs {
     val overlaying: Var[Boolean] = Var(false)
 
     def onrun: Unit
-
-    def relativePath: SafePath
 
     val block = tabName.flatMap { n ⇒
       overlaying.map { o ⇒
@@ -235,8 +231,8 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
     tab.refresh(() ⇒ removeTab(tab))
   }
 
-  def --(treeNode: TreeNode): Unit = {
-    find(treeNode).map {
+  def --(safePath: SafePath): Unit = {
+    find(safePath).map {
       removeTab
     }
   }
@@ -255,20 +251,20 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
   }
 
   def checkTabs = tabs.now.foreach { t: TreeNodeTab ⇒
-    OMPost[Api].exists(t.treeNode.safePath.now).call().foreach { e ⇒
+    OMPost[Api].exists(t.safePathTab.now).call().foreach { e ⇒
       if (!e) removeTab(t)
     }
   }
 
-  def rename(tn: TreeNode, newNode: TreeNode) = {
-    find(tn).map { tab ⇒
-      tab.tabName() = newNode.name.now
-      tab.treeNode.safePath() = newNode.safePath.now
+  def rename(sp: SafePath, newSafePath: SafePath) = {
+    find(sp).map { tab ⇒
+      tab.tabName() = newSafePath.name
+      tab.safePathTab() = newSafePath
     }
   }
 
-  def find(treeNode: TreeNode) = tabs.now.find { t ⇒
-    t.treeNode.safePath.now == treeNode.safePath.now
+  def find(safePath: SafePath) = tabs.now.find { t ⇒
+    t.safePathTab.now == safePath
   }
 
   val active = tabs.map {

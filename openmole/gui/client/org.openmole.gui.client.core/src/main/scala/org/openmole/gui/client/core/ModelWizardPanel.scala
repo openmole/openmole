@@ -231,7 +231,7 @@ class ModelWizardPanel extends ModalPanel {
                     resources() = Resources.empty
                     val fileName = fInput.files.item(0).name
                     labelName() = Some(fileName)
-                    filePath() = Some(manager.current.now.safePath.now ++ fileName)
+                    filePath() = Some(manager.current.now ++ fileName)
                     filePath.now.map {
                       fp ⇒
                         moveFilesAndBuildForm(fInput, fileName, fp)
@@ -364,10 +364,14 @@ class ModelWizardPanel extends ModalPanel {
     fileToUploadPath.now.foreach {
       mp ⇒
         val modelName = mp.name
-        OMPost[Api].listFiles(mp.parent).call().foreach {
+        val resourceDir = mp.parent
+        OMPost[Api].listFiles(resourceDir).call().foreach {
           b ⇒
             val l = b.filterNot {
               _.name == modelName
+            }.map { tn ⇒
+              val sp = resourceDir ++ tn.name
+              Resource(sp, 0L)
             }
             resources() = resources.now.copy(implicits = l, number = l.size)
             OMPost[Api].expandResources(resources.now).call().foreach {
@@ -472,7 +476,7 @@ class ModelWizardPanel extends ModalPanel {
 
         launchingCommand.now.foreach {
           lc ⇒
-            val path = manager.current.now.safePath.now
+            val path = manager.current.now
             val scriptName = scriptNameInput.value.clean
             val target = targetPath.now.map {
               _.name
@@ -496,7 +500,7 @@ class ModelWizardPanel extends ModalPanel {
             ).call().foreach {
                 b ⇒
                   panels.treeNodePanel.fileDisplayer.tabs -- b
-                  panels.treeNodePanel.displayNode(b)
+                  panels.treeNodePanel.displayNode(FileNode(Var(b.name), 0L, 0L))
                   TreeNodePanel.refreshAndDraw
               }
         }
@@ -686,7 +690,7 @@ class ModelWizardPanel extends ModalPanel {
                 i ← resources.now.implicits
               } yield {
                 body.appendChild(tags.tr(
-                  td(colMD(3))(i.name),
+                  td(colMD(3))(i.safePath.name),
                   td(colMD(2))(CoreUtils.readableByteCount(i.size))
                 ).render)
               }
