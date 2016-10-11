@@ -208,7 +208,7 @@ class TreeNodePanel {
               }
               fileBody.appendChild(moreEntries)
             })
-          }*/-
+          }*/
         }, "More entries"
       ).render
 
