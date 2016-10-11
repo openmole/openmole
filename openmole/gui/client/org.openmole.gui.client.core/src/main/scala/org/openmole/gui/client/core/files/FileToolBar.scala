@@ -195,7 +195,6 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
 
   def filterSubmit: () ⇒ Boolean = () ⇒ {
     updateFilter(fileFilter.now.copy(threshold = thresholdInput.value, nameFilter = nameInput.value))
-    println("filter submit")
     treeNodePanel.refreshAndDraw
     false
   }
@@ -204,7 +203,10 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
     tags.span(tdStyle)(label("# of entries ")(labelStyle)),
     tags.span(tdStyle)(form(thresholdInput, onsubmit := filterSubmit)),
     tags.span(tdStyle)(label("name ")(`for` := nameTag, labelStyle)),
-    tags.span(tdStyle)(form(nameInput, onsubmit := filterSubmit))
+    tags.span(tdStyle)(form(nameInput, onsubmit := { () ⇒
+      manager.invalidCurrentCache
+      filterSubmit()
+    }))
   )
 
   def createNewNode = {
