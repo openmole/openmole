@@ -3,30 +3,30 @@ package org.openmole.gui.client.core.files
 import java.text.SimpleDateFormat
 import java.util.Date
 
-import org.openmole.gui.client.core.alert.AbsolutePositioning.{FileZone, RelativeCenterPosition}
+import org.openmole.gui.client.core.alert.AbsolutePositioning.{ FileZone, RelativeCenterPosition }
 import org.openmole.gui.client.core.alert.AlertPanel
-import org.openmole.gui.client.core.files.FileToolBar.{FilterTool, PluginTool, TrashTool}
-import org.openmole.gui.client.core.{CoreUtils, OMPost}
+import org.openmole.gui.client.core.files.FileToolBar.{ FilterTool, PluginTool, TrashTool }
+import org.openmole.gui.client.core.{ CoreUtils, OMPost }
 import org.openmole.gui.client.core.Waiter._
 import org.openmole.gui.ext.data._
-import org.openmole.gui.misc.utils.{Utils, stylesheet}
+import org.openmole.gui.misc.utils.{ Utils, stylesheet }
 import org.openmole.gui.shared._
-import fr.iscpif.scaladget.api.{Popup, BootstrapTags ⇒ bs}
-import org.openmole.gui.misc.utils.{stylesheet ⇒ omsheet}
+import fr.iscpif.scaladget.api.{ Popup, BootstrapTags ⇒ bs }
+import org.openmole.gui.misc.utils.{ stylesheet ⇒ omsheet }
 import org.scalajs.dom.html.Input
 import org.scalajs.dom.raw._
 
 import scalatags.JsDom.all._
-import scalatags.JsDom.{TypedTag, tags}
+import scalatags.JsDom.{ TypedTag, tags }
 import org.openmole.gui.misc.js.JsRxTags._
-import org.openmole.gui.client.core.files.treenodemanager.{instance ⇒ manager}
+import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import TreeNode._
 import autowire._
 import rx._
 import bs._
-import fr.iscpif.scaladget.stylesheet.{all ⇒ sheet}
+import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
 import org.scalajs.dom
 import sheet._
 
@@ -54,7 +54,9 @@ object TreeNodePanel {
 
   def apply() = instance
 
-  def refreshAnd(todo: () ⇒ Unit) = instance.refreshAnd(todo)
+  def refreshAnd(todo: () ⇒ Unit) = {
+    instance.refreshAnd(todo)
+  }
 
   def refreshAndDraw = instance.refreshAndDraw
 
@@ -174,20 +176,21 @@ class TreeNodePanel {
     }
   )
 
-  def refreshAndDraw = refreshAnd(() ⇒ {
-    drawTree
-  })
+  def refreshAndDraw = {
+    refreshAnd(() ⇒ {
+      drawTree
+    })
+  }
 
-  def refreshAndDrawAnd(todo: () ⇒ Unit) = refreshAnd(() ⇒ {
-    drawTree
-    todo()
-  })
-
-  def refreshAnd(todo: () ⇒ Unit) = CoreUtils.updateSons(manager.current.now, todo, filter)
+  def refreshAnd(todo: () ⇒ Unit) = {
+    manager.computeCurrentSons(filter).foreach { x ⇒
+      todo()
+    }
+  }
 
   def computePluggables = fileToolBar.selectedTool.now match {
     case Some(PluginTool) ⇒ manager.computePluggables(() ⇒ if (!manager.pluggables.now.isEmpty) turnSelectionTo(true))
-    case _ ⇒
+    case _                ⇒
   }
 
   val scrollHeight = Var(0)
@@ -222,7 +225,7 @@ class TreeNodePanel {
         else div()
 
       ).render
-      if (sons._2) manager.updateSon(manager.current.now, sons._1)
+      // if (sons._2) manager.updateSon(manager.current.now, sons._1)
       tags.table(
         if (manager.isRootCurrent && manager.isProjectsEmpty) {
           div("Create a first OpenMOLE script (.oms)")(ms("message"))
@@ -244,8 +247,6 @@ class TreeNodePanel {
       manager + dn.name.now
       fileToolBar.clearMessage
       fileToolBar.unselectTool
-
-      drawTree
     })
   }
 
@@ -263,10 +264,10 @@ class TreeNodePanel {
   }
 
   def clickableElement(
-                        tn: TreeNode,
-                        treeNodeType: TreeNodeType,
-                        todo: () ⇒ Unit
-                      ): TypedTag[dom.html.TableRow] = {
+    tn:           TreeNode,
+    treeNodeType: TreeNodeType,
+    todo:         () ⇒ Unit
+  ): TypedTag[dom.html.TableRow] = {
     val tnSafePath = manager.current.now ++ tn.name.now
     toBeEdited.now match {
       case Some(etn: NodeEdition) ⇒
@@ -278,14 +279,15 @@ class TreeNodePanel {
               form(
                 editNodeInput,
                 onsubmit := {
-                  () ⇒ {
-                    if (etn.safePath.name == editNodeInput.value) {
-                      toBeEdited() = None
-                      drawTree
+                  () ⇒
+                    {
+                      if (etn.safePath.name == editNodeInput.value) {
+                        toBeEdited() = None
+                        drawTree
+                      }
+                      else renameNode(tnSafePath, editNodeInput.value, etn.replicateMode)
+                      false
                     }
-                    else renameNode(tnSafePath, editNodeInput.value, etn.replicateMode)
-                    false
-                  }
                 }
               )
             )
@@ -322,7 +324,7 @@ class TreeNodePanel {
     OMPost[Api].extractTGZ(safePath).call().foreach { r ⇒
       r.error match {
         case Some(e: org.openmole.gui.ext.data.Error) ⇒ stringAlertWithDetails("An error occurred during extraction", e.stackTrace)
-        case _ ⇒ refreshAndDraw
+        case _                                        ⇒ refreshAndDraw
       }
     }
 
@@ -359,7 +361,7 @@ class TreeNodePanel {
 
     val clickablePair = (treeNodeType match {
       case fn: FileNodeType ⇒ stylesheet.file
-      case _ ⇒ stylesheet.dir
+      case _                ⇒ stylesheet.dir
     }) +++ floatLeft +++ pointer +++ Seq(
       onclick := { (e: MouseEvent) ⇒
         if (!selectionMode.now) todo()
@@ -368,12 +370,12 @@ class TreeNodePanel {
 
     def timeOrSize(tn: TreeNode): String = fileToolBar.fileFilter.now.fileSorting match {
       case TimeSorting ⇒ CoreUtils.longTimeToString(tn.time)
-      case _ ⇒ CoreUtils.readableByteCount(tn.size)
+      case _           ⇒ CoreUtils.readableByteCount(tn.size)
     }
 
     lazy val fileIndent: ModifierSeq = tn match {
       case d: DirNode ⇒ sheet.paddingLeft(22)
-      case _ ⇒ sheet.emptyMod
+      case _          ⇒ sheet.emptyMod
     }
 
     def clearSelectionExecpt(safePath: SafePath) = {
@@ -400,19 +402,20 @@ class TreeNodePanel {
       {
         tr(
           td(
-            onclick := { (e: MouseEvent) ⇒ {
-              if (selectionMode.now) {
-                addToSelection
-                if (e.ctrlKey) clearSelectionExecpt(tnSafePath)
+            onclick := { (e: MouseEvent) ⇒
+              {
+                if (selectionMode.now) {
+                  addToSelection
+                  if (e.ctrlKey) clearSelectionExecpt(tnSafePath)
+                }
               }
-            }
             },
             Rx {
               span(clickablePair)(
                 div(stylesheet.fileNameOverflow +++ fileIndent)(tn.name())
               ).tooltip(
-                tags.span(tn.name()), popupStyle = whitePopup, arrowStyle = Popup.whiteBottomArrow, condition = () ⇒ tn.name().length > 24
-              )
+                  tags.span(tn.name()), popupStyle = whitePopup, arrowStyle = Popup.whiteBottomArrow, condition = () ⇒ tn.name().length > 24
+                )
             },
             Rx {
               div(stylesheet.fileInfo)(

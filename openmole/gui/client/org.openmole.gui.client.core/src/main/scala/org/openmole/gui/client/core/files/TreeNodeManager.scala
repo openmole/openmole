@@ -59,10 +59,6 @@ class TreeNodeManager {
     comment.now.foreach(AlertPanel.treeNodeCommentDiv)
   }
 
-  def updateSon(dirNode: SafePath, newSons: Seq[TreeNode]) = {
-    sons() = sons.now.updated(dirNode, newSons)
-  }
-
   def isSelected(tn: TreeNode) = selected.now.contains(tn)
 
   def clearSelection = selected() = Seq()
@@ -104,12 +100,18 @@ class TreeNodeManager {
   }
 
   def computeCurrentSons(fileFilter: FileFilter): Future[(Seq[TreeNode], Boolean)] = {
-    current.now match {
+    val cur = current.now
+    cur match {
       case safePath: SafePath ⇒
         if (sons.now.contains(safePath)) {
-          Future((sons.now(safePath), false))
+          Future((sons.now(safePath).take(fileFilter.threshold.getOrElse(1000)), false))
         }
-        else CoreUtils.getSons(safePath, fileFilter).map { x ⇒ (x, true) }
+        else {
+          CoreUtils.getSons(safePath, fileFilter).map { newsons ⇒
+            sons() = sons.now.updated(cur, newsons)
+            (newsons, true)
+          }
+        }
       case _ ⇒ Future(Seq(), false)
     }
   }

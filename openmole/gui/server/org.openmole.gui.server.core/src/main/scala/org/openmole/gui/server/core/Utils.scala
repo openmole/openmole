@@ -166,14 +166,8 @@ object Utils {
     val sorted = filteredByName.sorted(fileFilter.fileSorting)
 
     fileFilter.firstLast match {
-      case First ⇒ fileFilter.threshold match {
-        case Some(th: Int) ⇒ ListFiles(sorted.take(th), sorted.takeRight(sorted.size - th))
-        case _             ⇒ ListFiles(sorted, Seq())
-      }
-      case Last ⇒ (fileFilter.threshold match {
-        case Some(th: Int) ⇒ ListFiles(sorted.takeRight(th).reverse, sorted.take(sorted.size - th).reverse)
-        case _             ⇒ ListFiles(sorted.reverse, Seq())
-      })
+      case First ⇒ ListFiles(sorted.take(1000), sorted.takeRight(sorted.size - 1000))
+      case Last  ⇒ ListFiles(sorted.takeRight(1000).reverse, sorted.take(sorted.size - 1000).reverse)
     }
   }
 

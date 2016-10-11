@@ -84,14 +84,8 @@ object CoreUtils {
   def copyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Future[Unit] =
     OMPost[Api].copyProjectFilesTo(safePaths, to).call()
 
-  def getSons(safePath: SafePath, fileFilter: FileFilter): Future[Seq[TreeNodeData]] =
+  def getSons(safePath: SafePath, fileFilter: FileFilter): Future[Seq[TreeNodeData]] = {
     OMPost[Api].listFiles(safePath, fileFilter).call()
-
-  def updateSons(safePath: SafePath, todo: () ⇒ Unit = () ⇒ {}, fileFilter: FileFilter) = {
-    getSons(safePath, fileFilter).foreach { s ⇒
-      manager.updateSon(safePath, s)
-      todo()
-    }
   }
 
   def pluggables(safePath: SafePath, todo: () ⇒ Unit) = OMPost[Api].allPluggableIn(safePath).call.foreach { p ⇒
