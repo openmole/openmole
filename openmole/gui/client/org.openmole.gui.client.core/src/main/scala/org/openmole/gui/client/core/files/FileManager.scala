@@ -1,8 +1,13 @@
 package org.openmole.gui.client.core.files
 
+import org.openmole.gui.client.core.OMPost
 import org.openmole.gui.ext.data._
 import org.openmole.gui.misc.utils.Utils
 import org.scalajs.dom.raw._
+import autowire._
+import org.openmole.gui.shared.Api
+
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 
 /*
  * Copyright (C) 29/04/15 // mathieu.leclaire@openmole.org
@@ -69,26 +74,28 @@ object FileManager {
   }
 
   def download(
-    treeNode:          TreeNode,
+    safePath:          SafePath,
     fileTransferState: ProcessState ⇒ Unit,
     onLoadEnded:       String ⇒ Unit
   ) = {
 
-    val xhr = new XMLHttpRequest
+    OMPost[Api].size(safePath).call().foreach { size ⇒
+      val xhr = new XMLHttpRequest
 
-    xhr.onprogress = (e: ProgressEvent) ⇒ {
-      fileTransferState(Processing((e.loaded.toDouble * 100 / treeNode.size).toInt))
-    }
-
-    xhr.onloadend = (e: ProgressEvent) ⇒ {
-      fileTransferState(Processed())
-      if (treeNode.safePath.now.extension.displayable) {
-        onLoadEnded(xhr.responseText)
+      xhr.onprogress = (e: ProgressEvent) ⇒ {
+        fileTransferState(Processing((e.loaded.toDouble * 100 / size).toInt))
       }
-    }
 
-    xhr.open("GET", s"downloadFile?path=${Utils.toURI(treeNode.safePath.now.path)}", true)
-    xhr.send()
+      xhr.onloadend = (e: ProgressEvent) ⇒ {
+        fileTransferState(Processed())
+        if (DataUtils.fileToExtension(safePath.name).displayable) {
+          onLoadEnded(xhr.responseText)
+        }
+      }
+
+      xhr.open("GET", s"downloadFile?path=${Utils.toURI(safePath.path)}", true)
+      xhr.send()
+    }
   }
 
 }

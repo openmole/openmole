@@ -155,7 +155,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
     )
 
   private val upButton = upbtn((fileInput: HTMLInputElement) ⇒ {
-    FileManager.upload(fileInput, manager.current.now.safePath.now, (p: ProcessState) ⇒ transferring() = p, UploadProject(), () ⇒ treeNodePanel.refreshAndDraw)
+    FileManager.upload(fileInput, manager.current.now, (p: ProcessState) ⇒ transferring() = p, UploadProject(), () ⇒ treeNodePanel.refreshAndDraw)
   })
 
   // New file tool
@@ -181,7 +181,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
 
   val thresholdInput = bs.input(fileNumberThreshold.toString)(
     id := thresholdTag,
-    width := "50px",
+    width := "60px",
     autofocus
   ).render
 
@@ -253,7 +253,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
   val pluginButton = bs.button("Plug", btn_default, () ⇒ {
     OMPost[Api].copyToPluginUploadDir(manager.selected.now).call().foreach { c ⇒
       OMPost[Api].addPlugins(manager.selected.now.map {
-        _.name.now
+        _.name
       }).call().foreach { errs ⇒
         if (errs.isEmpty) {
           unselectAndRefreshTree

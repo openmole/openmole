@@ -34,21 +34,22 @@ package object treenodemanager {
 
 class TreeNodeManager {
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
-  val root = DirNode(Var("projects"), Var(SafePath.sp(Seq("projects"))), 0L, 0L)
+  val ROOTDIR = "projects"
+  val root = SafePath.sp(Seq(ROOTDIR))
 
-  val dirNodeLine: Var[Seq[DirNode]] = Var(Seq(root))
+  val dirNodeLine: Var[SafePath] = Var(root)
 
-  val sons: Var[Map[DirNode, Seq[TreeNode]]] = Var(Map())
+  val sons: Var[Map[SafePath, Seq[TreeNode]]] = Var(Map())
 
   val error: Var[Option[TreeNodeError]] = Var(None)
 
   val comment: Var[Option[TreeNodeComment]] = Var(None)
 
-  val selected: Var[Seq[TreeNode]] = Var(Seq())
+  val selected: Var[Seq[SafePath]] = Var(Seq())
 
-  val copied: Var[Seq[TreeNode]] = Var(Seq())
+  val copied: Var[Seq[SafePath]] = Var(Seq())
 
-  val pluggables: Var[Seq[TreeNode]] = Var(Seq())
+  val pluggables: Var[Seq[SafePath]] = Var(Seq())
 
   error.trigger {
     error.now.foreach(AlertPanel.treeNodeErrorDiv)
@@ -58,7 +59,7 @@ class TreeNodeManager {
     comment.now.foreach(AlertPanel.treeNodeCommentDiv)
   }
 
-  def updateSon(dirNode: DirNode, newSons: Seq[TreeNode]) = {
+  def updateSon(dirNode: SafePath, newSons: Seq[TreeNode]) = {
     sons() = sons.now.updated(dirNode, newSons)
   }
 
@@ -66,11 +67,11 @@ class TreeNodeManager {
 
   def clearSelection = selected() = Seq()
 
-  def clearSelectionExecpt(tn: TreeNode) = selected() = Seq(tn)
+  def clearSelectionExecpt(safePath: SafePath) = selected() = Seq(safePath)
 
-  def setSelected(tn: TreeNode, b: Boolean) = b match {
-    case true  ⇒ selected() = (selected.now :+ tn).distinct
-    case false ⇒ selected() = selected.now.filterNot(_ == tn)
+  def setSelected(sp: SafePath, b: Boolean) = b match {
+    case true  ⇒ selected() = (selected.now :+ sp).distinct
+    case false ⇒ selected() = selected.now.filterNot(_ == sp)
   }
 
   def setSelectedAsCopied = copied() = selected.now
@@ -86,45 +87,35 @@ class TreeNodeManager {
     comment() = None
   }
 
-  val head = dirNodeLine.map {
-    _.head
+  val current = dirNodeLine
+
+  def take(n: Int) = dirNodeLine.map { dn ⇒
+    SafePath.sp(dn.path.take(n))
   }
 
-  val current = dirNodeLine.map {
-    _.last
+  def drop(n: Int) = dirNodeLine.map { dn ⇒
+    SafePath.sp(dn.path.drop(n))
   }
 
-  def take(n: Int) = dirNodeLine.map {
-    _.take(n)
-  }
+  def +(dir: String) = dirNodeLine() = dirNodeLine.now.copy(path = dirNodeLine.now.path :+ dir)
 
-  def drop(n: Int) = dirNodeLine.map {
-    _.drop(n)
-  }
-
-  def +(dn: DirNode) = dirNodeLine() = dirNodeLine.now :+ dn
-
-  def switch(dn: DirNode) = {
-    dirNodeLine() = dirNodeLine.now.zipWithIndex.filter { d ⇒ d._1 == dn }.headOption.map {
-      case (dn, id) ⇒ take(id + 1)
-    }.getOrElse(dirNodeLine).now
+  def switch(sp: SafePath) = {
+    dirNodeLine() = sp
   }
 
   def computeCurrentSons(fileFilter: FileFilter): Future[(Seq[TreeNode], Boolean)] = {
     current.now match {
-      case dirNode: DirNode ⇒
-        if (sons.now.contains(dirNode)) {
-          OMPost[Api].resetMoreEntriesBuffer(dirNode.safePath.now).call()
-          Future((sons.now(dirNode), false))
+      case safePath: SafePath ⇒
+        if (sons.now.contains(safePath)) {
+          Future((sons.now(safePath), false))
         }
-        else CoreUtils.getSons(dirNode, fileFilter).map { x ⇒ (x, true) }
+        else CoreUtils.getSons(safePath, fileFilter).map { x ⇒ (x, true) }
       case _ ⇒ Future(Seq(), false)
     }
   }
 
-  def computePluggables(todo: () ⇒ Unit) = current.now match {
-    case dirNode: DirNode ⇒ CoreUtils.pluggables(dirNode, todo)
-    case _                ⇒
+  def computePluggables(todo: () ⇒ Unit) = current.foreach { sp ⇒
+    CoreUtils.pluggables(sp, todo)
   }
 
   def isRootCurrent = current.now == root

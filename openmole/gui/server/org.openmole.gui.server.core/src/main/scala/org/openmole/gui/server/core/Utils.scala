@@ -65,17 +65,19 @@ object Utils {
     !PluginManager.listBundles(safePathToFile(path)).isEmpty
   }
 
-  def allPluggableIn(path: SafePath): Seq[TreeNodeData] = {
+  def allPluggableIn(path: SafePath): Seq[SafePath] = {
     import org.openmole.gui.ext.data.ServerFileSytemContext.project
     path.listFiles().filter { f ⇒
       PluginManager.isBundle(f)
     }.toSeq
   }
 
+  def treeNodeToSafePath(tnd: TreeNodeData, parent: SafePath): SafePath = parent ++ tnd.name
+
   implicit def fileToSafePath(f: File)(implicit context: ServerFileSytemContext): SafePath = {
     context match {
-      case ProjectFileSystem ⇒ SafePath(getPathArray(f, workspaceProjectFile), f)
-      case _                 ⇒ SafePath(getPathArray(f, new File("")), f)
+      case ProjectFileSystem ⇒ SafePath(getPathArray(f, workspaceProjectFile))
+      case _                 ⇒ SafePath(getPathArray(f, new File("")))
     }
   }
 
@@ -97,7 +99,7 @@ object Utils {
 
   implicit def fileToTreeNodeData(f: File)(implicit context: ServerFileSytemContext = ProjectFileSystem): TreeNodeData = {
     val time = java.nio.file.Files.readAttributes(f, classOf[BasicFileAttributes]).lastModifiedTime.toMillis
-    TreeNodeData(f.getName, f, f.isDirectory, f.length, time)
+    TreeNodeData(f.getName, f.isDirectory, f.length, time)
   }
 
   implicit def seqfileToSeqTreeNodeData(fs: Seq[File])(implicit context: ServerFileSytemContext): Seq[TreeNodeData] = fs.map {
@@ -175,20 +177,20 @@ object Utils {
     }
   }
 
-  def replicate(treeNodeData: TreeNodeData): TreeNodeData = {
+  def replicate(safePath: SafePath): SafePath = {
     import org.openmole.gui.ext.data.ServerFileSytemContext.project
 
     val newName = {
-      val prefix = treeNodeData.safePath.path.last
-      if (treeNodeData.isDirectory) prefix + "_1"
+      val prefix = safePath.path.last
+      if (safePath.isDirectory) prefix + "_1"
       else prefix.replaceFirst("[.]", "_1.")
     }
 
-    val toPath = treeNodeData.safePath.copy(path = treeNodeData.safePath.path.dropRight(1) :+ newName)
+    val toPath = safePath.copy(path = safePath.path.dropRight(1) :+ newName)
     if (toPath.isDirectory()) toPath.mkdir
 
-    val parent = treeNodeData.safePath.parent
-    treeNodeData.safePath.copy(treeNodeData.safePath.parent, Some(newName))
+    val parent = safePath.parent
+    safePath.copy(safePath.parent, Some(newName))
 
     val f: File = parent ++ newName
     f
@@ -270,10 +272,10 @@ object Utils {
     safePathToFile(safePath).exists
   }
 
-  def existsExcept(in: TreeNodeData, exceptItSelf: Boolean): Boolean = {
+  def existsExcept(in: SafePath, exceptItSelf: Boolean): Boolean = {
     import org.openmole.gui.ext.data.ServerFileSytemContext.project
-    val li = listFiles(in.safePath.parent, data.FileFilter.defaultFilter)
-    val count = li.list.count(_.safePath.path == in.safePath.path)
+    val li = listFiles(in.parent, data.FileFilter.defaultFilter)
+    val count = li.list.count(l ⇒ treeNodeToSafePath(l, in.parent).path == in.path)
 
     val bound = if (exceptItSelf) 1 else 0
     if (count > bound) true else false

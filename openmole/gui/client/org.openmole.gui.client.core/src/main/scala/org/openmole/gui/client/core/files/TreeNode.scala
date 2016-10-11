@@ -52,25 +52,21 @@ sealed trait TreeNode {
 
   def name: Var[String]
 
-  def safePath: Var[SafePath]
-
   val size: Long
 
   val time: Long
-
-  def cloneWithName(newName: String) = FileNode(Var(newName), Var(SafePath.sp(safePath.now.path.dropRight(1) :+ newName)), size, time)
 
 }
 
 object TreeNode {
 
   implicit def treeNodeDataToTreeNode(tnd: TreeNodeData): TreeNode =
-    if (tnd.isDirectory) DirNode(Var(tnd.name), Var(tnd.safePath), tnd.size, tnd.time)
-    else FileNode(Var(tnd.name), Var(tnd.safePath), tnd.size, tnd.time)
+    if (tnd.isDirectory) DirNode(Var(tnd.name), tnd.size, tnd.time)
+    else FileNode(Var(tnd.name), tnd.size, tnd.time)
 
-  implicit def treeNodeToTreeNodeData(tn: TreeNode): TreeNodeData = TreeNodeData(tn.name.now, tn.safePath.now, tn match {
-    case DirNode(_, _, _, _) ⇒ true
-    case _                   ⇒ false
+  implicit def treeNodeToTreeNodeData(tn: TreeNode): TreeNodeData = TreeNodeData(tn.name.now, tn match {
+    case DirNode(_, _, _) ⇒ true
+    case _                ⇒ false
   }, tn.size, tn.time)
 
   implicit def seqTreeNodeToSeqTreeNodeData(tns: Seq[TreeNode]): Seq[TreeNodeData] = tns.map {
@@ -81,26 +77,24 @@ object TreeNode {
 
   implicit def seqTreeNodeDataToSeqTreeNode(tnds: Seq[TreeNodeData]): Seq[TreeNode] = tnds.map(treeNodeDataToTreeNode(_))
 
-  implicit def treeNodeToSafePath(tn: TreeNode): SafePath = tn.safePath.now
+  //implicit def treeNodeToSafePath(tn: TreeNode): SafePath = tn.safePath.now
 
-  implicit def treeNodesToSafePaths(tns: Seq[TreeNode]): Seq[SafePath] = tns.map {
+  /* implicit def treeNodesToSafePaths(tns: Seq[TreeNode]): Seq[SafePath] = tns.map {
     treeNodeToSafePath
-  }
+  }*/
 
-  implicit def safePathToDirNode(safePath: SafePath) = DirNode(Var(safePath.name), Var(safePath), 0, 0)
+  // implicit def safePathToDirNode(safePath: SafePath) = DirNode(Var(safePath.name), Var(safePath), 0, 0)
 
 }
 
 case class DirNode(
-  name:     Var[String],
-  safePath: Var[SafePath],
-  size:     Long,
-  time:     Long
+  name: Var[String],
+  size: Long,
+  time: Long
 ) extends TreeNode
 
 case class FileNode(
-  name:     Var[String],
-  safePath: Var[SafePath],
-  size:     Long,
-  time:     Long
+  name: Var[String],
+  size: Long,
+  time: Long
 ) extends TreeNode

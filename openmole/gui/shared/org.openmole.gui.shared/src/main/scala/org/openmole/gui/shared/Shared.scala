@@ -40,33 +40,32 @@ trait Api {
   def setConfigurationValue(configData: ConfigData, value: String): Unit
 
   //FILES
-  def addDirectory(treeNode: TreeNodeData, directoryName: String): Boolean
-  def addFile(treeNode: TreeNodeData, fileName: String): Boolean
-  def extractTGZ(treeNodeData: TreeNodeData): ExtractResult
+  def addDirectory(safePath: SafePath, directoryName: String): Boolean
+  def addFile(safePath: SafePath, fileName: String): Boolean
+  def extractTGZ(safePath: SafePath): ExtractResult
   def deleteAuthenticationKey(keyName: String): Unit
   def deleteFile(safePath: SafePath, context: ServerFileSytemContext): Unit
   def deleteFiles(safePath: Seq[SafePath], context: ServerFileSytemContext): Unit
   def temporaryFile(): SafePath
   def exists(safePath: SafePath): Boolean
-  def existsExcept(exception: TreeNodeData, exceptItSelf: Boolean): Boolean
+  def existsExcept(exception: SafePath, exceptItSelf: Boolean): Boolean
   def extractAndTestExistence(safePathToTest: SafePath, in: SafePath): Seq[SafePath]
-  def treeNodeData(safePaths: Seq[TreeNodeData]): Seq[TreeNodeData]
+  def safePath(safePaths: Seq[SafePath]): Seq[SafePath]
   def listFiles(path: SafePath, fileFilter: FileFilter = FileFilter()): Seq[TreeNodeData]
-  def resetMoreEntriesBuffer(sp: SafePath): Unit
-  def moreEntries(sp: SafePath, size: Int): Seq[TreeNodeData]
   def mdToHtml(safePath: SafePath): String
   def move(from: SafePath, to: SafePath): Unit
-  def replicate(treeNodeData: TreeNodeData): TreeNodeData
+  def replicate(safePath: SafePath): SafePath
   def copyAllTmpTo(tmpSafePath: SafePath, to: SafePath): Unit
   def testExistenceAndCopyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Seq[SafePath]
   def copyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Unit
   def copyToPluginUploadDir(safePaths: Seq[SafePath]): Unit
   def copyFromTmp(tmpSafePath: SafePath, filesToBeMoved: Seq[SafePath]): Unit
   def uuid(): String = java.util.UUID.randomUUID.toString
-  def renameFile(treeNode: TreeNodeData, name: String): TreeNodeData
+  def renameFile(safePath: SafePath, name: String): SafePath
   def renameKey(keyName: String, newName: String): Unit
   def saveFile(path: SafePath, fileContent: String): Unit
   def saveFiles(fileContents: Seq[AlterableFileContent]): Unit
+  def size(safePath: SafePath): Long
 
   //EXECUTIONS
   def allStates(lines: Int): (Seq[(ExecutionId, ExecutionInfo)], Seq[RunningOutputData])
@@ -84,7 +83,7 @@ trait Api {
   def addPlugins(nodes: Seq[String]): Seq[Error]
   def autoAddPlugins(path: SafePath): Unit
   def isPlugin(path: SafePath): Boolean
-  def allPluggableIn(path: SafePath): Seq[TreeNodeData]
+  def allPluggableIn(path: SafePath): Seq[SafePath]
   def listPlugins(): Iterable[Plugin]
   def removePlugin(plugin: Plugin): Unit
 
@@ -93,6 +92,6 @@ trait Api {
   def models(archivePath: SafePath): Seq[SafePath]
   def classes(jarPath: SafePath): Seq[ClassTree]
   def methods(jarPath: SafePath, className: String): Seq[JarMethod]
-  def buildModelTask(executableName: String, scriptName: String, command: String, language: Language, inputs: Seq[ProtoTypePair], outputs: Seq[ProtoTypePair], path: SafePath, imports: Option[String], libraries: Option[String], resources: Resources): TreeNodeData
+  def buildModelTask(executableName: String, scriptName: String, command: String, language: Language, inputs: Seq[ProtoTypePair], outputs: Seq[ProtoTypePair], path: SafePath, imports: Option[String], libraries: Option[String], resources: Resources): SafePath
   def expandResources(resources: Resources): Resources
 }
