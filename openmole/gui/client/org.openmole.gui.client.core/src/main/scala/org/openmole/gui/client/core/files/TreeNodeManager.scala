@@ -99,19 +99,27 @@ class TreeNodeManager {
     dirNodeLine() = sp
   }
 
+  def invalidCurrentCache = sons() = sons.now.filterNot(_._1 == current.now)
+
   def computeCurrentSons(fileFilter: FileFilter): Future[(Seq[TreeNode], Boolean)] = {
     val cur = current.now
+
+    def getAndUpdateSons(safePath: SafePath): Future[(Seq[TreeNode], Boolean)] = CoreUtils.getSons(safePath, fileFilter).map { newsons ⇒
+      sons() = sons.now.updated(cur, newsons)
+      (newsons, true)
+    }
+
     cur match {
       case safePath: SafePath ⇒
-        if (sons.now.contains(safePath)) {
-          Future((sons.now(safePath).take(fileFilter.threshold.getOrElse(1000)), false))
-        }
-        else {
-          CoreUtils.getSons(safePath, fileFilter).map { newsons ⇒
-            sons() = sons.now.updated(cur, newsons)
-            (newsons, true)
+        if (fileFilter.nameFilter.isEmpty) {
+          if (sons.now.contains(safePath)) {
+            Future((sons.now(safePath).take(fileFilter.threshold.getOrElse(1000)), false))
+          }
+          else {
+            getAndUpdateSons(safePath)
           }
         }
+        else getAndUpdateSons(safePath)
       case _ ⇒ Future(Seq(), false)
     }
   }
