@@ -153,21 +153,22 @@ object Utils {
     getFile0(paths, root)
   }
 
-  case class ListFiles(list: Seq[TreeNodeData], moreEntries: Seq[TreeNodeData])
+  def listFiles(path: SafePath, fileFilter: data.FileFilter)(implicit context: ServerFileSytemContext): ListFilesData = {
 
-  def listFiles(path: SafePath, fileFilter: data.FileFilter)(implicit context: ServerFileSytemContext): ListFiles = {
+    val allFiles = safePathToFile(path).listFilesSafe.toSeq
 
     val filteredByName: Seq[TreeNodeData] = {
-      val allFiles = safePathToFile(path).listFilesSafe.toSeq
       if (fileFilter.nameFilter.isEmpty) allFiles
       else allFiles.filter { f ⇒ f.getName.contains(fileFilter.nameFilter) }
     }
 
     val sorted = filteredByName.sorted(fileFilter.fileSorting)
+    val threshold = fileFilter.threshold.getOrElse(1000)
+    val nbFiles = allFiles.size
 
     fileFilter.firstLast match {
-      case First ⇒ ListFiles(sorted.take(1000), sorted.takeRight(sorted.size - 1000))
-      case Last  ⇒ ListFiles(sorted.takeRight(1000).reverse, sorted.take(sorted.size - 1000).reverse)
+      case First ⇒ ListFilesData(sorted.take(threshold), nbFiles)
+      case Last  ⇒ ListFilesData(sorted.takeRight(threshold).reverse, nbFiles)
     }
   }
 

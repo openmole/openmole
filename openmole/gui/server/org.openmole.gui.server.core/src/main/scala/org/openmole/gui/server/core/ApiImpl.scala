@@ -234,9 +234,8 @@ class ApiImpl extends Api {
     }
   }
 
-  def listFiles(sp: SafePath, fileFilter: data.FileFilter): Seq[TreeNodeData] = atomic { implicit ctx ⇒
-    val listFiles = Utils.listFiles(sp, fileFilter)(org.openmole.gui.ext.data.ServerFileSytemContext.project)
-    listFiles.list
+  def listFiles(sp: SafePath, fileFilter: data.FileFilter): ListFilesData = atomic { implicit ctx ⇒
+    Utils.listFiles(sp, fileFilter)(org.openmole.gui.ext.data.ServerFileSytemContext.project)
   }
 
   def move(from: SafePath, to: SafePath): Unit = {
@@ -472,7 +471,7 @@ class ApiImpl extends Api {
     val toDir = archivePath.toNoExtention
     // extractTGZToAndDeleteArchive(archivePath, toDir)
     (for {
-      tnd ← listFiles(toDir) if FileType.isSupportedLanguage(tnd.name)
+      tnd ← listFiles(toDir).list if FileType.isSupportedLanguage(tnd.name)
     } yield tnd).map { nd ⇒ toDir ++ nd.name }
   }
 

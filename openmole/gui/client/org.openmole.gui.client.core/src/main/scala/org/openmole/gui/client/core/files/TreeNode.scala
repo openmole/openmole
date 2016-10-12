@@ -77,13 +77,9 @@ object TreeNode {
 
   implicit def seqTreeNodeDataToSeqTreeNode(tnds: Seq[TreeNodeData]): Seq[TreeNode] = tnds.map(treeNodeDataToTreeNode(_))
 
-  //implicit def treeNodeToSafePath(tn: TreeNode): SafePath = tn.safePath.now
+  implicit def listFilesDataToListFiles(lfd: ListFilesData): ListFiles = ListFiles(lfd.list, lfd.nbFilesOnServer)
 
-  /* implicit def treeNodesToSafePaths(tns: Seq[TreeNode]): Seq[SafePath] = tns.map {
-    treeNodeToSafePath
-  }*/
-
-  // implicit def safePathToDirNode(safePath: SafePath) = DirNode(Var(safePath.name), Var(safePath), 0, 0)
+  case class ListFiles(list: Seq[TreeNode], nbFilesOnServer: Int)
 
 }
 

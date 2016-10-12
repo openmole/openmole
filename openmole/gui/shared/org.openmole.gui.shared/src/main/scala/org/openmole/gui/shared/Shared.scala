@@ -50,7 +50,7 @@ trait Api {
   def existsExcept(exception: SafePath, exceptItSelf: Boolean): Boolean
   def extractAndTestExistence(safePathToTest: SafePath, in: SafePath): Seq[SafePath]
   def safePath(safePaths: Seq[SafePath]): Seq[SafePath]
-  def listFiles(path: SafePath, fileFilter: FileFilter = FileFilter()): Seq[TreeNodeData]
+  def listFiles(path: SafePath, fileFilter: FileFilter = FileFilter()): ListFilesData
   def mdToHtml(safePath: SafePath): String
   def move(from: SafePath, to: SafePath): Unit
   def replicate(safePath: SafePath): SafePath

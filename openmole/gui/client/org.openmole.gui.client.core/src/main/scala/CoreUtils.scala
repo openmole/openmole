@@ -84,7 +84,7 @@ object CoreUtils {
   def copyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Future[Unit] =
     OMPost[Api].copyProjectFilesTo(safePaths, to).call()
 
-  def getSons(safePath: SafePath, fileFilter: FileFilter): Future[Seq[TreeNodeData]] = {
+  def getSons(safePath: SafePath, fileFilter: FileFilter): Future[ListFilesData] = {
     OMPost[Api].listFiles(safePath, fileFilter).call()
   }
 
