@@ -56,7 +56,7 @@ object JsRxTags {
     var last = rSafe
     r.triggerLater {
       val newLast = rSafe
-      last.parentNode.replaceChild(newLast, last)
+      if (last.parentNode != null) last.parentNode.replaceChild(newLast, last)
       last = newLast
     }
     last
@@ -73,7 +73,7 @@ object JsRxTags {
     var last = rSafe
     r.triggerLater {
       val newLast = rSafe
-      last.parentNode.replaceChild(newLast, last)
+      if (last.parentNode != null) last.parentNode.replaceChild(newLast, last)
       last = newLast
     }
     last

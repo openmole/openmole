@@ -367,7 +367,7 @@ class ModelWizardPanel extends ModalPanel {
         val resourceDir = mp.parent
         OMPost[Api].listFiles(resourceDir).call().foreach {
           b ⇒
-            val l = b.filterNot {
+            val l = b.list.filterNot {
               _.name == modelName
             }.map { tn ⇒
               val sp = resourceDir ++ tn.name

@@ -27,6 +27,7 @@ import autowire._
 import rx._
 import bs._
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
+import org.openmole.gui.misc.utils
 import org.scalajs.dom
 import sheet._
 
@@ -55,10 +56,10 @@ object TreeNodePanel {
   def apply() = instance
 
   def refreshAnd(todo: () ⇒ Unit) = {
-    instance.refreshAnd(todo)
+    instance.invalidCacheAnd(todo)
   }
 
-  def refreshAndDraw = instance.refreshAndDraw
+  def refreshAndDraw = instance.invalidCacheAndDraw
 
 }
 
@@ -116,7 +117,7 @@ class TreeNodePanel {
   private def paste(safePaths: Seq[SafePath], to: SafePath) = {
     def refreshWithNoError = {
       manager.noError
-      refreshAndDraw
+      invalidCacheAndDraw
     }
 
     def onpasted = {
@@ -172,17 +173,19 @@ class TreeNodePanel {
         manager.clearSelection
         turnSelectionTo(false)
         manager.switch(safePath)
+        fileToolBar.unselectTool
         drawTree
     }
   )
 
-  def refreshAndDraw = {
-    refreshAnd(() ⇒ {
+  def invalidCacheAndDraw = {
+    invalidCacheAnd(() ⇒ {
       drawTree
     })
   }
 
-  def refreshAnd(todo: () ⇒ Unit) = {
+  def invalidCacheAnd(todo: () ⇒ Unit) = {
+    manager.invalidCurrentCache
     manager.computeCurrentSons(filter).foreach { x ⇒
       todo()
     }
@@ -193,45 +196,41 @@ class TreeNodePanel {
     case _                ⇒
   }
 
-  val scrollHeight = Var(0)
-
-  import org.scalajs.dom
-
   def drawTree: Unit = {
     computePluggables
-    tree() = manager.computeCurrentSons(filter).withFutureWaiter("Get files", (sons: (Seq[TreeNode], Boolean)) ⇒ {
-      lazy val moreEntries: HTMLAnchorElement = a(
-        pointer +++ (fontSize := 12),
-        onclick := { () ⇒
-          /*fileToolBar.fileFilter.now.threshold.map { th ⇒
-            OMPost[Api].moreEntries(manager.current.now, th).call().withFutureWaiterAndSideEffect("", (me: Seq[TreeNodeData]) ⇒ {
-              fileBody.removeChild(moreEntries)
-              me.foreach { e ⇒
-                fileBody.appendChild(drawNode(e).render)
-              }
-              fileBody.appendChild(moreEntries)
-            })
-          }*/
-        }, "More entries"
-      ).render
+    tree() = manager.computeCurrentSons(filter).withFutureWaiter("Get files", (sons: ListFiles) ⇒ {
 
-      lazy val fileBody: HTMLTableSectionElement = tbody(omsheet.fileList)(
-        for (tn ← sons._1) yield {
-          drawNode(tn)
-        },
-        if (sons._1.length > fileToolBar.fileNumberThreshold) {
-          moreEntries
-        }
-        else div()
-
-      ).render
-      // if (sons._2) manager.updateSon(manager.current.now, sons._1)
       tags.table(
         if (manager.isRootCurrent && manager.isProjectsEmpty) {
           div("Create a first OpenMOLE script (.oms)")(ms("message"))
         }
         else {
-          fileBody
+          tbody(omsheet.fileList)(
+
+            if (sons.list.length < sons.nbFilesOnServer) {
+              div(stylesheet.moreEntries)(
+                div(
+                  stylesheet.moreEntriesText,
+                  div(
+                    s"Only 1000 files maximum (${100000 / sons.nbFilesOnServer}%) can be displayed.",
+                    div(
+                      "Use the ",
+                      span(
+                        "Filter tool",
+                        pointer +++ omsheet.color(stylesheet.BLUE),
+                        onclick := { () ⇒ fileToolBar.selectTool(FilterTool) }
+                      ), " to refine your search"
+                    )
+                  )
+                )
+              )
+            }
+            else div(),
+            for (tn ← sons.list) yield {
+              drawNode(tn)
+            }
+
+          )
         }
       )
     })
@@ -244,9 +243,10 @@ class TreeNodePanel {
         displayNode(fn)
       })
     case dn: DirNode ⇒ clickableElement(dn, TreeNodeType.folder, () ⇒ {
-      manager + dn.name.now
+      manager switch (dn.name.now)
       fileToolBar.clearMessage
       fileToolBar.unselectTool
+      drawTree
     })
   }
 
@@ -257,7 +257,7 @@ class TreeNodePanel {
       if (ext.displayable) {
         downloadFile(tnSafePath, false, (content: String) ⇒ {
           fileDisplayer.display(tnSafePath, content, ext)
-          refreshAndDraw
+          invalidCacheAndDraw
         })
       }
     case _ ⇒
@@ -314,32 +314,37 @@ class TreeNodePanel {
           () ⇒
             fileDisplayer.tabs -- safePath
             fileDisplayer.tabs.checkTabs
-            refreshAndDraw
+            invalidCacheAndDraw
         }
       }
     )
   }
 
   def extractTGZ(safePath: SafePath) =
-    OMPost[Api].extractTGZ(safePath).call().foreach { r ⇒
-      r.error match {
-        case Some(e: org.openmole.gui.ext.data.Error) ⇒ stringAlertWithDetails("An error occurred during extraction", e.stackTrace)
-        case _                                        ⇒ refreshAndDraw
-      }
+    OMPost[Api].extractTGZ(safePath).call().foreach {
+      r ⇒
+        r.error match {
+          case Some(e: org.openmole.gui.ext.data.Error) ⇒ stringAlertWithDetails("An error occurred during extraction", e.stackTrace)
+          case _                                        ⇒ invalidCacheAndDraw
+        }
     }
 
   def renameNode(safePath: SafePath, newName: String, replicateMode: Boolean) = {
-    def rename = OMPost[Api].renameFile(safePath, newName).call().foreach { newNode ⇒
-      fileDisplayer.tabs.rename(safePath, newNode)
-      toBeEdited() = None
-      refreshAndDraw
-      fileDisplayer.tabs.checkTabs
+    def rename = OMPost[Api].renameFile(safePath, newName).call().foreach {
+      newNode ⇒
+        fileDisplayer.tabs.rename(safePath, newNode)
+        toBeEdited() = None
+        invalidCacheAndDraw
+        fileDisplayer.tabs.checkTabs
     }
 
     fileDisplayer.tabs.saveAllTabs(() ⇒ {
-      OMPost[Api].existsExcept(safePath.copy(path = safePath.path.dropRight(1) :+ newName), replicateMode).call().foreach { b ⇒
-        if (b) stringAlert(s"${newName} already exists, overwrite ?", () ⇒ rename)
-        else rename
+      OMPost[Api].existsExcept(safePath.copy(path = safePath.path.dropRight(1) :+ newName), replicateMode).call().foreach {
+        b ⇒
+          if (b) stringAlert(s"${
+            newName
+          } already exists, overwrite ?", () ⇒ rename)
+          else rename
       }
     })
   }
@@ -364,7 +369,9 @@ class TreeNodePanel {
       case _                ⇒ stylesheet.dir
     }) +++ floatLeft +++ pointer +++ Seq(
       onclick := { (e: MouseEvent) ⇒
-        if (!selectionMode.now) todo()
+        if (!selectionMode.now) {
+          todo()
+        }
       }
     )
 
@@ -447,7 +454,7 @@ class TreeNodePanel {
                         },
                         span(onclick := { () ⇒
                           CoreUtils.replicate(tnSafePath, (replicated: SafePath) ⇒ {
-                            refreshAnd(() ⇒ {
+                            invalidCacheAnd(() ⇒ {
                               toBeEdited() = Some(NodeEdition(replicated, true))
                               drawTree
                             })

@@ -742,6 +742,8 @@ case class FileFilter(firstLast: FirstLast = First, threshold: Option[Int] = Som
   }
 }
 
+case class ListFilesData(list: Seq[TreeNodeData], nbFilesOnServer: Int)
+
 object FileFilter {
   def defaultFilter = FileFilter.this(First, Some(100), "", AlphaSorting)
 }

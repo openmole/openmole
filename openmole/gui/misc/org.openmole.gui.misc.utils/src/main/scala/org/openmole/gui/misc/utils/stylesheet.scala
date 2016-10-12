@@ -32,6 +32,8 @@ package object stylesheet {
     opacity := 0.8
   )
 
+  lazy val BLUE = "#3086b5"
+
   lazy val tableTag: ModifierSeq = Seq(
     sheet.marginLeft(3),
     fontSize := 14,
@@ -195,7 +197,7 @@ package object stylesheet {
   )
 
   lazy val dir: ModifierSeq = Seq(
-    backgroundColor := "#3086b5",
+    backgroundColor := BLUE,
     color("white"),
     display := "inline-block",
     height := 20,
@@ -265,6 +267,20 @@ package object stylesheet {
     pointer,
     fontSize := 12,
     width := 50
+  )
+
+  lazy val moreEntries: ModifierSeq = Seq(
+    backgroundColor := "white",
+    margin := 10,
+    borderRadius := "3px",
+    textAlign := "center"
+  )
+
+  lazy val moreEntriesText: ModifierSeq = Seq(
+    color("#444"),
+    fontSize := 12,
+    fontStyle := "italic",
+    padding := 7
   )
 
   //TREENODE TABS
@@ -385,7 +401,7 @@ package object stylesheet {
   )
 
   lazy val executionVisible: ModifierSeq = Seq(
-    color("#3086b5"),
+    color(BLUE),
     fontWeight := "bold"
   )
 
@@ -550,7 +566,7 @@ package object stylesheet {
   lazy val selectedTool: ModifierSeq = Seq(
     opacity := 1,
     svgAttrs.transform := "scale(1.2)",
-    color("#3086b5")
+    color(BLUE)
   )
 
   lazy val borderRightFlat: ModifierSeq = Seq(

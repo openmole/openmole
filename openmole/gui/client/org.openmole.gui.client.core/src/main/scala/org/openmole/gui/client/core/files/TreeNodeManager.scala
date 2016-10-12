@@ -19,10 +19,13 @@ package org.openmole.gui.client.core.files
 
 import org.openmole.gui.client.core.alert.AlertPanel
 import org.openmole.gui.client.core.{ CoreUtils, OMPost }
-import org.openmole.gui.ext.data.{ FileFilter, SafePath }
+import org.openmole.gui.ext.data.{ FileFilter, ListFilesData, SafePath }
 import org.openmole.gui.shared.Api
 import rx._
 import autowire._
+import org.openmole.gui.client.core.files.TreeNode.ListFiles
+import org.scalajs.dom.FileList
+
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -39,7 +42,7 @@ class TreeNodeManager {
 
   val dirNodeLine: Var[SafePath] = Var(root)
 
-  val sons: Var[Map[SafePath, Seq[TreeNode]]] = Var(Map())
+  val sons: Var[Map[SafePath, ListFiles]] = Var(Map())
 
   val error: Var[Option[TreeNodeError]] = Var(None)
 
@@ -93,34 +96,36 @@ class TreeNodeManager {
     SafePath.sp(dn.path.drop(n))
   }
 
-  def +(dir: String) = dirNodeLine() = dirNodeLine.now.copy(path = dirNodeLine.now.path :+ dir)
+  def switch(dir: String): Unit = switch(dirNodeLine.now.copy(path = dirNodeLine.now.path :+ dir))
 
-  def switch(sp: SafePath) = {
+  def switch(sp: SafePath): Unit = {
     dirNodeLine() = sp
   }
 
-  def invalidCurrentCache = sons() = sons.now.filterNot(_._1 == current.now)
+  def invalidCurrentCache = {
+    sons() = sons.now.filterNot(_._1.path == current.now.path)
+  }
 
-  def computeCurrentSons(fileFilter: FileFilter): Future[(Seq[TreeNode], Boolean)] = {
+  def computeCurrentSons(fileFilter: FileFilter): Future[ListFiles] = {
     val cur = current.now
 
-    def getAndUpdateSons(safePath: SafePath): Future[(Seq[TreeNode], Boolean)] = CoreUtils.getSons(safePath, fileFilter).map { newsons ⇒
+    def getAndUpdateSons(safePath: SafePath): Future[ListFiles] = CoreUtils.getSons(safePath, fileFilter).map { newsons ⇒
       sons() = sons.now.updated(cur, newsons)
-      (newsons, true)
+      newsons
     }
 
     cur match {
       case safePath: SafePath ⇒
         if (fileFilter.nameFilter.isEmpty) {
           if (sons.now.contains(safePath)) {
-            Future((sons.now(safePath).take(fileFilter.threshold.getOrElse(1000)), false))
+            Future(sons.now(safePath))
           }
           else {
             getAndUpdateSons(safePath)
           }
         }
         else getAndUpdateSons(safePath)
-      case _ ⇒ Future(Seq(), false)
+      case _ ⇒ Future(ListFilesData(Seq(), 0))
     }
   }
 
@@ -130,6 +135,6 @@ class TreeNodeManager {
 
   def isRootCurrent = current.now == root
 
-  def isProjectsEmpty = sons.now.getOrElse(root, Seq()).isEmpty
+  def isProjectsEmpty = sons.now.getOrElse(root, ListFiles(Seq(), 0)).list.isEmpty
 
 }
