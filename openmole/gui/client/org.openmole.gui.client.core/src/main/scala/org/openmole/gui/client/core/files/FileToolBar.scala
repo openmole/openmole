@@ -246,9 +246,11 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
   def unselectTool = {
     clearMessage
     resetFilter
+    manager.clearSelection
     newNodeInput.value = ""
     treeNodePanel.turnSelectionTo(false)
     selectedTool() = None
+    treeNodePanel.drawTree
   }
 
   val deleteButton = bs.button("Delete", btn_danger, () ⇒ {

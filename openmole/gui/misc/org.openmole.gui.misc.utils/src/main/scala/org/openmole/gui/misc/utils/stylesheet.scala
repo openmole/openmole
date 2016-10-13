@@ -34,6 +34,8 @@ package object stylesheet {
 
   lazy val BLUE = "#3086b5"
 
+  lazy val DARK_GREY = "#333"
+
   lazy val tableTag: ModifierSeq = Seq(
     sheet.marginLeft(3),
     fontSize := 14,
@@ -112,7 +114,7 @@ package object stylesheet {
   )
 
   lazy val leftpanel: ModifierSeq = Seq(
-    background := "#333333 none repeat scroll 0 0",
+    background := s"$DARK_GREY none repeat scroll 0 0",
     height := "100%",
     styles.left := -320,
     opacity := 1,
@@ -180,7 +182,7 @@ package object stylesheet {
     absolutePosition,
     width := 100,
     right := 2,
-    sheet.marginTop(2),
+    sheet.marginTop(6),
     textAlign := "right"
   )
 
@@ -202,7 +204,7 @@ package object stylesheet {
     display := "inline-block",
     height := 20,
     sheet.marginBottom(3),
-    sheet.marginTop(1),
+    sheet.marginTop(2),
     sheet.marginLeft(1),
     padding := 2,
     width := 20,
@@ -216,7 +218,8 @@ package object stylesheet {
     pointer,
     width := 245,
     textOverflow := "ellipsis",
-    sheet.paddingLeft(3)
+    sheet.paddingLeft(3) /*,
+    sheet.paddingTop(4)*/
   )
 
   lazy val treeprogress: ModifierSeq = Seq(
@@ -234,16 +237,12 @@ package object stylesheet {
   lazy val fileSelectionOverlay: ModifierSeq = Seq(
     right := 0,
     pointer,
-    width := 340,
-    height := 22,
+    width := 345,
+    height := 24,
     sheet.marginLeft(-5),
-    sheet.marginBottom(2),
+    sheet.marginBottom(1),
     borderRadius := "2px"
   )
-
-  lazy val fileSelectionMode: ModifierSeq = Seq(
-    backgroundColor := "rgb(152, 152, 152)"
-  ) +++ fileSelectionOverlay
 
   lazy val fileSelected: ModifierSeq = Seq(
     backgroundColor := "#a6bf26"
@@ -330,13 +329,13 @@ package object stylesheet {
   )
 
   lazy val executionTable: ModifierSeq = Seq(
-    backgroundColor := "#333",
+    backgroundColor := DARK_GREY,
     color("white")
   )
 
   lazy val monospace: ModifierSeq = fontFamily := "monospace"
 
-  lazy val fileList: ModifierSeq = {
+  def fileList: ModifierSeq = {
     Seq(
       height := dom.window.innerHeight - 195, //nbElements * 21, //  <-- Select the height of the body
       absolutePosition,
@@ -344,8 +343,11 @@ package object stylesheet {
       listStyleType := "none",
       sheet.marginTop(160),
       sheet.paddingBottom(30),
+      sheet.marginLeft(-7),
+      sheet.paddingLeft(10),
+      width := "100%",
       overflowY := "auto",
-      width := 363
+      zIndex := -1
     )
   }
 
@@ -358,7 +360,7 @@ package object stylesheet {
   //MARKET PANEL
   lazy val docEntry: ModifierSeq = Seq(
     color("white"),
-    backgroundColor := "#333",
+    backgroundColor := DARK_GREY,
     borderRadius := "4px",
     sheet.marginTop(3),
     sheet.paddingTop(6),
@@ -442,7 +444,7 @@ package object stylesheet {
   // ALERT PANELS
 
   lazy val alertOverlay: ModifierSeq = Seq(
-    background := "#333 none repeat scroll 0 0",
+    background := s"$DARK_GREY none repeat scroll 0 0",
     opacity := 0.95,
     color("white"),
     height := "100%",
@@ -548,7 +550,7 @@ package object stylesheet {
   )
 
   lazy val spinnerStyle: ModifierSeq = Seq(
-    backgroundColor := "#333",
+    backgroundColor := DARK_GREY,
     textAlign := "center",
     borderRadius := "4px"
   )
