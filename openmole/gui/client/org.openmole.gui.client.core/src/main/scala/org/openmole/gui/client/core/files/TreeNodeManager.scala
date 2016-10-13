@@ -103,10 +103,12 @@ class TreeNodeManager {
   }
 
   def invalidCurrentCache = {
+    println("INVALID CACHE")
     sons() = sons.now.filterNot(_._1.path == current.now.path)
   }
 
   def computeCurrentSons(fileFilter: FileFilter): Future[ListFiles] = {
+    println("COMPUTE CURR SON")
     val cur = current.now
 
     def getAndUpdateSons(safePath: SafePath): Future[ListFiles] = CoreUtils.getSons(safePath, fileFilter).map { newsons ⇒

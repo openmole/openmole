@@ -65,17 +65,17 @@ object TreeNodePanel {
 
 class TreeNodePanel {
 
-  case class NodeEdition(safePath: SafePath, replicateMode: Boolean = false)
-
-  val toBeEdited: Var[Option[NodeEdition]] = Var(None)
-  val fileDisplayer = new FileDisplayer
-  val fileToolBar = new FileToolBar(this)
-  val tree: Var[TypedTag[HTMLElement]] = Var(tags.div())
   val selectionMode = Var(false)
 
   selectionMode.trigger {
     if (!selectionMode.now) manager.clearSelection
   }
+
+  def turnSelectionTo(b: Boolean) = selectionMode() = b
+
+  val fileDisplayer = new FileDisplayer
+  val fileToolBar = new FileToolBar(this)
+  val tree: Var[TypedTag[HTMLElement]] = Var(tags.div())
 
   val editNodeInput: Input = bs.input()(
     placeholder := "Name",
@@ -168,13 +168,9 @@ class TreeNodePanel {
   def goToDirButton(safePath: SafePath, ck: ModifierSeq, name: String = "") = span(ck)(name)(
     onclick := {
       () ⇒
-        fileToolBar.resetFilter
         fileToolBar.clearMessage
-        manager.clearSelection
-        turnSelectionTo(false)
         manager.switch(safePath)
         fileToolBar.unselectTool
-        drawTree
     }
   )
 
@@ -205,8 +201,11 @@ class TreeNodePanel {
           div("Create a first OpenMOLE script (.oms)")(ms("message"))
         }
         else {
-          tbody(omsheet.fileList)(
-
+          tbody(
+            backgroundColor := Rx {
+              if (selectionMode()) stylesheet.BLUE else stylesheet.DARK_GREY
+            },
+            omsheet.fileList,
             if (sons.list.length < sons.nbFilesOnServer) {
               div(stylesheet.moreEntries)(
                 div(
@@ -227,7 +226,7 @@ class TreeNodePanel {
             }
             else div(),
             for (tn ← sons.list) yield {
-              drawNode(tn)
+              drawNode(tn).render
             }
 
           )
@@ -239,10 +238,10 @@ class TreeNodePanel {
 
   def drawNode(node: TreeNode) = node match {
     case fn: FileNode ⇒
-      clickableElement(fn, TreeNodeType.file, () ⇒ {
+      ReactiveLine(fn, TreeNodeType.file, () ⇒ {
         displayNode(fn)
       })
-    case dn: DirNode ⇒ clickableElement(dn, TreeNodeType.folder, () ⇒ {
+    case dn: DirNode ⇒ ReactiveLine(dn, TreeNodeType.folder, () ⇒ {
       manager switch (dn.name.now)
       fileToolBar.clearMessage
       fileToolBar.unselectTool
@@ -261,41 +260,6 @@ class TreeNodePanel {
         })
       }
     case _ ⇒
-  }
-
-  def clickableElement(
-    tn:           TreeNode,
-    treeNodeType: TreeNodeType,
-    todo:         () ⇒ Unit
-  ): TypedTag[dom.html.TableRow] = {
-    val tnSafePath = manager.current.now ++ tn.name.now
-    toBeEdited.now match {
-      case Some(etn: NodeEdition) ⇒
-        if (etn.safePath.path == tnSafePath.path) {
-          editNodeInput.value = tn.name.now
-          tr(
-            td(
-              height := 26,
-              form(
-                editNodeInput,
-                onsubmit := {
-                  () ⇒
-                    {
-                      if (etn.safePath.name == editNodeInput.value) {
-                        toBeEdited() = None
-                        drawTree
-                      }
-                      else renameNode(tnSafePath, editNodeInput.value, etn.replicateMode)
-                      false
-                    }
-                }
-              )
-            )
-          )
-        }
-        else ReactiveLine(tn, treeNodeType, todo).render
-      case _ ⇒ ReactiveLine(tn, treeNodeType, todo).render
-    }
   }
 
   def stringAlert(message: String, okaction: () ⇒ Unit) =
@@ -329,40 +293,34 @@ class TreeNodePanel {
         }
     }
 
-  def renameNode(safePath: SafePath, newName: String, replicateMode: Boolean) = {
-    def rename = OMPost[Api].renameFile(safePath, newName).call().foreach {
-      newNode ⇒
-        fileDisplayer.tabs.rename(safePath, newNode)
-        toBeEdited() = None
-        invalidCacheAndDraw
-        fileDisplayer.tabs.checkTabs
-    }
-
-    fileDisplayer.tabs.saveAllTabs(() ⇒ {
-      OMPost[Api].existsExcept(safePath.copy(path = safePath.path.dropRight(1) :+ newName), replicateMode).call().foreach {
-        b ⇒
-          if (b) stringAlert(s"${
-            newName
-          } already exists, overwrite ?", () ⇒ rename)
-          else rename
-      }
-    })
-  }
-
-  def turnSelectionTo(b: Boolean) = selectionMode() = b
-
-  val settingsSet: Var[Option[ReactiveLine]] = Var(None)
-
-  def unsetSettings = settingsSet() = None
-
   object ReactiveLine {
     def apply(tn: TreeNode, treeNodeType: TreeNodeType, todo: () ⇒ Unit) = new ReactiveLine(tn, treeNodeType, todo)
   }
 
   class ReactiveLine(tn: TreeNode, treeNodeType: TreeNodeType, todo: () ⇒ Unit) {
 
-    val selected: Var[Boolean] = Var(manager.isSelected(tn))
+    // val selected: Var[Boolean] = Var(manager.isSelected(tn))
     val tnSafePath = manager.current.now ++ tn.name.now
+
+    case class TreeStates(settingsSet: Boolean, edition: Boolean, replication: Boolean, selected: Boolean = manager.isSelected(tn)) {
+      def settingsOn = treeStates() = copy(settingsSet = true)
+
+      def editionOn = treeStates() = copy(edition = true)
+
+      def replicationOn = treeStates() = copy(replication = true)
+
+      def settingsOff = treeStates() = copy(settingsSet = false)
+
+      def editionOff = treeStates() = copy(edition = false)
+
+      def replicationOff = treeStates() = copy(replication = false)
+
+      def editionAndReplicationOn = treeStates() = copy(edition = true, replication = true)
+
+      def setSelected(b: Boolean) = treeStates() = copy(selected = b)
+    }
+
+    private val treeStates: Var[TreeStates] = Var(TreeStates(false, false, false))
 
     val clickablePair = (treeNodeType match {
       case fn: FileNodeType ⇒ stylesheet.file
@@ -375,6 +333,26 @@ class TreeNodePanel {
       }
     )
 
+    def renameNode(safePath: SafePath, newName: String, replicateMode: Boolean) = {
+      def rename = OMPost[Api].renameFile(safePath, newName).call().foreach {
+        newNode ⇒
+          fileDisplayer.tabs.rename(safePath, newNode)
+          treeStates.now.editionOff
+          invalidCacheAndDraw
+          fileDisplayer.tabs.checkTabs
+      }
+
+      fileDisplayer.tabs.saveAllTabs(() ⇒ {
+        OMPost[Api].existsExcept(safePath.copy(path = safePath.path.dropRight(1) :+ newName), replicateMode).call().foreach {
+          b ⇒
+            if (b) stringAlert(s"${
+              newName
+            } already exists, overwrite ?", () ⇒ rename)
+            else rename
+        }
+      })
+    }
+
     def timeOrSize(tn: TreeNode): String = fileToolBar.fileFilter.now.fileSorting match {
       case TimeSorting ⇒ CoreUtils.longTimeToString(tn.time)
       case _           ⇒ CoreUtils.readableByteCount(tn.size)
@@ -382,20 +360,20 @@ class TreeNodePanel {
 
     lazy val fileIndent: ModifierSeq = tn match {
       case d: DirNode ⇒ sheet.paddingLeft(22)
-      case _          ⇒ sheet.emptyMod
+      case _          ⇒ sheet.paddingTop(4)
     }
 
     def clearSelectionExecpt(safePath: SafePath) = {
-      selected() = true
+      treeStates.now.setSelected(true)
       manager.clearSelectionExecpt(safePath)
     }
 
     def addToSelection(b: Boolean): Unit = {
-      selected() = b
-      manager.setSelected(tnSafePath, selected.now)
+      treeStates.now.setSelected(b)
+      manager.setSelected(tnSafePath, treeStates.now.selected)
     }
 
-    def addToSelection: Unit = addToSelection(!selected.now)
+    def addToSelection: Unit = addToSelection(!treeStates.now.selected)
 
     val render: TypedTag[dom.html.TableRow] = {
       val baseGlyph = sheet.marginTop(2) +++ "glyphitem"
@@ -406,97 +384,101 @@ class TreeNodePanel {
       val archive = baseGlyph +++ glyph_archive
       val arrow_right_and_left = baseGlyph +++ glyph_arrow_right_and_left
 
-      {
-        tr(
-          td(
-            onclick := { (e: MouseEvent) ⇒
-              {
-                if (selectionMode.now) {
-                  addToSelection
-                  if (e.ctrlKey) clearSelectionExecpt(tnSafePath)
-                }
-              }
-            },
-            Rx {
-              span(clickablePair)(
-                div(stylesheet.fileNameOverflow +++ fileIndent)(tn.name())
-              ).tooltip(
-                  tags.span(tn.name()), popupStyle = whitePopup, arrowStyle = Popup.whiteBottomArrow, condition = () ⇒ tn.name().length > 24
-                )
-            },
-            Rx {
-              div(stylesheet.fileInfo)(
-                if (!selectionMode()) {
-                  div(
-                    if (settingsSet() == Some(this)) {
-                      span(
-                        span(onclick := { () ⇒ unsetSettings }, baseGlyph)(
-                          raw("&#215")
-                        ),
-                        tags.span(onclick := { () ⇒
-                          trashNode(tnSafePath)
-                          unsetSettings
-                        }, trash),
-                        span(onclick := { () ⇒
-                          toBeEdited() = Some(NodeEdition(tnSafePath))
-                          drawTree
-                        }, edit),
-                        a(
-                          span(onclick := { () ⇒ unsetSettings })(download_alt),
-                          href := s"downloadFile?path=${Utils.toURI(tnSafePath.path)}"
-                        ),
-                        DataUtils.fileToExtension(tn.name.now) match {
-                          case FileExtension.TGZ | FileExtension.TAR ⇒
-                            span(archive, onclick := { () ⇒
-                              extractTGZ(tnSafePath)
-                            })
-                          case _ ⇒
-                        },
-                        span(onclick := { () ⇒
-                          CoreUtils.replicate(tnSafePath, (replicated: SafePath) ⇒ {
-                            invalidCacheAnd(() ⇒ {
-                              toBeEdited() = Some(NodeEdition(replicated, true))
-                              drawTree
-                            })
-                          })
-                        })(arrow_right_and_left)
-                      )
+      tr(
+        Rx {
+          if (treeStates().edition) {
+            editNodeInput.value = tn.name.now
+            td(
+              height := 26,
+              form(
+                editNodeInput,
+                onsubmit := {
+                  () ⇒
+                    {
+                      treeStates().editionOff
+                      renameNode(tnSafePath, editNodeInput.value, treeStates().replication)
+                      false
                     }
-                    else
-                      span(stylesheet.fileSize)(
-                        tags.i(timeOrSize(tn)),
-                        tags.span(onclick := { () ⇒
-                          settingsSet() = Some(this)
-                        }, settingsGlyph)
-                      )
-                  )
                 }
-                else div()
               )
-            },
-            Rx {
-              if (selectionMode()) {
-                div(
-                  width := "100%",
-                  if (selected()) {
-                    fileToolBar.selectedTool() match {
-                      case Some(TrashTool) ⇒ stylesheet.fileSelectedForDeletion
-                      case Some(PluginTool) if manager.pluggables().contains(tn) ⇒ stylesheet.fileSelected
-                      case _ ⇒ stylesheet.fileSelected
-                    }
+            )
+          }
+          else
+            td(
+              onclick := { (e: MouseEvent) ⇒
+                {
+                  if (selectionMode.now) {
+                    addToSelection
+                    if (e.ctrlKey) clearSelectionExecpt(tnSafePath)
                   }
-                  else stylesheet.fileSelectionMode,
-                  span(stylesheet.fileSelectionMessage)
+                }
+              }, {
+                span(clickablePair)(
+                  div(stylesheet.fileNameOverflow +++ fileIndent)(tn.name())
+                ).tooltip(
+                    tags.span(tn.name()), popupStyle = whitePopup, arrowStyle = Popup.whiteBottomArrow, condition = () ⇒ tn.name().length > 24
+                  )
+              }, {
+                div(stylesheet.fileInfo)(
+                  if (treeStates().settingsSet) {
+                    span(
+                      span(onclick := { () ⇒ treeStates().settingsOff }, baseGlyph)(
+                        raw("&#215")
+                      ),
+                      tags.span(onclick := { () ⇒
+                        trashNode(tnSafePath)
+                        treeStates().settingsOff
+                      }, trash),
+                      span(onclick := { () ⇒
+                        treeStates().editionOn
+                        drawTree
+                      }, edit),
+                      a(
+                        span(onclick := { () ⇒ treeStates().settingsOff })(download_alt),
+                        href := s"downloadFile?path=${Utils.toURI(tnSafePath.path)}"
+                      ),
+                      DataUtils.fileToExtension(tn.name.now) match {
+                        case FileExtension.TGZ | FileExtension.TAR ⇒
+                          span(archive, onclick := { () ⇒
+                            extractTGZ(tnSafePath)
+                          })
+                        case _ ⇒
+                      },
+                      span(onclick := { () ⇒
+                        CoreUtils.replicate(tnSafePath, (replicated: SafePath) ⇒ {
+                          invalidCacheAnd(() ⇒ {
+                            treeStates().editionAndReplicationOn
+                            drawTree
+                          })
+                        })
+                      })(arrow_right_and_left)
+                    )
+                  }
+                  else
+                    span(stylesheet.fileSize)(
+                      tags.i(timeOrSize(tn)),
+                      tags.span(onclick := { () ⇒
+                        treeStates().settingsOn
+                      }, settingsGlyph)
+                    )
                 )
-              }
-              else div()
-            }
-          )
-        )
-
-      }
+              },
+              div(
+                width := "100%",
+                if (treeStates().selected) {
+                  fileToolBar.selectedTool() match {
+                    case Some(TrashTool) ⇒ stylesheet.fileSelectedForDeletion
+                    case Some(PluginTool) if manager.pluggables().contains(tn) ⇒ stylesheet.fileSelected
+                    case _ ⇒ stylesheet.fileSelected
+                  }
+                }
+                else stylesheet.fileSelectionOverlay,
+                span(stylesheet.fileSelectionMessage)
+              )
+            )
+        }
+      )
     }
   }
 
 }
-
