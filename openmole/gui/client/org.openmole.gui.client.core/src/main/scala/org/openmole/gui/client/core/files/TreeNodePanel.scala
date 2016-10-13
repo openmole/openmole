@@ -66,6 +66,7 @@ object TreeNodePanel {
 class TreeNodePanel {
 
   val selectionMode = Var(false)
+  val treeWarning = Var(true)
 
   selectionMode.trigger {
     if (!selectionMode.now) manager.clearSelection
@@ -171,6 +172,7 @@ class TreeNodePanel {
         fileToolBar.clearMessage
         manager.switch(safePath)
         fileToolBar.unselectTool
+        drawTree
     }
   )
 
@@ -206,25 +208,27 @@ class TreeNodePanel {
               if (selectionMode()) stylesheet.BLUE else stylesheet.DARK_GREY
             },
             omsheet.fileList,
-            if (sons.list.length < sons.nbFilesOnServer) {
-              div(stylesheet.moreEntries)(
-                div(
-                  stylesheet.moreEntriesText,
+            Rx {
+              if (sons.list.length < sons.nbFilesOnServer && treeWarning()) {
+                div(stylesheet.moreEntries)(
                   div(
-                    s"Only 1000 files maximum (${100000 / sons.nbFilesOnServer}%) can be displayed.",
+                    stylesheet.moreEntriesText,
                     div(
-                      "Use the ",
-                      span(
-                        "Filter tool",
-                        pointer +++ omsheet.color(stylesheet.BLUE),
-                        onclick := { () ⇒ fileToolBar.selectTool(FilterTool) }
-                      ), " to refine your search"
+                      s"Only 1000 files maximum (${100000 / sons.nbFilesOnServer}%) can be displayed.",
+                      div(
+                        "Use the ",
+                        span(
+                          "Filter tool",
+                          pointer +++ omsheet.color(stylesheet.BLUE),
+                          onclick := { () ⇒ fileToolBar.selectTool(FilterTool) }
+                        ), " to refine your search"
+                      )
                     )
                   )
                 )
-              )
-            }
-            else div(),
+              }
+              else div()
+            },
             for (tn ← sons.list) yield {
               drawNode(tn).render
             }
@@ -245,6 +249,7 @@ class TreeNodePanel {
       manager switch (dn.name.now)
       fileToolBar.clearMessage
       fileToolBar.unselectTool
+      treeWarning() = true
       drawTree
     })
   }

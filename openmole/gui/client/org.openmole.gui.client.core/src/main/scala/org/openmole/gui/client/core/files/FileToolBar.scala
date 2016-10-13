@@ -248,9 +248,9 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
     resetFilter
     manager.clearSelection
     newNodeInput.value = ""
+    treeNodePanel.treeWarning() = true
     treeNodePanel.turnSelectionTo(false)
     selectedTool() = None
-    treeNodePanel.drawTree
   }
 
   val deleteButton = bs.button("Delete", btn_danger, () ⇒ {
@@ -352,7 +352,9 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
       tags.div(centerElement +++ sheet.marginBottom(10))(
         msg,
         sT match {
-          case Some(FilterTool)       ⇒ filterTool
+          case Some(FilterTool) ⇒
+            treeNodePanel.treeWarning() = false
+            filterTool
           case Some(FileCreationTool) ⇒ createFileTool
           case Some(TrashTool)        ⇒ getIfSelected(deleteButton)
           case Some(PluginTool)       ⇒ getIfSelected(pluginButton)
