@@ -51,10 +51,6 @@ class ApiImpl extends Api {
 
   val execution = new Execution
 
-  private case class MoreEntries(default: Seq[TreeNodeData] = Seq(), currentIndex: Int = 0) {
-    def reset = MoreEntries(default, 0)
-  }
-
   implicit def authProvider = Workspace.authenticationProvider
 
   //GENERAL
