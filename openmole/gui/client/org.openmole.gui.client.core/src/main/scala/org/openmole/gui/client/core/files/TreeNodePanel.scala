@@ -185,9 +185,7 @@ class TreeNodePanel {
 
   def invalidCacheAnd(todo: () ⇒ Unit) = {
     manager.invalidCurrentCache
-    manager.computeCurrentSons(filter).foreach { x ⇒
-      todo()
-    }
+    todo()
   }
 
   def computePluggables = fileToolBar.selectedTool.now match {
@@ -305,7 +303,6 @@ class TreeNodePanel {
 
   class ReactiveLine(tn: TreeNode, treeNodeType: TreeNodeType, todo: () ⇒ Unit) {
 
-    // val selected: Var[Boolean] = Var(manager.isSelected(tn))
     val tnSafePath = manager.current.now ++ tn.name.now
     val fileIcon = Var(emptyMod)
 
