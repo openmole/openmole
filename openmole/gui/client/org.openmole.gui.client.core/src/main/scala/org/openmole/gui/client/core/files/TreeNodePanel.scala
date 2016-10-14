@@ -31,6 +31,7 @@ import org.openmole.gui.misc.utils
 import org.scalajs.dom
 import sheet._
 
+import scala.concurrent.Future
 import scala.scalajs.js
 
 /*
@@ -306,6 +307,7 @@ class TreeNodePanel {
 
     // val selected: Var[Boolean] = Var(manager.isSelected(tn))
     val tnSafePath = manager.current.now ++ tn.name.now
+    val fileIcon = Var(emptyMod)
 
     case class TreeStates(settingsSet: Boolean, edition: Boolean, replication: Boolean, selected: Boolean = manager.isSelected(tn)) {
       def settingsOn = treeStates() = copy(settingsSet = true)
@@ -363,9 +365,12 @@ class TreeNodePanel {
       case _           ⇒ CoreUtils.readableByteCount(tn.size)
     }
 
-    lazy val fileIndent: ModifierSeq = tn match {
-      case d: DirNode ⇒ sheet.paddingLeft(22)
-      case _          ⇒ sheet.paddingTop(4)
+    tn match {
+      case d: DirNode ⇒
+        OMPost[Api].isEmpty(tnSafePath).call().foreach { x ⇒
+          fileIcon() = omsheet.fileIcon +++ ms(x, emptyMod, glyph_plus)
+        }
+      case _ ⇒ fileIcon() = sheet.paddingTop(4)
     }
 
     def clearSelectionExecpt(safePath: SafePath) = {
@@ -417,13 +422,12 @@ class TreeNodePanel {
                     if (e.ctrlKey) clearSelectionExecpt(tnSafePath)
                   }
                 }
-              }, {
-                span(clickablePair)(
-                  div(stylesheet.fileNameOverflow +++ fileIndent)(tn.name())
-                ).tooltip(
-                    tags.span(tn.name()), popupStyle = whitePopup, arrowStyle = Popup.whiteBottomArrow, condition = () ⇒ tn.name().length > 24
-                  )
-              }, {
+              },
+              span(span(fileIcon()), clickablePair)(
+                div(stylesheet.fileNameOverflow)(tn.name())
+              ).tooltip(
+                  tags.span(tn.name()), popupStyle = whitePopup, arrowStyle = Popup.whiteBottomArrow, condition = () ⇒ tn.name().length > 24
+                ), {
                 div(stylesheet.fileInfo)(
                   if (treeStates().settingsSet) {
                     span(
