@@ -60,13 +60,14 @@ sealed trait TreeNode {
 
 object TreeNode {
 
-  implicit def treeNodeDataToTreeNode(tnd: TreeNodeData): TreeNode =
-    if (tnd.isDirectory) DirNode(Var(tnd.name), tnd.size, tnd.time)
-    else FileNode(Var(tnd.name), tnd.size, tnd.time)
+  implicit def treeNodeDataToTreeNode(tnd: TreeNodeData): TreeNode = tnd.dirData match {
+    case Some(dd: DirData) ⇒ DirNode(Var(tnd.name), tnd.size, tnd.time, dd.isEmpty)
+    case _                 ⇒ FileNode(Var(tnd.name), tnd.size, tnd.time)
+  }
 
   implicit def treeNodeToTreeNodeData(tn: TreeNode): TreeNodeData = TreeNodeData(tn.name.now, tn match {
-    case DirNode(_, _, _) ⇒ true
-    case _                ⇒ false
+    case DirNode(_, _, _, isEmpty) ⇒ Some(DirData(isEmpty))
+    case _                         ⇒ None
   }, tn.size, tn.time)
 
   implicit def seqTreeNodeToSeqTreeNodeData(tns: Seq[TreeNode]): Seq[TreeNodeData] = tns.map {
@@ -84,9 +85,10 @@ object TreeNode {
 }
 
 case class DirNode(
-  name: Var[String],
-  size: Long,
-  time: Long
+  name:    Var[String],
+  size:    Long,
+  time:    Long,
+  isEmpty: Boolean
 ) extends TreeNode
 
 case class FileNode(
