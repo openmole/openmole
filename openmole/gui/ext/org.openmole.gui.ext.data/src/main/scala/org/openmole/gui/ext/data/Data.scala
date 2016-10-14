@@ -278,12 +278,14 @@ case class UploadAbsolute() extends UploadType {
   def typeName = "absolute"
 }
 
+case class DirData(isEmpty: Boolean)
+
 @JSExport
 case class TreeNodeData(
-  name:        String,
-  isDirectory: Boolean,
-  size:        Long,
-  time:        Long
+  name:    String,
+  dirData: Option[DirData],
+  size:    Long,
+  time:    Long
 )
 
 @JSExport
@@ -701,13 +703,18 @@ object FileSizeOrdering extends Ordering[TreeNodeData] {
 }
 
 object AlphaOrdering extends Ordering[TreeNodeData] {
+  def isDirectory(tnd: TreeNodeData) = tnd.dirData match {
+    case None ⇒ false
+    case _    ⇒ true
+  }
+
   def compare(tn1: TreeNodeData, tn2: TreeNodeData) =
-    if (tn1.isDirectory) {
-      if (tn2.isDirectory) tn1.name compare tn2.name
+    if (isDirectory(tn1)) {
+      if (isDirectory(tn2)) tn1.name compare tn2.name
       else -1
     }
     else {
-      if (tn2.isDirectory) 1
+      if (isDirectory(tn2)) 1
       else tn1.name compare tn2.name
     }
 }

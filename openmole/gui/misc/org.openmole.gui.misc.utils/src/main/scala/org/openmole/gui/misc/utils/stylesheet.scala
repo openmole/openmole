@@ -217,8 +217,7 @@ package object stylesheet {
     overflow := "hidden",
     pointer,
     width := 245,
-    textOverflow := "ellipsis",
-    sheet.paddingLeft(22)
+    textOverflow := "ellipsis"
   )
 
   lazy val fileIcon: ModifierSeq = Seq(

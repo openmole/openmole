@@ -304,7 +304,6 @@ class TreeNodePanel {
   class ReactiveLine(tn: TreeNode, treeNodeType: TreeNodeType, todo: () ⇒ Unit) {
 
     val tnSafePath = manager.current.now ++ tn.name.now
-    val fileIcon = Var(emptyMod)
 
     case class TreeStates(settingsSet: Boolean, edition: Boolean, replication: Boolean, selected: Boolean = manager.isSelected(tn)) {
       def settingsOn = treeStates() = copy(settingsSet = true)
@@ -326,16 +325,24 @@ class TreeNodePanel {
 
     private val treeStates: Var[TreeStates] = Var(TreeStates(false, false, false))
 
-    val clickablePair = (treeNodeType match {
-      case fn: FileNodeType ⇒ stylesheet.file
-      case _                ⇒ stylesheet.dir
-    }) +++ floatLeft +++ pointer +++ Seq(
-      onclick := { (e: MouseEvent) ⇒
-        if (!selectionMode.now) {
-          todo()
+    val clickablePair = {
+      val style = floatLeft +++ pointer +++ Seq(
+        onclick := { (e: MouseEvent) ⇒
+          if (!selectionMode.now) {
+            todo()
+          }
         }
+      )
+
+      tn match {
+        case fn: FileNode ⇒ span(span(sheet.paddingTop(4)), stylesheet.file +++ style)(div(stylesheet.fileNameOverflow)(tn.name.now))
+        case dn: DirNode ⇒
+          span(
+            span(omsheet.fileIcon +++ ms(dn.isEmpty, emptyMod, glyph_plus)),
+            (stylesheet.dir +++ style)
+          )(div(stylesheet.fileNameOverflow +++ sheet.paddingLeft(22))(tn.name.now))
       }
-    )
+    }
 
     def renameNode(safePath: SafePath, newName: String, replicateMode: Boolean) = {
       def rename = OMPost[Api].renameFile(safePath, newName).call().foreach {
@@ -360,14 +367,6 @@ class TreeNodePanel {
     def timeOrSize(tn: TreeNode): String = fileToolBar.fileFilter.now.fileSorting match {
       case TimeSorting ⇒ CoreUtils.longTimeToString(tn.time)
       case _           ⇒ CoreUtils.readableByteCount(tn.size)
-    }
-
-    tn match {
-      case d: DirNode ⇒
-        OMPost[Api].isEmpty(tnSafePath).call().foreach { x ⇒
-          fileIcon() = omsheet.fileIcon +++ ms(x, emptyMod, glyph_plus)
-        }
-      case _ ⇒ fileIcon() = sheet.paddingTop(4)
     }
 
     def clearSelectionExecpt(safePath: SafePath) = {
@@ -420,11 +419,9 @@ class TreeNodePanel {
                   }
                 }
               },
-              span(span(fileIcon()), clickablePair)(
-                div(stylesheet.fileNameOverflow)(tn.name())
-              ).tooltip(
-                  tags.span(tn.name()), popupStyle = whitePopup, arrowStyle = Popup.whiteBottomArrow, condition = () ⇒ tn.name().length > 24
-                ), {
+              clickablePair.tooltip(
+                tags.span(tn.name()), popupStyle = whitePopup, arrowStyle = Popup.whiteBottomArrow, condition = () ⇒ tn.name().length > 24
+              ), {
                 div(stylesheet.fileInfo)(
                   if (treeStates().settingsSet) {
                     span(
