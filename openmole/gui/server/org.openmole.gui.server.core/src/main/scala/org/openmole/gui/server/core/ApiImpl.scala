@@ -234,6 +234,12 @@ class ApiImpl extends Api {
     Utils.listFiles(sp, fileFilter)(org.openmole.gui.ext.data.ServerFileSytemContext.project)
   }
 
+  def isEmpty(sp: SafePath): Boolean = {
+    import org.openmole.gui.ext.data.ServerFileSytemContext.project
+    val f: File = safePathToFile(sp)
+    f.isDirectoryEmpty
+  }
+
   def move(from: SafePath, to: SafePath): Unit = {
     import org.openmole.gui.ext.data.ServerFileSytemContext.project
     val fromFile = safePathToFile(from)

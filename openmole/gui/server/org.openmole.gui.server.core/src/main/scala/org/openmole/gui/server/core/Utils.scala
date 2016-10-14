@@ -20,8 +20,6 @@ package org.openmole.gui.server.core
 import java.io.File
 import java.lang.reflect.Modifier
 import java.nio.channels.FileChannel
-import java.text.SimpleDateFormat
-import java.util.Date
 import java.util.logging.Level
 import java.util.zip.{ ZipInputStream, GZIPInputStream }
 import org.openmole.core.pluginmanager.PluginManager

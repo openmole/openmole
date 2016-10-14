@@ -218,8 +218,15 @@ package object stylesheet {
     pointer,
     width := 245,
     textOverflow := "ellipsis",
-    sheet.paddingLeft(3) /*,
-    sheet.paddingTop(4)*/
+    sheet.paddingLeft(22)
+  )
+
+  lazy val fileIcon: ModifierSeq = Seq(
+    sheet.paddingLeft(5),
+    sheet.paddingTop(3),
+    fontSize := 8,
+    sheet.marginBottom(-16),
+    zIndex := 2
   )
 
   lazy val treeprogress: ModifierSeq = Seq(
