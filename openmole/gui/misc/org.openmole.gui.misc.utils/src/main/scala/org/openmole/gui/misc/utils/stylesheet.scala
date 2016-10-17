@@ -228,6 +228,12 @@ package object stylesheet {
     zIndex := 2
   )
 
+  lazy val divAlertPosition: ModifierSeq = Seq(
+    floatRight,
+    sheet.marginRight(70),
+    sheet.marginTop(20)
+  )
+
   lazy val treeprogress: ModifierSeq = Seq(
     sheet.marginTop(20),
     width := "100%"

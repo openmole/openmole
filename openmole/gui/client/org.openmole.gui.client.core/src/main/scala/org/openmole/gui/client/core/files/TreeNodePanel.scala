@@ -3,7 +3,7 @@ package org.openmole.gui.client.core.files
 import java.text.SimpleDateFormat
 import java.util.Date
 
-import org.openmole.gui.client.core.alert.AbsolutePositioning.{ FileZone, RelativeCenterPosition }
+import org.openmole.gui.client.core.alert.AbsolutePositioning.{ CenterPagePosition, FileZone, RelativeCenterPosition }
 import org.openmole.gui.client.core.alert.AlertPanel
 import org.openmole.gui.client.core.files.FileToolBar.{ FilterTool, PluginTool, TrashTool }
 import org.openmole.gui.client.core.{ CoreUtils, OMPost }
@@ -434,7 +434,6 @@ class TreeNodePanel {
                       }, trash),
                       span(onclick := { () ⇒
                         treeStates().editionOn
-                        drawTree
                       }, edit),
                       a(
                         span(onclick := { () ⇒ treeStates().settingsOff })(download_alt),
@@ -448,12 +447,23 @@ class TreeNodePanel {
                         case _ ⇒
                       },
                       span(onclick := { () ⇒
-                        CoreUtils.replicate(tnSafePath, (replicated: SafePath) ⇒ {
-                          invalidCacheAnd(() ⇒ {
-                            treeStates().editionAndReplicationOn
-                            drawTree
-                          })
-                        })
+                        val newName = {
+                          val prefix = tnSafePath.path.last
+                          tn match {
+                            case _: DirNode ⇒ prefix + "_1"
+                            case _          ⇒ prefix.replaceFirst("[.]", "_1.")
+                          }
+                        }
+
+                        val replicateInput = bs.input(newName).render
+                        AlertPanel.div(
+                          div(width := 250, sheet.floatRight, sheet.marginRight(70), replicateInput),
+                          () ⇒ CoreUtils.replicate(tnSafePath, replicateInput.value),
+                          transform = RelativeCenterPosition,
+                          zone = FileZone,
+                          alertType = btn_primary,
+                          buttonGroupClass = stylesheet.divAlertPosition
+                        )
                       })(arrow_right_and_left)
                     )
                   }

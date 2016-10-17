@@ -171,14 +171,8 @@ object Utils {
     }
   }
 
-  def replicate(safePath: SafePath): SafePath = {
+  def replicate(safePath: SafePath, newName: String): SafePath = {
     import org.openmole.gui.ext.data.ServerFileSytemContext.project
-
-    val newName = {
-      val prefix = safePath.path.last
-      if (safePath.isDirectory) prefix + "_1"
-      else prefix.replaceFirst("[.]", "_1.")
-    }
 
     val toPath = safePath.copy(path = safePath.path.dropRight(1) :+ newName)
     if (toPath.isDirectory()) toPath.mkdir
