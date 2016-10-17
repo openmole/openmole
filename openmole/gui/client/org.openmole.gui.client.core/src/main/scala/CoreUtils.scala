@@ -72,11 +72,10 @@ object CoreUtils {
     }
   }
 
-  def replicate(safePath: SafePath, onreplicated: (SafePath) ⇒ Unit) = {
-    OMPost[Api].replicate(safePath).call().foreach { r ⇒
-      onreplicated(r)
+  def replicate(safePath: SafePath, newName: String): Unit =
+    OMPost[Api].replicate(safePath, newName).call().foreach { y ⇒
+      TreeNodePanel.refreshAndDraw
     }
-  }
 
   def testExistenceAndCopyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Future[Seq[SafePath]] =
     OMPost[Api].testExistenceAndCopyProjectFilesTo(safePaths, to).call()
