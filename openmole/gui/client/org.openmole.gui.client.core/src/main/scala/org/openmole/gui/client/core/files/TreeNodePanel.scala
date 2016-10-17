@@ -338,7 +338,7 @@ class TreeNodePanel {
         case fn: FileNode ⇒ span(span(sheet.paddingTop(4)), stylesheet.file +++ style)(div(stylesheet.fileNameOverflow)(tn.name.now))
         case dn: DirNode ⇒
           span(
-            span(omsheet.fileIcon +++ ms(dn.isEmpty, emptyMod, glyph_plus)),
+            span(ms(dn.isEmpty, emptyMod, omsheet.fileIcon +++ glyph_plus)),
             (stylesheet.dir +++ style)
           )(div(stylesheet.fileNameOverflow +++ sheet.paddingLeft(22))(tn.name.now))
       }
