@@ -184,11 +184,18 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
   // Filter tool
   val thresholdTag = "threshold"
   val nameTag = "names"
+  val thresholdChanged = Var(false)
 
   val thresholdInput = bs.input(fileNumberThreshold.toString)(
     id := thresholdTag,
     width := "60px",
-    autofocus
+    autofocus,
+    `class` := Rx {
+      "form-control " + {
+        if (thresholdChanged()) "colorTransition"
+        else ""
+      }
+    }
   ).render
 
   val nameInput = bs.input("")(
@@ -200,9 +207,13 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
   def updateFilter: Unit = updateFilter(fileFilter.now.copy(threshold = thresholdInput.value, nameFilter = nameInput.value))
 
   def resetFilterTools = {
-    if (thresholdInput.value > "1000") thresholdInput.value = "1000"
+    if (thresholdInput.value > "1000") {
+      thresholdInput.value = "1000"
+      thresholdChanged() = true
+    }
+    else thresholdChanged() = false
     updateFilter(fileFilter.now.copy(threshold = thresholdInput.value, nameFilter = nameInput.value))
-  }
+      }
 
   def filterSubmit: () ⇒ Boolean = () ⇒ {
     resetFilterTools
@@ -248,9 +259,9 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
     resetFilter
     manager.clearSelection
     newNodeInput.value = ""
+    treeNodePanel.treeWarning() = true
     treeNodePanel.turnSelectionTo(false)
     selectedTool() = None
-    treeNodePanel.drawTree
   }
 
   val deleteButton = bs.button("Delete", btn_danger, () ⇒ {
@@ -352,7 +363,9 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
       tags.div(centerElement +++ sheet.marginBottom(10))(
         msg,
         sT match {
-          case Some(FilterTool)       ⇒ filterTool
+          case Some(FilterTool) ⇒
+            treeNodePanel.treeWarning() = false
+            filterTool
           case Some(FileCreationTool) ⇒ createFileTool
           case Some(TrashTool)        ⇒ getIfSelected(deleteButton)
           case Some(PluginTool)       ⇒ getIfSelected(pluginButton)

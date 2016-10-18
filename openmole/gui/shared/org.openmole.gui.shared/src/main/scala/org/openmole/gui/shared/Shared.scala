@@ -52,9 +52,10 @@ trait Api {
   def extractAndTestExistence(safePathToTest: SafePath, in: SafePath): Seq[SafePath]
   def safePath(safePaths: Seq[SafePath]): Seq[SafePath]
   def listFiles(path: SafePath, fileFilter: FileFilter = FileFilter()): ListFilesData
+  def isEmpty(safePath: SafePath): Boolean
   def mdToHtml(safePath: SafePath): String
   def move(from: SafePath, to: SafePath): Unit
-  def replicate(safePath: SafePath): SafePath
+  def replicate(safePath: SafePath, newName: String): SafePath
   def copyAllTmpTo(tmpSafePath: SafePath, to: SafePath): Unit
   def testExistenceAndCopyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Seq[SafePath]
   def copyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Unit

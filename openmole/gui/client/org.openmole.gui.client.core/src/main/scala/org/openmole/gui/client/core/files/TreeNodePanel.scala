@@ -3,7 +3,7 @@ package org.openmole.gui.client.core.files
 import java.text.SimpleDateFormat
 import java.util.Date
 
-import org.openmole.gui.client.core.alert.AbsolutePositioning.{ FileZone, RelativeCenterPosition }
+import org.openmole.gui.client.core.alert.AbsolutePositioning.{ CenterPagePosition, FileZone, RelativeCenterPosition }
 import org.openmole.gui.client.core.alert.AlertPanel
 import org.openmole.gui.client.core.files.FileToolBar.{ FilterTool, PluginTool, TrashTool }
 import org.openmole.gui.client.core.{ CoreUtils, OMPost }
@@ -31,6 +31,7 @@ import org.openmole.gui.misc.utils
 import org.scalajs.dom
 import sheet._
 
+import scala.concurrent.Future
 import scala.scalajs.js
 
 /*
@@ -66,6 +67,7 @@ object TreeNodePanel {
 class TreeNodePanel {
 
   val selectionMode = Var(false)
+  val treeWarning = Var(true)
 
   selectionMode.trigger {
     if (!selectionMode.now) manager.clearSelection
@@ -171,6 +173,7 @@ class TreeNodePanel {
         fileToolBar.clearMessage
         manager.switch(safePath)
         fileToolBar.unselectTool
+        drawTree
     }
   )
 
@@ -182,9 +185,7 @@ class TreeNodePanel {
 
   def invalidCacheAnd(todo: () ⇒ Unit) = {
     manager.invalidCurrentCache
-    manager.computeCurrentSons(filter).foreach { x ⇒
-      todo()
-    }
+    todo()
   }
 
   def computePluggables = fileToolBar.selectedTool.now match {
@@ -206,25 +207,27 @@ class TreeNodePanel {
               if (selectionMode()) stylesheet.BLUE else stylesheet.DARK_GREY
             },
             omsheet.fileList,
-            if (sons.list.length < sons.nbFilesOnServer) {
-              div(stylesheet.moreEntries)(
-                div(
-                  stylesheet.moreEntriesText,
+            Rx {
+              if (sons.list.length < sons.nbFilesOnServer && treeWarning()) {
+                div(stylesheet.moreEntries)(
                   div(
-                    s"Only 1000 files maximum (${100000 / sons.nbFilesOnServer}%) can be displayed.",
+                    stylesheet.moreEntriesText,
                     div(
-                      "Use the ",
-                      span(
-                        "Filter tool",
-                        pointer +++ omsheet.color(stylesheet.BLUE),
-                        onclick := { () ⇒ fileToolBar.selectTool(FilterTool) }
-                      ), " to refine your search"
+                      s"Only 1000 files maximum (${100000 / sons.nbFilesOnServer}%) can be displayed.",
+                      div(
+                        "Use the ",
+                        span(
+                          "Filter tool",
+                          pointer +++ omsheet.color(stylesheet.BLUE),
+                          onclick := { () ⇒ fileToolBar.selectTool(FilterTool) }
+                        ), " to refine your search"
+                      )
                     )
                   )
                 )
-              )
-            }
-            else div(),
+              }
+              else div()
+            },
             for (tn ← sons.list) yield {
               drawNode(tn).render
             }
@@ -245,6 +248,7 @@ class TreeNodePanel {
       manager switch (dn.name.now)
       fileToolBar.clearMessage
       fileToolBar.unselectTool
+      treeWarning() = true
       drawTree
     })
   }
@@ -299,7 +303,6 @@ class TreeNodePanel {
 
   class ReactiveLine(tn: TreeNode, treeNodeType: TreeNodeType, todo: () ⇒ Unit) {
 
-    // val selected: Var[Boolean] = Var(manager.isSelected(tn))
     val tnSafePath = manager.current.now ++ tn.name.now
 
     case class TreeStates(settingsSet: Boolean, edition: Boolean, replication: Boolean, selected: Boolean = manager.isSelected(tn)) {
@@ -322,16 +325,24 @@ class TreeNodePanel {
 
     private val treeStates: Var[TreeStates] = Var(TreeStates(false, false, false))
 
-    val clickablePair = (treeNodeType match {
-      case fn: FileNodeType ⇒ stylesheet.file
-      case _                ⇒ stylesheet.dir
-    }) +++ floatLeft +++ pointer +++ Seq(
-      onclick := { (e: MouseEvent) ⇒
-        if (!selectionMode.now) {
-          todo()
+    val clickablePair = {
+      val style = floatLeft +++ pointer +++ Seq(
+        onclick := { (e: MouseEvent) ⇒
+          if (!selectionMode.now) {
+            todo()
+          }
         }
+      )
+
+      tn match {
+        case fn: FileNode ⇒ span(span(sheet.paddingTop(4)), stylesheet.file +++ style)(div(stylesheet.fileNameOverflow)(tn.name.now))
+        case dn: DirNode ⇒
+          span(
+            span(ms(dn.isEmpty, emptyMod, omsheet.fileIcon +++ glyph_plus)),
+            (stylesheet.dir +++ style)
+          )(div(stylesheet.fileNameOverflow +++ sheet.paddingLeft(22))(tn.name.now))
       }
-    )
+    }
 
     def renameNode(safePath: SafePath, newName: String, replicateMode: Boolean) = {
       def rename = OMPost[Api].renameFile(safePath, newName).call().foreach {
@@ -356,11 +367,6 @@ class TreeNodePanel {
     def timeOrSize(tn: TreeNode): String = fileToolBar.fileFilter.now.fileSorting match {
       case TimeSorting ⇒ CoreUtils.longTimeToString(tn.time)
       case _           ⇒ CoreUtils.readableByteCount(tn.size)
-    }
-
-    lazy val fileIndent: ModifierSeq = tn match {
-      case d: DirNode ⇒ sheet.paddingLeft(22)
-      case _          ⇒ sheet.paddingTop(4)
     }
 
     def clearSelectionExecpt(safePath: SafePath) = {
@@ -412,13 +418,10 @@ class TreeNodePanel {
                     if (e.ctrlKey) clearSelectionExecpt(tnSafePath)
                   }
                 }
-              }, {
-                span(clickablePair)(
-                  div(stylesheet.fileNameOverflow +++ fileIndent)(tn.name())
-                ).tooltip(
-                    tags.span(tn.name()), popupStyle = whitePopup, arrowStyle = Popup.whiteBottomArrow, condition = () ⇒ tn.name().length > 24
-                  )
-              }, {
+              },
+              clickablePair.tooltip(
+                tags.span(tn.name()), popupStyle = whitePopup, arrowStyle = Popup.whiteBottomArrow, condition = () ⇒ tn.name().length > 24
+              ), {
                 div(stylesheet.fileInfo)(
                   if (treeStates().settingsSet) {
                     span(
@@ -431,7 +434,6 @@ class TreeNodePanel {
                       }, trash),
                       span(onclick := { () ⇒
                         treeStates().editionOn
-                        drawTree
                       }, edit),
                       a(
                         span(onclick := { () ⇒ treeStates().settingsOff })(download_alt),
@@ -445,12 +447,23 @@ class TreeNodePanel {
                         case _ ⇒
                       },
                       span(onclick := { () ⇒
-                        CoreUtils.replicate(tnSafePath, (replicated: SafePath) ⇒ {
-                          invalidCacheAnd(() ⇒ {
-                            treeStates().editionAndReplicationOn
-                            drawTree
-                          })
-                        })
+                        val newName = {
+                          val prefix = tnSafePath.path.last
+                          tn match {
+                            case _: DirNode ⇒ prefix + "_1"
+                            case _          ⇒ prefix.replaceFirst("[.]", "_1.")
+                          }
+                        }
+
+                        val replicateInput = bs.input(newName).render
+                        AlertPanel.div(
+                          div(width := 250, sheet.floatRight, sheet.marginRight(70), replicateInput),
+                          () ⇒ CoreUtils.replicate(tnSafePath, replicateInput.value),
+                          transform = RelativeCenterPosition,
+                          zone = FileZone,
+                          alertType = btn_primary,
+                          buttonGroupClass = stylesheet.divAlertPosition
+                        )
                       })(arrow_right_and_left)
                     )
                   }

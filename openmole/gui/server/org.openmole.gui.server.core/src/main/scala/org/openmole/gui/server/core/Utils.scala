@@ -20,8 +20,6 @@ package org.openmole.gui.server.core
 import java.io.File
 import java.lang.reflect.Modifier
 import java.nio.channels.FileChannel
-import java.text.SimpleDateFormat
-import java.util.Date
 import java.util.logging.Level
 import java.util.zip.{ ZipInputStream, GZIPInputStream }
 import org.openmole.core.pluginmanager.PluginManager
@@ -99,7 +97,8 @@ object Utils {
 
   implicit def fileToTreeNodeData(f: File)(implicit context: ServerFileSytemContext = ProjectFileSystem): TreeNodeData = {
     val time = java.nio.file.Files.readAttributes(f, classOf[BasicFileAttributes]).lastModifiedTime.toMillis
-    TreeNodeData(f.getName, f.isDirectory, f.length, time)
+    val dirData = if (f.isDirectory) Some(DirData(f.isDirectoryEmpty)) else None
+    TreeNodeData(f.getName, dirData, f.length, time)
   }
 
   implicit def seqfileToSeqTreeNodeData(fs: Seq[File])(implicit context: ServerFileSytemContext): Seq[TreeNodeData] = fs.map {
@@ -172,14 +171,8 @@ object Utils {
     }
   }
 
-  def replicate(safePath: SafePath): SafePath = {
+  def replicate(safePath: SafePath, newName: String): SafePath = {
     import org.openmole.gui.ext.data.ServerFileSytemContext.project
-
-    val newName = {
-      val prefix = safePath.path.last
-      if (safePath.isDirectory) prefix + "_1"
-      else prefix.replaceFirst("[.]", "_1.")
-    }
 
     val toPath = safePath.copy(path = safePath.path.dropRight(1) :+ newName)
     if (toPath.isDirectory()) toPath.mkdir
