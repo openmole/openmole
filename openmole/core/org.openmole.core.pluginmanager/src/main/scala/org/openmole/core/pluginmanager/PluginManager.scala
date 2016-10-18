@@ -269,5 +269,6 @@ object PluginManager extends Logger {
   /* For debugging purposes */
   def printBundles = println(Activator.contextOrException.getBundles.mkString("\n"))
   def printDirectDependencies(b: Long) = println(directDependingBundles(Activator.contextOrException.getBundle(b)).mkString("\n"))
+  def printIsPlugin(b: Long) = println(isPlugin(b))
 
 }
