@@ -86,9 +86,9 @@ object CARETask extends Logger {
 
   lazy val expandedCommand = VariableExpansion(command.command)
 
-  override def validate = expandedCommand.validate(inputs.toSeq)
-
-  archive.setExecutable(true)
+  override def validate =
+    expandedCommand.validate(inputs.toSeq) ++
+      (if (!archive.canExecute) Seq(new UserBadDataError(s"Archive $archive must be executable.")) else Seq.empty)
 
   override protected def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = external.withWorkDir(executionContext) { taskWorkDirectory ⇒
     taskWorkDirectory.mkdirs()
