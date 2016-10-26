@@ -20,7 +20,7 @@ package org.openmole.plugin.task.care
 
 import java.io.File
 
-import org.openmole.core.exception.InternalProcessingError
+import org.openmole.core.exception._
 import org.openmole.core.workflow.data.{ Context, Variable }
 import org.openmole.core.workflow.tools.VariableExpansion
 import org.openmole.plugin.task.external.{ External, ExternalBuilder }
@@ -35,7 +35,7 @@ import org.openmole.core.workflow.dsl._
 import scalaz._
 import Scalaz._
 import monocle.macros.Lenses
-import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputBuilder$, InputOutputConfig }
+import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputBuilder, InputOutputConfig }
 
 object CARETask extends Logger {
   implicit def isTask: InputOutputBuilder[CARETask] = InputOutputBuilder(CARETask._config)
