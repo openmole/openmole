@@ -317,19 +317,13 @@ object DocumentationPages { index ⇒
 
     def tutorial = new DocumentationPage {
       def name = "Tutorials"
-      def children = Seq(helloWorld, resume, headlessNetLogo, netLogoGA, capsule)
+      def children = Seq(helloWorld, headlessNetLogo, netLogoGA, capsule)
       def content = scalatex.documentation.language.Tutorial()
 
       def helloWorld = new DocumentationPage {
         def name = "Hello World"
         def children = Seq()
         def content = Pages.gettingStarted.content
-      }
-
-      def resume = new DocumentationPage {
-        def name = "Resume workflow"
-        def children = Seq()
-        def content = scalatex.documentation.language.tutorial.Resume()
       }
 
       def headlessNetLogo = new DocumentationPage {
