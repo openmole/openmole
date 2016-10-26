@@ -328,7 +328,6 @@ object DocumentationPages { index ⇒
 
       def resume = new DocumentationPage {
         def name = "Resume workflow"
-        override def title = Some(name)
         def children = Seq()
         def content = scalatex.documentation.language.tutorial.Resume()
       }
