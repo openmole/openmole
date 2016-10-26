@@ -213,7 +213,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
     }
     else thresholdChanged() = false
     updateFilter(fileFilter.now.copy(threshold = thresholdInput.value, nameFilter = nameInput.value))
-      }
+  }
 
   def filterSubmit: () ⇒ Boolean = () ⇒ {
     resetFilterTools

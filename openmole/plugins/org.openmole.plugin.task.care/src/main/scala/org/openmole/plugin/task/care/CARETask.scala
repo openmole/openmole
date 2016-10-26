@@ -22,7 +22,7 @@ import java.io.File
 
 import monocle.macros.Lenses
 import org.openmole.core.context.{ Context, Val, Variable }
-import org.openmole.core.exception.InternalProcessingError
+import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.expansion.ExpandedString
 import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
 import org.openmole.core.workflow.dsl._
@@ -86,9 +86,9 @@ object CARETask extends Logger {
 
   lazy val expandedCommand = ExpandedString(command.command)
 
-  override def validate = expandedCommand.validate(inputs.toSeq)
-
-  archive.setExecutable(true)
+  override def validate =
+    expandedCommand.validate(inputs.toSeq) ++
+      (if (!archive.canExecute) Seq(new UserBadDataError(s"Archive $archive must be executable.")) else Seq.empty)
 
   override protected def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = external.withWorkDir(executionContext) { taskWorkDirectory ⇒
     taskWorkDirectory.mkdirs()
