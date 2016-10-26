@@ -35,4 +35,6 @@ package object site {
     def toRow(p: Parameter) = li(p.name + ": " + p.`type` + ": " + p.description)
     ul(p.map(toRow))
   }
+
+  def tq = """""""""
 }
