@@ -169,7 +169,7 @@
         }
       }""", "java")
 
-      @p This Java program can be run inside the OpenMOLE runtime with the following script:
+      @p You can compile it and package as "Hello.jar" in the same manner as the previous example. This Java program can be explored with OpenMOLE using the following script:
 
       @hl.openmole("""
       val proto1 = Val[Int]
@@ -196,7 +196,7 @@
 
       explo -< (javaTask hook copyHook)""")
 
-      @p You can compile it and package as "Hello.jar" in the same manner as the previous example. For this example to work you also need to create a file named "input.txt" in the work directory of your project.
+      @p For this example to work you should create a file named "input.txt" in the work directory of your project.
 
       @p This tutorial works for simple Java programs. For more ambitious developments, you should consider embedding
       your code in an @a("OpenMOLE plugin", href := DocumentationPages.root.development.plugin.file).
