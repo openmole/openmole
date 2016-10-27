@@ -103,9 +103,13 @@ object TreeNodeTabs {
       editor.setReadOnly(!editable.now)
     }
 
-    val editButton = OMTags.glyphBorderButton("", btn_primary +++ editingElement, glyph_edit, () ⇒ {
-      editable() = !editable.now
-    })
+    val editButton = Rx {
+      if (editable()) tags.div()
+      else
+        OMTags.glyphBorderButton("", btn_primary +++ editingElement, glyph_edit, () ⇒ {
+          editable() = !editable.now
+        })
+    }
 
     def controlElement = tags.div(
       if (editable.now) tags.div else editButton
