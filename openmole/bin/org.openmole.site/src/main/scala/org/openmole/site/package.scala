@@ -39,4 +39,6 @@ package object site {
     ul(p.map(toRow))
   }
 
+  def tq = """""""""
+
 }

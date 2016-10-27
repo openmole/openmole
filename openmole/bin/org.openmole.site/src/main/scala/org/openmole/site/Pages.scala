@@ -361,7 +361,7 @@ object DocumentationPages { index ⇒
       def name = "Tutorials"
       override def title = Some(name)
       def children =
-        Seq(helloWorld, headlessNetLogo, netLogoGA, capsule) ++
+        Seq(helloWorld, resume, headlessNetLogo, netLogoGA, capsule) ++
           marketEntries.filter(_.tags.exists(_ == Tags.tutorial)).flatMap(MD.generatePage(_))
 
       def content = Reader(_ ⇒ scalatex.documentation.language.Tutorial())
@@ -371,6 +371,13 @@ object DocumentationPages { index ⇒
         override def title = Some(name)
         def children = Seq()
         def content = Pages.gettingStarted.content
+      }
+
+      def resume = new DocumentationPage {
+        def name = "Resume workflow"
+        override def title = Some(name)
+        def children = Seq()
+        def content = Reader(_ ⇒ scalatex.documentation.language.tutorial.Resume())
       }
 
       def headlessNetLogo = new DocumentationPage {
