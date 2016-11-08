@@ -127,8 +127,7 @@ class Workspace(val location: File) {
 
   @transient private lazy val configurationFile: ConfigurationFile = {
     val file = new File(location, preferences)
-    if (file.createNewFile) file.setPosixMode("rw-------")
-    new ConfigurationFile(file)
+    ConfigurationFile(file)
   }
 
   def clean = {
@@ -195,9 +194,11 @@ class Workspace(val location: File) {
   def reset() = synchronized {
     persistentDir.recursiveDelete
     val uniqueId = preference(uniqueIDLocation)
-    configurationFile.clear()
-    _password = None
-    setPreference(uniqueIDLocation, uniqueId)
+    try configurationFile.clear()
+    finally {
+      _password = None
+      setPreference(uniqueIDLocation, uniqueId)
+    }
   }
 
   def setPassword(password: String): Unit = synchronized {
