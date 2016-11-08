@@ -17,24 +17,29 @@
 package org.openmole.gui.server.core
 
 import javax.servlet.annotation.MultipartConfig
-import javax.servlet.http.{ HttpServletResponse, HttpServletRequest }
 
-import org.openmole.core.workspace.Workspace
 import org.scalatra._
-import org.scalatra.auth.{ ScentryConfig, ScentrySupport }
-import org.scalatra.auth.strategy.{ BasicAuthSupport, BasicAuthStrategy }
+import org.scalatra.auth.{ ScentryConfig, ScentryStrategy, ScentrySupport }
+import org.scalatra.auth.strategy.BasicAuthSupport
 import org.scalatra.servlet.{ FileItem, FileUploadSupport }
 import org.scalatra.util.MultiMapHeadView
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.openmole.gui.shared.Api
+
 import scala.concurrent.duration._
 import scala.concurrent.Await
 import scalatags.Text.all._
 import scalatags.Text.{ all ⇒ tags }
 import java.io.File
+
+import org.openmole.core.workspace.Workspace
+import org.openmole.gui.ext.data.OpenMOLEScript
 import org.openmole.tool.file._
 import org.openmole.tool.stream._
 import org.openmole.tool.tar._
+import rx.Var
+
 import scala.util.{ Failure, Success, Try }
 
 object AutowireServer extends autowire.Server[String, upickle.default.Reader, upickle.default.Writer] {
@@ -49,13 +54,60 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
   val basePath = "org/openmole/gui/shared"
   val apiImpl = new ApiImpl
 
+  //FIXME val connectedUsers: Var[Seq[UserID]] = Var(Seq())
+  val connected = Var(false)
+  val USER_ID = "UserID"
+
+  def connection = html("ScriptClient().connection();")
+
+  def application = html("ScriptClient().run();")
+
+  def html(javascritMethod: String) = tags.html(
+    tags.head(
+      tags.meta(tags.httpEquiv := "content-type", tags.content := "text/html; charset=UTF-8"),
+      cssFiles.map { f ⇒ tags.link(tags.rel := "stylesheet", tags.`type` := "text/css", href := "css/" + f) },
+      tags.script(tags.`type` := "text/javascript", tags.src := "js/openmole.js"),
+      tags.script(tags.`type` := "text/javascript", tags.src := "js/deps.js")
+    ),
+    tags.body(tags.onload := javascritMethod)
+  )
+
   // Get all the css files in the workspace (it is not working with js because of the order)
   val cssFiles = new File(GUIServer.resourcePath, "css").listFilesSafe.map {
     _.getName
   }.sorted
 
-  before() {
-    if (arguments.passwordCorrect.isDefined && Workspace.passwordChosen) basicAuth().foreach(u ⇒ Workspace.setPassword(u.password))
+  /* def isLoggedIn: Boolean =
+    //FIXME
+  userIDFromSession.map {
+    connectedUsers.now.contains
+  }.getOrElse(false)*/
+
+  def recordUser(u: UserID) = {
+    session.put(USER_ID, u)
+    // connectedUsers() = connectedUsers.now :+ u
+  }
+
+  def userIDFromSession =
+    session.getAttribute(USER_ID) match {
+      case u: UserID ⇒ Some(u)
+      case _         ⇒ None
+    }
+
+  protected def basicAuth(pass: String) = {
+    val baReq = new OpenMOLEtrategy(this, () ⇒ {
+      arguments.passwordCorrect(pass) && Workspace.passwordChosen
+    })
+    val rep = baReq.authenticate()
+    rep match {
+      case Some(u: UserID) ⇒
+        response.setHeader("WWW-Authenticate", "OpenMOLE realm=\"%s\"" format realm)
+        // recordUser(u)
+        connected() = true
+        Ok()
+      case _ ⇒
+        redirect("/connection")
+    }
   }
 
   get("/shutdown") {
@@ -115,18 +167,39 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
   }
 
   get("/") {
+    redirect("/app")
+  }
+
+  get("/connection") {
+    if (connected.now) redirect("/app")
+    else {
+      response.setHeader("Access-Control-Allow-Origin", "*")
+      response.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, UPDATE, OPTIONS")
+      response.setHeader("Access-Control-Allow-Headers", "Content-Type, Accept, X-Requested-With")
+      contentType = "text/html"
+      connection
+    }
+  }
+
+  post("/connection") {
+    response.setHeader("Access-Control-Allow-Origin", "*")
+    response.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, UPDATE, OPTIONS")
+    response.setHeader("Access-Control-Allow-Headers", "Content-Type, Accept, X-Requested-With")
+
+    val password = params.getOrElse("password", "")
+    val passwordAgain = params.getOrElse("passwordagain", "")
+    connected() = Utils.setPassword(password, passwordAgain)
+
+    connected.now match {
+      case true ⇒ redirect("/app")
+      case _    ⇒ redirect("/connection")
+    }
+  }
+
+  get("/app") {
     contentType = "text/html"
-    tags.html(
-      tags.head(
-        tags.meta(tags.httpEquiv := "content-type", tags.content := "text/html; charset = ISO-8859-1"),
-        cssFiles.map { f ⇒ tags.link(tags.rel := "stylesheet", tags.`type` := "text/css", href := "css/" + f) },
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/openmole.js"),
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/deps.js")
-      ),
-      tags.body(
-        tags.onload := "ScriptClient().run();"
-      )
-    )
+    if (connected.now) application
+    else redirect("/connection")
   }
 
   def parseParams(toTest: Seq[String], evaluated: Map[String, String] = Map(), errors: Seq[Throwable] = Seq()): (Map[String, String], Seq[Throwable]) = {
@@ -150,7 +223,9 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
   }
 }
 
-case class User(id: String, password: String)
+case class UserID(id: String)
+
+case class User(id: UserID, password: String)
 
 trait AuthenticationSupport extends ScentrySupport[User] with BasicAuthSupport[User] {
   this: GUIServlet ⇒
@@ -162,7 +237,7 @@ trait AuthenticationSupport extends ScentrySupport[User] with BasicAuthSupport[U
   }
 
   protected def toSession = {
-    case usr: User ⇒ usr.id
+    case usr: User ⇒ usr.id.id
   }
 
   protected val scentryConfig = (new ScentryConfig {}).asInstanceOf[ScentryConfiguration]
@@ -173,18 +248,8 @@ trait AuthenticationSupport extends ScentrySupport[User] with BasicAuthSupport[U
     }
   }
 
-  override protected def registerAuthStrategies = {
+  /*override protected def registerAuthStrategies = {
     scentry.register("Basic", app ⇒ new OurBasicAuthStrategy(app, realm))
-  }
-
-  class OurBasicAuthStrategy(protected override val app: ScalatraBase, realm: String)
-      extends BasicAuthStrategy[User](app, realm) {
-
-    override protected def validate(userName: String, password: String)(implicit request: HttpServletRequest, response: HttpServletResponse): Option[User] = {
-      if (arguments.passwordCorrect.get(password)) Some(User(userName, password)) else None
-    }
-
-    override protected def getUserId(user: User)(implicit request: HttpServletRequest, response: HttpServletResponse): String = user.id
-  }
+  }*/
 
 }

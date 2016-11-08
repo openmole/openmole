@@ -35,7 +35,6 @@ trait Api {
   def isPasswordCorrect(pass: String): Boolean
   def passwordState(): PasswordState
   def resetPassword(): Unit
-  def setPassword(pass: String): Boolean
   def getConfigurationValue(configData: ConfigData): Option[String]
   def setConfigurationValue(configData: ConfigData, value: String): Unit
 

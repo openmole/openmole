@@ -1,24 +1,23 @@
 package org.openmole.gui.client.core
 
-import org.openmole.gui.client.core.alert.{ AlertPanel, AbsolutePositioning }
-import AbsolutePositioning.CenterPagePosition
-import org.openmole.gui.shared.Api
-import org.scalajs.dom.raw.{ KeyboardEvent, HTMLElement, HTMLFormElement }
+import org.openmole.gui.client.core.alert.AlertPanel
 import org.openmole.gui.client.core.panels._
-import scalatags.JsDom.{ tags ⇒ tags }
-import org.openmole.gui.misc.js.OMTags
-import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
-import bs._
+
+import scalatags.JsDom.tags
 import scala.scalajs.js.annotation.JSExport
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
-import autowire._
 import org.openmole.gui.misc.js.JsRxTags._
 import org.scalajs.dom
 import rx._
+
 import scalatags.JsDom.all._
+import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
 import org.openmole.gui.misc.utils.{ stylesheet ⇒ omsheet }
 import sheet._
+import bs._
+import org.openmole.gui.misc.js.OMTags
+import org.scalajs.dom.KeyboardEvent
+import scala.concurrent.ExecutionContext.Implicits.global
 
 /*
  * Copyright (C) 15/04/15 // mathieu.leclaire@openmole.org
@@ -41,124 +40,24 @@ import sheet._
 object ScriptClient {
 
   @JSExport
+  def connection(): Unit = {
+
+    val connection = new Connection
+
+    dom.document.body.appendChild(connection.connectionDiv)
+    dom.document.body.appendChild(AlertPanel.alertDiv)
+  }
+
+  @JSExport
   def run(): Unit = {
 
     implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
-    val alert: Var[Boolean] = Var(false)
-
-    val shutdownButton = span(
-      omsheet.resetBlock,
-      a(onclick := { () ⇒
-        alert() = true
-      }, omsheet.resetPassword)("Reset password"),
-      a(
-        omsheet.shutdownButton,
-        bs.glyphSpan(glyph_off, onclickAction = () ⇒
-          AlertPanel.string(
-            "This will stop the server, the application will no longer be usable. Halt anyway?",
-            () ⇒ {
-              treeNodePanel.fileDisplayer.tabs.saveAllTabs(() ⇒
-                dom.window.location.href = "shutdown")
-            },
-            transform = CenterPagePosition
-          ))
-      )
-    )
-
-    val passwordChosen = Var(true)
-    val passwordOK = Var(false)
-
-    OMPost[Api].passwordState().call().foreach { b ⇒
-      passwordChosen() = b.chosen
-      passwordOK() = b.hasBeenSet
-    }
 
     val body = dom.document.body
     val maindiv = body.appendChild(tags.div())
-
-    val passwordInput = bs.input("")(
-      placeholder := "Password",
-      `type` := "password",
-      width := "130px",
-      autofocus := true
-    ).render
-
-    val passwordAgainInput = bs.input("")(
-      placeholder := "Password again",
-      `type` := "password",
-      width := "130px",
-      autofocus
-    ).render
-
-    def cleanInputs = {
-      passwordInput.value = ""
-      passwordAgainInput.value = ""
-    }
-
-    def resetPassword = OMPost[Api].resetPassword().call().foreach { b ⇒
-      passwordChosen() = false
-      passwordOK() = false
-      cleanInputs
-    }
+    val shutDown = new ShutDown
 
     val authenticationPanel = new AuthenticationPanel
-
-    def setPassword(s: String) = OMPost[Api].setPassword(s).call().foreach { b ⇒
-      passwordOK() = b
-      cleanInputs
-    }
-
-    lazy val connectButton = bs.button("Connect", btn_primary, () ⇒ connection).render
-
-    def connection: Unit = {
-      if (passwordChosen.now) setPassword(passwordInput.value)
-      else if (passwordInput.value == passwordAgainInput.value) {
-        passwordChosen() = true
-        setPassword(passwordInput.value)
-      }
-      else cleanInputs
-    }
-
-    def connectionForm(i: HTMLElement): HTMLFormElement =
-      tags.form(i, `type` := "submit", onsubmit := { () ⇒
-        connection
-        false
-      }).render
-
-    val connectionDiv = div(
-      shutdownButton,
-      Rx {
-        div(
-          if (!passwordOK()) omsheet.connectionTabOverlay
-          else omsheet.displayOff
-        )(div(
-            img(src := "img/openmole.png", omsheet.openmoleLogo),
-            div(
-              if (!passwordOK()) omsheet.centerPage else emptyMod,
-              div(
-                if (alert())
-                  AlertPanel.string(
-                  "Careful! Resetting your password will wipe out all your preferences! Reset anyway?",
-                  () ⇒ {
-                    alert() = false
-                    resetPassword
-                  }, () ⇒ {
-                    alert() = false
-                  }, CenterPagePosition
-                )
-                else {
-                  div(
-                    omsheet.connectionBlock,
-                    connectionForm(passwordInput),
-                    if (!passwordChosen()) connectionForm(passwordAgainInput) else div(),
-                    connectButton
-                  )
-                }
-              )
-            )
-          ))
-      }
-    )
 
     val openFileTree = Var(true)
 
@@ -205,7 +104,7 @@ object ScriptClient {
         docItem
       )
     )
-    maindiv.appendChild(tags.div(shutdownButton))
+    maindiv.appendChild(tags.div(shutDown.shutdownButton))
     maindiv.appendChild(executionTriggerer.modalPanel.dialog.render)
     maindiv.appendChild(modelWizardTriggerer.modalPanel.dialog.render)
     maindiv.appendChild(authenticationTriggerer.modalPanel.dialog.render)
@@ -252,7 +151,6 @@ object ScriptClient {
       )
     }
 
-    body.appendChild(connectionDiv)
     body.appendChild(maindiv)
   }
 

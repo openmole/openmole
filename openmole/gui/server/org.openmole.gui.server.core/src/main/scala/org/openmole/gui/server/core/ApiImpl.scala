@@ -93,17 +93,9 @@ class ApiImpl extends Api {
   //WORKSPACE
   def isPasswordCorrect(pass: String): Boolean = Workspace.passwordIsCorrect(pass)
 
-  def passwordState() = PasswordState(chosen = Workspace.passwordChosen, hasBeenSet = Workspace.passwordHasBeenSet)
+  def passwordState = Utils.passwordState
 
   def resetPassword(): Unit = Workspace.reset
-
-  def setPassword(pass: String): Boolean = try {
-    Workspace.setPassword(pass)
-    true
-  }
-  catch {
-    case e: UserBadDataError ⇒ false
-  }
 
   // FILES
   def addDirectory(safePath: SafePath, directoryName: String): Boolean = {
@@ -192,7 +184,9 @@ class ApiImpl extends Api {
       import org.openmole.gui.ext.data.ServerFileSytemContext.absolute
 
       val toTest: Seq[SafePath] = if (sps.size == 1) sps.flatMap { f ⇒
-        if (f.isDirectory) f.listFiles.map { fileToSafePath }
+        if (f.isDirectory) f.listFiles.map {
+          fileToSafePath
+        }
         else Seq(f)
       }
       else sps
@@ -392,7 +386,10 @@ class ApiImpl extends Api {
   def marketIndex() = {
     def mapToMd(marketIndex: MarketIndex) =
       marketIndex.copy(entries = marketIndex.entries.map {
-        e ⇒ e.copy(readme = e.readme.map { MarkDownProcessor(_) })
+        e ⇒
+          e.copy(readme = e.readme.map {
+            MarkDownProcessor(_)
+          })
       })
 
     mapToMd(market.marketIndex)
@@ -543,7 +540,9 @@ class ApiImpl extends Api {
 
   def expandResources(resources: Resources): Resources = {
     import org.openmole.gui.ext.data.ServerFileSytemContext.project
-    val paths = safePath(resources.all.map { _.safePath }).distinct.map { sp ⇒ Resource(sp, safePathToFile(sp).length) }
+    val paths = safePath(resources.all.map {
+      _.safePath
+    }).distinct.map { sp ⇒ Resource(sp, safePathToFile(sp).length) }
     val implicitResource = resources.implicits.map { r ⇒
       Resource(safePath(r.safePath), safePathToFile(r.safePath).length)
     }

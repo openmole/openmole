@@ -21,18 +21,22 @@ import java.io.File
 import java.lang.reflect.Modifier
 import java.nio.channels.FileChannel
 import java.util.logging.Level
-import java.util.zip.{ ZipInputStream, GZIPInputStream }
+import java.util.zip.{ GZIPInputStream, ZipInputStream }
+
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.workspace.Workspace
 import org.openmole.gui.ext.data
 import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.data.ListSorting._
 import java.io._
+
 import org.openmole.tool.file._
 import org.openmole.tool.stream._
 import org.openmole.tool.stream.StringOutputStream
 import org.openmole.tool.tar._
 import java.nio.file.attribute._
+
+import org.openmole.core.exception.UserBadDataError
 
 import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
 
@@ -386,4 +390,21 @@ object Utils {
       }.get
     }.opt.get
 
+  def passwordState = PasswordState(chosen = Workspace.passwordChosen, hasBeenSet = Workspace.passwordHasBeenSet)
+
+  def setPassword(pass: String, passAgain: String): Boolean = {
+    try {
+      def set = {
+        Workspace.setPassword(pass)
+        true
+      }
+
+      if (passwordState.chosen) set
+      else if (pass == passAgain) set
+      else false
+    }
+    catch {
+      case e: UserBadDataError ⇒ false
+    }
+  }
 }
