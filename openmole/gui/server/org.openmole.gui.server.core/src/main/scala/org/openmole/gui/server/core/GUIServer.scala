@@ -50,7 +50,7 @@ object GUIServer {
   lazy val urlFile = Workspace.file("GUI.url")
 
   val servletArguments = "servletArguments"
-  case class ServletArguments(passwordCorrect: Option[String ⇒ Boolean] = None, applicationControl: ApplicationControl)
+  case class ServletArguments(passwordCorrect: String ⇒ Boolean, applicationControl: ApplicationControl)
   case class ApplicationControl(restart: () ⇒ Unit, stop: () ⇒ Unit)
 
   sealed trait ExitStatus
@@ -61,7 +61,7 @@ object GUIServer {
 
 import GUIServer._
 
-class GUIServer(port: Int, authentication: Boolean) {
+class GUIServer(port: Int, localhost: Boolean) {
 
   val server = new Server()
   var exitStatus: GUIServer.ExitStatus = GUIServer.Ok
@@ -77,18 +77,17 @@ class GUIServer(port: Int, authentication: Boolean) {
 
   val connector = new ServerConnector(server, contextFactory)
   connector.setPort(port)
-  if (!authentication) connector.setHost("localhost")
+  if (!localhost) connector.setHost("localhost")
 
   server.addConnector(connector)
 
   val context = new WebAppContext()
-  val authenticationMethod = if (authentication) Some(GUIServer.isPasswordCorrect _) else None
   val applicationControl =
     ApplicationControl(
       () ⇒ { exitStatus = GUIServer.Restart; stop() },
       () ⇒ stop()
     )
-  context.setAttribute(GUIServer.servletArguments, GUIServer.ServletArguments(authenticationMethod, applicationControl))
+  context.setAttribute(GUIServer.servletArguments, GUIServer.ServletArguments(GUIServer.isPasswordCorrect, applicationControl))
   context.setContextPath("/")
   context.setResourceBase(resourcePath)
   context.setClassLoader(classOf[GUIServer].getClassLoader)
