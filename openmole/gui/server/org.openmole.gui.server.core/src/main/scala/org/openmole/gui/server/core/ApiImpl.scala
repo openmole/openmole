@@ -5,14 +5,14 @@ import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.zip.GZIPInputStream
 
-import org.openmole.plugin.environment.batch.environment.BatchEnvironment.{ BeginDownload, BeginUpload, EndDownload, EndUpload }
+import org.openmole.plugin.environment.batch.environment.BatchEnvironment.{BeginDownload, BeginUpload, EndDownload, EndUpload}
 import org.openmole.core.buildinfo
 import org.openmole.core.event._
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.pluginmanager._
 import org.openmole.gui.misc.utils.Utils._
 import org.openmole.gui.server.core.Utils._
-import org.openmole.core.workspace.{ ConfigurationLocation, Workspace }
+import org.openmole.core.workspace.{ConfigurationLocation, Workspace}
 import org.openmole.gui.shared._
 import org.openmole.gui.ext.data
 import org.openmole.gui.ext.data._
@@ -20,9 +20,9 @@ import java.io._
 import java.nio.file._
 
 import fr.iscpif.gridscale.http.HTTPStorage
-import org.openmole.core.market.{ MarketIndex, MarketIndexEntry }
+import org.openmole.core.market.{MarketIndex, MarketIndexEntry}
 
-import scala.util.{ Failure, Success, Try }
+import scala.util.{Failure, Success, Try}
 import org.openmole.core.workflow.mole.MoleExecutionContext
 import org.openmole.tool.stream.StringPrintStream
 
@@ -52,7 +52,7 @@ import rx._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class ApiImpl extends Api {
+class ApiImpl(val arguments: GUIServer.ServletArguments) extends Api {
 
   val outputSize = ConfigurationLocation[Int]("gui", "outputsize", Some(10 * 1024 * 1024))
 
@@ -73,6 +73,10 @@ class ApiImpl extends Api {
     )
   }
 
+  def shutdown = arguments.applicationControl.stop()
+
+  def restart = arguments.applicationControl.restart()
+
   //AUTHENTICATIONS
   def addAuthentication(data: AuthenticationData): Unit = AuthenticationFactories.addAuthentication(data)
 
@@ -86,8 +90,8 @@ class ApiImpl extends Api {
         if (vos.isEmpty) Seq(EGIAuthenticationTest("empty VO", AuthenticationTest.empty, AuthenticationTest.empty, AuthenticationTest.empty))
         else AuthenticationFactories.testEGIAuthentication(d, vos)
       case lp: LoginPasswordAuthenticationData ⇒ AuthenticationFactories.testLoginPasswordSSHAuthentication(lp)
-      case pk: PrivateKeyAuthenticationData    ⇒ AuthenticationFactories.testPrivateKeySSHAuthentication(pk)
-      case _                                   ⇒ Seq(AuthenticationTestBase(false, Error("Cannot test this authentication")))
+      case pk: PrivateKeyAuthenticationData ⇒ AuthenticationFactories.testPrivateKeySSHAuthentication(pk)
+      case _ ⇒ Seq(AuthenticationTestBase(false, Error("Cannot test this authentication")))
     }
 
   //WORKSPACE
@@ -151,7 +155,7 @@ class ApiImpl extends Api {
 
   def extractTGZ(safePath: SafePath): ExtractResult = DataUtils.fileToExtension(safePath.name) match {
     case FileExtension.TGZ | FileExtension.TAR ⇒ extractTGZTo(safePath, safePath.parent)
-    case _                                     ⇒ unknownFormat(safePath.name)
+    case _ ⇒ unknownFormat(safePath.name)
   }
 
   def temporaryFile(): SafePath = {
@@ -255,7 +259,7 @@ class ApiImpl extends Api {
 
     DataUtils.fileToExtension(safePath.name) match {
       case FileExtension.MD ⇒ MarkDownProcessor(safePathToFile(safePath).content)
-      case _                ⇒ ""
+      case _ ⇒ ""
     }
   }
 
@@ -310,8 +314,8 @@ class ApiImpl extends Api {
       val project = new Project(script.getParentFileSafe)
       project.compile(script, Seq.empty) match {
         case ScriptFileDoesNotExists() ⇒ message("Script file does not exist")
-        case ErrorInCode(e)            ⇒ error(e)
-        case ErrorInCompiler(e)        ⇒ error(e)
+        case ErrorInCode(e) ⇒ error(e)
+        case ErrorInCompiler(e) ⇒ error(e)
         case compiled: Compiled ⇒
 
           val outputStream = StringPrintStream(Some(Workspace.preference(outputSize)))
@@ -461,17 +465,17 @@ class ApiImpl extends Api {
   def methods(jarPath: SafePath, className: String): Seq[JarMethod] = Utils.jarMethods(jarPath, className)
 
   def buildModelTask(
-    executableName: String,
-    scriptName:     String,
-    command:        String,
-    language:       Language,
-    inputs:         Seq[ProtoTypePair],
-    outputs:        Seq[ProtoTypePair],
-    path:           SafePath,
-    imports:        Option[String],
-    libraries:      Option[String],
-    resources:      Resources
-  ): SafePath = {
+                      executableName: String,
+                      scriptName: String,
+                      command: String,
+                      language: Language,
+                      inputs: Seq[ProtoTypePair],
+                      outputs: Seq[ProtoTypePair],
+                      path: SafePath,
+                      imports: Option[String],
+                      libraries: Option[String],
+                      resources: Resources
+                    ): SafePath = {
     import org.openmole.gui.ext.data.ServerFileSytemContext.project
     val modelTaskFile = new File(path, scriptName + ".oms")
 
@@ -502,8 +506,8 @@ class ApiImpl extends Api {
         "  //Default values. Can be removed if OpenMOLE Vals are set by values coming from the workflow\n" +
           (inputs.map { p ⇒ (p.name, testBoolean(p)) } ++
             ifilemappings.map { p ⇒ (p.name, " workDirectory / \"" + p.mapping.getOrElse("") + "\"") }).filterNot {
-              _._2.isEmpty
-            }.map { p ⇒ default(p._1, p._2) }.mkString(",\n")
+            _._2.isEmpty
+          }.map { p ⇒ default(p._1, p._2) }.mkString(",\n")
 
       language.taskType match {
         case ctt: CareTaskType ⇒
@@ -556,6 +560,6 @@ class ApiImpl extends Api {
 
   def testBoolean(protoType: ProtoTypePair) = protoType.`type` match {
     case ProtoTYPE.BOOLEAN ⇒ if (protoType.default == "1") "true" else "false"
-    case _                 ⇒ protoType.default
+    case _ ⇒ protoType.default
   }
 }

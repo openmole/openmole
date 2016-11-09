@@ -61,6 +61,12 @@ package object stylesheet {
     margin := "0 auto"
   )
 
+  lazy val shutdown: ModifierSeq = Seq(
+    color(DARK_GREY),
+    fontStyle := "italic",
+    sheet.paddingTop(40),
+    sheet.marginLeft(-25)
+  )
   // SCRIPT CLIENT
   lazy val connectionTabOverlay: ModifierSeq = Seq(
     background := "white none repeat scroll 0 0",

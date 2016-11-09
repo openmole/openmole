@@ -24,6 +24,8 @@ trait Api {
 
   //GENERAL
   def settings(): OMSettings
+  def shutdown(): Unit
+  def restart(): Unit
 
   //AUTHENTICATIONS
   def authentications(): Seq[AuthenticationData]

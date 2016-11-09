@@ -52,7 +52,13 @@ object AutowireServer extends autowire.Server[String, upickle.default.Reader, up
 class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServlet with FileUploadSupport with AuthenticationSupport {
 
   val basePath = "org/openmole/gui/shared"
-  val apiImpl = new ApiImpl
+  val apiImpl = new ApiImpl(arguments)
+
+  val connectionRoute = "/connection"
+  val shutownRoute = "/shutdown"
+  val appRoute = "/app"
+  val downloadFileRoute = "/downloadFile"
+  val uploadFilesRoute = "/uploadFiles"
 
   //FIXME val connectedUsers: Var[Seq[UserID]] = Var(Seq())
   val connected = Var(false)
@@ -61,6 +67,8 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
   def connection = html("ScriptClient().connection();")
 
   def application = html("ScriptClient().run();")
+
+  def stopped = html("ScriptClient().stopped();")
 
   def html(javascritMethod: String) = tags.html(
     tags.head(
@@ -110,12 +118,11 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
     }
   }
 
-  get("/shutdown") {
-    val restart = Try(params("restart").toBoolean).getOrElse(false)
-    if (restart) arguments.applicationControl.restart() else arguments.applicationControl.stop()
+  get(shutownRoute) {
+    stopped
   }
 
-  post("/uploadfiles") {
+  post(uploadFilesRoute) {
     def move(fileParams: MultiMapHeadView[String, FileItem], fileType: String) = {
       def copyTo(rootFile: File) =
         for (file ← fileParams) yield {
@@ -143,7 +150,7 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
     move(fileParams, params("fileType"))
   }
 
-  get("/downloadFile") {
+  get(downloadFileRoute) {
     val path = new java.net.URI(null, null, params("path"), null).getPath
     val f = new File(Utils.webUIProjectFile, path)
 
@@ -167,10 +174,10 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
   }
 
   get("/") {
-    redirect("/app")
+    redirect(appRoute)
   }
 
-  get("/connection") {
+  get(connectionRoute) {
     if (connected.now) redirect("/app")
     else {
       response.setHeader("Access-Control-Allow-Origin", "*")
@@ -181,7 +188,7 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
     }
   }
 
-  post("/connection") {
+  post(connectionRoute) {
     response.setHeader("Access-Control-Allow-Origin", "*")
     response.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, UPDATE, OPTIONS")
     response.setHeader("Access-Control-Allow-Headers", "Content-Type, Accept, X-Requested-With")
@@ -191,15 +198,15 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
     connected() = Utils.setPassword(password, passwordAgain)
 
     connected.now match {
-      case true ⇒ redirect("/app")
-      case _    ⇒ redirect("/connection")
+      case true ⇒ redirect(appRoute)
+      case _    ⇒ redirect(connectionRoute)
     }
   }
 
-  get("/app") {
+  get(appRoute) {
     contentType = "text/html"
     if (connected.now) application
-    else redirect("/connection")
+    else redirect(connectionRoute)
   }
 
   def parseParams(toTest: Seq[String], evaluated: Map[String, String] = Map(), errors: Seq[Throwable] = Seq()): (Map[String, String], Seq[Throwable]) = {

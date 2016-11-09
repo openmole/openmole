@@ -1,7 +1,5 @@
 package org.openmole.gui.client.core
 
-import java.net.URI
-
 import fr.iscpif.scaladget.stylesheet.all._
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
@@ -9,14 +7,12 @@ import autowire._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import org.openmole.gui.misc.utils.{ stylesheet ⇒ omsheet }
 import org.openmole.gui.shared.Api
-import org.scalajs.dom.raw.{ HTMLElement, HTMLFormElement }
+import org.scalajs.dom.raw.HTMLFormElement
 import rx.{ Rx, Var }
 
 import scalatags.JsDom.all._
 import scalatags.JsDom.tags
 import org.openmole.gui.misc.js.JsRxTags._
-import org.apache.http.client.methods._
-import org.apache.http.impl.client.HttpClientBuilder
 
 /*
  * Copyright (C) 07/11/16 // mathieu.leclaire@openmole.org
@@ -75,7 +71,6 @@ class Connection {
     passwordChosen() = false
     cleanInputs
   }
-
 
   def connectionForm: HTMLFormElement =
     tags.form(

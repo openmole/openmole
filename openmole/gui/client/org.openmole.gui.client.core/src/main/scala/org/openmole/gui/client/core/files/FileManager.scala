@@ -69,7 +69,7 @@ object FileManager {
       inputElement.value = ""
     }
 
-    xhr.open("POST", "uploadfiles", true)
+    xhr.open("POST", "uploadFiles", true)
     xhr.send(formData)
   }
 

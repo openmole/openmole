@@ -16,8 +16,14 @@ import org.openmole.gui.misc.utils.{ stylesheet ⇒ omsheet }
 import sheet._
 import bs._
 import org.openmole.gui.misc.js.OMTags
+import org.openmole.gui.shared.Api
 import org.scalajs.dom.KeyboardEvent
-import scala.concurrent.ExecutionContext.Implicits.global
+
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+import autowire._
+
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 
 /*
  * Copyright (C) 15/04/15 // mathieu.leclaire@openmole.org
@@ -46,6 +52,22 @@ object ScriptClient {
 
     dom.document.body.appendChild(connection.connectionDiv)
     dom.document.body.appendChild(AlertPanel.alertDiv)
+  }
+
+  @JSExport
+  def stopped(): Unit = {
+    dom.document.body.appendChild(
+      div(omsheet.connectionTabOverlay)(
+        div(
+          img(src := "img/openmole.png", omsheet.openmoleLogo),
+          div(
+            omsheet.centerPage,
+            div(omsheet.shutdown, "The OpenMOLE server has been stopped"),
+            onload := { () ⇒ OMPost[Api].shutdown().call() }
+          )
+        )
+      )
+    )
   }
 
   @JSExport
@@ -114,7 +136,7 @@ object ScriptClient {
     maindiv.appendChild(docTriggerer.modalPanel.dialog.render)
     maindiv.appendChild(AlertPanel.alertDiv)
 
-    Settings.settings.foreach { settings ⇒
+    Settings.settings.foreach { sets ⇒
       maindiv.appendChild(
         tags.div(`class` := "fullpanel")(
         tags.div(
@@ -143,8 +165,8 @@ object ScriptClient {
               tags.div(
                 fontSize := "1em",
                 fontWeight := "bold"
-              )(s"${settings.version} ${settings.versionName}"),
-              tags.div(fontSize := "0.8em")(s"built the ${settings.buildTime}")
+              )(s"${sets.version} ${sets.versionName}"),
+              tags.div(fontSize := "0.8em")(s"built the ${sets.buildTime}")
             )
           )
       ).render
