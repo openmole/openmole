@@ -7,9 +7,13 @@ import autowire._
 import org.openmole.gui.client.core.alert.AbsolutePositioning.{ FileZone, RelativeCenterPosition }
 import org.openmole.gui.client.core.alert.AlertPanel
 
-import scala.concurrent.Future
+import scala.concurrent.{ Await, Future }
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
+
+import scala.async.Async
+import scala.concurrent.duration._
+import scala.concurrent.stm.CommitBarrier.Timeout
 
 /*
  * Copyright (C) 22/12/15 // mathieu.leclaire@openmole.org
