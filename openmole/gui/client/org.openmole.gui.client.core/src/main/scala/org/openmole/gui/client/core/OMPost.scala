@@ -27,12 +27,16 @@ object OMPost extends autowire.Client[String, upickle.default.Reader, upickle.de
     val url = req.path.mkString("/")
     val host = window.document.location.host
 
-    ext.Ajax.post(
+    val future = ext.Ajax.post(
       url = s"https://$host/$url",
       data = upickle.default.write(req.args)
     ).map {
         _.responseText
       }
+
+    future.onFailure { case (t: Throwable) ⇒ println(s"The request ${req.path.last} has not been completed succesfully. Please check your connection.") }
+
+    future
   }
 
   def read[Result: upickle.default.Reader](p: String) = upickle.default.read[Result](p)
