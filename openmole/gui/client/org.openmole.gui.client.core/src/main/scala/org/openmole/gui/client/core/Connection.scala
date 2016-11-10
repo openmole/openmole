@@ -1,6 +1,6 @@
 package org.openmole.gui.client.core
 
-import fr.iscpif.scaladget.stylesheet.all._
+import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
@@ -9,7 +9,7 @@ import org.openmole.gui.misc.utils.{ stylesheet ⇒ omsheet }
 import org.openmole.gui.shared.Api
 import org.scalajs.dom.raw.HTMLFormElement
 import rx.{ Rx, Var }
-
+import sheet._
 import scalatags.JsDom.all._
 import scalatags.JsDom.tags
 import org.openmole.gui.misc.js.JsRxTags._
@@ -46,7 +46,7 @@ class Connection {
     placeholder := "Password",
     `type` := "password",
     width := "130px",
-    marginBottom := 15,
+    sheet.marginBottom(15),
     name := "password",
     autofocus := true
   ).render
