@@ -247,7 +247,7 @@ lazy val csv = OsgiProject(pluginDir, "org.openmole.plugin.tool.csv", imports = 
   defaultActivator
 ) settings(toolsSettings: _*)
 
-lazy val pattern = OsgiProject(pluginDir, "org.openmole.plugin.tool.pattern", imports = Seq("*")) dependsOn (exception, openmoleDSL) settings (defaultActivator) settings(toolsSettings: _*)
+lazy val pattern = OsgiProject(pluginDir, "org.openmole.plugin.tool.pattern", imports = Seq("*")) dependsOn (exception, openmoleDSL) settings(toolsSettings: _*) settings (defaultActivator)
 
 lazy val sftpserver = OsgiProject(pluginDir, "org.openmole.plugin.tool.sftpserver", imports = Seq("*")) dependsOn (tools) settings (libraryDependencies += Libraries.sshd) settings(toolsSettings: _*)
 
