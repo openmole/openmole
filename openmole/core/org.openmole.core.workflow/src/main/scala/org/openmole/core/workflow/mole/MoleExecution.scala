@@ -70,7 +70,7 @@ object MoleExecution extends Logger {
     seed:               Long                        = Workspace.newSeed,
     defaultEnvironment: LocalEnvironment            = LocalEnvironment(),
     cleanOnFinish:      Boolean                     = true,
-    executionContext:   MoleExecutionContext        = MoleExecutionContext.default
+    executionContext:   MoleExecutionContext        = MoleExecutionContext()
   ) =
     new MoleExecution(
       mole,
@@ -185,6 +185,7 @@ class MoleExecution(
   def allWaiting = atomic { implicit txn ⇒ numberOfJobs <= nbWaiting() }
 
   def start(context: Context): this.type = {
+    executionContext.tmpDirectory.mkdirs()
     _started.single() = true
     _startTime.single() = Some(System.currentTimeMillis)
     EventDispatcher.trigger(this, new MoleExecution.Starting)
