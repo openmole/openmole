@@ -22,10 +22,6 @@ import java.io.{ File, PrintStream }
 import org.openmole.core.output.OutputManager
 import org.openmole.core.workspace.Workspace
 
-object MoleExecutionContext {
-  def default = MoleExecutionContext()
-}
-
 case class MoleExecutionContext(
   out:          PrintStream = OutputManager.systemOutput,
   tmpDirectory: File        = Workspace.newDir("execution")

@@ -73,7 +73,7 @@ object MoleTask {
         seed = rng().nextLong(),
         implicits = implicitsValues,
         defaultEnvironment = executionContext.localEnvironment,
-        executionContext = MoleExecutionContext.default.copy(tmpDirectory = executionContext.tmpDirectory.newDir("moletask")),
+        executionContext = MoleExecutionContext(tmpDirectory = executionContext.tmpDirectory.newDir("moletask")),
         cleanOnFinish = false
       )
 

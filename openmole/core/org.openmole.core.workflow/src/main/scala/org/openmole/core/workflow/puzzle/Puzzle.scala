@@ -159,7 +159,7 @@ case class Puzzle(
   def toExecution(
     implicits:          Context              = Context.empty,
     seed:               Long                 = Workspace.newSeed,
-    executionContext:   MoleExecutionContext = MoleExecutionContext.default,
+    executionContext:   MoleExecutionContext = MoleExecutionContext(),
     defaultEnvironment: LocalEnvironment     = LocalEnvironment()
   ): MoleExecution =
     MoleExecution(
