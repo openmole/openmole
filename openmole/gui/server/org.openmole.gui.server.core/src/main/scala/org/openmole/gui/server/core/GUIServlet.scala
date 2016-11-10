@@ -55,7 +55,7 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
   val apiImpl = new ApiImpl(arguments)
 
   val connectionRoute = "/connection"
-  val shutownRoute = "/shutdown"
+  val shutdownRoute = "/shutdown"
   val appRoute = "/app"
   val downloadFileRoute = "/downloadFile"
   val uploadFilesRoute = "/uploadFiles"
@@ -118,7 +118,7 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
     }
   }
 
-  get(shutownRoute) {
+  get(shutdownRoute) {
     stopped
   }
 
