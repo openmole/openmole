@@ -46,6 +46,7 @@ class Connection {
     placeholder := "Password",
     `type` := "password",
     width := "130px",
+    marginBottom := 15,
     name := "password",
     autofocus := true
   ).render
