@@ -765,7 +765,7 @@ lazy val dockerBin = Project("docker", binDir / "docker") enablePlugins(sbtdocke
     copy((assemble in openmole).value, s"/usr/lib/openmole")
     runRaw("chmod +x /usr/lib/openmole/openmole")
     runRaw("cd /usr/bin/ && ln -s ../lib/openmole/openmole")
-    expose(443)
+    expose(8443)
     user("openmole")
     cmdShell("openmole", "--port", "8443" ,"--remote")
   }
