@@ -81,17 +81,17 @@ lazy val scalaLang = OsgiProject(
   global = true,
   exports = Seq("akka.*", "com.typesafe.*", "scala.*", "scalax.*", "jline.*"),
   privatePackages = Seq("*"), imports = Seq("!org.apache.tools.ant.*", "!sun.misc.*" ,"*")) settings
-  (libraryDependencies <++= (scalaVersion) { sV ⇒
+  (libraryDependencies ++= {
     Seq(
       "org.scala-lang.modules" %% "scala-xml" % "1.0.6",
-      "org.scala-lang" % "scala-library" % sV,
-      "org.scala-lang" % "scala-reflect" % sV,
-      "org.scala-lang" % "scalap" % sV,
+      "org.scala-lang" % "scala-library" % scalaVersion.value,
+      "org.scala-lang" % "scala-reflect" % scalaVersion.value,
+      "org.scala-lang" % "scalap" % scalaVersion.value,
       "jline" % "jline" % "2.12.1",
       "org.scala-stm" %% "scala-stm" % "0.7",
       "com.typesafe" % "config" % "1.2.1",
       "com.github.scala-incubator.io" %% "scala-io-core" % "0.4.3",
-      "org.scala-lang" % "scala-compiler" % sV
+      "org.scala-lang" % "scala-compiler" % scalaVersion.value
     )
   }, version := scalaVersion.value) settings(settings: _*)
 
