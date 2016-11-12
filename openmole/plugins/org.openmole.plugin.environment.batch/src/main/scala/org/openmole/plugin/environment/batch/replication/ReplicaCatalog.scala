@@ -46,12 +46,14 @@ object ReplicaCatalog extends Logger {
   val ReplicaCacheTime = ConfigurationLocation("ReplicaCatalog", "ReplicaCacheTime", Some(30 minutes))
   val ReplicaGraceTime = ConfigurationLocation("ReplicaCatalog", "ReplicaGraceTime", Some(1 day))
   val LockTimeout = ConfigurationLocation("ReplicaCatalog", "LockTimeout", Some(1 minute))
+  val CheckFileExistsInterval = ConfigurationLocation("ReplicaCatalog", "CheckFileExistsInterval", Some(1 hour))
 
   Workspace setDefault NoAccessCleanTime
   Workspace setDefault InCatalogCacheTime
   Workspace setDefault ReplicaCacheTime
   Workspace setDefault ReplicaGraceTime
   Workspace setDefault LockTimeout
+  Workspace setDefault CheckFileExistsInterval
 
   lazy val replicationPattern = Pattern.compile("(\\p{XDigit}*)_.*")
 
@@ -119,7 +121,7 @@ object ReplicaCatalog extends Logger {
           @tailrec def uploadAndInsertIfNotInCatalog: Replica = {
             //Remove deleted replicas
             def stillExists(r: Replica) =
-              if (r.lastCheckExists + Workspace.preference(BatchEnvironment.CheckFileExistsInterval).toMillis < System.currentTimeMillis) {
+              if (r.lastCheckExists + Workspace.preference(CheckFileExistsInterval).toMillis < System.currentTimeMillis) {
                 Try(storage.exists(r.path)) match {
                   case Success(e) ⇒ e
                   case _          ⇒ false

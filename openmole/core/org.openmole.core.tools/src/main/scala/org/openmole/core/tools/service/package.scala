@@ -17,7 +17,7 @@
 
 package org.openmole.core.tools
 
-import java.time.{Duration => JDuration}
+import java.time.{ Duration ⇒ JDuration }
 import java.util.UUID
 
 import org.openmole.tool.random.Random
