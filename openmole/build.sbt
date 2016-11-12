@@ -32,7 +32,8 @@ def defaultSettings = BuildSystem.settings ++
   )
 
 
-publishTo in ThisBuild <<= isSnapshot(if (_) Some("OpenMOLE Nexus" at "https://maven.openmole.org/snapshots") else Some("OpenMOLE Nexus" at "https://maven.openmole.org/releases"))
+publishTo in ThisBuild :=
+  (if (isSnapshot.value) Some("OpenMOLE Nexus" at "https://maven.openmole.org/snapshots") else Some("OpenMOLE Nexus" at "https://maven.openmole.org/releases"))
 
 
 /* ------ Third parties ---------- */
@@ -183,7 +184,7 @@ lazy val console = OsgiProject(coreDir, "org.openmole.core.console", bundleActiv
 lazy val project = OsgiProject(coreDir, "org.openmole.core.project", imports = Seq("*")) dependsOn (console, openmoleDSL) settings (OsgiKeys.importPackage := Seq("*")) settings(coreSettings: _*)
 
 lazy val buildinfo = OsgiProject(coreDir, "org.openmole.core.buildinfo", imports = Seq("*")) settings (buildInfoSettings: _*) settings (
-  sourceGenerators in Compile <+= buildInfo,
+  sourceGenerators in Compile += buildInfo.taskValue,
   buildInfoKeys :=
   Seq[BuildInfoKey](
     name,
@@ -213,7 +214,7 @@ def allPlugin =
 
 def allTools = Seq(netLogoAPI, netLogo5API, csv, pattern, sftpserver)
 
-lazy val defaultActivator = OsgiKeys.bundleActivator <<= (name) { n ⇒ Some(n + ".Activator") }
+lazy val defaultActivator = OsgiKeys.bundleActivator := Some(name.value + ".Activator")
 
 def pluginSettings =
   defaultSettings ++  Seq(
@@ -587,24 +588,26 @@ lazy val openmoleNaked =
   Project("openmole-naked", binDir / "openmole-naked", settings = tarProject ++ assemblySettings) settings (
     setExecutable ++= Seq("openmole", "openmole.bat"),
     Osgi.bundleDependencies in Compile := OsgiKeys.bundle.all(ScopeFilter(inDependencies(ThisProject, includeRoot = false))).value,
-    resourcesAssemble <+= (resourceDirectory in Compile, assemblyPath).identityMap,
-    resourcesAssemble <+= (resourceDirectory in serverGUI in Compile, assemblyPath) map { case (r, p) ⇒ (r / "webapp") → (p / "webapp") },
-    resourcesAssemble <+= (fullOptJS in clientGUI in Compile, assemblyPath) map { case (js, p) ⇒ js.data → (p / "webapp/js/openmole.js") },
-    resourcesAssemble <+= (packageMinifiedJSDependencies in clientGUI in Compile, assemblyPath) map { case (js, p) ⇒ js → (p / "webapp/js/deps.js") },
-    resourcesAssemble <+= (assemble in dbServer, assemblyPath) map { case (r, p) ⇒ r → (p / "dbserver") },
-    resourcesAssemble <+= (Tar.tar in openmoleRuntime, assemblyPath) map { case (r, p) ⇒ r → (p / "runtime" / r.getName) },
-    resourcesAssemble <+= (assemble in launcher, assemblyPath) map { case (r, p) ⇒ r → (p / "launcher") },
-    resourcesAssemble <++= (Osgi.bundleDependencies in Compile, assemblyPath) map { case (bs, a) ⇒ bs.map(b ⇒ b → (a / "plugins" / b.getName)) },
+    resourcesAssemble += (resourceDirectory in Compile).value -> assemblyPath.value,
+    resourcesAssemble += ((resourceDirectory in serverGUI in Compile).value / "webapp") → (assemblyPath.value / "webapp"),
+    resourcesAssemble += (fullOptJS in clientGUI in Compile).value.data -> (assemblyPath.value / "webapp/js/openmole.js"),
+    resourcesAssemble += (packageMinifiedJSDependencies in clientGUI in Compile).value -> (assemblyPath.value / "webapp/js/deps.js"),
+    resourcesAssemble += (assemble in dbServer).value ->(assemblyPath.value / "dbserver"),
+    resourcesAssemble += {
+      val tar = (Tar.tar in openmoleRuntime).value
+      tar -> (assemblyPath.value / "runtime" / tar.getName)
+    },
+    resourcesAssemble += (assemble in launcher).value -> (assemblyPath.value / "launcher"),
+    resourcesAssemble ++= (Osgi.bundleDependencies in Compile).value.map(b ⇒ b → (assemblyPath.value / "plugins" / b.getName)),
     libraryDependencies += Libraries.logging,
     dependencyFilter := bundleFilter,
     dependencyName := rename,
     assemblyDependenciesPath := assemblyPath.value / "plugins",
     Tar.name := "openmole-naked.tar.gz",
     Tar.innerFolder := "openmole",
-    cleanFiles <++= cleanFiles in dbServer,
-    cleanFiles <++= cleanFiles in launcher,
-    cleanFiles <++= cleanFiles in openmoleRuntime
-  ) dependsOn (toDependencies(openmoleNakedDependencies): _*) settings (defaultSettings: _*)
+    cleanFiles ++= (cleanFiles in dbServer).value,
+    cleanFiles ++= (cleanFiles in launcher).value,
+    cleanFiles ++= (cleanFiles in openmoleRuntime).value) dependsOn (toDependencies(openmoleNakedDependencies): _*) settings (defaultSettings: _*)
 
 lazy val openmole =
   Project("openmole", binDir / "openmole", settings = tarProject ++ assemblySettings) settings (defaultSettings: _*) settings (
@@ -614,16 +617,15 @@ lazy val openmole =
     Tar.innerFolder := "openmole",
     dependencyFilter := bundleFilter,
     dependencyName := rename,
-    resourcesAssemble <+= (assemble in openmoleNaked, assemblyPath).identityMap,
-    resourcesAssemble <++= (Osgi.bundleDependencies in Compile, assemblyPath) map { case (bs, a) ⇒ bs.map(b ⇒ b → (a / "plugins" / b.getName)) },
+    resourcesAssemble += (assemble in openmoleNaked).value -> assemblyPath.value,
+    resourcesAssemble ++= (Osgi.bundleDependencies in Compile).value.map(b ⇒ b → (assemblyPath.value / "plugins" / b.getName)),
     assemblyDependenciesPath := assemblyPath.value / "plugins",
-    cleanFiles <++= cleanFiles in openmoleNaked
-  ) dependsOn (toDependencies(openmoleDependencies): _*)
+    cleanFiles ++= (cleanFiles in openmoleNaked).value) dependsOn (toDependencies(openmoleDependencies): _*)
 
 lazy val dbServer = OsgiProject(binDir, "org.openmole.dbserver", settings = assemblySettings) dependsOn (replication) settings (
   assemblyDependenciesPath := assemblyPath.value / "lib",
-  resourcesAssemble <+= (resourceDirectory in Compile, assemblyPath) map { case (r, p) ⇒ r → (p / "bin") },
-  resourcesAssemble <++= (Osgi.bundleDependencies in Compile, assemblyPath) map { case (bs, a) ⇒ bs.map(b ⇒ b → (a / "lib" / b.getName)) },
+  resourcesAssemble += (resourceDirectory in Compile).value -> (assemblyPath.value / "bin"),
+  resourcesAssemble ++= (Osgi.bundleDependencies in Compile).value.map(b ⇒ b → (assemblyPath.value / "lib" / b.getName)),
   libraryDependencies ++= Seq(
     Libraries.xstream,
     Libraries.slick,
@@ -638,9 +640,9 @@ lazy val dbServer = OsgiProject(binDir, "org.openmole.dbserver", settings = asse
 lazy val openmoleRuntime =
   OsgiProject(binDir, "org.openmole.runtime", singleton = true, imports = Seq("*"), settings = tarProject ++ assemblySettings) dependsOn (workflow, communication, serializer, logging, event, exception) settings (
     assemblyDependenciesPath := assemblyPath.value / "plugins",
-    resourcesAssemble <+= (resourceDirectory in Compile, assemblyPath) map { case (r, p) ⇒ r → p },
-    resourcesAssemble <+= (assemble in launcher, assemblyPath) map { case (r, p) ⇒ r → (p / "launcher") },
-    resourcesAssemble <++= (Osgi.bundleDependencies in Compile, assemblyPath) map { case (bs, a) ⇒ bs.map(b ⇒ b → (a / "plugins" / b.getName)) },
+    resourcesAssemble += (resourceDirectory in Compile).value -> assemblyPath.value,
+    resourcesAssemble += (assemble in launcher).value -> (assemblyPath.value / "launcher"),
+    resourcesAssemble ++= (Osgi.bundleDependencies in Compile).value.map(b ⇒ b → (assemblyPath.value / "plugins" / b.getName)),
     setExecutable ++= Seq("run.sh"),
     Tar.name := "runtime.tar.gz",
     libraryDependencies += Libraries.scopt,
@@ -653,9 +655,9 @@ lazy val openmoleRuntime =
 lazy val daemon = OsgiProject(binDir, "org.openmole.daemon", settings = tarProject ++ assemblySettings) dependsOn (workflow, workflow, communication, workspace,
   fileService, exception, tools, logging, desktopgrid) settings (
     assemblyDependenciesPath := assemblyPath.value / "plugins",
-    resourcesAssemble <++= (Osgi.bundleDependencies in Compile, assemblyPath) map { case (bs, a) ⇒ bs.map(b ⇒ b → (a / "plugins" / b.getName)) },
-    resourcesAssemble <+= (resourceDirectory in Compile, assemblyPath) map { case (r, p) ⇒ r → p },
-    resourcesAssemble <+= (assemble in launcher, assemblyPath) map { case (r, p) ⇒ r → (p / "launcher") },
+    resourcesAssemble ++= (Osgi.bundleDependencies in Compile).value.map(b ⇒ b → (assemblyPath.value / "plugins" / b.getName)),
+    resourcesAssemble += (resourceDirectory in Compile).value ->assemblyPath.value,
+    resourcesAssemble += (assemble in launcher).value -> (assemblyPath.value / "launcher"),
     libraryDependencies ++= Seq(
       Libraries.sshd,
       Libraries.gridscale,
@@ -681,7 +683,7 @@ lazy val api = Project("api", binDir / "target" / "api") settings (defaultSettin
     UnidocKeys.unidocProjectFilter in (ScalaUnidoc, UnidocKeys.unidoc) :=
       inProjects(openmoleDependencies.map(p ⇒ p: ProjectReference): _*), /*-- inProjects(Libraries.projects.map(p ⇒ p: ProjectReference) ++ ThirdParties.projects.map(p ⇒ p: ProjectReference)*/
     Tar.name := "openmole-api.tar.gz",
-    Tar.folder <<= (UnidocKeys.unidoc in Compile).map(_.head)
+    Tar.folder := (UnidocKeys.unidoc in Compile).map(_.head).value
   )
 
 lazy val site =
@@ -706,19 +708,31 @@ lazy val site =
       libraryDependencies += Libraries.logging,
       setExecutable ++= Seq("site"),
       assemblyDependenciesPath := assemblyPath.value / "plugins",
-      resourcesAssemble <++= (Osgi.bundleDependencies in Compile, assemblyPath) map { case (bs, a) ⇒ bs.map(b ⇒ b → (a / "plugins" / b.getName)) },
-      resourcesAssemble <+= (resourceDirectory in Compile, assemblyPath) map { case (r, p) ⇒ (r / "site") → (p / "site") },
-      resourcesAssemble <+= (resourceDirectory in Compile, assemblyPath) map { case (r, p) ⇒ r → (p / "resources") },
-      resourcesAssemble <+= (sourceDirectory in Compile, assemblyPath) map { case (r, p) ⇒ (r / "md") → (p / "resources" / "md") },
-      resourcesAssemble <+= (OsgiKeys.bundle, assemblyPath) map { case (r, p) ⇒ r → (p / "plugins" / r.getName) },
-      resourcesAssemble <+= (assemble in launcher, assemblyPath) map { case (r, p) ⇒ r → (p / "launcher") },
-      resourcesAssemble <+= (Tar.tar in openmole, assemblyPath) map { case (f, d) ⇒ f → (d / "resources" / f.getName) },
-      resourcesAssemble <+= (Tar.tar in daemon, assemblyPath) map { case (f, d) ⇒ f → (d / "resources" / f.getName) },
-      resourcesAssemble <+= (Tar.tar in api, assemblyPath) map { case (doc, d) ⇒ doc → (d / "resources" / doc.getName) },
-      resourcesAssemble <+= (fullOptJS in siteJS in Compile, assemblyPath) map { case (js, d) ⇒ js.data → (d / "resources" / "sitejs.js") },
+      resourcesAssemble ++= (Osgi.bundleDependencies in Compile).value.map(b ⇒ b → (assemblyPath.value / "plugins" / b.getName)),
+      resourcesAssemble += ((resourceDirectory in Compile).value / "site") -> (assemblyPath.value / "site"),
+      resourcesAssemble += (resourceDirectory in Compile).value -> (assemblyPath.value / "resources"),
+      resourcesAssemble += ((sourceDirectory in Compile).value / "md") -> (assemblyPath.value / "resources" / "md"),
+      resourcesAssemble += {
+        val bundle =  OsgiKeys.bundle.value
+        bundle -> (assemblyPath.value / "plugins" / bundle.getName)
+      },
+      resourcesAssemble += (assemble in launcher).value -> (assemblyPath.value / "launcher"),
+      resourcesAssemble += {
+        val tar = (Tar.tar in openmole).value
+        tar -> (assemblyPath.value / "resources" / tar.getName)
+      },
+      resourcesAssemble += {
+        val tar = (Tar.tar in daemon).value
+        tar -> (assemblyPath.value / "resources" / tar.getName)
+      },
+      resourcesAssemble += {
+        val tar = (Tar.tar in api).value
+        tar -> (assemblyPath.value / "resources" / tar.getName)
+      },
+      resourcesAssemble += (fullOptJS in siteJS in Compile).value.data -> (assemblyPath.value / "resources" / "sitejs.js"),
       dependencyFilter := bundleFilter,
       dependencyName := rename,
-      cleanFiles <++= cleanFiles in openmole
+      cleanFiles ++= (cleanFiles in openmole).value
     ) dependsOn (txtmark) dependsOn (toDependencies(openmoleNakedDependencies): _*) dependsOn (toDependencies(openmoleDependencies): _*)
 
 
@@ -733,7 +747,10 @@ lazy val siteJS = OsgiProject(binDir, "org.openmole.sitejs") settings (
 lazy val launcher = OsgiProject(binDir, "org.openmole.launcher", imports = Seq("*"), settings = assemblySettings) settings (
   autoScalaLibrary := false,
   libraryDependencies += Libraries.equinoxOSGi,
-  resourcesAssemble <+= (OsgiKeys.bundle, assemblyPath) map { case (f, d) ⇒ f → (d / f.getName) }
+  resourcesAssemble += {
+    val bundle = (OsgiKeys.bundle).value
+    bundle -> (assemblyPath.value / bundle.getName)
+  }
 ) settings (defaultSettings: _*)
 
 
