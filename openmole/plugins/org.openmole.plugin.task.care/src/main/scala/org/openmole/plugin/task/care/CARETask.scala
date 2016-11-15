@@ -93,6 +93,8 @@ object CARETask extends Logger {
   override protected def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = external.withWorkDir(executionContext) { taskWorkDirectory ⇒
     taskWorkDirectory.mkdirs()
 
+    def rootfs = "rootfs"
+
     // unarchiving in task's work directory
     // no need to retrieve error => will throw exception if failing
     execute(Array(archive.getAbsolutePath), taskWorkDirectory, Seq.empty, Context.empty, true, true)
@@ -131,13 +133,13 @@ object CARETask extends Logger {
       leafs(taskWorkDirectory / "inputs", "").map { case (f, b) ⇒ f.getAbsolutePath → b } ++
         hostFiles.map { case (f, b) ⇒ f → b.getOrElse(f) }
 
-    def createDestination(binding: (String, String), baseDir: String = "rootfs") = {
+    def createDestination(binding: (String, String)) = {
       import org.openmole.tool.file.{ File ⇒ OMFile }
       val (f, b) = binding
 
-      if (OMFile(f).isDirectory) (OMFile(baseDir) / b).mkdirs()
+      if (OMFile(f).isDirectory) (taskWorkDirectory / rootfs / b).mkdirs()
       else {
-        val dest = OMFile(baseDir) / b
+        val dest = taskWorkDirectory / rootfs / b
         dest.getParentFileSafe.mkdirs()
         dest.createNewFile()
       }
@@ -178,7 +180,7 @@ object CARETask extends Logger {
                  |[${commandline.mkString(" ")}] return code was not 0 but ${executionResult.returnCode}""".stripMargin
       )
 
-    def rootDirectory = extractedArchive / "rootfs"
+    def rootDirectory = extractedArchive / rootfs
 
     def outputPathResolver(filePath: String): File = {
       def isAbsolute = new File(filePath).isAbsolute
