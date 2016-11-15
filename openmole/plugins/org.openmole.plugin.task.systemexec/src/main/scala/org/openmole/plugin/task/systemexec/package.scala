@@ -184,7 +184,7 @@ package object systemexec extends external.ExternalPackage with SystemExecPackag
     context:                        Context,
     returnOutput:                   Boolean,
     returnError:                    Boolean,
-    additionalEnvironmentVariables: Vector[(String, String)] = Vector.empty
+    additionalEnvironmentVariables: Vector[(String, String)]    = Vector.empty
   ) = {
     try {
 
