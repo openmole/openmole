@@ -22,7 +22,7 @@ object Assembly {
   lazy val tarProject: Seq[Setting[_]] = Seq(
     Tar.name := "assemble.tar.gz",
     Tar.innerFolder := "",
-    Tar.tar <<= (Tar.folder, streams, target, Tar.name, Tar.innerFolder, streams) map tarImpl
+    Tar.tar := tarImpl(Tar.folder.value, target.value, Tar.name.value, Tar.innerFolder.value, streams.value)
   )
 
   private def recursiveCopy(from: File, to: File, streams: TaskStreams): Unit = {
@@ -82,24 +82,27 @@ object Assembly {
     setExecutable := Seq.empty,
     assemblyPath := target.value / "assemble",
     assemblyDependenciesPath := assemblyPath.value,
-    assemble <<=
-      (assemblyPath, setExecutable) map {
-        (path, files) ⇒
-          files.foreach(f ⇒ new File(path, f).setExecutable(true))
-          path
-      } dependsOn (copyResources in assemble, (downloads, assemblyPath, ivyPaths, streams) map urlDownloader),
-    Tar.folder <<= assemble,
+    assemble := {
+      (copyResources in assemble).value
+      urlDownloader(downloads.value, assemblyPath.value, ivyPaths.value, streams.value)
+      setExecutable.value.foreach(f ⇒ new File(assemblyPath.value, f).setExecutable(true))
+      assemblyPath.value
+    },
+    Tar.folder := assemble.value,
     dependencyName := { (_: ModuleID).name + ".jar" },
     dependencyFilter := { (_, _) ⇒ true },
-    (copyResources in assemble) <<=
-      (resourcesAssemble, streams) map {
-        case (resources, s) ⇒
-          resources.map { case (from, to) ⇒ copyFileTask(from, to, s) }
-      },
-    (copyResources in assemble) <++= ( /*dependencyClasspath in Compile,*/ externalDependencyClasspath in Compile, assemblyDependenciesPath, dependencyName, dependencyFilter, streams) map copyLibraryDependencies
+    (copyResources in assemble) := resourcesAssemble.value.map { case (from, to) ⇒ copyFileTask(from, to, streams.value) },
+    (copyResources in assemble) ++=
+      copyLibraryDependencies(
+        (externalDependencyClasspath in Compile).value,
+        assemblyDependenciesPath.value,
+        dependencyName.value,
+        dependencyFilter.value,
+        streams.value
+      )
   )
 
-  def tarImpl(folder: File, s: TaskStreams, t: File, name: String, innerFolder: String, streams: TaskStreams): File = {
+  def tarImpl(folder: File, t: File, name: String, innerFolder: String, streams: TaskStreams): File = {
     val out = t / name
 
     val tgzOS = managed {
@@ -114,7 +117,7 @@ object Assembly {
 
     val fn = FileFunction.cached(t / "zip-cache", FilesInfo.lastModified, FilesInfo.exists) {
       fileSet ⇒
-        s.log.info("Zipping:\n\t")
+        streams.log.info("Zipping:\n\t")
 
         val lCP = folder
 
@@ -124,7 +127,7 @@ object Assembly {
           is ← managed(Source.fromFile(file)(scala.io.Codec.ISO8859))
         } {
           val relativeFile = innerFolder + "/" + (file relativeTo lCP).get.getPath
-          s.log.info("\t - " + relativeFile)
+          streams.log.info("\t - " + relativeFile)
 
           val entry = new TarArchiveEntry(file, relativeFile)
           entry.setSize(file.length)

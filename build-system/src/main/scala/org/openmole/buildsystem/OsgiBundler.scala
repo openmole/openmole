@@ -10,18 +10,18 @@ object OsgiProject {
   protected val bundleMap = Map("Bundle-ActivationPolicy" → "lazy")
 
   protected def osgiSettings = SbtOsgi.autoImport.osgiSettings ++ Seq(
-    OsgiKeys.bundleSymbolicName <<= (name, Osgi.singleton) { case (name, singleton) ⇒ name + ";singleton:=" + singleton },
+    OsgiKeys.bundleSymbolicName := (name.value + ";singleton:=" + Osgi.singleton.value),
     autoAPIMappings := true,
 
     Osgi.bundleDependencies in Compile := OsgiKeys.bundle.all(ScopeFilter(inDependencies(ThisProject))).value,
 
     Osgi.openMOLEScope := None,
-    OsgiKeys.bundleVersion <<= version,
-    OsgiKeys.exportPackage <<= name { n ⇒ Seq(n + ".*") },
+    OsgiKeys.bundleVersion := version.value,
+    OsgiKeys.exportPackage := (name { n ⇒ Seq(n + ".*") }).value,
     OsgiKeys.bundleActivator := None,
 
-    install in Compile <<= publishLocal in Compile,
-    installRemote in Compile <<= publish in Compile,
+    install in Compile := (publishLocal in Compile).value,
+    installRemote in Compile := (publish in Compile).value,
     bundleType := Set("default")
   )
 
@@ -45,19 +45,19 @@ object OsgiProject {
       name := artifactId,
       Osgi.singleton := singleton,
       OsgiKeys.exportPackage := exportedPackages,
-      OsgiKeys.additionalHeaders <<=
-        (Osgi.openMOLEScope) {
+      OsgiKeys.additionalHeaders :=
+        ((Osgi.openMOLEScope) {
           omScope ⇒
             Map[String, String]() +
               ("Bundle-ActivationPolicy" → "lazy") ++
               omScope.map(os ⇒ "OpenMOLE-Scope" → os) ++
               (if (global) Some("Eclipse-BuddyPolicy" → "global") else None)
-        },
+        }).value,
       OsgiKeys.requireCapability := """osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))""""",
       OsgiKeys.privatePackage := privatePackages,
       OsgiKeys.dynamicImportPackage := dynamicImports,
       OsgiKeys.importPackage := imports,
-      OsgiKeys.bundleActivator <<= OsgiKeys.bundleActivator { bA ⇒ bundleActivator.orElse(bA) }
+      OsgiKeys.bundleActivator := (OsgiKeys.bundleActivator { bA ⇒ bundleActivator.orElse(bA) }).value
     )
   }
 }

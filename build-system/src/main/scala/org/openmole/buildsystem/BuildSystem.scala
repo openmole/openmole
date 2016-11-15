@@ -20,13 +20,12 @@ object BuildSystem {
 
   protected lazy val scalariformDefaults =
     Seq(
-      ScalariformKeys.preferences in Compile <<= ScalariformKeys.preferences(p ⇒
+      ScalariformKeys.preferences in Compile := ScalariformKeys.preferences(p ⇒
         p.setPreference(DoubleIndentClassDeclaration, true)
           .setPreference(RewriteArrowSymbols, true)
           .setPreference(AlignParameters, true)
           .setPreference(AlignSingleLineCaseStatements, true)
-          .setPreference(CompactControlReadability, true)
-          .setPreference(PreserveDanglingCloseParenthesis, true))
+          .setPreference(CompactControlReadability, true)).value
     ) ++ scalariformSettings
 
 }

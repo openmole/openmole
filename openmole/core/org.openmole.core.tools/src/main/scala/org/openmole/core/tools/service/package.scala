@@ -18,6 +18,7 @@
 package org.openmole.core.tools
 
 import java.time.{ Duration ⇒ JDuration }
+import java.util.UUID
 
 import org.openmole.tool.random.Random
 
@@ -26,10 +27,11 @@ import scala.concurrent.duration.Duration
 
 package object service {
 
-  def localRuntimeInfo = RuntimeInfo(LocalHostName.localHostName)
+  @transient lazy val localRuntimeInfo =
+    RuntimeInfo(LocalHostName.localHostName.toOption.getOrElse("fake:" + UUID.randomUUID().toString))
+
   case class RuntimeInfo(hostName: String)
 
-  def localHostName = LocalHostName.localHostName
   def newRNG(seed: Long) = Random(seed)
 
   def stringToDuration(s: String): FiniteDuration = JDuration.parse(s).getSeconds seconds

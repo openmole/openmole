@@ -18,23 +18,15 @@
 package org.openmole.core.tools.service
 
 import java.net.InetAddress
-import java.util.UUID
 
 import org.openmole.tool.logger.Logger
 
-object LocalHostName extends Logger {
+import scala.util.Try
 
-  import Log._
+object LocalHostName {
 
   @transient
-  lazy val localHostName =
-    try {
-      InetAddress.getLocalHost.getCanonicalHostName
-    }
-    catch {
-      case ex: Throwable ⇒
-        logger.log(WARNING, "Was not able to get local host name.", ex)
-        UUID.randomUUID.toString
-    }
+  lazy val localHostName: Try[String] =
+    Try { InetAddress.getLocalHost.getCanonicalHostName }
 
 }

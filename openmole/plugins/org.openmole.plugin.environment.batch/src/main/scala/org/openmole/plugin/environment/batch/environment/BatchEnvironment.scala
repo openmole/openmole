@@ -93,8 +93,6 @@ object BatchEnvironment extends Logger {
 
   val CheckInterval = ConfigurationLocation("BatchEnvironment", "CheckInterval", Some(1 minute))
 
-  val CheckFileExistsInterval = ConfigurationLocation("BatchEnvironment", "CheckFileExistsInterval", Some(1 hour))
-
   val GetTokenInterval = ConfigurationLocation("BatchEnvironment", "GetTokenInterval", Some(1 minute))
 
   val MinUpdateInterval = ConfigurationLocation("BatchEnvironment", "MinUpdateInterval", Some(1 minute))
@@ -122,7 +120,6 @@ object BatchEnvironment extends Logger {
 
   Workspace setDefault MemorySizeForRuntime
   Workspace setDefault CheckInterval
-  Workspace setDefault CheckFileExistsInterval
   Workspace setDefault JobManagementThreads
 
   Workspace setDefault StoragesGCUpdateInterval

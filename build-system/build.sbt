@@ -3,13 +3,12 @@ import com.typesafe.sbt.SbtScalariform.ScalariformKeys
 
 scalariformSettings
 
-ScalariformKeys.preferences <<= ScalariformKeys.preferences (p =>
+ScalariformKeys.preferences := ScalariformKeys.preferences (p =>
   p.setPreference(DoubleIndentClassDeclaration, true)
   .setPreference(RewriteArrowSymbols, true)
   .setPreference(AlignParameters, true)
   .setPreference(AlignSingleLineCaseStatements, true)
-  .setPreference(CompactControlReadability, true)
-  .setPreference(PreserveDanglingCloseParenthesis, true))
+  .setPreference(CompactControlReadability, true)).value
 
 scalacOptions += "-optimize"
 
