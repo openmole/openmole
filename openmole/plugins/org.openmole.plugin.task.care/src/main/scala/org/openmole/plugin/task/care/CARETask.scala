@@ -167,8 +167,11 @@ object CARETask extends Logger {
 
     val commandline = commandLine(expandedCommand.map(s"./${reExecute.getName} " + _), userWorkDirectory, preparedContext)
 
+    def prootNoSeccomp = ("PROOT_NO_SECCOMP", "1")
+
     // FIXME duplicated from SystemExecTask
-    val executionResult = execute(commandline, extractedArchive, environmentVariables, preparedContext, stdOut.isDefined, stdErr.isDefined)
+    val executionResult = execute(commandline, extractedArchive, environmentVariables, preparedContext, stdOut.isDefined, stdErr.isDefined, additionalEnvironmentVariables = Vector(prootNoSeccomp))
+
     if (errorOnReturnValue && returnValue.isEmpty && executionResult.returnCode != 0)
       throw new InternalProcessingError(
         s"""Error executing command":
