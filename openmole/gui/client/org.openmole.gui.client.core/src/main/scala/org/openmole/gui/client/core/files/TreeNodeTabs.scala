@@ -117,12 +117,10 @@ object TreeNodeTabs {
 
     lazy val overlayElement = tags.div
 
-    val block = Var(
-      div(
-        editorElement,
-        controlElement,
-        overlayElement
-      )
+    def block = div(
+      editorElement,
+      controlElement,
+      overlayElement
     )
 
     def fileContent = AlterableOnDemandFileContent(safePathTab.now, editor.code, () ⇒ editable.now)
