@@ -18,7 +18,9 @@
 package org.openmole.core.workspace
 
 import java.io.File
+import java.util.concurrent.locks.ReentrantReadWriteLock
 
+import org.openmole.tool.lock._
 import org.openmole.tool.file._
 import org.apache.commons.configuration2._
 import org.apache.commons.configuration2.builder._
@@ -42,28 +44,44 @@ class ConfigurationLocation[T](val group: String, val name: String, _default: â‡
   override def toString = s"$group.$name"
 }
 
-class ConfigurationFile(val file: File) {
-
-  @transient lazy val config = {
-    val params = new Parameters
-    val builder =
-      new ReloadingFileBasedConfigurationBuilder[FileBasedConfiguration](classOf[PropertiesConfiguration]).
-        configure(params.fileBased().setFile(file).setSynchronizer(new ReadWriteSynchronizer()))
-    builder.setAutoSave(true)
-    builder.getConfiguration
+object ConfigurationFile {
+  def apply(file: File) = {
+    if (file.createNewFile) file.setPosixMode("rw-------")
+    new ConfigurationFile(file)
   }
 
-  def value(group: String, name: String): Option[String] =
+}
+
+class ConfigurationFile private (val file: File) {
+
+  @transient private lazy val lock = new ReentrantReadWriteLock()
+
+  @transient private lazy val builder = {
+    val params = new Parameters
+    new ReloadingFileBasedConfigurationBuilder(classOf[PropertiesConfiguration]).
+      configure(params.fileBased().setFile(file))
+  }
+
+  private def config = builder.getConfiguration
+
+  def value(group: String, name: String): Option[String] = lock.read {
     Option(config.getString(s"$group.$name"))
+  }
 
-  def setValue(group: String, name: String, value: String) =
+  def setValue(group: String, name: String, value: String) = lock.write {
     config.setProperty(s"$group.$name", value)
+    builder.save()
+  }
 
-  def setCommentedValue(group: String, name: String, value: String) =
-    config.setProperty(s"#$group.$name", value)
+  def setCommentedValue(group: String, name: String, value: String) = lock.read {
+    def key = s"..default..$group.$name"
+    config.setProperty(key, value)
+    builder.save()
+  }
 
-  def clear() = {
+  def clear(): Unit = lock.write {
     file.content = ""
+    builder.resetResult()
   }
 
 }

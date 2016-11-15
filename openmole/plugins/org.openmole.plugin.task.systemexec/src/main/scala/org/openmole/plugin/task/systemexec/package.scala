@@ -178,12 +178,13 @@ package object systemexec extends external.ExternalPackage with SystemExecPackag
     CommandLine.parse(cmd.from(context + Variable(External.PWD, workDir))).toStrings
 
   def execute(
-    command:              Array[String],
-    workDir:              File,
-    environmentVariables: Seq[(Prototype[_], String)],
-    context:              Context,
-    returnOutput:         Boolean,
-    returnError:          Boolean
+    command:                        Array[String],
+    workDir:                        File,
+    environmentVariables:           Seq[(Prototype[_], String)],
+    context:                        Context,
+    returnOutput:                   Boolean,
+    returnError:                    Boolean,
+    additionalEnvironmentVariables: Vector[(String, String)]    = Vector.empty
   ) = {
     try {
 
@@ -197,7 +198,10 @@ package object systemexec extends external.ExternalPackage with SystemExecPackag
 
       import collection.JavaConversions._
       val inheritedEnvironment = System.getenv.map { case (key, value) ⇒ s"$key=$value" }.toArray
-      val openmoleEnvironment = environmentVariables.map { case (p, v) ⇒ v + "=" + context(p).toString }.toArray
+
+      val openmoleEnvironment =
+        (environmentVariables.map { case (variable, name) ⇒ (name, context(variable).toString) } ++ additionalEnvironmentVariables).
+          map { case (name, value) ⇒ name + "=" + value }.toArray
 
       //FIXES java.io.IOException: error=26
       val process = runtime.synchronized {

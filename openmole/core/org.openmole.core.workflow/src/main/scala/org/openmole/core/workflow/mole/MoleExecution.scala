@@ -182,6 +182,7 @@ class MoleExecution(
   def allWaiting = atomic { implicit txn ⇒ numberOfJobs <= nbWaiting() }
 
   def start(context: Context): this.type = {
+    tmpDirectory.mkdirs()
     _started.single() = true
     _startTime.single() = Some(System.currentTimeMillis)
     EventDispatcher.trigger(this, new MoleExecution.Starting)
