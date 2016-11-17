@@ -1,21 +1,7 @@
 package org.openmole.gui.client.core
 
-import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
-
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
-import autowire._
-import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
-import org.openmole.gui.misc.utils.{ stylesheet ⇒ omsheet }
-import org.openmole.gui.shared.Api
-import org.scalajs.dom.raw.HTMLFormElement
-import rx.{ Rx, Var }
-import sheet._
-import scalatags.JsDom.all._
-import scalatags.JsDom.tags
-import org.openmole.gui.misc.js.JsRxTags._
-
 /*
- * Copyright (C) 07/11/16 // mathieu.leclaire@openmole.org
+ * Copyright (C) 15/11/16 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -31,11 +17,22 @@ import org.openmole.gui.misc.js.JsRxTags._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class Connection {
+import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
 
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+import autowire._
+import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
+import org.openmole.gui.misc.utils.{ stylesheet ⇒ omsheet }
+import org.openmole.gui.shared.Api
+import org.scalajs.dom.raw.HTMLFormElement
+import rx.Rx
+import sheet._
+import scalatags.JsDom.all._
+import scalatags.JsDom.tags
+import org.openmole.gui.misc.js.JsRxTags._
+
+class ResetPassword {
   val shutDown = new ShutDown
-
-  lazy val connectButton = tags.button("Connect", btn_primary, `type` := "submit").render
 
   val passwordInput = bs.input("")(
     placeholder := "Password",
@@ -46,18 +43,28 @@ class Connection {
     autofocus := true
   ).render
 
-  def cleanInputs = {
-    passwordInput.value = ""
-  }
-
-  def connectionForm: HTMLFormElement =
-    tags.form(
-      method := "post",
-      passwordInput,
-      connectButton
+  val passwordAgainInput =
+    bs.input("")(
+      placeholder := "Password again",
+      `type` := "password",
+      width := "130px",
+      name := "passwordagain",
+      autofocus
     ).render
 
-  val connectionDiv = div(
+  lazy val resetButton = bs.button("Set password", btn_primary, () ⇒ {
+    OMPost[Api].resetPassword().call()
+    ()
+  }).render
+
+  def setPasswordForm: HTMLFormElement =
+    tags.form(
+      passwordInput,
+      passwordAgainInput,
+      resetButton
+    ).render
+
+  val resetPassDiv = div(
     shutDown.shutdownButton,
     Rx {
       div(omsheet.connectionTabOverlay)(
@@ -71,7 +78,7 @@ class Connection {
               else {
                 div(
                   omsheet.connectionBlock,
-                  connectionForm
+                  setPasswordForm
                 )
               }
             )
@@ -80,5 +87,4 @@ class Connection {
       )
     }
   )
-
 }

@@ -44,7 +44,7 @@ class ShutDown {
     "Careful! Resetting your password will wipe out all your preferences! Reset anyway?",
     () ⇒ {
       alert() = false
-      OMPost[Api].resetPassword.call()
+      dom.window.location.href = "resetPassword"
     }, () ⇒ {
       alert() = false
     }, CenterPagePosition

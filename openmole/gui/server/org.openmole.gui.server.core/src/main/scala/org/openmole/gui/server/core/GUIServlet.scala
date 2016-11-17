@@ -59,6 +59,7 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
   val appRoute = "/app"
   val downloadFileRoute = "/downloadFile"
   val uploadFilesRoute = "/uploadFiles"
+  val resetPasswordRoute = "/resetPassword"
 
   //FIXME val connectedUsers: Var[Seq[UserID]] = Var(Seq())
   val connected = Var(false)
@@ -69,6 +70,8 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
   def application = html("ScriptClient().run();")
 
   def stopped = html("ScriptClient().stopped();")
+
+  def resetPassword = html("ScriptClient().resetPassword();")
 
   def html(javascritMethod: String) = tags.html(
     tags.head(
@@ -114,8 +117,21 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
         connected() = true
         Ok()
       case _ ⇒
-        redirect("/connection")
+        redirect(connectionRoute)
     }
+  }
+
+  get(resetPasswordRoute) {
+    Workspace.reset
+    connected() = false
+    resetPassword
+  }
+
+  post(resetPasswordRoute) {
+    val password = params.getOrElse("password", "")
+    val passwordAgain = params.getOrElse("passwordagain", "")
+    connected() = Utils.setPassword(password, passwordAgain)
+    redirect(connectionRoute)
   }
 
   get(shutdownRoute) {
@@ -179,13 +195,14 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
 
   get(connectionRoute) {
     if (connected.now) redirect("/app")
-    else {
+    else if (apiImpl.passwordState.chosen) {
       response.setHeader("Access-Control-Allow-Origin", "*")
       response.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, UPDATE, OPTIONS")
       response.setHeader("Access-Control-Allow-Headers", "Content-Type, Accept, X-Requested-With")
       contentType = "text/html"
       connection
     }
+    else redirect(resetPasswordRoute)
   }
 
   post(connectionRoute) {
@@ -194,8 +211,7 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
     response.setHeader("Access-Control-Allow-Headers", "Content-Type, Accept, X-Requested-With")
 
     val password = params.getOrElse("password", "")
-    val passwordAgain = params.getOrElse("passwordagain", "")
-    connected() = Utils.setPassword(password, passwordAgain)
+    connected() = Utils.setPassword(password)
 
     connected.now match {
       case true ⇒ redirect(appRoute)

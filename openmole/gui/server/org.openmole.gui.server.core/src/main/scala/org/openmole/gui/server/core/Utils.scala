@@ -392,7 +392,7 @@ object Utils {
 
   def passwordState = PasswordState(chosen = Workspace.passwordChosen, hasBeenSet = Workspace.passwordHasBeenSet)
 
-  def setPassword(pass: String, passAgain: String): Boolean = {
+  def setPassword(pass: String, passAgain: String = ""): Boolean = {
     try {
       def set = {
         Workspace.setPassword(pass)

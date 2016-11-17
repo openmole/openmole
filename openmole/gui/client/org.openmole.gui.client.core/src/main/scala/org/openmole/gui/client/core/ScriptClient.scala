@@ -71,6 +71,12 @@ object ScriptClient {
   }
 
   @JSExport
+  def resetPassword(): Unit = {
+    val resetPassword = new ResetPassword
+    dom.document.body.appendChild(resetPassword.resetPassDiv)
+  }
+
+  @JSExport
   def run(): Unit = {
 
     implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
