@@ -171,7 +171,7 @@ object EGIAuthentication extends Logger {
 
   def testProxy(a: EGIAuthentication, voName: String)(implicit decrypt: Decrypt) = {
     val vomses = EGIAuthentication.getVMOSOrError(voName)
-    Try(initialise(a)(vomses, voName, None)).map(_ ⇒ true)
+    Try(initialise(a)(vomses, voName, None).apply()).map(_ ⇒ true)
   }
 
   def testDIRACAccess(a: EGIAuthentication, voName: String)(implicit decrypt: Decrypt) =
