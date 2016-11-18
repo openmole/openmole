@@ -80,7 +80,7 @@ lazy val scalaLang = OsgiProject(
   "org.scala-lang.scala-library",
   global = true,
   exports = Seq("akka.*", "com.typesafe.*", "scala.*", "scalax.*", "jline.*"),
-  privatePackages = Seq("*"), imports = Seq("!org.apache.tools.ant.*", "!sun.misc.*" ,"*")) settings
+  privatePackages = Seq("*", "META-INF.native.**"), imports = Seq("!org.apache.tools.ant.*", "!sun.misc.*" ,"*")) settings
   (libraryDependencies ++= {
     Seq(
       "org.scala-lang.modules" %% "scala-xml" % "1.0.6",
