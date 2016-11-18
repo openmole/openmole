@@ -125,6 +125,31 @@
     (i in (1 to 10))
     """)
 
+  @sect{I can't get CARE / PRoot to work}
+    @p CARE has recently encountered some compatibility issues with recent versions of the Linux kernel (>= 4.8). If you had
+    downloaded CARE before the release of OpenMOLE 6.0, you might be faced with this issue when trying to package new code.
+
+    @p The typical behaviour of this problem is to terminate CARE or your re-execution by a @i{"signal 11" (Segmentation Fault)} message. The output will be similar to:
+
+    @p @hl.highlight("care info: pid 24238: terminated with signal 11", "plain").
+
+    @p The easiest option to solve this problem is to download a fixed version from @a("GitHub", href := "https://github.com/proot-me/proot-static-build/releases/download/v5.1.1/care_2.2.2_x86_64_rc1--no-seccomp").
+
+    @p This binary only works for 64 bits machines, which might not be the case of your workstation. Older versions of CARE are still available for different computer architecture from @a("GitHub", href := "https://github.com/proot-me/proot-static-build/tree/master/static"). These versions require
+    the @hl.highlight("PROOT_NO_SECCOMP", "plain") environment variable to be set to 1 when running CARE. The packaging command line becomes:
+
+    @p @hl.highlight("PROOT_NO_SECCOMP=1 care -o foo.tgz.bin -r ~ my_app -input 42", "plain")
+
+    @p You can also export this variable to your environment once and for all:
+
+    @p @hl.highlight("export PROOT_NO_SECCOMP=1", "plain")
+
+    @p You'll have to do that in every terminal you're using unless you set this variable in your shell's startup file (@i{~/.bashrc} if you're using @i{bash}).
+
+    @p There is nothing to change in your OpenMOLE scripts, the good folks at OpenMOLE have everything under control ;)
+
+    @p For more information about this specific problem, you can join this @a("discussion", href := "https://github.com/proot-me/PRoot/issues/106").
+
   @sect{My problem is not listed here}
     @p If you could not resolve your problems, feel free to post your problem on the @a("mailing-list",
     href := "http://list.openmole.org").

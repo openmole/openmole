@@ -3,12 +3,12 @@
 
 @sect{Embed external applications (C, C++, Python, R, Scilab...)}
 
-  In OpenMOLE, a generic task named @hl.openmole("CARETask") offers to run external applications packaged with @a("CARE", href := "http://reproducible.io/"). CARE makes it possible to package your application from any Linux computer, and then re-execute it on any other Linux computer. The CARE / OpenMOLE pair is a very efficient way to distribute your application at very large scale with very little effort. Please note that this packaging step is only necessary if you plan distribute your workflow to an heterogeneous computing environment such as the EGI grid. If you target local clusters, running the same operating system and sharing a network file system, you can directly jump to the @a("SystemExecTask", href := DocumentationPages.root.language.task.native.file + "#Usingalocalexecutable(innonportabletasks)"), section.
+  In OpenMOLE, a generic task named @hl.openmole("CARETask") offers to run external applications packaged with @a("CARE", href := "https://proot-me.github.io/"). CARE makes it possible to package your application from any Linux computer, and then re-execute it on any other Linux computer. The CARE / OpenMOLE pair is a very efficient way to distribute your application at very large scale with very little effort. Please note that this packaging step is only necessary if you plan distribute your workflow to an heterogeneous computing environment such as the EGI grid. If you target local clusters, running the same operating system and sharing a network file system, you can directly jump to the @a("SystemExecTask", href := DocumentationPages.root.language.task.native.file + "#Usingalocalexecutable(innonportabletasks)"), section.
 
   @p You should first install CARE:
     @ul
-      @li{download the CARE version corresponding to your computer's architecture from @a("this GitHub repository", href := "https://github.com/proot-me/proot-static-build/tree/master/static")}
-      @li{extract the archive and add the path to the executable to your PATH variable (@hl.highlight("export PATH=/path/to/the/care/folder:$PATH", "plain"))}
+      @li{download the CARE binary from @a("here", href := "https://github.com/proot-me/proot-static-build/releases/download/v5.1.1/care_2.2.2_x86_64_rc1--no-seccomp")}
+      @li{add the path to the executable to your PATH variable (@hl.highlight("export PATH=/path/to/the/care/folder:$PATH", "plain"))}
 
   @p The @hl.openmole("CARETask") has been designed to embed native binaries such as programs compiled from C, C++, Fortran, Python, R, Scilab... Embedding an application in a @hl.openmole("CARETask") happens in 2 steps:
 
@@ -18,7 +18,7 @@
         @li{@hl.highlight("-r ~", "plain") is not compulsory but it has proved mandatory in some cases. So as rule of thumb, if you encounter problems when packaging your application, try adding / removing it.}
         @li{@hl.highlight("-p /path", "plain") asks CARE not to archive /path. This is particularly useful for input data that will change with your parameters. @b{You probably do not want} to embed this data in the archive, and we'll see further down how to inject the necessary input data in the archive from OpenMOLE.}
 
-  @p @b{Second}, just provide the resulting package along with some other information to OpenMOLE. Et voila!
+  @p @b{Second}, just provide the resulting package along with some other information to OpenMOLE. Et voila! If you encounter any problem to package your application, please refer to the corresponding entry in the @a("FAQ", href := DocumentationPages.root.faq.file + "#Ican'tgetCARE/PRoottowork")
 
   @p One very important aspect of CARE is that you only need to package your application @b{once}. As long as the execution you use to package your application makes uses of all the dependencies, you should not have any problem re-executing this archive with other parameters.
 
@@ -198,5 +198,5 @@
     @p Note that each execution is isolated in separate folder on the execution host and that the task execution is considered as failed if the script return a value different from 0. If you need another behaviour you can use the same advanced options as the @i{CARETask} regarding the return code.
 
   @sect{Troubleshooting}
-    @p You should always try to re-execute your application outside of OpenMOLE first. This allows you to ensure the packaging process with CARE was successful. If something goes wrong at this stage, you should check the official @a("CARE documentation", href := "http://reproducible.io/") or the archives of the @a("CARE mailing list", href := "https://groups.google.com/forum/?fromgroups#!forum/reproducible").
+    @p You should always try to re-execute your application outside of OpenMOLE first. This allows you to ensure the packaging process with CARE was successful. If something goes wrong at this stage, you should check the official @a("CARE documentation", href := "https://proot-me.github.io/") or the archives of the @a("CARE mailing list", href := "https://groups.google.com/forum/?fromgroups#!forum/reproducible").
     @p If the packaged application re-executes as you'd expect, but you still struggle to embed it in OpenMOLE, then get in touch with our user community via our the @a("OpenMOLE user mailing-list", href := "http://list.openmole.org/").

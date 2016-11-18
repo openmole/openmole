@@ -63,8 +63,10 @@ object AuthenticationFactories {
     def buildAuthentication(data: AuthenticationData) = {
       val auth = coreObject(data)
       auth.foreach { a ⇒
-        EGIAuthentication.update(a)
-        //        Workspace.authentications.set(a)
+        val auth = coreObject(data)
+        auth.foreach { a ⇒
+          EGIAuthentication.update(a, test = false)
+        }
       }
     }
 
