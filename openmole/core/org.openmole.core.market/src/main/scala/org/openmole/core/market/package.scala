@@ -17,11 +17,16 @@
  */
 package org.openmole.core
 
+import java.util.zip.GZIPInputStream
+
+import org.openmole.tool.file._
+import org.openmole.tool.tar._
 import fr.iscpif.gridscale.http.HTTPStorage
 import org.openmole.core.context._
 import org.openmole.core.expansion._
 import org.openmole.core.workspace._
 import org.openmole.tool.random._
+import org.openmole.tool.tar.TarInputStream
 
 package object market {
 
@@ -38,5 +43,13 @@ package object market {
       from(Context("version" → buildinfo.version))(RandomProvider.empty)
 
   def marketIndex = HTTPStorage.download(indexURL)(Serialization.read[MarketIndex](_))
+
+  def downloadEntry(entry: MarketIndexEntry, path: File) = {
+    HTTPStorage.download(entry.url) { is ⇒
+      val tis = new TarInputStream(new GZIPInputStream(is))
+      try tis.extract(path)
+      finally tis.close
+    }
+  }
 
 }
