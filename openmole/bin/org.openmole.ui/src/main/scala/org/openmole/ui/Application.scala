@@ -77,6 +77,7 @@ object Application extends Logger {
       loggerLevel:          Option[String]  = None,
       unoptimizedJS:        Boolean         = false,
       remote:               Boolean         = false,
+      http:                 Boolean         = false,
       browse:               Boolean         = true,
       args:                 List[String]    = Nil
     )
@@ -107,6 +108,7 @@ object Application extends Logger {
       |[--password-file file containing a password] read the OpenMOLE password (--password option) in a file
       |[--rest] run the REST server
       |[--remote] enable remote connection to the web interface
+      |[--http] force http connection instead of https in remote mode for the web interface
       |[--no-browser] don't automatically launch the browser in GUI mode
       |[--load-workspace-plugins] load the plugins of the OpenMOLE workspace (these plugins are always loaded in GUI mode)
       |[--console-work-directory] specify the workDirectory variable in console mode (it is set to the current directory by default)
@@ -136,6 +138,7 @@ object Application extends Logger {
         case "--console-work-directory" :: tail ⇒ parse(dropArg(tail), c.copy(consoleWorkDirectory = Some(new File(takeArg(tail)))))
         case "--logger-level" :: tail           ⇒ parse(tail.tail, c.copy(loggerLevel = Some(tail.head)))
         case "--remote" :: tail                 ⇒ parse(tail, c.copy(remote = true))
+        case "--http" :: tail                   ⇒ parse(tail, c.copy(http = true))
         case "--no-browser" :: tail             ⇒ parse(tail, c.copy(browse = false))
         case "--reset" :: tail                  ⇒ parse(tail, c.copy(launchMode = Reset(initialisePassword = false)))
         case "--host-name" :: tail              ⇒ parse(tail.tail, c.copy(hostName = Some(tail.head)))
@@ -217,11 +220,13 @@ object Application extends Logger {
           val launch = (config.remote || fos.getChannel.tryLock != null)
           if (launch) {
             val port = config.port.getOrElse(Workspace.preference(GUIServer.port))
-            val url = s"https://localhost:$port"
+            def useHTTP = config.http || !config.remote
+            def protocol = if (useHTTP) "http" else "https"
+            val url = s"$protocol://localhost:$port"
             GUIServer.urlFile.content = url
             val webui = Workspace.file("webui")
             webui.mkdirs()
-            val server = new GUIServer(port, config.remote)
+            val server = new GUIServer(port, config.remote, useHTTP)
             server.start()
             if (config.browse && !config.remote) browse(url)
             ScalaREPL.warmup
