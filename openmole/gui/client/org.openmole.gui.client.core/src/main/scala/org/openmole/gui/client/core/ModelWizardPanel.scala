@@ -17,35 +17,34 @@ package org.openmole.gui.client.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import fr.iscpif.scaladget.api.Select.SelectElement
 import org.openmole.gui.client.core.alert.AlertPanel
 import org.openmole.gui.client.core.files._
 import org.openmole.gui.ext.data._
-import org.openmole.gui.misc.js.{ OptionsDiv, OMTags }
+import org.openmole.gui.misc.js.{ OMTags, OptionsDiv }
 import autowire._
 import org.scalajs.dom.html.TextArea
 import org.openmole.gui.client.core.files.TreeNode._
+
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
 import org.scalajs.dom.raw.{ HTMLDivElement, HTMLInputElement }
 import org.openmole.gui.misc.js.JsRxTags._
 import rx._
 import org.openmole.gui.shared.Api
-import scalatags.JsDom.{ TypedTag, tags ⇒ tags }
+
+import scalatags.JsDom.{ TypedTag, tags }
 import scalatags.JsDom.all._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
-import fr.iscpif.scaladget.api.Select
-import fr.iscpif.scaladget.api.Select._
 import Waiter._
 import org.openmole.gui.ext.data.DataUtils._
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
 import org.openmole.gui.misc.utils.stylesheet._
 import sheet._
 import bs._
+import fr.iscpif.scaladget.api.Selector.Options
 
-class ModelWizardPanel extends ModalPanel {
+class ModelWizardPanel {
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
-  lazy val modalID = "modelWizardPanelID"
 
   def onOpen() = {}
 
@@ -102,27 +101,36 @@ class ModelWizardPanel extends ModalPanel {
   val targetPath: Var[Option[SafePath]] = Var(None)
   val fromArchive: Var[Boolean] = Var(false)
 
-  val modelSelector: Select[SafePath] = Seq[SafePath]().select(
-    None, SafePath.naming, btn_default, () ⇒ {
-    fileToUploadPath() = modelSelector.content.now
-    onModelChange
-  }
+  val modelSelector: Options[SafePath] = Seq[SafePath]().options(
+    0,
+    btn_default,
+    SafePath.naming,
+    onclickExtra = () ⇒ {
+      fileToUploadPath() = modelSelector.get
+      onModelChange
+    }
   )
 
-  val methodSelector: Select[JarMethod] = Seq[JarMethod]().select(
-    None, (jm: JarMethod) ⇒ jm.name, btn_default, () ⇒ {
-    methodSelector.content.now.foreach { s ⇒
-      setJavaLaunchingCommand(s.value)
+  val methodSelector: Options[JarMethod] = Seq[JarMethod]().options(
+    0,
+    btn_default,
+    (jm: JarMethod) ⇒ jm.name,
+    onclickExtra = () ⇒ {
+      methodSelector.get.foreach { s ⇒
+        setJavaLaunchingCommand(s)
+      }
     }
-  }
   )
 
-  val classSelector: Select[FullClass] = Seq[FullClass]().select(
-    None, (fc: FullClass) ⇒ fc.name, btn_default, () ⇒ {
-    classSelector.content.now.foreach { c ⇒
-      setMethodSelector(c.value)
+  val classSelector: Options[FullClass] = Seq[FullClass]().options(
+    0,
+    btn_default,
+    (fc: FullClass) ⇒ fc.name,
+    onclickExtra = () ⇒ {
+      classSelector.content.now.foreach { c ⇒
+        setMethodSelector(c)
+      }
     }
-  }
   )
 
   def onModelChange = {
@@ -172,7 +180,7 @@ class ModelWizardPanel extends ModalPanel {
 
   val scriptNameInput = bs.input()(modelNameInput, placeholder := "Script name").render
   val languages: Seq[Language] = Seq(Binary(), JavaLikeLanguage(), PythonLanguage(), NetLogoLanguage(), RLanguage())
-  val codeSelector: Select[Language] = languages.select(Some(Binary()), (l: Language) ⇒ l.name, btn_default)
+  val codeSelector: Options[Language] = languages.options(0, btn_default, (l: Language) ⇒ l.name)
 
   launchingCommand.triggerLater {
     if (autoMode.now) {
@@ -251,16 +259,12 @@ class ModelWizardPanel extends ModalPanel {
       ), {
         span(grey)(
           if (modelSelector.isContentsEmpty) div() else modelSelector.selector,
-          if (classSelector.isContentsEmpty) div() else classSelector.selectorWithFilter,
-          if (methodSelector.isContentsEmpty) div() else methodSelector.selectorWithFilter,
-          codeSelector.content.now.value match {
-            case Some(se: SelectElement[_]) ⇒
-              se.value match {
-                case NetLogoLanguage() ⇒ div("If your Netlogo sript depends on plugins, you should upload an archive (tar.gz, tgz) containing the root workspace.")
-                case _                 ⇒ div
-              }
-            case _ ⇒ div()
-          }
+          if (classSelector.isContentsEmpty) div() else classSelector.selector,
+          if (methodSelector.isContentsEmpty) div() else methodSelector.selector,
+          codeSelector.get.map {
+            case NetLogoLanguage() ⇒ div("If your Netlogo sript depends on plugins, you should upload an archive (tar.gz, tgz) containing the root workspace.")
+            case _                 ⇒ div
+          }.getOrElse(div)
         )
       }
     ).render
@@ -405,9 +409,7 @@ class ModelWizardPanel extends ModalPanel {
         fileToUploadPath() = Some(filePath)
         launchingCommand.now.foreach {
           lc ⇒
-            codeSelector.content() = lc.value.language.map {
-              SelectElement(_)
-            }
+            lc.language.map { codeSelector.set }
             setScritpName
             setReactives(lc)
         }
@@ -461,15 +463,17 @@ class ModelWizardPanel extends ModalPanel {
     tags.button("Build", btn_primary, onclick := {
       () ⇒
         save
-        close
+        dialog.close
 
-        val codeType = codeSelector.content.now.map {
-          _.value
-        }.getOrElse(Binary())
+        val codeType = codeSelector.getOrElse(Binary())
 
         val targetSuffix = codeType match {
           case NetLogoLanguage() ⇒
-            if (fromArchive.now) s"/${fileToUploadPath.now.map { _.name }.getOrElse("NetLogoMODEL")}"
+            if (fromArchive.now) s"/${
+              fileToUploadPath.now.map {
+                _.name
+              }.getOrElse("NetLogoMODEL")
+            }"
             else ""
           case _ ⇒ ""
         }
@@ -492,9 +496,8 @@ class ModelWizardPanel extends ModalPanel {
               outputs(currentReactives.now).map {
                 _.content.prototype
               },
-              path, classSelector.content.now.map {
-                _.value.name
-              }, fileToUploadPath.now.map {
+              path, classSelector.get.map { _.name },
+              fileToUploadPath.now.map {
                 _.name
               }, resources.now
             ).call().foreach {
@@ -703,20 +706,23 @@ class ModelWizardPanel extends ModalPanel {
 
   lazy val dialog = {
     setBodyContent
-    bs.modalDialog(
-      modalID,
-      bs.headerDialog(
-        tags.span(tags.b("Model import"))
-      ),
-      bs.bodyDialog(Rx {
-        bodyContent().getOrElse(tags.div())
-      }),
-      bs.footerDialog(buttonGroup(Seq(width := 200, right := 100))(
-        bs.inputGroupButton(closeButton),
-        bs.inputGroupButton(scriptNameInput),
-        bs.inputGroupButton(buildModelTaskButton)
-      ))
-    )
+    bs.ModalDialog()
   }
+
+  dialog.header(
+    tags.span(tags.b("Model import"))
+  )
+
+  dialog.body(
+    tags.div(Rx {
+      bodyContent().getOrElse(tags.div())
+    })
+  )
+
+  dialog.footer(buttonGroup(Seq(width := 200, right := 100))(
+    bs.inputGroupButton(bs.ModalDialog.closeButton(dialog, btn_default, "Close")),
+    bs.inputGroupButton(scriptNameInput),
+    bs.inputGroupButton(buildModelTaskButton)
+  ))
 
 }

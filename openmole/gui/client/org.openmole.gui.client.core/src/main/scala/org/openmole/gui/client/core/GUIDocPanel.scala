@@ -34,11 +34,9 @@ import scalatags.JsDom._
 import omsheet._
 import sheet._
 
-class GUIDocPanel extends ModalPanel {
+class GUIDocPanel {
 
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
-
-  lazy val modalID = "documentationID"
 
   def onOpen() = {}
 
@@ -236,11 +234,10 @@ class GUIDocPanel extends ModalPanel {
         spacer20,
         "To add one authentication, click on the ", span(glyph_plus +++ glyphStyle),
         " icon. In the new panel, select the authentication category: ",
-        factories.select(
-          factories.headOption,
-          (auth: AuthPanelWithID) ⇒ auth.name,
+        factories.options(
+          0,
           btn_primary,
-          onclickExtra = () ⇒ {}
+          (auth: AuthPanelWithID) ⇒ auth.name
         ).selector
       ),
       "Your selection updates the available settings. Let's see them in details:",
@@ -308,45 +305,46 @@ class GUIDocPanel extends ModalPanel {
     GUIDocEntry(OMTags.glyph_plug, "Plugins", pluginContent)
   )
 
-  lazy val dialog = bs.modalDialog(
-    modalID,
-    bs.headerDialog(
-      div(height := 55)(
-        b("Documentation")
-      )
-    ),
-    bs.bodyDialog(
-      tags.div(
-        Rx {
-          tags.div(
-            omsheet.color("#444"),
-            "This application is an advanced editor for OpenMOLE scripts. It allows editing, managing and running them." +
-              " The description of the ", omLanguageLink, " and concepts can be found on the OpenMOLE website.",
-            for (entry ← entries) yield {
-              val isSelected = selectedEntry() == Some(entry)
-              tags.div(
-                docEntry,
-                tags.span(
-                  docTitleEntry,
-                  onclick := { () ⇒
-                    {
-                      selectedEntry() = {
-                        if (isSelected) None
-                        else Some(entry)
-                      }
-                    }
-                  },
-                  span(entry.glyph +++ glyphText),
-                  entry.title
-                ),
-                if (isSelected) tags.div(docContent, entry.content)
-                else tags.div
-              )
-            }
-          )
-        }
-      )
-    ),
-    bs.footerDialog(closeButton)
+  lazy val dialog = bs.ModalDialog()
+
+  dialog.header(
+    div(height := 55)(
+      b("Documentation")
+    )
   )
+
+  dialog.body(
+    tags.div(
+      Rx {
+        tags.div(
+          omsheet.color("#444"),
+          "This application is an advanced editor for OpenMOLE scripts. It allows editing, managing and running them." +
+            " The description of the ", omLanguageLink, " and concepts can be found on the OpenMOLE website.",
+          for (entry ← entries) yield {
+            val isSelected = selectedEntry() == Some(entry)
+            tags.div(
+              docEntry,
+              tags.span(
+                docTitleEntry,
+                onclick := { () ⇒
+                  {
+                    selectedEntry() = {
+                      if (isSelected) None
+                      else Some(entry)
+                    }
+                  }
+                },
+                span(entry.glyph +++ glyphText),
+                entry.title
+              ),
+              if (isSelected) tags.div(docContent, entry.content)
+              else tags.div
+            )
+          }
+        )
+      }
+    )
+  )
+
+  dialog.footer(bs.ModalDialog.closeButton(dialog, btn_default, "Close"))
 }

@@ -472,7 +472,6 @@ lazy val datauiGUI: Project = OsgiProject(guiExt, "org.openmole.gui.ext.dataui")
 
 lazy val sharedGUI = OsgiProject(guiDir / "shared", "org.openmole.gui.shared") dependsOn (dataGUI, market) settings (defaultSettings: _*)
 
-val jqueryPath = s"META-INF/resources/webjars/jquery/${Libraries.jqueryVersion}/jquery.js"
 val acePath = s"META-INF/resources/webjars/ace/${Libraries.aceVersion}/src-min/ace.js"
 
 lazy val clientGUI = OsgiProject(guiDir / "client", "org.openmole.gui.client.core") enablePlugins (ScalaJSPlugin) dependsOn
@@ -485,12 +484,10 @@ lazy val clientGUI = OsgiProject(guiDir / "client", "org.openmole.gui.client.cor
     Libraries.scalaTagsJS,
     libraryDependencies += Libraries.async,
     skip in packageJSDependencies := false,
-    jsDependencies += Libraries.jquery / jqueryPath minified jqueryPath.replace(".js", ".min.js"),
     jsDependencies += Libraries.ace / acePath,
     jsDependencies += Libraries.ace / "src-min/mode-sh.js" dependsOn acePath,
     jsDependencies += Libraries.ace / "src-min/mode-scala.js" dependsOn acePath,
-    jsDependencies += Libraries.ace / "src-min/theme-github.js" dependsOn acePath,
-    jsDependencies += Libraries.bootstrap / "js/bootstrap.js" dependsOn jqueryPath minified "js/bootstrap.min.js"
+    jsDependencies += Libraries.ace / "src-min/theme-github.js" dependsOn acePath
   ) settings (defaultSettings: _*)
 
 

@@ -44,6 +44,7 @@ import Waiter._
 
 class ProcessStateWaiter(processingState: Var[ProcessState]) {
 
+  implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
   def withTransferWaiter[T <: HTMLElement](f: ProcessState ⇒ TypedTag[T]): TypedTag[HTMLElement] = {
 
     div(
@@ -67,6 +68,7 @@ class ProcessStateWaiter(processingState: Var[ProcessState]) {
 
 class FutureWaiter[S](waitingForFuture: Future[S]) {
 
+  implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
   def withFutureWaiter[T <: HTMLElement](
     waitingString:    String,
     onsuccessElement: S ⇒ TypedTag[HTMLElement]

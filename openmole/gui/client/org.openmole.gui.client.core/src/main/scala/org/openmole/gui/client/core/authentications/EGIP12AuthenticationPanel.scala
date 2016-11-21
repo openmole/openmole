@@ -7,12 +7,10 @@ import autowire._
 import org.openmole.gui.ext.data.EGIP12AuthenticationData
 import org.openmole.gui.ext.dataui.PanelUI
 import org.openmole.gui.shared.Api
-import scala.scalajs.js.annotation.JSExport
 import scalatags.JsDom.all._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
-import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
-import scalatags.JsDom.{ tags ⇒ tags }
 import AuthenticationUtils._
+import bs._
 
 /*
  * Copyright (C) 02/07/15 // mathieu.leclaire@openmole.org
@@ -36,9 +34,9 @@ class EGIP12AuthenticationPanel(data: EGIP12AuthenticationData = EGIP12Authentic
   val password = passwordInput(data.cypheredPassword)
   val privateKey = new AuthFileUploaderUI(data.privateKey.getOrElse(""), data.privateKey.isDefined, Some("egi.p12"))
 
-  val view = form(sheet.formInline)(
-    password.render,
-    privateKey.view
+  val view = hForm(
+    password.withLabel("Password"),
+    privateKey.view.render
   )
 
   def save(onsave: () ⇒ Unit) =

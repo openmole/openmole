@@ -42,8 +42,9 @@ import scalatags.JsDom.tags
 import scalatags.JsDom.all._
 import bs._
 
-class MarketPanel extends ModalPanel {
-  lazy val modalID = "marketPanelID"
+class MarketPanel {
+
+  implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
   private val marketIndex: Var[Option[MarketIndex]] = Var(None)
   val tagFilter = InputFilter(pHolder = "Filter")
@@ -105,7 +106,7 @@ class MarketPanel extends ModalPanel {
     downloading() = downloading.now.updatedFirst(_._1 == entry, (entry, Var(Processing())))
     OMPost[Api].getMarketEntry(entry, path).call().foreach { d ⇒
       downloading() = downloading.now.updatedFirst(_._1 == entry, (entry, Var(Processed())))
-      downloading.now.headOption.foreach(_ ⇒ close)
+      downloading.now.headOption.foreach(_ ⇒ dialog.close)
       TreeNodePanel.refreshAndDraw
     }
   }
@@ -116,7 +117,7 @@ class MarketPanel extends ModalPanel {
     }.map {
       case (e, state: Var[ProcessState]) ⇒
         state.withTransferWaiter { _ ⇒
-          if (selectedEntry.now == Some(e)) bs.glyphButton(" Download", btn_warning, glyph_download_alt, todo) else tags.div()
+          if (selectedEntry.now == Some(e)) bs.button(" Download", btn_warning, glyph_download_alt, todo) else tags.div()
         }
     }.getOrElse(tags.div())
   }
@@ -135,34 +136,35 @@ class MarketPanel extends ModalPanel {
       download(marketIndexEntry)
     }
 
-  val dialog = bs.modalDialog(
-    modalID,
-    headerDialog(
-      tags.span(tags.b("Market place"))
-    ),
-    bodyDialog({
-      Rx {
-        overwriteAlert() match {
-          case Some(e: MarketIndexEntry) ⇒
-            AlertPanel.string(
-              e.name + " already exists. Overwrite ? ",
-              () ⇒ {
-                overwriteAlert() = None
-                deleteFile(manager.current() ++ e.name, e)
-              }, () ⇒ {
-                overwriteAlert() = None
-              }, CenterPagePosition
-            )
-            tags.div
-          case _ ⇒
-        }
-      }
-      tags.div(
-        tagFilter.tag,
-        marketTable
-      )
-    }),
-    footerDialog(closeButton)
+  val dialog = bs.ModalDialog()
+
+  dialog.header(
+    tags.span(tags.b("Market place"))
   )
+
+  dialog.body({
+    Rx {
+      overwriteAlert() match {
+        case Some(e: MarketIndexEntry) ⇒
+          AlertPanel.string(
+            e.name + " already exists. Overwrite ? ",
+            () ⇒ {
+              overwriteAlert() = None
+              deleteFile(manager.current() ++ e.name, e)
+            }, () ⇒ {
+              overwriteAlert() = None
+            }, CenterPagePosition
+          )
+          tags.div
+        case _ ⇒
+      }
+    }
+    tags.div(
+      tagFilter.tag,
+      marketTable
+    )
+  })
+
+  dialog.footer(bs.ModalDialog.closeButton(dialog, btn_default, "Close"))
 
 }

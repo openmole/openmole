@@ -41,9 +41,8 @@ import bs._
 import rx._
 import concurrent.duration._
 
-class ExecutionPanel extends ModalPanel {
+class ExecutionPanel {
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
-  lazy val modalID = "executionsPanelID"
 
   case class PanelInfo(
     executionInfos: Seq[(ExecutionId, ExecutionInfo)],
@@ -66,13 +65,15 @@ class ExecutionPanel extends ModalPanel {
     }
   }
 
-  def closeAllExpanders = expanders.now.values.map { _.close }
+  def closeAllExpanders = expanders.now.values.map {
+    _.close
+  }
 
   def updateExecutionInfo: Unit = {
     def delay = {
       updating.set(false)
       setTimeout(5000) {
-        if (isVisible) updateExecutionInfo
+        if (dialog.isVisible) updateExecutionInfo
       }
     }
 
@@ -140,8 +141,8 @@ class ExecutionPanel extends ModalPanel {
 
   val envLevel: Var[ErrorStateLevel] = Var(ErrorLevel())
 
-  val outputHistory = bs.labeledInput("# outputs", "500", "# outputs", labelStyle = color := "#000")
-  val envErrorHistory = bs.labeledInput("# envirnoment errors", "500", "# envirnoment errors", labelStyle = color := "#000")
+  val outputHistory = bs.input("500")(placeholder := "# outputs").render
+  val envErrorHistory = bs.input("500")(placeholder := "# environment errors").render
 
   def ratio(completed: Long, running: Long, ready: Long) = s"${completed} / ${completed + running + ready}"
 
@@ -324,32 +325,33 @@ class ExecutionPanel extends ModalPanel {
     btn_default +++ glyph_settings +++ omsheet.settingsButton
   )(tags.span(caret))
 
-  val settingsDiv = tags.div(width := 200)(
-    outputHistory.render,
-    envErrorHistory.render
+  val settingsDiv = bs.vForm(width := 200)(
+    outputHistory.withLabel("# outputs"),
+    envErrorHistory.withLabel("# environment errors")
   )
 
-  val dialog = bs.modalDialog(
-    modalID,
-    headerDialog(
-      div(height := 55)(
-        b("Executions"),
-        div(omsheet.panelHeaderSettings)(
-          settingsButton
-        ).popup(
-          settingsDiv,
-          onclose = () ⇒ {
-        },
-          popupStyle = whitePopupWithBorder
-        )
-      )
-    ),
-    bodyDialog(ms("executionTable"))(
-      executionTable
-    ),
-    footerDialog(
-      closeButton
+  val dialog = bs.ModalDialog()
+
+  dialog.header(
+    div(height := 55)(
+      b("Executions"),
+      div(omsheet.panelHeaderSettings)(
+        settingsButton
+      ).dropdown(
+        "",
+        settingsDiv
+      ).render
     )
+  )
+
+  dialog.body(
+    tags.div(ms("executionTable"))(
+      executionTable
+    )
+  )
+
+  dialog.footer(
+    ModalDialog.closeButton(dialog, btn_default, "Close")
   )
 
 }

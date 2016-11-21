@@ -36,12 +36,12 @@ object AuthenticationUtils {
   val basicStyle = width := 130
   val portStyle = width := 130
 
-  def loginInput(default: String) = bs.labeledInput("Login", default, "Login", inputStyle = basicStyle)
+  def loginInput(default: String) = bs.input(default)(placeholder := "Login", basicStyle).render
 
-  def targetInput(default: String) = bs.labeledInput("Host", default, "Host", inputStyle = basicStyle)
+  def targetInput(default: String) = bs.input(default)(placeholder := "Host", basicStyle).render
 
-  def portInput(default: String) = bs.labeledInput("Port", default, "Port", inputStyle = portStyle)
+  def portInput(default: String) = bs.input(default)(placeholder := "Port", portStyle).render
 
-  def passwordInput(default: String) = bs.labeledInput("Password", default, "Password", inputStyle = passwordStyle)
+  def passwordInput(default: String) = bs.input(default)(placeholder := "Password", passwordStyle).render
 
 }

@@ -61,20 +61,20 @@ object Libraries {
 
   lazy val guava = "com.google.guava" % "guava" % "19.0"
 
-  lazy val scalaTagsVersion = "0.6.0"
-  lazy val scalaJSDomVersion = "0.9.0"
+  lazy val scalaTagsVersion = "0.6.2"
+  lazy val scalaJSDomVersion = "0.9.1"
   lazy val rxVersion = "0.3.1"
-  lazy val scalaUpickleVersion = "0.4.1"
-  lazy val scalaAutowireVersion = "0.2.5"
+  lazy val scalaUpickleVersion = "0.4.2"
+  lazy val scalaAutowireVersion = "0.2.6"
 
   lazy val upickle = "org.openmole" %% "upickle" % scalaUpickleVersion
   lazy val autowire = "org.openmole" %% "autowire" % scalaAutowireVersion
   lazy val scalaTags = "org.openmole" %% "com-scalatags" % scalaTagsVersion
   lazy val rx = "org.openmole" %% "rx" % rxVersion
 
-  lazy val scaladgetVersion = "0.8.1"
+  lazy val scaladgetVersion = "0.9.1-SNAPSHOT"
 
-  lazy val scalajsVersion = "0.6.11"
+  lazy val scalajsVersion = "0.6.13"
   lazy val scaladgetJS = libraryDependencies += "fr.iscpif" %%% "scaladget" % scaladgetVersion
   lazy val scalajsDomJS = libraryDependencies += "org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion
   lazy val rxJS = libraryDependencies += "com.lihaoyi" %%% "scalarx" % rxVersion
@@ -92,7 +92,7 @@ object Libraries {
 
   lazy val d3 = "org.webjars" % "d3js" % d3Version
 
-  lazy val bootstrap = "org.webjars" % "bootstrap" % bootsrapVersion
+  lazy val bootstrapNative = "org.webjars" % "bootstrapXXXX" % bootsrapVersion
 
   lazy val jquery = "org.webjars" % "jquery" % jqueryVersion
 

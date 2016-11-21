@@ -38,6 +38,7 @@ class AuthFileUploaderUI(
     renaming: Option[String] = None
 ) {
 
+  implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
   val fileName = if (keyName == "") renaming.getOrElse(Utils.getUUID) else keyName
   val pathSet: Var[Boolean] = Var(keySet)
 

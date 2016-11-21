@@ -66,6 +66,7 @@ object TreeNodePanel {
 
 class TreeNodePanel {
 
+  implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
   val selectionMode = Var(false)
   val treeWarning = Var(true)
 
@@ -419,9 +420,7 @@ class TreeNodePanel {
                   }
                 }
               },
-              clickablePair.tooltip(
-                tags.span(tn.name()), popupStyle = whitePopup, arrowStyle = Popup.whiteBottomArrow, condition = () ⇒ tn.name().length > 24
-              ), {
+              clickablePair.tooltip(tn.name(), condition = () ⇒ tn.name().length > 24), {
                 div(stylesheet.fileInfo)(
                   if (treeStates().settingsSet) {
                     span(

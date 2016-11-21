@@ -1,10 +1,13 @@
 package org.openmole.gui.client.core
 
 import org.scalajs.dom.raw.HTMLDivElement
-import scalatags.JsDom.{ tags ⇒ tags }
+
+import scalatags.JsDom.{ TypedTag, tags }
 import scalatags.JsDom.all._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import bs._
+import fr.iscpif.scaladget.stylesheet.all
+
 /*
  * Copyright (C) 26/08/15 // mathieu.leclaire@openmole.org
  *
@@ -22,21 +25,22 @@ import bs._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class DivPanel(_modalID: ModalID, title: String, div: HTMLDivElement) extends ModalPanel {
-
-  lazy val modalID = _modalID
+class DivPanel(title: String, div: TypedTag[HTMLDivElement]) {
 
   def onOpen() = {}
 
   def onClose() = {}
 
-  val dialog = bs.modalDialog(
-    modalID,
-    headerDialog(
-      tags.span(tags.b(title))
-    ),
-    bodyDialog(div),
-    footerDialog(closeButton)
+  def open = dialog.open
+
+  val dialog = bs.ModalDialog()
+
+  dialog.header(
+    tags.span(tags.b(title))
   )
+
+  dialog.body(div)
+
+  dialog.footer(ModalDialog.closeButton(dialog, all.btn_default, "Close"))
 
 }

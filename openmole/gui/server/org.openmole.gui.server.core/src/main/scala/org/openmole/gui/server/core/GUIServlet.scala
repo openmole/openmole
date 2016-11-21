@@ -76,8 +76,8 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
     tags.head(
       tags.meta(tags.httpEquiv := "content-type", tags.content := "text/html; charset=UTF-8"),
       cssFiles.map { f ⇒ tags.link(tags.rel := "stylesheet", tags.`type` := "text/css", href := "css/" + f) },
-      tags.script(tags.`type` := "text/javascript", tags.src := "js/openmole.js"),
-      tags.script(tags.`type` := "text/javascript", tags.src := "js/deps.js")
+      tags.script(tags.`type` := "text/javascript", tags.src := "js/openmole.js") /*,
+      tags.script(tags.`type` := "text/javascript", tags.src := "js/deps.js")*/
     ),
     tags.body(tags.onload := javascritMethod)
   )

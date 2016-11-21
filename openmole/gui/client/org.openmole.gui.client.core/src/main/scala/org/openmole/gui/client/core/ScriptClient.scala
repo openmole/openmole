@@ -1,6 +1,5 @@
 package org.openmole.gui.client.core
 
-import org.openmole.gui.client.core.alert.AlertPanel
 import org.openmole.gui.client.core.panels._
 
 import scalatags.JsDom.tags
@@ -21,6 +20,7 @@ import org.scalajs.dom.KeyboardEvent
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
+import org.scalajs.dom.raw.HTMLElement
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
@@ -45,18 +45,18 @@ import scala.concurrent.duration.Duration
 @JSExport("ScriptClient")
 object ScriptClient {
 
-  @JSExport
-  def connection(): Unit = {
-
-    val connection = new Connection
-
-    dom.document.body.appendChild(connection.connectionDiv)
-    dom.document.body.appendChild(AlertPanel.alertDiv)
-  }
+  def openmoleWithBootstrap[T <: HTMLElement](f: ⇒ T) = bs.withBootstrapNative("js/deps.js")(f)
 
   @JSExport
-  def stopped(): Unit = {
-    dom.document.body.appendChild(
+  def connection(): Unit =
+    openmoleWithBootstrap {
+      val connection = new Connection
+      connection.connectionDiv.render
+    }
+
+  @JSExport
+  def stopped(): Unit =
+    openmoleWithBootstrap {
       div(omsheet.connectionTabOverlay)(
         div(
           img(src := "img/openmole.png", omsheet.openmoleLogo),
@@ -66,48 +66,44 @@ object ScriptClient {
             onload := { () ⇒ OMPost[Api].shutdown().call() }
           )
         )
-      )
-    )
-  }
+      ).render
+    }
 
   @JSExport
-  def resetPassword(): Unit = {
-    val resetPassword = new ResetPassword
-    dom.document.body.appendChild(resetPassword.resetPassDiv)
-  }
+  def resetPassword(): Unit =
+    openmoleWithBootstrap {
+      val resetPassword = new ResetPassword
+      resetPassword.resetPassDiv.render
+    }
 
   @JSExport
   def run(): Unit = {
-
     implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
-    val body = dom.document.body
-    val maindiv = body.appendChild(tags.div())
+    val maindiv = tags.div()
     val shutDown = new ShutDown
 
     val authenticationPanel = new AuthenticationPanel
 
     val openFileTree = Var(true)
 
-    val authenticationTriggerer = new PanelTriggerer {
-      val modalPanel = authenticationPanel
-    }
+    val itemStyle = lineHeight := "35px"
 
-    val execItem = dialogNavItem("executions", glyphSpan(glyph_flash).tooltip(span("Executions")), () ⇒ executionTriggerer.triggerOpen)
+    val execItem = navItem(tags.div(glyph_flash, itemStyle).tooltip("Executions"), () ⇒ executionPanel.dialog.open)
 
-    val authenticationItem = dialogNavItem("authentications", glyphSpan(glyph_lock).tooltip(span("Authentications")), () ⇒ authenticationTriggerer.triggerOpen)
+    val authenticationItem = navItem(tags.div(glyph_lock, itemStyle).tooltip("Authentications"), () ⇒ authenticationPanel.dialog.open)
 
-    val marketItem = dialogNavItem("market", glyphSpan(glyph_market).tooltip(span("Market place")), () ⇒ marketTriggerer.triggerOpen)
+    val marketItem = navItem(tags.div(glyph_market, itemStyle).tooltip("Market place"), () ⇒ marketPanel.dialog.open)
 
-    val pluginItem = dialogNavItem("plugin", div(OMTags.glyph_plug).tooltip(span("Plugins")), () ⇒ pluginTriggerer.triggerOpen)
+    val pluginItem = navItem(div(OMTags.glyph_plug, itemStyle).tooltip("Plugins"), () ⇒ pluginPanel.dialog.open)
 
-    val envItem = dialogNavItem("envError", glyphSpan(glyph_exclamation).render, () ⇒ environmentStackTriggerer.open)
+    val envItem = navItem(div(glyph_exclamation, itemStyle), () ⇒ stackPanel.open)
 
-    val docItem = dialogNavItem("doc", div(OMTags.glyph_book).tooltip(span("Documentation")), () ⇒ docTriggerer.open)
+    val docItem = navItem(div(OMTags.glyph_book, itemStyle).tooltip("Documentation"), () ⇒ docPanel.dialog.open)
 
-    val modelWizardItem = dialogNavItem("modelWizard", glyphSpan(glyph_upload_alt).tooltip(span("Model import")), () ⇒ modelWizardTriggerer.triggerOpen)
+    val modelWizardItem = navItem(div(glyph_upload_alt, itemStyle).tooltip("Model import"), () ⇒ modelWizardPanel.dialog.open)
 
-    val fileItem = dialogNavItem("files", glyphSpan(glyph_file).tooltip(span("Files")), todo = () ⇒ {
+    val fileItem = navItem(div(glyph_file, itemStyle).tooltip("Files"), todo = () ⇒ {
       openFileTree() = !openFileTree.now
     })
 
@@ -119,67 +115,59 @@ object ScriptClient {
       }
     }
 
-    maindiv.appendChild(
-      bs.nav(
-        "mainNav",
-        omsheet.fixed +++ sheet.nav +++ nav_pills +++ nav_inverse +++ nav_staticTop,
-        fileItem,
-        modelWizardItem,
-        execItem,
-        authenticationItem,
-        marketItem,
-        pluginItem,
-        docItem
-      )
-    )
-    maindiv.appendChild(tags.div(shutDown.shutdownButton))
-    maindiv.appendChild(executionTriggerer.modalPanel.dialog.render)
-    maindiv.appendChild(modelWizardTriggerer.modalPanel.dialog.render)
-    maindiv.appendChild(authenticationTriggerer.modalPanel.dialog.render)
-    maindiv.appendChild(marketTriggerer.modalPanel.dialog.render)
-    maindiv.appendChild(pluginTriggerer.modalPanel.dialog.render)
-    maindiv.appendChild(environmentStackTriggerer.modalPanel.dialog.render)
-    maindiv.appendChild(docTriggerer.modalPanel.dialog.render)
-    maindiv.appendChild(AlertPanel.alertDiv)
-
-    Settings.settings.foreach { sets ⇒
-      maindiv.appendChild(
+    val mainFuture = Settings.settings.map { sets ⇒
+      div(
+        bs.navBar(
+          omsheet.fixed +++ sheet.nav +++ navbar_pills +++ navbar_inverse +++ navbar_staticTop,
+          fileItem,
+          modelWizardItem,
+          execItem,
+          authenticationItem,
+          marketItem,
+          pluginItem,
+          docItem
+        ),
+        tags.div(shutDown.shutdownButton),
         tags.div(`class` := "fullpanel")(
-        tags.div(
-          `class` := Rx {
-            "leftpanel " + {
-              if (openFileTree()) "open" else ""
+          tags.div(
+            `class` := Rx {
+              "leftpanel " + {
+                if (openFileTree()) "open" else ""
+              }
             }
-          }
-        )(
-            tags.div(omsheet.fixedPosition)(
-              treeNodePanel.fileToolBar.div,
-              treeNodePanel.fileControler,
-              treeNodePanel.labelArea
+          )(
+              tags.div(omsheet.fixedPosition)(
+                treeNodePanel.fileToolBar.div,
+                treeNodePanel.fileControler,
+                treeNodePanel.labelArea
+              ),
+              treeNodePanel.view.render
             ),
-            treeNodePanel.view.render
-          ),
-        tags.div(
-          `class` := Rx {
-            "centerpanel " + {
-              if (openFileTree()) "reduce" else ""
+          tags.div(
+            `class` := Rx {
+              "centerpanel " + {
+                if (openFileTree()) "reduce" else ""
+              }
             }
-          }
-        )(
-            treeNodePanel.fileDisplayer.tabs.render,
-            tags.div(omsheet.textVersion)(
-              tags.div(
-                fontSize := "1em",
-                fontWeight := "bold"
-              )(s"${sets.version} ${sets.versionName}"),
-              tags.div(fontSize := "0.8em")(s"built the ${sets.buildTime}")
+          )(
+              treeNodePanel.fileDisplayer.tabs.render,
+              tags.div(omsheet.textVersion)(
+                tags.div(
+                  fontSize := "1em",
+                  fontWeight := "bold"
+                )(s"${sets.version} ${sets.versionName}"),
+                tags.div(fontSize := "0.8em")(s"built the ${sets.buildTime}")
+              )
             )
-          )
-      ).render
+        )
       )
     }
 
-    body.appendChild(maindiv)
-  }
+    mainFuture.foreach { d ⇒
+      openmoleWithBootstrap {
+        d.render
+      }
+    }
 
+  }
 }

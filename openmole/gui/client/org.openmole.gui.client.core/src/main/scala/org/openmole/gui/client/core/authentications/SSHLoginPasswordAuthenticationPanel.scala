@@ -2,7 +2,6 @@ package org.openmole.gui.client.core.authentications
 
 import org.openmole.gui.client.core.OMPost
 import org.openmole.gui.ext.data.LoginPasswordAuthenticationData
-import org.openmole.gui.misc.utils.Utils
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
 import org.openmole.gui.ext.dataui.PanelUI
@@ -11,6 +10,7 @@ import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import scalatags.JsDom.all._
 import AuthenticationUtils._
+import bs._
 
 /*
  * Copyright (C) 16/06/15 // mathieu.leclaire@openmole.org
@@ -36,12 +36,11 @@ class SSHLoginPasswordAuthenticationPanel(data: LoginPasswordAuthenticationData 
   val port = portInput(data.port)
   val password = passwordInput(data.cypheredPassword)
 
-  val view = form(sheet.formInline)(
-    for {
-      e ← Seq(login, password, target, port)
-    } yield {
-      e.render
-    }
+  val view = hForm(
+    login.withLabel("Login"),
+    password.withLabel("Password"),
+    target.withLabel("Target"),
+    port.withLabel("Port")
   )
 
   def save(onsave: () ⇒ Unit) = {

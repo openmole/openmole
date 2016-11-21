@@ -24,32 +24,8 @@ package object panels {
   val modelWizardPanel = new ModelWizardPanel
   val marketPanel = new MarketPanel
   val pluginPanel = new PluginPanel
-  val stackPanel = new TextPanel("envStackID", "Error stack")
+  val executionPanel = new ExecutionPanel
   val docPanel = new GUIDocPanel
-
-  implicit val executionTriggerer = new PanelTriggerer {
-    val modalPanel = new ExecutionPanel
-  }
-
-  def modelWizardTriggerer = new PanelTriggerer {
-    val modalPanel = modelWizardPanel
-  }
-
-  def marketTriggerer = new PanelTriggerer {
-    val modalPanel = marketPanel
-  }
-
-  def pluginTriggerer = new PanelTriggerer {
-    val modalPanel = pluginPanel
-  }
-
-  def environmentStackTriggerer = new PanelTriggerer {
-    val modalPanel = stackPanel
-  }
-
-  def docTriggerer = new PanelTriggerer {
-    val modalPanel = docPanel
-  }
-
+  val stackPanel = new TextPanel("Error stack")
   val treeNodePanel = TreeNodePanel()
 }

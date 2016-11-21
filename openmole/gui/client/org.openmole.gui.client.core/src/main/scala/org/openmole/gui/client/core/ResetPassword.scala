@@ -25,13 +25,16 @@ import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import org.openmole.gui.misc.utils.{ stylesheet ⇒ omsheet }
 import org.openmole.gui.shared.Api
 import org.scalajs.dom.raw.HTMLFormElement
-import rx.Rx
+import rx.{ Ctx, Rx }
 import sheet._
+
 import scalatags.JsDom.all._
 import scalatags.JsDom.tags
 import org.openmole.gui.misc.js.JsRxTags._
 
 class ResetPassword {
+
+  implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
   val shutDown = new ShutDown
 
   val passwordInput = bs.input("")(

@@ -1,6 +1,5 @@
 package org.openmole.gui.client.core.files
 
-import fr.iscpif.scaladget.api.Select.SelectElement
 import org.openmole.gui.client.core.{ CoreUtils, OMPost }
 import org.openmole.gui.ext.data._
 import org.openmole.gui.misc.js.OMTags
@@ -16,16 +15,16 @@ import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import bs._
 import org.openmole.gui.misc.utils.{ stylesheet ⇒ omsheet }
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
-import fr.iscpif.scaladget.api._
 import omsheet._
 import sheet._
 import org.openmole.gui.misc.js.JsRxTags._
-import org.openmole.gui.client.core.files.TreeNode._
+import org.openmole.gui.client.core.files._
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
-import org.scalajs.dom.raw.{ HTMLButtonElement, HTMLDivElement, HTMLInputElement, HTMLSpanElement }
+import fr.iscpif.scaladget.api.Selector.Options
+import org.scalajs.dom.raw.{ HTMLButtonElement, HTMLInputElement, HTMLSpanElement }
 import rx._
 import org.openmole.gui.client.core.Waiter._
 import org.openmole.gui.client.core.alert.AbsolutePositioning.{ FileZone, RelativeCenterPosition }
@@ -172,13 +171,21 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
     autofocus
   ).render
 
-  lazy val addRootDirButton: Select[TreeNodeType] = {
-    val contents: Seq[SelectElement[TreeNodeType]] = Seq(SelectElement(TreeNodeType.file, glyph_file +++ sheet.paddingRight(3)), SelectElement(TreeNodeType.folder, glyph_folder_close +++ sheet.paddingRight(3)))
-    contents.select(Some(TreeNodeType.file), (tnt: TreeNodeType) ⇒ tnt.name, btn_default +++ borderRightFlat, onclickExtra = () ⇒ {
-      addRootDirButton.content.now.foreach { c ⇒
-        newNodeInput.placeholder = c.value.name + " name"
-      }
-    })
+  lazy val addRootDirButton: Options[TreeNodeType] = {
+    val file = TreeNodeType.file
+    val folder = TreeNodeType.folder
+
+    val contents = Seq(file, folder)
+    contents.options(
+      0,
+      btn_default +++ borderRightFlat,
+      (e: TreeNodeType) ⇒ e.name, onclickExtra = () ⇒ {
+        addRootDirButton.content.now.foreach { c ⇒
+          newNodeInput.placeholder = c.name + " name"
+        }
+      },
+      decorations = Map(file → glyph_file, folder → glyph_folder_close)
+    )
   }
 
   // Filter tool
@@ -231,19 +238,19 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
   def createNewNode = {
     val newFile = newNodeInput.value
     val currentDirNode = manager.current
-    addRootDirButton.content.now.foreach {
-      _.value match {
-        case dt: DirNodeType  ⇒ CoreUtils.addDirectory(currentDirNode.now, newFile, () ⇒ unselectToolAndRefreshTree)
-        case ft: FileNodeType ⇒ CoreUtils.addFile(currentDirNode.now, newFile, () ⇒ unselectToolAndRefreshTree)
-      }
+    addRootDirButton.get match {
+      case Some(dt: DirNodeType)  ⇒ CoreUtils.addDirectory(currentDirNode.now, newFile, () ⇒ unselectToolAndRefreshTree)
+      case Some(ft: FileNodeType) ⇒ CoreUtils.addFile(currentDirNode.now, newFile, () ⇒ unselectToolAndRefreshTree)
+      case _                      ⇒
     }
   }
 
   val createFileTool = bs.inputGroup()(
     bs.inputGroupButton(addRootDirButton.selector),
-    form(newNodeInput, onsubmit := { () ⇒
-      createNewNode
-      false
+    form(newNodeInput, onsubmit := {
+      () ⇒
+        createNewNode
+        false
     })
   ).render
 
@@ -265,8 +272,9 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
   }
 
   val deleteButton = bs.button("Delete", btn_danger, () ⇒ {
-    CoreUtils.trashNodes(manager.selected.now) { () ⇒
-      unselectToolAndRefreshTree
+    CoreUtils.trashNodes(manager.selected.now) {
+      () ⇒
+        unselectToolAndRefreshTree
     }
   })
 
@@ -276,16 +284,18 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
   })
 
   val pluginButton = bs.button("Plug", btn_default, () ⇒ {
-    OMPost[Api].copyToPluginUploadDir(manager.selected.now).call().foreach { c ⇒
-      OMPost[Api].addPlugins(manager.selected.now.map {
-        _.name
-      }).call().foreach { errs ⇒
-        if (errs.isEmpty) {
-          unselectToolAndRefreshTree
-          pluginTriggerer.open
+    OMPost[Api].copyToPluginUploadDir(manager.selected.now).call().foreach {
+      c ⇒
+        OMPost[Api].addPlugins(manager.selected.now.map {
+          _.name
+        }).call().foreach {
+          errs ⇒
+            if (errs.isEmpty) {
+              unselectToolAndRefreshTree
+              pluginPanel.dialog.open
+            }
+            else AlertPanel.detail("Plugin import failed", errs.head.stackTrace, transform = RelativeCenterPosition, zone = FileZone)
         }
-        else AlertPanel.detail("Plugin import failed", errs.head.stackTrace, transform = RelativeCenterPosition, zone = FileZone)
-      }
     }
   })
 
@@ -340,8 +350,9 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
     )
   }
 
-  def getIfSelected(butt: TypedTag[HTMLButtonElement]) = manager.selected.map { m ⇒
-    if (m.isEmpty) tags.div else butt
+  def getIfSelected(butt: TypedTag[HTMLButtonElement]) = manager.selected.map {
+    m ⇒
+      if (m.isEmpty) tags.div else butt
   }
 
   lazy val div = Rx {
@@ -374,8 +385,9 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
             getIfSelected(copyButton)
           case _ ⇒ tags.div()
         },
-        transferring.withTransferWaiter { _ ⇒
-          tags.div()
+        transferring.withTransferWaiter {
+          _ ⇒
+            tags.div()
         }
       )
     )

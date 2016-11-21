@@ -1,10 +1,11 @@
 package org.openmole.gui.client.core
 
-import scalatags.JsDom.{ tags ⇒ tags }
+import scalatags.JsDom.tags
 import scalatags.JsDom.all._
 import org.openmole.gui.misc.js.JsRxTags._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import bs._
+import fr.iscpif.scaladget.stylesheet.all
 import rx._
 
 /*
@@ -24,26 +25,30 @@ import rx._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class TextPanel(_modalID: bs.ModalID, title: String) extends ModalPanel {
+class TextPanel(title: String) {
 
-  lazy val modalID = _modalID
   val content: Var[String] = Var("")
 
   def onOpen() = {}
 
   def onClose() = {}
 
-  val dialog = bs.modalDialog(
-    modalID,
-    headerDialog(
-      tags.span(tags.b(title))
-    ),
-    bodyDialog(
-      tags.div(Rx {
-        bs.textArea(30)(scalatags.generic.Attr("wrap") := "off", content())
-      })
-    ),
-    footerDialog(closeButton)
+  def open = dialog.open
+
+  val dialog = bs.ModalDialog()
+
+  dialog.header(
+    tags.span(tags.b(title))
   )
+
+  dialog.body(
+    tags.div(
+      Rx {
+        bs.textArea(30)(scalatags.generic.Attr("wrap") := "off", content())
+      }
+    )
+  )
+
+  dialog.footer(bs.ModalDialog.closeButton(dialog, all.btn_default, "Close"))
 
 }

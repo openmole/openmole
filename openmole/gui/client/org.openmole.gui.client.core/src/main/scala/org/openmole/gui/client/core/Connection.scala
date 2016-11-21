@@ -8,8 +8,9 @@ import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import org.openmole.gui.misc.utils.{ stylesheet ⇒ omsheet }
 import org.openmole.gui.shared.Api
 import org.scalajs.dom.raw.HTMLFormElement
-import rx.{ Rx, Var }
+import rx.{ Ctx, Rx, Var }
 import sheet._
+
 import scalatags.JsDom.all._
 import scalatags.JsDom.tags
 import org.openmole.gui.misc.js.JsRxTags._
@@ -33,6 +34,7 @@ import org.openmole.gui.misc.js.JsRxTags._
 
 class Connection {
 
+  implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
   val shutDown = new ShutDown
 
   lazy val connectButton = tags.button("Connect", btn_primary, `type` := "submit").render
