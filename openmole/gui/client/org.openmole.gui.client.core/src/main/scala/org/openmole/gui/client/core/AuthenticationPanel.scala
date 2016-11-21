@@ -167,7 +167,7 @@ class AuthenticationPanel {
     btn_default +++ glyph_settings +++ omsheet.settingsButton
   )(tags.span(caret))
 
-  lazy val dialog: ModalDialog = bs.ModalDialog()
+  lazy val dialog: ModalDialog = bs.ModalDialog(omsheet.panelWidth(52))
 
   dialog.header(
     div(height := 55)(

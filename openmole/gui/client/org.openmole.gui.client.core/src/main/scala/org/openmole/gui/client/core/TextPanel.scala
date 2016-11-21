@@ -7,6 +7,7 @@ import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import bs._
 import fr.iscpif.scaladget.stylesheet.all
 import rx._
+import org.openmole.gui.misc.utils.{ stylesheet ⇒ omsheet }
 
 /*
  * Copyright (C) 03/08/15 // mathieu.leclaire@openmole.org
@@ -35,7 +36,7 @@ class TextPanel(title: String) {
 
   def open = dialog.open
 
-  val dialog = bs.ModalDialog()
+  val dialog = bs.ModalDialog(omsheet.panelWidth(65))
 
   dialog.header(
     tags.span(tags.b(title))

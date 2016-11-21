@@ -330,7 +330,7 @@ class ExecutionPanel {
     envErrorHistory.withLabel("# environment errors")
   )
 
-  val dialog = bs.ModalDialog()
+  val dialog = bs.ModalDialog(omsheet.panelWidth(92))
 
   dialog.header(
     div(height := 55)(

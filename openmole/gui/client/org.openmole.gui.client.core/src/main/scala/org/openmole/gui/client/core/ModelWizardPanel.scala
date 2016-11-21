@@ -23,15 +23,13 @@ import org.openmole.gui.ext.data._
 import org.openmole.gui.misc.js.{ OMTags, OptionsDiv }
 import autowire._
 import org.scalajs.dom.html.TextArea
-import org.openmole.gui.client.core.files.TreeNode._
-
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
 import org.scalajs.dom.raw.{ HTMLDivElement, HTMLInputElement }
 import org.openmole.gui.misc.js.JsRxTags._
 import rx._
 import org.openmole.gui.shared.Api
-
+import org.openmole.gui.misc.utils.{ stylesheet ⇒ omsheet }
 import scalatags.JsDom.{ TypedTag, tags }
 import scalatags.JsDom.all._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
@@ -409,7 +407,9 @@ class ModelWizardPanel {
         fileToUploadPath() = Some(filePath)
         launchingCommand.now.foreach {
           lc ⇒
-            lc.language.map { codeSelector.set }
+            lc.language.map {
+              codeSelector.set
+            }
             setScritpName
             setReactives(lc)
         }
@@ -496,7 +496,9 @@ class ModelWizardPanel {
               outputs(currentReactives.now).map {
                 _.content.prototype
               },
-              path, classSelector.get.map { _.name },
+              path, classSelector.get.map {
+                _.name
+              },
               fileToUploadPath.now.map {
                 _.name
               }, resources.now
@@ -706,7 +708,7 @@ class ModelWizardPanel {
 
   lazy val dialog = {
     setBodyContent
-    bs.ModalDialog()
+    bs.ModalDialog(omsheet.panelWidth(92))
   }
 
   dialog.header(
@@ -714,9 +716,11 @@ class ModelWizardPanel {
   )
 
   dialog.body(
-    tags.div(Rx {
-      bodyContent().getOrElse(tags.div())
-    })
+    tags.div(
+      Rx {
+        bodyContent().getOrElse(tags.div())
+      }
+    )
   )
 
   dialog.footer(buttonGroup(Seq(width := 200, right := 100))(

@@ -30,33 +30,6 @@ ul{
     list-style-type: none;
 }
 
-/* DIALOGS */
-#marketPanelID .modal-dialog, #executionsPanelID .modal-dialog, #modelWizardPanelID .modal-dialog  {
-    width: 92%;
-    max-width: 1250px;
-}
-
-#settingsPanelID .modal-dialog{
-    max-width: 1250px;
-    width: 70%;
-}
- #envStackID .modal-dialog, #documentationID .modal-dialog{
-    max-width: 1250px;
-    width: 65%;
-}
-
-#conceptPanelID .modal-footer {
-    border-top: 0 none;
-    padding: 15px;
-    text-align: right;
-}
-
-#authenticationsPanelID .modal-dialog{
-    max-width: 1250px;
-    width: 52%;
-}
-
-
 /* EDITOR */
 #editor {
     font-family: monospace;

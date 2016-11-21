@@ -37,10 +37,8 @@ import org.openmole.gui.ext.data._
 import Waiter._
 import autowire._
 import rx._
-
 import scalatags.JsDom.tags
 import scalatags.JsDom.all._
-import bs._
 
 class MarketPanel {
 
@@ -136,7 +134,7 @@ class MarketPanel {
       download(marketIndexEntry)
     }
 
-  val dialog = bs.ModalDialog()
+  val dialog = bs.ModalDialog(omsheet.panelWidth(92))
 
   dialog.header(
     tags.span(tags.b("Market place"))

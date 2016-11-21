@@ -305,7 +305,7 @@ class GUIDocPanel {
     GUIDocEntry(OMTags.glyph_plug, "Plugins", pluginContent)
   )
 
-  lazy val dialog = bs.ModalDialog()
+  lazy val dialog = bs.ModalDialog(omsheet.panelWidth(65))
 
   dialog.header(
     div(height := 55)(

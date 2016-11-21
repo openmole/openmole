@@ -375,6 +375,12 @@ package object stylesheet {
     width := "100%"
   )
 
+  //PANELS
+  def panelWidth(ratio: Int): ModifierSeq = Seq(
+    width := s"${ratio.toString}%",
+    maxWidth := 1250
+  )
+
   //MARKET PANEL
   lazy val docEntry: ModifierSeq = Seq(
     color("white"),
