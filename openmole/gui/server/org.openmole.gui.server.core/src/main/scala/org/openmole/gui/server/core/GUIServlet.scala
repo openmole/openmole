@@ -62,7 +62,6 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
   val resetPasswordRoute = "/resetPassword"
 
   //FIXME val connectedUsers: Var[Seq[UserID]] = Var(Seq())
-  val connected = Var(false)
   val USER_ID = "UserID"
 
   def connection = html("ScriptClient().connection();")
@@ -114,7 +113,6 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
       case Some(u: UserID) ⇒
         response.setHeader("WWW-Authenticate", "OpenMOLE realm=\"%s\"" format realm)
         // recordUser(u)
-        connected() = true
         Ok()
       case _ ⇒
         redirect(connectionRoute)
@@ -123,14 +121,13 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
 
   get(resetPasswordRoute) {
     Workspace.reset
-    connected() = false
     resetPassword
   }
 
   post(resetPasswordRoute) {
     val password = params.getOrElse("password", "")
     val passwordAgain = params.getOrElse("passwordagain", "")
-    connected() = Utils.setPassword(password, passwordAgain)
+    Utils.setPassword(password, passwordAgain)
     redirect(connectionRoute)
   }
 
@@ -194,7 +191,7 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
   }
 
   get(connectionRoute) {
-    if (connected.now) redirect("/app")
+    if (Workspace.passwordHasBeenSet) redirect("/app")
     else if (apiImpl.passwordState.chosen) {
       response.setHeader("Access-Control-Allow-Origin", "*")
       response.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, UPDATE, OPTIONS")
@@ -211,9 +208,9 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
     response.setHeader("Access-Control-Allow-Headers", "Content-Type, Accept, X-Requested-With")
 
     val password = params.getOrElse("password", "")
-    connected() = Utils.setPassword(password)
+    Utils.setPassword(password)
 
-    connected.now match {
+    Workspace.passwordHasBeenSet match {
       case true ⇒ redirect(appRoute)
       case _    ⇒ redirect(connectionRoute)
     }
@@ -221,7 +218,7 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
 
   get(appRoute) {
     contentType = "text/html"
-    if (connected.now) application
+    if (Workspace.passwordHasBeenSet) application
     else redirect(connectionRoute)
   }
 
