@@ -401,15 +401,8 @@ class ApiImpl(val arguments: GUIServer.ServletArguments) extends Api {
 
   def getMarketEntry(entry: MarketIndexEntry, path: SafePath) = {
     import org.openmole.gui.ext.data.ServerFileSytemContext.project
-    val url = new URL(entry.url)
-    HTTPStorage.download(entry.url) { is ⇒
-      val tis = new TarInputStream(new GZIPInputStream(is))
-      try {
-        tis.extract(safePathToFile(path))
-        autoAddPlugins(path)
-      }
-      finally tis.close
-    }
+    market.downloadEntry(entry, safePathToFile(path))
+    autoAddPlugins(path)
   }
 
   //PLUGINS

@@ -27,14 +27,13 @@ import scala.util.{ Failure, Success }
 object OMPost extends autowire.Client[String, upickle.default.Reader, upickle.default.Writer] {
   override def doCall(req: Request): Future[String] = {
     val url = req.path.mkString("/")
-    val host = window.document.location.host
 
     val timeout = setTimeout(10000) {
       println("The request is very long. Please check your connection.")
     }
 
     val future = ext.Ajax.post(
-      url = s"https://$host/$url",
+      url = s"$url",
       data = upickle.default.write(req.args),
       timeout = 60000
     ).map {

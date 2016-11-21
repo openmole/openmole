@@ -61,21 +61,24 @@ object GUIServer {
 
 import GUIServer._
 
-class GUIServer(port: Int, localhost: Boolean) {
+class GUIServer(port: Int, localhost: Boolean, http: Boolean) {
 
   val server = new Server()
   var exitStatus: GUIServer.ExitStatus = GUIServer.Ok
   val semaphore = new Semaphore(0)
 
-  val contextFactory = new org.eclipse.jetty.util.ssl.SslContextFactory()
-  val ks = Workspace.keyStore
-  contextFactory.setKeyStore(ks)
-  contextFactory.setKeyStorePassword(Workspace.keyStorePassword)
-  contextFactory.setKeyManagerPassword(Workspace.keyStorePassword)
-  contextFactory.setTrustStore(ks)
-  contextFactory.setTrustStorePassword(Workspace.keyStorePassword)
+  lazy val contextFactory = {
+    val contextFactory = new org.eclipse.jetty.util.ssl.SslContextFactory()
+    val ks = Workspace.keyStore
+    contextFactory.setKeyStore(ks)
+    contextFactory.setKeyStorePassword(Workspace.keyStorePassword)
+    contextFactory.setKeyManagerPassword(Workspace.keyStorePassword)
+    contextFactory.setTrustStore(ks)
+    contextFactory.setTrustStorePassword(Workspace.keyStorePassword)
+    contextFactory
+  }
 
-  val connector = new ServerConnector(server, contextFactory)
+  val connector = if (!http) new ServerConnector(server, contextFactory) else new ServerConnector(server)
   connector.setPort(port)
   if (!localhost) connector.setHost("localhost")
 
