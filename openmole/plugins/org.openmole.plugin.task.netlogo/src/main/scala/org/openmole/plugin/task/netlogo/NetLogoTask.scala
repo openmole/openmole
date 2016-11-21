@@ -22,13 +22,14 @@ import java.util.AbstractCollection
 import org.openmole.core.context.{ Context, Val, Variable }
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.expansion.ExpandedString
-import org.openmole.core.tools.io.Prettifier
+
 import org.openmole.core.tools.io.Prettifier._
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.task._
 import org.openmole.plugin.task.external._
 import org.openmole.tool.cache.Cache
 import org.openmole.tool.random.RandomProvider
+import org.openmole.tool.thread._
 
 object NetLogoTask {
   case class Workspace(script: String, workspace: OptionalArgument[String] = None)
@@ -65,7 +66,7 @@ trait NetLogoTask extends Task {
 
     val script = workDir / workspace.script
     val netLogo = netLogoFactory()
-    withClassLoader(netLogo.getNetLogoClassLoader) {
+    withThreadClassLoader(netLogo.getNetLogoClassLoader) {
       try {
         wrapError(s"Error while opening the file $script") {
           netLogo.open(script.getAbsolutePath)
@@ -122,13 +123,6 @@ trait NetLogoTask extends Task {
       }
       finally netLogo.dispose
     }
-  }
-
-  private def withClassLoader[T](classLoader: ClassLoader)(f: ⇒ T): T = {
-    val threadClassLoader = Thread.currentThread().getContextClassLoader
-    Thread.currentThread().setContextClassLoader(classLoader)
-    try f
-    finally Thread.currentThread().setContextClassLoader(threadClassLoader)
   }
 
   def netLogoArrayToVariable(netlogoCollection: AbstractCollection[Any], prototype: Val[_]) = {
