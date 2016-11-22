@@ -776,9 +776,9 @@ lazy val dockerBin = Project("docker", binDir / "docker") enablePlugins(sbtdocke
     )
   ),
   dockerfile in docker := new Dockerfile {
-    from("openjdk:alpine")
-    runRaw("""apk update && apk add bash""")
-    runRaw("""adduser openmole -g "" -D -h /var/openmole/""")
+    from("openjdk:8-jre")
+    runRaw("""apt update && apt install -y bash""")
+    runRaw("""groupadd -r openmole && useradd -r -g openmole openmole --home-dir /var/openmole/ --create-home""")
     copy((assemble in openmole).value, s"/usr/lib/openmole")
     runRaw("chmod +x /usr/lib/openmole/openmole")
     runRaw("cd /usr/bin/ && ln -s ../lib/openmole/openmole")
