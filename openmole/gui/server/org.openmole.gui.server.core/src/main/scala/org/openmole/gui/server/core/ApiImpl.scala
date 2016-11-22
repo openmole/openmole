@@ -256,11 +256,7 @@ class ApiImpl(val arguments: GUIServer.ServletArguments) extends Api {
 
   def mdToHtml(safePath: SafePath): String = {
     import org.openmole.gui.ext.data.ServerFileSytemContext.project
-
-    DataUtils.fileToExtension(safePath.name) match {
-      case FileExtension.MD ⇒ MarkDownProcessor(safePathToFile(safePath).content)
-      case _                ⇒ ""
-    }
+    MarkDownProcessor(safePathToFile(safePath).content)
   }
 
   def renameFile(safePath: SafePath, name: String): SafePath = {
@@ -390,10 +386,7 @@ class ApiImpl(val arguments: GUIServer.ServletArguments) extends Api {
   def marketIndex() = {
     def mapToMd(marketIndex: MarketIndex) =
       marketIndex.copy(entries = marketIndex.entries.map {
-        e ⇒
-          e.copy(readme = e.readme.map {
-            MarkDownProcessor(_)
-          })
+        e ⇒ e.copy(readme = e.readme.map { MarkDownProcessor(_) })
       })
 
     mapToMd(market.marketIndex)

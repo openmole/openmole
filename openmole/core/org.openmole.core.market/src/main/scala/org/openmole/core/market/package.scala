@@ -49,6 +49,7 @@ package object market {
       val tis = new TarInputStream(new GZIPInputStream(is))
       try tis.extract(path)
       finally tis.close
+      path.applyRecursive(_.setExecutable(true))
     }
   }
 
