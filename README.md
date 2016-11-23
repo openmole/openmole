@@ -6,7 +6,7 @@ It is a free software distributed under the [AGPLv3](http://www.gnu.org/licenses
 
 Imagine that you want to understand and/or optimize some parameters of an executable that you generally set in an empirical or arbitrary manner. Then embed the executable in OpenMOLE (5 minutes), use one of the distributed genetic algorithms provided by OpenMOLE (5 minutes) and resulting launch the workflow on a distributed execution environment with thousands of machines (1 minutes). To sumarize, you can design large scale distributed programs reusing legacy code and advanced numeric methods in approximately 10 minutes.
 
-## Try it ##
+## Try it! ##
 
 To checkout OpenMOLE you can play with to the [demo site](http://demo.openmole.org) (this site is wiped out every two hours). You should click on the litle cart and try out some of the market place examples.
 
@@ -18,9 +18,9 @@ To checkout OpenMOLE you can play with to the [demo site](http://demo.openmole.o
   - **Transparent distributed computing** – Zero-deployment (no installation step) approach to distribute the workload transparently on your multi-core machines, desktop-grids, clusters, grids, ...  
   - **Works with your programs** – Embed user’s executables (**Java, Binary exe, NetLogo, R, Scilab, Python, C++, ...**),  
   - **Scalable** – Handles millions of tasks and TB of data,  
-  - **Model analysis** – Advanced numerical experiments on simulation models (design of experiments, stochastic model replication, calibration, sensitivity analysis, ...),  
+  - **Advanced methods** – Advanced numerical experiments (design of experiments, stochastic replication, calibration, sensitivity analysis, ...),  
   - **Mature** – Developed since 2008, used in many real world applications and for daily production by many scientists.  
 
-
 ## Need some help to get started?##
+
 To get help please contact the maling list: users ‘at’ list.openmole.org (you should [subcribe](http://fedex.iscpif.fr/mailman/listinfo/openmole-users) first).
