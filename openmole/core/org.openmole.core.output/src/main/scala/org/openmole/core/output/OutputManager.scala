@@ -23,11 +23,24 @@ import org.openmole.tool.stream._
 
 object OutputManager {
 
-  private lazy val output = mutable.WeakHashMap[ThreadGroup, PrintStream]()
-  private lazy val error = mutable.WeakHashMap[ThreadGroup, PrintStream]()
-
   val systemOutput = System.out
   val systemError = System.err
+
+  lazy val outputDispatcher = new PrintStream(OutputManager.dispatchOutput)
+  lazy val errorDispatcher = new PrintStream(OutputManager.dispatchError)
+
+  def install = {
+    redirectSystemOutput(outputDispatcher)
+    redirectSystemError(errorDispatcher)
+  }
+
+  def uninstall = {
+    redirectSystemOutput(systemOutput)
+    redirectSystemError(systemError)
+  }
+
+  private lazy val output = mutable.WeakHashMap[ThreadGroup, PrintStream]()
+  private lazy val error = mutable.WeakHashMap[ThreadGroup, PrintStream]()
 
   private def findRedirect(group: ThreadGroup, map: mutable.Map[ThreadGroup, PrintStream]): Option[PrintStream] = {
     def parentThreadGroups(group: ThreadGroup) =
@@ -63,9 +76,6 @@ object OutputManager {
     System.setErr(ps)
     Console.getClass.getMethod("setErrDirect", classOf[PrintStream]).invoke(Console, ps)
   }
-
-  redirectSystemOutput(new PrintStream(dispatchOutput))
-  redirectSystemError(new PrintStream(dispatchError))
 
   private def unregister(thread: ThreadGroup) = {
     output.synchronized { output.remove(thread) }

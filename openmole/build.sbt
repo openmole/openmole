@@ -171,7 +171,7 @@ lazy val logging = OsgiProject(
   bundleActivator = Some("org.openmole.core.logging.internal.Activator"), imports = Seq("*")
 ) settings (libraryDependencies ++= Seq(Libraries.log4j, Libraries.logback, Libraries.slf4j)) dependsOn (tools) settings(coreSettings: _*)
 
-lazy val output = OsgiProject(coreDir, "org.openmole.core.output", imports = Seq("*")) dependsOn (openmoleStream) settings(coreSettings: _*)
+lazy val output = OsgiProject(coreDir, "org.openmole.core.output", imports = Seq("*"), bundleActivator = Some("org.openmole.core.output.Activator")) dependsOn (openmoleStream) settings(coreSettings: _*)
 
 lazy val console = OsgiProject(coreDir, "org.openmole.core.console", bundleActivator = Some("org.openmole.core.console.Activator"), global = true, imports = Seq("*")) dependsOn
   (pluginManager) settings (
