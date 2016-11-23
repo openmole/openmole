@@ -6,6 +6,15 @@ A process is told naturally parallel if the same computation runs many times for
 OpenMOLE can be used as a desktop application and embedded in web applications.  
 It is a free software distributed under the [AGPLv3](http://www.gnu.org/licenses/agpl.html) free software license.  
 
+## OpenMOLE by example ##
+
+Imagine that you want to understand and/or optimize some parameters of an executable that you generally fix in an empirical or arbitrary manner. Then embed the executable in OpenMOLE (5 minutes), use one of the distributed genetic algorithms provided by OpenMOLE (5 minutes) and resulting launch the workflow on a distributed execution environment with thousands of machines (1 minutes). To sumarize, you can design large scale distributed programs reusing legacy code and advanced numeric methods in approximately 10 minutes.
+
+## Try it ##
+
+To checkout OpenMOLE you can play with to the [demo site](http://demo.openmole.org) (this site is wiped out every two hours). You should click on the litle cart and try out some of the market place examples.
+
+/!\ Don't provide any credential to this site.
 
 ## OpenMOLE Features: ##
 
