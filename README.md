@@ -1,9 +1,5 @@
-OpenMOLE
-========
+[OpenMOLE](http://www.openmole.org) (Open MOdeL Experiment) is a workflow engine designed to leverage the computing power of distributed execution environments for naturally parallel processes. A process is told naturally parallel if the same computation runs many times for a set of different inputs, such as model experiment or data processing, ... 
 
-[OpenMOLE](http://www.openmole.org) (Open MOdeL Experiment) is a workflow engine designed to leverage the computing power of distributed execution environments for naturally parallel processes.  
-A process is told naturally parallel if the same computation runs many times for a set of different inputs, such as model experiment or data processing, ...  
-OpenMOLE can be used as a desktop application and embedded in web applications.  
 It is a free software distributed under the [AGPLv3](http://www.gnu.org/licenses/agpl.html) free software license.  
 
 ## OpenMOLE by example ##
