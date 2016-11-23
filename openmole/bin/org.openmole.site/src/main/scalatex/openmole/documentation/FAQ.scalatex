@@ -3,10 +3,10 @@
 
 @sect{FAQ}
 
-  This page present some questions about OpenMOLE.
+  This page answers some frequently asked questions about OpenMOLE.
 
   @sect{Which Java version should I use?}
-    @p OpenMOLE is fully working under OpenJDK 7 and 8. This is the recommended option. You can check which Java version
+    @p OpenMOLE is fully working under OpenJDK 8 and above. OpenJDK is the recommended option. You can check which Java version
     you're running by typing @hl.highlight("java -version", "plain") in a console.
 
     @p If you use the closed-source Oracle Java virtual machine (which is probably the case if you are working on Mac or
@@ -18,14 +18,15 @@
     directory of your java installation. It enables strong cryptographic algorithms.
 
     @p Another concern for @b{Mac users} are the concurrent versions of Java that are often present on the same system. Mac
-    OS ships with a default Java 6 that is not suitable to execute OpenMOLE. You must install Java 7 ir greater and
+    OS ships with a default Java 6 that is not suitable to execute OpenMOLE. You must install Java 8 or greater and
     @b{set the environment variable JAVA_HOME} to the install location on your machine (typically the directory
     containing @i{.../bin/java}).
 
   @sect{Where can I find the old versions of OpenMOLE?}
-    Old versions of OpenMOLE software and documentation are available @a("here", href := "http://www.openmole.org/all/").
+    @p Old versions of OpenMOLE software and documentation are available @a("here", href := "http://www.openmole.org/all/"). Due to a data loss in 2016, the versions from OpenMOLE 6 are available only.
 
   @sect{OpenMOLE cannot connect to my environment using SSH}
+
     @p When one of the SSH authentications you've added to OpenMOLE is marked as failed, you can try these few steps to identify the problems.
 
     @p If you are using OpenMOLE in console mode, enable the @i{FINE} level of logging in the console using:
