@@ -4,7 +4,7 @@ It is a free software distributed under the [AGPLv3](http://www.gnu.org/licenses
 
 ## OpenMOLE by example ##
 
-Imagine that you want to understand and/or optimize some parameters of an executable that you generally fix in an empirical or arbitrary manner. Then embed the executable in OpenMOLE (5 minutes), use one of the distributed genetic algorithms provided by OpenMOLE (5 minutes) and resulting launch the workflow on a distributed execution environment with thousands of machines (1 minutes). To sumarize, you can design large scale distributed programs reusing legacy code and advanced numeric methods in approximately 10 minutes.
+Imagine that you want to understand and/or optimize some parameters of an executable that you generally set in an empirical or arbitrary manner. Then embed the executable in OpenMOLE (5 minutes), use one of the distributed genetic algorithms provided by OpenMOLE (5 minutes) and resulting launch the workflow on a distributed execution environment with thousands of machines (1 minutes). To sumarize, you can design large scale distributed programs reusing legacy code and advanced numeric methods in approximately 10 minutes.
 
 ## Try it ##
 
