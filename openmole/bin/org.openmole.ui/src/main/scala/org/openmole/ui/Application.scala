@@ -103,7 +103,7 @@ object Application extends Logger {
       |[-p | --plugin list of arg] plugins list of jar or category containing jars to be loaded
       |[-c | --console] console mode
       |[--port port] specify the port for the GUI or REST API
-      |[--script path] a path of on OpenMOLE script to execute
+      |[--script path] a path of an OpenMOLE script to execute
       |[--password password] openmole password
       |[--password-file file containing a password] read the OpenMOLE password (--password option) in a file
       |[--rest] run the REST server
