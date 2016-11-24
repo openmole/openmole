@@ -405,11 +405,11 @@ class ApiImpl extends Api {
     import org.openmole.gui.ext.data.ServerFileSytemContext.project
     val url = new URL(entry.url)
     val is = new TarInputStream(new GZIPInputStream(url.openStream()))
-    try {
-      is.extract(safePathToFile(path))
-      autoAddPlugins(path)
-    }
+    val dest = safePathToFile(path)
+    try is.extract(dest)
     finally is.close
+    dest.applyRecursive(_.setExecutable(true))
+    autoAddPlugins(path)
   }
 
   //PLUGINS
