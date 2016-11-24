@@ -23,4 +23,4 @@ To checkout OpenMOLE you can play with to the [demo site](http://demo.openmole.o
 
 ## Need some help to get started?##
 
-To get help please contact the maling list: users ‘at’ list.openmole.org (you should [subcribe](http://fedex.iscpif.fr/mailman/listinfo/openmole-users) first).
+To get help please contact the maling list: users ‘at’ list.openmole.org (you should [subscribe](http://fedex.iscpif.fr/mailman/listinfo/openmole-users) first).
