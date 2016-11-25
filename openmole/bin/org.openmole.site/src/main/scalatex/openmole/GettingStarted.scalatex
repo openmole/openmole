@@ -34,14 +34,23 @@ $tasks
       i(s"${name} (version ${version}) was released on ${generationDate}.")
     )
 
-@sect{Launch}
+@sect{The big picture}
 
-  @p OpenMOLE requires that Java version 7 or above is installed and available on your computer. Then just extract the archive, and you're done! OpenMOLE is installed and works out of the box!
+  @p Imagine that you want to understand and/or optimize some parameters of an executable that you generally set in an empirical or arbitrary manner. Then embed the executable in OpenMOLE (5 minutes), use one of the distributed genetic algorithms provided by OpenMOLE (5 minutes) and launch the workflow on a distributed execution environment with thousands of machines (1 minutes). To summarize, you can design large scale distributed programs reusing legacy code and advanced numeric methods in approximately 10 minutes.
+
+@sect{Try it}
+
+  @p You can try OpenMOLE online using the @a("OpenMOLE demonstration site", href := "http://demo.openmole.org").
+
+@sect{Install it}
+
+  @p OpenMOLE requires that Java version 7 or above is installed and available on your computer. To make sure of that you can check our @a("FAQ", href := root.faq.file). Then just extract the archive, and you're done! OpenMOLE is installed and works out of the box!
 
   @p Once installed you can launch OpenMOLE by executing the @i{openmole} file in the installation directory (it is called @i{openmole.bat} for windozers). It will bring up the OpenMOLE @a("application", href := root.application.file) that runs in your web browser (OpenMOLE supports Firefox and Chrome).
 
 @sect{First workflow}
-  Let's design a workflow that explores one variable multiplies it by 2 and then displays each result. The computation is executed in a multi-threaded environment on the local machine.
+
+  @p Let's design a workflow that explores one variable multiplies it by 2 and then displays each result. The computation is executed in a multi-threaded environment on the local machine.
 
   @p In the OpenMOLE interface, first create a file named @i{example.oms} @("(the file extension is important")). Open it and write the following workflow:
 
@@ -67,4 +76,4 @@ $tasks
     @li{describe your design of experiments in the @a("sampling documentation", href := root.language.sampling.file).}
 
 @sect{Get help}
-  To get help you are more than welcome to contact the OpenMOLE user mailing list. To do so, you should @a("subscribe here", href := "http://list.openmole.org/"), and then you can post your question to the list users 'at' list.openmole.org. We're also present on the @b{#openmole} channel of the @a("ISC-PIF's RocketChat", href := "https://chat.iscpif.fr").
+  To get help you are more than welcome to contact the OpenMOLE user mailing list. To do so, you should @a("subscribe here", href := "http://list.openmole.org/"), and then you can post your question to the list users 'at' list.openmole.org. We're also present on the @b{#openmole} channel of the @a("ISC-PIF's RocketChat", href := "https://chat.iscpif.fr/channel/openmole").
