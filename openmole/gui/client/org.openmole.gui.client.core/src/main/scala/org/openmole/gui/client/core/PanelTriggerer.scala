@@ -2,7 +2,11 @@ package org.openmole.gui.client.core
 
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import fr.iscpif.scaladget.stylesheet.bootstrap.bootstrap._
+import org.scalajs.dom.html.Button
+import org.scalajs.dom.raw.HTMLButtonElement
+
 import scalatags.JsDom.all._
+import scalatags.Text.TypedTag
 
 /*
  * Copyright (C) 28/05/15 // mathieu.leclaire@openmole.org
@@ -43,7 +47,10 @@ trait ModalPanel {
 
   def onClose(): Unit
 
-  val closeButton = button("Close", btn_default)(data("dismiss") := "modal", onclick := { () ⇒ close })
+  def closeButton(onclickExtra: () ⇒ Unit = () ⇒ {}) = button("Close", btn_default)(data("dismiss") := "modal", onclick := { () ⇒
+    onclickExtra()
+    close
+  })
 
   def close: Unit = bs.hideModal(modalID)
 

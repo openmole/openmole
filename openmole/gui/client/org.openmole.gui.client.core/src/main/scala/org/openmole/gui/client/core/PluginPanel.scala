@@ -126,7 +126,7 @@ class PluginPanel extends ModalPanel {
     bs.bodyDialog(pluginTable),
     bs.footerDialog(
       tags.div(
-        closeButton
+        closeButton()
       )
     )
   )

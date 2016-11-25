@@ -102,7 +102,7 @@ class AuthenticationPanel extends ModalPanel {
               })
             ),
             td(colMD(6) +++ sheet.paddingTop(5))(label(pwID.name, label_primary)),
-            td(colMD(2))(
+            td(colMD(4))(
               for {
                 test ← pwID.authenticationTests
               } yield {
@@ -113,7 +113,7 @@ class AuthenticationPanel extends ModalPanel {
                 }
               }
             ),
-            td(
+            td(colMD(1))(
               Rx {
                 if (lineHovered()) opaque
                 else transparent
@@ -165,6 +165,10 @@ class AuthenticationPanel extends ModalPanel {
     btn_default +++ glyph_settings +++ omsheet.settingsButton
   )(tags.span(caret))
 
+  val cancelButton = bs.button("Cancel", btn_default, () ⇒ {
+    setting() = None
+  })
+
   lazy val dialog = bs.modalDialog(
     modalID,
     bs.headerDialog(
@@ -185,10 +189,10 @@ class AuthenticationPanel extends ModalPanel {
     bs.footerDialog(Rx {
       bs.buttonGroup()(
         setting() match {
-          case Some(_) ⇒ saveButton
+          case Some(_) ⇒ Seq(saveButton, cancelButton)
           case _       ⇒ newButton
         },
-        closeButton
+        closeButton(() ⇒ setting() = None)
       )
     })
   )
