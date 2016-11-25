@@ -12,8 +12,6 @@ object Libraries {
 
   val aceVersion = "01.08.2014"
 
-  val bootsrapVersion = "3.3.6"
-
   val d3Version = "3.5.12"
 
   val tooltipserVersion = "3.3.0"
@@ -91,8 +89,6 @@ object Libraries {
   lazy val monocle = "org.openmole" %% "monocle" % "1.2.0"
 
   lazy val d3 = "org.webjars" % "d3js" % d3Version
-
-  lazy val bootstrapNative = "org.webjars" % "bootstrapXXXX" % bootsrapVersion
 
   lazy val jquery = "org.webjars" % "jquery" % jqueryVersion
 
