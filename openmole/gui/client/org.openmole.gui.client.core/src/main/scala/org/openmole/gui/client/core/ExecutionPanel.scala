@@ -348,7 +348,7 @@ class ExecutionPanel extends ModalPanel {
       executionTable
     ),
     footerDialog(
-      closeButton
+      closeButton()
     )
   )
 

@@ -36,7 +36,7 @@ class DivPanel(_modalID: ModalID, title: String, div: HTMLDivElement) extends Mo
       tags.span(tags.b(title))
     ),
     bodyDialog(div),
-    footerDialog(closeButton)
+    footerDialog(closeButton())
   )
 
 }

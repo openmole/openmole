@@ -712,7 +712,7 @@ class ModelWizardPanel extends ModalPanel {
         bodyContent().getOrElse(tags.div())
       }),
       bs.footerDialog(buttonGroup(Seq(width := 200, right := 100))(
-        bs.inputGroupButton(closeButton),
+        bs.inputGroupButton(closeButton()),
         bs.inputGroupButton(scriptNameInput),
         bs.inputGroupButton(buildModelTaskButton)
       ))

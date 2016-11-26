@@ -347,6 +347,6 @@ class GUIDocPanel extends ModalPanel {
         }
       )
     ),
-    bs.footerDialog(closeButton)
+    bs.footerDialog(closeButton())
   )
 }

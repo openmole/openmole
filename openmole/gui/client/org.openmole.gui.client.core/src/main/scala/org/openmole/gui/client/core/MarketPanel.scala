@@ -160,7 +160,7 @@ class MarketPanel extends ModalPanel {
         marketTable
       )
     }),
-    footerDialog(closeButton)
+    footerDialog(closeButton())
   )
 
 }
