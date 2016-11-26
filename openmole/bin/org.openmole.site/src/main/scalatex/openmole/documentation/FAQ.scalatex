@@ -151,6 +151,30 @@
 
     @p For more information about this specific problem, you can join this @a("discussion", href := "https://github.com/proot-me/PRoot/issues/106").
 
+  @sect{I get an error relate to file on linux and there is "too many open files" written somewhere in the error}
+    @p On linux server the number of file a use can open is generally limited to 1024. OpenMOLE increase it to 4096 when on launch, but it doesn't seem to work on your system, you might want to understand why. To check the current of you system limit execute @i{ulimit -a} in a terminal:
+
+    @p @hl.highlight("""
+    reuillon@docker-host1:~$ ulimit -a
+core file size          (blocks, -c) 0
+data seg size           (kbytes, -d) unlimited
+scheduling priority             (-e) 0
+file size               (blocks, -f) unlimited
+pending signals                 (-i) 64040
+max locked memory       (kbytes, -l) 64
+max memory size         (kbytes, -m) unlimited
+open files                      (-n) 1024
+pipe size            (512 bytes, -p) 8
+POSIX message queues     (bytes, -q) 819200
+real-time priority              (-r) 0
+stack size              (kbytes, -s) 8192
+cpu time               (seconds, -t) unlimited
+max user processes              (-u) 64040
+virtual memory          (kbytes, -v) unlimited
+file locks                      (-x) unlimited""", "plain")
+
+     @p In this example you can see the the nax number of open files is 1024. This is generally a soft limitation that can be overridden by the user. To do so execute @i{ulimit -n 4096} before launching in the same terminal. You can check that you command had the expected effect using @i{ulimit -a}. If is does't work it means that a hard limit has been set in the @i{limits.conf} of your system. If you are administrator you can fix it by modifying the file @i{/etc/security/limits.conf}, otherwise you should contact the system administrator and ask him/her kindly to unleash it.
+
   @sect{My problem is not listed here}
     @p If you could not resolve your problems, feel free to post your problem on the @a("mailing-list",
     href := "http://list.openmole.org").
