@@ -3,7 +3,7 @@ package org.openmole.gui.client.core.files
 import org.openmole.gui.client.core.OMPost
 import org.openmole.gui.ext.data._
 import org.openmole.gui.misc.js.OMTags
-import org.openmole.gui.shared._
+import org.openmole.gui.ext.api._
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._

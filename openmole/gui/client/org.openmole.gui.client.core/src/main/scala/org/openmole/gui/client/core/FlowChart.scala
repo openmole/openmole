@@ -26,8 +26,7 @@ import rx._
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
-import org.openmole.gui.ext.api.Api
-import org.openmole.gui.shared._
+import org.openmole.gui.ext.api._
 
 import js.JSConverters._
 
