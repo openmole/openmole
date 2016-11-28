@@ -472,7 +472,7 @@ lazy val datauiGUI: Project = OsgiProject(guiExt, "org.openmole.gui.ext.dataui")
 
 lazy val extPluginGUI = OsgiProject(guiExt, "org.openmole.gui.ext.plugin") enablePlugins (ScalaJSPlugin)
 
-lazy val sharedGUI = OsgiProject(guiExt, "org.openmole.gui.shared") dependsOn (dataGUI, market) settings (defaultSettings: _*)
+lazy val sharedGUI = OsgiProject(guiExt, "org.openmole.gui.ext.api") dependsOn (dataGUI, market) settings (defaultSettings: _*)
 
 val jqueryPath = s"META-INF/resources/webjars/jquery/${Libraries.jqueryVersion}/jquery.js"
 val acePath = s"META-INF/resources/webjars/ace/${Libraries.aceVersion}/src-min/ace.js"
