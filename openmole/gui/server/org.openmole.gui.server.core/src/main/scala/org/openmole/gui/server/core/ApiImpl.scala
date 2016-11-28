@@ -33,6 +33,7 @@ import org.openmole.core.output.OutputManager
 import org.openmole.core.module
 import org.openmole.core.market
 import org.openmole.core.project._
+import org.openmole.gui.ext.api.Api
 import rx._
 
 /*

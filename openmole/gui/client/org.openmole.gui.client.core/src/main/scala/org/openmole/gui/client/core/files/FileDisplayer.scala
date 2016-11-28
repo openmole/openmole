@@ -3,12 +3,13 @@ package org.openmole.gui.client.core.files
 import TreeNodeTabs._
 import org.openmole.gui.client.core.OMPost
 import org.openmole.gui.ext.data.ScriptData
-import org.openmole.gui.shared.Api
 import org.openmole.gui.ext.data._
+
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
 import rx._
 import org.openmole.gui.client.core.panels._
+import org.openmole.gui.ext.api.Api
 
 /*
  * Copyright (C) 07/05/15 // mathieu.leclaire@openmole.org

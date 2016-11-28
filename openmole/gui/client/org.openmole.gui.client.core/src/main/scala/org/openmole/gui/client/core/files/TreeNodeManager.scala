@@ -20,10 +20,10 @@ package org.openmole.gui.client.core.files
 import org.openmole.gui.client.core.alert.AlertPanel
 import org.openmole.gui.client.core.{ CoreUtils, OMPost }
 import org.openmole.gui.ext.data.{ FileFilter, ListFilesData, SafePath }
-import org.openmole.gui.shared.Api
 import rx._
 import autowire._
 import org.openmole.gui.client.core.files.TreeNode.ListFiles
+import org.openmole.gui.ext.api.Api
 import org.scalajs.dom.FileList
 
 import scala.concurrent.Future

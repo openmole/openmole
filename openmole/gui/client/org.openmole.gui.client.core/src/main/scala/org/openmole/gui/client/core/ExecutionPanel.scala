@@ -21,15 +21,17 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 import fr.iscpif.scaladget.api.BootstrapTags.ScrollableTextArea.BottomScroll
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
-import org.openmole.gui.misc.utils.{ stylesheet ⇒ omsheet, Utils }
-import org.openmole.gui.shared.Api
+import org.openmole.gui.misc.utils.{ Utils, stylesheet ⇒ omsheet }
+
 import scala.concurrent.duration.Duration
 import scala.util.{ Failure, Success }
 import scalatags.JsDom.all._
-import org.openmole.gui.misc.js.{ _ }
+import org.openmole.gui.misc.js._
 import org.openmole.gui.misc.js.Expander._
+
 import scalatags.JsDom._
 import org.openmole.gui.misc.js.JsRxTags._
+
 import scala.scalajs.js.timers._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
@@ -38,7 +40,9 @@ import autowire._
 import org.openmole.gui.ext.data.{ Error ⇒ ExecError }
 import org.openmole.gui.ext.data._
 import bs._
+import org.openmole.gui.ext.api.Api
 import rx._
+
 import concurrent.duration._
 
 class ExecutionPanel extends ModalPanel {

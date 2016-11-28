@@ -27,6 +27,7 @@ import autowire._
 import rx._
 import bs._
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
+import org.openmole.gui.ext.api.Api
 import org.openmole.gui.misc.utils
 import org.scalajs.dom
 import sheet._
