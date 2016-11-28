@@ -470,7 +470,9 @@ lazy val datauiGUI: Project = OsgiProject(guiExt, "org.openmole.gui.ext.dataui")
   Libraries.scalaTagsJS,
   Libraries.scalajsDomJS) settings (defaultSettings: _*)
 
-lazy val extPluginGUI = OsgiProject(guiExt, "org.openmole.gui.ext.plugin") enablePlugins (ScalaJSPlugin)
+lazy val extPluginGUI = OsgiProject(guiExt, "org.openmole.gui.ext.plugin") enablePlugins (ScalaJSPlugin) settings (
+  libraryDependencies += Libraries.equinoxOSGi
+)
 
 lazy val sharedGUI = OsgiProject(guiExt, "org.openmole.gui.ext.api") dependsOn (dataGUI, market) settings (defaultSettings: _*)
 
@@ -528,10 +530,13 @@ lazy val serverGUI = OsgiProject(guiServerDir, "org.openmole.gui.server.core") s
 lazy val state = OsgiProject(guiServerDir, "org.openmole.gui.server.state") settings
   (libraryDependencies += Libraries.slick) dependsOn (dataGUI, workflow, workspace) settings (defaultSettings: _*)
 
+/* -------------------- GUI Plugin ----------------------- */
+
+def guiPluginSettings = defaultSettings ++  Seq(defaultActivator)
 
 def guiPluginDir = guiDir / "plugins"
 
-lazy val guiPluginEnvironmentEGI = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.environment.egi") enablePlugins (ScalaJSPlugin) dependsOn(extPluginGUI)
+lazy val guiPluginEnvironmentEGI = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.environment.egi") settings(guiPluginSettings: _*) enablePlugins (ScalaJSPlugin) dependsOn(extPluginGUI)
 
 
 /* -------------------- Bin ------------------------- */
