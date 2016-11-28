@@ -5,7 +5,6 @@ import org.openmole.gui.client.core.{ CoreUtils, OMPost }
 import org.openmole.gui.ext.data._
 import org.openmole.gui.misc.js.OMTags
 import org.openmole.gui.misc.utils.stylesheet
-import org.openmole.gui.shared.Api
 import org.scalajs.dom.html.Input
 
 import scala.util.Try
@@ -31,6 +30,7 @@ import org.openmole.gui.client.core.Waiter._
 import org.openmole.gui.client.core.alert.AbsolutePositioning.{ FileZone, RelativeCenterPosition }
 import org.openmole.gui.client.core.alert.AlertPanel
 import org.openmole.gui.client.core.panels._
+import org.openmole.gui.ext.api.Api
 
 /*
  * Copyright (C) 20/01/16 // mathieu.leclaire@openmole.org

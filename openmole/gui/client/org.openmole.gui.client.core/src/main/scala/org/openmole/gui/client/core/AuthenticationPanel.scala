@@ -19,11 +19,13 @@ package org.openmole.gui.client.core
 
 import org.openmole.gui.client
 import org.openmole.gui.ext.dataui.PanelUI
-import org.openmole.gui.shared.Api
+
 import scalatags.JsDom.all._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
-import scalatags.JsDom.{ tags ⇒ tags }
+
+import scalatags.JsDom.tags
 import org.openmole.gui.misc.js.JsRxTags._
+
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import org.openmole.gui.misc.utils.{ stylesheet ⇒ omsheet }
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
@@ -33,6 +35,7 @@ import sheet._
 import rx._
 import bs._
 import org.openmole.gui.client.core.authentications._
+import org.openmole.gui.ext.api.Api
 
 class AuthenticationPanel extends ModalPanel {
 

@@ -470,7 +470,9 @@ lazy val datauiGUI: Project = OsgiProject(guiExt, "org.openmole.gui.ext.dataui")
   Libraries.scalaTagsJS,
   Libraries.scalajsDomJS) settings (defaultSettings: _*)
 
-lazy val sharedGUI = OsgiProject(guiDir / "shared", "org.openmole.gui.shared") dependsOn (dataGUI, market) settings (defaultSettings: _*)
+lazy val extPluginGUI = OsgiProject(guiExt, "org.openmole.gui.ext.plugin") enablePlugins (ScalaJSPlugin)
+
+lazy val sharedGUI = OsgiProject(guiExt, "org.openmole.gui.shared") dependsOn (dataGUI, market) settings (defaultSettings: _*)
 
 val jqueryPath = s"META-INF/resources/webjars/jquery/${Libraries.jqueryVersion}/jquery.js"
 val acePath = s"META-INF/resources/webjars/ace/${Libraries.aceVersion}/src-min/ace.js"
@@ -492,6 +494,7 @@ lazy val clientGUI = OsgiProject(guiDir / "client", "org.openmole.gui.client.cor
     jsDependencies += Libraries.ace / "src-min/theme-github.js" dependsOn acePath,
     jsDependencies += Libraries.bootstrap / "js/bootstrap.js" dependsOn jqueryPath minified "js/bootstrap.min.js"
   ) settings (defaultSettings: _*)
+
 
 
 def guiServerDir = guiDir / "server"
@@ -516,12 +519,19 @@ lazy val serverGUI = OsgiProject(guiServerDir, "org.openmole.gui.server.core") s
     txtmark,
     openmoleCrypto,
     module,
-    market
+    market,
+    extPluginGUI
   )settings (defaultSettings: _*)
+
+
 
 lazy val state = OsgiProject(guiServerDir, "org.openmole.gui.server.state") settings
   (libraryDependencies += Libraries.slick) dependsOn (dataGUI, workflow, workspace) settings (defaultSettings: _*)
 
+
+def guiPluginDir = guiDir / "plugins"
+
+lazy val guiPluginEnvironmentEGI = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.environment.egi") enablePlugins (ScalaJSPlugin) dependsOn(extPluginGUI)
 
 
 /* -------------------- Bin ------------------------- */

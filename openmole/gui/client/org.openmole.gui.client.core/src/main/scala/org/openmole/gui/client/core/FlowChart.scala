@@ -19,12 +19,16 @@ package org.openmole.gui.client.core
 
 import fr.iscpif.scaladget.mapping._
 import org.scalajs.dom
+
 import scala.scalajs.js
 import js.Dynamic.{ literal ⇒ lit }
 import rx._
+
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
+import org.openmole.gui.ext.api.Api
 import org.openmole.gui.shared._
+
 import js.JSConverters._
 
 trait GraphElement <: EventStates {

@@ -16,11 +16,11 @@ import org.openmole.gui.misc.utils.{ stylesheet ⇒ omsheet }
 import sheet._
 import bs._
 import org.openmole.gui.misc.js.OMTags
-import org.openmole.gui.shared.Api
 import org.scalajs.dom.KeyboardEvent
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
+import org.openmole.gui.ext.api.Api
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration

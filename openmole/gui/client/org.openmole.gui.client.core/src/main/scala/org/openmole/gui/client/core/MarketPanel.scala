@@ -24,7 +24,6 @@ import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import org.openmole.gui.ext.data.{ ProcessState, Processing }
 import org.openmole.gui.misc.js.InputFilter
 import org.openmole.gui.misc.js.JsRxTags._
-import org.openmole.gui.shared.Api
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import org.openmole.gui.client.core.files.TreeNodePanel
@@ -41,6 +40,7 @@ import rx._
 import scalatags.JsDom.tags
 import scalatags.JsDom.all._
 import bs._
+import org.openmole.gui.ext.api.Api
 
 class MarketPanel extends ModalPanel {
   lazy val modalID = "marketPanelID"
