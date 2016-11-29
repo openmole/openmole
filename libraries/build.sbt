@@ -120,7 +120,7 @@ lazy val scalaDomVersion = "0.9.0"
 lazy val querkiJSQueryVersion = "0.11"
 lazy val scalaUpickleVersion = "0.4.1"
 lazy val scalaAutowireVersion = "0.2.5"
-lazy val scalajsVersion = "0.6.11"
+lazy val scalajsVersion = "0.6.13"
 
 lazy val rx = OsgiProject(dir, "rx", exports = Seq("rx.*")) settings(
   libraryDependencies ++= Seq("com.lihaoyi" %% "scalarx" % scalaRxVersion),
@@ -128,6 +128,9 @@ lazy val rx = OsgiProject(dir, "rx", exports = Seq("rx.*")) settings(
 
 lazy val scalajsTools = OsgiProject(dir, "scalajs-tools", exports = Seq("scala.scalajs.*", "org.scalajs.core.tools.*", "org.scalajs.core.ir.*", "com.google.javascript.*", "com.google.common.*", "rhino_ast.java.com.google.javascript.rhino.*", "org.json.*")) settings(
   libraryDependencies += "org.scala-js" %% "scalajs-tools" % scalajsVersion, version := scalajsVersion) settings(settings: _*)
+
+lazy val scalajsLibrary = OsgiProject(dir, "scalajs-library", exports = Seq("scala.scalajs.*", "org.scalajs.core.tools.*", "org.scalajs.core.ir.*", "com.google.javascript.*", "com.google.common.*", "rhino_ast.java.com.google.javascript.rhino.*", "org.json.*")) settings(
+  libraryDependencies += "org.scala-js" %% "scalajs-library" % scalajsVersion, version := scalajsVersion) settings(settings: _*)
 
 lazy val scalaJS = OsgiProject(dir, "scalajs", exports = Seq("scala.scalajs.*"), imports = Seq("*")) settings (
   libraryDependencies += "org.scala-js" %% "scalajs-library" % scalajsVersion,
