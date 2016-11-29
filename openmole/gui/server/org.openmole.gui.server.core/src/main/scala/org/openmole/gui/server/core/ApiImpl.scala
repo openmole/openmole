@@ -13,7 +13,6 @@ import org.openmole.core.pluginmanager._
 import org.openmole.gui.misc.utils.Utils._
 import org.openmole.gui.server.core.Utils._
 import org.openmole.core.workspace.{ ConfigurationLocation, Workspace }
-import org.openmole.gui.shared._
 import org.openmole.gui.ext.data
 import org.openmole.gui.ext.data._
 import java.io._

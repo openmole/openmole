@@ -50,7 +50,7 @@ object AutowireServer extends autowire.Server[String, upickle.default.Reader, up
 @MultipartConfig(fileSizeThreshold = 1024 * 1024)
 class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServlet with FileUploadSupport with AuthenticationSupport {
 
-  val basePath = "org/openmole/gui/shared"
+  val basePath = classOf[org.openmole.gui.ext.api.Api].getPackage.getName.replace('.', '/')
   val apiImpl = new ApiImpl(arguments)
 
   val connectionRoute = "/connection"

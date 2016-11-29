@@ -32,7 +32,7 @@ import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class EditorPanelUI(bindings: Seq[(String, String, () ⇒ Any)], initCode: String, fileType: FileExtension) extends PanelUI {
+class EditorPanelUI(bindings: Seq[(String, String, () ⇒ Any)], initCode: String, fileType: FileExtension) {
 
   lazy val Autocomplete = ace.require("ace/autocomplete").Autocomplete
 
