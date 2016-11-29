@@ -155,7 +155,7 @@ object CARETask extends Logger {
         |TRUEPROOT="$${PROOT-$$(dirname $$0)/proot.origin}"
         |$${TRUEPROOT} \\
         | ${bindings.map { case (f, d) ⇒ s"""-b "$f:$d"""" }.mkString(" \\\n")} \\
-        | $$@
+        | "$${@}"
       """.stripMargin
 
     proot.setExecutable(true)
