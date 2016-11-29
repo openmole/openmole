@@ -4,12 +4,14 @@ import org.openmole.gui.client.core.OMPost
 import org.openmole.gui.client.core.files.AuthFileUploaderUI
 import org.openmole.gui.ext.data.PrivateKeyAuthenticationData
 import org.openmole.gui.ext.dataui.PanelUI
-import org.openmole.gui.shared.Api
+
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
 import autowire._
+
 import scalatags.JsDom.all._
 import AuthenticationUtils._
+import org.openmole.gui.ext.api.Api
 
 /*
  * Copyright (C) 01/07/15 // mathieu.leclaire@openmole.org

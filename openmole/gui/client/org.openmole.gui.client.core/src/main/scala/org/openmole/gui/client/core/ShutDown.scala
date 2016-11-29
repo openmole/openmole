@@ -2,13 +2,14 @@ package org.openmole.gui.client.core
 
 import fr.iscpif.scaladget.stylesheet.all._
 import org.openmole.gui.client.core.alert.AbsolutePositioning.CenterPagePosition
+
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
 import org.openmole.gui.client.core.alert.AlertPanel
 import org.openmole.gui.misc.utils.{ stylesheet ⇒ omsheet }
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import org.openmole.gui.client.core.panels._
-import org.openmole.gui.shared.Api
+import org.openmole.gui.ext.api.Api
 import org.scalajs.dom
 import rx._
 

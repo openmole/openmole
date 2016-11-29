@@ -60,4 +60,11 @@ package object thread {
       f
   }
 
+  def withThreadClassLoader[T](classLoader: ClassLoader)(f: ⇒ T): T = {
+    val threadClassLoader = Thread.currentThread().getContextClassLoader
+    Thread.currentThread().setContextClassLoader(classLoader)
+    try f
+    finally Thread.currentThread().setContextClassLoader(threadClassLoader)
+  }
+
 }

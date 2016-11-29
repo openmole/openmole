@@ -2,7 +2,6 @@ package org.openmole.gui.client.core
 
 import org.openmole.gui.client.core.files.TreeNodePanel
 import org.openmole.gui.ext.data._
-import org.openmole.gui.shared.Api
 import autowire._
 import org.openmole.gui.client.core.alert.AbsolutePositioning.{ FileZone, RelativeCenterPosition }
 import org.openmole.gui.client.core.alert.AlertPanel
@@ -10,6 +9,7 @@ import org.openmole.gui.client.core.alert.AlertPanel
 import scala.concurrent.{ Await, Future }
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
+import org.openmole.gui.ext.api.Api
 
 import scala.async.Async
 import scala.concurrent.duration._

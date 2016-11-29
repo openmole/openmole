@@ -25,8 +25,6 @@ import org.scalatra.servlet.{ FileItem, FileUploadSupport }
 import org.scalatra.util.MultiMapHeadView
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import org.openmole.gui.shared.Api
-
 import scala.concurrent.duration._
 import scala.concurrent.Await
 import scalatags.Text.all._
@@ -34,6 +32,7 @@ import scalatags.Text.{ all ⇒ tags }
 import java.io.File
 
 import org.openmole.core.workspace.Workspace
+import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.data.OpenMOLEScript
 import org.openmole.tool.file._
 import org.openmole.tool.stream._

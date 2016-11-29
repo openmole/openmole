@@ -3,14 +3,16 @@ package org.openmole.gui.client.core.authentications
 import org.openmole.gui.client.core.OMPost
 import org.openmole.gui.ext.data.LoginPasswordAuthenticationData
 import org.openmole.gui.misc.utils.Utils
+
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
 import org.openmole.gui.ext.dataui.PanelUI
-import org.openmole.gui.shared.Api
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
+
 import scalatags.JsDom.all._
 import AuthenticationUtils._
+import org.openmole.gui.ext.api.Api
 
 /*
  * Copyright (C) 16/06/15 // mathieu.leclaire@openmole.org

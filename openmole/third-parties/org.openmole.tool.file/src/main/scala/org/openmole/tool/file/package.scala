@@ -381,6 +381,8 @@ package file {
 
       def withInputStream[T] = withClosable[InputStream, T](bufferedInputStream)(_)
 
+      def withReader[T] = withClosable[Reader, T](new InputStreamReader(bufferedInputStream))(_)
+
       def withWriter[T](append: Boolean = false) = withClosable[Writer, T](new OutputStreamWriter(bufferedOutputStream(append)))(_)
 
       def withDirectoryStream[T] = withClosable[DirectoryStream[Path], T](Files.newDirectoryStream(file))(_)

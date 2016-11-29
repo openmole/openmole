@@ -88,7 +88,7 @@ lazy val scalaLang = OsgiProject(
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
       "org.scala-lang" % "scalap" % scalaVersion.value,
       "jline" % "jline" % "2.12.1",
-      "org.scala-stm" %% "scala-stm" % "0.7",
+      "org.scala-stm" %% "scala-stm" % "0.8",
       "com.typesafe" % "config" % "1.2.1",
       "com.github.scala-incubator.io" %% "scala-io-core" % "0.4.3",
       "org.scala-lang" % "scala-compiler" % scalaVersion.value

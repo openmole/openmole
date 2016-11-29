@@ -10,7 +10,7 @@ import org.openmole.gui.client.core.{ CoreUtils, OMPost }
 import org.openmole.gui.client.core.Waiter._
 import org.openmole.gui.ext.data._
 import org.openmole.gui.misc.utils.{ Utils, stylesheet }
-import org.openmole.gui.shared._
+import org.openmole.gui.ext.api._
 import fr.iscpif.scaladget.api.{ Popup, BootstrapTags ⇒ bs }
 import org.openmole.gui.misc.utils.{ stylesheet ⇒ omsheet }
 import org.scalajs.dom.html.Input
@@ -27,6 +27,7 @@ import autowire._
 import rx._
 import bs._
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
+import org.openmole.gui.ext.api.Api
 import org.openmole.gui.misc.utils
 import org.scalajs.dom
 import sheet._

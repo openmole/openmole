@@ -21,17 +21,18 @@ import fr.iscpif.scaladget.api.Select.SelectElement
 import org.openmole.gui.client.core.alert.AlertPanel
 import org.openmole.gui.client.core.files._
 import org.openmole.gui.ext.data._
-import org.openmole.gui.misc.js.{ OptionsDiv, OMTags }
+import org.openmole.gui.misc.js.{ OMTags, OptionsDiv }
 import autowire._
 import org.scalajs.dom.html.TextArea
 import org.openmole.gui.client.core.files.TreeNode._
+
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
 import org.scalajs.dom.raw.{ HTMLDivElement, HTMLInputElement }
 import org.openmole.gui.misc.js.JsRxTags._
 import rx._
-import org.openmole.gui.shared.Api
-import scalatags.JsDom.{ TypedTag, tags ⇒ tags }
+
+import scalatags.JsDom.{ TypedTag, tags }
 import scalatags.JsDom.all._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import fr.iscpif.scaladget.api.Select
@@ -42,6 +43,7 @@ import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
 import org.openmole.gui.misc.utils.stylesheet._
 import sheet._
 import bs._
+import org.openmole.gui.ext.api.Api
 
 class ModelWizardPanel extends ModalPanel {
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()

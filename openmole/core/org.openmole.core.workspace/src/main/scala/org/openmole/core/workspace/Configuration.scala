@@ -25,8 +25,8 @@ import org.openmole.tool.file._
 import org.apache.commons.configuration2._
 import org.apache.commons.configuration2.builder._
 import org.apache.commons.configuration2.builder.fluent._
-import org.apache.commons.configuration2.sync.ReadWriteSynchronizer
 import org.openmole.core.tools.io.FromString
+import org.openmole.tool.thread._
 
 import scala.concurrent.duration._
 
@@ -58,11 +58,11 @@ class ConfigurationFile private (val file: File) {
 
   @transient private lazy val builder = {
     val params = new Parameters
-    new ReloadingFileBasedConfigurationBuilder(classOf[PropertiesConfiguration]).
-      configure(params.fileBased().setFile(file))
+    new PropertiesConfiguration()
+    new ReloadingFileBasedConfigurationBuilder(classOf[PropertiesConfiguration]).configure(params.fileBased().setFile(file))
   }
 
-  private def config = builder.getConfiguration
+  private def config = withThreadClassLoader(classOf[PropertiesConfiguration].getClassLoader) { builder.getConfiguration }
 
   def value(group: String, name: String): Option[String] = lock.read {
     Option(config.getString(s"$group.$name"))

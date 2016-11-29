@@ -18,18 +18,21 @@ package org.openmole.gui.client.core.files
  */
 
 import org.openmole.gui.client.core.OMPost
-import org.openmole.gui.misc.utils.{ stylesheet, Utils }
-import scalatags.JsDom.{ tags ⇒ tags }
-import org.openmole.gui.ext.data.{ ProcessState, UploadAuthentication, SafePath }
+import org.openmole.gui.misc.utils.{ Utils, stylesheet }
+
+import scalatags.JsDom.tags
+import org.openmole.gui.ext.data.{ ProcessState, SafePath, UploadAuthentication }
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import org.openmole.gui.misc.js.JsRxTags._
+
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
+
 import scalatags.JsDom.all._
-import org.openmole.gui.shared.Api
-import org.scalajs.dom.raw.{ HTMLInputElement }
+import org.scalajs.dom.raw.HTMLInputElement
 import rx._
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
+import org.openmole.gui.ext.api.Api
 import sheet._
 
 class AuthFileUploaderUI(

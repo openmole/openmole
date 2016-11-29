@@ -171,7 +171,7 @@ lazy val logging = OsgiProject(
   bundleActivator = Some("org.openmole.core.logging.internal.Activator"), imports = Seq("*")
 ) settings (libraryDependencies ++= Seq(Libraries.log4j, Libraries.logback, Libraries.slf4j)) dependsOn (tools) settings (coreSettings: _*)
 
-lazy val output = OsgiProject(coreDir, "org.openmole.core.output", imports = Seq("*")) dependsOn (openmoleStream) settings (coreSettings: _*)
+lazy val output = OsgiProject(coreDir, "org.openmole.core.output", imports = Seq("*"), bundleActivator = Some("org.openmole.core.output.Activator")) dependsOn (openmoleStream) settings(coreSettings: _*)
 
 lazy val console = OsgiProject(coreDir, "org.openmole.core.console", bundleActivator = Some("org.openmole.core.console.Activator"), global = true, imports = Seq("*")) dependsOn
   (pluginManager) settings(
@@ -472,7 +472,11 @@ lazy val datauiGUI: Project = OsgiProject(guiExt, "org.openmole.gui.ext.dataui")
   Libraries.scalaTagsJS,
   Libraries.scalajsDomJS) settings (defaultSettings: _*)
 
-lazy val sharedGUI = OsgiProject(guiDir / "shared", "org.openmole.gui.shared") dependsOn(dataGUI, market) settings (defaultSettings: _*)
+lazy val extPluginGUI = OsgiProject(guiExt, "org.openmole.gui.ext.plugin") enablePlugins (ScalaJSPlugin) settings (
+  libraryDependencies += Libraries.equinoxOSGi
+  )
+
+lazy val sharedGUI = OsgiProject(guiExt, "org.openmole.gui.ext.api") dependsOn (dataGUI, market) settings (defaultSettings: _*)
 
 val jqueryPath = s"META-INF/resources/webjars/jquery/${Libraries.jqueryVersion}/jquery.js"
 val acePath = s"META-INF/resources/webjars/ace/${Libraries.aceVersion}/src-min/ace.js"
@@ -505,10 +509,11 @@ lazy val clientGUI = OsgiProject(guiDir / "client", "org.openmole.gui.client.cor
   ) settings (defaultSettings: _*)
 
 
+
 def guiServerDir = guiDir / "server"
 
 lazy val serverGUI = OsgiProject(guiServerDir, "org.openmole.gui.server.core") settings
-  (libraryDependencies ++= Seq(Libraries.autowire, Libraries.upickle, Libraries.scalaTags, Libraries.logback, Libraries.scalatra, Libraries.clapper)) dependsOn(
+  (libraryDependencies ++= Seq(Libraries.autowire, Libraries.upickle, Libraries.scalaTags, Libraries.logback, Libraries.scalatra, Libraries.clapper)) dependsOn (
   sharedGUI,
   datauiGUI,
   dataGUI,
@@ -527,12 +532,20 @@ lazy val serverGUI = OsgiProject(guiServerDir, "org.openmole.gui.server.core") s
   txtmark,
   openmoleCrypto,
   module,
-  market
-  ) settings (defaultSettings: _*)
+  market,
+  extPluginGUI
+  )settings (defaultSettings: _*)
 
 lazy val state = OsgiProject(guiServerDir, "org.openmole.gui.server.state") settings
   (libraryDependencies += Libraries.slick) dependsOn(dataGUI, workflow, workspace) settings (defaultSettings: _*)
 
+/* -------------------- GUI Plugin ----------------------- */
+
+def guiPluginSettings = defaultSettings ++  Seq(defaultActivator)
+
+def guiPluginDir = guiDir / "plugins"
+
+lazy val guiPluginEnvironmentEGI = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.environment.egi") settings(guiPluginSettings: _*) enablePlugins (ScalaJSPlugin) dependsOn(extPluginGUI)
 
 
 /* -------------------- Bin ------------------------- */
@@ -787,9 +800,9 @@ lazy val dockerBin = Project("docker", binDir / "docker") enablePlugins (sbtdock
     )
   ),
   dockerfile in docker := new Dockerfile {
-    from("openjdk:alpine")
-    runRaw("""apk update && apk add bash""")
-    runRaw("""adduser openmole -g "" -D -h /var/openmole/""")
+    from("openjdk:8-jre")
+    runRaw("""apt update && apt install -y bash""")
+    runRaw("""groupadd -r openmole && useradd -r -g openmole openmole --home-dir /var/openmole/ --create-home""")
     copy((assemble in openmole).value, s"/usr/lib/openmole")
     runRaw("chmod +x /usr/lib/openmole/openmole")
     runRaw("cd /usr/bin/ && ln -s ../lib/openmole/openmole")
