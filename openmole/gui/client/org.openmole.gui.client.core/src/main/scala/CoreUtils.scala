@@ -9,6 +9,7 @@ import org.openmole.gui.client.core.alert.AlertPanel
 import scala.concurrent.{ Await, Future }
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
+import org.openmole.gui.client.tool.OMPost
 import org.openmole.gui.ext.api.Api
 
 import scala.async.Async

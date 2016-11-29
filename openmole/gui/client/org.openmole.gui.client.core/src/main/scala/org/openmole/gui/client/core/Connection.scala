@@ -6,14 +6,14 @@ import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import org.openmole.gui.ext.api.Api
-import org.openmole.gui.misc.utils.{ stylesheet ⇒ omsheet }
+import org.openmole.gui.client.tool._
+import JsRxTags._
 import org.scalajs.dom.raw.HTMLFormElement
-import rx.{ Rx, Var }
+import rx._
 import sheet._
 
 import scalatags.JsDom.all._
 import scalatags.JsDom.tags
-import org.openmole.gui.misc.js.JsRxTags._
 
 /*
  * Copyright (C) 07/11/16 // mathieu.leclaire@openmole.org

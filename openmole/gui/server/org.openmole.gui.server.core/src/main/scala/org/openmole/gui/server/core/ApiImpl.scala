@@ -10,7 +10,6 @@ import org.openmole.core.buildinfo
 import org.openmole.core.event._
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.pluginmanager._
-import org.openmole.gui.misc.utils.Utils._
 import org.openmole.gui.server.core.Utils._
 import org.openmole.core.workspace.{ ConfigurationLocation, Workspace }
 import org.openmole.gui.ext.data

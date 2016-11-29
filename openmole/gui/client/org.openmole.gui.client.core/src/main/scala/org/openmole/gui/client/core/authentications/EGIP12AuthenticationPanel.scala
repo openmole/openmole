@@ -1,12 +1,10 @@
 package org.openmole.gui.client.core.authentications
 
-import org.openmole.gui.client.core.OMPost
 import org.openmole.gui.client.core.files.AuthFileUploaderUI
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
-import org.openmole.gui.ext.data.EGIP12AuthenticationData
-import org.openmole.gui.ext.dataui.PanelUI
+import org.openmole.gui.ext.data.{ EGIP12AuthenticationData, PanelUI }
 
 import scala.scalajs.js.annotation.JSExport
 import scalatags.JsDom.all._
@@ -15,6 +13,7 @@ import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
 
 import scalatags.JsDom.tags
 import AuthenticationUtils._
+import org.openmole.gui.client.tool.OMPost
 import org.openmole.gui.ext.api.Api
 
 /*

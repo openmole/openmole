@@ -17,21 +17,20 @@ package org.openmole.gui.client.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.misc.js.OMTags
 import org.scalajs.dom.raw.HTMLDivElement
 
 import scalatags.JsDom.tags
 import scalatags.JsDom.TypedTag
-import org.openmole.gui.misc.js.JsRxTags._
+
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
-import org.openmole.gui.misc.utils.{ stylesheet ⇒ omsheet }
 import org.openmole.gui.client.core.authentications.AuthPanelWithID
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import rx._
-
+import org.openmole.gui.client.tool._
+import JsRxTags._
 import scalatags.JsDom.all._
 import scalatags.JsDom._
-import omsheet._
+import org.openmole.gui.client.tool.OMTags
 import sheet._
 
 class GUIDocPanel extends ModalPanel {

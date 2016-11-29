@@ -18,5 +18,19 @@
 package org.openmole.gui.ext.plugin
 
 import org.osgi.framework._
+import collection.JavaConverters._
 
-trait PluginActivator extends BundleActivator {}
+object PluginActivator {
+  val plugins =
+    new java.util.concurrent.ConcurrentHashMap[Class[_], PluginInfo]().asScala
+}
+
+trait PluginActivator extends BundleActivator {
+  def info: PluginInfo
+
+  override def stop(context: BundleContext): Unit =
+    PluginActivator.plugins -= this.getClass
+
+  override def start(context: BundleContext): Unit =
+    PluginActivator.plugins += this.getClass -> info
+}

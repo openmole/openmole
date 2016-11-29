@@ -1,16 +1,11 @@
 package org.openmole.gui.client.core.files
 
-import org.openmole.gui.client.core.OMPost
 import org.openmole.gui.ext.data._
-import org.openmole.gui.misc.js.OMTags
-import org.openmole.gui.ext.api._
-
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
-import org.openmole.gui.misc.utils.Utils._
+import org.openmole.gui.client.tool.Utils._
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
-import org.openmole.gui.misc.utils.stylesheet._
-import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
+import org.openmole.gui.client.tool._
 import org.openmole.gui.ext.api.Api
 import org.scalajs.dom.raw.{ HTMLDivElement, HTMLElement }
 import sheet._
@@ -19,7 +14,8 @@ import rx._
 import scalatags.JsDom.all._
 import scalatags.JsDom.{ TypedTag, tags }
 import scala.scalajs.js.timers._
-import org.openmole.gui.misc.js.JsRxTags._
+import org.openmole.gui.client.tool.JsRxTags._
+import org.openmole.gui.client.tool.{ OMPost, OMTags }
 
 /*
  * Copyright (C) 11/05/15 // mathieu.leclaire@openmole.org

@@ -1,17 +1,15 @@
 package org.openmole.gui.client.core.authentications
 
-import org.openmole.gui.client.core.OMPost
-import org.openmole.gui.ext.data.LoginPasswordAuthenticationData
-import org.openmole.gui.misc.utils.Utils
+import org.openmole.gui.ext.data.{ LoginPasswordAuthenticationData, PanelUI }
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
-import org.openmole.gui.ext.dataui.PanelUI
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 
 import scalatags.JsDom.all._
 import AuthenticationUtils._
+import org.openmole.gui.client.tool.{ OMPost, Utils }
 import org.openmole.gui.ext.api.Api
 
 /*

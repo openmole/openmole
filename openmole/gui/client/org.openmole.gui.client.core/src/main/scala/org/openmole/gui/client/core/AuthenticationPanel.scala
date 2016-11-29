@@ -18,16 +18,15 @@ package org.openmole.gui.client.core
  */
 
 import org.openmole.gui.client
-import org.openmole.gui.ext.dataui.PanelUI
 
 import scalatags.JsDom.all._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 
 import scalatags.JsDom.tags
-import org.openmole.gui.misc.js.JsRxTags._
+import org.openmole.gui.client.tool._
+import JsRxTags._
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
-import org.openmole.gui.misc.utils.{ stylesheet ⇒ omsheet }
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
 import autowire._
 import org.openmole.gui.ext.data._
@@ -35,7 +34,10 @@ import sheet._
 import rx._
 import bs._
 import org.openmole.gui.client.core.authentications._
+import org.openmole.gui.client.tool.OMPost
 import org.openmole.gui.ext.api.Api
+
+import scalatags.JsDom
 
 class AuthenticationPanel extends ModalPanel {
 
@@ -153,7 +155,7 @@ class AuthenticationPanel extends ModalPanel {
     save
   })
 
-  val vosToBeTested = bs.labeledInput("Test EGI credential on", "", "VO names (vo1,vo2,...)", labelStyle = color := "#000")
+  val vosToBeTested = bs.labeledInput("Test EGI credential on", "", "VO names (vo1,vo2,...)", labelStyle = JsDom.all.color := "#000")
   OMPost[Api].getConfigurationValue(VOTest).call().foreach {
     _.map { c ⇒
       vosToBeTested.setDefault(c)

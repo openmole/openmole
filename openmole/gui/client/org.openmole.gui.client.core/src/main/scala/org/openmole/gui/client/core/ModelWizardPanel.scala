@@ -21,7 +21,7 @@ import fr.iscpif.scaladget.api.Select.SelectElement
 import org.openmole.gui.client.core.alert.AlertPanel
 import org.openmole.gui.client.core.files._
 import org.openmole.gui.ext.data._
-import org.openmole.gui.misc.js.{ OMTags, OptionsDiv }
+import org.openmole.gui.client.tool._
 import autowire._
 import org.scalajs.dom.html.TextArea
 import org.openmole.gui.client.core.files.TreeNode._
@@ -29,7 +29,7 @@ import org.openmole.gui.client.core.files.TreeNode._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
 import org.scalajs.dom.raw.{ HTMLDivElement, HTMLInputElement }
-import org.openmole.gui.misc.js.JsRxTags._
+import org.openmole.gui.client.tool.JsRxTags._
 import rx._
 
 import scalatags.JsDom.{ TypedTag, tags }
@@ -40,9 +40,9 @@ import fr.iscpif.scaladget.api.Select._
 import Waiter._
 import org.openmole.gui.ext.data.DataUtils._
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
-import org.openmole.gui.misc.utils.stylesheet._
 import sheet._
 import bs._
+import org.openmole.gui.client.tool.{ OMPost, OMTags, OptionsDiv }
 import org.openmole.gui.ext.api.Api
 
 class ModelWizardPanel extends ModalPanel {

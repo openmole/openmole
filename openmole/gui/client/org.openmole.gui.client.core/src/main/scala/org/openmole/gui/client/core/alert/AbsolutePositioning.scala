@@ -1,10 +1,11 @@
 package org.openmole.gui.client.core.alert
 
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
+import org.openmole.gui.client.tool._
 import sheet._
-import org.openmole.gui.misc.utils.stylesheet
 import org.scalajs.dom.html.Div
 import org.scalajs.dom.raw.HTMLElement
+
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
 
@@ -34,15 +35,15 @@ object AbsolutePositioning {
   trait Position extends LayoutModifier
 
   object CenterPagePosition extends Position {
-    lazy val modifierClass = stylesheet.centerPage
+    lazy val modifierClass = omsheet.centerPage
   }
 
   object RelativeCenterPosition extends Position {
-    lazy val modifierClass = stylesheet.relativeCenter
+    lazy val modifierClass = omsheet.relativeCenter
   }
 
   object RightPosition extends Position {
-    lazy val modifierClass = stylesheet.rightPage
+    lazy val modifierClass = omsheet.rightPage
   }
 
   case class XYTransform(x: Int, y: Int) extends Position {
@@ -55,15 +56,15 @@ object AbsolutePositioning {
   trait Zone extends LayoutModifier
 
   object FullPage extends Zone {
-    lazy val modifierClass = stylesheet.fullPageZone
+    lazy val modifierClass = omsheet.fullPageZone
   }
 
   object FileZone extends Zone {
-    lazy val modifierClass = stylesheet.fileZone
+    lazy val modifierClass = omsheet.fileZone
   }
 
   object TopZone extends Zone {
-    lazy val modifierClass = stylesheet.topZone
+    lazy val modifierClass = omsheet.topZone
   }
 
 }

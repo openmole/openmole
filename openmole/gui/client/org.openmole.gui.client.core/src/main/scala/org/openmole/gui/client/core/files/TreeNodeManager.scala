@@ -18,7 +18,7 @@ package org.openmole.gui.client.core.files
  */
 
 import org.openmole.gui.client.core.alert.AlertPanel
-import org.openmole.gui.client.core.{ CoreUtils, OMPost }
+import org.openmole.gui.client.core.CoreUtils
 import org.openmole.gui.ext.data.{ FileFilter, ListFilesData, SafePath }
 import rx._
 import autowire._

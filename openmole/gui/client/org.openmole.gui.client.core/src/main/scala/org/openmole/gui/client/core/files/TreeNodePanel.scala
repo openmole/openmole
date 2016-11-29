@@ -6,19 +6,17 @@ import java.util.Date
 import org.openmole.gui.client.core.alert.AbsolutePositioning.{ CenterPagePosition, FileZone, RelativeCenterPosition }
 import org.openmole.gui.client.core.alert.AlertPanel
 import org.openmole.gui.client.core.files.FileToolBar.{ FilterTool, PluginTool, TrashTool }
-import org.openmole.gui.client.core.{ CoreUtils, OMPost }
+import org.openmole.gui.client.core.CoreUtils
 import org.openmole.gui.client.core.Waiter._
 import org.openmole.gui.ext.data._
-import org.openmole.gui.misc.utils.{ Utils, stylesheet }
-import org.openmole.gui.ext.api._
+import org.openmole.gui.client.tool._
+import JsRxTags._
 import fr.iscpif.scaladget.api.{ Popup, BootstrapTags ⇒ bs }
-import org.openmole.gui.misc.utils.{ stylesheet ⇒ omsheet }
 import org.scalajs.dom.html.Input
 import org.scalajs.dom.raw._
 
 import scalatags.JsDom.all._
 import scalatags.JsDom.{ TypedTag, tags }
-import org.openmole.gui.misc.js.JsRxTags._
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
@@ -27,8 +25,8 @@ import autowire._
 import rx._
 import bs._
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
+import org.openmole.gui.client.tool.{ OMPost, Utils }
 import org.openmole.gui.ext.api.Api
-import org.openmole.gui.misc.utils
 import org.scalajs.dom
 import sheet._
 
@@ -103,7 +101,7 @@ class TreeNodePanel {
     div(
       Rx {
         if (manager.copied().isEmpty) tags.div
-        else tags.label("paste")(label_danger, stylesheet.pasteLabel, onclick := { () ⇒ paste(manager.copied(), manager.current()) })
+        else tags.label("paste")(label_danger, omsheet.pasteLabel, onclick := { () ⇒ paste(manager.copied(), manager.current()) })
       },
       fileToolBar.sortingGroup.div
     )
@@ -205,21 +203,21 @@ class TreeNodePanel {
         else {
           tbody(
             backgroundColor := Rx {
-              if (selectionMode()) stylesheet.BLUE else stylesheet.DARK_GREY
+              if (selectionMode()) omsheet.BLUE else omsheet.DARK_GREY
             },
             omsheet.fileList,
             Rx {
               if (sons.list.length < sons.nbFilesOnServer && treeWarning()) {
-                div(stylesheet.moreEntries)(
+                div(omsheet.moreEntries)(
                   div(
-                    stylesheet.moreEntriesText,
+                    omsheet.moreEntriesText,
                     div(
                       s"Only 1000 files maximum (${100000 / sons.nbFilesOnServer}%) can be displayed.",
                       div(
                         "Use the ",
                         span(
                           "Filter tool",
-                          pointer +++ omsheet.color(stylesheet.BLUE),
+                          pointer +++ omsheet.color(omsheet.BLUE),
                           onclick := { () ⇒ fileToolBar.selectTool(FilterTool) }
                         ), " to refine your search"
                       )
@@ -336,12 +334,12 @@ class TreeNodePanel {
       )
 
       tn match {
-        case fn: FileNode ⇒ span(span(sheet.paddingTop(4)), stylesheet.file +++ style)(div(stylesheet.fileNameOverflow)(tn.name.now))
+        case fn: FileNode ⇒ span(span(sheet.paddingTop(4)), omsheet.file +++ style)(div(omsheet.fileNameOverflow)(tn.name.now))
         case dn: DirNode ⇒
           span(
             span(ms(dn.isEmpty, emptyMod, omsheet.fileIcon +++ glyph_plus)),
-            (stylesheet.dir +++ style)
-          )(div(stylesheet.fileNameOverflow +++ sheet.paddingLeft(22))(tn.name.now))
+            (omsheet.dir +++ style)
+          )(div(omsheet.fileNameOverflow +++ sheet.paddingLeft(22))(tn.name.now))
       }
     }
 
@@ -423,7 +421,7 @@ class TreeNodePanel {
               clickablePair.tooltip(
                 tags.span(tn.name()), popupStyle = whitePopup, arrowStyle = Popup.whiteBottomArrow, condition = () ⇒ tn.name().length > 24
               ), {
-                div(stylesheet.fileInfo)(
+                div(omsheet.fileInfo)(
                   if (treeStates().settingsSet) {
                     span(
                       span(onclick := { () ⇒ treeStates().settingsOff }, baseGlyph)(
@@ -463,13 +461,13 @@ class TreeNodePanel {
                           transform = RelativeCenterPosition,
                           zone = FileZone,
                           alertType = btn_primary,
-                          buttonGroupClass = stylesheet.divAlertPosition
+                          buttonGroupClass = omsheet.divAlertPosition
                         )
                       })(arrow_right_and_left)
                     )
                   }
                   else
-                    span(stylesheet.fileSize)(
+                    span(omsheet.fileSize)(
                       tags.i(timeOrSize(tn)),
                       tags.span(onclick := { () ⇒
                         treeStates().settingsOn
@@ -481,13 +479,13 @@ class TreeNodePanel {
                 width := "100%",
                 if (treeStates().selected) {
                   fileToolBar.selectedTool() match {
-                    case Some(TrashTool) ⇒ stylesheet.fileSelectedForDeletion
-                    case Some(PluginTool) if manager.pluggables().contains(tn) ⇒ stylesheet.fileSelected
-                    case _ ⇒ stylesheet.fileSelected
+                    case Some(TrashTool) ⇒ omsheet.fileSelectedForDeletion
+                    case Some(PluginTool) if manager.pluggables().contains(tn) ⇒ omsheet.fileSelected
+                    case _ ⇒ omsheet.fileSelected
                   }
                 }
-                else stylesheet.fileSelectionOverlay,
-                span(stylesheet.fileSelectionMessage)
+                else omsheet.fileSelectionOverlay,
+                span(omsheet.fileSelectionMessage)
               )
             )
         }

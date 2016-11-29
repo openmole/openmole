@@ -1,7 +1,6 @@
 package org.openmole.gui.client.core
 
-import org.openmole.gui.ext.data._
-import org.openmole.gui.ext.dataui.PanelUI
+import org.openmole.gui.ext.data.{ PanelUI, _ }
 import fr.iscpif.scaladget.api.BootstrapTags.Displayable
 
 /*

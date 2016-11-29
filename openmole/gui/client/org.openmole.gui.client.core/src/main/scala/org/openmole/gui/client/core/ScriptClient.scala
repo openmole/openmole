@@ -5,21 +5,21 @@ import org.openmole.gui.client.core.panels._
 
 import scalatags.JsDom.tags
 import scala.scalajs.js.annotation.JSExport
-import org.openmole.gui.misc.js.JsRxTags._
+import org.openmole.gui.client.tool.JsRxTags._
 import org.scalajs.dom
 import rx._
 
 import scalatags.JsDom.all._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
-import org.openmole.gui.misc.utils.{ stylesheet ⇒ omsheet }
 import sheet._
 import bs._
-import org.openmole.gui.misc.js.OMTags
+import org.openmole.gui.client.tool._
 import org.scalajs.dom.KeyboardEvent
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
+import org.openmole.gui.client.tool.{ OMPost, OMTags }
 import org.openmole.gui.ext.api.Api
 
 import scala.concurrent.Await

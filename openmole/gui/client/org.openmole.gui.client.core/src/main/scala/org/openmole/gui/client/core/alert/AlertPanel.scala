@@ -21,15 +21,15 @@ import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
 import org.openmole.gui.client.core.alert.AbsolutePositioning._
 import org.openmole.gui.client.core.files.{ TreeNodeComment, TreeNodeError }
 import org.openmole.gui.client.core.panels._
+import org.openmole.gui.client.tool.OMTags._
 import org.openmole.gui.ext.data.SafePath
-import org.openmole.gui.misc.js.JsRxTags._
-import org.openmole.gui.misc.js.OMTags.AlertAction
-import org.openmole.gui.misc.js.{ OMTags, OptionsDiv }
-import org.openmole.gui.misc.utils.stylesheet._
+import org.openmole.gui.client.tool._
+import org.openmole.gui.client.tool.JsRxTags._
 import org.scalajs.dom.html.Div
 import org.scalajs.dom.raw.HTMLDivElement
 import sheet._
 import rx._
+
 import scalatags.JsDom.all._
 import scalatags.JsDom.{ TypedTag, tags }
 

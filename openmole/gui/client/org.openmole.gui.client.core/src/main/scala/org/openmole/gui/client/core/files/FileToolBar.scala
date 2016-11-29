@@ -1,10 +1,9 @@
 package org.openmole.gui.client.core.files
 
 import fr.iscpif.scaladget.api.Select.SelectElement
-import org.openmole.gui.client.core.{ CoreUtils, OMPost }
+import org.openmole.gui.client.core.CoreUtils
 import org.openmole.gui.ext.data._
-import org.openmole.gui.misc.js.OMTags
-import org.openmole.gui.misc.utils.stylesheet
+import org.openmole.gui.client.tool._
 import org.scalajs.dom.html.Input
 
 import scala.util.Try
@@ -13,13 +12,10 @@ import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import bs._
-import org.openmole.gui.misc.utils.{ stylesheet ⇒ omsheet }
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
 import fr.iscpif.scaladget.api._
-import omsheet._
 import sheet._
-import org.openmole.gui.misc.js.JsRxTags._
-import org.openmole.gui.client.core.files.TreeNode._
+import org.openmole.gui.client.tool.JsRxTags._
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
@@ -30,6 +26,7 @@ import org.openmole.gui.client.core.Waiter._
 import org.openmole.gui.client.core.alert.AbsolutePositioning.{ FileZone, RelativeCenterPosition }
 import org.openmole.gui.client.core.alert.AlertPanel
 import org.openmole.gui.client.core.panels._
+import org.openmole.gui.client.tool._
 import org.openmole.gui.ext.api.Api
 
 /*
@@ -114,7 +111,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
 
   def buildSpan(tool: SelectedTool, todo: () ⇒ Unit, modifierSeq: ModifierSeq = emptyMod): Rx[TypedTag[HTMLSpanElement]] = Rx {
     span(
-      tool.glyph +++ pointer +++ selectedTool().filter(_ == tool).map { _ ⇒ modifierSeq +++ stylesheet.selectedTool }.getOrElse(emptyMod) +++ "glyphmenu",
+      tool.glyph +++ pointer +++ selectedTool().filter(_ == tool).map { _ ⇒ modifierSeq +++ omsheet.selectedTool }.getOrElse(emptyMod) +++ "glyphmenu",
       onclick := { () ⇒
         {
           todo()
@@ -314,7 +311,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
   val sortingGroup = {
     val topTriangle = glyph_triangle_top +++ (fontSize := 10)
     val bottomTriangle = glyph_triangle_bottom +++ (fontSize := 10)
-    bs.exclusiveButtonGroup(stylesheet.sortingBar, ms("sortingTool"), ms("selectedSortingTool"))(
+    bs.exclusiveButtonGroup(omsheet.sortingBar, ms("sortingTool"), ms("selectedSortingTool"))(
       ExclusiveButton.twoGlyphSpan(
         topTriangle,
         bottomTriangle,

@@ -21,16 +21,14 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 import fr.iscpif.scaladget.api.BootstrapTags.ScrollableTextArea.BottomScroll
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
-import org.openmole.gui.misc.utils.{ Utils, stylesheet ⇒ omsheet }
 
 import scala.concurrent.duration.Duration
 import scala.util.{ Failure, Success }
 import scalatags.JsDom.all._
-import org.openmole.gui.misc.js._
-import org.openmole.gui.misc.js.Expander._
-
+import org.openmole.gui.client.tool._
+import org.openmole.gui.client.tool.Expander._
 import scalatags.JsDom._
-import org.openmole.gui.misc.js.JsRxTags._
+import org.openmole.gui.client.tool.JsRxTags._
 
 import scala.scalajs.js.timers._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
@@ -40,10 +38,12 @@ import autowire._
 import org.openmole.gui.ext.data.{ Error ⇒ ExecError }
 import org.openmole.gui.ext.data._
 import bs._
+import org.openmole.gui.client.tool.{ Expander, OMPost, Utils }
 import org.openmole.gui.ext.api.Api
 import rx._
 
 import concurrent.duration._
+import scalatags.JsDom
 
 class ExecutionPanel extends ModalPanel {
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
@@ -129,7 +129,7 @@ class ExecutionPanel extends ModalPanel {
   val outputTextAreas: Var[Map[ExecutionId, ScrollableText]] = Var(Map())
   val envErrorPanels: Var[Map[EnvironmentId, EnvironmentErrorPanel]] = Var(Map())
 
-  def staticPanel[T, I <: ID](id: I, panelMap: Var[Map[I, T]], builder: () ⇒ T, appender: T ⇒ Unit = (t: T) ⇒ {}): T = {
+  def staticPanel[T, I <: org.openmole.gui.ext.data.ID](id: I, panelMap: Var[Map[I, T]], builder: () ⇒ T, appender: T ⇒ Unit = (t: T) ⇒ {}): T = {
     if (panelMap.now.isDefinedAt(id)) {
       val t = panelMap.now(id)
       appender(t)
@@ -144,8 +144,8 @@ class ExecutionPanel extends ModalPanel {
 
   val envLevel: Var[ErrorStateLevel] = Var(ErrorLevel())
 
-  val outputHistory = bs.labeledInput("# outputs", "500", "# outputs", labelStyle = color := "#000")
-  val envErrorHistory = bs.labeledInput("# envirnoment errors", "500", "# envirnoment errors", labelStyle = color := "#000")
+  val outputHistory = bs.labeledInput("# outputs", "500", "# outputs", labelStyle = JsDom.all.color := "#000")
+  val envErrorHistory = bs.labeledInput("# envirnoment errors", "500", "# envirnoment errors", labelStyle = JsDom.all.color := "#000")
 
   def ratio(completed: Long, running: Long, ready: Long) = s"${completed} / ${completed + running + ready}"
 

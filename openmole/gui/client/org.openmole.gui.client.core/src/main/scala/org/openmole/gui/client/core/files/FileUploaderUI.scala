@@ -17,13 +17,12 @@ package org.openmole.gui.client.core.files
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.client.core.OMPost
-import org.openmole.gui.misc.utils.{ Utils, stylesheet }
+import org.openmole.gui.client.tool._
+import JsRxTags._
 
 import scalatags.JsDom.tags
 import org.openmole.gui.ext.data.{ ProcessState, SafePath, UploadAuthentication }
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
-import org.openmole.gui.misc.js.JsRxTags._
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
@@ -32,6 +31,7 @@ import scalatags.JsDom.all._
 import org.scalajs.dom.raw.HTMLInputElement
 import rx._
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
+import org.openmole.gui.client.tool.{ OMPost, Utils }
 import org.openmole.gui.ext.api.Api
 import sheet._
 
@@ -68,5 +68,5 @@ class AuthFileUploaderUI(
     }), Rx {
       if (pathSet()) fileName else "No certificate"
     }
-  )(sheet.paddingTop(5) +++ stylesheet.certificate +++ "inputFileStyle")
+  )(sheet.paddingTop(5) +++ omsheet.certificate +++ "inputFileStyle")
 }

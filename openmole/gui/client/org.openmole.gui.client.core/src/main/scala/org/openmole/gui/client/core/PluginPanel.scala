@@ -3,22 +3,22 @@ package org.openmole.gui.client.core
 import org.openmole.gui.client.core.files.FileManager
 import org.openmole.gui.client.core.Waiter._
 import org.openmole.gui.ext.data._
-import org.openmole.gui.misc.utils.stylesheet._
+import org.openmole.gui.client.tool._
 import org.scalajs.dom.raw.HTMLInputElement
 
 import scalatags.JsDom.all._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 
 import scalatags.JsDom.tags
-import org.openmole.gui.misc.js.OMTags
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
-import org.openmole.gui.misc.js.JsRxTags._
+import org.openmole.gui.client.tool.JsRxTags._
 import autowire._
 import rx._
 import bs._
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
 import org.openmole.gui.client.core.alert.AlertPanel
+import org.openmole.gui.client.tool.{ OMPost, OMTags }
 import org.openmole.gui.ext.api.Api
 import sheet._
 

@@ -22,15 +22,16 @@ import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
+import org.openmole.gui.client.tool.OMPost
 import org.openmole.gui.ext.api.Api
-import org.openmole.gui.misc.utils.{ stylesheet ⇒ omsheet }
 import org.scalajs.dom.raw.HTMLFormElement
 import rx.Rx
 import sheet._
 
 import scalatags.JsDom.all._
 import scalatags.JsDom.tags
-import org.openmole.gui.misc.js.JsRxTags._
+import org.openmole.gui.client.tool._
+import JsRxTags._
 
 class ResetPassword {
   val shutDown = new ShutDown

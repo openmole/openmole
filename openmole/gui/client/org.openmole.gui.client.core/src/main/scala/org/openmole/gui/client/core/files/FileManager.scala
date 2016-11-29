@@ -1,10 +1,9 @@
 package org.openmole.gui.client.core.files
 
-import org.openmole.gui.client.core.OMPost
 import org.openmole.gui.ext.data._
-import org.openmole.gui.misc.utils.Utils
 import org.scalajs.dom.raw._
 import autowire._
+import org.openmole.gui.client.tool.{ OMPost, Utils }
 import org.openmole.gui.ext.api.Api
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow

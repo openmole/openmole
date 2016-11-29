@@ -1,5 +1,5 @@
 /**
- * Created by Romain Reuillon on 28/11/16.
+ * Created by Romain Reuillon on 29/11/16.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,11 +15,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package org.openmole.gui.plugin.environment.egi
+package org.openmole.gui.ext.plugin
 
-import org.openmole.gui.ext.jstool._
-import org.openmole.gui.ext.plugin._
-
-class EGIGUIAuthentication extends Authentication {
-  def panel = "EGI"
-}
+case class PluginInfo(
+  api: Any,
+  clientInstances: Seq[Class[_]]
+)

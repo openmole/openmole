@@ -1,7 +1,7 @@
-package org.openmole.gui.client.core
+package org.openmole.gui.ext.data
 
 /*
- * Copyright (C) 04/07/15 // mathieu.leclaire@openmole.org
+ * Copyright (C) 24/09/14 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -17,14 +17,25 @@ package org.openmole.gui.client.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scala.concurrent.Future
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
-import autowire._
-import org.openmole.gui.client.tool.OMPost
-import org.openmole.gui.ext.api.Api
-import org.openmole.gui.ext.data.OMSettings
-
-object Settings {
-
-  val settings: Future[OMSettings] = OMPost[Api].settings().call()
+trait FactoryUI {
+  val name: String
+  val uuid: String = java.util.UUID.randomUUID.toString
 }
+
+trait FactoryWithDataUI extends FactoryUI with DataUIBuilder
+
+trait FactoryWithPanelUI extends FactoryUI with PanelUIBuilder
+
+trait DataUIBuilder {
+  type DATAUI <: DataUI
+  def dataUI: DATAUI
+}
+
+trait PanelUIBuilder {
+  type DATA <: Data
+  def data: DATA
+  def panelUI(data: DATA): PanelUI
+  def panelUI: PanelUI = panelUI(data)
+}
+
+trait AuthenticationFactoryUI extends FactoryWithPanelUI

@@ -3,13 +3,14 @@ package org.openmole.gui.client.core
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
 import org.openmole.gui.ext.data._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
-import org.openmole.gui.misc.utils.{ stylesheet, Utils }
 import org.scalajs.dom.html.TableSection
-import scalatags.JsDom.{ TypedTag, tags ⇒ tags }
-import org.openmole.gui.misc.js.JsRxTags._
+import org.openmole.gui.client.tool._
+import JsRxTags._
+import scalatags.JsDom.{ TypedTag, tags }
 import scalatags.JsDom.all._
 import sheet._
 import bs._
+import org.openmole.gui.client.tool.Utils
 import rx._
 
 /*
@@ -83,7 +84,7 @@ class EnvironmentErrorPanel {
       for {
         (message, date, level, stack) ← sort(ers, sortingAndOrdering.now)
       } yield {
-        tags.tr(row +++ stylesheet.errorTable)(
+        tags.tr(row +++ errorTable)(
           tags.td(colMD(12))(
             tags.a(message, cursor := "pointer", onclick := {
               () ⇒
@@ -116,7 +117,7 @@ class EnvironmentErrorPanel {
       }
     )
 
-    scrollable.setChild(div(stylesheet.environmentPanelError)(errorTable).render)
+    scrollable.setChild(div(omsheet.environmentPanelError)(errorTable).render)
     scrollable.sRender
   }
 

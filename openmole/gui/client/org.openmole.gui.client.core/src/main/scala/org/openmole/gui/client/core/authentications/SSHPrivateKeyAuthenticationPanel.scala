@@ -1,9 +1,7 @@
 package org.openmole.gui.client.core.authentications
 
-import org.openmole.gui.client.core.OMPost
 import org.openmole.gui.client.core.files.AuthFileUploaderUI
-import org.openmole.gui.ext.data.PrivateKeyAuthenticationData
-import org.openmole.gui.ext.dataui.PanelUI
+import org.openmole.gui.ext.data.{ PanelUI, PrivateKeyAuthenticationData }
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
@@ -11,6 +9,7 @@ import autowire._
 
 import scalatags.JsDom.all._
 import AuthenticationUtils._
+import org.openmole.gui.client.tool.OMPost
 import org.openmole.gui.ext.api.Api
 
 /*

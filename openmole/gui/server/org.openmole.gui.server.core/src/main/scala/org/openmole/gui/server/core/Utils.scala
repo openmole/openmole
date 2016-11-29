@@ -407,4 +407,7 @@ object Utils {
       case e: UserBadDataError ⇒ false
     }
   }
+
+  def getUUID: String = java.util.UUID.randomUUID.toString
+
 }
