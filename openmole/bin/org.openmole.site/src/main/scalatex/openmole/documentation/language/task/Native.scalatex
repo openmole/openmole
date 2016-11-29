@@ -7,7 +7,7 @@
 
   @p You should first install CARE:
     @ul
-      @li{download the CARE binary from @a("here", href := "https://github.com/proot-me/proot-static-build/releases/download/v5.1.1/care_2.2.2_x86_64_rc1--no-seccomp")}
+      @li{download the CARE binary from @a("here", href := "https://github.com/proot-me/proot-static-build/releases/download/v5.1.1/care_2.2.2_x86_64_rc2--no-seccomp")}
       @li{add the path to the executable to your PATH variable (@hl.highlight("export PATH=/path/to/the/care/folder:$PATH", "plain"))}
 
   @p The @hl.openmole("CARETask") has been designed to embed native binaries such as programs compiled from C, C++, Fortran, Python, R, Scilab... Embedding an application in a @hl.openmole("CARETask") happens in 2 steps:
