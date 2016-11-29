@@ -83,7 +83,6 @@ object Libraries {
   lazy val upickleJS = libraryDependencies += "com.lihaoyi" %%% "upickle" % scalaUpickleVersion
 
   lazy val scalajsTools = "org.openmole" %% "scalajs-tools" % scalajsVersion
-  lazy val scalajsLibrary = "org.openmole" %% "scalajs-library" % scalajsVersion
   lazy val scalajs = "org.openmole" %% "scalajs" % scalajsVersion
 
   lazy val mgo = "org.openmole" %% "fr-iscpif-mgo" % "2.0"

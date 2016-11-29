@@ -457,14 +457,20 @@ lazy val sharedGUI = OsgiProject(guiExt, "org.openmole.gui.ext.api") dependsOn (
 val jqueryPath = s"META-INF/resources/webjars/jquery/${Libraries.jqueryVersion}/jquery.js"
 val acePath = s"META-INF/resources/webjars/ace/${Libraries.aceVersion}/src-min/ace.js"
 
-
-def guiBootstrapDir = guiDir / "bootstrap"
-lazy val bootstrapGUI = OsgiProject(guiBootstrapDir, "org.openmole.gui.bootstrap") dependsOn(pluginManager, sharedGUI, serverGUI, fileService) settings(defaultSettings: _*) settings(
-  libraryDependencies += Libraries.scalajsLibrary,
+lazy val bootstrapGUI = OsgiProject(guiServerDir, "org.openmole.gui.server.jscompile") dependsOn(pluginManager, sharedGUI, serverGUI, fileService) settings(defaultSettings: _*) settings(
+  libraryDependencies += "org.scala-js" %% "scalajs-library" % Libraries.scalajsVersion,
   libraryDependencies += Libraries.scalajsTools,
-  OsgiKeys.embeddedJars := (Keys.externalDependencyClasspath in Compile).value map (_.data) filter (
-    _.getName startsWith "scalajs-library")
-  )
+  OsgiKeys.embeddedJars := {
+    val scalaLib =
+      (Keys.externalDependencyClasspath in Compile).value.filter {
+        d => d.data.getName startsWith "scalajs-library"
+      }.head
+
+    val dest = target.value / "scalajs-library.jar"
+    sbt.IO.copyFile(scalaLib.data, dest)
+    Seq(dest)
+  }
+)
 
 
 /* -------------- Client ------------------- */
