@@ -6,14 +6,12 @@ import autowire._
 import org.openmole.gui.client.core.alert.AbsolutePositioning.{ FileZone, RelativeCenterPosition }
 import org.openmole.gui.client.core.alert.AlertPanel
 
-import scala.concurrent.{ Await, Future }
+import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
 import org.openmole.gui.ext.api.Api
 
-import scala.async.Async
-import scala.concurrent.duration._
-import scala.concurrent.stm.CommitBarrier.Timeout
+import scalatags.JsDom.all._
 
 /*
  * Copyright (C) 22/12/15 // mathieu.leclaire@openmole.org
@@ -94,6 +92,10 @@ object CoreUtils {
   def pluggables(safePath: SafePath, todo: () ⇒ Unit) = OMPost[Api].allPluggableIn(safePath).call.foreach { p ⇒
     manager.pluggables() = p
     todo()
+  }
+
+  def addJSScript(relativeJSPath: String) = {
+    org.scalajs.dom.document.body.appendChild(script(src := relativeJSPath).render)
   }
 
   def approximatedYearMonthDay(duration: Long): String = {
