@@ -489,7 +489,7 @@ lazy val bootstrapGUI = OsgiProject(guiServerDir, "org.openmole.gui.server.jscom
 
 def guiClientDir = guiDir / "client"
 lazy val clientGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.core") enablePlugins (ScalaJSPlugin) dependsOn
-  (sharedGUI, clientToolGUI, market) settings(
+  (sharedGUI, clientToolGUI, market, extPluginGUI) settings(
   Libraries.upickleJS,
   Libraries.autowireJS,
   Libraries.rxJS,

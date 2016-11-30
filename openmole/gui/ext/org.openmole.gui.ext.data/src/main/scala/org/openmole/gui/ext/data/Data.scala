@@ -761,3 +761,10 @@ sealed trait ConfigData
 object VOTest extends ConfigData
 
 case class OMSettings(workspace: SafePath, version: String, versionName: String, buildTime: String)
+
+sealed trait PluginExtensionType
+object AuthenticationExtension extends PluginExtensionType
+
+//TODO: add other extension points
+case class AllPluginExtensionData(tasks: Seq[GUIPlugin], authentications: Seq[GUIPlugin])
+case class GUIPlugin(jsObject: String)
