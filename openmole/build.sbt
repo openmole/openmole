@@ -443,10 +443,16 @@ def guiDir = file("gui")
 
 def guiExt = guiDir / "ext"
 
+def guiProvided =
+  Osgi.openMOLEScope := Some("gui-provided")
+
+/* -------------------- Ext ----------------------*/
+
 lazy val dataGUI = OsgiProject(guiExt, "org.openmole.gui.ext.data") enablePlugins (ScalaJSPlugin) dependsOn (workflow) settings(
   Libraries.scalaTagsJS,
   Libraries.scalajsDomJS,
-  Libraries.upickleJS) settings (defaultSettings: _*)
+  Libraries.upickleJS,
+  guiProvided) settings (defaultSettings: _*)
 
 lazy val extPluginGUI = OsgiProject(guiExt, "org.openmole.gui.ext.plugin") enablePlugins (ScalaJSPlugin) settings (
   Libraries.upickleJS,
@@ -455,10 +461,10 @@ lazy val extPluginGUI = OsgiProject(guiExt, "org.openmole.gui.ext.plugin") enabl
   Libraries.scalajsDomJS,
   Libraries.scaladgetJS,
   Libraries.scalaTagsJS,
-  libraryDependencies += Libraries.equinoxOSGi
-  ) settings (defaultSettings: _*)
+  libraryDependencies += Libraries.equinoxOSGi,
+  guiProvided) settings (defaultSettings: _*)
 
-lazy val sharedGUI = OsgiProject(guiExt, "org.openmole.gui.ext.api") dependsOn(dataGUI, market) settings (defaultSettings: _*)
+lazy val sharedGUI = OsgiProject(guiExt, "org.openmole.gui.ext.api") dependsOn(dataGUI, market) settings (defaultSettings: _*) settings(guiProvided)
 
 val jqueryPath = s"META-INF/resources/webjars/jquery/${Libraries.jqueryVersion}/jquery.js"
 val acePath = s"META-INF/resources/webjars/ace/${Libraries.aceVersion}/src-min/ace.js"
@@ -475,8 +481,8 @@ lazy val bootstrapGUI = OsgiProject(guiServerDir, "org.openmole.gui.server.jscom
     val dest = target.value / "scalajs-library.jar"
     sbt.IO.copyFile(scalaLib.data, dest)
     Seq(dest)
-  }
-  )
+  },
+  guiProvided)
 
 
 /* -------------- Client ------------------- */
@@ -497,8 +503,8 @@ lazy val clientGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.core") e
   jsDependencies += Libraries.ace / "src-min/mode-sh.js" dependsOn acePath,
   jsDependencies += Libraries.ace / "src-min/mode-scala.js" dependsOn acePath,
   jsDependencies += Libraries.ace / "src-min/theme-github.js" dependsOn acePath,
-  jsDependencies += Libraries.bootstrap / "js/bootstrap.js" dependsOn jqueryPath minified "js/bootstrap.min.js"
-  ) settings (defaultSettings: _*)
+  jsDependencies += Libraries.bootstrap / "js/bootstrap.js" dependsOn jqueryPath minified "js/bootstrap.min.js",
+  guiProvided) settings (defaultSettings: _*)
 
 
 lazy val clientToolGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.tool") enablePlugins (ScalaJSPlugin) dependsOn (workspace) settings(
@@ -507,7 +513,8 @@ lazy val clientToolGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.tool
   Libraries.scalajsDomJS,
   Libraries.scalaTagsJS,
   Libraries.scaladgetJS,
-  Libraries.rxJS) settings (defaultSettings: _*)
+  Libraries.rxJS,
+  guiProvided) settings (defaultSettings: _*)
 
 
 def guiServerDir = guiDir / "server"

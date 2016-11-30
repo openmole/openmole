@@ -33,12 +33,10 @@ package object pluginmanager {
   implicit class BundleDecorator(b: Bundle) {
 
     def isSystem = b.getLocation.toLowerCase.contains("system bundle") || b.getLocation.startsWith("netigso:")
-
-    def isProvided =
-      b.getHeaders.toMap.exists { case (k, v) ⇒ k.toString.toLowerCase.contains("openmole-scope") && v.toString.toLowerCase.contains("provided") }
-
-    def isFullDynamic =
-      b.getHeaders.toMap.exists { case (k, v) ⇒ k.toString.contains("DynamicImport-Package") && v.toString.split(",").toSet.contains("*") }
+    def headerExists(f: (String, String) ⇒ Boolean) = b.getHeaders.toSeq.exists { case (k, v) ⇒ f(k, v) }
+    def openMOLEScope: Option[String] = b.getHeaders.toSeq.find { case (k, v) ⇒ k.toLowerCase == "openmole-scope" }.map(_._2)
+    def isProvided = openMOLEScope.map(_.toLowerCase == "provided").getOrElse(false)
+    def isFullDynamic = headerExists { (k, v) ⇒ k.contains("DynamicImport-Package") && v.split(",").toSet.contains("*") }
 
     def file = {
       val (ref, url) = if (b.getLocation.startsWith("reference:"))
