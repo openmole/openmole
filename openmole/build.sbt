@@ -472,18 +472,20 @@ lazy val sharedGUI = OsgiProject(guiExt, "org.openmole.gui.ext.api") dependsOn(d
 val jqueryPath = s"META-INF/resources/webjars/jquery/${Libraries.jqueryVersion}/jquery.js"
 val acePath = s"META-INF/resources/webjars/ace/${Libraries.aceVersion}/src-min/ace.js"
 
-lazy val bootstrapGUI = OsgiProject(guiServerDir, "org.openmole.gui.server.jscompile") dependsOn(pluginManager, sharedGUI, serverGUI, fileService) settings (defaultSettings: _*) settings(
-  libraryDependencies += "org.scala-js" %% "scalajs-library" % Libraries.scalajsVersion,
+lazy val jsCompile = OsgiProject(guiServerDir, "org.openmole.gui.server.jscompile", imports = Seq("*")) dependsOn(pluginManager, fileService, workspace) settings (defaultSettings: _*) settings(
+  libraryDependencies += "org.scala-js" %% "scalajs-library" % Libraries.scalajsVersion % "provided" intransitive(),
   libraryDependencies += Libraries.scalajsTools,
-  OsgiKeys.embeddedJars := {
-    val scalaLib =
-      (Keys.externalDependencyClasspath in Compile).value.filter {
-        d => d.data.getName startsWith "scalajs-library"
-      }.head
+  (resourceDirectories in Compile) += (crossTarget.value / "resources"),
+  (OsgiKeys.embeddedJars) := {
+     val scalaLib =
+       (Keys.externalDependencyClasspath in Compile).value.filter {
+         d => d.data.getName startsWith "scalajs-library"
+       }.head
 
-    val dest = target.value / "scalajs-library.jar"
-    sbt.IO.copyFile(scalaLib.data, dest)
-    Seq(dest)
+      val dest = crossTarget.value / "resources/scalajs-library.jar"
+      dest.getParentFile.mkdirs()
+      sbt.IO.copyFile(scalaLib.data, dest)
+      Seq()
   },
   guiProvidedScope)
 
@@ -520,6 +522,8 @@ lazy val clientToolGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.tool
   guiProvidedScope) settings (defaultSettings: _*)
 
 
+/* -------------------------- Server ----------------------- */
+
 def guiServerDir = guiDir / "server"
 
 lazy val serverGUI = OsgiProject(guiServerDir, "org.openmole.gui.server.core") settings
@@ -542,7 +546,8 @@ lazy val serverGUI = OsgiProject(guiServerDir, "org.openmole.gui.server.core") s
   openmoleCrypto,
   module,
   market,
-  extPluginGUI
+  extPluginGUI,
+  jsCompile
   ) settings (defaultSettings: _*)
 
 lazy val state = OsgiProject(guiServerDir, "org.openmole.gui.server.state") settings

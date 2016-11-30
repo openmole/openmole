@@ -18,25 +18,29 @@ package org.openmole.gui.server.jscompile
  */
 
 import org.openmole.tool.file._
-
+import org.openmole.tool.stream._
 import java.io.File
 
 import org.scalajs.core.tools.io._
 import org.scalajs.core.tools.sem._
-import org.scalajs.core.tools.linker.backend.{ OutputMode, ModuleKind }
+import org.scalajs.core.tools.linker.backend.{ ModuleKind, OutputMode }
 import org.scalajs.core.tools.linker.Linker
 import org.scalajs.core.tools.logging.ScalaConsoleLogger
-
-import scala.collection.JavaConverters._
-import java.io.{ FileOutputStream, File }
+import java.io.File
+import org.openmole.core.workspace.Workspace
 
 object JSPack {
 
-  def link(inputClasspath: Seq[File], outputJSFile: File): Unit = {
+  def link(inputDirectory: File, outputJSFile: File): Unit = Workspace.withTmpFile("lib", "jar") { jar ⇒
+    getClass.getClassLoader.getResourceAsStream("scalajs-library.jar") copy jar
+
     // Obtain VirtualScalaJSIRFile's from the input classpath
     val irCache = new IRFileCache().newCache
-    val irContainers = IRFileCache.IRContainer.fromClasspath(inputClasspath)
-    val sjsirFiles = irCache.cached(irContainers)
+    //val irContainers = IRFileCache.IRContainer.fromJar(Seq(jar, inputDirector))
+    val sjsirFiles =
+      irCache.cached(
+        Seq(IRFileCache.IRContainer.fromJar(jar)) ++ IRFileCache.IRContainer.fromDirectory(inputDirectory)
+      )
 
     // A bunch of options. Here we use all the defaults
     val semantics = Semantics.Defaults
@@ -49,13 +53,5 @@ object JSPack {
     val logger = new ScalaConsoleLogger
     linker.link(sjsirFiles, WritableFileVirtualJSFile(outputJSFile), logger)
   }
-
-  /* def copyJar(name: String) = {
-    val libF = File.createTempFile(name, ".jar")
-    libF.deleteOnExit
-    val outLib = new FileOutputStream(libF)
-    getClass.getClassLoader.getResourceAsStream(name + ".jar").copy(outLib)
-    libF
-  }*/
 
 }

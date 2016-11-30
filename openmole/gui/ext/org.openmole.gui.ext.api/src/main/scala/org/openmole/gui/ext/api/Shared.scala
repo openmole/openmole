@@ -90,7 +90,7 @@ trait Api {
   def removePlugin(plugin: Plugin): Unit
 
   //GUI PLUGINS
-  def getGUIPlugins(): AllPluginExtensionData
+  //def getGUIPlugins(): AllPluginExtensionData
 
   //MODEL WIZARDS
   def launchingCommands(path: SafePath): Seq[LaunchingCommand]

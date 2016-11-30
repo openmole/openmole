@@ -30,11 +30,11 @@ object Plugins {
 
   private def buildJSObject(obj: String) = scalajs.js.eval(s"new $obj()")
 
-  def updateGUIPlugin = OMPost()[Api].getGUIPlugins().call().foreach { ps ⇒
-    ps.authentications.map { p ⇒
-      buildJSObject(p.jsObject).asInstanceOf[Authentication]
-    }
-  }
-
-  def installGUIPlugins = ???
+  //  def updateGUIPlugin = OMPost()[Api].getGUIPlugins().call().foreach { ps ⇒
+  //    ps.authentications.map { p ⇒
+  //      buildJSObject(p.jsObject).asInstanceOf[Authentication]
+  //    }
+  //  }
+  //
+  //  def installGUIPlugins = ???
 }
