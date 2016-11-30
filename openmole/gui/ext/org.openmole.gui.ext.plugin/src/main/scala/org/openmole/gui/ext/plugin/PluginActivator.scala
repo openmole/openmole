@@ -32,5 +32,5 @@ trait PluginActivator extends BundleActivator {
     PluginActivator.plugins -= this.getClass
 
   override def start(context: BundleContext): Unit =
-    PluginActivator.plugins += this.getClass -> info
+    PluginActivator.plugins += this.getClass → info
 }

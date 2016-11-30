@@ -17,6 +17,9 @@
  */
 package org.openmole.gui.ext.plugin
 
+import org.scalajs.dom.raw.HTMLDivElement
+import scalatags.JsDom.TypedTag
+
 trait Authentication {
-  def panel: String
+  def panel: TypedTag[HTMLDivElement]
 }

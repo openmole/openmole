@@ -18,6 +18,6 @@
 package org.openmole.gui.ext.plugin
 
 case class PluginInfo(
-  api: Any,
+  api:             Any,
   clientInstances: Seq[Class[_]]
 )

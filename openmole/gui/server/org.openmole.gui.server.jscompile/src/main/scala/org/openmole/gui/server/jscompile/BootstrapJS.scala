@@ -59,7 +59,7 @@ object BootstrapJS {
       val thisBundle = PluginManager.bundleForClass(classOf[GUIServer])
 
       //Add lib js files from webjars
-      copyWebJarResource("d3", "3.5.5", "d3.min.js")
+     /* copyWebJarResource("d3", "3.5.5", "d3.min.js")
       copyWebJarResource("jquery", "2.1.3", "jquery.min.js")
       copyWebJarResource("bootstrap", "3.3.4", FilePath("dist/js/", "bootstrap.min.js"))
       copyWebJarResource("ace", "01.08.2014",
@@ -67,7 +67,7 @@ object BootstrapJS {
         FilePath("src-min/", "theme-github.js"),
         FilePath("src-min/", "mode-scala.js"),
         FilePath("src-min/", "mode-sh.js"),
-        FilePath("src-min/", "mode-text.js"))
+        FilePath("src-min/", "mode-text.js"))*/
 
       //All other resources
       /* copyURL(thisBundle.findEntries("/", "*.css", true).asScala)
