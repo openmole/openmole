@@ -59,6 +59,13 @@ object GUIServer {
 
 }
 
+class GUIBootstrap extends LifeCycle {
+  override def init(context: ServletContext) {
+    val args = context.get(GUIServer.servletArguments).get.asInstanceOf[GUIServer.ServletArguments]
+    context mount (new GUIServlet(args), "/*")
+  }
+}
+
 import GUIServer._
 
 class GUIServer(port: Int, localhost: Boolean, http: Boolean) {
@@ -94,7 +101,7 @@ class GUIServer(port: Int, localhost: Boolean, http: Boolean) {
   context.setContextPath("/")
   context.setResourceBase(resourcePath)
   context.setClassLoader(classOf[GUIServer].getClassLoader)
-  context.setInitParameter(ScalatraListener.LifeCycleKey, classOf[ScalatraBootstrap].getCanonicalName)
+  context.setInitParameter(ScalatraListener.LifeCycleKey, classOf[GUIBootstrap].getCanonicalName)
   context.addEventListener(new ScalatraListener)
 
   server.setHandler(context)
