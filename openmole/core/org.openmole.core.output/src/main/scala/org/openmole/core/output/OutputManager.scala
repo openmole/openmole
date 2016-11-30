@@ -49,22 +49,28 @@ object OutputManager {
     parentThreadGroups(group).map(map.get).find(_.isDefined).map(_.get)
   }
 
-  lazy val dispatchOutput = new OutputStream {
-    override def write(i: Int): Unit = output.synchronized {
-      findRedirect(Thread.currentThread().getThreadGroup, output) match {
-        case None     ⇒ systemOutput.write(i)
-        case Some(os) ⇒ os.write(i)
-      }
+  private def redirectedOutput[T](f: OutputStream ⇒ T) = output.synchronized {
+    findRedirect(Thread.currentThread().getThreadGroup, output) match {
+      case None     ⇒ f(systemOutput)
+      case Some(os) ⇒ f(os)
     }
   }
 
-  lazy val dispatchError = new OutputStream {
-    override def write(i: Int): Unit = error.synchronized {
-      findRedirect(Thread.currentThread().getThreadGroup, error) match {
-        case None     ⇒ systemError.write(i)
-        case Some(os) ⇒ os.write(i)
-      }
+  private def redirectedError[T](f: OutputStream ⇒ T) = error.synchronized {
+    findRedirect(Thread.currentThread().getThreadGroup, error) match {
+      case None     ⇒ f(systemError)
+      case Some(os) ⇒ f(os)
     }
+  }
+
+  lazy val dispatchOutput = new OutputStream {
+    override def write(i: Int): Unit = redirectedOutput(_.write(i))
+    override def flush(): Unit = redirectedOutput(_.flush())
+  }
+
+  lazy val dispatchError = new OutputStream {
+    override def write(i: Int): Unit = redirectedError(_.write(i))
+    override def flush(): Unit = redirectedError(_.flush())
   }
 
   def redirectSystemOutput(ps: PrintStream) = {
