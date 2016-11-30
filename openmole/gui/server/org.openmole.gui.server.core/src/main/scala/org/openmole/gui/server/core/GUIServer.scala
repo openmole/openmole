@@ -106,10 +106,8 @@ class GUIServer(port: Int, localhost: Boolean, http: Boolean) {
 
   server.setHandler(context)
 
-  def start() = {
-    server.start
-  }
-
+  def start() = server.start
+ 
   def join(): GUIServer.ExitStatus = {
     semaphore.acquire()
     semaphore.release()
