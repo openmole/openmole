@@ -273,8 +273,8 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
   })
 
   val pluginButton = bs.button("Plug", btn_default, () ⇒ {
-    OMPost[Api].copyToPluginUploadDir(manager.selected.now).call().foreach { c ⇒
-      OMPost[Api].addPlugins(manager.selected.now.map {
+    OMPost()[Api].copyToPluginUploadDir(manager.selected.now).call().foreach { c ⇒
+      OMPost()[Api].addPlugins(manager.selected.now.map {
         _.name
       }).call().foreach { errs ⇒
         if (errs.isEmpty) {

@@ -143,7 +143,7 @@ class ModelWizardPanel extends ModalPanel {
   def setMethodSelector(classContent: FullClass) = {
     fileToUploadPath.now.map {
       fn ⇒
-        OMPost[Api].methods(fn, classContent.name).call().foreach {
+        OMPost()[Api].methods(fn, classContent.name).call().foreach {
           b ⇒
             methodSelector.setContents(b)
             b.headOption.map {
@@ -278,7 +278,7 @@ class ModelWizardPanel extends ModalPanel {
           },
           UploadAbsolute(),
           () ⇒ {
-            OMPost[Api].extractAndTestExistence(tempFile ++ fileName, uploadPath.parent).call().foreach {
+            OMPost()[Api].extractAndTestExistence(tempFile ++ fileName, uploadPath.parent).call().foreach {
               existing ⇒
                 val fileType: FileType = uploadPath
 
@@ -296,10 +296,10 @@ class ModelWizardPanel extends ModalPanel {
                 if (existing.isEmpty) {
                   targetPath.now.map {
                     tp ⇒
-                      OMPost[Api].copyAllTmpTo(tempFile, tp).call().foreach {
+                      OMPost()[Api].copyAllTmpTo(tempFile, tp).call().foreach {
                         b ⇒
                           buildForm(uploadPath, fileType)
-                          OMPost[Api].deleteFile(tempFile, ServerFileSytemContext.absolute).call()
+                          OMPost()[Api].deleteFile(tempFile, ServerFileSytemContext.absolute).call()
                       }
                   }
                 }
@@ -311,10 +311,10 @@ class ModelWizardPanel extends ModalPanel {
                       optionsDiv.div
                     ),
                     () ⇒ {
-                      OMPost[Api].copyFromTmp(tempFile, optionsDiv.result /*, fp ++ fileName*/ ).call().foreach {
+                      OMPost()[Api].copyFromTmp(tempFile, optionsDiv.result /*, fp ++ fileName*/ ).call().foreach {
                         b ⇒
                           buildForm(uploadPath, fileType)
-                          OMPost[Api].deleteFile(tempFile, ServerFileSytemContext.absolute).call()
+                          OMPost()[Api].deleteFile(tempFile, ServerFileSytemContext.absolute).call()
                       }
                     }, () ⇒ {
                     }, buttonGroupClass = "right"
@@ -341,7 +341,7 @@ class ModelWizardPanel extends ModalPanel {
 
           // Other archive: tgz, tar.gz
           case UndefinedLanguage ⇒
-            OMPost[Api].models(uploadPath).call().foreach {
+            OMPost()[Api].models(uploadPath).call().foreach {
               models ⇒
                 fileToUploadPath() = models.headOption
                 modelSelector.setContents(models, () ⇒ {
@@ -367,7 +367,7 @@ class ModelWizardPanel extends ModalPanel {
       mp ⇒
         val modelName = mp.name
         val resourceDir = mp.parent
-        OMPost[Api].listFiles(resourceDir).call().foreach {
+        OMPost()[Api].listFiles(resourceDir).call().foreach {
           b ⇒
             val l = b.list.filterNot {
               _.name == modelName
@@ -376,7 +376,7 @@ class ModelWizardPanel extends ModalPanel {
               Resource(sp, 0L)
             }
             resources() = resources.now.copy(implicits = l, number = l.size)
-            OMPost[Api].expandResources(resources.now).call().foreach {
+            OMPost()[Api].expandResources(resources.now).call().foreach {
               lf ⇒
                 resources() = lf
             }
@@ -386,7 +386,7 @@ class ModelWizardPanel extends ModalPanel {
 
   def getJarClasses(jarPath: SafePath) = {
     codeSelector.content() = Some(JavaLikeLanguage())
-    OMPost[Api].classes(jarPath).call().foreach {
+    OMPost()[Api].classes(jarPath).call().foreach {
       b ⇒
         val classContents = b.flatMap {
           _.flatten
@@ -400,7 +400,7 @@ class ModelWizardPanel extends ModalPanel {
 
   def setLaunchingCommand(filePath: SafePath) = {
     emptyJARSelectors
-    OMPost[Api].launchingCommands(filePath).call().foreach {
+    OMPost()[Api].launchingCommands(filePath).call().foreach {
       b ⇒
         TreeNodePanel.refreshAndDraw
         launchingCommand() = b.headOption
@@ -483,7 +483,7 @@ class ModelWizardPanel extends ModalPanel {
             val target = targetPath.now.map {
               _.name
             }.getOrElse("executable")
-            OMPost[Api].buildModelTask(
+            OMPost()[Api].buildModelTask(
               target + targetSuffix,
               scriptName,
               commandArea.value,

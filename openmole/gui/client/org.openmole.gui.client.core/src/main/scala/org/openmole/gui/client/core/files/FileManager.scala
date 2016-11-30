@@ -78,7 +78,7 @@ object FileManager {
     onLoadEnded:       String ⇒ Unit
   ) = {
 
-    OMPost[Api].size(safePath).call().foreach { size ⇒
+    OMPost()[Api].size(safePath).call().foreach { size ⇒
       val xhr = new XMLHttpRequest
 
       xhr.onprogress = (e: ProgressEvent) ⇒ {

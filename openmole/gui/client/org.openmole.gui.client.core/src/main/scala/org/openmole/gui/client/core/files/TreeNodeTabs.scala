@@ -71,7 +71,7 @@ object TreeNodeTabs {
     val editor: EditorPanelUI
 
     def save(afterSave: () ⇒ Unit) = editor.synchronized {
-      OMPost[Api].saveFile(safePathTab.now, editor.code).call().foreach(_ ⇒ afterSave())
+      OMPost()[Api].saveFile(safePathTab.now, editor.code).call().foreach(_ ⇒ afterSave())
     }
   }
 
@@ -246,13 +246,13 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
   }
 
   def saveAllTabs(onsave: () ⇒ Unit) = {
-    OMPost[Api].saveFiles(alterables).call().foreach { s ⇒
+    OMPost()[Api].saveFiles(alterables).call().foreach { s ⇒
       onsave()
     }
   }
 
   def checkTabs = tabs.now.foreach { t: TreeNodeTab ⇒
-    OMPost[Api].exists(t.safePathTab.now).call().foreach { e ⇒
+    OMPost()[Api].exists(t.safePathTab.now).call().foreach { e ⇒
       if (!e) removeTab(t)
     }
   }

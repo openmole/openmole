@@ -49,7 +49,7 @@ class FileDisplayer {
     def onrun = {
       overlaying() = true
       refresh(() ⇒
-        OMPost[Api].runScript(ScriptData(safePathTab.now)).call().foreach { execInfo ⇒
+        OMPost()[Api].runScript(ScriptData(safePathTab.now)).call().foreach { execInfo ⇒
           overlaying() = false
           executionTriggerer.open
         })
@@ -67,7 +67,7 @@ class FileDisplayer {
         tabs.setActive(t)
       case _ ⇒ fileExtension match {
         case oms: OpenMOLEScript ⇒ displayOMS(safePath, content)
-        case md: MDScript ⇒ OMPost[Api].mdToHtml(safePath).call.foreach { htmlString ⇒
+        case md: MDScript ⇒ OMPost()[Api].mdToHtml(safePath).call.foreach { htmlString ⇒
           tabs ++ new HTMLTab(Var(safePath), htmlString)
         }
         case dod: DisplayableOnDemandFile ⇒

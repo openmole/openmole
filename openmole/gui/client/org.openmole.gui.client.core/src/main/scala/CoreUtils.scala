@@ -45,52 +45,52 @@ object CoreUtils {
   }
 
   def withTmpFile(todo: SafePath ⇒ Unit): Unit = {
-    OMPost[Api].temporaryFile.call().foreach { tempFile ⇒
+    OMPost()[Api].temporaryFile.call().foreach { tempFile ⇒
       todo(tempFile)
     }
   }
 
   def addDirectory(in: SafePath, dirName: String, onadded: () ⇒ Unit = () ⇒ {}) =
-    OMPost[Api].addDirectory(in, dirName).call().foreach { b ⇒
+    OMPost()[Api].addDirectory(in, dirName).call().foreach { b ⇒
       if (b) onadded()
       else AlertPanel.string(s"$dirName already exists.", okaction = { () ⇒ {} }, transform = RelativeCenterPosition, zone = FileZone)
 
     }
 
   def addFile(safePath: SafePath, fileName: String, onadded: () ⇒ Unit = () ⇒ {}) =
-    OMPost[Api].addFile(safePath, fileName).call().foreach { b ⇒
+    OMPost()[Api].addFile(safePath, fileName).call().foreach { b ⇒
       if (b) onadded()
       else AlertPanel.string(s" $fileName already exists.", okaction = { () ⇒ {} }, transform = RelativeCenterPosition, zone = FileZone)
     }
 
   def trashNode(path: SafePath)(ontrashed: () ⇒ Unit): Unit = {
-    OMPost[Api].deleteFile(path, ServerFileSytemContext.project).call().foreach { d ⇒
+    OMPost()[Api].deleteFile(path, ServerFileSytemContext.project).call().foreach { d ⇒
       TreeNodePanel.refreshAnd(ontrashed)
     }
   }
 
   def trashNodes(paths: Seq[SafePath])(ontrashed: () ⇒ Unit): Unit = {
-    OMPost[Api].deleteFiles(paths, ServerFileSytemContext.project).call().foreach { d ⇒
+    OMPost()[Api].deleteFiles(paths, ServerFileSytemContext.project).call().foreach { d ⇒
       TreeNodePanel.refreshAnd(ontrashed)
     }
   }
 
   def replicate(safePath: SafePath, newName: String): Unit =
-    OMPost[Api].replicate(safePath, newName).call().foreach { y ⇒
+    OMPost()[Api].replicate(safePath, newName).call().foreach { y ⇒
       TreeNodePanel.refreshAndDraw
     }
 
   def testExistenceAndCopyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Future[Seq[SafePath]] =
-    OMPost[Api].testExistenceAndCopyProjectFilesTo(safePaths, to).call()
+    OMPost()[Api].testExistenceAndCopyProjectFilesTo(safePaths, to).call()
 
   def copyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Future[Unit] =
-    OMPost[Api].copyProjectFilesTo(safePaths, to).call()
+    OMPost()[Api].copyProjectFilesTo(safePaths, to).call()
 
   def getSons(safePath: SafePath, fileFilter: FileFilter): Future[ListFilesData] = {
-    OMPost[Api].listFiles(safePath, fileFilter).call()
+    OMPost()[Api].listFiles(safePath, fileFilter).call()
   }
 
-  def pluggables(safePath: SafePath, todo: () ⇒ Unit) = OMPost[Api].allPluggableIn(safePath).call.foreach { p ⇒
+  def pluggables(safePath: SafePath, todo: () ⇒ Unit) = OMPost()[Api].allPluggableIn(safePath).call.foreach { p ⇒
     manager.pluggables() = p
     todo()
   }

@@ -26,5 +26,5 @@ import org.openmole.gui.ext.data.OMSettings
 
 object Settings {
 
-  val settings: Future[OMSettings] = OMPost[Api].settings().call()
+  val settings: Future[OMSettings] = OMPost()[Api].settings().call()
 }

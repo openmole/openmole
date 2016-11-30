@@ -47,8 +47,8 @@ class SSHPrivateKeyAuthenticationPanel(data: PrivateKeyAuthenticationData = Priv
   )
 
   def save(onsave: () ⇒ Unit) =
-    OMPost[Api].removeAuthentication(data).call().foreach { d ⇒
-      OMPost[Api].addAuthentication(
+    OMPost()[Api].removeAuthentication(data).call().foreach { d ⇒
+      OMPost()[Api].addAuthentication(
         PrivateKeyAuthenticationData(
           Some(privateKey.fileName),
           login.value,

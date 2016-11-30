@@ -58,7 +58,7 @@ class AuthFileUploaderUI(
           if (fInput.files.length > 0) {
             val leaf = fInput.files.item(0).name
             pathSet() = false
-            OMPost[Api].renameKey(leaf, fileName).call().foreach {
+            OMPost()[Api].renameKey(leaf, fileName).call().foreach {
               b ⇒
                 pathSet() = true
             }

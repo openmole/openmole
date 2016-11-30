@@ -63,7 +63,7 @@ object ScriptClient {
           div(
             omsheet.centerPage,
             div(omsheet.shutdown, "The OpenMOLE server has been stopped"),
-            onload := { () ⇒ OMPost[Api].shutdown().call() }
+            onload := { () ⇒ OMPost()[Api].shutdown().call() }
           )
         )
       )
