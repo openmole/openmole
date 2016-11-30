@@ -203,7 +203,7 @@ lazy val buildinfo = OsgiProject(coreDir, "org.openmole.core.buildinfo", imports
 
 
 def pluginDir = file("plugins")
-def allPlugin =
+def corePlugins =
   allTask ++
     allSource ++
     allSampling ++
@@ -535,6 +535,8 @@ lazy val state = OsgiProject(guiServerDir, "org.openmole.gui.server.state") sett
 
 /* -------------------- GUI Plugin ----------------------- */
 
+def guiPlugins = Seq(guiPluginEnvironmentEGI)
+
 def guiPluginSettings = defaultSettings ++  Seq(defaultActivator)
 
 def guiPluginDir = guiDir / "plugins"
@@ -607,7 +609,7 @@ def minimumPlugins =
 
 def openmoleNakedDependencies = allCore ++ Seq(openmoleUI) ++ minimumPlugins
 
-def openmoleDependencies = openmoleNakedDependencies ++ allPlugin
+def openmoleDependencies = openmoleNakedDependencies ++ corePlugins ++ guiPlugins
 
 lazy val openmoleNaked =
   Project("openmole-naked", binDir / "openmole-naked", settings = tarProject ++ assemblySettings) settings(
