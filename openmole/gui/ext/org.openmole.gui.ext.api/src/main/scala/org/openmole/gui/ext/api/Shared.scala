@@ -81,13 +81,16 @@ trait Api {
   def marketIndex(): MarketIndex
   def getMarketEntry(entry: MarketIndexEntry, safePath: SafePath): Unit
 
-  //PLUGINS
+  //CORE PLUGINS
   def addPlugins(nodes: Seq[String]): Seq[Error]
   def autoAddPlugins(path: SafePath): Unit
   def isPlugin(path: SafePath): Boolean
   def allPluggableIn(path: SafePath): Seq[SafePath]
   def listPlugins(): Iterable[Plugin]
   def removePlugin(plugin: Plugin): Unit
+
+  //GUI PLUGINS
+  def getGUIPlugins(): AllPluginExtensionData
 
   //MODEL WIZARDS
   def launchingCommands(path: SafePath): Seq[LaunchingCommand]
