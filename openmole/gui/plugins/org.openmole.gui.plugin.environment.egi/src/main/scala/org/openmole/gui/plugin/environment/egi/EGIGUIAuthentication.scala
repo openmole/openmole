@@ -18,7 +18,8 @@
 package org.openmole.gui.plugin.environment.egi
 
 import org.openmole.gui.ext.plugin._
+import scalatags.JsDom.all._
 
 class EGIGUIAuthentication extends Authentication {
-  def panel = "EGI"
+  def panel = div("EGI")
 }
