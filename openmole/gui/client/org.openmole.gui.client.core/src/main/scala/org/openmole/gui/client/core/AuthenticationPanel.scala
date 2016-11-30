@@ -57,7 +57,7 @@ class AuthenticationPanel extends ModalPanel {
   }
 
   def getAuthentications = {
-    OMPost[Api].authentications.call().foreach { auth ⇒
+    OMPost()[Api].authentications.call().foreach { auth ⇒
       auths() = Some(auth.map { a ⇒ client.core.authentications.panelWithID(a) })
       testAuthentications
     }
@@ -156,7 +156,7 @@ class AuthenticationPanel extends ModalPanel {
   })
 
   val vosToBeTested = bs.labeledInput("Test EGI credential on", "", "VO names (vo1,vo2,...)", labelStyle = JsDom.all.color := "#000")
-  OMPost[Api].getConfigurationValue(VOTest).call().foreach {
+  OMPost()[Api].getConfigurationValue(VOTest).call().foreach {
     _.map { c ⇒
       vosToBeTested.setDefault(c)
     }
@@ -179,7 +179,7 @@ class AuthenticationPanel extends ModalPanel {
           settingsButton
         ).popup(
           settingsDiv,
-          onclose = () ⇒ OMPost[Api].setConfigurationValue(VOTest, vosToBeTested.value).call().foreach { x ⇒
+          onclose = () ⇒ OMPost()[Api].setConfigurationValue(VOTest, vosToBeTested.value).call().foreach { x ⇒
           getAuthentications
         },
           popupStyle = whitePopupWithBorder
@@ -199,10 +199,10 @@ class AuthenticationPanel extends ModalPanel {
   )
 
   def removeAuthentication(ad: AuthenticationData) = {
-    OMPost[Api].removeAuthentication(ad).call().foreach { r ⇒
+    OMPost()[Api].removeAuthentication(ad).call().foreach { r ⇒
       ad match {
         case pk: PrivateKey ⇒ pk.privateKey.map { k ⇒
-          OMPost[Api].deleteAuthenticationKey(k).call().foreach { df ⇒
+          OMPost()[Api].deleteAuthenticationKey(k).call().foreach { df ⇒
             getAuthentications
           }
         }
@@ -225,7 +225,7 @@ class AuthenticationPanel extends ModalPanel {
           if (vosToBeTested.value.isEmpty) Seq()
           else vosToBeTested.value.split(",").toSeq
         }
-        OMPost[Api].testAuthentication(a.data, vos).call().foreach { t ⇒
+        OMPost()[Api].testAuthentication(a.data, vos).call().foreach { t ⇒
           auths() = auths.now.map {
             _.updated(auths.now.map {
               _.indexOf(a)

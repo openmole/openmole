@@ -53,7 +53,7 @@ class PluginPanel extends ModalPanel {
   }
 
   def getPlugins = {
-    OMPost[Api].listPlugins.call().foreach { a ⇒
+    OMPost()[Api].listPlugins.call().foreach { a ⇒
       plugins() = Some(a.toSeq)
     }
   }
@@ -68,7 +68,7 @@ class PluginPanel extends ModalPanel {
         (p: ProcessState) ⇒ { transferring() = p },
         UploadPlugin(),
         () ⇒
-          OMPost[Api].addPlugins(FileManager.fileNames(fileInput.files)).call().foreach { ex ⇒
+          OMPost()[Api].addPlugins(FileManager.fileNames(fileInput.files)).call().foreach { ex ⇒
             if (ex.isEmpty) getPlugins
             else AlertPanel.detail("Plugin import failed", ex.head.stackTrace)
           }
@@ -111,7 +111,7 @@ class PluginPanel extends ModalPanel {
   }
 
   def removePlugin(plugin: Plugin) =
-    OMPost[Api].removePlugin(plugin).call().foreach {
+    OMPost()[Api].removePlugin(plugin).call().foreach {
       p ⇒
         getPlugins
     }

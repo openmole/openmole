@@ -20,29 +20,30 @@ package org.openmole.gui.client.tool
 import org.scalajs.dom._
 
 import scala.concurrent.Future
+import scala.concurrent.duration._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import scala.scalajs.js.timers._
 import scala.util.{ Failure, Success }
 
-object OMPost extends autowire.Client[String, upickle.default.Reader, upickle.default.Writer] {
+case class OMPost(timeout: Duration = 60 seconds, warningTimeout: Duration = 10 seconds) extends autowire.Client[String, upickle.default.Reader, upickle.default.Writer] {
   override def doCall(req: Request): Future[String] = {
     val url = req.path.mkString("/")
 
-    val timeout = setTimeout(10000) {
+    val timeoutSet = setTimeout(warningTimeout.toMillis) {
       println("The request is very long. Please check your connection.")
     }
 
     val future = ext.Ajax.post(
       url = s"$url",
       data = upickle.default.write(req.args),
-      timeout = 60000
+      timeout = timeout.toMillis.toInt
     ).map {
         _.responseText
       }
 
     future.onComplete {
       case Failure(t) ⇒ println(s"The request ${req.path.last} failed.")
-      case Success(_) ⇒ clearTimeout(timeout)
+      case Success(_) ⇒ clearTimeout(timeoutSet)
     }
 
     future

@@ -95,7 +95,7 @@ class MarketPanel extends ModalPanel {
   )
 
   def exists(sp: SafePath, entry: MarketIndexEntry) =
-    OMPost[Api].exists(sp).call().foreach { b ⇒
+    OMPost()[Api].exists(sp).call().foreach { b ⇒
       if (b) overwriteAlert() = Some(entry)
       else download(entry)
     }
@@ -103,7 +103,7 @@ class MarketPanel extends ModalPanel {
   def download(entry: MarketIndexEntry) = {
     val path = manager.current.now ++ entry.name
     downloading() = downloading.now.updatedFirst(_._1 == entry, (entry, Var(Processing())))
-    OMPost[Api].getMarketEntry(entry, path).call().foreach { d ⇒
+    OMPost()[Api].getMarketEntry(entry, path).call().foreach { d ⇒
       downloading() = downloading.now.updatedFirst(_._1 == entry, (entry, Var(Processed())))
       downloading.now.headOption.foreach(_ ⇒ close)
       TreeNodePanel.refreshAndDraw
@@ -122,7 +122,7 @@ class MarketPanel extends ModalPanel {
   }
 
   def onOpen() = marketIndex.now match {
-    case None ⇒ OMPost[Api].marketIndex.call().foreach { m ⇒
+    case None ⇒ OMPost()[Api].marketIndex.call().foreach { m ⇒
       marketIndex() = Some(m)
     }
     case _ ⇒
@@ -131,7 +131,7 @@ class MarketPanel extends ModalPanel {
   def onClose() = {}
 
   def deleteFile(sp: SafePath, marketIndexEntry: MarketIndexEntry) =
-    OMPost[Api].deleteFile(sp, ServerFileSytemContext.project).call().foreach { d ⇒
+    OMPost()[Api].deleteFile(sp, ServerFileSytemContext.project).call().foreach { d ⇒
       download(marketIndexEntry)
     }
 

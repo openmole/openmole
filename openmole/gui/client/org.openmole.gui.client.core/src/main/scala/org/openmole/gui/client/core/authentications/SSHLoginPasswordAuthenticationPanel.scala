@@ -45,8 +45,8 @@ class SSHLoginPasswordAuthenticationPanel(data: LoginPasswordAuthenticationData 
   )
 
   def save(onsave: () ⇒ Unit) = {
-    OMPost[Api].removeAuthentication(data).call().foreach { d ⇒
-      OMPost[Api].addAuthentication(LoginPasswordAuthenticationData(login.value, password.value, target.value, port.value)).call().foreach { b ⇒
+    OMPost()[Api].removeAuthentication(data).call().foreach { d ⇒
+      OMPost()[Api].addAuthentication(LoginPasswordAuthenticationData(login.value, password.value, target.value, port.value)).call().foreach { b ⇒
         onsave()
       }
     }

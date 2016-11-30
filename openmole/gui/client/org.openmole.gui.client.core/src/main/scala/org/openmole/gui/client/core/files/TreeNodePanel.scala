@@ -288,7 +288,7 @@ class TreeNodePanel {
   }
 
   def extractTGZ(safePath: SafePath) =
-    OMPost[Api].extractTGZ(safePath).call().foreach {
+    OMPost()[Api].extractTGZ(safePath).call().foreach {
       r ⇒
         r.error match {
           case Some(e: org.openmole.gui.ext.data.Error) ⇒ stringAlertWithDetails("An error occurred during extraction", e.stackTrace)
@@ -344,7 +344,7 @@ class TreeNodePanel {
     }
 
     def renameNode(safePath: SafePath, newName: String, replicateMode: Boolean) = {
-      def rename = OMPost[Api].renameFile(safePath, newName).call().foreach {
+      def rename = OMPost()[Api].renameFile(safePath, newName).call().foreach {
         newNode ⇒
           fileDisplayer.tabs.rename(safePath, newNode)
           treeStates.now.editionOff
@@ -353,7 +353,7 @@ class TreeNodePanel {
       }
 
       fileDisplayer.tabs.saveAllTabs(() ⇒ {
-        OMPost[Api].existsExcept(safePath.copy(path = safePath.path.dropRight(1) :+ newName), replicateMode).call().foreach {
+        OMPost()[Api].existsExcept(safePath.copy(path = safePath.path.dropRight(1) :+ newName), replicateMode).call().foreach {
           b ⇒
             if (b) stringAlert(s"${
               newName

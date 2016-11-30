@@ -81,7 +81,7 @@ class ExecutionPanel extends ModalPanel {
     }
 
     if (updating.compareAndSet(false, true)) {
-      OMPost[Api].allStates(outputHistory.value.toInt).call().andThen {
+      OMPost()[Api].allStates(outputHistory.value.toInt).call().andThen {
         case Success((executionInfos, runningOutputData)) ⇒
           execInfo() = PanelInfo(executionInfos, runningOutputData)
           doScrolls
@@ -91,7 +91,7 @@ class ExecutionPanel extends ModalPanel {
     }
   }
 
-  def updateStaticInfos = OMPost[Api].staticInfos.call().foreach { s ⇒
+  def updateStaticInfos = OMPost()[Api].staticInfos.call().foreach { s ⇒
     staticInfo() = s.toMap
     setTimeout(0) {
       updateExecutionInfo
@@ -301,17 +301,17 @@ class ExecutionPanel extends ModalPanel {
   }
 
   def cancelExecution(id: ExecutionId) =
-    OMPost[Api].cancelExecution(id).call().foreach { r ⇒
+    OMPost()[Api].cancelExecution(id).call().foreach { r ⇒
       updateExecutionInfo
     }
 
   def removeExecution(id: ExecutionId) =
-    OMPost[Api].removeExecution(id).call().foreach { r ⇒
+    OMPost()[Api].removeExecution(id).call().foreach { r ⇒
       updateExecutionInfo
     }
 
   def updateEnvErrors(environmentId: EnvironmentId, reset: Boolean) = {
-    OMPost[Api].runningErrorEnvironmentData(environmentId, envErrorHistory.value.toInt, reset).call().foreach { err ⇒
+    OMPost()[Api].runningErrorEnvironmentData(environmentId, envErrorHistory.value.toInt, reset).call().foreach { err ⇒
       envError() = envError.now + (environmentId → err)
     }
   }
