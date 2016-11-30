@@ -17,7 +17,6 @@
  */
 package org.openmole.gui.plugin.environment.egi
 
-import org.openmole.gui.ext.jstool._
 import org.openmole.gui.ext.plugin._
 
 class EGIGUIAuthentication extends Authentication {
