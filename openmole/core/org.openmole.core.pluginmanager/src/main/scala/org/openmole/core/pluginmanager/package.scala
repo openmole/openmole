@@ -34,8 +34,11 @@ package object pluginmanager {
 
     def isSystem = b.getLocation.toLowerCase.contains("system bundle") || b.getLocation.startsWith("netigso:")
     def headerExists(f: (String, String) ⇒ Boolean) = b.getHeaders.toSeq.exists { case (k, v) ⇒ f(k, v) }
-    def openMOLEScope: Option[String] = b.getHeaders.toSeq.find { case (k, v) ⇒ k.toLowerCase == "openmole-scope" }.map(_._2)
-    def isProvided = openMOLEScope.map(_.toLowerCase == "provided").getOrElse(false)
+
+    def openMOLEScope: Seq[String] =
+      b.getHeaders.toSeq.find { case (k, v) ⇒ k.toLowerCase == "openmole-scope" }.toSeq.flatMap(_._2.split(","))
+    def isProvided = openMOLEScope.exists(_.toLowerCase == "provided")
+
     def isFullDynamic = headerExists { (k, v) ⇒ k.contains("DynamicImport-Package") && v.split(",").toSet.contains("*") }
 
     def file = {

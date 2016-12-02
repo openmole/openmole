@@ -18,13 +18,20 @@ package org.openmole.gui.server.core
  */
 
 import java.util.concurrent.Semaphore
-import org.eclipse.jetty.server.{ ServerConnector, Server }
+import javax.servlet.http.{ HttpServletRequest, HttpServletResponse }
+
+import org.eclipse.jetty.server.{ Server, ServerConnector }
+import org.eclipse.jetty.servlet.DefaultServlet
 import org.eclipse.jetty.webapp._
 import org.openmole.core.tools.io.Network
 import org.openmole.core.workspace.{ ConfigurationLocation, Workspace }
 import org.scalatra.servlet.ScalatraListener
 import javax.servlet.ServletContext
+
 import org.scalatra._
+import org.eclipse.jetty.util.resource.{ Resource ⇒ Res }
+import org.openmole.gui.server.jscompile.JSPack
+import org.openmole.tool.hash._
 import org.openmole.tool.file._
 
 object GUIServer {
@@ -103,9 +110,7 @@ class GUIServer(port: Int, localhost: Boolean, http: Boolean) {
 
   server.setHandler(context)
 
-  def start() = {
-    server.start
-  }
+  def start() = server.start
 
   def join(): GUIServer.ExitStatus = {
     semaphore.acquire()

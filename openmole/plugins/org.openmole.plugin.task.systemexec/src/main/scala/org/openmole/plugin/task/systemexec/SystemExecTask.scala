@@ -88,7 +88,7 @@ object SystemExecTask {
     for {
       c ← command
       exp ← c.expanded
-      e ← exp.validate(inputs.toSeq)
+      e ← exp.validate(External.PWD :: inputs.toList)
     } yield e
 
   @tailrec

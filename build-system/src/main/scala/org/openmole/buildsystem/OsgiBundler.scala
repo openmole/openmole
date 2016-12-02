@@ -15,7 +15,7 @@ object OsgiProject {
 
     Osgi.bundleDependencies in Compile := OsgiKeys.bundle.all(ScopeFilter(inDependencies(ThisProject))).value,
 
-    Osgi.openMOLEScope := None,
+    Osgi.openMOLEScope := Seq.empty,
     OsgiKeys.bundleVersion := version.value,
     OsgiKeys.exportPackage := (name { n ⇒ Seq(n + ".*") }).value,
     OsgiKeys.bundleActivator := None,
@@ -50,7 +50,7 @@ object OsgiProject {
           omScope ⇒
             Map[String, String]() +
               ("Bundle-ActivationPolicy" → "lazy") ++
-              omScope.map(os ⇒ "OpenMOLE-Scope" → os) ++
+              (if (!omScope.isEmpty) Some("OpenMOLE-Scope" → omScope.mkString(",")) else None) ++
               (if (global) Some("Eclipse-BuddyPolicy" → "global") else None)
         }).value,
       OsgiKeys.requireCapability := """osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))""""",
