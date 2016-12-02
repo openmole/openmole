@@ -552,11 +552,8 @@ lazy val serverGUI = OsgiProject(guiServerDir, "org.openmole.gui.server.core") s
   module,
   market,
   extPluginGUI,
-<<<<<<< HEAD
-  extTool
-=======
+  extTool,
   jsCompile
->>>>>>> bf16a174b12c9cdcc4aa7c3857babbc1ff68d1ab
   ) settings (defaultSettings: _*)
 
 lazy val state = OsgiProject(guiServerDir, "org.openmole.gui.server.state") settings
