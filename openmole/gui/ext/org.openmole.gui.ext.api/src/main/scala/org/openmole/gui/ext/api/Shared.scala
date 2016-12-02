@@ -91,6 +91,7 @@ trait Api {
 
   //GUI PLUGINS
   def getGUIPlugins(): AllPluginExtensionData
+  def addGUIPlugin(): Unit
 
   //MODEL WIZARDS
   def launchingCommands(path: SafePath): Seq[LaunchingCommand]

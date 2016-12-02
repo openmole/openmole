@@ -19,7 +19,7 @@ package org.openmole.gui.server.core
 import javax.servlet.annotation.MultipartConfig
 
 import org.scalatra._
-import org.scalatra.auth.{ ScentryConfig, ScentryStrategy, ScentrySupport }
+import org.scalatra.auth.{ ScentryConfig, ScentrySupport }
 import org.scalatra.auth.strategy.BasicAuthSupport
 import org.scalatra.servlet.{ FileItem, FileUploadSupport }
 import org.scalatra.util.MultiMapHeadView
@@ -33,24 +33,17 @@ import java.io.File
 
 import org.openmole.core.workspace.Workspace
 import org.openmole.gui.ext.api.Api
-import org.openmole.gui.ext.data.OpenMOLEScript
+import org.openmole.gui.ext.tool.{ AutowireServer, OMRouter }
+import org.openmole.gui.server.core.GUIServer.ServletArguments
 import org.openmole.tool.file._
 import org.openmole.tool.stream._
 import org.openmole.tool.tar._
-import rx.Var
 
 import scala.util.{ Failure, Success, Try }
-
-object AutowireServer extends autowire.Server[String, upickle.default.Reader, upickle.default.Writer] {
-  def read[Result: upickle.default.Reader](p: String) = upickle.default.read[Result](p)
-
-  def write[Result: upickle.default.Writer](r: Result) = upickle.default.write(r)
-}
 
 @MultipartConfig(fileSizeThreshold = 1024 * 1024)
 class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServlet with FileUploadSupport with AuthenticationSupport {
 
-  val basePath = classOf[org.openmole.gui.ext.api.Api].getPackage.getName.replace('.', '/')
   val apiImpl = new ApiImpl(arguments)
 
   val connectionRoute = "/connection"
@@ -221,6 +214,8 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
     else redirect(connectionRoute)
   }
 
+  addRoute(OMRouter[Api](AutowireServer.route[Api](apiImpl)))
+
   def parseParams(toTest: Seq[String], evaluated: Map[String, String] = Map(), errors: Seq[Throwable] = Seq()): (Map[String, String], Seq[Throwable]) = {
     if (toTest.isEmpty) (evaluated, errors)
     else {
@@ -232,14 +227,17 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
     }
   }
 
-  post(s"/$basePath/*") {
-    Await.result(AutowireServer.route[Api](apiImpl)(
-      autowire.Core.Request(
-        basePath.split("/").toSeq ++ multiParams("splat").head.split("/"),
+  def addRoute[T](router: OMRouter[T]) = {
+    val bp = classOf[org.openmole.gui.ext.api.Api].getPackage.getName.replace('.', '/')
+    post(s"/${router.route}/*") {
+      val coreRequest = autowire.Core.Request(
+        router.route.split("/").toSeq ++ multiParams("splat").head.split("/"),
         upickle.default.read[Map[String, String]](request.body)
       )
-    ), Duration.Inf)
+      Await.result(router.router(coreRequest), Duration.Inf)
+    }
   }
+
 }
 
 case class UserID(id: String)

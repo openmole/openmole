@@ -37,6 +37,7 @@ import org.openmole.tool.tar._
 import java.nio.file.attribute._
 
 import org.openmole.core.exception.UserBadDataError
+import org.openmole.gui.ext.plugin.PluginInfo
 
 import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
 
@@ -409,5 +410,11 @@ object Utils {
   }
 
   def getUUID: String = java.util.UUID.randomUUID.toString
+
+  def loadPlugins(servlet: GUIServlet, plugins: Seq[PluginInfo]) = {
+    plugins.foreach { p ⇒
+      servlet.addRoute(p.router)
+    }
+  }
 
 }

@@ -433,6 +433,14 @@ class ApiImpl(val arguments: GUIServer.ServletArguments) extends Api {
     file.recursiveDelete
   }
 
+  //GUI PLUGINS
+
+  def getGUIPlugins(): AllPluginExtensionData = AllPluginExtensionData(Seq())
+
+  def addGUIPlugin(): Unit = {
+    //Utils.loadPlugins(servlet)
+  }
+
   //MODEL WIZARDS
   def launchingCommands(path: SafePath): Seq[LaunchingCommand] = Utils.launchinCommands(path)
 

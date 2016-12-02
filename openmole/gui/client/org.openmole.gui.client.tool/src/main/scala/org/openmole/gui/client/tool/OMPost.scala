@@ -29,6 +29,7 @@ case class OMPost(timeout: Duration = 60 seconds, warningTimeout: Duration = 10 
   override def doCall(req: Request): Future[String] = {
     val url = req.path.mkString("/")
 
+    println("POST " + url)
     val timeoutSet = setTimeout(warningTimeout.toMillis) {
       println("The request is very long. Please check your connection.")
     }

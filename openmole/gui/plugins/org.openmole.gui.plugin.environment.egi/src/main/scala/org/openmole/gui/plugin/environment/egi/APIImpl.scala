@@ -20,5 +20,5 @@ package org.openmole.gui.plugin.environment.egi
 import java.util.UUID
 
 class APIImpl extends API {
-  def uuid = UUID.randomUUID().toString
+  def uuid() = UUID.randomUUID().toString
 }

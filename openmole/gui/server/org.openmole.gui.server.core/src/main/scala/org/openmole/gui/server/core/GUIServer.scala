@@ -17,20 +17,14 @@ package org.openmole.gui.server.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import java.io.File
 import java.util.concurrent.Semaphore
-import javax.servlet.http.{ HttpServletResponse, HttpServletRequest }
 import org.eclipse.jetty.server.{ ServerConnector, Server }
-import org.eclipse.jetty.servlet.DefaultServlet
 import org.eclipse.jetty.webapp._
 import org.openmole.core.tools.io.Network
 import org.openmole.core.workspace.{ ConfigurationLocation, Workspace }
-import org.scalatra.auth.strategy.{ BasicAuthStrategy, BasicAuthSupport }
 import org.scalatra.servlet.ScalatraListener
 import javax.servlet.ServletContext
 import org.scalatra._
-import org.eclipse.jetty.util.resource.{ Resource ⇒ Res }
-import org.openmole.tool.hash._
 import org.openmole.tool.file._
 
 object GUIServer {
@@ -51,10 +45,13 @@ object GUIServer {
 
   val servletArguments = "servletArguments"
   case class ServletArguments(passwordCorrect: String ⇒ Boolean, applicationControl: ApplicationControl)
+
   case class ApplicationControl(restart: () ⇒ Unit, stop: () ⇒ Unit)
 
   sealed trait ExitStatus
+
   case object Restart extends ExitStatus
+
   case object Ok extends ExitStatus
 
 }

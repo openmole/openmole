@@ -454,7 +454,12 @@ lazy val dataGUI = OsgiProject(guiExt, "org.openmole.gui.ext.data") enablePlugin
   Libraries.upickleJS,
   guiProvided) settings (defaultSettings: _*)
 
-lazy val extPluginGUI = OsgiProject(guiExt, "org.openmole.gui.ext.plugin") enablePlugins (ScalaJSPlugin) settings (
+lazy val extTool = OsgiProject(guiExt, "org.openmole.gui.ext.tool") settings(
+  libraryDependencies += Libraries.autowire,
+  libraryDependencies += Libraries.upickle
+  ) settings (defaultSettings: _*)
+
+lazy val extPluginGUI = OsgiProject(guiExt, "org.openmole.gui.ext.plugin") enablePlugins (ScalaJSPlugin) dependsOn (extTool) settings(
   Libraries.upickleJS,
   Libraries.autowireJS,
   Libraries.rxJS,
@@ -464,7 +469,7 @@ lazy val extPluginGUI = OsgiProject(guiExt, "org.openmole.gui.ext.plugin") enabl
   libraryDependencies += Libraries.equinoxOSGi,
   guiProvided) settings (defaultSettings: _*)
 
-lazy val sharedGUI = OsgiProject(guiExt, "org.openmole.gui.ext.api") dependsOn(dataGUI, market) settings (defaultSettings: _*) settings(guiProvided)
+lazy val sharedGUI = OsgiProject(guiExt, "org.openmole.gui.ext.api") dependsOn(dataGUI, market) settings (defaultSettings: _*) settings (guiProvided)
 
 val jqueryPath = s"META-INF/resources/webjars/jquery/${Libraries.jqueryVersion}/jquery.js"
 val acePath = s"META-INF/resources/webjars/ace/${Libraries.aceVersion}/src-min/ace.js"
@@ -539,7 +544,8 @@ lazy val serverGUI = OsgiProject(guiServerDir, "org.openmole.gui.server.core") s
   openmoleCrypto,
   module,
   market,
-  extPluginGUI
+  extPluginGUI,
+  extTool
   ) settings (defaultSettings: _*)
 
 lazy val state = OsgiProject(guiServerDir, "org.openmole.gui.server.state") settings
@@ -550,7 +556,7 @@ lazy val state = OsgiProject(guiServerDir, "org.openmole.gui.server.state") sett
 
 def guiPlugins = Seq(guiPluginEnvironmentEGI)
 
-def guiPluginSettings = defaultSettings ++  Seq(defaultActivator)
+def guiPluginSettings = defaultSettings ++ Seq(defaultActivator)
 
 def guiPluginDir = guiDir / "plugins"
 

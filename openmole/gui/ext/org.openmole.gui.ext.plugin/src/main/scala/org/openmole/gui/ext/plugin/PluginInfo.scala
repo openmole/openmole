@@ -17,7 +17,9 @@
  */
 package org.openmole.gui.ext.plugin
 
+import org.openmole.gui.ext.tool._
+
 case class PluginInfo(
-  api:             Any,
-  clientInstances: Seq[Class[_]]
+  clientInstances: Seq[Class[_]],
+  router:          OMRouter[_]
 )
