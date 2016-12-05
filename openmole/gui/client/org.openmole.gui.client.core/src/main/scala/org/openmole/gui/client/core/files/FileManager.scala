@@ -5,6 +5,7 @@ import org.scalajs.dom.raw._
 import autowire._
 import org.openmole.gui.client.tool.{ OMPost, Utils }
 import org.openmole.gui.ext.api.Api
+import org.scalajs.dom
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 
@@ -92,9 +93,19 @@ object FileManager {
         }
       }
 
+      println("sp " + safePath)
+      println("path " + safePath.path)
+      println("URI " + Utils.toURI((safePath.path)))
       xhr.open("GET", s"downloadFile?path=${Utils.toURI(safePath.path)}", true)
       xhr.send()
     }
+  }
+
+  def downloadPlugins = {
+    val xhr = new XMLHttpRequest
+    xhr.open("GET", s"downloadPlugins", true)
+    xhr.send()
+    // xhr.responseText
   }
 
 }

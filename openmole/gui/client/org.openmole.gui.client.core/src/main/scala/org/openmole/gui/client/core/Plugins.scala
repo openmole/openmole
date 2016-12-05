@@ -8,6 +8,9 @@ import autowire._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import rx._
 
+import scalatags.JsDom.all._
+import org.openmole.gui.client.tool.JsRxTags._
+
 /*
  * Copyright (C) 30/11/16 // mathieu.leclaire@openmole.org
  *
@@ -29,6 +32,18 @@ object Plugins {
   val authentications: Var[Seq[Authentication]] = Var(Seq())
 
   private def buildJSObject(obj: String) = scalajs.js.eval(s"new $obj()")
+
+  def load =
+    OMPost()[Api].loadPlugins.call().foreach { _ ⇒
+      val pluginScript = script(src := "js/plugins.js").render
+      //      pluginScript.onload = (e: Event) => {
+      //        val apple = scalajs.js.eval("thing.ThingOps().build()")
+      //        println("APPLE " + apple)
+      //      }
+
+      org.scalajs.dom.document.head.appendChild(pluginScript)
+
+    }
 
   //  def updateGUIPlugin = OMPost()[Api].getGUIPlugins().call().foreach { ps ⇒
   //    ps.authentications.map { p ⇒

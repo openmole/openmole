@@ -33,6 +33,7 @@ import java.io.File
 
 import org.openmole.core.workspace.Workspace
 import org.openmole.gui.ext.api.Api
+import org.openmole.gui.ext.data.PasswordState
 import org.openmole.gui.ext.tool.{ AutowireServer, OMRouter }
 import org.openmole.gui.server.core.GUIServer.ServletArguments
 import org.openmole.tool.file._
@@ -41,15 +42,22 @@ import org.openmole.tool.tar._
 
 import scala.util.{ Failure, Success, Try }
 
+object GUIServlet {
+  def apply(arguments: GUIServer.ServletArguments) = {
+    new GUIServlet(arguments)
+
+  }
+}
+
 @MultipartConfig(fileSizeThreshold = 1024 * 1024)
 class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServlet with FileUploadSupport with AuthenticationSupport {
 
-  val apiImpl = new ApiImpl(arguments)
-
+  val apiImpl = new ApiImpl(arguments, addRouter)
   val connectionRoute = "/connection"
   val shutdownRoute = "/shutdown"
   val appRoute = "/app"
   val downloadFileRoute = "/downloadFile"
+  val downloadPluginsRoute = "/downloadPlugins"
   val uploadFilesRoute = "/uploadFiles"
   val resetPasswordRoute = "/resetPassword"
 
@@ -184,7 +192,7 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
 
   get(connectionRoute) {
     if (Workspace.passwordHasBeenSet) redirect("/app")
-    else if (apiImpl.passwordState.chosen) {
+    else if (Utils.passwordState.chosen) {
       response.setHeader("Access-Control-Allow-Origin", "*")
       response.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, UPDATE, OPTIONS")
       response.setHeader("Access-Control-Allow-Headers", "Content-Type, Accept, X-Requested-With")
@@ -214,8 +222,6 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
     else redirect(connectionRoute)
   }
 
-  addRoute(OMRouter[Api](AutowireServer.route[Api](apiImpl)))
-
   def parseParams(toTest: Seq[String], evaluated: Map[String, String] = Map(), errors: Seq[Throwable] = Seq()): (Map[String, String], Seq[Throwable]) = {
     if (toTest.isEmpty) (evaluated, errors)
     else {
@@ -227,7 +233,9 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
     }
   }
 
-  def addRoute[T](router: OMRouter[T]) = {
+  addRouter(OMRouter[Api](AutowireServer.route[Api](apiImpl)))
+
+  def addRouter(router: OMRouter): Unit = {
     val bp = classOf[org.openmole.gui.ext.api.Api].getPackage.getName.replace('.', '/')
     post(s"/${router.route}/*") {
       val coreRequest = autowire.Core.Request(

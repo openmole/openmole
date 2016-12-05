@@ -19,11 +19,12 @@ import org.scalajs.dom.KeyboardEvent
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
+import org.openmole.gui.client.core.files.FileManager
 import org.openmole.gui.client.tool.{ OMPost, OMTags }
 import org.openmole.gui.ext.api.Api
-
-import scala.concurrent.Await
-import scala.concurrent.duration.Duration
+import org.openmole.gui.ext.data.ProcessState
+import org.scalajs
+import org.scalajs.dom.raw.Event
 
 /*
  * Copyright (C) 15/04/15 // mathieu.leclaire@openmole.org
@@ -180,6 +181,7 @@ object ScriptClient {
     }
 
     body.appendChild(maindiv)
+    Plugins.load
   }
 
 }

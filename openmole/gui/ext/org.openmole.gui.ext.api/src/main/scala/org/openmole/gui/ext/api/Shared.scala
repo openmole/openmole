@@ -22,7 +22,7 @@ import org.openmole.gui.ext.data._
 
 trait Api {
 
-  //GENERAL
+  //  //GENERAL
   def settings(): OMSettings
   def shutdown(): Unit
   def restart(): Unit
@@ -88,10 +88,10 @@ trait Api {
   def allPluggableIn(path: SafePath): Seq[SafePath]
   def listPlugins(): Iterable[Plugin]
   def removePlugin(plugin: Plugin): Unit
-
-  //GUI PLUGINS
+  //
+  //  //  //GUI PLUGINS
   def getGUIPlugins(): AllPluginExtensionData
-  def addGUIPlugin(): Unit
+  def loadPlugins(): Unit
 
   //MODEL WIZARDS
   def launchingCommands(path: SafePath): Seq[LaunchingCommand]

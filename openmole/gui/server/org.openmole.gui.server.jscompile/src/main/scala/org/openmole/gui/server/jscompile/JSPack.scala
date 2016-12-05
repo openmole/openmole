@@ -31,27 +31,31 @@ import org.openmole.core.workspace.Workspace
 
 object JSPack {
 
-  def link(inputDirectory: File, outputJSFile: File): Unit = Workspace.withTmpFile("lib", "jar") { jar ⇒
-    getClass.getClassLoader.getResourceAsStream("scalajs-library.jar") copy jar
+  def link(inputDirectory: File, outputJSFile: File): Unit =
+    Workspace.withTmpFile("lib", "jar") { jar ⇒
+      println("start link")
+      getClass.getClassLoader.getResourceAsStream("scalajs-library.jar") copy jar
 
-    // Obtain VirtualScalaJSIRFile's from the input classpath
-    val irCache = new IRFileCache().newCache
-    //val irContainers = IRFileCache.IRContainer.fromJar(Seq(jar, inputDirector))
-    val sjsirFiles =
-      irCache.cached(
-        Seq(IRFileCache.IRContainer.fromJar(jar)) ++ IRFileCache.IRContainer.fromDirectory(inputDirectory)
-      )
+      // Obtain VirtualScalaJSIRFile's from the input classpath
+      val irCache = new IRFileCache().newCache
+      //val irContainers = IRFileCache.IRContainer.fromJar(Seq(jar, inputDirector))
+      val sjsirFiles =
+        irCache.cached(
+          Seq(IRFileCache.IRContainer.fromJar(jar)) ++ IRFileCache.IRContainer.fromDirectory(inputDirectory)
+        )
 
-    // A bunch of options. Here we use all the defaults
-    val semantics = Semantics.Defaults
-    val outputMode = OutputMode.Default
-    val moduleKind = ModuleKind.NoModule
-    val linkerConfig = Linker.Config()
+      // A bunch of options. Here we use all the defaults
+      val semantics = Semantics.Defaults
+      val outputMode = OutputMode.Default
+      val moduleKind = ModuleKind.NoModule
+      val linkerConfig = Linker.Config()
 
-    // Actual linking
-    val linker = Linker(semantics, outputMode, moduleKind, linkerConfig)
-    val logger = new ScalaConsoleLogger
-    linker.link(sjsirFiles, WritableFileVirtualJSFile(outputJSFile), logger)
-  }
+      // Actual linking
+      val linker = Linker(semantics, outputMode, moduleKind, linkerConfig)
+      val logger = new ScalaConsoleLogger
+      linker.link(sjsirFiles, WritableFileVirtualJSFile(outputJSFile), logger)
+
+      println("finish link")
+    }
 
 }

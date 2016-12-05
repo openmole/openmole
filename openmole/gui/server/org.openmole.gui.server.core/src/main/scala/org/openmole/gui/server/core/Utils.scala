@@ -37,8 +37,13 @@ import org.openmole.tool.tar._
 import java.nio.file.attribute._
 
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.gui.ext.plugin.PluginInfo
+import org.openmole.gui.ext.plugin.{ PluginActivator, PluginInfo }
+import org.openmole.gui.ext.tool.OMRouter
+import org.openmole.gui.server.jscompile.JSPack
+import org.scalatra.{ Route, ScalatraBase }
 
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
 
 object Utils {
@@ -47,7 +52,12 @@ object Utils {
 
   val webUIProjectFile = Workspace.file("webui")
   val pluginUpdoadDirectory = Workspace.tmpDir.newDir("pluginUpload")
+  val jsPluginDirectory = Workspace.tmpDir.newDir("jsplugin")
+  val pluginFileName = "plugins.js"
+  val pluginFile = jsPluginDirectory / pluginFileName
+  println("jsplugindirectory " + jsPluginDirectory.getAbsolutePath)
   pluginUpdoadDirectory.mkdir
+  jsPluginDirectory.mkdir
 
   def workspaceProjectFile = {
     val ws = new File(Workspace.file("webui"), "projects")
@@ -411,9 +421,18 @@ object Utils {
 
   def getUUID: String = java.util.UUID.randomUUID.toString
 
-  def loadPlugins(servlet: GUIServlet, plugins: Seq[PluginInfo]) = {
-    plugins.foreach { p ⇒
-      servlet.addRoute(p.router)
+  def loadPlugins(route: OMRouter ⇒ Unit) = {
+    import org.openmole.gui.ext.data.ServerFileSytemContext.project
+    //If no plugin.js in cache: compile it
+    if (jsPluginDirectory.isDirectoryEmpty) {
+      val sjsirDir = Workspace.tmpDir
+
+      Plugins.gatherJSIRFiles(sjsirDir)
+      JSPack.link(sjsirDir, Workspace.openMOLELocation / "webapp/js/plugins.js")
+
+      PluginActivator.plugins.foreach { p ⇒
+        route(p._2.router)
+      }
     }
   }
 

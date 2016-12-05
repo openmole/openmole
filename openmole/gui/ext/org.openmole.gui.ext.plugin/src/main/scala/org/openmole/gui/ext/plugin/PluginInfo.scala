@@ -21,5 +21,5 @@ import org.openmole.gui.ext.tool._
 
 case class PluginInfo(
   clientInstances: Seq[Class[_]],
-  router:          OMRouter[_]
+  router:          OMRouter
 )

@@ -32,6 +32,7 @@ import org.openmole.core.module
 import org.openmole.core.market
 import org.openmole.core.project._
 import org.openmole.gui.ext.api.Api
+import org.openmole.gui.ext.tool.OMRouter
 import rx._
 
 /*
@@ -51,7 +52,7 @@ import rx._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class ApiImpl(val arguments: GUIServer.ServletArguments) extends Api {
+class ApiImpl(val arguments: GUIServer.ServletArguments, addRoute: OMRouter ⇒ Unit) extends Api {
 
   val outputSize = ConfigurationLocation[Int]("gui", "outputsize", Some(10 * 1024 * 1024))
 
@@ -433,13 +434,11 @@ class ApiImpl(val arguments: GUIServer.ServletArguments) extends Api {
     file.recursiveDelete
   }
 
-  //GUI PLUGINS
+  //GUI OM PLUGINS
 
   def getGUIPlugins(): AllPluginExtensionData = AllPluginExtensionData(Seq())
 
-  def addGUIPlugin(): Unit = {
-    //Utils.loadPlugins(servlet)
-  }
+  def loadPlugins() = Utils.loadPlugins(addRoute)
 
   //MODEL WIZARDS
   def launchingCommands(path: SafePath): Seq[LaunchingCommand] = Utils.launchinCommands(path)

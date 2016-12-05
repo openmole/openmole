@@ -24,9 +24,9 @@ object AutowireServer extends autowire.Server[String, upickle.default.Reader, up
   def write[Result: upickle.default.Writer](r: Result) = upickle.default.write(r)
 }
 
-case class OMRouter[T: ClassTag](router: AutowireServer.Router) {
-  def route: String = {
-    reflect.classTag[T].runtimeClass.getCanonicalName.replace('.', '/')
-  }
-
+object OMRouter {
+  def route[T: ClassTag] = reflect.classTag[T].runtimeClass.getCanonicalName.replace('.', '/')
+  def apply[T: ClassTag](router: AutowireServer.Router): OMRouter = new OMRouter(router, route[T])
 }
+
+case class OMRouter(router: AutowireServer.Router, route: String)
