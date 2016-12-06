@@ -457,9 +457,10 @@ lazy val dataGUI = OsgiProject(guiExt, "org.openmole.gui.ext.data") enablePlugin
   guiProvidedScope
 ) settings (defaultSettings: _*)
 
-lazy val extTool = OsgiProject(guiExt, "org.openmole.gui.ext.tool") settings(
+lazy val extTool = OsgiProject(guiExt, "org.openmole.gui.ext.tool")  enablePlugins (ScalaJSPlugin) settings(
   libraryDependencies += Libraries.autowire,
-  libraryDependencies += Libraries.upickle
+  libraryDependencies += Libraries.upickle,
+  Libraries.scalajsDomJS
   ) settings (defaultSettings: _*)
 
 lazy val extPluginGUI = OsgiProject(guiExt, "org.openmole.gui.ext.plugin") enablePlugins (ScalaJSPlugin) dependsOn (extTool) settings(
@@ -477,7 +478,7 @@ lazy val sharedGUI = OsgiProject(guiExt, "org.openmole.gui.ext.api") dependsOn(d
 val jqueryPath = s"META-INF/resources/webjars/jquery/${Libraries.jqueryVersion}/jquery.js"
 val acePath = s"META-INF/resources/webjars/ace/${Libraries.aceVersion}/src-min/ace.js"
 
-lazy val jsCompile = OsgiProject(guiServerDir, "org.openmole.gui.server.jscompile", imports = Seq("*")) dependsOn(pluginManager, fileService, workspace) settings (defaultSettings: _*) settings(
+lazy val jsCompile = OsgiProject(guiServerDir, "org.openmole.gui.server.jscompile", imports = Seq("*")) dependsOn(pluginManager, fileService, workspace, extPluginGUI) settings (defaultSettings: _*) settings(
   libraryDependencies += "org.scala-js" %% "scalajs-library" % Libraries.scalajsVersion % "provided" intransitive(),
   libraryDependencies += Libraries.scalajsTools,
   (resourceDirectories in Compile) += (crossTarget.value / "resources"),

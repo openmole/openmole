@@ -55,9 +55,9 @@ object Utils {
   val jsPluginDirectory = Workspace.tmpDir.newDir("jsplugin")
   val pluginFileName = "plugins.js"
   val pluginFile = jsPluginDirectory / pluginFileName
-  println("jsplugindirectory " + jsPluginDirectory.getAbsolutePath)
   pluginUpdoadDirectory.mkdir
   jsPluginDirectory.mkdir
+  pluginFile.createNewFile
 
   def workspaceProjectFile = {
     val ws = new File(Workspace.file("webui"), "projects")
@@ -424,16 +424,19 @@ object Utils {
   def loadPlugins(route: OMRouter ⇒ Unit) = {
     import org.openmole.gui.ext.data.ServerFileSytemContext.project
     //If no plugin.js in cache: compile it
-    if (jsPluginDirectory.isDirectoryEmpty) {
-      val sjsirDir = Workspace.tmpDir
+    // if (jsPluginDirectory.isDirectoryEmpty) {
+    val sjsirDir = Workspace.tmpDir
+    val jsFile = Workspace.openMOLELocation / "webapp/js/plugins.js"
+    jsFile.delete
 
-      Plugins.gatherJSIRFiles(sjsirDir)
-      JSPack.link(sjsirDir, Workspace.openMOLELocation / "webapp/js/plugins.js")
+    Plugins.gatherJSIRFiles(sjsirDir)
+    JSPack.link(sjsirDir, jsFile)
+    jsFile.append(JSPack.jsMapping)
 
-      PluginActivator.plugins.foreach { p ⇒
-        route(p._2.router)
-      }
+    PluginActivator.plugins.foreach { p ⇒
+      route(p._2.router)
     }
   }
+  // }
 
 }

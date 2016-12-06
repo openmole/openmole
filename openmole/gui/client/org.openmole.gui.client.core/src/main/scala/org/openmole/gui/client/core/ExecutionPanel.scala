@@ -27,6 +27,7 @@ import scala.util.{ Failure, Success }
 import scalatags.JsDom.all._
 import org.openmole.gui.client.tool._
 import org.openmole.gui.client.tool.Expander._
+
 import scalatags.JsDom._
 import org.openmole.gui.client.tool.JsRxTags._
 
@@ -38,8 +39,9 @@ import autowire._
 import org.openmole.gui.ext.data.{ Error ⇒ ExecError }
 import org.openmole.gui.ext.data._
 import bs._
-import org.openmole.gui.client.tool.{ Expander, OMPost, Utils }
+import org.openmole.gui.client.tool.{ Expander, Utils }
 import org.openmole.gui.ext.api.Api
+import org.openmole.gui.ext.tool.OMPost
 import rx._
 
 import concurrent.duration._

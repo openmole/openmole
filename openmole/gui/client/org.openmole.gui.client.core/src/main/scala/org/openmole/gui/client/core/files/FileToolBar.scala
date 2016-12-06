@@ -28,6 +28,7 @@ import org.openmole.gui.client.core.alert.AlertPanel
 import org.openmole.gui.client.core.panels._
 import org.openmole.gui.client.tool._
 import org.openmole.gui.ext.api.Api
+import org.openmole.gui.ext.tool.OMPost
 
 /*
  * Copyright (C) 20/01/16 // mathieu.leclaire@openmole.org

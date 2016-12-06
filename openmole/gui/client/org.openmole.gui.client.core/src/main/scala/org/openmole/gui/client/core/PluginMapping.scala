@@ -1,5 +1,7 @@
-/**
- * Created by Romain Reuillon on 29/11/16.
+package org.openmole.gui.client.core
+
+/*
+ * Copyright (C) 06/12/16 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -9,17 +11,18 @@
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
  */
-package org.openmole.gui.ext.plugin
+import org.openmole.gui.ext.plugin.Authentication
 
-import org.openmole.gui.ext.tool._
+import scala.scalajs.js
+import js.annotation._
 
-case class PluginInfo(
-  clientInstance: Class[_],
-  router:         OMRouter
-)
+@js.native
+@JSImport("js/plugins.js", "PluginMapping")
+object PluginMapping extends js.Object {
+  def authentications(): Seq[Authentication] = js.native
+}

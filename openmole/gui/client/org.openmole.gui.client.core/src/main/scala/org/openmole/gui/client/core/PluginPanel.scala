@@ -10,7 +10,6 @@ import scalatags.JsDom.all._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 
 import scalatags.JsDom.tags
-
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import org.openmole.gui.client.tool.JsRxTags._
 import autowire._
@@ -18,8 +17,9 @@ import rx._
 import bs._
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
 import org.openmole.gui.client.core.alert.AlertPanel
-import org.openmole.gui.client.tool.{ OMPost, OMTags }
+import org.openmole.gui.client.tool.OMTags
 import org.openmole.gui.ext.api.Api
+import org.openmole.gui.ext.tool.OMPost
 import sheet._
 
 /*

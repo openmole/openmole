@@ -34,8 +34,8 @@ import sheet._
 import rx._
 import bs._
 import org.openmole.gui.client.core.authentications._
-import org.openmole.gui.client.tool.OMPost
 import org.openmole.gui.ext.api.Api
+import org.openmole.gui.ext.tool.OMPost
 
 import scalatags.JsDom
 

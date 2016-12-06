@@ -8,8 +8,8 @@ import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
 import rx._
 import org.openmole.gui.client.core.panels._
-import org.openmole.gui.client.tool.OMPost
 import org.openmole.gui.ext.api.Api
+import org.openmole.gui.ext.tool.OMPost
 
 /*
  * Copyright (C) 07/05/15 // mathieu.leclaire@openmole.org

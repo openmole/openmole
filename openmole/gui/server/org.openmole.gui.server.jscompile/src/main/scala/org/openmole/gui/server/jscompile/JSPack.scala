@@ -27,7 +27,9 @@ import org.scalajs.core.tools.linker.backend.{ ModuleKind, OutputMode }
 import org.scalajs.core.tools.linker.Linker
 import org.scalajs.core.tools.logging.ScalaConsoleLogger
 import java.io.File
+
 import org.openmole.core.workspace.Workspace
+import org.openmole.gui.ext.plugin.PluginActivator
 
 object JSPack {
 
@@ -54,8 +56,15 @@ object JSPack {
       val linker = Linker(semantics, outputMode, moduleKind, linkerConfig)
       val logger = new ScalaConsoleLogger
       linker.link(sjsirFiles, WritableFileVirtualJSFile(outputJSFile), logger)
-
       println("finish link")
     }
+
+  def jsMapping: String = {
+    "function PluginMapping {\n" +
+      "  this.authentications = [ " +
+      PluginActivator.authentications.map { c ⇒
+        s"new ${c}()"
+      }.mkString(",") + "\n ] "
+  }
 
 }

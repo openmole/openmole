@@ -31,8 +31,9 @@ import scalatags.JsDom.all._
 import org.scalajs.dom.raw.HTMLInputElement
 import rx._
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
-import org.openmole.gui.client.tool.{ OMPost, Utils }
+import org.openmole.gui.client.tool.Utils
 import org.openmole.gui.ext.api.Api
+import org.openmole.gui.ext.tool.OMPost
 import sheet._
 
 class AuthFileUploaderUI(

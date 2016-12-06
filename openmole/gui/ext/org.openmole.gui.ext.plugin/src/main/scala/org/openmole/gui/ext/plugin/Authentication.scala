@@ -17,9 +17,11 @@
  */
 package org.openmole.gui.ext.plugin
 
-import org.scalajs.dom.raw.HTMLDivElement
-import scalatags.JsDom.TypedTag
+import scala.scalajs.js.annotation.JSExport
 
 trait Authentication {
-  def panel: TypedTag[HTMLDivElement]
+
+  def test: Unit
+
+  // def panel: TypedTag[HTMLDivElement]
 }

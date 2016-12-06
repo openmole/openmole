@@ -13,8 +13,8 @@ import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
 
 import scalatags.JsDom.tags
 import AuthenticationUtils._
-import org.openmole.gui.client.tool.OMPost
 import org.openmole.gui.ext.api.Api
+import org.openmole.gui.ext.tool.OMPost
 
 /*
  * Copyright (C) 02/07/15 // mathieu.leclaire@openmole.org

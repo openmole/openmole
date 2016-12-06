@@ -1,4 +1,4 @@
-package org.openmole.gui.client.tool
+package org.openmole.gui.ext.tool
 
 /*
  * Copyright (C) 24/09/14 // mathieu.leclaire@openmole.org
@@ -22,14 +22,15 @@ import org.scalajs.dom._
 import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+import scala.scalajs.js.annotation.JSExport
 import scala.scalajs.js.timers._
 import scala.util.{ Failure, Success }
 
+@JSExport
 case class OMPost(timeout: Duration = 60 seconds, warningTimeout: Duration = 10 seconds) extends autowire.Client[String, upickle.default.Reader, upickle.default.Writer] {
   override def doCall(req: Request): Future[String] = {
     val url = req.path.mkString("/")
 
-    println("POST " + url)
     val timeoutSet = setTimeout(warningTimeout.toMillis) {
       println("The request is very long. Please check your connection.")
     }

@@ -20,9 +20,11 @@ import org.scalajs.dom.KeyboardEvent
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
 import org.openmole.gui.client.core.files.FileManager
-import org.openmole.gui.client.tool.{ OMPost, OMTags }
+import org.openmole.gui.client.tool.OMTags
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.data.ProcessState
+import org.openmole.gui.ext.plugin.Authentication
+import org.openmole.gui.ext.tool.OMPost
 import org.scalajs
 import org.scalajs.dom.raw.Event
 
@@ -181,7 +183,19 @@ object ScriptClient {
     }
 
     body.appendChild(maindiv)
-    Plugins.load
+
+    //TODO: add right sjsir dependencies (scalatags, autowire, etc) for building plugins.js
+    // Plugins.load
+    /*  OMPost()[Api].getGUIPlugins.call().foreach { all ⇒
+      Plugins.authentications() = all.authentications.map { gp ⇒ Plugins.buildJSObject(gp.jsObject).asInstanceOf[Authentication] }
+
+      //TEst
+      println("auth:" + Plugins.authentications.now)
+      // org.scalajs.dom.document.body.appendChild(Plugins.authentications.now.headOption.map { _.panel }.getOrElse(tags.div("Cannot load")).render)
+      Plugins.authentications.now.headOption.map { _.test }
+
+    }*/
+
   }
 
 }

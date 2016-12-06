@@ -9,8 +9,9 @@ import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 
 import scalatags.JsDom.all._
 import AuthenticationUtils._
-import org.openmole.gui.client.tool.{ OMPost, Utils }
+import org.openmole.gui.client.tool.Utils
 import org.openmole.gui.ext.api.Api
+import org.openmole.gui.ext.tool.OMPost
 
 /*
  * Copyright (C) 16/06/15 // mathieu.leclaire@openmole.org

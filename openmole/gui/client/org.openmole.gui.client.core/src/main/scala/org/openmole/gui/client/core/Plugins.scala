@@ -1,6 +1,5 @@
 package org.openmole.gui.client.core
 
-import org.openmole.gui.client.tool.OMPost
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.plugin.Authentication
 import autowire._
@@ -10,6 +9,12 @@ import rx._
 
 import scalatags.JsDom.all._
 import org.openmole.gui.client.tool.JsRxTags._
+import org.openmole.gui.ext.tool.OMPost
+
+import scalatags.JsDom.tags
+
+import scala.scalajs.js
+import js.annotation._
 
 /*
  * Copyright (C) 30/11/16 // mathieu.leclaire@openmole.org
@@ -31,17 +36,18 @@ import org.openmole.gui.client.tool.JsRxTags._
 object Plugins {
   val authentications: Var[Seq[Authentication]] = Var(Seq())
 
-  private def buildJSObject(obj: String) = scalajs.js.eval(s"new $obj()")
+  def buildJSObject(obj: String) = {
+    scalajs.js.eval(s"new $obj()")
+  }
 
   def load =
     OMPost()[Api].loadPlugins.call().foreach { _ ⇒
-      val pluginScript = script(src := "js/plugins.js").render
+      org.scalajs.dom.document.location.reload(true)
+      //  val pluginScript = script(src := "js/plugins.js").render
       //      pluginScript.onload = (e: Event) => {
       //        val apple = scalajs.js.eval("thing.ThingOps().build()")
       //        println("APPLE " + apple)
       //      }
-
-      org.scalajs.dom.document.head.appendChild(pluginScript)
 
     }
 

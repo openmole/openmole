@@ -21,8 +21,9 @@ import org.osgi.framework._
 import collection.JavaConverters._
 
 object PluginActivator {
-  val plugins =
-    new java.util.concurrent.ConcurrentHashMap[Class[_], PluginInfo]().asScala
+  val plugins = new java.util.concurrent.ConcurrentHashMap[Class[_], PluginInfo]().asScala
+
+  def authentications: Seq[Class[_]] = plugins.values.toSeq.map { _.clientInstance }.filter { classOf[Authentication].isAssignableFrom }
 }
 
 trait PluginActivator extends BundleActivator {

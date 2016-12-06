@@ -18,8 +18,21 @@
 package org.openmole.gui.plugin.environment.egi
 
 import org.openmole.gui.ext.plugin._
+import org.openmole.gui.ext.tool.OMPost
+
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+import autowire._
+import scala.scalajs.js.annotation.JSExport
 import scalatags.JsDom.all._
 
+@JSExport
 class EGIGUIAuthentication extends Authentication {
-  def panel = div("EGI")
+
+  @JSExport
+  def test: Unit = OMPost()[API].uuid.call().foreach { id =>
+    println("ID " + id)
+
+  }
+  // @JSExport
+  // def panel() = div(width := 200, h1("EGIII"))
 }
