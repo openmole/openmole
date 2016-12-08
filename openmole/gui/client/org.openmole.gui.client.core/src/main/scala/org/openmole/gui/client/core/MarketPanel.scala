@@ -41,7 +41,7 @@ import scalatags.JsDom.all._
 import bs._
 import org.openmole.gui.client.tool.InputFilter
 import org.openmole.gui.ext.api.Api
-import org.openmole.gui.ext.tool.OMPost
+import org.openmole.gui.ext.tool.client.OMPost
 
 class MarketPanel extends ModalPanel {
   lazy val modalID = "marketPanelID"

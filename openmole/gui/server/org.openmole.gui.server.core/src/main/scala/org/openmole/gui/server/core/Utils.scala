@@ -37,8 +37,9 @@ import org.openmole.tool.tar._
 import java.nio.file.attribute._
 
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.gui.ext.plugin.{ PluginActivator, PluginInfo }
-import org.openmole.gui.ext.tool.OMRouter
+import org.openmole.gui.ext.plugin.server.PluginActivator
+import org.openmole.gui.ext.tool.server._
+import org.openmole.gui.ext.tool.server.OMRouter
 import org.openmole.gui.server.jscompile.JSPack
 import org.scalatra.{ Route, ScalatraBase }
 
@@ -425,13 +426,13 @@ object Utils {
     import org.openmole.gui.ext.data.ServerFileSytemContext.project
     //If no plugin.js in cache: compile it
     // if (jsPluginDirectory.isDirectoryEmpty) {
-    val sjsirDir = Workspace.tmpDir
+    val sjsirDir = new java.io.File("/tmp/sjsir") //Workspace.tmpDir
     val jsFile = Workspace.openMOLELocation / "webapp/js/plugins.js"
     jsFile.delete
 
     Plugins.gatherJSIRFiles(sjsirDir)
     JSPack.link(sjsirDir, jsFile)
-    jsFile.append(JSPack.jsMapping)
+    println("zrfile " + jsFile.getAbsolutePath)
 
     PluginActivator.plugins.foreach { p ⇒
       route(p._2.router)

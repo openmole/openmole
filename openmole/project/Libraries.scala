@@ -66,6 +66,7 @@ object Libraries {
   lazy val rxVersion = "0.3.1"
   lazy val scalaUpickleVersion = "0.4.3"
   lazy val scalaAutowireVersion = "0.2.6"
+  lazy val sourcecodeVersion = "0.1.2"
 
   lazy val upickle = "org.openmole" %% "upickle" % scalaUpickleVersion
   lazy val autowire = "org.openmole" %% "autowire" % scalaAutowireVersion
@@ -81,6 +82,7 @@ object Libraries {
   lazy val scalaTagsJS = libraryDependencies += "com.lihaoyi" %%% "scalatags" % scalaTagsVersion
   lazy val autowireJS = libraryDependencies += "com.lihaoyi" %%% "autowire" % scalaAutowireVersion
   lazy val upickleJS = libraryDependencies += "com.lihaoyi" %%% "upickle" % scalaUpickleVersion
+  lazy val sourcecodeJS = libraryDependencies += "com.lihaoyi" %%% "sourcecode" % sourcecodeVersion
 
   lazy val scalajsTools = "org.openmole" %% "scalajs-tools" % scalajsVersion
   lazy val scalajs = "org.openmole" %% "scalajs" % scalajsVersion

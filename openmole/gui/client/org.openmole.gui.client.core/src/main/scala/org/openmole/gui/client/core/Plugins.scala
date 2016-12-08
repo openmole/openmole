@@ -1,7 +1,7 @@
 package org.openmole.gui.client.core
 
 import org.openmole.gui.ext.api.Api
-import org.openmole.gui.ext.plugin.Authentication
+import org.openmole.gui.ext.data.Authentication
 import autowire._
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
@@ -9,10 +9,9 @@ import rx._
 
 import scalatags.JsDom.all._
 import org.openmole.gui.client.tool.JsRxTags._
-import org.openmole.gui.ext.tool.OMPost
+import org.openmole.gui.ext.tool.client.OMPost
 
 import scalatags.JsDom.tags
-
 import scala.scalajs.js
 import js.annotation._
 
@@ -34,7 +33,13 @@ import js.annotation._
  */
 
 object Plugins {
-  val authentications: Var[Seq[Authentication]] = Var(Seq())
+  // lazy val mapping = buildJSObject("PluginMapping").asInstanceOf[PluginMapping]
+
+  lazy val authentications: Var[Seq[Authentication]] = Var(Seq())
+  // private val mapping = new PluginMapping()
+  // println("MAPPINH " + mapping)
+
+  //def apply() = mapping
 
   def buildJSObject(obj: String) = {
     scalajs.js.eval(s"new $obj()")
@@ -43,6 +48,7 @@ object Plugins {
   def load =
     OMPost()[Api].loadPlugins.call().foreach { _ ⇒
       org.scalajs.dom.document.location.reload(true)
+
       //  val pluginScript = script(src := "js/plugins.js").render
       //      pluginScript.onload = (e: Event) => {
       //        val apple = scalajs.js.eval("thing.ThingOps().build()")

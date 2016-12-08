@@ -31,7 +31,7 @@ import scalatags.JsDom.all._
 import scalatags.JsDom.tags
 import org.openmole.gui.client.tool._
 import JsRxTags._
-import org.openmole.gui.ext.tool.OMPost
+import org.openmole.gui.ext.tool.client.OMPost
 
 class ResetPassword {
   val shutDown = new ShutDown

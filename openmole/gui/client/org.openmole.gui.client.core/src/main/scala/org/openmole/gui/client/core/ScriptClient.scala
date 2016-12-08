@@ -22,9 +22,9 @@ import autowire._
 import org.openmole.gui.client.core.files.FileManager
 import org.openmole.gui.client.tool.OMTags
 import org.openmole.gui.ext.api.Api
+import org.openmole.gui.ext.tool.client.OMPost
 import org.openmole.gui.ext.data.ProcessState
-import org.openmole.gui.ext.plugin.Authentication
-import org.openmole.gui.ext.tool.OMPost
+import org.openmole.gui.ext.data.Authentication
 import org.scalajs
 import org.scalajs.dom.raw.Event
 
@@ -183,18 +183,30 @@ object ScriptClient {
     }
 
     body.appendChild(maindiv)
+    body.appendChild(bs.button("build", btn_danger +++ ms("ooo"), () ⇒ Plugins.load))
+    body.appendChild(bs.button("call", btn_primary +++ ms("oooo"), () ⇒ {
+      OMPost()[Api].getGUIPlugins.call().foreach { all ⇒
+        Plugins.authentications() = all.authentications.map { gp ⇒ Plugins.buildJSObject(gp.jsObject).asInstanceOf[Authentication] }
 
+        //TEst
+        println("auth:" + Plugins.authentications.now)
+
+        val oo = Plugins.authentications.now.headOption.map { h ⇒
+          println("h " + h)
+          println("h " + h.panel)
+          println("h " + h.test)
+          h.panel
+        }.getOrElse(tags.div("Cannot load"))
+
+        println("OO " + oo)
+
+        org.scalajs.dom.document.body.appendChild(oo.render)
+        // Plugins.authentications.now.headOption.map { _.test }
+      }
+
+    }))
     //TODO: add right sjsir dependencies (scalatags, autowire, etc) for building plugins.js
-    // Plugins.load
-    /*  OMPost()[Api].getGUIPlugins.call().foreach { all ⇒
-      Plugins.authentications() = all.authentications.map { gp ⇒ Plugins.buildJSObject(gp.jsObject).asInstanceOf[Authentication] }
-
-      //TEst
-      println("auth:" + Plugins.authentications.now)
-      // org.scalajs.dom.document.body.appendChild(Plugins.authentications.now.headOption.map { _.panel }.getOrElse(tags.div("Cannot load")).render)
-      Plugins.authentications.now.headOption.map { _.test }
-
-    }*/
+    //
 
   }
 

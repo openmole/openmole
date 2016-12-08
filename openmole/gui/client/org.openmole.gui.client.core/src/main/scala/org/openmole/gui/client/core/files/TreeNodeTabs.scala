@@ -17,7 +17,7 @@ import scalatags.JsDom.{ TypedTag, tags }
 import scala.scalajs.js.timers._
 import org.openmole.gui.client.tool.JsRxTags._
 import org.openmole.gui.client.tool.OMTags
-import org.openmole.gui.ext.tool.OMPost
+import org.openmole.gui.ext.tool.client.OMPost
 
 /*
  * Copyright (C) 11/05/15 // mathieu.leclaire@openmole.org

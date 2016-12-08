@@ -34,7 +34,7 @@ import java.io.File
 import org.openmole.core.workspace.Workspace
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.data.PasswordState
-import org.openmole.gui.ext.tool.{ AutowireServer, OMRouter }
+import org.openmole.gui.ext.tool.server.{ AutowireServer, OMRouter }
 import org.openmole.gui.server.core.GUIServer.ServletArguments
 import org.openmole.tool.file._
 import org.openmole.tool.stream._
@@ -76,8 +76,8 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
     tags.head(
       tags.meta(tags.httpEquiv := "content-type", tags.content := "text/html; charset=UTF-8"),
       cssFiles.map { f ⇒ tags.link(tags.rel := "stylesheet", tags.`type` := "text/css", href := "css/" + f) },
-      tags.script(tags.`type` := "text/javascript", tags.src := "js/openmole.js"),
       tags.script(tags.`type` := "text/javascript", tags.src := "js/plugins.js"),
+      tags.script(tags.`type` := "text/javascript", tags.src := "js/openmole.js"),
       tags.script(tags.`type` := "text/javascript", tags.src := "js/deps.js")
     ),
     tags.body(tags.onload := javascritMethod)

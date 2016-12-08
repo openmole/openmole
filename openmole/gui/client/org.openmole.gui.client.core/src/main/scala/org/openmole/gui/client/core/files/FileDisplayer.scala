@@ -9,7 +9,7 @@ import autowire._
 import rx._
 import org.openmole.gui.client.core.panels._
 import org.openmole.gui.ext.api.Api
-import org.openmole.gui.ext.tool.OMPost
+import org.openmole.gui.ext.tool.client.OMPost
 
 /*
  * Copyright (C) 07/05/15 // mathieu.leclaire@openmole.org

@@ -19,7 +19,7 @@ import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
 import org.openmole.gui.client.core.alert.AlertPanel
 import org.openmole.gui.client.tool.OMTags
 import org.openmole.gui.ext.api.Api
-import org.openmole.gui.ext.tool.OMPost
+import org.openmole.gui.ext.tool.client.OMPost
 import sheet._
 
 /*

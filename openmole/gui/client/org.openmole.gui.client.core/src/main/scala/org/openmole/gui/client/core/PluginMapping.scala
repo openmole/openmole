@@ -16,13 +16,8 @@ package org.openmole.gui.client.core
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import org.openmole.gui.ext.plugin.Authentication
+import org.openmole.gui.ext.data.Authentication
 
-import scala.scalajs.js
-import js.annotation._
-
-@js.native
-@JSImport("js/plugins.js", "PluginMapping")
-object PluginMapping extends js.Object {
-  def authentications(): Seq[Authentication] = js.native
+trait PluginMapping {
+  def authentications: Seq[Authentication]
 }

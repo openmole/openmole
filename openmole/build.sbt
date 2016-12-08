@@ -1,6 +1,3 @@
-
-
-
 import org.openmole.buildsystem._
 import OMKeys._
 
@@ -444,6 +441,7 @@ lazy val client = Project("org-openmole-rest-client", restDir / "client") settin
 def guiDir = file("gui")
 
 def guiExt = guiDir / "ext"
+def guiExtTarget = guiExt / "target"
 
 def guiProvidedScope =
   Osgi.openMOLEScope += "gui-provided"
@@ -455,43 +453,57 @@ lazy val dataGUI = OsgiProject(guiExt, "org.openmole.gui.ext.data") enablePlugin
   Libraries.scalajsDomJS,
   Libraries.upickleJS,
   guiProvidedScope
-) settings (defaultSettings: _*)
-
-lazy val extTool = OsgiProject(guiExt, "org.openmole.gui.ext.tool")  enablePlugins (ScalaJSPlugin) settings(
-  libraryDependencies += Libraries.autowire,
-  libraryDependencies += Libraries.upickle,
-  Libraries.scalajsDomJS
   ) settings (defaultSettings: _*)
 
-lazy val extPluginGUI = OsgiProject(guiExt, "org.openmole.gui.ext.plugin") enablePlugins (ScalaJSPlugin) dependsOn (extTool) settings(
+lazy val extServerTool = OsgiProject(guiExt, "org.openmole.gui.ext.tool.server") enablePlugins (ScalaJSPlugin) dependsOn (dataGUI) settings(
+  libraryDependencies += Libraries.autowire,
+  libraryDependencies += Libraries.upickle
+  ) settings (defaultSettings: _*)
+
+lazy val extClientTool = OsgiProject(guiExt, "org.openmole.gui.ext.tool.client") enablePlugins (ScalaJSPlugin) settings(
   Libraries.upickleJS,
   Libraries.autowireJS,
   Libraries.rxJS,
   Libraries.scalajsDomJS,
   Libraries.scaladgetJS,
-  Libraries.scalaTagsJS,
-  libraryDependencies += Libraries.equinoxOSGi,
-  guiProvidedScope) settings (defaultSettings: _*)
+  Libraries.scalaTagsJS
+  ) settings (defaultSettings: _*)
+
+
+//lazy val extPluginGUIClient = OsgiProject(guiExtTarget, "org.openmole.gui.ext.plugin.client",
+//  privatePackages = Seq("autowire.*", "upickle.*", "rx.*", "org.scalajs.dom.*", "scalatags.*", "fr.iscpif.scaladget.*")) enablePlugins (ScalaJSPlugin) settings(
+//  Libraries.upickleJS,
+//  Libraries.autowireJS,
+//  Libraries.rxJS,
+//  Libraries.scalajsDomJS,
+//  Libraries.scaladgetJS,
+//  Libraries.scalaTagsJS,
+//  libraryDependencies += Libraries.equinoxOSGi) dependsOn(extClientTool) settings (defaultSettings: _*)
+
+
+lazy val extPluginGUIServer = OsgiProject(guiExt, "org.openmole.gui.ext.plugin.server") dependsOn (extServerTool) settings(
+  libraryDependencies += Libraries.rx,
+  libraryDependencies += Libraries.equinoxOSGi) settings (defaultSettings: _*)
 
 lazy val sharedGUI = OsgiProject(guiExt, "org.openmole.gui.ext.api") dependsOn(dataGUI, market) settings (defaultSettings: _*) settings (guiProvidedScope)
 
 val jqueryPath = s"META-INF/resources/webjars/jquery/${Libraries.jqueryVersion}/jquery.js"
 val acePath = s"META-INF/resources/webjars/ace/${Libraries.aceVersion}/src-min/ace.js"
 
-lazy val jsCompile = OsgiProject(guiServerDir, "org.openmole.gui.server.jscompile", imports = Seq("*")) dependsOn(pluginManager, fileService, workspace, extPluginGUI) settings (defaultSettings: _*) settings(
+lazy val jsCompile = OsgiProject(guiServerDir, "org.openmole.gui.server.jscompile", imports = Seq("*")) dependsOn(pluginManager, fileService, workspace, dataGUI) settings (defaultSettings: _*) settings(
   libraryDependencies += "org.scala-js" %% "scalajs-library" % Libraries.scalajsVersion % "provided" intransitive(),
   libraryDependencies += Libraries.scalajsTools,
   (resourceDirectories in Compile) += (crossTarget.value / "resources"),
   (OsgiKeys.embeddedJars) := {
-     val scalaLib =
-       (Keys.externalDependencyClasspath in Compile).value.filter {
-         d => d.data.getName startsWith "scalajs-library"
-       }.head
+    val scalaLib =
+      (Keys.externalDependencyClasspath in Compile).value.filter {
+        d => d.data.getName startsWith "scalajs-library"
+      }.head
 
-      val dest = crossTarget.value / "resources/scalajs-library.jar"
-      dest.getParentFile.mkdirs()
-      sbt.IO.copyFile(scalaLib.data, dest)
-      Seq()
+    val dest = crossTarget.value / "resources/scalajs-library.jar"
+    dest.getParentFile.mkdirs()
+    sbt.IO.copyFile(scalaLib.data, dest)
+    Seq()
   },
   guiProvidedScope)
 
@@ -500,13 +512,7 @@ lazy val jsCompile = OsgiProject(guiServerDir, "org.openmole.gui.server.jscompil
 
 def guiClientDir = guiDir / "client"
 lazy val clientGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.core") enablePlugins (ScalaJSPlugin) dependsOn
-  (sharedGUI, clientToolGUI, market, extPluginGUI) settings(
-  Libraries.upickleJS,
-  Libraries.autowireJS,
-  Libraries.rxJS,
-  Libraries.scalajsDomJS,
-  Libraries.scaladgetJS,
-  Libraries.scalaTagsJS,
+  (sharedGUI, clientToolGUI, market, dataGUI, extClientTool) settings(
   libraryDependencies += Libraries.async,
   skip in packageJSDependencies := false,
   jsDependencies += Libraries.jquery / jqueryPath minified jqueryPath.replace(".js", ".min.js"),
@@ -552,8 +558,8 @@ lazy val serverGUI = OsgiProject(guiServerDir, "org.openmole.gui.server.core") s
   openmoleCrypto,
   module,
   market,
-  extPluginGUI,
-  extTool,
+  extServerTool,
+  extPluginGUIServer,
   jsCompile
   ) settings (defaultSettings: _*)
 
@@ -563,15 +569,29 @@ lazy val state = OsgiProject(guiServerDir, "org.openmole.gui.server.state") sett
 
 /* -------------------- GUI Plugin ----------------------- */
 
-def guiPlugins = Seq(guiPluginEnvironmentEGI)
-
 def guiPluginSettings = defaultSettings ++ Seq(defaultActivator)
 
 def guiPluginDir = guiDir / "plugins"
 
-lazy val guiPluginEnvironmentEGI =
-  OsgiProject(guiPluginDir, "org.openmole.gui.plugin.environment.egi") enablePlugins (ScalaJSPlugin) dependsOn (extPluginGUI) settings (defaultActivator)
+lazy val clientPluginSettings = Seq(
+  Libraries.upickleJS,
+  Libraries.autowireJS,
+  Libraries.rxJS,
+  Libraries.scalajsDomJS,
+  Libraries.scaladgetJS,
+  Libraries.scalaTagsJS,
+  Libraries.sourcecodeJS,
+  libraryDependencies += Libraries.equinoxOSGi)
+lazy val clientPrivatePackages = Seq("autowire.*", "upickle/js.*", "sourcecode.*", "rx.*", "org.scalajs.dom.*", "scalatags.*", "fr.iscpif.scaladget.*")
 
+
+lazy val sshared = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.environment.egi.shared")
+lazy val sserver = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.environment.egi.server") dependsOn(extPluginGUIServer, dataGUI, sshared) settings (defaultActivator)
+lazy val cclient = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.environment.egi.client", privatePackages = clientPrivatePackages) enablePlugins (ScalaJSPlugin) dependsOn(dataGUI, extClientTool,sshared) settings (clientPluginSettings)
+lazy val guiPluginEnvironmentEGI = Seq(sshared, sserver, cclient)
+
+
+val guiPlugins = Seq(sserver, cclient)
 
 /* -------------------- Bin ------------------------- */
 

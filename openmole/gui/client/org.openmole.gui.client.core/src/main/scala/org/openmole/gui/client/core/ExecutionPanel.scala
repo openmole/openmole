@@ -41,7 +41,7 @@ import org.openmole.gui.ext.data._
 import bs._
 import org.openmole.gui.client.tool.{ Expander, Utils }
 import org.openmole.gui.ext.api.Api
-import org.openmole.gui.ext.tool.OMPost
+import org.openmole.gui.ext.tool.client.OMPost
 import rx._
 
 import concurrent.duration._

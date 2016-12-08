@@ -44,7 +44,7 @@ import sheet._
 import bs._
 import org.openmole.gui.client.tool.{ OMTags, OptionsDiv }
 import org.openmole.gui.ext.api.Api
-import org.openmole.gui.ext.tool.OMPost
+import org.openmole.gui.ext.tool.client.OMPost
 
 class ModelWizardPanel extends ModalPanel {
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()

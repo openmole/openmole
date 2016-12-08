@@ -21,8 +21,8 @@ import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
 import org.openmole.gui.ext.api.Api
+import org.openmole.gui.ext.tool.client.OMPost
 import org.openmole.gui.ext.data.OMSettings
-import org.openmole.gui.ext.tool.OMPost
 
 object Settings {
 

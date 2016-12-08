@@ -10,7 +10,7 @@ import autowire._
 import scalatags.JsDom.all._
 import AuthenticationUtils._
 import org.openmole.gui.ext.api.Api
-import org.openmole.gui.ext.tool.OMPost
+import org.openmole.gui.ext.tool.client.OMPost
 
 /*
  * Copyright (C) 01/07/15 // mathieu.leclaire@openmole.org

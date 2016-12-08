@@ -32,10 +32,9 @@ import org.openmole.core.module
 import org.openmole.core.market
 import org.openmole.core.project._
 import org.openmole.gui.ext.api.Api
-import org.openmole.gui.ext.plugin.PluginActivator
-import org.openmole.gui.ext.tool.OMRouter
 import rx._
-import org.openmole.gui.ext.plugin._
+import org.openmole.gui.ext.plugin.server.PluginActivator
+import org.openmole.gui.ext.tool.server.OMRouter
 
 /*
  * Copyright (C) 21/07/14 // mathieu.leclaire@openmole.org
@@ -439,12 +438,9 @@ class ApiImpl(val arguments: GUIServer.ServletArguments, addRoute: OMRouter ⇒ 
   //GUI OM PLUGINS
 
   def getGUIPlugins(): AllPluginExtensionData = {
-    val pluginClasses = PluginActivator.plugins.values.toSeq.map { _.clientInstance }
-    println("Plugin classes " + pluginClasses)
-    println("ASSIGNALEB " + pluginClasses.filter { classOf[Authentication].isAssignableFrom })
 
     AllPluginExtensionData(
-      authentications = pluginClasses.filter { classOf[Authentication].isAssignableFrom }.map { c ⇒ GUIPlugin(c.getName) }
+      authentications = PluginActivator.authentications
     )
   }
 

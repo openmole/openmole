@@ -17,9 +17,7 @@ package org.openmole.gui.server.jscompile
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.tool.file._
 import org.openmole.tool.stream._
-import java.io.File
 
 import org.scalajs.core.tools.io._
 import org.scalajs.core.tools.sem._
@@ -29,7 +27,6 @@ import org.scalajs.core.tools.logging.ScalaConsoleLogger
 import java.io.File
 
 import org.openmole.core.workspace.Workspace
-import org.openmole.gui.ext.plugin.PluginActivator
 
 object JSPack {
 
@@ -50,7 +47,7 @@ object JSPack {
       val semantics = Semantics.Defaults
       val outputMode = OutputMode.Default
       val moduleKind = ModuleKind.NoModule
-      val linkerConfig = Linker.Config()
+      val linkerConfig = Linker.Config() //withSourceMap (false)
 
       // Actual linking
       val linker = Linker(semantics, outputMode, moduleKind, linkerConfig)
@@ -58,13 +55,5 @@ object JSPack {
       linker.link(sjsirFiles, WritableFileVirtualJSFile(outputJSFile), logger)
       println("finish link")
     }
-
-  def jsMapping: String = {
-    "function PluginMapping {\n" +
-      "  this.authentications = [ " +
-      PluginActivator.authentications.map { c ⇒
-        s"new ${c}()"
-      }.mkString(",") + "\n ] "
-  }
 
 }
