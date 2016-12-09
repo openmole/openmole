@@ -15,19 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package org.openmole.gui.plugin.environment.egi.client
+package org.openmole.gui.plugin.environment.egi
 
-import org.openmole.gui.ext.data.Authentication
+import java.util.UUID
 
-import scala.scalajs.js.annotation.JSExport
-import scalatags.JsDom.all._
-
-@JSExport
-class EGIGUIAuthentication extends Authentication {
-
-  @JSExport
-  def test: Unit = Utils.uuid
-
-  @JSExport
-  def panel = div(width := 200, h1("EGIII"))
+class APIImpl extends API {
+  def uuid() = UUID.randomUUID().toString
 }

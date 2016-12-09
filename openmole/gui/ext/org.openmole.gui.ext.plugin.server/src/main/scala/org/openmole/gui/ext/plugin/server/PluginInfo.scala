@@ -20,6 +20,6 @@ package org.openmole.gui.ext.plugin.server
 import org.openmole.gui.ext.tool.server.OMRouter
 
 case class PluginInfo(
-  clientInstance: String,
+  clientInstance: Class[_],
   router:         OMRouter
 )

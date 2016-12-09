@@ -1,5 +1,5 @@
 /**
- * Created by Romain Reuillon on 29/11/16.
+ * Created by Romain Reuillon on 28/11/16.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,8 +15,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package org.openmole.gui.plugin.environment.egi.shared
+package org.openmole.gui.plugin.environment.egi
 
-trait API {
-  def uuid(): String
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+import org.openmole.gui.ext.data.Authentication
+import org.openmole.gui.ext.tool.client.OMPost
+import autowire._
+import scala.scalajs.js.annotation.JSExport
+import scalatags.JsDom.all._
+
+@JSExport
+class EGIGUIAuthentication extends Authentication {
+
+  @JSExport
+  def test: Unit = OMPost()[API].uuid.call().foreach { id ⇒
+    println("ID " + id)
+  }
+
+  @JSExport
+  def panel = div(width := 200, h1("EGIII"))
 }

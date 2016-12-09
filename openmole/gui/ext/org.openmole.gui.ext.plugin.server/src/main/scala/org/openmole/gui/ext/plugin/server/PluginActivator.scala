@@ -24,18 +24,25 @@ import org.osgi.framework._
 import collection.JavaConverters._
 
 object PluginActivator {
-  val plugins = new java.util.concurrent.ConcurrentHashMap[Class[_], PluginInfo]().asScala
+  lazy val plugins = new java.util.concurrent.ConcurrentHashMap[Class[_], PluginInfo]().asScala
+
+  println("plugins map" + plugins)
 
   implicit def classesToGUIPlugins(cs: Seq[Class[_]]): Seq[GUIPlugin] = cs.map { c ⇒
     GUIPlugin(c.getName)
   }
 
-  private def instances = plugins.values.toSeq.map { pi ⇒
-    Class.forName(pi.clientInstance)
-  }
+  private def instances = plugins.values.toSeq.map { _.clientInstance }
 
-  def authentications: Seq[GUIPlugin] = instances.filter {
-    classOf[Authentication].isAssignableFrom
+  def authentications: Seq[GUIPlugin] = {
+    println("instances " + instances)
+
+    val oo: Seq[GUIPlugin] = instances.filter {
+      classOf[Authentication].isAssignableFrom
+    }
+
+    println("instances2 " + oo)
+    oo
   }
 }
 
@@ -45,6 +52,10 @@ trait PluginActivator extends BundleActivator {
   override def stop(context: BundleContext): Unit =
     PluginActivator.plugins -= this.getClass
 
-  override def start(context: BundleContext): Unit =
+  override def start(context: BundleContext): Unit = {
+    println("start " + info.clientInstance)
+    println("PluPlugins " + PluginActivator.plugins)
     PluginActivator.plugins += this.getClass → info
+    println("PluPlugins #2 " + PluginActivator.plugins)
+  }
 }

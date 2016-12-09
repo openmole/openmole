@@ -15,22 +15,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package org.openmole.gui.plugin.environment.egi.server
+package org.openmole.gui.plugin.environment.egi
 
 import org.openmole.gui.ext.plugin.server.{ PluginActivator, PluginInfo }
 import org.openmole.gui.ext.tool.server.{ AutowireServer, OMRouter }
-import org.openmole.gui.plugin.environment.egi.shared.API
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class Activator extends PluginActivator with autowire.Server[String, upickle.default.Reader, upickle.default.Writer] {
+class Activator extends PluginActivator { /*with AutowireServer autowire.Server[String, upickle.default.Reader, upickle.default.Writer] {
 
   def read[Result: upickle.default.Reader](p: String) = upickle.default.read[Result](p)
 
-  def write[Result: upickle.default.Writer](r: Result) = upickle.default.write(r)
+  def write[Result: upickle.default.Writer](r: Result) = upickle.default.write(r)*/
 
   def info: PluginInfo = PluginInfo(
-    "org.openmole.gui.plugin.environment.egi.client.EGIGUIAuthentication",
+    classOf[EGIGUIAuthentication],
     OMRouter[API](AutowireServer.route[API](new APIImpl))
   )
 

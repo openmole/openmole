@@ -42,6 +42,7 @@ object Plugins {
   //def apply() = mapping
 
   def buildJSObject(obj: String) = {
+    println("Build " + obj)
     scalajs.js.eval(s"new $obj()")
   }
 

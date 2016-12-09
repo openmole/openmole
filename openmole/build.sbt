@@ -451,11 +451,10 @@ def guiProvidedScope =
 lazy val dataGUI = OsgiProject(guiExt, "org.openmole.gui.ext.data") enablePlugins (ScalaJSPlugin) dependsOn (workflow) settings(
   Libraries.scalaTagsJS,
   Libraries.scalajsDomJS,
-  Libraries.upickleJS,
   guiProvidedScope
   ) settings (defaultSettings: _*)
 
-lazy val extServerTool = OsgiProject(guiExt, "org.openmole.gui.ext.tool.server") enablePlugins (ScalaJSPlugin) dependsOn (dataGUI) settings(
+lazy val extServerTool = OsgiProject(guiExt, "org.openmole.gui.ext.tool.server") dependsOn (dataGUI) settings(
   libraryDependencies += Libraries.autowire,
   libraryDependencies += Libraries.upickle
   ) settings (defaultSettings: _*)
@@ -469,20 +468,7 @@ lazy val extClientTool = OsgiProject(guiExt, "org.openmole.gui.ext.tool.client")
   Libraries.scalaTagsJS
   ) settings (defaultSettings: _*)
 
-
-//lazy val extPluginGUIClient = OsgiProject(guiExtTarget, "org.openmole.gui.ext.plugin.client",
-//  privatePackages = Seq("autowire.*", "upickle.*", "rx.*", "org.scalajs.dom.*", "scalatags.*", "fr.iscpif.scaladget.*")) enablePlugins (ScalaJSPlugin) settings(
-//  Libraries.upickleJS,
-//  Libraries.autowireJS,
-//  Libraries.rxJS,
-//  Libraries.scalajsDomJS,
-//  Libraries.scaladgetJS,
-//  Libraries.scalaTagsJS,
-//  libraryDependencies += Libraries.equinoxOSGi) dependsOn(extClientTool) settings (defaultSettings: _*)
-
-
 lazy val extPluginGUIServer = OsgiProject(guiExt, "org.openmole.gui.ext.plugin.server") dependsOn (extServerTool) settings(
-  libraryDependencies += Libraries.rx,
   libraryDependencies += Libraries.equinoxOSGi) settings (defaultSettings: _*)
 
 lazy val sharedGUI = OsgiProject(guiExt, "org.openmole.gui.ext.api") dependsOn(dataGUI, market) settings (defaultSettings: _*) settings (guiProvidedScope)
@@ -552,7 +538,6 @@ lazy val serverGUI = OsgiProject(guiServerDir, "org.openmole.gui.server.core") s
   batch,
   egi,
   ssh,
-  clientToolGUI,
   openmoleStream,
   txtmark,
   openmoleCrypto,
@@ -573,25 +558,15 @@ def guiPluginSettings = defaultSettings ++ Seq(defaultActivator)
 
 def guiPluginDir = guiDir / "plugins"
 
-lazy val clientPluginSettings = Seq(
-  Libraries.upickleJS,
-  Libraries.autowireJS,
-  Libraries.rxJS,
-  Libraries.scalajsDomJS,
-  Libraries.scaladgetJS,
-  Libraries.scalaTagsJS,
-  Libraries.sourcecodeJS,
-  libraryDependencies += Libraries.equinoxOSGi)
-lazy val clientPrivatePackages = Seq("autowire.*", "upickle/js.*", "sourcecode.*", "rx.*", "org.scalajs.dom.*", "scalatags.*", "fr.iscpif.scaladget.*")
+lazy val clientPrivatePackages = Seq("autowire.*", "upickle.*", "sourcecode.*", "rx.*", "org.scalajs.dom.*", "scalatags.*", "fr.iscpif.scaladget.*")
 
 
-lazy val sshared = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.environment.egi.shared")
-lazy val sserver = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.environment.egi.server") dependsOn(extPluginGUIServer, dataGUI, sshared) settings (defaultActivator)
-lazy val cclient = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.environment.egi.client", privatePackages = clientPrivatePackages) enablePlugins (ScalaJSPlugin) dependsOn(dataGUI, extClientTool,sshared) settings (clientPluginSettings)
-lazy val guiPluginEnvironmentEGI = Seq(sshared, sserver, cclient)
+lazy val guiEnvironmentEGIPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.environment.egi", privatePackages = clientPrivatePackages) settings(
+  guiPluginSettings,
+  libraryDependencies += Libraries.equinoxOSGi
+  ) dependsOn(extPluginGUIServer, extClientTool, dataGUI) enablePlugins(ScalaJSPlugin)
 
-
-val guiPlugins = Seq(sserver, cclient)
+val guiPlugins = Seq(guiEnvironmentEGIPlugin)
 
 /* -------------------- Bin ------------------------- */
 
@@ -659,7 +634,7 @@ lazy val openmoleNaked =
     Osgi.bundleDependencies in Compile := OsgiKeys.bundle.all(ScopeFilter(inDependencies(ThisProject, includeRoot = false))).value,
     resourcesAssemble += (resourceDirectory in Compile).value -> assemblyPath.value,
     resourcesAssemble += ((resourceDirectory in serverGUI in Compile).value / "webapp") → (assemblyPath.value / "webapp"),
-    resourcesAssemble += (fullOptJS in clientGUI in Compile).value.data -> (assemblyPath.value / "webapp/js/openmole.js"),
+    resourcesAssemble += (fastOptJS in clientGUI in Compile).value.data -> (assemblyPath.value / "webapp/js/openmole.js"),
     resourcesAssemble += (packageMinifiedJSDependencies in clientGUI in Compile).value -> (assemblyPath.value / "webapp/js/deps.js"),
     resourcesAssemble += (assemble in dbServer).value -> (assemblyPath.value / "dbserver"),
     resourcesAssemble += {
