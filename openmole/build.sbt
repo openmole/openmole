@@ -510,14 +510,13 @@ lazy val clientGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.core") e
   guiProvidedScope) settings (defaultSettings: _*)
 
 
-lazy val clientToolGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.tool") enablePlugins (ScalaJSPlugin) dependsOn (workspace) settings(
+lazy val clientToolGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.tool", privatePackages = Seq("autowire.*", "upickle.*", "sourcecode.*", "rx.*", "org.scalajs.dom.*", "scalatags.*", "fr.iscpif.scaladget.*")) enablePlugins (ScalaJSPlugin) dependsOn (workspace) settings(
   Libraries.autowireJS,
   Libraries.upickleJS,
   Libraries.scalajsDomJS,
   Libraries.scalaTagsJS,
   Libraries.scaladgetJS,
-  Libraries.rxJS,
-  guiProvidedScope) settings (defaultSettings: _*)
+  Libraries.rxJS) settings (defaultSettings: _*)
 
 
 /* -------------------------- Server ----------------------- */
@@ -558,10 +557,7 @@ def guiPluginSettings = defaultSettings ++ Seq(defaultActivator)
 
 def guiPluginDir = guiDir / "plugins"
 
-lazy val clientPrivatePackages = Seq("autowire.*", "upickle.*", "sourcecode.*", "rx.*", "org.scalajs.dom.*", "scalatags.*", "fr.iscpif.scaladget.*")
-
-
-lazy val guiEnvironmentEGIPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.environment.egi", privatePackages = clientPrivatePackages) settings(
+lazy val guiEnvironmentEGIPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.environment.egi") settings(
   guiPluginSettings,
   libraryDependencies += Libraries.equinoxOSGi
   ) dependsOn(extPluginGUIServer, extClientTool, dataGUI) enablePlugins(ScalaJSPlugin)
