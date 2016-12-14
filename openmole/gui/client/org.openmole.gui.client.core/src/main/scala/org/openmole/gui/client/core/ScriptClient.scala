@@ -24,6 +24,7 @@ import org.scalajs.dom.raw.HTMLElement
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
+import scala.scalajs.js.JSApp
 
 /*
  * Copyright (C) 15/04/15 // mathieu.leclaire@openmole.org
@@ -45,36 +46,35 @@ import scala.concurrent.duration.Duration
 @JSExport("ScriptClient")
 object ScriptClient {
 
-  def openmoleWithBootstrap[T <: HTMLElement](f: ⇒ T) = bs.withBootstrapNative("js/deps.js")(f)
+  @JSExport
+  def connection(): Unit = {
+    val connection = new Connection
+    dom.document.body.appendChild(connection.connectionDiv.render)
+  }
 
   @JSExport
-  def connection(): Unit =
-    openmoleWithBootstrap {
-      val connection = new Connection
-      connection.connectionDiv.render
-    }
-
-  @JSExport
-  def stopped(): Unit =
-    openmoleWithBootstrap {
+  def stopped(): Unit = {
+    dom.document.body.appendChild(
       div(omsheet.connectionTabOverlay)(
+      div(
+        img(src := "img/openmole.png", omsheet.openmoleLogo),
         div(
-          img(src := "img/openmole.png", omsheet.openmoleLogo),
-          div(
-            omsheet.centerPage,
-            div(omsheet.shutdown, "The OpenMOLE server has been stopped"),
-            onload := { () ⇒ OMPost[Api].shutdown().call() }
-          )
+          omsheet.centerPage,
+          div(omsheet.shutdown, "The OpenMOLE server has been stopped"),
+          onload := { () ⇒ OMPost[Api].shutdown().call() }
         )
-      ).render
-    }
+      )
+    ).render
+    )
+  }
 
   @JSExport
-  def resetPassword(): Unit =
-    openmoleWithBootstrap {
-      val resetPassword = new ResetPassword
+  def resetPassword(): Unit = {
+    val resetPassword = new ResetPassword
+    dom.document.body.appendChild(
       resetPassword.resetPassDiv.render
-    }
+    )
+  }
 
   @JSExport
   def run(): Unit = {
@@ -115,8 +115,9 @@ object ScriptClient {
       }
     }
 
-    val mainFuture = Settings.settings.map { sets ⇒
-      div(
+    Settings.settings.map { sets ⇒
+      dom.document.body.appendChild(
+        div(
         bs.navBar(
           omsheet.fixed +++ sheet.nav +++ navbar_pills +++ navbar_inverse +++ navbar_staticTop,
           fileItem,
@@ -160,13 +161,8 @@ object ScriptClient {
               )
             )
         )
+      ).render
       )
-    }
-
-    mainFuture.foreach { d ⇒
-      openmoleWithBootstrap {
-        d.render
-      }
     }
 
   }
