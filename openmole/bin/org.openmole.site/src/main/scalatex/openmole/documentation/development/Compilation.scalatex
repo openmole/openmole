@@ -8,6 +8,12 @@
     @br @hl.highlight("""git clone git@github.com:openmole/openmole.git""", "plain")
 
     @p The current development versions stands in the master branch.
+    
+  @sect{Install npm}
+    @hl.highlight("""
+    sudo apt install npm nodejs-legacy
+    """)
+
   @sect{Compile}
     In order to compile OpenMOLE, you should have @a("SBT", href := "http://www.scala-sbt.org/") and a JDK of version 7 or greater (we strongly recommend the use of the OpenJDK as its corresponding Runtime Environment embeds all the tools required by OpenMOLE). Here are the steps to compile OpenMOLE from a fresh clone:
     @br @hl.highlight("""
