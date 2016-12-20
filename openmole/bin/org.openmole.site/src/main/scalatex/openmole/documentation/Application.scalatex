@@ -1,6 +1,5 @@
 
 @import org.openmole.site._
-@import org.openmole.doc.GUIDoc
 
 @sect{Editor}
   To run OpenMOLE, just run the openmole file (or openmole.bat for the windoz users). It will bring up you web browser. OpenMOLE supports Chrome and Firefox. So if you are using another default web browser please copy paste the OpenMOLE url (https://localhost:port) in one of these browser.
