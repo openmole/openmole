@@ -42,16 +42,6 @@ class AuthenticationPanel {
   private lazy val auths: Var[Option[Seq[AuthPanelWithID]]] = Var(None)
   lazy val initialCheck = Var(false)
 
-  def onOpen() = {
-    if (!initialCheck.now) {
-      getAuthentications
-    }
-  }
-
-  def onClose() = {
-    setting() = None
-  }
-
   def getAuthentications = {
     OMPost[Api].authentications.call().foreach { auth ⇒
       auths() = Some(auth.map { a ⇒ client.core.authentications.panelWithID(a) })
@@ -167,7 +157,18 @@ class AuthenticationPanel {
     btn_default +++ glyph_settings +++ omsheet.settingsButton
   )(tags.span(caret))
 
-  lazy val dialog: ModalDialog = bs.ModalDialog(omsheet.panelWidth(52))
+  lazy val dialog: ModalDialog =
+    bs.ModalDialog(
+      omsheet.panelWidth(52),
+      onopen = () ⇒ {
+        if (!initialCheck.now) {
+          getAuthentications
+        }
+      },
+      onclose = () ⇒ {
+        setting() = None
+      }
+    )
 
   dialog.header(
     div(height := 55)(

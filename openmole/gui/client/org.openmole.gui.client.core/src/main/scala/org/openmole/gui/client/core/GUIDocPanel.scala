@@ -38,10 +38,6 @@ class GUIDocPanel {
 
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
-  def onOpen() = {}
-
-  def onClose() = {}
-
   case class GUIDocEntry(glyph: ModifierSeq, title: String, content: TypedTag[HTMLDivElement])
 
   val selectedEntry: Var[Option[GUIDocEntry]] = Var(None)

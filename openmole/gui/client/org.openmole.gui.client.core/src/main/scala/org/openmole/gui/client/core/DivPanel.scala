@@ -27,10 +27,6 @@ import fr.iscpif.scaladget.stylesheet.all
 
 class DivPanel(title: String, div: TypedTag[HTMLDivElement]) {
 
-  def onOpen() = {}
-
-  def onClose() = {}
-
   def open = dialog.open
 
   val dialog = bs.ModalDialog()

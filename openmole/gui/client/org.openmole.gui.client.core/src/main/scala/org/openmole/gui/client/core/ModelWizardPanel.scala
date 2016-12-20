@@ -44,10 +44,6 @@ import fr.iscpif.scaladget.api.Selector.Options
 class ModelWizardPanel {
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
-  def onOpen() = {}
-
-  def onClose() = {}
-
   sealed trait VariableRole[T] {
     def content: T
 

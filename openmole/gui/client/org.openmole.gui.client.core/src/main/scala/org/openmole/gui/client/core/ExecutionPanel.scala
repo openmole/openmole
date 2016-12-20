@@ -70,6 +70,8 @@ class ExecutionPanel {
   }
 
   def updateExecutionInfo: Unit = {
+    println("uPDATE EXEC INFO")
+
     def delay = {
       updating.set(false)
       setTimeout(5000) {
@@ -78,6 +80,7 @@ class ExecutionPanel {
     }
 
     if (updating.compareAndSet(false, true)) {
+      println("Inif")
       OMPost[Api].allStates(outputHistory.value.toInt).call().andThen {
         case Success((executionInfos, runningOutputData)) ⇒
           execInfo() = PanelInfo(executionInfos, runningOutputData)
@@ -94,13 +97,6 @@ class ExecutionPanel {
       updateExecutionInfo
     }
   }
-
-  def onOpen() = {
-    closeAllExpanders
-    updateStaticInfos
-  }
-
-  def onClose() = {}
 
   def doScrolls = {
     Seq(outputTextAreas.now, scriptTextAreas.now, errorTextAreas.now).map {
@@ -161,6 +157,7 @@ class ExecutionPanel {
     tags.table(sheet.table)(
       thead,
       Rx {
+        println("RX table " + execInfo())
         tbody({
           for {
             (id, executionInfo) ← execInfo().executionInfos.sortBy { case (execId, _) ⇒ staticInfo.now(execId).startDate }.reverse
@@ -326,7 +323,13 @@ class ExecutionPanel {
     envErrorHistory.withLabel("# environment errors")
   )
 
-  val dialog = bs.ModalDialog(omsheet.panelWidth(92))
+  val dialog = bs.ModalDialog(
+    omsheet.panelWidth(92),
+    onopen = () ⇒ {
+      closeAllExpanders
+      updateStaticInfos
+    }
+  )
 
   dialog.header(
     div(height := 55)(

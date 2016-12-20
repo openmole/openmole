@@ -120,21 +120,22 @@ class MarketPanel {
     }.getOrElse(tags.div())
   }
 
-  def onOpen() = marketIndex.now match {
-    case None ⇒ OMPost[Api].marketIndex.call().foreach { m ⇒
-      marketIndex() = Some(m)
-    }
-    case _ ⇒
-  }
-
-  def onClose() = {}
-
   def deleteFile(sp: SafePath, marketIndexEntry: MarketIndexEntry) =
     OMPost[Api].deleteFile(sp, ServerFileSytemContext.project).call().foreach { d ⇒
       download(marketIndexEntry)
     }
 
-  val dialog = bs.ModalDialog(omsheet.panelWidth(92))
+  val dialog = bs.ModalDialog(
+    omsheet.panelWidth(92),
+    onopen = () ⇒ {
+      marketIndex.now match {
+        case None ⇒ OMPost[Api].marketIndex.call().foreach { m ⇒
+          marketIndex() = Some(m)
+        }
+        case _ ⇒
+      }
+    }
+  )
 
   dialog.header(
     tags.span(tags.b("Market place"))

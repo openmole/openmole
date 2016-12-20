@@ -46,13 +46,6 @@ class PluginPanel {
   private lazy val plugins: Var[Option[Seq[Plugin]]] = Var(None)
   lazy val transferring: Var[ProcessState] = Var(Processed())
 
-  def onOpen() = {
-    getPlugins
-  }
-
-  def onClose() = {
-  }
-
   def getPlugins = {
     OMPost[Api].listPlugins.call().foreach { a ⇒
       plugins() = Some(a.toSeq)
@@ -117,7 +110,7 @@ class PluginPanel {
         getPlugins
     }
 
-  lazy val dialog = bs.ModalDialog()
+  lazy val dialog = bs.ModalDialog(onopen = () ⇒ getPlugins)
 
   dialog.header(
     tags.span(
