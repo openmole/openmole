@@ -1,9 +1,6 @@
 package org.openmole.gui.client.core.files
 
-import java.text.SimpleDateFormat
-import java.util.Date
-
-import org.openmole.gui.client.core.alert.AbsolutePositioning.{ CenterPagePosition, FileZone, RelativeCenterPosition }
+import org.openmole.gui.client.core.alert.AbsolutePositioning.{ FileZone, RelativeCenterPosition }
 import org.openmole.gui.client.core.alert.AlertPanel
 import org.openmole.gui.client.core.files.FileToolBar.{ FilterTool, PluginTool, TrashTool }
 import org.openmole.gui.client.core.CoreUtils
@@ -11,14 +8,14 @@ import org.openmole.gui.client.core.Waiter._
 import org.openmole.gui.ext.data._
 import org.openmole.gui.client.tool._
 import JsRxTags._
-import fr.iscpif.scaladget.api.{ Popup, BootstrapTags ⇒ bs }
+import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import org.scalajs.dom.html.Input
 import org.scalajs.dom.raw._
 
 import scalatags.JsDom.all._
 import scalatags.JsDom.{ TypedTag, tags }
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
-
+import fr.iscpif.scaladget.stylesheet
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import TreeNode._
 import autowire._
@@ -30,9 +27,6 @@ import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.tool.client.OMPost
 import org.scalajs.dom
 import sheet._
-
-import scala.concurrent.Future
-import scala.scalajs.js
 
 /*
  * Copyright (C) 16/04/15 // mathieu.leclaire@openmole.org
@@ -66,6 +60,7 @@ object TreeNodePanel {
 
 class TreeNodePanel {
 
+  implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
   val selectionMode = Var(false)
   val treeWarning = Var(true)
 
@@ -419,10 +414,9 @@ class TreeNodePanel {
                   }
                 }
               },
-              clickablePair.tooltip(
-                tags.span(tn.name()), popupStyle = whitePopup, arrowStyle = Popup.whiteBottomArrow, condition = () ⇒ tn.name().length > 24
-              ), {
-                div(omsheet.fileInfo)(
+
+              clickablePair.tooltip(tn.name(), condition = () ⇒ tn.name().length > 24), {
+                div(fileInfo)(
                   if (treeStates().settingsSet) {
                     span(
                       span(onclick := { () ⇒ treeStates().settingsOff }, baseGlyph)(

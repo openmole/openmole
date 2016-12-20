@@ -377,6 +377,12 @@ package object tool {
     width := "100%"
   )
 
+  //PANELS
+  def panelWidth(ratio: Int): ModifierSeq = Seq(
+    width := s"${ratio.toString}%",
+    maxWidth := 1250
+  )
+
   //MARKET PANEL
   lazy val docEntry: ModifierSeq = Seq(
     color("white"),
@@ -399,7 +405,7 @@ package object tool {
   //EXECUTION PANEL
   lazy val panelHeaderSettings: ModifierSeq = Seq(
     floatRight,
-    sheet.marginRight(130),
+    sheet.marginRight(200),
     sheet.marginTop(-25)
   )
 
@@ -441,7 +447,7 @@ package object tool {
   lazy val settingsButton: ModifierSeq = Seq(
     width := 45,
     height := 32,
-    top := 10,
+    top := 20,
     padding := 5
   )
 

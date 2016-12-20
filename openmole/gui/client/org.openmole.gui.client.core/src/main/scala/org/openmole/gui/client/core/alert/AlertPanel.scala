@@ -88,12 +88,14 @@ object AlertPanel {
       tags.div(message),
       () ⇒ {
         stackPanel.content() = detail
-        environmentStackTriggerer.open
+        stackPanel.dialog.open
       }, cancelaction, transform, zone, alertType, buttonGroupClass, "Details"
     )
 }
 
 class AlertPanel {
+
+  implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
   val visible: Var[Boolean] = Var(false)
   val zoneModifier: Var[ModifierSeq] = Var(FullPage.modifierClass)

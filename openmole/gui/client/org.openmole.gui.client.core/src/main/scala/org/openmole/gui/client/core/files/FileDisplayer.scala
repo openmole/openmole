@@ -51,7 +51,7 @@ class FileDisplayer {
       refresh(() ⇒
         OMPost()[Api].runScript(ScriptData(safePathTab.now)).call().foreach { execInfo ⇒
           overlaying() = false
-          executionTriggerer.open
+          executionPanel.dialog.open
         })
     }
   }

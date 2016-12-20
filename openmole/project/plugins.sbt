@@ -9,6 +9,8 @@ addSbtPlugin("org.openmole" % "openmole-buildsystem-plugin" % "1.6-SNAPSHOT")
 
 addSbtPlugin("org.scala-js" % "sbt-scalajs" % "0.6.13")
 
+addSbtPlugin("ch.epfl.scala" % "sbt-web-scalajs-bundler" % "0.4.0")
+
 addSbtPlugin("com.lihaoyi" % "scalatex-sbt-plugin" % "0.3.4")
 
 addSbtPlugin("com.eed3si9n" % "sbt-buildinfo" % "0.3.2")

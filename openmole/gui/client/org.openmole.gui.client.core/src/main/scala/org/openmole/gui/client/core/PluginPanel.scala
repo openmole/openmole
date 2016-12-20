@@ -10,11 +10,13 @@ import scalatags.JsDom.all._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 
 import scalatags.JsDom.tags
+
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import org.openmole.gui.client.tool.JsRxTags._
 import autowire._
 import rx._
 import bs._
+import fr.iscpif.scaladget.api.Popup.Bottom
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
 import org.openmole.gui.client.core.alert.AlertPanel
 import org.openmole.gui.client.tool.OMTags
@@ -39,18 +41,11 @@ import sheet._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class PluginPanel extends ModalPanel {
-  lazy val modalID = "pluginPanelID"
+class PluginPanel {
 
+  implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
   private lazy val plugins: Var[Option[Seq[Plugin]]] = Var(None)
   lazy val transferring: Var[ProcessState] = Var(Processed())
-
-  def onOpen() = {
-    getPlugins
-  }
-
-  def onClose() = {
-  }
 
   def getPlugins = {
     OMPost()[Api].listPlugins.call().foreach { a ⇒
@@ -74,7 +69,7 @@ class PluginPanel extends ModalPanel {
           }
       )
     })
-  ).tooltip(span("Upload plugin"))
+  ).tooltip("Upload plugin")
 
   lazy val pluginTable = {
 
@@ -116,21 +111,22 @@ class PluginPanel extends ModalPanel {
         getPlugins
     }
 
-  lazy val dialog = bs.modalDialog(
-    modalID,
-    bs.headerDialog(
-      tags.span(
-        tags.b("Plugins"),
-        bs.inputGroup(navbar_right)(
-          uploadPluginButton
-        )
+  lazy val dialog = bs.ModalDialog(onopen = () ⇒ getPlugins)
+
+  dialog.header(
+    tags.span(
+      tags.b("Plugins"),
+      bs.inputGroup(navbar_right)(
+        uploadPluginButton
       )
-    ),
-    bs.bodyDialog(pluginTable),
-    bs.footerDialog(
-      tags.div(
-        closeButton
-      )
+    )
+  )
+
+  dialog.body(pluginTable)
+
+  dialog.footer(
+    tags.div(
+      bs.ModalDialog.closeButton(dialog, btn_default, "Close")
     )
   )
 

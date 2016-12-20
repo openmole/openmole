@@ -36,6 +36,8 @@ object EnvironmentErrorPanel {
 
 class EnvironmentErrorPanel {
 
+  implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
+
   val scrollable = scrollableDiv()
   val sortingAndOrdering: Var[ListSortingAndOrdering] = Var(ListSortingAndOrdering(TimeSorting, Descending))
   val entries: Var[TypedTag[TableSection]] = Var(tbody)
@@ -89,7 +91,7 @@ class EnvironmentErrorPanel {
             tags.a(message, cursor := "pointer", onclick := {
               () ⇒
                 panels.stackPanel.content() = stack.stackTrace
-                panels.environmentStackTriggerer.open
+                panels.stackPanel.open
             })
           ),
           tags.td(colMD(1))(Utils.longToDate(date).split(",").last),

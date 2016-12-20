@@ -39,22 +39,12 @@ import org.openmole.gui.ext.tool.client.OMPost
 
 import scalatags.JsDom
 
-class AuthenticationPanel extends ModalPanel {
+class AuthenticationPanel {
 
-  lazy val modalID = "authenticationsPanelID"
+  implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
   lazy val setting: Var[Option[PanelUI]] = Var(None)
   private lazy val auths: Var[Option[Seq[AuthPanelWithID]]] = Var(None)
   lazy val initialCheck = Var(false)
-
-  def onOpen() = {
-    if (!initialCheck.now) {
-      getAuthentications
-    }
-  }
-
-  def onClose() = {
-    setting() = None
-  }
 
   def getAuthentications = {
     OMPost()[Api].authentications.call().foreach { auth ⇒
@@ -65,10 +55,10 @@ class AuthenticationPanel extends ModalPanel {
 
   lazy val authenticationSelector = {
     val fs = authentications.factories
-    fs.select(fs.headOption, (auth: AuthPanelWithID) ⇒ auth.name, btn_primary, onclickExtra = () ⇒ newPanel)
+    fs.options(0, btn_primary, (a: AuthPanelWithID) ⇒ a.name, onclickExtra = () ⇒ newPanel)
   }
 
-  def newPanel: Unit = authenticationSelector.content.now.foreach { f ⇒ setting() = Some(f.value.emptyClone.panel) }
+  def newPanel: Unit = authenticationSelector.get.foreach { f ⇒ setting() = Some(f.emptyClone.panel) }
 
   lazy val authenticationTable = {
 
@@ -86,7 +76,7 @@ class AuthenticationPanel extends ModalPanel {
           onclick := { () ⇒
             if (!test.passed) {
               panels.stackPanel.content() = test.errorStack.stackTrace
-              panels.environmentStackTriggerer.open
+              panels.stackPanel.open
             }
           }
         )
@@ -102,7 +92,7 @@ class AuthenticationPanel extends ModalPanel {
         )(
             td(colMD(2))(
               tags.a(pwID.data.synthetic, omsheet.docTitleEntry +++ floatLeft +++ omsheet.colorBold("white"), cursor := "pointer", onclick := { () ⇒
-                authenticationSelector.content() = Some(pwID.emptyClone)
+                authenticationSelector.set(pwID.emptyClone)
                 setting() = Some(pwID.panel)
               })
             ),
@@ -155,47 +145,64 @@ class AuthenticationPanel extends ModalPanel {
     save
   })
 
-  val vosToBeTested = bs.labeledInput("Test EGI credential on", "", "VO names (vo1,vo2,...)", labelStyle = JsDom.all.color := "#000")
+  val vosToBeTested = bs.input("")(placeholder := "VO names (vo1,vo2,...)").render
+
   OMPost()[Api].getConfigurationValue(VOTest).call().foreach {
     _.map { c ⇒
-      vosToBeTested.setDefault(c)
+      vosToBeTested.value = c
     }
   }
 
-  val settingsDiv = tags.div(width := 200)(
-    vosToBeTested.render
+  val settingsDiv = bs.vForm(width := 200)(
+    vosToBeTested.withLabel("Test EGI credential on", emptyMod)
   )
 
   val settingsButton = tags.span(
     btn_default +++ glyph_settings +++ omsheet.settingsButton
   )(tags.span(caret))
 
-  lazy val dialog = bs.modalDialog(
-    modalID,
-    bs.headerDialog(
-      div(height := 55)(
-        b("Authentications"),
-        div(omsheet.panelHeaderSettings)(
-          settingsButton
-        ).popup(
-          settingsDiv,
-          onclose = () ⇒ OMPost()[Api].setConfigurationValue(VOTest, vosToBeTested.value).call().foreach { x ⇒
+  lazy val dialog: ModalDialog =
+    bs.ModalDialog(
+      omsheet.panelWidth(52),
+      onopen = () ⇒ {
+        if (!initialCheck.now) {
           getAuthentications
-        },
-          popupStyle = whitePopupWithBorder
+        }
+      },
+      onclose = () ⇒ {
+        setting() = None
+      }
+    )
+
+  dialog.header(
+    div(height := 55)(
+      b("Authentications"),
+      div(omsheet.panelHeaderSettings)(
+        settingsButton
+      ).dropdown(
+        "",
+        settingsDiv,
+        onclose = () ⇒ OMPost()[Api].setConfigurationValue(VOTest, vosToBeTested.value).call().foreach { x ⇒
+          getAuthentications
+        }
+      ).render
+    )
+  )
+
+  dialog body (tags.div(authenticationTable))
+
+  dialog.footer(
+    tags.div(
+      Rx {
+        bs.buttonGroup()(
+          setting() match {
+            case Some(_) ⇒ saveButton
+            case _       ⇒ newButton
+          },
+          ModalDialog.closeButton(dialog, btn_default, "Cancel")
         )
-      )
-    ),
-    bs.bodyDialog(authenticationTable),
-    bs.footerDialog(Rx {
-      bs.buttonGroup()(
-        setting() match {
-          case Some(_) ⇒ saveButton
-          case _       ⇒ newButton
-        },
-        closeButton
-      )
-    })
+      }
+    )
   )
 
   def removeAuthentication(ad: AuthenticationData) = {

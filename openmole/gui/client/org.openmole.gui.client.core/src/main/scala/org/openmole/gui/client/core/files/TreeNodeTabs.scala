@@ -40,6 +40,7 @@ object TreeNodeTabs {
 
   sealed trait TreeNodeTab {
 
+    implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
     val safePathTab: Var[SafePath]
 
     val tabName = Var(safePathTab.now.name)
@@ -191,6 +192,7 @@ import org.openmole.gui.client.core.files.TreeNodeTabs._
 
 class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
 
+  implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
   def setActive(tab: TreeNodeTab) = {
     if (tabs.now.contains(tab)) {
       unActiveAll

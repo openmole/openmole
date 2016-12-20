@@ -9,7 +9,7 @@ import org.openmole.gui.ext.api.Api
 import org.openmole.gui.client.tool._
 import JsRxTags._
 import org.scalajs.dom.raw.HTMLFormElement
-import rx._
+import rx.{ Ctx, Rx, Var }
 import sheet._
 
 import scalatags.JsDom.all._
@@ -34,6 +34,7 @@ import scalatags.JsDom.tags
 
 class Connection {
 
+  implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
   val shutDown = new ShutDown
 
   lazy val connectButton = tags.button("Connect", btn_primary, `type` := "submit").render

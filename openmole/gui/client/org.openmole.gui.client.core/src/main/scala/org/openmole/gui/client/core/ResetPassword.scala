@@ -24,7 +24,7 @@ import autowire._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import org.openmole.gui.ext.api.Api
 import org.scalajs.dom.raw.HTMLFormElement
-import rx.Rx
+import rx.{ Ctx, Rx }
 import sheet._
 
 import scalatags.JsDom.all._
@@ -34,6 +34,8 @@ import JsRxTags._
 import org.openmole.gui.ext.tool.client.OMPost
 
 class ResetPassword {
+
+  implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
   val shutDown = new ShutDown
 
   val passwordInput = bs.input("")(

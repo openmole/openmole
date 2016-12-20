@@ -114,9 +114,9 @@ lazy val netlogo5 = OsgiProject(
     "asm" % "asm-all" % "3.3.1" % "provided",
     "org.picocontainer" % "picocontainer" % "2.13.6" % "provided"), version := netLogo5Version, scalaVersion := "2.9.2", crossPaths := false) settings(settings: _*)
 
-lazy val scalaTagsVersion = "0.6.0"
+lazy val scalaTagsVersion = "0.6.2"
 lazy val scalaRxVersion = "0.3.1"
-lazy val scalaDomVersion = "0.9.0"
+lazy val scalaDomVersion = "0.9.1"
 lazy val querkiJSQueryVersion = "0.11"
 lazy val scalaUpickleVersion = "0.4.3"
 lazy val scalaAutowireVersion = "0.2.6"

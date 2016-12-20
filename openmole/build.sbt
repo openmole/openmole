@@ -4,6 +4,14 @@ import OMKeys._
 import sbt._
 import Keys._
 
+import org.scalajs.core.tools.io.{FileVirtualJSFile, VirtualJSFile}
+
+import scalajsbundler.sbtplugin.ScalaJSBundlerPlugin.autoImport._
+import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
+
+import scalajsbundler.Launcher
+import scalajsbundler.sbtplugin.ScalaJSBundlerPlugin
+
 organization := "org.openmole"
 name := "openmole-root"
 
@@ -497,8 +505,16 @@ lazy val jsCompile = OsgiProject(guiServerDir, "org.openmole.gui.server.jscompil
 /* -------------- Client ------------------- */
 
 def guiClientDir = guiDir / "client"
-lazy val clientGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.core") enablePlugins (ScalaJSPlugin) dependsOn
+lazy val clientGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.core") enablePlugins (ScalaJSBundlerPlugin) dependsOn
   (sharedGUI, clientToolGUI, market, dataGUI, extClientTool) settings(
+  webpackConfigFile := Some((resourceDirectory in Compile).value / "webpack.config.js"),
+  webpackEntries in (Compile, fullOptJS) := {
+    val sjsOutput = (fullOptJS in Compile).value.data
+    Seq((sjsOutput.name.stripSuffix(".js"), sjsOutput))
+  },
+  scalaJSLauncher in (Compile, fullOptJS) := {
+    Attributed.blank[VirtualJSFile](FileVirtualJSFile((fullOptJS in Compile).value.data))
+},
   libraryDependencies += Libraries.async,
   skip in packageJSDependencies := false,
   jsDependencies += Libraries.jquery / jqueryPath minified jqueryPath.replace(".js", ".min.js"),
@@ -506,7 +522,6 @@ lazy val clientGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.core") e
   jsDependencies += Libraries.ace / "src-min/mode-sh.js" dependsOn acePath,
   jsDependencies += Libraries.ace / "src-min/mode-scala.js" dependsOn acePath,
   jsDependencies += Libraries.ace / "src-min/theme-github.js" dependsOn acePath,
-  jsDependencies += Libraries.bootstrap / "js/bootstrap.js" dependsOn jqueryPath minified "js/bootstrap.min.js",
   guiProvidedScope) settings (defaultSettings: _*)
 
 
@@ -630,7 +645,7 @@ lazy val openmoleNaked =
     Osgi.bundleDependencies in Compile := OsgiKeys.bundle.all(ScopeFilter(inDependencies(ThisProject, includeRoot = false))).value,
     resourcesAssemble += (resourceDirectory in Compile).value -> assemblyPath.value,
     resourcesAssemble += ((resourceDirectory in serverGUI in Compile).value / "webapp") → (assemblyPath.value / "webapp"),
-    resourcesAssemble += (fastOptJS in clientGUI in Compile).value.data -> (assemblyPath.value / "webapp/js/openmole.js"),
+     resourcesAssemble += (webpack in(clientGUI, fullOptJS) in Compile).value.head -> (assemblyPath.value / "webapp/js/openmole.js"),
     resourcesAssemble += (packageMinifiedJSDependencies in clientGUI in Compile).value -> (assemblyPath.value / "webapp/js/deps.js"),
     resourcesAssemble += (assemble in dbServer).value -> (assemblyPath.value / "dbserver"),
     resourcesAssemble += {

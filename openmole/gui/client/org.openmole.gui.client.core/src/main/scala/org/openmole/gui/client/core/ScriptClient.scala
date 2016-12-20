@@ -1,6 +1,5 @@
 package org.openmole.gui.client.core
 
-import org.openmole.gui.client.core.alert.AlertPanel
 import org.openmole.gui.client.core.panels._
 
 import scalatags.JsDom.tags
@@ -50,67 +49,62 @@ object ScriptClient {
 
   @JSExport
   def connection(): Unit = {
-
     val connection = new Connection
-
-    dom.document.body.appendChild(connection.connectionDiv)
-    dom.document.body.appendChild(AlertPanel.alertDiv)
+    dom.document.body.appendChild(connection.connectionDiv.render)
   }
 
   @JSExport
   def stopped(): Unit = {
     dom.document.body.appendChild(
       div(omsheet.connectionTabOverlay)(
+      div(
+        img(src := "img/openmole.png", omsheet.openmoleLogo),
         div(
-          img(src := "img/openmole.png", omsheet.openmoleLogo),
-          div(
-            omsheet.centerPage,
-            div(omsheet.shutdown, "The OpenMOLE server has been stopped"),
-            onload := { () ⇒ OMPost()[Api].shutdown().call() }
-          )
+          omsheet.centerPage,
+          div(omsheet.shutdown, "The OpenMOLE server has been stopped"),
+          onload := { () ⇒ OMPost()[Api].shutdown().call() }
         )
       )
+    ).render
     )
   }
 
   @JSExport
   def resetPassword(): Unit = {
     val resetPassword = new ResetPassword
-    dom.document.body.appendChild(resetPassword.resetPassDiv)
+    dom.document.body.appendChild(
+      resetPassword.resetPassDiv.render
+    )
   }
 
   @JSExport
   def run(): Unit = {
-
     implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
-    val body = dom.document.body
-    val maindiv = body.appendChild(tags.div())
+    val maindiv = tags.div()
     val shutDown = new ShutDown
 
     val authenticationPanel = new AuthenticationPanel
 
     val openFileTree = Var(true)
 
-    val authenticationTriggerer = new PanelTriggerer {
-      val modalPanel = authenticationPanel
-    }
+    val itemStyle = lineHeight := "35px"
 
-    val execItem = dialogNavItem("executions", glyphSpan(glyph_flash).tooltip(span("Executions")), () ⇒ executionTriggerer.triggerOpen)
+    val execItem = navItem(tags.div(glyph_flash, itemStyle).tooltip("Executions"), () ⇒ executionPanel.dialog.open)
 
-    val authenticationItem = dialogNavItem("authentications", glyphSpan(glyph_lock).tooltip(span("Authentications")), () ⇒ authenticationTriggerer.triggerOpen)
+    val authenticationItem = navItem(tags.div(glyph_lock, itemStyle).tooltip("Authentications"), () ⇒ authenticationPanel.dialog.open)
 
-    val marketItem = dialogNavItem("market", glyphSpan(glyph_market).tooltip(span("Market place")), () ⇒ marketTriggerer.triggerOpen)
+    val marketItem = navItem(tags.div(glyph_market, itemStyle).tooltip("Market place"), () ⇒ marketPanel.dialog.open)
 
-    val pluginItem = dialogNavItem("plugin", div(OMTags.glyph_plug).tooltip(span("Plugins")), () ⇒ pluginTriggerer.triggerOpen)
+    val pluginItem = navItem(div(OMTags.glyph_plug, itemStyle).tooltip("Plugins"), () ⇒ pluginPanel.dialog.open)
 
-    val envItem = dialogNavItem("envError", glyphSpan(glyph_exclamation).render, () ⇒ environmentStackTriggerer.open)
+    val envItem = navItem(div(glyph_exclamation, itemStyle), () ⇒ stackPanel.open)
 
-    val docItem = dialogNavItem("doc", div(OMTags.glyph_book).tooltip(span("Documentation")), () ⇒ docTriggerer.open)
+    val docItem = navItem(div(OMTags.glyph_book, itemStyle).tooltip("Documentation"), () ⇒ docPanel.dialog.open)
 
-    val modelWizardItem = dialogNavItem("modelWizard", glyphSpan(glyph_upload_alt).tooltip(span("Model import")), () ⇒ modelWizardTriggerer.triggerOpen)
+    val modelWizardItem = navItem(div(glyph_upload_alt, itemStyle).tooltip("Model import"), () ⇒ modelWizardPanel.dialog.open)
 
-    val fileItem = dialogNavItem("files", glyphSpan(glyph_file).tooltip(span("Files")), todo = () ⇒ {
+    val fileItem = navItem(div(glyph_file, itemStyle).tooltip("Files"), todo = () ⇒ {
       openFileTree() = !openFileTree.now
     })
 
@@ -122,92 +116,83 @@ object ScriptClient {
       }
     }
 
-    maindiv.appendChild(
-      bs.nav(
-        "mainNav",
-        omsheet.fixed +++ sheet.nav +++ nav_pills +++ nav_inverse +++ nav_staticTop,
-        fileItem,
-        modelWizardItem,
-        execItem,
-        authenticationItem,
-        marketItem,
-        pluginItem,
-        docItem
-      )
-    )
-    maindiv.appendChild(tags.div(shutDown.shutdownButton))
-    maindiv.appendChild(executionTriggerer.modalPanel.dialog.render)
-    maindiv.appendChild(modelWizardTriggerer.modalPanel.dialog.render)
-    maindiv.appendChild(authenticationTriggerer.modalPanel.dialog.render)
-    maindiv.appendChild(marketTriggerer.modalPanel.dialog.render)
-    maindiv.appendChild(pluginTriggerer.modalPanel.dialog.render)
-    maindiv.appendChild(environmentStackTriggerer.modalPanel.dialog.render)
-    maindiv.appendChild(docTriggerer.modalPanel.dialog.render)
-    maindiv.appendChild(AlertPanel.alertDiv)
+    Settings.settings.map { sets ⇒
+      dom.document.body.appendChild(
+        div(
+        ///////Plugin test
+        div(
+          bs.button("build", btn_danger +++ ms("ooo"), () ⇒ Plugins.load),
+          bs.button("call", btn_primary +++ ms("oooo"), () ⇒ {
+            OMPost()[Api].getGUIPlugins.call().foreach { all ⇒
+              Plugins.authentications() = all.authentications.map { gp ⇒ Plugins.buildJSObject(gp.jsObject).asInstanceOf[Authentication] }
 
-    Settings.settings.foreach { sets ⇒
-      maindiv.appendChild(
+              //TEst
+              println("auth:" + Plugins.authentications.now)
+
+              val oo = Plugins.authentications.now.headOption.map { h ⇒
+                println("h " + h)
+                // println("h " + h.test)
+                // println("h " + h.panel)
+                h.panel
+              }.getOrElse(tags.div("Cannot load"))
+
+              println("OO " + oo)
+
+              org.scalajs.dom.document.body.appendChild(oo.render)
+              // Plugins.authentications.now.headOption.map { _.test }
+            }
+
+          })
+        ),
+        //////
+        bs.navBar(
+          omsheet.fixed +++ sheet.nav +++ navbar_pills +++ navbar_inverse +++ navbar_staticTop,
+          fileItem,
+          modelWizardItem,
+          execItem,
+          authenticationItem,
+          marketItem,
+          pluginItem,
+          docItem
+        ),
+        tags.div(shutDown.shutdownButton),
         tags.div(`class` := "fullpanel")(
-        tags.div(
-          `class` := Rx {
-            "leftpanel " + {
-              if (openFileTree()) "open" else ""
+          tags.div(
+            `class` := Rx {
+              "leftpanel " + {
+                if (openFileTree()) "open" else ""
+              }
             }
-          }
-        )(
-            tags.div(omsheet.fixedPosition)(
-              treeNodePanel.fileToolBar.div,
-              treeNodePanel.fileControler,
-              treeNodePanel.labelArea
+          )(
+              tags.div(omsheet.fixedPosition)(
+                treeNodePanel.fileToolBar.div,
+                treeNodePanel.fileControler,
+                treeNodePanel.labelArea
+              ),
+              treeNodePanel.view.render
             ),
-            treeNodePanel.view.render
-          ),
-        tags.div(
-          `class` := Rx {
-            "centerpanel " + {
-              if (openFileTree()) "reduce" else ""
+          tags.div(
+            `class` := Rx {
+              "centerpanel " + {
+                if (openFileTree()) "reduce" else ""
+              }
             }
-          }
-        )(
-            treeNodePanel.fileDisplayer.tabs.render,
-            tags.div(omsheet.textVersion)(
-              tags.div(
-                fontSize := "1em",
-                fontWeight := "bold"
-              )(s"${sets.version} ${sets.versionName}"),
-              tags.div(fontSize := "0.8em")(s"built the ${sets.buildTime}")
+          )(
+              treeNodePanel.fileDisplayer.tabs.render,
+              tags.div(omsheet.textVersion)(
+                tags.div(
+                  fontSize := "1em",
+                  fontWeight := "bold"
+                )(s"${sets.version} ${sets.versionName}"),
+                tags.div(fontSize := "0.8em")(s"built the ${sets.buildTime}")
+              )
             )
-          )
+        )
       ).render
       )
     }
 
     body.appendChild(maindiv)
-    body.appendChild(bs.button("build", btn_danger +++ ms("ooo"), () ⇒ Plugins.load))
-    body.appendChild(bs.button("call", btn_primary +++ ms("oooo"), () ⇒ {
-      OMPost()[Api].getGUIPlugins.call().foreach { all ⇒
-        Plugins.authentications() = all.authentications.map { gp ⇒ Plugins.buildJSObject(gp.jsObject).asInstanceOf[Authentication] }
-
-        //TEst
-        println("auth:" + Plugins.authentications.now)
-
-        val oo = Plugins.authentications.now.headOption.map { h ⇒
-          println("h " + h)
-          println("h " + h.panel)
-          println("h " + h.test)
-          h.panel
-        }.getOrElse(tags.div("Cannot load"))
-
-        println("OO " + oo)
-
-        org.scalajs.dom.document.body.appendChild(oo.render)
-        // Plugins.authentications.now.headOption.map { _.test }
-      }
-
-    }))
-    //TODO: add right sjsir dependencies (scalatags, autowire, etc) for building plugins.js
-    //
 
   }
-
 }

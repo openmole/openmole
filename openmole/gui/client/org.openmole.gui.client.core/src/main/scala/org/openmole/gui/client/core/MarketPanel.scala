@@ -35,7 +35,6 @@ import org.openmole.gui.ext.data._
 import Waiter._
 import autowire._
 import rx._
-
 import scalatags.JsDom.tags
 import scalatags.JsDom.all._
 import bs._
@@ -43,8 +42,9 @@ import org.openmole.gui.client.tool.InputFilter
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.tool.client.OMPost
 
-class MarketPanel extends ModalPanel {
-  lazy val modalID = "marketPanelID"
+class MarketPanel {
+
+  implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
   private val marketIndex: Var[Option[MarketIndex]] = Var(None)
   val tagFilter = InputFilter(pHolder = "Filter")
@@ -106,7 +106,7 @@ class MarketPanel extends ModalPanel {
     downloading() = downloading.now.updatedFirst(_._1 == entry, (entry, Var(Processing())))
     OMPost()[Api].getMarketEntry(entry, path).call().foreach { d ⇒
       downloading() = downloading.now.updatedFirst(_._1 == entry, (entry, Var(Processed())))
-      downloading.now.headOption.foreach(_ ⇒ close)
+      downloading.now.headOption.foreach(_ ⇒ dialog.close)
       TreeNodePanel.refreshAndDraw
     }
   }
@@ -117,53 +117,55 @@ class MarketPanel extends ModalPanel {
     }.map {
       case (e, state: Var[ProcessState]) ⇒
         state.withTransferWaiter { _ ⇒
-          if (selectedEntry.now == Some(e)) bs.glyphButton(" Download", btn_warning, glyph_download_alt, todo) else tags.div()
+          if (selectedEntry.now == Some(e)) bs.button(" Download", btn_warning, glyph_download_alt, todo) else tags.div()
         }
     }.getOrElse(tags.div())
   }
-
-  def onOpen() = marketIndex.now match {
-    case None ⇒ OMPost()[Api].marketIndex.call().foreach { m ⇒
-      marketIndex() = Some(m)
-    }
-    case _ ⇒
-  }
-
-  def onClose() = {}
 
   def deleteFile(sp: SafePath, marketIndexEntry: MarketIndexEntry) =
     OMPost()[Api].deleteFile(sp, ServerFileSytemContext.project).call().foreach { d ⇒
       download(marketIndexEntry)
     }
 
-  val dialog = bs.modalDialog(
-    modalID,
-    headerDialog(
-      tags.span(tags.b("Market place"))
-    ),
-    bodyDialog({
-      Rx {
-        overwriteAlert() match {
-          case Some(e: MarketIndexEntry) ⇒
-            AlertPanel.string(
-              e.name + " already exists. Overwrite ? ",
-              () ⇒ {
-                overwriteAlert() = None
-                deleteFile(manager.current() ++ e.name, e)
-              }, () ⇒ {
-                overwriteAlert() = None
-              }, CenterPagePosition
-            )
-            tags.div
-          case _ ⇒
+  val dialog = bs.ModalDialog(
+    omsheet.panelWidth(92),
+    onopen = () ⇒ {
+      marketIndex.now match {
+        case None ⇒ OMPost()[Api].marketIndex.call().foreach { m ⇒
+          marketIndex() = Some(m)
         }
+        case _ ⇒
       }
-      tags.div(
-        tagFilter.tag,
-        marketTable
-      )
-    }),
-    footerDialog(closeButton)
+    }
   )
+
+  dialog.header(
+    tags.span(tags.b("Market place"))
+  )
+
+  dialog.body({
+    Rx {
+      overwriteAlert() match {
+        case Some(e: MarketIndexEntry) ⇒
+          AlertPanel.string(
+            e.name + " already exists. Overwrite ? ",
+            () ⇒ {
+              overwriteAlert() = None
+              deleteFile(manager.current() ++ e.name, e)
+            }, () ⇒ {
+              overwriteAlert() = None
+            }, CenterPagePosition
+          )
+          tags.div
+        case _ ⇒
+      }
+    }
+    tags.div(
+      tagFilter.tag,
+      marketTable
+    )
+  })
+
+  dialog.footer(bs.ModalDialog.closeButton(dialog, btn_default, "Close"))
 
 }

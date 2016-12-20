@@ -64,20 +64,20 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
   //FIXME val connectedUsers: Var[Seq[UserID]] = Var(Seq())
   val USER_ID = "UserID"
 
-  def connection = html("ScriptClient().connection();")
+  def connection = html("OM.ScriptClient().connection();")
 
-  def application = html("ScriptClient().run();")
+  def application = html("OM.ScriptClient().run();")
 
-  def stopped = html("ScriptClient().stopped();")
+  def stopped = html("OM.ScriptClient().stopped();")
 
-  def resetPassword = html("ScriptClient().resetPassword();")
+  def resetPassword = html("OM.ScriptClient().resetPassword();")
 
   def html(javascritMethod: String) = tags.html(
     tags.head(
       tags.meta(tags.httpEquiv := "content-type", tags.content := "text/html; charset=UTF-8"),
       cssFiles.map { f ⇒ tags.link(tags.rel := "stylesheet", tags.`type` := "text/css", href := "css/" + f) },
-      tags.script(tags.`type` := "text/javascript", tags.src := "js/plugins.js"),
       tags.script(tags.`type` := "text/javascript", tags.src := "js/openmole.js"),
+      tags.script(tags.`type` := "text/javascript", tags.src := "js/plugins.js"),
       tags.script(tags.`type` := "text/javascript", tags.src := "js/deps.js")
     ),
     tags.body(tags.onload := javascritMethod)

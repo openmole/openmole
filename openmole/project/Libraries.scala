@@ -12,8 +12,6 @@ object Libraries {
 
   val aceVersion = "01.08.2014"
 
-  val bootsrapVersion = "3.3.6"
-
   val d3Version = "3.5.12"
 
   val tooltipserVersion = "3.3.0"
@@ -61,8 +59,8 @@ object Libraries {
 
   lazy val guava = "com.google.guava" % "guava" % "19.0"
 
-  lazy val scalaTagsVersion = "0.6.0"
-  lazy val scalaJSDomVersion = "0.9.0"
+  lazy val scalaTagsVersion = "0.6.2"
+  lazy val scalaJSDomVersion = "0.9.1"
   lazy val rxVersion = "0.3.1"
   lazy val scalaUpickleVersion = "0.4.3"
   lazy val scalaAutowireVersion = "0.2.6"
@@ -73,7 +71,7 @@ object Libraries {
   lazy val scalaTags = "org.openmole" %% "com-scalatags" % scalaTagsVersion
   lazy val rx = "org.openmole" %% "rx" % rxVersion
 
-  lazy val scaladgetVersion = "0.8.1"
+  lazy val scaladgetVersion = "0.9.1-SNAPSHOT"
 
   lazy val scalajsVersion = "0.6.13"
   lazy val scaladgetJS = libraryDependencies += "fr.iscpif" %%% "scaladget" % scaladgetVersion
@@ -92,8 +90,6 @@ object Libraries {
   lazy val monocle = "org.openmole" %% "monocle" % "1.2.0"
 
   lazy val d3 = "org.webjars" % "d3js" % d3Version
-
-  lazy val bootstrap = "org.webjars" % "bootstrap" % bootsrapVersion
 
   lazy val jquery = "org.webjars" % "jquery" % jqueryVersion
 
