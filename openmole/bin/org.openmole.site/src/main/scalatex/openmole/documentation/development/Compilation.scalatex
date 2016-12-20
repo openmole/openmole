@@ -5,17 +5,17 @@
   This section explains how to compile OpenMOLE from its sources and how to modify the sources. The source code repository can be found @a("here", href := "https://github.com/openmole/openmole").
   @sect{Get the sources}
     OpenMOLE's source code is versioned under @a("git", href :=  "https://en.wikipedia.org/wiki/Git_%28software%29"). You can get the sources as follows:
-    @br @hl.highlight("""git clone git@github.com:openmole/openmole.git""", "plain")
+    @br @hl.highlight("""
+    git clone git@github.com:openmole/openmole.git
+    git submodule init
+    git submodule update""", "plain")
 
     @p The current development versions stands in the master branch.
     
-  @sect{Install npm}
-    @hl.highlight("""
-    sudo apt install npm nodejs-legacy
-    """)
-
   @sect{Compile}
-    In order to compile OpenMOLE, you should have @a("SBT", href := "http://www.scala-sbt.org/") and a JDK of version 7 or greater (we strongly recommend the use of the OpenJDK as its corresponding Runtime Environment embeds all the tools required by OpenMOLE). Here are the steps to compile OpenMOLE from a fresh clone:
+    In order to compile OpenMOLE, you should have @a("SBT", href := "http://www.scala-sbt.org/") and a JDK of version 8 or greater (we strongly recommend the use of the OpenJDK as its corresponding Runtime Environment embeds all the tools required by OpenMOLE). 
+    @p You also need to install node and npm. On ubuntu and debian you can simply install those by running @hl.highlight("""sudo apt install npm nodejs-legacy""", "plain").
+    @p Now you can compile OpenMOLE. Here are the steps to compile OpenMOLE from a fresh clone:
     @br @hl.highlight("""
     cd build-system
     sbt publish-local
