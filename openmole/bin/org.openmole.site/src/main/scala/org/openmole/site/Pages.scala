@@ -440,17 +440,23 @@ object DocumentationPages { index ⇒
         )
 
       def entryContent(deployedMarketEntry: GeneratedMarketEntry) = {
+        def title: Modifier =
+          deployedMarketEntry.viewURL match {
+            case None    ⇒ deployedMarketEntry.entry.name
+            case Some(l) ⇒ a(deployedMarketEntry.entry.name, href := l)
+          }
+
+        def content =
+          Seq[Modifier](
+            deployedMarketEntry.readme.map {
+              rm ⇒ RawFrag(txtmark.Processor.process(rm))
+            }.getOrElse(p("No README.md available yet.")),
+            a("Packaged archive", href := deployedMarketEntry.archive), " (can be imported in OpenMOLE)"
+          ) ++ deployedMarketEntry.viewURL.map(u ⇒ br(a("Source repository", href := u)))
+
         Seq(
-          a(deployedMarketEntry.entry.name, href := deployedMarketEntry.archive),
-          p(
-            div(id := "market-entry")(
-              Seq(
-                deployedMarketEntry.readme.map {
-                  rm ⇒ RawFrag(txtmark.Processor.process(rm))
-                }.getOrElse(p("No README.md available yet."))
-              ) ++ deployedMarketEntry.viewURL.map { u ⇒ a("source repository", href := u) }: _*
-            )
-          )
+          title,
+          p(div(id := "market-entry")(content: _*))
         )
       }
 
