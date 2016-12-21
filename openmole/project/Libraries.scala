@@ -8,8 +8,6 @@ object Libraries {
 
   val bouncyCastleVersion = "1.50"
 
-  val jqueryVersion = "2.2.1"
-
   val aceVersion = "01.08.2014"
 
   val d3Version = "3.5.12"
@@ -90,8 +88,6 @@ object Libraries {
   lazy val monocle = "org.openmole" %% "monocle" % "1.2.0"
 
   lazy val d3 = "org.webjars" % "d3js" % d3Version
-
-  lazy val jquery = "org.webjars" % "jquery" % jqueryVersion
 
   lazy val ace = "org.webjars" % "ace" % aceVersion
 

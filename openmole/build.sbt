@@ -481,7 +481,6 @@ lazy val extPluginGUIServer = OsgiProject(guiExt, "org.openmole.gui.ext.plugin.s
 
 lazy val sharedGUI = OsgiProject(guiExt, "org.openmole.gui.ext.api") dependsOn(dataGUI, market) settings (defaultSettings: _*) settings (guiProvidedScope)
 
-val jqueryPath = s"META-INF/resources/webjars/jquery/${Libraries.jqueryVersion}/jquery.js"
 val acePath = s"META-INF/resources/webjars/ace/${Libraries.aceVersion}/src-min/ace.js"
 
 lazy val jsCompile = OsgiProject(guiServerDir, "org.openmole.gui.server.jscompile", imports = Seq("*")) dependsOn(pluginManager, fileService, workspace, dataGUI) settings (defaultSettings: _*) settings(
@@ -517,7 +516,6 @@ lazy val clientGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.core") e
 },
   libraryDependencies += Libraries.async,
   skip in packageJSDependencies := false,
-  jsDependencies += Libraries.jquery / jqueryPath minified jqueryPath.replace(".js", ".min.js"),
   jsDependencies += Libraries.ace / acePath,
   jsDependencies += Libraries.ace / "src-min/mode-sh.js" dependsOn acePath,
   jsDependencies += Libraries.ace / "src-min/mode-scala.js" dependsOn acePath,
