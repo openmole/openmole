@@ -117,7 +117,6 @@ lazy val netlogo5 = OsgiProject(
 lazy val scalaTagsVersion = "0.6.2"
 lazy val scalaRxVersion = "0.3.1"
 lazy val scalaDomVersion = "0.9.1"
-lazy val querkiJSQueryVersion = "0.11"
 lazy val scalaUpickleVersion = "0.4.3"
 lazy val scalaAutowireVersion = "0.2.6"
 lazy val scalajsVersion = "0.6.13"
