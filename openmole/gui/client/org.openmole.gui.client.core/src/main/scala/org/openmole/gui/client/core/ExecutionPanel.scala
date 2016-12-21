@@ -75,7 +75,6 @@ class ExecutionPanel {
   }
 
   def updateExecutionInfo: Unit = {
-    println("uPDATE EXEC INFO")
 
     def delay = {
       updating.set(false)
@@ -85,7 +84,6 @@ class ExecutionPanel {
     }
 
     if (updating.compareAndSet(false, true)) {
-      println("Inif")
       OMPost()[Api].allStates(outputHistory.value.toInt).call().andThen {
         case Success((executionInfos, runningOutputData)) ⇒
           execInfo() = PanelInfo(executionInfos, runningOutputData)
@@ -162,7 +160,6 @@ class ExecutionPanel {
     tags.table(sheet.table)(
       thead,
       Rx {
-        println("RX table " + execInfo())
         tbody({
           for {
             (id, executionInfo) ← execInfo().executionInfos.sortBy { case (execId, _) ⇒ staticInfo.now(execId).startDate }.reverse

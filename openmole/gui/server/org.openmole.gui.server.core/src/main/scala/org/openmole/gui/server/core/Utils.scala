@@ -426,7 +426,7 @@ object Utils {
     import org.openmole.gui.ext.data.ServerFileSytemContext.project
     //If no plugin.js in cache: compile it
     // if (jsPluginDirectory.isDirectoryEmpty) {
-    val sjsirDir = new java.io.File("/tmp/sjsir") //Workspace.tmpDir
+    val sjsirDir = Workspace.tmpDir
     val jsFile = Workspace.openMOLELocation / "webapp/js/plugins.js"
     jsFile.delete
 

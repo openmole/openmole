@@ -94,9 +94,6 @@ object FileManager {
         }
       }
 
-      println("sp " + safePath)
-      println("path " + safePath.path)
-      println("URI " + Utils.toURI((safePath.path)))
       xhr.open("GET", s"downloadFile?path=${Utils.toURI(safePath.path)}", true)
       xhr.send()
     }
