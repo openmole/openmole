@@ -6,7 +6,8 @@
   @sect{Get the sources}
     OpenMOLE's source code is versioned under @a("git", href :=  "https://en.wikipedia.org/wiki/Git_%28software%29"). You can get the sources as follows:
     @br @hl.highlight("""
-    git clone git@github.com:openmole/openmole.git
+    git clone https://github.com/openmole/openmole.git
+    cd openmole
     git submodule init
     git submodule update""", "plain")
 
