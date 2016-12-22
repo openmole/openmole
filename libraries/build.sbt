@@ -158,12 +158,31 @@ lazy val closureCompilerVersion = "v20130603"
 lazy val closureCompiler = OsgiProject(dir, "closure-compiler", exports = Seq("com.google.javascript.*")) settings(
   libraryDependencies += "com.google.javascript" % "closure-compiler" % closureCompilerVersion, version := closureCompilerVersion) settings(settings: _*)
 
-lazy val mgoVersion = "2.0"
 
-lazy val mgo = OsgiProject(dir, "fr.iscpif.mgo") settings(
+lazy val cats =
+  OsgiProject(dir, "cats") settings (
+    libraryDependencies += "org.typelevel" %% "cats" % "0.8.1",
+    version := "0.8.1"
+  ) settings(settings: _*)
+
+lazy val squants =
+  OsgiProject(dir, "squants") settings (
+    libraryDependencies += "org.typelevel"  %% "squants"  % "1.0.0" intransitive(),
+    version := "1.0.0"
+  ) settings(settings: _*)
+
+lazy val freedsl =
+  OsgiProject(dir, "freedsl", exports = Seq("freedsl.*", "freek.*")) settings (
+    libraryDependencies += "fr.iscpif.freedsl" %% "all" % "0.3-SNAPSHOT",
+    version := "0.3-SNAPSHOT"
+  ) dependsOn(cats) settings(settings: _*)
+
+lazy val mgoVersion = "2.2-SNAPSHOT"
+
+lazy val mgo = OsgiProject(dir, "mgo") settings(
   libraryDependencies += "fr.iscpif" %% "mgo" % mgoVersion,
   version := mgoVersion
-  ) dependsOn(monocle, scalaz) settings(settings: _*)
+  ) dependsOn(monocle, squants, freedsl, math) settings(settings: _*)
 
 lazy val familyVersion = "1.3"
 lazy val family = OsgiProject(dir, "fr.iscpif.family") settings(
@@ -203,7 +222,7 @@ lazy val async =
     version := "0.9.1",
     exportPackage := Seq("scala.async.*")) settings(settings: _*)
 
-lazy val mathVersion = "3.5"
+lazy val mathVersion = "3.6.1"
 lazy val math = OsgiProject(dir, "org.apache.commons.math", exports = Seq("org.apache.commons.math3.*"), privatePackages = Seq("assets.*")) settings
   (libraryDependencies += "org.apache.commons" % "commons-math3" % mathVersion, version := mathVersion) settings(settings: _*)
 
@@ -212,7 +231,6 @@ lazy val exec = OsgiProject(dir, "org.apache.commons.exec") settings
 
 lazy val log4j = OsgiProject(dir, "org.apache.log4j") settings
   (libraryDependencies += "log4j" % "log4j" % "1.2.17", version := "1.2.17") settings(settings: _*)
-
 lazy val logging = OsgiProject(dir, "org.apache.commons.logging") settings
   (libraryDependencies += "commons-logging" % "commons-logging" % "1.2", version := "1.2") settings(settings: _*)
 
@@ -241,7 +259,7 @@ lazy val clapperVersion = "1.0.5"
 lazy val clapper = OsgiProject(dir, "org.clapper", exports = Seq("!scala.*","!grizzled.*","!jline.*","!org.fusesource.*","!org.slf4j.*","*")) settings (
   libraryDependencies += "org.clapper" % "classutil_2.11" % clapperVersion, version := clapperVersion) settings(settings: _*)
 
-val monocleVersion = "1.2.0"
+val monocleVersion = "1.3.2"
 
 lazy val monocle = OsgiProject(dir, "monocle", privatePackages = Seq("!scala.*", "!scalaz.*", "*")) settings(
   libraryDependencies += "com.github.julien-truffaut" %% "monocle-core" % monocleVersion,
@@ -250,12 +268,12 @@ lazy val monocle = OsgiProject(dir, "monocle", privatePackages = Seq("!scala.*",
   version := monocleVersion
   ) dependsOn(scalaz) settings(settings: _*)
 
-val scalazVersion = "7.2.0"
+val scalazVersion = "7.2.8"
 
 lazy val scalaz = OsgiProject(dir, "scalaz", privatePackages = Seq("!scala.*", "*")) settings (
   libraryDependencies ++= Seq(
-    "org.scalaz" %% "scalaz-core" % scalazVersion,
-    "org.scalaz" %% "scalaz-effect" % scalazVersion
+    "org.scalaz" %% "scalaz-core" % scalazVersion intransitive(),
+    "org.scalaz" %% "scalaz-effect" % scalazVersion intransitive()
   ),
   version := scalazVersion) settings(settings: _*)
 

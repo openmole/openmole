@@ -83,9 +83,9 @@ object Libraries {
   lazy val scalajsTools = "org.openmole" %% "scalajs-tools" % scalajsVersion
   lazy val scalajs = "org.openmole" %% "scalajs" % scalajsVersion
 
-  lazy val mgo = "org.openmole" %% "fr-iscpif-mgo" % "2.0"
+  lazy val mgo = "org.openmole" %% "mgo" % "2.2-SNAPSHOT"
   lazy val family = "org.openmole" %% "fr-iscpif-family" % "1.3"
-  lazy val monocle = "org.openmole" %% "monocle" % "1.2.0"
+  lazy val monocle = "org.openmole" %% "monocle" % "1.3.2"
 
   lazy val d3 = "org.webjars" % "d3js" % d3Version
 
@@ -109,7 +109,7 @@ object Libraries {
 
   lazy val scalatexSite = "org.openmole" %% "com-lihaoyi-scalatex-site" % "0.3.6"
 
-  lazy val math = "org.openmole" %% "org-apache-commons-math" % "3.5"
+  lazy val math = "org.openmole" %% "org-apache-commons-math" % "3.6.1"
 
   lazy val collections = "org.openmole" %% "org-apache-commons-collections" % "4.1"
 
@@ -133,7 +133,9 @@ object Libraries {
 
   lazy val toolxitBibtex = "org.openmole" %% "toolxit-bibtex" % "0.1"
 
-  lazy val scalaz = "org.openmole" %% "scalaz" % "7.2.0"
+  lazy val cats = "org.openmole" %% "cats" % "0.8.1"
+
+  lazy val scalaz = "org.openmole" %% "scalaz" % "7.2.8"
 
   lazy val clapper = "org.openmole" %% "org-clapper" % "1.0.5"
 
@@ -144,5 +146,7 @@ object Libraries {
   lazy val spray = "io.spray" %% "spray-json" % "1.3.2"
 
   lazy val json4s = "org.openmole" %% "org-json4s" % "3.4.0"
+
+  lazy val squants = "org.openmole"  % "squants"  % "1.0.0"
 
 }

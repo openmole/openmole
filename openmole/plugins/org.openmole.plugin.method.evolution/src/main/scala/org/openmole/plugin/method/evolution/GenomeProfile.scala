@@ -17,14 +17,14 @@
 
 package org.openmole.plugin.method.evolution
 
-import fr.iscpif.mgo.algorithm.{ noisyprofile, profile }
+import mgo.algorithm._
 import org.openmole.core.context.{ Context, Val, Variable }
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.dsl._
 
-import scalaz.Scalaz._
-import scalaz._
+import cats._
+import cats.implicits._
 
 object GenomeProfile {
 
@@ -89,10 +89,8 @@ object GenomeProfile {
 
   object DeterministicGenomeProfile {
 
-    import fr.iscpif.mgo
-
     def niche(x: Int, nX: Int) =
-      mgo.niche.genomeProfile[profile.Individual](
+      mgo.algorithm.profile.genomeProfile[profile.Individual](
         values = (profile.Individual.genome composeLens profile.vectorValues).get,
         x = x,
         nX = nX
@@ -134,11 +132,10 @@ object GenomeProfile {
   case class DeterministicGenomeProfile(algo: profile.OpenMOLE, genome: UniqueGenome, objective: Objective)
 
   object StochasticGenomeProfile {
-    import fr.iscpif.mgo
     import mgo.algorithm.noisyprofile._
 
     def niche(x: Int, nX: Int) =
-      mgo.niche.genomeProfile[Individual](
+      mgo.algorithm.profile.genomeProfile[Individual](
         values = (Individual.genome composeLens noisyprofile.vectorValues).get,
         x = x,
         nX = nX
