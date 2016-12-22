@@ -148,7 +148,7 @@ object ScriptClient {
         ),
         //////
         bs.navBar(
-          omsheet.fixed +++ sheet.nav +++ navbar_pills +++ navbar_inverse +++ navbar_staticTop,
+          omsheet.fixed +++ sheet.nav +++ navbar_pills +++ navbar_inverse +++ navbar_staticTop +++ mainNav,
           fileItem,
           modelWizardItem,
           execItem,

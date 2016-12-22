@@ -75,7 +75,7 @@ ul{
 }
 
 .treePathItems:hover{
-    color: #333;
+    color: #222;
 }
 
 .tree {
@@ -257,18 +257,18 @@ li.selectElement{
     top: 5px;
     margin-bottom: 20px;
     margin-right: 5px;
-    color: white;
+    color: #9d9d9d;
     display: inline-block;
     float: right;
     opacity: 0.9;
     padding-right: 5px;
     transition: transform 0.1s ease-out 0s;
-    font-size: 20px;
+    font-size: 16px;
 }
 
 .glyphmenu:hover {
     opacity: 1;
-    transform: scale(1.2);
+    transform: scale(1.6);
     color: #3086b5;
 }
 
@@ -378,30 +378,6 @@ li.selectElement{
 	color: white;
 }
 
-
-/*NAV */
-#mainNav {
-    background-color: #333333;
-    font-weight: bold;
-    padding-left: 370px;
-}
-
-.nav-tabs {
-    width: 99%;
-}
-
-.nav-tabs > li .close {
-    font-size: 14px;
-    margin: 3px 0 0 15px;
-}
-
-.nav-pills > li > a {
-    font-size: 20px;
-    margin-top: -3px;
-    color: #a6bf26;
-}
-
-
 /* FILE TOOL BAR*/
 .fileUpload {
     position: relative;
@@ -422,7 +398,7 @@ li.selectElement{
 
 .sortingTool{
     color: white;
-    background-color: #333;
+    background-color: #222;
     opacity: 0.5;
     width : 35px;
     position: fixed;
@@ -431,13 +407,13 @@ li.selectElement{
 
 .sortingTool.btn:hover{
     color: white;
-    background-color: #333;
+    background-color: #222;
     opacity: 1;
 }
 
 .selectedSortingTool.btn, .selectedSortingTool.btn:hover{
     color: white;
-    background-color: #333;
+    background-color: #222;
     opacity: 1;
     font-weight: bold;
     width : 50px;
@@ -473,13 +449,13 @@ li.selectElement{
 }
 
 .leftpanel {
-    background: #333333 none repeat scroll 0 0;
+    background: #222 none repeat scroll 0 0;
     height: 100%;
     left: -370px;
     opacity: 1;
     padding-left: 7px;
     position: fixed;
-    top: 37px;
+    padding-top: 80px;
     transition: all 0.1s ease-out 0s;
     width: 370px;
 }

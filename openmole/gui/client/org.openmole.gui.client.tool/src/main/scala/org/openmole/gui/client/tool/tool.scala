@@ -36,7 +36,7 @@ package object tool {
 
   lazy val BLUE = "#3086b5"
 
-  lazy val DARK_GREY = "#333"
+  lazy val DARK_GREY = "#222"
 
   lazy val tableTag: ModifierSeq = Seq(
     sheet.marginLeft(3),
@@ -70,6 +70,12 @@ package object tool {
     sheet.marginLeft(-25)
   )
   // SCRIPT CLIENT
+  lazy val mainNav: ModifierSeq = Seq(
+    left := 370,
+    fontSize := 20,
+    paddingLeft(150)
+  )
+
   lazy val connectionTabOverlay: ModifierSeq = Seq(
     background := "white none repeat scroll 0 0",
     color("white"),
@@ -145,7 +151,7 @@ package object tool {
   lazy val resetBlock: ModifierSeq = Seq(
     fixedPosition,
     pointer,
-    top := 8,
+    top := 20,
     right := 10,
     zIndex := 1101
   )
