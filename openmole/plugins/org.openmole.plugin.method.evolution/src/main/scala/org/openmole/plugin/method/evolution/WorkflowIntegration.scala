@@ -17,7 +17,6 @@
 
 package org.openmole.plugin.method.evolution
 
-import fr.iscpif.mgo
 import org.openmole.core.context._
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.dsl._

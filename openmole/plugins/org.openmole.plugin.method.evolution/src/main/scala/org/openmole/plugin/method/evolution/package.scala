@@ -29,6 +29,8 @@ import org.openmole.core.context._
 import scala.concurrent.duration.Duration
 import scalaz.\&/
 
+import squants.time.TimeConversions._
+
 package object evolution {
 
   val operatorExploration = 0.1

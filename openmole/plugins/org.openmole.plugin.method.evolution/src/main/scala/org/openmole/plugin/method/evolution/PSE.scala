@@ -16,8 +16,7 @@
  */
 package org.openmole.plugin.method.evolution
 
-import fr.iscpif.mgo
-import fr.iscpif.mgo.algorithm.{ noisypse, pse }
+import mgo.algorithm.{ noisypse, pse }
 import org.openmole.core.context.{ Context, Val }
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.sampling._
@@ -42,7 +41,7 @@ object PSE {
     val ug = UniqueGenome(genome)
 
     WorkflowIntegration.DeterministicGA(
-      pse.OpenMOLE(mgo.niche.irregularGrid(objectives.map(_.scale).toVector), UniqueGenome.size(ug), operatorExploration),
+      pse.OpenMOLE(mgo.algorithm.pse.irregularGrid(objectives.map(_.scale).toVector), UniqueGenome.size(ug), operatorExploration),
       ug,
       objectives.map(_.p)
     )
@@ -57,7 +56,7 @@ object PSE {
 
     WorkflowIntegration.StochasticGA(
       noisypse.OpenMOLE(
-        pattern = mgo.niche.irregularGrid(objectives.map(_.scale).toVector),
+        pattern = mgo.algorithm.pse.irregularGrid(objectives.map(_.scale).toVector),
         aggregation = StochasticGAIntegration.aggregateVector(replication.aggregation, _),
         genomeSize = UniqueGenome.size(ug),
         historySize = replication.max,

@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.method.evolution
 
-import fr.iscpif.mgo.algorithm.{ noisynsga2, nsga2 }
+import mgo.algorithm.{ noisynsga2, nsga2 }
 
 object NSGA2 {
 
