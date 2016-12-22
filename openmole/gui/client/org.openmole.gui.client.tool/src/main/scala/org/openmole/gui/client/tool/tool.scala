@@ -72,8 +72,7 @@ package object tool {
   // SCRIPT CLIENT
   lazy val mainNav: ModifierSeq = Seq(
     left := 370,
-    fontSize := 20,
-    paddingLeft(150)
+    fontSize := 20
   )
 
   lazy val connectionTabOverlay: ModifierSeq = Seq(

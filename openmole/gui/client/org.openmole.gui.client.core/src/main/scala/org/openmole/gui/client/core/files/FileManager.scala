@@ -76,8 +76,8 @@ object FileManager {
 
   def download(
     safePath:          SafePath,
-    fileTransferState: ProcessState ⇒ Unit,
-    onLoadEnded:       String ⇒ Unit
+    fileTransferState: ProcessState ⇒ Unit = (p: ProcessState) ⇒ {},
+    onLoadEnded:       String ⇒ Unit       = (s: String) ⇒ {}
   ) = {
 
     OMPost()[Api].size(safePath).call().foreach { size ⇒

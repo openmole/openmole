@@ -18,16 +18,13 @@ import org.scalajs.dom.KeyboardEvent
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
-import org.openmole.gui.client.core.files.FileManager
+import fr.iscpif.scaladget.api.Selector.Options
+import org.openmole.gui.client.core.files.{ FileDisplayer, FileManager, TreeNodePanel }
 import org.openmole.gui.client.tool.OMTags
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.tool.client.OMPost
-import org.openmole.gui.ext.data.ProcessState
-import org.openmole.gui.ext.data.Authentication
-import org.scalajs
-
-import scala.scalajs.js
-import org.scalajs.dom.raw.Event
+import org.openmole.gui.ext.data.{ Authentication, FileExtension }
+import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
 
 /*
  * Copyright (C) 15/04/15 // mathieu.leclaire@openmole.org
@@ -104,8 +101,6 @@ object ScriptClient {
 
     val docItem = navItem(div(OMTags.glyph_book, itemStyle).tooltip("Documentation"), () ⇒ docPanel.dialog.open)
 
-    val modelWizardItem = navItem(div(glyph_upload_alt, itemStyle).tooltip("Model import"), () ⇒ modelWizardPanel.dialog.open)
-
     val fileItem = navItem(div(glyph_file, itemStyle).tooltip("Files"), todo = () ⇒ {
       openFileTree() = !openFileTree.now
     })
@@ -118,7 +113,45 @@ object ScriptClient {
       }
     }
 
+    //START BUUTON
+    val fileDisplayer = new FileDisplayer
+
+    // Define the option sequence
+    case class MenuAction(name: String, action: () ⇒ Unit)
+
+    val newEmpty = MenuAction("Empty project", () ⇒ {
+      val fileName = "newProject.oms"
+      CoreUtils.addFile(manager.current.now, fileName, () ⇒ {
+        val toDisplay = manager.current.now ++ fileName
+        FileManager.download(
+          toDisplay,
+          onLoadEnded = (content: String) ⇒ {
+          TreeNodePanel.refreshAndDraw
+          fileDisplayer.display(toDisplay, content, FileExtension.OMS)
+        }
+        )
+      })
+    })
+
+    val importModel = MenuAction("Import your model", () ⇒ {
+      modelWizardPanel.dialog.open
+    })
+
+    val existingProject = MenuAction("From existing project", () ⇒ {
+
+    })
+
+    val elements = Seq(newEmpty, importModel)
+
+    lazy val menuActions: Options[MenuAction] = elements.options(
+      key = btn_danger,
+      naming = (m: MenuAction) ⇒ m.name,
+      onclose = () ⇒ menuActions.content.now.foreach { _.action() },
+      fixedTitle = Some("New project")
+    )
+
     Settings.settings.map { sets ⇒
+
       dom.document.body.appendChild(
         div(
         ///////Plugin test
@@ -149,8 +182,8 @@ object ScriptClient {
         //////
         bs.navBar(
           omsheet.fixed +++ sheet.nav +++ navbar_pills +++ navbar_inverse +++ navbar_staticTop +++ mainNav,
+          navItem(menuActions.selector),
           fileItem,
-          modelWizardItem,
           execItem,
           authenticationItem,
           marketItem,
