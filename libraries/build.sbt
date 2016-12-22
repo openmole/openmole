@@ -4,9 +4,10 @@ import org.openmole.buildsystem._
 def dir = file("bundles")
 
 def settings = Seq(
-  resolvers += DefaultMavenRepository,
-  resolvers += Resolver.sonatypeRepo("snapshots"),
-  resolvers += Resolver.sonatypeRepo("releases"),
+  resolvers ++= Seq(DefaultMavenRepository,
+                    Resolver.sonatypeRepo("snapshots"),
+                    Resolver.sonatypeRepo("releases"),
+                    Resolver.bintrayRepo("projectseptemberinc", "maven")),
   scalaVersion in Global := "2.11.8",
   scalacOptions ++= Seq("-deprecation"),
   publishArtifact in (packageDoc in publishLocal) := false,
