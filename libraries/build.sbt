@@ -4,15 +4,15 @@ import org.openmole.buildsystem._
 def dir = file("bundles")
 
 def settings = Seq(
-  resolvers ++= Seq(DefaultMavenRepository,
-                    Resolver.sonatypeRepo("snapshots"),
-                    Resolver.sonatypeRepo("releases"),
-                    Resolver.bintrayRepo("projectseptemberinc", "maven")),
+  resolvers += DefaultMavenRepository,
+  resolvers += Resolver.sonatypeRepo("snapshots"),
+  resolvers += Resolver.sonatypeRepo("releases"),
+  resolvers += Resolver.bintrayRepo("projectseptemberinc", "maven"), // For freek
   scalaVersion in Global := "2.11.8",
   scalacOptions ++= Seq("-deprecation"),
   publishArtifact in (packageDoc in publishLocal) := false,
   publishArtifact in (packageSrc in publishLocal) := false,
-  organization := "org.openmole",
+  organization := "org.openmole.library",
   isSnapshot := true
 ) ++ BuildSystem.settings
 
@@ -166,12 +166,6 @@ lazy val cats =
     version := "0.8.1"
   ) settings(settings: _*)
 
-lazy val squants =
-  OsgiProject(dir, "squants") settings (
-    libraryDependencies += "org.typelevel"  %% "squants"  % "1.0.0" intransitive(),
-    version := "1.0.0"
-  ) settings(settings: _*)
-
 lazy val freedsl =
   OsgiProject(dir, "freedsl", exports = Seq("freedsl.*", "freek.*")) settings (
     libraryDependencies += "fr.iscpif.freedsl" %% "all" % "0.3-SNAPSHOT",
@@ -183,7 +177,7 @@ lazy val mgoVersion = "2.2-SNAPSHOT"
 lazy val mgo = OsgiProject(dir, "mgo") settings(
   libraryDependencies += "fr.iscpif" %% "mgo" % mgoVersion,
   version := mgoVersion
-  ) dependsOn(monocle, squants, freedsl, math) settings(settings: _*)
+  ) dependsOn(monocle, freedsl, math) settings(settings: _*)
 
 lazy val familyVersion = "1.3"
 lazy val family = OsgiProject(dir, "fr.iscpif.family") settings(
@@ -267,16 +261,7 @@ lazy val monocle = OsgiProject(dir, "monocle", privatePackages = Seq("!scala.*",
   libraryDependencies += "com.github.julien-truffaut" %% "monocle-generic" % monocleVersion,
   libraryDependencies += "com.github.julien-truffaut" %% "monocle-macro" % monocleVersion,
   version := monocleVersion
-  ) dependsOn(scalaz) settings(settings: _*)
-
-val scalazVersion = "7.2.8"
-
-lazy val scalaz = OsgiProject(dir, "scalaz", privatePackages = Seq("!scala.*", "*")) settings (
-  libraryDependencies ++= Seq(
-    "org.scalaz" %% "scalaz-core" % scalazVersion intransitive(),
-    "org.scalaz" %% "scalaz-effect" % scalazVersion intransitive()
-  ),
-  version := scalazVersion) settings(settings: _*)
+  ) settings(settings: _*)
 
 val asmVersion = "5.1"
 
