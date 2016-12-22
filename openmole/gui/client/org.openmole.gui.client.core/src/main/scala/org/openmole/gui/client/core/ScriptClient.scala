@@ -25,6 +25,8 @@ import org.openmole.gui.ext.tool.client.OMPost
 import org.openmole.gui.ext.data.ProcessState
 import org.openmole.gui.ext.data.Authentication
 import org.scalajs
+
+import scala.scalajs.js
 import org.scalajs.dom.raw.Event
 
 /*
@@ -131,7 +133,7 @@ object ScriptClient {
 
               val oo = Plugins.authentications.now.headOption.map { h ⇒
                 println("h " + h)
-                // println("h " + h.test)
+                println("h " + h.test)
                 // println("h " + h.panel)
                 h.panel
               }.getOrElse(tags.div("Cannot load"))

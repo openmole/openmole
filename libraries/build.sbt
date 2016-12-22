@@ -119,7 +119,7 @@ lazy val scalaRxVersion = "0.3.1"
 lazy val scalaDomVersion = "0.9.1"
 lazy val scalaUpickleVersion = "0.4.3"
 lazy val scalaAutowireVersion = "0.2.6"
-lazy val scalajsVersion = "0.6.13"
+lazy val scalajsVersion = "0.6.14"
 
 lazy val rx = OsgiProject(dir, "rx", exports = Seq("rx.*")) settings(
   libraryDependencies ++= Seq("com.lihaoyi" %% "scalarx" % scalaRxVersion),

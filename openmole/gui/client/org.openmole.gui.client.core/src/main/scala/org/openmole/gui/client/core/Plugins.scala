@@ -43,7 +43,7 @@ object Plugins {
 
   def buildJSObject(obj: String) = {
     println("Build " + obj)
-    scalajs.js.eval(s"new $obj()")
+    scalajs.js.eval(s"new $obj")
   }
 
   def load =

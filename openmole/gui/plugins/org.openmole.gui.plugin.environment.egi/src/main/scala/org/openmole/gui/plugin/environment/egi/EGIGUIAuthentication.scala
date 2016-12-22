@@ -21,6 +21,7 @@ import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import org.openmole.gui.ext.data.Authentication
 import org.openmole.gui.ext.tool.client.OMPost
 import autowire._
+
 import scala.scalajs.js.annotation.JSExport
 import scalatags.JsDom.all._
 
