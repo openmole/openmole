@@ -102,10 +102,6 @@ object ScriptClient {
 
     val docItem = navItem(div(OMTags.glyph_book, itemStyle).tooltip("Documentation"), () ⇒ docPanel.dialog.open)
 
-    val fileItem = navItem(div(glyph_file, itemStyle).tooltip("Files"), todo = () ⇒ {
-      openFileTree() = !openFileTree.now
-    })
-
     dom.window.onkeydown = (k: KeyboardEvent) ⇒ {
       if ((k.keyCode == 83 && k.ctrlKey)) {
         k.preventDefault
@@ -185,8 +181,13 @@ object ScriptClient {
           bs.navBar(
             omsheet.fixed +++ sheet.nav +++ navbar_pills +++ navbar_inverse +++ (fontSize := 20) +++ navbar_staticTop +++
               { if (openFileTree()) mainNav370 else mainNav0 },
+            navItem(
+              if (openFileTree()) div(glyph_chevron_left, fileChevronStyle) else div(glyph_chevron_right, fileChevronStyle),
+              todo = () ⇒ {
+                openFileTree() = !openFileTree.now
+              }
+            ),
             navItem(menuActions.selector),
-            fileItem,
             execItem,
             authenticationItem,
             marketItem,

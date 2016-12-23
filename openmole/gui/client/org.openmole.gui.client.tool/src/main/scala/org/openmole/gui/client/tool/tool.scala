@@ -78,6 +78,13 @@ package object tool {
     left := 370
   )
 
+  lazy val fileChevronStyle: ModifierSeq = Seq(
+    lineHeight := "10px",
+    top := 10,
+    left := -30,
+    sheet.paddingRight(20)
+  )
+
   lazy val mainNav: ModifierSeq = Seq(
     left := 370,
     fontSize := 20
