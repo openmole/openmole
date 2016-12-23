@@ -432,6 +432,7 @@ li.selectElement{
     top: 80px;
     width: 100%;
     left : 20;
+    background-color: white;
 }
 
 .fullpanel .reduce {
