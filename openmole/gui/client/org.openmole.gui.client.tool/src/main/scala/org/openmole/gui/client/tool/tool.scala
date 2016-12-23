@@ -183,7 +183,7 @@ package object tool {
 
   lazy val resetPassword: ModifierSeq = Seq(
     fontSize := 12,
-    color("grey"),
+    color("#9d9d9d"),
     cursor := "pointer"
   )
 
