@@ -20,15 +20,15 @@ package org.openmole.plugin.domain.modifier
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.domain._
 
-import scalaz.Scalaz._
-import scalaz._
+import cats._
+import cats.implicits._
 
 object GroupDomain {
 
   implicit def isDiscrete[D, T: Manifest] = new Discrete[GroupDomain[D, T], Array[T]] with DomainInputs[GroupDomain[D, T]] {
     override def iterator(domain: GroupDomain[D, T]) = {
       import domain._
-      (discrete.iterator(d) |@| size) apply ((it, s) ⇒ it.grouped(s) map (_.toArray))
+      (discrete.iterator(d) map2 size)((it, s) ⇒ it.grouped(s) map (_.toArray))
     }
 
     override def inputs(domain: GroupDomain[D, T]) = domain.inputs.inputs(domain.d)

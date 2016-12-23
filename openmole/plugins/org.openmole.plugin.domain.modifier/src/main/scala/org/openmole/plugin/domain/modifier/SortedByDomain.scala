@@ -20,8 +20,7 @@ package org.openmole.plugin.domain.modifier
 import org.openmole.core.context.PrototypeSet
 import org.openmole.core.workflow.domain._
 
-import scalaz.Scalaz._
-import scalaz._
+import cats.implicits._
 
 object SortedByDomain {
 

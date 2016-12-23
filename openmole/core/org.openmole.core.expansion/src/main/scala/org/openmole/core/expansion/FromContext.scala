@@ -23,26 +23,27 @@ import org.openmole.tool.cache._
 import org.openmole.tool.random._
 import org.openmole.tool.file._
 
-import scalaz.Scalaz._
-import scalaz._
+import cats._
+import cats.implicits._
 
 object FromContext {
 
   implicit def functionToFromContext[T](f: Context ⇒ T) = FromContext((c, _) ⇒ f(c))
 
   implicit val applicative: Applicative[FromContext] = new Applicative[FromContext] {
-    override def ap[A, B](fa: ⇒ FromContext[A])(f: ⇒ FromContext[(A) ⇒ B]): FromContext[B] =
+
+    override def pure[A](x: A): FromContext[A] = FromContext.value(x)
+
+    override def ap[A, B](ff: FromContext[(A) ⇒ B])(fa: FromContext[A]): FromContext[B] =
       new FromContext[B] {
         override def from(context: ⇒ Context)(implicit rng: RandomProvider): B = {
           val res = fa.from(context)(rng)
-          f.from(context)(rng)(res)
+          ff.from(context)(rng)(res)
         }
 
         override def validate(inputs: Seq[Val[_]]): Seq[Throwable] =
-          fa.validate(inputs) ++ f.validate(inputs)
+          fa.validate(inputs) ++ ff.validate(inputs)
       }
-
-    override def point[A](a: ⇒ A): FromContext[A] = FromContext.value(a)
   }
 
   def codeToFromContext[T: Manifest](code: String): FromContext[T] =
@@ -107,13 +108,13 @@ object FromContext {
   }
 
   implicit class ExpandedStringOperations(s1: FromContext[String]) {
-    def +(s2: FromContext[String]) = (s1 |@| s2) apply (_ + _)
+    def +(s2: FromContext[String]) = (s1 map2 s2)(_ + _)
   }
 
   implicit class FromContextFileDecorator(f: FromContext[File]) {
     def exists = f.map(_.exists)
     def isEmpty = f.map(_.isEmpty)
-    def /(path: FromContext[String]) = (f |@| path)(_ / _)
+    def /(path: FromContext[String]) = (f map2 path)(_ / _)
   }
 
 }

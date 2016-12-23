@@ -20,9 +20,7 @@ package org.openmole.core.workflow.sampling
 import org.openmole.core.context._
 import org.openmole.core.expansion._
 import org.openmole.core.workflow.domain._
-
-import scalaz._
-import Scalaz._
+import cats.implicits._
 
 object FactorSampling {
 

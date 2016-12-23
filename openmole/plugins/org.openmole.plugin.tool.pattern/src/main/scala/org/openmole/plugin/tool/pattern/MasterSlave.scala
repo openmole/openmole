@@ -23,7 +23,7 @@ import org.openmole.core.workflow.puzzle._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
 
-import scalaz._
+import shapeless._
 
 object MasterSlave {
 
@@ -40,7 +40,7 @@ object MasterSlave {
     case class Elements(master: Slot, slave: Puzzle)
 
     val puzzle = (bootstrap -< slave -- masterSlot) & (masterCapsule -<- slaveSlot2) & (bootstrap oo (masterSlot, state: _*))
-    \&/(puzzle, Elements(masterSlot, slave))
+    puzzle :: Elements(masterSlot, slave) :: HNil
   }
 
 }

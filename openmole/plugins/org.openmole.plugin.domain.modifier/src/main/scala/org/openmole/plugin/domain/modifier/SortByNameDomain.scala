@@ -23,8 +23,8 @@ import org.openmole.core.context.PrototypeSet
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.workflow.domain._
 
-import scalaz.Scalaz._
-import scalaz._
+import cats._
+import cats.implicits._
 
 object SortByNameDomain {
   implicit def isFinite[D] = new Finite[SortByNameDomain[D], File] with DomainInputs[SortByNameDomain[D]] {

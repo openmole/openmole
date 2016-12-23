@@ -31,12 +31,13 @@ package dsl {
   import org.openmole.core.logging.LoggerService
   import org.openmole.core.workspace.Workspace
 
-  import scalaz.Functor
+  import cats._
 
   trait DSLPackage <: Commands
       with Serializer
       with Classes
-      with workflow.ExportedPackage {
+      with workflow.ExportedPackage
+      with cats.instances.AllInstances {
 
     def valImpl[T: c.WeakTypeTag](c: MContext): c.Expr[Val[T]] = {
       import c.universe._

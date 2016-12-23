@@ -23,8 +23,8 @@ import org.openmole.core.workflow.dsl._
 
 import scala.language.higherKinds
 import scala.util.Random
-import scalaz.Scalaz._
-import scalaz._
+import cats._
+import cats.implicits._
 
 object Seeder {
 
@@ -68,8 +68,8 @@ case class Replication[A[_]: Functor](
 
 object WorkflowIntegration {
 
-  implicit def unionContainingIntegrationRight[T, U](implicit wi: WorkflowIntegration[U]) = new WorkflowIntegration[\&/[T, U]] {
-    def apply(t: \&/[T, U]) = wi(t)
+  implicit def hlistContainingIntegration[H <: shapeless.HList, U](implicit hwi: WorkflowIntegrationSelector[H, U]) = new WorkflowIntegration[H] {
+    def apply(h: H) = hwi.wi(hwi(h))
   }
 
   def deterministicGAIntegration[AG](a: DeterministicGA[AG]) =
@@ -263,7 +263,7 @@ object StochasticGAIntegration {
     genome: UniqueGenome,
     values: Seq[Double],
     seed:   Seeder
-  ) = (GAIntegration.scaled(genome, values) |@| FromContext { (_, rng) ⇒ seed(rng()) }) apply (_ ++ _)
+  ) = (GAIntegration.scaled(genome, values) map2 FromContext { (_, rng) ⇒ seed(rng()) })(_ ++ _)
 
   def populationToVariables[I](
     genome:           UniqueGenome,

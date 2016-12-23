@@ -19,9 +19,7 @@ package org.openmole.core.workflow.tools
 
 import org.openmole.core.context._
 import org.openmole.core.expansion._
-
-import scalaz.Scalaz._
-import scalaz._
+import cats.implicits._
 
 /**
  * The parameter is a variable wich is injected in the data flow during the

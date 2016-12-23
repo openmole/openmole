@@ -34,8 +34,8 @@ import org.openmole.plugin.task.systemexec._
 import org.openmole.tool.logger.Logger
 import org.openmole.tool.random.RandomProvider
 
-import scalaz.Scalaz._
-import scalaz._
+import cats._
+import cats.implicits._
 
 object CARETask extends Logger {
   implicit def isTask: InputOutputBuilder[CARETask] = InputOutputBuilder(CARETask._config)
