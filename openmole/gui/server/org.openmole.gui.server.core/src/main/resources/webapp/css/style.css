@@ -429,15 +429,16 @@ li.selectElement{
     padding-left: 15px;
     padding-right: 15px;
     position: relative;
-    top: 30px;
+    top: 80px;
     width: 100%;
+    left : 20;
 }
 
 .fullpanel .reduce {
-    left: 370px;
+    left: 390px;
     padding-right: 370px;
     position: fixed;
-    top: 60px;
+    top: 80px;
     transition: all 0.1s ease-out 0s;
     width: 99%;
     height: calc(100% - 140px);

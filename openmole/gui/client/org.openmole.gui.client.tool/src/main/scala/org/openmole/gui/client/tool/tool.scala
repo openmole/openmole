@@ -70,11 +70,18 @@ package object tool {
     sheet.marginLeft(-25)
   )
   // SCRIPT CLIENT
+  lazy val mainNav0: ModifierSeq = Seq(
+    left := 0
+  )
+
+  lazy val mainNav370: ModifierSeq = Seq(
+    left := 370
+  )
+
   lazy val mainNav: ModifierSeq = Seq(
     left := 370,
     fontSize := 20
   )
-
   lazy val connectionTabOverlay: ModifierSeq = Seq(
     background := "white none repeat scroll 0 0",
     color("white"),

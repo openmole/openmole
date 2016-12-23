@@ -19,6 +19,7 @@ import org.scalajs.dom.KeyboardEvent
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
 import fr.iscpif.scaladget.api.Selector.Options
+import fr.iscpif.scaladget.tools
 import org.openmole.gui.client.core.files.{ FileDisplayer, FileManager, TreeNodePanel }
 import org.openmole.gui.client.tool.OMTags
 import org.openmole.gui.ext.api.Api
@@ -113,7 +114,7 @@ object ScriptClient {
       }
     }
 
-    //START BUUTON
+    //START BUTTON
     val fileDisplayer = new FileDisplayer
 
     // Define the option sequence
@@ -180,16 +181,19 @@ object ScriptClient {
           })
         ),
         //////
-        bs.navBar(
-          omsheet.fixed +++ sheet.nav +++ navbar_pills +++ navbar_inverse +++ navbar_staticTop +++ mainNav,
-          navItem(menuActions.selector),
-          fileItem,
-          execItem,
-          authenticationItem,
-          marketItem,
-          pluginItem,
-          docItem
-        ),
+        Rx {
+          bs.navBar(
+            omsheet.fixed +++ sheet.nav +++ navbar_pills +++ navbar_inverse +++ (fontSize := 20) +++ navbar_staticTop +++
+              { if (openFileTree()) mainNav370 else mainNav0 },
+            navItem(menuActions.selector),
+            fileItem,
+            execItem,
+            authenticationItem,
+            marketItem,
+            pluginItem,
+            docItem
+          )
+        },
         tags.div(shutDown.shutdownButton),
         tags.div(`class` := "fullpanel")(
           tags.div(
