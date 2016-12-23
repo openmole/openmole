@@ -16,13 +16,12 @@
  */
 package org.openmole.tool
 
-import scalaz._
+import shapeless._
 
 package types {
 
   trait TypesPackage {
-    implicit def bothToA[A](t: \&/[A, _]): A = t.a.get
-    implicit def bothToB[B](t: \&/[_, B]): B = t.b.get
+    implicit def hlistToA[H <: HList, A](h: H)(implicit s: ops.hlist.Selector[H, A]): A = s(h)
   }
 
 }

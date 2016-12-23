@@ -37,8 +37,6 @@ import monocle.macros._
 import scala.tools.nsc.io.AbstractFile
 import org.openmole.tool.osgi._
 
-import scalaz.Foldable
-
 object ScalaREPL {
 
   private def compilationMessage(errorMessages: List[ErrorMessage], code: String) = {

@@ -59,7 +59,7 @@ lazy val openmoleStream = OsgiProject(thirdPartiesDir, "org.openmole.tool.stream
 lazy val openmoleCollection = OsgiProject(thirdPartiesDir, "org.openmole.tool.collection", imports = Seq("*")) settings (libraryDependencies += Libraries.scalaLang) settings (thirdPartiesSettings: _*)
 lazy val openmoleCrypto = OsgiProject(thirdPartiesDir, "org.openmole.tool.crypto", imports = Seq("*")) settings (libraryDependencies += Libraries.bouncyCastle) settings (thirdPartiesSettings: _*)
 lazy val openmoleStatistics = OsgiProject(thirdPartiesDir, "org.openmole.tool.statistics", imports = Seq("*")) dependsOn (openmoleLogger) settings (thirdPartiesSettings: _*)
-lazy val openmoleTypes = OsgiProject(thirdPartiesDir, "org.openmole.tool.types", imports = Seq("*")) settings (libraryDependencies += Libraries.scalaz) settings (thirdPartiesSettings: _*)
+lazy val openmoleTypes = OsgiProject(thirdPartiesDir, "org.openmole.tool.types", imports = Seq("*")) settings (libraryDependencies += Libraries.shapeless) settings (thirdPartiesSettings: _*)
 lazy val openmoleByteCode = OsgiProject(thirdPartiesDir, "org.openmole.tool.bytecode", imports = Seq("*")) settings (libraryDependencies += Libraries.asm) settings (thirdPartiesSettings: _*)
 lazy val openmoleOSGi = OsgiProject(thirdPartiesDir, "org.openmole.tool.osgi", imports = Seq("*")) dependsOn (openmoleFile) settings (libraryDependencies += Libraries.equinoxOSGi) settings (thirdPartiesSettings: _*)
 lazy val openmoleRandom = OsgiProject(thirdPartiesDir, "org.openmole.tool.random", imports = Seq("*")) settings (thirdPartiesSettings: _*) settings (libraryDependencies += Libraries.math)
@@ -105,15 +105,15 @@ def allCore = Seq(
 
 
 lazy val context = OsgiProject(coreDir, "org.openmole.core.context", imports = Seq("*")) settings (
-  libraryDependencies ++= Seq(Libraries.scalaz)
+  libraryDependencies ++= Seq(Libraries.cats)
   ) dependsOn(tools, workspace) settings (coreSettings: _*)
 
 lazy val expansion = OsgiProject(coreDir, "org.openmole.core.expansion", imports = Seq("*")) settings (
-  libraryDependencies ++= Seq(Libraries.scalaz)
+  libraryDependencies ++= Seq(Libraries.cats)
   ) dependsOn(context, tools, openmoleRandom, openmoleFile, pluginManager, console) settings (coreSettings: _*)
 
 lazy val workflow = OsgiProject(coreDir, "org.openmole.core.workflow", imports = Seq("*")) settings (
-  libraryDependencies ++= Seq(Libraries.scalaLang, Libraries.math, Libraries.scalaz, Libraries.equinoxOSGi)
+  libraryDependencies ++= Seq(Libraries.scalaLang, Libraries.math, Libraries.cats, Libraries.equinoxOSGi, Libraries.shapeless)
   ) dependsOn(
   event,
   exception,
@@ -361,7 +361,7 @@ def allMethod = Seq(evolution, stochastic, abc)
 
 lazy val evolution = OsgiProject(pluginDir, "org.openmole.plugin.method.evolution", imports = Seq("*")) dependsOn(
   openmoleDSL, fileHook, toolsTask, pattern, collectionDomain % "test"
-) settings (libraryDependencies += Libraries.mgo) settings (pluginSettings: _*)
+) settings (libraryDependencies += Libraries.mgo, libraryDependencies += Libraries.shapeless) settings (pluginSettings: _*)
 
 lazy val stochastic = OsgiProject(pluginDir, "org.openmole.plugin.method.stochastic", imports = Seq("*")) dependsOn(openmoleDSL, distributionDomain, pattern) settings (pluginSettings: _*)
 

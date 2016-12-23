@@ -25,8 +25,8 @@ import org.openmole.core.workflow.sampling.Factor
 import org.openmole.tool.random.RandomProvider
 
 import scala.annotation.tailrec
-import scalaz.Scalaz._
-import scalaz._
+import cats._
+import cats.implicits._
 
 object InputConverter {
 
@@ -58,7 +58,7 @@ object Scalable {
       val g = genomePart.head
       assert(!g.isNaN)
 
-      (s.min |@| s.max) apply { (min, max) ⇒
+      (s.min map2 s.max) { (min, max) ⇒
         val sc = g.scale(min, max)
         ScaledScalar(s.prototype, sc)
       }
@@ -73,7 +73,7 @@ object Scalable {
     override def scaled(s: Sequence)(genomePart: Seq[Double]): FromContext[Scaled] = {
       def scaled =
         (genomePart zip (s.min zip s.max)).toVector traverseU {
-          case (g, (min, max)) ⇒ (min |@| max) apply (g.scale(_, _))
+          case (g, (min, max)) ⇒ (min map2 max)(g.scale(_, _))
         }
 
       scaled.map { sc ⇒ ScaledSequence(s.prototype, sc.toArray) }

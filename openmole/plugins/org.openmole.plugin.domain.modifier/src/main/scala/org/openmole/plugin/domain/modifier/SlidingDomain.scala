@@ -20,8 +20,8 @@ package org.openmole.plugin.domain.modifier
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.domain._
 
-import scalaz.Scalaz._
-import scalaz._
+import cats._
+import cats.implicits._
 
 object SlidingDomain {
 
@@ -36,8 +36,10 @@ case class SlidingDomain[D, T: Manifest](domain: D, size: FromContext[Int], step
 
   def inputs = domainInputs.inputs(domain)
 
+  // FIXME convoluted expression, might be simplified
   def iterator() =
-    (discrete.iterator(domain) |@| size |@| step) apply
-      ((it, si, st) ⇒ it.sliding(si, st).map(_.toArray))
+    ((discrete.iterator(domain) map2 size)((a, b) ⇒ (a, b)) map2 step) {
+      case ((it, si), st) ⇒ it.sliding(si, st).map(_.toArray)
+    }
 
 }

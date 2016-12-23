@@ -21,8 +21,8 @@ import org.openmole.core.context.PrototypeSet
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.domain._
 
-import scalaz.Scalaz._
-import scalaz._
+import cats._
+import cats.implicits._
 
 object TakeDomain {
 
@@ -36,6 +36,5 @@ object TakeDomain {
 case class TakeDomain[D, +T](val domain: D, val size: FromContext[Int])(implicit discrete: Discrete[D, T], domainInputs: DomainInputs[D]) {
   def inputs = domainInputs.inputs(domain)
   def computeValues() =
-    (discrete.iterator(domain) |@| size) apply
-      ((d, s) ⇒ d.slice(0, s).toIterable)
+    (discrete.iterator(domain) map2 size)((d, s) ⇒ d.slice(0, s).toIterable)
 }

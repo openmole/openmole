@@ -20,8 +20,8 @@ package org.openmole.core.workflow
 import scala.concurrent.stm._
 import org.openmole.tool.file._
 import scala.ref.WeakReference
-import scalaz._
-import Scalaz._
+import cats._
+import cats._
 
 package tools {
 

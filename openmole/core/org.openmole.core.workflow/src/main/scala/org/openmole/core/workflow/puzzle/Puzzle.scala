@@ -24,8 +24,8 @@ import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
 import org.openmole.core.workspace.Workspace
-
-import scalaz._
+import shapeless._
+import ops.hlist._
 
 object ToPuzzle {
 
@@ -53,8 +53,8 @@ object ToPuzzle {
     def toPuzzle(p: Task) = Capsule(p).toPuzzle
   }
 
-  implicit def bothToPuzzleIsToPuzzle[P: ToPuzzle] = new ToPuzzle[\&/[P, _]] {
-    def toPuzzle(p: \&/[P, _]) = implicitly[ToPuzzle[P]].toPuzzle(p.a.get)
+  implicit def hlistCanBeToPuzzle[P: ToPuzzle, H <: HList](implicit select: Selector[H, P]) = new ToPuzzle[H] {
+    def toPuzzle(h: H) = implicitly[ToPuzzle[P]].toPuzzle(select(h))
   }
 
 }

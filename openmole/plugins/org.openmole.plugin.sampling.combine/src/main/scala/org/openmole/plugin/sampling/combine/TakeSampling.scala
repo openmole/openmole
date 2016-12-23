@@ -20,8 +20,7 @@ package org.openmole.plugin.sampling.combine
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.sampling._
 
-import scalaz.Scalaz._
-import scalaz._
+import cats.implicits._
 
 object TakeSampling {
 
@@ -35,6 +34,6 @@ sealed class TakeSampling(val sampling: Sampling, val n: FromContext[Int]) exten
   override def inputs = sampling.inputs
   override def prototypes = sampling.prototypes
 
-  override def apply() = (sampling() |@| n) apply ((s, t) ⇒ s.take(t))
+  override def apply() = (sampling() map2 n)((s, t) ⇒ s.take(t))
 
 }

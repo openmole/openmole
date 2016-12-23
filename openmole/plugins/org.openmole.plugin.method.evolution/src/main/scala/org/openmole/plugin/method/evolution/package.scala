@@ -25,9 +25,9 @@ import org.openmole.core.workflow.transition._
 import org.openmole.plugin.task.tools._
 import org.openmole.plugin.tool.pattern._
 import org.openmole.core.context._
-
 import scala.concurrent.duration.Duration
-import scalaz.\&/
+
+import shapeless._
 
 import squants.time.TimeConversions._
 
@@ -143,17 +143,20 @@ package object evolution {
         def state = t.statePrototype
       }
 
-    \&/(gaPuzzle, algorithm)
+    gaPuzzle :: algorithm :: HNil
   }
 
-  def IslandEvolution[T](
-    island:      PuzzleContainer \&/ T,
+  def IslandEvolution[HL <: HList, T](
+    island:      HL,
     parallelism: Int,
     termination: OMTermination,
     sample:      OptionalArgument[Int] = None
-  )(implicit wfi: WorkflowIntegration[T]) = {
-    val algorithm: T = island
-    val t = wfi(algorithm)
+  )(implicit
+    wfi: WorkflowIntegrationSelector[HL, T],
+    selectPuzzle: ops.hlist.Selector[HL, _ <: PuzzleContainer]) = {
+    val algorithm: T = wfi(island)
+    implicit val wi = wfi.wi
+    val t = wi(algorithm)
 
     val islandPopulationPrototype = t.populationPrototype.withName("islandPopulation")
 
@@ -215,7 +218,7 @@ package object evolution {
         outputs += t.populationPrototype
       )
 
-    val islandCapsule = Slot(MoleTask(island))
+    val islandCapsule = Slot(MoleTask(selectPuzzle(island)))
 
     val slaveFist = EmptyTask() set (
       name := "slaveFirst",
@@ -253,7 +256,7 @@ package object evolution {
         def state = t.statePrototype
       }
 
-    \&/(gaPuzzle, algorithm)
+    gaPuzzle :: algorithm :: HNil
   }
 
 }

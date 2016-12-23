@@ -19,7 +19,8 @@ package org.openmole.core.workflow.domain
 
 import org.openmole.core.expansion._
 import scala.annotation.implicitNotFound
-import scalaz.Scalaz._
+import cats._
+import cats.implicits._
 import scala.language.higherKinds
 
 @implicitNotFound("${D} is not a finite variation domain of type ${T}")

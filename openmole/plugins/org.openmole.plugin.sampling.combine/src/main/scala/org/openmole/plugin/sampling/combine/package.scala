@@ -25,8 +25,7 @@ import org.openmole.core.workflow.sampling._
 import org.openmole.plugin.domain.collection._
 import org.openmole.plugin.domain.modifier._
 import org.openmole.core.expansion._
-import scalaz.Scalaz._
-import scalaz._
+import cats.implicits._
 
 package object combine {
 
