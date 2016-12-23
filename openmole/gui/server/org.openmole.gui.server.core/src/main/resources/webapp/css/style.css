@@ -424,8 +424,8 @@ li.selectElement{
     height: 100%;
     width: 100%;
 }
+
 .centerpanel {
-    height: 89%;
     padding-left: 15px;
     padding-right: 15px;
     position: relative;
@@ -433,17 +433,18 @@ li.selectElement{
     width: 100%;
     left : 20;
     background-color: white;
+    height: calc(100% - 140px);
 }
 
 .fullpanel .reduce {
     left: 390px;
-    padding-right: 370px;
+    padding-right: 400px;
     position: fixed;
     top: 80px;
     transition: all 0.1s ease-out 0s;
     width: 99%;
     height: calc(100% - 140px);
-
+padding-bottom: 35px;
 }
 
 .fullpanel .open {
