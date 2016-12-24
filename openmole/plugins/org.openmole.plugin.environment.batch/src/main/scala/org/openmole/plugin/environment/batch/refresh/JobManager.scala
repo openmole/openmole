@@ -102,7 +102,7 @@ class JobManager { self ⇒
       self ! Upload(job)
 
     case Delay(msg, delay) ⇒
-      delayedExecutor.schedule(self ! msg, delay.toMillis, TimeUnit.MILLISECONDS)
+      delayedExecutor.schedule(self ! msg, delay.millis, TimeUnit.MILLISECONDS)
 
     case Uploaded(job, sj) ⇒
       job.serializedJob = Some(sj)

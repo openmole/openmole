@@ -18,6 +18,7 @@
 package org.openmole.core.workspace
 
 import java.io.File
+import java.time.Duration
 import java.util.concurrent.locks.ReentrantReadWriteLock
 
 import org.openmole.tool.lock._
@@ -27,8 +28,8 @@ import org.apache.commons.configuration2.builder._
 import org.apache.commons.configuration2.builder.fluent._
 import org.openmole.core.tools.io.FromString
 import org.openmole.tool.thread._
-
-import scala.concurrent.duration._
+import squants.Time
+import squants.information.Information
 
 object ConfigurationLocation {
 
@@ -100,10 +101,16 @@ object ConfigurationString {
       override def fromString(s: String) = implicitly[FromString[Int]].apply(s)
     }
 
-  implicit def finiteDurationConfigurationString: ConfigurationString[FiniteDuration] =
-    new ConfigurationString[FiniteDuration] {
-      override def toString(t: FiniteDuration): String = org.openmole.core.tools.service.stringFromDuration(t)
-      override def fromString(s: String) = implicitly[FromString[FiniteDuration]].apply(s)
+  implicit def timeConfigurationString: ConfigurationString[Time] =
+    new ConfigurationString[Time] {
+      override def toString(t: Time): String = t.toString()
+      override def fromString(s: String) = implicitly[FromString[Time]].apply(s)
+    }
+
+  implicit def informationConfigurationString: ConfigurationString[Information] =
+    new ConfigurationString[Information] {
+      override def toString(i: Information): String = i.toString()
+      override def fromString(s: String) = implicitly[FromString[Information]].apply(s)
     }
 
   implicit def doubleConfigurationString: ConfigurationString[Double] =

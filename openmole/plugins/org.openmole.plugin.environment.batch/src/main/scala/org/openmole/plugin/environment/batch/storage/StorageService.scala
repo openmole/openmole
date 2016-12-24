@@ -34,11 +34,11 @@ import org.openmole.plugin.environment.batch.replication.ReplicaCatalog
 import org.openmole.tool.cache._
 import org.openmole.tool.logger.Logger
 
-import scala.concurrent.duration._
+import squants.time.TimeConversions._
 
 object StorageService extends Logger {
 
-  val DirRegenerate = ConfigurationLocation("StorageService", "DirRegenerate", Some(1 hour))
+  val DirRegenerate = ConfigurationLocation("StorageService", "DirRegenerate", Some(1 hours))
   Workspace setDefault DirRegenerate
 
   val TmpDirRemoval = ConfigurationLocation("StorageService", "TmpDirRemoval", Some(30 days))
@@ -62,7 +62,7 @@ trait StorageService extends BatchService with Storage {
   val _directoryCache = Cache {
     CacheBuilder.
       newBuilder().
-      expireAfterWrite(Workspace.preference(StorageService.DirRegenerate).toMillis, TimeUnit.MILLISECONDS).
+      expireAfterWrite(Workspace.preference(StorageService.DirRegenerate).millis, TimeUnit.MILLISECONDS).
       build[String, String]()
   }
 

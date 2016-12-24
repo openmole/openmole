@@ -17,8 +17,8 @@
 
 package org.openmole.core.updater
 
-import scala.concurrent.duration.FiniteDuration
+import squants._
 
-class UpdatableWithFixedDelay(val updatable: IUpdatable, val delay: FiniteDuration) extends IUpdatableWithVariableDelay {
+class UpdatableWithFixedDelay(val updatable: IUpdatable, val delay: Time) extends IUpdatableWithVariableDelay {
   override def update = updatable.update
 }

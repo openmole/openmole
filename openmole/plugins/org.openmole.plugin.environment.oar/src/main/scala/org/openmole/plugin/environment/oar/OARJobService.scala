@@ -25,6 +25,7 @@ import org.openmole.plugin.environment.batch.environment._
 import org.openmole.plugin.environment.batch.jobservice.{ BatchJob, BatchJobId }
 import org.openmole.plugin.environment.ssh.{ ClusterJobService, SSHService }
 import org.openmole.tool.logger.Logger
+import squants.time.TimeConversions._
 
 object OARJobService extends Logger
 
@@ -52,7 +53,7 @@ trait OARJobService extends ClusterJobService { js ⇒
       workDirectory = serializedJob.path,
       cpu = environment.cpu,
       core = environment.core,
-      wallTime = environment.wallTime,
+      wallTime = environment.wallTime.map(x ⇒ x: concurrent.duration.Duration),
       bestEffort = environment.bestEffort
     )
 

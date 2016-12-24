@@ -29,7 +29,6 @@ import org.openmole.tool.lock._
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ListBuffer
-import scala.concurrent.duration.Duration
 import scala.io.Source
 import scala.util.{ Success, Failure, Try }
 import org.openmole.tool.stream._
@@ -39,6 +38,7 @@ package file {
   import java.nio.file.attribute.PosixFilePermissions
 
   import org.openmole.tool.stream.GZipedInputStream
+  import squants.time.Time
 
   trait FilePackage {
     p ⇒
@@ -123,7 +123,7 @@ package file {
       }
 
       // TODO replace with NIO
-      def copy(to: OutputStream, maxRead: Int, timeout: Duration): Unit =
+      def copy(to: OutputStream, maxRead: Int, timeout: Time): Unit =
         withClosable(bufferedInputStream) {
           _.copy(to, maxRead, timeout)
         }

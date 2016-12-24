@@ -17,13 +17,9 @@
 
 package org.openmole.core.tools
 
-import java.time.{ Duration ⇒ JDuration }
 import java.util.UUID
 
 import org.openmole.tool.random.Random
-
-import concurrent.duration._
-import scala.concurrent.duration.Duration
 
 package object service {
 
@@ -34,10 +30,4 @@ package object service {
 
   def newRNG(seed: Long) = Random(seed)
 
-  def stringToDuration(s: String): FiniteDuration = JDuration.parse(s).getSeconds seconds
-  def stringFromDuration(d: Duration): String = JDuration.ofMillis(d.toMillis).toString
-
-  implicit class StringDurationDecorator(s: String) {
-    def toDuration = stringToDuration(s)
-  }
 }

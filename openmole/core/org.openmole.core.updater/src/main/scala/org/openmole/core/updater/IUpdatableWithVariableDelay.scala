@@ -17,8 +17,8 @@
 
 package org.openmole.core.updater
 
-import scala.concurrent.duration.FiniteDuration
+import squants._
 
 trait IUpdatableWithVariableDelay extends IUpdatable {
-  def delay: FiniteDuration
+  def delay: Time
 }

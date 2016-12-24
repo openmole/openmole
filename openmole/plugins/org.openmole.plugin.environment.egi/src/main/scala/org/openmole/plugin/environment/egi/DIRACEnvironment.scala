@@ -19,21 +19,23 @@ package org.openmole.plugin.environment.egi
 
 import java.net.URI
 
-import fr.iscpif.gridscale.egi.{ DIRACJobService ⇒ GSDIRACJobService, _ }
+import fr.iscpif.gridscale.egi.BDII
+import squants._
 import org.openmole.core.updater.Updater
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.job.Job
 import org.openmole.core.workspace._
 import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, BatchExecutionJob, UpdateInterval }
 import org.openmole.tool.cache.Cache
+import squants.information._
+import squants.time.TimeConversions._
 
-import scala.concurrent.duration._
 import scala.ref.WeakReference
 
 object DIRACEnvironment {
 
   val EagerSubmissionThreshold = ConfigurationLocation("DIRACEnvironment", "EagerSubmissionThreshold", Some(0.2))
-  val UpdateInterval = ConfigurationLocation("DIRACEnvironment", "UpdateInterval", Some(1 minute))
+  val UpdateInterval = ConfigurationLocation("DIRACEnvironment", "UpdateInterval", Some(1 minutes))
   val JobsByGroup = ConfigurationLocation("DIRACEnvironment", "JobsByGroup", Some(10000))
 
   Workspace setDefault EagerSubmissionThreshold
@@ -48,8 +50,8 @@ object DIRACEnvironment {
     vomsURLs:       OptionalArgument[Seq[String]] = None,
     setup:          OptionalArgument[String]      = None,
     fqan:           OptionalArgument[String]      = None,
-    cpuTime:        OptionalArgument[Duration]    = None,
-    openMOLEMemory: OptionalArgument[Int]         = None,
+    cpuTime:        OptionalArgument[Time]        = None,
+    openMOLEMemory: OptionalArgument[Information] = None,
     debug:          Boolean                       = false,
     name:           OptionalArgument[String]      = None
   )(implicit authentication: EGIAuthentication, decrypt: Decrypt) =
@@ -88,8 +90,8 @@ class DIRACEnvironment(
     val vomsURLs:                Seq[String],
     val setup:                   String,
     val fqan:                    Option[String],
-    val cpuTime:                 Option[Duration],
-    override val openMOLEMemory: Option[Int],
+    val cpuTime:                 Option[Time],
+    override val openMOLEMemory: Option[Information],
     val debug:                   Boolean,
     override val name:           Option[String]
 )(implicit a: EGIAuthentication, decrypt: Decrypt) extends BatchEnvironment with BDIIStorageServers with EGIEnvironmentId { env ⇒

@@ -23,8 +23,8 @@ import org.openmole.core.workflow.dsl._
 import org.openmole.core.workspace._
 import org.openmole.plugin.environment.batch.control._
 import org.openmole.plugin.environment.batch.environment._
-
-import scala.concurrent.duration._
+import squants.information.Information
+import squants.time.TimeConversions._
 
 object SSHEnvironment {
 
@@ -40,13 +40,13 @@ object SSHEnvironment {
     user:                 String,
     host:                 String,
     nbSlots:              Int,
-    port:                 Int                      = 22,
-    sharedDirectory:      OptionalArgument[String] = None,
-    workDirectory:        OptionalArgument[String] = None,
-    openMOLEMemory:       OptionalArgument[Int]    = None,
-    threads:              OptionalArgument[Int]    = None,
-    storageSharedLocally: Boolean                  = false,
-    name:                 OptionalArgument[String] = None
+    port:                 Int                           = 22,
+    sharedDirectory:      OptionalArgument[String]      = None,
+    workDirectory:        OptionalArgument[String]      = None,
+    openMOLEMemory:       OptionalArgument[Information] = None,
+    threads:              OptionalArgument[Int]         = None,
+    storageSharedLocally: Boolean                       = false,
+    name:                 OptionalArgument[String]      = None
   )(implicit decrypt: Decrypt) =
     new SSHEnvironment(
       user = user,
@@ -69,7 +69,7 @@ class SSHEnvironment(
     override val port:           Int,
     val sharedDirectory:         Option[String],
     val workDirectory:           Option[String],
-    override val openMOLEMemory: Option[Int],
+    override val openMOLEMemory: Option[Information],
     override val threads:        Option[Int],
     val storageSharedLocally:    Boolean,
     override val name:           Option[String]

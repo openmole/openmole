@@ -26,7 +26,7 @@ import org.openmole.tool.cache.AssociativeCache
 import org.openmole.tool.hash.Hash
 import org.openmole.tool.tar._
 
-import concurrent.duration._
+import squants.time.TimeConversions._
 
 object FileService {
   val GCInterval = ConfigurationLocation("FileService", "GCInterval", Some(5 minutes))

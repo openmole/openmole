@@ -33,6 +33,7 @@ object SharedStorage extends Logger
 import org.openmole.plugin.environment.ssh.SharedStorage._
 import Log._
 import org.openmole.core.communication.storage._
+import squants.time.TimeConversions._
 
 trait SharedStorage extends SSHService { js ⇒
 

@@ -26,7 +26,7 @@ import org.openmole.plugin.environment.batch.environment.SerializedJob
 import org.openmole.plugin.environment.gridscale.GridScaleJobService
 import org.openmole.tool.file.uniqName
 import org.openmole.tool.logger.Logger
-
+import squants.time.TimeConversions._
 import scalax.io.Resource
 
 object DIRACJobService extends Logger
@@ -65,7 +65,7 @@ trait DIRACJobService extends GridScaleJobService { js ⇒
   def jobScript =
     JobScript(
       voName = environment.voName,
-      memory = environment.openMOLEMemoryValue,
+      memory = environment.openMOLEMemoryValue.toMegabytes.toInt,
       threads = environment.threadsValue,
       debug = environment.debug
     )
@@ -88,7 +88,7 @@ trait DIRACJobService extends GridScaleJobService { js ⇒
         inputSandbox = Seq(script),
         arguments = script.getName,
         executable = "/bin/bash",
-        cpuTime = environment.cpuTime
+        cpuTime = environment.cpuTime.map(x ⇒ x: concurrent.duration.Duration)
       )
 
       val jid = jobService.submit(jobDescription)

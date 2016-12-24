@@ -42,7 +42,7 @@ class StoragesGC(storagesRef: WeakReference[Iterable[StorageService]]) extends I
           replica ← ReplicaCatalog.query { replicas.filter { _.storage === storage.id }.result }
         } {
           try
-            if (!new File(replica.source).exists || System.currentTimeMillis - replica.lastCheckExists > Workspace.preference(ReplicaCatalog.NoAccessCleanTime).toMillis) {
+            if (!new File(replica.source).exists || System.currentTimeMillis - replica.lastCheckExists > Workspace.preference(ReplicaCatalog.NoAccessCleanTime).millis) {
               logger.fine(s"Remove gc $replica")
               ReplicaCatalog.remove(replica.id)
               storage.backgroundRmFile(replica.path)

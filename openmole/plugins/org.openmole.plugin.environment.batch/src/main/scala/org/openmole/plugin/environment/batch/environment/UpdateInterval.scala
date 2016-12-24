@@ -17,14 +17,14 @@
  */
 package org.openmole.plugin.environment.batch.environment
 
-import scala.concurrent.duration._
+import squants.time._
 
 object UpdateInterval {
-  def fixed(duration: FiniteDuration) = UpdateInterval(duration, duration, 0 second)
+  def fixed(duration: Time) = UpdateInterval(duration, duration, Seconds(0))
 }
 
 case class UpdateInterval(
-  minUpdateInterval:       FiniteDuration,
-  maxUpdateInterval:       FiniteDuration,
-  incrementUpdateInterval: FiniteDuration
+  minUpdateInterval:       Time,
+  maxUpdateInterval:       Time,
+  incrementUpdateInterval: Time
 )

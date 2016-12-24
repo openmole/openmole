@@ -22,6 +22,7 @@ import org.openmole.plugin.environment.batch.environment._
 import org.openmole.plugin.environment.batch.jobservice.JobService
 import org.openmole.plugin.environment.batch.storage._
 import org.openmole.tool.thread._
+import squants.information._
 
 object DesktopGridEnvironment {
   val timeStempsDirName = "timeStemps"
@@ -33,9 +34,9 @@ object DesktopGridEnvironment {
 
   def apply(
     port:           Int,
-    openMOLEMemory: OptionalArgument[Int]    = None,
-    threads:        OptionalArgument[Int]    = None,
-    name:           OptionalArgument[String] = None
+    openMOLEMemory: OptionalArgument[Information] = None,
+    threads:        OptionalArgument[Int]         = None,
+    name:           OptionalArgument[String]      = None
   ) =
     new DesktopGridEnvironment(
       port = port,
@@ -47,7 +48,7 @@ object DesktopGridEnvironment {
 
 class DesktopGridEnvironment(
     val port:                    Int,
-    override val openMOLEMemory: Option[Int],
+    override val openMOLEMemory: Option[Information],
     override val threads:        Option[Int],
     override val name:           Option[String]
 ) extends SimpleBatchEnvironment { env ⇒

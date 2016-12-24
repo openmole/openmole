@@ -23,6 +23,7 @@ import org.openmole.core.workspace.Workspace
 import org.openmole.plugin.environment.batch.environment.BatchEnvironment
 import org.openmole.plugin.environment.batch.storage.StorageService
 import org.openmole.plugin.environment.gridscale.GridScaleStorage
+import squants.time.TimeConversions._
 
 trait SSHStorageService extends StorageService with SSHService with GridScaleStorage { ss ⇒
 

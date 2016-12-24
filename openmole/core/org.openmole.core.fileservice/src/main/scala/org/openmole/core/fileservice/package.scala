@@ -18,10 +18,10 @@
 package org.openmole.core
 
 import java.io.File
+
 import org.openmole.tool.file._
 import org.openmole.tool.hash._
-
-import scala.concurrent.duration.Duration
+import squants.time.Time
 
 import scala.util.{ Failure, Success, Try }
 
@@ -46,7 +46,7 @@ package object fileservice {
       file
     }
 
-    def updateIfTooOld(tooOld: Duration)(update: File ⇒ Unit) = {
+    def updateIfTooOld(tooOld: Time)(update: File ⇒ Unit) = {
       def timeStamp(f: File) = new File(f.getPath + "-timestamp")
       lock(file).withLock { _ ⇒
         val ts = timeStamp(file)
@@ -54,7 +54,7 @@ package object fileservice {
           if (!file.exists || !ts.exists) false
           else
             Try(ts.content.toLong) match {
-              case Success(v) ⇒ v + tooOld.toMillis > System.currentTimeMillis
+              case Success(v) ⇒ v + tooOld.millis > System.currentTimeMillis
               case Failure(_) ⇒ ts.delete; false
             }
 

@@ -18,12 +18,13 @@
 package org.openmole.plugin.environment.batch.environment
 
 import org.openmole.core.workspace.Workspace
+import squants.information._
 
 trait MemoryRequirement extends BatchEnvironment {
 
   // Margin for the thread stack allocations
   def margin = Workspace.preference(BatchEnvironment.RuntimeMemoryMargin)
-  def memory: Option[Int]
+  def memory: Option[Information]
 
   def requiredMemory = memory match {
     case Some(m) ⇒ m

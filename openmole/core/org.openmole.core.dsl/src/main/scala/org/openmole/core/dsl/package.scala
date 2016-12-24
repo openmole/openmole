@@ -17,21 +17,20 @@
 
 package org.openmole.core
 
-import org.openmole.core.context.Val
-import org.openmole.core.macros.ExtractValName
 import org.openmole.core.macros.ExtractValName._
 
-import scala.concurrent.duration
-import scala.concurrent.duration.FiniteDuration
 import scala.reflect.macros.blackbox.{ Context ⇒ MContext }
+import java.time.{ Duration ⇒ JDuration }
 
 package dsl {
 
   import org.openmole.core.context._
   import org.openmole.core.logging.LoggerService
   import org.openmole.core.workspace.Workspace
-
   import cats._
+  import org.openmole.core.tools.io.FromString
+  import squants._
+  import squants.information._
 
   trait DSLPackage <: Commands
       with Serializer
@@ -55,11 +54,32 @@ package dsl {
 
     implicit def stringToFile(path: String) = File(path)
 
-    implicit def durationInt(n: Int) = duration.DurationInt(n)
+    implicit def timeConversion[N: Numeric](n: N) = squants.time.TimeConversions.TimeConversions(n)
+    implicit class singularTimeConversion[N: Numeric](n: N) {
+      def nanosecond = n nanoseconds
+      def microsecond = n microseconds
+      def millisecond = n milliseconds
+      def second = n seconds
+      def minute = n minutes
+      def hour = n hours
+      def day = n days
+    }
 
-    implicit def durationLong(n: Long) = duration.DurationLong(n)
+    implicit def informationUnitConversion[N: Numeric](n: N) = squants.information.InformationConversions.InformationConversions(n)
+    implicit class singularInformationUnitConversion[N: Numeric](n: N) {
+      def byte = n bytes
+      def kilobyte = n kilobytes
+      def megabyte = n megabytes
+      def gigabyte = n gigabytes
+      def terabyte = n terabytes
+      def petabyte = n petabytes
+      def exabyte = n exabytes
+      def zettabyte = n zettabytes
+      def yottabyte = n yottabytes
+    }
 
-    implicit def stringToDuration(s: String): FiniteDuration = org.openmole.core.tools.service.stringToDuration(s)
+    implicit def stringToTime(s: String): Time = implicitly[FromString[Time]].apply(s)
+    implicit def intToMemory(i: Int): Information = (i megabytes)
 
     def encrypt(s: String) = Workspace.encrypt(s)
 
