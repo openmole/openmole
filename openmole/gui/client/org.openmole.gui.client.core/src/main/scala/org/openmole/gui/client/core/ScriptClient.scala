@@ -94,8 +94,6 @@ object ScriptClient {
 
     val authenticationItem = navItem(tags.div(glyph_lock, itemStyle).tooltip("Authentications"), () ⇒ authenticationPanel.dialog.open)
 
-    val marketItem = navItem(tags.div(glyph_market, itemStyle).tooltip("Market place"), () ⇒ marketPanel.dialog.open)
-
     val pluginItem = navItem(div(OMTags.glyph_plug, itemStyle).tooltip("Plugins"), () ⇒ pluginPanel.dialog.open)
 
     val envItem = navItem(div(glyph_exclamation, itemStyle), () ⇒ stackPanel.open)
@@ -134,11 +132,11 @@ object ScriptClient {
       modelWizardPanel.dialog.open
     })
 
-    val existingProject = MenuAction("From existing project", () ⇒ {
-
+    val marketPlaceProject = MenuAction("From market place", () ⇒ {
+      marketPanel.dialog.open
     })
 
-    val elements = Seq(newEmpty, importModel)
+    val elements = Seq(newEmpty, importModel, marketPlaceProject)
 
     lazy val menuActions: Options[MenuAction] = elements.options(
       key = btn_danger,
@@ -190,7 +188,6 @@ object ScriptClient {
             navItem(menuActions.selector),
             execItem,
             authenticationItem,
-            marketItem,
             pluginItem,
             docItem
           )
