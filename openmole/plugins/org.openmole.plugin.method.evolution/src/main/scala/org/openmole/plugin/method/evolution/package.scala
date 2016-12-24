@@ -25,10 +25,8 @@ import org.openmole.core.workflow.transition._
 import org.openmole.plugin.task.tools._
 import org.openmole.plugin.tool.pattern._
 import org.openmole.core.context._
-import scala.concurrent.duration.Duration
-
 import shapeless._
-
+import squants.time.Time
 import squants.time.TimeConversions._
 
 package object evolution {
@@ -41,7 +39,7 @@ package object evolution {
   type Genome = Seq[Input[_]]
 
   implicit def intToCounterTerminationConverter(n: Long): AfterGeneration = AfterGeneration(n)
-  implicit def durationToDurationTerminationConverter(d: Duration): AfterDuration = AfterDuration(d)
+  implicit def durationToDurationTerminationConverter(d: Time): AfterDuration = AfterDuration(d)
 
   object OMTermination {
     def toTermination(oMTermination: OMTermination, integration: EvolutionWorkflow) =
@@ -53,7 +51,7 @@ package object evolution {
 
   sealed trait OMTermination
   case class AfterGeneration(steps: Long) extends OMTermination
-  case class AfterDuration(duration: Duration) extends OMTermination
+  case class AfterDuration(duration: Time) extends OMTermination
 
   def SteadyStateEvolution[T](algorithm: T, evaluation: Puzzle, termination: OMTermination, parallelism: Int = 1)(implicit wfi: WorkflowIntegration[T]) = {
     val t = wfi(algorithm)
