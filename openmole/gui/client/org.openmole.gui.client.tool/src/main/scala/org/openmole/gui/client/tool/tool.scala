@@ -70,11 +70,25 @@ package object tool {
     sheet.marginLeft(-25)
   )
   // SCRIPT CLIENT
+  lazy val mainNav0: ModifierSeq = Seq(
+    left := 0
+  )
+
+  lazy val mainNav370: ModifierSeq = Seq(
+    left := 370
+  )
+
+  lazy val fileChevronStyle: ModifierSeq = Seq(
+    lineHeight := "10px",
+    top := 10,
+    left := -30,
+    sheet.paddingRight(20)
+  )
+
   lazy val mainNav: ModifierSeq = Seq(
     left := 370,
     fontSize := 20
   )
-
   lazy val connectionTabOverlay: ModifierSeq = Seq(
     background := "white none repeat scroll 0 0",
     color("white"),
@@ -169,7 +183,7 @@ package object tool {
 
   lazy val resetPassword: ModifierSeq = Seq(
     fontSize := 12,
-    color("grey"),
+    color("#9d9d9d"),
     cursor := "pointer"
   )
 
