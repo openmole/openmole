@@ -38,5 +38,5 @@
         EGIEnvironment(
           "biomed",
           cpuTime = 4 hours,
-          openMOLEMemory = 200
+          openMOLEMemory = 200 megabytes
         )""")
