@@ -25,8 +25,8 @@ object Environment {
 
   def provideOptions = """You also can set options by providing additional parameters to the environment (..., option = value, ...)"""
   def wallTime = newEntry("walltime", " the maximum duration for the job in term of user time, for instance ", hl.openmoleNoTest("wallTime = 1 hour"))
-  def memory = newEntry("memory", " the memory in mega-byte for the job, for instance ", hl.openmoleNoTest("memory = 2000"))
-  def openMOLEMemory = newEntry("openMOLEMemory", " the memory of attributed to the OpenMOLE runtime on the execution node, if you run external tasks you can reduce the memory for the OpenMOLE runtime to 256MB in order to have more memory for you program on the execution node, for instance ", hl.openmoleNoTest("openMOLEMemory = 256"))
+  def memory = newEntry("memory", " the memory for the job, for instance ", hl.openmoleNoTest("memory = 2 gigabytes"))
+  def openMOLEMemory = newEntry("openMOLEMemory", " the memory of attributed to the OpenMOLE runtime on the execution node, if you run external tasks you can reduce the memory for the OpenMOLE runtime to 256MB in order to have more memory for you program on the execution node, for instance ", hl.openmoleNoTest("openMOLEMemory = 256 megabytes"))
   def threads = newEntry("threads", " the number of threads for concurrent execution of tasks on the worker node, for instance ", hl.openmoleNoTest("threads = 4"))
   def queue = newEntry("queue", " the name of the queue on which jobs should be submitted, for instance ", hl.openmoleNoTest("queue = \"longjobs\""))
   def port = newEntry("port", " the number of the port used by the ssh server, by ", b("default it is set to 22"))
