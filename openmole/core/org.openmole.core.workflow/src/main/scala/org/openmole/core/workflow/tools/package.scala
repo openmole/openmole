@@ -54,6 +54,7 @@ package tools {
     object OptionalArgument {
       implicit def valueToOptionalArgument[T](v: T) = OptionalArgument(Some(v))
       implicit def noneToOptionalArgument[T](n: None.type) = OptionalArgument[T](n)
+      def apply[T](t: T): OptionalArgument[T] = OptionalArgument(Some(t))
     }
 
     case class OptionalArgument[T](option: Option[T] = None)

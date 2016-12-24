@@ -19,6 +19,7 @@ package org.openmole.plugin.environment.ssh
 
 import fr.iscpif.gridscale.ssh.{ SSHHost, SSHAuthentication ⇒ SA }
 import org.openmole.core.workspace.Workspace
+import squants.time.TimeConversions._
 
 trait SSHAccess extends SSHHost { s ⇒
 

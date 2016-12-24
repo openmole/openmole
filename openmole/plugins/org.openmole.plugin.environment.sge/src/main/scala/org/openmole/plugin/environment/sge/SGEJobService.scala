@@ -29,6 +29,7 @@ import org.openmole.tool.logger.Logger
 object SGEJobService extends Logger
 
 import org.openmole.plugin.environment.sge.SGEJobService._
+import squants.time.TimeConversions._
 
 trait SGEJobService extends ClusterJobService with SSHHost with SharedStorage { js ⇒
 
@@ -49,8 +50,8 @@ trait SGEJobService extends ClusterJobService with SSHHost with SharedStorage { 
       arguments = remoteScript,
       queue = environment.queue,
       workDirectory = serializedJob.path,
-      wallTime = environment.wallTime,
-      memory = Some(environment.requiredMemory)
+      wallTime = environment.wallTime.map(x ⇒ x: concurrent.duration.Duration),
+      memory = Some(environment.requiredMemory.toMegabytes.toInt)
     )
 
     val jid = js.jobService.submit(jobDescription)

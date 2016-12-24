@@ -25,12 +25,13 @@ import org.openmole.core.workspace._
 import org.openmole.tool.file._
 import org.openmole.tool.stream._
 
-import scala.concurrent.duration._
+import squants.time.TimeConversions._
+import squants.information.InformationConversions._
 
 object Storage {
-  val BufferSize = ConfigurationLocation("Storage", "BufferSize", Some(65535))
-  val CopyTimeout = ConfigurationLocation("Storage", "CopyTimeout", Some(1 minute))
-  val CloseTimeout = ConfigurationLocation("Storage", "CloseTimeout", Some(1 minute))
+  val BufferSize = ConfigurationLocation("Storage", "BufferSize", Some(64 kilobytes))
+  val CopyTimeout = ConfigurationLocation("Storage", "CopyTimeout", Some(1 minutes))
+  val CloseTimeout = ConfigurationLocation("Storage", "CloseTimeout", Some(1 minutes))
   Workspace setDefault BufferSize
   Workspace setDefault CopyTimeout
   Workspace setDefault CloseTimeout

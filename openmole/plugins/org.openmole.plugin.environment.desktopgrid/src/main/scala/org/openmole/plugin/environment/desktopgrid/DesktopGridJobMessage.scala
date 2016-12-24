@@ -18,5 +18,6 @@
 package org.openmole.plugin.environment.desktopgrid
 
 import org.openmole.core.communication.message._
+import squants.information._
 
-class DesktopGridJobMessage(val runtime: FileMessage, val runtimePlugins: Iterable[FileMessage], val memory: Int, val executionMessagePath: String)
+case class DesktopGridJobMessage(runtime: FileMessage, runtimePlugins: Iterable[FileMessage], memory: Information, executionMessagePath: String)

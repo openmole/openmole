@@ -34,7 +34,7 @@ import org.openmole.tool.file._
 import org.openmole.tool.logger.Logger
 import org.openmole.tool.stream._
 import org.openmole.tool.tar.TarInputStream
-
+import squants.time.TimeConversions._
 import scala.util.Try
 
 object EGIAuthentication extends Logger {

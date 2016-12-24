@@ -28,7 +28,7 @@ import org.openmole.plugin.environment.batch.environment._
 import org.openmole.plugin.environment.batch.jobservice.BatchJob
 import org.openmole.plugin.environment.gridscale._
 import org.openmole.tool.logger.Logger
-
+import squants.time.TimeConversions._
 import scala.collection.mutable
 
 object SSHJobService extends Logger

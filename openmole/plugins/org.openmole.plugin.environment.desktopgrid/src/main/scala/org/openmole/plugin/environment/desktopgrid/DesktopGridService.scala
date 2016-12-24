@@ -34,6 +34,7 @@ import org.openmole.plugin.environment.gridscale.GridScaleStorage
 import org.openmole.plugin.tool.sftpserver.SFTPServer
 import org.openmole.tool.file._
 import org.openmole.tool.hash._
+import squants.information.Information
 
 object DesktopGridService {
 
@@ -111,11 +112,11 @@ class DesktopGridService(port: Int, path: File = Workspace.newDir()) { service â
   def resultExists(jobId: String) = resultsDir.listFilesSafe.exists { _.getName.startsWith(jobId) }
   def results(jobId: String) = resultsDir.listFilesSafe.filter { _.getName.startsWith(jobId) }
 
-  def submit(serializedJob: SerializedJob, memory: Int, js: DesktopGridJobService): BatchJob = synchronized {
+  def submit(serializedJob: SerializedJob, memory: Information, js: DesktopGridJobService): BatchJob = synchronized {
     server.startIfNeeded
     val jobId = new File(serializedJob.path).getName
     import serializedJob._
-    val desktopJobMessage = new DesktopGridJobMessage(runtime.runtime, runtime.environmentPlugins, memory, inputFile)
+    val desktopJobMessage = DesktopGridJobMessage(runtime.runtime, runtime.environmentPlugins, memory, inputFile)
 
     val tmpJobFile = tmpJobSubmissionFile(jobId)
     tmpJobFile.withGzippedOutputStream(os â‡’

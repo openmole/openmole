@@ -22,7 +22,6 @@ import java.util.concurrent.atomic.AtomicBoolean
 import fr.iscpif.scaladget.api.BootstrapTags.ScrollableTextArea.BottomScroll
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 
-import scala.concurrent.duration.Duration
 import scala.util.{ Failure, Success }
 import scalatags.JsDom.all._
 import org.openmole.gui.client.tool._

@@ -21,15 +21,17 @@ import java.net.URI
 
 import fr.iscpif.gridscale.egi.BDII
 import org.openmole.core.exception.InternalProcessingError
-import org.openmole.core.workflow.dsl._
 import org.openmole.core.workspace._
+import org.openmole.core.workflow.dsl._
 import org.openmole.plugin.environment.batch.control._
 import org.openmole.plugin.environment.batch.environment._
 import org.openmole.tool.logger.Logger
 import org.openmole.tool.random._
+import squants.information.Information
+import squants.time.Time
+import squants.time.TimeConversions._
 
 import scala.annotation.tailrec
-import scala.concurrent.duration._
 
 object EGIEnvironment extends Logger {
 
@@ -200,8 +202,8 @@ object EGIEnvironment extends Logger {
     vomsURLs:       OptionalArgument[Seq[String]] = None,
     setup:          OptionalArgument[String]      = None,
     fqan:           OptionalArgument[String]      = None,
-    cpuTime:        OptionalArgument[Duration]    = None,
-    openMOLEMemory: OptionalArgument[Int]         = None,
+    cpuTime:        OptionalArgument[Time]        = None,
+    openMOLEMemory: OptionalArgument[Information] = None,
     debug:          Boolean                       = false,
     name:           OptionalArgument[String]      = None
   )(implicit authentication: EGIAuthentication, decrypt: Decrypt) =

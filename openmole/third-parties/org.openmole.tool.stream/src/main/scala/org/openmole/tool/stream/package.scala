@@ -19,11 +19,11 @@ package org.openmole.tool
 
 import java.io._
 import java.nio.file._
-import java.util.concurrent.{ Callable, TimeoutException }
+import java.util.concurrent.{ Callable, TimeUnit, TimeoutException }
 import java.util.zip.{ GZIPInputStream, GZIPOutputStream }
 
-import scala.concurrent.duration.Duration
 import org.openmole.tool.thread._
+import squants.time._
 
 package object stream {
 
@@ -36,7 +36,7 @@ package object stream {
     }
   }
 
-  def copy(inputStream: InputStream, outputStream: OutputStream, bufferSize: Int, timeout: Duration) = {
+  def copy(inputStream: InputStream, outputStream: OutputStream, bufferSize: Int, timeout: Time) = {
     val buffer = new Array[Byte](bufferSize)
     val executor = defaultExecutor
     val reader = new ReaderRunnable(buffer, inputStream, bufferSize)
@@ -44,7 +44,7 @@ package object stream {
     Iterator.continually {
       val futureRead = executor.submit(reader)
 
-      try futureRead.get(timeout.length, timeout.unit)
+      try futureRead.get(timeout.millis, TimeUnit.MILLISECONDS)
       catch {
         case (e: TimeoutException) ⇒
           futureRead.cancel(true)
@@ -54,7 +54,7 @@ package object stream {
       count ⇒
         val futureWrite = executor.submit(new WritterRunnable(buffer, outputStream, count))
 
-        try futureWrite.get(timeout.length, timeout.unit)
+        try futureWrite.get(timeout.millis, TimeUnit.MILLISECONDS)
         catch {
           case (e: TimeoutException) ⇒
             futureWrite.cancel(true)
@@ -78,12 +78,12 @@ package object stream {
 
     def copy(to: OutputStream): Unit = stream.copy(is, to)
 
-    def copy(to: File, maxRead: Int, timeout: Duration): Unit =
+    def copy(to: File, maxRead: Int, timeout: Time): Unit =
       withClosable(new BufferedOutputStream(new FileOutputStream(to))) {
         copy(_, maxRead, timeout)
       }
 
-    def copy(to: OutputStream, maxRead: Int, timeout: Duration) = stream.copy(is, to, maxRead, timeout)
+    def copy(to: OutputStream, maxRead: Int, timeout: Time) = stream.copy(is, to, maxRead, timeout)
     def toGZiped = new GZipedInputStream(is)
     def toGZ = new GZIPInputStream(is)
 

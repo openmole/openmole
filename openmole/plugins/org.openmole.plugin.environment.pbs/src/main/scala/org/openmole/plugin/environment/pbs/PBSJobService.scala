@@ -29,6 +29,7 @@ import org.openmole.tool.logger.Logger
 object PBSJobService extends Logger
 
 import org.openmole.plugin.environment.pbs.PBSJobService._
+import squants.time.TimeConversions._
 
 trait PBSJobService extends ClusterJobService { js ⇒
 
@@ -49,8 +50,8 @@ trait PBSJobService extends ClusterJobService { js ⇒
       arguments = remoteScript,
       queue = environment.queue,
       workDirectory = serializedJob.path,
-      wallTime = environment.wallTime,
-      memory = Some(environment.requiredMemory),
+      wallTime = environment.wallTime.map(x ⇒ x: concurrent.duration.Duration),
+      memory = Some(environment.requiredMemory.toMegabytes.toInt),
       nodes = environment.nodes,
       coreByNode = environment.coreByNode orElse environment.threads
     )

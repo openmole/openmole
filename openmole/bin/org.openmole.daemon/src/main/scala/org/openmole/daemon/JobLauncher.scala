@@ -21,14 +21,14 @@ import java.io.File
 import java.util.Random
 import java.util.UUID
 import java.util.concurrent.Executors
+
 import fr.iscpif.gridscale.authentication.UserPassword
-import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.plugin.environment.gridscale._
 import org.openmole.tool.file._
 import org.openmole.tool.logger.Logger
 import org.openmole.tool.thread._
 import org.openmole.core.tools.service.{ OS, ProcessUtil }
-import org.openmole.core.workspace.{ Workspace, ConfigurationLocation }
+import org.openmole.core.workspace.{ ConfigurationLocation, Workspace }
 import org.openmole.plugin.environment.desktopgrid._
 import DesktopGridEnvironment._
 import org.openmole.plugin.environment.batch.storage._
@@ -36,17 +36,18 @@ import org.openmole.core.serializer._
 import org.openmole.tool.tar._
 import ProcessUtil._
 import fr.iscpif.gridscale.ssh._
-
 import org.openmole.core.communication.storage._
 import org.openmole.core.communication.message._
 import org.openmole.core.communication.message.FileMessage._
+import squants.information.Information
+import squants.time.TimeConversions._
+
 import scala.annotation.tailrec
 import util.{ Failure, Success }
-import concurrent.duration._
 
 object JobLauncher extends Logger {
-  val jobCheckInterval = ConfigurationLocation("JobLauncher", "jobCheckInterval", Some(1 minute))
-  val connectionTimeout = ConfigurationLocation("JobLauncher", "connectionTimeout", Some(1 minute))
+  val jobCheckInterval = ConfigurationLocation("JobLauncher", "jobCheckInterval", Some(1 minutes))
+  val connectionTimeout = ConfigurationLocation("JobLauncher", "connectionTimeout", Some(1 minutes))
 
   Workspace setDefault jobCheckInterval
   Workspace setDefault connectionTimeout
@@ -98,7 +99,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
 
     processJob(background { fetchAJob(id, storage) })
 
-    @tailrec def processJob(fetchJobResult: () ⇒ Option[(File, File, File, File, Int, ExecutionMessage, String, List[FileMessage])]): Unit = {
+    @tailrec def processJob(fetchJobResult: () ⇒ Option[(File, File, File, File, Information, ExecutionMessage, String, List[FileMessage])]): Unit = {
       val next = try {
         fetchJobResult() match {
 
@@ -115,7 +116,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
                 val ptrFlag = if (OS.actualOS.is64Bit) "-XX:+UseCompressedOops" else ""
 
                 val launcher = s"""-cp ${quote("launcher/*")} org.openmole.launcher.Launcher --plugins ${quote("plugins/")} --run org.openmole.runtime.SimExplorer --osgi-directory ${quote(osgiDir.getAbsolutePath)}"""
-                val cmd = s"java -Xmx${memory}m -Dosgi.locking=none -XX:+UseG1GC $ptrFlag -Dosgi.configuration.area=${osgiDir.getName} -Dosgi.classloader.singleThreadLoads=true ${launcher} -- -s ${quote(storageFile.getAbsolutePath)} -i ${quote(localExecutionMessage.getAbsolutePath)} -o ${quote(localResultFile.getAbsolutePath)} -c ${localCommunicationDirPath} -p ${quote(pluginDir.getAbsolutePath)}" + (if (debug) " -d " else "")
+                val cmd = s"java -Xmx${memory.toMegabytes.toInt}m -Dosgi.locking=none -XX:+UseG1GC $ptrFlag -Dosgi.configuration.area=${osgiDir.getName} -Dosgi.classloader.singleThreadLoads=true ${launcher} -- -s ${quote(storageFile.getAbsolutePath)} -i ${quote(localExecutionMessage.getAbsolutePath)} -o ${quote(localResultFile.getAbsolutePath)} -c ${localCommunicationDirPath} -p ${quote(pluginDir.getAbsolutePath)}" + (if (debug) " -d " else "")
 
                 logger.info("Executing runtime: " + cmd + " in directory " + runtime)
                 //val commandLine = CommandLine.parse(cmd)

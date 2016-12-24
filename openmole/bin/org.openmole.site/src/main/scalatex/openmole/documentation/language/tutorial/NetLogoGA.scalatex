@@ -181,7 +181,7 @@
   val savePopulationHook = SavePopulationHook(island, workDirectory / "results")
 
   // Define the execution environment
-  val env = EGIEnvironment("biomed", openMOLEMemory = 1200, cpuTime = 4 hours)
+  val env = EGIEnvironment("biomed", openMOLEMemory = 1200 megabytes, cpuTime = 4 hours)
 
   // Define the workflow
   (island on env hook savePopulationHook)""", header = model)

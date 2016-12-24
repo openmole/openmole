@@ -21,8 +21,7 @@ import org.openmole.core.workflow.job._
 import org.openmole.plugin.environment.batch.environment._
 import org.openmole.plugin.environment.batch.jobservice._
 import org.openmole.plugin.environment.batch.storage._
-
-import scala.concurrent.duration.{ Duration, FiniteDuration }
+import squants.time.Time
 
 sealed trait JobMessage
 sealed trait DispatchedMessage
@@ -30,9 +29,9 @@ case class Upload(job: BatchExecutionJob) extends JobMessage with DispatchedMess
 case class Uploaded(job: BatchExecutionJob, serializedJob: SerializedJob) extends JobMessage
 case class Submit(job: BatchExecutionJob, serializedJob: SerializedJob) extends JobMessage with DispatchedMessage
 case class Submitted(job: BatchExecutionJob, serializedJob: SerializedJob, batchJob: BatchJob) extends JobMessage
-case class Refresh(job: BatchExecutionJob, serializedJob: SerializedJob, batchJob: BatchJob, delay: FiniteDuration, consecutiveUpdateErrors: Int = 0) extends JobMessage with DispatchedMessage
+case class Refresh(job: BatchExecutionJob, serializedJob: SerializedJob, batchJob: BatchJob, delay: Time, consecutiveUpdateErrors: Int = 0) extends JobMessage with DispatchedMessage
 case class Resubmit(job: BatchExecutionJob, storage: StorageService) extends JobMessage
-case class Delay(msg: JobMessage, delay: Duration) extends JobMessage
+case class Delay(msg: JobMessage, delay: Time) extends JobMessage
 case class Error(job: BatchExecutionJob, exception: Throwable) extends JobMessage
 case class Kill(job: BatchExecutionJob) extends JobMessage
 case class KillBatchJob(batchJob: BatchJob) extends JobMessage with DispatchedMessage

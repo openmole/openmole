@@ -26,6 +26,7 @@ import org.openmole.plugin.environment.batch.jobservice.{ BatchJob, BatchJobId }
 import org.openmole.plugin.environment.gridscale._
 import org.openmole.plugin.environment.ssh.{ SSHService, SharedStorage }
 import org.openmole.tool.logger.Logger
+import squants.time.TimeConversions._
 
 object CondorJobService extends Logger
 
@@ -54,7 +55,7 @@ trait CondorJobService extends GridScaleJobService with SSHHost with SharedStora
       workDirectory = serializedJob.path,
       // TODO not available in GridScale plugin yet
       //override val wallTime = environment.wallTime
-      memory = Some(environment.requiredMemory),
+      memory = Some(environment.requiredMemory.toMegabytes.toInt),
       nodes = environment.nodes,
       // TODO typo in coreByNode in GridScale -> should be coresByNode
       coreByNode = environment.coresByNode orElse environment.threads,

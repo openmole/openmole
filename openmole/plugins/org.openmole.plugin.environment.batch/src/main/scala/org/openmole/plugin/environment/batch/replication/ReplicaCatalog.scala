@@ -34,8 +34,8 @@ import slick.driver.H2Driver.api._
 
 import scala.annotation.tailrec
 import scala.concurrent.Await
-import scala.concurrent.duration._
 import scala.util.{ Success, Try }
+import squants.time.TimeConversions._
 
 object ReplicaCatalog extends Logger {
 
@@ -44,9 +44,9 @@ object ReplicaCatalog extends Logger {
   val NoAccessCleanTime = ConfigurationLocation("ReplicaCatalog", "NoAccessCleanTime", Some(30 days))
   val InCatalogCacheTime = ConfigurationLocation("ReplicaCatalog", "InCatalogCacheTime", Some(2 minutes))
   val ReplicaCacheTime = ConfigurationLocation("ReplicaCatalog", "ReplicaCacheTime", Some(30 minutes))
-  val ReplicaGraceTime = ConfigurationLocation("ReplicaCatalog", "ReplicaGraceTime", Some(1 day))
-  val LockTimeout = ConfigurationLocation("ReplicaCatalog", "LockTimeout", Some(1 minute))
-  val CheckFileExistsInterval = ConfigurationLocation("ReplicaCatalog", "CheckFileExistsInterval", Some(1 hour))
+  val ReplicaGraceTime = ConfigurationLocation("ReplicaCatalog", "ReplicaGraceTime", Some(1 days))
+  val LockTimeout = ConfigurationLocation("ReplicaCatalog", "LockTimeout", Some(1 minutes))
+  val CheckFileExistsInterval = ConfigurationLocation("ReplicaCatalog", "CheckFileExistsInterval", Some(1 hours))
 
   Workspace setDefault NoAccessCleanTime
   Workspace setDefault InCatalogCacheTime
@@ -68,19 +68,19 @@ object ReplicaCatalog extends Logger {
       password = info.password
     )
 
-    Await.result(db.run { sqlu"""SET DEFAULT_LOCK_TIMEOUT ${Workspace.preference(LockTimeout).toMillis}""" }, Duration.Inf)
+    Await.result(db.run { sqlu"""SET DEFAULT_LOCK_TIMEOUT ${Workspace.preference(LockTimeout).millis}""" }, concurrent.duration.Duration.Inf)
     db
   }
 
-  def query[T](f: DBIOAction[T, slick.dbio.NoStream, scala.Nothing]) = Await.result(database.run(f), Duration.Inf)
+  def query[T](f: DBIOAction[T, slick.dbio.NoStream, scala.Nothing]) = Await.result(database.run(f), concurrent.duration.Duration.Inf)
 
   lazy val localLock = new LockRepository[ReplicaCacheKey]
 
   type ReplicaCacheKey = (String, String, String)
   val replicaCache = CacheBuilder.newBuilder.asInstanceOf[CacheBuilder[ReplicaCacheKey, Replica]].
-    expireAfterWrite(Workspace.preference(ReplicaCacheTime).toSeconds, TimeUnit.SECONDS).build[ReplicaCacheKey, Replica]
+    expireAfterWrite(Workspace.preference(ReplicaCacheTime).millis, TimeUnit.MILLISECONDS).build[ReplicaCacheKey, Replica]
 
-  def inCatalog = inCatalogCache(inCatalogQuery, Workspace.preference(InCatalogCacheTime).toMillis)
+  def inCatalog = inCatalogCache(inCatalogQuery, Workspace.preference(InCatalogCacheTime).millis)
 
   private def inCatalogQuery: Map[String, Set[String]] = {
     val all = query(replicas.map { replica ⇒ (replica.storage, replica.hash) }.result)

@@ -23,6 +23,7 @@ import org.openmole.core.workflow.dsl._
 import org.openmole.core.workspace._
 import org.openmole.plugin.environment.batch.environment._
 import org.openmole.plugin.environment.ssh._
+import squants.information._
 
 object CondorEnvironment {
   def apply(
@@ -31,10 +32,10 @@ object CondorEnvironment {
     port: Int    = 22,
     // TODO not available in the GridScale plugin yet
     //  queue: Option[String] = None,
-    openMOLEMemory: OptionalArgument[Int] = None,
+    openMOLEMemory: OptionalArgument[Information] = None,
     // TODO not available in the GridScale plugin yet
     //wallTime: Option[Duration] = None,
-    memory:               OptionalArgument[Int]               = None,
+    memory:               OptionalArgument[Information]       = None,
     nodes:                OptionalArgument[Int]               = None,
     coresByNode:          OptionalArgument[Int]               = None,
     sharedDirectory:      OptionalArgument[String]            = None,
@@ -67,10 +68,10 @@ class CondorEnvironment(
     override val port: Int,
     // TODO not available in the GridScale plugin yet
     //val queue: Option[String],
-    override val openMOLEMemory: Option[Int],
+    override val openMOLEMemory: Option[Information],
     // TODO not available in the GridScale plugin yet
     //val wallTime: Option[Duration],
-    val memory:               Option[Int],
+    val memory:               Option[Information],
     val nodes:                Option[Int]               = None,
     val coresByNode:          Option[Int]               = None,
     val sharedDirectory:      Option[String],

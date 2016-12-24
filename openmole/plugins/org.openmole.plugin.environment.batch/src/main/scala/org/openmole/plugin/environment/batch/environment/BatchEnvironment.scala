@@ -40,7 +40,10 @@ import org.openmole.tool.cache._
 import org.openmole.tool.file._
 import org.openmole.tool.logger.Logger
 
-import scala.concurrent.duration._
+import squants.time.TimeConversions._
+import squants.information.Information
+import squants.information.InformationConversions._
+
 import scala.ref.WeakReference
 
 object BatchEnvironment extends Logger {
@@ -89,21 +92,21 @@ object BatchEnvironment extends Logger {
     res
   }
 
-  val MemorySizeForRuntime = ConfigurationLocation("BatchEnvironment", "MemorySizeForRuntime", Some(1024))
+  val MemorySizeForRuntime = ConfigurationLocation("BatchEnvironment", "MemorySizeForRuntime", Some(1024 megabytes))
 
-  val CheckInterval = ConfigurationLocation("BatchEnvironment", "CheckInterval", Some(1 minute))
+  val CheckInterval = ConfigurationLocation("BatchEnvironment", "CheckInterval", Some(1 minutes))
 
-  val GetTokenInterval = ConfigurationLocation("BatchEnvironment", "GetTokenInterval", Some(1 minute))
+  val GetTokenInterval = ConfigurationLocation("BatchEnvironment", "GetTokenInterval", Some(1 minutes))
 
-  val MinUpdateInterval = ConfigurationLocation("BatchEnvironment", "MinUpdateInterval", Some(1 minute))
-  val MaxUpdateInterval = ConfigurationLocation("BatchEnvironment", "MaxUpdateInterval", Some(10 minute))
-  val IncrementUpdateInterval = ConfigurationLocation("BatchEnvironment", "IncrementUpdateInterval", Some(1 minute))
+  val MinUpdateInterval = ConfigurationLocation("BatchEnvironment", "MinUpdateInterval", Some(1 minutes))
+  val MaxUpdateInterval = ConfigurationLocation("BatchEnvironment", "MaxUpdateInterval", Some(10 minutes))
+  val IncrementUpdateInterval = ConfigurationLocation("BatchEnvironment", "IncrementUpdateInterval", Some(1 minutes))
   val MaxUpdateErrorsInARow = ConfigurationLocation("BatchEnvironment", "MaxUpdateErrorsInARow", Some(3))
 
   val JobManagementThreads = ConfigurationLocation("BatchEnvironment", "JobManagementThreads", Some(100))
 
-  val StoragesGCUpdateInterval = ConfigurationLocation("BatchEnvironment", "StoragesGCUpdateInterval", Some(1 hour))
-  val RuntimeMemoryMargin = ConfigurationLocation("BatchEnvironment", "RuntimeMemoryMargin", Some(400))
+  val StoragesGCUpdateInterval = ConfigurationLocation("BatchEnvironment", "StoragesGCUpdateInterval", Some(1 hours))
+  val RuntimeMemoryMargin = ConfigurationLocation("BatchEnvironment", "RuntimeMemoryMargin", Some(400 megabytes))
 
   val downloadResultRetry = ConfigurationLocation("BatchEnvironment", "DownloadResultRetry", Some(3))
 
@@ -201,7 +204,7 @@ trait BatchEnvironment extends SubmissionEnvironment { env ⇒
 
   def executionJob(job: Job): BatchExecutionJob
 
-  def openMOLEMemory: Option[Int] = None
+  def openMOLEMemory: Option[Information] = None
   def openMOLEMemoryValue = openMOLEMemory match {
     case None    ⇒ Workspace.preference(MemorySizeForRuntime)
     case Some(m) ⇒ m

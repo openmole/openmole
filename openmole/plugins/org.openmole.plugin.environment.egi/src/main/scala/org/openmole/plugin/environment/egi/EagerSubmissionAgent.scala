@@ -23,6 +23,7 @@ import org.openmole.core.workflow.job.Job
 import org.openmole.core.workspace.{ ConfigurationLocation, Workspace }
 import org.openmole.plugin.environment.batch.environment.BatchEnvironment
 import org.openmole.tool.logger.Logger
+import squants.time.Time
 
 import scala.collection.immutable.TreeSet
 import scala.collection.mutable
@@ -34,9 +35,9 @@ object EagerSubmissionAgent extends Logger {
   case class HistoryPoint(running: Int, total: Int, time: Long = System.currentTimeMillis)
 
   implicit class FiniteQueue[A <: { def time: Long }](q: mutable.Queue[A]) {
-    def enqueueFinite(elem: A, keepTime: Long) = {
+    def enqueueFinite(elem: A, keepTime: Time) = {
       q.enqueue(elem)
-      q.dequeueFirst(e ⇒ e.time + keepTime < System.currentTimeMillis)
+      q.dequeueFirst(e ⇒ e.time + keepTime.millis < System.currentTimeMillis)
     }
   }
 }
@@ -68,7 +69,7 @@ class EagerSubmissionAgent(environment: WeakReference[BatchEnvironment], thresho
 
       runningHistory.enqueueFinite(
         HistoryPoint(running = stillRunning, total = jobSize),
-        Workspace.preference(EGIEnvironment.RunningHistoryDuration).toMillis
+        Workspace.preference(EGIEnvironment.RunningHistoryDuration)
       )
 
       logger.fine("still running " + stillRunning)

@@ -18,11 +18,13 @@
 package org.openmole.core.tools.io
 
 import java.math.MathContext
-import java.math.{ BigDecimal ⇒ JBigDecimal }
-import java.math.{ BigInteger ⇒ JBigInteger }
 import java.io.File
+import java.time.Duration
 
-import scala.concurrent.duration.{ FiniteDuration, Duration }
+import squants._
+import squants.information.Information
+import time.TimeConversions._
+import information.InformationConversions._
 
 object FromString {
 
@@ -81,9 +83,14 @@ object FromString {
       override def apply(s: String): Boolean = s.toBoolean
     }
 
-  implicit val finiteDurationFromString: FromString[FiniteDuration] =
-    new FromString[FiniteDuration] {
-      override def apply(s: String): FiniteDuration = org.openmole.core.tools.service.stringToDuration(s)
+  implicit val timeFromString: FromString[Time] =
+    new FromString[Time] {
+      override def apply(s: String): Time = s.toTime.get
+    }
+
+  implicit val memoryFromString: FromString[Information] =
+    new FromString[Information] {
+      override def apply(s: String): Information = s.toInformation.get
     }
 
   /*implicit val doubleAsIfIntegral = Numeric.DoubleAsIfIntegral

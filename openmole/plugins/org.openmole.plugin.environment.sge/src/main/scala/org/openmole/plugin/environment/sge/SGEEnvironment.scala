@@ -22,22 +22,23 @@ import org.openmole.core.workspace._
 import org.openmole.plugin.environment.batch.environment._
 import org.openmole.plugin.environment.ssh._
 
-import scala.concurrent.duration.Duration
+import squants._
+import squants.information._
 
 object SGEEnvironment {
   def apply(
     user:                 String,
     host:                 String,
-    port:                 Int                        = 22,
-    queue:                OptionalArgument[String]   = None,
-    openMOLEMemory:       OptionalArgument[Int]      = None,
-    wallTime:             OptionalArgument[Duration] = None,
-    memory:               OptionalArgument[Int]      = None,
-    sharedDirectory:      OptionalArgument[String]   = None,
-    workDirectory:        OptionalArgument[String]   = None,
-    threads:              OptionalArgument[Int]      = None,
-    storageSharedLocally: Boolean                    = false,
-    name:                 OptionalArgument[String]   = None
+    port:                 Int                           = 22,
+    queue:                OptionalArgument[String]      = None,
+    openMOLEMemory:       OptionalArgument[Information] = None,
+    wallTime:             OptionalArgument[Time]        = None,
+    memory:               OptionalArgument[Information] = None,
+    sharedDirectory:      OptionalArgument[String]      = None,
+    workDirectory:        OptionalArgument[String]      = None,
+    threads:              OptionalArgument[Int]         = None,
+    storageSharedLocally: Boolean                       = false,
+    name:                 OptionalArgument[String]      = None
   )(implicit decrypt: Decrypt) =
     new SGEEnvironment(
       user = user,
@@ -60,9 +61,9 @@ class SGEEnvironment(
     val host:                    String,
     override val port:           Int,
     val queue:                   Option[String],
-    override val openMOLEMemory: Option[Int],
-    val wallTime:                Option[Duration],
-    val memory:                  Option[Int],
+    override val openMOLEMemory: Option[Information],
+    val wallTime:                Option[Time],
+    val memory:                  Option[Information],
     val sharedDirectory:         Option[String],
     val workDirectory:           Option[String],
     override val threads:        Option[Int],

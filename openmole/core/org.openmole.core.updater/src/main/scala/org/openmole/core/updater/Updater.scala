@@ -17,10 +17,10 @@
 
 package org.openmole.core.updater
 
-import java.util.concurrent.Executors
-import org.openmole.tool.thread._
+import java.util.concurrent.{ Executors, TimeUnit }
 
-import scala.concurrent.duration.FiniteDuration
+import org.openmole.tool.thread._
+import squants._
 
 object Updater {
 
@@ -37,11 +37,11 @@ object Updater {
     delay(task)
   }
 
-  def registerForUpdate(updatable: IUpdatable, updateInterval: FiniteDuration): Unit = {
+  def registerForUpdate(updatable: IUpdatable, updateInterval: Time): Unit = {
     registerForUpdate(new UpdatableWithFixedDelay(updatable, updateInterval))
   }
 
-  def delay(updatable: IUpdatable, updateInterval: FiniteDuration): Unit = {
+  def delay(updatable: IUpdatable, updateInterval: Time): Unit = {
     delay(new UpdatableWithFixedDelay(updatable, updateInterval))
   }
 
@@ -49,7 +49,7 @@ object Updater {
     scheduler.schedule(
       new Runnable {
         override def run = pool.submit(updaterTask)
-      }, updaterTask.updatable.delay.length, updaterTask.updatable.delay.unit
+      }, updaterTask.updatable.delay.millis, TimeUnit.MILLISECONDS
     )
   }
 

@@ -25,6 +25,7 @@ import org.openmole.plugin.environment.batch.environment._
 import org.openmole.plugin.environment.batch.jobservice.{ BatchJob, BatchJobId }
 import org.openmole.plugin.environment.ssh.{ ClusterJobService, SSHService }
 import org.openmole.tool.logger.Logger
+import squants.time.TimeConversions._
 
 object SLURMJobService extends Logger
 
@@ -49,8 +50,8 @@ trait SLURMJobService extends ClusterJobService { js ⇒
       arguments = remoteScript,
       queue = environment.queue,
       workDirectory = serializedJob.path,
-      wallTime = environment.wallTime,
-      memory = Some(environment.requiredMemory),
+      wallTime = environment.wallTime.map(x ⇒ x: concurrent.duration.Duration),
+      memory = Some(environment.requiredMemory.toMegabytes.toInt),
       nodes = environment.nodes,
       coresByNode = environment.coresByNode orElse environment.threads,
       qos = environment.qos,

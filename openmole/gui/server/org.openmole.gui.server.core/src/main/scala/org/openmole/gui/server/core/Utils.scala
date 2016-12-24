@@ -43,8 +43,6 @@ import org.openmole.gui.ext.tool.server.OMRouter
 import org.openmole.gui.server.jscompile.JSPack
 import org.scalatra.{ Route, ScalatraBase }
 
-import scala.concurrent.Await
-import scala.concurrent.duration.Duration
 import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
 
 object Utils {
