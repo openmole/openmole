@@ -108,7 +108,7 @@ object TreeNodeTabs {
     val editButton = Rx {
       if (editable()) tags.div()
       else
-        OMTags.glyphBorderButton("", btn_primary +++ editingElement, glyph_edit, () ⇒ {
+        tags.button("Edit", btn_primary +++ editingElement)(onclick := { () ⇒
           editable() = !editable.now
         })
     }

@@ -71,11 +71,13 @@ package object tool {
   )
   // SCRIPT CLIENT
   lazy val mainNav0: ModifierSeq = Seq(
-    left := 0
+    sheet.paddingLeft(0),
+    zIndex := 0
   )
 
   lazy val mainNav370: ModifierSeq = Seq(
-    left := 370
+    sheet.paddingLeft(370),
+    zIndex := 0
   )
 
   lazy val fileChevronStyle: ModifierSeq = Seq(
@@ -323,13 +325,10 @@ package object tool {
 
   //TREENODE TABS
   lazy val editingElement: ModifierSeq = Seq(
-    fontSize := 18,
-    sheet.paddingLeft(5),
-    position := "fixed",
-    styles.right := 80,
-    top := 150,
-    width := 30,
-    zIndex := 800
+    fixedPosition,
+    styles.right := 200,
+    top := 15,
+    zIndex := 10
   )
 
   lazy val tabContent: ModifierSeq = Seq(
@@ -341,12 +340,12 @@ package object tool {
   lazy val playTabOverlay: ModifierSeq = Seq(
     color("white"),
     height := "100%",
-    left := 0,
-    absolutePosition,
+    left := 200,
+    fixedPosition,
     width := "100%",
     background := "rgba(0, 0, 0, 0.6) none repeat scroll 0 0",
     width := "100%",
-    zIndex := 20
+    zIndex := 10
   )
 
   lazy val overlayElement: ModifierSeq = Seq(
@@ -361,8 +360,8 @@ package object tool {
 
   lazy val executionElement: ModifierSeq = Seq(
     fixedPosition,
-    right := 80,
-    top := 150,
+    right := 200,
+    top := 15,
     width := 50,
     zIndex := 18
   )
@@ -644,7 +643,7 @@ package object tool {
 
   lazy val sortingBar: ModifierSeq = Seq(
     fixedPosition,
-    width := "100%",
+    width := 300,
     height := 20,
     right := -235,
     top := 20
