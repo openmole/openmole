@@ -38,7 +38,7 @@ object CSVSource {
     override def separator = CSVSource.separator
   }
 
-  def apply(path: FromContext[String]) =
+  def apply(path: FromContext[String])(implicit name: sourcecode.Name) =
     new CSVSource(
       path,
       config = InputOutputConfig(),

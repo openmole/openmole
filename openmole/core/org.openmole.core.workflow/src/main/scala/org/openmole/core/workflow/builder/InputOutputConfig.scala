@@ -21,9 +21,18 @@ import monocle.macros.Lenses
 import org.openmole.core.context.PrototypeSet
 import org.openmole.core.workflow.tools.DefaultSet
 
+object InputOutputConfig {
+  def apply(
+    inputs:   PrototypeSet = PrototypeSet.empty,
+    outputs:  PrototypeSet = PrototypeSet.empty,
+    defaults: DefaultSet   = DefaultSet.empty
+  )(implicit name: sourcecode.Name): InputOutputConfig =
+    InputOutputConfig(inputs, outputs, defaults, Some(name.value))
+}
+
 @Lenses case class InputOutputConfig(
-  inputs:   PrototypeSet   = PrototypeSet.empty,
-  outputs:  PrototypeSet   = PrototypeSet.empty,
-  defaults: DefaultSet     = DefaultSet.empty,
-  name:     Option[String] = None
+  inputs:   PrototypeSet,
+  outputs:  PrototypeSet,
+  defaults: DefaultSet,
+  name:     Option[String]
 )

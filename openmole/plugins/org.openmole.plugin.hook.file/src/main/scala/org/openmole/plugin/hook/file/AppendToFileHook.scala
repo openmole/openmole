@@ -33,7 +33,7 @@ object AppendToFileHook {
 
   implicit def isIO: InputOutputBuilder[AppendToFileHook] = InputOutputBuilder(AppendToFileHook.config)
 
-  def apply(file: FromContext[File], content: FromContext[String]) =
+  def apply(file: FromContext[File], content: FromContext[String])(implicit name: sourcecode.Name) =
     new AppendToFileHook(
       file,
       content,

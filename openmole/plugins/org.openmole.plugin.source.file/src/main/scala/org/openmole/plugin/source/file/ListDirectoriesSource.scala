@@ -31,7 +31,7 @@ object ListDirectoriesSource {
 
   implicit def isIO = InputOutputBuilder(ListDirectoriesSource.config)
 
-  def apply(path: FromContext[String], prototype: Val[Array[File]], regExp: FromContext[String] = ".*") =
+  def apply(path: FromContext[String], prototype: Val[Array[File]], regExp: FromContext[String] = ".*")(implicit name: sourcecode.Name) =
     new ListDirectoriesSource(
       path,
       prototype,

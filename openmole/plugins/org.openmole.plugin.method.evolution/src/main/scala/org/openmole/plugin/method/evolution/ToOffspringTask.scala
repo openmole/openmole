@@ -23,7 +23,7 @@ import org.openmole.core.workflow.task._
 
 object ToOffspringTask {
 
-  def apply[T](algorithm: T)(implicit wfi: WorkflowIntegration[T]) = {
+  def apply[T](algorithm: T)(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name) = {
     val t = wfi(algorithm)
 
     ClosureTask("ToOffspringTask") { (context, _, _) ⇒

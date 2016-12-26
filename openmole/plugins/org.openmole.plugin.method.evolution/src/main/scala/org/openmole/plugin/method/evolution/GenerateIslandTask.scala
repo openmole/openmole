@@ -23,7 +23,7 @@ import org.openmole.core.workflow.task._
 
 object GenerateIslandTask {
 
-  def apply[T](algorithm: T, sample: Option[Int], size: Int, outputPopulationName: String)(implicit wfi: WorkflowIntegration[T]) = {
+  def apply[T](algorithm: T, sample: Option[Int], size: Int, outputPopulationName: String)(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name) = {
     val t = wfi(algorithm)
 
     val outputPopulation = t.populationPrototype.withName(outputPopulationName)

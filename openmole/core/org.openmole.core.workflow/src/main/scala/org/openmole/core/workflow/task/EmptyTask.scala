@@ -18,6 +18,6 @@
 package org.openmole.core.workflow.task
 
 object EmptyTask {
-  def apply() =
+  def apply()(implicit name: sourcecode.Name) =
     ClosureTask("EmptyTask") { (ctx, _, _) ⇒ ctx }
 }

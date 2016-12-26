@@ -32,7 +32,7 @@ object FileSource {
 
   implicit def isIO = InputOutputBuilder(FileSource.config)
 
-  def apply(path: FromContext[String], prototype: Val[File]) =
+  def apply(path: FromContext[String], prototype: Val[File])(implicit name: sourcecode.Name) =
     new FileSource(
       path,
       prototype,

@@ -22,7 +22,7 @@ import org.openmole.core.workflow.task._
 
 object ReassignStateRNGTask {
 
-  def apply[T](algorithm: T)(implicit wfi: WorkflowIntegration[T]) = {
+  def apply[T](algorithm: T)(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name) = {
     val t = wfi(algorithm)
 
     ClosureTask("ReassignStateRNGTask") { (context, _, _) ⇒

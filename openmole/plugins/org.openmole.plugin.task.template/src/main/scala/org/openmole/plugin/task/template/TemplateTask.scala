@@ -33,7 +33,7 @@ object TemplateTask {
   def apply(
     template: String,
     output:   Val[File]
-  ) = new TemplateTask(template, output) set (outputs += output)
+  )(implicit name: sourcecode.Name) = new TemplateTask(template, output) set (outputs += output)
 
 }
 

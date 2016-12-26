@@ -43,7 +43,7 @@ object ScalaTask {
     override def plugins = ScalaTask.plugins
   }
 
-  def apply(source: String) =
+  def apply(source: String)(implicit name: sourcecode.Name) =
     new ScalaTask(
       source,
       plugins = Vector.empty,
@@ -52,10 +52,10 @@ object ScalaTask {
       external = External()
     )
 
-  def apply(f: (Context, ⇒ Random) ⇒ Seq[Variable[_]]) =
+  def apply(f: (Context, ⇒ Random) ⇒ Seq[Variable[_]])(implicit name: sourcecode.Name) =
     ClosureTask("ScalaTask")((ctx, rng, _) ⇒ Context(f(ctx, rng()): _*))
 
-  def apply(f: Context ⇒ Seq[Variable[_]]) =
+  def apply(f: Context ⇒ Seq[Variable[_]])(implicit name: sourcecode.Name) =
     ClosureTask("ScalaTask")((ctx, _, _) ⇒ Context(f(ctx): _*))
 
 }

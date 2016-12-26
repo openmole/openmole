@@ -27,6 +27,7 @@ def defaultSettings = BuildSystem.settings ++
     organization := "org.openmole",
     updateOptions := updateOptions.value.withCachedResolution(true),
     resolvers += Resolver.sonatypeRepo("snapshots"),
+    resolvers += Resolver.bintrayRepo("projectseptemberinc", "maven"), // For freek
     scalaVersion in Global := scalaVersionValue,
     scalacOptions ++= Seq("-target:jvm-1.8", "-language:higherKinds"),
     scalacOptions ++= Seq("-Xmax-classfile-name", "140"),

@@ -48,7 +48,7 @@ object NetLogo5Task {
     script:            String,
     launchingCommands: Seq[String],
     seed:              OptionalArgument[Val[Int]] = None
-  ): NetLogo5Task =
+  )(implicit name: sourcecode.Name): NetLogo5Task =
     withDefaultArgs(
       workspace = Workspace(script = script, workspace = workspace.getName),
       launchingCommands = launchingCommands,
@@ -62,7 +62,7 @@ object NetLogo5Task {
     script:            File,
     launchingCommands: Seq[String],
     seed:              OptionalArgument[Val[Int]] = None
-  ): NetLogo5Task =
+  )(implicit name: sourcecode.Name): NetLogo5Task =
     withDefaultArgs(
       workspace = Workspace(script = script.getName),
       launchingCommands = launchingCommands,
@@ -77,7 +77,7 @@ object NetLogo5Task {
     launchingCommands: Seq[String],
     embedWorkspace:    Boolean                    = false,
     seed:              OptionalArgument[Val[Int]] = None
-  ): NetLogo5Task =
+  )(implicit name: sourcecode.Name): NetLogo5Task =
     if (embedWorkspace) workspace(script.getCanonicalFile.getParentFile, script.getName, launchingCommands, seed)
     else file(script, launchingCommands, seed)
 
@@ -85,7 +85,7 @@ object NetLogo5Task {
     workspace:         NetLogoTask.Workspace,
     launchingCommands: Seq[String],
     seed:              Option[Val[Int]]
-  ) =
+  )(implicit name: sourcecode.Name) =
     NetLogo5Task(
       config = InputOutputConfig(),
       external = External(),

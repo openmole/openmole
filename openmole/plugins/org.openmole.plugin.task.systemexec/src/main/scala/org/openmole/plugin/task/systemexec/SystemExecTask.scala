@@ -54,7 +54,7 @@ object SystemExecTask {
    * To communicate with the dataflow the result should be either a file / category or the return
    * value of the process.
    */
-  def apply(commands: Command*): SystemExecTask =
+  def apply(commands: Command*)(implicit name: sourcecode.Name): SystemExecTask =
     new SystemExecTask(
       command = Vector.empty,
       workDirectory = None,
