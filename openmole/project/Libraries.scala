@@ -77,6 +77,7 @@ object Libraries {
   lazy val scalaTags = "org.openmole.library" %% "com-scalatags" % scalaTagsVersion
   lazy val rx = "org.openmole.library" %% "rx" % rxVersion
   lazy val netlogo5 = "org.openmole.library" % "ccl-northwestern-edu-netlogo5" % netLogo5Version
+  lazy val sourceCode = "org.openmole.library" %% "sourcecode" % "0.1.2"
 
   lazy val toolxitBibtex = "org.openmole" %% "toolxit-bibtex" % "0.1"
 

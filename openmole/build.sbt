@@ -89,7 +89,6 @@ def allCore = Seq(
   event,
   replication,
   workspace,
-  macros,
   pluginManager,
   updater,
   fileService,
@@ -105,7 +104,7 @@ def allCore = Seq(
 
 
 lazy val context = OsgiProject(coreDir, "org.openmole.core.context", imports = Seq("*")) settings (
-  libraryDependencies ++= Seq(Libraries.cats)
+  libraryDependencies ++= Seq(Libraries.cats, Libraries.sourceCode)
   ) dependsOn(tools, workspace) settings (coreSettings: _*)
 
 lazy val expansion = OsgiProject(coreDir, "org.openmole.core.expansion", imports = Seq("*")) settings (
@@ -120,7 +119,6 @@ lazy val workflow = OsgiProject(coreDir, "org.openmole.core.workflow", imports =
   tools,
   updater,
   workspace,
-  macros,
   pluginManager,
   serializer,
   output,
@@ -152,8 +150,6 @@ lazy val replication = OsgiProject(coreDir, "org.openmole.core.replication", imp
 lazy val workspace = OsgiProject(coreDir, "org.openmole.core.workspace", imports = Seq("*")) settings
   (libraryDependencies ++= Seq(Libraries.jasypt, Libraries.xstream, Libraries.math, Libraries.configuration)) dependsOn
   (exception, event, tools, replication, openmoleCrypto) settings (coreSettings: _*)
-
-lazy val macros = OsgiProject(coreDir, "org.openmole.core.macros", imports = Seq("*")) settings (libraryDependencies += Libraries.scalaLang) settings (coreSettings: _*)
 
 lazy val pluginManager = OsgiProject(
   coreDir,
