@@ -39,7 +39,7 @@ object SGEEnvironment {
     threads:              OptionalArgument[Int]         = None,
     storageSharedLocally: Boolean                       = false,
     name:                 OptionalArgument[String]      = None
-  )(implicit decrypt: Decrypt) =
+  )(implicit decrypt: Decrypt, varName: sourcecode.Name) =
     new SGEEnvironment(
       user = user,
       host = host,
@@ -52,7 +52,7 @@ object SGEEnvironment {
       workDirectory = workDirectory,
       threads = threads,
       storageSharedLocally = storageSharedLocally,
-      name = name
+      name = Some(name.getOrElse(varName.value))
     )(SSHAuthentication.find(user, host, port).apply)
 }
 

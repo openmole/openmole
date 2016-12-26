@@ -206,7 +206,7 @@ object EGIEnvironment extends Logger {
     openMOLEMemory: OptionalArgument[Information] = None,
     debug:          Boolean                       = false,
     name:           OptionalArgument[String]      = None
-  )(implicit authentication: EGIAuthentication, decrypt: Decrypt) =
+  )(implicit authentication: EGIAuthentication, decrypt: Decrypt, varName: sourcecode.Name) =
     DIRACEnvironment(
       voName = voName,
       service = service,
@@ -219,6 +219,6 @@ object EGIEnvironment extends Logger {
       openMOLEMemory = openMOLEMemory,
       debug = debug,
       name = name
-    )(authentication, decrypt)
+    )(authentication, decrypt, varName)
 
 }

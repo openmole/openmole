@@ -41,7 +41,7 @@ object OAREnvironment {
     storageSharedLocally: Boolean                       = false,
     name:                 OptionalArgument[String]      = None,
     bestEffort:           Boolean                       = true
-  )(implicit decrypt: Decrypt) =
+  )(implicit decrypt: Decrypt, varName: sourcecode.Name) =
     new OAREnvironment(
       user = user,
       host = host,
@@ -55,7 +55,7 @@ object OAREnvironment {
       workDirectory = workDirectory,
       threads = threads,
       storageSharedLocally = storageSharedLocally,
-      name = name,
+      name = Some(name.getOrElse(varName.value)),
       bestEffort = bestEffort
     )(SSHAuthentication.find(user, host, port).apply)
 }

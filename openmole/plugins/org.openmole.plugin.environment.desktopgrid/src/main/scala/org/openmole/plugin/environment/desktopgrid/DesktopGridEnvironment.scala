@@ -37,12 +37,12 @@ object DesktopGridEnvironment {
     openMOLEMemory: OptionalArgument[Information] = None,
     threads:        OptionalArgument[Int]         = None,
     name:           OptionalArgument[String]      = None
-  ) =
+  )(implicit varName: sourcecode.Name) =
     new DesktopGridEnvironment(
       port = port,
       openMOLEMemory = openMOLEMemory,
       threads = threads,
-      name = name
+      name = Some(name.getOrElse(varName.value))
     )
 }
 

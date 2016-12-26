@@ -54,7 +54,7 @@ object DIRACEnvironment {
     openMOLEMemory: OptionalArgument[Information] = None,
     debug:          Boolean                       = false,
     name:           OptionalArgument[String]      = None
-  )(implicit authentication: EGIAuthentication, decrypt: Decrypt) =
+  )(implicit authentication: EGIAuthentication, decrypt: Decrypt, varName: sourcecode.Name) =
     new DIRACEnvironment(
       voName = voName,
       service = service,
@@ -66,7 +66,7 @@ object DIRACEnvironment {
       cpuTime = cpuTime,
       openMOLEMemory = openMOLEMemory,
       debug = debug,
-      name = name
+      name = Some(name.getOrElse(varName.value))
     )(authentication, decrypt)
 
 }
