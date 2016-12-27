@@ -285,7 +285,7 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
         ul(sheet.nav +++ sheet.navTabs, role := "tablist")(
           for (t ← tabs()) yield {
             li(
-              sheet.paddingTop(20),
+              sheet.paddingTop(35),
               role := "presentation",
               `class` := {
                 if (isActive(t)()) "active" else ""

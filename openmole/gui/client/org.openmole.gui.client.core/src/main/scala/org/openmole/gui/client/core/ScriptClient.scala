@@ -194,6 +194,12 @@ object ScriptClient {
         },
         tags.div(shutDown.shutdownButton),
         tags.div(`class` := "fullpanel")(
+          tags.div(ms("iii"))(
+            span(onclick := { () ⇒ println("close") }, ms("iiiclose"))(
+              raw("&#215")
+            )
+
+          ),
           tags.div(
             `class` := Rx {
               "leftpanel " + {
@@ -204,9 +210,9 @@ object ScriptClient {
               tags.div(omsheet.fixedPosition)(
                 treeNodePanel.fileToolBar.div,
                 treeNodePanel.fileControler,
-                treeNodePanel.labelArea
-              ),
-              treeNodePanel.view.render
+                treeNodePanel.labelArea,
+                treeNodePanel.view.render
+              )
             ),
           tags.div(
             `class` := Rx {

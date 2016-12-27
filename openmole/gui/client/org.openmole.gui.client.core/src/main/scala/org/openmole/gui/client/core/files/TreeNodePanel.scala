@@ -96,10 +96,12 @@ class TreeNodePanel {
   lazy val labelArea =
     div(
       Rx {
-        if (manager.copied().isEmpty) tags.div
-        else tags.label("paste")(label_danger, omsheet.pasteLabel, onclick := { () ⇒ paste(manager.copied(), manager.current()) })
-      },
-      fileToolBar.sortingGroup.div
+        div(
+          if (manager.copied().isEmpty) tags.div
+          else tags.label("paste")(label_danger, omsheet.pasteLabel, onclick := { () ⇒ paste(manager.copied(), manager.current()) }),
+          fileToolBar.sortingGroup.div
+        )
+      }
     )
 
   lazy val view = {

@@ -246,7 +246,8 @@ package object tool {
     overflow := "hidden",
     pointer,
     width := 245,
-    textOverflow := "ellipsis"
+    textOverflow := "ellipsis",
+    sheet.paddingBottom(3)
   )
 
   lazy val fileIcon: ModifierSeq = Seq(
@@ -278,7 +279,7 @@ package object tool {
   lazy val fileSelectionOverlay: ModifierSeq = Seq(
     right := 0,
     pointer,
-    width := 345,
+    width := 360,
     height := 24,
     sheet.marginLeft(-5),
     sheet.marginBottom(1),
@@ -379,11 +380,11 @@ package object tool {
       absolutePosition,
       fontSize := 14,
       listStyleType := "none",
-      sheet.marginTop(160),
+      sheet.marginTop(50),
       sheet.paddingBottom(30),
       sheet.marginLeft(-7),
       sheet.paddingLeft(10),
-      width := "100%",
+      width := 370,
       overflowY := "auto",
       zIndex := -1
     )
@@ -642,11 +643,10 @@ package object tool {
   )
 
   lazy val sortingBar: ModifierSeq = Seq(
-    fixedPosition,
-    width := 300,
+    relativePosition,
     height := 20,
-    right := -235,
-    top := 20
+    right := -240,
+    top := -120
   )
 
   lazy val labelStyle: ModifierSeq = Seq(

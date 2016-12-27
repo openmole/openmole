@@ -14,6 +14,28 @@
     z-index: 2000;
 }
 
+.iii{
+    width:100%;
+    position: relative;
+    height:40px;
+    background-color: #3086b5;
+   top:65px;
+   z-index:5;
+}
+
+
+.iiiclose {
+    position: relative;
+    color: black;
+    display: inline-block;
+    float: right;
+    right: 10px;
+    cursor: pointer;
+    font-size: 22px;
+    z-index:21;
+    top:5px;
+}
+
 /* GENERAL*/
 a {
     color: #3086b5;
@@ -257,7 +279,7 @@ li.selectElement{
     top: 5px;
     margin-bottom: 20px;
     margin-right: 5px;
-    color: #9d9d9d;
+    color: white;
     display: inline-block;
     float: right;
     opacity: 0.9;
@@ -458,7 +480,8 @@ padding-bottom: 35px;
     opacity: 1;
     padding-left: 7px;
     position: fixed;
-    padding-top: 80px;
+    padding-top: 20px;
     transition: all 0.1s ease-out 0s;
     width: 370px;
+    z-index:6;
 }
