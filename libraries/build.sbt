@@ -168,8 +168,8 @@ lazy val cats =
 
 lazy val freedsl =
   OsgiProject(dir, "freedsl", exports = Seq("freedsl.*", "freek.*")) settings (
-    libraryDependencies += "fr.iscpif.freedsl" %% "all" % "0.3-SNAPSHOT",
-    version := "0.3-SNAPSHOT"
+    libraryDependencies += "fr.iscpif.freedsl" %% "all" % "0.3",
+    version := "0.3"
   ) dependsOn(cats) settings(settings: _*)
 
 lazy val mgoVersion = "2.2-SNAPSHOT"
