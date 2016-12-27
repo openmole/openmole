@@ -33,7 +33,7 @@ object LoadSource {
 
   implicit def isIO = InputOutputBuilder(LoadSource.config)
 
-  def apply(file: FromContext[String], prototypes: Val[_]*) =
+  def apply(file: FromContext[String], prototypes: Val[_]*)(implicit name: sourcecode.Name) =
     new LoadSource(
       file,
       prototypes.toVector,

@@ -35,7 +35,7 @@ object TemplateFileTask {
   def apply(
     template: File,
     output:   Val[File]
-  ) = new TemplateFileTask(template, output, InputOutputConfig()) set (dsl.outputs += output)
+  )(implicit name: sourcecode.Name) = new TemplateFileTask(template, output, InputOutputConfig()) set (dsl.outputs += output)
 
 }
 

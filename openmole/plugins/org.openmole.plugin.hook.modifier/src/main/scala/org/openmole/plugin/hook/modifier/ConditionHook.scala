@@ -29,7 +29,7 @@ object ConditionHook {
 
   implicit def isIO = InputOutputBuilder(ConditionHook.config)
 
-  def apply(hook: Hook, condition: Condition) =
+  def apply(hook: Hook, condition: Condition)(implicit name: sourcecode.Name) =
     new ConditionHook(
       hook,
       condition,

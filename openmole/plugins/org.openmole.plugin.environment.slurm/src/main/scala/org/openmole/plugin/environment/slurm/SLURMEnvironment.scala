@@ -45,7 +45,7 @@ object SLURMEnvironment {
     threads:              OptionalArgument[Int]         = None,
     storageSharedLocally: Boolean                       = false,
     name:                 OptionalArgument[String]      = None
-  )(implicit decrypt: Decrypt) =
+  )(implicit decrypt: Decrypt, varName: sourcecode.Name) =
     new SLURMEnvironment(
       user = user,
       host = host,
@@ -63,7 +63,7 @@ object SLURMEnvironment {
       workDirectory = workDirectory,
       threads = threads,
       storageSharedLocally = storageSharedLocally,
-      name = name
+      name = Some(name.getOrElse(varName.value))
     )(SSHAuthentication.find(user, host, port).apply)
 }
 

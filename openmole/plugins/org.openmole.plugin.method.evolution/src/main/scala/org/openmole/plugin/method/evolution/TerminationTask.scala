@@ -23,7 +23,7 @@ import org.openmole.core.workflow.task._
 
 object TerminationTask {
 
-  def apply[T](algorithm: T, termination: OMTermination)(implicit wfi: WorkflowIntegration[T]) = {
+  def apply[T](algorithm: T, termination: OMTermination)(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name) = {
     val t = wfi(algorithm)
 
     ClosureTask("TerminationTask") { (context, _, _) ⇒

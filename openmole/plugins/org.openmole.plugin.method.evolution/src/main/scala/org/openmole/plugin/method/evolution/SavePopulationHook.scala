@@ -24,7 +24,7 @@ import org.openmole.plugin.hook.file._
 
 object SavePopulationHook {
 
-  def apply[T](algorithm: T, dir: FromContext[File])(implicit wfi: WorkflowIntegration[T]) = {
+  def apply[T](algorithm: T, dir: FromContext[File])(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name) = {
     val t = wfi(algorithm)
 
     val fileName = dir / ExpandedString("population${" + t.generationPrototype.name + "}.csv")

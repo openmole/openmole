@@ -40,7 +40,7 @@ object AppendToCSVFileHook {
     override def arraysOnSingleRow = AppendToCSVFileHook.arraysOnSingleRow
   }
 
-  def apply(file: FromContext[File], prototypes: Val[_]*) =
+  def apply(file: FromContext[File], prototypes: Val[_]*)(implicit name: sourcecode.Name) =
     new AppendToCSVFileHook(
       file,
       prototypes.toVector,

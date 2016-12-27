@@ -82,7 +82,7 @@ object LocalEnvironment {
     nbThreads:    Int                      = defaultNumberOfThreads,
     deinterleave: Boolean                  = false,
     name:         OptionalArgument[String] = OptionalArgument()
-  ) = new LocalEnvironment(nbThreads, deinterleave, name)
+  )(implicit varName: sourcecode.Name) = new LocalEnvironment(nbThreads, deinterleave, Some(name.getOrElse(varName.value)))
 
 }
 

@@ -24,7 +24,7 @@ import org.openmole.core.workflow.task._
 
 object InitialStateTask {
 
-  def apply[T](algorithm: T)(implicit wfi: WorkflowIntegration[T]) = {
+  def apply[T](algorithm: T)(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name) = {
     val t = wfi(algorithm)
 
     ClosureTask("InitialStateTask") { (context, _, _) ⇒

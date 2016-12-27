@@ -30,7 +30,7 @@ object ListFilesSource {
 
   implicit def isIO = InputOutputBuilder(ListFilesSource.config)
 
-  def apply(path: FromContext[String], prototype: Val[Array[File]], regExp: FromContext[String] = ".*") =
+  def apply(path: FromContext[String], prototype: Val[Array[File]], regExp: FromContext[String] = ".*")(implicit name: sourcecode.Name) =
     new ListFilesSource(
       path,
       prototype,

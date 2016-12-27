@@ -26,7 +26,7 @@ object ClosureTask {
 
   implicit def isBuilder: InputOutputBuilder[ClosureTask] = InputOutputBuilder(ClosureTask.config)
 
-  def apply(className: String)(closure: (Context, RandomProvider, TaskExecutionContext) ⇒ Context): ClosureTask = new ClosureTask(
+  def apply(className: String)(closure: (Context, RandomProvider, TaskExecutionContext) ⇒ Context)(implicit name: sourcecode.Name): ClosureTask = new ClosureTask(
     closure,
     className = className,
     config = InputOutputConfig()

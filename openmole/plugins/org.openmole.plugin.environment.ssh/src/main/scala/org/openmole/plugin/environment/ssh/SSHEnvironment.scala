@@ -47,7 +47,7 @@ object SSHEnvironment {
     threads:              OptionalArgument[Int]         = None,
     storageSharedLocally: Boolean                       = false,
     name:                 OptionalArgument[String]      = None
-  )(implicit decrypt: Decrypt) =
+  )(implicit decrypt: Decrypt, varName: sourcecode.Name) =
     new SSHEnvironment(
       user = user,
       host = host,
@@ -58,7 +58,7 @@ object SSHEnvironment {
       openMOLEMemory = openMOLEMemory,
       threads = threads,
       storageSharedLocally = storageSharedLocally,
-      name = name
+      name = Some(name.getOrElse(varName.value))
     )(SSHAuthentication.find(user, host, port).apply)
 }
 

@@ -41,7 +41,7 @@ object PBSEnvironment {
     threads:              OptionalArgument[Int]         = None,
     storageSharedLocally: Boolean                       = false,
     name:                 OptionalArgument[String]      = None
-  )(implicit decrypt: Decrypt) =
+  )(implicit decrypt: Decrypt, varName: sourcecode.Name) =
     new PBSEnvironment(
       user = user,
       host = host,
@@ -56,7 +56,7 @@ object PBSEnvironment {
       workDirectory = workDirectory,
       threads = threads,
       storageSharedLocally = storageSharedLocally,
-      name = name
+      name = Some(name.getOrElse(varName.value))
     )(SSHAuthentication.find(user, host, port).apply)
 }
 

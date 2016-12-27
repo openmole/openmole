@@ -168,8 +168,8 @@ lazy val cats =
 
 lazy val freedsl =
   OsgiProject(dir, "freedsl", exports = Seq("freedsl.*", "freek.*")) settings (
-    libraryDependencies += "fr.iscpif.freedsl" %% "all" % "0.3-SNAPSHOT",
-    version := "0.3-SNAPSHOT"
+    libraryDependencies += "fr.iscpif.freedsl" %% "all" % "0.3",
+    version := "0.3"
   ) dependsOn(cats) settings(settings: _*)
 
 lazy val mgoVersion = "2.2-SNAPSHOT"
@@ -269,10 +269,14 @@ lazy val asm = OsgiProject(dir, "org.objectweb.asm") settings (
   libraryDependencies += "org.ow2.asm" % "asm" % asmVersion,
   version := asmVersion) settings(settings: _*)
 
-
 lazy val config = OsgiProject(dir, "org.apache.commons.configuration2",
   privatePackages = Seq("!scala.*", "!org.apache.commons.logging.*","*"),
   imports = Seq("org.apache.commons.logging.*")) settings (
   libraryDependencies += "org.apache.commons" % "commons-configuration2" % "2.1",
   libraryDependencies += "commons-beanutils" % "commons-beanutils" % "1.9.2",
   version := "2.1") settings(settings: _*) dependsOn (logging)
+
+lazy val sourceCode = OsgiProject(dir, "sourcecode") settings (
+  libraryDependencies += "com.lihaoyi" %% "sourcecode" % "0.1.2",
+  version := "0.1.2"
+) settings(settings: _*)

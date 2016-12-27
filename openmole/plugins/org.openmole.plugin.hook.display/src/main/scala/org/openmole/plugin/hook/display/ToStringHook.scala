@@ -29,10 +29,10 @@ object ToStringHook {
 
   implicit def isIO: InputOutputBuilder[ToStringHook] = InputOutputBuilder(ToStringHook.config)
 
-  def apply(prototypes: Val[_]*): ToStringHook =
+  def apply(prototypes: Val[_]*)(implicit name: sourcecode.Name): ToStringHook =
     apply(System.out, prototypes: _*)
 
-  def apply(out: PrintStream, prototypes: Val[_]*) =
+  def apply(out: PrintStream, prototypes: Val[_]*)(implicit name: sourcecode.Name) =
     new ToStringHook(
       prototypes.toVector,
       config = InputOutputConfig()

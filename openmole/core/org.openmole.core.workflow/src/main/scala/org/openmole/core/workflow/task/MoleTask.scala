@@ -35,7 +35,7 @@ object MoleTask {
 
   implicit def isTask = InputOutputBuilder(MoleTask.config)
 
-  def apply(puzzle: Puzzle): MoleTask =
+  def apply(puzzle: Puzzle)(implicit name: sourcecode.Name): MoleTask =
     apply(puzzle toMole, puzzle.lasts.head)
 
   /**
@@ -43,7 +43,7 @@ object MoleTask {
    * @param mole the mole executed by this task.
    * @param last the capsule which returns the results
    */
-  def apply(mole: Mole, last: Capsule): MoleTask = {
+  def apply(mole: Mole, last: Capsule)(implicit name: sourcecode.Name): MoleTask = {
     val mt = new MoleTask(_mole = mole, last = last)
 
     mt set (

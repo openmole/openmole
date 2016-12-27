@@ -29,7 +29,7 @@ object DisplayHook {
 
   implicit def isIO: InputOutputBuilder[DisplayHook] = InputOutputBuilder(config)
 
-  def apply(toDisplay: FromContext[String]) =
+  def apply(toDisplay: FromContext[String])(implicit name: sourcecode.Name) =
     new DisplayHook(
       toDisplay,
       config = InputOutputConfig()

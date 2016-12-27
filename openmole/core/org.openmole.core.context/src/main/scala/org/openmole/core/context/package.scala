@@ -17,8 +17,4 @@
  */
 package org.openmole.core
 
-import org.openmole.tool.random
-
-package object context {
-
-}
+package object context

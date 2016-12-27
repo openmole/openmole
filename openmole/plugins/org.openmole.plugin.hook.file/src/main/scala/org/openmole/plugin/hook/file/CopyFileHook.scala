@@ -51,10 +51,10 @@ object CopyFileHook {
     remove:      Boolean           = false,
     compress:    Boolean           = false,
     move:        Boolean           = false
-  ): CopyFileHook =
+  )(implicit name: sourcecode.Name): CopyFileHook =
     apply() set (pack.copies += (prototype, destination, remove, compress, move))
 
-  def apply(): CopyFileHook =
+  def apply()(implicit name: sourcecode.Name): CopyFileHook =
     new CopyFileHook(
       Vector.empty,
       config = InputOutputConfig()

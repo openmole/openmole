@@ -34,7 +34,7 @@ object SaveHook {
 
   implicit def isIO = InputOutputBuilder(SaveHook.config)
 
-  def apply(file: FromContext[File], prototypes: Val[_]*) =
+  def apply(file: FromContext[File], prototypes: Val[_]*)(implicit name: sourcecode.Name) =
     new SaveHook(
       file,
       prototypes.toVector,

@@ -23,7 +23,7 @@ import org.openmole.core.workflow.task._
 
 object AssignTask {
 
-  def apply(assignments: (Val[T], Val[T]) forSome { type T }*) =
+  def apply(assignments: (Val[T], Val[T]) forSome { type T }*)(implicit name: sourcecode.Name) =
     ClosureTask("AssignTask") { (context, _, _) ⇒
       assignments.map { case (from, to) ⇒ Variable(to, context(from)) }
     } set (

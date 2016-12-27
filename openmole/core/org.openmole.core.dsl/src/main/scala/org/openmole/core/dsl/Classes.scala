@@ -23,6 +23,8 @@ import org.openmole.core.workflow._
 trait Classes {
 
   lazy val Prototype = context.Val
+  lazy val Val = context.Val
+  type Val[T] = context.Val[T]
 
   lazy val LocalEnvironment = org.openmole.core.workflow.execution.LocalEnvironment
 

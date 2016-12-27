@@ -51,7 +51,7 @@ object CARETask extends Logger {
     override def stdErr = CARETask.stdErr
   }
 
-  def apply(archive: File, command: String): CARETask =
+  def apply(archive: File, command: String)(implicit name: sourcecode.Name): CARETask =
     new CARETask(
       archive = archive,
       command = command,

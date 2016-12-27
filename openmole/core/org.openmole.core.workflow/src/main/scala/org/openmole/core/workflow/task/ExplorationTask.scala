@@ -27,7 +27,7 @@ import scala.collection.immutable.TreeMap
 import scala.collection.mutable.ArrayBuffer
 object ExplorationTask {
 
-  def apply(sampling: Sampling) =
+  def apply(sampling: Sampling)(implicit name: sourcecode.Name) =
     ClosureTask("ExplorationTask") {
       (context, rng, _) ⇒
         implicit val implicitRNG = rng

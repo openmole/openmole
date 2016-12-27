@@ -26,7 +26,7 @@ import scala.reflect.ClassTag
 
 object FlattenTask {
 
-  def apply[S](flatten: Val[Array[Array[S]]], in: Val[Array[S]]) =
+  def apply[S](flatten: Val[Array[Array[S]]], in: Val[Array[S]])(implicit name: sourcecode.Name) =
     ClosureTask("FlattenTask") { (context, _, _) ⇒
       implicit val sClassTag = ClassTag[S](in.fromArray.`type`.runtimeClass)
       Variable(in, context(flatten).flatten.toArray[S])

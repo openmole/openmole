@@ -100,6 +100,8 @@ object Val {
     new Val[T](name, t, namespace)
   }
 
+  def apply[T](implicit t: ValType[T], name: sourcecode.Name): Val[T] = apply[T](name.value)
+
   implicit lazy val valOrderingOnName = new Ordering[Val[_]] {
     override def compare(left: Val[_], right: Val[_]) =
       left.name compare right.name

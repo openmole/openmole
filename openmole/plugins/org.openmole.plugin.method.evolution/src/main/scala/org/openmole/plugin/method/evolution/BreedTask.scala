@@ -23,7 +23,7 @@ import org.openmole.core.workflow.task._
 
 object BreedTask {
 
-  def apply[T: WorkflowIntegration](algorithm: T, size: Int)(implicit wfi: WorkflowIntegration[T]) = {
+  def apply[T: WorkflowIntegration](algorithm: T, size: Int)(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name) = {
     val t = wfi(algorithm)
 
     ClosureTask("BreedTask") { (context, _, _) ⇒

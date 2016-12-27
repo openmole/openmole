@@ -24,7 +24,7 @@ import scala.reflect.ClassTag
 
 object ToArrayTask {
 
-  def apply(prototypes: Val[T] forSome { type T }*) =
+  def apply(prototypes: Val[T] forSome { type T }*)(implicit name: sourcecode.Name) =
     ClosureTask("ToArrayTask") {
       (context, _, _) ⇒
         prototypes.map {

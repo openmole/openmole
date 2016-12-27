@@ -30,7 +30,7 @@ object TemplateFileFromInputTask {
   def apply(
     template: Val[File],
     output:   Val[File]
-  ) =
+  )(implicit name: sourcecode.Name) =
     ClosureTask("TemplateFileFromInputTask") { (context, rng, executionContext) ⇒
       implicit val impRng = rng
       val expanded = context(template).withInputStream { is ⇒ ExpandedString(is).from(context) }

@@ -26,7 +26,7 @@ import scala.reflect.ClassTag
 
 object MergeTask {
 
-  def apply[S](result: Val[Array[S]], prototypes: Val[Array[S]]*) =
+  def apply[S](result: Val[Array[S]], prototypes: Val[Array[S]]*)(implicit name: sourcecode.Name) =
     ClosureTask("MergeTask") { (context, _, _) ⇒
       val flattened = prototypes.map { p ⇒ context(p) }.flatten.toArray[S](ClassTag(result.fromArray.`type`.runtimeClass))
       Variable(result, flattened)
