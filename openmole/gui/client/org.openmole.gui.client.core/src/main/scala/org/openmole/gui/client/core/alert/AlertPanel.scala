@@ -58,12 +58,14 @@ object AlertPanel {
     ), okaction = error.okaction, cancelaction = error.cancelaction, zone = FileZone
   )
 
-  def treeNodeCommentDiv(error: TreeNodeComment): Unit = panel.popup(
-    tags.div(
-      error.message,
-      OptionsDiv(error.filesInError, SafePath.naming).div
-    ), Seq(AlertAction(error.okaction)), CenterPagePosition, FileZone, warning, floatRight
-  )
+  def treeNodeCommentDiv(error: TreeNodeComment): Unit = {
+    panel.popup(
+      tags.div(
+        error.message,
+        OptionsDiv(error.filesInError, SafePath.naming).div
+      ), Seq(AlertAction(error.okaction)), CenterPagePosition, FileZone, warning, floatRight
+    )
+  }
 
   def string(
     message:          String,

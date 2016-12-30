@@ -20,6 +20,7 @@ import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
 import fr.iscpif.scaladget.api.Selector.Options
 import fr.iscpif.scaladget.tools
+import org.openmole.gui.client.core.alert.AlertPanel
 import org.openmole.gui.client.core.files.{ FileDisplayer, FileManager, TreeNodePanel }
 import org.openmole.gui.client.tool.OMTags
 import org.openmole.gui.ext.api.Api
@@ -51,6 +52,7 @@ object ScriptClient {
   def connection(): Unit = {
     val connection = new Connection
     dom.document.body.appendChild(connection.connectionDiv.render)
+    addAlert
   }
 
   @JSExport
@@ -75,6 +77,7 @@ object ScriptClient {
     dom.document.body.appendChild(
       resetPassword.resetPassDiv.render
     )
+    addAlert
   }
 
   @JSExport
@@ -141,7 +144,9 @@ object ScriptClient {
     lazy val menuActions: Options[MenuAction] = elements.options(
       key = btn_danger,
       naming = (m: MenuAction) ⇒ m.name,
-      onclose = () ⇒ menuActions.content.now.foreach { _.action() },
+      onclose = () ⇒ menuActions.content.now.foreach {
+      _.action()
+    },
       fixedTitle = Some("New project")
     )
 
@@ -177,8 +182,9 @@ object ScriptClient {
         //////
         Rx {
           bs.navBar(
-            omsheet.fixed +++ sheet.nav +++ navbar_pills +++ navbar_inverse +++ (fontSize := 20) +++ navbar_staticTop +++
-              { if (openFileTree()) mainNav370 else mainNav0 },
+            omsheet.fixed +++ sheet.nav +++ navbar_pills +++ navbar_inverse +++ (fontSize := 20) +++ navbar_staticTop +++ {
+              if (openFileTree()) mainNav370 else mainNav0
+            },
             navItem(
               if (openFileTree()) div(glyph_chevron_left, fileChevronStyle) else div(glyph_chevron_right, fileChevronStyle),
               todo = () ⇒ {
@@ -236,6 +242,8 @@ object ScriptClient {
     }
 
     body.appendChild(maindiv)
-
+    addAlert
   }
+
+  def addAlert = dom.document.body.appendChild(AlertPanel.alertDiv)
 }
