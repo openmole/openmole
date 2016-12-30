@@ -72,12 +72,12 @@ package object tool {
   // SCRIPT CLIENT
   lazy val mainNav0: ModifierSeq = Seq(
     sheet.paddingLeft(0),
-    zIndex := 0
+    zIndex := 10
   )
 
   lazy val mainNav370: ModifierSeq = Seq(
     sheet.paddingLeft(370),
-    zIndex := 0
+    zIndex := 10
   )
 
   lazy val fileChevronStyle: ModifierSeq = Seq(
