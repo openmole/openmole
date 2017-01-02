@@ -824,6 +824,8 @@ lazy val consoleBin = OsgiProject(binDir, "org.openmole.console", imports = Seq(
 
 lazy val dockerBin = Project("docker", binDir / "docker") enablePlugins (sbtdocker.DockerPlugin) settings(
   imageNames in docker := Seq(
+    ImageName("openmole/openmole:latest"),
+
     ImageName(
       namespace = Some("openmole"),
       repository = "openmole",
@@ -832,13 +834,13 @@ lazy val dockerBin = Project("docker", binDir / "docker") enablePlugins (sbtdock
   ),
   dockerfile in docker := new Dockerfile {
     from("openjdk:8-jre")
-    runRaw("""apt update && apt install -y bash""")
-    runRaw("""groupadd -r openmole && useradd -r -g openmole openmole --home-dir /var/openmole/ --create-home""")
-    copy((assemble in openmole).value, s"/usr/lib/openmole")
-    runRaw("chmod +x /usr/lib/openmole/openmole")
-    runRaw("cd /usr/bin/ && ln -s ../lib/openmole/openmole")
+    maintainer("Romain Reuillon <romain.reuillon@iscpif.fr>, Jonathan Passerat-Palmbach <j.passerat-palmbach@imperial.ac.uk>")
+    copy((assemble in openmole).value, s"/openmole")    
+    runRaw("""groupadd -r openmole && \
+              useradd -r -g openmole openmole --home-dir /var/openmole/ --create-home && \
+              chmod +x /openmole/openmole""")
     expose(8443)
     user("openmole")
-    cmdShell("openmole", "--port", "8443", "--remote")
+    cmdShell("/openmole/openmole", "--port", "8443", "--remote")
   }
 )
