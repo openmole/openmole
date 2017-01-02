@@ -79,7 +79,7 @@ object Libraries {
   lazy val netlogo5 = "org.openmole.library" % "ccl-northwestern-edu-netlogo5" % netLogo5Version
   lazy val sourceCode = "org.openmole.library" %% "sourcecode" % "0.1.2"
 
-  lazy val toolxitBibtex = "org.openmole" %% "toolxit-bibtex" % "0.1"
+  lazy val toolxitBibtex = "org.openmole" %% "toolxit-bibtex" % "0.2"
 
   lazy val gridscale = "fr.iscpif.gridscale.bundle" %% "gridscale" % gridscaleVersion
   lazy val gridscaleSSH = "fr.iscpif.gridscale.bundle" %% "ssh" % gridscaleVersion
