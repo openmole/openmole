@@ -13,28 +13,13 @@
     left:100;
     z-index: 2000;
 }
-
-.iii{
-    width:100%;
-    position: relative;
-    height:40px;
-    background-color: #3086b5;
-   top:65px;
-   z-index:5;
+.ooooo{
+    position:fixed;
+    top: 0;
+    left:200;
+    z-index: 2000;
 }
 
-
-.iiiclose {
-    position: relative;
-    color: black;
-    display: inline-block;
-    float: right;
-    right: 10px;
-    cursor: pointer;
-    font-size: 22px;
-    z-index:21;
-    top:5px;
-}
 
 /* GENERAL*/
 a {
@@ -120,7 +105,7 @@ ul{
     left: -10px;
     padding-left: 10px;
     padding-right: 18px;
-    width: 377px;
+    width: 373px;
     background-color: #f8f8f8;
     word-wrap: break-word;
 }
@@ -279,7 +264,6 @@ li.selectElement{
     top: 5px;
     margin-bottom: 20px;
     margin-right: 5px;
-    color: white;
     display: inline-block;
     float: right;
     opacity: 0.9;
@@ -451,7 +435,7 @@ li.selectElement{
     padding-left: 15px;
     padding-right: 15px;
     position: relative;
-    top: 80px;
+    top: 90px;
     width: 100%;
     left : 20;
     background-color: white;
@@ -462,7 +446,7 @@ li.selectElement{
     left: 390px;
     padding-right: 400px;
     position: fixed;
-    top: 80px;
+    top: 90px;
     transition: all 0.1s ease-out 0s;
     width: 99%;
     height: calc(100% - 140px);

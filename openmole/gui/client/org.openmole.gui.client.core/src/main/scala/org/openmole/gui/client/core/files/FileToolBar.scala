@@ -355,7 +355,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
     val msg = message()
     val sT = selectedTool()
 
-    tags.div(
+    tags.div(sheet.paddingBottom(10), sheet.paddingTop(50))(
       tags.div(centerElement)(
         buildSpan(RefreshTool, () ⇒ {
           treeNodePanel.invalidCacheAndDraw
@@ -367,7 +367,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
         buildAndSelectSpan(FileCreationTool),
         buildAndSelectSpan(FilterTool)
       ),
-      tags.div(centerElement +++ sheet.marginBottom(10))(
+      tags.div(centerFileToolBar)(
         msg,
         sT match {
           case Some(FilterTool) ⇒

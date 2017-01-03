@@ -20,7 +20,8 @@ import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
 import fr.iscpif.scaladget.api.Selector.Options
 import fr.iscpif.scaladget.tools
-import org.openmole.gui.client.core.alert.AlertPanel
+import org.openmole.gui.client.core.alert.BannerAlert.BannerMessage
+import org.openmole.gui.client.core.alert.{ AlertPanel, BannerAlert }
 import org.openmole.gui.client.core.files.{ FileDisplayer, FileManager, TreeNodePanel }
 import org.openmole.gui.client.tool.OMTags
 import org.openmole.gui.ext.api.Api
@@ -157,6 +158,7 @@ object ScriptClient {
         ///////Plugin test
         div(
           bs.button("build", btn_danger +++ ms("ooo"), () ⇒ Plugins.load),
+          bs.button("expand", btn_success +++ ms("ooooo"), () ⇒ BannerAlert.register(BannerMessage("Hahaha"))),
           bs.button("call", btn_primary +++ ms("oooo"), () ⇒ {
             OMPost()[Api].getGUIPlugins.call().foreach { all ⇒
               Plugins.authentications() = all.authentications.map { gp ⇒ Plugins.buildJSObject(gp.jsObject).asInstanceOf[Authentication] }
@@ -200,12 +202,6 @@ object ScriptClient {
         },
         tags.div(shutDown.shutdownButton),
         tags.div(`class` := "fullpanel")(
-          tags.div(ms("iii"))(
-            span(onclick := { () ⇒ println("close") }, ms("iiiclose"))(
-              raw("&#215")
-            )
-
-          ),
           tags.div(
             `class` := Rx {
               "leftpanel " + {
@@ -213,7 +209,7 @@ object ScriptClient {
               }
             }
           )(
-              tags.div(omsheet.fixedPosition)(
+              tags.div(omsheet.relativePosition +++ sheet.paddingTop(-15))(
                 treeNodePanel.fileToolBar.div,
                 treeNodePanel.fileControler,
                 treeNodePanel.labelArea,
@@ -227,6 +223,7 @@ object ScriptClient {
               }
             }
           )(
+              BannerAlert.banner,
               treeNodePanel.fileDisplayer.tabs.render,
               tags.div(omsheet.textVersion)(
                 tags.div(

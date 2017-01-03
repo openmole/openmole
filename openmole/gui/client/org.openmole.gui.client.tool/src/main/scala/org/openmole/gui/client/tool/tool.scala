@@ -38,6 +38,8 @@ package object tool {
 
   lazy val DARK_GREY = "#222"
 
+  lazy val LIGHT_GREY = "#9d9d9d"
+
   lazy val tableTag: ModifierSeq = Seq(
     sheet.marginLeft(3),
     fontSize := 14,
@@ -60,7 +62,14 @@ package object tool {
 
   lazy val centerElement: ModifierSeq = Seq(
     display := "table",
-    margin := "0 auto"
+    margin := "0 auto",
+    color(LIGHT_GREY)
+  )
+
+  lazy val centerFileToolBar: ModifierSeq = Seq(
+    display := "table",
+    margin := "0 auto",
+    color(LIGHT_GREY)
   )
 
   lazy val shutdown: ModifierSeq = Seq(
@@ -72,11 +81,13 @@ package object tool {
   // SCRIPT CLIENT
   lazy val mainNav0: ModifierSeq = Seq(
     sheet.paddingLeft(0),
+    borderColor := DARK_GREY,
     zIndex := 10
   )
 
   lazy val mainNav370: ModifierSeq = Seq(
     sheet.paddingLeft(370),
+    borderColor := DARK_GREY,
     zIndex := 10
   )
 
@@ -185,7 +196,7 @@ package object tool {
 
   lazy val resetPassword: ModifierSeq = Seq(
     fontSize := 12,
-    color("#9d9d9d"),
+    color(LIGHT_GREY),
     cursor := "pointer"
   )
 
@@ -699,4 +710,35 @@ package object tool {
     opacity := 0.95,
     padding := "5 50"
   )
+
+  //BANNER ALERT
+  lazy val bannerAlert: ModifierSeq = Seq(
+    width := "100%",
+    backgroundColor := BLUE,
+    absolutePosition,
+    left := -20,
+    marginAll(top = -50, right = 5),
+    zIndex := 5
+  )
+
+  lazy val bannerAlertInner: ModifierSeq = Seq(
+    width := "100%",
+    relativePosition,
+    color("white"),
+    opacity := 0.9,
+    margin := 15
+  )
+
+  lazy val bannerAlertClose: ModifierSeq = Seq(
+    fixedPosition,
+    color("white"),
+    opacity := 0.6,
+    pointer,
+    fontSize := "25px",
+    zIndex := 21,
+    right := 5,
+    margin := 5,
+    top := 60
+  )
+
 }
