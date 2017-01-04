@@ -11,7 +11,8 @@ import org.openmole.gui.ext.api.Api
 import org.scalajs.dom.raw.{ HTMLDivElement, HTMLElement }
 import sheet._
 import rx._
-import scalatags.JsDom.all._
+
+import scalatags.JsDom.all.{ raw, _ }
 import scalatags.JsDom.{ TypedTag, tags }
 import scala.scalajs.js.timers._
 import org.openmole.gui.client.tool.JsRxTags._
@@ -297,7 +298,7 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
                     setActive(t)
                   }
                 )(
-                    tags.button(`class` := "close", `type` := "button", onclick := { () ⇒ --(t) })("x"),
+                    tags.button(ms("close") +++ tabClose, `type` := "button", onclick := { () ⇒ --(t) })(raw("&#215")),
                     t.tabName()
                   )
               )

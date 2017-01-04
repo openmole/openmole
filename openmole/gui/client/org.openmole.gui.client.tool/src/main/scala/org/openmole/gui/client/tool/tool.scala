@@ -404,6 +404,13 @@ package object tool {
     )
   }
 
+  lazy val tabClose: ModifierSeq = Seq(
+    relativePosition,
+    fontSize := 17,
+    right := -7,
+    top := 4
+  )
+
   //EDITOR
   lazy val editorContainer: ModifierSeq = Seq(
     padding := 0,
