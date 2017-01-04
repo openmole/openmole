@@ -34,31 +34,45 @@ object BannerAlert {
 
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
-  case class BannerMessage(message: String)
+  sealed trait BannerLevel
+
+  object RegularBannerLevel extends BannerLevel
+
+  object CriticalBannerLevel extends BannerLevel
+
+  case class BannerMessage(message: String, bannerLevel: BannerLevel = RegularBannerLevel) {
+    def critical = copy(bannerLevel = CriticalBannerLevel)
+  }
 
   private val bannerMessages: Var[Seq[BannerMessage]] = Var(Seq())
 
-  val banner = Rx {
-    !bannerMessages().isEmpty
-  }.expand(
-    tags.div(tool.bannerAlert)(
+  private val bannerDiv = div(Rx {
+    tags.div(tool.bannerAlert +++ (backgroundColor := color))(
       span(onclick := { () ⇒ close }, tool.bannerAlertClose)(
         raw("&#215")
       ), div(tool.bannerAlertInner)(
-        Rx {
-          (for {
-            bm ← bannerMessages()
-          } yield bm.message).map(msg ⇒ div(msg))
-        }
+        (for {
+          bm ← bannerMessages()
+        } yield bm.message).map(msg ⇒ div(msg))
       )
     )
-  )
+  })
+
+  val banner = Rx {
+    !bannerMessages().isEmpty
+  }.expand(bannerDiv)
 
   def close = {
     bannerMessages() = Seq()
   }
 
   def register(bannerMessage: BannerMessage) =
-    bannerMessages() = bannerMessages.now :+ bannerMessage
+    bannerMessages() = (bannerMessages.now :+ bannerMessage).distinct
+
+  private def color = {
+    if (bannerMessages.now.exists(_.bannerLevel == CriticalBannerLevel)) tool.RED
+    else if (bannerMessages.now.isEmpty) tool.DARK_GREY
+    else tool.BLUE
+  }
 
 }

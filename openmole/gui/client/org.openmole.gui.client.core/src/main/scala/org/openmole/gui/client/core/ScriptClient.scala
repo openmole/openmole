@@ -158,7 +158,6 @@ object ScriptClient {
         ///////Plugin test
         div(
           bs.button("build", btn_danger +++ ms("ooo"), () ⇒ Plugins.load),
-          bs.button("expand", btn_success +++ ms("ooooo"), () ⇒ BannerAlert.register(BannerMessage("Hahaha"))),
           bs.button("call", btn_primary +++ ms("oooo"), () ⇒ {
             OMPost()[Api].getGUIPlugins.call().foreach { all ⇒
               Plugins.authentications() = all.authentications.map { gp ⇒ Plugins.buildJSObject(gp.jsObject).asInstanceOf[Authentication] }

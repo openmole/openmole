@@ -36,6 +36,8 @@ package object tool {
 
   lazy val BLUE = "#3086b5"
 
+  lazy val RED = "#c9302c"
+
   lazy val DARK_GREY = "#222"
 
   lazy val LIGHT_GREY = "#9d9d9d"
@@ -352,10 +354,10 @@ package object tool {
   lazy val playTabOverlay: ModifierSeq = Seq(
     color("white"),
     height := "100%",
-    left := 200,
-    fixedPosition,
+    absolutePosition,
     width := "100%",
-    background := "rgba(0, 0, 0, 0.6) none repeat scroll 0 0",
+    background := BLUE,
+    opacity := 0.9,
     width := "100%",
     zIndex := 10
   )
@@ -364,6 +366,7 @@ package object tool {
     absolutePosition,
     width := "100%",
     color("white"),
+    fontWeight := "bold",
     sheet.paddingTop(100),
     fontSize := 25,
     zIndex := 25,
@@ -714,10 +717,9 @@ package object tool {
   //BANNER ALERT
   lazy val bannerAlert: ModifierSeq = Seq(
     width := "100%",
-    backgroundColor := BLUE,
     absolutePosition,
     left := -20,
-    marginAll(top = -50, right = 5),
+    marginAll(top = -10, right = 5),
     zIndex := 5
   )
 
@@ -726,7 +728,8 @@ package object tool {
     relativePosition,
     color("white"),
     opacity := 0.9,
-    margin := 15
+    marginAll(top = 20, left = 15, bottom = 15)
+
   )
 
   lazy val bannerAlertClose: ModifierSeq = Seq(

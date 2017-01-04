@@ -38,6 +38,8 @@ import autowire._
 import org.openmole.gui.ext.data.{ Error ⇒ ExecError }
 import org.openmole.gui.ext.data._
 import bs._
+import org.openmole.gui.client.core.alert.BannerAlert
+import org.openmole.gui.client.core.alert.BannerAlert.BannerMessage
 import org.openmole.gui.client.tool.{ Expander, Utils }
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.tool.client.OMPost
@@ -57,6 +59,7 @@ class ExecutionPanel {
   val staticInfo: Var[Map[ExecutionId, StaticExecutionInfo]] = Var(Map())
   var envError: Var[Map[EnvironmentId, EnvironmentErrorData]] = Var(Map())
   val expanders: Var[Map[ExpandID, Expander]] = Var(Map())
+  val executionsDisplayedInBanner: Var[Seq[ExecutionId]] = Var(Seq())
 
   val updating = new AtomicBoolean(false)
 
@@ -78,7 +81,7 @@ class ExecutionPanel {
     def delay = {
       updating.set(false)
       setTimeout(5000) {
-        if (dialog.isVisible) updateExecutionInfo
+        if (atLeastOneNotDisplayed) updateExecutionInfo
       }
     }
 
@@ -92,6 +95,8 @@ class ExecutionPanel {
       }
     }
   }
+
+  def atLeastOneNotDisplayed = execInfo.now.executionInfos.exists { ex ⇒ !executionsDisplayedInBanner.now.contains(ex._1) }
 
   def updateStaticInfos = OMPost()[Api].staticInfos.call().foreach { s ⇒
     staticInfo() = s.toMap
@@ -151,6 +156,15 @@ class ExecutionPanel {
     s" $text"
   )
 
+  def hasBeenDisplayed(id: ExecutionId) = executionsDisplayedInBanner() = (executionsDisplayedInBanner.now :+ id).distinct
+
+  def addToBanner(id: ExecutionId, bannerMessage: BannerMessage) = {
+    if (!executionsDisplayedInBanner.now.contains(id)) {
+      BannerAlert.register(bannerMessage)
+      hasBeenDisplayed(id)
+    }
+  }
+
   lazy val executionTable = {
     val scriptID: ColumnID = "script"
     val envID: ColumnID = "env"
@@ -177,11 +191,17 @@ class ExecutionPanel {
             val completed = executionInfo.completed
 
             val details = executionInfo match {
-              case f: Failed   ⇒ ExecutionDetails("0", 0, Some(f.error), f.environmentStates)
-              case f: Finished ⇒ ExecutionDetails(ratio(f.completed, f.running, f.ready), f.running, envStates = f.environmentStates)
-              case r: Running  ⇒ ExecutionDetails(ratio(r.completed, r.running, r.ready), r.running, envStates = r.environmentStates)
-              case c: Canceled ⇒ ExecutionDetails("0", 0, envStates = c.environmentStates)
-              case r: Ready    ⇒ ExecutionDetails("0", 0, envStates = r.environmentStates)
+              case f: Failed ⇒
+                addToBanner(id, BannerMessage(s"Your simulation ${staticInfo.now(id).path.name} failed.").critical)
+                ExecutionDetails("0", 0, Some(f.error), f.environmentStates)
+              case f: Finished ⇒
+                addToBanner(id, BannerMessage(s"Your simulation ${staticInfo.now(id).path.name} has finished."))
+                ExecutionDetails(ratio(f.completed, f.running, f.ready), f.running, envStates = f.environmentStates)
+              case r: Running ⇒ ExecutionDetails(ratio(r.completed, r.running, r.ready), r.running, envStates = r.environmentStates)
+              case c: Canceled ⇒
+                hasBeenDisplayed(id)
+                ExecutionDetails("0", 0, envStates = c.environmentStates)
+              case r: Ready ⇒ ExecutionDetails("0", 0, envStates = r.environmentStates)
             }
 
             val scriptLink = expander(id.id, ex ⇒ ex.getLink(staticInfo.now(id).path.name, scriptID))
