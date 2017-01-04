@@ -353,7 +353,7 @@ package object tool {
 
   lazy val playTabOverlay: ModifierSeq = Seq(
     color("white"),
-    height := "100%",
+    height := "calc(100% - 20px)",
     absolutePosition,
     width := "100%",
     background := BLUE,
@@ -719,7 +719,7 @@ package object tool {
     width := "100%",
     absolutePosition,
     left := -20,
-    marginAll(top = -10, right = 5),
+    marginAll(top = -20, right = 5),
     zIndex := 5
   )
 
@@ -741,7 +741,7 @@ package object tool {
     zIndex := 21,
     right := 5,
     margin := 5,
-    top := 60
+    top := 65
   )
 
 }

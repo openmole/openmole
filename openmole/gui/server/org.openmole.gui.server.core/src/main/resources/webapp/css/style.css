@@ -435,21 +435,21 @@ li.selectElement{
     padding-left: 15px;
     padding-right: 15px;
     position: relative;
-    top: 50px;
+    top: 61px;
     width: 100%;
     left : 20;
     background-color: white;
-    height: calc(100% - 140px);
+    height: calc(100% - 145px);
 }
 
 .fullpanel .reduce {
     left: 390px;
     padding-right: 400px;
     position: absolute;
-    top: 50px;
+    top: 61px;
     transition: all 0.1s ease-out 0s;
     width: 99%;
-    height: calc(100% - 140px);
+    height: calc(100% - 145px);
     padding-bottom: 35px;
 }
 
