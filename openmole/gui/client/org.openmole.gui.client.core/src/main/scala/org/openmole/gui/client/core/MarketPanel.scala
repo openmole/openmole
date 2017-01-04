@@ -40,7 +40,6 @@ import scalatags.JsDom.all._
 import bs._
 import org.openmole.gui.client.tool.InputFilter
 import org.openmole.gui.ext.api.Api
-import org.openmole.gui.ext.tool.client.OMPost
 
 class MarketPanel {
 
@@ -96,7 +95,7 @@ class MarketPanel {
   )
 
   def exists(sp: SafePath, entry: MarketIndexEntry) =
-    OMPost()[Api].exists(sp).call().foreach { b ⇒
+    post()[Api].exists(sp).call().foreach { b ⇒
       if (b) overwriteAlert() = Some(entry)
       else download(entry)
     }
@@ -104,7 +103,7 @@ class MarketPanel {
   def download(entry: MarketIndexEntry) = {
     val path = manager.current.now ++ entry.name
     downloading() = downloading.now.updatedFirst(_._1 == entry, (entry, Var(Processing())))
-    OMPost()[Api].getMarketEntry(entry, path).call().foreach { d ⇒
+    post()[Api].getMarketEntry(entry, path).call().foreach { d ⇒
       downloading() = downloading.now.updatedFirst(_._1 == entry, (entry, Var(Processed())))
       downloading.now.headOption.foreach(_ ⇒ dialog.close)
       TreeNodePanel.refreshAndDraw
@@ -123,7 +122,7 @@ class MarketPanel {
   }
 
   def deleteFile(sp: SafePath, marketIndexEntry: MarketIndexEntry) =
-    OMPost()[Api].deleteFile(sp, ServerFileSytemContext.project).call().foreach { d ⇒
+    post()[Api].deleteFile(sp, ServerFileSytemContext.project).call().foreach { d ⇒
       download(marketIndexEntry)
     }
 
@@ -131,7 +130,7 @@ class MarketPanel {
     omsheet.panelWidth(92),
     onopen = () ⇒ {
       marketIndex.now match {
-        case None ⇒ OMPost()[Api].marketIndex.call().foreach { m ⇒
+        case None ⇒ post()[Api].marketIndex.call().foreach { m ⇒
           marketIndex() = Some(m)
         }
         case _ ⇒

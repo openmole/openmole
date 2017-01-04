@@ -1,7 +1,12 @@
 package org.openmole.gui.client.core
 
+import org.openmole.gui.client.core.alert.BannerAlert
+import org.openmole.gui.client.core.alert.BannerAlert.BannerMessage
+import org.openmole.gui.ext.tool.client.OMPost
+import scala.concurrent.duration.Duration
+import scala.concurrent.duration._
 /*
- * Copyright (C) 04/07/15 // mathieu.leclaire@openmole.org
+ * Copyright (C) 04/01/17 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -17,13 +22,14 @@ package org.openmole.gui.client.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scala.concurrent.Future
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
-import autowire._
-import org.openmole.gui.ext.api.Api
-import org.openmole.gui.ext.data.OMSettings
-
-object Settings {
-
-  val settings: Future[OMSettings] = post()[Api].settings().call()
+object post {
+  def apply(timeout: Duration = 60 seconds, warningTimeout: Duration = 10 seconds) = {
+    OMPost(
+      timeout,
+      warningTimeout,
+      (request: String) ⇒ BannerAlert.register(BannerMessage(s"The request ${request} failed.").critical),
+      () ⇒ BannerAlert.register(BannerMessage("The request is very long. Please check your connection."))
+    )
+  }
 }
+

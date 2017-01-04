@@ -9,7 +9,6 @@ import rx._
 
 import scalatags.JsDom.all._
 import org.openmole.gui.client.tool.JsRxTags._
-import org.openmole.gui.ext.tool.client.OMPost
 
 import scalatags.JsDom.tags
 import scala.scalajs.js
@@ -47,7 +46,7 @@ object Plugins {
   }
 
   def load =
-    OMPost()[Api].loadPlugins.call().foreach { _ ⇒
+    post()[Api].loadPlugins.call().foreach { _ ⇒
       org.scalajs.dom.document.location.reload(true)
 
       //  val pluginScript = script(src := "js/plugins.js").render
@@ -58,7 +57,7 @@ object Plugins {
 
     }
 
-  //  def updateGUIPlugin = OMPost()[Api].getGUIPlugins().call().foreach { ps ⇒
+  //  def updateGUIPlugin = post()[Api].getGUIPlugins().call().foreach { ps ⇒
   //    ps.authentications.map { p ⇒
   //      buildJSObject(p.jsObject).asInstanceOf[Authentication]
   //    }

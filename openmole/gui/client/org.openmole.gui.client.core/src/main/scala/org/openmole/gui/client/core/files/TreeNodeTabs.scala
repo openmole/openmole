@@ -11,13 +11,11 @@ import org.openmole.gui.ext.api.Api
 import org.scalajs.dom.raw.{ HTMLDivElement, HTMLElement }
 import sheet._
 import rx._
-
 import scalatags.JsDom.all._
 import scalatags.JsDom.{ TypedTag, tags }
 import scala.scalajs.js.timers._
 import org.openmole.gui.client.tool.JsRxTags._
-import org.openmole.gui.client.tool.OMTags
-import org.openmole.gui.ext.tool.client.OMPost
+import org.openmole.gui.client.core._
 
 /*
  * Copyright (C) 11/05/15 // mathieu.leclaire@openmole.org
@@ -74,7 +72,7 @@ object TreeNodeTabs {
     val editor: EditorPanelUI
 
     def save(afterSave: () ⇒ Unit) = editor.synchronized {
-      OMPost()[Api].saveFile(safePathTab.now, editor.code).call().foreach(_ ⇒ afterSave())
+      post()[Api].saveFile(safePathTab.now, editor.code).call().foreach(_ ⇒ afterSave())
     }
   }
 
@@ -250,13 +248,13 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
   }
 
   def saveAllTabs(onsave: () ⇒ Unit) = {
-    OMPost()[Api].saveFiles(alterables).call().foreach { s ⇒
+    org.openmole.gui.client.core.post()[Api].saveFiles(alterables).call().foreach { s ⇒
       onsave()
     }
   }
 
   def checkTabs = tabs.now.foreach { t: TreeNodeTab ⇒
-    OMPost()[Api].exists(t.safePathTab.now).call().foreach { e ⇒
+    org.openmole.gui.client.core.post()[Api].exists(t.safePathTab.now).call().foreach { e ⇒
       if (!e) removeTab(t)
     }
   }

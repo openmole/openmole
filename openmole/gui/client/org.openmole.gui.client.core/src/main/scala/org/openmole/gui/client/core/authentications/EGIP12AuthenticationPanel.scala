@@ -9,7 +9,6 @@ import AuthenticationUtils._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import bs._
 import org.openmole.gui.ext.api.Api
-import org.openmole.gui.ext.tool.client.OMPost
 
 /*
  * Copyright (C) 02/07/15 // mathieu.leclaire@openmole.org
@@ -39,8 +38,8 @@ class EGIP12AuthenticationPanel(data: EGIP12AuthenticationData = EGIP12Authentic
   )
 
   def save(onsave: () ⇒ Unit) =
-    OMPost()[Api].removeAuthentication(data).call().foreach { d ⇒
-      OMPost()[Api].addAuthentication(EGIP12AuthenticationData(
+    org.openmole.gui.client.core.post()[Api].removeAuthentication(data).call().foreach { d ⇒
+      org.openmole.gui.client.core.post()[Api].addAuthentication(EGIP12AuthenticationData(
         password.value,
         if (privateKey.pathSet.now) Some("egi.p12") else None
       )).call().foreach { b ⇒

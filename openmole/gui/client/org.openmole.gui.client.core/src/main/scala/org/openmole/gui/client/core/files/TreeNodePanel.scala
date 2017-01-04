@@ -11,11 +11,10 @@ import JsRxTags._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import org.scalajs.dom.html.Input
 import org.scalajs.dom.raw._
-
+import org.openmole.gui.client.core._
 import scalatags.JsDom.all._
 import scalatags.JsDom.{ TypedTag, tags }
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
-import fr.iscpif.scaladget.stylesheet
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import TreeNode._
 import autowire._
@@ -24,7 +23,6 @@ import bs._
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
 import org.openmole.gui.client.tool.Utils
 import org.openmole.gui.ext.api.Api
-import org.openmole.gui.ext.tool.client.OMPost
 import org.scalajs.dom
 import sheet._
 
@@ -286,7 +284,7 @@ class TreeNodePanel {
   }
 
   def extractTGZ(safePath: SafePath) =
-    OMPost()[Api].extractTGZ(safePath).call().foreach {
+    post()[Api].extractTGZ(safePath).call().foreach {
       r ⇒
         r.error match {
           case Some(e: org.openmole.gui.ext.data.Error) ⇒ stringAlertWithDetails("An error occurred during extraction", e.stackTrace)
@@ -342,7 +340,7 @@ class TreeNodePanel {
     }
 
     def renameNode(safePath: SafePath, newName: String, replicateMode: Boolean) = {
-      def rename = OMPost()[Api].renameFile(safePath, newName).call().foreach {
+      def rename = post()[Api].renameFile(safePath, newName).call().foreach {
         newNode ⇒
           fileDisplayer.tabs.rename(safePath, newNode)
           treeStates.now.editionOff
@@ -351,7 +349,7 @@ class TreeNodePanel {
       }
 
       fileDisplayer.tabs.saveAllTabs(() ⇒ {
-        OMPost()[Api].existsExcept(safePath.copy(path = safePath.path.dropRight(1) :+ newName), replicateMode).call().foreach {
+        post()[Api].existsExcept(safePath.copy(path = safePath.path.dropRight(1) :+ newName), replicateMode).call().foreach {
           b ⇒
             if (b) stringAlert(s"${
               newName

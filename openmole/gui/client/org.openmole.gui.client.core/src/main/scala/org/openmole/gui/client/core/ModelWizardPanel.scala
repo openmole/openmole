@@ -39,7 +39,6 @@ import sheet._
 import bs._
 import org.openmole.gui.client.tool.{ OMTags, OptionsDiv }
 import org.openmole.gui.ext.api.Api
-import org.openmole.gui.ext.tool.client.OMPost
 import fr.iscpif.scaladget.api.Selector.Options
 
 class ModelWizardPanel {
@@ -144,7 +143,7 @@ class ModelWizardPanel {
   def setMethodSelector(classContent: FullClass) = {
     fileToUploadPath.now.map {
       fn ⇒
-        OMPost()[Api].methods(fn, classContent.name).call().foreach {
+        post()[Api].methods(fn, classContent.name).call().foreach {
           b ⇒
             methodSelector.setContents(b)
             b.headOption.map {
@@ -275,7 +274,7 @@ class ModelWizardPanel {
           },
           UploadAbsolute(),
           () ⇒ {
-            OMPost()[Api].extractAndTestExistence(tempFile ++ fileName, uploadPath.parent).call().foreach {
+            post()[Api].extractAndTestExistence(tempFile ++ fileName, uploadPath.parent).call().foreach {
               existing ⇒
                 val fileType: FileType = uploadPath
 
@@ -293,10 +292,10 @@ class ModelWizardPanel {
                 if (existing.isEmpty) {
                   targetPath.now.map {
                     tp ⇒
-                      OMPost()[Api].copyAllTmpTo(tempFile, tp).call().foreach {
+                      post()[Api].copyAllTmpTo(tempFile, tp).call().foreach {
                         b ⇒
                           buildForm(uploadPath, fileType)
-                          OMPost()[Api].deleteFile(tempFile, ServerFileSytemContext.absolute).call()
+                          post()[Api].deleteFile(tempFile, ServerFileSytemContext.absolute).call()
                       }
                   }
                 }
@@ -308,10 +307,10 @@ class ModelWizardPanel {
                       optionsDiv.div
                     ),
                     () ⇒ {
-                      OMPost()[Api].copyFromTmp(tempFile, optionsDiv.result /*, fp ++ fileName*/ ).call().foreach {
+                      post()[Api].copyFromTmp(tempFile, optionsDiv.result /*, fp ++ fileName*/ ).call().foreach {
                         b ⇒
                           buildForm(uploadPath, fileType)
-                          OMPost()[Api].deleteFile(tempFile, ServerFileSytemContext.absolute).call()
+                          post()[Api].deleteFile(tempFile, ServerFileSytemContext.absolute).call()
                       }
                     }, () ⇒ {
                     }, buttonGroupClass = "right"
@@ -338,7 +337,7 @@ class ModelWizardPanel {
 
           // Other archive: tgz, tar.gz
           case UndefinedLanguage ⇒
-            OMPost()[Api].models(uploadPath).call().foreach {
+            post()[Api].models(uploadPath).call().foreach {
               models ⇒
                 fileToUploadPath() = models.headOption
                 modelSelector.setContents(models, () ⇒ {
@@ -364,7 +363,7 @@ class ModelWizardPanel {
       mp ⇒
         val modelName = mp.name
         val resourceDir = mp.parent
-        OMPost()[Api].listFiles(resourceDir).call().foreach {
+        post()[Api].listFiles(resourceDir).call().foreach {
           b ⇒
             val l = b.list.filterNot {
               _.name == modelName
@@ -373,7 +372,7 @@ class ModelWizardPanel {
               Resource(sp, 0L)
             }
             resources() = resources.now.copy(implicits = l, number = l.size)
-            OMPost()[Api].expandResources(resources.now).call().foreach {
+            post()[Api].expandResources(resources.now).call().foreach {
               lf ⇒
                 resources() = lf
             }
@@ -383,7 +382,7 @@ class ModelWizardPanel {
 
   def getJarClasses(jarPath: SafePath) = {
     codeSelector.content() = Some(JavaLikeLanguage())
-    OMPost()[Api].classes(jarPath).call().foreach {
+    post()[Api].classes(jarPath).call().foreach {
       b ⇒
         val classContents = b.flatMap {
           _.flatten
@@ -397,7 +396,7 @@ class ModelWizardPanel {
 
   def setLaunchingCommand(filePath: SafePath) = {
     emptyJARSelectors
-    OMPost()[Api].launchingCommands(filePath).call().foreach {
+    post()[Api].launchingCommands(filePath).call().foreach {
       b ⇒
         TreeNodePanel.refreshAndDraw
         launchingCommand() = b.headOption
@@ -482,7 +481,7 @@ class ModelWizardPanel {
             val target = targetPath.now.map {
               _.name
             }.getOrElse("executable")
-            OMPost()[Api].buildModelTask(
+            post()[Api].buildModelTask(
               target + targetSuffix,
               scriptName,
               commandArea.value,

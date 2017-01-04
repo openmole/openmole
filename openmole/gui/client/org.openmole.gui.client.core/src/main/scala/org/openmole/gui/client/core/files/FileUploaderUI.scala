@@ -33,8 +33,8 @@ import rx._
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
 import org.openmole.gui.client.tool.Utils
 import org.openmole.gui.ext.api.Api
-import org.openmole.gui.ext.tool.client.OMPost
 import sheet._
+import org.openmole.gui.client.core._
 
 class AuthFileUploaderUI(
     keyName:  String,
@@ -60,7 +60,7 @@ class AuthFileUploaderUI(
           if (fInput.files.length > 0) {
             val leaf = fInput.files.item(0).name
             pathSet() = false
-            OMPost()[Api].renameKey(leaf, fileName).call().foreach {
+            post()[Api].renameKey(leaf, fileName).call().foreach {
               b ⇒
                 pathSet() = true
             }

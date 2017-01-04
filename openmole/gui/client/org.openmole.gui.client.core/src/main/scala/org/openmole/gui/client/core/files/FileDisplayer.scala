@@ -3,13 +3,13 @@ package org.openmole.gui.client.core.files
 import TreeNodeTabs._
 import org.openmole.gui.ext.data.ScriptData
 import org.openmole.gui.ext.data._
-
+import scala.concurrent.duration._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
 import rx._
 import org.openmole.gui.client.core.panels._
 import org.openmole.gui.ext.api.Api
-import org.openmole.gui.ext.tool.client.OMPost
+import org.openmole.gui.client.core._
 
 /*
  * Copyright (C) 07/05/15 // mathieu.leclaire@openmole.org
@@ -49,7 +49,7 @@ class FileDisplayer {
     def onrun = {
       overlaying() = true
       refresh(() ⇒
-        OMPost()[Api].runScript(ScriptData(safePathTab.now)).call().foreach { execInfo ⇒
+        post(timeout = 120 seconds, warningTimeout = 60 seconds)[Api].runScript(ScriptData(safePathTab.now)).call().foreach { execInfo ⇒
           overlaying() = false
           executionPanel.dialog.open
         })
@@ -67,7 +67,7 @@ class FileDisplayer {
         tabs.setActive(t)
       case _ ⇒ fileExtension match {
         case oms: OpenMOLEScript ⇒ displayOMS(safePath, content)
-        case md: MDScript ⇒ OMPost()[Api].mdToHtml(safePath).call.foreach { htmlString ⇒
+        case md: MDScript ⇒ post()[Api].mdToHtml(safePath).call.foreach { htmlString ⇒
           tabs ++ new HTMLTab(Var(safePath), htmlString)
         }
         case dod: DisplayableOnDemandFile ⇒

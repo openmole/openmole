@@ -16,12 +16,10 @@ import org.openmole.gui.client.tool.JsRxTags._
 import autowire._
 import rx._
 import bs._
-import fr.iscpif.scaladget.api.Popup.Bottom
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
 import org.openmole.gui.client.core.alert.AlertPanel
 import org.openmole.gui.client.tool.OMTags
 import org.openmole.gui.ext.api.Api
-import org.openmole.gui.ext.tool.client.OMPost
 import sheet._
 
 /*
@@ -48,7 +46,7 @@ class PluginPanel {
   lazy val transferring: Var[ProcessState] = Var(Processed())
 
   def getPlugins = {
-    OMPost()[Api].listPlugins.call().foreach { a ⇒
+    post()[Api].listPlugins.call().foreach { a ⇒
       plugins() = Some(a.toSeq)
     }
   }
@@ -63,7 +61,7 @@ class PluginPanel {
         (p: ProcessState) ⇒ { transferring() = p },
         UploadPlugin(),
         () ⇒
-          OMPost()[Api].addPlugins(FileManager.fileNames(fileInput.files)).call().foreach { ex ⇒
+          post()[Api].addPlugins(FileManager.fileNames(fileInput.files)).call().foreach { ex ⇒
             if (ex.isEmpty) getPlugins
             else AlertPanel.detail("Plugin import failed", ex.head.stackTrace)
           }
@@ -106,7 +104,7 @@ class PluginPanel {
   }
 
   def removePlugin(plugin: Plugin) =
-    OMPost()[Api].removePlugin(plugin).call().foreach {
+    post()[Api].removePlugin(plugin).call().foreach {
       p ⇒
         getPlugins
     }

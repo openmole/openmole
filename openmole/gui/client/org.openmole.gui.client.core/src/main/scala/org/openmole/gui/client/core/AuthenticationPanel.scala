@@ -35,7 +35,6 @@ import rx._
 import bs._
 import org.openmole.gui.client.core.authentications._
 import org.openmole.gui.ext.api.Api
-import org.openmole.gui.ext.tool.client.OMPost
 
 import scalatags.JsDom
 
@@ -47,7 +46,7 @@ class AuthenticationPanel {
   lazy val initialCheck = Var(false)
 
   def getAuthentications = {
-    OMPost()[Api].authentications.call().foreach { auth ⇒
+    post()[Api].authentications.call().foreach { auth ⇒
       auths() = Some(auth.map { a ⇒ client.core.authentications.panelWithID(a) })
       testAuthentications
     }
@@ -147,7 +146,7 @@ class AuthenticationPanel {
 
   val vosToBeTested = bs.input("")(placeholder := "VO names (vo1,vo2,...)").render
 
-  OMPost()[Api].getConfigurationValue(VOTest).call().foreach {
+  post()[Api].getConfigurationValue(VOTest).call().foreach {
     _.map { c ⇒
       vosToBeTested.value = c
     }
@@ -182,7 +181,7 @@ class AuthenticationPanel {
       ).dropdown(
         "",
         settingsDiv,
-        onclose = () ⇒ OMPost()[Api].setConfigurationValue(VOTest, vosToBeTested.value).call().foreach { x ⇒
+        onclose = () ⇒ post()[Api].setConfigurationValue(VOTest, vosToBeTested.value).call().foreach { x ⇒
           getAuthentications
         }
       ).render
@@ -206,10 +205,10 @@ class AuthenticationPanel {
   )
 
   def removeAuthentication(ad: AuthenticationData) = {
-    OMPost()[Api].removeAuthentication(ad).call().foreach { r ⇒
+    post()[Api].removeAuthentication(ad).call().foreach { r ⇒
       ad match {
         case pk: PrivateKey ⇒ pk.privateKey.map { k ⇒
-          OMPost()[Api].deleteAuthenticationKey(k).call().foreach { df ⇒
+          post()[Api].deleteAuthenticationKey(k).call().foreach { df ⇒
             getAuthentications
           }
         }
@@ -232,7 +231,7 @@ class AuthenticationPanel {
           if (vosToBeTested.value.isEmpty) Seq()
           else vosToBeTested.value.split(",").toSeq
         }
-        OMPost()[Api].testAuthentication(a.data, vos).call().foreach { t ⇒
+        post()[Api].testAuthentication(a.data, vos).call().foreach { t ⇒
           auths() = auths.now.map {
             _.updated(auths.now.map {
               _.indexOf(a)

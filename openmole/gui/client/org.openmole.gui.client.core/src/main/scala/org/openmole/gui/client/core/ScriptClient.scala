@@ -25,7 +25,6 @@ import org.openmole.gui.client.core.alert.{ AlertPanel, BannerAlert }
 import org.openmole.gui.client.core.files.{ FileDisplayer, FileManager, TreeNodePanel }
 import org.openmole.gui.client.tool.OMTags
 import org.openmole.gui.ext.api.Api
-import org.openmole.gui.ext.tool.client.OMPost
 import org.openmole.gui.ext.data.{ Authentication, FileExtension }
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
 
@@ -65,7 +64,7 @@ object ScriptClient {
         div(
           omsheet.centerPage,
           div(omsheet.shutdown, "The OpenMOLE server has been stopped"),
-          onload := { () ⇒ OMPost()[Api].shutdown().call() }
+          onload := { () ⇒ post()[Api].shutdown().call() }
         )
       )
     ).render
@@ -159,7 +158,7 @@ object ScriptClient {
         div(
           bs.button("build", btn_danger +++ ms("ooo"), () ⇒ Plugins.load),
           bs.button("call", btn_primary +++ ms("oooo"), () ⇒ {
-            OMPost()[Api].getGUIPlugins.call().foreach { all ⇒
+            post()[Api].getGUIPlugins.call().foreach { all ⇒
               Plugins.authentications() = all.authentications.map { gp ⇒ Plugins.buildJSObject(gp.jsObject).asInstanceOf[Authentication] }
 
               //TEst

@@ -10,7 +10,7 @@ import autowire._
 import scalatags.JsDom.all._
 import AuthenticationUtils._
 import org.openmole.gui.ext.api.Api
-import org.openmole.gui.ext.tool.client.OMPost
+import org.openmole.gui.client.core._
 
 /*
  * Copyright (C) 01/07/15 // mathieu.leclaire@openmole.org
@@ -47,8 +47,8 @@ class SSHPrivateKeyAuthenticationPanel(data: PrivateKeyAuthenticationData = Priv
   )
 
   def save(onsave: () ⇒ Unit) =
-    OMPost()[Api].removeAuthentication(data).call().foreach { d ⇒
-      OMPost()[Api].addAuthentication(
+    post()[Api].removeAuthentication(data).call().foreach { d ⇒
+      post()[Api].addAuthentication(
         PrivateKeyAuthenticationData(
           Some(privateKey.fileName),
           login.value,

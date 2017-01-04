@@ -182,7 +182,7 @@ class GraphCreator(svgSelection: Selection, _tasks: Array[Task], _edges: Array[E
     val xy = mouseXY
     if (d3.event.shiftKey && !dragging.now) {
       val (x, y) = (xy(0), xy(1))
-      OMPost()[Api].uuid.call().foreach { i ⇒
+      post()[Api].uuid.call().foreach { i ⇒
         addTask(i, i, x, y)
 
       }

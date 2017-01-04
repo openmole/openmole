@@ -25,7 +25,7 @@ import org.openmole.gui.client.core.alert.AlertPanel
 import org.openmole.gui.client.core.panels._
 import org.openmole.gui.client.tool._
 import org.openmole.gui.ext.api.Api
-import org.openmole.gui.ext.tool.client.OMPost
+import org.openmole.gui.client.core._
 
 /*
  * Copyright (C) 20/01/16 // mathieu.leclaire@openmole.org
@@ -280,9 +280,9 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
   })
 
   val pluginButton = bs.button("Plug", btn_default, () ⇒ {
-    OMPost()[Api].copyToPluginUploadDir(manager.selected.now).call().foreach {
+    post()[Api].copyToPluginUploadDir(manager.selected.now).call().foreach {
       c ⇒
-        OMPost()[Api].addPlugins(manager.selected.now.map {
+        post()[Api].addPlugins(manager.selected.now.map {
           _.name
         }).call().foreach {
           errs ⇒

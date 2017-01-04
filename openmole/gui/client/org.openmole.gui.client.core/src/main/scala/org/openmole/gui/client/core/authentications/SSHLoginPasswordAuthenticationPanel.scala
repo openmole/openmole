@@ -7,8 +7,7 @@ import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import bs._
 import AuthenticationUtils._
 import org.openmole.gui.ext.api.Api
-import org.openmole.gui.ext.tool.client.OMPost
-
+import org.openmole.gui.client.core._
 /*
  * Copyright (C) 16/06/15 // mathieu.leclaire@openmole.org
  *
@@ -41,8 +40,8 @@ class SSHLoginPasswordAuthenticationPanel(data: LoginPasswordAuthenticationData 
   )
 
   def save(onsave: () ⇒ Unit) = {
-    OMPost()[Api].removeAuthentication(data).call().foreach { d ⇒
-      OMPost()[Api].addAuthentication(LoginPasswordAuthenticationData(login.value, password.value, target.value, port.value)).call().foreach { b ⇒
+    post()[Api].removeAuthentication(data).call().foreach { d ⇒
+      post()[Api].addAuthentication(LoginPasswordAuthenticationData(login.value, password.value, target.value, port.value)).call().foreach { b ⇒
         onsave()
       }
     }

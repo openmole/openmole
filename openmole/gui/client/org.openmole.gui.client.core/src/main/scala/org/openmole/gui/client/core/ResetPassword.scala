@@ -31,7 +31,6 @@ import scalatags.JsDom.all._
 import scalatags.JsDom.tags
 import org.openmole.gui.client.tool._
 import JsRxTags._
-import org.openmole.gui.ext.tool.client.OMPost
 
 class ResetPassword {
 
@@ -57,7 +56,7 @@ class ResetPassword {
     ).render
 
   lazy val resetButton = bs.button("Set password", btn_primary, () ⇒ {
-    OMPost()[Api].resetPassword().call()
+    post()[Api].resetPassword().call()
     ()
   }).render
 

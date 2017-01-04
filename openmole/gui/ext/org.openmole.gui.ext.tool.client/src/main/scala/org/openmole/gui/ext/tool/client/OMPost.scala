@@ -27,12 +27,13 @@ import scala.scalajs.js.timers._
 import scala.util.{ Failure, Success }
 
 @JSExport
-case class OMPost(timeout: Duration = 60 seconds, warningTimeout: Duration = 10 seconds) extends autowire.Client[String, upickle.default.Reader, upickle.default.Writer] {
+case class OMPost(timeout: Duration = 60 seconds, warningTimeout: Duration = 10 seconds, timeOutAction: (String) ⇒ Unit = (s: String) ⇒ {}, warningTimeoutAction: () ⇒ Unit = () ⇒ {}) extends autowire.Client[String, upickle.default.Reader, upickle.default.Writer] {
+
   override def doCall(req: Request): Future[String] = {
     val url = req.path.mkString("/")
 
     val timeoutSet = setTimeout(warningTimeout.toMillis) {
-      println("The request is very long. Please check your connection.")
+      warningTimeoutAction()
     }
 
     val future = ext.Ajax.post(
@@ -44,7 +45,7 @@ case class OMPost(timeout: Duration = 60 seconds, warningTimeout: Duration = 10 
       }
 
     future.onComplete {
-      case Failure(t) ⇒ println(s"The request ${req.path.last} failed.")
+      case Failure(t) ⇒ timeOutAction(req.path.last)
       case Success(_) ⇒ clearTimeout(timeoutSet)
     }
 

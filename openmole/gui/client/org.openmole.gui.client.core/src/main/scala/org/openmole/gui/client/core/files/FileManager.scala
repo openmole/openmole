@@ -5,9 +5,7 @@ import org.scalajs.dom.raw._
 import autowire._
 import org.openmole.gui.client.tool.Utils
 import org.openmole.gui.ext.api.Api
-import org.openmole.gui.ext.tool.client.OMPost
-import org.scalajs.dom
-
+import org.openmole.gui.client.core._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 
 /*
@@ -80,7 +78,7 @@ object FileManager {
     onLoadEnded:       String ⇒ Unit       = (s: String) ⇒ {}
   ) = {
 
-    OMPost()[Api].size(safePath).call().foreach { size ⇒
+    post()[Api].size(safePath).call().foreach { size ⇒
       val xhr = new XMLHttpRequest
 
       xhr.onprogress = (e: ProgressEvent) ⇒ {
