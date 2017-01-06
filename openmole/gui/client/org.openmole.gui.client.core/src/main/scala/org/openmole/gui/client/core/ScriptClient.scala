@@ -19,8 +19,6 @@ import org.scalajs.dom.KeyboardEvent
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
 import fr.iscpif.scaladget.api.Selector.Options
-import fr.iscpif.scaladget.tools
-import org.openmole.gui.client.core.alert.BannerAlert.BannerMessage
 import org.openmole.gui.client.core.alert.{ AlertPanel, BannerAlert }
 import org.openmole.gui.client.core.files.{ FileDisplayer, FileManager, TreeNodePanel }
 import org.openmole.gui.client.tool.OMTags
@@ -49,16 +47,17 @@ import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager
 object ScriptClient {
 
   @JSExport
-  def connection(): Unit = {
+  def connection(): Unit = withBootstrapNative {
     val connection = new Connection
-    dom.document.body.appendChild(connection.connectionDiv.render)
-    addAlert
+    div(
+      connection.connectionDiv.render,
+      alert
+    ).render
   }
 
   @JSExport
-  def stopped(): Unit = {
-    dom.document.body.appendChild(
-      div(omsheet.connectionTabOverlay)(
+  def stopped(): Unit = withBootstrapNative {
+    div(omsheet.connectionTabOverlay)(
       div(
         img(src := "img/openmole.png", omsheet.openmoleLogo),
         div(
@@ -68,16 +67,17 @@ object ScriptClient {
         )
       )
     ).render
-    )
   }
 
   @JSExport
   def resetPassword(): Unit = {
     val resetPassword = new ResetPassword
-    dom.document.body.appendChild(
-      resetPassword.resetPassDiv.render
-    )
-    addAlert
+    withBootstrapNative {
+      div(
+        resetPassword.resetPassDiv,
+        alert
+      ).render
+    }
   }
 
   @JSExport
@@ -152,93 +152,91 @@ object ScriptClient {
 
     Settings.settings.map { sets ⇒
 
-      dom.document.body.appendChild(
+      withBootstrapNative {
         div(
-        ///////Plugin test
-        div(
-          bs.button("build", btn_danger +++ ms("ooo"), () ⇒ Plugins.load),
-          bs.button("call", btn_primary +++ ms("oooo"), () ⇒ {
-            post()[Api].getGUIPlugins.call().foreach { all ⇒
-              Plugins.authentications() = all.authentications.map { gp ⇒ Plugins.buildJSObject(gp.jsObject).asInstanceOf[Authentication] }
+          ///////Plugin test
+          div(
+            bs.button("build", btn_danger +++ ms("ooo"), () ⇒ Plugins.load),
+            bs.button("call", btn_primary +++ ms("oooo"), () ⇒ {
+              post()[Api].getGUIPlugins.call().foreach { all ⇒
+                Plugins.authentications() = all.authentications.map { gp ⇒ Plugins.buildJSObject(gp.jsObject).asInstanceOf[Authentication] }
 
-              //TEst
-              println("auth:" + Plugins.authentications.now)
+                //TEst
+                println("auth:" + Plugins.authentications.now)
 
-              val oo = Plugins.authentications.now.headOption.map { h ⇒
-                println("h " + h)
-                println("h " + h.test)
-                // println("h " + h.panel)
-                h.panel
-              }.getOrElse(tags.div("Cannot load"))
+                val oo = Plugins.authentications.now.headOption.map { h ⇒
+                  println("h " + h)
+                  println("h " + h.test)
+                  // println("h " + h.panel)
+                  h.panel
+                }.getOrElse(tags.div("Cannot load"))
 
-              println("OO " + oo)
+                println("OO " + oo)
 
-              org.scalajs.dom.document.body.appendChild(oo.render)
-              // Plugins.authentications.now.headOption.map { _.test }
-            }
-
-          })
-        ),
-        //////
-        Rx {
-          bs.navBar(
-            omsheet.fixed +++ sheet.nav +++ navbar_pills +++ navbar_inverse +++ (fontSize := 20) +++ navbar_staticTop +++ {
-              if (openFileTree()) mainNav370 else mainNav0
-            },
-            navItem(
-              if (openFileTree()) div(glyph_chevron_left, fileChevronStyle) else div(glyph_chevron_right, fileChevronStyle),
-              todo = () ⇒ {
-                openFileTree() = !openFileTree.now
+                org.scalajs.dom.document.body.appendChild(oo.render)
+                // Plugins.authentications.now.headOption.map { _.test }
               }
-            ),
-            navItem(menuActions.selector),
-            execItem,
-            authenticationItem,
-            pluginItem,
-            docItem
-          )
-        },
-        tags.div(shutDown.shutdownButton),
-        tags.div(`class` := "fullpanel")(
-          tags.div(
-            `class` := Rx {
-              "leftpanel " + {
-                if (openFileTree()) "open" else ""
-              }
-            }
-          )(
-              tags.div(omsheet.relativePosition +++ sheet.paddingTop(-15))(
-                treeNodePanel.fileToolBar.div,
-                treeNodePanel.fileControler,
-                treeNodePanel.labelArea,
-                treeNodePanel.view.render
-              )
-            ),
-          tags.div(
-            `class` := Rx {
-              "centerpanel " + {
-                if (openFileTree()) "reduce" else ""
-              }
-            }
-          )(
-              BannerAlert.banner,
-              treeNodePanel.fileDisplayer.tabs.render,
-              tags.div(omsheet.textVersion)(
-                tags.div(
-                  fontSize := "1em",
-                  fontWeight := "bold"
-                )(s"${sets.version} ${sets.versionName}"),
-                tags.div(fontSize := "0.8em")(s"built the ${sets.buildTime}")
-              )
+
+            })
+          ),
+          //////
+          Rx {
+            bs.navBar(
+              omsheet.fixed +++ sheet.nav +++ navbar_pills +++ navbar_inverse +++ (fontSize := 20) +++ navbar_staticTop +++ {
+                if (openFileTree()) mainNav370 else mainNav0
+              },
+              navItem(
+                if (openFileTree()) div(glyph_chevron_left, fileChevronStyle) else div(glyph_chevron_right, fileChevronStyle),
+                todo = () ⇒ {
+                  openFileTree() = !openFileTree.now
+                }
+              ),
+              navItem(menuActions.selector),
+              execItem,
+              authenticationItem,
+              pluginItem,
+              docItem
             )
-        )
-      ).render
-      )
+          },
+          tags.div(shutDown.shutdownButton),
+          tags.div(`class` := "fullpanel")(
+            tags.div(
+              `class` := Rx {
+                "leftpanel " + {
+                  if (openFileTree()) "open" else ""
+                }
+              }
+            )(
+                tags.div(omsheet.relativePosition +++ sheet.paddingTop(-15))(
+                  treeNodePanel.fileToolBar.div,
+                  treeNodePanel.fileControler,
+                  treeNodePanel.labelArea,
+                  treeNodePanel.view.render
+                )
+              ),
+            tags.div(
+              `class` := Rx {
+                "centerpanel " + {
+                  if (openFileTree()) "reduce" else ""
+                }
+              }
+            )(
+                BannerAlert.banner,
+                treeNodePanel.fileDisplayer.tabs.render,
+                tags.div(omsheet.textVersion)(
+                  tags.div(
+                    fontSize := "1em",
+                    fontWeight := "bold"
+                  )(s"${sets.version} ${sets.versionName}"),
+                  tags.div(fontSize := "0.8em")(s"built the ${sets.buildTime}")
+                )
+              )
+          ),
+          alert
+        ).render
+      }
     }
-
-    body.appendChild(maindiv)
-    addAlert
   }
 
-  def addAlert = dom.document.body.appendChild(AlertPanel.alertDiv)
+  def alert = AlertPanel.alertDiv
 }

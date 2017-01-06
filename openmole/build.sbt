@@ -9,9 +9,9 @@ import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 import org.scalajs.core.tools.io.{FileVirtualJSFile, VirtualJSFile}
 
 
-import scalajsbundler.sbtplugin.ScalaJSBundlerPlugin.autoImport._
-import scalajsbundler.Launcher
-import scalajsbundler.sbtplugin.ScalaJSBundlerPlugin
+//import scalajsbundler.sbtplugin.ScalaJSBundlerPlugin.autoImport._
+//import scalajsbundler.Launcher
+//import scalajsbundler.sbtplugin.ScalaJSBundlerPlugin
 
 organization := "org.openmole"
 name := "openmole-root"
@@ -502,7 +502,7 @@ lazy val jsCompile = OsgiProject(guiServerDir, "org.openmole.gui.server.jscompil
 
 /* -------------- Client ------------------- */
 
-val webpackSettings = Seq(
+/*val webpackSettings = Seq(
  webpackConfigFile := Some((resourceDirectory in Compile).value / "webpack.config.js"),
   webpackEntries in(Compile, fullOptJS) := {
     val sjsOutput = (fullOptJS in Compile).value.data
@@ -511,12 +511,12 @@ val webpackSettings = Seq(
   scalaJSLauncher in(Compile, fullOptJS) := {
     Attributed.blank[VirtualJSFile](FileVirtualJSFile((fullOptJS in Compile).value.data))
   }
-)
+)*/
 
 def guiClientDir = guiDir / "client"
-lazy val clientGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.core") enablePlugins (ScalaJSBundlerPlugin) dependsOn
+lazy val clientGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.core") enablePlugins (ScalaJSPlugin) dependsOn
   (sharedGUI, clientToolGUI, market, dataGUI, extClientTool) settings(
-  webpackSettings,
+  //webpackSettings,
   libraryDependencies += Libraries.async,
   skip in packageJSDependencies := false,
   jsDependencies += Libraries.ace / acePath,
@@ -645,7 +645,8 @@ lazy val openmoleNaked =
     Osgi.bundleDependencies in Compile := OsgiKeys.bundle.all(ScopeFilter(inDependencies(ThisProject, includeRoot = false))).value,
     resourcesAssemble += (resourceDirectory in Compile).value -> assemblyPath.value,
     resourcesAssemble += ((resourceDirectory in serverGUI in Compile).value / "webapp") → (assemblyPath.value / "webapp"),
-    resourcesAssemble += (webpack in(clientGUI, fullOptJS) in Compile).value.head -> (assemblyPath.value / "webapp/js/openmole.js"),
+  //  resourcesAssemble += (webpack in(clientGUI, fullOptJS) in Compile).value.head -> (assemblyPath.value / "webapp/js/openmole.js"),
+    resourcesAssemble += (fullOptJS in clientGUI in Compile).value.data -> (assemblyPath.value / "webapp/js/openmole.js"),
     resourcesAssemble += (packageMinifiedJSDependencies in clientGUI in Compile).value -> (assemblyPath.value / "webapp/js/deps.js"),
     resourcesAssemble += (assemble in dbServer).value -> (assemblyPath.value / "dbserver"),
     resourcesAssemble += {

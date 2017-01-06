@@ -64,13 +64,20 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
   //FIXME val connectedUsers: Var[Seq[UserID]] = Var(Seq())
   val USER_ID = "UserID"
 
-  def connection = html("OM.ScriptClient().connection();")
+  // def connection = html("OM.ScriptClient().connection();")
 
-  def application = html("OM.ScriptClient().run();")
+  //  def application = html("OM.ScriptClient().run();")
 
-  def stopped = html("OM.ScriptClient().stopped();")
+  // def stopped = html("OM.ScriptClient().stopped();")
 
-  def resetPassword = html("OM.ScriptClient().resetPassword();")
+  //  def resetPassword = html("OM.ScriptClient().resetPassword();")
+  def connection = html("ScriptClient().connection();")
+
+  def application = html("ScriptClient().run();")
+
+  def stopped = html("ScriptClient().stopped();")
+
+  def resetPassword = html("ScriptClient().resetPassword();")
 
   def html(javascritMethod: String) = tags.html(
     tags.head(
