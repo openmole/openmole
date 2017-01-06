@@ -16,8 +16,9 @@ import sheet._
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
 import org.openmole.gui.client.tool.JsRxTags._
 import autowire._
+
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
-import org.scalajs.dom.raw.{ HTMLButtonElement, HTMLInputElement, HTMLSpanElement }
+import org.scalajs.dom.raw.{ HTMLButtonElement, HTMLElement, HTMLInputElement, HTMLSpanElement }
 import rx._
 import org.openmole.gui.client.core.Waiter._
 import org.openmole.gui.client.core.alert.AbsolutePositioning.{ FileZone, RelativeCenterPosition }
@@ -107,7 +108,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
     resetFilterTools
   }
 
-  def buildSpan(tool: SelectedTool, todo: () ⇒ Unit, modifierSeq: ModifierSeq = emptyMod): Rx[TypedTag[HTMLSpanElement]] = Rx {
+  def buildSpan(tool: SelectedTool, legend: String, todo: () ⇒ Unit, modifierSeq: ModifierSeq = emptyMod): Rx[TypedTag[HTMLElement]] = Rx {
     span(
       tool.glyph +++ pointer +++ selectedTool().filter(_ == tool).map { _ ⇒ modifierSeq +++ omsheet.selectedTool }.getOrElse(emptyMod) +++ "glyphmenu",
       onclick := { () ⇒
@@ -115,10 +116,10 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
           todo()
         }
       }
-    )
+    ).tooltip(legend)
   }
 
-  def buildAndSelectSpan(tool: SelectedTool, todo: Boolean ⇒ Unit = (Boolean) ⇒ {}): Rx[TypedTag[HTMLSpanElement]] = buildSpan(tool, { () ⇒
+  def buildAndSelectSpan(tool: SelectedTool, legend: String, todo: Boolean ⇒ Unit = (Boolean) ⇒ {}): Rx[TypedTag[HTMLElement]] = buildSpan(tool, legend, { () ⇒
     val isSelectedTool = selectedTool.now == Some(tool)
     if (isSelectedTool) selectedTool.now match {
       case Some(FilterTool) ⇒ unselectToolAndRefreshTree
@@ -357,15 +358,15 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
 
     tags.div(sheet.paddingBottom(10), sheet.paddingTop(50))(
       tags.div(centerElement)(
-        buildSpan(RefreshTool, () ⇒ {
+        buildSpan(RefreshTool, "Refresh the current folder", () ⇒ {
           treeNodePanel.invalidCacheAndDraw
         }),
-        upButton,
-        buildAndSelectSpan(PluginTool),
-        buildAndSelectSpan(TrashTool),
-        buildAndSelectSpan(CopyTool),
-        buildAndSelectSpan(FileCreationTool),
-        buildAndSelectSpan(FilterTool)
+        upButton.tooltip("Upload a file"),
+        buildAndSelectSpan(PluginTool, "Detect plugins that can be enabled in this folder"),
+        buildAndSelectSpan(TrashTool, "Delete selected files"),
+        buildAndSelectSpan(CopyTool, "Copy selected files"),
+        buildAndSelectSpan(FileCreationTool, "File or folder creation"),
+        buildAndSelectSpan(FilterTool, "Filter files by number of entries or by names")
       ),
       tags.div(centerFileToolBar)(
         msg,
