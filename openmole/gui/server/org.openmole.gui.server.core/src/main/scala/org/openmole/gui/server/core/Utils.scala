@@ -425,7 +425,7 @@ object Utils {
     //If no plugin.js in cache: compile it
     // if (jsPluginDirectory.isDirectoryEmpty) {
     val sjsirDir = Workspace.tmpDir
-    val jsFile = Workspace.openMOLELocation / "webapp/js/plugins.js"
+    val jsFile = Workspace.openMOLELocation / "webapp/js/openmole.js"
     jsFile.delete
 
     Plugins.gatherJSIRFiles(sjsirDir)
