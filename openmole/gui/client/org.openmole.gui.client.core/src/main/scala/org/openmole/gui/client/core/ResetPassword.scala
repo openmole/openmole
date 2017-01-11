@@ -55,13 +55,12 @@ class ResetPassword {
       autofocus
     ).render
 
-  lazy val resetButton = bs.button("Set password", btn_primary, () ⇒ {
-    post()[Api].resetPassword().call()
-    ()
-  }).render
+  lazy val resetButton = tags.button("Set password", btn_primary +++ sheet.marginTop(15), `type` := "submit").render
 
   def setPasswordForm: HTMLFormElement =
     tags.form(
+      action := "/resetPassword",
+      method := "post",
       passwordInput,
       passwordAgainInput,
       resetButton
