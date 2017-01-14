@@ -1,7 +1,13 @@
-package org.openmole.gui.ext.data
+package org.openmole.gui.plugin.environment.egi
+
+import org.openmole.gui.ext.data.AuthenticationGUIPlugins
+import org.openmole.gui.ext.tool.client.OMPost
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+import autowire._
+import scala.scalajs.js.annotation.JSExport
 
 /*
- * Copyright (C) 08/08/14 // mathieu.leclaire@openmole.org
+ * Copyright (C) 13/01/17 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -17,16 +23,12 @@ package org.openmole.gui.ext.data
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-case class Help(title: String = "", content: String = "")
+@JSExport
+class Authentications extends AuthenticationGUIPlugins {
 
-trait DataUI {
-  type DATA <: Data
-
-  def panelUI: PanelUI
-
-  def data: DATA
-
-  def dataType: String
-
-  def help: Help = Help()
+  def fetch = OMPost()[API].egiAuthentications().call.map { auth ⇒
+    auth.map {
+      new EGIAuthenticationGUI(_)
+    }
+  } // ++ ssh ++ etc etc
 }

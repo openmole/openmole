@@ -1,12 +1,8 @@
 package org.openmole.gui.client.core.authentications
 
-import org.openmole.gui.ext.data.{ EGIP12AuthenticationData, AuthenticationData }
-import org.scalajs.dom.html.{ Input, Label }
-
 import scalatags.JsDom.all._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
-import scalatags.JsDom.{ TypedTag, tags ⇒ tags }
 import sheet._
 
 /*
@@ -28,20 +24,20 @@ import sheet._
 
 object AuthenticationUtils {
 
-  val passwordStyle: ModifierSeq = Seq(
-    width := 130,
-    passwordType
-  )
-
-  val basicStyle = width := 130
-  val portStyle = width := 130
-
-  def loginInput(default: String) = bs.input(default)(placeholder := "Login", basicStyle).render
-
-  def targetInput(default: String) = bs.input(default)(placeholder := "Host", basicStyle).render
-
-  def portInput(default: String) = bs.input(default)(placeholder := "Port", portStyle).render
-
-  def passwordInput(default: String) = bs.input(default)(placeholder := "Password", passwordStyle).render
+  //  val passwordStyle: ModifierSeq = Seq(
+  //    width := 130,
+  //    passwordType
+  //  )
+  //
+  //  val basicStyle = width := 130
+  //  val portStyle = width := 130
+  //
+  //  def loginInput(default: String) = bs.input(default)(placeholder := "Login", basicStyle).render
+  //
+  //  def targetInput(default: String) = bs.input(default)(placeholder := "Host", basicStyle).render
+  //
+  //  def portInput(default: String) = bs.input(default)(placeholder := "Port", portStyle).render
+  //
+  //  def passwordInput(default: String) = bs.input(default)(placeholder := "Password", passwordStyle).render
 
 }

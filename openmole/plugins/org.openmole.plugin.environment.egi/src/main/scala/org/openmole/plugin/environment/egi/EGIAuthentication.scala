@@ -135,11 +135,16 @@ object EGIAuthentication extends Logger {
     Workspace.authentications.set(a)
   }
 
-  def apply() =
+  def apply() = {
+    println("workspace auth " + Workspace.authentications.allByCategory)
+    println("workspace auth 1" + Workspace.authentications.allByCategory.getOrElse(classOf[EGIAuthentication].getName, Seq.empty))
+    println("workspace auth 2" + Workspace.authentications.allByCategory.getOrElse(classOf[EGIAuthentication].getName, Seq.empty).
+      map(_.asInstanceOf[EGIAuthentication]).headOption)
     Workspace.authentications.allByCategory.
       getOrElse(classOf[EGIAuthentication].getName, Seq.empty).
       map(_.asInstanceOf[EGIAuthentication]).headOption
 
+  }
   def clear() = Workspace.authentications.clear[EGIAuthentication]
 
   def initialise(a: EGIAuthentication)(

@@ -1,5 +1,9 @@
-/**
- * Created by Romain Reuillon on 28/11/16.
+package org.openmole.gui.ext.tool.server
+
+import org.openmole.core.workspace.Workspace
+
+/*
+ * Copyright (C) 13/01/17 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -9,21 +13,16 @@
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
  */
-package org.openmole.gui.ext.data
 
-import org.scalajs.dom.raw.HTMLDivElement
-
-import scalatags.JsDom.TypedTag
-
-trait Authentication {
-
-  def test: Unit
-
-  def panel: TypedTag[HTMLDivElement]
+object Utils {
+  def authenticationKeysFile = {
+    val ak = new java.io.File(Workspace.location, s"${Workspace.persistentLocation}/keys")
+    ak.mkdirs()
+    ak
+  }
 }

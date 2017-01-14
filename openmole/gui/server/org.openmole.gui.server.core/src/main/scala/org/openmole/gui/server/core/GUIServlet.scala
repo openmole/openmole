@@ -34,6 +34,7 @@ import java.io.File
 import org.openmole.core.workspace.Workspace
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.data.PasswordState
+import org.openmole.gui.ext.tool.server
 import org.openmole.gui.ext.tool.server.{ AutowireServer, OMRouter }
 import org.openmole.gui.server.core.GUIServer.ServletArguments
 import org.openmole.tool.file._
@@ -161,7 +162,7 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
 
       fileType match {
         case "project"        ⇒ copyTo(Utils.webUIProjectFile)
-        case "authentication" ⇒ copyTo(Utils.authenticationKeysFile)
+        case "authentication" ⇒ copyTo(server.Utils.authenticationKeysFile)
         case "plugin"         ⇒ copyTo(Utils.pluginUpdoadDirectory)
         case "absolute"       ⇒ copyTo(new File(""))
       }

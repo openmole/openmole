@@ -13,7 +13,7 @@ import scalatags.JsDom.tags
 import scala.async.Async.{ async, await }
 import fr.iscpif.scaladget.mapping.ace._
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
-import org.openmole.gui.client.tool._
+import org.openmole.gui.ext.tool.client._
 
 /*
  * Copyright (C) 07/04/15 // mathieu.leclaire@openmole.org

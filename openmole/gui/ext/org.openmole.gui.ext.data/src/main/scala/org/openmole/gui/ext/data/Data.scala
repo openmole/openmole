@@ -17,9 +17,7 @@ package org.openmole.gui.ext.data
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import DataUtils._
 import monocle.macros.Lenses
-import org.openmole.core.workspace.Workspace
 
 trait Data
 
@@ -196,67 +194,11 @@ case class SafePath(path: Seq[String], context: ServerFileSytemContext = Project
   def normalizedPathString = path.tail.mkString("/")
 }
 
-sealed trait AuthenticationData extends Data {
-  def synthetic: String
-}
-
-trait PrivateKey {
-  def privateKey: Option[String]
-}
-
-case class LoginPasswordAuthenticationData(
-    login:            String = "",
-    cypheredPassword: String = "",
-    target:           String = "",
-    port:             String = "22"
-) extends AuthenticationData {
-  def synthetic = s"$login@$target"
-}
-
-case class PrivateKeyAuthenticationData(
-    privateKey:       Option[String] = None,
-    login:            String         = "",
-    cypheredPassword: String         = "",
-    target:           String         = "",
-    port:             String         = "22"
-) extends AuthenticationData with PrivateKey {
-  def synthetic = s"$login@$target"
-}
-
-case class EGIP12AuthenticationData(
-    val cypheredPassword: String         = "",
-    val privateKey:       Option[String] = None
-) extends AuthenticationData with PrivateKey {
-  def synthetic = "egi.p12"
-}
-
 object ExtractResult {
   def ok = ExtractResult(None)
 }
 
 case class ExtractResult(error: Option[Error])
-
-object AuthenticationTest {
-  def empty = AuthenticationTestBase(false, Error(""))
-}
-
-sealed trait AuthenticationTest {
-  def passed: Boolean
-
-  def errorStack: Error
-}
-
-case class AuthenticationTestBase(passed: Boolean, errorStack: Error) extends AuthenticationTest
-
-case class EGIAuthenticationTest(message: String, password: AuthenticationTest, proxy: AuthenticationTest, dirac: AuthenticationTest) extends AuthenticationTest {
-  def errorStack = Error(s"${password.errorStack.stackTrace} \n\n ${proxy.errorStack.stackTrace} \n\n ${dirac.errorStack.stackTrace}")
-
-  def passed = password.passed && proxy.passed && dirac.passed
-}
-
-case class SSHAuthenticationTest(passed: Boolean, errorStack: Error) extends AuthenticationTest {
-  def message: String = if (passed) "OK" else "failed"
-}
 
 sealed trait UploadType {
   def typeName: String
@@ -766,5 +708,5 @@ sealed trait PluginExtensionType
 object AuthenticationExtension extends PluginExtensionType
 
 //TODO: add other extension points
-case class AllPluginExtensionData(authentications: Seq[GUIPlugin])
-case class GUIPlugin(jsObject: String)
+case class AllPluginExtensionData(authentications: Seq[GUIPluginAsJS])
+case class GUIPluginAsJS(jsObject: String)

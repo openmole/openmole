@@ -1,14 +1,14 @@
 package org.openmole.gui.client.core
 
 import org.openmole.gui.ext.api.Api
-import org.openmole.gui.ext.data.Authentication
+import org.openmole.gui.ext.data.{ AuthenticationPlugin }
 import autowire._
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import rx._
 
 import scalatags.JsDom.all._
-import org.openmole.gui.client.tool.JsRxTags._
+import org.openmole.gui.ext.tool.client.JsRxTags._
 
 import scalatags.JsDom.tags
 import scala.scalajs.js
@@ -34,7 +34,7 @@ import js.annotation._
 object Plugins {
   // lazy val mapping = buildJSObject("PluginMapping").asInstanceOf[PluginMapping]
 
-  lazy val authentications: Var[Seq[Authentication]] = Var(Seq())
+  lazy val authentications: Var[Seq[AuthenticationPlugin]] = Var(Seq())
   // private val mapping = new PluginMapping()
   // println("MAPPINH " + mapping)
 
@@ -45,17 +45,22 @@ object Plugins {
     scalajs.js.eval(s"new $obj")
   }
 
-  def load =
-    post()[Api].loadPlugins.call().foreach { _ ⇒
-      org.scalajs.dom.document.location.reload(true)
+  def buildAndLoad = post()[Api].buildAndLoadPlugins().call.foreach { _ ⇒
+    org.scalajs.dom.document.location.reload(true)
 
-      //  val pluginScript = script(src := "js/plugins.js").render
-      //      pluginScript.onload = (e: Event) => {
-      //        val apple = scalajs.js.eval("thing.ThingOps().build()")
-      //        println("APPLE " + apple)
-      //      }
+  }
 
-    }
+  //def load =
+  // post()[Api].loadPlugins.call().foreach { _ ⇒
+  // org.scalajs.dom.document.location.reload(true)
+
+  //  val pluginScript = script(src := "js/plugins.js").render
+  //      pluginScript.onload = (e: Event) => {
+  //        val apple = scalajs.js.eval("thing.ThingOps().build()")
+  //        println("APPLE " + apple)
+  //      }
+
+  //}
 
   //  def updateGUIPlugin = post()[Api].getGUIPlugins().call().foreach { ps ⇒
   //    ps.authentications.map { p ⇒

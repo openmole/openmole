@@ -18,7 +18,7 @@ package org.openmole.gui.ext.plugin.server
  *
  */
 
-import org.openmole.gui.ext.data.{ Authentication, GUIPlugin }
+import org.openmole.gui.ext.data.{ AuthenticationGUIPlugins, GUIPluginAsJS }
 import org.osgi.framework._
 
 import collection.JavaConverters._
@@ -28,17 +28,17 @@ object PluginActivator {
 
   println("plugins map" + plugins)
 
-  implicit def classesToGUIPlugins(cs: Seq[Class[_]]): Seq[GUIPlugin] = cs.map { c ⇒
-    GUIPlugin(c.getName)
+  implicit def classesToGUIPlugins(cs: Seq[Class[_]]): Seq[GUIPluginAsJS] = cs.map { c ⇒
+    GUIPluginAsJS(c.getName)
   }
 
   private def instances = plugins.values.toSeq.map { _.clientInstance }
 
-  def authentications: Seq[GUIPlugin] = {
+  def authentications: Seq[GUIPluginAsJS] = {
     println("instances " + instances)
 
-    val oo: Seq[GUIPlugin] = instances.filter {
-      classOf[Authentication].isAssignableFrom
+    val oo: Seq[GUIPluginAsJS] = instances.filter {
+      classOf[AuthenticationGUIPlugins].isAssignableFrom
     }
 
     println("instances2 " + oo)
@@ -53,9 +53,6 @@ trait PluginActivator extends BundleActivator {
     PluginActivator.plugins -= this.getClass
 
   override def start(context: BundleContext): Unit = {
-    println("start " + info.clientInstance)
-    println("PluPlugins " + PluginActivator.plugins)
     PluginActivator.plugins += this.getClass → info
-    println("PluPlugins #2 " + PluginActivator.plugins)
   }
 }

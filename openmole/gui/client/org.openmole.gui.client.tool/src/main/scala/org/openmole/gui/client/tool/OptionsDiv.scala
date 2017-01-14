@@ -19,9 +19,11 @@ package org.openmole.gui.client.tool
 
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
+import org.openmole.gui.ext.tool.client.omsheet
 import org.scalajs.dom.html.Input
 import org.scalajs.dom.raw.HTMLInputElement
-import scalatags.JsDom.{ tags ⇒ tags }
+
+import scalatags.JsDom.tags
 import scalatags.JsDom.all._
 import sheet._
 
@@ -49,7 +51,7 @@ class OptionsDiv[T](options: Seq[T], naming: T ⇒ String) {
     for {
       bo ← boxedOptions
     } yield tags.div(
-      span(optionsdiv)(naming(bo.option)),
+      span(omsheet.optionsdiv)(naming(bo.option)),
       bo.checkBox
     )
   )

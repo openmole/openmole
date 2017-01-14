@@ -15,24 +15,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package org.openmole.gui.plugin.environment.egi
+package org.openmole.gui.ext.data
 
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
-import org.openmole.gui.ext.data.Authentication
-import org.openmole.gui.ext.tool.client.OMPost
-import autowire._
+import org.scalajs.dom.raw.HTMLElement
 
-import scala.scalajs.js.annotation.JSExport
-import scalatags.JsDom.all._
+import scala.concurrent.Future
+import scalatags.JsDom.TypedTag
 
-@JSExport
-class EGIGUIAuthentication extends Authentication {
+trait AuthenticationGUIPlugins {
+  def fetch: Future[Seq[AuthenticationPlugin]]
+}
 
-  @JSExport
-  def test: Unit = OMPost()[API].uuid.call().foreach { id ⇒
-    println("ID " + id)
-  }
+trait GUIPlugin
 
-  @JSExport
-  def panel = div(width := 200, h1("EGIII"))
+trait AuthenticationPlugin extends GUIPlugin {
+
+  def panel: TypedTag[HTMLElement]
+
+  def save(onsave: () ⇒ Unit): Unit
 }

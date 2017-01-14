@@ -1,4 +1,4 @@
-package org.openmole.gui.client.tool
+package org.openmole.gui.ext.tool.client
 
 /*
  * Copyright (C) 21/07/14 // mathieu.leclaire@openmole.org
@@ -17,12 +17,13 @@ package org.openmole.gui.client.tool
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.scalajs.dom.raw.{ HTMLDivElement, SVGElement, Node }
-import scalatags.JsDom._
-import scala.util.{ Failure, Success }
-import all._
+import org.scalajs.dom.Element
+import org.scalajs.dom.raw.{ Node, SVGElement }
 import rx._
-import org.scalajs.dom.{ Element }
+
+import scala.util.{ Failure, Success }
+import scalatags.JsDom._
+import scalatags.JsDom.all._
 
 /**
  * A minimal binding between Scala.Rx and Scalatags and Scala-Js-Dom

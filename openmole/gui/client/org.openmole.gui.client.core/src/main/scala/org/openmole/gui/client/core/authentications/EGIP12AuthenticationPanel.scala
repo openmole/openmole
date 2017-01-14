@@ -1,14 +1,13 @@
 package org.openmole.gui.client.core.authentications
 
-import org.openmole.gui.client.core.files.AuthFileUploaderUI
-
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
-import autowire._
-import org.openmole.gui.ext.data.{ EGIP12AuthenticationData, PanelUI }
-import AuthenticationUtils._
-import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
-import bs._
-import org.openmole.gui.ext.api.Api
+//import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+//import autowire._
+//import org.openmole.gui.ext.data.{ EGIP12AuthenticationPluginData, PanelUI }
+//import AuthenticationUtils._
+//import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
+//import bs._
+//import org.openmole.gui.ext.api.Api
+//import org.openmole.gui.plugin.environment.egi.FileUploaderUI
 
 /*
  * Copyright (C) 02/07/15 // mathieu.leclaire@openmole.org
@@ -27,24 +26,24 @@ import org.openmole.gui.ext.api.Api
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class EGIP12AuthenticationPanel(data: EGIP12AuthenticationData = EGIP12AuthenticationData()) extends PanelUI {
-
-  val password = passwordInput(data.cypheredPassword)
-  val privateKey = new AuthFileUploaderUI(data.privateKey.getOrElse(""), data.privateKey.isDefined, Some("egi.p12"))
-
-  val view = hForm(
-    password.withLabel("Password"),
-    privateKey.view.render
-  )
-
-  def save(onsave: () ⇒ Unit) =
-    org.openmole.gui.client.core.post()[Api].removeAuthentication(data).call().foreach { d ⇒
-      org.openmole.gui.client.core.post()[Api].addAuthentication(EGIP12AuthenticationData(
-        password.value,
-        if (privateKey.pathSet.now) Some("egi.p12") else None
-      )).call().foreach { b ⇒
-        onsave()
-      }
-    }
-
-}
+//class EGIP12AuthenticationPanel(data: EGIP12AuthenticationPluginData = EGIP12AuthenticationPluginData()) extends PanelUI {
+//
+//  val password = passwordInput(data.cypheredPassword)
+//  val privateKey = new FileUploaderUI(data.privateKey.getOrElse(""), data.privateKey.isDefined, Some("egi.p12"))
+//
+//  val view = hForm(
+//    password.withLabel("Password"),
+//    privateKey.view.render
+//  )
+//
+//  def save(onsave: () ⇒ Unit) =
+//    org.openmole.gui.client.core.post()[Api].removeAuthentication(data).call().foreach { d ⇒
+//      org.openmole.gui.client.core.post()[Api].addAuthentication(EGIP12AuthenticationPluginData(
+//        password.value,
+//        if (privateKey.pathSet.now) Some("egi.p12") else None
+//      )).call().foreach { b ⇒
+//        onsave()
+//      }
+//    }
+//
+//}

@@ -78,21 +78,6 @@ class ApiImpl(val arguments: GUIServer.ServletArguments, addRoute: OMRouter ⇒ 
   def restart = arguments.applicationControl.restart()
 
   //AUTHENTICATIONS
-  def addAuthentication(data: AuthenticationData): Unit = AuthenticationFactories.addAuthentication(data)
-
-  def authentications(): Seq[AuthenticationData] = AuthenticationFactories.allAuthentications
-
-  def removeAuthentication(data: AuthenticationData) = AuthenticationFactories.removeAuthentication(data)
-
-  def testAuthentication(data: AuthenticationData, vos: Seq[String] = Seq()): Seq[AuthenticationTest] =
-    data match {
-      case d: EGIP12AuthenticationData ⇒
-        if (vos.isEmpty) Seq(EGIAuthenticationTest("empty VO", AuthenticationTest.empty, AuthenticationTest.empty, AuthenticationTest.empty))
-        else AuthenticationFactories.testEGIAuthentication(d, vos)
-      case lp: LoginPasswordAuthenticationData ⇒ AuthenticationFactories.testLoginPasswordSSHAuthentication(lp)
-      case pk: PrivateKeyAuthenticationData    ⇒ AuthenticationFactories.testPrivateKeySSHAuthentication(pk)
-      case _                                   ⇒ Seq(AuthenticationTestBase(false, Error("Cannot test this authentication")))
-    }
 
   //WORKSPACE
   def isPasswordCorrect(pass: String): Boolean = Workspace.passwordIsCorrect(pass)
@@ -111,8 +96,6 @@ class ApiImpl(val arguments: GUIServer.ServletArguments, addRoute: OMRouter ⇒ 
     import org.openmole.gui.ext.data.ServerFileSytemContext.project
     new File(safePath, fileName).createNewFile
   }
-
-  def deleteAuthenticationKey(keyName: String): Unit = authenticationFile(keyName).delete
 
   def deleteFile(safePath: SafePath, context: ServerFileSytemContext): Unit = Utils.deleteFile(safePath, context)
 
@@ -267,9 +250,6 @@ class ApiImpl(val arguments: GUIServer.ServletArguments, addRoute: OMRouter ⇒ 
     Files.move(safePathToFile(safePath), targetFile, StandardCopyOption.REPLACE_EXISTING)
     targetFile
   }
-
-  def renameKey(keyName: String, newName: String): Unit =
-    Files.move(authenticationFile(keyName), authenticationFile(newName), StandardCopyOption.REPLACE_EXISTING)
 
   def saveFile(path: SafePath, fileContent: String): Unit = {
     import org.openmole.gui.ext.data.ServerFileSytemContext.project
@@ -441,6 +421,11 @@ class ApiImpl(val arguments: GUIServer.ServletArguments, addRoute: OMRouter ⇒ 
     AllPluginExtensionData(
       authentications = PluginActivator.authentications
     )
+  }
+
+  def buildAndLoadPlugins() = {
+    Utils.buildPlugins
+    loadPlugins
   }
 
   def loadPlugins() = Utils.loadPlugins(addRoute)

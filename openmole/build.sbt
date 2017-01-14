@@ -21,6 +21,7 @@ def macroParadise =
   addCompilerPlugin("org.scalamacros" %% "paradise" % "2.1.0" cross CrossVersion.full)
 
 lazy val scalaVersionValue = "2.11.8"
+scalaOrganization in ThisBuild := "org.typelevel"
 
 def defaultSettings = BuildSystem.settings ++
   Seq(
@@ -452,17 +453,18 @@ def guiExtTarget = guiExt / "target"
 
 /* -------------------- Ext ----------------------*/
 
-lazy val dataGUI = OsgiProject(guiExt, "org.openmole.gui.ext.data") enablePlugins (ScalaJSPlugin) dependsOn (workflow) settings(
+lazy val dataGUI = OsgiProject(guiExt, "org.openmole.gui.ext.data") enablePlugins (ScalaJSPlugin) settings(
   Libraries.scalaTagsJS,
-  Libraries.scalajsDomJS
+  Libraries.scalajsDomJS,
+  libraryDependencies += Libraries.monocle
 ) settings (defaultSettings: _*)
 
-lazy val extServerTool = OsgiProject(guiExt, "org.openmole.gui.ext.tool.server") dependsOn (dataGUI) settings(
+lazy val extServerTool = OsgiProject(guiExt, "org.openmole.gui.ext.tool.server") dependsOn (dataGUI, workspace) settings(
   libraryDependencies += Libraries.autowire,
   libraryDependencies += Libraries.upickle
 ) settings (defaultSettings: _*)
 
-lazy val extClientTool = OsgiProject(guiExt, "org.openmole.gui.ext.tool.client") enablePlugins (ScalaJSPlugin) settings(
+lazy val extClientTool = OsgiProject(guiExt, "org.openmole.gui.ext.tool.client") enablePlugins (ScalaJSPlugin) dependsOn(dataGUI, sharedGUI) settings(
   Libraries.upickleJS,
   Libraries.autowireJS,
   Libraries.rxJS,
@@ -527,7 +529,7 @@ lazy val clientToolGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.tool
   Libraries.scalajsDomJS,
   Libraries.scalaTagsJS,
   Libraries.scaladgetJS,
-  Libraries.rxJS) settings (defaultSettings: _*)
+  Libraries.rxJS) dependsOn(extClientTool) settings (defaultSettings: _*)
 
 
 /* -------------------------- Server ----------------------- */
@@ -571,7 +573,7 @@ def guiPluginDir = guiDir / "plugins"
 lazy val guiEnvironmentEGIPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.environment.egi") settings(
   guiPluginSettings,
   libraryDependencies += Libraries.equinoxOSGi
-) dependsOn(extPluginGUIServer, extClientTool, dataGUI) enablePlugins (ScalaJSPlugin)
+) dependsOn(extPluginGUIServer, extClientTool, dataGUI, workspace, egi, ssh) enablePlugins (ScalaJSPlugin)
 
 val guiPlugins = Seq(guiEnvironmentEGIPlugin)
 

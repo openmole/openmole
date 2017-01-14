@@ -21,6 +21,7 @@ import org.scalajs.dom.Event
 
 import scalatags.JsDom.all._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
+import org.openmole.gui.ext.tool.client.Utils
 import rx._
 
 object InputFilter {

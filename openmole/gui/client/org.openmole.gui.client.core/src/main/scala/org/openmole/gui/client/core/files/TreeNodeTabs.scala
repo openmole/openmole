@@ -4,7 +4,7 @@ import org.openmole.gui.ext.data._
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
-import org.openmole.gui.client.tool.Utils._
+import org.openmole.gui.ext.tool.client.Utils._
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
 import org.openmole.gui.client.tool._
 import org.openmole.gui.ext.api.Api
@@ -15,8 +15,10 @@ import rx._
 import scalatags.JsDom.all.{ raw, _ }
 import scalatags.JsDom.{ TypedTag, tags }
 import scala.scalajs.js.timers._
-import org.openmole.gui.client.tool.JsRxTags._
+import org.openmole.gui.ext.tool.client.JsRxTags._
+import org.openmole.gui.ext.tool.client._
 import org.openmole.gui.client.core._
+import org.openmole.gui.ext.tool.client.FileManager
 
 /*
  * Copyright (C) 11/05/15 // mathieu.leclaire@openmole.org

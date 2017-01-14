@@ -14,9 +14,9 @@ import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
 import org.openmole.gui.client.core.CoreUtils
 import sheet._
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
-import org.openmole.gui.client.tool.JsRxTags._
+import org.openmole.gui.ext.tool.client.JsRxTags._
 import autowire._
-
+import org.openmole.gui.ext.tool.client._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import org.scalajs.dom.raw.{ HTMLButtonElement, HTMLElement, HTMLInputElement, HTMLSpanElement }
 import rx._
@@ -27,6 +27,7 @@ import org.openmole.gui.client.core.panels._
 import org.openmole.gui.client.tool._
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.client.core._
+import org.openmole.gui.ext.tool.client.FileManager
 
 /*
  * Copyright (C) 20/01/16 // mathieu.leclaire@openmole.org

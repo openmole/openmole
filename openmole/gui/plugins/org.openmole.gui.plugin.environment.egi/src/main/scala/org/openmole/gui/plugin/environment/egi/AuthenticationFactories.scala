@@ -1,34 +1,19 @@
-package org.openmole.gui.server.core
-
-/*
- * Copyright (C) 24/09/14 // mathieu.leclaire@openmole.org
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+package org.openmole.gui.plugin.environment.egi
 
 import org.openmole.core.workspace.Workspace
-import org.openmole.gui.ext.data._
-import org.openmole.gui.server.core.Utils._
+import org.openmole.gui.ext.data.{ Error, ErrorBuilder }
 import org.openmole.plugin.environment.egi.{ EGIAuthentication, P12Certificate }
-import org.openmole.plugin.environment.ssh.{ PrivateKey, SSHAuthentication, LoginPassword }
+import org.openmole.plugin.environment.ssh.{ LoginPassword, PrivateKey, SSHAuthentication }
 
-import scala.util.{ Try, Failure, Success }
+import scala.util.{ Failure, Success, Try }
 
+/**
+ * Created by mathieu on 13/01/17.
+ */
 object AuthenticationFactories {
 
   implicit def dataToFactory(data: AuthenticationData): AuthenticationFactory = data match {
-    case e: EGIP12AuthenticationData        ⇒ EGIP12Factory
+    case e: EGIAuthenticationData           ⇒ EGIP12Factory
     case l: LoginPasswordAuthenticationData ⇒ SSHLoginPasswordFactory
     case _                                  ⇒ SSHPrivateKeyFactory
 
@@ -70,10 +55,11 @@ object AuthenticationFactories {
       }
     }
 
-    def allAuthenticationData: Seq[AuthenticationData] = {
+    def allAuthenticationData: Seq[EGIAuthenticationData] = {
+      println("EGI AUth " + EGIAuthentication())
       EGIAuthentication() match {
         case Some(p12: P12Certificate) ⇒
-          Seq(EGIP12AuthenticationData(
+          Seq(EGIAuthenticationData(
             Workspace.decrypt(p12.cypheredPassword),
             Some(p12.certificate.getName)
           ))
@@ -82,11 +68,11 @@ object AuthenticationFactories {
     }
 
     def coreObject(data: AuthenticationData): Option[P12Certificate] = data match {
-      case p12: EGIP12AuthenticationData ⇒
+      case p12: EGIAuthenticationData ⇒
         p12.privateKey match {
           case Some(pk: String) ⇒ Some(P12Certificate(
             Workspace.encrypt(p12.cypheredPassword),
-            authenticationFile(pk)
+            Utils.authenticationFile(pk)
           ))
           case _ ⇒ None
         }
@@ -95,7 +81,7 @@ object AuthenticationFactories {
 
     def removeAuthentication(data: AuthenticationData) = EGIAuthentication.clear
 
-    def testAuthentication(data: EGIP12AuthenticationData, voName: String): AuthenticationTest = coreObject(data).map { auth ⇒
+    def testAuthentication(data: EGIAuthenticationData, voName: String): AuthenticationTest = coreObject(data).map { auth ⇒
       Try {
         EGIAuthenticationTest(
           voName,
@@ -107,11 +93,11 @@ object AuthenticationFactories {
         case Success(a) ⇒ a
         case Failure(f) ⇒ EGIAuthenticationTest("Error", AuthenticationTest.empty, AuthenticationTestBase(false, ErrorBuilder(f)), AuthenticationTest.empty)
       }
-    }.getOrElse(AuthenticationTestBase(false, ErrorBuilder(new Throwable("Unknown " + data.synthetic))))
+    }.getOrElse(AuthenticationTestBase(false, ErrorBuilder(new Throwable("Unknown " + data.name))))
 
     def testPassword(data: AuthenticationData): AuthenticationTest = coreObject(data).map { d ⇒
       toAuthenticationTest(EGIAuthentication.testPassword(d))
-    }.getOrElse(AuthenticationTestBase(false, Error("Unknown " + data.synthetic)))
+    }.getOrElse(AuthenticationTestBase(false, Error("Unknown " + data.name)))
 
   }
 
@@ -154,7 +140,7 @@ object AuthenticationFactories {
         case Success(_) ⇒ SSHAuthenticationTest(true, Error.empty)
         case Failure(f) ⇒ SSHAuthenticationTest(false, ErrorBuilder(f))
       }
-    }.getOrElse(SSHAuthenticationTest(false, ErrorBuilder(new Throwable("Unknown " + data.synthetic)))))
+    }.getOrElse(SSHAuthenticationTest(false, ErrorBuilder(new Throwable("Unknown " + data.name)))))
   }
 
   object SSHPrivateKeyFactory extends AuthenticationFactory {
@@ -183,7 +169,7 @@ object AuthenticationFactories {
       case keyData: PrivateKeyAuthenticationData ⇒
         keyData.privateKey match {
           case Some(pk: String) ⇒ Some(PrivateKey(
-            authenticationFile(pk),
+            Utils.authenticationFile(pk),
             keyData.login,
             Workspace.encrypt(keyData.cypheredPassword),
             keyData.target
@@ -200,11 +186,11 @@ object AuthenticationFactories {
         case Success(_) ⇒ SSHAuthenticationTest(true, Error.empty)
         case Failure(f) ⇒ SSHAuthenticationTest(false, ErrorBuilder(f))
       }
-    }.getOrElse(SSHAuthenticationTest(false, ErrorBuilder(new Throwable("Unknown " + data.synthetic)))))
+    }.getOrElse(SSHAuthenticationTest(false, ErrorBuilder(new Throwable("Unknown " + data.name)))))
 
   }
 
-  def testEGIAuthentication(data: EGIP12AuthenticationData, vos: Seq[String]): Seq[AuthenticationTest] =
+  def testEGIAuthentication(data: EGIAuthenticationData, vos: Seq[String]): Seq[AuthenticationTest] =
     vos.map { vo ⇒ EGIP12Factory.testAuthentication(data, vo) }
 
   def testLoginPasswordSSHAuthentication(data: LoginPasswordAuthenticationData): Seq[AuthenticationTest] =
@@ -214,4 +200,3 @@ object AuthenticationFactories {
     SSHPrivateKeyFactory.testAuthentication(data)
 
 }
-

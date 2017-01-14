@@ -20,14 +20,14 @@ package org.openmole.gui.client.core
 import org.openmole.gui.client.core.alert.AlertPanel
 import org.openmole.gui.client.core.files._
 import org.openmole.gui.ext.data._
-
 import org.openmole.gui.client.tool._
 import autowire._
 import org.scalajs.dom.html.TextArea
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
 import org.scalajs.dom.raw.{ HTMLDivElement, HTMLInputElement }
-import org.openmole.gui.client.tool.JsRxTags._
+import org.openmole.gui.ext.tool.client._
+import org.openmole.gui.ext.tool.client.JsRxTags._
 import rx._
 import scalatags.JsDom.{ TypedTag, tags }
 import scalatags.JsDom.all._
@@ -40,6 +40,7 @@ import bs._
 import org.openmole.gui.client.tool.{ OMTags, OptionsDiv }
 import org.openmole.gui.ext.api.Api
 import fr.iscpif.scaladget.api.Selector.Options
+import org.openmole.gui.ext.tool.client.FileManager
 
 class ModelWizardPanel {
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()

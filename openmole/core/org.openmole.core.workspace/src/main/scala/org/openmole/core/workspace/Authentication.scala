@@ -76,7 +76,10 @@ trait Authentication <: Persistent {
     }.toSeq
   }
 
-  def allByCategory: Map[String, Seq[Any]] =
+  def allByCategory: Map[String, Seq[Any]] = {
+    println("BASE DIR " + baseDir.getAbsolutePath)
+    baseDir.listFilesSafe { f: File ⇒ f.isDirectory }.foreach { b ⇒ println("BASE DIR list " + b) }
+    baseDir.listFilesSafe { f: File ⇒ f.isDirectory }.foreach { b ⇒ println("BASE DIR list " + b) }
     baseDir.listFilesSafe { f: File ⇒ f.isDirectory }.map { d ⇒ d.getName → inCategory(d.getName).map(_._2) }.toMap
-
+  }
 }

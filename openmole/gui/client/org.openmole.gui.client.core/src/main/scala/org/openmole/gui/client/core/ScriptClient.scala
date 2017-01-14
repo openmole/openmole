@@ -4,7 +4,7 @@ import org.openmole.gui.client.core.panels._
 
 import scalatags.JsDom.tags
 import scala.scalajs.js.annotation.JSExport
-import org.openmole.gui.client.tool.JsRxTags._
+import org.openmole.gui.ext.tool.client.JsRxTags._
 import org.scalajs.dom
 import rx._
 
@@ -20,11 +20,12 @@ import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
 import fr.iscpif.scaladget.api.Selector.Options
 import org.openmole.gui.client.core.alert.{ AlertPanel, BannerAlert }
-import org.openmole.gui.client.core.files.{ FileDisplayer, FileManager, TreeNodePanel }
+import org.openmole.gui.client.core.files.{ FileDisplayer, TreeNodePanel }
 import org.openmole.gui.client.tool.OMTags
 import org.openmole.gui.ext.api.Api
-import org.openmole.gui.ext.data.{ Authentication, FileExtension }
+import org.openmole.gui.ext.data._
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
+import org.openmole.gui.ext.tool.client._
 
 /*
  * Copyright (C) 15/04/15 // mathieu.leclaire@openmole.org
@@ -95,7 +96,7 @@ object ScriptClient {
 
     val execItem = navItem(tags.div(glyph_flash, itemStyle).tooltip("Executions"), () ⇒ executionPanel.dialog.open)
 
-    val authenticationItem = navItem(tags.div(glyph_lock, itemStyle).tooltip("Authentications"), () ⇒ authenticationPanel.dialog.open)
+    val authenticationItem = navItem(tags.div(glyph_lock, itemStyle).tooltip("Authentications"), () ⇒ {}) //authenticationPanel.dialog.open)
 
     val pluginItem = navItem(div(OMTags.glyph_plug, itemStyle).tooltip("Plugins"), () ⇒ pluginPanel.dialog.open)
 
@@ -156,27 +157,31 @@ object ScriptClient {
         div(
           ///////Plugin test
           div(
-            bs.button("build", btn_danger +++ ms("ooo"), () ⇒ Plugins.load),
+            bs.button("build", btn_danger +++ ms("ooo"), () ⇒ Plugins.buildAndLoad),
             bs.button("call", btn_primary +++ ms("oooo"), () ⇒ {
-              post()[Api].getGUIPlugins.call().foreach { all ⇒
-                Plugins.authentications() = all.authentications.map { gp ⇒ Plugins.buildJSObject(gp.jsObject).asInstanceOf[Authentication] }
+              post()[Api].loadPlugins.call().foreach { _ ⇒
+                post()[Api].getGUIPlugins.call().foreach { all ⇒
+                  println("All " + all)
+                  all.authentications.map { gp ⇒ Plugins.buildJSObject(gp.jsObject).asInstanceOf[AuthenticationGUIPlugins] }.head.fetch.foreach { plugins ⇒
+                    Plugins.authentications() = plugins
 
-                //TEst
-                println("auth:" + Plugins.authentications.now)
+                    //TEst
+                    println("auth:" + Plugins.authentications.now)
 
-                val oo = Plugins.authentications.now.headOption.map { h ⇒
-                  println("h " + h)
-                  println("h " + h.test)
-                  // println("h " + h.panel)
-                  h.panel
-                }.getOrElse(tags.div("Cannot load"))
+                    val oo = Plugins.authentications.now.headOption.map { h ⇒
+                      println("h " + h.panel)
+                      // println("h " + h.panel)
+                      // val ff = factory.build(EGIP12AuthenticationPluginData(""))
+                      h.panel
+                    }.getOrElse(tags.div("Cannot load"))
 
-                println("OO " + oo)
+                    println("OO " + oo)
 
-                org.scalajs.dom.document.body.appendChild(oo.render)
-                // Plugins.authentications.now.headOption.map { _.test }
+                    org.scalajs.dom.document.body.appendChild(oo.render)
+                    // Plugins.authentications.now.headOption.map { _.test }
+                  }
+                }
               }
-
             })
           ),
           //////

@@ -28,10 +28,6 @@ trait Api {
   def restart(): Unit
 
   //AUTHENTICATIONS
-  def authentications(): Seq[AuthenticationData]
-  def addAuthentication(data: AuthenticationData): Unit
-  def removeAuthentication(data: AuthenticationData): Unit
-  def testAuthentication(data: AuthenticationData, vos: Seq[String]): Seq[AuthenticationTest]
 
   //WORKSPACE
   def isPasswordCorrect(pass: String): Boolean
@@ -44,7 +40,6 @@ trait Api {
   def addDirectory(safePath: SafePath, directoryName: String): Boolean
   def addFile(safePath: SafePath, fileName: String): Boolean
   def extractTGZ(safePath: SafePath): ExtractResult
-  def deleteAuthenticationKey(keyName: String): Unit
   def deleteFile(safePath: SafePath, context: ServerFileSytemContext): Unit
   def deleteFiles(safePath: Seq[SafePath], context: ServerFileSytemContext): Unit
   def temporaryFile(): SafePath
@@ -64,7 +59,6 @@ trait Api {
   def copyFromTmp(tmpSafePath: SafePath, filesToBeMoved: Seq[SafePath]): Unit
   def uuid(): String = java.util.UUID.randomUUID.toString
   def renameFile(safePath: SafePath, name: String): SafePath
-  def renameKey(keyName: String, newName: String): Unit
   def saveFile(path: SafePath, fileContent: String): Unit
   def saveFiles(fileContents: Seq[AlterableFileContent]): Unit
   def size(safePath: SafePath): Long
@@ -91,6 +85,7 @@ trait Api {
   //
   //  //  //GUI PLUGINS
   def getGUIPlugins(): AllPluginExtensionData
+  def buildAndLoadPlugins(): Unit
   def loadPlugins(): Unit
 
   //MODEL WIZARDS

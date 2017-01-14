@@ -1,7 +1,7 @@
-package org.openmole.gui.ext.data
+package org.openmole.gui.ext.tool.client
 
 /*
- * Copyright (C) 24/09/14 // mathieu.leclaire@openmole.org
+ * Copyright (C) 22/04/15 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -17,25 +17,10 @@ package org.openmole.gui.ext.data
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-trait FactoryUI {
-  val name: String
-  val uuid: String = java.util.UUID.randomUUID.toString
+import scala.scalajs.js.Date
+
+object Utils {
+  def getUUID: String = java.util.UUID.randomUUID.toString
+  def toURI(path: Seq[String]): String = new java.net.URI(null, null, path.mkString("/"), null).toString
+  def longToDate(date: Long) = s"${new Date(date).toLocaleDateString}, ${new Date(date).toLocaleTimeString}"
 }
-
-trait FactoryWithDataUI extends FactoryUI with DataUIBuilder
-
-trait FactoryWithPanelUI extends FactoryUI with PanelUIBuilder
-
-trait DataUIBuilder {
-  type DATAUI <: DataUI
-  def dataUI: DATAUI
-}
-
-trait PanelUIBuilder {
-  type DATA <: Data
-  def data: DATA
-  def panelUI(data: DATA): PanelUI
-  def panelUI: PanelUI = panelUI(data)
-}
-
-trait AuthenticationFactoryUI extends FactoryWithPanelUI

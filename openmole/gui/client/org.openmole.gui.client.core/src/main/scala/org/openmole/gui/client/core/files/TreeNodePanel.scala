@@ -7,22 +7,25 @@ import org.openmole.gui.client.core.CoreUtils
 import org.openmole.gui.client.core.Waiter._
 import org.openmole.gui.ext.data._
 import org.openmole.gui.client.tool._
-import JsRxTags._
+import org.openmole.gui.ext.tool.client.JsRxTags._
+import org.openmole.gui.ext.tool.client._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import org.scalajs.dom.html.Input
 import org.scalajs.dom.raw._
 import org.openmole.gui.client.core._
+
 import scalatags.JsDom.all._
 import scalatags.JsDom.{ TypedTag, tags }
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
+
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import TreeNode._
 import autowire._
 import rx._
 import bs._
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
-import org.openmole.gui.client.tool.Utils
 import org.openmole.gui.ext.api.Api
+import org.openmole.gui.ext.tool.client.{ FileManager, Utils }
 import org.scalajs.dom
 import sheet._
 

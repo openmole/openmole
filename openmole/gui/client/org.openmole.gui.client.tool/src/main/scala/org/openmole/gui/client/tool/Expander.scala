@@ -2,13 +2,9 @@ package org.openmole.gui.client.tool
 
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import fr.iscpif.scaladget.stylesheet.all._
-import bs._
-import org.scalajs.dom.raw.{ HTMLDivElement, HTMLSpanElement }
 import rx._
-
 import scalatags.JsDom.{ tags ⇒ tags }
 import scalatags.JsDom.all._
-import scalatags.JsDom.TypedTag
 
 /*
  * Copyright (C) 09/06/15 // mathieu.leclaire@openmole.org

@@ -21,14 +21,12 @@ import rx._
 
 import scalatags.JsDom.all._
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
-import sheet._
-
 import scalatags.JsDom.all.{ onclick, raw, span }
-import org.openmole.gui.client.tool.JsRxTags._
+import org.openmole.gui.ext.tool.client._
+import org.openmole.gui.ext.tool.client.JsRxTags._
 import fr.iscpif.scaladget.api.BootstrapTags._
-import org.openmole.gui.client.tool
-
 import scalatags.JsDom.tags
+import sheet._
 
 object BannerAlert {
 
@@ -47,10 +45,10 @@ object BannerAlert {
   private val bannerMessages: Var[Seq[BannerMessage]] = Var(Seq())
 
   private val bannerDiv = div(Rx {
-    tags.div(tool.bannerAlert +++ (backgroundColor := color))(
-      span(onclick := { () ⇒ close }, tool.bannerAlertClose)(
+    tags.div(omsheet.bannerAlert +++ (backgroundColor := color))(
+      span(onclick := { () ⇒ close }, omsheet.bannerAlertClose)(
         raw("&#215")
-      ), div(tool.bannerAlertInner)(
+      ), div(omsheet.bannerAlertInner)(
         (for {
           bm ← bannerMessages()
         } yield bm.message).map(msg ⇒ div(msg))
@@ -70,9 +68,9 @@ object BannerAlert {
     bannerMessages() = (bannerMessages.now :+ bannerMessage).distinct
 
   private def color = {
-    if (bannerMessages.now.exists(_.bannerLevel == CriticalBannerLevel)) tool.RED
-    else if (bannerMessages.now.isEmpty) tool.DARK_GREY
-    else tool.BLUE
+    if (bannerMessages.now.exists(_.bannerLevel == CriticalBannerLevel)) omsheet.RED
+    else if (bannerMessages.now.isEmpty) omsheet.DARK_GREY
+    else omsheet.BLUE
   }
 
 }

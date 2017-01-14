@@ -42,7 +42,7 @@ object Libraries {
   lazy val bonecp = "org.openmole.library" %% "com-jolbox-bonecp" % "0.8.0-rc1"
   lazy val slick = "org.openmole.library" %% "com-typesafe-slick" % "3.1.1"
   lazy val slf4j = "org.openmole.library" %% "org-slf4j" % "1.7.10"
-  lazy val xstream = "org.openmole.library" %% "com-thoughtworks-xstream" % "1.4.8"
+  lazy val xstream = "org.openmole.library" %% "com-thoughtworks-xstream" % "1.4.9"
   lazy val scalaLang = "org.openmole.library" %% "org-scala-lang-scala-library" % "2.11.8"
   lazy val jasypt = "org.openmole.library" %% "org-jasypt-encryption" % "1.9.2"
   lazy val opencsv = "org.openmole.library" %% "au-com-bytecode-opencsv" % "2.3"

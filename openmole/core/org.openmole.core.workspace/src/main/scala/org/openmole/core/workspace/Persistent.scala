@@ -44,8 +44,10 @@ case class Persistent(_baseDir: File) {
     loadFile(file, xstream)
   }
 
-  protected def loadFile[T](file: File, xstream: XStream = Persistent.xstream): T =
+  protected def loadFile[T](file: File, xstream: XStream = Persistent.xstream): T = {
+    println("from " + file.content)
     xstream.fromXML(file.content).asInstanceOf[T]
+  }
 
   def delete() = {
     baseDir.recursiveDelete

@@ -1,4 +1,4 @@
-package org.openmole.gui.client
+package org.openmole.gui.ext.tool
 
 /*
  * Copyright (C) 01/04/16 // mathieu.leclaire@openmole.org
@@ -24,7 +24,7 @@ import org.scalajs.dom
 import scalatags.JsDom.all._
 import scalatags.JsDom.{ styles, svgAttrs }
 
-package object tool {
+package object client {
 
   lazy val omsheet = this
 

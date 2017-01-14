@@ -1,4 +1,4 @@
-package org.openmole.gui.client.core.files
+package org.openmole.gui.plugin.environment.egi
 
 /*
  * Copyright (C) 03/07/15 // mathieu.leclaire@openmole.org
@@ -17,33 +17,32 @@ package org.openmole.gui.client.core.files
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.client.tool._
-import JsRxTags._
-
-import scalatags.JsDom.tags
-import org.openmole.gui.ext.data.{ ProcessState, SafePath, UploadAuthentication }
+import autowire._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
+import fr.iscpif.scaladget.stylesheet.all._
+import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
+import org.openmole.gui.ext.data._
+import org.openmole.gui.ext.tool.client.{ FileManager, OMPost }
+import org.openmole.gui.ext.tool.client.JsRxTags._
+import org.scalajs.dom.raw.HTMLInputElement
+import org.openmole.gui.ext.tool.client._
+import rx._
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
-import autowire._
-
 import scalatags.JsDom.all._
-import org.scalajs.dom.raw.HTMLInputElement
-import rx._
-import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
-import org.openmole.gui.client.tool.Utils
-import org.openmole.gui.ext.api.Api
-import sheet._
-import org.openmole.gui.client.core._
 
-class AuthFileUploaderUI(
+object FileUploaderUI {
+  def empty = FileUploaderUI("", false)
+}
+
+case class FileUploaderUI(
     keyName:  String,
     keySet:   Boolean,
     renaming: Option[String] = None
 ) {
 
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
-  val fileName = if (keyName == "") renaming.getOrElse(Utils.getUUID) else keyName
+  val fileName = if (keyName == "") renaming.getOrElse(java.util.UUID.randomUUID.toString) else keyName
   val pathSet: Var[Boolean] = Var(keySet)
 
   val view = upButton
@@ -60,7 +59,7 @@ class AuthFileUploaderUI(
           if (fInput.files.length > 0) {
             val leaf = fInput.files.item(0).name
             pathSet() = false
-            post()[Api].renameKey(leaf, fileName).call().foreach {
+            OMPost()[API].renameKey(leaf, fileName).call().foreach {
               b ⇒
                 pathSet() = true
             }

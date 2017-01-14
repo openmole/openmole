@@ -5,7 +5,7 @@ import org.scalajs.dom.raw._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
 import scalatags.JsDom.{ tags ⇒ tags }
-import JsRxTags._
+import org.openmole.gui.ext.tool.client.JsRxTags._
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
 import sheet._

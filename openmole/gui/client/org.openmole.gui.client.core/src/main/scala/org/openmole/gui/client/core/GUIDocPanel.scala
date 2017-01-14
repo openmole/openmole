@@ -21,13 +21,13 @@ import org.scalajs.dom.raw.HTMLDivElement
 
 import scalatags.JsDom.tags
 import scalatags.JsDom.TypedTag
-
+import org.openmole.gui.ext.tool.client._
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
-import org.openmole.gui.client.core.authentications.AuthPanelWithID
+//import org.openmole.gui.client.core.authentications.AuthPanelWithID
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import rx._
 import org.openmole.gui.client.tool._
-import JsRxTags._
+import org.openmole.gui.ext.tool.client.JsRxTags._
 import scalatags.JsDom.all._
 import scalatags.JsDom._
 import org.openmole.gui.client.tool.OMTags
@@ -210,7 +210,7 @@ class GUIDocPanel {
   }
 
   val authenticationContent = {
-    val factories = authentications.factories
+    //   val factories = authentications.factories
 
     tags.div(
       "In OpenMOLE, the computation load can be delegated to remote environments (remote server through SSH, Cluster, Grid, ...) as explained on the ",
@@ -228,12 +228,12 @@ class GUIDocPanel {
       div(
         spacer20,
         "To add one authentication, click on the ", span(glyph_plus +++ glyphStyle),
-        " icon. In the new panel, select the authentication category: ",
-        factories.options(
-          0,
-          btn_primary,
-          (auth: AuthPanelWithID) ⇒ auth.name
-        ).selector
+        " icon. In the new panel, select the authentication category: " //,
+      //        factories.options(
+      //          0,
+      //          btn_primary,
+      //          (auth: AuthPanelWithID) ⇒ auth.name
+      //        ).selector
       ),
       "Your selection updates the available settings. Let's see them in details:",
       div(

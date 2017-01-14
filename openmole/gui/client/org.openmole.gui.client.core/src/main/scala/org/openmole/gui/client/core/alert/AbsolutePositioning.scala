@@ -1,12 +1,8 @@
 package org.openmole.gui.client.core.alert
 
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
-import org.openmole.gui.client.tool._
+import org.openmole.gui.ext.tool.client._
 import sheet._
-import org.scalajs.dom.html.Div
-import org.scalajs.dom.raw.HTMLElement
-
-import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
 
 /*

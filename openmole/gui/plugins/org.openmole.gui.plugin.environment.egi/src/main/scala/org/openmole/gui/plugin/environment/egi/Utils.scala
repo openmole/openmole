@@ -1,7 +1,11 @@
-package org.openmole.gui.client.tool
+package org.openmole.gui.plugin.environment.egi
+
+import java.io.File
+
+import org.openmole.gui.ext.tool.server.Utils._
 
 /*
- * Copyright (C) 22/04/15 // mathieu.leclaire@openmole.org
+ * Copyright (C) 13/01/17 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -17,10 +21,7 @@ package org.openmole.gui.client.tool
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scala.scalajs.js.Date
-
 object Utils {
-  def getUUID: String = java.util.UUID.randomUUID.toString
-  def toURI(path: Seq[String]): String = new java.net.URI(null, null, path.mkString("/"), null).toString
-  def longToDate(date: Long) = s"${new Date(date).toLocaleDateString}, ${new Date(date).toLocaleTimeString}"
+
+  def authenticationFile(keyFileName: String): File = new File(authenticationKeysFile, keyFileName)
 }

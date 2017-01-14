@@ -66,12 +66,6 @@ object Utils {
 
   def workspaceRoot = workspaceProjectFile.getParentFile
 
-  def authenticationKeysFile = {
-    val ak = Workspace.location / Workspace.persistentLocation / "keys"
-    ak.mkdirs()
-    ak
-  }
-
   def isPlugin(path: SafePath): Boolean = {
     import org.openmole.gui.ext.data.ServerFileSytemContext.project
     !PluginManager.listBundles(safePathToFile(path)).isEmpty
@@ -139,8 +133,6 @@ object Utils {
     }
   }
 
-  def authenticationFile(keyFileName: String): File = new File(authenticationKeysFile, keyFileName)
-
   def getPathArray(f: File, until: File): Seq[String] = {
     def getParentsArray0(f: File, computedParents: Seq[String]): Seq[String] = {
       val parent = f.getParentFile
@@ -155,6 +147,7 @@ object Utils {
       }
       else computedParents
     }
+
     getParentsArray0(f, Seq()) :+ f.getName
   }
 
@@ -163,6 +156,7 @@ object Utils {
       if (paths.isEmpty) accFile
       else getFile0(paths.tail, new File(accFile, paths.head))
     }
+
     getFile0(paths, root)
   }
 
@@ -420,7 +414,7 @@ object Utils {
 
   def getUUID: String = java.util.UUID.randomUUID.toString
 
-  def loadPlugins(route: OMRouter ⇒ Unit) = {
+  def buildPlugins = {
     import org.openmole.gui.ext.data.ServerFileSytemContext.project
     //If no plugin.js in cache: compile it
     // if (jsPluginDirectory.isDirectoryEmpty) {
@@ -431,11 +425,14 @@ object Utils {
     Plugins.gatherJSIRFiles(sjsirDir)
     JSPack.link(sjsirDir, jsFile)
     println("zrfile " + jsFile.getAbsolutePath)
+  }
 
+  def loadPlugins(route: OMRouter ⇒ Unit) = {
     PluginActivator.plugins.foreach { p ⇒
       route(p._2.router)
     }
   }
+
   // }
 
 }
