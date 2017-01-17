@@ -24,7 +24,7 @@ import squants._
 import org.openmole.core.updater.Updater
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.job.Job
-import org.openmole.core.workspace._
+import org.openmole.core.workspace.{ Decrypt, _ }
 import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, BatchExecutionJob, UpdateInterval }
 import org.openmole.tool.cache.Cache
 import squants.information._

@@ -15,47 +15,57 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.workspace
+package org.openmole.core.authentication
 
 import java.io.File
-import org.openmole.tool.file._
-import com.thoughtworks.xstream.XStream
 
-object Persistent {
-  @transient lazy val xstream = new XStream
+import org.openmole.core.serializer.SerialiserService
+import org.openmole.core.workspace._
+import org.openmole.tool.file._
+
+object AuthenticationStore {
+
+  def authenticationsLocation = "authentications"
+
+  implicit def defaultStore(implicit workspace: Workspace) = AuthenticationStore(workspace)
+
+  def apply(workspace: Workspace = Workspace.instance): AuthenticationStore = {
+    val dir = workspace.persistentDir / authenticationsLocation
+    if (dir.mkdirs) dir.setPosixMode("rwx------")
+    new AuthenticationStore(dir)
+  }
+
 }
 
-case class Persistent(_baseDir: File) {
+case class AuthenticationStore(_baseDir: File) {
 
   def baseDir = {
     _baseDir.mkdirs
     _baseDir
   }
 
-  def /(name: String) = Persistent(new File(baseDir, name))
+  def /(name: String) = AuthenticationStore(new File(baseDir, name))
 
-  def save(obj: Any, name: String, xstream: XStream = Persistent.xstream) = {
+  def save(obj: Any, name: String, workspace: Workspace = Workspace.instance) = {
     val file = new File(baseDir, name)
-    file.content = xstream.toXML(obj)
+    SerialiserService.serialise(obj, file)
   }
 
-  def load[T](name: String, xstream: XStream = Persistent.xstream): T = {
+  def load[T](name: String): T = {
     val file = new File(baseDir, name)
-    loadFile(file, xstream)
+    loadFile(file)
   }
 
-  protected def loadFile[T](file: File, xstream: XStream = Persistent.xstream): T = {
-    println("from " + file.content)
-    xstream.fromXML(file.content).asInstanceOf[T]
-  }
+  def loadFile[T](file: File): T =
+    SerialiserService.deserialise[T](file)
 
   def delete() = {
     baseDir.recursiveDelete
     baseDir.mkdirs
   }
 
-  def all(xstream: XStream = Persistent.xstream) =
-    baseDir.listRecursive(_.isFile).map { loadFile(_, xstream) }
+  def all =
+    baseDir.listRecursive(_.isFile).map { loadFile }
 
 }
 

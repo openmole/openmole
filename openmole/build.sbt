@@ -83,6 +83,7 @@ def coreSettings =
 
 def allCore = Seq(
   workflow,
+  authentication,
   serializer,
   communication,
   openmoleDSL,
@@ -152,6 +153,8 @@ lazy val replication = OsgiProject(coreDir, "org.openmole.core.replication", imp
 lazy val workspace = OsgiProject(coreDir, "org.openmole.core.workspace", imports = Seq("*")) settings
   (libraryDependencies ++= Seq(Libraries.jasypt, Libraries.xstream, Libraries.math, Libraries.configuration)) dependsOn
   (exception, event, tools, replication, openmoleCrypto) settings (coreSettings: _*)
+
+lazy val authentication = OsgiProject(coreDir, "org.openmole.core.authentication", imports = Seq("*")) dependsOn (workspace, serializer) settings (coreSettings: _*)
 
 lazy val pluginManager = OsgiProject(
   coreDir,
@@ -285,7 +288,7 @@ def allEnvironment = Seq(batch, oar, desktopgrid, egi, gridscale, pbs, sge, cond
 
 lazy val batch = OsgiProject(pluginDir, "org.openmole.plugin.environment.batch", imports = Seq("*")) dependsOn(
   workflow, workspace, tools, event, replication, updater, exception,
-  serializer, fileService, pluginManager, openmoleTar, communication
+  serializer, fileService, pluginManager, openmoleTar, communication, authentication
 ) settings (
   libraryDependencies ++= Seq(
     Libraries.gridscale,

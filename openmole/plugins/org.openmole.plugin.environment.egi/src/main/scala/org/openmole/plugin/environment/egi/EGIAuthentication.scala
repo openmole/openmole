@@ -27,14 +27,16 @@ import fr.iscpif.gridscale.egi._
 import fr.iscpif.gridscale.http._
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.fileservice._
-import org.openmole.core.workspace._
+import org.openmole.core.workspace.{ Decrypt, _ }
 import org.openmole.plugin.environment.batch.authentication.CypheredPassword
 import org.openmole.plugin.environment.egi.EGIEnvironment._
 import org.openmole.tool.file._
 import org.openmole.tool.logger.Logger
 import org.openmole.tool.stream._
+import org.openmole.core.authentication._
 import org.openmole.tool.tar.TarInputStream
 import squants.time.TimeConversions._
+
 import scala.util.Try
 
 object EGIAuthentication extends Logger {
@@ -130,22 +132,17 @@ object EGIAuthentication extends Logger {
     }
   }
 
-  def update(a: EGIAuthentication, test: Boolean = true)(implicit decrypt: Decrypt) = {
+  def update(a: EGIAuthentication, test: Boolean = true)(implicit decrypt: Decrypt, workspace: Workspace = Workspace.instance) = {
     if (test) testPassword(a).get
-    Workspace.authentications.set(a)
+    Authentication.set(a)
   }
 
-  def apply() = {
-    println("workspace auth " + Workspace.authentications.allByCategory)
-    println("workspace auth 1" + Workspace.authentications.allByCategory.getOrElse(classOf[EGIAuthentication].getName, Seq.empty))
-    println("workspace auth 2" + Workspace.authentications.allByCategory.getOrElse(classOf[EGIAuthentication].getName, Seq.empty).
-      map(_.asInstanceOf[EGIAuthentication]).headOption)
-    Workspace.authentications.allByCategory.
+  def apply()(implicit workspace: Workspace = Workspace.instance) =
+    Authentication.allByCategory.
       getOrElse(classOf[EGIAuthentication].getName, Seq.empty).
       map(_.asInstanceOf[EGIAuthentication]).headOption
 
-  }
-  def clear() = Workspace.authentications.clear[EGIAuthentication]
+  def clear(implicit workspace: Workspace) = Authentication.clear[EGIAuthentication]
 
   def initialise(a: EGIAuthentication)(
     serverURLs: Seq[String],

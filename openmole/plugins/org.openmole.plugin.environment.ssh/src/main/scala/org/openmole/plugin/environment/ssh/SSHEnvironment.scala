@@ -20,7 +20,7 @@ package org.openmole.plugin.environment.ssh
 import java.net.URI
 
 import org.openmole.core.workflow.dsl._
-import org.openmole.core.workspace._
+import org.openmole.core.workspace.{ Decrypt, _ }
 import org.openmole.plugin.environment.batch.control._
 import org.openmole.plugin.environment.batch.environment._
 import squants.information.Information

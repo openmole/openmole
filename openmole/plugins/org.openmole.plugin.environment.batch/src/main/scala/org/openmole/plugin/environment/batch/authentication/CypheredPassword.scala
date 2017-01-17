@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.environment.batch.authentication
 
-import org.openmole.core.workspace._
+import org.openmole.core.workspace.{ Decrypt, _ }
 
 trait CypheredPassword {
   def cypheredPassword: String

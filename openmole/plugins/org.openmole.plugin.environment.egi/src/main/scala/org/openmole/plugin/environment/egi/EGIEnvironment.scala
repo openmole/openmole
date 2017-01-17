@@ -21,7 +21,7 @@ import java.net.URI
 
 import fr.iscpif.gridscale.egi.BDII
 import org.openmole.core.exception.InternalProcessingError
-import org.openmole.core.workspace._
+import org.openmole.core.workspace.{ Decrypt, _ }
 import org.openmole.core.workflow.dsl._
 import org.openmole.plugin.environment.batch.control._
 import org.openmole.plugin.environment.batch.environment._

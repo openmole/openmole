@@ -20,15 +20,16 @@ package org.openmole.plugin.environment.ssh
 import java.io.File
 
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.workspace._
+import org.openmole.core.workspace.{ Decrypt, _ }
 import org.openmole.plugin.environment.batch.authentication.CypheredPassword
+import org.openmole.core.authentication._
 
 import scala.util.Try
 
 object SSHAuthentication {
 
-  def apply() =
-    Workspace.authentications.allByCategory.getOrElse(classOf[SSHAuthentication].getName, Seq.empty).map(_.asInstanceOf[SSHAuthentication])
+  def apply()(implicit workspace: Workspace = Workspace.instance) =
+    Authentication.allByCategory.getOrElse(classOf[SSHAuthentication].getName, Seq.empty).map(_.asInstanceOf[SSHAuthentication])
 
   def find(login: String, host: String, port: Int = 22): SSHAuthentication = {
     val list = apply()
@@ -36,17 +37,17 @@ object SSHAuthentication {
     auth.getOrElse(throw new UserBadDataError(s"No authentication method found for $login@$host:$port"))
   }
 
-  def +=(a: SSHAuthentication) =
-    Workspace.authentications.save[SSHAuthentication](a, eq)
+  def +=(a: SSHAuthentication)(implicit workspace: Workspace = Workspace.instance) =
+    Authentication.save[SSHAuthentication](a, eq)
 
-  def -=(a: SSHAuthentication) =
-    Workspace.authentications.remove[SSHAuthentication](a, eq)
+  def -=(a: SSHAuthentication)(implicit workspace: Workspace = Workspace.instance) =
+    Authentication.remove[SSHAuthentication](a, eq)
 
-  def clear() = Workspace.authentications.clear[SSHAuthentication]
+  def clear()(implicit workspace: Workspace = Workspace.instance) = Authentication.clear[SSHAuthentication]
 
   private def eq(a1: SSHAuthentication, a2: SSHAuthentication) = (a1.login, a1.host, a1.port) == (a2.login, a2.host, a2.port)
 
-  def test(a: SSHAuthentication)(implicit decrypt: Decrypt) = {
+  def test(a: SSHAuthentication)(implicit decrypt: Decrypt, workspace: Workspace = Workspace.instance) = {
     Try(fr.iscpif.gridscale.ssh.SSHJobService(a.host, a.port)(a.apply).home).map(_ ⇒ true)
   }
 }

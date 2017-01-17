@@ -19,9 +19,11 @@ package org.openmole.core.workspace
 
 object Decrypt {
 
-  def apply(password: String) = new Decrypt {
+  def apply(password: String): Decrypt = new Decrypt {
     def decrypt(s: String) = Workspace.decrypt(s, password)
   }
+
+  implicit def apply(implicit workspace: Workspace): Decrypt = apply(workspace.password)
 
 }
 

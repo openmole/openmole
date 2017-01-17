@@ -58,7 +58,7 @@ class ApiImpl(val arguments: GUIServer.ServletArguments, addRoute: OMRouter ⇒ 
 
   val execution = new Execution
 
-  implicit def authProvider = Workspace.authenticationProvider
+  implicit def workspace = Workspace.instance
 
   //GENERAL
   def settings: OMSettings = {

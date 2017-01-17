@@ -45,7 +45,6 @@ object Workspace {
   def globalGroup = "Global"
   def tmpLocation = ".tmp"
   def persistentLocation = "persistent"
-  def authenticationsLocation = "authentications"
 
   lazy val uniqueIDLocation = ConfigurationLocation[String](globalGroup, "UniqueID", None)
 
@@ -103,8 +102,6 @@ object Workspace {
 
   instance setPreferenceIfNotSet (uniqueIDLocation, UUID.randomUUID.toString)
   instance setDefault ErrorArraySnipSize
-
-  implicit def authenticationProvider = instance.authenticationProvider
 
 }
 
@@ -207,7 +204,7 @@ class Workspace(val location: File) {
     setPreference(Workspace.passwordTest, passwordTestString)
   }
 
-  private def password = {
+  private[workspace] def password = {
     _password match {
       case None    ⇒ EventDispatcher.trigger(this, Workspace.PasswordRequired)
       case Some(p) ⇒
@@ -235,12 +232,6 @@ class Workspace(val location: File) {
   def preferenceIsSet[T](configurationLocation: ConfigurationLocation[T]) = configurationFile.value(configurationLocation.group, configurationLocation.name).isDefined
   def passwordChosen = configurationFile.value(passwordTest.group, passwordTest.name).isDefined
   def passwordHasBeenSet = _password.map(passwordIsCorrect).getOrElse(false)
-
-  def persistent(name: String) = Persistent(persistentDir / name)
-
-  def authenticationProvider = Decrypt(password)
-
-  lazy val authentications = new Persistent(persistentDir / Workspace.authenticationsLocation) with Authentication
 
   lazy val keyStoreLocation = file("OMKeystore")
   lazy val keyStorePassword = "openmole"

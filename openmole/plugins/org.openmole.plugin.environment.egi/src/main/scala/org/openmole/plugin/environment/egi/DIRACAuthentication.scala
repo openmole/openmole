@@ -19,7 +19,7 @@ package org.openmole.plugin.environment.egi
 
 import fr.iscpif.gridscale.authentication._
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.workspace._
+import org.openmole.core.workspace.{ Decrypt, _ }
 
 object DIRACAuthentication {
 

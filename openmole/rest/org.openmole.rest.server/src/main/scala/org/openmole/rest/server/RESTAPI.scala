@@ -15,7 +15,7 @@ import org.openmole.core.workflow.execution.Environment.ExceptionRaised
 import org.openmole.core.workflow.mole.{ MoleExecution, MoleExecutionContext }
 import org.openmole.core.workflow.puzzle._
 import org.openmole.core.workflow.task._
-import org.openmole.core.workspace.{ Persistent, Workspace }
+import org.openmole.core.workspace.Workspace
 import org.openmole.tool.tar.{ TarOutputStream, TarInputStream }
 import org.scalatra._
 import org.scalatra.servlet.FileUploadSupport

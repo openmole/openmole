@@ -23,7 +23,7 @@ package dsl {
 
   import org.openmole.core.context._
   import org.openmole.core.logging.LoggerService
-  import org.openmole.core.workspace.Workspace
+  import org.openmole.core.workspace.{ Decrypt, Workspace }
   import cats._
   import org.openmole.core.tools.io.FromString
   import squants._
@@ -37,10 +37,10 @@ package dsl {
 
     implicit lazy val implicitContext = Context.empty
 
-    lazy val workspace = Workspace
+    implicit lazy val workspace = Workspace
     lazy val logger = LoggerService
 
-    implicit def authenticationProvider = workspace.authenticationProvider
+    implicit def decrypt = Decrypt(workspace)
 
     implicit def stringToFile(path: String) = File(path)
 

@@ -43,7 +43,7 @@ object AuthenticationFactories {
   }
 
   object EGIP12Factory extends AuthenticationFactory {
-    implicit def authProvider = Workspace.authenticationProvider
+    implicit def workpsace = Workspace.instance
 
     def buildAuthentication(data: AuthenticationData) = {
       val auth = coreObject(data)
@@ -103,7 +103,7 @@ object AuthenticationFactories {
 
   object SSHLoginPasswordFactory extends AuthenticationFactory {
 
-    implicit def authProvider = Workspace.authenticationProvider
+    implicit def workspace = Workspace.instance
 
     def buildAuthentication(data: AuthenticationData) = {
       val auth = coreObject(data)
@@ -144,7 +144,7 @@ object AuthenticationFactories {
   }
 
   object SSHPrivateKeyFactory extends AuthenticationFactory {
-    implicit def authProvider = Workspace.authenticationProvider
+    implicit def workspace = Workspace.instance
 
     def buildAuthentication(data: AuthenticationData) = {
       val auth = coreObject(data)

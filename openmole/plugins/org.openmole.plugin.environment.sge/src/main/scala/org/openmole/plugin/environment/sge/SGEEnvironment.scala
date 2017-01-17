@@ -18,10 +18,9 @@
 package org.openmole.plugin.environment.sge
 
 import org.openmole.core.workflow.dsl._
-import org.openmole.core.workspace._
+import org.openmole.core.workspace.{ Decrypt, _ }
 import org.openmole.plugin.environment.batch.environment._
 import org.openmole.plugin.environment.ssh._
-
 import squants._
 import squants.information._
 
