@@ -22,7 +22,11 @@ import org.openmole.tool.file._
 import com.thoughtworks.xstream.XStream
 
 object Persistent {
-  @transient lazy val xstream = new XStream
+  @transient lazy val xstream = {
+    val xs = new XStream
+    xs.setClassLoader(Persistent.getClass.getClassLoader)
+    xs
+  }
 }
 
 case class Persistent(_baseDir: File) {

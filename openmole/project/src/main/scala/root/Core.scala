@@ -44,7 +44,7 @@ object Core extends Defaults {
   val replication = OsgiProject("replication", imports = Seq("*")) settings (bundleType += "dbserver",
     libraryDependencies ++= Seq(slick, xstream))
 
-  val workspace = OsgiProject("workspace", imports = Seq("*")) settings
+  val workspace = OsgiProject("workspace", imports = Seq("*"), global = true) settings
     (libraryDependencies ++= Seq(jasypt, xstream, math, Libraries.configuration)) dependsOn
     (exception, event, tools, replication, openmoleCrypto)
 
