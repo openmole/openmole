@@ -1,7 +1,7 @@
 package org.openmole.gui.client.core
 
 import org.openmole.gui.ext.api.Api
-import org.openmole.gui.ext.data.{ AuthenticationPlugin }
+import org.openmole.gui.ext.data.AuthenticationPluginFactory
 import autowire._
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
@@ -13,6 +13,7 @@ import org.openmole.gui.ext.tool.client.JsRxTags._
 import scalatags.JsDom.tags
 import scala.scalajs.js
 import js.annotation._
+import scala.concurrent.Future
 
 /*
  * Copyright (C) 30/11/16 // mathieu.leclaire@openmole.org
@@ -34,11 +35,16 @@ import js.annotation._
 object Plugins {
   // lazy val mapping = buildJSObject("PluginMapping").asInstanceOf[PluginMapping]
 
-  lazy val authentications: Var[Seq[AuthenticationPlugin]] = Var(Seq())
+  val authenticationFactories: Var[Seq[AuthenticationPluginFactory]] = Var(Seq())
   // private val mapping = new PluginMapping()
   // println("MAPPINH " + mapping)
 
   //def apply() = mapping
+
+  post()[Api].getGUIPlugins.call().foreach { p ⇒
+    println("PP " + p)
+    authenticationFactories() = p.authentications.map { gp ⇒ Plugins.buildJSObject(gp.jsObject).asInstanceOf[AuthenticationPluginFactory] }
+  }
 
   def buildJSObject(obj: String) = {
     println("Build " + obj)

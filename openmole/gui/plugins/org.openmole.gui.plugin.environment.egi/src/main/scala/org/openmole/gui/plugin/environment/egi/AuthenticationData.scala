@@ -1,6 +1,6 @@
 package org.openmole.gui.plugin.environment.egi
 
-import org.openmole.gui.ext.data.Error
+import org.openmole.gui.ext.data.{ AuthenticationData, Error }
 
 /*
  * Copyright (C) 12/01/17 // mathieu.leclaire@openmole.org
@@ -18,10 +18,6 @@ import org.openmole.gui.ext.data.Error
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-sealed trait AuthenticationData {
-  def name: String
-}
 
 case class EGIAuthenticationData(
     cypheredPassword: String         = "",

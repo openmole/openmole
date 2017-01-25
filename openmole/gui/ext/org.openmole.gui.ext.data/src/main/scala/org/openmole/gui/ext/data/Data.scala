@@ -710,3 +710,7 @@ object AuthenticationExtension extends PluginExtensionType
 //TODO: add other extension points
 case class AllPluginExtensionData(authentications: Seq[GUIPluginAsJS])
 case class GUIPluginAsJS(jsObject: String)
+
+trait AuthenticationData {
+  def name: String
+}

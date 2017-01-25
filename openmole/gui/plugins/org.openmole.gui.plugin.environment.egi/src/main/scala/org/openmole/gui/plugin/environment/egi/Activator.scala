@@ -17,24 +17,14 @@
  */
 package org.openmole.gui.plugin.environment.egi
 
-import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.plugin.server.{ PluginActivator, PluginInfo }
 import org.openmole.gui.ext.tool.server.{ AutowireServer, OMRouter }
-import org.openmole.plugin.environment.egi.EGIAuthentication
-
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class Activator extends PluginActivator { /*with AutowireServer autowire.Server[String, upickle.default.Reader, upickle.default.Writer] {
-
-  def read[Result: upickle.default.Reader](p: String) = upickle.default.read[Result](p)
-
-  def write[Result: upickle.default.Writer](r: Result) = upickle.default.write(r)*/
+class Activator extends PluginActivator {
 
   def info: PluginInfo = PluginInfo(
-    classOf[Authentications],
+    classOf[EGIAuthenticationGUIFactory],
     OMRouter[API](AutowireServer.route[API](new APIImpl))
   )
-
-  println("Info" + info)
-  println(info.clientInstance)
 }

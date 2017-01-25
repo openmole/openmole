@@ -22,15 +22,32 @@ import org.scalajs.dom.raw.HTMLElement
 import scala.concurrent.Future
 import scalatags.JsDom.TypedTag
 
-trait AuthenticationGUIPlugins {
-  def fetch: Future[Seq[AuthenticationPlugin]]
-}
+//trait AuthenticationGUIPlugins {
+//  def fetch: Future[Seq[AuthenticationPlugin]]
+//}
 
-trait GUIPlugin
-
+sealed trait GUIPlugin
 trait AuthenticationPlugin extends GUIPlugin {
+  type AuthType <: AuthenticationData
+
+  def data: AuthType
+
+  def factory: AuthenticationPluginFactory
 
   def panel: TypedTag[HTMLElement]
 
   def save(onsave: () ⇒ Unit): Unit
+
+  def remove(onremoved: () ⇒ Unit): Unit
+}
+
+sealed trait GUIPluginFactory {
+  def name: String
+}
+
+trait AuthenticationPluginFactory extends GUIPluginFactory {
+  type AuthType <: AuthenticationData
+  def build(data: AuthType): AuthenticationPlugin
+  def buildEmpty: AuthenticationPlugin
+  def getData: Future[Seq[AuthType]]
 }

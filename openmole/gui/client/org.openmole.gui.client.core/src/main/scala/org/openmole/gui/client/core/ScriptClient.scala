@@ -85,160 +85,137 @@ object ScriptClient {
   def run(): Unit = {
     implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
-    val maindiv = tags.div()
-    val shutDown = new ShutDown
+    post()[Api].loadPlugins.call().map { _ ⇒
+      val maindiv = tags.div()
+      val shutDown = new ShutDown
 
-    val authenticationPanel = new AuthenticationPanel
+      val authenticationPanel = new AuthenticationPanel
 
-    val openFileTree = Var(true)
+      val openFileTree = Var(true)
 
-    val itemStyle = lineHeight := "35px"
+      val itemStyle = lineHeight := "35px"
 
-    val execItem = navItem(tags.div(glyph_flash, itemStyle).tooltip("Executions"), () ⇒ executionPanel.dialog.open)
+      val execItem = navItem(tags.div(glyph_flash, itemStyle).tooltip("Executions"), () ⇒ executionPanel.dialog.open)
 
-    val authenticationItem = navItem(tags.div(glyph_lock, itemStyle).tooltip("Authentications"), () ⇒ {}) //authenticationPanel.dialog.open)
+      val authenticationItem = navItem(tags.div(glyph_lock, itemStyle).tooltip("Authentications"), () ⇒ authenticationPanel.dialog.open)
 
-    val pluginItem = navItem(div(OMTags.glyph_plug, itemStyle).tooltip("Plugins"), () ⇒ pluginPanel.dialog.open)
+      val pluginItem = navItem(div(OMTags.glyph_plug, itemStyle).tooltip("Plugins"), () ⇒ pluginPanel.dialog.open)
 
-    val envItem = navItem(div(glyph_exclamation, itemStyle), () ⇒ stackPanel.open)
+      val envItem = navItem(div(glyph_exclamation, itemStyle), () ⇒ stackPanel.open)
 
-    val docItem = navItem(div(OMTags.glyph_book, itemStyle).tooltip("Documentation"), () ⇒ docPanel.dialog.open)
+      val docItem = navItem(div(OMTags.glyph_book, itemStyle).tooltip("Documentation"), () ⇒ docPanel.dialog.open)
 
-    dom.window.onkeydown = (k: KeyboardEvent) ⇒ {
-      if ((k.keyCode == 83 && k.ctrlKey)) {
-        k.preventDefault
-        false
+      dom.window.onkeydown = (k: KeyboardEvent) ⇒ {
+        if ((k.keyCode == 83 && k.ctrlKey)) {
+          k.preventDefault
+          false
 
-      }
-    }
-
-    //START BUTTON
-    val fileDisplayer = new FileDisplayer
-
-    // Define the option sequence
-    case class MenuAction(name: String, action: () ⇒ Unit)
-
-    val newEmpty = MenuAction("Empty project", () ⇒ {
-      val fileName = "newProject.oms"
-      CoreUtils.addFile(manager.current.now, fileName, () ⇒ {
-        val toDisplay = manager.current.now ++ fileName
-        FileManager.download(
-          toDisplay,
-          onLoadEnded = (content: String) ⇒ {
-          TreeNodePanel.refreshAndDraw
-          fileDisplayer.display(toDisplay, content, FileExtension.OMS)
         }
-        )
+      }
+
+      //START BUTTON
+      val fileDisplayer = new FileDisplayer
+
+      // Define the option sequence
+      case class MenuAction(name: String, action: () ⇒ Unit)
+
+      val newEmpty = MenuAction("Empty project", () ⇒ {
+        val fileName = "newProject.oms"
+        CoreUtils.addFile(manager.current.now, fileName, () ⇒ {
+          val toDisplay = manager.current.now ++ fileName
+          FileManager.download(
+            toDisplay,
+            onLoadEnded = (content: String) ⇒ {
+            TreeNodePanel.refreshAndDraw
+            fileDisplayer.display(toDisplay, content, FileExtension.OMS)
+          }
+          )
+        })
       })
-    })
 
-    val importModel = MenuAction("Import your model", () ⇒ {
-      modelWizardPanel.dialog.open
-    })
+      val importModel = MenuAction("Import your model", () ⇒ {
+        modelWizardPanel.dialog.open
+      })
 
-    val marketPlaceProject = MenuAction("From market place", () ⇒ {
-      marketPanel.dialog.open
-    })
+      val marketPlaceProject = MenuAction("From market place", () ⇒ {
+        marketPanel.dialog.open
+      })
 
-    val elements = Seq(newEmpty, importModel, marketPlaceProject)
+      val elements = Seq(newEmpty, importModel, marketPlaceProject)
 
-    lazy val menuActions: Options[MenuAction] = elements.options(
-      key = btn_danger,
-      naming = (m: MenuAction) ⇒ m.name,
-      onclose = () ⇒ menuActions.content.now.foreach {
-      _.action()
-    },
-      fixedTitle = Some("New project")
-    )
+      lazy val menuActions: Options[MenuAction] = elements.options(
+        key = btn_danger,
+        naming = (m: MenuAction) ⇒ m.name,
+        onclose = () ⇒ menuActions.content.now.foreach {
+        _.action()
+      },
+        fixedTitle = Some("New project")
+      )
 
-    Settings.settings.map { sets ⇒
+      Settings.settings.map { sets ⇒
 
-      withBootstrapNative {
-        div(
-          ///////Plugin test
+        withBootstrapNative {
           div(
-            bs.button("build", btn_danger +++ ms("ooo"), () ⇒ Plugins.buildAndLoad),
-            bs.button("call", btn_primary +++ ms("oooo"), () ⇒ {
-              post()[Api].loadPlugins.call().foreach { _ ⇒
-                post()[Api].getGUIPlugins.call().foreach { all ⇒
-                  println("All " + all)
-                  all.authentications.map { gp ⇒ Plugins.buildJSObject(gp.jsObject).asInstanceOf[AuthenticationGUIPlugins] }.head.fetch.foreach { plugins ⇒
-                    Plugins.authentications() = plugins
-
-                    //TEst
-                    println("auth:" + Plugins.authentications.now)
-
-                    val oo = Plugins.authentications.now.headOption.map { h ⇒
-                      println("h " + h.panel)
-                      // println("h " + h.panel)
-                      // val ff = factory.build(EGIP12AuthenticationPluginData(""))
-                      h.panel
-                    }.getOrElse(tags.div("Cannot load"))
-
-                    println("OO " + oo)
-
-                    org.scalajs.dom.document.body.appendChild(oo.render)
-                    // Plugins.authentications.now.headOption.map { _.test }
+            ///////Plugin test
+            div(
+              bs.button("build", btn_danger +++ ms("ooo"), () ⇒ Plugins.buildAndLoad)
+            ),
+            //////
+            Rx {
+              bs.navBar(
+                omsheet.fixed +++ sheet.nav +++ navbar_pills +++ navbar_inverse +++ (fontSize := 20) +++ navbar_staticTop +++ {
+                  if (openFileTree()) mainNav370 else mainNav0
+                },
+                navItem(
+                  if (openFileTree()) div(glyph_chevron_left, fileChevronStyle) else div(glyph_chevron_right, fileChevronStyle),
+                  todo = () ⇒ {
+                    openFileTree() = !openFileTree.now
+                  }
+                ),
+                navItem(menuActions.selector),
+                execItem,
+                authenticationItem,
+                pluginItem,
+                docItem
+              )
+            },
+            tags.div(shutDown.shutdownButton),
+            tags.div(`class` := "fullpanel")(
+              tags.div(
+                `class` := Rx {
+                  "leftpanel " + {
+                    if (openFileTree()) "open" else ""
                   }
                 }
-              }
-            })
-          ),
-          //////
-          Rx {
-            bs.navBar(
-              omsheet.fixed +++ sheet.nav +++ navbar_pills +++ navbar_inverse +++ (fontSize := 20) +++ navbar_staticTop +++ {
-                if (openFileTree()) mainNav370 else mainNav0
-              },
-              navItem(
-                if (openFileTree()) div(glyph_chevron_left, fileChevronStyle) else div(glyph_chevron_right, fileChevronStyle),
-                todo = () ⇒ {
-                  openFileTree() = !openFileTree.now
+              )(
+                  tags.div(omsheet.relativePosition +++ sheet.paddingTop(-15))(
+                    treeNodePanel.fileToolBar.div,
+                    treeNodePanel.fileControler,
+                    treeNodePanel.labelArea,
+                    treeNodePanel.view.render
+                  )
+                ),
+              tags.div(
+                `class` := Rx {
+                  "centerpanel " + {
+                    if (openFileTree()) "reduce" else ""
+                  }
                 }
-              ),
-              navItem(menuActions.selector),
-              execItem,
-              authenticationItem,
-              pluginItem,
-              docItem
-            )
-          },
-          tags.div(shutDown.shutdownButton),
-          tags.div(`class` := "fullpanel")(
-            tags.div(
-              `class` := Rx {
-                "leftpanel " + {
-                  if (openFileTree()) "open" else ""
-                }
-              }
-            )(
-                tags.div(omsheet.relativePosition +++ sheet.paddingTop(-15))(
-                  treeNodePanel.fileToolBar.div,
-                  treeNodePanel.fileControler,
-                  treeNodePanel.labelArea,
-                  treeNodePanel.view.render
+              )(
+                  BannerAlert.banner,
+                  treeNodePanel.fileDisplayer.tabs.render,
+                  tags.div(omsheet.textVersion)(
+                    tags.div(
+                      fontSize := "1em",
+                      fontWeight := "bold"
+                    )(s"${sets.version} ${sets.versionName}"),
+                    tags.div(fontSize := "0.8em")(s"built the ${sets.buildTime}")
+                  )
                 )
-              ),
-            tags.div(
-              `class` := Rx {
-                "centerpanel " + {
-                  if (openFileTree()) "reduce" else ""
-                }
-              }
-            )(
-                BannerAlert.banner,
-                treeNodePanel.fileDisplayer.tabs.render,
-                tags.div(omsheet.textVersion)(
-                  tags.div(
-                    fontSize := "1em",
-                    fontWeight := "bold"
-                  )(s"${sets.version} ${sets.versionName}"),
-                  tags.div(fontSize := "0.8em")(s"built the ${sets.buildTime}")
-                )
-              )
-          ),
-          alert
-        ).render
+            ),
+            alert
+          ).render
+        }
       }
     }
   }

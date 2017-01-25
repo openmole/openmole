@@ -1,6 +1,5 @@
 package org.openmole.gui.plugin.environment.egi
 
-import org.openmole.gui.ext.data.AuthenticationGUIPlugins
 import org.openmole.gui.ext.tool.client.OMPost
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
@@ -22,13 +21,13 @@ import scala.scalajs.js.annotation.JSExport
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-@JSExport
-class Authentications extends AuthenticationGUIPlugins {
-
-  def fetch = OMPost()[API].egiAuthentications().call.map { auth ⇒
-    auth.map {
-      new EGIAuthenticationGUI(_)
-    }
-  } // ++ ssh ++ etc etc
-}
+//
+//@JSExport
+//class Authentications extends AuthenticationGUIPlugins {
+//
+//  def fetch = OMPost()[API].egiAuthentications().call.map { auth ⇒
+//    auth.map {
+//      new EGIAuthenticationGUI(_)
+//    }
+//  } // ++ ssh ++ etc etc
+//}

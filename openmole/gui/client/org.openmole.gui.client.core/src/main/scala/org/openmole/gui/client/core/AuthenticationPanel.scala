@@ -37,208 +37,205 @@ import org.openmole.gui.client.core.authentications._
 import org.openmole.gui.ext.api.Api
 
 class AuthenticationPanel {
-  //
-  //  implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
-  //  lazy val setting: Var[Option[PanelUI]] = Var(None)
-  //  private lazy val auths: Var[Option[Seq[AuthPanelWithID]]] = Var(None)
-  //  lazy val initialCheck = Var(false)
-  //
-  //  def getAuthentications = {
-  //    post()[Api].authentications.call().foreach { auth ⇒
-  //      auths() = Some(auth.map { a ⇒ client.core.authentications.panelWithID(a) })
-  //      testAuthentications
-  //    }
-  //  }
-  //
-  //  lazy val authenticationSelector = {
-  //    val fs = authentications.factories
-  //    fs.options(0, btn_primary, (a: AuthPanelWithID) ⇒ a.name, onclickExtra = () ⇒ newPanel)
-  //  }
-  //
-  //  def newPanel: Unit = authenticationSelector.get.foreach { f ⇒ setting() = Some(f.emptyClone.panel) }
-  //
-  //  lazy val authenticationTable = {
-  //
-  //    case class Reactive(pwID: AuthPanelWithID) {
-  //      val lineHovered: Var[Boolean] = Var(false)
-  //
-  //      def toLabel(message: String, test: AuthenticationTest) =
-  //        label(
-  //          message,
-  //          scalatags.JsDom.all.marginLeft := 10,
-  //          test.passed match {
-  //            case true  ⇒ label_success
-  //            case false ⇒ label_danger +++ pointer
-  //          },
-  //          onclick := { () ⇒
-  //            if (!test.passed) {
-  //              panels.stackPanel.content() = test.errorStack.stackTrace
-  //              panels.stackPanel.open
-  //            }
-  //          }
-  //        )
-  //
-  //      lazy val render = {
-  //        tr(omsheet.docEntry +++ (lineHeight := "35px"))(
-  //          onmouseover := { () ⇒
-  //            lineHovered() = true
-  //          },
-  //          onmouseout := { () ⇒
-  //            lineHovered() = false
-  //          }
-  //        )(
-  //            td(colMD(2))(
-  //              tags.a(pwID.data.name, omsheet.docTitleEntry +++ floatLeft +++ omsheet.colorBold("white"), cursor := "pointer", onclick := { () ⇒
-  //                authenticationSelector.set(pwID.emptyClone)
-  //                setting() = Some(pwID.panel)
-  //              })
-  //            ),
-  //            td(colMD(6) +++ sheet.paddingTop(5))(label(pwID.name, label_primary)),
-  //            td(colMD(2))(
-  //              for {
-  //                test ← pwID.authenticationTests
-  //              } yield {
-  //                test match {
-  //                  case egi: EGIAuthenticationTest ⇒ toLabel(egi.message, egi)
-  //                  case ssh: SSHAuthenticationTest ⇒ toLabel(ssh.message, ssh)
-  //                  case _                          ⇒ label("pending", label_warning)
-  //                }
-  //              }
-  //            ),
-  //            td(
-  //              Rx {
-  //                if (lineHovered()) opaque
-  //                else transparent
-  //              },
-  //              bs.glyphSpan(glyph_trash, () ⇒ removeAuthentication(pwID.data))(omsheet.grey +++ sheet.paddingTop(9) +++ "glyphitem" +++ glyph_trash)
-  //            )
-  //          )
-  //      }
-  //    }
-  //
-  //    Rx {
-  //      tags.div(
-  //        setting() match {
-  //          case Some(p: PanelUI) ⇒ tags.div(
-  //            authenticationSelector.selector,
-  //            div(sheet.paddingTop(20))(p.view)
-  //          )
-  //          case _ ⇒
-  //            tags.table(
-  //              auths().map { aux ⇒
-  //                for (a ← aux) yield {
-  //                  Seq(Reactive(a).render)
-  //                }
-  //              }
-  //            )
-  //        }
-  //      )
-  //    }
-  //  }
-  //
-  //  val newButton = bs.button("New", btn_primary, () ⇒ newPanel)
-  //
-  //  val saveButton = bs.button("Save", btn_primary, () ⇒ {
-  //    save
-  //  })
-  //
-  //  val vosToBeTested = bs.input("")(placeholder := "VO names (vo1,vo2,...)").render
-  //
-  //  post()[Api].getConfigurationValue(VOTest).call().foreach {
-  //    _.map { c ⇒
-  //      vosToBeTested.value = c
-  //    }
-  //  }
-  //
-  //  val settingsDiv = bs.vForm(width := 200)(
-  //    vosToBeTested.withLabel("Test EGI credential on", emptyMod)
-  //  )
-  //
-  //  val settingsButton = tags.span(
-  //    btn_default +++ glyph_settings +++ omsheet.settingsButton
-  //  )(tags.span(caret))
-  //
-  //  lazy val dialog: ModalDialog =
-  //    bs.ModalDialog(
-  //      omsheet.panelWidth(52),
-  //      onopen = () ⇒ {
-  //        if (!initialCheck.now) {
-  //          getAuthentications
-  //        }
-  //      },
-  //      onclose = () ⇒ {
-  //        setting() = None
-  //      }
-  //    )
-  //
-  //  dialog.header(
-  //    div(height := 55)(
-  //      b("Authentications"),
-  //      div(omsheet.panelHeaderSettings)(
-  //        settingsButton
-  //      ).dropdown(
-  //        "",
-  //        settingsDiv,
-  //        onclose = () ⇒ post()[Api].setConfigurationValue(VOTest, vosToBeTested.value).call().foreach { x ⇒
-  //          getAuthentications
-  //        }
-  //      ).render
-  //    )
-  //  )
-  //
-  //  dialog body (tags.div(authenticationTable))
-  //
-  //  dialog.footer(
-  //    tags.div(
-  //      Rx {
-  //        bs.buttonGroup()(
-  //          setting() match {
-  //            case Some(_) ⇒ saveButton
-  //            case _       ⇒ newButton
-  //          },
-  //          ModalDialog.closeButton(dialog, btn_default, "Cancel")
-  //        )
-  //      }
-  //    )
-  //  )
-  //
-  //  def removeAuthentication(ad: AuthenticationData) = {
-  //    post()[Api].removeAuthentication(ad).call().foreach { r ⇒
-  //      ad match {
-  //        case pk: PrivateKey ⇒ pk.privateKey.map { k ⇒
-  //          post()[Api].deleteAuthenticationKey(k).call().foreach { df ⇒
-  //            getAuthentications
-  //          }
-  //        }
-  //        case _ ⇒ getAuthentications
-  //      }
-  //    }
-  //  }
-  //
-  //  def save = {
-  //    setting.now.map {
-  //      _.save(() ⇒ getAuthentications)
-  //    }
-  //    setting() = None
-  //  }
-  //
-  //  def testAuthentications = {
-  //    auths.now.foreach { aux ⇒
-  //      for (a ← aux) yield {
-  //        val vos = {
-  //          if (vosToBeTested.value.isEmpty) Seq()
-  //          else vosToBeTested.value.split(",").toSeq
-  //        }
-  //        post()[Api].testAuthentication(a.data, vos).call().foreach { t ⇒
-  //          auths() = auths.now.map {
-  //            _.updated(auths.now.map {
-  //              _.indexOf(a)
-  //            }.getOrElse(-1), a.copy(authenticationTests = t))
-  //          }
-  //          initialCheck() = true
-  //        }
-  //      }
-  //    }
-  //  }
 
+  implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
+  lazy val setting: Var[Option[AuthenticationPlugin]] = Var(None)
+  private lazy val auths: Var[Seq[AuthenticationPlugin]] = Var(Seq())
+  lazy val initialCheck = Var(false)
+
+  def getAuthentications = {
+    Plugins.authenticationFactories.now.map { factory ⇒
+      val data = factory.getData
+      data.map { d ⇒
+        auths() = d.map {
+          factory.build
+        }
+      }
+    }
+    //testAuthentications
+  }
+
+  val authenticationSelector = {
+    Plugins.authenticationFactories.map {
+      _.options(0, btn_primary, (a: AuthenticationPluginFactory) ⇒ a.name, onclickExtra = () ⇒ newPanel)
+    }
+  }
+
+  //
+  def newPanel: Unit = authenticationSelector.now.get.foreach { f ⇒ setting() = Some(f.buildEmpty) }
+
+  //
+  lazy val authenticationTable = {
+
+    case class Reactive(auth: AuthenticationPlugin) {
+      val lineHovered: Var[Boolean] = Var(false)
+
+      //          def toLabel(message: String, test: AuthenticationTest) =
+      //            label(
+      //              message,
+      //              scalatags.JsDom.all.marginLeft := 10,
+      //              test.passed match {
+      //                case true ⇒ label_success
+      //                case false ⇒ label_danger +++ pointer
+      //              },
+      //              onclick := { () ⇒
+      //                if (!test.passed) {
+      //                  panels.stackPanel.content() = test.errorStack.stackTrace
+      //                  panels.stackPanel.open
+      //                }
+      //              }
+      //            )
+
+      lazy val render = {
+        tr(omsheet.docEntry +++ (lineHeight := "35px"))(
+          onmouseover := { () ⇒
+            lineHovered() = true
+          },
+          onmouseout := { () ⇒
+            lineHovered() = false
+          }
+        )(
+            td(colMD(2))(
+              tags.a(auth.data.name, omsheet.docTitleEntry +++ floatLeft +++ omsheet.colorBold("white"), cursor := "pointer", onclick := { () ⇒
+                authenticationSelector.now.set(auth.factory)
+                setting() = Some(auth)
+              })
+            ),
+            td(colMD(6) +++ sheet.paddingTop(5))(label(auth.data.name, label_primary)),
+            //          td(colMD(2))(
+            //            for {
+            //              test ← data.authenticationTests
+            //            } yield {
+            //              test match {
+            //                case egi: EGIAuthenticationTest ⇒ toLabel(egi.message, egi)
+            //                case ssh: SSHAuthenticationTest ⇒ toLabel(ssh.message, ssh)
+            //                case _ ⇒ label("pending", label_warning)
+            //              }
+            //            }
+            //          ),
+            td(
+              Rx {
+                if (lineHovered()) opaque
+                else transparent
+              },
+              bs.glyphSpan(glyph_trash, () ⇒ removeAuthentication(auth))(omsheet.grey +++ sheet.paddingTop(9) +++ "glyphitem" +++ glyph_trash)
+            )
+          )
+      }
+    }
+
+    Rx {
+      tags.div(
+        setting() match {
+          case Some(p: AuthenticationPlugin) ⇒ tags.div(
+            authenticationSelector.now.selector,
+            div(sheet.paddingTop(20))(p.panel)
+          )
+          case _ ⇒
+            tags.table(
+              for (a ← auths()) yield {
+                Seq(Reactive(a).render)
+              }
+            )
+        }
+      )
+    }
+  }
+
+  val newButton = bs.button("New", btn_primary, () ⇒ newPanel)
+
+  val saveButton = bs.button("Save", btn_primary, () ⇒ {
+    save
+  })
+
+  val vosToBeTested = bs.input("")(placeholder := "VO names (vo1,vo2,...)").render
+  //
+  //    post()[Api].getConfigurationValue(VOTest).call().foreach {
+  //      _.map { c ⇒
+  //        vosToBeTested.value = c
+  //      }
+  //    }
+  //
+  val settingsDiv = bs.vForm(width := 200)(
+    vosToBeTested.withLabel("Test EGI credential on", emptyMod)
+  )
+
+  val settingsButton = tags.span(
+    btn_default +++ glyph_settings +++ omsheet.settingsButton
+  )(tags.span(caret))
+  //
+  lazy val dialog: ModalDialog =
+    bs.ModalDialog(
+      omsheet.panelWidth(52),
+      onopen = () ⇒ {
+        if (!initialCheck.now) {
+          getAuthentications
+        }
+      },
+      onclose = () ⇒ {
+        setting() = None
+      }
+    )
+
+  dialog.header(
+    div(height := 55)(
+      b("Authentications"),
+      div(omsheet.panelHeaderSettings)(
+        settingsButton
+      ).dropdown(
+        "",
+        settingsDiv,
+        onclose = () ⇒ post()[Api].setConfigurationValue(VOTest, vosToBeTested.value).call().foreach { x ⇒
+          getAuthentications
+        }
+      ).render
+    )
+  )
+
+  dialog body (tags.div(authenticationTable))
+
+  dialog.footer(
+    tags.div(
+      Rx {
+        bs.buttonGroup()(
+          setting() match {
+            case Some(_) ⇒ saveButton
+            case _       ⇒ newButton
+          },
+          ModalDialog.closeButton(dialog, btn_default, "Cancel")
+        )
+      }
+    )
+  )
+
+  def removeAuthentication(ad: AuthenticationPlugin) = {
+    ad.remove(() ⇒ getAuthentications)
+  }
+
+  def save = {
+    setting.now.map {
+      _.save(() ⇒ getAuthentications)
+    }
+    setting() = None
+  }
+
+  //
+  //    def testAuthentications = {
+  //      auths.now.foreach { aux ⇒
+  //        for (a ← aux) yield {
+  //          val vos = {
+  //            if (vosToBeTested.value.isEmpty) Seq()
+  //            else vosToBeTested.value.split(",").toSeq
+  //          }
+  //          post()[Api].testAuthentication(a.data, vos).call().foreach { t ⇒
+  //            auths() = auths.now.map {
+  //              _.updated(auths.now.map {
+  //                _.indexOf(a)
+  //              }.getOrElse(-1), a.copy(authenticationTests = t))
+  //            }
+  //            initialCheck() = true
+  //          }
+  //        }
+  //      }
+  //    }
 }

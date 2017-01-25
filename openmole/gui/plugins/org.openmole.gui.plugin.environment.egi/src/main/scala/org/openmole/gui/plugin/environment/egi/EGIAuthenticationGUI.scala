@@ -18,18 +18,36 @@
 package org.openmole.gui.plugin.environment.egi
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
-import org.openmole.gui.ext.data.AuthenticationPlugin
+import org.openmole.gui.ext.data.{ AuthenticationPlugin, AuthenticationPluginFactory }
 import org.openmole.gui.ext.tool.client.OMPost
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
 import autowire._
 import sheet._
 import bs._
+import org.openmole.core.workspace.Decrypt
+import org.openmole.core.workspace.Workspace
+import scala.concurrent.Future
 import scala.scalajs.js.annotation.JSExport
 import scalatags.JsDom.all._
 
 @JSExport
-class EGIAuthenticationGUI(data: EGIAuthenticationData) extends AuthenticationPlugin {
+class EGIAuthenticationGUIFactory extends AuthenticationPluginFactory {
+  type AuthType = EGIAuthenticationData
+
+  def buildEmpty: AuthenticationPlugin = new EGIAuthenticationGUI
+
+  def build(data: AuthType): AuthenticationPlugin = new EGIAuthenticationGUI(data)
+
+  def name = "EGI P12 certificate"
+
+  def getData: Future[Seq[AuthType]] = OMPost()[API].egiAuthentications().call()
+}
+
+@JSExport
+class EGIAuthenticationGUI(val data: EGIAuthenticationData = EGIAuthenticationData()) extends AuthenticationPlugin {
+  type AuthType = EGIAuthenticationData
+
   val passwordStyle: ModifierSeq = Seq(
     width := 130,
     passwordType
@@ -37,6 +55,12 @@ class EGIAuthenticationGUI(data: EGIAuthenticationData) extends AuthenticationPl
 
   val password = bs.input(data.cypheredPassword)(placeholder := "Password", passwordStyle).render
   val privateKey = FileUploaderUI(data.privateKey.getOrElse(""), data.privateKey.isDefined, Some("egi.p12"))
+
+  def factory = new EGIAuthenticationGUIFactory
+
+  def remove(onremove: () ⇒ Unit) = OMPost()[API].removeAuthentication().call().foreach { _ ⇒
+    onremove()
+  }
 
   @JSExport
   def panel() =
@@ -46,7 +70,7 @@ class EGIAuthenticationGUI(data: EGIAuthenticationData) extends AuthenticationPl
     )
 
   def save(onsave: () ⇒ Unit) = {
-    OMPost()[API].removeAuthentication(data).call().foreach { d ⇒
+    OMPost()[API].removeAuthentication().call().foreach { d ⇒
       OMPost()[API].addAuthentication(EGIAuthenticationData(
         cypheredPassword = password.value,
         privateKey = if (privateKey.pathSet.now) Some("egi.p12") else None

@@ -18,7 +18,7 @@ package org.openmole.gui.ext.plugin.server
  *
  */
 
-import org.openmole.gui.ext.data.{ AuthenticationGUIPlugins, GUIPluginAsJS }
+import org.openmole.gui.ext.data.{ AuthenticationPluginFactory, GUIPluginAsJS }
 import org.osgi.framework._
 
 import collection.JavaConverters._
@@ -38,7 +38,7 @@ object PluginActivator {
     println("instances " + instances)
 
     val oo: Seq[GUIPluginAsJS] = instances.filter {
-      classOf[AuthenticationGUIPlugins].isAssignableFrom
+      classOf[AuthenticationPluginFactory].isAssignableFrom
     }
 
     println("instances2 " + oo)
