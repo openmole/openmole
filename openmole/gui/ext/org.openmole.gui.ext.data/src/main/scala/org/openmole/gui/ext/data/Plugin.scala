@@ -29,6 +29,7 @@ import scalatags.JsDom.TypedTag
 sealed trait GUIPlugin
 trait AuthenticationPlugin extends GUIPlugin {
   type AuthType <: AuthenticationData
+  type TestType <: Test
 
   def data: AuthType
 
@@ -39,6 +40,8 @@ trait AuthenticationPlugin extends GUIPlugin {
   def save(onsave: () ⇒ Unit): Unit
 
   def remove(onremoved: () ⇒ Unit): Unit
+
+  def test: Future[Seq[TestType]]
 }
 
 sealed trait GUIPluginFactory {

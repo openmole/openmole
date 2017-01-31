@@ -59,7 +59,7 @@ case class FileUploaderUI(
           if (fInput.files.length > 0) {
             val leaf = fInput.files.item(0).name
             pathSet() = false
-            OMPost()[API].renameKey(leaf, fileName).call().foreach {
+            OMPost()[EGIAuthenticationAPI].renameKey(leaf, fileName).call().foreach {
               b ⇒
                 pathSet() = true
             }

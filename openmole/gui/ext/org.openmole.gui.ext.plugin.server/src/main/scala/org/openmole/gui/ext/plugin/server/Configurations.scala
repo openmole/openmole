@@ -1,6 +1,6 @@
-package org.openmole.gui.server.core
+package org.openmole.gui.ext.plugin.server
 
-import org.openmole.core.workspace.{ Workspace, ConfigurationLocation }
+import org.openmole.core.workspace.{ ConfigurationLocation, Workspace }
 import org.openmole.gui.ext.data._
 
 /*

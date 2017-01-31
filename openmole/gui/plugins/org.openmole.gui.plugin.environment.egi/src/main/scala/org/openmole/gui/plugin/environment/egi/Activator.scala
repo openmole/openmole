@@ -25,6 +25,6 @@ class Activator extends PluginActivator {
 
   def info: PluginInfo = PluginInfo(
     classOf[EGIAuthenticationGUIFactory],
-    OMRouter[API](AutowireServer.route[API](new APIImpl))
+    OMRouter[EGIAuthenticationAPI](AutowireServer.route[EGIAuthenticationAPI](new EGIAuthenticationAPIImpl))
   )
 }

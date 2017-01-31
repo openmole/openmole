@@ -32,7 +32,7 @@ import org.openmole.core.module
 import org.openmole.core.market
 import org.openmole.core.project._
 import org.openmole.gui.ext.api.Api
-import org.openmole.gui.ext.plugin.server.PluginActivator
+import org.openmole.gui.ext.plugin.server.{ Configurations, PluginActivator }
 import org.openmole.gui.ext.tool.server.OMRouter
 
 /*

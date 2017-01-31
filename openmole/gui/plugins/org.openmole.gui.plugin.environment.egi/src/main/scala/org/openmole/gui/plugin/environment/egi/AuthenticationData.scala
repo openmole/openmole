@@ -1,6 +1,6 @@
 package org.openmole.gui.plugin.environment.egi
 
-import org.openmole.gui.ext.data.{ AuthenticationData, Error }
+import org.openmole.gui.ext.data.{ AuthenticationData, Test, FailedTest, Error, ErrorBuilder }
 
 /*
  * Copyright (C) 12/01/17 // mathieu.leclaire@openmole.org
@@ -43,26 +43,56 @@ case class PrivateKeyAuthenticationData(
     port:             String         = "22"
 ) extends AuthenticationData {
   def name = s"$login@$target"
+
 }
 
+// Those 3 classes do not derive from Test because of bug: https://github.com/lihaoyi/upickle-pprint/issues/97
 object AuthenticationTest {
-  def empty = AuthenticationTestBase(false, Error(""))
+  def passed = AuthenticationTestImpl("", true, Error.empty)
+
+  def pending = AuthenticationTestImpl("pending", false, Error.empty)
+
+  def error(msg: String, passed: Boolean, err: Error) = AuthenticationTestImpl(msg, passed, err)
 }
 
 sealed trait AuthenticationTest {
+  def message: String
+
   def passed: Boolean
 
   def errorStack: Error
 }
 
-case class AuthenticationTestBase(passed: Boolean, errorStack: Error) extends AuthenticationTest
+case class AuthenticationTestImpl(message: String, passed: Boolean, errorStack: Error) extends AuthenticationTest
 
-case class EGIAuthenticationTest(message: String, password: AuthenticationTest, proxy: AuthenticationTest, dirac: AuthenticationTest) extends AuthenticationTest {
+/*object PasswordAuthenticationTest {
+  def passed = PasswordAuthenticationTest("", true, Error.empty)
+  def pending = PasswordAuthenticationTest("pending", false, Error.empty)
+}
+
+case class ProxyAuthenticationTest(message: String, passed: Boolean, errorStack: Error) extends AuthenticationTest
+object ProxyAuthenticationTest {
+  def passed =  ProxyAuthenticationTest("", true, Error.empty)
+  def pending = ProxyAuthenticationTest("pending", false, Error.empty)
+}
+
+case class DiracAuthenticationTest(message: String, passed: Boolean, errorStack: Error) extends AuthenticationTest
+object DiracAuthenticationTest {
+  def passed = DiracAuthenticationTest("", true, Error.empty)
+  def pending = DiracAuthenticationTest("pending", false, Error.empty)
+}*/
+
+case class EGIAuthenticationTest(
+  message:  String,
+  password: AuthenticationTest = AuthenticationTest.pending,
+  proxy:    AuthenticationTest = AuthenticationTest.pending,
+  dirac:    AuthenticationTest = AuthenticationTest.pending
+) extends Test {
   def errorStack = Error(s"${password.errorStack.stackTrace} \n\n ${proxy.errorStack.stackTrace} \n\n ${dirac.errorStack.stackTrace}")
 
   def passed = password.passed && proxy.passed && dirac.passed
 }
 
-case class SSHAuthenticationTest(passed: Boolean, errorStack: Error) extends AuthenticationTest {
+case class SSHAuthenticationTest(passed: Boolean, errorStack: Error) extends Test {
   def message: String = if (passed) "OK" else "failed"
 }

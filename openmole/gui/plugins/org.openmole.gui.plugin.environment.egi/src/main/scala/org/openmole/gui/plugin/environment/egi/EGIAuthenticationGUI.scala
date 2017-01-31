@@ -18,15 +18,18 @@
 package org.openmole.gui.plugin.environment.egi
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
-import org.openmole.gui.ext.data.{ AuthenticationPlugin, AuthenticationPluginFactory }
+import org.openmole.gui.ext.data.{ AuthenticationPlugin, AuthenticationPluginFactory, Test, VOTest }
 import org.openmole.gui.ext.tool.client.OMPost
+import org.openmole.gui.ext.tool.client.JsRxTags._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
 import autowire._
 import sheet._
 import bs._
-import org.openmole.core.workspace.Decrypt
-import org.openmole.core.workspace.Workspace
+import org.openmole.gui.ext.api.Api
+import org.scalajs.dom.raw.HTMLInputElement
+import rx._
+
 import scala.concurrent.Future
 import scala.scalajs.js.annotation.JSExport
 import scalatags.JsDom.all._
@@ -41,12 +44,13 @@ class EGIAuthenticationGUIFactory extends AuthenticationPluginFactory {
 
   def name = "EGI P12 certificate"
 
-  def getData: Future[Seq[AuthType]] = OMPost()[API].egiAuthentications().call()
+  def getData: Future[Seq[AuthType]] = OMPost()[EGIAuthenticationAPI].egiAuthentications().call()
 }
 
 @JSExport
 class EGIAuthenticationGUI(val data: EGIAuthenticationData = EGIAuthenticationData()) extends AuthenticationPlugin {
   type AuthType = EGIAuthenticationData
+  type TestType = EGIAuthenticationTest
 
   val passwordStyle: ModifierSeq = Seq(
     width := 130,
@@ -56,27 +60,43 @@ class EGIAuthenticationGUI(val data: EGIAuthenticationData = EGIAuthenticationDa
   val password = bs.input(data.cypheredPassword)(placeholder := "Password", passwordStyle).render
   val privateKey = FileUploaderUI(data.privateKey.getOrElse(""), data.privateKey.isDefined, Some("egi.p12"))
 
+  val voInput = bs.input("")(placeholder := "vo1,vo2").render
+
+  OMPost()[Api].getConfigurationValue(VOTest).call().foreach {
+    _.foreach { c ⇒
+      voInput.value = c
+    }
+  }
+
   def factory = new EGIAuthenticationGUIFactory
 
-  def remove(onremove: () ⇒ Unit) = OMPost()[API].removeAuthentication().call().foreach { _ ⇒
+  def remove(onremove: () ⇒ Unit) = OMPost()[EGIAuthenticationAPI].removeAuthentication().call().foreach { _ ⇒
     onremove()
   }
 
   @JSExport
-  def panel() =
-    hForm(
-      password.withLabel("Password"),
-      privateKey.view.render
-    )
+  lazy val panel = vForm(
+    password.withLabel("Password"),
+    privateKey.view.render,
+    voInput.withLabel("Test EGI credential on", emptyMod)
+  )
 
   def save(onsave: () ⇒ Unit) = {
-    OMPost()[API].removeAuthentication().call().foreach { d ⇒
-      OMPost()[API].addAuthentication(EGIAuthenticationData(
-        cypheredPassword = password.value,
-        privateKey = if (privateKey.pathSet.now) Some("egi.p12") else None
-      )).call().foreach { b ⇒
-        onsave()
-      }
+    OMPost()[EGIAuthenticationAPI].removeAuthentication().call().foreach {
+      d ⇒
+        OMPost()[EGIAuthenticationAPI].addAuthentication(EGIAuthenticationData(
+          cypheredPassword = password.value,
+          privateKey = if (privateKey.pathSet.now) Some("egi.p12") else None
+        )).call().foreach {
+          b ⇒
+            onsave()
+        }
     }
+
+    OMPost()[Api].setConfigurationValue(VOTest, voInput.value).call()
+  }
+
+  def test = {
+    OMPost()[EGIAuthenticationAPI].testAuthentication(data).call()
   }
 }

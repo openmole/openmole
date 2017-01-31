@@ -2,7 +2,9 @@ package org.openmole.gui.plugin.environment.egi
 
 import java.io.File
 
+import org.openmole.core.workspace.Workspace
 import org.openmole.gui.ext.tool.server.Utils._
+import org.openmole.plugin.environment.egi.P12Certificate
 
 /*
  * Copyright (C) 13/01/17 // mathieu.leclaire@openmole.org

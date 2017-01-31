@@ -19,15 +19,17 @@ package org.openmole.gui.plugin.environment.egi
 
 import java.nio.file.{ Files, StandardCopyOption }
 
-import org.openmole.gui.ext.data.{ Error, ErrorBuilder }
+import org.openmole.gui.ext.data._
 import org.openmole.plugin.environment.egi.{ EGIAuthentication, P12Certificate }
 import org.openmole.core.workspace.{ Decrypt, Workspace }
+import org.openmole.gui.ext.plugin.server.Configurations
 
 import scala.util.{ Failure, Success, Try }
 
-class APIImpl extends API {
+class EGIAuthenticationAPIImpl extends EGIAuthenticationAPI {
 
   implicit def workspace: Workspace = Workspace.instance
+
   implicit def decrypt: Decrypt = Decrypt(workspace)
 
   private def coreObject(data: EGIAuthenticationData) = data.privateKey.map { pk ⇒
@@ -62,35 +64,38 @@ class APIImpl extends API {
   def renameKey(keyName: String, newName: String): Unit =
     Files.move(Utils.authenticationFile(keyName).toPath, Utils.authenticationFile(newName).toPath, StandardCopyOption.REPLACE_EXISTING)
 
-  def testAuthentication(data: EGIAuthenticationData, vos: Seq[String] = Seq()): Seq[AuthenticationTest] = {
+  def testAuthentication(data: EGIAuthenticationData): Seq[EGIAuthenticationTest] = {
 
-    implicit def testPassword(data: EGIAuthenticationData): AuthenticationTest = coreObject(data).map { d ⇒
-      EGIAuthentication.testPassword(d) match {
-        case Success(_) ⇒ AuthenticationTestBase(true, Error.empty)
-        case Failure(f) ⇒ AuthenticationTestBase(false, ErrorBuilder(f))
+    def testPassword(data: EGIAuthenticationData, test: EGIAuthentication ⇒ Try[Boolean]): AuthenticationTest = coreObject(data).map { d ⇒
+      test(d) match {
+        case Success(_) ⇒ AuthenticationTest.passed
+        case Failure(f) ⇒ AuthenticationTest.error("Invalid Password", false, ErrorBuilder(f))
       }
-    }.getOrElse(AuthenticationTestBase(false, Error("Unknown " + data.name)))
+    }.getOrElse(AuthenticationTest.error("Unknown error", false, Error("Unknown " + data.name)))
 
-    implicit def toAuthenticationTest[T](t: Try[T]): AuthenticationTest = t match {
-      case Success(_) ⇒ AuthenticationTestBase(true, Error.empty)
-      case Failure(f) ⇒ AuthenticationTestBase(false, ErrorBuilder(f))
-    }
+    def test(data: EGIAuthenticationData, voName: String, test: (EGIAuthentication, String) ⇒ Try[Boolean]): AuthenticationTest = coreObject(data).map { d ⇒
+      test(d, voName) match {
+        case Success(_) ⇒ AuthenticationTest.passed
+        case Failure(f) ⇒ AuthenticationTest.error("Invalid Password", false, ErrorBuilder(f))
+      }
+    }.getOrElse(AuthenticationTest.error("Unknown error", false, Error("Unknown " + data.name)))
+
+    val vos = Configurations(VOTest).map { _.split(",").toSeq }.getOrElse(Seq())
 
     vos.map { voName ⇒
-      coreObject(data).map { auth ⇒
-        Try {
-          EGIAuthenticationTest(
-            voName,
-            data,
-            EGIAuthentication.testProxy(auth, voName),
-            EGIAuthentication.testDIRACAccess(auth, voName)
-          )
-        } match {
-          case Success(a) ⇒ a
-          case Failure(f) ⇒ EGIAuthenticationTest("Error", AuthenticationTest.empty, AuthenticationTestBase(false, ErrorBuilder(f)), AuthenticationTest.empty)
-        }
-      }.getOrElse(AuthenticationTestBase(false, ErrorBuilder(new Throwable("Unknown " + data.name))))
+      Try {
+        EGIAuthenticationTest(
+          voName,
+          testPassword(data, EGIAuthentication.testPassword),
+          test(data, voName, EGIAuthentication.testProxy),
+          test(data, voName, EGIAuthentication.testDIRACAccess)
+        )
+      } match {
+        case Success(a) ⇒ a
+        case Failure(f) ⇒ EGIAuthenticationTest("Error")
+      }
     }
+
   }
 
 }

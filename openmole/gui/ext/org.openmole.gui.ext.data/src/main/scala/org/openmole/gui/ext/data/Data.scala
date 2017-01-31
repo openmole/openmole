@@ -714,3 +714,27 @@ case class GUIPluginAsJS(jsObject: String)
 trait AuthenticationData {
   def name: String
 }
+
+trait Test {
+  def passed: Boolean
+
+  def message: String
+
+  def errorStack: Error
+}
+
+object PendingTest extends Test {
+  def passed = false
+  def message = "pending"
+  def errorStack = Error.empty
+}
+
+case class FailedTest(message: String, errorStack: Error) extends Test {
+  def passed = false
+}
+
+case object PassedTest extends Test {
+  def passed = true
+  def message = ""
+  override def errorStack = Error.empty
+}
