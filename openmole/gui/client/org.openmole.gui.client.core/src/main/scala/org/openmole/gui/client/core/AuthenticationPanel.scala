@@ -57,10 +57,8 @@ class AuthenticationPanel {
     }
   }
 
-  //
   def newPanel: Unit = authenticationSelector.now.get.foreach { f ⇒ setting() = Some(f.buildEmpty) }
 
-  //
   lazy val authenticationTable = {
 
     case class Reactive(testedAuth: TestedAuthentication) {
@@ -108,10 +106,7 @@ class AuthenticationPanel {
     Rx {
       tags.div(
         setting() match {
-          case Some(p: AuthenticationPlugin) ⇒ tags.div(
-            authenticationSelector.now.selector,
-            div(sheet.paddingTop(20))(p.panel)
-          )
+          case Some(p: AuthenticationPlugin) ⇒ div(sheet.paddingTop(20))(p.panel)
           case _ ⇒
             tags.table(width := "100%")(
               for (a ← auths()) yield {
@@ -143,8 +138,13 @@ class AuthenticationPanel {
     )
 
   dialog.header(
-    div(height := 55)(
-      b("Authentications")
+    div(
+      Rx {
+        setting() match {
+          case Some(_) ⇒ authenticationSelector.now.selector
+          case _       ⇒ b("Authentications")
+        }
+      }
     )
   )
 

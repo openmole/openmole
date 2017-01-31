@@ -77,8 +77,8 @@ class EGIAuthenticationGUI(val data: EGIAuthenticationData = EGIAuthenticationDa
   @JSExport
   lazy val panel = vForm(
     password.withLabel("Password"),
-    privateKey.view.render,
-    voInput.withLabel("Test EGI credential on", emptyMod)
+    privateKey.view(sheet.marginTop(10)).render,
+    voInput.withLabel("Test EGI credential on", sheet.paddingTop(40))
   )
 
   def save(onsave: () ⇒ Unit) = {
