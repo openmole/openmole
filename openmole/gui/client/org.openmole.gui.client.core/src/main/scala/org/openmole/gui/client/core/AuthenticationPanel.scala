@@ -19,15 +19,18 @@ package org.openmole.gui.client.core
 
 import scalatags.JsDom.all._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
+
 import scalatags.JsDom.tags
 import org.openmole.gui.ext.tool.client._
 import org.openmole.gui.ext.tool.client.JsRxTags._
+
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
 import org.openmole.gui.ext.data._
 import sheet._
 import rx._
 import bs._
+import fr.iscpif.scaladget.api.Popup.ClickPopup
 
 class AuthenticationPanel {
 
@@ -71,14 +74,9 @@ class AuthenticationPanel {
             case PassedTest  ⇒ label_success
             case PendingTest ⇒ label_warning
             case _           ⇒ label_danger +++ pointer
-          },
-          onclick := { () ⇒
-            if (!test.passed) {
-              panels.stackPanel.content() = test.errorStack.stackTrace
-              panels.stackPanel.open
-            }
           }
-        )
+          //FIXME: a bug seems to prevent from opening a popover from a dialog
+        ).popover(test.errorStack.stackTrace, title = Some("Errors"))
 
       lazy val render = Rx {
         tr(omsheet.docEntry +++ (lineHeight := "35px"))(
