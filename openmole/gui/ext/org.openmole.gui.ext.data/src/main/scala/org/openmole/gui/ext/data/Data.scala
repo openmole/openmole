@@ -522,7 +522,7 @@ sealed trait LaunchingCommand {
 
 case class BasicLaunchingCommand(language: Option[Language], codeName: String, arguments: Seq[CommandElement] = Seq(), outputs: Seq[VariableElement] = Seq()) extends LaunchingCommand {
   def fullCommand: String = language match {
-    case Some(NetLogoLanguage()) ⇒ "setup\nwhile [any? turtles] [go];;You should set your stopping criteria here instead"
+    case Some(NetLogoLanguage()) ⇒ "go;;You should set your stopping criteria here instead"
     case _ ⇒ (Seq(language.map {
       _.name
     }.getOrElse(""), codeName) ++ arguments.sortBy {
