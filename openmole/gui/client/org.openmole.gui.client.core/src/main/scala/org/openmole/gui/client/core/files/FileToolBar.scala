@@ -109,9 +109,11 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
     resetFilterTools
   }
 
-  def buildSpan(tool: SelectedTool, legend: String, todo: () ⇒ Unit, modifierSeq: ModifierSeq = emptyMod): Rx[TypedTag[HTMLElement]] = Rx {
+  def buildSpan(tool: SelectedTool, legend: String, todo: () ⇒ Unit, modifierSeq: ModifierSeq = emptyMod): TypedTag[HTMLElement] = {
     span(
-      tool.glyph +++ pointer +++ selectedTool().filter(_ == tool).map { _ ⇒ modifierSeq +++ omsheet.selectedTool }.getOrElse(emptyMod) +++ "glyphmenu",
+      Rx {
+        tool.glyph +++ pointer +++ selectedTool().filter(_ == tool).map { _ ⇒ modifierSeq +++ omsheet.selectedTool }.getOrElse(emptyMod) +++ "glyphmenu"
+      },
       onclick := { () ⇒
         {
           todo()
@@ -120,7 +122,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
     ).tooltip(legend)
   }
 
-  def buildAndSelectSpan(tool: SelectedTool, legend: String, todo: Boolean ⇒ Unit = (Boolean) ⇒ {}): Rx[TypedTag[HTMLElement]] = buildSpan(tool, legend, { () ⇒
+  def buildAndSelectSpan(tool: SelectedTool, legend: String, todo: Boolean ⇒ Unit = (Boolean) ⇒ {}): TypedTag[HTMLElement] = buildSpan(tool, legend, { () ⇒
     val isSelectedTool = selectedTool.now == Some(tool)
     if (isSelectedTool) selectedTool.now match {
       case Some(FilterTool) ⇒ unselectToolAndRefreshTree
@@ -290,7 +292,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
           errs ⇒
             if (errs.isEmpty) {
               unselectToolAndRefreshTree
-              pluginPanel.dialog.open
+              pluginPanel.dialog.show
             }
             else AlertPanel.detail("Plugin import failed", errs.head.stackTrace, transform = RelativeCenterPosition, zone = FileZone)
         }
@@ -353,9 +355,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
       if (m.isEmpty) tags.div else butt
   }
 
-  lazy val div = Rx {
-    val msg = message()
-    val sT = selectedTool()
+  lazy val div = {
 
     tags.div(sheet.paddingBottom(10), sheet.paddingTop(50))(
       tags.div(centerElement)(
@@ -369,25 +369,29 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
         buildAndSelectSpan(FileCreationTool, "File or folder creation"),
         buildAndSelectSpan(FilterTool, "Filter files by number of entries or by names")
       ),
-      tags.div(centerFileToolBar)(
-        msg,
-        sT match {
-          case Some(FilterTool) ⇒
-            treeNodePanel.treeWarning() = false
-            filterTool
-          case Some(FileCreationTool) ⇒ createFileTool
-          case Some(TrashTool)        ⇒ getIfSelected(deleteButton)
-          case Some(PluginTool)       ⇒ getIfSelected(pluginButton)
-          case Some(CopyTool) ⇒
-            manager.emptyCopied
-            getIfSelected(copyButton)
-          case _ ⇒ tags.div()
-        },
-        transferring.withTransferWaiter {
-          _ ⇒
-            tags.div()
-        }
-      )
+      Rx {
+        val msg = message()
+        val sT = selectedTool()
+        tags.div(centerFileToolBar)(
+          msg,
+          sT match {
+            case Some(FilterTool) ⇒
+              treeNodePanel.treeWarning() = false
+              filterTool
+            case Some(FileCreationTool) ⇒ createFileTool
+            case Some(TrashTool)        ⇒ getIfSelected(deleteButton)
+            case Some(PluginTool)       ⇒ getIfSelected(pluginButton)
+            case Some(CopyTool) ⇒
+              manager.emptyCopied
+              getIfSelected(copyButton)
+            case _ ⇒ tags.div()
+          },
+          transferring.withTransferWaiter {
+            _ ⇒
+              tags.div()
+          }
+        )
+      }
     )
   }
 
