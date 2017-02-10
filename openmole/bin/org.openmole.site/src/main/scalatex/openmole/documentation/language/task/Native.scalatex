@@ -109,7 +109,7 @@
 
     // python task
     val pythonTask =
-      CARETask("hello.tgz.bin", "python hello.py ${arg} output.txt") set (
+      CARETask(workDirectory / "hello.tgz.bin", "python hello.py ${arg} output.txt") set (
         inputs += arg,
         outputFiles += ("output.txt", output),
         outputs += arg
