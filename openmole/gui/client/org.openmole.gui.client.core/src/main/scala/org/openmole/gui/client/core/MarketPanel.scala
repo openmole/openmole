@@ -105,7 +105,7 @@ class MarketPanel {
     downloading() = downloading.now.updatedFirst(_._1 == entry, (entry, Var(Processing())))
     post()[Api].getMarketEntry(entry, path).call().foreach { d ⇒
       downloading() = downloading.now.updatedFirst(_._1 == entry, (entry, Var(Processed())))
-      downloading.now.headOption.foreach(_ ⇒ dialog.close)
+      downloading.now.headOption.foreach(_ ⇒ dialog.hide)
       TreeNodePanel.refreshAndDraw
     }
   }

@@ -1,13 +1,9 @@
-package org.openmole.gui.plugin.environment.egi
+package org.openmole.gui.plugin.authentication.sshlogin
 
-import java.io.File
-
-import org.openmole.core.workspace.Workspace
-import org.openmole.gui.ext.tool.server.Utils._
-import org.openmole.plugin.environment.egi.P12Certificate
+import org.openmole.gui.ext.data.AuthenticationData
 
 /*
- * Copyright (C) 13/01/17 // mathieu.leclaire@openmole.org
+ * Copyright (C) 12/01/17 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -23,7 +19,11 @@ import org.openmole.plugin.environment.egi.P12Certificate
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-object Utils {
-
-  def authenticationFile(keyFileName: String): File = new File(authenticationKeysFile, keyFileName)
+case class LoginAuthenticationData(
+    login:            String = "",
+    cypheredPassword: String = "",
+    target:           String = "",
+    port:             String = "22"
+) extends AuthenticationData {
+  def name = s"$login@$target"
 }

@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package org.openmole.gui.plugin.environment.egi
+package org.openmole.gui.plugin.authentication.egi
 
 import java.nio.file.{ Files, StandardCopyOption }
 
@@ -23,6 +23,7 @@ import org.openmole.gui.ext.data._
 import org.openmole.plugin.environment.egi.{ EGIAuthentication, P12Certificate }
 import org.openmole.core.workspace.{ Decrypt, Workspace }
 import org.openmole.gui.ext.plugin.server.Configurations
+import org.openmole.gui.ext.tool.server
 
 import scala.util.{ Failure, Success, Try }
 
@@ -32,10 +33,12 @@ class EGIAuthenticationAPIImpl extends EGIAuthenticationAPI {
 
   implicit def decrypt: Decrypt = Decrypt(workspace)
 
+  private def authenticationFile(key: String) = new java.io.File(server.Utils.authenticationKeysFile, key)
+
   private def coreObject(data: EGIAuthenticationData) = data.privateKey.map { pk ⇒
     P12Certificate(
       Workspace.encrypt(data.cypheredPassword),
-      Utils.authenticationFile(pk)
+      authenticationFile(pk)
     )
   }
 
@@ -59,28 +62,30 @@ class EGIAuthenticationAPIImpl extends EGIAuthenticationAPI {
   def removeAuthentication = EGIAuthentication.clear
 
   // To be used for ssh private key
-  def deleteAuthenticationKey(keyName: String): Unit = Utils.authenticationFile(keyName).delete
+  def deleteAuthenticationKey(keyName: String): Unit = authenticationFile(keyName).delete
 
-  def renameKey(keyName: String, newName: String): Unit =
-    Files.move(Utils.authenticationFile(keyName).toPath, Utils.authenticationFile(newName).toPath, StandardCopyOption.REPLACE_EXISTING)
+  //def renameKey(keyName: String, newName: String): Unit =
+  //Files.move(Utils.authenticationFile(keyName).toPath, Utils.authenticationFile(newName).toPath, StandardCopyOption.REPLACE_EXISTING)
 
-  def testAuthentication(data: EGIAuthenticationData): Seq[EGIAuthenticationTest] = {
+  def testAuthentication(data: EGIAuthenticationData): Seq[Test] = {
 
-    def testPassword(data: EGIAuthenticationData, test: EGIAuthentication ⇒ Try[Boolean]): AuthenticationTest = coreObject(data).map { d ⇒
+    def testPassword(data: EGIAuthenticationData, test: EGIAuthentication ⇒ Try[Boolean]): Test = coreObject(data).map { d ⇒
       test(d) match {
-        case Success(_) ⇒ AuthenticationTest.passed
-        case Failure(f) ⇒ AuthenticationTest.error("Invalid Password", false, ErrorBuilder(f))
+        case Success(_) ⇒ Test.passed()
+        case Failure(f) ⇒ Test.error("Invalid Password", ErrorBuilder(f))
       }
-    }.getOrElse(AuthenticationTest.error("Unknown error", false, Error("Unknown " + data.name)))
+    }.getOrElse(Test.error("Unknown error", Error("Unknown " + data.name)))
 
-    def test(data: EGIAuthenticationData, voName: String, test: (EGIAuthentication, String) ⇒ Try[Boolean]): AuthenticationTest = coreObject(data).map { d ⇒
+    def test(data: EGIAuthenticationData, voName: String, test: (EGIAuthentication, String) ⇒ Try[Boolean]): Test = coreObject(data).map { d ⇒
       test(d, voName) match {
-        case Success(_) ⇒ AuthenticationTest.passed
-        case Failure(f) ⇒ AuthenticationTest.error("Invalid Password", false, ErrorBuilder(f))
+        case Success(_) ⇒ Test.passed(voName)
+        case Failure(f) ⇒ Test.error("Invalid Password", ErrorBuilder(f))
       }
-    }.getOrElse(AuthenticationTest.error("Unknown error", false, Error("Unknown " + data.name)))
+    }.getOrElse(Test.error("Unknown error", Error("Unknown " + data.name)))
 
-    val vos = Configurations(VOTest).map { _.split(",").toSeq }.getOrElse(Seq())
+    val vos = Configurations(VOTest).map {
+      _.split(",").toSeq
+    }.getOrElse(Seq())
 
     vos.map { voName ⇒
       Try {
@@ -95,7 +100,6 @@ class EGIAuthenticationAPIImpl extends EGIAuthenticationAPI {
         case Failure(f) ⇒ EGIAuthenticationTest("Error")
       }
     }
-
   }
 
 }

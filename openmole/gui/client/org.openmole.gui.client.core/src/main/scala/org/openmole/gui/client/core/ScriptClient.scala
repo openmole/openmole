@@ -95,15 +95,15 @@ object ScriptClient {
 
       val itemStyle = lineHeight := "35px"
 
-      val execItem = navItem(tags.div(glyph_flash, itemStyle).tooltip("Executions"), () ⇒ executionPanel.dialog.open)
+      val execItem = navItem(tags.div(glyph_flash, itemStyle).tooltip("Executions"), () ⇒ executionPanel.dialog.show)
 
-      val authenticationItem = navItem(tags.div(glyph_lock, itemStyle).tooltip("Authentications"), () ⇒ authenticationPanel.dialog.open)
+      val authenticationItem = navItem(tags.div(glyph_lock, itemStyle).tooltip("Authentications"), () ⇒ authenticationPanel.dialog.show)
 
-      val pluginItem = navItem(div(OMTags.glyph_plug, itemStyle).tooltip("Plugins"), () ⇒ pluginPanel.dialog.open)
+      val pluginItem = navItem(div(OMTags.glyph_plug, itemStyle).tooltip("Plugins"), () ⇒ pluginPanel.dialog.show)
 
       val envItem = navItem(div(glyph_exclamation, itemStyle), () ⇒ stackPanel.open)
 
-      val docItem = navItem(div(OMTags.glyph_book, itemStyle).tooltip("Documentation"), () ⇒ docPanel.dialog.open)
+      val docItem = navItem(div(OMTags.glyph_book, itemStyle).tooltip("Documentation"), () ⇒ docPanel.dialog.show)
 
       dom.window.onkeydown = (k: KeyboardEvent) ⇒ {
         if ((k.keyCode == 83 && k.ctrlKey)) {
@@ -134,11 +134,11 @@ object ScriptClient {
       })
 
       val importModel = MenuAction("Import your model", () ⇒ {
-        modelWizardPanel.dialog.open
+        modelWizardPanel.dialog.show
       })
 
       val marketPlaceProject = MenuAction("From market place", () ⇒ {
-        marketPanel.dialog.open
+        marketPanel.dialog.show
       })
 
       val elements = Seq(newEmpty, importModel, marketPlaceProject)

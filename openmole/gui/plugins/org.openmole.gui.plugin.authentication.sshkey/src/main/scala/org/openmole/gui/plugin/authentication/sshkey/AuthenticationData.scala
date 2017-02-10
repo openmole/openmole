@@ -1,15 +1,9 @@
-package org.openmole.gui.client.core
+package org.openmole.gui.plugin.authentication.sshkey
 
-import org.scalajs.dom.raw.HTMLDivElement
-
-import scalatags.JsDom.{ TypedTag, tags }
-import scalatags.JsDom.all._
-import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
-import bs._
-import fr.iscpif.scaladget.stylesheet.all
+import org.openmole.gui.ext.data.{ AuthenticationData, Test, Error }
 
 /*
- * Copyright (C) 26/08/15 // mathieu.leclaire@openmole.org
+ * Copyright (C) 12/01/17 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -25,18 +19,15 @@ import fr.iscpif.scaladget.stylesheet.all
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class DivPanel(title: String, div: TypedTag[HTMLDivElement]) {
+sealed trait SSHAuthenticationData extends AuthenticationData
 
-  def open = dialog.show
-
-  val dialog = bs.ModalDialog()
-
-  dialog.header(
-    tags.span(tags.b(title))
-  )
-
-  dialog.body(div)
-
-  dialog.footer(ModalDialog.closeButton(dialog, all.btn_default, "Close"))
+case class PrivateKeyAuthenticationData(
+    privateKey:       String         = "",
+    login:            String         = "",
+    cypheredPassword: String         = "",
+    target:           String         = "",
+    port:             String         = "22"
+) extends SSHAuthenticationData {
+  def name = s"$login@$target"
 
 }

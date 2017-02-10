@@ -26,33 +26,27 @@ import collection.JavaConverters._
 object PluginActivator {
   lazy val plugins = new java.util.concurrent.ConcurrentHashMap[Class[_], PluginInfo]().asScala
 
-  println("plugins map" + plugins)
-
   implicit def classesToGUIPlugins(cs: Seq[Class[_]]): Seq[GUIPluginAsJS] = cs.map { c ⇒
     GUIPluginAsJS(c.getName)
   }
 
-  private def instances = plugins.values.toSeq.map { _.clientInstance }
+  private def instances = plugins.values.toSeq.map {
+    _.clientInstance
+  }
 
-  def authentications: Seq[GUIPluginAsJS] = {
-    println("instances " + instances)
-
-    val oo: Seq[GUIPluginAsJS] = instances.filter {
+  def authentications: Seq[GUIPluginAsJS] =
+    instances.filter {
       classOf[AuthenticationPluginFactory].isAssignableFrom
     }
-
-    println("instances2 " + oo)
-    oo
-  }
 }
 
 trait PluginActivator extends BundleActivator {
   def info: PluginInfo
 
   override def stop(context: BundleContext): Unit =
-    PluginActivator.plugins -= this.getClass
+    PluginActivator.plugins -= info.clientInstance
 
   override def start(context: BundleContext): Unit = {
-    PluginActivator.plugins += this.getClass → info
+    PluginActivator.plugins += info.clientInstance → info
   }
 }

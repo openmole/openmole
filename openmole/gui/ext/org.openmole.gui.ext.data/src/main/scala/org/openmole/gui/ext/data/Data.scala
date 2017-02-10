@@ -715,7 +715,7 @@ trait AuthenticationData {
   def name: String
 }
 
-trait Test {
+sealed trait Test {
   def passed: Boolean
 
   def message: String
@@ -733,8 +733,15 @@ case class FailedTest(message: String, errorStack: Error) extends Test {
   def passed = false
 }
 
-case object PassedTest extends Test {
+case class PassedTest(message: String) extends Test {
   def passed = true
-  def message = ""
   override def errorStack = Error.empty
+}
+
+object Test {
+  def passed(message: String = "OK") = PassedTest(message)
+
+  def pending = PendingTest
+
+  def error(msg: String, err: Error) = FailedTest(msg, err)
 }

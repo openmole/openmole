@@ -1,11 +1,4 @@
-package org.openmole.gui.plugin.environment.egi
-
-import org.openmole.core.workspace.Workspace
-import org.openmole.gui.ext.data.{ Error, ErrorBuilder }
-import org.openmole.plugin.environment.egi.{ EGIAuthentication, P12Certificate }
-import org.openmole.plugin.environment.ssh.{ LoginPassword, PrivateKey, SSHAuthentication }
-
-import scala.util.{ Failure, Success, Try }
+package org.openmole.gui.plugin.environment.ssh
 
 /**
  * Created by mathieu on 13/01/17.

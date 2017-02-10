@@ -91,7 +91,7 @@ object AlertPanel {
       tags.div(message),
       () ⇒ {
         stackPanel.content() = detail
-        stackPanel.dialog.open
+        stackPanel.dialog.show
       }, cancelaction, transform, zone, alertType, buttonGroupClass, "Details"
     )
 }

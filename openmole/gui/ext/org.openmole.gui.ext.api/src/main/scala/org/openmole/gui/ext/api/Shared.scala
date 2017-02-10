@@ -28,6 +28,7 @@ trait Api {
   def restart(): Unit
 
   //AUTHENTICATIONS
+  def renameKey(keyName: String, newName: String): Unit
 
   //WORKSPACE
   def isPasswordCorrect(pass: String): Boolean

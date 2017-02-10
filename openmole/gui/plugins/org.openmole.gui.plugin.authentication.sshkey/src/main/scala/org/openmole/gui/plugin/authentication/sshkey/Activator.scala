@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package org.openmole.gui.plugin.environment.egi
+package org.openmole.gui.plugin.authentication.sshkey
 
 import org.openmole.gui.ext.plugin.server.{ PluginActivator, PluginInfo }
 import org.openmole.gui.ext.tool.server.{ AutowireServer, OMRouter }
@@ -24,7 +24,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class Activator extends PluginActivator {
 
   def info: PluginInfo = PluginInfo(
-    classOf[EGIAuthenticationGUIFactory],
-    OMRouter[EGIAuthenticationAPI](AutowireServer.route[EGIAuthenticationAPI](new EGIAuthenticationAPIImpl))
+    classOf[PrivateKeyAuthenticationFactory],
+    OMRouter[PrivateKeyAuthenticationAPI](AutowireServer.route[PrivateKeyAuthenticationAPI](new PrivateKeyAuthenticationApiImpl))
   )
 }

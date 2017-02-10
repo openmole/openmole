@@ -22,14 +22,9 @@ import org.scalajs.dom.raw.HTMLElement
 import scala.concurrent.Future
 import scalatags.JsDom.TypedTag
 
-//trait AuthenticationGUIPlugins {
-//  def fetch: Future[Seq[AuthenticationPlugin]]
-//}
-
 sealed trait GUIPlugin
 trait AuthenticationPlugin extends GUIPlugin {
   type AuthType <: AuthenticationData
-  type TestType <: Test
 
   def data: AuthType
 
@@ -41,7 +36,7 @@ trait AuthenticationPlugin extends GUIPlugin {
 
   def remove(onremoved: () ⇒ Unit): Unit
 
-  def test: Future[Seq[TestType]]
+  def test: Future[Seq[Test]]
 }
 
 sealed trait GUIPluginFactory {

@@ -30,7 +30,7 @@ import org.openmole.gui.ext.data._
 import sheet._
 import rx._
 import bs._
-import fr.iscpif.scaladget.api.Popup.ClickPopup
+import fr.iscpif.scaladget.api.Selector.Options
 
 class AuthenticationPanel {
 
@@ -38,9 +38,25 @@ class AuthenticationPanel {
 
   case class TestedAuthentication(auth: AuthenticationPlugin, tests: Seq[Test])
 
-  lazy val setting: Var[Option[AuthenticationPlugin]] = Var(None)
+  val authSetting: Var[Option[AuthenticationPlugin]] = Var(None)
   private lazy val auths: Var[Seq[TestedAuthentication]] = Var(Seq())
   lazy val initialCheck = Var(false)
+
+  def getAuthSelector(currentFactory: AuthenticationPluginFactory) = {
+    lazy val authenticationSelector: Options[AuthenticationPluginFactory] = {
+      val factories = Plugins.authenticationFactories.now
+      val currentInd = {
+        val ind = factories.map { _.name }.indexOf(currentFactory.name)
+        if (ind == -1) 0 else ind
+      }
+
+      factories.options(currentInd, btn_primary, (a: AuthenticationPluginFactory) ⇒ a.name, onclose = () ⇒
+        authSetting() = authenticationSelector.content.now.map {
+          _.buildEmpty
+        })
+    }
+    authenticationSelector
+  }
 
   def getAuthentications = {
     Plugins.authenticationFactories.now.map { factory ⇒
@@ -54,44 +70,36 @@ class AuthenticationPanel {
     }
   }
 
-  val authenticationSelector = {
-    Plugins.authenticationFactories.map {
-      _.options(0, btn_primary, (a: AuthenticationPluginFactory) ⇒ a.name, onclickExtra = () ⇒ newPanel)
-    }
-  }
-
-  def newPanel: Unit = authenticationSelector.now.get.foreach { f ⇒ setting() = Some(f.buildEmpty) }
 
   lazy val authenticationTable = {
 
     case class Reactive(testedAuth: TestedAuthentication) {
-
-      def toLabel(message: String, test: Test) =
-        label(
-          message,
-          scalatags.JsDom.all.marginLeft := 10,
-          test match {
-            case PassedTest  ⇒ label_success
-            case PendingTest ⇒ label_warning
-            case _           ⇒ label_danger +++ pointer
-          }
+      def toLabel(test: Test) = {
+        val lab = label(
+          test.message,
+          scalatags.JsDom.all.marginLeft := 10
+        )
+        test match {
+          case PassedTest(_) ⇒ lab(label_success)
+          case PendingTest   ⇒ lab(label_warning)
           //FIXME: a bug seems to prevent from opening a popover from a dialog
-        ).popover(test.errorStack.stackTrace, title = Some("Errors"))
+          case _             ⇒ lab(label_danger).popover(test.errorStack.stackTrace, title = Some("Errors"))
+        }
+      }
 
       lazy val render = Rx {
         tr(omsheet.docEntry +++ (lineHeight := "35px"))(
           td(colMD(2))(
             tags.a(testedAuth.auth.data.name, omsheet.docTitleEntry +++ floatLeft +++ omsheet.colorBold("white"), cursor := "pointer", onclick := { () ⇒
-              authenticationSelector.now.set(testedAuth.auth.factory)
-              setting() = Some(testedAuth.auth)
+             authSetting() = Some(testedAuth.auth)
             })
           ),
-          td(colMD(6) +++ sheet.paddingTop(5))(label(testedAuth.auth.data.name, label_primary)),
+          td(colMD(6) +++ sheet.paddingTop(5))(label(testedAuth.auth.factory.name, label_primary)),
           td(colMD(2))(
             for {
               t ← testedAuth.tests
             } yield {
-              toLabel(t.message, t)
+              toLabel(t)
             }
           ),
           td(
@@ -103,7 +111,7 @@ class AuthenticationPanel {
 
     Rx {
       tags.div(
-        setting() match {
+        authSetting() match {
           case Some(p: AuthenticationPlugin) ⇒ div(sheet.paddingTop(20))(p.panel)
           case _ ⇒
             tags.table(width := "100%")(
@@ -116,10 +124,19 @@ class AuthenticationPanel {
     }
   }
 
-  val newButton = bs.button("New", btn_primary, () ⇒ newPanel)
+  val newButton = bs.button("New", btn_primary, () ⇒ authSetting() = Plugins.authenticationFactories.now.headOption.map {
+    _.buildEmpty
+  })
 
   val saveButton = bs.button("Save", btn_primary, () ⇒ {
     save
+  })
+
+  val cancelButton = bs.button("Cancel", btn_default, () ⇒ {
+    authSetting.now match {
+      case None ⇒ dialog.hide
+      case _    ⇒ authSetting() = None
+    }
   })
 
   lazy val dialog: ModalDialog =
@@ -131,17 +148,19 @@ class AuthenticationPanel {
         }
       },
       onclose = () ⇒ {
-        setting() = None
+        authSetting() = None
       }
     )
 
   dialog.header(
     div(
       Rx {
-        setting() match {
-          case Some(_) ⇒ authenticationSelector.now.selector
-          case _       ⇒ b("Authentications")
-        }
+        div(
+          authSetting() match {
+            case Some(o) ⇒ getAuthSelector(o.factory).selector
+            case _       ⇒ b("Authentications")
+          }
+        )
       }
     )
   )
@@ -152,11 +171,11 @@ class AuthenticationPanel {
     tags.div(
       Rx {
         bs.buttonGroup()(
-          setting() match {
+          authSetting() match {
             case Some(_) ⇒ saveButton
             case _       ⇒ newButton
           },
-          ModalDialog.closeButton(dialog, btn_default, "Cancel")
+          cancelButton
         )
       }
     )
@@ -167,12 +186,12 @@ class AuthenticationPanel {
   }
 
   def save = {
-    setting.now.map {
+    authSetting.now.map {
       _.save(() ⇒ {
         getAuthentications
       })
     }
-    setting() = None
+    authSetting() = None
   }
 
   def testAuthentications = {

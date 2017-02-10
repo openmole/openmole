@@ -51,7 +51,7 @@ class FileDisplayer {
       refresh(() ⇒
         post(timeout = 120 seconds, warningTimeout = 60 seconds)[Api].runScript(ScriptData(safePathTab.now)).call().foreach { execInfo ⇒
           overlaying() = false
-          executionPanel.dialog.open
+          executionPanel.dialog.show
         })
     }
   }

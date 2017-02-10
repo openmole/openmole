@@ -1,12 +1,5 @@
-package org.openmole.gui.plugin.environment.egi
-
-import org.openmole.gui.ext.tool.client.OMPost
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
-import autowire._
-import scala.scalajs.js.annotation.JSExport
-
-/*
- * Copyright (C) 13/01/17 // mathieu.leclaire@openmole.org
+/**
+ * Created by Romain Reuillon on 29/11/16.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -16,18 +9,22 @@ import scala.scalajs.js.annotation.JSExport
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
  */
-//
-//@JSExport
-//class Authentications extends AuthenticationGUIPlugins {
-//
-//  def fetch = OMPost()[API].egiAuthentications().call.map { auth ⇒
-//    auth.map {
-//      new EGIAuthenticationGUI(_)
-//    }
-//  } // ++ ssh ++ etc etc
-//}
+package org.openmole.gui.plugin.authentication.sshlogin
+
+import org.openmole.gui.ext.plugin.server.{ PluginActivator, PluginInfo }
+import org.openmole.gui.ext.tool.server.{ AutowireServer, OMRouter }
+import scala.concurrent.ExecutionContext.Implicits.global
+
+class Activator extends PluginActivator {
+
+  def info: PluginInfo = PluginInfo(
+    classOf[LoginAuthenticationFactory],
+    OMRouter[LoginAuthenticationAPI](AutowireServer.route[LoginAuthenticationAPI](new LoginAuthenticationApiImpl))
+  )
+}

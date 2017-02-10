@@ -34,6 +34,7 @@ import org.openmole.core.project._
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.plugin.server.{ Configurations, PluginActivator }
 import org.openmole.gui.ext.tool.server.OMRouter
+import org.openmole.gui.ext.tool.server.Utils.authenticationKeysFile
 
 /*
  * Copyright (C) 21/07/14 // mathieu.leclaire@openmole.org
@@ -78,6 +79,8 @@ class ApiImpl(val arguments: GUIServer.ServletArguments, addRoute: OMRouter ⇒ 
   def restart = arguments.applicationControl.restart()
 
   //AUTHENTICATIONS
+  def renameKey(keyName: String, newName: String): Unit =
+    Files.move(new File(authenticationKeysFile, keyName).toPath, new File(authenticationKeysFile, newName).toPath, StandardCopyOption.REPLACE_EXISTING)
 
   //WORKSPACE
   def isPasswordCorrect(pass: String): Boolean = Workspace.passwordIsCorrect(pass)

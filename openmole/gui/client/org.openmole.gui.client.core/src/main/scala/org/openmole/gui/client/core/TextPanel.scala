@@ -29,7 +29,7 @@ class TextPanel(title: String) {
 
   val content: Var[String] = Var("")
 
-  def open = dialog.open
+  def open = dialog.show
 
   val dialog = bs.ModalDialog(omsheet.panelWidth(65))
 

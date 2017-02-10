@@ -15,11 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package org.openmole.gui.plugin.environment.egi
+package org.openmole.gui.plugin.authentication.egi
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import org.openmole.gui.ext.data.{ AuthenticationPlugin, AuthenticationPluginFactory, Test, VOTest }
-import org.openmole.gui.ext.tool.client.OMPost
+import org.openmole.gui.ext.tool.client.{ FileUploaderUI, OMPost }
 import org.openmole.gui.ext.tool.client.JsRxTags._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
@@ -42,7 +42,7 @@ class EGIAuthenticationGUIFactory extends AuthenticationPluginFactory {
 
   def build(data: AuthType): AuthenticationPlugin = new EGIAuthenticationGUI(data)
 
-  def name = "EGI P12 certificate"
+  def name = "EGI"
 
   def getData: Future[Seq[AuthType]] = OMPost()[EGIAuthenticationAPI].egiAuthentications().call()
 }
@@ -50,7 +50,6 @@ class EGIAuthenticationGUIFactory extends AuthenticationPluginFactory {
 @JSExport
 class EGIAuthenticationGUI(val data: EGIAuthenticationData = EGIAuthenticationData()) extends AuthenticationPlugin {
   type AuthType = EGIAuthenticationData
-  type TestType = EGIAuthenticationTest
 
   val passwordStyle: ModifierSeq = Seq(
     width := 130,
@@ -96,7 +95,6 @@ class EGIAuthenticationGUI(val data: EGIAuthenticationData = EGIAuthenticationDa
     OMPost()[Api].setConfigurationValue(VOTest, voInput.value).call()
   }
 
-  def test = {
-    OMPost()[EGIAuthenticationAPI].testAuthentication(data).call()
-  }
+  def test = OMPost()[EGIAuthenticationAPI].testAuthentication(data).call()
+
 }

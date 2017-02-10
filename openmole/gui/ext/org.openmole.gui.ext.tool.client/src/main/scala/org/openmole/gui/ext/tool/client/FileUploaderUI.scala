@@ -1,4 +1,4 @@
-package org.openmole.gui.plugin.environment.egi
+package org.openmole.gui.ext.tool.client
 
 /*
  * Copyright (C) 03/07/15 // mathieu.leclaire@openmole.org
@@ -17,18 +17,17 @@ package org.openmole.gui.plugin.environment.egi
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import autowire._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import fr.iscpif.scaladget.stylesheet.all._
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
+import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.data._
-import org.openmole.gui.ext.tool.client.{ FileManager, OMPost }
 import org.openmole.gui.ext.tool.client.JsRxTags._
 import org.scalajs.dom.raw.HTMLInputElement
-import org.openmole.gui.ext.tool.client._
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+import autowire._
 import rx._
 
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import scalatags.JsDom.all._
 
 object FileUploaderUI {
@@ -36,8 +35,9 @@ object FileUploaderUI {
 }
 
 case class FileUploaderUI(
-    keyName:  String,
-    keySet:   Boolean,
+    keyName: String,
+    keySet:  Boolean,
+
     renaming: Option[String] = None
 ) {
 
@@ -59,7 +59,7 @@ case class FileUploaderUI(
           if (fInput.files.length > 0) {
             val leaf = fInput.files.item(0).name
             pathSet() = false
-            OMPost()[EGIAuthenticationAPI].renameKey(leaf, fileName).call().foreach {
+            OMPost()[Api].renameKey(leaf, fileName).call().foreach {
               b ⇒
                 pathSet() = true
             }

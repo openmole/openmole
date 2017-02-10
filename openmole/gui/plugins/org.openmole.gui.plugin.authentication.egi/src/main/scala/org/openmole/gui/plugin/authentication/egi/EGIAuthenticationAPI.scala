@@ -1,4 +1,4 @@
-package org.openmole.gui.plugin.environment.egi
+package org.openmole.gui.plugin.authentication.egi
 
 import org.openmole.gui.ext.data.Test
 
@@ -10,9 +10,7 @@ trait EGIAuthenticationAPI {
 
   def removeAuthentication(): Unit
 
-  def renameKey(keyName: String, newName: String): Unit
-
-  def testAuthentication(data: EGIAuthenticationData): Seq[EGIAuthenticationTest]
+  def testAuthentication(data: EGIAuthenticationData): Seq[Test]
   /*def deleteAuthenticationKey(keyName: String): Unit
 
   def renameKey(keyName: String, newName: String): Unit

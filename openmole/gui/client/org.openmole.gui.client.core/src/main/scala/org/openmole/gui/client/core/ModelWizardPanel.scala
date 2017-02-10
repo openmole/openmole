@@ -460,7 +460,7 @@ class ModelWizardPanel {
     tags.button("Build", btn_primary, onclick := {
       () ⇒
         save
-        dialog.close
+        dialog.hide
 
         val codeType = codeSelector.getOrElse(Binary())
 
