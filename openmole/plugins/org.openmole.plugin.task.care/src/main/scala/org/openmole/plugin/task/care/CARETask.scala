@@ -86,9 +86,13 @@ object CARETask extends Logger {
 
   lazy val expandedCommand = ExpandedString(command.command)
 
+  def validateArchive(archive: File) =
+    if (!archive.exists) Seq(new UserBadDataError(s"Cannot find specified Archive $archive in your work directory. Did you prefix the path with `workDirectory / `?"))
+    else if (!archive.canExecute) Seq(new UserBadDataError(s"Archive $archive must be executable. Make sure you upload it with x permissions"))
+    else Seq.empty[Throwable]
+
   override def validate =
-    expandedCommand.validate(External.PWD :: inputs.toList) ++
-      (if (!archive.canExecute) Seq(new UserBadDataError(s"Archive $archive must be executable.")) else Seq.empty)
+    expandedCommand.validate(External.PWD :: inputs.toList) ++ validateArchive(archive)
 
   override protected def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = external.withWorkDir(executionContext) { taskWorkDirectory ⇒
     taskWorkDirectory.mkdirs()
