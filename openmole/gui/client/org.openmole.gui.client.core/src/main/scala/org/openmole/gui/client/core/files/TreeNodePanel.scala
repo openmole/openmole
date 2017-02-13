@@ -64,6 +64,8 @@ class TreeNodePanel {
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
   val selectionMode = Var(false)
   val treeWarning = Var(true)
+  val dragState: Var[String] = Var("")
+  val draggedNode: Var[Option[TreeNode]] = Var(None)
 
   selectionMode.trigger {
     if (!selectionMode.now) manager.clearSelection
@@ -264,6 +266,49 @@ class TreeNodePanel {
     case _ ⇒
   }
 
+  def dropPairs(dn: DirNode) = Seq(
+    draggable := true, ondrop := {
+      dropAction(dn)
+    },
+    ondragenter := {
+      (e: DragEvent) ⇒
+        false
+    },
+    ondragover := {
+      (e: DragEvent) ⇒
+        e.dataTransfer.dropEffect = "move"
+        e.preventDefault
+        false
+    }
+  )
+
+  def dropAction(tn: TreeNode) = {
+    val currentPath = manager.current.now
+    val tnPath = currentPath ++ tn.name.now
+    (e: DragEvent) ⇒
+      e.preventDefault
+      draggedNode.now.map {
+        sp ⇒
+          val spPath = currentPath ++ sp.name.now
+          tn match {
+            case d: DirNode ⇒
+              val dPath = currentPath ++ d.name.now
+              if (spPath != dPath) {
+                fileDisplayer.tabs.saveAllTabs(() ⇒
+                  post()[Api].move(spPath, tnPath).call().foreach {
+                    b ⇒
+                      manager.invalidCache(tnPath)
+                      TreeNodePanel.refreshAndDraw
+                      fileDisplayer.tabs.checkTabs
+                  })
+              }
+            case _ ⇒
+          }
+      }
+      draggedNode() = None
+      false
+  }
+
   def stringAlert(message: String, okaction: () ⇒ Unit) =
     AlertPanel.string(message, okaction, transform = RelativeCenterPosition, zone = FileZone)
 
@@ -325,6 +370,7 @@ class TreeNodePanel {
 
     val clickablePair = {
       val style = floatLeft +++ pointer +++ Seq(
+        draggable := true,
         onclick := { (e: MouseEvent) ⇒
           if (!selectionMode.now) {
             todo()
@@ -417,7 +463,25 @@ class TreeNodePanel {
                   }
                 }
               },
-
+              ondragstart := { (e: DragEvent) ⇒
+                e.dataTransfer.setData("text/plain", "nothing") //  FIREFOX TRICK
+                draggedNode.now match {
+                  case Some(t: TreeNode) ⇒
+                  case _                 ⇒ draggedNode() = Some(tn)
+                }
+                true
+              },
+              ondragenter := { (e: DragEvent) ⇒
+                false
+              },
+              ondragover := { (e: DragEvent) ⇒
+                e.dataTransfer.dropEffect = "move"
+                e.preventDefault
+                false
+              },
+              ondrop := {
+                dropAction(tn)
+              },
               clickablePair.tooltip(tn.name(), condition = () ⇒ tn.name().length > 24), {
                 div(fileInfo)(
                   if (treeStates().settingsSet) {

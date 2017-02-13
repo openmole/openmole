@@ -102,9 +102,9 @@ class TreeNodeManager {
     dirNodeLine() = sp
   }
 
-  def invalidCurrentCache = {
-    sons() = sons.now.filterNot(_._1.path == current.now.path)
-  }
+  def invalidCurrentCache = invalidCache(current.now)
+
+  def invalidCache(sp: SafePath) = sons() = sons.now.filterNot(_._1.path == sp.path)
 
   def computeCurrentSons(fileFilter: FileFilter): Future[ListFiles] = {
     val cur = current.now
