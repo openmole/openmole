@@ -85,7 +85,7 @@ object ScriptClient {
   def run(): Unit = {
     implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
-    post()[Api].loadPlugins.call().map { _ ⇒
+    Plugins.fetch { _ ⇒
       val maindiv = tags.div()
       val shutDown = new ShutDown
 
