@@ -30,6 +30,7 @@ import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.data.ListSorting._
 import java.io._
 
+import org.openmole.tool.logger.Logger
 import org.openmole.tool.file._
 import org.openmole.core.fileservice._
 import org.openmole.tool.stream._
@@ -37,6 +38,7 @@ import org.openmole.tool.stream.StringOutputStream
 import org.openmole.tool.tar._
 import java.nio.file.attribute._
 
+import org.openmole.core.dsl
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.gui.ext.plugin.server.PluginActivator
 import org.openmole.gui.ext.tool.server.OMRouter
@@ -44,7 +46,9 @@ import org.openmole.gui.server.jscompile.JSPack
 
 import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
 
-object Utils {
+object Utils extends Logger {
+
+  import Log._
 
   implicit def fileToExtension(f: File): FileExtension = DataUtils.fileToExtension(f.getName)
 
@@ -415,20 +419,19 @@ object Utils {
 
   def buildPlugins = jsPluginDirectory.updateIfChanged(
     newDir ⇒ {
+      logger.info("Building GUI plugins ...")
       val jsFile = Workspace.openMOLELocation / "webapp/js/openmole.js"
       jsFile.delete
-      println("update if changed " + newDir.getAbsolutePath)
       Plugins.gatherJSIRFiles(newDir)
       JSPack.link(newDir, jsFile)
     }
   )
 
   def loadPlugins(route: OMRouter ⇒ Unit) = {
+    logger.info("Loading GUI plugins")
     PluginActivator.plugins.foreach { p ⇒
       route(p._2.router)
     }
   }
-
-  // }
 
 }

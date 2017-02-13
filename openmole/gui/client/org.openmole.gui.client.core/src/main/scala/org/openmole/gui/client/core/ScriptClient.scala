@@ -156,11 +156,6 @@ object ScriptClient {
 
         withBootstrapNative {
           div(
-            ///////Plugin test
-            div(
-              bs.button("build", btn_danger +++ ms("ooo"), () ⇒ Plugins.buildAndLoad)
-            ),
-            //////
             Rx {
               bs.navBar(
                 omsheet.fixed +++ sheet.nav +++ navbar_pills +++ navbar_inverse +++ (fontSize := 20) +++ navbar_staticTop +++ {
