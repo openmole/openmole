@@ -66,7 +66,7 @@ object GUIServer {
 class GUIBootstrap extends LifeCycle {
   override def init(context: ServletContext) {
     val args = context.get(GUIServer.servletArguments).get.asInstanceOf[GUIServer.ServletArguments]
-    context mount (new GUIServlet(args), "/*")
+    context mount (GUIServlet(args), "/*")
   }
 }
 

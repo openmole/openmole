@@ -70,7 +70,6 @@ class AuthenticationPanel {
     }
   }
 
-
   lazy val authenticationTable = {
 
     case class Reactive(testedAuth: TestedAuthentication) {
@@ -91,7 +90,7 @@ class AuthenticationPanel {
         tr(omsheet.docEntry +++ (lineHeight := "35px"))(
           td(colMD(2))(
             tags.a(testedAuth.auth.data.name, omsheet.docTitleEntry +++ floatLeft +++ omsheet.colorBold("white"), cursor := "pointer", onclick := { () ⇒
-             authSetting() = Some(testedAuth.auth)
+              authSetting() = Some(testedAuth.auth)
             })
           ),
           td(colMD(6) +++ sheet.paddingTop(5))(label(testedAuth.auth.factory.name, label_primary)),

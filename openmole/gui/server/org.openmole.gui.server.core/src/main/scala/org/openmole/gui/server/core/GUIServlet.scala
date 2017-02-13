@@ -45,8 +45,10 @@ import scala.util.{ Failure, Success, Try }
 
 object GUIServlet {
   def apply(arguments: GUIServer.ServletArguments) = {
-    new GUIServlet(arguments)
-
+    val servlet = new GUIServlet(arguments)
+    Utils.buildPlugins
+    servlet.apiImpl.loadPlugins
+    servlet
   }
 }
 

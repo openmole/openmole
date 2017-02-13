@@ -31,6 +31,7 @@ import org.openmole.gui.ext.data.ListSorting._
 import java.io._
 
 import org.openmole.tool.file._
+import org.openmole.core.fileservice._
 import org.openmole.tool.stream._
 import org.openmole.tool.stream.StringOutputStream
 import org.openmole.tool.tar._
@@ -38,10 +39,8 @@ import java.nio.file.attribute._
 
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.gui.ext.plugin.server.PluginActivator
-import org.openmole.gui.ext.tool.server._
 import org.openmole.gui.ext.tool.server.OMRouter
 import org.openmole.gui.server.jscompile.JSPack
-import org.scalatra.{ Route, ScalatraBase }
 
 import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
 
@@ -51,7 +50,7 @@ object Utils {
 
   val webUIProjectFile = Workspace.file("webui")
   val pluginUpdoadDirectory = Workspace.tmpDir.newDir("pluginUpload")
-  val jsPluginDirectory = Workspace.tmpDir.newDir("jsplugin")
+  val jsPluginDirectory = webUIProjectFile / "jsplugin"
   val pluginFileName = "plugins.js"
   val pluginFile = jsPluginDirectory / pluginFileName
   pluginUpdoadDirectory.mkdir
@@ -414,18 +413,15 @@ object Utils {
 
   def getUUID: String = java.util.UUID.randomUUID.toString
 
-  def buildPlugins = {
-    import org.openmole.gui.ext.data.ServerFileSytemContext.project
-    //If no plugin.js in cache: compile it
-    // if (jsPluginDirectory.isDirectoryEmpty) {
-    val sjsirDir = Workspace.tmpDir
-    val jsFile = Workspace.openMOLELocation / "webapp/js/openmole.js"
-    jsFile.delete
-
-    Plugins.gatherJSIRFiles(sjsirDir)
-    JSPack.link(sjsirDir, jsFile)
-    println("zrfile " + jsFile.getAbsolutePath)
-  }
+  def buildPlugins = jsPluginDirectory.updateIfChanged(
+    newDir ⇒ {
+      val jsFile = Workspace.openMOLELocation / "webapp/js/openmole.js"
+      jsFile.delete
+      println("update if changed " + newDir.getAbsolutePath)
+      Plugins.gatherJSIRFiles(newDir)
+      JSPack.link(newDir, jsFile)
+    }
+  )
 
   def loadPlugins(route: OMRouter ⇒ Unit) = {
     PluginActivator.plugins.foreach { p ⇒
