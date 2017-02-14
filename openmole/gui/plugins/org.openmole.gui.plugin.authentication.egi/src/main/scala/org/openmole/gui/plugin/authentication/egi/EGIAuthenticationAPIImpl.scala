@@ -62,9 +62,6 @@ class EGIAuthenticationAPIImpl extends EGIAuthenticationAPI {
   // To be used for ssh private key
   def deleteAuthenticationKey(keyName: String): Unit = authenticationFile(keyName).delete
 
-  //def renameKey(keyName: String, newName: String): Unit =
-  //Files.move(Utils.authenticationFile(keyName).toPath, Utils.authenticationFile(newName).toPath, StandardCopyOption.REPLACE_EXISTING)
-
   def testAuthentication(data: EGIAuthenticationData): Seq[Test] = {
 
     def testPassword(data: EGIAuthenticationData, test: EGIAuthentication ⇒ Try[Boolean]): Test = coreObject(data).map { d ⇒
