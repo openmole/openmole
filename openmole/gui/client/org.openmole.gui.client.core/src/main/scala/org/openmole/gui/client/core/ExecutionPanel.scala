@@ -187,12 +187,26 @@ class ExecutionPanel {
 
             val completed = executionInfo.completed
 
+            def failedDiv(ex: Expander) = div(
+              s"Your simulation ${staticInfo.now(id).path.name} ", a("failed", bold(WHITE) +++ pointer, onclick := { () ⇒
+                BannerAlert.clear
+                dialog.show
+                ex.update(errorID)
+              })
+            )
+
+            val succesDiv = div(
+              s"Your simulation ${staticInfo.now(id).path.name} has ", a("finished", bold(WHITE) +++ pointer, onclick := { () ⇒
+                BannerAlert.clear
+                dialog.show
+              })
+            )
+
             val details = executionInfo match {
               case f: Failed ⇒
-                addToBanner(id, BannerMessage(s"Your simulation ${staticInfo.now(id).path.name} failed.").critical)
                 ExecutionDetails("0", 0, Some(f.error), f.environmentStates)
               case f: Finished ⇒
-                addToBanner(id, BannerMessage(s"Your simulation ${staticInfo.now(id).path.name} has finished."))
+                addToBanner(id, BannerAlert.div(succesDiv))
                 ExecutionDetails(ratio(f.completed, f.running, f.ready), f.running, envStates = f.environmentStates)
               case r: Running ⇒ ExecutionDetails(ratio(r.completed, r.running, r.ready), r.running, envStates = r.environmentStates)
               case c: Canceled ⇒
@@ -205,8 +219,10 @@ class ExecutionPanel {
             val envLink = expander(id.id, ex ⇒ ex.getGlyph(glyph_stats, "Env", envID))
             val stateLink = expander(id.id, ex ⇒
               executionInfo match {
-                case f: Failed ⇒ ex.getLink(executionInfo.state, errorID).render
-                case _         ⇒ tags.span(executionInfo.state).render
+                case f: Failed ⇒
+                  addToBanner(id, BannerAlert.div(failedDiv(ex)).critical)
+                  ex.getLink(executionInfo.state, errorID).render
+                case _ ⇒ tags.span(executionInfo.state).render
               })
             val outputLink = expander(id.id, ex ⇒ ex.getGlyph(glyph_list, "", outputStreamID, () ⇒ doScrolls))
 

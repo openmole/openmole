@@ -27,8 +27,8 @@ object post {
     OMPost(
       timeout,
       warningTimeout,
-      (request: String) ⇒ BannerAlert.register(BannerMessage(s"The request ${request} failed.").critical),
-      () ⇒ BannerAlert.register(BannerMessage("The request is very long. Please check your connection."))
+      (request: String) ⇒ BannerAlert.register(BannerAlert.message(s"The request ${request} failed.").critical),
+      () ⇒ BannerAlert.register(BannerAlert.message("The request is very long. Please check your connection."))
     )
   }
 }

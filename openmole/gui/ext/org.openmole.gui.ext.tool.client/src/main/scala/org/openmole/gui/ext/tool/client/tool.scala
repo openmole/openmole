@@ -42,6 +42,8 @@ package object client {
 
   lazy val LIGHT_GREY = "#9d9d9d"
 
+  lazy val WHITE = "white"
+
   lazy val tableTag: ModifierSeq = Seq(
     sheet.marginLeft(3),
     fontSize := 14,
@@ -51,7 +53,7 @@ package object client {
 
   def color(col: String): ModifierSeq = styles.color := col
 
-  def colorBold(col: String): ModifierSeq = Seq(
+  def bold(col: String): ModifierSeq = Seq(
     color(col),
     fontWeight := "bold"
   )
@@ -106,7 +108,7 @@ package object client {
   )
   lazy val connectionTabOverlay: ModifierSeq = Seq(
     background := "white none repeat scroll 0 0",
-    color("white"),
+    color(WHITE),
     height := "100%",
     styles.left := 0,
     absolutePosition,
@@ -234,7 +236,7 @@ package object client {
   )
 
   lazy val file: ModifierSeq = Seq(
-    color("white"),
+    color(WHITE),
     display := "inline-block",
     height := 20,
     textDecoration := "none"
@@ -242,7 +244,7 @@ package object client {
 
   lazy val dir: ModifierSeq = Seq(
     backgroundColor := BLUE,
-    color("white"),
+    color(WHITE),
     display := "inline-block",
     height := 20,
     sheet.marginBottom(3),
@@ -254,7 +256,7 @@ package object client {
   )
 
   lazy val fileNameOverflow: ModifierSeq = Seq(
-    color("white"),
+    color(WHITE),
     whiteSpace := "nowrap",
     overflow := "hidden",
     pointer,
@@ -312,7 +314,7 @@ package object client {
     padding := 4,
     fontSize := 13,
     right := 6,
-    color("white")
+    color(WHITE)
   )
 
   lazy val pasteLabel: ModifierSeq = Seq(
@@ -324,7 +326,7 @@ package object client {
   )
 
   lazy val moreEntries: ModifierSeq = Seq(
-    backgroundColor := "white",
+    backgroundColor := WHITE,
     margin := 10,
     borderRadius := "3px",
     textAlign := "center"
@@ -352,7 +354,7 @@ package object client {
   )
 
   lazy val playTabOverlay: ModifierSeq = Seq(
-    color("white"),
+    color(WHITE),
     height := "calc(100% - 20px)",
     absolutePosition,
     width := "100%",
@@ -365,7 +367,7 @@ package object client {
   lazy val overlayElement: ModifierSeq = Seq(
     absolutePosition,
     width := "100%",
-    color("white"),
+    color(WHITE),
     fontWeight := "bold",
     sheet.paddingTop(100),
     fontSize := 25,
@@ -383,7 +385,7 @@ package object client {
 
   lazy val executionTable: ModifierSeq = Seq(
     backgroundColor := DARK_GREY,
-    color("white")
+    color(WHITE)
   )
 
   lazy val monospace: ModifierSeq = fontFamily := "monospace"
@@ -425,7 +427,7 @@ package object client {
 
   //MARKET PANEL
   lazy val docEntry: ModifierSeq = Seq(
-    color("white"),
+    color(WHITE),
     backgroundColor := DARK_GREY,
     borderRadius := "4px",
     sheet.marginTop(3),
@@ -479,7 +481,7 @@ package object client {
       case "running"  ⇒ color("yellow")
       case "finished" ⇒ color("#a6bf26")
       case "canceled" ⇒ color("orange")
-      case _          ⇒ color("white")
+      case _          ⇒ color(WHITE)
     },
     fontWeight := "bold"
   )
@@ -512,7 +514,7 @@ package object client {
   lazy val alertOverlay: ModifierSeq = Seq(
     background := s"$DARK_GREY none repeat scroll 0 0",
     opacity := 0.95,
-    color("white"),
+    color(WHITE),
     height := "100%",
     absolutePosition,
     width := "100%",
@@ -568,7 +570,7 @@ package object client {
 
   // ENVIRONMENT ERROR PANEL
   lazy val environmentPanelError: ModifierSeq = Seq(
-    backgroundColor := "white",
+    backgroundColor := WHITE,
     margin := "10 10 0",
     padding := 10
   )
@@ -672,7 +674,7 @@ package object client {
 
   lazy val labelStyle: ModifierSeq = Seq(
     sheet.marginTop(4),
-    color("white"),
+    color(WHITE),
     width := "auto",
     fontSize := 14
   )
@@ -733,7 +735,7 @@ package object client {
   lazy val bannerAlertInner: ModifierSeq = Seq(
     width := "100%",
     relativePosition,
-    color("white"),
+    color(WHITE),
     opacity := 0.9,
     marginAll(top = 20, left = 15, bottom = 15)
 
@@ -741,7 +743,7 @@ package object client {
 
   lazy val bannerAlertClose: ModifierSeq = Seq(
     fixedPosition,
-    color("white"),
+    color(WHITE),
     opacity := 0.6,
     pointer,
     fontSize := "25px",

@@ -21,11 +21,14 @@ import rx._
 
 import scalatags.JsDom.all._
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
+
 import scalatags.JsDom.all.{ onclick, raw, span }
 import org.openmole.gui.ext.tool.client._
 import org.openmole.gui.ext.tool.client.JsRxTags._
 import fr.iscpif.scaladget.api.BootstrapTags._
-import scalatags.JsDom.tags
+import org.scalajs.dom.raw.HTMLDivElement
+
+import scalatags.JsDom.{ TypedTag, tags }
 import sheet._
 
 object BannerAlert {
@@ -38,20 +41,24 @@ object BannerAlert {
 
   object CriticalBannerLevel extends BannerLevel
 
-  case class BannerMessage(message: String, bannerLevel: BannerLevel = RegularBannerLevel) {
+  def message(message: String, bannerLevel: BannerLevel = RegularBannerLevel) = div(tags.div(message), bannerLevel)
+
+  def div(messageDiv: TypedTag[HTMLDivElement], bannerLevel: BannerLevel = RegularBannerLevel) = BannerMessage(messageDiv, bannerLevel)
+
+  case class BannerMessage(messageDiv: TypedTag[HTMLDivElement], bannerLevel: BannerLevel) {
     def critical = copy(bannerLevel = CriticalBannerLevel)
   }
 
   private val bannerMessages: Var[Seq[BannerMessage]] = Var(Seq())
 
-  private val bannerDiv = div(Rx {
+  private val bannerDiv = tags.div(Rx {
     tags.div(omsheet.bannerAlert +++ (backgroundColor := color))(
-      span(onclick := { () ⇒ close }, omsheet.bannerAlertClose)(
+      span(onclick := { () ⇒ clear }, omsheet.bannerAlertClose)(
         raw("&#215")
-      ), div(omsheet.bannerAlertInner)(
-        (for {
+      ), tags.div(omsheet.bannerAlertInner)(
+        for {
           bm ← bannerMessages()
-        } yield bm.message).map(msg ⇒ div(msg))
+        } yield bm.messageDiv
       )
     )
   })
@@ -60,7 +67,7 @@ object BannerAlert {
     !bannerMessages().isEmpty
   }.expand(bannerDiv)
 
-  def close = {
+  def clear = {
     bannerMessages() = Seq()
   }
 
