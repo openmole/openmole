@@ -165,6 +165,10 @@ class Workspace(val location: File) {
     }
   }
 
+  def clearPreference[T](location: ConfigurationLocation[T]) = synchronized {
+    configurationFile.clearValue(location.group, location.name)
+  }
+
   def file(name: String): File = new File(location, name)
 
   def withTmpFile[T](prefix: String, postfix: String)(f: File ⇒ T): T = {

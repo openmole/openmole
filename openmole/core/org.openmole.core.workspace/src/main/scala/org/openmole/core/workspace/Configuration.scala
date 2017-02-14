@@ -80,6 +80,11 @@ class ConfigurationFile private (val file: File) {
     builder.save()
   }
 
+  def clearValue(group: String, name: String) = lock.write {
+    config.clearProperty(s"$group.$name")
+    builder.save()
+  }
+
   def clear(): Unit = lock.write {
     file.content = ""
     builder.resetResult()
