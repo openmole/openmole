@@ -23,4 +23,5 @@ object DesktopGridAuthentication {
   val desktopGridPassword = ConfigurationLocation[String]("desktopgrid", "password", None)
   def update(cypheredPassword: String) = Workspace.setPreference(desktopGridPassword, cypheredPassword)
   def password = Workspace.decrypt(Workspace.preference(desktopGridPassword))
+  def clear = Workspace.clearPreference(desktopGridPassword)
 }
