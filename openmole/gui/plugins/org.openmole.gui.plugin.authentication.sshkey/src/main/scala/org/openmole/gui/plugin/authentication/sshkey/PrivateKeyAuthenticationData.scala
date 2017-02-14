@@ -19,15 +19,13 @@ import org.openmole.gui.ext.data.{ AuthenticationData, Test, Error }
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-sealed trait SSHAuthenticationData extends AuthenticationData
-
 case class PrivateKeyAuthenticationData(
-    privateKey:       String         = "",
+    privateKey:       Option[String] = None,
     login:            String         = "",
     cypheredPassword: String         = "",
     target:           String         = "",
     port:             String         = "22"
-) extends SSHAuthenticationData {
+) extends AuthenticationData {
   def name = s"$login@$target"
 
 }

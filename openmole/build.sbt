@@ -588,7 +588,7 @@ lazy val guiEnvironmentSSHLoginPlugin = OsgiProject(guiPluginDir, "org.openmole.
   libraryDependencies += Libraries.equinoxOSGi
 ) dependsOn(extPluginGUIServer, extClientTool, dataGUI, workspace, ssh) enablePlugins (ScalaJSPlugin)
 
-val guiPlugins = Seq(guiEnvironmentEGIPlugin, guiEnvironmentSSHLoginPlugin)
+val guiPlugins = Seq(guiEnvironmentEGIPlugin, guiEnvironmentSSHLoginPlugin, guiEnvironmentSSHKeyPlugin)
 
 /* -------------------- Bin ------------------------- */
 

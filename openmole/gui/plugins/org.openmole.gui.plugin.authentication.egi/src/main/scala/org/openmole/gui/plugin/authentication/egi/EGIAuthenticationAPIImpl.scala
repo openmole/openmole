@@ -17,8 +17,6 @@
  */
 package org.openmole.gui.plugin.authentication.egi
 
-import java.nio.file.{ Files, StandardCopyOption }
-
 import org.openmole.gui.ext.data._
 import org.openmole.plugin.environment.egi.{ EGIAuthentication, P12Certificate }
 import org.openmole.core.workspace.{ Decrypt, Workspace }
