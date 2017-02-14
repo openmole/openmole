@@ -563,10 +563,6 @@ lazy val serverGUI = OsgiProject(guiServerDir, "org.openmole.gui.server.core") s
   jsCompile
 ) settings (defaultSettings: _*)
 
-lazy val state = OsgiProject(guiServerDir, "org.openmole.gui.server.state") settings
-  (libraryDependencies += Libraries.slick) dependsOn(dataGUI, workflow, workspace) settings (defaultSettings: _*)
-
-
 /* -------------------- GUI Plugin ----------------------- */
 
 def guiPluginSettings = defaultSettings ++ Seq(defaultActivator)
