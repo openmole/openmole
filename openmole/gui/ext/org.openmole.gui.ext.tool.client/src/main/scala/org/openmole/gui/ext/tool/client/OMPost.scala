@@ -36,6 +36,8 @@ case class OMPost(timeout: Duration = 60 seconds, warningTimeout: Duration = 10 
       warningTimeoutAction()
     }
 
+    def stopTimeout = clearTimeout(timeoutSet)
+
     val future = ext.Ajax.post(
       url = s"$url",
       data = upickle.default.write(req.args),
@@ -45,8 +47,10 @@ case class OMPost(timeout: Duration = 60 seconds, warningTimeout: Duration = 10 
       }
 
     future.onComplete {
-      case Failure(t) ⇒ timeOutAction(req.path.last)
-      case Success(_) ⇒ clearTimeout(timeoutSet)
+      case Failure(t) ⇒
+        timeOutAction(req.path.last)
+        stopTimeout
+      case Success(_) ⇒ stopTimeout
     }
 
     future
