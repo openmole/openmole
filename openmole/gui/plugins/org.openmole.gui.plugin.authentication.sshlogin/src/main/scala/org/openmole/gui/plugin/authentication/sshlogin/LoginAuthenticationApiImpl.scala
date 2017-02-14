@@ -31,7 +31,7 @@ class LoginAuthenticationApiImpl extends LoginAuthenticationAPI {
 
   private def coreObject(data: LoginAuthenticationData) = LoginPassword(
     data.login,
-    Workspace.encrypt(data.cypheredPassword),
+    Workspace.encrypt(data.password),
     data.target,
     data.port.toInt
   )

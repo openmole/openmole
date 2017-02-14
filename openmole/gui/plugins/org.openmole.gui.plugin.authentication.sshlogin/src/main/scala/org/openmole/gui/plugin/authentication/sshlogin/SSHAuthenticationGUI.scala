@@ -26,8 +26,10 @@ import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
 import autowire._
 import sheet._
 import bs._
+import org.openmole.core.workspace.Workspace
 import org.scalajs.dom.raw.HTMLElement
 import org.openmole.gui.ext.data._
+
 import scala.concurrent.Future
 import scala.scalajs.js.annotation.JSExport
 import scalatags.JsDom.TypedTag
@@ -58,7 +60,7 @@ class LoginAuthenticationGUI(val data: LoginAuthenticationData = LoginAuthentica
 
   val loginInput = bs.input(data.login)(placeholder := "Login").render
 
-  val passwordInput = bs.input(data.cypheredPassword)(placeholder := "Password", passwordType).render
+  val passwordInput = bs.input(data.password)(placeholder := "Password", passwordType).render
 
   val targetInput = bs.input(data.target)(placeholder := "Host").render
 

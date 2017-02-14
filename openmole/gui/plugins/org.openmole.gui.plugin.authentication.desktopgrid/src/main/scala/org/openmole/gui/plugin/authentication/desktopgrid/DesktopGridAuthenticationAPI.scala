@@ -1,9 +1,7 @@
-package org.openmole.gui.plugin.authentication.sshlogin
-
-import org.openmole.gui.ext.data.AuthenticationData
+package org.openmole.gui.plugin.authentication.desktopgrid
 
 /*
- * Copyright (C) 12/01/17 // mathieu.leclaire@openmole.org
+ * Copyright (C) 14/02/17 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -18,12 +16,10 @@ import org.openmole.gui.ext.data.AuthenticationData
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+trait DesktopGridAuthenticationAPI {
+  def desktopGridAuthentications(): Seq[DesktopGridAuthenticationData]
 
-case class LoginAuthenticationData(
-    login:    String = "",
-    password: String = "",
-    target:   String = "",
-    port:     String = "22"
-) extends AuthenticationData {
-  def name = s"$login@$target"
+  def updateAuthentication(data: DesktopGridAuthenticationData): Unit
+
+  def removeAuthentication(): Unit
 }

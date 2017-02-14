@@ -584,7 +584,12 @@ lazy val guiEnvironmentSSHLoginPlugin = OsgiProject(guiPluginDir, "org.openmole.
   libraryDependencies += Libraries.equinoxOSGi
 ) dependsOn(extPluginGUIServer, extClientTool, dataGUI, workspace, ssh) enablePlugins (ScalaJSPlugin)
 
-val guiPlugins = Seq(guiEnvironmentEGIPlugin, guiEnvironmentSSHLoginPlugin, guiEnvironmentSSHKeyPlugin)
+lazy val guiEnvironmentDesktopGridPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.authentication.desktopgrid") settings(
+  guiPluginSettings,
+  libraryDependencies += Libraries.equinoxOSGi
+) dependsOn(extPluginGUIServer, extClientTool, dataGUI, workspace, desktopgrid) enablePlugins (ScalaJSPlugin)
+
+val guiPlugins = Seq(guiEnvironmentEGIPlugin, guiEnvironmentSSHLoginPlugin, guiEnvironmentSSHKeyPlugin, guiEnvironmentDesktopGridPlugin)
 
 /* -------------------- Bin ------------------------- */
 

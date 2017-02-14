@@ -1,9 +1,5 @@
-package org.openmole.gui.plugin.authentication.sshlogin
-
-import org.openmole.gui.ext.data.AuthenticationData
-
 /*
- * Copyright (C) 12/01/17 // mathieu.leclaire@openmole.org
+ * Copyright (C) 14/02/17 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -18,12 +14,16 @@ import org.openmole.gui.ext.data.AuthenticationData
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package org.openmole.gui.plugin.authentication.desktopgrid
 
-case class LoginAuthenticationData(
-    login:    String = "",
-    password: String = "",
-    target:   String = "",
-    port:     String = "22"
-) extends AuthenticationData {
-  def name = s"$login@$target"
+import org.openmole.gui.ext.plugin.server.{ PluginActivator, PluginInfo }
+import org.openmole.gui.ext.tool.server.{ AutowireServer, OMRouter }
+import scala.concurrent.ExecutionContext.Implicits.global
+
+class Activator extends PluginActivator {
+
+  def info: PluginInfo = PluginInfo(
+    classOf[DesktopGridAuthenticationFactory],
+    OMRouter[DesktopGridAuthenticationAPI](AutowireServer.route[DesktopGridAuthenticationAPI](new DesktopGridAuthenticationApiImpl))
+  )
 }

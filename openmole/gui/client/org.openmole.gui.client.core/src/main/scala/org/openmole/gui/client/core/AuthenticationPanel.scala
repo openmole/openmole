@@ -32,7 +32,6 @@ import rx._
 import bs._
 import fr.iscpif.scaladget.api.Selector.Options
 
-
 class AuthenticationPanel {
 
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
