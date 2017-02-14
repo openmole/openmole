@@ -23,7 +23,7 @@ import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import scalatags.JsDom.tags
 import org.openmole.gui.ext.tool.client._
 import org.openmole.gui.ext.tool.client.JsRxTags._
-
+import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
 import org.openmole.gui.ext.data._
@@ -32,11 +32,12 @@ import rx._
 import bs._
 import fr.iscpif.scaladget.api.Selector.Options
 
+
 class AuthenticationPanel {
 
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
-  case class TestedAuthentication(auth: AuthenticationPlugin, tests: Seq[Test])
+  case class TestedAuthentication(auth: AuthenticationPlugin, tests: Future[Seq[Test]])
 
   val authSetting: Var[Option[AuthenticationPlugin]] = Var(None)
   private lazy val auths: Var[Seq[TestedAuthentication]] = Var(Seq())
@@ -46,7 +47,9 @@ class AuthenticationPanel {
     lazy val authenticationSelector: Options[AuthenticationPluginFactory] = {
       val factories = Plugins.authenticationFactories.now
       val currentInd = {
-        val ind = factories.map { _.name }.indexOf(currentFactory.name)
+        val ind = factories.map {
+          _.name
+        }.indexOf(currentFactory.name)
         if (ind == -1) 0 else ind
       }
 
@@ -58,17 +61,17 @@ class AuthenticationPanel {
     authenticationSelector
   }
 
-  def getAuthentications = {
+  def getAuthentications =
     Plugins.authenticationFactories.now.map { factory ⇒
       val data = factory.getData
-      data.map { d ⇒
-        auths() = d.map {
+      auths() = Seq()
+      data.foreach { d ⇒
+        auths() = (auths.now ++ d.map {
           factory.build
-        }.map { auth ⇒ TestedAuthentication(auth, Seq(PendingTest)) }
-        testAuthentications
+        }.map { auth ⇒ TestedAuthentication(auth, auth.test) })
       }
+      initialCheck() = true
     }
-  }
 
   lazy val authenticationTable = {
 
@@ -86,7 +89,7 @@ class AuthenticationPanel {
         }
       }
 
-      lazy val render = Rx {
+      lazy val render = {
         tr(omsheet.docEntry +++ (lineHeight := "35px"))(
           td(colMD(2))(
             tags.a(testedAuth.auth.data.name, omsheet.docTitleEntry +++ floatLeft +++ omsheet.bold("white"), cursor := "pointer", onclick := { () ⇒
@@ -94,13 +97,17 @@ class AuthenticationPanel {
             })
           ),
           td(colMD(6) +++ sheet.paddingTop(5))(label(testedAuth.auth.factory.name, label_primary)),
-          td(colMD(2))(
-            for {
-              t ← testedAuth.tests
-            } yield {
-              toLabel(t)
+          td(colMD(2))({
+            val tests: Var[Seq[Test]] = Var(Seq(Test.pending))
+            testedAuth.tests.foreach { ts ⇒
+              tests() = ts
             }
-          ),
+            Rx {
+              tests().map {
+                toLabel
+              }
+            }
+          }),
           td(
             bs.glyphSpan(glyph_trash, () ⇒ removeAuthentication(testedAuth.auth))(omsheet.grey +++ sheet.paddingTop(9) +++ "glyphitem" +++ glyph_trash)
           )
@@ -191,17 +198,6 @@ class AuthenticationPanel {
       })
     }
     authSetting() = None
-  }
-
-  def testAuthentications = {
-    auths.now.foreach { testedAuth ⇒
-      testedAuth.auth.test.foreach { newTest ⇒
-        auths() = auths.now.filterNot {
-          _ == testedAuth
-        } :+ testedAuth.copy(tests = newTest)
-      }
-    }
-    initialCheck() = true
   }
 
 }
