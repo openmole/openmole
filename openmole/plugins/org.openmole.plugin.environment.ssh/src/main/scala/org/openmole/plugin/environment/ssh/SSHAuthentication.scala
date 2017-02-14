@@ -45,7 +45,7 @@ object SSHAuthentication {
 
   def clear()(implicit workspace: Workspace = Workspace.instance) = Authentication.clear[SSHAuthentication]
 
-  private def eq(a1: SSHAuthentication, a2: SSHAuthentication) = (a1.login, a1.host, a1.port) == (a2.login, a2.host, a2.port)
+  private def eq(a1: SSHAuthentication, a2: SSHAuthentication) = (a1.getClass, a1.login, a1.host, a1.port) == (a2.getClass, a2.login, a2.host, a2.port)
 
   def test(a: SSHAuthentication)(implicit decrypt: Decrypt, workspace: Workspace = Workspace.instance) = {
     Try(fr.iscpif.gridscale.ssh.SSHJobService(a.host, a.port)(a.apply).home).map(_ ⇒ true)
