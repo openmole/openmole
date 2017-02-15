@@ -111,8 +111,8 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
 
   def buildSpan(tool: SelectedTool, legend: String, todo: () ⇒ Unit, modifierSeq: ModifierSeq = emptyMod): TypedTag[HTMLElement] = {
     span(
-      Rx {
-        tool.glyph +++ pointer +++ selectedTool().filter(_ == tool).map { _ ⇒ modifierSeq +++ omsheet.selectedTool }.getOrElse(emptyMod) +++ "glyphmenu"
+      {
+        tool.glyph +++ pointer +++ selectedTool.now.filter(_ == tool).map { _ ⇒ modifierSeq +++ omsheet.selectedTool }.getOrElse(emptyMod) +++ "glyphmenu"
       },
       onclick := { () ⇒
         {
@@ -129,10 +129,9 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
       case _                ⇒ unselectTool
     }
     else {
-      selectedTool() = Some(tool)
-      selectedTool.now match {
-        case Some(CopyTool | TrashTool) ⇒ treeNodePanel.turnSelectionTo(true)
-        case Some(PluginTool) ⇒
+      tool match {
+        case CopyTool | TrashTool ⇒ treeNodePanel.turnSelectionTo(true)
+        case PluginTool ⇒
           manager.computePluggables(() ⇒
             if (manager.pluggables.now.isEmpty)
               message() = tags.div(omsheet.color("white"), "No plugin could be found in this folder.")
@@ -142,6 +141,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
             })
         case _ ⇒
       }
+      selectedTool() = Some(tool)
     }
     // todo(isSelectedTool)
   })
