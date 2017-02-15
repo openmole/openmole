@@ -111,9 +111,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
 
   def buildSpan(tool: SelectedTool, legend: String, todo: () ⇒ Unit, modifierSeq: ModifierSeq = emptyMod): TypedTag[HTMLElement] = {
     span(
-      {
-        tool.glyph +++ pointer +++ selectedTool.now.filter(_ == tool).map { _ ⇒ modifierSeq +++ omsheet.selectedTool }.getOrElse(emptyMod) +++ "glyphmenu"
-      },
+      tool.glyph +++ pointer +++ modifierSeq +++ "glyphmenu",
       onclick := { () ⇒
         {
           todo()
