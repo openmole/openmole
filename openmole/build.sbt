@@ -21,7 +21,7 @@ def macroParadise =
   addCompilerPlugin("org.scalamacros" %% "paradise" % "2.1.0" cross CrossVersion.full)
 
 lazy val scalaVersionValue = "2.11.8"
-scalaOrganization in ThisBuild := "org.typelevel"
+//scalaOrganization in ThisBuild := "org.typelevel"
 
 def defaultSettings = BuildSystem.settings ++
   Seq(
