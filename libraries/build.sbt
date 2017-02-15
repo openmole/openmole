@@ -17,8 +17,8 @@ def settings = Seq(
 ) ++ BuildSystem.settings
 
 
-lazy val scalatraVersion = "2.4.0"
-lazy val jettyVersion = "9.2.14.v20151106"
+lazy val scalatraVersion = "2.5.0"
+lazy val jettyVersion = "9.2.19.v20160908"
 
 lazy val scalatra = OsgiProject(dir, "org.scalatra",
   exports = Seq("org.scalatra.*, org.fusesource.*", "grizzled.*", "org.eclipse.jetty.*", "javax.*"),

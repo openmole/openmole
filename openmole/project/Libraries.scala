@@ -36,7 +36,7 @@ object Libraries {
   /** ------- Bundles -------------- */
 
 
-  lazy val scalatra = "org.openmole.library" %% "org-scalatra" % "2.4.0"
+  lazy val scalatra = "org.openmole.library" %% "org-scalatra" % "2.5.0"
   lazy val logback = "org.openmole.library" %% "ch-qos-logback" % "1.0.9"
   lazy val h2 = "org.openmole.library" %% "org-h2" % "1.4.192"
   lazy val bonecp = "org.openmole.library" %% "com-jolbox-bonecp" % "0.8.0-rc1"
