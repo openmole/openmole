@@ -16,12 +16,10 @@
  */
 package org.openmole.gui.server.core
 
-import javax.servlet.annotation.MultipartConfig
-
 import org.scalatra._
 import org.scalatra.auth.{ ScentryConfig, ScentrySupport }
 import org.scalatra.auth.strategy.BasicAuthSupport
-import org.scalatra.servlet.{ FileItem, FileUploadSupport }
+import org.scalatra.servlet.{ FileItem, FileUploadSupport, MultipartConfig }
 import org.scalatra.util.MultiMapHeadView
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -33,10 +31,8 @@ import java.io.File
 
 import org.openmole.core.workspace.Workspace
 import org.openmole.gui.ext.api.Api
-import org.openmole.gui.ext.data.PasswordState
 import org.openmole.gui.ext.tool.server
 import org.openmole.gui.ext.tool.server.{ AutowireServer, OMRouter }
-import org.openmole.gui.server.core.GUIServer.ServletArguments
 import org.openmole.tool.file._
 import org.openmole.tool.stream._
 import org.openmole.tool.tar._
@@ -52,8 +48,8 @@ object GUIServlet {
   }
 }
 
-@MultipartConfig(fileSizeThreshold = 1024 * 1024)
 class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServlet with FileUploadSupport with AuthenticationSupport {
+  configureMultipartHandling(MultipartConfig(maxFileSize = Some(20 * 1024 * 1024 * 1024), fileSizeThreshold = Some(1024 * 1024))) // Limited to files of 20Go with 1Mo chunks
 
   val apiImpl = new ApiImpl(arguments, addRouter)
   val connectionRoute = "/connection"
