@@ -118,26 +118,21 @@ object CARETask extends Logger {
 
     def userWorkDirectory = workDirectory.getOrElse(packagingDirectory)
 
+    val inputDirectory = taskWorkDirectory / "inputs"
+
     def inputPathResolver(path: String) = {
-      if (new File(path).isAbsolute) taskWorkDirectory / "inputs" / path
-      else taskWorkDirectory / "inputs" / userWorkDirectory / path
+      if (new File(path).isAbsolute) inputDirectory / path
+      else inputDirectory / userWorkDirectory / path
     }
 
-    val preparedContext = external.prepareInputFiles(context, inputPathResolver)
+    val (preparedContext, preparedFilesInfo) = external.prepareAndListInputFiles(context, inputPathResolver)
 
     // Replace new proot with a version with user bindings
     val proot = extractedArchive / "proot"
     proot move (extractedArchive / "proot.origin")
-
-    /** Traverse directory hierarchy to retrieve terminal elements (files and empty directories) */
-    def leafs(file: File, bindingDestination: String): Seq[(File, String)] =
-      if (file.isDirectory)
-        if (file.isDirectoryEmpty) Seq(file → bindingDestination)
-        else file.listFilesSafe.flatMap(f ⇒ leafs(f, s"$bindingDestination/${f.getName}"))
-      else Seq(file → bindingDestination)
-
+    
     def bindings =
-      leafs(taskWorkDirectory / "inputs", "").map { case (f, b) ⇒ f.getAbsolutePath → b } ++
+      preparedFilesInfo.map { case (f, d) ⇒ d.getAbsolutePath → f.name } ++
         hostFiles.map { case (f, b) ⇒ f → b.getOrElse(f) }
 
     def createDestination(binding: (String, String)) = {

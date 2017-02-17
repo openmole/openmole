@@ -109,6 +109,14 @@ object UDockerTask {
         "UDOCKER_TMPDIR" → udockerTmpDir.getAbsolutePath
       )
 
+    val inputsFiles = {
+      val dir = taskWorkDirectory / "inputFiles"
+      dir.mkdirs()
+      dir
+    }
+
+    val preparedContext = external.prepareInputFiles(context, external.relativeResolver(inputsFiles))
+
     // TODO pass env variables with -e
     val executionResult = executeAll(
       taskWorkDirectory,
