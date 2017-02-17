@@ -396,7 +396,7 @@ lazy val fileSource = OsgiProject(pluginDir, "org.openmole.plugin.source.file", 
 
 /* Task */
 
-def allTask = Seq(toolsTask, external, netLogo, netLogo5, jvm, scala, template, systemexec, care)
+def allTask = Seq(toolsTask, external, netLogo, netLogo5, jvm, scala, template, systemexec, care, udocker)
 
 lazy val toolsTask = OsgiProject(pluginDir, "org.openmole.plugin.task.tools", imports = Seq("*")) dependsOn (openmoleDSL) settings (pluginSettings: _*)
 
@@ -412,8 +412,7 @@ lazy val jvm = OsgiProject(pluginDir, "org.openmole.plugin.task.jvm", imports = 
 lazy val scala = OsgiProject(pluginDir, "org.openmole.plugin.task.scala", imports = Seq("*")) dependsOn(openmoleDSL, jvm, console) settings (pluginSettings: _*)
 
 lazy val template = OsgiProject(pluginDir, "org.openmole.plugin.task.template", imports = Seq("*")) dependsOn(openmoleDSL, replication % "test") settings (
-  libraryDependencies += Libraries.scalatest
-  ) settings (pluginSettings: _*)
+  libraryDependencies += Libraries.scalatest) settings (pluginSettings: _*)
 
 lazy val systemexec = OsgiProject(pluginDir, "org.openmole.plugin.task.systemexec", imports = Seq("*")) dependsOn(openmoleDSL, external, workspace) settings (
   libraryDependencies += Libraries.exec) settings (pluginSettings: _*)
@@ -421,7 +420,8 @@ lazy val systemexec = OsgiProject(pluginDir, "org.openmole.plugin.task.systemexe
 lazy val care = OsgiProject(pluginDir, "org.openmole.plugin.task.care", imports = Seq("*")) dependsOn (systemexec) settings (
   libraryDependencies += Libraries.scalatest) settings (pluginSettings: _*)
 
-
+lazy val udocker = OsgiProject(pluginDir, "org.openmole.plugin.task.udocker", imports = Seq("*")) dependsOn (systemexec) settings (
+  libraryDependencies += Libraries.scalatest) settings (pluginSettings: _*)
 
 /* ---------------- REST ------------------- */
 

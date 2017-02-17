@@ -35,8 +35,6 @@ import scala.annotation.tailrec
 
 object SystemExecTask {
 
-  case class ExpandedSystemExecCommand(expandedCommand: FromContext[String])
-
   implicit def isTask: InputOutputBuilder[SystemExecTask] = InputOutputBuilder(SystemExecTask._config)
   implicit def isExternal: ExternalBuilder[SystemExecTask] = ExternalBuilder(SystemExecTask.external)
   implicit def isSystemExec = new SystemExecTaskBuilder[SystemExecTask] {
@@ -91,23 +89,7 @@ object SystemExecTask {
       e ← exp.validate(External.PWD :: inputs.toList)
     } yield e
 
-  @tailrec
-  protected[systemexec] final def execAll(cmds: List[ExpandedSystemExecCommand], workDir: File, preparedContext: Context, acc: ExecutionResult = ExecutionResult.empty)(implicit rng: RandomProvider): ExecutionResult =
-    cmds match {
-      case Nil ⇒ acc
-      case cmd :: t ⇒
-        val commandline = commandLine(cmd.expandedCommand, workDir.getAbsolutePath, preparedContext)
-
-        val result = execute(commandline, workDir, environmentVariables, preparedContext, returnOutput = stdOut.isDefined, returnError = stdErr.isDefined)
-        if (errorOnReturnValue && !returnValue.isDefined && result.returnCode != 0)
-          throw new InternalProcessingError(
-            s"""Error executing command"}:
-                 |[${commandline.mkString(" ")}] return code was not 0 but ${result.returnCode}""".stripMargin
-          )
-        else execAll(t, workDir, preparedContext, ExecutionResult.append(acc, result))
-    }
-
-  override protected def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = external.withWorkDir(executionContext) { tmpDir ⇒
+  override protected def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = External.withWorkDir(executionContext) { tmpDir ⇒
     val workDir =
       workDirectory match {
         case None    ⇒ tmpDir
@@ -118,11 +100,21 @@ object SystemExecTask {
 
     val preparedContext = external.prepareInputFiles(context, external.relativeResolver(workDir))
 
-    val osCommandLines: Seq[ExpandedSystemExecCommand] = command.find { _.os.compatible }.map {
-      cmd ⇒ cmd.expanded map { expansion ⇒ ExpandedSystemExecCommand(expansion) }
-    }.getOrElse(throw new UserBadDataError("No command line found for " + OS.actualOS))
+    val osCommandLines =
+      command.find { _.os.compatible }.map {
+        cmd ⇒ cmd.expanded
+      }.getOrElse(throw new UserBadDataError("No command line found for " + OS.actualOS))
 
-    val executionResult = execAll(osCommandLines.toList, workDir, preparedContext)
+    val executionResult = executeAll(
+      workDir,
+      environmentVariables.map { case (variable, name) ⇒ (name, context(variable).toString) },
+      errorOnReturnValue,
+      returnValue,
+      stdOut,
+      stdErr,
+      preparedContext,
+      osCommandLines.toList
+    )
 
     val retContext: Context = external.fetchOutputFiles(preparedContext, external.relativeResolver(workDir))
     external.checkAndClean(this, retContext, tmpDir)

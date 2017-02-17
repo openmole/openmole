@@ -58,6 +58,19 @@ object External {
 
   case class ToPut(file: File, name: String, link: Boolean)
   type PathResolver = String ⇒ File
+
+  def withWorkDir[T](executionContext: TaskExecutionContext)(f: File ⇒ T): T = {
+    val tmpDir = executionContext.tmpDirectory.newDir("externalTask")
+    val res =
+      try f(tmpDir)
+      catch {
+        case e: Throwable ⇒
+          tmpDir.recursiveDelete
+          throw e
+      }
+    tmpDir.delete
+    res
+  }
 }
 
 import org.openmole.plugin.task.external.External._
@@ -167,19 +180,6 @@ import org.openmole.plugin.task.external.External._
 
     // This delete the dir only if it is empty
     rootDir.delete
-  }
-
-  def withWorkDir[T](executionContext: TaskExecutionContext)(f: File ⇒ T): T = {
-    val tmpDir = executionContext.tmpDirectory.newDir("externalTask")
-    val res =
-      try f(tmpDir)
-      catch {
-        case e: Throwable ⇒
-          tmpDir.recursiveDelete
-          throw e
-      }
-    tmpDir.delete
-    res
   }
 
 }

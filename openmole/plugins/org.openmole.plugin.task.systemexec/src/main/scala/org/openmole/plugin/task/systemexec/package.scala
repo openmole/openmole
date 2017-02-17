@@ -177,13 +177,11 @@ package object systemexec extends external.ExternalPackage with SystemExecPackag
     CommandLine.parse(cmd.from(context + Variable(External.PWD, workDir))).toStrings
 
   def execute(
-    command:                        Array[String],
-    workDir:                        File,
-    environmentVariables:           Seq[(Val[_], String)],
-    context:                        Context,
-    returnOutput:                   Boolean,
-    returnError:                    Boolean,
-    additionalEnvironmentVariables: Vector[(String, String)] = Vector.empty
+    command:              Array[String],
+    workDir:              File,
+    environmentVariables: Vector[(String, String)],
+    returnOutput:         Boolean,
+    returnError:          Boolean
   ) = {
     try {
 
@@ -198,9 +196,7 @@ package object systemexec extends external.ExternalPackage with SystemExecPackag
       import collection.JavaConversions._
       val inheritedEnvironment = System.getenv.map { case (key, value) ⇒ s"$key=$value" }.toArray
 
-      val openmoleEnvironment =
-        (environmentVariables.map { case (variable, name) ⇒ (name, context(variable).toString) } ++ additionalEnvironmentVariables).
-          map { case (name, value) ⇒ name + "=" + value }.toArray
+      val openmoleEnvironment = environmentVariables.map { case (name, value) ⇒ name + "=" + value }.toArray
 
       //FIXES java.io.IOException: error=26
       val process = runtime.synchronized {
@@ -220,7 +216,7 @@ package object systemexec extends external.ExternalPackage with SystemExecPackag
     catch {
       case e: IOException ⇒ throw new InternalProcessingError(
         e,
-        s"""Error executing: ${command.mkString(" ")}
+        s"""Error executing: ${command.mkString("\n  ")}
 
             |The content of the working directory was:
             |${workDir.listRecursive(_ ⇒ true).map(_.getPath).mkString("\n")}
@@ -228,4 +224,32 @@ package object systemexec extends external.ExternalPackage with SystemExecPackag
       )
     }
   }
+
+  def error(commandLine: Vector[String], executionResult: ExecutionResult) =
+    throw new InternalProcessingError(
+      s"""Error executing command":
+         |[${commandLine.mkString(" ")}] return code was not 0 but ${executionResult.returnCode}""".stripMargin
+    )
+
+  @annotation.tailrec
+  def executeAll(
+    workDirectory:        File,
+    environmentVariables: Vector[(String, String)],
+    errorOnReturnValue:   Boolean,
+    returnValue:          Option[Val[Int]],
+    stdOut:               Option[Val[String]],
+    stdErr:               Option[Val[String]],
+    context:              Context,
+    cmds:                 List[FromContext[String]],
+    acc:                  ExecutionResult           = ExecutionResult.empty
+  )(implicit rng: RandomProvider): ExecutionResult =
+    cmds match {
+      case Nil ⇒ acc
+      case cmd :: t ⇒
+        val commandline = commandLine(cmd, workDirectory.getAbsolutePath, context)
+        val result = execute(commandline, workDirectory, environmentVariables, returnOutput = stdOut.isDefined, returnError = stdErr.isDefined)
+        if (errorOnReturnValue && !returnValue.isDefined && result.returnCode != 0) throw error(commandline.toVector, result)
+        else executeAll(workDirectory, environmentVariables, errorOnReturnValue, returnValue, stdOut, stdErr, context, t, ExecutionResult.append(acc, result))
+    }
+
 }

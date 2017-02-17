@@ -94,14 +94,15 @@ object CARETask extends Logger {
   override def validate =
     expandedCommand.validate(External.PWD :: inputs.toList) ++ validateArchive(archive)
 
-  override protected def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = external.withWorkDir(executionContext) { taskWorkDirectory ⇒
+  override protected def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = External.withWorkDir(executionContext) { taskWorkDirectory ⇒
+
     taskWorkDirectory.mkdirs()
 
     def rootfs = "rootfs"
 
     // unarchiving in task's work directory
     // no need to retrieve error => will throw exception if failing
-    execute(Array(archive.getAbsolutePath), taskWorkDirectory, Seq.empty, Context.empty, true, true)
+    execute(Array(archive.getAbsolutePath), taskWorkDirectory, Vector.empty, true, true)
 
     val extractedArchive = taskWorkDirectory.listFilesSafe.headOption.getOrElse(
       throw new InternalProcessingError("Work directory should contain extracted archive, but is empty")
@@ -176,13 +177,10 @@ object CARETask extends Logger {
     def prootNoSeccomp = ("PROOT_NO_SECCOMP", "1")
 
     // FIXME duplicated from SystemExecTask
-    val executionResult = execute(commandline, extractedArchive, environmentVariables, preparedContext, stdOut.isDefined, stdErr.isDefined, additionalEnvironmentVariables = Vector(prootNoSeccomp))
+    val allEnvironmentVariables = environmentVariables.map { case (variable, name) ⇒ (name, context(variable).toString) } ++ Vector(prootNoSeccomp)
+    val executionResult = execute(commandline, extractedArchive, allEnvironmentVariables, stdOut.isDefined, stdErr.isDefined)
 
-    if (errorOnReturnValue && returnValue.isEmpty && executionResult.returnCode != 0)
-      throw new InternalProcessingError(
-        s"""Error executing command":
-                 |[${commandline.mkString(" ")}] return code was not 0 but ${executionResult.returnCode}""".stripMargin
-      )
+    if (errorOnReturnValue && returnValue.isEmpty && executionResult.returnCode != 0) throw error(commandline.toVector, executionResult)
 
     def rootDirectory = extractedArchive / rootfs
 
