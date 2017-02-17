@@ -121,7 +121,12 @@ object UDockerTask {
       List(importCommand, runCommand)
     )
 
-    context
+    context ++
+      List(
+        stdOut.map { o ⇒ Variable(o, executionResult.output.get) },
+        stdErr.map { e ⇒ Variable(e, executionResult.errorOutput.get) },
+        returnValue.map { r ⇒ Variable(r, executionResult.returnCode) }
+      ).flatten
   }
 
   override def config = InputOutputConfig.outputs.modify(_ ++ Seq(stdOut, stdErr, returnValue).flatten)(_config)
