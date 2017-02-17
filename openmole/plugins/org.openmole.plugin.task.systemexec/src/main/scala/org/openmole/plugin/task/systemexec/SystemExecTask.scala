@@ -31,7 +31,7 @@ import org.openmole.core.workflow.validation._
 import org.openmole.plugin.task.external._
 import org.openmole.tool.random._
 
-import scala.annotation.tailrec
+import cats.syntax.traverse._
 
 object SystemExecTask {
 
@@ -73,7 +73,7 @@ object SystemExecTask {
     returnValue:          Option[Val[Int]],
     stdOut:               Option[Val[String]],
     stdErr:               Option[Val[String]],
-    environmentVariables: Vector[(Val[_], String)],
+    environmentVariables: Vector[(String, FromContext[String])],
     _config:              InputOutputConfig,
     external:             External
 ) extends Task with ValidateTask {
@@ -82,12 +82,18 @@ object SystemExecTask {
 
   def config = InputOutputConfig.outputs.modify(_ ++ Seq(stdOut, stdErr, returnValue).flatten)(_config)
 
-  override def validate =
-    for {
-      c ← command
-      exp ← c.expanded
-      e ← exp.validate(External.PWD :: inputs.toList)
-    } yield e
+  override def validate = {
+    val commandsError =
+      for {
+        c ← command
+        exp ← c.expanded
+        e ← exp.validate(External.PWD :: inputs.toList)
+      } yield e
+
+    val variableErrors = environmentVariables.map(_._2).flatMap(_.validate(inputs.toList))
+
+    commandsError ++ variableErrors
+  }
 
   override protected def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = External.withWorkDir(executionContext) { tmpDir ⇒
     val workDir =
@@ -107,7 +113,7 @@ object SystemExecTask {
 
     val executionResult = executeAll(
       workDir,
-      environmentVariables.map { case (variable, name) ⇒ (name, context(variable).toString) },
+      environmentVariables.map { case (name, variable) ⇒ name → variable.from(context) },
       errorOnReturnValue,
       returnValue,
       stdOut,

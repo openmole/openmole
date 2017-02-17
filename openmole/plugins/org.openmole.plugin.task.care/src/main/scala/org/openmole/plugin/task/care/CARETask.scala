@@ -31,6 +31,7 @@ import org.openmole.core.workflow.validation._
 import org.openmole.plugin.task.external.{ External, ExternalBuilder }
 import org.openmole.plugin.task.systemexec
 import org.openmole.plugin.task.systemexec._
+import org.openmole.core.expansion._
 import org.openmole.tool.logger.Logger
 import org.openmole.tool.random.RandomProvider
 
@@ -71,28 +72,29 @@ object CARETask extends Logger {
 @Lenses case class CARETask(
     archive:              File,
     hostFiles:            Vector[(String, Option[String])],
-    command:              systemexec.Command,
+    command:              FromContext[String],
     workDirectory:        Option[String],
     errorOnReturnValue:   Boolean,
     returnValue:          Option[Val[Int]],
     stdOut:               Option[Val[String]],
     stdErr:               Option[Val[String]],
-    environmentVariables: Vector[(Val[_], String)],
+    environmentVariables: Vector[(String, FromContext[String])],
     _config:              InputOutputConfig,
     external:             External
 ) extends Task with ValidateTask {
 
   def config = InputOutputConfig.outputs.modify(_ ++ Seq(stdOut, stdErr, returnValue).flatten)(_config)
 
-  lazy val expandedCommand = ExpandedString(command.command)
+  override def validate = {
+    def validateArchive(archive: File) =
+      if (!archive.exists) Seq(new UserBadDataError(s"Cannot find specified Archive $archive in your work directory. Did you prefix the path with `workDirectory / `?"))
+      else if (!archive.canExecute) Seq(new UserBadDataError(s"Archive $archive must be executable. Make sure you upload it with x permissions"))
+      else Seq.empty[Throwable]
 
-  def validateArchive(archive: File) =
-    if (!archive.exists) Seq(new UserBadDataError(s"Cannot find specified Archive $archive in your work directory. Did you prefix the path with `workDirectory / `?"))
-    else if (!archive.canExecute) Seq(new UserBadDataError(s"Archive $archive must be executable. Make sure you upload it with x permissions"))
-    else Seq.empty[Throwable]
-
-  override def validate =
-    expandedCommand.validate(External.PWD :: inputs.toList) ++ validateArchive(archive)
+    command.validate(External.PWD :: inputs.toList) ++
+      validateArchive(archive) ++
+      environmentVariables.map(_._2).flatMap(_.validate(inputs.toList))
+  }
 
   override protected def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = External.withWorkDir(executionContext) { taskWorkDirectory ⇒
 
@@ -172,12 +174,12 @@ object CARETask extends Logger {
 
     reExecute.setExecutable(true)
 
-    val commandline = commandLine(expandedCommand.map(s"./${reExecute.getName} " + _), userWorkDirectory, preparedContext)
+    val commandline = commandLine(command.map(s"./${reExecute.getName} " + _), userWorkDirectory, preparedContext)
 
     def prootNoSeccomp = ("PROOT_NO_SECCOMP", "1")
 
     // FIXME duplicated from SystemExecTask
-    val allEnvironmentVariables = environmentVariables.map { case (variable, name) ⇒ (name, context(variable).toString) } ++ Vector(prootNoSeccomp)
+    val allEnvironmentVariables = environmentVariables.map { case (name, variable) ⇒ (name, variable.from(context)) } ++ Vector(prootNoSeccomp)
     val executionResult = execute(commandline, extractedArchive, allEnvironmentVariables, stdOut.isDefined, stdErr.isDefined)
 
     if (errorOnReturnValue && returnValue.isEmpty && executionResult.returnCode != 0) throw error(commandline.toVector, executionResult)
