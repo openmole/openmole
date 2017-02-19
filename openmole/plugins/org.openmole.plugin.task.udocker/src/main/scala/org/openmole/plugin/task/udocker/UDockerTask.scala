@@ -86,13 +86,6 @@ object UDockerTask {
       destination
     }
 
-    // FIXME get rid of code to circonvent bug in udocker
-    val archiveCopy = {
-      val destination = taskWorkDirectory / "archive.tar"
-      archive.copy(destination)
-      destination
-    }
-
     val containers = subDirectory("containers")
 
     def udockerVariables =
@@ -106,7 +99,7 @@ object UDockerTask {
       )
 
     val imageId = {
-      val commandline = commandLine(s"${udocker.getAbsolutePath} load -i ${archiveCopy.getAbsolutePath}", taskWorkDirectory.getAbsolutePath, context)
+      val commandline = commandLine(s"${udocker.getAbsolutePath} load -i ${archive.getAbsolutePath}", taskWorkDirectory.getAbsolutePath, context)
       val result = execute(commandline, taskWorkDirectory, udockerVariables, returnOutput = true, returnError = true)
       val output = result.output.get
       output.lines.toSeq.last
