@@ -39,7 +39,11 @@ object ProcessUtil {
           process.destroy
           throw e
       }
-      finally pump.stop
+      finally {
+        out.flush()
+        err.flush()
+        pump.stop
+      }
     }
     finally processDestroyer.remove(process)
     process.exitValue

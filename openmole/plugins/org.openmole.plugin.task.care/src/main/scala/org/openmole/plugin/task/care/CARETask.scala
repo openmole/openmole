@@ -42,7 +42,7 @@ object CARETask extends Logger {
   implicit def isTask: InputOutputBuilder[CARETask] = InputOutputBuilder(CARETask._config)
   implicit def isExternal: ExternalBuilder[CARETask] = ExternalBuilder(CARETask.external)
 
-  implicit def isBuilder = new CARETaskBuilder[CARETask] {
+  implicit def isBuilder = new ReturnValue[CARETask] with ErrorOnReturnValue[CARETask] with StdOutErr[CARETask] with EnvironmentVariables[CARETask] with WorkDirectory[CARETask] with HostFiles[CARETask] {
     override def hostFiles = CARETask.hostFiles
     override def environmentVariables = CARETask.environmentVariables
     override def workDirectory = CARETask.workDirectory
@@ -130,7 +130,7 @@ object CARETask extends Logger {
     // Replace new proot with a version with user bindings
     val proot = extractedArchive / "proot"
     proot move (extractedArchive / "proot.origin")
-    
+
     def bindings =
       preparedFilesInfo.map { case (f, d) ⇒ d.getAbsolutePath → f.name } ++
         hostFiles.map { case (f, b) ⇒ f → b.getOrElse(f) }

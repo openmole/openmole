@@ -71,16 +71,16 @@ package systemexec {
   import org.openmole.plugin.task.external.ExternalPackage
 
   trait ReturnValue[T] {
-    def returnValue: Lens[T, Option[Val[Int]]] // = None
+    def returnValue: Lens[T, Option[Val[Int]]]
   }
 
   trait ErrorOnReturnValue[T] {
-    def errorOnReturnValue: Lens[T, Boolean] // = true
+    def errorOnReturnValue: Lens[T, Boolean]
   }
 
   trait StdOutErr[T] {
-    def stdOut: Lens[T, Option[Val[String]]] // = None
-    def stdErr: Lens[T, Option[Val[String]]] // = None
+    def stdOut: Lens[T, Option[Val[String]]]
+    def stdErr: Lens[T, Option[Val[String]]]
   }
 
   trait EnvironmentVariables[T] {
@@ -88,7 +88,11 @@ package systemexec {
   }
 
   trait WorkDirectory[T] {
-    def workDirectory: Lens[T, Option[String]] // = None
+    def workDirectory: Lens[T, Option[String]]
+  }
+
+  trait HostFiles[T] {
+    def hostFiles: Lens[T, Vector[(String, Option[String])]]
   }
 
   trait SystemExecPackage extends ExternalPackage {
@@ -148,6 +152,11 @@ package systemexec {
         def :=[T: WorkDirectory](s: OptionalArgument[String]) =
           implicitly[WorkDirectory[T]].workDirectory.set(s)
       }
+
+    lazy val hostFiles = new {
+      def +=[T: HostFiles](hostFile: String, binding: OptionalArgument[String] = None) =
+        implicitly[HostFiles[T]].hostFiles add (hostFile, binding)
+    }
 
   }
 }

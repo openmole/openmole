@@ -19,6 +19,4 @@ package org.openmole.plugin.task.care
 
 import org.openmole.core.pluginmanager.PluginInfoActivator
 
-class Activator extends PluginInfoActivator {
-  override def keyWordTraits = List(classOf[CAREPackage])
-}
+class Activator extends PluginInfoActivator
