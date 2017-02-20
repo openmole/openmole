@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Jonathan Passerat-Palmbach
+ * Copyright (C) 2015 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,8 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.task.care
+package org.openmole.plugin.task.udocker
 
 import org.openmole.core.pluginmanager.PluginInfoActivator
 
-class Activator extends PluginInfoActivator
+class Activator extends PluginInfoActivator {
+  //override def keyWordTraits = List(classOf[SystemExecPackage])
+}

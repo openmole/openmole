@@ -55,7 +55,7 @@ trait NetLogoTask extends Task {
 
   val expandedCommands = Cache(launchingCommands.map(ExpandedString(_)))
 
-  override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider): Context = external.withWorkDir(executionContext) { tmpDir ⇒
+  override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider): Context = External.withWorkDir(executionContext) { tmpDir ⇒
     val workDir =
       workspace.workspace.option match {
         case None    ⇒ tmpDir

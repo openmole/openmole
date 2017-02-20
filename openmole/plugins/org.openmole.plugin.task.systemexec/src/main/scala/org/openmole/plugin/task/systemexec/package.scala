@@ -31,6 +31,7 @@ import org.openmole.plugin.task.external._
 import org.openmole.tool.random._
 import org.openmole.tool.stream._
 import org.openmole.core.expansion._
+import cats.implicits._
 
 package systemexec {
 
@@ -70,24 +71,28 @@ package systemexec {
   import org.openmole.plugin.task.external.ExternalPackage
 
   trait ReturnValue[T] {
-    def returnValue: Lens[T, Option[Val[Int]]] // = None
+    def returnValue: Lens[T, Option[Val[Int]]]
   }
 
   trait ErrorOnReturnValue[T] {
-    def errorOnReturnValue: Lens[T, Boolean] // = true
+    def errorOnReturnValue: Lens[T, Boolean]
   }
 
   trait StdOutErr[T] {
-    def stdOut: Lens[T, Option[Val[String]]] // = None
-    def stdErr: Lens[T, Option[Val[String]]] // = None
+    def stdOut: Lens[T, Option[Val[String]]]
+    def stdErr: Lens[T, Option[Val[String]]]
   }
 
   trait EnvironmentVariables[T] {
-    def environmentVariables: Lens[T, Vector[(Val[_], String)]]
+    def environmentVariables: Lens[T, Vector[(String, FromContext[String])]]
   }
 
   trait WorkDirectory[T] {
-    def workDirectory: Lens[T, Option[String]] // = None
+    def workDirectory: Lens[T, Option[String]]
+  }
+
+  trait HostFiles[T] {
+    def hostFiles: Lens[T, Vector[(String, Option[String])]]
   }
 
   trait SystemExecPackage extends ExternalPackage {
@@ -121,7 +126,10 @@ package systemexec {
         (implicitly[SystemExecTaskBuilder[T]].commands add OSCommands(os, cmd: _*))
     }
 
-    lazy val environmentVariable =
+    @deprecated("Use environmentVariables", "7")
+    lazy val environmentVariable = environmentVariables
+
+    lazy val environmentVariables =
       new {
         /**
          * Add variable from openmole to the environment of the system exec task. The
@@ -132,8 +140,11 @@ package systemexec {
          *                 variable is the same as the one of the openmole protoype.
          */
         def +=[T: EnvironmentVariables: InputOutputBuilder](prototype: Val[_], variable: OptionalArgument[String] = None): T ⇒ T =
-          (implicitly[EnvironmentVariables[T]].environmentVariables add prototype → variable.getOrElse(prototype.name)) andThen
+          this.+=(variable.getOrElse(prototype.name), FromContext.prototype(prototype).map(_.toString)) andThen
             (inputs += prototype)
+
+        def +=[T: EnvironmentVariables: InputOutputBuilder](variable: String, value: FromContext[String]): T ⇒ T =
+          (implicitly[EnvironmentVariables[T]].environmentVariables add (variable → value))
       }
 
     lazy val customWorkDirectory =
@@ -141,6 +152,11 @@ package systemexec {
         def :=[T: WorkDirectory](s: OptionalArgument[String]) =
           implicitly[WorkDirectory[T]].workDirectory.set(s)
       }
+
+    lazy val hostFiles = new {
+      def +=[T: HostFiles](hostFile: String, binding: OptionalArgument[String] = None) =
+        implicitly[HostFiles[T]].hostFiles add (hostFile, binding)
+    }
 
   }
 }
@@ -177,13 +193,11 @@ package object systemexec extends external.ExternalPackage with SystemExecPackag
     CommandLine.parse(cmd.from(context + Variable(External.PWD, workDir))).toStrings
 
   def execute(
-    command:                        Array[String],
-    workDir:                        File,
-    environmentVariables:           Seq[(Val[_], String)],
-    context:                        Context,
-    returnOutput:                   Boolean,
-    returnError:                    Boolean,
-    additionalEnvironmentVariables: Vector[(String, String)] = Vector.empty
+    command:              Array[String],
+    workDir:              File,
+    environmentVariables: Vector[(String, String)],
+    returnOutput:         Boolean,
+    returnError:          Boolean
   ) = {
     try {
 
@@ -198,9 +212,7 @@ package object systemexec extends external.ExternalPackage with SystemExecPackag
       import collection.JavaConversions._
       val inheritedEnvironment = System.getenv.map { case (key, value) ⇒ s"$key=$value" }.toArray
 
-      val openmoleEnvironment =
-        (environmentVariables.map { case (variable, name) ⇒ (name, context(variable).toString) } ++ additionalEnvironmentVariables).
-          map { case (name, value) ⇒ name + "=" + value }.toArray
+      val openmoleEnvironment = environmentVariables.map { case (name, value) ⇒ name + "=" + value }.toArray
 
       //FIXES java.io.IOException: error=26
       val process = runtime.synchronized {
@@ -220,7 +232,7 @@ package object systemexec extends external.ExternalPackage with SystemExecPackag
     catch {
       case e: IOException ⇒ throw new InternalProcessingError(
         e,
-        s"""Error executing: ${command.mkString(" ")}
+        s"""Error executing: ${command.mkString("\n  ")}
 
             |The content of the working directory was:
             |${workDir.listRecursive(_ ⇒ true).map(_.getPath).mkString("\n")}
@@ -228,4 +240,32 @@ package object systemexec extends external.ExternalPackage with SystemExecPackag
       )
     }
   }
+
+  def error(commandLine: Vector[String], executionResult: ExecutionResult) =
+    throw new InternalProcessingError(
+      s"""Error executing command":
+         |[${commandLine.mkString(" ")}] return code was not 0 but ${executionResult.returnCode}""".stripMargin
+    )
+
+  @annotation.tailrec
+  def executeAll(
+    workDirectory:        File,
+    environmentVariables: Vector[(String, String)],
+    errorOnReturnValue:   Boolean,
+    returnValue:          Option[Val[Int]],
+    stdOut:               Option[Val[String]],
+    stdErr:               Option[Val[String]],
+    context:              Context,
+    cmds:                 List[FromContext[String]],
+    acc:                  ExecutionResult           = ExecutionResult.empty
+  )(implicit rng: RandomProvider): ExecutionResult =
+    cmds match {
+      case Nil ⇒ acc
+      case cmd :: t ⇒
+        val commandline = commandLine(cmd, workDirectory.getAbsolutePath, context)
+        val result = execute(commandline, workDirectory, environmentVariables, returnOutput = stdOut.isDefined, returnError = stdErr.isDefined)
+        if (errorOnReturnValue && !returnValue.isDefined && result.returnCode != 0) throw error(commandline.toVector, result)
+        else executeAll(workDirectory, environmentVariables, errorOnReturnValue, returnValue, stdOut, stdErr, context, t, ExecutionResult.append(acc, result))
+    }
+
 }

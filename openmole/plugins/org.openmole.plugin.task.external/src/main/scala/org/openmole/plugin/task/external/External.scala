@@ -58,6 +58,19 @@ object External {
 
   case class ToPut(file: File, name: String, link: Boolean)
   type PathResolver = String ⇒ File
+
+  def withWorkDir[T](executionContext: TaskExecutionContext)(f: File ⇒ T): T = {
+    val tmpDir = executionContext.tmpDirectory.newDir("externalTask")
+    val res =
+      try f(tmpDir)
+      catch {
+        case e: Throwable ⇒
+          tmpDir.recursiveDelete
+          throw e
+      }
+    tmpDir.delete
+    res
+  }
 }
 
 import org.openmole.plugin.task.external.External._
@@ -125,30 +138,41 @@ import org.openmole.plugin.task.external.External._
     }
   }
 
-  def prepareInputFiles(context: Context, resolver: PathResolver)(implicit rng: RandomProvider): Context = {
+  def prepareInputFiles(context: Context, resolver: PathResolver)(implicit rng: RandomProvider) =
+    prepareAndListInputFiles(context, resolver)._1
+
+  def prepareAndListInputFiles(context: Context, resolver: PathResolver)(implicit rng: RandomProvider) = {
     def destination(f: ToPut) = resolver(f.name)
 
-    for { f ← listResources(context, resolver) } copyFile(f, destination(f))
+    val resourcesFiles = for { f ← listResources(context, resolver) } yield {
+      val d = destination(f)
+      copyFile(f, d)
+      (f → d)
+    }
 
-    val copiedFiles =
-      for { (p, f) ← listInputFiles(context) } yield {
-        val d = destination(f)
-        copyFile(f, d)
-        Variable(p, d)
-      }
+    val (copiedFilesVariable, copiedFilesInfo) =
+      listInputFiles(context).map {
+        case (p, f) ⇒
+          val d = destination(f)
+          copyFile(f, d)
+          (Variable(p, d), f → d)
+      }.unzip
 
-    val copiedArrayFiles =
-      for { (p, fs) ← listInputFileArray(context) } yield {
-        val copied =
-          fs.map { f ⇒
-            val d = destination(f)
-            copyFile(f, d)
-            d
-          }
-        Variable(p, copied.toArray)
-      }
+    val (copiedArrayFilesVariable, copiedFilesArrayInfo) =
+      listInputFileArray(context).map {
+        case (p, fs) ⇒
+          val copied =
+            fs.map { f ⇒
+              val d = destination(f)
+              copyFile(f, d)
+              f → d
+            }
+          (Variable(p, copied.unzip._2.toArray), copied)
+      }.unzip
 
-    context ++ copiedFiles ++ copiedArrayFiles
+    def allFileInfo = resourcesFiles ++ copiedFilesInfo ++ copiedFilesArrayInfo.flatten
+
+    (context ++ copiedFilesVariable ++ copiedArrayFilesVariable, allFileInfo)
   }
 
   def fetchOutputFiles(context: Context, resolver: PathResolver)(implicit rng: RandomProvider): Context =
@@ -167,19 +191,6 @@ import org.openmole.plugin.task.external.External._
 
     // This delete the dir only if it is empty
     rootDir.delete
-  }
-
-  def withWorkDir[T](executionContext: TaskExecutionContext)(f: File ⇒ T): T = {
-    val tmpDir = executionContext.tmpDirectory.newDir("externalTask")
-    val res =
-      try f(tmpDir)
-      catch {
-        case e: Throwable ⇒
-          tmpDir.recursiveDelete
-          throw e
-      }
-    tmpDir.delete
-    res
   }
 
 }

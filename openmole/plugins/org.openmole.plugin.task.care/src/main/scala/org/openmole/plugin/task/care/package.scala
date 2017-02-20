@@ -18,19 +18,7 @@
 
 package org.openmole.plugin.task
 
-import org.openmole.core.dsl._
-import org.openmole.plugin.task.systemexec.SystemExecPackage
-
-package care {
-  trait CAREPackage extends SystemExecPackage {
-    lazy val hostFiles = new {
-      def +=[T: CARETaskBuilder](hostFile: String, binding: OptionalArgument[String] = None) =
-        implicitly[CARETaskBuilder[T]].hostFiles add (hostFile, binding)
-    }
-  }
-}
-
-package object care extends CAREPackage {
+package object care {
   val workDirectoryParse = """-w\s*['"](.*)['"]\s*\\""".r
 
   def workDirectoryLine(content: Seq[String]) =

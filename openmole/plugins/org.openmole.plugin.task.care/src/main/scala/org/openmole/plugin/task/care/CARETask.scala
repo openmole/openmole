@@ -31,6 +31,7 @@ import org.openmole.core.workflow.validation._
 import org.openmole.plugin.task.external.{ External, ExternalBuilder }
 import org.openmole.plugin.task.systemexec
 import org.openmole.plugin.task.systemexec._
+import org.openmole.core.expansion._
 import org.openmole.tool.logger.Logger
 import org.openmole.tool.random.RandomProvider
 
@@ -41,7 +42,7 @@ object CARETask extends Logger {
   implicit def isTask: InputOutputBuilder[CARETask] = InputOutputBuilder(CARETask._config)
   implicit def isExternal: ExternalBuilder[CARETask] = ExternalBuilder(CARETask.external)
 
-  implicit def isBuilder = new CARETaskBuilder[CARETask] {
+  implicit def isBuilder = new ReturnValue[CARETask] with ErrorOnReturnValue[CARETask] with StdOutErr[CARETask] with EnvironmentVariables[CARETask] with WorkDirectory[CARETask] with HostFiles[CARETask] {
     override def hostFiles = CARETask.hostFiles
     override def environmentVariables = CARETask.environmentVariables
     override def workDirectory = CARETask.workDirectory
@@ -71,37 +72,39 @@ object CARETask extends Logger {
 @Lenses case class CARETask(
     archive:              File,
     hostFiles:            Vector[(String, Option[String])],
-    command:              systemexec.Command,
+    command:              FromContext[String],
     workDirectory:        Option[String],
     errorOnReturnValue:   Boolean,
     returnValue:          Option[Val[Int]],
     stdOut:               Option[Val[String]],
     stdErr:               Option[Val[String]],
-    environmentVariables: Vector[(Val[_], String)],
+    environmentVariables: Vector[(String, FromContext[String])],
     _config:              InputOutputConfig,
     external:             External
 ) extends Task with ValidateTask {
 
   def config = InputOutputConfig.outputs.modify(_ ++ Seq(stdOut, stdErr, returnValue).flatten)(_config)
 
-  lazy val expandedCommand = ExpandedString(command.command)
+  override def validate = {
+    def validateArchive(archive: File) =
+      if (!archive.exists) Seq(new UserBadDataError(s"Cannot find specified Archive $archive in your work directory. Did you prefix the path with `workDirectory / `?"))
+      else if (!archive.canExecute) Seq(new UserBadDataError(s"Archive $archive must be executable. Make sure you upload it with x permissions"))
+      else Seq.empty[Throwable]
 
-  def validateArchive(archive: File) =
-    if (!archive.exists) Seq(new UserBadDataError(s"Cannot find specified Archive $archive in your work directory. Did you prefix the path with `workDirectory / `?"))
-    else if (!archive.canExecute) Seq(new UserBadDataError(s"Archive $archive must be executable. Make sure you upload it with x permissions"))
-    else Seq.empty[Throwable]
+    command.validate(External.PWD :: inputs.toList) ++
+      validateArchive(archive) ++
+      environmentVariables.map(_._2).flatMap(_.validate(inputs.toList))
+  }
 
-  override def validate =
-    expandedCommand.validate(External.PWD :: inputs.toList) ++ validateArchive(archive)
+  override protected def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = External.withWorkDir(executionContext) { taskWorkDirectory ⇒
 
-  override protected def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = external.withWorkDir(executionContext) { taskWorkDirectory ⇒
     taskWorkDirectory.mkdirs()
 
     def rootfs = "rootfs"
 
     // unarchiving in task's work directory
     // no need to retrieve error => will throw exception if failing
-    execute(Array(archive.getAbsolutePath), taskWorkDirectory, Seq.empty, Context.empty, true, true)
+    execute(Array(archive.getAbsolutePath), taskWorkDirectory, Vector.empty, true, true)
 
     val extractedArchive = taskWorkDirectory.listFilesSafe.headOption.getOrElse(
       throw new InternalProcessingError("Work directory should contain extracted archive, but is empty")
@@ -115,26 +118,21 @@ object CARETask extends Logger {
 
     def userWorkDirectory = workDirectory.getOrElse(packagingDirectory)
 
+    val inputDirectory = taskWorkDirectory / "inputs"
+
     def inputPathResolver(path: String) = {
-      if (new File(path).isAbsolute) taskWorkDirectory / "inputs" / path
-      else taskWorkDirectory / "inputs" / userWorkDirectory / path
+      if (new File(path).isAbsolute) inputDirectory / path
+      else inputDirectory / userWorkDirectory / path
     }
 
-    val preparedContext = external.prepareInputFiles(context, inputPathResolver)
+    val (preparedContext, preparedFilesInfo) = external.prepareAndListInputFiles(context, inputPathResolver)
 
     // Replace new proot with a version with user bindings
     val proot = extractedArchive / "proot"
     proot move (extractedArchive / "proot.origin")
 
-    /** Traverse directory hierarchy to retrieve terminal elements (files and empty directories) */
-    def leafs(file: File, bindingDestination: String): Seq[(File, String)] =
-      if (file.isDirectory)
-        if (file.isDirectoryEmpty) Seq(file → bindingDestination)
-        else file.listFilesSafe.flatMap(f ⇒ leafs(f, s"$bindingDestination/${f.getName}"))
-      else Seq(file → bindingDestination)
-
     def bindings =
-      leafs(taskWorkDirectory / "inputs", "").map { case (f, b) ⇒ f.getAbsolutePath → b } ++
+      preparedFilesInfo.map { case (f, d) ⇒ d.getAbsolutePath → f.name } ++
         hostFiles.map { case (f, b) ⇒ f → b.getOrElse(f) }
 
     def createDestination(binding: (String, String)) = {
@@ -171,18 +169,15 @@ object CARETask extends Logger {
 
     reExecute.setExecutable(true)
 
-    val commandline = commandLine(expandedCommand.map(s"./${reExecute.getName} " + _), userWorkDirectory, preparedContext)
+    val commandline = commandLine(command.map(s"./${reExecute.getName} " + _), userWorkDirectory, preparedContext)
 
     def prootNoSeccomp = ("PROOT_NO_SECCOMP", "1")
 
     // FIXME duplicated from SystemExecTask
-    val executionResult = execute(commandline, extractedArchive, environmentVariables, preparedContext, stdOut.isDefined, stdErr.isDefined, additionalEnvironmentVariables = Vector(prootNoSeccomp))
+    val allEnvironmentVariables = environmentVariables.map { case (name, variable) ⇒ (name, variable.from(context)) } ++ Vector(prootNoSeccomp)
+    val executionResult = execute(commandline, extractedArchive, allEnvironmentVariables, stdOut.isDefined, stdErr.isDefined)
 
-    if (errorOnReturnValue && returnValue.isEmpty && executionResult.returnCode != 0)
-      throw new InternalProcessingError(
-        s"""Error executing command":
-                 |[${commandline.mkString(" ")}] return code was not 0 but ${executionResult.returnCode}""".stripMargin
-      )
+    if (errorOnReturnValue && returnValue.isEmpty && executionResult.returnCode != 0) throw error(commandline.toVector, executionResult)
 
     def rootDirectory = extractedArchive / rootfs
 
