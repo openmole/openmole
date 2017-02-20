@@ -9,6 +9,7 @@ import org.scalajs.dom
 import rx._
 import org.openmole.gui.ext.tool.client._
 import scalatags.JsDom.all._
+import bs._
 
 /*
  * Copyright (C) 07/11/16 // mathieu.leclaire@openmole.org

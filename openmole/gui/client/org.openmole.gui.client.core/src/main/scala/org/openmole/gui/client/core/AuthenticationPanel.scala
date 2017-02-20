@@ -18,11 +18,12 @@ package org.openmole.gui.client.core
  */
 
 import scalatags.JsDom.all._
-import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
+import fr.iscpif.scaladget.api.{ Popup, BootstrapTags ⇒ bs }
 
 import scalatags.JsDom.tags
 import org.openmole.gui.ext.tool.client._
 import org.openmole.gui.ext.tool.client.JsRxTags._
+
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
@@ -30,7 +31,8 @@ import org.openmole.gui.ext.data._
 import sheet._
 import rx._
 import bs._
-import fr.iscpif.scaladget.api.Selector.Options
+import fr.iscpif.scaladget.api.Selector.{ Dropdown, Options }
+import org.scalajs.dom.raw.HTMLDivElement
 
 class AuthenticationPanel {
 
@@ -81,10 +83,22 @@ class AuthenticationPanel {
           scalatags.JsDom.all.marginLeft := 10
         )
         test match {
-          case PassedTest(_) ⇒ lab(label_success)
-          case PendingTest   ⇒ lab(label_warning)
-          //FIXME: a bug seems to prevent from opening a popover from a dialog
-          case _             ⇒ lab(label_danger).popover(test.errorStack.stackTrace, title = Some("Errors"))
+          case PassedTest(_) ⇒ lab(label_success).render
+          case PendingTest   ⇒ lab(label_warning).render
+          case _ ⇒
+
+            lazy val dropdown: Dropdown[HTMLDivElement] = bs.vForm(
+              bs.hForm(
+              div(bold(DARK_GREY), "Error stack").render,
+              bs.button("Close", btn_primary +++ (right := 10), () ⇒ {
+              dropdown.close
+              ()
+            }).render
+            ).render,
+              div(test.errorStack.stackTrace).render
+            ).dropdownWithTrigger(lab(label_danger +++ pointer), dropdownModifierSeq = authenticationError)
+
+            dropdown.render
         }
       }
 
@@ -144,7 +158,7 @@ class AuthenticationPanel {
     }
   })
 
-  lazy val dialog: ModalDialog =
+  val dialog: ModalDialog =
     bs.ModalDialog(
       omsheet.panelWidth(52),
       onopen = () ⇒ {
@@ -163,7 +177,9 @@ class AuthenticationPanel {
         div(
           authSetting() match {
             case Some(o) ⇒ getAuthSelector(o.factory).selector
-            case _       ⇒ b("Authentications")
+            case _ ⇒ div(
+              b("Authentications")
+            )
           }
         )
       }

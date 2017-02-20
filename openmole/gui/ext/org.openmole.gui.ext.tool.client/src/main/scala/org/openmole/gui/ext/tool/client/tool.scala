@@ -632,6 +632,14 @@ package object client {
     color("lightgrey")
   )
 
+  lazy val authenticationError: ModifierSeq = Seq(
+    margin := 10,
+    color(DARK_GREY),
+    relativePosition,
+    left := "-45%",
+    lineHeight := "0.5cm"
+  )
+
   //FILE TOOL BAR
   lazy val selectedTool: ModifierSeq = Seq(
     opacity := 1,
