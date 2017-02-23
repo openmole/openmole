@@ -29,10 +29,10 @@ import org.openmole.plugin.tool.pattern._
 
 package object stochastic {
 
-  def Replicate(
+  def Replication(
     model:       Puzzle,
     sampling:    Sampling,
-    aggregation: Puzzle
+    aggregation: Option[Puzzle] = None
   ): Puzzle = {
     val explorationSkel = ExplorationTask(sampling) set (
       name := "replicateExploration"
@@ -45,29 +45,13 @@ package object stochastic {
 
     val exploration = explorationSkel set ((inputs, outputs) += (missing: _*))
     val explorationCapsule = StrainerCapsule(exploration)
-    Strain(explorationCapsule -< model >- aggregation)
-  }
 
-  def Replicate(
-    model:    Puzzle,
-    sampling: Sampling
-  ) = {
+    val aggregationPuzzle: Puzzle = aggregation match {
+      case Some(a) ⇒ a
+      case None    ⇒ Puzzle(EmptyTask() set (name := "replicateAggregation"))
+    }
 
-    val explorationSkel = ExplorationTask(sampling) set (
-      name := "replicateExploration"
-    )
-
-    val missing =
-      Validation(explorationSkel -< model).collect {
-        case MissingInput(_, d) ⇒ d
-      }
-
-    val exploration = explorationSkel set ((inputs, outputs) += (missing: _*))
-    val aggregation = EmptyTask() set (name := "replicateAggregation")
-
-    val explorationCapsule = StrainerCapsule(exploration)
-    val aggregationCapsule = Slot(aggregation)
-    Strain(explorationCapsule -< model >- aggregationCapsule)
+    Strain(explorationCapsule -< model >- aggregationPuzzle)
   }
 
 }
