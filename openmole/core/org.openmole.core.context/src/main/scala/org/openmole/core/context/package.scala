@@ -19,7 +19,7 @@ package org.openmole.core
 
 package context {
   trait ContextPackage {
-    def VectorOf[T](v: Val[T], dimension: Int = 1) = v.array(dimension)
+    def Vec[T](v: Val[T], dimension: Int = 1) = v.array(dimension)
   }
 }
 
