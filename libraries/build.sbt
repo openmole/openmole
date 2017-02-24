@@ -162,8 +162,8 @@ lazy val closureCompiler = OsgiProject(dir, "closure-compiler", exports = Seq("c
 
 lazy val cats =
   OsgiProject(dir, "cats") settings (
-    libraryDependencies += "org.typelevel" %% "cats" % "0.9.0",
-    version := "0.9.0"
+    libraryDependencies += "org.typelevel" %% "cats" % "0.8.1",
+    version := "0.8.1"
   ) settings(settings: _*)
 
 lazy val freedsl =

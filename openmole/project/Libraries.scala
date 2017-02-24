@@ -62,7 +62,7 @@ object Libraries {
   lazy val codec = "org.openmole.library" %% "org-apache-commons-codec" % "1.10"
   lazy val async = "org.openmole.library" %% "scala-async" % "0.9.1"
   lazy val jgit = "org.openmole.library" %% "org-eclipse-jgit" % "3.7.1"
-  lazy val cats = "org.openmole.library" %% "cats" % "0.9.0"
+  lazy val cats = "org.openmole.library" %% "cats" % "0.8.1"
   lazy val clapper = "org.openmole.library" %% "org-clapper" % "1.0.5"
   lazy val asm = "org.openmole.library" %% "org-objectweb-asm" % "5.1"
   lazy val configuration = "org.openmole.library" %% "org-apache-commons-configuration2" % "2.1"
