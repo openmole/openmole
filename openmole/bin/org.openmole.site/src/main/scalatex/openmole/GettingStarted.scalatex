@@ -19,7 +19,7 @@
 $tasks
 
   // Define the execution environment, here it is a local execution environment with 4 threads but
-  // it could be a remote cluster or a grid. The workflow will work the same way whatever the environment
+  // it could be a remote cluster or a grid. The exploration will work the same way whatever the environment
   // and no installation step is required on the execution environment.
   val env = LocalEnvironment(4)
   """
@@ -34,7 +34,7 @@ $tasks
 
 @sect{The big picture}
 
-  @p Imagine that you want to understand and/or optimize some parameters of an executable that you generally set in an empirical or arbitrary manner. Then embed the executable in OpenMOLE (5 minutes), use one of the distributed genetic algorithms provided by OpenMOLE (5 minutes) and launch the workflow on a distributed execution environment with thousands of machines (1 minutes). To summarize, you can design large scale distributed programs reusing legacy code and advanced numeric methods in approximately 10 minutes.
+  @p When you build a model, you need to understand and/or optimize some parameters and to understand there effect on the dynamics of you model. Then embed you model in OpenMOLE (5 minutes), use one of the distributed genetic algorithms provided by OpenMOLE (5 minutes) and launch the model exploration on a distributed execution environment with thousands of machines (1 minutes). To summarize, you can design large scale model exploration reusing legacy code and advanced numeric methods in approximately 10 minutes.
 
 @sect{Try it}
 
@@ -46,7 +46,7 @@ $tasks
 
   @p Once installed you can launch OpenMOLE by executing the @i{openmole} file in the installation directory (it is called @i{openmole.bat} for windozers). It will bring up the OpenMOLE @a("application", href := root.application.file) that runs in your web browser (OpenMOLE supports Firefox and Chrome).
 
-@sect{Your first workflow}
+@sect{Your first exploration}
   Let's explore one variable, multiply it by 2 and then displays each result. The computation is executed in a multi-threaded environment on the local machine.
 
   @p In the OpenMOLE interface, first create a file named @i{example.oms} @("(the file extension matters")). Open it and write the following:
