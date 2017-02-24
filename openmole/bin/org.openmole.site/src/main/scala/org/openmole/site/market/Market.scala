@@ -57,6 +57,7 @@ object Market extends Logger {
     lazy val python = Tag("Python")
     lazy val calibration = Tag("Calibration")
     lazy val tutorial = Tag("Tutorial")
+    lazy val workflow = Tag("Workflow")
   }
 
   case class Tag(label: String)
@@ -85,7 +86,7 @@ object Market extends Logger {
       MarketEntry("Metamimetic Networks", "metamimetic-networks", Seq(stochastic, simulation, netlogo)),
       MarketEntry("Segmentation with FSL", "fsl-fast", Seq(fsl, data, native, neuroscience)),
       MarketEntry("Explore a GAMA Model", "gama", Seq(gama, stochastic, simulation)),
-      MarketEntry("Introduction Tutorial", "tutorials/introduction", Seq(tutorial, scala, stochastic)),
+      MarketEntry("Workflow Tutorial", "tutorials/workflow", Seq(tutorial, scala, workflow)),
       MarketEntry("Native Application Tutorial", "tutorials/native", Seq(tutorial, native, data, python)),
       MarketEntry("Model Exploration Tutorial", "tutorials/method", Seq(netlogo, ga, simulation, calibration, tutorial))
     )
