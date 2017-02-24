@@ -137,7 +137,7 @@
             mu = 100,
             genome = Seq(gDiffusionRate in (0.0, 99.0), gEvaporationRate in (0.0, 99.0)),
             objectives = Seq(food1, food2, food3),
-            replication = Replication(seed = seed)
+            stochastic = Stochastic(seed = seed)
           ),
         evaluation = ants,
         parallelism = 10,
@@ -163,7 +163,7 @@
           mu = 100,
           genome = Seq(gDiffusionRate in (0.0, 99.0), gEvaporationRate in (0.0, 99.0)),
           objectives = Seq(food1, food2, food3),
-          replication = Replication(seed = seed)
+          stochastic = Stochastic(seed = seed)
         ),
         evaluation = ants,
         termination = 1 hour

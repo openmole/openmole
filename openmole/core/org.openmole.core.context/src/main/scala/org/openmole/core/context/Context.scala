@@ -88,6 +88,8 @@ trait Context extends Map[String, Variable[_]] with MapLike[String, Variable[_],
    */
   def option[T](proto: Val[T]): Option[T] = option[T](proto.name)
 
+  def getOrElse[T](v: Val[T], f: ⇒ T): T = option(v).getOrElse(f)
+
   /**
    * Get a variable valaue given a prototype name. This method get the variable by its
    * name and then cast it to the correct type.

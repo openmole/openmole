@@ -40,7 +40,7 @@ class WorkflowSpec extends FlatSpec with Matchers {
           mu = 100,
           genome = Seq(x in (0.0, 1.0), y in ("0.0", "1.0")),
           objectives = Seq(x, y),
-          replication = Replication()
+          stochastic = Stochastic()
         ),
       evaluation = puzzle,
       parallelism = 10,
@@ -68,7 +68,7 @@ class WorkflowSpec extends FlatSpec with Matchers {
               population in (0.0 to 1.0 by 0.1),
               state in (0.0 to 1.0 by 0.1)
             ),
-          replication = Replication()
+          stochastic = Stochastic()
         ),
       evaluation = puzzle,
       parallelism = 10,

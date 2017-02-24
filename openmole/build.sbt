@@ -358,16 +358,17 @@ lazy val modifierHook = OsgiProject(pluginDir, "org.openmole.plugin.hook.modifie
 
 /* Method */
 
-def allMethod = Seq(evolution, stochastic, abc)
+def allMethod = Seq(evolution, directSampling, abc)
 
 lazy val evolution = OsgiProject(pluginDir, "org.openmole.plugin.method.evolution", imports = Seq("*")) dependsOn(
   openmoleDSL, fileHook, toolsTask, pattern, collectionDomain % "test"
 ) settings(libraryDependencies += Libraries.mgo, libraryDependencies += Libraries.shapeless) settings (pluginSettings: _*)
 
-lazy val stochastic = OsgiProject(pluginDir, "org.openmole.plugin.method.stochastic", imports = Seq("*")) dependsOn(openmoleDSL, distributionDomain, pattern) settings (pluginSettings: _*)
-
 lazy val abc = OsgiProject(pluginDir, "org.openmole.plugin.method.abc", imports = Seq("*")) dependsOn(openmoleDSL, fileHook, tools) settings
   (libraryDependencies += Libraries.scalabc) settings (pluginSettings: _*)
+
+lazy val directSampling = OsgiProject(pluginDir, "org.openmole.plugin.method.directsampling", imports = Seq("*")) dependsOn(openmoleDSL, distributionDomain, pattern, modifierDomain) settings (pluginSettings: _*)
+
 
 
 /* Sampling */

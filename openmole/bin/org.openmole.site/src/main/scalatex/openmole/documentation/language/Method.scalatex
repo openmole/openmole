@@ -110,7 +110,7 @@
           // OpenMOLE provide a seed for your stochastic model to use (it is optional)
           // 20% of the evaluations are used for replicating existing solutions
           // 100 replication are stored at max for each individual
-          replication = Replication(seed = seed, reevaluate = 0.2, max = 100)
+          stochastic = Stochastic(seed = seed, reevaluate = 0.2, replications = 100)
         ),
       evaluation = model,
       termination = 100

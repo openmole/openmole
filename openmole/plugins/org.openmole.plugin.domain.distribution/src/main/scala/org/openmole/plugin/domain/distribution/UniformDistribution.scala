@@ -24,7 +24,7 @@ import org.openmole.core.workflow.dsl._
 import org.openmole.tool.random.RandomProvider
 
 object UniformDistribution {
-  implicit def isDiscrete[T] = new Discrete[UniformDistribution[T], T] {
+  implicit def isDiscrete[T]: Discrete[UniformDistribution[T], T] = new Discrete[UniformDistribution[T], T] {
     override def iterator(domain: UniformDistribution[T]) =
       FromContext((context, rng) ⇒ domain.iterator(context)(rng))
   }

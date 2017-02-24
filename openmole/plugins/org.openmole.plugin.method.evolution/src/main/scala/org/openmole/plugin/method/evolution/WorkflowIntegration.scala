@@ -59,11 +59,11 @@ trait Seeder {
   def prototype: Option[Val[_]]
 }
 
-case class Replication[A[_]: Functor](
-  seed:        Seeder                                  = Seeder.empty,
-  max:         Int                                     = 100,
-  reevaluate:  Double                                  = 0.2,
-  aggregation: OptionalArgument[A[FitnessAggregation]] = None
+case class Stochastic[A[_]: Functor](
+  seed:         Seeder                                  = Seeder.empty,
+  replications: Int                                     = 100,
+  reevaluate:   Double                                  = 0.2,
+  aggregation:  OptionalArgument[A[FitnessAggregation]] = None
 )
 
 object WorkflowIntegration {
@@ -154,7 +154,7 @@ object WorkflowIntegration {
     ag:          AG,
     genome:      UniqueGenome,
     objectives:  Objectives,
-    replication: Replication[Seq]
+    replication: Stochastic[Seq]
   )(
     implicit
     val algorithm: mgo.openmole.Integration[AG, Vector[Double], Vector[Double]] with mgo.openmole.Stochastic

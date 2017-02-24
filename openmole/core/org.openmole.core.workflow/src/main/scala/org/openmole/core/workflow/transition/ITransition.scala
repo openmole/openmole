@@ -116,4 +116,6 @@ trait ITransition {
 
   protected def filtered(context: Context) = context.filterNot { case (_, v) ⇒ filter(v.prototype) }
 
+  override def toString = this.getClass.getSimpleName + " from " + start + " to " + end
+
 }

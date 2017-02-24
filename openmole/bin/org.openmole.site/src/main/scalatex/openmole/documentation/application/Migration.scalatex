@@ -4,19 +4,7 @@
 
 @sect{Migration guide}
   This section list the changes in the OpenMOLE language from one version to another in order to help you to migrate your workflows.
-  @sect{From 5 to 6}
-    @b{DSL:}
-    @ul
-      @li{Merging workflow parts is no longer performed using the '+' symbol but the '&' symbol}
-      @li{In capsules "strainer = true" becomes "strain = true"}
-    @p @b{Tasks:}
-    @ul
-      @li{ScalaTask: the "workDir" variable as been renamed "workDirectory"}
-      @li{NetLogoTask: the syntax NetLogo5Task(workspace, "script.oms") is no longer valid, you should use NetLogo5Task.workspace(workspace, "script.oms")}
-    @p @b{Environments:}
-    @ul
-      @li{EGI: No more ProxyFile authentication, authentication is made through P12 or PEM}
-      @li{EGI: EGIEnvironment is a DIRACEnvironment now, to use the WMS services use the WMSEnvironment}
+  @sect{From 6 to 7}
     @p @b{Methods:}
     @ul
-      @li{Evolution: full API rewrite, see the doc}
+      @li{Evolution: replication term is replaced by stochastic}

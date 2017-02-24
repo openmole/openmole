@@ -17,25 +17,40 @@
 
 package org.openmole.plugin.method
 
+import org.openmole.core.context._
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.puzzle._
 import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.transition._
-import org.openmole.core.workflow.validation.DataflowProblem.MissingInput
-import org.openmole.core.workflow.validation.{ DataflowProblem, Validation }
+import org.openmole.core.workflow.validation.DataflowProblem._
+import org.openmole.core.workflow.validation._
+import org.openmole.plugin.domain.distribution._
+import org.openmole.plugin.domain.modifier._
 import org.openmole.plugin.tool.pattern._
 
-package object stochastic {
+package object directsampling {
 
-  def Replication(
+  def Replication[T: Distribution](
+    model:            Puzzle,
+    seed:             Val[T],
+    replications:     Int,
+    distributionSeed: OptionalArgument[Long] = None,
+    aggregation:      Puzzle                 = defaultAggregation
+  ) =
+    DirectSampling(
+      model = model,
+      sampling = seed in (TakeDomain(UniformDistribution[T](distributionSeed), replications)),
+      aggregation = aggregation
+    )
+
+  def DirectSampling(
     model:       Puzzle,
     sampling:    Sampling,
-    aggregation: Option[Puzzle] = None
-  ): Puzzle = {
+    aggregation: Puzzle   = defaultAggregation
+  )(): Puzzle = {
     val explorationSkel = ExplorationTask(sampling) set (
-      name := "replicateExploration"
+      name := "exploration"
     )
 
     val missing =
@@ -46,12 +61,10 @@ package object stochastic {
     val exploration = explorationSkel set ((inputs, outputs) += (missing: _*))
     val explorationCapsule = StrainerCapsule(exploration)
 
-    val aggregationPuzzle: Puzzle = aggregation match {
-      case Some(a) ⇒ a
-      case None    ⇒ Puzzle(EmptyTask() set (name := "replicateAggregation"))
-    }
-
-    Strain(explorationCapsule -< model >- aggregationPuzzle)
+    Strain(explorationCapsule -< model >- aggregation)
   }
+
+  private def defaultAggregation =
+    Strain(EmptyTask() set (name := "aggregation"))
 
 }

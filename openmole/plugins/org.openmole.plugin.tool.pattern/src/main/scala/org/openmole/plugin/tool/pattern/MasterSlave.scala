@@ -27,20 +27,26 @@ import shapeless._
 
 object MasterSlave {
 
+  @deprecated("use the uncurried apply function", "7")
   def apply(
     bootstrap: Puzzle,
     master:    Task,
     state:     Val[_]*
-  )(slave: Puzzle) = {
+  )(slave: Puzzle): Puzzle = apply(bootstrap, master, slave, state: _*)
 
+  def apply(
+    bootstrap: Puzzle,
+    master:    Task,
+    slave:     Puzzle,
+    state:     Val[_]*
+  ): Puzzle = {
     val masterCapsule = MasterCapsule(master, state: _*)
     val masterSlot = Slot(masterCapsule)
     val slaveSlot2 = Slot(slave.first)
-
-    case class Elements(master: Slot, slave: Puzzle)
-
     val puzzle = (bootstrap -< slave -- masterSlot) & (masterCapsule -<- slaveSlot2) & (bootstrap oo (masterSlot, state: _*))
     puzzle :: Elements(masterSlot, slave) :: HNil
   }
+
+  case class Elements(master: Slot, slave: Puzzle)
 
 }

@@ -32,4 +32,6 @@ class SlaveTransition(start: Capsule, end: Slot, condition: Condition = Conditio
     if (condition.from(context))
       submitIn(filtered(context), ticket.parent.getOrElse(throw new UserBadDataError("Slave transition should take place within an exploration.")), subMole)
 
+  override def toString = s"$start -<- $end"
+
 }

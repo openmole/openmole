@@ -36,20 +36,20 @@ object NSGA2 {
   }
 
   def apply(
-    mu:          Int,
-    genome:      Genome,
-    objectives:  Objectives,
-    replication: Replication[Seq]
+    mu:         Int,
+    genome:     Genome,
+    objectives: Objectives,
+    stochastic: Stochastic[Seq]
   ) = {
     val ug = UniqueGenome(genome)
 
-    def aggregation(h: Vector[Vector[Double]]) = StochasticGAIntegration.aggregateVector(replication.aggregation, h)
+    def aggregation(h: Vector[Vector[Double]]) = StochasticGAIntegration.aggregateVector(stochastic.aggregation, h)
 
     WorkflowIntegration.StochasticGA(
-      noisynsga2.OpenMOLE(mu, operatorExploration, UniqueGenome.size(ug), replication.max, replication.reevaluate, aggregation),
+      noisynsga2.OpenMOLE(mu, operatorExploration, UniqueGenome.size(ug), stochastic.replications, stochastic.reevaluate, aggregation),
       ug,
       objectives,
-      replication
+      stochastic
     )
   }
 

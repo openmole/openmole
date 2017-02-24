@@ -21,7 +21,7 @@ import org.openmole.core.context.{ Context, Val }
 import org.openmole.core.workflow.task._
 
 object MasterCapsule {
-  def apply(task: Task, persist: Seq[Val[_]], strainer: Boolean) = new MasterCapsule(task, persist.map(_.name), strainer)
+  def apply(task: Task, persist: Seq[Val[_]], strain: Boolean) = new MasterCapsule(task, persist.map(_.name), strain)
   def apply(t: Task, persist: Val[_]*): MasterCapsule = apply(t, persist, false)
 }
 

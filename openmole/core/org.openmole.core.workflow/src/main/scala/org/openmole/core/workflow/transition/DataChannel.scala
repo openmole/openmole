@@ -108,6 +108,6 @@ class DataChannel(
 
   def levelDelta(mole: Mole): Int = DataChannel.levelDelta(mole)(this)
 
-  override def toString = "DataChannel from " + start + " to " + end
+  override def toString = s"$start oo $end"
 
 }

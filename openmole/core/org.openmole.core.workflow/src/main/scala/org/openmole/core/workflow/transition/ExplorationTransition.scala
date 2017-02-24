@@ -99,4 +99,6 @@ class ExplorationTransition(val start: Capsule, val end: Slot, val condition: Co
     }
   }
 
+  override def toString = s"$start -< $end"
+
 }

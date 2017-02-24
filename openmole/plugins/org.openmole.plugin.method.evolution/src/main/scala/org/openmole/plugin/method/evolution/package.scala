@@ -119,7 +119,12 @@ package object evolution {
 
     val masterTask = MoleTask(master) set (exploredOutputs += t.genomePrototype.toArray)
 
-    val masterSlave = MasterSlave(randomGenomes, masterTask, t.populationPrototype, t.statePrototype)(scalingGenomeTask -- Strain(evaluationCapsule))
+    val masterSlave = MasterSlave(
+      randomGenomes,
+      masterTask,
+      scalingGenomeTask -- Strain(evaluationCapsule),
+      t.populationPrototype, t.statePrototype
+    )
 
     val firstTask = InitialStateTask(algorithm) set (name := "first")
 
@@ -225,7 +230,12 @@ package object evolution {
 
     val slave = slaveFist -- (islandPopulationToPopulation, reassingRNGTask) -- islandCapsule -- fromIsland -- populationToOffspring
 
-    val masterSlave = MasterSlave(generateInitialIslands, masterTask, t.populationPrototype, t.statePrototype)(slave)
+    val masterSlave = MasterSlave(
+      generateInitialIslands,
+      masterTask,
+      slave,
+      t.populationPrototype, t.statePrototype
+    )
 
     val scalingIndividualsTask = ScalingPopulationTask(algorithm) set (name := "scalingIndividuals") set (
       (inputs, outputs) += (t.generationPrototype, t.terminatedPrototype, t.statePrototype),

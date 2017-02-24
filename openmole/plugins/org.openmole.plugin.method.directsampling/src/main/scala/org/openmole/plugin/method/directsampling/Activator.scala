@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.method.stochastic
+package org.openmole.plugin.method.directsampling
 
 import org.openmole.core.pluginmanager.PluginInfoActivator
 

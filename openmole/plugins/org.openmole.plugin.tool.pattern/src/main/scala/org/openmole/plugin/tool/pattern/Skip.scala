@@ -35,3 +35,10 @@ object Skip {
   }
 
 }
+
+object If {
+
+  def apply(puzzle: Puzzle, condition: Condition) =
+    Skip(puzzle = puzzle, condition = !condition)
+
+}

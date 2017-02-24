@@ -53,7 +53,7 @@ object Capsule {
  */
 class Capsule(_task: Task, val strainer: Boolean) {
 
-  def task =
+  lazy val task =
     strainer match {
       case false ⇒ _task
       case true  ⇒ new StrainerTaskDecorator(_task)

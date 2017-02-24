@@ -108,4 +108,5 @@ class AggregationTransition(val start: Capsule, val end: Slot, val condition: Co
     false
   }
 
+  override def toString = s"$start >- $end"
 }

@@ -47,4 +47,5 @@ class EndExplorationTransition(val start: Capsule, val end: Slot, val trigger: C
     }
   }
 
+  override def toString = s"$start >| $end"
 }

@@ -48,24 +48,24 @@ object PSE {
   }
 
   def apply(
-    genome:      Genome,
-    objectives:  Seq[PatternAxe],
-    replication: Replication[Seq]
+    genome:     Genome,
+    objectives: Seq[PatternAxe],
+    stochastic: Stochastic[Seq]
   ) = {
     val ug = UniqueGenome(genome)
 
     WorkflowIntegration.StochasticGA(
       noisypse.OpenMOLE(
         pattern = mgo.algorithm.pse.irregularGrid(objectives.map(_.scale).toVector),
-        aggregation = StochasticGAIntegration.aggregateVector(replication.aggregation, _),
+        aggregation = StochasticGAIntegration.aggregateVector(stochastic.aggregation, _),
         genomeSize = UniqueGenome.size(ug),
-        historySize = replication.max,
-        cloneProbability = replication.reevaluate,
+        historySize = stochastic.replications,
+        cloneProbability = stochastic.reevaluate,
         operatorExploration = operatorExploration
       ),
       ug,
       objectives.map(_.p),
-      replication
+      stochastic
     )
   }
 

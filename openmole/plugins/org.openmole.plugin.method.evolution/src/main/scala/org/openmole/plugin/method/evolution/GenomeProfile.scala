@@ -54,12 +54,12 @@ object GenomeProfile {
   }
 
   def apply(
-    x:           Val[Double],
-    nX:          Int,
-    genome:      Genome,
-    objective:   Objective,
-    replication: Replication[Id],
-    paretoSize:  Int             = 20
+    x:          Val[Double],
+    nX:         Int,
+    genome:     Genome,
+    objective:  Objective,
+    stochastic: Stochastic[Id],
+    paretoSize: Int            = 20
   ): StochasticGenomeProfile = {
     val ug = UniqueGenome(genome)
 
@@ -69,7 +69,7 @@ object GenomeProfile {
         case x  ⇒ x
       }
 
-    def aggregation(h: Vector[Double]) = StochasticGAIntegration.aggregate(replication.aggregation, h)
+    def aggregation(h: Vector[Double]) = StochasticGAIntegration.aggregate(stochastic.aggregation, h)
 
     StochasticGenomeProfile(
       noisyprofile.OpenMOLE(
@@ -77,13 +77,13 @@ object GenomeProfile {
         niche = StochasticGenomeProfile.niche(xIndex, nX),
         operatorExploration = operatorExploration,
         genomeSize = UniqueGenome.size(ug),
-        historySize = replication.max,
-        cloneProbability = replication.reevaluate,
+        historySize = stochastic.replications,
+        cloneProbability = stochastic.reevaluate,
         aggregation = aggregation
       ),
       ug,
       objective,
-      replication
+      stochastic
     )
   }
 
@@ -185,7 +185,7 @@ object GenomeProfile {
     algo:        noisyprofile.OpenMOLE,
     genome:      UniqueGenome,
     objective:   Objective,
-    replication: Replication[Id]
+    replication: Stochastic[Id]
   )
 
 }

@@ -39,6 +39,5 @@ class Transition(
   override def perform(context: Context, ticket: Ticket, subMole: SubMoleExecution)(implicit rng: RandomProvider) =
     if (condition().from(context)) submitNextJobsIfReady(filtered(context).values, ticket, subMole)
 
-  override def toString = this.getClass.getSimpleName + " from " + start + " to " + end
-
+  override def toString = s"$start -- $end"
 }
