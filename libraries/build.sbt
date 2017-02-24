@@ -162,17 +162,17 @@ lazy val closureCompiler = OsgiProject(dir, "closure-compiler", exports = Seq("c
 
 lazy val cats =
   OsgiProject(dir, "cats") settings (
-    libraryDependencies += "org.typelevel" %% "cats" % "0.8.1",
-    version := "0.8.1"
+    libraryDependencies += "org.typelevel" %% "cats" % "0.9.0",
+    version := "0.9.0"
   ) settings(settings: _*)
 
 lazy val freedsl =
   OsgiProject(dir, "freedsl", exports = Seq("freedsl.*", "freek.*")) settings (
-    libraryDependencies += "fr.iscpif.freedsl" %% "all" % "0.3",
-    version := "0.3"
+    libraryDependencies += "fr.iscpif.freedsl" %% "all" % "0.9",
+    version := "0.9"
   ) dependsOn(cats) settings(settings: _*)
 
-lazy val mgoVersion = "2.2-SNAPSHOT"
+lazy val mgoVersion = "2.2"
 
 lazy val mgo = OsgiProject(dir, "mgo") settings(
   libraryDependencies += "fr.iscpif" %% "mgo" % mgoVersion,
