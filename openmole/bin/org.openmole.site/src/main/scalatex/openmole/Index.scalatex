@@ -1,21 +1,14 @@
 
 @import org.openmole.site._
 
-@p(style := "text-align: center")
-  Need to tune parameters of your program?
-  @br Need to execute your program against many datasets?
-  @br Need to calibrate?
-  @br Need to optimize?
-  @br ...
-
-@p OpenMOLE simplify the execution your programs on distributed computing environments. If you want to execute the same program for many different inputs (parameters or datasets), you might check it out. The typical usages are high performance model calibration, model exploration, machine learning, optimization, data processing.
+@p(style := "margin-top: 40px") OpenMOLE analyses your model dynamics using state-of-the art exploration methods taking advantage of distributed computing environments. The typical usages are model calibration, model exploration, machine learning, optimization, data processing.
 
   @ul(style := "margin-top: 10px")
-    @li{@b{Works with your programs} - Java, Binary exe, NetLogo, R, SciLab, Python, C++...}
-    @li{@b{Distributed computing} - Works on your multi-core machines, clusters, grids, desktop grid.}
-    @li{@b{Expressive} - Workflow language to describe your naturally parallel processes.}
+    @li{@b{Works with your model} - Java, Binary exe, NetLogo, R, SciLab, Python, C++...}
+    @li{@b{Ready-to-use methods} - Direct Sampling, Calibration, Sensitivity Analysis...}
+    @li{@b{Painless distributed computing} - Multi-thread, PBS, SLURM, SGE, EGI grid, Clouds...}
     @li{@b{Scalable} - Handles millions of tasks, years of computation, and GBs of data.}
     @li{@b{Mature} - Developed since 2008 and widely used.}
-    @li{@b{Open} - AGPLv3 free software license.}
+    @li{@b{Free and Open} - AGPLv3 free software license.}
 
 

@@ -52,7 +52,6 @@ object Application extends Logger {
       |      |_|
     """.stripMargin
 
-
   lazy val consoleUsage = "(Type :q to quit)"
 
   def run(args: Array[String]): Int = DBServerRunning.useDB {
