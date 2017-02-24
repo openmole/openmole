@@ -32,36 +32,36 @@ import org.openmole.plugin.tool.pattern._
 package object directsampling {
 
   def Replication[T: Distribution](
-    model:            Puzzle,
+    evaluation:       Puzzle,
     seed:             Val[T],
     replications:     Int,
     distributionSeed: OptionalArgument[Long] = None,
     aggregation:      Puzzle                 = defaultAggregation
   ) =
     DirectSampling(
-      model = model,
+      evaluation = evaluation,
       sampling = seed in (TakeDomain(UniformDistribution[T](distributionSeed), replications)),
       aggregation = aggregation
     )
 
   def DirectSampling(
-    model:       Puzzle,
+    evaluation:  Puzzle,
     sampling:    Sampling,
     aggregation: Puzzle   = defaultAggregation
-  )(): Puzzle = {
+  ): Puzzle = {
     val explorationSkel = ExplorationTask(sampling) set (
       name := "exploration"
     )
 
     val missing =
-      Validation(explorationSkel -< model).collect {
+      Validation(explorationSkel -< evaluation).collect {
         case MissingInput(_, d) ⇒ d
       }
 
     val exploration = explorationSkel set ((inputs, outputs) += (missing: _*))
     val explorationCapsule = StrainerCapsule(exploration)
 
-    Strain(explorationCapsule -< model >- aggregation)
+    Strain(explorationCapsule -< evaluation >- aggregation)
   }
 
   private def defaultAggregation =

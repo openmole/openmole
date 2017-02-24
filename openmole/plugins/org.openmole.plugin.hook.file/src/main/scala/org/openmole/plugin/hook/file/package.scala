@@ -45,6 +45,8 @@ package file {
       def :=[T: AppendToCSVFileHookBuilder](b: Boolean) =
         implicitly[AppendToCSVFileHookBuilder[T]].arraysOnSingleRow.set(b)
     }
+
+    lazy val CSVHook = AppendToCSVFileHook
   }
 }
 
