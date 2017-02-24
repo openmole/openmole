@@ -8,9 +8,6 @@
   val i = Val[Double]
   val res = Val[Double]
 
-  // Define the design of experiment
-  val exploration = ExplorationTask(i in (0.0 to 100.0 by 1.0))
-
   // Define the model, here it is a simple task executing "res = i * 2", but it can be your model
   val model =
     ScalaTask("val res = i * 2") set (
@@ -50,14 +47,17 @@ $tasks
   @p Once installed you can launch OpenMOLE by executing the @i{openmole} file in the installation directory (it is called @i{openmole.bat} for windozers). It will bring up the OpenMOLE @a("application", href := root.application.file) that runs in your web browser (OpenMOLE supports Firefox and Chrome).
 
 @sect{Your first workflow}
-  Let's design a workflow that explores one variable multiplies it by 2 and then displays each result. The computation is executed in a multi-threaded environment on the local machine.
+  Let's explore one variable, multiply it by 2 and then displays each result. The computation is executed in a multi-threaded environment on the local machine.
 
-  @p In the OpenMOLE interface, first create a file named @i{example.oms} @("(the file extension is important")). Open it and write the following workflow:
+  @p In the OpenMOLE interface, first create a file named @i{example.oms} @("(the file extension matters")). Open it and write the following:
 
   @br @hl.openmole(s"""
   $localScript
-  // Define the workflow
-  exploration -< (model on env hook ToStringHook())""")
+  // Define the design of experiment
+  DirectSampling(
+    evaluation = model on env hook ToStringHook(),
+    sampling = i in (0.0 to 100.0 by 1.0)
+  )""")
 
   @p You can run it by clicking on the execution button.
 
@@ -66,8 +66,10 @@ $tasks
   @br @hl.openmole(s"""
   val env = SLURMEnvironment("myLogin", "cluster.iscpif.fr")
 
-  // Define the workflow
-  exploration -< (model on env hook ToStringHook())""", header = tasks)
+  DirectSampling(
+    evaluation = model on env hook ToStringHook() on env,
+    sampling = i in (0.0 to 100.0 by 1.0)
+  )""", header = tasks)
 
   @p This is just a tiny bit of what OpenMOLE can achieve! Now you might want to discover how to:
   @ul
