@@ -19,6 +19,7 @@ package org.openmole.core
 
 package workflow {
 
+  import org.openmole.core.context.ContextPackage
   import org.openmole.core.expansion.CodePackage
   import org.openmole.core.workflow.builder.BuilderPackage
   import org.openmole.core.workflow.mole.MolePackage
@@ -38,6 +39,7 @@ package workflow {
     with BuilderPackage
     with TypesPackage
     with CodePackage
+    with ContextPackage
 
   object dsl extends ExportedPackage
 

@@ -17,4 +17,10 @@
  */
 package org.openmole.core
 
-package object context
+package context {
+  trait ContextPackage {
+    def VectorOf[T](v: Val[T], dimension: Int = 1) = v.array(dimension)
+  }
+}
+
+package object context extends ContextPackage
