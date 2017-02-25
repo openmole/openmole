@@ -186,7 +186,7 @@ object Application extends Logger {
       }
     }
 
-    if (!config.ignored.isEmpty) logger.warning("Ignored options: " + config.ignored.mkString(" "))
+    if (!config.ignored.isEmpty) logger.warning("Ignored options: " + config.ignored.reverse.mkString(" "))
 
     config.launchMode match {
       case HelpMode ⇒
