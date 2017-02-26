@@ -18,9 +18,9 @@
 package org.openmole.tool.collection
 
 import java.util.concurrent.Semaphore
-
-import scala.collection.immutable.TreeMap
+import java.util.TreeMap
 import scala.collection.mutable.Stack
+import collection.JavaConverters._
 
 object PriorityQueue {
 
@@ -36,7 +36,7 @@ trait PriorityQueue[T] {
 
   def priority: T ⇒ Int
 
-  var queues = new TreeMap[Int, Stack[T]]
+  val queues = (new TreeMap[Int, Stack[T]]).asScala
 
   def size: Int = synchronized { queues.map { case (_, q) ⇒ q.size }.sum }
 
@@ -48,7 +48,7 @@ trait PriorityQueue[T] {
         case None ⇒
           val q = new Stack[T]
           q.push(e)
-          queues += p → q
+          queues.put(p, q)
       }
     }
     inQueue.release
@@ -59,7 +59,7 @@ trait PriorityQueue[T] {
     synchronized {
       val (p, q) = queues.last
       val job = q.pop
-      if (q.isEmpty) queues -= p
+      if (q.isEmpty) queues.remove(p)
       job
     }
   }
