@@ -23,7 +23,7 @@ import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
 import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.validation.TypeUtil.{InvalidType, ValidType}
+import org.openmole.core.workflow.validation.TypeUtil.{ InvalidType, ValidType }
 import org.scalatest._
 import org.openmole.core.workflow.puzzle._
 import org.openmole.core.workflow.dsl._

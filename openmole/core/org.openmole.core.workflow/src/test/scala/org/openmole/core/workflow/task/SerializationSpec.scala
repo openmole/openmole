@@ -17,7 +17,7 @@
 
 package org.openmole.core.workflow.task
 
-import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
+import java.io.{ ByteArrayInputStream, ByteArrayOutputStream }
 
 import org.openmole.core.context.Val
 import org.openmole.core.workflow.data._

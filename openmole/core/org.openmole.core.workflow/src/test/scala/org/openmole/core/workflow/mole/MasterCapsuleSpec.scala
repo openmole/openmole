@@ -17,7 +17,7 @@
 
 package org.openmole.core.workflow.mole
 
-import org.openmole.core.context.{Val, Variable}
+import org.openmole.core.context.{ Val, Variable }
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.transition._
