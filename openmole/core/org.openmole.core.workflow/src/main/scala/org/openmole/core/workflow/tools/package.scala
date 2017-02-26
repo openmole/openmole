@@ -52,6 +52,7 @@ package tools {
     implicit def arrayOfFunction[T](s: Array[T ⇒ T]) = s.toSeq.sequence
 
     object OptionalArgument {
+      implicit def valueToOptionalOfForContext[T](v: T) = OptionalArgument(Some(v: FromContext[T]))
       implicit def valueToOptionalArgument[T](v: T) = OptionalArgument(Some(v))
       implicit def noneToOptionalArgument[T](n: None.type) = OptionalArgument[T](n)
       def apply[T](t: T): OptionalArgument[T] = OptionalArgument(Some(t))
