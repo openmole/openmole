@@ -10,6 +10,7 @@ object Libraries {
   lazy val d3Version = "3.5.12"
   lazy val tooltipserVersion = "3.3.0"
   lazy val netLogo5Version = "5.3.1"
+  lazy val netLogo6Version = "6.0.0"
   lazy val scalaTagsVersion = "0.6.2"
   lazy val scalaJSDomVersion = "0.9.1"
   lazy val rxVersion = "0.3.1"
@@ -77,6 +78,7 @@ object Libraries {
   lazy val scalaTags = "org.openmole.library" %% "com-scalatags" % scalaTagsVersion
   lazy val rx = "org.openmole.library" %% "rx" % rxVersion
   lazy val netlogo5 = "org.openmole.library" % "ccl-northwestern-edu-netlogo5" % netLogo5Version
+  lazy val netlogo6 = "org.openmole.library" % "ccl-northwestern-edu-netlogo6" % netLogo6Version
   lazy val sourceCode = "org.openmole.library" %% "sourcecode" % "0.1.2"
 
   lazy val toolxitBibtex = "org.openmole" %% "toolxit-bibtex" % "0.2"

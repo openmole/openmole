@@ -109,11 +109,30 @@ lazy val netlogo5 = OsgiProject(
   "ccl.northwestern.edu.netlogo5",
   exports = Seq("org.nlogo.*"),
   privatePackages = Seq("**"),
-  imports = Seq("!*")) settings
-  (libraryDependencies ++= Seq("ccl.northwestern.edu" % "netlogo" % netLogo5Version % "provided" from s"https://github.com/NetLogo/NetLogo/releases/download/$netLogo5Version/NetLogo.jar",
-    "org.scala-lang" % "scala-library" % "2.9.2" % "provided",
-    "asm" % "asm-all" % "3.3.1" % "provided",
-    "org.picocontainer" % "picocontainer" % "2.13.6" % "provided"), version := netLogo5Version, scalaVersion := "2.9.2", crossPaths := false) settings(settings: _*)
+  imports = Seq("!*")) settings(
+    libraryDependencies ++= Seq(
+      "ccl.northwestern.edu" % "netlogo" % netLogo5Version % "provided" from s"https://github.com/NetLogo/NetLogo/releases/download/$netLogo5Version/NetLogo.jar",
+      "org.scala-lang" % "scala-library" % "2.9.2" % "provided",
+      "asm" % "asm-all" % "3.3.1" % "provided",
+      "org.picocontainer" % "picocontainer" % "2.13.6" % "provided"), version := netLogo5Version, scalaVersion := "2.9.2", crossPaths := false) settings(settings: _*)
+
+lazy val netLogo6Version = "6.0.0"
+
+lazy val netlogo6 = OsgiProject(
+  dir,
+  "ccl.northwestern.edu.netlogo6",
+  exports = Seq("org.nlogo.*"),
+  privatePackages = Seq("**"),
+  imports = Seq("!*")) settings (
+  //resolvers += Resolver.bintrayRepo("netlogo", "NetLogo-JVM"),
+  libraryDependencies ++= Seq(
+    "org.nlogo" % "netlogo" % netLogo6Version % "provided" from s"https://dl.bintray.com/netlogo/NetLogo-JVM/org/nlogo/netlogo/$netLogo6Version/netlogo-$netLogo6Version.jar",
+    "org.scala-lang" % "scala-library" % "2.12.1" % "provided",
+    "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4" % "provided",
+     "org.ow2.asm" % "asm-all" % "5.0.4" % "provided",
+     "org.picocontainer" % "picocontainer" % "2.13.6" % "provided",
+    "org.parboiled" %% "parboiled" % "2.1.3" % "provided"
+  ), version := netLogo6Version, scalaVersion := "2.12.1", crossPaths := false) settings(settings: _*)
 
 lazy val scalaTagsVersion = "0.6.2"
 lazy val scalaRxVersion = "0.3.1"

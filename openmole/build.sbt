@@ -223,7 +223,7 @@ def corePlugins =
     allDomain ++
     allTools
 
-def allTools = Seq(netLogoAPI, netLogo5API, csv, pattern, sftpserver)
+def allTools = Seq(netLogoAPI, netLogo5API, netLogo6API, csv, pattern, sftpserver)
 
 lazy val defaultActivator = OsgiKeys.bundleActivator := Some(name.value + ".Activator")
 
@@ -251,6 +251,14 @@ lazy val netLogo5API = OsgiProject(pluginDir, "org.openmole.plugin.tool.netlogo5
   crossPaths := false,
   autoScalaLibrary := false,
   libraryDependencies += Libraries.netlogo5 intransitive(),
+  libraryDependencies -= Libraries.scalatest
+) settings (toolsSettings: _*)
+
+
+lazy val netLogo6API = OsgiProject(pluginDir, "org.openmole.plugin.tool.netlogo6", imports = Seq("*")) dependsOn (netLogoAPI) settings(
+  crossPaths := false,
+  autoScalaLibrary := false,
+  libraryDependencies += Libraries.netlogo6 intransitive(),
   libraryDependencies -= Libraries.scalatest
 ) settings (toolsSettings: _*)
 
@@ -397,16 +405,17 @@ lazy val fileSource = OsgiProject(pluginDir, "org.openmole.plugin.source.file", 
 
 /* Task */
 
-def allTask = Seq(toolsTask, external, netLogo, netLogo5, jvm, scala, template, systemexec, care, udocker)
+def allTask = Seq(toolsTask, external, netLogo, netLogo5, netLogo6, jvm, scala, template, systemexec, care, udocker)
 
 lazy val toolsTask = OsgiProject(pluginDir, "org.openmole.plugin.task.tools", imports = Seq("*")) dependsOn (openmoleDSL) settings (pluginSettings: _*)
-
 
 lazy val external = OsgiProject(pluginDir, "org.openmole.plugin.task.external", imports = Seq("*")) dependsOn(openmoleDSL, workspace) settings (pluginSettings: _*)
 
 lazy val netLogo = OsgiProject(pluginDir, "org.openmole.plugin.task.netlogo", imports = Seq("*")) dependsOn(openmoleDSL, external, netLogoAPI) settings (pluginSettings: _*)
 
 lazy val netLogo5 = OsgiProject(pluginDir, "org.openmole.plugin.task.netlogo5") dependsOn(netLogo, openmoleDSL, external, netLogo5API) settings (pluginSettings: _*)
+
+lazy val netLogo6 = OsgiProject(pluginDir, "org.openmole.plugin.task.netlogo6") dependsOn(netLogo, openmoleDSL, external, netLogo6API) settings (pluginSettings: _*)
 
 lazy val jvm = OsgiProject(pluginDir, "org.openmole.plugin.task.jvm", imports = Seq("*")) dependsOn(openmoleDSL, external, workspace) settings (pluginSettings: _*)
 
