@@ -69,9 +69,11 @@ object UDockerTask {
     external:             External
 ) extends Task with ValidateTask {
 
-  override protected def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider): Context = External.withWorkDir(executionContext) { taskWorkDirectory ⇒
+  override protected def process(ctx: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider): Context = External.withWorkDir(executionContext) { taskWorkDirectory ⇒
 
     taskWorkDirectory.mkdirs()
+
+    val context = ctx + (External.PWD → taskWorkDirectory.getAbsolutePath)
 
     def subDirectory(name: String) = {
       val dir = taskWorkDirectory / name
@@ -172,9 +174,11 @@ object UDockerTask {
   override def config = InputOutputConfig.outputs.modify(_ ++ Seq(stdOut, stdErr, returnValue).flatten)(_config)
 
   override def validate: Seq[Throwable] = {
+    val allInputs = External.PWD :: inputs.toList
+
     def validateArchive = if (!archive.exists) Seq(new UserBadDataError(s"Cannot find specified Archive $archive in your work directory. Did you prefix the path with `workDirectory / `?")) else Seq.empty
-    def validateVariables = environmentVariables.map(_._2).flatMap(_.validate(inputs.toList))
-    command.validate(inputs.toList) ++ validateArchive ++ validateVariables
+    def validateVariables = environmentVariables.map(_._2).flatMap(_.validate(allInputs))
+    command.validate(allInputs) ++ validateArchive ++ validateVariables ++ External.validate(external, allInputs)
   }
 
 }

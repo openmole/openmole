@@ -21,13 +21,12 @@ import java.util.AbstractCollection
 
 import org.openmole.core.context.{ Context, Val, Variable }
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.expansion.ExpandedString
-
+import org.openmole.core.expansion._
 import org.openmole.core.tools.io.Prettifier._
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.validation.ValidateTask
 import org.openmole.plugin.task.external._
-import org.openmole.tool.cache.Cache
 import org.openmole.tool.random.RandomProvider
 import org.openmole.tool.thread._
 
@@ -35,16 +34,21 @@ object NetLogoTask {
   case class Workspace(script: String, workspace: OptionalArgument[String] = None)
 }
 
-trait NetLogoTask extends Task {
+trait NetLogoTask extends Task with ValidateTask {
 
   def workspace: NetLogoTask.Workspace
-  def launchingCommands: Seq[String]
+  def launchingCommands: Seq[FromContext[String]]
   def netLogoInputs: Seq[(Val[_], String)]
   def netLogoOutputs: Iterable[(String, Val[_])]
   def netLogoArrayOutputs: Iterable[(String, Int, Val[_])]
   def netLogoFactory: NetLogoFactory
   def seed: Option[Val[Int]]
   def external: External
+
+  override def validate = {
+    val allInputs = External.PWD :: inputs.toList
+    launchingCommands.flatMap(_.validate(allInputs)) ++ External.validate(external, allInputs)
+  }
 
   private def wrapError[T](msg: String)(f: ⇒ T): T =
     try f
@@ -53,14 +57,14 @@ trait NetLogoTask extends Task {
         throw new UserBadDataError(s"$msg:\n" + e.stackStringWithMargin)
     }
 
-  val expandedCommands = Cache(launchingCommands.map(ExpandedString(_)))
-
-  override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider): Context = External.withWorkDir(executionContext) { tmpDir ⇒
+  override def process(ctx: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider): Context = External.withWorkDir(executionContext) { tmpDir ⇒
     val workDir =
       workspace.workspace.option match {
         case None    ⇒ tmpDir
         case Some(d) ⇒ tmpDir / d
       }
+
+    val context = ctx + (External.PWD → workDir.getAbsolutePath)
 
     val preparedContext = external.prepareInputFiles(context, external.relativeResolver(tmpDir))
 
@@ -86,7 +90,7 @@ trait NetLogoTask extends Task {
           executeNetLogo("set " + inBinding._2 + " " + v)
         }
 
-        for (cmd ← expandedCommands()) executeNetLogo(cmd.from(context))
+        for (cmd ← launchingCommands.map(_.from(context))) executeNetLogo(cmd)
 
         val contextResult =
           external.fetchOutputFiles(preparedContext, external.relativeResolver(workDir)) ++ netLogoOutputs.map {

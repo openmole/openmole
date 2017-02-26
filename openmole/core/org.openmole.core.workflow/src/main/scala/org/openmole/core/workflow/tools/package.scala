@@ -25,8 +25,7 @@ import cats._
 
 package tools {
 
-  import org.openmole.core.context.Context
-  import org.openmole.core.expansion.{ Expandable, ExpandedString, FromContext }
+  import org.openmole.core.expansion.{ Expandable, ExpandedString, FromContext, ToFromContext }
 
   trait ToolsPackage {
 
@@ -52,7 +51,7 @@ package tools {
     implicit def arrayOfFunction[T](s: Array[T ⇒ T]) = s.toSeq.sequence
 
     object OptionalArgument {
-      implicit def valueToOptionalOfForContext[T](v: T) = OptionalArgument(Some(v: FromContext[T]))
+      implicit def valueToOptionalOfForContext[T](v: T)(implicit toFromContext: ToFromContext[T, T]) = OptionalArgument(Some(FromContext.contextConverter(v)))
       implicit def valueToOptionalArgument[T](v: T) = OptionalArgument(Some(v))
       implicit def noneToOptionalArgument[T](n: None.type) = OptionalArgument[T](n)
       def apply[T](t: T): OptionalArgument[T] = OptionalArgument(Some(t))

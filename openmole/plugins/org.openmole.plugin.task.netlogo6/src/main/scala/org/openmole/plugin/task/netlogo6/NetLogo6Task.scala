@@ -27,6 +27,7 @@ import org.openmole.plugin.task.external._
 import org.openmole.plugin.task.netlogo.NetLogoTask.Workspace
 import org.openmole.plugin.task.netlogo._
 import org.openmole.plugin.tool.netlogo6._
+import org.openmole.core.expansion._
 
 object NetLogo6Task {
 
@@ -46,7 +47,7 @@ object NetLogo6Task {
   def workspace(
     workspace:         File,
     script:            String,
-    launchingCommands: Seq[String],
+    launchingCommands: Seq[FromContext[String]],
     seed:              OptionalArgument[Val[Int]] = None
   )(implicit name: sourcecode.Name): NetLogo6Task =
     withDefaultArgs(
@@ -60,7 +61,7 @@ object NetLogo6Task {
 
   def file(
     script:            File,
-    launchingCommands: Seq[String],
+    launchingCommands: Seq[FromContext[String]],
     seed:              OptionalArgument[Val[Int]] = None
   )(implicit name: sourcecode.Name): NetLogo6Task =
     withDefaultArgs(
@@ -74,7 +75,7 @@ object NetLogo6Task {
 
   def apply(
     script:            File,
-    launchingCommands: Seq[String],
+    launchingCommands: Seq[FromContext[String]],
     embedWorkspace:    Boolean                    = false,
     seed:              OptionalArgument[Val[Int]] = None
   )(implicit name: sourcecode.Name): NetLogo6Task =
@@ -83,7 +84,7 @@ object NetLogo6Task {
 
   private def withDefaultArgs(
     workspace:         NetLogoTask.Workspace,
-    launchingCommands: Seq[String],
+    launchingCommands: Seq[FromContext[String]],
     seed:              Option[Val[Int]]
   )(implicit name: sourcecode.Name) =
     NetLogo6Task(
@@ -106,7 +107,7 @@ object NetLogo6Task {
     netLogoOutputs:      Vector[(String, Val[_])],
     netLogoArrayOutputs: Vector[(String, Int, Val[_])],
     workspace:           NetLogoTask.Workspace,
-    launchingCommands:   Seq[String],
+    launchingCommands:   Seq[FromContext[String]],
     seed:                Option[Val[Int]]
 ) extends NetLogoTask {
   override def netLogoFactory: NetLogoFactory = NetLogo6Task.factory

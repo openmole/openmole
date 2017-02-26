@@ -26,7 +26,8 @@ import org.openmole.core.workflow.dsl._
 import org.openmole.plugin.task.external._
 import org.openmole.plugin.task.netlogo.NetLogoTask.Workspace
 import org.openmole.plugin.task.netlogo._
-import org.openmole.plugin.tool.netlogo5.NetLogo5
+import org.openmole.plugin.tool.netlogo5._
+import org.openmole.core.expansion._
 
 object NetLogo5Task {
 
@@ -46,7 +47,7 @@ object NetLogo5Task {
   def workspace(
     workspace:         File,
     script:            String,
-    launchingCommands: Seq[String],
+    launchingCommands: Seq[FromContext[String]],
     seed:              OptionalArgument[Val[Int]] = None
   )(implicit name: sourcecode.Name): NetLogo5Task =
     withDefaultArgs(
@@ -60,7 +61,7 @@ object NetLogo5Task {
 
   def file(
     script:            File,
-    launchingCommands: Seq[String],
+    launchingCommands: Seq[FromContext[String]],
     seed:              OptionalArgument[Val[Int]] = None
   )(implicit name: sourcecode.Name): NetLogo5Task =
     withDefaultArgs(
@@ -74,7 +75,7 @@ object NetLogo5Task {
 
   def apply(
     script:            File,
-    launchingCommands: Seq[String],
+    launchingCommands: Seq[FromContext[String]],
     embedWorkspace:    Boolean                    = false,
     seed:              OptionalArgument[Val[Int]] = None
   )(implicit name: sourcecode.Name): NetLogo5Task =
@@ -83,7 +84,7 @@ object NetLogo5Task {
 
   private def withDefaultArgs(
     workspace:         NetLogoTask.Workspace,
-    launchingCommands: Seq[String],
+    launchingCommands: Seq[FromContext[String]],
     seed:              Option[Val[Int]]
   )(implicit name: sourcecode.Name) =
     NetLogo5Task(
@@ -106,7 +107,7 @@ object NetLogo5Task {
     netLogoOutputs:      Vector[(String, Val[_])],
     netLogoArrayOutputs: Vector[(String, Int, Val[_])],
     workspace:           NetLogoTask.Workspace,
-    launchingCommands:   Seq[String],
+    launchingCommands:   Seq[FromContext[String]],
     seed:                Option[Val[Int]]
 ) extends NetLogoTask {
   override def netLogoFactory: NetLogoFactory = NetLogo5Task.factory

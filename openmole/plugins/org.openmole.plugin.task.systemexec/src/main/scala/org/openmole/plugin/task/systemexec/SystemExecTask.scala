@@ -83,19 +83,21 @@ object SystemExecTask {
   def config = InputOutputConfig.outputs.modify(_ ++ Seq(stdOut, stdErr, returnValue).flatten)(_config)
 
   override def validate = {
+    val allInputs = External.PWD :: inputs.toList
+
     val commandsError =
       for {
         c ← command
         exp ← c.expanded
-        e ← exp.validate(External.PWD :: inputs.toList)
+        e ← exp.validate(allInputs)
       } yield e
 
-    val variableErrors = environmentVariables.map(_._2).flatMap(_.validate(inputs.toList))
+    val variableErrors = environmentVariables.map(_._2).flatMap(_.validate(allInputs))
 
-    commandsError ++ variableErrors
+    commandsError ++ variableErrors ++ External.validate(external, allInputs)
   }
 
-  override protected def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = External.withWorkDir(executionContext) { tmpDir ⇒
+  override protected def process(ctx: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = External.withWorkDir(executionContext) { tmpDir ⇒
     val workDir =
       workDirectory match {
         case None    ⇒ tmpDir
@@ -103,6 +105,8 @@ object SystemExecTask {
       }
 
     workDir.mkdirs()
+
+    val context = ctx + (External.PWD → workDir.getAbsolutePath)
 
     val preparedContext = external.prepareInputFiles(context, external.relativeResolver(workDir))
 

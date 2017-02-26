@@ -71,6 +71,13 @@ object External {
     tmpDir.delete
     res
   }
+
+  def validate(external: External, inputs: Seq[Val[_]]): Seq[Throwable] =
+    external.inputFileArrays.flatMap(_.prefix.validate(inputs)) ++
+      external.inputFileArrays.flatMap(_.suffix.validate(inputs)) ++
+      external.inputFiles.flatMap(_.destination.validate(inputs)) ++
+      external.outputFiles.flatMap(_.origin.validate(inputs)) ++
+      external.resources.flatMap(_.destination.validate(inputs))
 }
 
 import org.openmole.plugin.task.external.External._

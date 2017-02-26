@@ -8,29 +8,24 @@ import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 
 import org.scalajs.core.tools.io.{FileVirtualJSFile, VirtualJSFile}
 
-
-//import scalajsbundler.sbtplugin.ScalaJSBundlerPlugin.autoImport._
-//import scalajsbundler.Launcher
-//import scalajsbundler.sbtplugin.ScalaJSBundlerPlugin
-
 organization := "org.openmole"
 name := "openmole-root"
-
 
 def macroParadise =
   addCompilerPlugin("org.scalamacros" %% "paradise" % "2.1.0" cross CrossVersion.full)
 
 lazy val scalaVersionValue = "2.11.8"
-//scalaOrganization in ThisBuild := "org.typelevel"
 
 def defaultSettings = BuildSystem.settings ++
   Seq(
     organization := "org.openmole",
+    scalaOrganization := "org.typelevel",
     updateOptions := updateOptions.value.withCachedResolution(true),
     resolvers += Resolver.sonatypeRepo("snapshots"),
     resolvers += Resolver.bintrayRepo("projectseptemberinc", "maven"), // For freek
     scalaVersion in Global := scalaVersionValue,
     scalacOptions ++= Seq("-target:jvm-1.8", "-language:higherKinds"),
+    scalacOptions += "-Ypartial-unification",
     scalacOptions ++= Seq("-Xmax-classfile-name", "140"),
     javacOptions ++= Seq("-source", "1.8", "-target", "1.8"),
     publishArtifact in (packageDoc in install) := false,
