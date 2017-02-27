@@ -54,7 +54,7 @@ object ToFromContext extends LowPriorityToFromContext {
   implicit def fileToFile = ToFromContext[File, File](f ⇒ ExpandedString(f.getPath).map(s ⇒ File(s)))
 
   implicit def booleanToCondition = ToFromContext[Boolean, Boolean](b ⇒ FromContext.value(b))
-  implicit def booleanPrototypeIsCondition: ToFromContext[Val[Boolean], Boolean] = ToFromContext[Val[Boolean], Boolean](p ⇒ prototype(p))
+  implicit def prototypeIsFromContext[T]: ToFromContext[Val[T], T] = ToFromContext[Val[T], T](p ⇒ prototype(p))
 }
 
 trait ToFromContext[F, T] {
@@ -104,7 +104,7 @@ object FromContext extends LowPriorityFromContext {
   implicit def fileToFile(f: File) = contextConverter[File, File](f)
 
   implicit def booleanToCondition(b: Boolean) = contextConverter[Boolean, Boolean](b)
-  implicit def booleanPrototypeIsCondition(p: Val[Boolean]) = contextConverter[Val[Boolean], Boolean](p)
+  implicit def prototypeIsFromContext[T](p: Val[T]) = contextConverter[Val[T], T](p)
 
   def prototype[T](p: Val[T]) =
     new FromContext[T] {
