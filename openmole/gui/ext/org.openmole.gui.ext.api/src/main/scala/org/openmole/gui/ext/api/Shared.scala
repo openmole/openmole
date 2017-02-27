@@ -86,8 +86,6 @@ trait Api {
   //
   //  //  //GUI PLUGINS
   def getGUIPlugins(): AllPluginExtensionData
-  def buildAndLoadPlugins(): Unit
-  def loadPlugins(): Unit
 
   //MODEL WIZARDS
   def launchingCommands(path: SafePath): Seq[LaunchingCommand]

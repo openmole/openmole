@@ -33,6 +33,7 @@ import org.openmole.core.workspace.Workspace
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.tool.server
 import org.openmole.gui.ext.tool.server.{ AutowireServer, OMRouter }
+import org.openmole.gui.server.jscompile.JSPack
 import org.openmole.tool.file._
 import org.openmole.tool.stream._
 import org.openmole.tool.tar._
@@ -42,8 +43,7 @@ import scala.util.{ Failure, Success, Try }
 object GUIServlet {
   def apply(arguments: GUIServer.ServletArguments) = {
     val servlet = new GUIServlet(arguments)
-    Utils.buildPlugins
-    servlet.apiImpl.loadPlugins
+    Utils.addPluginRoutes(servlet.addRouter)
     servlet
   }
 }
@@ -51,7 +51,7 @@ object GUIServlet {
 class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServlet with FileUploadSupport with AuthenticationSupport {
   configureMultipartHandling(MultipartConfig(maxFileSize = Some(20 * 1024 * 1024 * 1024), fileSizeThreshold = Some(1024 * 1024))) // Limited to files of 20Go with 1Mo chunks
 
-  val apiImpl = new ApiImpl(arguments, addRouter)
+  val apiImpl = new ApiImpl(arguments)
   val connectionRoute = "/connection"
   val shutdownRoute = "/shutdown"
   val appRoute = "/app"
@@ -82,7 +82,7 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
     tags.head(
       tags.meta(tags.httpEquiv := "content-type", tags.content := "text/html; charset=UTF-8"),
       cssFiles.map { f ⇒ tags.link(tags.rel := "stylesheet", tags.`type` := "text/css", href := "css/" + f) },
-      tags.script(tags.`type` := "text/javascript", tags.src := "js/openmole.js"),
+      tags.script(tags.`type` := "text/javascript", tags.src := "js/" + Utils.openmoleFile.getName),
       tags.script(tags.`type` := "text/javascript", tags.src := "js/deps.js")
     ),
     tags.body(tags.onload := javascritMethod)

@@ -53,7 +53,7 @@ import org.openmole.gui.ext.tool.server.Utils.authenticationKeysFile
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class ApiImpl(val arguments: GUIServer.ServletArguments, addRoute: OMRouter ⇒ Unit) extends Api {
+class ApiImpl(val arguments: GUIServer.ServletArguments) extends Api {
 
   val outputSize = ConfigurationLocation[Int]("gui", "outputsize", Some(10 * 1024 * 1024))
 
@@ -425,13 +425,6 @@ class ApiImpl(val arguments: GUIServer.ServletArguments, addRoute: OMRouter ⇒ 
       authentications = PluginActivator.authentications
     )
   }
-
-  def buildAndLoadPlugins() = {
-    Utils.buildPlugins
-    loadPlugins
-  }
-
-  def loadPlugins() = Utils.loadPlugins(addRoute)
 
   //MODEL WIZARDS
   def launchingCommands(path: SafePath): Seq[LaunchingCommand] = Utils.launchinCommands(path)

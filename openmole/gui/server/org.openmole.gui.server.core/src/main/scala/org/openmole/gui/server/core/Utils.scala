@@ -54,12 +54,6 @@ object Utils extends Logger {
 
   val webUIProjectFile = Workspace.file("webui")
   val pluginUpdoadDirectory = Workspace.tmpDir.newDir("pluginUpload")
-  val jsPluginDirectory = webUIProjectFile / "jsplugin"
-  val pluginFileName = "plugins.js"
-  val pluginFile = jsPluginDirectory / pluginFileName
-  pluginUpdoadDirectory.mkdir
-  jsPluginDirectory.mkdir
-  pluginFile.createNewFile
 
   def workspaceProjectFile = {
     val ws = new File(Workspace.file("webui"), "projects")
@@ -417,23 +411,28 @@ object Utils extends Logger {
 
   def getUUID: String = java.util.UUID.randomUUID.toString
 
-  def buildPlugins = {
-    val jsFile = Workspace.openMOLELocation / "webapp/js/openmole.js"
+  lazy val jsPluginDirectory = {
+    val jsPluginDirectory = webUIProjectFile / "jsplugin"
+    jsPluginDirectory.mkdir
     Plugins.gatherJSIRFiles(jsPluginDirectory)
-    jsPluginDirectory.updateIfChanged(
-      newDir ⇒ {
-        logger.info("Building GUI plugins ...")
-        jsFile.delete
-        JSPack.link(newDir, jsFile)
-      }
-    )
+    jsPluginDirectory
   }
 
-  def loadPlugins(route: OMRouter ⇒ Unit) = {
-    logger.info("Loading GUI plugins")
-    PluginActivator.plugins.foreach { p ⇒
-      route(p._2.router)
+  lazy val openmoleFile = {
+    val jsFile = Workspace.openMOLELocation / "webapp/js/openmole.js"
+    jsPluginDirectory.updateIfChanged { newDir ⇒
+      logger.info("Building GUI plugins ...")
+      jsFile.delete
+      JSPack.link(newDir, jsFile)
     }
+    jsFile
+  }
+
+  def pluginFile = jsPluginDirectory / "plugins.js"
+
+  def addPluginRoutes(route: OMRouter ⇒ Unit) = {
+    logger.info("Loading GUI plugins")
+    PluginActivator.plugins.foreach { p ⇒ route(p._2.router) }
   }
 
 }

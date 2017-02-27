@@ -47,8 +47,8 @@ object Plugins {
     scalajs.js.eval(s"new $obj")
   }
 
-  def buildAndLoad = post()[Api].buildAndLoadPlugins().call.foreach { _ ⇒
-    org.scalajs.dom.document.location.reload(true)
-
-  }
+  //  def buildAndLoad = post()[Api].loadPlugins().call.foreach { _ ⇒
+  //    org.scalajs.dom.document.location.reload(true)
+  //
+  //  }
 }

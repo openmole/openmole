@@ -32,7 +32,6 @@ object JSPack {
 
   def link(inputDirectory: File, outputJSFile: File): Unit =
     Workspace.withTmpFile("lib", "jar") { jar ⇒
-      println("start link")
       getClass.getClassLoader.getResourceAsStream("scalajs-library.jar") copy jar
 
       // Obtain VirtualScalaJSIRFile's from the input classpath
@@ -53,7 +52,6 @@ object JSPack {
       val linker = Linker(semantics, outputMode, moduleKind, linkerConfig)
       val logger = new ScalaConsoleLogger
       linker.link(sjsirFiles, WritableFileVirtualJSFile(outputJSFile), logger)
-      println("finish link")
     }
 
 }
