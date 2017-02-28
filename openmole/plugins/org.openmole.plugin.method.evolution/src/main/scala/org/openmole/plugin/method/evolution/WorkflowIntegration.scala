@@ -86,7 +86,7 @@ object WorkflowIntegration {
         operations.buildIndividual(genome, variablesToPhenotype(context))
 
       def inputPrototypes = a.genome.inputs.map(_.prototype)
-      def outputPrototypes = a.objectives
+      def outputPrototypes = a.objectives.map(_.prototype)
       def resultPrototypes = (inputPrototypes ++ outputPrototypes).distinct
 
       def genomeToVariables(genome: G): FromContext[Seq[Variable[_]]] =
@@ -100,7 +100,7 @@ object WorkflowIntegration {
           operations.phenotype
         )(population)
 
-      def variablesToPhenotype(context: Context) = a.objectives.map(o ⇒ context(o)).toVector
+      def variablesToPhenotype(context: Context) = a.objectives.map(o ⇒ o.fromContext(context)).toVector
     }
 
   def stochasticGAIntegration[AG](a: StochasticGA[AG]) =
@@ -119,7 +119,7 @@ object WorkflowIntegration {
         operations.buildIndividual(genome, variablesToPhenotype(context))
 
       def inputPrototypes = a.genome.inputs.map(_.prototype) ++ a.replication.seed.prototype
-      def outputPrototypes = a.objectives
+      def outputPrototypes = a.objectives.map(_.prototype)
       def resultPrototypes = (a.genome.inputs.map(_.prototype) ++ outputPrototypes ++ Seq(samples)).distinct
 
       def genomeToVariables(genome: G): FromContext[Seq[Variable[_]]] =
@@ -135,7 +135,7 @@ object WorkflowIntegration {
           integration.samples
         )(population)
 
-      def variablesToPhenotype(context: Context) = a.objectives.map(o ⇒ context(o)).toVector
+      def variablesToPhenotype(context: Context) = a.objectives.map(o ⇒ o.fromContext(context)).toVector
     }
 
   case class DeterministicGA[AG](
@@ -233,7 +233,7 @@ object GAIntegration {
     objectives.zipWithIndex.map {
       case (p, i) ⇒
         Variable(
-          p.toArray,
+          Val[Array[Double]](p.prototype.name),
           population.map(ind ⇒ phenotypeValues(ind)(i)).toArray
         )
     }

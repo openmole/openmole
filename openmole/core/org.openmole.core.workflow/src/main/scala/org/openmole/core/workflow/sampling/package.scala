@@ -21,7 +21,7 @@ package sampling {
 
   import org.openmole.core.context._
   import org.openmole.core.expansion._
-  import org.openmole.core.tools.io._
+  import org.openmole.tool.types._
   import org.openmole.core.workflow.domain._
   import cats.implicits._
 

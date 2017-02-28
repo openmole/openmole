@@ -155,6 +155,7 @@ object FromContext extends LowPriorityFromContext {
 }
 
 trait FromContext[+T] {
+  def apply(context: ⇒ Context)(implicit rng: RandomProvider): T = from(context)
   def from(context: ⇒ Context)(implicit rng: RandomProvider): T
   def validate(inputs: Seq[Val[_]]): Seq[Throwable]
 }

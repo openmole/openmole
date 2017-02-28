@@ -25,7 +25,7 @@ package dsl {
   import org.openmole.core.logging.LoggerService
   import org.openmole.core.workspace.{ Decrypt, Workspace }
   import cats._
-  import org.openmole.core.tools.io.FromString
+  import org.openmole.tool.types._
   import squants._
   import squants.information._
 

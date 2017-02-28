@@ -25,15 +25,23 @@ import org.openmole.core.workflow.transition._
 import org.openmole.plugin.task.tools._
 import org.openmole.plugin.tool.pattern._
 import org.openmole.core.context._
+import org.openmole.core.expansion._
+import org.openmole.tool.types._
 import shapeless._
 import squants.time.Time
 import squants.time.TimeConversions._
+import cats.implicits._
 
 package object evolution {
 
   val operatorExploration = 0.1
 
-  type Objective = Val[Double]
+  object Objective {
+    implicit def valToObjective[T](v: Val[T])(implicit td: ToDouble[T]) = Objective(v, ctx ⇒ td(ctx(v)))
+  }
+
+  case class Objective(prototype: Val[_], fromContext: Context ⇒ Double)
+
   type Objectives = Seq[Objective]
   type FitnessAggregation = Seq[Double] ⇒ Double
   type Genome = Seq[Input[_]]

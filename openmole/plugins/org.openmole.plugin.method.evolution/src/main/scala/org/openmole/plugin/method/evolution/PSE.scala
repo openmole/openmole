@@ -27,12 +27,18 @@ object PSE {
   object PatternAxe {
 
     // FIXME provide an evidence that the domain does'nt require a context
-    implicit def fromDomainToPatternAxe[D](f: Factor[D, Double])(implicit finite: Finite[D, Double]): PatternAxe =
+    implicit def fromDoubleDomainToPatternAxe[D](f: Factor[D, Double])(implicit finite: Finite[D, Double]): PatternAxe =
       PatternAxe(f.prototype, finite.computeValues(f.domain).from(Context.empty)(RandomProvider.empty).toVector)
+
+    implicit def fromIntDomainToPatternAxe[D](f: Factor[D, Int])(implicit finite: Finite[D, Int]): PatternAxe =
+      PatternAxe(f.prototype, finite.computeValues(f.domain).from(Context.empty)(RandomProvider.empty).toVector.map(_.toDouble))
+
+    implicit def fromLongDomainToPatternAxe[D](f: Factor[D, Long])(implicit finite: Finite[D, Long]): PatternAxe =
+      PatternAxe(f.prototype, finite.computeValues(f.domain).from(Context.empty)(RandomProvider.empty).toVector.map(_.toDouble))
 
   }
 
-  case class PatternAxe(p: Val[Double], scale: Vector[Double])
+  case class PatternAxe(p: Objective, scale: Vector[Double])
 
   def apply(
     genome:     Genome,

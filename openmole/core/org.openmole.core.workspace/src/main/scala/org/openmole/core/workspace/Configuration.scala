@@ -26,7 +26,7 @@ import org.openmole.tool.file._
 import org.apache.commons.configuration2._
 import org.apache.commons.configuration2.builder._
 import org.apache.commons.configuration2.builder.fluent._
-import org.openmole.core.tools.io.FromString
+import org.openmole.tool.types._
 import org.openmole.tool.thread._
 import squants.Time
 import squants.information.Information
