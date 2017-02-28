@@ -147,7 +147,8 @@ class Val[T](val simpleName: String, val `type`: ValType[T], val namespace: Name
   def accepts(obj: Any): Boolean =
     obj == null || classAssignable(obj.getClass, `type`.runtimeClass)
 
-  def withName(name: String) = Val[T](name)(`type`)
+  def withName(name: String) = Val[T](name, namespace = namespace)(`type`)
+  def withType[T: ValType] = Val[T](simpleName, namespace = namespace)
 
   def from(context: ⇒ Context): T = context(this)
 

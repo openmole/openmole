@@ -86,7 +86,7 @@ object WorkflowIntegration {
         operations.buildIndividual(genome, variablesToPhenotype(context))
 
       def inputPrototypes = a.genome.inputs.map(_.prototype)
-      def outputPrototypes = a.objectives.map(_.prototype)
+      def objectives = a.objectives
       def resultPrototypes = (inputPrototypes ++ outputPrototypes).distinct
 
       def genomeToVariables(genome: G): FromContext[Seq[Variable[_]]] =
@@ -119,7 +119,7 @@ object WorkflowIntegration {
         operations.buildIndividual(genome, variablesToPhenotype(context))
 
       def inputPrototypes = a.genome.inputs.map(_.prototype) ++ a.replication.seed.prototype
-      def outputPrototypes = a.objectives.map(_.prototype)
+      def objectives = a.objectives
       def resultPrototypes = (a.genome.inputs.map(_.prototype) ++ outputPrototypes ++ Seq(samples)).distinct
 
       def genomeToVariables(genome: G): FromContext[Seq[Variable[_]]] =
@@ -200,7 +200,9 @@ trait EvolutionWorkflow {
 
   def inputPrototypes: Seq[Val[_]]
   def resultPrototypes: Seq[Val[_]]
-  def outputPrototypes: Seq[Val[_]]
+
+  def objectives: Seq[Objective]
+  def outputPrototypes: Seq[Val[Double]] = objectives.map(_.prototype.withType[Double])
 
   def genomeToVariables(genome: G): FromContext[Seq[Variable[_]]]
   def populationToVariables(population: Pop): FromContext[Seq[Variable[_]]]
@@ -233,7 +235,7 @@ object GAIntegration {
     objectives.zipWithIndex.map {
       case (p, i) ⇒
         Variable(
-          Val[Array[Double]](p.prototype.name),
+          p.prototype.withType[Array[Double]],
           population.map(ind ⇒ phenotypeValues(ind)(i)).toArray
         )
     }

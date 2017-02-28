@@ -37,7 +37,7 @@ package object evolution {
   val operatorExploration = 0.1
 
   object Objective {
-    implicit def valToObjective[T](v: Val[T])(implicit td: ToDouble[T]) = Objective(v, ctx ⇒ td(ctx(v)))
+    implicit def valToObjective[T](v: Val[T])(implicit td: ToDouble[T]) = Objective(v, context ⇒ td(context(v)))
   }
 
   case class Objective(prototype: Val[_], fromContext: Context ⇒ Double)
@@ -98,7 +98,7 @@ package object evolution {
       EmptyTask() set (
         name := "masterFirst",
         (inputs, outputs) += (t.populationPrototype, t.genomePrototype, t.statePrototype),
-        (inputs, outputs) += (t.outputPrototypes: _*)
+        (inputs, outputs) += (t.objectives.map(_.prototype): _*)
       )
 
     val masterLast =
@@ -115,7 +115,7 @@ package object evolution {
 
     val master =
       (masterFirstCapsule --
-        (toOffspring keep (Seq(t.statePrototype, t.genomePrototype) ++ t.outputPrototypes: _*)) --
+        (toOffspring keep (Seq(t.statePrototype, t.genomePrototype) ++ t.objectives.map(_.prototype): _*)) --
         elitismSlot --
         terminationCapsule --
         breedSlot --
@@ -185,7 +185,7 @@ package object evolution {
 
     val elitismTask = ElitismTask(algorithm) set (name := "elitism")
 
-    val generateIsland = GenerateIslandTask(algorithm, sample, 1, islandPopulationPrototype.name)
+    val generateIsland = GenerateIslandTask(algorithm, sample, 1, islandPopulationPrototype)
 
     val terminationTask = TerminationTask(algorithm, termination) set (name := "termination")
 
@@ -223,7 +223,7 @@ package object evolution {
     )
 
     val generateInitialIslands =
-      GenerateIslandTask(algorithm, sample, parallelism, islandPopulationPrototype.name) set (
+      GenerateIslandTask(algorithm, sample, parallelism, islandPopulationPrototype) set (
         name := "generateInitialIslands",
         (inputs, outputs) += t.statePrototype,
         outputs += t.populationPrototype

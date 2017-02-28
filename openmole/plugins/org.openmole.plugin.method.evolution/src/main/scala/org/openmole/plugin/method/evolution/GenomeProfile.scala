@@ -110,7 +110,7 @@ object GenomeProfile {
           operations.buildIndividual(genome, variablesToPhenotype(context))
 
         def inputPrototypes = a.genome.inputs.map(_.prototype)
-        def outputPrototypes = Seq(a.objective.prototype)
+        def objectives = Seq(a.objective)
         def resultPrototypes = (inputPrototypes ++ outputPrototypes).distinct
 
         def genomeToVariables(genome: G): FromContext[Seq[Variable[_]]] =
@@ -159,7 +159,7 @@ object GenomeProfile {
         import UniqueGenome._
 
         def inputPrototypes = a.genome.map(_.prototype) ++ a.replication.seed.prototype
-        def outputPrototypes = Vector(a.objective.prototype)
+        def objectives = Vector(a.objective)
         def resultPrototypes = (a.genome.map(_.prototype) ++ outputPrototypes ++ Seq(samples)).distinct
 
         def genomeToVariables(genome: G): FromContext[Seq[Variable[_]]] =

@@ -20,15 +20,18 @@ import org.openmole.core.dsl._
 import org.openmole.core.workflow.validation.Validation
 import org.openmole.plugin.domain.collection._
 import org.scalatest._
+import org.openmole.tool.types._
 
 class WorkflowSpec extends FlatSpec with Matchers {
 
   def nsga2 = {
     val x = Val[Double]
     val y = Val[Double]
+    val z = Val[Int]
 
     val puzzle = EmptyTask() set (
-      (inputs, outputs) += (x, y)
+      (inputs, outputs) += (x, y, z),
+      z := 9
     )
 
     // Define a builder to use NSGA2 generational EA algorithm.
@@ -39,7 +42,7 @@ class WorkflowSpec extends FlatSpec with Matchers {
         NSGA2(
           mu = 100,
           genome = Seq(x in (0.0, 1.0), y in ("0.0", "1.0")),
-          objectives = Seq(x, y),
+          objectives = Seq(x, y, z),
           stochastic = Stochastic()
         ),
       evaluation = puzzle,
@@ -77,24 +80,26 @@ class WorkflowSpec extends FlatSpec with Matchers {
   }
 
   "Steady state workflow" should "have no validation error" in {
-    Validation(nsga2.toMole).toList match {
+    Validation(nsga2.head.toMole).toList match {
       case Nil ⇒
       case l   ⇒ sys.error("Several validation errors have been found: " + l.mkString("\n"))
     }
 
-    Validation(conflict.toMole).toList match {
+    Validation(conflict.head.toMole).toList match {
       case Nil ⇒
       case l   ⇒ sys.error("Several validation errors have been found: " + l.mkString("\n"))
     }
   }
 
   "Island workflow" should "have no validation error" in {
-    Validation(IslandEvolution(nsga2, 10, 50, 100).toMole).toList match {
+    val islandEvolutionNSGA2 = IslandEvolution(nsga2, 10, 50, 100).head.toMole
+
+    Validation(islandEvolutionNSGA2).toList match {
       case Nil ⇒
       case l   ⇒ sys.error("Several validation errors have been found: " + l.mkString("\n"))
     }
 
-    Validation(IslandEvolution(conflict, 10, 50, 100).toMole).toList match {
+    Validation(IslandEvolution(conflict, 10, 50, 100).head.toMole).toList match {
       case Nil ⇒
       case l   ⇒ sys.error("Several validation errors have been found: " + l.mkString("\n"))
     }

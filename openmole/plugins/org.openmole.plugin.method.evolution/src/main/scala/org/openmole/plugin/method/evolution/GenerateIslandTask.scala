@@ -20,17 +20,15 @@ package org.openmole.plugin.method.evolution
 import org.openmole.core.context.Variable
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.task._
+import org.openmole.core.context._
 
 object GenerateIslandTask {
 
-  def apply[T](algorithm: T, sample: Option[Int], size: Int, outputPopulationName: String)(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name) = {
+  def apply[T](algorithm: T, sample: Option[Int], size: Int, untypedOutputPopulation: Val[_])(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name) = {
     val t = wfi(algorithm)
-
-    val outputPopulation = t.populationPrototype.withName(outputPopulationName)
+    val outputPopulation = untypedOutputPopulation.asInstanceOf[Val[t.Pop]]
 
     ClosureTask("GenerateIslandTask") { (context, rng, _) ⇒
-      val outputPopulation = t.populationPrototype.withName(outputPopulationName)
-
       val p = context(t.populationPrototype)
 
       def samples =

@@ -30,7 +30,7 @@ object ToOffspringTask {
       val i = t.buildIndividual(context(t.genomePrototype), context)
       Context(Variable(t.offspringPrototype, Vector(i)))
     } set (
-      inputs += (t.outputPrototypes: _*),
+      inputs += (t.objectives.map(_.prototype): _*),
       inputs += (t.genomePrototype, t.statePrototype),
       outputs += (t.statePrototype, t.offspringPrototype)
     )
