@@ -632,12 +632,16 @@ package object client {
     color("lightgrey")
   )
 
-  lazy val authenticationError: ModifierSeq = Seq(
-    margin := 10,
+  lazy val dropdownError: ModifierSeq = Seq(
+    // margin := 10,
     color(DARK_GREY),
     relativePosition,
-    left := "-45%",
-    lineHeight := "0.5cm"
+    borderRadius := 5,
+    fontSize := 11,
+    border := "1px solid #ccc",
+    padding := 10,
+    lineHeight := "0.5cm",
+    wordWrap := "break-word"
   )
 
   //FILE TOOL BAR

@@ -77,6 +77,10 @@ class AuthenticationPanel {
   lazy val authenticationTable = {
 
     case class Reactive(testedAuth: TestedAuthentication) {
+
+      val errorOn = Var(false)
+      val currentStack: Var[String] = Var("")
+
       def toLabel(test: Test) = {
         val lab = label(
           test.message,
@@ -85,20 +89,10 @@ class AuthenticationPanel {
         test match {
           case PassedTest(_) ⇒ lab(label_success).render
           case PendingTest   ⇒ lab(label_warning).render
-          case _ ⇒
-
-            lazy val dropdown: Dropdown[HTMLDivElement] = bs.vForm(
-              bs.hForm(
-              div(bold(DARK_GREY), "Error stack").render,
-              bs.button("Close", btn_primary +++ (right := 10), () ⇒ {
-              dropdown.close
-              ()
-            }).render
-            ).render,
-              div(test.errorStack.stackTrace).render
-            ).dropdownWithTrigger(lab(label_danger +++ pointer), dropdownModifierSeq = authenticationError)
-
-            dropdown.render
+          case _ ⇒ lab(label_danger +++ pointer)(onclick := { () ⇒
+            currentStack() = test.errorStack.stackTrace
+            errorOn() = !errorOn.now
+          }).render
         }
       }
 
@@ -121,7 +115,7 @@ class AuthenticationPanel {
               }
             }
           }),
-          td(
+          td(colMD(2))(
             bs.glyphSpan(glyph_trash, () ⇒ removeAuthentication(testedAuth.auth))(omsheet.grey +++ sheet.paddingTop(9) +++ "glyphitem" +++ glyph_trash)
           )
         )
@@ -129,17 +123,31 @@ class AuthenticationPanel {
     }
 
     Rx {
-      tags.div(
-        authSetting() match {
-          case Some(p: AuthenticationPlugin) ⇒ div(sheet.paddingTop(20))(p.panel)
-          case _ ⇒
-            tags.table(width := "100%")(
-              for (a ← auths()) yield {
-                Seq(Reactive(a).render)
-              }
-            )
-        }
-      )
+      authSetting() match {
+        case Some(p: AuthenticationPlugin) ⇒ div(sheet.paddingTop(20))(p.panel)
+        case _ ⇒
+          tags.table(sheet.table)(
+            thead,
+            for (a ← auths()) yield {
+              val r = Reactive(a)
+              Seq(
+                r.render,
+                tr(
+                  td(colMD(12))(
+                    colspan := 12,
+                    r.errorOn.expand(
+                      tags.div(Rx {
+                        tags.div(dropdownError)(
+                          r.currentStack()
+                        )
+                      })
+                    )
+                  )
+                )
+              )
+            }
+          )
+      }
     }
   }
 
@@ -186,7 +194,7 @@ class AuthenticationPanel {
     )
   )
 
-  dialog body (tags.div(authenticationTable))
+  dialog body (div(authenticationTable))
 
   dialog.footer(
     tags.div(
