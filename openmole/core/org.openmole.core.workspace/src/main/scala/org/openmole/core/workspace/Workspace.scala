@@ -98,25 +98,31 @@ object Workspace {
   def openMOLELocation =
     openMOLELocationOption.getOrElse(throw new InternalProcessingError("openmole.location not set"))
 
-  lazy val instance = new Workspace(defaultLocation)
+  def apply(location: File) = {
+    val tmpDir = new File(Workspace.allTmpDir(location), sessionUUID.toString)
+    new Workspace(location, tmpDir)
+  }
+
+  lazy val instance = {
+    Workspace(defaultLocation)
+  }
 
   instance setPreferenceIfNotSet (uniqueIDLocation, UUID.randomUUID.toString)
   instance setDefault ErrorArraySnipSize
 
 }
 
-class Workspace(val location: File) {
+class Workspace(val location: File, val tmpDir: File) {
 
   import Workspace._
-  location.mkdirs
 
-  val tmpDir = new File(Workspace.allTmpDir(location), sessionUUID.toString)
+  location.mkdirs
   tmpDir.mkdirs
 
   val persistentDir = new File(location, persistentLocation)
   persistentDir.mkdirs
 
-  val rng = Random.newRNG(uuid2long(sessionUUID))
+  val rng = Random(uuid2long(sessionUUID))
   val currentSeed = new AtomicLong(rng.nextLong)
   def newSeed = currentSeed.getAndIncrement()
 
