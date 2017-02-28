@@ -36,7 +36,14 @@ import org.openmole.tool.file._
 
 object GUIServer {
   def isPasswordCorrect(p: String) = Workspace.passwordIsCorrect(p)
-  def resourcePath = (Workspace.openMOLELocation / "webapp").getAbsolutePath
+
+  lazy val webapp = {
+    val from = (Workspace.openMOLELocation / "webapp")
+    val to = Workspace.tmpDir / "webapp"
+    from.copy(to)
+    Utils.openmoleFile copy (to /> "js" / "openmole.js")
+    to
+  }
 
   val portValue = Network.freePort
   val port = ConfigurationLocation("GUIServer", "Port", Some(portValue))
@@ -103,7 +110,7 @@ class GUIServer(port: Int, localhost: Boolean, http: Boolean) {
     )
   context.setAttribute(GUIServer.servletArguments, GUIServer.ServletArguments(GUIServer.isPasswordCorrect, applicationControl))
   context.setContextPath("/")
-  context.setResourceBase(resourcePath)
+  context.setResourceBase(webapp.getAbsolutePath)
   context.setClassLoader(classOf[GUIServer].getClassLoader)
   context.setInitParameter(ScalatraListener.LifeCycleKey, classOf[GUIBootstrap].getCanonicalName)
   context.addEventListener(new ScalatraListener)

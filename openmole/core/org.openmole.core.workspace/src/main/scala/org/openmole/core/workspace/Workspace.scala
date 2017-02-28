@@ -28,7 +28,7 @@ import org.jasypt.util.text._
 import org.openmole.core.event.{ Event, EventDispatcher }
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.replication.DBServerInfo
-import org.openmole.core.tools.io.FromString
+import org.openmole.tool.types._
 import org.openmole.tool.crypto.Certificate
 import org.openmole.tool.file._
 import org.openmole.core.tools.service._
@@ -119,8 +119,8 @@ class Workspace(val location: File, val tmpDir: File) {
   location.mkdirs
   tmpDir.mkdirs
 
-  val persistentDir = new File(location, persistentLocation)
-  persistentDir.mkdirs
+  lazy val persistentDir = location /> persistentLocation
+  lazy val cacheDir = persistentDir /> "cache"
 
   val rng = Random(uuid2long(sessionUUID))
   val currentSeed = new AtomicLong(rng.nextLong)

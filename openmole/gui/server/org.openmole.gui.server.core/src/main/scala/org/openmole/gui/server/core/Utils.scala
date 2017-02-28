@@ -412,23 +412,23 @@ object Utils extends Logger {
   def getUUID: String = java.util.UUID.randomUUID.toString
 
   lazy val jsPluginDirectory = {
-    val jsPluginDirectory = webUIProjectFile / "jsplugin"
-    jsPluginDirectory.mkdir
+    val jsPluginDirectory = webUIProjectFile /> "jsplugin"
     Plugins.gatherJSIRFiles(jsPluginDirectory)
     jsPluginDirectory
   }
 
   lazy val openmoleFile = {
-    val jsFile = Workspace.openMOLELocation / "webapp/js/openmole.js"
-    jsPluginDirectory.updateIfChanged { newDir ⇒
+    val jsFile = Workspace.cacheDir /> "webui" / "openmole.js"
+    def update = {
       logger.info("Building GUI plugins ...")
       jsFile.delete
-      JSPack.link(newDir, jsFile)
+      JSPack.link(jsPluginDirectory, jsFile)
     }
+
+    if (!jsFile.exists) update
+    else jsPluginDirectory.updateIfChanged { _ ⇒ update }
     jsFile
   }
-
-  def pluginFile = jsPluginDirectory / "plugins.js"
 
   def addPluginRoutes(route: OMRouter ⇒ Unit) = {
     logger.info("Loading GUI plugins")

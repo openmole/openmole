@@ -89,7 +89,7 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
   )
 
   // Get all the css files in the workspace (it is not working with js because of the order)
-  val cssFiles = new File(GUIServer.resourcePath, "css").listFilesSafe.map {
+  val cssFiles = (GUIServer.webapp / "css").listFilesSafe.map {
     _.getName
   }.sorted
 
