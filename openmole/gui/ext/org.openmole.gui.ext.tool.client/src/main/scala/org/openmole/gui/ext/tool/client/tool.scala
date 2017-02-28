@@ -644,6 +644,11 @@ package object client {
     wordWrap := "break-word"
   )
 
+  lazy val fixedTable: ModifierSeq = Seq(
+    tableLayout := "fixed",
+    width := "100%"
+  )
+
   //FILE TOOL BAR
   lazy val selectedTool: ModifierSeq = Seq(
     opacity := 1,

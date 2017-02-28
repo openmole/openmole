@@ -98,12 +98,12 @@ class AuthenticationPanel {
 
       lazy val render = {
         tr(omsheet.docEntry +++ (lineHeight := "35px"))(
-          td(colMD(2))(
+          td(colMD(4))(
             tags.a(testedAuth.auth.data.name, omsheet.docTitleEntry +++ floatLeft +++ omsheet.bold("white"), cursor := "pointer", onclick := { () ⇒
               authSetting() = Some(testedAuth.auth)
             })
           ),
-          td(colMD(6) +++ sheet.paddingTop(5))(label(testedAuth.auth.factory.name, label_primary)),
+          td(colMD(4) +++ sheet.paddingTop(5))(label(testedAuth.auth.factory.name, label_primary)),
           td(colMD(2))({
             val tests: Var[Seq[Test]] = Var(Seq(Test.pending))
             testedAuth.tests.foreach { ts ⇒
@@ -126,7 +126,7 @@ class AuthenticationPanel {
       authSetting() match {
         case Some(p: AuthenticationPlugin) ⇒ div(sheet.paddingTop(20))(p.panel)
         case _ ⇒
-          tags.table(sheet.table)(
+          tags.table(fixedTable)(
             thead,
             for (a ← auths()) yield {
               val r = Reactive(a)
