@@ -267,6 +267,12 @@ package file {
 
       def /(s: String): File = Paths.get(file.toString, s)
 
+      def />(s: String): File = {
+        val dir = file / s
+        dir.mkdirs()
+        dir
+      }
+
       // TODO implement using NIO getLastModifiedTime
       def lastModification = {
         var lastModification = file.lastModified
@@ -353,7 +359,7 @@ package file {
         file.getCanonicalFile.getParentFileSafe.mkdirs
       }
 
-      def withLock[T](f: OutputStream ⇒ T) = jvmLevelFileLock.withLock(file.getCanonicalPath) {
+      def withLock[T](f: OutputStream ⇒ T): T = jvmLevelFileLock.withLock(file.getCanonicalPath) {
         withClosable(new FileOutputStream(file, true)) { fos ⇒
           withClosable(new BufferedOutputStream(fos)) { bfos ⇒
             val lock = fos.getChannel.lock
@@ -361,6 +367,13 @@ package file {
             finally lock.release
           }
         }
+      }
+
+      def withLockInDirectory[T](f: ⇒ T, lockName: String = ".lock"): T = {
+        val lockFile = file / lockName
+        lockFile.createNewFile()
+        try lockFile.withLock { _ ⇒ f }
+        finally lockFile.delete()
       }
 
       def bufferedInputStream = new BufferedInputStream(new FileInputStream(file))
