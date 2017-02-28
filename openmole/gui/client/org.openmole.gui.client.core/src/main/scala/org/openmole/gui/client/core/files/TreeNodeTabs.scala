@@ -233,9 +233,7 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
     }
   }
 
-  def --(tab: TreeNodeTab): Unit = {
-    tab.refresh(() ⇒ removeTab(tab))
-  }
+  def --(tab: TreeNodeTab): Unit = removeTab(tab)
 
   def --(safePath: SafePath): Unit = {
     find(safePath).map {
