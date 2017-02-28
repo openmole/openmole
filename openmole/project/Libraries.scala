@@ -70,7 +70,7 @@ object Libraries {
   lazy val json4s = "org.openmole.library" %% "org-json4s" % "3.4.0"
   lazy val scalajsTools = "org.openmole.library" %% "scalajs-tools" % scalajsVersion
   lazy val scalajs = "org.openmole.library" %% "scalajs" % scalajsVersion
-  lazy val mgo = "org.openmole.library" %% "mgo" % "2.3"
+  lazy val mgo = "org.openmole.library" %% "mgo" % "2.4"
   lazy val family = "org.openmole.library" %% "fr-iscpif-family" % "1.3"
   lazy val monocle = "org.openmole.library" %% "monocle" % "1.3.2"
   lazy val upickle = "org.openmole.library" %% "upickle" % scalaUpickleVersion
