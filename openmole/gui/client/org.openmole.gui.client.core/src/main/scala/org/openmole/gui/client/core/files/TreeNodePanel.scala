@@ -158,7 +158,7 @@ class TreeNodePanel {
 
   def filter: FileFilter = fileToolBar.fileFilter.now
 
-  def downloadFile(safePath: SafePath, saveFile: Boolean, onLoaded: String ⇒ Unit = (s: String) ⇒ {}) =
+  def downloadFile(safePath: SafePath, saveFile: Boolean, onLoaded: String ⇒ Unit = (s: String) ⇒ {}) = {
     FileManager.download(
       safePath,
       (p: ProcessState) ⇒ {
@@ -166,6 +166,7 @@ class TreeNodePanel {
       },
       onLoaded
     )
+  }
 
   def goToDirButton(safePath: SafePath, ck: ModifierSeq, name: String = "") = span(ck)(name)(
     onclick := {

@@ -43,25 +43,14 @@ object TreeNodeTabs {
 
     implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
     val safePathTab: Var[SafePath]
+    val active = Var(false)
 
     val tabName = Var(safePathTab.now.name)
     val id: String = getUUID
-    val active: Var[Option[SetIntervalHandle]] = Var(None)
 
-    def desactivate = {
-      active.map {
-        _.foreach {
-          clearInterval
-        }
-      }
-      active() = None
-    }
+    def activate = active() = true
 
-    def activate = {
-      active() = Some(setInterval(15000) {
-        refresh()
-      })
-    }
+    def desactivate = active() = false
 
     val editorElement: TypedTag[HTMLDivElement]
 
@@ -194,31 +183,46 @@ import org.openmole.gui.client.core.files.TreeNodeTabs._
 class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
 
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
+  val timer: Var[Option[SetIntervalHandle]] = Var(None)
+
+  def stopTimerIfNoTabs = {
+    if (tabs.now.isEmpty) {
+      timer.map {
+        _.foreach {
+          clearInterval
+        }
+      }
+      timer() = None
+    }
+  }
+
+  def startTimerIfStopped =
+    timer.now match {
+      case None ⇒
+        timer() = Some(setInterval(15000) {
+          tabs.now.foreach {
+            _.refresh()
+          }
+        })
+      case _ ⇒
+    }
+
   def setActive(tab: TreeNodeTab) = {
     if (tabs.now.contains(tab)) {
       unActiveAll
-      tab.activate
     }
+    tab.activate
   }
 
   def unActiveAll = tabs.map {
     _.foreach { t ⇒
-      t.refresh()
       t.desactivate
     }
   }
 
-  def isActive(tab: TreeNodeTab) = tab.active.map { t ⇒
-    t.map {
-      _ match {
-        case handle: SetIntervalHandle ⇒ true
-        case _                         ⇒ false
-      }
-    }.getOrElse(false)
-  }
-
   def ++(tab: TreeNodeTab) = {
     tabs() = tabs.now :+ tab
+    startTimerIfStopped
     setActive(tab)
   }
 
@@ -233,7 +237,7 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
     }
   }
 
-  def --(tab: TreeNodeTab): Unit = removeTab(tab)
+  def --(tab: TreeNodeTab): Unit = tab.refresh(() ⇒ removeTab(tab))
 
   def --(safePath: SafePath): Unit = {
     find(safePath).map {
@@ -271,12 +275,6 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
     t.safePathTab.now == safePath
   }
 
-  val active = tabs.map {
-    _.find { t ⇒
-      isActive(t).now
-    }
-  }
-
   val render = div({
     div(role := "tabpanel")(
       //Headers
@@ -287,7 +285,7 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
               sheet.paddingTop(35),
               role := "presentation",
               `class` := {
-                if (isActive(t)()) "active" else ""
+                if (t.active()) "active" else ""
               }
             )(
                 a(
@@ -309,13 +307,13 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
       div(tabContent)(
         Rx {
           for (t ← tabs()) yield {
-            val isTabActive = isActive(t)
+            def tabActive = t.active()
             div(
               role := "tabpanel",
-              ms("tab-pane " + isTabActive.map { a ⇒
-                if (a) "active" else ""
+              ms("tab-pane " + {
+                if (tabActive) "active" else ""
               }), id := t.id
-            )(if (isTabActive()) {
+            )(if (tabActive) {
                 t match {
                   case oms: OMSTabControl        ⇒ oms.block
                   case etc: LockedEditionNodeTab ⇒ etc.block
