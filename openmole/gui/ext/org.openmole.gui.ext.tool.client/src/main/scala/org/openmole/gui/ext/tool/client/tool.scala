@@ -42,6 +42,8 @@ package object client {
 
   lazy val LIGHT_GREY = "#9d9d9d"
 
+  lazy val VERY_LIGHT_GREY = "#d3d3d3"
+
   lazy val WHITE = "white"
 
   lazy val tableTag: ModifierSeq = Seq(
@@ -350,7 +352,8 @@ package object client {
   lazy val tabContent: ModifierSeq = Seq(
     sheet.marginTop(-1),
     relativePosition,
-    width := "100%"
+    width := "100%",
+    border := "1px solid rgb(204, 204, 204)"
   )
 
   lazy val playTabOverlay: ModifierSeq = Seq(
@@ -416,7 +419,17 @@ package object client {
   //EDITOR
   lazy val editorContainer: ModifierSeq = Seq(
     padding := 0,
+    relativePosition,
+    height := "100%",
     width := "100%"
+  )
+
+  lazy val activeTab: ModifierSeq = Seq(
+    backgroundColor := VERY_LIGHT_GREY
+  )
+
+  lazy val unActiveTab: ModifierSeq = Seq(
+    border := s"1px solid $VERY_LIGHT_GREY"
   )
 
   //PANELS

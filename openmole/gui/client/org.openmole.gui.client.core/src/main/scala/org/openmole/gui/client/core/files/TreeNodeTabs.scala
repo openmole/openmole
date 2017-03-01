@@ -6,12 +6,12 @@ import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
 import org.openmole.gui.ext.tool.client.Utils._
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
-import org.openmole.gui.client.tool._
+import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import org.openmole.gui.ext.api.Api
 import org.scalajs.dom.raw.{ HTMLDivElement, HTMLElement }
 import sheet._
 import rx._
-
+import bs._
 import scalatags.JsDom.all.{ raw, _ }
 import scalatags.JsDom.{ TypedTag, tags }
 import scala.scalajs.js.timers._
@@ -275,6 +275,8 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
     t.safePathTab.now == safePath
   }
 
+  implicit def modToModSeq(m: Modifier): ModifierSeq = Seq(m)
+
   val render = div({
     div(role := "tabpanel")(
       //Headers
@@ -292,6 +294,7 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
                   href := "#" + t.id,
                   aria.controls := t.id,
                   role := "tab",
+                  if (t.active()) activeTab else unActiveTab,
                   data("toggle") := "tab", onclick := { () ⇒
                     setActive(t)
                   }
@@ -308,6 +311,7 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
         Rx {
           for (t ← tabs()) yield {
             def tabActive = t.active()
+
             div(
               role := "tabpanel",
               ms("tab-pane " + {
