@@ -20,7 +20,7 @@ package org.openmole.gui.client.core
 import org.openmole.gui.client.core.alert.AlertPanel
 import org.openmole.gui.client.core.files._
 import org.openmole.gui.ext.data._
-import org.openmole.gui.client.tool._
+import org.openmole.gui.client.core.panels._
 import autowire._
 import org.scalajs.dom.html.TextArea
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
@@ -501,8 +501,8 @@ class ModelWizardPanel {
               }, resources.now
             ).call().foreach {
                 b ⇒
-                  panels.treeNodePanel.fileDisplayer.tabs -- b
-                  panels.treeNodePanel.displayNode(FileNode(Var(b.name), 0L, 0L))
+                  treeNodeTabs -- b
+                  treeNodePanel.displayNode(FileNode(Var(b.name), 0L, 0L))
                   TreeNodePanel.refreshAndDraw
               }
         }

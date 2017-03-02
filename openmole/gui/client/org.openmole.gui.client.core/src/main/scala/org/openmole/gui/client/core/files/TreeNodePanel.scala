@@ -6,7 +6,7 @@ import org.openmole.gui.client.core.files.FileToolBar.{ FilterTool, PluginTool, 
 import org.openmole.gui.client.core.CoreUtils
 import org.openmole.gui.client.core.Waiter._
 import org.openmole.gui.ext.data._
-import org.openmole.gui.client.tool._
+import org.openmole.gui.client.core.panels._
 import org.openmole.gui.ext.tool.client.JsRxTags._
 import org.openmole.gui.ext.tool.client._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
@@ -73,7 +73,6 @@ class TreeNodePanel {
 
   def turnSelectionTo(b: Boolean) = selectionMode() = b
 
-  val fileDisplayer = new FileDisplayer
   val fileToolBar = new FileToolBar(this)
   val tree: Var[TypedTag[HTMLElement]] = Var(tags.div())
 
@@ -295,12 +294,12 @@ class TreeNodePanel {
             case d: DirNode ⇒
               val dPath = currentPath ++ d.name.now
               if (spPath != dPath) {
-                fileDisplayer.tabs.saveAllTabs(() ⇒
+                treeNodeTabs.saveAllTabs(() ⇒
                   post()[Api].move(spPath, tnPath).call().foreach {
                     b ⇒
                       manager.invalidCache(tnPath)
                       TreeNodePanel.refreshAndDraw
-                      fileDisplayer.tabs.checkTabs
+                      treeNodeTabs.checkTabs
                   })
               }
             case _ ⇒
@@ -324,8 +323,8 @@ class TreeNodePanel {
       () ⇒ {
         CoreUtils.trashNode(safePath) {
           () ⇒
-            fileDisplayer.tabs -- safePath
-            fileDisplayer.tabs.checkTabs
+            treeNodeTabs -- safePath
+            treeNodeTabs.checkTabs
             invalidCacheAndDraw
         }
       }
@@ -392,13 +391,13 @@ class TreeNodePanel {
     def renameNode(safePath: SafePath, newName: String, replicateMode: Boolean) = {
       def rename = post()[Api].renameFile(safePath, newName).call().foreach {
         newNode ⇒
-          fileDisplayer.tabs.rename(safePath, newNode)
+          treeNodeTabs.rename(safePath, newNode)
           treeStates.now.editionOff
           invalidCacheAndDraw
-          fileDisplayer.tabs.checkTabs
+          treeNodeTabs.checkTabs
       }
 
-      fileDisplayer.tabs.saveAllTabs(() ⇒ {
+      treeNodeTabs.saveAllTabs(() ⇒ {
         post()[Api].existsExcept(safePath.copy(path = safePath.path.dropRight(1) :+ newName), replicateMode).call().foreach {
           b ⇒
             if (b) stringAlert(s"${

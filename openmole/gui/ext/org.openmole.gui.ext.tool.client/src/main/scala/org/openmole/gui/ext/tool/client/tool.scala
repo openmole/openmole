@@ -42,7 +42,7 @@ package object client {
 
   lazy val LIGHT_GREY = "#9d9d9d"
 
-  lazy val VERY_LIGHT_GREY = "#d3d3d3"
+  lazy val VERY_LIGHT_GREY = "#e7e7e7"
 
   lazy val WHITE = "white"
 
@@ -181,15 +181,30 @@ package object client {
   )
 
   lazy val resetBlock: ModifierSeq = Seq(
-    fixedPosition,
+    relativePosition,
     pointer,
+    floatRight,
     top := 20,
-    right := 10,
-    zIndex := 1101
+    zIndex := 10
+  )
+
+  lazy val closeBanner: ModifierSeq = Seq(
+    floatRight,
+    pointer,
+    relativePosition,
+    top := 18,
+    zIndex := 10,
+    sheet.paddingRight(15),
+    fontSize := 20
   )
 
   lazy val fixed: ModifierSeq = Seq(
     fixedPosition,
+    width := "100%"
+  )
+
+  lazy val absoluteFullWidth: ModifierSeq = Seq(
+    absolutePosition,
     width := "100%"
   )
 
@@ -352,13 +367,12 @@ package object client {
   lazy val tabContent: ModifierSeq = Seq(
     sheet.marginTop(-1),
     relativePosition,
-    width := "100%",
-    border := "1px solid rgb(204, 204, 204)"
+    width := "100%"
   )
 
   lazy val playTabOverlay: ModifierSeq = Seq(
     color(WHITE),
-    height := "calc(100% - 20px)",
+    height := "100%",
     absolutePosition,
     width := "100%",
     background := BLUE,
@@ -379,9 +393,11 @@ package object client {
   )
 
   lazy val executionElement: ModifierSeq = Seq(
-    fixedPosition,
+    relativePosition,
+    floatRight,
     right := 200,
-    top := 15,
+    padding := 15,
+    margin := "auto",
     width := 50,
     zIndex := 18
   )
@@ -757,8 +773,7 @@ package object client {
   lazy val bannerAlert: ModifierSeq = Seq(
     width := "100%",
     absolutePosition,
-    left := -20,
-    marginAll(top = -20, right = 5),
+    height := 60,
     zIndex := 5
   )
 
@@ -767,20 +782,8 @@ package object client {
     relativePosition,
     color(WHITE),
     opacity := 0.9,
-    marginAll(top = 20, left = 15, bottom = 15)
+    marginAll(top = 10, left = 15, bottom = 15)
 
-  )
-
-  lazy val bannerAlertClose: ModifierSeq = Seq(
-    fixedPosition,
-    color(WHITE),
-    opacity := 0.6,
-    pointer,
-    fontSize := "25px",
-    zIndex := 21,
-    right := 5,
-    margin := 5,
-    top := 65
   )
 
 }

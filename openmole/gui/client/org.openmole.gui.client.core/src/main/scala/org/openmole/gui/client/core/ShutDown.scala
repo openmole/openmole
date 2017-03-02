@@ -9,7 +9,6 @@ import org.scalajs.dom
 import rx._
 import org.openmole.gui.ext.tool.client._
 import scalatags.JsDom.all._
-import bs._
 
 /*
  * Copyright (C) 07/11/16 // mathieu.leclaire@openmole.org
@@ -58,7 +57,7 @@ class ShutDown {
         AlertPanel.string(
           "This will stop the server, the application will no longer be usable. Halt anyway?",
           () ⇒ {
-            treeNodePanel.fileDisplayer.tabs.saveAllTabs(() ⇒
+            fileDisplayer.tabs.saveAllTabs(() ⇒
               dom.window.location.href = "shutdown")
           },
           transform = CenterPagePosition

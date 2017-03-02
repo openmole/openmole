@@ -1,26 +1,5 @@
 /* ????????*/
 
-
-.ooo{
-    position:fixed;
-    top: 0;
-    z-index: 2000;
-}
-
-.oooo{
-    position:fixed;
-    top: 0;
-    left:100;
-    z-index: 2000;
-}
-.ooooo{
-    position:fixed;
-    top: 0;
-    left:200;
-    z-index: 2000;
-}
-
-
 /* GENERAL*/
 a {
     color: #3086b5;
@@ -445,7 +424,7 @@ li.selectElement{
 .fullpanel .reduce {
     left: 390px;
     padding-right: 400px;
-    position: absolute;
+    position: relative;
     top: 61px;
     transition: all 0.1s ease-out 0s;
     width: 99%;

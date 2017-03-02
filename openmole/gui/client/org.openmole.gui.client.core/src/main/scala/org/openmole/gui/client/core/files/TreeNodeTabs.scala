@@ -11,7 +11,6 @@ import org.openmole.gui.ext.api.Api
 import org.scalajs.dom.raw.{ HTMLDivElement, HTMLElement }
 import sheet._
 import rx._
-import bs._
 import scalatags.JsDom.all.{ raw, _ }
 import scalatags.JsDom.{ TypedTag, tags }
 import scala.scalajs.js.timers._
@@ -111,7 +110,6 @@ object TreeNodeTabs {
 
     def block = div(
       editorElement,
-      controlElement,
       overlayElement
     )
 
@@ -162,15 +160,16 @@ object TreeNodeTabs {
 
     def onrun: Unit
 
-    val block = tabName.flatMap { n ⇒
-      overlaying.map { o ⇒
-        div(
-          div(if (o) playTabOverlay else emptyMod),
-          if (o) div(overlayElement)(s"Starting ${n}, please wait ...")
-          else div,
-          editorElement,
-          controlElement
-        )
+    val block = {
+      tabName.flatMap { n ⇒
+        overlaying.map { o ⇒
+          div(
+            div(if (o) playTabOverlay else emptyMod),
+            if (o) div(overlayElement)(s"Starting ${n}, please wait ...")
+            else div,
+            editorElement
+          )
+        }
       }
     }
 
@@ -184,6 +183,7 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
 
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
   val timer: Var[Option[SetIntervalHandle]] = Var(None)
+  val temporaryControl: Var[Option[TypedTag[HTMLElement]]] = Var(None)
 
   def stopTimerIfNoTabs = {
     if (tabs.now.isEmpty) {
@@ -319,9 +319,15 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
               }), id := t.id
             )(if (tabActive) {
                 t match {
-                  case oms: OMSTabControl        ⇒ oms.block
-                  case etc: LockedEditionNodeTab ⇒ etc.block
-                  case _                         ⇒ Var(div(t.editorElement))
+                  case oms: OMSTabControl ⇒
+                    temporaryControl() = Some(oms.controlElement)
+                    oms.block
+                  case etc: LockedEditionNodeTab ⇒
+                    temporaryControl() = Some(etc.controlElement)
+                    etc.block
+                  case _ ⇒
+                    temporaryControl() = None
+                    Var(div(t.editorElement))
                 }
               }
               else div())

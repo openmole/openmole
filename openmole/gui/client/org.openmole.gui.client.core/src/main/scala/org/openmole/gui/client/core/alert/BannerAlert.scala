@@ -51,28 +51,28 @@ object BannerAlert {
 
   private val bannerMessages: Var[Seq[BannerMessage]] = Var(Seq())
 
-  private val bannerDiv = tags.div(Rx {
-    tags.div(omsheet.bannerAlert +++ (backgroundColor := color))(
-      span(onclick := { () ⇒ clear }, omsheet.bannerAlertClose)(
-        raw("&#215")
-      ), tags.div(omsheet.bannerAlertInner)(
-        for {
-          bm ← bannerMessages()
-        } yield bm.messageDiv
+  private val bannerDiv = tags.div(
+    Rx {
+      tags.div(omsheet.bannerAlert +++ (backgroundColor := color))(
+        tags.div(omsheet.bannerAlertInner)(
+          for {
+            bm ← bannerMessages()
+          } yield bm.messageDiv
+        )
       )
+    }, span(omsheet.closeBanner, onclick := { () ⇒ clear })(
+      raw("&#215")
     )
-  })
+  )(height := 45)
 
-  val banner = Rx {
-    !bannerMessages().isEmpty
-  }.expand(bannerDiv)
+  lazy val banner = bannerMessages.map { bm ⇒ !bm.isEmpty }.expand(bannerDiv)
 
   def clear = {
     bannerMessages() = Seq()
   }
 
   def register(bannerMessage: BannerMessage) =
-    bannerMessages() = (bannerMessages.now :+ bannerMessage).distinct
+    bannerMessages() = (bannerMessages.now :+ bannerMessage).distinct.takeRight(2)
 
   private def color = {
     if (bannerMessages.now.exists(_.bannerLevel == CriticalBannerLevel)) omsheet.RED

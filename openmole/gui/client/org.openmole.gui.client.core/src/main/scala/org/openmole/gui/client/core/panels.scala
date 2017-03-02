@@ -1,7 +1,6 @@
 package org.openmole.gui.client.core
 
-import org.openmole.gui.client.core.files.TreeNodePanel
-import scalatags.JsDom.{ tags ⇒ tags }
+import org.openmole.gui.client.core.files.{ FileDisplayer, TreeNodePanel, TreeNodeTabs }
 
 /*
  * Copyright (C) 24/07/15 // mathieu.leclaire@openmole.org
@@ -21,11 +20,13 @@ import scalatags.JsDom.{ tags ⇒ tags }
  */
 
 package object panels {
+  val treeNodeTabs = TreeNodeTabs()
+  val fileDisplayer = new FileDisplayer(treeNodeTabs)
+  val treeNodePanel = TreeNodePanel()
   val modelWizardPanel = new ModelWizardPanel
   val marketPanel = new MarketPanel
   val pluginPanel = new PluginPanel
   val executionPanel = new ExecutionPanel
   val docPanel = new GUIDocPanel
   val stackPanel = new TextPanel("Error stack")
-  val treeNodePanel = TreeNodePanel()
 }

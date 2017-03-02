@@ -13,14 +13,13 @@ import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
 import sheet._
 import bs._
-import org.openmole.gui.client.tool._
 import org.scalajs.dom.KeyboardEvent
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
 import fr.iscpif.scaladget.api.Selector.Options
 import org.openmole.gui.client.core.alert.{ AlertPanel, BannerAlert }
-import org.openmole.gui.client.core.files.{ FileDisplayer, TreeNodePanel }
+import org.openmole.gui.client.core.files.TreeNodePanel
 import org.openmole.gui.client.tool.OMTags
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.data._
@@ -113,13 +112,9 @@ object ScriptClient {
         }
       }
 
-      //START BUTTON
-      val fileDisplayer = new FileDisplayer
-
-      // Define the option sequence
       case class MenuAction(name: String, action: () ⇒ Unit)
 
-      val newEmpty = MenuAction("Empty project", () ⇒ {
+      lazy val newEmpty = MenuAction("Empty project", () ⇒ {
         val fileName = "newProject.oms"
         CoreUtils.addFile(manager.current.now, fileName, () ⇒ {
           val toDisplay = manager.current.now ++ fileName
@@ -133,15 +128,39 @@ object ScriptClient {
         })
       })
 
-      val importModel = MenuAction("Import your model", () ⇒ {
+      //START BUTTON
+      lazy val navBar = tags.div(
+        Rx {
+          bs.navBar(
+            omsheet.absoluteFullWidth +++ sheet.nav +++ navbar_pills +++ navbar_inverse +++ (fontSize := 20) +++ navbar_staticTop +++ {
+              if (openFileTree()) mainNav370 else mainNav0
+            },
+            navItem(
+              if (openFileTree()) div(glyph_chevron_left, fileChevronStyle) else div(glyph_chevron_right, fileChevronStyle),
+              todo = () ⇒ {
+                openFileTree() = !openFileTree.now
+              }
+            ),
+            navItem(menuActions.selector),
+            execItem,
+            authenticationItem,
+            pluginItem,
+            docItem
+          )
+        }
+      )
+
+      lazy val menuBar = new MenuBar(navBar, treeNodeTabs)
+
+      lazy val importModel = MenuAction("Import your model", () ⇒ {
         modelWizardPanel.dialog.show
       })
 
-      val marketPlaceProject = MenuAction("From market place", () ⇒ {
+      lazy val marketPlaceProject = MenuAction("From market place", () ⇒ {
         marketPanel.dialog.show
       })
 
-      val elements = Seq(newEmpty, importModel, marketPlaceProject)
+      lazy val elements = Seq(newEmpty, importModel, marketPlaceProject)
 
       lazy val menuActions: Options[MenuAction] = elements.options(
         key = btn_danger,
@@ -152,30 +171,16 @@ object ScriptClient {
         fixedTitle = Some("New project")
       )
 
+      // Define the option sequence
+
       Settings.settings.map { sets ⇒
 
         withBootstrapNative {
           div(
-            Rx {
-              bs.navBar(
-                omsheet.fixed +++ sheet.nav +++ navbar_pills +++ navbar_inverse +++ (fontSize := 20) +++ navbar_staticTop +++ {
-                  if (openFileTree()) mainNav370 else mainNav0
-                },
-                navItem(
-                  if (openFileTree()) div(glyph_chevron_left, fileChevronStyle) else div(glyph_chevron_right, fileChevronStyle),
-                  todo = () ⇒ {
-                    openFileTree() = !openFileTree.now
-                  }
-                ),
-                navItem(menuActions.selector),
-                execItem,
-                authenticationItem,
-                pluginItem,
-                docItem
-              )
-            },
-            tags.div(shutDown.shutdownButton),
             tags.div(`class` := "fullpanel")(
+              BannerAlert.banner,
+              menuBar.render,
+              tags.div(shutDown.shutdownButton),
               tags.div(
                 `class` := Rx {
                   "leftpanel " + {
@@ -197,8 +202,7 @@ object ScriptClient {
                   }
                 }
               )(
-                  BannerAlert.banner,
-                  treeNodePanel.fileDisplayer.tabs.render,
+                  treeNodeTabs.render,
                   tags.div(omsheet.textVersion)(
                     tags.div(
                       fontSize := "1em",

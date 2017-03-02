@@ -35,9 +35,7 @@ object FileDisplayer {
 
 import FileDisplayer._
 
-class FileDisplayer {
-
-  val tabs = TreeNodeTabs()
+class FileDisplayer(val tabs: TreeNodeTabs) {
 
   def alreadyDisplayed(safePath: SafePath) =
     tabs.tabs.now.find { t ⇒
