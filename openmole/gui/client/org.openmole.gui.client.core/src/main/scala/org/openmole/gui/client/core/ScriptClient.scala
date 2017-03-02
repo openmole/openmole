@@ -184,7 +184,7 @@ object ScriptClient {
               tags.div(
                 `class` := Rx {
                   "leftpanel " + {
-                    if (openFileTree()) "open" else ""
+                    CoreUtils.ifOrNothing(openFileTree(), "open")
                   }
                 }
               )(
@@ -197,9 +197,9 @@ object ScriptClient {
                 ),
               tags.div(
                 `class` := Rx {
-                  "centerpanel " + {
-                    if (openFileTree()) "reduce" else ""
-                  }
+                  "centerpanel " +
+                    CoreUtils.ifOrNothing(openFileTree(), "reduce") +
+                    CoreUtils.ifOrNothing(BannerAlert.isOpen(), " banneropen")
                 }
               )(
                   treeNodeTabs.render,

@@ -378,7 +378,8 @@ package object client {
     background := BLUE,
     opacity := 0.9,
     width := "100%",
-    zIndex := 10
+    zIndex := 10,
+    bottom := 3
   )
 
   lazy val overlayElement: ModifierSeq = Seq(
@@ -782,7 +783,7 @@ package object client {
     relativePosition,
     color(WHITE),
     opacity := 0.9,
-    marginAll(top = 10, left = 15, bottom = 15)
+    paddingAll(top = 10, left = 15, bottom = 15)
 
   )
 

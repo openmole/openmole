@@ -419,6 +419,11 @@ li.selectElement{
     height: calc(100% - 145px);
 }
 
+.centerpanel.banneropen{
+padding-bottom: 90px;
+}
+
+
 .fullpanel .reduce{
     left: 390px;
     width: calc(100% - 390px);

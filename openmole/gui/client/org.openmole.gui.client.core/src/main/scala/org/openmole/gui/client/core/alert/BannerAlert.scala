@@ -50,6 +50,7 @@ object BannerAlert {
   }
 
   private val bannerMessages: Var[Seq[BannerMessage]] = Var(Seq())
+  val isOpen = bannerMessages.map { bm ⇒ !bm.isEmpty }
 
   private val bannerDiv = tags.div(
     Rx {

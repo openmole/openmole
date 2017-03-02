@@ -138,4 +138,6 @@ object CoreUtils {
     else (doubleBytes / tB).formatted("%.2f").toString + "TB"
   }
 
+  def ifOrNothing(condition: Boolean, classString: String) = if (condition) classString else ""
+
 }
