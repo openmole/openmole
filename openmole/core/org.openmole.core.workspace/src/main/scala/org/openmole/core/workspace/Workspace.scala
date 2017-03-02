@@ -17,8 +17,6 @@
 
 package org.openmole.core.workspace
 
-import java.io.File
-import java.security.Security
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicLong
 import java.util.logging.Level
@@ -70,9 +68,6 @@ object Workspace {
     instance.setDefault(location)
   }
 
-  def allTmpDir(location: File) = new File(location, tmpLocation)
-  def lock(location: File) = new File(allTmpDir(location), s"${sessionUUID.toString}-lock")
-
   object NoneTextEncryptor extends TextEncryptor {
     def decrypt(encryptedMessage: String) = encryptedMessage
     def encrypt(message: String) = message
@@ -98,9 +93,14 @@ object Workspace {
   def openMOLELocation =
     openMOLELocationOption.getOrElse(throw new InternalProcessingError("openmole.location not set"))
 
+  def persistentDirLocationProperty = "openmole.persisentlocation"
+
+  def persistentDirLocation: Option[File] = Option(System.getProperty(persistentDirLocationProperty)).map(l ⇒ File(l))
+
   def apply(location: File) = {
-    val tmpDir = new File(Workspace.allTmpDir(location), sessionUUID.toString)
-    new Workspace(location, tmpDir)
+    val tmpDir = location / tmpLocation / sessionUUID.toString
+    val persistentDir = persistentDirLocation.getOrElse(location / persistentLocation)
+    new Workspace(location, tmpDir, persistentDir)
   }
 
   lazy val instance = {
@@ -112,15 +112,13 @@ object Workspace {
 
 }
 
-class Workspace(val location: File, val tmpDir: File) {
+class Workspace(val location: File, val tmpDir: File, val persistentDir: File) {
 
   import Workspace._
 
   location.mkdirs
-  tmpDir.mkdirs
-
-  lazy val persistentDir = location /> persistentLocation
-  lazy val cacheDir = persistentDir /> "cache"
+  persistentDir.mkdirs()
+  tmpDir.mkdirs()
 
   val rng = Random(uuid2long(sessionUUID))
   val currentSeed = new AtomicLong(rng.nextLong)

@@ -20,5 +20,5 @@ package org.openmole.plugin.task.udocker
 import org.openmole.core.pluginmanager.PluginInfoActivator
 
 class Activator extends PluginInfoActivator {
-  //override def keyWordTraits = List(classOf[SystemExecPackage])
+  override def keyWordTraits = List(classOf[UDockerPackage])
 }
