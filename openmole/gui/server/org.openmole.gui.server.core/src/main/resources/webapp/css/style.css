@@ -407,21 +407,24 @@ li.selectElement{
 
 .fullpanel {
     height: 100%;
-    width: 100%;
+    width: calc(100% - 50px);
 }
 
 .centerpanel {
     padding-left: 15px;
-    padding-right: 15px;
+    padding-bottom:25px;
     position: relative;
-    top: 61px;
+    top: 60px;
     width: 100%;
-    left : 20;
-    background-color: white;
     height: calc(100% - 145px);
 }
 
-.fullpanel .reduce {
+.fullpanel .reduce{
+    left: 390px;
+    width: calc(100% - 390px);
+}
+
+.centerpanel .reduce {
     left: 390px;
     padding-right: 400px;
     position: relative;
