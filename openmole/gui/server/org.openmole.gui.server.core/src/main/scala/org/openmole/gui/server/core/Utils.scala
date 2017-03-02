@@ -418,7 +418,7 @@ object Utils extends Logger {
   }
 
   lazy val openmoleFile = {
-    val jsFile = Workspace.cacheDir /> "webui" / "openmole.js"
+    val jsFile = Workspace.persistentDir /> "webui" / "openmole.js"
     def update = {
       logger.info("Building GUI plugins ...")
       jsFile.delete
