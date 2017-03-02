@@ -95,7 +95,7 @@ package systemexec {
     def hostFiles: Lens[T, Vector[(String, Option[String])]]
   }
 
-  trait SystemExecPackage extends ExternalPackage {
+  trait SystemExecPackage {
 
     lazy val errorOnReturnValue =
       new {
@@ -197,7 +197,8 @@ package object systemexec extends external.ExternalPackage with SystemExecPackag
     workDir:              File,
     environmentVariables: Vector[(String, String)],
     returnOutput:         Boolean,
-    returnError:          Boolean
+    returnError:          Boolean,
+    errorOnReturnValue:   Boolean                  = true
   ) = {
     try {
 
@@ -223,16 +224,22 @@ package object systemexec extends external.ExternalPackage with SystemExecPackag
         )
       }
 
-      ExecutionResult(
-        executeProcess(process, out, err),
-        if (returnOutput) Some(outBuilder.toString) else None,
-        if (returnError) Some(errBuilder.toString) else None
-      )
+      val returnCode = executeProcess(process, out, err)
+
+      val result =
+        ExecutionResult(
+          returnCode,
+          if (returnOutput) Some(outBuilder.toString) else None,
+          if (returnError) Some(errBuilder.toString) else None
+        )
+
+      if (errorOnReturnValue && result.returnCode != 0) throw error(command.toVector, result)
+      result
     }
     catch {
       case e: IOException ⇒ throw new InternalProcessingError(
         e,
-        s"""Error executing: ${command.mkString("\n  ")}
+        s"""Error executing: ${command.mkString(" ")}
 
             |The content of the working directory was:
             |${workDir.listRecursive(_ ⇒ true).map(_.getPath).mkString("\n")}
@@ -263,7 +270,7 @@ package object systemexec extends external.ExternalPackage with SystemExecPackag
       case Nil ⇒ acc
       case cmd :: t ⇒
         val commandline = commandLine(cmd, workDirectory.getAbsolutePath, context)
-        val result = execute(commandline, workDirectory, environmentVariables, returnOutput = stdOut.isDefined, returnError = stdErr.isDefined)
+        val result = execute(commandline, workDirectory, environmentVariables, returnOutput = stdOut.isDefined, returnError = stdErr.isDefined, errorOnReturnValue = false)
         if (errorOnReturnValue && !returnValue.isDefined && result.returnCode != 0) throw error(commandline.toVector, result)
         else executeAll(workDirectory, environmentVariables, errorOnReturnValue, returnValue, stdOut, stdErr, context, t, ExecutionResult.append(acc, result))
     }
