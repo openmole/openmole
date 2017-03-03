@@ -442,7 +442,6 @@ object Utils extends Logger {
     val basename = from.getName.substring(0, from.getName.lastIndexOf("."))
     to.getParentFile.mkdirs
 
-    println("ZIP0 " + from.getAbsolutePath + " to " + to.getAbsolutePath)
     val zip = new ZipFile(from)
     zip.entries.foreach { entry ⇒
       val entryName = entry.getName
@@ -453,7 +452,6 @@ object Utils extends Logger {
           entryName
       }
 
-      println("ZIP " + zip.getName)
       // create output directory if it doesn't exist already
       val splitPath = entry.getName.split(java.io.File.separator).dropRight(1)
       if (splitPath.size >= 1) {
@@ -469,12 +467,10 @@ object Utils extends Logger {
         })
       }
 
-      println("ZIP1")
       // write file to dest
       val inputSrc = new BufferedSource(
         zip.getInputStream(entry)
       )(Codec.ISO8859)
-      println("ZIP2")
 
       val ostream = new FileOutputStream(new File(to, entryPath))
       inputSrc foreach { c: Char ⇒ ostream.write(c) }
