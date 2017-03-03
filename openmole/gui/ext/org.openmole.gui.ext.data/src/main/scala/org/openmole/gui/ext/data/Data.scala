@@ -116,11 +116,15 @@ case class BinaryFile() extends FileExtension {
   def displayable = false
 }
 
-case class TarGz() extends FileExtension {
+object TarGz extends FileExtension {
   def displayable = false
 }
 
-case class Tar() extends FileExtension {
+object Tar extends FileExtension {
+  def displayable = false
+}
+
+object Zip extends FileExtension {
   def displayable = false
 }
 
@@ -131,8 +135,9 @@ object FileExtension {
   val SH = DisplayableOnDemandFile("sh")
   val TEXT = DisplayableOnDemandFile("text")
   val NO_EXTENSION = DisplayableFile("text")
-  val TGZ = TarGz()
-  val TAR = Tar()
+  val TGZ = TarGz
+  val TAR = Tar
+  val ZIP = Zip
   val BINARY = BinaryFile()
 }
 
