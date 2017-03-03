@@ -6,7 +6,6 @@ import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
 import org.openmole.gui.ext.tool.client.Utils._
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
-import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import org.openmole.gui.ext.api.Api
 import org.scalajs.dom.raw.{ HTMLDivElement, HTMLElement }
 import sheet._
@@ -128,10 +127,16 @@ object TreeNodeTabs {
   }
 
   class HTMLTab(val safePathTab: Var[SafePath], htmlContent: String) extends TreeNodeTab {
-    val editorElement = tags.div(
-      `class` := "mdRendering",
-      RawFrag(htmlContent)
-    )
+    val editorElement =
+      div(editorContainer +++ container)(
+        overflowY := "scroll",
+        div(panel +++ panelDefault)(
+          div(sheet.panelBody)(
+            ms("mdRendering") +++ (padding := 10),
+            RawFrag(htmlContent)
+          )
+        )
+      )
 
     def fileContent = ReadOnlyFileContent()
 
