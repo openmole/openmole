@@ -501,7 +501,7 @@ class TreeNodePanel {
                         href := s"downloadFile?path=${Utils.toURI(tnSafePath.path)}"
                       ),
                       DataUtils.fileToExtension(tn.name.now) match {
-                        case FileExtension.TGZ | FileExtension.TAR ⇒
+                        case FileExtension.TGZ | FileExtension.TAR | FileExtension.ZIP ⇒
                           span(archive, onclick := { () ⇒
                             extractTGZ(tnSafePath)
                           })

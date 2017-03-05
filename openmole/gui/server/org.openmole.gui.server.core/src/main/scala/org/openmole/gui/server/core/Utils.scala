@@ -21,7 +21,8 @@ import java.io.File
 import java.lang.reflect.Modifier
 import java.nio.channels.FileChannel
 import java.util.logging.Level
-import java.util.zip.{ GZIPInputStream, ZipInputStream }
+import java.util.zip._
+import scala.collection.JavaConversions.enumerationAsScalaIterator
 
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.workspace.Workspace
@@ -38,12 +39,12 @@ import org.openmole.tool.stream.StringOutputStream
 import org.openmole.tool.tar._
 import java.nio.file.attribute._
 
-import org.openmole.core.dsl
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.gui.ext.plugin.server.PluginActivator
 import org.openmole.gui.ext.tool.server.OMRouter
 import org.openmole.gui.server.jscompile.JSPack
 
+import scala.io.{ BufferedSource, Codec }
 import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
 
 object Utils extends Logger {
@@ -419,6 +420,7 @@ object Utils extends Logger {
 
   lazy val openmoleFile = {
     val jsFile = Workspace.persistentDir /> "webui" / "openmole.js"
+
     def update = {
       logger.info("Building GUI plugins ...")
       jsFile.delete
@@ -433,6 +435,48 @@ object Utils extends Logger {
   def addPluginRoutes(route: OMRouter ⇒ Unit) = {
     logger.info("Loading GUI plugins")
     PluginActivator.plugins.foreach { p ⇒ route(p._2.router) }
+  }
+
+  // Extract .zip archive
+  def unzip(from: File, to: File) = {
+    val basename = from.getName.substring(0, from.getName.lastIndexOf("."))
+    to.getParentFile.mkdirs
+
+    val zip = new ZipFile(from)
+    zip.entries.foreach { entry ⇒
+      val entryName = entry.getName
+      val entryPath = {
+        if (entryName.startsWith(basename))
+          entryName.substring(basename.length)
+        else
+          entryName
+      }
+
+      // create output directory if it doesn't exist already
+      val splitPath = entry.getName.split(java.io.File.separator).dropRight(1)
+      if (splitPath.size >= 1) {
+        // create intermediate directories if they don't exist
+        val dirBuilder = new StringBuilder(to.getName)
+        splitPath.foldLeft(dirBuilder)((a: StringBuilder, b: String) ⇒ {
+          val path = a.append(java.io.File.separator + b)
+          val str = path.mkString
+          if (!(new File(str).exists)) {
+            new File(str).mkdir
+          }
+          path
+        })
+      }
+
+      // write file to dest
+      val inputSrc = new BufferedSource(
+        zip.getInputStream(entry)
+      )(Codec.ISO8859)
+
+      val ostream = new FileOutputStream(new File(to, entryPath))
+      inputSrc foreach { c: Char ⇒ ostream.write(c) }
+      inputSrc.close
+      ostream.close
+    }
   }
 
 }

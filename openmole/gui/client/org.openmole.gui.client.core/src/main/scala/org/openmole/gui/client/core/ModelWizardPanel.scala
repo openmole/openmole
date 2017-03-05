@@ -617,17 +617,19 @@ class ModelWizardPanel {
     val reactives = currentReactives.now
     val topButtons = Rx {
       div(sheet.paddingTop(20))(
-        badge("I/O", s"$nbInputs/$nbOutputs",
+        bs.button(
+          "I/O",
           buttonStyle(0), () ⇒ {
             currentTab() = 0
             setBodyContent
-          }),
-        badge("Resources", s"${
-          resources().number
-        }", buttonStyle(1), () ⇒ {
+          }
+        )(bs.badge(s"$nbInputs/$nbOutputs")),
+        bs.button("Resources", buttonStyle(1), () ⇒ {
           currentTab() = 1
           setBodyContent
-        })
+        })(badge(s"${
+          resources().number
+        }"))
       )
     }
 

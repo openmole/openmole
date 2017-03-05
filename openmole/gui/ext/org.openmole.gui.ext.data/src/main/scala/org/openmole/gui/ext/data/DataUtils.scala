@@ -52,11 +52,7 @@ object DataUtils {
   }
 
   implicit def fileToExtension(fileName: String): FileExtension = fileName match {
-    case x if x.endsWith(".oms")                         ⇒ OMS
-    case x if x.endsWith(".scala")                       ⇒ SCALA
-    case x if x.endsWith(".sh")                          ⇒ SH
-    case x if x.endsWith(".tgz") | x.endsWith(".tar.gz") ⇒ TGZ
-    case x if x.endsWith(".tar")                         ⇒ TAR
+    case x if x.endsWith(".oms") ⇒ OMS
     case x if x.endsWith(".csv") |
       x.endsWith(".nlogo") |
       x.endsWith(".gaml") |
@@ -65,7 +61,12 @@ object DataUtils {
       x.endsWith(".R") |
       x.endsWith(".txt") ⇒ TEXT
     case x if x.endsWith(".md") ⇒ MD
-    case _                      ⇒ BINARY
+    case x if x.endsWith(".tgz") | x.endsWith(".tar.gz") ⇒ TGZ
+    case x if x.endsWith(".tar") ⇒ TAR
+    case x if x.endsWith(".zip") ⇒ ZIP
+    case x if x.endsWith(".scala") ⇒ SCALA
+    case x if x.endsWith(".sh") ⇒ SH
+    case _ ⇒ BINARY
   }
 
   implicit class CleanName(s: String) {

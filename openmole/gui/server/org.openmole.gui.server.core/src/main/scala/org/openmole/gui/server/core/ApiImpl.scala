@@ -5,22 +5,22 @@ import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.zip.GZIPInputStream
 
-import org.openmole.plugin.environment.batch.environment.BatchEnvironment.{ BeginDownload, BeginUpload, EndDownload, EndUpload }
+import org.openmole.plugin.environment.batch.environment.BatchEnvironment.{BeginDownload, BeginUpload, EndDownload, EndUpload}
 import org.openmole.core.buildinfo
 import org.openmole.core.event._
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.pluginmanager._
 import org.openmole.gui.server.core.Utils._
-import org.openmole.core.workspace.{ ConfigurationLocation, Workspace }
+import org.openmole.core.workspace.{ConfigurationLocation, Workspace}
 import org.openmole.gui.ext.data
 import org.openmole.gui.ext.data._
 import java.io._
 import java.nio.file._
 
 import fr.iscpif.gridscale.http.HTTPStorage
-import org.openmole.core.market.{ MarketIndex, MarketIndexEntry }
+import org.openmole.core.market.{MarketIndex, MarketIndexEntry}
 
-import scala.util.{ Failure, Success, Try }
+import scala.util.{Failure, Success, Try}
 import org.openmole.core.workflow.mole.MoleExecutionContext
 import org.openmole.tool.stream.StringPrintStream
 
@@ -32,7 +32,7 @@ import org.openmole.core.module
 import org.openmole.core.market
 import org.openmole.core.project._
 import org.openmole.gui.ext.api.Api
-import org.openmole.gui.ext.plugin.server.{ Configurations, PluginActivator }
+import org.openmole.gui.ext.plugin.server.{Configurations, PluginActivator}
 import org.openmole.gui.ext.tool.server.OMRouter
 import org.openmole.gui.ext.tool.server.Utils.authenticationKeysFile
 
@@ -115,12 +115,13 @@ class ApiImpl(val arguments: GUIServer.ServletArguments) extends Api {
     Try {
       val ext = DataUtils.fileToExtension(from.getName)
       ext match {
-        case org.openmole.gui.ext.data.Tar() ⇒
+        case org.openmole.gui.ext.data.Tar ⇒
           from.extract(to)
           to.applyRecursive((f: File) ⇒ f.setWritable(true))
-        case TarGz() ⇒
+        case TarGz ⇒
           from.extractUncompress(to, true)
           to.applyRecursive((f: File) ⇒ f.setWritable(true))
+        case Zip ⇒ Utils.unzip(from, to)
         case _ ⇒ throw new Throwable("Unknown compression format for " + from.getName)
       }
     } match {
@@ -129,19 +130,14 @@ class ApiImpl(val arguments: GUIServer.ServletArguments) extends Api {
     }
   }
 
-  private def extractTGZTo(safePath: SafePath, to: SafePath): ExtractResult = {
+  def extractTGZ(safePath: SafePath): ExtractResult = {
     DataUtils.fileToExtension(safePath.name) match {
-      case FileExtension.TGZ | FileExtension.TAR ⇒
+      case FileExtension.TGZ | FileExtension.TAR | FileExtension.ZIP ⇒
         val archiveFile = safePathToFile(safePath)(ServerFileSytemContext.project)
-        val toFile: File = safePathToFile(to)(ServerFileSytemContext.project)
+        val toFile: File = safePathToFile(safePath.parent)(ServerFileSytemContext.project)
         extractArchiveFromFiles(archiveFile, toFile)(ServerFileSytemContext.project)
       case _ ⇒ unknownFormat(safePath.name)
     }
-  }
-
-  def extractTGZ(safePath: SafePath): ExtractResult = DataUtils.fileToExtension(safePath.name) match {
-    case FileExtension.TGZ | FileExtension.TAR ⇒ extractTGZTo(safePath, safePath.parent)
-    case _                                     ⇒ unknownFormat(safePath.name)
   }
 
   def temporaryFile(): SafePath = {
