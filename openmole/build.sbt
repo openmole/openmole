@@ -160,7 +160,7 @@ lazy val pluginManager = OsgiProject(
 
 lazy val updater = OsgiProject(coreDir, "org.openmole.core.updater", imports = Seq("*")) dependsOn(exception, tools, workspace) settings (coreSettings: _*)
 
-lazy val fileService = OsgiProject(coreDir, "orcg.openmole.core.fileservice", imports = Seq("*")) dependsOn(tools, updater, workspace, openmoleTar) settings (coreSettings: _*) settings(defaultActivator)
+lazy val fileService = OsgiProject(coreDir, "org.openmole.core.fileservice", imports = Seq("*")) dependsOn(tools, updater, workspace, openmoleTar) settings (coreSettings: _*) settings(defaultActivator)
 
 lazy val module = OsgiProject(coreDir, "org.openmole.core.module", imports = Seq("*")) dependsOn(buildinfo, expansion, openmoleHash, openmoleFile, pluginManager) settings (coreSettings: _*) settings(
   libraryDependencies += Libraries.gridscaleHTTP,
