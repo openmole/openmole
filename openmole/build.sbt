@@ -744,6 +744,7 @@ lazy val daemon = OsgiProject(binDir, "org.openmole.daemon", settings = tarProje
     Libraries.logging,
     Libraries.scopt
   ),
+  defaultActivator,
   assemblyDependenciesPath := assemblyPath.value / "plugins",
   dependencyFilter := bundleFilter,
   dependencyName := rename,

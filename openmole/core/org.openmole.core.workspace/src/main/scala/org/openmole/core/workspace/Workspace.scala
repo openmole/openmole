@@ -97,7 +97,7 @@ object Workspace {
 
   def persistentDirLocation: Option[File] = Option(System.getProperty(persistentDirLocationProperty)).map(l ⇒ File(l))
 
-  def apply(location: File) = {
+  def apply(location: File): Workspace = {
     val tmpDir = location / tmpLocation / sessionUUID.toString
     val persistentDir = persistentDirLocation.getOrElse(location / persistentLocation)
     val ws = new Workspace(location, tmpDir, persistentDir)
@@ -105,7 +105,7 @@ object Workspace {
     ws
   }
 
-  lazy val instance = Workspace(defaultLocation)
+  lazy val instance = Workspace.apply(defaultLocation)
 
 }
 
