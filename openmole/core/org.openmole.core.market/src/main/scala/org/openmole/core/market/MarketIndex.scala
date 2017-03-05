@@ -16,6 +16,14 @@
  */
 package org.openmole.core.market
 
+import org.openmole.core.buildinfo
+import org.openmole.core.workspace.{ ConfigurationLocation, Workspace }
+
+object MarketIndex {
+  // FIXME support list of indexes
+  val marketIndexLocation = ConfigurationLocation("Market", "Index", Some(buildinfo.marketAddress))
+}
+
 case class MarketIndexEntry(name: String, archive: String, readme: Option[String], tags: Seq[String]) {
   def url: String = org.openmole.core.buildinfo.url(archive)
 }

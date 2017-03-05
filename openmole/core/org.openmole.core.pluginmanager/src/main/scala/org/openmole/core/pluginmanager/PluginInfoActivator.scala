@@ -17,7 +17,7 @@
 
 package org.openmole.core.pluginmanager
 
-import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent._
 
 import org.osgi.framework.{ BundleActivator, BundleContext }
 
@@ -28,13 +28,19 @@ object PluginInfo {
   def addPlugin(c: Class[_], info: PluginInfo) = plugins += c → info
   def removePlugin(c: Class[_]) = plugins -= c
   def pluginsInfo = plugins.values
+
+  def add(clazz: Class[_], keywordTraits: List[Class[_]] = Nil): Unit = {
+    val info = PluginInfo(List(clazz.getPackage.getName), keywordTraits.map(_.getCanonicalName))
+    PluginInfo.addPlugin(clazz, info)
+  }
+
+  def remove(clazz: Class[_]): Unit = PluginInfo.removePlugin(clazz)
 }
 
 case class PluginInfo(namespaces: List[String], keywordTraits: List[String])
 
 trait PluginInfoActivator extends BundleActivator {
   def keyWordTraits: List[Class[_]] = Nil
-  def info = PluginInfo(List(this.getClass.getPackage.getName), keyWordTraits.map(_.getCanonicalName))
-  override def start(bundleContext: BundleContext): Unit = PluginInfo.addPlugin(this.getClass, info)
-  override def stop(bundleContext: BundleContext): Unit = PluginInfo.removePlugin(this.getClass)
+  override def start(bundleContext: BundleContext): Unit = PluginInfo.add(this.getClass, keyWordTraits)
+  override def stop(bundleContext: BundleContext): Unit = PluginInfo.remove(this.getClass)
 }

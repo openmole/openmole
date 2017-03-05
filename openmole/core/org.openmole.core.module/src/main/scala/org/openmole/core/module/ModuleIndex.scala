@@ -17,5 +17,12 @@
  */
 package org.openmole.core.module
 
+import org.openmole.core.buildinfo
+import org.openmole.core.workspace.{ ConfigurationLocation }
+
+object ModuleIndex {
+  val moduleIndexes = ConfigurationLocation("Module", "Indexes", Some(Seq[String](buildinfo.moduleAddress)))
+}
+
 case class Component(location: String, hash: String)
 case class Module(name: String, description: String, components: Seq[Component])

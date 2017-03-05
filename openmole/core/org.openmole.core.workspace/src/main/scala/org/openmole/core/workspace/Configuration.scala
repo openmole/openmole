@@ -74,12 +74,6 @@ class ConfigurationFile private (val file: File) {
     builder.save()
   }
 
-  def setCommentedValue(group: String, name: String, value: String) = lock.read {
-    def key = s"..default..$group.$name"
-    config.setProperty(key, value)
-    builder.save()
-  }
-
   def clearValue(group: String, name: String) = lock.write {
     config.clearProperty(s"$group.$name")
     builder.save()

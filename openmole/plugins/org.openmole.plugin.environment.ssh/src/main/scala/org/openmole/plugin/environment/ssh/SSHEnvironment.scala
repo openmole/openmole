@@ -32,10 +32,6 @@ object SSHEnvironment {
   val MaxOperationsByMinute = ConfigurationLocation("SSHEnvironment", "MaxOperationByMinute", Some(500))
   val UpdateInterval = ConfigurationLocation("SSHEnvironment", "UpdateInterval", Some(10 seconds))
 
-  Workspace setDefault UpdateInterval
-  Workspace setDefault MaxConnections
-  Workspace setDefault MaxOperationsByMinute
-
   def apply(
     user:                 String,
     host:                 String,

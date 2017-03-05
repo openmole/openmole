@@ -38,10 +38,6 @@ object DIRACEnvironment {
   val UpdateInterval = ConfigurationLocation("DIRACEnvironment", "UpdateInterval", Some(1 minutes))
   val JobsByGroup = ConfigurationLocation("DIRACEnvironment", "JobsByGroup", Some(10000))
 
-  Workspace setDefault EagerSubmissionThreshold
-  Workspace setDefault UpdateInterval
-  Workspace setDefault JobsByGroup
-
   def apply(
     voName:         String,
     service:        OptionalArgument[String]      = None,

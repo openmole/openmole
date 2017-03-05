@@ -64,9 +64,9 @@ object Workspace {
     }
   })
 
-  def setDefault[T: ConfigurationString](location: ConfigurationLocation[T]) = synchronized {
-    instance.setDefault(location)
-  }
+  //  def setDefault[T: ConfigurationString](location: ConfigurationLocation[T]) = synchronized {
+  //    instance.setDefault(location)
+  //  }
 
   object NoneTextEncryptor extends TextEncryptor {
     def decrypt(encryptedMessage: String) = encryptedMessage
@@ -100,15 +100,12 @@ object Workspace {
   def apply(location: File) = {
     val tmpDir = location / tmpLocation / sessionUUID.toString
     val persistentDir = persistentDirLocation.getOrElse(location / persistentLocation)
-    new Workspace(location, tmpDir, persistentDir)
+    val ws = new Workspace(location, tmpDir, persistentDir)
+    ws setPreferenceIfNotSet (uniqueIDLocation, UUID.randomUUID.toString)
+    ws
   }
 
-  lazy val instance = {
-    Workspace(defaultLocation)
-  }
-
-  instance setPreferenceIfNotSet (uniqueIDLocation, UUID.randomUUID.toString)
-  instance setDefault ErrorArraySnipSize
+  lazy val instance = Workspace(defaultLocation)
 
 }
 
@@ -161,13 +158,13 @@ class Workspace(val location: File, val tmpDir: File, val persistentDir: File) {
     if (!preferenceIsSet(location)) setPreference(location, value)
   }
 
-  def setDefault[T](location: ConfigurationLocation[T])(implicit configurationString: ConfigurationString[T]) = synchronized {
-    if (!preferenceIsSet(location)) {
-      def defaultOrException = location.default.getOrElse(throw new UserBadDataError(s"No default value set for location ${this}."))
-      def prop = if (location.cyphered) encrypt(configurationString.toString(defaultOrException)) else configurationString.toString(defaultOrException)
-      configurationFile.setCommentedValue(location.group, location.name, prop)
-    }
-  }
+  //  def setDefault[T](location: ConfigurationLocation[T])(implicit configurationString: ConfigurationString[T]) = synchronized {
+  //    if (!preferenceIsSet(location)) {
+  //      def defaultOrException = location.default.getOrElse(throw new UserBadDataError(s"No default value set for location ${this}."))
+  //      def prop = if (location.cyphered) encrypt(configurationString.toString(defaultOrException)) else configurationString.toString(defaultOrException)
+  //      configurationFile.setCommentedValue(location.group, location.name, prop)
+  //    }
+  //  }
 
   def clearPreference[T](location: ConfigurationLocation[T]) = synchronized {
     configurationFile.clearValue(location.group, location.name)

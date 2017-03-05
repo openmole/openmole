@@ -39,8 +39,6 @@ object Variable {
 
   val OpenMOLEVariablePrefix = ConfigurationLocation("Variable", "OpenMOLEVariablePrefix", Some("oM"))
 
-  Workspace setDefault OpenMOLEVariablePrefix
-
   def prefixedVariable(name: String) = Workspace.preference(OpenMOLEVariablePrefix) + name
 
   val openMOLESeed = Val[Long](prefixedVariable("Seed"))

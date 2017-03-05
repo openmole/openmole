@@ -30,7 +30,6 @@ import squants.time.TimeConversions._
 
 object FileService {
   val GCInterval = ConfigurationLocation("FileService", "GCInterval", Some(5 minutes))
-  Workspace setDefault GCInterval
 
   private[fileservice] val hashCache = new AssociativeCache[String, Hash]
   private[fileservice] val archiveCache = new AssociativeCache[String, FileCache]

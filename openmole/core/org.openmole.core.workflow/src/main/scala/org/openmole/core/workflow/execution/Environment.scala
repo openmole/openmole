@@ -37,8 +37,6 @@ import scala.ref.WeakReference
 object Environment {
   val maxExceptionsLog = ConfigurationLocation("Environment", "MaxExceptionsLog", Some(1000))
 
-  Workspace setDefault maxExceptionsLog
-
   case class JobSubmitted(job: ExecutionJob) extends Event[Environment]
   case class JobStateChanged(job: ExecutionJob, newState: ExecutionState, oldState: ExecutionState) extends Event[Environment]
   case class ExceptionRaised(job: ExecutionJob, exception: Throwable, level: Level) extends Event[Environment] with ExceptionEvent
@@ -75,8 +73,7 @@ object LocalEnvironment {
 
   val DefaultNumberOfThreads = ConfigurationLocation("LocalExecutionEnvironment", "ThreadNumber", Some(1))
 
-  Workspace setDefault DefaultNumberOfThreads
-  var defaultNumberOfThreads = Workspace.preference(DefaultNumberOfThreads)
+  def defaultNumberOfThreads = Workspace.preference(DefaultNumberOfThreads)
 
   def apply(
     nbThreads:    Int                      = defaultNumberOfThreads,

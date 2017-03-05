@@ -34,12 +34,8 @@ package object market {
   import org.json4s.jackson.Serialization
   implicit val formats = Serialization.formats(NoTypeHints)
 
-  // FIXME support list of indexes
-  val marketIndexLocation = ConfigurationLocation("Market", "Index", Some(buildinfo.marketAddress))
-  Workspace setDefault marketIndexLocation
-
   lazy val indexURL =
-    ExpandedString(Workspace.preference(marketIndexLocation)).
+    ExpandedString(Workspace.preference(MarketIndex.marketIndexLocation)).
       from(Context("version" → buildinfo.version))(RandomProvider.empty)
 
   def marketIndex = HTTPStorage.download(indexURL)(Serialization.read[MarketIndex](_))

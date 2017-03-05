@@ -17,6 +17,22 @@
 
 package org.openmole.plugin.environment.ssh
 
-import org.openmole.core.pluginmanager.PluginInfoActivator
+import org.openmole.core.pluginmanager.{ PluginInfo, PluginInfoActivator }
+import org.openmole.core.workspace.ConfigurationInfo
+import org.osgi.framework.{ BundleActivator, BundleContext }
 
-class Activator extends PluginInfoActivator
+class Activator extends BundleActivator {
+  override def stop(context: BundleContext): Unit = {
+    PluginInfo.remove(this.getClass)
+    ConfigurationInfo.remove(this.getClass)
+  }
+
+  override def start(context: BundleContext): Unit = {
+    PluginInfo.add(this.getClass)
+    ConfigurationInfo.add(
+      this.getClass,
+      ConfigurationInfo.list(SSHEnvironment) ++
+        ConfigurationInfo.list(SSHService)
+    )
+  }
+}

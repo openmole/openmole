@@ -39,11 +39,7 @@ import squants.time.TimeConversions._
 object StorageService extends Logger {
 
   val DirRegenerate = ConfigurationLocation("StorageService", "DirRegenerate", Some(1 hours))
-  Workspace setDefault DirRegenerate
-
   val TmpDirRemoval = ConfigurationLocation("StorageService", "TmpDirRemoval", Some(30 days))
-  Workspace setDefault TmpDirRemoval
-
   val persistent = "persistent/"
   val tmp = "tmp/"
 

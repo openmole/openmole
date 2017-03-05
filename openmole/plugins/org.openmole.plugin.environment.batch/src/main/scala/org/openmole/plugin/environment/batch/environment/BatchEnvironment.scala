@@ -110,24 +110,10 @@ object BatchEnvironment extends Logger {
 
   val downloadResultRetry = ConfigurationLocation("BatchEnvironment", "DownloadResultRetry", Some(3))
 
-  Workspace setDefault MinUpdateInterval
-  Workspace setDefault MaxUpdateInterval
-  Workspace setDefault IncrementUpdateInterval
-  Workspace setDefault MaxUpdateErrorsInARow
-  Workspace setDefault GetTokenInterval
-
   private def runtimeDirLocation = Workspace.openMOLELocation / "runtime"
 
   lazy val runtimeLocation = runtimeDirLocation / "runtime.tar.gz"
   lazy val JVMLinuxX64Location = runtimeDirLocation / "jvm-x64.tar.gz"
-
-  Workspace setDefault MemorySizeForRuntime
-  Workspace setDefault CheckInterval
-  Workspace setDefault JobManagementThreads
-
-  Workspace setDefault StoragesGCUpdateInterval
-
-  Workspace setDefault RuntimeMemoryMargin
 
   def defaultRuntimeMemory = Workspace.preference(BatchEnvironment.MemorySizeForRuntime)
   def getTokenInterval = Workspace.preference(GetTokenInterval) * Workspace.rng.nextDouble
