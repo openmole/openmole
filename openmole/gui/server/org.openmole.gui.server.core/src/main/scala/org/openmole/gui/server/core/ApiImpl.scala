@@ -5,22 +5,22 @@ import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.zip.GZIPInputStream
 
-import org.openmole.plugin.environment.batch.environment.BatchEnvironment.{BeginDownload, BeginUpload, EndDownload, EndUpload}
+import org.openmole.plugin.environment.batch.environment.BatchEnvironment.{ BeginDownload, BeginUpload, EndDownload, EndUpload }
 import org.openmole.core.buildinfo
 import org.openmole.core.event._
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.pluginmanager._
 import org.openmole.gui.server.core.Utils._
-import org.openmole.core.workspace.{ConfigurationLocation, Workspace}
+import org.openmole.core.workspace.{ ConfigurationLocation, Workspace }
 import org.openmole.gui.ext.data
 import org.openmole.gui.ext.data._
 import java.io._
 import java.nio.file._
 
 import fr.iscpif.gridscale.http.HTTPStorage
-import org.openmole.core.market.{MarketIndex, MarketIndexEntry}
+import org.openmole.core.market.{ MarketIndex, MarketIndexEntry }
 
-import scala.util.{Failure, Success, Try}
+import scala.util.{ Failure, Success, Try }
 import org.openmole.core.workflow.mole.MoleExecutionContext
 import org.openmole.tool.stream.StringPrintStream
 
@@ -32,7 +32,7 @@ import org.openmole.core.module
 import org.openmole.core.market
 import org.openmole.core.project._
 import org.openmole.gui.ext.api.Api
-import org.openmole.gui.ext.plugin.server.{Configurations, PluginActivator}
+import org.openmole.gui.ext.plugin.server.{ Configurations, PluginActivator }
 import org.openmole.gui.ext.tool.server.OMRouter
 import org.openmole.gui.ext.tool.server.Utils.authenticationKeysFile
 
@@ -122,7 +122,7 @@ class ApiImpl(val arguments: GUIServer.ServletArguments) extends Api {
           from.extractUncompress(to, true)
           to.applyRecursive((f: File) ⇒ f.setWritable(true))
         case Zip ⇒ Utils.unzip(from, to)
-        case _ ⇒ throw new Throwable("Unknown compression format for " + from.getName)
+        case _   ⇒ throw new Throwable("Unknown compression format for " + from.getName)
       }
     } match {
       case Success(_) ⇒ ExtractResult.ok
@@ -283,6 +283,7 @@ class ApiImpl(val arguments: GUIServer.ServletArguments) extends Api {
     execution.addStaticInfo(execId, StaticExecutionInfo(scriptData.scriptPath, content, System.currentTimeMillis()))
 
     def error(t: Throwable): Unit = execution.addError(execId, Failed(ErrorBuilder(t), Seq()))
+
     def message(message: String): Unit = execution.addError(execId, Failed(Error(message), Seq()))
 
     try {
@@ -354,9 +355,11 @@ class ApiImpl(val arguments: GUIServer.ServletArguments) extends Api {
       environmentErrors.sortBy(_.date).takeRight(lines).groupBy {
         _.errorMessage
       }.toSeq.map {
-        case (msg, err) ⇒ (err.head, err.map {
-          _.date
-        })
+        case (msg, err) ⇒
+          val dates = err.map {
+            _.date
+          }
+          (err.head, dates.max, dates.size)
       }
 
     EnvironmentErrorData(groupedErrors)
@@ -365,7 +368,10 @@ class ApiImpl(val arguments: GUIServer.ServletArguments) extends Api {
   def marketIndex() = {
     def mapToMd(marketIndex: MarketIndex) =
       marketIndex.copy(entries = marketIndex.entries.map {
-        e ⇒ e.copy(readme = e.readme.map { MarkDownProcessor(_) })
+        e ⇒
+          e.copy(readme = e.readme.map {
+            MarkDownProcessor(_)
+          })
       })
 
     mapToMd(market.marketIndex)
@@ -456,8 +462,11 @@ class ApiImpl(val arguments: GUIServer.ServletArguments) extends Api {
     val os = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(modelTaskFile)))
 
     def ioString(protos: Seq[ProtoTypePair], keyString: String) = if (protos.nonEmpty) Seq(s"  $keyString += (", ")").mkString(protos.map { i ⇒ s"${i.name}" }.mkString(", ")) + ",\n" else ""
+
     def imapString(protos: Seq[ProtoTypePair], keyString: String) = if (protos.nonEmpty) protos.map { i ⇒ s"""  $keyString += (${i.name}, "${i.mapping.get}")""" }.mkString(",\n") + ",\n" else ""
+
     def omapString(protos: Seq[ProtoTypePair], keyString: String) = if (protos.nonEmpty) protos.map { o ⇒ s"""  $keyString += ("${o.mapping.get}", ${o.name})""" }.mkString(",\n") + ",\n" else ""
+
     def default(key: String, value: String) = s"  $key := $value"
 
     try {

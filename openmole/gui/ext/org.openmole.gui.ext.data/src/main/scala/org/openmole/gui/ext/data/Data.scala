@@ -301,7 +301,8 @@ object EnvironmentErrorData {
   def empty = EnvironmentErrorData(Seq())
 }
 
-case class EnvironmentErrorData(datedErrors: Seq[(EnvironmentError, Seq[Long])])
+// datedError is a triplet of (EnvironmentError, most recent occurrence, number of occurrences)
+case class EnvironmentErrorData(datedErrors: Seq[(EnvironmentError, Long, Int)])
 
 case class RunningOutputData(id: ExecutionId, output: String)
 

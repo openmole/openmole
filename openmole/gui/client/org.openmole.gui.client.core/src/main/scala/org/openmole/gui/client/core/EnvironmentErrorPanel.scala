@@ -6,11 +6,14 @@ import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import org.scalajs.dom.html.TableSection
 import org.openmole.gui.ext.tool.client.JsRxTags._
 import org.openmole.gui.ext.tool.client._
+
 import scalatags.JsDom.{ TypedTag, tags }
 import scalatags.JsDom.all._
 import sheet._
 import bs._
+import fr.iscpif.scaladget.api.BootstrapTags.ScrollableTextArea.NoScroll
 import org.openmole.gui.ext.tool.client.Utils
+import org.scalajs.dom.raw.HTMLLabelElement
 import rx._
 
 /*
@@ -30,17 +33,13 @@ import rx._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-object EnvironmentErrorPanel {
-  def apply = new EnvironmentErrorPanel
-}
-
 class EnvironmentErrorPanel {
 
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
-  val scrollable = scrollableDiv()
+  val scrollableTable = scrollableDiv()
+  val scrollableStack = scrollableText()
   val sortingAndOrdering: Var[ListSortingAndOrdering] = Var(ListSortingAndOrdering(TimeSorting, Descending))
-  val entries: Var[TypedTag[TableSection]] = Var(tbody)
   val currentData: Var[Option[EnvironmentErrorData]] = Var(None)
 
   val topTriangle = glyph_triangle_top +++ (fontSize := 10)
@@ -58,20 +57,24 @@ class EnvironmentErrorPanel {
 
   def setSorting(sorting: ListSorting, ordering: ListOrdering) = {
     sortingAndOrdering() = ListSortingAndOrdering(sorting, ordering)
-    currentData.now.foreach { setErrors }
+    currentData.now.foreach {
+      setErrors
+    }
   }
 
-  def sort(datedErrors: EnvironmentErrorData, sortingAndOrdering: ListSortingAndOrdering): Seq[(String, Long, ErrorStateLevel, Error)] = {
+  def sort(datedErrors: EnvironmentErrorData, sortingAndOrdering: ListSortingAndOrdering): Seq[(String, Long, Int, ErrorStateLevel, Error)] = {
     val lines =
       for {
-        (error, dates) ← datedErrors.datedErrors
-        date ← dates
-      } yield (error.errorMessage, date, error.level, error.stack)
+        (error, mostRecentDate, occurrences) ← datedErrors.datedErrors.headOption match {
+          case Some(o) ⇒ Seq(o)
+          case _       ⇒ Seq()
+        }
+      } yield (error.errorMessage, mostRecentDate, occurrences, error.level, error.stack)
 
     val sorted = sortingAndOrdering.fileSorting match {
       case AlphaSorting ⇒ lines.sortBy(_._1)
       case TimeSorting  ⇒ lines.sortBy(_._2)
-      case _            ⇒ lines.sortBy(_._3.name)
+      case _            ⇒ lines.sortBy(_._4.name)
     }
 
     sortingAndOrdering.fileOrdering match {
@@ -80,25 +83,26 @@ class EnvironmentErrorPanel {
     }
   }
 
-  def setErrors(ers: EnvironmentErrorData) = {
-    currentData() = Some(ers)
-    entries() = tbody(
-      for {
-        (message, date, level, stack) ← sort(ers, sortingAndOrdering.now)
-      } yield {
-        tags.tr(row +++ errorTable)(
-          tags.td(colMD(12))(
-            tags.a(message, cursor := "pointer", onclick := {
-              () ⇒
-                panels.stackPanel.content() = stack.stackTrace
-                panels.stackPanel.open
-            })
-          ),
-          tags.td(colMD(1))(Utils.longToDate(date).split(",").last),
-          tags.td(colMD(1))(levelLabel(level))
-        )
-      }
+  case class Line(message: String, stack: String, date: String, occurrences: String, levelLabel: TypedTag[HTMLLabelElement]) {
+    implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
+    val detailOn = Var(false)
+
+    def toggleDetails = {
+      detailOn() = !detailOn.now
+    }
+
+    val render = tags.tr(row +++ errorTable)(
+      tags.td(colMD(10))(tags.a(message, pointer +++ (fontSize := 13), onclick := { () ⇒ toggleDetails }), bs.badge(occurrences)), //(width := 400)
+      tags.td(colMD(1))(date),
+      tags.td(colMD(1))(levelLabel)
     )
+  }
+
+  def setErrors(ers: EnvironmentErrorData) = {
+    val someErs = Some(ers)
+    if (someErs != currentData.now) {
+      currentData() = someErs
+    }
   }
 
   def levelLabel(level: ErrorStateLevel) = label(level.name)(level match {
@@ -107,7 +111,7 @@ class EnvironmentErrorPanel {
   })
 
   val view = {
-    val errorTable = tags.table(fontSize := "0.96em", width := "100%")(
+    val errorTable = tags.table(sheet.table +++ (width := "100%"))(
       thead(
         tr(row)(
           th(exclusiveButton("Error", () ⇒ setSorting(AlphaSorting, Ascending), () ⇒ setSorting(AlphaSorting, Descending))),
@@ -115,12 +119,34 @@ class EnvironmentErrorPanel {
           th(exclusiveButton("Level", () ⇒ setSorting(LevelSorting, Ascending), () ⇒ setSorting(LevelSorting, Descending)))
         )
       ), Rx {
-        entries()
+        tbody(
+          for {
+            (message, date, occurrences, level, stack) ← sort(currentData().getOrElse(EnvironmentErrorData.empty), sortingAndOrdering.now)
+          } yield {
+
+            val line = Line(message, stack.stackTrace, Utils.longToDate(date).split(",").last, occurrences.toString, levelLabel(level))
+
+            scrollableStack.setContent(line.stack)
+            Seq(
+              line.render,
+              tr(
+                td(colMD(12) +++ (fontSize := 11))(
+                  colspan := 12,
+                  line.detailOn.expand(
+                    tags.div(
+                      scrollableStack.view
+                    )
+                  )
+                )
+              )
+            )
+          }
+        )
       }
     )
 
-    scrollable.setChild(div(omsheet.environmentPanelError)(errorTable).render)
-    scrollable.sRender
+    scrollableTable.setChild(div(omsheet.environmentPanelError)(errorTable).render)
+    scrollableTable.sRender
   }
 
 }

@@ -57,6 +57,7 @@ class ExecutionPanel {
   var envError: Var[Map[EnvironmentId, EnvironmentErrorData]] = Var(Map())
   val expanders: Var[Map[ExpandID, Expander]] = Var(Map())
   val executionsDisplayedInBanner: Var[Seq[ExecutionId]] = Var(Seq())
+  val timerOn = Var(false)
 
   val updating = new AtomicBoolean(false)
 
@@ -73,6 +74,15 @@ class ExecutionPanel {
     _.close
   }
 
+  def setTimerOn = {
+    updating.set(false)
+    timerOn() = true
+  }
+
+  def setTimerOff = {
+    timerOn() = false
+  }
+
   def updateExecutionInfo: Unit = {
 
     def delay = {
@@ -87,7 +97,7 @@ class ExecutionPanel {
         case Success((executionInfos, runningOutputData)) ⇒
           execInfo() = PanelInfo(executionInfos, runningOutputData)
           doScrolls
-          delay
+          if (timerOn.now) delay
         case Failure(_) ⇒ delay
       }
     }
@@ -103,13 +113,12 @@ class ExecutionPanel {
   }
 
   def doScrolls = {
-    Seq(outputTextAreas.now, scriptTextAreas.now, errorTextAreas.now).map {
-      _.values.foreach {
-        _.doScroll
-      }
-    }
-    envErrorPanels.now.values.foreach {
-      _.scrollable.doScroll
+    val scrollables =
+      Seq(outputTextAreas.now, scriptTextAreas.now, errorTextAreas.now).flatMap { _.values } ++
+        envErrorPanels.now.flatMap { e ⇒ Seq(e._2.scrollableTable, e._2.scrollableStack) }.toSeq
+
+    scrollables.foreach {
+      _.doScroll
     }
   }
 
@@ -229,6 +238,7 @@ class ExecutionPanel {
             val hiddenMap: Map[ColumnID, Modifier] = Map(
               scriptID → staticPanel(id, scriptTextAreas,
                 () ⇒ scrollableText(staticInfo.now(id).script)).view,
+
               envID → {
                 details.envStates.map { e ⇒
                   tags.table(sheet.table)(
@@ -273,6 +283,7 @@ class ExecutionPanel {
                   )
                 }
               },
+
               errorID →
                 div(
                   omsheet.monospace,
@@ -360,8 +371,12 @@ class ExecutionPanel {
   val dialog = bs.ModalDialog(
     omsheet.panelWidth(92),
     onopen = () ⇒ {
+      setTimerOn
       closeAllExpanders
       updateStaticInfos
+    },
+    onclose = () ⇒ {
+      setTimerOff
     }
   )
 
