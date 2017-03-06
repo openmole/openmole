@@ -36,7 +36,7 @@ package object client {
 
   lazy val BLUE = "#3086b5"
 
-  lazy val RED = "#c9302c"
+  lazy val RED = "#c83737"
 
   lazy val DARK_GREY = "#222"
 
@@ -53,7 +53,6 @@ package object client {
   lazy val textRight = ms("text-right")
   lazy val textJustify = ms("text-justify")
   lazy val textNoWrap = ms("text-nowrap")
-
 
   lazy val tableTag: ModifierSeq = Seq(
     sheet.marginLeft(3),
@@ -389,7 +388,10 @@ package object client {
     opacity := 0.9,
     width := "100%",
     zIndex := 10,
-    bottom := 3
+    bottom := 3,
+    borderBottomLeftRadius := "5px",
+    borderBottomRightRadius := "5px",
+    borderTopRightRadius := "5px"
   )
 
   lazy val overlayElement: ModifierSeq = Seq(
@@ -452,7 +454,8 @@ package object client {
   )
 
   lazy val activeTab: ModifierSeq = Seq(
-    backgroundColor := VERY_LIGHT_GREY
+    backgroundColor := FUN_GREY,
+    bold
   )
 
   lazy val unActiveTab: ModifierSeq = Seq(
