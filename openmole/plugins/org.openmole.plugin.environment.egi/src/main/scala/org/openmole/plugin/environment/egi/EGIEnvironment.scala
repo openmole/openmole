@@ -99,62 +99,6 @@ object EGIEnvironment extends Logger {
 
   val WMSRank = ConfigurationLocation("EGIEnvironment", "WMSRank", Some("""( other.GlueCEStateFreeJobSlots > 0 ? other.GlueCEStateFreeJobSlots : (-other.GlueCEStateWaitingJobs * 4 / ( other.GlueCEStateRunningJobs + 1 )) - 1 )"""))
 
-  Workspace setDefault ProxyTime
-  Workspace setDefault MyProxyTime
-
-  Workspace setDefault FetchResourcesTimeOut
-  Workspace setDefault CACertificatesSite
-  Workspace setDefault CACertificatesCacheTime
-  Workspace setDefault CACertificatesDownloadTimeOut
-  Workspace setDefault VOInformationSite
-  Workspace setDefault VOCardDownloadTimeOut
-  Workspace setDefault VOCardCacheTime
-
-  Workspace setDefault ConnectionsBySRMSE
-  Workspace setDefault ConnectionsByWMS
-  Workspace setDefault ConnectionsByWebDAVSE
-
-  Workspace setDefault ProxyRenewalTime
-
-  Workspace setDefault EagerSubmissionNbSampling
-  Workspace setDefault EagerSubmissionSamplingWindowFactor
-
-  Workspace setDefault EagerSubmissionInterval
-
-  Workspace setDefault EagerSubmissionMinNumberOfJob
-  Workspace setDefault EagerSubmissionNumberOfJobUnderMin
-
-  Workspace setDefault JobShakingHalfLife
-  Workspace setDefault JobShakingMaxReady
-
-  Workspace setDefault RemoteCopyTimeout
-
-  Workspace setDefault MinValueForSelectionExploration
-  Workspace setDefault QualityHysteresis
-
-  Workspace setDefault ShallowWMSRetryCount
-  Workspace setDefault JobServiceFitnessPower
-  Workspace setDefault StorageFitnessPower
-
-  Workspace setDefault StorageSizeFactor
-  Workspace setDefault StorageTimeFactor
-  Workspace setDefault StorageAvailabilityFactor
-  Workspace setDefault StorageSuccessRateFactor
-
-  Workspace setDefault JobServiceJobFactor
-  Workspace setDefault JobServiceTimeFactor
-  Workspace setDefault JobServiceAvailabilityFactor
-  Workspace setDefault JobServiceSuccessRateFactor
-
-  Workspace setDefault RunningHistoryDuration
-  Workspace setDefault EagerSubmissionThreshold
-
-  Workspace setDefault DefaultBDIIs
-
-  Workspace setDefault EnvironmentCleaningThreads
-
-  Workspace setDefault WMSRank
-
   def proxyTime = Workspace.preference(ProxyTime)
   def proxyRenewalTime = Workspace.preference(EGIEnvironment.ProxyRenewalTime)
 

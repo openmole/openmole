@@ -48,13 +48,6 @@ object ReplicaCatalog extends Logger {
   val LockTimeout = ConfigurationLocation("ReplicaCatalog", "LockTimeout", Some(1 minutes))
   val CheckFileExistsInterval = ConfigurationLocation("ReplicaCatalog", "CheckFileExistsInterval", Some(1 hours))
 
-  Workspace setDefault NoAccessCleanTime
-  Workspace setDefault InCatalogCacheTime
-  Workspace setDefault ReplicaCacheTime
-  Workspace setDefault ReplicaGraceTime
-  Workspace setDefault LockTimeout
-  Workspace setDefault CheckFileExistsInterval
-
   lazy val replicationPattern = Pattern.compile("(\\p{XDigit}*)_.*")
 
   lazy val inCatalogCache = new TimeCache[Map[String, Set[String]]]

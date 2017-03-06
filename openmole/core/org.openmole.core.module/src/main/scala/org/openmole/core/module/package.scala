@@ -32,11 +32,8 @@ import org.openmole.tool.random.RandomProvider
 
 package object module {
 
-  val moduleIndexes = ConfigurationLocation("Module", "Indexes", Some(Seq[String](buildinfo.moduleAddress)))
-  Workspace setDefault moduleIndexes
-
   lazy val indexes =
-    Workspace.preference(moduleIndexes).
+    Workspace.preference(ModuleIndex.moduleIndexes).
       map(ExpandedString(_).from(Context("version" → buildinfo.version))(RandomProvider.empty))
 
   lazy val pluginDirectory = Workspace.location / "plugins"

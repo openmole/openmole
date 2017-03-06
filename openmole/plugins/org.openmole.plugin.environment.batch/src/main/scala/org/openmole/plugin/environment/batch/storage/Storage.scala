@@ -32,9 +32,6 @@ object Storage {
   val BufferSize = ConfigurationLocation("Storage", "BufferSize", Some(64 kilobytes))
   val CopyTimeout = ConfigurationLocation("Storage", "CopyTimeout", Some(1 minutes))
   val CloseTimeout = ConfigurationLocation("Storage", "CloseTimeout", Some(1 minutes))
-  Workspace setDefault BufferSize
-  Workspace setDefault CopyTimeout
-  Workspace setDefault CloseTimeout
 }
 
 trait CompressedTransfer <: Storage {

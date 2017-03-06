@@ -102,7 +102,7 @@ def allCore = Seq(
 
 
 lazy val context = OsgiProject(coreDir, "org.openmole.core.context", imports = Seq("*")) settings (
-  libraryDependencies ++= Seq(Libraries.cats, Libraries.sourceCode)
+  libraryDependencies ++= Seq(Libraries.cats, Libraries.sourceCode), defaultActivator
   ) dependsOn(tools, workspace) settings (coreSettings: _*)
 
 lazy val expansion = OsgiProject(coreDir, "org.openmole.core.expansion", imports = Seq("*")) settings (
@@ -110,7 +110,8 @@ lazy val expansion = OsgiProject(coreDir, "org.openmole.core.expansion", imports
   ) dependsOn(context, tools, openmoleRandom, openmoleFile, pluginManager, console) settings (coreSettings: _*)
 
 lazy val workflow = OsgiProject(coreDir, "org.openmole.core.workflow", imports = Seq("*")) settings (
-  libraryDependencies ++= Seq(Libraries.scalaLang, Libraries.math, Libraries.cats, Libraries.equinoxOSGi, Libraries.shapeless)
+  libraryDependencies ++= Seq(Libraries.scalaLang, Libraries.math, Libraries.cats, Libraries.equinoxOSGi, Libraries.shapeless),
+  defaultActivator
   ) dependsOn(
   event,
   exception,
@@ -146,7 +147,7 @@ lazy val replication = OsgiProject(coreDir, "org.openmole.core.replication", imp
   libraryDependencies ++= Seq(Libraries.slick, Libraries.xstream)) settings (coreSettings: _*)
 
 lazy val workspace = OsgiProject(coreDir, "org.openmole.core.workspace", imports = Seq("*")) settings
-  (libraryDependencies ++= Seq(Libraries.jasypt, Libraries.xstream, Libraries.math, Libraries.configuration)) dependsOn
+  (libraryDependencies ++= Seq(Libraries.jasypt, Libraries.xstream, Libraries.math, Libraries.configuration), defaultActivator) dependsOn
   (exception, event, tools, replication, openmoleCrypto) settings (coreSettings: _*)
 
 lazy val authentication = OsgiProject(coreDir, "org.openmole.core.authentication", imports = Seq("*")) dependsOn(workspace, serializer) settings (coreSettings: _*)
@@ -159,15 +160,17 @@ lazy val pluginManager = OsgiProject(
 
 lazy val updater = OsgiProject(coreDir, "org.openmole.core.updater", imports = Seq("*")) dependsOn(exception, tools, workspace) settings (coreSettings: _*)
 
-lazy val fileService = OsgiProject(coreDir, "org.openmole.core.fileservice", imports = Seq("*")) dependsOn(tools, updater, workspace, openmoleTar) settings (coreSettings: _*)
+lazy val fileService = OsgiProject(coreDir, "org.openmole.core.fileservice", imports = Seq("*")) dependsOn(tools, updater, workspace, openmoleTar) settings (coreSettings: _*) settings(defaultActivator)
 
 lazy val module = OsgiProject(coreDir, "org.openmole.core.module", imports = Seq("*")) dependsOn(buildinfo, expansion, openmoleHash, openmoleFile, pluginManager) settings (coreSettings: _*) settings(
   libraryDependencies += Libraries.gridscaleHTTP,
-  libraryDependencies += Libraries.json4s)
+  libraryDependencies += Libraries.json4s,
+  defaultActivator)
 
 lazy val market = OsgiProject(coreDir, "org.openmole.core.market", imports = Seq("*")) enablePlugins (ScalaJSPlugin) dependsOn(buildinfo, expansion, openmoleHash, openmoleFile, pluginManager) settings (coreSettings: _*) settings(
   libraryDependencies += Libraries.gridscaleHTTP,
-  libraryDependencies += Libraries.json4s)
+  libraryDependencies += Libraries.json4s,
+  defaultActivator)
 
 lazy val logging = OsgiProject(
   coreDir,
@@ -175,14 +178,15 @@ lazy val logging = OsgiProject(
   bundleActivator = Some("org.openmole.core.logging.internal.Activator"), imports = Seq("*")
 ) settings (libraryDependencies ++= Seq(Libraries.log4j, Libraries.logback, Libraries.slf4j)) dependsOn (tools) settings (coreSettings: _*)
 
-lazy val output = OsgiProject(coreDir, "org.openmole.core.output", imports = Seq("*"), bundleActivator = Some("org.openmole.core.output.Activator")) dependsOn (openmoleStream) settings (coreSettings: _*)
+lazy val output = OsgiProject(coreDir, "org.openmole.core.output", imports = Seq("*")) dependsOn (openmoleStream) settings (coreSettings: _*) settings(defaultActivator)
 
-lazy val console = OsgiProject(coreDir, "org.openmole.core.console", bundleActivator = Some("org.openmole.core.console.Activator"), global = true, imports = Seq("*")) dependsOn
+lazy val console = OsgiProject(coreDir, "org.openmole.core.console", global = true, imports = Seq("*")) dependsOn
   (pluginManager) settings(
   OsgiKeys.importPackage := Seq("*"),
   libraryDependencies += Libraries.scalaLang,
   libraryDependencies += Libraries.monocle,
-  macroParadise
+  macroParadise,
+  defaultActivator
 ) dependsOn(openmoleByteCode, openmoleOSGi) settings (coreSettings: _*)
 
 lazy val project = OsgiProject(coreDir, "org.openmole.core.project", imports = Seq("*")) dependsOn(console, openmoleDSL) settings (OsgiKeys.importPackage := Seq("*")) settings (coreSettings: _*)
@@ -740,6 +744,7 @@ lazy val daemon = OsgiProject(binDir, "org.openmole.daemon", settings = tarProje
     Libraries.logging,
     Libraries.scopt
   ),
+  defaultActivator,
   assemblyDependenciesPath := assemblyPath.value / "plugins",
   dependencyFilter := bundleFilter,
   dependencyName := rename,

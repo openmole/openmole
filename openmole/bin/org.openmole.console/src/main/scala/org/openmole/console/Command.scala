@@ -117,7 +117,7 @@ class Command(val console: ScalaREPL, val variables: ConsoleVariables) { command
       case x           ⇒ throw new UserBadDataError("The result is not a puzzle")
     }
 
-  def modules(urls: Seq[String] = Workspace.preference(module.moduleIndexes)): Unit = {
+  def modules(urls: Seq[String] = module.indexes): Unit = {
     val installedBundles = PluginManager.bundleHashes.map(_.toString).toSet
     def installed(components: Seq[String]) = (components.toSet -- installedBundles).isEmpty
 
@@ -132,7 +132,7 @@ class Command(val console: ScalaREPL, val variables: ConsoleVariables) { command
   }
 
   def install(name: String*): Unit = install(name)
-  def install(names: Seq[String], urls: Seq[String] = Workspace.preference(module.moduleIndexes)): Unit = {
+  def install(names: Seq[String], urls: Seq[String] = module.indexes): Unit = {
     val toInstall = urls.flatMap(url ⇒ module.selectableModules(url)).filter(sm ⇒ names.contains(sm.module.name))
     if (toInstall.isEmpty) println("The module(s) is/are already installed.")
     else

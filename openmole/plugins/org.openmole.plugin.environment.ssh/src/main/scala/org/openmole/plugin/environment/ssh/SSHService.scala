@@ -26,8 +26,6 @@ import squants.time.TimeConversions._
 
 object SSHService {
   val timeout = ConfigurationLocation("SSH", "TimeOut", Some(2 minutes))
-  Workspace setDefault timeout
-
 }
 
 trait SSHService extends BatchService {
