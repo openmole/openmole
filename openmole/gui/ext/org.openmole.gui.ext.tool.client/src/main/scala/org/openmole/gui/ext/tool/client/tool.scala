@@ -44,7 +44,16 @@ package object client {
 
   lazy val VERY_LIGHT_GREY = "#e7e7e7"
 
+  lazy val FUN_GREY = "#cccccc"
+
   lazy val WHITE = "white"
+
+  lazy val textCenter = ms("text-center")
+  lazy val textLeft = ms("text-left")
+  lazy val textRight = ms("text-right")
+  lazy val textJustify = ms("text-justify")
+  lazy val textNoWrap = ms("text-nowrap")
+
 
   lazy val tableTag: ModifierSeq = Seq(
     sheet.marginLeft(3),
@@ -55,8 +64,9 @@ package object client {
 
   def color(col: String): ModifierSeq = styles.color := col
 
-  def bold(col: String): ModifierSeq = Seq(
-    color(col),
+  def bold(col: String): ModifierSeq = bold +++ (color(col))
+
+  val bold: ModifierSeq = Seq(
     fontWeight := "bold"
   )
 
@@ -521,6 +531,23 @@ package object client {
     height := 32,
     top := 20,
     padding := 5
+  )
+
+  lazy val closeDetails: ModifierSeq = Seq(
+    display := "inline-block",
+    floatRight,
+    sheet.paddingRight(5),
+    pointer,
+    sheet.marginTop(-28),
+    color(DARK_GREY),
+    fontSize := 22,
+    fontWeight := "bold",
+    opacity := 0.4
+  )
+
+  lazy val environmentErrorBadge: ModifierSeq = Seq(
+    color(DARK_GREY),
+    backgroundColor := FUN_GREY
   )
 
   //OPTON DIVS

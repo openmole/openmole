@@ -114,7 +114,9 @@ class ExecutionPanel {
 
   def doScrolls = {
     val scrollables =
-      Seq(outputTextAreas.now, scriptTextAreas.now, errorTextAreas.now).flatMap { _.values } ++
+      Seq(outputTextAreas.now, scriptTextAreas.now, errorTextAreas.now).flatMap {
+        _.values
+      } ++
         envErrorPanels.now.flatMap { e ⇒ Seq(e._2.scrollableTable, e._2.scrollableStack) }.toSeq
 
     scrollables.foreach {
@@ -241,7 +243,7 @@ class ExecutionPanel {
 
               envID → {
                 details.envStates.map { e ⇒
-                  tags.table(sheet.table)(
+                  tags.table(width := "100%")(
                     thead,
                     tbody(
                       Seq(
@@ -254,23 +256,25 @@ class ExecutionPanel {
                           td(colMD(1))(glyphAndText(glyph_flash +++ sheet.paddingBottom(7), e.running.toString)),
                           td(colMD(1))(glyphAndText(glyph_flag +++ sheet.paddingBottom(7), e.done.toString)),
                           td(colMD(1))(glyphAndText(glyph_fire +++ sheet.paddingBottom(7), e.failed.toString)),
-                          td(colMD(3))(tags.span(omsheet.color("#3086b5") +++ ((envErrorVisible().contains(e.envId)), ms(" executionVisible"), emptyMod))(
-                            sheet.pointer, onclick := { () ⇒
-                            if (envErrorVisible().contains(e.envId)) envErrorVisible() = envErrorVisible().filterNot {
-                              _ == e.envId
+                          td(colMD(3))(({
+                            if (envErrorVisible().contains(e.envId)) {
+                              tags.span(
+                                bs.buttonGroup(width := 100)(
+                                  bs.button(glyphicon = glyph_refresh, todo = () ⇒ updateEnvErrors(e.envId, false)).tooltip("Refresh environment errors"),
+                                  bs.button(buttonStyle = btn_default, glyphicon = glyph_repeat, todo = () ⇒ updateEnvErrors(e.envId, false)).tooltip("Reset environment errors")
+                                ),
+                                tags.span(onclick := toggleEnvironmentErrorPanel(e.envId), closeDetails)(raw("&#215"))
+                              )
                             }
-                            else envErrorVisible() = envErrorVisible() :+ e.envId
-                          }
-                          )("details"))
+                            else tags.span(omsheet.color(BLUE) +++ ((envErrorVisible().contains(e.envId)), ms(" executionVisible"), emptyMod))(
+                              sheet.pointer +++ omsheet.bold, onclick := toggleEnvironmentErrorPanel(e.envId)
+                            )("details")
+                          }))
                         ),
                         tr(row)(
                           {
                             td(colMD(12) +++ (!envErrorVisible().contains(e.envId), omsheet.displayOff, emptyMod))(
                               colspan := 12,
-                              bs.buttonGroup(omsheet.centerElement)(
-                                bs.button("Update", () ⇒ updateEnvErrors(e.envId, false)),
-                                bs.button("Reset", () ⇒ updateEnvErrors(e.envId, true))
-                              ),
                               staticPanel(e.envId, envErrorPanels,
                                 () ⇒ new EnvironmentErrorPanel,
                                 (ep: EnvironmentErrorPanel) ⇒
@@ -337,6 +341,13 @@ class ExecutionPanel {
         })
       }
     ).render
+  }
+
+  def toggleEnvironmentErrorPanel(envID: EnvironmentId) = { () ⇒
+    if (envErrorVisible.now.contains(envID)) envErrorVisible() = envErrorVisible.now.filterNot {
+      _ == envID
+    }
+    else envErrorVisible() = envErrorVisible.now :+ envID
   }
 
   def cancelExecution(id: ExecutionId) =

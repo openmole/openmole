@@ -92,9 +92,10 @@ class EnvironmentErrorPanel {
     }
 
     val render = tags.tr(row +++ errorTable)(
-      tags.td(colMD(10))(tags.a(message, pointer +++ (fontSize := 13), onclick := { () ⇒ toggleDetails }), bs.badge(occurrences)), //(width := 400)
-      tags.td(colMD(1))(date),
-      tags.td(colMD(1))(levelLabel)
+      tags.td(colMD(9) +++ textNoWrap)(tags.a(message, pointer +++ (fontSize := 13), onclick := { () ⇒ toggleDetails })), //(width := 400)
+      tags.td(colMD(1) +++ textCenter)(bs.badge(occurrences, environmentErrorBadge)),
+      tags.td(colMD(1) +++ (fontSize := 13) +++ textCenter)(date),
+      tags.td(colMD(1) +++ textCenter)(levelLabel)
     )
   }
 
@@ -107,7 +108,7 @@ class EnvironmentErrorPanel {
 
   def levelLabel(level: ErrorStateLevel) = label(level.name)(level match {
     case ErrorLevel() ⇒ label_danger
-    case _            ⇒ label_default
+    case _            ⇒ environmentErrorBadge +++ "label"
   })
 
   val view = {
@@ -115,6 +116,7 @@ class EnvironmentErrorPanel {
       thead(
         tr(row)(
           th(exclusiveButton("Error", () ⇒ setSorting(AlphaSorting, Ascending), () ⇒ setSorting(AlphaSorting, Descending))),
+          th(""),
           th(exclusiveButton("Date", () ⇒ setSorting(TimeSorting, Ascending), () ⇒ setSorting(TimeSorting, Descending))),
           th(exclusiveButton("Level", () ⇒ setSorting(LevelSorting, Ascending), () ⇒ setSorting(LevelSorting, Descending)))
         )
