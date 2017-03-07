@@ -374,7 +374,7 @@ class ExecutionPanel {
     expanderIfVisible(expandID, columnID, ex ⇒
       tags.span(omsheet.executionVisible +++ extraStyle, modifier), tags.span(extraStyle, modifier))
 
-  val settingsDiv = bs.vForm(width := 200)(
+  val settingsForm = bs.vForm(width := 200)(
     outputHistory.withLabel("# outputs"),
     envErrorHistory.withLabel("# environment errors")
   )
@@ -395,9 +395,9 @@ class ExecutionPanel {
     div(height := 55)(
       b("Executions"),
       div(omsheet.panelHeaderSettings)(
-        settingsDiv.dropdown(
-        "",
-        btn_default +++ glyph_settings +++ omsheet.settingsButton
+        settingsForm.dropdown(
+        buttonModifierSeq = btn_default,
+        buttonIcon = glyph_settings
       ).render
       )
     )

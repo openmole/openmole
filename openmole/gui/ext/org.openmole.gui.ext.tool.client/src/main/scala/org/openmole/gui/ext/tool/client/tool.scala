@@ -490,8 +490,7 @@ package object client {
   //EXECUTION PANEL
   lazy val panelHeaderSettings: ModifierSeq = Seq(
     floatRight,
-    sheet.marginRight(200),
-    sheet.marginTop(-25)
+    sheet.marginRight(200)
   )
 
   lazy val execOutput: ModifierSeq = Seq(
@@ -527,13 +526,6 @@ package object client {
       case _          ⇒ color(WHITE)
     },
     fontWeight := "bold"
-  )
-
-  lazy val settingsButton: ModifierSeq = Seq(
-    width := 45,
-    height := 32,
-    top := 20,
-    padding := 5
   )
 
   lazy val rowLayout: ModifierSeq = Seq(
