@@ -366,12 +366,6 @@ package object client {
   )
 
   //TREENODE TABS
-  lazy val editingElement: ModifierSeq = Seq(
-    fixedPosition,
-    styles.right := 200,
-    top := 15,
-    zIndex := 10
-  )
 
   lazy val tabContent: ModifierSeq = Seq(
     sheet.marginTop(-1),
@@ -409,7 +403,7 @@ package object client {
     relativePosition,
     floatRight,
     right := 200,
-    padding := 15,
+    top := 15,
     margin := "auto",
     width := 50,
     zIndex := 18

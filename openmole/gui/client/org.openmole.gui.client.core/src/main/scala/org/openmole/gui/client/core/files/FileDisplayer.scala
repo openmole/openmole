@@ -45,10 +45,9 @@ class FileDisplayer(val tabs: TreeNodeTabs) {
   class EditableNodeTabWithOMSTabControl(sp: SafePath, ed: EditorPanelUI) /*extends EditableNodeTab(tn, ed)*/ extends OMSTabControl(Var(sp), ed) {
 
     def onrun = {
-      overlaying() = true
       refresh(() ⇒
         post(timeout = 120 seconds, warningTimeout = 60 seconds)[Api].runScript(ScriptData(safePathTab.now)).call().foreach { execInfo ⇒
-          overlaying() = false
+          standby
           executionPanel.dialog.show
         })
     }

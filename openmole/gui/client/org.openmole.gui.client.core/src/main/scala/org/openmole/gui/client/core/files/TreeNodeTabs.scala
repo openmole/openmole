@@ -37,24 +37,43 @@ import org.openmole.gui.ext.tool.client.FileManager
 
 object TreeNodeTabs {
 
+  sealed trait Activity
+
+  object Active extends Activity
+
+  object UnActive extends Activity
+
+  sealed trait Computation
+
+  object Pending extends Computation
+
+  object StandBy extends Computation
+
   sealed trait TreeNodeTab {
 
     implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
     val safePathTab: Var[SafePath]
-    val active = Var(false)
+    val activity: Var[Activity] = Var(UnActive)
+    val computation: Var[Computation] = Var(StandBy)
 
     val tabName = Var(safePathTab.now.name)
     val id: String = getUUID
 
-    def activate = active() = true
+    def activate = activity() = Active
 
-    def desactivate = active() = false
+    def desactivate = activity() = UnActive
+
+    def suspend = computation() = Pending
+
+    def standby = computation() = StandBy
 
     val editorElement: TypedTag[HTMLDivElement]
 
     def fileContent: FileContent
 
     def refresh(afterRefresh: () ⇒ Unit = () ⇒ {}): Unit
+
+    def block: Rx.Dynamic[TypedTag[_ <: HTMLElement]]
 
   }
 
@@ -96,7 +115,7 @@ object TreeNodeTabs {
     val editButton = Rx {
       if (editable()) tags.div()
       else
-        tags.button("Edit", btn_primary +++ editingElement)(onclick := { () ⇒
+        tags.button("Edit", btn_primary +++ executionElement)(onclick := { () ⇒
           editable() = !editable.now
         })
     }
@@ -107,10 +126,12 @@ object TreeNodeTabs {
 
     lazy val overlayElement = tags.div
 
-    def block = div(
-      editorElement,
-      overlayElement
-    )
+    lazy val block = Rx {
+      div(
+        editorElement,
+        overlayElement
+      )
+    }
 
     def fileContent = AlterableOnDemandFileContent(safePathTab.now, editor.code, () ⇒ editable.now)
 
@@ -141,6 +162,10 @@ object TreeNodeTabs {
     def fileContent = ReadOnlyFileContent()
 
     def refresh(onsaved: () ⇒ Unit) = onsaved()
+
+    lazy val block = Rx {
+      editorElement
+    }
   }
 
   def apply(tabs: TreeNodeTab*) = new TreeNodeTabs(Var(tabs.toSeq))
@@ -157,27 +182,27 @@ object TreeNodeTabs {
 
     def refresh(onsaved: () ⇒ Unit) = save(onsaved)
 
-    val runButton = tags.button("Play", btn_primary)(onclick := { () ⇒ onrun })
+    val runButton = tags.button("Play", btn_primary)(onclick := { () ⇒
+      computation() = Pending
+      onrun
+    })
 
     val controlElement = div(executionElement)(runButton)
-
-    val overlaying: Var[Boolean] = Var(false)
 
     def onrun: Unit
 
     val block = {
-      tabName.flatMap { n ⇒
-        overlaying.map { o ⇒
+      computation.flatMap { c ⇒
+        tabName.map { n ⇒
           div(
-            div(if (o) playTabOverlay else emptyMod),
-            if (o) div(overlayElement)(s"Starting ${n}, please wait ...")
+            div(if (c == Pending) playTabOverlay else emptyMod),
+            if (c == Pending) div(overlayElement)(s"Starting ${n}, please wait ...")
             else div,
             editorElement
           )
         }
       }
     }
-
   }
 
 }
@@ -292,14 +317,20 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
               sheet.paddingTop(35),
               role := "presentation",
               `class` := {
-                if (t.active()) "active" else ""
+                t.activity() match {
+                  case Active ⇒ "active"
+                  case _      ⇒ ""
+                }
               }
             )(
                 a(
                   href := "#" + t.id,
                   aria.controls := t.id,
                   role := "tab",
-                  if (t.active()) activeTab else unActiveTab,
+                  t.activity() match {
+                    case Active ⇒ activeTab
+                    case _      ⇒ unActiveTab
+                  },
                   data("toggle") := "tab", onclick := { () ⇒
                     setActive(t)
                   }
@@ -315,27 +346,39 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
       div(tabContent)(
         Rx {
           for (t ← tabs()) yield {
-            def tabActive = t.active()
-
             div(
               role := "tabpanel",
               ms("tab-pane " + {
-                if (tabActive) "active" else ""
-              }), id := t.id
-            )(if (tabActive) {
-                t match {
-                  case oms: OMSTabControl ⇒
-                    temporaryControl() = Some(oms.controlElement)
-                    oms.block
-                  case etc: LockedEditionNodeTab ⇒
-                    temporaryControl() = Some(etc.controlElement)
-                    etc.block
-                  case _ ⇒
-                    temporaryControl() = None
-                    Var(div(t.editorElement))
+                t.activity() match {
+                  case Active ⇒ "active"
+                  case _      ⇒ ""
                 }
-              }
-              else div())
+              }), id := t.id
+            )({
+                t.activity() match {
+                  case Active ⇒
+                    t match {
+                      case oms: OMSTabControl ⇒
+                        temporaryControl() = Some(oms.computation() match {
+                          case Pending ⇒ tags.div()
+                          case _       ⇒ oms.controlElement
+                        })
+                        oms.block()
+                      case etc: LockedEditionNodeTab ⇒
+                        temporaryControl() = Some(etc.controlElement)
+                        etc.block()
+                      case _ ⇒
+                        temporaryControl() = None
+                        Var(div(t.editorElement))
+                    }
+                  case UnActive ⇒
+                    t.computation() match {
+                      case Pending ⇒ Waiter.waiter
+                      case _       ⇒ tags.div()
+                    }
+
+                }
+              })
           }
         }
       )
