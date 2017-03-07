@@ -258,12 +258,12 @@ class ExecutionPanel {
                           td(colMD(1))(glyphAndText(glyph_fire +++ sheet.paddingBottom(7), e.failed.toString)),
                           td(colMD(3))(({
                             if (envErrorVisible().contains(e.envId)) {
-                              tags.span(
-                                bs.buttonGroup(width := 100)(
+                              tags.div(rowLayout +++ (width := 100))(
+                                bs.buttonGroup(columnLayout +++ (width := 80))(
                                   bs.button(glyphicon = glyph_refresh, todo = () ⇒ updateEnvErrors(e.envId, false)).tooltip("Refresh environment errors"),
                                   bs.button(buttonStyle = btn_default, glyphicon = glyph_repeat, todo = () ⇒ updateEnvErrors(e.envId, false)).tooltip("Reset environment errors")
                                 ),
-                                tags.span(onclick := toggleEnvironmentErrorPanel(e.envId), closeDetails)(raw("&#215"))
+                                tags.span(onclick := toggleEnvironmentErrorPanel(e.envId), columnLayout +++ closeDetails)(raw("&#215"))
                               )
                             }
                             else tags.span(omsheet.color(BLUE) +++ ((envErrorVisible().contains(e.envId)), ms(" executionVisible"), emptyMod))(

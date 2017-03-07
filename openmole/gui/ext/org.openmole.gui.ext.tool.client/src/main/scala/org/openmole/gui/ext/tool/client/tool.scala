@@ -536,15 +536,22 @@ package object client {
     padding := 5
   )
 
+  lazy val rowLayout: ModifierSeq = Seq(
+    display := "table",
+    tableLayout := "fixed",
+    borderSpacing := 5
+  )
+
+  lazy val columnLayout: ModifierSeq = Seq(
+    display := "table-cell"
+  )
+
   lazy val closeDetails: ModifierSeq = Seq(
-    display := "inline-block",
-    floatRight,
-    sheet.paddingRight(5),
     pointer,
-    sheet.marginTop(-28),
     color(DARK_GREY),
     fontSize := 22,
     fontWeight := "bold",
+    verticalAlign := "middle",
     opacity := 0.4
   )
 
