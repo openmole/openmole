@@ -86,7 +86,7 @@ object ScriptClient {
 
     Plugins.fetch { _ ⇒
       val maindiv = tags.div()
-      val shutDown = new ShutDown
+      val settingsView = new SettingsView
 
       val authenticationPanel = new AuthenticationPanel
 
@@ -180,7 +180,7 @@ object ScriptClient {
             tags.div(`class` := "fullpanel")(
               BannerAlert.banner,
               menuBar.render,
-              tags.div(shutDown.shutdownButton),
+              settingsView.renderApp,
               tags.div(
                 `class` := Rx {
                   "leftpanel " + {

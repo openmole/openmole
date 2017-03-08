@@ -190,11 +190,13 @@ package object client {
   )
 
   lazy val resetBlock: ModifierSeq = Seq(
-    relativePosition,
     pointer,
+    relativePosition,
     floatRight,
     top := 20,
-    zIndex := 10
+    zIndex := 1101,
+    fontSize := 22,
+    color(BLUE)
   )
 
   lazy val closeBanner: ModifierSeq = Seq(

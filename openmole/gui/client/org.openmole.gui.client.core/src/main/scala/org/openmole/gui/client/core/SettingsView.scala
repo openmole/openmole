@@ -7,6 +7,7 @@ import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import org.openmole.gui.client.core.panels._
 import org.scalajs.dom
 import rx._
+import bs._
 import org.openmole.gui.ext.tool.client._
 import scalatags.JsDom.all._
 
@@ -27,7 +28,7 @@ import scalatags.JsDom.all._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class ShutDown {
+class SettingsView {
 
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
@@ -46,22 +47,30 @@ class ShutDown {
     }, CenterPagePosition
   )
 
-  val shutdownButton = span(
-    omsheet.resetBlock,
-    a(onclick := { () ⇒
-      alert() = true
-    }, omsheet.resetPassword)("Reset password"),
-    a(
-      omsheet.shutdownButton,
-      bs.glyphSpan(glyph_off, onclickAction = () ⇒
-        AlertPanel.string(
-          "This will stop the server, the application will no longer be usable. Halt anyway?",
-          () ⇒ {
-            fileDisplayer.tabs.saveAllTabs(() ⇒
-              dom.window.location.href = "shutdown")
-          },
-          transform = CenterPagePosition
-        ))
-    )
-  )
+  val resetPassword = a(onclick := { () ⇒
+    alert() = true
+  }, omsheet.resetPassword)("Reset password").render
+
+  val shutdownButton = a(
+    omsheet.shutdownButton,
+    bs.glyphSpan(glyph_off, onclickAction = () ⇒
+      AlertPanel.string(
+        "This will stop the server, the application will no longer be usable. Halt anyway?",
+        () ⇒ {
+          fileDisplayer.tabs.saveAllTabs(() ⇒
+            dom.window.location.href = "shutdown")
+        },
+        transform = CenterPagePosition
+      ))
+  ).render
+
+  val renderApp = bs.vForm(width := 200)(
+    resetPassword,
+    shutdownButton
+  ).dropdownWithTrigger(bs.glyphSpan(glyph_menu_hamburger), omsheet.resetBlock, Seq(left := "initial", right := 0)).render
+
+  val renderConnection = bs.vForm(width := 200)(
+    resetPassword
+  ).dropdownWithTrigger(bs.glyphSpan(glyph_menu_hamburger), omsheet.resetBlock +++ (right := 20), Seq(left := "initial", right := 0)).render
+
 }

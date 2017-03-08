@@ -31,7 +31,7 @@ import scalatags.JsDom.tags
 class Connection {
 
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
-  val shutDown = new ShutDown
+  val settingsView = new SettingsView
 
   lazy val connectButton = tags.button("Connect", btn_primary, `type` := "submit").render
 
@@ -56,7 +56,7 @@ class Connection {
     ).render
 
   val connectionDiv = div(
-    shutDown.shutdownButton,
+    settingsView.renderConnection,
     Rx {
       div(omsheet.connectionTabOverlay)(
         div(
@@ -64,8 +64,8 @@ class Connection {
           div(
             omsheet.centerPage,
             div(
-              if (shutDown.alert.now)
-                shutDown.alertPanel
+              if (settingsView.alert.now)
+                settingsView.alertPanel
               else {
                 div(
                   omsheet.connectionBlock,

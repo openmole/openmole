@@ -31,7 +31,7 @@ import org.openmole.gui.ext.tool.client.JsRxTags._
 class ResetPassword {
 
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
-  val shutDown = new ShutDown
+  val settingsView = new SettingsView
 
   val passwordInput = bs.input("")(
     placeholder := "Password",
@@ -63,7 +63,6 @@ class ResetPassword {
     ).render
 
   val resetPassDiv = div(
-    shutDown.shutdownButton,
     Rx {
       div(omsheet.connectionTabOverlay)(
         div(
@@ -71,8 +70,8 @@ class ResetPassword {
           div(
             omsheet.centerPage,
             div(
-              if (shutDown.alert.now)
-                shutDown.alertPanel
+              if (settingsView.alert.now)
+                settingsView.alertPanel
               else {
                 div(
                   omsheet.connectionBlock,
