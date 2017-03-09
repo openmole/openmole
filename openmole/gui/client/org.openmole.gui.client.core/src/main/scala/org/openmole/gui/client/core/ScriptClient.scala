@@ -25,6 +25,7 @@ import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.data._
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
 import org.openmole.gui.ext.tool.client._
+import org.scalajs.dom.raw.Event
 
 /*
  * Copyright (C) 15/04/15 // mathieu.leclaire@openmole.org
@@ -57,16 +58,18 @@ object ScriptClient {
 
   @JSExport
   def stopped(): Unit = withBootstrapNative {
-    div(omsheet.connectionTabOverlay)(
+
+    val stoppedDiv = div(omsheet.connectionTabOverlay)(
       div(
-        img(src := "img/openmole.png", omsheet.openmoleLogo),
         div(
           omsheet.centerPage,
-          div(omsheet.shutdown, "The OpenMOLE server has been stopped"),
-          onload := { () ⇒ post()[Api].shutdown().call() }
+          div(omsheet.shutdown, "The OpenMOLE server has been stopped")
         )
       )
     ).render
+
+    post()[Api].shutdown().call()
+    stoppedDiv
   }
 
   @JSExport

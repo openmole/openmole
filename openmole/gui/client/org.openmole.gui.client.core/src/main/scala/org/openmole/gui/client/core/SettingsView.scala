@@ -47,13 +47,14 @@ class SettingsView {
     }, CenterPagePosition
   )
 
-  val resetPassword = a(onclick := { () ⇒
+  val resetPassword = span(onclick := { () ⇒
     alert() = true
-  }, omsheet.resetPassword)("Reset password").render
+  }, omsheet.settingsItemStyle)("Reset password").render
 
-  val shutdownButton = a(
-    omsheet.shutdownButton,
-    bs.glyphSpan(glyph_off, onclickAction = () ⇒
+  val shutdownButton = div(rowLayout +++ (lineHeight := "7px"))(
+    bs.glyphSpan(glyph_off +++ omsheet.shutdownButton +++ columnLayout),
+    span("Shutdown", settingsItemStyle +++ columnLayout +++ (scalatags.JsDom.all.paddingTop := 8)),
+    onclick := { () ⇒
       AlertPanel.string(
         "This will stop the server, the application will no longer be usable. Halt anyway?",
         () ⇒ {
@@ -61,7 +62,8 @@ class SettingsView {
             dom.window.location.href = "shutdown")
         },
         transform = CenterPagePosition
-      ))
+      )
+    }
   ).render
 
   val renderApp = bs.vForm(width := "auto")(

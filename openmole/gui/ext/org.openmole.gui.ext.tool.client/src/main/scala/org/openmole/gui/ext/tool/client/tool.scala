@@ -226,10 +226,10 @@ package object client {
     zIndex := 1101
   )
 
-  lazy val resetPassword: ModifierSeq = Seq(
+  lazy val settingsItemStyle: ModifierSeq = Seq(
     fontSize := 12,
     color(DARK_GREY),
-    cursor := "pointer"
+    pointer
   )
 
   lazy val connectionBlock: ModifierSeq = Seq(
