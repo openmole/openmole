@@ -64,12 +64,12 @@ class SettingsView {
       ))
   ).render
 
-  val renderApp = bs.vForm(width := 200)(
+  val renderApp = bs.vForm(width := "auto")(
     resetPassword,
     shutdownButton
   ).dropdownWithTrigger(bs.glyphSpan(glyph_menu_hamburger), omsheet.resetBlock, Seq(left := "initial", right := 0)).render
 
-  val renderConnection = bs.vForm(width := 200)(
+  val renderConnection = bs.vForm(width := "auto")(
     resetPassword
   ).dropdownWithTrigger(bs.glyphSpan(glyph_menu_hamburger), omsheet.resetBlock +++ (right := 20), Seq(left := "initial", right := 0)).render
 

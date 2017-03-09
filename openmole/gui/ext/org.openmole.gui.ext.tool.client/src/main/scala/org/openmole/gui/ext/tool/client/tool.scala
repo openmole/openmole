@@ -228,7 +228,7 @@ package object client {
 
   lazy val resetPassword: ModifierSeq = Seq(
     fontSize := 12,
-    color(LIGHT_GREY),
+    color(DARK_GREY),
     cursor := "pointer"
   )
 
