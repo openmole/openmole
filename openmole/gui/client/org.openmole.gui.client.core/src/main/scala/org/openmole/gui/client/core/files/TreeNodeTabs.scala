@@ -305,6 +305,12 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
     t.safePathTab.now == safePath
   }
 
+  def set(safePath: SafePath, c: Computation) = {
+    find(safePath).foreach {
+      _.computation() = c
+    }
+  }
+
   implicit def modToModSeq(m: Modifier): ModifierSeq = Seq(m)
 
   val render = div({

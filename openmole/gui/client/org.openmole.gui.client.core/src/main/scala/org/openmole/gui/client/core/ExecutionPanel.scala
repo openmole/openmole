@@ -18,15 +18,19 @@ package org.openmole.gui.client.core
  */
 
 import java.util.concurrent.atomic.AtomicBoolean
+
 import fr.iscpif.scaladget.api.BootstrapTags.ScrollableTextArea.BottomScroll
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
+
 import scala.util.{ Failure, Success }
 import scalatags.JsDom.all._
 import org.openmole.gui.client.tool._
 import org.openmole.gui.client.tool.Expander._
+
 import scalatags.JsDom._
 import org.openmole.gui.ext.tool.client.JsRxTags._
 import org.openmole.gui.ext.tool.client._
+
 import scala.scalajs.js.timers._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
@@ -37,6 +41,8 @@ import org.openmole.gui.ext.data._
 import bs._
 import org.openmole.gui.client.core.alert.BannerAlert
 import org.openmole.gui.client.core.alert.BannerAlert.BannerMessage
+import org.openmole.gui.client.core.files.TreeNodeTabs
+import org.openmole.gui.client.core.files.TreeNodeTabs.StandBy
 import org.openmole.gui.client.tool.Expander
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.tool.client.Utils
@@ -350,15 +356,22 @@ class ExecutionPanel {
     else envErrorVisible() = envErrorVisible.now :+ envID
   }
 
-  def cancelExecution(id: ExecutionId) =
+  private def setIDTabInStandBy(id: ExecutionId) =
+    staticInfo.now.get(id).foreach { st ⇒ panels.treeNodeTabs.set(st.path, StandBy) }
+
+  def cancelExecution(id: ExecutionId) = {
+    setIDTabInStandBy(id)
     post()[Api].cancelExecution(id).call().foreach { r ⇒
       updateExecutionInfo
     }
+  }
 
-  def removeExecution(id: ExecutionId) =
+  def removeExecution(id: ExecutionId) = {
+    setIDTabInStandBy(id)
     post()[Api].removeExecution(id).call().foreach { r ⇒
       updateExecutionInfo
     }
+  }
 
   def updateEnvErrors(environmentId: EnvironmentId, reset: Boolean) = {
     post()[Api].runningErrorEnvironmentData(environmentId, envErrorHistory.value.toInt, reset).call().foreach { err ⇒

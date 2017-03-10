@@ -47,8 +47,8 @@ class FileDisplayer(val tabs: TreeNodeTabs) {
     def onrun = {
       refresh(() ⇒
         post(timeout = 120 seconds, warningTimeout = 60 seconds)[Api].runScript(ScriptData(safePathTab.now)).call().foreach { execInfo ⇒
+          if (computation.now == Pending) executionPanel.dialog.show
           standby
-          executionPanel.dialog.show
         })
     }
   }
