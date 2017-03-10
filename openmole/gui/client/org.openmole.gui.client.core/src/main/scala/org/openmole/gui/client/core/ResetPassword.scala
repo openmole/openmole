@@ -30,9 +30,6 @@ import org.openmole.gui.ext.tool.client.JsRxTags._
 
 class ResetPassword {
 
-  implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
-  val settingsView = new SettingsView
-
   val passwordInput = bs.input("")(
     placeholder := "Password",
     `type` := "password",
@@ -62,26 +59,17 @@ class ResetPassword {
       resetButton
     ).render
 
-  val resetPassDiv = div(
-    Rx {
-      div(omsheet.connectionTabOverlay)(
+  val resetPassDiv =
+    div(omsheet.connectionTabOverlay)(
+      div(
+        img(src := "img/openmole.png", omsheet.openmoleLogo),
         div(
-          img(src := "img/openmole.png", omsheet.openmoleLogo),
+          omsheet.centerPage,
           div(
-            omsheet.centerPage,
-            div(
-              if (settingsView.alert.now)
-                settingsView.alertPanel
-              else {
-                div(
-                  omsheet.connectionBlock,
-                  setPasswordForm
-                )
-              }
-            )
+            omsheet.connectionBlock,
+            setPasswordForm
           )
         )
       )
-    }
-  )
+    )
 }

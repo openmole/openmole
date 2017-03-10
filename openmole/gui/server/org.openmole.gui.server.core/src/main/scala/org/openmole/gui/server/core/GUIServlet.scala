@@ -28,12 +28,11 @@ import scala.concurrent.Await
 import scalatags.Text.all._
 import scalatags.Text.{ all ⇒ tags }
 import java.io.File
-
-import org.openmole.core.workspace.Workspace
 import org.openmole.gui.ext.api.Api
+import org.openmole.core.workspace.Workspace
+import org.openmole.gui.ext.data.routes._
 import org.openmole.gui.ext.tool.server
 import org.openmole.gui.ext.tool.server.{ AutowireServer, OMRouter }
-import org.openmole.gui.server.jscompile.JSPack
 import org.openmole.tool.file._
 import org.openmole.tool.stream._
 import org.openmole.tool.tar._
@@ -52,13 +51,6 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
   configureMultipartHandling(MultipartConfig(maxFileSize = Some(20 * 1024 * 1024 * 1024), fileSizeThreshold = Some(1024 * 1024))) // Limited to files of 20Go with 1Mo chunks
 
   val apiImpl = new ApiImpl(arguments)
-  val connectionRoute = "/connection"
-  val shutdownRoute = "/shutdown"
-  val appRoute = "/app"
-  val downloadFileRoute = "/downloadFile"
-  val downloadPluginsRoute = "/downloadPlugins"
-  val uploadFilesRoute = "/uploadFiles"
-  val resetPasswordRoute = "/resetPassword"
 
   //FIXME val connectedUsers: Var[Seq[UserID]] = Var(Seq())
   val USER_ID = "UserID"
@@ -75,6 +67,8 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
   def application = html("ScriptClient().run();")
 
   def stopped = html("ScriptClient().stopped();")
+
+  def restarted = html("ScriptClient().restarted();")
 
   def resetPassword = html("ScriptClient().resetPassword();")
 
@@ -139,6 +133,10 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
 
   get(shutdownRoute) {
     stopped
+  }
+
+  get(restartRoute) {
+    restarted
   }
 
   post(uploadFilesRoute) {

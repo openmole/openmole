@@ -78,6 +78,8 @@ class ApiImpl(val arguments: GUIServer.ServletArguments) extends Api {
 
   def restart = arguments.applicationControl.restart()
 
+  def isAlive = true
+
   //AUTHENTICATIONS
   def renameKey(keyName: String, newName: String): Unit =
     Files.move(new File(authenticationKeysFile, keyName).toPath, new File(authenticationKeysFile, newName).toPath, StandardCopyOption.REPLACE_EXISTING)

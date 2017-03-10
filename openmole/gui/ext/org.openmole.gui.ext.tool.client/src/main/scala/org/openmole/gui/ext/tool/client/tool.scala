@@ -220,7 +220,7 @@ package object client {
   )
 
   lazy val shutdownButton: ModifierSeq = Seq(
-    fontSize := 20,
+    fontSize := 12,
     verticalAlign := "middle",
     sheet.marginLeft(10),
     zIndex := 1101
@@ -526,8 +526,8 @@ package object client {
 
   lazy val rowLayout: ModifierSeq = Seq(
     display := "table",
-    tableLayout := "fixed",
-    borderSpacing := 5
+    tableLayout := "fixed"
+  //borderSpacing := 5
   )
 
   lazy val columnLayout: ModifierSeq = Seq(

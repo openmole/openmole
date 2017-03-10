@@ -25,7 +25,9 @@ import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.data._
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
 import org.openmole.gui.ext.tool.client._
-import org.scalajs.dom.raw.Event
+
+import scala.concurrent.duration._
+import scala.scalajs.js.timers._
 
 /*
  * Copyright (C) 15/04/15 // mathieu.leclaire@openmole.org
@@ -49,9 +51,8 @@ object ScriptClient {
 
   @JSExport
   def connection(): Unit = withBootstrapNative {
-    val connection = new Connection
     div(
-      connection.connectionDiv.render,
+      Connection.render,
       alert
     ).render
   }
@@ -73,6 +74,37 @@ object ScriptClient {
   }
 
   @JSExport
+  def restarted(): Unit = withBootstrapNative {
+    val timer: Var[Option[SetIntervalHandle]] = Var(None)
+
+    def setTimer = {
+      timer() = Some(setInterval(5000) {
+        post(3 seconds, 5 minutes)[Api].isAlive().call().foreach { x ⇒
+          if (x) {
+            dom.window.location.href = routes.connectionRoute
+            timer.now.foreach {
+              clearInterval
+            }
+          }
+        }
+      })
+    }
+
+    setTimer
+    val restartedDiv = div(omsheet.connectionTabOverlay)(
+      div(
+        div(
+          omsheet.centerPage,
+          div(omsheet.shutdown, "The OpenMOLE server is restarting, please wait.")
+        )
+      )
+    ).render
+
+    post()[Api].restart().call()
+    restartedDiv
+  }
+
+  @JSExport
   def resetPassword(): Unit = {
     val resetPassword = new ResetPassword
     withBootstrapNative {
@@ -89,7 +121,7 @@ object ScriptClient {
 
     Plugins.fetch { _ ⇒
       val maindiv = tags.div()
-      val settingsView = new SettingsView
+      //  val settingsView = new SettingsView
 
       val authenticationPanel = new AuthenticationPanel
 
@@ -183,7 +215,7 @@ object ScriptClient {
             tags.div(`class` := "fullpanel")(
               BannerAlert.banner,
               menuBar.render,
-              settingsView.renderApp,
+              SettingsView.renderApp,
               tags.div(
                 `class` := Rx {
                   "leftpanel " + {

@@ -8,7 +8,11 @@ import org.openmole.gui.client.core.panels._
 import org.scalajs.dom
 import rx._
 import bs._
+import fr.iscpif.scaladget.api.Selector.Dropdown
+import org.openmole.gui.ext
+import org.openmole.gui.ext.data.routes
 import org.openmole.gui.ext.tool.client._
+
 import scalatags.JsDom.all._
 
 /*
@@ -28,51 +32,62 @@ import scalatags.JsDom.all._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class SettingsView {
+object SettingsView {
 
-  implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
-
-  val alert: Var[Boolean] = Var(false)
-  alert.triggerLater {
-    alertPanel
-  }
-
-  def alertPanel = AlertPanel.string(
-    "Careful! Resetting your password will wipe out all your preferences! Reset anyway?",
+  private def alertPanel(warnMessage: String, route: String) = AlertPanel.string(
+    warnMessage,
     () ⇒ {
-      alert() = false
-      dom.window.location.href = "resetPassword"
-    }, () ⇒ {
-      alert() = false
-    }, CenterPagePosition
+      fileDisplayer.tabs.saveAllTabs(() ⇒
+        dom.window.location.href = route)
+    },
+    transform = CenterPagePosition
   )
 
-  val resetPassword = span(onclick := { () ⇒
-    alert() = true
-  }, omsheet.settingsItemStyle)("Reset password").render
-
-  val shutdownButton = div(rowLayout +++ (lineHeight := "7px"))(
-    bs.glyphSpan(glyph_off +++ omsheet.shutdownButton +++ columnLayout),
-    span("Shutdown", settingsItemStyle +++ columnLayout +++ (scalatags.JsDom.all.paddingTop := 8)),
-    onclick := { () ⇒
-      AlertPanel.string(
-        "This will stop the server, the application will no longer be usable. Halt anyway?",
-        () ⇒ {
-          fileDisplayer.tabs.saveAllTabs(() ⇒
-            dom.window.location.href = "shutdown")
-        },
-        transform = CenterPagePosition
-      )
-    }
-  ).render
-
-  val renderApp = bs.vForm(width := "auto")(
-    resetPassword,
+  lazy val dropdownApp: Dropdown[_] = bs.vForm(width := "auto")(
+    resetPasswordButton,
+    restartButton,
     shutdownButton
-  ).dropdownWithTrigger(bs.glyphSpan(glyph_menu_hamburger), omsheet.resetBlock, Seq(left := "initial", right := 0)).render
+  ).dropdownWithTrigger(bs.glyphSpan(glyph_menu_hamburger), omsheet.resetBlock, Seq(left := "initial", right := 0))
 
-  val renderConnection = bs.vForm(width := "auto")(
-    resetPassword
-  ).dropdownWithTrigger(bs.glyphSpan(glyph_menu_hamburger), omsheet.resetBlock +++ (right := 20), Seq(left := "initial", right := 0)).render
+  lazy val dropdownConnection: Dropdown[_] = bs.vForm(width := "auto")(
+    resetPasswordButton
+  ).dropdownWithTrigger(bs.glyphSpan(glyph_menu_hamburger), omsheet.resetBlock +++ (right := 20), Seq(left := "initial", right := 0))
+
+  private def serverActions(message: String, messageGlyph: Glyphicon, warnMessage: String, route: String) =
+    div(rowLayout +++ (lineHeight := "7px"))(
+      bs.glyphSpan(messageGlyph +++ omsheet.shutdownButton +++ columnLayout),
+      span(message, settingsItemStyle +++ columnLayout +++ (paddingAll(top = 3, left = 5))),
+      onclick := { () ⇒
+        dropdownApp.close
+        dropdownConnection.close
+        alertPanel(warnMessage, route)
+      }
+    ).render
+
+  val resetPasswordButton =
+    serverActions(
+      "reset password",
+      glyph_lock,
+      "Careful! Resetting your password will wipe out all your preferences! Reset anyway?",
+      routes.resetPasswordRoute
+    )
+
+  val shutdownButton = serverActions(
+    "shutdown",
+    glyph_off,
+    "This will stop the server, the application will no longer be usable. Halt anyway?",
+    routes.shutdownRoute
+  )
+
+  val restartButton = serverActions(
+    "restart",
+    glyph_repeat,
+    "This will restart the server, the application will not respond for a while. Restart anyway?",
+    routes.restartRoute
+  )
+
+  val renderApp = dropdownApp.render
+
+  val renderConnection = dropdownConnection.render
 
 }

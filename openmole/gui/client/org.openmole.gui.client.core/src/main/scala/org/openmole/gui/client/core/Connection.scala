@@ -28,10 +28,7 @@ import scalatags.JsDom.tags
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class Connection {
-
-  implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
-  val settingsView = new SettingsView
+object Connection {
 
   lazy val connectButton = tags.button("Connect", btn_primary, `type` := "submit").render
 
@@ -48,35 +45,29 @@ class Connection {
     passwordInput.value = ""
   }
 
-  def connectionForm: HTMLFormElement =
+  private val connectionForm: HTMLFormElement =
     tags.form(
       method := "post",
       passwordInput,
       connectButton
     ).render
 
-  val connectionDiv = div(
-    settingsView.renderConnection,
-    Rx {
+  val render = {
+    div(
+      SettingsView.renderConnection,
       div(omsheet.connectionTabOverlay)(
         div(
           img(src := "img/openmole.png", omsheet.openmoleLogo),
           div(
             omsheet.centerPage,
             div(
-              if (settingsView.alert.now)
-                settingsView.alertPanel
-              else {
-                div(
-                  omsheet.connectionBlock,
-                  connectionForm
-                )
-              }
+              omsheet.connectionBlock,
+              connectionForm
             )
           )
         )
       )
-    }
-  )
+    ).render
 
+  }
 }

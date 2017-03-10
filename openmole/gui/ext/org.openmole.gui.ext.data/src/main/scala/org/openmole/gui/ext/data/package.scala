@@ -1,11 +1,7 @@
-package org.openmole.gui.client.core
+package org.openmole.gui.ext.data
 
-import org.openmole.gui.client.core.alert.BannerAlert
-import org.openmole.gui.ext.tool.client.OMPost
-import scala.concurrent.duration.Duration
-import scala.concurrent.duration._
 /*
- * Copyright (C) 04/01/17 // mathieu.leclaire@openmole.org
+ * Copyright (C) 10/03/17 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -20,15 +16,13 @@ import scala.concurrent.duration._
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-object post {
-  def apply(timeout: Duration = 60 seconds, warningTimeout: Duration = 10 seconds) = {
-    OMPost(
-      timeout,
-      warningTimeout,
-      (request: String) ⇒ BannerAlert.register(BannerAlert.message(s"The request ${request} failed.").critical),
-      () ⇒ BannerAlert.register(BannerAlert.message("The request is very long. Please check your connection."))
-    )
-  }
+package object routes {
+  val connectionRoute = "/connection"
+  val shutdownRoute = "/shutdown"
+  val restartRoute = "/restart"
+  val appRoute = "/app"
+  val downloadFileRoute = "/downloadFile"
+  val downloadPluginsRoute = "/downloadPlugins"
+  val uploadFilesRoute = "/uploadFiles"
+  val resetPasswordRoute = "/resetPassword"
 }
-

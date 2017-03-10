@@ -26,6 +26,7 @@ trait Api {
   def settings(): OMSettings
   def shutdown(): Unit
   def restart(): Unit
+  def isAlive(): Boolean
 
   //AUTHENTICATIONS
   def renameKey(keyName: String, newName: String): Unit
