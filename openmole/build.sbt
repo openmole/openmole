@@ -862,7 +862,8 @@ lazy val dockerBin = Project("docker", binDir / "docker") enablePlugins (sbtdock
     runRaw(
       """groupadd -r openmole && \
               useradd -r -g openmole openmole --home-dir /var/openmole/ --create-home && \
-              chmod +x /openmole/openmole""")
+              chmod +x /openmole/openmole && \
+              ln -s /openmole/openmole /usr/bin/openmole""")
     expose(8443)
     user("openmole")
     cmdShell("/openmole/openmole", "--port", "8443", "--remote")
