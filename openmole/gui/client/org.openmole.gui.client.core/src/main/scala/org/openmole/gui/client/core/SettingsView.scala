@@ -2,17 +2,25 @@ package org.openmole.gui.client.core
 
 import fr.iscpif.scaladget.stylesheet.all._
 import org.openmole.gui.client.core.alert.AbsolutePositioning.CenterPagePosition
+
+import scalatags.JsDom._
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import org.openmole.gui.client.core.alert.AlertPanel
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import org.openmole.gui.client.core.panels._
 import org.scalajs.dom
-import rx._
 import bs._
 import fr.iscpif.scaladget.api.Selector.Dropdown
-import org.openmole.gui.ext
-import org.openmole.gui.ext.data.routes
+import org.openmole.gui.ext.api.Api
+import org.openmole.gui.ext.data.{ JVMInfos, routes }
 import org.openmole.gui.ext.tool.client._
+import autowire._
+import rx._
+import org.openmole.gui.ext.tool.client.JsRxTags._
+import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
 
+import scala.scalajs.js.timers
+import scala.scalajs.js.timers.SetIntervalHandle
 import scalatags.JsDom.all._
 
 /*
@@ -34,6 +42,10 @@ import scalatags.JsDom.all._
 
 object SettingsView {
 
+  implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
+  val jvmInfos: Var[Option[JVMInfos]] = Var(None)
+  val timer: Var[Option[SetIntervalHandle]] = Var(None)
+
   private def alertPanel(warnMessage: String, route: String) = AlertPanel.string(
     warnMessage,
     () ⇒ {
@@ -44,6 +56,8 @@ object SettingsView {
   )
 
   lazy val dropdownApp: Dropdown[_] = bs.vForm(width := "auto")(
+    jvmInfoButton,
+    jvmInfosDiv,
     resetPasswordButton,
     restartButton,
     shutdownButton
@@ -63,6 +77,58 @@ object SettingsView {
         alertPanel(warnMessage, route)
       }
     ).render
+
+  val jvmInfoButton = bs.button("JVM stats", btn_default +++ sheet.marginLeft(12), glyph_stats, () ⇒ timer.now match {
+    case Some(t) ⇒ stopJVMTimer(t)
+    case _       ⇒ setJVMTimer
+  }).render
+
+  def updateJVMInfos = {
+    post()[Api].jvmInfos.call().foreach { j ⇒
+      jvmInfos() = Some(j)
+    }
+  }
+
+  def setJVMTimer = {
+    timer() = Some(timers.setInterval(3000) {
+      updateJVMInfos
+    })
+  }
+
+  def stopJVMTimer(t: SetIntervalHandle) = {
+    timers.clearInterval(t)
+    timer() = None
+  }
+
+  val waiter = timer.map {
+    _.isDefined
+  }
+
+  val jvmInfosDiv = timer.map {
+    _.isDefined
+  }.expand(div(height := 150)(
+    Rx {
+      for (
+        j ← jvmInfos()
+      ) yield {
+        val readableTotalMemory = CoreUtils.readableByteCount(j.totalMemory)
+        tags.div(
+          tags.div(relative100)(
+            tags.div(bigHalfColumn)(j.processorAvailable.toString),
+            tags.div(smallHalfColumn)("Processors")
+          ),
+          tags.div(relative100)(
+            tags.div(bigHalfColumn)(s"${(j.allocatedMemory.toDouble / j.totalMemory * 100).toInt}"),
+            tags.div(smallHalfColumn)("Allocated memory (%)")
+          ),
+          tags.div(relative100)(
+            tags.div(bigHalfColumn)(s"${readableTotalMemory.bytes}"),
+            tags.div(smallHalfColumn)(s"Total memory (${readableTotalMemory.units})")
+          )
+        )
+      }
+    }
+  ))
 
   val resetPasswordButton =
     serverActions(

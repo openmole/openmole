@@ -80,6 +80,18 @@ class ApiImpl(val arguments: GUIServer.ServletArguments) extends Api {
 
   def isAlive = true
 
+  def jvmInfos = {
+    val runtime = Runtime.getRuntime
+    val totalMemory = runtime.totalMemory
+    val allocatedMemory = totalMemory - runtime.freeMemory
+
+    JVMInfos(
+      Runtime.getRuntime.availableProcessors,
+      allocatedMemory,
+      totalMemory
+    )
+  }
+
   //AUTHENTICATIONS
   def renameKey(keyName: String, newName: String): Unit =
     Files.move(new File(authenticationKeysFile, keyName).toPath, new File(authenticationKeysFile, newName).toPath, StandardCopyOption.REPLACE_EXISTING)

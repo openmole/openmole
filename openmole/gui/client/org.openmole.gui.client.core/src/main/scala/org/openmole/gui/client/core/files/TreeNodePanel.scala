@@ -410,7 +410,7 @@ class TreeNodePanel {
 
     def timeOrSize(tn: TreeNode): String = fileToolBar.fileFilter.now.fileSorting match {
       case TimeSorting ⇒ CoreUtils.longTimeToString(tn.time)
-      case _           ⇒ CoreUtils.readableByteCount(tn.size)
+      case _           ⇒ CoreUtils.readableByteCountAsString(tn.size)
     }
 
     def clearSelectionExecpt(safePath: SafePath) = {

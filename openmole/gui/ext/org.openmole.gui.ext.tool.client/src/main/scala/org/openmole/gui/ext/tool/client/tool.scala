@@ -44,6 +44,8 @@ package object client {
 
   lazy val VERY_LIGHT_GREY = "#e7e7e7"
 
+  lazy val BS_GREY = "#808080"
+
   lazy val FUN_GREY = "#cccccc"
 
   lazy val WHITE = "white"
@@ -193,6 +195,7 @@ package object client {
     pointer,
     relativePosition,
     floatRight,
+    right := -30,
     top := 20,
     zIndex := 1101,
     fontSize := 22,
@@ -811,5 +814,29 @@ package object client {
     paddingAll(top = 10, left = 15, bottom = 15)
 
   )
+
+  //GENERAL SETTINGS
+  lazy val relative100: ModifierSeq = Seq(
+    width := 130,
+    height := 50,
+    display := "table",
+    overflow := "hidden"
+  )
+
+  lazy val centerCell: ModifierSeq = Seq(
+    display := "table-cell",
+    verticalAlign := "middle"
+  )
+
+  lazy val bigHalfColumn: ModifierSeq = (Seq(
+    fontSize := 26,
+    width := 60
+  ): ModifierSeq) ++ centerCell
+
+  lazy val smallHalfColumn: ModifierSeq = (Seq(
+    left := 65,
+    fontSize := 10,
+    color(BS_GREY)
+  ): ModifierSeq) ++ centerCell
 
 }

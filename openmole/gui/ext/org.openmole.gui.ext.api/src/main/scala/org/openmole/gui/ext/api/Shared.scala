@@ -27,6 +27,7 @@ trait Api {
   def shutdown(): Unit
   def restart(): Unit
   def isAlive(): Boolean
+  def jvmInfos(): JVMInfos
 
   //AUTHENTICATIONS
   def renameKey(keyName: String, newName: String): Unit

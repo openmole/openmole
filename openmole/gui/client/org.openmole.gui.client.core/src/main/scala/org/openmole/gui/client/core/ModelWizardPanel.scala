@@ -695,7 +695,7 @@ class ModelWizardPanel {
               } yield {
                 body.appendChild(tags.tr(
                   td(colMD(3))(i.safePath.name),
-                  td(colMD(2))(CoreUtils.readableByteCount(i.size))
+                  td(colMD(2))(CoreUtils.readableByteCountAsString(i.size))
                 ).render)
               }
               tags.table(striped +++ sheet.paddingTop(20))(body)

@@ -124,19 +124,25 @@ object CoreUtils {
     s"${date.toLocaleDateString} ${date.toLocaleTimeString.dropRight(3)}"
   }
 
+  case class ReadableByteCount(bytes: String, units: String) {
+    def render = s"$bytes$units"
+  }
+
   //Duplicated from server to optimize data transfer
-  def readableByteCount(bytes: Long): String = {
+  def readableByteCount(bytes: Long): ReadableByteCount = {
     val kb = 1024L
     val mB = kb * kb
     val gB = mB * kb
     val tB = gB * kb
 
     val doubleBytes = bytes.toDouble
-    if (bytes < mB) (doubleBytes / kb).formatted("%.2f").toString() + "KB"
-    else if (bytes < gB) (doubleBytes / mB).formatted("%.2f").toString + "MB"
-    else if (bytes < tB) (doubleBytes / gB).formatted("%.2f").toString + "GB"
-    else (doubleBytes / tB).formatted("%.2f").toString + "TB"
+    if (bytes < mB) ReadableByteCount((doubleBytes / kb).formatted("%.2f").toString(), "KB")
+    else if (bytes < gB) ReadableByteCount((doubleBytes / mB).formatted("%.2f").toString, "MB")
+    else if (bytes < tB) ReadableByteCount((doubleBytes / gB).formatted("%.2f").toString, "GB")
+    else ReadableByteCount((doubleBytes / tB).formatted("%.2f").toString, "TB")
   }
+
+  def readableByteCountAsString(bytes: Long): String = readableByteCount(bytes).render
 
   def ifOrNothing(condition: Boolean, classString: String) = if (condition) classString else ""
 

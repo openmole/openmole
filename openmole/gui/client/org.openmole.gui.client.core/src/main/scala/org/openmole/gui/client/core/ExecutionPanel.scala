@@ -24,7 +24,6 @@ import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 
 import scala.util.{ Failure, Success }
 import scalatags.JsDom.all._
-import org.openmole.gui.client.tool._
 import org.openmole.gui.client.tool.Expander._
 
 import scalatags.JsDom._
@@ -41,7 +40,6 @@ import org.openmole.gui.ext.data._
 import bs._
 import org.openmole.gui.client.core.alert.BannerAlert
 import org.openmole.gui.client.core.alert.BannerAlert.BannerMessage
-import org.openmole.gui.client.core.files.TreeNodeTabs
 import org.openmole.gui.client.core.files.TreeNodeTabs.StandBy
 import org.openmole.gui.client.tool.Expander
 import org.openmole.gui.ext.api.Api

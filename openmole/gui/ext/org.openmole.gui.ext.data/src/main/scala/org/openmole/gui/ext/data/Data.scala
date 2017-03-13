@@ -751,3 +751,5 @@ object Test {
 
   def error(msg: String, err: Error) = FailedTest(msg, err)
 }
+
+case class JVMInfos(processorAvailable: Int, allocatedMemory: Long, totalMemory: Long)
