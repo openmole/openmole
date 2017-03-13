@@ -54,6 +54,8 @@ while [[ $# -gt 0 ]]; do
   shift
 done
 
+SCRIPT_ARGS=()
+
 # Try to increase the max number of opened files
 if [[ `ulimit -S -n` < 4096 ]]; then ulimit -S -n 4096 2>/dev/null; fi
 
@@ -64,12 +66,16 @@ function run {
   java -Xss2M -Dfile.encoding=UTF-8 -Djava.security.egd=file:/dev/./urandom -Dosgi.locking=none -Dopenmole.location="${LOCATION}" -Dosgi.classloader.singleThreadLoads=true  -Dosgi.configuration.area="${CONFIGDIR}" -Xmx${MEM} $FLAG \
      -XX:+UseG1GC -XX:CICompilerCount=2 -XX:ParallelGCThreads=2 -XX:ConcGCThreads=2 -XX:G1ConcRefinementThreads=2 \
      -cp "${LOCATION}/launcher/*" org.openmole.launcher.Launcher  --plugins "${LOCATION}/plugins/" --priority "logging" --run org.openmole.ui.Application --osgi-directory "${CONFIGDIR}" -- \
-     "${ARGS[@]}"
+     "${ARGS[@]}" "${SCRIPT_ARGS[@]}"
 
   RET=$?
   rm -rf "${CONFIGDIR}"
 }
 
 run
-if [[ $RET -eq 254 ]]; then run; fi
+while [[ $RET -eq 254 ]]; do
+ SCRIPT_ARGS=("--no-browser")
+ run
+done
+
 exit $RET
