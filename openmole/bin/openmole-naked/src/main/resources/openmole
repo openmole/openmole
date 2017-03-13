@@ -71,5 +71,5 @@ function run {
 }
 
 run
-if [[ $RET -eq 254 ]]; then run; fi
+while [[ $RET -eq 254 ]]; do run; done
 exit $RET
