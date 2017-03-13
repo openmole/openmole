@@ -17,7 +17,7 @@ object Libraries {
   lazy val scalaUpickleVersion = "0.4.3"
   lazy val scalaAutowireVersion = "0.2.6"
   lazy val sourcecodeVersion = "0.1.2"
-  lazy val scaladgetVersion = "0.9.1-SNAPSHOT"
+  lazy val scaladgetVersion = "0.9.1"
   lazy val scalajsVersion = "0.6.14"
 
   lazy val scaladgetJS = libraryDependencies += "fr.iscpif" %%% "scaladget" % scaladgetVersion
