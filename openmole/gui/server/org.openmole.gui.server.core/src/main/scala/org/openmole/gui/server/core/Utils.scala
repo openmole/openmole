@@ -445,37 +445,31 @@ object Utils extends Logger {
     val zip = new ZipFile(from)
     zip.entries.foreach { entry ⇒
       val entryName = entry.getName
-      val entryPath = {
-        if (entryName.startsWith(basename))
-          entryName.substring(basename.length)
-        else
-          entryName
+      if (entryName != s"$basename/") {
+        val entryPath = {
+          if (entryName.startsWith(basename))
+            entryName.substring(basename.length)
+          else
+            entryName
+        }
+
+        val sub = new File(to, entryPath)
+        if (entry.isDirectory) {
+          if (!sub.exists) sub.mkdirs
+        }
+        else {
+          // write file to dest
+          val inputSrc = new BufferedSource(
+            zip.getInputStream(entry)
+          )(Codec.ISO8859)
+
+          val ostream = new FileOutputStream(new File(to, entryPath))
+          inputSrc foreach { c: Char ⇒ ostream.write(c) }
+          inputSrc.close
+          ostream.close
+
+        }
       }
-
-      // create output directory if it doesn't exist already
-      val splitPath = entry.getName.split(java.io.File.separator).dropRight(1)
-      if (splitPath.size >= 1) {
-        // create intermediate directories if they don't exist
-        val dirBuilder = new StringBuilder(to.getName)
-        splitPath.foldLeft(dirBuilder)((a: StringBuilder, b: String) ⇒ {
-          val path = a.append(java.io.File.separator + b)
-          val str = path.mkString
-          if (!(new File(str).exists)) {
-            new File(str).mkdir
-          }
-          path
-        })
-      }
-
-      // write file to dest
-      val inputSrc = new BufferedSource(
-        zip.getInputStream(entry)
-      )(Codec.ISO8859)
-
-      val ostream = new FileOutputStream(new File(to, entryPath))
-      inputSrc foreach { c: Char ⇒ ostream.write(c) }
-      inputSrc.close
-      ostream.close
     }
   }
 
