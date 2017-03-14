@@ -122,7 +122,7 @@ object SettingsView {
             tags.div(smallHalfColumn)("Allocated memory (%)")
           ),
           tags.div(relative100)(
-            tags.div(bigHalfColumn)(s"${readableTotalMemory.bytes}"),
+            tags.div(bigHalfColumn)(s"${CoreUtils.dropDecimalIfNull(readableTotalMemory.bytes)}"),
             tags.div(smallHalfColumn)(s"Total memory (${readableTotalMemory.units})")
           )
         )

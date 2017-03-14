@@ -128,6 +128,13 @@ object CoreUtils {
     def render = s"$bytes$units"
   }
 
+  def dropDecimalIfNull(string: String) = {
+    val cut = string.split('.')
+    val avoid = Seq("0", "00", "000")
+    if (avoid.contains(cut.last)) cut.head
+    else string
+  }
+
   //Duplicated from server to optimize data transfer
   def readableByteCount(bytes: Long): ReadableByteCount = {
     val kb = 1024L
