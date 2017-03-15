@@ -47,6 +47,7 @@ import org.openmole.gui.ext.tool.client.Utils
 import rx._
 
 import concurrent.duration._
+import scala.scalajs.js
 
 class ExecutionPanel {
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
@@ -92,6 +93,7 @@ class ExecutionPanel {
     def delay = {
       updating.set(false)
       setTimeout(5000) {
+        Tooltip.cleanAll
         if (atLeastOneNotDisplayed) updateExecutionInfo
       }
     }
@@ -142,6 +144,7 @@ class ExecutionPanel {
   val envErrorPanels: Var[Map[EnvironmentId, EnvironmentErrorPanel]] = Var(Map())
 
   def staticPanel[T, I <: org.openmole.gui.ext.data.ID](id: I, panelMap: Var[Map[I, T]], builder: () ⇒ T, appender: T ⇒ Unit = (t: T) ⇒ {}): T = {
+    Tooltip.cleanAll
     if (panelMap.now.isDefinedAt(id)) {
       val t = panelMap.now(id)
       appender(t)
@@ -252,15 +255,15 @@ class ExecutionPanel {
                     tbody(
                       Seq(
                         tr(row +++ (fontSize := 14))(
-                          td(colMD(1))(tags.span(e.taskName)),
-                          td(colMD(2))(tags.span(CoreUtils.approximatedYearMonthDay(e.executionActivity.executionTime))),
-                          td(colMD(2))(glyphAndText(glyph_upload, s" ${e.networkActivity.uploadingFiles} ${displaySize(e.networkActivity.uploadedSize, e.networkActivity.readableUploadedSize)}")),
-                          td(colMD(2))(glyphAndText(glyph_download, s" ${e.networkActivity.downloadingFiles} ${displaySize(e.networkActivity.downloadedSize, e.networkActivity.readableDownloadedSize)}")),
-                          td(colMD(1))(glyphAndText(glyph_road +++ sheet.paddingBottom(7), e.submitted.toString)),
-                          td(colMD(1))(glyphAndText(glyph_flash +++ sheet.paddingBottom(7), e.running.toString)),
-                          td(colMD(1))(glyphAndText(glyph_flag +++ sheet.paddingBottom(7), e.done.toString)),
-                          td(colMD(1))(glyphAndText(glyph_fire +++ sheet.paddingBottom(7), e.failed.toString)),
-                          td(colMD(3))(({
+                          td(colMD(1) +++ textCenter)(tags.span(e.taskName)),
+                          td(colMD(2) +++ textCenter)(tags.span(CoreUtils.approximatedYearMonthDay(e.executionActivity.executionTime))).tooltip("Full computation time"),
+                          td(colMD(2) +++ textCenter)(glyphAndText(glyph_upload, s" ${e.networkActivity.uploadingFiles} ${displaySize(e.networkActivity.uploadedSize, e.networkActivity.readableUploadedSize)}")).tooltip("Uploads"),
+                          td(colMD(2) +++ textCenter)(glyphAndText(glyph_download, s" ${e.networkActivity.downloadingFiles} ${displaySize(e.networkActivity.downloadedSize, e.networkActivity.readableDownloadedSize)}")).tooltip("Downloads"),
+                          td(colMD(1) +++ textCenter)(glyphAndText(glyph_road +++ sheet.paddingBottom(7), e.submitted.toString)).tooltip("Submitted jobs"),
+                          td(colMD(1) +++ textCenter)(glyphAndText(glyph_flash +++ sheet.paddingBottom(7), e.running.toString)).tooltip(("Running jobs")),
+                          td(colMD(1) +++ textCenter)(glyphAndText(glyph_flag +++ sheet.paddingBottom(7), e.done.toString)).tooltip("Finished jobs"),
+                          td(colMD(1) +++ textCenter)(glyphAndText(glyph_fire +++ sheet.paddingBottom(7), e.failed.toString)).tooltip("Failed jobs"),
+                          td(colMD(3) +++ textCenter)(({
                             if (envErrorVisible().contains(e.envId)) {
                               tags.div(rowLayout +++ (width := 100))(
                                 bs.buttonGroup(columnLayout +++ (width := 80))(
@@ -273,11 +276,11 @@ class ExecutionPanel {
                             else tags.span(omsheet.color(BLUE) +++ ((envErrorVisible().contains(e.envId)), ms(" executionVisible"), emptyMod))(
                               sheet.pointer +++ omsheet.bold, onclick := toggleEnvironmentErrorPanel(e.envId)
                             )("details")
-                          }))
+                          })).tooltip("Error details")
                         ),
                         tr(row)(
                           {
-                            td(colMD(12) +++ (!envErrorVisible().contains(e.envId), omsheet.displayOff, emptyMod))(
+                            td(colMD(12) +++ textCenter +++ (!envErrorVisible().contains(e.envId), omsheet.displayOff, emptyMod))(
                               colspan := 12,
                               staticPanel(e.envId, envErrorPanels,
                                 () ⇒ new EnvironmentErrorPanel,
@@ -320,20 +323,20 @@ class ExecutionPanel {
 
             Seq(
               tr(row +++ omsheet.executionTable, colspan := 12)(
-                td(colMD(2), pointer)(visibleClass(id.id, scriptID, scriptLink)),
-                td(colMD(2))(div(Utils.longToDate(staticInfo.now(id).startDate))),
-                td(colMD(2))(glyphAndText(glyph_flash, details.running.toString)),
-                td(colMD(2))(glyphAndText(glyph_flag, details.ratio.toString)),
-                td(colMD(1))(div(durationString)),
-                td(colMD(1))(visibleClass(id.id, errorID, stateLink, omsheet.executionState(executionInfo.state))),
-                td(colMD(1), pointer)(visibleClass(id.id, envID, envLink)),
-                td(colMD(1), pointer)(visibleClass(id.id, outputStreamID, outputLink)),
-                td(colMD(1))(tags.span(glyph_remove +++ ms("removeExecution"), onclick := { () ⇒
+                td(colMD(2), pointer +++ textCenter)(visibleClass(id.id, scriptID, scriptLink)).tooltip("Original script"),
+                td(colMD(2) +++ textCenter)(div(Utils.longToDate(staticInfo.now(id).startDate))).tooltip("Starting time"),
+                td(colMD(2) +++ textCenter)(glyphAndText(glyph_flash, details.running.toString)).tooltip("Running jobs"),
+                td(colMD(2) +++ textCenter)(glyphAndText(glyph_flag, details.ratio.toString)).tooltip("Finished/Total jobs"),
+                td(colMD(1) +++ textCenter)(div(durationString)).tooltip("Elapsed time"),
+                td(colMD(1) +++ textCenter)(visibleClass(id.id, errorID, stateLink, omsheet.executionState(executionInfo.state))).tooltip("Execution state"),
+                td(colMD(1) +++ textCenter, pointer)(visibleClass(id.id, envID, envLink)).tooltip("Computation environment details"),
+                td(colMD(1) +++ textCenter, pointer)(visibleClass(id.id, outputStreamID, outputLink)).tooltip("Standard output"),
+                td(colMD(1) +++ textCenter)(tags.span(glyph_remove +++ ms("removeExecution"), onclick := { () ⇒
                   cancelExecution(id)
-                })),
-                td(colMD(1))(tags.span(glyph_trash +++ ms("removeExecution"), onclick := { () ⇒
+                })).tooltip("Cancel execution"),
+                td(colMD(1) +++ textCenter)(tags.span(glyph_trash +++ ms("removeExecution"), onclick := { () ⇒
                   removeExecution(id)
-                }))
+                })).tooltip("Trash execution")
               ),
               tr(row)(
                 theExpanders(id.id).currentColumn().map { col ⇒
@@ -399,6 +402,7 @@ class ExecutionPanel {
     },
     onclose = () ⇒ {
       setTimerOff
+      Tooltip.cleanAll
     }
   )
 

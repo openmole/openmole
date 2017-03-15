@@ -135,7 +135,7 @@ object ScriptClient {
 
       val pluginItem = navItem(div(OMTags.glyph_plug, itemStyle).tooltip("Plugins"), () ⇒ pluginPanel.dialog.show)
 
-      val envItem = navItem(div(glyph_exclamation, itemStyle), () ⇒ stackPanel.open)
+      val envItem = navItem(div(glyph_exclamation, itemStyle).render, () ⇒ stackPanel.open)
 
       val docItem = navItem(div(OMTags.glyph_book, itemStyle).tooltip("Documentation"), () ⇒ docPanel.dialog.show)
 
@@ -171,7 +171,7 @@ object ScriptClient {
               if (openFileTree()) mainNav370 else mainNav0
             },
             navItem(
-              if (openFileTree()) div(glyph_chevron_left, fileChevronStyle) else div(glyph_chevron_right, fileChevronStyle),
+              if (openFileTree()) div(glyph_chevron_left, fileChevronStyle).render else div(glyph_chevron_right, fileChevronStyle).render,
               todo = () ⇒ {
                 openFileTree() = !openFileTree.now
               }

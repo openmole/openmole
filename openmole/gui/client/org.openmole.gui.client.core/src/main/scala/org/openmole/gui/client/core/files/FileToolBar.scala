@@ -109,7 +109,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
     resetFilterTools
   }
 
-  def buildSpan(tool: SelectedTool, legend: String, todo: () ⇒ Unit, modifierSeq: ModifierSeq = emptyMod): TypedTag[HTMLElement] = {
+  def buildSpan(tool: SelectedTool, legend: String, todo: () ⇒ Unit, modifierSeq: ModifierSeq = emptyMod): HTMLElement = {
     span(
       tool.glyph +++ pointer +++ modifierSeq +++ "glyphmenu",
       onclick := { () ⇒
@@ -120,7 +120,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
     ).tooltip(legend)
   }
 
-  def buildAndSelectSpan(tool: SelectedTool, legend: String, todo: Boolean ⇒ Unit = (Boolean) ⇒ {}): TypedTag[HTMLElement] = buildSpan(tool, legend, { () ⇒
+  def buildAndSelectSpan(tool: SelectedTool, legend: String, todo: Boolean ⇒ Unit = (Boolean) ⇒ {}): HTMLElement = buildSpan(tool, legend, { () ⇒
     val isSelectedTool = selectedTool.now == Some(tool)
     if (isSelectedTool) selectedTool.now match {
       case Some(FilterTool) ⇒ unselectToolAndRefreshTree
