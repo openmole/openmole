@@ -30,6 +30,7 @@ class DesktopGridAuthenticationApiImpl extends DesktopGridAuthenticationAPI {
 
   def removeAuthentication(): Unit = DesktopGridAuthentication.clear
 
-  def desktopGridAuthentications(): Seq[DesktopGridAuthenticationData] = Seq(DesktopGridAuthenticationData(DesktopGridAuthentication.password))
+  def desktopGridAuthentications(): Seq[DesktopGridAuthenticationData] =
+    DesktopGridAuthentication.passwordOption.map(DesktopGridAuthenticationData).toSeq
 
 }
