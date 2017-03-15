@@ -58,13 +58,13 @@ object SettingsView {
   lazy val dropdownApp: Dropdown[_] = bs.vForm(width := "auto")(
     jvmInfoButton,
     jvmInfosDiv,
-    resetPasswordButton,
+    resetPasswordButton.render,
     restartButton,
     shutdownButton
   ).dropdownWithTrigger(bs.glyphSpan(glyph_menu_hamburger), omsheet.resetBlock, Seq(left := "initial", right := 0))
 
   lazy val dropdownConnection: Dropdown[_] = bs.vForm(width := "auto")(
-    resetPasswordButton
+    resetPasswordButton.render
   ).dropdownWithTrigger(bs.glyphSpan(glyph_menu_hamburger), omsheet.resetBlock +++ (right := 20), Seq(left := "initial", right := 0))
 
   private def serverActions(message: String, messageGlyph: Glyphicon, warnMessage: String, route: String) =
@@ -76,7 +76,7 @@ object SettingsView {
         dropdownConnection.close
         alertPanel(warnMessage, route)
       }
-    ).render
+    )
 
   val jvmInfoButton = bs.button("JVM stats", btn_default +++ sheet.marginLeft(12), glyph_stats, () ⇒ timer.now match {
     case Some(t) ⇒ stopJVMTimer(t)
@@ -143,14 +143,14 @@ object SettingsView {
     glyph_off,
     "This will stop the server, the application will no longer be usable. Halt anyway?",
     routes.shutdownRoute
-  )
+  ).render
 
   val restartButton = serverActions(
     "restart",
     glyph_repeat,
     "This will restart the server, the application will not respond for a while. Restart anyway?",
     routes.restartRoute
-  )
+  ).render
 
   val renderApp = dropdownApp.render
 
