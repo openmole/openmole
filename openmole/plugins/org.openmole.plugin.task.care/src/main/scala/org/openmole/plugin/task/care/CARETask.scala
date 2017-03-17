@@ -18,8 +18,6 @@
 
 package org.openmole.plugin.task.care
 
-import java.io.File
-
 import monocle.macros.Lenses
 import org.openmole.core.context.{ Context, Val, Variable }
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
@@ -33,7 +31,7 @@ import org.openmole.plugin.task.systemexec
 import org.openmole.plugin.task.systemexec._
 import org.openmole.core.expansion._
 import org.openmole.tool.logger.Logger
-import org.openmole.tool.random.RandomProvider
+import org.openmole.tool.random._
 
 import cats._
 import cats.implicits._
@@ -126,7 +124,7 @@ object CARETask extends Logger {
     val inputDirectory = taskWorkDirectory / "inputs"
 
     def inputPathResolver(path: String) = {
-      if (new File(path).isAbsolute) inputDirectory / path
+      if (File(path).isAbsolute) inputDirectory / path
       else inputDirectory / userWorkDirectory / path
     }
 
@@ -187,8 +185,14 @@ object CARETask extends Logger {
     def rootDirectory = extractedArchive / rootfs
 
     def outputPathResolver(filePath: String): File = {
-      def isAbsolute = new File(filePath).isAbsolute
-      if (isAbsolute) rootDirectory / filePath else rootDirectory / userWorkDirectory / filePath
+      def isParent(dir: String, file: String) = File(file).getAbsolutePath.startsWith(File(dir).getAbsolutePath)
+      def inBindings(f: String) = bindings.map(b ⇒ b._2).exists(b ⇒ isParent(b, f))
+
+      def isAbsolute = File(filePath).isAbsolute
+      def absoluteInCARE: String = if (isAbsolute) filePath else (File(userWorkDirectory) / filePath).getPath
+
+      if (inBindings(File("/") / absoluteInCARE getAbsolutePath)) inputPathResolver(filePath)
+      else rootDirectory / absoluteInCARE
     }
 
     val retContext = external.fetchOutputFiles(preparedContext, outputPathResolver)
