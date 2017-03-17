@@ -134,9 +134,9 @@ object CARETask extends Logger {
     val proot = extractedArchive / "proot"
     proot move (extractedArchive / "proot.origin")
 
-    def bindings =
-      preparedFilesInfo.map { case (f, d) ⇒ d.getAbsolutePath → f.name } ++
-        hostFiles.map { case (f, b) ⇒ f → b.getOrElse(f) }
+    def preparedFileBindings = preparedFilesInfo.map { case (f, d) ⇒ d.getAbsolutePath → f.name }
+    def hostFileBindings = hostFiles.map { case (f, b) ⇒ f → b.getOrElse(f) }
+    def bindings = preparedFileBindings ++ hostFileBindings
 
     def createDestination(binding: (String, String)) = {
       import org.openmole.tool.file.{ File ⇒ OMFile }
@@ -186,12 +186,14 @@ object CARETask extends Logger {
 
     def outputPathResolver(filePath: String): File = {
       def isParent(dir: String, file: String) = File(file).getAbsolutePath.startsWith(File(dir).getAbsolutePath)
-      def inBindings(f: String) = bindings.map(b ⇒ b._2).exists(b ⇒ isParent(b, f))
+      def inPreparedFiles(f: String) = preparedFileBindings.map(b ⇒ b._2).exists(b ⇒ isParent(b, f))
+      def inHostFiles(f: String) = hostFileBindings.map(b ⇒ b._2).exists(b ⇒ isParent(b, f))
 
       def isAbsolute = File(filePath).isAbsolute
       def absoluteInCARE: String = if (isAbsolute) filePath else (File(userWorkDirectory) / filePath).getPath
 
-      if (inBindings(File("/") / absoluteInCARE getAbsolutePath)) inputPathResolver(filePath)
+      if (inPreparedFiles(File("/") / absoluteInCARE getAbsolutePath)) inputPathResolver(filePath)
+      else if (inHostFiles(File("/") / absoluteInCARE getAbsolutePath)) File("/") / absoluteInCARE
       else rootDirectory / absoluteInCARE
     }
 
