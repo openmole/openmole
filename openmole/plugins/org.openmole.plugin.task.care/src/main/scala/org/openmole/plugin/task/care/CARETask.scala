@@ -185,7 +185,7 @@ object CARETask extends Logger {
     def rootDirectory = extractedArchive / rootfs
 
     def outputPathResolver(filePath: String): File = {
-      def isParent(dir: String, file: String) = File(file).getAbsolutePath.startsWith(File(dir).getAbsolutePath)
+      def isParent(dir: String, file: String) = dir.equals(File(file).getParent)
       def inPreparedFiles(f: String) = preparedFileBindings.map(b ⇒ b._2).exists(b ⇒ isParent(b, f))
       def inHostFiles(f: String) = hostFileBindings.map(b ⇒ b._2).exists(b ⇒ isParent(b, f))
 
