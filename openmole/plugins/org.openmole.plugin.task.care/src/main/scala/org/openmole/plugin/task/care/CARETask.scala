@@ -30,6 +30,7 @@ import org.openmole.plugin.task.systemexec._
 import org.openmole.core.expansion._
 import org.openmole.tool.logger.Logger
 import org.openmole.tool.random._
+import org.openmole.plugin.task.container
 
 import cats.implicits._
 
@@ -120,10 +121,7 @@ object CARETask extends Logger {
 
     val inputDirectory = taskWorkDirectory / "inputs"
 
-    def inputPathResolver(path: String) = {
-      if (File(path).isAbsolute) inputDirectory / path
-      else inputDirectory / userWorkDirectory / path
-    }
+    def inputPathResolver = container.inputPathResolver(inputDirectory, userWorkDirectory) _
 
     val (preparedContext, preparedFilesInfo) = external.prepareAndListInputFiles(context, inputPathResolver)
 
@@ -181,20 +179,7 @@ object CARETask extends Logger {
 
     def rootDirectory = extractedArchive / rootfs
 
-    def outputPathResolver(filePath: String): File = {
-
-      def isParent(dir: String, file: String) = dir.equals(File(file).getParent)
-      def isPreparedFile(f: String) = preparedFileBindings.map(b ⇒ b._2).exists(b ⇒ isParent(b, f))
-      def isHostFile(f: String) = hostFileBindings.map(b ⇒ b._2).exists(b ⇒ isParent(b, f))
-      def isAbsolute = File(filePath).isAbsolute
-
-      val absolutePathInCARE: String = if (isAbsolute) filePath else (File(userWorkDirectory) / filePath).getPath
-      val pathToResolve = (File("/") / absolutePathInCARE).getAbsolutePath
-
-      if (isPreparedFile(pathToResolve)) inputPathResolver(filePath)
-      else if (isHostFile(pathToResolve)) File("/") / absolutePathInCARE
-      else rootDirectory / absolutePathInCARE
-    }
+    def outputPathResolver = container.outputPathResolver(preparedFileBindings, hostFileBindings, inputDirectory, userWorkDirectory, rootDirectory) _
 
     val retContext = external.fetchOutputFiles(preparedContext, outputPathResolver)
     external.checkAndClean(this, retContext, taskWorkDirectory)
