@@ -21,19 +21,16 @@ package org.openmole.plugin.task.care
 import monocle.macros.Lenses
 import org.openmole.core.context.{ Context, Val, Variable }
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
-import org.openmole.core.expansion.ExpandedString
 import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.validation._
 import org.openmole.plugin.task.external.{ External, ExternalBuilder }
-import org.openmole.plugin.task.systemexec
 import org.openmole.plugin.task.systemexec._
 import org.openmole.core.expansion._
 import org.openmole.tool.logger.Logger
 import org.openmole.tool.random._
 
-import cats._
 import cats.implicits._
 
 object CARETask extends Logger {
@@ -50,7 +47,7 @@ object CARETask extends Logger {
     override def stdErr = CARETask.stdErr
   }
 
-  def apply(archive: File, command: String)(implicit name: sourcecode.Name): CARETask =
+  def apply(archive: File, command: String)(implicit sourceCodeName: sourcecode.Name): CARETask =
     new CARETask(
       archive = archive,
       command = command,
@@ -107,7 +104,7 @@ object CARETask extends Logger {
 
     // unarchiving in task's work directory
     // no need to retrieve error => will throw exception if failing
-    execute(Array(archive.getAbsolutePath), taskWorkDirectory, Vector.empty, true, true)
+    execute(Array(archive.getAbsolutePath), taskWorkDirectory, Vector.empty, returnOutput = true, returnError = true)
 
     val extractedArchive = taskWorkDirectory.listFilesSafe.headOption.getOrElse(
       throw new InternalProcessingError("Work directory should contain extracted archive, but is empty")
@@ -116,7 +113,7 @@ object CARETask extends Logger {
     val reExecute = extractedArchive / "re-execute.sh"
 
     val packagingDirectory: String = workDirectoryLine(reExecute.lines).getOrElse(
-      throw new InternalProcessingError(s"Could not find packaging path in ${archive}")
+      throw new InternalProcessingError(s"Could not find packaging path in $archive")
     )
 
     def userWorkDirectory = workDirectory.getOrElse(packagingDirectory)
@@ -177,7 +174,7 @@ object CARETask extends Logger {
     def prootNoSeccomp = ("PROOT_NO_SECCOMP", "1")
 
     // FIXME duplicated from SystemExecTask
-    val allEnvironmentVariables = environmentVariables.map { case (name, variable) ⇒ (name, variable.from(context)) } ++ Vector(prootNoSeccomp)
+    val allEnvironmentVariables = environmentVariables.map { case (varName, variable) ⇒ (varName, variable.from(context)) } ++ Vector(prootNoSeccomp)
     val executionResult = execute(commandline, extractedArchive, allEnvironmentVariables, stdOut.isDefined, stdErr.isDefined)
 
     if (errorOnReturnValue && returnValue.isEmpty && executionResult.returnCode != 0) throw error(commandline.toVector, executionResult)
@@ -185,16 +182,18 @@ object CARETask extends Logger {
     def rootDirectory = extractedArchive / rootfs
 
     def outputPathResolver(filePath: String): File = {
+
       def isParent(dir: String, file: String) = dir.equals(File(file).getParent)
-      def inPreparedFiles(f: String) = preparedFileBindings.map(b ⇒ b._2).exists(b ⇒ isParent(b, f))
-      def inHostFiles(f: String) = hostFileBindings.map(b ⇒ b._2).exists(b ⇒ isParent(b, f))
-
+      def isPreparedFile(f: String) = preparedFileBindings.map(b ⇒ b._2).exists(b ⇒ isParent(b, f))
+      def isHostFile(f: String) = hostFileBindings.map(b ⇒ b._2).exists(b ⇒ isParent(b, f))
       def isAbsolute = File(filePath).isAbsolute
-      def absoluteInCARE: String = if (isAbsolute) filePath else (File(userWorkDirectory) / filePath).getPath
 
-      if (inPreparedFiles(File("/") / absoluteInCARE getAbsolutePath)) inputPathResolver(filePath)
-      else if (inHostFiles(File("/") / absoluteInCARE getAbsolutePath)) File("/") / absoluteInCARE
-      else rootDirectory / absoluteInCARE
+      val absolutePathInCARE: String = if (isAbsolute) filePath else (File(userWorkDirectory) / filePath).getPath
+      val pathToResolve = (File("/") / absolutePathInCARE).getAbsolutePath
+
+      if (isPreparedFile(pathToResolve)) inputPathResolver(filePath)
+      else if (isHostFile(pathToResolve)) File("/") / absolutePathInCARE
+      else rootDirectory / absolutePathInCARE
     }
 
     val retContext = external.fetchOutputFiles(preparedContext, outputPathResolver)
