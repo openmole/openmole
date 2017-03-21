@@ -105,19 +105,27 @@ object UDockerTask {
 
     taskWorkDirectory.mkdirs()
 
+    val inputDirectory = taskWorkDirectory /> "inputs"
+
     def subDirectory(name: String) = taskWorkDirectory /> name
 
     // FIXME containersDirectory might actually be imagesDirectory
-    /** Sets environment variable according to the location of the container
-      *
-      * @param containersDirectory Directory storing the container on disk
-      * @return Expanded set of environment variables containing location dependent entries
-      */
+    /**
+     * Sets environment variable according to the location of the container
+     *
+     * @param containersDirectory Directory storing the container on disk
+     * @return Expanded set of environment variables containing location dependent entries
+     */
     def setContainerPaths(containersDirectory: File) =
       Vector(
         "HOME" → taskWorkDirectory.getAbsolutePath,
         "UDOCKER_CONTAINERS" → containersDirectory.getAbsolutePath
       ) ++ udockerRepoVariables(subDirectory("tmpdir"))
+
+    // FIXME get rid of it
+    def basePathResolver(baseDirectory: String)(path: String) =
+      if (File(path).isAbsolute) path
+      else (File(baseDirectory) / path).getPath
 
     def executeWithContainerReuse = {
 
@@ -142,17 +150,14 @@ object UDockerTask {
 
       createContainer(pulledImageId, containerName)
 
-      val inputDirectory = taskWorkDirectory /> "inputs"
       val tmpMount = "/tmp/openmole/"
       val containerTmpVolume = taskWorkDirectory /> "tmp"
       val context = ctx + (External.PWD → tmpMount)
 
       // FIXME get rid of it
-      def containerPathResolver(path: String) =
-        if (File(path).isAbsolute) path
-        else (File(tmpMount) / path).getPath
+      def containerPathResolver(path: String) = basePathResolver(tmpMount)(path)
 
-      def inputPathResolver(path: String) = inputDirectory / containerPathResolver(path)
+      def inputPathResolver(path: String) = inputDirectory / basePathResolver(tmpMount)(path)
 
       val (preparedContext, preparedFilesInfo) = external.prepareAndListInputFiles(context, inputPathResolver)
 
@@ -218,13 +223,9 @@ object UDockerTask {
 
       val context = ctx + (External.PWD → workDirectory)
 
-      def containerPathResolver(path: String) =
-        if (File(path).isAbsolute) path
-        else (File(workDirectory) / path).getPath
+      def containerPathResolver(path: String) = basePathResolver(workDirectory)(path)
 
-      val inputDirectory = taskWorkDirectory /> "inputs"
-
-      def inputPathResolver(path: String) = inputDirectory / containerPathResolver(path)
+      def inputPathResolver(path: String) = inputDirectory / basePathResolver(workDirectory)(path)
 
       val (preparedContext, preparedFilesInfo) = external.prepareAndListInputFiles(context, inputPathResolver)
 
