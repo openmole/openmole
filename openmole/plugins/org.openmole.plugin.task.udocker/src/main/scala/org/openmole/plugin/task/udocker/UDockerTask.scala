@@ -1,29 +1,30 @@
 /**
-  * Copyright (C) 2017 Romain Reuillon
-  * Copyright (C) 2017 Jonathan Passerat-Palmbach
-  *
-  * This program is free software: you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation, either version 3 of the License, or
-  * (at your option) any later version.
-  *
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
-  *
-  * You should have received a copy of the GNU General Public License
-  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
-  */
+ * Copyright (C) 2017 Romain Reuillon
+ * Copyright (C) 2017 Jonathan Passerat-Palmbach
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 package org.openmole.plugin.task.udocker
 
 import java.util.UUID
 
+import monocle.macros._
+import cats.implicits._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.validation._
 import org.openmole.core.workspace._
-import monocle.macros._
 import org.openmole.core.context._
 import org.openmole.core.workflow.builder._
 import org.openmole.tool.random._
@@ -32,9 +33,8 @@ import org.openmole.tool.file._
 import org.openmole.core.expansion._
 import org.openmole.plugin.task.external._
 import org.openmole.plugin.task.systemexec._
-import cats.implicits._
-import org.openmole.tool.cache._
 import org.openmole.core.exception._
+import org.openmole.plugin.task.container
 
 object UDockerTask {
 
@@ -87,6 +87,7 @@ object UDockerTask {
 
   override def config = InputOutputConfig.outputs.modify(_ ++ Seq(stdOut, stdErr, returnValue).flatten)(_config)
 
+  // TODO see whether it can factored with CARETask's
   override def validate: Seq[Throwable] = {
     val allInputs = External.PWD :: inputs.toList
 
@@ -101,18 +102,27 @@ object UDockerTask {
   }
 
   override protected def process(ctx: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider): Context = External.withWorkDir(executionContext) { taskWorkDirectory ⇒
+
     taskWorkDirectory.mkdirs()
 
     def subDirectory(name: String) = taskWorkDirectory /> name
 
-    def executeWithContainerReuse = {
-      val containersDirectory = executionContext.tmpDirectory /> "containers"
+    // FIXME containersDirectory might actually be imagesDirectory
+    /** Sets environment variable according to the location of the container
+      *
+      * @param containersDirectory Directory storing the container on disk
+      * @return Expanded set of environment variables containing location dependent entries
+      */
+    def setContainerPaths(containersDirectory: File) =
+      Vector(
+        "HOME" → taskWorkDirectory.getAbsolutePath,
+        "UDOCKER_CONTAINERS" → containersDirectory.getAbsolutePath
+      ) ++ udockerRepoVariables(subDirectory("tmpdir"))
 
-      def udockerVariables =
-        Vector(
-          "HOME" → taskWorkDirectory.getAbsolutePath,
-          "UDOCKER_CONTAINERS" → containersDirectory.getAbsolutePath
-        ) ++ udockerRepoVariables(subDirectory("tmpdir"))
+    def executeWithContainerReuse = {
+
+      val containersDirectory = executionContext.tmpDirectory /> "containers"
+      val udockerVariables = setContainerPaths(containersDirectory)
 
       def containerExists(name: String) = Workspace.withTmpDir { tmpDirectory ⇒
         val commandline = commandLine(s"${udocker.getAbsolutePath} ps", tmpDirectory.getAbsolutePath, Context.empty)(RandomProvider.empty)
@@ -137,6 +147,7 @@ object UDockerTask {
       val containerTmpVolume = taskWorkDirectory /> "tmp"
       val context = ctx + (External.PWD → tmpMount)
 
+      // FIXME get rid of it
       def containerPathResolver(path: String) =
         if (File(path).isAbsolute) path
         else (File(tmpMount) / path).getPath
@@ -183,16 +194,13 @@ object UDockerTask {
 
     def executeWithNewContainer = {
       val containersDirectory = taskWorkDirectory /> "containers"
-
-      def udockerVariables =
-        Vector(
-          "HOME" → taskWorkDirectory.getAbsolutePath,
-          "UDOCKER_CONTAINERS" → containersDirectory.getAbsolutePath
-        ) ++ udockerRepoVariables(subDirectory("tmpdir"))
+      val udockerVariables = setContainerPaths(containersDirectory)
 
       val dockerWorkDirectory = {
+
         import org.json4s._
         import org.json4s.jackson.JsonMethods._
+
         val cmd = commandLine(s"${udocker.getAbsolutePath} inspect $pulledImageId", taskWorkDirectory.getAbsolutePath, ctx)
         val result = execute(cmd, taskWorkDirectory, udockerVariables, returnOutput = true, returnError = true)
         implicit def format = DefaultFormats
