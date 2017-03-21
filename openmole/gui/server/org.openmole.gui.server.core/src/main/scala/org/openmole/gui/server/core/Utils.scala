@@ -195,7 +195,7 @@ object Utils extends Logger {
     model.name.split('.').last match {
       case "nlogo" ⇒ Seq(CodeParsing.netlogoParsing(model))
       case "jar"   ⇒ Seq(JavaLaunchingCommand(JarMethod("", Seq(), "", true, ""), Seq(), Seq()))
-      case _       ⇒ Seq(CodeParsing.fromCommand(getCareBinInfos(model).commandLine.getOrElse(Seq())).get)
+      case "bin"   ⇒ Seq(CodeParsing.fromCommand(getCareBinInfos(model).commandLine.getOrElse(Seq())).get)
     }
   }
 
@@ -345,12 +345,20 @@ object Utils extends Logger {
   def managedArchive(careArchive: File) = managed(new RandomAccessFile(careArchive, "r")) map (_.getChannel)
 
   def extractArchiveStream(archive: ManagedResource[FileChannel]) = archive.map { fileChannel ⇒
-    //Get the tar.gz from the bin archive
-    val endMinus8Bytes = fileChannel.size - 8L
-    val archiveSize = fileChannel.map(FileChannel.MapMode.READ_ONLY, endMinus8Bytes, 8L).getLong.toInt
+
+    //Get the tar.gz or the tgz from the bin archive
+    val archiveSize = fileChannel.map(FileChannel.MapMode.READ_ONLY, fileChannel.size - 8L, 8L).getLong.toInt
     fileChannel.position(0L)
     val srcArray = new Array[Byte](archiveSize)
-    fileChannel.map(FileChannel.MapMode.READ_ONLY, endMinus8Bytes - 13L - archiveSize, archiveSize).get(srcArray, 0, archiveSize)
+
+    // Take final 100 and find I_LOVE PIZZA
+    val pizza = "I_LOVE_PIZZA".getBytes
+    val final100 = fileChannel.map(FileChannel.MapMode.READ_ONLY, fileChannel.size - 100L, 100L)
+    val array100 = new Array[Byte](100)
+    final100.get(array100, 0, 100)
+    val offset = 100L - array100.indexOfSlice(pizza).toLong
+
+    fileChannel.map(FileChannel.MapMode.READ_ONLY, fileChannel.size - offset - archiveSize, archiveSize).get(srcArray, 0, archiveSize)
 
     //Extract and uncompress the tar.gz
     val stream = managed(new TarInputStream(new GZIPInputStream(new ByteArrayInputStream(srcArray))))

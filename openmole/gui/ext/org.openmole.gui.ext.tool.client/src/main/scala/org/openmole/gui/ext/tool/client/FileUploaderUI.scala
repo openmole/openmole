@@ -69,5 +69,5 @@ case class FileUploaderUI(
     }), Rx {
       if (pathSet()) fileName else "No certificate"
     }
-  )(sheet.paddingTop(5) +++ omsheet.certificate +++ "inputFileStyle")
+  )(sheet.paddingTop(5) +++ omsheet.certificate +++ "inputFileStyle" +++ sheet.marginTop(40))
 }
