@@ -31,9 +31,15 @@ package object container {
 
   def outputPathResolver(preparedFileBindings: Iterable[FileBinding], hostFileBindings: Iterable[FileBinding], inputDirectory: File, userWorkDirectory: String, rootDirectory: File)(filePath: String): File = {
 
-    def isParent(dir: String, file: String) = dir.equals(File(file).getParent)
-    def isPreparedFile(f: String) = preparedFileBindings.map(b ⇒ b._2).exists(b ⇒ isParent(b, f))
-    def isHostFile(f: String) = hostFileBindings.map(b ⇒ b._2).exists(b ⇒ isParent(b, f))
+    /**
+     * Search for a parent, not only in level 1 subdirs
+     * @param dir potential parent
+     * @param file target file
+     * @return true if dir is a parent of file at a level
+     */
+    def isOneOfParents(dir: String, file: String) = File(file).getAbsolutePath.startsWith(File(dir).getAbsolutePath)
+    def isPreparedFile(f: String) = preparedFileBindings.map(b ⇒ b._2).exists(b ⇒ isOneOfParents(b, f))
+    def isHostFile(f: String) = hostFileBindings.map(b ⇒ b._2).exists(b ⇒ isOneOfParents(b, f))
     def isAbsolute = File(filePath).isAbsolute
 
     val absolutePathInCARE: String = if (isAbsolute) filePath else (File(userWorkDirectory) / filePath).getPath
