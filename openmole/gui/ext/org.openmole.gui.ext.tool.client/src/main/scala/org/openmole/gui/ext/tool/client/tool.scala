@@ -622,8 +622,7 @@ package object client {
   // AUTHENTICATION PANEL
   lazy val certificate: ModifierSeq = Seq(
     width := 130,
-    textAlign := "center",
-    sheet.marginTop(40)
+    textAlign := "center"
   )
 
   // ENVIRONMENT ERROR PANEL

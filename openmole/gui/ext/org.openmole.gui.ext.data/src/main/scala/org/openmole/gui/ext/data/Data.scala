@@ -441,7 +441,7 @@ object FileType {
   def apply(safePath: SafePath): FileType = apply(safePath.name)
 
   def apply(fileName: String): FileType = {
-    if (fileName.endsWith("tar.gz.bin")) CodeFile(UndefinedLanguage)
+    if (fileName.endsWith("tar.gz.bin") || fileName.endsWith("tgz.bin")) CodeFile(UndefinedLanguage)
     else if (fileName.endsWith("nlogo")) CodeFile(NetLogoLanguage())
     else if (fileName.endsWith("jar")) Archive(JavaLikeLanguage())
     else if (fileName.endsWith("tgz") || fileName.endsWith("tar.gz")) Archive(UndefinedLanguage)

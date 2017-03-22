@@ -223,7 +223,7 @@ class ModelWizardPanel {
     div(ms("modelWizardDivs"))(
       div(maxWidth := 250)(
         label(
-          sheet.paddingTop(5) +++ certificate +++ "inputFileStyle",
+          Seq(display := "table") +++ certificate +++ "inputFileStyle",
           transferring.withTransferWaiter {
             _ ⇒
               div(
@@ -434,8 +434,7 @@ class ModelWizardPanel {
     div(grey +++ rightBlock)(
       "Pick your code up among jar archive, netlogo scripts, or any code packaged on linux with Care ( like Python, C, C++ " +
         "R, etc). In the case of a Care archive, the packaging has to be done with the",
-      tags.b(" -o yourmodel.tar.gz.bin."),
-      " option."
+      tags.b(" -o yourmodel.tar.gz.bin"), " or ", tags.b(" -o yourmodel.tgz.bin"), " option."
     )
   )
 
