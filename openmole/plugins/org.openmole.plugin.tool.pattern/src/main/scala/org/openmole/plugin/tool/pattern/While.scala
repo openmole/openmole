@@ -20,18 +20,21 @@ object While {
         val last = Capsule(EmptyTask(), strain = true)
         (puzzle -- (last, !condition)) & (puzzle -- (Slot(puzzle.first), condition))
       case Some(counter) ⇒
+        val firstTask = EmptyTask() set (
+          counter := 0L
+        )
+
         val incrementTask =
           ClosureTask("IncrementTask") { (ctx, _, _) ⇒
             ctx + (counter → (ctx(counter) + 1))
           } set (
-            (inputs, outputs) += counter,
-            counter := 0L
+            (inputs, outputs) += counter
           )
 
         val increment = MasterCapsule(incrementTask, persist = Seq(counter), strain = true)
         val last = Capsule(EmptyTask(), strain = true)
 
-        (puzzle -- increment -- (last, !condition)) & (increment -- (Slot(puzzle.first), condition))
+        (firstTask -- puzzle -- increment -- (last, !condition)) & (increment -- (Slot(puzzle.first), condition))
     }
 
 }
