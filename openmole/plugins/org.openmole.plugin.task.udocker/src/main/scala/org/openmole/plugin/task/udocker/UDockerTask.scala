@@ -101,6 +101,11 @@ object UDockerTask {
     command.validate(allInputs) ++ validateArchive ++ validateVariables ++ External.validate(external, allInputs)
   }
 
+  type FileInfo = (External.ToPut, File)
+  type HostFile = (String, Option[String])
+  type VolumeInfo = (File, String)
+  type MountPoint = (String, String)
+
   override protected def process(ctx: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider): Context = External.withWorkDir(executionContext) { taskWorkDirectory ⇒
 
     taskWorkDirectory.mkdirs()
@@ -121,6 +126,18 @@ object UDockerTask {
         "HOME" → taskWorkDirectory.getAbsolutePath,
         "UDOCKER_CONTAINERS" → containersDirectory.getAbsolutePath
       ) ++ udockerRepoVariables(subDirectory("tmpdir"))
+
+    def prepareVolumes(
+      preparedFilesInfo:     Iterable[FileInfo],
+      containerPathResolver: String ⇒ File,
+      hostFiles:             Vector[HostFile],
+      volumesInfo:           List[VolumeInfo]   = List.empty[VolumeInfo]
+    ): Iterable[MountPoint] =
+      preparedFilesInfo.map { case (f, d) ⇒ d.getAbsolutePath → containerPathResolver(f.name).toString } ++
+        hostFiles.map { case (f, b) ⇒ f → b.getOrElse(f) } ++
+        volumesInfo.map { case (f, d) ⇒ f.toString → d }
+
+    def volumesArgument(volumes: Iterable[MountPoint]) = volumes.map { case (host, container) ⇒ s"""-v "$host":"$container"""" }.mkString(" ")
 
     def executeWithContainerReuse = {
 
@@ -155,18 +172,13 @@ object UDockerTask {
 
       val (preparedContext, preparedFilesInfo) = external.prepareAndListInputFiles(context, inputPathResolver)
 
-      def volumes =
-        preparedFilesInfo.map { case (f, d) ⇒ d.getAbsolutePath → containerPathResolver(f.name) } ++
-          hostFiles.map { case (f, b) ⇒ f → b.getOrElse(f) } ++
-          List(containerTmpVolume → tmpMount)
+      val volumes = prepareVolumes(preparedFilesInfo, containerPathResolver, hostFiles, List(containerTmpVolume → tmpMount))
 
       def runCommand: FromContext[String] = {
         val variablesArgument =
           (environmentVariables ++ List("HOME" → FromContext.value(tmpMount))).map { case (name, variable) ⇒ s"""-e $name="${variable.from(context)}"""" }.mkString(" ")
 
-        def volumesArgument = volumes.map { case (host, container) ⇒ s"""-v "$host":"$container"""" }.mkString(" ")
-
-        command.map(cmd ⇒ s"""${udocker.getAbsolutePath} run --workdir="$tmpMount" $variablesArgument $volumesArgument $containerName $cmd""")
+        command.map(cmd ⇒ s"""${udocker.getAbsolutePath} run --workdir="$tmpMount" $variablesArgument ${volumesArgument(volumes)} $containerName $cmd""")
       }
 
       val executionResult = executeAll(
@@ -193,6 +205,7 @@ object UDockerTask {
     }
 
     def executeWithNewContainer = {
+
       val containersDirectory = taskWorkDirectory /> "containers"
       val udockerVariables = setContainerPaths(containersDirectory)
 
@@ -224,17 +237,13 @@ object UDockerTask {
 
       val (preparedContext, preparedFilesInfo) = external.prepareAndListInputFiles(context, inputPathResolver)
 
-      def volumes =
-        preparedFilesInfo.map { case (f, d) ⇒ d.getAbsolutePath → containerPathResolver(f.name) } ++
-          hostFiles.map { case (f, b) ⇒ f → b.getOrElse(f) }
+      val volumes = prepareVolumes(preparedFilesInfo, containerPathResolver, hostFiles)
 
       def runCommand: FromContext[String] = {
         val variablesArgument =
           environmentVariables.map { case (name, variable) ⇒ s"""-e $name="${variable.from(context)}"""" }.mkString(" ")
 
-        def volumesArgument = volumes.map { case (host, container) ⇒ s"""-v "$host":"$container"""" }.mkString(" ")
-
-        command.map(cmd ⇒ s"""${udocker.getAbsolutePath} run $variablesArgument $volumesArgument $pulledImageId $cmd""")
+        command.map(cmd ⇒ s"""${udocker.getAbsolutePath} run $variablesArgument ${volumesArgument(volumes)} $pulledImageId $cmd""")
       }
 
       val executionResult = executeAll(
@@ -285,14 +294,14 @@ object UDockerTask {
   def repoDirectory = udockerDirectory /> "repo"
   def udockerInstallTmpDirectory = Workspace.tmpDir /> "udocker"
 
-  def udockerRepoVariables(tmpDirectory: File, loglevel: Int = 1) =
+  def udockerRepoVariables(tmpDirectory: File, logLevel: Int = 1) =
     Vector(
       "UDOCKER_DIR" → udockerInstallTmpDirectory.getAbsolutePath,
       "UDOCKER_TMPDIR" → tmpDirectory.getAbsolutePath,
       "UDOCKER_REPOS" → repoDirectory.getAbsolutePath,
       "UDOCKER_LAYERS" → layersDirectory.getAbsolutePath,
       "UDOCKER_TARBALL" → udockerTarBall.getAbsolutePath,
-      "UDOCKER_LOGLEVEL" → loglevel.toString
+      "UDOCKER_LOGLEVEL" → logLevel.toString
     )
 
   @volatile @transient lazy val udockerTarBall = {
@@ -327,7 +336,7 @@ object UDockerTask {
         Workspace.withTmpDir { tmpDirectory ⇒
           repoDirectory.withLockInDirectory {
             val commandline = commandLine(s"${udocker.getAbsolutePath} pull --registry ${image.registry} ${image.image}", tmpDirectory.getAbsolutePath, Context.empty)(RandomProvider.empty)
-            execute(commandline, tmpDirectory, udockerRepoVariables(tmpDirectory, loglevel = 0), returnOutput = false, returnError = false)
+            execute(commandline, tmpDirectory, udockerRepoVariables(tmpDirectory, logLevel = 0), returnOutput = false, returnError = false)
             image.image
           }
         }
