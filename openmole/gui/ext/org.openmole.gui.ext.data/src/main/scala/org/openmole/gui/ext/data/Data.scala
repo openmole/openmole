@@ -104,16 +104,25 @@ sealed trait FileExtension {
   def displayable: Boolean
 }
 
-case class DisplayableFile(highlighter: String, displayable: Boolean = true) extends FileExtension
+trait EditableFile {
+  def highlighter: String
+}
 
-case class OpenMOLEScript(highlighter: String, displayable: Boolean = true) extends FileExtension
+object OpenMOLEScript extends FileExtension with EditableFile {
+  val displayable = true
+  val highlighter = "openmole"
+}
 
-case class MDScript(displayable: Boolean = true) extends FileExtension
+object MDScript extends FileExtension {
+  val displayable = true
+}
 
-case class DisplayableOnDemandFile(highlighter: String, displayable: Boolean = true) extends FileExtension
+case class EditableOnDemandFile(highlighter: String) extends FileExtension with EditableFile {
+  val displayable = true
+}
 
-case class BinaryFile() extends FileExtension {
-  def displayable = false
+object BinaryFile extends FileExtension {
+  val displayable = false
 }
 
 object TarGz extends FileExtension {
@@ -129,16 +138,16 @@ object Zip extends FileExtension {
 }
 
 object FileExtension {
-  val OMS = OpenMOLEScript("scala")
-  val SCALA = DisplayableOnDemandFile("scala")
-  val MD = MDScript()
-  val SH = DisplayableOnDemandFile("sh")
-  val TEXT = DisplayableOnDemandFile("text")
-  val NO_EXTENSION = DisplayableFile("text")
+  val OMS = OpenMOLEScript
+  val SCALA = EditableOnDemandFile("scala")
+  val MD = MDScript
+  val SH = EditableOnDemandFile("sh")
+  val TEXT = EditableOnDemandFile("text")
+  val NO_EXTENSION = EditableOnDemandFile("text")
   val TGZ = TarGz
   val TAR = Tar
   val ZIP = Zip
-  val BINARY = BinaryFile()
+  val BINARY = BinaryFile
 }
 
 sealed trait FileContent
@@ -711,10 +720,12 @@ object VOTest extends ConfigData
 case class OMSettings(workspace: SafePath, version: String, versionName: String, buildTime: String)
 
 sealed trait PluginExtensionType
+
 object AuthenticationExtension extends PluginExtensionType
 
 //TODO: add other extension points
 case class AllPluginExtensionData(authentications: Seq[GUIPluginAsJS])
+
 case class GUIPluginAsJS(jsObject: String)
 
 trait AuthenticationData {
@@ -731,7 +742,9 @@ sealed trait Test {
 
 object PendingTest extends Test {
   def passed = false
+
   def message = "pending"
+
   def errorStack = Error.empty
 }
 
@@ -741,6 +754,7 @@ case class FailedTest(message: String, errorStack: Error) extends Test {
 
 case class PassedTest(message: String) extends Test {
   def passed = true
+
   override def errorStack = Error.empty
 }
 
