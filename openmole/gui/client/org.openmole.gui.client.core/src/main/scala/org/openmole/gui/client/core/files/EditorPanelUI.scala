@@ -2,7 +2,7 @@ package org.openmole.gui.client.core.files
 
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
-import org.openmole.gui.ext.data.{ DisplayableFile, DisplayableOnDemandFile, FileExtension, PanelUI }
+import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.data.FileExtension._
 
 import scala.scalajs.js
@@ -79,10 +79,8 @@ class EditorPanelUI(bindings: Seq[(String, String, () ⇒ Any)], initCode: Strin
 
   def initEditor = {
     fileType match {
-      //case disp @ (DisplayableFile(_, _, _) | DisplayableOnDemandFile(_, _, _)) ⇒ editor.getSession().setMode("ace/mode/" + disp.highlighter)
-      case disp: DisplayableFile         ⇒ editor.getSession().setMode("ace/mode/" + disp.highlighter)
-      case disp: DisplayableOnDemandFile ⇒ editor.getSession().setMode("ace/mode/" + disp.highlighter)
-      case _                             ⇒
+      case ef: EditableFile ⇒ editor.getSession().setMode("ace/mode/" + ef.highlighter)
+      case _                ⇒
     }
 
     setCode(initCode)
@@ -122,7 +120,6 @@ class EditorPanelUI(bindings: Seq[(String, String, () ⇒ Any)], initCode: Strin
 
       //FIXME: CALL FOR COMPILATION AND  COMPLETION
       val res = await(Future {
-        println("fixme: comeletestuff and completion")
         List(("ss", "auie"))
       })
       //await(Post[Api].completeStuff(code, flag, intOffset).call())
@@ -153,15 +150,16 @@ class EditorPanelUI(bindings: Seq[(String, String, () ⇒ Any)], initCode: Strin
 object EditorPanelUI {
 
   def apply(fileType: FileExtension, initCode: String) = fileType match {
-    case SCALA | OMS ⇒ scala(initCode)
-    case _           ⇒ empty(initCode)
+    case OMS   ⇒ editor(initCode, OMS)
+    case SCALA ⇒ editor(initCode, SCALA)
+    case _     ⇒ empty(initCode)
   }
 
   def empty(initCode: String) = new EditorPanelUI(Seq(), initCode, NO_EXTENSION)
 
-  def scala(initCode: String = "") = new EditorPanelUI(Seq(
+  private def editor(initCode: String = "", language: FileExtension) = new EditorPanelUI(Seq(
     ("Compile", "Enter", () ⇒ println("Compile  !"))
-  ), initCode, SCALA)
+  ), initCode, language)
 
   def sh(initCode: String = "") = new EditorPanelUI(Seq(), initCode, SH)
 

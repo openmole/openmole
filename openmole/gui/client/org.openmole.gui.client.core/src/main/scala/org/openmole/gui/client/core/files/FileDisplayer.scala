@@ -63,11 +63,11 @@ class FileDisplayer(val tabs: TreeNodeTabs) {
       case Some(t: TreeNodeTab) ⇒
         tabs.setActive(t)
       case _ ⇒ fileExtension match {
-        case oms: OpenMOLEScript ⇒ displayOMS(safePath, content)
-        case md: MDScript ⇒ post()[Api].mdToHtml(safePath).call.foreach { htmlString ⇒
+        case OpenMOLEScript ⇒ displayOMS(safePath, content)
+        case MDScript ⇒ post()[Api].mdToHtml(safePath).call.foreach { htmlString ⇒
           tabs ++ new HTMLTab(Var(safePath), htmlString)
         }
-        case dod: DisplayableOnDemandFile ⇒
+        case dod: EditableOnDemandFile ⇒
           tabs ++ new LockedEditionNodeTab(Var(safePath), editor(fileExtension, content))
         case _ ⇒ //FIXME for GUI workflows
       }
