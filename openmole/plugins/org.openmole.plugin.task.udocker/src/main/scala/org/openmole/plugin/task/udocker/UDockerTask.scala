@@ -226,6 +226,7 @@ object UDockerTask {
 
       val rootDirectory = containersDirectory.listFiles().head / "ROOT"
 
+      // FIXME check the case when output file is in volume (input or host file)
       def outputPathResolver(filePath: String): File =
         if (File(filePath).isAbsolute) rootDirectory / filePath
         else rootDirectory / workDirectory / filePath

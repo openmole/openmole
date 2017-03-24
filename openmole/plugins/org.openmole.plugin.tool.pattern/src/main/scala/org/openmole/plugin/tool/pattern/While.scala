@@ -18,18 +18,23 @@ object While {
     counter.option match {
       case None ⇒
         val last = Capsule(EmptyTask(), strain = true)
-        (puzzle -- (last, !condition)) & (puzzle -- (puzzle, condition))
+        (puzzle -- (last, !condition)) & (puzzle -- (Slot(puzzle.first), condition))
       case Some(counter) ⇒
+        val firstTask = EmptyTask() set (
+          counter := 0L
+        )
+
         val incrementTask =
           ClosureTask("IncrementTask") { (ctx, _, _) ⇒
-            ctx + (counter → (ctx.getOrElse(counter, 0L) + 1))
-          } set ((inputs, outputs) += counter)
+            ctx + (counter → (ctx(counter) + 1))
+          } set (
+            (inputs, outputs) += counter
+          )
 
         val increment = MasterCapsule(incrementTask, persist = Seq(counter), strain = true)
-
         val last = Capsule(EmptyTask(), strain = true)
 
-        (puzzle -- increment -- (last, !condition)) & (increment -- (puzzle, condition))
+        (firstTask -- puzzle -- increment -- (last, !condition)) & (increment -- (Slot(puzzle.first), condition))
     }
 
 }
