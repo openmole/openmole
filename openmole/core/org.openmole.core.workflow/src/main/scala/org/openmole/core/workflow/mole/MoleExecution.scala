@@ -197,7 +197,7 @@ class MoleExecution(
   def start: this.type = {
     if (!_started.getUpdate(_ ⇒ true)) {
       val validationErrors = Validation(mole, implicits, sources, hooks)
-      if (!validationErrors.isEmpty) throw new UserBadDataError(s"Formal validation of your mole has failed, ${validationErrors.size} error(s) has(ve) been found.\n" + validationErrors.mkString("\n"))
+      if (!validationErrors.isEmpty) throw new UserBadDataError(s"Formal validation of your mole has failed, ${validationErrors.size} error(s) has(ve) been found.\n" + validationErrors.mkString("\n") + s"\nIn mole: $mole")
       start(Context.empty)
     }
     this
