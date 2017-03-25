@@ -328,9 +328,23 @@ object UDockerTask {
       case SavedDockerImage(archive) ⇒
         Workspace.withTmpDir { tmpDirectory ⇒
           val commandline = commandLine(s"${udocker.getAbsolutePath} load -i ${archive.getAbsolutePath}", tmpDirectory.getAbsolutePath, Context.empty)(RandomProvider.empty)
-          val result = execute(commandline, tmpDirectory, udockerRepoVariables(tmpDirectory), returnOutput = false, returnError = false)
-          val output = result.output.get
-          output.lines.toSeq.last
+
+          val result = execute(commandline, tmpDirectory, udockerRepoVariables(tmpDirectory), returnOutput = true, returnError = true, errorOnReturnValue = false)
+
+          // retrieve and parse error as workaround to https://github.com/indigo-dc/udocker/issues/45
+          val imageId = if (result.returnCode == 1) {
+            // error in the form of "Error: repository and tag already exist ubuntu 16.04"
+            val Pattern = ".* (\\S+) (\\S+)".r
+            result.errorOutput.flatMap(_.split('\n').headOption) match {
+              case Some(Pattern(repo, tag)) ⇒ Some(s"$repo:$tag")
+              case _                        ⇒ None
+            }
+          }
+          else for {
+            output ← result.output
+          } yield output.lines.toSeq.last
+
+          imageId.getOrElse(throw new UserBadDataError(s"Could not retrieve image from archive ${archive.getAbsolutePath}"))
         }
       case image: DockerImage ⇒
         Workspace.withTmpDir { tmpDirectory ⇒
