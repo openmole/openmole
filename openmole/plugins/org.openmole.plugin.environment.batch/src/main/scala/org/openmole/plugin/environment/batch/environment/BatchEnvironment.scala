@@ -56,12 +56,12 @@ object BatchEnvironment extends Logger {
 
   case class BeginUpload(id: Long, file: File, path: String, storage: StorageService) extends Event[BatchEnvironment] with Transfer
   case class EndUpload(id: Long, file: File, path: String, storage: StorageService, exception: Option[Throwable]) extends Event[BatchEnvironment] with Transfer {
-    def success = !exception.isDefined
+    def success = exception.isEmpty
   }
 
   case class BeginDownload(id: Long, file: File, path: String, storage: StorageService) extends Event[BatchEnvironment] with Transfer
   case class EndDownload(id: Long, file: File, path: String, storage: StorageService, exception: Option[Throwable]) extends Event[BatchEnvironment] with Transfer {
-    def success = !exception.isDefined
+    def success = exception.isEmpty
   }
 
   def signalUpload[T](upload: ⇒ T, file: File, path: String, storage: StorageService): T = {
@@ -191,10 +191,7 @@ trait BatchEnvironment extends SubmissionEnvironment { env ⇒
   def executionJob(job: Job): BatchExecutionJob
 
   def openMOLEMemory: Option[Information] = None
-  def openMOLEMemoryValue = openMOLEMemory match {
-    case None    ⇒ Workspace.preference(MemorySizeForRuntime)
-    case Some(m) ⇒ m
-  }
+  def openMOLEMemoryValue = openMOLEMemory.getOrElse(Workspace.preference(MemorySizeForRuntime))
 
   @transient val batchJobWatcher = Cache {
     val watcher = new BatchJobWatcher(WeakReference(this))
