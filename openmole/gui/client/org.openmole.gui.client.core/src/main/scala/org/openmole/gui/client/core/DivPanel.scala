@@ -4,9 +4,9 @@ import org.scalajs.dom.raw.HTMLDivElement
 
 import scalatags.JsDom.{ TypedTag, tags }
 import scalatags.JsDom.all._
-import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
+import scaladget.api.{ BootstrapTags ⇒ bs }
 import bs._
-import fr.iscpif.scaladget.stylesheet.all
+import scaladget.stylesheet.all
 
 /*
  * Copyright (C) 26/08/15 // mathieu.leclaire@openmole.org

@@ -17,7 +17,7 @@ package org.openmole.sitejs
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import fr.iscpif.scaladget.mapping.lunr.{ IIndexSearchResult, Importedjs, Index }
+import scaladget.mapping.lunr.{ IIndexSearchResult, Importedjs, Index }
 import JsRxTags._
 import scala.scalajs._
 import scala.scalajs.js.annotation.JSExport

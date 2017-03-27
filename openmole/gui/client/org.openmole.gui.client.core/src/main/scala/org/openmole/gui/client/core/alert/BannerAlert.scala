@@ -20,12 +20,12 @@ package org.openmole.gui.client.core.alert
 import rx._
 
 import scalatags.JsDom.all._
-import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
+import scaladget.stylesheet.{ all ⇒ sheet }
 
 import scalatags.JsDom.all.{ onclick, raw, span }
 import org.openmole.gui.ext.tool.client._
 import org.openmole.gui.ext.tool.client.JsRxTags._
-import fr.iscpif.scaladget.api.BootstrapTags._
+import scaladget.api.BootstrapTags._
 import org.scalajs.dom.raw.HTMLDivElement
 
 import scalatags.JsDom.{ TypedTag, tags }

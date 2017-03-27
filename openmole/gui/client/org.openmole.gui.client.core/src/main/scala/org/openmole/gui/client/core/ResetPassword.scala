@@ -17,9 +17,9 @@ package org.openmole.gui.client.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
+import scaladget.stylesheet.{ all ⇒ sheet }
 
-import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
+import scaladget.api.{ BootstrapTags ⇒ bs }
 import org.scalajs.dom.raw.HTMLFormElement
 import rx.{ Ctx, Rx }
 import sheet._

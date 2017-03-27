@@ -537,7 +537,7 @@ lazy val clientGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.core") e
 ) settings (defaultSettings: _*)
 
 
-lazy val clientToolGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.tool", privatePackages = Seq("autowire.*", "upickle.*", "sourcecode.*", "rx.*", "org.scalajs.dom.*", "scalatags.*", "fr.iscpif.scaladget.*")) enablePlugins (ScalaJSPlugin) dependsOn (workspace) settings(
+lazy val clientToolGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.tool", privatePackages = Seq("autowire.*", "upickle.*", "sourcecode.*", "rx.*", "org.scalajs.dom.*", "scalatags.*", "scaladget.*")) enablePlugins (ScalaJSPlugin) dependsOn (workspace) settings(
   Libraries.autowireJS,
   Libraries.upickleJS,
   Libraries.scalajsDomJS,

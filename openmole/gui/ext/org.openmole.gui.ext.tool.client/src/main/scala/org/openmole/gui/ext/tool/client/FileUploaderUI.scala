@@ -17,9 +17,9 @@ package org.openmole.gui.ext.tool.client
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
-import fr.iscpif.scaladget.stylesheet.all._
-import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
+import scaladget.api.{ BootstrapTags ⇒ bs }
+import scaladget.stylesheet.all._
+import scaladget.stylesheet.{ all ⇒ sheet }
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.tool.client.JsRxTags._

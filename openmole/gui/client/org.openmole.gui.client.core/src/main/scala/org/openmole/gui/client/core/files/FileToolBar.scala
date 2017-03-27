@@ -7,10 +7,10 @@ import scala.util.Try
 import scalatags.JsDom.tags
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
-import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
+import scaladget.api.{ BootstrapTags ⇒ bs }
 import bs._
-import fr.iscpif.scaladget.api.Selector.Options
-import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
+import scaladget.api.Selector.Options
+import scaladget.stylesheet.{ all ⇒ sheet }
 import org.openmole.gui.client.core.CoreUtils
 import sheet._
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }

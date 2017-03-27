@@ -17,8 +17,8 @@ package org.openmole.gui.ext.tool
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import fr.iscpif.scaladget.stylesheet.all._
-import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
+import scaladget.stylesheet.all._
+import scaladget.stylesheet.{ all ⇒ sheet }
 import org.scalajs.dom
 
 import scalatags.JsDom.all._

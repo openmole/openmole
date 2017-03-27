@@ -11,8 +11,8 @@ import scala.scalajs.js.{ Dynamic ⇒ Dyn }
 import scalatags.JsDom.all._
 import scalatags.JsDom.tags
 import scala.async.Async.{ async, await }
-import fr.iscpif.scaladget.mapping.ace._
-import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
+import scaladget.mapping.ace._
+import scaladget.stylesheet.{ all ⇒ sheet }
 import org.openmole.gui.ext.tool.client._
 
 /*
@@ -69,7 +69,7 @@ class EditorPanelUI(bindings: Seq[(String, String, () ⇒ Any)], initCode: Strin
 
   def complete() = {
     if (editor.completer == null)
-      editor.completer = fr.iscpif.scaladget.mapping.ace.autocomplete //fr.iscpif.scaladget.ace.autocomplete
+      editor.completer = scaladget.mapping.ace.autocomplete //scaladget.ace.autocomplete
     js.Dynamic.global.window.ed = editor
     editor.completer.showPopup(editor)
 

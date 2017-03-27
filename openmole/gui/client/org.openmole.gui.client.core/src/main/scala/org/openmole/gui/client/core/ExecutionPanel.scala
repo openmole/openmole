@@ -19,8 +19,8 @@ package org.openmole.gui.client.core
 
 import java.util.concurrent.atomic.AtomicBoolean
 
-import fr.iscpif.scaladget.api.BootstrapTags.ScrollableTextArea.BottomScroll
-import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
+import scaladget.api.BootstrapTags.ScrollableTextArea.BottomScroll
+import scaladget.api.{ BootstrapTags ⇒ bs }
 
 import scala.util.{ Failure, Success }
 import scalatags.JsDom.all._
@@ -32,7 +32,7 @@ import org.openmole.gui.ext.tool.client._
 
 import scala.scalajs.js.timers._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
-import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
+import scaladget.stylesheet.{ all ⇒ sheet }
 import sheet._
 import autowire._
 import org.openmole.gui.ext.data.{ Error ⇒ ExecError }

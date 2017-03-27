@@ -22,9 +22,9 @@ import org.scalajs.dom.raw.HTMLDivElement
 import scalatags.JsDom.tags
 import scalatags.JsDom.TypedTag
 import org.openmole.gui.ext.tool.client._
-import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
+import scaladget.stylesheet.{ all ⇒ sheet }
 //import org.openmole.gui.client.core.authentications.AuthPanelWithID
-import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
+import scaladget.api.{ BootstrapTags ⇒ bs }
 import rx._
 import org.openmole.gui.client.tool._
 import org.openmole.gui.ext.tool.client.JsRxTags._

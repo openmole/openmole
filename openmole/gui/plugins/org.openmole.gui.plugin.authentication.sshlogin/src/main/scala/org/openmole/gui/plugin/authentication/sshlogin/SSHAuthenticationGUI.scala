@@ -21,8 +21,8 @@ import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import org.openmole.gui.ext.data.{ AuthenticationPlugin, AuthenticationPluginFactory }
 import org.openmole.gui.ext.tool.client.OMPost
 import org.openmole.gui.ext.tool.client.JsRxTags._
-import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
-import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
+import scaladget.api.{ BootstrapTags ⇒ bs }
+import scaladget.stylesheet.{ all ⇒ sheet }
 import autowire._
 import sheet._
 import bs._

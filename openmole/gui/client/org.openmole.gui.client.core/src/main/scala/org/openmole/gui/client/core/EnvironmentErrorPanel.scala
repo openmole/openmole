@@ -1,8 +1,8 @@
 package org.openmole.gui.client.core
 
-import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
+import scaladget.stylesheet.{ all ⇒ sheet }
 import org.openmole.gui.ext.data._
-import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
+import scaladget.api.{ BootstrapTags ⇒ bs }
 import org.scalajs.dom.html.TableSection
 import org.openmole.gui.ext.tool.client.JsRxTags._
 import org.openmole.gui.ext.tool.client._
@@ -11,7 +11,7 @@ import scalatags.JsDom.{ TypedTag, tags }
 import scalatags.JsDom.all._
 import sheet._
 import bs._
-import fr.iscpif.scaladget.api.BootstrapTags.ScrollableTextArea.NoScroll
+import scaladget.api.BootstrapTags.ScrollableTextArea.NoScroll
 import org.openmole.gui.ext.tool.client.Utils
 import org.scalajs.dom.raw.HTMLLabelElement
 import rx._
