@@ -192,7 +192,7 @@ import org.openmole.plugin.task.external.External._
     for {
       f ← contextFiles
       if !f.exists
-    } throw new UserBadDataError("Output file " + f.getAbsolutePath + " for task " + this.toString + " doesn't exist")
+    } throw new UserBadDataError("Output file " + f.getAbsolutePath + s" doesn't exist, parent directory ${f.getParentFileSafe} contains [" + f.getParentFileSafe.listFilesSafe.map(_.getName).mkString(", ") + "]")
 
     rootDir.applyRecursive(f ⇒ f.delete, contextFiles)
 
