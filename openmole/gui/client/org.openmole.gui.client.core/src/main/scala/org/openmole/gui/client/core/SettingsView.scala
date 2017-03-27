@@ -1,23 +1,23 @@
 package org.openmole.gui.client.core
 
-import fr.iscpif.scaladget.stylesheet.all._
+import scaladget.stylesheet.all._
 import org.openmole.gui.client.core.alert.AbsolutePositioning.CenterPagePosition
 
 import scalatags.JsDom._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import org.openmole.gui.client.core.alert.AlertPanel
-import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
+import scaladget.api.{ BootstrapTags ⇒ bs }
 import org.openmole.gui.client.core.panels._
 import org.scalajs.dom
 import bs._
-import fr.iscpif.scaladget.api.Selector.Dropdown
+import scaladget.api.Selector.Dropdown
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.data.{ JVMInfos, routes }
 import org.openmole.gui.ext.tool.client._
 import autowire._
 import rx._
 import org.openmole.gui.ext.tool.client.JsRxTags._
-import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
+import scaladget.stylesheet.{ all ⇒ sheet }
 
 import scala.scalajs.js.timers
 import scala.scalajs.js.timers.SetIntervalHandle

@@ -18,7 +18,7 @@ package org.openmole.gui.client.core
  */
 
 import scalatags.JsDom.all._
-import fr.iscpif.scaladget.api.{ Popup, BootstrapTags ⇒ bs }
+import scaladget.api.{ Popup, BootstrapTags ⇒ bs }
 
 import scalatags.JsDom.tags
 import org.openmole.gui.ext.tool.client._
@@ -26,12 +26,12 @@ import org.openmole.gui.ext.tool.client.JsRxTags._
 
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
-import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
+import scaladget.stylesheet.{ all ⇒ sheet }
 import org.openmole.gui.ext.data._
 import sheet._
 import rx._
 import bs._
-import fr.iscpif.scaladget.api.Selector.{ Dropdown, Options }
+import scaladget.api.Selector.{ Dropdown, Options }
 import org.scalajs.dom.raw.HTMLDivElement
 
 class AuthenticationPanel {

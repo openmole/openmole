@@ -9,15 +9,15 @@ import org.scalajs.dom
 import rx._
 
 import scalatags.JsDom.all._
-import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
-import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
+import scaladget.api.{ BootstrapTags ⇒ bs }
+import scaladget.stylesheet.{ all ⇒ sheet }
 import sheet._
 import bs._
 import org.scalajs.dom.KeyboardEvent
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
-import fr.iscpif.scaladget.api.Selector.Options
+import scaladget.api.Selector.Options
 import org.openmole.gui.client.core.alert.{ AlertPanel, BannerAlert }
 import org.openmole.gui.client.core.files.TreeNodePanel
 import org.openmole.gui.client.tool.OMTags

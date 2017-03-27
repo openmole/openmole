@@ -31,15 +31,15 @@ import org.openmole.gui.ext.tool.client.JsRxTags._
 import rx._
 import scalatags.JsDom.{ TypedTag, tags }
 import scalatags.JsDom.all._
-import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
+import scaladget.api.{ BootstrapTags ⇒ bs }
 import Waiter._
 import org.openmole.gui.ext.data.DataUtils._
-import fr.iscpif.scaladget.stylesheet.{ all ⇒ sheet }
+import scaladget.stylesheet.{ all ⇒ sheet }
 import sheet._
 import bs._
 import org.openmole.gui.client.tool.{ OMTags, OptionsDiv }
 import org.openmole.gui.ext.api.Api
-import fr.iscpif.scaladget.api.Selector.Options
+import scaladget.api.Selector.Options
 import org.openmole.gui.ext.tool.client.FileManager
 
 class ModelWizardPanel {

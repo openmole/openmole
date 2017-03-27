@@ -2,8 +2,8 @@ package org.openmole.gui.client.core
 
 import scalatags.JsDom.tags
 import scalatags.JsDom.all._
-import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
-import fr.iscpif.scaladget.stylesheet.all
+import scaladget.api.{ BootstrapTags ⇒ bs }
+import scaladget.stylesheet.all
 import rx._
 import org.openmole.gui.ext.tool.client.JsRxTags._
 import org.openmole.gui.ext.tool.client._
