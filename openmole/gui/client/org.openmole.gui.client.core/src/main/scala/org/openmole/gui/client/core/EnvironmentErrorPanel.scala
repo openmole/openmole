@@ -92,7 +92,7 @@ class EnvironmentErrorPanel {
     }
 
     val render = tags.tr(row +++ errorTable)(
-      tags.td(colMD(9) +++ textNoWrap)(tags.a(message, pointer +++ (fontSize := 13), onclick := { () ⇒ toggleDetails })), //(width := 400)
+      tags.td(colMD(9), wordWrap := "break-word")(tags.a(message, pointer +++ (fontSize := 13), onclick := { () ⇒ toggleDetails })), //(width := 400)
       tags.td(colMD(1) +++ textCenter)(bs.badge(occurrences, environmentErrorBadge)),
       tags.td(colMD(1) +++ (fontSize := 13) +++ textCenter)(date),
       tags.td(colMD(1) +++ textCenter)(levelLabel)
