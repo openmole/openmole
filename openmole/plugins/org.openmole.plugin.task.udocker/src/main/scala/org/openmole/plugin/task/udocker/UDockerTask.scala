@@ -114,7 +114,6 @@ object UDockerTask {
 
     def subDirectory(name: String) = taskWorkDirectory /> name
 
-    // FIXME containersDirectory might actually be imagesDirectory
     /**
      * Sets environment variable according to the location of the container
      *
@@ -146,18 +145,18 @@ object UDockerTask {
 
       def containerExists(name: String) = Workspace.withTmpDir { tmpDirectory ⇒
         val commandline = commandLine(s"${udocker.getAbsolutePath} ps", tmpDirectory.getAbsolutePath, Context.empty)(RandomProvider.empty)
-        val result = execute(commandline, tmpDirectory, udockerVariables, returnOutput = true, returnError = true)
-        result.output.get.lines.exists(_.contains(name))
+        val result = execute(commandline, tmpDirectory, udockerVariables, returnOutput = true, returnError = false)
+        result.output.get.lines.exists(_.contains(s"['$name']"))
       }
 
-      def createContainer(imageId: String, name: String) =
+      def createContainer(imageId: String, name: String): String =
         containersDirectory.withLockInDirectory {
           if (!containerExists(name))
             Workspace.withTmpDir { tmpDirectory ⇒
               val commandline = commandLine(s"${udocker.getAbsolutePath} create --name=$name $imageId", tmpDirectory.getAbsolutePath, Context.empty)(RandomProvider.empty)
               execute(commandline, tmpDirectory, udockerVariables, returnOutput = false, returnError = false)
-              name
             }
+          name
         }
 
       createContainer(pulledImageId, containerName)
@@ -215,7 +214,7 @@ object UDockerTask {
         import org.json4s.jackson.JsonMethods._
 
         val cmd = commandLine(s"${udocker.getAbsolutePath} inspect $pulledImageId", taskWorkDirectory.getAbsolutePath, ctx)
-        val result = execute(cmd, taskWorkDirectory, udockerVariables, returnOutput = true, returnError = true)
+        val result = execute(cmd, taskWorkDirectory, udockerVariables, returnOutput = true, returnError = false)
         implicit def format = DefaultFormats
 
         result.output.flatMap {
@@ -243,6 +242,7 @@ object UDockerTask {
         val variablesArgument =
           environmentVariables.map { case (name, variable) ⇒ s"""-e $name="${variable.from(context)}"""" }.mkString(" ")
 
+        // one container per run so run based on imageId
         command.map(cmd ⇒ s"""${udocker.getAbsolutePath} run $variablesArgument ${volumesArgument(volumes)} $pulledImageId $cmd""")
       }
 
