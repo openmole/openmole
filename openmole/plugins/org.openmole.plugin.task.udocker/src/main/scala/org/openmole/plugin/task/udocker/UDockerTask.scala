@@ -146,6 +146,7 @@ object UDockerTask {
       def containerExists(name: String) = Workspace.withTmpDir { tmpDirectory ⇒
         val commandline = commandLine(s"${udocker.getAbsolutePath} ps", tmpDirectory.getAbsolutePath, Context.empty)(RandomProvider.empty)
         val result = execute(commandline, tmpDirectory, udockerVariables, returnOutput = true, returnError = false)
+
         result.output.get.lines.exists(_.contains(s"['$name']"))
       }
 
@@ -193,9 +194,13 @@ object UDockerTask {
 
       val rootDirectory = containersDirectory / containerName / "ROOT"
 
-      def outputPathResolver(filePath: String): File =
-        if (File(filePath).isAbsolute) rootDirectory / filePath
-        else containerTmpVolume / filePath
+      def outputPathResolver = container.outputPathResolver(
+        preparedFilesInfo.map { case (f, d) ⇒ f.toString → d.toString },
+        hostFiles.map { case (f, b) ⇒ f.toString → b.getOrElse(f) },
+        inputDirectory,
+        containerTmpVolume.toString,
+        rootDirectory
+      ) _
 
       val retContext = external.fetchOutputFiles(preparedContext, outputPathResolver)
 
@@ -259,10 +264,13 @@ object UDockerTask {
 
       val rootDirectory = containersDirectory.listFiles().head / "ROOT"
 
-      // FIXME check the case when output file is in volume (input or host file)
-      def outputPathResolver(filePath: String): File =
-        if (File(filePath).isAbsolute) rootDirectory / filePath
-        else rootDirectory / workDirectory / filePath
+      def outputPathResolver = container.outputPathResolver(
+        preparedFilesInfo.map { case (f, d) ⇒ f.toString → d.toString },
+        hostFiles.map { case (f, b) ⇒ f.toString → b.getOrElse(f) },
+        inputDirectory,
+        workDirectory.toString,
+        rootDirectory
+      ) _
 
       val retContext = external.fetchOutputFiles(preparedContext, outputPathResolver)
 

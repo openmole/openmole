@@ -24,9 +24,16 @@ package object container {
 
   type FileBinding = (String, String)
 
-  def inputPathResolver(inputDirectory: File, userWorkDirectory: String)(path: String): File = {
+  /**
+   * @param inputDirectory Directory used to store input files / folder from the dataflow
+   * @param baseDirectory
+   * @param path Target location
+   * @return
+   */
+  // FIXME maybe make it an option to avoid passing "" when inputDirectory is empty
+  def inputPathResolver(inputDirectory: File, baseDirectory: String)(path: String): File = {
     if (File(path).isAbsolute) inputDirectory / path
-    else inputDirectory / userWorkDirectory / path
+    else inputDirectory / baseDirectory / path
   }
 
   def outputPathResolver(preparedFileBindings: Iterable[FileBinding], hostFileBindings: Iterable[FileBinding], inputDirectory: File, userWorkDirectory: String, rootDirectory: File)(filePath: String): File = {
