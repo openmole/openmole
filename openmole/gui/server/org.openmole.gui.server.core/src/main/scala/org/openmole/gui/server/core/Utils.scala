@@ -22,8 +22,8 @@ import java.lang.reflect.Modifier
 import java.nio.channels.FileChannel
 import java.util.logging.Level
 import java.util.zip._
-import scala.collection.JavaConversions.enumerationAsScalaIterator
 
+import scala.collection.JavaConversions.enumerationAsScalaIterator
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.workspace.Workspace
 import org.openmole.gui.ext.data
@@ -46,6 +46,7 @@ import org.openmole.gui.server.jscompile.JSPack
 
 import scala.io.{ BufferedSource, Codec }
 import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
+import scalax.io.support.FileUtils
 
 object Utils extends Logger {
 
@@ -421,7 +422,9 @@ object Utils extends Logger {
   def getUUID: String = java.util.UUID.randomUUID.toString
 
   lazy val jsPluginDirectory = {
-    val jsPluginDirectory = webUIProjectFile /> "jsplugin"
+    val jsPluginDirectory = webUIProjectFile / "jsplugin"
+    jsPluginDirectory.recursiveDelete
+    jsPluginDirectory.mkdirs
     Plugins.gatherJSIRFiles(jsPluginDirectory)
     jsPluginDirectory
   }
