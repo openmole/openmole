@@ -181,7 +181,7 @@ object Validation {
 
   def duplicatedName(mole: Mole, sources: Sources, hooks: Hooks) = {
     def duplicated(data: PrototypeSet) =
-      data.prototypes.groupBy(_.name).filter { case (_, d) ⇒ d.size > 1 }
+      data.prototypes.groupBy(_.name).filter { case (_, d) ⇒ d.map(_.`type`).distinct.size > 1 }
 
     mole.capsules.flatMap {
       c ⇒

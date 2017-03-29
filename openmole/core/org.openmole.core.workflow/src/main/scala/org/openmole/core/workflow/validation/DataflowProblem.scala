@@ -61,7 +61,7 @@ object DataflowProblem {
       slotType:  SlotType
   ) extends DataflowProblem {
 
-    override def toString = name + " has been found several time in " + slotType + " of capsule " + capsule + ": " + prototype.mkString(", ") + "."
+    override def toString = name + " has been found several time with different types in " + slotType + " of capsule " + capsule + ": " + prototype.mkString(", ") + "."
   }
 
   case class IncoherentTypesBetweenSlots(

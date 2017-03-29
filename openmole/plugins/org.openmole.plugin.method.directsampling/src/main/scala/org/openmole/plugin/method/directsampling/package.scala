@@ -49,19 +49,16 @@ package object directsampling {
     sampling:    Sampling,
     aggregation: Puzzle   = defaultAggregation
   ): Puzzle = {
-    val explorationSkel = ExplorationTask(sampling) set (
-      name := "exploration"
+    val missing = (evaluation.inputs.toSet -- sampling.prototypes).toSeq
+
+    val exploration = ExplorationTask(sampling) set (
+      (inputs, outputs) += (missing: _*),
+      defaults += (missing.flatMap(v ⇒ evaluation.defaults.get(v)): _*)
     )
 
-    val missing =
-      Validation(explorationSkel -< evaluation).collect {
-        case MissingInput(_, d) ⇒ d
-      }
+    val explorationCapsule = exploration
 
-    val exploration = explorationSkel set ((inputs, outputs) += (missing: _*))
-    val explorationCapsule = StrainerCapsule(exploration)
-
-    Strain(explorationCapsule -< evaluation >- aggregation)
+    explorationCapsule -< evaluation >- aggregation
   }
 
   private def defaultAggregation =

@@ -39,7 +39,12 @@ object Capsule {
     else {
       val capsules = mole.inputTransitions(slot).map { _.start } ++ mole.inputDataChannels(slot).map { _.start }
       val noStrainer =
-        for (c ← capsules; if isStrainer(c); s ← mole.slots(c)) yield reachNoStrainer(mole)(s, seen + slot)
+        for {
+          c ← capsules
+          if isStrainer(c)
+          s ← mole.slots(c)
+        } yield reachNoStrainer(mole)(s, seen + slot)
+
       noStrainer.forall(_ == true)
     }
   }
