@@ -18,6 +18,10 @@
 
 package org.openmole.plugin.task
 
+import org.openmole.core.context.PrototypeSet
+import org.openmole.core.exception.UserBadDataError
+import org.openmole.core.expansion.FromContext
+import org.openmole.plugin.task.external.External
 import org.openmole.tool.file._
 
 package object container {
@@ -49,12 +53,36 @@ package object container {
     def isHostFile(f: String) = hostFileBindings.map(b ⇒ b._2).exists(b ⇒ isOneOfParents(b, f))
     def isAbsolute = File(filePath).isAbsolute
 
-    val absolutePathInCARE: String = if (isAbsolute) filePath else (File(userWorkDirectory) / filePath).getPath
-    val pathToResolve = (File("/") / absolutePathInCARE).getAbsolutePath
+    val absolutePathInArchive: String = if (isAbsolute) filePath else (File(userWorkDirectory) / filePath).getPath
+    val pathToResolve = (File("/") / absolutePathInArchive).getAbsolutePath
 
     if (isPreparedFile(pathToResolve)) inputPathResolver(inputDirectory, userWorkDirectory)(filePath)
-    else if (isHostFile(pathToResolve)) File("/") / absolutePathInCARE
-    else rootDirectory / absolutePathInCARE
+    else if (isHostFile(pathToResolve)) File("/") / absolutePathInArchive
+    else rootDirectory / absolutePathInArchive
   }
+
+  type EnvironmentVariable = (String, FromContext[String])
+
+  def validateContainer[A](validateArchive: A ⇒ Seq[Throwable])(
+    archive:              A,
+    command:              FromContext[String],
+    environmentVariables: Vector[EnvironmentVariable],
+    external:             External,
+    inputs:               PrototypeSet
+  ) = {
+
+    val allInputs = External.PWD :: inputs.toList
+
+    val validateVariables = environmentVariables.map(_._2).flatMap(_.validate(allInputs))
+
+    command.validate(allInputs) ++
+      validateArchive(archive) ++
+      validateVariables ++
+      External.validate(external, allInputs)
+  }
+
+  def ArchiveNotFound(archive: File) = Seq(new UserBadDataError(s"Cannot find specified Archive $archive in your work directory. Did you prefix the path with `workDirectory / `?"))
+
+  lazy val ArchiveOK = Seq.empty[UserBadDataError]
 
 }

@@ -81,19 +81,12 @@ object CARETask extends Logger {
 
   def config = InputOutputConfig.outputs.modify(_ ++ Seq(stdOut, stdErr, returnValue).flatten)(_config)
 
-  override def validate = {
-    val allInputs = External.PWD :: inputs.toList
+  def validateArchive(archive: File) =
+    if (!archive.exists) container.ArchiveNotFound(archive)
+    else if (!archive.canExecute) Seq(new UserBadDataError(s"Archive $archive must be executable. Make sure you upload it with x permissions"))
+    else container.ArchiveOK
 
-    def validateArchive(archive: File) =
-      if (!archive.exists) Seq(new UserBadDataError(s"Cannot find specified Archive $archive in your work directory. Did you prefix the path with `workDirectory / `?"))
-      else if (!archive.canExecute) Seq(new UserBadDataError(s"Archive $archive must be executable. Make sure you upload it with x permissions"))
-      else Seq.empty[Throwable]
-
-    command.validate(allInputs) ++
-      validateArchive(archive) ++
-      environmentVariables.map(_._2).flatMap(_.validate(allInputs)) ++
-      External.validate(external, allInputs)
-  }
+  override def validate: Seq[Throwable] = container.validateContainer(validateArchive)(archive, command, environmentVariables, external, this.inputs)
 
   override protected def process(ctx: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = External.withWorkDir(executionContext) { taskWorkDirectory ⇒
 

@@ -90,19 +90,12 @@ object UDockerTask {
 
   override def config = InputOutputConfig.outputs.modify(_ ++ Seq(stdOut, stdErr, returnValue).flatten)(_config)
 
-  // TODO see whether it can factored with CARETask's
-  override def validate: Seq[Throwable] = {
-    val allInputs = External.PWD :: inputs.toList
-
-    def validateArchive =
-      image match {
-        case SavedDockerImage(archive) if !archive.exists ⇒ Seq(new UserBadDataError(s"Cannot find specified Archive $archive in your work directory. Did you prefix the path with `workDirectory / `?"))
-        case _ ⇒ Seq.empty
-      }
-
-    def validateVariables = environmentVariables.map(_._2).flatMap(_.validate(allInputs))
-    command.validate(allInputs) ++ validateArchive ++ validateVariables ++ External.validate(external, allInputs)
+  def validateArchive(image: ContainerImage) = image match {
+    case SavedDockerImage(archive) if !archive.exists ⇒ container.ArchiveNotFound(archive)
+    case _ ⇒ container.ArchiveOK
   }
+
+  override def validate: Seq[Throwable] = container.validateContainer(validateArchive)(image, command, environmentVariables, external, this.inputs)
 
   type FileInfo = (External.ToPut, File)
   type HostFile = (String, Option[String])
