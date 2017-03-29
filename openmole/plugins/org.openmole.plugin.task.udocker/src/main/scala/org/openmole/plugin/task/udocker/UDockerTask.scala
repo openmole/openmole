@@ -183,6 +183,25 @@ object UDockerTask {
 
     val volumes = prepareVolumes(preparedFilesInfo, containerPathResolver, hostFiles)
 
+    // location of the root directory HAS TO BE Call By Name to delay evaluation until directory is actually populated
+    def runContainer(runCommand: FromContext[String], rootDirectory: ⇒ File) = {
+      val executionResult = executeAll(
+        taskWorkDirectory,
+        udockerVariables,
+        errorOnReturnValue,
+        returnValue,
+        stdOut,
+        stdErr,
+        context,
+        List(runCommand)
+      )
+
+      val retContext = external.fetchOutputFiles(preparedContext, outputPathResolver(rootDirectory))
+
+      external.checkAndClean(this, retContext, taskWorkDirectory)
+      (retContext, executionResult)
+    }
+
     def executeWithContainerReuse = {
 
       def containerExists(name: String) = Workspace.withTmpDir { tmpDirectory ⇒
@@ -211,23 +230,9 @@ object UDockerTask {
         command.map(cmd ⇒ s"""${udocker.getAbsolutePath} run --workdir="$userWorkDirectory" $variablesArgument ${volumesArgument(volumes)} $containerName $cmd""")
       }
 
-      val executionResult = executeAll(
-        taskWorkDirectory,
-        udockerVariables,
-        errorOnReturnValue,
-        returnValue,
-        stdOut,
-        stdErr,
-        context,
-        List(runCommand)
-      )
-
       val rootDirectory = containersDirectory / containerName / "ROOT"
 
-      val retContext = external.fetchOutputFiles(preparedContext, outputPathResolver(rootDirectory))
-
-      external.checkAndClean(this, retContext, taskWorkDirectory)
-      (retContext, executionResult)
+      runContainer(runCommand, rootDirectory)
     }
 
     def executeWithNewContainer = {
@@ -240,23 +245,10 @@ object UDockerTask {
         command.map(cmd ⇒ s"""${udocker.getAbsolutePath} run $variablesArgument ${volumesArgument(volumes)} $pulledImageId $cmd""")
       }
 
-      val executionResult = executeAll(
-        taskWorkDirectory,
-        udockerVariables,
-        errorOnReturnValue,
-        returnValue,
-        stdOut,
-        stdErr,
-        context,
-        List(runCommand)
-      )
+      // lazy combined with Call By Name to delay evaluation until directory is actually populated
+      lazy val rootDirectory = containersDirectory.listFiles().head / "ROOT"
 
-      val rootDirectory = containersDirectory.listFiles().head / "ROOT"
-
-      val retContext = external.fetchOutputFiles(preparedContext, outputPathResolver(rootDirectory))
-
-      external.checkAndClean(this, retContext, taskWorkDirectory)
-      (retContext, executionResult)
+      runContainer(runCommand, rootDirectory)
     }
 
     val (retContext, executionResult) =
