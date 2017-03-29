@@ -41,7 +41,7 @@ object UDockerTask {
   implicit def isTask: InputOutputBuilder[UDockerTask] = InputOutputBuilder(UDockerTask._config)
   implicit def isExternal: ExternalBuilder[UDockerTask] = ExternalBuilder(UDockerTask.external)
 
-  implicit def isBuilder = new ReturnValue[UDockerTask] with ErrorOnReturnValue[UDockerTask] with StdOutErr[UDockerTask] with EnvironmentVariables[UDockerTask] with HostFiles[UDockerTask] with ReuseContainer[UDockerTask] { builder ⇒
+  implicit def isBuilder = new ReturnValue[UDockerTask] with ErrorOnReturnValue[UDockerTask] with StdOutErr[UDockerTask] with EnvironmentVariables[UDockerTask] with HostFiles[UDockerTask] with ReuseContainer[UDockerTask] with WorkDirectory[UDockerTask] { builder ⇒
     override def environmentVariables = UDockerTask.environmentVariables
     override def returnValue = UDockerTask.returnValue
     override def errorOnReturnValue = UDockerTask.errorOnReturnValue
@@ -49,6 +49,7 @@ object UDockerTask {
     override def stdErr = UDockerTask.stdErr
     override def hostFiles = UDockerTask.hostFiles
     override def reuseContainer = UDockerTask.reuseContainer
+    override def workDirectory = UDockerTask.workDirectory
   }
 
   def apply(
@@ -58,6 +59,7 @@ object UDockerTask {
     new UDockerTask(
       image = image,
       command = command,
+      workDirectory = None,
       reuseContainer = true,
       errorOnReturnValue = true,
       returnValue = None,
@@ -74,6 +76,7 @@ object UDockerTask {
 @Lenses case class UDockerTask(
     image:                ContainerImage,
     command:              FromContext[String],
+    workDirectory:        Option[String],
     reuseContainer:       Boolean,
     errorOnReturnValue:   Boolean,
     returnValue:          Option[Val[Int]],
