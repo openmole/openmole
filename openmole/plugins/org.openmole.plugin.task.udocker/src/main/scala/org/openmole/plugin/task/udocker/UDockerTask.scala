@@ -165,7 +165,6 @@ object UDockerTask {
       } getOrElse ("/")
     )
 
-    val containerTmpVolume = taskWorkDirectory /> "tmp"
     val context = ctx + (External.PWD → userWorkDirectory)
 
     def containerPathResolver = container.inputPathResolver(File(""), userWorkDirectory) _
@@ -173,6 +172,14 @@ object UDockerTask {
     def inputPathResolver = container.inputPathResolver(inputDirectory, userWorkDirectory) _
 
     val (preparedContext, preparedFilesInfo) = external.prepareAndListInputFiles(context, inputPathResolver)
+
+    def outputPathResolver(rootDirectory: File) = container.outputPathResolver(
+      preparedFilesInfo.map { case (f, d) ⇒ f.toString → d.toString },
+      hostFiles.map { case (f, b) ⇒ f.toString → b.getOrElse(f) },
+      inputDirectory,
+      userWorkDirectory.toString,
+      rootDirectory
+    ) _
 
     val volumes = prepareVolumes(preparedFilesInfo, containerPathResolver, hostFiles)
 
@@ -217,15 +224,7 @@ object UDockerTask {
 
       val rootDirectory = containersDirectory / containerName / "ROOT"
 
-      def outputPathResolver = container.outputPathResolver(
-        preparedFilesInfo.map { case (f, d) ⇒ f.toString → d.toString },
-        hostFiles.map { case (f, b) ⇒ f.toString → b.getOrElse(f) },
-        inputDirectory,
-        containerTmpVolume.toString,
-        rootDirectory
-      ) _
-
-      val retContext = external.fetchOutputFiles(preparedContext, outputPathResolver)
+      val retContext = external.fetchOutputFiles(preparedContext, outputPathResolver(rootDirectory))
 
       external.checkAndClean(this, retContext, taskWorkDirectory)
       (retContext, executionResult)
@@ -254,15 +253,7 @@ object UDockerTask {
 
       val rootDirectory = containersDirectory.listFiles().head / "ROOT"
 
-      def outputPathResolver = container.outputPathResolver(
-        preparedFilesInfo.map { case (f, d) ⇒ f.toString → d.toString },
-        hostFiles.map { case (f, b) ⇒ f.toString → b.getOrElse(f) },
-        inputDirectory,
-        userWorkDirectory.toString,
-        rootDirectory
-      ) _
-
-      val retContext = external.fetchOutputFiles(preparedContext, outputPathResolver)
+      val retContext = external.fetchOutputFiles(preparedContext, outputPathResolver(rootDirectory))
 
       external.checkAndClean(this, retContext, taskWorkDirectory)
       (retContext, executionResult)
