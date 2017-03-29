@@ -33,8 +33,8 @@ import platform
 __author__ = "udocker@lip.pt"
 __credits__ = ["PRoot http://proot.me"]
 __license__ = "Licensed under the Apache License, Version 2.0"
-__version__ = "1.0.2"
-__date__ = "2016"
+__version__ = "1.0.3"
+__date__ = "2017"
 
 # Python version major.minor
 PY_VER = "%d.%d" % (sys.version_info[0], sys.version_info[1])
@@ -110,7 +110,7 @@ class Config(object):
     # udocker installation tarball
     tarball = (
         "https://owncloud.indigo-datacloud.eu/index.php"
-        "/s/jZmbZU9sNmgs1ah/download"
+        "/s/rsGr1QF3Fb5c8SK/download"
     )
     autoinstall = True
 
@@ -646,8 +646,9 @@ class FileUtil(object):
                 Msg().err("Error: deleting file: ", self.filename)
                 return False
         elif os.path.isdir(self.filename):
-            cmd = ["/bin/rm", "-Rf", self.filename]
-            if subprocess.call(cmd, stderr=Msg.chlderr,
+            cmd = "/bin/rm -Rf %s || /bin/chmod -R u+w %s && /bin/rm -Rf %s" % \
+                  (self.filename, self.filename, self.filename)
+            if subprocess.call(cmd, stderr=Msg.chlderr, shell=True,
                                close_fds=True, env=None):
                 Msg().err("Error: deleting directory: ", self.filename)
                 return False
@@ -1123,8 +1124,14 @@ class ExecutionEngine(object):
     def _is_in_volumes(self, pathname):
         """Is pathaname in the volumes exported to the container"""
         for vol in self.opt["vol"]:
-            if vol.startswith(pathname):
-                return True
+            if ":" in vol:
+                (host_path, cont_path) = vol.split(":")
+                if pathname.startswith(cont_path):
+                    if os.path.isdir(host_path + pathname[len(cont_path):]):
+                        return True
+            elif pathname.startswith(vol):
+                if os.path.isdir(pathname):
+                    return True
         return False
 
     def _check_volumes(self):
@@ -1136,7 +1143,8 @@ class ExecutionEngine(object):
                 host_path = vol
                 cont_path = ""
             if cont_path and not cont_path.startswith("/"):
-                Msg().err("Error: invalid volume destination path:", cont_path)
+                Msg().err("Error: volume destination must be absolute path:",
+                          cont_path)
                 return False
             elif not (host_path and host_path.startswith("/")):
                 Msg().err("Error: invalid volume spec:", vol)
@@ -1149,6 +1157,16 @@ class ExecutionEngine(object):
                     return False
         return True
 
+    def _get_bindhome(self):
+        """Binding of the host $HOME in to the container $HOME"""
+        if self.opt["bindhome"]:
+            host_auth = NixAuthentication()
+            (r_user, dummy, dummy, dummy, r_home,
+             dummy) = host_auth.get_user(os.getuid())
+            if r_user:
+                return r_home
+        return ""
+
     def _set_volume_bindings(self):
         """Set the volume bindings string for container run command"""
         # predefined volume bindings --sysdirs --hostauth --dri
@@ -1158,12 +1176,18 @@ class ExecutionEngine(object):
             self.opt["vol"].extend(self.hostauth_list)
         if self.opt["dri"]:
             self.opt["vol"].extend(Config.dri_list)
+        home = self._get_bindhome()
+        if home:
+            self.opt["vol"].append(home)
         # remove directory bindings specified with --novol
-        for novolume in list(set(self.opt["novol"])):
-            try:
-                self.opt["vol"].remove(novolume)
-            except ValueError:
-                Msg().out("Warning:  novol %s not in volumes list" %
+        for novolume in list(self.opt["novol"]):
+            found = False
+            for vol in list(self.opt["vol"]):
+                if novolume == vol or novolume == vol.split(":")[0]:
+                    self.opt["vol"].remove(vol)
+                    found = True
+            if not found:
+                Msg().out("Warning: --novol %s not in volumes list" %
                           novolume, l=Msg.WAR)
         return self._check_volumes()
 
@@ -1178,13 +1202,12 @@ class ExecutionEngine(object):
         # verify if the working directory is valid and fix it
         if not self.opt["cwd"]:
             self.opt["cwd"] = self.opt["home"]
-        #if (self.opt["cwd"] and not (self.opt["bindhome"] or
-        #                             self._is_in_volumes(self.opt["cwd"]))):
-        #    if (not (os.path.exists(container_root + "/" + self.opt["cwd"]) and
-        #             os.path.isdir(container_root + "/" + self.opt["cwd"]))):
-        #        Msg().err("Error: invalid working directory: ",
-        #                  self.opt["cwd"])
-        #        return False
+        if self.opt["cwd"] and not self._is_in_volumes(self.opt["cwd"]):
+            if (not (os.path.exists(container_root + "/" + self.opt["cwd"]) and
+                     os.path.isdir(container_root + "/" + self.opt["cwd"]))):
+                Msg().err("Error: invalid working directory: ",
+                          self.opt["cwd"])
+                return False
         return True
 
     def _quote(self, argv):
@@ -1207,7 +1230,7 @@ class ExecutionEngine(object):
         elif self.opt["entryp"] and isinstance(self.opt["entryp"], list):
             if self.opt["cmd"]:                                     # and cmd
                 cmd_args = self.opt["cmd"]
-                self.opt["cmd"] = [self.opt["entryp"][0]]
+                self.opt["cmd"] = self.opt["entryp"]
                 self.opt["cmd"].extend(cmd_args)   # cmd=args entryp
             else:
                 self.opt["cmd"] = self.opt["entryp"]
@@ -1219,6 +1242,9 @@ class ExecutionEngine(object):
         self.opt["cmd"] = self._quote(self.opt["cmd"])
         if exec_name.startswith("/"):
             exec_path = container_root + exec_name
+        # exe started from work dir
+        elif exec_name.startswith("."):
+            exec_path = container_root + "/" + self.opt["cwd"] + exec_name[1:]
         else:
             exec_path = \
                 FileUtil(exec_name).find_inpath(path, container_root + "/")
@@ -1293,8 +1319,14 @@ class ExecutionEngine(object):
     def _check_env(self):
         """Sanitize the environment variables"""
         for pair in list(self.opt["env"]):
-            if not pair or "=" not in pair:
+            if not pair:
                 self.opt["env"].remove(pair)
+                continue
+            if "=" not in pair:
+                self.opt["env"].remove(pair)
+                val = os.getenv(pair, "")
+                if val:
+                    self.opt["env"].append('%s="%s"' % (pair, val))
                 continue
             (key, val) = pair.split("=", 1)
             if " " in key or key[0] in string.digits:
@@ -1500,6 +1532,9 @@ class ExecutionEngine(object):
                                           self.container_root):
             return False
 
+        if not self._set_volume_bindings():
+            return False
+
         if (not (self._check_paths(self.container_root) and
                  self._check_executable(self.container_root))):
             return False
@@ -1556,13 +1591,10 @@ class PRootEngine(ExecutionEngine):
             else:
                 image_list = ["proot-arm", "proot"]
         self.proot_exec = self._find_image(image_list)
-        if conf.oskernel_isgreater((4, 8, 0)):
-            if not self.proot_exec.endswith("-4_8_0"):
-                self.proot_noseccomp = True
-            if conf.proot_noseccomp is not None:
-                self.proot_noseccomp = conf.proot_noseccomp
-            if self.opt["noseccomp"]:
-                self.proot_noseccomp = True
+        if conf.proot_noseccomp is not None:
+            self.proot_noseccomp = conf.proot_noseccomp
+        if self.opt["noseccomp"]:
+            self.proot_noseccomp = True
 
     def _set_uid_map(self):
         """Set the uid_map string for container run command"""
@@ -1580,17 +1612,6 @@ class PRootEngine(ExecutionEngine):
         else:
             vol_str = " "
         return vol_str
-
-    def _set_bindhome(self):
-        """Binding of the host $HOME in to the container $HOME"""
-        if self.opt["bindhome"]:
-            host_auth = NixAuthentication()
-            (r_user, dummy, dummy, dummy, r_home,
-             dummy) = host_auth.get_user(os.getuid())
-            if r_user:
-                return " -b " + r_home
-        else:
-            return " "
 
     def run(self, container_id):
         """Execute a Docker container using PRoot. This is the main method
@@ -1613,9 +1634,6 @@ class PRootEngine(ExecutionEngine):
         if self.opt["kernel"]:
             self._kernel = self.opt["kernel"]
 
-        if not self._set_volume_bindings():
-            return 3
-
         # set environment variables
         self._run_env_set()
         if not self._check_env():
@@ -1627,7 +1645,6 @@ class PRootEngine(ExecutionEngine):
                  " ".join(self.opt["env"]),
                  self._set_cpu_affinity(),
                  self.proot_exec,
-                 self._set_bindhome(),
                  self._get_volume_bindings(),
                  self._set_uid_map(),
                  "-k", self._kernel,
@@ -1741,6 +1758,7 @@ class ContainerStructure(object):
         and permissions are changed to avoid file permission
         issues when extracting the next layer.
         """
+        status = True
         gid = str(os.getgid())
         for tarf in tarfiles:
             self._apply_whiteouts(tarf, destdir)
@@ -2021,32 +2039,32 @@ class LocalRepository(object):
             return False
         return True
 
+    def _name_is_valid(self, name):
+        """Check name alias validity"""
+        invalid_chars = ("/", ".", " ", "[", "]")
+        if name and any(x in name for x in invalid_chars):
+            return False
+        return not len(name) > 2048
+
     def set_container_name(self, container_id, name):
         """Associates a name to a container id The container can
         then be referenced either by its id or by its name.
         """
-        invalid_chars = ("/", ".", " ", "[", "]")
-        if name and any(x in name for x in invalid_chars):
-            return False
-        if len(name) > 30:
-            return False
-        container_dir = self.cd_container(container_id)
-        if container_dir:
-            linkname = self.containersdir + "/" + name
-            if os.path.exists(linkname):
-                return False
-            self._symlink(container_dir, linkname)
-            return True
+        if self._name_is_valid(name):
+            container_dir = self.cd_container(container_id)
+            if container_dir:
+                linkname = self.containersdir + "/" + name
+                if os.path.exists(linkname):
+                    return False
+                return self._symlink(container_dir, linkname)
         return False
 
     def del_container_name(self, name):
         """Remove a name previously associated to a container"""
-        if "/" in name or "." in name or " " in name or len(name) > 30:
-            return False
-        linkname = self.containersdir + "/" + name
-        if os.path.exists(linkname):
-            FileUtil(linkname).remove()
-            return True
+        if self._name_is_valid(name):
+            linkname = self.containersdir + "/" + name
+            if os.path.exists(linkname):
+                return FileUtil(linkname).remove()
         return False
 
     def get_container_id(self, container_name):
@@ -3416,7 +3434,7 @@ class DockerLocalFileAPI(object):
                 return []
             try:
                 top_layer_id = structure["repositories"][imagerepo][tag]
-            except (IndexError, NameError):
+            except (IndexError, NameError, KeyError):
                 top_layer_id = self._find_top_layer_id(structure)
             for layer_id in self._sorted_layers(structure, top_layer_id):
                 if str(structure["layers"][layer_id]["VERSION"]) != "1.0":
@@ -3984,6 +4002,7 @@ class Udocker(object):
         --bindhome                 :bind the home directory into the container
         --location=<path-to-dir>   :use root tree outside the repository
         --kernel=<kernel-id>       :use this Linux kernel identifier
+        --noseccomp                :disable proot seccomp
         """
         exec_engine = PRootEngine(self.localrepo)
         self._get_run_options(cmdp, exec_engine)
@@ -4499,7 +4518,7 @@ class Main(object):
     def __init__(self):
         self.cmdp = CmdParser()
         if not self.cmdp.parse(sys.argv):
-            Msg().err("Error: parsing command line, use: udocker --help")
+            Msg().err("Error: parsing command line, use: udocker help")
             sys.exit(1)
         Config().user_init(self.cmdp.get("--config=", "GEN_OPT"))
         if (self.cmdp.get("--debug", "GEN_OPT") or
