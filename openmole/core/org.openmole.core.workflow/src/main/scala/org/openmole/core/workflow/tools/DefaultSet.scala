@@ -19,9 +19,12 @@ package org.openmole.core.workflow.tools
 
 import scala.collection.SetLike
 import scala.collection.immutable.TreeMap
+import org.openmole.core.context._
 
 object DefaultSet {
   implicit def seqToDefaultSet(s: Seq[Default[_]]) = DefaultSet(s: _*)
+  implicit def defaultSetToSeq(d: DefaultSet) = d.toSeq
+
   val empty = DefaultSet(Iterable.empty)
 
   def apply(p: Traversable[Default[_]]): DefaultSet =
@@ -43,10 +46,9 @@ trait DefaultSet extends Set[Default[_]] with SetLike[Default[_], DefaultSet] { 
   override def empty = DefaultSet.empty
   override def iterator: Iterator[Default[_]] = defaultMap.values.iterator
 
-  def +(p: Default[_]) = DefaultSet(p :: defaults.toList)
-
+  def +(p: Default[_]) = DefaultSet(p :: defaults.toList.filter(_.prototype != p.prototype))
   def -(p: Default[_]) = DefaultSet((defaultMap - p.prototype.name).values.toList)
-
   def contains(p: Default[_]) = defaultMap.contains(p.prototype.name)
-
+  def get(name: String): Option[Default[_]] = defaultMap.get(name)
+  def get(v: Val[_]): Option[Default[_]] = get(v.name)
 }
