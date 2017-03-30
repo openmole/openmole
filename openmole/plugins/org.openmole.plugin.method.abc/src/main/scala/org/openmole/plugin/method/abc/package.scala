@@ -49,7 +49,7 @@ package object abc {
     val sampling = LenormandSampling(algorithm, statePrototype)
     val explorationTask = ExplorationTask(sampling) set (
       name := methodName + "Exploration",
-      statePrototype := FromContext((_, _) ⇒ algorithm.initialState),
+      statePrototype := FromContext(_ ⇒ algorithm.initialState),
       outputs += statePrototype
     )
 

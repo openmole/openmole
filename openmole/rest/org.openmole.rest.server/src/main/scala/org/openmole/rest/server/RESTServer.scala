@@ -10,20 +10,27 @@ import org.openmole.core.workspace._
 import org.openmole.tool.logger.Logger
 import org.scalatra.ScalatraBase
 import org.scalatra.servlet.ScalatraListener
-
 import org.eclipse.jetty.security.{ ConstraintMapping, ConstraintSecurityHandler }
+import org.openmole.core.preference.Preference
+import org.openmole.core.replication.ReplicaCatalog
+import org.openmole.core.threadprovider.ThreadProvider
 import org.scalatra._
 import org.openmole.tool.hash._
+import org.openmole.tool.crypto._
+import org.openmole.tool.file._
+import org.openmole.tool.random.Seeder
+import org.openmole.core.services._
 
 object RESTServer extends Logger {
-  def isPasswordCorrect(p: String) = Workspace.passwordIsCorrect(p)
+  def isPasswordCorrect(cypher: Cypher)(implicit preference: Preference) =
+    Preference.passwordIsCorrect(cypher, preference)
 }
 
 import RESTServer.Log._
 
 object RESTLifeCycle {
   def arguments = "arguments"
-  case class Arguments()
+  case class Arguments(services: Services)
 }
 
 class RESTLifeCycle extends LifeCycle {
@@ -32,7 +39,7 @@ class RESTLifeCycle extends LifeCycle {
     val args = context.getAttribute(RESTLifeCycle.arguments).asInstanceOf[RESTLifeCycle.Arguments]
     context.mount(
       new RESTAPI {
-        def arguments = args
+        lazy val arguments = args
       },
       "/*"
     )
@@ -40,7 +47,7 @@ class RESTLifeCycle extends LifeCycle {
 
 }
 
-class RESTServer(sslPort: Option[Int], hostName: Option[String]) {
+class RESTServer(sslPort: Option[Int], hostName: Option[String], services: Services) {
 
   private lazy val server = {
     val sslP = sslPort getOrElse 8443
@@ -48,12 +55,13 @@ class RESTServer(sslPort: Option[Int], hostName: Option[String]) {
     val server = new Server()
 
     val contextFactory = new org.eclipse.jetty.util.ssl.SslContextFactory()
-    val ks = Workspace.keyStore
-    contextFactory.setKeyStore(ks)
-    contextFactory.setKeyStorePassword(Workspace.keyStorePassword)
-    contextFactory.setKeyManagerPassword(Workspace.keyStorePassword)
-    contextFactory.setTrustStore(ks)
-    contextFactory.setTrustStorePassword(Workspace.keyStorePassword)
+    def keyStorePassword = "openmole"
+    val ks = KeyStore(services.workspace.persistentDir / "keystorerest", keyStorePassword)
+    contextFactory.setKeyStore(ks.keyStore)
+    contextFactory.setKeyStorePassword(keyStorePassword)
+    contextFactory.setKeyManagerPassword(keyStorePassword)
+    contextFactory.setTrustStore(ks.keyStore)
+    contextFactory.setTrustStorePassword(keyStorePassword)
 
     logger.info(s"binding https to port $sslP")
 
@@ -70,7 +78,7 @@ class RESTServer(sslPort: Option[Int], hostName: Option[String]) {
     context.setInitParameter("org.scalatra.Port", sslP.toString)
     context.setInitParameter(ScalatraBase.ForceHttpsKey, true.toString)
 
-    context.setAttribute(RESTLifeCycle.arguments, RESTLifeCycle.Arguments())
+    context.setAttribute(RESTLifeCycle.arguments, RESTLifeCycle.Arguments(services))
     context.setInitParameter(ScalatraListener.LifeCycleKey, classOf[RESTLifeCycle].getCanonicalName)
     context.addEventListener(new ScalatraListener)
 
@@ -87,7 +95,7 @@ class RESTServer(sslPort: Option[Int], hostName: Option[String]) {
     server
   }
 
-  def start() {
+  def run() {
     server.start
     server.join
   }

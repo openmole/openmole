@@ -23,7 +23,6 @@ import org.openmole.core.expansion._
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.validation.ValidateHook
-import org.openmole.tool.random.RandomProvider
 
 object DisplayHook {
 
@@ -43,7 +42,8 @@ object DisplayHook {
 
   override def validate(inputs: Seq[Val[_]]): Seq[Throwable] = toDisplay.validate(inputs)
 
-  override def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider) = {
+  override protected def process(executionContext: MoleExecutionContext) = FromContext { parameters ⇒
+    import parameters._
     executionContext.out.println(toDisplay.from(context))
     context
   }

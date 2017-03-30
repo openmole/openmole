@@ -19,10 +19,9 @@ package org.openmole.plugin.environment.batch.storage
 
 import java.io.File
 
-import org.openmole.core.replication.replicas
-import org.openmole.core.updater.IUpdatable
-import org.openmole.core.workspace.Workspace
-import org.openmole.plugin.environment.batch.replication._
+import org.openmole.core.db._
+import org.openmole.core.replication.ReplicaCatalog
+import org.openmole.core.threadprovider.IUpdatable
 import org.openmole.tool.logger.Logger
 import slick.driver.H2Driver.api._
 
@@ -32,19 +31,20 @@ object StoragesGC extends Logger
 
 import org.openmole.plugin.environment.batch.storage.StoragesGC.Log._
 
-class StoragesGC(storagesRef: WeakReference[Iterable[StorageService]]) extends IUpdatable {
+class StoragesGC(storageRef: WeakReference[StorageService]) extends IUpdatable {
 
   override def update: Boolean =
-    storagesRef.get match {
-      case Some(storages) ⇒
+    storageRef.get match {
+      case Some(storage) ⇒
+        import storage.environment.services
+
         for {
-          storage ← storages
-          replica ← ReplicaCatalog.query { replicas.filter { _.storage === storage.id }.result }
+          replica ← services.replicaCatalog.query { replicas.filter { _.storage === storage.id }.result }
         } {
           try
-            if (!new File(replica.source).exists || System.currentTimeMillis - replica.lastCheckExists > Workspace.preference(ReplicaCatalog.NoAccessCleanTime).millis) {
+            if (!new File(replica.source).exists || System.currentTimeMillis - replica.lastCheckExists > services.preference(ReplicaCatalog.NoAccessCleanTime).millis) {
               logger.fine(s"Remove gc $replica")
-              ReplicaCatalog.remove(replica.id)
+              services.replicaCatalog.remove(replica.id)
               storage.backgroundRmFile(replica.path)
             }
           catch {

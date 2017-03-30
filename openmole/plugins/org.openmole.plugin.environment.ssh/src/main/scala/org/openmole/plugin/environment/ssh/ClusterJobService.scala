@@ -20,6 +20,6 @@ import fr.iscpif.gridscale.ssh.SSHHost
 import org.openmole.plugin.environment.gridscale.GridScaleJobService
 
 trait ClusterJobService extends GridScaleJobService with SSHHost with SharedStorage {
-  def environment: ClusterEnvironment
+  val environment: ClusterEnvironment
   def usageControl = environment.usageControl
 }

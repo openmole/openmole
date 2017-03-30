@@ -20,21 +20,20 @@ import mgo.algorithm.{ noisypse, pse }
 import org.openmole.core.context.{ Context, Val }
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.sampling._
-import org.openmole.tool.random.RandomProvider
+import org.openmole.tool.random._
 
 object PSE {
 
   object PatternAxe {
 
-    // FIXME provide an evidence that the domain does'nt require a context
-    implicit def fromDoubleDomainToPatternAxe[D](f: Factor[D, Double])(implicit finite: Finite[D, Double]): PatternAxe =
-      PatternAxe(f.prototype, finite.computeValues(f.domain).from(Context.empty)(RandomProvider.empty).toVector)
+    implicit def fromDoubleDomainToPatternAxe[D](f: Factor[D, Double])(implicit fix: Fix[D, Double]): PatternAxe =
+      PatternAxe(f.prototype, fix(f.domain).toVector)
 
-    implicit def fromIntDomainToPatternAxe[D](f: Factor[D, Int])(implicit finite: Finite[D, Int]): PatternAxe =
-      PatternAxe(f.prototype, finite.computeValues(f.domain).from(Context.empty)(RandomProvider.empty).toVector.map(_.toDouble))
+    implicit def fromIntDomainToPatternAxe[D](f: Factor[D, Int])(implicit fix: Fix[D, Int]): PatternAxe =
+      PatternAxe(f.prototype, fix(f.domain).toVector.map(_.toDouble))
 
-    implicit def fromLongDomainToPatternAxe[D](f: Factor[D, Long])(implicit finite: Finite[D, Long]): PatternAxe =
-      PatternAxe(f.prototype, finite.computeValues(f.domain).from(Context.empty)(RandomProvider.empty).toVector.map(_.toDouble))
+    implicit def fromLongDomainToPatternAxe[D](f: Factor[D, Long])(implicit fix: Fix[D, Long]): PatternAxe =
+      PatternAxe(f.prototype, fix(f.domain).toVector.map(_.toDouble))
 
   }
 

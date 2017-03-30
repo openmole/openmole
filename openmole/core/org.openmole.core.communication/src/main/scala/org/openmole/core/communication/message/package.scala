@@ -20,13 +20,14 @@ import java.io.File
 
 import org.openmole.core.context.Context
 import org.openmole.core.exception.InternalProcessingError
-import org.openmole.core.fileservice.FileDeleter
+import org.openmole.core.fileservice.{ FileDeleter, FileService }
+import org.openmole.core.serializer.SerializerService
 import org.openmole.core.tools.service._
 import org.openmole.core.workflow.execution.Environment.RuntimeLog
 import org.openmole.core.workflow.job.MoleJob._
 import org.openmole.core.workflow.job._
 import org.openmole.core.workflow.task.Task
-import org.openmole.core.workspace.Workspace
+import org.openmole.core.workspace.{ NewFile, Workspace }
 
 import util.Try
 import org.openmole.tool.file._
@@ -41,12 +42,12 @@ package object message {
   }
 
   implicit class FileToReplicatedFileDecorator(file: File) {
-    def upload(upload: File ⇒ String) = {
+    def upload(upload: File ⇒ String)(implicit newFile: NewFile) = {
       val isDir = file.isDirectory
 
       val toReplicate =
         if (isDir) {
-          val ret = Workspace.newFile("archive", ".tar")
+          val ret = newFile.newFile("archive", ".tar")
           file.archive(ret)
           ret
         }
@@ -54,8 +55,8 @@ package object message {
 
       val mode = file.mode
       val hash = toReplicate.hash.toString
-      val newFile = upload(toReplicate)
-      ReplicatedFile(file.getPath, isDir, hash, newFile, mode)
+      val uploaded = upload(toReplicate)
+      ReplicatedFile(file.getPath, isDir, hash, uploaded, mode)
     }
   }
 
@@ -70,8 +71,8 @@ package object message {
   case class FileMessage(path: String, hash: String)
 
   object ReplicatedFile {
-    def download(replicatedFile: ReplicatedFile)(download: (String, File) ⇒ Unit, verifyHash: Boolean = false) = {
-      val cache = Workspace.newFile()
+    def download(replicatedFile: ReplicatedFile)(download: (String, File) ⇒ Unit, verifyHash: Boolean = false)(implicit newFile: NewFile) = {
+      val cache = newFile.newFile()
 
       download(replicatedFile.path, cache)
 
@@ -82,7 +83,7 @@ package object message {
 
       val dl =
         if (replicatedFile.directory) {
-          val local = Workspace.newDir("dirReplica")
+          val local = newFile.newDir("dirReplica")
           cache.extract(local)
           local.mode = replicatedFile.mode
           cache.delete
@@ -99,24 +100,35 @@ package object message {
 
   case class ReplicatedFile(originalPath: String, directory: Boolean, hash: String, path: String, mode: Int)
   case class RuntimeSettings(archiveResult: Boolean)
-  case class ExecutionMessage(plugins: Iterable[ReplicatedFile], files: Iterable[ReplicatedFile], jobs: File, communicationDirPath: String, runtimeSettings: RuntimeSettings) {
-    FileDeleter.deleteWhenGarbageCollected(jobs)
+
+  object ExecutionMessage {
+    def load(file: File)(implicit serialiserService: SerializerService, fileService: FileService, newFile: NewFile) = {
+      val em = serialiserService.deserialiseAndExtractFiles[ExecutionMessage](file)
+      fileService.deleteWhenGarbageCollected(em.jobs)
+      em
+    }
   }
 
+  case class ExecutionMessage(plugins: Iterable[ReplicatedFile], files: Iterable[ReplicatedFile], jobs: File, communicationDirPath: String, runtimeSettings: RuntimeSettings)
+
+  object RuntimeResult {
+    def load(file: File)(implicit serialiserService: SerializerService, fileService: FileService, newFile: NewFile) = {
+      val result = serialiserService.deserialiseAndExtractFiles[RuntimeResult](file)
+      result.stdOut.foreach(fileService.deleteWhenGarbageCollected)
+      result.stdErr.foreach(fileService.deleteWhenGarbageCollected)
+
+      result.result.toOption.foreach {
+        case (r: ArchiveContextResults, _)         ⇒ fileService.deleteWhenGarbageCollected(r.contextResults)
+        case (r: IndividualFilesContextResults, _) ⇒ fileService.deleteWhenGarbageCollected(r.contextResults)
+      }
+      result
+    }
+  }
+
+  case class RuntimeResult(stdOut: Option[File], stdErr: Option[File], result: Try[(SerializedContextResults, RuntimeLog)], info: RuntimeInfo)
   sealed trait SerializedContextResults
-
-  case class ArchiveContextResults(contextResults: File) extends SerializedContextResults {
-    FileDeleter.deleteWhenGarbageCollected(contextResults)
-  }
-
-  case class IndividualFilesContextResults(contextResults: File, files: Iterable[ReplicatedFile]) extends SerializedContextResults {
-    FileDeleter.deleteWhenGarbageCollected(contextResults)
-  }
+  case class ArchiveContextResults(contextResults: File) extends SerializedContextResults
+  case class IndividualFilesContextResults(contextResults: File, files: Iterable[ReplicatedFile]) extends SerializedContextResults
   case class ContextResults(results: PartialFunction[MoleJobId, Try[Context]])
-
-  case class RuntimeResult(stdOut: Option[File], stdErr: Option[File], result: Try[(SerializedContextResults, RuntimeLog)], info: RuntimeInfo) {
-    stdOut.foreach(FileDeleter.deleteWhenGarbageCollected)
-    stdErr.foreach(FileDeleter.deleteWhenGarbageCollected)
-  }
 
 }

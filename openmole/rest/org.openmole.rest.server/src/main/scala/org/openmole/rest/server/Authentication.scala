@@ -7,13 +7,19 @@ package org.openmole.rest.server
  * Time: 5:40 PM
  */
 
+import java.util.UUID
 import javax.crypto.spec.SecretKeySpec
 import javax.crypto.Mac
+
 import org.openmole.core.workspace.Workspace
 import org.apache.commons.codec.binary.Base64
 import javax.servlet.http.HttpServletRequest
+
+import org.openmole.core.preference.Preference
 import org.openmole.tool.collection._
+import org.openmole.tool.crypto.Cypher
 import org.openmole.tool.logger.Logger
+
 import scala.concurrent.stm._
 import scala.util.{ Failure, Success, Try }
 
@@ -50,14 +56,18 @@ trait Authentication { self ⇒
   /// FIXME remove outdated keys
   private val keyStorage = new TokenHandler
 
-  def issueToken(password: String)(implicit r: HttpServletRequest) = {
-    if (RESTServer.isPasswordCorrect(password)) {
+  lazy val sessionUUID = UUID.randomUUID().toString
+
+  def issueToken(password: String)(implicit r: HttpServletRequest, preference: Preference) = {
+    val cypher = Cypher(password)
+
+    if (RESTServer.isPasswordCorrect(cypher)) {
       val signingKey = new SecretKeySpec(password.getBytes, "HmacSHA256")
       val mac = Mac.getInstance("HmacSHA256")
       mac.init(signingKey)
       val start = java.util.Calendar.getInstance().getTimeInMillis
       val end = start + (24 * 60 * 60 * 1000)
-      val rawHmac = mac.doFinal((r.getRemoteHost + Workspace.sessionUUID + start + end) getBytes ())
+      val rawHmac = mac.doFinal((r.getRemoteHost + sessionUUID + start + end) getBytes ())
       val hash = new String(Base64.encodeBase64(rawHmac))
       val token = AuthenticationToken(hash, start, end)
       keyStorage.add(hash, token)

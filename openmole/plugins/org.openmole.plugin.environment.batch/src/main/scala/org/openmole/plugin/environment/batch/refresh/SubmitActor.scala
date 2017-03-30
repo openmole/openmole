@@ -21,11 +21,11 @@ import org.openmole.core.workflow.execution.ExecutionState._
 import org.openmole.plugin.environment.batch.environment.BatchEnvironment
 import org.openmole.tool.logger.Logger
 
-object SubmitActor extends Logger
+object SubmitActor {
 
-class SubmitActor(jobManager: JobManager) {
+  def receive(submit: Submit)(implicit services: BatchEnvironment.Services) = {
+    import services._
 
-  def receive(submit: Submit) = {
     val Submit(job, sj) = submit
     if (!job.state.isFinal) {
       try job.trySelectJobService match {
@@ -34,13 +34,13 @@ class SubmitActor(jobManager: JobManager) {
             try js.submit(sj)(token)
             finally js.releaseToken(token)
           job.state = SUBMITTED
-          jobManager ! Submitted(job, sj, bj)
-        case None ⇒ jobManager ! Delay(submit, BatchEnvironment.getTokenInterval)
+          JobManager ! Submitted(job, sj, bj)
+        case None ⇒ JobManager ! Delay(submit, BatchEnvironment.getTokenInterval)
       }
       catch {
         case e: Throwable ⇒
-          jobManager ! Error(job, e)
-          jobManager ! Submit(job, sj)
+          JobManager ! Error(job, e)
+          JobManager ! Submit(job, sj)
       }
     }
   }

@@ -27,30 +27,32 @@ import org.openmole.core.expansion.FromContext
 import org.openmole.core.serializer._
 import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
 import org.openmole.core.workflow.mole._
-import org.openmole.tool.random.RandomProvider
 
 object LoadSource {
 
   implicit def isIO = InputOutputBuilder(LoadSource.config)
 
-  def apply(file: FromContext[String], prototypes: Val[_]*)(implicit name: sourcecode.Name) =
+  def apply(file: FromContext[String], prototypes: Val[_]*)(implicit serializerService: SerializerService, name: sourcecode.Name) =
     new LoadSource(
       file,
       prototypes.toVector,
-      config = InputOutputConfig()
+      config = InputOutputConfig(),
+      serializerService = serializerService
     ) set (outputs += (prototypes: _*))
 
 }
 
 @Lenses case class LoadSource(
-    file:       FromContext[String],
-    prototypes: Vector[Val[_]],
-    config:     InputOutputConfig
+    file:              FromContext[String],
+    prototypes:        Vector[Val[_]],
+    config:            InputOutputConfig,
+    serializerService: SerializerService
 ) extends Source {
 
-  override def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider) = {
+  override protected def process(executionContext: MoleExecutionContext) = FromContext { parameters ⇒
+    import parameters._
     val from = new File(file.from(context))
-    val loadedContext = SerialiserService.deserialiseAndExtractFiles[Context](from)
+    val loadedContext = serializerService.deserialiseAndExtractFiles[Context](from)
     context ++ prototypes.map(p ⇒ loadedContext.variable(p).getOrElse(throw new UserBadDataError(s"Variable $p has not been found in the loaded context")))
   }
 

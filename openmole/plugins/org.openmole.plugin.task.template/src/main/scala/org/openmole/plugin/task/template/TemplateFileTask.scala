@@ -21,12 +21,11 @@ import java.io.File
 
 import monocle.macros.Lenses
 import org.openmole.core.context.{ Context, Val }
-import org.openmole.core.expansion.ExpandedString
+import org.openmole.core.expansion.{ ExpandedString, FromContext }
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.dsl
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.task._
-import org.openmole.tool.random.RandomProvider
 
 object TemplateFileTask {
 
@@ -49,7 +48,8 @@ object TemplateFileTask {
     ExpandedString(is)
   }
 
-  override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = {
+  override protected def process(executionContext: TaskExecutionContext) = FromContext { parameters ⇒
+    import parameters._
     val file = executionContext.tmpDirectory.newFile(template.getName, ".tmp")
     file.content = expanded.from(context)
     context + (output → file)

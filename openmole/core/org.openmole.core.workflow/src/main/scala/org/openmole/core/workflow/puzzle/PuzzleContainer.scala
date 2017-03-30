@@ -16,12 +16,16 @@
  */
 package org.openmole.core.workflow.puzzle
 
+import org.openmole.core.preference.Preference
+import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.mole._
+import org.openmole.core.workspace.NewFile
+import org.openmole.tool.random.Seeder
 
 trait PuzzleContainer {
   def buildPuzzle: Puzzle
-  def toExecution = buildPuzzle.toExecution
+  def toExecution(implicit seeder: Seeder, preference: Preference, newFile: NewFile, threadProvider: ThreadProvider) = buildPuzzle.toExecution
 }
 
 case class OutputPuzzleContainer(

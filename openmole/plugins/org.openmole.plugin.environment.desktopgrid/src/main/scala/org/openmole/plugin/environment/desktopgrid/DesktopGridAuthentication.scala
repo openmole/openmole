@@ -17,12 +17,13 @@
  */
 package org.openmole.plugin.environment.desktopgrid
 
-import org.openmole.core.workspace._
+import org.openmole.core.preference.{ ConfigurationLocation, Preference }
+import org.openmole.tool.crypto.Cypher
 
 object DesktopGridAuthentication {
   val desktopGridPassword = ConfigurationLocation[String]("desktopgrid", "password", None)
-  def update(cypheredPassword: String) = Workspace.setPreference(desktopGridPassword, cypheredPassword)
-  def password = Workspace.decrypt(Workspace.preference(desktopGridPassword))
-  def passwordOption = Workspace.preferenceOption(desktopGridPassword).map(Workspace.decrypt(_))
-  def clear = Workspace.clearPreference(desktopGridPassword)
+  def update(cypheredPassword: String)(implicit preference: Preference) = preference.setPreference(desktopGridPassword, cypheredPassword)
+  def password(implicit preference: Preference, cypher: Cypher) = cypher.decrypt(preference(desktopGridPassword))
+  def passwordOption(implicit preference: Preference, cypher: Cypher) = preference.preferenceOption(desktopGridPassword).map(cypher.decrypt(_))
+  def clear(implicit preference: Preference) = preference.clearPreference(desktopGridPassword)
 }

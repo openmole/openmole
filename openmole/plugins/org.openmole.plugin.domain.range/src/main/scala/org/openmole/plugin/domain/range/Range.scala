@@ -19,18 +19,18 @@ package org.openmole.plugin.domain.range
 
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.domain.{ Bounds, Center, Finite }
+import cats.implicits._
 
 object Range {
 
   implicit def isBounded[T] = new Bounds[Range[T], T] with Center[Range[T], T] {
-    override def min(domain: Range[T]) = FromContext((context, rng) ⇒ domain.min.from(context)(rng))
-    override def max(domain: Range[T]) = FromContext((context, rng) ⇒ domain.max.from(context)(rng))
+    override def min(domain: Range[T]) = domain.min
+    override def max(domain: Range[T]) = domain.max
     override def center(domain: Range[T]) = Range.rangeCenter(domain)
   }
 
   implicit def rangeWithDefaultStepIsFinite[T](implicit step: DefaultStep[T]) = new Finite[Range[T], T] {
-    override def computeValues(domain: Range[T]) =
-      FromContext((context, rng) ⇒ StepRange[T](domain, step.step).computeValues(context)(rng))
+    override def computeValues(domain: Range[T]) = StepRange[T](domain, step.step).computeValues
   }
 
   def apply[T: RangeValue](
@@ -52,10 +52,9 @@ object Range {
   ): SizeRange[T] =
     SizeRange[T](Range[T](min, max), size)
 
-  def rangeCenter[T](r: Range[T]): FromContext[T] = FromContext { (context, rng) ⇒
+  def rangeCenter[T](r: Range[T]): FromContext[T] = (r.min |@| r.max) map { (min, max) ⇒
     import r.ops._
-    val mi = r.min.from(context)(rng)
-    mi + ((r.max.from(context)(rng) - mi) / fromInt(2))
+    min + ((max - min) / fromInt(2))
   }
 
 }

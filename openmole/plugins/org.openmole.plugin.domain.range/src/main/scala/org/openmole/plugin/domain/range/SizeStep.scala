@@ -17,8 +17,7 @@
 
 package org.openmole.plugin.domain.range
 
-import org.openmole.core.context.Context
-import org.openmole.tool.random.RandomProvider
+import org.openmole.core.expansion._
 
 trait SizeStep[T] {
 
@@ -26,13 +25,15 @@ trait SizeStep[T] {
 
   import range.ops._
 
-  def stepAndSize(maxValue: T, minValue: T, context: Context)(implicit rng: RandomProvider): (T, Int)
+  def stepAndSize(maxValue: T, minValue: T): FromContext[(T, Int)]
 
-  def computeValues(context: Context)(implicit rng: RandomProvider): Iterable[T] = {
-    val mi: T = range.min.from(context)
-    val ma: T = range.max.from(context)
-    val (step, size) = stepAndSize(mi, ma, context)
-    for (i ← 0 to size) yield { mi + (fromInt(i) * step) }
-  }
+  def computeValues: FromContext[Iterable[T]] =
+    FromContext.withValidation(s ⇒ range.min.validate(s) ++ range.max.validate(s)) { p ⇒
+      import p._
+      val mi: T = range.min.from(context)
+      val ma: T = range.max.from(context)
+      val (step, size) = stepAndSize(mi, ma).from(context)
+      for (i ← 0 to size) yield { mi + (fromInt(i) * step) }
+    }
 
 }

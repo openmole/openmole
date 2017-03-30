@@ -18,15 +18,14 @@
 package org.openmole.gui.plugin.authentication.desktopgrid
 
 import org.openmole.core.workspace._
+import org.openmole.core.services._
 import org.openmole.plugin.environment.desktopgrid.DesktopGridAuthentication
 
-class DesktopGridAuthenticationApiImpl extends DesktopGridAuthenticationAPI {
+class DesktopGridAuthenticationApiImpl(s: Services) extends DesktopGridAuthenticationAPI {
 
-  implicit def workspace: Workspace = Workspace.instance
+  import s._
 
-  implicit def decrypt: Decrypt = Decrypt(workspace)
-
-  def updateAuthentication(data: DesktopGridAuthenticationData): Unit = DesktopGridAuthentication.update(Workspace.encrypt(data.password))
+  def updateAuthentication(data: DesktopGridAuthenticationData): Unit = DesktopGridAuthentication.update(cypher.encrypt(data.password))
 
   def removeAuthentication(): Unit = DesktopGridAuthentication.clear
 

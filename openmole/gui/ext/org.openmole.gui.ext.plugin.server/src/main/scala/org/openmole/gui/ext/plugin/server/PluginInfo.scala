@@ -18,8 +18,9 @@
 package org.openmole.gui.ext.plugin.server
 
 import org.openmole.gui.ext.tool.server.OMRouter
+import org.openmole.core.services._
 
 case class PluginInfo(
   clientInstance: Class[_],
-  router:         OMRouter
+  router:         Services ⇒ OMRouter
 )

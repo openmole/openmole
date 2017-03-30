@@ -22,11 +22,13 @@ import java.io.PrintStream
 import org.openmole.core.communication.message._
 import org.openmole.core.communication.storage._
 import org.openmole.core.event.EventDispatcher
-import org.openmole.core.serializer.SerialiserService
+import org.openmole.core.fileservice.FileService
+import org.openmole.core.preference.Preference
+import org.openmole.core.serializer.SerializerService
 import org.openmole.core.tools.service.Retry._
 import org.openmole.core.workflow.execution
 import org.openmole.core.workflow.execution._
-import org.openmole.core.workspace.Workspace
+import org.openmole.core.workspace.{ NewFile, Workspace }
 import org.openmole.plugin.environment.batch.control._
 import org.openmole.plugin.environment.batch.environment.BatchEnvironment._
 import org.openmole.plugin.environment.batch.environment._
@@ -36,28 +38,30 @@ import org.openmole.tool.logger.Logger
 
 import scala.util.{ Failure, Success }
 
-object GetResultActor extends Logger
+object GetResultActor extends Logger {
 
-class GetResultActor(jobManager: JobManager) {
+  def receive(msg: GetResult)(implicit services: BatchEnvironment.Services) = {
+    import services._
 
-  def receive(msg: GetResult) = {
     val GetResult(job, sj, resultPath) = msg
     try sj.storage.tryWithToken {
       case Some(token) ⇒
-        getResult(sj.storage, resultPath, job)(token)
-        jobManager ! Kill(job)
+        getResult(sj.storage, resultPath, job)(token, services)
+        JobManager ! Kill(job)
       case None ⇒
-        jobManager ! Delay(msg, getTokenInterval)
+        JobManager ! Delay(msg, getTokenInterval)
     } catch {
       case e: Throwable ⇒
         job.state = ExecutionState.FAILED
-        jobManager ! Error(job, e)
-        jobManager ! Kill(job)
+        JobManager ! Error(job, e)
+        JobManager ! Kill(job)
     }
   }
 
-  def getResult(storage: StorageService, outputFilePath: String, batchJob: BatchExecutionJob)(implicit token: AccessToken): Unit = {
+  def getResult(storage: StorageService, outputFilePath: String, batchJob: BatchExecutionJob)(implicit token: AccessToken, services: BatchEnvironment.Services): Unit = {
     import batchJob.job
+    import services._
+
     val runtimeResult = getRuntimeResult(outputFilePath, storage)
 
     val stream = job.moleExecution.executionContext.out
@@ -77,18 +81,18 @@ class GetResultActor(jobManager: JobManager) {
             val executionResult = contextResults.results(moleJob.id)
             executionResult match {
               case Success(context) ⇒ moleJob.finish(context)
-              case Failure(e)       ⇒ if (!moleJob.finished) jobManager ! MoleJobError(moleJob, batchJob, e)
+              case Failure(e)       ⇒ if (!moleJob.finished) JobManager ! MoleJobError(moleJob, batchJob, e)
             }
           }
         }
     }
   }
 
-  private def getRuntimeResult(outputFilePath: String, storage: StorageService)(implicit token: AccessToken): RuntimeResult =
-    retry(Workspace.preference(BatchEnvironment.downloadResultRetry)) {
-      Workspace.withTmpFile { resultFile ⇒
+  private def getRuntimeResult(outputFilePath: String, storage: StorageService)(implicit token: AccessToken, newFile: NewFile, fileService: FileService, preference: Preference, serialiserService: SerializerService): RuntimeResult =
+    retry(preference(BatchEnvironment.downloadResultRetry)) {
+      newFile.withTmpFile { resultFile ⇒
         signalDownload(storage.download(outputFilePath, resultFile), outputFilePath, storage, resultFile)
-        SerialiserService.deserialiseAndExtractFiles[RuntimeResult](resultFile)
+        RuntimeResult.load(resultFile)
       }
     }
 
@@ -99,27 +103,27 @@ class GetResultActor(jobManager: JobManager) {
     }
   }
 
-  private def getContextResults(serializedResults: SerializedContextResults, storage: StorageService)(implicit token: AccessToken): ContextResults = {
+  private def getContextResults(serializedResults: SerializedContextResults, storage: StorageService)(implicit token: AccessToken, newFile: NewFile, fileService: FileService, preference: Preference, serialiserService: SerializerService): ContextResults = {
     serializedResults match {
       case serializedResults: IndividualFilesContextResults ⇒
-        Workspace.withTmpFile { serializedResultsFile ⇒
+        newFile.withTmpFile { serializedResultsFile ⇒
           val fileReplacement =
             serializedResults.files.map {
               replicated ⇒
                 replicated.originalPath →
                   ReplicatedFile.download(replicated) { (p, f) ⇒
-                    retry(Workspace.preference(BatchEnvironment.downloadResultRetry)) {
+                    retry(preference(BatchEnvironment.downloadResultRetry)) {
                       signalDownload(storage.download(p, f, TransferOptions(forceCopy = true, canMove = true)), p, storage, f)
                     }
                   }
             }.toMap
 
-          val res = SerialiserService.deserialiseReplaceFiles[ContextResults](serializedResults.contextResults, fileReplacement)
+          val res = serialiserService.deserialiseReplaceFiles[ContextResults](serializedResults.contextResults, fileReplacement)
           serializedResults.contextResults.delete()
           res
         }
       case serializedResults: ArchiveContextResults ⇒
-        val res = SerialiserService.deserialiseAndExtractFiles[ContextResults](serializedResults.contextResults)
+        val res = serialiserService.deserialiseAndExtractFiles[ContextResults](serializedResults.contextResults)
         serializedResults.contextResults.delete()
         res
     }

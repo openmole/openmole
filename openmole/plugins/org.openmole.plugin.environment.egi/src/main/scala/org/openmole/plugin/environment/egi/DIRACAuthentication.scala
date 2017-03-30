@@ -19,13 +19,13 @@ package org.openmole.plugin.environment.egi
 
 import fr.iscpif.gridscale.authentication._
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.workspace.{ Decrypt, _ }
+import org.openmole.tool.crypto.Cypher
 
 object DIRACAuthentication {
 
-  def initialise(a: EGIAuthentication)(implicit decrypt: Decrypt): P12Authentication =
+  def initialise(a: EGIAuthentication)(implicit cypher: Cypher): P12Authentication =
     a match {
-      case a: P12Certificate ⇒ P12Authentication(a.certificate, password = a.password(decrypt))
+      case a: P12Certificate ⇒ P12Authentication(a.certificate, password = a.password)
       case _                 ⇒ throw new UserBadDataError(s"Wrong authentication type ${a.getClass.getName} DIRAC only supports P12 authentication")
     }
 

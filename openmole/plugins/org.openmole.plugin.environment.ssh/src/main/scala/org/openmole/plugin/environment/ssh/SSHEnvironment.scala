@@ -19,11 +19,14 @@ package org.openmole.plugin.environment.ssh
 
 import java.net.URI
 
+import org.openmole.core.authentication.AuthenticationStore
+import org.openmole.core.preference.{ ConfigurationLocation, Preference }
 import org.openmole.core.workflow.dsl._
-import org.openmole.core.workspace.{ Decrypt, _ }
+import org.openmole.core.workspace._
 import org.openmole.plugin.environment.batch.control._
 import org.openmole.plugin.environment.batch.environment._
-import squants.information.Information
+import org.openmole.tool.crypto._
+import squants.information._
 import squants.time.TimeConversions._
 
 object SSHEnvironment {
@@ -43,7 +46,8 @@ object SSHEnvironment {
     threads:              OptionalArgument[Int]         = None,
     storageSharedLocally: Boolean                       = false,
     name:                 OptionalArgument[String]      = None
-  )(implicit decrypt: Decrypt, varName: sourcecode.Name) =
+  )(implicit services: BatchEnvironment.Services, cypher: Cypher, authenticationStore: AuthenticationStore, varName: sourcecode.Name) = {
+    import services._
     new SSHEnvironment(
       user = user,
       host = host,
@@ -56,20 +60,21 @@ object SSHEnvironment {
       storageSharedLocally = storageSharedLocally,
       name = Some(name.getOrElse(varName.value))
     )(SSHAuthentication.find(user, host, port).apply)
+  }
 }
 
 class SSHEnvironment(
-    val user:                    String,
-    val host:                    String,
-    val nbSlots:                 Int,
-    override val port:           Int,
-    val sharedDirectory:         Option[String],
-    val workDirectory:           Option[String],
-    override val openMOLEMemory: Option[Information],
-    override val threads:        Option[Int],
-    val storageSharedLocally:    Boolean,
-    override val name:           Option[String]
-)(val credential: fr.iscpif.gridscale.ssh.SSHAuthentication) extends SimpleBatchEnvironment with SSHPersistentStorage { env ⇒
+    val user:                 String,
+    val host:                 String,
+    val nbSlots:              Int,
+    override val port:        Int,
+    val sharedDirectory:      Option[String],
+    val workDirectory:        Option[String],
+    val openMOLEMemory:       Option[Information],
+    override val threads:     Option[Int],
+    val storageSharedLocally: Boolean,
+    override val name:        Option[String]
+)(val credential: fr.iscpif.gridscale.ssh.SSHAuthentication)(implicit val services: BatchEnvironment.Services) extends SimpleBatchEnvironment with SSHPersistentStorage { env ⇒
 
   type JS = SSHJobService
 
@@ -77,15 +82,15 @@ class SSHEnvironment(
 
   val usageControl =
     new LimitedAccess(
-      Workspace.preference(SSHEnvironment.MaxConnections),
-      Workspace.preference(SSHEnvironment.MaxOperationsByMinute)
+      preference(SSHEnvironment.MaxConnections),
+      preference(SSHEnvironment.MaxOperationsByMinute)
     )
 
   val jobService =
     new SSHJobService {
       def nbSlots = env.nbSlots
       def sharedFS = storage
-      def environment = env
+      val environment = env
       def workDirectory = env.workDirectory
       override def credential = environment.credential
       override def host = environment.host
@@ -93,6 +98,6 @@ class SSHEnvironment(
       override def port = environment.port
     }
 
-  override def updateInterval = UpdateInterval.fixed(Workspace.preference(SSHEnvironment.UpdateInterval))
+  override def updateInterval = UpdateInterval.fixed(preference(SSHEnvironment.UpdateInterval))
 
 }

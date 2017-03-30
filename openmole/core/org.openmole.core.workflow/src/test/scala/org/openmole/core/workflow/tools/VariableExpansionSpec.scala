@@ -22,11 +22,13 @@ import org.openmole.core.expansion.ExpandedString
 import org.openmole.core.workflow.data._
 import org.scalatest._
 import org.openmole.core.workflow.dsl._
-import org.openmole.tool.random.RandomProvider
+import org.openmole.tool.cache.Lazy
 
 import scala.util.Random
 
 class VariableExpansionSpec extends FlatSpec with Matchers {
+
+  import org.openmole.core.workflow.Services._
 
   "A expandData" should "expand all the ${} top level sequence from an inputStream and return a parsed OuputStream" in {
     val template = """My first line
@@ -37,13 +39,13 @@ ${s"I am ${6*5} year old"}"""
 6
 I am 30 year old"""
 
-    val res = ExpandedString(template).from(Context.empty)(RandomProvider(new Random()))
+    val res = ExpandedString(template).from(Context.empty)(Lazy(new Random()), newFile)
     res should equal(expected)
   }
 
   "A expandData" should "preserve additionnal $ in the string" in {
     val test = "$$$etere{etsaesrn}etasriu$$$$eatsrn$"
-    val res = ExpandedString(test).from(Context.empty)(RandomProvider(new Random()))
+    val res = ExpandedString(test).from(Context.empty)(Lazy(new Random()), newFile)
     test should equal(res)
   }
 

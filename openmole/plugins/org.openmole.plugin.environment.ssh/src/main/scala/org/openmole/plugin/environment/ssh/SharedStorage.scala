@@ -20,6 +20,7 @@ package org.openmole.plugin.environment.ssh
 import java.util.UUID
 
 import org.openmole.core.exception.InternalProcessingError
+import org.openmole.core.preference.Preference
 import org.openmole.core.workspace.Workspace
 import org.openmole.plugin.environment.batch.environment._
 import org.openmole.plugin.environment.batch.storage._
@@ -45,7 +46,7 @@ trait SharedStorage extends SSHService { js ⇒
     def host = js.host
     def user = js.user
     override def port = js.port
-    override def timeout = Workspace.preference(SSHService.timeout)
+    override def timeout = environment.preference(SSHService.timeout)
   }
 
   @transient private var installed: Option[String] = None
@@ -59,10 +60,10 @@ trait SharedStorage extends SSHService { js ⇒
         val (workdir, scriptName) = {
           val installDir = sharedFS.child(sharedFS.root, "install")
           Try(sharedFS.makeDir(installDir))
-          val workdir = sharedFS.child(installDir, Workspace.preference(Workspace.uniqueIDLocation) + "_install")
+          val workdir = sharedFS.child(installDir, environment.preference(Preference.uniqueID) + "_install")
           if (!sharedFS.exists(workdir)) sharedFS.makeDir(workdir)
 
-          Workspace.withTmpFile("install", ".sh") { script ⇒
+          environment.services.newFile.withTmpFile("install", ".sh") { script ⇒
 
             val tmpDirName = runtimePrefix + UUID.randomUUID.toString
             val scriptName = uniqName("install", ".sh")
@@ -113,15 +114,17 @@ trait SharedStorage extends SSHService { js ⇒
     val result = sharedFS.child(serializedJob.path, uniqName("result", ".bin"))
 
     val remoteScript =
-      Workspace.withTmpFile("run", ".sh") { script ⇒
+      environment.services.newFile.withTmpFile("run", ".sh") { script ⇒
         val baseWorkspace = workDirectory getOrElse serializedJob.path
         val workspace = serializedJob.storage.child(baseWorkspace, UUID.randomUUID.toString)
         val osgiWorkDir = serializedJob.storage.child(baseWorkspace, UUID.randomUUID.toString)
 
+        import environment.preference
+
         val content =
           s"""export PATH=$runtime/jre/bin/:$$PATH; cd $runtime; mkdir -p $osgiWorkDir; export OPENMOLE_HOME=$workspace ; mkdir -p $$OPENMOLE_HOME ; """ +
-            "sh run.sh " + environment.openMOLEMemoryValue.toMegabytes.toInt + "m " + osgiWorkDir + " -s " + serializedJob.runtime.storage.path +
-            " -c " + serializedJob.path + " -p envplugins/ -i " + serializedJob.inputFile + " -o " + result + " -t " + environment.threadsValue +
+            "sh run.sh " + BatchEnvironment.openMOLEMemoryValue(environment.openMOLEMemory)(preference).toMegabytes.toInt + "m " + osgiWorkDir + " -s " + serializedJob.runtime.storage.path +
+            " -c " + serializedJob.path + " -p envplugins/ -i " + serializedJob.inputFile + " -o " + result + " -t " + BatchEnvironment.threadsValue(environment.threads) +
             "; RETURNCODE=$?; rm -rf $OPENMOLE_HOME ; rm -rf " + osgiWorkDir + " ; exit $RETURNCODE;"
 
         logger.fine("Script: " + content)

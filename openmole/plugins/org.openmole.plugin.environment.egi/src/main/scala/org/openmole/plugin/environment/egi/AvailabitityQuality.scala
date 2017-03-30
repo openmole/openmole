@@ -17,8 +17,8 @@
 
 package org.openmole.plugin.environment.egi
 
-import org.openmole.core.tools.service.MovingAverage
 import org.openmole.plugin.environment.batch.control._
+import org.openmole.tool.statistics.MovingAverage
 
 object AvailabilityQuality {
   def apply(_usageControl: UsageControl, _hysteresis: Int) =

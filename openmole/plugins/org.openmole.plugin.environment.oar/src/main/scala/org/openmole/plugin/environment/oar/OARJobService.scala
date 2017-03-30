@@ -33,7 +33,7 @@ import org.openmole.plugin.environment.oar.OARJobService._
 
 trait OARJobService extends ClusterJobService { js ⇒
 
-  def environment: OAREnvironment
+  val environment: OAREnvironment
 
   val jobService = new GSOARJobService with SSHConnectionCache {
     def host = js.host
@@ -41,7 +41,7 @@ trait OARJobService extends ClusterJobService { js ⇒
     def credential = js.credential
     def usageControl = environment.usageControl
     override def port = js.port
-    override def timeout = Workspace.preference(SSHService.timeout)
+    override def timeout = environment.preference(SSHService.timeout)
   }
 
   protected def _submit(serializedJob: SerializedJob) = {

@@ -20,14 +20,32 @@ package org.openmole.core.workflow.task
 import java.io.File
 
 import org.openmole.core.context._
+import org.openmole.core.expansion.FromContext
+import org.openmole.core.preference.Preference
+import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.workflow.builder.InputOutputConfig
 import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.tools._
+import org.openmole.core.workspace.NewFile
+import org.openmole.tool.cache.Lazy
+import org.openmole.tool.random
 import org.openmole.tool.random._
+import org.openmole.tool.thread._
 
-case class TaskExecutionContext(tmpDirectory: File, localEnvironment: LocalEnvironment)
+case class TaskExecutionContext(
+    tmpDirectory:                File,
+    localEnvironment:            LocalEnvironment,
+    implicit val preference:     Preference,
+    implicit val threadProvider: ThreadProvider
+) {
+  implicit def newFile = NewFile(tmpDirectory)
+}
 
-trait Task <: InputOutputCheck with Name {
+object Task {
+  def buildRNG(context: Context): scala.util.Random = random.Random(context(Variable.openMOLESeed)).toScala
+}
+
+trait Task <: Name {
 
   /**
    *
@@ -35,10 +53,12 @@ trait Task <: InputOutputCheck with Name {
    *
    * @param context the context in which the task will be executed
    */
-  def perform(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider = RandomProvider(Context.buildRNG(context))): Context =
-    perform(context, process(_, executionContext))
+  def perform(context: Context, executionContext: TaskExecutionContext): Context = {
+    lazy val rng = Lazy(Task.buildRNG(context))
+    InputOutputCheck.perform(inputs, outputs, defaults, process(executionContext))(executionContext.preference).from(context)(rng, executionContext.newFile)
+  }
 
-  protected def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider): Context
+  protected def process(executionContext: TaskExecutionContext): FromContext[Context]
 
   def config: InputOutputConfig
 

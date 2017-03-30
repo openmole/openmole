@@ -21,10 +21,12 @@ import java.net.URI
 
 import fr.iscpif.gridscale.egi.BDII
 import org.openmole.core.exception.InternalProcessingError
-import org.openmole.core.workspace.{ Decrypt, _ }
+import org.openmole.core.preference.{ ConfigurationLocation, Preference }
 import org.openmole.core.workflow.dsl._
+import org.openmole.core.workspace.Workspace
 import org.openmole.plugin.environment.batch.control._
 import org.openmole.plugin.environment.batch.environment._
+import org.openmole.tool.crypto.Cypher
 import org.openmole.tool.logger.Logger
 import org.openmole.tool.random._
 import squants.information.Information
@@ -92,17 +94,17 @@ object EGIEnvironment extends Logger {
 
   val DefaultBDIIs = ConfigurationLocation("EGIEnvironment", "DefaultBDIIs", Some(ldapURLs))
 
-  def toBDII(bdii: URI) = BDII(bdii.getHost, bdii.getPort, Workspace.preference(FetchResourcesTimeOut))
-  def defaultBDIIs = Workspace.preference(EGIEnvironment.DefaultBDIIs).map(b ⇒ new URI(b)).map(toBDII)
+  def toBDII(bdii: URI)(implicit preference: Preference) = BDII(bdii.getHost, bdii.getPort, preference(FetchResourcesTimeOut))
+  def defaultBDIIs(implicit preference: Preference) = preference(EGIEnvironment.DefaultBDIIs).map(b ⇒ new URI(b)).map(toBDII)
 
   val EnvironmentCleaningThreads = ConfigurationLocation("EGIEnvironment", "EnvironmentCleaningThreads", Some(20))
 
   val WMSRank = ConfigurationLocation("EGIEnvironment", "WMSRank", Some("""( other.GlueCEStateFreeJobSlots > 0 ? other.GlueCEStateFreeJobSlots : (-other.GlueCEStateWaitingJobs * 4 / ( other.GlueCEStateRunningJobs + 1 )) - 1 )"""))
 
-  def proxyTime = Workspace.preference(ProxyTime)
-  def proxyRenewalTime = Workspace.preference(EGIEnvironment.ProxyRenewalTime)
+  def proxyTime(implicit preference: Preference) = preference(ProxyTime)
+  def proxyRenewalTime(implicit preference: Preference) = preference(EGIEnvironment.ProxyRenewalTime)
 
-  def normalizedFitness[T](fitness: ⇒ Iterable[(T, Double)], min: Double = Workspace.preference(EGIEnvironment.MinValueForSelectionExploration)): Iterable[(T, Double)] = {
+  def normalizedFitness[T](fitness: ⇒ Iterable[(T, Double)], min: Double): Iterable[(T, Double)] = {
     def orMinForExploration(v: Double) = math.max(v, min)
     val fit = fitness
     val maxFit = fit.map(_._2).max
@@ -110,7 +112,7 @@ object EGIEnvironment extends Logger {
     else fit.map { case (c, f) ⇒ c → orMinForExploration(f / maxFit) }
   }
 
-  def select[BS <: BatchService { def usageControl: AvailabilityQuality }](bss: List[BS], rate: BS ⇒ Double): Option[(BS, AccessToken)] =
+  def select[BS <: BatchService { def usageControl: AvailabilityQuality }](bss: List[BS], rate: BS ⇒ Double)(implicit preference: Preference, randomProvider: RandomProvider): Option[(BS, AccessToken)] =
     bss match {
       case Nil       ⇒ throw new InternalProcessingError("Cannot accept empty list.")
       case bs :: Nil ⇒ bs.tryGetToken.map(bs → _)
@@ -130,10 +132,10 @@ object EGIEnvironment extends Logger {
               else selected(value - fitness, tail)
           }
 
-        val notLoaded = normalizedFitness(fitness).shuffled(Workspace.rng)
+        val notLoaded = normalizedFitness(fitness, preference(EGIEnvironment.MinValueForSelectionExploration)).shuffled(randomProvider())
         val totalFitness = notLoaded.map { case (_, fitness) ⇒ fitness }.sum
 
-        val selectedBS = selected(Workspace.rng.nextDouble * totalFitness, notLoaded.toList)
+        val selectedBS = selected(randomProvider().nextDouble * totalFitness, notLoaded.toList)
 
         selectedBS.tryGetToken.map(selectedBS → _)
     }
@@ -150,7 +152,7 @@ object EGIEnvironment extends Logger {
     openMOLEMemory: OptionalArgument[Information] = None,
     debug:          Boolean                       = false,
     name:           OptionalArgument[String]      = None
-  )(implicit authentication: EGIAuthentication, decrypt: Decrypt, varName: sourcecode.Name) =
+  )(implicit authentication: EGIAuthentication, services: BatchEnvironment.Services, cypher: Cypher, workspace: Workspace, varName: sourcecode.Name) =
     DIRACEnvironment(
       voName = voName,
       service = service,
@@ -163,6 +165,6 @@ object EGIEnvironment extends Logger {
       openMOLEMemory = openMOLEMemory,
       debug = debug,
       name = name
-    )(authentication, decrypt, varName)
+    )(authentication, services, cypher, workspace, varName)
 
 }

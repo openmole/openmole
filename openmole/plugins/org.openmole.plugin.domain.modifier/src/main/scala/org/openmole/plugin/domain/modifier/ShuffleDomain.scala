@@ -23,8 +23,9 @@ import org.openmole.tool.random._
 object ShuffleDomain {
 
   implicit def isFinite[D, T] = new Finite[ShuffleDomain[D, T], T] with DomainInputs[ShuffleDomain[D, T]] {
-    override def computeValues(domain: ShuffleDomain[D, T]) = FromContext { (context, rng) ⇒
-      domain.finite.iterator(domain.domain).from(context)(rng).toSeq.shuffled(rng())
+    override def computeValues(domain: ShuffleDomain[D, T]) = FromContext { p ⇒
+      import p._
+      domain.finite.iterator(domain.domain).from(context).toSeq.shuffled(random())
     }
     override def inputs(domain: ShuffleDomain[D, T]) = domain.inputs.inputs(domain.domain)
   }

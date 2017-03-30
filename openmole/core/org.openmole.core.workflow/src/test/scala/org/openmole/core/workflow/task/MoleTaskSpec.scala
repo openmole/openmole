@@ -31,6 +31,8 @@ import scala.util.Try
 
 class MoleTaskSpec extends FlatSpec with Matchers {
 
+  import org.openmole.core.workflow.Services._
+
   "Implicits" should "work with mole task" in {
     val i = Val[String]("i")
     val emptyT = EmptyTask() set (inputs += i)

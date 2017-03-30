@@ -1,6 +1,6 @@
 package org.openmole.core.market
 
-import org.openmole.core.workspace.ConfigurationInfo
+import org.openmole.core.preference.ConfigurationInfo
 import org.osgi.framework.{ BundleActivator, BundleContext }
 
 class Activator extends BundleActivator {

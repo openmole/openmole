@@ -36,9 +36,10 @@ sealed class SobolSampling[D](val samples: FromContext[Int], val factors: Factor
   override def inputs = PrototypeSet(factors.flatMap(f ⇒ domainInputs.inputs(f.domain)))
   override def prototypes = factors.map { _.prototype }
 
-  override def apply() = FromContext { (context, rng) ⇒
+  override def apply() = FromContext { p ⇒
+    import p._
     val sequence = new SobolSequenceGenerator(factors.size)
-    val s = samples.from(context)(rng)
+    val s = samples.from(context)
 
     for {
       v ← Iterator.continually(sequence.nextVector()).take(s)
@@ -46,7 +47,7 @@ sealed class SobolSampling[D](val samples: FromContext[Int], val factors: Factor
       case (f, v) ⇒
         Variable(
           f.prototype,
-          v.scale(bounds.min(f.domain).from(context)(rng), bounds.max(f.domain).from(context)(rng))
+          v.scale(bounds.min(f.domain).from(context), bounds.max(f.domain).from(context))
         )
     }
   }

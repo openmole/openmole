@@ -22,10 +22,10 @@ import java.io.File
 import fr.iscpif.gridscale.egi.{ BDII, GlobusAuthentication }
 import fr.iscpif.gridscale.tools.findWorking
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
+import org.openmole.core.replication.ReplicaCatalog
 import org.openmole.core.tools.math._
 import org.openmole.core.workspace._
 import org.openmole.plugin.environment.batch.environment.BatchEnvironment
-import org.openmole.plugin.environment.batch.replication.ReplicaCatalog
 import org.openmole.tool.cache.Cache
 import org.openmole.tool.file._
 import org.openmole.tool.hash.Hash
@@ -36,6 +36,11 @@ object BDIIStorageServers extends Logger
 import org.openmole.plugin.environment.egi.BDIIStorageServers.Log._
 
 trait BDIIStorageServers extends BatchEnvironment { env ⇒
+  import services._
+
+  implicit val preferences = services.preference
+  implicit val threadProvider = services.threadProvider
+
   type SS = EGIStorageService
 
   def bdiis: Seq[BDII]
@@ -63,7 +68,7 @@ trait BDIIStorageServers extends BatchEnvironment { env ⇒
     lazy val sizes = usedFileHashes.map { case (f, _) ⇒ f → f.size }.toMap
     lazy val totalFileSize = sizes.values.sum
 
-    lazy val onStorage = ReplicaCatalog.inCatalog
+    lazy val onStorage = replicaCatalog.inCatalog
     lazy val maxTime = nonEmpty.map(_.usageControl.time).max
     lazy val minTime = nonEmpty.map(_.usageControl.time).min
 
@@ -84,11 +89,11 @@ trait BDIIStorageServers extends BatchEnvironment { env ⇒
       val availabilityFactor = if (minAvailability == maxAvailability) 1.0 else 1.0 - availability.normalize(minTime, maxTime)
 
       math.pow(
-        Workspace.preference(StorageSizeFactor) * sizeFactor +
-          Workspace.preference(StorageTimeFactor) * timeFactor +
-          Workspace.preference(StorageAvailabilityFactor) * availabilityFactor +
-          Workspace.preference(StorageSuccessRateFactor) * ss.usageControl.successRate,
-        Workspace.preference(StorageFitnessPower)
+        preference(StorageSizeFactor) * sizeFactor +
+          preference(StorageTimeFactor) * timeFactor +
+          preference(StorageAvailabilityFactor) * availabilityFactor +
+          preference(StorageSuccessRateFactor) * ss.usageControl.successRate,
+        preference(StorageFitnessPower)
       )
     }
 

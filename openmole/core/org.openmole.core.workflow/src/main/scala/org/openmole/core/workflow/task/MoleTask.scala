@@ -20,16 +20,17 @@ package org.openmole.core.workflow.task
 import java.util.concurrent.locks.ReentrantLock
 
 import monocle.macros.Lenses
-import org.openmole.core.context.Context
+import org.openmole.core.context._
 import org.openmole.core.event._
 import org.openmole.core.exception._
+import org.openmole.core.expansion._
 import org.openmole.core.workflow.builder._
-import org.openmole.core.workflow.{ builder, dsl }
+import org.openmole.core.workflow._
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.puzzle._
 import org.openmole.tool.lock._
-import org.openmole.tool.random.RandomProvider
+import org.openmole.tool.random.Seeder
 
 object MoleTask {
 
@@ -64,13 +65,16 @@ object MoleTask {
 
   def mole = _mole.copy(inputs = inputs)
 
-  protected def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider): Context = {
+  protected def process(executionContext: TaskExecutionContext) = FromContext[Context] { p ⇒
+    import p._
     val implicitsValues = implicits.flatMap(i ⇒ context.get(i))
+    implicit val seeder = Seeder(random().nextLong())
+    import executionContext.preference
+    import executionContext.threadProvider
 
     val execution =
       MoleExecution(
         mole,
-        seed = rng().nextLong(),
         implicits = implicitsValues,
         defaultEnvironment = executionContext.localEnvironment,
         executionContext = MoleExecutionContext(tmpDirectory = executionContext.tmpDirectory.newDir("moletask")),
@@ -96,7 +100,7 @@ object MoleTask {
         throw e
     }
 
-    context + lastContext.getOrElse(throw new UserBadDataError("Last capsule " + last + " has never been executed."))
+    lastContext.getOrElse(throw new UserBadDataError("Last capsule " + last + " has never been executed."))
   }
 
 }

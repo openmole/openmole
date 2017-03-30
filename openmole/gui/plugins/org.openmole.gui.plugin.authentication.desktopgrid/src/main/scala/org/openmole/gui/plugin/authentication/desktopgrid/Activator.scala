@@ -24,6 +24,6 @@ class Activator extends PluginActivator {
 
   def info: PluginInfo = PluginInfo(
     classOf[DesktopGridAuthenticationFactory],
-    OMRouter[DesktopGridAuthenticationAPI](AutowireServer.route[DesktopGridAuthenticationAPI](new DesktopGridAuthenticationApiImpl))
+    s ⇒ OMRouter[DesktopGridAuthenticationAPI](AutowireServer.route[DesktopGridAuthenticationAPI](new DesktopGridAuthenticationApiImpl(s)))
   )
 }

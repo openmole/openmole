@@ -18,7 +18,6 @@
 package org.openmole.tool
 
 import java.util.concurrent._
-
 import org.openmole.tool.logger.Logger
 
 import scala.concurrent.duration.Duration
@@ -28,27 +27,14 @@ package object thread {
   object L extends Logger
   import L._
 
-  val daemonThreadFactory = new ThreadFactory {
-
-    override def newThread(r: Runnable): Thread = {
-      val t = new Thread(r)
-      t.setDaemon(true)
-      t
-    }
-
-  }
-
-  val defaultExecutor = Executors.newCachedThreadPool(daemonThreadFactory)
-
   implicit def future2Function[A](f: Future[A]) = () ⇒ f.get
   implicit def function2Callable[F](f: ⇒ F) = new Callable[F] { def call = f }
+  implicit def function2Runable(f: ⇒ Unit) = new Runnable { def run = f }
 
-  def fixedThreadPool(n: Int) = Executors.newFixedThreadPool(n, daemonThreadFactory)
+  def background[F](f: ⇒ F)(implicit pool: ThreadPoolExecutor): Future[F] = pool.submit(f)
 
-  def background[F](f: ⇒ F)(implicit executor: ExecutorService = defaultExecutor): Future[F] = executor.submit(f)
-
-  def timeout[F](f: ⇒ F)(duration: Duration)(implicit executor: ExecutorService = defaultExecutor): F = try {
-    val r = executor.submit(f)
+  def timeout[F](f: ⇒ F)(duration: Duration)(implicit pool: ThreadPoolExecutor): F = try {
+    val r = pool.submit(f)
     try r.get(duration.toMillis, TimeUnit.MILLISECONDS)
     catch {
       case e: TimeoutException ⇒ r.cancel(true); throw e
@@ -65,6 +51,11 @@ package object thread {
     Thread.currentThread().setContextClassLoader(classLoader)
     try f
     finally Thread.currentThread().setContextClassLoader(threadClassLoader)
+  }
+
+  def forciblyStop(t: Thread) = {
+    t.interrupt()
+    if (t.isAlive) t.stop
   }
 
 }

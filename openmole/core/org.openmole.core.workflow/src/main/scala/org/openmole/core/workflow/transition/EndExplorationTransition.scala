@@ -19,11 +19,10 @@ package org.openmole.core.workflow.transition
 
 import org.openmole.core.context.{ Context, Val }
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
-import org.openmole.core.expansion.Condition
+import org.openmole.core.expansion.{ Condition, FromContext }
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.validation.ValidateTransition
 import org.openmole.tool.lock._
-import org.openmole.tool.random.RandomProvider
 
 import scala.util.{ Failure, Success, Try }
 
@@ -31,13 +30,15 @@ class EndExplorationTransition(val start: Capsule, val end: Slot, val trigger: C
 
   override def validate(inputs: Seq[Val[_]]) = trigger.validate(inputs)
 
-  override def perform(context: Context, ticket: Ticket, subMole: SubMoleExecution)(implicit rng: RandomProvider) = {
+  override def perform(context: Context, ticket: Ticket, subMole: SubMoleExecution, executionContext: MoleExecutionContext) = {
     def perform() {
       val parentTicket = ticket.parent.getOrElse(throw new UserBadDataError("End exploration transition should take place after an exploration."))
       val subMoleParent = subMole.parent.getOrElse(throw new InternalProcessingError("Submole execution has no parent"))
-      subMoleParent.transitionLock { submitNextJobsIfReady(context.values, parentTicket, subMoleParent) }
+      subMoleParent.transitionLock { ITransition.submitNextJobsIfReady(this)(context.values, parentTicket, subMoleParent) }
       subMole.cancel
     }
+
+    import executionContext._
 
     Try(!subMole.canceled && trigger.from(context)) match {
       case Success(true) ⇒ perform()

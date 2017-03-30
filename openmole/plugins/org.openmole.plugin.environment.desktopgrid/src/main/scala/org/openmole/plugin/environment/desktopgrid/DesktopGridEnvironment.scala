@@ -21,8 +21,11 @@ import org.openmole.core.dsl._
 import org.openmole.plugin.environment.batch.environment._
 import org.openmole.plugin.environment.batch.jobservice.JobService
 import org.openmole.plugin.environment.batch.storage._
+import org.openmole.tool.crypto.Cypher
+import org.openmole.tool.hash.Hash
 import org.openmole.tool.thread._
 import squants.information._
+import org.openmole.tool.hash._
 
 object DesktopGridEnvironment {
   val timeStempsDirName = "timeStemps"
@@ -37,28 +40,35 @@ object DesktopGridEnvironment {
     openMOLEMemory: OptionalArgument[Information] = None,
     threads:        OptionalArgument[Int]         = None,
     name:           OptionalArgument[String]      = None
-  )(implicit varName: sourcecode.Name) =
+  )(implicit services: BatchEnvironment.Services, cypher: Cypher, varName: sourcecode.Name) = {
+    import services._
+
     new DesktopGridEnvironment(
       port = port,
       openMOLEMemory = openMOLEMemory,
       threads = threads,
-      name = Some(name.getOrElse(varName.value))
+      name = Some(name.getOrElse(varName.value)),
+      passwordHash = DesktopGridAuthentication.password.hash
     )
+  }
 }
 
 class DesktopGridEnvironment(
     val port:                    Int,
     override val openMOLEMemory: Option[Information],
     override val threads:        Option[Int],
-    override val name:           Option[String]
-) extends SimpleBatchEnvironment { env ⇒
+    override val name:           Option[String],
+    passwordHash:                Hash
+)(implicit val services: BatchEnvironment.Services) extends SimpleBatchEnvironment { env ⇒
+  import services._
+  import threadProvider.pool
 
   type SS = StorageService
   type JS = JobService
 
-  lazy val service = DesktopGridService.borrow(port)
+  lazy val service = DesktopGridService(port, passwordHash)
 
-  override def finalize() = background { DesktopGridService.release(port) }
+  override def finalize() = background { service.clean }
   override val storage = service.storage(this, port)
   override val jobService = service.jobService(this, port)
 }

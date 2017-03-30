@@ -34,7 +34,7 @@ object InitialStateTask {
     } set (
       inputs += (t.statePrototype, t.populationPrototype),
       outputs += (t.statePrototype, t.populationPrototype),
-      t.statePrototype := FromContext((ctx, rng) ⇒ t.operations.initialState(rng())),
+      t.statePrototype := FromContext(p ⇒ t.operations.initialState(p.random())),
       t.populationPrototype := Vector.empty
     )
   }

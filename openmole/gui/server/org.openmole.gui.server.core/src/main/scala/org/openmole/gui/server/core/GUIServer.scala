@@ -23,42 +23,48 @@ import javax.servlet.http.{ HttpServletRequest, HttpServletResponse }
 import org.eclipse.jetty.server.{ Server, ServerConnector }
 import org.eclipse.jetty.servlet.DefaultServlet
 import org.eclipse.jetty.webapp._
-import org.openmole.core.tools.io.Network
-import org.openmole.core.workspace.{ ConfigurationLocation, Workspace }
+import org.openmole.core.workspace.{ NewFile, Workspace }
 import org.scalatra.servlet.ScalatraListener
 import javax.servlet.ServletContext
 
 import org.scalatra._
 import org.eclipse.jetty.util.resource.{ Resource ⇒ Res }
+import org.openmole.core.fileservice.FileService
+import org.openmole.core.preference.{ ConfigurationLocation, Preference }
 import org.openmole.gui.server.jscompile.JSPack
 import org.openmole.tool.hash._
 import org.openmole.tool.file._
+import org.openmole.core.services._
+import org.openmole.tool.crypto.KeyStore
+import org.openmole.tool.network.Network
+import org.openmole.core.location._
 
 object GUIServer {
-  def isPasswordCorrect(p: String) = Workspace.passwordIsCorrect(p)
 
-  lazy val webapp = {
-    val from = (Workspace.openMOLELocation / "webapp")
-    val to = Workspace.tmpDir / "webapp"
+  def webapp()(implicit newFile: NewFile, workspace: Workspace, fileService: FileService) = {
+    val from = openMOLELocation / "webapp"
+    val to = newFile.newDir("webapp")
     from.copy(to)
     Utils.openmoleFile copy (to /> "js" / "openmole.js")
     to
   }
 
-  val portValue = Network.freePort
-  val port = ConfigurationLocation("GUIServer", "Port", Some(portValue))
-  Workspace setPreferenceIfNotSet (port, portValue)
+  val port = ConfigurationLocation("GUIServer", "Port", Some(Network.freePort))
 
-  lazy val lockFile = {
-    val file = Workspace.file("GUI.lock")
+  def initialisePreference(preference: Preference) = {
+    if (!preference.isSet(port)) preference.setPreference(port, Network.freePort)
+  }
+
+  def lockFile(implicit workspace: Workspace) = {
+    val file = Utils.webUIDirectory() / "GUI.lock"
     file.createNewFile
     file
   }
 
-  lazy val urlFile = Workspace.file("GUI.url")
+  def urlFile(implicit workspace: Workspace) = Utils.webUIDirectory() / "GUI.url"
 
   val servletArguments = "servletArguments"
-  case class ServletArguments(passwordCorrect: String ⇒ Boolean, applicationControl: ApplicationControl)
+  case class ServletArguments(services: GUIServices, password: Option[String], applicationControl: ApplicationControl)
 
   case class ApplicationControl(restart: () ⇒ Unit, stop: () ⇒ Unit)
 
@@ -79,20 +85,23 @@ class GUIBootstrap extends LifeCycle {
 
 import GUIServer._
 
-class GUIServer(port: Int, localhost: Boolean, http: Boolean) {
+class GUIServer(port: Int, localhost: Boolean, http: Boolean, services: GUIServices, password: Option[String]) {
 
   val server = new Server()
   var exitStatus: GUIServer.ExitStatus = GUIServer.Ok
   val semaphore = new Semaphore(0)
 
+  import services._
+
   lazy val contextFactory = {
     val contextFactory = new org.eclipse.jetty.util.ssl.SslContextFactory()
-    val ks = Workspace.keyStore
-    contextFactory.setKeyStore(ks)
-    contextFactory.setKeyStorePassword(Workspace.keyStorePassword)
-    contextFactory.setKeyManagerPassword(Workspace.keyStorePassword)
-    contextFactory.setTrustStore(ks)
-    contextFactory.setTrustStorePassword(Workspace.keyStorePassword)
+    def keyStorePassword = "openmole"
+    val ks = KeyStore(services.workspace.persistentDir / "keystoregui", keyStorePassword)
+    contextFactory.setKeyStore(ks.keyStore)
+    contextFactory.setKeyStorePassword(keyStorePassword)
+    contextFactory.setKeyManagerPassword(keyStorePassword)
+    contextFactory.setTrustStore(ks.keyStore)
+    contextFactory.setTrustStorePassword(keyStorePassword)
     contextFactory
   }
 
@@ -108,8 +117,11 @@ class GUIServer(port: Int, localhost: Boolean, http: Boolean) {
       () ⇒ { exitStatus = GUIServer.Restart; stop() },
       () ⇒ stop()
     )
-  context.setAttribute(GUIServer.servletArguments, GUIServer.ServletArguments(GUIServer.isPasswordCorrect, applicationControl))
+  context.setAttribute(GUIServer.servletArguments, GUIServer.ServletArguments(services, password, applicationControl))
   context.setContextPath("/")
+
+  import services._
+
   context.setResourceBase(webapp.getAbsolutePath)
   context.setClassLoader(classOf[GUIServer].getClassLoader)
   context.setInitParameter(ScalatraListener.LifeCycleKey, classOf[GUIBootstrap].getCanonicalName)

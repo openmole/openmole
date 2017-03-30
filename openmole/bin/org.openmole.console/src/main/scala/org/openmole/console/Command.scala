@@ -32,7 +32,13 @@ import org.openmole.core.workflow.puzzle._
 import org.openmole.core.workflow.validation.Validation
 import org.openmole.core.module
 import org.openmole.core.pluginmanager.PluginManager
-import org.openmole.core.workspace.Workspace
+import org.openmole.core.preference.Preference
+import org.openmole.core.replication.ReplicaCatalog
+import org.openmole.core.threadprovider.ThreadProvider
+import org.openmole.core.workspace.{ NewFile, Workspace }
+import org.openmole.core.services._
+import org.openmole.tool.crypto.Cypher
+import org.openmole.tool.random.{ RandomProvider, Seeder }
 
 class Command(val console: ScalaREPL, val variables: ConsoleVariables) { commands ⇒
 
@@ -87,13 +93,13 @@ class Command(val console: ScalaREPL, val variables: ConsoleVariables) { command
 
   def verify(mole: Mole): Unit = Validation(mole).foreach(println)
 
-  def encrypted: String = encrypt(Console.askPassword())
+  def encrypted(implicit cypher: Cypher): String = encrypt(Console.askPassword())
 
   def version() =
     println(s"""You are running OpenMOLE ${buildinfo.version} - ${buildinfo.name}
        |built on the ${buildinfo.version.generationDate}.""".stripMargin)
 
-  def loadAny(file: File, args: Seq[String] = Seq.empty): AnyRef =
+  def loadAny(file: File, args: Seq[String] = Seq.empty)(implicit services: Services): AnyRef =
     try {
       val project =
         new Project(
@@ -111,17 +117,17 @@ class Command(val console: ScalaREPL, val variables: ConsoleVariables) { command
     }
     finally ConsoleVariables.bindVariables(console, variables)
 
-  def load(file: File, args: Seq[String] = Seq.empty): Puzzle =
+  def load(file: File, args: Seq[String] = Seq.empty)(implicit services: Services): Puzzle =
     loadAny(file) match {
       case res: Puzzle ⇒ res
       case x           ⇒ throw new UserBadDataError("The result is not a puzzle")
     }
 
-  def modules(urls: Seq[String] = module.indexes): Unit = {
+  def modules(urls: OptionalArgument[Seq[String]] = None)(implicit preference: Preference, randomProvider: RandomProvider, newFile: NewFile): Unit = {
     val installedBundles = PluginManager.bundleHashes.map(_.toString).toSet
     def installed(components: Seq[String]) = (components.toSet -- installedBundles).isEmpty
 
-    urls.flatMap {
+    urls.getOrElse(module.indexes).flatMap {
       url ⇒
         module.modules(url).map {
           m ⇒
@@ -131,9 +137,9 @@ class Command(val console: ScalaREPL, val variables: ConsoleVariables) { command
     }.sorted.foreach(println)
   }
 
-  def install(name: String*): Unit = install(name)
-  def install(names: Seq[String], urls: Seq[String] = module.indexes): Unit = {
-    val toInstall = urls.flatMap(url ⇒ module.selectableModules(url)).filter(sm ⇒ names.contains(sm.module.name))
+  def install(name: String*)(implicit preference: Preference, randomProvider: RandomProvider, newFile: NewFile, workspace: Workspace): Unit = install(name)
+  def install(names: Seq[String], urls: OptionalArgument[Seq[String]] = None)(implicit preference: Preference, randomProvider: RandomProvider, newFile: NewFile, workspace: Workspace): Unit = {
+    val toInstall = urls.getOrElse(module.indexes).flatMap(url ⇒ module.selectableModules(url)).filter(sm ⇒ names.contains(sm.module.name))
     if (toInstall.isEmpty) println("The module(s) is/are already installed.")
     else
       Console.dealWithLoadError(module.install(toInstall), interactive = true) match {

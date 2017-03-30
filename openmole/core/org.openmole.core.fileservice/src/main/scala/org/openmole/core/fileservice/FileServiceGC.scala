@@ -18,43 +18,42 @@
 package org.openmole.core.fileservice
 
 import java.io.File
+
+import org.openmole.core.threadprovider.IUpdatable
+import org.openmole.tool.cache.AssociativeCache
 import org.openmole.tool.file._
-import org.openmole.core.updater.IUpdatable
+import org.openmole.tool.hash.Hash
 
-class FileServiceGC extends IUpdatable {
-  override def update: Boolean = {
-    FileService.archiveCache.cacheMaps.synchronized {
-      def invalidate =
-        for {
-          execution ← FileService.archiveCache.cacheMaps
-          file ← execution._2
-          if (!new File(file._1).exists)
-        } yield (execution._1, file._1)
+import scala.ref.WeakReference
 
-      invalidate.foreach(Function.tupled(FileService.archiveCache.invalidateCache))
+class FileServiceGC(fileService: WeakReference[FileService]) extends IUpdatable {
+
+  override def update: Boolean =
+    fileService.get match {
+      case Some(fileService) ⇒
+        fileService.archiveCache.cacheMaps.synchronized {
+          def invalidate =
+            for {
+              execution ← fileService.archiveCache.cacheMaps
+              file ← execution._2
+              if (!new File(file._1).exists)
+            } yield (execution._1, file._1)
+
+          invalidate.foreach(Function.tupled(fileService.archiveCache.invalidateCache))
+        }
+
+        fileService.hashCache.cacheMaps.synchronized {
+          def invalidate =
+            for {
+              execution ← fileService.hashCache.cacheMaps
+              file ← execution._2
+              if !new File(file._1).exists
+            } yield (execution._1, file._1)
+
+          invalidate.foreach(Function.tupled(fileService.hashCache.invalidateCache))
+        }
+
+        true
+      case None ⇒ false
     }
-
-    FileService.hashCache.cacheMaps.synchronized {
-      def invalidate =
-        for {
-          execution ← FileService.hashCache.cacheMaps
-          file ← execution._2
-          if !new File(file._1).exists
-        } yield (execution._1, file._1)
-
-      invalidate.foreach(Function.tupled(FileService.hashCache.invalidateCache))
-    }
-
-    FileDeleter.cleanDirectories.synchronized {
-      def delete =
-        for {
-          directory ← FileDeleter.cleanDirectories
-          if directory.isDirectoryEmpty
-        } yield directory
-
-      delete.foreach { dir ⇒ dir.delete; FileDeleter.cleanDirectories.remove(dir) }
-    }
-
-    true
-  }
 }

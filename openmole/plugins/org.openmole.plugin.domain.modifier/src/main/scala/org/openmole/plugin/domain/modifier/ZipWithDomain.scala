@@ -20,12 +20,11 @@ package org.openmole.plugin.domain.modifier
 import org.openmole.core.context.Context
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.domain._
-import org.openmole.tool.random.RandomProvider
 
 object ZipWithDomain {
 
   implicit def isDiscrete[D, I, O] = new Discrete[ZipWithDomain[D, I, O], (I, O)] with DomainInputs[ZipWithDomain[D, I, O]] {
-    override def iterator(domain: ZipWithDomain[D, I, O]) = FromContext((context, rng) ⇒ domain.iterator(context)(rng))
+    override def iterator(domain: ZipWithDomain[D, I, O]) = domain.iterator
     override def inputs(domain: ZipWithDomain[D, I, O]) = domain.inputs
   }
 
@@ -35,6 +34,9 @@ case class ZipWithDomain[D, I, O](domain: D, f: I ⇒ O)(implicit discrete: Disc
 
   def inputs = domainInputs.inputs(domain)
 
-  def iterator(context: Context)(implicit rng: RandomProvider): Iterator[(I, O)] =
+  def iterator = FromContext { p ⇒
+    import p._
     discrete.iterator(domain).from(context).map { e ⇒ e → f(e) }
+  }
 }
+

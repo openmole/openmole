@@ -21,6 +21,7 @@ import java.io.InputStream
 
 import org.openmole.core.context.{ Context, Val }
 import org.openmole.core.exception.UserBadDataError
+import org.openmole.core.workspace.NewFile
 import org.openmole.tool.stream.{ StringInputStream, StringOutputStream }
 import org.openmole.tool.random._
 
@@ -86,17 +87,17 @@ object ExpandedString {
   }
 
   case class Expansion(elements: Seq[ExpandedString.ExpansionElement]) extends FromContext[String] {
-    def from(context: ⇒ Context)(implicit rng: RandomProvider) = elements.map(_.from(context)).mkString
+    def from(context: ⇒ Context)(implicit rng: RandomProvider, newFile: NewFile) = elements.map(_.from(context)).mkString
     def validate(inputs: Seq[Val[_]]): Seq[Throwable] = elements.flatMap(_.validate(inputs))
   }
 
   trait ExpansionElement {
-    def from(context: ⇒ Context)(implicit rng: RandomProvider): String
+    def from(context: ⇒ Context)(implicit rng: RandomProvider, newFile: NewFile): String
     def validate(inputs: Seq[Val[_]]): Seq[Throwable]
   }
 
   case class UnexpandedElement(string: String) extends ExpansionElement {
-    def from(context: ⇒ Context)(implicit rng: RandomProvider): String = string
+    def from(context: ⇒ Context)(implicit rng: RandomProvider, newFile: NewFile): String = string
     def validate(inputs: Seq[Val[_]]): Seq[Throwable] = Seq.empty
   }
 
@@ -114,13 +115,13 @@ object ExpandedString {
   }
 
   case class ValueElement(v: String) extends ExpansionElement {
-    def from(context: ⇒ Context)(implicit rng: RandomProvider): String = v
+    def from(context: ⇒ Context)(implicit rng: RandomProvider, newFile: NewFile): String = v
     def validate(inputs: Seq[Val[_]]): Seq[Throwable] = Seq.empty
   }
 
   case class CodeElement(code: String) extends ExpansionElement {
     @transient lazy val proxy = ScalaWrappedCompilation.dynamic[Any](code)
-    def from(context: ⇒ Context)(implicit rng: RandomProvider): String = {
+    def from(context: ⇒ Context)(implicit rng: RandomProvider, newFile: NewFile): String = {
       context.variable(code) match {
         case Some(value) ⇒ value.value.toString
         case None        ⇒ proxy().from(context).toString

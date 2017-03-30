@@ -11,13 +11,16 @@ import org.openmole.core.event._
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.pluginmanager._
 import org.openmole.gui.server.core.Utils._
-import org.openmole.core.workspace.{ ConfigurationLocation, Workspace }
+import org.openmole.core.workspace.{ NewFile, Workspace }
 import org.openmole.gui.ext.data
 import org.openmole.gui.ext.data._
 import java.io._
 import java.nio.file._
+import java.util.concurrent.atomic.AtomicReference
 
 import fr.iscpif.gridscale.http.HTTPStorage
+import org.openmole.core.authentication.AuthenticationStore
+import org.openmole.core.fileservice.FileService
 import org.openmole.core.market.{ MarketIndex, MarketIndexEntry }
 
 import scala.util.{ Failure, Success, Try }
@@ -30,11 +33,19 @@ import org.openmole.tool.tar._
 import org.openmole.core.output.OutputManager
 import org.openmole.core.module
 import org.openmole.core.market
+import org.openmole.core.preference.{ ConfigurationLocation, Preference }
 import org.openmole.core.project._
+import org.openmole.core.replication.ReplicaCatalog
+import org.openmole.core.serializer.SerializerService
+import org.openmole.core.services.Services
+import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.gui.ext.api.Api
-import org.openmole.gui.ext.plugin.server.{ Configurations, PluginActivator }
+import org.openmole.gui.ext.plugin.server._
 import org.openmole.gui.ext.tool.server.OMRouter
 import org.openmole.gui.ext.tool.server.Utils.authenticationKeysFile
+import org.openmole.gui.server.core.GUIServer.ApplicationControl
+import org.openmole.tool.crypto.Cypher
+import org.openmole.tool.random.{ RandomProvider, Seeder }
 
 /*
  * Copyright (C) 21/07/14 // mathieu.leclaire@openmole.org
@@ -53,30 +64,30 @@ import org.openmole.gui.ext.tool.server.Utils.authenticationKeysFile
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class ApiImpl(val arguments: GUIServer.ServletArguments) extends Api {
+class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
+
+  implicit def services = s
+  import s._
 
   val outputSize = ConfigurationLocation[Int]("gui", "outputsize", Some(10 * 1024 * 1024))
 
   val execution = new Execution
 
-  implicit def workspace = Workspace.instance
-
   //GENERAL
   def settings: OMSettings = {
     import org.openmole.gui.ext.data.ServerFileSytemContext.project
-    val workspace = Utils.workspaceProjectFile
 
     OMSettings(
-      workspace,
+      Utils.projectsDirectory(),
       buildinfo.version.value,
       buildinfo.name,
       new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(buildinfo.BuildInfo.buildTime)
     )
   }
 
-  def shutdown = arguments.applicationControl.stop()
+  def shutdown = applicationControl.stop()
 
-  def restart = arguments.applicationControl.restart()
+  def restart = applicationControl.restart()
 
   def isAlive = true
 
@@ -97,11 +108,11 @@ class ApiImpl(val arguments: GUIServer.ServletArguments) extends Api {
     Files.move(new File(authenticationKeysFile, keyName).toPath, new File(authenticationKeysFile, newName).toPath, StandardCopyOption.REPLACE_EXISTING)
 
   //WORKSPACE
-  def isPasswordCorrect(pass: String): Boolean = Workspace.passwordIsCorrect(pass)
+  def isPasswordCorrect(pass: String): Boolean = Preference.passwordIsCorrect(Cypher(pass), services.preference)
 
-  def passwordState = Utils.passwordState
+  //def passwordState = Utils.passwordState
 
-  def resetPassword(): Unit = Workspace.reset
+  def resetPassword(): Unit = Services.resetPassword
 
   // FILES
   def addDirectory(safePath: SafePath, directoryName: String): Boolean = {
@@ -147,8 +158,8 @@ class ApiImpl(val arguments: GUIServer.ServletArguments) extends Api {
   def extractTGZ(safePath: SafePath): ExtractResult = {
     DataUtils.fileToExtension(safePath.name) match {
       case FileExtension.TGZ | FileExtension.TAR | FileExtension.ZIP ⇒
-        val archiveFile = safePathToFile(safePath)(ServerFileSytemContext.project)
-        val toFile: File = safePathToFile(safePath.parent)(ServerFileSytemContext.project)
+        val archiveFile = safePathToFile(safePath)(ServerFileSytemContext.project, workspace)
+        val toFile: File = safePathToFile(safePath.parent)(ServerFileSytemContext.project, workspace)
         extractArchiveFromFiles(archiveFile, toFile)(ServerFileSytemContext.project)
       case _ ⇒ unknownFormat(safePath.name)
     }
@@ -156,7 +167,7 @@ class ApiImpl(val arguments: GUIServer.ServletArguments) extends Api {
 
   def temporaryFile(): SafePath = {
     import org.openmole.gui.ext.data.ServerFileSytemContext.absolute
-    val dir = Workspace.instance.newDir("openmoleGUI")
+    val dir = services.newFile.newDir("openmoleGUI")
     dir.mkdirs()
     dir
   }
@@ -202,13 +213,13 @@ class ApiImpl(val arguments: GUIServer.ServletArguments) extends Api {
         case j: JavaLikeLanguage ⇒ test(Seq(safePathToTest))
         case _ ⇒
           // val emptyFile = new File("")
-          val from: File = safePathToFile(safePathToTest)(ServerFileSytemContext.absolute)
-          val to: File = safePathToFile(safePathToTest.parent)(ServerFileSytemContext.absolute)
+          val from: File = safePathToFile(safePathToTest)(ServerFileSytemContext.absolute, workspace)
+          val to: File = safePathToFile(safePathToTest.parent)(ServerFileSytemContext.absolute, workspace)
           val extracted = getExtractedArchiveTo(from, to)(ServerFileSytemContext.absolute).filterNot {
             _ == safePathToTest
           }
           val toTest = in ++ safePathToTest.nameWithNoExtension
-          val toTestFile: File = safePathToFile(in ++ safePathToTest.nameWithNoExtension)(ServerFileSytemContext.project)
+          val toTestFile: File = safePathToFile(in ++ safePathToTest.nameWithNoExtension)(ServerFileSytemContext.project, workspace)
           new File(to, from.getName).recursiveDelete
 
           if (toTestFile.exists) {
@@ -232,7 +243,7 @@ class ApiImpl(val arguments: GUIServer.ServletArguments) extends Api {
   }
 
   def listFiles(sp: SafePath, fileFilter: data.FileFilter): ListFilesData = atomic { implicit ctx ⇒
-    Utils.listFiles(sp, fileFilter)(org.openmole.gui.ext.data.ServerFileSytemContext.project)
+    Utils.listFiles(sp, fileFilter)(org.openmole.gui.ext.data.ServerFileSytemContext.project, workspace)
   }
 
   def isEmpty(sp: SafePath): Boolean = {
@@ -278,10 +289,6 @@ class ApiImpl(val arguments: GUIServer.ServletArguments) extends Api {
     safePathToFile(safePath).length
   }
 
-  def getConfigurationValue(configData: ConfigData): Option[String] = Configurations(configData)
-
-  def setConfigurationValue(configData: ConfigData, value: String) = Configurations.set(configData, value)
-
   // EXECUTIONS
   def cancelExecution(id: ExecutionId): Unit = execution.cancel(id)
 
@@ -308,7 +315,7 @@ class ApiImpl(val arguments: GUIServer.ServletArguments) extends Api {
         case ErrorInCompiler(e)        ⇒ error(e)
         case compiled: Compiled ⇒
 
-          val outputStream = StringPrintStream(Some(Workspace.preference(outputSize)))
+          val outputStream = StringPrintStream(Some(preference(outputSize)))
           Runnings.setOutput(execId, outputStream)
 
           def catchAll[T](f: ⇒ T): Try[T] = {

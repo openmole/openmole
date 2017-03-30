@@ -35,8 +35,8 @@ sealed class ZipSampling(val samplings: Sampling*) extends Sampling {
   override def inputs = PrototypeSet(samplings.flatMap(_.inputs))
   override def prototypes = samplings.flatMap(_.prototypes)
 
-  override def apply() = FromContext.apply { (context, rng) ⇒
-    implicit val random = rng
+  override def apply() = FromContext { p ⇒
+    import p._
 
     samplings.headOption match {
       case Some(reference) ⇒

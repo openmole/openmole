@@ -17,14 +17,13 @@
 
 package org.openmole.core
 
-import java.time.{ Duration ⇒ JDuration }
-
 package dsl {
 
   import org.openmole.core.context._
   import org.openmole.core.logging.LoggerService
-  import org.openmole.core.workspace.{ Decrypt, Workspace }
+  import org.openmole.core.workspace._
   import cats._
+  import org.openmole.tool.crypto.Cypher
   import org.openmole.tool.types._
   import squants._
   import squants.information._
@@ -37,10 +36,10 @@ package dsl {
 
     implicit lazy val implicitContext = Context.empty
 
-    implicit lazy val workspace = Workspace
+    //implicit lazy val workspace = Workspace
     lazy val logger = LoggerService
 
-    implicit def decrypt = Decrypt(workspace)
+    //implicit def decrypt = Decrypt(workspace)
 
     implicit def stringToFile(path: String) = File(path)
 
@@ -73,7 +72,7 @@ package dsl {
     implicit def intToMemory(i: Int): Information = (i megabytes)
     implicit def intToMemoryOptional(i: Int): OptionalArgument[Information] = OptionalArgument(intToMemory(i))
 
-    def encrypt(s: String) = Workspace.encrypt(s)
+    def encrypt(s: String)(implicit cypher: Cypher) = cypher.encrypt(s)
 
     implicit def seqIsFunctor = new Functor[Seq] {
       override def map[A, B](fa: Seq[A])(f: (A) ⇒ B): Seq[B] = fa.map(f)

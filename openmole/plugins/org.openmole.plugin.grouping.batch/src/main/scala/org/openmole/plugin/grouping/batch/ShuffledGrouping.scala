@@ -17,9 +17,10 @@
 
 package org.openmole.plugin.grouping.batch
 
-import org.openmole.core.context.Context
+import org.openmole.core.context._
 import org.openmole.core.workflow.job._
 import org.openmole.core.workflow.mole._
+import org.openmole.core.workflow.task._
 
 object ShuffledGrouping {
 
@@ -36,6 +37,6 @@ object ShuffledGrouping {
 class ShuffledGrouping(numberOfBatch: Int) extends Grouping {
 
   override def apply(context: Context, groups: Iterable[(MoleJobGroup, Iterable[MoleJob])]): MoleJobGroup =
-    new MoleJobGroup(Context.buildRNG(context).nextInt(numberOfBatch))
+    new MoleJobGroup(Task.buildRNG(context).nextInt(numberOfBatch))
 
 }

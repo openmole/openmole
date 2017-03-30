@@ -19,8 +19,10 @@ package org.openmole.core.workflow.tools
 
 import org.openmole.core.context._
 import org.openmole.core.exception._
-import org.openmole.core.workflow.tools.InputOutputCheck._
-import org.openmole.tool.random.RandomProvider
+import org.openmole.core.expansion.FromContext
+import org.openmole.core.preference.Preference
+import org.openmole.core.workspace.NewFile
+import org.openmole.tool.random._
 
 object InputOutputCheck {
 
@@ -44,15 +46,7 @@ object InputOutputCheck {
     override def toString = s"""Type mismatch the content of the output value '${output.name}' of type '${variable.value.getClass}' is incompatible with the output variable '${output}'."""
   }
 
-}
-
-trait InputOutputCheck {
-
-  def inputs: PrototypeSet
-  def outputs: PrototypeSet
-  def defaults: DefaultSet
-
-  protected def verifyInput(context: Context): Iterable[InputError] =
+  protected def verifyInput(inputs: PrototypeSet, context: Context): Iterable[InputError] =
     (for {
       p ← inputs.toList
     } yield context.variable(p.name) match {
@@ -60,7 +54,7 @@ trait InputOutputCheck {
       case Some(v) ⇒ if (!p.isAssignableFrom(v.prototype)) Some(InputTypeMismatch(p, v.prototype)) else None
     }).flatten
 
-  protected def verifyOutput(context: Context): Iterable[OutputError] =
+  protected def verifyOutput(outputs: PrototypeSet, context: Context): Iterable[OutputError] =
     outputs.flatMap {
       d ⇒
         context.variable(d) match {
@@ -72,10 +66,10 @@ trait InputOutputCheck {
         }
     }
 
-  def filterOutput(context: Context): Context =
+  def filterOutput(outputs: PrototypeSet, context: Context): Context =
     Context(outputs.toList.flatMap(o ⇒ context.variable(o): Option[Variable[_]]): _*)
 
-  def initializeInput(context: Context)(implicit randomProvider: RandomProvider): Context =
+  def initializeInput(defaults: DefaultSet, context: Context)(implicit randomProvider: RandomProvider, newFile: NewFile): Context =
     context ++
       defaults.flatMap {
         parameter ⇒
@@ -83,21 +77,22 @@ trait InputOutputCheck {
           else Option.empty[Variable[_]]
       }
 
-  def perform(context: Context, process: (Context ⇒ Context))(implicit randomProvider: RandomProvider) = {
-    val initializedContext = initializeInput(context)
-    val inputErrors = verifyInput(initializedContext)
+  def perform(inputs: PrototypeSet, outputs: PrototypeSet, defaults: DefaultSet, process: FromContext[Context])(implicit preference: Preference) = FromContext.withValidation(process.validate(_)) { p ⇒
+    import p._
+    val initializedContext = initializeInput(defaults, context)
+    val inputErrors = verifyInput(inputs, initializedContext)
     if (!inputErrors.isEmpty) throw new InternalProcessingError(s"Input errors have been found in ${this}: ${inputErrors.mkString(", ")}.")
 
     val result =
-      try initializedContext + process(initializedContext)
+      try initializedContext + process.from(initializedContext)
       catch {
         case e: Throwable ⇒
-          throw new InternalProcessingError(e, s"Error for context values in ${this} ${initializedContext.prettified()}")
+          throw new InternalProcessingError(e, s"Error for context values in ${this} ${initializedContext.prettified}")
       }
 
-    val outputErrors = verifyOutput(result)
+    val outputErrors = verifyOutput(outputs, result)
     if (!outputErrors.isEmpty) throw new InternalProcessingError(s"Output errors in ${this}: ${outputErrors.mkString(", ")}.")
-    filterOutput(result)
+    filterOutput(outputs, result)
   }
 
 }

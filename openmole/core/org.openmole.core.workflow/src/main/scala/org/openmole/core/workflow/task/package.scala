@@ -29,7 +29,7 @@ package task {
       def toCapsule(strainer: Boolean) = Capsule(task, true)
     }
 
-    def newRNG(context: Context) = Context.buildRNG(context)
+    def newRNG(context: Context) = Task.buildRNG(context)
 
     def implicits = new {
       def +=(p: Val[_]) = MoleTask.implicits.modify(_ ++ Seq(p.name))

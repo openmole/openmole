@@ -17,8 +17,6 @@
 
 package org.openmole.core
 
-import slick.lifted.TableQuery
-
 package object replication {
-  lazy val replicas = TableQuery[Replicas]
+
 }

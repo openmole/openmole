@@ -23,32 +23,24 @@ import scala.collection.mutable.Stack
 import collection.JavaConverters._
 
 object PriorityQueue {
-
-  def apply[T](p: T ⇒ Int) =
-    new PriorityQueue[T] {
-      def priority = p
-    }
-
+  def apply[T]() = new PriorityQueue[T]
 }
 
-trait PriorityQueue[T] {
+class PriorityQueue[T] {
   private val inQueue = new Semaphore(0)
-
-  def priority: T ⇒ Int
 
   val queues = (new TreeMap[Int, Stack[T]]).asScala
 
   def size: Int = synchronized { queues.map { case (_, q) ⇒ q.size }.sum }
 
-  def enqueue(e: T) = {
+  def enqueue(e: T, priority: Int) = {
     synchronized {
-      val p = priority(e)
-      queues.get(p) match {
+      queues.get(priority) match {
         case Some(queue) ⇒ queue.push(e)
         case None ⇒
           val q = new Stack[T]
           q.push(e)
-          queues.put(p, q)
+          queues.put(priority, q)
       }
     }
     inQueue.release

@@ -19,9 +19,9 @@ package org.openmole.plugin.environment.ssh
 
 import java.net.URI
 
-import org.openmole.core.workspace.{ ConfigurationLocation, Workspace }
+import org.openmole.core.preference.ConfigurationLocation
+import org.openmole.core.workspace.Workspace
 import org.openmole.plugin.environment.batch.environment._
-
 import squants.time.TimeConversions._
 
 object SSHService {

@@ -1,7 +1,9 @@
 package org.openmole.gui.server.core
 
+import org.openmole.core.workspace.Workspace
 import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.data.DataUtils._
+
 import scala.io.Source
 import org.openmole.gui.server.core.Utils._
 
@@ -25,14 +27,13 @@ import org.openmole.gui.server.core.Utils._
 object CodeParsing {
 
   def fromCommand(command: Seq[String]) = {
-    val (language, codeName, commandElements: Seq[CommandElement]) = command.headOption match {
-      case Some("python") ⇒ (Some(PythonLanguage()), command.lift(1).getOrElse(""), mapToVariableElements(indexArgs(command.drop(2), Seq()), CareTaskType()))
+    val (language, codeName, commandElements) = command.headOption match {
+      case Some("python") ⇒ (Some(PythonLanguage()), command.lift(1).getOrElse(""), mapToVariableElements(indexArgs(command.drop(2), Seq()), CareTaskType()).toSeq)
       case Some("R")      ⇒ (Some(RLanguage()), "", rParsing(command.drop(1), CareTaskType()))
-      case _              ⇒ (None, command.head, command.drop(1))
+      case _              ⇒ (None, command.head, command.drop(1).zipWithIndex.map(e ⇒ StaticElement(e._2, e._1)))
     }
 
     //Parse the arguments and return the LaunchingCommand
-
     Some(
       BasicLaunchingCommand(
         language,
@@ -42,7 +43,7 @@ object CodeParsing {
     )
   }
 
-  def fromFile(safePath: SafePath) = {
+  def fromFile(safePath: SafePath)(implicit workspace: Workspace) = {
     safePath.name.split(".").last match {
       case "nlogo" ⇒ Some(netlogoParsing(safePath))
       case _       ⇒ None
@@ -140,7 +141,7 @@ object CodeParsing {
     }
   }
 
-  def netlogoParsing(safePath: SafePath): LaunchingCommand = {
+  def netlogoParsing(safePath: SafePath)(implicit workspace: Workspace): LaunchingCommand = {
 
     import org.openmole.gui.ext.data.ServerFileSytemContext.project
 

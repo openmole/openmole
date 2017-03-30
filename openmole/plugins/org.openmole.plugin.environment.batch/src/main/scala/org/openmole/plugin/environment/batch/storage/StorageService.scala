@@ -24,25 +24,35 @@ import java.util.concurrent.{ Callable, TimeUnit, TimeoutException }
 import com.google.common.cache.CacheBuilder
 import fr.iscpif.gridscale.storage._
 import org.openmole.core.communication.storage._
-import org.openmole.core.fileservice.FileDeleter
+import org.openmole.core.fileservice.{ FileDeleter, FileService }
+import org.openmole.core.preference.{ ConfigurationLocation, Preference }
+import org.openmole.core.replication.{ ReplicaCatalog, ReplicationStorage }
 import org.openmole.core.serializer._
-import org.openmole.core.workspace.{ ConfigurationLocation, Workspace }
+import org.openmole.core.threadprovider.{ ThreadProvider, Updater }
+import org.openmole.core.workspace.{ NewFile, Workspace }
 import org.openmole.plugin.environment.batch.control._
 import org.openmole.plugin.environment.batch.environment._
 import org.openmole.plugin.environment.batch.refresh._
-import org.openmole.plugin.environment.batch.replication.ReplicaCatalog
 import org.openmole.tool.cache._
 import org.openmole.tool.logger.Logger
-
 import squants.time.TimeConversions._
 
-object StorageService extends Logger {
+import scala.ref.WeakReference
 
+object StorageService extends Logger {
   val DirRegenerate = ConfigurationLocation("StorageService", "DirRegenerate", Some(1 hours))
   val TmpDirRemoval = ConfigurationLocation("StorageService", "TmpDirRemoval", Some(30 days))
   val persistent = "persistent/"
   val tmp = "tmp/"
 
+  def startGC(storage: StorageService)(implicit threadProvider: ThreadProvider, preference: Preference) =
+    Updater.delay(new StoragesGC(WeakReference(storage)), preference(BatchEnvironment.StoragesGCUpdateInterval))
+
+  implicit def replicationStorage(implicit token: AccessToken): ReplicationStorage[StorageService] = new ReplicationStorage[StorageService] {
+    override def backgroundRmFile(storage: StorageService, path: String): Unit = storage.backgroundRmFile(path)
+    override def exists(storage: StorageService, path: String): Boolean = storage.exists(path)
+    override def id(storage: StorageService): String = storage.id
+  }
 }
 
 import org.openmole.plugin.environment.batch.storage.StorageService.Log._
@@ -55,17 +65,20 @@ trait StorageService extends BatchService with Storage {
 
   val remoteStorage: RemoteStorage
 
+  import environment.services
+  import environment.services._
+
   val _directoryCache = Cache {
     CacheBuilder.
       newBuilder().
-      expireAfterWrite(Workspace.preference(StorageService.DirRegenerate).millis, TimeUnit.MILLISECONDS).
+      expireAfterWrite(preference(StorageService.DirRegenerate).millis, TimeUnit.MILLISECONDS).
       build[String, String]()
   }
 
   val _serializedRemoteStorage = Cache {
-    val file = Workspace.newFile("remoteStorage", ".xml")
-    FileDeleter.deleteWhenGarbageCollected(file)
-    SerialiserService.serialiseAndArchiveFiles(remoteStorage, file)
+    val file = newFile.newFile("remoteStorage", ".xml")
+    fileService.deleteWhenGarbageCollected(file)
+    serializerService.serialiseAndArchiveFiles(remoteStorage, file)
     file
   }
 
@@ -75,7 +88,7 @@ trait StorageService extends BatchService with Storage {
   protected implicit def callable[T](f: () ⇒ T): Callable[T] = new Callable[T]() { def call() = f() }
 
   def clean(implicit token: AccessToken) = {
-    ReplicaCatalog.deleteReplicas(this)
+    replicaCatalog.deleteReplicas(this)
     rmDir(baseDir)
     directoryCache.invalidateAll
   }
@@ -114,12 +127,12 @@ trait StorageService extends BatchService with Storage {
     if (!exists(persistentPath)) makeDir(persistentPath)
 
     def graceIsOver(name: String) =
-      ReplicaCatalog.timeOfPersistent(name).map {
-        _ + Workspace.preference(ReplicaCatalog.ReplicaGraceTime).toMillis < System.currentTimeMillis
+      replicaCatalog.timeOfPersistent(name).map {
+        _ + preference(ReplicaCatalog.ReplicaGraceTime).toMillis < System.currentTimeMillis
       }.getOrElse(true)
 
     val names = listNames(persistentPath)
-    val inReplica = ReplicaCatalog.forPaths(names.map { child(persistentPath, _) }).map(_.path).toSet
+    val inReplica = replicaCatalog.forPaths(names.map { child(persistentPath, _) }).map(_.path).toSet
 
     for {
       name ← names
@@ -128,6 +141,7 @@ trait StorageService extends BatchService with Storage {
       val path = child(persistentPath, name)
       if (!inReplica.contains(path)) backgroundRmFile(path)
     }
+
     persistentPath
   }
 
@@ -140,7 +154,7 @@ trait StorageService extends BatchService with Storage {
     val tmpNoTime = child(baseDir, tmp)
     if (!exists(tmpNoTime)) makeDir(tmpNoTime)
 
-    val removalDate = System.currentTimeMillis - Workspace.preference(TmpDirRemoval).toMillis
+    val removalDate = System.currentTimeMillis - preference(TmpDirRemoval).toMillis
 
     for (entry ← list(tmpNoTime)) {
       val childPath = child(tmpNoTime, entry.name)
@@ -189,9 +203,9 @@ trait StorageService extends BatchService with Storage {
   def upload(src: File, dest: String, options: TransferOptions = TransferOptions.default)(implicit token: AccessToken) = token.access { _upload(src, dest, options) }
   def download(src: String, dest: File, options: TransferOptions = TransferOptions.default)(implicit token: AccessToken) = token.access { _download(src, dest, options) }
 
-  def baseDirName = "openmole-" + Workspace.preference(Workspace.uniqueIDLocation) + '/'
+  def baseDirName = "openmole-" + preference(Preference.uniqueID) + '/'
 
-  def backgroundRmFile(path: String) = BatchEnvironment.jobManager ! DeleteFile(this, path, false)
-  def backgroundRmDir(path: String) = BatchEnvironment.jobManager ! DeleteFile(this, path, true)
+  def backgroundRmFile(path: String) = JobManager ! DeleteFile(this, path, false)
+  def backgroundRmDir(path: String) = JobManager ! DeleteFile(this, path, true)
 
 }

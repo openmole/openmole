@@ -27,6 +27,7 @@ import org.openmole.tool.file._
 import monocle.function.all._
 import monocle.std.all._
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
+import org.openmole.core.services._
 import org.openmole.tool.hash._
 
 object Project {
@@ -107,7 +108,7 @@ class Project(workDirectory: File, newREPL: (ConsoleVariables) ⇒ ScalaREPL = P
 
   def loadPlugins = PluginManager.load(plugins)
 
-  def compile(script: File, args: Seq[String]): CompileResult = {
+  def compile(script: File, args: Seq[String])(implicit services: Services): CompileResult = {
     if (!script.exists) ScriptFileDoesNotExists()
     else {
       def header =

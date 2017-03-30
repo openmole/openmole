@@ -24,13 +24,12 @@ import org.openmole.core.context.Context
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.domain.Finite
 import org.openmole.core.workflow.dsl._
-import org.openmole.tool.random.RandomProvider
+import cats.implicits._
 
 object ListPathsDomain {
 
   implicit def isFinite = new Finite[ListPathsDomain, Path] {
-    override def computeValues(domain: ListPathsDomain) =
-      FromContext((context, rng) ⇒ domain.computeValues(context)(rng))
+    override def computeValues(domain: ListPathsDomain) = domain.computeValues
   }
 
   def apply(
@@ -49,6 +48,7 @@ class ListPathsDomain(
     filter:    Option[FromContext[String]] = None
 ) {
 
-  def computeValues(context: Context)(implicit rng: RandomProvider): Iterable[Path] =
-    new ListFilesDomain(base, directory, recursive, filter).computeValues(context).map(_.toPath)
+  def computeValues: FromContext[Iterable[Path]] =
+    new ListFilesDomain(base, directory, recursive, filter).computeValues.map(_.map(_.toPath))
+
 }

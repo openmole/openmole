@@ -20,7 +20,7 @@ package org.openmole.core
 import java.io._
 import java.net.URLDecoder
 
-import org.openmole.core.workspace.Workspace
+import org.openmole.core.location._
 import org.osgi.framework._
 import org.osgi.framework.wiring.BundleWiring
 
@@ -57,7 +57,7 @@ package object pluginmanager {
       val decodedLocation = URLDecoder.decode(location, "UTF-8")
 
       if (ref)
-        Workspace.openMOLELocationOption match {
+        openMOLELocationOption match {
           case Some(oMLoc) ⇒ new File(oMLoc, decodedLocation)
           case None        ⇒ new File(decodedLocation)
         }

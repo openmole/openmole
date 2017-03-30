@@ -34,10 +34,9 @@ trait Api {
 
   //WORKSPACE
   def isPasswordCorrect(pass: String): Boolean
-  def passwordState(): PasswordState
   def resetPassword(): Unit
-  def getConfigurationValue(configData: ConfigData): Option[String]
-  def setConfigurationValue(configData: ConfigData, value: String): Unit
+  //  def getConfigurationValue(configData: ConfigData): Option[String]
+  //  def setConfigurationValue(configData: ConfigData, value: String): Unit
 
   //FILES
   def addDirectory(safePath: SafePath, directoryName: String): Boolean

@@ -20,16 +20,19 @@ package org.openmole.plugin.domain.range
 import org.openmole.core.context.Context
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.domain._
-import org.openmole.tool.random.RandomProvider
+
+import cats._
+import cats.implicits._
+import cats.syntax._
 
 object LogRange {
 
   implicit def isFinite[T] =
     new Finite[LogRange[T], T] with Center[LogRange[T], T] with Bounds[LogRange[T], T] {
-      override def computeValues(domain: LogRange[T]) = FromContext((context, rng) ⇒ domain.computeValues(context)(rng))
+      override def computeValues(domain: LogRange[T]) = domain.computeValues
       override def center(domain: LogRange[T]) = Range.rangeCenter(domain.range)
-      override def max(domain: LogRange[T]) = FromContext((context, rng) ⇒ domain.max.from(context)(rng))
-      override def min(domain: LogRange[T]) = FromContext((context, rng) ⇒ domain.min.from(context)(rng))
+      override def max(domain: LogRange[T]) = domain.max
+      override def min(domain: LogRange[T]) = domain.min
     }
 
   def apply[T: Log](range: Range[T], steps: FromContext[Int]) =
@@ -48,15 +51,14 @@ sealed class LogRange[T](val range: Range[T], val steps: FromContext[Int])(impli
 
   import range._
 
-  def computeValues(context: Context)(implicit rng: RandomProvider): Iterable[T] = {
-    val logMin: T = lg.log(min.from(context))
-    val logMax: T = lg.log(max.from(context))
-    val nbSteps = steps.from(context)
+  def computeValues = (min |@| max |@| steps) map { (min, max, steps) ⇒
+    val logMin: T = lg.log(min)
+    val logMax: T = lg.log(max)
 
     import ops._
 
-    val logStep = (logMax - logMin) / (fromInt(nbSteps - 1))
-    Iterator.iterate(logMin)(_ + logStep).map(lg.exp).take(nbSteps).toVector
+    val logStep = (logMax - logMin) / (fromInt(steps - 1))
+    Iterator.iterate(logMin)(_ + logStep).map(lg.exp).take(steps).toVector
   }
 
   def max = range.max

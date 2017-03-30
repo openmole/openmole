@@ -17,7 +17,7 @@
 
 package org.openmole.core.workflow.task
 
-import org.openmole.core.context.{ Val, Variable }
+import org.openmole.core.context.{ Context, Val, Variable }
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.mole.Capsule
@@ -25,23 +25,25 @@ import org.openmole.core.workflow.sampling._
 
 import scala.collection.immutable.TreeMap
 import scala.collection.mutable.ArrayBuffer
+import cats.implicits._
+
 object ExplorationTask {
 
   def apply(sampling: Sampling)(implicit name: sourcecode.Name) =
-    ClosureTask("ExplorationTask") {
-      (context, rng, _) ⇒
-        implicit val implicitRNG = rng
+    FromContextTask(
+      "ExplorationTask",
+      sampling().map { s ⇒
         val variablesValues = TreeMap.empty[Val[_], ArrayBuffer[Any]] ++ sampling.prototypes.map { p ⇒ p → ArrayBuffer[Any]() }
 
         for {
-          sample ← sampling().from(context)
+          sample ← s
           v ← sample
         } variablesValues.get(v.prototype) match {
           case Some(b) ⇒ b += v.value
           case None    ⇒
         }
 
-        context ++ variablesValues.map {
+        variablesValues.map {
           case (k, v) ⇒
             try {
               Variable.unsecure(
@@ -52,11 +54,12 @@ object ExplorationTask {
             catch {
               case e: ArrayStoreException ⇒ throw new UserBadDataError("Cannot fill factor values in " + k.toArray + ", values " + v)
             }
-        }
-    } set (
-      inputs += (sampling.inputs.toSeq: _*),
-      exploredOutputs += (sampling.prototypes.toSeq.map(_.toArray): _*)
-    )
+        }: Context
+      }
+    ) set (
+        inputs += (sampling.inputs.toSeq: _*),
+        exploredOutputs += (sampling.prototypes.toSeq.map(_.toArray): _*)
+      )
 
   def explored(c: Capsule) = (p: Val[_]) ⇒ c.task.outputs.explored(p)
 

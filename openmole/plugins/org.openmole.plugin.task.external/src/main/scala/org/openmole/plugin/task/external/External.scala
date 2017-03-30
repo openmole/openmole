@@ -26,7 +26,9 @@ import org.openmole.core.expansion.FromContext
 import org.openmole.core.tools.service.OS
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.task._
-import org.openmole.tool.random.RandomProvider
+import org.openmole.core.workflow.tools.InputOutputCheck
+import org.openmole.core.workspace.NewFile
+import org.openmole.tool.random._
 
 object External {
   val PWD = Val[String]("PWD")
@@ -89,12 +91,12 @@ import org.openmole.plugin.task.external.External._
     resources:       Vector[External.Resource]       = Vector.empty
 ) {
 
-  protected def listInputFiles(context: Context)(implicit rng: RandomProvider): Vector[(Val[File], ToPut)] =
+  protected def listInputFiles(context: Context)(implicit rng: RandomProvider, newFile: NewFile): Vector[(Val[File], ToPut)] =
     inputFiles.map {
       case InputFile(prototype, name, link) ⇒ prototype → ToPut(context(prototype), name.from(context), link)
     }
 
-  protected def listInputFileArray(context: Context)(implicit rng: RandomProvider): Vector[(Val[Array[File]], Seq[ToPut])] =
+  protected def listInputFileArray(context: Context)(implicit rng: RandomProvider, newFile: NewFile): Vector[(Val[Array[File]], Seq[ToPut])] =
     for {
       ifa ← inputFileArrays
     } yield {
@@ -107,7 +109,7 @@ import org.openmole.plugin.task.external.External._
       )
     }
 
-  protected def listResources(context: Context, resolver: PathResolver)(implicit rng: RandomProvider): Iterable[ToPut] = {
+  protected def listResources(context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: NewFile): Iterable[ToPut] = {
     val byLocation =
       resources groupBy {
         case Resource(_, name, _, _) ⇒ resolver(name.from(context)).getCanonicalPath
@@ -128,7 +130,7 @@ import org.openmole.plugin.task.external.External._
     resolved.toFile
   }
 
-  protected def outputFileVariables(context: Context, resolver: PathResolver)(implicit rng: RandomProvider) =
+  protected def outputFileVariables(context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: NewFile) =
     outputFiles.map {
       case OutputFile(name, prototype) ⇒
         val fileName = name.from(context)
@@ -145,10 +147,10 @@ import org.openmole.plugin.task.external.External._
     }
   }
 
-  def prepareInputFiles(context: Context, resolver: PathResolver)(implicit rng: RandomProvider) =
+  def prepareInputFiles(context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: NewFile) =
     prepareAndListInputFiles(context, resolver)._1
 
-  def prepareAndListInputFiles(context: Context, resolver: PathResolver)(implicit rng: RandomProvider) = {
+  def prepareAndListInputFiles(context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: NewFile) = {
     def destination(f: ToPut) = resolver(f.name)
 
     val resourcesFiles = for { f ← listResources(context, resolver) } yield {
@@ -182,12 +184,12 @@ import org.openmole.plugin.task.external.External._
     (context ++ copiedFilesVariable ++ copiedArrayFilesVariable, allFileInfo)
   }
 
-  def fetchOutputFiles(context: Context, resolver: PathResolver)(implicit rng: RandomProvider): Context =
+  def fetchOutputFiles(context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: NewFile): Context =
     context ++ outputFileVariables(context, resolver)
 
   def checkAndClean(task: Task, context: Context, rootDir: File) = {
     lazy val contextFiles =
-      task.filterOutput(context).values.map(_.value).collect { case f: File ⇒ f }
+      InputOutputCheck.filterOutput(task.outputs, context).values.map(_.value).collect { case f: File ⇒ f }
 
     for {
       f ← contextFiles

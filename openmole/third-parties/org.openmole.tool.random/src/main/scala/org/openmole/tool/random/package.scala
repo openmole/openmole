@@ -18,8 +18,18 @@
 package org.openmole.tool
 
 import org.apache.commons.math3.random.RandomGenerator
+import org.openmole.tool.cache._
 
 package object random {
+
+  type RandomProvider = Lazy[util.Random]
+
+  object RandomProvider {
+    def empty: RandomProvider = emptyLazyRandom
+    def apply(random: util.Random) = Lazy(random)
+  }
+
+  def emptyLazyRandom = Lazy[util.Random](throw new RuntimeException("No random number generator is available"))
 
   @transient lazy val longInterval = {
     val min = BigDecimal(Long.MinValue)

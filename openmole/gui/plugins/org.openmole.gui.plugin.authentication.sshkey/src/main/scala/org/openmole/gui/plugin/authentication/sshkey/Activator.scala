@@ -25,6 +25,6 @@ class Activator extends PluginActivator {
 
   def info: PluginInfo = PluginInfo(
     classOf[PrivateKeyAuthenticationFactory],
-    OMRouter[PrivateKeyAuthenticationAPI](AutowireServer.route[PrivateKeyAuthenticationAPI](new PrivateKeyAuthenticationApiImpl))
+    s ⇒ OMRouter[PrivateKeyAuthenticationAPI](AutowireServer.route[PrivateKeyAuthenticationAPI](new PrivateKeyAuthenticationApiImpl(s)))
   )
 }

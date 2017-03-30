@@ -19,6 +19,7 @@ package org.openmole.core.tools
 
 import java.util.UUID
 
+import org.openmole.tool.network.LocalHostName
 import org.openmole.tool.random.Random
 
 package object service {

@@ -19,6 +19,7 @@ package org.openmole.core
 
 import java.io.File
 
+import org.openmole.core.workspace.{ NewFile, Workspace }
 import org.openmole.tool.file._
 import org.openmole.tool.hash._
 import squants.time.Time
@@ -26,6 +27,7 @@ import squants.time.Time
 import scala.util.{ Failure, Success, Try }
 
 package object fileservice {
+
   implicit class FileServiceDecorator(file: File) {
     private def lock(f: File) = {
       val lock = new File(f.getPath + "-lock")
@@ -66,11 +68,11 @@ package object fileservice {
       file
     }
 
-    def updateIfChanged(update: File ⇒ Unit) = {
+    def updateIfChanged(update: File ⇒ Unit)(implicit fileService: FileService, newFile: NewFile) = {
       def hash(f: File) = new File(f + "-hash")
       lock(file).withLock { _ ⇒
         val hashFile = hash(file)
-        lazy val currentHash = FileService.hash(file).toString
+        lazy val currentHash = fileService.hash(file).toString
         val upToDate =
           if (!file.exists || !hashFile.exists) false
           else

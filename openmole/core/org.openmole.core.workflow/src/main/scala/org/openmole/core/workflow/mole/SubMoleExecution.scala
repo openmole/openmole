@@ -53,7 +53,8 @@ class SubMoleExecution(
   private val _children = TSet.empty[SubMoleExecution]
   private val _jobs = TMap[MoleJob, (Capsule, Ticket)]()
   private val _canceled = Ref(false)
-  private lazy val masterCapsuleExecutor = Executors.newSingleThreadExecutor(daemonThreadFactory)
+
+  private lazy val masterCapsuleExecutor = Executors.newSingleThreadExecutor(moleExecution.executionContext.threadProvider.threadFactory)
 
   val masterCapsuleRegistry = new RegistryWithTicket[MasterCapsule, Context]
   val aggregationTransitionRegistry = new RegistryWithTicket[IAggregationTransition, Buffer[(Long, Variable[_])]]
@@ -128,7 +129,7 @@ class SubMoleExecution(
     def ctxForHooks = implicits + job.context
 
     def executeHook(h: Hook) =
-      try h.perform(ctxForHooks, moleExecution.executionContext)(RandomProvider(moleExecution.newRNG))
+      try h.perform(ctxForHooks, moleExecution.executionContext)
       catch {
         case e: Throwable ⇒
           val event = MoleExecution.HookExceptionRaised(h, capsule, job, e, SEVERE)
@@ -146,7 +147,7 @@ class SubMoleExecution(
       transitionLock {
         for {
           transition ← mole.outputTransitions(capsule).toList.sortBy(t ⇒ mole.slots(t.end.capsule).size).reverse
-        } transition.perform(implicits + context, ticket, this)(RandomProvider(moleExecution.newRNG))
+        } transition.perform(implicits + context, ticket, this, moleExecution.executionContext)
       }
     }
     catch {
@@ -190,7 +191,7 @@ class SubMoleExecution(
       val sourced =
         moleExecution.sources(capsule).foldLeft(Context.empty) {
           case (a, s) ⇒
-            val ctx = try s.perform(implicits + context, moleExecution.executionContext)(RandomProvider(moleExecution.newRNG))
+            val ctx = try s.perform(implicits + context, moleExecution.executionContext)
             catch {
               case t: Throwable ⇒
                 logger.log(FINE, "Error in submole execution", t)
@@ -200,7 +201,7 @@ class SubMoleExecution(
                 throw new InternalProcessingError(t, s"Error in source execution that is plugged to $capsule")
             }
             a + ctx
-        } + Variable(Variable.openMOLESeed, moleExecution.newSeed)
+        } + Variable(Variable.openMOLESeed, moleExecution.executionContext.seeder.newSeed)
 
       capsule match {
         case c: MasterCapsule ⇒
@@ -212,7 +213,7 @@ class SubMoleExecution(
             val moleJob: MoleJob = MoleJob(capsule.task, implicits + sourced + context + savedContext, moleExecution.nextJobId, stateChanged)
             EventDispatcher.trigger(moleExecution, new MoleExecution.JobCreated(moleJob, capsule))
             addJob(moleJob, capsule, ticket)
-            moleJob.perform(TaskExecutionContext(moleExecution.executionContext.tmpDirectory, moleExecution.defaultEnvironment))
+            moleJob.perform(TaskExecutionContext(moleExecution.executionContext.tmpDirectory, moleExecution.defaultEnvironment, moleExecution.executionContext.preference, moleExecution.executionContext.threadProvider))
             masterCapsuleRegistry.register(c, ticket.parentOrException, c.toPersist(moleJob.context))
             finalState(moleJob, moleJob.state)
           }

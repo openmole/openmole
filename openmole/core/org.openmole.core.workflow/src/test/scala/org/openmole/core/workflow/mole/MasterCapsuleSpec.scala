@@ -37,6 +37,8 @@ import org.openmole.core.workflow.dsl._
 
 class MasterCapsuleSpec extends FlatSpec with Matchers {
 
+  import org.openmole.core.workflow.Services._
+
   "A master capsule" should "execute tasks" in {
     val p = Val[String]("p")
 

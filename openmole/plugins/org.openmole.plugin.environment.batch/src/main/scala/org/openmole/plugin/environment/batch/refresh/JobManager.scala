@@ -18,97 +18,65 @@
 package org.openmole.plugin.environment.batch.refresh
 
 import java.io.FileNotFoundException
-import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.{ Executors, TimeUnit }
+import java.util.concurrent.{ TimeUnit }
 
 import fr.iscpif.gridscale.authentication._
 import org.openmole.core.event.EventDispatcher
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.workflow.execution._
-import org.openmole.core.workspace.Workspace
-import org.openmole.plugin.environment.batch.environment.BatchEnvironment.JobManagementThreads
 import org.openmole.plugin.environment.batch.environment._
-import org.openmole.tool.collection.PriorityQueue
 import org.openmole.tool.logger.Logger
 import org.openmole.tool.thread._
 
-object JobManager extends Logger
+object JobManager extends Logger { self ⇒
+  import Log._
 
-import org.openmole.plugin.environment.batch.refresh.JobManager.Log._
-
-class JobManager { self ⇒
-
-  var finalized = new AtomicBoolean(false)
-
-  override def finalize(): Unit = {
-    finalized.set(true)
-    super.finalize()
-  }
-
-  lazy val messageQueue = PriorityQueue[DispatchedMessage] {
-    case msg: Upload       ⇒ 10
-    case msg: Submit       ⇒ 50
-    case msg: Refresh      ⇒ 5
-    case msg: GetResult    ⇒ 50
-    case msg: KillBatchJob ⇒ 2
-    case _                 ⇒ 1
-  }
-
-  lazy val delayedExecutor = Executors.newSingleThreadScheduledExecutor(daemonThreadFactory)
-
-  for {
-    i ← 0 until Workspace.preference(JobManagementThreads)
-  } {
-    val t =
-      new Thread {
-        override def run = while (!self.finalized.get) DispatcherActor.receive(messageQueue.dequeue)
-      }
-    t.setDaemon(true)
-    t.start()
-    t
-  }
-
-  lazy val uploader = new UploadActor(self)
-  lazy val submitter = new SubmitActor(self)
-  lazy val refresher = new RefreshActor(self)
-  lazy val resultGetters = new GetResultActor(self)
-  lazy val killer = new KillerActor(self)
-  lazy val cleaner = new CleanerActor(self)
-  lazy val deleter = new DeleteActor(self)
+  def messagePriority(message: DispatchedMessage) =
+    message match {
+      case msg: Upload       ⇒ 10
+      case msg: Submit       ⇒ 50
+      case msg: Refresh      ⇒ 5
+      case msg: GetResult    ⇒ 50
+      case msg: KillBatchJob ⇒ 2
+      case _                 ⇒ 1
+    }
 
   object DispatcherActor {
-    def receive(dispatched: DispatchedMessage) =
+    def receive(dispatched: DispatchedMessage)(implicit services: BatchEnvironment.Services) =
       dispatched match {
-        case msg: Upload             ⇒ uploader.receive(msg)
-        case msg: Submit             ⇒ submitter.receive(msg)
-        case msg: Refresh            ⇒ refresher.receive(msg)
-        case msg: GetResult          ⇒ resultGetters.receive(msg)
-        case msg: KillBatchJob       ⇒ killer.receive(msg)
-        case msg: DeleteFile         ⇒ deleter.receive(msg)
-        case msg: CleanSerializedJob ⇒ cleaner.receive(msg)
+        case msg: Upload             ⇒ UploadActor.receive(msg)
+        case msg: Submit             ⇒ SubmitActor.receive(msg)
+        case msg: Refresh            ⇒ RefreshActor.receive(msg)
+        case msg: GetResult          ⇒ GetResultActor.receive(msg)
+        case msg: KillBatchJob       ⇒ KillerActor.receive(msg)
+        case msg: DeleteFile         ⇒ DeleteActor.receive(msg)
+        case msg: CleanSerializedJob ⇒ CleanerActor.receive(msg)
       }
   }
 
-  def !(msg: JobMessage): Unit = msg match {
-    case msg: Upload             ⇒ messageQueue.enqueue(msg)
-    case msg: Submit             ⇒ messageQueue.enqueue(msg)
-    case msg: Refresh            ⇒ messageQueue.enqueue(msg)
-    case msg: GetResult          ⇒ messageQueue.enqueue(msg)
-    case msg: KillBatchJob       ⇒ messageQueue.enqueue(msg)
-    case msg: DeleteFile         ⇒ messageQueue.enqueue(msg)
-    case msg: CleanSerializedJob ⇒ messageQueue.enqueue(msg)
+  def dispatch(msg: DispatchedMessage)(implicit services: BatchEnvironment.Services) = services.threadProvider.submit(() ⇒ DispatcherActor.receive(msg), messagePriority(msg))
+
+  def !(msg: JobMessage)(implicit services: BatchEnvironment.Services): Unit = msg match {
+    case msg: Upload             ⇒ dispatch(msg)
+    case msg: Submit             ⇒ dispatch(msg)
+    case msg: Refresh            ⇒ dispatch(msg)
+    case msg: GetResult          ⇒ dispatch(msg)
+    case msg: KillBatchJob       ⇒ dispatch(msg)
+    case msg: DeleteFile         ⇒ dispatch(msg)
+    case msg: CleanSerializedJob ⇒ dispatch(msg)
 
     case Manage(job) ⇒
       self ! Upload(job)
 
     case Delay(msg, delay) ⇒
-      delayedExecutor.schedule(self ! msg, delay.millis, TimeUnit.MILLISECONDS)
+      services.threadProvider.scheduler.schedule((self ! msg): Runnable, delay.millis, TimeUnit.MILLISECONDS)
 
     case Uploaded(job, sj) ⇒
       job.serializedJob = Some(sj)
       self ! Submit(job, sj)
 
     case Submitted(job, sj, bj) ⇒
+      import services._
       job.batchJob = Some(bj)
       self ! Delay(Refresh(job, sj, bj, job.environment.updateInterval.minUpdateInterval), job.environment.updateInterval.minUpdateInterval)
 
@@ -119,7 +87,7 @@ class JobManager { self ⇒
     case Resubmit(job, storage) ⇒
       killAndClean(job)
       job.state = ExecutionState.READY
-      messageQueue.enqueue(Upload(job))
+      dispatch(Upload(job))
 
     case Error(job, exception) ⇒
       val level = exception match {
@@ -142,7 +110,7 @@ class JobManager { self ⇒
 
   }
 
-  def killAndClean(job: BatchExecutionJob) = {
+  def killAndClean(job: BatchExecutionJob)(implicit services: BatchEnvironment.Services) = {
     job.batchJob.foreach(bj ⇒ self ! KillBatchJob(bj))
     job.batchJob = None
     job.serializedJob.foreach(j ⇒ self ! CleanSerializedJob(j))

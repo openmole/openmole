@@ -187,10 +187,11 @@ package object systemexec extends external.ExternalPackage with SystemExecPackag
 
   def commandLine(
     cmd:     FromContext[String],
-    workDir: String,
-    context: Context
-  )(implicit rng: RandomProvider): Array[String] =
+    workDir: String
+  ) = FromContext { p ⇒
+    import p._
     CommandLine.parse(cmd.from(context + Variable(External.PWD, workDir))).toStrings
+  }
 
   def execute(
     command:              Array[String],
@@ -254,7 +255,6 @@ package object systemexec extends external.ExternalPackage with SystemExecPackag
          |[${commandLine.mkString(" ")}] return code was not 0 but ${executionResult.returnCode}""".stripMargin
     )
 
-  @annotation.tailrec
   def executeAll(
     workDirectory:        File,
     environmentVariables: Vector[(String, String)],
@@ -262,17 +262,18 @@ package object systemexec extends external.ExternalPackage with SystemExecPackag
     returnValue:          Option[Val[Int]],
     stdOut:               Option[Val[String]],
     stdErr:               Option[Val[String]],
-    context:              Context,
     cmds:                 List[FromContext[String]],
     acc:                  ExecutionResult           = ExecutionResult.empty
-  )(implicit rng: RandomProvider): ExecutionResult =
+  )(p: FromContext.Parameters): ExecutionResult = {
+    import p._
     cmds match {
       case Nil ⇒ acc
       case cmd :: t ⇒
-        val commandline = commandLine(cmd, workDirectory.getAbsolutePath, context)
+        val commandline = commandLine(cmd, workDirectory.getAbsolutePath).from(context)
         val result = execute(commandline, workDirectory, environmentVariables, returnOutput = stdOut.isDefined, returnError = stdErr.isDefined, errorOnReturnValue = false)
         if (errorOnReturnValue && !returnValue.isDefined && result.returnCode != 0) throw error(commandline.toVector, result)
-        else executeAll(workDirectory, environmentVariables, errorOnReturnValue, returnValue, stdOut, stdErr, context, t, ExecutionResult.append(acc, result))
+        else executeAll(workDirectory, environmentVariables, errorOnReturnValue, returnValue, stdOut, stdErr, t, ExecutionResult.append(acc, result))(p)
     }
+  }
 
 }

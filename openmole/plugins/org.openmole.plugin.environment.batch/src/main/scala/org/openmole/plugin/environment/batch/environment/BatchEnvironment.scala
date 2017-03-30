@@ -19,6 +19,7 @@ package org.openmole.plugin.environment.batch.environment
 
 import java.io.File
 import java.util.UUID
+import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicLong
 
 import org.openmole.core.communication.message._
@@ -27,11 +28,13 @@ import org.openmole.core.console.{ REPLClassloader, ScalaREPL }
 import org.openmole.core.event.{ Event, EventDispatcher }
 import org.openmole.core.fileservice.{ FileCache, FileService }
 import org.openmole.core.pluginmanager.PluginManager
-import org.openmole.core.serializer.SerialiserService
-import org.openmole.core.updater.Updater
+import org.openmole.core.preference.{ ConfigurationLocation, Preference }
+import org.openmole.core.replication.ReplicaCatalog
+import org.openmole.core.serializer.SerializerService
+import org.openmole.core.threadprovider.{ ThreadProvider, Updater }
 import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.job._
-import org.openmole.core.workspace.{ ConfigurationLocation, Workspace }
+import org.openmole.core.workspace._
 import org.openmole.plugin.environment.batch.control._
 import org.openmole.plugin.environment.batch.jobservice._
 import org.openmole.plugin.environment.batch.refresh._
@@ -39,12 +42,14 @@ import org.openmole.plugin.environment.batch.storage._
 import org.openmole.tool.cache._
 import org.openmole.tool.file._
 import org.openmole.tool.logger.Logger
-
+import org.openmole.tool.random.{ RandomProvider, Seeder }
 import squants.time.TimeConversions._
 import squants.information.Information
 import squants.information.InformationConversions._
+import org.openmole.core.location._
 
 import scala.ref.WeakReference
+import scala.util.Random
 
 object BatchEnvironment extends Logger {
 
@@ -102,111 +107,80 @@ object BatchEnvironment extends Logger {
   val MaxUpdateInterval = ConfigurationLocation("BatchEnvironment", "MaxUpdateInterval", Some(10 minutes))
   val IncrementUpdateInterval = ConfigurationLocation("BatchEnvironment", "IncrementUpdateInterval", Some(1 minutes))
   val MaxUpdateErrorsInARow = ConfigurationLocation("BatchEnvironment", "MaxUpdateErrorsInARow", Some(3))
-
-  val JobManagementThreads = ConfigurationLocation("BatchEnvironment", "JobManagementThreads", Some(100))
-
   val StoragesGCUpdateInterval = ConfigurationLocation("BatchEnvironment", "StoragesGCUpdateInterval", Some(1 hours))
   val RuntimeMemoryMargin = ConfigurationLocation("BatchEnvironment", "RuntimeMemoryMargin", Some(400 megabytes))
 
   val downloadResultRetry = ConfigurationLocation("BatchEnvironment", "DownloadResultRetry", Some(3))
 
-  private def runtimeDirLocation = Workspace.openMOLELocation / "runtime"
+  private def runtimeDirLocation = openMOLELocation / "runtime"
 
   lazy val runtimeLocation = runtimeDirLocation / "runtime.tar.gz"
   lazy val JVMLinuxX64Location = runtimeDirLocation / "jvm-x64.tar.gz"
 
-  def defaultRuntimeMemory = Workspace.preference(BatchEnvironment.MemorySizeForRuntime)
-  def getTokenInterval = Workspace.preference(GetTokenInterval) * Workspace.rng.nextDouble
+  def defaultRuntimeMemory(implicit preference: Preference) = preference(BatchEnvironment.MemorySizeForRuntime)
+  def getTokenInterval(implicit preference: Preference, randomProvider: RandomProvider) = preference(GetTokenInterval) * randomProvider().nextDouble
 
-  lazy val jobManager = new JobManager
-}
+  def openMOLEMemoryValue(openMOLEMemory: Option[Information])(implicit preference: Preference) = openMOLEMemory match {
+    case None    ⇒ preference(MemorySizeForRuntime)
+    case Some(m) ⇒ m
+  }
 
-import org.openmole.plugin.environment.batch.environment.BatchEnvironment._
+  def requiredMemory(openMOLEMemory: Option[Information], memory: Option[Information])(implicit preference: Preference) = memory match {
+    case Some(m) ⇒ m
+    case None    ⇒ openMOLEMemoryValue(openMOLEMemory) + preference(BatchEnvironment.RuntimeMemoryMargin)
+  }
 
-object BatchExecutionJob {
-  val replBundleCache = new AssociativeCache[ReferencedClasses, FileCache]()
-}
+  def threadsValue(threads: Option[Int]) = threads.getOrElse(1)
 
-trait BatchExecutionJob extends ExecutionJob { bej ⇒
-  def job: Job
-  var serializedJob: Option[SerializedJob] = None
-  var batchJob: Option[BatchJob] = None
+  object Services {
 
-  def moleJobs = job.moleJobs
-  def runnableTasks = job.moleJobs.map(RunnableTask(_))
-
-  def plugins = pluginsAndFiles.plugins ++ closureBundle.map(_.file) ++ referencedClosures.toSeq.flatMap(_.plugins)
-  def files = pluginsAndFiles.files
-
-  def pluginsAndFiles = synchronized(_pluginsAndFiles)
-  @transient private lazy val _pluginsAndFiles = SerialiserService.pluginsAndFiles(runnableTasks)
-
-  def referencedClosures = synchronized(_referencedClosures)
-  @transient private lazy val _referencedClosures = {
-    if (pluginsAndFiles.replClasses.isEmpty) None
-    else {
-      def referenced =
-        pluginsAndFiles.replClasses.map { c ⇒
-          val replClassloader = c.getClassLoader.asInstanceOf[REPLClassloader]
-          replClassloader.referencedClasses(Seq(c))
-        }.fold(ReferencedClasses.empty)(ReferencedClasses.merge)
-      Some(referenced)
+    implicit def fromServices(implicit services: org.openmole.core.services.Services): Services = {
+      import services._
+      new Services()
     }
   }
 
-  def closureBundle =
-    referencedClosures.map { closures ⇒
-      BatchExecutionJob.replBundleCache.cache(job.moleExecution, closures, preCompute = false) { rc ⇒
-        val bundle = Workspace.newFile("closureBundle", ".jar")
-        try ScalaREPL.bundleFromReferencedClass(closures, "closure-" + UUID.randomUUID.toString, "1.0", bundle)
-        catch {
-          case e: Throwable ⇒
-            e.printStackTrace()
-            bundle.delete()
-            throw e
-        }
-        FileCache(bundle)
-      }
-    }
+  class Services(
+    implicit
+    val threadProvider:             ThreadProvider,
+    implicit val preference:        Preference,
+    implicit val newFile:           NewFile,
+    implicit val serializerService: SerializerService,
+    implicit val fileService:       FileService,
+    implicit val seeder:            Seeder,
+    implicit val randomProvider:    RandomProvider,
+    implicit val replicaCatalog:    ReplicaCatalog
+  )
 
-  def usedFiles: Iterable[File] =
-    (files ++
-      Seq(environment.runtime, environment.jvmLinuxX64) ++
-      environment.plugins() ++ plugins).distinct
-
-  def usedFileHashes = usedFiles.map(f ⇒ (f, FileService.hash(job.moleExecution, f)))
-
-  def environment: BatchEnvironment
-
-  def trySelectStorage(): Option[(StorageService, AccessToken)]
-  def trySelectJobService(): Option[(JobService, AccessToken)]
 }
 
 trait BatchEnvironment extends SubmissionEnvironment { env ⇒
   type SS <: StorageService
   type JS <: JobService
 
+  implicit val services: BatchEnvironment.Services
+  def preference: Preference = services.preference
+
   def jobs = batchJobWatcher().executionJobs
 
   def executionJob(job: Job): BatchExecutionJob
 
-  def openMOLEMemory: Option[Information] = None
-  def openMOLEMemoryValue = openMOLEMemory.getOrElse(Workspace.preference(MemorySizeForRuntime))
-
   @transient val batchJobWatcher = Cache {
-    val watcher = new BatchJobWatcher(WeakReference(this))
+    val watcher = new BatchJobWatcher(WeakReference(this), preference)
+    import services._
     Updater.registerForUpdate(watcher)
     watcher
   }
 
   def threads: Option[Int] = None
-  def threadsValue = threads.getOrElse(1)
+  def openMOLEMemory: Option[Information]
 
   override def submit(job: Job) = {
+    import services._
     val bej = executionJob(job)
     EventDispatcher.trigger(this, new Environment.JobSubmitted(bej))
     batchJobWatcher().register(bej)
-    jobManager ! Manage(bej)
+    JobManager ! Manage(bej)
   }
 
   def runtime = BatchEnvironment.runtimeLocation
@@ -216,9 +190,9 @@ trait BatchEnvironment extends SubmissionEnvironment { env ⇒
 
   def updateInterval =
     UpdateInterval(
-      minUpdateInterval = Workspace.preference(MinUpdateInterval),
-      maxUpdateInterval = Workspace.preference(MaxUpdateInterval),
-      incrementUpdateInterval = Workspace.preference(IncrementUpdateInterval)
+      minUpdateInterval = services.preference(BatchEnvironment.MinUpdateInterval),
+      maxUpdateInterval = services.preference(BatchEnvironment.MaxUpdateInterval),
+      incrementUpdateInterval = services.preference(BatchEnvironment.IncrementUpdateInterval)
     )
 
   def submitted: Long = jobs.count { _.state == ExecutionState.SUBMITTED }
@@ -247,4 +221,62 @@ trait SimpleBatchEnvironment <: BatchEnvironment { env ⇒
 
   def storage: SS
   def jobService: JS
+}
+
+object BatchExecutionJob {
+  val replBundleCache = new AssociativeCache[ReferencedClasses, FileCache]()
+}
+
+trait BatchExecutionJob extends ExecutionJob { bej ⇒
+
+  def job: Job
+  var serializedJob: Option[SerializedJob] = None
+  var batchJob: Option[BatchJob] = None
+
+  def moleJobs = job.moleJobs
+  def runnableTasks = job.moleJobs.map(RunnableTask(_))
+
+  def plugins = pluginsAndFiles.plugins ++ closureBundle.map(_.file) ++ referencedClosures.toSeq.flatMap(_.plugins)
+  def files = pluginsAndFiles.files
+
+  @transient lazy val pluginsAndFiles = environment.services.serializerService.pluginsAndFiles(runnableTasks)
+
+  @transient lazy val referencedClosures = {
+    if (pluginsAndFiles.replClasses.isEmpty) None
+    else {
+      def referenced =
+        pluginsAndFiles.replClasses.map { c ⇒
+          val replClassloader = c.getClassLoader.asInstanceOf[REPLClassloader]
+          replClassloader.referencedClasses(Seq(c))
+        }.fold(ReferencedClasses.empty)(ReferencedClasses.merge)
+      Some(referenced)
+    }
+  }
+
+  def closureBundle =
+    referencedClosures.map { closures ⇒
+      BatchExecutionJob.replBundleCache.cache(job.moleExecution, closures, preCompute = false) { rc ⇒
+        val bundle = environment.services.newFile.newFile("closureBundle", ".jar")
+        try ScalaREPL.bundleFromReferencedClass(closures, "closure-" + UUID.randomUUID.toString, "1.0", bundle)
+        catch {
+          case e: Throwable ⇒
+            bundle.delete()
+            throw e
+        }
+        FileCache(bundle)(environment.services.fileService)
+      }
+    }
+
+  def usedFiles: Iterable[File] =
+    (files ++
+      Seq(environment.runtime, environment.jvmLinuxX64) ++
+      environment.plugins() ++ plugins).distinct
+
+  def usedFileHashes = usedFiles.map(f ⇒ (f, environment.services.fileService.hash(job.moleExecution, f)(environment.services.newFile)))
+
+  def environment: BatchEnvironment
+
+  def trySelectStorage(): Option[(StorageService, AccessToken)]
+  def trySelectJobService(): Option[(JobService, AccessToken)]
+
 }

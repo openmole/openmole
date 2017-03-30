@@ -17,7 +17,7 @@
 package org.openmole.core.expansion
 
 import org.openmole.core.tools.service
-import org.openmole.core.workspace.Workspace
+import org.openmole.core.workspace.{ NewFile, Workspace }
 import org.openmole.tool.file.FilePackage
 import org.openmole.tool.random
 import org.openmole.tool.statistics.StatisticsPackage
@@ -26,10 +26,10 @@ trait CodePackage extends FilePackage with StatisticsPackage {
   def Random(seed: Long) = random.Random.apply(seed)
   def newRNG(seed: Long) = Random(seed)
 
-  def newFile(prefix: String = Workspace.fixedPrefix, suffix: String = Workspace.fixedPostfix) = Workspace.newFile(prefix, suffix)
-  def newDir(prefix: String = Workspace.fixedDir) = Workspace.newDir(prefix)
-  def mkDir(prefix: String = Workspace.fixedDir) = {
-    val dir = Workspace.newDir(prefix)
+  def newFile(prefix: String = Workspace.fixedPrefix, suffix: String = Workspace.fixedPostfix)(implicit newFile: NewFile) = newFile.newFile(prefix, suffix)
+  def newDir(prefix: String = Workspace.fixedDir)(implicit newFile: NewFile) = newFile.newDir(prefix)
+  def mkDir(prefix: String = Workspace.fixedDir)(implicit newFile: NewFile) = {
+    val dir = newFile.newDir(prefix)
     dir.mkdirs
     dir
   }

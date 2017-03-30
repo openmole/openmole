@@ -26,7 +26,6 @@ import org.openmole.core.dsl._
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
 import org.openmole.core.workflow.mole._
-import org.openmole.tool.random.RandomProvider
 
 object FileSource {
 
@@ -47,7 +46,8 @@ object FileSource {
     config:    InputOutputConfig
 ) extends Source {
 
-  override def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider) = {
+  override protected def process(executionContext: MoleExecutionContext) = FromContext { parameters ⇒
+    import parameters._
     val expandedPath = new File(path.from(context))
     Variable(
       prototype,

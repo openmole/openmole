@@ -21,12 +21,10 @@ import org.openmole.core.context.Context
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.dsl._
-import org.openmole.tool.random.RandomProvider
 
 object UniformDistribution {
   implicit def isDiscrete[T]: Discrete[UniformDistribution[T], T] = new Discrete[UniformDistribution[T], T] {
-    override def iterator(domain: UniformDistribution[T]) =
-      FromContext((context, rng) ⇒ domain.iterator(context)(rng))
+    override def iterator(domain: UniformDistribution[T]) = domain.iterator
   }
 
   def apply[T](
@@ -38,10 +36,10 @@ object UniformDistribution {
 
 sealed class UniformDistribution[T](seed: Option[Long], max: Option[T])(implicit distribution: Distribution[T]) {
 
-  def iterator(context: Context)(implicit rng: RandomProvider): Iterator[T] = {
+  def iterator = FromContext { p ⇒
     val random: scala.util.Random = seed match {
       case Some(s) ⇒ Random(s)
-      case None    ⇒ rng()
+      case None    ⇒ p.random()
     }
     Iterator.continually {
       max match {

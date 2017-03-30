@@ -18,7 +18,7 @@ package org.openmole.tool.crypto
 
 import java.io.{ File, FileInputStream, FileOutputStream }
 import java.math.BigInteger
-import java.security.{ KeyPairGenerator, KeyStore, SecureRandom }
+import java.security.{ KeyPairGenerator, SecureRandom }
 import java.util.Date
 
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo
@@ -36,7 +36,7 @@ object Certificate {
   //Security.addProvider(new BouncyCastleProvider())
 
   def loadOrGenerate(file: File, ksPassword: String, hostName: Option[String] = Some("OpenMOLE")) = {
-    val ks = KeyStore.getInstance(KeyStore.getDefaultType)
+    val ks = java.security.KeyStore.getInstance(java.security.KeyStore.getDefaultType)
     if (file.exists()) {
       val fis = new FileInputStream(file)
       try ks.load(fis, ksPassword.toCharArray)

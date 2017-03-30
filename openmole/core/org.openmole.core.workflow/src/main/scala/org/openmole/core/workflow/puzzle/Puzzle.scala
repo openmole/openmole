@@ -23,10 +23,14 @@ import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
-import org.openmole.core.workspace.Workspace
+import org.openmole.core.workspace.{ NewFile, Workspace }
 import shapeless._
 import ops.hlist._
-import org.openmole.core.workflow.validation.TypeUtil
+import org.openmole.core.workflow.validation._
+import org.openmole.core.preference._
+import org.openmole.core.threadprovider.ThreadProvider
+import org.openmole.tool.random._
+import org.openmole.tool.thread._
 
 object ToPuzzle {
 
@@ -159,15 +163,15 @@ case class Puzzle(
 
   def toMole = new Mole(firstSlot.capsule, transitions, dataChannels)
 
-  def toExecution: MoleExecution =
+  def toExecution(implicit seeder: Seeder, preference: Preference, newFile: NewFile, threadProvider: ThreadProvider): MoleExecution =
     MoleExecution(toMole, sources, hooks, environments, grouping)
 
   def toExecution(
-    implicits:          Context              = Context.empty,
-    seed:               Long                 = Workspace.newSeed,
-    executionContext:   MoleExecutionContext = MoleExecutionContext(),
-    defaultEnvironment: LocalEnvironment     = LocalEnvironment()
-  ): MoleExecution =
+    implicits:          Context                                = Context.empty,
+    seed:               OptionalArgument[Long]                 = None,
+    executionContext:   OptionalArgument[MoleExecutionContext] = None,
+    defaultEnvironment: OptionalArgument[LocalEnvironment]     = None
+  )(implicit seeder: Seeder, preference: Preference, newFile: NewFile, threadProvider: ThreadProvider): MoleExecution =
     MoleExecution(
       mole = toMole,
       sources = sources,
@@ -175,7 +179,6 @@ case class Puzzle(
       environments = environments,
       grouping = grouping,
       implicits = implicits,
-      seed = seed,
       defaultEnvironment = defaultEnvironment,
       executionContext = executionContext
     )

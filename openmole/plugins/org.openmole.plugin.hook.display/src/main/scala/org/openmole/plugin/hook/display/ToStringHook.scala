@@ -21,9 +21,9 @@ import java.io.PrintStream
 
 import monocle.macros.Lenses
 import org.openmole.core.context.{ Context, Val }
+import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
 import org.openmole.core.workflow.mole._
-import org.openmole.tool.random.RandomProvider
 
 object ToStringHook {
 
@@ -45,7 +45,8 @@ object ToStringHook {
     config:     InputOutputConfig
 ) extends Hook {
 
-  override def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider) = {
+  override protected def process(executionContext: MoleExecutionContext) = FromContext { parameters ⇒
+    import parameters._
     if (!prototypes.isEmpty) {
       val filtered = Context(prototypes.flatMap(p ⇒ context.variable(p.asInstanceOf[Val[Any]])): _*)
       executionContext.out.println(filtered.toString)

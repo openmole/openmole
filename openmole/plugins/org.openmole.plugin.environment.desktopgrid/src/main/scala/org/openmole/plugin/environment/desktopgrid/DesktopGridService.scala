@@ -21,13 +21,13 @@ import java.io.File
 import java.net.URI
 
 import org.openmole.core.communication.storage.RemoteStorage
-import org.openmole.core.serializer.SerialiserService
+import org.openmole.core.replication.ReplicaCatalog
+import org.openmole.core.serializer.SerializerService
 import org.openmole.core.workflow.execution.ExecutionState._
 import org.openmole.core.workspace.Workspace
 import org.openmole.plugin.environment.batch.control._
 import org.openmole.plugin.environment.batch.environment._
 import org.openmole.plugin.environment.batch.jobservice._
-import org.openmole.plugin.environment.batch.replication.ReplicaCatalog
 import org.openmole.plugin.environment.batch.storage._
 import org.openmole.plugin.environment.desktopgrid.DesktopGridEnvironment._
 import org.openmole.plugin.environment.gridscale.GridScaleStorage
@@ -38,29 +38,9 @@ import squants.information.Information
 
 object DesktopGridService {
 
-  case class DesktopGridEntry(service: DesktopGridService, var users: Int)
-
-  val services = new collection.mutable.HashMap[Int, DesktopGridEntry]()
-
-  def borrow(port: Int): DesktopGridService = services.synchronized {
-    val service = services.getOrElseUpdate(port, DesktopGridEntry(DesktopGridService(port), 0))
-    service.users += 1
-    service.service
-  }
-
-  def release(port: Int) = services.synchronized {
-    services.get(port).foreach { service ⇒
-      service.users -= 1
-      if (service.users == 0) {
-        services.remove(port)
-        service.service.clean
-      }
-    }
-  }
-
-  def apply(port: Int) = {
-    val service = new DesktopGridService(port)
-    ReplicaCatalog.deleteReplicas(service.storageId)
+  def apply(port: Int, passwordHash: Hash)(implicit services: BatchEnvironment.Services) = {
+    val service = new DesktopGridService(port, passwordHash, services.newFile.newDir("desktopgrid"))
+    services.replicaCatalog.deleteReplicas(service.storageId)
     service
   }
 
@@ -70,34 +50,48 @@ trait DesktopGridJobService extends JobService {
   override type J = String
 }
 
-class DesktopGridService(port: Int, path: File = Workspace.newDir()) { service ⇒
+class DesktopGridService(port: Int, passwordHash: Hash, path: File)(implicit services: BatchEnvironment.Services) { service ⇒
+  import services._
+  import threadProvider.pool
+
   type J = String
 
   val url = new URI("desktop", null, "localhost", port, null, null, null)
   val storageId = url.toString
 
-  def storage(_environment: BatchEnvironment, port: Int) = new StorageService with GridScaleStorage with CompressedTransfer {
-    def usageControl = UnlimitedAccess
-    val remoteStorage: RemoteStorage = new DumyStorage
-    val environment = _environment
-    def root = "/"
-    val storage = new RelativeStorage(path)
-    val id = storageId
-    val url = service.url
+  def storage(_environment: BatchEnvironment, port: Int) = {
+    val storage =
+      new StorageService with GridScaleStorage with CompressedTransfer {
 
-    override def persistentDir(implicit token: AccessToken) = baseDir(token)
-    override def tmpDir(implicit token: AccessToken) = baseDir(token)
+        def usageControl = UnlimitedAccess
+
+        val remoteStorage: RemoteStorage = new DumyStorage
+        val environment = _environment
+
+        def root = "/"
+
+        val storage = new RelativeStorage(path)
+        val id = storageId
+        val url = service.url
+
+        override def persistentDir(implicit token: AccessToken) = baseDir(token)
+
+        override def tmpDir(implicit token: AccessToken) = baseDir(token)
+      }
+    StorageService.startGC(storage)
+    storage
   }
 
   def jobService(_environment: BatchEnvironment, port: Int) = new DesktopGridJobService {
     override protected def _delete(j: J): Unit = service.delete(j)
-    override protected def _submit(serializedJob: SerializedJob): BatchJob = service.submit(serializedJob, environment.openMOLEMemoryValue, this)
+    override protected def _submit(serializedJob: SerializedJob): BatchJob =
+      service.submit(serializedJob, BatchEnvironment.openMOLEMemoryValue(environment.openMOLEMemory), this)
     override protected def _state(j: J): ExecutionState = service.state(j)
-    override def environment: BatchEnvironment = _environment
+    override val environment: BatchEnvironment = _environment
     override def usageControl = UnlimitedAccess
   }
 
-  val server = new SFTPServer(path, port, DesktopGridAuthentication.password.hash)
+  val server = new SFTPServer(path, port, passwordHash = passwordHash)
 
   val timeStempsDir = new File(path, timeStempsDirName) { mkdirs }
   val jobsDir = new File(path, jobsDirName) { mkdirs }
@@ -120,7 +114,7 @@ class DesktopGridService(port: Int, path: File = Workspace.newDir()) { service �
 
     val tmpJobFile = tmpJobSubmissionFile(jobId)
     tmpJobFile.withGzippedOutputStream(os ⇒
-      SerialiserService.serialise(desktopJobMessage, os))
+      services.serializerService.serialise(desktopJobMessage, os))
 
     tmpJobFile.move(jobSubmissionFile(jobId))
 
@@ -149,7 +143,7 @@ class DesktopGridService(port: Int, path: File = Workspace.newDir()) { service �
   def clean = {
     server.stop
     path.recursiveDelete
-    ReplicaCatalog.deleteReplicas(storageId)
+    services.replicaCatalog.deleteReplicas(storageId)
   }
 
 }

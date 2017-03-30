@@ -23,12 +23,15 @@ import java.net.URI
 import fr.iscpif.gridscale.http.{ DPMWebDAVStorage, HTTPSAuthentication, WebDAVLocation }
 import fr.iscpif.gridscale.storage.{ ListEntry, Storage ⇒ GSStorage }
 import org.openmole.core.communication.storage.{ RemoteStorage, _ }
-import org.openmole.core.workspace.Workspace
+import org.openmole.core.preference.Preference
+import org.openmole.core.threadprovider.ThreadProvider
+import org.openmole.core.workspace.{ NewFile, Workspace }
 import org.openmole.plugin.environment.batch.control._
 import org.openmole.plugin.environment.batch.environment.BatchEnvironment
 import org.openmole.plugin.environment.batch.storage._
 import org.openmole.plugin.environment.gridscale.GridScaleStorage
 import org.openmole.tool.file._
+import squants.time.Time
 
 import scala.sys.process.{ Process, ProcessLogger }
 import scala.util.Try
@@ -51,6 +54,8 @@ trait NativeCommandCopy {
 
   def url: URI
 
+  implicit def newFile: NewFile
+
   protected def run(cmd: String) = {
     val output = new StringBuilder
     val error = new StringBuilder
@@ -71,7 +76,7 @@ trait NativeCommandCopy {
   def download(src: String, dest: File, options: TransferOptions): Unit =
     try {
       if (options.raw) download(src, dest)
-      else Workspace.withTmpFile { tmpFile ⇒
+      else newFile.withTmpFile { tmpFile ⇒
         download(src, tmpFile)
         tmpFile.copyUncompressFile(dest)
       }
@@ -85,7 +90,7 @@ trait NativeCommandCopy {
   def upload(src: File, dest: String, options: TransferOptions): Unit =
     try {
       if (options.raw) upload(src, dest)
-      else Workspace.withTmpFile { tmpFile ⇒
+      else newFile.withTmpFile { tmpFile ⇒
         src.copyCompressFile(tmpFile)
         upload(tmpFile, dest)
       }
@@ -102,23 +107,28 @@ trait NativeCommandCopy {
 
 object EGIWebDAVStorageService {
 
-  def apply[A: HTTPSAuthentication](s: WebDAVLocation, _environment: BatchEnvironment, voName: String, debug: Boolean, authentication: A) = new EGIWebDAVStorageService {
-    def threads = Workspace.preference(EGIEnvironment.ConnectionsByWebDAVSE)
-    val usageControl = AvailabilityQuality(new LimitedAccess(threads, Int.MaxValue), Workspace.preference(EGIEnvironment.QualityHysteresis))
-    val storage = DPMWebDAVStorage(s.copy(basePath = ""))(authentication)
-    val url = new URI("https", null, s.host, s.port, null, null, null)
-    val remoteStorage = new CurlRemoteStorage(s.host, s.port, voName, debug)
-    val environment = _environment
-    val root = s.basePath
-    override lazy val id = new URI("webdavs", voName, s.host, s.port, s.basePath, null, null).toString
-  }
+  def apply[A: HTTPSAuthentication](s: WebDAVLocation, _environment: BatchEnvironment, voName: String, debug: Boolean, authentication: A)(implicit preference: Preference, threadProvider: ThreadProvider, newFile: NewFile) = {
+    val storage =
+      new EGIWebDAVStorageService {
+        def threads = preference(EGIEnvironment.ConnectionsByWebDAVSE)
 
+        val usageControl = AvailabilityQuality(new LimitedAccess(threads, Int.MaxValue), preference(EGIEnvironment.QualityHysteresis))
+        val storage = DPMWebDAVStorage(s.copy(basePath = ""))(authentication)
+        val url = new URI("https", null, s.host, s.port, null, null, null)
+        val remoteStorage = new CurlRemoteStorage(s.host, s.port, voName, preference(EGIEnvironment.RemoteCopyTimeout), debug)
+        val environment = _environment
+        val root = s.basePath
+        override lazy val id = new URI("webdavs", voName, s.host, s.port, s.basePath, null, null).toString
+      }
+    StorageService.startGC(storage)
+    storage
+  }
 }
 
 trait EGIWebDAVStorageService <: EGIStorageService
 
-class CurlRemoteStorage(val host: String, val port: Int, val voName: String, val debug: Boolean) extends RemoteStorage with NativeCommandCopy { s ⇒
-  lazy val curl = new Curl(voName, debug)
+class CurlRemoteStorage(val host: String, val port: Int, val voName: String, val timeout: Time, val debug: Boolean)(implicit val newFile: NewFile) extends RemoteStorage with NativeCommandCopy { s ⇒
+  lazy val curl = new Curl(voName, debug, timeout)
   @transient lazy val url = new URI("https", null, host, port, null, null, null)
   def downloadCommand(from: URI, to: String): String = curl.download(from, to)
   def uploadCommand(from: String, to: URI): String = curl.upload(from, to)

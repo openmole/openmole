@@ -22,14 +22,13 @@ import java.io.File
 import monocle.macros.Lenses
 import org.openmole.core.context.{ Context, Variable }
 import org.openmole.core.exception.InternalProcessingError
-import org.openmole.core.expansion.ScalaWrappedCompilation
+import org.openmole.core.expansion.{ FromContext, ScalaWrappedCompilation }
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.validation._
 import org.openmole.plugin.task.external.{ External, ExternalBuilder }
 import org.openmole.plugin.task.jvm._
 import org.openmole.tool.cache.Cache
-import org.openmole.tool.random.RandomProvider
 
 import scala.util._
 
@@ -84,8 +83,9 @@ object ScalaTask {
       case Failure(e) ⇒ Seq(e)
     }
 
-  override def processCode(context: Context)(implicit rng: RandomProvider) = {
-    val map = scalaCompilation()().from(context)(rng)
+  override def processCode = FromContext { p ⇒
+    import p._
+    val map = scalaCompilation()().from(context)
     outputs.toSeq.map {
       o ⇒ Variable.unsecure(o, Option(map.get(o.name)).getOrElse(new InternalProcessingError(s"Not found output $o")))
     }

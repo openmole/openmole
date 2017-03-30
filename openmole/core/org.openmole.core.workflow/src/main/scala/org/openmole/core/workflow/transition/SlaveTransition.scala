@@ -19,18 +19,19 @@ package org.openmole.core.workflow.transition
 
 import org.openmole.core.context.{ Context, Val }
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.expansion.Condition
+import org.openmole.core.expansion.{ Condition, FromContext }
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.validation.ValidateTransition
-import org.openmole.tool.random.RandomProvider
 
 class SlaveTransition(start: Capsule, end: Slot, condition: Condition = Condition.True, filter: BlockList = BlockList.empty) extends ExplorationTransition(start, end, condition, filter) with ISlaveTransition with ValidateTransition {
 
   override def validate(inputs: Seq[Val[_]]) = condition.validate(inputs)
 
-  override def perform(context: Context, ticket: Ticket, subMole: SubMoleExecution)(implicit rng: RandomProvider) =
+  override def perform(context: Context, ticket: Ticket, subMole: SubMoleExecution, executionContext: MoleExecutionContext) = {
+    import executionContext._
     if (condition.from(context))
-      submitIn(filtered(context), ticket.parent.getOrElse(throw new UserBadDataError("Slave transition should take place within an exploration.")), subMole)
+      submitIn(filtered(context), ticket.parent.getOrElse(throw new UserBadDataError("Slave transition should take place within an exploration.")), subMole, executionContext)
+  }
 
   override def toString = s"$start -<- $end"
 

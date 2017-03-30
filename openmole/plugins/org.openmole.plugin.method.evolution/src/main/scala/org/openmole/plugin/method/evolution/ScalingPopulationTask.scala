@@ -25,8 +25,9 @@ object ScalingPopulationTask {
   def apply[T](algorithm: T)(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name) = {
     val t = wfi(algorithm)
 
-    ClosureTask("ScalingPopulationTask") { (context, rng, _) ⇒
-      t.populationToVariables(context(t.populationPrototype)).from(context)(rng)
+    FromContextTask("ScalingPopulationTask") { p ⇒
+      import p._
+      t.populationToVariables(context(t.populationPrototype)).from(context)
     } set (
       inputs += t.populationPrototype,
       outputs += (t.resultPrototypes.map(_.array): _*)

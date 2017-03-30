@@ -36,8 +36,8 @@ import org.openmole.tool.stream._
 package file {
 
   import java.nio.file.attribute.PosixFilePermissions
+  import java.util.concurrent.ThreadPoolExecutor
 
-  import org.openmole.tool.stream.GZipedInputStream
   import squants.time.Time
 
   trait FilePackage {
@@ -123,7 +123,7 @@ package file {
       }
 
       // TODO replace with NIO
-      def copy(to: OutputStream, maxRead: Int, timeout: Time): Unit =
+      def copy(to: OutputStream, maxRead: Int, timeout: Time)(implicit pool: ThreadPoolExecutor): Unit =
         withClosable(bufferedInputStream) {
           _.copy(to, maxRead, timeout)
         }

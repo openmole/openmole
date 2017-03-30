@@ -33,6 +33,8 @@ import org.openmole.core.context.Val
 
 class ValidationSpec extends FlatSpec with Matchers {
 
+  import org.openmole.core.workflow.Services._
+
   "Validation" should "detect a missing input error" in {
     val p = Val[String]("t")
 

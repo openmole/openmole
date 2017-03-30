@@ -25,12 +25,12 @@ import org.openmole.core.communication.storage._
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.serializer._
+import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.workflow.job._
-import org.openmole.core.workspace.Workspace
+import org.openmole.core.workspace.{ NewFile, Workspace }
 import org.openmole.plugin.environment.batch.control._
 import org.openmole.plugin.environment.batch.environment.BatchEnvironment.signalUpload
 import org.openmole.plugin.environment.batch.environment._
-import org.openmole.plugin.environment.batch.replication._
 import org.openmole.plugin.environment.batch.storage._
 import org.openmole.tool.file.{ uniqName, _ }
 import org.openmole.tool.logger.Logger
@@ -38,34 +38,35 @@ import org.openmole.tool.random._
 
 import scala.collection.immutable.TreeSet
 
-object UploadActor extends Logger
+object UploadActor extends Logger {
 
-import org.openmole.plugin.environment.batch.refresh.UploadActor._
+  def receive(msg: Upload)(implicit services: BatchEnvironment.Services) = {
+    import services._
 
-class UploadActor(jobManager: JobManager) {
-
-  def receive(msg: Upload) = {
     val job = msg.job
     if (!job.state.isFinal) {
       try job.trySelectStorage match {
         case Some((storage, token)) ⇒
           try {
-            val sj = initCommunication(job, storage)(token)
-            jobManager ! Uploaded(job, sj)
+            implicit val implicitToken = token
+            val sj = initCommunication(job, storage)
+            JobManager ! Uploaded(job, sj)
           }
           finally storage.releaseToken(token)
-        case None ⇒ jobManager ! Delay(msg, BatchEnvironment.getTokenInterval)
+        case None ⇒ JobManager ! Delay(msg, BatchEnvironment.getTokenInterval)
       }
       catch {
         case e: Throwable ⇒
-          jobManager ! Error(job, e)
-          jobManager ! msg
+          JobManager ! Error(job, e)
+          JobManager ! msg
       }
     }
   }
 
-  private def initCommunication(job: BatchExecutionJob, storage: StorageService)(implicit token: AccessToken): SerializedJob = Workspace.withTmpFile("job", ".tar") { jobFile ⇒
-    SerialiserService.serialise(job.runnableTasks, jobFile)
+  private def initCommunication(job: BatchExecutionJob, storage: StorageService)(implicit token: AccessToken, services: BatchEnvironment.Services): SerializedJob = services.newFile.withTmpFile("job", ".tar") { jobFile ⇒
+    import services._
+
+    serializerService.serialise(job.runnableTasks, jobFile)
 
     val plugins = new TreeSet[File]()(fileOrdering) ++ job.plugins
     val files = (new TreeSet[File]()(fileOrdering) ++ job.files) diff plugins
@@ -89,26 +90,28 @@ class UploadActor(jobManager: JobManager) {
     )
 
     /* ---- upload the execution message ----*/
-    Workspace.withTmpFile("job", ".tar") { executionMessageFile ⇒
-      SerialiserService.serialiseAndArchiveFiles(executionMessage, executionMessageFile)
+    newFile.withTmpFile("job", ".tar") { executionMessageFile ⇒
+      serializerService.serialiseAndArchiveFiles(executionMessage, executionMessageFile)
       signalUpload(storage.upload(executionMessageFile, inputPath, TransferOptions(forceCopy = true, canMove = true)), executionMessageFile, inputPath, storage)
     }
 
     SerializedJob(storage, communicationPath, inputPath, runtime)
   }
 
-  def toReplicatedFile(job: Job, file: File, storage: StorageService, transferOptions: TransferOptions)(implicit token: AccessToken): ReplicatedFile = {
+  def toReplicatedFile(job: Job, file: File, storage: StorageService, transferOptions: TransferOptions)(implicit token: AccessToken, services: BatchEnvironment.Services): ReplicatedFile = {
+    import services._
+
     if (!file.exists) throw new UserBadDataError(s"File $file is required but doesn't exist.")
 
     val isDir = file.isDirectory
     val toReplicatePath = file.getCanonicalFile
 
     val (toReplicate, options) =
-      if (isDir) (FileService.archiveForDir(job.moleExecution, file).file, transferOptions.copy(forceCopy = true))
+      if (isDir) (services.fileService.archiveForDir(job.moleExecution, file).file, transferOptions.copy(forceCopy = true))
       else (file, transferOptions)
 
     val fileMode = file.mode
-    val hash = FileService.hash(job.moleExecution, toReplicate).toString
+    val hash = services.fileService.hash(job.moleExecution, toReplicate).toString
 
     def upload = {
       val name = uniqName(System.currentTimeMillis.toString, ".rep")
@@ -118,7 +121,7 @@ class UploadActor(jobManager: JobManager) {
       newFile
     }
 
-    val replica = ReplicaCatalog.uploadAndGet(upload, toReplicatePath, hash, storage)
+    val replica = services.replicaCatalog.uploadAndGet(upload, toReplicatePath, hash, storage)
     ReplicatedFile(file.getPath, isDir, hash, replica.path, fileMode)
   }
 
@@ -126,8 +129,8 @@ class UploadActor(jobManager: JobManager) {
     job:         Job,
     environment: BatchEnvironment,
     storage:     StorageService
-  )(implicit token: AccessToken) = {
-    val environmentPluginPath = shuffled(environment.plugins())(Workspace.rng).map { p ⇒ toReplicatedFile(job, p, storage, TransferOptions(raw = true)) }.map { FileMessage(_) }
+  )(implicit token: AccessToken, services: BatchEnvironment.Services) = {
+    val environmentPluginPath = shuffled(environment.plugins())(services.randomProvider()).map { p ⇒ toReplicatedFile(job, p, storage, TransferOptions(raw = true)) }.map { FileMessage(_) }
     val runtimeFileMessage = FileMessage(toReplicatedFile(job, environment.runtime, storage, TransferOptions(raw = true)))
     val jvmLinuxX64FileMessage = FileMessage(toReplicatedFile(job, environment.jvmLinuxX64, storage, TransferOptions(raw = true)))
 
@@ -148,10 +151,10 @@ class UploadActor(jobManager: JobManager) {
     serializationPlugin: Iterable[File],
     storage:             StorageService,
     path:                String
-  )(implicit token: AccessToken): ExecutionMessage = {
+  )(implicit token: AccessToken, services: BatchEnvironment.Services): ExecutionMessage = {
 
-    val pluginReplicas = shuffled(serializationPlugin)(Workspace.rng).map { toReplicatedFile(job, _, storage, TransferOptions(raw = true)) }
-    val files = shuffled(serializationFile)(Workspace.rng).map { toReplicatedFile(job, _, storage, TransferOptions()) }
+    val pluginReplicas = shuffled(serializationPlugin)(services.randomProvider()).map { toReplicatedFile(job, _, storage, TransferOptions(raw = true)) }
+    val files = shuffled(serializationFile)(services.randomProvider()).map { toReplicatedFile(job, _, storage, TransferOptions()) }
 
     ExecutionMessage(
       pluginReplicas,

@@ -17,15 +17,53 @@
 
 package org.openmole.site
 
-import org.openmole.core.console.ScalaREPL
-import org.openmole.core.exception.UserBadDataError
+import org.openmole.core.fileservice.FileService
 import org.openmole.core.project._
-import org.openmole.core.tools.service.ObjectPool
+import org.openmole.core.replication.ReplicaCatalog
+import org.openmole.core.serializer.SerializerService
 
 import scala.collection.mutable.ListBuffer
-import scala.util.{ Failure, Try, Success }
+import scala.util.{ Failure, Success, Try }
+import org.openmole.core.services._
+import org.openmole.core.threadprovider.ThreadProvider
+import org.openmole.core.workspace.{ NewFile, Workspace }
+import org.openmole.tool.crypto.Cypher
+import org.openmole.tool.file._
+import org.openmole.tool.random.{ RandomProvider, Seeder }
 
 object DSLTest {
+
+  def withTmpServices[T](f: Services ⇒ T) = {
+    val tmpDirectory = {
+      val newF = java.io.File.createTempFile("workspace", "")
+      newF.delete()
+      newF.mkdirs()
+      newF
+    }
+
+    def build(workspace: File, password: String) = {
+      implicit val ws = Workspace(workspace)
+      implicit val cypher = Cypher(password)
+      implicit val preference = Services.preference(ws)
+      implicit val newFile = NewFile(workspace)
+      implicit val seeder = Seeder()
+      implicit val serializerService = SerializerService()
+      implicit val threadProvider = ThreadProvider()
+      implicit val replicaCatalog = ReplicaCatalog(org.openmole.core.db.memory())
+      implicit val authenticationStore = Services.authenticationStore(ws)
+      implicit val fileService = FileService()
+      implicit val randomProvider = RandomProvider(seeder.newRNG)
+      new ServicesContainer()
+    }
+
+    val services = build(tmpDirectory, "")
+
+    try f(services)
+    finally {
+      Services.dispose(services)
+      tmpDirectory.recursiveDelete
+    }
+  }
 
   case class Test(code: String, header: String, number: Int) {
     def toCode =
@@ -37,8 +75,6 @@ $code
 
   val toTest = ListBuffer[Test]()
 
-  def engine = Project.newREPL(ConsoleVariables.empty)
-
   def test(code: String, header: String) = toTest.synchronized {
     toTest += Test(code, header, toTest.size)
   }
@@ -46,7 +82,12 @@ $code
   def testCode = toTest.map { _.toCode }.mkString("\n")
 
   def runTest =
-    Try { engine.compile(testCode) }
+    Try {
+      withTmpServices { implicit services ⇒
+        val repl = Project.newREPL(ConsoleVariables.empty)
+        repl.compile(testCode)
+      }
+    }
 
   def clear = toTest.clear
 

@@ -19,11 +19,11 @@ package org.openmole.core.fileservice
 
 import java.io.File
 
-class DeleteOnFinalize(path: String) {
+class DeleteOnFinalize(path: String, fileDeleter: FileDeleter) {
 
   override protected def finalize = {
     super.finalize
-    FileDeleter.assynchonousRemove(new File(path))
+    fileDeleter.assynchonousRemove(new File(path))
   }
 
 }

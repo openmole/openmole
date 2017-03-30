@@ -40,7 +40,8 @@ class AggregationTransition(val start: Capsule, val end: Slot, val condition: Co
   override def validate(inputs: Seq[Val[_]]) =
     condition.validate(inputs) ++ trigger.validate(inputs)
 
-  override def perform(context: Context, ticket: Ticket, subMole: SubMoleExecution)(implicit rng: RandomProvider) = {
+  override def perform(context: Context, ticket: Ticket, subMole: SubMoleExecution, executionContext: MoleExecutionContext) = {
+    import executionContext._
     val moleExecution = subMole.moleExecution
     val mole = moleExecution.mole
     val parentTicket = ticket.parent.getOrElse(throw new UserBadDataError("Aggregation transition should take place after an exploration."))
@@ -53,7 +54,7 @@ class AggregationTransition(val start: Capsule, val end: Slot, val condition: Co
           if (trigger != Condition.False) {
             val context = AggregationTransition.aggregateOutputs(moleExecution, this, results)
             if (trigger.from(context)) {
-              aggregate(subMole, ticket)
+              aggregate(subMole, ticket, executionContext)
               if (allAggregationTransitionsPerformed(subMole, parentTicket)) subMole.cancel
             }
           }
@@ -63,14 +64,15 @@ class AggregationTransition(val start: Capsule, val end: Slot, val condition: Co
     }
   }
 
-  override def aggregate(subMole: SubMoleExecution, ticket: Ticket)(implicit rng: RandomProvider) = subMole.transitionLock {
+  override def aggregate(subMole: SubMoleExecution, ticket: Ticket, executionContext: MoleExecutionContext) = subMole.transitionLock {
+    import executionContext._
     val parentTicket = ticket.parent.getOrElse(throw new UserBadDataError("Aggregation transition should take place after an exploration"))
 
     if (!subMole.canceled && !hasBeenPerformed(subMole, parentTicket)) {
       val results = subMole.aggregationTransitionRegistry.remove(this, parentTicket).getOrElse(throw new InternalProcessingError("No context registred for the aggregation transition"))
       val subMoleParent = subMole.parent.getOrElse(throw new InternalProcessingError("Submole execution has no parent"))
       val aggregated = AggregationTransition.aggregateOutputs(subMole.moleExecution, this, results)
-      if (condition.from(aggregated)) subMoleParent.transitionLock { submitNextJobsIfReady(aggregated.values, parentTicket, subMoleParent) }
+      if (condition.from(aggregated)) subMoleParent.transitionLock { ITransition.submitNextJobsIfReady(this)(aggregated.values, parentTicket, subMoleParent) }
     }
   }
 

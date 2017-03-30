@@ -19,26 +19,40 @@ package org.openmole.plugin.task.template
 
 import java.io.File
 
+import monocle.macros.Lenses
 import org.openmole.core.context.Val
-import org.openmole.core.expansion.ExpandedString
+import org.openmole.core.expansion.{ ExpandedString, FromContext }
+import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
 import org.openmole.core.workflow.dsl
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.task._
 
 object TemplateFileFromInputTask {
 
+  implicit def isTask: InputOutputBuilder[TemplateFileFromInputTask] = InputOutputBuilder(TemplateFileFromInputTask.config)
+
   def apply(
     template: Val[File],
     output:   Val[File]
   )(implicit name: sourcecode.Name) =
-    ClosureTask("TemplateFileFromInputTask") { (context, rng, executionContext) ⇒
-      implicit val impRng = rng
-      val expanded = context(template).withInputStream { is ⇒ ExpandedString(is).from(context) }
-      val file = executionContext.tmpDirectory.newFile("template", ".tmp")
-      file.content = expanded
-      context + (output → file)
-    } set (
-      inputs += template,
-      outputs += output
+    new TemplateFileFromInputTask(template, output, InputOutputConfig()) set (
+      dsl.inputs += template,
+      dsl.outputs += output
     )
+
+}
+
+@Lenses case class TemplateFileFromInputTask(
+    template: Val[File],
+    output:   Val[File],
+    config:   InputOutputConfig
+) extends Task {
+
+  override protected def process(executionContext: TaskExecutionContext) = FromContext { parameters ⇒
+    import parameters._
+    val expanded = context(template).withInputStream { is ⇒ ExpandedString(is).from(context) }
+    val file = executionContext.tmpDirectory.newFile("template", ".tmp")
+    file.content = expanded
+    context + (output → file)
+  }
 }
