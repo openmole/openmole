@@ -41,14 +41,14 @@ object UDockerTask {
   implicit def isTask: InputOutputBuilder[UDockerTask] = InputOutputBuilder(UDockerTask._config)
   implicit def isExternal: ExternalBuilder[UDockerTask] = ExternalBuilder(UDockerTask.external)
 
-  implicit def isBuilder = new ReturnValue[UDockerTask] with ErrorOnReturnValue[UDockerTask] with StdOutErr[UDockerTask] with EnvironmentVariables[UDockerTask] with HostFiles[UDockerTask] with ReuseContainer[UDockerTask] with WorkDirectory[UDockerTask] { builder ⇒
+  implicit def isBuilder = new ReturnValue[UDockerTask] with ErrorOnReturnValue[UDockerTask] with StdOutErr[UDockerTask] with EnvironmentVariables[UDockerTask] with HostFiles[UDockerTask] with SharedContainer[UDockerTask] with WorkDirectory[UDockerTask] { builder ⇒
     override def environmentVariables = UDockerTask.environmentVariables
     override def returnValue = UDockerTask.returnValue
     override def errorOnReturnValue = UDockerTask.errorOnReturnValue
     override def stdOut = UDockerTask.stdOut
     override def stdErr = UDockerTask.stdErr
     override def hostFiles = UDockerTask.hostFiles
-    override def reuseContainer = UDockerTask.reuseContainer
+    override def sharedContainer = UDockerTask.sharedContainer
     override def workDirectory = UDockerTask.workDirectory
   }
 
@@ -60,7 +60,7 @@ object UDockerTask {
       image = image,
       command = command,
       workDirectory = None,
-      reuseContainer = true,
+      sharedContainer = true,
       errorOnReturnValue = true,
       returnValue = None,
       stdOut = None,
@@ -77,7 +77,7 @@ object UDockerTask {
     image:                ContainerImage,
     command:              FromContext[String],
     workDirectory:        Option[String],
-    reuseContainer:       Boolean,
+    sharedContainer:      Boolean,
     errorOnReturnValue:   Boolean,
     returnValue:          Option[Val[Int]],
     stdOut:               Option[Val[String]],
@@ -105,6 +105,8 @@ object UDockerTask {
   override protected def process(ctx: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider): Context = External.withWorkDir(executionContext) { taskWorkDirectory ⇒
 
     taskWorkDirectory.mkdirs()
+
+    println(taskWorkDirectory)
 
     val inputDirectory = taskWorkDirectory /> "inputs"
 
@@ -245,7 +247,7 @@ object UDockerTask {
     }
 
     val (retContext, executionResult) =
-      if (reuseContainer) executeWithContainerReuse else executeWithNewContainer
+      if (sharedContainer) executeWithContainerReuse else executeWithNewContainer
 
     retContext ++
       List(
