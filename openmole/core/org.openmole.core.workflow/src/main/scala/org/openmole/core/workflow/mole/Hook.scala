@@ -30,8 +30,9 @@ trait Hook <: Name {
   def name = config.name
 
   def perform(context: Context, executionContext: MoleExecutionContext): Context = {
-    val rng = executionContext.newRandom
-    InputOutputCheck.perform(inputs, outputs, defaults, process(executionContext))(executionContext.preference).from(context)(rng, executionContext.newFile)
+    implicit val rng = executionContext.services.newRandom
+    import executionContext.services.newFile
+    InputOutputCheck.perform(inputs, outputs, defaults, process(executionContext))(executionContext.services.preference).from(context)
   }
 
   protected def process(executionContext: MoleExecutionContext): FromContext[Context]

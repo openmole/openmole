@@ -26,6 +26,7 @@ import java.io.File
 
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.communication.storage.RemoteStorage
+import org.openmole.core.event.EventDispatcher
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.preference.Preference
 import org.openmole.core.threadprovider.ThreadProvider
@@ -85,6 +86,7 @@ object SimExplorer extends Logger {
         implicit val preference = Preference.memory()
         implicit val threadProvider = ThreadProvider()
         implicit val fileService = FileService()
+        implicit val eventDispatcher = EventDispatcher()
 
         try {
 

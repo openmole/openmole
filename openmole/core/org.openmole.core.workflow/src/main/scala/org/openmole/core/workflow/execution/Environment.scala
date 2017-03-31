@@ -54,6 +54,7 @@ sealed trait Environment <: Name {
   private[execution] val _failed = new AtomicLong(0L)
 
   implicit def preference: Preference
+  implicit def eventDispatcher: EventDispatcher
 
   private lazy val _errors = new SlidingList[ExceptionEvent]
   def error(e: ExceptionEvent) = _errors.put(e, preference(maxExceptionsLog))
@@ -78,7 +79,7 @@ object LocalEnvironment {
     nbThreads:    OptionalArgument[Int]    = None,
     deinterleave: Boolean                  = false,
     name:         OptionalArgument[String] = OptionalArgument()
-  )(implicit varName: sourcecode.Name, preference: Preference, threadProvider: ThreadProvider) = new LocalEnvironment(nbThreads.getOrElse(1), deinterleave, Some(name.getOrElse(varName.value)))
+  )(implicit varName: sourcecode.Name, preference: Preference, threadProvider: ThreadProvider, eventDispatcher: EventDispatcher) = new LocalEnvironment(nbThreads.getOrElse(1), deinterleave, Some(name.getOrElse(varName.value)))
 
 }
 
@@ -86,7 +87,7 @@ class LocalEnvironment(
     val nbThreads:     Int,
     val deinterleave:  Boolean,
     override val name: Option[String]
-)(implicit val preference: Preference, threadProvider: ThreadProvider) extends Environment {
+)(implicit val preference: Preference, threadProvider: ThreadProvider, val eventDispatcher: EventDispatcher) extends Environment {
 
   val pool = Cache(new ExecutorPool(nbThreads, WeakReference(this), threadProvider))
 
@@ -101,7 +102,7 @@ class LocalEnvironment(
   private def submit(ejob: LocalExecutionJob): Unit = {
     pool().enqueue(ejob)
     ejob.state = ExecutionState.SUBMITTED
-    EventDispatcher.trigger(this, new Environment.JobSubmitted(ejob))
+    eventDispatcher.trigger(this, new Environment.JobSubmitted(ejob))
   }
 
   def submitted: Long = pool().waiting

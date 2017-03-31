@@ -31,6 +31,7 @@ import org.openmole.core.tools.service._
 import org.openmole.core.workflow.execution._
 import org.openmole.core.communication.message._
 import org.openmole.core.communication.storage._
+import org.openmole.core.event.EventDispatcher
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.preference.Preference
 import org.openmole.core.serializer._
@@ -59,7 +60,7 @@ class Runtime {
     outputMessagePath:    String,
     threads:              Int,
     debug:                Boolean
-  )(implicit serializerService: SerializerService, newFile: NewFile, fileService: FileService, preference: Preference, threadProvider: ThreadProvider) = {
+  )(implicit serializerService: SerializerService, newFile: NewFile, fileService: FileService, preference: Preference, threadProvider: ThreadProvider, eventDispatcher: EventDispatcher) = {
 
     /*--- get execution message and job for runtime---*/
     val usedFiles = new HashMap[String, File]

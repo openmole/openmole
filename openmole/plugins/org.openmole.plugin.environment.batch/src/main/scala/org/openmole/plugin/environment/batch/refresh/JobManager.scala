@@ -99,13 +99,13 @@ object JobManager extends Logger { self ⇒
       }
       val er = Environment.ExceptionRaised(job, exception, level)
       job.environment.error(er)
-      EventDispatcher.trigger(job.environment: Environment, er)
+      services.eventDispatcher.trigger(job.environment: Environment, er)
       logger.log(FINE, "Error in job refresh", exception)
 
     case MoleJobError(mj, j, e) ⇒
       val er = Environment.MoleJobExceptionRaised(j, e, WARNING, mj)
       j.environment.error(er)
-      EventDispatcher.trigger(j.environment: Environment, er)
+      services.eventDispatcher.trigger(j.environment: Environment, er)
       logger.log(FINE, "Error during job execution, it will be resubmitted.", e)
 
   }

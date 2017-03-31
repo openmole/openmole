@@ -30,7 +30,7 @@ class EmptyExplorationTransition(start: Capsule, end: Slot, size: FromContext[In
   override def validate(inputs: Seq[Val[_]]) = condition.validate(inputs)
 
   override def submitIn(context: Context, ticket: Ticket, subMole: SubMoleExecution, executionContext: MoleExecutionContext) = {
-    import executionContext._
+    import executionContext.services._
     for (i ← 0 until size.from(context)) ITransition.submitNextJobsIfReady(this)(ListBuffer() ++ filtered(context).values, subMole.moleExecution.nextTicket(ticket), subMole)
   }
 

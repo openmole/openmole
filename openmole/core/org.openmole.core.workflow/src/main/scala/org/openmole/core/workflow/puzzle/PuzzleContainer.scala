@@ -25,7 +25,7 @@ import org.openmole.tool.random.Seeder
 
 trait PuzzleContainer {
   def buildPuzzle: Puzzle
-  def toExecution(implicit seeder: Seeder, preference: Preference, newFile: NewFile, threadProvider: ThreadProvider) = buildPuzzle.toExecution
+  def toExecution(implicit moleServices: MoleServices) = buildPuzzle.toExecution
 }
 
 case class OutputPuzzleContainer(

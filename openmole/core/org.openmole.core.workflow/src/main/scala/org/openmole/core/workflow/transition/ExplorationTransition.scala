@@ -65,7 +65,7 @@ class ExplorationTransition(val start: Capsule, val end: Slot, val condition: Co
         else throw new UserBadDataError("Found value of type " + v.asInstanceOf[AnyRef].getClass + " incompatible with prototype " + fp)
       }
 
-      import executionContext._
+      import executionContext.services._
 
       if (condition().from(variables)) { ITransition.submitNextJobsIfReady(this)(ListBuffer() ++ variables, newTicket, subMole) }
     }
@@ -90,6 +90,7 @@ class ExplorationTransition(val start: Capsule, val end: Slot, val condition: Co
             if (level > 0) toProcess += t.end.capsule → (level - 1)
             else if (level == 0) {
               subMoleExecution.aggregationTransitionRegistry.register(t, ticket, new ListBuffer)
+              import executionContext.services.eventDispatcher
               subMoleExecution listen {
                 case (se, ev: SubMoleExecution.Finished) ⇒ t.aggregate(se, ev.ticket, executionContext)
               }

@@ -92,7 +92,7 @@ object UploadActor extends Logger {
     /* ---- upload the execution message ----*/
     newFile.withTmpFile("job", ".tar") { executionMessageFile ⇒
       serializerService.serialiseAndArchiveFiles(executionMessage, executionMessageFile)
-      signalUpload(storage.upload(executionMessageFile, inputPath, TransferOptions(forceCopy = true, canMove = true)), executionMessageFile, inputPath, storage)
+      signalUpload(eventDispatcher.eventId, storage.upload(executionMessageFile, inputPath, TransferOptions(forceCopy = true, canMove = true)), executionMessageFile, inputPath, storage)
     }
 
     SerializedJob(storage, communicationPath, inputPath, runtime)
@@ -117,7 +117,7 @@ object UploadActor extends Logger {
       val name = uniqName(System.currentTimeMillis.toString, ".rep")
       val newFile = storage.child(storage.persistentDir, name)
       Log.logger.fine(s"Upload $toReplicate to $newFile on ${storage.id} mode $fileMode")
-      signalUpload(storage.upload(toReplicate, newFile, options), toReplicate, newFile, storage)
+      signalUpload(eventDispatcher.eventId, storage.upload(toReplicate, newFile, options), toReplicate, newFile, storage)
       newFile
     }
 

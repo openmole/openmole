@@ -19,6 +19,7 @@ package org.openmole.core.workflow.mole
 
 import java.io.{ File, PrintStream }
 
+import org.openmole.core.event.EventDispatcher
 import org.openmole.core.output.OutputManager
 import org.openmole.core.preference.Preference
 import org.openmole.core.serializer.SerializerService
@@ -30,20 +31,35 @@ import org.openmole.tool.random.Seeder
 
 object MoleExecutionContext {
   def apply(
-    out:          PrintStream            = OutputManager.systemOutput,
-    tmpDirectory: OptionalArgument[File] = None
-  )(implicit newFile: NewFile, preference: Preference, seeder: Seeder, threadProvider: ThreadProvider) =
-    new MoleExecutionContext(out, tmpDirectory.getOrElse(newFile.newDir("execution")), preference, seeder, threadProvider)
+    out: PrintStream = OutputManager.systemOutput
+  )(implicit moleServices: MoleServices) = new MoleExecutionContext(out)
 }
 
 class MoleExecutionContext(
-    val out:                 PrintStream,
-    val tmpDirectory:        File,
-    implicit val preference: Preference,
-    val seeder:              Seeder,
-    val threadProvider:      ThreadProvider
+  val out: PrintStream
+)(implicit val services: MoleServices)
+
+object MoleServices {
+
+  implicit def create(implicit preference: Preference, seeder: Seeder, threadProvider: ThreadProvider, eventDispatcher: EventDispatcher, newFile: NewFile) = {
+    new MoleServices()(
+      preference = preference,
+      seeder = Seeder(seeder.newSeed),
+      threadProvider = threadProvider,
+      eventDispatcher = eventDispatcher,
+      newFile = NewFile(newFile.newDir("execution"))
+    )
+  }
+}
+
+class MoleServices(
+    implicit
+    val preference:      Preference,
+    val seeder:          Seeder,
+    val threadProvider:  ThreadProvider,
+    val eventDispatcher: EventDispatcher,
+    val newFile:         NewFile
 ) {
-  implicit def newFile = NewFile(tmpDirectory)
   def newRandom = Lazy(seeder.newRNG)
   implicit lazy val defaultRandom = newRandom
 }

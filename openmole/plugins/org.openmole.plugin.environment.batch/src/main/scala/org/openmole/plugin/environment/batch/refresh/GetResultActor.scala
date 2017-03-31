@@ -73,7 +73,7 @@ object GetResultActor extends Logger {
       case Success((result, log)) ⇒
         val contextResults = getContextResults(result, storage)
 
-        EventDispatcher.trigger(storage.environment: Environment, Environment.JobCompleted(batchJob, log, runtimeResult.info))
+        services.eventDispatcher.trigger(storage.environment: Environment, Environment.JobCompleted(batchJob, log, runtimeResult.info))
 
         //Try to download the results for all the jobs of the group
         for (moleJob ← job.moleJobs) {
@@ -88,13 +88,15 @@ object GetResultActor extends Logger {
     }
   }
 
-  private def getRuntimeResult(outputFilePath: String, storage: StorageService)(implicit token: AccessToken, newFile: NewFile, fileService: FileService, preference: Preference, serialiserService: SerializerService): RuntimeResult =
+  private def getRuntimeResult(outputFilePath: String, storage: StorageService)(implicit token: AccessToken, services: BatchEnvironment.Services): RuntimeResult = {
+    import services._
     retry(preference(BatchEnvironment.downloadResultRetry)) {
       newFile.withTmpFile { resultFile ⇒
-        signalDownload(storage.download(outputFilePath, resultFile), outputFilePath, storage, resultFile)
+        signalDownload(eventDispatcher.eventId, storage.download(outputFilePath, resultFile), outputFilePath, storage, resultFile)
         RuntimeResult.load(resultFile)
       }
     }
+  }
 
   private def display(output: Option[File], description: String, storage: StorageService, stream: PrintStream)(implicit token: AccessToken) = {
     output.foreach { file ⇒
@@ -103,7 +105,8 @@ object GetResultActor extends Logger {
     }
   }
 
-  private def getContextResults(serializedResults: SerializedContextResults, storage: StorageService)(implicit token: AccessToken, newFile: NewFile, fileService: FileService, preference: Preference, serialiserService: SerializerService): ContextResults = {
+  private def getContextResults(serializedResults: SerializedContextResults, storage: StorageService)(implicit token: AccessToken, services: BatchEnvironment.Services): ContextResults = {
+    import services._
     serializedResults match {
       case serializedResults: IndividualFilesContextResults ⇒
         newFile.withTmpFile { serializedResultsFile ⇒
@@ -113,17 +116,17 @@ object GetResultActor extends Logger {
                 replicated.originalPath →
                   ReplicatedFile.download(replicated) { (p, f) ⇒
                     retry(preference(BatchEnvironment.downloadResultRetry)) {
-                      signalDownload(storage.download(p, f, TransferOptions(forceCopy = true, canMove = true)), p, storage, f)
+                      signalDownload(eventDispatcher.eventId, storage.download(p, f, TransferOptions(forceCopy = true, canMove = true)), p, storage, f)
                     }
                   }
             }.toMap
 
-          val res = serialiserService.deserialiseReplaceFiles[ContextResults](serializedResults.contextResults, fileReplacement)
+          val res = serializerService.deserialiseReplaceFiles[ContextResults](serializedResults.contextResults, fileReplacement)
           serializedResults.contextResults.delete()
           res
         }
       case serializedResults: ArchiveContextResults ⇒
-        val res = serialiserService.deserialiseAndExtractFiles[ContextResults](serializedResults.contextResults)
+        val res = serializerService.deserialiseAndExtractFiles[ContextResults](serializedResults.contextResults)
         serializedResults.contextResults.delete()
         res
     }

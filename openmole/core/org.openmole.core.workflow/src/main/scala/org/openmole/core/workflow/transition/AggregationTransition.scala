@@ -41,7 +41,7 @@ class AggregationTransition(val start: Capsule, val end: Slot, val condition: Co
     condition.validate(inputs) ++ trigger.validate(inputs)
 
   override def perform(context: Context, ticket: Ticket, subMole: SubMoleExecution, executionContext: MoleExecutionContext) = {
-    import executionContext._
+    import executionContext.services._
     val moleExecution = subMole.moleExecution
     val mole = moleExecution.mole
     val parentTicket = ticket.parent.getOrElse(throw new UserBadDataError("Aggregation transition should take place after an exploration."))
@@ -65,7 +65,7 @@ class AggregationTransition(val start: Capsule, val end: Slot, val condition: Co
   }
 
   override def aggregate(subMole: SubMoleExecution, ticket: Ticket, executionContext: MoleExecutionContext) = subMole.transitionLock {
-    import executionContext._
+    import executionContext.services._
     val parentTicket = ticket.parent.getOrElse(throw new UserBadDataError("Aggregation transition should take place after an exploration"))
 
     if (!subMole.canceled && !hasBeenPerformed(subMole, parentTicket)) {

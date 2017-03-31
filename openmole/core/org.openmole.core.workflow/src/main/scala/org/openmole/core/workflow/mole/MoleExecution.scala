@@ -73,7 +73,8 @@ object MoleExecution extends Logger {
     defaultEnvironment: OptionalArgument[LocalEnvironment]     = None,
     cleanOnFinish:      Boolean                                = true,
     executionContext:   OptionalArgument[MoleExecutionContext] = None
-  )(implicit seeder: Seeder, preference: Preference, newFile: NewFile, threadProvider: ThreadProvider): MoleExecution =
+  )(implicit moleServices: MoleServices): MoleExecution = {
+    import moleServices._
     new MoleExecution(
       mole,
       listOfTupleToMap(sources),
@@ -85,6 +86,7 @@ object MoleExecution extends Logger {
       implicits,
       executionContext.getOrElse(MoleExecutionContext())
     )
+  }
 
 }
 
@@ -103,7 +105,7 @@ class MoleExecution(
     val id:                 String                    = UUID.randomUUID().toString
 ) {
 
-  import executionContext._
+  import executionContext.services._
 
   private val _started = Ref(false)
   private val _canceled = Ref(false)
@@ -165,9 +167,9 @@ class MoleExecution(
       val env = environments.getOrElse(capsule, defaultEnvironment)
       env match {
         case env: SubmissionEnvironment ⇒ env.submit(job)
-        case env: LocalEnvironment      ⇒ env.submit(job, TaskExecutionContext(executionContext.tmpDirectory, env, preference, executionContext.threadProvider))
+        case env: LocalEnvironment      ⇒ env.submit(job, TaskExecutionContext(newFile.baseDir, env, preference, threadProvider))
       }
-      EventDispatcher.trigger(this, new MoleExecution.JobSubmitted(job, capsule, env))
+      eventDispatcher.trigger(this, new MoleExecution.JobSubmitted(job, capsule, env))
     }
 
   def submitAll =
@@ -187,10 +189,10 @@ class MoleExecution(
   def allWaiting = atomic { implicit txn ⇒ numberOfJobs <= nbWaiting() }
 
   def start(context: Context): this.type = {
-    executionContext.tmpDirectory.mkdirs()
+    newFile.baseDir.mkdirs()
     _started.single() = true
     _startTime.single() = Some(System.currentTimeMillis)
-    EventDispatcher.trigger(this, new MoleExecution.Starting)
+    eventDispatcher.trigger(this, new MoleExecution.Starting)
     rootSubMoleExecution.newChild.submit(mole.root, context, nextTicket(rootTicket))
     if (allWaiting) submitAll
     this
@@ -222,7 +224,7 @@ class MoleExecution(
 
   private def cancelAction = {
     rootSubMoleExecution.cancel
-    EventDispatcher.trigger(this, MoleExecution.Finished(canceled = true))
+    eventDispatcher.trigger(this, MoleExecution.Finished(canceled = true))
     finish()
   }
 
@@ -286,7 +288,7 @@ class MoleExecution(
     if (!_canceled.single()) {
       if (allWaiting) submitAll
       if (numberOfJobs == 0) {
-        EventDispatcher.trigger(this, MoleExecution.Finished(canceled = false))
+        eventDispatcher.trigger(this, MoleExecution.Finished(canceled = false))
         finish()
       }
     }
@@ -294,7 +296,7 @@ class MoleExecution(
   private def finish() = {
     _finished.single() = true
     _endTime.single() = Some(System.currentTimeMillis)
-    if (cleanOnFinish) executionContext.tmpDirectory.recursiveDelete
+    if (cleanOnFinish) newFile.baseDir.recursiveDelete
   }
 
   def canceled: Boolean = _canceled.single()

@@ -37,7 +37,7 @@ class Transition(
   override def validate(inputs: Seq[Val[_]]) = condition.validate(inputs)
 
   override def perform(context: Context, ticket: Ticket, subMole: SubMoleExecution, moleExecutionContext: MoleExecutionContext) = {
-    import moleExecutionContext._
+    import moleExecutionContext.services._
     if (condition().from(context)) ITransition.submitNextJobsIfReady(this)(filtered(context).values, ticket, subMole)
   }
 

@@ -31,6 +31,7 @@ import java.io.File
 import java.util.concurrent.atomic.AtomicReference
 
 import org.openmole.core.authentication.AuthenticationStore
+import org.openmole.core.event.EventDispatcher
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.preference.Preference
 import org.openmole.core.replication.ReplicaCatalog
@@ -65,6 +66,7 @@ object GUIServices {
     implicit def serializerService = guiServices.serializerService
     implicit def fileService = guiServices.fileService
     implicit def randomProvider = guiServices.randomProvider
+    implicit def eventDispatcher: EventDispatcher = guiServices.eventDispatcher
   }
 
   def apply(workspace: Workspace) = {
@@ -78,6 +80,7 @@ object GUIServices {
     implicit val authenticationStore = AuthenticationStore(ws.persistentDir)
     implicit val fileService = FileService()
     implicit val randomProvider = RandomProvider(seeder.newRNG)
+    implicit val eventDispatcher = EventDispatcher()
 
     new GUIServices()
   }
@@ -106,7 +109,8 @@ class GUIServices(
   val authenticationStore: AuthenticationStore,
   val serializerService:   SerializerService,
   val fileService:         FileService,
-  val randomProvider:      RandomProvider
+  val randomProvider:      RandomProvider,
+  val eventDispatcher:     EventDispatcher
 )
 
 object GUIServlet {

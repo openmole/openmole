@@ -29,6 +29,7 @@ import org.openmole.core.workflow._
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.puzzle._
+import org.openmole.core.workspace.NewFile
 import org.openmole.tool.lock._
 import org.openmole.tool.random.Seeder
 
@@ -69,6 +70,9 @@ object MoleTask {
     import p._
     val implicitsValues = implicits.flatMap(i ⇒ context.get(i))
     implicit val seeder = Seeder(random().nextLong())
+    implicit val eventDispatcher = EventDispatcher()
+    implicit val newFile = NewFile(executionContext.tmpDirectory.newDir("moletask"))
+
     import executionContext.preference
     import executionContext.threadProvider
 
@@ -77,7 +81,7 @@ object MoleTask {
         mole,
         implicits = implicitsValues,
         defaultEnvironment = executionContext.localEnvironment,
-        executionContext = MoleExecutionContext(tmpDirectory = executionContext.tmpDirectory.newDir("moletask")),
+        executionContext = MoleExecutionContext(),
         cleanOnFinish = false
       )
 

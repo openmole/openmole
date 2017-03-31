@@ -23,6 +23,7 @@ import org.openmole.core.workflow.transition._
 
 package puzzle {
 
+  import org.openmole.core.event.EventDispatcher
   import org.openmole.core.preference.Preference
   import org.openmole.core.threadprovider.ThreadProvider
   import org.openmole.core.workflow.execution.Environment
@@ -60,7 +61,7 @@ package puzzle {
     implicit def capsulePuzzlePieceDecoration(capsule: Capsule) = new PuzzlePieceDecorator(capsule.toPuzzlePiece)
     implicit def slotPuzzlePieceDecoration(slot: Slot) = new PuzzlePieceDecorator(slot.toPuzzlePiece)
     implicit def taskPuzzlePieceDecoration(task: Task): PuzzlePieceDecorator = new PuzzlePieceDecorator(Capsule(task).toPuzzlePiece)
-    implicit def puzzlePieceMoleExecutionConverter(puzzle: PuzzlePiece)(implicit seeder: Seeder, preference: Preference, newFile: NewFile, threadProvider: ThreadProvider) = puzzle.buildPuzzle.toExecution
+    implicit def puzzlePieceMoleExecutionConverter(puzzle: PuzzlePiece)(implicit moleServices: MoleServices) = puzzle.buildPuzzle.toExecution
     implicit def puzzlePieceMoleConverter(puzzle: PuzzlePiece) = puzzle.buildPuzzle.toMole
     implicit def pieceOfPuzzleToPuzzleDecorator(piece: PuzzlePiece) = piece.buildPuzzle
 
@@ -92,14 +93,14 @@ package puzzle {
     }
 
     implicit def puzzleContainerDecoration(pc: PuzzleContainer) = new PuzzleDecorator(pc.buildPuzzle)
-    implicit def puzzleMoleExecutionConverter(puzzle: Puzzle)(implicit seeder: Seeder, preference: Preference, newFile: NewFile, threadProvider: ThreadProvider) = puzzle.toExecution
+    implicit def puzzleMoleExecutionConverter(puzzle: Puzzle)(implicit moleServices: MoleServices) = puzzle.toExecution
     implicit def puzzleMoleConverter(puzzle: Puzzle) = puzzle.toMole
-    implicit def puzzleContainerMoleExecutionConverter(puzzle: PuzzleContainer)(implicit seeder: Seeder, preference: Preference, newFile: NewFile, threadProvider: ThreadProvider) = puzzle.buildPuzzle.toExecution
+    implicit def puzzleContainerMoleExecutionConverter(puzzle: PuzzleContainer)(implicit moleServices: MoleServices) = puzzle.buildPuzzle.toExecution
     implicit def puzzleContainerMoleConverter(puzzle: PuzzleContainer) = puzzle.buildPuzzle.toMole
 
-    implicit def capsuleToMoleExecutionConverter(capsule: Capsule)(implicit seeder: Seeder, preference: Preference, newFile: NewFile, threadProvider: ThreadProvider): MoleExecution = capsule.toPuzzle.toExecution
-    implicit def taskToMoleExecutionConverter(task: Task)(implicit seeder: Seeder, preference: Preference, newFile: NewFile, threadProvider: ThreadProvider): MoleExecution = Capsule(task).toPuzzle.toExecution
-    implicit def moleToMoleExecutionConverter(mole: Mole)(implicit seeder: Seeder, preference: Preference, newFile: NewFile, threadProvider: ThreadProvider) = MoleExecution(mole)
+    implicit def capsuleToMoleExecutionConverter(capsule: Capsule)(implicit moleServices: MoleServices): MoleExecution = capsule.toPuzzle.toExecution
+    implicit def taskToMoleExecutionConverter(task: Task)(implicit moleServices: MoleServices): MoleExecution = Capsule(task).toPuzzle.toExecution
+    implicit def moleToMoleExecutionConverter(mole: Mole)(implicit moleServices: MoleServices) = MoleExecution(mole)
 
   }
 

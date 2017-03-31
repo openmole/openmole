@@ -163,7 +163,7 @@ case class Puzzle(
 
   def toMole = new Mole(firstSlot.capsule, transitions, dataChannels)
 
-  def toExecution(implicit seeder: Seeder, preference: Preference, newFile: NewFile, threadProvider: ThreadProvider): MoleExecution =
+  def toExecution(implicit moleServices: MoleServices): MoleExecution =
     MoleExecution(toMole, sources, hooks, environments, grouping)
 
   def toExecution(
@@ -171,7 +171,7 @@ case class Puzzle(
     seed:               OptionalArgument[Long]                 = None,
     executionContext:   OptionalArgument[MoleExecutionContext] = None,
     defaultEnvironment: OptionalArgument[LocalEnvironment]     = None
-  )(implicit seeder: Seeder, preference: Preference, newFile: NewFile, threadProvider: ThreadProvider): MoleExecution =
+  )(implicit moleServices: MoleServices): MoleExecution =
     MoleExecution(
       mole = toMole,
       sources = sources,

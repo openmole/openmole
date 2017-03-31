@@ -57,8 +57,6 @@ object BatchEnvironment extends Logger {
     def id: Long
   }
 
-  val transferId = new AtomicLong
-
   case class BeginUpload(id: Long, file: File, path: String, storage: StorageService) extends Event[BatchEnvironment] with Transfer
   case class EndUpload(id: Long, file: File, path: String, storage: StorageService, exception: Option[Throwable]) extends Event[BatchEnvironment] with Transfer {
     def success = exception.isEmpty
@@ -69,31 +67,29 @@ object BatchEnvironment extends Logger {
     def success = exception.isEmpty
   }
 
-  def signalUpload[T](upload: ⇒ T, file: File, path: String, storage: StorageService): T = {
-    val id = transferId.getAndIncrement
-    EventDispatcher.trigger(storage.environment, BeginUpload(id, file, path, storage))
+  def signalUpload[T](id: Long, upload: ⇒ T, file: File, path: String, storage: StorageService)(implicit eventDispatcher: EventDispatcher): T = {
+    eventDispatcher.trigger(storage.environment, BeginUpload(id, file, path, storage))
     val res =
       try upload
       catch {
         case e: Throwable ⇒
-          EventDispatcher.trigger(storage.environment, EndUpload(id, file, path, storage, Some(e)))
+          eventDispatcher.trigger(storage.environment, EndUpload(id, file, path, storage, Some(e)))
           throw e
       }
-    EventDispatcher.trigger(storage.environment, EndUpload(id, file, path, storage, None))
+    eventDispatcher.trigger(storage.environment, EndUpload(id, file, path, storage, None))
     res
   }
 
-  def signalDownload[T](download: ⇒ T, path: String, storage: StorageService, file: File): T = {
-    val id = transferId.getAndIncrement
-    EventDispatcher.trigger(storage.environment, BeginDownload(id, file, path, storage))
+  def signalDownload[T](id: Long, download: ⇒ T, path: String, storage: StorageService, file: File)(implicit eventDispatcher: EventDispatcher): T = {
+    eventDispatcher.trigger(storage.environment, BeginDownload(id, file, path, storage))
     val res =
       try download
       catch {
         case e: Throwable ⇒
-          EventDispatcher.trigger(storage.environment, EndDownload(id, file, path, storage, Some(e)))
+          eventDispatcher.trigger(storage.environment, EndDownload(id, file, path, storage, Some(e)))
           throw e
       }
-    EventDispatcher.trigger(storage.environment, EndDownload(id, file, path, storage, None))
+    eventDispatcher.trigger(storage.environment, EndDownload(id, file, path, storage, None))
     res
   }
 
@@ -149,7 +145,8 @@ object BatchEnvironment extends Logger {
     implicit val fileService:       FileService,
     implicit val seeder:            Seeder,
     implicit val randomProvider:    RandomProvider,
-    implicit val replicaCatalog:    ReplicaCatalog
+    implicit val replicaCatalog:    ReplicaCatalog,
+    implicit val eventDispatcher:   EventDispatcher
   )
 
 }
@@ -159,7 +156,8 @@ trait BatchEnvironment extends SubmissionEnvironment { env ⇒
   type JS <: JobService
 
   implicit val services: BatchEnvironment.Services
-  def preference: Preference = services.preference
+  def preference = services.preference
+  def eventDispatcher = services.eventDispatcher
 
   def jobs = batchJobWatcher().executionJobs
 
@@ -176,9 +174,8 @@ trait BatchEnvironment extends SubmissionEnvironment { env ⇒
   def openMOLEMemory: Option[Information]
 
   override def submit(job: Job) = {
-    import services._
     val bej = executionJob(job)
-    EventDispatcher.trigger(this, new Environment.JobSubmitted(bej))
+    eventDispatcher.trigger(this, new Environment.JobSubmitted(bej))
     batchJobWatcher().register(bej)
     JobManager ! Manage(bej)
   }

@@ -28,7 +28,7 @@ class SlaveTransition(start: Capsule, end: Slot, condition: Condition = Conditio
   override def validate(inputs: Seq[Val[_]]) = condition.validate(inputs)
 
   override def perform(context: Context, ticket: Ticket, subMole: SubMoleExecution, executionContext: MoleExecutionContext) = {
-    import executionContext._
+    import executionContext.services._
     if (condition.from(context))
       submitIn(filtered(context), ticket.parent.getOrElse(throw new UserBadDataError("Slave transition should take place within an exploration.")), subMole, executionContext)
   }

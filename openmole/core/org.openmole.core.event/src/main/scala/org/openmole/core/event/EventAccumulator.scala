@@ -20,7 +20,7 @@ import scala.concurrent.stm._
 
 object EventAccumulator {
 
-  def apply[T, E](t: Seq[T], max: Option[Int] = None)(f: PartialFunction[(T, Event[T]), E]) = {
+  def apply[T, E](t: Seq[T], max: Option[Int] = None)(f: PartialFunction[(T, Event[T]), E])(implicit eventDispatcher: EventDispatcher) = {
     val accumulator = new EventAccumulator[E](max)
     val listener = f andThen accumulator.accumulate
     t.foreach(_ listen listener)

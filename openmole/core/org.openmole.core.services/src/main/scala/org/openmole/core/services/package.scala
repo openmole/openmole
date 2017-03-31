@@ -1,7 +1,8 @@
 package org.openmole.core
 
-import org.openmole.core.authentication.AuthenticationStore
-import org.openmole.core.fileservice.FileService
+import org.openmole.core.authentication._
+import org.openmole.core.event._
+import org.openmole.core.fileservice._
 import org.openmole.core.preference._
 import org.openmole.core.replication._
 import org.openmole.core.serializer._
@@ -36,6 +37,7 @@ package object services {
       implicit val authenticationStore = Services.authenticationStore(ws)
       implicit val fileService = FileService()
       implicit val randomProvider = RandomProvider(seeder.newRNG)
+      implicit val eventDispatcher = EventDispatcher()
       new ServicesContainer()
     }
 
@@ -63,6 +65,7 @@ package object services {
     implicit def serializerService: SerializerService
     implicit def fileService: FileService
     implicit def randomProvider: RandomProvider
+    implicit def eventDispatcher: EventDispatcher
   }
 
   class ServicesContainer(implicit
@@ -76,6 +79,7 @@ package object services {
                           val authenticationStore: AuthenticationStore,
                           val serializerService:   SerializerService,
                           val fileService:         FileService,
-                          val randomProvider:      RandomProvider) extends Services
+                          val randomProvider:      RandomProvider,
+                          val eventDispatcher:     EventDispatcher) extends Services
 
 }
