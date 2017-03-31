@@ -30,36 +30,34 @@ import cats.implicits._
 object ExplorationTask {
 
   def apply(sampling: Sampling)(implicit name: sourcecode.Name) =
-    FromContextTask(
-      "ExplorationTask",
-      sampling().map { s ⇒
-        val variablesValues = TreeMap.empty[Val[_], ArrayBuffer[Any]] ++ sampling.prototypes.map { p ⇒ p → ArrayBuffer[Any]() }
+    FromContextTask("ExplorationTask") { p ⇒
+      import p._
+      val variablesValues = TreeMap.empty[Val[_], ArrayBuffer[Any]] ++ sampling.prototypes.map { p ⇒ p → ArrayBuffer[Any]() }
 
-        for {
-          sample ← s
-          v ← sample
-        } variablesValues.get(v.prototype) match {
-          case Some(b) ⇒ b += v.value
-          case None    ⇒
-        }
-
-        variablesValues.map {
-          case (k, v) ⇒
-            try {
-              Variable.unsecure(
-                k.toArray,
-                v.toArray(k.`type`.manifest.asInstanceOf[Manifest[Any]])
-              )
-            }
-            catch {
-              case e: ArrayStoreException ⇒ throw new UserBadDataError("Cannot fill factor values in " + k.toArray + ", values " + v)
-            }
-        }: Context
+      for {
+        sample ← sampling().from(context)
+        v ← sample
+      } variablesValues.get(v.prototype) match {
+        case Some(b) ⇒ b += v.value
+        case None    ⇒
       }
-    ) set (
-        inputs += (sampling.inputs.toSeq: _*),
-        exploredOutputs += (sampling.prototypes.toSeq.map(_.toArray): _*)
-      )
+
+      variablesValues.map {
+        case (k, v) ⇒
+          try {
+            Variable.unsecure(
+              k.toArray,
+              v.toArray(k.`type`.manifest.asInstanceOf[Manifest[Any]])
+            )
+          }
+          catch {
+            case e: ArrayStoreException ⇒ throw new UserBadDataError("Cannot fill factor values in " + k.toArray + ", values " + v)
+          }
+      }: Context
+    } set (
+      inputs += (sampling.inputs.toSeq: _*),
+      exploredOutputs += (sampling.prototypes.toSeq.map(_.toArray): _*)
+    )
 
   def explored(c: Capsule) = (p: Val[_]) ⇒ c.task.outputs.explored(p)
 
