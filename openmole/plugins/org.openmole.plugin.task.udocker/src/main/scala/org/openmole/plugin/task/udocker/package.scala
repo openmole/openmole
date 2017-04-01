@@ -1,5 +1,7 @@
 package org.openmole.plugin.task
 
+import java.util.UUID
+
 import monocle.Lens
 
 package udocker {
@@ -29,4 +31,13 @@ package object udocker extends UDockerPackage {
   trait SharedContainer[T] {
     def sharedContainer: Lens[T, Boolean]
   }
+
+  def newContainerName: String = {
+    val uuid = UUID.randomUUID().toString
+    uuid.filter(_ != '-').map {
+      case c if c < 'a' ⇒ (c - '0' + 'g').toChar
+      case c            ⇒ c
+    }.takeRight(10)
+  }
+
 }

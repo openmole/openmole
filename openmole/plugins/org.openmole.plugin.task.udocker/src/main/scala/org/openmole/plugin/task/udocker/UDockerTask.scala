@@ -18,8 +18,6 @@
 
 package org.openmole.plugin.task.udocker
 
-import java.util.UUID
-
 import monocle.macros._
 import cats.implicits._
 import org.openmole.core.workflow.task._
@@ -35,6 +33,7 @@ import org.openmole.plugin.task.external._
 import org.openmole.plugin.task.systemexec._
 import org.openmole.core.exception._
 import org.openmole.plugin.task.container
+import org.openmole.core.tools.service.ObjectPool
 
 object UDockerTask {
 
@@ -51,6 +50,9 @@ object UDockerTask {
     override def sharedContainer = UDockerTask.sharedContainer
     override def workDirectory = UDockerTask.workDirectory
   }
+
+  // minimise potential race conditions in sharedContainer mode by assigning distinct containers to concurrent threads
+  lazy val containerPool = new ObjectPool[String](newContainerName)
 
   def apply(
     image:   ContainerImage,
@@ -70,7 +72,6 @@ object UDockerTask {
       _config = InputOutputConfig(),
       external = External()
     )
-
 }
 
 @Lenses case class UDockerTask(
@@ -105,8 +106,6 @@ object UDockerTask {
   override protected def process(ctx: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider): Context = External.withWorkDir(executionContext) { taskWorkDirectory ⇒
 
     taskWorkDirectory.mkdirs()
-
-    println(taskWorkDirectory)
 
     val inputDirectory = taskWorkDirectory /> "inputs"
 
@@ -197,7 +196,7 @@ object UDockerTask {
       (retContext, executionResult)
     }
 
-    def executeWithContainerReuse = {
+    def executeWithContainerReuse(containerName: String) = {
 
       def containerExists(name: String) = Workspace.withTmpDir { tmpDirectory ⇒
         val commandline = commandLine(s"${udocker.getAbsolutePath} ps", tmpDirectory.getAbsolutePath, Context.empty)(RandomProvider.empty)
@@ -247,7 +246,7 @@ object UDockerTask {
     }
 
     val (retContext, executionResult) =
-      if (sharedContainer) executeWithContainerReuse else executeWithNewContainer
+      if (sharedContainer) UDockerTask.containerPool.exec(executeWithContainerReuse) else executeWithNewContainer
 
     retContext ++
       List(
@@ -255,14 +254,6 @@ object UDockerTask {
         stdErr.map { e ⇒ Variable(e, executionResult.errorOutput.get) },
         returnValue.map { r ⇒ Variable(r, executionResult.returnCode) }
       ).flatten
-  }
-
-  lazy val containerName: String = {
-    val uuid = UUID.randomUUID().toString
-    uuid.filter(_ != '-').map {
-      case c if c < 'a' ⇒ (c - '0' + 'g').toChar
-      case c            ⇒ c
-    }.takeRight(10)
   }
 
   def udockerDirectory = Workspace.persistentDir /> "udocker"
