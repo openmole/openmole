@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# Limit virtual memory on docker
+export MALLOC_ARENA_MAX=4
+
 # resolve links - $0 may be a softlink
 PRG="$0"
 
