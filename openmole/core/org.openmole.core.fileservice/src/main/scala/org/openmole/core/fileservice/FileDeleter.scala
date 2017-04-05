@@ -22,6 +22,7 @@ import java.util.concurrent.LinkedBlockingQueue
 
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.tool.thread._
+import org.openmole.tool.file._
 
 import scala.ref.WeakReference
 
@@ -33,7 +34,7 @@ private class FileDeleter(fileService: WeakReference[FileService]) { fd ⇒
   def assynchonousRemove(file: File) = cleanFiles.add(file)
 
   private def run: Runnable =
-    while (!cleanFiles.isEmpty || !stop) cleanFiles.take.delete
+    while (!cleanFiles.isEmpty || !stop) cleanFiles.take.recursiveDelete
 
   def start(implicit threadProvider: ThreadProvider) = threadProvider.pool.submit(run)
 
