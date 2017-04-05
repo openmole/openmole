@@ -98,7 +98,7 @@ object UploadActor extends Logger {
     SerializedJob(storage, communicationPath, inputPath, runtime)
   }
 
-  def toReplicatedFile(job: Job, file: File, storage: StorageService, transferOptions: TransferOptions)(implicit token: AccessToken, services: BatchEnvironment.Services): ReplicatedFile = {
+  def toReplicatedFile(file: File, storage: StorageService, transferOptions: TransferOptions)(implicit token: AccessToken, services: BatchEnvironment.Services): ReplicatedFile = {
     import services._
 
     if (!file.exists) throw new UserBadDataError(s"File $file is required but doesn't exist.")
@@ -107,11 +107,11 @@ object UploadActor extends Logger {
     val toReplicatePath = file.getCanonicalFile
 
     val (toReplicate, options) =
-      if (isDir) (services.fileService.archiveForDir(job.moleExecution, file).file, transferOptions.copy(forceCopy = true))
+      if (isDir) (services.fileService.archiveForDir(file).file, transferOptions.copy(forceCopy = true))
       else (file, transferOptions)
 
     val fileMode = file.mode
-    val hash = services.fileService.hash(job.moleExecution, toReplicate).toString
+    val hash = services.fileService.hash(toReplicate).toString
 
     def upload = {
       val name = uniqName(System.currentTimeMillis.toString, ".rep")
@@ -130,11 +130,11 @@ object UploadActor extends Logger {
     environment: BatchEnvironment,
     storage:     StorageService
   )(implicit token: AccessToken, services: BatchEnvironment.Services) = {
-    val environmentPluginPath = shuffled(environment.plugins())(services.randomProvider()).map { p ⇒ toReplicatedFile(job, p, storage, TransferOptions(raw = true)) }.map { FileMessage(_) }
-    val runtimeFileMessage = FileMessage(toReplicatedFile(job, environment.runtime, storage, TransferOptions(raw = true)))
-    val jvmLinuxX64FileMessage = FileMessage(toReplicatedFile(job, environment.jvmLinuxX64, storage, TransferOptions(raw = true)))
+    val environmentPluginPath = shuffled(environment.plugins())(services.randomProvider()).map { p ⇒ toReplicatedFile(p, storage, TransferOptions(raw = true)) }.map { FileMessage(_) }
+    val runtimeFileMessage = FileMessage(toReplicatedFile(environment.runtime, storage, TransferOptions(raw = true)))
+    val jvmLinuxX64FileMessage = FileMessage(toReplicatedFile(environment.jvmLinuxX64, storage, TransferOptions(raw = true)))
 
-    val storageReplication = FileMessage(toReplicatedFile(job, storage.serializedRemoteStorage, storage, TransferOptions(raw = true, forceCopy = true)))
+    val storageReplication = FileMessage(toReplicatedFile(storage.serializedRemoteStorage, storage, TransferOptions(raw = true, forceCopy = true)))
 
     Runtime(
       storageReplication,
@@ -153,8 +153,8 @@ object UploadActor extends Logger {
     path:                String
   )(implicit token: AccessToken, services: BatchEnvironment.Services): ExecutionMessage = {
 
-    val pluginReplicas = shuffled(serializationPlugin)(services.randomProvider()).map { toReplicatedFile(job, _, storage, TransferOptions(raw = true)) }
-    val files = shuffled(serializationFile)(services.randomProvider()).map { toReplicatedFile(job, _, storage, TransferOptions()) }
+    val pluginReplicas = shuffled(serializationPlugin)(services.randomProvider()).map { toReplicatedFile(_, storage, TransferOptions(raw = true)) }
+    val files = shuffled(serializationFile)(services.randomProvider()).map { toReplicatedFile(_, storage, TransferOptions()) }
 
     ExecutionMessage(
       pluginReplicas,

@@ -20,38 +20,29 @@ package org.openmole.core.fileservice
 import java.io.File
 
 import org.openmole.core.threadprovider.IUpdatable
-import org.openmole.tool.cache.AssociativeCache
-import org.openmole.tool.file._
-import org.openmole.tool.hash.Hash
-
 import scala.ref.WeakReference
+import collection.JavaConverters._
 
 class FileServiceGC(fileService: WeakReference[FileService]) extends IUpdatable {
 
   override def update: Boolean =
     fileService.get match {
       case Some(fileService) ⇒
-        fileService.archiveCache.cacheMaps.synchronized {
-          def invalidate =
-            for {
-              execution ← fileService.archiveCache.cacheMaps
-              file ← execution._2
-              if (!new File(file._1).exists)
-            } yield (execution._1, file._1)
+        def invalidateArchive =
+          for {
+            file ← fileService.archiveCache.asMap().keySet().asScala.toSeq
+            if (!new File(file).exists)
+          } yield file
 
-          invalidate.foreach(Function.tupled(fileService.archiveCache.invalidateCache))
-        }
+        fileService.archiveCache.invalidateAll(invalidateArchive.asJava)
 
-        fileService.hashCache.cacheMaps.synchronized {
-          def invalidate =
-            for {
-              execution ← fileService.hashCache.cacheMaps
-              file ← execution._2
-              if !new File(file._1).exists
-            } yield (execution._1, file._1)
+        def invalidateHash =
+          for {
+            file ← fileService.hashCache.asMap().keySet().asScala.toSeq
+            if !new File(file).exists
+          } yield file
 
-          invalidate.foreach(Function.tupled(fileService.hashCache.invalidateCache))
-        }
+        fileService.hashCache.invalidateAll(invalidateHash.asJava)
 
         true
       case None ⇒ false

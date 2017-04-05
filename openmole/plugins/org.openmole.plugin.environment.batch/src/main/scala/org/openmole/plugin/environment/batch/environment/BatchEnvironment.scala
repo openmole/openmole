@@ -269,7 +269,7 @@ trait BatchExecutionJob extends ExecutionJob { bej ⇒
       Seq(environment.runtime, environment.jvmLinuxX64) ++
       environment.plugins() ++ plugins).distinct
 
-  def usedFileHashes = usedFiles.map(f ⇒ (f, environment.services.fileService.hash(job.moleExecution, f)(environment.services.newFile)))
+  def usedFileHashes = usedFiles.map(f ⇒ (f, environment.services.fileService.hash(f)(environment.services.newFile)))
 
   def environment: BatchEnvironment
 
