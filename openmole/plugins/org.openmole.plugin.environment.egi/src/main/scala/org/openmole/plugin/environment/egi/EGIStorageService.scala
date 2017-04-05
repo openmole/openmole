@@ -54,8 +54,6 @@ trait NativeCommandCopy {
 
   def url: URI
 
-  implicit def newFile: NewFile
-
   protected def run(cmd: String) = {
     val output = new StringBuilder
     val error = new StringBuilder
@@ -73,7 +71,7 @@ trait NativeCommandCopy {
 
   def child(parent: String, child: String): String = GSStorage.child(parent, child)
 
-  def download(src: String, dest: File, options: TransferOptions): Unit =
+  def download(src: String, dest: File, options: TransferOptions)(implicit newFile: NewFile): Unit =
     try {
       if (options.raw) download(src, dest)
       else newFile.withTmpFile { tmpFile ⇒
@@ -87,7 +85,7 @@ trait NativeCommandCopy {
 
   private def download(src: String, dest: File): Unit = run(downloadCommand(url.resolve(src), dest.getAbsolutePath))
 
-  def upload(src: File, dest: String, options: TransferOptions): Unit =
+  def upload(src: File, dest: String, options: TransferOptions)(implicit newFile: NewFile): Unit =
     try {
       if (options.raw) upload(src, dest)
       else newFile.withTmpFile { tmpFile ⇒
@@ -127,13 +125,14 @@ object EGIWebDAVStorageService {
 
 trait EGIWebDAVStorageService <: EGIStorageService
 
-class CurlRemoteStorage(val host: String, val port: Int, val voName: String, val timeout: Time, val debug: Boolean)(implicit val newFile: NewFile) extends RemoteStorage with NativeCommandCopy { s ⇒
+class CurlRemoteStorage(val host: String, val port: Int, val voName: String, val timeout: Time, val debug: Boolean) extends RemoteStorage with NativeCommandCopy { s ⇒
   lazy val curl = new Curl(voName, debug, timeout)
+
   @transient lazy val url = new URI("https", null, host, port, null, null, null)
   def downloadCommand(from: URI, to: String): String = curl.download(from, to)
   def uploadCommand(from: String, to: URI): String = curl.upload(from, to)
 
-  override def upload(src: File, dest: String, options: TransferOptions): Unit =
+  override def upload(src: File, dest: String, options: TransferOptions)(implicit newFile: NewFile): Unit =
     try super.upload(src, dest, options)
     catch {
       case t: Throwable ⇒

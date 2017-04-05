@@ -19,9 +19,11 @@ package org.openmole.core.communication.storage
 
 import java.io.File
 
+import org.openmole.core.workspace.NewFile
+
 trait RemoteStorage {
-  def upload(src: File, dest: String, options: TransferOptions = TransferOptions.default): Unit
-  def download(src: String, dest: File, options: TransferOptions = TransferOptions.default): Unit
+  def upload(src: File, dest: String, options: TransferOptions = TransferOptions.default)(implicit newFile: NewFile): Unit
+  def download(src: String, dest: File, options: TransferOptions = TransferOptions.default)(implicit newFile: NewFile): Unit
   def child(parent: String, child: String): String
 }
 

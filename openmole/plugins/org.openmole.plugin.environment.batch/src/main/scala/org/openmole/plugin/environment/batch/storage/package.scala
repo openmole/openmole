@@ -20,14 +20,15 @@ package org.openmole.plugin.environment.batch
 import java.io.File
 
 import org.openmole.core.communication.storage._
+import org.openmole.core.workspace.NewFile
 
 package object storage {
 
   implicit class SimpleRemoteStorage(s: SimpleStorage) extends RemoteStorage {
     val storage = s
     override def child(parent: String, child: String): String = storage.child(parent, child)
-    override def download(src: String, dest: File, options: TransferOptions) = storage.download(src, dest, options)
-    override def upload(src: File, dest: String, options: TransferOptions) = storage.upload(src, dest, options)
+    override def download(src: String, dest: File, options: TransferOptions)(implicit newFile: NewFile) = storage.download(src, dest, options)
+    override def upload(src: File, dest: String, options: TransferOptions)(implicit newFile: NewFile) = storage.upload(src, dest, options)
   }
 
 }
