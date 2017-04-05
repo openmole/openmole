@@ -64,7 +64,12 @@ object GUIServer {
   def urlFile(implicit workspace: Workspace) = Utils.webUIDirectory() / "GUI.url"
 
   val servletArguments = "servletArguments"
-  case class ServletArguments(services: GUIServices, password: Option[String], applicationControl: ApplicationControl)
+  case class ServletArguments(
+    services:           GUIServices,
+    password:           Option[String],
+    applicationControl: ApplicationControl,
+    webapp:             File
+  )
 
   case class ApplicationControl(restart: () ⇒ Unit, stop: () ⇒ Unit)
 
@@ -117,12 +122,15 @@ class GUIServer(port: Int, localhost: Boolean, http: Boolean, services: GUIServi
       () ⇒ { exitStatus = GUIServer.Restart; stop() },
       () ⇒ stop()
     )
-  context.setAttribute(GUIServer.servletArguments, GUIServer.ServletArguments(services, password, applicationControl))
+
+  val webappCache = webapp
+
+  context.setAttribute(GUIServer.servletArguments, GUIServer.ServletArguments(services, password, applicationControl, webappCache))
   context.setContextPath("/")
 
   import services._
 
-  context.setResourceBase(webapp.getAbsolutePath)
+  context.setResourceBase(webappCache.getAbsolutePath)
   context.setClassLoader(classOf[GUIServer].getClassLoader)
   context.setInitParameter(ScalatraListener.LifeCycleKey, classOf[GUIBootstrap].getCanonicalName)
   context.addEventListener(new ScalatraListener)
