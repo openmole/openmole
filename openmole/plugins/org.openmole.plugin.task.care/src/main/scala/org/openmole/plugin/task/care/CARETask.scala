@@ -21,18 +21,17 @@ package org.openmole.plugin.task.care
 import monocle.macros.Lenses
 import org.openmole.core.context.{ Context, Val, Variable }
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
-import org.openmole.core.expansion.ExpandedString
 import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.validation._
 import org.openmole.plugin.task.external.{ External, ExternalBuilder }
-import org.openmole.plugin.task.systemexec
 import org.openmole.plugin.task.systemexec._
 import org.openmole.core.expansion._
 import org.openmole.tool.logger.Logger
+import org.openmole.tool.random._
+import org.openmole.plugin.task.container
 
-import cats._
 import cats.implicits._
 
 object CARETask extends Logger {
@@ -49,7 +48,7 @@ object CARETask extends Logger {
     override def stdErr = CARETask.stdErr
   }
 
-  def apply(archive: File, command: String)(implicit name: sourcecode.Name): CARETask =
+  def apply(archive: File, command: String)(implicit sourceCodeName: sourcecode.Name): CARETask =
     new CARETask(
       archive = archive,
       command = command,
@@ -82,19 +81,12 @@ object CARETask extends Logger {
 
   def config = InputOutputConfig.outputs.modify(_ ++ Seq(stdOut, stdErr, returnValue).flatten)(_config)
 
-  override def validate = {
-    val allInputs = External.PWD :: inputs.toList
+  def validateArchive(archive: File) =
+    if (!archive.exists) container.ArchiveNotFound(archive)
+    else if (!archive.canExecute) Seq(new UserBadDataError(s"Archive $archive must be executable. Make sure you upload it with x permissions"))
+    else container.ArchiveOK
 
-    def validateArchive(archive: File) =
-      if (!archive.exists) Seq(new UserBadDataError(s"Cannot find specified Archive $archive in your work directory. Did you prefix the path with `workDirectory / `?"))
-      else if (!archive.canExecute) Seq(new UserBadDataError(s"Archive $archive must be executable. Make sure you upload it with x permissions"))
-      else Seq.empty[Throwable]
-
-    command.validate(allInputs) ++
-      validateArchive(archive) ++
-      environmentVariables.map(_._2).flatMap(_.validate(allInputs)) ++
-      External.validate(external, allInputs)
-  }
+  override def validate: Seq[Throwable] = container.validateContainer(validateArchive)(archive, command, environmentVariables, external, this.inputs)
 
   override protected def process(executionContext: TaskExecutionContext) = FromContext[Context] { parameters ⇒
     External.withWorkDir(executionContext) { taskWorkDirectory ⇒
@@ -109,7 +101,7 @@ object CARETask extends Logger {
 
       // unarchiving in task's work directory
       // no need to retrieve error => will throw exception if failing
-      execute(Array(archive.getAbsolutePath), taskWorkDirectory, Vector.empty, true, true)
+      execute(Array(archive.getAbsolutePath), taskWorkDirectory, Vector.empty, returnOutput = true, returnError = true)
 
       val extractedArchive = taskWorkDirectory.listFilesSafe.headOption.getOrElse(
         throw new InternalProcessingError("Work directory should contain extracted archive, but is empty")
@@ -118,17 +110,14 @@ object CARETask extends Logger {
       val reExecute = extractedArchive / "re-execute.sh"
 
       val packagingDirectory: String = workDirectoryLine(reExecute.lines).getOrElse(
-        throw new InternalProcessingError(s"Could not find packaging path in ${archive}")
+        throw new InternalProcessingError(s"Could not find packaging path in $archive")
       )
 
       def userWorkDirectory = workDirectory.getOrElse(packagingDirectory)
 
       val inputDirectory = taskWorkDirectory / "inputs"
 
-      def inputPathResolver(path: String) = {
-        if (File(path).isAbsolute) inputDirectory / path
-        else inputDirectory / userWorkDirectory / path
-      }
+      def inputPathResolver = container.inputPathResolver(inputDirectory, userWorkDirectory) _
 
       val (preparedContext, preparedFilesInfo) = external.prepareAndListInputFiles(context, inputPathResolver)
 
@@ -179,25 +168,14 @@ object CARETask extends Logger {
       def prootNoSeccomp = ("PROOT_NO_SECCOMP", "1")
 
       // FIXME duplicated from SystemExecTask
-      val allEnvironmentVariables = environmentVariables.map { case (name, variable) ⇒ (name, variable.from(context)) } ++ Vector(prootNoSeccomp)
+      val allEnvironmentVariables = environmentVariables.map { case (varName, variable) ⇒ (varName, variable.from(context)) } ++ Vector(prootNoSeccomp)
       val executionResult = execute(commandline, extractedArchive, allEnvironmentVariables, stdOut.isDefined, stdErr.isDefined)
 
       if (errorOnReturnValue && returnValue.isEmpty && executionResult.returnCode != 0) throw error(commandline.toVector, executionResult)
 
       def rootDirectory = extractedArchive / rootfs
 
-      def outputPathResolver(filePath: String): File = {
-        def isParent(dir: String, file: String) = File(file).getAbsolutePath.startsWith(File(dir).getAbsolutePath)
-        def inPreparedFiles(f: String) = preparedFileBindings.map(b ⇒ b._2).exists(b ⇒ isParent(b, f))
-        def inHostFiles(f: String) = hostFileBindings.map(b ⇒ b._2).exists(b ⇒ isParent(b, f))
-
-        def isAbsolute = File(filePath).isAbsolute
-        def absoluteInCARE: String = if (isAbsolute) filePath else (File(userWorkDirectory) / filePath).getPath
-
-        if (inPreparedFiles(File("/") / absoluteInCARE getAbsolutePath)) inputPathResolver(filePath)
-        else if (inHostFiles(File("/") / absoluteInCARE getAbsolutePath)) File("/") / absoluteInCARE
-        else rootDirectory / absoluteInCARE
-      }
+      def outputPathResolver = container.outputPathResolver(preparedFileBindings, hostFileBindings, inputDirectory, userWorkDirectory, rootDirectory) _
 
       val retContext = external.fetchOutputFiles(preparedContext, outputPathResolver)
       external.checkAndClean(this, retContext, taskWorkDirectory)

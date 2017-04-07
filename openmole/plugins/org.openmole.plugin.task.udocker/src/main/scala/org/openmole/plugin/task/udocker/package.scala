@@ -1,5 +1,6 @@
 package org.openmole.plugin.task
 
+import java.util.UUID
 import monocle.Lens
 
 package udocker {
@@ -22,7 +23,10 @@ package object udocker extends UDockerPackage {
     implicit def strsingToContainerImage(s: String) = DockerImage(s)
   }
 
-  sealed trait ContainerImage
+  sealed trait ContainerImage {
+    lazy val id = UUID.randomUUID().toString
+  }
+
   case class DockerImage(image: String, registry: String = "https://registry-1.docker.io") extends ContainerImage
   case class SavedDockerImage(file: java.io.File) extends ContainerImage
 

@@ -185,6 +185,8 @@ package object systemexec extends external.ExternalPackage with SystemExecPackag
 
   case class ExecutionResult(returnCode: Int, output: Option[String], errorOutput: Option[String])
 
+  def commandLine(cmd: String) = CommandLine.parse(cmd).toStrings
+
   def commandLine(
     cmd:     FromContext[String],
     workDir: String

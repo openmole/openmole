@@ -19,17 +19,14 @@ package org.openmole.console
 
 import jline.console.ConsoleReader
 import org.openmole.core.console.ScalaREPL
-import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.preference.Preference
 import org.openmole.core.project._
-import org.openmole.core.replication.ReplicaCatalog
-import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.tools.io.Prettifier._
-import org.openmole.core.workspace._
 import org.openmole.tool.crypto.Cypher
 import org.openmole.tool.file._
 import org.openmole.tool.logger.Logger
 import org.openmole.core.services._
+import org.openmole.core.workflow.mole._
 
 import scala.annotation.tailrec
 import scala.util._
@@ -103,12 +100,7 @@ import org.openmole.console.Console._
 class Console(script: Option[String] = None) {
   console ⇒
 
-  def workspace = "workspace"
-  def registry = "registry"
-  def logger = "logger"
-  def serializer = "serializer"
   def commandsName = "_commands_"
-  def pluginsName = "_plugins_"
 
   def run(args: Seq[String], workDirectory: Option[File])(implicit services: Services): Int = {
     import services._
@@ -134,6 +126,7 @@ class Console(script: Option[String] = None) {
           case compiled: Compiled ⇒
             Try(compiled.eval) match {
               case Success(res) ⇒
+                MoleServices.create
                 val ex = res.toExecution()
                 Try(ex.start) match {
                   case Failure(e) ⇒

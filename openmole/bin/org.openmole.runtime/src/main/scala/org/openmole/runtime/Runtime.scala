@@ -42,6 +42,7 @@ import scala.collection.JavaConversions._
 import scala.collection.mutable.HashMap
 import util.{ Failure, Success }
 import org.openmole.core.workflow.execution.Environment.RuntimeLog
+import org.openmole.tool.cache.KeyValueCache
 
 object Runtime extends Logger {
   val NbRetry = 3
@@ -60,7 +61,7 @@ class Runtime {
     outputMessagePath:    String,
     threads:              Int,
     debug:                Boolean
-  )(implicit serializerService: SerializerService, newFile: NewFile, fileService: FileService, preference: Preference, threadProvider: ThreadProvider, eventDispatcher: EventDispatcher) = {
+  )(implicit serializerService: SerializerService, newFile: NewFile, fileService: FileService, preference: Preference, threadProvider: ThreadProvider, eventDispatcher: EventDispatcher, workspace: Workspace) = {
 
     /*--- get execution message and job for runtime---*/
     val usedFiles = new HashMap[String, File]
@@ -136,7 +137,7 @@ class Runtime {
       /* --- Submit all jobs to the local environment --*/
       logger.fine("Run the jobs")
       val environment = LocalEnvironment(nbThreads = threads)
-      val taskExecutionContext = TaskExecutionContext(newFile.newDir("runtime"), environment, preference, threadProvider)
+      val taskExecutionContext = TaskExecutionContext(newFile.newDir("runtime"), environment, preference, threadProvider, workspace, KeyValueCache())
       for (toProcess ← allMoleJobs) environment.submit(toProcess, taskExecutionContext)
 
       saver.waitAllFinished

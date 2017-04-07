@@ -215,7 +215,7 @@ class SubMoleExecution(
             val moleJob: MoleJob = MoleJob(capsule.task, implicits + sourced + context + savedContext, moleExecution.nextJobId, stateChanged)
             eventDispatcher.trigger(moleExecution, new MoleExecution.JobCreated(moleJob, capsule))
             addJob(moleJob, capsule, ticket)
-            moleJob.perform(TaskExecutionContext(newFile.baseDir, moleExecution.defaultEnvironment, preference, threadProvider))
+            moleJob.perform(TaskExecutionContext(newFile.baseDir, moleExecution.defaultEnvironment, preference, threadProvider, workspace, moleExecution.taskCache))
             masterCapsuleRegistry.register(c, ticket.parentOrException, c.toPersist(moleJob.context))
             finalState(moleJob, moleJob.state)
           }

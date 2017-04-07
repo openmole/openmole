@@ -53,8 +53,6 @@ package file {
     val WRITE_MODE = 2 + 16 + 128
     val READ_MODE = 4 + 32 + 256
 
-    val jvmLevelFileLock = new LockRepository[String]
-
     def copyChannel(source: FileChannel, destination: FileChannel): Unit = source.transferTo(0, source.size, destination)
 
     // glad you were there...
@@ -475,4 +473,6 @@ package file {
 
 }
 
-package object file extends FilePackage
+package object file extends FilePackage {
+  val jvmLevelFileLock = new LockRepository[String]
+}

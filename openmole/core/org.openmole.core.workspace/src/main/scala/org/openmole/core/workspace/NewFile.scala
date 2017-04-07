@@ -8,6 +8,12 @@ object NewFile {
 }
 
 case class NewFile(baseDir: File) {
+  def makeNewDir(prefix: String = fixedDir): File = {
+    val dir = newDir(prefix)
+    dir.mkdirs()
+    dir
+  }
+
   def newDir(prefix: String = fixedDir): File = baseDir.newDir(prefix)
   def newFile(prefix: String = fixedPrefix, suffix: String = fixedPostfix): File = baseDir.newFile(prefix, suffix)
   def withTmpFile[T](prefix: String, postfix: String)(f: File ⇒ T): T = {

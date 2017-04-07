@@ -26,8 +26,8 @@ import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.workflow.builder.InputOutputConfig
 import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.tools._
-import org.openmole.core.workspace.NewFile
-import org.openmole.tool.cache.Lazy
+import org.openmole.core.workspace.{ NewFile, Workspace }
+import org.openmole.tool.cache._
 import org.openmole.tool.random
 import org.openmole.tool.random._
 import org.openmole.tool.thread._
@@ -36,7 +36,9 @@ case class TaskExecutionContext(
     tmpDirectory:                File,
     localEnvironment:            LocalEnvironment,
     implicit val preference:     Preference,
-    implicit val threadProvider: ThreadProvider
+    implicit val threadProvider: ThreadProvider,
+    implicit val workspace:      Workspace,
+    cache:                       KeyValueCache
 ) {
   implicit def newFile = NewFile(tmpDirectory)
 }

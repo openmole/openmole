@@ -75,6 +75,7 @@ object MoleTask {
 
     import executionContext.preference
     import executionContext.threadProvider
+    import executionContext.workspace
 
     val execution =
       MoleExecution(

@@ -22,9 +22,9 @@ import java.io.{ File, PrintStream }
 import org.openmole.core.event.EventDispatcher
 import org.openmole.core.output.OutputManager
 import org.openmole.core.preference.Preference
-import org.openmole.core.serializer.SerializerService
-import org.openmole.core.threadprovider.ThreadProvider
-import org.openmole.core.workspace.NewFile
+import org.openmole.core.serializer._
+import org.openmole.core.threadprovider._
+import org.openmole.core.workspace._
 import org.openmole.core.workflow.dsl._
 import org.openmole.tool.cache._
 import org.openmole.tool.random.Seeder
@@ -41,13 +41,14 @@ class MoleExecutionContext(
 
 object MoleServices {
 
-  implicit def create(implicit preference: Preference, seeder: Seeder, threadProvider: ThreadProvider, eventDispatcher: EventDispatcher, newFile: NewFile) = {
+  implicit def create(implicit preference: Preference, seeder: Seeder, threadProvider: ThreadProvider, eventDispatcher: EventDispatcher, newFile: NewFile, workspace: Workspace) = {
     new MoleServices()(
       preference = preference,
       seeder = Seeder(seeder.newSeed),
       threadProvider = threadProvider,
       eventDispatcher = eventDispatcher,
-      newFile = NewFile(newFile.newDir("execution"))
+      newFile = NewFile(newFile.newDir("execution")),
+      workspace = workspace
     )
   }
 }
@@ -58,7 +59,8 @@ class MoleServices(
     val seeder:          Seeder,
     val threadProvider:  ThreadProvider,
     val eventDispatcher: EventDispatcher,
-    val newFile:         NewFile
+    val newFile:         NewFile,
+    val workspace:       Workspace
 ) {
   def newRandom = Lazy(seeder.newRNG)
   implicit lazy val defaultRandom = newRandom
