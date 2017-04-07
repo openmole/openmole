@@ -18,16 +18,33 @@
 package org.openmole.core.workflow.execution.local
 
 import java.util.UUID
+
+import org.openmole.core.threadprovider.ThreadProvider
+
 import collection.mutable
 import scala.ref.WeakReference
 import org.openmole.core.workflow.execution._
+import org.openmole.tool.collection._
 
-class ExecutorPool(nbThreads: Int, environment: WeakReference[LocalEnvironment]) {
-  private val jobs = JobPriorityQueue()
+object ExecutorPool {
+
+  private def createExecutor(environment: WeakReference[LocalEnvironment], threadProvider: ThreadProvider) = {
+    val executor = new LocalExecutor(environment)
+    val t = threadProvider.newThread(executor, Some("executor" + UUID.randomUUID().toString))
+    t.start
+    (executor, t)
+  }
+
+}
+
+class ExecutorPool(nbThreads: Int, environment: WeakReference[LocalEnvironment], threadProvider: ThreadProvider) {
+
+  def priority(localExecutionJob: LocalExecutionJob) = localExecutionJob.moleJobs.count(mj ⇒ LocalExecutor.containsMoleTask(mj))
+  private val jobs = PriorityQueue[LocalExecutionJob]()
 
   private val executors = {
     val map = mutable.HashMap[LocalExecutor, Thread]()
-    (0 until nbThreads).foreach { _ ⇒ map += createExecutor }
+    (0 until nbThreads).foreach { _ ⇒ map += ExecutorPool.createExecutor(environment, threadProvider) }
     map
   }
 
@@ -35,22 +52,13 @@ class ExecutorPool(nbThreads: Int, environment: WeakReference[LocalEnvironment])
     case (exe, thread) ⇒ exe.stop = true; thread.interrupt
   }
 
-  private def createExecutor = {
-    val executor = new LocalExecutor(environment)
-    val group = new ThreadGroup(Thread.currentThread().getThreadGroup, "executor" + UUID.randomUUID().toString)
-    val t = new Thread(group, executor)
-    t.setDaemon(true)
-    t.start
-    (executor, t)
-  }
-
-  private[local] def addExecuter() = executors.synchronized { executors += createExecutor }
+  private[local] def addExecuter() = executors.synchronized { executors += ExecutorPool.createExecutor(environment, threadProvider) }
 
   private[local] def removeExecuter(ex: LocalExecutor) = executors.synchronized { executors.remove(ex) }
 
   private[local] def takeNextjob: LocalExecutionJob = jobs.dequeue
 
-  def enqueue(job: LocalExecutionJob) = jobs.enqueue(job)
+  def enqueue(job: LocalExecutionJob) = jobs.enqueue(job, priority(job))
 
   def waiting: Int = jobs.size
   def running: Int =

@@ -17,18 +17,16 @@
  */
 package org.openmole.gui.plugin.authentication.sshkey
 
-import org.openmole.core.workspace.{ Decrypt, Workspace }
+import org.openmole.core.services._
 import org.openmole.gui.ext.data.{ ErrorBuilder, Test }
 import org.openmole.gui.ext.tool.server.Utils
 import org.openmole.plugin.environment.ssh._
 
 import scala.util._
 
-class PrivateKeyAuthenticationApiImpl extends PrivateKeyAuthenticationAPI {
+class PrivateKeyAuthenticationApiImpl(s: Services) extends PrivateKeyAuthenticationAPI {
 
-  implicit def workspace: Workspace = Workspace.instance
-
-  implicit def decrypt: Decrypt = Decrypt(workspace)
+  import s._
 
   private def authenticationFile(key: String) = new java.io.File(Utils.authenticationKeysFile, key)
 
@@ -37,7 +35,7 @@ class PrivateKeyAuthenticationApiImpl extends PrivateKeyAuthenticationAPI {
       case Some(pk: String) ⇒ Some(PrivateKey(
         authenticationFile(pk),
         data.login,
-        Workspace.encrypt(data.cypheredPassword),
+        cypher.encrypt(data.cypheredPassword),
         data.target,
         data.port.toInt
       ))
@@ -49,7 +47,7 @@ class PrivateKeyAuthenticationApiImpl extends PrivateKeyAuthenticationAPI {
       case key: PrivateKey ⇒ Seq(PrivateKeyAuthenticationData(
         Some(key.privateKey.getName),
         key.login,
-        Workspace.decrypt(key.cypheredPassword),
+        cypher.decrypt(key.cypheredPassword),
         key.host,
         key.port.toString
       ))

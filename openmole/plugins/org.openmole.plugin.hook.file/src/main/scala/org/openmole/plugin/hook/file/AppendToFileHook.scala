@@ -26,7 +26,6 @@ import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfi
 import org.openmole.core.dsl._
 import org.openmole.core.workflow.mole.{ MoleExecutionContext, _ }
 import org.openmole.core.workflow.validation.ValidateHook
-import org.openmole.tool.random.RandomProvider
 import org.openmole.tool.stream._
 
 object AppendToFileHook {
@@ -51,7 +50,8 @@ object AppendToFileHook {
   override def validate(inputs: Seq[Val[_]]): Seq[Throwable] =
     file.validate(inputs) ++ content.validate(inputs)
 
-  override def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider) = {
+  override protected def process(executionContext: MoleExecutionContext) = FromContext { parameters ⇒
+    import parameters._
     val f = file.from(context)
     f.createParentDir
     f.withLock(_.append(content.from(context)))

@@ -18,6 +18,7 @@
 package org.openmole.core.context
 
 import org.openmole.core.exception._
+import org.openmole.core.preference._
 import org.openmole.core.workspace._
 import org.openmole.tool.random
 
@@ -26,8 +27,10 @@ import scala.collection.immutable.TreeMap
 
 object Context {
 
+  def ErrorArraySnipSize = ConfigurationLocation[Int]("Display", "ErrorArraySnipSize", Some(10))
+
   implicit def variableToContextConverter(variable: Variable[_]) = Context(variable)
-  implicit def variablesToContextConverter(variables: Seq[Variable[_]]): Context = Context(variables: _*)
+  implicit def variablesToContextConverter(variables: Iterable[Variable[_]]): Context = Context(variables.toSeq: _*)
 
   def fromMap(v: Traversable[(String, Variable[_])]) = new Context {
     val variables = TreeMap.empty[String, Variable[_]] ++ v
@@ -36,8 +39,6 @@ object Context {
   def apply(v: T forSome { type T <: Variable[_] }*): Context = Context.fromMap(v.map { v ⇒ v.prototype.name → v })
 
   val empty = apply()
-
-  def buildRNG(context: Context): scala.util.Random = random.Random(context(Variable.openMOLESeed)).toScala
 
 }
 
@@ -174,8 +175,10 @@ trait Context extends Map[String, Variable[_]] with MapLike[String, Variable[_],
 
   def prototypes = values.map { _.prototype }
 
-  def prettified(stripSize: Int = Workspace.preference(Workspace.ErrorArraySnipSize)) =
+  def prettified(stripSize: Int): String =
     "{" + (if (variables.values.isEmpty) ""
     else variables.values.map(v ⇒ if (v != null) v.prettified(stripSize) else "null").mkString(", ")) + "}"
+
+  def prettified(implicit preference: Preference): String = prettified(preference(Context.ErrorArraySnipSize))
 
 }

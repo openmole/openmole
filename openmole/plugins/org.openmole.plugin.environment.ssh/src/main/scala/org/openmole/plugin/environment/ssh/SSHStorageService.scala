@@ -27,11 +27,11 @@ import squants.time.TimeConversions._
 
 trait SSHStorageService extends StorageService with SSHService with GridScaleStorage { ss ⇒
 
-  def environment: BatchEnvironment with SSHAccess
+  val environment: BatchEnvironment with SSHAccess
 
   lazy val storage =
     new fr.iscpif.gridscale.ssh.SSHStorage with SSHConnectionCache {
-      override def timeout = Workspace.preference(SSHService.timeout)
+      override def timeout = environment.services.preference(SSHService.timeout)
       override def credential = environment.credential
       override def host: String = environment.host
       override def port: Int = environment.port

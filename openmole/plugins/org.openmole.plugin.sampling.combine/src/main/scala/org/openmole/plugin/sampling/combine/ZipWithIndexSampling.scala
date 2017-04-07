@@ -33,8 +33,9 @@ sealed class ZipWithIndexSampling(val sampling: Sampling, val index: Val[Int]) e
   override def inputs = sampling.inputs
   override def prototypes = index :: sampling.prototypes.toList
 
-  override def apply() = FromContext.apply { (context, rng) ⇒
-    sampling().from(context)(rng).zipWithIndex.map {
+  override def apply() = FromContext { p ⇒
+    import p._
+    sampling().from(context).zipWithIndex.map {
       case (line, i) ⇒ line ++ List(Variable(index, i))
     }
   }

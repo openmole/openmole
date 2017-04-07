@@ -21,8 +21,9 @@ import java.io.File
 import org.openmole.core.expansion.FromContext
 
 object FileList {
-  def apply(directory: File, name: FromContext[String]) = FromContext { (context, rng) ⇒
-    new File(directory, name.from(context)(rng))
+  def apply(directory: File, name: FromContext[String]) = FromContext { p ⇒
+    import p._
+    new File(directory, name.from(context))
   }
 }
 

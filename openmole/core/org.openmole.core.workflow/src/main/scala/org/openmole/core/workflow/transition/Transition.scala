@@ -23,7 +23,7 @@ import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.validation._
 import org.openmole.tool.logger.Logger
-import org.openmole.tool.random.RandomProvider
+import cats.implicits._
 
 object Transition extends Logger
 
@@ -36,8 +36,10 @@ class Transition(
 
   override def validate(inputs: Seq[Val[_]]) = condition.validate(inputs)
 
-  override def perform(context: Context, ticket: Ticket, subMole: SubMoleExecution)(implicit rng: RandomProvider) =
-    if (condition().from(context)) submitNextJobsIfReady(filtered(context).values, ticket, subMole)
+  override def perform(context: Context, ticket: Ticket, subMole: SubMoleExecution, moleExecutionContext: MoleExecutionContext) = {
+    import moleExecutionContext.services._
+    if (condition().from(context)) ITransition.submitNextJobsIfReady(this)(filtered(context).values, ticket, subMole)
+  }
 
   override def toString = s"$start -- $end"
 }

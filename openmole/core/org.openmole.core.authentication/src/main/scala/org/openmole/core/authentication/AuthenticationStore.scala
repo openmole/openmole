@@ -19,7 +19,7 @@ package org.openmole.core.authentication
 
 import java.io.File
 
-import org.openmole.core.serializer.SerialiserService
+import org.openmole.core.serializer.SerializerService
 import org.openmole.core.workspace._
 import org.openmole.tool.file._
 
@@ -27,44 +27,42 @@ object AuthenticationStore {
 
   def authenticationsLocation = "authentications"
 
-  implicit def defaultStore(implicit workspace: Workspace) = AuthenticationStore(workspace)
-
-  def apply(workspace: Workspace = Workspace.instance): AuthenticationStore = {
-    val dir = workspace.persistentDir / authenticationsLocation
+  def apply(directory: File): AuthenticationStore = {
+    val dir = directory / authenticationsLocation
     if (dir.mkdirs) dir.setPosixMode("rwx------")
     new AuthenticationStore(dir)
   }
 
 }
 
-case class AuthenticationStore(_baseDir: File) {
+class AuthenticationStore(_baseDir: File) {
 
   def baseDir = {
     _baseDir.mkdirs
     _baseDir
   }
 
-  def /(name: String) = AuthenticationStore(new File(baseDir, name))
+  def /(name: String) = new AuthenticationStore(new File(baseDir, name))
 
-  def save(obj: Any, name: String, workspace: Workspace = Workspace.instance) = {
+  def save(obj: Any, name: String)(implicit serializerService: SerializerService) = {
     val file = new File(baseDir, name)
-    SerialiserService.serialise(obj, file)
+    serializerService.serialise(obj, file)
   }
 
-  def load[T](name: String): T = {
+  def load[T](name: String)(implicit serializerService: SerializerService): T = {
     val file = new File(baseDir, name)
     loadFile(file)
   }
 
-  def loadFile[T](file: File): T =
-    SerialiserService.deserialise[T](file)
+  def loadFile[T](file: File)(implicit serializerService: SerializerService): T =
+    serializerService.deserialise[T](file)
 
   def delete() = {
     baseDir.recursiveDelete
     baseDir.mkdirs
   }
 
-  def all =
+  def all(implicit serializerService: SerializerService) =
     baseDir.listRecursive(_.isFile).map { loadFile }
 
 }

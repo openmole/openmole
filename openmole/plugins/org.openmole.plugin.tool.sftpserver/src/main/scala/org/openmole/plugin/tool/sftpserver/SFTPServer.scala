@@ -18,6 +18,7 @@
 package org.openmole.plugin.tool.sftpserver
 
 import java.io.File
+import java.util.concurrent.ThreadPoolExecutor
 
 import org.apache.sshd.common.file._
 import org.apache.sshd.common.file.root.RootedFileSystemProvider
@@ -36,7 +37,7 @@ import scala.collection.JavaConversions._
 
 object SFTPServer extends Logger
 
-class SFTPServer(path: File, port: Int, passwordHash: Hash) {
+class SFTPServer(path: File, port: Int, passwordHash: Hash)(implicit val pool: ThreadPoolExecutor) {
 
   @volatile var started = false
 

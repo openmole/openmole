@@ -46,6 +46,8 @@ class SubMoleExecution(
     val moleExecution: MoleExecution
 ) {
 
+  import moleExecution.executionContext.services._
+
   @transient private lazy val _transitionLock = new locks.ReentrantLock()
   def transitionLock = synchronized(_transitionLock)
 
@@ -53,7 +55,8 @@ class SubMoleExecution(
   private val _children = TSet.empty[SubMoleExecution]
   private val _jobs = TMap[MoleJob, (Capsule, Ticket)]()
   private val _canceled = Ref(false)
-  private lazy val masterCapsuleExecutor = Executors.newSingleThreadExecutor(daemonThreadFactory)
+
+  private lazy val masterCapsuleExecutor = Executors.newSingleThreadExecutor(threadProvider.threadFactory)
 
   val masterCapsuleRegistry = new RegistryWithTicket[MasterCapsule, Context]
   val aggregationTransitionRegistry = new RegistryWithTicket[IAggregationTransition, Buffer[(Long, Variable[_])]]
@@ -128,11 +131,11 @@ class SubMoleExecution(
     def ctxForHooks = implicits + job.context
 
     def executeHook(h: Hook) =
-      try h.perform(ctxForHooks, moleExecution.executionContext)(RandomProvider(moleExecution.newRNG))
+      try h.perform(ctxForHooks, moleExecution.executionContext)
       catch {
         case e: Throwable ⇒
           val event = MoleExecution.HookExceptionRaised(h, capsule, job, e, SEVERE)
-          EventDispatcher.trigger(moleExecution, event)
+          eventDispatcher.trigger(moleExecution, event)
           moleExecution.cancel(event)
           logger.log(FINE, "Error in execution of misc " + h + "at the end of task " + job.task, e)
           throw e
@@ -146,14 +149,14 @@ class SubMoleExecution(
       transitionLock {
         for {
           transition ← mole.outputTransitions(capsule).toList.sortBy(t ⇒ mole.slots(t.end.capsule).size).reverse
-        } transition.perform(implicits + context, ticket, this)(RandomProvider(moleExecution.newRNG))
+        } transition.perform(implicits + context, ticket, this, moleExecution.executionContext)
       }
     }
     catch {
       case t: Throwable ⇒
         logger.log(FINE, "Error in submole execution", t)
         val event = MoleExecution.ExceptionRaised(job, capsule, t, SEVERE)
-        EventDispatcher.trigger(moleExecution, event)
+        eventDispatcher.trigger(moleExecution, event)
         moleExecution.cancel(event)
         throw t
     }
@@ -172,7 +175,7 @@ class SubMoleExecution(
   private def isFinished = _nbJobs.single() == 0
 
   private def finish(ticket: Ticket) = {
-    EventDispatcher.trigger(this, new SubMoleExecution.Finished(ticket, canceled = _canceled.single()))
+    eventDispatcher.trigger(this, new SubMoleExecution.Finished(ticket, canceled = _canceled.single()))
     parentApply(_.-=(this))
   }
 
@@ -190,41 +193,41 @@ class SubMoleExecution(
       val sourced =
         moleExecution.sources(capsule).foldLeft(Context.empty) {
           case (a, s) ⇒
-            val ctx = try s.perform(implicits + context, moleExecution.executionContext)(RandomProvider(moleExecution.newRNG))
+            val ctx = try s.perform(implicits + context, moleExecution.executionContext)
             catch {
               case t: Throwable ⇒
                 logger.log(FINE, "Error in submole execution", t)
                 val event = MoleExecution.SourceExceptionRaised(s, capsule, t, SEVERE)
-                EventDispatcher.trigger(moleExecution, event)
+                eventDispatcher.trigger(moleExecution, event)
                 moleExecution.cancel(event)
                 throw new InternalProcessingError(t, s"Error in source execution that is plugged to $capsule")
             }
             a + ctx
-        } + Variable(Variable.openMOLESeed, moleExecution.newSeed)
+        } + Variable(Variable.openMOLESeed, seeder.newSeed)
 
       capsule match {
         case c: MasterCapsule ⇒
           def stateChanged(job: MoleJob, oldState: State, newState: State) =
-            EventDispatcher.trigger(moleExecution, new MoleExecution.JobStatusChanged(job, c, newState, oldState))
+            eventDispatcher.trigger(moleExecution, new MoleExecution.JobStatusChanged(job, c, newState, oldState))
 
           masterCapsuleExecutor.submit {
             val savedContext = masterCapsuleRegistry.remove(c, ticket.parentOrException).getOrElse(Context.empty)
             val moleJob: MoleJob = MoleJob(capsule.task, implicits + sourced + context + savedContext, moleExecution.nextJobId, stateChanged)
-            EventDispatcher.trigger(moleExecution, new MoleExecution.JobCreated(moleJob, capsule))
+            eventDispatcher.trigger(moleExecution, new MoleExecution.JobCreated(moleJob, capsule))
             addJob(moleJob, capsule, ticket)
-            moleJob.perform(TaskExecutionContext(moleExecution.executionContext.tmpDirectory, moleExecution.defaultEnvironment))
+            moleJob.perform(TaskExecutionContext(newFile.baseDir, moleExecution.defaultEnvironment, preference, threadProvider))
             masterCapsuleRegistry.register(c, ticket.parentOrException, c.toPersist(moleJob.context))
             finalState(moleJob, moleJob.state)
           }
         case _ ⇒
           def stateChanged(job: MoleJob, oldState: State, newState: State) = {
-            EventDispatcher.trigger(moleExecution, new MoleExecution.JobStatusChanged(job, capsule, newState, oldState))
+            eventDispatcher.trigger(moleExecution, new MoleExecution.JobStatusChanged(job, capsule, newState, oldState))
             if (newState.isFinal) finalState(job, newState)
           }
 
           val moleJob: MoleJob = MoleJob(capsule.task, implicits + sourced + context, moleExecution.nextJobId, stateChanged)
           addJob(moleJob, capsule, ticket)
-          EventDispatcher.trigger(moleExecution, new MoleExecution.JobCreated(moleJob, capsule))
+          eventDispatcher.trigger(moleExecution, new MoleExecution.JobCreated(moleJob, capsule))
           moleExecution.group(moleJob, capsule, this)
       }
 
@@ -250,13 +253,13 @@ class SubMoleExecution(
         val error = MoleExecution.JobFailed(job, capsule, e)
         moleExecution.cancel(error)
         logger.log(FINE, s"Error in user job execution for capsule $capsule, job state is FAILED.", e)
-        EventDispatcher.trigger(moleExecution, error)
+        eventDispatcher.trigger(moleExecution, error)
       case _ ⇒
     }
 
     if (state == COMPLETED) {
       val (capsule, _) = _jobs.single(job)
-      EventDispatcher.trigger(moleExecution, MoleExecution.JobFinished(job, capsule))
+      eventDispatcher.trigger(moleExecution, MoleExecution.JobFinished(job, capsule))
     }
 
     state match {

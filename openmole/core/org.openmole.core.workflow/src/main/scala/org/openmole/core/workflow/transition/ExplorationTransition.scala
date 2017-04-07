@@ -20,13 +20,13 @@ package org.openmole.core.workflow.transition
 import org.openmole.core.context.{ Context, Val, Variable }
 import org.openmole.core.event._
 import org.openmole.core.exception._
-import org.openmole.core.expansion.Condition
+import org.openmole.core.expansion.{ Condition, FromContext }
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.validation.ValidateTransition
+import org.openmole.core.workspace.NewFile
 import org.openmole.tool.lock._
-import org.openmole.tool.random.RandomProvider
 
 import scala.collection.mutable.{ HashSet, ListBuffer }
 
@@ -34,13 +34,13 @@ class ExplorationTransition(val start: Capsule, val end: Slot, val condition: Co
 
   override def validate(inputs: Seq[Val[_]]) = condition.validate(inputs)
 
-  override def perform(context: Context, ticket: Ticket, subMole: SubMoleExecution)(implicit rng: RandomProvider) = {
+  override def perform(context: Context, ticket: Ticket, subMole: SubMoleExecution, executionContext: MoleExecutionContext) = {
     val subSubMole = subMole.newChild
-    registerAggregationTransitions(ticket, subSubMole)
-    subSubMole.transitionLock { submitIn(filtered(context), ticket, subSubMole) }
+    registerAggregationTransitions(ticket, subSubMole, executionContext)
+    subSubMole.transitionLock { submitIn(filtered(context), ticket, subSubMole, executionContext) }
   }
 
-  def submitIn(context: Context, ticket: Ticket, subMole: SubMoleExecution)(implicit rng: RandomProvider) = {
+  def submitIn(context: Context, ticket: Ticket, subMole: SubMoleExecution, executionContext: MoleExecutionContext) = {
     val moleExecution = subMole.moleExecution
     val mole = moleExecution.mole
     def explored = ExplorationTask.explored(start)
@@ -65,12 +65,14 @@ class ExplorationTransition(val start: Capsule, val end: Slot, val condition: Co
         else throw new UserBadDataError("Found value of type " + v.asInstanceOf[AnyRef].getClass + " incompatible with prototype " + fp)
       }
 
-      if (condition().from(variables)) { submitNextJobsIfReady(ListBuffer() ++ variables, newTicket, subMole) }
+      import executionContext.services._
+
+      if (condition().from(variables)) { ITransition.submitNextJobsIfReady(this)(ListBuffer() ++ variables, newTicket, subMole) }
     }
 
   }
 
-  private def registerAggregationTransitions(ticket: Ticket, subMoleExecution: SubMoleExecution)(implicit rng: RandomProvider) = {
+  private def registerAggregationTransitions(ticket: Ticket, subMoleExecution: SubMoleExecution, executionContext: MoleExecutionContext) = {
     val alreadySeen = new HashSet[Capsule]
     val toProcess = new ListBuffer[(Capsule, Int)]
     toProcess += ((end.capsule, 0))
@@ -88,8 +90,9 @@ class ExplorationTransition(val start: Capsule, val end: Slot, val condition: Co
             if (level > 0) toProcess += t.end.capsule → (level - 1)
             else if (level == 0) {
               subMoleExecution.aggregationTransitionRegistry.register(t, ticket, new ListBuffer)
+              import executionContext.services.eventDispatcher
               subMoleExecution listen {
-                case (se, ev: SubMoleExecution.Finished) ⇒ t.aggregate(se, ev.ticket)
+                case (se, ev: SubMoleExecution.Finished) ⇒ t.aggregate(se, ev.ticket, executionContext)
               }
             }
           case t: IExplorationTransition ⇒ toProcess += t.end.capsule → (level + 1)

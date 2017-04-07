@@ -25,6 +25,6 @@ class Activator extends PluginActivator {
 
   def info: PluginInfo = PluginInfo(
     classOf[LoginAuthenticationFactory],
-    OMRouter[LoginAuthenticationAPI](AutowireServer.route[LoginAuthenticationAPI](new LoginAuthenticationApiImpl))
+    s ⇒ OMRouter[LoginAuthenticationAPI](AutowireServer.route[LoginAuthenticationAPI](new LoginAuthenticationApiImpl(s)))
   )
 }

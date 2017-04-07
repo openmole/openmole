@@ -1,7 +1,7 @@
 package org.openmole.core.workflow
 
+import org.openmole.core.preference.ConfigurationInfo
 import org.openmole.core.workflow.execution.{ Environment, LocalEnvironment }
-import org.openmole.core.workspace.ConfigurationInfo
 import org.osgi.framework.{ BundleActivator, BundleContext }
 
 class Activator extends BundleActivator {

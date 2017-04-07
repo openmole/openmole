@@ -20,12 +20,10 @@ package org.openmole.plugin.environment.batch.refresh
 import org.openmole.plugin.environment.batch.environment.BatchEnvironment
 import org.openmole.tool.logger.Logger
 
-object CleanerActor extends Logger
+object CleanerActor extends Logger {
+  def receive(msg: CleanSerializedJob)(implicit services: BatchEnvironment.Services) = {
+    import services._
 
-import org.openmole.plugin.environment.batch.refresh.CleanerActor.Log._
-
-class CleanerActor(jobManager: JobManager) {
-  def receive(msg: CleanSerializedJob) = {
     val CleanSerializedJob(sj) = msg
     try
       sj.synchronized {
@@ -34,13 +32,13 @@ class CleanerActor(jobManager: JobManager) {
             sj.storage.rmDir(sj.path)(t)
             sj.cleaned = true
           case None ⇒
-            jobManager ! Delay(msg, BatchEnvironment.getTokenInterval)
+            JobManager ! Delay(msg, BatchEnvironment.getTokenInterval)
         }
 
       }
     catch {
       case t: Throwable ⇒
-        logger.log(FINE, "Error when deleting a file", t)
+        Log.logger.log(Log.FINE, "Error when deleting a file", t)
     }
   }
 }

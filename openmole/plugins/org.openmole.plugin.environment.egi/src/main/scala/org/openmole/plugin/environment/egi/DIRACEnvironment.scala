@@ -20,13 +20,15 @@ package org.openmole.plugin.environment.egi
 import java.net.URI
 
 import fr.iscpif.gridscale.egi.BDII
+import org.openmole.core.preference.{ ConfigurationLocation, Preference }
+import org.openmole.core.threadprovider.Updater
 import squants._
-import org.openmole.core.updater.Updater
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.job.Job
-import org.openmole.core.workspace.{ Decrypt, _ }
+import org.openmole.core.workspace.Workspace
 import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, BatchExecutionJob, UpdateInterval }
 import org.openmole.tool.cache.Cache
+import org.openmole.tool.crypto.Cypher
 import squants.information._
 import squants.time.TimeConversions._
 
@@ -50,7 +52,9 @@ object DIRACEnvironment {
     openMOLEMemory: OptionalArgument[Information] = None,
     debug:          Boolean                       = false,
     name:           OptionalArgument[String]      = None
-  )(implicit authentication: EGIAuthentication, decrypt: Decrypt, varName: sourcecode.Name) =
+  )(implicit authentication: EGIAuthentication, services: BatchEnvironment.Services, cypher: Cypher, workspace: Workspace, varName: sourcecode.Name) = {
+    import services._
+
     new DIRACEnvironment(
       voName = voName,
       service = service,
@@ -63,7 +67,8 @@ object DIRACEnvironment {
       openMOLEMemory = openMOLEMemory,
       debug = debug,
       name = Some(name.getOrElse(varName.value))
-    )(authentication, decrypt)
+    )(authentication, services, cypher, workspace)
+  }
 
 }
 
@@ -90,12 +95,12 @@ class DIRACEnvironment(
     override val openMOLEMemory: Option[Information],
     val debug:                   Boolean,
     override val name:           Option[String]
-)(implicit a: EGIAuthentication, decrypt: Decrypt) extends BatchEnvironment with BDIIStorageServers with EGIEnvironmentId { env ⇒
+)(implicit a: EGIAuthentication, val services: BatchEnvironment.Services, cypher: Cypher, workspace: Workspace) extends BatchEnvironment with BDIIStorageServers with EGIEnvironmentId { env ⇒
 
   type JS = DIRACJobService
 
   val registerAgents = Cache {
-    Updater.delay(new EagerSubmissionAgent(WeakReference(this), DIRACEnvironment.EagerSubmissionThreshold))
+    Updater.delay(new EagerSubmissionAgent(WeakReference(this)))
     None
   }
 
@@ -106,20 +111,17 @@ class DIRACEnvironment(
 
   def executionJob(job: Job) = new DiracBatchExecutionJob(job, this)
 
-  @transient val authentication = DIRACAuthentication.initialise(a)(decrypt)
+  @transient val authentication = DIRACAuthentication.initialise(a)(cypher)
 
   @transient lazy val proxyCreator =
     EGIAuthentication.initialise(a)(
       vomsURLs,
       voName,
       fqan
-    )(decrypt)
+    )(cypher, workspace, services.preference)
 
-  @transient lazy val jobService =
-    new DIRACJobService {
-      def environment = env
-    }
+  @transient lazy val jobService = new DIRACJobService(env)
 
-  override def updateInterval = UpdateInterval.fixed(Workspace.preference(DIRACEnvironment.UpdateInterval))
+  override def updateInterval = UpdateInterval.fixed(preference(DIRACEnvironment.UpdateInterval))
   override def runtimeSettings = super.runtimeSettings.copy(archiveResult = true)
 }

@@ -37,13 +37,13 @@ import org.openmole.plugin.environment.ssh.SSHJobService._
 
 trait SSHJobService extends GridScaleJobService with SharedStorage { js ⇒
 
-  def environment: SSHEnvironment
+  val environment: SSHEnvironment
 
   def nbSlots: Int
   override def usageControl = environment.usageControl
 
   val jobService = new GSSSHJobService with SSHConnectionCache {
-    override def timeout = Workspace.preference(SSHService.timeout)
+    override def timeout = environment.preference(SSHService.timeout)
     override def credential = environment.credential
     override def host = environment.host
     override def port = environment.port
@@ -71,6 +71,8 @@ trait SSHJobService extends GridScaleJobService with SharedStorage { js ⇒
     Log.logger.fine(s"SSHJobService: Queueing /bin/bash $remoteScript in directory ${sharedFS.root}")
 
     import ExecutionState._
+
+    import environment.services.eventDispatcher
 
     sshBatchJob listen {
       case (_, ev: BatchJob.StateChanged) ⇒

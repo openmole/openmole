@@ -24,6 +24,6 @@ package object event {
   type Listner[T] = PartialFunction[(T, Event[T]), Unit]
 
   implicit class EventDispatcherDecorator[T](o: T) {
-    def listen(listener: Listner[T]) = EventDispatcher.listen(o)(listener)
+    def listen(listener: Listner[T])(implicit eventDispatcher: EventDispatcher) = eventDispatcher.listen(o)(listener)
   }
 }

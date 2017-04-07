@@ -19,7 +19,7 @@ package org.openmole.core.serializer.file
 
 import org.openmole.tool.file._
 import org.openmole.tool.tar._
-import org.openmole.core.workspace.Workspace
+import org.openmole.core.workspace.{ NewFile, Workspace }
 import org.openmole.tool.tar.TarOutputStream
 
 import scala.collection.immutable.HashMap
@@ -39,14 +39,14 @@ trait FileSerialisation extends Serialiser {
   def filesInfo = "filesInfo.xml"
   def fileDir = "files"
 
-  def serialiseFiles(files: Iterable[File], tos: TarOutputStream) = {
+  def serialiseFiles(files: Iterable[File], tos: TarOutputStream)(implicit newFile: NewFile) = newFile.withTmpDir { tmpDir ⇒
     val fileInfo = HashMap() ++ files.map {
       file ⇒
         val name = UUID.randomUUID
 
         val toArchive =
           if (file.isDirectory) {
-            val toArchive = Workspace.newFile()
+            val toArchive = tmpDir.newFile("archive", ".tar")
             file.archive(toArchive)
             toArchive
           }
@@ -58,13 +58,13 @@ trait FileSerialisation extends Serialiser {
         (name.toString, FileInfo(file.getPath, file.isDirectory, file.exists))
     }
 
-    Workspace.withTmpFile { tmpFile ⇒
+    newFile.withTmpFile { tmpFile ⇒
       tmpFile.withOutputStream(xStream.toXML(fileInfo, _))
       tos.addFile(tmpFile, fileDir + "/" + filesInfo)
     }
   }
 
-  def deserialiseFileReplacements(archiveExtractDir: File, extractDir: File) = {
+  def deserialiseFileReplacements(archiveExtractDir: File)(implicit newFile: NewFile) = {
     val fileInfoFile = archiveExtractDir / s"$fileDir/$filesInfo"
     val fi = fileInfoFile.withInputStream(xStream.fromXML).asInstanceOf[FilesInfo]
 
@@ -74,14 +74,14 @@ trait FileSerialisation extends Serialiser {
 
         def fileContent =
           if (isDirectory) {
-            val dest = extractDir.newDir("directoryFromArchive")
+            val dest = newFile.newDir("directoryFromArchive")
             dest.mkdirs()
             if (exists) fromArchive.extract(dest)
             else dest.delete
             dest
           }
           else {
-            val dest = extractDir.newFile("fileFromArchive", ".bin")
+            val dest = newFile.newFile("fileFromArchive", ".bin")
             dest.createParentDir
             if (exists) fromArchive.move(dest)
             else dest.delete

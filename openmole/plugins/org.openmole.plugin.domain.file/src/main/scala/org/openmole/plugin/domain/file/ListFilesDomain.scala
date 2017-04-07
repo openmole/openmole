@@ -24,13 +24,11 @@ import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.dsl._
 import org.openmole.tool.logger.Logger
-import org.openmole.tool.random.RandomProvider
 
 object ListFilesDomain extends Logger {
 
   implicit def isFinite: Finite[ListFilesDomain, File] = new Finite[ListFilesDomain, File] {
-    override def computeValues(domain: ListFilesDomain) =
-      FromContext((context, rng) ⇒ domain.computeValues(context)(rng))
+    override def computeValues(domain: ListFilesDomain) = domain.computeValues
   }
 
   def apply(
@@ -51,7 +49,8 @@ class ListFilesDomain(
     filter:    Option[FromContext[String]] = None
 ) {
 
-  def computeValues(context: Context)(implicit rng: RandomProvider): Iterable[File] = {
+  def computeValues = FromContext[Iterable[File]] { p ⇒
+    import p._
     def toFilter(f: File) =
       filter.map(e ⇒ f.getName.matches(e.from(context))).getOrElse(true)
 

@@ -22,7 +22,6 @@ import java.io.{ OutputStream, PrintStream }
 import org.openmole.core.event.EventDispatcher
 import org.openmole.core.output.OutputManager
 import org.openmole.core.tools.service
-import org.openmole.core.tools.service.LocalHostName
 import org.openmole.core.workflow.execution.ExecutionState
 import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.execution.Environment._
@@ -34,8 +33,18 @@ import org.openmole.tool.stream._
 import ref.WeakReference
 import org.openmole.core.workflow.mole.{ MoleExecution, StrainerCapsule, StrainerTaskDecorator }
 import org.openmole.core.event._
+import org.openmole.tool.network.LocalHostName
 
-object LocalExecutor extends Logger
+object LocalExecutor extends Logger {
+
+  def containsMoleTask(moleJob: MoleJob) =
+    moleJob.task match {
+      case _: MoleTask              ⇒ true
+      case t: StrainerTaskDecorator ⇒ classOf[MoleTask].isAssignableFrom(t.task.getClass)
+      case _                        ⇒ false
+    }
+
+}
 
 class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnable {
 
@@ -63,12 +72,7 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
 
                 for (moleJob ← executionJob.moleJobs) {
                   if (moleJob.state != State.CANCELED) {
-                    moleJob.task match {
-                      case _: MoleTask ⇒ jobGoneIdle()
-                      case t: StrainerTaskDecorator ⇒
-                        if (classOf[MoleTask].isAssignableFrom(t.task.getClass)) jobGoneIdle()
-                      case _ ⇒
-                    }
+                    if (LocalExecutor.containsMoleTask(moleJob)) jobGoneIdle()
 
                     val executionThread = Thread.currentThread()
                     val originalCallBack = moleJob.stateChangedCallBack
@@ -86,7 +90,7 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
                     finally moleJob.stateChangedCallBack = originalCallBack
 
                     moleJob.exception match {
-                      case Some(e) ⇒ EventDispatcher.trigger(environment: Environment, MoleJobExceptionRaised(executionJob, e, SEVERE, moleJob))
+                      case Some(e) ⇒ environment.eventDispatcher.trigger(environment: Environment, MoleJobExceptionRaised(executionJob, e, SEVERE, moleJob))
                       case _       ⇒
                     }
                   }
@@ -104,7 +108,7 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
                 display(stream, s"Error of local execution", error)
             }
 
-            EventDispatcher.trigger(environment: Environment, Environment.JobCompleted(executionJob, log, service.localRuntimeInfo))
+            environment.eventDispatcher.trigger(environment: Environment, Environment.JobCompleted(executionJob, log, service.localRuntimeInfo))
           }
           catch {
             case e: InterruptedException ⇒ throw e
@@ -113,7 +117,7 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
               val er = ExceptionRaised(executionJob, e, SEVERE)
               environment.error(er)
               logger.log(SEVERE, "Error in execution", e)
-              EventDispatcher.trigger(environment: Environment, er)
+              environment.eventDispatcher.trigger(environment: Environment, er)
           }
           finally executionJob.state = ExecutionState.KILLED
         case None ⇒ stop = true

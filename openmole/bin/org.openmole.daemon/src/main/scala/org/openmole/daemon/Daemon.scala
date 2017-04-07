@@ -17,8 +17,15 @@
 
 package org.openmole.daemon
 
+import org.openmole.core.fileservice.FileService
 import org.openmole.core.logging._
+import org.openmole.core.preference.Preference
+import org.openmole.core.serializer.SerializerService
+import org.openmole.core.workspace.{ NewFile, Workspace }
+import org.openmole.tool.file._
 import org.openmole.tool.logger._
+import org.openmole.core.services._
+import org.openmole.core.threadprovider.ThreadProvider
 import scopt._
 
 object Daemon extends Logger {
@@ -30,6 +37,7 @@ object Daemon extends Logger {
       case class Config(
         host:      Option[String] = None,
         password:  Option[String] = None,
+        workspace: Option[File]   = None,
         workers:   Int            = 1,
         cacheSize: Int            = 2000
       )
@@ -42,6 +50,9 @@ object Daemon extends Logger {
         opt[String]('p', "password") text ("password") action {
           (v, c) ⇒ c.copy(password = Some(v))
         }
+        opt[String]('w', "workspace") text ("workspace") action {
+          (v, c) ⇒ c.copy(workspace = Some(File(v)))
+        }
         opt[Int]('w', "workers") text ("Number of workers, default is 1") action {
           (v, c) ⇒ c.copy(workers = v)
         }
@@ -53,11 +64,25 @@ object Daemon extends Logger {
       val debug = args.contains("-d")
       val filteredArgs = args.filterNot((_: String) == "-d")
       parser.parse(filteredArgs, Config()) foreach { config ⇒
-        new JobLauncher(config.cacheSize * 1024 * 1024, debug).launch(
-          config.host.getOrElse(throw new RuntimeException("Host undefined")),
-          config.password.getOrElse(throw new RuntimeException("Password undefined")),
-          config.workers
-        )
+        val workspace = Workspace(config.workspace.getOrElse(org.openmole.core.db.defaultOpenMOLEDirectory))
+        implicit val preference = Services.preference(workspace)
+        implicit val serializerService = SerializerService()
+        implicit val newFile = NewFile(workspace)
+        implicit val threadProvider = ThreadProvider(10)
+        implicit val fileService = FileService()
+
+        try {
+          val lancher = new JobLauncher(config.cacheSize * 1024 * 1024, debug)
+          lancher.launch(
+            config.host.getOrElse(throw new RuntimeException("Host undefined")),
+            config.password.getOrElse(throw new RuntimeException("Password undefined")),
+            config.workers
+          )
+        }
+        finally {
+          workspace.tmpDir.recursiveDelete
+          threadProvider.stop()
+        }
       }
     }
     catch {

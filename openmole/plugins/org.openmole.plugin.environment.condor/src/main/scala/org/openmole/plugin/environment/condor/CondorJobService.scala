@@ -34,18 +34,19 @@ import org.openmole.plugin.environment.condor.CondorJobService._
 
 trait CondorJobService extends GridScaleJobService with SSHHost with SharedStorage { js ⇒
 
-  def environment: CondorEnvironment
+  val environment: CondorEnvironment
   def usageControl = environment.usageControl
 
-  val jobService = new GSCondorJobService with SSHConnectionCache {
+  lazy val jobService = new GSCondorJobService with SSHConnectionCache {
     def host = js.host
     def user = js.user
     def credential = js.credential
     override def port = js.port
-    override def timeout = Workspace.preference(SSHService.timeout)
+    override def timeout = environment.preference(SSHService.timeout)
   }
 
   protected def _submit(serializedJob: SerializedJob) = {
+    import environment.services._
     val (remoteScript, result) = buildScript(serializedJob)
     val jobDescription = CondorJobDescription(
       executable = "/bin/bash",
@@ -55,7 +56,7 @@ trait CondorJobService extends GridScaleJobService with SSHHost with SharedStora
       workDirectory = serializedJob.path,
       // TODO not available in GridScale plugin yet
       //override val wallTime = environment.wallTime
-      memory = Some(environment.requiredMemory.toMegabytes.toInt),
+      memory = Some(BatchEnvironment.requiredMemory(environment.openMOLEMemory, environment.memory).toMegabytes.toInt),
       nodes = environment.nodes,
       // TODO typo in coreByNode in GridScale -> should be coresByNode
       coreByNode = environment.coresByNode orElse environment.threads,

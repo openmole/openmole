@@ -21,7 +21,7 @@ import java.nio.file._
 import org.openmole.tool.file._
 import org.openmole.tool.stream._
 import scala.collection.mutable.{ Stack, ListBuffer }
-import collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 package object tar {
 
@@ -132,7 +132,7 @@ package object tar {
       val e =
         if (isDirectory && !isSymbolicLink) {
           // walk the directory tree to add all its entries to stack
-          for (f ← Files.newDirectoryStream(source)) {
+          for (f ← Files.newDirectoryStream(source).asScala) {
             val newSource = source.resolve(f.getFileName)
             val newEntryName = entryName + '/' + f.getFileName
             toArchive.push((newSource, newEntryName))

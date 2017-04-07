@@ -11,6 +11,11 @@ trait EGIAuthenticationAPI {
   def removeAuthentication(): Unit
 
   def testAuthentication(data: EGIAuthenticationData): Seq[Test]
+
+  def setVOTest(vos: Seq[String]): Unit
+
+  def geVOTest(): Seq[String]
+
   /*def deleteAuthenticationKey(keyName: String): Unit
 
   def renameKey(keyName: String, newName: String): Unit

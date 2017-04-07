@@ -21,7 +21,7 @@ import org.openmole.core.buildinfo
 import org.openmole.core.market.MarketIndexEntry
 import org.openmole.core.project._
 import org.openmole.core.pluginmanager.PluginManager
-import org.openmole.site.{ Config, Page }
+import org.openmole.site.{ Config, DSLTest, Page }
 import org.openmole.tool.file._
 import org.openmole.tool.hash._
 import org.openmole.tool.logger.Logger
@@ -145,7 +145,7 @@ class Market(repositories: Seq[MarketRepository], destination: File) {
     }
   }
 
-  def test(directory: File, project: MarketEntry): Boolean =
+  def test(directory: File, project: MarketEntry): Boolean = DSLTest.withTmpServices { implicit servivces ⇒
     Try {
       PluginManager.synchronized {
         val projectDirectory = directory / project.directory
@@ -154,6 +154,7 @@ class Market(repositories: Seq[MarketRepository], destination: File) {
         try {
 
           def files = projectDirectory listRecursive (_.getName.endsWith(".oms"))
+
           Log.logger.info(s"Test ${project.name} containing ${files.map(_.getName).mkString(",")}")
 
           def exclusion = s"Project ${project} of repository $directory has been excluded "
@@ -169,6 +170,7 @@ class Market(repositories: Seq[MarketRepository], destination: File) {
                 false
             }
           }
+
           compiles.exists(_ != true)
         }
         finally {
@@ -181,6 +183,7 @@ class Market(repositories: Seq[MarketRepository], destination: File) {
         false
       case Success(_) ⇒ true
     }
+  }
 
 }
 

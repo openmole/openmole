@@ -36,7 +36,7 @@ trait BatchJob { bj ⇒
 
   protected[jobservice] def state_=(state: ExecutionState) = synchronized {
     if (_state < state) {
-      EventDispatcher.trigger(this, new BatchJob.StateChanged(state, _state))
+      jobService.environment.eventDispatcher.trigger(this, new BatchJob.StateChanged(state, _state))
       _state = state
     }
   }

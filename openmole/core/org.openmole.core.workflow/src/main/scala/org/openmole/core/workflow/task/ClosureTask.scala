@@ -19,8 +19,9 @@ package org.openmole.core.workflow.task
 
 import monocle.macros.Lenses
 import org.openmole.core.context.Context
+import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.builder._
-import org.openmole.tool.random.RandomProvider
+import org.openmole.tool.random._
 
 object ClosureTask {
 
@@ -38,5 +39,7 @@ object ClosureTask {
     override val className: String,
     config:                 InputOutputConfig
 ) extends Task {
-  override protected def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider): Context = closure(context, rng, executionContext)
+  override protected def process(executionContext: TaskExecutionContext): FromContext[Context] = FromContext { p ⇒
+    closure(p.context, p.random, executionContext)
+  }
 }

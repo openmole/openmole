@@ -97,44 +97,46 @@ object SystemExecTask {
     commandsError ++ variableErrors ++ External.validate(external, allInputs)
   }
 
-  override protected def process(ctx: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = External.withWorkDir(executionContext) { tmpDir ⇒
-    val workDir =
-      workDirectory match {
-        case None    ⇒ tmpDir
-        case Some(d) ⇒ new File(tmpDir, d)
-      }
+  override protected def process(executionContext: TaskExecutionContext) = FromContext { p ⇒
+    import p._
+    External.withWorkDir(executionContext) { tmpDir ⇒
+      val workDir =
+        workDirectory match {
+          case None    ⇒ tmpDir
+          case Some(d) ⇒ new File(tmpDir, d)
+        }
 
-    workDir.mkdirs()
+      workDir.mkdirs()
 
-    val context = ctx + (External.PWD → workDir.getAbsolutePath)
+      val context = p.context + (External.PWD → workDir.getAbsolutePath)
 
-    val preparedContext = external.prepareInputFiles(context, external.relativeResolver(workDir))
+      val preparedContext = external.prepareInputFiles(context, external.relativeResolver(workDir))
 
-    val osCommandLines =
-      command.find { _.os.compatible }.map {
-        cmd ⇒ cmd.expanded
-      }.getOrElse(throw new UserBadDataError("No command line found for " + OS.actualOS))
+      val osCommandLines =
+        command.find { _.os.compatible }.map {
+          cmd ⇒ cmd.expanded
+        }.getOrElse(throw new UserBadDataError("No command line found for " + OS.actualOS))
 
-    val executionResult = executeAll(
-      workDir,
-      environmentVariables.map { case (name, variable) ⇒ name → variable.from(context) },
-      errorOnReturnValue,
-      returnValue,
-      stdOut,
-      stdErr,
-      preparedContext,
-      osCommandLines.toList
-    )
+      val executionResult = executeAll(
+        workDir,
+        environmentVariables.map { case (name, variable) ⇒ name → variable.from(context) },
+        errorOnReturnValue,
+        returnValue,
+        stdOut,
+        stdErr,
+        osCommandLines.toList
+      )(p.copy(context = preparedContext))
 
-    val retContext: Context = external.fetchOutputFiles(preparedContext, external.relativeResolver(workDir))
-    external.checkAndClean(this, retContext, tmpDir)
+      val retContext: Context = external.fetchOutputFiles(preparedContext, external.relativeResolver(workDir))
+      external.checkAndClean(this, retContext, tmpDir)
 
-    retContext ++
-      List(
-        stdOut.map { o ⇒ Variable(o, executionResult.output.get) },
-        stdErr.map { e ⇒ Variable(e, executionResult.errorOutput.get) },
-        returnValue.map { r ⇒ Variable(r, executionResult.returnCode) }
-      ).flatten
+      retContext ++
+        List(
+          stdOut.map { o ⇒ Variable(o, executionResult.output.get) },
+          stdErr.map { e ⇒ Variable(e, executionResult.errorOutput.get) },
+          returnValue.map { r ⇒ Variable(r, executionResult.returnCode) }
+        ).flatten
+    }
   }
 
 }

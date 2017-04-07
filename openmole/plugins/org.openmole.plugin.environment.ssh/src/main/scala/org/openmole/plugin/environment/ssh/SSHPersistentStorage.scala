@@ -47,29 +47,33 @@ trait SSHPersistentStorage <: BatchEnvironment with SSHAccess { st ⇒
 
   def storageSharedLocally: Boolean
 
-  lazy val storage =
-    storageSharedLocally match {
-      case true ⇒
-        new StorageService with LogicalLinkStorage with StorageRoot {
-          def usageControl = UnlimitedAccess
-          lazy val remoteStorage: RemoteStorage = new RemoteLogicalLinkStorage(root)
-          def url = new URI("file", st.user, "localhost", -1, sharedDirectory.orNull, null, null)
-          def id: String = url.toString
-          def environment = st
+  lazy val storage = {
+    val storage =
+      storageSharedLocally match {
+        case true ⇒
+          new StorageService with LogicalLinkStorage with StorageRoot {
+            def usageControl = UnlimitedAccess
+            lazy val remoteStorage: RemoteStorage = new RemoteLogicalLinkStorage(root)
+            def url = new URI("file", st.user, "localhost", -1, sharedDirectory.orNull, null, null)
+            def id: String = url.toString
+            val environment = st
+            override def parent(path: String) =
+              Option(new File(path).getCanonicalFile.getParentFile).map(_.getAbsolutePath)
+          }
+        case false ⇒
+          new StorageService with SSHStorageService with StorageRoot {
+            def usageControl = st.usageControl
+            val environment = st
+            def id = new URI("ssh", st.user, st.host, st.port, sharedDirectory.orNull, null, null).toString
+            def host: String = environment.host
+            def credential = environment.credential
+            def user: String = environment.user
+            def port: Int = environment.port
+          }
+      }
 
-          override def parent(path: String) =
-            Option(new File(path).getCanonicalFile.getParentFile).map(_.getAbsolutePath)
-        }
-      case false ⇒
-        new StorageService with SSHStorageService with StorageRoot {
-          def usageControl = st.usageControl
-          def environment = st
-          def id = new URI("ssh", st.user, st.host, st.port, sharedDirectory.orNull, null, null).toString
-          def host: String = environment.host
-          def credential = environment.credential
-          def user: String = environment.user
-          def port: Int = environment.port
-        }
-    }
+    StorageService.startGC(storage)(services.threadProvider, services.preference)
+    storage
+  }
 
 }

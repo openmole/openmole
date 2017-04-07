@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Limit virtual memory on docker
+export MALLOC_ARENA_MAX=4
+
 CURDIR=$PWD
 
 #REALPATH=`readlink -f $0`
@@ -42,17 +45,18 @@ case "$JVMVERSION" in
   *1\.7\.*) FLAG="$FLAG -XX:MaxPermSize=128M";;
 esac
 
-(nohup sh $LOCATION/dbserver/bin/openmole-dbserver >/dev/null &) 2>/dev/null
-
 ARGS=()
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --) ARGS+=("$@"); break ;;
     --mem) shift; MEM=$1 ;;
+    --workspace) ARGS+=("$1"); shift; WORKSPACE=$1; ARGS+=("$1");;
     *) ARGS+=("$1") ;;
   esac
   shift
 done
+
+(nohup sh $LOCATION/dbserver/bin/openmole-dbserver $WORKSPACE >/dev/null &) 2>/dev/null
 
 SCRIPT_ARGS=()
 

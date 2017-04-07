@@ -22,9 +22,9 @@ import org.openmole.core.exception._
 import org.openmole.tool.cache._
 import org.openmole.tool.random._
 import org.openmole.tool.file._
-
 import cats._
 import cats.implicits._
+import org.openmole.core.workspace.NewFile
 
 trait LowPriorityToFromContext {
   implicit def fromTToContext[T] = ToFromContext[T, T](t ⇒ FromContext.value[T](t))
@@ -38,7 +38,7 @@ object ToFromContext extends LowPriorityToFromContext {
   }
 
   implicit def functionToFromContext[T] =
-    ToFromContext[(Context ⇒ T), FromContext[T]](f ⇒ FromContext((c, _) ⇒ f(c)))
+    ToFromContext[(Context ⇒ T), FromContext[T]](f ⇒ FromContext(p ⇒ f(p.context)))
 
   implicit def codeToFromContextFloat = ToFromContext(codeToFromContext[Float])
   implicit def codeToFromContextDouble = ToFromContext(codeToFromContext[Double])
@@ -72,9 +72,9 @@ object FromContext extends LowPriorityFromContext {
     override def pure[A](x: A): FromContext[A] = FromContext.value(x)
     override def ap[A, B](ff: FromContext[(A) ⇒ B])(fa: FromContext[A]): FromContext[B] =
       new FromContext[B] {
-        override def from(context: ⇒ Context)(implicit rng: RandomProvider): B = {
-          val res = fa.from(context)(rng)
-          ff.from(context)(rng)(res)
+        override def from(context: ⇒ Context)(implicit rng: RandomProvider, newFile: NewFile): B = {
+          val res = fa.from(context)(rng, newFile)
+          ff.from(context)(rng, newFile)(res)
         }
 
         override def validate(inputs: Seq[Val[_]]): Seq[Throwable] =
@@ -85,7 +85,7 @@ object FromContext extends LowPriorityFromContext {
   def codeToFromContext[T: Manifest](code: String): FromContext[T] =
     new FromContext[T] {
       val proxy = Cache(ScalaWrappedCompilation.dynamic[T](code))
-      override def from(context: ⇒ Context)(implicit rng: RandomProvider): T = proxy()().from(context)
+      override def from(context: ⇒ Context)(implicit rng: RandomProvider, newFile: NewFile): T = proxy.apply.apply.from(context)
       override def validate(inputs: Seq[Val[_]]): Seq[Throwable] = proxy().validate(inputs).toSeq
     }
 
@@ -108,7 +108,7 @@ object FromContext extends LowPriorityFromContext {
 
   def prototype[T](p: Val[T]) =
     new FromContext[T] {
-      override def from(context: ⇒ Context)(implicit rng: RandomProvider) = context(p)
+      override def from(context: ⇒ Context)(implicit rng: RandomProvider, newFile: NewFile) = context(p)
       def validate(inputs: Seq[Val[_]]): Seq[Throwable] = {
         if (inputs.exists(_ == p)) Seq.empty else Seq(new UserBadDataError(s"Prototype $p not found"))
       }
@@ -116,14 +116,22 @@ object FromContext extends LowPriorityFromContext {
 
   def value[T](t: T): FromContext[T] =
     new FromContext[T] {
-      def from(context: ⇒ Context)(implicit rng: RandomProvider): T = t
+      def from(context: ⇒ Context)(implicit rng: RandomProvider, newFile: NewFile): T = t
       def validate(inputs: Seq[Val[_]]): Seq[Throwable] = Seq.empty
     }
 
-  def apply[T](f: (Context, RandomProvider) ⇒ T) =
+  case class Parameters(context: Context, implicit val random: RandomProvider, implicit val newFile: NewFile)
+
+  def apply[T](f: Parameters ⇒ T): FromContext[T] =
     new FromContext[T] {
-      def from(context: ⇒ Context)(implicit rng: RandomProvider) = f(context, rng)
+      def from(context: ⇒ Context)(implicit rng: RandomProvider, newFile: NewFile) = f(Parameters(context, rng, newFile))
       def validate(inputs: Seq[Val[_]]): Seq[Throwable] = Seq.empty
+    }
+
+  def withValidation[T](validate: Seq[Val[_]] ⇒ Seq[Throwable])(f: Parameters ⇒ T) =
+    new FromContext[T] {
+      def from(context: ⇒ Context)(implicit rng: RandomProvider, newFile: NewFile) = f(Parameters(context, rng, newFile))
+      def validate(inputs: Seq[Val[_]]): Seq[Throwable] = validate(inputs)
     }
 
   implicit class ConditionDecorator(f: Condition) {
@@ -131,13 +139,13 @@ object FromContext extends LowPriorityFromContext {
 
     def &&(d: Condition): Condition =
       new FromContext[Boolean] {
-        override def from(context: ⇒ Context)(implicit rng: RandomProvider): Boolean = f.from(context) && d.from(context)
+        override def from(context: ⇒ Context)(implicit rng: RandomProvider, newFile: NewFile): Boolean = f.from(context) && d.from(context)
         override def validate(inputs: Seq[Val[_]]): Seq[Throwable] = f.validate(inputs) ++ d.validate(inputs)
       }
 
     def ||(d: Condition): Condition =
       new FromContext[Boolean] {
-        override def from(context: ⇒ Context)(implicit rng: RandomProvider): Boolean = f.from(context) || d.from(context)
+        override def from(context: ⇒ Context)(implicit rng: RandomProvider, newFile: NewFile): Boolean = f.from(context) || d.from(context)
         override def validate(inputs: Seq[Val[_]]): Seq[Throwable] = f.validate(inputs) ++ d.validate(inputs)
       }
   }
@@ -155,8 +163,8 @@ object FromContext extends LowPriorityFromContext {
 }
 
 trait FromContext[+T] {
-  def apply(context: ⇒ Context)(implicit rng: RandomProvider): T = from(context)
-  def from(context: ⇒ Context)(implicit rng: RandomProvider): T
+  def apply(context: ⇒ Context)(implicit rng: RandomProvider, newFile: NewFile): T = from(context)
+  def from(context: ⇒ Context)(implicit rng: RandomProvider, newFile: NewFile): T
   def validate(inputs: Seq[Val[_]]): Seq[Throwable]
 }
 

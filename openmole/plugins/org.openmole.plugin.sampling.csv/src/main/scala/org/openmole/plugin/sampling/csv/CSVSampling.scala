@@ -61,6 +61,9 @@ object CSVSampling {
 
   override def inputs = InputOutputConfig.inputs.get(config)
   override def prototypes = InputOutputConfig.outputs.get(config)
-  override def apply() = FromContext { (context, rng) ⇒ toVariables(file.from(context)(rng), context) }
+  override def apply() = FromContext { p ⇒
+    import p._
+    toVariables(file.from(context), context)
+  }
 
 }

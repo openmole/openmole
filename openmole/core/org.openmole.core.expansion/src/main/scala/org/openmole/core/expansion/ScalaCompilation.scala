@@ -23,6 +23,7 @@ import org.openmole.core.context._
 import org.openmole.core.exception._
 import org.openmole.core.pluginmanager._
 import org.openmole.core.tools.obj.ClassUtils._
+import org.openmole.core.workspace.NewFile
 import org.openmole.tool.cache._
 import org.openmole.tool.random._
 
@@ -107,7 +108,7 @@ object ScalaWrappedCompilation {
     }
   }
 
-  type ContextClosure[+R] = (Context, RandomProvider) ⇒ R
+  type ContextClosure[+R] = (Context, RandomProvider, NewFile) ⇒ R
 
   trait OutputWrapping[+R] {
     def wrapOutput: String
@@ -143,29 +144,30 @@ trait ScalaWrappedCompilation <: ScalaCompilation { compilation ⇒
 
   def function(inputs: Seq[Val[_]]) =
     compile(script(inputs)).map { evaluated ⇒
-      (evaluated, evaluated.getClass.getMethod("apply", classOf[Context], classOf[RandomProvider]))
+      (evaluated, evaluated.getClass.getMethod("apply", classOf[Context], classOf[RandomProvider], classOf[NewFile]))
     }
 
   def closure(inputs: Seq[Val[_]]) =
     function(inputs).map {
       case (evaluated, method) ⇒
-        val closure: ContextClosure[RETURN] = (context: Context, rng: RandomProvider) ⇒ method.invoke(evaluated, context, rng).asInstanceOf[RETURN]
+        val closure: ContextClosure[RETURN] = (context: Context, rng: RandomProvider, newFile: NewFile) ⇒ method.invoke(evaluated, context, rng, newFile).asInstanceOf[RETURN]
         closure
     }
 
   def script(inputs: Seq[Val[_]]) =
-    s"""(${prefix}context: ${classOf[Context].getCanonicalName}, ${prefix}RNGProvider: ${classOf[RandomProvider].getCanonicalName}) => {
+    s"""(${prefix}context: ${manifest[Context].toString}, ${prefix}RNG: ${manifest[RandomProvider].toString}, ${prefix}NewFile: ${manifest[NewFile].toString}) => {
           |  object $inputObject {
           |    ${inputs.toSeq.map(i ⇒ s"""var ${i.name} = ${prefix}context("${i.name}").asInstanceOf[${toScalaNativeType(i.`type`)}]""").mkString("; ")}
           |  }
           |  import ${inputObject}._
-          |  implicit lazy val ${Variable.prefixedVariable("RNG")}: util.Random = ${prefix}RNGProvider()
+          |  implicit lazy val ${Variable.openMOLE("RNG").name}: util.Random = ${prefix}RNG()
+          |  implicit lazy val ${Variable.openMOLE("NewFile").name} = ${prefix}NewFile
           |  $source
           |  ${wrapping.wrapOutput}
           |}: ${toScalaNativeType(returnType)}
           |""".stripMargin
 
-  def apply(): FromContext[RETURN] = FromContext { (context, rng) ⇒ compiled(context).get(context, rng) }
+  def apply(): FromContext[RETURN] = FromContext { p ⇒ compiled(p.context).get(p.context, p.random, p.newFile) }
 
   def compiled(context: Context): Try[ContextClosure[RETURN]]
 }

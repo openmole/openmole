@@ -17,11 +17,12 @@
 
 package org.openmole.plugin.environment.batch.environment
 
-import org.openmole.core.updater.IUpdatableWithVariableDelay
+import org.openmole.core.preference.Preference
+import org.openmole.core.threadprovider.IUpdatableWithVariableDelay
 import org.openmole.core.workflow.execution.ExecutionState._
 import org.openmole.core.workflow.job.Job
 import org.openmole.core.workspace.Workspace
-import org.openmole.plugin.environment.batch.refresh.Kill
+import org.openmole.plugin.environment.batch.refresh.{ JobManager, Kill }
 import org.openmole.tool.logger.Logger
 
 import scala.concurrent.stm._
@@ -51,7 +52,7 @@ object BatchJobWatcher extends Logger {
 
 }
 
-class BatchJobWatcher(environment: WeakReference[BatchEnvironment]) extends IUpdatableWithVariableDelay {
+class BatchJobWatcher(environment: WeakReference[BatchEnvironment], preference: Preference) extends IUpdatableWithVariableDelay {
 
   val registry = new BatchJobWatcher.ExecutionJobRegistry
 
@@ -63,6 +64,7 @@ class BatchJobWatcher(environment: WeakReference[BatchEnvironment]) extends IUpd
     environment.get match {
       case None ⇒ false
       case Some(env) ⇒
+        import env._
         Log.logger.fine("Watch jobs " + registry.allJobs.size)
 
         val (toKill, toSubmit) =
@@ -82,11 +84,11 @@ class BatchJobWatcher(environment: WeakReference[BatchEnvironment]) extends IUpd
           }
 
         toSubmit.foreach(env.submit)
-        toKill.foreach(ej ⇒ BatchEnvironment.jobManager ! Kill(ej))
+        toKill.foreach(ej ⇒ JobManager ! Kill(ej))
         true
     }
 
   def executionJobs = registry.allExecutionJobs
 
-  def delay = Workspace.preference(BatchEnvironment.CheckInterval)
+  def delay = preference(BatchEnvironment.CheckInterval)
 }

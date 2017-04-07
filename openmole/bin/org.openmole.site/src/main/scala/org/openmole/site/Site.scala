@@ -23,7 +23,7 @@ import java.nio.file.Paths
 import java.util.zip.GZIPInputStream
 
 import ammonite.ops.{ Path, write }
-import org.openmole.core.serializer.SerialiserService
+import org.openmole.core.serializer.SerializerService
 import org.openmole.core.workspace.Workspace
 import org.openmole.site.market.Market
 import org.openmole.tool.file._

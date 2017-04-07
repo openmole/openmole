@@ -18,7 +18,7 @@
 package org.openmole.core.module
 
 import org.openmole.core.buildinfo
-import org.openmole.core.workspace.{ ConfigurationLocation }
+import org.openmole.core.preference.ConfigurationLocation
 
 object ModuleIndex {
   val moduleIndexes = ConfigurationLocation("Module", "Indexes", Some(Seq[String](buildinfo.moduleAddress)))

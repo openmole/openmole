@@ -19,17 +19,15 @@ package org.openmole.plugin.domain.file
 
 import java.io.File
 
-import org.openmole.core.context.Context
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.tools._
-import org.openmole.tool.random.RandomProvider
+import cats.implicits._
 
 object SelectFileDomain {
 
   implicit def isFinite = new Finite[SelectFileDomain, File] {
-    override def computeValues(domain: SelectFileDomain) =
-      FromContext((context, rng) ⇒ domain.computeValues(context)(rng))
+    override def computeValues(domain: SelectFileDomain) = domain.computeValues
 
   }
 
@@ -37,5 +35,5 @@ object SelectFileDomain {
 }
 
 class SelectFileDomain(val provider: FromContext[File]) {
-  def computeValues(context: Context)(implicit rng: RandomProvider): Iterable[File] = List(provider.from(context))
+  def computeValues = provider.map(p ⇒ List(p))
 }

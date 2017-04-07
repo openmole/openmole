@@ -31,6 +31,8 @@ import org.openmole.core.workflow.dsl._
 
 class StrainerCapsuleSpec extends FlatSpec with Matchers {
 
+  import org.openmole.core.workflow.Services._
+
   "The strainer capsule" should "let the data pass through" in {
     val p = Val[String]("p")
 

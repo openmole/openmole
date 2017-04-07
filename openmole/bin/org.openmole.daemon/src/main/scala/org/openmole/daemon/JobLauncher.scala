@@ -28,7 +28,7 @@ import org.openmole.tool.file._
 import org.openmole.tool.logger.Logger
 import org.openmole.tool.thread._
 import org.openmole.core.tools.service.{ OS, ProcessUtil }
-import org.openmole.core.workspace.{ ConfigurationLocation, Workspace }
+import org.openmole.core.workspace.{ NewFile, Workspace }
 import org.openmole.plugin.environment.desktopgrid._
 import DesktopGridEnvironment._
 import org.openmole.plugin.environment.batch.storage._
@@ -39,6 +39,9 @@ import fr.iscpif.gridscale.ssh._
 import org.openmole.core.communication.storage._
 import org.openmole.core.communication.message._
 import org.openmole.core.communication.message.FileMessage._
+import org.openmole.core.fileservice.FileService
+import org.openmole.core.preference.{ ConfigurationLocation, Preference }
+import org.openmole.core.threadprovider.ThreadProvider
 import squants.information.Information
 import squants.time.TimeConversions._
 
@@ -50,7 +53,7 @@ object JobLauncher extends Logger {
   val connectionTimeout = ConfigurationLocation("JobLauncher", "connectionTimeout", Some(1 minutes))
 }
 
-class JobLauncher(cacheSize: Long, debug: Boolean) {
+class JobLauncher(cacheSize: Long, debug: Boolean)(implicit preference: Preference, serializerService: SerializerService, newFile: NewFile, threadProvider: ThreadProvider, fileService: FileService) {
   import JobLauncher._
   import Log._
 
@@ -58,7 +61,8 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
     val limit = cacheSize
   }
 
-  val resultUploader = Executors.newSingleThreadScheduledExecutor(daemonThreadFactory)
+  val resultUploader = Executors.newSingleThreadScheduledExecutor(threadProvider.threadFactory)
+  import threadProvider.pool
 
   def launch(userHostPort: String, password: String, nbWorkers: Int) = {
     val host = userHostPort.split("@").last
@@ -74,17 +78,19 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
         val host = _host
         override val port = _port
         def credential = UserPassword("", password)
-        def timeout = Workspace.preference(connectionTimeout)
+        def timeout = preference(connectionTimeout)
       }
 
       val root = ""
     }
 
-    val storageFile = Workspace.newFile()
-    SerialiserService.serialiseAndArchiveFiles(new LocalSimpleStorage, storageFile)
+    val storageFile = newFile.newFile()
+    serializerService.serialiseAndArchiveFiles(new LocalSimpleStorage, storageFile)
 
     (0 until nbWorkers).foreach {
-      i ⇒ background { runJobs(storageFile, storage) }
+      i ⇒
+        implicit val workerPool = Executors.newFixedThreadPool(nbWorkers, threadProvider.threadFactory)
+        background { runJobs(storageFile, storage) }
     }
 
     Thread.currentThread.join
@@ -105,19 +111,19 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
 
             val localResultFile =
               try {
-                val localResultFile = Workspace.newFile("job", ".res")
-                val workspaceDir = Workspace.newDir("workspace")
+                val localResultFile = newFile.newFile("job", ".res")
+                val workspaceDir = newFile.newDir("workspace")
                 val osgiDir = new File(runtime, UUID.randomUUID.toString)
 
                 def quote(s: String) = if (OS.actualOS.isWindows) '"' + s + '"' else s.replace(" ", "\\ ")
                 val ptrFlag = if (OS.actualOS.is64Bit) "-XX:+UseCompressedOops" else ""
 
                 val launcher = s"""-cp ${quote("launcher/*")} org.openmole.launcher.Launcher --plugins ${quote("plugins/")} --run org.openmole.runtime.SimExplorer --osgi-directory ${quote(osgiDir.getAbsolutePath)}"""
-                val cmd = s"java -Xmx${memory.toMegabytes.toInt}m -Dosgi.locking=none -XX:+UseG1GC $ptrFlag -Dosgi.configuration.area=${osgiDir.getName} -Dosgi.classloader.singleThreadLoads=true ${launcher} -- -s ${quote(storageFile.getAbsolutePath)} -i ${quote(localExecutionMessage.getAbsolutePath)} -o ${quote(localResultFile.getAbsolutePath)} -c ${localCommunicationDirPath} -p ${quote(pluginDir.getAbsolutePath)}" + (if (debug) " -d " else "")
+                val cmd = s"java -Xmx${memory.toMegabytes.toInt}m -Dosgi.locking=none -XX:+UseG1GC $ptrFlag -Dosgi.configuration.area=${osgiDir.getName} -Dosgi.classloader.singleThreadLoads=true ${launcher} -- --workspace ${workspaceDir.getAbsolutePath} -s ${quote(storageFile.getAbsolutePath)} -i ${quote(localExecutionMessage.getAbsolutePath)} -o ${quote(localResultFile.getAbsolutePath)} -c ${localCommunicationDirPath} -p ${quote(pluginDir.getAbsolutePath)}" + (if (debug) " -d " else "")
 
                 logger.info("Executing runtime: " + cmd + " in directory " + runtime)
                 //val commandLine = CommandLine.parse(cmd)
-                val process = Runtime.getRuntime.exec(cmd, Array("OPENMOLE_HOME=" + workspaceDir.getAbsolutePath), runtime) //commandLine.toString, null, runtimeLocation)
+                val process = Runtime.getRuntime.exec(cmd, Array.empty[String], runtime) //commandLine.toString, null, runtimeLocation)
                 executeProcess(process, System.out, System.err)
                 logger.info("Process finished.")
 
@@ -146,14 +152,14 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
             next
           case None ⇒
             logger.info("Job list is empty on the remote host.")
-            Thread.sleep(Workspace.preference(jobCheckInterval).toMillis)
+            Thread.sleep(preference(jobCheckInterval).toMillis)
             background { fetchAJob(id, storage) }
         }
       }
       catch {
         case e: Exception ⇒
-          logger.log(WARNING, s"Error while looking for jobs, it might happen if the jobs have not yep been made on the server side. Automatic retry in ${Workspace.preference(jobCheckInterval)}.", e)
-          Thread.sleep(Workspace.preference(jobCheckInterval).toMillis)
+          logger.log(WARNING, s"Error while looking for jobs, it might happen if the jobs have not yep been made on the server side. Automatic retry in ${preference(jobCheckInterval)}.", e)
+          Thread.sleep(preference(jobCheckInterval).toMillis)
           background { fetchAJob(id, storage) }
       }
       processJob(next)
@@ -161,7 +167,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
   }
 
   def uploadResult(localResultFile: File, communicationDir: String, job: String, storage: SimpleStorage) = {
-    val runtimeResult = SerialiserService.deserialiseAndExtractFiles[RuntimeResult](localResultFile)
+    val runtimeResult = serializerService.deserialiseAndExtractFiles[RuntimeResult](localResultFile)
 
     logger.info(s"Uploading context results to communication dir $communicationDir")
 
@@ -193,9 +199,9 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
     val resultToSend = runtimeResult.copy(result = uploadedResult)
 
     // Upload the result
-    Workspace.withTmpFile { outputLocal ⇒
+    newFile.withTmpFile { outputLocal ⇒
       logger.info("Uploading job results")
-      SerialiserService.serialiseAndArchiveFiles(resultToSend, outputLocal)
+      serializerService.serialiseAndArchiveFiles(resultToSend, outputLocal)
       val tmpResultFile = storage.child(tmpResultsDirName, uniqName(job, ".res"))
       storage.upload(outputLocal, tmpResultFile)
       val resultFile = storage.child(resultsDirName, uniqName(job, ".res"))
@@ -242,10 +248,10 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
       storage.create(storage.child(timeStempsDirName, job + timeStempSeparator + UUID.randomUUID))
 
       val jobMessage =
-        Workspace.withTmpFile {
+        newFile.withTmpFile {
           f ⇒
             storage.download(storage.child(jobsDirName, job), f)
-            SerialiserService.deserialise[DesktopGridJobMessage](f)
+            serializerService.deserialise[DesktopGridJobMessage](f)
         }
 
       logger.info("Job execution message is " + jobMessage.executionMessagePath)
@@ -257,7 +263,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
   def fetchAJob(id: UUID, storage: SimpleStorage)(implicit rng: Random) = {
 
     def download(fileMessage: FileMessage, raw: Boolean) = {
-      val file = Workspace.newFile("cache", ".bin")
+      val file = newFile.newFile("cache", ".bin")
       storage.download(fileMessage.path, file, TransferOptions(raw = raw))
       file → fileMessage.hash
     }
@@ -271,7 +277,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
             localCache.cache(
               jobMessage.runtime,
               msg ⇒ {
-                val dir = Workspace.newDir()
+                val dir = newFile.newDir()
                 logger.info("Downloading the runtime.")
                 val (archive, hash) = download(msg, true)
                 logger.info("Extracting runtime.")
@@ -281,7 +287,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
             )
           cached ::= jobMessage.runtime
 
-          val pluginDir = Workspace.newDir()
+          val pluginDir = newFile.newDir()
           pluginDir.mkdirs
 
           jobMessage.runtimePlugins.foreach {
@@ -291,9 +297,9 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
               plugin.copy(File.createTempFile("plugin", ".jar", pluginDir))
           }
 
-          val executionMessage = Workspace.withTmpFile { executionMessageFileCache ⇒
+          val executionMessage = newFile.withTmpFile { executionMessageFileCache ⇒
             storage.download(jobMessage.executionMessagePath, executionMessageFileCache)
-            SerialiserService.deserialiseAndExtractFiles[ExecutionMessage](executionMessageFileCache)
+            ExecutionMessage.load(executionMessageFileCache)
           }
 
           def localCachedReplicatedFile(replicatedFile: ReplicatedFile, raw: Boolean) = {
@@ -305,12 +311,12 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
           val files = executionMessage.files.map(localCachedReplicatedFile(_, raw = false))
           val plugins = executionMessage.plugins.map(localCachedReplicatedFile(_, raw = true))
 
-          val localCommunicationDirPath = Workspace.newDir()
+          val localCommunicationDirPath = newFile.newDir()
           localCommunicationDirPath.mkdirs
 
-          val localExecutionMessage = Workspace.newFile("executionMessage", ".gz")
+          val localExecutionMessage = newFile.newFile("executionMessage", ".gz")
 
-          SerialiserService.serialiseAndArchiveFiles(ExecutionMessage(plugins, files, executionMessage.jobs, localCommunicationDirPath.getAbsolutePath, executionMessage.runtimeSettings), localExecutionMessage)
+          serializerService.serialiseAndArchiveFiles(ExecutionMessage(plugins, files, executionMessage.jobs, localCommunicationDirPath.getAbsolutePath, executionMessage.runtimeSettings), localExecutionMessage)
 
           Some((localExecutionMessage, localCommunicationDirPath, runtime, pluginDir, jobMessage.memory, executionMessage, job, cached))
         }

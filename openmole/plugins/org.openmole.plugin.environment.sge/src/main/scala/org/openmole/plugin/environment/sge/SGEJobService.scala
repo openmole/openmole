@@ -33,14 +33,15 @@ import squants.time.TimeConversions._
 
 trait SGEJobService extends ClusterJobService with SSHHost with SharedStorage { js ⇒
 
-  def environment: SGEEnvironment
+  val environment: SGEEnvironment
+  import environment.services._
 
-  val jobService = new GSSGEJobService with SSHConnectionCache {
+  lazy val jobService = new GSSGEJobService with SSHConnectionCache {
     def host = js.host
     def user = js.user
     def credential = js.credential
     override def port = js.port
-    override def timeout = Workspace.preference(SSHService.timeout)
+    override def timeout = preference(SSHService.timeout)
   }
 
   protected def _submit(serializedJob: SerializedJob) = {
@@ -51,7 +52,7 @@ trait SGEJobService extends ClusterJobService with SSHHost with SharedStorage { 
       queue = environment.queue,
       workDirectory = serializedJob.path,
       wallTime = environment.wallTime.map(x ⇒ x: concurrent.duration.Duration),
-      memory = Some(environment.requiredMemory.toMegabytes.toInt)
+      memory = Some(BatchEnvironment.requiredMemory(environment.openMOLEMemory, environment.memory).toMegabytes.toInt)
     )
 
     val jid = js.jobService.submit(jobDescription)

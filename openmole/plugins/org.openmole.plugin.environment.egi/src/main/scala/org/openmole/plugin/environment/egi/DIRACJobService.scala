@@ -22,22 +22,24 @@ import fr.iscpif.gridscale.egi._
 import fr.iscpif.gridscale.{ egi ⇒ gridscale }
 import org.openmole.core.workspace.Workspace
 import org.openmole.plugin.environment.batch.control.UnlimitedAccess
-import org.openmole.plugin.environment.batch.environment.SerializedJob
+import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, SerializedJob }
 import org.openmole.plugin.environment.gridscale.GridScaleJobService
 import org.openmole.tool.file.uniqName
 import org.openmole.tool.logger.Logger
 import squants.time.TimeConversions._
+
 import scalax.io.Resource
 
 object DIRACJobService extends Logger
 
 import org.openmole.plugin.environment.egi.DIRACJobService._
 
-trait DIRACJobService extends GridScaleJobService { js ⇒
+class DIRACJobService(val environment: DIRACEnvironment) extends GridScaleJobService { js ⇒
 
   def getToken = jobService.jobService.token
 
-  def environment: DIRACEnvironment
+  import environment.services._
+
   def usageControl = UnlimitedAccess
 
   def diracService = {
@@ -50,12 +52,13 @@ trait DIRACJobService extends GridScaleJobService { js ⇒
   }
 
   val jobService = {
+    import environment.services._
     val js =
       gridscale.DIRACGroupedJobService(
         environment.voName,
         service = Some(diracService),
         statusQueryInterval = environment.updateInterval.minUpdateInterval,
-        jobsByGroup = Workspace.preference(DIRACEnvironment.JobsByGroup)
+        jobsByGroup = preference(DIRACEnvironment.JobsByGroup)
       )(environment.authentication)
 
     js.delegate(environment.authentication.certificate, environment.authentication.password)
@@ -65,17 +68,18 @@ trait DIRACJobService extends GridScaleJobService { js ⇒
   def jobScript =
     JobScript(
       voName = environment.voName,
-      memory = environment.openMOLEMemoryValue.toMegabytes.toInt,
-      threads = environment.threadsValue,
+      memory = BatchEnvironment.openMOLEMemoryValue(environment.openMOLEMemory).toMegabytes.toInt,
+      threads = BatchEnvironment.threadsValue(environment.threads),
       debug = environment.debug
     )
 
   def id = diracService
 
   protected def _submit(serializedJob: SerializedJob) = {
+    import environment.services._
     import serializedJob._
 
-    val script = Workspace.newFile("script", ".sh")
+    val script = newFile.newFile("script", ".sh")
     try {
       val outputFilePath = storage.child(path, uniqName("job", ".out"))
 
@@ -84,7 +88,7 @@ trait DIRACJobService extends GridScaleJobService { js ⇒
       val jobDescription = gridscale.DIRACJobDescription(
         stdOut = if (environment.debug) Some("out") else None,
         stdErr = if (environment.debug) Some("err") else None,
-        outputSandbox = if (environment.debug) Seq("out" → Workspace.newFile("job", ".out"), "err" → Workspace.newFile("job", ".err")) else Seq.empty,
+        outputSandbox = if (environment.debug) Seq("out" → newFile.newFile("job", ".out"), "err" → newFile.newFile("job", ".err")) else Seq.empty,
         inputSandbox = Seq(script),
         arguments = script.getName,
         executable = "/bin/bash",

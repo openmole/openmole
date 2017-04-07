@@ -18,43 +18,33 @@
 package org.openmole.core.fileservice
 
 import java.io.File
-import org.openmole.tool.file._
-import org.openmole.core.updater.IUpdatable
 
-class FileServiceGC extends IUpdatable {
-  override def update: Boolean = {
-    FileService.archiveCache.cacheMaps.synchronized {
-      def invalidate =
-        for {
-          execution ← FileService.archiveCache.cacheMaps
-          file ← execution._2
-          if (!new File(file._1).exists)
-        } yield (execution._1, file._1)
+import org.openmole.core.threadprovider.IUpdatable
+import scala.ref.WeakReference
+import collection.JavaConverters._
 
-      invalidate.foreach(Function.tupled(FileService.archiveCache.invalidateCache))
+class FileServiceGC(fileService: WeakReference[FileService]) extends IUpdatable {
+
+  override def update: Boolean =
+    fileService.get match {
+      case Some(fileService) ⇒
+        def invalidateArchive =
+          for {
+            file ← fileService.archiveCache.asMap().keySet().asScala.toSeq
+            if (!new File(file).exists)
+          } yield file
+
+        fileService.archiveCache.invalidateAll(invalidateArchive.asJava)
+
+        def invalidateHash =
+          for {
+            file ← fileService.hashCache.asMap().keySet().asScala.toSeq
+            if !new File(file).exists
+          } yield file
+
+        fileService.hashCache.invalidateAll(invalidateHash.asJava)
+
+        true
+      case None ⇒ false
     }
-
-    FileService.hashCache.cacheMaps.synchronized {
-      def invalidate =
-        for {
-          execution ← FileService.hashCache.cacheMaps
-          file ← execution._2
-          if !new File(file._1).exists
-        } yield (execution._1, file._1)
-
-      invalidate.foreach(Function.tupled(FileService.hashCache.invalidateCache))
-    }
-
-    FileDeleter.cleanDirectories.synchronized {
-      def delete =
-        for {
-          directory ← FileDeleter.cleanDirectories
-          if directory.isDirectoryEmpty
-        } yield directory
-
-      delete.foreach { dir ⇒ dir.delete; FileDeleter.cleanDirectories.remove(dir) }
-    }
-
-    true
-  }
 }

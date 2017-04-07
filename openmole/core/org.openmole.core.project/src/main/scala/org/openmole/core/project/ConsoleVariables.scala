@@ -18,6 +18,7 @@
 package org.openmole.core.project
 
 import org.openmole.core.console._
+import org.openmole.core.services._
 import org.openmole.tool.file._
 
 object ConsoleVariables {
@@ -25,17 +26,25 @@ object ConsoleVariables {
   def variablesName = "_variables_"
   def workDirectory = "workDirectory"
 
-  def empty = ConsoleVariables()
+  def empty(implicit services: Services) = ConsoleVariables(
+    args = Seq.empty,
+    workDirectory = currentDirectory
+  )
 
   def bindVariables(loop: ScalaREPL, variables: ConsoleVariables, variablesName: String = variablesName) =
     loop.beQuietDuring {
       loop.bind(variablesName, variables)
-      loop.eval(s"import $variablesName._")
+      loop.eval(s"""
+        |import $variablesName._
+        |import $variablesName.services._""".stripMargin)
     }
 
 }
 
 case class ConsoleVariables(
-  args:          Seq[String] = Seq.empty,
-  workDirectory: File        = currentDirectory
+  args:          Seq[String],
+  workDirectory: File
+)(
+  implicit
+  val services: Services
 )

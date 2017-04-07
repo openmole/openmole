@@ -21,24 +21,32 @@ import java.util.logging.Logger
 
 import com.thoughtworks.xstream.XStream
 import java.io.File
-import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.util.UUID
+
 import org.h2.tools.Server
-import org.openmole.core.replication.{ DBServerRunning, replicas, DBServerInfo }
 import slick.driver.H2Driver.api._
+
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
-import scala.util.{ Success, Failure, Try }
+import scala.util.{ Failure, Success, Try }
+import org.openmole.core.db
+import org.openmole.core.db.{ DBServerInfo, DBServerRunning }
 
 object DBServer extends App {
+
+  val base = if (!args.isEmpty) new File(args(0)) else db.defaultOpenMOLEDirectory
 
   def checkInterval = 30000
   def maxAllDead = 5
 
-  val base = DBServerInfo.dbDirectory
+  val dbDirectory = db.dbDirectory(base)
+  dbDirectory.mkdirs()
 
-  val lockFile = DBServerInfo.dbLockFile
+  def dbLock = s"${db.dbName}.lock"
+  def urlDBPath = s"${db.dbName};MV_STORE=FALSE;MVCC=TRUE;"
+
+  val lockFile = new File(dbDirectory, dbLock)
   lockFile.createNewFile
 
   val str = new FileOutputStream(lockFile)
@@ -57,18 +65,18 @@ object DBServer extends App {
       }
     )
 
-    val fullDataBaseFile = new File(base.getPath, DBServerInfo.dbName + ".h2.db")
+    val fullDataBaseFile = new File(dbDirectory, db.dbName + ".h2.db")
 
-    def db(user: String, password: String) =
-      Database.forDriver(driver = new org.h2.Driver, url = s"jdbc:h2:file:${base}/${DBServerInfo.urlDBPath}", user = user, password = password)
+    def database(user: String, password: String) =
+      Database.forDriver(driver = new org.h2.Driver, url = s"jdbc:h2:file:${dbDirectory}/${urlDBPath}", user = user, password = password)
 
     def createDB(user: String, password: String): Unit = {
       Logger.getLogger(this.getClass.getName).info("Create BDD")
       fullDataBaseFile.delete
 
-      val h2 = db(user, "")
+      val h2 = database(user, "")
 
-      Await.result(h2.run(replicas.schema.create), Duration.Inf)
+      Await.result(h2.run(db.replicas.schema.create), Duration.Inf)
 
       val session = h2.createSession()
 
@@ -80,37 +88,36 @@ object DBServer extends App {
     }
 
     val info =
-      if (!DBServerInfo.dbInfoFile.exists || !fullDataBaseFile.exists) {
+      if (!db.dbInfoFile(dbDirectory).exists || !fullDataBaseFile.exists) {
         val user = "sa"
         val password = UUID.randomUUID.toString.filter(_.isLetterOrDigit)
         createDB(user, password)
         new DBServerInfo(server.getPort, user, password)
       }
-      else DBServerInfo.load(DBServerInfo.dbInfoFile).copy(port = server.getPort)
+      else db.load(db.dbInfoFile(dbDirectory)).copy(port = server.getPort)
 
     def dbWorks =
-
       Try {
         //DBIO.seq(replicas.size)
-        Await.result(db(info.user, info.password).run(replicas.length.result), Duration.Inf)
+        Await.result(database(info.user, info.password).run(db.replicas.length.result), Duration.Inf)
+
         //db(info.user, info.password).run(replicas.size).result(Duration.Inf)
         /* db(info.user, info.password).withSession { implicit s ⇒
           replicas.size.run
         }*/
       } match {
         case Failure(_) ⇒ false
-        case Success(_) ⇒ true
+        case Success(r) ⇒ true
       }
 
     if (!dbWorks) createDB(info.user, info.password)
 
-    val dbInfoFile = DBServerInfo.dbInfoFile
-    val out = new FileOutputStream(dbInfoFile)
+    val out = new FileOutputStream(db.dbInfoFile(dbDirectory))
     try new XStream().toXML(info, out) finally out.close
 
     def waitAllDead(count: Int): Unit = {
       Logger.getLogger(getClass.getName).info(s"Waiting $count times for all OpenMOLE to be dead.")
-      val allDead = !DBServerRunning.oneLocked
+      val allDead = !DBServerRunning.oneLocked(dbDirectory)
       if (!allDead) {
         Thread.sleep(checkInterval)
         waitAllDead(maxAllDead)
@@ -124,6 +131,6 @@ object DBServer extends App {
 
     waitAllDead(maxAllDead)
   }
-  else println("Server is already running")
+  else Logger.getLogger(getClass.getName).info("Server is already running")
 
 }

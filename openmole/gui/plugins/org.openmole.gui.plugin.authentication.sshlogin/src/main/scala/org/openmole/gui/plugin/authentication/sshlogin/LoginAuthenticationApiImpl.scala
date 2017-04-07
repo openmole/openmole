@@ -17,21 +17,19 @@
  */
 package org.openmole.gui.plugin.authentication.sshlogin
 
-import org.openmole.core.workspace.{ Decrypt, Workspace }
+import org.openmole.core.services._
 import org.openmole.gui.ext.data._
 import org.openmole.plugin.environment.ssh.{ LoginPassword, SSHAuthentication }
 
 import scala.util._
 
-class LoginAuthenticationApiImpl extends LoginAuthenticationAPI {
+class LoginAuthenticationApiImpl(s: Services) extends LoginAuthenticationAPI {
 
-  implicit def workspace: Workspace = Workspace.instance
-
-  implicit def decrypt: Decrypt = Decrypt(workspace)
+  import s._
 
   private def coreObject(data: LoginAuthenticationData) = LoginPassword(
     data.login,
-    Workspace.encrypt(data.password),
+    cypher.encrypt(data.password),
     data.target,
     data.port.toInt
   )
@@ -45,7 +43,7 @@ class LoginAuthenticationApiImpl extends LoginAuthenticationAPI {
       case lp: LoginPassword ⇒
         Some(LoginAuthenticationData(
           lp.login,
-          Workspace.decrypt(lp.cypheredPassword),
+          cypher.decrypt(lp.cypheredPassword),
           lp.host,
           lp.port.toString
         ))

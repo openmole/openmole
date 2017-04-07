@@ -25,8 +25,9 @@ object ScalingGenomeTask {
   def apply[T](algorithm: T)(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name) = {
     val t = wfi(algorithm)
 
-    ClosureTask("ScalingGenomeTask") { (context, rng, _) ⇒
-      context ++ t.genomeToVariables(context(t.genomePrototype)).from(context)(rng)
+    FromContextTask("ScalingGenomeTask") { p ⇒
+      import p._
+      context ++ t.genomeToVariables(context(t.genomePrototype)).from(context)
     } set (
       outputs += (t.inputPrototypes: _*),
       (inputs, outputs) += t.genomePrototype

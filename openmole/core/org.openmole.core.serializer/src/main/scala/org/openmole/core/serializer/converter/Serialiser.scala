@@ -18,9 +18,9 @@
 package org.openmole.core.serializer.converter
 
 import com.thoughtworks.xstream.XStream
-import org.openmole.core.serializer.SerialiserService
+import org.openmole.core.serializer.SerializerService
 
-class Serialiser {
-  val xStream: XStream = SerialiserService.buildXStream
+class Serialiser(serialiserService: SerializerService) {
+  val xStream: XStream = serialiserService.buildXStream
   def clean = {}
 }

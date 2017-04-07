@@ -18,9 +18,9 @@ package org.openmole.core.workflow.mole
 
 import monocle.macros.Lenses
 import org.openmole.core.context.Context
+import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.data._
-import org.openmole.tool.random.RandomProvider
 
 object TestHook {
 
@@ -32,6 +32,5 @@ object TestHook {
     f:      Context ⇒ Context = identity[Context],
     config: InputOutputConfig = InputOutputConfig()
 ) extends Hook {
-  override protected def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider): Context =
-    f(context)
+  override protected def process(executionContext: MoleExecutionContext) = FromContext { p ⇒ f(p.context) }
 }

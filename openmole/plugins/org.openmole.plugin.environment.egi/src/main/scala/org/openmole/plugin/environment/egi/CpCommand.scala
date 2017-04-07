@@ -20,16 +20,16 @@ package org.openmole.plugin.environment.egi
 import java.net.URI
 
 import org.openmole.core.workspace.Workspace
+import squants.time.Time
 
 trait CpCommands {
   def upload(from: String, to: URI): String
   def download(from: URI, to: String): String
-  def getTimeOut = Workspace.preference(EGIEnvironment.RemoteCopyTimeout).toSeconds.toString
 }
 
-case class Curl(voName: String, debug: Boolean) extends CpCommands {
+case class Curl(voName: String, debug: Boolean, timeOut: Time) extends CpCommands {
   @transient lazy val curl =
-    s"curl ${if (debug) "--verbose" else ""} --connect-timeout $getTimeOut --max-time $getTimeOut --cert $$X509_USER_PROXY --key $$X509_USER_PROXY --cacert $$X509_USER_PROXY --capath $$X509_CERT_DIR -f "
+    s"curl ${if (debug) "--verbose" else ""} --connect-timeout ${timeOut.toSeconds.toInt.toString} --max-time ${timeOut.toSeconds.toInt.toString} --cert $$X509_USER_PROXY --key $$X509_USER_PROXY --cacert $$X509_USER_PROXY --capath $$X509_CERT_DIR -f "
 
   def upload(from: String, to: URI) = s"$curl -T $from -L $to"
   def download(from: URI, to: String) = s"$curl -L $from -o $to"

@@ -28,21 +28,95 @@ import scala.concurrent.Await
 import scalatags.Text.all._
 import scalatags.Text.{ all ⇒ tags }
 import java.io.File
+import java.util.concurrent.atomic.AtomicReference
+
+import org.openmole.core.authentication.AuthenticationStore
+import org.openmole.core.event.EventDispatcher
+import org.openmole.core.fileservice.FileService
+import org.openmole.core.preference.Preference
+import org.openmole.core.replication.ReplicaCatalog
+import org.openmole.core.serializer.SerializerService
+import org.openmole.core.services.Services
+import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.gui.ext.api.Api
-import org.openmole.core.workspace.Workspace
+import org.openmole.core.workspace.{ NewFile, Workspace }
 import org.openmole.gui.ext.data.routes._
 import org.openmole.gui.ext.tool.server
 import org.openmole.gui.ext.tool.server.{ AutowireServer, OMRouter }
+import org.openmole.tool.crypto.Cypher
 import org.openmole.tool.file._
+import org.openmole.tool.random.{ RandomProvider, Seeder }
 import org.openmole.tool.stream._
 import org.openmole.tool.tar._
 
 import scala.util.{ Failure, Success, Try }
 
+object GUIServices {
+
+  case class ServicesProvider(guiServices: GUIServices, cypherProvider: () ⇒ Cypher) extends Services {
+    implicit def services = guiServices
+    implicit def workspace = guiServices.workspace
+    implicit def preference = guiServices.preference
+    implicit def cypher = cypherProvider()
+    implicit def threadProvider = guiServices.threadProvider
+    implicit def seeder = guiServices.seeder
+    implicit def replicaCatalog = guiServices.replicaCatalog
+    implicit def newFile = guiServices.newFile
+    implicit def authenticationStore = guiServices.authenticationStore
+    implicit def serializerService = guiServices.serializerService
+    implicit def fileService = guiServices.fileService
+    implicit def randomProvider = guiServices.randomProvider
+    implicit def eventDispatcher: EventDispatcher = guiServices.eventDispatcher
+  }
+
+  def apply(workspace: Workspace) = {
+    implicit val ws = workspace
+    implicit val preference = Preference(ws.persistentDir)
+    implicit val newFile = NewFile(workspace)
+    implicit val seeder = Seeder()
+    implicit val serializerService = SerializerService()
+    implicit val threadProvider = ThreadProvider()
+    implicit val replicaCatalog = ReplicaCatalog()
+    implicit val authenticationStore = AuthenticationStore(ws.persistentDir)
+    implicit val fileService = FileService()
+    implicit val randomProvider = RandomProvider(seeder.newRNG)
+    implicit val eventDispatcher = EventDispatcher()
+
+    new GUIServices()
+  }
+
+  def dispose(services: GUIServices) = {
+    scala.util.Try(services.workspace.tmpDir.recursiveDelete)
+    scala.util.Try(services.threadProvider.stop())
+  }
+
+  def withServices[T](workspace: Workspace)(f: GUIServices ⇒ T) = {
+    val services = GUIServices(workspace)
+    try f(services)
+    finally dispose(services)
+  }
+
+}
+
+class GUIServices(
+  implicit
+  val workspace:           Workspace,
+  val preference:          Preference,
+  val threadProvider:      ThreadProvider,
+  val seeder:              Seeder,
+  val replicaCatalog:      ReplicaCatalog,
+  val newFile:             NewFile,
+  val authenticationStore: AuthenticationStore,
+  val serializerService:   SerializerService,
+  val fileService:         FileService,
+  val randomProvider:      RandomProvider,
+  val eventDispatcher:     EventDispatcher
+)
+
 object GUIServlet {
   def apply(arguments: GUIServer.ServletArguments) = {
     val servlet = new GUIServlet(arguments)
-    Utils.addPluginRoutes(servlet.addRouter)
+    Utils.addPluginRoutes(servlet.addRouter, GUIServices.ServicesProvider(arguments.services, servlet.cypher.get))
     servlet
   }
 }
@@ -50,7 +124,11 @@ object GUIServlet {
 class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServlet with FileUploadSupport with AuthenticationSupport {
   configureMultipartHandling(MultipartConfig(maxFileSize = Some(20 * 1024 * 1024 * 1024), fileSizeThreshold = Some(1024 * 1024))) // Limited to files of 20Go with 1Mo chunks
 
-  val apiImpl = new ApiImpl(arguments)
+  val cypher = new AtomicReference[Cypher](Cypher(arguments.password))
+  val services = GUIServices.ServicesProvider(arguments.services, cypher.get)
+  val apiImpl = new ApiImpl(services, arguments.applicationControl)
+
+  import services._
 
   //FIXME val connectedUsers: Var[Seq[UserID]] = Var(Seq())
   val USER_ID = "UserID"
@@ -106,7 +184,7 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
 
   protected def basicAuth(pass: String) = {
     val baReq = new OpenMOLEtrategy(this, () ⇒ {
-      arguments.passwordCorrect(pass) && Workspace.passwordChosen
+      Preference.passwordIsCorrect(Cypher(pass), arguments.services.preference) && Preference.passwordChosen(arguments.services.preference)
     })
     val rep = baReq.authenticate()
     rep match {
@@ -120,14 +198,19 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
   }
 
   get(resetPasswordRoute) {
-    Workspace.reset
+    apiImpl.resetPassword()
     resetPassword
   }
 
   post(resetPasswordRoute) {
     val password = params.getOrElse("password", "")
     val passwordAgain = params.getOrElse("passwordagain", "")
-    Utils.setPassword(password, passwordAgain)
+
+    if (password == passwordAgain) {
+      Preference.setPasswordTest(arguments.services.preference, Cypher(password))
+      cypher.set(Cypher(password))
+    }
+
     redirect(connectionRoute)
   }
 
@@ -157,7 +240,7 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
         }
 
       fileType match {
-        case "project"        ⇒ copyTo(Utils.webUIProjectFile)
+        case "project"        ⇒ copyTo(Utils.webUIDirectory)
         case "authentication" ⇒ copyTo(server.Utils.authenticationKeysFile)
         case "plugin"         ⇒ copyTo(Utils.pluginUpdoadDirectory)
         case "absolute"       ⇒ copyTo(new File(""))
@@ -169,7 +252,7 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
 
   get(downloadFileRoute) {
     val path = new java.net.URI(null, null, params("path"), null).getPath
-    val f = new File(Utils.webUIProjectFile, path)
+    val f = new File(Utils.webUIDirectory, path)
 
     if (!f.exists()) NotFound("The file " + path + " does not exist.")
     else {
@@ -195,8 +278,8 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
   }
 
   get(connectionRoute) {
-    if (Workspace.passwordHasBeenSet) redirect("/app")
-    else if (Utils.passwordState.chosen) {
+    if (passwordIsChosen && passwordIsCorrect) redirect("/app")
+    else if (passwordIsChosen) {
       response.setHeader("Access-Control-Allow-Origin", "*")
       response.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, UPDATE, OPTIONS")
       response.setHeader("Access-Control-Allow-Headers", "Content-Type, Accept, X-Requested-With")
@@ -212,17 +295,25 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
     response.setHeader("Access-Control-Allow-Headers", "Content-Type, Accept, X-Requested-With")
 
     val password = params.getOrElse("password", "")
-    Utils.setPassword(password)
+    cypher.set(Cypher(password))
 
-    Workspace.passwordHasBeenSet match {
+    passwordIsCorrect match {
       case true ⇒ redirect(appRoute)
       case _    ⇒ redirect(connectionRoute)
     }
   }
 
+  def passwordProvided = arguments.password.isDefined
+  def passwordIsChosen = Preference.passwordChosen(arguments.services.preference)
+  def passwordIsCorrect = Preference.passwordIsCorrect(cypher.get, arguments.services.preference)
+
   get(appRoute) {
     contentType = "text/html"
-    if (Workspace.passwordHasBeenSet) application
+    if (!passwordIsChosen)
+      if (passwordProvided) Preference.setPasswordTest(preference, cypher.get)
+      else redirect(connectionRoute)
+
+    if (passwordIsCorrect) application
     else redirect(connectionRoute)
   }
 

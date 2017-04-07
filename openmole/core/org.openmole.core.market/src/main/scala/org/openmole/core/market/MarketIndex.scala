@@ -17,7 +17,8 @@
 package org.openmole.core.market
 
 import org.openmole.core.buildinfo
-import org.openmole.core.workspace.{ ConfigurationLocation, Workspace }
+import org.openmole.core.preference.ConfigurationLocation
+import org.openmole.core.workspace.Workspace
 
 object MarketIndex {
   // FIXME support list of indexes

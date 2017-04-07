@@ -23,9 +23,14 @@ import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
-import org.openmole.core.workspace.Workspace
+import org.openmole.core.workspace.{ NewFile, Workspace }
 import shapeless._
 import ops.hlist._
+import org.openmole.core.workflow.validation._
+import org.openmole.core.preference._
+import org.openmole.core.threadprovider.ThreadProvider
+import org.openmole.tool.random._
+import org.openmole.tool.thread._
 
 object ToPuzzle {
 
@@ -97,6 +102,11 @@ object Puzzle {
       puzzles.flatMap { _.grouping }.toMap
     )
 
+  def transitionOutputs(puzzle: Puzzle, lastTransition: (Puzzle, Puzzle) ⇒ Puzzle) = {
+    val last = Slot(EmptyTask())
+    val _puzzle = lastTransition(puzzle, last)
+    TypeUtil.receivedTypes(_puzzle.toMole, _puzzle.sources, _puzzle.hooks)(last) toSeq
+  }
 }
 
 object PuzzlePiece {
@@ -153,15 +163,15 @@ case class Puzzle(
 
   def toMole = new Mole(firstSlot.capsule, transitions, dataChannels)
 
-  def toExecution: MoleExecution =
+  def toExecution(implicit moleServices: MoleServices): MoleExecution =
     MoleExecution(toMole, sources, hooks, environments, grouping)
 
   def toExecution(
-    implicits:          Context              = Context.empty,
-    seed:               Long                 = Workspace.newSeed,
-    executionContext:   MoleExecutionContext = MoleExecutionContext(),
-    defaultEnvironment: LocalEnvironment     = LocalEnvironment()
-  ): MoleExecution =
+    implicits:          Context                                = Context.empty,
+    seed:               OptionalArgument[Long]                 = None,
+    executionContext:   OptionalArgument[MoleExecutionContext] = None,
+    defaultEnvironment: OptionalArgument[LocalEnvironment]     = None
+  )(implicit moleServices: MoleServices): MoleExecution =
     MoleExecution(
       mole = toMole,
       sources = sources,
@@ -169,7 +179,6 @@ case class Puzzle(
       environments = environments,
       grouping = grouping,
       implicits = implicits,
-      seed = seed,
       defaultEnvironment = defaultEnvironment,
       executionContext = executionContext
     )
@@ -177,6 +186,12 @@ case class Puzzle(
   def slots: Set[Slot] = (firstSlot :: transitions.map(_.end).toList).toSet
 
   def first = firstSlot.capsule
+
+  def inputs = first.inputs(toMole, sources, hooks).toSeq
+  def defaults = first.task.defaults
+  def exploredOutputs = Puzzle.transitionOutputs(this, _ -< _)
+  def aggregatedOutputs = Puzzle.transitionOutputs(this, _ >- _)
+  def outputs = Puzzle.transitionOutputs(this, _ -- _)
 
   def buildPuzzle = this
 

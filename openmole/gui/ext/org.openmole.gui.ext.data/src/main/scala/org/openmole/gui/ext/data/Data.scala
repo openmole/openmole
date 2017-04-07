@@ -713,11 +713,6 @@ object FileFilter {
   def defaultFilter = FileFilter.this(First, Some(100), "", AlphaSorting)
 }
 
-//Configuration entries
-sealed trait ConfigData
-
-object VOTest extends ConfigData
-
 case class OMSettings(workspace: SafePath, version: String, versionName: String, buildTime: String)
 
 sealed trait PluginExtensionType

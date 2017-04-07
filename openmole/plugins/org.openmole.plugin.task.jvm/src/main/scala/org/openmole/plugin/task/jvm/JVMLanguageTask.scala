@@ -20,11 +20,11 @@ package org.openmole.plugin.task.jvm
 import java.io.File
 
 import org.openmole.core.context.{ Context, Val, Variable }
+import org.openmole.core.expansion.FromContext
 import org.openmole.core.serializer.plugin.Plugins
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.task.{ Task, TaskExecutionContext }
 import org.openmole.plugin.task.external.External
-import org.openmole.tool.random.RandomProvider
 
 object JVMLanguageTask {
   lazy val workDirectory = Val[File]("workDirectory")
@@ -35,7 +35,8 @@ trait JVMLanguageTask extends Task with Plugins {
   def libraries: Seq[File]
   def external: External
 
-  override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = {
+  override def process(executionContext: TaskExecutionContext) = FromContext { p ⇒
+    import p._
     val pwd = executionContext.tmpDirectory.newDir("jvmtask")
     val preparedContext = external.prepareInputFiles(context, external.relativeResolver(pwd.getCanonicalFile)) + Variable(JVMLanguageTask.workDirectory, pwd)
     val resultContext = processCode(preparedContext)
@@ -44,6 +45,6 @@ trait JVMLanguageTask extends Task with Plugins {
     resultContextWithFiles
   }
 
-  def processCode(context: Context)(implicit rng: RandomProvider): Context
+  def processCode: FromContext[Context]
 
 }

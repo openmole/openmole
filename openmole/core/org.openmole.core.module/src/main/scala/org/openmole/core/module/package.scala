@@ -23,29 +23,26 @@ import java.nio.file.FileAlreadyExistsException
 import fr.iscpif.gridscale.storage._
 import fr.iscpif.gridscale.http.HTTPStorage
 import org.openmole.core.pluginmanager.PluginManager
-import org.openmole.core.workspace.{ ConfigurationLocation, Workspace }
+import org.openmole.core.workspace.{ NewFile, Workspace }
 import org.openmole.tool.file._
 import org.openmole.tool.stream._
 import org.openmole.core.expansion._
 import org.openmole.core.context._
+import org.openmole.core.preference.Preference
 import org.openmole.tool.random.RandomProvider
 
 package object module {
 
-  lazy val indexes =
-    Workspace.preference(ModuleIndex.moduleIndexes).
-      map(ExpandedString(_).from(Context("version" → buildinfo.version))(RandomProvider.empty))
+  def indexes(implicit preference: Preference, randomProvider: RandomProvider, newFile: NewFile) =
+    preference(ModuleIndex.moduleIndexes).map(ExpandedString(_).from(Context("version" → buildinfo.version)))
 
-  lazy val pluginDirectory = Workspace.location / "plugins"
-  pluginDirectory.mkdirs
+  def pluginDirectory(implicit workspace: Workspace) = workspace.location /> "plugins"
 
-  lazy val moduleDirectory =
-    if (buildinfo.development) Workspace.newDir("modules")
-    else Workspace.location / "modules" / buildinfo.version.major
+  def moduleDirectory(implicit workspace: Workspace) =
+    if (buildinfo.development) workspace.tmpDir /> "modules" /> buildinfo.version.major
+    else workspace.persistentDir /> "modules" /> buildinfo.version.major
 
-  moduleDirectory.mkdirs
-
-  def allModules =
+  def allModules(implicit workspace: Workspace) =
     (pluginDirectory.listFilesSafe ++ moduleDirectory.listFilesSafe).flatMap(PluginManager.listBundles)
 
   import org.json4s._
@@ -57,7 +54,7 @@ package object module {
 
   case class SelectableModule(baseURL: String, module: Module)
 
-  def install(modules: Seq[SelectableModule]) = Workspace.withTmpDir { dir ⇒
+  def install(modules: Seq[SelectableModule])(implicit newFile: NewFile, workspace: Workspace) = newFile.withTmpDir { dir ⇒
     case class DownloadableComponent(baseURL: String, component: Component)
     val downloadableComponents = modules.flatMap { m ⇒ m.module.components.map(c ⇒ DownloadableComponent(m.baseURL, c)) }
     val hashes = downloadableComponents.map(_.component.hash).distinct.toSet -- PluginManager.bundleHashes.map(_.toString)
@@ -73,8 +70,10 @@ package object module {
   def components[T](implicit m: Manifest[T]) = PluginManager.pluginsForClass(m.erasure).toSeq
   def components(o: Object) = PluginManager.pluginsForClass(o.getClass).toSeq
 
-  def addPluginsFiles(files: Seq[File], move: Boolean, directory: File = pluginDirectory): Seq[(File, Throwable)] = synchronized {
-    val destinations = files.map { file ⇒ file → (directory / file.getName) }
+  def addPluginsFiles(files: Seq[File], move: Boolean, directory: Option[File] = None)(implicit workspace: Workspace): Seq[(File, Throwable)] = synchronized {
+    val dir = directory.getOrElse(moduleDirectory)
+
+    val destinations = files.map { file ⇒ file → (dir / file.getName) }
 
     destinations.filter(_._2.exists).toList match {
       case Nil ⇒

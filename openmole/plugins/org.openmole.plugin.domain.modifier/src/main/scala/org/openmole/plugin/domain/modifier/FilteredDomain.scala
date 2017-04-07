@@ -20,12 +20,11 @@ package org.openmole.plugin.domain.modifier
 import org.openmole.core.context.Context
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.domain._
-import org.openmole.tool.random.RandomProvider
 
 object FilteredDomain {
 
   implicit def isDiscrete[D, I] = new Discrete[FilteredDomain[D, I], I] with DomainInputs[FilteredDomain[D, I]] {
-    override def iterator(domain: FilteredDomain[D, I]) = FromContext((context, rng) ⇒ domain.iterator(context)(rng))
+    override def iterator(domain: FilteredDomain[D, I]) = domain.iterator
     override def inputs(domain: FilteredDomain[D, I]) = domain.inputs
   }
 
@@ -35,7 +34,8 @@ case class FilteredDomain[D, I](domain: D, f: FromContext[I ⇒ Boolean])(implic
 
   def inputs = domainInputs.inputs(domain)
 
-  def iterator(context: Context)(implicit rng: RandomProvider): Iterator[I] = {
+  def iterator = FromContext { p ⇒
+    import p._
     val fVal = f.from(context)
     discrete.iterator(domain).from(context).filter(fVal)
   }

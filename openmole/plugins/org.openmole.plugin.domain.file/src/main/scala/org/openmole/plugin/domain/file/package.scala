@@ -23,6 +23,7 @@ import org.openmole.core.context.Val
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.dsl._
+import cats.implicits._
 
 package object file {
 
@@ -45,7 +46,7 @@ package object file {
   }
 
   implicit def prototypeOfFileIsFinite = new Finite[Val[File], File] {
-    override def computeValues(prototype: Val[File]) = FromContext { (ctx, rng) ⇒ ctx(prototype).listFilesSafe }
+    override def computeValues(prototype: Val[File]) = FromContext.prototype(prototype).map { _.listFilesSafe }
   }
 
   implicit def fileIsFinite = new Finite[File, File] {

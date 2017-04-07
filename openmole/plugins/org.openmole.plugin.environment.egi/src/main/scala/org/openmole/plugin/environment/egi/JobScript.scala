@@ -20,6 +20,7 @@ package org.openmole.plugin.environment.egi
 import java.net.URI
 import java.util.UUID
 
+import org.openmole.core.preference.Preference
 import org.openmole.plugin.environment.batch.environment.SerializedJob
 
 import scala.collection.mutable.ListBuffer
@@ -32,10 +33,10 @@ case class JobScript(voName: String, memory: Int, threads: Int, debug: Boolean) 
     runningPath:   Option[String] = None,
     finishedPath:  Option[String] = None,
     proxy:         Option[String] = None
-  ) = {
+  )(implicit preference: Preference) = {
     import serializedJob._
 
-    def cpCommand = Curl(voName, debug)
+    def cpCommand = Curl(voName, debug, preference(EGIEnvironment.RemoteCopyTimeout))
 
     assert(runtime.runtime.path != null)
 

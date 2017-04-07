@@ -26,7 +26,6 @@ import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfi
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.validation._
-import org.openmole.tool.random.RandomProvider
 import org.openmole.tool.stream._
 
 import scala.annotation.tailrec
@@ -62,7 +61,8 @@ object AppendToCSVFileHook {
   override def validate(inputs: Seq[Val[_]]): Seq[Throwable] =
     file.validate(inputs) ++ header.toSeq.flatMap(_.validate(inputs))
 
-  override def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider) = {
+  override protected def process(executionContext: MoleExecutionContext) = FromContext { parameters ⇒
+    import parameters._
     val f = file.from(context)
     f.createParentDir
 

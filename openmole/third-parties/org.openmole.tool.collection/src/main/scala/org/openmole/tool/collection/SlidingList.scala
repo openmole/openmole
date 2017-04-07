@@ -20,12 +20,12 @@ package org.openmole.tool.collection
 import java.util.concurrent.ConcurrentLinkedQueue
 import scala.collection.JavaConversions._
 
-class SlidingList[T](capacity: () ⇒ Int) {
+class SlidingList[T] {
 
   private val queue = new ConcurrentLinkedQueue[T]()
 
-  def put(t: T) = queue.synchronized {
-    if (queue.size() >= capacity()) queue.poll()
+  def put(t: T, capacity: Int) = queue.synchronized {
+    while (queue.size() >= capacity) queue.poll()
     queue.add(t)
   }
 

@@ -18,7 +18,7 @@
 package org.openmole.plugin.environment.ssh
 
 import org.openmole.core.pluginmanager.{ PluginInfo, PluginInfoActivator }
-import org.openmole.core.workspace.ConfigurationInfo
+import org.openmole.core.preference.ConfigurationInfo
 import org.osgi.framework.{ BundleActivator, BundleContext }
 
 class Activator extends BundleActivator {

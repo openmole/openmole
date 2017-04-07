@@ -17,39 +17,41 @@
  */
 package org.openmole.gui.plugin.authentication.egi
 
+import org.openmole.core.preference.ConfigurationLocation
 import org.openmole.gui.ext.data._
 import org.openmole.plugin.environment.egi.{ EGIAuthentication, P12Certificate }
-import org.openmole.core.workspace.{ Decrypt, Workspace }
-import org.openmole.gui.ext.plugin.server.Configurations
 import org.openmole.gui.ext.tool.server
+import org.openmole.core.services._
 
 import scala.util.{ Failure, Success, Try }
 
-class EGIAuthenticationAPIImpl extends EGIAuthenticationAPI {
+object EGIAuthenticationAPIImpl {
+  val voTest = ConfigurationLocation[Seq[String]]("AuthenicationPanel", "voTest", Some(Seq[String]()))
+}
 
-  implicit def workspace: Workspace = Workspace.instance
+class EGIAuthenticationAPIImpl(s: Services) extends EGIAuthenticationAPI {
 
-  implicit def decrypt: Decrypt = Decrypt(workspace)
+  implicit val services = s
+  import services._
 
   private def authenticationFile(key: String) = new java.io.File(server.Utils.authenticationKeysFile, key)
 
   private def coreObject(data: EGIAuthenticationData) = data.privateKey.map { pk ⇒
     P12Certificate(
-      Workspace.encrypt(data.cypheredPassword),
+      cypher.encrypt(data.cypheredPassword),
       authenticationFile(pk)
     )
   }
 
-  def egiAuthentications(): Seq[EGIAuthenticationData] = {
+  def egiAuthentications(): Seq[EGIAuthenticationData] =
     EGIAuthentication() match {
       case Some(p12: P12Certificate) ⇒
         Seq(EGIAuthenticationData(
-          Workspace.decrypt(p12.cypheredPassword),
+          cypher.decrypt(p12.cypheredPassword),
           Some(p12.certificate.getName)
         ))
       case x: Any ⇒ Seq()
     }
-  }
 
   def addAuthentication(data: EGIAuthenticationData): Unit = {
     coreObject(data).foreach { a ⇒
@@ -78,9 +80,7 @@ class EGIAuthenticationAPIImpl extends EGIAuthenticationAPI {
       }
     }.getOrElse(Test.error("Unknown error", Error("Unknown " + data.name)))
 
-    val vos = Configurations(VOTest).map {
-      _.split(",").toSeq
-    }.getOrElse(Seq())
+    val vos = services.preference(EGIAuthenticationAPIImpl.voTest)
 
     vos.map { voName ⇒
       Try {
@@ -96,5 +96,11 @@ class EGIAuthenticationAPIImpl extends EGIAuthenticationAPI {
       }
     }
   }
+
+  override def setVOTest(vos: Seq[String]): Unit =
+    services.preference.setPreference(EGIAuthenticationAPIImpl.voTest, vos)
+
+  override def geVOTest(): Seq[String] =
+    services.preference(EGIAuthenticationAPIImpl.voTest)
 
 }

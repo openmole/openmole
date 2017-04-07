@@ -19,6 +19,7 @@ package org.openmole.core.workflow.mole
 
 import org.openmole.core.context._
 import org.openmole.core.exception._
+import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
 import org.openmole.core.workflow.validation._
@@ -39,7 +40,12 @@ object Capsule {
     else {
       val capsules = mole.inputTransitions(slot).map { _.start } ++ mole.inputDataChannels(slot).map { _.start }
       val noStrainer =
-        for (c ← capsules; if isStrainer(c); s ← mole.slots(c)) yield reachNoStrainer(mole)(s, seen + slot)
+        for {
+          c ← capsules
+          if isStrainer(c)
+          s ← mole.slots(c)
+        } yield reachNoStrainer(mole)(s, seen + slot)
+
       noStrainer.forall(_ == true)
     }
   }
@@ -134,8 +140,8 @@ class Capsule(_task: Task, val strainer: Boolean) {
 
 class StrainerTaskDecorator(val task: Task) extends Task {
   override def config = task.config
-  override def perform(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = context + task.perform(context, executionContext)
-  override def process(context: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = throw new InternalProcessingError("This method should never be called")
+  override def perform(context: Context, executionContext: TaskExecutionContext): Context = context + task.perform(context, executionContext)
+  override def process(executionContext: TaskExecutionContext): FromContext[Context] = throw new InternalProcessingError("This method should never be called")
 }
 
 object StrainerCapsule {

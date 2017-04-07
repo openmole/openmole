@@ -19,48 +19,23 @@ package org.openmole.core.fileservice
 
 import java.io.File
 import java.util.concurrent.LinkedBlockingQueue
-import java.util.logging.{ Level, Logger }
 
+import org.openmole.core.threadprovider.ThreadProvider
+import org.openmole.tool.thread._
 import org.openmole.tool.file._
 
-import scala.collection.immutable.HashSet
-import scala.collection.mutable.WeakHashMap
+import scala.ref.WeakReference
 
-object FileDeleter {
+private class FileDeleter(fileService: WeakReference[FileService]) { fd ⇒
+
+  def stop = !fileService.get.isDefined
 
   private val cleanFiles = new LinkedBlockingQueue[File]
-  private val deleters = new WeakHashMap[File, DeleteOnFinalize]
-
-  private val cleanFilesThread = new Thread(new Runnable {
-
-    override def run = {
-      var finished = false
-
-      while (!finished) {
-        try cleanFiles.take.delete
-        catch {
-          case ex: InterruptedException ⇒
-            Logger.getLogger(FileDeleter.getClass.getName).log(Level.INFO, "File deleter interrupted", ex)
-            finished = true
-        }
-      }
-    }
-  })
-  cleanFilesThread.setDaemon(true)
-  cleanFilesThread.start
-
   def assynchonousRemove(file: File) = cleanFiles.add(file)
 
-  def deleteWhenGarbageCollected(file: File): File = deleters.synchronized {
-    deleters += file → new DeleteOnFinalize(file.getAbsolutePath)
-    file
-  }
+  private def run: Runnable =
+    while (!cleanFiles.isEmpty || !stop) cleanFiles.take.recursiveDelete
 
-  val cleanDirectories = new collection.mutable.HashSet[File]
-
-  def deleteWhenEmpty(dir: File) = {
-    if (dir.isDirectoryEmpty) dir.delete()
-    else cleanDirectories.synchronized { cleanDirectories.add(dir) }
-  }
+  def start(implicit threadProvider: ThreadProvider) = threadProvider.pool.submit(run)
 
 }

@@ -18,7 +18,6 @@
 package org.openmole.plugin.domain.modifier
 
 import org.openmole.core.context.Context
-import org.openmole.tool.random.RandomProvider
 import org.scalatest._
 
 import scala.util.Random

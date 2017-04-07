@@ -19,10 +19,8 @@ import org.openmole.core.workspace.Workspace
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import org.openmole.tool.file._
+
 object Utils {
-  def authenticationKeysFile = {
-    val ak = new java.io.File(Workspace.location, s"${Workspace.persistentLocation}/keys")
-    ak.mkdirs()
-    ak
-  }
+  def authenticationKeysFile(implicit workspace: Workspace) = workspace.persistentDir / "keys"
 }

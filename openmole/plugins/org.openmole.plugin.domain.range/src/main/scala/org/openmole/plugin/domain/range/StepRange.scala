@@ -17,17 +17,16 @@
 
 package org.openmole.plugin.domain.range
 
-import org.openmole.core.context.Context
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.domain._
-import org.openmole.tool.random.RandomProvider
+import cats.implicits._
 
 object StepRange {
 
   implicit def isFinite[T] = new Finite[StepRange[T], T] with Bounds[StepRange[T], T] with Center[StepRange[T], T] {
-    override def computeValues(domain: StepRange[T]) = FromContext((context, rng) ⇒ domain.computeValues(context)(rng))
-    override def max(domain: StepRange[T]) = FromContext((context, rng) ⇒ domain.max.from(context)(rng))
-    override def min(domain: StepRange[T]) = FromContext((context, rng) ⇒ domain.min.from(context)(rng))
+    override def computeValues(domain: StepRange[T]) = domain.computeValues
+    override def max(domain: StepRange[T]) = domain.max
+    override def min(domain: StepRange[T]) = domain.min
     override def center(domain: StepRange[T]) = Range.rangeCenter(domain.range)
   }
 
@@ -37,9 +36,8 @@ object StepRange {
 class StepRange[T](val range: Range[T], steps: FromContext[T]) extends SizeStep[T] {
   import range._
 
-  def stepAndSize(minValue: T, maxValue: T, context: Context)(implicit rng: RandomProvider) = {
+  def stepAndSize(minValue: T, maxValue: T) = steps.map { step ⇒
     import ops._
-    val step = steps.from(context)
     val size = (maxValue - minValue) / step
     (step, if (size.toInt < 0) 0 else size.toInt)
   }

@@ -3,9 +3,10 @@ package org.openmole.rest.server
 import java.io.{ File, PrintStream }
 import java.util.UUID
 import java.util.logging.Level
-import java.util.zip.{ GZIPOutputStream, GZIPInputStream }
+import java.util.zip.{ GZIPInputStream, GZIPOutputStream }
 import javax.servlet.annotation.MultipartConfig
 import javax.servlet.http.HttpServletRequest
+
 import org.json4s.JsonDSL._
 import org.json4s._
 import org.openmole.core.project._
@@ -16,16 +17,18 @@ import org.openmole.core.workflow.mole.{ MoleExecution, MoleExecutionContext }
 import org.openmole.core.workflow.puzzle._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workspace.Workspace
-import org.openmole.tool.tar.{ TarOutputStream, TarInputStream }
+import org.openmole.tool.tar.{ TarInputStream, TarOutputStream }
 import org.scalatra._
 import org.scalatra.servlet.FileUploadSupport
 import org.openmole.rest.message._
 import org.openmole.tool.file._
 import org.openmole.tool.stream._
 import org.openmole.tool.tar._
-import scala.util.{ Try, Failure, Success }
+
+import scala.util.{ Failure, Success, Try }
 import org.openmole.tool.collection._
 import org.json4s.jackson.JsonMethods._
+import org.openmole.core.preference.Preference
 
 case class EnvironmentException(environment: Environment, error: Error)
 
@@ -66,8 +69,11 @@ trait RESTAPI extends ScalatraServlet with GZipSupport
     def toJson = pretty(Extraction.decompose(x))
   }
 
-  def arguments: RESTLifeCycle.Arguments
-  def baseDirectory = Workspace.location / "rest"
+  val arguments: RESTLifeCycle.Arguments
+  implicit def services = arguments.services
+  import arguments.services._
+
+  def baseDirectory = workspace.tmpDir /> "rest"
 
   def exceptionToHttpError(e: Throwable) = InternalServerError(Error(e).toJson)
 

@@ -19,10 +19,9 @@ package org.openmole.tool
 
 import java.io._
 import java.nio.file._
-import java.util.concurrent.{ Callable, TimeUnit, TimeoutException }
+import java.util.concurrent.{ Callable, ThreadPoolExecutor, TimeUnit, TimeoutException }
 import java.util.zip.{ GZIPInputStream, GZIPOutputStream }
 
-import org.openmole.tool.thread._
 import squants.time._
 
 package object stream {
@@ -36,13 +35,12 @@ package object stream {
     }
   }
 
-  def copy(inputStream: InputStream, outputStream: OutputStream, bufferSize: Int, timeout: Time) = {
+  def copy(inputStream: InputStream, outputStream: OutputStream, bufferSize: Int, timeout: Time)(implicit pool: ThreadPoolExecutor) = {
     val buffer = new Array[Byte](bufferSize)
-    val executor = defaultExecutor
     val reader = new ReaderRunnable(buffer, inputStream, bufferSize)
 
     Iterator.continually {
-      val futureRead = executor.submit(reader)
+      val futureRead = pool.submit(reader)
 
       try futureRead.get(timeout.millis, TimeUnit.MILLISECONDS)
       catch {
@@ -52,7 +50,7 @@ package object stream {
       }
     }.takeWhile(_ != -1).foreach {
       count ⇒
-        val futureWrite = executor.submit(new WritterRunnable(buffer, outputStream, count))
+        val futureWrite = pool.submit(new WritterRunnable(buffer, outputStream, count))
 
         try futureWrite.get(timeout.millis, TimeUnit.MILLISECONDS)
         catch {
@@ -78,12 +76,12 @@ package object stream {
 
     def copy(to: OutputStream): Unit = stream.copy(is, to)
 
-    def copy(to: File, maxRead: Int, timeout: Time): Unit =
+    def copy(to: File, maxRead: Int, timeout: Time)(implicit pool: ThreadPoolExecutor): Unit =
       withClosable(new BufferedOutputStream(new FileOutputStream(to))) {
         copy(_, maxRead, timeout)
       }
 
-    def copy(to: OutputStream, maxRead: Int, timeout: Time) = stream.copy(is, to, maxRead, timeout)
+    def copy(to: OutputStream, maxRead: Int, timeout: Time)(implicit pool: ThreadPoolExecutor) = stream.copy(is, to, maxRead, timeout)
     def toGZiped = new GZipedInputStream(is)
     def toGZ = new GZIPInputStream(is)
 

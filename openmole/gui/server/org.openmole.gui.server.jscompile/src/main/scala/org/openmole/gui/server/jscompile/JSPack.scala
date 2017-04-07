@@ -18,7 +18,6 @@ package org.openmole.gui.server.jscompile
  */
 
 import org.openmole.tool.stream._
-
 import org.scalajs.core.tools.io._
 import org.scalajs.core.tools.sem._
 import org.scalajs.core.tools.linker.backend.{ ModuleKind, OutputMode }
@@ -26,12 +25,12 @@ import org.scalajs.core.tools.linker.Linker
 import org.scalajs.core.tools.logging.ScalaConsoleLogger
 import java.io.File
 
-import org.openmole.core.workspace.Workspace
+import org.openmole.core.workspace._
 
 object JSPack {
 
-  def link(inputDirectory: File, outputJSFile: File): Unit =
-    Workspace.withTmpFile("lib", "jar") { jar ⇒
+  def link(inputDirectory: File, outputJSFile: File)(implicit newFile: NewFile): Unit =
+    newFile.withTmpFile("lib", "jar") { jar ⇒
       getClass.getClassLoader.getResourceAsStream("scalajs-library.jar") copy jar
 
       // Obtain VirtualScalaJSIRFile's from the input classpath

@@ -26,7 +26,6 @@ import org.openmole.core.console.ScalaREPL
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.logging.LoggerService
 import org.openmole.core.pluginmanager.PluginManager
-import org.openmole.core.replication.DBServerRunning
 import org.openmole.core.workspace.Workspace
 import org.openmole.rest.server.RESTServer
 import org.openmole.tool.logger.Logger
@@ -34,9 +33,12 @@ import org.openmole.tool.logger.Logger
 import annotation.tailrec
 import org.openmole.gui.server.core._
 import org.openmole.console._
+import org.openmole.core.db.DBServerRunning
 import org.openmole.tool.file._
 import org.openmole.tool.hash._
 import org.openmole.core.module
+import org.openmole.core.preference._
+import org.openmole.core.services._
 
 object Application extends Logger {
 
@@ -54,7 +56,7 @@ object Application extends Logger {
 
   lazy val consoleUsage = "(Type :q to quit)"
 
-  def run(args: Array[String]): Int = DBServerRunning.useDB {
+  def run(args: Array[String]): Int = {
 
     sealed trait LaunchMode
     object ConsoleMode extends LaunchMode
@@ -66,11 +68,11 @@ object Application extends Logger {
     case class Config(
       userPlugins:          List[String]    = Nil,
       loadHomePlugins:      Option[Boolean] = None,
-      workspaceDir:         Option[String]  = None,
       scriptFile:           Option[String]  = None,
       consoleWorkDirectory: Option[File]    = None,
       password:             Option[String]  = None,
       passwordFile:         Option[File]    = None,
+      workspace:            Option[File]    = None,
       hostName:             Option[String]  = None,
       launchMode:           LaunchMode      = GUIMode,
       ignored:              List[String]    = Nil,
@@ -107,6 +109,7 @@ object Application extends Logger {
       |[--script path] a path of an OpenMOLE script to execute
       |[--password password] openmole password
       |[--password-file file containing a password] read the OpenMOLE password (--password option) in a file
+      |[--workspace directory] run openmole with an alternative workspace location
       |[--rest] run the REST server
       |[--remote] enable remote connection to the web interface
       |[--http] force http connection instead of https in remote mode for the web interface
@@ -134,6 +137,7 @@ object Application extends Logger {
         case "--port" :: tail                   ⇒ parse(tail.tail, c.copy(port = Some(tail.head.toInt)))
         case "--password" :: tail               ⇒ parse(dropArg(tail), c.copy(password = Some(takeArg(tail))))
         case "--password-file" :: tail          ⇒ parse(dropArg(tail), c.copy(passwordFile = Some(new File(takeArg(tail)))))
+        case "--workspace" :: tail              ⇒ parse(dropArg(tail), c.copy(workspace = Some(new File(takeArg(tail)))))
         case "--rest" :: tail                   ⇒ parse(tail, c.copy(launchMode = RESTMode))
         case "--load-workspace-plugins" :: tail ⇒ parse(tail, c.copy(loadHomePlugins = Some(true)))
         case "--console-work-directory" :: tail ⇒ parse(dropArg(tail), c.copy(consoleWorkDirectory = Some(new File(takeArg(tail)))))
@@ -157,91 +161,123 @@ object Application extends Logger {
     val config = parse(args.map(_.trim).toList)
 
     config.loggerLevel.foreach(LoggerService.level)
+    val workspaceDirectory = config.workspace.getOrElse(org.openmole.core.db.defaultOpenMOLEDirectory)
+    implicit val workspace = Workspace(workspaceDirectory)
 
-    def loadPlugins = {
-      val (existingUserPlugins, notExistingUserPlugins) = config.userPlugins.span(new File(_).exists)
+    DBServerRunning.useDB(org.openmole.core.db.dbDirectory(workspaceDirectory)) {
 
-      if (!notExistingUserPlugins.isEmpty) logger.warning(s"""Some plugins or plugin folders don't exist: ${notExistingUserPlugins.mkString(",")}""")
+      def loadPlugins = {
+        val (existingUserPlugins, notExistingUserPlugins) = config.userPlugins.span(new File(_).exists)
 
-      val userPlugins =
-        existingUserPlugins.flatMap { p ⇒ PluginManager.listBundles(new File(p)) } ++ module.allModules
+        if (!notExistingUserPlugins.isEmpty) logger.warning(s"""Some plugins or plugin folders don't exist: ${notExistingUserPlugins.mkString(",")}""")
 
-      logger.fine(s"Loading user plugins " + userPlugins)
+        val userPlugins =
+          existingUserPlugins.flatMap { p ⇒ PluginManager.listBundles(new File(p)) } ++ module.allModules
 
-      PluginManager.tryLoad(userPlugins)
-    }
+        logger.fine(s"Loading user plugins " + userPlugins)
 
-    def displayErrors(load: ⇒ Iterable[(File, Throwable)]) =
-      load.foreach { case (f, e) ⇒ logger.log(WARNING, s"Error loading bundle $f", e) }
-
-    def password =
-      config.password orElse config.passwordFile.map(_.lines.head)
-
-    def setPassword = {
-      try password foreach Workspace.setPassword
-      catch {
-        case e: UserBadDataError ⇒
-          logger.severe("Wrong password!")
-          throw e
+        PluginManager.tryLoad(userPlugins)
       }
-    }
 
-    if (!config.ignored.isEmpty) logger.warning("Ignored options: " + config.ignored.reverse.mkString(" "))
+      def displayErrors(load: ⇒ Iterable[(File, Throwable)]) =
+        load.foreach { case (f, e) ⇒ logger.log(WARNING, s"Error loading bundle $f", e) }
 
-    config.launchMode match {
-      case HelpMode ⇒
-        println(usage)
-        Console.ExitCodes.ok
-      case Reset(initialisePassword) ⇒
-        Workspace.reset()
-        if (initialisePassword) Console.initPassword
-        Console.ExitCodes.ok
-      case RESTMode ⇒
-        setPassword
-        displayErrors(loadPlugins)
-        if (!password.isDefined) Console.initPassword
-        val server = new RESTServer(config.port, config.hostName)
-        server.start()
-        Console.ExitCodes.ok
-      case ConsoleMode ⇒
-        setPassword
-        print(consoleSplash)
-        println(consoleUsage)
-        Console.dealWithLoadError(loadPlugins, !config.scriptFile.isDefined)
-        val console = new Console(password, config.scriptFile)
-        val variables = ConsoleVariables(args = config.args)
-        console.run(variables, config.consoleWorkDirectory)
-      case GUIMode ⇒
-        setPassword
-        // FIXME switch to a GUI display in the plugin panel
-        displayErrors(loadPlugins)
-        def browse(url: String) =
-          if (Desktop.isDesktopSupported) Desktop.getDesktop.browse(new URI(url))
-        GUIServer.lockFile.withFileOutputStream { fos ⇒
-          val launch = (config.remote || fos.getChannel.tryLock != null)
-          if (launch) {
-            val port = config.port.getOrElse(Workspace.preference(GUIServer.port))
-            def useHTTP = config.http || !config.remote
-            def protocol = if (useHTTP) "http" else "https"
-            val url = s"$protocol://localhost:$port"
-            GUIServer.urlFile.content = url
-            val webui = Workspace.file("webui")
-            webui.mkdirs()
-            val server = new GUIServer(port, config.remote, useHTTP)
-            server.start()
-            if (config.browse && !config.remote) browse(url)
-            ScalaREPL.warmup
-            logger.info(s"Server listening on port $port.")
-            server.join() match {
-              case GUIServer.Ok      ⇒ Console.ExitCodes.ok
-              case GUIServer.Restart ⇒ Console.ExitCodes.restart
-            }
+      def password = config.password orElse config.passwordFile.map(_.lines.head)
+
+      if (!config.ignored.isEmpty) logger.warning("Ignored options: " + config.ignored.reverse.mkString(" "))
+
+      config.launchMode match {
+        case HelpMode ⇒
+          println(usage)
+          Console.ExitCodes.ok
+        case Reset(initialisePassword) ⇒
+          implicit val preference = Services.preference(workspace)
+          implicit val authenticationStore = Services.authenticationStore(workspace)
+          Services.resetPassword
+          if (initialisePassword) Console.initPassword
+          Console.ExitCodes.ok
+        case RESTMode ⇒
+          implicit val preference = Services.preference(workspace)
+          displayErrors(loadPlugins)
+
+          val passwordString = password match {
+            case Some(p) ⇒ p
+            case None    ⇒ Console.initPassword
+          }
+
+          if (!Console.testPassword(passwordString)) {
+            println("Password is incorrect")
+            Console.ExitCodes.incorrectPassword
           }
           else {
-            browse(GUIServer.urlFile.content)
+            Services.withServices(workspaceDirectory, passwordString) { services ⇒
+              val server = new RESTServer(config.port, config.hostName, services)
+              server.run()
+            }
             Console.ExitCodes.ok
           }
-        }
+        case ConsoleMode ⇒
+          implicit val preference = Services.preference(workspace)
+
+          val passwordString = password match {
+            case Some(p) ⇒ p
+            case None    ⇒ Console.initPassword
+          }
+
+          if (!Console.testPassword(passwordString)) {
+            println("Password is incorrect")
+            Console.ExitCodes.incorrectPassword
+          }
+          else {
+            print(consoleSplash)
+            println(consoleUsage)
+            Console.dealWithLoadError(loadPlugins, !config.scriptFile.isDefined)
+            Services.withServices(workspaceDirectory, passwordString) { implicit services ⇒
+              val console = new Console(config.scriptFile)
+              console.run(config.args, config.consoleWorkDirectory)
+            }
+          }
+        case GUIMode ⇒
+          implicit val preference = Services.preference(workspace)
+
+          // FIXME switch to a GUI display in the plugin panel
+          displayErrors(loadPlugins)
+
+          def browse(url: String) =
+            if (Desktop.isDesktopSupported) Desktop.getDesktop.browse(new URI(url))
+
+          GUIServer.lockFile.withFileOutputStream { fos ⇒
+            val launch = (config.remote || fos.getChannel.tryLock != null)
+            if (launch) {
+              GUIServer.initialisePreference(preference)
+              val port = config.port.getOrElse(preference(GUIServer.port))
+
+              def useHTTP = config.http || !config.remote
+
+              def protocol = if (useHTTP) "http" else "https"
+
+              val url = s"$protocol://localhost:$port"
+
+              GUIServer.urlFile.content = url
+
+              GUIServices.withServices(workspace) { services ⇒
+                val server = new GUIServer(port, config.remote, useHTTP, services, config.password)
+                server.start()
+                if (config.browse && !config.remote) browse(url)
+                ScalaREPL.warmup
+                logger.info(s"Server listening on port $port.")
+                server.join() match {
+                  case GUIServer.Ok      ⇒ Console.ExitCodes.ok
+                  case GUIServer.Restart ⇒ Console.ExitCodes.restart
+                }
+              }
+            }
+            else {
+              browse(GUIServer.urlFile.content)
+              Console.ExitCodes.ok
+            }
+          }
+      }
     }
 
   }

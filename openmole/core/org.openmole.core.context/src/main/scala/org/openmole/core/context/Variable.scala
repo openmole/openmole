@@ -18,12 +18,14 @@
 package org.openmole.core.context
 
 import org.openmole.core.tools.io.Prettifier._
-import org.openmole.core.workspace.{ ConfigurationLocation, Workspace }
+import org.openmole.core.workspace.Workspace
 import org.openmole.tool.random
 
 import scala.util.Random
 
 object Variable {
+  def openMOLENameSpace = Namespace("openmole")
+
   implicit def tupleWithValToVariable[T](t: (Val[T], T)) = apply(t._1, t._2)
   implicit def tubleToVariable[T: Manifest](t: (String, T)) = apply(Val[T](t._1), t._2)
 
@@ -37,11 +39,8 @@ object Variable {
     val value = v.asInstanceOf[T]
   }
 
-  val OpenMOLEVariablePrefix = ConfigurationLocation("Variable", "OpenMOLEVariablePrefix", Some("oM"))
-
-  def prefixedVariable(name: String) = Workspace.preference(OpenMOLEVariablePrefix) + name
-
-  val openMOLESeed = Val[Long](prefixedVariable("Seed"))
+  def openMOLE(name: String) = Val[Long](name, namespace = openMOLENameSpace)
+  val openMOLESeed = openMOLE("seed")
 
 }
 

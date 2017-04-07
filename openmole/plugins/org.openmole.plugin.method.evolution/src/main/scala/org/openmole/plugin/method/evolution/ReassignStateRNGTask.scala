@@ -26,7 +26,7 @@ object ReassignStateRNGTask {
     val t = wfi(algorithm)
 
     ClosureTask("ReassignStateRNGTask") { (context, _, _) ⇒
-      Context(Variable(t.statePrototype, t.operations.randomLens.set(Context.buildRNG(context))(context(t.statePrototype))))
+      Context(Variable(t.statePrototype, t.operations.randomLens.set(Task.buildRNG(context))(context(t.statePrototype))))
     } set (
       (inputs, outputs) += t.statePrototype
     )

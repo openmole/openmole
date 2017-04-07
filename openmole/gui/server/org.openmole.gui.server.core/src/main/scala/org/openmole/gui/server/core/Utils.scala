@@ -25,7 +25,7 @@ import java.util.zip._
 
 import scala.collection.JavaConversions.enumerationAsScalaIterator
 import org.openmole.core.pluginmanager.PluginManager
-import org.openmole.core.workspace.Workspace
+import org.openmole.core.workspace.{ NewFile, Workspace }
 import org.openmole.gui.ext.data
 import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.data.ListSorting._
@@ -46,7 +46,8 @@ import org.openmole.gui.server.jscompile.JSPack
 
 import scala.io.{ BufferedSource, Codec }
 import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
-import scalax.io.support.FileUtils
+import org.openmole.core.services._
+import org.openmole.tool.crypto.Cypher
 
 object Utils extends Logger {
 
@@ -54,23 +55,17 @@ object Utils extends Logger {
 
   implicit def fileToExtension(f: File): FileExtension = DataUtils.fileToExtension(f.getName)
 
-  val webUIProjectFile = Workspace.file("webui")
-  val pluginUpdoadDirectory = Workspace.tmpDir.newDir("pluginUpload")
+  def pluginUpdoadDirectory()(implicit workspace: Workspace) = workspace.tmpDir / "pluginUpload"
+  def webUIDirectory()(implicit workspace: Workspace) = workspace.location /> "webui"
+  def projectsDirectory()(implicit workspace: Workspace) = webUIDirectory /> "projects"
+  def workspaceRoot()(implicit workspace: Workspace) = workspace.location
 
-  def workspaceProjectFile = {
-    val ws = new File(Workspace.file("webui"), "projects")
-    ws.mkdirs()
-    ws
-  }
-
-  def workspaceRoot = workspaceProjectFile.getParentFile
-
-  def isPlugin(path: SafePath): Boolean = {
+  def isPlugin(path: SafePath)(implicit workspace: Workspace): Boolean = {
     import org.openmole.gui.ext.data.ServerFileSytemContext.project
     !PluginManager.listBundles(safePathToFile(path)).isEmpty
   }
 
-  def allPluggableIn(path: SafePath): Seq[SafePath] = {
+  def allPluggableIn(path: SafePath)(implicit workspace: Workspace): Seq[SafePath] = {
     import org.openmole.gui.ext.data.ServerFileSytemContext.project
     path.listFiles().filter { f ⇒
       PluginManager.isBundle(f)
@@ -79,26 +74,26 @@ object Utils extends Logger {
 
   def treeNodeToSafePath(tnd: TreeNodeData, parent: SafePath): SafePath = parent ++ tnd.name
 
-  implicit def fileToSafePath(f: File)(implicit context: ServerFileSytemContext): SafePath = {
+  implicit def fileToSafePath(f: File)(implicit context: ServerFileSytemContext, workspace: Workspace): SafePath = {
     context match {
-      case ProjectFileSystem ⇒ SafePath(getPathArray(f, workspaceProjectFile))
+      case ProjectFileSystem ⇒ SafePath(getPathArray(f, projectsDirectory))
       case _                 ⇒ SafePath(getPathArray(f, new File("")))
     }
   }
 
-  implicit def safePathToFile(s: SafePath)(implicit context: ServerFileSytemContext): File = {
+  implicit def safePathToFile(s: SafePath)(implicit context: ServerFileSytemContext, workspace: Workspace): File = {
     context match {
-      case ProjectFileSystem ⇒ getFile(webUIProjectFile, s.path)
+      case ProjectFileSystem ⇒ getFile(webUIDirectory, s.path)
       case _                 ⇒ getFile(new File(""), s.path)
     }
 
   }
 
-  implicit def seqOfSafePathToSeqOfFile(s: Seq[SafePath])(implicit context: ServerFileSytemContext): Seq[File] = s.map {
+  implicit def seqOfSafePathToSeqOfFile(s: Seq[SafePath])(implicit context: ServerFileSytemContext, workspace: Workspace): Seq[File] = s.map {
     safePathToFile
   }
 
-  implicit def seqOfFileToSeqOfSafePath(s: Seq[File])(implicit context: ServerFileSytemContext): Seq[SafePath] = s.map {
+  implicit def seqOfFileToSeqOfSafePath(s: Seq[File])(implicit context: ServerFileSytemContext, workspace: Workspace): Seq[SafePath] = s.map {
     fileToSafePath
   }
 
@@ -112,7 +107,7 @@ object Utils extends Logger {
     fileToTreeNodeData(_)
   }
 
-  implicit def fileToOptionSafePath(f: File)(implicit context: ServerFileSytemContext): Option[SafePath] = Some(fileToSafePath(f))
+  implicit def fileToOptionSafePath(f: File)(implicit context: ServerFileSytemContext, workspace: Workspace): Option[SafePath] = Some(fileToSafePath(f))
 
   implicit def javaLevelToErrorLevel(level: Level): ErrorStateLevel = {
     if (level.intValue >= java.util.logging.Level.WARNING.intValue) ErrorLevel()
@@ -123,7 +118,7 @@ object Utils extends Logger {
 
     import org.openmole.gui.ext.data.ServerFileSytemContext.project
 
-    def copy(toPath: SafePath, withName: Option[String] = None) = {
+    def copy(toPath: SafePath, withName: Option[String] = None)(implicit workspace: Workspace) = {
       val from: File = sp
       val to: File = toPath
       if (from.exists && to.exists) {
@@ -159,7 +154,7 @@ object Utils extends Logger {
     getFile0(paths, root)
   }
 
-  def listFiles(path: SafePath, fileFilter: data.FileFilter)(implicit context: ServerFileSytemContext): ListFilesData = {
+  def listFiles(path: SafePath, fileFilter: data.FileFilter)(implicit context: ServerFileSytemContext, workspace: Workspace): ListFilesData = {
 
     val allFiles = safePathToFile(path).listFilesSafe.toSeq
 
@@ -178,7 +173,7 @@ object Utils extends Logger {
     }
   }
 
-  def replicate(safePath: SafePath, newName: String): SafePath = {
+  def replicate(safePath: SafePath, newName: String)(implicit workspace: Workspace): SafePath = {
     import org.openmole.gui.ext.data.ServerFileSytemContext.project
 
     val toPath = safePath.copy(path = safePath.path.dropRight(1) :+ newName)
@@ -191,7 +186,7 @@ object Utils extends Logger {
     f
   }
 
-  def launchinCommands(model: SafePath): Seq[LaunchingCommand] = {
+  def launchinCommands(model: SafePath)(implicit workspace: Workspace): Seq[LaunchingCommand] = {
     import org.openmole.gui.ext.data.ServerFileSytemContext.project
     model.name.split('.').last match {
       case "nlogo" ⇒ Seq(CodeParsing.netlogoParsing(model))
@@ -200,7 +195,7 @@ object Utils extends Logger {
     }
   }
 
-  def jarClasses(jarPath: SafePath): Seq[ClassTree] = {
+  def jarClasses(jarPath: SafePath)(implicit workspace: Workspace): Seq[ClassTree] = {
     import org.openmole.gui.ext.data.ServerFileSytemContext.project
     val zip = new ZipInputStream(new FileInputStream(jarPath))
     val classes = Stream.continually(zip.getNextEntry).
@@ -240,7 +235,7 @@ object Utils extends Logger {
     build(classes, Seq())
   }
 
-  def jarMethods(jarPath: SafePath, classString: String): Seq[JarMethod] = {
+  def jarMethods(jarPath: SafePath, classString: String)(implicit workspace: Workspace): Seq[JarMethod] = {
     import org.openmole.gui.ext.data.ServerFileSytemContext.project
     val classLoader = new URLClassLoader(Seq(jarPath.toURI.toURL), this.getClass.getClassLoader)
     val clazz = Class.forName(classString, true, classLoader)
@@ -262,12 +257,12 @@ object Utils extends Logger {
       from.copy(new File(to, from.getName))
     }
 
-  def exists(safePath: SafePath) = {
+  def exists(safePath: SafePath)(implicit workspace: Workspace) = {
     import org.openmole.gui.ext.data.ServerFileSytemContext.project
     safePathToFile(safePath).exists
   }
 
-  def existsExcept(in: SafePath, exceptItSelf: Boolean): Boolean = {
+  def existsExcept(in: SafePath, exceptItSelf: Boolean)(implicit workspace: Workspace): Boolean = {
     import org.openmole.gui.ext.data.ServerFileSytemContext.project
     val li = listFiles(in.parent, data.FileFilter.defaultFilter)
     val count = li.list.count(l ⇒ treeNodeToSafePath(l, in.parent).path == in.path)
@@ -276,34 +271,34 @@ object Utils extends Logger {
     if (count > bound) true else false
   }
 
-  def existsIn(safePaths: Seq[SafePath], to: SafePath): Seq[SafePath] = {
+  def existsIn(safePaths: Seq[SafePath], to: SafePath)(implicit workspace: Workspace): Seq[SafePath] = {
     safePaths.map { sp ⇒
       to ++ sp.name
     }.filter(exists)
   }
 
-  def copyToPluginUploadDirectory(safePaths: Seq[SafePath]) = {
+  def copyToPluginUploadDirectory(safePaths: Seq[SafePath])(implicit workspace: Workspace) = {
     safePaths.map { sp ⇒
-      val from = safePathToFile(sp)(ServerFileSytemContext.project)
+      val from = safePathToFile(sp)(ServerFileSytemContext.project, workspace)
       copy(from, pluginUpdoadDirectory)
     }
   }
 
-  def copyFromTmp(tmpSafePath: SafePath, filesToBeMovedTo: Seq[SafePath]): Unit = {
-    val tmp: File = safePathToFile(tmpSafePath)(ServerFileSytemContext.absolute)
+  def copyFromTmp(tmpSafePath: SafePath, filesToBeMovedTo: Seq[SafePath])(implicit workspace: Workspace): Unit = {
+    val tmp: File = safePathToFile(tmpSafePath)(ServerFileSytemContext.absolute, workspace)
 
     filesToBeMovedTo.foreach { f ⇒
       val from = getFile(tmp, Seq(f.name))
-      val toFile: File = safePathToFile(f.parent)(ServerFileSytemContext.project)
+      val toFile: File = safePathToFile(f.parent)(ServerFileSytemContext.project, workspace)
       copy(from, toFile)
     }
 
   }
 
-  def copyAllTmpTo(tmpSafePath: SafePath, to: SafePath): Unit = {
+  def copyAllTmpTo(tmpSafePath: SafePath, to: SafePath)(implicit workspace: Workspace): Unit = {
 
-    val f: File = safePathToFile(tmpSafePath)(ServerFileSytemContext.absolute)
-    val toFile: File = safePathToFile(to)(ServerFileSytemContext.project)
+    val f: File = safePathToFile(tmpSafePath)(ServerFileSytemContext.absolute, workspace)
+    val toFile: File = safePathToFile(to)(ServerFileSytemContext.project, workspace)
 
     val dirToCopy = {
       val level1 = f.listFiles.toSeq
@@ -317,7 +312,7 @@ object Utils extends Logger {
   }
 
   // Test if files exist in the 'to' directory, return the lists of already existing files or copy them otherwise
-  def testExistenceAndCopyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Seq[SafePath] = {
+  def testExistenceAndCopyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath)(implicit workspace: Workspace): Seq[SafePath] = {
     val existing = existsIn(safePaths, to)
 
     if (existing.isEmpty) safePaths.foreach { sp ⇒ sp.copy(to) }
@@ -325,17 +320,17 @@ object Utils extends Logger {
   }
 
   //copy safePaths files to 'to' folder in overwriting in they exist
-  def copyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath) = {
+  def copyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath)(implicit workspace: Workspace) = {
     safePaths.foreach { sp ⇒ sp.copy(to) }
 
   }
 
-  def deleteFile(safePath: SafePath, context: ServerFileSytemContext): Unit = {
+  def deleteFile(safePath: SafePath, context: ServerFileSytemContext)(implicit workspace: Workspace): Unit = {
     implicit val ctx = context
     safePathToFile(safePath).recursiveDelete
   }
 
-  def deleteFiles(safePaths: Seq[SafePath], context: ServerFileSytemContext): Unit = {
+  def deleteFiles(safePaths: Seq[SafePath], context: ServerFileSytemContext)(implicit workspace: Workspace): Unit = {
     safePaths.foreach { sp ⇒
       deleteFile(sp, context)
     }
@@ -401,36 +396,36 @@ object Utils extends Logger {
       }.get
     }.opt.get
 
-  def passwordState = PasswordState(chosen = Workspace.passwordChosen, hasBeenSet = Workspace.passwordHasBeenSet)
+  //  def passwordState = PasswordState(chosen = Workspace.passwordChosen, hasBeenSet = Workspace.passwordHasBeenSet)
 
-  def setPassword(pass: String, passAgain: String = ""): Boolean = {
-    try {
-      def set = {
-        Workspace.setPassword(pass)
-        true
-      }
-
-      if (passwordState.chosen) set
-      else if (pass == passAgain) set
-      else false
-    }
-    catch {
-      case e: UserBadDataError ⇒ false
-    }
-  }
+  //  def setPassword(pass: String, passAgain: String = ""): Boolean = {
+  //    try {
+  //      def set = {
+  //        Workspace.setPassword(pass)
+  //        true
+  //      }
+  //
+  //      if (passwordState.chosen) set
+  //      else if (pass == passAgain) set
+  //      else false
+  //    }
+  //    catch {
+  //      case e: UserBadDataError ⇒ false
+  //    }
+  //  }
 
   def getUUID: String = java.util.UUID.randomUUID.toString
 
-  lazy val jsPluginDirectory = {
-    val jsPluginDirectory = webUIProjectFile / "jsplugin"
+  def jsPluginDirectory(implicit workspace: Workspace) = {
+    val jsPluginDirectory = webUIDirectory / "jsplugin"
     jsPluginDirectory.recursiveDelete
     jsPluginDirectory.mkdirs
     Plugins.gatherJSIRFiles(jsPluginDirectory)
     jsPluginDirectory
   }
 
-  lazy val openmoleFile = {
-    val jsFile = Workspace.persistentDir /> "webui" / "openmole.js"
+  def openmoleFile(implicit workspace: Workspace, newFile: NewFile, fileService: FileService) = {
+    val jsFile = workspace.persistentDir /> "webui" / "openmole.js"
 
     def update = {
       logger.info("Building GUI plugins ...")
@@ -443,9 +438,9 @@ object Utils extends Logger {
     jsFile
   }
 
-  def addPluginRoutes(route: OMRouter ⇒ Unit) = {
+  def addPluginRoutes(route: OMRouter ⇒ Unit, services: Services) = {
     logger.info("Loading GUI plugins")
-    PluginActivator.plugins.foreach { p ⇒ route(p._2.router) }
+    PluginActivator.plugins.foreach { p ⇒ route(p._2.router(services)) }
   }
 
   // Extract .zip archive

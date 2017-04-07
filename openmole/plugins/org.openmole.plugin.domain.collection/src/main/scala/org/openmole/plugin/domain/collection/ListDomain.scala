@@ -19,11 +19,11 @@ package org.openmole.plugin.domain.collection
 
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.domain._
+import cats.implicits._
 
 object ListDomain {
   implicit def isFinite[T] = new Finite[ListDomain[T], T] {
-    override def computeValues(domain: ListDomain[T]) =
-      FromContext((context, rng) ⇒ domain.values.map(_.from(context)(rng)))
+    override def computeValues(domain: ListDomain[T]) = domain.values.toList.sequence.map(_.toIterable)
   }
 
   def apply[T](values: FromContext[T]*) = new ListDomain[T](values: _*)

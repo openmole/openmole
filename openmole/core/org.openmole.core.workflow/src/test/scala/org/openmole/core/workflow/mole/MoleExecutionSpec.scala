@@ -37,6 +37,8 @@ import org.openmole.core.workflow.dsl._
 
 class MoleExecutionSpec extends FlatSpec with Matchers {
 
+  import org.openmole.core.workflow.Services._
+
   class JobGroupingBy2Test extends Grouping {
 
     def apply(context: Context, groups: Iterable[(MoleJobGroup, Iterable[MoleJob])]): MoleJobGroup = {

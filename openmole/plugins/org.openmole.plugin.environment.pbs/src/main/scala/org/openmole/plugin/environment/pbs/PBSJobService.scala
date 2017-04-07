@@ -33,14 +33,15 @@ import squants.time.TimeConversions._
 
 trait PBSJobService extends ClusterJobService { js ⇒
 
-  def environment: PBSEnvironment
+  val environment: PBSEnvironment
+  import environment.services._
 
-  val jobService = new GSPBSJobService with SSHConnectionCache {
+  lazy val jobService = new GSPBSJobService with SSHConnectionCache {
     def host = js.host
     def user = js.user
     def credential = js.credential
     override def port = js.port
-    override def timeout = Workspace.preference(SSHService.timeout)
+    override def timeout = preference(SSHService.timeout)
   }
 
   protected def _submit(serializedJob: SerializedJob) = {
@@ -51,7 +52,7 @@ trait PBSJobService extends ClusterJobService { js ⇒
       queue = environment.queue,
       workDirectory = serializedJob.path,
       wallTime = environment.wallTime.map(x ⇒ x: concurrent.duration.Duration),
-      memory = Some(environment.requiredMemory.toMegabytes.toInt),
+      memory = Some(BatchEnvironment.requiredMemory(environment.openMOLEMemory, environment.memory).toMegabytes.toInt),
       nodes = environment.nodes,
       coreByNode = environment.coreByNode orElse environment.threads
     )

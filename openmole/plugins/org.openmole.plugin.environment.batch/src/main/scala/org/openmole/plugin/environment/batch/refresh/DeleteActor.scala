@@ -20,22 +20,20 @@ package org.openmole.plugin.environment.batch.refresh
 import org.openmole.plugin.environment.batch.environment.BatchEnvironment
 import org.openmole.tool.logger.Logger
 
-object DeleteActor extends Logger
+object DeleteActor extends Logger {
+  def receive(msg: DeleteFile)(implicit services: BatchEnvironment.Services) = {
+    import services._
 
-import org.openmole.plugin.environment.batch.refresh.DeleteActor.Log._
-
-class DeleteActor(jobManager: JobManager) {
-  def receive(msg: DeleteFile) = {
     val DeleteFile(storage, path, directory) = msg
     try storage.tryWithToken {
       case Some(t) ⇒
         if (directory) storage.rmDir(path)(t) else storage.rmFile(path)(t)
       case None ⇒
-        jobManager ! Delay(msg, BatchEnvironment.getTokenInterval)
+        JobManager ! Delay(msg, BatchEnvironment.getTokenInterval)
     }
     catch {
       case t: Throwable ⇒
-        logger.log(FINE, "Error when deleting a file", t)
+        Log.logger.log(Log.FINE, "Error when deleting a file", t)
     }
   }
 }

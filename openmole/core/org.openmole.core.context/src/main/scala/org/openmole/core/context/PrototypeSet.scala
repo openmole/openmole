@@ -22,9 +22,12 @@ import scala.collection.immutable.TreeMap
 object PrototypeSet {
   implicit def traversableToProtoypeSet(ps: Traversable[Val[_]]) = PrototypeSet(ps.toSeq)
   val empty = PrototypeSet(Seq.empty)
+
+  def apply(prototypes: Seq[Val[_]], explore: Set[String] = Set.empty) = new PrototypeSet(prototypes.distinct, explore)
+  def copy(prototypeSet: PrototypeSet)(prototypes: Seq[Val[_]] = prototypeSet.prototypes, explore: Set[String] = prototypeSet.explore) = apply(prototypes, explore)
 }
 
-case class PrototypeSet(prototypes: Seq[Val[_]], explore: Set[String] = Set.empty) extends Iterable[Val[_]] { self ⇒
+class PrototypeSet(val prototypes: Seq[Val[_]], val explore: Set[String] = Set.empty) extends Iterable[Val[_]] { self ⇒
 
   @transient lazy val prototypeMap: Map[String, Val[_]] =
     TreeMap.empty[String, Val[_]] ++ prototypes.map { d ⇒ (d.name, d) }
@@ -52,19 +55,19 @@ case class PrototypeSet(prototypes: Seq[Val[_]], explore: Set[String] = Set.empt
 
   override def iterator: Iterator[Val[_]] = prototypes.iterator
 
-  def explore(d: String*) = copy(explore = explore ++ d)
+  def explore(d: String*) = PrototypeSet.copy(this)(explore = explore ++ d)
 
-  def ++(d: Traversable[Val[_]]) = copy(prototypes = d.toList ::: prototypes.toList)
+  def ++(d: Traversable[Val[_]]) = PrototypeSet.copy(this)(prototypes = d.toList ::: prototypes.toList)
 
-  def +(set: PrototypeSet): PrototypeSet = copy(prototypes = set.prototypes.toList ::: prototypes.toList)
+  def +(set: PrototypeSet): PrototypeSet = PrototypeSet.copy(this)(prototypes = set.prototypes.toList ::: prototypes.toList)
 
-  def +(d: Val[_]) = copy(prototypes = d :: prototypes.toList)
+  def +(d: Val[_]) = PrototypeSet.copy(this)(prototypes = d :: prototypes.toList)
 
-  def -(d: Val[_]) = copy(prototypes = prototypes.filter(_.name != d.name).toList)
+  def -(d: Val[_]) = PrototypeSet.copy(this)(prototypes = prototypes.filter(_.name != d.name).toList)
 
   def --(d: Traversable[Val[_]]) = {
     val dset = d.map(_.name).toSet
-    copy(prototypes = prototypes.filter(p ⇒ !dset.contains(p.name)).toList)
+    PrototypeSet.copy(this)(prototypes = prototypes.filter(p ⇒ !dset.contains(p.name)).toList)
   }
 
   def contains(data: Val[_]) = prototypeMap.contains(data.name)

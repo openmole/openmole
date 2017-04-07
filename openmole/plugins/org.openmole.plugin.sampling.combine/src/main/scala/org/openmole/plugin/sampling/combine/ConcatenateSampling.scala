@@ -30,8 +30,9 @@ class ConcatenateSampling(val samplings: Sampling*) extends Sampling {
 
   override def prototypes: Iterable[Val[_]] = samplings.head.prototypes
 
-  override def apply() = FromContext.apply {
-    (context, rng) ⇒ samplings.toIterator.flatMap(_().from(context)(rng))
+  override def apply() = FromContext { p ⇒
+    import p._
+    samplings.toIterator.flatMap(_().from(context))
   }
 
 }

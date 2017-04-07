@@ -18,7 +18,7 @@
 package org.openmole.gui.plugin.authentication.egi
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
-import org.openmole.gui.ext.data.{ AuthenticationPlugin, AuthenticationPluginFactory, Test, VOTest }
+import org.openmole.gui.ext.data.{ AuthenticationPlugin, AuthenticationPluginFactory, Test }
 import org.openmole.gui.ext.tool.client.{ FileUploaderUI, OMPost }
 import org.openmole.gui.ext.tool.client.JsRxTags._
 import scaladget.api.{ BootstrapTags ⇒ bs }
@@ -61,7 +61,7 @@ class EGIAuthenticationGUI(val data: EGIAuthenticationData = EGIAuthenticationDa
 
   val voInput = bs.input("")(placeholder := "vo1,vo2").render
 
-  OMPost()[Api].getConfigurationValue(VOTest).call().foreach {
+  OMPost()[EGIAuthenticationAPI].geVOTest().call().foreach {
     _.foreach { c ⇒
       voInput.value = c
     }
@@ -92,7 +92,7 @@ class EGIAuthenticationGUI(val data: EGIAuthenticationData = EGIAuthenticationDa
         }
     }
 
-    OMPost()[Api].setConfigurationValue(VOTest, voInput.value).call()
+    OMPost()[EGIAuthenticationAPI].setVOTest(voInput.value.split(",").map(_.trim).toSeq).call()
   }
 
   def test = OMPost()[EGIAuthenticationAPI].testAuthentication(data).call()

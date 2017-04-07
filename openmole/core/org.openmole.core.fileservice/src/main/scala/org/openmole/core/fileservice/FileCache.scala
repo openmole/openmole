@@ -20,9 +20,9 @@ package org.openmole.core.fileservice
 import java.io.File
 
 object FileCache {
-  def apply(file: File) = new FileCache(file)
+  def apply(file: File)(implicit fileService: FileService) = new FileCache(file, fileService)
 }
 
-class FileCache(val file: File) {
-  override protected def finalize = FileDeleter.assynchonousRemove(file)
+class FileCache(val file: File, fileService: FileService) {
+  override protected def finalize = fileService.assynchonousRemove(file)
 }

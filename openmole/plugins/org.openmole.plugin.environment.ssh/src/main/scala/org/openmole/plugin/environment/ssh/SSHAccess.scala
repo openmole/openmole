@@ -18,14 +18,16 @@
 package org.openmole.plugin.environment.ssh
 
 import fr.iscpif.gridscale.ssh.{ SSHHost, SSHAuthentication ⇒ SA }
-import org.openmole.core.workspace.Workspace
+import org.openmole.core.preference._
 import squants.time.TimeConversions._
 
 trait SSHAccess extends SSHHost { s ⇒
 
+  def preference: Preference
+
   def user: String
   def credential: SA
-  def maxConnections = Workspace.preference(SSHEnvironment.MaxConnections)
-  override def timeout = Workspace.preference(SSHService.timeout)
+  def maxConnections = preference(SSHEnvironment.MaxConnections)
+  override def timeout = preference(SSHService.timeout)
 
 }

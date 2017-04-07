@@ -27,8 +27,8 @@ import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.mole.{ MoleExecutionContext, _ }
 import org.openmole.core.workflow.validation.ValidateHook
-import org.openmole.plugin.hook.file.CopyFileHook.CopyOptions
-import org.openmole.tool.random.RandomProvider
+import org.openmole.plugin.hook.file.CopyFileHook._
+import org.openmole.tool.random._
 import org.openmole.tool.tar._
 
 object CopyFileHook {
@@ -69,38 +69,40 @@ object CopyFileHook {
 
   override def validate(inputs: Seq[Val[_]]) = copies.flatMap(_._2.validate(inputs)).toSeq
 
-  override def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider) = {
+  override protected def process(executionContext: MoleExecutionContext) = FromContext { parameters ⇒
+    import parameters._
+
+    def copyFile(
+      context:          Context,
+      executionContext: MoleExecutionContext,
+      filePrototype:    Val[File],
+      destination:      FromContext[File],
+      options:          CopyOptions
+    ): Option[Variable[File]] = {
+      val from = context(filePrototype)
+      val to = destination.from(context)
+
+      to.createParentDir
+      val ret: Option[Variable[File]] =
+        if (options.move) {
+          from.realFile.move(to)
+          Some(Variable(filePrototype, to))
+        }
+        else if (options.compress) {
+          from.copyCompress(to)
+          None
+        }
+        else {
+          from.copy(to)
+          None
+        }
+
+      if (options.remove) from.recursiveDelete
+      ret
+    }
+
     val moved = for ((p, d, options) ← copies) yield copyFile(context, executionContext, p, d, options)
     context ++ moved.flatten
-  }
-
-  private def copyFile(
-    context:          Context,
-    executionContext: MoleExecutionContext,
-    filePrototype:    Val[File],
-    destination:      FromContext[File],
-    options:          CopyOptions
-  )(implicit rng: RandomProvider): Option[Variable[File]] = {
-    val from = context(filePrototype)
-    val to = destination.from(context)
-
-    to.createParentDir
-    val ret: Option[Variable[File]] =
-      if (options.move) {
-        from.realFile.move(to)
-        Some(Variable(filePrototype, to))
-      }
-      else if (options.compress) {
-        from.copyCompress(to)
-        None
-      }
-      else {
-        from.copy(to)
-        None
-      }
-
-    if (options.remove) from.recursiveDelete
-    ret
   }
 
 }

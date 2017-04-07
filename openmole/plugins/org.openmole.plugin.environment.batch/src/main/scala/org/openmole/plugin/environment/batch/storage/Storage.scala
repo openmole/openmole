@@ -21,18 +21,21 @@ import java.nio.file.Files
 
 import fr.iscpif.gridscale.storage._
 import org.openmole.core.communication.storage._
+import org.openmole.core.threadprovider.Updater
 import org.openmole.core.workspace._
+import org.openmole.plugin.environment.batch.environment.BatchEnvironment
 import org.openmole.tool.file._
 import org.openmole.tool.stream._
-
 import squants.time.TimeConversions._
 import squants.information.InformationConversions._
 
-object Storage {
-  val BufferSize = ConfigurationLocation("Storage", "BufferSize", Some(64 kilobytes))
-  val CopyTimeout = ConfigurationLocation("Storage", "CopyTimeout", Some(1 minutes))
-  val CloseTimeout = ConfigurationLocation("Storage", "CloseTimeout", Some(1 minutes))
-}
+import scala.ref.WeakReference
+
+//object Storage {
+//  val BufferSize = ConfigurationLocation("Storage", "BufferSize", Some(64 kilobytes))
+//  val CopyTimeout = ConfigurationLocation("Storage", "CopyTimeout", Some(1 minutes))
+//  val CloseTimeout = ConfigurationLocation("Storage", "CloseTimeout", Some(1 minutes))
+//}
 
 trait CompressedTransfer <: Storage {
 
@@ -68,7 +71,7 @@ trait Storage {
     finally is.close()
   }
 
-  protected def bufferSize = Workspace.preference(Storage.BufferSize)
-  protected def copyTimeout = Workspace.preference(Storage.CopyTimeout)
-  protected def closeTimeout = Workspace.preference(Storage.CloseTimeout)
+  //  protected def bufferSize = Workspace.preference(Storage.BufferSize)
+  //  protected def copyTimeout = Workspace.preference(Storage.CopyTimeout)
+  //  protected def closeTimeout = Workspace.preference(Storage.CloseTimeout)
 }

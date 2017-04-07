@@ -17,10 +17,11 @@
 
 package org.openmole.plugin.environment.pbs
 
+import org.openmole.core.authentication.AuthenticationStore
 import org.openmole.core.workflow.dsl._
-import org.openmole.core.workspace.{ Decrypt, _ }
 import org.openmole.plugin.environment.batch.environment._
 import org.openmole.plugin.environment.ssh._
+import org.openmole.tool.crypto.Cypher
 import squants._
 import squants.information._
 
@@ -41,7 +42,8 @@ object PBSEnvironment {
     threads:              OptionalArgument[Int]         = None,
     storageSharedLocally: Boolean                       = false,
     name:                 OptionalArgument[String]      = None
-  )(implicit decrypt: Decrypt, varName: sourcecode.Name) =
+  )(implicit services: BatchEnvironment.Services, authenticationStore: AuthenticationStore, cypher: Cypher, varName: sourcecode.Name) = {
+    import services._
     new PBSEnvironment(
       user = user,
       host = host,
@@ -58,6 +60,7 @@ object PBSEnvironment {
       storageSharedLocally = storageSharedLocally,
       name = Some(name.getOrElse(varName.value))
     )(SSHAuthentication.find(user, host, port).apply)
+  }
 }
 
 class PBSEnvironment(
@@ -75,14 +78,14 @@ class PBSEnvironment(
     override val threads:        Option[Int],
     val storageSharedLocally:    Boolean,
     override val name:           Option[String]
-)(val credential: fr.iscpif.gridscale.ssh.SSHAuthentication) extends ClusterEnvironment with MemoryRequirement { env ⇒
+)(val credential: fr.iscpif.gridscale.ssh.SSHAuthentication)(implicit val services: BatchEnvironment.Services) extends ClusterEnvironment { env ⇒
 
   type JS = PBSJobService
 
-  val jobService =
+  lazy val jobService =
     new PBSJobService {
       def queue = env.queue
-      def environment = env
+      val environment = env
       def sharedFS = storage
       def workDirectory = env.workDirectory
       def timeout = env.timeout

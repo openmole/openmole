@@ -32,16 +32,17 @@ sealed class RepeatSampling(val sampling: Sampling, val times: FromContext[Int])
   override def inputs = sampling.inputs
   override def prototypes = sampling.prototypes.map(_.toArray)
 
-  override def apply() = FromContext.apply { (context, rng) ⇒
+  override def apply() = FromContext.apply { p ⇒
+    import p._
     def sampled =
       for {
-        vs ← sampling().from(context)(rng).map(_.toSeq).toSeq.transpose
+        vs ← sampling().from(context).map(_.toSeq).toSeq.transpose
       } yield {
         val p = vs.head.prototype
         Variable.unsecure(p.toArray, vs.map(_.value).toArray(p.`type`.manifest.asInstanceOf[Manifest[Any]]))
       }
 
-    Iterator.continually(sampled).take(times.from(context)(rng))
+    Iterator.continually(sampled).take(times.from(context))
   }
 
 }

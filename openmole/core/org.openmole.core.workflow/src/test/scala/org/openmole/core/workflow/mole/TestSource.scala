@@ -18,8 +18,8 @@ package org.openmole.core.workflow.mole
 
 import monocle.macros.Lenses
 import org.openmole.core.context.Context
+import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
-import org.openmole.tool.random.RandomProvider
 
 object TestSource {
   implicit def isBuilder: InputOutputBuilder[TestSource] = InputOutputBuilder(config)
@@ -29,6 +29,5 @@ object TestSource {
     f:      Context ⇒ Context = identity[Context],
     config: InputOutputConfig = InputOutputConfig()
 ) extends Source {
-  override protected def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider): Context =
-    f(context)
+  override protected def process(executionContext: MoleExecutionContext) = FromContext { p ⇒ f(p.context) }
 }

@@ -23,7 +23,6 @@ import org.openmole.core.expansion._
 import org.openmole.core.dsl._
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.mole._
-import org.openmole.tool.random.RandomProvider
 
 object ConditionHook {
 
@@ -47,7 +46,9 @@ object ConditionHook {
     config:    InputOutputConfig
 ) extends Hook {
 
-  override def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider) =
+  override protected def process(executionContext: MoleExecutionContext) = FromContext { parameters ⇒
+    import parameters._
     if (condition.from(context)) hook.perform(context, executionContext) else context
+  }
 
 }

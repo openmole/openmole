@@ -17,7 +17,7 @@
 
 package org.openmole.core.workflow.task
 
-import org.openmole.core.context.{ Val, Variable }
+import org.openmole.core.context.{ Context, Val, Variable }
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.mole.Capsule
@@ -25,34 +25,35 @@ import org.openmole.core.workflow.sampling._
 
 import scala.collection.immutable.TreeMap
 import scala.collection.mutable.ArrayBuffer
+import cats.implicits._
+
 object ExplorationTask {
 
   def apply(sampling: Sampling)(implicit name: sourcecode.Name) =
-    ClosureTask("ExplorationTask") {
-      (context, rng, _) ⇒
-        implicit val implicitRNG = rng
-        val variablesValues = TreeMap.empty[Val[_], ArrayBuffer[Any]] ++ sampling.prototypes.map { p ⇒ p → ArrayBuffer[Any]() }
+    FromContextTask("ExplorationTask") { p ⇒
+      import p._
+      val variablesValues = TreeMap.empty[Val[_], ArrayBuffer[Any]] ++ sampling.prototypes.map { p ⇒ p → ArrayBuffer[Any]() }
 
-        for {
-          sample ← sampling().from(context)
-          v ← sample
-        } variablesValues.get(v.prototype) match {
-          case Some(b) ⇒ b += v.value
-          case None    ⇒
-        }
+      for {
+        sample ← sampling().from(context)
+        v ← sample
+      } variablesValues.get(v.prototype) match {
+        case Some(b) ⇒ b += v.value
+        case None    ⇒
+      }
 
-        context ++ variablesValues.map {
-          case (k, v) ⇒
-            try {
-              Variable.unsecure(
-                k.toArray,
-                v.toArray(k.`type`.manifest.asInstanceOf[Manifest[Any]])
-              )
-            }
-            catch {
-              case e: ArrayStoreException ⇒ throw new UserBadDataError("Cannot fill factor values in " + k.toArray + ", values " + v)
-            }
-        }
+      variablesValues.map {
+        case (k, v) ⇒
+          try {
+            Variable.unsecure(
+              k.toArray,
+              v.toArray(k.`type`.manifest.asInstanceOf[Manifest[Any]])
+            )
+          }
+          catch {
+            case e: ArrayStoreException ⇒ throw new UserBadDataError("Cannot fill factor values in " + k.toArray + ", values " + v)
+          }
+      }: Context
     } set (
       inputs += (sampling.inputs.toSeq: _*),
       exploredOutputs += (sampling.prototypes.toSeq.map(_.toArray): _*)

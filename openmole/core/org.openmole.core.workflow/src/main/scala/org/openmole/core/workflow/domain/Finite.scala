@@ -28,3 +28,4 @@ trait Finite[-D, +T] extends Discrete[D, T] {
   def computeValues(domain: D): FromContext[collection.Iterable[T]]
   override def iterator(domain: D) = computeValues(domain).map(_.iterator)
 }
+

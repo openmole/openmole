@@ -31,7 +31,6 @@ import org.openmole.plugin.task.systemexec
 import org.openmole.plugin.task.systemexec._
 import org.openmole.core.expansion._
 import org.openmole.tool.logger.Logger
-import org.openmole.tool.random._
 
 import cats._
 import cats.implicits._
@@ -97,114 +96,119 @@ object CARETask extends Logger {
       External.validate(external, allInputs)
   }
 
-  override protected def process(ctx: Context, executionContext: TaskExecutionContext)(implicit rng: RandomProvider) = External.withWorkDir(executionContext) { taskWorkDirectory ⇒
+  override protected def process(executionContext: TaskExecutionContext) = FromContext[Context] { parameters ⇒
+    External.withWorkDir(executionContext) { taskWorkDirectory ⇒
+      import parameters.random
+      import parameters.newFile
 
-    taskWorkDirectory.mkdirs()
+      taskWorkDirectory.mkdirs()
 
-    val context = ctx + (External.PWD → taskWorkDirectory.getAbsolutePath)
+      val context = parameters.context + (External.PWD → taskWorkDirectory.getAbsolutePath)
 
-    def rootfs = "rootfs"
+      def rootfs = "rootfs"
 
-    // unarchiving in task's work directory
-    // no need to retrieve error => will throw exception if failing
-    execute(Array(archive.getAbsolutePath), taskWorkDirectory, Vector.empty, true, true)
+      // unarchiving in task's work directory
+      // no need to retrieve error => will throw exception if failing
+      execute(Array(archive.getAbsolutePath), taskWorkDirectory, Vector.empty, true, true)
 
-    val extractedArchive = taskWorkDirectory.listFilesSafe.headOption.getOrElse(
-      throw new InternalProcessingError("Work directory should contain extracted archive, but is empty")
-    )
+      val extractedArchive = taskWorkDirectory.listFilesSafe.headOption.getOrElse(
+        throw new InternalProcessingError("Work directory should contain extracted archive, but is empty")
+      )
 
-    val reExecute = extractedArchive / "re-execute.sh"
+      val reExecute = extractedArchive / "re-execute.sh"
 
-    val packagingDirectory: String = workDirectoryLine(reExecute.lines).getOrElse(
-      throw new InternalProcessingError(s"Could not find packaging path in ${archive}")
-    )
+      val packagingDirectory: String = workDirectoryLine(reExecute.lines).getOrElse(
+        throw new InternalProcessingError(s"Could not find packaging path in ${archive}")
+      )
 
-    def userWorkDirectory = workDirectory.getOrElse(packagingDirectory)
+      def userWorkDirectory = workDirectory.getOrElse(packagingDirectory)
 
-    val inputDirectory = taskWorkDirectory / "inputs"
+      val inputDirectory = taskWorkDirectory / "inputs"
 
-    def inputPathResolver(path: String) = {
-      if (File(path).isAbsolute) inputDirectory / path
-      else inputDirectory / userWorkDirectory / path
-    }
-
-    val (preparedContext, preparedFilesInfo) = external.prepareAndListInputFiles(context, inputPathResolver)
-
-    // Replace new proot with a version with user bindings
-    val proot = extractedArchive / "proot"
-    proot move (extractedArchive / "proot.origin")
-
-    def preparedFileBindings = preparedFilesInfo.map { case (f, d) ⇒ d.getAbsolutePath → f.name }
-    def hostFileBindings = hostFiles.map { case (f, b) ⇒ f → b.getOrElse(f) }
-    def bindings = preparedFileBindings ++ hostFileBindings
-
-    def createDestination(binding: (String, String)) = {
-      import org.openmole.tool.file.{ File ⇒ OMFile }
-      val (f, b) = binding
-
-      if (OMFile(f).isDirectory) (taskWorkDirectory / rootfs / b).mkdirs()
-      else {
-        val dest = taskWorkDirectory / rootfs / b
-        dest.getParentFileSafe.mkdirs()
-        dest.createNewFile()
+      def inputPathResolver(path: String) = {
+        if (File(path).isAbsolute) inputDirectory / path
+        else inputDirectory / userWorkDirectory / path
       }
+
+      val (preparedContext, preparedFilesInfo) = external.prepareAndListInputFiles(context, inputPathResolver)
+
+      // Replace new proot with a version with user bindings
+      val proot = extractedArchive / "proot"
+      proot move (extractedArchive / "proot.origin")
+
+      def preparedFileBindings = preparedFilesInfo.map { case (f, d) ⇒ d.getAbsolutePath → f.name }
+      def hostFileBindings = hostFiles.map { case (f, b) ⇒ f → b.getOrElse(f) }
+      def bindings = preparedFileBindings ++ hostFileBindings
+
+      def createDestination(binding: (String, String)) = {
+        import org.openmole.tool.file.{ File ⇒ OMFile }
+        val (f, b) = binding
+
+        if (OMFile(f).isDirectory) (taskWorkDirectory / rootfs / b).mkdirs()
+        else {
+          val dest = taskWorkDirectory / rootfs / b
+          dest.getParentFileSafe.mkdirs()
+          dest.createNewFile()
+        }
+      }
+
+      for (binding ← bindings) createDestination(binding)
+
+      // replace original proot executable with a script that will first bind all the inputs in the guest rootfs before
+      // calling the original proot
+      proot.content =
+        s"""
+          |#!/bin/bash
+          |TRUEPROOT="$${PROOT-$$(dirname $$0)/proot.origin}"
+          |$${TRUEPROOT} \\
+          | ${bindings.map { case (f, d) ⇒ s"""-b "$f:$d"""" }.mkString(" \\\n")} \\
+          | "$${@}"
+        """.stripMargin
+
+      proot.setExecutable(true)
+
+      reExecute.content = reExecute.lines.map {
+        case line if line.trim.startsWith("-w") ⇒ s"-w '$userWorkDirectory' \\"
+        case line                               ⇒ line
+      }.mkString("\n")
+
+      reExecute.setExecutable(true)
+
+      val commandline = commandLine(command.map(s"./${reExecute.getName} " + _), userWorkDirectory).from(preparedContext)
+
+      def prootNoSeccomp = ("PROOT_NO_SECCOMP", "1")
+
+      // FIXME duplicated from SystemExecTask
+      val allEnvironmentVariables = environmentVariables.map { case (name, variable) ⇒ (name, variable.from(context)) } ++ Vector(prootNoSeccomp)
+      val executionResult = execute(commandline, extractedArchive, allEnvironmentVariables, stdOut.isDefined, stdErr.isDefined)
+
+      if (errorOnReturnValue && returnValue.isEmpty && executionResult.returnCode != 0) throw error(commandline.toVector, executionResult)
+
+      def rootDirectory = extractedArchive / rootfs
+
+      def outputPathResolver(filePath: String): File = {
+        def isParent(dir: String, file: String) = File(file).getAbsolutePath.startsWith(File(dir).getAbsolutePath)
+        def inPreparedFiles(f: String) = preparedFileBindings.map(b ⇒ b._2).exists(b ⇒ isParent(b, f))
+        def inHostFiles(f: String) = hostFileBindings.map(b ⇒ b._2).exists(b ⇒ isParent(b, f))
+
+        def isAbsolute = File(filePath).isAbsolute
+        def absoluteInCARE: String = if (isAbsolute) filePath else (File(userWorkDirectory) / filePath).getPath
+
+        if (inPreparedFiles(File("/") / absoluteInCARE getAbsolutePath)) inputPathResolver(filePath)
+        else if (inHostFiles(File("/") / absoluteInCARE getAbsolutePath)) File("/") / absoluteInCARE
+        else rootDirectory / absoluteInCARE
+      }
+
+      val retContext = external.fetchOutputFiles(preparedContext, outputPathResolver)
+      external.checkAndClean(this, retContext, taskWorkDirectory)
+
+      retContext ++
+        List(
+          stdOut.map { o ⇒ Variable(o, executionResult.output.get) },
+          stdErr.map { e ⇒ Variable(e, executionResult.errorOutput.get) },
+          returnValue.map { r ⇒ Variable(r, executionResult.returnCode) }
+        ).flatten
     }
-
-    for (binding ← bindings) createDestination(binding)
-
-    // replace original proot executable with a script that will first bind all the inputs in the guest rootfs before
-    // calling the original proot
-    proot.content =
-      s"""
-        |#!/bin/bash
-        |TRUEPROOT="$${PROOT-$$(dirname $$0)/proot.origin}"
-        |$${TRUEPROOT} \\
-        | ${bindings.map { case (f, d) ⇒ s"""-b "$f:$d"""" }.mkString(" \\\n")} \\
-        | "$${@}"
-      """.stripMargin
-
-    proot.setExecutable(true)
-
-    reExecute.content = reExecute.lines.map {
-      case line if line.trim.startsWith("-w") ⇒ s"-w '$userWorkDirectory' \\"
-      case line                               ⇒ line
-    }.mkString("\n")
-
-    reExecute.setExecutable(true)
-
-    val commandline = commandLine(command.map(s"./${reExecute.getName} " + _), userWorkDirectory, preparedContext)
-
-    def prootNoSeccomp = ("PROOT_NO_SECCOMP", "1")
-
-    // FIXME duplicated from SystemExecTask
-    val allEnvironmentVariables = environmentVariables.map { case (name, variable) ⇒ (name, variable.from(context)) } ++ Vector(prootNoSeccomp)
-    val executionResult = execute(commandline, extractedArchive, allEnvironmentVariables, stdOut.isDefined, stdErr.isDefined)
-
-    if (errorOnReturnValue && returnValue.isEmpty && executionResult.returnCode != 0) throw error(commandline.toVector, executionResult)
-
-    def rootDirectory = extractedArchive / rootfs
-
-    def outputPathResolver(filePath: String): File = {
-      def isParent(dir: String, file: String) = File(file).getAbsolutePath.startsWith(File(dir).getAbsolutePath)
-      def inPreparedFiles(f: String) = preparedFileBindings.map(b ⇒ b._2).exists(b ⇒ isParent(b, f))
-      def inHostFiles(f: String) = hostFileBindings.map(b ⇒ b._2).exists(b ⇒ isParent(b, f))
-
-      def isAbsolute = File(filePath).isAbsolute
-      def absoluteInCARE: String = if (isAbsolute) filePath else (File(userWorkDirectory) / filePath).getPath
-
-      if (inPreparedFiles(File("/") / absoluteInCARE getAbsolutePath)) inputPathResolver(filePath)
-      else if (inHostFiles(File("/") / absoluteInCARE getAbsolutePath)) File("/") / absoluteInCARE
-      else rootDirectory / absoluteInCARE
-    }
-
-    val retContext = external.fetchOutputFiles(preparedContext, outputPathResolver)
-    external.checkAndClean(this, retContext, taskWorkDirectory)
-
-    retContext ++
-      List(
-        stdOut.map { o ⇒ Variable(o, executionResult.output.get) },
-        stdErr.map { e ⇒ Variable(e, executionResult.errorOutput.get) },
-        returnValue.map { r ⇒ Variable(r, executionResult.returnCode) }
-      ).flatten
   }
+
 }

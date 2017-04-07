@@ -36,16 +36,16 @@ sealed class LHS[D](val samples: FromContext[Int], val factors: Factor[D, Double
   override def inputs = PrototypeSet(factors.flatMap(f ⇒ domainInputs.inputs(f.domain)))
   override def prototypes = factors.map { _.prototype }
 
-  override def apply() = FromContext { (context, rng) ⇒
-    implicit val random = rng
+  override def apply() = FromContext { p ⇒
+    import p._
     val s = samples.from(context)
     factors.map {
       f ⇒
-        (0 until s).shuffled(rng()).map {
+        (0 until s).shuffled(random()).map {
           i ⇒
             Variable(
               f.prototype,
-              ((i + rng().nextDouble) / s).scale(bounds.min(f.domain).from(context), bounds.max(f.domain).from(context))
+              ((i + random().nextDouble) / s).scale(bounds.min(f.domain).from(context), bounds.max(f.domain).from(context))
             )
         }
     }.transpose.toIterator

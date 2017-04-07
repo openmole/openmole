@@ -18,11 +18,11 @@
 package org.openmole.core.workflow.mole
 
 import org.openmole.core.context.Context
+import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.builder.InputOutputConfig
 import org.openmole.core.workflow.tools._
-import org.openmole.tool.random.RandomProvider
 
-trait Source <: InputOutputCheck with Name {
+trait Source <: Name {
   def config: InputOutputConfig
 
   def inputs = config.inputs
@@ -30,6 +30,12 @@ trait Source <: InputOutputCheck with Name {
   def defaults = config.defaults
   def name = config.name
 
-  protected def process(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider): Context
-  def perform(context: Context, executionContext: MoleExecutionContext)(implicit rng: RandomProvider): Context = perform(context, process(_, executionContext))
+  protected def process(executionContext: MoleExecutionContext): FromContext[Context]
+
+  def perform(context: Context, executionContext: MoleExecutionContext): Context = {
+    implicit val rng = executionContext.services.newRandom
+    import executionContext.services.newFile
+    InputOutputCheck.perform(inputs, outputs, defaults, process(executionContext))(executionContext.services.preference).from(context)
+  }
+
 }

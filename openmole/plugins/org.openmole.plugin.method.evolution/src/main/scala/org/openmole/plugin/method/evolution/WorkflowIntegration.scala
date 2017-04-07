@@ -26,14 +26,14 @@ import scala.util.Random
 import cats._
 import cats.implicits._
 
-object Seeder {
+object GASeeder {
 
-  def empty = new Seeder {
+  def empty = new GASeeder {
     def apply(rng: Random) = None
     def prototype = None
   }
 
-  implicit def prototypeToSeeder[T](p: Val[T])(implicit seed: Seed[T]) = new Seeder {
+  implicit def prototypeToSeeder[T](p: Val[T])(implicit seed: Seed[T]) = new GASeeder {
     def apply(rng: Random) = Some(Variable(p, seed(rng)))
     def prototype = Some(p)
   }
@@ -54,13 +54,13 @@ object Seeder {
 
 }
 
-trait Seeder {
+trait GASeeder {
   def apply(rng: Random): Option[Variable[_]]
   def prototype: Option[Val[_]]
 }
 
 case class Stochastic[A[_]: Functor](
-  seed:         Seeder                                  = Seeder.empty,
+  seed:         GASeeder                                = GASeeder.empty,
   replications: Int                                     = 100,
   reevaluate:   Double                                  = 0.2,
   aggregation:  OptionalArgument[A[FitnessAggregation]] = None
@@ -220,8 +220,8 @@ trait EvolutionWorkflow {
 
 object GAIntegration {
 
-  def scaled(inputs: UniqueGenome, values: Seq[Double]) = FromContext { (context, rng) ⇒
-    InputConverter.scaled(inputs.inputs.toList, values.toList)(context, rng)
+  def scaled(inputs: UniqueGenome, values: Seq[Double]) = FromContext { p ⇒
+    InputConverter.scaled(inputs.inputs.toList, values.toList)(p.context, p.random, p.newFile)
   }
 
   def genomesOfPopulationToVariables[I](inputs: UniqueGenome, population: Vector[I], genomeValues: I ⇒ Vector[Double]) =
@@ -264,8 +264,8 @@ object StochasticGAIntegration {
   def genomeToVariables(
     genome: UniqueGenome,
     values: Seq[Double],
-    seed:   Seeder
-  ) = (GAIntegration.scaled(genome, values) map2 FromContext { (_, rng) ⇒ seed(rng()) })(_ ++ _)
+    seeder: GASeeder
+  ) = (GAIntegration.scaled(genome, values) map2 FromContext { p ⇒ seeder(p.random()) })(_ ++ _)
 
   def populationToVariables[I](
     genome:           UniqueGenome,

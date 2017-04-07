@@ -17,9 +17,11 @@
 
 package org.openmole.plugin.environment.oar
 
+import org.openmole.core.authentication.AuthenticationStore
 import org.openmole.core.workflow.dsl._
-import org.openmole.core.workspace.{ Decrypt, _ }
+import org.openmole.plugin.environment.batch.environment.BatchEnvironment
 import org.openmole.plugin.environment.ssh._
+import org.openmole.tool.crypto.Cypher
 import squants._
 import squants.information._
 
@@ -40,7 +42,8 @@ object OAREnvironment {
     storageSharedLocally: Boolean                       = false,
     name:                 OptionalArgument[String]      = None,
     bestEffort:           Boolean                       = true
-  )(implicit decrypt: Decrypt, varName: sourcecode.Name) =
+  )(implicit services: BatchEnvironment.Services, authenticationStore: AuthenticationStore, cypher: Cypher, varName: sourcecode.Name) = {
+    import services._
     new OAREnvironment(
       user = user,
       host = host,
@@ -57,6 +60,7 @@ object OAREnvironment {
       name = Some(name.getOrElse(varName.value)),
       bestEffort = bestEffort
     )(SSHAuthentication.find(user, host, port).apply)
+  }
 }
 
 class OAREnvironment(
@@ -74,11 +78,11 @@ class OAREnvironment(
     val storageSharedLocally:    Boolean,
     override val name:           Option[String],
     val bestEffort:              Boolean
-)(val credential: fr.iscpif.gridscale.ssh.SSHAuthentication) extends ClusterEnvironment { env ⇒
+)(val credential: fr.iscpif.gridscale.ssh.SSHAuthentication)(implicit val services: BatchEnvironment.Services) extends ClusterEnvironment { env ⇒
 
   type JS = OARJobService
 
-  val jobService =
+  lazy val jobService =
     new OARJobService {
       def queue = env.queue
       val environment = env

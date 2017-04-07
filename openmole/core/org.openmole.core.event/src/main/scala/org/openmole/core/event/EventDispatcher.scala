@@ -17,11 +17,20 @@
 
 package org.openmole.core.event
 
+import java.util.concurrent.atomic.AtomicLong
+
 import scala.collection.mutable.{ ListBuffer, WeakHashMap }
 
 object EventDispatcher {
+  def apply() = new EventDispatcher
+}
 
+class EventDispatcher {
+
+  private val _eventId = new AtomicLong
   private lazy val listenerMap = new WeakHashMap[Any, ListBuffer[Listner[Any]]]
+
+  def eventId = _eventId.getAndIncrement()
 
   def listen[T](obj: T)(listener: Listner[T]) = listenerMap.synchronized {
     listenerMap.getOrElseUpdate(obj, ListBuffer()) += listener.asInstanceOf[Listner[Any]]

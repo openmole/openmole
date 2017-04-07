@@ -23,6 +23,8 @@ import java.util.logging.Level
 import org.openmole.core.context.{ Context, Variable }
 import org.openmole.core.event.{ Event, EventDispatcher }
 import org.openmole.core.exception.UserBadDataError
+import org.openmole.core.preference.Preference
+import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.job.State._
@@ -32,9 +34,10 @@ import org.openmole.core.workflow.task.TaskExecutionContext
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.transition.DataChannel
 import org.openmole.core.workflow.validation._
-import org.openmole.core.workspace.Workspace
+import org.openmole.core.workspace.{ NewFile, Workspace }
 import org.openmole.tool.logger.Logger
 import org.openmole.tool.random
+import org.openmole.tool.random.Seeder
 
 import scala.collection.mutable.Buffer
 import scala.concurrent.stm._
@@ -62,28 +65,28 @@ object MoleExecution extends Logger {
 
   def apply(
     mole:               Mole,
-    sources:            Iterable[(Capsule, Source)] = Iterable.empty,
-    hooks:              Iterable[(Capsule, Hook)]   = Iterable.empty,
-    environments:       Map[Capsule, Environment]   = Map.empty,
-    grouping:           Map[Capsule, Grouping]      = Map.empty,
-    implicits:          Context                     = Context.empty,
-    seed:               Long                        = Workspace.newSeed,
-    defaultEnvironment: LocalEnvironment            = LocalEnvironment(),
-    cleanOnFinish:      Boolean                     = true,
-    executionContext:   MoleExecutionContext        = MoleExecutionContext()
-  ) =
+    sources:            Iterable[(Capsule, Source)]            = Iterable.empty,
+    hooks:              Iterable[(Capsule, Hook)]              = Iterable.empty,
+    environments:       Map[Capsule, Environment]              = Map.empty,
+    grouping:           Map[Capsule, Grouping]                 = Map.empty,
+    implicits:          Context                                = Context.empty,
+    defaultEnvironment: OptionalArgument[LocalEnvironment]     = None,
+    cleanOnFinish:      Boolean                                = true,
+    executionContext:   OptionalArgument[MoleExecutionContext] = None
+  )(implicit moleServices: MoleServices): MoleExecution = {
+    import moleServices._
     new MoleExecution(
       mole,
       listOfTupleToMap(sources),
       listOfTupleToMap(hooks),
       environments,
       grouping,
-      seed,
-      defaultEnvironment,
+      defaultEnvironment.getOrElse(LocalEnvironment()),
       cleanOnFinish,
       implicits,
-      executionContext
+      executionContext.getOrElse(MoleExecutionContext())
     )
+  }
 
 }
 
@@ -95,13 +98,14 @@ class MoleExecution(
     val hooks:              Hooks,
     val environments:       Map[Capsule, Environment],
     val grouping:           Map[Capsule, Grouping],
-    val seed:               Long,
     val defaultEnvironment: LocalEnvironment,
     val cleanOnFinish:      Boolean,
     val implicits:          Context,
     val executionContext:   MoleExecutionContext,
     val id:                 String                    = UUID.randomUUID().toString
 ) {
+
+  import executionContext.services._
 
   private val _started = Ref(false)
   private val _canceled = Ref(false)
@@ -163,9 +167,9 @@ class MoleExecution(
       val env = environments.getOrElse(capsule, defaultEnvironment)
       env match {
         case env: SubmissionEnvironment ⇒ env.submit(job)
-        case env: LocalEnvironment      ⇒ env.submit(job, TaskExecutionContext(executionContext.tmpDirectory, env))
+        case env: LocalEnvironment      ⇒ env.submit(job, TaskExecutionContext(newFile.baseDir, env, preference, threadProvider))
       }
-      EventDispatcher.trigger(this, new MoleExecution.JobSubmitted(job, capsule, env))
+      eventDispatcher.trigger(this, new MoleExecution.JobSubmitted(job, capsule, env))
     }
 
   def submitAll =
@@ -185,10 +189,10 @@ class MoleExecution(
   def allWaiting = atomic { implicit txn ⇒ numberOfJobs <= nbWaiting() }
 
   def start(context: Context): this.type = {
-    executionContext.tmpDirectory.mkdirs()
+    newFile.baseDir.mkdirs()
     _started.single() = true
     _startTime.single() = Some(System.currentTimeMillis)
-    EventDispatcher.trigger(this, new MoleExecution.Starting)
+    eventDispatcher.trigger(this, new MoleExecution.Starting)
     rootSubMoleExecution.newChild.submit(mole.root, context, nextTicket(rootTicket))
     if (allWaiting) submitAll
     this
@@ -220,7 +224,7 @@ class MoleExecution(
 
   private def cancelAction = {
     rootSubMoleExecution.cancel
-    EventDispatcher.trigger(this, MoleExecution.Finished(canceled = true))
+    eventDispatcher.trigger(this, MoleExecution.Finished(canceled = true))
     finish()
   }
 
@@ -284,7 +288,7 @@ class MoleExecution(
     if (!_canceled.single()) {
       if (allWaiting) submitAll
       if (numberOfJobs == 0) {
-        EventDispatcher.trigger(this, MoleExecution.Finished(canceled = false))
+        eventDispatcher.trigger(this, MoleExecution.Finished(canceled = false))
         finish()
       }
     }
@@ -292,7 +296,7 @@ class MoleExecution(
   private def finish() = {
     _finished.single() = true
     _endTime.single() = Some(System.currentTimeMillis)
-    if (cleanOnFinish) executionContext.tmpDirectory.recursiveDelete
+    if (cleanOnFinish) newFile.baseDir.recursiveDelete
   }
 
   def canceled: Boolean = _canceled.single()
@@ -302,9 +306,5 @@ class MoleExecution(
 
   def nextTicket(parent: Ticket): Ticket = Ticket(parent, ticketNumber.next)
   def nextJobId = UUID.randomUUID
-
-  private val currentSeed = Ref(seed)
-  def newSeed = currentSeed.next
-  def newRNG = random.Random.newRNG(newSeed).toScala
 
 }

@@ -18,43 +18,82 @@
 package org.openmole.core.fileservice
 
 import java.io.File
+import java.util.concurrent.TimeUnit
 
+import com.google.common.cache._
+import org.openmole.core.preference.{ ConfigurationLocation, Preference }
+import org.openmole.core.threadprovider.{ ThreadProvider, Updater }
 import org.openmole.tool.hash._
-import org.openmole.core.updater.Updater
-import org.openmole.core.workspace.{ ConfigurationLocation, Workspace }
+import org.openmole.core.workspace._
 import org.openmole.tool.cache.AssociativeCache
-import org.openmole.tool.hash.Hash
+import org.openmole.tool.hash._
 import org.openmole.tool.tar._
-
+import org.openmole.tool.file._
+import org.openmole.tool.thread._
+import squants._
 import squants.time.TimeConversions._
+
+import scala.collection.mutable.WeakHashMap
+import scala.ref.WeakReference
 
 object FileService {
   val GCInterval = ConfigurationLocation("FileService", "GCInterval", Some(5 minutes))
 
-  private[fileservice] val hashCache = new AssociativeCache[String, Hash]
-  private[fileservice] val archiveCache = new AssociativeCache[String, FileCache]
+  val hashCacheSize = ConfigurationLocation("FileService", "HashCacheSize", Some(1000))
+  val hashCacheTime = ConfigurationLocation("FileService", "HashCacheTime", Some(10 minutes))
 
-  Updater.delay(new FileServiceGC, Workspace.preference(FileService.GCInterval))
+  val archiveCacheSize = ConfigurationLocation("FileService", "ArchiveCacheSize", Some(1000))
+  val archiveCacheTime = ConfigurationLocation("FileService", "ArchiveCacheTime", Some(10 minutes))
 
-  def hash(file: File): Hash =
-    hash(file, if (file.isDirectory) archiveForDir(file).file else file)
+  def apply()(implicit preference: Preference, threadProvider: ThreadProvider) = {
+    val fs = new FileService
+    fs.start
+    fs
+  }
+}
 
-  def invalidate(key: Object, file: File) = hashCache.invalidateCache(key, file.getAbsolutePath)
+class FileService(implicit preference: Preference) {
 
-  def archiveForDir(file: File): FileCache = archiveForDir(file, file)
+  private[fileservice] val hashCache =
+    CacheBuilder.newBuilder.maximumSize(preference(FileService.hashCacheSize)).
+      expireAfterAccess(preference(FileService.hashCacheTime).millis, TimeUnit.MILLISECONDS).
+      build[String, Hash]()
 
-  def hash(key: Object, file: File): Hash =
-    hashCache.cache(
-      key,
-      file.getCanonicalPath
-    ) { _ ⇒ computeHash(if (file.isDirectory) archiveForDir(key, file).file else file) }
+  private[fileservice] val archiveCache =
+    CacheBuilder.newBuilder.maximumSize(preference(FileService.archiveCacheSize)).
+      expireAfterAccess(preference(FileService.archiveCacheTime).millis, TimeUnit.MILLISECONDS).
+      build[String, FileCache]()
 
-  def archiveForDir(key: Object, directory: File) = {
-    archiveCache.cache(key, directory.getAbsolutePath) { _ ⇒
-      val ret = Workspace.newFile("archive", ".tar")
+  def hash(file: File)(implicit newFile: NewFile): Hash = {
+    def hash = computeHash(if (file.isDirectory) archiveForDir(file).file else file)
+    hashCache.get(file.getCanonicalPath, hash)
+  }
+
+  def archiveForDir(directory: File)(implicit newFile: NewFile): FileCache = {
+    def archive = {
+      val ret = newFile.newFile("archive", ".tar")
       directory.archive(ret, time = false)
-      FileCache(ret)
+      FileCache(ret)(this)
     }
+
+    archiveCache.get(directory.getAbsolutePath, archive)
+  }
+
+  private val fileDeleter = new FileDeleter(WeakReference(this))
+  private val gc = new FileServiceGC(WeakReference(this))
+
+  private val deleters = new WeakHashMap[File, DeleteOnFinalize]
+
+  def deleteWhenGarbageCollected(file: File): File = deleters.synchronized {
+    deleters += file → new DeleteOnFinalize(file.getAbsolutePath, fileDeleter)
+    file
+  }
+
+  def assynchonousRemove(file: File): Boolean = fileDeleter.assynchonousRemove(file)
+
+  def start(implicit preference: Preference, threadProvider: ThreadProvider): Unit = {
+    fileDeleter.start(threadProvider)
+    Updater.delay(gc, preference(FileService.GCInterval))
   }
 
 }

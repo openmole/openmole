@@ -18,10 +18,11 @@
 
 package org.openmole.plugin.environment.slurm
 
+import org.openmole.core.authentication.AuthenticationStore
 import org.openmole.core.workflow.dsl._
-import org.openmole.core.workspace.{ Decrypt, _ }
 import org.openmole.plugin.environment.batch.environment._
 import org.openmole.plugin.environment.ssh._
+import org.openmole.tool.crypto.Cypher
 import squants.information.Information
 import squants.time.Time
 
@@ -45,7 +46,8 @@ object SLURMEnvironment {
     threads:              OptionalArgument[Int]         = None,
     storageSharedLocally: Boolean                       = false,
     name:                 OptionalArgument[String]      = None
-  )(implicit decrypt: Decrypt, varName: sourcecode.Name) =
+  )(implicit services: BatchEnvironment.Services, authenticationStore: AuthenticationStore, cypher: Cypher, varName: sourcecode.Name) = {
+    import services._
     new SLURMEnvironment(
       user = user,
       host = host,
@@ -65,6 +67,7 @@ object SLURMEnvironment {
       storageSharedLocally = storageSharedLocally,
       name = Some(name.getOrElse(varName.value))
     )(SSHAuthentication.find(user, host, port).apply)
+  }
 }
 
 class SLURMEnvironment(
@@ -85,14 +88,14 @@ class SLURMEnvironment(
     override val threads:        Option[Int],
     val storageSharedLocally:    Boolean,
     override val name:           Option[String]
-)(val credential: fr.iscpif.gridscale.ssh.SSHAuthentication) extends ClusterEnvironment with MemoryRequirement { env ⇒
+)(val credential: fr.iscpif.gridscale.ssh.SSHAuthentication)(implicit val services: BatchEnvironment.Services) extends ClusterEnvironment { env ⇒
 
   type JS = SLURMJobService
 
-  val jobService =
+  lazy val jobService =
     new SLURMJobService {
       def queue = env.queue
-      def environment = env
+      val environment = env
       def sharedFS = storage
       def workDirectory = env.workDirectory
       def timeout = env.timeout

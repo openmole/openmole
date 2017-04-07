@@ -26,13 +26,16 @@ import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.workflow.task.TaskExecutionContext
 import org.openmole.tool.logger.Logger
 import org.openmole.core.tools.service.Retry
-import org.openmole.core.workspace.Workspace
+import org.openmole.core.workspace.{ NewFile, Workspace }
 import org.openmole.core.tools.service._
 import org.openmole.core.workflow.execution._
 import org.openmole.core.communication.message._
 import org.openmole.core.communication.storage._
+import org.openmole.core.event.EventDispatcher
+import org.openmole.core.fileservice.FileService
+import org.openmole.core.preference.Preference
 import org.openmole.core.serializer._
-
+import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.tool.file.uniqName
 
 import scala.collection.JavaConversions._
@@ -57,7 +60,7 @@ class Runtime {
     outputMessagePath:    String,
     threads:              Int,
     debug:                Boolean
-  ) = {
+  )(implicit serializerService: SerializerService, newFile: NewFile, fileService: FileService, preference: Preference, threadProvider: ThreadProvider, eventDispatcher: EventDispatcher) = {
 
     /*--- get execution message and job for runtime---*/
     val usedFiles = new HashMap[String, File]
@@ -65,16 +68,16 @@ class Runtime {
     logger.fine("Downloading input message")
 
     val executionMessage =
-      Workspace.withTmpFile { executionMessageFileCache ⇒
+      newFile.withTmpFile { executionMessageFileCache ⇒
         retry(storage.download(inputMessagePath, executionMessageFileCache))
-        SerialiserService.deserialiseAndExtractFiles[ExecutionMessage](executionMessageFileCache)
+        ExecutionMessage.load(executionMessageFileCache)
       }
 
     val oldOut = System.out
     val oldErr = System.err
 
-    val out = Workspace.newFile("openmole", ".out")
-    val err = Workspace.newFile("openmole", ".err")
+    val out = newFile.newFile("openmole", ".out")
+    val err = newFile.newFile("openmole", ".err")
 
     val outSt = new PrintStream(out)
     val errSt = new PrintStream(err)
@@ -123,7 +126,7 @@ class Runtime {
         }
       }
 
-      val runnableTasks = SerialiserService.deserialiseReplaceFiles[Seq[RunnableTask]](executionMessage.jobs, usedFiles)
+      val runnableTasks = serializerService.deserialiseReplaceFiles[Seq[RunnableTask]](executionMessage.jobs, usedFiles)
 
       val saver = new ContextSaver(runnableTasks.size)
       val allMoleJobs = runnableTasks.map { _.toMoleJob(saver.save) }
@@ -133,7 +136,7 @@ class Runtime {
       /* --- Submit all jobs to the local environment --*/
       logger.fine("Run the jobs")
       val environment = LocalEnvironment(nbThreads = threads)
-      val taskExecutionContext = TaskExecutionContext(Workspace.newDir("runtime"), environment)
+      val taskExecutionContext = TaskExecutionContext(newFile.newDir("runtime"), environment, preference, threadProvider)
       for (toProcess ← allMoleJobs) environment.submit(toProcess, taskExecutionContext)
 
       saver.waitAllFinished
@@ -145,15 +148,17 @@ class Runtime {
       val contextResults = ContextResults(saver.results)
 
       def uploadArchive = {
-        val contextResultFile = Workspace.newFile("contextResult", "res")
-        SerialiserService.serialiseAndArchiveFiles(contextResults, contextResultFile)
+        val contextResultFile = newFile.newFile("contextResult", "res")
+        serializerService.serialiseAndArchiveFiles(contextResults, contextResultFile)
+        fileService.deleteWhenGarbageCollected(contextResultFile)
         ArchiveContextResults(contextResultFile)
       }
 
       def uploadIndividualFiles = {
-        val contextResultFile = Workspace.newFile("contextResult", "res")
-        SerialiserService.serialise(contextResults, contextResultFile)
-        val pac = SerialiserService.pluginsAndFiles(contextResults)
+        val contextResultFile = newFile.newFile("contextResult", "res")
+        serializerService.serialise(contextResults, contextResultFile)
+        fileService.deleteWhenGarbageCollected(contextResultFile)
+        val pac = serializerService.pluginsAndFiles(contextResults)
 
         val replicated =
           pac.files.map {
@@ -194,8 +199,8 @@ class Runtime {
     val runtimeResult = RuntimeResult(outputMessage, errorMessage, result, localRuntimeInfo)
 
     logger.fine("Upload the result message")
-    Workspace.withTmpFile("output", ".tgz") { outputLocal ⇒
-      SerialiserService.serialiseAndArchiveFiles(runtimeResult, outputLocal)
+    newFile.withTmpFile("output", ".tgz") { outputLocal ⇒
+      serializerService.serialiseAndArchiveFiles(runtimeResult, outputLocal)
       retry(storage.upload(outputLocal, outputMessagePath, TransferOptions(forceCopy = true, canMove = true)))
     }
 

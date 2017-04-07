@@ -21,7 +21,7 @@ import org.openmole.plugin.environment.batch.control._
 
 trait BatchService {
   def usageControl: UsageControl
-  def environment: BatchEnvironment
+  val environment: BatchEnvironment
   def tryGetToken: Option[AccessToken] = usageControl.tryGetToken
   def available: Int = usageControl.available
   def releaseToken(token: AccessToken): Unit = usageControl.releaseToken(token)
