@@ -84,8 +84,12 @@ class ApiImpl(val arguments: GUIServer.ServletArguments) extends Api {
     val runtime = Runtime.getRuntime
     val totalMemory = runtime.totalMemory
     val allocatedMemory = totalMemory - runtime.freeMemory
+    val javaVersion = System.getProperty("java.version")
+    val jvmName = System.getProperty("java.vm.name")
 
     JVMInfos(
+      javaVersion,
+      jvmName,
       Runtime.getRuntime.availableProcessors,
       allocatedMemory,
       totalMemory

@@ -815,17 +815,33 @@ package object client {
   )
 
   //GENERAL SETTINGS
-  lazy val relative100: ModifierSeq = Seq(
+  lazy val highLine: ModifierSeq = Seq(
     width := 130,
     height := 50,
     display := "table",
     overflow := "hidden"
   )
 
+  lazy val generalSettings: ModifierSeq = Seq(
+    height := 185,
+    sheet.marginBottom(20)
+  )
+
+  lazy val smallLine: ModifierSeq = Seq(
+    width := 130,
+    height := 15,
+    display := "table",
+    overflow := "hidden"
+  )
   lazy val centerCell: ModifierSeq = Seq(
     display := "table-cell",
     verticalAlign := "middle"
   )
+
+  lazy val mediumHalfColumn: ModifierSeq = (Seq(
+    fontSize := 18,
+    width := 60
+  ): ModifierSeq) ++ centerCell
 
   lazy val bigHalfColumn: ModifierSeq = (Seq(
     fontSize := 26,

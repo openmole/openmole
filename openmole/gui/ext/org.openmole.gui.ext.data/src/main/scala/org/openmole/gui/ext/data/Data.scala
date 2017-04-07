@@ -173,6 +173,7 @@ object SafePath {
       if (todo.isEmpty) done
       else all(todo.dropRight(1), done :+ SafePath.sp(todo))
     }
+
     all(path, Seq())
   }
 }
@@ -766,4 +767,4 @@ object Test {
   def error(msg: String, err: Error) = FailedTest(msg, err)
 }
 
-case class JVMInfos(processorAvailable: Int, allocatedMemory: Long, totalMemory: Long)
+case class JVMInfos(javaVersion: String, jvmImplementation: String, processorAvailable: Int, allocatedMemory: Long, totalMemory: Long)
