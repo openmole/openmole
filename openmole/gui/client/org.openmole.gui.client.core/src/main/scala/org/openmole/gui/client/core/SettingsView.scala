@@ -106,24 +106,30 @@ object SettingsView {
 
   val jvmInfosDiv = timer.map {
     _.isDefined
-  }.expand(div(height := 150)(
+  }.expand(tags.div(generalSettings)(
     Rx {
       for (
         j ← jvmInfos()
       ) yield {
         val readableTotalMemory = CoreUtils.readableByteCount(j.totalMemory)
         tags.div(
-          tags.div(relative100)(
+          tags.div(highLine)(
             tags.div(bigHalfColumn)(j.processorAvailable.toString),
             tags.div(smallHalfColumn)("Processors")
           ),
-          tags.div(relative100)(
+          tags.div(highLine)(
             tags.div(bigHalfColumn)(s"${(j.allocatedMemory.toDouble / j.totalMemory * 100).toInt}"),
             tags.div(smallHalfColumn)("Allocated memory (%)")
           ),
-          tags.div(relative100)(
+          tags.div(highLine)(
             tags.div(bigHalfColumn)(s"${CoreUtils.dropDecimalIfNull(readableTotalMemory.bytes)}"),
             tags.div(smallHalfColumn)(s"Total memory (${readableTotalMemory.units})")
+          ),
+          tags.div(smallLine)(
+            tags.div(smallHalfColumn +++ textCenter +++ sheet.paddingTop(5))(s"${j.javaVersion}")
+          ),
+          tags.div(smallLine)(
+            tags.div(smallHalfColumn +++ textCenter)(s"${j.jvmImplementation}")
           )
         )
       }
