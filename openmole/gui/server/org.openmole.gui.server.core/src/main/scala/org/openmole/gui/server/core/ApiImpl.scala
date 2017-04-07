@@ -95,8 +95,12 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
     val runtime = Runtime.getRuntime
     val totalMemory = runtime.totalMemory
     val allocatedMemory = totalMemory - runtime.freeMemory
+    val javaVersion = System.getProperty("java.version")
+    val jvmName = System.getProperty("java.vm.name")
 
     JVMInfos(
+      javaVersion,
+      jvmName,
       Runtime.getRuntime.availableProcessors,
       allocatedMemory,
       totalMemory
@@ -372,16 +376,15 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
         ex ⇒ EnvironmentError(environmentId, ex.exception.getMessage, ErrorBuilder(ex.exception), ex.creationTime, Utils.javaLevelToErrorLevel(ex.level))
       }
 
-    def groupedErrors =
-      environmentErrors.sortBy(_.date).takeRight(lines).groupBy {
-        _.errorMessage
-      }.toSeq.map {
-        case (msg, err) ⇒
-          val dates = err.map {
-            _.date
-          }
-          (err.head, dates.max, dates.size)
-      }
+    def groupedErrors = environmentErrors.groupBy {
+      _.errorMessage
+    }.toSeq.map {
+      case (_, err) ⇒
+        val dates = err.map {
+          _.date
+        }.sorted
+        (err.head, dates.max, dates.size)
+    }.takeRight(lines)
 
     EnvironmentErrorData(groupedErrors)
   }
