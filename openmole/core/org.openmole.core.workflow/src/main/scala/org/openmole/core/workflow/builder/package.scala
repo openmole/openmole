@@ -42,6 +42,11 @@ package builder {
     }
   }
 
+  class Defaults {
+    def +=[U: DefaultBuilder](d: Default[_]*): U ⇒ U =
+      implicitly[DefaultBuilder[U]].defaults.modify(_ ++ d)
+  }
+
   class AssignDefault[T](p: Val[T]) {
     def :=[U: DefaultBuilder](v: T, `override`: Boolean): U ⇒ U =
       implicitly[DefaultBuilder[U]].defaults.modify(_ + Default[T](p, v, `override`))
@@ -61,6 +66,7 @@ package builder {
     final lazy val inputs: Inputs = new Inputs
     final lazy val outputs: Outputs = new Outputs
     final lazy val exploredOutputs: ExploredOutputs = new ExploredOutputs
+    final lazy val defaults: Defaults = new Defaults
 
     implicit class InputsOutputsDecorator(io: (Inputs, Outputs)) {
       def +=[T: InputBuilder: OutputBuilder](ps: Val[_]*): T ⇒ T =

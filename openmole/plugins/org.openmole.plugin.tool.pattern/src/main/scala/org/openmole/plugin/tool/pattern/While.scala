@@ -20,22 +20,30 @@ object While {
         val last = Capsule(EmptyTask(), strain = true)
         (puzzle -- (last, !condition)) & (puzzle -- (Slot(puzzle.first), condition))
       case Some(counter) ⇒
-        val firstLoop = Val[Boolean]
+        val firstTask = EmptyTask() set (
+          (inputs, outputs) += counter,
+          counter := 0L,
+          (inputs, outputs) += (puzzle.inputs: _*),
+          defaults += (puzzle.defaults: _*)
+        )
+
+        val first = Capsule(firstTask)
 
         val incrementTask =
           ClosureTask("IncrementTask") { (ctx, _, _) ⇒
-            val counterValue = if (ctx(firstLoop)) ctx(counter) else ctx(counter) + 1
-            ctx + (counter → counterValue) + (firstLoop → false)
+            ctx + (counter → (ctx(counter) + 1))
           } set (
-            (inputs, outputs) += (counter, firstLoop),
-            counter := 0L,
-            firstLoop := true
+            (inputs, outputs) += counter,
+            (inputs, outputs) += (puzzle.outputs: _*)
           )
 
-        val increment = MasterCapsule(incrementTask, persist = Seq(counter, firstLoop), strain = true)
-        val last = Capsule(EmptyTask(), strain = true)
+        val last = EmptyTask() set (
+          (inputs, outputs) += counter,
+          (inputs, outputs) += (puzzle.outputs: _*)
+        )
 
-        (puzzle -- increment -- (last, !condition)) & (increment -- (Slot(puzzle.first), condition))
+        (first -- puzzle -- incrementTask -- (last, !condition)) &
+          (puzzle -- incrementTask -- (first, condition))
     }
 
 }

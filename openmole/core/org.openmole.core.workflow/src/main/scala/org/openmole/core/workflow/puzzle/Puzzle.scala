@@ -26,6 +26,7 @@ import org.openmole.core.workflow.transition._
 import org.openmole.core.workspace.Workspace
 import shapeless._
 import ops.hlist._
+import org.openmole.core.workflow.validation.TypeUtil
 
 object ToPuzzle {
 
@@ -97,6 +98,11 @@ object Puzzle {
       puzzles.flatMap { _.grouping }.toMap
     )
 
+  def transitionOutputs(puzzle: Puzzle, lastTransition: (Puzzle, Puzzle) ⇒ Puzzle) = {
+    val last = Slot(EmptyTask())
+    val _puzzle = lastTransition(puzzle, last)
+    TypeUtil.receivedTypes(_puzzle.toMole, _puzzle.sources, _puzzle.hooks)(last) toSeq
+  }
 }
 
 object PuzzlePiece {
@@ -177,6 +183,12 @@ case class Puzzle(
   def slots: Set[Slot] = (firstSlot :: transitions.map(_.end).toList).toSet
 
   def first = firstSlot.capsule
+
+  def inputs = first.inputs(toMole, sources, hooks).toSeq
+  def defaults = first.task.defaults
+  def exploredOutputs = Puzzle.transitionOutputs(this, _ -< _)
+  def aggregatedOutputs = Puzzle.transitionOutputs(this, _ >- _)
+  def outputs = Puzzle.transitionOutputs(this, _ -- _)
 
   def buildPuzzle = this
 
