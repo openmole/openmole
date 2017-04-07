@@ -690,7 +690,8 @@ package object client {
   )
 
   lazy val dropdownError: ModifierSeq = Seq(
-    // margin := 10,
+    height := 300,
+    width := "100%",
     color(DARK_GREY),
     relativePosition,
     borderRadius := 5,

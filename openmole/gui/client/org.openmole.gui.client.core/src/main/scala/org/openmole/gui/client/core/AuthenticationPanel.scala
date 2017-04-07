@@ -137,7 +137,7 @@ class AuthenticationPanel {
                     colspan := 12,
                     r.errorOn.expand(
                       tags.div(Rx {
-                        tags.div(dropdownError)(
+                        tags.textarea(dropdownError)(
                           r.currentStack()
                         )
                       })
