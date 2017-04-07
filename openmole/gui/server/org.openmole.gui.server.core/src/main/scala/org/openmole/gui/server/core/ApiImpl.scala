@@ -369,16 +369,15 @@ class ApiImpl(val arguments: GUIServer.ServletArguments) extends Api {
         ex ⇒ EnvironmentError(environmentId, ex.exception.getMessage, ErrorBuilder(ex.exception), ex.creationTime, Utils.javaLevelToErrorLevel(ex.level))
       }
 
-    def groupedErrors =
-      environmentErrors.sortBy(_.date).takeRight(lines).groupBy {
-        _.errorMessage
-      }.toSeq.map {
-        case (msg, err) ⇒
-          val dates = err.map {
-            _.date
-          }
-          (err.head, dates.max, dates.size)
-      }
+    def groupedErrors = environmentErrors.groupBy {
+      _.errorMessage
+    }.toSeq.map {
+      case (_, err) ⇒
+        val dates = err.map {
+          _.date
+        }.sorted
+        (err.head, dates.max, dates.size)
+    }.takeRight(lines)
 
     EnvironmentErrorData(groupedErrors)
   }
