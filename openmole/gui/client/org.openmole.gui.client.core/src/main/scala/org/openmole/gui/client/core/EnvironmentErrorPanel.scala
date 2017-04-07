@@ -65,10 +65,7 @@ class EnvironmentErrorPanel {
   def sort(datedErrors: EnvironmentErrorData, sortingAndOrdering: ListSortingAndOrdering): Seq[(String, Long, Int, ErrorStateLevel, Error)] = {
     val lines =
       for {
-        (error, mostRecentDate, occurrences) ← datedErrors.datedErrors.headOption match {
-          case Some(o) ⇒ Seq(o)
-          case _       ⇒ Seq()
-        }
+        (error, mostRecentDate, occurrences) ← datedErrors.datedErrors
       } yield (error.errorMessage, mostRecentDate, occurrences, error.level, error.stack)
 
     val sorted = sortingAndOrdering.fileSorting match {
