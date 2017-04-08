@@ -125,6 +125,7 @@ trait NetLogoTask extends Task with ValidateTask {
                 }
             }
 
+          import executionContext._
           external.checkAndClean(this, contextResult, tmpDir)
           contextResult
         }

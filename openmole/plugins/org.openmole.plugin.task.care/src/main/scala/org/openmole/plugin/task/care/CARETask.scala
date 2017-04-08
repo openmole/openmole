@@ -178,6 +178,8 @@ object CARETask extends Logger {
       def outputPathResolver = container.outputPathResolver(preparedFileBindings, hostFileBindings, inputDirectory, userWorkDirectory, rootDirectory) _
 
       val retContext = external.fetchOutputFiles(preparedContext, outputPathResolver)
+
+      import executionContext._
       external.checkAndClean(this, retContext, taskWorkDirectory)
 
       retContext ++

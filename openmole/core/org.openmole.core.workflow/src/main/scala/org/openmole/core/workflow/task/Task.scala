@@ -21,6 +21,7 @@ import java.io.File
 
 import org.openmole.core.context._
 import org.openmole.core.expansion.FromContext
+import org.openmole.core.fileservice.FileService
 import org.openmole.core.preference.Preference
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.workflow.builder.InputOutputConfig
@@ -33,15 +34,14 @@ import org.openmole.tool.random._
 import org.openmole.tool.thread._
 
 case class TaskExecutionContext(
-    tmpDirectory:                File,
-    localEnvironment:            LocalEnvironment,
-    implicit val preference:     Preference,
-    implicit val threadProvider: ThreadProvider,
-    implicit val workspace:      Workspace,
-    cache:                       KeyValueCache
-) {
-  implicit def newFile = NewFile(tmpDirectory)
-}
+  tmpDirectory:                File,
+  localEnvironment:            LocalEnvironment,
+  implicit val preference:     Preference,
+  implicit val threadProvider: ThreadProvider,
+  implicit val fileService:    FileService,
+  implicit val workspace:      Workspace,
+  cache:                       KeyValueCache
+)
 
 object Task {
   def buildRNG(context: Context): scala.util.Random = random.Random(context(Variable.openMOLESeed)).toScala
@@ -57,7 +57,7 @@ trait Task <: Name {
    */
   def perform(context: Context, executionContext: TaskExecutionContext): Context = {
     lazy val rng = Lazy(Task.buildRNG(context))
-    InputOutputCheck.perform(inputs, outputs, defaults, process(executionContext))(executionContext.preference).from(context)(rng, executionContext.newFile)
+    InputOutputCheck.perform(inputs, outputs, defaults, process(executionContext))(executionContext.preference).from(context)(rng, NewFile(executionContext.tmpDirectory))
   }
 
   protected def process(executionContext: TaskExecutionContext): FromContext[Context]

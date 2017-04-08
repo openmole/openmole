@@ -23,6 +23,7 @@ import monocle.macros.Lenses
 import org.openmole.core.context.{ Context, Val, Variable }
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.expansion.FromContext
+import org.openmole.core.fileservice.FileService
 import org.openmole.core.tools.service.OS
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.task._
@@ -187,7 +188,7 @@ import org.openmole.plugin.task.external.External._
   def fetchOutputFiles(context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: NewFile): Context =
     context ++ outputFileVariables(context, resolver)
 
-  def checkAndClean(task: Task, context: Context, rootDir: File) = {
+  def checkAndClean(task: Task, context: Context, rootDir: File)(implicit fileService: FileService) = {
     lazy val contextFiles =
       InputOutputCheck.filterOutput(task.outputs, context).values.map(_.value).collect { case f: File ⇒ f }
 
@@ -197,6 +198,8 @@ import org.openmole.plugin.task.external.External._
     } throw new UserBadDataError("Output file " + f.getAbsolutePath + s" doesn't exist, parent directory ${f.getParentFileSafe} contains [" + f.getParentFileSafe.listFilesSafe.map(_.getName).mkString(", ") + "]")
 
     rootDir.applyRecursive(f ⇒ f.delete, contextFiles)
+
+    contextFiles.foreach(fileService.deleteWhenGarbageCollected)
 
     // This delete the dir only if it is empty
     rootDir.delete

@@ -103,7 +103,8 @@ package object message {
 
   object ExecutionMessage {
     def load(file: File)(implicit serialiserService: SerializerService, fileService: FileService, newFile: NewFile) = {
-      val em = serialiserService.deserialiseAndExtractFiles[ExecutionMessage](file)
+      val (em, files) = serialiserService.deserialiseAndExtractFiles[ExecutionMessage](file)
+      files.foreach(fileService.deleteWhenGarbageCollected)
       fileService.deleteWhenGarbageCollected(em.jobs)
       em
     }
@@ -113,7 +114,8 @@ package object message {
 
   object RuntimeResult {
     def load(file: File)(implicit serialiserService: SerializerService, fileService: FileService, newFile: NewFile) = {
-      val result = serialiserService.deserialiseAndExtractFiles[RuntimeResult](file)
+      val (result, files) = serialiserService.deserialiseAndExtractFiles[RuntimeResult](file)
+      files.foreach(fileService.deleteWhenGarbageCollected)
       result.stdOut.foreach(fileService.deleteWhenGarbageCollected)
       result.stdErr.foreach(fileService.deleteWhenGarbageCollected)
 

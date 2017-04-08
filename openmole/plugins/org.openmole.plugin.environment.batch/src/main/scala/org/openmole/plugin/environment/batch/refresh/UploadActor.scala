@@ -78,8 +78,6 @@ object UploadActor extends Logger {
 
     val runtime = replicateTheRuntime(job.job, job.environment, storage)
 
-    val jobForRuntimePath = storage.child(communicationPath, uniqName("job", ".tgz"))
-
     val executionMessage = createExecutionMessage(
       job.job,
       jobFile,

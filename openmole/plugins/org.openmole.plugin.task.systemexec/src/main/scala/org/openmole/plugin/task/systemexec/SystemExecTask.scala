@@ -99,6 +99,8 @@ object SystemExecTask {
 
   override protected def process(executionContext: TaskExecutionContext) = FromContext { p ⇒
     import p._
+    import executionContext._
+
     External.withWorkDir(executionContext) { tmpDir ⇒
       val workDir =
         workDirectory match {

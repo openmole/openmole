@@ -110,6 +110,7 @@ object UDockerTask {
 
   override protected def process(executionContext: TaskExecutionContext) = FromContext[Context] { parameters ⇒
     import parameters._
+    import executionContext._
 
     val layersDirectory = executionContext.workspace.persistentDir /> "udocker" /> "layers"
     val repoDirectory = executionContext.tmpDirectory /> image.id /> "repo"
@@ -223,7 +224,7 @@ object UDockerTask {
       val pulledImage = executionContext.cache.getOrElseUpdate(pulledImageIdKey, pullImage)
 
       def newContainer() =
-        executionContext.newFile.withTmpDir { tmpDirectory ⇒
+        newFile.withTmpDir { tmpDirectory ⇒
           val name = containerName(UUID.randomUUID().toString)
           val commandline = commandLine(s"${udocker.getAbsolutePath} create --name=${name} ${pulledImage.pulledImageId}")
           execute(commandline, tmpDirectory, udockerVariables, returnOutput = true, returnError = true)
