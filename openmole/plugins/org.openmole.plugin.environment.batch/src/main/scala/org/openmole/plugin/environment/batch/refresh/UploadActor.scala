@@ -45,7 +45,7 @@ object UploadActor extends Logger {
 
     val job = msg.job
     if (!job.state.isFinal) {
-      try job.trySelectStorage match {
+      try job.trySelectStorage(jobFiles(job)) match {
         case Some((storage, token)) ⇒
           try {
             implicit val implicitToken = token
@@ -62,6 +62,12 @@ object UploadActor extends Logger {
       }
     }
   }
+
+  private def jobFiles(job: BatchExecutionJob) =
+    job.pluginsAndFiles.files.toVector ++
+      job.pluginsAndFiles.plugins ++
+      job.environment.plugins() ++
+      Seq(job.environment.jvmLinuxX64, job.environment.runtime)
 
   private def initCommunication(job: BatchExecutionJob, storage: StorageService)(implicit token: AccessToken, services: BatchEnvironment.Services): SerializedJob = services.newFile.withTmpFile("job", ".tar") { jobFile ⇒
     import services._
