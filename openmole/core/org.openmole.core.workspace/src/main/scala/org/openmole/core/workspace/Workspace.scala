@@ -59,18 +59,6 @@ object Workspace {
 
   lazy val instance = Workspace(defaultLocation)
 
-  //  def reset(workspace: Workspace, preference: Preference) = {
-  //    workspace.persistentDir.recursiveDelete
-  //    preference.clear()
-  //    //
-  //    //    val uniqueId = preference(uniqueIDLocation)
-  //    //    try configurationFile.clear()
-  //    //    finally {
-  //    //      _password = None
-  //    //      setPreference(uniqueIDLocation, uniqueId)
-  //    //    }
-  //  }
-
   def clean(ws: Workspace) = ws.tmpDir.recursiveDelete
 }
 

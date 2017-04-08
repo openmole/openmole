@@ -163,6 +163,8 @@ object Application extends Logger {
     config.loggerLevel.foreach(LoggerService.level)
     val workspaceDirectory = config.workspace.getOrElse(org.openmole.core.db.defaultOpenMOLEDirectory)
     implicit val workspace = Workspace(workspaceDirectory)
+    import org.openmole.tool.thread._
+    Runtime.getRuntime.addShutdownHook(thread(Workspace.clean(workspace)))
 
     DBServerRunning.useDB(org.openmole.core.db.dbDirectory(workspaceDirectory)) {
 

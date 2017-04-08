@@ -30,6 +30,7 @@ package object thread {
   implicit def future2Function[A](f: Future[A]) = () ⇒ f.get
   implicit def function2Callable[F](f: ⇒ F) = new Callable[F] { def call = f }
   implicit def function2Runable(f: ⇒ Unit) = new Runnable { def run = f }
+  def thread(f: ⇒ Unit) = new Thread { override def run = f }
 
   def background[F](f: ⇒ F)(implicit pool: ThreadPoolExecutor): Future[F] = pool.submit(f)
 
