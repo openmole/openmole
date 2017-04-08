@@ -22,6 +22,7 @@ import java.io.File
 import fr.iscpif.gridscale.egi.{ BDII, GlobusAuthentication }
 import fr.iscpif.gridscale.tools.findWorking
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
+import org.openmole.core.fileservice.FileService
 import org.openmole.core.replication.ReplicaCatalog
 import org.openmole.core.tools.math._
 import org.openmole.core.workspace._
@@ -38,9 +39,6 @@ import org.openmole.plugin.environment.egi.BDIIStorageServers.Log._
 trait BDIIStorageServers extends BatchEnvironment { env ⇒
   import services._
 
-  implicit val preferences = services.preference
-  implicit val threadProvider = services.threadProvider
-
   type SS = EGIStorageService
 
   def bdiis: Seq[BDII]
@@ -53,22 +51,27 @@ trait BDIIStorageServers extends BatchEnvironment { env ⇒
     val webdavStorages = findWorking(bdiis, (b: BDII) ⇒ b.queryWebDAVLocations(voName))
     if (!webdavStorages.isEmpty) {
       logger.fine("Use webdav storages:" + webdavStorages.mkString(","))
+      implicit def preference = services.preference
       webdavStorages.map { s ⇒ EGIWebDAVStorageService(s, env, voName, debug, proxyCreator) }
     }
     else throw new UserBadDataError("No WebDAV storage available for the VO")
   }
 
-  def trySelectAStorage(usedFileHashes: Iterable[(File, Hash)]) = {
+  def trySelectAStorage(usedFiles: Vector[File]) = {
     import EGIEnvironment._
 
     val sss = storages
     if (sss.isEmpty) throw new InternalProcessingError("No storage service available for the environment.")
 
     val nonEmpty = sss.filter(!_.usageControl.isEmpty)
-    lazy val sizes = usedFileHashes.map { case (f, _) ⇒ f → f.size }.toMap
-    lazy val totalFileSize = sizes.values.sum
 
-    lazy val onStorage = replicaCatalog.inCatalog
+    case class FileInfo(size: Long, hash: String)
+    lazy val usedFilesInfo = usedFiles.map { f ⇒ f → FileInfo(f.size, fileService.hash(f).toString) }.toMap
+
+    lazy val totalFileSize = usedFilesInfo.values.toSeq.map(_.size).sum
+
+    lazy val onStorage = replicaCatalog.forHashes(usedFilesInfo.values.toSeq.map(_.hash), sss.map(_.id)).groupBy(_.storage)
+
     lazy val maxTime = nonEmpty.map(_.usageControl.time).max
     lazy val minTime = nonEmpty.map(_.usageControl.time).min
 
@@ -77,7 +80,7 @@ trait BDIIStorageServers extends BatchEnvironment { env ⇒
     lazy val minAvailability = availablities.min
 
     def rate(ss: EGIStorageService) = {
-      val sizesOnStorage = usedFileHashes.filter { case (_, h) ⇒ onStorage.getOrElse(ss.id, Set.empty).contains(h.toString) }.map { case (f, _) ⇒ sizes(f) }
+      val sizesOnStorage = usedFilesInfo.filter { case (_, info) ⇒ onStorage.getOrElse(ss.id, Set.empty).exists(_.hash == info.hash) }.values.map { _.size }
       val sizeOnStorage = sizesOnStorage.sum
 
       val sizeFactor = if (totalFileSize != 0) sizeOnStorage.toDouble / totalFileSize else 0.0
@@ -97,6 +100,7 @@ trait BDIIStorageServers extends BatchEnvironment { env ⇒
       )
     }
 
+    implicit def preference = services.preference
     select(sss.toList, rate)
   }
 

@@ -122,11 +122,13 @@ object GetResultActor extends Logger {
             }.toMap
 
           val res = serializerService.deserialiseReplaceFiles[ContextResults](serializedResults.contextResults, fileReplacement)
+          fileReplacement.values.foreach(services.fileService.deleteWhenGarbageCollected)
           serializedResults.contextResults.delete()
           res
         }
       case serializedResults: ArchiveContextResults ⇒
-        val res = serializerService.deserialiseAndExtractFiles[ContextResults](serializedResults.contextResults)
+        val (res, files) = serializerService.deserialiseAndExtractFiles[ContextResults](serializedResults.contextResults)
+        files.foreach(services.fileService.deleteWhenGarbageCollected)
         serializedResults.contextResults.delete()
         res
     }

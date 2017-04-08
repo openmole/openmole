@@ -95,18 +95,18 @@ class SerializerService { service ⇒
 
   def deserialise[T](is: InputStream): T = lock.read(xstream.fromXML(is).asInstanceOf[T])
 
-  def deserialiseAndExtractFiles[T](file: File)(implicit newFile: NewFile): T = {
+  def deserialiseAndExtractFiles[T](file: File)(implicit newFile: NewFile): (T, Iterable[File]) = {
     val tis = new TarInputStream(file.bufferedInputStream)
     try deserialiseAndExtractFiles(tis)
     finally tis.close
   }
 
-  def deserialiseAndExtractFiles[T](tis: TarInputStream)(implicit newFile: NewFile): T = lock.read {
+  def deserialiseAndExtractFiles[T](tis: TarInputStream)(implicit newFile: NewFile): (T, Iterable[File]) = lock.read {
     newFile.withTmpDir { archiveExtractDir ⇒
       tis.extract(archiveExtractDir)
       val fileReplacement = fileSerialisation.exec(_.deserialiseFileReplacements(archiveExtractDir))
       val contentFile = new File(archiveExtractDir, content)
-      deserialiseReplaceFiles[T](contentFile, fileReplacement)
+      (deserialiseReplaceFiles[T](contentFile, fileReplacement), fileReplacement.values)
     }
   }
 

@@ -137,7 +137,7 @@ class Runtime {
       /* --- Submit all jobs to the local environment --*/
       logger.fine("Run the jobs")
       val environment = LocalEnvironment(nbThreads = threads)
-      val taskExecutionContext = TaskExecutionContext(newFile.newDir("runtime"), environment, preference, threadProvider, workspace, KeyValueCache())
+      val taskExecutionContext = TaskExecutionContext(newFile.newDir("runtime"), environment, preference, threadProvider, fileService, workspace, KeyValueCache())
       for (toProcess ← allMoleJobs) environment.submit(toProcess, taskExecutionContext)
 
       saver.waitAllFinished

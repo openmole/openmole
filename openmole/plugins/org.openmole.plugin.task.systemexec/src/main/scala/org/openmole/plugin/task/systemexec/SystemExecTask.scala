@@ -99,6 +99,8 @@ object SystemExecTask {
 
   override protected def process(executionContext: TaskExecutionContext) = FromContext { p ⇒
     import p._
+    import executionContext._
+
     External.withWorkDir(executionContext) { tmpDir ⇒
       val workDir =
         workDirectory match {
@@ -127,8 +129,8 @@ object SystemExecTask {
         osCommandLines.toList
       )(p.copy(context = preparedContext))
 
-      val retContext: Context = external.fetchOutputFiles(preparedContext, external.relativeResolver(workDir))
-      external.checkAndClean(this, retContext, tmpDir)
+      val retContext: Context = external.fetchOutputFiles(this, preparedContext, external.relativeResolver(workDir))
+      external.cleanWorkDirectory(this, retContext, tmpDir)
 
       retContext ++
         List(

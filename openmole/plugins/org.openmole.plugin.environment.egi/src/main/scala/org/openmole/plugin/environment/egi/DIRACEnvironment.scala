@@ -17,6 +17,7 @@
 
 package org.openmole.plugin.environment.egi
 
+import java.io.File
 import java.net.URI
 
 import fr.iscpif.gridscale.egi.BDII
@@ -73,8 +74,9 @@ object DIRACEnvironment {
 }
 
 class DiracBatchExecutionJob(val job: Job, val environment: DIRACEnvironment) extends BatchExecutionJob {
+  import environment.services._
 
-  def trySelectStorage() = environment.trySelectAStorage(usedFileHashes)
+  def trySelectStorage(files: ⇒ Vector[File]) = environment.trySelectAStorage(files)
 
   def trySelectJobService() = {
     val js = environment.jobService
@@ -100,6 +102,7 @@ class DIRACEnvironment(
   type JS = DIRACJobService
 
   val registerAgents = Cache {
+    implicit def threadProvider = services.threadProvider
     Updater.delay(new EagerSubmissionAgent(WeakReference(this)))
     None
   }

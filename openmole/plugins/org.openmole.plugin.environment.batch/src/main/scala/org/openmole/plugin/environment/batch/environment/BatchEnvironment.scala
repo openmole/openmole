@@ -156,8 +156,8 @@ trait BatchEnvironment extends SubmissionEnvironment { env ⇒
   type JS <: JobService
 
   implicit val services: BatchEnvironment.Services
-  def preference = services.preference
-  def eventDispatcher = services.eventDispatcher
+  implicit def preference = services.preference
+  implicit def eventDispatcher = services.eventDispatcher
 
   def jobs = batchJobWatcher().executionJobs
 
@@ -200,7 +200,7 @@ trait BatchEnvironment extends SubmissionEnvironment { env ⇒
 
 class SimpleBatchExecutionJob(val job: Job, val environment: SimpleBatchEnvironment) extends ExecutionJob with BatchExecutionJob { bej ⇒
 
-  def trySelectStorage() = {
+  def trySelectStorage(files: ⇒ Vector[File]) = {
     val s = environment.storage
     s.tryGetToken.map(t ⇒ (s, t))
   }
@@ -273,7 +273,7 @@ trait BatchExecutionJob extends ExecutionJob { bej ⇒
 
   def environment: BatchEnvironment
 
-  def trySelectStorage(): Option[(StorageService, AccessToken)]
+  def trySelectStorage(files: ⇒ Vector[File]): Option[(StorageService, AccessToken)]
   def trySelectJobService(): Option[(JobService, AccessToken)]
 
 }

@@ -20,9 +20,10 @@ package org.openmole.plugin.task.external
 import java.io.File
 
 import monocle.macros.Lenses
-import org.openmole.core.context.{ Context, Val, Variable }
+import org.openmole.core.context.{ Context, Val, ValType, Variable }
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.expansion.FromContext
+import org.openmole.core.fileservice.FileService
 import org.openmole.core.tools.service.OS
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.task._
@@ -130,13 +131,6 @@ import org.openmole.plugin.task.external.External._
     resolved.toFile
   }
 
-  protected def outputFileVariables(context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: NewFile) =
-    outputFiles.map {
-      case OutputFile(name, prototype) ⇒
-        val fileName = name.from(context)
-        Variable(prototype, resolver(fileName))
-    }
-
   private def copyFile(f: ToPut, to: File) = {
     to.createParentDir
 
@@ -184,22 +178,31 @@ import org.openmole.plugin.task.external.External._
     (context ++ copiedFilesVariable ++ copiedArrayFilesVariable, allFileInfo)
   }
 
-  def fetchOutputFiles(context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: NewFile): Context =
-    context ++ outputFileVariables(context, resolver)
+  protected def outputFileVariables(context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: NewFile) =
+    outputFiles.map {
+      case OutputFile(name, prototype) ⇒
+        val fileName = name.from(context)
+        val file = resolver(fileName)
+        Variable(prototype, file)
+    }
 
-  def checkAndClean(task: Task, context: Context, rootDir: File) = {
-    lazy val contextFiles =
-      InputOutputCheck.filterOutput(task.outputs, context).values.map(_.value).collect { case f: File ⇒ f }
+  def contextFiles(task: Task, context: Context): Seq[Variable[File]] =
+    InputOutputCheck.filterOutput(task.outputs, context).values.filter { v ⇒ v.prototype.`type` == ValType[File] }.map(_.asInstanceOf[Variable[File]]).toSeq
+
+  def fetchOutputFiles(task: Task, context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: NewFile, fileService: FileService): Context = {
+
+    val fileOutputs = outputFileVariables(context, resolver)
 
     for {
-      f ← contextFiles
-      if !f.exists
-    } throw new UserBadDataError("Output file " + f.getAbsolutePath + s" doesn't exist, parent directory ${f.getParentFileSafe} contains [" + f.getParentFileSafe.listFilesSafe.map(_.getName).mkString(", ") + "]")
+      f ← (fileOutputs ++ contextFiles(task, context)).distinct
+      if !f.value.exists
+    } throw new UserBadDataError("Output file " + f.value.getAbsolutePath + s" (stored in variable ${f.prototype}) doesn't exist, parent directory ${f.value.getParentFileSafe} contains [" + f.value.getParentFileSafe.listFilesSafe.map(_.getName).mkString(", ") + "]")
 
-    rootDir.applyRecursive(f ⇒ f.delete, contextFiles)
-
-    // This delete the dir only if it is empty
-    rootDir.delete
+    fileOutputs.foreach(f ⇒ fileService.deleteWhenGarbageCollected(f.value))
+    context ++ fileOutputs
   }
+
+  def cleanWorkDirectory(task: Task, context: Context, rootDirectory: File) =
+    rootDirectory.applyRecursive(f ⇒ f.delete, contextFiles(task, context).map(_.value))
 
 }

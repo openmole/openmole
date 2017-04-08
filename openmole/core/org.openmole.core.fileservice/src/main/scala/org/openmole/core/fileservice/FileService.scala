@@ -33,7 +33,7 @@ import org.openmole.tool.thread._
 import squants._
 import squants.time.TimeConversions._
 
-import scala.collection.mutable.WeakHashMap
+import scala.collection.mutable.{ ListBuffer, WeakHashMap }
 import scala.ref.WeakReference
 
 object FileService {
@@ -64,6 +64,8 @@ class FileService(implicit preference: Preference) {
       expireAfterAccess(preference(FileService.archiveCacheTime).millis, TimeUnit.MILLISECONDS).
       build[String, FileCache]()
 
+  private[fileservice] val deleteEmpty = ListBuffer[File]()
+
   def hash(file: File)(implicit newFile: NewFile): Hash = {
     def hash = computeHash(if (file.isDirectory) archiveForDir(file).file else file)
     hashCache.get(file.getCanonicalPath, hash)
@@ -81,13 +83,14 @@ class FileService(implicit preference: Preference) {
 
   private val fileDeleter = new FileDeleter(WeakReference(this))
   private val gc = new FileServiceGC(WeakReference(this))
-
   private val deleters = new WeakHashMap[File, DeleteOnFinalize]
 
   def deleteWhenGarbageCollected(file: File): File = deleters.synchronized {
     deleters += file → new DeleteOnFinalize(file.getAbsolutePath, fileDeleter)
     file
   }
+
+  def deleteWhenEmpty(directory: File) = deleteEmpty.synchronized { deleteEmpty += directory }
 
   def assynchonousRemove(file: File): Boolean = fileDeleter.assynchonousRemove(file)
 

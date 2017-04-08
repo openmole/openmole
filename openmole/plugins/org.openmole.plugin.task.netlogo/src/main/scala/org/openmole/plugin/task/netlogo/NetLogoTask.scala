@@ -95,8 +95,10 @@ trait NetLogoTask extends Task with ValidateTask {
 
           for (cmd ← launchingCommands.map(_.from(context))) executeNetLogo(cmd)
 
+          import executionContext._
+
           val contextResult =
-            external.fetchOutputFiles(preparedContext, external.relativeResolver(workDir)) ++ netLogoOutputs.map {
+            external.fetchOutputFiles(this, preparedContext, external.relativeResolver(workDir)) ++ netLogoOutputs.map {
               case (name, prototype) ⇒
                 try {
                   val outputValue = netLogo.report(name)
@@ -125,7 +127,7 @@ trait NetLogoTask extends Task with ValidateTask {
                 }
             }
 
-          external.checkAndClean(this, contextResult, tmpDir)
+          external.cleanWorkDirectory(this, contextResult, tmpDir)
           contextResult
         }
         finally netLogo.dispose

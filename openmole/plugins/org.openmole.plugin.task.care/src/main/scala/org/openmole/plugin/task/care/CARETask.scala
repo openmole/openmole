@@ -89,6 +89,7 @@ object CARETask extends Logger {
   override def validate: Seq[Throwable] = container.validateContainer(validateArchive)(archive, command, environmentVariables, external, this.inputs)
 
   override protected def process(executionContext: TaskExecutionContext) = FromContext[Context] { parameters ⇒
+    import executionContext._
     External.withWorkDir(executionContext) { taskWorkDirectory ⇒
       import parameters.random
       import parameters.newFile
@@ -177,8 +178,9 @@ object CARETask extends Logger {
 
       def outputPathResolver = container.outputPathResolver(preparedFileBindings, hostFileBindings, inputDirectory, userWorkDirectory, rootDirectory) _
 
-      val retContext = external.fetchOutputFiles(preparedContext, outputPathResolver)
-      external.checkAndClean(this, retContext, taskWorkDirectory)
+      val retContext = external.fetchOutputFiles(this, preparedContext, outputPathResolver)
+
+      external.cleanWorkDirectory(this, retContext, taskWorkDirectory)
 
       retContext ++
         List(

@@ -22,6 +22,7 @@ import java.io.File
 import org.openmole.core.threadprovider.IUpdatable
 import scala.ref.WeakReference
 import collection.JavaConverters._
+import org.openmole.tool.file._
 
 class FileServiceGC(fileService: WeakReference[FileService]) extends IUpdatable {
 
@@ -43,6 +44,13 @@ class FileServiceGC(fileService: WeakReference[FileService]) extends IUpdatable 
           } yield file
 
         fileService.hashCache.invalidateAll(invalidateHash.asJava)
+
+        fileService.deleteEmpty.synchronized {
+          val (empty, nonEmpty) = fileService.deleteEmpty.span(_.directoryIsEmpty)
+          empty.foreach(_.delete())
+          fileService.deleteEmpty.clear()
+          fileService.deleteEmpty ++= nonEmpty
+        }
 
         true
       case None ⇒ false
