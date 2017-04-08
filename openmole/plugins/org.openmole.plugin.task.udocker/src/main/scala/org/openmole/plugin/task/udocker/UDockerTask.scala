@@ -279,8 +279,8 @@ object UDockerTask {
             List(runCommand)
           )(parameters.copy(context = preparedContext))
 
-          val retContext = external.fetchOutputFiles(preparedContext, outputPathResolver(rootDirectory))
-          external.checkAndClean(this, retContext, taskWorkDirectory)
+          val retContext = external.fetchOutputFiles(this, preparedContext, outputPathResolver(rootDirectory))
+          external.cleanWorkDirectory(this, retContext, taskWorkDirectory)
           (retContext, executionResult)
         }
 

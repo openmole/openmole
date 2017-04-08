@@ -46,10 +46,11 @@ public class DirUtils {
    * @throws IOException
    * @see DirUtils.copy
    */
-  public static void move(Path from, Path to) throws IOException {
+  public static Path move(Path from, Path to) throws IOException {
     validate(from);
     DirUtils.copy(from, to);
     DirUtils.delete(from);
+    return to;
   }
 
   /**

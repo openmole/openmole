@@ -183,7 +183,9 @@ package file {
 
       def isSymbolicLink = Files.isSymbolicLink(Paths.get(file.getAbsolutePath))
 
-      def dirContainsNoFileRecursive: Boolean = {
+      def directoryIsEmpty = file.withDirectoryStream(_.iterator().isEmpty)
+
+      def directoryContainsNoFileRecursive: Boolean = {
         val toProceed = new ListBuffer[File]
         toProceed += file
 
@@ -309,8 +311,9 @@ package file {
        * @param prefix String to prefix the generated UUID name.
        * @return New temporary directory
        */
-      def newDir(prefix: String): File = {
+      def newDir(prefix: String, create: Boolean = false): File = {
         val tempDir = Paths.get(file.toString, prefix + UUID.randomUUID)
+        if (create) tempDir.mkdirs()
         tempDir.toFile
       }
 
