@@ -38,6 +38,7 @@ package file {
   import java.nio.file.attribute.PosixFilePermissions
   import java.util.concurrent.ThreadPoolExecutor
 
+  import org.openmole.tool.file
   import squants.time.Time
 
   trait FilePackage {
@@ -432,6 +433,8 @@ package file {
 
       def applyRecursive(operation: File ⇒ Unit, stopPath: Iterable[File]): Unit =
         recurse(file)(operation, stopPath)
+
+      def isAParentOf(f: File) = f.getCanonicalPath.startsWith(file.getCanonicalPath)
     }
 
     private def block(file: File, stopPath: Iterable[File]) =

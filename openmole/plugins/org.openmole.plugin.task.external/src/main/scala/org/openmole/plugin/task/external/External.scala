@@ -189,7 +189,7 @@ import org.openmole.plugin.task.external.External._
   def contextFiles(task: Task, context: Context): Seq[Variable[File]] =
     InputOutputCheck.filterOutput(task.outputs, context).values.filter { v ⇒ v.prototype.`type` == ValType[File] }.map(_.asInstanceOf[Variable[File]]).toSeq
 
-  def fetchOutputFiles(task: Task, context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: NewFile, fileService: FileService): Context = {
+  def fetchOutputFiles(task: Task, context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: NewFile): Context = {
 
     val fileOutputs = outputFileVariables(context, resolver)
 
@@ -198,11 +198,19 @@ import org.openmole.plugin.task.external.External._
       if !f.value.exists
     } throw new UserBadDataError("Output file " + f.value.getAbsolutePath + s" (stored in variable ${f.prototype}) doesn't exist, parent directory ${f.value.getParentFileSafe} contains [" + f.value.getParentFileSafe.listFilesSafe.map(_.getName).mkString(", ") + "]")
 
-    fileOutputs.foreach(f ⇒ fileService.deleteWhenGarbageCollected(f.value))
     context ++ fileOutputs
   }
 
-  def cleanWorkDirectory(task: Task, context: Context, rootDirectory: File) =
-    rootDirectory.applyRecursive(f ⇒ f.delete, contextFiles(task, context).map(_.value))
+  def cleanWorkDirectory(task: Task, context: Context, rootDirectory: File)(implicit fileService: FileService) = {
+    val ctxFiles = contextFiles(task, context)
+
+    for {
+      f ← ctxFiles
+      if rootDirectory.isAParentOf(f.value)
+    } fileService.deleteWhenGarbageCollected(f.value)
+
+    rootDirectory.applyRecursive(f ⇒ f.delete, ctxFiles.map(_.value))
+    rootDirectory.applyRecursive(f ⇒ if (f.isDirectory) fileService.deleteWhenEmpty(f), ctxFiles.map(_.value))
+  }
 
 }
