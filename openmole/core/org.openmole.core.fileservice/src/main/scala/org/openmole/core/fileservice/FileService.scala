@@ -37,7 +37,7 @@ import scala.collection.mutable.{ ListBuffer, WeakHashMap }
 import scala.ref.WeakReference
 
 object FileService {
-  val GCInterval = ConfigurationLocation("FileService", "GCInterval", Some(5 minutes))
+  val GCInterval = ConfigurationLocation("FileService", "GCInterval", Some(1 minutes))
 
   val hashCacheSize = ConfigurationLocation("FileService", "HashCacheSize", Some(1000))
   val hashCacheTime = ConfigurationLocation("FileService", "HashCacheTime", Some(10 minutes))
@@ -90,7 +90,10 @@ class FileService(implicit preference: Preference) {
     file
   }
 
-  def deleteWhenEmpty(directory: File) = deleteEmpty.synchronized { deleteEmpty += directory }
+  def deleteWhenEmpty(directory: File) = deleteEmpty.synchronized {
+    println("delete when empty " + directory)
+    deleteEmpty += directory
+  }
 
   def assynchonousRemove(file: File): Boolean = fileDeleter.assynchonousRemove(file)
 

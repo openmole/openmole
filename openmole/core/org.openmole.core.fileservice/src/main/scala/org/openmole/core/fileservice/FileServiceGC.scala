@@ -46,8 +46,13 @@ class FileServiceGC(fileService: WeakReference[FileService]) extends IUpdatable 
         fileService.hashCache.invalidateAll(invalidateHash.asJava)
 
         fileService.deleteEmpty.synchronized {
-          val (empty, nonEmpty) = fileService.deleteEmpty.span(_.directoryIsEmpty)
-          empty.foreach(_.delete())
+          def deleteEmpty(files: Vector[File]): Vector[File] = {
+            val (empty, nonEmpty) = files.partition(_.directoryIsEmpty)
+            empty.foreach { f ⇒ f.recursiveDelete }
+            if (!empty.isEmpty) deleteEmpty(nonEmpty) else nonEmpty
+          }
+
+          val nonEmpty = deleteEmpty(fileService.deleteEmpty.toVector)
           fileService.deleteEmpty.clear()
           fileService.deleteEmpty ++= nonEmpty
         }
