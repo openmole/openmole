@@ -66,18 +66,21 @@ trait BDIIStorageServers extends BatchEnvironment { env ⇒
     val nonEmpty = sss.filter(!_.usageControl.isEmpty)
 
     case class FileInfo(size: Long, hash: String)
+
     lazy val usedFilesInfo = usedFiles.map { f ⇒ f → FileInfo(f.size, fileService.hash(f).toString) }.toMap
-
     lazy val totalFileSize = usedFilesInfo.values.toSeq.map(_.size).sum
+    lazy val onStorage = replicaCatalog.forHashes(usedFilesInfo.values.toVector.map(_.hash), sss.map(_.id)).groupBy(_.storage)
 
-    lazy val onStorage = replicaCatalog.forHashes(usedFilesInfo.values.toSeq.map(_.hash), sss.map(_.id)).groupBy(_.storage)
+    def minOption(v: Seq[Double]) = if (v.isEmpty) None else Some(v.min)
+    def maxOption(v: Seq[Double]) = if (v.isEmpty) None else Some(v.max)
 
-    lazy val maxTime = nonEmpty.map(_.usageControl.time).max
-    lazy val minTime = nonEmpty.map(_.usageControl.time).min
+    val times = sss.flatMap(_.usageControl.time)
+    val maxTime = maxOption(times)
+    val minTime = minOption(times)
 
-    lazy val availablities = nonEmpty.map(_.usageControl.availability)
-    lazy val maxAvailability = availablities.max
-    lazy val minAvailability = availablities.min
+    val availablities = nonEmpty.flatMap(_.usageControl.availability)
+    val maxAvailability = maxOption(availablities)
+    val minAvailability = minOption(availablities)
 
     def rate(ss: EGIStorageService) = {
       val sizesOnStorage = usedFilesInfo.filter { case (_, info) ⇒ onStorage.getOrElse(ss.id, Set.empty).exists(_.hash == info.hash) }.values.map { _.size }
@@ -85,17 +88,23 @@ trait BDIIStorageServers extends BatchEnvironment { env ⇒
 
       val sizeFactor = if (totalFileSize != 0) sizeOnStorage.toDouble / totalFileSize else 0.0
 
-      val time = ss.usageControl.time
-      val timeFactor = if (minTime == maxTime) 1.0 else 1.0 - time.normalize(minTime, maxTime)
+      val timeFactor =
+        (minTime, maxTime, ss.usageControl.time) match {
+          case (Some(minTime), Some(maxTime), Some(time)) if (maxTime > minTime) ⇒ 0.0 - time.normalize(minTime, maxTime)
+          case _ ⇒ 0.0
+        }
 
-      val availability = ss.usageControl.availability
-      val availabilityFactor = if (minAvailability == maxAvailability) 1.0 else 1.0 - availability.normalize(minTime, maxTime)
+      val availabilityFactor =
+        (minAvailability, maxAvailability, ss.usageControl.availability) match {
+          case (Some(minAvailability), Some(maxAvailability), Some(availability)) if (maxAvailability > minAvailability) ⇒ 0.0 - availability.normalize(minAvailability, maxAvailability)
+          case _ ⇒ 0.0
+        }
 
       math.pow(
         preference(StorageSizeFactor) * sizeFactor +
           preference(StorageTimeFactor) * timeFactor +
           preference(StorageAvailabilityFactor) * availabilityFactor +
-          preference(StorageSuccessRateFactor) * ss.usageControl.successRate,
+          preference(StorageSuccessRateFactor) * ss.usageControl.successRate.getOrElse(0.0),
         preference(StorageFitnessPower)
       )
     }
