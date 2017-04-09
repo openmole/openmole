@@ -85,33 +85,24 @@ object DBServer extends App {
       Database.forDriver(driver = new org.h2.Driver, url = dbURL, user = user, password = password)
     }
 
-    def createDB(user: String, password: String): Unit = {
-      Logger.getLogger(this.getClass.getName).info("Create BDD")
-      fullDataBaseFile.delete
-
-      val h2 = database(user, "")
-
-      Await.result(h2.run(db.replicas.schema.create), Duration.Inf)
-
-      val session = h2.createSession()
-
-      try session.withStatement() {
-        _.execute(s"SET PASSWORD '$password';")
+    def createNewDatabase(user: String = "sa", password: String = UUID.randomUUID.toString.filter(_.isLetterOrDigit)) = {
+      def createDB(user: String, password: String): Unit = {
+        Logger.getLogger(this.getClass.getName).info("Create BDD")
+        fullDataBaseFile.delete
+        val h2 = database(user, "")
+        Await.result(h2.run(db.replicas.schema.create), Duration.Inf)
+        val session = h2.createSession()
+        try session.withStatement() {
+          _.execute(s"SET PASSWORD '$password';")
+        }
+        finally session.close()
       }
-      finally session.close()
 
+      createDB(user, password)
+      new DBServerInfo(server.getPort, user, password)
     }
 
-    val info =
-      if (!db.dbInfoFile(dbDirectory).exists || !fullDataBaseFile.exists) {
-        val user = "sa"
-        val password = UUID.randomUUID.toString.filter(_.isLetterOrDigit)
-        createDB(user, password)
-        new DBServerInfo(server.getPort, user, password)
-      }
-      else db.load(db.dbInfoFile(dbDirectory)).copy(port = server.getPort)
-
-    def dbWorks =
+    def dbWorks(info: DBServerInfo) =
       Try {
         val connection = database(info.user, info.password)
         Await.result(connection.run(db.replicas.size.result), Duration.Inf)
@@ -120,7 +111,12 @@ object DBServer extends App {
         case Success(r) ⇒ true
       }
 
-    if (!dbWorks) createDB(info.user, info.password)
+    val info =
+      if (!db.dbInfoFile(dbDirectory).exists || !fullDataBaseFile.exists) createNewDatabase()
+      else Try(db.load(db.dbInfoFile(dbDirectory)).copy(port = server.getPort)) match {
+        case Success(info) ⇒ if (!dbWorks(info)) createNewDatabase(info.user, info.password) else info
+        case Failure(_)    ⇒ createNewDatabase()
+      }
 
     val newFile = NewFile(dbDirectory)
 

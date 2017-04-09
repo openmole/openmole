@@ -25,7 +25,7 @@ import java.util.regex.Pattern
 import com.google.common.cache._
 import org.openmole.core.db
 import org.openmole.core.preference._
-import org.openmole.core.db.{ Replica, replicas }
+import org.openmole.core.db.{ DBServerInfo, Replica, replicas }
 import org.openmole.core.workspace.Workspace
 import org.openmole.tool.cache.TimeCache
 import org.openmole.tool.lock.LockRepository
@@ -47,9 +47,9 @@ object ReplicaCatalog extends Logger {
   val LockTimeout = ConfigurationLocation("ReplicaCatalog", "LockTimeout", Some(1 minutes))
   val CheckFileExistsInterval = ConfigurationLocation("ReplicaCatalog", "CheckFileExistsInterval", Some(1 hours))
 
-  def apply()(implicit preference: Preference, workspace: Workspace): ReplicaCatalog = {
+  def apply(dbServerInfo: DBServerInfo)(implicit preference: Preference, workspace: Workspace): ReplicaCatalog = {
     val dbDirectory = org.openmole.core.db.dbDirectory(workspace.location)
-    new ReplicaCatalog(org.openmole.core.db.databaseServer(dbDirectory, preference(LockTimeout)), preference)
+    new ReplicaCatalog(org.openmole.core.db.databaseServer(dbDirectory, dbServerInfo, preference(LockTimeout)), preference)
   }
 
   def apply(database: Database)(implicit preference: Preference): ReplicaCatalog =

@@ -166,7 +166,7 @@ object Application extends Logger {
     import org.openmole.tool.thread._
     Runtime.getRuntime.addShutdownHook(thread(Workspace.clean(workspace)))
 
-    DBServerRunning.useDB(org.openmole.core.db.dbDirectory(workspaceDirectory)) {
+    DBServerRunning.useDB(org.openmole.core.db.dbDirectory(workspaceDirectory)) { dbInfo ⇒
 
       def loadPlugins = {
         val (existingUserPlugins, notExistingUserPlugins) = config.userPlugins.span(new File(_).exists)
@@ -212,7 +212,7 @@ object Application extends Logger {
             Console.ExitCodes.incorrectPassword
           }
           else {
-            Services.withServices(workspaceDirectory, passwordString) { services ⇒
+            Services.withServices(workspaceDirectory, passwordString, dbInfo) { services ⇒
               val server = new RESTServer(config.port, config.hostName, services)
               server.run()
             }
@@ -234,7 +234,7 @@ object Application extends Logger {
             print(consoleSplash)
             println(consoleUsage)
             Console.dealWithLoadError(loadPlugins, !config.scriptFile.isDefined)
-            Services.withServices(workspaceDirectory, passwordString) { implicit services ⇒
+            Services.withServices(workspaceDirectory, passwordString, dbInfo) { implicit services ⇒
               val console = new Console(config.scriptFile)
               console.run(config.args, config.consoleWorkDirectory)
             }
@@ -262,7 +262,7 @@ object Application extends Logger {
 
               GUIServer.urlFile.content = url
 
-              GUIServices.withServices(workspace) { services ⇒
+              GUIServices.withServices(workspace, dbInfo) { services ⇒
                 val server = new GUIServer(port, config.remote, useHTTP, services, config.password)
                 server.start()
                 if (config.browse && !config.remote) browse(url)

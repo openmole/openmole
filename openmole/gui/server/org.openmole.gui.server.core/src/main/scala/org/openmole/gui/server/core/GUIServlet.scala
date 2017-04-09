@@ -31,6 +31,7 @@ import java.io.File
 import java.util.concurrent.atomic.AtomicReference
 
 import org.openmole.core.authentication.AuthenticationStore
+import org.openmole.core.db.DBServerInfo
 import org.openmole.core.event.EventDispatcher
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.preference.Preference
@@ -69,14 +70,14 @@ object GUIServices {
     implicit def eventDispatcher: EventDispatcher = guiServices.eventDispatcher
   }
 
-  def apply(workspace: Workspace) = {
+  def apply(workspace: Workspace, dbServerInfo: DBServerInfo) = {
     implicit val ws = workspace
     implicit val preference = Preference(ws.persistentDir)
     implicit val newFile = NewFile(workspace)
     implicit val seeder = Seeder()
     implicit val serializerService = SerializerService()
     implicit val threadProvider = ThreadProvider()
-    implicit val replicaCatalog = ReplicaCatalog()
+    implicit val replicaCatalog = ReplicaCatalog(dbServerInfo)
     implicit val authenticationStore = AuthenticationStore(ws.persistentDir)
     implicit val fileService = FileService()
     implicit val randomProvider = RandomProvider(seeder.newRNG)
@@ -90,8 +91,8 @@ object GUIServices {
     scala.util.Try(services.threadProvider.stop())
   }
 
-  def withServices[T](workspace: Workspace)(f: GUIServices ⇒ T) = {
-    val services = GUIServices(workspace)
+  def withServices[T](workspace: Workspace, dbServerInfo: DBServerInfo)(f: GUIServices ⇒ T) = {
+    val services = GUIServices(workspace, dbServerInfo)
     try f(services)
     finally dispose(services)
   }

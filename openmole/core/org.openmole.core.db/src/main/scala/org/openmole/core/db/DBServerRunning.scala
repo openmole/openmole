@@ -21,6 +21,10 @@ import java.util.UUID
 
 import org.openmole.tool.logger._
 import org.openmole.tool.file._
+import org.openmole.tool.network._
+
+import scala.annotation.tailrec
+import scala.util._
 
 object DBServerRunning extends Logger {
 
@@ -37,18 +41,37 @@ object DBServerRunning extends Logger {
     dir
   }
 
-  def useDB[T](dbDirectory: File)(f: ⇒ T): T = {
+  def useDB[T](dbDirectory: File)(f: DBServerInfo ⇒ T): T = {
 
-    while (!dbInfoFile(dbDirectory).exists() || dbInfoFile(dbDirectory).isEmpty) {
-      Log.logger.info(s"Waiting for db info file ${dbInfoFile(dbDirectory)} to be created.")
-      Thread.sleep(100)
+    @tailrec def waitDBInfo(): DBServerInfo = {
+      def portIsOpened(dBServerInfo: DBServerInfo) = isPortAcceptingConnections("localhost", dBServerInfo.port)
+      def sleep = Thread.sleep(100)
+
+      if (dbInfoFile(dbDirectory).exists() && !dbInfoFile(dbDirectory).isEmpty)
+        Try(load(dbInfoFile(dbDirectory))) match {
+          case Success(info) ⇒
+            if (!portIsOpened(info)) {
+              sleep
+              waitDBInfo()
+            }
+            else info
+          case Failure(_) ⇒
+            sleep
+            waitDBInfo()
+        }
+      else {
+        sleep
+        waitDBInfo()
+      }
     }
+
+    val dbInfo = waitDBInfo()
 
     val locked = newRunningFile(dbDirectory)
     val os = new FileOutputStream(locked)
     try {
       val lock = os.getChannel.lock()
-      try f
+      try f(dbInfo)
       finally lock.release()
     }
     finally {
