@@ -91,7 +91,6 @@ class FileService(implicit preference: Preference) {
   }
 
   def deleteWhenEmpty(directory: File) = deleteEmpty.synchronized {
-    println("delete when empty " + directory)
     deleteEmpty += directory
   }
 
