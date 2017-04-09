@@ -167,7 +167,8 @@ class JobLauncher(cacheSize: Long, debug: Boolean)(implicit preference: Preferen
   }
 
   def uploadResult(localResultFile: File, communicationDir: String, job: String, storage: SimpleStorage) = {
-    val runtimeResult = serializerService.deserialiseAndExtractFiles[RuntimeResult](localResultFile)
+    val (runtimeResult, files) = serializerService.deserialiseAndExtractFiles[RuntimeResult](localResultFile)
+    files.foreach(fileService.deleteWhenGarbageCollected)
 
     logger.info(s"Uploading context results to communication dir $communicationDir")
 
