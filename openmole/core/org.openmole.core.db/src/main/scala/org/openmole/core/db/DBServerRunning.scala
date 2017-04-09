@@ -19,7 +19,10 @@ package org.openmole.core.db
 import java.io.{ File, FileOutputStream }
 import java.util.UUID
 
-object DBServerRunning {
+import org.openmole.tool.logger._
+import org.openmole.tool.file._
+
+object DBServerRunning extends Logger {
 
   def newRunningFile(dbDirectory: File) = {
     val f = new File(runningDirectory(dbDirectory), UUID.randomUUID().toString)
@@ -35,6 +38,12 @@ object DBServerRunning {
   }
 
   def useDB[T](dbDirectory: File)(f: ⇒ T): T = {
+
+    while (!dbInfoFile(dbDirectory).exists() || dbInfoFile(dbDirectory).isEmpty) {
+      Log.logger.info(s"Waiting for db info file ${dbInfoFile(dbDirectory)} to be created.")
+      Thread.sleep(100)
+    }
+
     val locked = newRunningFile(dbDirectory)
     val os = new FileOutputStream(locked)
     try {
