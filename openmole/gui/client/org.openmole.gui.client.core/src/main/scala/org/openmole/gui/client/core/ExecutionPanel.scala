@@ -376,12 +376,12 @@ class ExecutionPanel {
 
   def clearEnvErrors(environmentId: EnvironmentId) =
     post()[Api].clearEnvironmentErrors(environmentId).call().foreach { _ ⇒
-      envError() = envError() - environmentId
+      envError() = envError.now - environmentId
     }
 
   def updateEnvErrors(environmentId: EnvironmentId) =
     post()[Api].runningErrorEnvironmentData(environmentId, envErrorHistory.value.toInt).call().foreach { err ⇒
-      envError() = envError() + (environmentId → err)
+      envError() = envError.now + (environmentId → err)
     }
 
   def displaySize(size: Long, readable: String) =
