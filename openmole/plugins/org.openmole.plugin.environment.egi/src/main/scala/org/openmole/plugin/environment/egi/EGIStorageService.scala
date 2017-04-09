@@ -116,7 +116,7 @@ object EGIWebDAVStorageService {
         val remoteStorage = new CurlRemoteStorage(s.host, s.port, voName, preference(EGIEnvironment.RemoteCopyTimeout), debug)
         val environment = _environment
         val root = s.basePath
-        override lazy val id = new URI("webdavs", voName, s.host, s.port, s.basePath, null, null).toString
+        val id = new URI("webdavs", voName, s.host, s.port, s.basePath, null, null).toString
       }
     StorageService.startGC(storage)
     storage

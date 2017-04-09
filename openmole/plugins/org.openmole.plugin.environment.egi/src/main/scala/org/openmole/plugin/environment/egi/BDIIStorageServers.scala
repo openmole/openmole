@@ -67,9 +67,9 @@ trait BDIIStorageServers extends BatchEnvironment { env ⇒
 
     case class FileInfo(size: Long, hash: String)
 
-    lazy val usedFilesInfo = usedFiles.map { f ⇒ f → FileInfo(f.size, fileService.hash(f).toString) }.toMap
-    lazy val totalFileSize = usedFilesInfo.values.toSeq.map(_.size).sum
-    lazy val onStorage = replicaCatalog.forHashes(usedFilesInfo.values.toVector.map(_.hash), sss.map(_.id)).groupBy(_.storage)
+    val usedFilesInfo = usedFiles.map { f ⇒ f → FileInfo(f.size, fileService.hash(f).toString) }.toMap
+    val totalFileSize = usedFilesInfo.values.toSeq.map(_.size).sum
+    val onStorage = replicaCatalog.forHashes(usedFilesInfo.values.toVector.map(_.hash), sss.map(_.id)).groupBy(_.storage)
 
     def minOption(v: Seq[Double]) = if (v.isEmpty) None else Some(v.min)
     def maxOption(v: Seq[Double]) = if (v.isEmpty) None else Some(v.max)
