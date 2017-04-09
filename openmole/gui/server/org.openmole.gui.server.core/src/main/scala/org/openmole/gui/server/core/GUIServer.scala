@@ -101,7 +101,7 @@ class GUIServer(port: Int, localhost: Boolean, http: Boolean, services: GUIServi
   lazy val contextFactory = {
     val contextFactory = new org.eclipse.jetty.util.ssl.SslContextFactory()
     def keyStorePassword = "openmole"
-    val ks = KeyStore(services.workspace.persistentDir / "keystoregui", keyStorePassword)
+    val ks = KeyStore(services.workspace.persistentDir /> "keystoregui", keyStorePassword)
     contextFactory.setKeyStore(ks.keyStore)
     contextFactory.setKeyStorePassword(keyStorePassword)
     contextFactory.setKeyManagerPassword(keyStorePassword)
