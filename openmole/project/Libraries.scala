@@ -39,9 +39,9 @@ object Libraries {
 
   lazy val scalatra = "org.openmole.library" %% "org-scalatra" % "2.5.0"
   lazy val logback = "org.openmole.library" %% "ch-qos-logback" % "1.0.9"
-  lazy val h2 = "org.openmole.library" %% "org-h2" % "1.4.192"
+  lazy val h2 = "org.openmole.library" %% "org-h2" % "1.4.194"
   lazy val bonecp = "org.openmole.library" %% "com-jolbox-bonecp" % "0.8.0-rc1"
-  lazy val slick = "org.openmole.library" %% "com-typesafe-slick" % "3.1.1"
+  lazy val slick = "org.openmole.library" %% "com-typesafe-slick" % "3.2.0"
   lazy val slf4j = "org.openmole.library" %% "org-slf4j" % "1.7.10"
   lazy val xstream = "org.openmole.library" %% "com-thoughtworks-xstream" % "1.4.9"
   lazy val scalaLang = "org.openmole.library" %% "org-scala-lang-scala-library" % "2.11.8"
