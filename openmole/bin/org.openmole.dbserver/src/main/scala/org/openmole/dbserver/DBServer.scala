@@ -25,17 +25,30 @@ import java.io.FileOutputStream
 import java.util.UUID
 
 import org.h2.tools.Server
-import slick.driver.H2Driver.api._
+import slick.jdbc.H2Profile.api._
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 import scala.util.{ Failure, Success, Try }
 import org.openmole.core.db
 import org.openmole.core.db.{ DBServerInfo, DBServerRunning, Replica }
+import org.openmole.core.workspace.NewFile
+import scopt._
+import org.openmole.tool.file._
 
 object DBServer extends App {
 
-  val base = if (!args.isEmpty) new File(args(0)) else db.defaultOpenMOLEDirectory
+  case class Config(workspace: Option[String] = None)
+
+  val parser = new OptionParser[Config]("OpenMOLE") {
+    head("OpenMOLE database server", "0.x")
+    opt[String]('w', "workspace") text ("workspace location") action {
+      (v, c) ⇒ c.copy(workspace = Some(v))
+    }
+  }
+
+  val config = parser.parse(args, Config()).getOrElse(throw new RuntimeException("Incorrect arguments: \n" + parser.usage))
+  val base = config.workspace.map(w ⇒ new File(w)).getOrElse(db.defaultOpenMOLEDirectory)
 
   def checkInterval = 30000
   def maxAllDead = 5
@@ -109,8 +122,14 @@ object DBServer extends App {
 
     if (!dbWorks) createDB(info.user, info.password)
 
-    val out = new FileOutputStream(db.dbInfoFile(dbDirectory))
-    try new XStream().toXML(info, out) finally out.close
+    val newFile = NewFile(dbDirectory)
+
+    newFile.withTmpFile { tmp ⇒
+      tmp.withFileOutputStream { os ⇒ new XStream().toXML(info, os) }
+      val destination = db.dbInfoFile(dbDirectory)
+      tmp move destination
+      destination
+    }
 
     def waitAllDead(count: Int): Unit = {
       Logger.getLogger(getClass.getName).info(s"Waiting $count times for all OpenMOLE to be dead.")

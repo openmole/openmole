@@ -49,7 +49,7 @@ object Libraries {
   lazy val opencsv = "org.openmole.library" %% "au-com-bytecode-opencsv" % "2.3"
   lazy val arm = "org.openmole.library" %% "com-jsuereth-scala-arm" % "1.4"
   lazy val scalajHttp = "org.openmole.library" %% "org-scalaj-scalaj-http" % "0.3.15"
-  lazy val scopt = "org.openmole.library" %% "com-github-scopt" % "3.2.0"
+  lazy val scopt = "org.openmole.library" %% "com-github-scopt" % "3.5.0"
   lazy val scalabc = "org.openmole.library" %% "fr-iscpif-scalabc" % "0.4"
   lazy val scalatexSite = "org.openmole.library" %% "com-lihaoyi-scalatex-site" % "0.3.6"
   lazy val math = "org.openmole.library" %% "org-apache-commons-math" % "3.6.1"

@@ -171,7 +171,7 @@ lazy val replication = OsgiProject(coreDir, "org.openmole.core.replication", imp
   libraryDependencies ++= Seq(Libraries.slick, Libraries.xstream, Libraries.guava)) settings (coreSettings: _*) dependsOn(db, preference)
 
 lazy val db = OsgiProject(coreDir, "org.openmole.core.db", imports = Seq("*")) settings(bundleType += "dbserver",
-  libraryDependencies ++= Seq(Libraries.slick, Libraries.xstream, Libraries.h2)) settings (coreSettings: _*) dependsOn(openmoleNetwork, workspace, exception, openmoleCrypto)
+  libraryDependencies ++= Seq(Libraries.slick, Libraries.xstream, Libraries.h2, Libraries.scopt)) settings (coreSettings: _*) dependsOn(openmoleNetwork, workspace, exception, openmoleCrypto)
 
 lazy val preference = OsgiProject(coreDir, "org.openmole.core.preference", imports = Seq("*")) settings(
   libraryDependencies ++= Seq(Libraries.configuration, Libraries.scalaLang, Libraries.squants)) settings (coreSettings: _*) dependsOn(openmoleNetwork, openmoleCrypto, openmoleFile, openmoleThread, openmoleTypes, openmoleLock, exception)

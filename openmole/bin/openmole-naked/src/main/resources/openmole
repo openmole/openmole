@@ -56,7 +56,10 @@ while [[ $# -gt 0 ]]; do
   shift
 done
 
-(nohup sh $LOCATION/dbserver/bin/openmole-dbserver $WORKSPACE >/dev/null &) 2>/dev/null
+if [ -z $WORKSPACE ];
+  then (nohup sh $LOCATION/dbserver/bin/openmole-dbserver >/dev/null &) 2>/dev/null
+  else (nohup sh $LOCATION/dbserver/bin/openmole-dbserver -w "${WORKSPACE}" >/dev/null &) 2>/dev/null
+fi
 
 SCRIPT_ARGS=()
 

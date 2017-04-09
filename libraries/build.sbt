@@ -221,8 +221,8 @@ lazy val scalajHttp = OsgiProject(dir, "org.scalaj.scalaj-http") settings(
   ) settings(settings: _*)
 
 lazy val scopt = OsgiProject(dir, "com.github.scopt", exports = Seq("scopt.*")) settings(
-  libraryDependencies += "com.github.scopt" %% "scopt" % "3.2.0",
-  version := "3.2.0"
+  libraryDependencies += "com.github.scopt" %% "scopt" % "3.5.0",
+  version := "3.5.0"
   ) settings(settings: _*)
 
 lazy val scalabc = OsgiProject(dir, "fr.iscpif.scalabc", privatePackages = Seq("!scala.*", "!junit.*", "*")) settings(
