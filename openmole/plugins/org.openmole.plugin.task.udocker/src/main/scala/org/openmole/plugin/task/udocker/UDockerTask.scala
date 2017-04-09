@@ -72,6 +72,8 @@ object UDockerTask {
       external = External()
     )
 
+  def layersDirectory(workspace: Workspace) = workspace.persistentDir /> "udocker" /> "layers"
+
 }
 
 @Lenses case class UDockerTask(
@@ -112,7 +114,7 @@ object UDockerTask {
     import parameters._
     import executionContext._
 
-    val layersDirectory = executionContext.workspace.persistentDir /> "udocker" /> "layers"
+    val layersDirectory = UDockerTask.layersDirectory(executionContext.workspace)
     val repoDirectory = executionContext.tmpDirectory /> image.id /> "repo"
     val udockerInstallDirectory = executionContext.tmpDirectory /> "udocker"
 

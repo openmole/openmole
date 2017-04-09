@@ -349,7 +349,10 @@ package file {
           file
         }
 
-        try Files.createSymbolicLink(file, target)
+        try {
+          if (target.toFile.exists()) target.toFile.recursiveDelete
+          Files.createSymbolicLink(file, target)
+        }
         catch {
           case _: UnsupportedOperationException ⇒ unsupported
           case _: FileSystemException           ⇒ unsupported
