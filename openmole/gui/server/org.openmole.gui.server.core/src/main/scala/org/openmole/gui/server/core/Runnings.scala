@@ -96,11 +96,15 @@ object Runnings {
   }
 
   def runningEnvironments(id: ExecutionId): Seq[(EnvironmentId, RunningEnvironment)] = atomic { implicit ctx ⇒
-    runningEnvironments(environmentIds.getOrElse(id, Seq.empty))
+    runningEnvironments(environmentIds.getOrElse(id, Seq.empty): _*)
   }
 
-  def runningEnvironments(envIds: Seq[EnvironmentId]): Seq[(EnvironmentId, RunningEnvironment)] = atomic { implicit ctx ⇒
-    envIds.flatMap { id ⇒ instance.runningEnvironments.get(id).map(id → _) }
+  def runningEnvironments(envIds: EnvironmentId*): Seq[(EnvironmentId, RunningEnvironment)] = atomic { implicit ctx ⇒
+    envIds.flatMap { id ⇒ instance.runningEnvironments.get(id).map(r ⇒ id → r) }
+  }
+
+  def deleteErrors(id: EnvironmentId): Unit = atomic { implicit ctx ⇒
+    instance.runningEnvironments.get(id).foreach(_.environment.clearErrors)
   }
 
   def outputsDatas(id: ExecutionId, lines: Int) = atomic { implicit ctx ⇒

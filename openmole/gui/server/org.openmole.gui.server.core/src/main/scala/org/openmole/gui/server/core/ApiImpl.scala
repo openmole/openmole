@@ -363,13 +363,11 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
 
   def staticInfos() = execution.staticInfos()
 
-  def clearEnvironmentErrors(environmentId: EnvironmentId): Unit = {
+  def clearEnvironmentErrors(environmentId: EnvironmentId): Unit = Runnings.deleteErrors(environmentId)
 
-  }
-
-  def runningErrorEnvironmentData(environmentId: EnvironmentId, lines: Int, reset: Boolean): EnvironmentErrorData = atomic { implicit ctx ⇒
-    val info = Runnings.runningEnvironments(Seq(environmentId)).toMap.get(environmentId).get
-    if (reset) info.environment.clearErrors
+  def runningErrorEnvironmentData(environmentId: EnvironmentId, lines: Int): EnvironmentErrorData = atomic { implicit ctx ⇒
+    val errorMap = Runnings.runningEnvironments(environmentId).toMap
+    val info = errorMap(environmentId)
 
     val environmentErrors =
       info.environment.errors.map {
@@ -380,9 +378,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
       _.errorMessage
     }.toSeq.map {
       case (_, err) ⇒
-        val dates = err.map {
-          _.date
-        }.sorted
+        val dates = err.map { _.date }.sorted
         (err.head, dates.max, dates.size)
     }.takeRight(lines)
 
