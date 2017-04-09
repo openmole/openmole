@@ -268,7 +268,7 @@ class ExecutionPanel {
                               tags.div(rowLayout +++ (width := 100))(
                                 bs.buttonGroup(columnLayout +++ (width := 80))(
                                   bs.button(glyphicon = glyph_refresh, todo = () ⇒ updateEnvErrors(e.envId)).tooltip("Refresh environment errors"),
-                                  bs.button(buttonStyle = btn_default, glyphicon = glyph_repeat, todo = () ⇒ clearEnvErrors(e.envId)).tooltip("Reset environment errors")
+                                  bs.button(buttonStyle = btn_default, glyphicon = glyph_repeat, todo = () ⇒ { clearEnvErrors(e.envId) }).tooltip("Reset environment errors")
                                 ),
                                 tags.span(onclick := toggleEnvironmentErrorPanel(e.envId), columnLayout +++ closeDetails)(raw("&#215"))
                               )
@@ -375,11 +375,13 @@ class ExecutionPanel {
   }
 
   def clearEnvErrors(environmentId: EnvironmentId) =
-    post()[Api].clearEnvironmentErrors(environmentId).call()
+    post()[Api].clearEnvironmentErrors(environmentId).call().foreach { _ ⇒
+      envError() = envError() - environmentId
+    }
 
   def updateEnvErrors(environmentId: EnvironmentId) =
     post()[Api].runningErrorEnvironmentData(environmentId, envErrorHistory.value.toInt).call().foreach { err ⇒
-      envError() = envError.now + (environmentId → err)
+      envError() = envError() + (environmentId → err)
     }
 
   def displaySize(size: Long, readable: String) =
