@@ -29,7 +29,8 @@ class MovingAverage(period: Int, queue: Queue[Double]) {
   }
 
   def get = synchronized {
-    queue.sum / queue.size
+    if (queue.isEmpty) None
+    else Some(queue.sum / queue.size)
   }
 
   def isEmpty = queue.isEmpty

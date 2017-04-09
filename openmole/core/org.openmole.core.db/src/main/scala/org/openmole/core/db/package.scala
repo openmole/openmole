@@ -40,14 +40,12 @@ package object db {
   }
 
   def databaseServer(baseDirectory: File, lockTimeout: Time) = {
-    //val dbInfoFile = DBServerInfo.dbInfoFile
-    //val info = DBServerInfo.load(dbInfoFile)
     val dBServerInfo = load(dbInfoFile(baseDirectory))
-    def urlDBPath = s"$dbName;MV_STORE=FALSE;MVCC=TRUE;"
+    def urlDBPath = s"jdbc:h2:tcp://localhost:${dBServerInfo.port}/${baseDirectory}/$dbName;MV_STORE=FALSE;MVCC=TRUE;"
 
     val db = Database.forDriver(
       driver = new org.h2.Driver,
-      url = s"jdbc:h2:tcp://localhost:${dBServerInfo.port}/${baseDirectory}/${urlDBPath}",
+      url = urlDBPath,
       user = dBServerInfo.user,
       password = dBServerInfo.password
     )

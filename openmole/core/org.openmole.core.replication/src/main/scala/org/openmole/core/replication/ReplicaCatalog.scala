@@ -18,6 +18,7 @@
 package org.openmole.core.replication
 
 import java.io.File
+import java.sql.DriverAction
 import java.util.concurrent.TimeUnit
 import java.util.regex.Pattern
 
@@ -69,7 +70,7 @@ class ReplicaCatalog(database: Database, preference: Preference) {
 
   lazy val replicationPattern = Pattern.compile("(\\p{XDigit}*)_.*")
 
-  def query[T](f: DBIOAction[T, slick.dbio.NoStream, scala.Nothing]) = Await.result(database.run(f), concurrent.duration.Duration.Inf)
+  def query[T](f: DBIOAction[T, slick.dbio.NoStream, scala.Nothing]): T = Await.result(database.run(f), concurrent.duration.Duration.Inf)
 
   lazy val localLock = new LockRepository[ReplicaCacheKey]
   type ReplicaCacheKey = (String, String, String)
@@ -131,10 +132,14 @@ class ReplicaCatalog(database: Database, preference: Preference) {
             query(getReplica.result).lastOption.getOrElse {
               val newFile = upload
 
-              val (replica, delete) =
+              sealed trait InsertionResult
+              case class AlreadyInDb(remoteFile: String, replica: Replica) extends InsertionResult
+              case class Inserted(replica: Replica) extends InsertionResult
+
+              val inserted =
                 query {
-                  getReplica.result.map(_.lastOption).map {
-                    case Some(r) ⇒ (r, Some(newFile))
+                  getReplica.result.map(_.lastOption).flatMap {
+                    case Some(r) ⇒ DBIO.successful(AlreadyInDb(newFile, r))
                     case None ⇒
                       val newReplica = Replica(
                         source = srcPath.getCanonicalPath,
@@ -143,13 +148,17 @@ class ReplicaCatalog(database: Database, preference: Preference) {
                         hash = hash,
                         lastCheckExists = System.currentTimeMillis
                       )
-                      replicas += newReplica
-                      (newReplica, Option.empty[String])
+
+                      (replicas += newReplica).map(_ ⇒ Inserted(newReplica))
                   }.transactionally
                 }
 
-              delete.foreach(replicationStorage.exists(storage, _))
-              replica
+              inserted match {
+                case AlreadyInDb(remoteFile, replica) ⇒
+                  replicationStorage.backgroundRmFile(storage, remoteFile)
+                  replica
+                case Inserted(replica) ⇒ replica
+              }
             }
           }
 
@@ -180,6 +189,8 @@ class ReplicaCatalog(database: Database, preference: Preference) {
 
   def forPaths(paths: Seq[String]) = query { replicas.filter(_.path inSetBind paths).result }
   def forHashes(hashes: Seq[String], storageId: Seq[String]) = query { replicas.filter(r ⇒ (r.hash inSetBind hashes) && (r.storage inSetBind storageId)).result }
+  def all = query { replicas.result }
+
   def deleteReplicas[S](storageId: S)(implicit replicationStorage: ReplicationStorage[S]): Unit = deleteReplicas(replicationStorage.id(storageId))
   def deleteReplicas(storageId: String): Unit = query { replicas.filter { _.storage === storageId }.delete }
 

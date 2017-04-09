@@ -31,7 +31,7 @@ import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 import scala.util.{ Failure, Success, Try }
 import org.openmole.core.db
-import org.openmole.core.db.{ DBServerInfo, DBServerRunning }
+import org.openmole.core.db.{ DBServerInfo, DBServerRunning, Replica }
 
 object DBServer extends App {
 
@@ -67,8 +67,10 @@ object DBServer extends App {
 
     val fullDataBaseFile = new File(dbDirectory, db.dbName + ".h2.db")
 
-    def database(user: String, password: String) =
-      Database.forDriver(driver = new org.h2.Driver, url = s"jdbc:h2:file:${dbDirectory}/${urlDBPath}", user = user, password = password)
+    def database(user: String, password: String) = {
+      val dbURL = s"jdbc:h2:file:${dbDirectory}/${urlDBPath}"
+      Database.forDriver(driver = new org.h2.Driver, url = dbURL, user = user, password = password)
+    }
 
     def createDB(user: String, password: String): Unit = {
       Logger.getLogger(this.getClass.getName).info("Create BDD")
@@ -98,13 +100,8 @@ object DBServer extends App {
 
     def dbWorks =
       Try {
-        //DBIO.seq(replicas.size)
-        Await.result(database(info.user, info.password).run(db.replicas.length.result), Duration.Inf)
-
-        //db(info.user, info.password).run(replicas.size).result(Duration.Inf)
-        /* db(info.user, info.password).withSession { implicit s ⇒
-          replicas.size.run
-        }*/
+        val connection = database(info.user, info.password)
+        Await.result(connection.run(db.replicas.size.result), Duration.Inf)
       } match {
         case Failure(_) ⇒ false
         case Success(r) ⇒ true
