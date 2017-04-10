@@ -68,7 +68,7 @@ class Runtime {
 
     logger.fine("Downloading input message")
 
-    val executionMessage =
+    val (executionMessage, _) =
       newFile.withTmpFile { executionMessageFileCache ⇒
         retry(storage.download(inputMessagePath, executionMessageFileCache))
         ExecutionMessage.load(executionMessageFileCache)

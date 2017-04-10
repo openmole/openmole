@@ -300,7 +300,9 @@ class JobLauncher(cacheSize: Long, debug: Boolean)(implicit preference: Preferen
 
           val executionMessage = newFile.withTmpFile { executionMessageFileCache ⇒
             storage.download(jobMessage.executionMessagePath, executionMessageFileCache)
-            ExecutionMessage.load(executionMessageFileCache)
+            val (msg, files) = ExecutionMessage.load(executionMessageFileCache)
+            files.foreach(fileService.deleteWhenGarbageCollected)
+            msg
           }
 
           def localCachedReplicatedFile(replicatedFile: ReplicatedFile, raw: Boolean) = {

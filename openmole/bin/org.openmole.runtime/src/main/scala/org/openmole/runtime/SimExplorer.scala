@@ -80,7 +80,7 @@ object SimExplorer extends Logger {
 
       parser.parse(filteredArgs, Config()) foreach { config ⇒
 
-        implicit val workspace = Workspace(new File(config.workspace.get).getAbsoluteFile)
+        implicit val workspace = Workspace(new File(config.workspace.get).getCanonicalFile)
         implicit val newFile = NewFile(workspace)
         implicit val serializerService = SerializerService()
         implicit val preference = Preference.memory()
@@ -94,8 +94,7 @@ object SimExplorer extends Logger {
           logger.fine("plugins: " + config.pluginPath.get + " " + new File(config.pluginPath.get).listFilesSafe.mkString(","))
           PluginManager.tryLoad(new File(config.pluginPath.get).listFilesSafe).foreach { case (f, e) ⇒ logger.log(WARNING, s"Error loading bundle $f", e) }
 
-          val (storage, fs) = serializerService.deserialiseAndExtractFiles[RemoteStorage](new File(config.storage.get))
-          fs.foreach(fileService.deleteWhenGarbageCollected)
+          val (storage, _) = serializerService.deserialiseAndExtractFiles[RemoteStorage](new File(config.storage.get))
 
           new Runtime().apply(
             storage,
