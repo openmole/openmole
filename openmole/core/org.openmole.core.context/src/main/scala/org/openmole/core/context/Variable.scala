@@ -42,6 +42,7 @@ object Variable {
   def openMOLE(name: String) = Val[Long](name, namespace = openMOLENameSpace)
   val openMOLESeed = openMOLE("seed")
 
+  def copy[T](v: Variable[T])(prototype: Val[T] = v.prototype, value: T = v.value) = apply(prototype, value)
 }
 
 trait Variable[T] {

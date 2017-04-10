@@ -23,11 +23,8 @@ package object udocker extends UDockerPackage {
     implicit def strsingToContainerImage(s: String) = DockerImage(s)
   }
 
-  sealed trait ContainerImage {
-    lazy val id = UUID.randomUUID().toString
-  }
-
-  case class DockerImage(image: String, registry: String = "https://registry-1.docker.io") extends ContainerImage
+  sealed trait ContainerImage
+  case class DockerImage(image: String, tag: String = "latest", registry: String = "https://registry-1.docker.io") extends ContainerImage
   case class SavedDockerImage(file: java.io.File) extends ContainerImage
 
   trait ReuseContainer[T] {

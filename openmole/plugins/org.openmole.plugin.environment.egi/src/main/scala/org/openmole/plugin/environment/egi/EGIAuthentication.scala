@@ -82,7 +82,7 @@ object EGIAuthentication extends Logger {
           }.toList
 
           links.foreach {
-            case (file, linkTo) ⇒ file.createLink(linkTo)
+            case (file, linkTo) ⇒ file.createLinkTo(linkTo)
           }
         }
         catch {

@@ -39,7 +39,7 @@ case class BundlesInfo(
     files:                Map[File, (Long, Long)],
     providedDependencies: Set[Long]
 ) {
-  lazy val hashes = files.keys.map(f ⇒ f → f.hash).toMap
+  lazy val hashes = files.keys.map(f ⇒ f → f.hash()).toMap
 }
 
 object PluginManager extends Logger {
