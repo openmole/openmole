@@ -272,7 +272,7 @@ sealed trait ID {
 
 case class ExecutionId(id: String = java.util.UUID.randomUUID.toString) extends ID
 
-case class EnvironmentId(id: String = java.util.UUID.randomUUID.toString) extends ID
+case class EnvironmentId(id: String = java.util.UUID.randomUUID.toString, executionId: ExecutionId) extends ID
 
 sealed trait ErrorStateLevel {
   def name: String

@@ -372,6 +372,8 @@ class ExecutionPanel {
     post()[Api].removeExecution(id).call().foreach { r ⇒
       updateExecutionInfo
     }
+    envError() = envError.now.filterNot { e ⇒ e._1.executionId == id }
+    envErrorPanels() = envErrorPanels.now.filterNot { e ⇒ e._1.executionId == id }
   }
 
   def clearEnvErrors(environmentId: EnvironmentId) =
