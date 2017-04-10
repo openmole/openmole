@@ -259,8 +259,8 @@ object UDockerTask {
           for {
             layer ← localDockerImage.layers
           } {
-            (layersDirectory / layer._1.digest) createLinkTo layer._2.getPath
-            (imageRepositoryDirectory / layer._1.digest) createLinkTo layer._2.getPath
+            (layersDirectory / layer._1.digest) createLinkTo layer._2.getAbsolutePath
+            (imageRepositoryDirectory / layer._1.digest) createLinkTo layer._2.getAbsolutePath
           }
 
           val imageId = s"${localDockerImage.image}:${localDockerImage.tag}"

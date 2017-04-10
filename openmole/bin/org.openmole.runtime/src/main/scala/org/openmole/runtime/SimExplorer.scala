@@ -80,7 +80,7 @@ object SimExplorer extends Logger {
 
       parser.parse(filteredArgs, Config()) foreach { config ⇒
 
-        implicit val workspace = Workspace(new File(config.workspace.get))
+        implicit val workspace = Workspace(new File(config.workspace.get).getAbsoluteFile)
         implicit val newFile = NewFile(workspace)
         implicit val serializerService = SerializerService()
         implicit val preference = Preference.memory()
