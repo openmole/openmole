@@ -336,7 +336,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
             case Success(o) ⇒
               val puzzle = o.buildPuzzle
 
-              val envIds = puzzle.environments.values.toSeq.distinct.map { env ⇒ EnvironmentId(getUUID) → env }
+              val envIds = puzzle.environments.values.toSeq.distinct.map { env ⇒ EnvironmentId(getUUID, execId) → env }
               Runnings.add(execId, envIds)
 
               envIds.foreach { case (envId, env) ⇒ env.listen(Runnings.environmentListener(envId)) }
