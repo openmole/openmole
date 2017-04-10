@@ -23,30 +23,39 @@ import org.openmole.tool.file._
 
 package object hash {
 
+  sealed trait HashType
+  object SHA1 extends HashType
+  object SHA256 extends HashType
+
   implicit class StringHashDecorator(s: String) {
-    def hash = computeHash(new StringInputStream(s))
+    def hash(hashType: HashType = SHA1) = computeHash(new StringInputStream(s), hashType)
   }
 
   implicit class FileHashServiceDecorator(file: File) {
-    def hash = computeHash(file)
+    def hash(hashType: HashType = SHA1) = computeHash(file, hashType)
   }
 
   implicit class InputStreamHashServiceDecorator(is: InputStream) {
-    def hash = computeHash(is)
+    def hash(hashType: HashType = SHA1) = computeHash(is, hashType)
   }
 
-  def computeHash(file: File): Hash = {
+  def computeHash(file: File, hashType: HashType = SHA1): Hash = {
     val is = new FileInputStream(file)
-    try hash.computeHash(is)
+    try hash.computeHash(is, hashType)
     finally is.close
   }
 
-  def computeHash(is: InputStream): Hash = {
+  def computeHash(is: InputStream, hashType: HashType): Hash = {
     val buffer = new Array[Byte](DefaultBufferSize)
-    val md = MessageDigest.getInstance("SHA1")
+    val md =
+      hashType match {
+        case SHA1   ⇒ MessageDigest.getInstance("SHA-1")
+        case SHA256 ⇒ MessageDigest.getInstance("SHA-256")
+      }
     Iterator.continually(is.read(buffer)).takeWhile(_ != -1).foreach {
       count ⇒ md.update(buffer, 0, count)
     }
     Hash(md.digest)
   }
+
 }

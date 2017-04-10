@@ -251,11 +251,17 @@ package object systemexec extends external.ExternalPackage with SystemExecPackag
     }
   }
 
-  def error(commandLine: Vector[String], executionResult: ExecutionResult) =
+  def error(commandLine: Vector[String], executionResult: ExecutionResult) = {
+    def output = executionResult.output.map(o ⇒ s"\nStandard output was:\n$o")
+    def error = executionResult.errorOutput.map(e ⇒ s"\nError output was:\n$e")
+
     throw new InternalProcessingError(
-      s"""Error executing command":
-         |[${commandLine.mkString(" ")}] return code was not 0 but ${executionResult.returnCode}""".stripMargin
+      s"""Error executing command:
+         |${commandLine.mkString(" ")}, return code was not 0 but ${executionResult.returnCode}""".stripMargin +
+        output.getOrElse("") +
+        error.getOrElse("")
     )
+  }
 
   def executeAll(
     workDirectory:        File,

@@ -34,10 +34,19 @@ import org.openmole.core.expansion._
 import org.openmole.plugin.task.external._
 import org.openmole.plugin.task.systemexec._
 import org.openmole.core.exception._
+import org.openmole.core.fileservice.FileService
+import org.openmole.core.preference._
 import org.openmole.plugin.task.container
+import org.openmole.plugin.task.udocker.Registry.Layer
+import org.openmole.plugin.task.udocker.UDockerTask.LocalDockerImage
 import org.openmole.tool.cache._
+import squants._
+import squants.time.TimeConversions._
+import org.openmole.tool.file._
 
 object UDockerTask {
+
+  val RegistryTimeout = ConfigurationLocation("UDockerTask", "RegistryTimeout", Some(1 minutes))
 
   implicit def isTask: InputOutputBuilder[UDockerTask] = InputOutputBuilder(UDockerTask._config)
   implicit def isExternal: ExternalBuilder[UDockerTask] = ExternalBuilder(UDockerTask.external)
@@ -56,9 +65,9 @@ object UDockerTask {
   def apply(
     image:   ContainerImage,
     command: FromContext[String]
-  )(implicit name: sourcecode.Name): UDockerTask =
+  )(implicit name: sourcecode.Name, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService): UDockerTask =
     new UDockerTask(
-      image = image,
+      localDockerImage = toLocalImage(image),
       command = command,
       workDirectory = None,
       reuseContainer = true,
@@ -72,12 +81,79 @@ object UDockerTask {
       external = External()
     )
 
-  def layersDirectory(workspace: Workspace) = workspace.persistentDir /> "udocker" /> "layers"
+  def downloadImage(dockerImage: DockerImage, timeout: Time)(implicit newFile: NewFile, workspace: Workspace) = {
+    import Registry._
+    import org.json4s.jackson.JsonMethods._
+
+    def layersDirectory(workspace: Workspace) = workspace.persistentDir /> "udocker" /> "layers"
+    def layerFile(workspace: Workspace, layer: Layer) = layersDirectory(workspace) / layer.digest
+    val m = manifest(dockerImage, timeout)
+    val ls = layers(m)
+    val lDirectory = layersDirectory(workspace)
+
+    val localLayers =
+      for { l ← ls } yield {
+        val lf = layerFile(workspace, l)
+        def downloadLayer =
+          newFile.withTmpFile { tmpFile ⇒
+            blob(dockerImage, l, tmpFile, timeout)
+            lDirectory.withLockInDirectory {
+              if (!lf.exists) tmpFile move lf
+            }
+          }
+
+        if (!lf.exists) downloadLayer
+        l → lf
+      }
+
+    LocalDockerImage(dockerImage.image, dockerImage.tag, localLayers.toVector, compact(m.value))
+  }
+
+  def loadImage(dockerImage: SavedDockerImage)(implicit newFile: NewFile, fileService: FileService): LocalDockerImage = {
+    import org.openmole.tool.tar._
+    import org.openmole.tool.hash._
+    import org.json4s.jackson.JsonMethods._
+    implicit def formats = org.json4s.DefaultFormats
+
+    newFile.withTmpDir { extracted ⇒
+      dockerImage.file.extract(extracted)
+      val archiveManifest = parse(extracted / "manifest.json")
+
+      val layersName = (archiveManifest \ "Layers").children.flatMap(_.extract[Array[String]]).distinct
+
+      val layers =
+        layersName.toVector.map {
+          l ⇒
+            val destination = newFile.newFile("udockerlayer")
+            fileService.deleteWhenGarbageCollected(destination)
+            (extracted / l) move destination
+            val hash = destination.hash(SHA256)
+            Layer(s"sha256:$hash") → destination
+        }
+
+      val Array(image, tag) = (archiveManifest \\ "RepoTags").children.map(_.extract[String]).head.split(":")
+      val manifestName = (archiveManifest \\ "Config").children.map(_.extract[String]).head
+
+      val manifest = (extracted / manifestName).content
+
+      LocalDockerImage(image, tag, layers, manifest)
+    }
+  }
+
+  def toLocalImage(containerImage: ContainerImage)(implicit preference: Preference, newFile: NewFile, workspace: Workspace, fileService: FileService) =
+    containerImage match {
+      case i: DockerImage      ⇒ downloadImage(i, preference(RegistryTimeout))
+      case i: SavedDockerImage ⇒ loadImage(i)
+    }
+
+  case class LocalDockerImage(image: String, tag: String, layers: Vector[(Registry.Layer, File)], manifest: String) {
+    lazy val id = UUID.randomUUID().toString
+  }
 
 }
 
 @Lenses case class UDockerTask(
-    image:                ContainerImage,
+    localDockerImage:     LocalDockerImage,
     command:              FromContext[String],
     workDirectory:        Option[String],
     reuseContainer:       Boolean,
@@ -91,13 +167,7 @@ object UDockerTask {
     external:             External
 ) extends Task with ValidateTask { self ⇒
   override def config = InputOutputConfig.outputs.modify(_ ++ Seq(stdOut, stdErr, returnValue).flatten)(_config)
-
-  def validateArchive(image: ContainerImage) = image match {
-    case SavedDockerImage(archive) if !archive.exists ⇒ container.ArchiveNotFound(archive)
-    case _ ⇒ container.ArchiveOK
-  }
-
-  override def validate: Seq[Throwable] = container.validateContainer(validateArchive)(image, command, environmentVariables, external, this.inputs)
+  override def validate: Seq[Throwable] = container.validateContainer(command, environmentVariables, external, inputs)
 
   type FileInfo = (External.ToPut, File)
   type HostFile = (String, Option[String])
@@ -114,42 +184,43 @@ object UDockerTask {
     import parameters._
     import executionContext._
 
-    val layersDirectory = UDockerTask.layersDirectory(executionContext.workspace)
-    val repoDirectory = executionContext.tmpDirectory /> image.id /> "repo"
     val udockerInstallDirectory = executionContext.tmpDirectory /> "udocker"
-
     val udockerTarBall = udockerInstallDirectory / "udocketarball.tar.gz"
-
-    if (!udockerTarBall.exists)
-      udockerInstallDirectory.withLockInDirectory { if (!udockerTarBall.exists()) this.getClass.getClassLoader.getResourceAsStream("udocker.tar.gz") copy udockerTarBall }
-
-    def udockerRepoVariables(logLevel: Int = 1) =
-      Vector(
-        "UDOCKER_DIR" → udockerInstallDirectory.getAbsolutePath,
-        "UDOCKER_TMPDIR" → executionContext.tmpDirectory.getAbsolutePath,
-        "UDOCKER_REPOS" → repoDirectory.getAbsolutePath,
-        "UDOCKER_LAYERS" → layersDirectory.getAbsolutePath,
-        "UDOCKER_TARBALL" → udockerTarBall.getAbsolutePath,
-        "UDOCKER_LOGLEVEL" → logLevel.toString
-      )
-
     val udocker = udockerInstallDirectory / "udocker"
 
-    if (!udocker.exists)
-      udockerInstallDirectory.withLockInDirectory {
-        if (!udocker.exists()) {
-          this.getClass.getClassLoader.getResourceAsStream("udocker") copy udocker
-          udocker.setExecutable(true)
+    def installUDocker() = {
+      if (!udockerTarBall.exists)
+        udockerInstallDirectory.withLockInDirectory {
+          if (!udockerTarBall.exists()) this.getClass.getClassLoader.getResourceAsStream("udocker.tar.gz") copy udockerTarBall
         }
-      }
+
+      if (!udocker.exists)
+        udockerInstallDirectory.withLockInDirectory {
+          if (!udocker.exists()) {
+            this.getClass.getClassLoader.getResourceAsStream("udocker") copy udocker
+            udocker.setExecutable(true)
+          }
+        }
+    }
+
+    installUDocker()
 
     External.withWorkDir(executionContext) { taskWorkDirectory ⇒
-
       taskWorkDirectory.mkdirs()
 
-      val inputDirectory = taskWorkDirectory /> "inputs"
+      val containersDirectory =
+        if (reuseContainer) executionContext.tmpDirectory /> "containers" /> localDockerImage.id
+        else taskWorkDirectory /> "containers" /> localDockerImage.id
 
-      def subDirectory(name: String) = taskWorkDirectory /> name
+      def udockerVariables(logLevel: Int = 1) =
+        Vector(
+          "UDOCKER_DIR" → udockerInstallDirectory.getAbsolutePath,
+          "UDOCKER_TMPDIR" → executionContext.tmpDirectory.getAbsolutePath,
+          "UDOCKER_TARBALL" → udockerTarBall.getAbsolutePath,
+          "UDOCKER_LOGLEVEL" → logLevel.toString,
+          "HOME" → taskWorkDirectory.getAbsolutePath,
+          "UDOCKER_CONTAINERS" → containersDirectory.getAbsolutePath
+        )
 
       def prepareVolumes(
         preparedFilesInfo:     Iterable[FileInfo],
@@ -163,92 +234,64 @@ object UDockerTask {
 
       def volumesArgument(volumes: Iterable[MountPoint]) = volumes.map { case (host, container) ⇒ s"""-v "$host":"$container"""" }.mkString(" ")
 
-      val containersDirectory = executionContext.tmpDirectory /> image.id /> "containers"
-      val udockerVariables =
-        Vector(
-          "HOME" → taskWorkDirectory.getAbsolutePath,
-          "UDOCKER_CONTAINERS" → containersDirectory.getAbsolutePath
-        ) ++ udockerRepoVariables()
-
-      def pullImage: PulledImage = {
-        val pulledImageId = repoDirectory.withLockInDirectory {
-          val images = {
-            val commandline = commandLine(s"${udocker.getAbsolutePath} images")
-            val result = execute(commandline, executionContext.tmpDirectory, udockerRepoVariables(), returnOutput = true, returnError = true)
-            result.output.get.split("\n").flatMap { l ⇒
-              val trimed = l.dropRight(1).trim
-              if (trimed.isEmpty) None else Some(trimed)
-            }
-          }
-
-          images.headOption match {
-            case Some(id) ⇒ id
-            case None ⇒
-              image match {
-                case image: SavedDockerImage ⇒
-                  val commandline = commandLine(s"${udocker.getAbsolutePath} load -i ${image.file.getAbsolutePath}")
-                  val result = execute(commandline, executionContext.tmpDirectory, udockerRepoVariables(), returnOutput = true, returnError = true)
-                  val imageId = result.output.map(_.lines.toSeq.last)
-                  imageId.getOrElse(throw new UserBadDataError(s"Could not retrieve image from archive ${image.file}"))
-                case image: DockerImage ⇒
-                  val commandline = commandLine(s"${udocker.getAbsolutePath} pull --registry ${image.registry} ${image.image}")
-                  execute(commandline, executionContext.tmpDirectory, udockerRepoVariables(logLevel = 0), returnOutput = true, returnError = true)
-                  image.image
-              }
-          }
-        }
-
-        def dockerWorkDirectory = {
-          import org.json4s._
-          import org.json4s.jackson.JsonMethods._
-
-          val cmd = commandLine(s"${udocker.getAbsolutePath} inspect $pulledImageId", taskWorkDirectory.getAbsolutePath)
-          val result = execute(cmd.from(parameters.context), taskWorkDirectory, udockerVariables, returnOutput = true, returnError = true)
-
-          implicit def format = DefaultFormats
-
-          result.output.flatMap {
-            o ⇒ (parse(o) \ "config" \ "WorkingDir").extractOpt[String]
-          }
-        }
-
-        val userWorkDirectory =
-          workDirectory.getOrElse(
-            dockerWorkDirectory.map {
-              case "" ⇒ "/"
-              case d  ⇒ d
-            } getOrElse ("/")
-          )
-
-        PulledImage(userWorkDirectory, pulledImageId)
+      def dockerWorkDirectory = {
+        import org.json4s._
+        import org.json4s.jackson.JsonMethods._
+        implicit def format = DefaultFormats
+        (parse(localDockerImage.manifest) \ "config" \ "WorkingDir").extractOpt[String]
       }
 
-      val pulledImage = executionContext.cache.getOrElseUpdate(pulledImageIdKey, pullImage)
+      val userWorkDirectory =
+        workDirectory.getOrElse(
+          dockerWorkDirectory.map {
+            case "" ⇒ "/"
+            case d  ⇒ d
+          } getOrElse ("/")
+        )
 
       def newContainer() =
         newFile.withTmpDir { tmpDirectory ⇒
+          val baseRepositoryDirectory = tmpDirectory /> "udocker"
+          val layersDirectory = tmpDirectory /> "layers"
+          val repositoryDirectory = tmpDirectory /> "repo"
+          val imageRepositoryDirectory = repositoryDirectory /> localDockerImage.image /> localDockerImage.tag
+
+          for {
+            layer ← localDockerImage.layers
+          } {
+            (layersDirectory / layer._1.digest) createLinkTo layer._2.getPath
+            (imageRepositoryDirectory / layer._1.digest) createLinkTo layer._2.getPath
+          }
+
+          val imageId = s"${localDockerImage.image}:${localDockerImage.tag}"
+
+          imageRepositoryDirectory / "manifest" content = localDockerImage.manifest
+          imageRepositoryDirectory / "TAG" content = s"$baseRepositoryDirectory/$imageId"
+          imageRepositoryDirectory / "v2" content = ""
+
+          val variables = udockerVariables() ++ Vector(
+            "UDOCKER_REPOS" → repositoryDirectory.getAbsolutePath,
+            "UDOCKER_LAYERS" → layersDirectory.getAbsolutePath
+          )
+
           val name = containerName(UUID.randomUUID().toString)
-          val commandline = commandLine(s"${udocker.getAbsolutePath} create --name=${name} ${pulledImage.pulledImageId}")
-          execute(commandline, tmpDirectory, udockerVariables, returnOutput = true, returnError = true)
+          val commandline = commandLine(s"${udocker.getAbsolutePath} create --name=${name} ${imageId}")
+          execute(commandline, tmpDirectory, variables, returnOutput = true, returnError = true)
           name
         }
-
-      def deleteContainer(name: String): Unit = {
-        val commandline = commandLine(s"${udocker.getAbsolutePath} delete --name $name")
-        execute(commandline, executionContext.tmpDirectory, udockerRepoVariables(), returnOutput = true, returnError = true)
-      }
 
       val pool =
         executionContext.cache.getOrElseUpdate(
           containerPoolKey,
-          if (reuseContainer) Pool[ContainerId](newContainer) else WithNewInstance[ContainerId](newContainer, name ⇒ deleteContainer(name))
+          if (reuseContainer) Pool[ContainerId](newContainer) else WithNewInstance[ContainerId](newContainer)
         )
 
       pool { runId ⇒
+        val inputDirectory = taskWorkDirectory /> "inputs"
 
-        val context = parameters.context + (External.PWD → pulledImage.userWorkDirectory)
-        def containerPathResolver = container.inputPathResolver(File(""), pulledImage.userWorkDirectory) _
-        def inputPathResolver = container.inputPathResolver(inputDirectory, pulledImage.userWorkDirectory) _
+        val context = parameters.context + (External.PWD → userWorkDirectory)
+        def containerPathResolver = container.inputPathResolver(File(""), userWorkDirectory) _
+        def inputPathResolver = container.inputPathResolver(inputDirectory, userWorkDirectory) _
 
         val (preparedContext, preparedFilesInfo) = external.prepareAndListInputFiles(context, inputPathResolver)
 
@@ -256,24 +299,23 @@ object UDockerTask {
           preparedFilesInfo.map { case (f, d) ⇒ f.toString → d.toString },
           hostFiles.map { case (f, b) ⇒ f.toString → b.getOrElse(f) },
           inputDirectory,
-          pulledImage.userWorkDirectory.toString,
+          userWorkDirectory.toString,
           rootDirectory
         ) _
 
         val volumes = prepareVolumes(preparedFilesInfo, containerPathResolver, hostFiles)
 
-        val name: String = if (!reuseContainer) containerName(UUID.randomUUID().toString) else runId
-
         def runContainer = {
-          val rootDirectory = containersDirectory / name / "ROOT"
+          val rootDirectory = containersDirectory / runId / "ROOT"
+
           def runCommand: FromContext[String] = {
             val variablesArgument = environmentVariables.map { case (name, variable) ⇒ s"""-e $name="${variable.from(context)}"""" }.mkString(" ")
-            command.map(cmd ⇒ s"""${udocker.getAbsolutePath} run --workdir="${pulledImage.userWorkDirectory}" $variablesArgument ${volumesArgument(volumes)} $runId $cmd""")
+            command.map(cmd ⇒ s"""${udocker.getAbsolutePath} run --workdir="${userWorkDirectory}" $variablesArgument ${volumesArgument(volumes)} $runId $cmd""")
           }
 
           val executionResult = executeAll(
             taskWorkDirectory,
-            udockerVariables,
+            udockerVariables(),
             errorOnReturnValue,
             returnValue,
             stdOut,
@@ -281,7 +323,7 @@ object UDockerTask {
             List(runCommand)
           )(parameters.copy(context = preparedContext))
 
-          val retContext = external.fetchOutputFiles(this, preparedContext, outputPathResolver(rootDirectory))
+          val retContext = external.fetchOutputFiles(this, preparedContext, outputPathResolver(rootDirectory), rootDirectory)
           external.cleanWorkDirectory(this, retContext, taskWorkDirectory)
           (retContext, executionResult)
         }

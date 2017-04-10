@@ -33,9 +33,8 @@ object Registry {
 
   import HTTP._
 
-  case class Image(image: String, tag: String, registry: String = "https://registry-1.docker.io")
-  case class Layer(image: Image, digest: String)
-  case class Manifest(value: JValue, image: Image)
+  case class Layer(digest: String)
+  case class Manifest(value: JValue, image: DockerImage)
 
   object Token {
     case class AuthenticationRequest(scheme: String, realm: String, service: String, scope: String)
@@ -78,17 +77,22 @@ object Registry {
 
   }
 
-  def manifest(image: Image, timeout: Time): Manifest = {
-    val url = s"${image.registry}/v2/${image.image}/manifests/${image.tag}"
+  def baseURL(image: DockerImage) = {
+    val path = if (image.image.contains("/")) image.image else s"library/${image.image}"
+    s"${image.registry}/v2/$path"
+  }
+
+  def manifest(image: DockerImage, timeout: Time): Manifest = {
+    val url = s"${baseURL(image)}/manifests/${image.tag}"
     val m = parse(content(client.execute(Token.withToken(url, timeout))))
     Manifest(m, image)
   }
 
   def layers(manifest: Manifest) =
-    (manifest.value \ "fsLayers" \\ "blobSum").children.map(_.extract[String]).map { l ⇒ Layer(manifest.image, l) }.reverse
+    (manifest.value \ "fsLayers" \\ "blobSum").children.map(_.extract[String]).distinct.map { l ⇒ Layer(l) }.reverse
 
-  def blob(layer: Layer, file: File, timeout: Time) = {
-    val url = s"""${layer.image.registry}/v2/${layer.image.image}/blobs/${layer.digest}"""
+  def blob(image: DockerImage, layer: Layer, file: File, timeout: Time) = {
+    val url = s"""${baseURL(image)}/blobs/${layer.digest}"""
     execute(Token.withToken(url, timeout)) { response ⇒
       val os = new FileOutputStream(file)
       try copy(response.getEntity.getContent, os)

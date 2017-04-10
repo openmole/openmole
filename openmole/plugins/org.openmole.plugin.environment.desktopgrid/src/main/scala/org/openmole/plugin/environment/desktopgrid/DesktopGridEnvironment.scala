@@ -48,7 +48,7 @@ object DesktopGridEnvironment {
       openMOLEMemory = openMOLEMemory,
       threads = threads,
       name = Some(name.getOrElse(varName.value)),
-      passwordHash = DesktopGridAuthentication.password.hash
+      passwordHash = DesktopGridAuthentication.password.hash()
     )
   }
 }

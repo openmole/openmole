@@ -54,7 +54,7 @@ package object message {
         else file
 
       val mode = file.mode
-      val hash = toReplicate.hash.toString
+      val hash = toReplicate.hash().toString
       val uploaded = upload(toReplicate)
       ReplicatedFile(file.getPath, isDir, hash, uploaded, mode)
     }
@@ -77,7 +77,7 @@ package object message {
       download(replicatedFile.path, cache)
 
       if (verifyHash) {
-        val cacheHash = cache.hash.toString
+        val cacheHash = cache.hash().toString
         if (cacheHash != replicatedFile.hash) throw new InternalProcessingError("Hash is incorrect for file " + replicatedFile.originalPath + " replicated at " + replicatedFile.path)
       }
 

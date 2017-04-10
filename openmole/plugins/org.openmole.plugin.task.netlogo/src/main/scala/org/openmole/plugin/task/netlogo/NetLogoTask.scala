@@ -98,7 +98,7 @@ trait NetLogoTask extends Task with ValidateTask {
           import executionContext._
 
           val contextResult =
-            external.fetchOutputFiles(this, preparedContext, external.relativeResolver(workDir)) ++ netLogoOutputs.map {
+            external.fetchOutputFiles(this, preparedContext, external.relativeResolver(workDir), tmpDir) ++ netLogoOutputs.map {
               case (name, prototype) ⇒
                 try {
                   val outputValue = netLogo.report(name)
