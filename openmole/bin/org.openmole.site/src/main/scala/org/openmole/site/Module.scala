@@ -77,7 +77,7 @@ object module {
       Module(
         m.name,
         m.description,
-        m.components.map(f ⇒ Component(location(f), f.hash.toString))
+        m.components.map(f ⇒ Component(location(f), f.hash().toString))
       )
     }
   }

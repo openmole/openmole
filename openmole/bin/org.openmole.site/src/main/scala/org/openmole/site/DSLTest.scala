@@ -24,13 +24,13 @@ import org.openmole.core.replication.ReplicaCatalog
 import org.openmole.core.serializer.SerializerService
 
 import scala.collection.mutable.ListBuffer
-import scala.util.{Failure, Success, Try}
+import scala.util.{ Failure, Success, Try }
 import org.openmole.core.services._
 import org.openmole.core.threadprovider.ThreadProvider
-import org.openmole.core.workspace.{NewFile, Workspace}
+import org.openmole.core.workspace.{ NewFile, Workspace }
 import org.openmole.tool.crypto.Cypher
 import org.openmole.tool.file._
-import org.openmole.tool.random.{RandomProvider, Seeder}
+import org.openmole.tool.random.{ RandomProvider, Seeder }
 
 object DSLTest {
 
