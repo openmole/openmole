@@ -38,6 +38,8 @@ object Resource {
 
   def bootstrapJS = FileResource("bootstrap.min.js")
 
+  def care = FileResource("care")
+
   def fireNLogo = FileResource("Fire.nlogo")
 
   def fireScreen = FileResource("firescreen.png")
@@ -111,7 +113,8 @@ object Resource {
     geocite,
     biomedia,
     img,
-    lunr
+    lunr,
+    care
   )
 }
 
