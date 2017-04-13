@@ -4,7 +4,7 @@ import sbt._
 
 object Libraries {
 
-  lazy val gridscaleVersion = "1.88-SNAPSHOT"
+  lazy val gridscaleVersion = "1.90"
   lazy val bouncyCastleVersion = "1.50"
   lazy val aceVersion = "01.08.2014"
   lazy val d3Version = "3.5.12"
@@ -17,7 +17,7 @@ object Libraries {
   lazy val scalaUpickleVersion = "0.4.3"
   lazy val scalaAutowireVersion = "0.2.6"
   lazy val sourcecodeVersion = "0.1.2"
-  lazy val scaladgetVersion = "0.9.2-SNAPSHOT"
+  lazy val scaladgetVersion = "0.9.2"
   lazy val scalajsVersion = "0.6.14"
 
   lazy val scaladgetJS = libraryDependencies += "fr.iscpif" %%% "scaladget" % scaladgetVersion
