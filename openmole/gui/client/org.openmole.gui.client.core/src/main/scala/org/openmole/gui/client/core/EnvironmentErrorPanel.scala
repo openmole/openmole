@@ -124,8 +124,8 @@ class EnvironmentErrorPanel {
           } yield {
 
             val line = Line(message, stack.stackTrace, Utils.longToDate(date).split(",").last, occurrences.toString, levelLabel(level))
-
-            scrollableStack.setContent(line.stack)
+            val stackText = scrollableText()
+            stackText.setContent(line.stack)
             Seq(
               line.render,
               tr(
@@ -133,7 +133,7 @@ class EnvironmentErrorPanel {
                   colspan := 12,
                   line.detailOn.expand(
                     tags.div(
-                      scrollableStack.view
+                      stackText.view
                     )
                   )
                 )
