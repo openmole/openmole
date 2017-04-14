@@ -27,7 +27,7 @@ case class Pool[T](f: () ⇒ T) extends WithInstance[T] {
   }
 }
 
-case class WithNewInstance[T](o: () ⇒ T, clean: T ⇒ Unit) extends WithInstance[T] {
+case class WithNewInstance[T](o: () ⇒ T, clean: T ⇒ Unit = (_: T) ⇒ {}) extends WithInstance[T] {
   def apply[A](f: T ⇒ A): A = {
     val instance = o()
     try f(instance)

@@ -93,7 +93,9 @@ object GetResultActor extends Logger {
     retry(preference(BatchEnvironment.downloadResultRetry)) {
       newFile.withTmpFile { resultFile ⇒
         signalDownload(eventDispatcher.eventId, storage.download(outputFilePath, resultFile), outputFilePath, storage, resultFile)
-        RuntimeResult.load(resultFile)
+        val (res, files) = RuntimeResult.load(resultFile)
+        files.foreach(fileService.deleteWhenGarbageCollected)
+        res
       }
     }
   }

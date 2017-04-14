@@ -54,7 +54,7 @@ package object message {
         else file
 
       val mode = file.mode
-      val hash = toReplicate.hash.toString
+      val hash = toReplicate.hash().toString
       val uploaded = upload(toReplicate)
       ReplicatedFile(file.getPath, isDir, hash, uploaded, mode)
     }
@@ -77,7 +77,7 @@ package object message {
       download(replicatedFile.path, cache)
 
       if (verifyHash) {
-        val cacheHash = cache.hash.toString
+        val cacheHash = cache.hash().toString
         if (cacheHash != replicatedFile.hash) throw new InternalProcessingError("Hash is incorrect for file " + replicatedFile.originalPath + " replicated at " + replicatedFile.path)
       }
 
@@ -103,28 +103,15 @@ package object message {
 
   object ExecutionMessage {
     def load(file: File)(implicit serialiserService: SerializerService, fileService: FileService, newFile: NewFile) = {
-      val (em, files) = serialiserService.deserialiseAndExtractFiles[ExecutionMessage](file)
-      files.foreach(fileService.deleteWhenGarbageCollected)
-      fileService.deleteWhenGarbageCollected(em.jobs)
-      em
+      serialiserService.deserialiseAndExtractFiles[ExecutionMessage](file)
     }
   }
 
   case class ExecutionMessage(plugins: Iterable[ReplicatedFile], files: Iterable[ReplicatedFile], jobs: File, communicationDirPath: String, runtimeSettings: RuntimeSettings)
 
   object RuntimeResult {
-    def load(file: File)(implicit serialiserService: SerializerService, fileService: FileService, newFile: NewFile) = {
-      val (result, files) = serialiserService.deserialiseAndExtractFiles[RuntimeResult](file)
-      files.foreach(fileService.deleteWhenGarbageCollected)
-      result.stdOut.foreach(fileService.deleteWhenGarbageCollected)
-      result.stdErr.foreach(fileService.deleteWhenGarbageCollected)
-
-      result.result.toOption.foreach {
-        case (r: ArchiveContextResults, _)         ⇒ fileService.deleteWhenGarbageCollected(r.contextResults)
-        case (r: IndividualFilesContextResults, _) ⇒ fileService.deleteWhenGarbageCollected(r.contextResults)
-      }
-      result
-    }
+    def load(file: File)(implicit serialiserService: SerializerService, fileService: FileService, newFile: NewFile) =
+      serialiserService.deserialiseAndExtractFiles[RuntimeResult](file)
   }
 
   case class RuntimeResult(stdOut: Option[File], stdErr: Option[File], result: Try[(SerializedContextResults, RuntimeLog)], info: RuntimeInfo)

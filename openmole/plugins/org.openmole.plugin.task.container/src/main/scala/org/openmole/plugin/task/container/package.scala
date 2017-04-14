@@ -63,8 +63,7 @@ package object container {
 
   type EnvironmentVariable = (String, FromContext[String])
 
-  def validateContainer[A](validateArchive: A ⇒ Seq[Throwable])(
-    archive:              A,
+  def validateContainer(
     command:              FromContext[String],
     environmentVariables: Vector[EnvironmentVariable],
     external:             External,
@@ -76,7 +75,6 @@ package object container {
     val validateVariables = environmentVariables.map(_._2).flatMap(_.validate(allInputs))
 
     command.validate(allInputs) ++
-      validateArchive(archive) ++
       validateVariables ++
       External.validate(external, allInputs)
   }

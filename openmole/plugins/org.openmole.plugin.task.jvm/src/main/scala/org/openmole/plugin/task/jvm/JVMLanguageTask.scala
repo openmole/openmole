@@ -39,11 +39,11 @@ trait JVMLanguageTask extends Task with Plugins {
     import p._
     import executionContext._
 
-    val pwd = executionContext.tmpDirectory.newDir("jvmtask")
-    val preparedContext = external.prepareInputFiles(p.context, external.relativeResolver(pwd.getCanonicalFile)) + Variable(JVMLanguageTask.workDirectory, pwd)
+    val pwd = executionContext.tmpDirectory.newDir("jvmtask").getCanonicalFile
+    val preparedContext = external.prepareInputFiles(p.context, external.relativeResolver(pwd)) + Variable(JVMLanguageTask.workDirectory, pwd)
     val resultContext = processCode(preparedContext)
-    val resultContextWithFiles = external.fetchOutputFiles(this, resultContext, external.relativeResolver(pwd.getCanonicalFile))
-    external.cleanWorkDirectory(this, resultContextWithFiles, pwd.getCanonicalFile)
+    val resultContextWithFiles = external.fetchOutputFiles(this, resultContext, external.relativeResolver(pwd), pwd)
+    external.cleanWorkDirectory(this, resultContextWithFiles, pwd)
     resultContextWithFiles
   }
 

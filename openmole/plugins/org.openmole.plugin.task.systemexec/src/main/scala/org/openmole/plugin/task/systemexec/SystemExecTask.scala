@@ -129,7 +129,7 @@ object SystemExecTask {
         osCommandLines.toList
       )(p.copy(context = preparedContext))
 
-      val retContext: Context = external.fetchOutputFiles(this, preparedContext, external.relativeResolver(workDir))
+      val retContext: Context = external.fetchOutputFiles(this, preparedContext, external.relativeResolver(workDir), tmpDir)
       external.cleanWorkDirectory(this, retContext, tmpDir)
 
       retContext ++

@@ -469,7 +469,8 @@ lazy val care = OsgiProject(pluginDir, "org.openmole.plugin.task.care", imports 
 
 lazy val udocker = OsgiProject(pluginDir, "org.openmole.plugin.task.udocker", imports = Seq("*")) dependsOn (systemexec, container) settings (
   libraryDependencies += Libraries.scalatest,
-  libraryDependencies += Libraries.json4s) settings (pluginSettings: _*)
+  libraryDependencies += Libraries.json4s,
+  libraryDependencies += Libraries.httpClient) settings (pluginSettings: _*)
 
 /* ---------------- REST ------------------- */
 

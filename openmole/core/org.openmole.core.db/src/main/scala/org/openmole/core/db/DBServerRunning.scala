@@ -51,15 +51,18 @@ object DBServerRunning extends Logger {
         Try(load(dbInfoFile(dbDirectory))) match {
           case Success(info) ⇒
             if (!portIsOpened(info)) {
+              Log.logger.info(s"Database server is not accepting connection on port ${info.port}, waiting...")
               sleep
               waitDBInfo()
             }
             else info
           case Failure(_) ⇒
+            Log.logger.info(s"Failed to deserialize database server information file ${dbInfoFile(dbDirectory)}, waiting...")
             sleep
             waitDBInfo()
         }
       else {
+        Log.logger.info(s"Database server information file ${dbInfoFile(dbDirectory)} does'nt exist or is empty, waiting...")
         sleep
         waitDBInfo()
       }

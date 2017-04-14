@@ -55,7 +55,7 @@ class SFTPServer(path: File, port: Int, passwordHash: Hash)(implicit val pool: T
 
     sshd.setPasswordAuthenticator(new PasswordAuthenticator {
       override def authenticate(username: String, pass: String, session: ServerSession) =
-        pass.hash == passwordHash
+        pass.hash() == passwordHash
     })
     sshd.setKeyPairProvider(new SimpleGeneratorHostKeyProvider)
     sshd

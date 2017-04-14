@@ -36,7 +36,7 @@ object Project {
   def isScript(file: File) = file.exists() && file.getName.endsWith(scriptExtension)
   def newREPL(variables: ConsoleVariables) = OpenMOLEREPL.newREPL(variables, quiet = true)
 
-  def uniqueName(source: File) = s"_${source.getCanonicalPath.hash}"
+  def uniqueName(source: File) = s"_${source.getCanonicalPath.hash()}"
 
   def scriptsObjects(script: File) = {
 

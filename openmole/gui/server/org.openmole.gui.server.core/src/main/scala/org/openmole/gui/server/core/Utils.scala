@@ -416,16 +416,20 @@ object Utils extends Logger {
 
   def getUUID: String = java.util.UUID.randomUUID.toString
 
-  def jsPluginDirectory(implicit workspace: Workspace) = {
-    val jsPluginDirectory = webUIDirectory / "jsplugin"
+  def updateJsPluginDirectory(jsPluginDirectory: File) = {
     jsPluginDirectory.recursiveDelete
     jsPluginDirectory.mkdirs
     Plugins.gatherJSIRFiles(jsPluginDirectory)
     jsPluginDirectory
   }
 
+  val openmoleFileName = "openmole.js"
+
   def openmoleFile(implicit workspace: Workspace, newFile: NewFile, fileService: FileService) = {
-    val jsFile = workspace.persistentDir /> "webui" / "openmole.js"
+    val jsPluginDirectory = webUIDirectory / "jsplugin"
+    updateJsPluginDirectory(jsPluginDirectory)
+
+    val jsFile = workspace.persistentDir /> "webui" / openmoleFileName
 
     def update = {
       logger.info("Building GUI plugins ...")

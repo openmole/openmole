@@ -338,9 +338,9 @@ package file {
        * @param target Target of the link
        * @return
        */
-      def createLink(target: String): Path = createLink(Paths.get(target))
+      def createLinkTo(target: String): Path = createLinkTo(Paths.get(target))
 
-      def createLink(target: Path): Path = {
+      def createLinkTo(target: Path): Path = {
         def unsupported = {
           // FIXME this block can throw an exception too
           Logger.getLogger(getClass.getName).warning("File system doesn't support symbolic link, make a file copy instead")
@@ -352,6 +352,7 @@ package file {
         try Files.createSymbolicLink(file, target)
         catch {
           case _: UnsupportedOperationException ⇒ unsupported
+          case e: FileAlreadyExistsException    ⇒ throw e
           case _: FileSystemException           ⇒ unsupported
           case e: IOException                   ⇒ throw e
         }
