@@ -88,7 +88,7 @@ class EnvironmentErrorPanel {
       detailOn() = !detailOn.now
     }
 
-    val render = tags.tr(row +++ errorTable)(
+    val render = tags.tr(row)(
       tags.td(colMD(9), wordWrap := "break-word")(tags.a(message, pointer +++ (fontSize := 13), onclick := { () ⇒ toggleDetails })), //(width := 400)
       tags.td(colMD(1) +++ textCenter)(bs.badge(occurrences, environmentErrorBadge)),
       tags.td(colMD(1) +++ (fontSize := 13) +++ textCenter)(date),
@@ -109,7 +109,7 @@ class EnvironmentErrorPanel {
   })
 
   val view = {
-    val errorTable = tags.table(sheet.table +++ (width := "100%"))(
+    val errorTable = tags.table(sheet.table +++ ms("EnvError") +++ (width := "100%"))(
       thead(
         tr(row)(
           th(exclusiveButton("Error", () ⇒ setSorting(AlphaSorting, Ascending), () ⇒ setSorting(AlphaSorting, Descending))),

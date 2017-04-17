@@ -8,6 +8,11 @@
 
 body{font-family:gi;}
 
+.table.envError>tbody>tr>td{
+    border-top:none;
+    vertical-align: middle;
+}
+
 .label{
 padding-top:7px;
 }
