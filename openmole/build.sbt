@@ -22,6 +22,7 @@ def defaultSettings = BuildSystem.settings ++
     scalaOrganization := "org.typelevel",
     updateOptions := updateOptions.value.withCachedResolution(true),
     resolvers += Resolver.sonatypeRepo("snapshots"),
+    resolvers += Resolver.sonatypeRepo("staging"),
     resolvers += Resolver.bintrayRepo("projectseptemberinc", "maven"), // For freek
     scalaVersion in Global := scalaVersionValue,
     scalacOptions ++= Seq("-target:jvm-1.8", "-language:higherKinds"),
