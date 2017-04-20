@@ -293,7 +293,7 @@ package object client {
     pointer,
     width := 245,
     textOverflow := "ellipsis",
-    sheet.paddingBottom(3)
+    sheet.paddingTop(3)
   )
 
   lazy val fileIcon: ModifierSeq = Seq(
@@ -683,7 +683,7 @@ package object client {
   lazy val dateStyle: ModifierSeq = Seq(
     absolutePosition,
     fontStyle := "italic",
-    sheet.paddingTop(6),
+    sheet.paddingTop(9),
     floatRight,
     right := 50,
     color("lightgrey")
@@ -695,7 +695,7 @@ package object client {
     color(DARK_GREY),
     relativePosition,
     borderRadius := 5,
-    fontSize := 11,
+    fontSize := 12,
     border := "1px solid #ccc",
     padding := 10,
     lineHeight := "0.5cm",

@@ -88,7 +88,7 @@ class EnvironmentErrorPanel {
       detailOn() = !detailOn.now
     }
 
-    val render = tags.tr(row +++ errorTable)(
+    val render = tags.tr(row)(
       tags.td(colMD(9), wordWrap := "break-word")(tags.a(message, pointer +++ (fontSize := 13), onclick := { () ⇒ toggleDetails })), //(width := 400)
       tags.td(colMD(1) +++ textCenter)(bs.badge(occurrences, environmentErrorBadge)),
       tags.td(colMD(1) +++ (fontSize := 13) +++ textCenter)(date),
@@ -109,7 +109,7 @@ class EnvironmentErrorPanel {
   })
 
   val view = {
-    val errorTable = tags.table(sheet.table +++ (width := "100%"))(
+    val errorTable = tags.table(sheet.table +++ ms("EnvError") +++ (width := "100%"))(
       thead(
         tr(row)(
           th(exclusiveButton("Error", () ⇒ setSorting(AlphaSorting, Ascending), () ⇒ setSorting(AlphaSorting, Descending))),
@@ -124,8 +124,8 @@ class EnvironmentErrorPanel {
           } yield {
 
             val line = Line(message, stack.stackTrace, Utils.longToDate(date).split(",").last, occurrences.toString, levelLabel(level))
-
-            scrollableStack.setContent(line.stack)
+            val stackText = scrollableText()
+            stackText.setContent(line.stack)
             Seq(
               line.render,
               tr(
@@ -133,7 +133,7 @@ class EnvironmentErrorPanel {
                   colspan := 12,
                   line.detailOn.expand(
                     tags.div(
-                      scrollableStack.view
+                      stackText.view
                     )
                   )
                 )

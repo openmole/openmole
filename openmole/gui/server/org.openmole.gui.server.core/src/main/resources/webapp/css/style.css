@@ -1,6 +1,26 @@
-/* ????????*/
-
 /* GENERAL*/
+@font-face {
+    font-family: 'gi';
+    src: url('../fonts/gi.otf');
+    font-weight: normal;
+    font-style: normal;
+}
+
+body{font-family:gi;}
+
+.table.envError>tbody>tr>td{
+    border-top:none;
+    vertical-align: middle;
+}
+
+.label{
+padding-top:7px;
+}
+
+span.badge{
+padding-top:7px;
+}
+
 a {
     color: #3086b5;
 }
@@ -8,6 +28,10 @@ a {
 a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-focus-inner, input[type="reset"]::-moz-focus-inner, input[type="button"]::-moz-focus-inner, input[type="submit"]::-moz-focus-inner, select::-moz-focus-inner {
     border: medium none;
     outline: medium none;
+}
+
+div table tr {
+    text-align: left;
 }
 
 label {

@@ -482,7 +482,7 @@ class TreeNodePanel {
               ondrop := {
                 dropAction(tn)
               },
-              clickablePair.tooltip(tn.name(), condition = () ⇒ tn.name().length > 24), {
+              clickablePair, {
                 div(fileInfo)(
                   if (treeStates().settingsSet) {
                     span(
