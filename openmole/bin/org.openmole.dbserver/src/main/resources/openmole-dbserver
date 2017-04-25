@@ -19,6 +19,6 @@ done
 PRGDIR=`dirname "$PRG"`
 BASEDIR=`cd "$PRGDIR/.." >/dev/null; pwd`
 
-EXTRA_JVM_ARGUMENTS="-XX:+UseG1GC -XX:CICompilerCount=2 -XX:ParallelGCThreads=2 -XX:ConcGCThreads=2 -XX:G1ConcRefinementThreads=2"
+EXTRA_JVM_ARGUMENTS="-XX:+UseG1GC -XX:CICompilerCount=2 -XX:ParallelGCThreads=2 -XX:ConcGCThreads=2 -XX:G1ConcRefinementThreads=2 -Xmx1G"
 
 java $EXTRA_JVM_ARGUMENTS -Djava.ext.dirs="$BASEDIR/lib" -Dapp.pid="$$" org.openmole.dbserver.DBServer "$@"
