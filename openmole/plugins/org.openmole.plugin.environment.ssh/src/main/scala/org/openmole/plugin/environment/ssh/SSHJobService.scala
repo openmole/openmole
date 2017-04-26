@@ -82,6 +82,7 @@ trait SSHJobService extends GridScaleJobService with SharedStorage { js ⇒
               case DONE | FAILED | KILLED ⇒
               case _ ⇒
                 queue.synchronized {
+                  queue.dropWhile(_.state == KILLED)
                   if (!queue.isEmpty) Some(queue.pop) else None
                 } match {
                   case Some(j) ⇒ j.submit
