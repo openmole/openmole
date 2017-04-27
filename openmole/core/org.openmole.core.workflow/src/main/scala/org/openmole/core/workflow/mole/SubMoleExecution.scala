@@ -35,9 +35,7 @@ import org.openmole.tool.thread._
 import scala.collection.mutable.Buffer
 import scala.concurrent.stm._
 
-object SubMoleExecution extends Logger {
-  case class Finished(val ticket: Ticket, canceled: Boolean) extends Event[SubMoleExecution]
-}
+object SubMoleExecution extends Logger
 
 import org.openmole.core.workflow.mole.SubMoleExecution.Log._
 
@@ -55,6 +53,7 @@ class SubMoleExecution(
   private val _children = TSet.empty[SubMoleExecution]
   private val _jobs = TMap[MoleJob, (Capsule, Ticket)]()
   private val _canceled = Ref(false)
+  private val _onFinish = Ref(List[(SubMoleExecution, Ticket) ⇒ Any]())
 
   private lazy val masterCapsuleExecutor = Executors.newSingleThreadExecutor(threadProvider.threadFactory)
 
@@ -175,8 +174,12 @@ class SubMoleExecution(
   private def isFinished = _nbJobs.single() == 0
 
   private def finish(ticket: Ticket) = {
-    eventDispatcher.trigger(this, new SubMoleExecution.Finished(ticket, canceled = _canceled.single()))
+    _onFinish.single().foreach(_(this, ticket))
     parentApply(_.-=(this))
+  }
+
+  def onFinish(f: (SubMoleExecution, Ticket) ⇒ Any) = atomic { implicit txn ⇒
+    _onFinish() = f :: _onFinish()
   }
 
   def implicits =

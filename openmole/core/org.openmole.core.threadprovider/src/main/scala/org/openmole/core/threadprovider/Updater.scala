@@ -70,6 +70,12 @@ object Updater {
 
 }
 
+object IUpdatable {
+  def apply(f: () ⇒ Boolean) = new IUpdatable {
+    override def update: Boolean = f()
+  }
+}
+
 trait IUpdatable {
   def update: Boolean
 }
