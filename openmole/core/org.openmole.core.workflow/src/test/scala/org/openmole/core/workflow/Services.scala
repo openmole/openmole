@@ -1,12 +1,13 @@
 package org.openmole.core.workflow
 
 import org.openmole.core.event.EventDispatcher
+import org.openmole.core.fileservice.FileService
 import org.openmole.core.preference.Preference
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.workspace._
 import org.openmole.tool.crypto.Cypher
-import org.openmole.tool.random.Seeder
+import org.openmole.tool.random._
 
 object Services {
 
@@ -14,7 +15,7 @@ object Services {
   dir.delete()
   dir.mkdirs()
 
-  val workspace = Workspace(dir)
+  implicit val workspace = Workspace(dir)
 
   implicit lazy val cypher = Cypher("")
   implicit lazy val preference = Preference(workspace.persistentDir)
@@ -23,5 +24,6 @@ object Services {
   implicit val serializer = SerializerService()
   implicit val threadProvider = ThreadProvider(Some(10))
   implicit val eventDispatcher = EventDispatcher()
-
+  implicit val fileService = FileService()
+  implicit val randomProvider = RandomProvider(seeder.newRNG)
 }
