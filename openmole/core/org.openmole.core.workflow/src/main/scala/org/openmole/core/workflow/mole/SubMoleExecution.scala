@@ -35,9 +35,7 @@ import org.openmole.tool.thread._
 import scala.collection.mutable.Buffer
 import scala.concurrent.stm._
 
-object SubMoleExecution extends Logger {
-  case class Finished(val ticket: Ticket, canceled: Boolean) extends Event[SubMoleExecution]
-}
+object SubMoleExecution extends Logger
 
 import org.openmole.core.workflow.mole.SubMoleExecution.Log._
 
@@ -177,7 +175,6 @@ class SubMoleExecution(
 
   private def finish(ticket: Ticket) = {
     _onFinish.single().foreach(_(this, ticket))
-    eventDispatcher.trigger(this, new SubMoleExecution.Finished(ticket, canceled = _canceled.single()))
     parentApply(_.-=(this))
   }
 
