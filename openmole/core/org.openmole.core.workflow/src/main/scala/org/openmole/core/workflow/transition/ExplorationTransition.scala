@@ -90,10 +90,7 @@ class ExplorationTransition(val start: Capsule, val end: Slot, val condition: Co
             if (level > 0) toProcess += t.end.capsule → (level - 1)
             else if (level == 0) {
               subMoleExecution.aggregationTransitionRegistry.register(t, ticket, new ListBuffer)
-              import executionContext.services.eventDispatcher
-              subMoleExecution listen {
-                case (se, ev: SubMoleExecution.Finished) ⇒ t.aggregate(se, ev.ticket, executionContext)
-              }
+              subMoleExecution.onFinish { (se, ticket) ⇒ t.aggregate(se, ticket, executionContext) }
             }
           case t: IExplorationTransition ⇒ toProcess += t.end.capsule → (level + 1)
           case t                         ⇒ toProcess += t.end.capsule → level
