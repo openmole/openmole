@@ -53,11 +53,12 @@ trait SSHBatchJob extends BatchJob {
     }
   }
 
-  def kill(implicit token: AccessToken) =
+  def kill(implicit token: AccessToken) = synchronized {
     id match {
       case Some(Success(id)) ⇒ super.kill(id)
       case _                 ⇒ state = KILLED
     }
+  }
 
   override def toString = id.toString
 

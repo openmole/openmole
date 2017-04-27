@@ -86,17 +86,18 @@ class SSHEnvironment(
       preference(SSHEnvironment.MaxOperationsByMinute)
     )
 
-  val jobService =
-    new SSHJobService {
-      def nbSlots = env.nbSlots
-      def sharedFS = storage
-      val environment = env
-      def workDirectory = env.workDirectory
-      override def credential = environment.credential
-      override def host = environment.host
-      override def user: String = environment.user
-      override def port = environment.port
-    }
+  import services.threadProvider
+
+  val jobService = SSHJobService(
+    slots = nbSlots,
+    sharedFS = storage,
+    environment = env,
+    workDirectory = env.workDirectory,
+    credential = credential,
+    host = host,
+    user = user,
+    port = port
+  )
 
   override def updateInterval = UpdateInterval.fixed(preference(SSHEnvironment.UpdateInterval))
 
