@@ -31,10 +31,13 @@ import org.openmole.core.expansion._
 import org.openmole.tool.logger.Logger
 import org.openmole.tool.random._
 import org.openmole.plugin.task.container
-
 import cats.implicits._
+import org.openmole.core.preference.ConfigurationLocation
 
 object CARETask extends Logger {
+
+  val disableSeccomp = ConfigurationLocation("CARETask", "DisableSeccomp", Some(false))
+
   implicit def isTask: InputOutputBuilder[CARETask] = InputOutputBuilder(CARETask._config)
   implicit def isExternal: ExternalBuilder[CARETask] = ExternalBuilder(CARETask.external)
 
@@ -168,10 +171,9 @@ object CARETask extends Logger {
 
       val commandline = commandLine(command.map(s"./${reExecute.getName} " + _), userWorkDirectory).from(preparedContext)
 
-      def prootNoSeccomp = ("PROOT_NO_SECCOMP", "1")
+      def prootNoSeccomp = if (preference(CARETask.disableSeccomp)) Vector(("PROOT_NO_SECCOMP", "1")) else Vector()
 
-      // FIXME duplicated from SystemExecTask
-      val allEnvironmentVariables = environmentVariables.map { case (varName, variable) ⇒ (varName, variable.from(context)) } ++ Vector(prootNoSeccomp)
+      val allEnvironmentVariables = environmentVariables.map { case (varName, variable) ⇒ (varName, variable.from(context)) } ++ prootNoSeccomp
       val executionResult = execute(commandline, extractedArchive, allEnvironmentVariables, stdOut.isDefined, stdErr.isDefined)
 
       if (errorOnReturnValue && returnValue.isEmpty && executionResult.returnCode != 0) throw error(commandline.toVector, executionResult)
