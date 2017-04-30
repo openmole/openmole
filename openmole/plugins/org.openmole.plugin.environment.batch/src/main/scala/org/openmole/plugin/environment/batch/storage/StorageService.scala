@@ -132,7 +132,7 @@ trait StorageService extends BatchService with Storage {
       }.getOrElse(true)
 
     val names = listNames(persistentPath)
-    val inReplica = replicaCatalog.forPaths(names.map { child(persistentPath, _) }).map(_.path).toSet
+    val inReplica = replicaCatalog.forPaths(names.map { child(persistentPath, _) }, Seq(this.id)).map(_.path).toSet
 
     for {
       name ← names
