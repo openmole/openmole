@@ -119,6 +119,7 @@ object Application extends Logger {
       |[--reset] reset all preferences and authentications
       |[--reset-password] reset all preferences and ask for the a password
       |[--mem memory] allocate more memory to the JVM (not supported on windows yes), for instance --mem 2G
+      |[--logger-level level] set the level of logging
       |[--] end of options the remaining arguments are provided to the console in the args array
       |[-h | --help] print help""".stripMargin
 
