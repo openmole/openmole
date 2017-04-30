@@ -40,7 +40,6 @@ import scala.util.{ Success, Try }
 
 object ReplicaCatalog extends Logger {
   val NoAccessCleanTime = ConfigurationLocation("ReplicaCatalog", "NoAccessCleanTime", Some(30 days))
-  val InCatalogCacheTime = ConfigurationLocation("ReplicaCatalog", "InCatalogCacheTime", Some(2 minutes))
   val ReplicaCacheTime = ConfigurationLocation("ReplicaCatalog", "ReplicaCacheTime", Some(30 minutes))
   val ReplicaCacheSize = ConfigurationLocation("ReplicaCatalog", "ReplicaCacheSize", Some(1000))
   val ReplicaGraceTime = ConfigurationLocation("ReplicaCatalog", "ReplicaGraceTime", Some(1 days))
@@ -187,9 +186,8 @@ class ReplicaCatalog(database: Database, preference: Preference) {
     else replica
   }
 
-  def forPaths(paths: Seq[String]) = query { replicas.filter(_.path inSetBind paths).result }
+  def forPaths(paths: Seq[String], storageId: Seq[String]) = query { replicas.filter(r ⇒ (r.path inSetBind paths) && (r.storage inSetBind storageId)).result }
   def forHashes(hashes: Seq[String], storageId: Seq[String]) = query { replicas.filter(r ⇒ (r.hash inSetBind hashes) && (r.storage inSetBind storageId)).result }
-  def all = query { replicas.result }
 
   def deleteReplicas[S](storageId: S)(implicit replicationStorage: ReplicationStorage[S]): Unit = deleteReplicas(replicationStorage.id(storageId))
   def deleteReplicas(storageId: String): Unit = query { replicas.filter { _.storage === storageId }.delete }
