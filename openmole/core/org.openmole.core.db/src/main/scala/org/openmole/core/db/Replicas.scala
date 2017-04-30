@@ -17,7 +17,7 @@
 
 package org.openmole.core.db
 
-import slick.driver.H2Driver.api._
+import slick.jdbc.H2Profile.api._
 
 class Replicas(tag: Tag) extends Table[Replica](tag, "REPLICAS") {
   def id = column[Long]("ID", O.PrimaryKey, O.AutoInc)
@@ -27,9 +27,9 @@ class Replicas(tag: Tag) extends Table[Replica](tag, "REPLICAS") {
   def hash = column[String]("HASH")
   def lastCheckExists = column[Long]("LAST_CHECK_EXISTS")
 
-  def idx1 = index("idx1", (source, hash, storage) /*, unique = true*/ )
-  def idx2 = index("idx2", (source, storage))
-  def idx3 = index("idx3", (storage))
+  def idx1 = index("idx1", (source, hash, storage))
+  def idx2 = index("idx2", (path, storage))
+  def idx3 = index("idx3", (hash, storage))
 
   def * = (id, source, storage, path, hash, lastCheckExists) <> (Replica.tupled, Replica.unapply)
 }
