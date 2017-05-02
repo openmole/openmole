@@ -103,6 +103,12 @@ object ConfigurationString {
       def fromString(s: String) = implicitly[FromString[String]].apply(s)
     }
 
+  implicit def booleanConfigurationString: ConfigurationString[Boolean] =
+    new ConfigurationString[Boolean] {
+      def toString(t: Boolean): String = t.toString
+      def fromString(s: String) = implicitly[FromString[Boolean]].apply(s)
+    }
+
   implicit def intConfigurationString: ConfigurationString[Int] =
     new ConfigurationString[Int] {
       override def toString(t: Int): String = t.toString

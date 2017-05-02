@@ -36,8 +36,10 @@ trait SSHBatchJob extends BatchJob {
   var id: Option[Try[jobService.J]] = None
 
   def submit = synchronized {
-    id = Some(Try[jobService.J](jobService.submit(jobDescription)))
-    logger.fine(s"Submited job $id")
+    if (state != KILLED) {
+      id = Some(Try[jobService.J](jobService.submit(jobDescription)))
+      logger.fine(s"Submited job $id")
+    }
   }
 
   def updateState(implicit token: AccessToken) = synchronized {
@@ -51,11 +53,12 @@ trait SSHBatchJob extends BatchJob {
     }
   }
 
-  def kill(implicit token: AccessToken) =
+  def kill(implicit token: AccessToken) = synchronized {
     id match {
       case Some(Success(id)) ⇒ super.kill(id)
       case _                 ⇒ state = KILLED
     }
+  }
 
   override def toString = id.toString
 

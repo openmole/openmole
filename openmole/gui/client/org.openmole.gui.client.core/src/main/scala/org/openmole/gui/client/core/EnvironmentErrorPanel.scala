@@ -123,7 +123,7 @@ class EnvironmentErrorPanel {
             (message, date, occurrences, level, stack) ← sort(currentData().getOrElse(EnvironmentErrorData.empty), sortingAndOrdering.now)
           } yield {
 
-            val line = Line(message, stack.stackTrace, Utils.longToDate(date).split(",").last, occurrences.toString, levelLabel(level))
+            val line = Line(message, stack.stackTrace, Utils.longToDate(date), occurrences.toString, levelLabel(level))
             val stackText = scrollableText()
             stackText.setContent(line.stack)
             Seq(
