@@ -169,10 +169,10 @@ lazy val tools = OsgiProject(coreDir, "org.openmole.core.tools", global = true, 
 lazy val event = OsgiProject(coreDir, "org.openmole.core.event", imports = Seq("*")) dependsOn (tools) settings (coreSettings: _*)
 
 lazy val replication = OsgiProject(coreDir, "org.openmole.core.replication", imports = Seq("*")) settings(
-  libraryDependencies ++= Seq(Libraries.slick, Libraries.xstream, Libraries.guava)) settings (coreSettings: _*) dependsOn(db, preference)
+  libraryDependencies ++= Seq(Libraries.slick, Libraries.xstream, Libraries.guava)) settings (coreSettings: _*) dependsOn(db, preference, workspace, openmoleCache)
 
-lazy val db = OsgiProject(coreDir, "org.openmole.core.db", imports = Seq("*")) settings(bundleType += "dbserver",
-  libraryDependencies ++= Seq(Libraries.slick, Libraries.xstream, Libraries.h2, Libraries.scopt)) settings (coreSettings: _*) dependsOn(openmoleNetwork, workspace, exception, openmoleCrypto)
+lazy val db = OsgiProject(coreDir, "org.openmole.core.db", imports = Seq("*")) settings(
+  libraryDependencies ++= Seq(Libraries.slick, Libraries.xstream, Libraries.h2, Libraries.scopt)) settings (coreSettings: _*) dependsOn(openmoleNetwork, exception, openmoleCrypto, openmoleFile, openmoleLogger)
 
 lazy val preference = OsgiProject(coreDir, "org.openmole.core.preference", imports = Seq("*")) settings(
   libraryDependencies ++= Seq(Libraries.configuration, Libraries.scalaLang, Libraries.squants)) settings (coreSettings: _*) dependsOn(openmoleNetwork, openmoleCrypto, openmoleFile, openmoleThread, openmoleTypes, openmoleLock, exception)
@@ -712,7 +712,6 @@ lazy val openmoleNaked =
     //  resourcesAssemble += (webpack in(clientGUI, fullOptJS) in Compile).value.head -> (assemblyPath.value / "webapp/js/openmole.js"),
     resourcesAssemble += (fullOptJS in clientGUI in Compile).value.data -> (assemblyPath.value / "webapp/js/openmole.js"),
     resourcesAssemble += (packageMinifiedJSDependencies in clientGUI in Compile).value -> (assemblyPath.value / "webapp/js/deps.js"),
-    resourcesAssemble += (assemble in dbServer).value -> (assemblyPath.value / "dbserver"),
     resourcesAssemble += {
       val tar = (Tar.tar in openmoleRuntime).value
       tar -> (assemblyPath.value / "runtime" / tar.getName)
@@ -725,7 +724,6 @@ lazy val openmoleNaked =
     assemblyDependenciesPath := assemblyPath.value / "plugins",
     Tar.name := "openmole-naked.tar.gz",
     Tar.innerFolder := "openmole",
-    cleanFiles ++= (cleanFiles in dbServer).value,
     cleanFiles ++= (cleanFiles in launcher).value,
     cleanFiles ++= (cleanFiles in openmoleRuntime).value) dependsOn (toDependencies(openmoleNakedDependencies): _*) settings (defaultSettings: _*)
 
@@ -741,21 +739,6 @@ lazy val openmole =
     resourcesAssemble ++= (Osgi.bundleDependencies in Compile).value.map(b ⇒ b → (assemblyPath.value / "plugins" / b.getName)),
     assemblyDependenciesPath := assemblyPath.value / "plugins",
     cleanFiles ++= (cleanFiles in openmoleNaked).value) dependsOn (toDependencies(openmoleDependencies): _*)
-
-lazy val dbServer = OsgiProject(binDir, "org.openmole.dbserver", settings = assemblySettings) dependsOn (db) settings(
-  assemblyDependenciesPath := assemblyPath.value / "lib",
-  resourcesAssemble += (resourceDirectory in Compile).value -> (assemblyPath.value / "bin"),
-  resourcesAssemble ++= (Osgi.bundleDependencies in Compile).value.map(b ⇒ b → (assemblyPath.value / "lib" / b.getName)),
-  libraryDependencies ++= Seq(
-    Libraries.xstream,
-    Libraries.slick,
-    Libraries.h2,
-    Libraries.slf4j,
-    Libraries.scalaLang
-  ),
-  dependencyFilter := bundleFilter,
-  dependencyName := rename
-) settings (defaultSettings: _*)
 
 lazy val openmoleRuntime =
   OsgiProject(binDir, "org.openmole.runtime", singleton = true, imports = Seq("*"), settings = tarProject ++ assemblySettings) dependsOn(workflow, communication, serializer, logging, event, exception) settings(

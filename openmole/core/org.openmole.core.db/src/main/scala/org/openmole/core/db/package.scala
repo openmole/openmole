@@ -4,25 +4,27 @@ import java.io.File
 
 import com.thoughtworks.xstream.XStream
 import org.openmole.tool.network._
-import slick.driver.H2Driver.api._
+import slick.jdbc.H2Profile.api._
 import squants.time.Time
+import slick.jdbc.meta._
 
-import scala.concurrent.Await
+import scala.concurrent.{ Await, Future }
 import scala.concurrent.duration.Duration
 import scala.io.Source
+import org.openmole.tool.file._
+import org.openmole.tool.logger.Logger
 
-package object db {
-
-  def defaultOpenMOLEDirectory = new File(System.getProperty("user.home"), s".openmole/${fixHostName}/")
+package object db extends Logger {
 
   case class DBServerInfo(port: Int, user: String, password: String)
 
   lazy val replicas = TableQuery[Replicas]
 
-  def dbName = s"replica"
+  def dbVersion = 2
+  def dbName = s"replica-$dbVersion"
   def dbInfoName = s"$dbName.info"
 
-  def dbDirectory(baseDirectory: File) = new File(baseDirectory, "database")
+  def dbDirectory(baseDirectory: File) = baseDirectory / "database"
   def dbFile(dbDirectory: File) = new File(dbDirectory, dbName)
   def dbInfoFile(dbDirectory: File) = new File(dbDirectory, dbInfoName)
 
@@ -39,17 +41,33 @@ package object db {
     finally src.close
   }
 
-  def databaseServer(baseDirectory: File, dBServerInfo: DBServerInfo, lockTimeout: Time) = {
-    def urlDBPath = s"jdbc:h2:tcp://localhost:${dBServerInfo.port}/${baseDirectory}/$dbName;MV_STORE=FALSE;MVCC=TRUE;"
+  def jdbcH2Options = "AUTO_SERVER=TRUE;AUTO_RECONNECT=TRUE"
 
-    val db = Database.forDriver(
-      driver = new org.h2.Driver,
-      url = urlDBPath,
-      user = dBServerInfo.user,
-      password = dBServerInfo.password
-    )
+  def databaseServer(baseDirectory: File, lockTimeout: Time) = {
+    def dbFile = baseDirectory / dbName
+
+    def urlDBPath = s"jdbc:h2:${dbFile};$jdbcH2Options;"
+
+    def connect =
+      Database.forDriver(
+        driver = new org.h2.Driver,
+        url = urlDBPath
+      )
+
+    val db = connect
 
     Await.result(db.run { sqlu"""SET DEFAULT_LOCK_TIMEOUT ${lockTimeout.millis}""" }, concurrent.duration.Duration.Inf)
+
+    import scala.concurrent.ExecutionContext.Implicits.global
+
+    def createTableIfNotInTables(tables: Vector[MTable]): Future[Unit] =
+      if (!tables.exists(_.name.name == replicas.baseTableRow.tableName)) db.run(replicas.schema.create)
+      else Future()
+
+    val createTableIfNotExist: Future[Unit] = db.run(MTable.getTables).flatMap(createTableIfNotInTables)
+
+    Await.result(createTableIfNotExist, Duration.Inf)
+
     db
   }
 
