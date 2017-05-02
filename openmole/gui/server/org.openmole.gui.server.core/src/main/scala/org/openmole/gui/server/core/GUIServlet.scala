@@ -70,14 +70,14 @@ object GUIServices {
     implicit def eventDispatcher: EventDispatcher = guiServices.eventDispatcher
   }
 
-  def apply(workspace: Workspace, dbServerInfo: DBServerInfo) = {
+  def apply(workspace: Workspace) = {
     implicit val ws = workspace
     implicit val preference = Preference(ws.persistentDir)
     implicit val newFile = NewFile(workspace)
     implicit val seeder = Seeder()
     implicit val serializerService = SerializerService()
     implicit val threadProvider = ThreadProvider()
-    implicit val replicaCatalog = ReplicaCatalog(dbServerInfo)
+    implicit val replicaCatalog = ReplicaCatalog(ws)
     implicit val authenticationStore = AuthenticationStore(ws.persistentDir)
     implicit val fileService = FileService()
     implicit val randomProvider = RandomProvider(seeder.newRNG)
@@ -91,8 +91,8 @@ object GUIServices {
     scala.util.Try(services.threadProvider.stop())
   }
 
-  def withServices[T](workspace: Workspace, dbServerInfo: DBServerInfo)(f: GUIServices ⇒ T) = {
-    val services = GUIServices(workspace, dbServerInfo)
+  def withServices[T](workspace: Workspace)(f: GUIServices ⇒ T) = {
+    val services = GUIServices(workspace)
     try f(services)
     finally dispose(services)
   }

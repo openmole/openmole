@@ -30,7 +30,7 @@ import org.openmole.core.workspace.Workspace
 import org.openmole.tool.cache.TimeCache
 import org.openmole.tool.lock.LockRepository
 import org.openmole.tool.logger.Logger
-import slick.driver.H2Driver.api._
+import slick.jdbc.H2Profile.api._
 import squants.time.TimeConversions._
 
 import scala.annotation.tailrec
@@ -46,9 +46,9 @@ object ReplicaCatalog extends Logger {
   val LockTimeout = ConfigurationLocation("ReplicaCatalog", "LockTimeout", Some(1 minutes))
   val CheckFileExistsInterval = ConfigurationLocation("ReplicaCatalog", "CheckFileExistsInterval", Some(1 hours))
 
-  def apply(dbServerInfo: DBServerInfo)(implicit preference: Preference, workspace: Workspace): ReplicaCatalog = {
+  def apply(workspace: Workspace)(implicit preference: Preference): ReplicaCatalog = {
     val dbDirectory = org.openmole.core.db.dbDirectory(workspace.location)
-    new ReplicaCatalog(org.openmole.core.db.databaseServer(dbDirectory, dbServerInfo, preference(LockTimeout)), preference)
+    new ReplicaCatalog(org.openmole.core.db.databaseServer(dbDirectory, preference(LockTimeout)), preference)
   }
 
   def apply(database: Database)(implicit preference: Preference): ReplicaCatalog =
