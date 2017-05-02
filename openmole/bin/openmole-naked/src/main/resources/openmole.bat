@@ -2,7 +2,6 @@ set startdir=%cd%
 set PWD=%~dp0
 if "%PWD:~-1%"=="\" set PWD=%PWD:~0,-1%
 cd /d %~dp0
-start /MIN dbserver\bin\openmole-dbserver.bat
 cd %cd%
 mkdir "%UserProfile%\.openmole\.tmp"
 set ran="%UserProfile%\.openmole\.tmp\%random%"

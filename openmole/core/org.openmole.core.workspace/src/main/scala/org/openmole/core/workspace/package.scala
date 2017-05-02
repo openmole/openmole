@@ -17,6 +17,9 @@
 
 package org.openmole.core
 
+import java.io.File
+import org.openmole.tool.network._
+
 package object workspace {
-  //implicit def workspaceObjectToInstance(w: Workspace.type) = w.instance
+  def defaultOpenMOLEDirectory = new File(System.getProperty("user.home"), s".openmole/${fixHostName}/")
 }

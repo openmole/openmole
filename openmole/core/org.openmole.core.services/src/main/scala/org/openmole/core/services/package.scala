@@ -17,8 +17,8 @@ package object services {
 
   object Services {
 
-    def withServices[T](workspace: File, password: String, dbServerInfo: DBServerInfo)(f: Services ⇒ T) = {
-      val services = Services(workspace, password, dbServerInfo)
+    def withServices[T](workspace: File, password: String)(f: Services ⇒ T) = {
+      val services = Services(workspace, password)
       try f(services)
       finally dispose(services)
     }
@@ -26,7 +26,7 @@ package object services {
     def preference(workspace: Workspace) = Preference(workspace.persistentDir)
     def authenticationStore(workspace: Workspace) = AuthenticationStore(workspace.persistentDir)
 
-    def apply(workspace: File, password: String, dbServerInfo: DBServerInfo) = {
+    def apply(workspace: File, password: String) = {
       implicit val ws = Workspace(workspace)
       implicit val cypher = Cypher(password)
       implicit val preference = Services.preference(ws)
@@ -34,7 +34,7 @@ package object services {
       implicit val seeder = Seeder()
       implicit val serializerService = SerializerService()
       implicit val threadProvider = ThreadProvider()
-      implicit val replicaCatalog = ReplicaCatalog(dbServerInfo)
+      implicit val replicaCatalog = ReplicaCatalog(ws)
       implicit val authenticationStore = Services.authenticationStore(ws)
       implicit val fileService = FileService()
       implicit val randomProvider = RandomProvider(seeder.newRNG)
