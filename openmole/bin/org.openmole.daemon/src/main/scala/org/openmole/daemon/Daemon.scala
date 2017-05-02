@@ -64,7 +64,7 @@ object Daemon extends Logger {
       val debug = args.contains("-d")
       val filteredArgs = args.filterNot((_: String) == "-d")
       parser.parse(filteredArgs, Config()) foreach { config ⇒
-        val workspace = Workspace(config.workspace.getOrElse(org.openmole.core.db.defaultOpenMOLEDirectory))
+        val workspace = Workspace(config.workspace.getOrElse(org.openmole.core.workspace.defaultOpenMOLEDirectory))
         implicit val preference = Services.preference(workspace)
         implicit val serializerService = SerializerService()
         implicit val newFile = NewFile(workspace)
