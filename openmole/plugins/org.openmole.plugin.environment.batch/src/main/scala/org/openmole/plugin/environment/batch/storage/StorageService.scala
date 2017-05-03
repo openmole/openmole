@@ -99,8 +99,11 @@ trait StorageService extends BatchService with Storage {
   protected def createBasePath(implicit token: AccessToken) = {
     val rootPath = mkRootDir
     val basePath = child(rootPath, baseDirName)
-    if (!exists(basePath)) makeDir(basePath)
-    basePath
+    util.Try(makeDir(basePath)) match {
+      case util.Success(_) ⇒ basePath
+      case util.Failure(e) ⇒
+        if (exists(basePath)) basePath else throw e
+    }
   }
 
   protected def mkRootDir(implicit token: AccessToken): String = synchronized {
