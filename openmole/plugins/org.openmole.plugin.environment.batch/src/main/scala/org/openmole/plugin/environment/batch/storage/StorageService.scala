@@ -180,8 +180,11 @@ trait StorageService extends BatchService with Storage {
     }
 
     val tmpTimePath = child(tmpNoTime, time.toString)
-    if (!exists(tmpTimePath)) makeDir(tmpTimePath)
-    tmpTimePath
+    util.Try(makeDir(tmpTimePath)) match {
+      case util.Success(_) ⇒ tmpTimePath
+      case util.Failure(e) ⇒
+        if (exists(tmpTimePath)) tmpTimePath else throw e
+    }
   }
 
   override def toString: String = id
