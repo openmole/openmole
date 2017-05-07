@@ -63,7 +63,7 @@ object ScalaREPL {
         |${code}""".stripMargin
   }
 
-  @Lenses case class CompilationError(errorMessages: List[ErrorMessage], code: String, parent: Throwable) extends Exception(compilationMessage(errorMessages, code), parent)
+  @Lenses case class CompilationError(errorMessages: List[ErrorMessage], code: String) extends Exception(compilationMessage(errorMessages, code))
 
   @Lenses case class ErrorMessage(decoratedMessage: String, rawMessage: String, position: Option[ErrorPosition])
   @Lenses case class ErrorPosition(line: Int, start: Int, end: Int, point: Int)
@@ -250,16 +250,20 @@ class ScalaREPL(priorityBundles: ⇒ Seq[Bundle], jars: Seq[JFile], quiet: Boole
 
   in = chooseReader(settings)
 
-  private def messageToException(e: Throwable, messages: List[ErrorMessage], code: String): Throwable =
-    CompilationError(messages.reverse, code, e)
+  private def messageToException(messages: List[ErrorMessage], code: String): Throwable =
+    CompilationError(messages.reverse, code)
 
   def eval(code: String) = compile(code).apply()
 
-  def compile(script: String): ScalaREPL.Compiled =
-    ScalaREPL.call[IMain, Either[IR.Result, omIMain.Request]](intp, "compile", Vector(script, false)) match {
+  def compile(script: String): ScalaREPL.Compiled = {
+    omIMain.errorMessage = Nil
+
+    ScalaREPL.call[IMain, Either[IR.Result, omIMain.Request]](intp, "compile", Vector("\n" + omIMain.firstLineTag + "\n" + script, false)) match {
       case Right(req) ⇒ () ⇒ req.lineRep.evalEither.toTry.get
-      case _ ⇒ throw new ScriptException("compile-time error")
+      case Left(IR.Incomplete) ⇒ throw new ScriptException(s"compile-time error, input was incomplete:\n$script")
+      case e                   ⇒ throw messageToException(omIMain.errorMessage, script)
     }
+  }
 
   def loopWithExitCode = {
     loop()

@@ -83,13 +83,16 @@ $code
 
   def testCode = toTest.map { _.toCode }.mkString("\n")
 
-  def runTest =
+  def runTest = if (Config.testScript) {
     Try {
       withTmpServices { implicit services ⇒
-        val repl = Project.newREPL(ConsoleVariables.empty)
+        import services._
+        val repl = OpenMOLEREPL.newREPL(ConsoleVariables.empty(services), quiet = true)
         repl.compile(testCode)
       }
     }
+  }
+  else Success(Unit)
 
   def clear = toTest.clear
 

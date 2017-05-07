@@ -173,7 +173,7 @@ object Site {
     lazy val bibPapers = Publication.papers ++ Communication.papers
     bibPapers foreach (_.generateBibtex(dest))
 
-    site.renderTo(Path(dest))
+    site.renderTo(Path(dest.getAbsoluteFile))
 
     for {
       r ← Resource.all ++ Resource.marketResources(marketEntries)

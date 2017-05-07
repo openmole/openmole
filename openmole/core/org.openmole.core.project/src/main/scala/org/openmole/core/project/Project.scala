@@ -36,7 +36,7 @@ object Project {
 
   def scriptExtension = ".oms"
   def isScript(file: File) = file.exists() && file.getName.endsWith(scriptExtension)
-  def newREPL(variables: ConsoleVariables)(implicit newFile: NewFile, fileService: FileService) = OpenMOLEREPL.newREPL(variables, quiet = true)
+  def newREPL(variables: ConsoleVariables, quiet: Boolean = true)(implicit newFile: NewFile, fileService: FileService) = OpenMOLEREPL.newREPL(variables, quiet = quiet)
 
   def uniqueName(source: File) = s"_${source.getCanonicalPath.hash()}"
 
@@ -85,7 +85,7 @@ object Project {
   }
 
   def apply(workDirectory: File)(implicit newFile: NewFile, fileService: FileService) =
-    new Project(workDirectory, Project.newREPL)
+    new Project(workDirectory, v ⇒ Project.newREPL(v))
 
 }
 

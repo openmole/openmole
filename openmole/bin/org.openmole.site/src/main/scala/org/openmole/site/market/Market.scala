@@ -145,11 +145,12 @@ class Market(repositories: Seq[MarketRepository], destination: File) {
     }
   }
 
-  def test(directory: File, project: MarketEntry): Boolean = DSLTest.withTmpServices { implicit servivces ⇒
+  def test(directory: File, project: MarketEntry): Boolean = DSLTest.withTmpServices { implicit services ⇒
+    import services._
     Try {
       PluginManager.synchronized {
         val projectDirectory = directory / project.directory
-        val consoleProject = new Project(projectDirectory)
+        val consoleProject = Project(projectDirectory)
         val plugins = consoleProject.loadPlugins
         try {
 
