@@ -20,7 +20,7 @@ package org.openmole.plugin.task.external
 import java.io.File
 
 import monocle.macros.Lenses
-import org.openmole.core.context.{ Context, Val, ValType, Variable }
+import org.openmole.core.context._
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.fileservice.FileService
@@ -30,6 +30,7 @@ import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.tools.InputOutputCheck
 import org.openmole.core.workspace.NewFile
 import org.openmole.tool.random._
+import org.openmole.core.workflow.validation._
 
 object External {
   val PWD = Val[String]("PWD")
@@ -75,12 +76,14 @@ object External {
     res
   }
 
-  def validate(external: External, inputs: Seq[Val[_]]): Seq[Throwable] =
+  def validate(external: External)(inputs: Seq[Val[_]]) = Validate { p ⇒
+    import p._
     external.inputFileArrays.flatMap(_.prefix.validate(inputs)) ++
       external.inputFileArrays.flatMap(_.suffix.validate(inputs)) ++
       external.inputFiles.flatMap(_.destination.validate(inputs)) ++
       external.outputFiles.flatMap(_.origin.validate(inputs)) ++
       external.resources.flatMap(_.destination.validate(inputs))
+  }
 }
 
 import org.openmole.plugin.task.external.External._
@@ -92,12 +95,12 @@ import org.openmole.plugin.task.external.External._
     resources:       Vector[External.Resource]       = Vector.empty
 ) {
 
-  protected def listInputFiles(context: Context)(implicit rng: RandomProvider, newFile: NewFile): Vector[(Val[File], ToPut)] =
+  protected def listInputFiles(context: Context)(implicit rng: RandomProvider, newFile: NewFile, fileService: FileService): Vector[(Val[File], ToPut)] =
     inputFiles.map {
       case InputFile(prototype, name, link) ⇒ prototype → ToPut(context(prototype), name.from(context), link)
     }
 
-  protected def listInputFileArray(context: Context)(implicit rng: RandomProvider, newFile: NewFile): Vector[(Val[Array[File]], Seq[ToPut])] =
+  protected def listInputFileArray(context: Context)(implicit rng: RandomProvider, newFile: NewFile, fileService: FileService): Vector[(Val[Array[File]], Seq[ToPut])] =
     for {
       ifa ← inputFileArrays
     } yield {
@@ -110,7 +113,7 @@ import org.openmole.plugin.task.external.External._
       )
     }
 
-  protected def listResources(context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: NewFile): Iterable[ToPut] = {
+  protected def listResources(context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: NewFile, fileService: FileService): Iterable[ToPut] = {
     val byLocation =
       resources groupBy {
         case Resource(_, name, _, _) ⇒ resolver(name.from(context)).getCanonicalPath
@@ -141,10 +144,10 @@ import org.openmole.plugin.task.external.External._
     }
   }
 
-  def prepareInputFiles(context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: NewFile) =
+  def prepareInputFiles(context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: NewFile, fileService: FileService) =
     prepareAndListInputFiles(context, resolver)._1
 
-  def prepareAndListInputFiles(context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: NewFile) = {
+  def prepareAndListInputFiles(context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: NewFile, fileService: FileService) = {
     def destination(f: ToPut) = resolver(f.name)
 
     val resourcesFiles = for { f ← listResources(context, resolver) } yield {
@@ -178,7 +181,7 @@ import org.openmole.plugin.task.external.External._
     (context ++ copiedFilesVariable ++ copiedArrayFilesVariable, allFileInfo)
   }
 
-  protected def outputFileVariables(context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: NewFile) =
+  protected def outputFileVariables(context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: NewFile, fileService: FileService) =
     outputFiles.map {
       case OutputFile(name, prototype) ⇒
         val fileName = name.from(context)
@@ -186,12 +189,12 @@ import org.openmole.plugin.task.external.External._
         Variable(prototype, file)
     }
 
-  def contextFiles(task: Task, context: Context): Seq[Variable[File]] =
-    InputOutputCheck.filterOutput(task.outputs, context).values.filter { v ⇒ v.prototype.`type` == ValType[File] }.map(_.asInstanceOf[Variable[File]]).toSeq
+  def contextFiles(outputs: PrototypeSet, context: Context): Seq[Variable[File]] =
+    InputOutputCheck.filterOutput(outputs, context).values.filter { v ⇒ v.prototype.`type` == ValType[File] }.map(_.asInstanceOf[Variable[File]]).toSeq
 
-  def fetchOutputFiles(task: Task, context: Context, resolver: PathResolver, workDirectory: File)(implicit rng: RandomProvider, newFile: NewFile): Context = {
+  def fetchOutputFiles(outputs: PrototypeSet, context: Context, resolver: PathResolver, workDirectory: File)(implicit rng: RandomProvider, newFile: NewFile, fileService: FileService): Context = {
     val fileOutputs = outputFileVariables(context, resolver)
-    val allFiles = (fileOutputs ++ contextFiles(task, context)).distinct
+    val allFiles = (fileOutputs ++ contextFiles(outputs, context)).distinct
 
     for {
       f ← allFiles
@@ -204,8 +207,8 @@ import org.openmole.plugin.task.external.External._
     }
   }
 
-  def cleanWorkDirectory(task: Task, context: Context, workDirectory: File)(implicit fileService: FileService) = {
-    val ctxFiles = contextFiles(task, context)
+  def cleanWorkDirectory(outputs: PrototypeSet, context: Context, workDirectory: File)(implicit fileService: FileService) = {
+    val ctxFiles = contextFiles(outputs, context)
 
     for {
       f ← ctxFiles

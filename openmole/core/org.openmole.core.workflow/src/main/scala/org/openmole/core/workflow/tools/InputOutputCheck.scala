@@ -20,6 +20,7 @@ package org.openmole.core.workflow.tools
 import org.openmole.core.context._
 import org.openmole.core.exception._
 import org.openmole.core.expansion.FromContext
+import org.openmole.core.fileservice.FileService
 import org.openmole.core.preference.Preference
 import org.openmole.core.workspace.NewFile
 import org.openmole.tool.random._
@@ -69,7 +70,7 @@ object InputOutputCheck {
   def filterOutput(outputs: PrototypeSet, context: Context): Context =
     Context(outputs.toList.flatMap(o ⇒ context.variable(o): Option[Variable[_]]): _*)
 
-  def initializeInput(defaults: DefaultSet, context: Context)(implicit randomProvider: RandomProvider, newFile: NewFile): Context =
+  def initializeInput(defaults: DefaultSet, context: Context)(implicit randomProvider: RandomProvider, newFile: NewFile, fileService: FileService): Context =
     context ++
       defaults.flatMap {
         parameter ⇒
@@ -77,7 +78,7 @@ object InputOutputCheck {
           else Option.empty[Variable[_]]
       }
 
-  def perform(inputs: PrototypeSet, outputs: PrototypeSet, defaults: DefaultSet, process: FromContext[Context])(implicit preference: Preference) = FromContext.withValidation(process.validate(_)) { p ⇒
+  def perform(inputs: PrototypeSet, outputs: PrototypeSet, defaults: DefaultSet, process: FromContext[Context])(implicit preference: Preference) = FromContext.withValidation(process) { p ⇒
     import p._
     val initializedContext = initializeInput(defaults, context)
     val inputErrors = verifyInput(inputs, initializedContext)

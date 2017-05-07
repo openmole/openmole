@@ -25,7 +25,7 @@ import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
 import org.openmole.core.dsl._
 import org.openmole.core.workflow.mole.{ MoleExecutionContext, _ }
-import org.openmole.core.workflow.validation.ValidateHook
+import org.openmole.core.workflow.validation._
 import org.openmole.tool.stream._
 
 object AppendToFileHook {
@@ -47,8 +47,10 @@ object AppendToFileHook {
     config:  InputOutputConfig
 ) extends Hook with ValidateHook {
 
-  override def validate(inputs: Seq[Val[_]]): Seq[Throwable] =
+  override def validate(inputs: Seq[Val[_]]) = Validate { p ⇒
+    import p._
     file.validate(inputs) ++ content.validate(inputs)
+  }
 
   override protected def process(executionContext: MoleExecutionContext) = FromContext { parameters ⇒
     import parameters._

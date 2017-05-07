@@ -4,6 +4,6 @@ resolvers += Classpaths.sbtPluginSnapshots
 
 resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/"
 
-addSbtPlugin("org.openmole" % "openmole-buildsystem-plugin" % "1.6-SNAPSHOT")
+addSbtPlugin("org.openmole" % "openmole-buildsystem-plugin" % "1.7-SNAPSHOT")
 
 addSbtPlugin("com.eed3si9n" % "sbt-dirty-money" % "0.1.0")

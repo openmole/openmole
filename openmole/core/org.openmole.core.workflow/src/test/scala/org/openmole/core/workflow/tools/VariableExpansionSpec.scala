@@ -33,19 +33,19 @@ class VariableExpansionSpec extends FlatSpec with Matchers {
   "A expandData" should "expand all the ${} top level sequence from an inputStream and return a parsed OuputStream" in {
     val template = """My first line
 ${2*3}
-${s"I am ${6*5} year old"}"""
+${s"I am ${6*5} years old"}"""
 
     val expected = """My first line
 6
-I am 30 year old"""
+I am 30 years old"""
 
-    val res = ExpandedString(template).from(Context.empty)(Lazy(new Random()), newFile)
+    val res = ExpandedString(template).from(Context.empty)
     res should equal(expected)
   }
 
   "A expandData" should "preserve additionnal $ in the string" in {
     val test = "$$$etere{etsaesrn}etasriu$$$$eatsrn$"
-    val res = ExpandedString(test).from(Context.empty)(Lazy(new Random()), newFile)
+    val res = ExpandedString(test).from(Context.empty)
     test should equal(res)
   }
 

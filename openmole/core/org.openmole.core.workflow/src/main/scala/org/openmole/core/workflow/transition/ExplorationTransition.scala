@@ -21,10 +21,12 @@ import org.openmole.core.context.{ Context, Val, Variable }
 import org.openmole.core.event._
 import org.openmole.core.exception._
 import org.openmole.core.expansion.{ Condition, FromContext }
+import org.openmole.core.fileservice.FileService
+import org.openmole.core.workflow.dsl
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.validation.ValidateTransition
+import org.openmole.core.workflow.validation._
 import org.openmole.core.workspace.NewFile
 import org.openmole.tool.lock._
 
@@ -32,7 +34,10 @@ import scala.collection.mutable.{ HashSet, ListBuffer }
 
 class ExplorationTransition(val start: Capsule, val end: Slot, val condition: Condition = Condition.True, val filter: BlockList = BlockList.empty) extends IExplorationTransition with ValidateTransition {
 
-  override def validate(inputs: Seq[Val[_]]) = condition.validate(inputs)
+  override def validate(inputs: Seq[Val[_]]) = Validate { p ⇒
+    import p._
+    condition.validate(inputs)
+  }
 
   override def perform(context: Context, ticket: Ticket, subMole: SubMoleExecution, executionContext: MoleExecutionContext) = {
     val subSubMole = subMole.newChild

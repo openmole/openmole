@@ -167,7 +167,7 @@ object UDockerTask {
     external:             External
 ) extends Task with ValidateTask { self ⇒
   override def config = InputOutputConfig.outputs.modify(_ ++ Seq(stdOut, stdErr, returnValue).flatten)(_config)
-  override def validate: Seq[Throwable] = container.validateContainer(command, environmentVariables, external, inputs)
+  override def validate = container.validateContainer(command, environmentVariables, external, inputs)
 
   type FileInfo = (External.ToPut, File)
   type HostFile = (String, Option[String])
@@ -182,7 +182,6 @@ object UDockerTask {
 
   override protected def process(executionContext: TaskExecutionContext) = FromContext[Context] { parameters ⇒
     import parameters._
-    import executionContext._
 
     val udockerInstallDirectory = executionContext.tmpDirectory /> "udocker"
     val udockerTarBall = udockerInstallDirectory / "udocketarball.tar.gz"
@@ -323,8 +322,8 @@ object UDockerTask {
             List(runCommand)
           )(parameters.copy(context = preparedContext))
 
-          val retContext = external.fetchOutputFiles(this, preparedContext, outputPathResolver(rootDirectory), rootDirectory)
-          external.cleanWorkDirectory(this, retContext, taskWorkDirectory)
+          val retContext = external.fetchOutputFiles(outputs, preparedContext, outputPathResolver(rootDirectory), rootDirectory)
+          external.cleanWorkDirectory(outputs, retContext, taskWorkDirectory)
           (retContext, executionResult)
         }
 

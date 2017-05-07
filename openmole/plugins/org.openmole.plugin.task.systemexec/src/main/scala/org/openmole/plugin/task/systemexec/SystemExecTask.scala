@@ -82,24 +82,26 @@ object SystemExecTask {
 
   def config = InputOutputConfig.outputs.modify(_ ++ Seq(stdOut, stdErr, returnValue).flatten)(_config)
 
-  override def validate = {
-    val allInputs = External.PWD :: inputs.toList
+  override def validate =
+    Validate { p ⇒
+      import p._
 
-    val commandsError =
-      for {
-        c ← command
-        exp ← c.expanded
-        e ← exp.validate(allInputs)
-      } yield e
+      val allInputs = External.PWD :: inputs.toList
 
-    val variableErrors = environmentVariables.map(_._2).flatMap(_.validate(allInputs))
+      val commandsError =
+        for {
+          c ← command
+          exp ← c.expanded
+          e ← exp.validate(allInputs)
+        } yield e
 
-    commandsError ++ variableErrors ++ External.validate(external, allInputs)
-  }
+      val variableErrors = environmentVariables.map(_._2).flatMap(_.validate(allInputs))
+
+      commandsError ++ variableErrors ++ External.validate(external)(allInputs).apply
+    }
 
   override protected def process(executionContext: TaskExecutionContext) = FromContext { p ⇒
     import p._
-    import executionContext._
 
     External.withWorkDir(executionContext) { tmpDir ⇒
       val workDir =
@@ -129,8 +131,8 @@ object SystemExecTask {
         osCommandLines.toList
       )(p.copy(context = preparedContext))
 
-      val retContext: Context = external.fetchOutputFiles(this, preparedContext, external.relativeResolver(workDir), tmpDir)
-      external.cleanWorkDirectory(this, retContext, tmpDir)
+      val retContext: Context = external.fetchOutputFiles(outputs, preparedContext, external.relativeResolver(workDir), tmpDir)
+      external.cleanWorkDirectory(outputs, retContext, tmpDir)
 
       retContext ++
         List(

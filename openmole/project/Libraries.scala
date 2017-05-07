@@ -13,12 +13,13 @@ object Libraries {
   lazy val netLogo6Version = "6.0.0"
   lazy val scalaTagsVersion = "0.6.2"
   lazy val scalaJSDomVersion = "0.9.1"
-  lazy val rxVersion = "0.3.1"
-  lazy val scalaUpickleVersion = "0.4.3"
+  lazy val rxVersion = "0.3.2"
+  lazy val scalaUpickleVersion = "0.4.4"
   lazy val scalaAutowireVersion = "0.2.6"
-  lazy val sourcecodeVersion = "0.1.2"
-  lazy val scaladgetVersion = "0.9.2"
-  lazy val scalajsVersion = "0.6.14"
+  lazy val sourcecodeVersion = "0.1.3"
+  lazy val scaladgetVersion = "0.9.4"
+  lazy val scalajsVersion = "0.6.16"
+  lazy val json4sVersion = "3.5.0"
 
   lazy val scaladgetJS = libraryDependencies += "fr.iscpif" %%% "scaladget" % scaladgetVersion
   lazy val scalajsDomJS = libraryDependencies += "org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion
@@ -32,7 +33,7 @@ object Libraries {
   lazy val ace = "org.webjars" % "ace" % aceVersion
   lazy val tooltipster = "org.webjars" % "tooltipster" % tooltipserVersion
 
-  lazy val scalatest = "org.scalatest" %% "scalatest" % "2.2.4" % "test"
+  lazy val scalatest = "org.scalatest" %% "scalatest" % "3.0.1" % "test"
 
   /** ------- Bundles -------------- */
 
@@ -44,10 +45,10 @@ object Libraries {
   lazy val slick = "org.openmole.library" %% "com-typesafe-slick" % "3.2.0"
   lazy val slf4j = "org.openmole.library" %% "org-slf4j" % "1.7.10"
   lazy val xstream = "org.openmole.library" %% "com-thoughtworks-xstream" % "1.4.9"
-  lazy val scalaLang = "org.openmole.library" %% "org-scala-lang-scala-library" % "2.11.8"
+  lazy val scalaLang = "org.openmole.library" %% "org-scala-lang-scala-library" % "2.12.2"
   lazy val jasypt = "org.openmole.library" %% "org-jasypt-encryption" % "1.9.2"
   lazy val opencsv = "org.openmole.library" %% "au-com-bytecode-opencsv" % "2.3"
-  lazy val arm = "org.openmole.library" %% "com-jsuereth-scala-arm" % "1.4"
+  lazy val arm = "org.openmole.library" %% "com-jsuereth-scala-arm" % "2.0"
   lazy val scalajHttp = "org.openmole.library" %% "org-scalaj-scalaj-http" % "0.3.15"
   lazy val scopt = "org.openmole.library" %% "com-github-scopt" % "3.5.0"
   lazy val scalabc = "org.openmole.library" %% "fr-iscpif-scalabc" % "0.4"
@@ -62,13 +63,13 @@ object Libraries {
   lazy val sshd = "org.openmole.library" %% "org-apache-sshd" % "1.0.0"
   lazy val ant = "org.openmole.library" %% "org-apache-ant" % "1.8.0"
   lazy val codec = "org.openmole.library" %% "org-apache-commons-codec" % "1.10"
-  lazy val async = "org.openmole.library" %% "scala-async" % "0.9.1"
+  lazy val async = "org.openmole.library" %% "scala-async" % "0.9.6"
   lazy val jgit = "org.openmole.library" %% "org-eclipse-jgit" % "3.7.1"
   lazy val cats = "org.openmole.library" %% "cats" % "0.8.1"
-  lazy val clapper = "org.openmole.library" %% "org-clapper" % "1.0.5"
+  lazy val clapper = "org.openmole.library" %% "org-clapper" % "1.1.2"
   lazy val asm = "org.openmole.library" %% "org-objectweb-asm" % "5.1"
   lazy val configuration = "org.openmole.library" %% "org-apache-commons-configuration2" % "2.1"
-  lazy val json4s = "org.openmole.library" %% "org-json4s" % "3.4.0"
+  lazy val json4s = "org.openmole.library" %% "org-json4s" % json4sVersion
   lazy val scalajsTools = "org.openmole.library" %% "scalajs-tools" % scalajsVersion
   lazy val scalajs = "org.openmole.library" %% "scalajs" % scalajsVersion
   lazy val mgo = "org.openmole.library" %% "mgo" % "2.4"
@@ -80,7 +81,7 @@ object Libraries {
   lazy val rx = "org.openmole.library" %% "rx" % rxVersion
   lazy val netlogo5 = "org.openmole.library" % "ccl-northwestern-edu-netlogo5" % netLogo5Version
   lazy val netlogo6 = "org.openmole.library" % "ccl-northwestern-edu-netlogo6" % netLogo6Version
-  lazy val sourceCode = "org.openmole.library" %% "sourcecode" % "0.1.2"
+  lazy val sourceCode = "org.openmole.library" %% "sourcecode" % sourcecodeVersion
 
   lazy val toolxitBibtex = "org.openmole" %% "toolxit-bibtex" % "0.2"
 

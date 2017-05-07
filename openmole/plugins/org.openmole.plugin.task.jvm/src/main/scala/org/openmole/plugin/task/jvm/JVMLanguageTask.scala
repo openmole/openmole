@@ -19,7 +19,7 @@ package org.openmole.plugin.task.jvm
 
 import java.io.File
 
-import org.openmole.core.context.{ Context, Val, Variable }
+import org.openmole.core.context.{ Context, PrototypeSet, Val, Variable }
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.serializer.plugin.Plugins
 import org.openmole.core.workflow.dsl._
@@ -28,25 +28,18 @@ import org.openmole.plugin.task.external.External
 
 object JVMLanguageTask {
   lazy val workDirectory = Val[File]("workDirectory")
-}
 
-trait JVMLanguageTask extends Task with Plugins {
-
-  def libraries: Seq[File]
-  def external: External
-
-  override def process(executionContext: TaskExecutionContext) = FromContext { p ⇒
+  def process(executionContext: TaskExecutionContext, libraries: Seq[File], external: External, processCode: FromContext[Context], outputs: PrototypeSet) = FromContext { p ⇒
     import p._
-    import executionContext._
 
     val pwd = executionContext.tmpDirectory.newDir("jvmtask").getCanonicalFile
     val preparedContext = external.prepareInputFiles(p.context, external.relativeResolver(pwd)) + Variable(JVMLanguageTask.workDirectory, pwd)
+
     val resultContext = processCode(preparedContext)
-    val resultContextWithFiles = external.fetchOutputFiles(this, resultContext, external.relativeResolver(pwd), pwd)
-    external.cleanWorkDirectory(this, resultContextWithFiles, pwd)
+
+    val resultContextWithFiles = external.fetchOutputFiles(outputs, resultContext, external.relativeResolver(pwd), pwd)
+    external.cleanWorkDirectory(outputs, resultContextWithFiles, pwd)
     resultContextWithFiles
   }
-
-  def processCode: FromContext[Context]
 
 }

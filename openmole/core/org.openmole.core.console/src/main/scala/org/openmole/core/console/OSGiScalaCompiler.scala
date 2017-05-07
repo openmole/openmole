@@ -17,7 +17,7 @@
 
 package org.openmole.core.console
 
-import org.openmole.core.pluginmanager.PluginManager
+import org.openmole.core.pluginmanager.{ BundleDecorator, PluginManager }
 import org.osgi.framework.Bundle
 
 import scala.reflect.io.ZipArchive
@@ -28,38 +28,43 @@ import scala.tools.nsc.io.AbstractFile
 import scala.tools.nsc.reporters.ConsoleReporter
 import scala.tools.nsc.reporters.Reporter
 import scala.tools.nsc.util._
-import scala.util.parsing.input.OffsetPosition
 import collection.mutable.ListBuffer
 import java.io.{ File, PrintWriter, StringWriter }
 import java.net.URL
 
-import scala.tools.nsc.symtab.SymbolLoaders
-import scala.tools.nsc.backend.JavaPlatform
-import scala.tools.util.PathResolver
-import scala.tools.nsc._
-
-class OSGiScalaCompiler(settings: Settings, reporter: Reporter, virtualDirectory: AbstractFile, priorityBundles: Seq[Bundle], jars: Seq[File]) extends Global(settings, reporter) with ReplGlobal { g ⇒
-
-  //settings.bootclasspath.value = ClassPathBuilder.getClassPathFrom(classOf[scala.App].getClassLoader).mkString(":")
-
-  lazy val cp = {
-    val original = new PathResolver(settings).result
-    def bundles: Iterable[AbstractFile] =
-      priorityBundles.flatMap(BundleClassPathBuilder.create) ++
-        jars.map(f ⇒ ZipArchive.fromFile(f)) ++
-        PluginManager.bundlesForClass(classOf[OSGiScalaCompiler]).flatMap(BundleClassPathBuilder.create) ++
-        BundleClassPathBuilder.allBundles
-
-    val result = bundles.map { original.context.newClassPath }.toList
-    val vdcp = original.context.newClassPath(virtualDirectory)
-    new MergedClassPath(vdcp :: result ::: original :: Nil, original.context) {
-      override def asURLs = List.empty
+object OSGiScalaCompiler {
+  def createSettings(settings: Settings, priorityBundles: Seq[Bundle], jars: Seq[File], classDirectory: File) =
+    if (!Activator.osgi) {
+      val newSettings = settings.copy()
+      case class Plop()
+      newSettings.embeddedDefaults[Plop]
+      //settings.usejavacp.value = true
+      newSettings
     }
-  }
+    else {
+      def toPath(b: Bundle) = new URL(b.getLocation).getPath
 
-  override lazy val platform = new JavaPlatform {
-    val global: OSGiScalaCompiler.this.type = OSGiScalaCompiler.this
-    override def classPath = cp
-  }
+      //def dependencies(b: Bundle) = PluginManager.allDependingBundles(b, _=> true).map(toPath)
+
+      def bundles: Seq[String] = {
+        priorityBundles.map(toPath) ++
+          jars.map(_.getCanonicalPath) ++
+          PluginManager.bundlesForClass(OSGiScalaCompiler.getClass).map(toPath) ++ Activator.bundleContext.get.getBundles.filter(!_.isSystem).map(toPath)
+      }.distinct
+
+      val newSettings = settings.copy()
+
+      classDirectory.mkdirs()
+      newSettings.outputDirs.setSingleOutput(AbstractFile.getDirectory(classDirectory))
+      newSettings.classpath.append(classDirectory.getCanonicalPath)
+      bundles.foreach(newSettings.classpath.append)
+
+      newSettings
+    }
+
+  def apply(settings: Settings, reporter: Reporter, priorityBundles: Seq[Bundle], jars: Seq[File]) =
+    new OSGiScalaCompiler(settings, reporter)
 
 }
+
+class OSGiScalaCompiler private (settings: Settings, reporter: Reporter) extends Global(settings, reporter) with ReplGlobal

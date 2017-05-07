@@ -20,9 +20,11 @@ package org.openmole.core.workflow.transition
 import org.openmole.core.context.{ Context, Val, ValType, Variable }
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.expansion.Condition
+import org.openmole.core.fileservice.FileService
+import org.openmole.core.workflow.dsl
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.tools._
-import org.openmole.core.workflow.validation.ValidateTransition
+import org.openmole.core.workflow.validation._
 import org.openmole.tool.lock._
 import org.openmole.tool.random.RandomProvider
 
@@ -37,8 +39,10 @@ object AggregationTransition {
 
 class AggregationTransition(val start: Capsule, val end: Slot, val condition: Condition = Condition.True, val filter: BlockList = BlockList.empty, val trigger: Condition = Condition.False) extends IAggregationTransition with ValidateTransition {
 
-  override def validate(inputs: Seq[Val[_]]) =
+  override def validate(inputs: Seq[Val[_]]) = Validate { p ⇒
+    import p._
     condition.validate(inputs) ++ trigger.validate(inputs)
+  }
 
   override def perform(context: Context, ticket: Ticket, subMole: SubMoleExecution, executionContext: MoleExecutionContext) = {
     import executionContext.services._

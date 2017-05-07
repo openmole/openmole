@@ -312,7 +312,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
     def message(message: String): Unit = execution.addError(execId, Failed(Error(message), Seq()))
 
     try {
-      val project = new Project(script.getParentFileSafe)
+      val project = Project(script.getParentFileSafe)
       project.compile(script, Seq.empty) match {
         case ScriptFileDoesNotExists() ⇒ message("Script file does not exist")
         case ErrorInCode(e)            ⇒ error(e)

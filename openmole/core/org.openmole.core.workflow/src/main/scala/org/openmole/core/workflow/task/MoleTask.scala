@@ -72,11 +72,9 @@ object MoleTask {
     implicit val seeder = Seeder(random().nextLong())
     implicit val eventDispatcher = EventDispatcher()
     implicit val newFile = NewFile(executionContext.tmpDirectory.newDir("moletask"))
-
     import executionContext.preference
     import executionContext.threadProvider
     import executionContext.workspace
-    import executionContext.fileService
 
     val execution =
       MoleExecution(

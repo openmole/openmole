@@ -118,7 +118,7 @@ trait RESTAPI extends ScalatraServlet with GZipSupport
           }
         }
 
-        val project = new Project(directory.workDirectory)
+        val project = Project(directory.workDirectory)
         project.compile(directory.workDirectory / script, Seq.empty) match {
           case ScriptFileDoesNotExists() ⇒ ExpectationFailed(Error("The script doesn't exist").toJson)
           case e: CompilationError       ⇒ error(e.error)

@@ -20,15 +20,13 @@ package org.openmole.plugin.environment.egi
 
 import fr.iscpif.gridscale.egi._
 import fr.iscpif.gridscale.{ egi ⇒ gridscale }
-import org.openmole.core.workspace.Workspace
+import org.openmole.tool.file._
 import org.openmole.plugin.environment.batch.control.UnlimitedAccess
 import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, SerializedJob }
 import org.openmole.plugin.environment.gridscale.GridScaleJobService
 import org.openmole.tool.file.uniqName
 import org.openmole.tool.logger.Logger
 import squants.time.TimeConversions._
-
-import scalax.io.Resource
 
 object DIRACJobService extends Logger
 
@@ -83,7 +81,7 @@ class DIRACJobService(val environment: DIRACEnvironment) extends GridScaleJobSer
     try {
       val outputFilePath = storage.child(path, uniqName("job", ".out"))
 
-      Resource.fromFile(script).write(jobScript(serializedJob, outputFilePath, None, None))
+      script.content = jobScript(serializedJob, outputFilePath, None, None)
 
       val jobDescription = gridscale.DIRACJobDescription(
         stdOut = if (environment.debug) Some("out") else None,

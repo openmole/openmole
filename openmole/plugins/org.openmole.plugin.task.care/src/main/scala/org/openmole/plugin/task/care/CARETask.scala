@@ -89,15 +89,16 @@ object CARETask extends Logger {
     else if (!archive.canExecute) Seq(new UserBadDataError(s"Archive $archive must be executable. Make sure you upload it with x permissions"))
     else container.ArchiveOK
 
-  override def validate: Seq[Throwable] =
+  override def validate = Validate { p ⇒
+    import p._
     validateArchive(archive) ++
-      container.validateContainer(command, environmentVariables, external, this.inputs)
+      container.validateContainer(command, environmentVariables, external, this.inputs).apply
+  }
 
   override protected def process(executionContext: TaskExecutionContext) = FromContext[Context] { parameters ⇒
     import executionContext._
     External.withWorkDir(executionContext) { taskWorkDirectory ⇒
-      import parameters.random
-      import parameters.newFile
+      import parameters._
 
       taskWorkDirectory.mkdirs()
 
@@ -182,9 +183,9 @@ object CARETask extends Logger {
 
       def outputPathResolver = container.outputPathResolver(preparedFileBindings, hostFileBindings, inputDirectory, userWorkDirectory, rootDirectory) _
 
-      val retContext = external.fetchOutputFiles(this, preparedContext, outputPathResolver, taskWorkDirectory)
+      val retContext = external.fetchOutputFiles(outputs, preparedContext, outputPathResolver, taskWorkDirectory)
 
-      external.cleanWorkDirectory(this, retContext, taskWorkDirectory)
+      external.cleanWorkDirectory(outputs, retContext, taskWorkDirectory)
 
       retContext ++
         List(

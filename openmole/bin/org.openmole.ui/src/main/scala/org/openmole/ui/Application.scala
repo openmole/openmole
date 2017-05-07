@@ -264,7 +264,6 @@ object Application extends Logger {
               val server = new GUIServer(port, config.remote, useHTTP, services, config.password)
               server.start()
               if (config.browse && !config.remote) browse(url)
-              ScalaREPL.warmup
               logger.info(s"Server listening on port $port.")
               server.join() match {
                 case GUIServer.Ok      ⇒ Console.ExitCodes.ok

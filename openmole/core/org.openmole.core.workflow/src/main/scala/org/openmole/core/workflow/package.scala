@@ -28,6 +28,7 @@ package workflow {
   import org.openmole.core.workflow.task.TaskPackage
   import org.openmole.core.workflow.tools.ToolsPackage
   import org.openmole.core.workflow.transition.TransitionPackage
+  import org.openmole.core.workflow.validation.ValidationPackage
   import org.openmole.tool.types.TypesPackage
 
   trait ExportedPackage extends MolePackage
@@ -41,6 +42,7 @@ package workflow {
     with CodePackage
     with ContextPackage
     with ExpansionPackage
+    with ValidationPackage
 
   object dsl extends ExportedPackage
 

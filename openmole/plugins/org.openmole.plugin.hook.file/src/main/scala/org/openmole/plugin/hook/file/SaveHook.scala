@@ -50,7 +50,10 @@ object SaveHook {
     serializerService: SerializerService
 ) extends Hook with ValidateHook {
 
-  override def validate(inputs: Seq[Val[_]]) = file.validate(inputs)
+  override def validate(inputs: Seq[Val[_]]) = Validate { p ⇒
+    import p._
+    file.validate(inputs)
+  }
 
   override protected def process(executionContext: MoleExecutionContext) = FromContext { parameters ⇒
     import parameters._

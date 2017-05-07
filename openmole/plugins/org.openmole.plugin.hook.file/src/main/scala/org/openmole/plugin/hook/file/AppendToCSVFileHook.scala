@@ -19,13 +19,12 @@ package org.openmole.plugin.hook.file
 
 import monocle.macros.Lenses
 import org.openmole.core.context.{ Context, Val }
-import org.openmole.core.expansion.FromContext
-import org.openmole.core.tools.io.Prettifier
+import org.openmole.core.expansion._
 import org.openmole.core.tools.io.Prettifier._
 import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
-import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.validation._
+import org.openmole.core.workflow.dsl._
 import org.openmole.tool.stream._
 
 import scala.annotation.tailrec
@@ -58,8 +57,10 @@ object AppendToCSVFileHook {
     config:            InputOutputConfig
 ) extends Hook with ValidateHook {
 
-  override def validate(inputs: Seq[Val[_]]): Seq[Throwable] =
+  override def validate(inputs: Seq[Val[_]]) = Validate { p ⇒
+    import p._
     file.validate(inputs) ++ header.toSeq.flatMap(_.validate(inputs))
+  }
 
   override protected def process(executionContext: MoleExecutionContext) = FromContext { parameters ⇒
     import parameters._

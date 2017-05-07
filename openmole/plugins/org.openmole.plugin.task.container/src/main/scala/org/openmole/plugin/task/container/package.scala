@@ -23,6 +23,7 @@ import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.expansion.FromContext
 import org.openmole.plugin.task.external.External
 import org.openmole.tool.file._
+import org.openmole.core.workflow.validation._
 
 package object container {
 
@@ -68,7 +69,8 @@ package object container {
     environmentVariables: Vector[EnvironmentVariable],
     external:             External,
     inputs:               PrototypeSet
-  ) = {
+  ) = Validate { p ⇒
+    import p._
 
     val allInputs = External.PWD :: inputs.toList
 
@@ -76,7 +78,7 @@ package object container {
 
     command.validate(allInputs) ++
       validateVariables ++
-      External.validate(external, allInputs)
+      External.validate(external)(allInputs).apply
   }
 
   def ArchiveNotFound(archive: File) = Seq(new UserBadDataError(s"Cannot find specified Archive $archive in your work directory. Did you prefix the path with `workDirectory / `?"))

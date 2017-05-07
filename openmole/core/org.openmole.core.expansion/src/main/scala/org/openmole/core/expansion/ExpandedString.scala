@@ -21,6 +21,7 @@ import java.io.InputStream
 
 import org.openmole.core.context.{ Context, Val }
 import org.openmole.core.exception.UserBadDataError
+import org.openmole.core.fileservice.FileService
 import org.openmole.core.workspace.NewFile
 import org.openmole.tool.stream.{ StringInputStream, StringOutputStream }
 import org.openmole.tool.random._
@@ -87,18 +88,15 @@ object ExpandedString {
   }
 
   case class Expansion(elements: Seq[ExpandedString.ExpansionElement]) extends FromContext[String] {
-    def from(context: ⇒ Context)(implicit rng: RandomProvider, newFile: NewFile) = elements.map(_.from(context)).mkString
-    def validate(inputs: Seq[Val[_]]): Seq[Throwable] = elements.flatMap(_.validate(inputs))
+    def from(context: ⇒ Context)(implicit rng: RandomProvider, newFile: NewFile, fileService: FileService) = elements.map(_.from(context)).mkString
+    def validate(inputs: Seq[Val[_]])(implicit newFile: NewFile, fileService: FileService): Seq[Throwable] = elements.flatMap(_.validate(inputs))
   }
 
-  trait ExpansionElement {
-    def from(context: ⇒ Context)(implicit rng: RandomProvider, newFile: NewFile): String
-    def validate(inputs: Seq[Val[_]]): Seq[Throwable]
-  }
+  type ExpansionElement = FromContext[String]
 
   case class UnexpandedElement(string: String) extends ExpansionElement {
-    def from(context: ⇒ Context)(implicit rng: RandomProvider, newFile: NewFile): String = string
-    def validate(inputs: Seq[Val[_]]): Seq[Throwable] = Seq.empty
+    def from(context: ⇒ Context)(implicit rng: RandomProvider, newFile: NewFile, fileService: FileService): String = string
+    def validate(inputs: Seq[Val[_]])(implicit newFile: NewFile, fileService: FileService): Seq[Throwable] = Seq.empty
   }
 
   object ExpandedElement {
@@ -115,19 +113,19 @@ object ExpandedString {
   }
 
   case class ValueElement(v: String) extends ExpansionElement {
-    def from(context: ⇒ Context)(implicit rng: RandomProvider, newFile: NewFile): String = v
-    def validate(inputs: Seq[Val[_]]): Seq[Throwable] = Seq.empty
+    def from(context: ⇒ Context)(implicit rng: RandomProvider, newFile: NewFile, fileService: FileService): String = v
+    def validate(inputs: Seq[Val[_]])(implicit newFile: NewFile, fileService: FileService): Seq[Throwable] = Seq.empty
   }
 
   case class CodeElement(code: String) extends ExpansionElement {
-    @transient lazy val proxy = ScalaWrappedCompilation.dynamic[Any](code)
-    def from(context: ⇒ Context)(implicit rng: RandomProvider, newFile: NewFile): String = {
+    @transient lazy val proxy = ScalaCompilation.dynamic[Any](code)
+    def from(context: ⇒ Context)(implicit rng: RandomProvider, newFile: NewFile, fileService: FileService): String = {
       context.variable(code) match {
         case Some(value) ⇒ value.value.toString
         case None        ⇒ proxy().from(context).toString
       }
     }
-    def validate(inputs: Seq[Val[_]]): Seq[Throwable] =
+    def validate(inputs: Seq[Val[_]])(implicit newFile: NewFile, fileService: FileService): Seq[Throwable] =
       if (inputs.exists(_.name == code)) Seq.empty
       else proxy.validate(inputs).toSeq
   }

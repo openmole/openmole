@@ -28,12 +28,13 @@ import org.openmole.tool.file._
 import org.openmole.tool.stream._
 import org.openmole.core.expansion._
 import org.openmole.core.context._
+import org.openmole.core.fileservice.FileService
 import org.openmole.core.preference.Preference
 import org.openmole.tool.random.RandomProvider
 
 package object module {
 
-  def indexes(implicit preference: Preference, randomProvider: RandomProvider, newFile: NewFile) =
+  def indexes(implicit preference: Preference, randomProvider: RandomProvider, newFile: NewFile, fileService: FileService) =
     preference(ModuleIndex.moduleIndexes).map(ExpandedString(_).from(Context("version" → buildinfo.version)))
 
   def pluginDirectory(implicit workspace: Workspace) = workspace.location /> "plugins"

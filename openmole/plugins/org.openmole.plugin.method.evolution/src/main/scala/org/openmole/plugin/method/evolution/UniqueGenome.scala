@@ -26,12 +26,13 @@ import org.openmole.core.workflow.sampling.Factor
 import scala.annotation.tailrec
 import cats._
 import cats.implicits._
+import org.openmole.core.fileservice.FileService
 import org.openmole.core.workspace.NewFile
 import org.openmole.tool.random.RandomProvider
 
 object InputConverter {
 
-  @tailrec def scaled(scales: List[Input[_]], genome: List[Double], acc: List[Variable[_]] = Nil)(context: ⇒ Context, rng: RandomProvider, newFile: NewFile): List[Variable[_]] =
+  @tailrec def scaled(scales: List[Input[_]], genome: List[Double], acc: List[Variable[_]] = Nil)(context: ⇒ Context, rng: RandomProvider, newFile: NewFile, fileService: FileService): List[Variable[_]] =
     if (scales.isEmpty || genome.isEmpty) acc.reverse
     else {
       val input = scales.head
@@ -39,9 +40,9 @@ object InputConverter {
         input.scaled(genome).map {
           case Scalable.ScaledScalar(p, v)   ⇒ Variable(p, v) → genome.tail
           case Scalable.ScaledSequence(p, v) ⇒ Variable(p, v) → genome.drop(input.size)
-        }.from(context)(rng, newFile)
+        }.from(context)(rng, newFile, fileService)
 
-      scaled(scales.tail, tail, variable :: acc)({ context + variable }, rng, newFile)
+      scaled(scales.tail, tail, variable :: acc)({ context + variable }, rng, newFile, fileService)
     }
 
 }

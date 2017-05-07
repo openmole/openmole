@@ -25,7 +25,7 @@ import org.openmole.core.expansion._
 import org.openmole.core.tools.io.Prettifier._
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.validation.ValidateTask
+import org.openmole.core.workflow.validation._
 import org.openmole.plugin.task.external._
 import org.openmole.tool.thread._
 
@@ -44,9 +44,10 @@ trait NetLogoTask extends Task with ValidateTask {
   def seed: Option[Val[Int]]
   def external: External
 
-  override def validate = {
+  override def validate = Validate { p ⇒
+    import p._
     val allInputs = External.PWD :: inputs.toList
-    launchingCommands.flatMap(_.validate(allInputs)) ++ External.validate(external, allInputs)
+    launchingCommands.flatMap(_.validate(allInputs)) ++ External.validate(external)(allInputs).apply
   }
 
   private def wrapError[T](msg: String)(f: ⇒ T): T =
@@ -58,8 +59,7 @@ trait NetLogoTask extends Task with ValidateTask {
 
   override protected def process(executionContext: TaskExecutionContext) = FromContext { parameters ⇒
     External.withWorkDir(executionContext) { tmpDir ⇒
-      import parameters.random
-      import parameters.newFile
+      import parameters._
 
       val workDir =
         workspace.workspace.option match {
@@ -95,10 +95,8 @@ trait NetLogoTask extends Task with ValidateTask {
 
           for (cmd ← launchingCommands.map(_.from(context))) executeNetLogo(cmd)
 
-          import executionContext._
-
           val contextResult =
-            external.fetchOutputFiles(this, preparedContext, external.relativeResolver(workDir), tmpDir) ++ netLogoOutputs.map {
+            external.fetchOutputFiles(outputs, preparedContext, external.relativeResolver(workDir), tmpDir) ++ netLogoOutputs.map {
               case (name, prototype) ⇒
                 try {
                   val outputValue = netLogo.report(name)
@@ -127,7 +125,7 @@ trait NetLogoTask extends Task with ValidateTask {
                 }
             }
 
-          external.cleanWorkDirectory(this, contextResult, tmpDir)
+          external.cleanWorkDirectory(outputs, contextResult, tmpDir)
           contextResult
         }
         finally netLogo.dispose

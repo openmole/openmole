@@ -18,20 +18,22 @@
 package org.openmole.core.workflow.validation
 
 import org.openmole.core.context.Val
+import org.openmole.core.fileservice.FileService
 import org.openmole.core.tools.io.Prettifier
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.task._
+import org.openmole.core.workspace.NewFile
 
 trait ValidateTask {
-  def validate: Seq[Throwable]
+  def validate: Validate
 }
 
 trait ValidateHook {
-  def validate(inputs: Seq[Val[_]]): Seq[Throwable]
+  def validate(inputs: Seq[Val[_]]): Validate
 }
 
 trait ValidateTransition {
-  def validate(inputs: Seq[Val[_]]): Seq[Throwable]
+  def validate(inputs: Seq[Val[_]]): Validate
 }
 
 object ValidationProblem {

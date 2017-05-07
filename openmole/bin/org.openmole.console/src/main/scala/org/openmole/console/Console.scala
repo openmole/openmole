@@ -19,6 +19,7 @@ package org.openmole.console
 
 import jline.console.ConsoleReader
 import org.openmole.core.console.ScalaREPL
+import org.openmole.core.fileservice.FileService
 import org.openmole.core.preference.Preference
 import org.openmole.core.project._
 import org.openmole.core.tools.io.Prettifier._
@@ -27,6 +28,7 @@ import org.openmole.tool.file._
 import org.openmole.tool.logger.Logger
 import org.openmole.core.services._
 import org.openmole.core.workflow.mole._
+import org.openmole.core.workspace.NewFile
 
 import scala.annotation.tailrec
 import scala.util._
@@ -113,9 +115,8 @@ class Console(script: Option[String] = None) {
           loop.loopWithExitCode
         }
       case Some(script) ⇒
-        ScalaREPL.warmup
         val scriptFile = new File(script)
-        val project = new Project(workDirectory.getOrElse(scriptFile.getParentFileSafe))
+        val project = Project(workDirectory.getOrElse(scriptFile.getParentFileSafe))
         project.compile(scriptFile, args) match {
           case ScriptFileDoesNotExists() ⇒
             println("File " + scriptFile + " doesn't exist.")
@@ -151,7 +152,7 @@ class Console(script: Option[String] = None) {
     }
   }
 
-  def withREPL[T](args: ConsoleVariables)(f: ScalaREPL ⇒ T) = {
+  def withREPL[T](args: ConsoleVariables)(f: ScalaREPL ⇒ T)(implicit newFile: NewFile, fileService: FileService) = {
     val loop =
       OpenMOLEREPL.newREPL(
         args,

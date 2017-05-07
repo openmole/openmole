@@ -38,7 +38,7 @@ case class TaskExecutionContext(
   localEnvironment:            LocalEnvironment,
   implicit val preference:     Preference,
   implicit val threadProvider: ThreadProvider,
-  implicit val fileService:    FileService,
+  fileService:                 FileService,
   implicit val workspace:      Workspace,
   cache:                       KeyValueCache
 )
@@ -57,7 +57,7 @@ trait Task <: Name {
    */
   def perform(context: Context, executionContext: TaskExecutionContext): Context = {
     lazy val rng = Lazy(Task.buildRNG(context))
-    InputOutputCheck.perform(inputs, outputs, defaults, process(executionContext))(executionContext.preference).from(context)(rng, NewFile(executionContext.tmpDirectory))
+    InputOutputCheck.perform(inputs, outputs, defaults, process(executionContext))(executionContext.preference).from(context)(rng, NewFile(executionContext.tmpDirectory), executionContext.fileService)
   }
 
   protected def process(executionContext: TaskExecutionContext): FromContext[Context]

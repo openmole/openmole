@@ -24,6 +24,7 @@ import org.openmole.tool.tar._
 import fr.iscpif.gridscale.http.HTTPStorage
 import org.openmole.core.context._
 import org.openmole.core.expansion._
+import org.openmole.core.fileservice.FileService
 import org.openmole.core.preference.Preference
 import org.openmole.core.workspace._
 import org.openmole.tool.random._
@@ -35,10 +36,10 @@ package object market {
   import org.json4s.jackson.Serialization
   implicit val formats = Serialization.formats(NoTypeHints)
 
-  def indexURL(implicit preference: Preference, randomProvider: RandomProvider, newFile: NewFile) =
+  def indexURL(implicit preference: Preference, randomProvider: RandomProvider, newFile: NewFile, fileService: FileService) =
     ExpandedString(preference(MarketIndex.marketIndexLocation)).from(Context("version" → buildinfo.version))
 
-  def marketIndex(implicit preference: Preference, randomProvider: RandomProvider, newFile: NewFile) = HTTPStorage.download(indexURL)(Serialization.read[MarketIndex](_))
+  def marketIndex(implicit preference: Preference, randomProvider: RandomProvider, newFile: NewFile, fileService: FileService) = HTTPStorage.download(indexURL)(Serialization.read[MarketIndex](_))
 
   def downloadEntry(entry: MarketIndexEntry, path: File) = {
     HTTPStorage.download(entry.url) { is ⇒

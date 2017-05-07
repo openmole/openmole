@@ -20,15 +20,21 @@ package org.openmole.core.workflow.transition
 import org.openmole.core.context.{ Context, Val }
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.expansion.{ Condition, FromContext }
+import org.openmole.core.fileservice.FileService
+import org.openmole.core.workflow.dsl
 import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.validation.ValidateTransition
+import org.openmole.core.workflow.validation._
+import org.openmole.core.workspace.NewFile
 import org.openmole.tool.lock._
 
 import scala.util.{ Failure, Success, Try }
 
 class EndExplorationTransition(val start: Capsule, val end: Slot, val trigger: Condition, val filter: BlockList = BlockList.empty) extends IEndExplorationTransition with ValidateTransition {
 
-  override def validate(inputs: Seq[Val[_]]) = trigger.validate(inputs)
+  override def validate(inputs: Seq[Val[_]]) = Validate { p ⇒
+    import p._
+    trigger.validate(inputs)
+  }
 
   override def perform(context: Context, ticket: Ticket, subMole: SubMoleExecution, executionContext: MoleExecutionContext) = {
     def perform() {

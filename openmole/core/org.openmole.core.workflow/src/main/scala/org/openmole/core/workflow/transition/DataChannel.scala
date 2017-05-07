@@ -77,7 +77,7 @@ class DataChannel(
    * @param ticket the ticket of the current execution
    * @param moleExecution the current mole execution
    */
-  def provides(fromContext: Context, ticket: Ticket, moleExecution: MoleExecution) = moleExecution.synchronized {
+  def provides(fromContext: Context, ticket: Ticket, moleExecution: MoleExecution): Unit = moleExecution.synchronized[Unit] {
     val delta = levelDelta(moleExecution.mole)
     val dataChannelRegistry = moleExecution.dataChannelRegistry
 

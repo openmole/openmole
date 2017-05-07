@@ -22,7 +22,7 @@ import org.openmole.core.context._
 import org.openmole.core.expansion._
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.validation.ValidateHook
+import org.openmole.core.workflow.validation._
 
 object DisplayHook {
 
@@ -40,7 +40,10 @@ object DisplayHook {
     config:    InputOutputConfig
 ) extends Hook with ValidateHook {
 
-  override def validate(inputs: Seq[Val[_]]): Seq[Throwable] = toDisplay.validate(inputs)
+  override def validate(inputs: Seq[Val[_]]) = Validate { p ⇒
+    import p._
+    toDisplay.validate(inputs)
+  }
 
   override protected def process(executionContext: MoleExecutionContext) = FromContext { parameters ⇒
     import parameters._

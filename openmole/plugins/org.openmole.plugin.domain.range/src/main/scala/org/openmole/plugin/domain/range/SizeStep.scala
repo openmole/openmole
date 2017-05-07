@@ -28,7 +28,7 @@ trait SizeStep[T] {
   def stepAndSize(maxValue: T, minValue: T): FromContext[(T, Int)]
 
   def computeValues: FromContext[Iterable[T]] =
-    FromContext.withValidation(s ⇒ range.min.validate(s) ++ range.max.validate(s)) { p ⇒
+    FromContext.withValidation(range.min, range.max) { p ⇒
       import p._
       val mi: T = range.min.from(context)
       val ma: T = range.max.from(context)

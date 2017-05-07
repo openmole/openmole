@@ -26,7 +26,7 @@ import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.mole.{ MoleExecutionContext, _ }
-import org.openmole.core.workflow.validation.ValidateHook
+import org.openmole.core.workflow.validation._
 import org.openmole.plugin.hook.file.CopyFileHook._
 import org.openmole.tool.random._
 import org.openmole.tool.tar._
@@ -67,7 +67,10 @@ object CopyFileHook {
     config: InputOutputConfig
 ) extends Hook with ValidateHook {
 
-  override def validate(inputs: Seq[Val[_]]) = copies.flatMap(_._2.validate(inputs)).toSeq
+  override def validate(inputs: Seq[Val[_]]) = Validate { p ⇒
+    import p._
+    copies.flatMap(_._2.validate(inputs))
+  }
 
   override protected def process(executionContext: MoleExecutionContext) = FromContext { parameters ⇒
     import parameters._

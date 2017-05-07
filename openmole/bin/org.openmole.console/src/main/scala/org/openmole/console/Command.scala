@@ -24,6 +24,7 @@ import org.openmole.core.buildinfo
 import org.openmole.core.console.ScalaREPL
 import org.openmole.core.dsl._
 import org.openmole.core.exception.UserBadDataError
+import org.openmole.core.fileservice.FileService
 import org.openmole.core.project._
 import org.openmole.core.tools.io.Prettifier._
 import org.openmole.core.workflow.execution.Environment
@@ -91,7 +92,7 @@ class Command(val console: ScalaREPL, val variables: ConsoleVariables) { command
     } println(s"${error.level.toString}: ${exceptionToString(error.exception)}")
   }
 
-  def verify(mole: Mole): Unit = Validation(mole).foreach(println)
+  def verify(mole: Mole)(implicit newFile: NewFile, fileService: FileService): Unit = Validation(mole).foreach(println)
 
   def encrypted(implicit cypher: Cypher): String = encrypt(Console.askPassword())
 
@@ -99,7 +100,7 @@ class Command(val console: ScalaREPL, val variables: ConsoleVariables) { command
     println(s"""You are running OpenMOLE ${buildinfo.version} - ${buildinfo.name}
        |built on the ${buildinfo.version.generationDate}.""".stripMargin)
 
-  def loadAny(file: File, args: Seq[String] = Seq.empty)(implicit services: Services): AnyRef =
+  def loadAny(file: File, args: Seq[String] = Seq.empty)(implicit services: Services): Any =
     try {
       val project =
         new Project(
@@ -112,7 +113,7 @@ class Command(val console: ScalaREPL, val variables: ConsoleVariables) { command
       project.compile(file, args) match {
         case ScriptFileDoesNotExists() ⇒ throw new IOException("File " + file + " doesn't exist.")
         case e: CompilationError       ⇒ throw e.error
-        case Compiled(compiled)        ⇒ compiled.eval()
+        case Compiled(compiled)        ⇒ compiled.apply()
       }
     }
     finally ConsoleVariables.bindVariables(console, variables)
@@ -123,7 +124,7 @@ class Command(val console: ScalaREPL, val variables: ConsoleVariables) { command
       case x           ⇒ throw new UserBadDataError("The result is not a puzzle")
     }
 
-  def modules(urls: OptionalArgument[Seq[String]] = None)(implicit preference: Preference, randomProvider: RandomProvider, newFile: NewFile): Unit = {
+  def modules(urls: OptionalArgument[Seq[String]] = None)(implicit preference: Preference, randomProvider: RandomProvider, newFile: NewFile, fileService: FileService): Unit = {
     val installedBundles = PluginManager.bundleHashes.map(_.toString).toSet
     def installed(components: Seq[String]) = (components.toSet -- installedBundles).isEmpty
 
@@ -137,8 +138,8 @@ class Command(val console: ScalaREPL, val variables: ConsoleVariables) { command
     }.sorted.foreach(println)
   }
 
-  def install(name: String*)(implicit preference: Preference, randomProvider: RandomProvider, newFile: NewFile, workspace: Workspace): Unit = install(name)
-  def install(names: Seq[String], urls: OptionalArgument[Seq[String]] = None)(implicit preference: Preference, randomProvider: RandomProvider, newFile: NewFile, workspace: Workspace): Unit = {
+  def install(name: String*)(implicit preference: Preference, randomProvider: RandomProvider, newFile: NewFile, workspace: Workspace, fileService: FileService): Unit = install(name)
+  def install(names: Seq[String], urls: OptionalArgument[Seq[String]] = None)(implicit preference: Preference, randomProvider: RandomProvider, newFile: NewFile, workspace: Workspace, fileService: FileService): Unit = {
     val toInstall = urls.getOrElse(module.indexes).flatMap(url ⇒ module.selectableModules(url)).filter(sm ⇒ names.contains(sm.module.name))
     if (toInstall.isEmpty) println("The module(s) is/are already installed.")
     else

@@ -22,13 +22,16 @@ import java.io.File
 import monocle.macros.Lenses
 import org.openmole.core.context.{ Context, Variable }
 import org.openmole.core.exception.InternalProcessingError
-import org.openmole.core.expansion.{ FromContext, ScalaWrappedCompilation }
+import org.openmole.core.expansion.{ FromContext, ScalaCompilation }
+import org.openmole.core.fileservice.FileService
+import org.openmole.core.serializer.plugin.Plugins
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.validation._
+import org.openmole.core.workspace.NewFile
 import org.openmole.plugin.task.external.{ External, ExternalBuilder }
 import org.openmole.plugin.task.jvm._
-import org.openmole.tool.cache.Cache
+import org.openmole.tool.cache.{ Cache, CacheKey }
 
 import scala.util._
 
@@ -65,30 +68,44 @@ object ScalaTask {
     libraries:  Vector[File],
     config:     InputOutputConfig,
     external:   External
-) extends JVMLanguageTask with ValidateTask {
+) extends Task with ValidateTask with Plugins {
 
-  val scalaCompilation = Cache {
-    ScalaWrappedCompilation.static(
+  lazy val compilation = CacheKey[ScalaCompilation.ContextClosure[java.util.Map[String, Any]]]()
+
+  def compile(implicit newFile: NewFile, fileService: FileService) = {
+    implicit def m = manifest[java.util.Map[String, Any]]
+    ScalaCompilation.static(
       sourceCode,
       inputs.toSeq,
-      ScalaWrappedCompilation.WrappedOutput(outputs),
+      ScalaCompilation.WrappedOutput(outputs),
       libraries = libraries,
       plugins = plugins
-    )(manifest[java.util.Map[String, Any]])
+    )
   }
 
-  override def validate =
-    Try(scalaCompilation()) match {
+  override def validate = Validate { p ⇒
+    import p._
+
+    Try(compile) match {
       case Success(_) ⇒ Seq.empty
       case Failure(e) ⇒ Seq(e)
     }
+  }
 
-  override def processCode = FromContext { p ⇒
-    import p._
-    val map = scalaCompilation()().from(context)
-    outputs.toSeq.map {
-      o ⇒ Variable.unsecure(o, Option(map.get(o.name)).getOrElse(new InternalProcessingError(s"Not found output $o")))
-    }
+  override def process(taskExecutionContext: TaskExecutionContext) = {
+    def processCode =
+      FromContext { p ⇒
+        import p._
+
+        val scalaCompilation = taskExecutionContext.cache.getOrElseUpdate(compilation, compile)
+
+        val map = scalaCompilation(context, p.random, p.newFile)
+        outputs.toSeq.map {
+          o ⇒ Variable.unsecure(o, Option(map.get(o.name)).getOrElse(new InternalProcessingError(s"Not found output $o")))
+        }: Context
+      }
+
+    JVMLanguageTask.process(taskExecutionContext, libraries, external, processCode, outputs)
   }
 }
 

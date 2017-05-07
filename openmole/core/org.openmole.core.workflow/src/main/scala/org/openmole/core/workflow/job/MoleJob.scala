@@ -38,7 +38,7 @@ object MoleJob {
   }
   def compressContext(context: Context) =
     context.toSeq.map {
-      case (_, v: Variable[Any]) ⇒ (v.prototype, v.value)
+      case (_, v) ⇒ (v.asInstanceOf[Variable[Any]].prototype, v.value)
     }.unzip
 
   sealed trait StateChange

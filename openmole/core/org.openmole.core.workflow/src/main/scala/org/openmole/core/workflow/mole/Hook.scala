@@ -32,6 +32,7 @@ trait Hook <: Name {
   def perform(context: Context, executionContext: MoleExecutionContext): Context = {
     implicit val rng = executionContext.services.newRandom
     import executionContext.services.newFile
+    import executionContext.services.fileService
     InputOutputCheck.perform(inputs, outputs, defaults, process(executionContext))(executionContext.services.preference).from(context)
   }
 

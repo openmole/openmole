@@ -49,7 +49,7 @@ package object bytecode {
             classes += Type.getReturnType(desc)
           }
 
-          override def visitInvokeDynamicInsn(name: String, desc: String, bsm: Handle, bsmArgs: Object*) = {
+          override def visitInvokeDynamicInsn(name: String, desc: String, bsm: Handle, bsmArgs: Object*): Unit = {
             classes ++= Type.getArgumentTypes(desc)
             classes += Type.getReturnType(desc)
           }

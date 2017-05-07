@@ -14,9 +14,7 @@ object BuildSystem {
   val credential = Path.userHome / ".sbt" / "openmole.credentials"
 
   lazy val settings =
-    Seq(scalacOptions ++= Seq("-feature", "-language:reflectiveCalls", "-language:implicitConversions",
-      "-language:existentials", "-language:postfixOps", "-Yinline-warnings")) ++
-      (if (credential.exists()) Seq(credentials += Credentials(credential)) else Seq.empty) ++ scalariformDefaults
+    (if (credential.exists()) Seq(credentials += Credentials(credential)) else Seq.empty) ++ scalariformDefaults
 
   protected lazy val scalariformDefaults =
     Seq(

@@ -26,6 +26,8 @@ import cats._
 package tools {
 
   import org.openmole.core.expansion.{ Expandable, ExpandedString, FromContext, ToFromContext }
+  import org.openmole.core.fileservice.FileService
+  import org.openmole.core.workspace.NewFile
 
   trait ToolsPackage {
 
