@@ -63,7 +63,7 @@ object ScalaREPL {
         |${code}""".stripMargin
   }
 
-  @Lenses case class CompilationError(errorMessages: List[ErrorMessage], code: String) extends Exception(compilationMessage(errorMessages, code))
+  @Lenses case class CompilationError(cause: Throwable, errorMessages: List[ErrorMessage], code: String) extends Exception(compilationMessage(errorMessages, code), cause)
 
   @Lenses case class ErrorMessage(decoratedMessage: String, rawMessage: String, position: Option[ErrorPosition])
   @Lenses case class ErrorPosition(line: Int, start: Int, end: Int, point: Int)
@@ -250,18 +250,30 @@ class ScalaREPL(priorityBundles: ⇒ Seq[Bundle], jars: Seq[JFile], quiet: Boole
 
   in = chooseReader(settings)
 
-  private def messageToException(messages: List[ErrorMessage], code: String): Throwable =
-    CompilationError(messages.reverse, code)
+  private def messageToException(e: Throwable, messages: List[ErrorMessage], code: String): Throwable =
+    CompilationError(e, messages.reverse, code)
 
   def eval(code: String) = compile(code).apply()
 
-  def compile(script: String): ScalaREPL.Compiled = {
-    omIMain.errorMessage = Nil
+  //  def compile(script: String): ScalaREPL.Compiled = {
+  //    omIMain.errorMessage = Nil
+  //
+  //    ScalaREPL.call[IMain, Either[IR.Result, omIMain.Request]](intp, "compile", Vector("\n" + omIMain.firstLineTag + "\n" + script, false)) match {
+  //      case Right(req) ⇒ () ⇒ req.lineRep.evalEither.toTry.get
+  //      case Left(IR.Incomplete) ⇒ throw new ScriptException(s"compile-time error, input was incomplete:\n$script")
+  //      case e                   ⇒ throw messageToException(omIMain.errorMessage, script)
+  //    }
+  //  }
 
-    ScalaREPL.call[IMain, Either[IR.Result, omIMain.Request]](intp, "compile", Vector("\n" + omIMain.firstLineTag + "\n" + script, false)) match {
-      case Right(req) ⇒ () ⇒ req.lineRep.evalEither.toTry.get
-      case Left(IR.Incomplete) ⇒ throw new ScriptException(s"compile-time error, input was incomplete:\n$script")
-      case e                   ⇒ throw messageToException(omIMain.errorMessage, script)
+  def compile(code: String): ScalaREPL.Compiled = synchronized {
+    omIMain.errorMessage = Nil
+    val scripted = new OMScripted(new nsc.interpreter.Scripted.Factory, settings, out, omIMain)
+
+    try {
+      val compiled = scripted.compile("\n" + omIMain.firstLineTag + "\n" + code)
+      () ⇒ compiled.eval()
+    } catch {
+      case e: Throwable ⇒ throw messageToException(e, omIMain.errorMessage, code)
     }
   }
 
