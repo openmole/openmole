@@ -21,19 +21,18 @@ package org.openmole.plugin.task.udocker
 import java.util.UUID
 
 import monocle.macros._
+import cats.data.Validated
 import cats.implicits._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.validation._
 import org.openmole.core.workspace._
 import org.openmole.core.context._
+import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.workflow.builder._
-import org.openmole.tool.random._
 import org.openmole.tool.stream._
-import org.openmole.tool.file._
 import org.openmole.core.expansion._
 import org.openmole.plugin.task.external._
 import org.openmole.plugin.task.systemexec._
-import org.openmole.core.exception._
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.preference._
 import org.openmole.plugin.task.container
@@ -43,6 +42,8 @@ import org.openmole.tool.cache._
 import squants._
 import squants.time.TimeConversions._
 import org.openmole.tool.file._
+
+import scala.language.postfixOps
 
 object UDockerTask {
 
@@ -65,9 +66,15 @@ object UDockerTask {
   def apply(
     image:   ContainerImage,
     command: FromContext[String]
-  )(implicit name: sourcecode.Name, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService): UDockerTask =
+  )(implicit name: sourcecode.Name, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService): UDockerTask = {
+
+    val dockerImage = toLocalImage(image) match {
+      case Right(x) ⇒ x
+      case Left(x)  ⇒ throw new UserBadDataError(x)
+    }
+
     new UDockerTask(
-      localDockerImage = toLocalImage(image),
+      localDockerImage = dockerImage,
       command = command,
       workDirectory = None,
       reuseContainer = true,
@@ -80,6 +87,7 @@ object UDockerTask {
       _config = InputOutputConfig(),
       external = External()
     )
+  }
 
   def downloadImage(dockerImage: DockerImage, timeout: Time)(implicit newFile: NewFile, workspace: Workspace) = {
     import Registry._
@@ -109,7 +117,12 @@ object UDockerTask {
     LocalDockerImage(dockerImage.image, dockerImage.tag, localLayers.toVector, compact(m.value))
   }
 
-  def loadImage(dockerImage: SavedDockerImage)(implicit newFile: NewFile, fileService: FileService): LocalDockerImage = {
+  /**
+   * Mimic `docker load -i` to recontruct an registry entry for a previously saved image (using `docker save`).
+   *
+   * Assume v1.x Image JSON format and registry protocol v2 Schema 1
+   */
+  def loadImage(dockerImage: SavedDockerImage)(implicit newFile: NewFile, fileService: FileService): Either[String, LocalDockerImage] = {
     import org.openmole.tool.tar._
     import org.openmole.tool.hash._
     import org.json4s.jackson.JsonMethods._
@@ -117,9 +130,9 @@ object UDockerTask {
 
     newFile.withTmpDir { extracted ⇒
       dockerImage.file.extract(extracted)
-      val archiveManifest = parse(extracted / "manifest.json")
+      val topLevelImageManifest = parse(extracted / "manifest.json")
 
-      val layersName = (archiveManifest \ "Layers").children.flatMap(_.extract[Array[String]]).distinct
+      val layersName = (topLevelImageManifest \ "Layers").children.flatMap(_.extract[Array[String]]).distinct
 
       val layers =
         layersName.toVector.map {
@@ -131,18 +144,31 @@ object UDockerTask {
             Layer(s"sha256:$hash") → destination
         }
 
-      val Array(image, tag) = (archiveManifest \\ "RepoTags").children.map(_.extract[String]).head.split(":")
-      val manifestName = (archiveManifest \\ "Config").children.map(_.extract[String]).head
+      val imageAndTag = (topLevelImageManifest \\ "RepoTags").children.map(_.extractOpt[String]).flatMap(_.head.split(":"))
 
-      val manifest = (extracted / manifestName).content
+      val imageJSONameOpt = (topLevelImageManifest \\ "Config").extractOpt[String]
 
-      LocalDockerImage(image, tag, layers, manifest)
+      val v = validateDockerImage(DockerImageData(imageAndTag, imageJSONameOpt)) bimap (
+
+        errors ⇒ errors.foldLeft("\n") { case (acc, err) ⇒ acc + err.msg },
+
+        validImage ⇒ {
+
+          val ValidDockerImageData((image, tag), imageJSONName) = validImage
+          val config = (extracted / imageJSONName).content
+          LocalDockerImage(image, tag, layers, config)
+        }
+      )
+
+      v.toEither
     }
   }
 
-  def toLocalImage(containerImage: ContainerImage)(implicit preference: Preference, newFile: NewFile, workspace: Workspace, fileService: FileService) =
+  def toLocalImage(containerImage: ContainerImage)(implicit preference: Preference, newFile: NewFile, workspace: Workspace, fileService: FileService): Either[String, LocalDockerImage] =
     containerImage match {
-      case i: DockerImage      ⇒ downloadImage(i, preference(RegistryTimeout))
+      // TODO Eitherify download
+      // Left(s"Failed to download docker image $i")
+      case i: DockerImage      ⇒ Right(downloadImage(i, preference(RegistryTimeout)))
       case i: SavedDockerImage ⇒ loadImage(i)
     }
 
