@@ -33,20 +33,20 @@ package object udocker extends UDockerPackage {
   import cats.data._
   import cats.implicits._
 
-  case class DockerImageData(imageAndTag: List[String], manifest: Option[String])
+  case class DockerImageData(imageAndTag: Option[Array[String]], manifest: String)
   case class ValidDockerImageData(imageAndTag: (String, String), manifest: String)
 
   // FIXME turn to plain String if useless
   case class Err(msg: String)
 
-  def validateNonEmpty(imageAndTag: List[String]): ValidatedNel[Err, (String, String)] = imageAndTag match {
-    case List(image, tag) ⇒ Validated.valid((image, tag))
-    case _                ⇒ Validated.invalidNel(Err("Could not parse image and tag from Docker image's metadata"))
+  def validateNonEmpty(imageAndTag: Option[Array[String]]): ValidatedNel[Err, (String, String)] = imageAndTag match {
+    case Some(Array(image, tag)) ⇒ Validated.valid((image, tag))
+    case _                       ⇒ Validated.invalidNel(Err("Could not parse image and tag from Docker image's metadata"))
   }
 
-  def validateManifestName(manifestOpt: Option[String]): ValidatedNel[Err, String] = manifestOpt match {
-    case Some(manifest) ⇒ Validated.valid(manifest)
-    case _              ⇒ Validated.invalidNel(Err("Could not parse manifest name from Docker image's metadata"))
+  def validateManifestName(manifestOpt: String): ValidatedNel[Err, String] = manifestOpt match {
+    case manifest if !manifest.isEmpty ⇒ Validated.valid(manifest)
+    case _                             ⇒ Validated.invalidNel(Err("Could not parse manifest name from Docker image's metadata"))
   }
 
   def validateDockerImage(data: DockerImageData) = {

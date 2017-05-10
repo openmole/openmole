@@ -126,37 +126,36 @@ object UDockerTask {
     import org.openmole.tool.tar._
     import org.openmole.tool.hash._
     import org.json4s.jackson.JsonMethods._
-    implicit def formats = org.json4s.DefaultFormats
+    import DockerMetadata.dockerDateFormat
 
-    newFile.withTmpDir { extracted ⇒
-      dockerImage.file.extract(extracted)
-      val topLevelImageManifest = parse(extracted / "manifest.json")
+    newFile.withTmpDir { extractedImage ⇒
+      dockerImage.file.extract(extractedImage)
+      val topLevelImageManifest = parse(extractedImage / "manifest.json").extract[DockerMetadata.TopLevelImageManifest]
 
-      val layersName = (topLevelImageManifest \ "Layers").children.flatMap(_.extract[Array[String]]).distinct
+      val layersName = topLevelImageManifest.Layers.distinct
 
       val layers =
         layersName.toVector.map {
           l ⇒
             val destination = newFile.newFile("udockerlayer")
             fileService.deleteWhenGarbageCollected(destination)
-            (extracted / l) move destination
+            (extractedImage / l) move destination
             val hash = destination.hash(SHA256)
             Layer(s"sha256:$hash") → destination
         }
 
-      val imageAndTag = (topLevelImageManifest \\ "RepoTags").children.map(_.extractOpt[String]).flatMap(_.head.split(":"))
+      val imageAndTag = topLevelImageManifest.RepoTags.map(_.split(":")).headOption
+      val imageJSOName = topLevelImageManifest.Config
 
-      val imageJSONameOpt = (topLevelImageManifest \\ "Config").extractOpt[String]
-
-      val v = validateDockerImage(DockerImageData(imageAndTag, imageJSONameOpt)) bimap (
+      val v = validateDockerImage(DockerImageData(imageAndTag, imageJSOName)) bimap (
 
         errors ⇒ errors.foldLeft("\n") { case (acc, err) ⇒ acc + err.msg },
 
         validImage ⇒ {
 
           val ValidDockerImageData((image, tag), imageJSONName) = validImage
-          val config = (extracted / imageJSONName).content
-          LocalDockerImage(image, tag, layers, config)
+          val imageJSON = (extractedImage / imageJSONName).content
+          LocalDockerImage(image, tag, layers, imageJSON)
         }
       )
 
@@ -172,7 +171,7 @@ object UDockerTask {
       case i: SavedDockerImage ⇒ loadImage(i)
     }
 
-  case class LocalDockerImage(image: String, tag: String, layers: Vector[(Registry.Layer, File)], manifest: String) {
+  case class LocalDockerImage(image: String, tag: String, layers: Vector[(Registry.Layer, File)], imageJSON: String) {
     lazy val id = UUID.randomUUID().toString
   }
 
@@ -262,8 +261,14 @@ object UDockerTask {
       def dockerWorkDirectory = {
         import org.json4s._
         import org.json4s.jackson.JsonMethods._
-        implicit def format = DefaultFormats
-        (parse(localDockerImage.manifest) \ "config" \ "WorkingDir").extractOpt[String]
+        import DockerMetadata.dockerDateFormat
+
+        val imageJSON = parse(localDockerImage.imageJSON).extract[DockerMetadata.ImageJSON]
+
+        for {
+          config ← imageJSON.config
+          workDir ← config.WorkingDir
+        } yield workDir
       }
 
       val userWorkDirectory =
@@ -290,7 +295,8 @@ object UDockerTask {
 
           val imageId = s"${localDockerImage.image}:${localDockerImage.tag}"
 
-          imageRepositoryDirectory / "manifest" content = localDockerImage.manifest
+          // FIXME wrong
+          imageRepositoryDirectory / "manifest" content = localDockerImage.imageJSON
           imageRepositoryDirectory / "TAG" content = s"$baseRepositoryDirectory/$imageId"
           imageRepositoryDirectory / "v2" content = ""
 
