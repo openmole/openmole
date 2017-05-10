@@ -300,7 +300,7 @@ object UDockerTask {
           )
 
           val name = containerName(UUID.randomUUID().toString)
-          val commandline = commandLine(s"${udocker.getAbsolutePath} create --name=${name} ${imageId}")
+          val commandline = commandLine(s"${udocker.getAbsolutePath} create --name=$name $imageId")
           execute(commandline, tmpDirectory, variables, returnOutput = true, returnError = true)
           name
         }
@@ -335,7 +335,7 @@ object UDockerTask {
 
           def runCommand: FromContext[String] = {
             val variablesArgument = environmentVariables.map { case (name, variable) ⇒ s"""-e $name="${variable.from(context)}"""" }.mkString(" ")
-            command.map(cmd ⇒ s"""${udocker.getAbsolutePath} run --workdir="${userWorkDirectory}" $variablesArgument ${volumesArgument(volumes)} $runId $cmd""")
+            command.map(cmd ⇒ s"""${udocker.getAbsolutePath} run --workdir="$userWorkDirectory" $variablesArgument ${volumesArgument(volumes)} $runId $cmd""")
           }
 
           val executionResult = executeAll(
