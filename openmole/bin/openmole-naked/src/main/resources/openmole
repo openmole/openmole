@@ -29,7 +29,10 @@ LOCATION=$( cd $(dirname $REALPATH) ; pwd -P )
 cd "$CURDIR"
 
 MEM=${OPENMOLE_MEMORY:-"2G"}
-
+# enable through command line arguments --debug and --debug-port
+DEBUG_MODE=false
+DEBUG_PORT=5005
+DEBUG_FLAGS=""
 FLAG=""
 
 JAVAVERSION=`java -version 2>&1`
@@ -51,12 +54,18 @@ while [[ $# -gt 0 ]]; do
     --) ARGS+=("$@"); break ;;
     --mem) shift; MEM=$1 ;;
     --workspace) ARGS+=("$1"); shift; WORKSPACE=$1; ARGS+=("$1");;
+    --debug) DEBUG_MODE=true;;
+    --debug-port) shift; DEBUG_PORT="$1";;
     *) ARGS+=("$1") ;;
   esac
   shift
 done
 
 SCRIPT_ARGS=()
+
+if [ ${DEBUG_MODE} == true ]; then
+  DEBUG_FLAGS="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=${DEBUG_PORT}"
+fi
 
 # Try to increase the max number of opened files
 if [[ `ulimit -S -n` < 4096 ]]; then ulimit -S -n 4096 2>/dev/null; fi
@@ -65,7 +74,7 @@ function run {
   mkdir -p "$HOME/.openmole/.tmp/"
   CONFIGDIR=$HOME/.openmole/.tmp/`date +%s`_$RANDOM
 
-  java -Xss2M -Dfile.encoding=UTF-8 -Djava.security.egd=file:/dev/./urandom -Dosgi.locking=none -Dopenmole.location="${LOCATION}" -Dosgi.classloader.singleThreadLoads=true  -Dosgi.configuration.area="${CONFIGDIR}" -Xmx${MEM} $FLAG \
+  java ${DEBUG_FLAGS} -Xss2M -Dfile.encoding=UTF-8 -Djava.security.egd=file:/dev/./urandom -Dosgi.locking=none -Dopenmole.location="${LOCATION}" -Dosgi.classloader.singleThreadLoads=true  -Dosgi.configuration.area="${CONFIGDIR}" -Xmx${MEM} $FLAG \
      -XX:+UseG1GC -XX:CICompilerCount=2 -XX:ParallelGCThreads=2 -XX:ConcGCThreads=2 -XX:G1ConcRefinementThreads=2 \
      -cp "${LOCATION}/launcher/*" org.openmole.launcher.Launcher  --plugins "${LOCATION}/plugins/" --priority "logging" --run org.openmole.ui.Application --osgi-directory "${CONFIGDIR}" -- \
      "${ARGS[@]}" "${SCRIPT_ARGS[@]}"
