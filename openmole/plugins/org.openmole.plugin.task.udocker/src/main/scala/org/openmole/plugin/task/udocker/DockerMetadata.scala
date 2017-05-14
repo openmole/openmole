@@ -26,7 +26,12 @@ object DockerMetadata {
 
   /** Support Docker date format (8 S digits) */
   implicit val dockerDateFormat = new DefaultFormats {
+
+    import org.json4s.prefs.EmptyValueStrategy
+
     override def dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSS'Z'")
+
+    override val emptyValueStrategy: EmptyValueStrategy = EmptyValueStrategy.preserve
   }
 
   case class HistoryEntry(
@@ -112,6 +117,7 @@ object DockerMetadata {
   )
 
   case class Digest(blobSum: String)
+  case class V1History(v1Compatibility: String)
 
   /**
    * JSON Web Key
@@ -171,14 +177,14 @@ object DockerMetadata {
    *
    * NOT TO BE confused with the distribution manifest, used to push and pull images
    *
-   * Usually presented in a List[TopLevelImageManifest] with one entry per image (current one + parent images it was derived from).
+   * Usually presented in a Vector[TopLevelImageManifest] with one entry per image (current one + parent images it was derived from).
    *
    * @see https:://github.com/moby/moby/blob/master/image/spec/v1.2.md#combined-image-json--filesystem-changeset-format
    */
   case class TopLevelImageManifest(
     Config:   String,
-    Layers:   List[String],
-    RepoTags: List[String],
+    Layers:   Vector[String],
+    RepoTags: Vector[String],
     Parent:   Option[String] = None
   )
 
