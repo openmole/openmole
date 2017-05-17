@@ -32,6 +32,8 @@ class DockerMetadataSpec extends FlatSpec with Matchers {
     val parsedroundTrip = parse(roundTripFile)
     val roundTrip = parsedroundTrip.extract[T]
 
+    roundTripFile.delete()
+
     (source, roundTrip)
   }
 
