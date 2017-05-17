@@ -1,6 +1,10 @@
 package org.openmole.plugin.task
 
 import monocle.Lens
+import org.openmole.core.fileservice.FileService
+import org.openmole.core.workspace.NewFile
+import org.openmole.plugin.task.udocker.Registry.{ Layer, LayerElement }
+import org.openmole.tool.file._
 
 package udocker {
 
@@ -54,6 +58,30 @@ package object udocker extends UDockerPackage {
     val validManifest = validateManifestName(data.manifest)
 
     (validImageAndTag |@| validManifest).map(ValidDockerImageData)
+  }
+
+  // TODO refactor
+  type LayerAndConfig[T <: LayerElement] = (T, File)
+
+  /**
+   * Indistincly moves a file part of a layer (tar or json) to target destination
+   *
+   * @param extracted File containing extracted Docker image
+   * @param layerElement tar or json config
+   * @param elementSuffix <"layer"|"json">
+   * @return newly created destination file
+   */
+  def moveLayerElement[T <: LayerElement](extracted: File, layerElement: String, elementSuffix: String, builder: (String) ⇒ T)(implicit newFile: NewFile, fileService: FileService): LayerAndConfig[T] = {
+
+    import org.openmole.tool.hash._
+
+    val elementDestination = newFile.newFile(s"udocker$elementSuffix")
+    fileService.deleteWhenGarbageCollected(elementDestination)
+    (extracted / layerElement) move elementDestination
+
+    // FIXME useless? isn't hash already the name of the layer?
+    val hash = elementDestination.hash(SHA256)
+    builder(s"$hash.$elementSuffix") → elementDestination
   }
 
 }

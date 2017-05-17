@@ -21,7 +21,6 @@ package org.openmole.plugin.task.udocker
 import java.util.UUID
 
 import monocle.macros._
-import cats.data.Validated
 import cats.implicits._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.validation._
@@ -36,7 +35,7 @@ import org.openmole.plugin.task.systemexec._
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.preference._
 import org.openmole.plugin.task.container
-import org.openmole.plugin.task.udocker.Registry.Layer
+import org.openmole.plugin.task.udocker.Registry._
 import org.openmole.plugin.task.udocker.UDockerTask.LocalDockerImage
 import org.openmole.tool.cache._
 import squants._
@@ -114,7 +113,8 @@ object UDockerTask {
         l → lf
       }
 
-    LocalDockerImage(dockerImage.image, dockerImage.tag, localLayers.toVector, compact(m.value))
+    // FIXME pull config too
+    LocalDockerImage(dockerImage.image, dockerImage.tag, localLayers.toVector, Vector.empty, compact(m.value))
   }
 
   /**
@@ -129,22 +129,28 @@ object UDockerTask {
 
     newFile.withTmpDir { extractedImage ⇒
       dockerImage.file.extract(extractedImage)
-      val topLevelImageManifest = parse(extractedImage / "manifest.json").extract[DockerMetadata.TopLevelImageManifest]
 
-      val layersName = topLevelImageManifest.Layers.distinct
+      val manifestContent = (extractedImage / "manifest.json").content
+      val topLevelManifests = decode[List[TopLevelImageManifest]](manifestContent)
+      val topLevelImageManifest = topLevelManifests.map(_.head)
+      val layersNamesE = topLevelImageManifest.map(_.Layers.distinct)
+      val layersConfigsE = layersNamesE.map(layers ⇒ layers.map(path ⇒ s"${path.split("/").head}/json"))
+
+      // FIXME change .head
+      val Right((layersNames, layersConfigs)) = for {
+        layersNames ← layersNamesE
+        layersConfigs ← layersConfigsE
+      } yield (layersNames, layersConfigs)
 
       val layers =
-        layersName.toVector.map {
-          l ⇒
-            val destination = newFile.newFile("udockerlayer")
-            fileService.deleteWhenGarbageCollected(destination)
-            (extractedImage / l) move destination
-            val hash = destination.hash(SHA256)
-            Layer(s"sha256:$hash") → destination
-        }
+        layersNames.map(l ⇒ moveLayerElement[Layer](extractedImage, l, "layer", Layer.apply))
+      val configs = layersConfigs.map(c ⇒ moveLayerElement[LayerConfig](extractedImage, c, "json", LayerConfig.apply))
 
-      val imageAndTag = topLevelImageManifest.RepoTags.map(_.split(":")).headOption
-      val imageJSOName = topLevelImageManifest.Config
+      val Right((imageAndTag, imageJSOName)) = for {
+        topLevelManifest ← topLevelImageManifest
+        imageAndTag = topLevelManifest.RepoTags.map(_.split(":")).headOption
+        imageJSOName = topLevelManifest.Config
+      } yield (imageAndTag, imageJSOName)
 
       val v = validateDockerImage(DockerImageData(imageAndTag, imageJSOName)) bimap (
 
@@ -154,7 +160,7 @@ object UDockerTask {
 
           val ValidDockerImageData((image, tag), imageJSONName) = validImage
           val imageJSON = (extractedImage / imageJSONName).content
-          LocalDockerImage(image, tag, layers, imageJSON)
+          LocalDockerImage(image, tag, layers, configs, imageJSON)
         }
       )
 
@@ -170,7 +176,7 @@ object UDockerTask {
       case i: SavedDockerImage ⇒ loadImage(i)
     }
 
-  case class LocalDockerImage(image: String, tag: String, layers: Vector[(Registry.Layer, File)], imageJSON: String) {
+  case class LocalDockerImage(image: String, tag: String, layers: Vector[(Registry.Layer, File)], layersConfig: Vector[(Registry.LayerConfig, File)], imageJSON: String) {
     lazy val id = UUID.randomUUID().toString
   }
 
@@ -214,6 +220,8 @@ object UDockerTask {
     val udockerInstallDirectory = executionContext.tmpDirectory /> "udocker"
     val udockerTarBall = udockerInstallDirectory / "udockertarball.tar.gz"
     val udocker = udockerInstallDirectory / "udocker"
+
+    val imageJSONE = decode[ImageJSON](localDockerImage.imageJSON)
 
     def installUDocker() = {
       if (!udockerTarBall.exists)
@@ -267,21 +275,7 @@ object UDockerTask {
       } yield if (workDir.isEmpty) "/"
       else workDir
 
-        val imageJSON = parse(localDockerImage.imageJSON).extract[DockerMetadata.ImageJSON]
-
-        for {
-          config ← imageJSON.config
-          workDir ← config.WorkingDir
-        } yield workDir
-      }
-
-      val userWorkDirectory =
-        workDirectory.getOrElse(
-          dockerWorkDirectory.map {
-            case "" ⇒ "/"
-            case d  ⇒ d
-          } getOrElse ("/")
-        )
+      val userWorkDirectory = workDirectory.getOrElse(dockerWorkDirectory.getOrElse("/"))
 
       def newContainer() =
         newFile.withTmpDir { tmpDirectory ⇒
@@ -299,8 +293,26 @@ object UDockerTask {
 
           val imageId = s"${localDockerImage.image}:${localDockerImage.tag}"
 
-          // FIXME wrong
-          imageRepositoryDirectory / "manifest" content = localDockerImage.imageJSON
+          import org.json4s.jackson.Serialization.{ write ⇒ writeJSON }
+
+          val (fsLayers, history) = localDockerImage.layers.zip(localDockerImage.layersConfig).map {
+            case ((layer, _), (_, layerConfigFile)) ⇒
+              val layerDigest = DockerMetadata.Digest(layer.digest)
+              val imageJSON = decodeFile[ImageJSON](layerConfigFile)
+
+              (layerDigest, imageJSON)
+          }.toList.unzip
+
+          val manifest = DockerMetadata.ImageManifestV2Schema1(
+            name = Some(localDockerImage.image),
+            tag = Some(localDockerImage.tag),
+            architecture = imageJSONE.toOption.map(_.architecture),
+            fsLayers = Some(fsLayers),
+            history = Some(history.map(h ⇒ DockerMetadata.V1History(writeJSON(h)))),
+            schemaVersion = Some(1)
+          )
+
+          imageRepositoryDirectory / "manifest" content = writeJSON(manifest)
           imageRepositoryDirectory / "TAG" content = s"$baseRepositoryDirectory/$imageId"
           imageRepositoryDirectory / "v2" content = ""
 
