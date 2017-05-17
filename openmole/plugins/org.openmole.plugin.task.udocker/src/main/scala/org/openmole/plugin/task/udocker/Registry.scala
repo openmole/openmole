@@ -17,8 +17,6 @@ object Registry {
   def copy(is: InputStream, os: OutputStream) =
     Iterator.continually(is.read()).takeWhile(_ != -1).foreach { os.write }
 
-  implicit def formats = org.json4s.DefaultFormats
-
   def content(response: HttpResponse) = scala.io.Source.fromInputStream(response.getEntity.getContent).mkString
 
   object HTTP {
@@ -32,11 +30,13 @@ object Registry {
   }
 
   import HTTP._
+  import DockerMetadata.dockerFormat4S
 
   case class Layer(digest: String)
   case class Manifest(value: JValue, image: DockerImage)
 
   object Token {
+
     case class AuthenticationRequest(scheme: String, realm: String, service: String, scope: String)
     case class Token(scheme: String, token: String)
 

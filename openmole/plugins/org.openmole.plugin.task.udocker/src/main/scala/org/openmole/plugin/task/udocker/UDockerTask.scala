@@ -124,9 +124,8 @@ object UDockerTask {
    */
   def loadImage(dockerImage: SavedDockerImage)(implicit newFile: NewFile, fileService: FileService): Either[String, LocalDockerImage] = {
     import org.openmole.tool.tar._
-    import org.openmole.tool.hash._
-    import org.json4s.jackson.JsonMethods._
-    import DockerMetadata.dockerDateFormat
+    import DockerMetadata._
+    import io.circe.generic.extras.auto._, io.circe.jawn.decode
 
     newFile.withTmpDir { extractedImage ⇒
       dockerImage.file.extract(extractedImage)
@@ -206,10 +205,14 @@ object UDockerTask {
   lazy val containerPoolKey = CacheKey[WithInstance[ContainerId]]()
 
   override protected def process(executionContext: TaskExecutionContext) = FromContext[Context] { parameters ⇒
+
     import parameters._
+    import io.circe.jawn._, io.circe.generic.extras.auto._
+
+    import DockerMetadata._
 
     val udockerInstallDirectory = executionContext.tmpDirectory /> "udocker"
-    val udockerTarBall = udockerInstallDirectory / "udocketarball.tar.gz"
+    val udockerTarBall = udockerInstallDirectory / "udockertarball.tar.gz"
     val udocker = udockerInstallDirectory / "udocker"
 
     def installUDocker() = {
@@ -258,10 +261,11 @@ object UDockerTask {
 
       def volumesArgument(volumes: Iterable[MountPoint]) = volumes.map { case (host, container) ⇒ s"""-v "$host":"$container"""" }.mkString(" ")
 
-      def dockerWorkDirectory = {
-        import org.json4s._
-        import org.json4s.jackson.JsonMethods._
-        import DockerMetadata.dockerDateFormat
+      val dockerWorkDirectory = for {
+        imageJSON ← imageJSONE
+        workDir = imageJSON.config.WorkingDir
+      } yield if (workDir.isEmpty) "/"
+      else workDir
 
         val imageJSON = parse(localDockerImage.imageJSON).extract[DockerMetadata.ImageJSON]
 

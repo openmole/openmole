@@ -24,12 +24,23 @@ object DockerMetadata {
 
   import org.json4s.DefaultFormats
 
+  import io.circe.{ Encoder, Decoder }
+
+  val dockerDateFormatter4S = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSS'Z'")
+
   /** Support Docker date format (8 S digits) */
-  implicit val dockerDateFormat = new DefaultFormats {
+  implicit val dockerFormat4S = new DefaultFormats {
+    override def dateFormatter = dockerDateFormatter4S
+  }
 
-    import org.json4s.prefs.EmptyValueStrategy
+  import io.circe.generic.extras.Configuration
+  implicit val customConfig: Configuration =
+    Configuration.default.withDefaults.withDiscriminator("type")
 
-    override def dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSS'Z'")
+  import java.time.LocalDateTime
+  import java.time.format.DateTimeFormatter
+
+  type DockerDate = LocalDateTime
 
     override val emptyValueStrategy: EmptyValueStrategy = EmptyValueStrategy.preserve
   }
