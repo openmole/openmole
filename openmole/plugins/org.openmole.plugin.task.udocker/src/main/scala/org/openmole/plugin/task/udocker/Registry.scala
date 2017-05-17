@@ -32,7 +32,10 @@ object Registry {
   import HTTP._
   import DockerMetadata.dockerFormat4S
 
-  case class Layer(digest: String)
+  // FIXME should integrate File?
+  sealed trait LayerElement
+  final case class Layer(digest: String) extends LayerElement
+  final case class LayerConfig(digest: String) extends LayerElement
   case class Manifest(value: JValue, image: DockerImage)
 
   object Token {

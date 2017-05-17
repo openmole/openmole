@@ -20,7 +20,6 @@ package org.openmole.plugin.task.udocker
 object DockerMetadata {
 
   import java.text.SimpleDateFormat
-  import java.util.Date
 
   import org.json4s.DefaultFormats
 
@@ -54,19 +53,23 @@ object DockerMetadata {
     }
   }
 
+  /** Most examples seem to have at least created and created_by fields populated */
   case class HistoryEntry(
-    created_by:  Option[String],
-    empty_layer: Option[Option[Boolean]],
-    author:      Option[Option[String]],
-    comment:     Option[Option[String]],
-    created:     Option[Date]
+    created_by:  String,
+    created:     DockerDate,
+    empty_layer: Option[Boolean],
+    author:      Option[String],
+    comment:     Option[String]
   )
 
   case class RootFS(
-    `type`:   Option[String],
-    diff_ids: Option[List[String]]
+    `type`:   String       = "layers",
+    diff_ids: List[String] = List.empty
   )
 
+  /**
+   * All HealthCheck's fields are optional as a field can be omitted to indicate that the value should be inherited from the base layer
+   */
   case class HealthCheck(
     Test:     Option[List[String]],
     Interval: Option[Int],
@@ -85,30 +88,30 @@ object DockerMetadata {
    */
   case class ContainerConfig(
     // <--- documented fields  --->
-    User:         Option[String],
-    Memory:       Option[Int],
-    MemorySwap:   Option[Int],
-    CpuShares:    Option[Int],
-    ExposedPorts: Option[Ports],
-    Env:          Option[List[String]],
-    Entrypoint:   Option[List[String]],
-    Cmd:          Option[List[String]],
-    Healthcheck:  Option[HealthCheck],
-    Volumes:      Option[Volumes],
-    WorkingDir:   Option[String],
+    User:         String              = "",
+    Memory:       Int                 = 0,
+    MemorySwap:   Int                 = 0,
+    CpuShares:    Int                 = 0,
+    ExposedPorts: Ports               = Map.empty,
+    Env:          List[String]        = List.empty,
+    Entrypoint:   List[String]        = List.empty,
+    Cmd:          List[String]        = List.empty,
+    Healthcheck:  Option[HealthCheck] = None,
+    Volumes:      Volumes             = Map.empty,
+    WorkingDir:   String              = "",
     // <--- extra fields not part of the spec: implementation specific --->
-    Domainname:   Option[String]  = None,
-    AttachStdout: Option[Boolean] = None,
-    Hostname:     Option[String]  = None,
-    StdinOnce:    Option[Boolean] = None,
-    Labels:       Any, // FIXME what is this?
-    AttachStderr: Option[Boolean] = None,
-    OnBuild:      Any, // FIXME what is this?
-    Tty:          Option[Boolean] = None,
-    OpenStdin:    Option[Boolean] = None,
-    Image:        Option[String]  = None,
-    AttachStdin:  Option[Boolean] = None,
-    ArgsEscaped:  Option[Boolean] = None
+    Domainname:   Option[String]                   = Some(""), // udocker specific
+    AttachStdout: Option[Boolean]                  = None,
+    Hostname:     Option[String]                   = Some(""), // udocker specific
+    StdinOnce:    Option[Boolean]                  = None,
+    Labels:       Option[Map[String, EmptyObject]] = None, // FIXME what is this?
+    AttachStderr: Option[Boolean]                  = None,
+    OnBuild:      Option[List[String]]             = None, // FIXME what is this?
+    Tty:          Option[Boolean]                  = None,
+    OpenStdin:    Option[Boolean]                  = None,
+    Image:        Option[String]                   = None,
+    AttachStdin:  Option[Boolean]                  = None,
+    ArgsEscaped:  Option[Boolean]                  = None
   )
 
   type ContainerID = String
@@ -123,14 +126,16 @@ object DockerMetadata {
    */
   case class ImageJSON(
     // <--- documented fields  --->
-    created:      Option[Date],
-    author:       Option[String],
-    architecture: Option[String],
-    os:           Option[String],
-    config:       Option[ContainerConfig],
-    rootfs:       Option[RootFS],
-    history:      Option[List[HistoryEntry]],
+    created:      Option[DockerDate] = None,
+    author:       String             = "",
+    architecture: String             = "",
+    os:           String             = "",
+    config:       ContainerConfig    = ContainerConfig(),
+    rootfs:       RootFS             = RootFS(),
+    history:      List[HistoryEntry] = List.empty,
     // <--- extra fields not part of the spec: implementation specific --->
+    id:               Option[String],
+    parent:           Option[String],
     docker_version:   Option[String]          = None,
     container:        Option[ContainerID]     = None,
     container_config: Option[ContainerConfig] = None
@@ -184,7 +189,7 @@ object DockerMetadata {
     tag:           Option[String],
     architecture:  Option[String],
     fsLayers:      Option[List[Digest]],
-    history:       Option[List[HistoryEntry]],
+    history:       Option[List[V1History]],
     schemaVersion: Option[Int],
     // <--- extra fields not part of the spec: implementation specific --->
     signatures: Option[List[Signature]] = None
