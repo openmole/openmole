@@ -37,6 +37,25 @@ lazy val json4s = OsgiProject(dir, "org.json4s",
   libraryDependencies +=  "org.json4s" %% "json4s-jackson" % "3.5.0",
   version := "3.5.0") settings(settings: _*)
 
+
+lazy val shapeless = "com.chuusai" %% "shapeless" % "2.3.2"
+
+lazy val circeVersion = "0.8.0"
+lazy val circe = OsgiProject(dir, "io.circe",
+  exports = Seq("io.circe.*", "!cats.*", "!scala.*", "!shapeless.*"),
+  // FIXME shapeless should be OSGified and imported (reused in cats and others)
+  privatePackages = Seq("jawn.*"),
+  // TODO force cats version to be >= 0.9.0
+  imports = Seq("scala.*", "cats.*", "shapeless.*")) settings (
+  libraryDependencies ++= Seq(
+    "io.circe" %% "circe-core",
+    "io.circe" %% "circe-generic",
+    "io.circe" %% "circe-generic-extras",
+    "io.circe" %% "circe-parser"
+  ).map(_ % circeVersion),
+  libraryDependencies += shapeless,
+  version := circeVersion) settings(settings: _*)
+
 lazy val logback = OsgiProject(dir, "ch.qos.logback", exports = Seq("ch.qos.logback.*", "org.slf4j.impl"), dynamicImports = Seq("*")) settings
   (libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.0.9", version := "1.0.9") settings(settings: _*)
 
@@ -178,10 +197,11 @@ lazy val closureCompiler = OsgiProject(dir, "closure-compiler", exports = Seq("c
   libraryDependencies += "com.google.javascript" % "closure-compiler" % closureCompilerVersion, version := closureCompilerVersion) settings(settings: _*)
 
 
+lazy val catsVersion = "0.9.0"
 lazy val cats =
   OsgiProject(dir, "cats") settings (
-    libraryDependencies += "org.typelevel" %% "cats" % "0.8.1",
-    version := "0.8.1"
+    libraryDependencies += "org.typelevel" %% "cats" % catsVersion,
+    version := catsVersion
   ) settings(settings: _*)
 
 lazy val freedsl =
