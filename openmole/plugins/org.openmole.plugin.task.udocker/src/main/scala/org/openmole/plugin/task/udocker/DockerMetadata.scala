@@ -42,7 +42,16 @@ object DockerMetadata {
 
   type DockerDate = LocalDateTime
 
-    override val emptyValueStrategy: EmptyValueStrategy = EmptyValueStrategy.preserve
+  val dockerDateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS'Z'")
+  implicit val encodeDate: Encoder[DockerDate] = Encoder.encodeString.contramap[DockerDate](dockerDateFormatter.format(_))
+
+  implicit val decodeDate: Decoder[DockerDate] = Decoder.decodeString.emap { str ⇒
+    try {
+      Right(LocalDateTime.parse(str, dockerDateFormatter))
+    }
+    catch {
+      case e: jawn.ParseException ⇒ Left("Date")
+    }
   }
 
   case class HistoryEntry(
