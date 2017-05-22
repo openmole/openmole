@@ -43,7 +43,6 @@ lazy val shapeless = "com.chuusai" %% "shapeless" % "2.3.2"
 lazy val circeVersion = "0.8.0"
 lazy val circe = OsgiProject(dir, "io.circe",
   exports = Seq("io.circe.*", "!cats.*", "!scala.*", "!shapeless.*"),
-  // FIXME shapeless should be OSGified and imported (reused in cats and others)
   privatePackages = Seq("jawn.*"),
   // TODO force cats version to be >= 0.9.0
   imports = Seq("scala.*", "cats.*", "shapeless.*")) settings (
@@ -141,7 +140,7 @@ lazy val netlogo6 = OsgiProject(
   "ccl.northwestern.edu.netlogo6",
   exports = Seq("org.nlogo.*"),
   privatePackages = Seq("!scala.*", "!shapeless.*", "**"),
-  imports = Seq("shapeless.*", "!*")) settings (
+  imports = Seq("scala.*", "shapeless.*", "!*")) settings (
   //resolvers += Resolver.bintrayRepo("netlogo", "NetLogo-JVM"),
   libraryDependencies ++= Seq(
     "org.nlogo" % "netlogo" % netLogo6Version % "provided" from s"https://dl.bintray.com/netlogo/NetLogo-JVM/org/nlogo/netlogo/$netLogo6Version/netlogo-$netLogo6Version.jar",
