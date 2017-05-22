@@ -118,7 +118,7 @@ object UDockerTask {
   }
 
   /**
-   * Mimic `docker load -i` to recontruct an registry entry for a previously saved image (using `docker save`).
+   * Mimic `docker load -i` to reconstruct a registry entry for a previously saved image (using `docker save`).
    *
    * Assume v1.x Image JSON format and registry protocol v2 Schema 1
    */
@@ -149,8 +149,8 @@ object UDockerTask {
       val Right((imageAndTag, imageJSOName)) = for {
         topLevelManifest ← topLevelImageManifest
         imageAndTag = topLevelManifest.RepoTags.map(_.split(":")).headOption
-        imageJSOName = topLevelManifest.Config
-      } yield (imageAndTag, imageJSOName)
+        imageJSONName = topLevelManifest.Config
+      } yield (imageAndTag, imageJSONName)
 
       val v = validateDockerImage(DockerImageData(imageAndTag, imageJSOName)) bimap (
 
@@ -328,7 +328,8 @@ object UDockerTask {
 
       val pool =
         if (reuseContainer) executionContext.cache.getOrElseUpdate(
-          containerPoolKey, Pool[ContainerId](newContainer))
+          containerPoolKey, Pool[ContainerId](newContainer)
+        )
         else WithNewInstance[ContainerId](newContainer)
 
       pool { runId ⇒
