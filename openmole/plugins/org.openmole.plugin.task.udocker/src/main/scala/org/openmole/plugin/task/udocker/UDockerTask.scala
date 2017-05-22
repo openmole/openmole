@@ -327,10 +327,9 @@ object UDockerTask {
         }
 
       val pool =
-        executionContext.cache.getOrElseUpdate(
-          containerPoolKey,
-          if (reuseContainer) Pool[ContainerId](newContainer) else WithNewInstance[ContainerId](newContainer)
-        )
+        if (reuseContainer) executionContext.cache.getOrElseUpdate(
+          containerPoolKey, Pool[ContainerId](newContainer))
+        else WithNewInstance[ContainerId](newContainer)
 
       pool { runId ⇒
         val inputDirectory = taskWorkDirectory /> "inputs"
