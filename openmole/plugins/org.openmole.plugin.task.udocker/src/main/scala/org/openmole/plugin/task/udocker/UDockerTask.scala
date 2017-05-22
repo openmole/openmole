@@ -279,7 +279,6 @@ object UDockerTask {
 
       def newContainer() =
         newFile.withTmpDir { tmpDirectory ⇒
-          val baseRepositoryDirectory = tmpDirectory /> "udocker"
           val layersDirectory = tmpDirectory /> "layers"
           val repositoryDirectory = tmpDirectory /> "repo"
           val imageRepositoryDirectory = repositoryDirectory /> localDockerImage.image /> localDockerImage.tag
@@ -288,7 +287,7 @@ object UDockerTask {
             layer ← localDockerImage.layers
           } {
             (layersDirectory / layer._1.digest) createLinkTo layer._2.getAbsolutePath
-            (imageRepositoryDirectory / layer._1.digest) createLinkTo layer._2.getAbsolutePath
+            (imageRepositoryDirectory / layer._1.digest) createLinkTo (layersDirectory / layer._1.digest).getAbsolutePath
           }
 
           val imageId = s"${localDockerImage.image}:${localDockerImage.tag}"
@@ -313,7 +312,7 @@ object UDockerTask {
           )
 
           imageRepositoryDirectory / "manifest" content = writeJSON(manifest)
-          imageRepositoryDirectory / "TAG" content = s"$baseRepositoryDirectory/$imageId"
+          imageRepositoryDirectory / "TAG" content = s"$repositoryDirectory/$imageId"
           imageRepositoryDirectory / "v2" content = ""
 
           val variables = udockerVariables() ++ Vector(
