@@ -132,10 +132,12 @@ package object tar {
       val e =
         if (isDirectory && !isSymbolicLink) {
           // walk the directory tree to add all its entries to stack
-          for (f ← Files.newDirectoryStream(source).asScala) {
-            val newSource = source.resolve(f.getFileName)
-            val newEntryName = entryName + '/' + f.getFileName
-            toArchive.push((newSource, newEntryName))
+          source.withDirectoryStream() { stream ⇒
+            for (f ← stream.asScala) {
+              val newSource = source.resolve(f.getFileName)
+              val newEntryName = entryName + '/' + f.getFileName
+              toArchive.push((newSource, newEntryName))
+            }
           }
           // create the actual tar entry for the directory
           new TarEntry(entryName + '/')

@@ -21,8 +21,6 @@ import java.nio.file._
 import java.nio.file.attribute.BasicFileAttributes
 import org.openmole.tool.logger.Logger
 
-import scala.collection.JavaConversions._
-
 class CopyDirVisitor(fromPath: Path, toPath: Path, copyOptions: Array[CopyOption]) extends SimpleFileVisitor[Path] with Logger {
 
   // 1st one just to make it compile...
