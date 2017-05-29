@@ -21,21 +21,23 @@ import java.io.{ IOException }
 import java.nio.file.attribute.BasicFileAttributes
 import java.nio.file.{ FileVisitResult, Files, Path, SimpleFileVisitor }
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
-class DeleteDirVisitor extends SimpleFileVisitor[Path] {
-
+object DeleteDirVisitor {
   def setAllPermissions(f: File) = {
     f.setReadable(true)
     f.setWritable(true)
     f.setExecutable(true)
   }
+}
+
+class DeleteDirVisitor extends SimpleFileVisitor[Path] {
 
   override def preVisitDirectory(dir: Path, attr: BasicFileAttributes) = {
     // make sure direct sub-directories are traversable before deletion
-    for {
-      subdir ← Files.newDirectoryStream(dir, DirectoryFilter.FILTER)
-    } setAllPermissions(subdir.toFile)
+    dir.toFile.withDirectoryStream(Some(acceptDirectory)) {
+      _.asScala.foreach(f ⇒ DeleteDirVisitor.setAllPermissions(f.toFile))
+    }
 
     FileVisitResult.CONTINUE
   }
@@ -47,7 +49,10 @@ class DeleteDirVisitor extends SimpleFileVisitor[Path] {
 
   override def postVisitDirectory(dir: Path, exc: IOException) = {
     if (exc == null) {
-      dir.toFile.listFilesSafe.foreach { f ⇒ setAllPermissions(f); f.delete }
+      dir.toFile.withDirectoryStream() {
+        _.asScala.foreach { f ⇒ DeleteDirVisitor.setAllPermissions(f.toFile); f.delete }
+      }
+
       Files.delete(dir)
       FileVisitResult.CONTINUE
     }

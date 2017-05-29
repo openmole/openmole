@@ -21,10 +21,9 @@ import java.nio.file.DirectoryStream.Filter
 import java.nio.file.{ Files, Path }
 
 object DirectoryFilter {
-  val FILTER: DirectoryFilter = new DirectoryFilter
+
 }
 
 class DirectoryFilter extends Filter[Path] {
-
   def accept(entry: Path): Boolean = Files.isDirectory(entry)
 }
