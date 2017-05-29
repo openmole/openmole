@@ -35,6 +35,7 @@ import org.openmole.tool.stream._
 
 package file {
 
+  import java.nio.file.DirectoryStream.Filter
   import java.nio.file.attribute.PosixFilePermissions
   import java.util.concurrent.ThreadPoolExecutor
 
@@ -73,11 +74,8 @@ package file {
 
       def realPath = file.toPath.toRealPath()
 
-      def isDirectoryEmpty = {
-        val dirStream = Files.newDirectoryStream(file)
-        try !dirStream.iterator().hasNext()
-        finally dirStream.close
-      }
+      def isDirectoryEmpty =
+        file.withDirectoryStream()(_.iterator().isEmpty)
 
       def isEmpty =
         if (file.isDirectory) isDirectoryEmpty
@@ -184,8 +182,6 @@ package file {
 
       def isSymbolicLink = Files.isSymbolicLink(Paths.get(file.getAbsolutePath))
 
-      def directoryIsEmpty = file.withDirectoryStream(_.iterator().isEmpty)
-
       def directoryContainsNoFileRecursive: Boolean = {
         val toProceed = new ListBuffer[File]
         toProceed += file
@@ -194,11 +190,12 @@ package file {
           val f = toProceed.remove(0)
 
           // wrap with try catch in case CARE Archive generates d--------- directories
-          try f.withDirectoryStream(s ⇒
+          try f.withDirectoryStream() { s ⇒
             for (f ← s) {
               if (Files.isRegularFile(f)) return false
               else if (Files.isDirectory(f)) toProceed += f
-            })
+            }
+          }
           catch {
             case e: java.nio.file.AccessDeniedException ⇒ Logger.getLogger(this.getClass.getName).warning(s"Unable to browse directory ${e.getFile}")
           }
@@ -401,7 +398,14 @@ package file {
 
       def withWriter[T](append: Boolean = false) = withClosable[Writer, T](new OutputStreamWriter(bufferedOutputStream(append)))(_)
 
-      def withDirectoryStream[T] = withClosable[DirectoryStream[Path], T](Files.newDirectoryStream(file))(_)
+      def withDirectoryStream[T](filter: Option[java.nio.file.DirectoryStream.Filter[Path]] = None) = {
+        def open =
+          filter match {
+            case None    ⇒ Files.newDirectoryStream(file)
+            case Some(f) ⇒ Files.newDirectoryStream(file, f)
+          }
+        withClosable[DirectoryStream[Path], T](open)(_)
+      }
 
       def withSource[T] = withClosable[Source, T](Source.fromFile(file))(_)
 
@@ -476,6 +480,9 @@ package file {
 
     def uniqName(prefix: String, sufix: String) = prefix + "_" + UUID.randomUUID.toString + sufix
 
+    def acceptDirectory = new Filter[Path] {
+      def accept(entry: Path): Boolean = Files.isDirectory(entry)
+    }
   }
 
 }

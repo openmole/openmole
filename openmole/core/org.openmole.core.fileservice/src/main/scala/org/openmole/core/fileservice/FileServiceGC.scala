@@ -47,7 +47,7 @@ class FileServiceGC(fileService: WeakReference[FileService]) extends IUpdatable 
 
         fileService.deleteEmpty.synchronized {
           def deleteEmpty(files: Vector[File]): Vector[File] = {
-            val (empty, nonEmpty) = files.partition(f ⇒ !f.exists() || f.directoryIsEmpty)
+            val (empty, nonEmpty) = files.partition(f ⇒ !f.exists() || f.isDirectoryEmpty)
             empty.foreach { f ⇒ f.recursiveDelete }
             if (!empty.isEmpty) deleteEmpty(nonEmpty) else nonEmpty
           }
