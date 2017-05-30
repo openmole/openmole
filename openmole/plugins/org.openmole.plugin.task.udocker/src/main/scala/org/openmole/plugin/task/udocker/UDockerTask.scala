@@ -90,6 +90,11 @@ object UDockerTask {
     )
   }
 
+  // TODO make vals??
+  def layersDirectory(workspace: Workspace) = workspace.persistentDir /> "udocker" /> "layers"
+
+  def repositoriesDirectory(workspace: Workspace) = workspace.persistentDir /> "udocker" /> "repos"
+
   def downloadImage(dockerImage: DockerImage, timeout: Time)(implicit newFile: NewFile, workspace: Workspace) = {
     import Registry._
 
@@ -122,10 +127,8 @@ object UDockerTask {
    *
    * Assume v1.x Image JSON format and registry protocol v2 Schema 1
    */
-  def loadImage(dockerImage: SavedDockerImage)(implicit newFile: NewFile, fileService: FileService): Either[String, LocalDockerImage] = {
+  def loadImage(dockerImage: SavedDockerImage)(implicit newFile: NewFile, fileService: FileService, workspace: Workspace): Either[String, LocalDockerImage] = {
     import org.openmole.tool.tar._
-    import DockerMetadata._
-    import io.circe.generic.extras.auto._, io.circe.jawn.decode
 
     newFile.withTmpDir { extractedImage ⇒
       dockerImage.file.extract(extractedImage)
@@ -306,26 +309,25 @@ object UDockerTask {
             schemaVersion = Some(1)
           )
 
-          imageRepositoryDirectory / "manifest" content = writeJSON(manifest)
-          imageRepositoryDirectory / "TAG" content = s"$repositoryDirectory/$imageId"
-          imageRepositoryDirectory / "v2" content = ""
+        // TODO merge with rest of env vars
+        val variables = udockerVariables() ++ Vector(
+          "UDOCKER_REPOS" → UDockerTask.repositoriesDirectory(workspace).getAbsolutePath,
+          "UDOCKER_LAYERS" → UDockerTask.layersDirectory(workspace).getAbsolutePath
+        )
 
-          val variables = udockerVariables() ++ Vector(
-            "UDOCKER_REPOS" → repositoryDirectory.getAbsolutePath,
-            "UDOCKER_LAYERS" → layersDirectory.getAbsolutePath
-          )
+        val name = containerName(UUID.randomUUID().toString)
+        val commandline = commandLine(s"${udocker.getAbsolutePath} create --name=$name $imageId")
+        execute(commandline, tmpDirectory, variables, returnOutput = true, returnError = true)
+        name
+      }
 
-          val name = containerName(UUID.randomUUID().toString)
-          val commandline = commandLine(s"${udocker.getAbsolutePath} create --name=$name $imageId")
-          execute(commandline, tmpDirectory, variables, returnOutput = true, returnError = true)
-          name
-        }
+      val imageId = s"${localDockerImage.image}:${localDockerImage.tag}"
 
       val pool =
         if (reuseContainer) executionContext.cache.getOrElseUpdate(
-          containerPoolKey, Pool[ContainerId](newContainer)
+          containerPoolKey, Pool[ContainerId](newContainer(taskWorkDirectory, imageId))
         )
-        else WithNewInstance[ContainerId](newContainer)
+        else WithNewInstance[ContainerId](newContainer(taskWorkDirectory, imageId))
 
       pool { runId ⇒
         val inputDirectory = taskWorkDirectory /> "inputs"
