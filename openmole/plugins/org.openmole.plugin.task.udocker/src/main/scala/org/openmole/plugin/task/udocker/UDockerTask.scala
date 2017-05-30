@@ -119,7 +119,37 @@ object UDockerTask {
       }
 
     // FIXME pull config too
-    LocalDockerImage(dockerImage.image, dockerImage.tag, localLayers.toVector, Vector.empty, compact(m.value))
+    val localImage = LocalDockerImage(dockerImage.image, dockerImage.tag, localLayers.toVector, Vector.empty, "")
+
+    buildRepoV2(localImage, m.value)
+
+    localImage
+  }
+
+  def buildRepoV2(localDockerImage: LocalDockerImage, manifest: ImageManifestV2Schema1)(implicit workspace: Workspace): Unit = {
+    val layerDir = layersDirectory(workspace)
+    val reposDir = repositoriesDirectory(workspace)
+    val imageRepositoryDirectory = reposDir /> localDockerImage.image /> localDockerImage.tag
+
+    // move layer file in persistent/layers and create link to layer in persistent/repos
+    for {
+      layer ← localDockerImage.layers
+    } {
+
+      val layerFileInLayers = layerDir / layer._1.digest
+      val layerFileInRepos = imageRepositoryDirectory / layer._1.digest
+
+      if (!layerFileInLayers.exists()) layer._2 move layerFileInLayers
+      if (!layerFileInRepos.exists()) layerFileInRepos createLinkTo layerFileInLayers.getAbsolutePath
+    }
+
+    val imageId = s"${localDockerImage.image}:${localDockerImage.tag}"
+
+    import org.json4s.jackson.Serialization.{ write ⇒ writeJSON }
+
+    imageRepositoryDirectory / "manifest" content = writeJSON(manifest)
+    imageRepositoryDirectory / "TAG" content = s"$reposDir/$imageId"
+    imageRepositoryDirectory / "v2" content = ""
   }
 
   /**
@@ -167,7 +197,34 @@ object UDockerTask {
         }
       )
 
-      v.toEither
+      for {
+        localImage ← v.toEither
+        imageJSON ← decode[ImageJSON](localImage.imageJSON).leftMap(_.toString)
+      } yield {
+
+        import org.json4s.jackson.Serialization.{ write ⇒ writeJSON }
+
+        val (fsLayers, history) = localImage.layers.zip(localImage.layersConfig).map {
+          case ((layer, _), (_, layerConfigFile)) ⇒
+            val layerDigest = DockerMetadata.Digest(layer.digest)
+            val imageJSON = decodeFile[ImageJSON](layerConfigFile)
+
+            (layerDigest, imageJSON)
+        }.toList.unzip
+
+        val manifest = DockerMetadata.ImageManifestV2Schema1(
+          name = Some(localImage.image),
+          tag = Some(localImage.tag),
+          architecture = Some(imageJSON.architecture),
+          fsLayers = Some(fsLayers),
+          history = Some(history.map(h ⇒ DockerMetadata.V1History(writeJSON(h)))),
+          schemaVersion = Some(1)
+        )
+
+        buildRepoV2(localImage, manifest)
+        localImage
+      }
+
     }
   }
 
@@ -275,39 +332,9 @@ object UDockerTask {
 
       val userWorkDirectory = workDirectory.getOrElse(dockerWorkDirectory.getOrElse("/"))
 
-      def newContainer() =
-        newFile.withTmpDir { tmpDirectory ⇒
-          val layersDirectory = tmpDirectory /> "layers"
-          val repositoryDirectory = tmpDirectory /> "repo"
-          val imageRepositoryDirectory = repositoryDirectory /> localDockerImage.image /> localDockerImage.tag
+      def newContainer(tmpDirectory: File, imageId: String)() = {
 
-          for {
-            layer ← localDockerImage.layers
-          } {
-            (layersDirectory / layer._1.digest) createLinkTo layer._2.getAbsolutePath
-            (imageRepositoryDirectory / layer._1.digest) createLinkTo (layersDirectory / layer._1.digest).getAbsolutePath
-          }
-
-          val imageId = s"${localDockerImage.image}:${localDockerImage.tag}"
-
-          import org.json4s.jackson.Serialization.{ write ⇒ writeJSON }
-
-          val (fsLayers, history) = localDockerImage.layers.zip(localDockerImage.layersConfig).map {
-            case ((layer, _), (_, layerConfigFile)) ⇒
-              val layerDigest = DockerMetadata.Digest(layer.digest)
-              val imageJSON = decodeFile[ImageJSON](layerConfigFile)
-
-              (layerDigest, imageJSON)
-          }.toList.unzip
-
-          val manifest = DockerMetadata.ImageManifestV2Schema1(
-            name = Some(localDockerImage.image),
-            tag = Some(localDockerImage.tag),
-            architecture = imageJSONE.toOption.map(_.architecture),
-            fsLayers = Some(fsLayers),
-            history = Some(history.map(h ⇒ DockerMetadata.V1History(writeJSON(h)))),
-            schemaVersion = Some(1)
-          )
+        implicit val workspace = executionContext.workspace
 
         // TODO merge with rest of env vars
         val variables = udockerVariables() ++ Vector(
