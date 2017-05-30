@@ -35,12 +35,14 @@ import org.openmole.plugin.task.systemexec._
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.preference._
 import org.openmole.plugin.task.container
+import org.openmole.plugin.task.udocker.DockerMetadata._
 import org.openmole.plugin.task.udocker.Registry._
 import org.openmole.plugin.task.udocker.UDockerTask.LocalDockerImage
 import org.openmole.tool.cache._
 import squants._
 import squants.time.TimeConversions._
 import org.openmole.tool.file._
+import io.circe.generic.extras.auto._, io.circe.jawn.{ decode, decodeFile }
 
 import scala.language.postfixOps
 
@@ -90,12 +92,10 @@ object UDockerTask {
 
   def downloadImage(dockerImage: DockerImage, timeout: Time)(implicit newFile: NewFile, workspace: Workspace) = {
     import Registry._
-    import org.json4s.jackson.JsonMethods._
 
-    def layersDirectory(workspace: Workspace) = workspace.persistentDir /> "udocker" /> "layers"
     def layerFile(workspace: Workspace, layer: Layer) = layersDirectory(workspace) / layer.digest
     val m = manifest(dockerImage, timeout)
-    val ls = layers(m)
+    val ls = layers(m.value)
     val lDirectory = layersDirectory(workspace)
 
     val localLayers =
@@ -136,7 +136,7 @@ object UDockerTask {
       val layersNamesE = topLevelImageManifest.map(_.Layers.distinct)
       val layersConfigsE = layersNamesE.map(layers ⇒ layers.map(path ⇒ s"${path.split("/").head}/json"))
 
-      // FIXME change .head
+      // FIXME change pattern matching
       val Right((layersNames, layersConfigs)) = for {
         layersNames ← layersNamesE
         layersConfigs ← layersConfigsE
@@ -159,8 +159,8 @@ object UDockerTask {
         validImage ⇒ {
 
           val ValidDockerImageData((image, tag), imageJSONName) = validImage
-          val imageJSON = (extractedImage / imageJSONName).content
-          LocalDockerImage(image, tag, layers, configs, imageJSON)
+          val imageJSONString = (extractedImage / imageJSONName).content
+          LocalDockerImage(image, tag, layers, configs, imageJSONString)
         }
       )
 
@@ -176,6 +176,7 @@ object UDockerTask {
       case i: SavedDockerImage ⇒ loadImage(i)
     }
 
+  // TODO review data structure
   case class LocalDockerImage(image: String, tag: String, layers: Vector[(Registry.Layer, File)], layersConfig: Vector[(Registry.LayerConfig, File)], imageJSON: String) {
     lazy val id = UUID.randomUUID().toString
   }
@@ -204,18 +205,12 @@ object UDockerTask {
   type VolumeInfo = (File, String)
   type MountPoint = (String, String)
 
-  case class PulledImage(userWorkDirectory: String, pulledImageId: String)
-  lazy val pulledImageIdKey = CacheKey[PulledImage]()
-
   type ContainerId = String
   lazy val containerPoolKey = CacheKey[WithInstance[ContainerId]]()
 
   override protected def process(executionContext: TaskExecutionContext) = FromContext[Context] { parameters ⇒
 
     import parameters._
-    import io.circe.jawn._, io.circe.generic.extras.auto._
-
-    import DockerMetadata._
 
     val udockerInstallDirectory = executionContext.tmpDirectory /> "udocker"
     val udockerTarBall = udockerInstallDirectory / "udockertarball.tar.gz"

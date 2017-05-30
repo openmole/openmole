@@ -1,15 +1,14 @@
 package org.openmole.plugin.task.udocker
 
 import java.io._
-import java.net.URLEncoder
 
 import org.apache.http.HttpResponse
 import org.apache.http.client.config.RequestConfig
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.impl.client.{ HttpClients, LaxRedirectStrategy }
 import org.apache.http.impl.conn.BasicHttpClientConnectionManager
-import org.json4s.JsonAST._
 import org.json4s.jackson.JsonMethods._
+import org.openmole.plugin.task.udocker.DockerMetadata.ImageManifestV2Schema1
 import squants.time._
 
 object Registry {
@@ -36,7 +35,7 @@ object Registry {
   sealed trait LayerElement
   final case class Layer(digest: String) extends LayerElement
   final case class LayerConfig(digest: String) extends LayerElement
-  case class Manifest(value: JValue, image: DockerImage)
+  case class Manifest(value: ImageManifestV2Schema1, image: DockerImage)
 
   object Token {
 
@@ -70,7 +69,6 @@ object Registry {
     }
 
     def token(authenticationRequest: AuthenticationRequest) = {
-      val end = URLEncoder.encode("", "UTF-8")
       val tokenRequest = s"${authenticationRequest.realm}?service=${authenticationRequest.service}&scope=${authenticationRequest.scope}"
       val get = new HttpGet(tokenRequest)
       execute(get) { response ⇒
@@ -86,13 +84,23 @@ object Registry {
   }
 
   def manifest(image: DockerImage, timeout: Time): Manifest = {
+    import DockerMetadata._
+    import io.circe.generic.extras.auto._, io.circe.jawn.decode
+
     val url = s"${baseURL(image)}/manifests/${image.tag}"
-    val m = parse(content(client.execute(Token.withToken(url, timeout))))
-    Manifest(m, image)
+    val httpResponse = client.execute(Token.withToken(url, timeout))
+    val manifestContent = content(httpResponse)
+    val manifestsE = decode[ImageManifestV2Schema1](manifestContent)
+
+    // FIXME assumes it works => handle error
+    val Right(manifest) = manifestsE
+    Manifest(manifest, image)
   }
 
-  def layers(manifest: Manifest) =
-    (manifest.value \ "fsLayers" \\ "blobSum").children.map(_.extract[String]).distinct.map { l ⇒ Layer(l) }.reverse
+  def layers(manifest: ImageManifestV2Schema1) = for {
+    fsLayers ← manifest.fsLayers.toSeq
+    fsLayer ← fsLayers
+  } yield Layer(fsLayer.blobSum)
 
   def blob(image: DockerImage, layer: Layer, file: File, timeout: Time) = {
     val url = s"""${baseURL(image)}/blobs/${layer.digest}"""
