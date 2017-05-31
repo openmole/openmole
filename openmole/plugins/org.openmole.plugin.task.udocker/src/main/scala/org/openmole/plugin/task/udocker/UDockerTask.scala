@@ -279,18 +279,23 @@ object UDockerTask {
     val imageJSONE = decode[ImageJSON](localDockerImage.imageJSON)
 
     def installUDocker() = {
-      if (!udockerTarBall.exists)
-        udockerInstallDirectory.withLockInDirectory {
-          if (!udockerTarBall.exists()) this.getClass.getClassLoader.getResourceAsStream("udocker.tar.gz") copy udockerTarBall
-        }
 
-      if (!udocker.exists)
+      def retrieveResource(candidateFile: File, resourceName: String) =
+        if (!candidateFile.exists())
+          withClosable(this.getClass.getClassLoader.getResourceAsStream(resourceName))(_.copy(candidateFile))
+
+      udockerTarBall.synchronized {
         udockerInstallDirectory.withLockInDirectory {
-          if (!udocker.exists()) {
-            this.getClass.getClassLoader.getResourceAsStream("udocker") copy udocker
-            udocker.setExecutable(true)
-          }
+          retrieveResource(udockerTarBall, "udocker.tar.gz")
         }
+      }
+
+      udockerTarBall.synchronized {
+        udockerInstallDirectory.withLockInDirectory {
+          retrieveResource(udocker, "udocker")
+          udocker.setExecutable(true)
+        }
+      }
     }
 
     installUDocker()
@@ -332,7 +337,7 @@ object UDockerTask {
 
       val userWorkDirectory = workDirectory.getOrElse(dockerWorkDirectory.getOrElse("/"))
 
-      def newContainer(tmpDirectory: File, imageId: String)() = {
+      def newContainer(imageId: String)() = newFile.withTmpDir { tmpDirectory ⇒
 
         implicit val workspace = executionContext.workspace
 
@@ -352,9 +357,9 @@ object UDockerTask {
 
       val pool =
         if (reuseContainer) executionContext.cache.getOrElseUpdate(
-          containerPoolKey, Pool[ContainerId](newContainer(taskWorkDirectory, imageId))
+          containerPoolKey, Pool[ContainerId](newContainer(imageId))
         )
-        else WithNewInstance[ContainerId](newContainer(taskWorkDirectory, imageId))
+        else WithNewInstance[ContainerId](newContainer(imageId))
 
       pool { runId ⇒
         val inputDirectory = taskWorkDirectory /> "inputs"
