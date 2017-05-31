@@ -314,7 +314,9 @@ object UDockerTask {
           "UDOCKER_TARBALL" → udockerTarBall.getAbsolutePath,
           "UDOCKER_LOGLEVEL" → logLevel.toString,
           "HOME" → taskWorkDirectory.getAbsolutePath,
-          "UDOCKER_CONTAINERS" → containersDirectory.getAbsolutePath
+          "UDOCKER_CONTAINERS" → containersDirectory.getAbsolutePath,
+          "UDOCKER_REPOS" → UDockerTask.repositoriesDirectory(executionContext.workspace).getAbsolutePath,
+          "UDOCKER_LAYERS" → UDockerTask.layersDirectory(executionContext.workspace).getAbsolutePath
         )
 
       def prepareVolumes(
@@ -339,17 +341,9 @@ object UDockerTask {
 
       def newContainer(imageId: String)() = newFile.withTmpDir { tmpDirectory ⇒
 
-        implicit val workspace = executionContext.workspace
-
-        // TODO merge with rest of env vars
-        val variables = udockerVariables() ++ Vector(
-          "UDOCKER_REPOS" → UDockerTask.repositoriesDirectory(workspace).getAbsolutePath,
-          "UDOCKER_LAYERS" → UDockerTask.layersDirectory(workspace).getAbsolutePath
-        )
-
         val name = containerName(UUID.randomUUID().toString)
         val commandline = commandLine(s"${udocker.getAbsolutePath} create --name=$name $imageId")
-        execute(commandline, tmpDirectory, variables, returnOutput = true, returnError = true)
+        execute(commandline, tmpDirectory, udockerVariables(), returnOutput = true, returnError = true)
         name
       }
 
