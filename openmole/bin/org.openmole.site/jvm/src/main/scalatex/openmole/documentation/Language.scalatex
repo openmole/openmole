@@ -1,0 +1,40 @@
+@import org.openmole.site.tools._
+@import org.openmole.site._
+
+@p{The OpenMOLE language}
+  @p The OpenMOLE console language is an extension of the Scala language designed for distributed computing. It supports all the scala constructs and additional operators and classes especially designed to compose workflows. OpenMOLE workflows expose explicit parallel aspect of the workload that can be delegated to distributed computing environments in a transparent manner. The philosophy of OpenMOLE is test small (on your computer) and scale for free (on remote distributed computing environments).
+
+  @p A good way to get a first glimpse at what OpenMOLE can do is to read this @a("research paper", href := "http://www.openmole.org/files/FGCS2013.pdf").
+
+     @p{Basic scala constructs}
+       You need only a very basic understanding of the scala language in order to design OpenMOLE workflows.
+       @p{Declare variables}
+         @hl.openmoleNoTest("""
+         val a = 1 // declares a variable a of type Int
+         val b = "Text" // declares a variable a of type String
+         val c = if(condition) 5 else 10 // declare a variable c of type Int, the value of c depends on the condition""")
+
+       @p{Construct objects}
+         OpenMOLE takes advantage of the object oriented aspect of scala. It proposes a set of objects that you can build and assemble together to specify your workflow. In general, an object is instantiated using the "new" keyword:
+         @br @hl.openmole("""val f = new File("/tmp/file.txt")""")
+         @p In OpenMOLE we have choosen to use factories instead of directly constructing objects, that's why most of the OpenMOLE scripts doesn't contain the "new" keyword at all.
+         @p For instance: @hl.openmole("""val l = File("/tmp/file.txt")""")
+         @p Under the hood, it calls a method that is in charge of building the file.")
+       @p{Named parameters}
+         Functions calls generally require the parameters to be provided in a predefined order. In scala you can get rid of this ordering constraint by using named parameters. OpenMOLE scripts will often make use of this pattern:
+         @br @hl.openmoleNoTest("val t = SomeClass(value1, value2, otherParam = otherValue)")
+         @p It means that @i{value1} and @i{value2} are the values for the first two parameters and that the parameter named @i{otherParam} is set to the value @i{otherValue}. Unspecified parameters are set to their default value.
+
+ @p{Going further}
+   What you have read so far should be sufficient in order to get started with OpenMOLE. To begin with the OpenMOLE syntax you should have a look at the @a("Hello World tutorial", href := DocumentationPages.root.tutorial.helloWorld.file). You may also want to look at the @a("Task documentation", href := DocumentationPages.root.language.model.file) and other sections detailing specific concepts.
+
+   @p Scala is a very nice language with an extensive very well designed standard library. To get more insights on this language, check these links:
+   @ul
+     @li{ @a("Scala website", href := "http://www.scala-lang.org/") }
+     @li{ @a("Scala books", href := "http://www.scala-lang.org/node/959") }
+     @li{ @a("Standard API documentation", href := "http://www.scala-lang.org/api/current/index.html") }
+
+  @p{API documentation}
+    You can browse OpenMOLE's @a("automatically generated documentation", href := Resource.api.file + "/index.html")
+
+

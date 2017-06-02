@@ -1,0 +1,42 @@
+
+@import org.openmole.site.tools._
+@import org.openmole.site.Environment._
+
+@p{Delegation to the EGI grid}
+  @a("EGI", href := "http://www.egi.eu/") is a grid infrastructure gathering computing resources from all over the world. It is a very powerful computing environment, but shows technically challenging to use. OpenMOLE makes it very simple to benefit from the grid.
+
+ @p{Setup your grid credentials}
+   Note: The following instructions explain how to setup the EGI authentication in console mode. If you are using the script editor you can configure it directly in the authentication panel.
+
+   @p To delegate a task to EGI you need to register your certificate in OpenMOLE. In the console execute:
+   @br @hl.openmole("""
+   EGIAuthentication() = P12Certificate(encrypted, "/path/to/your/certificate.p12")""", header = """def encrypted = "" """)
+
+   @p You need to execute this operation only once and for all. OpenMOLE persists this information in your preferences folder.
+
+  @p{Submitting job to EGI}
+    To use EGI through DIRAC you should setup an @hl.openmoleNoTest{EGIAuthentication} as explained above using a P12Certificates. Other methods are not supported by DIRAC. To use EGI you must be registered in a Virtual Organisation (VO). The VO is the only compulsory parameter when creating an EGI environment:
+    @br @hl.openmole("""
+    val env = EGIEnvironment("biomed")""")
+    @p Here the VO @i{biomed} is specified, but you can specify the EGI VO of you choice.
+
+    @p Options available for DIRAC are:
+    @ul
+      @li{@envEntryTitle{cpuTime} the maximum duration for the job in terms of CPU consumption, for instance 1 hour,}
+      @li{@openMOLEMemory,}
+      @li{@envEntryTitle{service} a DIRAC REST API,}
+      @li{@envEntryTitle{group} the name of the DIRAC group,}
+      @li{@envEntryTitle{bdii} the BDII to use for listing resources accessible from this VO. The BDII in your preference file is used, when this field is left unspecified.}
+      @li{@envEntryTitle{vomsURL} the URL of the VOMS server used for the authentication,}
+      @li{@envEntryTitle{fqan} additional flags for authentication,}
+      @li{@envEntryTitle{setup} setup to use on the DIRAC server. It is set to "Dirac-Production" by default,}
+      @li{@name.}
+
+    @p The @hl.openmoleNoTest{EGIEnvironment} can be tuned using the previous options as in this example:
+    @br @hl.openmole("""
+      val env =
+        EGIEnvironment(
+          "biomed",
+          cpuTime = 4 hours,
+          openMOLEMemory = 200 megabytes
+        )""")

@@ -1,0 +1,13 @@
+
+
+@import org.openmole.site.tools._
+
+@p{Development}
+  This part of the documentation concerns the development process of OpenMOLE. It explains how to compile OpenMOLE, how to write the documentation, how to develop plugins...
+
+  @p To interact with the OpenMOLE development team, you can post on the OpenMOLE development mailing list: devs 'at' list.openmole.org (you should @a("subscribe", href := "http://devlist.openmole.org/") first). We're also present on the @b{#openmole-dev} channel of the @a("ISC-PIF's RocketChat", href := "https://chat.iscpif.fr/channel/openmole-dev").
+
+  @p The development version of the OpenMOLE site and software is compiled and distributed several times an hour at @a( "this url", href := "http://next.openmole.org").
+
+@p{Bug report}
+  Please report bugs you may find in OpenMOLE on the @a("bug tracker", href := "https://github.com/openmole/openmole/issues").

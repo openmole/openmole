@@ -1,0 +1,24 @@
+@import org.openmole.site._
+@import org.openmole.site.tools._
+@import Pages._
+
+@p{Active developers}
+  FIXME with developers
+
+  @p The development activity can be seen on @a("GitHub", href := "https://github.com/openmole/openmole").
+
+@p{How to cite OpenMOLE}
+  FIXME: PUBLICATION PAPERS
+
+@p{Communications}
+  FIXME with communications
+
+@p{Contact us}
+  For any question regarding OpenMOLE, contact us through the OpenMOLE user mailing list: users 'at' list.openmole.org
+  (you should @a("subscribe", href := "http://list.openmole.org/") first).
+
+  @p
+  @a(img(src := Resource.iscpif.file, `class` := "logoISC"), href := "http://iscpif.fr", target := "_blank")
+  @a(img(src := Resource.geocite.file, `class` := "logoGeocite"), href := "http://www.parisgeo.cnrs.fr/", target := "_blank")
+  @a(img(src := Resource.biomedia.file, `class` := "logoBiomedia"), href := "http://biomedic.doc.ic.ac.uk/", target := "_blank")
+

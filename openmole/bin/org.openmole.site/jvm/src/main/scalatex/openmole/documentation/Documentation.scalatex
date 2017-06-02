@@ -1,0 +1,12 @@
+
+@import org.openmole.site.tools._
+@import org.openmole.site._
+
+@p{Documentation}
+  Welcome to the OpenMOLE documentation.
+
+  @p OpenMOLE is a scientific workflow engine that works with your own programs and on your own execution environments. OpenMOLE has a wide range of use cases from high-performance parameter tuning, to large datasets exploration, model calibration, and pretty much any other thing you can think of :)
+
+  @p To specify your workflow in OpenMOLE you will use a high-level workflow language. To get started with OpenMOLE, you might want to first have a look at the @a("getting started tutorial", href := Pages.gettingStarted.file) and at @a("the OpenMOLE market place", href := "https://github.com/openmole/openmole-market") containing workflow examples, check how to handle the @a("OpenMOLE application", href := DocumentationPages.root.application.file) and go through the concept in OpenMOLE: @a("Tasks", href := DocumentationPages.root.language.model.file), @a("Transitions", href := DocumentationPages.root.language.transition.file), @a("Environments", href := DocumentationPages.root.language.environment.file), Workflow, @a("Hooks", href := DocumentationPages.root.language.hook.file)...
+
+  @p The OpenMOLE community is very friendly. To get some help, don't hesitate to post your questions on the OpenMOLE user mailing list: users 'at' list.openmole.org (you should @a("subscribe", href := "http://list.openmole.org/") first).

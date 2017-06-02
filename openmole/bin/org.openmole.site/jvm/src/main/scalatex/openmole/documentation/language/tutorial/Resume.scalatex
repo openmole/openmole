@@ -1,0 +1,36 @@
+
+@import org.openmole.site.tools._
+
+@p{How to design a resumable workflow}
+  This little tutorial explains how to prepare your workflow to be able to stop it and easily relaunch it only on unfinished jobs. This tutorial is for you if you want to relaunch your workflow only on unprocessed inputs or with new inputs. For instance if your task may fail or sometime return empty or invalid files, you can benefit from this OpenMOLE construct.
+
+  @p The solution is a combination of the @i{when} condition and the @i{Expression} keyword. You can add a @i{when} clause in your workflow conditionally execute some jobs. The condition is expressed using an OpenMOLE @i{Expression}.
+
+  @p Here is an example:
+  @p @hl.openmole(s"""
+  // define files and name used
+  val parameter = Val[Int]
+  val resultFile = Val[File]
+
+  // define the sampling
+  val exploration = ExplorationTask(parameter in (0 to 100))
+
+  // write the parameter in a file
+  val writeTask = ScalaTask($tq
+    val resultFile = newFile();
+    resultFile.content = s"$$parameter"
+    $tq) set (
+    (inputs, outputs) += parameter,
+    outputs += resultFile
+  )
+
+  // outputpath is the path where resultFile is stored
+  val outputPath = Expression[File](workDirectory / "results/results_$${parameter}")
+
+  // the file coming from each job is copied in the results folder
+  val copy = CopyFileHook(resultFile, outputPath)
+
+  // a job is executed only if there is no matching resultFile or an empty resultFile
+  // once you've run this workflow once you can manually suppress some result files and run it again
+  exploration -< (writeTask hook copy when (!outputPath.exists || outputPath.isEmpty))""")
+

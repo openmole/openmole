@@ -27,7 +27,7 @@ import sheet._
 import bs._
 
 import scala.concurrent.Future
-import scala.scalajs.js.annotation.JSExport
+import scala.scalajs.js.annotation._
 import scalatags.JsDom.all._
 
 @JSExport
@@ -67,7 +67,6 @@ class PrivateKeyAuthenticationGUI(val data: PrivateKeyAuthenticationData = Priva
     onremove()
   }
 
-  @JSExport
   lazy val panel = vForm(
     hForm(
     loginInput.withLabel("Login"),

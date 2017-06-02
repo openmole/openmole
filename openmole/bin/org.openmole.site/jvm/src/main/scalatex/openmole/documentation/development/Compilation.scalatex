@@ -1,0 +1,68 @@
+
+@import org.openmole.site.tools._
+@import org.openmole.site._
+
+@p{Compile OpenMOLE}
+  This section explains how to compile OpenMOLE from its sources and how to modify the sources. The source code repository can be found @a("here", href := "https://github.com/openmole/openmole").
+  @p{Manual instructions}
+      @p{Get the sources}
+        OpenMOLE's source code is versioned under @a("git", href :=  "https://en.wikipedia.org/wiki/Git_%28software%29"). You can get the sources as follows:
+        @br @hl.highlight("""
+        git clone https://github.com/openmole/openmole.git
+        cd openmole
+        git submodule init
+        git submodule update""", "plain")
+
+        @p The current development versions stands in the master branch.
+
+      @p{Compile}
+        In order to compile OpenMOLE, you should have @a("SBT", href := "http://www.scala-sbt.org/") and a JDK of version 8 or greater (we strongly recommend the use of the OpenJDK as its corresponding Runtime Environment embeds all the tools required by OpenMOLE).
+        @p You also need to install node and npm. On ubuntu and debian you can simply install those by running @hl.highlight("""sudo apt install npm nodejs-legacy""", "plain").
+        @p Now you can compile OpenMOLE. Here are the steps to compile OpenMOLE from a fresh clone:
+        @br @hl.highlight("""
+        cd build-system
+        sbt publish-local
+        cd ../libraries
+        sbt publish-local
+        cd ../openmole
+        optionally: sbt clean
+        sbt "project openmole" assemble""", "plain")
+        @p You can now find the application in bin/openmole/target/assemble/.
+        @p To compile offline (plain / train...) you should use: @hl.highlight("""set offline in Global := true""", "plain") when in the sbt shell, or start sbt with the @i{-offline} option.
+      @p{Develop}
+        @p The OpenMOLE development team generally uses the community version of @a("IntelliJ", href := "http://www.jetbrains.com/idea/").
+        Once deployed you should install the SBT and Scala plugins. You can then create an IntelliJ project containing the
+        OpenMOLE's folder hierarchy by clicking on the "Import Project" button in IntelliJ. Browse to the folder
+        @i{openmole/openmole} and click import.
+
+        @p OpenMOLE is made of three different projects:
+          @ul
+            @li{ @i{openmole/openmole}: the main project containing the source code for the core and plugins }
+            @li{ @i{openmole/libraries}: contains the libraries which OpenMOLE depends on but are not available as OSGi bundles from their developers. This project takes all these dependencies, wraps them in OSGi projects and generates the corresponding bundles to be later imported by OpenMOLE's main project.}
+            @li{ @i{openmole/build-system}: As its name stands, that's the build system :) It's very unlikely that you'll have to modify this project.}
+
+      @p{Create a standalone archive}
+        You can create a standalone archive of your fresh OpenMOLE build and ship it around by using the task @i{openmole:tar}:
+        @br @hl.highlight("""sbt openmole:tar""", "plain")
+        @p You will find the resulting archive in @i{bin/openmole/target/openmole.tar.gz}.
+      @p{Publish the bundles}
+        @hl.highlight("""
+        cd build-system
+        sbt publish
+        cd ../libraries
+        sbt publish
+        cd ../openmole
+        sbt publish""", "plain")
+
+  @p{Compile within docker}
+      An easy way to get an OpenMOLE compilation environment up and running is to use docker. Once docker is installed on you machine you can do:
+      @br @hl.highlight("""
+      git clone https://github.com/openmole/docker-build.git
+      cd docker-build
+      ./run -v /a/local/path/on/your/system
+      # You should be in the docker container now, execute
+      clone
+      compile
+      """, "plain")
+      @p You can now find the compile OpenMOLE in @i{/a/local/path/on/your/system/openmole/openmole/bin/openmole/target/assemble/}
+

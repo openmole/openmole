@@ -1,0 +1,6 @@
+
+@import org.openmole.site.tools._
+@import org.openmole.site._
+
+@p{OpenMOLE citations}
+  @p{Fix me and generate citations with a lib compatible with js}

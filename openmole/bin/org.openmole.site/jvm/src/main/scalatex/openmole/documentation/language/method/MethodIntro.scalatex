@@ -1,0 +1,6 @@
+@import org.openmole.site.tools._
+@import org.openmole.site._
+
+
+@p{Method intro}
+    Introduction for method  text here

@@ -64,7 +64,7 @@ object BannerAlert {
     }, span(omsheet.closeBanner, onclick := { () ⇒ clear })(
       raw("&#215")
     )
-  )(height := 45)
+  )(height := 60)
 
   lazy val banner = bannerMessages.map { bm ⇒ !bm.isEmpty }.expand(bannerDiv)
 
