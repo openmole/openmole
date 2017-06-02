@@ -1,0 +1,9 @@
+
+@import org.openmole.site.tools._
+
+@p{Multi-threaded environment}
+  By default OpenMOLE tasks run on a single thread of your local machine. To use several cores of your computer, you can
+  define a so called LocalEnvironment with the number of threads to use as its parameter.
+  @br @hl.openmole("""
+  // Use 10 threads / cores
+  val env = LocalEnvironment(10)""")

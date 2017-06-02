@@ -31,7 +31,7 @@ import org.scalajs.dom.raw.HTMLInputElement
 import rx._
 
 import scala.concurrent.Future
-import scala.scalajs.js.annotation.JSExport
+import scala.scalajs.js.annotation._
 import scalatags.JsDom.all._
 
 @JSExport
@@ -73,7 +73,6 @@ class EGIAuthenticationGUI(val data: EGIAuthenticationData = EGIAuthenticationDa
     onremove()
   }
 
-  @JSExport
   lazy val panel = vForm(
     password.withLabel("Password"),
     privateKey.view(sheet.marginTop(10)).render.withLabel("Certificate"),

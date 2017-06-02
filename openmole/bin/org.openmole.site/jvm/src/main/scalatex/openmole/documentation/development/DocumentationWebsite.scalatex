@@ -1,0 +1,23 @@
+
+@import org.openmole.site.tools._
+@import org.openmole.site._
+
+@p{Build the web site}
+    @p The source code of the website and the OpenMOLE's documentation are hosted along in the code repository. You might spot a typo/incorrect spelling/grammar mistake/bad wording or simply want to improve a part of the documentation you think is unclear.
+    If so, you're more than welcome to correct our mistakes and improve the documentation. To check your changes before sending us a Pull Request, here is how to build a local copy of the website/documentation.
+
+    @hl.highlight("""
+    cd openmole
+    git submodule update --init
+    sbt "project org-openmole-site" assemble
+    cd bin/org.openmole.site/target/assemble
+    ./site --target /path/of/the/site
+    """, "plain")
+
+    @p The site will be generated in the target directory passed as parameter to @i{./site}. In case you do not provide
+    a target folder, one named @i{openmole-doc-html} will be created for you in the current directory.
+
+    @p Updating the git submodules is mandatory the first time you
+    set up your OpenMOLE development environment. It pulls the examples from the MARKETLINK that are necessary to build the documentation website.
+
+    @p Optionally you can use @hl.highlight("./site /path/to/the/site --no-test", "plain") in order to disable the tests of the scripts, which is (really) time-consuming. The tests concerning the examples from the OpenMOLE market can in turn be disabled using @hl.highlight("--no-market-test", "plain").

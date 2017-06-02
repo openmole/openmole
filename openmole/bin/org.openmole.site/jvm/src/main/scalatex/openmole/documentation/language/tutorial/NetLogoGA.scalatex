@@ -1,0 +1,187 @@
+
+@import org.openmole.site.tools._
+@import org.openmole.site._
+
+@def model = """
+    // Define the input variables
+    val gPopulation = Val[Double]
+    val gDiffusionRate = Val[Double]
+    val gEvaporationRate = Val[Double]
+    val seed = Val[Int]
+
+    // Define the output variables
+    val food1 = Val[Double]
+    val food2 = Val[Double]
+    val food3 = Val[Double]
+
+    // Define the NetlogoTask
+
+
+    val cmds = Seq("run-to-grid")
+    val ants =
+      NetLogo5Task(workDirectory / "Ants.nlogo", cmds, seed = seed) set (
+        // Map the OpenMOLE variables to NetLogo variables
+        netLogoInputs += (gPopulation, "gpopulation"),
+        netLogoInputs += (gDiffusionRate, "gdiffusion-rate"),
+        netLogoInputs += (gEvaporationRate, "gevaporation-rate"),
+        netLogoOutputs += ("final-ticks-food1", food1),
+        netLogoOutputs += ("final-ticks-food2", food2),
+        netLogoOutputs += ("final-ticks-food3", food3),
+        // Define default values for inputs of the model
+        seed := 42,
+        gPopulation := 125.0,
+        gDiffusionRate := 50.0,
+        gEvaporationRate := 50
+      )"""
+
+
+@p{Calibrating a NetLogo model using Genetic Algorithms}
+  This example presents step by step how to explore a NetLogo model with an Evolutionary/Genetic Algorithm (EA/GA) in
+  OpenMOLE.
+  @br For more generic details regarding the exploitation of Genetic Algorithms using OpenMOLE, you can check the
+  @a("GA section of the methods documentation", href := DocumentationPages.root.language.method.file + "#Geneticalgorithms").
+
+  @p{The ant model}
+    We demonstrate this tutorial using the ants foraging model present in the Netlogo library. This model was created by
+    Ury Wilensky. According to @a("NetLogo's website", href := "http://ccl.northwestern.edu/netlogo/models/Ants"),
+    this model is described as:
+    @br @i{In this project, a colony of ants forages for food. Though each ant follows a set of simple rules, the colony
+    as a whole acts in a sophisticated way. When an ant finds a piece of food, it carries the food back to the nest,
+    dropping a chemical as it moves. When other ants “sniff” the chemical, they follow the chemical toward the food. As
+    more ants carry food to the nest, they reinforce the chemical trail.}
+
+    @p A visual representation of this model looks like that:
+    @br @img(src := Resource.ants.file)
+
+    @p In this tutorial we use @a("a headless version", href := DocumentationPages.root.tutorial.headlessNetLogo.file) of the
+    model. This modified version is available @a("here", href := Resource.antsNLogo.file).
+
+  @p{Define the problem to solve as an optimisation problem}
+    This model manipulates three parameters:
+    @ul
+      @li{Population: number of Ants in the model,}
+      @li{Evaporation-rate: controls the evaporation rate of the chemical,}
+      @li{Diffusion-rate: controls the diffusion rate of the chemical.}
+
+    @p Ants forage from three sources of food (see the number in the picture below). Each source is positioned at
+    different distances from the Ant colony.
+    @br @img(src := Resource.antNumbers.file)
+
+    @p It can be interesting to search the best combination of the two parameters evaporation-rate and diffusion-rate
+    which minimises the eating time of each food source.
+
+    @p To build our fitness function, we modify the NetLogo Ants source code to store for each food source the first ticks
+    indicating that this food source is empty.
+
+    @p @hl.highlight("""
+    to compute-fitness
+      if ((sum [food] of patches with [food-source-number = 1] = 0) and (final-ticks-food1 = 0)) [
+        set final-ticks-food1 ticks ]
+      if ((sum [food] of patches with [food-source-number = 2] = 0) and (final-ticks-food2 = 0)) [
+        set final-ticks-food2 ticks ]
+      if ((sum [food] of patches with [food-source-number = 3] = 0) and (final-ticks-food3 = 0)) [
+        set final-ticks-food3 ticks ]
+    end""", "plain")
+
+    @p At the end of each simulation we return the values for the three objectives :
+    @ul
+      @li{The simulation ticks indicating that source 1 is empty,}
+      @li{The simulation ticks indicating that source 2 is empty,}
+      @li{The simulation ticks indicating that source 3 is empty.}
+
+    @p The combination of the three objectives indicates the quality of the parameters used to run the simulation.
+    This situation is a
+    @a("multi-objective optimisation", href := "http://en.wikipedia.org/wiki/Multiobjective_optimization") problem. In
+    case there is a compromise between these 3 objectives, we will obtain a
+    @a("Pareto frontier", href := "http://en.wikipedia.org/wiki/Pareto_efficiency") at the end of the optimisation
+    process.
+
+
+  @p{Getting the ant model to run in OpenMOLE}
+    When building a calibration or optimisation workflow, the first step is to make the model run in
+    OpenMOLE. This script simply embeds the NetLogo model and runs one single execution of the model with arbitrary
+    parameters. More details about the NetLogo5 task used in this script can be found in
+    @a("this section of the documentation", href := DocumentationPages.root.language.model.netLogo.file).
+
+    @hl.openmole(s"""
+    $model
+
+    // Define the hooks to collect the results
+    val displayHook = ToStringHook(food1, food2, food3)
+
+    // Start a workflow with 1 task
+    val ex = (ants hook displayHook) start
+    """)
+
+    @p The result of this execution should look like:
+    @br @hl.highlight("{food1=746.0, food2=1000.0, food3=2109.0}", "plain")
+
+  @p{The optimisation algorithm}
+    We will try to find the parameter settings minimising these estimators. This script describes how to use the NSGA2 multi-objective optimisation algorithm in OpenMOLE. The result files are written to @hl.highlight("/tmp/ants", "plain").
+
+    @br @hl.openmole("""
+    // Define the population size: 100.
+    // Define the inputs and their respective variation bounds.
+    // Define the objectives to minimize.
+    // Tell OpenMOLE that this model is stochastic and that it should generate a seed for each execution
+    // Define the fitness evaluation
+    // Define the parallelism level
+    // Terminate after 10000 evaluations
+    val evolution =
+      SteadyStateEvolution(
+        // Define the population (10) and the number of generations (100).
+        // Define the inputs and their respective variation bounds.
+        // Define the objectives to minimize.
+        algorithm =
+          NSGA2(
+            mu = 100,
+            genome = Seq(gDiffusionRate in (0.0, 99.0), gEvaporationRate in (0.0, 99.0)),
+            objectives = Seq(food1, food2, food3),
+            stochastic = Stochastic(seed = seed)
+          ),
+        evaluation = ants,
+        parallelism = 10,
+        termination = 1000
+      )
+
+    // Define a hook to save the Pareto frontier
+    val savePopulationHook = SavePopulationHook(evolution, workDirectory / "results")
+
+    // Plug everything together to create the workflow
+    (evolution hook savePopulationHook)""", header = model)
+
+  @p{Scale up}
+    If you use distributed computing, it might be a good idea to opt for an Island model. Islands are better suited to
+    exploit distributed computing resources than classical generational genetic algorithms. See how the end of the
+    script changes to implement islands in the workflow. Here we compute 2,000 islands in parallel, each running during
+    1 hour on the European grid:
+    @br @hl.openmole("""
+  val evolution =
+    SteadyStateEvolution(
+      algorithm =
+        NSGA2(
+          mu = 100,
+          genome = Seq(gDiffusionRate in (0.0, 99.0), gEvaporationRate in (0.0, 99.0)),
+          objectives = Seq(food1, food2, food3),
+          stochastic = Stochastic(seed = seed)
+        ),
+        evaluation = ants,
+        termination = 1 hour
+    )
+
+  // Define the island model with 1,000 concurrent islands. Each island gets 50 individuals sampled from the global
+  // population. The algorithm stops after 100,000 islands evaluations.
+  val island =
+    IslandEvolution(
+      evolution,
+      parallelism = 1000,
+      termination = 100000
+    )
+
+  val savePopulationHook = SavePopulationHook(island, workDirectory / "results")
+
+  // Define the execution environment
+  val env = EGIEnvironment("biomed", openMOLEMemory = 1200 megabytes, cpuTime = 4 hours)
+
+  // Define the workflow
+  (island on env hook savePopulationHook)""", header = model)

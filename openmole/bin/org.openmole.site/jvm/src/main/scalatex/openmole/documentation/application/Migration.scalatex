@@ -1,0 +1,10 @@
+
+
+@import org.openmole.site.tools._
+
+@p{Migration guide}
+  This section list the changes in the OpenMOLE language from one version to another in order to help you to migrate your workflows.
+  @p{From 6 to 7}
+    @p @b{Methods:}
+    @ul
+      @li{Evolution: replication term is replaced by stochastic}

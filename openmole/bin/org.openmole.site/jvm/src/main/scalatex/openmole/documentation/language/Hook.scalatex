@@ -1,0 +1,110 @@
+
+@import org.openmole.site.tools._
+
+@p{Hook}
+ @p Tasks are mute pieces of software. They are not conceived to write files, display values, nor more generally present
+  any side effects at all. Tasks' role is to compute some output data from their input data. That's what guaranties that
+  their execution can be deported to other machines.
+
+@p OpenMOLE introduces a mechanism called @b{Hooks} to save or display results generated on remote environments. Hooks
+  are conceived to perform an action upon completion of the task they are attached to.
+  @p{Plug a hook}
+     Let's consider this simple workflow:
+     @br @hl.openmole("""
+     val i = Val[Int]
+     val hello = ScalaTask("i = i * 2") set (
+       inputs += i,
+       outputs += i
+     )
+
+     val exploration = ExplorationTask(i in (0 to 9))
+
+     val h = ToStringHook()
+
+     val ex = exploration -< (hello hook h) start""")
+     @p The hook @i{h} is plugged to the end of the @i{hello} task. Everytime @i{hello} finishes, the hook @i{h} is
+     executed. Multiple hooks can also be plugged to the same task as in the present example:
+     @br @hl.openmole("""
+     val i = Val[Int]
+
+     val hello = ScalaTask("val i = 2") set (
+       outputs += i
+     )
+
+     val h1 = ToStringHook()
+     val h2 = ToStringHook()
+     val h3 = ToStringHook()
+
+     val ex = (hello hook (h1, h2, h3)) start""").
+
+  @p Hooks come in various declinations, with different actions on the results. The available hooks are described
+  hereafter.
+
+  @p{Save your data as CSV}
+    The @i{AppendToCSVFileHook} takes data from the dataflow and appends it to a file formatted as CSV:
+    @br @hl.openmole("""
+    val i = Val[Int]
+
+    val h = AppendToCSVFileHook("/path/to/a/file/or/dir${i}.csv")""")
+    @p The path is expanded using the variables from the dataflow (expressions between ${} are evaluated and replaced).
+
+    @p The optional last parameter of @i{AppendToCSVFileHook} is the list of variables to write to the CSV file. The
+    default behaviour when this list is not specified is to dump all the variables from the dataflow to the file. You
+    can restrict this behaviour by @b{listing only the variables you want to save}
+
+    @p Some additional optional parameters can be set by calling the function @hl.openmoleNoTest("set") on the newly
+    created @i{Hook}.
+    @br Setting @hl.openmoleNoTest("csvHeader := Col1, Col2, ColZ") customises the header of the CSV file to be created
+    with the string it receives as a parameter. Please note that this only happens if the file doesn't exist when the
+    hook is executed.
+    @br @hl.openmoleNoTest("singleRow := true") forces the flattening of the input lists such that all variables values
+    are written to a single row/line of the CSV file.
+
+    @p This workflow demonstrates the optional behaviour of @i{AppendToCSVFileHook}:
+    @br @hl.openmole("""
+      val i = Val[Int]
+      val j = Val[Int]
+      // this variable will not be written to the CSV file
+      val z = Val[Double]
+
+      val h = AppendToCSVFileHook("/path/to/a/file/or/dir${i}.csv", i, j) set (
+        csvHeader := "i, j",
+        arraysOnSingleRow := true
+      )
+      """)
+
+  @p{Save files computed by your tasks}
+    The @i{CopyFileHook} makes it possible to copy a file / directory from the dataflow to a given location on the machine
+    running OpenMOLE.
+    @br @hl.openmole("""
+    val file = Val[File]
+    val i = Val[Int]
+
+    val h = CopyFileHook(file, "/path/to/copy/the/file${i}.txt")""")
+  @p{Append some content to a file}
+    Similarly to the @i{AppendToFileHook}, any string can be appended to a file, using the more general
+    @i{AppendToFileHook}. The appended strings can be a combination of variables from the dataflow and plain text.
+    @br @hl.openmole("""
+    val h = AppendToFileHook("/path/of/the/file.txt", "string ${i} to append")""")
+
+  @p{Append a file to another file}
+    Use the @i{AppendFileFileHook} as well.
+    @br @hl.openmole("""
+    val file = Val[File]
+    val h = AppendToFileHook("${file.content}", "/path/of/the/file")""")
+
+  @p{Display variables}
+    To display a variable in the console, use the @i{ToStringHook}:
+    @br @hl.openmole("""
+    val i = Val[Int]
+    val j = Val[Int]
+
+    val h = ToStringHook(i, j)""")
+    If no variable is specified, @i{ToStringHook} displays the whole dataflow.
+  @p{Display results in the console}
+    To display a string formed of variables and plain text in the console, use the @i{DisplayHook}. You can think of the
+    @i{DisplayHook} as an OpenMOLE equivalent to Scala's @i{println}.
+    @br @hl.openmole("""
+    val i = Val[Int]
+
+    val h = DisplayHook("The value of i is ${i}.")""")

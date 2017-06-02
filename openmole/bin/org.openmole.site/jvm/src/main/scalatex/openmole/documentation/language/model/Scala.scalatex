@@ -1,0 +1,50 @@
+@import org.openmole.site.tools._
+@import org.openmole.site._
+
+@p{Embedding  Scala Code }
+  @b
+    TODO refaire le texte avec un vrai exemple  de la vraie vie véritable : des import de libs , une classe model, une méthode run() et un fichier ?
+  @p
+    You can program your data processing tasks using the @hl.openmole("ScalaTask"). For instance the following
+    workflow sums all the elements of an array using a @hl.openmole("ScalaTask") and displays the results. To get more
+    details on the hook part you can check the doc on @a("hooks", href := DocumentationPages.root.language.hook.file).
+
+  @br @hl.openmole("""
+    val array = Val[Array[Double]]
+    val result = Val[Double]
+
+    val sum = ScalaTask("val result = array.sum") set (
+        inputs += array,
+        outputs += result,
+        array := Array(8.0, 9.0, 10.0)
+      )
+
+    (sum hook ToStringHook())""")
+
+
+  @p Multiple @i{ScalaTasks} can be joint to compose a workflow. Lets imagine that you want to
+  perform an expensive computation on every element of an array. For the sake of simplicity, the "expensive computation"
+  is here a multiplication by 2.
+
+  @br @hl.openmole("""
+    val element = Val[Double]
+    val multiplied = Val[Double]
+    val result = Val[Double]
+
+    val expensive = ScalaTask("val multiplied = element * 2") set (
+      inputs += element,
+      outputs += multiplied
+    )
+
+    val exploration = ExplorationTask(element in List(8.0, 9.0, 10.0))
+
+    val sum = ScalaTask("val result = multiplied.sum") set (
+      inputs += multiplied.toArray,
+      outputs += result
+    )
+
+    exploration -< expensive >- (sum hook ToStringHook())""")
+
+  @p The execution of this workflow can be distributed using OpenMOLE's environments. Check the page dedicated to
+  @a("environments", href := DocumentationPages.root.language.environment.file) to learn more on this process.
+

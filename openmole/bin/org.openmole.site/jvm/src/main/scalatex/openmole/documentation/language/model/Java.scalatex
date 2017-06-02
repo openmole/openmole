@@ -1,0 +1,159 @@
+@import org.openmole.site.tools._
+@import org.openmole.site._
+
+@p{Execute your Java code into OpenMOLE}
+
+  OpenMOLE makes it simple to include your own Java code in a workflow. A Java program can be encapsulated in a task of
+  a workflow. The task should be a ScalaTask and the Java program should be packaged as a JAR archive passed to the
+  ScalaTask through the @hl.openmoleNoTest("libraries") parameter.
+
+  @p{Hello world}
+      Let us consider the simple code @em{Hello.java} in a directory named @i{hello} @("(to respect Java's package structure)"):
+      @hl.highlight("""
+      package hello;
+
+      public class Hello {
+        public static void run(int arg) {
+          System.out.println("Hello from Java! " + arg);
+        }
+      }""", "java")
+      @p We compile the code and generate the JAR file as follows:
+      @hl.highlight("""
+      mkdir hello
+      mv Hello.java hello
+      cd hello
+      javac Hello.java
+      cd ..
+      jar cvf Hello.jar hello""", "plain")
+
+      @p You should upload the Hello.jar file in a folder in OpenMOLE. Then you can call the Java program from a ScalaTask with the following OpenMOLE code:
+      @hl.openmole("""
+      val proto1 = Val[Int]
+
+      val explo = ExplorationTask(proto1 in (0 until 10))
+
+      //Defines the task to perform the hello function
+      val javaTask = ScalaTask("hello.Hello.run(proto1)") set (
+        libraries += workDirectory / "Hello.jar",
+        inputs += proto1
+      )
+
+      explo -< javaTask""")
+
+      @p The output should look like that (the order in which the lines are printed might be different in your case):
+      @hl.highlight("""
+      Hello from Java! 0
+      Hello from Java! 1
+      Hello from Java! 2
+      Hello from Java! 3
+      Hello from Java! 4
+      Hello from Java! 5
+      Hello from Java! 6
+      Hello from Java! 7
+      Hello from Java! 8
+      Hello from Java! 9
+      Hello from Java! 10""", "plain")
+
+  @p{Computing}
+    @p In the general case a task is used to compute some output values depending on some input values. To illustrate
+    that, let's consider another Java code:
+    @hl.highlight("""
+    package hello;
+
+    public class Hello {
+      public static double[] run(double arg1, double arg2) {
+        return double[]{arg1 * 10, arg2 * 10};
+      }
+    }""", "java")
+
+    @p Once you have packaged this code in the same way as before, it can be explored in OpenMOLE:
+
+      @hl.openmole("""
+      val arg1 = Val[Double]
+      val arg2 = Val[Double]
+      val out1 = Val[Double]
+      val out2 = Val[Double]
+
+      val explo = ExplorationTask(
+        (arg1 in (0.0 to 10.0 by 1.0)) x
+        (arg2 in (0.0 until 10.0 by 1.0))
+      )
+
+      val javaTask = ScalaTask("hello.Array(out1, out2) = Hello.run(arg1, arg2)") set (
+        libraries += workDirectory / "Hello.jar",
+        inputs += (arg1, arg2),
+        outputs += (arg1, arg2, out1, out2)
+      )
+
+      // save the result in a CSV file
+      val csvHook = AppendToCSVFileHook(workDirectory / "result.csv")
+
+      explo -< (javaTask hook csvHook)""")
+
+    @p You can compile it and package as "Hello.jar" in the same manner as the previous example. This workflow explores the 2 arguments of the @i{hello} function and saves the results in a CSV file.
+
+  @p{Working with files}
+      @p Let's consider another "hello world" code Hello.java. This program reads the content of a file and writes it to
+      another file.
+      @hl.highlight("""
+      package hello;
+
+      import java.io.*;
+
+      public class Hello {
+
+        public static void run(int arg, File input, File output) throws IOException {
+          //Read the input file
+          String content = readFileAsString(input);
+          PrintStream myStream = new PrintStream(new FileOutputStream(output));
+          try {
+            myStream.println(content + "  " + arg);
+          } finally {
+            myStream.close();
+          }
+        }
+
+        private static String readFileAsString(File file) throws IOException {
+          byte[] buffer = new byte[(int) file.length()];
+          BufferedInputStream f = null;
+          try {
+            f = new BufferedInputStream(new FileInputStream(file));
+            f.read(buffer);
+          } finally {
+            if (f != null) try { f.close(); } catch (IOException ignored) { }
+          }
+          return new String(buffer);
+        }
+      }""", "java")
+
+      @p You can compile it and package as "Hello.jar" in the same manner as the previous example. This Java program can be explored with OpenMOLE using the following script:
+
+      @hl.openmole("""
+      val proto1 = Val[Int]
+      val inputFile = Val[File]
+      val outputFile = Val[File]
+
+      val explo = ExplorationTask(proto1 in (0 to 10))
+
+      //Defines the scala task as a launcher of the hello executable
+      val javaTask =
+        ScalaTask("val outputFile = newFile(); hello.Hello.run(proto1, inputFile, outputFile)") set (
+          libraries += workDirectory / "Hello.jar",
+          inputs += (proto1, inputFile),
+          outputs += (proto1, outputFile),
+          inputFile := workDirectory / "input.txt"
+        )
+
+      //Save the output file locally
+      val copyHook =
+        CopyFileHook(
+          outputFile,
+          workDirectory / "out-${proto1}.txt"
+        )
+
+      explo -< (javaTask hook copyHook)""")
+
+      @p For this example to work you should create a file named "input.txt" in the work directory of your project.
+
+      @p This tutorial works for simple Java programs. For more ambitious developments, you should consider embedding
+      your code in an @a("OpenMOLE plugin"/*, href := DocumentationPages.root.development.plugin.file*/).

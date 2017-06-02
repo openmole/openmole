@@ -1,0 +1,18 @@
+
+@import org.openmole.site.tools._
+@import org.openmole.site._
+
+@p{Tutorial}
+  This part of the documentation exposes tutorials handling certain use cases of OpenMOLE. Don't focus too much on the
+  applications or programming languages serving as a use case. These tutorials are more about how to do things
+  the OpenMOLE way. You can discover how to:
+  @ul
+    @li{@a("Get started with OpenMOLE and a simple workflow", href := DocumentationPages.root.tutorial.helloWorld.file)}
+    @li{@a("Build a headless version of you NetLogo model to integrate in into OpenMOLE",
+    href := DocumentationPages.root.tutorial.headlessNetLogo.file)}
+    @li{@a("Calibrate a NetLogo model using genetic algorithms", href := DocumentationPages.root.tutorial.netLogoGA.file)}
+    @li{@a("Use advanced features of Capsules", href := DocumentationPages.root.tutorial.capsule.file)}
+
+  @p Feel free to suggest new tutorial on topics you'd like us to describe more thoroughly. You can even write your own
+  and share it with the OpenMOLE community on the @a("wiki", href := "https://github.com/openmole/openmole/wiki")! We'll
+  make sure to integrate it in the next release.

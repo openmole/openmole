@@ -1,0 +1,6 @@
+
+@import org.openmole.site.tools._
+@import org.openmole.site.Environment._
+
+@p{PSE Method}
+    @p The method aims at studying the output diversity
