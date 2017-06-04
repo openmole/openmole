@@ -20,21 +20,22 @@ package org.openmole.tool.lock
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.locks.{ Lock, ReentrantLock }
 
-import scala.collection.mutable.HashMap
+import scala.collection.mutable
 
+// FIXME potential race condition: map update and lock.lock() can be split in two transactions
 class LockRepository[T] {
 
-  val locks = new HashMap[T, (Lock, AtomicInteger)]
+  val locks = new mutable.HashMap[T, (Lock, AtomicInteger)]
 
-  def nbLocked(k: T) = synchronized(locks.get(k).map { _._2.get }.getOrElse(0))
+  def nbLocked(k: T) = locks.synchronized(locks.get(k).map { _._2.get }.getOrElse(0))
 
-  def lock(obj: T) = synchronized {
+  def lock(obj: T) = locks.synchronized {
     val lock = locks.getOrElseUpdate(obj, (new ReentrantLock, new AtomicInteger(0)))
     lock._2.incrementAndGet
     lock._1
-  }.lock
+  }.lock()
 
-  def unlock(obj: T) = synchronized {
+  def unlock(obj: T) = locks.synchronized {
     locks.get(obj) match {
       case Some(lock) ⇒
         val value = lock._2.decrementAndGet
@@ -42,7 +43,7 @@ class LockRepository[T] {
         lock._1
       case None ⇒ throw new IllegalArgumentException("Unlocking an object that has not been locked.")
     }
-  }.unlock
+  }.unlock()
 
   def withLock[A](obj: T)(op: ⇒ A) = {
     lock(obj)
