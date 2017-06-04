@@ -19,6 +19,7 @@
 package org.openmole.plugin.task.udocker
 
 import java.util.UUID
+import java.util.concurrent.locks.ReentrantLock
 
 import monocle.macros._
 import cats.implicits._
@@ -139,8 +140,11 @@ object UDockerTask {
       val layerFileInLayers = layerDir / layer._1.digest
       val layerFileInRepos = imageRepositoryDirectory / layer._1.digest
 
-      if (!layerFileInLayers.exists()) layer._2 move layerFileInLayers
-      if (!layerFileInRepos.exists()) layerFileInRepos createLinkTo layerFileInLayers.getAbsolutePath
+      // lock before existence tests to account for incomplete files
+      layerDir.withLockInDirectory {
+        if (!layerFileInLayers.exists()) layer._2 move layerFileInLayers
+        if (!layerFileInRepos.exists()) layerFileInRepos createLinkTo layerFileInLayers.getAbsolutePath
+      }
     }
 
     val imageId = s"${localDockerImage.image}:${localDockerImage.tag}"
@@ -268,6 +272,8 @@ object UDockerTask {
   type ContainerId = String
   lazy val containerPoolKey = CacheKey[WithInstance[ContainerId]]()
 
+  @transient lazy val udockerInstallLock = new ReentrantLock
+
   override protected def process(executionContext: TaskExecutionContext) = FromContext[Context] { parameters ⇒
 
     import parameters._
@@ -280,22 +286,19 @@ object UDockerTask {
 
     def installUDocker() = {
 
-      def retrieveResource(candidateFile: File, resourceName: String) =
-        if (!candidateFile.exists())
+      def retrieveResource(candidateFile: File, resourceName: String, executable: Boolean = false) =
+        if (!candidateFile.exists()) {
           withClosable(this.getClass.getClassLoader.getResourceAsStream(resourceName))(_.copy(candidateFile))
+          if (executable) candidateFile.setExecutable(true)
 
-      udockerTarBall.synchronized {
-        udockerInstallDirectory.withLockInDirectory {
-          retrieveResource(udockerTarBall, "udocker.tar.gz")
+          candidateFile
         }
-      }
 
-      udockerTarBall.synchronized {
-        udockerInstallDirectory.withLockInDirectory {
-          retrieveResource(udocker, "udocker")
-          udocker.setExecutable(true)
-        }
-      }
+      // lock in any case since file.exists() might return for an incomplete file
+      udockerInstallLock.lock()
+      retrieveResource(udockerTarBall, "udocker.tar.gz")
+      retrieveResource(udocker, "udocker", executable = true)
+      udockerInstallLock.unlock()
     }
 
     installUDocker()
