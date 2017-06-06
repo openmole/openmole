@@ -83,6 +83,7 @@ object Libraries {
   lazy val netlogo5 = "org.openmole.library" % "ccl-northwestern-edu-netlogo5" % netLogo5Version
   lazy val netlogo6 = "org.openmole.library" % "ccl-northwestern-edu-netlogo6" % netLogo6Version
   lazy val sourceCode = "org.openmole.library" %% "sourcecode" % sourcecodeVersion
+  lazy val txtmark = "org.openmole.library" %% "com-github-rjeschke-txtmark" % "0.13"
 
   lazy val toolxitBibtex = "org.openmole" %% "toolxit-bibtex" % "0.2"
 

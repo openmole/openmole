@@ -796,7 +796,8 @@ lazy val site = crossProject.in(binDir / "org.openmole.site") settings (defaultS
   libraryDependencies += Libraries.scalaz,
   libraryDependencies += Libraries.scalatexSite,
   libraryDependencies += Libraries.json4s,
-  libraryDependencies += Libraries.spray
+  libraryDependencies += Libraries.spray,
+  libraryDependencies += Libraries.txtmark
 ) jsSettings(
   Libraries.rxJS,
   Libraries.scaladgetJS,

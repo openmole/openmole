@@ -59,7 +59,6 @@ object Menu {
       lazy val searchInput = bs.input("")(placeholder := "Search", width := 150).render
       val result: Var[Seq[IIndexSearchResult]] = Var(Seq())
       val resultDiv = div(Rx {
-        println("RXX")
         for {
           r ← result().take(10)
         } yield {
