@@ -138,18 +138,21 @@ object Site extends App {
       /**
        * The body of this site's HTML page
        */
-      def bodyFrag(page: org.openmole.site.Page) = body(
-        div(id := shared.sitexIntro, page.intro.map {
-          _.intro
-        }.getOrElse("")),
-        div(id := shared.sitexIntroMore, page.intro.map {
-          _.more.getOrElse(RawFrag(""))
-        }.getOrElse("")),
-        div(id := {
-          if (DocumentationPages.topPagesChildren.contains(page)) shared.sitexDoc else shared.sitexMain
-        }, page.content),
-        onload := "org.openmole.site.SiteJS().main();org.openmole.site.SiteJS().loadIndex(index);"
-      )(`class` := "fade-in")
+      def bodyFrag(page: org.openmole.site.Page) = {
+
+        body(
+          div(id := shared.sitexIntro, page.intro.map {
+            _.intro
+          }.getOrElse("")),
+          div(id := shared.sitexIntroMore, page.intro.map {
+            _.more.getOrElse(RawFrag(""))
+          }.getOrElse("")),
+          div(id := {
+            if (DocumentationPages.topPagesChildren.contains(page)) shared.sitexDoc else shared.sitexMain
+          }, page.content),
+          onload := "org.openmole.site.SiteJS().main();org.openmole.site.SiteJS().loadIndex(index);"
+        )(`class` := "fade-in")
+      }
 
       override def generateHtml(outputRoot: Path) = {
         val res = Pages.all.map { page ⇒
