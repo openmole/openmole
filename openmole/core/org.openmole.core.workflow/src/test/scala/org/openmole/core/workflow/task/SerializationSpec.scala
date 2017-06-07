@@ -25,10 +25,17 @@ import org.openmole.core.serializer.SerializerService
 import org.openmole.core.workflow.builder._
 import org.scalatest._
 import org.openmole.core.workflow.dsl._
+import org.openmole.core.workflow.tools.DefaultSet
 
 class SerializationSpec extends FlatSpec with Matchers {
 
   import org.openmole.core.workflow.Services._
+
+  def serializeDeserialize[T](o: T) = {
+    val builder = new ByteArrayOutputStream()
+    serializer.serialise(o, builder)
+    serializer.deserialise[T](new ByteArrayInputStream(builder.toByteArray))
+  }
 
   "Task " should "be the same after serialization and deserialization" in {
     val p = Val[Int]("p")
@@ -38,12 +45,16 @@ class SerializationSpec extends FlatSpec with Matchers {
       outputs += p
     )
 
-    val builder = new ByteArrayOutputStream()
-
-    serializer.serialise(t, builder)
-    val t2 = serializer.deserialise[Task](new ByteArrayInputStream(builder.toByteArray))
-
+    val t2 = serializeDeserialize(t)
     t2.config.inputs.contains(p.name) should equal(true)
     t2.config.outputs.contains(p.name) should equal(true)
   }
+
+  "Transient lazy field" should "not be null in defaultSet" in {
+    val defaults = DefaultSet()
+    defaults.defaultMap.get("test")
+    val d2 = serializeDeserialize(defaults)
+    defaults.defaultMap should equal(d2.defaultMap)
+  }
+
 }
