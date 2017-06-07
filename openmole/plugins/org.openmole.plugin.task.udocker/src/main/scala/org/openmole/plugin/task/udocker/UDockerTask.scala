@@ -119,8 +119,12 @@ object UDockerTask {
         l → lf
       }
 
-    // FIXME pull config too
-    val localImage = LocalDockerImage(dockerImage.image, dockerImage.tag, localLayers.toVector, Vector.empty, "")
+    // FIXME how reliable is it to assume config in first v1Compat string?
+    val imageConfig = for {
+      v1 ← m.value.history.map(_.head)
+    } yield v1.v1Compatibility
+
+    val localImage = LocalDockerImage(dockerImage.image, dockerImage.tag, localLayers.toVector, Vector.empty, imageConfig.getOrElse(""))
 
     buildRepoV2(localImage, m.value)
 
