@@ -166,74 +166,70 @@ object UDockerTask {
    *
    * Assume v1.x Image JSON format and registry protocol v2 Schema 1
    */
-  def loadImage(dockerImage: SavedDockerImage)(implicit newFile: NewFile, fileService: FileService, workspace: Workspace): Either[String, LocalDockerImage] = {
+  def loadImage(dockerImage: SavedDockerImage)(implicit newFile: NewFile, fileService: FileService, workspace: Workspace): Either[String, LocalDockerImage] = newFile.withTmpDir { extractedImage ⇒
+
     import org.openmole.tool.tar._
 
-    newFile.withTmpDir { extractedImage ⇒
-      dockerImage.file.extract(extractedImage)
+    dockerImage.file.extract(extractedImage)
 
-      val manifestContent = (extractedImage / "manifest.json").content
-      val topLevelManifests = decode[List[TopLevelImageManifest]](manifestContent)
-      val topLevelImageManifest = topLevelManifests.map(_.head)
-      val layersNamesE = topLevelImageManifest.map(_.Layers.distinct)
-      val layersConfigsE = layersNamesE.map(layers ⇒ layers.map(path ⇒ s"${path.split("/").head}/json"))
+    val manifestContent = (extractedImage / "manifest.json").content
+    val topLevelManifests = decode[List[TopLevelImageManifest]](manifestContent)
+    val topLevelImageManifest = topLevelManifests.map(_.head)
+    val layersNamesE = topLevelImageManifest.map(_.Layers.distinct)
+    val layersConfigsE = layersNamesE.map(layers ⇒ layers.map(path ⇒ s"${path.split("/").head}/json"))
 
-      // FIXME change pattern matching
-      val Right((layersNames, layersConfigs)) = for {
-        layersNames ← layersNamesE
-        layersConfigs ← layersConfigsE
-      } yield (layersNames, layersConfigs)
+    // FIXME change pattern matching
+    val Right((layersNames, layersConfigs)) = for {
+      layersNames ← layersNamesE
+      layersConfigs ← layersConfigsE
+    } yield (layersNames, layersConfigs)
 
-      val layers =
-        layersNames.map(l ⇒ moveLayerElement[Layer](extractedImage, l, "layer", Layer.apply))
-      val configs = layersConfigs.map(c ⇒ moveLayerElement[LayerConfig](extractedImage, c, "json", LayerConfig.apply))
+    val layers =
+      layersNames.map(l ⇒ moveLayerElement[Layer](extractedImage, l, "layer", Layer.apply))
+    val configs = layersConfigs.map(c ⇒ moveLayerElement[LayerConfig](extractedImage, c, "json", LayerConfig.apply))
 
-      val Right((imageAndTag, imageJSOName)) = for {
-        topLevelManifest ← topLevelImageManifest
-        imageAndTag = topLevelManifest.RepoTags.map(_.split(":")).headOption
-        imageJSONName = topLevelManifest.Config
-      } yield (imageAndTag, imageJSONName)
+    val Right((imageAndTag, imageJSOName)) = for {
+      topLevelManifest ← topLevelImageManifest
+      imageAndTag = topLevelManifest.RepoTags.map(_.split(":")).headOption
+      imageJSONName = topLevelManifest.Config
+    } yield (imageAndTag, imageJSONName)
 
-      val v = validateDockerImage(DockerImageData(imageAndTag, imageJSOName)) bimap (
+    val v = validateDockerImage(DockerImageData(imageAndTag, imageJSOName)) bimap (
 
-        errors ⇒ errors.foldLeft("\n") { case (acc, err) ⇒ acc + err.msg },
+      errors ⇒ errors.foldLeft("\n") { case (acc, err) ⇒ acc + err.msg },
 
-        validImage ⇒ {
+      validImage ⇒ {
 
-          val ValidDockerImageData((image, tag), imageJSONName) = validImage
-          val imageJSONString = (extractedImage / imageJSONName).content
-          LocalDockerImage(image, tag, layers, configs, imageJSONString)
-        }
+        val ValidDockerImageData((image, tag), imageJSONName) = validImage
+        val imageJSONString = (extractedImage / imageJSONName).content
+        LocalDockerImage(image, tag, layers, configs, imageJSONString)
+      }
+    )
+
+    for {
+      localImage ← v.toEither
+      imageJSON ← decode[ImageJSON](localImage.imageJSON).leftMap(_.toString)
+    } yield {
+
+      val (fsLayers, history) = localImage.layers.zip(localImage.layersConfig).map {
+        case ((layer, _), (_, layerConfigFile)) ⇒
+          val layerDigest = DockerMetadata.Digest(layer.digest)
+          val imageJSON = decodeFile[ImageJSON](layerConfigFile)
+
+          (layerDigest, imageJSON)
+      }.toList.unzip
+
+      val manifest = DockerMetadata.ImageManifestV2Schema1(
+        name = Some(localImage.image),
+        tag = Some(localImage.tag),
+        architecture = Some(imageJSON.architecture),
+        fsLayers = Some(fsLayers),
+        history = history.sequenceU.toOption.map(histList ⇒ histList.map(h ⇒ DockerMetadata.V1History(h.asJson.toString))),
+        schemaVersion = Some(1)
       )
 
-      for {
-        localImage ← v.toEither
-        imageJSON ← decode[ImageJSON](localImage.imageJSON).leftMap(_.toString)
-      } yield {
-
-        import org.json4s.jackson.Serialization.{ write ⇒ writeJSON }
-
-        val (fsLayers, history) = localImage.layers.zip(localImage.layersConfig).map {
-          case ((layer, _), (_, layerConfigFile)) ⇒
-            val layerDigest = DockerMetadata.Digest(layer.digest)
-            val imageJSON = decodeFile[ImageJSON](layerConfigFile)
-
-            (layerDigest, imageJSON)
-        }.toList.unzip
-
-        val manifest = DockerMetadata.ImageManifestV2Schema1(
-          name = Some(localImage.image),
-          tag = Some(localImage.tag),
-          architecture = Some(imageJSON.architecture),
-          fsLayers = Some(fsLayers),
-          history = Some(history.map(h ⇒ DockerMetadata.V1History(writeJSON(h)))),
-          schemaVersion = Some(1)
-        )
-
-        buildRepoV2(localImage, manifest)
-        localImage
-      }
-
+      buildRepoV2(localImage, manifest)
+      localImage
     }
   }
 
