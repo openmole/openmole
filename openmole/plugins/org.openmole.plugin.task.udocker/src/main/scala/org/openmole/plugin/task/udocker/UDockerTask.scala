@@ -102,6 +102,7 @@ object UDockerTask {
     import Registry._
 
     def layerFile(workspace: Workspace, layer: Layer) = layersDirectory(workspace) / layer.digest
+
     val m = manifest(dockerImage, timeout)
     val ls = layers(m.value)
     val lDirectory = layersDirectory(workspace)

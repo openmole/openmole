@@ -3,7 +3,7 @@ package org.openmole.plugin.task
 import monocle.Lens
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.workspace.NewFile
-import org.openmole.plugin.task.udocker.Registry.{ Layer, LayerElement }
+import org.openmole.plugin.task.udocker.Registry.LayerElement
 import org.openmole.tool.file._
 
 package udocker {
@@ -64,7 +64,7 @@ package object udocker extends UDockerPackage {
   type LayerAndConfig[T <: LayerElement] = (T, File)
 
   /**
-   * Indistincly moves a file part of a layer (tar or json) to target destination
+   * Indistinctly moves a file part of a layer (tar or json) to target destination in case it's not already present (based on SHA256 hash).
    *
    * @param extracted File containing extracted Docker image
    * @param layerElement tar or json config
@@ -75,13 +75,28 @@ package object udocker extends UDockerPackage {
 
     import org.openmole.tool.hash._
 
-    val elementDestination = newFile.newFile(s"udocker$elementSuffix")
-    fileService.deleteWhenGarbageCollected(elementDestination)
-    (extracted / layerElement) move elementDestination
+    val fileName = layerElement.split("/").headOption.map(s ⇒ s"$s.$elementSuffix")
+    val elementDestination: File = fileName match {
+      case Some(f) ⇒ newFile.baseDir / f
+      case None    ⇒ newFile.newFile(s"udocker$elementSuffix")
+    }
 
-    // FIXME useless? isn't hash already the name of the layer?
-    val hash = elementDestination.hash(SHA256)
-    builder(s"$hash.$elementSuffix") → elementDestination
+    fileService.deleteWhenGarbageCollected(elementDestination)
+
+    val source = extracted / layerElement
+    val sourceHash = source.hash(SHA256)
+
+    val identical =
+      if (elementDestination.exists()) {
+
+        val hashCandidate = elementDestination.hash(SHA256)
+        hashCandidate.equals(sourceHash)
+      }
+      else false
+
+    if (!identical) (extracted / layerElement) move elementDestination
+
+    builder(s"$sourceHash.$elementSuffix") → elementDestination
   }
 
 }
