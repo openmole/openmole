@@ -1,0 +1,48 @@
+@import org.openmole.site.tools._
+@import org.openmole.site._
+@import org.openmole.site.Environment._
+
+@p{Environment}
+  A key feature in OpenMOLE is the possibility to delegate the workload to a remote execution environment. Tasks in OpenMOLE have been designed so that the delegation a part of the workload to a remote environment is declarative.
+
+  @p{Defining an execution Environment}
+    You first need to define the environment(s) you want to use an authentication method. Then, the actual delegation of
+    the task is noted by the keyword @hl.openmoleNoTest("on") followed by a defined @i{Environment}:
+    @br @hl.openmole("""
+    val env = LocalEnvironment(10)
+
+    val t1 = EmptyTask()
+    val t2 = EmptyTask()
+    val t3 = EmptyTask()
+
+    val mole = t1 -- (t2 on env) -- t3""")
+
+    @p You do not need to install anything or perform any kind of configuration on the target execution environment for
+    OpenMOLE to work. It reuses the infrastructure in place. You will however be required to provide the authentication
+    information in order for OpenMOLE to access the remote environment. At this point, just specify the credentials you're
+    using to login to this environment outside of OpenMOLE. Voila! That's all you need to do to use your environment
+    through OpenMOLE. In case you face authentication problems when targeting an environment through SSH, please refer
+    to the troubleshooting page.
+
+    @p When no specific environment is specified for a task, or a group of tasks, they will be executed sequentially on your
+    local machine.
+   @p{Grouping}
+    @p The use of a batch environment is generally not suited for short tasks (less than a 1 minute for a cluster to less
+    than 1 hour for a grid). In case your tasks are short you can group several executions. To group the execution by 100
+    in each job submitted to the environment, use the keyword @hl.openmoleNoTest("by"):
+    @br @hl.openmole("""val mole = explo -< (t1 on env by 100)""", header = """
+    val env = LocalEnvironment(10)
+    val t1 = EmptyTask()
+    val i = Val[Int]
+    val explo = ExplorationTask(i in (0 to 10000))
+    """)
+
+   @p{Available environments}
+    @p Multiple environments are available to delegate your workload, check the following sections:
+    @ul
+      @li{@a("Multi-thread", href := DocumentationPages.root.language.environment.multithread.file), to execute the tasks concurrently on your machine,}
+      @li{@a("SSH", href := DocumentationPages.root.language.environment.ssh.file), to execute tasks on remote server through SSH,}
+      @li{@a("Clusters", href := DocumentationPages.root.language.environment.cluster.file), to execute tasks on a cluster managed by @a("PBS/Torque", href := DocumentationPages.root.language.environment.cluster.file + "#PBS/Torque"), @a("SGE", href := DocumentationPages.root.language.environment.cluster.file + "#SGE"), @a("Slurm", href := DocumentationPages.root.language.environment.cluster.file + "#SLURM"), @a("Condor", href := DocumentationPages.root.language.environment.cluster.file + "#Condor"), or @a("OAR", href := DocumentationPages.root.language.environment.cluster.file + "#OAR").}
+      @li{@a("EGI", href := DocumentationPages.root.language.environment.egi.file), to execute tasks on the @a("EGI grid", href := "http://www.egi.eu/"),}
+      @li{@a("Ad-hoc Desktop Grid", href := DocumentationPages.root.language.environment.desktopGrid.file), to distribute your workflows on a set of desktop/laptop computers.}
+

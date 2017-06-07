@@ -3,7 +3,7 @@ package org.openmole.gui.client.core
 import org.openmole.gui.client.core.panels._
 
 import scalatags.JsDom.tags
-import scala.scalajs.js.annotation.JSExport
+import scala.scalajs.js.annotation._
 import org.openmole.gui.ext.tool.client.JsRxTags._
 import org.scalajs.dom
 import rx._
@@ -46,7 +46,7 @@ import scala.scalajs.js.timers._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-@JSExport("ScriptClient")
+@JSExportTopLevel("ScriptClient")
 object ScriptClient {
 
   @JSExport
@@ -181,7 +181,7 @@ object ScriptClient {
             authenticationItem,
             pluginItem,
             docItem
-          )
+          ).render
         }
       )
 

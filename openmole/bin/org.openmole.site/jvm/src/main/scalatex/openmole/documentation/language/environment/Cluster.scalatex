@@ -1,0 +1,118 @@
+
+@import org.openmole.site.tools._
+@import org.openmole.site.Environment._
+
+@p{Batch systems}
+  Many distributed computing environments offer @a("batch processing", href := "https://en.wikipedia.org/wiki/Batch_processing") capabilities. OpenMOLE supports most of the batch systems. Batch systems generally work by exposing an entry point on which the user can log in and submit jobs. OpenMOLE accesses this entry point using SSH.
+  Different environments can be assigned to delegate the workload resulting of different tasks or groups of tasks. However, not all clusters expose the same features, so options may vary from one environment to another.
+
+  @p You should first provide your authentication information to OpenMOLE to be able to use your batch system.
+
+  @part.SSHAuthentication()
+
+  @p{PBS / Torque}
+    @a("PBS", href :="http://en.wikipedia.org/wiki/Portable_Batch_System") is a venerable batch system for clusters. You may use a PBS computing environment as follow:
+    @br @hl.openmole("""
+    val env =
+      PBSEnvironment(
+        "login",
+        "machine.domain"
+      )""")
+
+   @p @provideOptions:
+   @ul
+     @li{@port,}
+     @li{@sharedDirectory,}
+     @li{@workDirectory,}
+     @li{@queue,}
+     @li{@wallTime,}
+     @li{@memory,}
+     @li{@openMOLEMemory,}
+     @li{@envEntryTitle{nodes} Number of nodes requested,}
+     @li{@threads,}
+     @li{@envEntryTitle{coreByNodes} An alternative to specifying the number of threads. @hl.openmoleNoTest{coreByNodes} takes the value of the @hl.openmoleNoTest{threads} when not specified, or 1 if none of them is specified.}
+     @li{@name}
+  @p{SGE}
+    To delegate some computation load to a @a("SGE", href := "https://en.wikipedia.org/wiki/Oracle_Grid_Engine") based cluster you can use the SGEEnvironment as follows:
+    @br @hl.openmole("""
+    val env =
+      SGEEnvironment(
+        "login",
+        "machine.domain"
+      )""")
+    @p @provideOptions:
+    @ul
+      @li{@port,}
+      @li{@sharedDirectory,}
+      @li{@workDirectory,}
+      @li{@queue,}
+      @li{@wallTime,}
+      @li{@memory,}
+      @li{@openMOLEMemory,}
+      @li{@threads,}
+      @li{@name.}
+  @p{Slurm}
+    To delegate the workload to a @a("Slurm", href := "https://en.wikipedia.org/wiki/Simple_Linux_Utility_for_Resource_Management") based cluster you can use the Slurm environment as follows:
+    @br @hl.openmole("""
+    val env =
+      SLURMEnvironment(
+        "login",
+        "machine.domain",
+        // optional parameters
+        gres = List( Gres("resource", 1) ),
+        constraints = List("constraint1", "constraint2")
+      )""")
+    @p @provideOptions:
+    @ul
+      @li{@port,}
+      @li{@sharedDirectory,}
+      @li{@workDirectory,}
+      @li{@queue,}
+      @li{@wallTime,}
+      @li{@memory,}
+      @li{@openMOLEMemory,}
+      @li{@envEntryTitle{nodes} Number of nodes requested,}
+      @li{@threads,}
+      @li{@envEntryTitle{coresByNodes} An alternative to specifying the number of threads. @i{coresByNodes} takes the value of the @{threads} when not specified, or 1 if none of them is specified.}
+      @li{@envEntryTitle{qos} Quality of Service (QOS) as defined in the Slurm database}
+      @li{@envEntryTitle{gres} a list of Generic Resource (GRES) requested. A Gres is a pair defined by the name of the resource and the number of resources requested (scalar).}
+      @li{@envEntryTitle{constraints} a list of Slurm defined constraints which selected nodes must match,}
+      @li{@name.}
+  @p{Condor}
+    @a("Condor", href := "https://en.wikipedia.org/wiki/HTCondor") clusters can be leveraged using the following syntax:
+    @br @hl.openmole("""
+    val env =
+      CondorEnvironment(
+        "login",
+        "machine.domain"
+      )""")
+    @p @provideOptions:
+    @ul
+      @li{@port,}
+      @li{@sharedDirectory,}
+      @li{@workDirectory,}
+      @li{@memory,}
+      @li{@openMOLEMemory,}
+      @li{@threads,}
+      @li{@name.}
+  @p{OAR}
+    Similarly, @a("OAR", href := "http://oar.imag.fr/dokuwiki/doku.php") clusters are reached as follows:
+    @br @hl.openmole("""
+    val env =
+      OAREnvironment(
+        "login",
+        "machine.domain"
+      )""")
+    @p @provideOptions:
+    @ul
+      @li{@port,}
+      @li{@sharedDirectory,}
+      @li{@workDirectory,}
+      @li{@queue,}
+      @li{@wallTime,}
+      @li{@openMOLEMemory,}
+      @li{@threads,}
+      @li{@envEntryTitle{core} number of cores allocated for each job,}
+      @li{@envEntryTitle{cpu} number of CPUs allocated for each job,}
+      @li{@envEntryTitle{bestEffort} a boolean for setting the best effort mode (true by default),}
+      @li{@name.}

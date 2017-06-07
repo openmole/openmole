@@ -1,0 +1,7 @@
+@import org.openmole.site.tools._
+@import org.openmole.site._
+
+
+@sect{Troubleshooting}
+    @p You should always try to re-execute your application outside of OpenMOLE first. This allows you to ensure the packaging process with CARE was successful. If something goes wrong at this stage, you should check the official @a("CARE documentation", href := "https://proot-me.github.io/") or the archives of the @a("CARE mailing list", href := "https://groups.google.com/forum/?fromgroups#!forum/reproducible").
+    @p If the packaged application re-executes as you'd expect, but you still struggle to embed it in OpenMOLE, then get in touch with our user community via our the @a("OpenMOLE user mailing-list", href := "http://list.openmole.org/").

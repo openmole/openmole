@@ -17,7 +17,7 @@ object Libraries {
   lazy val scalaUpickleVersion = "0.4.4"
   lazy val scalaAutowireVersion = "0.2.6"
   lazy val sourcecodeVersion = "0.1.3"
-  lazy val scaladgetVersion = "0.9.4"
+  lazy val scaladgetVersion = "0.9.5-SNAPSHOT"
   lazy val scalajsVersion = "0.6.16"
   lazy val json4sVersion = "3.5.0"
 
@@ -28,6 +28,7 @@ object Libraries {
   lazy val autowireJS = libraryDependencies += "com.lihaoyi" %%% "autowire" % scalaAutowireVersion
   lazy val upickleJS = libraryDependencies += "com.lihaoyi" %%% "upickle" % scalaUpickleVersion
   lazy val sourcecodeJS = libraryDependencies += "com.lihaoyi" %%% "sourcecode" % sourcecodeVersion
+  lazy val scalajsMarked = libraryDependencies += "com.github.karasiq" %%% "scalajs-marked" % "1.0.2"
 
   lazy val d3 = "org.webjars" % "d3js" % d3Version
   lazy val ace = "org.webjars" % "ace" % aceVersion
@@ -82,6 +83,7 @@ object Libraries {
   lazy val netlogo5 = "org.openmole.library" % "ccl-northwestern-edu-netlogo5" % netLogo5Version
   lazy val netlogo6 = "org.openmole.library" % "ccl-northwestern-edu-netlogo6" % netLogo6Version
   lazy val sourceCode = "org.openmole.library" %% "sourcecode" % sourcecodeVersion
+  lazy val txtmark = "org.openmole.library" %% "com-github-rjeschke-txtmark" % "0.13"
 
   lazy val toolxitBibtex = "org.openmole" %% "toolxit-bibtex" % "0.2"
 

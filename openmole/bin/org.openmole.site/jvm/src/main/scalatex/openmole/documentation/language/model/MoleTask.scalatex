@@ -1,0 +1,16 @@
+
+@import org.openmole.site.tools._
+
+@p{Embed an OpenMOLE workflow in a task}
+  A @i{MoleTask} encapsulates a whole Mole in a task. A Mole can form a complete workflow or part of its tasks and the
+  transitions linking them together. It may be useful to delegate entire Moles executions to the same remote node.
+  Another typical use case is to make you Moles and workflows more modular.
+
+  @p To encapsulate a Mole in a @i{MoleTask}, simply wrap it in the @i{MoleTask} builder:
+  @br @hl.openmole("""
+  // Define tasks t1 and t2
+  val moleTask = MoleTask(t1 -- t2)""", header = """
+  val t1 = EmptyTask()
+  val t2 = EmptyTask()""")
+
+  @p In that case, the @i{MoleTask}'s inputs are the same as @i{t1}'s and its outputs are the same as @i{t2}'s.

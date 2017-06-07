@@ -1,0 +1,69 @@
+
+
+@import org.openmole.site.tools._
+@import org.openmole.site._
+
+@p{Build a headless version of a NetLogo code}
+
+  @p This tutorial will guide you towards using your program with graphical widgets and NetLogo in OpenMOLE.
+  For this combination to work, some rules have to be applied to your program.
+
+@p{Guidelines}
+  @ul
+    @li{A) Limit your usage of widget implicit globals. We prefer explicit globals using the globals primitive, because
+    you need to re-define all the important values from your program in OpenMoLE before you launch it on a remote
+    computing environment.}
+    @li{B) Do not use the same functions @i{setup} and @i{go} to setup your program on a remote environment. On the remote environment,
+    the NetLogo program is initialised and launched only once, so there is no need to call a @i{clear-all} primitive with each
+    setup. When running on distributed environments, @i{clear-all} is @b{not} your best friend. @i{clear-all} erases all the
+    globals passed by OpenMoLE to your program before it starts and will make it crash.}
+    @li{C) Do not directly use the implicit globals created by means of a widget. Although you can you can access and
+    overwrite implicit globals in OpenMole, it prevents OpenMoLE from mapping explicitly its Prototypes to the NetLogo
+    globals.}
+
+  @p NetLogo is a graphical framework. As such, many variables of a model developed in NetLogo are set through widgets
+  (a graphical component). In the NetLogo World, setting or getting a value on the model inputs is generally achieved by
+  calling set or get on the widget object. In OpenMoLE however, the NetLogo program has to be parameterised without the GUI.
+  Models must be used in headless mode with OpenMole. This is not a problem because globals with unspecified values
+  in the OpenMole NetLogo Task will take the default values defined in widgets.
+
+  @p Still, having a lot of parameters defined in your model might make you forget to override values in OpenMOLE.
+  As a result, NetLogo would take widget values and your model would run a thousand times with a wrong set of parameter values!
+  Let's study a simple method to avoid such a situation. This approach invites you to define all the parameters of your
+  models prior to any run of your NetLogo models in OpenMOLE.
+
+@p{Application to the Fire model}
+  @i{Fire} has a widget slider named @i{density} which is a global implicit.
+
+  @br @img(src := Resource.fireScreen.file)
+
+  @p This excerpt shows the @i{initial-trees} and @i{burned-trees} variables which are explicit globals. They can be
+  used directly in OpenMOLE.
+
+  @br @img(src := Resource.fireGlobals.file)
+
+  @p We propose here a simple method to better organise your code in order to make it manipulable by OpenMOLE:
+  @ul
+    @li{First we do not use the implicit globals, so we create an explicit global variable @i{myDensity} corresponding
+    to the implicit one (@i{density}) :
+      @img(src := Resource.fireNewGlobals.file)
+    }
+    @li{Second, we use this new variable in the setup procedure:
+      @img(src := Resource.fireMyDensity.file)
+    }
+    @li{At this moment, your program does not work any more in NetLogo, @b{it’s normal, don’t panic :)}.
+      @img(src := Resource.fireNewFunction.file)
+    }
+    @li{Fourth, we call this function in our setup function, after the clear-all primitives.
+      @img(src := Resource.fireOldSetup.file)
+    }
+    @li{Now, the program works in NetLogo’s graphical mode. We still need to create another setup function without the
+     call to @i{clear-all} and to @i{init-globals}. Remember that these two calls don't cope well with distributed
+     executions.
+      @img(src := Resource.fireRemoveClearAll.file)
+    }
+
+  @p The program is now ready to be parameterised and manipulated by OpenMOLE \o/
+
+  @p Think you're ready for the next level? Check this other tutorial to learn how OpenMOLE can help you @a("calibrate your NetLogo model using Genetic Algorithms",
+  href := DocumentationPages.root.tutorial.netLogoGA.file).
