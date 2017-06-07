@@ -1,7 +1,7 @@
 /**
  * Copyright (C) 2017 Jonathan Passerat-Palmbach
  *
- * This program is free software: Option[you] can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -19,18 +19,7 @@ package org.openmole.plugin.task.udocker
 
 object DockerMetadata {
 
-  import java.text.SimpleDateFormat
-
-  import org.json4s.DefaultFormats
-
   import io.circe.{ Encoder, Decoder }
-
-  val dockerDateFormatter4S = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSS'Z'")
-
-  /** Support Docker date format (8 S digits) */
-  implicit val dockerFormat4S = new DefaultFormats {
-    override def dateFormatter = dockerDateFormatter4S
-  }
 
   import io.circe.generic.extras.Configuration
   implicit val customConfig: Configuration =

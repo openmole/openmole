@@ -7,8 +7,8 @@ import org.apache.http.client.config.RequestConfig
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.impl.client.{ HttpClients, LaxRedirectStrategy }
 import org.apache.http.impl.conn.BasicHttpClientConnectionManager
-import org.json4s.jackson.JsonMethods._
-import org.openmole.plugin.task.udocker.DockerMetadata.ImageManifestV2Schema1
+import DockerMetadata._
+import io.circe.generic.extras.auto._, io.circe.jawn.decode, io.circe.parser._
 import squants.time._
 
 object Registry {
@@ -24,12 +24,11 @@ object Registry {
     def execute[T](get: HttpGet)(f: HttpResponse ⇒ T) = {
       val response = client.execute(get)
       try f(response)
-      finally response.close
+      finally response.close()
     }
   }
 
   import HTTP._
-  import DockerMetadata.dockerFormat4S
 
   // FIXME should integrate File?
   sealed trait LayerElement
@@ -46,7 +45,11 @@ object Registry {
       val get = new HttpGet(url)
       get.setConfig(RequestConfig.custom().setConnectTimeout(timeout.millis.toInt).setConnectionRequestTimeout(timeout.millis.toInt).build())
       val authenticationRequest = authentication(get)
-      val t = token(authenticationRequest.get)
+      val t = token(authenticationRequest.get) match {
+        case Left(l)  ⇒ throw new RuntimeException(s"Failed to obtain authentication token: $l")
+        case Right(r) ⇒ r
+      }
+
       val request = new HttpGet(url)
       request.setHeader("Authorization", s"${t.scheme} ${t.token}")
       request.setConfig(RequestConfig.custom().setConnectTimeout(timeout.millis.toInt).setConnectionRequestTimeout(timeout.millis.toInt).build())
@@ -68,11 +71,18 @@ object Registry {
 
     }
 
-    def token(authenticationRequest: AuthenticationRequest) = {
+    def token(authenticationRequest: AuthenticationRequest): Either[String, Token] = {
       val tokenRequest = s"${authenticationRequest.realm}?service=${authenticationRequest.service}&scope=${authenticationRequest.scope}"
       val get = new HttpGet(tokenRequest)
       execute(get) { response ⇒
-        Token(authenticationRequest.scheme, (parse(content(response)) \ "token").extract[String])
+
+        // @Romain could be done with optics at the cost of an extra dependency ;)
+        val tokenRes = for {
+          parsed ← parse(content(response))
+          token ← parsed.hcursor.get[String]("token")
+        } yield Token(authenticationRequest.scheme, token)
+
+        tokenRes.fold(l ⇒ Left(l.getMessage()), r ⇒ Right(r))
       }
     }
 
@@ -84,8 +94,6 @@ object Registry {
   }
 
   def manifest(image: DockerImage, timeout: Time): Manifest = {
-    import DockerMetadata._
-    import io.circe.generic.extras.auto._, io.circe.jawn.decode
 
     val url = s"${baseURL(image)}/manifests/${image.tag}"
     val httpResponse = client.execute(Token.withToken(url, timeout))

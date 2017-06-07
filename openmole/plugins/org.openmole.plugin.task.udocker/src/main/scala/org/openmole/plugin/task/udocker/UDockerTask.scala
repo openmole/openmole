@@ -43,7 +43,9 @@ import org.openmole.tool.cache._
 import squants._
 import squants.time.TimeConversions._
 import org.openmole.tool.file._
-import io.circe.generic.extras.auto._, io.circe.jawn.{ decode, decodeFile }
+import io.circe.generic.extras.auto._
+import io.circe.jawn.{ decode, decodeFile }
+import io.circe.syntax._
 
 import scala.language.postfixOps
 
@@ -107,6 +109,7 @@ object UDockerTask {
     val localLayers =
       for { l ← ls } yield {
         val lf = layerFile(workspace, l)
+        // TODO unify with buildRepoV2 (duplicate code)
         def downloadLayer =
           newFile.withTmpFile { tmpFile ⇒
             blob(dockerImage, l, tmpFile, timeout)
@@ -153,9 +156,7 @@ object UDockerTask {
 
     val imageId = s"${localDockerImage.image}:${localDockerImage.tag}"
 
-    import org.json4s.jackson.Serialization.{ write ⇒ writeJSON }
-
-    imageRepositoryDirectory / "manifest" content = writeJSON(manifest)
+    imageRepositoryDirectory / "manifest" content = manifest.asJson.toString
     imageRepositoryDirectory / "TAG" content = s"$reposDir/$imageId"
     imageRepositoryDirectory / "v2" content = ""
   }

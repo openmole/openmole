@@ -1,11 +1,11 @@
 package org.openmole.plugin.task.udocker
 
-import org.json4s._
-import org.json4s.jackson.JsonMethods._
-import org.json4s.jackson.Serialization.{ write ⇒ writeJSON }
 import org.openmole.plugin.task.udocker.DockerMetadata._
 import org.openmole.tool.file._
-
+import io.circe.generic.extras.auto._
+import io.circe.jawn.{ decode, decodeFile }
+import io.circe.syntax._
+import io.circe.{ Decoder, Encoder }
 import org.scalatest._
 
 class DockerMetadataSpec extends FlatSpec with Matchers {
@@ -15,30 +15,34 @@ class DockerMetadataSpec extends FlatSpec with Matchers {
    *
    * @param tmpDir Directory where to generate the temporary files
    * @param sourceFile Source JSON file containing some docker metadata
-   * @param formats json4s Format instance
-   * @param mf cause json4s works with reflection..
    * @tparam T Docker Metadata type
    * @return A pair of DockerMetadata to compare
    */
-  def roundTrip[T <: AnyRef](tmpDir: File, sourceFile: File)(implicit formats: Formats, mf: scala.reflect.Manifest[T]) = {
+  def roundTrip[T: Decoder: Encoder](tmpDir: File, sourceFile: File) = {
 
-    val parsedSource = parse(sourceFile)
-
-    val source = parsedSource.extract[T]
+    val sourceString = sourceFile.content
+    val source = decode[T](sourceString)
 
     val roundTripFile = tmpDir.newFile("dockermetadataspec", ".json")
-    roundTripFile.withWriter()(writer ⇒ writer.write(writeJSON[T](source)))
+    roundTripFile.withWriter() { writer ⇒
+      for {
+        src ← source
+      } { writer.write(src.asJson.toString) }
+    }
 
-    val parsedroundTrip = parse(roundTripFile)
-    val roundTrip = parsedroundTrip.extract[T]
+    val roundTrip = decodeFile[T](roundTripFile)
 
     roundTripFile.delete()
 
-    (source, roundTrip)
+    (source, roundTrip) match {
+      case (Right(s), Right(r)) ⇒ (s, r)
+      // make sure test failed in case parsing failed
+      case (e1, e2)             ⇒ (source, (e1, e2))
+    }
   }
 
   val tmpDir = File("/tmp")
-  val registryManifests = Seq("example_image", "debian_jessie--image_manifest", "ubuntu_16.04--image_manifest")
+  val registryManifests = Seq("debian_jessie--image_manifest", "ubuntu_16.04--image_manifest")
 
   registryManifests.foreach { manifest ⇒
     "DockerMetadata" should s"correctly extract an Image Manifest V2 Schema 1 from $manifest" in {
