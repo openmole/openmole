@@ -58,14 +58,17 @@ object Menu {
       val searchDiv = div()
       lazy val searchInput = bs.input("")(placeholder := "Search", width := 150).render
       val result: Var[Seq[IIndexSearchResult]] = Var(Seq())
-      val resultDiv = div(Rx {
-        for {
-          r ← result().take(10)
-        } yield {
-          val page = JSPages.all.filter { p: JSPage ⇒ p.file == r.ref }.head
-          div(a(pointer, onclick := { () ⇒ to(page) })(page.name))
-        }
-      })
+      val resultDiv =
+        div(
+          Rx {
+            for {
+              r ← result().take(10)
+            } yield {
+              val page = JSPages.all.filter { p: JSPage ⇒ p.file == r.ref }.headOption
+              page.map { p ⇒ div(a(pointer, onclick := { () ⇒ to(p) })(p.name)) }.getOrElse(div())
+            }
+          }
+        )
 
       val dd = new Dropdown(resultDiv, searchDiv, emptyMod, sitesheet.searchResult, () ⇒ {})
 
@@ -79,7 +82,9 @@ object Menu {
           false
         }
       ).render,
-        dd.render,
+        Rx {
+          if (result().size > 0) dd.render else div.render
+        },
         searchDiv
       ).render
       )
@@ -104,4 +109,5 @@ object Menu {
         org.scalajs.dom.window.location.href = JSPages.index.file
       }).render
   }
+
 }
