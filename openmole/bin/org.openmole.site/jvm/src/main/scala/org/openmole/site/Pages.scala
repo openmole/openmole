@@ -115,11 +115,12 @@ abstract class DocumentationPage(implicit p: Parent[DocumentationPage] = Parent(
     }
 
   def allPages: Seq[Page] = {
-    def pages(p: DocumentationPage): List[Page] =
-      p.children.toList ::: p.details.toList ::: p.children.flatMap(_.allPages).toList
-
-    this :: pages(this)
-  }.distinct
+    {
+      def pages(p: DocumentationPage): List[Page] =
+        p.children.toList ::: p.details.toList ::: p.children.flatMap(_.allPages).toList
+      this :: pages(this)
+    }.distinct
+  }
 
   override def equals(o: scala.Any): Boolean =
     o match {
@@ -579,7 +580,6 @@ object DocumentationPages {
 
       def content = scalatex.documentation.language.Tutorial()
 
-      println("marketEntries " + marketEntries.size)
       marketEntries.filter(_.tags.exists(_ == Tags.tutorial)).flatMap(MD.generatePage(_))
 
       val helloWorld = new DocumentationPage {

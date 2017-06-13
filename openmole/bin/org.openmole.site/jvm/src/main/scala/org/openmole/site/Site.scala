@@ -148,7 +148,9 @@ object Site extends App {
             _.more.getOrElse(RawFrag(""))
           }.getOrElse("")),
           div(id := {
-            if (DocumentationPages.topPagesChildren.contains(page)) shared.sitexDoc else shared.sitexMain
+            if (DocumentationPages.topPagesChildren.contains(page)) shared.sitexDoc
+            else if (page == DocumentationPages.root.market) shared.sitexMarket
+            else shared.sitexMain
           }, page.content),
           onload := "org.openmole.site.SiteJS().main();org.openmole.site.SiteJS().loadIndex(index);"
         )(`class` := "fade-in")
@@ -164,10 +166,10 @@ object Site extends App {
           val bytes = scala.io.Codec.UTF8.encoder.encode(cb)
           val target = outputRoot / page.file
           write.over(target, bytes.array())
+          println("Index " + page.file)
           LunrIndex.Index(page.file, txt)
         }
 
-        println("Outpp" + outputRoot.toString())
         write.over(outputRoot / "js" / "index.js", "var index = " + JsArray(res.toVector).compactPrint)
       }
 
