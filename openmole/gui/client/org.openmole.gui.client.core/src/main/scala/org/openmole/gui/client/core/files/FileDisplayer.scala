@@ -67,6 +67,7 @@ class FileDisplayer(val tabs: TreeNodeTabs) {
         case MDScript ⇒ post()[Api].mdToHtml(safePath).call.foreach { htmlString ⇒
           tabs ++ new HTMLTab(Var(safePath), htmlString)
         }
+        case SVGExtension ⇒ tabs ++ new HTMLTab(Var(safePath), content)
         case dod: EditableOnDemandFile ⇒
           tabs ++ new LockedEditionNodeTab(Var(safePath), editor(fileExtension, content))
         case _ ⇒ //FIXME for GUI workflows

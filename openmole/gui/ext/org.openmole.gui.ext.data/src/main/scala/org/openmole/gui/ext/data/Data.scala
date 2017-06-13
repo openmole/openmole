@@ -117,6 +117,10 @@ object MDScript extends FileExtension {
   val displayable = true
 }
 
+object SVGExtension extends FileExtension {
+  val displayable = true
+}
+
 case class EditableOnDemandFile(highlighter: String) extends FileExtension with EditableFile {
   val displayable = true
 }
@@ -144,6 +148,7 @@ object FileExtension {
   val SH = EditableOnDemandFile("sh")
   val TEXT = EditableOnDemandFile("text")
   val NO_EXTENSION = EditableOnDemandFile("text")
+  val SVG = SVGExtension
   val TGZ = TarGz
   val TAR = Tar
   val ZIP = Zip
