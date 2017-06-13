@@ -788,9 +788,6 @@ lazy val api = Project("api", binDir / "target" / "api") settings (defaultSettin
   Tar.folder := (UnidocKeys.unidoc in Compile).map(_.head).value
 )
 
-lazy val macrosite = project.in(binDir / "org.openmole.site.macro") settings (defaultSettings: _*) settings (
-  libraryDependencies += "com.github.pathikrit" %% "better-files" % "2.17.1"
-  ) dependsOn (siteJVM)
 
 lazy val site = crossProject.in(binDir / "org.openmole.site") settings (defaultSettings: _*) settings (scalatex.SbtPlugin.projectSettings
   ) jvmSettings(
@@ -806,6 +803,9 @@ lazy val site = crossProject.in(binDir / "org.openmole.site") settings (defaultS
   Libraries.scalajsMarked
 )
 
+lazy val macrosite = Project("macrosite", binDir / "org.openmole.macrosite") settings (defaultSettings: _*) settings (
+  libraryDependencies += "com.github.pathikrit" %% "better-files" % "2.17.1"
+  ) dependsOn (siteJVM)
 
 lazy val siteJS = site.js
 lazy val siteJVM = site.jvm dependsOn(tools, buildinfo, project, serializer, market)
@@ -815,12 +815,10 @@ lazy val buildSite = inputKey[Unit]("buildSite")
 lazy val buildMacro = inputKey[Unit]("buildMacro")
 
 buildMacro := {
-
   Def.inputTaskDyn {
     Def.taskDyn {
       val jsSource = (sourceDirectory in siteJS in Compile).value / "scala/org/openmole/site/macropackage.scala"
-      println("js " + jsSource)
-      (run in macrosite in Compile).toTask(" " + jsSource).result
+     (run in macrosite in Compile).toTask(" " + jsSource).result
     }
   }.evaluated
 }
@@ -864,54 +862,54 @@ buildSite := {
   }).evaluated
 }
 
-lazy val siteold =
-  OsgiProject(
-    binDir,
-    "org.openmole.site",
-    singleton = true,
-    imports = Seq("*"),
-    settings = defaultSettings ++ scalatex.SbtPlugin.projectSettings ++ assemblySettings
-  ) settings(
-    organization := "org.openmole.site",
-    OsgiKeys.exportPackage := Seq("scalatex.openmole.*") ++ OsgiKeys.exportPackage.value,
-    libraryDependencies += Libraries.scalaLang,
-    libraryDependencies += Libraries.xstream,
-    libraryDependencies += Libraries.scalatexSite,
-    libraryDependencies += Libraries.scalaTags,
-    libraryDependencies += Libraries.upickle,
-    libraryDependencies += Libraries.spray,
-    libraryDependencies += Libraries.lang3,
-    libraryDependencies += Libraries.toolxitBibtex intransitive(),
-    libraryDependencies += Libraries.json4s,
-    libraryDependencies += Libraries.logging,
-    setExecutable ++= Seq("site"),
-    assemblyDependenciesPath := assemblyPath.value / "plugins",
-    resourcesAssemble ++= (Osgi.bundleDependencies in Compile).value.map(b ⇒ b → (assemblyPath.value / "plugins" / b.getName)),
-    resourcesAssemble += ((resourceDirectory in Compile).value / "site") -> (assemblyPath.value / "site"),
-    resourcesAssemble += (resourceDirectory in Compile).value -> (assemblyPath.value / "resources"),
-    resourcesAssemble += ((sourceDirectory in Compile).value / "md") -> (assemblyPath.value / "resources" / "md"),
-    resourcesAssemble += {
-      val bundle = OsgiKeys.bundle.value
-      bundle -> (assemblyPath.value / "plugins" / bundle.getName)
-    },
-    resourcesAssemble += (assemble in launcher).value -> (assemblyPath.value / "launcher"),
-    resourcesAssemble += {
-      val tar = (Tar.tar in openmole).value
-      tar -> (assemblyPath.value / "resources" / tar.getName)
-    },
-    resourcesAssemble += {
-      val tar = (Tar.tar in daemon).value
-      tar -> (assemblyPath.value / "resources" / tar.getName)
-    },
-    resourcesAssemble += {
-      val tar = (Tar.tar in api).value
-      tar -> (assemblyPath.value / "resources" / tar.getName)
-    },
-    resourcesAssemble += (fullOptJS in siteJS in Compile).value.data -> (assemblyPath.value / "resources" / "sitejs.js"),
-    dependencyFilter := bundleFilter,
-    dependencyName := rename,
-    cleanFiles ++= (cleanFiles in openmole).value
-  ) dependsOn (txtmark) dependsOn (toDependencies(openmoleNakedDependencies): _*) dependsOn (toDependencies(openmoleDependencies): _*)
+//lazy val siteold =
+//  OsgiProject(
+//    binDir,
+//    "org.openmole.site",
+//    singleton = true,
+//    imports = Seq("*"),
+//    settings = defaultSettings ++ scalatex.SbtPlugin.projectSettings ++ assemblySettings
+//  ) settings(
+//    organization := "org.openmole.site",
+//    OsgiKeys.exportPackage := Seq("scalatex.openmole.*") ++ OsgiKeys.exportPackage.value,
+//    libraryDependencies += Libraries.scalaLang,
+//    libraryDependencies += Libraries.xstream,
+//    libraryDependencies += Libraries.scalatexSite,
+//    libraryDependencies += Libraries.scalaTags,
+//    libraryDependencies += Libraries.upickle,
+//    libraryDependencies += Libraries.spray,
+//    libraryDependencies += Libraries.lang3,
+//    libraryDependencies += Libraries.toolxitBibtex intransitive(),
+//    libraryDependencies += Libraries.json4s,
+//    libraryDependencies += Libraries.logging,
+//    setExecutable ++= Seq("site"),
+//    assemblyDependenciesPath := assemblyPath.value / "plugins",
+//    resourcesAssemble ++= (Osgi.bundleDependencies in Compile).value.map(b ⇒ b → (assemblyPath.value / "plugins" / b.getName)),
+//    resourcesAssemble += ((resourceDirectory in Compile).value / "site") -> (assemblyPath.value / "site"),
+//    resourcesAssemble += (resourceDirectory in Compile).value -> (assemblyPath.value / "resources"),
+//    resourcesAssemble += ((sourceDirectory in Compile).value / "md") -> (assemblyPath.value / "resources" / "md"),
+//    resourcesAssemble += {
+//      val bundle = OsgiKeys.bundle.value
+//      bundle -> (assemblyPath.value / "plugins" / bundle.getName)
+//    },
+//    resourcesAssemble += (assemble in launcher).value -> (assemblyPath.value / "launcher"),
+//    resourcesAssemble += {
+//      val tar = (Tar.tar in openmole).value
+//      tar -> (assemblyPath.value / "resources" / tar.getName)
+//    },
+//    resourcesAssemble += {
+//      val tar = (Tar.tar in daemon).value
+//      tar -> (assemblyPath.value / "resources" / tar.getName)
+//    },
+//    resourcesAssemble += {
+//      val tar = (Tar.tar in api).value
+//      tar -> (assemblyPath.value / "resources" / tar.getName)
+//    },
+//    resourcesAssemble += (fullOptJS in siteJS in Compile).value.data -> (assemblyPath.value / "resources" / "sitejs.js"),
+//    dependencyFilter := bundleFilter,
+//    dependencyName := rename,
+//    cleanFiles ++= (cleanFiles in openmole).value
+//  ) dependsOn (txtmark) dependsOn (toDependencies(openmoleNakedDependencies): _*) dependsOn (toDependencies(openmoleDependencies): _*)
 
 
 

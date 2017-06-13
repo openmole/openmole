@@ -17,6 +17,8 @@ package org.openmole.site
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import org.scalajs.dom.raw.HTMLDivElement
+
 import scaladget.stylesheet.{ all ⇒ sheet }
 import scaladget.api.{ BootstrapTags ⇒ bs }
 import scaladget.api.Popup._
