@@ -272,7 +272,8 @@ class ScalaREPL(priorityBundles: ⇒ Seq[Bundle], jars: Seq[JFile], quiet: Boole
     try {
       val compiled = scripted.compile("\n" + omIMain.firstLineTag + "\n" + code)
       () ⇒ compiled.eval()
-    } catch {
+    }
+    catch {
       case e: Throwable ⇒ throw messageToException(e, omIMain.errorMessage, code)
     }
   }

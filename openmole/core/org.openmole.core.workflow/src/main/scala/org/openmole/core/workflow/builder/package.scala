@@ -44,7 +44,7 @@ package builder {
 
   class Defaults {
     def +=[U: DefaultBuilder](d: Default[_]*): U ⇒ U =
-      implicitly[DefaultBuilder[U]].defaults.modify(_ ++ d)
+      implicitly[DefaultBuilder[U]].defaults.modify(_.toSeq ++ d)
   }
 
   class AssignDefault[T](p: Val[T]) {

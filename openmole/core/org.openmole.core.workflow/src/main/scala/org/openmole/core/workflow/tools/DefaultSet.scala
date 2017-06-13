@@ -23,28 +23,17 @@ import org.openmole.core.context._
 
 object DefaultSet {
   implicit def seqToDefaultSet(s: Seq[Default[_]]) = DefaultSet(s: _*)
-  implicit def defaultSetToSeq(d: DefaultSet) = d.toSeq
+  implicit def defaultSetToSeq(d: DefaultSet): Seq[Default[_]] = d.defaultMap.values.toSeq
 
   val empty = DefaultSet(Iterable.empty)
 
-  def apply(p: Traversable[Default[_]]): DefaultSet =
-    new DefaultSet {
-      val defaults = p.toIterable
-    }
-
   def apply(p: Default[_]*): DefaultSet = DefaultSet(p)
-
 }
 
-trait DefaultSet extends Set[Default[_]] with SetLike[Default[_], DefaultSet] { self ⇒
-
-  def defaults: Iterable[Default[_]]
+case class DefaultSet(defaults: Iterable[Default[_]]) {
 
   @transient lazy val defaultMap =
     TreeMap.empty[String, Default[_]] ++ defaults.map { p ⇒ (p.prototype.name, p) }
-
-  override def empty = DefaultSet.empty
-  override def iterator: Iterator[Default[_]] = defaultMap.values.iterator
 
   def +(p: Default[_]) = DefaultSet(p :: defaults.toList.filter(_.prototype != p.prototype))
   def -(p: Default[_]) = DefaultSet((defaultMap - p.prototype.name).values.toList)
