@@ -139,8 +139,8 @@ lazy val netlogo6 = OsgiProject(
   dir,
   "ccl.northwestern.edu.netlogo6",
   exports = Seq("org.nlogo.*"),
-  privatePackages = Seq("!scala.*", "!shapeless.*", "**"),
-  imports = Seq("scala.*", "shapeless.*", "!*")) settings (
+  privatePackages = Seq("**"),
+  imports = Seq("!*")) settings (
   //resolvers += Resolver.bintrayRepo("netlogo", "NetLogo-JVM"),
   libraryDependencies ++= Seq(
     "org.nlogo" % "netlogo" % netLogo6Version % "provided" from s"https://dl.bintray.com/netlogo/NetLogo-JVM/org/nlogo/netlogo/$netLogo6Version/netlogo-$netLogo6Version.jar",
@@ -148,9 +148,7 @@ lazy val netlogo6 = OsgiProject(
     "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4" % "provided",
      "org.ow2.asm" % "asm-all" % "5.0.4" % "provided",
      "org.picocontainer" % "picocontainer" % "2.13.6" % "provided",
-    "org.parboiled" %% "parboiled" % "2.1.3" % "provided",
-    shapeless
-    // FIXME why is scalaVersion different from OpenMOLE's?
+    "org.parboiled" %% "parboiled" % "2.1.3" % "provided"
   ), version := netLogo6Version, scalaVersion := "2.12.1", crossPaths := false) settings(settings: _*)
 
 lazy val scalaTagsVersion = "0.6.2"
@@ -296,7 +294,7 @@ lazy val clapper = OsgiProject(dir, "org.clapper", exports = Seq("!scala.*","!gr
 val monocleVersion = "1.3.2"
 lazy val monocle = OsgiProject(dir, "monocle",
   privatePackages = Seq("!scala.*", "!scalaz.*", "!shapeless.*", "*"),
-  imports = Seq("scala.*", "shapeless.*")) settings(
+  imports = Seq("scala.*", "shapeless.*", "scalaz.*")) settings(
   libraryDependencies ++= Seq (
     "com.github.julien-truffaut" %% "monocle-core",
     "com.github.julien-truffaut" %% "monocle-generic",
