@@ -3,4 +3,39 @@
 
 
 @p{Method intro}
-    Introduction for method  text here
+    OpenMOLE built-in methods allows to answer several questions about your model.
+
+
+@h2{Context}
+@p
+    Simulation models can be abstracted as a program that transforms a set of @b{inputs} into a set of @b{outputs}.
+
+
+@img(src := Resource.modelIO.file, width:= "50%")
+@br
+    Even though any kind of inputs space can be explored (parameters , pictures, digits, files, DB connections, etc.),
+    simulation experiments revolves mostly around @b{parameters space exploration} (e.g. sensitivity analysis).
+    Likewise, considered outputs in simulation experiments are most of times @b{measures} computed on the dynamics produced by a simulation run  (e.g. fitness or error functions)
+
+@h2{Questioning your model}
+
+@p
+    There is three types of general questions that can be addressed by OpenMOLE methods.
+
+@br
+
+@ol
+    @li{What are all the possible inputs producing a given output ?}
+    @li{What is the effect of an input variation on the output ?}
+    @li{How do the inputs participate to produce the outputs ? @br Are every parameter compulsory to produce outputs ?
+    @br What are the robustness intervals of the inputs that lead to a desired output ?}
+    @li{What are the possible outputs of the model ?}
+
+@br
+Question 1 is referred as a @b{calibration problem} and solved via Genetic Algorithms.
+@br
+Question 2 is addressed by performing a @b{sensitivity analysis} via Exploration task.
+@br
+Question 3 is addressed using @b{Calibration Profiles Algorithm}, that extends the results of a sensitivity analysis.
+@br
+Question 4 is addressed by using the @b{Pattern Space Exploration} (PSE) method.

@@ -41,6 +41,8 @@ object Resource {
 
   def ants = imgResource("ants.png")
 
+  def modelIO = imgResource("modelIO.png")
+
   def antNumbers = imgResource("antnumbers.png")
 
   def antsNLogo = scriptResource("ants.nlogo")
