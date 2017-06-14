@@ -2,53 +2,57 @@
 @import org.openmole.site.tools._
 @import org.openmole.site._
 
+<<<<<<< HEAD
 @p{PSE Method}
-    @p The method aims at studying the output diversity
 
+@img(src := Resource.vignette_pse.file, width:= "90%")
 
- @img(src := Resource.vignette_pse.file, width:= "90%")
+p The PSE method searches for diverse output values. As with all
+evolutionary algorithms, PSE generates new individuals through
+a combination of genetic inheritance from parent individuals
+and mutation. PSE (inspired by @a("novelty search", href := "http://eplex.cs.ucf.edu/noveltysearch/userspage/")) selects for
+the parents whose output values are rare compared to the rest of
+the population and to the previous generations. In order to evaluate
+the rarity of a the output values, PSE discretises the output space,
+dividing it into cells. Each time a simulation is run and its output
+is known, a counter is incremented in the corresponding cell. PSE
+preferentially selects the parents whose associated cells have
+low counters. By selecting parents with rare output values, we try and increase the 
+chances to produce new individuals with previously unobserved
+behaviours.
 
+@p PSE takes the following parameters:
+@ul
+    @li{inputs: the model parameters with their minimum and maximum bounds,}
+    @li{observables: the observables measured for each simulation and within which we search for diversity,}
+    @li{gridSize: the discretisation step for each observable,}
+    @li{reevaluate: the probability of picking a new individual from the existing population in order to reevaluate it,}
+    @li{a termination criterion.}
 
-     @p The method searches for diverse output values. As with all
-     evolutionary algorithms, PSE generates new individuals through
-     a combination of genetic inheritance from parent individuals
-     and mutation. PSE (inspired by @a("novelty search", href := "http://eplex.cs.ucf.edu/noveltysearch/userspage/")) selects for
-     the parents whose output values are rare compared to the rest of
-     the population and to the previous generations. In order to evaluate
-     the rarity of a the output values, PSE discretises the output space,
-     dividing it into cells. Each time a simulation is run and its output
-     is known, a counter is incremented in the corresponding cell. PSE
-     preferentially selects the parents whose associated cells have
-     low counters. By selecting parents with rare output values, we try and increase the
-     chances to produce new individuals with previously unobserved
-     behaviours.
-
-     @p PSE takes the following parameters:
-     @ul
-         @li{inputs: the model parameters with their minimum and maximum bounds,}
-         @li{observables: the observables measured for each simulation and within which we search for diversity,}
-         @li{gridSize: the discretisation step for each observable,}
-         @li{reevaluate: the probability of picking a new individual from the existing population in order to reevaluate it,}
-         @li{a termination criterion.}
-
-     @p To use PSE as the exploration method in openmole, use the PSE constructor like so:
-     @br @hl.openmole("""
-     val exploration =
-         PSE (
-           inputs =
-             Seq(
-               param1 -> (0.0, 1.0),
-               param2 -> (-10.0, 10.0)),
-           observables =
-             Seq(
-               output1,
-               output2),
-           gridSize = Seq(40.0, 10.0),
-           reevaluate = 0.01,
-           termination = 1000000
-         )""")
-     where @hl.openmole("param1") and @hl.openmole("param2") are inputs of the task that runs the model,
-     and @hl.openmole("output1") and @hl.openmole("output2") are outputs of that same task. The number
-     of inputs and outputs are illimited. Note that the method is subject to the curse of dimensionality
-     on the output space, meaning that the number of output patterns can grow as a power of the number
-     of output variables, which can become impractical with more than just a few output variables.
+@p To use PSE as the exploration method in openmole, use the PSE constructor like so:
+@br @hl.openmole("""
+val exploration =
+    PSE (
+      inputs =
+        Seq(
+          param1 -> (0.0, 1.0),
+          param2 -> (-10.0, 10.0)),
+      observables =
+        Seq(
+          output1,
+          output2),
+      gridSize = Seq(40.0, 10.0),
+      reevaluate = 0.01,
+      termination = 1000000
+    )""")
+where @hl.openmole("param1") and @hl.openmole("param2") are inputs
+of the task that runs the model, and @hl.openmole("output1") and
+@hl.openmole("output2") are outputs of that same task. The number
+of inputs and outputs are illimited. Note that the method is subject
+to the curse of dimensionality on the output space, meaning that the
+number of output patterns can grow as a power of the number of output
+variables. With more than just a few output variables, the search space
+may become so big that the search will take too long to complete and the
+search results will take more memory than one can handle on a modern
+computer. Restricting the number of output variables to 2 or 3 also
+facilitates the interpretation of the results, making them easy to visualise.
