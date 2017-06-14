@@ -1,0 +1,6 @@
+
+@import org.openmole.site.tools._
+@import org.openmole.site._
+
+
+@p This is the index page

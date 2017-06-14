@@ -1,0 +1,94 @@
+
+@import org.openmole.site.tools._
+@import org.openmole.site._
+
+@p{Source}
+  Sources have been designed as a possible way to inject data in the dataflow from diverse sources: CSV files,
+  databases, sensors...
+
+  @p At the moment, only file-based Sources are available in OpenMOLE. If you need to interface OpenMOLE with an
+  external datasource, check the @a("contact information page", href := Pages.whoAreWe.file) to see how to reach the
+  OpenMOLE development team.
+
+  @p{Plug a source}
+    Sources are plugged in the data flow in a similar fashion to @a("hooks", href := DocumentationPages.root.language.hook.file ). Let's
+    consider this simple workflow:
+    @br @hl.openmole("""
+    val files = Val[Array[File]]
+    val result = Val[Double]
+
+    val hello =
+      ScalaTask("val result = computeFromFiles(files)") set (
+        inputs += files,
+        outputs += result
+      )
+
+    val s = ListFilesSource(workDirectory / "directory", files)
+
+    (hello source s)""")
+
+    @p The source @i{s} is plugged at the beginning of the task @i{hello}. The source is executed prior to
+    @b{each execution} of @i{hello}. You can also plug multiple sources on the same task using the syntax:
+    @hl.openmoleNoTest("hello source (s1, s2, s3)").
+
+  @p{List files in a directory}
+    This source lists directories and injects an array of @i{File} objects into the dataflow. See how the range of files
+    selected can be filtered using a regular expression as a last parameter to the source builder.
+    @br @hl.openmole("""
+    val someVariable = Val[String]
+    val txtFiles = Val[Array[File]]
+    val files = Val[Array[File]]
+
+    val s1 = ListFilesSource(workDirectory / "directory", files)
+
+    val s2 =
+      ListFilesSource(workDirectory / "/${someVariable}/", txtFiles, ".*\\.txt") set (
+        inputs += someVariable
+      )""")
+
+  @p{List directories in a directory}
+    Likewise, you can inject an array of directories in the dataflow. Directories are also represented as @i{File}
+    objects. Again, the selection can be done either by passing a complete directory name, or a glob pattern that will
+    be matched against the names of the directories found.
+
+    @br @hl.openmole("""
+    val someVariable = Val[String]
+    val dirs = Val[Array[File]]
+    val aaaDirs = Val[Array[File]]
+
+    // will fill dirs with all the subdirectories of "directory"
+    val s1 = ListDirectoriesSource(workDirectory / "directory", dirs)
+
+    val s2 =
+      // will fill aaaDirs with all the subdirectories of "directory" starting with aaa
+      ListDirectoriesSource(workDirectory / "${someVariable}", aaaDirs, "^aaa.*") set (
+        inputs += someVariable
+      )""")
+
+    @p Sources store each entry found in an Array. In most cases, you will want each of the entries to feed a different
+    task. Let's now see how this can be done by reusing what we've discovered with
+    @a("samplings", href := DocumentationPages.root.language.sampling.file + "#Exploringfiles").
+
+  @p{A complete example: exploring directories in a workflow}
+
+    Here, we are collecting all the directories which named "care_archive". See how they are gathered in an
+    @i{Array[File]} container and can be explored by an @a("ExplorationTask", href := DocumentationPages.root.language.sampling.file) using
+    the keyword @hl.openmoleNoTest("in"). This exploration generates one @i{analysisTask} per directory collected by the
+    source.
+
+    @br @hl.openmole("""
+    val directoriesToAnalyze  = Val[Array[File]]
+
+    val s = ListDirectoriesSource(workDirectory / "data/care_DoE", directoriesToAnalyze, "care_archive")
+
+    val inDir = Val[File]
+    val myWorkDirectory = "care_archive"
+
+    val analysisTask =
+    SystemExecTask(s"${myWorkDirectory}/re-execute.sh") set (
+      inputFiles    += (inDir, myWorkDirectory)
+    )
+
+    val exploration = ExplorationTask(inDir in directoriesToAnalyze)
+
+    (exploration source s) -< analysisTask""")

@@ -1,0 +1,128 @@
+@import org.openmole.site.tools._
+@import org.openmole.{site=> site}
+@import site._
+
+@def variables = """
+  val density = Val[Double]
+  val seed = Val[Int]
+  val burned = Val[Double]"""
+
+@def exploration = """
+  val exploration =
+    ExplorationTask(
+      (density in (20.0 to 80.0 by 10.0)) x
+      (seed in (UniformDistribution[Int]() take 10))
+    )"""
+
+@def netlogo = """
+  val cmds = List(
+    "random-seed ${seed}",
+    "setup",
+    "while [any? turtles] [go]")
+
+  val fireTask =
+    NetLogo5Task("/path/to/the/Fire.nlogo", cmds) set (
+      inputs += seed,
+      outputs += (density, seed),
+      netLogoInputs += (density, "density"),
+      netLogoOutputs += ("burned-trees", burned)
+    )"""
+
+@def csvHook = """
+  val csvHook = AppendToCSVFileHook("result.csv", density, burned, seed)"""
+
+@p{Embed your NetLogo model}
+  In this example, we present step by step how to explore a NetLogo model. @a("The Fire model", href := Resource.fireNLogo.file) is a
+  common NetLogo example. It studies the percolation of a fire in a forest depending on the density of the forest.
+
+  @p{The simulation}
+    We would like to study the impact of the @i{density} factor for a fixed population size. To do this, let's
+   build a design of experiment where the @i{density} factor ranges from 20% to 80% by steps of 10.
+
+  @p Since the Fire model is stochastic, we are interested in doing replications for each instance of the
+  @i{density} factor. Results for each replication will be stored it in a @i{CSV} file.
+  In this example case, we will perform 10 replications per step (even though it is a way too small sample to draw up
+  any formal conclusion).
+
+  @p You can get the NetLogo implementation of the model
+  @a("here", href := "http://www.openmole.org/files/segregation.nlogo").
+
+  @p{The Design of Experiment}
+    We first need to define 2 OpenMOLE variables in order to repeat our experience 10 times for every step of the
+    @i{density} exploration. These 2 variables are:
+    @ul
+	  @li{an integer (Int) representing the seed of the random number generator for exploring the replications,}
+	  @li{and a Double to set the value of @i{density},}
+
+    @br @hl.openmole(variables)
+
+    @p Given these variables, the definition of the exploration in OpenMOLE writes as follows:
+
+    @br @hl.openmole(exploration, header = variables)
+
+    @p This design of experiment will generate 70 distinct sets of input values for the NetLogo model:
+    @ul
+      @li{10 replications with 10 different seeds for @i{density} = 20%}
+      @li{10 replications with 10 different seeds for @i{density} = 30%}
+      @li{...}
+      @li{10 replications with 10 different seeds for @i{density} = 80%}
+
+    @p We now need to compose this design of experiment in a complete workflow in order to run the 70 distinct
+    experiments.
+
+  @p{The NetLogo task}
+    Let's first construct the main task of the workflow. This task runs the actual NetLogo code. OpenMOLE provides a
+     NetLogoTask that expects the following parameters definitions:
+    @ul
+	  @li{the path where to find the NetLogo model, i.e. the nlogo source file,}
+	  @li{the list of NetLogo commands that OpenMOLE needs to run}
+	@p In this example, the commands list contains:
+	@ul
+	  @li{@i{random-seed} that initialises the random number generator of NetLogo using the seed provided by OpenMOLE,}
+	  @li{@i{setup} that calls the setup function of the netlogo file to initialise the model,}
+	  @li{@i{go}, a function that runs the model, for this particular model this function is called until no more turttle are active.}
+	@p The function @i{go-openMOLE} takes three parameters:
+
+	@br @hl.openmole(netlogo, header =
+	s"""
+	$variables
+	$exploration
+	""")
+
+    @p The @i{replication} and the @i{density} OpenMOLE variables are used as parameters of the NetLogo program.
+    Therefore they appear as inputs of the NetLogoTask.
+
+    @p Similarly, 1 output of the model is considered and collected by OpenMOLE at the end of each model execution.
+    It is noted as @i{netLogoOutputs} in the task definition.
+
+  @p{Storing the results}
+    OpenMOLE usually delegates the tasks execution to many different computers. To gather the results of these remote
+    executions, we use a mechanism called @i{hooks}. Hooks can be assimilated to a listener that saves or display
+    results. They are more thoroughly described in a
+    @a("specific section of the documentation", href := DocumentationPages.root.language.hook.file).
+
+    @p Here we will create a hook to listen to the model executions and save the results in a CSV file at the end of
+    each of the 70 runs.
+
+    @br @hl.openmole(csvHook, header =
+    s"""
+	$variables
+	$exploration
+	$netlogo
+	""")
+
+  @p{Bringing all the pieces together}
+    Now that we have defined each component, we can compose the workflow that brings all the pieces of the simulation
+    together:
+    @br @hl.openmole(s"""
+$variables
+$exploration
+$netlogo
+$csvHook
+
+  exploration -< (fireTask hook csvHook)""")
+
+    @p The progress of the simulation can be monitored by printing the state of the execution variable:
+    @hl.openmoleNoTest("print(ex)").
+
+    @p At the end of the execution, you will find the output values in a file called @i{result.csv}.

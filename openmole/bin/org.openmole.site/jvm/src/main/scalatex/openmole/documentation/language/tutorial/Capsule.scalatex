@@ -1,0 +1,65 @@
+
+@import org.openmole.site.tools._
+@import org.openmole.site._
+
+@p{Strainer capsule}
+  In a general manner you are expected to specify the inputs and outputs of each task. Capsules' strainer mode transmits all the variables arriving through the input transition as if they were inputs and ouptuts of the task.
+
+  @p For instance, variable @i{i} is transmitted to the hook without adding it explicitly in input and output of the task @i{t2}, in the following workflow:
+  @br @hl.openmole("""
+  val i = Val[Int]
+  val j = Val[Int]
+
+  val t1 = ScalaTask("val i = 42") set (outputs += i)
+
+  val t2 = ScalaTask("val j = i * 2") set (outputs += j)
+  val c2 = Capsule(t2, strain = true)
+
+  t1 -- (c2 hook ToStringHook(i, j))
+  """)
+
+  @p This workflow displays @hl.highlight("{i=42, j=84}", "plain")
+
+@p{Master/Slave workflows}
+  OpenMOLE provides a very flexible workflow formalism. It even makes it possible to design workflows with a part that mimics a @b{master / slave} @("(also known as Map/Reduce)") distribution scheme. This schemes involves many slave jobs computing partial results and a master gathering the whole result.
+
+  @p You can think of a steady state genetic algorithm of instance as an typical use case. This use case would see a global solution population maintained and a bunch of slave workers computing fitnesses in a distributed manner. Each time a worker ends, its result is used to update the global population and a new worker is launched. To achieve such a distribution scheme, one should use the @i{Master Capsule} along with an end-exploration transition.
+
+  @p The @i{MasterCapsule} is a special capsule that preserve a state from one execution to another. An execution of the @i{MasterCapsule} modifies this state and the next execution gets the state that has been modified last. To ensure soundness of the state only, the @i{MasterCapsule}s are always executed locally and multiple executions of a given @i{MasterCapsule} are carried sequentially.
+
+  @p By using the @i{MasterCapsule}, a workflow can evolve a global archive, and compute new inputs to be evaluated from this archive. Even if it is not required, a @i{MasterCapsule} is generally executed in an exploration, in order to have several workers computing concurrently. This distribution scheme suggests that all the workers should be killed when the global archive has reached a suitable state. This is the aim of the end-exploration transition, which is noted @b{>|}.
+
+  @p The following script orchestrates a master slave distribution scheme for a dummy problem. OpenMOLE launches 10
+  workers. Along these workers, the @i{MasterCapsule} hosts the selection task. The selection task stores the numbers
+  that are multiple of 3 and relaunches a worker for the next value of @i{i}. The second argument of the
+  @i{MasterCapsule} constructor is the data that should be persisted from one execution of the @i{MasterCapsule} to
+  another.
+  @br @hl.openmole("""
+  val i = Val[Int]
+  val archive = Val[Array[Int]]
+
+  val exploration = ExplorationTask(i in (0 until 10))
+
+  val model = ScalaTask("i = i + 7") set (inputs += i, outputs += i)
+
+  val modelCapsule = Capsule(model)
+  val modelSlot1 = Slot(modelCapsule)
+  val modelSlot2 = Slot(modelCapsule)
+
+  val select =
+    ScalaTask("archive = archive ++ (if(i % 3 == 0) Seq(i) else Seq())") set (
+      (inputs, outputs) += (i, archive),
+      archive := Array[Int]()
+    )
+
+  val selectCaps = MasterCapsule(select, archive)
+
+  val finalTask = EmptyTask()
+
+  val displayHook = ToStringHook()
+
+  val skel = exploration -< modelSlot1 -- (selectCaps hook displayHook)
+  val loop = selectCaps -- modelSlot2
+  val terminate = selectCaps >| (Capsule(finalTask, strain = true) hook displayHook, "archive.size >= 10")
+
+  skel & loop & terminate""")

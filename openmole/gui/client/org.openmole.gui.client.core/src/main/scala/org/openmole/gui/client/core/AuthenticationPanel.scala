@@ -135,13 +135,12 @@ class AuthenticationPanel {
                 tr(
                   td(colMD(12))(
                     colspan := 12,
-                    r.errorOn.expand(
-                      tags.div(Rx {
-                        tags.textarea(dropdownError)(
-                          r.currentStack()
-                        )
-                      })
-                    )
+                    tags.div(Rx {
+                      if (r.errorOn()) {
+                        tags.textarea(dropdownError)(r.currentStack())
+                      }
+                      else tags.div()
+                    })
                   )
                 )
               )

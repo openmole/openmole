@@ -66,6 +66,7 @@ object DataUtils {
     case x if x.endsWith(".zip") ⇒ ZIP
     case x if x.endsWith(".scala") ⇒ SCALA
     case x if x.endsWith(".sh") ⇒ SH
+    case x if x.endsWith(".svg") ⇒ SVG
     case _ ⇒ BINARY
   }
 

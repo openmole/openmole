@@ -29,7 +29,7 @@ import org.scalajs.dom.raw.HTMLElement
 import org.openmole.gui.ext.data._
 
 import scala.concurrent.Future
-import scala.scalajs.js.annotation.JSExport
+import scala.scalajs.js.annotation._
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
 

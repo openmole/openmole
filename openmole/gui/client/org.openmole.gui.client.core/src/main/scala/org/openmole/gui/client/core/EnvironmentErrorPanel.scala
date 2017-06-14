@@ -131,11 +131,14 @@ class EnvironmentErrorPanel {
               tr(
                 td(colMD(12) +++ (fontSize := 11))(
                   colspan := 12,
-                  line.detailOn.expand(
-                    tags.div(
-                      stackText.view
-                    )
-                  )
+                  Rx {
+                    if (line.detailOn()) {
+                      tags.div(
+                        stackText.view
+                      )
+                    }
+                    else tags.div()
+                  }
                 )
               )
             )

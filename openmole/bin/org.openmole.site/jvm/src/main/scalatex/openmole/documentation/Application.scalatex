@@ -1,0 +1,26 @@
+
+@import org.openmole.site.tools._
+@import org.openmole.site._
+
+@p{Editor}
+  To run OpenMOLE, just run the openmole file (or openmole.bat for the windoz users). It will bring up you web browser. OpenMOLE supports Chrome and Firefox. So if you are using another default web browser please copy paste the OpenMOLE url (http://localhost:port) in one of these browser.
+  @p You should see something like this (all the documentation concerning the application is provided in the application itself (the last green icon in the top bar)):
+  @img(src := Resource.uiScreenshot.file, `class` := "uiScreenshot").
+
+@p{Remote Editor}
+  To run OpenMOLE on a remote machine and connect to using a web browser you should run: @hl.highlight("openmole --remote --port portnumber", "plain"). The first time you launch it, it asks you for a password. Then you can remotely connect to OpenMOLE using the url https://remotemachine:portnumber - @b("https:// is important"). When you connect it asks you for the password you've entered previously.
+
+@p{Headless mode}
+  OpenMOLE proposes a headless mode for running scripts. You can enable it thanks to the -s option: @hl.highlight("./openmole -s /path/to/you/mole/script", "plain")
+  @p In that case OpenMOLE still asks for your preferences cyphering password. To provide it at launch time use the -pw option: @hl.highlight("./openmole -s /path/to/your/mole/script --password password", "plain"). A better practice is to write this password in a file readable by OpenMOLE only and use @hl.highlight("./openmole -s /path/to/your/mole/script --password-file password.txt", "plain").
+
+@p{Interactive console mode}
+  OpenMOLE also proposes an interactive console mode. To launch the console execute openmole -c in a console. The only difference between the script in the console mode and the ones from the editor concerns the way you launch the execution, you cancel it and you follow the execution progress. An console workflow is launched like this:
+
+  @br @hl.openmole("""val ex = exploration -< (model on env) start""", test = false)
+
+  @p Using the ex and the env variables you can follow the progress of the execution by using the commands: print(ex) and print(env). To cancel the execution you should use: ex.cancel.
+
+@p{Launching parameter}
+  OpenMOLE proposes several launching options. Execute @hl.highlight("openmole -h to", "plain") list all the available options.
+

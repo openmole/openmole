@@ -134,7 +134,7 @@ object SettingsView {
         )
       }
     }
-  ))
+  )).render
 
   val resetPasswordButton =
     serverActions(

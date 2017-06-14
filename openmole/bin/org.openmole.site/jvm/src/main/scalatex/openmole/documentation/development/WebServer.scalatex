@@ -1,0 +1,73 @@
+
+@import org.openmole.site.tools._
+@import org.openmole.site._
+
+@p{Web Server}
+  Warning: The REST API of OpenMOLE is still experimental, it might be subject to some backward incompatible changes in the future.
+
+  @p OpenMOLE ships with a web server providing a REST API to @b{start} workflows, @b{manage} their execution and @b{retrieve} their output data. To start the OpenMOLE REST API, run the command: "openmole --rest --port 8843" from the console. If you need to launch it automatically in a deamon for instance you should also you the --password-file argument to provide the password for encryption of the preferences.
+
+  @p The web server can be accessed at the URL https://localhost:8443. Replace @i{localhost} with the remote machine's hostname or IP address if the web server is not running on your local system.
+
+  @p{API Reference}
+    @p The API of the web server uses exclusively the POST method:
+    @ul
+      @li{@b{token} - return a temporary token in order to use the web service. It has the following parameters:
+        @ul
+          @li{@b{password} - the password of the server}
+        It return a structure containing:
+        @ul
+          @li{@b{token} - the token}
+          @li{@b{duration} - the duration of the token in milliseconds}
+      }
+      @li{@b{start} - start a mole execution. It has the following parameters:
+        @ul
+          @li{@b{token} - the authentication token}
+          @li{@b{workDirectory} - a tar.gz archive containing the workDirectory for the script},
+          @li{@b{script} - the path (relative to the workDirectory) of script to execute, the last line should be a puzzle}
+        When successful, it return a structure containing:
+        @ul
+          @li{@b{id} - the id of the execution}
+        When something has failed, it returns a structure containing:
+        @ul
+          @li{@b{message} - the error message}
+          @li{@b{stackTrace} - optionally a stack trace if the error has been caused by an exception}
+      }
+      @li{@b{state} - return the state of a mole execution. It has the following parameters:
+        @ul
+          @li{@b{token} - the authentication token}
+          @li{@b{id} - the id of the mole execution}
+        When successful, it returns a structure the state:
+        @ul
+          @li{@b{state} - the state of the execution, it can be running, finished or failed}
+        When running the other fields are:
+        @ul
+          @li{@b{ready, running, completed} - the number of jobs in each of these states in the execution}
+          @li{@b{environments} - that contains the state for each execution environment on the execution. This is a JSON structure containing, the name of the environment if it has been set (name), the number of jobs in submitted (submitted), running (running), done (done) and failed (failed) state, a list of errors that happened since the last state query (errors) with the message (message), the stack (stackTrace) and the error level (level).}
+        When failed the other field is:
+        @ul
+          @li{@b{error}: a JSON structure containing the message (message) and the stack (stackTrace)}
+      }
+      @li{@b{output} - returns the output of a mole execution as a string. It has the following parameters:
+        @ul
+          @li{@b{token} - the authentication token}
+          @li{@b{id} - the id of the mole execution}
+      }
+      @li{@b{download} - download a file or a directory from the server. It returns the gunziped content of the file or a tar.gz archive of the directory. It has the following parameters:
+        @ul
+          @li{@b{token} - the authentication token}
+          @li{@b{id} - the id of the mole execution}
+          @li{@b{path}} - the path of the file to download}
+      }
+      @li{@b{remove} - cancel and remove an execution from the server. It has the following parameters:
+        @ul
+          @li{@b{token} - the authentication token}
+          @li{@b{id} - the id of the mole execution}
+      }
+      @li{@b{list} - list execution ids on the server. It has the following parameters:
+       @ul
+          @li{@b{token} - the authentication token}
+      }
+
+
+
