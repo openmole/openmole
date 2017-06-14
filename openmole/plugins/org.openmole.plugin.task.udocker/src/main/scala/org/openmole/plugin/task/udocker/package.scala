@@ -2,8 +2,9 @@ package org.openmole.plugin.task
 
 import monocle.Lens
 import org.openmole.core.fileservice.FileService
-import org.openmole.core.workspace.NewFile
+import org.openmole.core.workspace.{ NewFile, Workspace }
 import org.openmole.plugin.task.udocker.Registry.LayerElement
+import org.openmole.plugin.task.udocker.UDockerTask.layersDirectory
 import org.openmole.tool.file._
 
 package udocker {
@@ -71,20 +72,21 @@ package object udocker extends UDockerPackage {
    * @param elementSuffix <"layer"|"json">
    * @return newly created destination file
    */
-  def moveLayerElement[T <: LayerElement](extracted: File, layerElement: String, elementSuffix: String, builder: (String) ⇒ T)(implicit newFile: NewFile, fileService: FileService): LayerAndConfig[T] = {
+  def moveLayerElement[T <: LayerElement](extracted: File, layerElement: String, elementSuffix: String, builder: (String) ⇒ T)(implicit workspace: Workspace): LayerAndConfig[T] = {
 
     import org.openmole.tool.hash._
 
-    val fileName = layerElement.split("/").headOption.map(s ⇒ s"$s.$elementSuffix")
-    val elementDestination: File = fileName match {
-      case Some(f) ⇒ newFile.baseDir / f
-      case None    ⇒ newFile.newFile(s"udocker$elementSuffix")
-    }
+    val layerDir = layersDirectory(workspace)
 
-    fileService.deleteWhenGarbageCollected(elementDestination)
+    val fileName = layerElement.split("/").headOption.map(s ⇒ s"$s.$elementSuffix")
 
     val source = extracted / layerElement
     val sourceHash = source.hash(SHA256)
+
+    val elementDestination: File = fileName match {
+      case Some(f) ⇒ layerDir / f
+      case None    ⇒ layerDir / s"$sourceHash.$elementSuffix"
+    }
 
     val identical =
       if (elementDestination.exists()) {
