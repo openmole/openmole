@@ -3,4 +3,8 @@
 @import org.openmole.site._
 
 
-@p This is the index page
+@h1{OpenMOLE}
+@br@h2{
+A Computational Engine for Custom Simulation Experiments}
+ @p
+ Also, boobs : (oYo)

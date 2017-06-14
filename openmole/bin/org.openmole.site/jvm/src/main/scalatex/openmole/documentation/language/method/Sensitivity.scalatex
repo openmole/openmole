@@ -1,0 +1,7 @@
+
+@import org.openmole.site.tools._
+@import org.openmole.site.Environment._
+
+@p{Sensitivity Analysis }
+    @p Typical Sensitivity analysis (in a simulation experiment  context) is the study of how the variation of a parameter
+     affect the output(s) of a model.

@@ -224,7 +224,7 @@ object DocumentationPages {
 
           override def title = Some(name)
 
-          def children = Seq(scala, java, rscript, python, /*ccplusplus,*/ native, netLogo, mole)
+          def children = Seq(scala, java, rscript, python, ccplusplus, native, netLogo, mole)
 
           def content = scalatex.documentation.language.Model()
 
@@ -275,7 +275,7 @@ object DocumentationPages {
           }
 
           val ccplusplus = new DocumentationPage {
-            def name = "C/C++"
+            def name = "CCplusplus"
 
             override def title = Some(name)
 
@@ -531,15 +531,54 @@ object DocumentationPages {
 
           override def title = Some(name)
 
-          def children = Seq(pse, profile)
+          def children = Seq(calibration, sensitivity, profile, pse)
 
           def details = Seq()
 
           lazy val methIntro = Some(PageIntro(scalatex.documentation.language.method.MethodIntro(), Some(scalatex.documentation.language.Method())))
 
-          def content = scalatex.documentation.language.Method()
+          val content = scalatex.documentation.language.Method()
 
-          def pse = new DocumentationPage {
+          val calibration = new DocumentationPage {
+            def name = "Calibration"
+
+            override def title = Some(name)
+
+            def children = Seq()
+
+            def details = Seq()
+
+            def content = scalatex.documentation.language.method.Calibration()
+
+            override def intro = methIntro
+          }
+          val sensitivity = new DocumentationPage {
+            def name = "Sensitivity_Analysis"
+
+            override def title = Some(name)
+
+            def children = Seq()
+
+            def details = Seq()
+
+            def content = scalatex.documentation.language.method.Sensitivity()
+
+            override def intro = methIntro
+          }
+          val profile = new DocumentationPage {
+            def name = "Profiles"
+
+            override def title = Some(name)
+
+            def children = Seq()
+
+            def details = Seq()
+
+            def content = scalatex.documentation.language.method.Profile()
+
+            override def intro = methIntro
+          }
+          val pse = new DocumentationPage {
             def name = "PSE"
 
             override def title = Some(name)
@@ -553,19 +592,6 @@ object DocumentationPages {
             override def intro = methIntro
           }
 
-          def profile = new DocumentationPage {
-            def name = "Profiles"
-
-            override def title = Some(name)
-
-            def children = Seq()
-
-            def details = Seq()
-
-            def content = scalatex.documentation.language.method.Profile()
-
-            override def intro = methIntro
-          }
         }
       }
 
