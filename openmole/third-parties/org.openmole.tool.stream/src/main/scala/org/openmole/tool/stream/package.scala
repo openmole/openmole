@@ -50,7 +50,7 @@ package object stream {
       }
     }.takeWhile(_ != -1).foreach {
       count ⇒
-        val futureWrite = pool.submit(new WritterRunnable(buffer, outputStream, count))
+        val futureWrite = pool.submit(new WriterRunnable(buffer, outputStream, count))
 
         try futureWrite.get(timeout.millis, TimeUnit.MILLISECONDS)
         catch {
@@ -105,7 +105,7 @@ package object stream {
     override def call: Int = from.read(buffer, 0, maxRead)
   }
 
-  class WritterRunnable(buffer: Array[Byte], to: OutputStream, amount: Int) extends Callable[Unit] {
+  class WriterRunnable(buffer: Array[Byte], to: OutputStream, amount: Int) extends Callable[Unit] {
     override def call: Unit = {
       to.write(buffer, 0, amount)
       to.flush()

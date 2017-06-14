@@ -263,6 +263,7 @@ package object systemexec extends external.ExternalPackage with SystemExecPackag
     )
   }
 
+  @scala.annotation.tailrec
   def executeAll(
     workDirectory:        File,
     environmentVariables: Vector[(String, String)],

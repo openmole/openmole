@@ -37,6 +37,24 @@ lazy val json4s = OsgiProject(dir, "org.json4s",
   libraryDependencies +=  "org.json4s" %% "json4s-jackson" % "3.5.0",
   version := "3.5.0") settings(settings: _*)
 
+
+lazy val shapeless = "com.chuusai" %% "shapeless" % "2.3.2"
+
+lazy val circeVersion = "0.8.0"
+lazy val circe = OsgiProject(dir, "io.circe",
+  exports = Seq("io.circe.*", "!cats.*", "!scala.*", "!shapeless.*"),
+  privatePackages = Seq("jawn.*"),
+  // TODO force cats version to be >= 0.9.0
+  imports = Seq("scala.*", "cats.*", "shapeless.*")) settings (
+  libraryDependencies ++= Seq(
+    "io.circe" %% "circe-core",
+    "io.circe" %% "circe-generic",
+    "io.circe" %% "circe-generic-extras",
+    "io.circe" %% "circe-parser"
+  ).map(_ % circeVersion),
+  libraryDependencies += shapeless,
+  version := circeVersion) settings(settings: _*)
+
 lazy val logback = OsgiProject(dir, "ch.qos.logback", exports = Seq("ch.qos.logback.*", "org.slf4j.impl"), dynamicImports = Seq("*")) settings
   (libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.0.9", version := "1.0.9") settings(settings: _*)
 
@@ -121,8 +139,8 @@ lazy val netlogo6 = OsgiProject(
   dir,
   "ccl.northwestern.edu.netlogo6",
   exports = Seq("org.nlogo.*"),
-  privatePackages = Seq("**"),
-  imports = Seq("!*")) settings (
+  privatePackages = Seq("!scala.*", "!shapeless.*", "**"),
+  imports = Seq("scala.*", "shapeless.*", "!*")) settings (
   //resolvers += Resolver.bintrayRepo("netlogo", "NetLogo-JVM"),
   libraryDependencies ++= Seq(
     "org.nlogo" % "netlogo" % netLogo6Version % "provided" from s"https://dl.bintray.com/netlogo/NetLogo-JVM/org/nlogo/netlogo/$netLogo6Version/netlogo-$netLogo6Version.jar",
@@ -130,7 +148,9 @@ lazy val netlogo6 = OsgiProject(
     "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4" % "provided",
      "org.ow2.asm" % "asm-all" % "5.0.4" % "provided",
      "org.picocontainer" % "picocontainer" % "2.13.6" % "provided",
-    "org.parboiled" %% "parboiled" % "2.1.3" % "provided"
+    "org.parboiled" %% "parboiled" % "2.1.3" % "provided",
+    shapeless
+    // FIXME why is scalaVersion different from OpenMOLE's?
   ), version := netLogo6Version, scalaVersion := "2.12.1", crossPaths := false) settings(settings: _*)
 
 lazy val scalaTagsVersion = "0.6.2"
@@ -178,10 +198,11 @@ lazy val closureCompiler = OsgiProject(dir, "closure-compiler", exports = Seq("c
   libraryDependencies += "com.google.javascript" % "closure-compiler" % closureCompilerVersion, version := closureCompilerVersion) settings(settings: _*)
 
 
+lazy val catsVersion = "0.9.0"
 lazy val cats =
   OsgiProject(dir, "cats") settings (
-    libraryDependencies += "org.typelevel" %% "cats" % "0.8.1",
-    version := "0.8.1"
+    libraryDependencies += "org.typelevel" %% "cats" % catsVersion,
+    version := catsVersion
   ) settings(settings: _*)
 
 lazy val freedsl =
@@ -273,11 +294,15 @@ lazy val clapper = OsgiProject(dir, "org.clapper", exports = Seq("!scala.*","!gr
   libraryDependencies += "org.clapper" %% "classutil" % clapperVersion, version := clapperVersion) settings(settings: _*)
 
 val monocleVersion = "1.3.2"
-
-lazy val monocle = OsgiProject(dir, "monocle", privatePackages = Seq("!scala.*", "!scalaz.*", "*")) settings(
-  libraryDependencies += "com.github.julien-truffaut" %% "monocle-core" % monocleVersion,
-  libraryDependencies += "com.github.julien-truffaut" %% "monocle-generic" % monocleVersion,
-  libraryDependencies += "com.github.julien-truffaut" %% "monocle-macro" % monocleVersion,
+lazy val monocle = OsgiProject(dir, "monocle",
+  privatePackages = Seq("!scala.*", "!scalaz.*", "!shapeless.*", "*"),
+  imports = Seq("scala.*", "shapeless.*")) settings(
+  libraryDependencies ++= Seq (
+    "com.github.julien-truffaut" %% "monocle-core",
+    "com.github.julien-truffaut" %% "monocle-generic",
+    "com.github.julien-truffaut" %% "monocle-macro"
+  ).map(_ % monocleVersion),
+  libraryDependencies += shapeless,
   version := monocleVersion
   ) settings(settings: _*)
 

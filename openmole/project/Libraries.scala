@@ -20,6 +20,8 @@ object Libraries {
   lazy val scaladgetVersion = "0.9.5-SNAPSHOT"
   lazy val scalajsVersion = "0.6.16"
   lazy val json4sVersion = "3.5.0"
+  lazy val circeVersion = "0.8.0"
+  lazy val catsVersion = "0.9.0"
 
   lazy val scaladgetJS = libraryDependencies += "fr.iscpif" %%% "scaladget" % scaladgetVersion
   lazy val scalajsDomJS = libraryDependencies += "org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion
@@ -66,11 +68,12 @@ object Libraries {
   lazy val codec = "org.openmole.library" %% "org-apache-commons-codec" % "1.10"
   lazy val async = "org.openmole.library" %% "scala-async" % "0.9.6"
   lazy val jgit = "org.openmole.library" %% "org-eclipse-jgit" % "3.7.1"
-  lazy val cats = "org.openmole.library" %% "cats" % "0.8.1"
+  lazy val cats = "org.openmole.library" %% "cats" % catsVersion
   lazy val clapper = "org.openmole.library" %% "org-clapper" % "1.1.2"
   lazy val asm = "org.openmole.library" %% "org-objectweb-asm" % "5.1"
   lazy val configuration = "org.openmole.library" %% "org-apache-commons-configuration2" % "2.1"
   lazy val json4s = "org.openmole.library" %% "org-json4s" % json4sVersion
+  lazy val circe = "org.openmole.library" %% "io-circe" % circeVersion
   lazy val scalajsTools = "org.openmole.library" %% "scalajs-tools" % scalajsVersion
   lazy val scalajs = "org.openmole.library" %% "scalajs" % scalajsVersion
   lazy val mgo = "org.openmole.library" %% "mgo" % "2.4"

@@ -3,8 +3,10 @@ package org.openmole.plugin.task.udocker
 import org.openmole.tool.file._
 import org.openmole.tool.tar._
 import org.openmole.tool.hash._
-import org.json4s.JsonAST._
-import org.json4s.jackson.JsonMethods._
+import org.openmole.plugin.task.udocker.DockerMetadata._
+import io.circe.generic.extras.auto._
+import io.circe.jawn.decodeFile
+import cats.implicits._
 
 object TestExtractArchive extends App {
 
@@ -19,19 +21,27 @@ object TestExtractArchive extends App {
 
   archive.extract(extracted)
 
-  val manifest = parse(extracted / "manifest.json")
+  def copyLayers(layersName: Seq[String]) =
+    layersName.foreach {
+      l ⇒
+        val hash = (extracted / l).hash(SHA256)
+        (extracted / l) copy (layersDirectory / s"sha256:$hash")
+    }
 
-  implicit def formats = org.json4s.DefaultFormats
+  val manifests = decodeFile[List[TopLevelImageManifest]](extracted / "manifest.json").toOption.sequenceU
 
-  val layersName = (manifest \ "Layers").children.flatMap(_.extract[Array[String]])
+  val imageTags = for {
+    manifest ← manifests
+    m ← manifest
+  } yield {
+    val layersName = m.Layers
 
-  layersName.foreach {
-    l ⇒
-      val hash = (extracted / l).hash(SHA256)
-      (extracted / l) copy (layersDirectory / s"sha256:$hash")
+    copyLayers(layersName)
+
+    m.RepoTags.head.split(":")
   }
 
-  val Array(image, tag) = (manifest \\ "RepoTags").children.map(_.extract[String]).head.split(":")
+  val Array(image, tag) = imageTags.head
   println(image)
   println(tag)
 
