@@ -69,8 +69,9 @@ object UDockerTask {
   }
 
   def apply(
-    image:   ContainerImage,
-    command: FromContext[String]
+    image:           ContainerImage,
+    command:         FromContext[String],
+    installCommands: Vector[FromContext[String]] = Vector.empty
   )(implicit name: sourcecode.Name, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService): UDockerTask = {
 
     val dockerImage = toLocalImage(image) match {
@@ -81,6 +82,7 @@ object UDockerTask {
     new UDockerTask(
       localDockerImage = dockerImage,
       command = command,
+      installCommands = installCommands,
       workDirectory = None,
       reuseContainer = true,
       errorOnReturnValue = true,
@@ -253,6 +255,7 @@ object UDockerTask {
 @Lenses case class UDockerTask(
     localDockerImage:     LocalDockerImage,
     command:              FromContext[String],
+    installCommands:      Vector[FromContext[String]],
     workDirectory:        Option[String],
     reuseContainer:       Boolean,
     errorOnReturnValue:   Boolean,
@@ -335,8 +338,6 @@ object UDockerTask {
           hostFiles.map { case (f, b) ⇒ f → b.getOrElse(f) } ++
           volumesInfo.map { case (f, d) ⇒ f.toString → d }
 
-      def volumesArgument(volumes: Iterable[MountPoint]) = volumes.map { case (host, container) ⇒ s"""-v "$host":"$container"""" }.mkString(" ")
-
       val dockerWorkDirectory =
         for {
           imageJSON ← imageJSONE
@@ -345,11 +346,42 @@ object UDockerTask {
 
       val userWorkDirectory = workDirectory.getOrElse(dockerWorkDirectory.getOrElse("/"))
 
-      def newContainer(imageId: String)() = newFile.withTmpDir { tmpDirectory ⇒
+      val inputDirectory = taskWorkDirectory /> "inputs"
 
+      val context = parameters.context + (External.PWD → userWorkDirectory)
+      def containerPathResolver = container.inputPathResolver(File(""), userWorkDirectory) _
+      def inputPathResolver = container.inputPathResolver(inputDirectory, userWorkDirectory) _
+
+      val (preparedContext, preparedFilesInfo) = external.prepareAndListInputFiles(context, inputPathResolver)
+
+      def outputPathResolver(rootDirectory: File) = container.outputPathResolver(
+        preparedFilesInfo.map { case (f, d) ⇒ f.toString → d.toString },
+        hostFiles.map { case (f, b) ⇒ f.toString → b.getOrElse(f) },
+        inputDirectory,
+        userWorkDirectory.toString,
+        rootDirectory
+      ) _
+
+      val volumes = prepareVolumes(preparedFilesInfo, containerPathResolver, hostFiles)
+
+      def newContainer(imageId: String)() = newFile.withTmpDir { tmpDirectory ⇒
         val name = containerName(UUID.randomUUID().toString)
         val commandline = commandLine(s"${udocker.getAbsolutePath} create --name=$name $imageId")
         execute(commandline, tmpDirectory, udockerVariables(), returnOutput = true, returnError = true)
+
+        if (!installCommands.isEmpty) {
+          val runInstall = installCommands.map(ic ⇒ runCommand(udocker, userWorkDirectory, volumes.toVector, name, ic))
+          executeAll(
+            tmpDirectory,
+            udockerVariables(),
+            true,
+            None,
+            None,
+            None,
+            runInstall.toList
+          )(parameters.copy(context = preparedContext))
+        }
+
         name
       }
 
@@ -362,31 +394,9 @@ object UDockerTask {
         else WithNewInstance[ContainerId](newContainer(imageId))
 
       pool { runId ⇒
-        val inputDirectory = taskWorkDirectory /> "inputs"
-
-        val context = parameters.context + (External.PWD → userWorkDirectory)
-        def containerPathResolver = container.inputPathResolver(File(""), userWorkDirectory) _
-        def inputPathResolver = container.inputPathResolver(inputDirectory, userWorkDirectory) _
-
-        val (preparedContext, preparedFilesInfo) = external.prepareAndListInputFiles(context, inputPathResolver)
-
-        def outputPathResolver(rootDirectory: File) = container.outputPathResolver(
-          preparedFilesInfo.map { case (f, d) ⇒ f.toString → d.toString },
-          hostFiles.map { case (f, b) ⇒ f.toString → b.getOrElse(f) },
-          inputDirectory,
-          userWorkDirectory.toString,
-          rootDirectory
-        ) _
-
-        val volumes = prepareVolumes(preparedFilesInfo, containerPathResolver, hostFiles)
 
         def runContainer = {
           val rootDirectory = containersDirectory / runId / "ROOT"
-
-          def runCommand: FromContext[String] = {
-            val variablesArgument = environmentVariables.map { case (name, variable) ⇒ s"""-e $name="${variable.from(context)}"""" }.mkString(" ")
-            command.map(cmd ⇒ s"""${udocker.getAbsolutePath} run --workdir="$userWorkDirectory" $variablesArgument ${volumesArgument(volumes)} $runId $cmd""")
-          }
 
           val executionResult = executeAll(
             taskWorkDirectory,
@@ -395,7 +405,7 @@ object UDockerTask {
             returnValue,
             stdOut,
             stdErr,
-            List(runCommand)
+            List(runCommand(udocker, userWorkDirectory, volumes.toVector, runId, command))
           )(parameters.copy(context = preparedContext))
 
           val retContext = external.fetchOutputFiles(outputs, preparedContext, outputPathResolver(rootDirectory), rootDirectory)
@@ -420,6 +430,14 @@ object UDockerTask {
       case c if c < 'a' ⇒ (c - '0' + 'g').toChar
       case c            ⇒ c
     }
+  }
+
+  def runCommand(udocker: File, workDirectory: String, volumes: Vector[MountPoint], runId: String, command: FromContext[String]): FromContext[String] = FromContext { p ⇒
+    import p._
+    def volumesArgument(volumes: Vector[MountPoint]) = volumes.map { case (host, container) ⇒ s"""-v "$host":"$container"""" }.mkString(" ")
+
+    val variablesArgument = environmentVariables.map { case (name, variable) ⇒ s"""-e $name="${variable.from(context)}"""" }.mkString(" ")
+    command.map(cmd ⇒ s"""${udocker.getAbsolutePath} run --workdir="$workDirectory" $variablesArgument ${volumesArgument(volumes)} $runId $cmd""").from(context)
   }
 
 }

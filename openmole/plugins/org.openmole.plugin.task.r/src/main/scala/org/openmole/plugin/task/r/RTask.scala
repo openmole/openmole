@@ -12,11 +12,16 @@ object RTask {
   def apply(
     script:    File,
     arguments: String,
+    libraries: Seq[String]              = Seq.empty,
     version:   OptionalArgument[String] = None
   )(implicit name: sourcecode.Name, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService) = {
+
+    def installLibraries = s"""R -e "install.packages(c(${libraries.map(lib ⇒ s"'$lib'").mkString(",")}), dependencies = T)""""
+
     UDockerTask(
       DockerImage("r-base", version.getOrElse("latest")),
-      s"R --slave -f ${script.getName} --args ${arguments}"
+      s"R --slave -f ${script.getName} --args ${arguments}",
+      installCommands = Vector(installLibraries)
     ) set (
         resources += script,
         reuseContainer := true
