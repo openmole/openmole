@@ -43,6 +43,7 @@ import org.openmole.tool.cache._
 import squants._
 import squants.time.TimeConversions._
 import org.openmole.tool.file._
+import org.openmole.tool.lock._
 import io.circe.generic.extras.auto._
 import io.circe.jawn.{ decode, decodeFile }
 import io.circe.syntax._
@@ -297,10 +298,10 @@ object UDockerTask {
         }
 
       // lock in any case since file.exists() might return for an incomplete file
-      udockerInstallLock.lock()
-      retrieveResource(udockerTarBall, "udocker.tar.gz")
-      retrieveResource(udocker, "udocker", executable = true)
-      udockerInstallLock.unlock()
+      udockerInstallLock {
+        retrieveResource(udockerTarBall, "udocker.tar.gz")
+        retrieveResource(udocker, "udocker", executable = true)
+      }
     }
 
     installUDocker()
@@ -336,11 +337,11 @@ object UDockerTask {
 
       def volumesArgument(volumes: Iterable[MountPoint]) = volumes.map { case (host, container) ⇒ s"""-v "$host":"$container"""" }.mkString(" ")
 
-      val dockerWorkDirectory = for {
-        imageJSON ← imageJSONE
-        workDir = imageJSON.config.WorkingDir
-      } yield if (workDir.isEmpty) "/"
-      else workDir
+      val dockerWorkDirectory =
+        for {
+          imageJSON ← imageJSONE
+          workDir = imageJSON.config.WorkingDir
+        } yield if (workDir.isEmpty) "/" else workDir
 
       val userWorkDirectory = workDirectory.getOrElse(dockerWorkDirectory.getOrElse("/"))
 
