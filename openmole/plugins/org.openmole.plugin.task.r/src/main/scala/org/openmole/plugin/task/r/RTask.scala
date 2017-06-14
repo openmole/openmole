@@ -11,7 +11,7 @@ object RTask {
 
   def apply(
     script:    File,
-    arguments: String,
+    arguments: OptionalArgument[String] = None,
     libraries: Seq[String]              = Seq.empty,
     version:   OptionalArgument[String] = None
   )(implicit name: sourcecode.Name, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService) = {
@@ -20,7 +20,7 @@ object RTask {
 
     UDockerTask(
       DockerImage("r-base", version.getOrElse("latest")),
-      s"R --slave -f ${script.getName} --args ${arguments}",
+      s"R --slave -f ${script.getName}" + arguments.map(a ⇒ " --args ${a}").getOrElse(""),
       installCommands = Vector(installLibraries)
     ) set (
         resources += script,
