@@ -77,6 +77,8 @@ package dsl {
     implicit def seqIsFunctor = new Functor[Seq] {
       override def map[A, B](fa: Seq[A])(f: (A) ⇒ B): Seq[B] = fa.map(f)
     }
+
+    type Data = File
   }
 
 }
