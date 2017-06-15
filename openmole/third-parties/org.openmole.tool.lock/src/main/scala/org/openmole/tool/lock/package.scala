@@ -16,6 +16,7 @@
  */
 package org.openmole.tool
 
+import java.util.UUID
 import java.util.concurrent.Semaphore
 import java.util.concurrent.locks._
 
@@ -56,4 +57,6 @@ package object lock {
     }
 
   }
+
+  case class LockKey(id: UUID = java.util.UUID.randomUUID())
 }

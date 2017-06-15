@@ -43,6 +43,7 @@ import scala.collection.mutable.HashMap
 import util.{ Failure, Success }
 import org.openmole.core.workflow.execution.Environment.RuntimeLog
 import org.openmole.tool.cache.KeyValueCache
+import org.openmole.tool.lock._
 
 object Runtime extends Logger {
   val NbRetry = 3
@@ -137,7 +138,7 @@ class Runtime {
       /* --- Submit all jobs to the local environment --*/
       logger.fine("Run the jobs")
       val environment = LocalEnvironment(nbThreads = threads)
-      val taskExecutionContext = TaskExecutionContext(newFile.newDir("runtime"), environment, preference, threadProvider, fileService, workspace, KeyValueCache())
+      val taskExecutionContext = TaskExecutionContext(newFile.newDir("runtime"), environment, preference, threadProvider, fileService, workspace, KeyValueCache(), LockRepository[LockKey]())
       for (toProcess ← allMoleJobs) environment.submit(toProcess, taskExecutionContext)
 
       saver.waitAllFinished

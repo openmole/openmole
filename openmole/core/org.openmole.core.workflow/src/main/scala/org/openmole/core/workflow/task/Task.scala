@@ -29,6 +29,7 @@ import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workspace.{ NewFile, Workspace }
 import org.openmole.tool.cache._
+import org.openmole.tool.lock._
 import org.openmole.tool.random
 import org.openmole.tool.random._
 import org.openmole.tool.thread._
@@ -40,7 +41,8 @@ case class TaskExecutionContext(
   implicit val threadProvider: ThreadProvider,
   fileService:                 FileService,
   implicit val workspace:      Workspace,
-  cache:                       KeyValueCache
+  cache:                       KeyValueCache,
+  lockRepository:              LockRepository[LockKey]
 )
 
 object Task {

@@ -36,6 +36,7 @@ import org.openmole.core.workflow.transition.DataChannel
 import org.openmole.core.workflow.validation._
 import org.openmole.core.workspace.{ NewFile, Workspace }
 import org.openmole.tool.cache.KeyValueCache
+import org.openmole.tool.lock._
 import org.openmole.tool.logger.Logger
 import org.openmole.tool.random
 import org.openmole.tool.random.Seeder
@@ -126,6 +127,7 @@ class MoleExecution(
   val rootSubMoleExecution = new SubMoleExecution(None, this)
   val rootTicket = Ticket(id, ticketNumber.next)
   val taskCache = KeyValueCache()
+  val lockRepository = LockRepository[LockKey]()
 
   val dataChannelRegistry = new RegistryWithTicket[DataChannel, Buffer[Variable[_]]]
 
@@ -169,7 +171,7 @@ class MoleExecution(
       val env = environments.getOrElse(capsule, defaultEnvironment)
       env match {
         case env: SubmissionEnvironment ⇒ env.submit(job)
-        case env: LocalEnvironment      ⇒ env.submit(job, TaskExecutionContext(newFile.baseDir, env, preference, threadProvider, fileService, workspace, taskCache))
+        case env: LocalEnvironment      ⇒ env.submit(job, TaskExecutionContext(newFile.baseDir, env, preference, threadProvider, fileService, workspace, taskCache, lockRepository))
       }
       eventDispatcher.trigger(this, new MoleExecution.JobSubmitted(job, capsule, env))
     }

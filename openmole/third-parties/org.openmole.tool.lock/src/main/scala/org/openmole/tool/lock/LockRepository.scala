@@ -22,25 +22,29 @@ import java.util.concurrent.locks.{ Lock, ReentrantLock }
 
 import scala.collection.mutable
 
+object LockRepository {
+  def apply[T]() = new LockRepository[T]()
+}
+
 // FIXME potential race condition: map update and lock.lock() can be split in two transactions
 class LockRepository[T] {
 
-  val locks = new mutable.HashMap[T, (Lock, AtomicInteger)]
+  val locks = new mutable.HashMap[T, (ReentrantLock, AtomicInteger)]
 
-  def nbLocked(k: T) = locks.synchronized(locks.get(k).map { _._2.get }.getOrElse(0))
+  def nbLocked(k: T) = locks.synchronized(locks.get(k).map { case (_, users) ⇒ users.get }.getOrElse(0))
 
   def lock(obj: T) = locks.synchronized {
-    val lock = locks.getOrElseUpdate(obj, (new ReentrantLock, new AtomicInteger(0)))
-    lock._2.incrementAndGet
-    lock._1
+    val (lock, users) = locks.getOrElseUpdate(obj, (new ReentrantLock, new AtomicInteger(0)))
+    users.incrementAndGet
+    lock
   }.lock()
 
   def unlock(obj: T) = locks.synchronized {
     locks.get(obj) match {
-      case Some(lock) ⇒
-        val value = lock._2.decrementAndGet
+      case Some((lock, users)) ⇒
+        val value = users.decrementAndGet
         if (value <= 0) locks.remove(obj)
-        lock._1
+        lock
       case None ⇒ throw new IllegalArgumentException("Unlocking an object that has not been locked.")
     }
   }.unlock()

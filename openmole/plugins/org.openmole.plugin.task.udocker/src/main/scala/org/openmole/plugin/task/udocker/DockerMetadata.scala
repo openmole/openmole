@@ -34,9 +34,7 @@ object DockerMetadata {
   implicit val encodeDate: Encoder[DockerDate] = Encoder.encodeString.contramap[DockerDate](dockerDateFormatter.format(_))
 
   implicit val decodeDate: Decoder[DockerDate] = Decoder.decodeString.emap { str ⇒
-    try {
-      Right(LocalDateTime.parse(str, dockerDateFormatter))
-    }
+    try Right(LocalDateTime.parse(str, dockerDateFormatter))
     catch {
       case e: jawn.ParseException ⇒ Left("Date")
     }

@@ -6,12 +6,15 @@ import monocle.Lens
 import monocle.macros.Lenses
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.fileservice.FileService
+import org.openmole.core.workflow.task.TaskExecutionContext
 import org.openmole.core.workspace.{ NewFile, Workspace }
 import org.openmole.plugin.task.external.External
 import org.openmole.plugin.task.udocker.DockerMetadata.ImageJSON
 import org.openmole.plugin.task.udocker.Registry.LayerElement
 import org.openmole.plugin.task.udocker.UDockerTask.layersDirectory
 import org.openmole.tool.file._
+import org.openmole.tool.stream._
+import org.openmole.tool.lock._
 
 package udocker {
 
@@ -160,5 +163,34 @@ package object udocker extends UDockerPackage {
       } yield if (workDir.isEmpty) "/" else workDir
 
     uDocker.workDirectory.getOrElse(dockerWorkDirectory.getOrElse("/"))
+  }
+
+  lazy val installLockKey = LockKey()
+
+  def installUDocker(executionContext: TaskExecutionContext, installDirectory: File) = {
+    val udockerInstallDirectory = installDirectory /> "udocker"
+    val udockerTarBall = udockerInstallDirectory / "udockertarball.tar.gz"
+    val udockerFile = udockerInstallDirectory / "udocker"
+
+    def retrieveResource(candidateFile: File, resourceName: String, executable: Boolean = false) =
+      if (!candidateFile.exists()) {
+        withClosable(this.getClass.getClassLoader.getResourceAsStream(resourceName))(_.copy(candidateFile))
+        if (executable) candidateFile.setExecutable(true)
+        candidateFile
+      }
+
+    // lock in any case since file.exists() might return for an incomplete file
+    executionContext.lockRepository.withLock(installLockKey) {
+      retrieveResource(udockerTarBall, "udocker.tar.gz")
+      retrieveResource(udockerFile, "udocker", executable = true)
+    }
+
+    val variables =
+      Vector(
+        "UDOCKER_DIR" → udockerInstallDirectory.getAbsolutePath,
+        "UDOCKER_TARBALL" → udockerTarBall.getAbsolutePath
+      )
+
+    (udockerFile, variables)
   }
 }

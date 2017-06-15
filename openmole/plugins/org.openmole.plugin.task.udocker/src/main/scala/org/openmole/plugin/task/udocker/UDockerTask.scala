@@ -263,34 +263,11 @@ object UDockerTask {
   type ContainerId = String
   lazy val containerPoolKey = CacheKey[WithInstance[ContainerId]]()
 
-  @transient lazy val udockerInstallLock = new ReentrantLock
-
   override protected def process(executionContext: TaskExecutionContext) = FromContext[Context] { parameters ⇒
 
     import parameters._
 
-    val udockerInstallDirectory = executionContext.tmpDirectory /> "udocker"
-    val udockerTarBall = udockerInstallDirectory / "udockertarball.tar.gz"
-    val udockerFile = udockerInstallDirectory / "udocker"
-
-    //val imageJSONE = decode[ImageJSON](localDockerImage.imageJSON)
-
-    def installUDocker() = {
-      def retrieveResource(candidateFile: File, resourceName: String, executable: Boolean = false) =
-        if (!candidateFile.exists()) {
-          withClosable(this.getClass.getClassLoader.getResourceAsStream(resourceName))(_.copy(candidateFile))
-          if (executable) candidateFile.setExecutable(true)
-          candidateFile
-        }
-
-      // lock in any case since file.exists() might return for an incomplete file
-      udockerInstallLock {
-        retrieveResource(udockerTarBall, "udocker.tar.gz")
-        retrieveResource(udockerFile, "udocker", executable = true)
-      }
-    }
-
-    installUDocker()
+    val (uDockerFile, installVariables) = installUDocker(executionContext, executionContext.tmpDirectory)
 
     External.withWorkDir(executionContext) { taskWorkDirectory ⇒
       taskWorkDirectory.mkdirs()
@@ -301,15 +278,13 @@ object UDockerTask {
 
       def udockerVariables(logLevel: Int = 1) =
         Vector(
-          "UDOCKER_DIR" → udockerInstallDirectory.getAbsolutePath,
           "UDOCKER_TMPDIR" → executionContext.tmpDirectory.getAbsolutePath,
-          "UDOCKER_TARBALL" → udockerTarBall.getAbsolutePath,
           "UDOCKER_LOGLEVEL" → logLevel.toString,
           "HOME" → taskWorkDirectory.getAbsolutePath,
           "UDOCKER_CONTAINERS" → containersDirectory.getAbsolutePath,
           "UDOCKER_REPOS" → UDockerTask.repositoriesDirectory(executionContext.workspace).getAbsolutePath,
           "UDOCKER_LAYERS" → UDockerTask.layersDirectory(executionContext.workspace).getAbsolutePath
-        )
+        ) ++ installVariables
 
       def prepareVolumes(
         preparedFilesInfo:     Iterable[FileInfo],
@@ -342,11 +317,11 @@ object UDockerTask {
 
       def newContainer(imageId: String)() = newFile.withTmpDir { tmpDirectory ⇒
         val name = containerName(UUID.randomUUID().toString)
-        val commandline = commandLine(s"${udockerFile.getAbsolutePath} create --name=$name $imageId")
+        val commandline = commandLine(s"${uDockerFile.getAbsolutePath} create --name=$name $imageId")
         execute(commandline, tmpDirectory, udockerVariables(), returnOutput = true, returnError = true)
 
         if (!uDocker.installCommands.isEmpty) {
-          val runInstall = uDocker.installCommands.map(ic ⇒ runCommand(uDocker)(udockerFile, volumes.toVector, name, ic))
+          val runInstall = uDocker.installCommands.map(ic ⇒ runCommand(uDocker)(uDockerFile, volumes.toVector, name, ic))
           executeAll(
             tmpDirectory,
             udockerVariables(),
@@ -379,7 +354,7 @@ object UDockerTask {
             returnValue,
             stdOut,
             stdErr,
-            List(runCommand(uDocker)(udockerFile, volumes.toVector, runId, uDocker.command))
+            List(runCommand(uDocker)(uDockerFile, volumes.toVector, runId, uDocker.command))
           )(parameters.copy(context = preparedContext))
 
           val retContext = external.fetchOutputFiles(outputs, preparedContext, outputPathResolver(rootDirectory), rootDirectory)
