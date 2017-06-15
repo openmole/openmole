@@ -31,6 +31,7 @@ import org.openmole.core.expansion._
 import org.openmole.tool.logger.Logger
 import org.openmole.tool.random._
 import org.openmole.plugin.task.container
+import org.openmole.plugin.task.container._
 import cats.implicits._
 import org.openmole.core.preference.ConfigurationLocation
 

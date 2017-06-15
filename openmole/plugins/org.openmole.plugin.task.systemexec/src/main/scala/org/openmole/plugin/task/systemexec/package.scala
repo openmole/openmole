@@ -91,10 +91,6 @@ package systemexec {
     def workDirectory: Lens[T, Option[String]]
   }
 
-  trait HostFiles[T] {
-    def hostFiles: Lens[T, Vector[(String, Option[String])]]
-  }
-
   trait SystemExecPackage {
 
     lazy val errorOnReturnValue =
@@ -153,11 +149,6 @@ package systemexec {
           implicitly[WorkDirectory[T]].workDirectory.set(s)
       }
 
-    lazy val hostFiles = new {
-      def +=[T: HostFiles](hostFile: String, binding: OptionalArgument[String] = None) =
-        implicitly[HostFiles[T]].hostFiles add (hostFile, binding)
-    }
-
   }
 }
 
@@ -213,8 +204,8 @@ package object systemexec extends external.ExternalPackage with SystemExecPackag
 
       val runtime = Runtime.getRuntime
 
-      import collection.JavaConversions._
-      val inheritedEnvironment = System.getenv.map { case (key, value) ⇒ s"$key=$value" }.toArray
+      import collection.JavaConverters._
+      val inheritedEnvironment = System.getenv.asScala.map { case (key, value) ⇒ s"$key=$value" }.toArray
 
       val openmoleEnvironment = environmentVariables.map { case (name, value) ⇒ name + "=" + value }.toArray
 

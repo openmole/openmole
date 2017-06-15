@@ -21,11 +21,28 @@ package org.openmole.plugin.task
 import org.openmole.core.context.PrototypeSet
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.expansion.FromContext
+import org.openmole.core.dsl._
 import org.openmole.plugin.task.external.External
-import org.openmole.tool.file._
 import org.openmole.core.workflow.validation._
 
-package object container {
+package container {
+
+  import monocle.Lens
+
+  trait HostFiles[T] {
+    def hostFiles: Lens[T, Vector[(String, Option[String])]]
+  }
+
+  trait ContainerPackage {
+    lazy val hostFiles = new {
+      def +=[T: HostFiles](hostFile: String, binding: OptionalArgument[String] = None) =
+        implicitly[HostFiles[T]].hostFiles add (hostFile, binding)
+    }
+  }
+
+}
+
+package object container extends ContainerPackage {
 
   type FileBinding = (String, String)
 

@@ -10,7 +10,7 @@ organization := "org.openmole"
 name := "openmole-root"
 
 def macroParadise =
-  addCompilerPlugin("org.scalamacros" %% "paradise" % "2.1.0" cross CrossVersion.full)
+  addCompilerPlugin("org.scalamacros" %% "paradise" % "2.1.0" cross CrossVersion.fullMapped(_ ⇒ scalaVersionValue))
 
 lazy val scalaVersionValue = "2.12.2"
 
@@ -21,14 +21,15 @@ def defaultSettings = BuildSystem.settings ++
     resolvers += Resolver.sonatypeRepo("snapshots"),
     resolvers += Resolver.sonatypeRepo("staging"),
     resolvers += Resolver.bintrayRepo("projectseptemberinc", "maven"), // For freek
-    scalaVersion in Global := scalaVersionValue,
+    scalaVersion in Global := scalaVersionValue, // + "-bin-typelevel-4",
     scalacOptions ++= Seq("-target:jvm-1.8", "-language:higherKinds"),
     scalacOptions += "-Ypartial-unification",
+    //scalacOptions += "-Yinduction-heuristics",
     scalacOptions ++= Seq("-Xmax-classfile-name", "140"),
     javacOptions ++= Seq("-source", "1.8", "-target", "1.8"),
     publishArtifact in (packageDoc in install) := false,
     publishArtifact in (packageSrc in install) := false,
-    addCompilerPlugin("org.scalamacros" %% "paradise" % "2.1.0" cross CrossVersion.fullMapped(_ ⇒ scalaVersionValue)),
+    macroParadise,
     shellPrompt := { s => Project.extract(s).currentProject.id + " > " }
   )
 

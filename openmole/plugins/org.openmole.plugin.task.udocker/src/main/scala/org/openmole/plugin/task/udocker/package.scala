@@ -1,8 +1,14 @@
 package org.openmole.plugin.task
 
+import java.util.UUID
+
 import monocle.Lens
+import monocle.macros.Lenses
+import org.openmole.core.expansion.FromContext
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.workspace.{ NewFile, Workspace }
+import org.openmole.plugin.task.external.External
+import org.openmole.plugin.task.udocker.DockerMetadata.ImageJSON
 import org.openmole.plugin.task.udocker.Registry.LayerElement
 import org.openmole.plugin.task.udocker.UDockerTask.layersDirectory
 import org.openmole.tool.file._
@@ -101,4 +107,58 @@ package object udocker extends UDockerPackage {
     builder(s"$sourceHash.$elementSuffix") → elementDestination
   }
 
+  def containerName(uuid: String): String = {
+    uuid.filter(_ != '-').map {
+      case c if c < 'a' ⇒ (c - '0' + 'g').toChar
+      case c            ⇒ c
+    }
+  }
+
+  type FileInfo = (External.ToPut, File)
+  type HostFile = (String, Option[String])
+  type VolumeInfo = (File, String)
+  type MountPoint = (String, String)
+
+  // TODO review data structure
+  case class LocalDockerImage(image: String, tag: String, layers: Vector[(Registry.Layer, File)], layersConfig: Vector[(Registry.LayerConfig, File)], imageJSON: String) {
+    lazy val id = UUID.randomUUID().toString
+  }
+
+  @Lenses case class UDocker(
+    localDockerImage:     LocalDockerImage,
+    command:              FromContext[String],
+    environmentVariables: Vector[(String, FromContext[String])] = Vector.empty,
+    hostFiles:            Vector[(String, Option[String])]      = Vector.empty,
+    installCommands:      Vector[FromContext[String]]           = Vector.empty,
+    workDirectory:        Option[String]                        = None,
+    reuseContainer:       Boolean                               = true
+  )
+
+  def runCommand(uDocker: UDocker)(udocker: File, volumes: Vector[MountPoint], runId: String, command: FromContext[String]): FromContext[String] = FromContext { p ⇒
+    import p._
+
+    val workDirectory = userWorkDirectory(uDocker)
+
+    def volumesArgument(volumes: Vector[MountPoint]) = volumes.map { case (host, container) ⇒ s"""-v "$host":"$container"""" }.mkString(" ")
+
+    val variablesArgument = uDocker.environmentVariables.map { case (name, variable) ⇒ s"""-e $name="${variable.from(context)}"""" }.mkString(" ")
+    command.map(cmd ⇒ s"""${udocker.getAbsolutePath} run --workdir="$workDirectory" $variablesArgument ${volumesArgument(volumes)} $runId $cmd""").from(context)
+  }
+
+  def userWorkDirectory(uDocker: UDocker) = {
+    import io.circe.generic.extras.auto._
+    import io.circe.jawn.{ decode, decodeFile }
+    import io.circe.syntax._
+    import org.openmole.plugin.task.udocker.DockerMetadata._
+
+    val imageJSONE = decode[ImageJSON](uDocker.localDockerImage.imageJSON)
+
+    val dockerWorkDirectory =
+      for {
+        imageJSON ← imageJSONE
+        workDir = imageJSON.config.WorkingDir
+      } yield if (workDir.isEmpty) "/" else workDir
+
+    uDocker.workDirectory.getOrElse(dockerWorkDirectory.getOrElse("/"))
+  }
 }
