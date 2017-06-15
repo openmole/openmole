@@ -126,7 +126,8 @@ object Resource {
     geocite,
     biomedia,
     lunr,
-    care
+    care,
+    modelIO
   )
 }
 

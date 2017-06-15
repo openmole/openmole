@@ -10,8 +10,7 @@
 @p
     Simulation models can be abstracted as a program that transforms a set of @b{inputs} into a set of @b{outputs}.
 
-
-@img(src := Resource.modelIO.file, width:= "50%")
+    @img(src := Resource.modelIO.file, width:= "50%")
 @br
     Even though any kind of inputs space can be explored (parameters , pictures, digits, files, DB connections, etc.),
     simulation experiments revolves mostly around @b{parameters space exploration} (e.g. sensitivity analysis).
@@ -25,10 +24,10 @@
 @br
 
 @ol
-    @li{What are all the possible inputs producing a given output ?}
-    @li{What is the effect of an input variation on the output ?}
+    @li{What are all the possible inputs producing a given output ?} @br
+    @li{What is the effect of an input variation on the output ?} @br
     @li{How do the inputs participate to produce the outputs ? @br Are every parameter compulsory to produce outputs ?
-    @br What are the robustness intervals of the inputs that lead to a desired output ?}
+    @br What are the robustness intervals of the inputs that lead to a desired output ?} @br
     @li{What are the possible outputs of the model ?}
 
 @br
