@@ -9,9 +9,10 @@ import org.openmole.core.fileservice.FileService
 import org.openmole.core.workflow.task.TaskExecutionContext
 import org.openmole.core.workspace.{ NewFile, Workspace }
 import org.openmole.plugin.task.external.External
-import org.openmole.plugin.task.udocker.DockerMetadata.ImageJSON
+import org.openmole.plugin.task.udocker.DockerMetadata.{ ContainerID, ImageJSON }
 import org.openmole.plugin.task.udocker.Registry.LayerElement
 import org.openmole.plugin.task.udocker.UDockerTask.layersDirectory
+import org.openmole.tool.cache.{ CacheKey, WithInstance }
 import org.openmole.tool.file._
 import org.openmole.tool.stream._
 import org.openmole.tool.lock._
@@ -121,6 +122,7 @@ package object udocker extends UDockerPackage {
   type HostFile = (String, Option[String])
   type VolumeInfo = (File, String)
   type MountPoint = (String, String)
+  type ContainerId = String
 
   // TODO review data structure
   case class LocalDockerImage(image: String, tag: String, layers: Vector[(Registry.Layer, File)], layersConfig: Vector[(Registry.LayerConfig, File)], imageJSON: String) {
@@ -166,6 +168,7 @@ package object udocker extends UDockerPackage {
   }
 
   lazy val installLockKey = LockKey()
+  lazy val containerPoolKey = CacheKey[WithInstance[ContainerID]]()
 
   def installUDocker(executionContext: TaskExecutionContext, installDirectory: File) = {
     val udockerInstallDirectory = installDirectory /> "udocker"

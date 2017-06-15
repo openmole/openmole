@@ -82,7 +82,7 @@ package object container extends ContainerPackage {
   type EnvironmentVariable = (String, FromContext[String])
 
   def validateContainer(
-    command:              FromContext[String],
+    commands:             Vector[FromContext[String]],
     environmentVariables: Vector[EnvironmentVariable],
     external:             External,
     inputs:               PrototypeSet
@@ -90,10 +90,9 @@ package object container extends ContainerPackage {
     import p._
 
     val allInputs = External.PWD :: inputs.toList
-
     val validateVariables = environmentVariables.map(_._2).flatMap(_.validate(allInputs))
 
-    command.validate(allInputs) ++
+    commands.flatMap(_.validate(allInputs)) ++
       validateVariables ++
       External.validate(external)(allInputs).apply
   }

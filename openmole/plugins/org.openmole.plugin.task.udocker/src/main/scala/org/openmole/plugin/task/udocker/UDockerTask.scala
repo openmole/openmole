@@ -72,20 +72,18 @@ object UDockerTask {
     image:           ContainerImage,
     command:         FromContext[String],
     installCommands: Vector[FromContext[String]] = Vector.empty
-  )(implicit name: sourcecode.Name, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService): UDockerTask = {
-
-    val dockerImage = toLocalImage(image) match {
-      case Right(x) ⇒ x
-      case Left(x)  ⇒ throw new UserBadDataError(x)
-    }
-
+  )(implicit name: sourcecode.Name, newFile: NewFile, workspace: Workspace, preference: Preference): UDockerTask = {
     val uDocker =
       UDocker(
-        localDockerImage = dockerImage,
+        localDockerImage = toLocalImage(image).get,
         command = command,
         installCommands = installCommands
       )
 
+    fromUDocker(uDocker)
+  }
+
+  def fromUDocker(uDocker: UDocker)(implicit name: sourcecode.Name, newFile: NewFile, workspace: Workspace, preference: Preference): UDockerTask =
     new UDockerTask(
       uDocker = uDocker,
       errorOnReturnValue = true,
@@ -95,7 +93,6 @@ object UDockerTask {
       _config = InputOutputConfig(),
       external = External()
     )
-  }
 
   // TODO make vals??
   def layersDirectory(workspace: Workspace) = workspace.persistentDir /> "udocker" /> "layers"
@@ -171,7 +168,7 @@ object UDockerTask {
    *
    * Assume v1.x Image JSON format and registry protocol v2 Schema 1
    */
-  def loadImage(dockerImage: SavedDockerImage)(implicit newFile: NewFile, fileService: FileService, workspace: Workspace): Either[String, LocalDockerImage] = newFile.withTmpDir { extractedImage ⇒
+  def loadImage(dockerImage: SavedDockerImage)(implicit newFile: NewFile, workspace: Workspace): Either[String, LocalDockerImage] = newFile.withTmpDir { extractedImage ⇒
 
     import org.openmole.tool.tar._
 
@@ -238,12 +235,16 @@ object UDockerTask {
     }
   }
 
-  def toLocalImage(containerImage: ContainerImage)(implicit preference: Preference, newFile: NewFile, workspace: Workspace, fileService: FileService): Either[String, LocalDockerImage] =
+  def toLocalImage(containerImage: ContainerImage)(implicit preference: Preference, newFile: NewFile, workspace: Workspace): util.Try[LocalDockerImage] =
     containerImage match {
       // TODO Eitherify download
       // Left(s"Failed to download docker image $i")
-      case i: DockerImage      ⇒ Right(downloadImage(i, preference(RegistryTimeout)))
-      case i: SavedDockerImage ⇒ loadImage(i)
+      case i: DockerImage ⇒ util.Try(downloadImage(i, preference(RegistryTimeout)))
+      case i: SavedDockerImage ⇒
+        loadImage(i) match {
+          case Right(x) ⇒ util.Success(x)
+          case Left(x)  ⇒ util.Failure(new UserBadDataError(x))
+        }
     }
 
 }
@@ -258,12 +259,10 @@ object UDockerTask {
     external:           External
 ) extends Task with ValidateTask { self ⇒
   override def config = InputOutputConfig.outputs.modify(_ ++ Seq(stdOut, stdErr, returnValue).flatten)(_config)
-  override def validate = container.validateContainer(uDocker.command, uDocker.environmentVariables, external, inputs)
+  override def validate =
+    container.validateContainer(Vector(uDocker.command) ++ uDocker.installCommands, uDocker.environmentVariables, external, inputs)
 
-  type ContainerId = String
-  lazy val containerPoolKey = CacheKey[WithInstance[ContainerId]]()
-
-  override protected def process(executionContext: TaskExecutionContext) = FromContext[Context] { parameters ⇒
+  override def process(executionContext: TaskExecutionContext) = FromContext[Context] { parameters ⇒
 
     import parameters._
 

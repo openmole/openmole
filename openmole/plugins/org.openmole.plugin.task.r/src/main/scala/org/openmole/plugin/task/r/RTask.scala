@@ -7,44 +7,92 @@ import org.openmole.core.preference._
 import org.openmole.core.workspace._
 import org.openmole.plugin.task.external._
 import cats.implicits._
+import monocle.macros._
+import org.openmole.core.context._
 import org.openmole.core.expansion._
+import org.openmole.core.workflow.builder._
+import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.validation._
+import org.openmole.core.dsl._
 
 object RTask {
 
   def installLibraries(libraries: Seq[String]) = s"""R -e "install.packages(c(${libraries.map(lib ⇒ s"'$lib'").mkString(",")}), dependencies = T)""""
+  def rImage(version: OptionalArgument[String]) = DockerImage("r-base", version.getOrElse("latest"))
 
   def apply(
     script:    File,
     arguments: OptionalArgument[String] = None,
     libraries: Seq[String]              = Seq.empty,
     version:   OptionalArgument[String] = None
-  )(implicit name: sourcecode.Name, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService) = {
-
+  )(implicit name: sourcecode.Name, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService) =
     UDockerTask(
-      DockerImage("r-base", version.getOrElse("latest")),
+      rImage(version),
       s"R --slave -f ${script.getName}" + arguments.map(a ⇒ " --args ${a}").getOrElse(""),
       installCommands = Vector(installLibraries(libraries))
     ) set (
         resources += script,
         reuseContainer := true
       )
-  }
 
 }
 
-//object RScriptTask {
-//
-//  def apply(
-//    script:    FromContext[String],
-//    libraries: Seq[String]              = Seq.empty,
-//    version:   OptionalArgument[String] = None
-//  )(implicit name: sourcecode.Name, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService) =
-//    UDockerTask(
-//      DockerImage("r-base", version.getOrElse("latest")),
-//      script.map(s ⇒ s"""R -e "$s""""),
-//      installCommands = Vector(RTask.installLibraries(libraries))
-//    ) set (
-//        reuseContainer := true
-//      )
-//
-//}
+object RScriptTask {
+
+  implicit def isTask: InputOutputBuilder[RScriptTask] = InputOutputBuilder(RScriptTask.config)
+  implicit def isExternal: ExternalBuilder[RScriptTask] = ExternalBuilder(RScriptTask.external)
+
+  def apply(
+    script:    FromContext[String],
+    libraries: Seq[String]              = Seq.empty,
+    version:   OptionalArgument[String] = None
+  )(implicit name: sourcecode.Name, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService): RScriptTask =
+    RScriptTask(
+      script,
+      UDockerTask.toLocalImage(RTask.rImage(version)).get,
+      InputOutputConfig(),
+      External()
+    )
+
+}
+
+@Lenses case class RScriptTask(
+    script:           FromContext[String],
+    localDockerImage: LocalDockerImage,
+    config:           InputOutputConfig,
+    external:         External
+) extends Task with ValidateTask {
+
+  override def validate = Validate { p ⇒
+    import p._
+    val allInputs = External.PWD :: inputs.toList
+    script.validate(inputs.toList) ++
+      External.validate(external)(allInputs).apply
+  }
+
+  override def process(executionContext: TaskExecutionContext) = FromContext[Context] { parameters ⇒
+    import parameters._
+
+    parameters.newFile.withTmpFile("script", ".R") { scriptFile ⇒
+      scriptFile.content = script.from(context)
+
+      val uDocker =
+        UDocker(
+          localDockerImage,
+          s"R --slave -f ${scriptFile.getName}"
+        )
+
+      val udockerTask = {
+        import executionContext._
+
+        UDockerTask.fromUDocker(uDocker) set (
+          resources += scriptFile,
+          reuseContainer := true
+        )
+      }
+
+      udockerTask.process(executionContext).apply(context)
+    }
+  }
+
+}

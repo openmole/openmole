@@ -93,7 +93,7 @@ object CARETask extends Logger {
   override def validate = Validate { p ⇒
     import p._
     validateArchive(archive) ++
-      container.validateContainer(command, environmentVariables, external, this.inputs).apply
+      container.validateContainer(Vector(command), environmentVariables, external, this.inputs).apply
   }
 
   override protected def process(executionContext: TaskExecutionContext) = FromContext[Context] { parameters ⇒
