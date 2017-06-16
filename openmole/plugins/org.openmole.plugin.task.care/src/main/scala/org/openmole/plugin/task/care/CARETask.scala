@@ -171,14 +171,14 @@ object CARETask extends Logger {
 
       reExecute.setExecutable(true)
 
-      val commandline = commandLine(command.map(s"./${reExecute.getName} " + _), userWorkDirectory).from(preparedContext)
+      val cl = commandLine(command.map(s"./${reExecute.getName} " + _), userWorkDirectory).from(preparedContext)
 
       def prootNoSeccomp = if (preference(CARETask.disableSeccomp)) Vector(("PROOT_NO_SECCOMP", "1")) else Vector()
 
       val allEnvironmentVariables = environmentVariables.map { case (varName, variable) ⇒ (varName, variable.from(context)) } ++ prootNoSeccomp
-      val executionResult = execute(commandline, extractedArchive, allEnvironmentVariables, stdOut.isDefined, stdErr.isDefined)
+      val executionResult = execute(cl.toArray, extractedArchive, allEnvironmentVariables, stdOut.isDefined, stdErr.isDefined)
 
-      if (errorOnReturnValue && returnValue.isEmpty && executionResult.returnCode != 0) throw error(commandline.toVector, executionResult)
+      if (errorOnReturnValue && returnValue.isEmpty && executionResult.returnCode != 0) throw error(cl, executionResult)
 
       def rootDirectory = extractedArchive / rootfs
 
