@@ -97,6 +97,23 @@ object Resource {
 
   def biomedia = imgResource("biomedia.png")
 
+  //Radars graph for methodes
+  def m_complete = imgResource("methods_radars/complet.png")
+
+  def m_LHS = imgResource("methods_radars/LHS_sobol.png")
+
+  def m_pse = imgResource("methods_radars/pse.png")
+
+  def m_ga_mono = imgResource("methods_radars/ga_mono.png")
+
+  def m_ga_multi = imgResource("methods_radars/ga_multi.png")
+
+  def m_profile = imgResource("methods_radars/profile.png")
+
+  def m_sa = imgResource("methods_radars/sa.png")
+
+  def m_ancestor = imgResource("methods_radars/ancestor.png")
+
   def openmole = RenameFileResource("openmole.tar.gz", s"openmole-${buildinfoVersion}.tar.gz")
 
   def openmoleDaemon = RenameFileResource("openmole-daemon.tar.gz", s"openmole-daemon-${buildinfoVersion}.tar.gz")
@@ -151,4 +168,3 @@ sealed trait Resource
 case class RenameFileResource(source: String, file: String) extends Resource
 case class ArchiveResource(source: String, file: String) extends Resource
 case class MarketResource(marketEntry: GeneratedMarketEntry) extends Resource
-
