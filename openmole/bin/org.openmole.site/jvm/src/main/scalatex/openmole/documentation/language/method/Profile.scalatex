@@ -1,6 +1,8 @@
 
 @import org.openmole.site.tools._
-@import org.openmole.site.Environment._
+@import org.openmole.site._
 
 @p{Profile Method}
     @p The method aims at testing the validity intervals of input parameters
+
+ @img(src := Resource.vignette_profiles.file, width:= "90%")

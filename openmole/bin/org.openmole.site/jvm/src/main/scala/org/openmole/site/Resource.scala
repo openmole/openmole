@@ -43,6 +43,16 @@ object Resource {
 
   def modelIO = imgResource("modelIO.png")
 
+  def vignette_profiles = imgResource("profiles.gif")
+
+  def vignette_ancestors = imgResource("ancestors.png")
+
+  def vignette_calib_mono = imgResource("calibrage_mono.png")
+
+  def vignette_calib_multi = imgResource("calibrage_multi.png")
+
+  def vignette_pse = imgResource("pse_anim.gif")
+
   def antNumbers = imgResource("antnumbers.png")
 
   def antsNLogo = scriptResource("ants.nlogo")
@@ -127,7 +137,13 @@ object Resource {
     biomedia,
     lunr,
     care,
-    modelIO
+    modelIO,
+    vignette_pse,
+    vignette_ancestors,
+    vignette_calib_mono,
+    vignette_calib_multi,
+    vignette_profiles
+
   )
 }
 
