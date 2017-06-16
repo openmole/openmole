@@ -259,7 +259,7 @@ lazy val math = OsgiProject(dir, "org.apache.commons.math", exports = Seq("org.a
   (libraryDependencies += "org.apache.commons" % "commons-math3" % mathVersion, version := mathVersion) settings(settings: _*)
 
 lazy val exec = OsgiProject(dir, "org.apache.commons.exec") settings
-  (libraryDependencies += "org.apache.commons" % "commons-exec" % "1.1", version := "1.1") settings(settings: _*)
+  (libraryDependencies += "org.apache.commons" % "commons-exec" % "1.3", version := "1.3") settings(settings: _*)
 
 lazy val log4j = OsgiProject(dir, "org.apache.log4j") settings
   (libraryDependencies += "log4j" % "log4j" % "1.2.17", version := "1.2.17") settings(settings: _*)

@@ -17,7 +17,7 @@ import org.openmole.core.dsl._
 
 object RTask {
 
-  def installLibraries(libraries: Seq[String]) = s"""R -e "install.packages(c(${libraries.map(lib ⇒ s"'$lib'").mkString(",")}), dependencies = T)""""
+  def installLibraries(libraries: Seq[String]) = s"""R -e 'install.packages(c(${libraries.map(lib ⇒ '"' + s"$lib" + '"').mkString(",")}), dependencies = T)'"""
   def rImage(version: OptionalArgument[String]) = DockerImage("r-base", version.getOrElse("latest"))
 
   def apply(
@@ -28,7 +28,7 @@ object RTask {
   )(implicit name: sourcecode.Name, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService) =
     UDockerTask(
       rImage(version),
-      s"R --slave -f ${script.getName}" + arguments.map(a ⇒ " --args ${a}").getOrElse(""),
+      s"R --slave -f ${script.getName}" + arguments.map(a ⇒ s" --args ${a}").getOrElse(""),
       installCommands = Vector(installLibraries(libraries))
     ) set (
         resources += script,

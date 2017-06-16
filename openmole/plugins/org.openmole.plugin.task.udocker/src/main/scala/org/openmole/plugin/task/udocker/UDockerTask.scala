@@ -316,11 +316,15 @@ object UDockerTask {
 
       def newContainer(imageId: String)() = newFile.withTmpDir { tmpDirectory ⇒
         val name = containerName(UUID.randomUUID().toString)
-        val commandline = commandLine(s"${uDockerFile.getAbsolutePath} create --name=$name $imageId")
-        execute(commandline, tmpDirectory, udockerVariables(), returnOutput = true, returnError = true)
+
+        val cl = commandLine(s"${uDockerFile.getAbsolutePath} create --name=$name $imageId")
+        execute(cl.toArray, tmpDirectory, udockerVariables(), returnOutput = true, returnError = true)
 
         if (!uDocker.installCommands.isEmpty) {
           val runInstall = uDocker.installCommands.map(ic ⇒ runCommand(uDocker)(uDockerFile, volumes.toVector, name, ic))
+
+          println(runInstall.map(_.from(preparedContext)))
+
           executeAll(
             tmpDirectory,
             udockerVariables(),

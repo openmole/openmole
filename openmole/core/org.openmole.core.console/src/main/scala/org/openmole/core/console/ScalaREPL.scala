@@ -157,6 +157,19 @@ object ScalaREPL {
       }
     }
 
+    override lazy val classLoader =
+      if (Activator.osgi) {
+        new REPLClassloader(
+          replOutput.dir,
+          new CompositeClassLoader(
+            priorityBundles.map(_.classLoader) ++
+              List(new URLClassLoader(jars.toArray.map(_.toURI.toURL))) ++
+              List(classOf[OSGiScalaCompiler].getClassLoader, super.classLoader): _*
+          )
+        )
+      }
+      else super.classLoader
+
   }
 
   type Compiled = () ⇒ Any
