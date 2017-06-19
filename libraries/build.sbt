@@ -205,16 +205,15 @@ lazy val cats =
 
 lazy val freedsl =
   OsgiProject(dir, "freedsl", exports = Seq("freedsl.*", "freek.*")) settings (
-    libraryDependencies += "fr.iscpif.freedsl" %% "all" % "0.9",
-    version := "0.9"
+    libraryDependencies += "fr.iscpif.freedsl" %% "all" % "0.10",
+    version := "0.10"
   ) dependsOn(cats) settings(settings: _*)
 
-lazy val mgoVersion = "2.4"
+lazy val mgoVersion = "3.0-SNAPSHOT"
 
-lazy val mgo = OsgiProject(dir, "mgo") settings(
+lazy val mgo = OsgiProject(dir, "mgo", imports = Seq("*")) settings(
   libraryDependencies += "fr.iscpif" %% "mgo" % mgoVersion,
-  version := mgoVersion
-  ) dependsOn(monocle, freedsl, math) settings(settings: _*)
+  version := mgoVersion) dependsOn(monocle, freedsl, math) settings(settings: _*)
 
 /*lazy val familyVersion = "1.3"
 lazy val family = OsgiProject(dir, "fr.iscpif.family") settings(
@@ -291,7 +290,7 @@ lazy val clapperVersion = "1.1.2"
 lazy val clapper = OsgiProject(dir, "org.clapper", exports = Seq("!scala.*","!grizzled.*","!jline.*","!org.fusesource.*","!org.slf4j.*","*")) settings (
   libraryDependencies += "org.clapper" %% "classutil" % clapperVersion, version := clapperVersion) settings(settings: _*)
 
-val monocleVersion = "1.3.2"
+val monocleVersion = "1.4.0"
 lazy val monocle = OsgiProject(dir, "monocle",
   privatePackages = Seq("!scala.*", "!scalaz.*", "!shapeless.*", "*"),
   imports = Seq("scala.*", "shapeless.*", "scalaz.*")) settings(
