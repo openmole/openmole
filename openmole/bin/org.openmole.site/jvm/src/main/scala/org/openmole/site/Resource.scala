@@ -51,6 +51,8 @@ object Resource {
 
   def vignette_calib_multi = imgResource("calibrage_multi.png")
 
+  def vignette_sensitivity = imgResource("sensitivity.svg")
+
   def vignette_pse = imgResource("pse_anim.gif")
 
   def antNumbers = imgResource("antnumbers.png")
