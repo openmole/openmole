@@ -269,7 +269,7 @@ lazy val lang3 = OsgiProject(dir, "org.apache.commons.lang3") settings (
   libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.4", version := "3.4") settings(settings: _*)
 
 lazy val sshd = OsgiProject(dir, "org.apache.sshd", exports = Seq("org.apache.sshd.*", "org.apache.mina.*"), dynamicImports = Seq("*"), privatePackages = Seq("META-INF.*")) settings
-  (libraryDependencies += "org.apache.sshd" % "sshd-core" % "1.0.0", version := "1.0.0") settings(settings: _*)
+  (libraryDependencies += "org.apache.sshd" % "sshd-core" % "1.2.0", version := "1.2.0") settings(settings: _*)
 
 lazy val ant = OsgiProject(dir, "org.apache.ant") settings
   (libraryDependencies += "org.apache.ant" % "ant" % "1.8.0", version := "1.8.0") settings(settings: _*)

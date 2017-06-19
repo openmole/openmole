@@ -63,7 +63,7 @@ object Libraries {
   lazy val logging = "org.openmole.library" %% "org-apache-commons-logging" % "1.2"
   lazy val lang3 = "org.openmole.library" %% "org-apache-commons-lang3" % "3.4"
   lazy val httpClient = "org.apache.httpcomponents" % "httpclient-osgi" % "4.5.2"
-  lazy val sshd = "org.openmole.library" %% "org-apache-sshd" % "1.0.0"
+  lazy val sshd = "org.openmole.library" %% "org-apache-sshd" % "1.2.0"
   lazy val ant = "org.openmole.library" %% "org-apache-ant" % "1.8.0"
   lazy val codec = "org.openmole.library" %% "org-apache-commons-codec" % "1.10"
   lazy val async = "org.openmole.library" %% "scala-async" % "0.9.6"
