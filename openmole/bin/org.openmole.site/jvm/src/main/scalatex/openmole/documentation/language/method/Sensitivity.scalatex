@@ -3,5 +3,142 @@
 @import org.openmole.site.Environment._
 
 @p{Sensitivity Analysis }
-    @p Typical Sensitivity analysis (in a simulation experiment  context) is the study of how the variation of a parameter
+
+    @p Typical Sensitivity analysis (in a simulation experiment  context) is the study of how the variation of an input
      affect the output(s) of a model.
+
+@h3{Prerequisites}
+
+An embedded model in OpenMOLE (see Step 1 : Model)
+
+@h2{Variation of one input}
+
+@p     The most simple case to consider is to observe the effect of a single input variation on a single output.
+
+    This is achieved by using an @b{exploration task} , who will generate the sequence of values of an input, according to its
+    boundaries values and a discretisation step.
+
+@br
+
+   @hl.openmole("""
+val my_input = Val[Double]
+
+
+val exploration = ExplorationTask(
+(my_input in (0.0 to 10.0 by 0.5))
+)""")
+
+@p
+
+Sampling can also be performed via a Uniform Distribution
+
+ @hl.openmole("""
+val my_input = Val[Double]
+val exploration = ExplorationTask(
+    (my_input in (0.0 to 10.0 by 0.5)
+)""")
+
+
+
+
+If your input is one file among many,  or  a line among a CSV file, use the  @b{CSVSampling} task  TODO lien
+and @b{FileSampling} TODO lien
+
+
+
+
+
+@h2{Variation of several inputs}
+@p
+
+  Exploration can be performed on several inputs domains, using the @b{cartesian product} operator @b{x}.
+The basic syntax is
+   @hl.openmole("""
+
+    val exploration =
+        ExplorationTask (
+          (i in (0 to 10 by 2)) x
+          (j in (0.0 to 5.0 by 0.5)) )
+      """)
+
+
+@h3{Different Types of inputs}
+
+ @hl.openmole("""
+   val exploration =
+     ExplorationTask (
+       (i in (0 to 10 by 2)) x
+       (j in (0.0 to 5.0 by 0.5)) x
+       (k in List("Leonardo", "Donatello", "Raphaël", "Michelangelo")) x
+       (l in (UniformDistribution[Long]() take 10)) x
+       (m in (workDirectory / "dir").files().filter(f => f.getName.startsWith("exp") && f.getName.endsWith(".csv")))
+     )
+    )""")
+
+This task performs every combination between the 4 inputs i,j,k and l. It handles several types of inputs : Integer (i) , Double (j), Strings (k), Long (l), Files (m).
+
+@br
+
+The UniformDistribution[T]() take 10 is a uniform sampling of 10 numbers of the Long type,
+taken in the [Long.MIN_VALUE; Long.MAX_VALUE] domain of the Long native type
+(should be -9,223,372,036,854,775,808 to +9,223,372,036,854,775,807)
+
+
+@br
+
+Finally, files are explored as items of a list.
+ The items are gathered  by the files() function applied  on the dir directory,
+ optionally filtered with any String => Boolean  functions  such as contains(), startswith(), endswith() (see
+ the Java Class String Documentation for more details)
+
+
+@br
+
+Finally, files can be explored in a systematic way
+
+@h3{Higher Dimension spaces}
+
+Higher dimension spaces must be handled via specific methods, which are specifications of the exploration task:
+
+@br
+
+ @h4{Latin Hypercube Sampling}
+
+
+
+@hl.openmole("""
+
+val i = Val[Double]
+val j = Val[Double]
+
+val my_LHS_sampling =
+  ExplorationTask (
+    LHS(
+      100, // Number of points of the LHS
+      i in Range(0.0, 10.0),
+      j in Range(0.0, 5.0)
+    )
+  )
+""")
+
+@br
+
+ @h4{Sobol Sequence}
+
+
+
+@hl.openmole("""
+
+val i = Val[Double]
+val j = Val[Double]
+
+val my_sobol_sampling =
+  ExplorationTask (
+    SobolSampling(
+      100, // Number of points
+      i in Range(0.0, 10.0),
+      j in Range(0.0, 5.0)
+    )
+  )
+""")
+

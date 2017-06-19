@@ -24,7 +24,7 @@
 
     @img(src := Resource.modelIO.file, width:= "50%")
 @br
-    Even though any kind of inputs space can be explored (parameters , pictures, digits, files, DB connections, etc.),
+    Even though any type of data can be used as inputs for simulation models  (parameters , pictures, CSV files, DB connections, etc.),
     simulation experiments revolves mostly around @b{parameters space exploration} (e.g. sensitivity analysis).
     Likewise, considered outputs in simulation experiments are most of times @b{measures} computed on the dynamics produced by a simulation run  (e.g. fitness or error functions)
 
@@ -54,7 +54,8 @@ Question 4 is addressed by using the @b{Pattern Space Exploration} (PSE) method.
 
 
 @p{Automatic parameter exploration methods}
-  OpenMOLE provides advanced methods to help you explore your application's space of parameters. These methods automatically generate workflows in order to solve exploration problems.
+  OpenMOLE provides advanced methods to help you explore your application's space of parameters.
+  These methods automatically generate workflows in order to solve exploration problems.
 
   @p{Genetic algorithms}
     This workflow optimises a dummy model using the generational NSGA II multi-objective algorithm. You can replace the instances of @i{model} by your own model and adapt the variation range of its input variables. If you're not familiar with parameter tuning using Genetic Algorithms (GA), you should first consult the @a("tutorial explaining how to calibrate a NetLogo model with a GA", href := DocumentationPages.root.tutorial.netLogoGA.file).
