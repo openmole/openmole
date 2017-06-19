@@ -323,8 +323,6 @@ object UDockerTask {
         if (!uDocker.installCommands.isEmpty) {
           val runInstall = uDocker.installCommands.map(ic ⇒ runCommand(uDocker)(uDockerFile, volumes.toVector, name, ic))
 
-          println(runInstall.map(_.from(preparedContext)))
-
           executeAll(
             tmpDirectory,
             udockerVariables(),
