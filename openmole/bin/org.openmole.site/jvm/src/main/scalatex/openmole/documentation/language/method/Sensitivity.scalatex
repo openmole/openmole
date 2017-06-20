@@ -12,6 +12,7 @@
 @img(src := Resource.vignette_sensitivity.file, width:= "50%")
 
 @br
+@br
 
 @h3{Prerequisites}
 

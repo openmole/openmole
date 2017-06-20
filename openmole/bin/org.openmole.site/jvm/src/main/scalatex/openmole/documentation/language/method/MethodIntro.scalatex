@@ -2,5 +2,6 @@
 @import org.openmole.site._
 
 
-@p{Method intro}
-    OpenMOLE built-in methods allows to answer several questions about your model.
+@p
+    OpenMOLE built-in methods are designed to explore your model and answer several questions regarding @b{optimization,
+    robustnesss and diversity} of your model capabilities

@@ -21,17 +21,19 @@
 @h2{Context}
 @p
     Simulation models can be abstracted as a program that transforms a set of @b{inputs} into a set of @b{outputs}.
+@br
 
-    @img(src := Resource.modelIO.file, width:= "50%")
+    @img(src := Resource.modelIO.file, width:= "40%")
 @br
     Even though any type of data can be used as inputs for simulation models  (parameters , pictures, CSV files, DB connections, etc.),
     simulation experiments revolves mostly around @b{parameters space exploration} (e.g. sensitivity analysis).
     Likewise, considered outputs in simulation experiments are most of times @b{measures} computed on the dynamics produced by a simulation run  (e.g. fitness or error functions)
 
-@h2{Questioning your model}
+@h2
+    Questionning your model
 
 @p
-    There is three types of general questions that can be addressed by OpenMOLE methods.
+    There is four types of general questions that can be addressed by OpenMOLE methods.
 
 @br
 
@@ -43,9 +45,9 @@
     @li{What are the possible outputs of the model ?}
 
 @br
-Question 1 is referred as a @b{calibration problem} and solved via Genetic Algorithms.
+Question 1 is referred as a @b{calibration} or @b{optimization problem} and solved via Genetic Algorithms.
 @br
-Question 2 is addressed by performing a @b{sensitivity analysis} via Exploration task.
+Question 2 is addressed by performing a @b{sensitivity analysis} via custom Exploration tasks.
 @br
 Question 3 is addressed using @b{Calibration Profiles Algorithm}, that extends the results of a sensitivity analysis.
 @br
@@ -53,7 +55,10 @@ Question 4 is addressed by using the @b{Pattern Space Exploration} (PSE) method.
 
 
 
-@p{Automatic parameter exploration methods}
+@h3{Automatic parameter exploration methods}
+
+
+@p
   OpenMOLE provides advanced methods to help you explore your application's space of parameters.
   These methods automatically generate workflows in order to solve exploration problems.
 
@@ -130,7 +135,9 @@ Question 4 is addressed by using the @b{Pattern Space Exploration} (PSE) method.
   // Here the generated workflow will run using 4 threads of the local machine.
   (island on LocalEnvironment(4) hook savePopulation)""", header = model)
 
-  @p Calibration of stochastic models leads to noisy fitness functions. An efficient strategy to deal with such fitness functions is implemented in OpenMOLE. This strategy automatically balances the need for replications and the discovery of new solutions. In case you want to explore a stochastic model with a genetic algorithm you can do:
+  @p Calibration of stochastic models leads to noisy fitness functions. An efficient strategy to deal with such
+  fitness functions is implemented in OpenMOLE. This strategy automatically balances the need for replications and
+  the discovery of new solutions. In case you want to explore a stochastic model with a genetic algorithm you can do:
 
   @br @hl.openmole("""
   val seed = Val[Long]

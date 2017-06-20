@@ -22,6 +22,7 @@ import org.openmole.site.market._
 
 import scalatags.Text.all._
 import com.github.rjeschke._
+import org.apache.commons.math3.genetics.GeneticAlgorithm
 import org.openmole.site.market.Market.Tags
 
 import scalatex.{ openmole ⇒ scalatex }
@@ -514,7 +515,7 @@ object DocumentationPages {
 
         }
 
-        def source = new DocumentationPage {
+        val source = new DocumentationPage {
           def name = "Sources"
 
           override def title = Some(name)
@@ -546,7 +547,7 @@ object DocumentationPages {
 
             def children = Seq()
 
-            def details = Seq()
+            def details = Seq(geneticalgo)
 
             def content = scalatex.documentation.language.method.Calibration()
 
@@ -590,6 +591,19 @@ object DocumentationPages {
             def content = scalatex.documentation.language.method.PSE()
 
             override def intro = methIntro
+          }
+          val geneticalgo = new DocumentationPage {
+            override def id = "geneticalgo"
+
+            def name = "Genetic Algorithms"
+
+            override def title = Some(name)
+
+            def children = Seq()
+
+            def details = Seq()
+
+            def content = scalatex.documentation.details.GeneticAlgorithm()
           }
 
         }
