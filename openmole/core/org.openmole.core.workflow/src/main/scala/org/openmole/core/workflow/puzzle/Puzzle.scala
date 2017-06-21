@@ -34,33 +34,17 @@ import org.openmole.tool.thread._
 
 object ToPuzzle {
 
-  implicit val puzzleToPuzzle = new ToPuzzle[Puzzle] {
-    def toPuzzle(p: Puzzle) = p
+  def apply[T](f: T ⇒ Puzzle): ToPuzzle[T] = new ToPuzzle[T] {
+    override def toPuzzle(t: T): Puzzle = f(t)
   }
 
-  implicit val puzzlePieceToPuzzle = new ToPuzzle[PuzzlePiece] {
-    def toPuzzle(p: PuzzlePiece) = p.buildPuzzle
-  }
-
-  implicit val puzzleContainerToPuzzle = new ToPuzzle[PuzzleContainer] {
-    def toPuzzle(p: PuzzleContainer) = p.buildPuzzle
-  }
-
-  implicit val slotToPuzzle = new ToPuzzle[Slot] {
-    def toPuzzle(p: Slot) = p.toPuzzle
-  }
-
-  implicit val capsuleToPuzzle = new ToPuzzle[Capsule] {
-    def toPuzzle(p: Capsule) = p.toPuzzle
-  }
-
-  implicit val taskToPuzzle = new ToPuzzle[Task] {
-    def toPuzzle(p: Task) = Capsule(p).toPuzzle
-  }
-
-  implicit def hlistCanBeToPuzzle[P: ToPuzzle, H <: HList](implicit select: Selector[H, P]) = new ToPuzzle[H] {
-    def toPuzzle(h: H) = implicitly[ToPuzzle[P]].toPuzzle(select(h))
-  }
+  implicit val puzzleToPuzzle = ToPuzzle[Puzzle](identity)
+  implicit val puzzlePieceToPuzzle = ToPuzzle[PuzzlePiece](_.buildPuzzle)
+  implicit val puzzleContainerToPuzzle = ToPuzzle[PuzzleContainer](_.buildPuzzle)
+  implicit val slotToPuzzle = ToPuzzle[Slot](_.toPuzzle)
+  implicit val capsuleToPuzzle = ToPuzzle[Capsule](_.toPuzzle)
+  implicit val taskToPuzzle = ToPuzzle[Task](p ⇒ Capsule(p).toPuzzle)
+  implicit def hlistCanBeToPuzzle[P: ToPuzzle, H <: HList](implicit select: Selector[H, P]) = ToPuzzle[H](h ⇒ implicitly[ToPuzzle[P]].toPuzzle(select(h)))
 
 }
 
