@@ -142,7 +142,7 @@ object WorkflowIntegration {
     ag:         AG,
     genome:     UniqueGenome,
     objectives: Objectives
-  )(implicit val algorithm: mgo.openmole.Integration[AG, Vector[Double], Vector[Double]])
+  )(implicit val algorithm: MGOAPI.Integration[AG, Vector[Double], Vector[Double]])
 
   object DeterministicGA {
     implicit def deterministicGAIntegration[AG] = new WorkflowIntegration[DeterministicGA[AG]] {
@@ -157,7 +157,7 @@ object WorkflowIntegration {
     replication: Stochastic[Seq]
   )(
     implicit
-    val algorithm: mgo.openmole.Integration[AG, Vector[Double], Vector[Double]] with mgo.openmole.Stochastic
+    val algorithm: MGOAPI.Integration[AG, Vector[Double], Vector[Double]] with MGOAPI.Stochastic
   )
 
   object StochasticGA {
@@ -177,7 +177,7 @@ trait EvolutionWorkflow {
   type MGOAG
   def mgoAG: MGOAG
 
-  val integration: mgo.openmole.Integration[MGOAG, V, P]
+  val integration: MGOAPI.Integration[MGOAG, V, P]
   import integration._
 
   def operations = integration.operations(mgoAG)
