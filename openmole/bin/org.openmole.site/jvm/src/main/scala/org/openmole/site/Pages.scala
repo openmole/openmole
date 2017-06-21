@@ -547,7 +547,7 @@ object DocumentationPages {
 
             def children = Seq()
 
-            def details = Seq(geneticalgo)
+            def details = Seq(geneticalgo, island, stochasticity)
 
             def content = scalatex.documentation.language.method.Calibration()
 
@@ -605,7 +605,32 @@ object DocumentationPages {
 
             def content = scalatex.documentation.details.GeneticAlgorithm()
           }
+          val island = new DocumentationPage {
+            override def id = "island"
 
+            def name = "Islands Scheme"
+
+            override def title = Some(name)
+
+            def children = Seq()
+
+            def details = Seq()
+
+            def content = scalatex.documentation.details.Island()
+          }
+          val stochasticity = new DocumentationPage {
+            override def id = "stochasticity"
+
+            def name = "Stochasticity Management"
+
+            override def title = Some(name)
+
+            def children = Seq()
+
+            def details = Seq()
+
+            def content = scalatex.documentation.details.StochasticityManagement()
+          }
         }
       }
 

@@ -74,6 +74,7 @@ Stochasticity => balance exploration pour nouvelles solutions et réplications d
     and the characteristics you want to reproduce.
 
 @br
+Un peu relou cet exemple finalement TODO à virer ?
     For example, if your ideal dynamic is such that one of your model outputs reaches a certain value V
     after a certain time T, in a linear way, you want to reach  three distinct objectives :
     @ul
@@ -145,13 +146,15 @@ Stochasticity => balance exploration pour nouvelles solutions et réplications d
 Notice that the objectives are given as a sequence of model outputs variables to @b{minimize}.
 So if you want to reach specific target values, like Pi and 42  you should have written your objectives as
 
-@hl.openmole("""objectives = Seq(math.abs(o1-math.Pi), math.abs(o2-42))""")
+@hl.openmole("""objectives = Seq(math.abs(o1-> math.Pi), math.abs(o2->42))""")
+@br
 
-TODO checker syntaxe et écriture d'une task dédiée ??
-Il faut pouvoir facilement définir les target values : je veux optimiser mon modèle pour qu'il me donne 25 , comment je fais
+TODO checker syntaxe et écriture d'une task dédiée avant d'écrire ça  o1 -> 22 , o2 -> math.Pi
+Il faut pouvoir facilement définir les target values : je veux optimiser mon modèle pour qu'il me donne 25 , il faut que
+ ce soit limpide à la lecture du script oms
 
 
-Obviously, maximization problem ar achieved by taking the opposite of variables as objectives.
+Obviously, maximization problem are  performed by taking the opposite of variables as objectives.
 
 @h3
     Scaling Up the calibration

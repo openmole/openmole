@@ -58,7 +58,8 @@ If your input is one file among many,  or  a line among a CSV file, use the  @b{
 and @b{FileSampling} TODO lien interne à la doc
 
 
-
+@br
+@br
 
 @h2{Variation of several inputs}
 @p
@@ -104,11 +105,12 @@ taken in the [Long.MIN_VALUE; Long.MAX_VALUE] domain of the Long native type.
 
 
 @br
+@br
 
 Files are explored as items of a list.
  The items are gathered  by the @hl.openmole("files()") function applied  on the @hl.openmole("dir") directory,
  optionally filtered with any @hl.openmole("String => Boolean")  functions  such as
- @hl.openmole("contains(), startswith(), endswith()")
+ @hl.openmole("""contains(), startswith(), endswith()""")
 
 
  (see  the @a("Java Class String Documentation", href:="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html")
@@ -116,11 +118,14 @@ Files are explored as items of a list.
 
 
 
-@h3{Higher Dimension spaces}
+@h3
+    Higher Dimension spaces
+@p
 
-Higher dimension spaces must be handled via specific methods of the literature.
- OpenMOLE includes two of these methods Sobol Sequence and Latin HyperCube, defined as specifications
- of the exploration task:
+    Higher dimension spaces must be handled via specific methods of the literature, because otherwise cartesian product
+    would be too memory consuming .
+     OpenMOLE includes two of these methods: Sobol Sequence and Latin HyperCube, defined as specifications
+     of the exploration task:
 
 @br
 
@@ -177,4 +182,5 @@ This model features a threshold value in its unique parameter domain, below whic
 We will perform sensitivity analysis to make this threshold appear.
 
 
-TODO
+TODO est ce qu'il faut vaiment le faire ici ou faire un tuto dédié ?
+TODO le faire d'abord et décider ensuite
