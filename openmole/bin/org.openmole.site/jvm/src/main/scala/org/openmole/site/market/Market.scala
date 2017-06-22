@@ -123,27 +123,28 @@ class Market(repositories: Seq[MarketRepository], destination: File) {
   def archiveDirectoryName = "market"
 
   def generate(resourceDirectory: File, testScript: Boolean = true): Seq[GeneratedMarketEntry] = {
-    val archiveDirectory = destination / archiveDirectoryName
-    archiveDirectory.mkdirs()
-    for {
-      marketRepository ← repositories
-      repository = marketRepository.repository
-      project ← marketRepository.entries
-      if !testScript || test(repository.location(resourceDirectory), project)
-    } yield {
-      val fileName = s"${project.name}.tgz".replace(" ", "_")
-      val archive = archiveDirectory / fileName
-      val projectDirectory = repository.location(resourceDirectory) / project.directory
-      projectDirectory archiveCompress archive
-
-      println(s"GER $archiveDirectoryName/$fileName / $projectDirectory")
-      GeneratedMarketEntry(
-        s"$archiveDirectoryName/$fileName",
-        project,
-        projectDirectory,
-        marketRepository.repository.viewURL(project.directory, branchName)
-      )
-    }
+    //    val archiveDirectory = destination / archiveDirectoryName
+    //    archiveDirectory.mkdirs()
+    //    for {
+    //      marketRepository ← repositories
+    //      repository = marketRepository.repository
+    //      project ← marketRepository.entries
+    //      if !testScript || test(repository.location(resourceDirectory), project)
+    //    } yield {
+    //      val fileName = s"${project.name}.tgz".replace(" ", "_")
+    //      val archive = archiveDirectory / fileName
+    //      val projectDirectory = repository.location(resourceDirectory) / project.directory
+    //      projectDirectory archiveCompress archive
+    //
+    //      println(s"GER $archiveDirectoryName/$fileName / $projectDirectory")
+    //      GeneratedMarketEntry(
+    //        s"$archiveDirectoryName/$fileName",
+    //        project,
+    //        projectDirectory,
+    //        marketRepository.repository.viewURL(project.directory, branchName)
+    //      )
+    //    }
+    Seq()
   }
 
   def test(directory: File, project: MarketEntry): Boolean = true

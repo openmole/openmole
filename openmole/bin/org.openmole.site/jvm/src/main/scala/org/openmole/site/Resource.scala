@@ -27,6 +27,8 @@ object Resource {
   //FIXME
   def buildinfoVersion = "7.0-SNAPSHOT"
 
+  def htmlResource(name: String) = FileResource(s"html/$name")
+
   def imgResource(name: String) = FileResource(s"img/$name")
 
   def jsResource(name: String) = FileResource(s"js/$name")
@@ -38,6 +40,7 @@ object Resource {
   def FileResource(name: String) = RenameFileResource(name, name)
 
   //def css = FileResource("openMOLEStyles.css")
+  val menuHtml = htmlResource("menu.html")
 
   def ants = imgResource("ants.png")
 
