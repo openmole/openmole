@@ -2,8 +2,9 @@
 @import org.openmole.site.tools._
 @import org.openmole.site._
 
-@p{Embedding C/C++ code }
 
+@h3{Embedding C/C++ code }
+@p
   In OpenMOLE, a generic task named @hl.openmole("CARETask") offers to run external applications packaged with @a("CARE", href := Resource.care.file). The site (proposing an outdated version of CARE for now, but a great documentation) can be found @a("here", href := "https://proot-me.github.io/"). CARE makes it possible to package your application from any Linux computer, and then re-execute it on any other Linux computer. The CARE / OpenMOLE pair is a very efficient way to distribute your application at very large scale with very little effort. Please note that this packaging step is only necessary if you plan distribute your workflow to an heterogeneous computing environment such as the EGI grid. If you target local clusters, running the same operating system and sharing a network file system, you can directly jump to the @a("SystemExecTask", href := DocumentationPages.root.language.model.native.file + "#Usingalocalexecutable(innonportabletasks)"), section.
 
   @p You should first install CARE:
@@ -35,9 +36,9 @@
   documentation.
 
 
-  @p{Advanced options}
-
-    @p The @i{CARETask} can be customised to fit the needs of a specific application. For instance, some applications disregarding standards might not return the expected 0 value upon completion. The return value of the application is used by OpenMOLE to determine whether the task has been successfully executed, or needs to be re-executed. Setting the boolean flag @hl.openmoleNoTest("errorOnReturnValue") to @i{false} will prevent OpenMOLE from re-scheduling a @i{CARETask} that have reported a return code different from 0. You can also get the return code in a variable using the @hl.openmoleNoTest("returnValue") setting.
+  @h3{Advanced options}
+ @p
+    The @i{CARETask} can be customised to fit the needs of a specific application. For instance, some applications disregarding standards might not return the expected 0 value upon completion. The return value of the application is used by OpenMOLE to determine whether the task has been successfully executed, or needs to be re-executed. Setting the boolean flag @hl.openmoleNoTest("errorOnReturnValue") to @i{false} will prevent OpenMOLE from re-scheduling a @i{CARETask} that have reported a return code different from 0. You can also get the return code in a variable using the @hl.openmoleNoTest("returnValue") setting.
 
     @p Another default behaviour is to print the standard and error outputs of each task in the OpenMOLE console. Such raw prints might not be suitable when a very large number of tasks is involved or that further processing are to be performed on the outputs. A @i{CARETask}'s standard and error outputs can be assigned to OpenMOLE variable and thus injected in the dataflow by summoning respectively the @hl.openmoleNoTest("stdOut") and @hl.openmoleNoTest("stdErr") actions on the task.
 
@@ -65,8 +66,9 @@
 
     @p You will note that @b{options holding a single value} are set using the @hl.openmoleNoTest(":=") operator. Also, the OpenMOLE variables containing the standard and error outputs are @b{automatically marked as outputs} of the task, and must not be added to the @hl.openmoleNoTest("outputs") list.
 
-  @p{Using local resources}
-    @p To access data present on the execution node (outside the CARE filesystem) you should use a dedicated option of the @i{CARETask}: @i{hostFiles}. This option takes the path of a file on the execution host and binds it to the same path in the CARE filesystem. Optionally you can provide a second argument to specify the path explicitly. For instance:
+  @h3{Using local resources}
+    @p
+    To access data present on the execution node (outside the CARE filesystem) you should use a dedicated option of the @i{CARETask}: @i{hostFiles}. This option takes the path of a file on the execution host and binds it to the same path in the CARE filesystem. Optionally you can provide a second argument to specify the path explicitly. For instance:
     @br @hl.openmole("""
       val careTask = CARETask("care.tgz.bin", "executable arg1 arg2 /path/to/my/file /virtual/path arg4") set (
         hostFiles += ("/path/to/my/file"),
@@ -103,6 +105,6 @@
 
     @p Note that each execution is isolated in separate folder on the execution host and that the task execution is considered as failed if the script return a value different from 0. If you need another behaviour you can use the same advanced options as the @i{CARETask} regarding the return code.
 
-  @p{Troubleshooting}
+  @h3{Troubleshooting}
     @p You should always try to re-execute your application outside of OpenMOLE first. This allows you to ensure the packaging process with CARE was successful. If something goes wrong at this stage, you should check the official @a("CARE documentation", href := "https://proot-me.github.io/") or the archives of the @a("CARE mailing list", href := "https://groups.google.com/forum/?fromgroups#!forum/reproducible").
     @p If the packaged application re-executes as you'd expect, but you still struggle to embed it in OpenMOLE, then get in touch with our user community via our the @a("OpenMOLE user mailing-list", href := "http://list.openmole.org/").
