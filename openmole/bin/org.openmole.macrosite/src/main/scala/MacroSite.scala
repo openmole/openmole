@@ -67,8 +67,6 @@ object MacroSite extends App {
     } + s"""\n\nlazy val all: Seq[JSPage] = Seq(${pageMap.map { _.name }.mkString(", ")})\n\nlazy val topPagesChildren = Seq(${topPagesChildren.map { _.name }.mkString(", ")})
                  """.stripMargin + footer
 
-    println(content)
     targetFile overwrite content
-
   }
 }
