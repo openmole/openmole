@@ -141,6 +141,7 @@ object Site extends App {
       def bodyFrag(page: org.openmole.site.Page) = {
 
         body(
+          Menu.build,
           div(id := shared.sitexIntro, page.intro.map {
             _.intro
           }.getOrElse("")),
