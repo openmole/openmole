@@ -4,5 +4,8 @@
 
 @p{Profile Method}
     @p The method aims at testing the validity intervals of input parameters
-
+@figure
  @img(src := Resource.vignette_profiles.file, width:= "90%")
+   @figcaption
+    Calibration Profiles find the domain of a parameter within which the model can produce dynamics
+    under a given threshold of acceptance, every other parameter being calibrated.
