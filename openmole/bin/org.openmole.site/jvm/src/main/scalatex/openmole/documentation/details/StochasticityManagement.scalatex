@@ -1,0 +1,60 @@
+@import org.openmole.site.tools._
+@import org.openmole.site._
+
+
+
+
+@def model = """
+  //model inputs
+  val x = Val[Double]
+  val y = Val[Double]
+  //model outputs
+  val o1 = Val[Double]
+  val o2 = Val[Double]
+
+  val model =
+    ScalaTask("val o1 = x; val o2 = y") set (
+      inputs += (x, y),
+      outputs += (o1, o2)
+    )
+"""
+
+@h1
+    Handling Stochastic Models Calibration
+
+  @p Calibration of stochastic models leads to noisy fitness functions. An efficient strategy to deal with such
+  fitness functions is implemented in OpenMOLE. This strategy automatically balances the need for replications and
+  the discovery of new solutions. In case you want to explore a stochastic model with a genetic algorithm you can do:
+
+@p
+
+
+    TODO donner pplus de détails sur la façon dont c'est fait
+
+@br
+
+  @br @hl.openmole("""
+  val seed = Val[Long]
+
+  val evolution =
+    SteadyStateEvolution(
+      // Definition of the optimisation algorithm
+      // mu is the size of the population
+      // genome is the inputs prototype and their variation ranges
+      // objectives are the objectives to minimise
+      algorithm =
+        NSGA2(
+          mu = 100,
+          genome = Seq(x in (0.0, 1.0), y in (0.0, 1.0)),
+          objectives = Seq(o1, o2),
+          // OpenMOLE provide a seed for your stochastic model to use (it is optional)
+          // 20% of the evaluations are used for replicating existing solutions
+          // 100 replication are stored at max for each individual
+          stochastic = Stochastic(seed = seed, reevaluate = 0.2, replications = 100)
+        ),
+      evaluation = model,
+      termination = 100
+    )""", header = model)
+
+
+
