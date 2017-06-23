@@ -50,14 +50,33 @@ package object tools {
 
   def classIs(s: String) = `class` := s
 
-  def styleIs(s: String) = `style` := s
-
-  val targetBlank = target := "_blank"
-
   def to(ref: String) = a(href := ref)
 
   def innerLink(page: Page, title: String) = to(page.file)(span(title))
 
   def buttonLink(ref: String, buttonTitle: String) = to(ref)(targetBlank)(span(classIs("btn btn-primary"), `type` := "button", buttonTitle))
+
+  // CONVINIENT KEYS
+  implicit class SString(ss: String) {
+    def ++(s: String) = s"$ss $s"
+  }
+  
+  lazy val nav: String = "nav"
+  lazy val navbar: String = "navbar"
+  lazy val navbar_nav: String = "navbar-nav"
+  lazy val navbar_default: String = "navbar-default"
+  lazy val navbar_inverse: String = "navbar-inverse"
+  lazy val navbar_staticTop: String = "navbar-static-top"
+  lazy val navbar_fixedTop: String = "navbar-fixed-top"
+  lazy val navbar_right: String = "navbar-right"
+  lazy val navbar_left: String = "navbar-left"
+  lazy val navbar_header: String = "navbar-header"
+  lazy val navbar_brand: String = "navbar-brand"
+  lazy val navbar_btn: String = "navbar-btn"
+  lazy val navbar_collapse: String = "navbar-collapse"
+  lazy val container_fluid: String = "container-fluid"
+  lazy val pointer = cursor := "pointer"
+  lazy val targetBlank = target := "_blank"
+  lazy val collapse: String = "collapse"
 
 }

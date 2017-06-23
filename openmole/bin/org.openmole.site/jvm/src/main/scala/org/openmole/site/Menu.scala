@@ -23,21 +23,22 @@ import org.openmole.site.tools._
 
 object Menu {
 
-  val navClass = classIs("navbar navbar-default navbar-static-top navbar-fixed-top navbar-inverse")
-  val liStyle = styleIs("padding-top: 8px;")
-  val inputStyle = styleIs("padding-top: 15px;")
+  val navClass = classIs(navbar ++ navbar_default ++ navbar_staticTop ++ navbar_fixedTop ++ navbar_inverse)
+  val liStyle = paddingTop := 8
+  val inputStyle = paddingTop := 15
+  val index = "index.html"
 
   def build = {
-    tags2.nav(navClass, styleIs("padding-right: 20px;"))(
-      div(classIs("container-fluid"))(
-        div(classIs("navbar-header"))(
-          div(classIs("navbar-brand"), href := "#", styleIs("padding: 0px;")),
-          to("index.html")(
-            img(alt := "", src := "img/openmole.png", styleIs("width: 240px; cursor: pointer;"))
+    tags2.nav(navClass, paddingRight := 20)(
+      div(classIs(container_fluid))(
+        div(classIs(navbar_header))(
+          div(classIs(navbar_brand), href := "#", padding := 0),
+          to(index)(
+            img(alt := "", src := "img/openmole.png", Seq(width := 240, pointer))
           )
         ),
-        div(classIs("collapse navbar-collapse"), styleIs("padding-top:10px;"))(
-          ul(classIs("nav navbar-nav navbar-right"))(
+        div(classIs(collapse ++ navbar_collapse), paddingTop := 10)(
+          ul(classIs(nav ++ navbar_nav ++ navbar_right))(
             li(innerLink(DocumentationPages.root.language.model.scala, "DOCUMENTATION"), liStyle),
             li(innerLink(Pages.faq, "FAQ"), liStyle),
             li(inputStyle)(div(id := shared.searchDiv)),
