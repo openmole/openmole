@@ -36,15 +36,10 @@ object SiteJS extends JSApp {
   @JSExport()
   def main(): Unit = {
 
-    // val menu = Menu.build.render
     JSPages.toJSPage(org.scalajs.dom.window.location.pathname.split('/').last) foreach { page ⇒
 
       if (JSPages.topPagesChildren.contains(page)) UserGuide.addCarousel(page)
       else MainPage.load(page)
-
-      //   withBootstrapNative {
-      //    menu
-      //   }
 
       Highlighting.init
     }
@@ -54,6 +49,7 @@ object SiteJS extends JSApp {
 
   @JSExport
   def loadIndex(indexArray: js.Array[js.Any]): Unit = {
+    Search.build
 
     val index = Importedjs.lunr((i: Index) ⇒ {
       i.field("title", lit("boost" → 10).value)
@@ -65,26 +61,6 @@ object SiteJS extends JSApp {
     })
 
     lunrIndex() = Some(index)
-    //    val resultList = tags.div(
-    //      Rx {
-    //        for {r ← results()} yield {
-    //          tags.div(
-    //            tags.span(
-    //              tags.a(r.ref, cursor := "pointer", href := r.ref, target := "_blank")
-    //            )
-    //          )
-    //        }
-    //      }
-    //    ).render
-
-    //      dom.document.getElementById("openmoleSearch").appendChild(
-    //        tags.div(
-    //          form(`type` := "submit", searchInput, textAlign := "center", onsubmit := { () ⇒
-    //            search()
-    //            false
-    //          }), resultList
-    //        ).render
-    //      )
   }
 
   def search(content: String): Seq[IIndexSearchResult] = {
