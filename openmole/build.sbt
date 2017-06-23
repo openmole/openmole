@@ -815,7 +815,7 @@ lazy val buildMacro = inputKey[Unit]("buildMacro")
 buildMacro := {
   Def.inputTaskDyn {
     Def.taskDyn {
-      val jsSource = (sourceManaged in siteJS in Compile).value / "scala/org/openmole/site/macropackage.scala"
+      val jsSource = (sourceDirectory in siteJS in Compile).value / "scala/org/openmole/site/macropackage.scala"
      (run in macrosite in Compile).toTask(" " + jsSource).result
     }
   }.evaluated
