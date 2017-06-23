@@ -50,7 +50,7 @@ object UserGuide {
         )
       )
 
-      tabs.add(t.name, withDetails, isCurrent, onclickExtra = () ⇒ Search.to(t))
+      tabs.add(t.name, withDetails, isCurrent, onclickExtra = () ⇒ utils.to(t))
     })
   }
 

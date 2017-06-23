@@ -37,9 +37,9 @@ class StepCarousel(current: Int, steps: Step*) {
   val currentStep = steps(current)
   val stepsSize = steps.size
 
-  def toRight = Search.to(steps((current + 1) % stepsSize).page)
+  def toRight = utils.to(steps((current + 1) % stepsSize).page)
 
-  def toLeft = Search.to(steps((current + stepsSize - 1) % stepsSize).page)
+  def toLeft = utils.to(steps((current + stepsSize - 1) % stepsSize).page)
 
   val render = {
     tags.div(width := "100%")(

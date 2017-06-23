@@ -31,10 +31,6 @@ object Search {
 
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
-  def to(page: JSPage) {
-    org.scalajs.dom.window.location.href = page.file
-  }
-
   def build = {
 
     val searchDiv = div
@@ -47,7 +43,7 @@ object Search {
             r ← result().take(10)
           } yield {
             val page = JSPages.all.filter { p: JSPage ⇒ p.file == r.ref }.headOption
-            page.map { p ⇒ div(a(pointer, onclick := { () ⇒ to(p) })(p.name)) }.getOrElse(div())
+            page.map { p ⇒ div(a(pointer, onclick := { () ⇒ utils.to(p) })(p.name)) }.getOrElse(div())
           }
         }
       )
