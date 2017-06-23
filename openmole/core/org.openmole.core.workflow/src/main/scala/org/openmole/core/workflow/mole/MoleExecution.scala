@@ -66,27 +66,34 @@ object MoleExecution extends Logger {
   private def listOfTupleToMap[K, V](l: Traversable[(K, V)]): Map[K, Traversable[V]] = l.groupBy(_._1).mapValues(_.map(_._2))
 
   def apply(
-    mole:               Mole,
-    sources:            Iterable[(Capsule, Source)]            = Iterable.empty,
-    hooks:              Iterable[(Capsule, Hook)]              = Iterable.empty,
-    environments:       Map[Capsule, Environment]              = Map.empty,
-    grouping:           Map[Capsule, Grouping]                 = Map.empty,
-    implicits:          Context                                = Context.empty,
-    defaultEnvironment: OptionalArgument[LocalEnvironment]     = None,
-    cleanOnFinish:      Boolean                                = true,
-    executionContext:   OptionalArgument[MoleExecutionContext] = None
+    mole:                        Mole,
+    sources:                     Iterable[(Capsule, Source)]                = Iterable.empty,
+    hooks:                       Iterable[(Capsule, Hook)]                  = Iterable.empty,
+    environments:                Map[Capsule, EnvironmentProvider]          = Map.empty,
+    grouping:                    Map[Capsule, Grouping]                     = Map.empty,
+    implicits:                   Context                                    = Context.empty,
+    defaultEnvironment:          OptionalArgument[LocalEnvironmentProvider] = None,
+    cleanOnFinish:               Boolean                                    = true,
+    executionContext:            OptionalArgument[MoleExecutionContext]     = None,
+    startStopDefaultEnvironment: Boolean                                    = true
   )(implicit moleServices: MoleServices): MoleExecution = {
     import moleServices._
+
+    def defaultDefaultEnvironment =
+      LocalEnvironment()(varName = sourcecode.Name("local"), preference = implicitly, threadProvider = implicitly, eventDispatcher = implicitly)
+
     new MoleExecution(
       mole,
       listOfTupleToMap(sources),
       listOfTupleToMap(hooks),
       environments,
       grouping,
-      defaultEnvironment.getOrElse(LocalEnvironment()),
+      defaultEnvironment.getOrElse(defaultDefaultEnvironment),
       cleanOnFinish,
       implicits,
-      executionContext.getOrElse(MoleExecutionContext())
+      executionContext.getOrElse(MoleExecutionContext()),
+      startStopDefaultEnvironment,
+      id = UUID.randomUUID().toString
     )
   }
 
@@ -95,16 +102,17 @@ object MoleExecution extends Logger {
 case class JobStatuses(ready: Long, running: Long, completed: Long)
 
 class MoleExecution(
-    val mole:               Mole,
-    val sources:            Sources,
-    val hooks:              Hooks,
-    val environments:       Map[Capsule, Environment],
-    val grouping:           Map[Capsule, Grouping],
-    val defaultEnvironment: LocalEnvironment,
-    val cleanOnFinish:      Boolean,
-    val implicits:          Context,
-    val executionContext:   MoleExecutionContext,
-    val id:                 String                    = UUID.randomUUID().toString
+    val mole:                        Mole,
+    val sources:                     Sources,
+    val hooks:                       Hooks,
+    val environmentProviders:        Map[Capsule, EnvironmentProvider],
+    val grouping:                    Map[Capsule, Grouping],
+    val defaultEnvironmentProvider:  LocalEnvironmentProvider,
+    val cleanOnFinish:               Boolean,
+    val implicits:                   Context,
+    val executionContext:            MoleExecutionContext,
+    val startStopDefaultEnvironment: Boolean,
+    val id:                          String
 ) {
 
   import executionContext.services._
@@ -123,6 +131,10 @@ class MoleExecution(
 
   private val nbWaiting = Ref(0)
   private val _completed = Ref(0L)
+
+  lazy val environments = environmentProviders.mapValues(_())
+  lazy val defaultEnvironment = defaultEnvironmentProvider()
+  def allEnvironments = (environments.values ++ Seq(defaultEnvironment)).toSeq.distinct
 
   val rootSubMoleExecution = new SubMoleExecution(None, this)
   val rootTicket = Ticket(id, ticketNumber.next)
@@ -193,10 +205,16 @@ class MoleExecution(
   def allWaiting = atomic { implicit txn ⇒ numberOfJobs <= nbWaiting() }
 
   def start(context: Context): this.type = {
+    def startEnvironments() = {
+      if (startStopDefaultEnvironment) defaultEnvironment.start()
+      environments.values.foreach(_.start())
+    }
+
     newFile.baseDir.mkdirs()
     _started.single() = true
     _startTime.single() = Some(System.currentTimeMillis)
     eventDispatcher.trigger(this, new MoleExecution.Starting)
+    startEnvironments()
     rootSubMoleExecution.newChild.submit(mole.root, context, nextTicket(rootTicket))
     if (allWaiting) submitAll
     this
@@ -248,7 +266,7 @@ class MoleExecution(
 
     val runningSet: java.util.HashSet[UUID] = {
       def executionJobs =
-        environments.values.toSeq.collect { case e: SubmissionEnvironment ⇒ e }.toIterator.flatMap(_.jobs.toIterator)
+        environmentProviders.values.toSeq.collect { case e: SubmissionEnvironment ⇒ e }.toIterator.flatMap(_.jobs.toIterator)
 
       val set = new java.util.HashSet[UUID](jobs.size + 1, 1.0f)
 
@@ -298,9 +316,17 @@ class MoleExecution(
     }
 
   private def finish() = {
-    _finished.single() = true
-    _endTime.single() = Some(System.currentTimeMillis)
-    if (cleanOnFinish) newFile.baseDir.recursiveDelete
+    def stopEnvironments() = {
+      if (startStopDefaultEnvironment) defaultEnvironment.stop()
+      environments.values.foreach(_.stop())
+    }
+
+    try stopEnvironments()
+    finally {
+      _finished.single() = true
+      _endTime.single() = Some(System.currentTimeMillis)
+      if (cleanOnFinish) newFile.baseDir.recursiveDelete
+    }
   }
 
   def canceled: Boolean = _canceled.single()

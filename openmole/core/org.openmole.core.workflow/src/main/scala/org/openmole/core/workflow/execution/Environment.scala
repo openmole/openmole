@@ -66,6 +66,8 @@ sealed trait Environment <: Name {
   def done: Long = _done.get()
   def failed: Long = _failed.get()
 
+  def start(): Unit = {}
+  def stop(): Unit = {}
 }
 
 trait SubmissionEnvironment <: Environment {
@@ -79,7 +81,8 @@ object LocalEnvironment {
     nbThreads:    OptionalArgument[Int]    = None,
     deinterleave: Boolean                  = false,
     name:         OptionalArgument[String] = OptionalArgument()
-  )(implicit varName: sourcecode.Name, preference: Preference, threadProvider: ThreadProvider, eventDispatcher: EventDispatcher) = new LocalEnvironment(nbThreads.getOrElse(1), deinterleave, Some(name.getOrElse(varName.value)))
+  )(implicit varName: sourcecode.Name, preference: Preference, threadProvider: ThreadProvider, eventDispatcher: EventDispatcher) =
+    LocalEnvironmentProvider(() ⇒ new LocalEnvironment(nbThreads.getOrElse(1), deinterleave, Some(name.getOrElse(varName.value))))
 
 }
 
@@ -107,4 +110,7 @@ class LocalEnvironment(
 
   def submitted: Long = pool().waiting
   def running: Long = pool().running
+
+  override def start() = {}
+  override def stop() = pool().stop()
 }

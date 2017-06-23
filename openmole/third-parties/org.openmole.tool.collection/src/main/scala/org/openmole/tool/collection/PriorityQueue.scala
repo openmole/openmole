@@ -19,14 +19,15 @@ package org.openmole.tool.collection
 
 import java.util.concurrent.Semaphore
 import java.util.TreeMap
-import scala.collection.mutable.Stack
 import collection.JavaConverters._
+import java.util.Stack
 
 object PriorityQueue {
   def apply[T]() = new PriorityQueue[T]
 }
 
 class PriorityQueue[T] {
+
   private val inQueue = new Semaphore(0)
 
   val queues = (new TreeMap[Int, Stack[T]]).asScala
@@ -55,4 +56,8 @@ class PriorityQueue[T] {
       job
     }
   }
+
+  def all = synchronized { queues.values.toVector.flatMap(_.iterator().asScala.toVector) }
+  def clear() = synchronized { queues.clear() }
+
 }

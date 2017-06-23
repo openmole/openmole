@@ -24,7 +24,7 @@ trait HookDecorator[T] {
 }
 
 trait EnvironmentDecorator[T] {
-  def on(environment: Environment): T
+  def on(environment: EnvironmentProvider): T
   def by(strategy: Grouping): T
 }
 

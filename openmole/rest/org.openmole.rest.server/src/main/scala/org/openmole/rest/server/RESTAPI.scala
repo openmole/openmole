@@ -175,7 +175,7 @@ trait RESTAPI extends ScalatraServlet with GZipSupport
         case (Some(t), _) ⇒ Failed(Error(t.exception).copy(message = s"Mole execution failed when execution capsule: ${t.capsule}"))
         case (None, true) ⇒ Finished()
         case _ ⇒
-          def environments = moleExecution.environments.values.toSeq
+          def environments = moleExecution.environments.values.toSeq ++ Seq(moleExecution.defaultEnvironment)
           def environmentStatus = environments.map {
             env ⇒
               def environmentErrors = env.clearErrors.map(e ⇒ Error(e.exception).copy(level = Some(e.level.toString)))

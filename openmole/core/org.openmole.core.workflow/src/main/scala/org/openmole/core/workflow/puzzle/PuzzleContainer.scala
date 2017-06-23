@@ -41,12 +41,12 @@ case class OutputEnvironmentPuzzleContainer(
     puzzle:      Puzzle,
     output:      Capsule,
     delegate:    Capsule,
-    hooks:       Seq[Hook]           = Seq.empty,
-    environment: Option[Environment] = None,
-    grouping:    Option[Grouping]    = None
+    hooks:       Seq[Hook]                   = Seq.empty,
+    environment: Option[EnvironmentProvider] = None,
+    grouping:    Option[Grouping]            = None
 ) extends HookDecorator[OutputEnvironmentPuzzleContainer] with EnvironmentDecorator[OutputEnvironmentPuzzleContainer] with PuzzleContainer {
 
-  def on(environment: Environment) = copy(environment = Some(environment))
+  def on(environment: EnvironmentProvider) = copy(environment = Some(environment))
   def by(strategy: Grouping): OutputEnvironmentPuzzleContainer = copy(grouping = Some(strategy))
   def hook(hs: Hook*) = copy(hooks = hooks ++ hs)
 

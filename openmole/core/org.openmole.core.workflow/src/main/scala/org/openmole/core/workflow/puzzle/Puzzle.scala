@@ -101,10 +101,10 @@ object PuzzlePiece {
 
 case class PuzzlePiece(
     slot:        Slot,
-    sources:     Iterable[Source]    = Iterable.empty,
-    hooks:       Iterable[Hook]      = Iterable.empty,
-    environment: Option[Environment] = None,
-    grouping:    Option[Grouping]    = None
+    sources:     Iterable[Source]            = Iterable.empty,
+    hooks:       Iterable[Hook]              = Iterable.empty,
+    environment: Option[EnvironmentProvider] = None,
+    grouping:    Option[Grouping]            = None
 ) {
   def capsule = slot.capsule
 
@@ -124,13 +124,13 @@ case class PuzzlePiece(
 
 case class Puzzle(
     firstSlot:    Slot,
-    lasts:        Iterable[Capsule]           = Iterable.empty,
-    transitions:  Iterable[ITransition]       = Iterable.empty,
-    dataChannels: Iterable[DataChannel]       = Iterable.empty,
-    sources:      Iterable[(Capsule, Source)] = Iterable.empty,
-    hooks:        Iterable[(Capsule, Hook)]   = Iterable.empty,
-    environments: Map[Capsule, Environment]   = Map.empty,
-    grouping:     Map[Capsule, Grouping]      = Map.empty
+    lasts:        Iterable[Capsule]                 = Iterable.empty,
+    transitions:  Iterable[ITransition]             = Iterable.empty,
+    dataChannels: Iterable[DataChannel]             = Iterable.empty,
+    sources:      Iterable[(Capsule, Source)]       = Iterable.empty,
+    hooks:        Iterable[(Capsule, Hook)]         = Iterable.empty,
+    environments: Map[Capsule, EnvironmentProvider] = Map.empty,
+    grouping:     Map[Capsule, Grouping]            = Map.empty
 ) {
 
   def this(p: Puzzle) =
@@ -151,10 +151,10 @@ case class Puzzle(
     MoleExecution(toMole, sources, hooks, environments, grouping)
 
   def toExecution(
-    implicits:          Context                                = Context.empty,
-    seed:               OptionalArgument[Long]                 = None,
-    executionContext:   OptionalArgument[MoleExecutionContext] = None,
-    defaultEnvironment: OptionalArgument[LocalEnvironment]     = None
+    implicits:          Context                                    = Context.empty,
+    seed:               OptionalArgument[Long]                     = None,
+    executionContext:   OptionalArgument[MoleExecutionContext]     = None,
+    defaultEnvironment: OptionalArgument[LocalEnvironmentProvider] = None
   )(implicit moleServices: MoleServices): MoleExecution =
     MoleExecution(
       mole = toMole,

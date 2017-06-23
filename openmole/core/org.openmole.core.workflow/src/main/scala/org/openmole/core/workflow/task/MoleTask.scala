@@ -80,9 +80,10 @@ object MoleTask {
       MoleExecution(
         mole,
         implicits = implicitsValues,
-        defaultEnvironment = executionContext.localEnvironment,
+        defaultEnvironment = () ⇒ executionContext.localEnvironment,
         executionContext = MoleExecutionContext(),
-        cleanOnFinish = false
+        cleanOnFinish = false,
+        startStopDefaultEnvironment = false
       )
 
     @volatile var lastContext: Option[Context] = None
