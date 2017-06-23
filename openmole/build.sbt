@@ -789,8 +789,7 @@ lazy val api = Project("api", binDir / "target" / "api") settings (defaultSettin
 )
 
 
-lazy val site = crossProject.in(binDir / "org.openmole.site") settings (defaultSettings: _*) settings (scalatex.SbtPlugin.projectSettings
-  ) jvmSettings(
+lazy val site = crossProject.in(binDir / "org.openmole.site") settings (defaultSettings: _*) settings (scalatex.SbtPlugin.projectSettings) jvmSettings(
   libraryDependencies += Libraries.scalaz,
   libraryDependencies += Libraries.scalatexSite,
   libraryDependencies += Libraries.json4s,
@@ -805,12 +804,10 @@ lazy val site = crossProject.in(binDir / "org.openmole.site") settings (defaultS
 )
 
 lazy val macrosite = Project("macrosite", binDir / "org.openmole.macrosite") settings (defaultSettings: _*) settings (
-  libraryDependencies += "com.github.pathikrit" %% "better-files" % "2.17.1"
-  ) dependsOn (siteJVM)
+  libraryDependencies += "com.github.pathikrit" %% "better-files" % "2.17.1") dependsOn (siteJVM)
 
 lazy val siteJS = site.js
 lazy val siteJVM = site.jvm dependsOn(tools, buildinfo, project, serializer, market)
-
 
 lazy val buildSite = inputKey[Unit]("buildSite")
 lazy val buildMacro = inputKey[Unit]("buildMacro")
@@ -818,7 +815,7 @@ lazy val buildMacro = inputKey[Unit]("buildMacro")
 buildMacro := {
   Def.inputTaskDyn {
     Def.taskDyn {
-      val jsSource = (sourceDirectory in siteJS in Compile).value / "scala/org/openmole/site/macropackage.scala"
+      val jsSource = (sourceManaged in siteJS in Compile).value / "scala/org/openmole/site/macropackage.scala"
      (run in macrosite in Compile).toTask(" " + jsSource).result
     }
   }.evaluated
