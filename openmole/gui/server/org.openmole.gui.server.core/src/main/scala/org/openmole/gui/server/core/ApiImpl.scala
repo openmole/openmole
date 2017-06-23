@@ -336,13 +336,13 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
             case Success(o) ⇒
               val puzzle = o.buildPuzzle
 
-              val envIds = puzzle.environments.values.toSeq.distinct.map { env ⇒ EnvironmentId(getUUID, execId) → env }
-              Runnings.add(execId, envIds)
-
-              envIds.foreach { case (envId, env) ⇒ env.listen(Runnings.environmentListener(envId)) }
-
               Try(puzzle.toExecution(executionContext = MoleExecutionContext(out = outputStream))) match {
                 case Success(ex) ⇒
+                  val envIds = (ex.environments.values ++ Seq(ex.defaultEnvironment)).toSeq.distinct.map { env ⇒ EnvironmentId(getUUID, execId) → env }
+                  Runnings.add(execId, envIds)
+
+                  envIds.foreach { case (envId, env) ⇒ env.listen(Runnings.environmentListener(envId)) }
+
                   Try(ex.start) match {
                     case Failure(e) ⇒ error(e)
                     case Success(ex) ⇒
