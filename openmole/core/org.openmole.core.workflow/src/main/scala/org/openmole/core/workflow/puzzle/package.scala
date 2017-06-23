@@ -26,7 +26,7 @@ package puzzle {
   import org.openmole.core.event.EventDispatcher
   import org.openmole.core.preference.Preference
   import org.openmole.core.threadprovider.ThreadProvider
-  import org.openmole.core.workflow.execution.Environment
+  import org.openmole.core.workflow.execution.{ Environment, EnvironmentProvider }
   import org.openmole.core.workspace.NewFile
   import org.openmole.tool.random.Seeder
 
@@ -36,7 +36,7 @@ package puzzle {
     class PuzzlePieceDecorator(puzzle: PuzzlePiece) extends HookDecorator[PuzzlePiece] with EnvironmentDecorator[PuzzlePiece] with SourceDecorator[PuzzlePiece] with TransitionDecorator {
       def from = puzzle.buildPuzzle
 
-      def on(env: Environment) =
+      def on(env: EnvironmentProvider) =
         puzzle.copy(environment = Some(env))
 
       def hook(hooks: Hook*) =
