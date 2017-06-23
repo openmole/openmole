@@ -82,6 +82,10 @@ package object utils {
   import scalatags.JsDom.tags
   import scalatags.JsDom.all._
 
+  def to(page: JSPage) {
+    org.scalajs.dom.window.location.href = page.file
+  }
+
   implicit def texToDiv(textFrag: scalatags.Text.all.Frag): HTMLDivElement = {
     val aDiv = tags.div(sheet.paddingTop(60)).render
     raw(textFrag.render).applyTo(aDiv)

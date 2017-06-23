@@ -2,6 +2,7 @@ package org.openmole.site
 
 import scalatags.Text.tags2
 import scalatags.Text.all._
+import org.openmole.site.tools._
 
 /*
  * Copyright (C) 22/06/17 // mathieu.leclaire@openmole.org
@@ -22,18 +23,11 @@ import scalatags.Text.all._
 
 object Menu {
 
-  def classIs(s: String) = `class` := s
-  def styleIs(s: String) = `style` := s
-  val targetBlank = target := "_blank"
-
-  def to(ref: String) = a(href := ref)
-  def innerLink(page: Page, title: String) = to(page.file)(span(title))
-  def buttonLink(ref: String, buttonTitle: String) = to(ref)(targetBlank)(span(classIs("btn btn-primary"), `type` := "button", buttonTitle))
-
   val navClass = classIs("navbar navbar-default navbar-static-top navbar-fixed-top navbar-inverse")
   val liStyle = styleIs("padding-top: 8px;")
+  val inputStyle = styleIs("padding-top: 15px;")
 
-  def build() = {
+  def build = {
     tags2.nav(navClass, styleIs("padding-right: 20px;"))(
       div(classIs("container-fluid"))(
         div(classIs("navbar-header"))(
@@ -46,6 +40,7 @@ object Menu {
           ul(classIs("nav navbar-nav navbar-right"))(
             li(innerLink(DocumentationPages.root.language.model.scala, "DOCUMENTATION"), liStyle),
             li(innerLink(Pages.faq, "FAQ"), liStyle),
+            li(inputStyle)(div(id := shared.searchDiv)),
             li(buttonLink("http://demo.openmole.org", "DEMO"))
           )
         )

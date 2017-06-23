@@ -46,4 +46,18 @@ package object tools {
 
   def tq = """""""""
 
+  // SCALATAGS METHODS
+
+  def classIs(s: String) = `class` := s
+
+  def styleIs(s: String) = `style` := s
+
+  val targetBlank = target := "_blank"
+
+  def to(ref: String) = a(href := ref)
+
+  def innerLink(page: Page, title: String) = to(page.file)(span(title))
+
+  def buttonLink(ref: String, buttonTitle: String) = to(ref)(targetBlank)(span(classIs("btn btn-primary"), `type` := "button", buttonTitle))
+
 }
