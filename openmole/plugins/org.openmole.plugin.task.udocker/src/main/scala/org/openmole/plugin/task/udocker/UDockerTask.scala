@@ -19,7 +19,6 @@
 package org.openmole.plugin.task.udocker
 
 import java.util.UUID
-import java.util.concurrent.locks.ReentrantLock
 
 import monocle.macros._
 import cats.implicits._
@@ -29,12 +28,10 @@ import org.openmole.core.workspace._
 import org.openmole.core.context._
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.workflow.builder._
-import org.openmole.tool.stream._
 import org.openmole.core.expansion._
 import org.openmole.plugin.task.external._
 import org.openmole.plugin.task.systemexec._
 import org.openmole.plugin.task.container._
-import org.openmole.core.fileservice.FileService
 import org.openmole.core.preference._
 import org.openmole.plugin.task.container
 import org.openmole.plugin.task.udocker.DockerMetadata._
@@ -43,7 +40,6 @@ import org.openmole.tool.cache._
 import squants._
 import squants.time.TimeConversions._
 import org.openmole.tool.file._
-import org.openmole.tool.lock._
 import io.circe.generic.extras.auto._
 import io.circe.jawn.{ decode, decodeFile }
 import io.circe.syntax._
@@ -315,7 +311,7 @@ object UDockerTask {
       val volumes = prepareVolumes(preparedFilesInfo, containerPathResolver, uDocker.hostFiles)
 
       def newContainer(imageId: String)() = newFile.withTmpDir { tmpDirectory ⇒
-        val name = containerName(UUID.randomUUID().toString)
+        val name = containerName(UUID.randomUUID().toString).take(10)
 
         val cl = commandLine(s"${uDockerFile.getAbsolutePath} create --name=$name $imageId")
         execute(cl.toArray, tmpDirectory, udockerVariables(), returnOutput = true, returnError = true)

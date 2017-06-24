@@ -5,11 +5,10 @@ import java.util.UUID
 import monocle.Lens
 import monocle.macros.Lenses
 import org.openmole.core.expansion.FromContext
-import org.openmole.core.fileservice.FileService
 import org.openmole.core.workflow.task.TaskExecutionContext
-import org.openmole.core.workspace.{ NewFile, Workspace }
+import org.openmole.core.workspace.Workspace
 import org.openmole.plugin.task.external.External
-import org.openmole.plugin.task.udocker.DockerMetadata.{ ContainerID, ImageJSON }
+import org.openmole.plugin.task.udocker.DockerMetadata.ContainerID
 import org.openmole.plugin.task.udocker.Registry.LayerElement
 import org.openmole.plugin.task.udocker.UDockerTask.layersDirectory
 import org.openmole.tool.cache.{ CacheKey, WithInstance }
