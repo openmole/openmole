@@ -809,55 +809,57 @@ lazy val macrosite = Project("macrosite", binDir / "org.openmole.macrosite") set
 lazy val siteJS = site.js
 lazy val siteJVM = site.jvm dependsOn(tools, buildinfo, project, serializer, market)
 
-lazy val buildSite = inputKey[Unit]("buildSite")
-lazy val buildMacro = inputKey[Unit]("buildMacro")
-
-buildMacro := {
-  Def.inputTaskDyn {
-    Def.taskDyn {
-      val jsSource = (sourceDirectory in siteJS in Compile).value / "scala/org/openmole/site/macropackage.scala"
-     (run in macrosite in Compile).toTask(" " + jsSource).result
-    }
-  }.evaluated
+def parse(key: String, default: sbt.File, parsed: Seq[String]) = parsed.indexOf(key) match {
+  case -1 => (default, parsed ++ Seq(key, default.getAbsolutePath))
+  case i: Int => {
+    if (i == parsed.size - 1) (default, parsed :+ default.getAbsolutePath)
+    else (file(parsed(i + 1)), parsed)
+  }
 }
 
-buildSite := {
-  buildMacro.evaluated
-  (Def.inputTaskDyn {
-    import sbt.complete.Parsers.spaceDelimited
 
+lazy val copySiteResources = inputKey[Unit]("copySiteResources")
+copySiteResources := {
+  import sbt.complete.Parsers.spaceDelimited
+  val parsed = spaceDelimited("<args>").parsed
+  val defaultResources = (resources in siteJVM in Compile).value
+  val defaultDest = (target in siteJVM).value / "site"
+  val (siteTarget, args1) = parse("--target", defaultDest, parsed)
+  val (resourcesTarget, args2) = parse("--resources", defaultResources.head, parsed)
+
+  val siteBuildJS = (fullOptJS in siteJS in Compile).value
+
+  IO.copyFile(siteBuildJS.data, siteTarget / "js/sitejs.js")
+  IO.copyDirectory(resourcesTarget / "js", siteTarget / "js")
+  IO.copyDirectory(resourcesTarget / "css", siteTarget / "css")
+  IO.copyDirectory(resourcesTarget / "fonts", siteTarget / "fonts")
+  IO.copyDirectory(resourcesTarget / "img", siteTarget / "img")
+  IO.copyDirectory(resourcesTarget / "script", siteTarget / "script")
+}
+
+lazy val buildSite = inputKey[File]("buildSite")
+buildSite :=  {
+  import sbt.complete.Parsers.spaceDelimited
+
+  val generateMacro = Def.taskDyn {
+    val jsSource = (sourceDirectory in siteJS in Compile).value / "scala/org/openmole/site/macropackage.scala"
+    (run in macrosite in Compile).toTask(" " + jsSource)
+  }.value
+
+  val siteTarget = Def.inputTaskDyn {
     val parsed = spaceDelimited("<args>").parsed
-
     val defaultResources = (resources in siteJVM in Compile).value
-    val defaultDest = (target in siteJVM).value
+    val defaultDest = (target in siteJVM).value / "site"
+    val (siteTarget, args1) = parse("--target", defaultDest, parsed)
+    val (resourcesTarget, args2) = parse("--resources", defaultResources.head, parsed)
 
-    def parse(key: String, default: sbt.File) = parsed.indexOf(key) match {
-      case -1 => (default, parsed ++ Seq(key, default.getAbsolutePath))
-      case i: Int => {
-        if (i == parsed.size - 1) (default, parsed :+ default.getAbsolutePath)
-        else (file(parsed(i + 1)), parsed)
-      }
-    }
-
-    val (siteTarget, args1) = parse("--target", defaultDest)
-    val (resourcesTarget, args2) = parse("--resources", defaultResources.head)
     val args = (args1 ++ args2).distinct
+    (run in siteJVM in Compile).toTask(" " + args.mkString(" ")).map(_ => siteTarget)
+  }.evaluated
 
-    Def.taskDyn {
-      val siterun = (run in siteJVM in Compile).toTask(" " + args.mkString(" ")).result
-     // val siteResource = (resourceDirectory in siteJS in Compile).value
-      val siteBuildJS = (fullOptJS in siteJS in Compile).value
+  val copy = copySiteResources.evaluated
 
-      IO.copyFile(siteBuildJS.data, siteTarget / "js/sitejs.js")
-      IO.copyDirectory(resourcesTarget / "js", siteTarget / "js")
-      IO.copyDirectory(resourcesTarget/ "css", siteTarget / "css")
-      IO.copyDirectory(resourcesTarget / "fonts", siteTarget / "fonts")
-      IO.copyDirectory(resourcesTarget / "img", siteTarget / "img")
-      IO.copyDirectory(resourcesTarget / "script", siteTarget / "script")
-      siterun
-    }
-
-  }).evaluated
+  siteTarget
 }
 
 //lazy val siteold =
