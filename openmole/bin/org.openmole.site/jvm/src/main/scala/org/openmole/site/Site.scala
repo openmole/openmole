@@ -76,12 +76,12 @@ object Site extends App {
     )
 
     @tailrec def parse(args: List[String], c: Parameters = Parameters()): Parameters = args match {
-      case "--target" :: tail    ⇒ parse(tail.tail, c.copy(target = tail.headOption.map(new File(_))))
+      case "--target" :: tail ⇒ parse(tail.tail, c.copy(target = tail.headOption.map(new File(_))))
       //  case "--test" :: tail        ⇒ parse(tail, c.copy(test = true))
       //case "--market-test" :: tail ⇒ parse(tail, c.copy(marketTest = true))
-      case "--resources" :: tail ⇒ parse(tail.tail, c.copy(resources = tail.headOption.map(new File(_))))
-      case s :: tail             ⇒ parse(tail, c.copy(ignored = s :: c.ignored))
-      case Nil                   ⇒ c
+      //case "--resources" :: tail ⇒ parse(tail.tail, c.copy(resources = tail.headOption.map(new File(_))))
+      case s :: tail          ⇒ parse(tail, c.copy(ignored = s :: c.ignored))
+      case Nil                ⇒ c
     }
 
     val parameters = parse(args.toList.map(_.trim))
@@ -92,22 +92,21 @@ object Site extends App {
     //dest.recursiveDelete
 
     //    val modules = generateModules(dest, f ⇒ s"modules/${f.getName}", dest / buildinfo.moduleListName)
-    def generateMarket(resourceDirectory: File, dest: File, index: File, test: Boolean) = {
-      import org.json4s._
-      import org.json4s.jackson.Serialization
-      implicit val formats = Serialization.formats(NoTypeHints)
-      val m = new Market(Market.entries, dest)
-      val mEntries = m.generate(resourceDirectory, test)
-      index.content = Serialization.writePretty(MarketIndex(mEntries.map(_.toDeployedMarketEntry)))
-      mEntries
-    }
+    //    def generateMarket(resourceDirectory: File, dest: File, index: File, test: Boolean) = {
+    //      import org.json4s._
+    //      import org.json4s.jackson.Serialization
+    //      implicit val formats = Serialization.formats(NoTypeHints)
+    //      val mEntries = Market.generate(Market.entries, dest, resourceDirectory)
+    //      index.content = Serialization.writePretty(MarketIndex(mEntries.map(_.toDeployedMarketEntry)))
+    //      mEntries
+    //    }
 
-    val marketEntries = generateMarket(parameters.resources.get, dest, dest / buildinfo.marketName, parameters.test && parameters.marketTest)
-    DocumentationPages.marketEntries = marketEntries
+    //    val marketEntries = generateMarket(parameters.resources.get, dest, dest / buildinfo.marketName, parameters.test && parameters.marketTest)
+    //    DocumentationPages.marketEntries = marketEntries
 
     case class PageFrag(page: Page, frag: Frag)
 
-    def mdFiles = (parameters.resources.get / "md").listFilesSafe.filter(_.getName.endsWith(".md"))
+    //    def mdFiles = (parameters.resources.get / "md").listFilesSafe.filter(_.getName.endsWith(".md"))
 
     val site = new scalatex.site.Site {
       site ⇒
@@ -192,24 +191,26 @@ object Site extends App {
     //
     //    site.renderTo(Path(dest))
     //
-    for {
-      r ← Resource.marketResources(marketEntries)
-    } r match {
-      //      case RenameFileResource(source, destination) ⇒
-      //        val from = parameters.resources.get / source
-      //        val f = new File(dest, destination)
-      //        from copy f
-      //      case ArchiveResource(name, dir) ⇒
-      //        val f = new File(dest, dir)
-      //        f.mkdirs
-      //        val resource = parameters.resources.get / name
-      //        withClosable(new TarInputStream(new GZIPInputStream(new FileInputStream(resource)))) {
-      //          _.extract(f)
-      //        }
-      case MarketResource(entry) ⇒
-        val f = new File(dest, entry.entry.name)
-        entry.location copy f
-    }
+
+    //
+    //    for {
+    //      r ← Resource.marketResources(marketEntries)
+    //    } r match {
+    //      //      case RenameFileResource(source, destination) ⇒
+    //      //        val from = parameters.resources.get / source
+    //      //        val f = new File(dest, destination)
+    //      //        from copy f
+    //      //      case ArchiveResource(name, dir) ⇒
+    //      //        val f = new File(dest, dir)
+    //      //        f.mkdirs
+    //      //        val resource = parameters.resources.get / name
+    //      //        withClosable(new TarInputStream(new GZIPInputStream(new FileInputStream(resource)))) {
+    //      //          _.extract(f)
+    //      //        }
+    //      case MarketResource(entry) ⇒
+    //        val f = new File(dest, entry.entry.name)
+    //        entry.location copy f
+    //    }
 
     //
     //  def generateModules(baseDirectory: File, moduleLocation: File ⇒ String, index: File) = {

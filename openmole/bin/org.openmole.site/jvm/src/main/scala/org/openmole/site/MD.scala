@@ -81,7 +81,6 @@ object MD {
 
   def generatePage(entry: GeneratedMarketEntry)(implicit parent: Parent[DocumentationPage]) =
     entry.readme.map { md ⇒
-      println("md " + Seq(entry.entry.name, entry.entry.name))
       import scalatags.Text.all._
       def frag = RawFrag(relativiseLinks(MD.mdToHTML(md), entry.entry.name + "/"))
       DocumentationPages(entry.entry.name, frag, location = Some(Seq(entry.entry.name, entry.entry.name)))

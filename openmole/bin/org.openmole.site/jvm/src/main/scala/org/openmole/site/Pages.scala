@@ -639,13 +639,13 @@ object DocumentationPages {
 
       override def title = Some(name)
 
-      def children = Seq(helloWorld, resume, headlessNetLogo, netLogoGA, capsule)
+      def children = Seq(helloWorld, resume, headlessNetLogo, netLogoGA, capsule) ++ marketTutorials
 
       def details = Seq()
 
       def content = scalatex.documentation.language.Tutorial()
 
-      marketEntries.filter(_.tags.exists(_ == Tags.tutorial)).flatMap(MD.generatePage(_))
+      def marketTutorials = marketEntries.filter(_.tags.exists(_ == Tags.tutorial)).flatMap(MD.generatePage(_))
 
       val helloWorld = new DocumentationPage {
         override def id = "HelloWord"

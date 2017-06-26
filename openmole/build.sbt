@@ -822,19 +822,18 @@ lazy val copySiteResources = inputKey[Unit]("copySiteResources")
 copySiteResources := {
   import sbt.complete.Parsers.spaceDelimited
   val parsed = spaceDelimited("<args>").parsed
-  val defaultResources = (resources in siteJVM in Compile).value
+  val resourceDirectoryValue = (resourceDirectory in siteJVM in Compile).value
   val defaultDest = (target in siteJVM).value / "site"
   val (siteTarget, args1) = parse("--target", defaultDest, parsed)
-  val (resourcesTarget, args2) = parse("--resources", defaultResources.head, parsed)
 
   val siteBuildJS = (fullOptJS in siteJS in Compile).value
 
   IO.copyFile(siteBuildJS.data, siteTarget / "js/sitejs.js")
-  IO.copyDirectory(resourcesTarget / "js", siteTarget / "js")
-  IO.copyDirectory(resourcesTarget / "css", siteTarget / "css")
-  IO.copyDirectory(resourcesTarget / "fonts", siteTarget / "fonts")
-  IO.copyDirectory(resourcesTarget / "img", siteTarget / "img")
-  IO.copyDirectory(resourcesTarget / "script", siteTarget / "script")
+  IO.copyDirectory(resourceDirectoryValue / "js", siteTarget / "js")
+  IO.copyDirectory(resourceDirectoryValue / "css", siteTarget / "css")
+  IO.copyDirectory(resourceDirectoryValue / "fonts", siteTarget / "fonts")
+  IO.copyDirectory(resourceDirectoryValue / "img", siteTarget / "img")
+  IO.copyDirectory(resourceDirectoryValue / "script", siteTarget / "script")
 }
 
 lazy val buildSite = inputKey[File]("buildSite")
@@ -848,12 +847,9 @@ buildSite :=  {
 
   val siteTarget = Def.inputTaskDyn {
     val parsed = spaceDelimited("<args>").parsed
-    val defaultResources = (resources in siteJVM in Compile).value
     val defaultDest = (target in siteJVM).value / "site"
-    val (siteTarget, args1) = parse("--target", defaultDest, parsed)
-    val (resourcesTarget, args2) = parse("--resources", defaultResources.head, parsed)
+    val (siteTarget, args) = parse("--target", defaultDest, parsed)
 
-    val args = (args1 ++ args2).distinct
     (run in siteJVM in Compile).toTask(" " + args.mkString(" ")).map(_ => siteTarget)
   }.evaluated
 
@@ -865,52 +861,53 @@ buildSite :=  {
 //lazy val siteold =
 //  OsgiProject(
 //    binDir,
-//    "org.openmole.site",
+//    "org.openmole.release",
 //    singleton = true,
 //    imports = Seq("*"),
-//    settings = defaultSettings ++ scalatex.SbtPlugin.projectSettings ++ assemblySettings
+//    settings = defaultSettings /*++ scalatex.SbtPlugin.projectSettings*/ ++ assemblySettings
 //  ) settings(
 //    organization := "org.openmole.site",
-//    OsgiKeys.exportPackage := Seq("scalatex.openmole.*") ++ OsgiKeys.exportPackage.value,
-//    libraryDependencies += Libraries.scalaLang,
-//    libraryDependencies += Libraries.xstream,
-//    libraryDependencies += Libraries.scalatexSite,
-//    libraryDependencies += Libraries.scalaTags,
-//    libraryDependencies += Libraries.upickle,
-//    libraryDependencies += Libraries.spray,
-//    libraryDependencies += Libraries.lang3,
-//    libraryDependencies += Libraries.toolxitBibtex intransitive(),
-//    libraryDependencies += Libraries.json4s,
-//    libraryDependencies += Libraries.logging,
-//    setExecutable ++= Seq("site"),
-//    assemblyDependenciesPath := assemblyPath.value / "plugins",
-//    resourcesAssemble ++= (Osgi.bundleDependencies in Compile).value.map(b ⇒ b → (assemblyPath.value / "plugins" / b.getName)),
-//    resourcesAssemble += ((resourceDirectory in Compile).value / "site") -> (assemblyPath.value / "site"),
-//    resourcesAssemble += (resourceDirectory in Compile).value -> (assemblyPath.value / "resources"),
-//    resourcesAssemble += ((sourceDirectory in Compile).value / "md") -> (assemblyPath.value / "resources" / "md"),
-//    resourcesAssemble += {
-//      val bundle = OsgiKeys.bundle.value
-//      bundle -> (assemblyPath.value / "plugins" / bundle.getName)
-//    },
-//    resourcesAssemble += (assemble in launcher).value -> (assemblyPath.value / "launcher"),
-//    resourcesAssemble += {
-//      val tar = (Tar.tar in openmole).value
-//      tar -> (assemblyPath.value / "resources" / tar.getName)
-//    },
-//    resourcesAssemble += {
-//      val tar = (Tar.tar in daemon).value
-//      tar -> (assemblyPath.value / "resources" / tar.getName)
-//    },
-//    resourcesAssemble += {
-//      val tar = (Tar.tar in api).value
-//      tar -> (assemblyPath.value / "resources" / tar.getName)
-//    },
-//    resourcesAssemble += (fullOptJS in siteJS in Compile).value.data -> (assemblyPath.value / "resources" / "sitejs.js"),
+////    OsgiKeys.exportPackage := Seq("scalatex.openmole.*") ++ OsgiKeys.exportPackage.value,
+////    libraryDependencies += Libraries.scalaLang,
+////    libraryDependencies += Libraries.xstream,
+////    libraryDependencies += Libraries.scalatexSite,
+////    libraryDependencies += Libraries.scalaTags,
+////    libraryDependencies += Libraries.upickle,
+////    libraryDependencies += Libraries.spray,
+////    libraryDependencies += Libraries.lang3,
+////    libraryDependencies += Libraries.toolxitBibtex intransitive(),
+////    libraryDependencies += Libraries.json4s,
+////    libraryDependencies += Libraries.logging,
+////    setExecutable ++= Seq("site"),
+////    assemblyDependenciesPath := assemblyPath.value / "plugins",
+////    resourcesAssemble ++= (Osgi.bundleDependencies in Compile).value.map(b ⇒ b → (assemblyPath.value / "plugins" / b.getName)),
+////    resourcesAssemble += ((resourceDirectory in Compile).value / "site") -> (assemblyPath.value / "site"),
+////    resourcesAssemble += (resourceDirectory in Compile).value -> (assemblyPath.value / "resources"),
+////    resourcesAssemble += ((sourceDirectory in Compile).value / "md") -> (assemblyPath.value / "resources" / "md"),
+////    resourcesAssemble += {
+////      val bundle = OsgiKeys.bundle.value
+////      bundle -> (assemblyPath.value / "plugins" / bundle.getName)
+////    },
+////    resourcesAssemble += (assemble in launcher).value -> (assemblyPath.value / "launcher"),
+////    resourcesAssemble += {
+////      val tar = (Tar.tar in openmole).value
+////      tar -> (assemblyPath.value / "resources" / tar.getName)
+////    },
+////    resourcesAssemble += {
+////      val tar = (Tar.tar in daemon).value
+////      tar -> (assemblyPath.value / "resources" / tar.getName)
+////    },
+////    resourcesAssemble += {
+////      val tar = (Tar.tar in api).value
+////      tar -> (assemblyPath.value / "resources" / tar.getName)
+////    },
+////    resourcesAssemble += (fullOptJS in siteJS in Compile).value.data -> (assemblyPath.value / "resources" / "sitejs.js"),
 //    dependencyFilter := bundleFilter,
 //    dependencyName := rename,
-//    cleanFiles ++= (cleanFiles in openmole).value
-//  ) dependsOn (txtmark) dependsOn (toDependencies(openmoleNakedDependencies): _*) dependsOn (toDependencies(openmoleDependencies): _*)
-
+////    cleanFiles ++= (cleanFiles in openmole).value
+////    resourcesAssemble += (buildSite.value -> (assemblyPath.value / "site"))
+//  ) dependsOn (txtmark) dependsOn (toDependencies(openmoleNakedDependencies): _*) dependsOn (toDependencies(openmoleDependencies): _*) dependsOn(siteJVM)
+//
 
 
 lazy val siteJSold = OsgiProject(binDir, "org.openmole.sitejs") settings(

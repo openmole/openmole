@@ -26,8 +26,8 @@ import org.openmole.tool.file._
 import org.openmole.tool.hash._
 import org.openmole.tool.logger.Logger
 import org.openmole.tool.tar._
-
-import collection.JavaConversions._
+import java.io.File
+import collection.JavaConverters._
 import scala.util.{ Failure, Success, Try }
 
 object Market extends Logger {
@@ -92,9 +92,33 @@ object Market extends Logger {
     )
   )
 
-}
+  def generate(repositories: Seq[MarketRepository], destination: File, resourceDirectory: File): Seq[GeneratedMarketEntry] = {
+    def branchName = buildinfo.version.major + "-dev"
+    def archiveDirectoryName = "market"
 
-import java.io.File
+    val archiveDirectory = destination / archiveDirectoryName
+    archiveDirectory.mkdirs()
+    for {
+      marketRepository ← repositories
+      repository = marketRepository.repository
+      project ← marketRepository.entries
+    } yield {
+      val fileName = s"${project.name}.tgz".replace(" ", "_")
+      val archive = archiveDirectory / fileName
+      val projectDirectory = repository.location(resourceDirectory) / project.directory
+      projectDirectory archiveCompress archive
+
+      GeneratedMarketEntry(
+        s"$archiveDirectoryName/$fileName",
+        project,
+        projectDirectory,
+        marketRepository.repository.viewURL(project.directory, branchName)
+      )
+    }
+
+  }
+
+}
 
 import Market._
 
@@ -117,76 +141,48 @@ case class GeneratedMarketEntry(
     )
 }
 
-class Market(repositories: Seq[MarketRepository], destination: File) {
+//class Market(repositories: Seq[MarketRepository], destination: File) {
 
-  def branchName = buildinfo.version.major + "-dev"
-  def archiveDirectoryName = "market"
+// def test(directory: File, project: MarketEntry): Boolean = true
+//DSLTest.withTmpServices { implicit servivces ⇒
+//    Try {
+//      PluginManager.synchronized {
+//        val projectDirectory = directory / project.directory
+//        val consoleProject = new Project(projectDirectory)
+//        val plugins = consoleProject.loadPlugins
+//        try {
+//
+//          def files = projectDirectory listRecursive (_.getName.endsWith(".oms"))
+//
+//          Log.logger.info(s"Test ${project.name} containing ${files.map(_.getName).mkString(",")}")
+//
+//          def exclusion = s"Project ${project} of repository $directory has been excluded "
+//
+//          def compiles = for { file ← files } yield {
+//            consoleProject.compile(file, Seq.empty) match {
+//              case Compiled(_) ⇒ true
+//              case e: CompilationError ⇒
+//                Log.logger.log(Log.WARNING, exclusion + s" because there was an error during compilation of file ${file.getName}.", e)
+//                false
+//              case e ⇒
+//                Log.logger.log(Log.WARNING, exclusion + s" because the compilation of file ${file.getName} raise the error $e")
+//                false
+//            }
+//          }
+//
+//          compiles.exists(_ != true)
+//        }
+//        finally {
+//          plugins.foreach(_.uninstall())
+//        }
+//      }
+//    } match {
+//      case Failure(e) ⇒
+//        Log.logger.log(Log.WARNING, s"Error durring $project test.", e)
+//        false
+//      case Success(_) ⇒ true
+//    }
+//  }
 
-  def generate(resourceDirectory: File, testScript: Boolean = true): Seq[GeneratedMarketEntry] = {
-    //    val archiveDirectory = destination / archiveDirectoryName
-    //    archiveDirectory.mkdirs()
-    //    for {
-    //      marketRepository ← repositories
-    //      repository = marketRepository.repository
-    //      project ← marketRepository.entries
-    //      if !testScript || test(repository.location(resourceDirectory), project)
-    //    } yield {
-    //      val fileName = s"${project.name}.tgz".replace(" ", "_")
-    //      val archive = archiveDirectory / fileName
-    //      val projectDirectory = repository.location(resourceDirectory) / project.directory
-    //      projectDirectory archiveCompress archive
-    //
-    //      println(s"GER $archiveDirectoryName/$fileName / $projectDirectory")
-    //      GeneratedMarketEntry(
-    //        s"$archiveDirectoryName/$fileName",
-    //        project,
-    //        projectDirectory,
-    //        marketRepository.repository.viewURL(project.directory, branchName)
-    //      )
-    //    }
-    Seq()
-  }
-
-  def test(directory: File, project: MarketEntry): Boolean = true
-  //DSLTest.withTmpServices { implicit servivces ⇒
-  //    Try {
-  //      PluginManager.synchronized {
-  //        val projectDirectory = directory / project.directory
-  //        val consoleProject = new Project(projectDirectory)
-  //        val plugins = consoleProject.loadPlugins
-  //        try {
-  //
-  //          def files = projectDirectory listRecursive (_.getName.endsWith(".oms"))
-  //
-  //          Log.logger.info(s"Test ${project.name} containing ${files.map(_.getName).mkString(",")}")
-  //
-  //          def exclusion = s"Project ${project} of repository $directory has been excluded "
-  //
-  //          def compiles = for { file ← files } yield {
-  //            consoleProject.compile(file, Seq.empty) match {
-  //              case Compiled(_) ⇒ true
-  //              case e: CompilationError ⇒
-  //                Log.logger.log(Log.WARNING, exclusion + s" because there was an error during compilation of file ${file.getName}.", e)
-  //                false
-  //              case e ⇒
-  //                Log.logger.log(Log.WARNING, exclusion + s" because the compilation of file ${file.getName} raise the error $e")
-  //                false
-  //            }
-  //          }
-  //
-  //          compiles.exists(_ != true)
-  //        }
-  //        finally {
-  //          plugins.foreach(_.uninstall())
-  //        }
-  //      }
-  //    } match {
-  //      case Failure(e) ⇒
-  //        Log.logger.log(Log.WARNING, s"Error durring $project test.", e)
-  //        false
-  //      case Success(_) ⇒ true
-  //    }
-  //  }
-
-}
+//}
 
