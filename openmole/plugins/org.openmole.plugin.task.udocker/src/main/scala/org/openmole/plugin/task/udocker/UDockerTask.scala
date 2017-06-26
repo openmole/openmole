@@ -71,6 +71,7 @@ object UDockerTask {
   )(implicit name: sourcecode.Name, newFile: NewFile, workspace: Workspace, preference: Preference): UDockerTask = {
     val uDocker =
       UDocker(
+        // TODO handle errors
         localDockerImage = toLocalImage(image).get,
         command = command,
         installCommands = installCommands
@@ -131,15 +132,11 @@ object UDockerTask {
 
       // FIXME how reliable is it to assume config in first v1Compat string?
       val imageConfig = v1.v1Compatibility
-      val localImage = LocalDockerImage(dockerImage.image, dockerImage.tag, localLayers, Vector.empty, imageConfig)
-
-      buildRepoV2(localImage, manif.value)
-
-      localImage
+      LocalDockerImage(dockerImage.image, dockerImage.tag, localLayers, Vector.empty, imageConfig, manif.value)
     }
   }
 
-  def buildRepoV2(localDockerImage: LocalDockerImage, manifest: ImageManifestV2Schema1)(implicit workspace: Workspace): Unit = {
+  def buildRepoV2(localDockerImage: LocalDockerImage)(implicit workspace: Workspace): Unit = {
     val layerDir = layersDirectory(workspace)
     val reposDir = repositoriesDirectory(workspace)
     val imageRepositoryDirectory = reposDir /> localDockerImage.image /> localDockerImage.tag
@@ -161,7 +158,7 @@ object UDockerTask {
 
     val imageId = s"${localDockerImage.image}:${localDockerImage.tag}"
 
-    imageRepositoryDirectory / "manifest" content = manifest.asJson.toString
+    imageRepositoryDirectory / "manifest" content = localDockerImage.manifest.asJson.toString
     imageRepositoryDirectory / "TAG" content = s"$reposDir/$imageId"
     imageRepositoryDirectory / "v2" content = ""
   }
@@ -207,16 +204,17 @@ object UDockerTask {
 
         val ValidDockerImageData((image, tag), imageJSONName) = validImage
         val imageJSONString = (extractedImage / imageJSONName).content
-        LocalDockerImage(image, tag, layers, configs, imageJSONString)
+        (image, tag, imageJSONString)
       }
     )
 
     for {
-      localImage ← v.toEither
-      imageJSON ← decode[ImageJSON](localImage.imageJSON).leftMap(_.toString)
+      infos ← v.toEither
+      (image, tag, imageJSONString) = infos
+      imageJSON ← decode[ImageJSON](imageJSONString).leftMap(_.toString)
     } yield {
 
-      val (fsLayers, history) = localImage.layers.zip(localImage.layersConfig).map {
+      val (fsLayers, history) = layers.zip(configs).map {
         case ((layer, _), (_, layerConfigFile)) ⇒
           val layerDigest = DockerMetadata.Digest(layer.digest)
           val imageJSON = decodeFile[ImageJSON](layerConfigFile)
@@ -225,16 +223,15 @@ object UDockerTask {
       }.toList.unzip
 
       val manifest = DockerMetadata.ImageManifestV2Schema1(
-        name = Some(localImage.image),
-        tag = Some(localImage.tag),
+        name = Some(image),
+        tag = Some(tag),
         architecture = Some(imageJSON.architecture),
         fsLayers = Some(fsLayers),
         history = history.sequenceU.toOption.map(histList ⇒ histList.map(h ⇒ DockerMetadata.V1History(h.asJson.toString))),
         schemaVersion = Some(1)
       )
 
-      buildRepoV2(localImage, manifest)
-      localImage
+      LocalDockerImage(image, tag, layers, configs, imageJSONString, manifest)
     }
   }
 
@@ -272,6 +269,7 @@ object UDockerTask {
     import parameters._
 
     val (uDockerFile, installVariables) = installUDocker(executionContext, executionContext.tmpDirectory)
+    UDockerTask.buildRepoV2(uDocker.localDockerImage)(executionContext.workspace)
 
     External.withWorkDir(executionContext) { taskWorkDirectory ⇒
       taskWorkDirectory.mkdirs()

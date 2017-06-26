@@ -8,7 +8,7 @@ import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.task.TaskExecutionContext
 import org.openmole.core.workspace.Workspace
 import org.openmole.plugin.task.external.External
-import org.openmole.plugin.task.udocker.DockerMetadata.ContainerID
+import org.openmole.plugin.task.udocker.DockerMetadata.{ ContainerID, ImageManifestV2Schema1 }
 import org.openmole.plugin.task.udocker.Registry.LayerElement
 import org.openmole.plugin.task.udocker.UDockerTask.layersDirectory
 import org.openmole.tool.cache.{ CacheKey, WithInstance }
@@ -124,7 +124,14 @@ package object udocker extends UDockerPackage {
   type ContainerId = String
 
   // TODO review data structure
-  case class LocalDockerImage(image: String, tag: String, layers: Vector[(Registry.Layer, File)], layersConfig: Vector[(Registry.LayerConfig, File)], imageJSON: String) {
+  case class LocalDockerImage(
+    image:        String,
+    tag:          String,
+    layers:       Vector[(Registry.Layer, File)],
+    layersConfig: Vector[(Registry.LayerConfig, File)],
+    imageJSON:    String,
+    manifest:     ImageManifestV2Schema1
+  ) {
     lazy val id = UUID.randomUUID().toString
   }
 
