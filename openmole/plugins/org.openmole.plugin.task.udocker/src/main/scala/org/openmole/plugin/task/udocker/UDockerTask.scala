@@ -90,7 +90,6 @@ object UDockerTask {
       external = External()
     )
 
-  // TODO make vals??
   def layersDirectory(workspace: Workspace) = workspace.persistentDir /> "udocker" /> "layers"
 
   def repositoriesDirectory(workspace: Workspace) = workspace.persistentDir /> "udocker" /> "repos"
@@ -101,13 +100,16 @@ object UDockerTask {
     def layerFile(workspace: Workspace, layer: Layer) = layersDirectory(workspace) / layer.digest
 
     val m = manifest(dockerImage, timeout)
-    val ls = layers(m.value)
     val lDirectory = layersDirectory(workspace)
 
     val localLayers =
-      for { l ← ls } yield {
+      for {
+        manif ← m.toSeq.toVector
+        l ← layers(manif.value)
+      } yield {
         val lf = layerFile(workspace, l)
         // TODO unify with buildRepoV2 (duplicate code)
+        // TODO pass destination file as parameter
         def downloadLayer =
           newFile.withTmpFile { tmpFile ⇒
             blob(dockerImage, l, tmpFile, timeout)
@@ -120,16 +122,21 @@ object UDockerTask {
         l → lf
       }
 
-    // FIXME how reliable is it to assume config in first v1Compat string?
-    val imageConfig = for {
-      v1 ← m.value.history.map(_.head)
-    } yield v1.v1Compatibility
+    for {
+      manif ← m
+      history = manif.value.history
+      hist = Either.cond(history.isDefined, history.get, "No history field in Docker manifest")
+      v1 ← hist.map(_.head)
+    } yield {
 
-    val localImage = LocalDockerImage(dockerImage.image, dockerImage.tag, localLayers.toVector, Vector.empty, imageConfig.getOrElse(""))
+      // FIXME how reliable is it to assume config in first v1Compat string?
+      val imageConfig = v1.v1Compatibility
+      val localImage = LocalDockerImage(dockerImage.image, dockerImage.tag, localLayers, Vector.empty, imageConfig)
 
-    buildRepoV2(localImage, m.value)
+      buildRepoV2(localImage, manif.value)
 
-    localImage
+      localImage
+    }
   }
 
   def buildRepoV2(localDockerImage: LocalDockerImage, manifest: ImageManifestV2Schema1)(implicit workspace: Workspace): Unit = {
@@ -233,9 +240,11 @@ object UDockerTask {
 
   def toLocalImage(containerImage: ContainerImage)(implicit preference: Preference, newFile: NewFile, workspace: Workspace): util.Try[LocalDockerImage] =
     containerImage match {
-      // TODO Eitherify download
-      // Left(s"Failed to download docker image $i")
-      case i: DockerImage ⇒ util.Try(downloadImage(i, preference(RegistryTimeout)))
+      case i: DockerImage ⇒
+        downloadImage(i, preference(RegistryTimeout)) match {
+          case Right(x) ⇒ util.Success(x)
+          case Left(x)  ⇒ util.Failure(new UserBadDataError(s"Failed to download docker image $i. Error: [$x]"))
+        }
       case i: SavedDockerImage ⇒
         loadImage(i) match {
           case Right(x) ⇒ util.Success(x)

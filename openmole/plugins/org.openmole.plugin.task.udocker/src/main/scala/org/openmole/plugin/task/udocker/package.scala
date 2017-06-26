@@ -33,7 +33,7 @@ package object udocker extends UDockerPackage {
 
   object ContainerImage {
     implicit def fileToContainerImage(f: java.io.File) = SavedDockerImage(f)
-    implicit def strsingToContainerImage(s: String) = DockerImage(s)
+    implicit def stringToContainerImage(s: String) = DockerImage(s)
   }
 
   sealed trait ContainerImage

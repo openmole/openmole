@@ -1,7 +1,6 @@
 package org.openmole.plugin.task.udocker
 
 import java.io._
-
 import org.apache.http.HttpResponse
 import org.apache.http.client.config.RequestConfig
 import org.apache.http.client.methods.HttpGet
@@ -93,16 +92,18 @@ object Registry {
     s"${image.registry}/v2/$path"
   }
 
-  def manifest(image: DockerImage, timeout: Time): Manifest = {
+  def manifest(image: DockerImage, timeout: Time): Either[String, Manifest] = {
 
     val url = s"${baseURL(image)}/manifests/${image.tag}"
     val httpResponse = client.execute(Token.withToken(url, timeout))
     val manifestContent = content(httpResponse)
     val manifestsE = decode[ImageManifestV2Schema1](manifestContent)
 
-    // FIXME assumes it works => handle error
-    val Right(manifest) = manifestsE
-    Manifest(manifest, image)
+    val manifest = for {
+      manifest ← manifestsE
+    } yield Manifest(manifest, image)
+
+    manifest.fold(err ⇒ Left(err.getMessage()), r ⇒ Right(r))
   }
 
   def layers(manifest: ImageManifestV2Schema1) = for {
