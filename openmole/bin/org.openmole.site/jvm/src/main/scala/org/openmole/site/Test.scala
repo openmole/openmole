@@ -18,7 +18,7 @@ object Test {
     val tests =
       try {
         Pages.all.foreach { _.content }
-        allTests.toVector
+        allTests.toVector.distinct
       }
       finally {
         allTests.clear()
