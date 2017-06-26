@@ -789,7 +789,7 @@ lazy val api = Project("api", binDir / "target" / "api") settings (defaultSettin
 )
 
 
-lazy val site = crossProject.in(binDir / "org.openmole.site") settings (defaultSettings: _*) settings (scalatex.SbtPlugin.projectSettings) jvmSettings(
+lazy val site = crossProject.in(binDir / "org.openmole.site") settings (defaultSettings: _*) jvmSettings (scalatex.SbtPlugin.projectSettings) jvmSettings(
   libraryDependencies += Libraries.scalaz,
   libraryDependencies += Libraries.scalatexSite,
   libraryDependencies += Libraries.json4s,
