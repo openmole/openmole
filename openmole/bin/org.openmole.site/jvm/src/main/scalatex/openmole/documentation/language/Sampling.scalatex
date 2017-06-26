@@ -41,14 +41,12 @@
        ExplorationTask (
          (i in (0 to 10 by 2)) x
          (j in Range[Double]("0.0", "2 * i", "0.5"))
-       )"""
-      )
+       )""", name = "combine sampling")
 
       Samplings can also be combined using variants of the zip operator.
 
     @p{Zip samplings}
-      @p
-        Zip Samplings come in three declinations in OpenMOLE.
+      @p Zip Samplings come in three declinations in OpenMOLE.
 
       @p The first one is the @hl.code("ZipSampling"). It combines the elements of corresponding indices
       from two samplings. @hl.code("ZipSampling") mimics the traditional @i{zip} operation from functional
@@ -78,7 +76,7 @@
 
         // Create a sampling containing an id for each experiment in a variable called id
         val id = Val[Int]
-        val s4 = s2 withIndex id""")
+        val s4 = s2 withIndex id""", name = "zip sampling")
 
         @p The third and last sampling from the Zip family is the @hl.code("ZipWithNameSampling"). It maps the name
         the files from a @i{FileDomain} @("(see the next section for more details about exploring files)") to a String variable
@@ -98,7 +96,7 @@
             outputs += (name, size)
           )
 
-          ExplorationTask(file in (workDirectory / "dir") withName name) -< (t hook ToStringHook())""")
+          ExplorationTask(file in (workDirectory / "dir") withName name) -< (t hook ToStringHook())""", name = "zip with name sampling")
 
         @p If you need to go through several level of files you may use a sampling like this one:
 
@@ -122,7 +120,7 @@
             (file in dir withName fileName)
           )
 
-        explo -< (t hook ToStringHook())""")
+        explo -< (t hook ToStringHook())""", name = "multilevel file sampling")
 
   @p{Shrink the initial Sampling with Take, Filter, Sample}
     You can modify a Sampling using various operations in OpenMOLE.
@@ -151,7 +149,7 @@
       val s4 = (s1 x s2) filter ("p1 + p2 < 100")
 
       // Sample 5 values from s1
-      val s5 = s1 sample 5""")
+      val s5 = s1 sample 5""", name = "sampling modifiers")
   @p{Generate random Samplings}
     OpenMOLE can generate random samplings from an initial sampling using @hl.code("shuffle") that creates
     a new sampling which is a randomly shuffled version of the initial one.
@@ -172,8 +170,7 @@
 
     // Replicate 100 times the sampling s1 and provide seed for each experiment
     val seed = Val[Int]
-    val s7 = s1 x (seed in (UniformDistribution[Int]() take 100))
-    """)
+    val s7 = s1 x (seed in (UniformDistribution[Int]() take 100))""", name = "random sampling")
 
   @p{Higher level samplings}
     Some sampling combinations generate higher level samplings such as @hl.code("repeat") and
@@ -188,7 +185,7 @@
 
         // Create 10 samples of 5 values from s1, it is equivalent to "s1 sample 5 repeat 10", the output type is an
         // array of array of values
-        val s3 = s1 bootstrap (5, 10)""")
+        val s3 = s1 bootstrap (5, 10)""", name = "high level sampling")
 
     @p Here is how such higher level samplings would be used within a Mole:
     @br @hl.openmole("""
@@ -206,7 +203,7 @@
           outputs += (p1, p2)
         )
 
-        val mole = e1 -< (stat hook ToStringHook())""")
+        val mole = e1 -< (stat hook ToStringHook())""", name = "bootstrap example sampling")
 
   @p{Exploring files}
     OpenMOLE introduces the concept of @i{Domains} as a variable ranging along a set of files. For instance to explore a
@@ -223,14 +220,14 @@
       ExplorationTask (
         (i in (0 to 10)) x
         (f in (workDirectory / "dir").files("subdir${i}", recursive = true).filter(f => f.isDirectory && f.getName.startsWith("exp")))
-      )""")
+      )""", name = "explore files sampling")
 
     @p To filter the files you want to list use the filter modifier. You can filter using any function from File (see javadoc) to Boolean.
     @br @hl.openmole("""
      val f = Val[File]
 
      val explo =
-       ExplorationTask ( (f in (workDirectory / "dir") filter(_.getName.endsWith(".nii.gz")) ) )""")
+       ExplorationTask ( (f in (workDirectory / "dir") filter(_.getName.endsWith(".nii.gz")) ) )""", name = "file filter sampling")
 
     @p Searching in deep file trees can be very time consuming and irrelevant in some cases where you know how your data
     is organised. By default the file selector only explores the direct level under under the directory you've passed as
@@ -260,7 +257,7 @@
       ExplorationTask (
         (i in (0 to 10)) x
         (f in File("/path/to/a/dir").select("file${i}.txt"))
-      )""")
+      )""", name = "select file sampling")
 
     @p Files can also be injected in the dataflow through
     @a("Sources", href := DocumentationPages.root.language.source.file). They provide more powerful file filtering
@@ -289,7 +286,7 @@
           separator := ','
         )
 
-        val exploration = ExplorationTask(s)""")
+        val exploration = ExplorationTask(s)""", name = "csv sampling")
 
         @p In this example the column name @i{i} in the CSV file is mapped to the variable @i{i} of OpenMOLE.
         The column name @i{colD} is mapped to the variable @i{d}. The column named @i{colFileName} is appended to the
@@ -314,7 +311,7 @@
             i in Range(0.0, 10.0),
             j in Range(0.0, 5.0)
           )
-        )""")
+        )""", name = "LHS?sampling")
 
     @p{Low-discrepancy sequences}
       For uniform sampling, you can also use the
@@ -330,7 +327,7 @@
                 i in Range(0.0, 10.0),
                 j in Range(0.0, 5.0)
               )
-            )""")
+            )""", name = "sobol sampling")
 
   @p{The is keyword}
     @p The is keyword can be use to assigned a value to variable in a sampling. For instance:
@@ -344,7 +341,7 @@
         (i in (0 until 10)) x
         (j is "i * 2") x
         (k in Range[Int]("j", "j + 7"))
-      )""")
+      )""", "is keyword sampling")
 
 
 

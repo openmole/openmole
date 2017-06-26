@@ -27,6 +27,9 @@ object Test {
 
     target.mkdirs()
 
+    val duplicatedName = tests.flatMap(_.name).groupBy(n ⇒ n).mapValues(_.size).filter(_._2 > 1)
+    if (!duplicatedName.isEmpty) throw new RuntimeException(s"Some test names are not unique: ${duplicatedName.keys.toVector.mkString(", ")}")
+
     for {
       (t, i) ← tests.zipWithIndex
     } {
