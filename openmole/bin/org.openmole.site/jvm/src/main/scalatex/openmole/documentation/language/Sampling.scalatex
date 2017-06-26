@@ -311,7 +311,7 @@
             i in Range(0.0, 10.0),
             j in Range(0.0, 5.0)
           )
-        )""", name = "LHS?sampling")
+        )""", name = "LHS sampling")
 
     @p{Low-discrepancy sequences}
       For uniform sampling, you can also use the
