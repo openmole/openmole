@@ -27,8 +27,15 @@ package object tools {
   object sect extends Section()
 
   object hl extends Highlighter {
-    def openmole(code: String, header: String = "") = {
-      if (Test.testing) Test.allTests += code
+
+    object OptionalName {
+      implicit def fromString(s: String) = OptionalName(Some(s))
+    }
+
+    case class OptionalName(name: Option[String])
+
+    def openmole(code: String, header: String = "", name: OptionalName = OptionalName(None)) = {
+      if (Test.testing) Test.allTests += Test(code, name.name)
       highlight(code, "scala")
     }
 

@@ -20,7 +20,7 @@
         (j in (0.0 to 5.0 by 0.5)) x
         (k in List("hello", "world")) x
         (l in (UniformDistribution[Long]() take 10))
-      )""")
+      )""", name = "complete sampling")
 
     Using the @i{x} combinator means that all the domains are @b{unrolled before being combined} with each other.
 

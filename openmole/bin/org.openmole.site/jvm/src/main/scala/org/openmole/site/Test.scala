@@ -8,7 +8,8 @@ import scala.collection.mutable.ListBuffer
 object Test {
 
   var testing = false
-  var allTests = ListBuffer[String]()
+
+  var allTests = ListBuffer[Test]()
 
   def generate(target: File) = synchronized {
     allTests.clear()
@@ -28,6 +29,11 @@ object Test {
 
     for {
       (t, i) ← tests.zipWithIndex
-    } (target / s"test${i}.oms").content = t
+    } {
+      def name: String = t.name.getOrElse(s"test${i}") + ".omt"
+      (target / name).content = t.code
+    }
   }
 }
+
+case class Test(code: String, name: Option[String])
