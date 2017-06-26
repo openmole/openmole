@@ -120,7 +120,7 @@
 
     // Start a workflow with 1 task
     val model_execution = (ants hook displayHook) start
-    """)
+    """, name = "ga netlogo model")
 
     @p The result of this execution should look like:
     @br @hl.highlight("{food1=746.0, food2=1000.0, food3=2109.0}", "plain")
@@ -165,7 +165,7 @@
 
     // Plug everything together to create the workflow
     (evolution hook savePopulationHook)
-    """, header = model)
+    """, header = model, name = "ga netlogo evolution")
 
     @br
 
@@ -206,4 +206,4 @@
   val env = EGIEnvironment("biomed", openMOLEMemory = 1200 megabytes, cpuTime = 4 hours)
 
   // Define the workflow
-  (island on env hook savePopulationHook)""", header = model)
+  (island on env hook savePopulationHook)""", header = model, name = "ga netlogo islands")

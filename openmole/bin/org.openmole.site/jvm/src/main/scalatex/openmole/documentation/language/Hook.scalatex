@@ -45,7 +45,7 @@
     @br @hl.openmole("""
     val i = Val[Int]
 
-    val h = CSVHook("/path/to/a/file/or/dir${i}.csv")""", "csv hook")
+    val h = CSVHook("/path/to/a/file/or/dir${i}.csv")""", name = "csv hook")
     @p The path is expanded using the variables from the dataflow (expressions between ${} are evaluated and replaced).
 
     @p The optional last parameter of @i{AppendToCSVFileHook} is the list of variables to write to the CSV file. The default behaviour when this list is not specified is to dump all the variables from the dataflow to the file. You can restrict this behaviour by @b{listing only the variables you want to save}

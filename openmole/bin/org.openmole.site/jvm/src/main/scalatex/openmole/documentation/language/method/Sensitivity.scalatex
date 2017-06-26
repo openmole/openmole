@@ -34,14 +34,14 @@ An embedded model in OpenMOLE (see Step 1 : Model)
    @hl.openmole("""
 val my_input = Val[Double]
 
-
-val exploration = ExplorationTask(
-(my_input in (0.0 to 10.0 by 0.5))
-)""")
+val exploration =
+ ExplorationTask(
+   (my_input in (0.0 to 10.0 by 0.5))
+  )""", name = "variation of 1 input in sensitivity")
 
 @p
 
-Sampling can also be performed via a @hl.openmole("UniformDistribution(maximum)"), that generates values uniformly
+Sampling can also be performed via a @hl.code("UniformDistribution(maximum)"), that generates values uniformly
 distributed between zero and the maximum provided argument.
 Custom domains can be defined using transformations, as in the example below that generates values between -10 and + 10.
 
@@ -49,9 +49,7 @@ Custom domains can be defined using transformations, as in the example below tha
 val my_input = Val[Double]
 val exploration = ExplorationTask(
     (my_input in (UniformDistribution[Double](max=20) take 100)).map(x => x -10)
-)""")
-
-
+)""", name = "uniform distribution in sensitivity")
 
 
 If your input is one file among many,  or  a line among a CSV file, use the  @b{CSVSampling} task  TODO lien intern à la doc
@@ -72,7 +70,7 @@ The basic syntax to explore 2 inputs (i.e. every combination of 2 inputs values)
         ExplorationTask (
           (i in (0 to 10 by 2)) x
           (j in (0.0 to 5.0 by 0.5)) )
-      """)
+      """, name = "cartesian product for sensitivity")
 
 
 @h3{Different Types of inputs}
@@ -88,7 +86,7 @@ The cartesian product operator can handle different data types :
        (l in (UniformDistribution[Long]() take 10)) x
        (m in (workDirectory / "dir").files().filter(f => f.getName.startsWith("exp") && f.getName.endsWith(".csv")))
      )
-    """)
+    """, name = "data on cartesian product sampling in sensitivity")
 
 This task performs every combination between the 5 inputs i,j,k,l and m. It can handle several types of inputs :
 Integer (i) , Double (j), Strings (k), Long (l), Files (m).
@@ -108,9 +106,9 @@ taken in the [Long.MIN_VALUE; Long.MAX_VALUE] domain of the Long native type.
 @br
 
 Files are explored as items of a list.
- The items are gathered  by the @hl.openmole("files()") function applied  on the @hl.openmole("dir") directory,
- optionally filtered with any @hl.openmole("String => Boolean")  functions  such as
- @hl.openmole("""contains(), startswith(), endswith()""")
+ The items are gathered  by the @hl.code("files()") function applied  on the @hl.code("dir") directory,
+ optionally filtered with any @hl.code("String => Boolean")  functions  such as
+ @hl.code("""contains(), startswith(), endswith()""")
 
 
  (see  the @a("Java Class String Documentation", href:="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html")
@@ -132,7 +130,6 @@ Files are explored as items of a list.
  @h4{Latin Hypercube Sampling}
 
 
-
 @hl.openmole("""
 
 val i = Val[Double]
@@ -146,13 +143,11 @@ val my_LHS_sampling =
       j in Range(0.0, 5.0)
     )
   )
-""")
+""", name = "lhs sampling in sensitivity")
 
 @br
 
  @h4{Sobol Sequence}
-
-
 
 @hl.openmole("""
 
@@ -167,12 +162,12 @@ val my_sobol_sampling =
       j in Range(0.0, 5.0)
     )
   )
-""")
+""", name = "sobol sampling in sensitivity")
 
 
 @h2{Real World Example}
 
-the @hl.openmole("Fire.nlogo") model is a simple, one-parameter, simulation model that simulates fire propagation.
+the @hl.code("Fire.nlogo") model is a simple, one-parameter, simulation model that simulates fire propagation.
 This model features a threshold value in its unique parameter domain, below which fire fails to burn the majority
  of the forest, and beyond which fire propagates and burn most of it.
 

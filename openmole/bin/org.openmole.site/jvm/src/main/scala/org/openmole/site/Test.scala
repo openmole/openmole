@@ -34,7 +34,10 @@ object Test {
       (t, i) ← tests.zipWithIndex
     } {
       def name: String = t.name.getOrElse(s"test${i}") + ".omt"
-      (target / name).content = t.code
+      (target / name).content =
+        s"""${t.code}
+           |EmptyTask()
+         """.stripMargin
     }
   }
 }
