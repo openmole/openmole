@@ -27,15 +27,13 @@ package object tools {
   object sect extends Section()
 
   object hl extends Highlighter {
-    //  override def suffixMappings = Map().withDefault(identity)
-
-    def openmole(code: String, test: Boolean = true, header: String = "") = {
-      if (Test.testing && test) Test.allTests += code
+    def openmole(code: String, header: String = "") = {
+      if (Test.testing) Test.allTests += code
       highlight(code, "scala")
     }
 
     def code(code: String) = openmoleNoTest(code)
-    def openmoleNoTest(code: String) = openmole(code, test = false)
+    def openmoleNoTest(code: String) = highlight(code, "scala")
   }
 
   case class Parameter(name: String, `type`: String, description: String)
