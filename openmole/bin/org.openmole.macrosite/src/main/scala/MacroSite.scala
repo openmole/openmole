@@ -3,14 +3,11 @@
  */
 
 import org.openmole.site._
-import better.files._
+import org.openmole.tool.file._
 
 object MacroSite extends App {
 
   override def main(args: Array[String]) = {
-
-    val targetFile = File(args(0))
-    targetFile.createIfNotExists()
 
     val header =
       """
@@ -67,6 +64,6 @@ object MacroSite extends App {
     } + s"""\n\nlazy val all: Seq[JSPage] = Seq(${pageMap.map { _.name }.mkString(", ")})\n\nlazy val topPagesChildren = Seq(${topPagesChildren.map { _.name }.mkString(", ")})
                  """.stripMargin + footer
 
-    targetFile overwrite content
+    File(args(0)) < content
   }
 }

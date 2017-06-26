@@ -803,11 +803,12 @@ lazy val site = crossProject.in(binDir / "org.openmole.site") settings (defaultS
   Libraries.scalajsMarked
 )
 
-lazy val macrosite = Project("macrosite", binDir / "org.openmole.macrosite") settings (defaultSettings: _*) settings (
-  libraryDependencies += "com.github.pathikrit" %% "better-files" % "2.17.1") dependsOn (siteJVM)
+lazy val macrosite = Project("macrosite", binDir / "org.openmole.macrosite") settings (defaultSettings: _*) dependsOn (siteJVM, openmoleFile)
 
 lazy val siteJS = site.js
-lazy val siteJVM = site.jvm dependsOn(tools, buildinfo, project, serializer, market)
+lazy val siteJVM = site.jvm dependsOn(tools, buildinfo, project, serializer, market) settings (
+  libraryDependencies += Libraries.sourceCode
+)
 
 def parse(key: String, default: sbt.File, parsed: Seq[String]) = parsed.indexOf(key) match {
   case -1 => (default, parsed ++ Seq(key, default.getAbsolutePath))
