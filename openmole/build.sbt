@@ -837,7 +837,7 @@ copySiteResources := {
 }
 
 lazy val buildSite = inputKey[File]("buildSite")
-buildSite :=  {
+buildSite := {
   import sbt.complete.Parsers.spaceDelimited
 
   val generateMacro = Def.taskDyn {
@@ -854,6 +854,21 @@ buildSite :=  {
   }.evaluated
 
   val copy = copySiteResources.evaluated
+
+  siteTarget
+}
+
+lazy val releaseSite = inputKey[File]("releaseSite")
+releaseSite := {
+  import sbt.complete.Parsers.spaceDelimited
+  val siteTarget = Def.inputTaskDyn {
+    val parsed = spaceDelimited("<args>").parsed
+    val defaultDest = (target in siteJVM).value / "tests"
+    val (testTarget, args) = parse("--target", defaultDest, parsed)
+    IO.delete(testTarget)
+
+    (run in siteJVM in Compile).toTask(" --test " + args.mkString(" ")).map(_ => testTarget)
+  }.evaluated
 
   siteTarget
 }

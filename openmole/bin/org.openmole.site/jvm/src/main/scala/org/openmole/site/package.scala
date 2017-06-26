@@ -30,9 +30,11 @@ package object tools {
     //  override def suffixMappings = Map().withDefault(identity)
 
     def openmole(code: String, test: Boolean = true, header: String = "") = {
+      if (Test.testing && test) Test.allTests += code
       highlight(code, "scala")
     }
 
+    def code(code: String) = openmoleNoTest(code)
     def openmoleNoTest(code: String) = openmole(code, test = false)
   }
 
