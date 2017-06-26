@@ -18,12 +18,9 @@
 
 package org.openmole.site
 
-import org.openmole.site.market._
-
 import scalatags.Text.all._
 import com.github.rjeschke._
 import org.apache.commons.math3.genetics.GeneticAlgorithm
-import org.openmole.site.market.Market.Tags
 
 import scalatex.{ openmole ⇒ scalatex }
 import org.openmole.tool.file._
@@ -135,7 +132,7 @@ abstract class DocumentationPage(implicit p: Parent[DocumentationPage] = Parent(
 object DocumentationPages {
   index ⇒
 
-  var marketEntries: Seq[GeneratedMarketEntry] = Seq()
+  //var marketEntries: Seq[GeneratedMarketEntry] = Seq()
 
   def apply(
     name:     String,
@@ -182,7 +179,7 @@ object DocumentationPages {
 
     def details = Seq()
 
-    def children = Seq(application, language, tutorial, market, development)
+    def children = Seq(application, language, tutorial, development)
 
     val application = new DocumentationPage {
       def name = "Application"
@@ -639,13 +636,13 @@ object DocumentationPages {
 
       override def title = Some(name)
 
-      def children = Seq(helloWorld, resume, headlessNetLogo, netLogoGA, capsule) ++ marketTutorials
+      def children = Seq(helloWorld, resume, headlessNetLogo, netLogoGA, capsule) //++ marketTutorials
 
       def details = Seq()
 
       def content = scalatex.documentation.language.Tutorial()
 
-      def marketTutorials = marketEntries.filter(_.tags.exists(_ == Tags.tutorial)).flatMap(MD.generatePage(_))
+      //def marketTutorials = marketEntries.filter(_.tags.exists(_ == Tags.tutorial)).flatMap(MD.generatePage(_))
 
       val helloWorld = new DocumentationPage {
         override def id = "HelloWord"
@@ -716,45 +713,45 @@ object DocumentationPages {
       }
     }
 
-    val market = new DocumentationPage {
-      override def content: Text.all.Frag = div(tagContent(marketEntries))
-
-      override def children: Seq[DocumentationPage] = Seq()
-
-      override def name: String = "Market"
-
-      override def details: Seq[Page] = Seq()
-
-      def tagContent(entries: Seq[GeneratedMarketEntry]) =
-        ul(
-          entries.sortBy(_.entry.name.toLowerCase).map {
-            de ⇒ li(entryContent(de))
-          }: _*
-        )
-
-      def entryContent(deployedMarketEntry: GeneratedMarketEntry) = {
-        def title: Modifier =
-          deployedMarketEntry.viewURL match {
-            case None    ⇒ deployedMarketEntry.entry.name
-            case Some(l) ⇒ a(deployedMarketEntry.entry.name, href := l)
-          }
-
-        def content =
-          Seq[Modifier](
-            deployedMarketEntry.readme.map {
-              rm ⇒ RawFrag(txtmark.Processor.process(rm))
-            }.getOrElse(p("No README.md available yet.")),
-            a("Packaged archive", href := deployedMarketEntry.archive), " (can be imported in OpenMOLE)"
-          ) ++ deployedMarketEntry.viewURL.map(u ⇒ br(a("Source repository", href := u)))
-
-        div(scalatags.Text.all.id := "market-entry")(content: _*)
-      }
-
-      def themes: Seq[Market.Tag] = {
-        marketEntries.flatMap(_.entry.tags).distinct.sortBy(_.label.toLowerCase)
-      }
-
-    }
+    //    val market = new DocumentationPage {
+    //      override def content: Text.all.Frag = div(tagContent(marketEntries))
+    //
+    //      override def children: Seq[DocumentationPage] = Seq()
+    //
+    //      override def name: String = "Market"
+    //
+    //      override def details: Seq[Page] = Seq()
+    //
+    //      def tagContent(entries: Seq[GeneratedMarketEntry]) =
+    //        ul(
+    //          entries.sortBy(_.entry.name.toLowerCase).map {
+    //            de ⇒ li(entryContent(de))
+    //          }: _*
+    //        )
+    //
+    //      def entryContent(deployedMarketEntry: GeneratedMarketEntry) = {
+    //        def title: Modifier =
+    //          deployedMarketEntry.viewURL match {
+    //            case None    ⇒ deployedMarketEntry.entry.name
+    //            case Some(l) ⇒ a(deployedMarketEntry.entry.name, href := l)
+    //          }
+    //
+    //        def content =
+    //          Seq[Modifier](
+    //            deployedMarketEntry.readme.map {
+    //              rm ⇒ RawFrag(txtmark.Processor.process(rm))
+    //            }.getOrElse(p("No README.md available yet.")),
+    //            a("Packaged archive", href := deployedMarketEntry.archive), " (can be imported in OpenMOLE)"
+    //          ) ++ deployedMarketEntry.viewURL.map(u ⇒ br(a("Source repository", href := u)))
+    //
+    //        div(scalatags.Text.all.id := "market-entry")(content: _*)
+    //      }
+    //
+    //      def themes: Seq[Market.Tag] = {
+    //        marketEntries.flatMap(_.entry.tags).distinct.sortBy(_.label.toLowerCase)
+    //      }
+    //
+    //    }
 
     def development = new DocumentationPage {
       def name = "Development"

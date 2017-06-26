@@ -15,22 +15,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.site.market
+package org.openmole.marketindex
 
-import org.openmole.core.buildinfo
-import org.openmole.core.market.MarketIndexEntry
-import org.openmole.core.project._
-import org.openmole.core.pluginmanager.PluginManager
-import org.openmole.site.{ Config, DSLTest, Page }
-import org.openmole.tool.file._
-import org.openmole.tool.hash._
-import org.openmole.tool.logger.Logger
-import org.openmole.tool.tar._
 import java.io.File
-import collection.JavaConverters._
-import scala.util.{ Failure, Success, Try }
 
-object Market extends Logger {
+import org.openmole.tool.file._
+import org.openmole.tool.tar._
+import org.openmole.core.market._
+
+object Market {
 
   lazy val githubMarket =
     new Repository {
@@ -92,8 +85,8 @@ object Market extends Logger {
     )
   )
 
-  def generate(repositories: Seq[MarketRepository], destination: File, resourceDirectory: File): Seq[GeneratedMarketEntry] = {
-    def branchName = buildinfo.version.major + "-dev"
+  def generate(repositories: Seq[MarketRepository], destination: File, resourceDirectory: File, branchName: String): Seq[GeneratedMarketEntry] = {
+    //def branchName = buildinfo.version.major + "-dev"
     def archiveDirectoryName = "market"
 
     val archiveDirectory = destination / archiveDirectoryName
@@ -120,7 +113,7 @@ object Market extends Logger {
 
 }
 
-import Market._
+import org.openmole.marketindex.Market._
 
 case class GeneratedMarketEntry(
     archive:  String,

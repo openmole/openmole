@@ -659,6 +659,8 @@ def bundleFilter(m: ModuleID, artifact: Artifact) = {
   include && !exclude
 }
 
+def noDependencyFilter(m: ModuleID, artifact: Artifact) = false
+
 def rename(m: ModuleID): String =
   if (m.name.exists(_ == '-') == false) s"${m.organization.replaceAllLiterally(".", "-")}-${m.name}_${m.revision}.jar"
   else s"${m.name}_${m.revision}.jar"
@@ -806,9 +808,13 @@ lazy val site = crossProject.in(binDir / "org.openmole.site") settings (defaultS
 lazy val macrosite = Project("macrosite", binDir / "org.openmole.macrosite") settings (defaultSettings: _*) dependsOn (siteJVM, openmoleFile)
 
 lazy val siteJS = site.js
-lazy val siteJVM = site.jvm dependsOn(tools, buildinfo, project, serializer, market) settings (
+lazy val siteJVM = site.jvm dependsOn(tools, project, serializer, marketIndex) settings (
   libraryDependencies += Libraries.sourceCode
-)
+) dependsOn(marketIndex)
+
+lazy val marketIndex = Project("marketindex", binDir / "org.openmole.marketindex") settings (defaultSettings: _*) settings (
+  libraryDependencies += Libraries.json4s
+) dependsOn(buildinfo, openmoleFile, openmoleTar, market)
 
 def parse(key: String, default: sbt.File, parsed: Seq[String]) = parsed.indexOf(key) match {
   case -1 => (default, parsed ++ Seq(key, default.getAbsolutePath))
@@ -859,20 +865,18 @@ buildSite := {
   siteTarget
 }
 
-lazy val releaseSite = inputKey[File]("releaseSite")
-releaseSite := {
-  import sbt.complete.Parsers.spaceDelimited
-  val siteTarget = Def.inputTaskDyn {
-    val parsed = spaceDelimited("<args>").parsed
-    val defaultDest = (target in siteJVM).value / "tests"
-    val (testTarget, args) = parse("--target", defaultDest, parsed)
-    IO.delete(testTarget)
 
-    (run in siteJVM in Compile).toTask(" --test " + args.mkString(" ")).map(_ => testTarget)
-  }.evaluated
-
-  siteTarget
+def siteTests = Def.taskDyn {
+  val testTarget = (target in siteJVM).value / "tests"
+  IO.delete(testTarget)
+  (run in siteJVM in Compile).toTask(" --test --target " + testTarget).map(_ => testTarget)
 }
+
+lazy val tests = Project("tests", binDir / "tests") settings (defaultSettings: _*) settings (assemblySettings: _*) settings (
+ resourcesAssemble += (siteTests.value -> (assemblyPath.value / "site")),
+  dependencyFilter := noDependencyFilter
+)
+
 
 //lazy val siteold =
 //  OsgiProject(

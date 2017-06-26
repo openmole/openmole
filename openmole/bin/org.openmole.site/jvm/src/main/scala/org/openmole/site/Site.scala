@@ -24,7 +24,6 @@ import java.util.zip.GZIPInputStream
 
 import ammonite.ops.{ Path, write }
 //import org.openmole.core.workspace.Workspace
-import org.openmole.site.market.Market
 import org.openmole.tool.file._
 import org.openmole.tool.tar._
 import org.openmole.tool.stream._
@@ -35,8 +34,7 @@ import scalatags.Text.all._
 //import org.openmole.site.credits._
 //import spray.json.JsArray
 //import module._
-import org.openmole.core.buildinfo
-import org.openmole.core.market.MarketIndex
+//import org.openmole.core.buildinfo
 
 import scala.annotation.tailrec
 import spray.json._
@@ -92,7 +90,9 @@ object Site extends App {
       case None    ⇒ throw new RuntimeException("Missing argument --target")
     }
 
-    if (parameters.test) Test.generate(dest)
+    if (parameters.test) {
+      Test.generate(dest)
+    }
     else {
 
       //dest.recursiveDelete
@@ -155,7 +155,7 @@ object Site extends App {
             }.getOrElse("")),
             div(id := {
               if (DocumentationPages.topPagesChildren.contains(page)) shared.sitexDoc
-              else if (page == DocumentationPages.root.market) shared.sitexMarket
+              //else if (page == DocumentationPages.root.market) shared.sitexMarket
               else shared.sitexMain
             }, page.content),
             onload := "org.openmole.site.SiteJS().main();org.openmole.site.SiteJS().loadIndex(index);"
