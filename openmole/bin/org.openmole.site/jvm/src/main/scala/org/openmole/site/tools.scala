@@ -31,13 +31,20 @@ package object tools {
   object sect extends Section()
 
   object hl extends Highlighter {
-    //  override def suffixMappings = Map().withDefault(identity)
 
-    def openmole(code: String, test: Boolean = true, header: String = "") = {
+    object OptionalName {
+      implicit def fromString(s: String) = OptionalName(Some(s))
+    }
+
+    case class OptionalName(name: Option[String])
+
+    def openmole(code: String, header: String = "", name: OptionalName = OptionalName(None)) = {
+      if (Test.testing) Test.allTests += Test(header + "\n" + code, name.name)
       highlight(code, "scala")
     }
 
-    def openmoleNoTest(code: String) = openmole(code, test = false)
+    def code(code: String) = openmoleNoTest(code)
+    def openmoleNoTest(code: String) = highlight(code, "scala")
   }
 
   case class Parameter(name: String, `type`: String, description: String)

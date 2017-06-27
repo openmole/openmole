@@ -40,18 +40,18 @@ TODO plus de texte
 
 @p
 
-  Islands scheme  is  used via a specific task, @hl.openmole("""IslandEvolution""") to be added in the workflow.
+  Islands scheme  is  used via a specific task, @hl.code("""IslandEvolution""") to be added in the workflow.
 @br
   The task take three parameters:
 
   @ul
     @li
-        an evolution task method, which is the calibration task (@hl.openmole("""SteadyStateEvolution""") in the example
+        an evolution task method, which is the calibration task (@hl.code("""SteadyStateEvolution""") in the example
          below ), to be distributed on the nodes of the distributed environment
     @li
-       @hl.openmole("""parallelism""") : the number of concurrent islands that evolve at a given time
+       @hl.code("""parallelism""") : the number of concurrent islands that evolve at a given time
     @li
-       the @hl.openmole("""termination""")  criterion is the total number of evolutions performed by all the islands.
+       the @hl.code("""termination""")  criterion is the total number of evolutions performed by all the islands.
        In the example below, each island performs 100 iterations of their evolution tasks, so for 100 islands,
        this parameter is set to 100*100= 10000.
 

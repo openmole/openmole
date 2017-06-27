@@ -139,14 +139,16 @@ Un peu relou cet exemple finalement TODO à virer ?
 
   // Construction of the complete workflow with the execution environment, and the hook.
   // Here the generated workflow will run using 4 threads of the local machine.
-  (evolution hook savePopulation on LocalEnvironment(4))""")
+  (evolution hook savePopulation on LocalEnvironment(4))""", name = "nsga2 example")
 
 @br
 
 Notice that the objectives are given as a sequence of model outputs variables to @b{minimize}.
 So if you want to reach specific target values, like Pi and 42  you should have written your objectives as
 
-@hl.openmole("""objectives = Seq(math.abs(o1-> math.Pi), math.abs(o2->42))""")
+@hl.code("""evaluation = Delta(model, o1 -> math.Pi, o2 -> 42)""")
+
+NB: in this case the results in the saved file in will be the difference between the outputs of the model and your objectives.
 @br
 
 TODO checker syntaxe et écriture d'une task dédiée avant d'écrire ça  o1 -> 22 , o2 -> math.Pi
@@ -196,7 +198,7 @@ Obviously, maximization problem are  performed by taking the opposite of variabl
 
   // Construction of the complete mole with the execution environment, and the hook.
   // Here the generated workflow will run using 4 threads of the local machine.
-  (island on LocalEnvironment(4) hook savePopulation)""", header = model)
+  (island on LocalEnvironment(4) hook savePopulation)""", header = model, name = "nsga2 islands")
 
   @p Calibration of stochastic models leads to noisy fitness functions. An efficient strategy to deal with such
   fitness functions is implemented in OpenMOLE. This strategy automatically balances the need for replications and
@@ -223,7 +225,7 @@ Obviously, maximization problem are  performed by taking the opposite of variabl
         ),
       evaluation = model,
       termination = 100
-    )""", header = model)
+    )""", header = model, name = "nsga2 stochastic")
 
 
 
