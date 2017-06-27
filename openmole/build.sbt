@@ -805,7 +805,6 @@ lazy val site = crossProject.in(binDir / "org.openmole.site") settings (defaultS
   Libraries.scalajsMarked
 )
 
-
 lazy val siteJS = site.js
 lazy val siteJVM = site.jvm dependsOn(tools, project, serializer, marketIndex) settings (
   libraryDependencies += Libraries.sourceCode
@@ -857,9 +856,13 @@ def siteTests = Def.taskDyn {
 }
 
 lazy val tests = Project("tests", binDir / "tests") settings (defaultSettings: _*) settings (assemblySettings: _*) settings (
- resourcesAssemble += (siteTests.value -> (assemblyPath.value / "site")),
+  resourcesAssemble += (siteTests.value -> (assemblyPath.value / "site")),
   dependencyFilter := noDependencyFilter
 )
+
+//lazy val fullSite = Project("fullsite", binDir / "fullsite") settings (defaultSettings: _*) settings (assemblySettings: _*) settings (
+//  dependencyFilter := noDependencyFilter
+//)
 
 
 //lazy val siteold =
