@@ -57,7 +57,6 @@ object Market {
   trait Repository {
     def url: String
     def viewURL(name: String, branch: String): Option[String]
-    def location(resourceDirectory: File) = resourceDirectory / "openmole-market"
   }
 
   import Tags._
@@ -85,24 +84,20 @@ object Market {
     )
   )
 
-  def generate(repositories: Seq[MarketRepository], destination: File, resourceDirectory: File, branchName: String): Seq[GeneratedMarketEntry] = {
-    //def branchName = buildinfo.version.major + "-dev"
-    def archiveDirectoryName = "market"
-
-    val archiveDirectory = destination / archiveDirectoryName
-    archiveDirectory.mkdirs()
+  def generate(repositories: Seq[MarketRepository], destination: File, marketDirectory: File, branchName: String): Seq[GeneratedMarketEntry] = {
+    destination.mkdirs()
     for {
       marketRepository ← repositories
       repository = marketRepository.repository
       project ← marketRepository.entries
     } yield {
       val fileName = s"${project.name}.tgz".replace(" ", "_")
-      val archive = archiveDirectory / fileName
-      val projectDirectory = repository.location(resourceDirectory) / project.directory
+      val archive = destination / fileName
+      val projectDirectory = marketDirectory / project.directory
       projectDirectory archiveCompress archive
 
       GeneratedMarketEntry(
-        s"$archiveDirectoryName/$fileName",
+        s"$destination/$fileName",
         project,
         projectDirectory,
         marketRepository.repository.viewURL(project.directory, branchName)
