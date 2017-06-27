@@ -4,7 +4,13 @@
 
 @p{PSE Method}
 
-@img(src := Resource.vignette_pse.file, width:= "90%")
+@figure
+  @img(src := Resource.vignette_pse.file, width:= "90%")
+    @figcaption
+      Figure: Input parameter values are selected to produce new output
+      values, such that as the exploration progresses, the region of
+      the output space that is covered gets bigger.
+
 
 @p
     The PSE method searches for diverse output values. As with all
@@ -29,7 +35,7 @@
     @li{@hl.code("observables"): the observables measured for each simulation and within which we search for diversity,}
     @li{@hl.code("gridSize"): the discretisation step for each observable,}
     @li{@hl.code("reevaluate"): the probability of picking a new individual from the existing population in order to reevaluate it,}
-    @li{a @hl.code("termination") criterion.}
+    @li{@hl.code("termination") criterion.}
 
 @p To use PSE as the exploration method in openmole, use the PSE constructor like so:
 @br @hl.openmole("""
