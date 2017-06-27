@@ -13,5 +13,6 @@ package object shared {
   lazy val sitexDocDetails = "sitex-doc-details"
   lazy val sitexMarket = "sitex-market"
   lazy val searchDiv = "search-div"
+  lazy val moreCollapse = "more-collapse"
 
 }

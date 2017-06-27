@@ -1,5 +1,9 @@
 package org.openmole.site
 
+import java.util.UUID
+
+import scalatags.Text.TypedTag
+
 /*
  * Copyright (C) 01/04/16 // mathieu.leclaire@openmole.org
  *
@@ -46,21 +50,32 @@ package object tools {
 
   def tq = """""""""
 
-  // SCALATAGS METHODS
+  def uuID: String = UUID.randomUUID.toString
 
+  implicit class ShortID(id: String) {
+    def short = id.split('-').head
+  }
+
+  // SCALATAGS METHODS
   def classIs(s: String) = `class` := s
 
-  def to(ref: String) = a(href := ref)
+  def to(page: Page) = a(href := page.file)
 
-  def innerLink(page: Page, title: String) = to(page.file)(span(title))
-
-  def buttonLink(ref: String, buttonTitle: String) = to(ref)(targetBlank)(span(classIs("btn btn-primary"), `type` := "button", buttonTitle))
+  def innerLink(page: Page, title: String) = to(page)(span(title))
 
   // CONVINIENT KEYS
   implicit class SString(ss: String) {
     def ++(s: String) = s"$ss $s"
   }
-  
+
+  def siteButton(buttonStyle: AttrPair) = scalatags.Text.all.button(buttonStyle, `type` := "button")
+
+  def linkButton(title: String, link: String, buttonStyle: AttrPair = classIs(btn ++ btn_default), openInOtherTab: Boolean = true) =
+    a(href := link)(targetBlank)(span(classIs("btn btn-primary"), `type` := "button", title))
+
+  def glyphSpan(glyphicon: String, style: Seq[Modifier], page: Page, text: String = ""): TypedTag[_ <: String] =
+    to(page)(classIs(glyphicon), style, pointer, aria.hidden := "true")(text)
+
   lazy val nav: String = "nav"
   lazy val navbar: String = "navbar"
   lazy val navbar_nav: String = "navbar-nav"
@@ -74,9 +89,30 @@ package object tools {
   lazy val navbar_brand: String = "navbar-brand"
   lazy val navbar_btn: String = "navbar-btn"
   lazy val navbar_collapse: String = "navbar-collapse"
+  lazy val nav_pills: String = "nav-pills"
+
+  lazy val btn: String = "btn"
+  lazy val btn_default: String = "btn-default"
+  lazy val btn_primary: String = "btn-primary"
+  lazy val btn_danger: String = "btn-danger"
+
+  lazy val glyph_chevron_left: String = "glyphicon glyphicon-chevron-left"
+  lazy val glyph_chevron_right: String = "glyphicon glyphicon-chevron-right"
+
+  private def role(suffix: String): AttrPair = scalatags.Text.all.role := suffix
+
+  lazy val role_tablist = role("tablist")
+  lazy val role_presentation = role("presentation")
+  lazy val role_tab = role("tab")
+  lazy val tab_pane: String = "tab-pane"
+  lazy val tab_panel_role = role("tabpanel")
+  lazy val role_button = role("button")
+
   lazy val container_fluid: String = "container-fluid"
   lazy val pointer = cursor := "pointer"
+  lazy val fixedPosition = position := "fixed"
   lazy val targetBlank = target := "_blank"
   lazy val collapse: String = "collapse"
+  lazy val fade: String = "fade"
 
 }

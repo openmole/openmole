@@ -1,5 +1,7 @@
 package org.openmole.site
 
+import org.scalajs.dom.raw.HTMLElement
+
 import scaladget.api.{ BootstrapTags ⇒ bs }
 import scaladget.tools.JsRxTags._
 import scala.scalajs.js.JSApp
@@ -36,13 +38,19 @@ object SiteJS extends JSApp {
   @JSExport()
   def main(): Unit = {
 
-    JSPages.toJSPage(org.scalajs.dom.window.location.pathname.split('/').last) foreach { page ⇒
-
-      if (JSPages.topPagesChildren.contains(page)) UserGuide.addCarousel(page)
-      else MainPage.load(page)
-
+    //    JSPages.toJSPage(org.scalajs.dom.window.location.pathname.split('/').last) foreach { page ⇒
+    //
+    //      if (JSPages.topPagesChildren.contains(page)) UserGuide.addCarousel(page)
+    //      else MainPage.load(page)
+    //
+    //      Highlighting.init
+    //    }
+    withBootstrapNative {
+      Expander()
       Highlighting.init
+      div.render
     }
+
   }
 
   val lunrIndex: Var[Option[Index]] = Var(None)
@@ -68,4 +76,5 @@ object SiteJS extends JSApp {
       i.search(content).toSeq
     }.getOrElse(Seq())
   }
+
 }

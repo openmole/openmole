@@ -26,14 +26,13 @@ object Menu {
   val navClass = classIs(navbar ++ navbar_default ++ navbar_staticTop ++ navbar_fixedTop ++ navbar_inverse)
   val liStyle = paddingTop := 8
   val inputStyle = paddingTop := 15
-  val index = "index.html"
 
-  def build = {
+  val build = {
     tags2.nav(navClass, paddingRight := 20)(
       div(classIs(container_fluid))(
         div(classIs(navbar_header))(
           div(classIs(navbar_brand), href := "#", padding := 0),
-          to(index)(
+          to(Pages.index)(
             img(alt := "", src := "img/openmole.png", Seq(width := 240, pointer))
           )
         ),
@@ -42,7 +41,7 @@ object Menu {
             li(innerLink(DocumentationPages.root.language.model.scala, "DOCUMENTATION"), liStyle),
             li(innerLink(Pages.faq, "FAQ"), liStyle),
             li(inputStyle)(div(id := shared.searchDiv)),
-            li(buttonLink("http://demo.openmole.org", "DEMO"))
+            li(linkButton("DEMO", "http://demo.openmole.org", classIs(btn ++ btn_primary)))
           )
         )
       )

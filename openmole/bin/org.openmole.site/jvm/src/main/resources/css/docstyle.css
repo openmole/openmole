@@ -18,7 +18,7 @@ body{
 p{
   padding-top:30px;
 }
-
+/*
 .fade-in {
 	opacity: 1;
 	animation-name: fadeInOpacity;
@@ -34,7 +34,7 @@ p{
 	100% {
 		opacity: 1;
 	}
-}
+}*/
 
 
 .question{

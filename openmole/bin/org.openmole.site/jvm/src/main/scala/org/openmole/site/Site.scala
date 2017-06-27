@@ -140,19 +140,24 @@ object Site extends App {
        */
       def bodyFrag(page: org.openmole.site.Page) = {
 
-        body(
+        body(stylesheet.mainDiv)(
           Menu.build,
-          div(id := shared.sitexIntro, page.intro.map {
+          /*div(id := shared.sitexIntro, page.intro.map {
             _.intro
           }.getOrElse("")),
           div(id := shared.sitexIntroMore, page.intro.map {
             _.more.getOrElse(RawFrag(""))
-          }.getOrElse("")),
-          div(id := {
-            if (DocumentationPages.topPagesChildren.contains(page)) shared.sitexDoc
-            else if (page == DocumentationPages.root.market) shared.sitexMarket
-            else shared.sitexMain
-          }, page.content),
+          }.getOrElse("")),*/ {
+            page match {
+              case doc: DocumentationPage ⇒ UserGuide.addCarousel(page)
+              case _                      ⇒ div("autre")
+            }
+
+            //            if (DocumentationPages.topPagesChildren.contains(page)) UserGuide.addCarousel(page)
+            //            else if (page == DocumentationPages.root.market) div(shared.sitexMarket)
+            //            else div(shared.sitexMain)
+          },
+          //page.content),
           onload := "org.openmole.site.SiteJS().main();org.openmole.site.SiteJS().loadIndex(index);"
         )(`class` := "fade-in")
       }
