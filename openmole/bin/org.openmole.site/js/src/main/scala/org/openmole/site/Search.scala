@@ -42,13 +42,18 @@ object Search {
           for {
             r ← result().take(10)
           } yield {
-            val page = JSPages.all.filter { p: JSPage ⇒ p.file == r.ref }.headOption
-            page.map { p ⇒ div(a(pointer, onclick := { () ⇒ utils.to(p) })(p.name)) }.getOrElse(div())
+            div(a(pointer, href := r.ref)(SiteJS.entries.get(r.ref)))
           }
         }
       )
 
-    val dd = new Dropdown(resultDiv, div(searchDiv), emptyMod, sitesheet.searchResult, () ⇒ {})
+    val resultStyle: ModifierSeq = Seq(
+      color := "black",
+      left := -20,
+      width := 200
+    )
+
+    val dd = new Dropdown(resultDiv, div(searchDiv), emptyMod, resultStyle, () ⇒ {})
 
     val searchBlock = div(
       form(

@@ -37,14 +37,6 @@ object SiteJS extends JSApp {
 
   @JSExport()
   def main(): Unit = {
-
-    //    JSPages.toJSPage(org.scalajs.dom.window.location.pathname.split('/').last) foreach { page ⇒
-    //
-    //      if (JSPages.topPagesChildren.contains(page)) UserGuide.addCarousel(page)
-    //      else MainPage.load(page)
-    //
-    //      Highlighting.init
-    //    }
     withBootstrapNative {
       Expander()
       Highlighting.init
@@ -53,7 +45,16 @@ object SiteJS extends JSApp {
 
   }
 
+  implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
+  @js.native
+  trait IndexEntry extends js.Object {
+    val title: String = js.native
+    val url: String = js.native
+  }
+  type Entries = collection.mutable.Map[String, String]
+
   val lunrIndex: Var[Option[Index]] = Var(None)
+  var entries: Entries = collection.mutable.Map.empty
 
   @JSExport
   def loadIndex(indexArray: js.Array[js.Any]): Unit = {
@@ -65,6 +66,8 @@ object SiteJS extends JSApp {
       i.ref("url")
       indexArray.foreach(p ⇒ {
         i.add(p)
+        val ie = p.asInstanceOf[IndexEntry]
+        entries.update(ie.url, ie.title)
       })
     })
 

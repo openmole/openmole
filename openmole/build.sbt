@@ -805,7 +805,6 @@ lazy val site = crossProject.in(binDir / "org.openmole.site") settings (defaultS
   Libraries.scalajsMarked
 )
 
-lazy val macrosite = Project("macrosite", binDir / "org.openmole.macrosite") settings (defaultSettings: _*) dependsOn (siteJVM, openmoleFile)
 
 lazy val siteJS = site.js
 lazy val siteJVM = site.jvm dependsOn(tools, project, serializer, marketIndex) settings (
@@ -846,11 +845,6 @@ copySiteResources := {
 lazy val buildSite = inputKey[File]("buildSite")
 buildSite := {
   import sbt.complete.Parsers.spaceDelimited
-
-  val generateMacro = Def.taskDyn {
-    val jsSource = (sourceDirectory in siteJS in Compile).value / "scala/org/openmole/site/macropackage.scala"
-    (run in macrosite in Compile).toTask(" " + jsSource)
-  }.value
 
   val siteTarget = Def.inputTaskDyn {
     val parsed = spaceDelimited("<args>").parsed
