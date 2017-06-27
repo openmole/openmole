@@ -48,15 +48,14 @@ case class Tabs(tabs: Seq[Tab] = Seq()) {
     div(
       ul(classIs(nav ++ nav_pills), role_tablist)(
         theTabs.map { t ⇒
-          println("TAB " + t.title + " " + t.topage.file)
           li(role_presentation, t.activeClass._1)(
-            tools.to(t.topage)(id := t.tabID, role_tab, data("toggle") := "tab", data("height") := true, aria.controls := t.refID)(t.title)
+            tools.to(t.topage)(id := t.tabID)(t.title)
           )
         }
       ),
       div(classIs("tab_content"), paddingTop := 10)(
         theTabs.map { t ⇒
-          div(id := t.refID, classIs(tab_pane ++ fade), t.activeClass._2, tab_panel_role, aria.labelledby := t.tabID)(t.content)
+          div(id := t.refID)(t.content)
         }
       )
     )
