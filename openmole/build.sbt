@@ -823,25 +823,6 @@ def parse(key: String, default: sbt.File, parsed: Seq[String]) = parsed.indexOf(
   }
 }
 
-
-lazy val copySiteResources = inputKey[Unit]("copySiteResources")
-copySiteResources := {
-  import sbt.complete.Parsers.spaceDelimited
-  val parsed = spaceDelimited("<args>").parsed
-  val resourceDirectoryValue = (resourceDirectory in siteJVM in Compile).value
-  val defaultDest = (target in siteJVM).value / "site"
-  val (siteTarget, args1) = parse("--target", defaultDest, parsed)
-
-  val siteBuildJS = (fullOptJS in siteJS in Compile).value
-
-  IO.copyFile(siteBuildJS.data, siteTarget / "js/sitejs.js")
-  IO.copyDirectory(resourceDirectoryValue / "js", siteTarget / "js")
-  IO.copyDirectory(resourceDirectoryValue / "css", siteTarget / "css")
-  IO.copyDirectory(resourceDirectoryValue / "fonts", siteTarget / "fonts")
-  IO.copyDirectory(resourceDirectoryValue / "img", siteTarget / "img")
-  IO.copyDirectory(resourceDirectoryValue / "script", siteTarget / "script")
-}
-
 lazy val buildSite = inputKey[File]("buildSite")
 buildSite := {
   import sbt.complete.Parsers.spaceDelimited
@@ -854,7 +835,16 @@ buildSite := {
     (run in siteJVM in Compile).toTask(" " + args.mkString(" ")).map(_ => siteTarget)
   }.evaluated
 
-  val copy = copySiteResources.evaluated
+  def copySiteResources(siteBuildJS: File, resourceDirectory: File, siteTarget: File) = {
+    IO.copyFile(siteBuildJS, siteTarget / "js/sitejs.js")
+    IO.copyDirectory(resourceDirectory / "js", siteTarget / "js")
+    IO.copyDirectory(resourceDirectory / "css", siteTarget / "css")
+    IO.copyDirectory(resourceDirectory / "fonts", siteTarget / "fonts")
+    IO.copyDirectory(resourceDirectory / "img", siteTarget / "img")
+    IO.copyDirectory(resourceDirectory / "script", siteTarget / "script")
+  }
+
+  copySiteResources((fullOptJS in siteJS in Compile).value.data, (resourceDirectory in siteJVM in Compile).value, siteTarget)
 
   siteTarget
 }
