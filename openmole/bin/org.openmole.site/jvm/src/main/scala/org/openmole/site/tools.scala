@@ -68,6 +68,7 @@ package object tools {
 
   def to(page: Page) = a(href := page.file)
 
+
   def innerLink(page: Page, title: String) = to(page)(span(title))
 
   // CONVINIENT KEYS
@@ -78,7 +79,7 @@ package object tools {
   def siteButton(buttonStyle: AttrPair) = scalatags.Text.all.button(buttonStyle, `type` := "button")
 
   def linkButton(title: String, link: String, buttonStyle: AttrPair = classIs(btn ++ btn_default), openInOtherTab: Boolean = true) =
-    a(href := link)(targetBlank)(span(classIs("btn btn-primary"), `type` := "button", title))
+    a(href := link)(targetBlank)(span(buttonStyle, `type` := "button", title))
 
   def glyphSpan(glyphicon: String, style: Seq[Modifier], page: Page, text: String = ""): TypedTag[_ <: String] =
     to(page)(classIs(glyphicon), style, pointer, aria.hidden := "true")(text)
