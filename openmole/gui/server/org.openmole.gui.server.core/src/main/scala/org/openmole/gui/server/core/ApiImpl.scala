@@ -295,7 +295,6 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
 
   // EXECUTIONS
   def cancelExecution(id: ExecutionId): Unit = execution.cancel(id)
-
   def removeExecution(id: ExecutionId): Unit = execution.remove(id)
 
   def runScript(scriptData: ScriptData): Unit = {
@@ -340,12 +339,11 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
                 case Success(ex) ⇒
                   val envIds = (ex.allEnvironments).map { env ⇒ EnvironmentId(getUUID, execId) → env }
                   Runnings.add(execId, envIds)
-
                   envIds.foreach { case (envId, env) ⇒ env.listen(Runnings.environmentListener(envId)) }
 
                   Try(ex.start) match {
                     case Failure(e) ⇒ error(e)
-                    case Success(ex) ⇒
+                    case Success(_) ⇒
                       val inserted = execution.addDynamicInfo(execId, DynamicExecutionInfo(ex, outputStream))
                       if (!inserted) ex.cancel
                   }
