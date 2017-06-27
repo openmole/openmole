@@ -4,8 +4,67 @@
 
 @p{Profile Method}
     @p The method aims at testing the validity intervals of input parameters
+
 @figure
  @img(src := Resource.vignette_profiles.file, width:= "90%")
    @figcaption
     Calibration Profiles find the domain of a parameter within which the model can produce dynamics
     under a given threshold of acceptance, every other parameter being calibrated.
+
+@p
+  Given a distance measure between the model output values and
+  the data, the profile of a selected parameter is constructed by
+  dividing the interval within which i can vary into subintervals
+  of equal size, and calibrating the model within each to
+  minimise the distance (similarly to @a("Calibration", href :=
+  DocumentationPages.root.language.method.calibration.file)).  The
+  optimisation is made over the other parameters of the model which are
+  left free.
+
+@p
+  As an example, let's consider a model with 3 parameters i, j and k,
+  each taking real values between 1 and 10. The profile of the parameter
+  i is made by splitting the [1,10] interval into (for example) 9
+  intervals of size 1. Calibration is performed in parallel within each
+  interval. At the end of the minimisation, we obtain sets of parameter
+  values minimising the given distance with i taking values in each
+  subinterval. By plotting the distance against the values of i, one
+  can visually determine what values i must take for the model to be
+  able to reproduce the data.
+
+@p
+  By defining a threshold below which the distance between the model output and the data
+  is considered acceptable, the results of the profile methods can be interpreted as
+  the subset of values of the parameter for which the model output reproduces the data
+  sufficiently well.
+
+@p
+    The Profile method takes the following parameters:
+@ul
+    @li{@hl.code("inputs"): a list of the model parameters with their minimum and maximum bounds,}
+    @li{@hl.code("objective"): a variable defined in the OpenMOLE script that contains the distance between the data and the model output,}
+    @li{@hl.code("x"): the parameter which is being profiled (refers to the index of the parameter in the list "inputs", starting to 0),}
+    @li{@hl.code("nX"): the size of the subintervals,}
+    @li{@hl.code("reevaluate"): the probability of picking a new individual from the existing population in order to reevaluate it,}
+    @li{@hl.code("termination") criterion.}
+
+@p To profile a parameter, use the PSE constructor like so:
+@br @hl.openmole("""
+val exploration =
+    GenomeProfile (
+      x = 0,
+      nX = 20,
+      inputs =
+        Seq(
+          param1 -> (0.0, 99.0),
+          param2 -> (0.0, 99.0)),
+      objective = fitness,
+      reevaluate = 0.01,
+      termination = 1000000
+    )""", name = "PSE")
+where @hl.code("param1") and @hl.code("param2") are inputs
+of the task that runs the model (and refer to the model parameters), 
+and @hl.code("output1") and @hl.code("output2") are outputs of that
+same task. The number of inputs and outputs are illimited. Here, @hl.code("x = 0")
+specifies that we are profiling @hl.code("param1").
+
