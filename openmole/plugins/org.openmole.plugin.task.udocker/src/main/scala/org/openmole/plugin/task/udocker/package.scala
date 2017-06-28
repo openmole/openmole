@@ -50,8 +50,9 @@ package object udocker extends UDockerPackage {
   case class DockerImageData(imageAndTag: Option[Array[String]], manifest: String)
   case class ValidDockerImageData(imageAndTag: (String, String), manifest: String)
 
-  // FIXME turn to plain String if useless
-  case class Err(msg: String)
+  case class Err(msg: String) {
+    def +(o: Err) = Err(msg + o.msg)
+  }
 
   def validateNonEmpty(imageAndTag: Option[Array[String]]): ValidatedNel[Err, (String, String)] = imageAndTag match {
     case Some(Array(image, tag)) ⇒ Validated.valid((image, tag))

@@ -9,6 +9,7 @@ import org.apache.http.impl.conn.BasicHttpClientConnectionManager
 import DockerMetadata._
 import io.circe.generic.extras.auto._, io.circe.jawn.decode, io.circe.parser._
 import squants.time._
+import cats.implicits._
 
 object Registry {
 
@@ -70,7 +71,7 @@ object Registry {
 
     }
 
-    def token(authenticationRequest: AuthenticationRequest): Either[String, Token] = {
+    def token(authenticationRequest: AuthenticationRequest): Either[Err, Token] = {
       val tokenRequest = s"${authenticationRequest.realm}?service=${authenticationRequest.service}&scope=${authenticationRequest.scope}"
       val get = new HttpGet(tokenRequest)
       execute(get) { response ⇒
@@ -81,7 +82,7 @@ object Registry {
           token ← parsed.hcursor.get[String]("token")
         } yield Token(authenticationRequest.scheme, token)
 
-        tokenRes.fold(l ⇒ Left(l.getMessage()), r ⇒ Right(r))
+        tokenRes.leftMap(l ⇒ Err(l.getMessage()))
       }
     }
 
@@ -92,7 +93,7 @@ object Registry {
     s"${image.registry}/v2/$path"
   }
 
-  def manifest(image: DockerImage, timeout: Time): Either[String, Manifest] = {
+  def manifest(image: DockerImage, timeout: Time): Either[Err, Manifest] = {
 
     val url = s"${baseURL(image)}/manifests/${image.tag}"
     val httpResponse = client.execute(Token.withToken(url, timeout))
@@ -103,7 +104,7 @@ object Registry {
       manifest ← manifestsE
     } yield Manifest(manifest, image)
 
-    manifest.fold(err ⇒ Left(err.getMessage()), r ⇒ Right(r))
+    manifest.leftMap(err ⇒ Err(err.getMessage()))
   }
 
   def layers(manifest: ImageManifestV2Schema1) = for {
