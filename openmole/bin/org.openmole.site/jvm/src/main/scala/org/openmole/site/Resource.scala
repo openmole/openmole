@@ -46,7 +46,7 @@ object Resource {
 
   def modelIO = imgResource("modelIO.png")
 
-  def vignette_profiles = imgResource("profiles.gif")
+  def vignette_profiles = imgResource("profileanimV1.svg")
 
   def vignette_ancestors = imgResource("ancestors.png")
 
@@ -56,7 +56,7 @@ object Resource {
 
   def vignette_sensitivity = imgResource("sensitivity.svg")
 
-  def vignette_pse = imgResource("pse_anim.gif")
+  def vignette_pse = imgResource("pse_anim.svg")
 
   def antNumbers = imgResource("antnumbers.png")
 
