@@ -53,12 +53,7 @@ object UserGuide {
 
       tabs.add(p.name, withDetails, isCurrent, p)
 
-    }) //)
-
-    //    println(" +++ The tabs: afetr fold l" + tabs.tabs.map {
-    //      _.title
-    //    })
-    //  tabs
+    })
   }
 
   def addCarousel(current: Page) = {
