@@ -64,7 +64,7 @@ package object tools {
   }
 
   // SCALATAGS METHODS
-  def classIs(s: String) = `class` := s
+  def classIs(s: String): AttrPair = `class` := s
 
   def to(page: Page) = a(href := page.file)
 
@@ -75,10 +75,11 @@ package object tools {
     def ++(s: String) = s"$ss $s"
   }
 
-  def siteButton(buttonStyle: AttrPair) = scalatags.Text.all.button(buttonStyle, `type` := "button")
-
   def linkButton(title: String, link: String, buttonStyle: AttrPair = classIs(btn ++ btn_default), openInOtherTab: Boolean = true) =
-    a(href := link)(targetBlank)(span(buttonStyle, `type` := "button", title))
+    a(href := link)(if (openInOtherTab) targetBlank else "")(span(buttonStyle, `type` := "button", title))
+
+  def pageLinkButton(title: String, page: Page, openInOtherTab: Boolean = true, buttonStyle: Seq[Modifier] = Seq(classIs(btn ++ btn_default))) =
+    to(page)(if (openInOtherTab) targetBlank else "")(span(buttonStyle, `type` := "button", title))
 
   def glyphSpan(glyphicon: String, style: Seq[Modifier], page: Page, text: String = ""): TypedTag[_ <: String] =
     to(page)(classIs(glyphicon), style, pointer, aria.hidden := "true")(text)
@@ -121,5 +122,7 @@ package object tools {
   lazy val targetBlank = target := "_blank"
   lazy val collapse: String = "collapse"
   lazy val fade: String = "fade"
+  lazy val row: String = "row"
+  def colMD(nb: Int): String = s"col-md-$nb"
 
 }

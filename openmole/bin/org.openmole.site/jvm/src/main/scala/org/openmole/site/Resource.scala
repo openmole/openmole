@@ -102,6 +102,12 @@ object Resource {
 
   def biomedia = imgResource("biomedia.png")
 
+  val scale = imgResource("scale.svg")
+
+  val code = imgResource("code.svg")
+
+  val exploreMap = imgResource("map.svg")
+
   //Radars graph for methodes
   def m_complete = imgResource("methods_radars/complet.png")
 

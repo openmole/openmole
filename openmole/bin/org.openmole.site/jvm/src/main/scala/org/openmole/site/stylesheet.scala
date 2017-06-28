@@ -22,6 +22,18 @@ import tools._
 
 package object stylesheet {
 
+  lazy val GREEN = "#a6bf26"
+
+  lazy val DARK_GREY = "#222"
+
+  lazy val LIGHT_GREY = "#e7e7e7"
+  //
+  //  lazy val VERY_LIGHT_GREY = "#e7e7e7"
+  //
+  //  lazy val BS_GREY = "#808080"
+  //
+  //  lazy val FUN_GREY = "#cccccc"
+
   lazy val mainDiv = Seq(
     width := "50%",
     margin := "0 auto",
@@ -60,4 +72,19 @@ package object stylesheet {
     paddingLeft := "calc(50% + 200px)"
   ) ++ navigateDoc
 
+  lazy val mainTitle = Seq(
+    color := DARK_GREY,
+    fontWeight := "bold",
+    fontSize := "35px",
+    padding := 10
+  )
+
+  lazy val mainText = Seq(
+    color := DARK_GREY
+  )
+
+  lazy val centerBox = Seq(
+    textAlign := "center",
+    width := "60%"
+  )
 }

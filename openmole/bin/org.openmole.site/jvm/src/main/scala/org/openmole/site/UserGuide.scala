@@ -56,6 +56,10 @@ object UserGuide {
     })
   }
 
+  val firstModel = DocumentationPages.root.language.model.scala
+  val firstMethod = DocumentationPages.root.language.method.profile
+  val firstEnvironment = DocumentationPages.root.language.environment.ssh
+
   def addCarousel(current: Page) = {
 
     val methodTabs = buildTabs(DocumentationPages.root.language.method.children, current)
@@ -75,9 +79,9 @@ object UserGuide {
 
     new StepCarousel(
       currentStep,
-      Step("1. MODEL", taskTabs.render, DocumentationPages.root.language.model.scala),
-      Step("2. METHOD", methodTabs.render, DocumentationPages.root.language.method.profile),
-      Step("3. ENVIRONMENT ", envTabs.render, DocumentationPages.root.language.environment.ssh)
+      Step("1. MODEL", taskTabs.render, firstModel),
+      Step("2. METHOD", methodTabs.render, firstMethod),
+      Step("3. ENVIRONMENT ", envTabs.render, firstEnvironment)
     ).render
 
   }
