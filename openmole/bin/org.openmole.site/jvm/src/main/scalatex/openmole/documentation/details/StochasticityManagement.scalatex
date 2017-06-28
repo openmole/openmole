@@ -53,26 +53,26 @@
 
 
 @h2
-    Stochastic Models and Calibration
+    The problem of stochasticity in Calibration of models
 
 @p
     Genetic algorithms don’t cope well with stochasticity.
 
-     This is especially the case for algorithms of type "µ + λ" (such as NSGA2, the GA used in OpenMOLE)
-     which preserve best solutions individuals from a generation to another.
+     This is especially the case for algorithms with evolution strategies of type "µ + λ" (such as NSGA2, the GA used in OpenMOLE)
+     which preserves best solutions (individuals) from a generation to another.
 
-    In that kind of optimisation, the quality of a solution is only @b{estimated}.
+    In that kind of optimization, the quality of a solution is only @b{estimated}.
     Since it is subject to variation from a replication to another, the quality can either be overvalued or
-    undervalued i.e. estimated at a significantly greater or  lower value than the one obtained for an infinite
+    undervalued i.e. estimated at a significantly greater or lower value than the one obtained for an infinite
     number of replications.
 
-@br@br
+@br
     Undervalued solutions are not that problematic, as they might be discarded instead of being kept, but the algorithm
     has a chance to retry a very similar solution later on.
 
-    Conversely, the overvalued solution are very problematic : the genetic algorithm might  keep them
-    in the population of good solutions because they have falsely been evaluated as good solutions and generates new
-    offspring solutions from them, who may not perform as well during an other evaluation , because of the stochasticity.
+    Conversely, the overvalued solutions are very problematic : the genetic algorithm will keep them
+    in the population of good solutions because they have been (falsely) evaluated as good solutions, and will generate
+     new offspring solutions from them.
 @br
 
     This behaviour can greatly slow down the convergence of the calibration algorithm and even make it converge toward
@@ -83,17 +83,17 @@
 
 @p
     To reduce the influence of the fitness fluctuation, the most commonly used approach is  "resampling". It consists in
-    running several replications for each fitness evaluation. The computed quality of an individual (i.e. a set of
-    parameter) is then an estimation given a @i{finite} number of replications of the fitness computation.
-
-    This number is set to a compromise between the computation time taken to evaluate one set of parameters and an
-    acceptable level of noise for the quality. Any number of replications, even very high, still implies
-    that some solutions are overvalued with a non negligible probability given that the fitness function is evaluated
+    replicating the fitness evaluation of an the individual. The computed "quality" of an individual is then
+    an estimation (e.g. mean, median) based on a @i{finite} number of replications of the fitness computation.
+@br
+    This number is set to a compromise between the computation time taken to evaluate one set of parameters (an individual)
+     and an acceptable level of noise for the computed quality.
+     Still, any number of replications, even very high, implies that some solutions are overvalued with a non negligible probability given that the fitness function is evaluated
     millions of times.
-
-    The other ad hoc methods of the literature significantly complicates the optimisation algorithm, as they are often
-    based some assumptions that are hard or impossible to verify (such as the invariance of the noise distribution
-    over the fitness space) and add parameters to the algorithm that are difficult to tune finely.
+@br
+    Other ad hoc methods of the literature  are often based some assumptions that are hard or impossible to verify
+    (such as the invariance of the noise distribution over the fitness space) and add parameters to the algorithm
+    that are difficult to tune finely.
 
 @h3
     OpenMOLE's solution
@@ -101,14 +101,13 @@
 @p
     To overcome these limitations, OpenMOLE uses an auto-adaptive strategy called "stochastic resampling".
 
-
+@br
 TODO texte à confirmer par romain
-
+@br
     The idea (loosely related to the idea of resampling best solutions so they are more precisely evaluated, cf
-    [Branke, 1998] TODO garder la REF ?) is to to evaluate individuals with only one replication and then to resample
-    the individuals of the current population with a fixed probability at each generation of the evolutionary algorithm.
-
-
+    [Branke, 1998] TODO garder la REF ?) is to  evaluate individuals with only one replication and then, at the next generation
+     ,  to keep and re-inject a sample of the individuals of the current population.
+@br
 
     For instance, at each generation, 90% of the individuals offspring genomes are @b{new genomes} obtained by
     classical mutation/crossover steps of genetic algorithms, and 10% of the offspring genomes are drawn randomly from
@@ -118,8 +117,8 @@ TODO texte à confirmer par romain
     Replicated evaluations are stored for each individual in a vector of replications. The global fitness of an
     individual is computed using (for instance) the median of each fitness value stored in the replication vector.
 
-
-    The goal is that best individuals survive several generations and therefore are the most likely to be resampled
+@br
+    The goal is to have the best individuals survive several generations and therefore are the most likely to be resampled
     given that each individual has a fixed chance of being resampled at each generation.
 
 
@@ -138,7 +137,7 @@ TODO texte à confirmer par romain
 
 
 
-    By doing so, we let the multi-objective optimisation algorithm handle the compromise between the quality of the
+    By doing so, we let the multi-objective optimization algorithm handle the compromise between the quality of the
     solutions and their robustness.
 
     This method adds only two new parameters:
