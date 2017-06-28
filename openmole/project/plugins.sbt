@@ -3,7 +3,7 @@ resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/release
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-native-packager" % "0.6.0")
 
-addSbtPlugin("com.eed3si9n" % "sbt-unidoc" % "0.3.2")
+addSbtPlugin("com.eed3si9n" % "sbt-unidoc" % "0.4.0")
 
 addSbtPlugin("org.openmole" % "openmole-buildsystem-plugin" % "1.6-SNAPSHOT")
 

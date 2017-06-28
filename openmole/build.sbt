@@ -704,7 +704,7 @@ def openmoleNakedDependencies = allCore ++ Seq(openmoleUI) ++ minimumPlugins
 def openmoleDependencies = openmoleNakedDependencies ++ corePlugins ++ guiPlugins
 
 lazy val openmoleNaked =
-  Project("openmole-naked", binDir / "openmole-naked", settings = tarProject ++ assemblySettings) settings(
+  Project("openmole-naked", binDir / "openmole-naked") settings(assemblySettings: _*) settings(
     setExecutable ++= Seq("openmole", "openmole.bat"),
     Osgi.bundleDependencies in Compile := OsgiKeys.bundle.all(ScopeFilter(inDependencies(ThisProject, includeRoot = false))).value,
     resourcesAssemble += (resourceDirectory in Compile).value -> assemblyPath.value,
@@ -713,8 +713,8 @@ lazy val openmoleNaked =
     resourcesAssemble += (fullOptJS in clientGUI in Compile).value.data -> (assemblyPath.value / "webapp/js/openmole.js"),
     resourcesAssemble += (packageMinifiedJSDependencies in clientGUI in Compile).value -> (assemblyPath.value / "webapp/js/deps.js"),
     resourcesAssemble += {
-      val tar = (Tar.tar in openmoleRuntime).value
-      tar -> (assemblyPath.value / "runtime" / tar.getName)
+      val tarFile = (tar in openmoleRuntime).value
+      tarFile -> (assemblyPath.value / "runtime" / tarFile.getName)
     },
     resourcesAssemble += (assemble in launcher).value -> (assemblyPath.value / "launcher"),
     resourcesAssemble ++= (Osgi.bundleDependencies in Compile).value.map(b ⇒ b → (assemblyPath.value / "plugins" / b.getName)),
@@ -722,17 +722,17 @@ lazy val openmoleNaked =
     dependencyFilter := bundleFilter,
     dependencyName := rename,
     assemblyDependenciesPath := assemblyPath.value / "plugins",
-    Tar.name := "openmole-naked.tar.gz",
-    Tar.innerFolder := "openmole",
+    tarName := "openmole-naked.tar.gz",
+    tarInnerFolder := "openmole",
     cleanFiles ++= (cleanFiles in launcher).value,
     cleanFiles ++= (cleanFiles in openmoleRuntime).value) dependsOn (toDependencies(openmoleNakedDependencies): _*) settings (defaultSettings: _*)
 
 lazy val openmole =
-  Project("openmole", binDir / "openmole", settings = tarProject ++ assemblySettings) settings (defaultSettings: _*) settings(
+  Project("openmole", binDir / "openmole") enablePlugins(TarPlugin) settings(assemblySettings: _*) settings (defaultSettings: _*) settings(
     setExecutable ++= Seq("openmole", "openmole.bat"),
     Osgi.bundleDependencies in Compile := OsgiKeys.bundle.all(ScopeFilter(inDependencies(ThisProject, includeRoot = false))).value,
-    Tar.name := "openmole.tar.gz",
-    Tar.innerFolder := "openmole",
+    tarName := "openmole.tar.gz",
+    tarInnerFolder := "openmole",
     dependencyFilter := bundleFilter,
     dependencyName := rename,
     resourcesAssemble += (assemble in openmoleNaked).value -> assemblyPath.value,
@@ -741,13 +741,13 @@ lazy val openmole =
     cleanFiles ++= (cleanFiles in openmoleNaked).value) dependsOn (toDependencies(openmoleDependencies): _*)
 
 lazy val openmoleRuntime =
-  OsgiProject(binDir, "org.openmole.runtime", singleton = true, imports = Seq("*"), settings = tarProject ++ assemblySettings) dependsOn(workflow, communication, serializer, logging, event, exception) settings(
+  OsgiProject(binDir, "org.openmole.runtime", singleton = true, imports = Seq("*")) enablePlugins(TarPlugin) settings(assemblySettings: _*) dependsOn(workflow, communication, serializer, logging, event, exception) settings(
     assemblyDependenciesPath := assemblyPath.value / "plugins",
     resourcesAssemble += (resourceDirectory in Compile).value -> assemblyPath.value,
     resourcesAssemble += (assemble in launcher).value -> (assemblyPath.value / "launcher"),
     resourcesAssemble ++= (Osgi.bundleDependencies in Compile).value.map(b ⇒ b → (assemblyPath.value / "plugins" / b.getName)),
     setExecutable ++= Seq("run.sh"),
-    Tar.name := "runtime.tar.gz",
+    tarName := "runtime.tar.gz",
     libraryDependencies += Libraries.scopt,
     libraryDependencies += Libraries.logging,
     dependencyFilter := bundleFilter,
@@ -755,7 +755,7 @@ lazy val openmoleRuntime =
   ) dependsOn (toDependencies(allCore): _*) settings (defaultSettings: _*)
 
 
-lazy val daemon = OsgiProject(binDir, "org.openmole.daemon", settings = tarProject ++ assemblySettings) dependsOn(workflow, workflow, communication, workspace,
+lazy val daemon = OsgiProject(binDir, "org.openmole.daemon")  enablePlugins(TarPlugin) settings(assemblySettings: _*) dependsOn(workflow, workflow, communication, workspace,
   fileService, exception, tools, logging, desktopgrid) settings(
   assemblyDependenciesPath := assemblyPath.value / "plugins",
   resourcesAssemble ++= (Osgi.bundleDependencies in Compile).value.map(b ⇒ b → (assemblyPath.value / "plugins" / b.getName)),
@@ -775,19 +775,17 @@ lazy val daemon = OsgiProject(binDir, "org.openmole.daemon", settings = tarProje
   dependencyFilter := bundleFilter,
   dependencyName := rename,
   setExecutable ++= Seq("openmole-daemon", "openmole-daemon.bat"),
-  Tar.name := "openmole-daemon.tar.gz",
-  Tar.innerFolder := "openmole-daemon"
+  tarName := "openmole-daemon.tar.gz",
+  tarInnerFolder := "openmole-daemon"
 ) settings (defaultSettings: _*)
 
 
-lazy val api = Project("api", binDir / "target" / "api") settings (defaultSettings: _*) settings (
-  unidocSettings: _*
-  ) settings (tarProject: _*) settings(
+lazy val api = Project("api", binDir / "target" / "api") settings (defaultSettings: _*)  enablePlugins(ScalaUnidocPlugin) settings(
   compile := sbt.inc.Analysis.Empty,
-  UnidocKeys.unidocProjectFilter in(ScalaUnidoc, UnidocKeys.unidoc) :=
-    inProjects(openmoleDependencies.map(p ⇒ p: ProjectReference): _*), /*-- inProjects(Libraries.projects.map(p ⇒ p: ProjectReference) ++ ThirdParties.projects.map(p ⇒ p: ProjectReference)*/
-  Tar.name := "openmole-api.tar.gz",
-  Tar.folder := (UnidocKeys.unidoc in Compile).map(_.head).value
+  unidocProjectFilter in(ScalaUnidoc, unidoc) := inProjects(openmoleDependencies.map(p ⇒ p: ProjectReference): _*)
+  // -- inProjects(Libraries.projects.map(p ⇒ p: ProjectReference) ++ ThirdParties.projects.map(p ⇒ p: ProjectReference)*/
+//  Tar.name := "openmole-api.tar.gz",
+//  Tar.folder := (UnidocKeys.unidoc in Compile).map(_.head).value
 )
 
 
@@ -876,7 +874,8 @@ lazy val modules =
   resourcesAssemble ++= (Osgi.bundleDependencies in Compile).value.map(b ⇒ b → (assemblyPath.value / "plugins" / b.getName)),
   resourcesAssemble += ((resourceDirectory in Compile).value / "modules") -> (assemblyPath.value / "modules"),
   resourcesAssemble += (assemble in launcher).value -> (assemblyPath.value / "launcher"),
-  dependencyFilter := bundleFilter) dependsOn (toDependencies(openmoleNakedDependencies): _*) dependsOn (toDependencies(openmoleDependencies): _*) //dependsOn(siteJVM)
+  dependencyFilter := bundleFilter) dependsOn (toDependencies(openmoleNakedDependencies): _*) dependsOn (toDependencies(openmoleDependencies): _*)
+
 
 
 //lazy val fullSite = Project("fullsite", binDir / "fullsite") settings (defaultSettings: _*) settings (assemblySettings: _*) settings (
