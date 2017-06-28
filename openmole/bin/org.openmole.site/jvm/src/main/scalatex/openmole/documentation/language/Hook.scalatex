@@ -21,7 +21,7 @@
 
      val h = ToStringHook()
 
-     val ex = exploration -< (hello hook h) start""")
+     exploration -< (hello hook h)""", name = "plug a hook")
      @p The hook @i{h} is plugged to the end of the @i{hello} task. Everytime @i{hello} finishes, the hook @i{h} is
      executed. Multiple hooks can also be plugged to the same task as in the present example:
      @br @hl.openmole("""
@@ -35,29 +35,24 @@
      val h2 = ToStringHook()
      val h3 = ToStringHook()
 
-     val ex = (hello hook (h1, h2, h3)) start""").
+     (hello hook (h1, h2, h3))""", name = "plug multiple hooks").
 
   @p Hooks come in various declinations, with different actions on the results. The available hooks are described
   hereafter.
 
   @p{Save your data as CSV}
-    The @i{AppendToCSVFileHook} takes data from the dataflow and appends it to a file formatted as CSV:
+    The @i{CSVHook} takes data from the dataflow and appends it to a file formatted as CSV:
     @br @hl.openmole("""
     val i = Val[Int]
 
-    val h = AppendToCSVFileHook("/path/to/a/file/or/dir${i}.csv")""")
+    val h = CSVHook("/path/to/a/file/or/dir${i}.csv")""", name = "csv hook")
     @p The path is expanded using the variables from the dataflow (expressions between ${} are evaluated and replaced).
 
-    @p The optional last parameter of @i{AppendToCSVFileHook} is the list of variables to write to the CSV file. The
-    default behaviour when this list is not specified is to dump all the variables from the dataflow to the file. You
-    can restrict this behaviour by @b{listing only the variables you want to save}
+    @p The optional last parameter of @i{AppendToCSVFileHook} is the list of variables to write to the CSV file. The default behaviour when this list is not specified is to dump all the variables from the dataflow to the file. You can restrict this behaviour by @b{listing only the variables you want to save}
 
-    @p Some additional optional parameters can be set by calling the function @hl.openmoleNoTest("set") on the newly
-    created @i{Hook}.
-    @br Setting @hl.openmoleNoTest("csvHeader := Col1, Col2, ColZ") customises the header of the CSV file to be created
-    with the string it receives as a parameter. Please note that this only happens if the file doesn't exist when the
-    hook is executed.
-    @br @hl.openmoleNoTest("singleRow := true") forces the flattening of the input lists such that all variables values
+    @p Some additional optional parameters can be set by calling the function @hl.openmoleNoTest("set") on the newly created @i{Hook}.
+    @br Setting @hl.code("csvHeader := Col1, Col2, ColZ") customises the header of the CSV file to be created with the string it receives as a parameter. Please note that this only happens if the file doesn't exist when the hook is executed.
+    @br @hl.code("singleRow := true") forces the flattening of the input lists such that all variables values
     are written to a single row/line of the CSV file.
 
     @p This workflow demonstrates the optional behaviour of @i{AppendToCSVFileHook}:
@@ -67,11 +62,10 @@
       // this variable will not be written to the CSV file
       val z = Val[Double]
 
-      val h = AppendToCSVFileHook("/path/to/a/file/or/dir${i}.csv", i, j) set (
+      val h = CSVHook("/path/to/a/file/or/dir${i}.csv", i, j) set (
         csvHeader := "i, j",
         arraysOnSingleRow := true
-      )
-      """)
+      )""", name = "csv hook with headers")
 
   @p{Save files computed by your tasks}
     The @i{CopyFileHook} makes it possible to copy a file / directory from the dataflow to a given location on the machine
@@ -80,18 +74,18 @@
     val file = Val[File]
     val i = Val[Int]
 
-    val h = CopyFileHook(file, "/path/to/copy/the/file${i}.txt")""")
+    val h = CopyFileHook(file, "/path/to/copy/the/file${i}.txt")""", name = "copy file hook")
   @p{Append some content to a file}
     Similarly to the @i{AppendToFileHook}, any string can be appended to a file, using the more general
     @i{AppendToFileHook}. The appended strings can be a combination of variables from the dataflow and plain text.
     @br @hl.openmole("""
-    val h = AppendToFileHook("/path/of/the/file.txt", "string ${i} to append")""")
+    val h = AppendToFileHook("/path/of/the/file.txt", "string ${i} to append")""", name = "append to file hook")
 
   @p{Append a file to another file}
     Use the @i{AppendFileFileHook} as well.
     @br @hl.openmole("""
     val file = Val[File]
-    val h = AppendToFileHook("${file.content}", "/path/of/the/file")""")
+    val h = AppendToFileHook("${file.content}", "/path/of/the/file")""", name = "append file to file hook")
 
   @p{Display variables}
     To display a variable in the console, use the @i{ToStringHook}:
@@ -99,7 +93,7 @@
     val i = Val[Int]
     val j = Val[Int]
 
-    val h = ToStringHook(i, j)""")
+    val h = ToStringHook(i, j)""", name = "to string hook")
     If no variable is specified, @i{ToStringHook} displays the whole dataflow.
   @p{Display results in the console}
     To display a string formed of variables and plain text in the console, use the @i{DisplayHook}. You can think of the
@@ -107,4 +101,4 @@
     @br @hl.openmole("""
     val i = Val[Int]
 
-    val h = DisplayHook("The value of i is ${i}.")""")
+    val h = DisplayHook("The value of i is ${i}.")""", name = "display hook")

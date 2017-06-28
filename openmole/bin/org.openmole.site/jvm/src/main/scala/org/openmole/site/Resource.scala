@@ -18,14 +18,16 @@
 package org.openmole.site
 
 //import org.openmole.core.buildinfo
-import org.openmole.site.market.GeneratedMarketEntry
-import org.openmole.site.market.Market._
+//import org.openmole.marketindex.{ GeneratedMarketEntry, Market }
+//import org.openmole.site.market.Market._
 
 //TODO automatically generate this object as a managed source using sbt
 object Resource {
 
   //FIXME
   def buildinfoVersion = "7.0-SNAPSHOT"
+
+  def htmlResource(name: String) = FileResource(s"html/$name")
 
   def imgResource(name: String) = FileResource(s"img/$name")
 
@@ -38,8 +40,23 @@ object Resource {
   def FileResource(name: String) = RenameFileResource(name, name)
 
   //def css = FileResource("openMOLEStyles.css")
+  val menuHtml = htmlResource("menu.html")
 
   def ants = imgResource("ants.png")
+
+  def modelIO = imgResource("modelIO.png")
+
+  def vignette_profiles = imgResource("profileanimV1.svg")
+
+  def vignette_ancestors = imgResource("ancestors.png")
+
+  def vignette_calib_mono = imgResource("calibrage_mono.png")
+
+  def vignette_calib_multi = imgResource("calibrage_multi.png")
+
+  def vignette_sensitivity = imgResource("sensitivity.svg")
+
+  def vignette_pse = imgResource("pse_anim.svg")
 
   def antNumbers = imgResource("antnumbers.png")
 
@@ -85,6 +102,23 @@ object Resource {
 
   def biomedia = imgResource("biomedia.png")
 
+  //Radars graph for methodes
+  def m_complete = imgResource("methods_radars/complet.png")
+
+  def m_LHS = imgResource("methods_radars/LHS_sobol.png")
+
+  def m_pse = imgResource("methods_radars/pse.png")
+
+  def m_ga_mono = imgResource("methods_radars/ga_mono.png")
+
+  def m_ga_multi = imgResource("methods_radars/ga_multi.png")
+
+  def m_profile = imgResource("methods_radars/profile.png")
+
+  def m_sa = imgResource("methods_radars/sa.png")
+
+  def m_ancestor = imgResource("methods_radars/ancestor.png")
+
   def openmole = RenameFileResource("openmole.tar.gz", s"openmole-${buildinfoVersion}.tar.gz")
 
   def openmoleDaemon = RenameFileResource("openmole-daemon.tar.gz", s"openmole-daemon-${buildinfoVersion}.tar.gz")
@@ -95,8 +129,8 @@ object Resource {
 
   def index = jsResource("index.js")
 
-  def marketResources(entries: Seq[GeneratedMarketEntry]) =
-    entries.filter(_.tags.exists(_ == market.Market.Tags.tutorial)).map { tuto ⇒ MarketResource(tuto) }
+  //  def marketResources(entries: Seq[GeneratedMarketEntry]) =
+  //    entries.filter(_.tags.exists(_ == Market.Tags.tutorial)).map { tuto ⇒ MarketResource(tuto) }
 
   def all = Seq[Resource](
     docStyle,
@@ -124,12 +158,18 @@ object Resource {
     geocite,
     biomedia,
     lunr,
-    care
+    care,
+    modelIO,
+    vignette_pse,
+    vignette_ancestors,
+    vignette_calib_mono,
+    vignette_calib_multi,
+    vignette_profiles
+
   )
 }
 
 sealed trait Resource
 case class RenameFileResource(source: String, file: String) extends Resource
 case class ArchiveResource(source: String, file: String) extends Resource
-case class MarketResource(marketEntry: GeneratedMarketEntry) extends Resource
-
+//case class MarketResource(marketEntry: GeneratedMarketEntry) extends Resource

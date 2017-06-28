@@ -1,0 +1,984 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+
+   version="1.1"
+   id="svg6853"
+   viewBox="0 0 893.76823 400
+   "
+   height="107.36277mm"
+   width="252.24126mm">
+  <defs
+     id="defs6855">
+    <marker
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker4532-0-4-5-7-5-3-9"
+       style="overflow:visible">
+      <path
+         id="path4534-3-3-6-9-3-4-7"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 Z"
+         style="fill:#333333;fill-opacity:1;fill-rule:evenodd;stroke:#333333;stroke-width:1pt;stroke-opacity:1"
+         transform="matrix(-0.8,0,0,-0.8,-10,0)" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="marker4608-8-7-4-0-5-3"
+       refX="0"
+       refY="0"
+       orient="auto">
+      <path
+         transform="matrix(-0.8,0,0,-0.8,-10,0)"
+         style="fill:#333333;fill-opacity:1;fill-rule:evenodd;stroke:#333333;stroke-width:1pt;stroke-opacity:1"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 Z"
+         id="path4610-4-8-0-4-0-1" />
+    </marker>
+    <marker
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker4532-0-4-5-5-3-0"
+       style="overflow:visible">
+      <path
+         id="path4534-3-3-6-0-5-6"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 Z"
+         style="fill:#333333;fill-opacity:1;fill-rule:evenodd;stroke:#333333;stroke-width:1pt;stroke-opacity:1"
+         transform="matrix(-0.8,0,0,-0.8,-10,0)" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="marker4690-1-4-3-7-5-7"
+       refX="0"
+       refY="0"
+       orient="auto">
+      <path
+         transform="matrix(-0.8,0,0,-0.8,-10,0)"
+         style="fill:#333333;fill-opacity:1;fill-rule:evenodd;stroke:#333333;stroke-width:1pt;stroke-opacity:1"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 Z"
+         id="path4692-0-7-8-6-9-49" />
+    </marker>
+  </defs>
+  <metadata
+     id="metadata6858">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <path
+     style="opacity:1;fill:#1651db;fill-opacity:1;stroke:#1651db;stroke-width:2.93463683;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+     id="cursor"
+     d="m 19.550965,149.2355 -3.78251,-9.52045 -3.78251,-9.52045 7.56502,0 7.56503,0 -3.78252,9.52045 z" />
+  <rect
+     style="opacity:1;fill:#55d400;fill-opacity:0.1;stroke:#338000;stroke-width:1.27892029;stroke-miterlimit:4;stroke-dasharray:3.83676075, 3.83676075;stroke-dashoffset:0;stroke-opacity:0.1"
+     id="interval"
+     width="55.938988"
+     height="16.949875"
+     x="80.610916"
+     y="144.62401">
+
+
+
+
+
+<animate 
+  attributeType="CSS"
+  attributeName="stroke-opacity"   
+  to="1" 
+  dur="1s" 
+  begin="movec10.end"
+  repeatCount="1"
+  restart="always"
+  fill="freeze"/>
+
+
+  <animate 
+  attributeType="CSS"
+  attributeName="fill-opacity"  
+  to="1" 
+  dur="2s" 
+  begin="movec10.end"
+  repeatCount="1"
+  restart="always"
+  fill="freeze"/>
+
+
+     </rect>
+
+  <rect
+     ry="5.9222541"
+     y="167.76562"
+     x="295.03299"
+     height="82.000435"
+     width="157.62308"
+     id="rect4376-6-8-4-1-6-5"
+     style="fill:#ffcc00;fill-rule:evenodd;stroke:#333333;stroke-width:1.54542041;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+  <path
+     style="fill:none;fill-rule:evenodd;stroke:#333333;stroke-width:1.54542041;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker-end:url(#marker4532-0-4-5-7-5-3-9)"
+     d="m 461.50271,210.01046 64.88798,0.62826"
+     id="path4390-4-2-9-7-5-5-9" />
+  <path
+     id="path156898-7-1-8-6-0"
+     d="m 558.07814,99.618239 0,202.989741 222.61415,0"
+     style="fill:none;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1.54542041;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+  <path
+     id="path161389-6-53-7-3-5-6"
+     d="m 557.78188,99.252747 3.92305,4.033233 -3.7853,-13.978579 -4.17098,13.868389 4.03323,-3.923043 z"
+     style="fill:#333333;fill-opacity:1;fill-rule:evenodd;stroke:#333333;stroke-width:0.79570203pt;stroke-opacity:1" />
+  <path
+     id="path161389-6-1-5-4-8-0-40"
+     d="m 777.14663,302.70693 -4.03324,3.92305 13.97859,-3.78535 -13.8684,-4.17093 3.92305,4.03323 z"
+     style="fill:#333333;fill-opacity:1;fill-rule:evenodd;stroke:#333333;stroke-width:0.79570203pt;stroke-opacity:1" />
+  <path
+     id="path155705-7-2-3-0-0"
+     d="m 17.368048,153.09895 175.734252,0"
+     style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1.79291642;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+  <path
+     id="path156732-2-8-4-3-9"
+     d="m 18.079537,145.27274 c 0,14.94098 0,15.65247 0,15.65247"
+     style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1.79291642;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+  <path
+     id="path156732-6-7-2-4-2-91"
+     d="m 193.1023,145.27274 c 0,14.94098 0,15.65247 0,15.65247"
+     style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1.79291642;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+  <path
+     id="path155705-4-2-9-9-0-45"
+     d="m 17.368048,213.79275 175.734252,0"
+     style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1.79291642;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+  <path
+     id="path156732-9-6-6-7-3-8"
+     d="m 18.079537,205.96655 c 0,14.94097 0,15.65246 0,15.65246"
+     style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1.79291642;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+  <path
+     id="path156732-6-5-1-0-2-7-57"
+     d="m 193.1023,205.96655 c 0,14.94097 0,15.65246 0,15.65246"
+     style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1.79291642;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+  <path
+     id="path155705-48-6-7-8-0-3"
+     d="m 17.368098,266.63243 175.734252,0"
+     style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1.79291642;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+  <path
+     id="path156732-7-1-6-9-3-8"
+     d="m 18.079587,258.80623 c 0,14.94097 0,15.65246 0,15.65246"
+     style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1.79291642;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+  <path
+     id="path156732-6-1-5-1-0-4-9"
+     d="m 193.10235,258.80623 c 0,14.94097 0,15.65246 0,15.65246"
+     style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1.79291642;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+  <path
+     id="path4386-7-9-6-1-8-5"
+     d="m 211.30704,252.22953 60.58923,-23.23344"
+     style="fill:none;fill-rule:evenodd;stroke:#333333;stroke-width:1.54542041;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker-end:url(#marker4608-8-7-4-0-5-3)" />
+  <path
+     style="fill:none;fill-rule:evenodd;stroke:#333333;stroke-width:1.54542041;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker-end:url(#marker4532-0-4-5-5-3-0)"
+     d="m 211.49342,213.19556 64.88797,-0.62827"
+     id="path4390-4-2-9-3-9-1" />
+  <path
+     id="path4395-5-0-8-5-2-1"
+     d="m 211.30704,173.35117 60.58923,23.23343"
+     style="fill:none;fill-rule:evenodd;stroke:#333333;stroke-width:1.54542041;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker-end:url(#marker4690-1-4-3-7-5-7)" />
+  <text
+     xml:space="preserve"
+     style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:28.55229378px;line-height:125%;font-family:'Glacial Indifference';-inkscape-font-specification:'Glacial Indifference Bold';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+     x="128.97208"
+     y="337.59082"
+     id="text5940"><tspan
+       x="128.97208"
+       y="347.59082"
+       id="tspan5944"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Glacial Indifference';-inkscape-font-specification:'Glacial Indifference Bold';fill:#000000">For each <tspan
+   style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Glacial Indifference';-inkscape-font-specification:'Glacial Indifference Bold';fill:#ff6600"
+   id="tspan7785">i</tspan> 's value, j and k are calibrated</tspan><tspan
+       x="128.97208"
+       y="383.28119"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Glacial Indifference';-inkscape-font-specification:'Glacial Indifference Bold';fill:#000000"
+       id="tspan7783"> to minimize the objective</tspan></text>
+  <path
+     style="fill:none;fill-rule:evenodd;stroke:#338000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:8, 4;stroke-dashoffset:0;stroke-opacity:0.6627451"
+     d="m 542.29441,250.5415 244.45692,0"
+     id="path7742" />
+  <path
+     style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.05"
+     d="m 577.64975,117.20136 c 55.55838,178.79701 113.16923,183.13414 139.40105,164.65487 76.5384,-53.91824 52.52793,-109.09648 89.90357,-176.7767"
+     id="fitcurve" >
+
+ <animate 
+  attributeName="stroke-opacity"  
+  from = "0" 
+  to="1" 
+  dur="2s" 
+  begin="movec10.end"
+  repeatCount="1"
+  restart="always"
+  fill="freeze"
+  id="appear"
+  />
+<set 
+   attributeName="stroke-opacity" 
+   to="0.05" 
+   fill="freeze" 
+   begin="startanim.begin" 
+   restart="always"
+   id="resetfitcurve"/>    
+
+
+
+     </path>
+
+
+
+
+
+  <text
+     xml:space="preserve"
+     style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:40px;line-height:125%;font-family:'Glacial Indifference';-inkscape-font-specification:'Glacial Indifference Bold';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+     x="75.603935"
+     y="111.14045"
+     id="text7804"><tspan
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Glacial Indifference';-inkscape-font-specification:'Glacial Indifference Bold'"
+       id="tspan7806"
+       x="75.603935"
+       y="111.14045" /></text>
+  <text
+     id="text6937"
+     y="68.790138"
+     x="460.69516"
+     style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:17.5px;line-height:125%;font-family:'Glacial Indifference';-inkscape-font-specification:'Glacial Indifference Bold';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+     xml:space="preserve"><tspan
+       y="68.790138"
+       x="460.69516"
+       id="tspan6939">objective</tspan><tspan
+       id="tspan6941"
+       y="90.665146"
+       x="460.69516">to minimize</tspan></text>
+  <text
+     id="text6943"
+     y="322.83429"
+     x="781.92529"
+     style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:22.5px;line-height:125%;font-family:'Glacial Indifference';-inkscape-font-specification:'Glacial Indifference Bold';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+     xml:space="preserve"><tspan
+       y="322.83429"
+       x="781.92529"
+       id="tspan6945">i</tspan></text>
+  <text
+     id="text6947"
+     y="269.67892"
+     x="0.83683068"
+     style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:22.5px;line-height:125%;font-family:'Glacial Indifference';-inkscape-font-specification:'Glacial Indifference Bold';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+     xml:space="preserve"><tspan
+       y="269.67892"
+       x="0.83683068"
+       id="tspan6949">k</tspan></text>
+  <text
+     id="text6947-2"
+     y="219.05493"
+     x="0.54000002"
+     style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:22.5px;line-height:125%;font-family:'Glacial Indifference';-inkscape-font-specification:'Glacial Indifference Bold';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+     xml:space="preserve"><tspan
+       y="219.05493"
+       x="0.54000002"
+       id="tspan6949-8">j</tspan></text>
+  <text
+     id="text6947-2-8"
+     y="157.86996"
+     x="2.2331748"
+     style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:22.5px;line-height:125%;font-family:'Glacial Indifference';-inkscape-font-specification:'Glacial Indifference Bold';letter-spacing:0px;word-spacing:0px;fill:#ff6600;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+     xml:space="preserve"><tspan
+       y="157.86996"
+       x="2.2331748"
+       id="tspan6949-8-9">i</tspan></text>
+  <text
+     id="text6947-2-88"
+     y="219.88454"
+     x="328.54803"
+     style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:30px;line-height:125%;font-family:'Glacial Indifference';-inkscape-font-specification:'Glacial Indifference Bold';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+     xml:space="preserve"><tspan
+       y="219.88454"
+       x="328.54803"
+       id="tspan6949-8-6">Model</tspan></text>
+  <text
+     xml:space="preserve"
+     style="font-style:normal;font-weight:normal;font-size:15px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#55d400;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+     x="803.56317"
+     y="243.83482"
+     id="text8629"><tspan
+       id="tspan8631"
+       x="803.56317"
+       y="243.83482">threshold of </tspan><tspan
+       x="803.56317"
+       y="262.58481"
+       id="tspan8633">acceptance</tspan></text>
+ 
+
+
+ <animate
+     xlink:href="#cursor"
+     attributeName="d"
+     values=
+     "m 19.550965,149.2355 -3.78251,-9.52045 -3.78251,-9.52045 7.56502,0 7.56503,0 -3.78252,9.52045 z; 
+     m 39.21222,149.2355 -3.78251,-9.52045 -3.78251,-9.52045 7.56502,0 7.56503,0 -3.78252,9.52045 z; 
+     m 58.87444 ,149.2355 -3.78251,-9.52045 -3.78251,-9.52045 7.56502,0 7.56503,0 -3.78252,9.52045 z; 
+     m 78.53667,149.2355 -3.78251,-9.52045 -3.78251,-9.52045 7.56502,0 7.56503,0 -3.78252,9.52045 z; 
+     m 98.19889,149.2355 -3.78251,-9.52045 -3.78251,-9.52045 7.56502,0 7.56503,0 -3.78252,9.52045 z; 
+     m117.86111,149.2355 -3.78251,-9.520449 -3.78251,-9.520448 7.56502,0 7.56503,0 -3.78252,9.520448 z; 
+     m 137.52333,149.2355 -3.78251,-9.520449 -3.78251,-9.520448 7.56502,0 7.56503,0 -3.78252,9.520448 z;   
+      m 157.18556,149.2355 -3.78251,-9.520449 -3.78251,-9.520448 7.56502,0 7.56503,0 -3.78252,9.520448 z;   
+     m 176.84778,149.2355 -3.78251,-9.520449 -3.78251,-9.520448 7.56502,0 7.56503,0 -3.78252,9.520448 z;   
+    m 194,149.2355 -3.78251,-9.520449 -3.78251,-9.520448 7.56502,0 7.56503,0 -3.78252,9.520448 z;
+    m 194,149.2355 -3.78251,-9.520449 -3.78251,-9.520448 7.56502,0 7.56503,0 -3.78252,9.520448 z;
+     m 194,149.2355 -3.78251,-9.520449 -3.78251,-9.520448 7.56502,0 7.56503,0 -3.78252,9.520448 z"
+     dur="12s"
+      begin="startanim.begin"
+
+     restart="always"
+     repeatCount="1"
+     fill="freeze"
+     calcMode="discrete"
+     id="cursoranim" />
+
+
+<!--animation des points en groupe-->
+<g>
+
+  <circle
+     style="opacity:1;fill:#e80700;fill-opacity:0;stroke:none;stroke-width:3;stroke-miterlimit:4;stroke-dasharray:9, 9;stroke-dashoffset:0;stroke-opacity:1"
+     id="circle1"
+     cx="579.07068"
+     cy="7.9916425"
+     r="7.9916425" >
+     <animate attributeType="CSS" attributeName="fill-opacity" 
+           from="0.2" to="0.9"   dur="1s" repeatCount="1" fill="freeze" begin="cursoranim.begin"  />
+  
+
+   <animate 
+  attributeName="fill-opacity"  
+  from = "0.9" 
+  to="0" 
+  dur="1s" 
+  begin="movec10.end"
+  fill="freeze"
+  id="vanish"
+  />
+    
+<set 
+   attributeName="cy" 
+   to="7.9" 
+   fill="freeze" 
+   begin="vanish.end" 
+   restart="always"
+   id="resetpos"/>     
+
+
+<set 
+    attributeType="CSS"
+   attributeName="fill" 
+   to="red" 
+   fill="freeze" 
+   begin="vanish.end" 
+   restart="always"
+   id="resetcol"/> 
+
+
+ 
+   </circle>
+
+<circle
+     style="opacity:1;fill:#e80700;fill-opacity:0;stroke:none;stroke-width:3;stroke-miterlimit:4;stroke-dasharray:9, 9;stroke-dashoffset:0;stroke-opacity:1"
+     id="circle2"
+     cx="604.66"
+     cy="7.9916425"
+     r="7.9916425" >
+     <animate attributeType="CSS" attributeName="fill-opacity" 
+           from="0.2" to="0.9" dur="1s" repeatCount="1" fill="freeze" begin="movec1.end" />
+ 
+   <animate 
+  attributeName="fill-opacity"  
+  from = "0.9" 
+  to="0" 
+  dur="1s" 
+  begin="movec10.end"
+  fill="freeze"
+  id="vanish"
+  />
+    
+<set 
+   attributeName="cy" 
+   to="7.9" 
+   fill="freeze" 
+   begin="vanish.end" 
+   restart="always"
+   id="resetpos"/>     
+
+
+<set 
+    attributeType="CSS"
+   attributeName="fill" 
+   to="red" 
+   fill="freeze" 
+   begin="vanish.end" 
+   restart="always"
+   id="resetcol"/> 
+
+   
+   </circle>
+
+<circle
+     style="opacity:1;fill:#e80700;fill-opacity:0;stroke:none;stroke-width:3;stroke-miterlimit:4;stroke-dasharray:9, 9;stroke-dashoffset:0;stroke-opacity:1"
+     id="circle3"
+     cx="630.2544"
+     cy="7.9916425"
+     r="7.9916425" >
+     <animate attributeType="CSS" attributeName="fill-opacity" 
+           from="0" to="0.9" dur="1s" repeatCount="1" fill="freeze" begin="movec2.end" />
+ 
+    <animate 
+  attributeName="fill-opacity"  
+  from = "0.9" 
+  to="0" 
+  dur="1s" 
+  begin="movec10.end"
+  fill="freeze"
+  id="vanish"
+  />
+    
+<set 
+   attributeName="cy" 
+   to="7.9" 
+   fill="freeze" 
+   begin="vanish.end" 
+   restart="always"
+   id="resetpos"/>     
+
+
+<set 
+    attributeType="CSS"
+   attributeName="fill" 
+   to="red" 
+   fill="freeze" 
+   begin="vanish.end" 
+   restart="always"
+   id="resetcol"/> 
+
+   </circle>
+
+<circle
+     style="opacity:1;fill:#e80700;fill-opacity:0;stroke:none;stroke-width:3;stroke-miterlimit:4;stroke-dasharray:9, 9;stroke-dashoffset:0;stroke-opacity:1"
+     id="circle4"
+     cx="655.8467"
+     cy="7.9916425"
+     r="7.9916425" >
+     <animate attributeType="CSS" attributeName="fill-opacity" 
+           from="0" to="0.9" dur="1s" repeatCount="1" fill="freeze" begin="movec3.end" />
+     <animate attributeType="CSS" attributeName="fill" 
+          from="#e80700" to="green" dur="0.2s"  fill="freeze" begin="movec3.end + 0.8s" />
+    <animate 
+  attributeName="fill-opacity"  
+  from = "0.9" 
+  to="0" 
+  dur="1s" 
+  begin="movec10.end"
+  fill="freeze"
+  id="vanish"
+  />
+    
+<set 
+   attributeName="cy" 
+   to="7.9" 
+   fill="freeze" 
+   begin="vanish.end" 
+   restart="always"
+   id="resetpos"/>     
+
+
+<set 
+    attributeType="CSS"
+   attributeName="fill" 
+   to="red" 
+   fill="freeze" 
+   begin="vanish.end" 
+   restart="always"
+   id="resetcol"/> 
+
+ 
+   </circle>
+
+
+<circle
+     style="opacity:1;fill:#e80700;fill-opacity:0;stroke:none;stroke-width:3;stroke-miterlimit:4;stroke-dasharray:9, 9;stroke-dashoffset:0;stroke-opacity:1"
+     id="circle5"
+     cx="681.4389"
+     cy="7.9916425"
+     r="7.9916425" >
+     <animate attributeType="CSS" attributeName="fill-opacity" 
+           from="0" to="0.9" dur="1s" repeatCount="1" fill="freeze" begin="movec4.end" />
+     <animate attributeType="CSS" attributeName="fill" 
+           from="#e80700" to="green" dur="0.2s" repeatCount="1" fill="freeze" begin="movec4.end + 0.8s" />
+  
+    <animate 
+  attributeName="fill-opacity"  
+  from = "0.9" 
+  to="0" 
+  dur="1s" 
+  begin="movec10.end"
+  fill="freeze"
+  id="vanish"
+  />
+    
+<set 
+   attributeName="cy" 
+   to="7.9" 
+   fill="freeze" 
+   begin="vanish.end" 
+   restart="always"
+   id="resetpos"/>     
+
+
+<set 
+    attributeType="CSS"
+   attributeName="fill" 
+   to="red" 
+   fill="freeze" 
+   begin="vanish.end" 
+   restart="always"
+   id="resetcol"/> 
+
+
+   </circle>
+
+
+<circle
+     style="opacity:1;fill:#e80700;fill-opacity:0;stroke:none;stroke-width:3;stroke-miterlimit:4;stroke-dasharray:9, 9;stroke-dashoffset:0;stroke-opacity:1"
+     id="circle6"
+     cx="707.0311"
+     cy="7.9916425"
+     r="7.9916425" >
+     <animate attributeType="CSS" attributeName="fill-opacity" 
+           from="0" to="0.9" dur="1s" repeatCount="1" fill="freeze" begin="movec5.end" />
+     <animate attributeType="CSS" attributeName="fill" 
+           from="#e80700" to="green" dur="0.2s" repeatCount="1" fill="freeze" begin="movec5.end + 0.8s" />
+
+    <animate 
+  attributeName="fill-opacity"  
+  from = "0.9" 
+  to="0" 
+  dur="1s" 
+  begin="movec10.end"
+  fill="freeze"
+  id="vanish"
+  />
+    
+<set 
+   attributeName="cy" 
+   to="7.9" 
+   fill="freeze" 
+   begin="vanish.end" 
+   restart="always"
+   id="resetpos"/>     
+
+
+<set 
+    attributeType="CSS"
+   attributeName="fill" 
+   to="red" 
+   fill="freeze" 
+   begin="vanish.end" 
+   restart="always"
+   id="resetcol"/> 
+
+
+   </circle>
+
+<circle
+     style="opacity:1;fill:#e80700;fill-opacity:0;stroke:none;stroke-width:3;stroke-miterlimit:4;stroke-dasharray:9, 9;stroke-dashoffset:0;stroke-opacity:1"
+     id="circle7"
+     cx="732.6233 "
+     cy="7.9916425"
+     r="7.9916425" >
+     <animate attributeType="CSS" attributeName="fill-opacity" 
+           from="0" to="0.9" dur="1s" repeatCount="1" fill="freeze" begin="movec6.end" />
+    <animate attributeType="CSS" attributeName="fill" 
+           from="#e80700" to="green" dur="0.2s" repeatCount="1" fill="freeze" begin="movec6.end + 0.8s" />
+
+ 
+   <animate 
+  attributeName="fill-opacity"  
+  from = "0.9" 
+  to="0" 
+  dur="1s" 
+  begin="movec10.end"
+  fill="freeze"
+  id="vanish"
+  />
+    
+<set 
+   attributeName="cy" 
+   to="7.9" 
+   fill="freeze" 
+   begin="vanish.end" 
+   restart="always"
+   id="resetpos"/>     
+
+
+<set 
+    attributeType="CSS"
+   attributeName="fill" 
+   to="red" 
+   fill="freeze" 
+   begin="vanish.end" 
+   restart="always"
+   id="resetcol"/> 
+
+   </circle>
+
+
+
+   <circle
+     style="opacity:1;fill:#e80700;fill-opacity:0;stroke:none;stroke-width:3;stroke-miterlimit:4;stroke-dasharray:9, 9;stroke-dashoffset:0;stroke-opacity:1"
+     id="circle8"
+     cx="758.2156 "
+     cy="7.9916425"
+     r="7.9916425" >
+     <animate attributeType="CSS" attributeName="fill-opacity" 
+           from="0" to="0.9" dur="1s" repeatCount="1" fill="freeze" begin="movec7.end" />
+ 
+    <animate 
+  attributeName="fill-opacity"  
+  from = "0.9" 
+  to="0" 
+  dur="1s" 
+  begin="movec10.end"
+  fill="freeze"
+  id="vanish"
+  />
+    
+<set 
+   attributeName="cy" 
+   to="7.9" 
+   fill="freeze" 
+   begin="vanish.end" 
+   restart="always"
+   id="resetpos"/>     
+
+
+<set 
+    attributeType="CSS"
+   attributeName="fill" 
+   to="red" 
+   fill="freeze" 
+   begin="vanish.end" 
+   restart="always"
+   id="resetcol"/> 
+
+
+  </circle>
+
+
+
+
+   <circle
+     style="opacity:1;fill:#e80700;fill-opacity:0;stroke:none;stroke-width:3;stroke-miterlimit:4;stroke-dasharray:9, 9;stroke-dashoffset:0;stroke-opacity:1"
+     id="circle9"
+     cx="783.8078 "
+     cy="7.9916425"
+     r="7.9916425" >
+     <animate attributeType="CSS" attributeName="fill-opacity" 
+           from="0" to="0.9" dur="1s" repeatCount="1" fill="freeze" begin="movec8.end" />
+ 
+   <animate 
+  attributeName="fill-opacity"  
+  from = "0.9" 
+  to="0" 
+  dur="1s" 
+  begin="movec10.end"
+  fill="freeze"
+  id="vanish"
+  />
+    
+<set 
+   attributeName="cy" 
+   to="7.9" 
+   fill="freeze" 
+   begin="vanish.end" 
+   restart="always"
+   id="resetpos"/>     
+
+
+<set 
+    attributeType="CSS"
+   attributeName="fill" 
+   to="red" 
+   fill="freeze" 
+   begin="vanish.end" 
+   restart="always"
+   id="resetcol"/> 
+
+   </circle>
+
+
+<circle
+     style="opacity:1;fill:#e80700;fill-opacity:0;stroke:none;stroke-width:3;stroke-miterlimit:4;stroke-dasharray:9, 9;stroke-dashoffset:0;stroke-opacity:1"
+     id="circle10"
+     cx="809.40 "
+     cy="7.9916425"
+     r="7.9916425" >
+     <animate attributeType="CSS" attributeName="fill-opacity" 
+           from="0" to="0.9" dur="1s" repeatCount="1" fill="freeze" begin="movec9.end" />
+
+   <animate 
+  attributeName="fill-opacity"  
+  from = "0.9" 
+  to="0" 
+  dur="1s" 
+  begin="movec10.end"
+  fill="freeze"
+  id="vanish"
+  />
+    
+<set 
+   attributeName="cy" 
+   to="7.9" 
+   fill="freeze" 
+   begin="vanish.end" 
+   restart="always"
+   id="resetpos"/>     
+
+
+<set 
+    attributeType="CSS"
+   attributeName="fill" 
+   to="red" 
+   fill="freeze" 
+   begin="vanish.end" 
+   restart="always"
+   id="resetcol"/> 
+
+   </circle>
+
+
+
+
+
+</g>
+<!--     Boutton animate  -->
+
+<style> 
+  g.button:hover{
+    opacity: 0.75;
+  }
+</style>
+<g class="button" cursor="pointer"  onmouseup="buttonClick(evt)" >
+
+
+
+
+
+
+  <text
+     id="text6947-2-88"
+     y="40"
+     x="20"
+     style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:15px;line-height:125%;font-family:'Glacial Indifference';-inkscape-font-specification:'Glacial Indifference Bold';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+     xml:space="preserve"><tspan
+       y="40"
+       x="30"
+       id="textbutton">Click to Animate </tspan>
+
+
+ <animate 
+ attributeType="CSS"
+   attributeName="fill-opacity" 
+   to="0.2" 
+   dur="1s"
+   fill="freeze" 
+   begin="startanim.begin" 
+   restart="always"
+   repeatCount="1"
+   id="start"/> 
+
+ <animate 
+ attributeType="CSS"
+   attributeName="fill-opacity" 
+   to="1" 
+   dur="1s"
+   fill="freeze" 
+   begin="cursoranim.end" 
+   restart="always"
+   repeatCount="1"
+   /> 
+     </text>
+
+<rect
+     ry="2"
+     y="20"
+     x="20"
+     height="35"
+     width="140"
+     id="button"
+     style="fill:#eeeeee;fill-rule:evenodd;stroke:#333333;stroke-width:1.54542041;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1; fill-opacity:0.5">
+  <animate 
+ attributeType="CSS"
+   attributeName="fill-opacity" 
+   to="0.2" 
+   dur="1s"
+   fill="freeze" 
+   begin="click" 
+   restart="always"
+   repeatCount="1"
+   id="startanim"/> 
+ <animate 
+ attributeType="CSS"
+   attributeName="fill-opacity" 
+   to="0.5" 
+   dur="1s"
+   fill="freeze" 
+   begin="cursoranim.end" 
+   restart="always"
+   repeatCount="1"
+   id="resetbutton"/> 
+
+
+   </rect>
+
+
+
+ 
+
+</g>
+
+<!-- Mouvement des cercles-->
+
+
+<animate
+     xlink:href="#circle1"
+     attributeName="cy"
+     values="7.9916425;118.01"
+     begin="cursoranim.begin"
+     dur="1s"
+     fill="freeze" 
+     restart="always"
+     repeatCount="1"
+     id="movec1" />
+
+ 
+
+
+<animate
+     xlink:href="#circle2"
+     attributeName="cy"
+     values="7.9916425;189.01"
+     dur="1s"
+     begin="movec1.end"
+     end="movec"
+     restart="always"
+     repeatCount="1"
+     fill="freeze"
+     id="movec2" />
+
+<animate
+     xlink:href="#circle3"
+     attributeName="cy"
+     values="7.9916425;240.01"
+     dur="1s"
+     begin="movec2.end"
+     restart="always"
+     repeatCount="1"
+     fill="freeze"
+     id="movec3" />
+
+<animate
+     xlink:href="#circle4"
+     attributeName="cy"
+     values="7.9916425;270.01"
+     dur="1s"
+     begin="movec3.end"
+     restart="always"
+     repeatCount="1"
+     fill="freeze"
+     id="movec4" />
+
+
+<animate
+     xlink:href="#circle5"
+     attributeName="cy"
+     values="7.9916425;286.01"
+     dur="1s"
+     begin="movec4.end"
+     restart="always"
+     repeatCount="1"
+     fill="freeze"
+     id="movec5" />
+
+
+<animate
+     xlink:href="#circle6"
+     attributeName="cy"
+     values="7.9916425;286.01"
+     dur="1s"
+     begin="movec5.end"
+     restart="always"
+     repeatCount="1"
+     fill="freeze"
+     id="movec6" />
+
+
+
+<animate
+     xlink:href="#circle7"
+     attributeName="cy"
+     values="7.9916425;268.01"
+     dur="1s"
+     begin="movec6.end"
+     restart="always"
+     repeatCount="1"
+     fill="freeze"
+     id="movec7" />
+
+
+<animate
+     xlink:href="#circle8"
+     attributeName="cy"
+     values="7.9916425;240.01"
+     dur="1s"
+     begin="movec7.end"
+     restart="always"
+     repeatCount="1"
+     fill="freeze"
+     id="movec8" />
+
+<animate
+     xlink:href="#circle9"
+     attributeName="cy"
+     values="7.9916425;164.01"
+     dur="1s"
+     begin="movec8.end"
+     restart="always"
+     repeatCount="1"
+     fill="freeze"
+     id="movec9" />
+
+
+<animate
+     xlink:href="#circle10"
+     attributeName="cy"
+     values="7.9916425;106"
+     dur="1s"
+     begin="movec9.end"
+     restart="always"
+     repeatCount="1"
+     fill="freeze"
+     id="movec10" />
+
+
+</svg>
+
