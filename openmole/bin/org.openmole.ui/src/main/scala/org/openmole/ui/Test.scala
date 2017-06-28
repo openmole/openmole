@@ -1,7 +1,7 @@
 package org.openmole.ui
 
 import java.io.File
-import org.openmole.core.services.{Services, ServicesContainer}
+import org.openmole.core.services.{ Services, ServicesContainer }
 import org.openmole.tool.file._
 
 object Test {
