@@ -25,11 +25,11 @@
 
     val s = ListFilesSource(workDirectory / "directory", files)
 
-    (hello source s)""")
+    (hello source s)""", name = "plug a source")
 
     @p The source @i{s} is plugged at the beginning of the task @i{hello}. The source is executed prior to
     @b{each execution} of @i{hello}. You can also plug multiple sources on the same task using the syntax:
-    @hl.openmoleNoTest("hello source (s1, s2, s3)").
+    @hl.code("hello source (s1, s2, s3)").
 
   @p{List files in a directory}
     This source lists directories and injects an array of @i{File} objects into the dataflow. See how the range of files
@@ -44,7 +44,7 @@
     val s2 =
       ListFilesSource(workDirectory / "/${someVariable}/", txtFiles, ".*\\.txt") set (
         inputs += someVariable
-      )""")
+      )""", name = "list file source")
 
   @p{List directories in a directory}
     Likewise, you can inject an array of directories in the dataflow. Directories are also represented as @i{File}
@@ -63,7 +63,7 @@
       // will fill aaaDirs with all the subdirectories of "directory" starting with aaa
       ListDirectoriesSource(workDirectory / "${someVariable}", aaaDirs, "^aaa.*") set (
         inputs += someVariable
-      )""")
+      )""", name = "list directories source")
 
     @p Sources store each entry found in an Array. In most cases, you will want each of the entries to feed a different
     task. Let's now see how this can be done by reusing what we've discovered with
@@ -91,4 +91,4 @@
 
     val exploration = ExplorationTask(inDir in directoriesToAnalyze)
 
-    (exploration source s) -< analysisTask""")
+    (exploration source s) -< analysisTask""", name = "complete example with source")

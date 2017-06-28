@@ -15,8 +15,6 @@
     val food3 = Val[Double]
 
     // Define the NetlogoTask
-
-
     val cmds = Seq("run-to-grid")
     val ants =
       NetLogo5Task(workDirectory / "Ants.nlogo", cmds, seed = seed) set (
@@ -35,13 +33,20 @@
       )"""
 
 
-@p{Calibrating a NetLogo model using Genetic Algorithms}
-  This example presents step by step how to explore a NetLogo model with an Evolutionary/Genetic Algorithm (EA/GA) in
-  OpenMOLE.
-  @br For more generic details regarding the exploitation of Genetic Algorithms using OpenMOLE, you can check the
-  @a("GA section of the methods documentation", href := DocumentationPages.root.language.method.file + "#Geneticalgorithms").
+@h2
+    Calibrating a NetLogo model using Genetic Algorithms
 
-  @p{The ant model}
+@p
+  This example presents how to explore a NetLogo model step by step with an Evolutionary/Genetic Algorithm (EA/GA) in
+  OpenMOLE.
+@br
+    For more generic details regarding the exploitation of Genetic Algorithms using OpenMOLE, you can check the
+    @a("GA section of the methods documentation", href := DocumentationPages.root.language.method.file + "#Geneticalgorithms")
+
+@h3
+    The ant model
+
+@p
     We demonstrate this tutorial using the ants foraging model present in the Netlogo library. This model was created by
     Ury Wilensky. According to @a("NetLogo's website", href := "http://ccl.northwestern.edu/netlogo/models/Ants"),
     this model is described as:
@@ -56,7 +61,9 @@
     @p In this tutorial we use @a("a headless version", href := DocumentationPages.root.tutorial.headlessNetLogo.file) of the
     model. This modified version is available @a("here", href := Resource.antsNLogo.file).
 
-  @p{Define the problem to solve as an optimisation problem}
+@h3
+    Define the problem to solve as an optimisation problem
+@p
     This model manipulates three parameters:
     @ul
       @li{Population: number of Ants in the model,}
@@ -67,7 +74,8 @@
     different distances from the Ant colony.
     @br @img(src := Resource.antNumbers.file)
 
-    @p It can be interesting to search the best combination of the two parameters evaporation-rate and diffusion-rate
+    @p It can be interesting to search the @b{best combination of the two parameters}
+    @hl.highlight("evaporation-rate", "plain") and @hl.highlight("diffusion-rate", "plain")
     which minimises the eating time of each food source.
 
     @p To build our fitness function, we modify the NetLogo Ants source code to store for each food source the first ticks
@@ -83,7 +91,7 @@
         set final-ticks-food3 ticks ]
     end""", "plain")
 
-    @p At the end of each simulation we return the values for the three objectives :
+    @p At the end of each simulation we return the values for the three objectives (or criteria) :
     @ul
       @li{The simulation ticks indicating that source 1 is empty,}
       @li{The simulation ticks indicating that source 2 is empty,}
@@ -97,7 +105,9 @@
     process.
 
 
-  @p{Getting the ant model to run in OpenMOLE}
+@h3
+    Getting the ant model to run in OpenMOLE
+@p
     When building a calibration or optimisation workflow, the first step is to make the model run in
     OpenMOLE. This script simply embeds the NetLogo model and runs one single execution of the model with arbitrary
     parameters. More details about the NetLogo5 task used in this script can be found in
@@ -105,19 +115,25 @@
 
     @hl.openmole(s"""
     $model
-
     // Define the hooks to collect the results
     val displayHook = ToStringHook(food1, food2, food3)
 
     // Start a workflow with 1 task
-    val ex = (ants hook displayHook) start
-    """)
+    val model_execution = (ants hook displayHook) start
+    """, name = "ga netlogo model")
 
     @p The result of this execution should look like:
     @br @hl.highlight("{food1=746.0, food2=1000.0, food3=2109.0}", "plain")
 
-  @p{The optimisation algorithm}
-    We will try to find the parameter settings minimising these estimators. This script describes how to use the NSGA2 multi-objective optimisation algorithm in OpenMOLE. The result files are written to @hl.highlight("/tmp/ants", "plain").
+@h3
+    The optimisation algorithm
+@p
+    We will try to find the parameter settings minimising these estimators.
+    This script describes how to use the NSGA2 multi-objective optimisation algorithm in OpenMOLE.
+    The result files are written to @hl.highlight("/tmp/ants", "plain").
+    Notice how the @hl.highlight("evaluation", "plain") parameter of the @hl.highlight("SteadyStateEvolution", "plain")
+    method, is the netlogo task i.e. running the model, which indeed provides an @b{evaluation} of the genome
+    (parameter settings) efficiency regarding the @hl.highlight("objectives","plain").
 
     @br @hl.openmole("""
     // Define the population size: 100.
@@ -148,13 +164,19 @@
     val savePopulationHook = SavePopulationHook(evolution, workDirectory / "results")
 
     // Plug everything together to create the workflow
-    (evolution hook savePopulationHook)""", header = model)
+    (evolution hook savePopulationHook)
+    """, header = model, name = "ga netlogo evolution")
 
-  @p{Scale up}
+    @br
+
+@h3
+    Scale up
+@p
     If you use distributed computing, it might be a good idea to opt for an Island model. Islands are better suited to
     exploit distributed computing resources than classical generational genetic algorithms. See how the end of the
     script changes to implement islands in the workflow. Here we compute 2,000 islands in parallel, each running during
     1 hour on the European grid:
+
     @br @hl.openmole("""
   val evolution =
     SteadyStateEvolution(
@@ -184,4 +206,4 @@
   val env = EGIEnvironment("biomed", openMOLEMemory = 1200 megabytes, cpuTime = 4 hours)
 
   // Define the workflow
-  (island on env hook savePopulationHook)""", header = model)
+  (island on env hook savePopulationHook)""", header = model, name = "ga netlogo islands")

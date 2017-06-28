@@ -4,5 +4,5 @@
 
 
 @p
-    Before your model can be investigated by OpenMOLE, it must be properly introduced.
-    This formal presentation is performed in various manners, depending on the language you used for your model.
+    OpenMOLE handles your model execution by framing it in a @b{workflow}.
+@br Select the language of your model below to see how it is done . If you can't find it, select the  @i{Native} tab.

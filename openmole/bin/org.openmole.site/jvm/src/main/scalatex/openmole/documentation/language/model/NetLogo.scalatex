@@ -54,11 +54,11 @@
 	  @li{an integer (Int) representing the seed of the random number generator for exploring the replications,}
 	  @li{and a Double to set the value of @i{density},}
 
-    @br @hl.openmole(variables)
+    @br @hl.openmole(variables, name = "netlogo variables")
 
     @p Given these variables, the definition of the exploration in OpenMOLE writes as follows:
 
-    @br @hl.openmole(exploration, header = variables)
+    @br @hl.openmole(exploration, header = variables, name = "netlogo exploration")
 
     @p This design of experiment will generate 70 distinct sets of input values for the NetLogo model:
     @ul
@@ -87,7 +87,7 @@
 	s"""
 	$variables
 	$exploration
-	""")
+	""", name = "netlogo task")
 
     @p The @i{replication} and the @i{density} OpenMOLE variables are used as parameters of the NetLogo program.
     Therefore they appear as inputs of the NetLogoTask.
@@ -109,7 +109,7 @@
 	$variables
 	$exploration
 	$netlogo
-	""")
+	""", name = "netlogo hook")
 
   @p{Bringing all the pieces together}
     Now that we have defined each component, we can compose the workflow that brings all the pieces of the simulation
@@ -120,9 +120,9 @@ $exploration
 $netlogo
 $csvHook
 
-  exploration -< (fireTask hook csvHook)""")
+  exploration -< (fireTask hook csvHook)""", name = "netlogo full workflow")
 
     @p The progress of the simulation can be monitored by printing the state of the execution variable:
-    @hl.openmoleNoTest("print(ex)").
+    @hl.code("print(ex)").
 
     @p At the end of the execution, you will find the output values in a file called @i{result.csv}.

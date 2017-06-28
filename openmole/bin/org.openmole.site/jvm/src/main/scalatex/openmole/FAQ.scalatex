@@ -111,7 +111,7 @@
   @div Combining samplings is straightforward in OpenMOLE, but can sometimes results in syntax errors a bit cryptic to new users.
     Let's take the example of a combined sampling made of a file exploration sampling and an integer range exploration:
 
-  @hl.openmoleNoTest("""
+  @hl.code("""
     (input in (workDirectory / "../data/").files withName inputName) x
     i in (1 to 10)
     """)
@@ -127,7 +127,7 @@
   @div OpenMOLE cannot identify the integer range the valid sampling it is. Simply @b{wrapping the expression in parentheses}
      fixes the problem as shown in this correct version:
 
-    @hl.openmoleNoTest("""
+    @hl.code("""
     (input in (workDirectory / "../data/").files withName inputName) x
     (i in (1 to 10))
     """)

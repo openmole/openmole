@@ -18,11 +18,8 @@
 
 package org.openmole.site
 
-import org.openmole.site.market._
-
 import scalatags.Text.all._
 import com.github.rjeschke._
-import org.openmole.site.market.Market.Tags
 
 import scalatex.{ openmole ⇒ scalatex }
 import org.openmole.tool.file._
@@ -134,7 +131,7 @@ abstract class DocumentationPage(implicit p: Parent[DocumentationPage] = Parent(
 object DocumentationPages {
   index ⇒
 
-  var marketEntries: Seq[GeneratedMarketEntry] = Seq()
+  //var marketEntries: Seq[GeneratedMarketEntry] = Seq()
 
   def apply(
     name:     String,
@@ -181,7 +178,7 @@ object DocumentationPages {
 
     def details = Seq()
 
-    def children = Seq(application, language, tutorial, market, development)
+    def children = Seq(application, language, tutorial, development)
 
     val application = new DocumentationPage {
       def name = "Application"
@@ -224,7 +221,7 @@ object DocumentationPages {
 
           override def title = Some(name)
 
-          def children = Seq(scala, java, rscript, python, /*ccplusplus,*/ native, netLogo, mole)
+          def children = Seq(scala, java, rscript, python, ccplusplus, native, netLogo, mole)
 
           def content = scalatex.documentation.language.Model()
 
@@ -275,7 +272,7 @@ object DocumentationPages {
           }
 
           val ccplusplus = new DocumentationPage {
-            def name = "C/C++"
+            def name = "CCplusplus"
 
             override def title = Some(name)
 
@@ -514,7 +511,7 @@ object DocumentationPages {
 
         }
 
-        def source = new DocumentationPage {
+        val source = new DocumentationPage {
           def name = "Sources"
 
           override def title = Some(name)
@@ -531,16 +528,29 @@ object DocumentationPages {
 
           override def title = Some(name)
 
-          def children = Seq(pse, profile)
+          def children = Seq(calibration, sensitivity, profile, pse)
 
           def details = Seq()
 
           lazy val methIntro = Some(PageIntro(scalatex.documentation.language.method.MethodIntro(), Some(scalatex.documentation.language.Method())))
 
-          def content = scalatex.documentation.language.Method()
+          val content = scalatex.documentation.language.Method()
 
-          def pse = new DocumentationPage {
-            def name = "PSE"
+          val calibration = new DocumentationPage {
+            def name = "Calibration"
+
+            override def title = Some(name)
+
+            def children = Seq()
+
+            def details = Seq(geneticalgo, island, stochasticity)
+
+            def content = scalatex.documentation.language.method.Calibration()
+
+            override def intro = methIntro
+          }
+          val sensitivity = new DocumentationPage {
+            def name = "Sensitivity_Analysis"
 
             override def title = Some(name)
 
@@ -548,12 +558,11 @@ object DocumentationPages {
 
             def details = Seq()
 
-            def content = scalatex.documentation.language.method.PSE()
+            def content = scalatex.documentation.language.method.Sensitivity()
 
             override def intro = methIntro
           }
-
-          def profile = new DocumentationPage {
+          val profile = new DocumentationPage {
             def name = "Profiles"
 
             override def title = Some(name)
@@ -566,6 +575,58 @@ object DocumentationPages {
 
             override def intro = methIntro
           }
+          val pse = new DocumentationPage {
+            def name = "PSE"
+
+            override def title = Some(name)
+
+            def children = Seq()
+
+            def details = Seq()
+
+            def content = scalatex.documentation.language.method.PSE()
+
+            override def intro = methIntro
+          }
+          val geneticalgo = new DocumentationPage {
+            override def id = "geneticalgo"
+
+            def name = "Genetic Algorithms"
+
+            override def title = Some(name)
+
+            def children = Seq()
+
+            def details = Seq()
+
+            def content = scalatex.documentation.details.GeneticAlgorithm()
+          }
+          val island = new DocumentationPage {
+            override def id = "island"
+
+            def name = "Islands Scheme"
+
+            override def title = Some(name)
+
+            def children = Seq()
+
+            def details = Seq()
+
+            def content = scalatex.documentation.details.Island()
+          }
+          val stochasticity = new DocumentationPage {
+            override def id = "stochasticity"
+
+            def name = "Stochasticity Management"
+
+            override def title = Some(name)
+
+            def children = Seq()
+
+            def details = Seq()
+
+            def content = scalatex.documentation.details.StochasticityManagement()
+          }
         }
       }
 
@@ -574,13 +635,13 @@ object DocumentationPages {
 
       override def title = Some(name)
 
-      def children = Seq(helloWorld, resume, headlessNetLogo, netLogoGA, capsule)
+      def children = Seq(helloWorld, resume, headlessNetLogo, netLogoGA, capsule) //++ marketTutorials
 
       def details = Seq()
 
       def content = scalatex.documentation.language.Tutorial()
 
-      marketEntries.filter(_.tags.exists(_ == Tags.tutorial)).flatMap(MD.generatePage(_))
+      //def marketTutorials = marketEntries.filter(_.tags.exists(_ == Tags.tutorial)).flatMap(MD.generatePage(_))
 
       val helloWorld = new DocumentationPage {
         override def id = "HelloWord"
@@ -651,45 +712,45 @@ object DocumentationPages {
       }
     }
 
-    val market = new DocumentationPage {
-      override def content: Text.all.Frag = div(tagContent(marketEntries))
-
-      override def children: Seq[DocumentationPage] = Seq()
-
-      override def name: String = "Market"
-
-      override def details: Seq[Page] = Seq()
-
-      def tagContent(entries: Seq[GeneratedMarketEntry]) =
-        ul(
-          entries.sortBy(_.entry.name.toLowerCase).map {
-            de ⇒ li(entryContent(de))
-          }: _*
-        )
-
-      def entryContent(deployedMarketEntry: GeneratedMarketEntry) = {
-        def title: Modifier =
-          deployedMarketEntry.viewURL match {
-            case None    ⇒ deployedMarketEntry.entry.name
-            case Some(l) ⇒ a(deployedMarketEntry.entry.name, href := l)
-          }
-
-        def content =
-          Seq[Modifier](
-            deployedMarketEntry.readme.map {
-              rm ⇒ RawFrag(txtmark.Processor.process(rm))
-            }.getOrElse(p("No README.md available yet.")),
-            a("Packaged archive", href := deployedMarketEntry.archive), " (can be imported in OpenMOLE)"
-          ) ++ deployedMarketEntry.viewURL.map(u ⇒ br(a("Source repository", href := u)))
-
-        div(scalatags.Text.all.id := "market-entry")(content: _*)
-      }
-
-      def themes: Seq[Market.Tag] = {
-        marketEntries.flatMap(_.entry.tags).distinct.sortBy(_.label.toLowerCase)
-      }
-
-    }
+    //    val market = new DocumentationPage {
+    //      override def content: Text.all.Frag = div(tagContent(marketEntries))
+    //
+    //      override def children: Seq[DocumentationPage] = Seq()
+    //
+    //      override def name: String = "Market"
+    //
+    //      override def details: Seq[Page] = Seq()
+    //
+    //      def tagContent(entries: Seq[GeneratedMarketEntry]) =
+    //        ul(
+    //          entries.sortBy(_.entry.name.toLowerCase).map {
+    //            de ⇒ li(entryContent(de))
+    //          }: _*
+    //        )
+    //
+    //      def entryContent(deployedMarketEntry: GeneratedMarketEntry) = {
+    //        def title: Modifier =
+    //          deployedMarketEntry.viewURL match {
+    //            case None    ⇒ deployedMarketEntry.entry.name
+    //            case Some(l) ⇒ a(deployedMarketEntry.entry.name, href := l)
+    //          }
+    //
+    //        def content =
+    //          Seq[Modifier](
+    //            deployedMarketEntry.readme.map {
+    //              rm ⇒ RawFrag(txtmark.Processor.process(rm))
+    //            }.getOrElse(p("No README.md available yet.")),
+    //            a("Packaged archive", href := deployedMarketEntry.archive), " (can be imported in OpenMOLE)"
+    //          ) ++ deployedMarketEntry.viewURL.map(u ⇒ br(a("Source repository", href := u)))
+    //
+    //        div(scalatags.Text.all.id := "market-entry")(content: _*)
+    //      }
+    //
+    //      def themes: Seq[Market.Tag] = {
+    //        marketEntries.flatMap(_.entry.tags).distinct.sortBy(_.label.toLowerCase)
+    //      }
+    //
+    //    }
 
     def development = new DocumentationPage {
       def name = "Development"

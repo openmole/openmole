@@ -8,11 +8,11 @@
     @b{@a("transitions", href := DocumentationPages.root.language.transition.file)}. From a high level point of view, tasks comprise
     @b{inputs}, @b{outputs} and @b{optional default values}. Tasks are the atomic computing element of OpenMOLE.
     They describe what OpenMOLE should execute and delegate to remote environments. They embed your own programs.
-    Depending on what kind of program (binary executable, Java...) you want to embed in OpenMOLE you have to choose the
-    matching task. Tasks execution @b{depends on inputs variables}, which are provided by the dataflow, and each task
+   @br Depending on what kind of program (binary executable, Java...) you want to embed in OpenMOLE you have to choose the
+    adequate task. Tasks execution @b{depends on inputs variables}, which are provided by the dataflow, and each task
     @b{produces outputs} which are provided to the dataflow and transmitted to the input of consecutive tasks.
 
-    @p Let's begin by a very useless task that does nothing to illustrate all this jargon:
+    @p Below is a dummy task  to illustrate all this jargon:
     @br @hl.openmole("""
       // Define a variable i of type Int
       val i = Val[Int]

@@ -21,6 +21,7 @@ import java.awt.Desktop
 import java.io.{ File, FileOutputStream }
 import java.net.URI
 
+import org.openmole.console.Console.ExitCodes
 import org.openmole.core.project._
 import org.openmole.core.console.ScalaREPL
 import org.openmole.core.exception.UserBadDataError
@@ -63,6 +64,7 @@ object Application extends Logger {
     object HelpMode extends LaunchMode
     object RESTMode extends LaunchMode
     case class Reset(initialisePassword: Boolean) extends LaunchMode
+    case class TestCompile(files: List[File]) extends LaunchMode
 
     case class Config(
       userPlugins:          List[String]    = Nil,
@@ -151,6 +153,7 @@ object Application extends Logger {
         case "--" :: tail                       ⇒ parse(Nil, c.copy(args = tail))
         case "-h" :: tail                       ⇒ help(tail)
         case "--help" :: tail                   ⇒ help(tail)
+        case "--test-compile" :: tail           ⇒ parse(dropArgs(tail), c.copy(launchMode = TestCompile(takeArgs(tail).map(p ⇒ new File(p)))))
         case s :: tail                          ⇒ parse(tail, c.copy(ignored = s :: c.ignored))
         case Nil                                ⇒ c
       }
@@ -276,6 +279,31 @@ object Application extends Logger {
             Console.ExitCodes.ok
           }
         }
+      case TestCompile(files) ⇒
+
+        def toFile(f: File) = if (f.isDirectory) f.listFiles().toList else Seq(f)
+
+        val results = Test.withTmpServices { implicit services ⇒
+          import services._
+          files.flatMap(toFile).map { file ⇒
+            val project = Project(file.getParentFileSafe)
+            println(s"Testing: ${file.getName}")
+            val res = file → project.compile(file, args)
+            print("\33[1A\33[2K")
+            println(s"${res._1.getName}: ${res._2}")
+            res
+          }
+        }
+
+        val errors =
+          results.filter {
+            case (_, Compiled(_)) ⇒ false
+            case _                ⇒ true
+          }
+
+        if (errors.isEmpty) Console.ExitCodes.ok
+        else Console.ExitCodes.compilationError
+
     }
 
   }
