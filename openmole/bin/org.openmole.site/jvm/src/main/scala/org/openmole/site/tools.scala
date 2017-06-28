@@ -68,7 +68,6 @@ package object tools {
 
   def to(page: Page) = a(href := page.file)
 
-
   def innerLink(page: Page, title: String) = to(page)(span(title))
 
   // CONVINIENT KEYS

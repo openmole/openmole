@@ -1,0 +1,3031 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   version="1.1"
+   id="svg8564"
+   viewBox="0 0 1677.8628 651.73839"
+   height="183.93506mm"
+   width="473.53018mm"
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="pse_anim.svg">
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1855"
+     inkscape:window-height="1056"
+     id="namedview4318"
+     showgrid="false"
+     inkscape:zoom="0.37219967"
+     inkscape:cx="806.59476"
+     inkscape:cy="-74.615825"
+     inkscape:window-x="65"
+     inkscape:window-y="24"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg8564" />
+  <defs
+     id="defs8566">
+    <marker
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker5313-7"
+       style="overflow:visible">
+      <path
+         id="path5315-36"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 Z"
+         style="fill:#333333;fill-opacity:1;fill-rule:evenodd;stroke:#333333;stroke-width:1pt;stroke-opacity:1"
+         transform="matrix(-0.8,0,0,-0.8,-10,0)" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="marker5369-7"
+       refX="0"
+       refY="0"
+       orient="auto">
+      <path
+         transform="matrix(-0.8,0,0,-0.8,-10,0)"
+         style="fill:#333333;fill-opacity:1;fill-rule:evenodd;stroke:#333333;stroke-width:1pt;stroke-opacity:1"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 Z"
+         id="path5371-7" />
+    </marker>
+    <marker
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow1Lend-6"
+       style="overflow:visible">
+      <path
+         id="path4164-2"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 Z"
+         style="fill:#333333;fill-opacity:1;fill-rule:evenodd;stroke:#333333;stroke-width:1pt;stroke-opacity:1"
+         transform="matrix(-0.8,0,0,-0.8,-10,0)" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="marker4501-9"
+       refX="0"
+       refY="0"
+       orient="auto">
+      <path
+         transform="matrix(-0.8,0,0,-0.8,-10,0)"
+         style="fill:#333333;fill-opacity:1;fill-rule:evenodd;stroke:#333333;stroke-width:1pt;stroke-opacity:1"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 Z"
+         id="path4503-1" />
+    </marker>
+    <marker
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker4533-0"
+       style="overflow:visible">
+      <path
+         id="path4535-4"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 Z"
+         style="fill:#333333;fill-opacity:1;fill-rule:evenodd;stroke:#333333;stroke-width:1pt;stroke-opacity:1"
+         transform="matrix(-0.8,0,0,-0.8,-10,0)" />
+    </marker>
+  </defs>
+  <metadata
+     id="metadata8569">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     transform="translate(453.21715,-349.35016)"
+     id="layer1">
+    <rect
+       style="fill:#ffcc00;fill-rule:evenodd;stroke:#333333;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect4376-6-8"
+       width="305.98096"
+       height="159.18083"
+       x="104.91343"
+       y="571.79443"
+       ry="11.496394" />
+    <path
+       id="path3602-3"
+       d="m 461.965,623.5768 125.9618,1.2196"
+       style="fill:none;fill-rule:evenodd;stroke:#333333;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker-end:url(#marker5313-7)" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#333333;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker-end:url(#marker5369-7)"
+       d="m 461.965,697.5768 125.9618,1.2196"
+       id="path3606-9" />
+    <rect
+       y="422.48431"
+       x="696.94873"
+       height="469.04761"
+       width="469.04761"
+       id="rect10545-0"
+       style="fill:#e6e6e6;fill-opacity:0.9758454;stroke:none;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+    <g
+       id="g156749-1"
+       transform="matrix(1.160148,0,0,1.160148,1448.8601,-1863.117)">
+      <path
+         id="path155705-7"
+         d="m -1604.7619,2090.4574 294.0476,0"
+         style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+      <path
+         id="path156732-2"
+         d="m -1603.5714,2077.3622 c 0,25 0,26.1905 0,26.1905"
+         style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+      <path
+         id="path156732-6-7"
+         d="m -1310.7143,2077.3622 c 0,25 0,26.1905 0,26.1905"
+         style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+    </g>
+    <rect
+       transform="matrix(0.70710678,0.70710678,-0.70710678,0.70710678,0,0)"
+       ry="0"
+       y="528.91473"
+       x="248.64549"
+       height="17.401726"
+       width="17.401726"
+       id="Ailosange"
+       style="opacity:0.79500002;fill:#aad400;fill-opacity:0;stroke:#445500;stroke-width:1.19109428;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0" />
+    <rect
+       ry="0"
+       y="554.47882"
+       x="-342.97168"
+       height="16.963396"
+       width="16.963396"
+       id="Aisquare"
+       style="opacity:0.79500002;fill:#ff2a2a;fill-opacity:0;stroke:#aa0000;stroke-width:1.16109204;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0" />
+    <path
+       d="m -113.48403,569.78113 -10.29136,0 -10.29136,0 5.14568,-8.91257 5.14568,-8.91258 5.14568,8.91258 z"
+       id="Aitriangle"
+       style="opacity:0.79500002;fill:#ff7f2a;fill-opacity:0;stroke:#aa4400;stroke-width:1.15580475;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0" />
+    <g
+       transform="matrix(1.160148,0,0,1.160148,1448.8601,-1772.678)"
+       id="g156749-6-2">
+      <path
+         id="path155705-4-2"
+         d="m -1604.7619,2090.4574 294.0476,0"
+         style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+      <path
+         id="path156732-9-6"
+         d="m -1603.5714,2077.3622 c 0,25 0,26.1905 0,26.1905"
+         style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+      <path
+         id="path156732-6-5-1"
+         d="m -1310.7143,2077.3622 c 0,25 0,26.1905 0,26.1905"
+         style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+    </g>
+    <rect
+       transform="matrix(0.70710678,0.70710678,-0.70710678,0.70710678,0,0)"
+       ry="0"
+       y="623.59662"
+       x="281.86398"
+       height="17.401726"
+       width="17.401726"
+       id="Ajlosange"
+       style="opacity:0.79500002;fill:#aad400;fill-opacity:0;stroke:#445500;stroke-width:1.19109428;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0" />
+    <rect
+       ry="0"
+       y="644.95502"
+       x="-132.25757"
+       height="16.963396"
+       width="16.963396"
+       id="Ajsquare"
+       style="opacity:0.79500002;fill:#ff2a2a;fill-opacity:0;stroke:#aa0000;stroke-width:1.16109204;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0" />
+    <path
+       d="m -359.91274,659.0669 -10.29136,0 -10.29136,0 5.14568,-8.91258 5.14568,-8.91257 5.14568,8.91257 z"
+       id="Ajtriangle"
+       style="opacity:0.79500002;fill:#ff7f2a;fill-opacity:0;stroke:#aa4400;stroke-width:1.15580475;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0" />
+    <g
+       transform="matrix(1.160148,0,0,1.160148,1446.4792,-1680.8188)"
+       id="g156749-0-0">
+      <path
+         id="path155705-48-6"
+         d="m -1604.7619,2090.4574 294.0476,0"
+         style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+      <path
+         id="path156732-7-1"
+         d="m -1603.5714,2077.3622 c 0,25 0,26.1905 0,26.1905"
+         style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+      <path
+         id="path156732-6-1-5"
+         d="m -1310.7143,2077.3622 c 0,25 0,26.1905 0,26.1905"
+         style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+    </g>
+    <rect
+       transform="matrix(0.70710678,0.70710678,-0.70710678,0.70710678,0,0)"
+       ry="0"
+       y="757.57178"
+       x="277.79724"
+       height="17.401726"
+       width="17.401726"
+       id="Aklosange"
+       style="opacity:0.79500002;fill:#aad400;fill-opacity:0;stroke:#445500;stroke-width:1.19109428;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0" />
+    <rect
+       ry="0"
+       y="733.05029"
+       x="-303.68616"
+       height="16.963396"
+       width="16.963396"
+       id="Aksquare"
+       style="opacity:0.79500002;fill:#ff2a2a;fill-opacity:0;stroke:#aa0000;stroke-width:1.16109204;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0" />
+    <path
+       d="m -105.15116,750.73347 -10.29136,0 -10.29136,0 5.14568,-8.91258 5.14568,-8.91258 5.14568,8.91258 z"
+       id="Aktriangle"
+       style="opacity:0.79500002;fill:#ff7f2a;fill-opacity:0;stroke:#aa4400;stroke-width:1.15580475;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#333333;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker-end:url(#Arrow1Lend-6)"
+       d="M -38.147,565.6647 79.4699,610.766"
+       id="path4040-4" />
+    <path
+       id="path4044-4"
+       d="m -46.8536,653.7729 125.9618,1.2196"
+       style="fill:none;fill-rule:evenodd;stroke:#333333;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker-end:url(#marker4501-9)" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#333333;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker-end:url(#marker4533-0)"
+       d="M -38.147,740.7469 79.4699,695.6457"
+       id="path4048-9" />
+    <flowRoot
+       xml:space="preserve"
+       id="flowRoot4104-9"
+       style="font-style:normal;font-weight:normal;line-height:0.01%;font-family:'Glacial Indifference';text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       transform="translate(-413.9819,-1765.4861)"><flowRegion
+         id="flowRegion4106-3"><rect
+           id="rect4108-6"
+           width="220.78235"
+           height="417.03333"
+           x="298.46503"
+           y="2211.4695" /></flowRegion><flowPara
+         id="flowPara4110-0"
+         style="font-size:22.5px;line-height:1.25"> </flowPara></flowRoot>    <path
+       style="fill:#333333;fill-opacity:1;fill-rule:evenodd;stroke:#333333;stroke-width:1.81909027pt;stroke-opacity:1"
+       d="m 696.27142,424.14058 8.96866,9.22057 -8.65375,-31.95708 -9.53548,31.70517 9.22057,-8.96866 z"
+       id="path161389-6-53-7-6" />
+    <path
+       style="fill:#333333;fill-opacity:1;fill-rule:evenodd;stroke:#333333;stroke-width:1.81909027pt;stroke-opacity:1"
+       d="m 1197.7711,889.26637 -9.2206,8.96866 31.9571,-8.65387 -31.7052,-9.53536 8.9687,9.22057 z"
+       id="path161389-6-1-5-4-7" />
+    <path
+       style="fill:none;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:3.53305531;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 696.9487,424.97615 0,464.06398 508.9283,0"
+       id="path156898-7-1-3" />
+    <text
+       id="text10244"
+       y="672.82434"
+       x="175.00993"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:57.55641937px;line-height:125%;font-family:'Glacial Indifference';-inkscape-font-specification:'Glacial Indifference Bold';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         y="672.82434"
+         x="175.00993"
+         id="tspan10246">Model</tspan></text>
+    <text
+       id="text10446"
+       y="631.3493"
+       x="611.39258"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:42.60259628px;line-height:125%;font-family:'Glacial Indifference';-inkscape-font-specification:'Glacial Indifference Bold';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         y="631.3493"
+         x="611.39258"
+         id="tspan10448">o1</tspan></text>
+    <text
+       id="text10446-2"
+       y="940.63043"
+       x="1167.2238"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:42.60259628px;line-height:125%;font-family:'Glacial Indifference';-inkscape-font-specification:'Glacial Indifference Bold';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         y="940.63043"
+         x="1167.2238"
+         id="tspan10448-8">o1</tspan></text>
+    <text
+       id="text10486"
+       y="704.08575"
+       x="611.41394"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:41.99188995px;line-height:125%;font-family:'Glacial Indifference';-inkscape-font-specification:'Glacial Indifference Bold';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         y="704.08575"
+         x="611.41394"
+         id="tspan10488">o2</tspan></text>
+    <text
+       id="text10486-3"
+       y="399.19373"
+       x="645.28699"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:41.99188995px;line-height:125%;font-family:'Glacial Indifference';-inkscape-font-specification:'Glacial Indifference Bold';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         y="399.19373"
+         x="645.28699"
+         id="tspan10488-8">o2</tspan></text>
+    <text
+       id="text10697"
+       y="573.32532"
+       x="-441.60019"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:49.70933914px;line-height:125%;font-family:'Glacial Indifference';-inkscape-font-specification:'Glacial Indifference Bold';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         y="573.32532"
+         x="-441.60019"
+         id="tspan10699">i</tspan></text>
+    <text
+       id="text10697-0"
+       y="660.51324"
+       x="-439.32535"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:47.99862671px;line-height:125%;font-family:'Glacial Indifference';-inkscape-font-specification:'Glacial Indifference Bold';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         y="660.51324"
+         x="-439.32535"
+         id="tspan10699-9">j</tspan></text>
+    <text
+       id="text10697-0-1"
+       y="759.62256"
+       x="-445.97015"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:47.99862671px;line-height:125%;font-family:'Glacial Indifference';-inkscape-font-specification:'Glacial Indifference Bold';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         y="759.62256"
+         x="-445.97015"
+         id="tspan10699-9-9">k</tspan></text>
+  </g>
+  <!-- Points  en bleu
+
+##################################################################################################################
+apparaissent en 6 secondes depuis le startanim
+##################################################################################################################
+-->
+  <g
+     transform="translate(453.21715,-349.35016)"
+     id="g4201">
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10759-6"
+       cx="712.30829"
+       cy="853.38861"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+5s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+5s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10761-3"
+       cx="762.3725"
+       cy="879.04449"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+5s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+5s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10763-8"
+       cx="770.20624"
+       cy="789.07428"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+5s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+5s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10765-5"
+       cx="838.68695"
+       cy="820.72443"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+5s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+5s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10767-6"
+       cx="765.91888"
+       cy="794.31036"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+5s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+5s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10769-1"
+       cx="776.49286"
+       cy="853.67462"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+5s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+5s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10771-1"
+       cx="824.37836"
+       cy="842.9184"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+5s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+5s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10773-5"
+       cx="832.03558"
+       cy="870.79266"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+5s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+5s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10775-9"
+       cx="758.6994"
+       cy="856.56097"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+5s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+5s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+  </g>
+  <g
+     transform="translate(453.21715,-349.35016)"
+     id="g4212">
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10777-8"
+       cx="851.55316"
+       cy="801.64008"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+4s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+4s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10783-4"
+       cx="829.12177"
+       cy="850.41193"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+4s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+4s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10789-8"
+       cx="879.28802"
+       cy="777.43854"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+4s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+4s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10795-1"
+       cx="867.87225"
+       cy="816.45392"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+4s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+4s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10797-0"
+       cx="905.73236"
+       cy="807.29144"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+4s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+4s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10799-3"
+       cx="937.62006"
+       cy="859.9212"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+4s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+4s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10801-0"
+       cx="903.70331"
+       cy="784.83246"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+4s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+4s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10803-4"
+       cx="913.57098"
+       cy="848.76093"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+4s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+4s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10805-4"
+       cx="960.56427"
+       cy="858.48688"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+4s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+4s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10807-4"
+       cx="853.98138"
+       cy="870.36017"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+4s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+4s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10813-4"
+       cx="919.38763"
+       cy="856.34381"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+4s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+4s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10817-7"
+       cx="981.52948"
+       cy="837.38446"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+4s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+4s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10819-6"
+       cx="924.16766"
+       cy="873.36188"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+4s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+4s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10821-3"
+       cx="1053.5436"
+       cy="853.35052"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+4s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+4s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10825-1"
+       cx="979.19403"
+       cy="789.94489"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+4s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+4s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10827-7"
+       cx="971.96552"
+       cy="846.50397"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+4s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+4s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10829-5"
+       cx="970.02472"
+       cy="842.74701"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+4s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+4s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+  </g>
+  <g
+     transform="translate(453.21715,-349.35016)"
+     id="g4231">
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10831-9"
+       cx="1068.7502"
+       cy="846.5163"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+3s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+3s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10833-6"
+       cx="1079.2971"
+       cy="778.39886"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+3s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+3s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10835-2"
+       cx="1014.9991"
+       cy="847.40277"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+3s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+3s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10837-1"
+       cx="1010.5169"
+       cy="876.36078"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+3s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+3s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10839-7"
+       cx="1071.7335"
+       cy="829.77386"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+3s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+3s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10841-8"
+       cx="1052.8442"
+       cy="841.58832"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+3s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+3s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10843-5"
+       cx="1076.7518"
+       cy="772.74493"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+3s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+3s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10845-7"
+       cx="1082.6293"
+       cy="778.50482"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+3s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+3s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10847-4"
+       cx="1037.5112"
+       cy="769.22711"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+3s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+3s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10849-1"
+       cx="1117.423"
+       cy="795.89459"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+3s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+3s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10851-8"
+       cx="1042.682"
+       cy="733.39606"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+3s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+3s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10853-5"
+       cx="1104.2682"
+       cy="776.78009"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+3s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+3s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="ptlosange"
+       cx="1100.0897"
+       cy="719.07635"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+3s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+3s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10857-7"
+       cx="1122.2346"
+       cy="748.96832"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+3s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+3s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10859-5"
+       cx="1023.1026"
+       cy="765.06976"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+3s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+3s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10861-3"
+       cx="987.93536"
+       cy="718.19379"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+3s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+3s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10863-8"
+       cx="1014.3055"
+       cy="766.86346"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+3s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+3s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10865-8"
+       cx="1052.5249"
+       cy="665.25177"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+3s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+3s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10867-3"
+       cx="992.68646"
+       cy="785.12592"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+3s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+3s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10869-1"
+       cx="995.08356"
+       cy="763.16339"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+3s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+3s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10871-8"
+       cx="932.93036"
+       cy="697.42487"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+3s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+3s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10873-9"
+       cx="938.8598"
+       cy="702.5412"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+3s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+3s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10875-6"
+       cx="932.35858"
+       cy="671.25336"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+3s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+3s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+  </g>
+  <g
+     transform="translate(453.21715,-349.35016)"
+     id="g4256">
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10877-4"
+       cx="999.07257"
+       cy="700.55341"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+2s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+2s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10879-3"
+       cx="981.16168"
+       cy="708.12225"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+2s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+2s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10881-3"
+       cx="946.73981"
+       cy="796.53729"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+2s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+2s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10883-3"
+       cx="932.06952"
+       cy="730.1485"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+2s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+2s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10885-8"
+       cx="975.86798"
+       cy="721.21954"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+2s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+2s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10887-6"
+       cx="853.08759"
+       cy="756.12128"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+2s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+2s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10889-0"
+       cx="883.22113"
+       cy="732.95111"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+2s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+2s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10891-4"
+       cx="875.06146"
+       cy="704.99872"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+2s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+2s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+  </g>
+  <g
+     transform="translate(453.21715,-349.35016)"
+     id="g4266">
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10893-8"
+       cx="890.25409"
+       cy="723.64594"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+1s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+1s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10895-8"
+       cx="848.70795"
+       cy="746.60565"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+1s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+1s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10897-8"
+       cx="939.12909"
+       cy="671.75092"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+1s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+1s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="pttriangle"
+       cx="805.95624"
+       cy="666.26788"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+1s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+1s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10901-7"
+       cx="836.84637"
+       cy="675.45966"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+1s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+1s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10903-7"
+       cx="858.63202"
+       cy="616.90619"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+1s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+1s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10905-6"
+       cx="746.33685"
+       cy="646.82843"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+1s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+1s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10907-4"
+       cx="794.6098"
+       cy="623.06927"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+1s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+1s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10909-3"
+       cx="740.8515"
+       cy="601.47711"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+1s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+1s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10911-0"
+       cx="759.77386"
+       cy="567.59113"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+1s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+1s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10913-3"
+       cx="729.37738"
+       cy="580.13055"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+1s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+1s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10915-0"
+       cx="733.88177"
+       cy="627.10724"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+1s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+1s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10917-9"
+       cx="801.27289"
+       cy="492.65582"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+1s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+1s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10919-2"
+       cx="722.51337"
+       cy="442.39081"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+1s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+1s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10921-5"
+       cx="825.12469"
+       cy="545.76678"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+1s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+1s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10923-4"
+       cx="803.6955"
+       cy="539.5401"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+1s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+1s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10925-0"
+       cx="854.4433"
+       cy="546.5589"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+1s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+1s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="ptsquare"
+       cx="763.46967"
+       cy="430.2226"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+1s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+1s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10929-9"
+       cx="832.72357"
+       cy="468.73065"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+1s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+1s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10931-4"
+       cx="840.17523"
+       cy="550.6441"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+1s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+1s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10933-6"
+       cx="864.61176"
+       cy="520.33575"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin+1s"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin+1s"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+  </g>
+  <g
+     transform="translate(453.21715,-349.35016)"
+     id="g4289">
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10935-9"
+       cx="768.50848"
+       cy="582.01788"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10937-2"
+       cx="861.95331"
+       cy="470.27118"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10939-2"
+       cx="781.30316"
+       cy="526.0722"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10941-4"
+       cx="861.23944"
+       cy="589.82367"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10943-7"
+       cx="833.57758"
+       cy="478.1546"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10945-7"
+       cx="800.62762"
+       cy="501.92548"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10947-5"
+       cx="781.27313"
+       cy="511.97894"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10949-4"
+       cx="846.5014"
+       cy="514.73529"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10951-8"
+       cx="884.16107"
+       cy="593.69061"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10953-1"
+       cx="817.52924"
+       cy="609.60284"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10955-2"
+       cx="826.70013"
+       cy="615.5119"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+    <circle
+       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       id="circle10957-8"
+       cx="863.34271"
+       cy="665.16486"
+       r="10">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.84"
+         dur="0.8s"
+         fill="freeze"
+         begin="startanim.begin"
+         restart="always"
+         repeatCount="1" />
+      <animate
+         attributeType="CSS"
+         attributeName="stroke-opacity"
+         to="0.9"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin"
+         restart="always"
+         repeatCount="1" />
+    </circle>
+  </g>
+  <!--     specific pattern  -->
+  <g
+     transform="translate(453.21715,-349.35016)"
+     id="g4303">
+    <path
+       d="m 824,676.26788 -17.80812,0 -17.80812,0 8.90406,-15.42228 8.90406,-15.42229 8.90406,15.42229 z"
+       id="triangle"
+       style="opacity:0.79500002;fill:#ff7f2a;fill-opacity:0;stroke:#aa4400;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0" />
+    <rect
+       ry="0"
+       x="749"
+       y="415.2226"
+       height="29.219727"
+       width="29.219727"
+       id="square"
+       style="opacity:0.79500002;fill:#ff2a2a;fill-opacity:0;stroke:#aa0000;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0" />
+    <rect
+       ry="0"
+       x="1200.1375"
+       y="-289.14203"
+       height="29.219727"
+       width="29.219727"
+       id="losange"
+       style="opacity:0.79500002;fill:#aad400;fill-opacity:0;stroke:#445500;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0"
+       transform="matrix(0.70710678,0.70710678,-0.70710678,0.70710678,0,0)" />
+  </g>
+  <!--     Boutton animate  -->
+  <style
+     id="style4308"> 
+  g.button:hover{
+    opacity: 0.75;
+  }
+</style>
+  <g
+     class="button"
+     cursor="pointer"
+     onmouseup="buttonClick(evt)"
+     id="g4310">
+    <text
+       id="text6947-2-88"
+       y="40"
+       x="20"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:15px;line-height:125%;font-family:'Glacial Indifference';-inkscape-font-specification:'Glacial Indifference Bold';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         y="40"
+         x="30"
+         id="textbutton">Click to Animate </tspan><animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.2"
+         dur="1s"
+         fill="freeze"
+         begin="startanim.begin"
+         restart="always"
+         repeatCount="1"
+         id="start" /><animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="1"
+         dur="1s"
+         fill="freeze"
+         begin="cursoranim.end"
+         restart="always"
+         repeatCount="1" /></text>
+    <rect
+       ry="2"
+       y="20"
+       x="20"
+       height="35"
+       width="140"
+       id="button"
+       style="fill:#eeeeee;fill-rule:evenodd;stroke:#333333;stroke-width:1.54542041;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1; fill-opacity:0.5">
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.2"
+         dur="1s"
+         fill="freeze"
+         begin="click"
+         restart="always"
+         repeatCount="1"
+         id="startanim" />
+      <animate
+         attributeType="CSS"
+         attributeName="fill-opacity"
+         to="0.5"
+         dur="1s"
+         fill="freeze"
+         begin="cursoranim.end"
+         restart="always"
+         repeatCount="1"
+         id="resetbutton" />
+    </rect>
+  </g>
+  <animate
+     xlink:href="#triangle"
+     attributeName="fill-opacity"
+     to="0.8"
+     begin="startanim.begin+6s"
+     dur="1s"
+     fill="freeze"
+     restart="always"
+     repeatCount="1" />
+  <animate
+     xlink:href="#triangle"
+     attributeName="stroke-opacity"
+     to="0.8"
+     begin="startanim.begin+6s"
+     dur="1s"
+     fill="freeze"
+     restart="always"
+     repeatCount="1"
+     id="appeartriangle" />
+  <animate
+     xlink:href="#square"
+     attributeName="fill-opacity"
+     to="0.8"
+     begin="appeartriangle.begin+2s"
+     dur="1s"
+     fill="freeze"
+     restart="always"
+     repeatCount="1"
+     id="appearsquare" />
+  <animate
+     xlink:href="#square"
+     attributeName="stroke-opacity"
+     to="0.8"
+     begin="appeartriangle.begin+2s"
+     dur="1s"
+     fill="freeze"
+     restart="always"
+     repeatCount="1" />
+  <animate
+     xlink:href="#losange"
+     attributeName="fill-opacity"
+     to="0.8"
+     begin="appearsquare.begin+2s"
+     dur="1s"
+     fill="freeze"
+     restart="always"
+     repeatCount="1"
+     id="appearlosange" />
+  <animate
+     xlink:href="#losange"
+     attributeName="stroke-opacity"
+     to="0.8"
+     begin="appearsquare.begin+2s"
+     dur="1s"
+     fill="freeze"
+     restart="always"
+     repeatCount="1" />
+  <!-- Antécédents dans les intervales de param -->
+  <animate
+     xlink:href="#Aitriangle"
+     attributeName="fill-opacity"
+     to="0.8"
+     begin="appeartriangle.begin+0.5s"
+     dur="1s"
+     fill="freeze"
+     restart="always"
+     repeatCount="1" />
+  <animate
+     xlink:href="#Aitriangle"
+     attributeName="stroke-opacity"
+     to="0.8"
+     begin="appeartriangle.begin+0.5s"
+     dur="1s"
+     fill="freeze"
+     restart="always"
+     repeatCount="1" />
+  <animate
+     xlink:href="#Ajtriangle"
+     attributeName="fill-opacity"
+     to="0.8"
+     begin="appeartriangle.begin+0.5s"
+     dur="1s"
+     fill="freeze"
+     restart="always"
+     repeatCount="1" />
+  <animate
+     xlink:href="#Ajtriangle"
+     attributeName="stroke-opacity"
+     to="0.8"
+     begin="appeartriangle.begin+0.5s"
+     dur="1s"
+     fill="freeze"
+     restart="always"
+     repeatCount="1" />
+  <animate
+     xlink:href="#Aktriangle"
+     attributeName="fill-opacity"
+     to="0.8"
+     begin="appeartriangle.begin+0.5s"
+     dur="1s"
+     fill="freeze"
+     restart="always"
+     repeatCount="1" />
+  <animate
+     xlink:href="#Aktriangle"
+     attributeName="stroke-opacity"
+     to="0.8"
+     begin="appeartriangle.begin+0.5s"
+     dur="1s"
+     fill="freeze"
+     restart="always"
+     repeatCount="1" />
+  <animate
+     xlink:href="#Aisquare"
+     attributeName="fill-opacity"
+     to="0.8"
+     begin="appearsquare.begin+0.5s"
+     dur="1s"
+     fill="freeze"
+     restart="always"
+     repeatCount="1" />
+  <animate
+     xlink:href="#Aisquare"
+     attributeName="stroke-opacity"
+     to="0.8"
+     begin="appearsquare.begin+0.5s"
+     dur="1s"
+     fill="freeze"
+     restart="always"
+     repeatCount="1" />
+  <animate
+     xlink:href="#Ajsquare"
+     attributeName="fill-opacity"
+     to="0.8"
+     begin="appearsquare.begin+0.5s"
+     dur="1s"
+     fill="freeze"
+     restart="always"
+     repeatCount="1" />
+  <animate
+     xlink:href="#Ajsquare"
+     attributeName="stroke-opacity"
+     to="0.8"
+     begin="appearsquare.begin+0.5s"
+     dur="1s"
+     fill="freeze"
+     restart="always"
+     repeatCount="1" />
+  <animate
+     xlink:href="#Aksquare"
+     attributeName="fill-opacity"
+     to="0.8"
+     begin="appearsquare.begin+0.5s"
+     dur="1s"
+     fill="freeze"
+     restart="always"
+     repeatCount="1" />
+  <animate
+     xlink:href="#Aksquare"
+     attributeName="stroke-opacity"
+     to="0.8"
+     begin="appearsquare.begin+0.5s"
+     dur="1s"
+     fill="freeze"
+     restart="always"
+     repeatCount="1" />
+  <animate
+     xlink:href="#Ailosange"
+     attributeName="fill-opacity"
+     to="0.8"
+     begin="appearlosange.begin+0.5s"
+     dur="1s"
+     fill="freeze"
+     restart="always"
+     repeatCount="1" />
+  <animate
+     xlink:href="#Ailosange"
+     attributeName="stroke-opacity"
+     to="0.8"
+     begin="appearlosange.begin+0.5s"
+     dur="1s"
+     fill="freeze"
+     restart="always"
+     repeatCount="1" />
+  <animate
+     xlink:href="#Ajlosange"
+     attributeName="fill-opacity"
+     to="0.8"
+     begin="appearlosange.begin+0.5s"
+     dur="1s"
+     fill="freeze"
+     restart="always"
+     repeatCount="1" />
+  <animate
+     xlink:href="#Ajlosange"
+     attributeName="stroke-opacity"
+     to="0.8"
+     begin="appearlosange.begin+0.5s"
+     dur="1s"
+     fill="freeze"
+     restart="always"
+     repeatCount="1" />
+  <animate
+     xlink:href="#Aklosange"
+     attributeName="fill-opacity"
+     to="0.8"
+     begin="appearlosange.begin+0.5s"
+     dur="1s"
+     fill="freeze"
+     restart="always"
+     repeatCount="1" />
+  <animate
+     xlink:href="#Aklosange"
+     attributeName="stroke-opacity"
+     to="0.8"
+     begin="appearlosange.begin+0.5s"
+     dur="1s"
+     fill="freeze"
+     restart="always"
+     repeatCount="1" />
+  <!-- text antécedents patterns-->
+
+<g transform="translate(-50,+320)">
+
+  <text
+     id="textantetriangle"
+     y="150"
+     x="70"
+     style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:25px;line-height:125%;font-family:'Glacial Indifference';-inkscape-font-specification:'Glacial Indifference Bold';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:0;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+     xml:space="preserve"><tspan
+       y="150"
+       x="70"
+       id="tspan4316">Inputs leading to patterns      ,      and </tspan><animate
+       xlink:href="#textantetriangle"
+       attributeName="fill-opacity"
+       to="0.8"
+       begin="appeartriangle.begin"
+       dur="1s"
+       fill="freeze"
+       restart="always"
+       repeatCount="1" /></text>
+  <!-- pattern miniatures-->
+  <path
+     d="m 400,150 -10.29136,0 -10.29136,0 5.14568,-8.91257 5.14568,-8.91258 5.14568,8.91258 z"
+     id="minitriangle"
+     style="opacity:0.79500002;fill:#ff7f2a;fill-opacity:0;stroke:#aa4400;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0">
+    <animate
+       xlink:href="#minitriangle"
+       attributeName="fill-opacity"
+       to="0.9"
+       begin="appeartriangle.begin"
+       dur="1s"
+       fill="freeze"
+       restart="always"
+       repeatCount="1" />
+  </path>
+  <rect
+     ry="0"
+     x="420"
+     y="130"
+     height="22"
+     width="22"
+     id="minisquare"
+     style="opacity:0.79500002;fill:#ff2a2a;fill-opacity:0;stroke:#aa0000;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0">
+    <animate
+       xlink:href="#minisquare"
+       attributeName="fill-opacity"
+       to="0.9"
+       begin="appearsquare.begin"
+       dur="1s"
+       fill="freeze"
+       restart="always"
+       repeatCount="1" />
+  </rect>
+  <rect
+     ry="0"
+     y="-279.70059"
+     x="457.10468"
+     height="22"
+     width="22"
+     id="minilosange"
+     style="opacity:0.79500002;fill:#aad400;fill-opacity:0;stroke:#445500;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0"
+     transform="matrix(0.70710678,0.70710678,-0.70710678,0.70710678,0,0)">
+    <animate
+       xlink:href="#minilosange"
+       attributeName="fill-opacity"
+       to="0.9"
+       begin="appearlosange.begin"
+       dur="1s"
+       fill="freeze"
+       restart="always"
+       repeatCount="1" />
+  </rect>
+
+
+
+</g>
+
+</svg>
