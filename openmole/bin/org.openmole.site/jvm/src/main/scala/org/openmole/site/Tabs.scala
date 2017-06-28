@@ -23,8 +23,6 @@ import scalatags.Text.all._
 import scalatags.Text.TypedTag
 
 case class Tab(title: String, content: TypedTag[_ <: String], active: Boolean, topage: Page) {
-  val tabID = "t" + uuID.short
-  val refID = "r" + uuID.short
 
   def activeClass = if (active) (classIs("active"), classIs("active in")) else (classIs(""), classIs(""))
 }
@@ -49,13 +47,13 @@ case class Tabs(tabs: Seq[Tab] = Seq()) {
       ul(classIs(nav ++ nav_pills), role_tablist)(
         theTabs.map { t ⇒
           li(role_presentation, t.activeClass._1)(
-            tools.to(t.topage)(id := t.tabID)(t.title)
+            tools.to(t.topage)(t.title)
           )
         }
       ),
       div(classIs("tab_content"), paddingTop := 10)(
         theTabs.map { t ⇒
-          div(id := t.refID)(t.content)
+          div(t.content)
         }
       )
     )
