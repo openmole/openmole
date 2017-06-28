@@ -35,7 +35,7 @@
     SteadyStateEvolution(
       // Definition of the optimisation algorithm
       // mu is the size of the population
-      // genome is the inputs prototype and their variation ranges
+      // genome (of individuals) is the inputs prototype and their variation ranges
       // objectives are the objectives to minimise
       algorithm =
         NSGA2(
@@ -53,8 +53,7 @@
 
 
 @h2
-    The problem of stochasticity in Calibration of models
-
+    The problem of stochasticity in Model Calibration
 @p
     Genetic algorithms don’t cope well with stochasticity.
 
@@ -71,7 +70,7 @@
     has a chance to retry a very similar solution later on.
 
     Conversely, the overvalued solutions are very problematic : the genetic algorithm will keep them
-    in the population of good solutions because they have been (falsely) evaluated as good solutions, and will generate
+    in the population of good solutions because they have been (falsely) evaluated as such, and will generate
      new offspring solutions from them.
 @br
 
@@ -80,7 +79,6 @@
 
 @h3
     Existing solutions
-
 @p
     To reduce the influence of the fitness fluctuation, the most commonly used approach is  "resampling". It consists in
     replicating the fitness evaluation of an the individual. The computed "quality" of an individual is then
@@ -91,7 +89,7 @@
      Still, any number of replications, even very high, implies that some solutions are overvalued with a non negligible probability given that the fitness function is evaluated
     millions of times.
 @br
-    Other ad hoc methods of the literature  are often based some assumptions that are hard or impossible to verify
+    Other ad hoc methods of the literature are based on some assumptions that are hard or impossible to verify
     (such as the invariance of the noise distribution over the fitness space) and add parameters to the algorithm
     that are difficult to tune finely.
 
@@ -105,8 +103,8 @@
 TODO texte à confirmer par romain
 @br
     The idea (loosely related to the idea of resampling best solutions so they are more precisely evaluated, cf
-    [Branke, 1998] TODO garder la REF ?) is to  evaluate individuals with only one replication and then, at the next generation
-     ,  to keep and re-inject a sample of the individuals of the current population.
+    [Branke, 1998] TODO garder la REF ?) is to  evaluate individuals with only one replication and, at the next generation
+     ,  to keep and re-inject a sample of the individuals of the current population in the newly created population..
 @br
 
     For instance, at each generation, 90% of the individuals offspring genomes are @b{new genomes} obtained by
@@ -118,19 +116,23 @@ TODO texte à confirmer par romain
     individual is computed using (for instance) the median of each fitness value stored in the replication vector.
 
 @br
-    The goal is to have the best individuals survive several generations and therefore are the most likely to be resampled
-    given that each individual has a fixed chance of being resampled at each generation.
+    This evolution strategy intends to have the best individuals survive several generations and therefore be
+    the most likely to be resampled, since each individual has a fixed chance of being resampled at each generation.
+@br
 
-
-    However, this fixed probability of resampling is not sufficient alone, since well evaluated solutions are very likely
+    However, this fixed probability of resampling is not sufficient alone, since well evaluated solutions are likely
      to be replaced by overvalued solutions (new solutions with a few "lucky" replications).
 
 
     So as to compensate this bias, we add a technical objective to NSGA2 : maximize the number of evaluations
     of a solution.
+
+
+@br
+
     The optimization problem of model calibration becomes a @b{multi-objective optimisation problem}
-    (if it was not already the case) : the algorithm has
-      to optimize the objectives of the model @b{and} the technical objective as well.
+    (if it was not already !) : the algorithm has to optimize the objectives of the model @b{and} the technical
+    objective as well.
 
     Therefore, the number of replications is taken into account in the Pareto compromise elitism of NSGA2: solutions with
     many replications are kept, even if some solutions are better on the other objectives but have been evaluated fewer times.
@@ -139,6 +141,9 @@ TODO texte à confirmer par romain
 
     By doing so, we let the multi-objective optimization algorithm handle the compromise between the quality of the
     solutions and their robustness.
+
+
+@p
 
     This method adds only two new parameters:
     @ol
@@ -152,4 +157,4 @@ See the line @hl.code("""stochastic = Stochastic(seed = seed, reevaluate = 0.2, 
 
 
 
- This method has been implement in the library for evolutionary computing: MGO5, and has not been published yet.
+ This method has been implement in the library for evolutionary computing: MGO5, but it has not been published yet :-(
