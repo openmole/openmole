@@ -71,8 +71,10 @@ object UDockerTask {
   )(implicit name: sourcecode.Name, newFile: NewFile, workspace: Workspace, preference: Preference): UDockerTask = {
     val uDocker =
       UDocker(
-        // TODO handle errors
-        localDockerImage = toLocalImage(image).get,
+        localDockerImage = toLocalImage(image) match {
+          case Right(x) ⇒ x
+          case Left(x)  ⇒ throw new UserBadDataError(x.msg)
+        },
         command = command,
         installCommands = installCommands
       )
@@ -233,18 +235,10 @@ object UDockerTask {
     }
   }
 
-  def toLocalImage(containerImage: ContainerImage)(implicit preference: Preference, newFile: NewFile, workspace: Workspace): util.Try[LocalDockerImage] =
+  def toLocalImage(containerImage: ContainerImage)(implicit preference: Preference, newFile: NewFile, workspace: Workspace): Either[Err, LocalDockerImage] =
     containerImage match {
-      case i: DockerImage ⇒
-        downloadImage(i, preference(RegistryTimeout)) match {
-          case Right(x) ⇒ util.Success(x)
-          case Left(x)  ⇒ util.Failure(new UserBadDataError(s"Failed to download docker image $i. Error: [$x]"))
-        }
-      case i: SavedDockerImage ⇒
-        loadImage(i) match {
-          case Right(x) ⇒ util.Success(x)
-          case Left(x)  ⇒ util.Failure(new UserBadDataError(x))
-        }
+      case i: DockerImage      ⇒ downloadImage(i, preference(RegistryTimeout))
+      case i: SavedDockerImage ⇒ loadImage(i)
     }
 
 }

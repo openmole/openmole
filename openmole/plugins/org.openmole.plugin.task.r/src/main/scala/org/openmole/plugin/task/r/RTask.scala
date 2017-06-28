@@ -14,6 +14,7 @@ import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.validation._
 import org.openmole.core.dsl._
+import org.openmole.core.exception.UserBadDataError
 
 object RTask {
 
@@ -49,7 +50,10 @@ object RScriptTask {
   )(implicit name: sourcecode.Name, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService): RScriptTask =
     RScriptTask(
       script,
-      UDockerTask.toLocalImage(RTask.rImage(version)).get,
+      UDockerTask.toLocalImage(RTask.rImage(version)) match {
+        case Right(x) ⇒ x
+        case Left(x)  ⇒ throw new UserBadDataError(x.msg)
+      },
       InputOutputConfig(),
       External()
     )
