@@ -980,13 +980,5 @@
      id="movec10" />
 
 
-
-
-
-
-
-
-<!-- coordonnées à 0 sinon la trasnfo animateMotion marchepas , elle est toujours en relative-->
-  
 </svg>
 
