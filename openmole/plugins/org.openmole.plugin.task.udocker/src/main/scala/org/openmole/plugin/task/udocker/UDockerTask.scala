@@ -111,17 +111,7 @@ object UDockerTask {
         l ← layers(manif.value)
       } yield {
         val lf = layerFile(workspace, l)
-        // TODO unify with buildRepoV2 (duplicate code)
-        // TODO pass destination file as parameter
-        def downloadLayer =
-          newFile.withTmpFile { tmpFile ⇒
-            blob(dockerImage, l, tmpFile, timeout)
-            lDirectory.withLockInDirectory {
-              if (!lf.exists) tmpFile move lf
-            }
-          }
-
-        if (!lf.exists) downloadLayer
+        if (!lf.exists) downloadLayer(dockerImage, l, lDirectory, lf, timeout)
         l → lf
       }
 
