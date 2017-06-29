@@ -860,6 +860,23 @@ lazy val tests = Project("tests", binDir / "tests") settings (defaultSettings: _
   dependencyFilter := noDependencyFilter
 )
 
+lazy val modules =
+  OsgiProject(
+    binDir,
+    "org.openmole.modules",
+    singleton = true,
+    imports = Seq("*"),
+    settings = defaultSettings ++ assemblySettings
+  ) settings(
+  assemblyDependenciesPath := assemblyPath.value / "plugins",
+  setExecutable ++= Seq("modules"),
+  resourcesAssemble += {
+    val bundle = OsgiKeys.bundle.value
+    bundle -> (assemblyPath.value / "plugins" / bundle.getName)},
+  resourcesAssemble ++= (Osgi.bundleDependencies in Compile).value.map(b ⇒ b → (assemblyPath.value / "plugins" / b.getName)),
+  resourcesAssemble += ((resourceDirectory in Compile).value / "modules") -> (assemblyPath.value / "modules"),
+  resourcesAssemble += (assemble in launcher).value -> (assemblyPath.value / "launcher"),
+  dependencyFilter := bundleFilter) dependsOn (toDependencies(openmoleNakedDependencies): _*) dependsOn (toDependencies(openmoleDependencies): _*)
 
 
 lazy val siteJSold = OsgiProject(binDir, "org.openmole.sitejs") settings(
