@@ -66,7 +66,9 @@ package object tools {
   // SCALATAGS METHODS
   def classIs(s: String): AttrPair = `class` := s
 
-  def to(page: Page) = a(href := page.file)
+  def to(page: Page): TypedTag[String] = to(page.file, false)
+
+  def to(link: String, otherTab: Boolean = true): TypedTag[String] = a(href := link)(if (otherTab) targetBlank else "")
 
   def innerLink(page: Page, title: String) = to(page)(span(title))
 
@@ -90,7 +92,9 @@ package object tools {
   lazy val navbar_default: String = "navbar-default"
   lazy val navbar_inverse: String = "navbar-inverse"
   lazy val navbar_staticTop: String = "navbar-static-top"
+  lazy val navbar_staticBottom: String = "navbar-static-bottom"
   lazy val navbar_fixedTop: String = "navbar-fixed-top"
+  lazy val navbar_fixedBottom: String = "navbar-fixed-bottom"
   lazy val navbar_right: String = "navbar-right"
   lazy val navbar_left: String = "navbar-left"
   lazy val navbar_header: String = "navbar-header"

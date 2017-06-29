@@ -115,14 +115,14 @@ object Site extends App {
             meta(name := "viewport", all.content := "width=device-width, initial-scale=1"),
 
             link(rel := "stylesheet", href := stylesName),
-            link(rel := "stylesheet", href := Resource.bootstrapCss.file),
+            link(rel := "stylesheet", href := Resource.css.bootstrap.file),
             //  link(rel := "stylesheet", href := Resource.css.file),
-            link(rel := "stylesheet", href := Resource.github.file),
-            link(rel := "stylesheet", href := Resource.docStyle.file),
-            script(src := Resource.highlightJS.file),
-            script(`type` := "text/javascript", src := Resource.siteJS.file),
-            script(src := Resource.lunr.file),
-            script(src := Resource.index.file),
+            link(rel := "stylesheet", href := Resource.css.github.file),
+            link(rel := "stylesheet", href := Resource.css.docStyle.file),
+            script(src := Resource.js.highlight.file),
+            script(`type` := "text/javascript", src := Resource.js.siteJS.file),
+            script(src := Resource.js.lunr.file),
+            script(src := Resource.js.index.file),
             meta(charset := "UTF-8"),
             piwik
           )
@@ -132,17 +132,20 @@ object Site extends App {
          */
         def bodyFrag(page: org.openmole.site.Page) = {
 
-          body(stylesheet.mainDiv)(
+          body(position := "relative", minHeight := "100%")(
             Menu.build,
-            page match {
-              case doc: DocumentationPage ⇒ {
-                if (DocumentationPages.topPagesChildren.contains(doc)) UserGuide.addCarousel(page)
-                else page.content
+            div(stylesheet.mainDiv)(
+              page match {
+                case doc: DocumentationPage ⇒ {
+                  if (DocumentationPages.topPagesChildren.contains(doc)) UserGuide.addCarousel(page)
+                  else page.content
+                }
+                case _ ⇒ page.content
               }
-              case _ ⇒ page.content
-            },
+            ),
+            Footer.build,
             onload := "org.openmole.site.SiteJS().main();org.openmole.site.SiteJS().loadIndex(index);"
-          )(`class` := "fade-in")
+          )
         }
 
         override def generateHtml(outputRoot: Path) = {

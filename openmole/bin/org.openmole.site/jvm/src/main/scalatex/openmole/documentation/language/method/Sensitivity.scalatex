@@ -9,7 +9,7 @@
      affect the output(s) of a model.
 
 
-@img(src := Resource.vignette_sensitivity.file, width:= "50%")
+@img(src := Resource.img.vignette_sensitivity.file, width:= "50%")
 
 @br
 @br

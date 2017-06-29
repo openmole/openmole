@@ -32,7 +32,7 @@
   val csvHook = AppendToCSVFileHook("result.csv", density, burned, seed)"""
 
 @p{Embed your NetLogo model}
-  In this example, we present step by step how to explore a NetLogo model. @a("The Fire model", href := Resource.fireNLogo.file) is a
+      In this example, we present step by step how to explore a NetLogo model. @a("The Fire model", href := Resource.script.fireNLogo.file) is a
   common NetLogo example. It studies the percolation of a fire in a forest depending on the density of the forest.
 
   @p{The simulation}

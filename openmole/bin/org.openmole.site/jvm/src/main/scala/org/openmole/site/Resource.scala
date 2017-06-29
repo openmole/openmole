@@ -25,154 +25,131 @@ package org.openmole.site
 object Resource {
 
   //FIXME
-  def buildinfoVersion = "7.0-SNAPSHOT"
+  val buildinfoVersion = "7.0-SNAPSHOT"
 
-  def htmlResource(name: String) = FileResource(s"html/$name")
+  def imgResource(name: String) = fileResource(s"img/$name")
 
-  def imgResource(name: String) = FileResource(s"img/$name")
+  def jsResource(name: String) = fileResource(s"js/$name")
 
-  def jsResource(name: String) = FileResource(s"js/$name")
+  def cssResource(name: String) = fileResource(s"css/$name")
 
-  def cssResource(name: String) = FileResource(s"css/$name")
+  def scriptResource(name: String) = fileResource(s"script/$name")
 
-  def scriptResource(name: String) = FileResource(s"script/$name")
+  def fileResource(name: String) = RenameFileResource(name, name)
 
-  def FileResource(name: String) = RenameFileResource(name, name)
+  object img {
 
-  //def css = FileResource("openMOLEStyles.css")
-  val menuHtml = htmlResource("menu.html")
+    val ants = imgResource("ants.png")
 
-  def ants = imgResource("ants.png")
+    val modelIO = imgResource("modelIO.png")
 
-  def modelIO = imgResource("modelIO.png")
+    val vignette_profiles = imgResource("profileanimV1.svg")
 
-  def vignette_profiles = imgResource("profileanimV1.svg")
+    val vignette_ancestors = imgResource("ancestors.png")
 
-  def vignette_ancestors = imgResource("ancestors.png")
+    val vignette_calib_mono = imgResource("calibrage_mono.png")
 
-  def vignette_calib_mono = imgResource("calibrage_mono.png")
+    val vignette_calib_multi = imgResource("calibrage_multi.png")
 
-  def vignette_calib_multi = imgResource("calibrage_multi.png")
+    val vignette_sensitivity = imgResource("sensitivity.svg")
 
-  def vignette_sensitivity = imgResource("sensitivity.svg")
+    val vignette_pse = imgResource("pse_anim.svg")
 
-  def vignette_pse = imgResource("pse_anim.svg")
+    val antNumbers = imgResource("antnumbers.png")
 
-  def antNumbers = imgResource("antnumbers.png")
+    val fireScreen = imgResource("firescreen.png")
 
-  def antsNLogo = scriptResource("ants.nlogo")
+    val fireGlobals = imgResource("fireGlobals.png")
 
-  def bootstrapCss = cssResource("bootstrap.min-3.3.7.css")
+    val fireNewGlobals = imgResource("fireNewGlobals.png")
 
-  def github = cssResource("github.css")
+    val fireMyDensity = imgResource("fireMyDensity.png")
 
-  def docStyle = cssResource("docstyle.css")
+    val fireNewFunction = imgResource("fireNewFunction.png")
 
-  def bootstrapJS = jsResource("bootstrap-native.min.js")
+    val fireOldSetup = imgResource("fireOldSetup.png")
 
-  def highlightJS = jsResource("highlight.pack.js")
+    val fireRemoveClearAll = imgResource("fireRemoveClearAll.png")
 
-  def siteJS = jsResource("sitejs.js")
+    val logo = imgResource("openmole.png")
 
-  def care = scriptResource("care")
+    val uiScreenshot = imgResource("openmoleUI.png")
 
-  def fireNLogo = scriptResource("Fire.nlogo")
+    val iscpif = imgResource("iscpif.svg")
 
-  def fireScreen = imgResource("firescreen.png")
+    val geocite = imgResource("geocite.png")
 
-  def fireGlobals = imgResource("fireGlobals.png")
+    val biomedia = imgResource("biomedia.png")
 
-  def fireNewGlobals = imgResource("fireNewGlobals.png")
+    val scale = imgResource("scale.svg")
 
-  def fireMyDensity = imgResource("fireMyDensity.png")
+    val code = imgResource("code.svg")
 
-  def fireNewFunction = imgResource("fireNewFunction.png")
+    val exploreMap = imgResource("map.svg")
 
-  def fireOldSetup = imgResource("fireOldSetup.png")
+    val github = imgResource("github.svg")
 
-  def fireRemoveClearAll = imgResource("fireRemoveClearAll.png")
+    //Radars graph for methodes
+    val m_complete = imgResource("methods_radars/complet.png")
 
-  def logo = imgResource("openmole.png")
+    val m_LHS = imgResource("methods_radars/LHS_sobol.png")
 
-  def uiScreenshot = imgResource("openmoleUI.png")
+    val m_pse = imgResource("methods_radars/pse.png")
 
-  def iscpif = imgResource("iscpif.svg")
+    val m_ga_mono = imgResource("methods_radars/ga_mono.png")
 
-  def geocite = imgResource("geocite.png")
+    val m_ga_multi = imgResource("methods_radars/ga_multi.png")
 
-  def biomedia = imgResource("biomedia.png")
+    val m_profile = imgResource("methods_radars/profile.png")
 
-  val scale = imgResource("scale.svg")
+    val m_sa = imgResource("methods_radars/sa.png")
 
-  val code = imgResource("code.svg")
+    val m_ancestor = imgResource("methods_radars/ancestor.png")
 
-  val exploreMap = imgResource("map.svg")
+  }
 
-  //Radars graph for methodes
-  def m_complete = imgResource("methods_radars/complet.png")
+  object script {
 
-  def m_LHS = imgResource("methods_radars/LHS_sobol.png")
+    val antsNLogo = scriptResource("ants.nlogo")
 
-  def m_pse = imgResource("methods_radars/pse.png")
+    val fireNLogo = scriptResource("Fire.nlogo")
 
-  def m_ga_mono = imgResource("methods_radars/ga_mono.png")
+    val care = scriptResource("care")
 
-  def m_ga_multi = imgResource("methods_radars/ga_multi.png")
+  }
 
-  def m_profile = imgResource("methods_radars/profile.png")
+  object css {
 
-  def m_sa = imgResource("methods_radars/sa.png")
+    val github = cssResource("github.css")
 
-  def m_ancestor = imgResource("methods_radars/ancestor.png")
+    val docStyle = cssResource("docstyle.css")
 
-  def openmole = RenameFileResource("openmole.tar.gz", s"openmole-${buildinfoVersion}.tar.gz")
+    val bootstrap = cssResource("bootstrap.min-3.3.7.css")
 
-  def openmoleDaemon = RenameFileResource("openmole-daemon.tar.gz", s"openmole-daemon-${buildinfoVersion}.tar.gz")
+  }
 
-  def api = ArchiveResource("openmole-api.tar.gz", "api")
+  object js {
 
-  def lunr = jsResource("lunr.min.js")
+    val bootstrapJS = jsResource("bootstrap-native.min.js")
 
-  def index = jsResource("index.js")
+    val highlight = jsResource("highlight.pack.js")
 
-  //  def marketResources(entries: Seq[GeneratedMarketEntry]) =
+    val siteJS = jsResource("sitejs.js")
+
+    val lunr = jsResource("lunr.min.js")
+
+    val index = jsResource("index.js")
+
+  }
+
+  val openmole = RenameFileResource("openmole.tar.gz", s"openmole-${buildinfoVersion}.tar.gz")
+
+  val openmoleDaemon = RenameFileResource("openmole-daemon.tar.gz", s"openmole-daemon-${buildinfoVersion}.tar.gz")
+
+  val api = ArchiveResource("openmole-api.tar.gz", "api")
+
+  //  val marketResources(entries: Seq[GeneratedMarketEntry]) =
   //    entries.filter(_.tags.exists(_ == Market.Tags.tutorial)).map { tuto ⇒ MarketResource(tuto) }
-
-  def all = Seq[Resource](
-    docStyle,
-    github,
-    highlightJS,
-    siteJS,
-    bootstrapCss,
-    bootstrapJS,
-    logo,
-    openmole,
-    openmoleDaemon,
-    api,
-    ants,
-    antNumbers,
-    antsNLogo,
-    fireNLogo,
-    fireScreen,
-    fireGlobals,
-    fireNewGlobals,
-    fireNewFunction,
-    fireOldSetup,
-    fireRemoveClearAll,
-    uiScreenshot,
-    iscpif,
-    geocite,
-    biomedia,
-    lunr,
-    care,
-    modelIO,
-    vignette_pse,
-    vignette_ancestors,
-    vignette_calib_mono,
-    vignette_calib_multi,
-    vignette_profiles
-
-  )
 }
 
 sealed trait Resource
