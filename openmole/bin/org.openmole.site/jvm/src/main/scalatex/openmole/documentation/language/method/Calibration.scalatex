@@ -6,22 +6,91 @@
     @p Using Genetic Algorithms (GA) , OpenMOLE find the inputs set matching one or several criteria.
 
 
-@h2{Single criterion Calibration}
+@h2{Single criterion and multi-criteria Calibration}
 
 @p
 
 @figure
  @img(src := Resource.img.vignette_calib_mono.file, width:= "50%")
  @figcaption
-    Single criterion calibration answers the question :  For a given target value of output o1, what is(are) the
+    Figure: Single criterion calibration answers the question :  For a given target value of output o1, what is(are) the
     parameter set(s) (i, j , k) that produce the closest values of o1 to the target ?
 
-@br
- @h2{Multi-criteria Calibration}
 
 @p
 @figure
- @img(src := Resource.img.vignette_calib_multi.file, width:= "50%")
- @figcaption
-    Multi-criteria answers the question : For a given target pattern (o1,o2) what are the parameters sets (i,j) that produce
+  @img(src := Resource.img.vignette_calib_multi.file, width:= "50%")
+  @figcaption
+    Figure: Multi-criteria answers the question : For a given target pattern (o1,o2) what are the parameters sets (i,j) that produce
     closest output values to the target patter ? Sometimes a Pareto Frontier may appear !
+
+@p
+  Calibration boils down to minimizing a distance measure between the
+  model output and some data. When there is only a single distance measure
+  considered, it is single criterion calibration. When it there are more
+  than one distance that matter, it is multi-criteria calibration. For
+  example, one may study a prey-predator model and want to find parameter
+  values for which the model reproduce some expected size of both the prey
+  and predator populations.
+
+@p
+  The single criterion case is simpler, because we can always tell which
+  distance is smaller between any two distances. Thus, we can always
+  select the set of parameter values that is the best.
+
+@p
+  In the multi-criteria case, it may not always be possible to tell which
+  simulation output has the smallest distance to the data. For example,
+  consider a pair (d1, d2) that represents the differences between the
+  model output and the data for the prey population size (d1) and the
+  predator population size (d2). Two pairs such as (10, 50) and (50,
+  10) each have one element smaller than the other and one bigger. There
+  is no natural way to tell which pair represents the smaller distance
+  between the model and the data. Thus, in the multi-criteria case, we
+  keep all the parameter sets (e.g. {(i1, j1, k1), (i2, j2, k2), ...})
+  which yield distances (e.g. {(d11, d21), (d12, d22), ...}) for which
+  we cannot find another parameter set that yields smaller distances for
+  all the distances considered. The set of all these parameter sets is
+  called the Pareto-front.
+
+@p
+  Single and multi-criteria calibration in OpenMOLE are both done with the NSGA2 algorithm.
+  It takes the following parameters:
+
+@ul
+    @li{@hl.code("mu"): the population size,}
+    @li{@hl.code("genome"): a list of the model parameters and their respective intervals,}
+    @li{@hl.code("objectives"): a list of the distance measures (which in the single criterion case will contain only one measure)}
+
+@p
+  You will also need a evolutionary scheme to drive the evolution and can use the SteadyStateEvolution scheme.
+  it takes the following parameters:
+
+@ul
+  @li{@hl.code("algorithm"): the nsga2 algorithm defining the evolution,}
+  @li{@hl.code("evaluation"): the OpenMOLE task that runs the simulation,}  
+  @li{@hl.code("parallelism"): the number of simulations that will be run in parallel,}
+  @li{@hl.code("termination"): the total number of evaluations (execution of the task passed to the parameter "evaluation") to be executed}
+
+@p
+  In your OpenMOLE script, the NSGA2 algorithm and SteadyStateEvolution scheme are used like so:
+@br @hl.openmole("""
+val nsga2 = 
+  NSGA2(
+    mu = 50,
+    genome = Seq(
+      param1 in (0.0, 99.0),
+      param2 in (0.0, 99.0)),
+    objectives = Seq(distance1, distance2)
+  )
+
+val evolution =
+  SteadyStateEvolution(
+    algorithm = nsga2,
+    evaluation = modelTask,
+    parallelism = 10,
+    termination = 100 
+  )
+)""", name = "Calibration")
+where @hl.code("param1") and @hl.code("param2") are input of the @hl.code("modelTask"), and @hl.code("distance1") and @hl.code("distance2") are its outputs.
+@p
