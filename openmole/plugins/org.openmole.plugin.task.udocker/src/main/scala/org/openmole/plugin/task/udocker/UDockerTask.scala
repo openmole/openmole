@@ -31,7 +31,6 @@ import org.openmole.core.workflow.builder._
 import org.openmole.core.expansion._
 import org.openmole.plugin.task.external._
 import org.openmole.plugin.task.systemexec._
-import org.openmole.plugin.task.container._
 import org.openmole.core.preference._
 import org.openmole.plugin.task.container
 import org.openmole.plugin.task.udocker.DockerMetadata._
