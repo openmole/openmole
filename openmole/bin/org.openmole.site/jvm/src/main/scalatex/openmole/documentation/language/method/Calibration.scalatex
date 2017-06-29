@@ -11,7 +11,7 @@
 @p
 
 @figure
- @img(src := Resource.img.vignette_calib_mono.file, width:= "50%")
+ @img(src := Resource.img.thumbnail_calib_mono.file, width:= "50%")
  @figcaption
     Figure: Single criterion calibration answers the question :  For a given target value of output o1, what is(are) the
     parameter set(s) (i, j , k) that produce the closest values of o1 to the target ?
@@ -19,7 +19,7 @@
 
 @p
 @figure
-  @img(src := Resource.img.vignette_calib_multi.file, width:= "50%")
+  @img(src := Resource.img.thumbnail_calib_multi.file, width:= "50%")
   @figcaption
     Figure: Multi-criteria answers the question : For a given target pattern (o1,o2) what are the parameters sets (i,j) that produce
     closest output values to the target patter ? Sometimes a Pareto Frontier may appear !

@@ -5,7 +5,7 @@
 @p{PSE Method}
 
 @figure
-  @img(src := Resource.img.vignette_pse.file, width:= "90%")
+  @img(src := Resource.img.thumbnail_pse.file, width:= "90%")
     @figcaption
       Figure: Input parameter values are selected to produce new output
       values, such that as the exploration progresses, the region of
