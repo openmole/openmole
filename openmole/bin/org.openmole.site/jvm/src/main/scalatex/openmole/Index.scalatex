@@ -2,8 +2,6 @@
 @import org.openmole.site.tools._
 @import org.openmole.site._
 
-
-@h1{OpenMOLE}
 @br@h2{
 A Computational Engine for Custom Simulation Experiments}
 

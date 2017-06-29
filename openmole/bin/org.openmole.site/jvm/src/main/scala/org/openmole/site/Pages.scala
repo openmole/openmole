@@ -20,6 +20,7 @@ package org.openmole.site
 
 import scalatags.Text.all._
 import com.github.rjeschke._
+import org.apache.commons.math3.genetics.GeneticAlgorithm
 
 import scalatex.{ openmole ⇒ scalatex }
 import org.openmole.tool.file._
