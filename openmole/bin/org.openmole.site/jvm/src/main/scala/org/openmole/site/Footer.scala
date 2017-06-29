@@ -34,7 +34,7 @@ object Footer {
     fontSize := "12px"
   )
 
-  def subItem(i: TypedTag[String]) = div(paddingTop := 10)(i)
+  def subItem(i: TypedTag[String]) = div(paddingTop := 15)(i)
 
   def impgSubItem(image: RenameFileResource, title: String, link: String, text: String) =
     subItem(
@@ -52,7 +52,7 @@ object Footer {
         div(classIs(collapse ++ navbar_collapse))(
           ul(classIs(nav ++ navbar_nav))(
             li(span("COMMUNITY", WHITE)(
-              div(paddingTop := 25),
+              div(paddingTop := 15),
               impgSubItem(Resource.img.github, "Source Repository", shared.link.github, "Follow the commits, submit an issue or take part to the devloppement !"),
               impgSubItem(Resource.img.email, "Mailing list", shared.link.github, "The good old way of contacting us (subscribe first)"),
               impgSubItem(Resource.img.twitter, "Twitter", shared.link.twitter, "#openmole #model #optimization #hpc #amazing"),
