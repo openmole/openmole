@@ -1,6 +1,6 @@
 package org.openmole.site
 
-import scalatags.Text.tags2
+import scalatags.Text.{ TypedTag, tags2 }
 import scalatags.Text.all._
 import org.openmole.site.tools._
 
@@ -24,8 +24,7 @@ import org.openmole.site.tools._
 object Footer {
 
   val navClass = classIs(navbar_default ++ navbar_inverse)
-  val WHITE = color := "white"
-  val BLUE = color := "#3086b5"
+  val WHITE = color := "#e6e6e6"
 
   val titleStyle = Seq(
     fontSize := "25px"
@@ -35,12 +34,16 @@ object Footer {
     fontSize := "12px"
   )
 
-  def subItem(image: RenameFileResource, title: String, link: String, text: String) =
-    div(width := 200)(
-      tools.to(link)(
-        img(src := image.file, height := 25, paddingBottom := 5)(s" $title", titleStyle)
-      ),
-      div(text, textStyle)
+  def subItem(i: TypedTag[String]) = div(paddingTop := 10)(i)
+
+  def impgSubItem(image: RenameFileResource, title: String, link: String, text: String) =
+    subItem(
+      div(width := 200)(
+        tools.to(link)(
+          img(src := image.file, height := 25, paddingBottom := 5)(s" $title", titleStyle)
+        ),
+        div(text, textStyle)
+      )
     )
 
   val build = {
@@ -49,10 +52,12 @@ object Footer {
         div(classIs(collapse ++ navbar_collapse))(
           ul(classIs(nav ++ navbar_nav))(
             li(span("COMMUNITY", WHITE)(
-              div(paddingTop := 15),
-              subItem(Resource.img.github, "Source Repository", shared.link.github, "Follow the commits, submit an issue or take part to the devloppement !")
-            ), padding := 15),
-            li(div(href := Pages.faq.file, pointer, BLUE)("FAQ"), padding := 15)
+              div(paddingTop := 25),
+              impgSubItem(Resource.img.github, "Source Repository", shared.link.github, "Follow the commits, submit an issue or take part to the devloppement !"),
+              impgSubItem(Resource.img.email, "Mailing list", shared.link.github, "The good old way of contacting us (subscribe first)"),
+              impgSubItem(Resource.img.twitter, "Twitter", shared.link.twitter, "#openmole #model #optimization #hpc #amazing"),
+              subItem(tools.to(Pages.faq.file)("FAQ"))
+            ), padding := 15)
           )
         )
       )

@@ -89,6 +89,10 @@ object Resource {
 
     val github = imgResource("github.svg")
 
+    val email = imgResource("email.svg")
+
+    val twitter = imgResource("twitter.svg")
+
     //Radars graph for methodes
     val m_complete = imgResource("methods_radars/complet.png")
 
