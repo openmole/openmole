@@ -92,4 +92,4 @@ val evolution =
     termination = 100 
   )
 )""", name = "Calibration")
-where @hl.code("distance1") and @hl.code("distance2") are outputs of the @hl.code("modelTask").
+where @hl.code("param1") and @hl.code("param2") are input of the @hl.code("modelTask"), and @hl.code("distance1") and @hl.code("distance2") are its outputs.
