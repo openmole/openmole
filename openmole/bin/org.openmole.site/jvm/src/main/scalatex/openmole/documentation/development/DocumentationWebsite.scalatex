@@ -3,7 +3,9 @@
 @import org.openmole.site._
 
 @p{Build the web site}
-    @p The source code of the website and the OpenMOLE's documentation are hosted along in the code repository. You might spot a typo/incorrect spelling/grammar mistake/bad wording or simply want to improve a part of the documentation you think is unclear.
+    @p The source code of the website and the OpenMOLE's documentation are hosted along in the code repository.
+    You might spot a typo/incorrect spelling/grammar mistake/bad wording or simply want to improve a part of the
+    documentation you think is unclear.
     If so, you're more than welcome to correct our mistakes and improve the documentation. To check your changes before sending us a Pull Request, here is how to build a local copy of the website/documentation.
 
     @hl.highlight("""

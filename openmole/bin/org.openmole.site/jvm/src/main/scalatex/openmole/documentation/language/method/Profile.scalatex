@@ -6,7 +6,7 @@
     @p The method aims at testing the validity intervals of input parameters
 
 @figure
- @img(src := Resource.vignette_profiles.file, width:= "90%")
+ @img(src := Resource.img.thumbnail_profiles.file, width:= "90%")
    @figcaption
     Calibration Profiles finds the domain of a parameter within which the model can produce dynamics
     under a given threshold of acceptance, @b{every other parameter being calibrated}.
@@ -44,9 +44,11 @@
     @li{@hl.code("inputs"): a list of the model parameters with their minimum and maximum bounds,}
     @li{@hl.code("objective"): a variable defined in the OpenMOLE script that contains the distance between the data and the model output,}
     @li{@hl.code("x"): the parameter which is being profiled (refers to the index of the parameter in the list "inputs", starting to 0),}
-    @li{@hl.code("nX"): the size of the subintervals,}
-    @li{@hl.code("reevaluate"): the probability of picking a new individual from the existing population in order to reevaluate it,}
-    @li{@hl.code("termination") criterion.}
+    @li{@hl.code("nX"): the size of the subintervals.}
+
+@p
+  You will also need an evolutionary scheme and can use SteadyStateEvolution as described in @a("Calibration", href :=
+  DocumentationPages.root.language.method.calibration.file))
 
 @p To profile a parameter, use the PSE constructor like so:
 @br @hl.openmole("""
@@ -58,13 +60,19 @@ val exploration =
         Seq(
           param1 -> (0.0, 99.0),
           param2 -> (0.0, 99.0)),
-      objective = fitness,
-      reevaluate = 0.01,
-      termination = 1000000
-    )""", name = "PSE")
+      objective = fitness)
+
+val evolution =
+  SteadyStateEvolution(
+    algorithm = exploration,
+    evaluation = modelTask,
+    parallelism = 10,
+    termination = 100 
+  )
+)""", name = "Profile")
 where @hl.code("param1") and @hl.code("param2") are inputs
 of the task that runs the model (and refer to the model parameters), 
-and @hl.code("output1") and @hl.code("output2") are outputs of that
-same task. The number of inputs and outputs are illimited. Here, @hl.code("x = 0")
+and @hl.code("fitness") is an output of that
+same task. The number of inputs are illimited. Here, @hl.code("x = 0")
 specifies that we are profiling @hl.code("param1").
 
