@@ -43,17 +43,17 @@ object Resource {
 
     val modelIO = imgResource("modelIO.png")
 
-    val vignette_profiles = imgResource("profileanimV1.svg")
+    val thumbnail_profiles = imgResource("profileanimV1.svg")
 
-    val vignette_ancestors = imgResource("ancestors.png")
+    val thumbnail_ancestors = imgResource("ancestors.png")
 
-    val vignette_calib_mono = imgResource("calibrage_mono.png")
+    val thumbnail_calib_mono = imgResource("calibrage_mono.png")
 
-    val vignette_calib_multi = imgResource("calibrage_multi.png")
+    val thumbnail_calib_multi = imgResource("calibrage_multi.png")
 
-    val vignette_sensitivity = imgResource("sensitivity.svg")
+    val thumbnail_sensitivity = imgResource("sensitivity.svg")
 
-    val vignette_pse = imgResource("pse_anim.svg")
+    val thumbnail_pse = imgResource("pse_anim.svg")
 
     val antNumbers = imgResource("antnumbers.png")
 
