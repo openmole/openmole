@@ -47,8 +47,9 @@ package object stylesheet {
   lazy val detailButtons = Seq(
     float := "left",
     fixedPosition,
-    top := 500,
-    marginLeft := -200
+    top := 550,
+    marginLeft := -300,
+    textAlign := "right"
   )
 
   lazy val navigateDoc = Seq(
