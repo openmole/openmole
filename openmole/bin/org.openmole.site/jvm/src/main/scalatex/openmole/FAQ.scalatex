@@ -62,7 +62,7 @@
     @div If you still could not solve your SSH authentication problems, another option is to recreate a public/private
       keypair using the @hl.highlight("ssh-keygen", "bash") shell command. Store it to a different file to avoid
       overwriting the one already in place. You might also want to try a simple @hl.openmole{LoginPassword}
-      authentication as explained in the @a("SSH section", href := DocumentationPages.root.language.environment.ssh.file).
+      authentication as explained in the @a("SSH section", href := DocumentationPages.ssh.file).
 
     @div Adding the @hl.highlight("-vvv", "bash") flag to your @i{ssh} command will give a lot more details on the
         communication between your client and the remote server. This will allow you to find out which authentication

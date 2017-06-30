@@ -4,7 +4,7 @@
 
 @p{Embed external applications (C, C++, Python, R, Scilab...)}
 
-  In OpenMOLE, a generic task named @hl.openmole("CARETask") offers to run external applications packaged with @a("CARE", href := Resource.script.care.file). The site (proposing an outdated version of CARE for now, but a great documentation) can be found @a("here", href := "https://proot-me.github.io/"). CARE makes it possible to package your application from any Linux computer, and then re-execute it on any other Linux computer. The CARE / OpenMOLE pair is a very efficient way to distribute your application at very large scale with very little effort. Please note that this packaging step is only necessary if you plan distribute your workflow to an heterogeneous computing environment such as the EGI grid. If you target local clusters, running the same operating system and sharing a network file system, you can directly jump to the @a("SystemExecTask", href := DocumentationPages.root.language.model.native.file + "#Usingalocalexecutable(innonportabletasks)"), section.
+  In OpenMOLE, a generic task named @hl.openmole("CARETask") offers to run external applications packaged with @a("CARE", href := Resource.script.care.file). The site (proposing an outdated version of CARE for now, but a great documentation) can be found @a("here", href := "https://proot-me.github.io/"). CARE makes it possible to package your application from any Linux computer, and then re-execute it on any other Linux computer. The CARE / OpenMOLE pair is a very efficient way to distribute your application at very large scale with very little effort. Please note that this packaging step is only necessary if you plan distribute your workflow to an heterogeneous computing environment such as the EGI grid. If you target local clusters, running the same operating system and sharing a network file system, you can directly jump to the @a("SystemExecTask", href := DocumentationPages.native.file + "#Usingalocalexecutable(innonportabletasks)"), section.
 
   @p You should first install CARE:
     @ul
@@ -24,11 +24,11 @@
 
   @p One very important aspect of CARE is that you only need to package your application @b{once}. As long as the execution you use to package your application makes uses of all the dependencies, you should not have any problem re-executing this archive with other parameters.
 
-  @p Let's study two concrete use cases that take an existing application, package it with CARE, and embed it in OpenMOLE. You should be able to achieve exactly the same process with almost any executable running on Linux. We've chosen an @a("R code", href := DocumentationPages.root.language.model.native.file + "#AnexamplewithR") and a @a("Python script", href := DocumentationPages.root.language.model.native.file + "#AnotherexamplewithaPythonscript").
+  @p Let's study two concrete use cases that take an existing application, package it with CARE, and embed it in OpenMOLE. You should be able to achieve exactly the same process with almost any executable running on Linux. We've chosen an @a("R code", href := DocumentationPages.native.file + "#AnexamplewithR") and a @a("Python script", href := DocumentationPages.native.file + "#AnotherexamplewithaPythonscript").
 
   @p{An example with R}
 
-    Our first example is an R script contained in a file @i{myscript.R}. We want to distribute the execution of this R code to the @a("EGI grid", href := DocumentationPages.root.language.environment.egi.file).
+    Our first example is an R script contained in a file @i{myscript.R}. We want to distribute the execution of this R code to the @a("EGI grid", href := DocumentationPages.egi.file).
 
     @p First your script should run in headless mode with no input required from the user during the execution. Your script should produce files or write its results to the standard output so that OpenMOLE can retrieve them from the remote execution environment.
 
@@ -87,8 +87,8 @@
   @p The @hl.openmole("CARETask") performs two actions: it first unarchives the CARE container by running @hl.highlight("r.tgz.bin", "plain"). Then the actual execution takes place as a second command. Note that for each execution of the @i("CARETask"), any command starting with @i("/") is @b{relative to the root of the CARE archive}, and @b{any other command is executed in the current directory}. The current directory @b{defaults to the original packaging directory}.
 
   @p Several notions from OpenMOLE are reused in this example. If you're not too familiar with
-  @a("Hooks", href := DocumentationPages.root.language.hook.file) or
-  @a("Samplings", href := DocumentationPages.root.language.sampling.file), check the relevant sections of the
+  @a("Hooks", href := DocumentationPages.hook.file) or
+  @a("Samplings", href := DocumentationPages.sampling.file), check the relevant sections of the
   documentation.
 
   @p{Another example with a Python script}
@@ -123,12 +123,12 @@
     val env = LocalEnvironment(4)
     exploration -< (pythonTask hook copy on env by 2)""")
 
-   @p Again notions from OpenMOLE are reused in this example. If you're not too familiar with @a("Environments", href := DocumentationPages.root.language.environment.file) or @i{Groupings}, check the relevant sections of the documentation.
+   @p Again notions from OpenMOLE are reused in this example. If you're not too familiar with @a("Environments", href := DocumentationPages.environment.file) or @i{Groupings}, check the relevant sections of the documentation.
 
    @p Two things should be noted from these examples:
      @ul
        @li{The procedure to package an application @b{is always the same} regardless of the underlying programming language / framework used.}
-       @li{The CARETask is not different from the @a("SystemExecTask", href := DocumentationPages.root.language.model.native.file + "#Usingalocalexecutable(innonportabletasks)"), to the extent of the archive given as a first parameter.}
+       @li{The CARETask is not different from the @a("SystemExecTask", href := DocumentationPages.native.file + "#Usingalocalexecutable(innonportabletasks)"), to the extent of the archive given as a first parameter.}
     These two aspects make it really easy to embed native applications in OpenMOLE.
 
   @p{Advanced options}
@@ -169,7 +169,7 @@
         hostFiles += ("/path/to/another/file", "/virtual/path")
       )""")
 
-    @p This CARE task will thus be able to access @i{/path/to/my/file} and @i{/virtual/path}.
+    @p This CARE?task will thus be able to access @i{/path/to/my/file} and @i{/virtual/path}.
 
   @p{Using a local executable (in non portable tasks)}
     @p The @i{CARETask} was designed to be portable from one machine to another. However, some use-cases require executing specific commands installed on a given cluster. To achieve that you should use another task called @i{SystemExecTask}. This task is made to launch native commands on the execution host. There is two modes for using this task:

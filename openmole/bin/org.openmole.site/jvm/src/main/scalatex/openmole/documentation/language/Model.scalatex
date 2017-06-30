@@ -5,7 +5,7 @@
     This section explains how you can embed your programs and compose them in simple OpenMOLE workflows.
 
     @p A workflow is a set of @b{tasks} linked with each other through
-    @b{@a("transitions", href := DocumentationPages.root.language.transition.file)}. From a high level point of view, tasks comprise
+    @b{@a("transitions", href := DocumentationPages.transition.file)}. From a high level point of view, tasks comprise
     @b{inputs}, @b{outputs} and @b{optional default values}. Tasks are the atomic computing element of OpenMOLE.
     They describe what OpenMOLE should execute and delegate to remote environments. They embed your own programs.
    @br Depending on what kind of program (binary executable, Java...) you want to embed in OpenMOLE you have to choose the

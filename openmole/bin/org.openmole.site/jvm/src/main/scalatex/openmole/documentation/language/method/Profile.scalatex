@@ -17,7 +17,7 @@
   dividing the interval within which i can vary into subintervals
   of equal size, and calibrating the model within each to
   minimise the distance (similarly to @a("Calibration", href :=
-  DocumentationPages.root.language.method.calibration.file)).  The
+  DocumentationPages.calibration.file)).  The
   optimisation is made over the other parameters of the model which are
   left free.
 
@@ -48,7 +48,7 @@
 
 @p
   You will also need an evolutionary scheme and can use SteadyStateEvolution as described in @a("Calibration", href :=
-  DocumentationPages.root.language.method.calibration.file))
+  DocumentationPages.calibration.file))
 
 @p To profile a parameter, use the PSE constructor like so:
 @br @hl.openmole("""

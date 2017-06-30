@@ -137,7 +137,7 @@ object Site extends App {
             div(stylesheet.mainDiv)(
               page match {
                 case doc: DocumentationPage ⇒ {
-                  if (DocumentationPages.topPagesChildren.contains(doc)) UserGuide.addCarousel(page)
+                  if (DocumentationPages.topPages.contains(doc)) UserGuide.addCarousel(page)
                   else page.content
                 }
                 case _ ⇒ page.content

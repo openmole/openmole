@@ -40,9 +40,9 @@
    @p{Available environments}
     @p Multiple environments are available to delegate your workload, check the following sections:
     @ul
-      @li{@a("Multi-thread", href := DocumentationPages.root.language.environment.multithread.file), to execute the tasks concurrently on your machine,}
-      @li{@a("SSH", href := DocumentationPages.root.language.environment.ssh.file), to execute tasks on remote server through SSH,}
-      @li{@a("Clusters", href := DocumentationPages.root.language.environment.cluster.file), to execute tasks on a cluster managed by @a("PBS/Torque", href := DocumentationPages.root.language.environment.cluster.file + "#PBS/Torque"), @a("SGE", href := DocumentationPages.root.language.environment.cluster.file + "#SGE"), @a("Slurm", href := DocumentationPages.root.language.environment.cluster.file + "#SLURM"), @a("Condor", href := DocumentationPages.root.language.environment.cluster.file + "#Condor"), or @a("OAR", href := DocumentationPages.root.language.environment.cluster.file + "#OAR").}
-      @li{@a("EGI", href := DocumentationPages.root.language.environment.egi.file), to execute tasks on the @a("EGI grid", href := "http://www.egi.eu/"),}
-      @li{@a("Ad-hoc Desktop Grid", href := DocumentationPages.root.language.environment.desktopGrid.file), to distribute your workflows on a set of desktop/laptop computers.}
+      @li{@a("Multi-thread", href := DocumentationPages.multithread.file), to execute the tasks concurrently on your machine,}
+      @li{@a("SSH", href := DocumentationPages.ssh.file), to execute tasks on remote server through SSH,}
+      @li{@a("Clusters", href := DocumentationPages.cluster.file), to execute tasks on a cluster managed by @a("PBS/Torque", href := DocumentationPages.cluster.file + "#PBS/Torque"), @a("SGE", href := DocumentationPages.cluster.file + "#SGE"), @a("Slurm", href := DocumentationPages.cluster.file + "#SLURM"), @a("Condor", href := DocumentationPages.cluster.file + "#Condor"), or @a("OAR", href := DocumentationPages.cluster.file + "#OAR").}
+      @li{@a("EGI", href := DocumentationPages.egi.file), to execute tasks on the @a("EGI grid", href := "http://www.egi.eu/"),}
+      @li{@a("Ad-hoc Desktop Grid", href := DocumentationPages.desktopGrid.file), to distribute your workflows on a set of desktop/laptop computers.}
 
