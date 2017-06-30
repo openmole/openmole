@@ -77,9 +77,9 @@ object UserGuide {
 
     new StepCarousel(
       currentStep,
-      Step(span(img(src := Resource.img.code.file, imgStyle), "Run your own MODEL"), taskTabs.render, firstModel),
-      Step(span(img(src := Resource.img.exploreMap.file, imgStyle), "Explore models with a METHOD"), methodTabs.render, firstMethod),
-      Step(span(img(src := Resource.img.scale.file, imgStyle), "Scale on an ENVIRONMENT "), envTabs.render, firstEnvironment)
+      Step(span(img(src := Resource.img.codeAnimated.file, imgStyle), "Run your own MODEL"), taskTabs.render, firstModel),
+      Step(span(img(src := Resource.img.exploreMapAnimated.file, imgStyle), "Explore models with a METHOD"), methodTabs.render, firstMethod),
+      Step(span(img(src := Resource.img.scaleAnimated.file, imgStyle), "Scale on an ENVIRONMENT "), envTabs.render, firstEnvironment)
     ).render
 
   }

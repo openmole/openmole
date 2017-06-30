@@ -85,9 +85,15 @@ object Resource {
 
     val scale = imgResource("scale.svg")
 
+    val scaleAnimated = imgResource("scaleAnimated.svg")
+
     val code = imgResource("code.svg")
 
+    val codeAnimated = imgResource("codeAnimated.svg")
+
     val exploreMap = imgResource("map.svg")
+
+    val exploreMapAnimated = imgResource("mapAnimated.svg")
 
     val github = imgResource("github.svg")
 

@@ -5,4 +5,7 @@
 @br@h2{
 A Computational Engine for Custom Simulation Experiments}
 
+OpenMOLE has been developped since 2008 as free and open-source platform to explore, diagnose your numerical model and to optimize it
+ OpenMOLE analyses your model dynamics using state-of-the art exploration methods taking advantage of distributed computing environments. The typical usages are model calibration, model exploration, machine learning, optimization, data processing.
+
 @Main.build
