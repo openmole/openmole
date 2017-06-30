@@ -22,23 +22,16 @@ import tools._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-case class Step(name: TypedTag[_ <: String], element: TypedTag[_ <: String], page: DocumentationPage)
+case class Step(name: TypedTag[_ <: String], element: TypedTag[_ <: String], page: DocumentationPage, previous: DocumentationPage, next: DocumentationPage)
 
-class StepCarousel(current: Int, steps: Step*) {
-
-  val currentStep = steps(current)
-  val stepsSize = steps.size
-
-  def toRight = steps((current + 1) % stepsSize).page
-
-  def toLeft = steps((current + stepsSize - 1) % stepsSize).page
+class StepCarousel(step: Step) {
 
   val render = {
     div(width := "100%")(
-      glyphSpan(glyph_chevron_left, previousDoc, toLeft),
-      glyphSpan(glyph_chevron_right, nextDoc, toRight),
-      div(stepHeader)(currentStep.name),
-      currentStep.page.intro.map { i ⇒
+      glyphSpan(glyph_chevron_left, previousDoc, step.previous),
+      glyphSpan(glyph_chevron_right, nextDoc, step.next),
+      div(stepHeader)(step.name),
+      step.page.intro.map { i ⇒
         div(
           div(paddingTop := 50, i.intro),
           i.more.map { more ⇒
@@ -46,7 +39,7 @@ class StepCarousel(current: Int, steps: Step*) {
           }.getOrElse(div)
         )
       }.getOrElse(div),
-      div(paddingTop := 50)(currentStep.element)
+      div(paddingTop := 50)(step.element)
     )
   }
 }
