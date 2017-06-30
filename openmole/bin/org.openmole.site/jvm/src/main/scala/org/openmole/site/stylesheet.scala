@@ -66,6 +66,7 @@ package object stylesheet {
     fontSize := "22px",
     fontWeight := "bold",
     margin := "0 auto",
+    minHeight := 85,
     width := "50%"
   )
 

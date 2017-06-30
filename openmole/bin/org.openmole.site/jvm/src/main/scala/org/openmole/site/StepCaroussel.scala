@@ -30,10 +30,13 @@ class StepCarousel(step: Step) {
     div(width := "100%")(
       glyphSpan(glyph_chevron_left, previousDoc, step.previous),
       glyphSpan(glyph_chevron_right, nextDoc, step.next),
-      div(stepHeader)(step.name),
+      div(maxHeight := 100)(
+        div(stepHeader)(step.name),
+        hr(classIs("line"), width := "80%", marginTop := 40)
+      ),
       step.page.intro.map { i ⇒
         div(
-          div(paddingTop := 50, i.intro),
+          div(paddingTop := 20, i.intro),
           i.more.map { more ⇒
             div(more.render, id := shared.moreCollapse)
           }.getOrElse(div)
