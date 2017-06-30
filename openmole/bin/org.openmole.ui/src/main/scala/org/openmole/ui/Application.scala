@@ -18,7 +18,7 @@
 package org.openmole.ui
 
 import java.awt.Desktop
-import java.io.{ File, FileOutputStream }
+import java.io.{ File, FileOutputStream, IOException }
 import java.net.URI
 
 import org.openmole.console.Console.ExitCodes
@@ -286,9 +286,17 @@ object Application extends Logger {
 
         val results = Test.withTmpServices { implicit services ⇒
           files.flatMap(toFile).map { file ⇒
+
+            def processResult(c: CompileResult) =
+              c match {
+                case s: ScriptFileDoesNotExists ⇒ util.Failure(new IOException("File doesn't exists"))
+                case s: CompilationError        ⇒ util.Failure(s.error)
+                case s: Compiled                ⇒ util.Success("Compilation succeded")
+              }
+
             val project = new Project(file.getParentFileSafe)
             println(s"Testing: ${file.getName}")
-            val res = file → project.compile(file, args)
+            val res = file → processResult(project.compile(file, args))
             print("\33[1A\33[2K")
             println(s"${res._1.getName}: ${res._2}")
             res
@@ -297,8 +305,8 @@ object Application extends Logger {
 
         val errors =
           results.filter {
-            case (_, Compiled(_)) ⇒ false
-            case _                ⇒ true
+            case (_, util.Success(_)) ⇒ false
+            case _                    ⇒ true
           }
 
         if (errors.isEmpty) Console.ExitCodes.ok
