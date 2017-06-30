@@ -40,7 +40,9 @@ object Pages {
 
   def faq = Page("faq", scalatex.FAQ(), title = Some("FAQ"))
 
-  def all: Seq[Page] = DocumentationPages.allPages ++ Seq(index, gettingStarted, whoAreWe, faq, communications)
+  def previousVersions = Page("previous_versions", scalatex.PreviousVersions(), title = Some("Previous versions"))
+
+  def all: Seq[Page] = DocumentationPages.allPages ++ Seq(index, gettingStarted, whoAreWe, faq, communications, previousVersions)
 
   def file(page: Page) = page.location.mkString("_") + ".html"
 
