@@ -39,6 +39,8 @@ object Resource {
 
   object img {
 
+    val openmole = imgResource("openmole.png")
+
     val ants = imgResource("ants.png")
 
     val modelIO = imgResource("modelIO.png")

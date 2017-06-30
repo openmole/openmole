@@ -33,7 +33,7 @@ object Menu {
         div(classIs(navbar_header))(
           div(classIs(navbar_brand), href := "#", padding := 0),
           to(Pages.index)(
-            img(alt := "", src := "img/openmole.png", Seq(width := 240, pointer))
+            img(alt := "", src := Resource.img.openmole.file, Seq(width := 240, paddingTop := 5, pointer))
           )
         ),
         div(classIs(collapse ++ navbar_collapse), paddingTop := 10)(

@@ -22,7 +22,7 @@ import tools._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-case class Step(name: String, element: TypedTag[_ <: String], page: DocumentationPage)
+case class Step(name: TypedTag[_ <: String], element: TypedTag[_ <: String], page: DocumentationPage)
 
 class StepCarousel(current: Int, steps: Step*) {
 

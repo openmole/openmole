@@ -58,6 +58,10 @@ object UserGuide {
   val firstMethod = DocumentationPages.calibration
   val firstEnvironment = DocumentationPages.multithread
 
+  lazy val imgStyle = Seq(
+    width := 100,
+    paddingRight := 15
+  )
   def addCarousel(current: Page) = {
 
     val methodTabs = buildTabs(DocumentationPages.methodPages, current)
@@ -73,9 +77,9 @@ object UserGuide {
 
     new StepCarousel(
       currentStep,
-      Step("1. MODEL", taskTabs.render, firstModel),
-      Step("2. METHOD", methodTabs.render, firstMethod),
-      Step("3. ENVIRONMENT ", envTabs.render, firstEnvironment)
+      Step(span(img(src := Resource.img.code.file, imgStyle), "Run your own MODEL"), taskTabs.render, firstModel),
+      Step(span(img(src := Resource.img.exploreMap.file, imgStyle), "Explore models with a METHOD"), methodTabs.render, firstMethod),
+      Step(span(img(src := Resource.img.scale.file, imgStyle), "Scale on an ENVIRONMENT "), envTabs.render, firstEnvironment)
     ).render
 
   }
