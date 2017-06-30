@@ -27,22 +27,25 @@ object Footer {
   val WHITE = color := "#e6e6e6"
 
   val titleStyle = Seq(
-    fontSize := "25px"
+    fontSize := "15px",
+    marginLeft := 10
   )
 
-  val textStyle = Seq(
-    fontSize := "12px"
+  val liStyle = Seq(
+    paddingLeft := 50,
+    paddingBottom := 25,
+    paddingTop := 25
   )
 
   def subItem(i: TypedTag[String]) = div(paddingTop := 15)(i)
 
-  def impgSubItem(image: RenameFileResource, title: String, link: String, text: String) =
+  def imgSubItem(image: RenameFileResource, title: String, link: String, text: String = "", otherTab: Boolean = true) =
     subItem(
       div(width := 200)(
-        tools.to(link)(
-          img(src := image.file, height := 25, paddingBottom := 5)(s" $title", titleStyle)
+        tools.to(link, otherTab)(
+          img(src := image.file, height := 25, paddingBottom := 5)(span(s"$title", titleStyle))
         ),
-        div(text, textStyle)
+        div(text, fontSize := "12px")
       )
     )
 
@@ -53,11 +56,17 @@ object Footer {
           ul(classIs(nav ++ navbar_nav))(
             li(span("COMMUNITY", WHITE)(
               div(paddingTop := 15),
-              impgSubItem(Resource.img.github, "Source Repository", shared.link.github, "Follow the commits, submit an issue or take part to the devloppement !"),
-              impgSubItem(Resource.img.email, "Mailing list", shared.link.github, "The good old way of contacting us (subscribe first)"),
-              impgSubItem(Resource.img.twitter, "Twitter", shared.link.twitter, "#openmole #model #optimization #hpc #amazing"),
-              subItem(tools.to(Pages.faq.file)("FAQ"))
-            ), padding := 15)
+              imgSubItem(Resource.img.github, "Source Repository", shared.link.github, "Follow the commits, submit an issue or take part to the devloppement !"),
+              imgSubItem(Resource.img.previousVersion, "Previous versions", Pages.previousVersions.file, "Downloads and change logs of previous versions", false),
+              imgSubItem(Resource.img.email, "Mailing list", shared.link.mailingList, "The good old way of contacting us (subscribe first)"),
+              imgSubItem(Resource.img.faq, "FAQ", Pages.faq.file, "Any questions you may have", false)
+            ), liStyle),
+            li(span("ABOUT US", WHITE)(
+              div(paddingTop := 15),
+              imgSubItem(Resource.img.paper, "Publications", Pages.communications.file, "Papers referencing OpenMOLE. How to cite us.", true),
+              imgSubItem(Resource.img.twitter, "Twitter", shared.link.twitter, "#openmole #model #optimization #hpc #amazing"),
+              imgSubItem(Resource.img.mole, "Who are we ?", Pages.whoAreWe.file, "Developpment team, partners", false)
+            ), liStyle)
           )
         )
       )

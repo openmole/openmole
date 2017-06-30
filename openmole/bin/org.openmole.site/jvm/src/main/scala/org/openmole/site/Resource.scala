@@ -93,6 +93,13 @@ object Resource {
 
     val twitter = imgResource("twitter.svg")
 
+    val faq = imgResource("faq.svg")
+
+    val previousVersion = imgResource("previousVersion.svg")
+
+    val paper = imgResource("paper.svg")
+
+    val mole = imgResource("mole.svg")
     //Radars graph for methodes
     val m_complete = imgResource("methods_radars/complet.png")
 

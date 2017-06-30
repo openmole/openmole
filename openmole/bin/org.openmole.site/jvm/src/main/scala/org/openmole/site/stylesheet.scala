@@ -41,7 +41,7 @@ package object stylesheet {
 
   lazy val mainDiv = Seq(
     paddingTop := 150,
-    paddingBottom := 350
+    paddingBottom := 450
   ) ++ center
 
   lazy val detailButtons = Seq(
