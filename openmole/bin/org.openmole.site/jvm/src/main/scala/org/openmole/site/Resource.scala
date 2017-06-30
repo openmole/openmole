@@ -89,6 +89,17 @@ object Resource {
 
     val github = imgResource("github.svg")
 
+    val email = imgResource("email.svg")
+
+    val twitter = imgResource("twitter.svg")
+
+    val faq = imgResource("faq.svg")
+
+    val previousVersion = imgResource("previousVersion.svg")
+
+    val paper = imgResource("paper.svg")
+
+    val mole = imgResource("mole.svg")
     //Radars graph for methodes
     val m_complete = imgResource("methods_radars/complet.png")
 
@@ -146,7 +157,7 @@ object Resource {
 
   val openmoleDaemon = RenameFileResource("openmole-daemon.tar.gz", s"openmole-daemon-${buildinfoVersion}.tar.gz")
 
-  val api = ArchiveResource("openmole-api.tar.gz", "api")
+  val api = fileResource("api")
 
   //  val marketResources(entries: Seq[GeneratedMarketEntry]) =
   //    entries.filter(_.tags.exists(_ == Market.Tags.tutorial)).map { tuto ⇒ MarketResource(tuto) }

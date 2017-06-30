@@ -23,7 +23,6 @@ import scalatags.Text.all._
 import scalatags.Text.TypedTag
 
 case class Tab(title: String, content: TypedTag[_ <: String], active: Boolean, topage: Page) {
-
   def activeClass = if (active) (classIs("active"), classIs("active in")) else (classIs(""), classIs(""))
 }
 

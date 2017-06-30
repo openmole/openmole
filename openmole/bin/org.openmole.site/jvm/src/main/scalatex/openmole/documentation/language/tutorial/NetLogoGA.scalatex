@@ -41,7 +41,7 @@
   OpenMOLE.
 @br
     For more generic details regarding the exploitation of Genetic Algorithms using OpenMOLE, you can check the
-    @a("GA section of the methods documentation", href := DocumentationPages.root.language.method.file + "#Geneticalgorithms")
+    @a("GA section of the methods documentation", href := DocumentationPages.method.file + "#Geneticalgorithms")
 
 @h3
     The ant model
@@ -58,7 +58,7 @@
     @p A visual representation of this model looks like that:
     @br @img(src := Resource.img.ants.file)
 
-    @p In this tutorial we use @a("a headless version", href := DocumentationPages.root.tutorial.headlessNetLogo.file) of the
+    @p In this tutorial we use @a("a headless version", href := DocumentationPages.headlessNetLogo.file) of the
     model. This modified version is available @a("here", href := Resource.script.antsNLogo.file).
 
 @h3
@@ -111,7 +111,7 @@
     When building a calibration or optimisation workflow, the first step is to make the model run in
     OpenMOLE. This script simply embeds the NetLogo model and runs one single execution of the model with arbitrary
     parameters. More details about the NetLogo5 task used in this script can be found in
-    @a("this section of the documentation", href := DocumentationPages.root.language.model.netLogo.file).
+    @a("this section of the documentation", href := DocumentationPages.netLogo.file).
 
     @hl.openmole(s"""
     $model

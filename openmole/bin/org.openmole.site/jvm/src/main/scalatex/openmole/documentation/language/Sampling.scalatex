@@ -236,14 +236,14 @@
 
     @p As its name suggests, the @hl.code("files") selector manipulates @i{File} instances and directly injects
       them in the dataflow. If you plan to delegate your workflow to a
-      @a("local cluster environment", href := DocumentationPages.root.language.environment.cluster.file ) equipped with
+      @a("local cluster environment", href := DocumentationPages.cluster.file ) equipped with
       a shared file system across all nodes, you don't
       need data to be automatically copied by OpenMOLE. In this case, you might prefer the @hl.code("paths")
       selector instead. @hl.code("paths") works exactly like @hl.code("files") and accepts the very
       same options. The only difference between the two selectors is that @hl.code("paths") will inject @i{Path}
       variables in the dataflow. @i{Path} describes a file's location but not its content. The explored files
       @b{won't be automatically copied} by OpenMOLE in this case, so this does not fit a
-      @a("grid environment", href := DocumentationPages.root.language.environment.egi.file) for instance.
+      @a("grid environment", href := DocumentationPages.egi.file) for instance.
 
     @p More details on the difference between manipulating @i{Files} and @i{Paths} can be found in the
     @a("dedicated entry of the FAQ", href := Pages.faq.file).
@@ -260,7 +260,7 @@
       )""", name = "select file sampling")
 
     @p Files can also be injected in the dataflow through
-    @a("Sources", href := DocumentationPages.root.language.source.file). They provide more powerful file filtering
+    @a("Sources", href := DocumentationPages.source.file). They provide more powerful file filtering
       possibilities using regular expressions and can also target directories only.
 
     @p{CSV files Sampling}
