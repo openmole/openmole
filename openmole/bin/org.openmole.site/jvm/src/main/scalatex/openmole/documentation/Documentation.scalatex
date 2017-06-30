@@ -19,11 +19,11 @@
     To specify your workflow in OpenMOLE you will use a high-level workflow language. To get started with OpenMOLE, you
    might want to first have a look at the @a("getting started tutorial", href := Pages.gettingStarted.file) and at
     @a("the OpenMOLE market place", href := "https://github.com/openmole/openmole-market") containing workflow examples,
-    check how to handle the @a("OpenMOLE application", href := DocumentationPages.root.application.file) and go through
-    the concept in OpenMOLE: @a("Tasks", href := DocumentationPages.root.language.model.file),
-     @a("Transitions", href := DocumentationPages.root.language.transition.file),
-     @a("Environments", href := DocumentationPages.root.language.environment.file),
-     Workflow, @a("Hooks", href := DocumentationPages.root.language.hook.file)...
+    check how to handle the @a("OpenMOLE application", href := DocumentationPages.application.file) and go through
+    the concept in OpenMOLE: @a("Tasks", href := DocumentationPages.model.file),
+     @a("Transitions", href := DocumentationPages.transition.file),
+     @a("Environments", href := DocumentationPages.environment.file),
+     Workflow, @a("Hooks", href := DocumentationPages.hook.file)...
 
 @p
 
@@ -36,15 +36,15 @@
 @h1
     Contents of the Documentation
 
-    @a("Transitions", href := DocumentationPages.root.language.transition.file),
+    @a("Transitions", href := DocumentationPages.transition.file),
 
 
 @h2
     OpenMOLE Concepts
 
-    @a("1.Model", href := DocumentationPages.root.language.model.file),
-    @a("2.Method", href := DocumentationPages.root.language.method.file),
-    @a("3.Environment", href := DocumentationPages.root.language.environment.file),
+    @a("1.Model", href := DocumentationPages.model.file),
+    @a("2.Method", href := DocumentationPages.method.file),
+    @a("3.Environment", href := DocumentationPages.environment.file),
 
 
 @h3
@@ -57,7 +57,7 @@
 @h2
     Technical Documentation
 
-    @a("Transitions", href := DocumentationPages.root.language.transition.file),
+    @a("Transitions", href := DocumentationPages.transition.file),
 
 
 

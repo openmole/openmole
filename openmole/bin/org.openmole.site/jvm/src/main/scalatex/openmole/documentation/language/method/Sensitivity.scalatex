@@ -53,8 +53,8 @@ val exploration = ExplorationTask(
 
 
 If your input is one file among many,  or  a line among a CSV file, use the
-@a("CSVSampling task", href := DocumentationPages.root.language.sampling.file)
-and @a("FileSampling task", href := DocumentationPages.root.language.sampling.file)
+@a("CSVSampling task", href := DocumentationPages.sampling.file)
+and @a("FileSampling task", href := DocumentationPages.sampling.file)
 
 @br
 @br
