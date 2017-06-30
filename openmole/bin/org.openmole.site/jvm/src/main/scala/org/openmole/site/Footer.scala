@@ -38,7 +38,7 @@ object Footer {
 
   def subItem(i: TypedTag[String]) = div(paddingTop := 15)(i)
 
-  def imgSubItem(image: RenameFileResource, title: String, link: String, text: String = "", otherTab: Boolean = true) =
+  def imgSubItem(image: FileResource, title: String, link: String, text: String = "", otherTab: Boolean = true) =
     subItem(
       div(width := 200)(
         tools.to(link, otherTab)(
