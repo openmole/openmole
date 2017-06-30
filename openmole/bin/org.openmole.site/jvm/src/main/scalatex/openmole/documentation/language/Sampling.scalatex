@@ -341,7 +341,7 @@
         (i in (0 until 10)) x
         (j is "i * 2") x
         (k in Range[Int]("j", "j + 7"))
-      )""", "is keyword sampling")
+      )""", name = "is keyword sampling")
 
 
 
