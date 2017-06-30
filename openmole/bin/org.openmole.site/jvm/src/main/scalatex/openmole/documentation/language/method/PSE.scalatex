@@ -37,7 +37,7 @@
 
 @p
   You will also need an evolutionary scheme and can use SteadyStateEvolution as described in @a("Calibration", href :=
-  DocumentationPages.root.language.method.calibration.file))
+  DocumentationPages.calibration.file))
 
 @p To use PSE as the exploration method in openmole, use the PSE constructor like so:
 @br @hl.openmole("""

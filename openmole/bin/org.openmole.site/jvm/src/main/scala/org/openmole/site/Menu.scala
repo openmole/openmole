@@ -38,7 +38,7 @@ object Menu {
         ),
         div(classIs(collapse ++ navbar_collapse), paddingTop := 10)(
           ul(classIs(nav ++ navbar_nav ++ navbar_right))(
-            li(innerLink(DocumentationPages.root.language.model.scala, "DOCUMENTATION"), liStyle),
+            li(innerLink(DocumentationPages.scala, "DOCUMENTATION"), liStyle),
             li(inputStyle)(div(id := shared.searchDiv)),
             li(linkButton("DEMO", shared.link.demo, classIs(btn ++ btn_primary)))
           )

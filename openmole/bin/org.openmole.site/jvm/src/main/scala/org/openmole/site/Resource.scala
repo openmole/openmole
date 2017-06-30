@@ -157,7 +157,7 @@ object Resource {
 
   val openmoleDaemon = RenameFileResource("openmole-daemon.tar.gz", s"openmole-daemon-${buildinfoVersion}.tar.gz")
 
-  val api = ArchiveResource("openmole-api.tar.gz", "api")
+  val api = fileResource("api")
 
   //  val marketResources(entries: Seq[GeneratedMarketEntry]) =
   //    entries.filter(_.tags.exists(_ == Market.Tags.tutorial)).map { tuto ⇒ MarketResource(tuto) }

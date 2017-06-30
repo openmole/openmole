@@ -97,7 +97,7 @@ object Market {
       projectDirectory archiveCompress archive
 
       GeneratedMarketEntry(
-        s"$destination/$fileName",
+        fileName,
         project,
         projectDirectory,
         marketRepository.repository.viewURL(project.directory, branchName)

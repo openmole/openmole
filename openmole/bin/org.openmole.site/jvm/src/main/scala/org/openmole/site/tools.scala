@@ -66,7 +66,7 @@ package object tools {
   // SCALATAGS METHODS
   def classIs(s: String): AttrPair = `class` := s
 
-  def to(page: Page): TypedTag[String] = to(page.file, false)
+  def to(page: Page): TypedTag[String] = to(Pages.file(page), false)
 
   def to(link: String, otherTab: Boolean = true): TypedTag[String] = a(href := link)(if (otherTab) targetBlank else "")
 
