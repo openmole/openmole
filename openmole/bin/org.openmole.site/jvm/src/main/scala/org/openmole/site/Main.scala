@@ -26,7 +26,7 @@ object Main {
   private def readMore(page: Page) = pageLinkButton("Read more", page, false, Seq(classIs(btn ++ btn_default), marginTop := 20))
 
   def build = {
-    div(classIs(row), paddingTop := 200)(
+    div(classIs(row), paddingTop := 100)(
       div(classIs(colMD(4)))(
         div(centerBox)(
           img(src := Resource.img.code.file, width := 100),

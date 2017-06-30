@@ -33,14 +33,15 @@ object Menu {
         div(classIs(navbar_header))(
           div(classIs(navbar_brand), href := "#", padding := 0),
           to(Pages.index)(
-            img(alt := "", src := "img/openmole.png", Seq(width := 240, pointer))
+            img(alt := "", src := Resource.img.openmole.file, Seq(width := 240, paddingTop := 5, pointer))
           )
         ),
         div(classIs(collapse ++ navbar_collapse), paddingTop := 10)(
           ul(classIs(nav ++ navbar_nav ++ navbar_right))(
             li(innerLink(DocumentationPages.scala, "DOCUMENTATION"), liStyle),
             li(inputStyle)(div(id := shared.searchDiv)),
-            li(linkButton("DEMO", shared.link.demo, classIs(btn ++ btn_primary)))
+            li(linkButton("TEST", shared.link.demo, classIs(btn ++ btn_default))),
+            li(linkButton("ADOPT", Resource.script.openmole.file, classIs(btn ++ btn_mole))(marginLeft := -15))
           )
         )
       )

@@ -39,6 +39,8 @@ object Resource {
 
   object img {
 
+    val openmole = imgResource("openmole.png")
+
     val ants = imgResource("ants.png")
 
     val modelIO = imgResource("modelIO.png")
@@ -83,9 +85,15 @@ object Resource {
 
     val scale = imgResource("scale.svg")
 
+    val scaleAnimated = imgResource("scaleAnimated.svg")
+
     val code = imgResource("code.svg")
 
+    val codeAnimated = imgResource("codeAnimated.svg")
+
     val exploreMap = imgResource("map.svg")
+
+    val exploreMapAnimated = imgResource("mapAnimated.svg")
 
     val github = imgResource("github.svg")
 
@@ -99,7 +107,9 @@ object Resource {
 
     val paper = imgResource("paper.svg")
 
-    val mole = imgResource("mole.svg")
+    val whoarwe = imgResource("mole.svg")
+
+    val mole = imgResource("openmole.svg")
     //Radars graph for methodes
     val m_complete = imgResource("methods_radars/complet.png")
 
@@ -127,6 +137,10 @@ object Resource {
 
     val care = scriptResource("care")
 
+    val openmole = RenameFileResource("openmole.tar.gz", s"openmole-${buildinfoVersion}.tar.gz")
+
+    val openmoleDaemon = RenameFileResource("openmole-daemon.tar.gz", s"openmole-daemon-${buildinfoVersion}.tar.gz")
+
   }
 
   object css {
@@ -152,10 +166,6 @@ object Resource {
     val index = jsResource("index.js")
 
   }
-
-  val openmole = RenameFileResource("openmole.tar.gz", s"openmole-${buildinfoVersion}.tar.gz")
-
-  val openmoleDaemon = RenameFileResource("openmole-daemon.tar.gz", s"openmole-daemon-${buildinfoVersion}.tar.gz")
 
   val api = fileResource("api")
 

@@ -34,15 +34,15 @@ package object stylesheet {
   //
   //  lazy val FUN_GREY = "#cccccc"
 
-  lazy val center = Seq(
-    width := "50%",
+  def center(percentage: Int) = Seq(
+    width := s"$percentage%",
     margin := "0 auto"
   )
 
   lazy val mainDiv = Seq(
     paddingTop := 150,
     paddingBottom := 450
-  ) ++ center
+  ) ++ center(50)
 
   lazy val detailButtons = Seq(
     float := "left",
@@ -66,6 +66,7 @@ package object stylesheet {
     fontSize := "22px",
     fontWeight := "bold",
     margin := "0 auto",
+    minHeight := 85,
     width := "50%"
   )
 
@@ -91,7 +92,7 @@ package object stylesheet {
   lazy val centerBox = Seq(
     textAlign := "center",
     width := "60%"
-  ) ++ center
+  ) ++ center(50)
 
   lazy val footer = Seq(
     position := "absolute",

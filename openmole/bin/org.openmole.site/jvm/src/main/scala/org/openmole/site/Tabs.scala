@@ -43,7 +43,7 @@ case class Tabs(tabs: Seq[Tab] = Seq()) {
     }
 
     div(
-      ul(classIs(nav ++ nav_pills), role_tablist)(
+      ul(classIs(nav ++ nav_pills), role_tablist, stylesheet.center(75))(
         theTabs.map { t ⇒
           li(role_presentation, t.activeClass._1)(
             tools.to(t.topage)(t.title)

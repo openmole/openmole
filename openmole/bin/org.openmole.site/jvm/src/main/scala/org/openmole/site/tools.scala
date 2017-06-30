@@ -107,6 +107,7 @@ package object tools {
   lazy val btn_default: String = "btn-default"
   lazy val btn_primary: String = "btn-primary"
   lazy val btn_danger: String = "btn-danger"
+  lazy val btn_mole: String = "btn-mole"
 
   lazy val glyph_chevron_left: String = "glyphicon glyphicon-chevron-left"
   lazy val glyph_chevron_right: String = "glyphicon glyphicon-chevron-right"

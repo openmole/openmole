@@ -23,11 +23,6 @@ import scalatags.Text.all._
 
 object UserGuide {
 
-  //  def father(page: Page) =
-  //    Pages.all.collect { case doc: DocumentationPage ⇒ doc }.filter {
-  //      _.children.contains(page)
-  //    }.headOption
-
   private def buildTabs(docPages: Seq[DocumentationPage], current: Page) = {
     val tabs = Tabs()
 
@@ -58,24 +53,23 @@ object UserGuide {
   val firstMethod = DocumentationPages.calibration
   val firstEnvironment = DocumentationPages.multithread
 
+  lazy val imgStyle = Seq(
+    width := 100,
+    paddingRight := 15
+  )
+
   def addCarousel(current: Page) = {
 
-    val methodTabs = buildTabs(DocumentationPages.methodPages, current)
-    val envTabs = buildTabs(DocumentationPages.environmentPages, current)
-    val taskTabs = buildTabs(DocumentationPages.modelPages, current)
-
     val currentStep = {
-      if (DocumentationPages.modelPages.contains(current)) 0
-      else if (DocumentationPages.methodPages.contains(current)) 1
-      else if (DocumentationPages.environmentPages.contains(current)) 2
-      else 0
+      if (DocumentationPages.modelPages.contains(current))
+        Step(span(img(src := Resource.img.codeAnimated.file, imgStyle), "Run your own MODEL"), buildTabs(DocumentationPages.modelPages, current).render, firstModel, firstEnvironment, firstMethod)
+      else if (DocumentationPages.methodPages.contains(current))
+        Step(span(img(src := Resource.img.exploreMapAnimated.file, imgStyle), "Explore models with a METHOD"), buildTabs(DocumentationPages.methodPages, current).render, firstMethod, firstModel, firstEnvironment)
+      else Step(span(img(src := Resource.img.scaleAnimated.file, imgStyle), "Scale on an ENVIRONMENT "), buildTabs(DocumentationPages.environmentPages, current).render, firstEnvironment, firstMethod, firstModel)
     }
 
     new StepCarousel(
-      currentStep,
-      Step("1. MODEL", taskTabs.render, firstModel),
-      Step("2. METHOD", methodTabs.render, firstMethod),
-      Step("3. ENVIRONMENT ", envTabs.render, firstEnvironment)
+      currentStep
     ).render
 
   }

@@ -26,7 +26,7 @@ $tasks
 
 
   @div(`class` := "text-center")(
-      a(`class` := "btn btn-default btn-sm", id := "download-button", href := openmole.file)(s"Download OpenMOLE FIXMEVERSION"),
+      a(`class` := "btn btn-default btn-sm", id := "download-button", href := script.openmole.file)(s"Download OpenMOLE FIXMEVERSION"),
       br,
       hr(style := "width:200px; height:1px;"),
       i(s"${name} (version FIXMEVERSION) was released on FIXM:VERSION DATE.")
