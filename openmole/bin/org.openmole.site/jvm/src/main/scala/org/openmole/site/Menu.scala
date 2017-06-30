@@ -41,7 +41,7 @@ object Menu {
             li(innerLink(DocumentationPages.scala, "DOCUMENTATION"), liStyle),
             li(inputStyle)(div(id := shared.searchDiv)),
             li(linkButton("TEST", shared.link.demo, classIs(btn ++ btn_default))),
-            li(linkButton("ADOPT", shared.link.currentDownload, classIs(btn ++ btn_mole))(marginLeft := -15))
+            li(linkButton("ADOPT", Resource.script.openmole.file, classIs(btn ++ btn_mole))(marginLeft := -15))
           )
         )
       )
