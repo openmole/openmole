@@ -294,7 +294,7 @@ object Application extends Logger {
                 case s: Compiled                ⇒ util.Success("Compilation succeded")
               }
 
-            val project = new Project(file.getParentFileSafe)
+            val project = Project(file.getParentFileSafe)
             println(s"Testing: ${file.getName}")
             val res = file → processResult(project.compile(file, args))
             print("\33[1A\33[2K")
