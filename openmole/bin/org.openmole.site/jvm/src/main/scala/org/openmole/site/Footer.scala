@@ -50,7 +50,7 @@ object Footer {
 
   val build = {
     tags2.nav(classIs(navbar_default ++ navbar_inverse), stylesheet.footer)(
-      div(classIs(container_fluid), stylesheet.center)(
+      div(classIs(container_fluid), stylesheet.center(50))(
         div(classIs(collapse ++ navbar_collapse))(
           ul(classIs(nav ++ navbar_nav))(
             li(span("COMMUNITY", WHITE)(
