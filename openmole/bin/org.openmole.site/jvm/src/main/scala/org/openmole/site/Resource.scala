@@ -24,9 +24,6 @@ package org.openmole.site
 //TODO automatically generate this object as a managed source using sbt
 object Resource {
 
-  //FIXME
-  val buildinfoVersion = "7.0-SNAPSHOT"
-
   def imgResource(name: String) = fileResource(s"img/$name")
 
   def jsResource(name: String) = fileResource(s"js/$name")
@@ -35,7 +32,7 @@ object Resource {
 
   def scriptResource(name: String) = fileResource(s"script/$name")
 
-  def fileResource(name: String) = RenameFileResource(name, name)
+  def fileResource(name: String) = FileResource(name)
 
   object img {
 
@@ -137,9 +134,9 @@ object Resource {
 
     val care = scriptResource("care")
 
-    val openmole = RenameFileResource("openmole.tar.gz", s"openmole-${buildinfoVersion}.tar.gz")
+    val openmole = fileResource("openmole.tar.gz")
 
-    val openmoleDaemon = RenameFileResource("openmole-daemon.tar.gz", s"openmole-daemon-${buildinfoVersion}.tar.gz")
+    val openmoleDaemon = fileResource("daemon.tar.gz")
 
   }
 
@@ -174,6 +171,6 @@ object Resource {
 }
 
 sealed trait Resource
-case class RenameFileResource(source: String, file: String) extends Resource
-case class ArchiveResource(source: String, file: String) extends Resource
+case class FileResource(file: String) extends Resource
+//case class ArchiveResource(source: String, file: String) extends Resource
 //case class MarketResource(marketEntry: GeneratedMarketEntry) extends Resource
