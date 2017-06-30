@@ -65,12 +65,14 @@ and @a("FileSampling task", href := DocumentationPages.sampling.file)
   Exploration can be performed on several inputs domains, using the @b{cartesian product} operator @b{x}.
 The basic syntax to explore 2 inputs (i.e. every combination of 2 inputs values) is
    @hl.openmole("""
+   val i = Val[Int]
+   val j = Val[Double]
 
-    val exploration =
-        ExplorationTask (
-          (i in (0 to 10 by 2)) x
-          (j in (0.0 to 5.0 by 0.5)) )
-      """, name = "cartesian product for sensitivity")
+   val exploration =
+     ExplorationTask (
+       (i in (0 to 10 by 2)) x
+       (j in (0.0 to 5.0 by 0.5))
+     )""", name = "cartesian product for sensitivity")
 
 
 @h3{Different Types of inputs}
@@ -78,6 +80,12 @@ The basic syntax to explore 2 inputs (i.e. every combination of 2 inputs values)
 
 The cartesian product operator can handle different data types :
  @hl.openmole("""
+   val i = Val[Int]
+   val j = Val[Double]
+   val k = Val[String]
+   val l = Val[Long]
+   val m = Val[File]
+
    val exploration =
      ExplorationTask (
        (i in (0 to 10 by 2)) x
@@ -131,7 +139,6 @@ Files are explored as items of a list.
 
 
 @hl.openmole("""
-
 val i = Val[Double]
 val j = Val[Double]
 
