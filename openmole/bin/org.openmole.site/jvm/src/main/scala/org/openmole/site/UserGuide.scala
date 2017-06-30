@@ -23,17 +23,17 @@ import scalatags.Text.all._
 
 object UserGuide {
 
-  def father(page: Page) =
-    Pages.all.collect { case doc: DocumentationPage ⇒ doc }.filter {
-      _.children.contains(page)
-    }.headOption
+  //  def father(page: Page) =
+  //    Pages.all.collect { case doc: DocumentationPage ⇒ doc }.filter {
+  //      _.children.contains(page)
+  //    }.headOption
 
   private def buildTabs(docPages: Seq[DocumentationPage], current: Page) = {
     val tabs = Tabs()
 
     docPages.foldLeft(tabs)((tabs, p) ⇒ {
 
-      val isCurrent = p.title == current.title
+      val isCurrent = p.location == current.location
 
       val withDetails = div(
         div(detailButtons)(
@@ -44,9 +44,7 @@ object UserGuide {
           }
         ),
         div(paddingTop := 20)(
-          if (isCurrent) {
-            div(p.content)
-          }
+          if (isCurrent) div(p.content)
           else div()
         )
       )
@@ -56,25 +54,21 @@ object UserGuide {
     })
   }
 
-  val firstModel = DocumentationPages.root.language.model.scala
-  val firstMethod = DocumentationPages.root.language.method.profile
-  val firstEnvironment = DocumentationPages.root.language.environment.ssh
+  val firstModel = DocumentationPages.scala
+  val firstMethod = DocumentationPages.calibration
+  val firstEnvironment = DocumentationPages.multithread
 
   def addCarousel(current: Page) = {
 
-    val methodTabs = buildTabs(DocumentationPages.root.language.method.children, current)
-    val envTabs = buildTabs(DocumentationPages.root.language.environment.children, current)
-    val taskTabs = buildTabs(DocumentationPages.root.language.model.children, current)
+    val methodTabs = buildTabs(DocumentationPages.methodPages, current)
+    val envTabs = buildTabs(DocumentationPages.environmentPages, current)
+    val taskTabs = buildTabs(DocumentationPages.modelPages, current)
 
-    val parent = father(current)
     val currentStep = {
-      parent match {
-        case Some(dp: DocumentationPage) ⇒
-          if (dp == DocumentationPages.root.language.model) 0
-          else if (dp == DocumentationPages.root.language.method) 1
-          else 2
-        case _ ⇒ 0
-      }
+      if (DocumentationPages.modelPages.contains(current)) 0
+      else if (DocumentationPages.methodPages.contains(current)) 1
+      else if (DocumentationPages.environmentPages.contains(current)) 2
+      else 0
     }
 
     new StepCarousel(

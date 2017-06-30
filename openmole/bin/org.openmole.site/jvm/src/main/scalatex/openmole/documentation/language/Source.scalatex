@@ -11,7 +11,7 @@
   OpenMOLE development team.
 
   @p{Plug a source}
-    Sources are plugged in the data flow in a similar fashion to @a("hooks", href := DocumentationPages.root.language.hook.file ). Let's
+    Sources are plugged in the data flow in a similar fashion to @a("hooks", href := DocumentationPages.hook.file ). Let's
     consider this simple workflow:
     @br @hl.openmole("""
     val files = Val[Array[File]]
@@ -67,12 +67,12 @@
 
     @p Sources store each entry found in an Array. In most cases, you will want each of the entries to feed a different
     task. Let's now see how this can be done by reusing what we've discovered with
-    @a("samplings", href := DocumentationPages.root.language.sampling.file + "#Exploringfiles").
+    @a("samplings", href := DocumentationPages.sampling.file + "#Exploringfiles").
 
   @p{A complete example: exploring directories in a workflow}
 
     Here, we are collecting all the directories which named "care_archive". See how they are gathered in an
-    @i{Array[File]} container and can be explored by an @a("ExplorationTask", href := DocumentationPages.root.language.sampling.file) using
+    @i{Array[File]} container and can be explored by an @a("ExplorationTask", href := DocumentationPages.sampling.file) using
     the keyword @hl.openmoleNoTest("in"). This exploration generates one @i{analysisTask} per directory collected by the
     source.
 
