@@ -52,9 +52,9 @@ val exploration = ExplorationTask(
 )""", name = "uniform distribution in sensitivity")
 
 
-If your input is one file among many,  or  a line among a CSV file, use the  @b{CSVSampling} task  TODO lien intern à la doc
-and @b{FileSampling} TODO lien interne à la doc
-
+If your input is one file among many,  or  a line among a CSV file, use the
+@a("CSVSampling task", href := DocumentationPages.sampling.file)
+and @a("FileSampling task", href := DocumentationPages.sampling.file)
 
 @br
 @br
