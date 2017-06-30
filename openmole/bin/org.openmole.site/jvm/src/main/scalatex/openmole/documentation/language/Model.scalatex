@@ -1,7 +1,9 @@
 @import org.openmole.site.tools._
 @import org.openmole.site._
 
-@p{Task}
+@p
+
+    TODO texte insuffisant
     This section explains how you can embed your programs and compose them in simple OpenMOLE workflows.
 
     @p A workflow is a set of @b{tasks} linked with each other through
