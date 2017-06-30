@@ -23,7 +23,6 @@ import org.openmole.site.tools._
 
 object Footer {
 
-  val navClass = classIs(navbar_default ++ navbar_inverse)
   val WHITE = color := "#e6e6e6"
 
   val titleStyle = Seq(
@@ -50,7 +49,7 @@ object Footer {
     )
 
   val build = {
-    tags2.nav(navClass, stylesheet.footer)(
+    tags2.nav(classIs(navbar_default ++ navbar_inverse), stylesheet.footer)(
       div(classIs(container_fluid), stylesheet.center)(
         div(classIs(collapse ++ navbar_collapse))(
           ul(classIs(nav ++ navbar_nav))(

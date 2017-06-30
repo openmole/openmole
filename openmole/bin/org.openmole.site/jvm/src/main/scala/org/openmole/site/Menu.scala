@@ -40,7 +40,8 @@ object Menu {
           ul(classIs(nav ++ navbar_nav ++ navbar_right))(
             li(innerLink(DocumentationPages.scala, "DOCUMENTATION"), liStyle),
             li(inputStyle)(div(id := shared.searchDiv)),
-            li(linkButton("DEMO", shared.link.demo, classIs(btn ++ btn_primary)))
+            li(linkButton("TEST", shared.link.demo, classIs(btn ++ btn_default))),
+            li(linkButton("ADOPT", shared.link.currentDownload, classIs(btn ++ btn_mole))(marginLeft := -15))
           )
         )
       )
