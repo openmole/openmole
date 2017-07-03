@@ -28,6 +28,8 @@ package object tools {
 
   def question(content: String) = div(`class` := "question", content)
 
+  def aa = a(targetBlank)
+
   object sect extends Section()
 
   object hl extends Highlighter {
@@ -66,9 +68,9 @@ package object tools {
   // SCALATAGS METHODS
   def classIs(s: String): AttrPair = `class` := s
 
-  def to(page: Page): TypedTag[String] = to(Pages.file(page), false)
+  def to(page: Page): TypedTag[String] = to(Pages.file(page), otherTab = false)
 
-  def to(link: String, otherTab: Boolean = true): TypedTag[String] = a(href := link)(if (otherTab) targetBlank else "")
+  def to(link: String, linkName: String = "", otherTab: Boolean = true): TypedTag[String] = a(href := link)(if (otherTab) targetBlank else "")
 
   def innerLink(page: Page, title: String) = to(page)(span(title))
 
