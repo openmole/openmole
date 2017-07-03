@@ -101,4 +101,22 @@ package object stylesheet {
     left := 0,
     padding := "1rem"
   )
+
+  val memberStyle = Seq(
+    color := DARK_GREY,
+    fontSize := "25px",
+    fontWeight := "bold",
+    paddingTop := 5
+  )
+
+  val communityStyle = Seq(
+    fontSize := "30px",
+    color := DARK_GREY,
+    backgroundColor := "red"
+  )
+
+  val partners = Seq(
+    width := 270,
+    padding := 50
+  )
 }
