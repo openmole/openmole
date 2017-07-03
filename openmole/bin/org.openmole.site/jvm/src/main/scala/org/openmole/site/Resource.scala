@@ -52,6 +52,8 @@ object Resource {
 
     val thumbnail_sensitivity = imgResource("sensitivity.svg")
 
+    val profileID = imgResource("profileID.svg")
+
     val thumbnail_pse = imgResource("pse_anim.svg")
 
     val antNumbers = imgResource("antnumbers.png")
