@@ -106,6 +106,16 @@ object Resource {
 
     val whoarwe = imgResource("mole.svg")
 
+    val romain = imgResource("romain.png")
+
+    val mathieu = imgResource("mathieu.png")
+
+    val jo = imgResource("jo.png")
+
+    val paul = imgResource("paul.png")
+
+    val guillaume = imgResource("guillaume.png")
+
     val mole = imgResource("openmole.svg")
     //Radars graph for methodes
     val m_complete = imgResource("methods_radars/complet.png")

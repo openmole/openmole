@@ -41,7 +41,7 @@ object Footer {
   def imgSubItem(image: FileResource, title: String, link: String, text: String = "", otherTab: Boolean = true) =
     subItem(
       div(width := 200)(
-        tools.to(link, otherTab)(
+        tools.to(link, otherTab = otherTab)(
           img(src := image.file, height := 25, paddingBottom := 5)(span(s"$title", titleStyle))
         ),
         div(text, fontSize := "12px")

@@ -1,24 +1,43 @@
 @import org.openmole.site._
 @import org.openmole.site.tools._
+@import org.openmole.site.stylesheet._
 @import Pages._
 
-@p{Active developers}
-  FIXME with developers
+ @def member(image: FileResource, name: String): Frag =
+    div(paddingTop := 60)(
+      img(src := image.file, height := 70, paddingRight := 10),
+      span(name, memberStyle)
+    )
 
-  @p The development activity can be seen on @a("GitHub", href := "https://github.com/openmole/openmole").
 
-@p{How to cite OpenMOLE}
-  FIXME: PUBLICATION PAPERS
+@h1{Community leaders}
 
-@p{Communications}
-  FIXME with communications
+@member(Resource.img.romain, "Romain REUILLON")
+@div(width := "75%", paddingLeft := 70)
+    CNRS Researcher at Géographie-cité and ISC-PIF. Scientific Manager of the OpenMOLE platform leader of the development for Scientific simulation and computing, he developped both @aa("MGO", href := "https://github.com/openmole/mgo")  and  @aa("Gridscale", href := "https://github.com/openmole/gridscale")
 
-@p{Contact us}
-  For any question regarding OpenMOLE, contact us through the OpenMOLE user mailing list: users 'at' list.openmole.org
-  (you should @a("subscribe", href := "http://list.openmole.org/") first).
 
+@member(Resource.img.mathieu, "Mathieu LECLAIRE")
+@div(width := "75%", paddingLeft := 70)
+    CNRS Researcher Engineer at ISC-PIF (UPS 3611) and Géographie-cité (UMR 8504). Developper of the OpenMOLE Platform, he developped both the @aa("Scaladget", href := "https://github.com/openmole/scaladaget") library and @aa("ScalaWUI", href := "https://github.com/openmole/scalaWUI") skeleton.
+
+@member(Resource.img.jo, "Jonathan PASSERAT-PALMBACH")
+@div(width := "75%", paddingLeft := 70)
+    Bla bla
+
+
+@h1{Active community}
+@member(Resource.img.paul, "Paul CHAPRON")
+@div(width := "75%", paddingLeft := 70)
+   Bla bla
+
+@member(Resource.img.guillaume, "Guillaume CHEREL")
+@div(width := "75%", paddingLeft := 70)
+      Bla bla
+
+
+@h1{Partners}
   @p
-  @a(img(src := Resource.img.iscpif.file, `class` := "logoISC"), href := "http://iscpif.fr", target := "_blank")
-  @a(img(src := Resource.img.geocite.file, `class` := "logoGeocite"), href := "http://www.parisgeo.cnrs.fr/", target := "_blank")
-  @a(img(src := Resource.img.biomedia.file, `class` := "logoBiomedia"), href := "http://biomedic.doc.ic.ac.uk/", target := "_blank")
-
+  @a(img(src := Resource.img.iscpif.file,  partners), href := "http://iscpif.fr", target := "_blank")
+  @a(img(src := Resource.img.geocite.file, partners), href := "http://www.parisgeo.cnrs.fr/", target := "_blank")
+  @a(img(src := Resource.img.biomedia.file, partners), href := "http://biomedic.doc.ic.ac.uk/", target := "_blank")
