@@ -80,7 +80,7 @@
        repeatCount="1"
        restart="always"
        fill="freeze"
-       begin="0s; oscillo3.end + 7s"
+       begin="0s"
        calcMode="paced"
        id="powering" /><animateTransform
        attributeType="xml"
