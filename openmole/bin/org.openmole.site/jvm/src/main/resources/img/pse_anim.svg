@@ -160,7 +160,7 @@
        height="17.401726"
        width="17.401726"
        id="Ailosange"
-       style="opacity:0.79500002;fill:#aad400;fill-opacity:0;stroke:#445500;stroke-width:1.19109428;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0" />
+       style="opacity:0.79500002;fill:#a6bf26;fill-opacity:0;stroke:#445500;stroke-width:1.19109428;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0" />
     <rect
        ry="0"
        y="554.47882"
@@ -168,7 +168,7 @@
        height="16.963396"
        width="16.963396"
        id="Aisquare"
-       style="opacity:0.79500002;fill:#ff2a2a;fill-opacity:0;stroke:#aa0000;stroke-width:1.16109204;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0" />
+       style="opacity:0.79500002;fill:#a02c2c;fill-opacity:0;stroke:#aa0000;stroke-width:1.16109204;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0" />
     <path
        d="m -113.48403,569.78113 -10.29136,0 -10.29136,0 5.14568,-8.91257 5.14568,-8.91258 5.14568,8.91258 z"
        id="Aitriangle"
@@ -197,7 +197,7 @@
        height="17.401726"
        width="17.401726"
        id="Ajlosange"
-       style="opacity:0.79500002;fill:#aad400;fill-opacity:0;stroke:#445500;stroke-width:1.19109428;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0" />
+       style="opacity:0.79500002;fill:#a6bf26;fill-opacity:0;stroke:#445500;stroke-width:1.19109428;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0" />
     <rect
        ry="0"
        y="644.95502"
@@ -205,7 +205,7 @@
        height="16.963396"
        width="16.963396"
        id="Ajsquare"
-       style="opacity:0.79500002;fill:#ff2a2a;fill-opacity:0;stroke:#aa0000;stroke-width:1.16109204;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0" />
+       style="opacity:0.79500002;fill:#a02c2c;fill-opacity:0;stroke:#aa0000;stroke-width:1.16109204;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0" />
     <path
        d="m -359.91274,659.0669 -10.29136,0 -10.29136,0 5.14568,-8.91258 5.14568,-8.91257 5.14568,8.91257 z"
        id="Ajtriangle"
@@ -234,7 +234,7 @@
        height="17.401726"
        width="17.401726"
        id="Aklosange"
-       style="opacity:0.79500002;fill:#aad400;fill-opacity:0;stroke:#445500;stroke-width:1.19109428;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0" />
+       style="opacity:0.79500002;fill:#a6bf26;fill-opacity:0;stroke:#445500;stroke-width:1.19109428;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0" />
     <rect
        ry="0"
        y="733.05029"
@@ -242,7 +242,7 @@
        height="16.963396"
        width="16.963396"
        id="Aksquare"
-       style="opacity:0.79500002;fill:#ff2a2a;fill-opacity:0;stroke:#aa0000;stroke-width:1.16109204;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0" />
+       style="opacity:0.79500002;fill:#a02c2c;fill-opacity:0;stroke:#aa0000;stroke-width:1.16109204;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0" />
     <path
        d="m -105.15116,750.73347 -10.29136,0 -10.29136,0 5.14568,-8.91258 5.14568,-8.91258 5.14568,8.91258 z"
        id="Aktriangle"
@@ -366,7 +366,7 @@ apparaissent en 6 secondes depuis le startanim
      transform="translate(453.21715,-349.35016)"
      id="g4201">
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10759-6"
        cx="712.30829"
        cy="853.38861"
@@ -391,7 +391,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10761-3"
        cx="762.3725"
        cy="879.04449"
@@ -416,7 +416,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10763-8"
        cx="770.20624"
        cy="789.07428"
@@ -441,7 +441,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10765-5"
        cx="838.68695"
        cy="820.72443"
@@ -466,7 +466,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10767-6"
        cx="765.91888"
        cy="794.31036"
@@ -491,7 +491,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10769-1"
        cx="776.49286"
        cy="853.67462"
@@ -516,7 +516,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10771-1"
        cx="824.37836"
        cy="842.9184"
@@ -541,7 +541,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10773-5"
        cx="832.03558"
        cy="870.79266"
@@ -566,7 +566,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10775-9"
        cx="758.6994"
        cy="856.56097"
@@ -595,7 +595,7 @@ apparaissent en 6 secondes depuis le startanim
      transform="translate(453.21715,-349.35016)"
      id="g4212">
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10777-8"
        cx="851.55316"
        cy="801.64008"
@@ -620,7 +620,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10783-4"
        cx="829.12177"
        cy="850.41193"
@@ -645,7 +645,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10789-8"
        cx="879.28802"
        cy="777.43854"
@@ -670,7 +670,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10795-1"
        cx="867.87225"
        cy="816.45392"
@@ -695,7 +695,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10797-0"
        cx="905.73236"
        cy="807.29144"
@@ -720,7 +720,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10799-3"
        cx="937.62006"
        cy="859.9212"
@@ -745,7 +745,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10801-0"
        cx="903.70331"
        cy="784.83246"
@@ -770,7 +770,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10803-4"
        cx="913.57098"
        cy="848.76093"
@@ -795,7 +795,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10805-4"
        cx="960.56427"
        cy="858.48688"
@@ -820,7 +820,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10807-4"
        cx="853.98138"
        cy="870.36017"
@@ -845,7 +845,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10813-4"
        cx="919.38763"
        cy="856.34381"
@@ -870,7 +870,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10817-7"
        cx="981.52948"
        cy="837.38446"
@@ -895,7 +895,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10819-6"
        cx="924.16766"
        cy="873.36188"
@@ -920,7 +920,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10821-3"
        cx="1053.5436"
        cy="853.35052"
@@ -945,7 +945,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10825-1"
        cx="979.19403"
        cy="789.94489"
@@ -970,7 +970,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10827-7"
        cx="971.96552"
        cy="846.50397"
@@ -995,7 +995,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10829-5"
        cx="970.02472"
        cy="842.74701"
@@ -1024,7 +1024,7 @@ apparaissent en 6 secondes depuis le startanim
      transform="translate(453.21715,-349.35016)"
      id="g4231">
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10831-9"
        cx="1068.7502"
        cy="846.5163"
@@ -1049,7 +1049,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10833-6"
        cx="1079.2971"
        cy="778.39886"
@@ -1074,7 +1074,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10835-2"
        cx="1014.9991"
        cy="847.40277"
@@ -1099,7 +1099,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10837-1"
        cx="1010.5169"
        cy="876.36078"
@@ -1124,7 +1124,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10839-7"
        cx="1071.7335"
        cy="829.77386"
@@ -1149,7 +1149,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10841-8"
        cx="1052.8442"
        cy="841.58832"
@@ -1174,7 +1174,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10843-5"
        cx="1076.7518"
        cy="772.74493"
@@ -1199,7 +1199,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10845-7"
        cx="1082.6293"
        cy="778.50482"
@@ -1224,7 +1224,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10847-4"
        cx="1037.5112"
        cy="769.22711"
@@ -1249,7 +1249,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10849-1"
        cx="1117.423"
        cy="795.89459"
@@ -1274,7 +1274,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10851-8"
        cx="1042.682"
        cy="733.39606"
@@ -1299,7 +1299,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10853-5"
        cx="1104.2682"
        cy="776.78009"
@@ -1324,7 +1324,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="ptlosange"
        cx="1100.0897"
        cy="719.07635"
@@ -1349,7 +1349,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10857-7"
        cx="1122.2346"
        cy="748.96832"
@@ -1374,7 +1374,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10859-5"
        cx="1023.1026"
        cy="765.06976"
@@ -1399,7 +1399,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10861-3"
        cx="987.93536"
        cy="718.19379"
@@ -1424,7 +1424,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10863-8"
        cx="1014.3055"
        cy="766.86346"
@@ -1449,7 +1449,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10865-8"
        cx="1052.5249"
        cy="665.25177"
@@ -1474,7 +1474,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10867-3"
        cx="992.68646"
        cy="785.12592"
@@ -1499,7 +1499,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10869-1"
        cx="995.08356"
        cy="763.16339"
@@ -1524,7 +1524,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10871-8"
        cx="932.93036"
        cy="697.42487"
@@ -1549,7 +1549,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10873-9"
        cx="938.8598"
        cy="702.5412"
@@ -1574,7 +1574,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10875-6"
        cx="932.35858"
        cy="671.25336"
@@ -1603,7 +1603,7 @@ apparaissent en 6 secondes depuis le startanim
      transform="translate(453.21715,-349.35016)"
      id="g4256">
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10877-4"
        cx="999.07257"
        cy="700.55341"
@@ -1628,7 +1628,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10879-3"
        cx="981.16168"
        cy="708.12225"
@@ -1653,7 +1653,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10881-3"
        cx="946.73981"
        cy="796.53729"
@@ -1678,7 +1678,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10883-3"
        cx="932.06952"
        cy="730.1485"
@@ -1703,7 +1703,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10885-8"
        cx="975.86798"
        cy="721.21954"
@@ -1728,7 +1728,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10887-6"
        cx="853.08759"
        cy="756.12128"
@@ -1753,7 +1753,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10889-0"
        cx="883.22113"
        cy="732.95111"
@@ -1778,7 +1778,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10891-4"
        cx="875.06146"
        cy="704.99872"
@@ -1807,7 +1807,7 @@ apparaissent en 6 secondes depuis le startanim
      transform="translate(453.21715,-349.35016)"
      id="g4266">
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10893-8"
        cx="890.25409"
        cy="723.64594"
@@ -1832,7 +1832,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10895-8"
        cx="848.70795"
        cy="746.60565"
@@ -1857,7 +1857,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10897-8"
        cx="939.12909"
        cy="671.75092"
@@ -1882,7 +1882,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="pttriangle"
        cx="805.95624"
        cy="666.26788"
@@ -1907,7 +1907,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10901-7"
        cx="836.84637"
        cy="675.45966"
@@ -1932,7 +1932,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10903-7"
        cx="858.63202"
        cy="616.90619"
@@ -1957,7 +1957,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10905-6"
        cx="746.33685"
        cy="646.82843"
@@ -1982,7 +1982,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10907-4"
        cx="794.6098"
        cy="623.06927"
@@ -2007,7 +2007,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10909-3"
        cx="740.8515"
        cy="601.47711"
@@ -2032,7 +2032,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10911-0"
        cx="759.77386"
        cy="567.59113"
@@ -2057,7 +2057,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10913-3"
        cx="729.37738"
        cy="580.13055"
@@ -2082,7 +2082,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10915-0"
        cx="733.88177"
        cy="627.10724"
@@ -2107,7 +2107,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10917-9"
        cx="801.27289"
        cy="492.65582"
@@ -2132,7 +2132,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10919-2"
        cx="722.51337"
        cy="442.39081"
@@ -2157,7 +2157,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10921-5"
        cx="825.12469"
        cy="545.76678"
@@ -2182,7 +2182,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10923-4"
        cx="803.6955"
        cy="539.5401"
@@ -2207,7 +2207,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10925-0"
        cx="854.4433"
        cy="546.5589"
@@ -2232,7 +2232,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="ptsquare"
        cx="763.46967"
        cy="430.2226"
@@ -2257,7 +2257,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10929-9"
        cx="832.72357"
        cy="468.73065"
@@ -2282,7 +2282,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10931-4"
        cx="840.17523"
        cy="550.6441"
@@ -2307,7 +2307,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10933-6"
        cx="864.61176"
        cy="520.33575"
@@ -2336,7 +2336,7 @@ apparaissent en 6 secondes depuis le startanim
      transform="translate(453.21715,-349.35016)"
      id="g4289">
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10935-9"
        cx="768.50848"
        cy="582.01788"
@@ -2361,7 +2361,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10937-2"
        cx="861.95331"
        cy="470.27118"
@@ -2386,7 +2386,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10939-2"
        cx="781.30316"
        cy="526.0722"
@@ -2411,7 +2411,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10941-4"
        cx="861.23944"
        cy="589.82367"
@@ -2436,7 +2436,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10943-7"
        cx="833.57758"
        cy="478.1546"
@@ -2461,7 +2461,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10945-7"
        cx="800.62762"
        cy="501.92548"
@@ -2486,7 +2486,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10947-5"
        cx="781.27313"
        cy="511.97894"
@@ -2511,7 +2511,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10949-4"
        cx="846.5014"
        cy="514.73529"
@@ -2536,7 +2536,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10951-8"
        cx="884.16107"
        cy="593.69061"
@@ -2561,7 +2561,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10953-1"
        cx="817.52924"
        cy="609.60284"
@@ -2586,7 +2586,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10955-2"
        cx="826.70013"
        cy="615.5119"
@@ -2611,7 +2611,7 @@ apparaissent en 6 secondes depuis le startanim
          repeatCount="1" />
     </circle>
     <circle
-       style="fill:#2e7ae6;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
+       style="fill:#337ab7;fill-opacity:0.01;stroke:#1c1c8a;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.01"
        id="circle10957-8"
        cx="863.34271"
        cy="665.16486"
@@ -2651,7 +2651,7 @@ apparaissent en 6 secondes depuis le startanim
        height="29.219727"
        width="29.219727"
        id="square"
-       style="opacity:0.79500002;fill:#ff2a2a;fill-opacity:0;stroke:#aa0000;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0" />
+       style="opacity:0.79500002;fill:#a02c2c;fill-opacity:0;stroke:#aa0000;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0" />
     <rect
        ry="0"
        x="1200.1375"
@@ -2659,7 +2659,7 @@ apparaissent en 6 secondes depuis le startanim
        height="29.219727"
        width="29.219727"
        id="losange"
-       style="opacity:0.79500002;fill:#aad400;fill-opacity:0;stroke:#445500;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0"
+       style="opacity:0.79500002;fill:#a6bf26;fill-opacity:0;stroke:#445500;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0"
        transform="matrix(0.70710678,0.70710678,-0.70710678,0.70710678,0,0)" />
   </g>
   <!--     Boutton animate  -->
@@ -2993,7 +2993,7 @@ apparaissent en 6 secondes depuis le startanim
      height="22"
      width="22"
      id="minisquare"
-     style="opacity:0.79500002;fill:#ff2a2a;fill-opacity:0;stroke:#aa0000;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0">
+     style="opacity:0.79500002;fill:#a02c2c;fill-opacity:0;stroke:#aa0000;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0">
     <animate
        xlink:href="#minisquare"
        attributeName="fill-opacity"
@@ -3011,7 +3011,7 @@ apparaissent en 6 secondes depuis le startanim
      height="22"
      width="22"
      id="minilosange"
-     style="opacity:0.79500002;fill:#aad400;fill-opacity:0;stroke:#445500;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0"
+     style="opacity:0.79500002;fill:#a6bf26;fill-opacity:0;stroke:#445500;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0"
      transform="matrix(0.70710678,0.70710678,-0.70710678,0.70710678,0,0)">
     <animate
        xlink:href="#minilosange"
