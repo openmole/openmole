@@ -130,136 +130,157 @@
        d="m 372.83151,631.995 c 0,0 25.12786,-49.03594 30.9829,-60.74601 5.85504,-11.46611 5.85504,-24.63995 0,-36.59398 -10.00235,-20.00471 -34.6423,-28.05538 -54.64701,-18.05303 -20.00471,10.00235 -27.81143,35.37418 -18.05303,54.64701 9.75839,19.27283 30.9829,60.74601 30.9829,60.74601 2.19564,4.39128 8.5386,4.39128 10.73424,0 z m -26.34767,-78.79904 c 0,-11.71007 9.51444,-21.22451 21.22451,-21.22451 11.71007,0 21.22451,9.51444 21.22451,21.22451 0,11.71007 -9.51444,21.22451 -21.22451,21.22451 -11.95403,-0.24396 -21.22451,-9.51444 -21.22451,-21.22451 z"
        inkscape:connector-curvature="0" />
   </g>
-  <animate
-     xlink:href="#dash1"
-     attributeType="CSS"
-     attributeName="fill-opacity"
-     values="0;1"
-     dur="0.35s"
-     begin="0s; vousetesiciappear.end + 7s"
-     restart="always"
-     repeatCount="1"
-     fill="freeze"
-     id="step1"
-     calcMode="paced" />
-  <animate
-     xlink:href="#dash2"
-     attributeType="CSS"
-     attributeName="fill-opacity"
-     values="0;1"
-     dur="0.35s"
-     begin="step1.end"
-     restart="always"
-     repeatCount="1"
-     fill="freeze"
-     id="step2"
-     calcMode="paced" />
-  <animate
-     xlink:href="#dash3"
-     attributeType="CSS"
-     attributeName="fill-opacity"
-     values="0;1"
-     dur="0.35s"
-     begin="step2.end"
-     restart="always"
-     repeatCount="1"
-     fill="freeze"
-     id="step3"
-     calcMode="paced" />
-  <animate
-     xlink:href="#dash4"
-     attributeType="CSS"
-     attributeName="fill-opacity"
-     values="0;1"
-     dur="0.35s"
-     begin="step3.end"
-     restart="always"
-     repeatCount="1"
-     fill="freeze"
-     id="step4"
-     calcMode="paced" />
-  <animate
-     xlink:href="#dash5"
-     attributeType="CSS"
-     attributeName="fill-opacity"
-     values="0;1"
-     dur="0.35s"
-     begin="step4.end"
-     restart="always"
-     repeatCount="1"
-     fill="freeze"
-     id="step5"
-     calcMode="paced" />
-  <animate
-     xlink:href="#dash6"
-     attributeType="CSS"
-     attributeName="fill-opacity"
-     values="0;1"
-     dur="0.35s"
-     begin="step5.end"
-     restart="always"
-     repeatCount="1"
-     fill="freeze"
-     id="step6"
-     calcMode="paced" />
-  <animate
-     xlink:href="#dash7"
-     attributeType="CSS"
-     attributeName="fill-opacity"
-     values="0;1"
-     dur="0.35s"
-     begin="step6.end"
-     restart="always"
-     repeatCount="1"
-     fill="freeze"
-     id="step7"
-     calcMode="paced" />
-  <animate
-     xlink:href="#dash8"
-     attributeType="CSS"
-     attributeName="fill-opacity"
-     values="0;1"
-     dur="0.35s"
-     begin="step7.end"
-     restart="always"
-     repeatCount="1"
-     fill="freeze"
-     id="step8"
-     calcMode="paced" />
-  <animate
-     xlink:href="#dash9"
-     attributeType="CSS"
-     attributeName="fill-opacity"
-     values="0;1"
-     dur="0.35s"
-     begin="step8.end"
-     restart="always"
-     repeatCount="1"
-     fill="freeze"
-     id="step9"
-     calcMode="paced" />
-  <animate
-     xlink:href="#croix"
-     attributeType="CSS"
-     attributeName="fill-opacity"
-     values="0;1"
-     dur="0.35s"
-     begin="0s"
-     restart="always"
-     repeatCount="1"
-     fill="freeze"
-     id="croix"
-     calcMode="paced" />
-  <animate
-     xlink:href="#vousetesici"
-     attributeType="CSS"
-     attributeName="fill-opacity"
-     values="1;0;1"
-     dur="1s"
-     begin="step9.end"
-     restart="always"
-     repeatCount="1"
-     fill="freeze"
-     id="vousetesiciappear"
-     calcMode="paced" />
+
+
+
+
+  <animate 
+    xlink:href="#dash1"
+    attributeType="CSS"
+    attributeName="fill-opacity"
+    values= "0;1" 
+    dur="0.35s"
+    begin="0s"
+    restart="always"
+    repeatCount="1"
+    fill="freeze" 
+    id="step1"
+    calcMode="paced"
+    />
+
+  <animate 
+    xlink:href="#dash2"
+    attributeType="CSS"
+    attributeName="fill-opacity"
+    values= "0;1" 
+    dur="0.35s"
+    begin="step1.end"
+    restart="always"
+    repeatCount="1"
+    fill="freeze" 
+    id="step2"
+    calcMode="paced"
+    />
+
+
+  <animate 
+    xlink:href="#dash3"
+    attributeType="CSS"
+    attributeName="fill-opacity"
+    values= "0;1" 
+    dur="0.35s"
+    begin="step2.end"
+    restart="always"
+    repeatCount="1"
+    fill="freeze" 
+    id="step3"
+    calcMode="paced"
+    />
+
+
+<animate 
+    xlink:href="#dash4"
+    attributeType="CSS"
+    attributeName="fill-opacity"
+    values= "0;1" 
+    dur="0.35s"
+    begin="step3.end"
+    restart="always"
+    repeatCount="1"
+    fill="freeze" 
+    id="step4"
+    calcMode="paced"
+    />
+<animate 
+    xlink:href="#dash5"
+    attributeType="CSS"
+    attributeName="fill-opacity"
+    values= "0;1" 
+    dur="0.35s"
+    begin="step4.end"
+    restart="always"
+    repeatCount="1"
+    fill="freeze" 
+    id="step5"
+    calcMode="paced"
+    />
+
+<animate 
+    xlink:href="#dash6"
+    attributeType="CSS"
+    attributeName="fill-opacity"
+    values= "0;1" 
+    dur="0.35s"
+    begin="step5.end"
+    restart="always"
+    repeatCount="1"
+    fill="freeze" 
+    id="step6"
+    calcMode="paced"
+    />
+<animate 
+    xlink:href="#dash7"
+    attributeType="CSS"
+    attributeName="fill-opacity"
+    values= "0;1" 
+    dur="0.35s"
+    begin="step6.end"
+    restart="always"
+    repeatCount="1"
+    fill="freeze" 
+    id="step7"
+    calcMode="paced"
+    />
+<animate 
+    xlink:href="#dash8"
+    attributeType="CSS"
+    attributeName="fill-opacity"
+    values= "0;1" 
+    dur="0.35s"
+    begin="step7.end"
+    restart="always"
+    repeatCount="1"
+    fill="freeze" 
+    id="step8"
+    calcMode="paced"
+    />
+<animate 
+    xlink:href="#dash9"
+    attributeType="CSS"
+    attributeName="fill-opacity"
+    values= "0;1" 
+    dur="0.35s"
+    begin="step8.end"
+    restart="always"
+    repeatCount="1"
+    fill="freeze" 
+    id="step9"
+    calcMode="paced"
+    />
+<animate 
+    xlink:href="#croix"
+    attributeType="CSS"
+    attributeName="fill-opacity"
+    values= "0;1" 
+    dur="0.35s"
+    begin="0s"
+    restart="always"
+    repeatCount="1"
+    fill="freeze" 
+    id="croix"
+    calcMode="paced"
+    />
+<animate 
+    xlink:href="#vousetesici"
+    attributeType="CSS"
+    attributeName="fill-opacity"
+    values= "1;0;1" 
+    dur="1s"
+    begin="step9.end"
+    restart="always"
+    repeatCount="1"
+    fill="freeze" 
+   id="vousetesiciappear"
+    calcMode="paced"
+    />
 </svg>
