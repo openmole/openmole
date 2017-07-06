@@ -24,6 +24,8 @@
 
   @p One very important aspect of CARE is that you only need to package your application @b{once}. As long as the execution you use to package your application makes uses of all the dependencies, you should not have any problem re-executing this archive with other parameters.
 
+TODO mentionner article frontier in neuroinformatics
+
   @p Let's study two concrete use cases that take an existing application, package it with CARE, and embed it in OpenMOLE. You should be able to achieve exactly the same process with almost any executable running on Linux. We've chosen an @a("R code", href := DocumentationPages.native.file + "#AnexamplewithR") and a @a("Python script", href := DocumentationPages.native.file + "#AnotherexamplewithaPythonscript").
 
   @p{An example with R}
