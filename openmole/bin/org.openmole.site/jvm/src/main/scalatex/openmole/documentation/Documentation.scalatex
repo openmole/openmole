@@ -3,7 +3,7 @@
 @import org.openmole.site._
 
 @h1
-    Documentation}
+    Documentation
 @p
   Welcome to the OpenMOLE documentation.
 
@@ -58,7 +58,8 @@
     Technical Documentation
 
     @a("Transitions", href := DocumentationPages.transition.file),
-
+    @a("Hook", href := DocumentationPages.hook.file),
+    @a("Source", href := DocumentationPages.source.file),
 
 
 @h2
