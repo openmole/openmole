@@ -12,13 +12,20 @@
         Romain Reuillon, Mathieu Leclaire, Sebastien Rey-Coyrehourcq, «OpenMOLE, a workflow engine specifically tailored for
         the distributed exploration of simulation models» published in @i{Future Generation Computer Systems}, 2013.
         @br
-            @a("[bibteX]", href:= Resource.bibtex.FGCSRefBib.file)  TODO lien vers papier online
+          @a("[editor version]" , href:="http://www.sciencedirect.com/science/article/pii/S0167739X13001027")
+
+          @a("[online preprint]" , href:="https://hal-paris1.archives-ouvertes.fr/hal-00840744/")
+
+           @a("[bibteX]", href:= Resource.bibtex.FGCSRefBib.file)  TODO lien direct download du fichier  pdf ?
     @li
         Romain Reuillon, Florent Chuffart, Mathieu Leclaire, Thierry Faure, Nicolas Dumoulin, and  David R.C. Hill,
         «Declarative Task Delegation in OpenMOLE», proceedings of @i{High Performance Computing and Simulation (HPCS)}
         international conference, 2010.
         @br
-            @a("[bibteX]", href:= Resource.bibtex.HPCSRefBib.file) TODO lien vers papier online
+             @a("[editor version]" , href:="http://ieeexplore.ieee.org/document/5547155/")
+
+             @a("[bibteX]", href:= Resource.bibtex.HPCSRefBib.file) TODO lien direct download vers fichier pdf ?
+
 
 
 
@@ -81,5 +88,12 @@
 
 
     @li
+         Jonathan Passerat-Palmbach, Romain Reuillon, Mathieu Leclaire, Antonios Makropoulos, Emma C. Robinson, Sarah
+         Parisot and Daniel Rueckert,« Reproducible Large-Scale Neuroimaging Studies with the OpenMOLE Workflow
+         Management System», published in @i{Frontiers in Neuroinformatics}, Vol 11, 2017.
+          @br
+                @a("[online version]" , href:="http://journal.frontiersin.org/article/10.3389/fninf.2017.00021/full#")
+                 @a("[bibteX]", href:= Resource.bibtex.frontierBib.file)
 
-        Frontier 20XX TODO ajouter auteur et bibtex
+
+

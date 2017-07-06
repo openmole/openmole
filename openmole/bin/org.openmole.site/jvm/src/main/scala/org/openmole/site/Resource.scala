@@ -194,6 +194,8 @@ object Resource {
 
     val halfbillionBib = bibtexResource("Schmitt2015halfbillion.bib")
 
+    val frontierBib = bibtexResource("passerat2017frontier.bib")
+
   }
 
   val api = fileResource("api")
