@@ -77,16 +77,35 @@
     </rdf:RDF>
   </metadata>
   <path
-     style="opacity:1;fill:#1651db;fill-opacity:1;stroke:#1651db;stroke-width:2.93463683;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+     style="opacity:1;fill:#337ab7;fill-opacity:1;stroke:#337ab7    ;stroke-width:2.93463683;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
      id="cursor"
      d="m 19.550965,149.2355 -3.78251,-9.52045 -3.78251,-9.52045 7.56502,0 7.56503,0 -3.78252,9.52045 z" />
   <rect
-     style="opacity:1;fill:#55d400;fill-opacity:0.1;stroke:#338000;stroke-width:1.27892029;stroke-miterlimit:4;stroke-dasharray:3.83676075, 3.83676075;stroke-dashoffset:0;stroke-opacity:0.1"
+     style="opacity:1;fill:#a6bf26;fill-opacity:0;stroke:#000000;stroke-width:1.27892029;stroke-miterlimit:4;stroke-dasharray:3.83676075, 3.83676075;stroke-dashoffset:0;stroke-opacity:0.0"
      id="interval"
      width="55.938988"
      height="16.949875"
      x="80.610916"
      y="144.62401">
+
+
+      <set
+                xlink:href="#interval"
+              attributeName="fill-opacity"
+              to="0.0"
+              fill="freeze"
+              begin="startanim.begin"
+              restart="always"
+              id="resetinterval"/>
+      <set
+              xlink:href="#interval"
+              attributeName="stroke-opacity"
+              to="0.0"
+              fill="freeze"
+              begin="startanim.begin"
+              restart="always"
+              id="resetinterval2"/>
+
 
 
 
@@ -205,9 +224,12 @@
        style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Glacial Indifference';-inkscape-font-specification:'Glacial Indifference Bold';fill:#000000"
        id="tspan7783"> to minimize the objective</tspan></text>
   <path
-     style="fill:none;fill-rule:evenodd;stroke:#338000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:8, 4;stroke-dashoffset:0;stroke-opacity:0.6627451"
+     style="fill:none;fill-rule:evenodd;stroke:#a6bf26;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:8, 4;stroke-dashoffset:0;stroke-opacity:0.6627451"
      d="m 542.29441,250.5415 244.45692,0"
-     id="path7742" />
+     id="path7742" >
+
+
+  </path>
   <path
      style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.05"
      d="m 577.64975,117.20136 c 55.55838,178.79701 113.16923,183.13414 139.40105,164.65487 76.5384,-53.91824 52.52793,-109.09648 89.90357,-176.7767"
@@ -309,7 +331,7 @@
        id="tspan6949-8-6">Model</tspan></text>
   <text
      xml:space="preserve"
-     style="font-style:normal;font-weight:normal;font-size:15px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#55d400;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+     style="font-style:normal;font-weight:normal;font-size:15px;line-height:125%;font-family:'Glacial Indifference';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
      x="803.56317"
      y="243.83482"
      id="text8629"><tspan
@@ -481,7 +503,7 @@
      <animate attributeType="CSS" attributeName="fill-opacity" 
            from="0" to="0.9" dur="1s" repeatCount="1" fill="freeze" begin="movec3.end" />
      <animate attributeType="CSS" attributeName="fill" 
-          from="#e80700" to="green" dur="0.2s"  fill="freeze" begin="movec3.end + 0.8s" />
+          from="#e80700" to="#a6bf26" dur="0.2s"  fill="freeze" begin="movec3.end + 0.8s" />
     <animate 
   attributeName="fill-opacity"  
   from = "0.9" 
@@ -517,13 +539,13 @@
 <circle
      style="opacity:1;fill:#e80700;fill-opacity:0;stroke:none;stroke-width:3;stroke-miterlimit:4;stroke-dasharray:9, 9;stroke-dashoffset:0;stroke-opacity:1"
      id="circle5"
-     cx="681.4389"
+     cx="681.43"
      cy="7.9916425"
      r="7.9916425" >
      <animate attributeType="CSS" attributeName="fill-opacity" 
            from="0" to="0.9" dur="1s" repeatCount="1" fill="freeze" begin="movec4.end" />
      <animate attributeType="CSS" attributeName="fill" 
-           from="#e80700" to="green" dur="0.2s" repeatCount="1" fill="freeze" begin="movec4.end + 0.8s" />
+           from="#e80700" to="#a6bf26" dur="0.2s" repeatCount="1" fill="freeze" begin="movec4.end + 0.8s" />
   
     <animate 
   attributeName="fill-opacity"  
@@ -566,7 +588,7 @@
      <animate attributeType="CSS" attributeName="fill-opacity" 
            from="0" to="0.9" dur="1s" repeatCount="1" fill="freeze" begin="movec5.end" />
      <animate attributeType="CSS" attributeName="fill" 
-           from="#e80700" to="green" dur="0.2s" repeatCount="1" fill="freeze" begin="movec5.end + 0.8s" />
+           from="#e80700" to="#a6bf26" dur="0.2s" repeatCount="1" fill="freeze" begin="movec5.end + 0.8s" />
 
     <animate 
   attributeName="fill-opacity"  
@@ -602,13 +624,13 @@
 <circle
      style="opacity:1;fill:#e80700;fill-opacity:0;stroke:none;stroke-width:3;stroke-miterlimit:4;stroke-dasharray:9, 9;stroke-dashoffset:0;stroke-opacity:1"
      id="circle7"
-     cx="732.6233 "
+     cx="732.62"
      cy="7.9916425"
      r="7.9916425" >
      <animate attributeType="CSS" attributeName="fill-opacity" 
            from="0" to="0.9" dur="1s" repeatCount="1" fill="freeze" begin="movec6.end" />
     <animate attributeType="CSS" attributeName="fill" 
-           from="#e80700" to="green" dur="0.2s" repeatCount="1" fill="freeze" begin="movec6.end + 0.8s" />
+           from="#e80700" to="#a6bf26" dur="0.2s" repeatCount="1" fill="freeze" begin="movec6.end + 0.8s" />
 
  
    <animate 
@@ -646,7 +668,7 @@
    <circle
      style="opacity:1;fill:#e80700;fill-opacity:0;stroke:none;stroke-width:3;stroke-miterlimit:4;stroke-dasharray:9, 9;stroke-dashoffset:0;stroke-opacity:1"
      id="circle8"
-     cx="758.2156 "
+     cx="758.21"
      cy="7.9916425"
      r="7.9916425" >
      <animate attributeType="CSS" attributeName="fill-opacity" 
@@ -689,7 +711,7 @@
    <circle
      style="opacity:1;fill:#e80700;fill-opacity:0;stroke:none;stroke-width:3;stroke-miterlimit:4;stroke-dasharray:9, 9;stroke-dashoffset:0;stroke-opacity:1"
      id="circle9"
-     cx="783.8078 "
+     cx="783.80"
      cy="7.9916425"
      r="7.9916425" >
      <animate attributeType="CSS" attributeName="fill-opacity" 
@@ -729,7 +751,7 @@
 <circle
      style="opacity:1;fill:#e80700;fill-opacity:0;stroke:none;stroke-width:3;stroke-miterlimit:4;stroke-dasharray:9, 9;stroke-dashoffset:0;stroke-opacity:1"
      id="circle10"
-     cx="809.40 "
+     cx="809.40"
      cy="7.9916425"
      r="7.9916425" >
      <animate attributeType="CSS" attributeName="fill-opacity" 
@@ -936,7 +958,7 @@
 <animate
      xlink:href="#circle7"
      attributeName="cy"
-     values="7.9916425;268.01"
+     values="7.99;268.01"
      dur="1s"
      begin="movec6.end"
      restart="always"
@@ -948,7 +970,7 @@
 <animate
      xlink:href="#circle8"
      attributeName="cy"
-     values="7.9916425;240.01"
+     values="7.99;240.01"
      dur="1s"
      begin="movec7.end"
      restart="always"
@@ -959,7 +981,7 @@
 <animate
      xlink:href="#circle9"
      attributeName="cy"
-     values="7.9916425;164.01"
+     values="7.99;164.01"
      dur="1s"
      begin="movec8.end"
      restart="always"
@@ -971,7 +993,7 @@
 <animate
      xlink:href="#circle10"
      attributeName="cy"
-     values="7.9916425;106"
+     values="7.99;106"
      dur="1s"
      begin="movec9.end"
      restart="always"

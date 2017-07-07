@@ -57,7 +57,7 @@
        dur="4s"
        repeatCount="1"
        restart="always"
-       begin="0s; petiterouehaut.end + 6s"
+       begin="0s"
        id="granderoue" /></path><path
      inkscape:connector-curvature="0"
      id="wheel3"

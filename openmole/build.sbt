@@ -838,6 +838,7 @@ buildSite := {
     IO.copyDirectory(resourceDirectory / "css", siteTarget / "css")
     IO.copyDirectory(resourceDirectory / "fonts", siteTarget / "fonts")
     IO.copyDirectory(resourceDirectory / "img", siteTarget / "img")
+    IO.copyDirectory(resourceDirectory / "bibtex", siteTarget / "bibtex")
     IO.copyDirectory(resourceDirectory / "script", siteTarget / "script")
   }
 

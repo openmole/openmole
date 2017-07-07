@@ -263,7 +263,7 @@
        inkscape:export-xdpi="128"
        inkscape:export-ydpi="128" />
     <rect
-       style="opacity:0.79500002;fill:#ff2a2a;fill-opacity:0.8309179;stroke:#aa0000;stroke-width:0.59721488;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       style="opacity:0.79500002;fill:#a02c2c;fill-opacity:0.8309179;stroke:#aa0000;stroke-width:0.59721488;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        id="cursor"
        width="6.3788505"
        height="11.93469"
@@ -271,7 +271,7 @@
        y="121.28519"
        ry="0" />
     <rect
-       style="opacity:0.79500002;fill:#ff2a2a;fill-opacity:0.8309179;stroke:#aa0000;stroke-width:0.59721488;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       style="opacity:0.79500002;fill:#a02c2c;fill-opacity:0.8309179;stroke:#aa0000;stroke-width:0.59721488;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        id="rect11166-1-8-6"
        width="6.3788505"
        height="11.93469"
@@ -279,7 +279,7 @@
        y="168.6118"
        ry="0" />
     <rect
-       style="opacity:0.79500002;fill:#ff2a2a;fill-opacity:0.8309179;stroke:#aa0000;stroke-width:0.59721488;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       style="opacity:0.79500002;fill:#a02c2c;fill-opacity:0.8309179;stroke:#aa0000;stroke-width:0.59721488;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        id="rect11166-1-8-7"
        width="6.3788505"
        height="11.93469"
@@ -302,7 +302,7 @@
        style="fill:#333333;fill-opacity:1;fill-rule:evenodd;stroke:#333333;stroke-width:0.41899734pt;stroke-opacity:1"
        inkscape:connector-curvature="0" />
     <path
-       style="fill:none;fill-rule:evenodd;stroke:#88aa00;stroke-width:0.81378084;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:none;fill-rule:evenodd;stroke:#acbf26;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        d="m 495.66291,214.67144 c 28.98155,-126.589676 52.89344,35.69453 99.23089,-24.96759 25.92647,-33.94136 16.52901,26.80086 16.52901,26.80086"
        id="curve"
        inkscape:connector-curvature="0"

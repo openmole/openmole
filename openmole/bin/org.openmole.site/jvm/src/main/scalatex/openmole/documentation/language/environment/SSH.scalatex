@@ -7,8 +7,11 @@
 
 @part.SSHAuthentication()
 
-@p{Use the SSH environment in your workflows}
-  @p Once the @hl.openmole("SSHAuthentication") is defined, all that is left is to define the
+@h3
+    Use the SSH environment in your workflows
+
+@p
+Once the @hl.openmole("SSHAuthentication") is defined, all that is left is to define the
   @hl.openmole("SSHEnvironment"):
   @br @hl.openmole("""
   val env =

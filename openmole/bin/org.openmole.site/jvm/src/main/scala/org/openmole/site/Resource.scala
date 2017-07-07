@@ -32,6 +32,8 @@ object Resource {
 
   def scriptResource(name: String) = fileResource(s"script/$name")
 
+  def bibtexResource(name: String) = fileResource(s"bibtex/$name")
+
   def fileResource(name: String) = FileResource(name)
 
   object img {
@@ -183,6 +185,26 @@ object Resource {
     val lunr = jsResource("lunr.min.js")
 
     val index = jsResource("index.js")
+
+  }
+
+  object bibtex {
+
+    val PSEmethodBib = bibtexResource("cherelpse2015.bib")
+
+    val multimodelBib = bibtexResource("cottineau2015multimodel.bib")
+
+    val EBIMMBib = bibtexResource("cottineauEBIMM2015.bib")
+
+    val HPCSRefBib = bibtexResource("reuillon2010HPCS.bib")
+
+    val FGCSRefBib = bibtexResource("reuillon2013FGCS.bib")
+
+    val profilemethodBib = bibtexResource("reuillonProfile2015.bib")
+
+    val halfbillionBib = bibtexResource("Schmitt2015halfbillion.bib")
+
+    val frontierBib = bibtexResource("passerat2017frontier.bib")
 
   }
 
