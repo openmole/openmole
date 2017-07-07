@@ -15,7 +15,7 @@
    version="1.1"
    id="svg4853"
    inkscape:version="0.91 r13725"
-   sodipodi:docname="completeID.svg">
+   sodipodi:docname="sobolLHSID.svg">
   <defs
      id="defs4847">
     <inkscape:path-effect
@@ -43,7 +43,7 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="4"
-     inkscape:cx="113.73253"
+     inkscape:cx="123.73253"
      inkscape:cy="30.465096"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
@@ -234,14 +234,6 @@
          x="-6.0447426"
          sodipodi:role="line"
          id="tspan5034">Sensitivity</tspan></text>
-    <rect
-       ry="0.17799951"
-       y="132.61055"
-       x="10.213411"
-       height="1.9396569"
-       width="4.9396567"
-       id="rect4775"
-       style="fill:#2f2f3b;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.06034318;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
     <text
        id="text4801"
        y="129.53354"
@@ -253,14 +245,6 @@
          x="-8.5297432"
          id="tspan4799"
          sodipodi:role="line">Optimisation</tspan></text>
-    <rect
-       style="fill:#2f2f3b;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.06034318;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       id="rect856"
-       width="4.9396567"
-       height="1.9396569"
-       x="10.213411"
-       y="127.97977"
-       ry="0.17799953" />
     <g
        id="g936"
        transform="translate(8.946943,38.421933)"
@@ -319,5 +303,21 @@
            height="137.53227"
            x="-50.204582"
            y="-25.005783" /></flowRegion><flowPara
-         id="flowPara4184" /></flowRoot>  </g>
+         id="flowPara4184" /></flowRoot>    <rect
+       ry="0.17498507"
+       y="132.74525"
+       x="10.213411"
+       height="1.9068084"
+       width="15.000002"
+       id="rect4179"
+       style="opacity:1;fill:#2f2f3b;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.09319162;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+    <rect
+       style="opacity:1;fill:#2f2f3b;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.09319162;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect4181"
+       width="15.000002"
+       height="1.9068084"
+       x="10.213411"
+       y="128.11447"
+       ry="0.17498507" />
+  </g>
 </svg>

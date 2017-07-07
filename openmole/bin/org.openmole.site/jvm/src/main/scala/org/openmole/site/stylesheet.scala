@@ -49,8 +49,9 @@ package object stylesheet {
     float := "left",
     fixedPosition,
     top := topValue,
-    marginLeft := -300,
-    textAlign := "right"
+    marginLeft := -320,
+    textAlign := "right",
+    minWidth := 180
   )
 
   lazy val navigateDoc = Seq(

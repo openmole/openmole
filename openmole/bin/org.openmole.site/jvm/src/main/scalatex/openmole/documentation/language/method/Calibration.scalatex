@@ -3,8 +3,8 @@
 @import org.openmole.site._
 @import org.openmole.site.stylesheet._
 
-@p{Calibration }
-    @p Using Genetic Algorithms (GA) , OpenMOLE find the inputs set matching one or several criteria.
+@p
+Using Genetic Algorithms (GA) , OpenMOLE find the inputs set matching one or several criteria.
 
 
 @h2{Single criterion and multi-criteria Calibration}
