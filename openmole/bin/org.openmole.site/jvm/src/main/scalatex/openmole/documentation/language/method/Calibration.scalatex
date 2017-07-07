@@ -10,9 +10,9 @@
 @h2{Single criterion and multi-criteria Calibration}
 
 
-@img(src := Resource.img.GAsingleID.file, center(60), padding := 20)
+@img(src := Resource.img.GAsingleID.file, center(65), padding := 20)
 
-@img(src := Resource.img.GAmultiID.file, center(60), padding := 20)
+@img(src := Resource.img.GAmultiID.file, center(65), padding := 20)
 
 @figure
  @img(src := Resource.img.thumbnail_calib_mono.file, center(50))

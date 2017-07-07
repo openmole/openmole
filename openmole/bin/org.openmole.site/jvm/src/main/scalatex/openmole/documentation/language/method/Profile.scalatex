@@ -4,7 +4,7 @@
 @import org.openmole.site.stylesheet._
 
 The profile method is designed to test the sensitivity of the input parameters.
-@img(src := Resource.img.profileID.file, center(60), padding := 20)
+@img(src := Resource.img.profileID.file, center(65), padding := 20)
 
 @figure
  @img(src := Resource.img.thumbnail_profiles.file, center(70), paddingTop := 10 )

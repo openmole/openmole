@@ -5,4 +5,4 @@
 Several states-of-the-art DoE methodes are also implemented in OpenMOLE. However, we recomend to first focus on OpenMOLE new methods, which have been thought to improve the drawbacks of the classical methods.
 
 @h2{Complete sampling}
-@img(src := Resource.img.completeID.file, center(60), padding := 20)
+@img(src := Resource.img.completeID.file, center(65), padding := 20)
