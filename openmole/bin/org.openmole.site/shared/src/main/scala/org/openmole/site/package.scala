@@ -25,6 +25,7 @@ package object shared {
     lazy val github = "https://github.com/openmole/openmole"
     lazy val demo = "http://demo.openmole.org"
     lazy val twitter = "https://twitter.com/OpenMOLE"
-    lazy val mailingList = "list.openmole.org"
+    lazy val blog = "blog.openmole.org"
+    lazy val mailingList = "ask.openmole.org"
   }
 }
