@@ -58,14 +58,19 @@ object Footer {
                 div(paddingTop := 15),
                 imgSubItem(Resource.img.github, "Source Repository", shared.link.github, "Follow the commits, submit an issue or take part to the devloppement !"),
                 imgSubItem(Resource.img.previousVersion, "Previous versions", Pages.previousVersions.file, "Downloads and change logs of previous versions", false),
-                imgSubItem(Resource.img.email, "Mailing list", shared.link.mailingList, "The good old way of contacting us (subscribe first)"),
+                imgSubItem(Resource.img.email, "Forum", shared.link.mailingList, "Both forum and mailing list(subscribe first)"),
                 imgSubItem(Resource.img.faq, "FAQ", Pages.faq.file, "Any questions you may have", false)
               ), liStyle),
               li(span("ABOUT US", WHITE)(
                 div(paddingTop := 15),
                 imgSubItem(Resource.img.paper, "Publications", Pages.communications.file, "Papers referencing OpenMOLE. How to cite us.", true),
-                imgSubItem(Resource.img.twitter, "Twitter", shared.link.twitter, "#openmole #model #optimization #hpc #amazing"),
-                imgSubItem(Resource.img.whoarwe, "Who are we ?", Pages.whoAreWe.file, "Developpment team, partners", false)
+                imgSubItem(Resource.img.whoarwe, "Who are we ?", Pages.whoAreWe.file, "Developpment team, partners", false),
+                imgSubItem(Resource.img.partner, "Partners", Pages.partner.file, "Developpment team, partners", false)
+              ), liStyle),
+              li(span("COMMUNICATION", WHITE)(
+                div(paddingTop := 15),
+                imgSubItem(Resource.img.blog, "Blog", shared.link.blog, "Nice stories about OpenMOLE"),
+                imgSubItem(Resource.img.twitter, "Twitter", shared.link.twitter, "#openmole #model #optimization #hpc #amazing")
               ), liStyle)
             )
           )

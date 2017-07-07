@@ -36,13 +36,15 @@ object Pages {
 
   def whoAreWe = Page("who_are_we", scalatex.WhoAreWe(), title = Some("Developers, reference publications, contact information - OpenMOLE"))
 
+  def partner = Page("partner", scalatex.Partner(), title = Some("OpenMOLE partners"))
+
   def communications = Page("communications", scalatex.Communications(), title = Some("Related papers, conference slides, videos, OpenMOLE in the news"))
 
   def faq = Page("faq", scalatex.FAQ(), title = Some("FAQ"))
 
   def previousVersions = Page("previous_versions", scalatex.PreviousVersions(), title = Some("Previous versions"))
 
-  def all: Seq[Page] = DocumentationPages.allPages ++ Seq(index, gettingStarted, whoAreWe, faq, communications, previousVersions)
+  def all: Seq[Page] = DocumentationPages.allPages ++ Seq(index, gettingStarted, whoAreWe, partner, faq, communications, previousVersions)
 
   //def rawFile(page: Page) = page.location.mkString("_") + ".html"
   def file(page: Page) = java.net.URLEncoder.encode(page.location, "UTF-8") + ".html"
