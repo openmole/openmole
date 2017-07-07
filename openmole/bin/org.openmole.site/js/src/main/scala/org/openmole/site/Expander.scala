@@ -24,16 +24,16 @@ import bs._
  */
 
 object Expander {
-  def apply() = {
-    val collapseNode = org.scalajs.dom.window.document.getElementById(shared.moreCollapse)
-
-    if (collapseNode != null) {
-      val parent = collapseNode.parentNode
-      val content = collapseNode.textContent
-      val button = bs.button("More")
-
-      parent.removeChild(collapseNode)
-      parent.appendChild(button.expandOnclick(tags.all.div(RawFrag(content))))
-    }
-  }
+  //  def apply() = {
+  //    val collapseNode = org.scalajs.dom.window.document.getElementById(shared.moreCollapse)
+  //
+  //    if (collapseNode != null) {
+  //      val parent = collapseNode.parentNode
+  //      val content = collapseNode.textContent
+  //      val button = bs.button("More")
+  //
+  //      parent.removeChild(collapseNode)
+  //      parent.appendChild(button.expandOnclick(tags.all.div(RawFrag(content))))
+  //    }
+  //  }
 }

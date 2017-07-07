@@ -22,27 +22,21 @@ import tools._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-case class Step(name: TypedTag[_ <: String], element: TypedTag[_ <: String], page: DocumentationPage, previous: DocumentationPage, next: DocumentationPage)
+case class Step(name: TypedTag[_ <: String], element: TypedTag[_ <: String], menu: TypedTag[_ <: String], page: DocumentationPage, previous: DocumentationPage, next: DocumentationPage)
 
 class StepCarousel(step: Step) {
 
+  val line = hr(classIs("line"), width := "80%", marginTop := 40)
   val render = {
     div(width := "100%")(
       glyphSpan(glyph_chevron_left, previousDoc, step.previous),
       glyphSpan(glyph_chevron_right, nextDoc, step.next),
       div(maxHeight := 100)(
         div(stepHeader)(step.name),
-        hr(classIs("line"), width := "80%", marginTop := 40)
+        line
       ),
-      step.page.intro.map { i ⇒
-        div(
-          div(paddingTop := 20, i.intro),
-          i.more.map { more ⇒
-            div(more.render, id := shared.moreCollapse)
-          }.getOrElse(div)
-        )
-      }.getOrElse(div),
-      div(paddingTop := 50)(step.element)
+      div(paddingTop := 70)(step.element),
+      step.menu
     )
   }
 }

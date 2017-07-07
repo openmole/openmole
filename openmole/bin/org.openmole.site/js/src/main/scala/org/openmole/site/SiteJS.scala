@@ -38,7 +38,6 @@ object SiteJS extends JSApp {
   @JSExport()
   def main(): Unit = {
     withBootstrapNative {
-      Expander()
       Highlighting.init
       div.render
     }

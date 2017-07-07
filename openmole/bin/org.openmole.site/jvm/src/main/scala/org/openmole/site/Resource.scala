@@ -32,6 +32,8 @@ object Resource {
 
   def scriptResource(name: String) = fileResource(s"script/$name")
 
+  def bibtexResource(name: String) = fileResource(s"bibtex/$name")
+
   def fileResource(name: String) = FileResource(name)
 
   object img {
@@ -53,6 +55,14 @@ object Resource {
     val thumbnail_sensitivity = imgResource("sensitivity.svg")
 
     val profileID = imgResource("profileID.svg")
+
+    val pseID = imgResource("pseID.svg")
+
+    val GAsingleID = imgResource("GAsingleID.svg")
+
+    val GAmultiID = imgResource("GAmultiID.svg")
+
+    val completeID = imgResource("completeID.svg")
 
     val thumbnail_pse = imgResource("pse_anim.svg")
 
@@ -101,6 +111,8 @@ object Resource {
     val twitter = imgResource("twitter.svg")
 
     val faq = imgResource("faq.svg")
+
+    val search = imgResource("search.svg")
 
     val previousVersion = imgResource("previousVersion.svg")
 
@@ -173,6 +185,26 @@ object Resource {
     val lunr = jsResource("lunr.min.js")
 
     val index = jsResource("index.js")
+
+  }
+
+  object bibtex {
+
+    val PSEmethodBib = bibtexResource("cherelpse2015.bib")
+
+    val multimodelBib = bibtexResource("cottineau2015multimodel.bib")
+
+    val EBIMMBib = bibtexResource("cottineauEBIMM2015.bib")
+
+    val HPCSRefBib = bibtexResource("reuillon2010HPCS.bib")
+
+    val FGCSRefBib = bibtexResource("reuillon2013FGCS.bib")
+
+    val profilemethodBib = bibtexResource("reuillonProfile2015.bib")
+
+    val halfbillionBib = bibtexResource("Schmitt2015halfbillion.bib")
+
+    val frontierBib = bibtexResource("passerat2017frontier.bib")
 
   }
 

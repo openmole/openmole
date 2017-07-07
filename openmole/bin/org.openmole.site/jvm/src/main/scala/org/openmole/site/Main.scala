@@ -32,7 +32,7 @@ object Main {
           img(src := Resource.img.code.file, width := 100),
           div(mainTitle, "RUN"),
           div(mainText, "OpenMOLE runs your own program, whatever the language. Java, Binary exe, NetLogo, R, SciLab, Python, C++..."),
-          readMore(UserGuide.firstModel)
+          readMore(DocumentationPages.model)
         )
       ),
       div(classIs(colMD(4)))(
@@ -40,7 +40,7 @@ object Main {
           img(src := Resource.img.exploreMap.file, width := 100),
           div(mainTitle, "EXPLORE"),
           div(mainText, "eianestainestaiu enrasuitenrauitnerauist enaruist naiusrte ansr  anuiseta nstauinesrtai nrestaui  enrsat nsta uinsretanui rset nasurite narsti e"),
-          readMore(UserGuide.firstMethod)
+          readMore(DocumentationPages.method)
         )
       ),
       div(classIs(colMD(4)))(
@@ -48,7 +48,7 @@ object Main {
           img(src := Resource.img.scale.file, width := 100),
           div(mainTitle, "SCALE"),
           div(mainText, "eianestainestaiu enrasuitenra uitneraui stenaruist naiusrte ansr anuiseta nstauinesrtai nrestaui enrsat nsta uinsretanui rset nasurite narsti e"),
-          readMore(UserGuide.firstEnvironment)
+          readMore(DocumentationPages.environment)
         )
       )
     )

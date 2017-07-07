@@ -21,9 +21,9 @@ import scaladget.stylesheet.{ all ⇒ sheet }
 import scaladget.api.{ BootstrapTags ⇒ bs }
 import scaladget.tools.JsRxTags._
 import scalatags.JsDom.all._
+import org.scalajs.dom.raw.MouseEvent
 import sheet._
 import rx._
-
 import scaladget.api.Selector.Dropdown
 import scaladget.mapping.lunr.IIndexSearchResult
 
@@ -33,43 +33,51 @@ object Search {
 
   def build = {
 
-    val searchDiv = div
-    lazy val searchInput = bs.input("")(placeholder := "Search", width := 150).render
+    val centerSearch = Seq(
+      width := 150,
+      margin := "0 auto",
+      display := "block"
+    )
+
+    val searchInput = bs.input("")(placeholder := "Search", centerSearch).render
     val result: Var[Seq[IIndexSearchResult]] = Var(Seq())
-    val resultDiv =
-      div(
-        Rx {
-          for {
-            r ← result().take(10)
-          } yield {
-            div(a(pointer, href := r.ref)(SiteJS.entries.get(r.ref)))
-          }
-        }
-      )
 
     val resultStyle: ModifierSeq = Seq(
       color := "black",
-      left := -20,
+      left := -160,
       width := 200
     )
 
-    val dd = new Dropdown(resultDiv, div(searchDiv), emptyMod, resultStyle, () ⇒ {})
+    def search = () ⇒ {
+      result() = SiteJS.search(searchInput.value)
+      false
+    }
 
-    val searchBlock = div(
+    val resultDiv = div(
       form(
-      searchInput,
-      onsubmit := { () ⇒
-        result() = SiteJS.search(searchInput.value)
-        dd.toggle
-        false
-      }
-    ).render,
-      Rx {
-        if (result().size > 0) dd.render else div.render
-      }
-    ).render
+        div(
+          searchInput,
+          Rx {
+            div(scalatags.JsDom.all.paddingTop := 20)(
+              for {
+                r ← result().take(10)
+              } yield {
+                div(a(pointer, href := r.ref)(SiteJS.entries.get(r.ref)))
+              }
+            )
+          }
+        ),
+        onsubmit := search
+      )
+    )
 
-    org.scalajs.dom.window.document.getElementById(shared.searchDiv).appendChild(searchBlock)
+    val dd = new Dropdown(resultDiv, div, emptyMod, resultStyle, () ⇒ {})
+
+    org.scalajs.dom.window.document.getElementById(shared.searchImg).addEventListener("click", {
+      (e: MouseEvent) ⇒ dd.toggle
+    })
+
+    org.scalajs.dom.window.document.getElementById(shared.searchDiv).appendChild(dd.render)
 
   }
 }

@@ -23,35 +23,24 @@ import scalatags.Text.all._
 
 object UserGuide {
 
-  private def buildTabs(docPages: Seq[DocumentationPage], current: Page) = {
-    val tabs = Tabs()
-
-    docPages.foldLeft(tabs)((tabs, p) ⇒ {
-
-      val isCurrent = p.location == current.location
-
-      val withDetails = div(
-        div(detailButtons)(
-          for {
-            d ← p.details
-          } yield {
-            div(paddingTop := 10)(linkButton(d.name, d.file, classIs(btn ++ btn_danger)))
-          }
-        ),
-        div(paddingTop := 20)(
-          if (isCurrent) div(p.content)
-          else div()
-        )
-      )
-
-      tabs.add(p.name, withDetails, isCurrent, p)
-
-    })
-  }
-
   val firstModel = DocumentationPages.scala
   val firstMethod = DocumentationPages.calibration
   val firstEnvironment = DocumentationPages.multithread
+
+  def headerModel(model: String) = span(
+    tools.to(DocumentationPages.model)(img(src := Resource.img.codeAnimated.file, headerImg)),
+    span(s"Run your own $model model", h1Like)
+  )
+
+  def headerMethod(method: String) = span(
+    tools.to(DocumentationPages.method)(img(src := Resource.img.exploreMapAnimated.file, headerImg)),
+    span(s"Explore with $method", h1Like)
+  )
+
+  def headerEnvironment(env: String) = span(
+    tools.to(DocumentationPages.environment)(img(src := Resource.img.scaleAnimated.file, headerImg)),
+    span(s"Scale on $env "), h1Like
+  )
 
   lazy val imgStyle = Seq(
     width := 100,
@@ -60,12 +49,29 @@ object UserGuide {
 
   def addCarousel(current: Page) = {
 
+    val currentDetailMenu = LeftMenu.details(current.details)
+
     val currentStep = {
       if (DocumentationPages.modelPages.contains(current))
-        Step(span(img(src := Resource.img.codeAnimated.file, imgStyle), "Run your own MODEL"), buildTabs(DocumentationPages.modelPages, current).render, firstModel, firstEnvironment, firstMethod)
+        Step(
+          headerModel(current.name),
+          div(current.content),
+          LeftMenu.model.add(currentDetailMenu).build(300),
+          firstModel, firstEnvironment, firstMethod
+        )
       else if (DocumentationPages.methodPages.contains(current))
-        Step(span(img(src := Resource.img.exploreMapAnimated.file, imgStyle), "Explore models with a METHOD"), buildTabs(DocumentationPages.methodPages, current).render, firstMethod, firstModel, firstEnvironment)
-      else Step(span(img(src := Resource.img.scaleAnimated.file, imgStyle), "Scale on an ENVIRONMENT "), buildTabs(DocumentationPages.environmentPages, current).render, firstEnvironment, firstMethod, firstModel)
+        Step(
+          headerMethod(current.name),
+          div(current.content),
+          LeftMenu.method.add(currentDetailMenu).build(300),
+          firstMethod, firstModel, firstEnvironment
+        )
+      else Step(
+        headerEnvironment(current.name),
+        div(current.content),
+        LeftMenu.environment.add(currentDetailMenu).build(300),
+        firstEnvironment, firstMethod, firstModel
+      )
     }
 
     new StepCarousel(

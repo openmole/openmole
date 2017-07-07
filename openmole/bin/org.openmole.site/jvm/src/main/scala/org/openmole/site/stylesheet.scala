@@ -36,7 +36,8 @@ package object stylesheet {
 
   def center(percentage: Int) = Seq(
     width := s"$percentage%",
-    margin := "0 auto"
+    margin := "0 auto",
+    display := "block"
   )
 
   lazy val mainDiv = Seq(
@@ -44,21 +45,21 @@ package object stylesheet {
     paddingBottom := 450
   ) ++ center(50)
 
-  lazy val detailButtons = Seq(
+  def detailButtons(topValue: Int) = Seq(
     float := "left",
     fixedPosition,
-    top := 550,
+    top := topValue,
     marginLeft := -300,
     textAlign := "right"
   )
 
   lazy val navigateDoc = Seq(
-    float := "left",
     fixedPosition,
     top := 200,
     fontSize := "32px",
     color := "black",
-    textDecoration := "none"
+    textDecoration := "none",
+    width := 30
   )
 
   lazy val stepHeader = Seq(
@@ -67,15 +68,22 @@ package object stylesheet {
     fontWeight := "bold",
     margin := "0 auto",
     minHeight := 85,
-    width := "50%"
+    width := "95%"
+  )
+
+  val headerImg = Seq(
+    padding := 10,
+    width := 130
   )
 
   lazy val previousDoc = Seq(
-    marginLeft := -200
+    float := "left",
+    left := 300
   ) ++ navigateDoc
 
   lazy val nextDoc = Seq(
-    paddingLeft := "calc(50% + 200px)"
+    right := 300,
+    float := "right"
   ) ++ navigateDoc
 
   lazy val mainTitle = Seq(
@@ -118,5 +126,14 @@ package object stylesheet {
   val partners = Seq(
     width := 270,
     padding := 50
+  )
+
+  val h1Like = Seq(
+    color := "#444",
+    fontSize := "32px",
+    fontWeight := 800,
+    margin := "0 0 24px",
+    textTransform := "uppercase",
+    paddingTop := 100
   )
 }

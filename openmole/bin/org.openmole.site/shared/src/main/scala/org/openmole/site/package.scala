@@ -19,7 +19,7 @@ package org.openmole.site
 
 package object shared {
   lazy val searchDiv = "search-div"
-  lazy val moreCollapse = "more-collapse"
+  lazy val searchImg = "search-img"
 
   object link {
     lazy val github = "https://github.com/openmole/openmole"

@@ -158,7 +158,7 @@ object Site extends App {
             val bytes = scala.io.Codec.UTF8.encoder.encode(cb)
             val target = outputRoot / page.file
             write.over(target, bytes.array())
-            LunrIndex.Index(page.file, txt)
+            LunrIndex.Index(page.file, page.name, txt)
           }
           write.over(outputRoot / "js" / "index.js", "var index = " + JsArray(res.toVector).compactPrint)
         }

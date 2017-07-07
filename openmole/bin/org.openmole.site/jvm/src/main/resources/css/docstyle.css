@@ -53,9 +53,16 @@ a {
 
 h1{
 color: #444;
-font-size: 42px;
+font-size: 32px;
 font-weight: 800;
  margin: 0 0 24px;
  text-transform: uppercase;
  padding-top: 100px;
  }
+
+code{
+    color: #c83771;
+    font-size: small;
+    background-color:white;
+    font-weight:bold;
+}
