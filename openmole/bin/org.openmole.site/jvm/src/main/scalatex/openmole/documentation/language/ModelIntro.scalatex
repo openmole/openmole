@@ -1,8 +1,0 @@
-
-@import org.openmole.site.tools._
-@import org.openmole.site._
-
-
-@p
-    Before your model can be investigated by OpenMOLE, it must be properly introduced.
-    This formal presentation is performed in various manners, depending on the language you used for your model.

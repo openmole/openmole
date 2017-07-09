@@ -2,5 +2,19 @@
 @import org.openmole.site.tools._
 @import org.openmole.site._
 
+@br@h2{
+A Computational Engine for Custom Simulation Experiments}
 
-@p This is the index page
+@def indexDiv= div(width := "75%", paddingTop := 15)
+
+@indexDiv{
+OpenMOLE has been developped since 2008 as a @b{free and open-source} platform.
+It explores, diagnoses your numerical model and optimizes its dynamics taking advantage of distributed computing environments.
+The typical usages are model calibration, model exploration, machine learning, optimization, data processing.
+}
+
+@indexDiv{
+OpenMOLE comes with web interface, that enables you to write @b{modeling-oriented scripts}. You can describe how to @b{explore} your own model and how to @b{distribute} its executions on hpc environments in a few lines of code !
+}
+
+@Main.build

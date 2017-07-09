@@ -20,15 +20,14 @@ import scala.xml._
 import spray.json._
 
 object LunrIndex {
-  def Index(url: String, text: String): JsObject = {
-    Index(url, XML.loadString(text))
+  def Index(url: String, name: String, text: String): JsObject = {
+    Index(url, name, XML.loadString(text))
   }
-  def Index(url: String, xml: Elem): JsObject = {
-    val title = (xml \\ "title").text
+  def Index(url: String, name: String, xml: Elem): JsObject = {
     val body = (xml \\ "body").text
     JsObject(
       "url" → JsString(url),
-      "title" → JsString(title),
+      "title" → JsString(name),
       "body" → JsString(body)
     )
   }

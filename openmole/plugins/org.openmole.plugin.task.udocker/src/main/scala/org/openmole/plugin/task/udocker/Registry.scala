@@ -8,8 +8,13 @@ import org.apache.http.client.methods.HttpGet
 import org.apache.http.impl.client.{ HttpClients, LaxRedirectStrategy }
 import org.apache.http.impl.conn.BasicHttpClientConnectionManager
 import DockerMetadata._
-import io.circe.generic.extras.auto._, io.circe.jawn.decode, io.circe.parser._
+import io.circe.generic.extras.auto._
+import io.circe.jawn.decode
+import io.circe.parser._
 import squants.time._
+import cats.implicits._
+import org.openmole.core.workspace.NewFile
+import org.openmole.tool.file.{ File ⇒ OMFile, FileDecorator }
 
 object Registry {
 
@@ -71,7 +76,7 @@ object Registry {
 
     }
 
-    def token(authenticationRequest: AuthenticationRequest): Either[String, Token] = {
+    def token(authenticationRequest: AuthenticationRequest): Either[Err, Token] = {
       val tokenRequest = s"${authenticationRequest.realm}?service=${authenticationRequest.service}&scope=${authenticationRequest.scope}"
       val get = new HttpGet(tokenRequest)
       execute(get) { response ⇒
@@ -82,35 +87,37 @@ object Registry {
           token ← parsed.hcursor.get[String]("token")
         } yield Token(authenticationRequest.scheme, token)
 
-        tokenRes.fold(l ⇒ Left(l.getMessage()), r ⇒ Right(r))
+        tokenRes.leftMap(l ⇒ Err(l.getMessage))
       }
     }
 
   }
 
-  def baseURL(image: DockerImage) = {
+  def baseURL(image: DockerImage): String = {
     val path = if (image.image.contains("/")) image.image else s"library/${image.image}"
     s"${image.registry}/v2/$path"
   }
 
-  def manifest(image: DockerImage, timeout: Time): Manifest = {
+  def manifest(image: DockerImage, timeout: Time): Either[Err, Manifest] = {
 
     val url = s"${baseURL(image)}/manifests/${image.tag}"
     val httpResponse = client.execute(Token.withToken(url, timeout))
     val manifestContent = content(httpResponse)
     val manifestsE = decode[ImageManifestV2Schema1](manifestContent)
 
-    // FIXME assumes it works => handle error
-    val Right(manifest) = manifestsE
-    Manifest(manifest, image)
+    val manifest = for {
+      manifest ← manifestsE
+    } yield Manifest(manifest, image)
+
+    manifest.leftMap(err ⇒ Err(err.getMessage))
   }
 
-  def layers(manifest: ImageManifestV2Schema1) = for {
+  def layers(manifest: ImageManifestV2Schema1): Seq[Layer] = for {
     fsLayers ← manifest.fsLayers.toSeq
     fsLayer ← fsLayers
   } yield Layer(fsLayer.blobSum)
 
-  def blob(image: DockerImage, layer: Layer, file: File, timeout: Time) = {
+  def blob(image: DockerImage, layer: Layer, file: File, timeout: Time): Unit = {
     val url = s"""${baseURL(image)}/blobs/${layer.digest}"""
     execute(Token.withToken(url, timeout)) { response ⇒
       val os = new FileOutputStream(file)
@@ -118,5 +125,23 @@ object Registry {
       finally os.close()
     }
   }
+
+  /**
+   * Download layer file from image if not already present in layers destination directory
+   *
+   * @param dockerImage DockerImage which layer to download
+   * @param layer layer to download
+   * @param layersDirectory Layers destination directory
+   * @param layerFile Destination file for the layer within destination directory
+   * @param timeout Download timeout
+   * @param newFile OM temporary file creation service
+   */
+  def downloadLayer(dockerImage: DockerImage, layer: Layer, layersDirectory: OMFile, layerFile: File, timeout: Time)(implicit newFile: NewFile): Unit =
+    newFile.withTmpFile { tmpFile ⇒
+      blob(dockerImage, layer, tmpFile, timeout)
+      layersDirectory.withLockInDirectory {
+        if (!layerFile.exists) tmpFile move layerFile
+      }
+    }
 
 }

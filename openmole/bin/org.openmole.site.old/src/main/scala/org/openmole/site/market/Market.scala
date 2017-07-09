@@ -129,7 +129,7 @@ class Market(repositories: Seq[MarketRepository], destination: File) {
       marketRepository ← repositories
       repository = marketRepository.repository
       project ← marketRepository.entries
-      if !testScript || test(repository.location(resourceDirectory), project)
+      //if !testScript || test(repository.location(resourceDirectory), project)
     } yield {
       val fileName = s"${project.name}.tgz".replace(" ", "_")
       val archive = archiveDirectory / fileName

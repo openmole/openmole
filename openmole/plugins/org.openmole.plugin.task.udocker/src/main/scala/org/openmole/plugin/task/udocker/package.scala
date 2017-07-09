@@ -5,11 +5,10 @@ import java.util.UUID
 import monocle.Lens
 import monocle.macros.Lenses
 import org.openmole.core.expansion.FromContext
-import org.openmole.core.fileservice.FileService
 import org.openmole.core.workflow.task.TaskExecutionContext
-import org.openmole.core.workspace.{ NewFile, Workspace }
+import org.openmole.core.workspace.Workspace
 import org.openmole.plugin.task.external.External
-import org.openmole.plugin.task.udocker.DockerMetadata.{ ContainerID, ImageJSON }
+import org.openmole.plugin.task.udocker.DockerMetadata.{ ContainerID, ImageManifestV2Schema1 }
 import org.openmole.plugin.task.udocker.Registry.LayerElement
 import org.openmole.plugin.task.udocker.UDockerTask.layersDirectory
 import org.openmole.tool.cache.{ CacheKey, WithInstance }
@@ -34,7 +33,7 @@ package object udocker extends UDockerPackage {
 
   object ContainerImage {
     implicit def fileToContainerImage(f: java.io.File) = SavedDockerImage(f)
-    implicit def strsingToContainerImage(s: String) = DockerImage(s)
+    implicit def stringToContainerImage(s: String) = DockerImage(s)
   }
 
   sealed trait ContainerImage
@@ -51,8 +50,9 @@ package object udocker extends UDockerPackage {
   case class DockerImageData(imageAndTag: Option[Array[String]], manifest: String)
   case class ValidDockerImageData(imageAndTag: (String, String), manifest: String)
 
-  // FIXME turn to plain String if useless
-  case class Err(msg: String)
+  case class Err(msg: String) {
+    def +(o: Err) = Err(msg + o.msg)
+  }
 
   def validateNonEmpty(imageAndTag: Option[Array[String]]): ValidatedNel[Err, (String, String)] = imageAndTag match {
     case Some(Array(image, tag)) ⇒ Validated.valid((image, tag))
@@ -125,7 +125,14 @@ package object udocker extends UDockerPackage {
   type ContainerId = String
 
   // TODO review data structure
-  case class LocalDockerImage(image: String, tag: String, layers: Vector[(Registry.Layer, File)], layersConfig: Vector[(Registry.LayerConfig, File)], imageJSON: String) {
+  case class LocalDockerImage(
+      image:        String,
+      tag:          String,
+      layers:       Vector[(Registry.Layer, File)],
+      layersConfig: Vector[(Registry.LayerConfig, File)],
+      imageJSON:    String,
+      manifest:     ImageManifestV2Schema1
+  ) {
     lazy val id = UUID.randomUUID().toString
   }
 

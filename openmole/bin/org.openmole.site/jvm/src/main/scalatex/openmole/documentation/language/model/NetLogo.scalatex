@@ -32,7 +32,7 @@
   val csvHook = AppendToCSVFileHook("result.csv", density, burned, seed)"""
 
 @p{Embed your NetLogo model}
-  In this example, we present step by step how to explore a NetLogo model. @a("The Fire model", href := Resource.fireNLogo.file) is a
+      In this example, we present step by step how to explore a NetLogo model. @a("The Fire model", href := Resource.script.fireNLogo.file) is a
   common NetLogo example. It studies the percolation of a fire in a forest depending on the density of the forest.
 
   @p{The simulation}
@@ -54,11 +54,11 @@
 	  @li{an integer (Int) representing the seed of the random number generator for exploring the replications,}
 	  @li{and a Double to set the value of @i{density},}
 
-    @br @hl.openmole(variables)
+    @br @hl.openmole(variables, name = "netlogo variables")
 
     @p Given these variables, the definition of the exploration in OpenMOLE writes as follows:
 
-    @br @hl.openmole(exploration, header = variables)
+    @br @hl.openmole(exploration, header = variables, name = "netlogo exploration")
 
     @p This design of experiment will generate 70 distinct sets of input values for the NetLogo model:
     @ul
@@ -87,7 +87,7 @@
 	s"""
 	$variables
 	$exploration
-	""")
+	""", name = "netlogo task")
 
     @p The @i{replication} and the @i{density} OpenMOLE variables are used as parameters of the NetLogo program.
     Therefore they appear as inputs of the NetLogoTask.
@@ -99,7 +99,7 @@
     OpenMOLE usually delegates the tasks execution to many different computers. To gather the results of these remote
     executions, we use a mechanism called @i{hooks}. Hooks can be assimilated to a listener that saves or display
     results. They are more thoroughly described in a
-    @a("specific section of the documentation", href := DocumentationPages.root.language.hook.file).
+    @a("specific section of the documentation", href := DocumentationPages.hook.file).
 
     @p Here we will create a hook to listen to the model executions and save the results in a CSV file at the end of
     each of the 70 runs.
@@ -109,7 +109,7 @@
 	$variables
 	$exploration
 	$netlogo
-	""")
+	""", name = "netlogo hook")
 
   @p{Bringing all the pieces together}
     Now that we have defined each component, we can compose the workflow that brings all the pieces of the simulation
@@ -120,9 +120,9 @@ $exploration
 $netlogo
 $csvHook
 
-  exploration -< (fireTask hook csvHook)""")
+  exploration -< (fireTask hook csvHook)""", name = "netlogo full workflow")
 
     @p The progress of the simulation can be monitored by printing the state of the execution variable:
-    @hl.openmoleNoTest("print(ex)").
+    @hl.code("print(ex)").
 
     @p At the end of the execution, you will find the output values in a file called @i{result.csv}.

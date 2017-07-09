@@ -137,11 +137,15 @@ class Runtime {
 
       /* --- Submit all jobs to the local environment --*/
       logger.fine("Run the jobs")
-      val environment = LocalEnvironment(nbThreads = threads)
-      val taskExecutionContext = TaskExecutionContext(newFile.newDir("runtime"), environment, preference, threadProvider, fileService, workspace, KeyValueCache(), LockRepository[LockKey]())
-      for (toProcess ← allMoleJobs) environment.submit(toProcess, taskExecutionContext)
+      val environment = LocalEnvironment(nbThreads = threads).apply()
+      environment.start()
 
-      saver.waitAllFinished
+      try {
+        val taskExecutionContext = TaskExecutionContext(newFile.newDir("runtime"), environment, preference, threadProvider, fileService, workspace, KeyValueCache(), LockRepository[LockKey]())
+        for (toProcess ← allMoleJobs) environment.submit(toProcess, taskExecutionContext)
+        saver.waitAllFinished
+      }
+      finally environment.stop()
 
       val endExecutionTime = System.currentTimeMillis
 

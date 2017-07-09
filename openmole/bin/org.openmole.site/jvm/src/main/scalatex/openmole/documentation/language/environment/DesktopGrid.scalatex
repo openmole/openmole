@@ -11,7 +11,7 @@
 
   @p The only parameter is the port on which the desktop grid server is listening.
 
-  @p Once your workflow has been started you @a(b("download the OpenMOLE daemon"), href := openmoleDaemon.file), and run it to execute jobs on other computers. Extract the daemon from the archive and run it with the following command:
+  @p Once your workflow has been started you @a(b("download the OpenMOLE daemon"), href := script.openmoleDaemon.file), and run it to execute jobs on other computers. Extract the daemon from the archive and run it with the following command:
 
   @br @hl.highlight("""./openmole-daemon -h hostname.of.the.server:port -p test -w nbWorker""", "plain")
   @p Windows users shall use the @i{run.bat} script with the same arguments.

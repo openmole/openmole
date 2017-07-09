@@ -19,7 +19,6 @@
 package org.openmole.plugin.task.udocker
 
 import java.util.UUID
-import java.util.concurrent.locks.ReentrantLock
 
 import monocle.macros._
 import cats.implicits._
@@ -29,12 +28,9 @@ import org.openmole.core.workspace._
 import org.openmole.core.context._
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.workflow.builder._
-import org.openmole.tool.stream._
 import org.openmole.core.expansion._
 import org.openmole.plugin.task.external._
 import org.openmole.plugin.task.systemexec._
-import org.openmole.plugin.task.container._
-import org.openmole.core.fileservice.FileService
 import org.openmole.core.preference._
 import org.openmole.plugin.task.container
 import org.openmole.plugin.task.udocker.DockerMetadata._
@@ -43,7 +39,6 @@ import org.openmole.tool.cache._
 import squants._
 import squants.time.TimeConversions._
 import org.openmole.tool.file._
-import org.openmole.tool.lock._
 import io.circe.generic.extras.auto._
 import io.circe.jawn.{ decode, decodeFile }
 import io.circe.syntax._
@@ -75,7 +70,10 @@ object UDockerTask {
   )(implicit name: sourcecode.Name, newFile: NewFile, workspace: Workspace, preference: Preference): UDockerTask = {
     val uDocker =
       UDocker(
-        localDockerImage = toLocalImage(image).get,
+        localDockerImage = toLocalImage(image) match {
+          case Right(x) ⇒ x
+          case Left(x)  ⇒ throw new UserBadDataError(x.msg)
+        },
         command = command,
         installCommands = installCommands
       )
@@ -94,7 +92,6 @@ object UDockerTask {
       external = External()
     )
 
-  // TODO make vals??
   def layersDirectory(workspace: Workspace) = workspace.persistentDir /> "udocker" /> "layers"
 
   def repositoriesDirectory(workspace: Workspace) = workspace.persistentDir /> "udocker" /> "repos"
@@ -105,38 +102,32 @@ object UDockerTask {
     def layerFile(workspace: Workspace, layer: Layer) = layersDirectory(workspace) / layer.digest
 
     val m = manifest(dockerImage, timeout)
-    val ls = layers(m.value)
     val lDirectory = layersDirectory(workspace)
 
     val localLayers =
-      for { l ← ls } yield {
+      for {
+        manif ← m.toSeq.toVector
+        l ← layers(manif.value)
+      } yield {
         val lf = layerFile(workspace, l)
-        // TODO unify with buildRepoV2 (duplicate code)
-        def downloadLayer =
-          newFile.withTmpFile { tmpFile ⇒
-            blob(dockerImage, l, tmpFile, timeout)
-            lDirectory.withLockInDirectory {
-              if (!lf.exists) tmpFile move lf
-            }
-          }
-
-        if (!lf.exists) downloadLayer
+        if (!lf.exists) downloadLayer(dockerImage, l, lDirectory, lf, timeout)
         l → lf
       }
 
-    // FIXME how reliable is it to assume config in first v1Compat string?
-    val imageConfig = for {
-      v1 ← m.value.history.map(_.head)
-    } yield v1.v1Compatibility
+    for {
+      manif ← m
+      history = manif.value.history
+      hist = Either.cond(history.isDefined, history.get, Err("No history field in Docker manifest"))
+      v1 ← hist.map(_.head)
+    } yield {
 
-    val localImage = LocalDockerImage(dockerImage.image, dockerImage.tag, localLayers.toVector, Vector.empty, imageConfig.getOrElse(""))
-
-    buildRepoV2(localImage, m.value)
-
-    localImage
+      // FIXME how reliable is it to assume config in first v1Compat string?
+      val imageConfig = v1.v1Compatibility
+      LocalDockerImage(dockerImage.image, dockerImage.tag, localLayers, Vector.empty, imageConfig, manif.value)
+    }
   }
 
-  def buildRepoV2(localDockerImage: LocalDockerImage, manifest: ImageManifestV2Schema1)(implicit workspace: Workspace): Unit = {
+  def buildRepoV2(localDockerImage: LocalDockerImage)(implicit workspace: Workspace): Unit = {
     val layerDir = layersDirectory(workspace)
     val reposDir = repositoriesDirectory(workspace)
     val imageRepositoryDirectory = reposDir /> localDockerImage.image /> localDockerImage.tag
@@ -158,7 +149,7 @@ object UDockerTask {
 
     val imageId = s"${localDockerImage.image}:${localDockerImage.tag}"
 
-    imageRepositoryDirectory / "manifest" content = manifest.asJson.toString
+    imageRepositoryDirectory / "manifest" content = localDockerImage.manifest.asJson.toString
     imageRepositoryDirectory / "TAG" content = s"$reposDir/$imageId"
     imageRepositoryDirectory / "v2" content = ""
   }
@@ -168,7 +159,7 @@ object UDockerTask {
    *
    * Assume v1.x Image JSON format and registry protocol v2 Schema 1
    */
-  def loadImage(dockerImage: SavedDockerImage)(implicit newFile: NewFile, workspace: Workspace): Either[String, LocalDockerImage] = newFile.withTmpDir { extractedImage ⇒
+  def loadImage(dockerImage: SavedDockerImage)(implicit newFile: NewFile, workspace: Workspace): Either[Err, LocalDockerImage] = newFile.withTmpDir { extractedImage ⇒
 
     import org.openmole.tool.tar._
 
@@ -177,74 +168,66 @@ object UDockerTask {
     val manifestContent = (extractedImage / "manifest.json").content
     val topLevelManifests = decode[List[TopLevelImageManifest]](manifestContent)
     val topLevelImageManifest = topLevelManifests.map(_.head)
-    val layersNamesE = topLevelImageManifest.map(_.Layers.distinct)
-    val layersConfigsE = layersNamesE.map(layers ⇒ layers.map(path ⇒ s"${path.split("/").head}/json"))
 
-    // FIXME change pattern matching
-    val Right((layersNames, layersConfigs)) = for {
-      layersNames ← layersNamesE
-      layersConfigs ← layersConfigsE
-    } yield (layersNames, layersConfigs)
-
-    val layers =
-      layersNames.map(l ⇒ moveLayerElement[Layer](extractedImage, l, "layer", Layer.apply))
-    val configs = layersConfigs.map(c ⇒ moveLayerElement[LayerConfig](extractedImage, c, "json", LayerConfig.apply))
-
-    val Right((imageAndTag, imageJSOName)) = for {
-      topLevelManifest ← topLevelImageManifest
-      imageAndTag = topLevelManifest.RepoTags.map(_.split(":")).headOption
-      imageJSONName = topLevelManifest.Config
-    } yield (imageAndTag, imageJSONName)
-
-    val v = validateDockerImage(DockerImageData(imageAndTag, imageJSOName)) bimap (
-
-      errors ⇒ errors.foldLeft("\n") { case (acc, err) ⇒ acc + err.msg },
-
-      validImage ⇒ {
-
-        val ValidDockerImageData((image, tag), imageJSONName) = validImage
-        val imageJSONString = (extractedImage / imageJSONName).content
-        LocalDockerImage(image, tag, layers, configs, imageJSONString)
-      }
-    )
-
-    for {
-      localImage ← v.toEither
-      imageJSON ← decode[ImageJSON](localImage.imageJSON).leftMap(_.toString)
+    val validatedInfo = for {
+      layersNames ← topLevelImageManifest.map(_.Layers.distinct)
+      topLevelManifest ← topLevelManifests.map(_.head)
     } yield {
 
-      val (fsLayers, history) = localImage.layers.zip(localImage.layersConfig).map {
-        case ((layer, _), (_, layerConfigFile)) ⇒
-          val layerDigest = DockerMetadata.Digest(layer.digest)
+      val layersConfigs = layersNames.map(path ⇒ s"${path.split("/").head}/json")
+
+      val imageLayers =
+        layersNames.map(l ⇒ moveLayerElement[Layer](extractedImage, l, "layer", Layer.apply))
+      val configs = layersConfigs.map(c ⇒ moveLayerElement[LayerConfig](extractedImage, c, "json", LayerConfig.apply))
+
+      val imageAndTag = topLevelManifest.RepoTags.map(_.split(":")).headOption
+      val imageJSONName = topLevelManifest.Config
+
+      validateDockerImage(DockerImageData(imageAndTag, imageJSONName)) bimap (
+
+        errors ⇒ errors.foldLeft(Err("\n")) { case (acc, err) ⇒ acc + err },
+
+        validImage ⇒ {
+
+          val ValidDockerImageData((image: String, tag: String), imageJSONName) = validImage
+          val imageJSONString = (extractedImage / imageJSONName).content
+          (image, tag, imageJSONString, imageLayers, configs)
+        }
+      )
+    }
+
+    for {
+      v ← validatedInfo.leftMap(l ⇒ Err(l.getMessage))
+      infos ← v.toEither
+      (image, tag, imageJSONString, imageLayers, configs) = infos
+      imageJSON ← decode[ImageJSON](imageJSONString).leftMap(l ⇒ Err(l.toString))
+    } yield {
+
+      val (fsLayers, history) = imageLayers.zip(configs).map {
+        case ((imageLayer, _), (_, layerConfigFile)) ⇒
+          val layerDigest = DockerMetadata.Digest(imageLayer.digest)
           val imageJSON = decodeFile[ImageJSON](layerConfigFile)
 
           (layerDigest, imageJSON)
       }.toList.unzip
 
       val manifest = DockerMetadata.ImageManifestV2Schema1(
-        name = Some(localImage.image),
-        tag = Some(localImage.tag),
+        name = Some(image),
+        tag = Some(tag),
         architecture = Some(imageJSON.architecture),
         fsLayers = Some(fsLayers),
         history = history.sequenceU.toOption.map(histList ⇒ histList.map(h ⇒ DockerMetadata.V1History(h.asJson.toString))),
         schemaVersion = Some(1)
       )
 
-      buildRepoV2(localImage, manifest)
-      localImage
+      LocalDockerImage(image, tag, imageLayers, configs, imageJSONString, manifest)
     }
   }
 
-  def toLocalImage(containerImage: ContainerImage)(implicit preference: Preference, newFile: NewFile, workspace: Workspace): util.Try[LocalDockerImage] =
+  def toLocalImage(containerImage: ContainerImage)(implicit preference: Preference, newFile: NewFile, workspace: Workspace): Either[Err, LocalDockerImage] =
     containerImage match {
-      // TODO Eitherify download
-      // Left(s"Failed to download docker image $i")
-      case i: DockerImage ⇒ util.Try(downloadImage(i, preference(RegistryTimeout)))
-      case i: SavedDockerImage ⇒
-        loadImage(i) match {
-          case Right(x) ⇒ util.Success(x)
-          case Left(x)  ⇒ util.Failure(new UserBadDataError(x))
-        }
+      case i: DockerImage      ⇒ downloadImage(i, preference(RegistryTimeout))
+      case i: SavedDockerImage ⇒ loadImage(i)
     }
 
 }
@@ -267,6 +250,7 @@ object UDockerTask {
     import parameters._
 
     val (uDockerFile, installVariables) = installUDocker(executionContext, executionContext.tmpDirectory)
+    UDockerTask.buildRepoV2(uDocker.localDockerImage)(executionContext.workspace)
 
     External.withWorkDir(executionContext) { taskWorkDirectory ⇒
       taskWorkDirectory.mkdirs()
@@ -315,15 +299,13 @@ object UDockerTask {
       val volumes = prepareVolumes(preparedFilesInfo, containerPathResolver, uDocker.hostFiles)
 
       def newContainer(imageId: String)() = newFile.withTmpDir { tmpDirectory ⇒
-        val name = containerName(UUID.randomUUID().toString)
+        val name = containerName(UUID.randomUUID().toString).take(10)
 
         val cl = commandLine(s"${uDockerFile.getAbsolutePath} create --name=$name $imageId")
         execute(cl.toArray, tmpDirectory, udockerVariables(), returnOutput = true, returnError = true)
 
         if (!uDocker.installCommands.isEmpty) {
           val runInstall = uDocker.installCommands.map(ic ⇒ runCommand(uDocker)(uDockerFile, volumes.toVector, name, ic))
-
-          println(runInstall.map(_.from(preparedContext)))
 
           executeAll(
             tmpDirectory,

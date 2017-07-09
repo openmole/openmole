@@ -20,20 +20,21 @@ package org.openmole.plugin.tool.sftpserver
 import java.io.File
 import java.util.concurrent.ThreadPoolExecutor
 
+import org.apache.sshd.common.NamedFactory
 import org.apache.sshd.common.file._
 import org.apache.sshd.common.file.root.RootedFileSystemProvider
 import org.apache.sshd.common.session.Session
-import org.apache.sshd.server.SshServer
-import org.apache.sshd.server.auth.password.PasswordAuthenticator
-import org.apache.sshd.server.command.ScpCommandFactory
-import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider
-import org.apache.sshd.server.session.ServerSession
-import org.apache.sshd.server.subsystem.sftp.SftpSubsystemFactory
+import org.apache.sshd.server._
+import org.apache.sshd.server.auth.password._
+import org.apache.sshd.server.scp._
+import org.apache.sshd.server.keyprovider._
+import org.apache.sshd.server.session._
+import org.apache.sshd.server.subsystem.sftp._
 import org.openmole.tool.hash._
 import org.openmole.tool.logger.Logger
 import org.openmole.tool.thread._
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 object SFTPServer extends Logger
 
@@ -44,10 +45,10 @@ class SFTPServer(path: File, port: Int, passwordHash: Hash)(implicit val pool: T
   lazy val sshd = {
     val sshd = SshServer.setUpDefaultServer
 
-    def fileSystem = new RootedFileSystemProvider().newFileSystem(path.toPath, Map.empty[String, Object])
+    def fileSystem = new RootedFileSystemProvider().newFileSystem(path.toPath, Map.empty[String, Object].asJava)
 
     sshd.setPort(port)
-    sshd.setSubsystemFactories(List(new SftpSubsystemFactory))
+    sshd.setSubsystemFactories((List(new SftpSubsystemFactory): List[NamedFactory[Command]]).asJava)
     sshd.setCommandFactory(new ScpCommandFactory)
     sshd.setFileSystemFactory(new FileSystemFactory {
       override def createFileSystem(s: Session) = fileSystem

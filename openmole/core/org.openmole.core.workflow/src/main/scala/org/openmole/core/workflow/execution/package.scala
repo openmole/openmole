@@ -33,4 +33,16 @@ package object execution {
       }
     }
 
+  object EnvironmentProvider {
+    def apply(build: () ⇒ Environment) = build
+  }
+
+  type EnvironmentProvider = () ⇒ Environment
+
+  object LocalEnvironmentProvider {
+    def apply(build: () ⇒ LocalEnvironment) = build
+  }
+
+  type LocalEnvironmentProvider = () ⇒ LocalEnvironment
+
 }

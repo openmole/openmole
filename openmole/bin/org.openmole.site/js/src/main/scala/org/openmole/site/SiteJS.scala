@@ -1,5 +1,7 @@
 package org.openmole.site
 
+import org.scalajs.dom.raw.HTMLElement
+
 import scaladget.api.{ BootstrapTags ⇒ bs }
 import scaladget.tools.JsRxTags._
 import scala.scalajs.js.JSApp
@@ -35,25 +37,27 @@ object SiteJS extends JSApp {
 
   @JSExport()
   def main(): Unit = {
-
-    val menu = Menu.build.render
-    JSPages.toJSPage(org.scalajs.dom.window.location.pathname.split('/').last) foreach { page ⇒
-
-      if (JSPages.topPagesChildren.contains(page)) UserGuide.addCarousel(page)
-      else MainPage.load(page)
-
-      withBootstrapNative {
-        menu
-      }
-
+    withBootstrapNative {
       Highlighting.init
+      div.render
     }
+
   }
 
+  implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
+  @js.native
+  trait IndexEntry extends js.Object {
+    val title: String = js.native
+    val url: String = js.native
+  }
+  type Entries = collection.mutable.Map[String, String]
+
   val lunrIndex: Var[Option[Index]] = Var(None)
+  var entries: Entries = collection.mutable.Map.empty
 
   @JSExport
   def loadIndex(indexArray: js.Array[js.Any]): Unit = {
+    Search.build
 
     val index = Importedjs.lunr((i: Index) ⇒ {
       i.field("title", lit("boost" → 10).value)
@@ -61,30 +65,12 @@ object SiteJS extends JSApp {
       i.ref("url")
       indexArray.foreach(p ⇒ {
         i.add(p)
+        val ie = p.asInstanceOf[IndexEntry]
+        entries.update(ie.url, ie.title)
       })
     })
 
     lunrIndex() = Some(index)
-    //    val resultList = tags.div(
-    //      Rx {
-    //        for {r ← results()} yield {
-    //          tags.div(
-    //            tags.span(
-    //              tags.a(r.ref, cursor := "pointer", href := r.ref, target := "_blank")
-    //            )
-    //          )
-    //        }
-    //      }
-    //    ).render
-
-    //      dom.document.getElementById("openmoleSearch").appendChild(
-    //        tags.div(
-    //          form(`type` := "submit", searchInput, textAlign := "center", onsubmit := { () ⇒
-    //            search()
-    //            false
-    //          }), resultList
-    //        ).render
-    //      )
   }
 
   def search(content: String): Seq[IIndexSearchResult] = {
@@ -92,4 +78,5 @@ object SiteJS extends JSApp {
       i.search(content).toSeq
     }.getOrElse(Seq())
   }
+
 }

@@ -142,7 +142,7 @@ object WorkflowIntegration {
     ag:         AG,
     genome:     UniqueGenome,
     objectives: Objectives
-  )(implicit val algorithm: mgo.openmole.Integration[AG, Vector[Double], Vector[Double]])
+  )(implicit val algorithm: MGOAPI.Integration[AG, Vector[Double], Vector[Double]])
 
   object DeterministicGA {
     implicit def deterministicGAIntegration[AG] = new WorkflowIntegration[DeterministicGA[AG]] {
@@ -157,7 +157,7 @@ object WorkflowIntegration {
     replication: Stochastic[Seq]
   )(
     implicit
-    val algorithm: mgo.openmole.Integration[AG, Vector[Double], Vector[Double]] with mgo.openmole.Stochastic
+    val algorithm: MGOAPI.Integration[AG, Vector[Double], Vector[Double]] with MGOAPI.Stochastic
   )
 
   object StochasticGA {
@@ -177,7 +177,7 @@ trait EvolutionWorkflow {
   type MGOAG
   def mgoAG: MGOAG
 
-  val integration: mgo.openmole.Integration[MGOAG, V, P]
+  val integration: MGOAPI.Integration[MGOAG, V, P]
   import integration._
 
   def operations = integration.operations(mgoAG)
@@ -221,7 +221,7 @@ trait EvolutionWorkflow {
 object GAIntegration {
 
   def scaled(inputs: UniqueGenome, values: Seq[Double]) = FromContext { p ⇒
-    InputConverter.scaled(inputs.inputs.toList, values.toList)(p.context, p.random, p.newFile, p.fileService)
+    Genome.InputConverter.scaled(inputs.inputs.toList, values.toList)(p.context, p.random, p.newFile, p.fileService)
   }
 
   def genomesOfPopulationToVariables[I](inputs: UniqueGenome, population: Vector[I], genomeValues: I ⇒ Vector[Double]) =
@@ -278,6 +278,65 @@ object StochasticGAIntegration {
     GAIntegration.populationToVariables[I](genome, objectives, genomeValues, phenotypeValues)(population).map {
       _ ++ Seq(Variable(samplesPrototype.toArray, population.map(samples).toArray))
     }
+
+}
+
+object MGOAPI {
+
+  import cats.Monad
+  import mgo.{ breeding, contexts, elitism }
+
+  import contexts._
+  import breeding._
+  import elitism._
+  import squants._
+
+  trait Integration[A, V, P] {
+    type M[_]
+    type I
+    type G
+    type S
+
+    implicit def iManifest: Manifest[I]
+    implicit def gManifest: Manifest[G]
+    implicit def sManifest: Manifest[S]
+
+    implicit def mMonad: Monad[M]
+    implicit def mGeneration: Generation[M]
+    implicit def mStartTime: StartTime[M]
+
+    def operations(a: A): Ops
+
+    trait Ops {
+      def initialState(rng: util.Random): S
+      def initialGenomes(n: Int): M[Vector[G]]
+      def buildIndividual(genome: G, phenotype: P): I
+      def values(genome: G): V
+      def genome(individual: I): G
+      def phenotype(individual: I): P
+      def genomeValues(individual: I) = values(genome(individual))
+      def randomLens: monocle.Lens[S, util.Random]
+      def startTimeLens: monocle.Lens[S, Long]
+      def generation(s: S): Long
+      def breeding(n: Int): Breeding[M, I, G]
+      def elitism: Elitism[M, I]
+      def migrateToIsland(i: Vector[I]): Vector[I]
+      def migrateFromIsland(population: Vector[I]): Vector[I]
+    }
+
+    def run[T](s: S, m: M[T]): (S, T)
+
+    def afterGeneration(g: Long) = mgo.afterGeneration[M, I](g)
+    def afterDuration(d: Time) = mgo.afterDuration[M, I](d)
+  }
+
+  trait Stochastic { self: Integration[_, _, _] ⇒
+    def samples(s: I): Long
+  }
+
+  trait Profile[A] { self: Integration[A, _, _] ⇒
+    def profile(a: A)(population: Vector[I]): Vector[I]
+  }
 
 }
 

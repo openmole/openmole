@@ -35,7 +35,7 @@
 
     exploration -< (t1 hook ToStringHook())""")
 
-    @p You can read more about @a("Explorations and Samplings", href := DocumentationPages.root.language.sampling.file)
+    @p You can read more about @a("Explorations and Samplings", href := DocumentationPages.sampling.file)
     in the relevant section of the documentation.
 
   @p{Combining transitions}
@@ -111,8 +111,8 @@
       val c1 = Capsule(t1)
       """)
     @p Capsules are the atomic element in the workflow which transitions are plugged to. Capsules also serve as an entry
-    point on which @a("Hooks", href := DocumentationPages.root.language.hook.file), @a("Sources", href := DocumentationPages.root.language.source.file) and
-    @a("Execution Environments", href := DocumentationPages.root.language.environment.file) are specified.
+    point on which @a("Hooks", href := DocumentationPages.hook.file), @a("Sources", href := DocumentationPages.source.file) and
+    @a("Execution Environments", href := DocumentationPages.environment.file) are specified.
 
     @p When a task is directly linked to another without explicitly specifying a Capsule, @b{a new capsule is created}.
     It means that for several transitions to reach the same task, the Capsule should be created explicitly.

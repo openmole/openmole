@@ -1,16 +1,30 @@
 package org.openmole.site
 
-/**
- * Created by mathieu on 11/05/17.
+/*
+ * Copyright (C) 11/05/17 // mathieu.leclaire@openmole.org
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package object shared {
+  lazy val searchDiv = "search-div"
+  lazy val searchImg = "search-img"
 
-  lazy val sitexMain = "sitex-main"
-  lazy val sitexDoc = "sitex-doc"
-  lazy val sitexIntro = "sitex-intro"
-  lazy val sitexIntroMore = "sitex-intro-more"
-  lazy val sitexDocDetails = "sitex-doc-details"
-  lazy val sitexMarket = "sitex-market"
-
+  object link {
+    lazy val github = "https://github.com/openmole/openmole"
+    lazy val demo = "http://demo.openmole.org"
+    lazy val twitter = "https://twitter.com/OpenMOLE"
+    lazy val mailingList = "list.openmole.org"
+  }
 }

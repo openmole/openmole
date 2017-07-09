@@ -47,10 +47,11 @@ package object buildinfo {
     }
 
   def marketName = "market.json"
-  def marketAddress = url(marketName)
+  def marketAddress = marketURL(marketName)
+  def marketURL(entry: String) = url(s"market/$entry")
 
   def moduleListName = "modules.json"
-  def moduleAddress = url(moduleListName)
+  def moduleAddress = url(s"modules/$moduleListName")
 
   def url(entry: String): String = siteURL + "/" + entry
 
