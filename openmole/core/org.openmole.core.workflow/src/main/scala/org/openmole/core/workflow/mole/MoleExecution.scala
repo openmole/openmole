@@ -132,9 +132,10 @@ class MoleExecution(
   private val nbWaiting = Ref(0)
   private val _completed = Ref(0L)
 
-  lazy val environments = environmentProviders.toVector.map { case (k, v) ⇒ k → v() }.toMap
+  lazy val environmentInstances = environmentProviders.toVector.map { case (k, v) ⇒ v }.distinct.map { v ⇒ v → v() }.toMap
+  lazy val environments = environmentProviders.toVector.map { case (k, v) ⇒ k → environmentInstances(v) }.toMap
   lazy val defaultEnvironment = defaultEnvironmentProvider()
-  def allEnvironments = (environments.values ++ Seq(defaultEnvironment)).toSeq.distinct
+  def allEnvironments = (environmentInstances.values ++ Seq(defaultEnvironment)).toVector.distinct
 
   val rootSubMoleExecution = new SubMoleExecution(None, this)
   val rootTicket = Ticket(id, ticketNumber.next)
