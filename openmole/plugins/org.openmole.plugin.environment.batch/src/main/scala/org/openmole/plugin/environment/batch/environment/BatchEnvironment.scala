@@ -166,6 +166,8 @@ trait BatchEnvironment extends SubmissionEnvironment { env ⇒
 
   lazy val replBundleCache = new AssociativeCache[ReferencedClasses, FileCache]()
 
+  lazy val replBundleCache = new AssociativeCache[ReferencedClasses, FileCache]()
+
   def threads: Option[Int] = None
   def openMOLEMemory: Option[Information]
 
