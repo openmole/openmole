@@ -159,24 +159,18 @@ trait BatchEnvironment extends SubmissionEnvironment { env ⇒
   implicit def preference = services.preference
   implicit def eventDispatcher = services.eventDispatcher
 
-  def jobs = batchJobWatcher().executionJobs
-
   def executionJob(job: Job): BatchExecutionJob
 
-  @transient val batchJobWatcher = Cache {
-    val watcher = new BatchJobWatcher(WeakReference(this), preference)
-    import services._
-    Updater.registerForUpdate(watcher)
-    watcher
-  }
+  lazy val batchJobWatcher = new BatchJobWatcher(WeakReference(this), preference)
+  def jobs = batchJobWatcher.executionJobs
 
   def threads: Option[Int] = None
   def openMOLEMemory: Option[Information]
 
   override def submit(job: Job) = {
     val bej = executionJob(job)
+    batchJobWatcher.register(bej)
     eventDispatcher.trigger(this, new Environment.JobSubmitted(bej))
-    batchJobWatcher().register(bej)
     JobManager ! Manage(bej)
   }
 
@@ -197,9 +191,16 @@ trait BatchEnvironment extends SubmissionEnvironment { env ⇒
 
   def runtimeSettings = RuntimeSettings(archiveResult = false)
 
+  override def start() = {
+    super.start()
+    import services.threadProvider
+    Updater.registerForUpdate(batchJobWatcher)
+  }
+
   override def stop() = {
+    super.stop()
     jobs.foreach(ej ⇒ JobManager ! Kill(ej))
-    batchJobWatcher().stop = true
+    batchJobWatcher.stop = true
   }
 
 }
