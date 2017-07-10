@@ -21,6 +21,11 @@ package object shared {
   lazy val searchDiv = "search-div"
   lazy val searchImg = "search-img"
 
+  object profile {
+    val button = "profileTrigger"
+    val svgID = "profileSVG"
+    val animation = "startProfileAnim"
+  }
   object link {
     lazy val github = "https://github.com/openmole/openmole"
     lazy val demo = "http://demo.openmole.org"

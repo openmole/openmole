@@ -90,6 +90,9 @@ package object tools {
   def glyphSpan(glyphicon: String, style: Seq[Modifier], page: Page, text: String = ""): TypedTag[_ <: String] =
     to(page)(classIs(glyphicon), style, pointer, aria.hidden := "true")(text)
 
+  def basicButton(title: String, buttonStyle: AttrPair = classIs(btn ++ btn_default)) =
+    span(buttonStyle, `type` := "button", title)
+
   lazy val nav: String = "nav"
   lazy val navbar: String = "navbar"
   lazy val navbar_nav: String = "navbar-nav"

@@ -144,8 +144,17 @@ object Site extends App {
               }
             ),
             Footer.build,
-            onload := "org.openmole.site.SiteJS().main();org.openmole.site.SiteJS().loadIndex(index);"
+            onload := onLoadString(page)
           )
+        }
+
+        private def onLoadString(sitepage: org.openmole.site.Page) = {
+          val toBeAppended = sitepage match {
+            case DocumentationPages.profile ⇒ "org.openmole.site.SiteJS().profileAnimation();"
+            case _                          ⇒ ""
+          }
+
+          "org.openmole.site.SiteJS().main();org.openmole.site.SiteJS().loadIndex(index);" + toBeAppended
         }
 
         override def generateHtml(outputRoot: Path) = {
