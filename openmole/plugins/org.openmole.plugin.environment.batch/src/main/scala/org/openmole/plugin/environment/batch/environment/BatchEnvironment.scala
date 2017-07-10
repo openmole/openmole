@@ -196,6 +196,12 @@ trait BatchEnvironment extends SubmissionEnvironment { env ⇒
   def running: Long = jobs.count { _.state == ExecutionState.RUNNING }
 
   def runtimeSettings = RuntimeSettings(archiveResult = false)
+
+  override def stop() = {
+    jobs.foreach(ej ⇒ JobManager ! Kill(ej))
+    batchJobWatcher().stop = true
+  }
+
 }
 
 class SimpleBatchExecutionJob(val job: Job, val environment: SimpleBatchEnvironment) extends ExecutionJob with BatchExecutionJob { bej ⇒
