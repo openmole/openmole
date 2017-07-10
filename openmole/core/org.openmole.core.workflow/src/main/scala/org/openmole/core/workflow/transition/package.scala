@@ -26,17 +26,6 @@ package transition {
   import org.openmole.core.context.Val
   import org.openmole.core.expansion.{ Condition, FromContext }
 
-  case class TransitionParameter(
-      puzzleParameter:    Puzzle,
-      conditionParameter: Condition = Condition.True,
-      filterParameter:    BlockList = BlockList.empty
-  ) {
-    def when(condition: Condition) = copy(conditionParameter = condition)
-    def filter(filter: BlockList) = copy(filterParameter = filter)
-    def keep(prototypes: Val[_]*) = filter(Keep(prototypes: _*))
-    def block(prototypes: Val[_]*) = filter(Block(prototypes: _*))
-  }
-
   trait TransitionDecorator {
     def from: Puzzle
 
@@ -63,50 +52,23 @@ package transition {
       Puzzle.merge(from.firstSlot, to.lasts, from :: to :: Nil, transitions)
     }
 
-    def -<(toHead: Puzzle, toTail: Puzzle*): Puzzle = -<((toHead :: toTail.toList).map(TransitionParameter(_)): _*)
-
-    def -<(parameters: TransitionParameter*): Puzzle = {
+    def -<[T: ToTransitionParameter](ts: T*): Puzzle = {
+      val parameters = ts.map(implicitly[ToTransitionParameter[T]].apply)
       def buildTransitions(parameter: TransitionParameter) =
         from.lasts.map { c ⇒ new ExplorationTransition(c, parameter.puzzleParameter.firstSlot, parameter.conditionParameter, parameter.filterParameter) }
       val transitions = parameters.flatMap { buildTransitions }
       Puzzle.merge(from.firstSlot, parameters.flatMap(_.puzzleParameter.lasts), from :: parameters.map(_.puzzleParameter).toList, transitions)
     }
 
-    def -<-(
-      to:        Puzzle,
-      condition: Condition = Condition.True,
-      filter:    BlockList = BlockList.empty
-    ) = {
-
-      val transitions = from.lasts.map {
-        c ⇒ new SlaveTransition(c, to.firstSlot, condition, filter)
-      }
-
-      Puzzle.merge(from.firstSlot, to.lasts, from :: to :: Nil, transitions)
-    }
-
-    def -<-(toHead: Puzzle, toTail: Puzzle*): Puzzle = -<-(toHead :: toTail.toList)
-
-    def -<-(toPuzzles: Seq[Puzzle]) = {
+    def -<-(toPuzzles: Puzzle*) = {
       val transitions = for (f ← from.lasts; l ← toPuzzles) yield new SlaveTransition(f, l.firstSlot)
       Puzzle.merge(from.firstSlot, toPuzzles.flatMap {
         _.lasts
       }, from :: toPuzzles.toList ::: Nil, transitions)
     }
 
-    def >-(
-      to:        Puzzle,
-      condition: Condition = Condition.True,
-      filter:    BlockList = BlockList.empty,
-      trigger:   Condition = Condition.False
-    ): Puzzle = {
-      val transitions = from.lasts.map { c ⇒ new AggregationTransition(c, to.firstSlot, condition, filter, trigger) }
-      Puzzle.merge(from.firstSlot, to.lasts, from :: to :: Nil, transitions)
-    }
-
-    def >-(toHead: Puzzle, toTail: Puzzle*): Puzzle = >-((toHead :: toTail.toList).map(TransitionParameter(_)): _*)
-
-    def >-(parameters: TransitionParameter*): Puzzle = {
+    def >-[T: ToTransitionParameter](ts: T*): Puzzle = {
+      val parameters = ts.map(implicitly[ToTransitionParameter[T]].apply)
       def buildTransitions(parameter: TransitionParameter) =
         from.lasts.map { c ⇒ new AggregationTransition(c, parameter.puzzleParameter.firstSlot, parameter.conditionParameter, parameter.filterParameter) }
       val transitions = parameters.flatMap { buildTransitions }
@@ -125,27 +87,19 @@ package transition {
     private def buildTransitions(parameter: TransitionParameter) =
       from.lasts.map { c ⇒ new Transition(c, parameter.puzzleParameter.firstSlot, parameter.conditionParameter, parameter.filterParameter) }
 
-    def --(to: Puzzle, condition: Condition = Condition.True, filter: BlockList = BlockList.empty): Puzzle = {
-      val transitions = buildTransitions(TransitionParameter(to, condition, filter))
-      Puzzle.merge(from.firstSlot, to.lasts, from :: to :: Nil, transitions)
-    }
-
-    def --(head: Puzzle, tail: Puzzle*): Puzzle = this.--((Seq(head) ++ tail).map(TransitionParameter(_)): _*)
-
-    def --(parameters: TransitionParameter*): Puzzle = {
+    def --[T: ToTransitionParameter](ts: T*): Puzzle = {
+      val parameters = ts.map(implicitly[ToTransitionParameter[T]].apply)
       val transitions = parameters.flatMap { buildTransitions }
       Puzzle.merge(from.firstSlot, parameters.flatMap(_.puzzleParameter.lasts), from :: parameters.map(_.puzzleParameter).toList, transitions)
     }
 
-    def --=(to: Puzzle, condition: Condition = Condition.True, filter: BlockList = BlockList.empty): Puzzle = {
+    private def --=(to: Puzzle, condition: Condition = Condition.True, filter: BlockList = BlockList.empty): Puzzle = {
       val transitions =
         from.lasts.map {
           c ⇒ new Transition(c, Slot(to.first), condition, filter)
         }
       Puzzle.merge(from.firstSlot, to.lasts, from :: to :: Nil, transitions)
     }
-
-    def --=(head: Puzzle, tail: Puzzle*): Puzzle = this.--=((Seq(head) ++ tail).map(TransitionParameter(_)): _*)
 
     def --=(parameters: TransitionParameter*): Puzzle = {
       val puzzles = parameters.map { case TransitionParameter(t, condition, filter) ⇒ this.--=(t, condition, filter) }

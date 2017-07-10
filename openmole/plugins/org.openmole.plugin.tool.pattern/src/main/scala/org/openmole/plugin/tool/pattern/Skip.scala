@@ -30,8 +30,8 @@ object Skip {
     val firstSlot = Slot(first)
     val last = Capsule(EmptyTask(), strain = true)
 
-    (firstSlot -- (puzzle, !condition) -- last) &
-      (firstSlot -- (last, condition))
+    (firstSlot -- (puzzle when !condition) -- last) &
+      (firstSlot -- (last when condition))
   }
 
 }

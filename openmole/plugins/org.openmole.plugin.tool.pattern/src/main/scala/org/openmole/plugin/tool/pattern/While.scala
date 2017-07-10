@@ -18,7 +18,7 @@ object While {
     counter.option match {
       case None ⇒
         val last = Capsule(EmptyTask(), strain = true)
-        (puzzle -- (last, !condition)) & (puzzle -- (Slot(puzzle.first), condition))
+        (puzzle -- (last when !condition)) & (puzzle -- (Slot(puzzle.first) when condition))
       case Some(counter) ⇒
         val firstTask = EmptyTask() set (
           (inputs, outputs) += counter,
@@ -42,8 +42,8 @@ object While {
           (inputs, outputs) += (puzzle.outputs: _*)
         )
 
-        (first -- puzzle -- incrementTask -- (last, !condition)) &
-          (puzzle -- incrementTask -- (first, condition))
+        (first -- puzzle -- incrementTask -- (last when !condition)) &
+          (puzzle -- incrementTask -- (first when condition))
     }
 
 }
