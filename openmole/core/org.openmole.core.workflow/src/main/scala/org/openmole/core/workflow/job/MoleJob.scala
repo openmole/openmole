@@ -53,7 +53,7 @@ class MoleJob(
     private var prototypes: Array[Val[Any]],
     private var values:     Array[Any],
     mostSignificantBits:    Long, leastSignificantBits: Long,
-    private[workflow] var stateChangedCallBack: MoleJob.StateChangedCallBack
+    stateChangedCallBack: MoleJob.StateChangedCallBack
 ) {
 
   var exception: Option[Throwable] = None

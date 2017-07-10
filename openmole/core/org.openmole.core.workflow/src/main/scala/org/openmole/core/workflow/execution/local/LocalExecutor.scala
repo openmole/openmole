@@ -79,7 +79,7 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
                       case Some(e) ⇒ environment.eventDispatcher.trigger(environment: Environment, MoleJobExceptionRaised(executionJob, e, SEVERE, moleJob))
                       case _       ⇒
                     }
-                    
+
                   }
                 }
 
