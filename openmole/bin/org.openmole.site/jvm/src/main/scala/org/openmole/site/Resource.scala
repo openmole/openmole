@@ -44,7 +44,7 @@ object Resource {
 
     val modelIO = imgResource("modelIO.png")
 
-    val thumbnail_profiles = imgResource("profileanimV1.svg")
+    val profileAnim = imgResource("profileAnim.svg")
 
     val thumbnail_ancestors = imgResource("ancestors.png")
 
@@ -219,6 +219,16 @@ object Resource {
   }
 
   val api = fileResource("api")
+
+  def rawFrag(fileResource: FileResource) = {
+    val builder = new scalatags.text.Builder()
+    scalatags.Text.all.raw(content(fileResource)).applyTo(builder)
+    builder.children.head
+  }
+
+  def content(fileResource: FileResource) = {
+    scala.io.Source.fromResource(fileResource.file).getLines.mkString("\n")
+  }
 
   //  val marketResources(entries: Seq[GeneratedMarketEntry]) =
   //    entries.filter(_.tags.exists(_ == Market.Tags.tutorial)).map { tuto ⇒ MarketResource(tuto) }

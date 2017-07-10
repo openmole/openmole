@@ -1,4 +1,3 @@
-
 @import org.openmole.site.tools._
 @import org.openmole.site._
 @import org.openmole.site.stylesheet._
@@ -6,53 +5,51 @@
 The profile method is designed to test the sensitivity of the input parameters.
 @img(src := Resource.img.profileID.file, center(65), padding := 20)
 
-@figure
- @img(src := Resource.img.thumbnail_profiles.file, center(70), paddingTop := 10 )
-   @figcaption
-    Calibration Profiles finds the domain of a parameter within which the model can produce dynamics
-    under a given threshold of acceptance, @b{every other parameter being calibrated}.
+@basicButton("Run")(id := shared.profile.button)
+@Resource.rawFrag(Resource.img.profileAnim)
+
 
 @p
-  Given a distance measure between the model output values and
+Given a distance measure between the model output values and
   the data, the profile of a selected parameter is constructed by
-  dividing the interval within which i can vary into subintervals
+dividing the interval within which i can vary into subintervals
   of equal size, and calibrating the model within each to
-  minimise the distance (similarly to @a("Calibration", href :=
+minimise the distance (similarly to @a("Calibration", href :=
   DocumentationPages.calibration.file)).  The
-  optimisation is made over the other parameters of the model which are
+optimisation is made over the other parameters of the model which are
   left free.
 
 @p
-  As an example, let's consider a model with 3 parameters i, j and k,
-  each taking real values between 1 and 10. The profile of the parameter
+As an example, let's consider a model with 3 parameters i, j and k,
+each taking real values between 1 and 10. The profile of the parameter
   i is made by splitting the [1,10] interval into (for example) 9
-  intervals of size 1. Calibration is performed in parallel within each
+intervals of size 1. Calibration is performed in parallel within each
   interval. At the end of the minimisation, we obtain sets of parameter
-  values minimising the given distance with i taking values in each
-  subinterval. By plotting the distance against the values of i, one
-  can visually determine what values i must take for the model to be
+values minimising the given distance with i taking values in each
+subinterval. By plotting the distance against the values of i, one
+can visually determine what values i must take for the model to be
   able to reproduce the data.
 
 @p
-  By defining a threshold below which the distance between the model output and the data
-  is considered acceptable, the results of the profile methods can be interpreted as
+By defining a threshold below which the distance between the model output and the data
+is considered acceptable, the results of the profile methods can be interpreted as
   the subset of values of the parameter for which the model output reproduces the data
-  sufficiently well.
+sufficiently well.
 
 @p
-    The Profile method takes the following parameters:
-@ul
-    @li{@hl.code("inputs"): a list of the model parameters with their minimum and maximum bounds,}
-    @li{@hl.code("objective"): a variable defined in the OpenMOLE script that contains the distance between the data and the model output,}
-    @li{@hl.code("x"): the parameter which is being profiled (refers to the index of the parameter in the list "inputs", starting to 0),}
-    @li{@hl.code("nX"): the size of the subintervals.}
+The Profile method takes the following parameters:
+  @ul
+  @li{@hl.code("inputs"): a list of the model parameters with their minimum and maximum bounds,}
+  @li{@hl.code("objective"): a variable defined in the OpenMOLE script that contains the distance between the data and the model output,}
+  @li{@hl.code("x"): the parameter which is being profiled (refers to the index of the parameter in the list "inputs", starting to 0),}
+@li{@hl.code("nX"): the size of the subintervals.}
 
 @p
-  You will also need an evolutionary scheme and can use SteadyStateEvolution as described in @a("Calibration", href :=
+You will also need an evolutionary scheme and can use SteadyStateEvolution as described in @a("Calibration", href :=
   DocumentationPages.calibration.file))
 
 @p To profile a parameter, use the PSE constructor like so:
-@br @hl.openmole("""
+  @br @hl.openmole("""
 val exploration =
     GenomeProfile (
       x = 0,
@@ -68,13 +65,13 @@ val evolution =
     algorithm = exploration,
     evaluation = modelTask,
     parallelism = 10,
-    termination = 100 
+    termination = 100
   )
 )""", name = "Profile")
 where @hl.code("param1") and @hl.code("param2") are inputs
-of the task that runs the model (and refer to the model parameters), 
+of the task that runs the model (and refer to the model parameters),
 and @hl.code("fitness") is an output of that
-same task. The number of inputs are illimited. Here, @hl.code("x = 0")
+  same task. The number of inputs are illimited. Here, @hl.code("x = 0")
 specifies that we are profiling @hl.code("param1").
 
 
