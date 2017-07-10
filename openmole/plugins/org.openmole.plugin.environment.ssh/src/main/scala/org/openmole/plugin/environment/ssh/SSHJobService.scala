@@ -62,44 +62,47 @@ object SSHJobService extends Logger {
         override def port = _port
       }
 
-    Updater.delay(update(WeakReference(js)), preference(SSHEnvironment.UpdateInterval))
-
     js
   }
 
-  def update(jobService: WeakReference[SSHJobService]) = IUpdatable { () ⇒
-    jobService.get match {
-      case Some(js) ⇒
-        val toSubmit =
-          js.queuesLock {
-            // Clean submitted
-            val keep = js.submitted.filter(j ⇒ j.state == RUNNING || j.state == READY || j.state == SUBMITTED)
-            js.submitted.clear()
-            js.submitted.pushAll(keep)
+  class Updater(jobService: WeakReference[SSHJobService]) extends IUpdatable {
 
-            //Clean queue
-            val keepQueued = js.queue.filter(j ⇒ j.state == READY || j.state == SUBMITTED)
-            js.queue.clear()
-            js.queue.pushAll(keepQueued)
+    var stop = false
 
-            var numberToSubmit = js.nbSlots - js.submitted.size
+    def update() =
+      jobService.get match {
+        case Some(js) ⇒
+          val toSubmit =
+            js.queuesLock {
+              // Clean submitted
+              val keep = js.submitted.filter(j ⇒ j.state == RUNNING || j.state == READY || j.state == SUBMITTED)
+              js.submitted.clear()
+              js.submitted.pushAll(keep)
 
-            val toSubmit = mutable.Stack[SSHBatchJob]()
-            while (!js.queue.isEmpty && numberToSubmit > 0) {
-              val j = js.queue.pop()
-              toSubmit.push(j)
-              numberToSubmit -= 1
-              j
+              //Clean queue
+              val keepQueued = js.queue.filter(j ⇒ j.state == READY || j.state == SUBMITTED)
+              js.queue.clear()
+              js.queue.pushAll(keepQueued)
+
+              var numberToSubmit = js.nbSlots - js.submitted.size
+
+              val toSubmit = mutable.Stack[SSHBatchJob]()
+              while (!js.queue.isEmpty && numberToSubmit > 0) {
+                val j = js.queue.pop()
+                toSubmit.push(j)
+                numberToSubmit -= 1
+                j
+              }
+
+              toSubmit
             }
 
-            toSubmit
-          }
-
-        toSubmit.foreach(_.submit)
-        true
-      case None ⇒ false
-    }
+          toSubmit.foreach(_.submit)
+          !stop
+        case None ⇒ false
+      }
   }
+
 }
 
 trait SSHJobService extends GridScaleJobService with SharedStorage { js ⇒
@@ -144,5 +147,17 @@ trait SSHJobService extends GridScaleJobService with SharedStorage { js ⇒
 
   private[ssh] def submit(description: SSHJobDescription) =
     jobService.submit(description)
+
+  lazy val jobUpdater = new SSHJobService.Updater(WeakReference(this))
+
+  def start() = {
+    import environment.preference
+    import environment.services.threadProvider
+    Updater.delay(jobUpdater, preference(SSHEnvironment.UpdateInterval))
+  }
+
+  def stop() = {
+    jobUpdater.stop = true
+  }
 
 }
