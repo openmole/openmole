@@ -166,6 +166,8 @@ trait BatchEnvironment extends SubmissionEnvironment { env ⇒
 
   lazy val replBundleCache = new AssociativeCache[ReferencedClasses, FileCache]()
 
+  lazy val plugins = PluginManager.pluginsForClass(this.getClass)
+
   def threads: Option[Int] = None
   def openMOLEMemory: Option[Information]
 
@@ -178,8 +180,6 @@ trait BatchEnvironment extends SubmissionEnvironment { env ⇒
 
   def runtime = BatchEnvironment.runtimeLocation
   def jvmLinuxX64 = BatchEnvironment.JVMLinuxX64Location
-
-  @transient val plugins = Cache { PluginManager.pluginsForClass(this.getClass) }
 
   def updateInterval =
     UpdateInterval(
@@ -272,7 +272,7 @@ trait BatchExecutionJob extends ExecutionJob { bej ⇒
   def usedFiles: Iterable[File] =
     (files ++
       Seq(environment.runtime, environment.jvmLinuxX64) ++
-      environment.plugins() ++ plugins).distinct
+      environment.plugins ++ plugins).distinct
 
   def usedFileHashes = usedFiles.map(f ⇒ (f, environment.services.fileService.hash(f)(environment.services.newFile)))
 
