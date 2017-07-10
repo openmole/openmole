@@ -193,7 +193,6 @@ object DocumentationPages {
   /* Application */
 
   lazy val documentation = DocumentationPage(name = "Documentation", content = scalatex.documentation.Documentation())
-  
 
   lazy val application = DocumentationPage(name = "Application", content = scalatex.documentation.Application())
   lazy val migration = DocumentationPage(name = "Migration", content = scalatex.documentation.application.Migration())
