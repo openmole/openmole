@@ -105,7 +105,8 @@ object Libraries {
   lazy val spray = "io.spray" %% "spray-json" % "1.3.2"
   lazy val bouncyCastle = "org.bouncycastle" % "bcpkix-jdk15on" % bouncyCastleVersion
   lazy val equinoxOSGi = "org.eclipse" % "osgi" % "3.10.0-v20140606-1445"
-  lazy val squants = "org.typelevel"  %% "squants"  % "1.0.0"
+
+  lazy val squants = "org.typelevel"  %% "squants"  % "1.3.0"
   lazy val shapeless = "com.chuusai" %% "shapeless" % "2.3.2"
 
 
