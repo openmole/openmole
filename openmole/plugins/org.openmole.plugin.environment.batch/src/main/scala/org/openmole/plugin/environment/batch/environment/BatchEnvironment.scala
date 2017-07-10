@@ -164,6 +164,8 @@ trait BatchEnvironment extends SubmissionEnvironment { env ⇒
   lazy val batchJobWatcher = new BatchJobWatcher(WeakReference(this), preference)
   def jobs = batchJobWatcher.executionJobs
 
+  lazy val replBundleCache = new AssociativeCache[ReferencedClasses, FileCache]()
+
   def threads: Option[Int] = None
   def openMOLEMemory: Option[Information]
 
@@ -227,10 +229,6 @@ trait SimpleBatchEnvironment <: BatchEnvironment { env ⇒
   def jobService: JS
 }
 
-object BatchExecutionJob {
-  val replBundleCache = new AssociativeCache[ReferencedClasses, FileCache]()
-}
-
 trait BatchExecutionJob extends ExecutionJob { bej ⇒
 
   def job: Job
@@ -259,7 +257,7 @@ trait BatchExecutionJob extends ExecutionJob { bej ⇒
 
   def closureBundle =
     referencedClosures.map { closures ⇒
-      BatchExecutionJob.replBundleCache.cache(job.moleExecution, closures, preCompute = false) { rc ⇒
+      environment.replBundleCache.cache(job.moleExecution, closures, preCompute = false) { rc ⇒
         val bundle = environment.services.newFile.newFile("closureBundle", ".jar")
         try ScalaREPL.bundleFromReferencedClass(closures, "closure-" + UUID.randomUUID.toString, "1.0", bundle)
         catch {
