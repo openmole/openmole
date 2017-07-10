@@ -7,3 +7,4 @@
 @a(img(src := Resource.img.iscpif.file,  partners), href := "http://iscpif.fr", target := "_blank")
 @a(img(src := Resource.img.geocite.file, partners), href := "http://www.parisgeo.cnrs.fr/", target := "_blank")
 @a(img(src := Resource.img.biomedia.file, partners), href := "http://biomedic.doc.ic.ac.uk/", target := "_blank")
+@a(img(src := Resource.img.ign.file, partners), href := "http://recherche.ign.fr", target := "_blank")
