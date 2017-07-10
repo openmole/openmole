@@ -74,25 +74,12 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
                   if (moleJob.state != State.CANCELED) {
                     if (LocalExecutor.containsMoleTask(moleJob)) jobGoneIdle()
 
-                    val executionThread = Thread.currentThread()
-                    val originalCallBack = moleJob.stateChangedCallBack
-
-                    moleJob.stateChangedCallBack =
-                      (job: MoleJob, oldState: State.State, newState) ⇒ {
-                        if (newState == State.CANCELED) {
-                          stop = true
-                          executionThread.stop() //interrupt()
-                        }
-                        originalCallBack(job, oldState, newState)
-                      }
-
-                    try moleJob.perform(executionJob.executionContext)
-                    finally moleJob.stateChangedCallBack = originalCallBack
-
+                    moleJob.perform(executionJob.executionContext)
                     moleJob.exception match {
                       case Some(e) ⇒ environment.eventDispatcher.trigger(environment: Environment, MoleJobExceptionRaised(executionJob, e, SEVERE, moleJob))
                       case _       ⇒
                     }
+                    
                   }
                 }
 

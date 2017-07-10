@@ -66,6 +66,14 @@ class ExecutorPool(nbThreads: Int, environment: WeakReference[LocalEnvironment],
       executors.toList.count { case (e, t) ⇒ (t.getState == Thread.State.RUNNABLE) && !e.stop }
     }
 
-  def stop() = jobs.clear()
+  def stop() = executors.synchronized {
+    executors.foreach {
+      case (exe, thread) ⇒
+        exe.stop = true
+        thread.stop()
+    }
+    executors.clear()
+    jobs.clear()
+  }
 
 }
