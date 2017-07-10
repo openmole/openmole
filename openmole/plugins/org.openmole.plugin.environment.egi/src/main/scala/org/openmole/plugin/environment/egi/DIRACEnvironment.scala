@@ -101,16 +101,7 @@ class DIRACEnvironment(
 
   type JS = DIRACJobService
 
-  val registerAgents = Cache {
-    implicit def threadProvider = services.threadProvider
-    Updater.delay(new EagerSubmissionAgent(WeakReference(this)))
-    None
-  }
-
-  override def submit(job: Job) = {
-    registerAgents()
-    super.submit(job)
-  }
+  lazy val eagerSubmissionAgent = new EagerSubmissionAgent(WeakReference(this))
 
   def executionJob(job: Job) = new DiracBatchExecutionJob(job, this)
 
@@ -127,4 +118,15 @@ class DIRACEnvironment(
 
   override def updateInterval = UpdateInterval.fixed(preference(DIRACEnvironment.UpdateInterval))
   override def runtimeSettings = super.runtimeSettings.copy(archiveResult = true)
+
+  override def start() = {
+    super.start()
+    import services.threadProvider
+    Updater.delay(eagerSubmissionAgent)
+  }
+
+  override def stop() = {
+    super.stop()
+    eagerSubmissionAgent.stop = true
+  }
 }

@@ -52,9 +52,10 @@ object BatchJobWatcher extends Logger {
 
 }
 
-class BatchJobWatcher(environment: WeakReference[BatchEnvironment], preference: Preference) extends IUpdatableWithVariableDelay {
+class BatchJobWatcher(environment: WeakReference[BatchEnvironment], preference: Preference) extends IUpdatableWithVariableDelay { watch ⇒
 
   val registry = new BatchJobWatcher.ExecutionJobRegistry
+  var stop = false
 
   import BatchJobWatcher._
 
@@ -85,7 +86,7 @@ class BatchJobWatcher(environment: WeakReference[BatchEnvironment], preference: 
 
         toSubmit.foreach(env.submit)
         toKill.foreach(ej ⇒ JobManager ! Kill(ej))
-        true
+        !watch.stop
     }
 
   def executionJobs = registry.allExecutionJobs

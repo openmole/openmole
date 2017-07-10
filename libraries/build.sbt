@@ -195,7 +195,6 @@ lazy val closureCompilerVersion = "v20130603"
 lazy val closureCompiler = OsgiProject(dir, "closure-compiler", exports = Seq("com.google.javascript.*")) settings(
   libraryDependencies += "com.google.javascript" % "closure-compiler" % closureCompilerVersion, version := closureCompilerVersion) settings(settings: _*)
 
-
 lazy val catsVersion = "0.9.0"
 lazy val cats =
   OsgiProject(dir, "cats") settings (

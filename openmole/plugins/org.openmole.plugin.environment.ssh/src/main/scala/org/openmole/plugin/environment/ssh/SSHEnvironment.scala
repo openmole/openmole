@@ -101,4 +101,14 @@ class SSHEnvironment(
 
   override def updateInterval = UpdateInterval.fixed(preference(SSHEnvironment.UpdateInterval))
 
+  override def start() = {
+    super.start()
+    jobService.start()
+  }
+
+  override def stop() = {
+    super.stop()
+    jobService.stop()
+  }
+
 }
