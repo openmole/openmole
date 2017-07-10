@@ -146,6 +146,7 @@ object DocumentationPages {
     mole,
     model,
     language,
+    howToContribute,
     sampling,
     transition,
     hook,
@@ -271,6 +272,7 @@ object DocumentationPages {
   lazy val plugin = DocumentationPage(name = "Plugins", content = scalatex.documentation.development.Plugin())
   lazy val branching = DocumentationPage(name = "Branching model", content = scalatex.documentation.development.Branching())
   lazy val webserver = DocumentationPage(name = "Web Server", content = scalatex.documentation.development.WebServer())
+  lazy val howToContribute = DocumentationPage(name = "HowToContribute", content = scalatex.documentation.development.howToContribute())
 
   //    val market = new DocumentationPage {
   //      override def content: Text.all.Frag = div(tagContent(marketEntries))

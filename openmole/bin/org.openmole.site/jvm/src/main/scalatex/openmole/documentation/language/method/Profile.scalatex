@@ -77,3 +77,14 @@ and @hl.code("fitness") is an output of that
 same task. The number of inputs are illimited. Here, @hl.code("x = 0")
 specifies that we are profiling @hl.code("param1").
 
+
+
+@br
+@br
+The calibration profile algorithm has been published in the following paper:
+
+Romain Reuillon, Clara Schmitt, Ricardo De Aldama, and Jean-Baptiste Mouret, «A New Method to Evaluate Simulation
+       Models: The Calibration Profile (CP) Algorithm » published in @i{Journal of Artificial Societies and Social Simulation}
+        (JASSS) , Vol 18, Issue 1, 2015.
+        @br
+            @a("[online version]" , href:="http://jasss.soc.surrey.ac.uk/18/1/12.html")  @a("[bibteX]", href:= Resource.bibtex.profilemethodBib.file)
