@@ -48,89 +48,88 @@ import Log._
 class EagerSubmissionAgent(environment: WeakReference[BatchEnvironment])(implicit preference: Preference) extends IUpdatableWithVariableDelay {
 
   @transient lazy val runningHistory = new mutable.Queue[HistoryPoint]
+  var stop = false
 
   override def delay = preference(EGIEnvironment.EagerSubmissionInterval)
 
-  override def update: Boolean = {
-    try {
-      logger.log(FINE, "Eager submission started")
+  override def update: Boolean = environment.get match {
+    case Some(env) ⇒
+      try {
+        logger.log(FINE, "Eager submission started")
 
-      val env = environment.get match {
-        case None      ⇒ return false
-        case Some(env) ⇒ env
-      }
+        val jobs = env.jobs
 
-      val jobs = env.jobs
+        val executionJobs = jobs.groupBy(_.job)
+        val jobSize = jobs.size
+        val stillRunning = jobs.count(_.state == RUNNING)
+        val stillReady = jobs.count(_.state == READY)
 
-      val executionJobs = jobs.groupBy(_.job)
-      val jobSize = jobs.size
-      val stillRunning = jobs.count(_.state == RUNNING)
-      val stillReady = jobs.count(_.state == READY)
+        runningHistory.enqueueFinite(
+          HistoryPoint(running = stillRunning, total = jobSize),
+          preference(EGIEnvironment.RunningHistoryDuration)
+        )
 
-      runningHistory.enqueueFinite(
-        HistoryPoint(running = stillRunning, total = jobSize),
-        preference(EGIEnvironment.RunningHistoryDuration)
-      )
+        logger.fine("still running " + stillRunning)
 
-      logger.fine("still running " + stillRunning)
+        val maxTotal = runningHistory.map(_.total).max
+        val shouldBeRunning = runningHistory.map(_.running).max * preference(DIRACEnvironment.EagerSubmissionThreshold)
 
-      val maxTotal = runningHistory.map(_.total).max
-      val shouldBeRunning = runningHistory.map(_.running).max * preference(DIRACEnvironment.EagerSubmissionThreshold)
+        val minOversub = preference(EGIEnvironment.EagerSubmissionMinNumberOfJob)
 
-      val minOversub = preference(EGIEnvironment.EagerSubmissionMinNumberOfJob)
+        var nbRessub =
+          if (jobSize < minOversub) minOversub - jobSize
+          else if (jobSize < maxTotal) shouldBeRunning - (stillRunning + stillReady) else 0
 
-      var nbRessub =
-        if (jobSize < minOversub) minOversub - jobSize
-        else if (jobSize < maxTotal) shouldBeRunning - (stillRunning + stillReady) else 0
+        val numberOfSimultaneousExecutionForAJobWhenUnderMinJob = preference(EGIEnvironment.EagerSubmissionNumberOfJobUnderMin)
 
-      val numberOfSimultaneousExecutionForAJobWhenUnderMinJob = preference(EGIEnvironment.EagerSubmissionNumberOfJobUnderMin)
+        logger.fine("resubmit " + nbRessub)
 
-      logger.fine("resubmit " + nbRessub)
+        if (nbRessub > 0) {
+          // Resubmit nbRessub jobs in a fair manner
+          val order = new HashMap[Int, Set[Job]] with MultiMap[Int, Job]
+          var keys = new TreeSet[Int]
 
-      if (nbRessub > 0) {
-        // Resubmit nbRessub jobs in a fair manner
-        val order = new HashMap[Int, Set[Job]] with MultiMap[Int, Job]
-        var keys = new TreeSet[Int]
-
-        for (job ← executionJobs.keys) {
-          val nb = executionJobs(job).size
-          if (nb < numberOfSimultaneousExecutionForAJobWhenUnderMinJob) {
-            order.addBinding(nb, job)
-            keys += nb
+          for (job ← executionJobs.keys) {
+            val nb = executionJobs(job).size
+            if (nb < numberOfSimultaneousExecutionForAJobWhenUnderMinJob) {
+              order.addBinding(nb, job)
+              keys += nb
+            }
           }
-        }
 
-        if (!keys.isEmpty) {
-          while (nbRessub > 0 && keys.head < numberOfSimultaneousExecutionForAJobWhenUnderMinJob) {
-            val key = keys.head
-            val jobs = order(keys.head)
-            val job =
-              jobs.find(j ⇒ executionJobs(j).isEmpty) match {
-                case Some(j) ⇒ j
-                case None ⇒
-                  jobs.find(j ⇒ !executionJobs(j).exists(_.state != SUBMITTED)) match {
-                    case Some(j) ⇒ j
-                    case None    ⇒ jobs.head
-                  }
-              }
+          if (!keys.isEmpty) {
+            while (nbRessub > 0 && keys.head < numberOfSimultaneousExecutionForAJobWhenUnderMinJob) {
+              val key = keys.head
+              val jobs = order(keys.head)
+              val job =
+                jobs.find(j ⇒ executionJobs(j).isEmpty) match {
+                  case Some(j) ⇒ j
+                  case None ⇒
+                    jobs.find(j ⇒ !executionJobs(j).exists(_.state != SUBMITTED)) match {
+                      case Some(j) ⇒ j
+                      case None    ⇒ jobs.head
+                    }
+                }
 
-            env.submit(job)
+              env.submit(job)
 
-            order.removeBinding(key, job)
-            if (jobs.isEmpty) keys -= key
+              order.removeBinding(key, job)
+              if (jobs.isEmpty) keys -= key
 
-            order.addBinding(key + 1, job)
-            keys += (key + 1)
-            nbRessub -= 1
+              order.addBinding(key + 1, job)
+              keys += (key + 1)
+              nbRessub -= 1
+            }
           }
-        }
 
+        }
       }
-    }
-    catch {
-      case e: Throwable ⇒ Log.logger.log(Log.SEVERE, "Exception in oversubmission agen", e)
-    }
-    true
+      catch {
+        case e: Throwable ⇒ Log.logger.log(Log.SEVERE, "Exception in oversubmission agen", e)
+      }
+      !stop
+
+    case None ⇒ return false
   }
 
 }

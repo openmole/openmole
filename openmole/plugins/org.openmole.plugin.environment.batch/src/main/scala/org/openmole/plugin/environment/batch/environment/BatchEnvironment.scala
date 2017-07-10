@@ -159,31 +159,27 @@ trait BatchEnvironment extends SubmissionEnvironment { env ⇒
   implicit def preference = services.preference
   implicit def eventDispatcher = services.eventDispatcher
 
-  def jobs = batchJobWatcher().executionJobs
-
   def executionJob(job: Job): BatchExecutionJob
 
-  @transient val batchJobWatcher = Cache {
-    val watcher = new BatchJobWatcher(WeakReference(this), preference)
-    import services._
-    Updater.registerForUpdate(watcher)
-    watcher
-  }
+  lazy val batchJobWatcher = new BatchJobWatcher(WeakReference(this), preference)
+  def jobs = batchJobWatcher.executionJobs
+
+  lazy val replBundleCache = new AssociativeCache[ReferencedClasses, FileCache]()
+
+  lazy val plugins = PluginManager.pluginsForClass(this.getClass)
 
   def threads: Option[Int] = None
   def openMOLEMemory: Option[Information]
 
   override def submit(job: Job) = {
     val bej = executionJob(job)
+    batchJobWatcher.register(bej)
     eventDispatcher.trigger(this, new Environment.JobSubmitted(bej))
-    batchJobWatcher().register(bej)
     JobManager ! Manage(bej)
   }
 
   def runtime = BatchEnvironment.runtimeLocation
   def jvmLinuxX64 = BatchEnvironment.JVMLinuxX64Location
-
-  @transient val plugins = Cache { PluginManager.pluginsForClass(this.getClass) }
 
   def updateInterval =
     UpdateInterval(
@@ -196,6 +192,19 @@ trait BatchEnvironment extends SubmissionEnvironment { env ⇒
   def running: Long = jobs.count { _.state == ExecutionState.RUNNING }
 
   def runtimeSettings = RuntimeSettings(archiveResult = false)
+
+  override def start() = {
+    super.start()
+    import services.threadProvider
+    Updater.registerForUpdate(batchJobWatcher)
+  }
+
+  override def stop() = {
+    super.stop()
+    jobs.foreach(ej ⇒ JobManager ! Kill(ej))
+    batchJobWatcher.stop = true
+  }
+
 }
 
 class SimpleBatchExecutionJob(val job: Job, val environment: SimpleBatchEnvironment) extends ExecutionJob with BatchExecutionJob { bej ⇒
@@ -218,10 +227,6 @@ trait SimpleBatchEnvironment <: BatchEnvironment { env ⇒
 
   def storage: SS
   def jobService: JS
-}
-
-object BatchExecutionJob {
-  val replBundleCache = new AssociativeCache[ReferencedClasses, FileCache]()
 }
 
 trait BatchExecutionJob extends ExecutionJob { bej ⇒
@@ -252,7 +257,7 @@ trait BatchExecutionJob extends ExecutionJob { bej ⇒
 
   def closureBundle =
     referencedClosures.map { closures ⇒
-      BatchExecutionJob.replBundleCache.cache(job.moleExecution, closures, preCompute = false) { rc ⇒
+      environment.replBundleCache.cache(job.moleExecution, closures, preCompute = false) { rc ⇒
         val bundle = environment.services.newFile.newFile("closureBundle", ".jar")
         try ScalaREPL.bundleFromReferencedClass(closures, "closure-" + UUID.randomUUID.toString, "1.0", bundle)
         catch {
@@ -267,7 +272,7 @@ trait BatchExecutionJob extends ExecutionJob { bej ⇒
   def usedFiles: Iterable[File] =
     (files ++
       Seq(environment.runtime, environment.jvmLinuxX64) ++
-      environment.plugins() ++ plugins).distinct
+      environment.plugins ++ plugins).distinct
 
   def usedFileHashes = usedFiles.map(f ⇒ (f, environment.services.fileService.hash(f)(environment.services.newFile)))
 

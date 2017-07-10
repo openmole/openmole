@@ -64,6 +64,8 @@ object Resource {
 
     val completeID = imgResource("completeID.svg")
 
+    val sobolLHSID = imgResource("sobolLHSID.svg")
+
     val thumbnail_pse = imgResource("pse_anim.svg")
 
     val antNumbers = imgResource("antnumbers.png")
@@ -113,6 +115,10 @@ object Resource {
     val faq = imgResource("faq.svg")
 
     val search = imgResource("search.svg")
+
+    val blog = imgResource("blog.svg")
+
+    val partner = imgResource("partner.svg")
 
     val previousVersion = imgResource("previousVersion.svg")
 

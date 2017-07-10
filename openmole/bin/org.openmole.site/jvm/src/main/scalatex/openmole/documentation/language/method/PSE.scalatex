@@ -4,7 +4,7 @@
 @import org.openmole.site.stylesheet._
 
 
-@img(src := Resource.img.pseID.file, center(60), padding := 20)
+@img(src := Resource.img.pseID.file, center(65), padding := 20)
 
 @figure
   @img(src := Resource.img.thumbnail_pse.file, center(70), paddingTop := 10 )

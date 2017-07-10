@@ -66,7 +66,7 @@ object UploadActor extends Logger {
   private def jobFiles(job: BatchExecutionJob) =
     job.pluginsAndFiles.files.toVector ++
       job.pluginsAndFiles.plugins ++
-      job.environment.plugins() ++
+      job.environment.plugins ++
       Seq(job.environment.jvmLinuxX64, job.environment.runtime)
 
   private def initCommunication(job: BatchExecutionJob, storage: StorageService)(implicit token: AccessToken, services: BatchEnvironment.Services): SerializedJob = services.newFile.withTmpFile("job", ".tar") { jobFile ⇒
@@ -134,7 +134,7 @@ object UploadActor extends Logger {
     environment: BatchEnvironment,
     storage:     StorageService
   )(implicit token: AccessToken, services: BatchEnvironment.Services) = {
-    val environmentPluginPath = shuffled(environment.plugins())(services.randomProvider()).map { p ⇒ toReplicatedFile(p, storage, TransferOptions(raw = true)) }.map { FileMessage(_) }
+    val environmentPluginPath = shuffled(environment.plugins)(services.randomProvider()).map { p ⇒ toReplicatedFile(p, storage, TransferOptions(raw = true)) }.map { FileMessage(_) }
     val runtimeFileMessage = FileMessage(toReplicatedFile(environment.runtime, storage, TransferOptions(raw = true)))
     val jvmLinuxX64FileMessage = FileMessage(toReplicatedFile(environment.jvmLinuxX64, storage, TransferOptions(raw = true)))
 

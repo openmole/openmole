@@ -36,13 +36,15 @@ object Pages {
 
   def whoAreWe = Page("who_are_we", scalatex.WhoAreWe(), title = Some("Developers, reference publications, contact information - OpenMOLE"))
 
+  def partner = Page("partner", scalatex.Partner(), title = Some("OpenMOLE partners"))
+
   def communications = Page("communications", scalatex.Communications(), title = Some("Related papers, conference slides, videos, OpenMOLE in the news"))
 
   def faq = Page("faq", scalatex.FAQ(), title = Some("FAQ"))
 
   def previousVersions = Page("previous_versions", scalatex.PreviousVersions(), title = Some("Previous versions"))
 
-  def all: Seq[Page] = DocumentationPages.allPages ++ Seq(index, gettingStarted, whoAreWe, faq, communications, previousVersions)
+  def all: Seq[Page] = DocumentationPages.allPages ++ Seq(index, gettingStarted, whoAreWe, partner, faq, communications, previousVersions)
 
   //def rawFile(page: Page) = page.location.mkString("_") + ".html"
   def file(page: Page) = java.net.URLEncoder.encode(page.location, "UTF-8") + ".html"
@@ -159,7 +161,6 @@ object DocumentationPages {
     geneticalgo,
     island,
     stochasticity,
-    sensitivity,
     profile,
     pse,
     helloWorld,
@@ -237,7 +238,7 @@ object DocumentationPages {
 
   lazy val desktopGrid = DocumentationPage(name = "DesktopGrid", content = scalatex.documentation.language.environment.DesktopGrid())
 
-  def methodPages = Seq(calibration, sensitivity, profile, pse, dataProcessing, otherDoE)
+  def methodPages = Seq(calibration, profile, pse, dataProcessing, otherDoE)
 
   lazy val method = DocumentationPage(name = "Methods", content = scalatex.documentation.language.Method())
 
@@ -245,9 +246,8 @@ object DocumentationPages {
 
   lazy val geneticalgo = DocumentationPage(name = "Genetic Algorithms", content = scalatex.documentation.details.GeneticAlgorithm())
   lazy val island = DocumentationPage(name = "Islands Scheme", content = scalatex.documentation.details.Island())
-  lazy val stochasticity = DocumentationPage(name = "Stochasticity Management", content = scalatex.documentation.details.StochasticityManagement())
+  lazy val stochasticity = DocumentationPage(name = "Stochasticity mangement", content = scalatex.documentation.details.StochasticityManagement())
 
-  lazy val sensitivity = DocumentationPage(name = "Sensitivity Analysis", content = scalatex.documentation.language.method.Sensitivity())
   lazy val profile = DocumentationPage(name = "Profiles", content = scalatex.documentation.language.method.Profile())
   lazy val pse = DocumentationPage(name = "PSE", content = scalatex.documentation.language.method.PSE())
   lazy val otherDoE = DocumentationPage(name = "other DoE", content = scalatex.documentation.language.method.OtherDoE())
