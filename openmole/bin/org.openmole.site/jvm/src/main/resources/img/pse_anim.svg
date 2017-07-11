@@ -2662,74 +2662,7 @@ apparaissent en 6 secondes depuis le startanim
        style="opacity:0.79500002;fill:#a6bf26;fill-opacity:0;stroke:#445500;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0"
        transform="matrix(0.70710678,0.70710678,-0.70710678,0.70710678,0,0)" />
   </g>
-  <!--     Boutton animate  -->
-  <style
-     id="style4308"> 
-  g.button:hover{
-    opacity: 0.75;
-  }
-</style>
-  <g
-     class="button"
-     cursor="pointer"
-     onmouseup="buttonClick(evt)"
-     id="g4310">
-    <text
-       id="text6947-2-88"
-       y="40"
-       x="20"
-       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:25px;line-height:125%;font-family:'Glacial Indifference';-inkscape-font-specification:'Glacial Indifference Bold';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       xml:space="preserve"><tspan
-         y="40"
-         x="30"
-         id="textbutton">Click to Animate </tspan><animate
-         attributeType="CSS"
-         attributeName="fill-opacity"
-         to="0.2"
-         dur="1s"
-         fill="freeze"
-         begin="startanim.begin"
-         restart="always"
-         repeatCount="1"
-         id="start" /><animate
-         attributeType="CSS"
-         attributeName="fill-opacity"
-         to="1"
-         dur="1s"
-         fill="freeze"
-         begin="cursoranim.end"
-         restart="always"
-         repeatCount="1" /></text>
-    <rect
-       ry="2"
-       y="15"
-       x="20"
-       height="55"
-       width="210"
-       id="button"
-       style="fill:#eeeeee;fill-rule:evenodd;stroke:#333333;stroke-width:1.54542041;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1; fill-opacity:0.5">
-      <animate
-         attributeType="CSS"
-         attributeName="fill-opacity"
-         to="0.2"
-         dur="1s"
-         fill="freeze"
-         begin="click"
-         restart="always"
-         repeatCount="1"
-         id="startanim" />
-      <animate
-         attributeType="CSS"
-         attributeName="fill-opacity"
-         to="0.5"
-         dur="1s"
-         fill="freeze"
-         begin="cursoranim.end"
-         restart="always"
-         repeatCount="1"
-         id="resetbutton" />
-    </rect>
-  </g>
+  
   <animate
      xlink:href="#triangle"
      attributeName="fill-opacity"
