@@ -17,9 +17,7 @@
 
 package org.openmole.site
 
-//import org.openmole.core.buildinfo
-//import org.openmole.marketindex.{ GeneratedMarketEntry, Market }
-//import org.openmole.site.market.Market._
+import org.openmole.tool.stream._
 
 //TODO automatically generate this object as a managed source using sbt
 object Resource {
@@ -222,9 +220,8 @@ object Resource {
     builder.children.head
   }
 
-  def content(fileResource: FileResource) = {
-    scala.io.Source.fromResource(fileResource.file).getLines.mkString("\n")
-  }
+  def content(fileResource: FileResource) =
+    this.getClass.getClassLoader.getResourceAsStream(fileResource.file).content
 
   //  val marketResources(entries: Seq[GeneratedMarketEntry]) =
   //    entries.filter(_.tags.exists(_ == Market.Tags.tutorial)).map { tuto ⇒ MarketResource(tuto) }
