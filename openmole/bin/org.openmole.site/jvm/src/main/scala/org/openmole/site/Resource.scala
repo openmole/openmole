@@ -92,6 +92,8 @@ object Resource {
 
     val biomedia = imgResource("biomedia.png")
 
+    val ign = imgResource("ign.png")
+
     val scale = imgResource("scale.svg")
 
     val scaleAnimated = imgResource("scaleAnimated.svg")
@@ -133,6 +135,8 @@ object Resource {
     val paul = imgResource("paul.png")
 
     val guillaume = imgResource("guillaume.png")
+
+    val julien = imgResource("julien.png")
 
     val mole = imgResource("openmole.svg")
     //Radars graph for methodes

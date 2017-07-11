@@ -182,6 +182,31 @@ file locks                      (-x) unlimited""", "plain")
 
  @div In this example you can see the the nax number of open files is 1024. This is generally a soft limitation that can be overridden by the user. To do so execute @i{ulimit -n 4096} before launching in the same terminal. You can check that you command had the expected effect using @i{ulimit -a}. If is does't work it means that a hard limit has been set in the @i{limits.conf} of your system. If you are administrator you can fix it by modifying the file @i{/etc/security/limits.conf}, otherwise you should contact the system administrator and ask him/her kindly to unleash it.
 
+@question("My workflow fails with QXcbConnection: Could not connect to display")
+@div For instance, if you try to use a standalone QGIS application, QGIS might try to access the display server (even when you run the application without a GUI).
+This will definitely not work on a remote openmole instance (that probably does not have a display server).
+
+@div The full error might look something like:
+@hl.highlight("""
+QXcbConnection: Could not connect to display
+proot terminated with signal 6
+""", "plain")
+
+@div Fortunately for you, we have a workaround.
+
+@div Let's go back to our QGIS standalone application. It is a python application so we use CARE to embed it in a CARETask in openmole. The packaging would look like:
+@hl.highlight("""
+care -o myapp.tgz.bin python3 myapp.py param1 param2
+""", "plain")
+
+@div The workaround uses @a("xvfb", href := "https://www.x.org/releases/X11R7.7/doc/man/man1/Xvfb.1.xhtml"), a virtual framebuffer X server. The only thing you have to do is to run you command through xvfb. In our example, that would be:
+
+@hl.highlight("""
+care -o myapp.tgz.bin xvfb-run python3 myapp.py param1 param2
+""", "plain")
+
+@div And that's it. After that, no connection to the display server will be attempted.
+
 @question("My problem is not listed here")
 @div If you could not resolve your problems, feel free to post your problem on the @a("mailing-list",
 href := "http://list.openmole.org").
