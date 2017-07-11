@@ -137,4 +137,9 @@ package object stylesheet {
     textTransform := "uppercase",
     paddingTop := 100
   )
+
+  val svgRunButton = Seq(
+    position := "absolute",
+    marginTop := -70
+  )
 }

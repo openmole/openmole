@@ -80,6 +80,6 @@ object SiteJS extends JSApp {
   }
 
   @JSExport
-  def profileAnimation(): Unit = SVGStarter.decorateTrigger(shared.profile.button, shared.profile.svgID, shared.profile.animation)
+  def profileAnimation(): Unit = SVGStarter.decorateTrigger(shared.profile.button, shared.profile.animation, 11000)
 
 }
