@@ -104,7 +104,7 @@ package object stylesheet {
   ) ++ center(50)
 
   lazy val footer = Seq(
-    position := "absolute",
+    position := "relative",
     right := 0,
     bottom := 0,
     left := 0,
