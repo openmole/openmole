@@ -1,5 +1,8 @@
 package org.openmole.site
 
+import scalatags.Text.all._
+import scalatags.generic.StylePair
+
 /*
  * Copyright (C) 11/05/17 // mathieu.leclaire@openmole.org
  *

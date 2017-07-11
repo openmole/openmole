@@ -40,15 +40,16 @@ abstract class SVGAnimationElement extends org.scalajs.dom.raw.SVGElement {
 
 object SVGStarter {
 
-  def decorateTrigger(triggerID: String, svgID: String, animationID: String) = {
+  def decorateTrigger(triggerID: String, animationID: String, timeOut: Int) = {
     val button = org.scalajs.dom.window.document.getElementById(triggerID)
     val animation = org.scalajs.dom.window.document.getElementById(animationID).asInstanceOf[SVGAnimationElement]
 
+    val svgString = "position:absolute;margin-top:-70px"
     button.addEventListener("click", {
       (e: MouseEvent) ⇒
         animation.beginElement()
-        button.setAttribute("style", "display:none")
-        org.scalajs.dom.window.setTimeout(() ⇒ button.setAttribute("style", "display"), 11000)
+        button.setAttribute("style", "opacity:0;ponter:unset;" + svgString)
+        org.scalajs.dom.window.setTimeout(() ⇒ button.setAttribute("style", "opacity:1;" + svgString), timeOut)
     })
 
   }

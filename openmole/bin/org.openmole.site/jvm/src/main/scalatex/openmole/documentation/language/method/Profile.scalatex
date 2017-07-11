@@ -3,11 +3,11 @@
 @import org.openmole.site.stylesheet._
 
 The profile method is designed to test the sensitivity of the input parameters.
-@img(src := Resource.img.profileID.file, center(65), padding := 20)
+@br
+@Resource.rawFrag(Resource.img.profileID)
 
-@basicButton("Run")(id := shared.profile.button)
 @Resource.rawFrag(Resource.img.profileAnim)
-
+@basicButton("Run", classIs(btn ++ btn_danger))(id := shared.profile.button, stylesheet.svgRunButton)
 
 @p
 Given a distance measure between the model output values and
