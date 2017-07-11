@@ -780,8 +780,8 @@
    attributeName="fill-opacity" 
    to="0.2" 
    dur="1s"
+    begin="startButton.click"
    fill="freeze" 
-   begin="click" 
    restart="always"
    repeatCount="1"
    id="startProfileAnim"/> 
