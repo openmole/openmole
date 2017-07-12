@@ -39,7 +39,7 @@ object Main {
         div(centerBox)(
           img(src := Resource.img.exploreMap.file, width := 100),
           div(mainTitle, "EXPLORE"),
-          div(mainText, "eianestainestaiu enrasuitenrauitnerauist enaruist naiusrte ansr  anuiseta nstauinesrtai nrestaui  enrsat nsta uinsretanui rset nasurite narsti e"),
+          div(mainText, "Explore spaces of parameters, optimize, test the sensitivity of your model through innovative and integrated methods"),
           readMore(DocumentationPages.method)
         )
       ),
@@ -47,7 +47,7 @@ object Main {
         div(centerBox)(
           img(src := Resource.img.scale.file, width := 100),
           div(mainTitle, "SCALE"),
-          div(mainText, "eianestainestaiu enrasuitenra uitneraui stenaruist naiusrte ansr anuiseta nstauinesrtai nrestaui enrsat nsta uinsretanui rset nasurite narsti e"),
+          div(mainText, "Scale up your experimentations with no effort on servers, clusters, grid, cloud, ..."),
           readMore(DocumentationPages.environment)
         )
       )
