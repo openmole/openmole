@@ -7,7 +7,8 @@ The profile method is designed to test the sensitivity of the input parameters.
 @Resource.rawFrag(Resource.img.profileID)
 
 @Resource.rawFrag(Resource.img.profileAnim)
-@basicButton("Run", classIs(btn ++ btn_danger))(id := shared.profile.button, stylesheet.svgRunButton)
+@br
+@basicButton("Run", classIs(btn ++ btn_danger))(id := shared.profile.button, stylesheet.svgRunButton(-70))
 
 @p
 Given a distance measure between the model output values and

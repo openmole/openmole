@@ -5,10 +5,16 @@
 Several states-of-the-art DoE methodes are also implemented in OpenMOLE. However, we recomend to first focus on OpenMOLE new methods, which have been thought to improve the drawbacks of the classical methods.
 
 @h2{Complete sampling}
-@img(src := Resource.img.completeID.file, center(65), padding := 20)
+
+@br
+@Resource.rawFrag(Resource.img.completeID)
 
 @h2{LHS and Sobol}
-@img(src := Resource.img.sobolLHSID.file, center(65), padding := 20)
+
+@br
+@Resource.rawFrag(Resource.img.sobolLHSID)
+
+
 
 @p{Sensitivity Analysis }
 
@@ -16,7 +22,11 @@ Several states-of-the-art DoE methodes are also implemented in OpenMOLE. However
      affect the output(s) of a model.
 
 
-@img(src := Resource.img.thumbnail_sensitivity.file, width:= "50%")
+@br
+@Resource.rawFrag(Resource.img.thumbnail_sensitivity)
+@br
+@basicButton("Run", classIs(btn ++ btn_danger))(id := shared.sensitivity.button, stylesheet.svgRunButton(10))
+
 
 @br
 @br
@@ -69,7 +79,7 @@ and @a("FileSampling task", href := DocumentationPages.sampling.file)
 @h2{Variation of several inputs}
 @p
 
-  Exploration can be performed on several inputs domains, using the @b{cartesian product} operator @b{x}.
+  Exploration can be performed on several inputs domains, using the @b{cartesian product} operator: @b{x}.
 The basic syntax to explore 2 inputs (i.e. every combination of 2 inputs values) is
    @hl.openmole("""
    val i = Val[Int]
@@ -189,6 +199,7 @@ This model features a threshold value in its unique parameter domain, below whic
 
 
 We will perform sensitivity analysis to make this threshold appear.
+Sometimes. Stay tuned !
 
 
 TODO est ce qu'il faut vaiment le faire ici ou faire un tuto dédié ?

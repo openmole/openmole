@@ -42,7 +42,7 @@ package object stylesheet {
 
   lazy val mainDiv = Seq(
     paddingTop := 150,
-    paddingBottom := 450
+    paddingBottom := 150
   ) ++ center(50)
 
   def detailButtons(topValue: Int) = Seq(
@@ -143,8 +143,8 @@ package object stylesheet {
     paddingTop := 100
   )
 
-  val svgRunButton = Seq(
+  def svgRunButton(top: Int) = Seq(
     position := "absolute",
-    marginTop := -70
+    marginTop := top
   )
 }
