@@ -143,8 +143,8 @@ package object stylesheet {
     paddingTop := 100
   )
 
-  val svgRunButton = Seq(
+  def svgRunButton(top: Int) = Seq(
     position := "absolute",
-    marginTop := -70
+    marginTop := top
   )
 }

@@ -82,9 +82,9 @@
          id="text4809"
          y="104.59969"
          x="-17.610018"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.34460402px;line-height:1.25;font-family:gi;-inkscape-font-specification:gi;letter-spacing:0px;word-spacing:0px;fill:#2f2f3b;fill-opacity:1;stroke:none;stroke-width:0.22269183"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.34460402px;line-height:1.25;font-family:'gi';-inkscape-font-specification:gi;letter-spacing:0px;word-spacing:0px;fill:#2f2f3b;fill-opacity:1;stroke:none;stroke-width:0.22269183"
          xml:space="preserve"><tspan
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.11666703px;font-family:gi;-inkscape-font-specification:gi;fill:#2f2f3b;fill-opacity:1;stroke-width:0.22269183"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.11666703px;font-family:'gi';-inkscape-font-specification:gi;fill:#2f2f3b;fill-opacity:1;stroke-width:0.22269183"
            y="104.59969"
            x="-17.610018"
            id="tspan4807">Output Exploration</tspan></text>
@@ -98,14 +98,14 @@
          style="fill:#a02c2c;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.11872421;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
       <text
          xml:space="preserve"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.34460402px;line-height:1.25;font-family:gi;-inkscape-font-specification:gi;letter-spacing:0px;word-spacing:0px;fill:#2f2f3b;fill-opacity:1;stroke:none;stroke-width:0.22269183"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.34460402px;line-height:1.25;font-family:'gi';-inkscape-font-specification:gi;letter-spacing:0px;word-spacing:0px;fill:#2f2f3b;fill-opacity:1;stroke:none;stroke-width:0.22269183"
          x="-15.803408"
          y="99.968903"
          id="text4797"><tspan
            id="tspan4795"
            x="-15.803408"
            y="99.968903"
-           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:2.11666703px;font-family:gi;-inkscape-font-specification:'Glacial Indifference Bold';fill:#2f2f3b;fill-opacity:1;stroke-width:0.22269183">Input Exploration</tspan></text>
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:2.11666703px;font-family:'gi';-inkscape-font-specification:'gi Bold';fill:#2f2f3b;fill-opacity:1;stroke-width:0.22269183">Input Exploration</tspan></text>
       <g
          id="g4285">
         <rect
@@ -162,7 +162,7 @@
            aria-label="M">
           <path
              id="path4672"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:gi;-inkscape-font-specification:gi;fill:#2f2f3b;fill-opacity:1"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'gi';-inkscape-font-specification:gi;fill:#2f2f3b;fill-opacity:1"
              d="m 293.2535,166.72559 1.5975,0 -3.555,-16.3125 -5.0175,13.095 -5.0175,-13.095 -3.5775,16.3125 1.62,0 2.3625,-10.89 4.6125,11.79 4.59,-11.79 z" />
         </g>
       </g>
@@ -172,7 +172,7 @@
          x="-9.4695454"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333311px;line-height:1.25;font-family:'Humor Sans';-inkscape-font-specification:'Humor Sans';letter-spacing:0px;word-spacing:0px;fill:#2f2f3b;fill-opacity:1;stroke:none;stroke-width:0.22269183"
          xml:space="preserve"><tspan
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.11666703px;font-family:gi;-inkscape-font-specification:gi;fill:#2f2f3b;fill-opacity:1;stroke-width:0.22269183"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.11666703px;font-family:'gi';-inkscape-font-specification:gi;fill:#2f2f3b;fill-opacity:1;stroke-width:0.22269183"
            y="113.86127"
            x="-9.4695454"
            id="tspan5034">Sensitivity</tspan></text>
@@ -182,7 +182,7 @@
          x="-11.954546"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.34460402px;line-height:1.25;font-family:'Humor Sans';-inkscape-font-specification:'Humor Sans';letter-spacing:0px;word-spacing:0px;fill:#2f2f3b;fill-opacity:1;stroke:none;stroke-width:0.22269183"
          xml:space="preserve"><tspan
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.11666703px;font-family:gi;-inkscape-font-specification:gi;fill:#2f2f3b;fill-opacity:1;stroke-width:0.22269183"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.11666703px;font-family:'gi';-inkscape-font-specification:gi;fill:#2f2f3b;fill-opacity:1;stroke-width:0.22269183"
            y="109.23049"
            x="-11.954546"
            id="tspan4799">Optimisation</tspan></text>
