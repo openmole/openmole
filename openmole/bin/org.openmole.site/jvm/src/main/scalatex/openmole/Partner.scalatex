@@ -2,9 +2,23 @@
 @import org.openmole.site._
 @import org.openmole.site.stylesheet._
 
-@h1{Partners}
-@p
-@a(img(src := Resource.img.iscpif.file,  partners), href := "http://iscpif.fr", target := "_blank")
-@a(img(src := Resource.img.geocite.file, partners), href := "http://www.parisgeo.cnrs.fr/", target := "_blank")
-@a(img(src := Resource.img.biomedia.file, partners), href := "http://biomedic.doc.ic.ac.uk/", target := "_blank")
-@a(img(src := Resource.img.ign.file, partners), href := "http://recherche.ign.fr", target := "_blank")
+
+@h1{Financial partners}
+@a(img(src := Resource.img.iscpif.file,  partners), href := shared.link.partner.iscpif, target := "_blank")
+@a(img(src := Resource.img.geocite.file, partners), href := shared.link.partner.parisgeo, target := "_blank")
+@a(img(src := Resource.img.biomedia.file, partners), href := shared.link.partner.biomedic, target := "_blank")
+@a(img(src := Resource.img.idf.file, partners), href := shared.link.partner.idf, target := "_blank")
+@a(img(src := Resource.img.paris.file, partners), href := shared.link.partner.paris, target := "_blank")
+
+@h1{Some scientific colaborations}
+
+@a(img(src := Resource.img.ign.file,  smallPartners), href := shared.link.partner.ign, target := "_blank")
+@span(width := "75%", paddingLeft := 30)
+  An exploration of the output diversity of the @aa("SimPLU model", href := shared.link.repo.simplu) lead to this
+  decision making tool: @outerLink(shared.link.simpluDemo.split("//").last, shared.link.simpluDemo)
+
+@div(width := "75%", paddingLeft := 70)
+  SimPopLocal
+
+@div(width := "75%", paddingLeft := 70)
+  Marius

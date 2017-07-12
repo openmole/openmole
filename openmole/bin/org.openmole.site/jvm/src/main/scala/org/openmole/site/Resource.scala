@@ -92,6 +92,10 @@ object Resource {
 
     val biomedia = imgResource("biomedia.png")
 
+    val idf = imgResource("idf.svg")
+
+    val paris = imgResource("mairieParis.svg")
+
     val ign = imgResource("ign.png")
 
     val scale = imgResource("scale.svg")
@@ -137,6 +141,8 @@ object Resource {
     val guillaume = imgResource("guillaume.png")
 
     val julien = imgResource("julien.png")
+
+    val etienne = imgResource("etienne.png")
 
     val mole = imgResource("openmole.svg")
     //Radars graph for methodes

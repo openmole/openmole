@@ -129,6 +129,11 @@ package object stylesheet {
     padding := 50
   )
 
+  val smallPartners = Seq(
+    width := 120,
+    padding := 30
+  )
+
   val h1Like = Seq(
     color := "#444",
     fontSize := "32px",
