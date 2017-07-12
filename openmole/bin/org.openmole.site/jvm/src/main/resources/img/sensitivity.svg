@@ -4,16 +4,16 @@
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-	xmlns:xlink="http://www.w3.org/1999/xlink"
-   width="158.75505mm"
-   height="40.585983mm"
-   viewBox="0 0 562.5179 143.8086"
+   width="250mm"
+   height="63.824078mm"
+   viewBox="0 0 885.82678 226.1483"
    id="svg6838"
    version="1.1"
    inkscape:version="0.91 r13725"
-   sodipodi:docname="cursor_anim_final_position.svg">
+   sodipodi:docname="sensitivity.svg">
   <defs
      id="defs6840">
     <marker
@@ -126,15 +126,15 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.98994949"
-     inkscape:cx="243.71777"
-     inkscape:cy="26.188721"
+     inkscape:cx="78.280339"
+     inkscape:cy="26.188727"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
-     inkscape:window-width="1855"
-     inkscape:window-height="1056"
-     inkscape:window-x="65"
-     inkscape:window-y="24"
+     inkscape:window-width="1920"
+     inkscape:window-height="1022"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
      inkscape:window-maximized="1"
      fit-margin-top="0"
      fit-margin-left="0"
@@ -156,47 +156,47 @@
      inkscape:label="Calque 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(-56.75826,-85.503777)">
+     transform="translate(-57.035749,-3.1640833)">
     <rect
-       ry="4.5945458"
-       y="137.96111"
-       x="275.63287"
-       height="63.616783"
-       width="122.2856"
+       ry="7.2201142"
+       y="85.758118"
+       x="400.55093"
+       height="99.97081"
+       width="192.16611"
        id="rect4376-6-8-6"
-       style="fill:#ffcc00;fill-rule:evenodd;stroke:#333333;stroke-width:1.19895303;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+       style="fill:#ffcc00;fill-rule:evenodd;stroke:#333333;stroke-width:1.88409877;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
     <path
        inkscape:connector-curvature="0"
-       inkscape:original-d="m 217.20716,200.76313 47.00576,-18.02474"
+       inkscape:original-d="m 308.73765,184.44857 73.86736,-28.32504"
        inkscape:path-effect="#path-effect4388-5-6-0"
        id="path4386-7-9-6"
-       d="m 217.20716,200.76313 47.00576,-18.02474"
-       style="fill:none;fill-rule:evenodd;stroke:#333333;stroke-width:1.19895303;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker-end:url(#marker4608-8-7-4)"
+       d="m 308.73765,184.44857 73.86736,-28.32504"
+       style="fill:none;fill-rule:evenodd;stroke:#333333;stroke-width:1.88409877;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker-end:url(#marker4608-8-7-4)"
        inkscape:export-filename="/home/mathieu/Documents/openMOLE/openmole-com/slides/images/inverseProblem.png"
        inkscape:export-xdpi="128.34"
        inkscape:export-ydpi="128.34" />
     <path
-       style="fill:none;fill-rule:evenodd;stroke:#333333;stroke-width:1.19895303;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker-end:url(#marker4532-0-4-5)"
-       d="m 217.35175,170.48018 50.34077,-0.48741"
+       style="fill:none;fill-rule:evenodd;stroke:#333333;stroke-width:1.88409877;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker-end:url(#marker4532-0-4-5)"
+       d="m 308.96486,136.86032 79.10818,-0.76594"
        id="path4390-4-2-9"
        inkscape:path-effect="#path-effect4392-6-0-6"
-       inkscape:original-d="m 217.35175,170.48018 50.34077,-0.48741"
+       inkscape:original-d="m 308.96486,136.86032 79.10818,-0.76594"
        inkscape:connector-curvature="0"
        inkscape:export-filename="/home/mathieu/Documents/openMOLE/openmole-com/slides/images/inverseProblem.png"
        inkscape:export-xdpi="128.34"
        inkscape:export-ydpi="128.34" />
     <path
        inkscape:connector-curvature="0"
-       inkscape:original-d="m 217.20716,139.56849 47.00576,18.02474"
+       inkscape:original-d="m 308.73765,88.284045 73.86736,28.325035"
        inkscape:path-effect="#path-effect4397-6-4-0"
        id="path4395-5-0-8"
-       d="m 217.20716,139.56849 47.00576,18.02474"
-       style="fill:none;fill-rule:evenodd;stroke:#333333;stroke-width:1.19895303;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker-end:url(#marker4690-1-4-3)"
+       d="m 308.73765,88.284045 73.86736,28.325035"
+       style="fill:none;fill-rule:evenodd;stroke:#333333;stroke-width:1.88409877;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker-end:url(#marker4690-1-4-3)"
        inkscape:export-filename="/home/mathieu/Documents/openMOLE/openmole-com/slides/images/inverseProblem.png"
        inkscape:export-xdpi="128.34"
        inkscape:export-ydpi="128.34" />
     <g
-       transform="matrix(0.46365433,0,0,0.46365433,809.97531,-842.06527)"
+       transform="matrix(0.72861115,0,0,0.72861115,1240.2451,-1454.3076)"
        id="g156749-1-7">
       <path
          style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
@@ -216,7 +216,7 @@
     </g>
     <g
        id="g156749-6-2-9"
-       transform="matrix(0.46365433,0,0,0.46365433,809.97531,-794.97839)">
+       transform="matrix(0.72861115,0,0,0.72861115,1240.2451,-1380.3128)">
       <path
          style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
          d="m -1604.7619,2090.4574 294.0476,0"
@@ -235,7 +235,7 @@
     </g>
     <g
        id="g156749-0-0-2"
-       transform="matrix(0.46365433,0,0,0.46365433,809.97535,-753.98482)">
+       transform="matrix(0.72861115,0,0,0.72861115,1240.2452,-1315.8933)">
       <path
          style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
          d="m -1604.7619,2090.4574 294.0476,0"
@@ -253,57 +253,57 @@
          inkscape:connector-curvature="0" />
     </g>
     <path
-       style="fill:none;fill-rule:evenodd;stroke:#333333;stroke-width:1.19895303;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker-end:url(#marker5313-7-6)"
-       d="m 404.87193,171.4401 50.34076,0.48742"
+       style="fill:none;fill-rule:evenodd;stroke:#333333;stroke-width:1.88409877;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker-end:url(#marker5313-7-6)"
+       d="m 603.64408,138.36879 79.10816,0.76596"
        id="path3602-3-3"
        inkscape:path-effect="#path-effect3604-56-3"
-       inkscape:original-d="m 404.87193,171.4401 50.34076,0.48742"
+       inkscape:original-d="m 603.64408,138.36879 79.10816,0.76596"
        inkscape:connector-curvature="0"
        inkscape:export-filename="/home/mathieu/Documents/openMOLE/openmole-com/slides/images/sensitivityAnalysis.png"
        inkscape:export-xdpi="128"
        inkscape:export-ydpi="128" />
     <rect
-       style="opacity:0.79500002;fill:#a02c2c;fill-opacity:0.8309179;stroke:#aa0000;stroke-width:0.59721488;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       style="opacity:0.79500002;fill:#a02c2c;fill-opacity:0.8309179;stroke:#aa0000;stroke-width:0.93849534;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        id="cursor"
-       width="6.3788505"
-       height="11.93469"
-       x="67.53875"
-       y="121.28519"
+       width="10.024066"
+       height="18.754808"
+       x="73.540726"
+       y="59.552685"
        ry="0" />
     <rect
-       style="opacity:0.79500002;fill:#a02c2c;fill-opacity:0.8309179;stroke:#aa0000;stroke-width:0.59721488;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       style="opacity:0.79500002;fill:#a02c2c;fill-opacity:0.8309179;stroke:#aa0000;stroke-width:0.93849534;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        id="rect11166-1-8-6"
-       width="6.3788505"
-       height="11.93469"
-       x="159.87843"
-       y="168.6118"
+       width="10.024066"
+       height="18.754808"
+       x="218.64822"
+       y="133.92426"
        ry="0" />
     <rect
-       style="opacity:0.79500002;fill:#a02c2c;fill-opacity:0.8309179;stroke:#aa0000;stroke-width:0.59721488;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       style="opacity:0.79500002;fill:#a02c2c;fill-opacity:0.8309179;stroke:#aa0000;stroke-width:0.93849534;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        id="rect11166-1-8-7"
-       width="6.3788505"
-       height="11.93469"
-       x="94.723579"
-       y="209.27176"
+       width="10.024066"
+       height="18.754808"
+       x="116.26041"
+       y="197.81947"
        ry="0" />
     <path
        inkscape:connector-curvature="0"
        id="path156898-7-1"
-       d="m 491.4681,112.12153 0,106.88947 117.2232,0"
-       style="fill:none;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.81378084;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+       d="m 739.72592,45.152427 0,167.971813 184.21079,0"
+       style="fill:none;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1.27881861;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
     <path
        id="path161389-6-53-7"
-       d="m 491.31213,111.92907 2.06575,2.1238 -1.99324,-7.36077 -2.1963,7.30275 2.12379,-2.06578 z"
-       style="fill:#333333;fill-opacity:1;fill-rule:evenodd;stroke:#333333;stroke-width:0.41899734pt;stroke-opacity:1"
+       d="m 739.48082,44.849985 3.24623,3.337453 -3.13228,-11.567107 -3.45139,11.475931 3.33744,-3.246277 z"
+       style="fill:#333333;fill-opacity:1;fill-rule:evenodd;stroke:#333333;stroke-width:0.65843477pt;stroke-opacity:1"
        inkscape:connector-curvature="0" />
     <path
        id="path161389-6-1-5-4"
-       d="m 606.82426,219.0631 -2.12379,2.06579 7.36079,-1.99328 -7.30276,-2.19631 2.06576,2.1238 z"
-       style="fill:#333333;fill-opacity:1;fill-rule:evenodd;stroke:#333333;stroke-width:0.41899734pt;stroke-opacity:1"
+       d="m 921.00275,213.20612 -3.33744,3.24629 11.56714,-3.13235 -11.47595,-3.4514 3.24625,3.33746 z"
+       style="fill:#333333;fill-opacity:1;fill-rule:evenodd;stroke:#333333;stroke-width:0.65843477pt;stroke-opacity:1"
        inkscape:connector-curvature="0" />
     <path
-       style="fill:none;fill-rule:evenodd;stroke:#acbf26;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="m 495.66291,214.67144 c 28.98155,-126.589676 52.89344,35.69453 99.23089,-24.96759 25.92647,-33.94136 16.52901,26.80086 16.52901,26.80086"
+       style="fill:none;fill-rule:evenodd;stroke:#acbf26;stroke-width:3.14290667;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 746.31787,206.30483 c 45.54315,-198.9297734 83.11957,56.09229 155.93671,-39.23541 40.74224,-53.33726 25.97457,42.11631 25.97457,42.11631"
        id="curve"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="csc" />
@@ -311,95 +311,98 @@
        sodipodi:linespacing="125%"
        id="text164639-3"
        y="229.31238"
-       x="615.46973"
-       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:11.56962013px;line-height:125%;font-family:'Glacial Indifference'"
+       x="934.58868"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:18.18111801px;line-height:125%;font-family:gi"
        xml:space="preserve"><tspan
          y="229.31238"
-         x="615.46973"
+         x="934.58868"
          id="tspan164641-9"
          sodipodi:role="line">t</tspan></text>
     <text
        xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:11.56962013px;line-height:125%;font-family:'Glacial Indifference'"
-       x="479.16949"
-       y="94.180992"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:18.18111801px;line-height:125%;font-family:gi"
+       x="720.39923"
+       y="16.959709"
        id="text169233-8"
        sodipodi:linespacing="125%"><tspan
          sodipodi:role="line"
          id="tspan169235-1"
-         x="479.16949"
-         y="94.180992">o(t)</tspan></text>
+         x="720.39923"
+         y="16.959709">o(t)</tspan></text>
     <text
        xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:11.56962013px;line-height:125%;font-family:'Glacial Indifference'"
-       x="56.389191"
-       y="129.63704"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:18.18111801px;line-height:125%;font-family:gi"
+       x="56.019711"
+       y="72.677231"
        id="text169233-8-5"
        sodipodi:linespacing="125%"><tspan
          sodipodi:role="line"
          id="tspan169235-1-3"
-         x="56.389191"
-         y="129.63704">i</tspan></text>
+         x="56.019711"
+         y="72.677231">i</tspan></text>
     <text
        xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:11.56962013px;line-height:125%;font-family:'Glacial Indifference'"
-       x="57.487396"
-       y="177.36731"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:18.18111801px;line-height:125%;font-family:gi"
+       x="57.745491"
+       y="147.68312"
        id="text169233-8-5-5"
        sodipodi:linespacing="125%"><tspan
          sodipodi:role="line"
          id="tspan169235-1-3-6"
-         x="57.487396"
-         y="177.36731">j</tspan></text>
+         x="57.745491"
+         y="147.68312">j</tspan></text>
     <text
        xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:11.56962013px;line-height:125%;font-family:'Glacial Indifference'"
-       x="56.064083"
-       y="219.54079"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:18.18111801px;line-height:125%;font-family:gi"
+       x="55.50882"
+       y="213.95677"
        id="text169233-8-5-2"
        sodipodi:linespacing="125%"><tspan
          sodipodi:role="line"
          id="tspan169235-1-3-9"
-         x="56.064083"
-         y="219.54079">k</tspan></text>
+         x="55.50882"
+         y="213.95677">k</tspan></text>
     <text
        xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:18.94331741px;line-height:125%;font-family:'Glacial Indifference'"
-       x="310.04626"
-       y="175.26897"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:29.76853943px;line-height:125%;font-family:gi"
+       x="454.62997"
+       y="144.38568"
        id="text169233-8-5-2-7"
        sodipodi:linespacing="125%"><tspan
          sodipodi:role="line"
          id="tspan169235-1-3-9-0"
-         x="310.04626"
-         y="175.26897">Model</tspan></text>
+         x="454.62997"
+         y="144.38568">Model</tspan></text>
   </g>
-
-
- <animate 
-           xlink:href="#cursor"
-           attributeName="x"
-           values="65 ; 195 ; 65"
-           dur="8s"
-           begin="0s"
-	   restart="always"
-	   repeatCount="indefinite"
-           fill="freeze" 
-           id="cursor-anim"/>
-  
- <animate 
-           xlink:href="#curve"
-           attributeName="d"
-           values= "m 495.66291,214.67144 c 28.98155,-126.589676 2.38581,-26.93493 48.72326,-87.59705 25.92647,-33.941353 67.03664,89.43032 67.03664,89.43032 ; 
-           m 495.66291,214.67144 c 28.98155,-126.589676 52.89344,35.69453 99.23089,-24.96759 25.92647,-33.94136 16.52901,26.80086 16.52901,26.80086 ; 
-           m 495.66291,214.67144 c 28.98155,-126.589676 2.38581,-26.93493 48.72326,-87.59705 25.92647,-33.941353 67.03664,89.43032 67.03664,89.43032" 
-           
-
-	   dur="8s"
-           begin="0s"
-	   restart="always"
-	   repeatCount="indefinite"
-           fill="freeze" 
-           id="curve-anim"/>
-
+  <!-- code dummy animation for starting from button -->
+  <animate
+     attributeType="CSS"
+     attributeName="fill-opacity"
+     to="1"
+     dur="1s"
+     begin="startButton.click"
+     fill="freeze"
+     restart="always"
+     repeatCount="1"
+     id="startSensitivityAnim" />
+  <animate
+     xlink:href="#cursor"
+     attributeName="x"
+     values="65 ; 195 ; 65"
+     dur="8s"
+     begin="startSensitivityAnim.begin"
+     restart="always"
+     repeatCount="1"
+     fill="freeze"
+     id="cursor-anim" />
+  <animate
+     xlink:href="#curve"
+     attributeName="d"
+     values="m 495.66291,214.67144 c 28.98155,-126.589676 2.38581,-26.93493 48.72326,-87.59705 25.92647,-33.941353 67.03664,89.43032 67.03664,89.43032 ;             m 495.66291,214.67144 c 28.98155,-126.589676 52.89344,35.69453 99.23089,-24.96759 25.92647,-33.94136 16.52901,26.80086 16.52901,26.80086 ;             m 495.66291,214.67144 c 28.98155,-126.589676 2.38581,-26.93493 48.72326,-87.59705 25.92647,-33.941353 67.03664,89.43032 67.03664,89.43032"
+     dur="8s"
+     begin="startSensitivityAnim.begin"
+     restart="always"
+     repeatCount="1"
+     fill="freeze"
+     id="curve-anim" />
 </svg>

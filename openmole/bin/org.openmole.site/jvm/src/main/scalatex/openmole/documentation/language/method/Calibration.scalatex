@@ -9,10 +9,17 @@ Using Genetic Algorithms (GA) , OpenMOLE find the inputs set matching one or sev
 
 @h2{Single criterion and multi-criteria Calibration}
 
+@br
+@Resource.rawFrag(Resource.img.GAsingleID)
 
-@img(src := Resource.img.GAsingleID.file, center(65), padding := 20)
+@br
+@Resource.rawFrag(Resource.img.GAmultiID)
 
-@img(src := Resource.img.GAmultiID.file, center(65), padding := 20)
+
+
+@br
+@br
+
 
 @figure
  @img(src := Resource.img.thumbnail_calib_mono.file, center(50))

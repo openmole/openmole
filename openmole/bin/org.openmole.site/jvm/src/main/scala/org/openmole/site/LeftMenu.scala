@@ -34,7 +34,7 @@ case class LeftMenuBlock(menus: Seq[LeftMenu]) {
           m ← menus
         } yield {
           div(
-            if (m.pages.isEmpty) div else div(m.preText, fontWeight := "bold", paddingTop := 40),
+            if (m.pages.isEmpty) div else div(m.preText, fontWeight := "bold", paddingTop := 20),
             for {
               p ← m.pages
             } yield {

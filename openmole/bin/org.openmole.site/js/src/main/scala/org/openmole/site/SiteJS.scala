@@ -79,4 +79,13 @@ object SiteJS extends JSApp {
     }.getOrElse(Seq())
   }
 
+  @JSExport
+  def profileAnimation(): Unit = SVGStarter.decorateTrigger(shared.profile.button, shared.profile.animation, 11000)
+
+  @JSExport
+  def pseAnimation(): Unit = SVGStarter.decorateTrigger(shared.pse.button, shared.pse.animation, 11000)
+
+  @JSExport
+  def sensitivityAnimation(): Unit = SVGStarter.decorateTrigger(shared.sensitivity.button, shared.sensitivity.animation, 8000)
+
 }

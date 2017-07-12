@@ -42,7 +42,7 @@ package object stylesheet {
 
   lazy val mainDiv = Seq(
     paddingTop := 150,
-    paddingBottom := 450
+    paddingBottom := 150
   ) ++ center(50)
 
   def detailButtons(topValue: Int) = Seq(
@@ -104,7 +104,7 @@ package object stylesheet {
   ) ++ center(50)
 
   lazy val footer = Seq(
-    position := "absolute",
+    position := "relative",
     right := 0,
     bottom := 0,
     left := 0,
@@ -129,6 +129,11 @@ package object stylesheet {
     padding := 50
   )
 
+  val smallPartners = Seq(
+    width := 120,
+    padding := 30
+  )
+
   val h1Like = Seq(
     color := "#444",
     fontSize := "32px",
@@ -136,5 +141,10 @@ package object stylesheet {
     margin := "0 0 24px",
     textTransform := "uppercase",
     paddingTop := 100
+  )
+
+  def svgRunButton(top: Int) = Seq(
+    position := "absolute",
+    marginTop := top
   )
 }

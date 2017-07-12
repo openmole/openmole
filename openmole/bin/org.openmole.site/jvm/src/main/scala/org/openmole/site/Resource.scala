@@ -17,9 +17,7 @@
 
 package org.openmole.site
 
-//import org.openmole.core.buildinfo
-//import org.openmole.marketindex.{ GeneratedMarketEntry, Market }
-//import org.openmole.site.market.Market._
+import org.openmole.tool.stream._
 
 //TODO automatically generate this object as a managed source using sbt
 object Resource {
@@ -44,7 +42,7 @@ object Resource {
 
     val modelIO = imgResource("modelIO.png")
 
-    val thumbnail_profiles = imgResource("profileanimV1.svg")
+    val profileAnim = imgResource("profileAnim.svg")
 
     val thumbnail_ancestors = imgResource("ancestors.png")
 
@@ -66,7 +64,7 @@ object Resource {
 
     val sobolLHSID = imgResource("sobolLHSID.svg")
 
-    val thumbnail_pse = imgResource("pse_anim.svg")
+    val pseAnim = imgResource("pseAnim.svg")
 
     val antNumbers = imgResource("antnumbers.png")
 
@@ -93,6 +91,12 @@ object Resource {
     val geocite = imgResource("geocite.png")
 
     val biomedia = imgResource("biomedia.png")
+
+    val idf = imgResource("idf.svg")
+
+    val paris = imgResource("mairieParis.svg")
+
+    val ign = imgResource("ign.png")
 
     val scale = imgResource("scale.svg")
 
@@ -135,6 +139,10 @@ object Resource {
     val paul = imgResource("paul.png")
 
     val guillaume = imgResource("guillaume.png")
+
+    val julien = imgResource("julien.png")
+
+    val etienne = imgResource("etienne.png")
 
     val mole = imgResource("openmole.svg")
     //Radars graph for methodes
@@ -215,6 +223,15 @@ object Resource {
   }
 
   val api = fileResource("api")
+
+  def rawFrag(fileResource: FileResource) = {
+    val builder = new scalatags.text.Builder()
+    scalatags.Text.all.raw(content(fileResource)).applyTo(builder)
+    builder.children.head
+  }
+
+  def content(fileResource: FileResource) =
+    this.getClass.getClassLoader.getResourceAsStream(fileResource.file).content
 
   //  val marketResources(entries: Seq[GeneratedMarketEntry]) =
   //    entries.filter(_.tags.exists(_ == Market.Tags.tutorial)).map { tuto ⇒ MarketResource(tuto) }

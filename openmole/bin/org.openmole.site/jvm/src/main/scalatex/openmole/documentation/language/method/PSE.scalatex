@@ -4,14 +4,23 @@
 @import org.openmole.site.stylesheet._
 
 
-@img(src := Resource.img.pseID.file, center(65), padding := 20)
 
-@figure
-  @img(src := Resource.img.thumbnail_pse.file, center(70), paddingTop := 10 )
-    @figcaption
-      Figure: Input parameter values are selected to produce new output
-      values, such that as the exploration progresses, the region of
+
+@p
+
+      PSE method is used to explore the output's diversity of a model.
+      Input parameter values are selected to produce new output values, such that as the exploration progresses, the region of
       the output space that is covered gets bigger.
+
+@br
+@Resource.rawFrag(Resource.img.pseID)
+
+@Resource.rawFrag(Resource.img.pseAnim)
+@br
+@basicButton("Run", classIs(btn ++ btn_danger))(id := shared.pse.button, stylesheet.svgRunButton(-50))
+
+
+
 
 
 @p
@@ -76,3 +85,14 @@ of inputs and outputs are illimited.
     search results will take more memory than one can handle on a modern
     computer. Restricting the number of output variables to 2 or 3 also
     facilitates the interpretation of the results, making them easy to visualise.
+
+@br
+@br
+    The PSE method is described in the following scientific paper :
+
+
+Guillaume Chérel, Clémentine Cottineau and Romain Reuillon, « Beyond Corroboration: Strengthening Model
+        Validation by Looking for Unexpected Patterns» published in @i{PLOS ONE} 10(9), 2015.
+        @br
+            @a("[online version]" , href:="http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0138212")  @a("[bibteX]", href:= Resource.bibtex.PSEmethodBib.file)
+
