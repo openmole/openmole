@@ -14,13 +14,13 @@
 
 @member(Resource.img.romain, "Romain REUILLON")
 @div(width := "75%", paddingLeft := 70)
-    CNRS Researcher at Géographie-cité and ISC-PIF. Scientific Manager of the OpenMOLE platform leader of the development for Scientific simulation and computing, he developped both @aa("MGO", href := shared.link.mgo)  and  @aa("Gridscale", href := shared.link.gridscale)
+    CNRS Researcher at Géographie-cité and ISC-PIF. Scientific Manager of the OpenMOLE platform leader of the development for Scientific simulation and computing, he developped both @aa("MGO", href := shared.link.repo.mgo)  and  @aa("Gridscale", href := shared.link.repo.gridscale)
 
 
 @member(Resource.img.mathieu, "Mathieu LECLAIRE")
 @div(width := "75%", paddingLeft := 70)
     CNRS Researcher Engineer at ISC-PIF (UPS 3611) and Géographie-cité (UMR 8504).
-    Developper of the OpenMOLE Platform, he developped both the @aa("Scaladget", href := shared.link.scaladget) library and @aa("ScalaWUI", href := shared.link.scalawui) skeleton.
+    Developper of the OpenMOLE Platform, he developped both the @aa("Scaladget", href := shared.link.repo.scaladget) library and @aa("ScalaWUI", href := shared.link.repo.scalawui) skeleton.
 
 @member(Resource.img.jo, "Jonathan PASSERAT-PALMBACH")
 @div(width := "75%", paddingLeft := 70)

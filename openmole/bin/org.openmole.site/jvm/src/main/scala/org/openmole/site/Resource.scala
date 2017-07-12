@@ -92,6 +92,10 @@ object Resource {
 
     val biomedia = imgResource("biomedia.png")
 
+    val idf = imgResource("idf.svg")
+
+    val paris = imgResource("mairieParis.svg")
+
     val ign = imgResource("ign.png")
 
     val scale = imgResource("scale.svg")

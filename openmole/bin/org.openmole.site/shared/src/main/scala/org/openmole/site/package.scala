@@ -30,18 +30,28 @@ package object shared {
   }
 
   object link {
-    lazy val iscpif = "http://iscpif.fr"
-    lazy val parisgeo = "http://www.parisgeo.cnrs.fr/"
-    lazy val biomedic = "http://biomedic.doc.ic.ac.uk/"
-    lazy val github = "https://github.com/openmole/openmole"
-    lazy val demo = "http://demo.openmole.org"
+    lazy val demo = "https://demo.openmole.org"
     lazy val twitter = "https://twitter.com/OpenMOLE"
-    lazy val blog = "blog.openmole.org"
+    lazy val blog = "https://blog.openmole.org"
     lazy val simpluDemo = "https://simplu.openmole.org"
-    lazy val mgo = "https://github.com/openmole/mgo"
-    lazy val gridscale = "https://github.com/openmole/gridscale"
-    lazy val scaladget = "https://github.com/openmole/scaladaget"
-    lazy val scalawui = "https://github.com/openmole/scalaWUI"
-    lazy val mailingList = "ask.openmole.org"
+    lazy val mailingList = "https://ask.openmole.org"
+
+    object partner {
+      lazy val iscpif = "http://iscpif.fr"
+      lazy val parisgeo = "http://www.parisgeo.cnrs.fr/"
+      lazy val biomedic = "http://biomedic.doc.ic.ac.uk/"
+      lazy val idf = "https://www.iledefrance.fr/"
+      lazy val paris = "https://www.paris.fr/"
+      lazy val ign = "http://www.ign.fr/"
+    }
+
+    object repo {
+      lazy val openmole = "https://github.com/openmole/openmole"
+      lazy val gridscale = "https://github.com/openmole/gridscale"
+      lazy val scaladget = "https://github.com/openmole/scaladaget"
+      lazy val scalawui = "https://github.com/openmole/scalaWUI"
+      lazy val mgo = "https://github.com/openmole/mgo"
+      lazy val simplu = "https://github.com/IGNF/simplu3D"
+    }
   }
 }

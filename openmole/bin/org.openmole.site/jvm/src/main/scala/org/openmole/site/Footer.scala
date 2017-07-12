@@ -56,7 +56,7 @@ object Footer {
             ul(classIs(nav ++ navbar_nav))(
               li(span("COMMUNITY", WHITE)(
                 div(paddingTop := 15),
-                imgSubItem(Resource.img.github, "Source Repository", shared.link.github, "Follow the commits, submit an issue or take part to the devloppement !"),
+                imgSubItem(Resource.img.github, "Source Repository", shared.link.repo.openmole, "Follow the commits, submit an issue or take part to the devloppement !"),
                 imgSubItem(Resource.img.previousVersion, "Previous versions", Pages.previousVersions.file, "Downloads and change logs of previous versions", false),
                 imgSubItem(Resource.img.email, "Forum", shared.link.mailingList, "Both forum and mailing list(subscribe first)"),
                 imgSubItem(Resource.img.faq, "FAQ", Pages.faq.file, "Any questions you may have", false)
