@@ -36,8 +36,7 @@ Upon registering your new authentication, OpenMOLE will verify that it can conta
 More details on the authentication methods available for a given environment are available in the dedicated sections of the documentation.
 
 @h2{Defining an execution Environment}
-Then, the actual delegation of
-the task is noted by the keyword @hl.openmoleNoTest("on") followed by a defined @i{Environment}:
+The actual delegation of the task is noted by the keyword @hl.openmoleNoTest("on") followed by a defined @i{Environment}:
 @br @hl.openmole("""
 val env = LocalEnvironment(10)
 
@@ -52,16 +51,18 @@ OpenMOLE to work. It reuses the infrastructure in place. You will however be req
 information in order for OpenMOLE to access the remote environment. At this point, just specify the credentials you're
 using to login to this environment outside of OpenMOLE. Voila! That's all you need to do to use your environment
 through OpenMOLE. In case you face authentication problems when targeting an environment through SSH, please refer
-to the troubleshooting page.
+to the corresponding entry in the @a("FAQ", href := Pages.faq.file).
 
 @p When no specific environment is specified for a task, or a group of tasks, they will be executed sequentially on your
 local machine.
 
 @h2{Grouping}
-@p The use of a batch environment is generally not suited for short tasks (less than a 1 minute for a cluster to less
+@p The use of a batch environment is generally not suited for short tasks (less than a 1 minute for a cluster, or less
 than 1 hour for a grid). In case your tasks are short you can group several executions. To group the execution by 100
 in each job submitted to the environment, use the keyword @hl.openmoleNoTest("by"):
-@br @hl.openmole("""val mole = explo -< (t1 on env by 100)""", header = """
+@br @hl.openmole("""
+val mole = explo -< (t1 on env by 100)
+""", header = """
 val env = LocalEnvironment(10)
 val t1 = EmptyTask()
 val i = Val[Int]
