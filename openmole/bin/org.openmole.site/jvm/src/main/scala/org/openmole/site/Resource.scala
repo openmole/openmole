@@ -138,6 +138,8 @@ object Resource {
 
     val julien = imgResource("julien.png")
 
+    val etienne = imgResource("etienne.png")
+
     val mole = imgResource("openmole.svg")
     //Radars graph for methodes
     val m_complete = imgResource("methods_radars/complet.png")
