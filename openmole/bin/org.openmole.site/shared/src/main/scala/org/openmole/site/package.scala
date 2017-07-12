@@ -29,7 +29,6 @@ package object shared {
     val animation = "startProfileAnim"
   }
 
-
   object pse {
     val button = "pseTrigger"
     val animation = "startPseAnim"
@@ -39,7 +38,6 @@ package object shared {
     val button = "sensitivityTrigger"
     val animation = "startSensitivityAnim"
   }
-
 
   object link {
     lazy val demo = "https://demo.openmole.org"
