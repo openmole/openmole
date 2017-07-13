@@ -23,9 +23,9 @@ import scalatags.Text.all._
 
 object UserGuide {
 
-  val firstModel = DocumentationPages.scala
-  val firstMethod = DocumentationPages.calibration
-  val firstEnvironment = DocumentationPages.multithread
+  val firstModel = DocumentationPages.model
+  val firstMethod = DocumentationPages.method
+  val firstEnvironment = DocumentationPages.environment
 
   def headerModel(model: String) = span(
     tools.to(DocumentationPages.model)(img(src := Resource.img.codeAnimated.file, headerImg)),
@@ -49,29 +49,35 @@ object UserGuide {
 
   def addCarousel(current: Page) = {
 
+    println("XX " + current.file)
     val currentDetailMenu = LeftMenu.details(current.details)
 
     val currentStep = {
-      if (DocumentationPages.modelPages.contains(current))
-        Step(
-          headerModel(current.name),
+      val o = {
+        if ((DocumentationPages.modelPages :+ DocumentationPages.model).contains(current))
+          Step(
+            headerModel(current.name),
+            div(current.content),
+            LeftMenu.model.add(currentDetailMenu).build(300),
+            firstModel, firstEnvironment, firstMethod
+          )
+        else if ((DocumentationPages.methodPages :+ DocumentationPages.method).contains(current))
+          Step(
+            headerMethod(current.name),
+            div(current.content),
+            LeftMenu.method.add(currentDetailMenu).build(300),
+            firstMethod, firstModel, firstEnvironment
+          )
+        else Step(
+          headerEnvironment(current.name),
           div(current.content),
-          LeftMenu.model.add(currentDetailMenu).build(300),
-          firstModel, firstEnvironment, firstMethod
+          LeftMenu.environment.add(currentDetailMenu).build(300),
+          firstEnvironment, firstMethod, firstModel
         )
-      else if (DocumentationPages.methodPages.contains(current))
-        Step(
-          headerMethod(current.name),
-          div(current.content),
-          LeftMenu.method.add(currentDetailMenu).build(300),
-          firstMethod, firstModel, firstEnvironment
-        )
-      else Step(
-        headerEnvironment(current.name),
-        div(current.content),
-        LeftMenu.environment.add(currentDetailMenu).build(300),
-        firstEnvironment, firstMethod, firstModel
-      )
+      }
+
+      println("CURRENT " + o.page.name)
+      o
     }
 
     new StepCarousel(

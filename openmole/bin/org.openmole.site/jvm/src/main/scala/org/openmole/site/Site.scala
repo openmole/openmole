@@ -135,13 +135,8 @@ object Site extends App {
           body(position := "relative", minHeight := "100%")(
             Menu.build,
             div(stylesheet.mainDiv)(
-              page match {
-                case doc: DocumentationPage ⇒ {
-                  if (DocumentationPages.topPages.contains(doc)) UserGuide.addCarousel(page)
-                  else page.content
-                }
-                case _ ⇒ page.content
-              }
+              if (DocumentationPages.topPages.contains(page)) UserGuide.addCarousel(page)
+              else page.content
             ),
             Footer.build,
             onload := onLoadString(page)

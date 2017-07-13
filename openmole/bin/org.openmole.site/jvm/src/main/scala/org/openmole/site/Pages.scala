@@ -54,10 +54,6 @@ object Pages {
     case _                    ⇒ false
   }
 
-  //  def isTopDoc(page: Page) = DocumentationPages.topPages.map {
-  //    _.children
-  //  }
-
 }
 
 object Page {
@@ -184,7 +180,7 @@ object DocumentationPages {
     modelPages,
     methodPages,
     environmentPages
-  ).flatten
+  ).flatten ++ Seq(model, method, environment)
 
   //  lazy val topPagesChildren = topPages.flatMap {
   //    _.children
@@ -217,7 +213,7 @@ object DocumentationPages {
   lazy val python = DocumentationPage(name = "Python", content = scalatex.documentation.language.model.Python(), details = Seq(nativeAPI, nativePackaging, CARETroubleshooting))
   lazy val netLogo = DocumentationPage(name = "NetLogo", content = scalatex.documentation.language.model.NetLogo())
   lazy val mole = DocumentationPage(name = "Mole", content = scalatex.documentation.language.model.MoleTask())
-  lazy val model = DocumentationPage(name = "Models", content = scalatex.documentation.language.Model())
+  lazy val model = DocumentationPage(name = "", content = scalatex.documentation.language.Model())
 
   def languagePages = Seq(model, sampling, transition, hook, environment, source, method)
 
