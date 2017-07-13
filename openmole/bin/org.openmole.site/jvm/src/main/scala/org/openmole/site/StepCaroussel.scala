@@ -26,10 +26,6 @@ case class Step(name: TypedTag[_ <: String], element: TypedTag[_ <: String], men
 
 class StepCarousel(step: Step) {
 
-  println(" step " + step.page.name)
-  println(" previos " + step.previous.name)
-  println(" nex" + step.next.name)
-
   val line = hr(classIs("line"), width := "80%", marginTop := 40)
   val render = {
     div(width := "100%")(
