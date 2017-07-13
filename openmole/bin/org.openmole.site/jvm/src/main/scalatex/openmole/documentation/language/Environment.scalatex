@@ -2,10 +2,6 @@
 @import org.openmole.site._
 @import org.openmole.site.Environment._
 
-@UserGuide.headerEnvironment("Environments")
-@LeftMenu.environment.build(300)
-
-
 @p
 A key feature in OpenMOLE is the possibility to delegate the workload to a remote execution environment. Tasks in OpenMOLE have been designed so that the delegation a part of the workload to a remote environment is declarative.
 

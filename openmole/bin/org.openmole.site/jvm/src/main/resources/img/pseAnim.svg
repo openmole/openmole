@@ -337,7 +337,7 @@
   <animate
           attributeType="CSS"
           attributeName="fill-opacity"
-          to="0.2"
+          to="1"
           dur="1s"
           begin="startButton.click"
           fill="freeze"
