@@ -5,7 +5,7 @@
 @h2
     Delegation to the EGI grid
 @p
-  @a("EGI", href := "http://www.egi.eu/") is a grid infrastructure gathering computing resources from all over the world. It is a very powerful computing environment, but shows technically challenging to use. OpenMOLE makes it very simple to benefit from the grid.
+  @a("EGI", href := "http://www.egi.eu/") is a grid infrastructure gathering computing resources from all over the world. It is a very powerful computing environment, but is transpires as technically challenging to use. OpenMOLE makes it very simple to benefit from the grid.
 
  @h3
     Setup your grid credentials
@@ -20,7 +20,7 @@
   @h3
     Submitting job to EGI
   @p
-    To use EGI through DIRAC you should setup an @hl.openmoleNoTest{EGIAuthentication} as explained above using a P12Certificates. Other methods are not supported by DIRAC. To use EGI you must be registered in a Virtual Organisation (VO). The VO is the only compulsory parameter when creating an EGI environment:
+    To use EGI through DIRAC you should setup an @hl.openmoleNoTest{EGIAuthentication} as explained above using a @b{P12 certificate bundle}. Other methods are not supported by DIRAC. In order to use EGI you must be registered in a Virtual Organisation (VO). The VO is the only compulsory parameter when creating an EGI environment:
     @br @hl.openmole("""
     val env = EGIEnvironment("biomed")""")
     @p Here the VO @i{biomed} is specified, but you can specify the EGI VO of you choice.
