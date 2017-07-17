@@ -1,6 +1,4 @@
 package org.openmole.site
-
-import org.openmole.core.buildinfo
 /*
  * Copyright (C) 11/05/17 // mathieu.leclaire@openmole.org
  *
@@ -61,13 +59,6 @@ package object shared {
       lazy val mgo = "https://github.com/openmole/mgo"
       lazy val simplu = "https://github.com/IGNF/simplu3D"
     }
-
-    lazy val closedIssues = Map(
-      buildinfo.version.value → "https://github.com/openmole/openmole/milestone/3?closed=1",
-      "0.6.2" → "",
-      "0.6.1" → "https://github.com/openmole/openmole/milestone/6?closed=1",
-      "0.6.0" → "https://github.com/openmole/openmole/milestone/2?closed=1"
-    )
 
   }
 }
