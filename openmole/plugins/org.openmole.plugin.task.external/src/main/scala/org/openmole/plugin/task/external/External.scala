@@ -59,7 +59,7 @@ object External {
     os:          OS
   )
 
-  case class ToPut(file: File, name: String, link: Boolean)
+  case class ToPut(file: File, expandedUserPath: String, link: Boolean)
   type PathResolver = String ⇒ File
 
   def withWorkDir[T](executionContext: TaskExecutionContext)(f: File ⇒ T): T = {
@@ -145,7 +145,7 @@ import org.openmole.plugin.task.external.External._
     prepareAndListInputFiles(context, resolver)._1
 
   def prepareAndListInputFiles(context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: NewFile) = {
-    def destination(f: ToPut) = resolver(f.name)
+    def destination(f: ToPut) = resolver(f.expandedUserPath)
 
     val resourcesFiles = for { f ← listResources(context, resolver) } yield {
       val d = destination(f)

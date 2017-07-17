@@ -228,7 +228,7 @@ object UDockerTask {
         hostFiles:             Vector[HostFile],
         volumesInfo:           List[VolumeInfo]   = List.empty[VolumeInfo]
       ): Iterable[MountPoint] =
-        preparedFilesInfo.map { case (f, d) ⇒ d.getAbsolutePath → containerPathResolver(f.name).toString } ++
+        preparedFilesInfo.map { case (f, d) ⇒ d.getAbsolutePath → containerPathResolver(f.expandedUserPath).toString } ++
           hostFiles.map { case (f, b) ⇒ f → b.getOrElse(f) } ++
           volumesInfo.map { case (f, d) ⇒ f.toString → d }
 
