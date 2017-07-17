@@ -1,4 +1,5 @@
 package org.openmole.site
+
 /*
  * Copyright (C) 11/05/17 // mathieu.leclaire@openmole.org
  *
