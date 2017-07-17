@@ -73,4 +73,3 @@ Fix the deserialization of the authentications.
 @div
   @aa("Bug fixes", href := closedIssues("0.6.2"))
 
-
