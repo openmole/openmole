@@ -86,6 +86,12 @@ object Resource {
 
     val uiScreenshot = imgResource("openmoleUI.png")
 
+    val uiAuthenticationButton = imgResource("authentications.png")
+
+    val uiAuthenticationPanel = imgResource("authentications_panel.png")
+
+    val uiAuthenticationValid = imgResource("authentication_valid.png")
+
     val iscpif = imgResource("iscpif.svg")
 
     val geocite = imgResource("geocite.png")
@@ -145,7 +151,7 @@ object Resource {
     val etienne = imgResource("etienne.png")
 
     val mole = imgResource("openmole.svg")
-    //Radars graph for methodes
+    //Radars graph for methods
     val m_complete = imgResource("methods_radars/complet.png")
 
     val m_LHS = imgResource("methods_radars/LHS_sobol.png")
