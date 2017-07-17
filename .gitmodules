@@ -1,3 +1,4 @@
 [submodule "openmole/bin/org.openmole.marketindex/src/main/resources/openmole-market"]
 	path = openmole/bin/org.openmole.marketindex/src/main/resources/openmole-market
-	url = http://gitlab.iscpif.fr/openmole/market.git 
+	url = https://github.com/openmole/openmole-market.git
+	branch = 7-dev
