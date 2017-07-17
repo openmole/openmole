@@ -52,13 +52,15 @@ object UserGuide {
     val currentDetailMenu = LeftMenu.details(current.details)
 
     val currentStep = {
-      if ((DocumentationPages.modelPages :+ DocumentationPages.model).contains(current))
+      if ((DocumentationPages.modelPages :+ DocumentationPages.model).contains(current)) {
+        val name = if (current == firstModel) "" else current.name
         Step(
-          headerModel(current.name),
+          headerModel(name),
           div(current.content),
           LeftMenu.model.add(currentDetailMenu).build(300),
           firstModel, firstEnvironment, firstMethod
         )
+      }
       else if ((DocumentationPages.methodPages :+ DocumentationPages.method).contains(current))
         Step(
           headerMethod(current.name),
