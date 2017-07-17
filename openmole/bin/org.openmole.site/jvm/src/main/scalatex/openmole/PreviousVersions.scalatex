@@ -1,6 +1,6 @@
 
 @import org.openmole.site.tools._
-@import org.openmole.site._
+@import org.openmole.core.buildinfo._
 @import org.openmole.site.Config._
 
 @h1{@version.value | @version.name}
