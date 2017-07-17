@@ -49,35 +49,31 @@ object UserGuide {
 
   def addCarousel(current: Page) = {
 
-    println("XX " + current.file)
     val currentDetailMenu = LeftMenu.details(current.details)
 
     val currentStep = {
-      val o = {
-        if ((DocumentationPages.modelPages :+ DocumentationPages.model).contains(current))
-          Step(
-            headerModel(current.name),
-            div(current.content),
-            LeftMenu.model.add(currentDetailMenu).build(300),
-            firstModel, firstEnvironment, firstMethod
-          )
-        else if ((DocumentationPages.methodPages :+ DocumentationPages.method).contains(current))
-          Step(
-            headerMethod(current.name),
-            div(current.content),
-            LeftMenu.method.add(currentDetailMenu).build(300),
-            firstMethod, firstModel, firstEnvironment
-          )
-        else Step(
-          headerEnvironment(current.name),
+      if ((DocumentationPages.modelPages :+ DocumentationPages.model).contains(current)) {
+        val name = if (current == firstModel) "" else current.name
+        Step(
+          headerModel(name),
           div(current.content),
-          LeftMenu.environment.add(currentDetailMenu).build(300),
-          firstEnvironment, firstMethod, firstModel
+          LeftMenu.model.add(currentDetailMenu).build(300),
+          firstModel, firstEnvironment, firstMethod
         )
       }
-
-      println("CURRENT " + o.page.name)
-      o
+      else if ((DocumentationPages.methodPages :+ DocumentationPages.method).contains(current))
+        Step(
+          headerMethod(current.name),
+          div(current.content),
+          LeftMenu.method.add(currentDetailMenu).build(300),
+          firstMethod, firstModel, firstEnvironment
+        )
+      else Step(
+        headerEnvironment(current.name),
+        div(current.content),
+        LeftMenu.environment.add(currentDetailMenu).build(300),
+        firstEnvironment, firstMethod, firstModel
+      )
     }
 
     new StepCarousel(
