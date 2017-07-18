@@ -1,5 +1,6 @@
 
 @import org.openmole.site.tools._
+@import org.openmole.site._
 @import org.openmole.core.buildinfo._
 @import org.openmole.site.Config._
 
@@ -71,8 +72,4 @@ Fix the deserialization of the authentications.
 
 @div
   @aa("Bug fixes", href := closedIssues("0.6.2"))
-<<<<<<< HEAD
-
-=======
->>>>>>> master
 

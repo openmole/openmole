@@ -52,7 +52,7 @@ class StrainerCapsuleSpec extends FlatSpec with Matchers {
     )
 
     val t1c = Capsule(t1)
-    val strainerC = StrainerCapsule(strainer)
+    val strainerC = Capsule(strainer, strain = true)
     val t2c = Capsule(t2)
 
     val ex = t1c -- strainerC -- t2c
@@ -70,8 +70,8 @@ class StrainerCapsuleSpec extends FlatSpec with Matchers {
         outputs += p
       )
 
-    val tNone = StrainerCapsule(EmptyTask())
-    val tNone2 = StrainerCapsule(EmptyTask())
+    val tNone = Capsule(EmptyTask(), strain = true)
+    val tNone2 = Capsule(EmptyTask(), strain = true)
 
     val strainer = EmptyTask()
 
@@ -83,9 +83,9 @@ class StrainerCapsuleSpec extends FlatSpec with Matchers {
       inputs += p
     )
 
-    val strainerC = Slot(StrainerCapsule(strainer))
+    val strainerC = Slot(Capsule(strainer, strain = true))
 
-    val ex = (root -- tNone -- (t1, tNone2) -- strainerC -- t2) & (root oo strainerC)
+    val ex = (root -- tNone -- (Capsule(t1), tNone2) -- strainerC -- t2) & (root oo strainerC)
     ex.start.waitUntilEnded
   }
 

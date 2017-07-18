@@ -148,8 +148,7 @@ import org.openmole.plugin.task.external.External._
     prepareAndListInputFiles(context, resolver)._1
 
   def prepareAndListInputFiles(context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: NewFile, fileService: FileService) = {
-    def destination(f: ToPut) = resolver(f.name)
-
+    def destination(f: ToPut) = resolver(f.expandedUserPath)
 
     val resourcesFiles = for { f ← listResources(context, resolver) } yield {
       val d = destination(f)
