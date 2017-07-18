@@ -58,8 +58,7 @@ class MoleJob(
 
   var exception: Option[Throwable] = None
 
-  @volatile private var _state: State = null
-  state = READY
+  @volatile private var _state: State = READY
 
   def state: State = _state
   def context: Context =
@@ -74,11 +73,7 @@ class MoleJob(
   def id = new UUID(mostSignificantBits, leastSignificantBits)
 
   private def changeState(state: State) = synchronized {
-    if (_state == null) {
-      _state = state
-      Unchanged
-    }
-    else if (!_state.isFinal) {
+    if (!_state.isFinal) {
       val oldState = _state
       _state = state
       Changed(oldState, state)
@@ -92,7 +87,7 @@ class MoleJob(
       case _                   ⇒
     }
 
-  def state_=(state: State) = signalChanged(changeState(state))
+  private def state_=(state: State) = signalChanged(changeState(state))
 
   def perform(executionContext: TaskExecutionContext) =
     if (!state.isFinal) {
