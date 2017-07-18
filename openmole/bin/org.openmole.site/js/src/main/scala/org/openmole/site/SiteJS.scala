@@ -37,11 +37,17 @@ object SiteJS extends JSApp {
 
   @JSExport()
   def main(): Unit = {
+    BlogPosts.fetch
+
     withBootstrapNative {
       Highlighting.init
       div.render
     }
 
+    Rx {
+      val oo = BlogPosts.all()
+      println("PPP " + oo)
+    }
   }
 
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()

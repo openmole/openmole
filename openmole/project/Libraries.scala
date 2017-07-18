@@ -12,7 +12,7 @@ object Libraries {
   lazy val netLogo5Version = "5.3.1"
   lazy val netLogo6Version = "6.0.1"
   lazy val scalaTagsVersion = "0.6.2"
-  lazy val scalaJSDomVersion = "0.9.1"
+  lazy val scalaJSDomVersion = "0.9.3"
   lazy val rxVersion = "0.3.2"
   lazy val scalaUpickleVersion = "0.4.3"
   lazy val scalaAutowireVersion = "0.2.6"
@@ -28,6 +28,7 @@ object Libraries {
   lazy val upickleJS = libraryDependencies += "com.lihaoyi" %%% "upickle" % scalaUpickleVersion
   lazy val sourcecodeJS = libraryDependencies += "com.lihaoyi" %%% "sourcecode" % sourcecodeVersion
   lazy val scalajsMarked = libraryDependencies += "com.github.karasiq" %%% "scalajs-marked" % "1.0.2"
+  lazy val htmlparser2 = libraryDependencies += "com.definitelyscala" %%% "scala-js-htmlparser2" % "1.0.2"
 
   lazy val d3 = "org.webjars" % "d3js" % d3Version
   lazy val ace = "org.webjars" % "ace" % aceVersion

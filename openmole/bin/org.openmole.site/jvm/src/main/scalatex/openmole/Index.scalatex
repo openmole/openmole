@@ -18,3 +18,6 @@ OpenMOLE comes with web interface, that enables you to write @b{modeling-oriente
 }
 
 @Main.build
+
+@h2{News}(paddingTop := 50)
+@indexDiv(id := shared.newsPosts)
