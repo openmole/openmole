@@ -110,3 +110,22 @@ As a suggestion, we recommand the @a("IntelliJ IDE", href:="https://www.jetbrain
 
     They are written using @a("scalatex", href:="http://www.lihaoyi.com/Scalatex/"), a DSL to generate html content.
 
+@h2
+    Repositories
+@p
+    @a("OpenMOLE repos", href:="https://github.com/openmole/openmole") are divided into three branches.
+
+        @ul
+            @li
+                @hl.highlight("dev", "plain") contains the unstable, current version  of the platform.
+            @li
+                @hl.highlight("#version-dev", "plain")  e.g. 7-dev , is the stabilized version of the @hl.highlight("dev", "plain") branch
+            @li
+                @hl.highlight("master", "plain") is the main branch, from which  the two former branches are derived
+
+@h2
+    Recommended contribution procedure
+@p
+    When you want to contribute to the project (code or documentation) we recommend that you start by submitting an @b{issue}
+    , so that the community can identify the nature of the potential caveat.
+    After that , send a @b{pull request} so that your potential changes can be discussed.
