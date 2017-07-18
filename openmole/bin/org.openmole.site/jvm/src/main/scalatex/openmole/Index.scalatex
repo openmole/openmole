@@ -2,8 +2,8 @@
 @import org.openmole.site.tools._
 @import org.openmole.site._
 
-    @h2(style:="text-align:center")
-        A Computational Engine for Custom Simulation Experiments
+@h2(textAlign := "center")
+  A Computational Engine for Custom Simulation Experiments
 
 
 @def indexDiv= div(width := "75%", paddingTop := 15, style:="text-align:justify; margin-left:auto; margin-right:auto")
@@ -20,6 +20,4 @@ You can describe how to @b{explore} your own model and how to @b{distribute} its
 }
 
 @Main.build
-
-@h2{News}(paddingTop := 50)
 @indexDiv(id := shared.newsPosts)

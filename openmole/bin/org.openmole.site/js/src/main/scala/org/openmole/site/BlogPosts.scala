@@ -49,9 +49,10 @@ object BlogPosts {
   val all: Var[Seq[BlogPost]] = Var(Seq())
 
   all.trigger {
-    println("trigger")
-    val news = all.now.filter { _.category == newsCategory }.take(3)
-    org.scalajs.dom.window.document.getElementById(shared.newsPosts).appendChild(newsDiv(news).render)
+    if (!all.now.isEmpty) {
+      val news = all.now.filter { _.category == newsCategory }.take(3)
+      org.scalajs.dom.window.document.getElementById(shared.newsPosts).appendChild(newsDiv(news).render)
+    }
   }
 
   def fetch = {
@@ -129,20 +130,17 @@ object BlogPosts {
     right := 10
   )
 
-  def newsDiv(blogPosts: Seq[BlogPost]) = div(
-    for {
-      bp ← blogPosts
-    } yield {
-      div(
-        span(bp.title)(titleStyle),
-        span(a(href := bp.link, target := "_blank")("Read more"))(moreStyle)
-      )(newsStyle)
-    }
-  )
+  def newsDiv(blogPosts: Seq[BlogPost]) =
+    div(paddingTop := 50)(
+      h2("News"),
+      for {
+        bp ← blogPosts
+      } yield {
+        div(
+          span(bp.title)(titleStyle),
+          span(a(href := bp.link, target := "_blank")("Read more"))(moreStyle)
+        )(newsStyle)
+      }
+    )
 
-  def toDiv(f: scalatags.Text.Frag) = {
-    val aDiv = div().render
-    scalatags.JsDom.all.raw(f.render).applyTo(aDiv)
-    aDiv
-  }
 }
