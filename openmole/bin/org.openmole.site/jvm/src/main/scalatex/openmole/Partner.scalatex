@@ -38,5 +38,5 @@
     The @b{ERC @a("Geodivercity", href:="http://geodivercity.parisgeo.cnrs.fr/blog/")} was an advanced grant ERC project ,
     led by Pr. Denise Pumain. A significant part of the  development of OpenMOLE  as a scalable platform for geographical
     simulation models experiments was founded by this project. The project led to the publication of a book publisshed by Springer,
-    available @a{"on the editor site", href:="http://www.springer.com/fr/book/9783319464954"}
+    available @a("on the editor site", href:="http://www.springer.com/fr/book/9783319464954")
     and here as a pre-print open version TODO ajouter liens vers HAL pour les preprint
