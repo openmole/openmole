@@ -9,17 +9,34 @@
 @a(img(src := Resource.img.idf.file, partners), href := shared.link.partner.idf, target := "_blank")
 @a(img(src := Resource.img.paris.file, partners), href := shared.link.partner.paris, target := "_blank")
 
-@h1{Some scientific colaborations}
+@h1{Some scientific collaborations outputs}
 
 @a(img(src := Resource.img.ign.file,  smallPartners), href := shared.link.partner.ign, target := "_blank")
-@span(width := "75%", paddingLeft := 30)
+@span(width := "75%")
   An exploration of the output diversity of the @aa("SimPLU model", href := shared.link.repo.simplu) lead to this
   decision making tool: @outerLink(shared.link.simpluDemo.split("//").last, shared.link.simpluDemo)
 
-@div(width := "75%", paddingLeft := 70)
-  SimPopLocal
 
-@div(width := "75%", paddingLeft := 70)
-  Marius
+@br
+@br
 
+@a(img(src := Resource.img.geocite.file,  smallPartners), href := shared.link.partner.parisgeo, target := "_blank", float:="left")
 
+@span(width := "75%")
+  @b{SimPopLocal} is a theoretical geography model, simulating the emergence and the upkeep of systems of settlements (ancestors
+  of system of cities) by means of spatial interactions and innovation exchanges. Main results are shown in the «Half a billion simulations: Evolutionary algorithms and distributed computing for calibrating the SimpopLocal
+  geographical model» article in our  @a("publication page", href := Pages.communications.file)
+
+@span(width := "75%")
+    @br
+    @b{MARIUS} ("Modélisation des Agglomérations de Russie Imperiale et ex-Union Soviétique," french for Former URSS agglomerations model)
+    is the last born of the Simpop family of model, and addresses the dynamics of Russia/ former URSS from 1950 to 2010.
+    See «A modular modelling framework for hypotheses testing in the simulation of urbanisation»,
+    in our @a("publication page", href := Pages.communications.file)).
+@span(width := "75%")
+@br
+    The @b{ERC @a("Geodivercity", href:="http://geodivercity.parisgeo.cnrs.fr/blog/")} was an advanced grant ERC project ,
+    led by Pr. Denise Pumain. A significant part of the  development of OpenMOLE  as a scalable platform for geographical
+    simulation models experiments was founded by this project. The project led to the publication of a book publisshed by Springer,
+    available @a("on the editor site", href:="http://www.springer.com/fr/book/9783319464954")
+    and here as a pre-print open version TODO ajouter liens vers HAL pour les preprint

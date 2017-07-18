@@ -5,11 +5,35 @@
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
    xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    width="254mm"
    height="89.9851mm"
    viewBox="0 0 899.99997 318.84484"
    id="svg8564"
-   version="1.1">
+   version="1.1"
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="pseAnim.svg">
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1920"
+     inkscape:window-height="1022"
+     id="namedview4307"
+     showgrid="false"
+     inkscape:zoom="1.5611111"
+     inkscape:cx="434.76241"
+     inkscape:cy="159.42242"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg8564" />
   <defs
      id="defs8566">
     <marker
@@ -81,7 +105,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -331,22 +355,17 @@
          x="-445.97015"
          y="759.62256">k</tspan></text>
   </g>
-
-
   <!-- code dummy animation for starting from button -->
   <animate
-          attributeType="CSS"
-          attributeName="fill-opacity"
-          to="1"
-          dur="1s"
-          begin="startButton.click"
-          fill="freeze"
-          restart="always"
-          repeatCount="1"
-          id="startPseAnim"/>
-
-
-
+     attributeType="CSS"
+     attributeName="fill-opacity"
+     to="1"
+     dur="1s"
+     begin="startButton.click"
+     fill="freeze"
+     restart="always"
+     repeatCount="1"
+     id="startPseAnim" />
   <!-- Points  en bleu
 
 ##################################################################################################################
@@ -2323,9 +2342,6 @@ apparaissent en 6 secondes depuis le startPseAnim
          attributeType="CSS" />
     </circle>
   </g>
-
-
-
   <g
      id="g4289"
      transform="matrix(0.5315222,0,0,0.5315222,241.98701,-188.52837)">
@@ -2876,80 +2892,77 @@ apparaissent en 6 secondes depuis le startPseAnim
      to="0.8"
      attributeName="stroke-opacity"
      xlink:href="#Aklosange" />
-  <!-- text antécedents patterns-->
-  <g
-     id="g3880"
-     transform="matrix(0.5315222,0,0,0.5315222,-25.484072,167.2461)">
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:25px;line-height:125%;font-family:gi;-inkscape-font-specification:'gi Bold';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:0;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       x="70"
-       y="150"
-       id="textantetriangle"><tspan
-         id="tspan4316"
-         x="70"
-         y="150">Inputs leading to patterns      ,      and </tspan><animate
-         repeatCount="1"
-         restart="always"
-         fill="freeze"
-         dur="1s"
-         begin="appeartriangle.begin"
-         to="0.8"
-         attributeName="fill-opacity"
-         xlink:href="#textantetriangle" /></text>
-    <!-- pattern miniatures-->
-    <path
-       style="opacity:0.79500002;fill:#ff7f2a;fill-opacity:0;stroke:#aa4400;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0"
-       id="minitriangle"
-       d="m 420,150 -10.29136,0 -10.29136,0 5.14568,-8.91257 5.14568,-8.91258 5.14568,8.91258 z">
-      <animate
-         repeatCount="1"
-         restart="always"
-         fill="freeze"
-         dur="1s"
-         begin="appeartriangle.begin"
-         to="0.9"
-         attributeName="fill-opacity"
-         xlink:href="#minitriangle" />
-    </path>
-    <rect
-       style="opacity:0.79500002;fill:#a02c2c;fill-opacity:0;stroke:#aa0000;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0"
-       id="minisquare"
-       width="22"
-       height="22"
-       y="130"
-       x="460"
-       ry="0">
-      <animate
-         repeatCount="1"
-         restart="always"
-         fill="freeze"
-         dur="1s"
-         begin="appearsquare.begin"
-         to="0.9"
-         attributeName="fill-opacity"
-         xlink:href="#minisquare" />
-    </rect>
-    <rect
-       transform="matrix(0.70710678,0.70710678,-0.70710678,0.70710678,0,0)"
-       style="opacity:0.79500002;fill:#a6bf26;fill-opacity:0;stroke:#445500;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0"
-       id="minilosange"
-       width="22"
-       height="22"
-       x="490.10468"
-       y="-319.70059"
-       ry="0">
-      <animate
-         repeatCount="1"
-         restart="always"
-         fill="freeze"
-         dur="1s"
-         begin="appearlosange.begin"
-         to="0.9"
-         attributeName="fill-opacity"
-         xlink:href="#minilosange" />
-    </rect>
-  </g>
 
 
+  <!-- text antécedents patterns et version minitures des patterns  -->
+  <text
+     sodipodi:linespacing="125%"
+     id="textantetriangle"
+     y="246.97443"
+     x="11.722482"
+     style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:13.28805542px;line-height:125%;font-family:gi;-inkscape-font-specification:'gi Bold';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:0;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+     xml:space="preserve"><tspan
+       y="246.97443"
+       x="11.722482"
+       id="tspan4316">Inputs leading to patterns      ,      and </tspan><animate
+       xlink:href="#textantetriangle"
+       attributeName="fill-opacity"
+       to="0.8"
+       begin="appeartriangle.begin"
+       dur="1s"
+       fill="freeze"
+       restart="always"
+       repeatCount="1" /></text>
+  <path
+     inkscape:connector-curvature="0"
+     d="m 197.75525,246.97443 -5.47008,0 -5.47009,0 2.73504,-4.73723 2.73505,-4.73723 2.73504,4.73723 z"
+     id="minitriangle"
+     style="opacity:0.79500002;fill:#ff7f2a;fill-opacity:0;stroke:#aa4400;stroke-width:1.06304443;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0">
+    <animate
+       xlink:href="#minitriangle"
+       attributeName="fill-opacity"
+       to="0.9"
+       begin="appeartriangle.begin"
+       dur="1s"
+       fill="freeze"
+       restart="always"
+       repeatCount="1" />
+  </path>
+  <rect
+     ry="0"
+     x="219.01614"
+     y="236.34398"
+     height="11.693488"
+     width="11.693488"
+     id="minisquare"
+     style="opacity:0.79500002;fill:#a02c2c;fill-opacity:0;stroke:#aa0000;stroke-width:1.06304443;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0">
+    <animate
+       xlink:href="#minisquare"
+       attributeName="fill-opacity"
+       to="0.9"
+       begin="appearsquare.begin"
+       dur="1s"
+       fill="freeze"
+       restart="always"
+       repeatCount="1" />
+  </rect>
+  <rect
+     ry="0"
+     y="-33.647148"
+     x="360.7424"
+     height="11.693488"
+     width="11.693488"
+     id="minilosange"
+     style="opacity:0.79500002;fill:#a6bf26;fill-opacity:0;stroke:#445500;stroke-width:1.06304443;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0"
+     transform="matrix(0.70710678,0.70710678,-0.70710678,0.70710678,0,0)">
+    <animate
+       xlink:href="#minilosange"
+       attributeName="fill-opacity"
+       to="0.9"
+       begin="appearlosange.begin"
+       dur="1s"
+       fill="freeze"
+       restart="always"
+       repeatCount="1" />
+  </rect>
 </svg>
