@@ -20,6 +20,8 @@ package org.openmole.site
 package object shared {
   lazy val searchDiv = "search-div"
   lazy val searchImg = "search-img"
+  lazy val blogposts = "blog-posts"
+  lazy val newsPosts = "news-posts"
 
   object profile {
     val button = "profileTrigger"
@@ -61,5 +63,11 @@ package object shared {
       lazy val simplu = "https://github.com/IGNF/simplu3D"
     }
 
+  }
+
+  def rawFrag(content: String) = {
+    val builder = new scalatags.text.Builder()
+    scalatags.Text.all.raw(content).applyTo(builder)
+    builder.children.head
   }
 }

@@ -230,11 +230,7 @@ object Resource {
 
   val api = fileResource("api")
 
-  def rawFrag(fileResource: FileResource) = {
-    val builder = new scalatags.text.Builder()
-    scalatags.Text.all.raw(content(fileResource)).applyTo(builder)
-    builder.children.head
-  }
+  def rawFrag(fileResource: FileResource) = shared.rawFrag(content(fileResource))
 
   def content(fileResource: FileResource) =
     this.getClass.getClassLoader.getResourceAsStream(fileResource.file).content

@@ -2,10 +2,11 @@
 @import org.openmole.site.tools._
 @import org.openmole.site._
 
-@br@h2{
-A Computational Engine for Custom Simulation Experiments}
+    @h2(style:="text-align:center")
+        A Computational Engine for Custom Simulation Experiments
 
-@def indexDiv= div(width := "75%", paddingTop := 15)
+
+@def indexDiv= div(width := "75%", paddingTop := 15, style:="text-align:justify; margin-left:auto; margin-right:auto")
 
 @indexDiv{
 OpenMOLE has been developped since 2008 as a @b{free and open-source} platform.
@@ -14,7 +15,11 @@ The typical usages are model calibration, model exploration, machine learning, o
 }
 
 @indexDiv{
-OpenMOLE comes with web interface, that enables you to write @b{modeling-oriented scripts}. You can describe how to @b{explore} your own model and how to @b{distribute} its executions on hpc environments in a few lines of code !
+OpenMOLE comes with web interface, that enables you to write @b{modeling-oriented scripts}.
+You can describe how to @b{explore} your own model and how to @b{distribute} its executions on HPC environments in a few lines of code !
 }
 
 @Main.build
+
+@h2{News}(paddingTop := 50)
+@indexDiv(id := shared.newsPosts)
