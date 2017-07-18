@@ -89,17 +89,21 @@ class MoleJob(
 
   private def state_=(state: State) = signalChanged(changeState(state))
 
+  private def failed(t: Throwable) =
+    if (!finished) {
+      exception = Some(t)
+      state = FAILED
+    }
+
   def perform(executionContext: TaskExecutionContext) =
-    if (!state.isFinal) {
+    if (!finished) {
       try {
         state = RUNNING
         context = task.perform(context, executionContext)
         state = COMPLETED
       }
       catch {
-        case t: Throwable ⇒
-          exception = Some(t)
-          state = FAILED
+        case t: Throwable ⇒ failed(t)
       }
     }
 
@@ -114,7 +118,6 @@ class MoleJob(
   }
 
   def finished: Boolean = state.isFinal
-
   def cancel = state = CANCELED
 
 }
