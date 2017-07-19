@@ -1,0 +1,7 @@
+@import org.openmole.site.tools._
+@import org.openmole.core.buildinfo._
+@import org.openmole.site.Config._
+
+@h1{Short and free Trainings}
+@p
+These trainings are given around every 2 months. They last 3 hours. You will learn how to start with the application, what are the main concepts and how to build first experiments.
