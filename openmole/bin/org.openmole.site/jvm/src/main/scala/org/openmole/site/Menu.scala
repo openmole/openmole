@@ -40,6 +40,7 @@ object Menu {
           ul(classIs(nav ++ navbar_nav ++ navbar_right))(
             li(innerLink(DocumentationPages.scala, "DOCUMENTATION"), liStyle),
             li(outerLink("DEMO", shared.link.demo), liStyle),
+            li(innerLink(Pages.training, "TRAINING"), liStyle),
             li(linkButton("DOWNLOAD", Resource.script.openmole.file, classIs(btn ++ btn_primary))),
             li(inputStyle)(img(id := shared.searchImg, src := Resource.img.search.file, Seq(width := 35, paddingTop := 5, paddingLeft := 10, pointer)))(
               div(id := shared.searchDiv)

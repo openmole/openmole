@@ -22,6 +22,8 @@ package object shared {
   lazy val searchImg = "search-img"
   lazy val blogposts = "blog-posts"
   lazy val newsPosts = "news-posts"
+  lazy val shortTraining = "short-training"
+  lazy val longTraining = "long-training"
 
   object profile {
     val button = "profileTrigger"
