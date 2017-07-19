@@ -41,7 +41,7 @@ import spray.json._
 
 object Site extends App {
 
-  def piwik =
+  lazy val piwik =
     RawFrag(
       """
         |<!-- Piwik -->
@@ -145,6 +145,7 @@ object Site extends App {
 
         private def onLoadString(sitepage: org.openmole.site.Page) = {
           val toBeAppended = sitepage match {
+            case Pages.index                 ⇒ "org.openmole.site.SiteJS().loadNews();"
             case DocumentationPages.profile  ⇒ "org.openmole.site.SiteJS().profileAnimation();"
             case DocumentationPages.pse      ⇒ "org.openmole.site.SiteJS().pseAnimation();"
             case DocumentationPages.otherDoE ⇒ "org.openmole.site.SiteJS().sensitivityAnimation();"

@@ -30,7 +30,7 @@ import scalaz.Reader
 
 object Pages {
 
-  def index = Page("index", scalatex.Index(), title = Some("OpenMOLE: scientific workflow, distributed computing, parameter tuning"))
+  val index = Page("index", scalatex.Index(), title = Some("OpenMOLE: scientific workflow, distributed computing, parameter tuning"))
 
   def gettingStarted = Page("getting_started", scalatex.GettingStarted(), title = Some("Getting started with OpenMOLE - introductory tutorial"))
 
@@ -38,13 +38,15 @@ object Pages {
 
   def partner = Page("partner", scalatex.Partner(), title = Some("OpenMOLE partners"))
 
-  def communications = Page("communications", scalatex.Communications(), title = Some("Related papers, conference slides, videos, OpenMOLE in the news"))
+  val communications = Page("communications", scalatex.Communications(), title = Some("Related papers, conference slides, videos, OpenMOLE in the news"))
 
   def faq = Page("faq", scalatex.FAQ(), title = Some("FAQ"))
 
   def previousVersions = Page("previous_versions", scalatex.PreviousVersions(), title = Some("Previous versions"))
 
-  def all: Seq[Page] = DocumentationPages.allPages ++ Seq(index, gettingStarted, whoAreWe, partner, faq, communications, previousVersions)
+  val training = Page("training", scalatex.Training(), title = Some("Trainings"))
+
+  val all: Seq[Page] = DocumentationPages.allPages ++ Seq(index, gettingStarted, whoAreWe, partner, faq, communications, previousVersions, training)
 
   //def rawFile(page: Page) = page.location.mkString("_") + ".html"
   def file(page: Page) = java.net.URLEncoder.encode(page.location, "UTF-8") + ".html"

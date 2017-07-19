@@ -1,13 +1,9 @@
 package org.openmole.site
 
-import org.scalajs.dom.raw.HTMLElement
-
 import scaladget.api.{ BootstrapTags ⇒ bs }
-import scaladget.tools.JsRxTags._
 import scala.scalajs.js.JSApp
 import scala.scalajs.js.annotation._
-import scalatags.JsDom.tags
-import scalatags.JsDom.all.{ input, _ }
+import scalatags.JsDom.all._
 import bs._
 import rx._
 
@@ -37,20 +33,14 @@ object SiteJS extends JSApp {
 
   @JSExport()
   def main(): Unit = {
-    BlogPosts.fetch
-
     withBootstrapNative {
       Highlighting.init
       div.render
     }
-
-    Rx {
-      val oo = BlogPosts.all()
-      println("PPP " + oo)
-    }
   }
 
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
+
   @js.native
   trait IndexEntry extends js.Object {
     val title: String = js.native
@@ -83,6 +73,15 @@ object SiteJS extends JSApp {
     lunrIndex.now.map { i ⇒
       i.search(content).toSeq
     }.getOrElse(Seq())
+  }
+
+  @JSExport
+  def loadNews(): Unit = {
+    BlogPosts.fetch
+
+    Rx {
+      BlogPosts.all()
+    }
   }
 
   @JSExport

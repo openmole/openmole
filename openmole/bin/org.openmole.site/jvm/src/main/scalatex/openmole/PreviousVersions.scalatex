@@ -19,7 +19,7 @@
   @aa("Bug fixes", href := closedIssues(version.value))
 
 
-@h1{0.6 | Mostly Magic}
+@h1{6.0 | Mostly Magic}
 
 Long time, no release! More than a year!
 The OpenMOLE team is very proud to disclose "Mostly Magic", the 6th major version of OpenMOLE.
@@ -53,7 +53,7 @@ A multi-user version that you can install on a server and be used by several use
 The possibility to delegate computation to cloud provider such as Amazon, Azure... and cloud middleware such as open stack.
 
 @div
-  @aa("Bug fixes", href := closedIssues("0.6.0"))
+  @aa("Bug fixes", href := closedIssues("6.0"))
 
 
 @h2{0.6.1}
@@ -64,12 +64,12 @@ The possibility to delegate computation to cloud provider such as Amazon, Azure.
   @li{The authentication add panel had no cancel button.}
   @li{A link to the demo site has been added on the website.}
 
-@aa("Bug fixes", href := closedIssues("0.6.1"))
+@aa("Bug fixes", href := closedIssues("6.1"))
 
 
 @h2{0.6.2}
 Fix the deserialization of the authentications.
 
 @div
-  @aa("Bug fixes", href := closedIssues("0.6.2"))
+  @aa("Bug fixes", href := closedIssues("6.2"))
 
