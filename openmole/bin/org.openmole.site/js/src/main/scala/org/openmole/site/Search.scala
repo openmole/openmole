@@ -67,7 +67,7 @@ object Search {
             )
           }
         ),
-        onsubmit := search
+        onkeyup := search
       )
     )
 
