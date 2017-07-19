@@ -49,7 +49,7 @@ object UserGuide {
 
   def addCarousel(current: Page) = {
 
-    val currentDetailMenu = LeftMenu.details(current.details)
+    val currentDetailMenu = SideMenu.details(current.details)
 
     val currentStep = {
       if ((DocumentationPages.modelPages :+ DocumentationPages.model).contains(current)) {
@@ -57,7 +57,8 @@ object UserGuide {
         Step(
           headerModel(name),
           div(current.content),
-          LeftMenu.model.add(currentDetailMenu).build(370),
+          SideMenu.model.left(370),
+          SideMenu.block(currentDetailMenu).right(370),
           firstModel, firstEnvironment, firstMethod
         )
       }
@@ -65,13 +66,15 @@ object UserGuide {
         Step(
           headerMethod(current.name),
           div(current.content),
-          LeftMenu.method.add(currentDetailMenu).build(370),
+          SideMenu.method.left(370),
+          SideMenu.block(currentDetailMenu).right(370),
           firstMethod, firstModel, firstEnvironment
         )
       else Step(
         headerEnvironment(current.name),
         div(current.content),
-        LeftMenu.environment.add(currentDetailMenu).build(370),
+        SideMenu.environment.left(370),
+        SideMenu.block(currentDetailMenu).right(370),
         firstEnvironment, firstMethod, firstModel
       )
     }

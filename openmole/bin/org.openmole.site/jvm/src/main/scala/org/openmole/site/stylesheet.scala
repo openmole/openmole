@@ -52,7 +52,7 @@ package object stylesheet {
     right := 320,
     textAlign := "left",
     minWidth := 180,
-    marginRight := -140
+    marginRight := -180
   )
 
   def leftDetailButtons(topValue: Int) = Seq(

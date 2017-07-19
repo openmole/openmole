@@ -22,7 +22,7 @@ import tools._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-case class Step(name: TypedTag[_ <: String], element: TypedTag[_ <: String], menu: TypedTag[_ <: String], page: DocumentationPage, previous: DocumentationPage, next: DocumentationPage)
+case class Step(name: TypedTag[_ <: String], element: TypedTag[_ <: String], leftMenu: TypedTag[_ <: String], rightMenu: TypedTag[_ <: String], page: DocumentationPage, previous: DocumentationPage, next: DocumentationPage)
 
 class StepCarousel(step: Step) {
 
@@ -31,14 +31,13 @@ class StepCarousel(step: Step) {
     div(width := "100%")(
       leftGlyphButton(step.previous.name, step.previous, glyph_chevron_left)(leftDetailButtons(200)),
       rightGlyphButton(step.next.name, step.next, glyph_chevron_right)(rightDetailButtons(200)),
-      //glyphSpan(glyph_chevron_left, previousDoc, step.previous),
-      //glyphSpan(glyph_chevron_right, nextDoc, step.next),
       div(maxHeight := 100)(
         div(stepHeader)(step.name),
         line
       ),
       div(paddingTop := 70)(step.element),
-      step.menu
+      step.leftMenu,
+      step.rightMenu
     )
   }
 }
