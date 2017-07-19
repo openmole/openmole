@@ -27,9 +27,9 @@
      inkscape:window-height="1022"
      id="namedview4307"
      showgrid="false"
-     inkscape:zoom="1.5611111"
-     inkscape:cx="434.76241"
-     inkscape:cy="159.42242"
+     inkscape:zoom="6.2444444"
+     inkscape:cx="263.89778"
+     inkscape:cy="54.601994"
      inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
@@ -105,7 +105,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -2892,8 +2892,6 @@ apparaissent en 6 secondes depuis le startPseAnim
      to="0.8"
      attributeName="stroke-opacity"
      xlink:href="#Aklosange" />
-
-
   <!-- text antécedents patterns et version minitures des patterns  -->
   <text
      sodipodi:linespacing="125%"
@@ -2904,7 +2902,7 @@ apparaissent en 6 secondes depuis le startPseAnim
      xml:space="preserve"><tspan
        y="246.97443"
        x="11.722482"
-       id="tspan4316">Inputs leading to patterns      ,      and </tspan><animate
+       id="tspan4316">Inputs leading to patterns </tspan><animate
        xlink:href="#textantetriangle"
        attributeName="fill-opacity"
        to="0.8"
@@ -2915,7 +2913,7 @@ apparaissent en 6 secondes depuis le startPseAnim
        repeatCount="1" /></text>
   <path
      inkscape:connector-curvature="0"
-     d="m 197.75525,246.97443 -5.47008,0 -5.47009,0 2.73504,-4.73723 2.73505,-4.73723 2.73504,4.73723 z"
+     d="M 220.81508,237.49998 226.28516,237.49998 231.75525,237.49998 229.02021,242.23721 226.28516,246.97444 223.55012,242.23721 Z"
      id="minitriangle"
      style="opacity:0.79500002;fill:#ff7f2a;fill-opacity:0;stroke:#aa4400;stroke-width:1.06304443;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0">
     <animate
@@ -2930,12 +2928,13 @@ apparaissent en 6 secondes depuis le startPseAnim
   </path>
   <rect
      ry="0"
-     x="219.01614"
-     y="236.34398"
+     x="-252.70963"
+     y="-248.03746"
      height="11.693488"
      width="11.693488"
      id="minisquare"
-     style="opacity:0.79500002;fill:#a02c2c;fill-opacity:0;stroke:#aa0000;stroke-width:1.06304443;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0">
+     style="opacity:0.79500002;fill:#a02c2c;fill-opacity:0;stroke:#aa0000;stroke-width:1.06304443;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0"
+     transform="scale(-1,-1)">
     <animate
        xlink:href="#minisquare"
        attributeName="fill-opacity"
@@ -2948,13 +2947,13 @@ apparaissent en 6 secondes depuis le startPseAnim
   </rect>
   <rect
      ry="0"
-     y="-33.647148"
-     x="360.7424"
+     y="21.953659"
+     x="-372.43588"
      height="11.693488"
      width="11.693488"
      id="minilosange"
      style="opacity:0.79500002;fill:#a6bf26;fill-opacity:0;stroke:#445500;stroke-width:1.06304443;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0"
-     transform="matrix(0.70710678,0.70710678,-0.70710678,0.70710678,0,0)">
+     transform="matrix(-0.70710678,-0.70710678,0.70710678,-0.70710678,0,0)">
     <animate
        xlink:href="#minilosange"
        attributeName="fill-opacity"
