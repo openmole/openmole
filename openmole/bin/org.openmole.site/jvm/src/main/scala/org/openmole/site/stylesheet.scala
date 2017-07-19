@@ -147,4 +147,12 @@ package object stylesheet {
     position := "absolute",
     marginTop := top
   )
+
+  val centerJustify = Seq(
+    width := "75%",
+    paddingTop := 15,
+    textAlign := "justify",
+    marginLeft := "auto",
+    marginRight := "auto"
+  )
 }

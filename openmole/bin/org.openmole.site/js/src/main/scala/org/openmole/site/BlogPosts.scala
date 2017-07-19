@@ -1,6 +1,7 @@
 package org.openmole.site
 
 import org.scalajs.dom._
+import org.scalajs.dom.raw.{ HTMLDivElement, HTMLElement }
 
 import scala.util.{ Failure, Success }
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
@@ -11,6 +12,7 @@ import scalatags.Text.RawFrag
 import scalatags.Text.all.{ backgroundColor, padding }
 import scaladget.api.{ BootstrapTags ⇒ bs }
 import bs._
+import scalatags.JsDom.TypedTag
 
 /*
  * Copyright (C) 13/07/17 // mathieu.leclaire@openmole.org
@@ -47,11 +49,13 @@ object BlogPosts {
   case class BlogPost(title: String = "", category: Category = newsCategory, link: String = "", date: String = "")
 
   val all: Var[Seq[BlogPost]] = Var(Seq())
+  private def allBy(category: Category) = all.now.filter { _.category == category }.take(3)
 
   all.trigger {
     if (!all.now.isEmpty) {
-      val news = all.now.filter { _.category == newsCategory }.take(3)
-      org.scalajs.dom.window.document.getElementById(shared.newsPosts).appendChild(newsDiv(news).render)
+      addNewsdiv(allBy(newsCategory))
+      addTrainings(allBy(shortTrainingCategory), shared.shortTraining)
+      addTrainings(allBy(longTrainingCategory), shared.longTraining)
     }
   }
 
@@ -118,7 +122,8 @@ object BlogPosts {
     backgroundColor := "#222",
     color := "white",
     padding := 10,
-    marginTop := 5
+    marginTop := 5,
+    borderRadius := "5px"
   )
 
   val titleStyle = Seq(
@@ -130,8 +135,14 @@ object BlogPosts {
     right := 10
   )
 
-  def newsDiv(blogPosts: Seq[BlogPost]) =
-    div(paddingTop := 50)(
+  def testAndAppend(id: String, element: HTMLElement) = {
+    val node = org.scalajs.dom.window.document.getElementById(id)
+    if (node != null)
+      node.appendChild(element)
+  }
+
+  def addNewsdiv(blogPosts: Seq[BlogPost]) = {
+    val newsDiv = div(paddingTop := 50)(
       h2("News"),
       for {
         bp ← blogPosts
@@ -141,6 +152,23 @@ object BlogPosts {
           span(a(href := bp.link, target := "_blank")("Read more"))(moreStyle)
         )(newsStyle)
       }
-    )
+    ).render
 
+    testAndAppend(shared.newsPosts, newsDiv)
+  }
+
+  def addTrainings(blogPosts: Seq[BlogPost], id: String) = {
+    val trainingDiv = div(
+      for {
+        bp ← blogPosts
+      } yield {
+        div(
+          a(href := bp.link, target := "_blank")(bp.title)
+        )
+      }
+    ).render
+
+    testAndAppend(id, trainingDiv)
+  }
 }
+

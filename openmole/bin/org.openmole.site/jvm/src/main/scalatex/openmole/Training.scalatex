@@ -1,7 +1,17 @@
-@import org.openmole.site.tools._
-@import org.openmole.core.buildinfo._
-@import org.openmole.site.Config._
+@import org.openmole.site.shared
+@import org.openmole.site._
 
-@h1{Short and free Trainings}
-@p
-These trainings are given around every 2 months. They last 3 hours. You will learn how to start with the application, what are the main concepts and how to build first experiments.
+@h1{Short and free trainings}
+These trainings are given around every 2 months. In 3 hours, you will learn how to start with
+the application, what are the main concepts and how to build your first experiments. They take place
+at the ISC-PIF lab, Paris. Check and register for the next sessions:
+
+@div(id := shared.shortTraining)
+
+
+@h1{Long trainings}
+
+These trainings are oragnized with the CNRS. In 3 days, you will dive into the OpenMOLE concepts. All the recent
+optimization methods are explained and tested in detail. See the detailed program below:
+
+@div(id := shared.longTraining)

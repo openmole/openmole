@@ -22,6 +22,8 @@ package object shared {
   lazy val searchImg = "search-img"
   lazy val blogposts = "blog-posts"
   lazy val newsPosts = "news-posts"
+  lazy val shortTraining = "short-training"
+  lazy val longTraining = "long-training"
 
   object profile {
     val button = "profileTrigger"
@@ -43,7 +45,7 @@ package object shared {
     lazy val twitter = "https://twitter.com/OpenMOLE"
     lazy val blog = "https://blog.openmole.org"
     lazy val simpluDemo = "https://simplu.openmole.org"
-    lazy val mailingList = "https://ask.openmole.org"
+    lazy val mailingList = "http://ask.openmole.org"
 
     object partner {
       lazy val iscpif = "http://iscpif.fr"

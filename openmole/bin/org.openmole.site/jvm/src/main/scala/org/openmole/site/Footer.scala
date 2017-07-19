@@ -31,16 +31,16 @@ object Footer {
   )
 
   val liStyle = Seq(
-    paddingLeft := 50,
-    paddingBottom := 25,
-    paddingTop := 25
+    paddingLeft := 20,
+    padding := 20,
+    width := "25%"
   )
 
   def subItem(i: TypedTag[String]) = div(paddingTop := 15)(i)
 
   def imgSubItem(image: FileResource, title: String, link: String, text: String = "", otherTab: Boolean = true) =
     subItem(
-      div(width := 200)(
+      div(width := "100%")(
         tools.to(link, otherTab = otherTab)(
           img(src := image.file, height := 25, paddingBottom := 5)(span(s"$title", titleStyle))
         ),
@@ -56,10 +56,14 @@ object Footer {
             ul(classIs(nav ++ navbar_nav))(
               li(span("COMMUNITY", WHITE)(
                 div(paddingTop := 15),
-                imgSubItem(Resource.img.github, "Source Repository", shared.link.repo.openmole, "Follow the commits, submit an issue or take part to the devloppement !"),
                 imgSubItem(Resource.img.previousVersion, "Previous versions", Pages.previousVersions.file, "Downloads and change logs of previous versions", false),
                 imgSubItem(Resource.img.email, "Forum", shared.link.mailingList, "Both forum and mailing list(subscribe first)"),
                 imgSubItem(Resource.img.faq, "FAQ", Pages.faq.file, "Any questions you may have", false)
+              ), liStyle),
+              li(span("DEVELOPMENT", WHITE)(
+                div(paddingTop := 15),
+                imgSubItem(Resource.img.github, "Source Repository", shared.link.repo.openmole, "Follow the commits, submit an issue or take part to the devloppement !"),
+                imgSubItem(Resource.img.previousVersion, "How to contribute ?", DocumentationPages.howToContribute.file, "Get sources, compile and propose pull requests !", false)
               ), liStyle),
               li(span("ABOUT US", WHITE)(
                 div(paddingTop := 15),

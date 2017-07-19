@@ -67,14 +67,16 @@ object Search {
             )
           }
         ),
-        onsubmit := search
+        onkeyup := search
       )
     )
 
     val dd = new Dropdown(resultDiv, div, emptyMod, resultStyle, () ⇒ {})
 
     org.scalajs.dom.window.document.getElementById(shared.searchImg).addEventListener("click", {
-      (e: MouseEvent) ⇒ dd.toggle
+      (e: MouseEvent) ⇒
+        dd.toggle
+        searchInput.focus()
     })
 
     org.scalajs.dom.window.document.getElementById(shared.searchDiv).appendChild(dd.render)

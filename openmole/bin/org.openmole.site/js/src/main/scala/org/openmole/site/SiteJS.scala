@@ -76,7 +76,7 @@ object SiteJS extends JSApp {
   }
 
   @JSExport
-  def loadNews(): Unit = {
+  def loadBlogPosts(): Unit = {
     BlogPosts.fetch
 
     Rx {
