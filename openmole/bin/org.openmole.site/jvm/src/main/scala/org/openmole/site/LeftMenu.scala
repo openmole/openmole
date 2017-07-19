@@ -29,7 +29,7 @@ case class LeftMenuBlock(menus: Seq[LeftMenu]) {
 
   def build(top: Int) =
     div(
-      div(detailButtons(top))(
+      div(leftDetailButtons(top))(
         for {
           m ← menus
         } yield {

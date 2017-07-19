@@ -45,7 +45,17 @@ package object stylesheet {
     paddingBottom := 150
   ) ++ center(50)
 
-  def detailButtons(topValue: Int) = Seq(
+  def rightDetailButtons(topValue: Int) = Seq(
+    float := "right",
+    fixedPosition,
+    top := topValue,
+    right := 320,
+    textAlign := "left",
+    minWidth := 180,
+    marginRight := -140
+  )
+
+  def leftDetailButtons(topValue: Int) = Seq(
     float := "left",
     fixedPosition,
     top := topValue,
@@ -79,7 +89,7 @@ package object stylesheet {
 
   lazy val previousDoc = Seq(
     float := "left",
-    left := 300
+    left := 230
   ) ++ navigateDoc
 
   lazy val nextDoc = Seq(

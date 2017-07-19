@@ -57,7 +57,7 @@ object UserGuide {
         Step(
           headerModel(name),
           div(current.content),
-          LeftMenu.model.add(currentDetailMenu).build(300),
+          LeftMenu.model.add(currentDetailMenu).build(370),
           firstModel, firstEnvironment, firstMethod
         )
       }
@@ -65,13 +65,13 @@ object UserGuide {
         Step(
           headerMethod(current.name),
           div(current.content),
-          LeftMenu.method.add(currentDetailMenu).build(300),
+          LeftMenu.method.add(currentDetailMenu).build(370),
           firstMethod, firstModel, firstEnvironment
         )
       else Step(
         headerEnvironment(current.name),
         div(current.content),
-        LeftMenu.environment.add(currentDetailMenu).build(300),
+        LeftMenu.environment.add(currentDetailMenu).build(370),
         firstEnvironment, firstMethod, firstModel
       )
     }

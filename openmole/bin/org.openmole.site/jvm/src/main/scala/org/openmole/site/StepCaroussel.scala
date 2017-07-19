@@ -29,8 +29,10 @@ class StepCarousel(step: Step) {
   val line = hr(classIs("line"), width := "80%", marginTop := 40)
   val render = {
     div(width := "100%")(
-      glyphSpan(glyph_chevron_left, previousDoc, step.previous),
-      glyphSpan(glyph_chevron_right, nextDoc, step.next),
+      leftGlyphButton(step.previous.name, step.previous, glyph_chevron_left)(leftDetailButtons(200)),
+      rightGlyphButton(step.next.name, step.next, glyph_chevron_right)(rightDetailButtons(200)),
+      //glyphSpan(glyph_chevron_left, previousDoc, step.previous),
+      //glyphSpan(glyph_chevron_right, nextDoc, step.next),
       div(maxHeight := 100)(
         div(stepHeader)(step.name),
         line

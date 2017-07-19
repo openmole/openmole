@@ -90,6 +90,22 @@ package object tools {
   def glyphSpan(glyphicon: String, style: Seq[Modifier], page: Page, text: String = ""): TypedTag[_ <: String] =
     to(page)(classIs(glyphicon), style, pointer, aria.hidden := "true")(text)
 
+  def leftGlyphButton(title: String, page: Page, glyph: String, openInOtherTab: Boolean = false, buttonStyle: Seq[Modifier] = Seq(classIs(btn ++ btn_default))) =
+    to(page)(if (openInOtherTab) targetBlank else "")(
+      span(buttonStyle, `type` := "button")(
+        span(classIs(glyph)),
+        span(s" $title")
+      )
+    )
+
+  def rightGlyphButton(title: String, page: Page, glyph: String, openInOtherTab: Boolean = false, buttonStyle: Seq[Modifier] = Seq(classIs(btn ++ btn_default))) =
+    to(page)(if (openInOtherTab) targetBlank else "")(
+      span(buttonStyle, `type` := "button")(
+        span(s"$title "),
+        span(classIs(glyph))
+      )
+    )
+
   def basicButton(title: String, buttonStyle: AttrPair = classIs(btn ++ btn_default)) =
     span(buttonStyle, `type` := "button", title)
 
