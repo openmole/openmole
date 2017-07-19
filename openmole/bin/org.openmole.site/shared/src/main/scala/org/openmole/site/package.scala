@@ -45,7 +45,7 @@ package object shared {
     lazy val twitter = "https://twitter.com/OpenMOLE"
     lazy val blog = "https://blog.openmole.org"
     lazy val simpluDemo = "https://simplu.openmole.org"
-    lazy val mailingList = "https://ask.openmole.org"
+    lazy val mailingList = "http://ask.openmole.org"
 
     object partner {
       lazy val iscpif = "http://iscpif.fr"
