@@ -19,17 +19,19 @@ package org.openmole.site
 
 import tools._
 import stylesheet._
+
+import scalatags.Text.TypedTag
 import scalatags.Text.all._
 
-case class LeftMenu(pages: Seq[Page], menuStyle: AttrPair = classIs(btn ++ btn_default), preText: String = "", otherTab: Boolean = false)
+case class SideMenu(pages: Seq[Page], menuStyle: AttrPair = classIs(btn ++ btn_default), preText: String = "", otherTab: Boolean = false)
 
-case class LeftMenuBlock(menus: Seq[LeftMenu]) {
+case class SideMenuBlock(menus: Seq[SideMenu]) {
 
-  def add(leftMenu: LeftMenu) = copy(menus :+ leftMenu)
+  def add(sideMenu: SideMenu) = copy(menus :+ sideMenu)
 
-  def build(top: Int) =
+  private def build(topDiv: TypedTag[_]) =
     div(
-      div(detailButtons(top))(
+      topDiv(
         for {
           m ← menus
         } yield {
@@ -45,17 +47,21 @@ case class LeftMenuBlock(menus: Seq[LeftMenu]) {
       )
     )
 
+  def right(top: Int) = build(div(rightDetailButtons(top)))
+
+  def left(top: Int) = build(div(leftDetailButtons(top)))
+
 }
 
-object LeftMenu {
+object SideMenu {
 
-  def block(leftMenu: LeftMenu) = LeftMenuBlock(Seq(leftMenu))
+  def block(sideMenu: SideMenu) = SideMenuBlock(Seq(sideMenu))
 
-  def details(pages: Seq[Page]) = LeftMenu(pages, preText = "See also", otherTab = true)
+  def details(pages: Seq[Page]) = SideMenu(pages, preText = "See also", otherTab = true)
 
-  val model = LeftMenu.block(LeftMenu(DocumentationPages.modelPages, classIs(btn ++ btn_primary), "Available tasks"))
+  val model = SideMenu.block(SideMenu(DocumentationPages.modelPages, classIs(btn ++ btn_primary), "Available tasks"))
 
-  val method = LeftMenu.block(LeftMenu(DocumentationPages.methodPages, classIs(btn ++ btn_primary), "Available methods"))
+  val method = SideMenu.block(SideMenu(DocumentationPages.methodPages, classIs(btn ++ btn_primary), "Available methods"))
 
-  val environment = LeftMenu.block(LeftMenu(DocumentationPages.environmentPages, classIs(btn ++ btn_primary), "Available environments"))
+  val environment = SideMenu.block(SideMenu(DocumentationPages.environmentPages, classIs(btn ++ btn_primary), "Available environments"))
 }
