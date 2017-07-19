@@ -118,7 +118,8 @@ object BlogPosts {
     backgroundColor := "#222",
     color := "white",
     padding := 10,
-    marginTop := 5
+    marginTop := 5,
+    borderRadius := "5px"
   )
 
   val titleStyle = Seq(
