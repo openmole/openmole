@@ -46,6 +46,16 @@ package object shared {
     lazy val blog = "https://blog.openmole.org"
     lazy val simpluDemo = "https://simplu.openmole.org"
     lazy val mailingList = "http://ask.openmole.org"
+    lazy val shortTraining = "https://iscpif.fr/events/formationsjedi/"
+    lazy val longTraining = "http://cnrsformation.cnrs.fr"
+    lazy val egi = "http://www.egi.eu/"
+    lazy val batchProcessing = "https://en.wikipedia.org/wiki/Batch_processing"
+    lazy val batchSystem = "http://en.wikipedia.org/wiki/Portable_Batch_System"
+    lazy val grieEngine = "https://en.wikipedia.org/wiki/Oracle_Grid_Engine"
+    lazy val slurm = "https://en.wikipedia.org/wiki/Simple_Linux_Utility_for_Resource_Management"
+    lazy val condor = "https://en.wikipedia.org/wiki/HTCondor"
+    lazy val oar = "http://oar.imag.fr/dokuwiki/doku.php"
+    lazy val ssh = "https://en.wikipedia.org/wiki/Secure_Shell"
 
     object partner {
       lazy val iscpif = "http://iscpif.fr"

@@ -1,9 +1,9 @@
-
+@import org.openmole.site._
 @import org.openmole.site.tools._
 @import org.openmole.site.Environment._
 
 @sect{Batch systems}
-  Many distributed computing environments offer @a("batch processing", href := "https://en.wikipedia.org/wiki/Batch_processing") capabilities. OpenMOLE supports most of the batch systems. Batch systems generally work by exposing an entry point on which the user can log in and submit jobs. OpenMOLE accesses this entry point using SSH.
+  Many distributed computing environments offer @aa("batch processing", href := shared.link.batchProcessing) capabilities. OpenMOLE supports most of the batch systems. Batch systems generally work by exposing an entry point on which the user can log in and submit jobs. OpenMOLE accesses this entry point using SSH.
   Different environments can be assigned to delegate the workload resulting of different tasks or groups of tasks. However, not all clusters expose the same features, so options may vary from one environment to another.
 
   @p You should first provide your authentication information to OpenMOLE to be able to use your batch system.
@@ -12,7 +12,7 @@
 
   @sect{PBS / Torque}
     @p
-    @a("PBS", href :="http://en.wikipedia.org/wiki/Portable_Batch_System") is a venerable batch system for clusters. You may use a PBS computing environment as follow:
+    @aa("PBS", href := shared.link.batchSystem) is a venerable batch system for clusters. You may use a PBS computing environment as follow:
     @br @hl.openmole("""
     val env =
       PBSEnvironment(
@@ -34,7 +34,7 @@
      @li{@envEntryTitle{coreByNodes} An alternative to specifying the number of threads. @hl.openmoleNoTest{coreByNodes} takes the value of the @hl.openmoleNoTest{threads} when not specified, or 1 if none of them is specified.}
      @li{@name}
   @sect{SGE}
-    To delegate some computation load to a @a("SGE", href := "https://en.wikipedia.org/wiki/Oracle_Grid_Engine") based cluster you can use the @hl.openmoleNoTest{SGEEnvironment} as follows:
+    To delegate some computation load to a @aa("SGE", href := shared.link.grieEngine) based cluster you can use the @hl.openmoleNoTest{SGEEnvironment} as follows:
     @br @hl.openmole("""
     val env =
       SGEEnvironment(
@@ -53,7 +53,7 @@
       @li{@threads,}
       @li{@name.}
   @sect{Slurm}
-    To delegate the workload to a @a("Slurm", href := "https://en.wikipedia.org/wiki/Simple_Linux_Utility_for_Resource_Management") based cluster you can use the @hl.openmoleNoTest{SLURMEnvironment} as follows:
+    To delegate the workload to a @aa("Slurm", href := shared.link.slurm) based cluster you can use the @hl.openmoleNoTest{SLURMEnvironment} as follows:
     @br @hl.openmole("""
     val env =
       SLURMEnvironment(
@@ -80,7 +80,7 @@
       @li{@envEntryTitle{constraints} a list of Slurm defined constraints which selected nodes must match,}
       @li{@name.}
   @sect{Condor}
-    @a("Condor", href := "https://en.wikipedia.org/wiki/HTCondor") clusters can be leveraged using the following syntax:
+    @aa("Condor", href := shared.link.condor) clusters can be leveraged using the following syntax:
     @br @hl.openmole("""
     val env =
       CondorEnvironment(
@@ -97,7 +97,7 @@
       @li{@threads,}
       @li{@name.}
   @sect{OAR}
-    Similarly, @a("OAR", href := "http://oar.imag.fr/dokuwiki/doku.php") clusters are reached as follows:
+    Similarly, @aa("OAR", href := shared.link.oar) clusters are reached as follows:
     @br @hl.openmole("""
     val env =
       OAREnvironment(

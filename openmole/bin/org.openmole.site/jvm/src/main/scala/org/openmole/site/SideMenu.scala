@@ -57,11 +57,13 @@ object SideMenu {
 
   def block(sideMenu: SideMenu) = SideMenuBlock(Seq(sideMenu))
 
-  def details(pages: Seq[Page]) = SideMenu(pages, preText = "See also", otherTab = true)
+  def details(pages: Seq[Page]) = SideMenu(pages, otherTab = true)
 
   val model = SideMenu.block(SideMenu(DocumentationPages.modelPages, classIs(btn ++ btn_primary), "Available tasks"))
 
   val method = SideMenu.block(SideMenu(DocumentationPages.methodPages, classIs(btn ++ btn_primary), "Available methods"))
 
   val environment = SideMenu.block(SideMenu(DocumentationPages.environmentPages, classIs(btn ++ btn_primary), "Available environments"))
+
+  val more = SideMenu.block(SideMenu(Seq(DocumentationPages.documentation, DocumentationPages.gui), preText = "See also"))
 }

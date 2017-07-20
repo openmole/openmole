@@ -136,6 +136,8 @@ object Resource {
 
     val whoarwe = imgResource("mole.svg")
 
+    val contribute = imgResource("contribute.svg")
+
     val romain = imgResource("romain.png")
 
     val mathieu = imgResource("mathieu.png")

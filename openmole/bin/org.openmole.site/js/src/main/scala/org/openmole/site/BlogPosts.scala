@@ -54,8 +54,8 @@ object BlogPosts {
   all.trigger {
     if (!all.now.isEmpty) {
       addNewsdiv(allBy(newsCategory))
-      addTrainings(allBy(shortTrainingCategory), shared.shortTraining)
-      addTrainings(allBy(longTrainingCategory), shared.longTraining)
+      // addTrainings(allBy(shortTrainingCategory), shared.shortTraining)
+      // addTrainings(allBy(longTrainingCategory), shared.longTraining)
     }
   }
 
@@ -119,7 +119,7 @@ object BlogPosts {
   }
 
   val newsStyle = Seq(
-    backgroundColor := "#222",
+    backgroundColor := "#333",
     color := "white",
     padding := 10,
     marginTop := 5,
