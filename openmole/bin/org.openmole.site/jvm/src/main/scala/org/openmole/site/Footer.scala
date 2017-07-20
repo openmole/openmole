@@ -63,7 +63,7 @@ object Footer {
               li(span("DEVELOPMENT", WHITE)(
                 div(paddingTop := 15),
                 imgSubItem(Resource.img.github, "Source Repository", shared.link.repo.openmole, "Follow the commits, submit an issue or take part to the devloppement !"),
-                imgSubItem(Resource.img.previousVersion, "How to contribute ?", DocumentationPages.howToContribute.file, "Get sources, compile and propose pull requests !", false)
+                imgSubItem(Resource.img.contribute, "How to contribute ?", DocumentationPages.howToContribute.file, "Get sources, compile and propose pull requests !", false)
               ), liStyle),
               li(span("ABOUT US", WHITE)(
                 div(paddingTop := 15),
