@@ -119,7 +119,7 @@ object BlogPosts {
   }
 
   val newsStyle = Seq(
-    backgroundColor := "#222",
+    backgroundColor := "#333",
     color := "white",
     padding := 10,
     marginTop := 5,
