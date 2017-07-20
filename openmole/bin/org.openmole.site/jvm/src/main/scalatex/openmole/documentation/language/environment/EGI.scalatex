@@ -1,11 +1,13 @@
-
+@import org.openmole.site._
 @import org.openmole.site.tools._
 @import org.openmole.site.Environment._
 
 @h2
     Delegation to the EGI grid
 @p
-  @a("EGI", href := "http://www.egi.eu/") is a grid infrastructure gathering computing resources from all over the world. It is a very powerful computing environment, but is transpires as technically challenging to use. OpenMOLE makes it very simple to benefit from the grid.
+  @aa("EGI", href := shared.link.egi) is a grid infrastructure gathering computing resources from all over the world.
+  It is a very powerful computing environment, but is transpires as technically challenging to use.
+  OpenMOLE makes it very simple to benefit from the grid.
 
  @h3
     Setup your grid credentials
