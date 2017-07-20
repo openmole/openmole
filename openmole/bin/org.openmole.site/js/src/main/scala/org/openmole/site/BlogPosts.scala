@@ -54,8 +54,8 @@ object BlogPosts {
   all.trigger {
     if (!all.now.isEmpty) {
       addNewsdiv(allBy(newsCategory))
-      addTrainings(allBy(shortTrainingCategory), shared.shortTraining)
-      addTrainings(allBy(longTrainingCategory), shared.longTraining)
+      // addTrainings(allBy(shortTrainingCategory), shared.shortTraining)
+      // addTrainings(allBy(longTrainingCategory), shared.longTraining)
     }
   }
 

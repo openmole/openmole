@@ -46,6 +46,8 @@ package object shared {
     lazy val blog = "https://blog.openmole.org"
     lazy val simpluDemo = "https://simplu.openmole.org"
     lazy val mailingList = "http://ask.openmole.org"
+    lazy val shortTraining = "https://iscpif.fr/events/formationsjedi/"
+    lazy val longTraining = "http://cnrsformation.cnrs.fr"
 
     object partner {
       lazy val iscpif = "http://iscpif.fr"
