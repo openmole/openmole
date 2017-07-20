@@ -23,7 +23,9 @@ import stylesheet._
 import scalatags.Text.TypedTag
 import scalatags.Text.all._
 
-case class SideMenu(pages: Seq[Page], menuStyle: AttrPair = classIs(btn ++ btn_default), preText: String = "", otherTab: Boolean = false)
+case class Link(name: String, link: String)
+
+case class SideMenu(pages: Seq[Link], menuStyle: AttrPair = classIs(btn ++ btn_default), preText: String = "", otherTab: Boolean = false)
 
 case class SideMenuBlock(menus: Seq[SideMenu]) {
 
@@ -40,7 +42,7 @@ case class SideMenuBlock(menus: Seq[SideMenu]) {
             for {
               p ← m.pages
             } yield {
-              div(paddingTop := 10)(linkButton(p.name, p.file, m.menuStyle, m.otherTab))
+              div(paddingTop := 10)(linkButton(p.name, p.link, m.menuStyle, m.otherTab))
             }
           )
         }
@@ -55,6 +57,9 @@ case class SideMenuBlock(menus: Seq[SideMenu]) {
 
 object SideMenu {
 
+  implicit def pageToLink(p: Page): Link = Link(p.name, p.file)
+  implicit def seqPagToSeqLink(ps: Seq[Page]): Seq[Link] = ps.map { pageToLink }
+
   def block(sideMenu: SideMenu) = SideMenuBlock(Seq(sideMenu))
 
   def details(pages: Seq[Page]) = SideMenu(pages, otherTab = true)
@@ -66,4 +71,14 @@ object SideMenu {
   val environment = SideMenu.block(SideMenu(DocumentationPages.environmentPages, classIs(btn ++ btn_primary), "Available environments"))
 
   val more = SideMenu.block(SideMenu(Seq(DocumentationPages.documentation, DocumentationPages.gui), preText = "See also"))
+
+  val guiGuide =
+    SideMenu.block(
+      SideMenu(
+        Seq(
+          shared.guiGuide.overview,
+          shared.guiGuide.fileManagment
+        ).map { a ⇒ Link(a, s"#${a.replaceAll(" ", "")}") }
+      )
+    )
 }

@@ -40,6 +40,11 @@ package object shared {
     val animation = "startSensitivityAnim"
   }
 
+  object guiGuide {
+    lazy val overview = "Overview"
+    lazy val fileManagment = "File Management"
+  }
+
   object link {
     lazy val demo = "https://demo.openmole.org"
     lazy val twitter = "https://twitter.com/OpenMOLE"
@@ -74,6 +79,7 @@ package object shared {
       lazy val mgo = "https://github.com/openmole/mgo"
       lazy val simplu = "https://github.com/IGNF/simplu3D"
     }
+
   }
 
   def rawFrag(content: String) = {

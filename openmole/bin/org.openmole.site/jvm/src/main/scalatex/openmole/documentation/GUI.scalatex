@@ -2,3 +2,22 @@
 @import org.openmole.site._
 
 @h1{GUI guide}
+@SideMenu.guiGuide.left(370)
+
+@sect{@shared.guiGuide.overview}
+  auie
+@p
+@p
+@p
+@p
+@p
+@p
+@p
+@p
+@p
+@p
+@p
+@p
+
+@sect{@shared.guiGuide.fileManagment}
+  auieaiueaiue
