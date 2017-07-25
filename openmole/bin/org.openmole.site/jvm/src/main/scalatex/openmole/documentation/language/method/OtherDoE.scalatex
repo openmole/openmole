@@ -7,24 +7,41 @@
 
 
 @p
-    Several states-of-the-art DoE methodes are also implemented in OpenMOLE. However, we recommend to first focus on OpenMOLE
-    new methods, which have been thought to improve the drawbacks of the classical methods.
+    @b{Design of Experiments} (DoE) is the art of setting up an experimentation. In a model simulation context,
+    it boils down to declare the inputs (most of the time, they're parameters) of each simulation, for a batch of several simulations.
+    Even if there are several states-of-the-art DoE methods implemented in OpenMOLE, we recommend to focus on OpenMOLE
+    new methods:  PSE, and Calibration and Profiles  which have been thought to improve the drawbacks of the classical methods.
+
+@br
+@h4
+    Table of Contents
+
+@ol
+    @li
+        @sect.ref{Basic sampling : Grid and Uniform Distribution}, for covering  ranges of inputs by given discretisation steps or following uniform distribution.
+    @li
+        @sect.ref{Latin Hypercube Sampling and Sobol methods}, for covering high dimensionnal spaces
+    @li
+        @sect.ref{Variation of several inputs} details the types of inputs to be explored by OpenMOLE and the way to combine
+        their exploration in your own experiment workflows.
+    @li
+        @sect.ref{Sensitivity Analysis} is an example of a common experiment, targetting the model sensitivity of a
+        model to one on its inputs.
 
 
 
-
-
-@sect{Complete sampling}
-
-    For a reasonable number of dimension and discretisation quanta, complete sampling consists in producing every combination of
-    the inputs possibles values, given their bounds ans quantum.
-
+@sect{Basic sampling : Grid and Uniform Distribution}
+    @br
+    For a reasonable number of dimension and discretisation quanta (steps) values, complete sampling (or grid sampling)  consists in producing every combination of
+    the inputs possibles values, given their bounds and quanta of discretisation.
+    @br
     @br
     @Resource.rawFrag(Resource.img.completeID)
     @br
-    Complete sampling are declared as an @b{ExplorationTask}, where the bounds
+    Complete sampling is declared as an @b{ExplorationTask}, where the bounds and discretisation quantum of each input to vary  are declared
+    using the following syntax :
 
-
+    @br @br
     @hl.openmole("""
        val input_i = Val[Int]
        val input_j = Val[Double]
@@ -35,6 +52,23 @@
            (input_j in (0.0 to 5.0 by 0.5))
          )""", name = "cartesian product for sensitivity")
 
+    In this example ExplorationTask, two inputs are varying at the same time, using the cartesian product, see the  @sect.ref{Variation of several inputs}
+    to get more details on the input combination.
+    @br
+    @br
+
+    Sampling can also be performed via a @hl.code("UniformDistribution(maximum)"), that generates values uniformly
+    distributed between zero and the maximum provided argument.
+    Custom domains can be defined using transformations, as in the example below that generates values between -10 and + 10.
+
+     @hl.openmole("""
+    val my_input = Val[Double]
+    val exploration = ExplorationTask(
+        (my_input in (UniformDistribution[Double](max=20) take 100)).map(x => x -10)
+    )""", name = "uniform distribution in sensitivity")
+
+
+    @br
 
 
 
@@ -43,11 +77,32 @@
 
     High dimension spaces must be handled via specific methods of the literature, because otherwise cartesian product
     would be too memory consuming .
-    OpenMOLE includes two of these methods: Sobol Sequence and Latin HyperCube, defined as specifications of the exploration task:
-
+    OpenMOLE includes two of these methods: @a("Sobol Sequence", href:="https://en.wikipedia.org/wiki/Sobol_sequence")
+     and  @a("Latin Hypercube Sampling", href:="https://en.wikipedia.org/wiki/Latin_hypercube_sampling") , defined as specifications of the @hl.highlight("ExplorationTask","plain"):
     @br
 
-     @h4{Latin Hypercube Sampling}
+
+    @br
+    @Resource.rawFrag(Resource.img.sobolLHSID)
+    @br
+    @b{Method Rating}
+    @br
+    @p
+        These two methods perform allright in terms of Input Space Exploration (which is normal as they were built for that extent).
+        They are not targetted to reveal the full sensitivity of an input TODO finir
+        @br
+        Because of their very objective, that is, @b{covering the input space}, they cannot be efficient in term of Output space exploration.
+        @br
+        There is no special way of handling Stochasticity of the model, out of standard replications.
+        @br
+        These methods are not expansive @i{per se} , it depends on the magnitude of the Input Space you want to be covered.
+        @br
+
+
+
+    @br@br
+
+     @h3{Latin Hypercube Sampling}
 
 
     @hl.openmole("""
@@ -66,7 +121,7 @@
 
     @br
 
-     @h4{Sobol Sequence}
+     @h3{Sobol Sequence}
 
     @hl.openmole("""
 
@@ -86,75 +141,8 @@
 
 
 
-    @br
-    @Resource.rawFrag(Resource.img.sobolLHSID)
 
-
-
-
-
-
-@sect{Sensitivity Analysis }
-
-    @p Typical Sensitivity analysis (in a simulation experiment  context) is the study of how the variation of an input
-    affect the output(s) of a model. Basically it
-
-
-    @br
-    @Resource.rawFrag(Resource.img.thumbnail_sensitivity)
-    @br
-    @basicButton("Run", classIs(btn ++ btn_danger))(id := shared.sensitivity.button, stylesheet.svgRunButton(10))
-
-
-    @br
-    @br
-
-    @h3{Prerequisites}
-
-    An embedded model in OpenMOLE (see Step 1 : Model)
-
-    @br
-
-
-
-    @h2{Variation of one input}
-
-    @p     The most simple case to consider is to observe the effect of a single input variation on a single output.
-
-        This is achieved by using an @b{exploration task} , who will generate the sequence of values of an input, according to its
-        boundaries values and a discretisation step.
-
-    @br
-
-       @hl.openmole("""
-    val my_input = Val[Double]
-
-    val exploration =
-     ExplorationTask(
-       (my_input in (0.0 to 10.0 by 0.5))
-      )""", name = "variation of 1 input in sensitivity")
-
-    @p
-
-    Sampling can also be performed via a @hl.code("UniformDistribution(maximum)"), that generates values uniformly
-    distributed between zero and the maximum provided argument.
-    Custom domains can be defined using transformations, as in the example below that generates values between -10 and + 10.
-
-     @hl.openmole("""
-    val my_input = Val[Double]
-    val exploration = ExplorationTask(
-        (my_input in (UniformDistribution[Double](max=20) take 100)).map(x => x -10)
-    )""", name = "uniform distribution in sensitivity")
-
-
-    If your input is one file among many,  or  a line among a CSV file, use the
-    @a("CSVSampling task", href := DocumentationPages.sampling.file)
-    and @a("FileSampling task", href := DocumentationPages.sampling.file)
-
-    @br
-    @br
-
-    @h2{Variation of several inputs}
+@sect{Variation of several inputs}
     @p
 
       Exploration can be performed on several inputs domains, using the @b{cartesian product} operator: @b{x}.
@@ -199,23 +187,74 @@
 
 
 
-    @br
 
     The UniformDistribution[T]() take 10 is a uniform sampling of 10 numbers of the Long type,
     taken in the [Long.MIN_VALUE; Long.MAX_VALUE] domain of the Long native type.
 
 
-    @br
+
     @br
 
     Files are explored as items of a list.
-     The items are gathered  by the @hl.code("files()") function applied  on the @hl.code("dir") directory,
-     optionally filtered with any @hl.code("String => Boolean")  functions  such as
-     @hl.code("""contains(), startswith(), endswith()""")
+     The items are gathered  by the @hl.code("files()") function applied  on the @hl.highlight("dir","plain") directory,
+     optionally filtered with any @hl.code("String => Boolean")  functions  such as  @hl.highlight("contains(), startswith(), endswith()", "plain")
 
 
      (see  the @a("Java Class String Documentation", href:="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html")
      for more details)
+
+
+    @br
+        If your input is one file among many,  or  a line among a CSV file, use the
+        @a("CSVSampling task", href := DocumentationPages.sampling.file)
+        and @a("FileSampling task", href := DocumentationPages.sampling.file)
+
+
+
+
+@sect{Sensitivity Analysis}
+
+    @p Typical Sensitivity analysis (in a simulation experiment  context) is the study of how the variation of an input
+    affect the output(s) of a model. Basically it
+
+
+    @br
+    @Resource.rawFrag(Resource.img.thumbnail_sensitivity)
+    @br
+    @basicButton("Run", classIs(btn ++ btn_danger))(id := shared.sensitivity.button, stylesheet.svgRunButton(10))
+
+
+    @br
+    @br
+
+    @h3{Prerequisites}
+
+    An embedded model in OpenMOLE (see Step 1 : Model)
+
+    @br
+
+
+
+    @h2{Variation of one input}
+
+    @p     The most simple case to consider is to observe the effect of a single input variation on a single output.
+
+        This is achieved by using an @b{exploration task} , who will generate the sequence of values of an input, according to its
+        boundaries values and a discretisation step.
+
+    @br
+
+       @hl.openmole("""
+    val my_input = Val[Double]
+
+    val exploration =
+     ExplorationTask(
+       (my_input in (0.0 to 10.0 by 0.5))
+      )""", name = "variation of 1 input in sensitivity")
+
+
+    @br
+
 
 
 
@@ -230,7 +269,5 @@
 
     We will perform sensitivity analysis to make this threshold appear.
     Sometimes. Stay tuned !
-
-
     TODO est ce qu'il faut vaiment le faire ici ou faire un tuto dédié ?
     TODO le faire d'abord et décider ensuite
