@@ -142,7 +142,7 @@ object BlogPosts {
   }
 
   def addNewsdiv(blogPosts: Seq[BlogPost]) = {
-    val newsDiv = div(paddingTop := 50)(
+    val newsDiv = div(paddingTop := 20)(
       h2("News"),
       for {
         bp ← blogPosts

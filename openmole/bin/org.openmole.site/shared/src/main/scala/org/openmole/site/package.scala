@@ -40,6 +40,11 @@ package object shared {
     val animation = "startSensitivityAnim"
   }
 
+  object guiGuide {
+    lazy val overview = "Overview"
+    lazy val fileManagment = "File Management"
+  }
+
   object link {
     lazy val demo = "https://demo.openmole.org"
     lazy val twitter = "https://twitter.com/OpenMOLE"
