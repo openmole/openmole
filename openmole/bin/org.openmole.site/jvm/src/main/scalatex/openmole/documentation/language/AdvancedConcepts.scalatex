@@ -33,10 +33,10 @@ We present here the relevant elements of the OpenMOLE framework roughly divided 
 @sect{Development Documentation}
 
     @sect{Plugin development}
+        plugi dev bla bla
 
     @sect{Server Version and REST API }
-
-@h2
-    Community
+        rest api bla bla
+@h2{Community}
 
 
