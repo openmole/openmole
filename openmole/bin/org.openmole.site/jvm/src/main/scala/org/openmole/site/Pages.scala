@@ -59,14 +59,15 @@ object Pages {
 }
 
 object Page {
-  def apply(name: String, content: Frag, details: Seq[Page] = Seq(), title: Option[String] = None) = {
-    val (_name, _content, _details, _title) = (name, content, details, title)
+  def apply(name: String, content: Frag, details: Seq[Page] = Seq(), title: Option[String] = None, extraMenu: Option[SideMenu] = None) = {
+    val (_name, _content, _details, _title, _extraMenu) = (name, content, details, title, extraMenu)
 
     new Page {
       override def name: String = _name
       override def content = _content
       override def title = _title
       override def details = _details
+      override def extraMenu = _extraMenu
     }
   }
 }
@@ -79,26 +80,30 @@ trait Page {
   def location: String = name
   def file = Pages.file(this)
   def details: Seq[Page]
+  def extraMenu: Option[SideMenu]
 }
 
 case class Parent[T](parent: Option[T])
 
 object DocumentationPage {
   def apply(
-    name:     String,
-    content:  ⇒ Frag,
-    details:  ⇒ Seq[DocumentationPage] = Seq.empty,
-    location: Option[String]           = None
+    name:      String,
+    content:   ⇒ Frag,
+    details:   ⇒ Seq[DocumentationPage] = Seq.empty,
+    location:  Option[String]           = None,
+    extraMenu: Option[SideMenu]         = None
   ) = {
     def _name = name
     def _content = content
     def _details = details
     def _location = location
+    def _extraMenu = extraMenu
     new DocumentationPage {
       def name = _name
       def content = _content
       override def details = _details
       override def location = _location.getOrElse(name)
+      def extraMenu: Option[SideMenu] = _extraMenu
     }
   }
 }
@@ -237,7 +242,11 @@ object DocumentationPages {
   lazy val multithread = DocumentationPage(name = "Multi-threads", content = scalatex.documentation.language.environment.Multithread())
   lazy val ssh = DocumentationPage(name = "SSH", content = scalatex.documentation.language.environment.SSH())
   lazy val egi = DocumentationPage(name = "EGI", content = scalatex.documentation.language.environment.EGI())
-  lazy val cluster = DocumentationPage(name = "Clusters", content = scalatex.documentation.language.environment.Cluster())
+  lazy val cluster = DocumentationPage(
+    name = "Clusters",
+    content = scalatex.documentation.language.environment.Cluster(),
+    extraMenu = Some(SideMenu.clusterMenu)
+  )
 
   lazy val desktopGrid = DocumentationPage(name = "DesktopGrid", content = scalatex.documentation.language.environment.DesktopGrid())
 
