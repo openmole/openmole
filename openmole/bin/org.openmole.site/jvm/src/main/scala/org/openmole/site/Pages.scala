@@ -133,7 +133,7 @@ object DocumentationPages {
   //var marketEntries: Seq[GeneratedMarketEntry] = Seq()
 
   def allPages = Vector[DocumentationPage](
-    documentation,
+    docSiteMap,
     application,
     gui,
     migration,
@@ -151,7 +151,6 @@ object DocumentationPages {
     model,
     language,
     howToContribute,
-    sampling,
     transition,
     hook,
     source,
@@ -189,8 +188,9 @@ object DocumentationPages {
   lazy val topPages = Seq(
     modelPages,
     methodPages,
-    environmentPages
-  ).flatten ++ Seq(model, method, environment)
+    environmentPages,
+    advancedPages
+  ).flatten ++ Seq(model, method, environment, advancedConcepts)
 
   //  lazy val topPagesChildren = topPages.flatMap {
   //    _.children
@@ -198,7 +198,7 @@ object DocumentationPages {
 
   /* Application */
 
-  lazy val documentation = DocumentationPage(name = "Documentation", content = scalatex.documentation.Documentation())
+  lazy val docSiteMap = DocumentationPage(name = "Documentation Site Map", content = scalatex.documentation.DocSiteMap())
 
   lazy val application = DocumentationPage(name = "Application", content = scalatex.documentation.Application())
   lazy val gui = DocumentationPage(name = "GUI guide", content = scalatex.documentation.GUI())
@@ -226,14 +226,13 @@ object DocumentationPages {
   lazy val mole = DocumentationPage(name = "Mole", content = scalatex.documentation.language.model.MoleTask())
   lazy val model = DocumentationPage(name = "Models", content = scalatex.documentation.language.Model())
 
-  def languagePages = Seq(model, sampling, transition, hook, environment, source, method)
+  def languagePages = Seq(model, transition, hook, environment, source, method)
 
   lazy val language = DocumentationPage(name = "Language", content = scalatex.documentation.Language())
 
-  lazy val sampling = DocumentationPage(name = "Samplings", content = scalatex.documentation.language.Sampling())
-  lazy val transition = DocumentationPage(name = "Transitions", content = scalatex.documentation.language.Transition())
-  lazy val hook = DocumentationPage(name = "Hooks", content = scalatex.documentation.language.Hook())
-  lazy val source = DocumentationPage(name = "Sources", content = scalatex.documentation.language.Source())
+  lazy val transition = DocumentationPage(name = "Transitions", content = scalatex.documentation.language.advanced.Transition())
+  lazy val hook = DocumentationPage(name = "Hooks", content = scalatex.documentation.language.advanced.Hook())
+  lazy val source = DocumentationPage(name = "Sources", content = scalatex.documentation.language.advanced.Source())
 
   def environmentPages = Seq(multithread, ssh, egi, cluster, desktopGrid)
 
