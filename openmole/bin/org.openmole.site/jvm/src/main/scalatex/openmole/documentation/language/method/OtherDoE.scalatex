@@ -206,8 +206,8 @@
 
     @br
         If your input is one file among many,  or  a line among a CSV file, use the
-        @a("CSVSampling task", href := DocumentationPages.sampling.file)
-        and @a("FileSampling task", href := DocumentationPages.sampling.file)
+        @a("CSVSampling task", href := DocumentationPages.fileExploration.file)
+        and @a("FileSampling task", href := DocumentationPages.fileExploration.file)
 
 
 

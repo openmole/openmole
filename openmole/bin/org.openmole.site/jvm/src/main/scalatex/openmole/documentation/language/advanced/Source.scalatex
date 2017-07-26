@@ -1,6 +1,11 @@
-
-@import org.openmole.site.tools._
+@import org.openmole.site.stylesheet._
+@import org.openmole.site.Resource._
 @import org.openmole.site._
+@import org.openmole.site.tools._
+@import org.openmole.site.Environment._
+
+
+
 
 @p{Source}
   Sources have been designed as a possible way to inject data in the dataflow from diverse sources: CSV files,
@@ -67,12 +72,12 @@
 
     @p Sources store each entry found in an Array. In most cases, you will want each of the entries to feed a different
     task. Let's now see how this can be done by reusing what we've discovered with
-    @a("samplings", href := DocumentationPages.sampling.file + "#Exploringfiles").
+    @a("files exploration", href := DocumentationPages.fileExploration.file).
 
   @p{A complete example: exploring directories in a workflow}
 
     Here, we are collecting all the directories which named "care_archive". See how they are gathered in an
-    @i{Array[File]} container and can be explored by an @a("ExplorationTask", href := DocumentationPages.sampling.file) using
+    @i{Array[File]} container and can be explored by an @a("ExplorationTask", href := DocumentationPages.fileExploration.file) using
     the keyword @hl.openmoleNoTest("in"). This exploration generates one @i{analysisTask} per directory collected by the
     source.
 

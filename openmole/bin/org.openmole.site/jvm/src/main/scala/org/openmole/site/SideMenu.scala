@@ -70,7 +70,7 @@ object SideMenu {
 
   val environment = SideMenu.block(SideMenu(DocumentationPages.environmentPages, classIs(btn ++ btn_primary), "Available environments"))
 
-  val more = SideMenu.block(SideMenu(Seq(DocumentationPages.documentation, DocumentationPages.gui), preText = "See also"))
+  val more = SideMenu.block(SideMenu(Seq(DocumentationPages.docSiteMap, DocumentationPages.gui), preText = "See also"))
 
   val guiGuide =
     SideMenu.block(
