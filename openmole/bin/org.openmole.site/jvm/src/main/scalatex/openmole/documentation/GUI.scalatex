@@ -2,7 +2,7 @@
 @import org.openmole.site._
 
 @h1{GUI guide}
-@SideMenu.guiGuide.left(370)
+@SideMenu.block(SideMenu.guiGuide).left(370)
 
 @sect{@shared.guiGuide.overview}
   auie

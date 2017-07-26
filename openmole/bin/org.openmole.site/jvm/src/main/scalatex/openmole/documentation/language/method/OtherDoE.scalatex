@@ -206,8 +206,8 @@
 
     @br
         If your input is one file among many,  or  a line among a CSV file, use the
-        @a("CSVSampling task", href := DocumentationPages.sampling.file)
-        and @a("FileSampling task", href := DocumentationPages.sampling.file)
+        @a("CSVSampling task", href := DocumentationPages.fileExploration.file)
+        and @a("FileSampling task", href := DocumentationPages.fileExploration.file)
 
 
 
@@ -258,15 +258,11 @@
 
 
 
-    @h2{Real World Example}
-
-    the @hl.code("Fire.nlogo") model is a simple, one-parameter, simulation model that simulates fire propagation.
+@h2{Real World Example}
+@p
+    the @hl.highlight("Fire.nlogo", "plain") model is a simple, one-parameter, simulation model that simulates fire propagation.
     This model features a threshold value in its unique parameter domain, below which fire fails to burn the majority
-     of the forest, and beyond which fire propagates and burn most of it.
-
-    @br
-
-
+    of the forest, and beyond which fire propagates and burn most of it.
     We will perform sensitivity analysis to make this threshold appear.
     Sometimes. Stay tuned !
     TODO est ce qu'il faut vaiment le faire ici ou faire un tuto dédié ?

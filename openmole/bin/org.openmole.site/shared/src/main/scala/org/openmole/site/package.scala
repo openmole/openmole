@@ -45,6 +45,14 @@ package object shared {
     lazy val fileManagment = "File Management"
   }
 
+  object clusterMenu {
+    lazy val pbsTorque = "PBS and Torque"
+    lazy val sge = "SGE"
+    lazy val oar = "OAR"
+    lazy val slurm = "Slurm"
+    lazy val condor = "Condor"
+  }
+
   object link {
     lazy val demo = "https://demo.openmole.org"
     lazy val twitter = "https://twitter.com/OpenMOLE"

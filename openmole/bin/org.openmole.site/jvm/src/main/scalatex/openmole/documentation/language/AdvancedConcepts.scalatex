@@ -1,0 +1,42 @@
+@import org.openmole.site.stylesheet._
+@import org.openmole.site.Resource._
+@import org.openmole.site._
+@import org.openmole.site.tools._
+@import org.openmole.site.Environment._
+
+
+
+OpenMOLE has a lot of handy features that allows the familiar user to tune the workflow of execution into much more details
+that previously described in the Model and Method Sections.
+
+We present here the relevant elements of the OpenMOLE framework roughly divided into the following sections:
+
+
+@b{Table of contents}
+
+
+@sect{Sampling and exploring Files}
+
+    @a("Advanced Samplings", href := DocumentationPages.advancedSampling.file),
+    @a("Sampling files and lines into files ", href := DocumentationPages.fileExploration.file)
+
+
+@sect{OpenMOLE language and concepts : Technical Documentation}
+
+    @a("Transitions", href := DocumentationPages.transition.file),
+    @a("Hook", href := DocumentationPages.hook.file),
+    @a("Source", href := DocumentationPages.source.file),
+
+
+
+
+@sect{Development Documentation}
+
+    @sect{Plugin development}
+        plugi dev bla bla
+
+    @sect{Server Version and REST API }
+        rest api bla bla
+@h2{Community}
+
+

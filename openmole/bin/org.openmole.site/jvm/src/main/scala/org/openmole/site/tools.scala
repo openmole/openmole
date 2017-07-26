@@ -3,6 +3,7 @@ package org.openmole.site
 import java.util.UUID
 
 import scalatags.Text.TypedTag
+import scalatags.generic.StylePair
 
 /*
  * Copyright (C) 01/04/16 // mathieu.leclaire@openmole.org
@@ -30,7 +31,14 @@ package object tools {
 
   def aa = a(targetBlank)
 
-  object sect extends Section()
+  object sect extends Section() {
+    override val headerH1 = Seq(
+      fontSize := "1.75em",
+      textAlign := "left",
+      // padding := "2.5em 1em 0"
+      margin := "20px 0 0"
+    )
+  }
 
   object hl extends Highlighter {
 

@@ -75,7 +75,7 @@ $tasks
   @ul
     @li{include your program in the @a("Model documentation", href := model.file),}
     @li{define your environment in the @a("environment documentation", href := environment.file),}
-    @li{describe your design of experiments in the @a("sampling documentation", href := sampling.file).}
+    @li{describe your design of experiments in the @a("workflow and sampling documentation", href := DocumentationPages.advancedConcepts.file).}
 
 @p{Get help}
   To get help you are more than welcome to contact the OpenMOLE user mailing list. To do so, you should @a("subscribe here", href := "http://list.openmole.org/"), and then you can post your question to the list users 'at' list.openmole.org. We're also present on the @b{#openmole} channel of the @a("ISC-PIF's RocketChat", href := "https://chat.iscpif.fr/channel/openmole").

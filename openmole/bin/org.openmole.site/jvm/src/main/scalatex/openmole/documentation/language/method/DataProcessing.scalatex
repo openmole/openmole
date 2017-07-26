@@ -1,6 +1,19 @@
-@import org.openmole.site.tools._
+@import org.openmole.site.stylesheet._
+@import org.openmole.site.Resource._
 @import org.openmole.site._
+@import org.openmole.site.tools._
+@import org.openmole.site.Environment._
 
 
-@p
-Data processing
+@sect{Handling Files}
+
+    Data processing often revolves about massive computation using big bunch of files, so you may want to check out the
+    @a("File exploration", href:=DocumentationPages.fileExploration.file) section first.
+
+
+@sect{General case}
+    un cas d'utilisation facile genre traitement d'images dans une collection ?
+
+@sect{Particular Use case}
+    TODO si Jo a un truc tout fait .
+

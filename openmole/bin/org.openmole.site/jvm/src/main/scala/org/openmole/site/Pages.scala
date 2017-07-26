@@ -59,14 +59,15 @@ object Pages {
 }
 
 object Page {
-  def apply(name: String, content: Frag, details: Seq[Page] = Seq(), title: Option[String] = None) = {
-    val (_name, _content, _details, _title) = (name, content, details, title)
+  def apply(name: String, content: Frag, details: Seq[Page] = Seq(), title: Option[String] = None, extraMenu: Option[SideMenu] = None) = {
+    val (_name, _content, _details, _title, _extraMenu) = (name, content, details, title, extraMenu)
 
     new Page {
       override def name: String = _name
       override def content = _content
       override def title = _title
       override def details = _details
+      override def extraMenu = _extraMenu
     }
   }
 }
@@ -79,26 +80,30 @@ trait Page {
   def location: String = name
   def file = Pages.file(this)
   def details: Seq[Page]
+  def extraMenu: Option[SideMenu]
 }
 
 case class Parent[T](parent: Option[T])
 
 object DocumentationPage {
   def apply(
-    name:     String,
-    content:  ⇒ Frag,
-    details:  ⇒ Seq[DocumentationPage] = Seq.empty,
-    location: Option[String]           = None
+    name:      String,
+    content:   ⇒ Frag,
+    details:   ⇒ Seq[DocumentationPage] = Seq.empty,
+    location:  Option[String]           = None,
+    extraMenu: Option[SideMenu]         = None
   ) = {
     def _name = name
     def _content = content
     def _details = details
     def _location = location
+    def _extraMenu = extraMenu
     new DocumentationPage {
       def name = _name
       def content = _content
       override def details = _details
       override def location = _location.getOrElse(name)
+      def extraMenu: Option[SideMenu] = _extraMenu
     }
   }
 }
@@ -128,7 +133,7 @@ object DocumentationPages {
   //var marketEntries: Seq[GeneratedMarketEntry] = Seq()
 
   def allPages = Vector[DocumentationPage](
-    documentation,
+    docSiteMap,
     application,
     gui,
     migration,
@@ -146,7 +151,6 @@ object DocumentationPages {
     model,
     language,
     howToContribute,
-    sampling,
     transition,
     hook,
     source,
@@ -176,14 +180,17 @@ object DocumentationPages {
     branching,
     webserver,
     dataProcessing,
-    otherDoE
+    otherDoE,
+    advancedSampling,
+    fileExploration
   )
 
   lazy val topPages = Seq(
     modelPages,
     methodPages,
-    environmentPages
-  ).flatten ++ Seq(model, method, environment)
+    environmentPages,
+    advancedPages
+  ).flatten ++ Seq(model, method, environment, advancedConcepts)
 
   //  lazy val topPagesChildren = topPages.flatMap {
   //    _.children
@@ -191,7 +198,7 @@ object DocumentationPages {
 
   /* Application */
 
-  lazy val documentation = DocumentationPage(name = "Documentation", content = scalatex.documentation.Documentation())
+  lazy val docSiteMap = DocumentationPage(name = "Documentation Site Map", content = scalatex.documentation.DocSiteMap())
 
   lazy val application = DocumentationPage(name = "Application", content = scalatex.documentation.Application())
   lazy val gui = DocumentationPage(name = "GUI guide", content = scalatex.documentation.GUI())
@@ -219,14 +226,13 @@ object DocumentationPages {
   lazy val mole = DocumentationPage(name = "Mole", content = scalatex.documentation.language.model.MoleTask())
   lazy val model = DocumentationPage(name = "Models", content = scalatex.documentation.language.Model())
 
-  def languagePages = Seq(model, sampling, transition, hook, environment, source, method)
+  def languagePages = Seq(model, transition, hook, environment, source, method)
 
   lazy val language = DocumentationPage(name = "Language", content = scalatex.documentation.Language())
 
-  lazy val sampling = DocumentationPage(name = "Samplings", content = scalatex.documentation.language.Sampling())
-  lazy val transition = DocumentationPage(name = "Transitions", content = scalatex.documentation.language.Transition())
-  lazy val hook = DocumentationPage(name = "Hooks", content = scalatex.documentation.language.Hook())
-  lazy val source = DocumentationPage(name = "Sources", content = scalatex.documentation.language.Source())
+  lazy val transition = DocumentationPage(name = "Transitions", content = scalatex.documentation.language.advanced.Transition())
+  lazy val hook = DocumentationPage(name = "Hooks", content = scalatex.documentation.language.advanced.Hook())
+  lazy val source = DocumentationPage(name = "Sources", content = scalatex.documentation.language.advanced.Source())
 
   def environmentPages = Seq(multithread, ssh, egi, cluster, desktopGrid)
 
@@ -235,7 +241,11 @@ object DocumentationPages {
   lazy val multithread = DocumentationPage(name = "Multi-threads", content = scalatex.documentation.language.environment.Multithread())
   lazy val ssh = DocumentationPage(name = "SSH", content = scalatex.documentation.language.environment.SSH())
   lazy val egi = DocumentationPage(name = "EGI", content = scalatex.documentation.language.environment.EGI())
-  lazy val cluster = DocumentationPage(name = "Clusters", content = scalatex.documentation.language.environment.Cluster())
+  lazy val cluster = DocumentationPage(
+    name = "Clusters",
+    content = scalatex.documentation.language.environment.Cluster(),
+    extraMenu = Some(SideMenu.clusterMenu)
+  )
 
   lazy val desktopGrid = DocumentationPage(name = "DesktopGrid", content = scalatex.documentation.language.environment.DesktopGrid())
 
@@ -255,6 +265,13 @@ object DocumentationPages {
   lazy val dataProcessing = DocumentationPage(name = "Data Processing", content = scalatex.documentation.language.method.DataProcessing())
 
   lazy val helloWorld = DocumentationPage(name = "Hello Word!", content = Pages.gettingStarted.content)
+
+  def advancedPages = Seq(advancedSampling, fileExploration)
+
+  lazy val advancedConcepts = DocumentationPage(name = "Methods", content = scalatex.documentation.language.AdvancedConcepts())
+
+  lazy val advancedSampling = DocumentationPage(name = "Advanced Sampling", content = scalatex.documentation.language.advanced.AdvancedSampling())
+  lazy val fileExploration = DocumentationPage(name = "Files Exploration", content = scalatex.documentation.language.advanced.FileExploration())
 
   def tutorialPages = Seq(helloWorld, resume, headlessNetLogo, netLogoGA, capsule) //++ marketTutorials
 
