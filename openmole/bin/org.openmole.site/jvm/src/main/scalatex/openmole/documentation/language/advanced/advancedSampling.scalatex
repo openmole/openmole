@@ -1,236 +1,189 @@
-@import org.openmole.site.tools._
+@import org.openmole.site.stylesheet._
+@import org.openmole.site.Resource._
 @import org.openmole.site._
+@import org.openmole.site.tools._
+@import org.openmole.site.Environment._
 
 
-In this page are the advanced functions and tasks  fine-tune your OpenMOLE workflows
+In this page are the advanced functions and tasks to fine-tune your data flows into the OpenMOLE workflow: samplings , list and combination.
 
 
 
+@sect{Combine samplings}
+    @br
+    To define samplings you can combine them with each other. As we've previously seen, the complete sampling is a way to achieve that. Many composition functions are implemented in OpenMOLE.
 
-Combine samplings
+    The "x" combinator also enables domain bounds to depend on each others. Notice how the upper bound of the second factor depends on the value of the first one.
+    @hl.openmole("""
+    val i = Val[Int]
+    val j = Val[Double]
 
-To define samplings you can combine them with each other. As we've previously seen, the complete sampling is a way to achieve that. Many composition functions are implemented in OpenMOLE.
+    val explo =
+     ExplorationTask (
+       (i in (0 to 10 by 2)) x
+       (j in Range[Double]("0.0", "2 * i", "0.5"))
+     )
+    """)
+    Samplings can also be combined using variants of the zip operator.
 
-The "x" combinator also enables domain bounds to depend on each others. Notice how the upper bound of the second factor depends on the value of the first one.
+@sect{Zip samplings}
+    @br
+    Zip Samplings come in three declinations in OpenMOLE.
 
-val i = Val[Int]
-val j = Val[Double]
+    The first one is the ZipSampling. It combines the elements of corresponding indices from two samplings. ZipSampling mimics the traditional zip operation from functional programming that combining elements from two lists. OpenMOLE implements the ZipSampling through the keyword zip.
 
-val explo =
- ExplorationTask (
-   (i in (0 to 10 by 2)) x
-   (j in Range[Double]("0.0", "2 * i", "0.5"))
- )
+    The second sampling from the Zip family is the ZipWithIndexSampling. Again, this is inspired from a common functional programming operation called zipWithIndex. Applying zipWithIndex to a list would create a new list of pairs formed by the elements of the original list and the index of their position in the list. For instance List('A', 'B', 'C') zipWithIndex would returns the new list List(('A',0), ('B',1), ('C',2)). ZipWithIndexSampling performs a similar operation in the dataflow. An integer variable from the dataflow is filled with the index instead of generating a new pair. OpenMOLE implements the ZipWithIndexSampling through the keyword withIndex.
 
-Samplings can also be combined using variants of the zip operator.
+    The following code snippet gives an example of how to use these two first Zip samplings.
 
-Zip samplings
+    @hl.openmole("""
+    val p1 = Val[Int]
+    val p2 = Val[Int]
 
-Zip Samplings come in three declinations in OpenMOLE.
+    val s1 = p1 in (0 to 100) // Code to build sampling 1
+    val s2 = p2 in (0 to 100) // Code to build sampling 2
 
-The first one is the ZipSampling. It combines the elements of corresponding indices from two samplings. ZipSampling mimics the traditional zip operation from functional programming that combining elements from two lists. OpenMOLE implements the ZipSampling through the keyword zip.
+    // Create a sampling by zipping line by line s1 and s2
+    val s3 = s1 zip s2
 
-The second sampling from the Zip family is the ZipWithIndexSampling. Again, this is inspired from a common functional programming operation called zipWithIndex. Applying zipWithIndex to a list would create a new list of pairs formed by the elements of the original list and the index of their position in the list. For instance List('A', 'B', 'C') zipWithIndex would returns the new list List(('A',0), ('B',1), ('C',2)). ZipWithIndexSampling performs a similar operation in the dataflow. An integer variable from the dataflow is filled with the index instead of generating a new pair. OpenMOLE implements the ZipWithIndexSampling through the keyword withIndex.
+    // Create a sampling containing an id for each experiment in a variable called id
+    val id = Val[Int]
+    val s4 = s2 withIndex id
+    """)
+    @br
+    The third and last sampling from the Zip family is the ZipWithNameSampling. It maps the name the files from a FileDomain (see the next section for more details about exploring files) to a String variable in the dataflow. In the following excerpt, we map the name of the file and print it along to its size. In OpenMOLE file variables generally don't preserve the name of the file from which it was originally created. In order to save some output results depending on the input filename the filename should be transmitted in a variable of type String. When running this snippet, the file is renamed by the ScalaTask however, its name is saved in the name variable.
+    @hl.openmole("""
 
-The following code snippet gives an example of how to use these two first Zip samplings.
+    val file = Val[File]
+    val name = Val[String]
+    val size = Val[Long]
 
-val p1 = Val[Int]
-val p2 = Val[Int]
+    val t = ScalaTask("val size = new java.io.File(workDir, \"file\").length") set (
+      inputFiles += (file, "file"),
+      inputs += name,
+      outputs += (name, size)
+    )
 
-val s1 = p1 in (0 to 100) // Code to build sampling 1
-val s2 = p2 in (0 to 100) // Code to build sampling 2
+    ExplorationTask(file in (workDirectory / "dir") withName name) -< (t hook ToStringHook())
+    """)
+    @br
+    If you need to go through several level of files you may use a sampling like this one:
+    @hl.openmole("""
 
-// Create a sampling by zipping line by line s1 and s2
-val s3 = s1 zip s2
+    val dir = Val[File]
+    val dirName = Val[String]
+    val file = Val[File]
+    val fileName = Val[String]
+    val name = Val[String]
+    val size = Val[Long]
 
-// Create a sampling containing an id for each experiment in a variable called id
-val id = Val[Int]
-val s4 = s2 withIndex id
+    val t = ScalaTask("val size = file.length") set (
+      inputs += file,
+      outputs += size,
+      (inputs, outputs) += (fileName, dirName)
+    )
 
-The third and last sampling from the Zip family is the ZipWithNameSampling. It maps the name the files from a FileDomain (see the next section for more details about exploring files) to a String variable in the dataflow. In the following excerpt, we map the name of the file and print it along to its size. In OpenMOLE file variables generally don't preserve the name of the file from which it was originally created. In order to save some output results depending on the input filename the filename should be transmitted in a variable of type String. When running this snippet, the file is renamed by the ScalaTask however, its name is saved in the name variable.
+    val explo =
+      ExplorationTask(
+        (dir in (workDirectory / "test") withName dirName) x
+        (file in dir withName fileName)
+      )
 
-val file = Val[File]
-val name = Val[String]
-val size = Val[Long]
+    explo -< (t hook ToStringHook())
+    """)
+@sect{Shrink the initial Sampling with Take, Filter, Sample}
 
-val t = ScalaTask("val size = new java.io.File(workDir, \"file\").length") set (
-  inputFiles += (file, "file"),
-  inputs += name,
-  outputs += (name, size)
-)
+    You can modify a Sampling using various operations in OpenMOLE.
 
-ExplorationTask(file in (workDirectory / "dir") withName name) -< (t hook ToStringHook())
+    When calling take N on a Sampling, along with N an integer, OpenMOLE will generate a new Sampling from the first N values of the initial Sampling.
 
-If you need to go through several level of files you may use a sampling like this one:
+    Similarly, you can use sample N to create a new Sampling with N random values picked up at random from the initial Sampling.
 
-val dir = Val[File]
-val dirName = Val[String]
-val file = Val[File]
-val fileName = Val[String]
-val name = Val[String]
-val size = Val[Long]
+    More advanced Sampling reductions happen through filter ("predicate"). It filters out all the values from the initial Sampling for which the given predicate is wrong.
 
-val t = ScalaTask("val size = file.length") set (
-  inputs += file,
-  outputs += size,
-  (inputs, outputs) += (fileName, dirName)
-)
+    The 3 sampling operations presented in this section are put into play in the following example:
 
-val explo =
-  ExplorationTask(
-    (dir in (workDirectory / "test") withName dirName) x
-    (file in dir withName fileName)
-  )
+    val p1 = Val[Int]
+    val p2 = Val[Int]
 
-explo -< (t hook ToStringHook())
+    val s1 = p1 in (0 to 100) // Code to build sampling 1
+    val s2 = p2 in (0 to 100) // Code to build sampling 2
 
-Shrink the initial Sampling with Take, Filter, Sample
+    // Create a sampling containing the 10 first values of s1
+    val s3 = s1 take 10
 
-You can modify a Sampling using various operations in OpenMOLE.
+    // Create a new sampling containing only the lines of s1 for which the given predicate is true
+    val s4 = (s1 x s2) filter ("p1 + p2 < 100")
 
-When calling take N on a Sampling, along with N an integer, OpenMOLE will generate a new Sampling from the first N values of the initial Sampling.
+    // Sample 5 values from s1
+    val s5 = s1 sample 5
 
-Similarly, you can use sample N to create a new Sampling with N random values picked up at random from the initial Sampling.
+@sect{Generate random Samplings}
 
-More advanced Sampling reductions happen through filter ("predicate"). It filters out all the values from the initial Sampling for which the given predicate is wrong.
+    OpenMOLE can generate random samplings from an initial sampling using shuffle that creates a new sampling which is a randomly shuffled version of the initial one.
 
-The 3 sampling operations presented in this section are put into play in the following example:
+    OpenMOLE can also generate a fresh new Sampling made of random numbers using UniformDistribution[T], with T the type of random numbers to be generated.
 
-val p1 = Val[Int]
-val p2 = Val[Int]
+    Check the following script to discover how to use these random-based operations in a workflow:
 
-val s1 = p1 in (0 to 100) // Code to build sampling 1
-val s2 = p2 in (0 to 100) // Code to build sampling 2
+    val p1 = Val[Int]
+    val p2 = Val[Int]
 
-// Create a sampling containing the 10 first values of s1
-val s3 = s1 take 10
+    val s1 = p1 in (0 to 100) // Code to build sampling 1
+    val s2 = p2 in (0 to 100) // Code to build sampling 2
+    // Create a sampling containing the values of s1 in a random order
+    val s6 = s1.shuffle
 
-// Create a new sampling containing only the lines of s1 for which the given predicate is true
-val s4 = (s1 x s2) filter ("p1 + p2 < 100")
+    // Replicate 100 times the sampling s1 and provide seed for each experiment
+    val seed = Val[Int]
+    val s7 = s1 x (seed in (UniformDistribution[Int]() take 100))
 
-// Sample 5 values from s1
-val s5 = s1 sample 5
+@sect{Higher level samplings}
 
-Generate random Samplings
+    Some sampling combinations generate higher level samplings such as repeat and bootstrap:
 
-OpenMOLE can generate random samplings from an initial sampling using shuffle that creates a new sampling which is a randomly shuffled version of the initial one.
+    val i = Val[Int]
 
-OpenMOLE can also generate a fresh new Sampling made of random numbers using UniformDistribution[T], with T the type of random numbers to be generated.
+    val s1 = i in (0 to 100)
 
-Check the following script to discover how to use these random-based operations in a workflow:
+    // Re-sample 10 times s1, the output is an array of array of values
+    val s2 = s1 repeat 10
 
-val p1 = Val[Int]
-val p2 = Val[Int]
+    // Create 10 samples of 5 values from s1, it is equivalent to "s1 sample 5 repeat 10", the output type is an
+    // array of array of values
+    val s3 = s1 bootstrap (5, 10)
 
-val s1 = p1 in (0 to 100) // Code to build sampling 1
-val s2 = p2 in (0 to 100) // Code to build sampling 2
-// Create a sampling containing the values of s1 in a random order
-val s6 = s1.shuffle
+    Here is how such higher level samplings would be used within a Mole:
 
-// Replicate 100 times the sampling s1 and provide seed for each experiment
-val seed = Val[Int]
-val s7 = s1 x (seed in (UniformDistribution[Int]() take 100))
+    // This code compute 10 couples (for f1 and f2) of medians among 5 samples picked at random in f1 x f2
+    val p1 = Val[Double]
+    val p2 = Val[Double]
 
-Higher level samplings
+    val f1 = p1 in (0.0 to 1.0 by 0.1)
+    val f2 = p2 in (0.0 to 1.0 by 0.1)
 
-Some sampling combinations generate higher level samplings such as repeat and bootstrap:
+    val e1 = ExplorationTask((f1 x f2) bootstrap (5, 10))
 
-val i = Val[Int]
+    val stat = ScalaTask("val p1 = input.p1.median; val p2 = input.p2.median") set (
+      inputs += (p1.toArray, p2.toArray),
+      outputs += (p1, p2)
+    )
 
-val s1 = i in (0 to 100)
+    val mole = e1 -< (stat hook ToStringHook())
 
-// Re-sample 10 times s1, the output is an array of array of values
-val s2 = s1 repeat 10
 
-// Create 10 samples of 5 values from s1, it is equivalent to "s1 sample 5 repeat 10", the output type is an
-// array of array of values
-val s3 = s1 bootstrap (5, 10)
 
-Here is how such higher level samplings would be used within a Mole:
+@sect{The is keyword}
 
-// This code compute 10 couples (for f1 and f2) of medians among 5 samples picked at random in f1 x f2
-val p1 = Val[Double]
-val p2 = Val[Double]
+    The is keyword can be use to assigned a value to variable in a sampling. For instance:
+    @hl.openmole("""
+    val i = Val[Int]
+    val j = Val[Int]
+    val k = Val[Int]
 
-val f1 = p1 in (0.0 to 1.0 by 0.1)
-val f2 = p2 in (0.0 to 1.0 by 0.1)
-
-val e1 = ExplorationTask((f1 x f2) bootstrap (5, 10))
-
-val stat = ScalaTask("val p1 = input.p1.median; val p2 = input.p2.median") set (
-  inputs += (p1.toArray, p2.toArray),
-  outputs += (p1, p2)
-)
-
-val mole = e1 -< (stat hook ToStringHook())
-
-Exploring files
-
-OpenMOLE introduces the concept of Domains as a variable ranging along a set of files. For instance to explore a program over a set of files in a subdirectory you may use:
-
-val f = Val[File]
-val explo = ExplorationTask (f in (workDirectory / "dir"))
-
-To explore files located in several directories:
-
-val i = Val[Int]
-val f = Val[File]
-
-val explo =
-  ExplorationTask (
-    (i in (0 to 10)) x
-    (f in (workDirectory / "dir").files("subdir${i}", recursive = true).filter(f => f.isDirectory && f.getName.startsWith("exp")))
-  )
-
-To filter the files you want to list use the filter modifier. You can filter using any function from File (see javadoc) to Boolean.
-
-val f = Val[File]
-
-val explo =
-  ExplorationTask ( (f in (workDirectory / "dir") filter(_.getName.endsWith(".nii.gz")) ) )
-
-Searching in deep file trees can be very time consuming and irrelevant in some cases where you know how your data is organised. By default the file selector only explores the direct level under under the directory you've passed as a parameter. If you want it to explore the whole file tree, you can set the option recursive to true as in files(recursive = true).
-
-As its name suggests, the files selector manipulates File instances and directly injects them in the dataflow. If you plan to delegate your workflow to a local cluster environment equipped with a shared file system across all nodes, you don't need data to be automatically copied by OpenMOLE. In this case, you might prefer the paths selector instead. paths works exactly like files and accepts the very same options. The only difference between the two selectors is that paths will inject Path variables in the dataflow. Path describes a file's location but not its content. The explored files won't be automatically copied by OpenMOLE in this case, so this does not fit a grid environment for instance.
-
-More details on the difference between manipulating Files and Paths can be found in the dedicated entry of the FAQ.
-
-If you wish to select one single file for each value of i you may use select:
-
-val i = Val[Int]
-val f = Val[File]
-
-val explo =
-  ExplorationTask (
-    (i in (0 to 10)) x
-    (f in File("/path/to/a/dir").select("file${i}.txt"))
-  )
-
-Files can also be injected in the dataflow through Sources. They provide more powerful file filtering possibilities using regular expressions and can also target directories only.
-CSV files Sampling
-As an extension to undifferientiated files, you can inject your own sampling in OpenMOLE through a CSV file. Considering a CSV file like:
-
-coldD,colFileName,i
-0.7,fic1,8
-0.9,fic2,19
-0.8,fic2,19
-
-The corresponding CSVSampling is:
-
-val i = Val[Int]
-val d = Val[Double]
-val f = Val[File]
-
-//Only comma separated files with header are supported for now
-val s = CSVSampling("/path/to/a/file.csv") set (
-  columns += i,
-  columns += ("colD", d),
-  fileColumns += ("colFileName", "/path/of/the/base/dir/", f),
-  // ',' is the default separator, but you can specify a different one using
-  separator := ','
-)
-
-val exploration = ExplorationTask(s)
-
-In this example the column name i in the CSV file is mapped to the variable i of OpenMOLE. The column name colD is mapped to the variable d. The column named colFileName is appended to the base directory "/path/of/the/base/dir/" and used as a file in OpenMOLE.
-As a sampling, the CSVSampling can directly be injected in an ExplorationTask. It will generate a different task for each entry in the file.
+    val exploration =
+      ExplorationTask(
+        (i in (0 until 10)) x
+        (j is "i * 2") x
+        (k in Range[Int]("j", "j + 7"))
+      )""")

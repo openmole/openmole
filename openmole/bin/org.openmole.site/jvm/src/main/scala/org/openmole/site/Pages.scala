@@ -176,7 +176,8 @@ object DocumentationPages {
     branching,
     webserver,
     dataProcessing,
-    otherDoE
+    otherDoE,
+    advancedSampling
   )
 
   lazy val topPages = Seq(
@@ -255,6 +256,12 @@ object DocumentationPages {
   lazy val dataProcessing = DocumentationPage(name = "Data Processing", content = scalatex.documentation.language.method.DataProcessing())
 
   lazy val helloWorld = DocumentationPage(name = "Hello Word!", content = Pages.gettingStarted.content)
+
+  def advancedPages = Seq(advancedSampling)
+
+  lazy val advancedConcepts = DocumentationPage(name = "Methods", content = scalatex.documentation.language.advancedConcepts())
+
+  lazy val advancedSampling = DocumentationPage(name = "Advanced Sampling", content = scalatex.documentation.language.advanced.advancedSampling())
 
   def tutorialPages = Seq(helloWorld, resume, headlessNetLogo, netLogoGA, capsule) //++ marketTutorials
 

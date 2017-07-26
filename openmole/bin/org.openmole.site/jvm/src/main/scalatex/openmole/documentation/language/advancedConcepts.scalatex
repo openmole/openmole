@@ -1,0 +1,20 @@
+@import org.openmole.site.stylesheet._
+@import org.openmole.site.Resource._
+@import org.openmole.site._
+@import org.openmole.site.tools._
+@import org.openmole.site.Environment._
+
+
+
+OpenMOLE has a lot of handy features that allows the familiar user to tune the workflow of execution into much more details
+that previously described in the Model and Method Sections.
+
+We present here thee relevant elements oof the OpenMOLE script language, roughly divided into the following sections
+
+
+@b{Table of contents}
+
+
+@sect{Advanced Sampling Techniques}
+    @p
+        blablba
