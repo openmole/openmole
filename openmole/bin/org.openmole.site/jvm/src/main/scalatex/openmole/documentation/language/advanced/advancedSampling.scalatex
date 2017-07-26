@@ -6,9 +6,24 @@
 
 
 In this page are the advanced functions and tasks to fine-tune your data flows into the OpenMOLE workflow: samplings , list and combination.
+@br
+@br
+@b{Table of contents}
+@ol
+    @li
+        @sect.ref{Combine samplings}
+    @li
+        @sect.ref{Zip samplings}
+    @li
+        @sect.ref{Shrink the initial Sampling with Take, Filter, Sample}
+    @li
+        @sect.ref{Generate random samplings}
+    @li
+        @sect.ref{Higher level samplings}
+    @li
+        @sect.ref{The is keyword}
 
-
-
+@br
 @sect{Combine samplings}
     @br
     To define samplings you can combine them with each other. As we've previously seen, the complete sampling is a way to achieve that. Many composition functions are implemented in OpenMOLE.
@@ -102,6 +117,7 @@ In this page are the advanced functions and tasks to fine-tune your data flows i
     More advanced Sampling reductions happen through filter ("predicate"). It filters out all the values from the initial Sampling for which the given predicate is wrong.
 
     The 3 sampling operations presented in this section are put into play in the following example:
+    @hl.openmole("""
 
     val p1 = Val[Int]
     val p2 = Val[Int]
@@ -117,14 +133,15 @@ In this page are the advanced functions and tasks to fine-tune your data flows i
 
     // Sample 5 values from s1
     val s5 = s1 sample 5
-
-@sect{Generate random Samplings}
+    """)
+@sect{Generate random samplings}
 
     OpenMOLE can generate random samplings from an initial sampling using shuffle that creates a new sampling which is a randomly shuffled version of the initial one.
 
     OpenMOLE can also generate a fresh new Sampling made of random numbers using UniformDistribution[T], with T the type of random numbers to be generated.
 
     Check the following script to discover how to use these random-based operations in a workflow:
+    @hl.openmole("""
 
     val p1 = Val[Int]
     val p2 = Val[Int]
@@ -137,10 +154,11 @@ In this page are the advanced functions and tasks to fine-tune your data flows i
     // Replicate 100 times the sampling s1 and provide seed for each experiment
     val seed = Val[Int]
     val s7 = s1 x (seed in (UniformDistribution[Int]() take 100))
-
+    """)
 @sect{Higher level samplings}
 
     Some sampling combinations generate higher level samplings such as repeat and bootstrap:
+    @hl.openmole("""
 
     val i = Val[Int]
 
@@ -152,8 +170,9 @@ In this page are the advanced functions and tasks to fine-tune your data flows i
     // Create 10 samples of 5 values from s1, it is equivalent to "s1 sample 5 repeat 10", the output type is an
     // array of array of values
     val s3 = s1 bootstrap (5, 10)
-
+    """)
     Here is how such higher level samplings would be used within a Mole:
+    @hl.openmole("""
 
     // This code compute 10 couples (for f1 and f2) of medians among 5 samples picked at random in f1 x f2
     val p1 = Val[Double]
@@ -170,7 +189,7 @@ In this page are the advanced functions and tasks to fine-tune your data flows i
     )
 
     val mole = e1 -< (stat hook ToStringHook())
-
+    """)
 
 
 @sect{The is keyword}
