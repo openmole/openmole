@@ -42,7 +42,8 @@ package object stylesheet {
 
   lazy val mainDiv = Seq(
     paddingTop := 150,
-    paddingBottom := 150
+    paddingBottom := 150,
+    minHeight := 800
   ) ++ center(50)
 
   def rightDetailButtons(topValue: Int) = Seq(
@@ -80,7 +81,7 @@ package object stylesheet {
     margin := "0 auto",
     minHeight := 85,
     width := "95%"
-  )
+  ) ++ center(70)
 
   val headerImg = Seq(
     padding := 10,
@@ -124,14 +125,7 @@ package object stylesheet {
   val memberStyle = Seq(
     color := DARK_GREY,
     fontSize := "25px",
-    fontWeight := "bold",
     paddingTop := 5
-  )
-
-  val communityStyle = Seq(
-    fontSize := "30px",
-    color := DARK_GREY,
-    backgroundColor := "red"
   )
 
   val partners = Seq(
@@ -147,7 +141,7 @@ package object stylesheet {
   val h1Like = Seq(
     color := "#444",
     fontSize := "32px",
-    fontWeight := 800,
+    fontWeight := 100,
     margin := "0 0 24px",
     textTransform := "uppercase",
     paddingTop := 100

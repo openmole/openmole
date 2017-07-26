@@ -35,7 +35,7 @@ class StepCarousel(step: Step) {
         div(stepHeader)(step.name),
         line
       ),
-      div(paddingTop := 70)(step.element),
+      div(paddingTop := 40)(step.element),
       step.leftMenu,
       step.rightMenu
     )

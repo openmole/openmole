@@ -11,7 +11,6 @@
   @part.SSHAuthentication()
 
   @sect{PBS / Torque}
-    @p
     @aa("PBS", href := shared.link.batchSystem) is a venerable batch system for clusters. You may use a PBS computing environment as follow:
     @br @hl.openmole("""
     val env =
@@ -33,6 +32,7 @@
      @li{@threads,}
      @li{@envEntryTitle{coreByNodes} An alternative to specifying the number of threads. @hl.openmoleNoTest{coreByNodes} takes the value of the @hl.openmoleNoTest{threads} when not specified, or 1 if none of them is specified.}
      @li{@name}
+
   @sect{SGE}
     To delegate some computation load to a @aa("SGE", href := shared.link.grieEngine) based cluster you can use the @hl.openmoleNoTest{SGEEnvironment} as follows:
     @br @hl.openmole("""
@@ -52,6 +52,7 @@
       @li{@openMOLEMemory,}
       @li{@threads,}
       @li{@name.}
+
   @sect{Slurm}
     To delegate the workload to a @aa("Slurm", href := shared.link.slurm) based cluster you can use the @hl.openmoleNoTest{SLURMEnvironment} as follows:
     @br @hl.openmole("""
@@ -79,6 +80,7 @@
       @li{@envEntryTitle{gres} a list of Generic Resource (GRES) requested. A Gres is a pair defined by the name of the resource and the number of resources requested (scalar). For instance @hl.openmoleNoTest{gres = List( Gres("resource", 1) )}}
       @li{@envEntryTitle{constraints} a list of Slurm defined constraints which selected nodes must match,}
       @li{@name.}
+
   @sect{Condor}
     @aa("Condor", href := shared.link.condor) clusters can be leveraged using the following syntax:
     @br @hl.openmole("""
@@ -96,6 +98,7 @@
       @li{@openMOLEMemory,}
       @li{@threads,}
       @li{@name.}
+
   @sect{OAR}
     Similarly, @aa("OAR", href := shared.link.oar) clusters are reached as follows:
     @br @hl.openmole("""
