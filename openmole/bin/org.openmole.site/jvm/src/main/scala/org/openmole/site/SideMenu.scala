@@ -48,7 +48,7 @@ case class SideMenuBlock(menus: Seq[SideMenu]) {
             for {
               p ← m.links
             } yield {
-              div(paddingTop := 10)(linkButton(p.name, p.link, m.menuStyle, m.otherTab))
+              div(paddingTop := 7)(linkButton(p.name, p.link, m.menuStyle, m.otherTab))
             }
           )
         }
