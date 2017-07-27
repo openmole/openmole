@@ -44,13 +44,13 @@ package object stylesheet {
     paddingTop := 150,
     paddingBottom := 150,
     minHeight := 800
-  ) ++ center(50)
+  ) ++ center(45)
 
   def rightDetailButtons(topValue: Int) = Seq(
     float := "right",
     fixedPosition,
     top := topValue,
-    right := 320,
+    right := 370,
     textAlign := "left",
     minWidth := 180,
     marginRight := -180
@@ -60,7 +60,7 @@ package object stylesheet {
     float := "left",
     fixedPosition,
     top := topValue,
-    marginLeft := -320,
+    marginLeft := -370,
     textAlign := "right",
     minWidth := 180
   )

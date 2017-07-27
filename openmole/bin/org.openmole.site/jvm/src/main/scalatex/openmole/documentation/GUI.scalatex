@@ -5,19 +5,8 @@
 @SideMenu.block(SideMenu.guiGuide).left(320)
 
 @sect{@shared.guiGuide.overview}
-  auie
-@p
-@p
-@p
-@p
-@p
-@p
-@p
-@p
-@p
-@p
-@p
-@p
+    This GUI is an advanced editor for OpenMOLE scripts. It allows editing, managing and running them.
+    The description of the OpenMOLE language and concepts can be found on the
 
 @sect{@shared.guiGuide.fileManagment}
   auieaiueaiue

@@ -46,10 +46,9 @@ import scala.scalajs.js.timers._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-@JSExportTopLevel("ScriptClient")
 object ScriptClient {
 
-  @JSExport
+  @JSExportTopLevel("connection")
   def connection(): Unit = withBootstrapNative {
     div(
       Connection.render,
@@ -57,7 +56,7 @@ object ScriptClient {
     ).render
   }
 
-  @JSExport
+  @JSExportTopLevel("stopped")
   def stopped(): Unit = withBootstrapNative {
 
     val stoppedDiv = div(omsheet.connectionTabOverlay)(
@@ -73,7 +72,7 @@ object ScriptClient {
     stoppedDiv
   }
 
-  @JSExport
+  @JSExportTopLevel("restarted")
   def restarted(): Unit = withBootstrapNative {
     val timer: Var[Option[SetIntervalHandle]] = Var(None)
 
@@ -104,7 +103,7 @@ object ScriptClient {
     restartedDiv
   }
 
-  @JSExport
+  @JSExportTopLevel("resetPassword")
   def resetPassword(): Unit = {
     val resetPassword = new ResetPassword
     withBootstrapNative {
@@ -115,7 +114,7 @@ object ScriptClient {
     }
   }
 
-  @JSExport
+  @JSExportTopLevel("run")
   def run(): Unit = {
     implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
