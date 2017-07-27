@@ -151,9 +151,6 @@ object DocumentationPages {
     model,
     language,
     howToContribute,
-    transition,
-    hook,
-    source,
     environment,
     multithread,
     ssh,
@@ -181,8 +178,13 @@ object DocumentationPages {
     webserver,
     dataProcessing,
     otherDoE,
+    advancedConcepts,
     advancedSampling,
-    fileExploration
+    fileExploration,
+    transition,
+    hook,
+    source
+
   )
 
   lazy val topPages = Seq(
@@ -226,7 +228,7 @@ object DocumentationPages {
   lazy val mole = DocumentationPage(name = "Mole", content = scalatex.documentation.language.model.MoleTask())
   lazy val model = DocumentationPage(name = "Models", content = scalatex.documentation.language.Model())
 
-  def languagePages = Seq(model, transition, hook, environment, source, method)
+  def languagePages = Seq(model, environment, method, advancedConcepts)
 
   lazy val language = DocumentationPage(name = "Language", content = scalatex.documentation.Language())
 
@@ -266,9 +268,9 @@ object DocumentationPages {
 
   lazy val helloWorld = DocumentationPage(name = "Hello Word!", content = Pages.gettingStarted.content)
 
-  def advancedPages = Seq(advancedSampling, fileExploration)
+  def advancedPages = Seq(advancedSampling, fileExploration, transition, hook, source)
 
-  lazy val advancedConcepts = DocumentationPage(name = "Methods", content = scalatex.documentation.language.AdvancedConcepts())
+  lazy val advancedConcepts = DocumentationPage(name = "Advanced Concepts", content = scalatex.documentation.language.AdvancedConcepts())
 
   lazy val advancedSampling = DocumentationPage(name = "Advanced Sampling", content = scalatex.documentation.language.advanced.AdvancedSampling())
   lazy val fileExploration = DocumentationPage(name = "Files Exploration", content = scalatex.documentation.language.advanced.FileExploration())
