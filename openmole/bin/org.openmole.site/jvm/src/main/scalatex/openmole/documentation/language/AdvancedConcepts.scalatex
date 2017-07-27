@@ -10,33 +10,44 @@ OpenMOLE has a lot of handy features that allows the familiar user to tune the w
 that previously described in the Model and Method Sections.
 
 We present here the relevant elements of the OpenMOLE framework roughly divided into the following sections:
-
+@br@br
 
 @b{Table of contents}
 
 
 @sect{Sampling and exploring Files}
 
-    @a("Advanced Samplings", href := DocumentationPages.advancedSampling.file),
-    @a("Sampling files and lines into files ", href := DocumentationPages.fileExploration.file)
+    @ul
+        @li
+            @a("Advanced Samplings", href := DocumentationPages.advancedSampling.file),
+        @li
+            @a("Sampling files and lines into files ", href := DocumentationPages.fileExploration.file)
 
 
 @sect{OpenMOLE language and concepts : Technical Documentation}
-
-    @a("Transitions", href := DocumentationPages.transition.file),
-    @a("Hook", href := DocumentationPages.hook.file),
-    @a("Source", href := DocumentationPages.source.file),
+    Fine-tune  your workflow using the elements of the OpenMOLE language :
+    @br
+    @ul
+        @li
+            @a("Transitions", href := DocumentationPages.transition.file),
+        @li
+            @a("Hook", href := DocumentationPages.hook.file),
+        @li
+            @a("Source", href := DocumentationPages.source.file),
 
 
 
 
 @sect{Development Documentation}
 
-    @sect{Plugin development}
-        plugi dev bla bla
+    @b{Plugin development}
+    @br
+    Develop your own plugin to have full control over your code - OpenMOLE integration: @a("Plugin Page", href := DocumentationPages.plugin.file),
+    @br
+    @br
+    @b{Server Version and REST API }
+    @br
+    Command your OpenMOLE server from within your own app: @a("Web server and REST API", href := DocumentationPages.webserver.file),
 
-    @sect{Server Version and REST API }
-        rest api bla bla
-@h2{Community}
 
 

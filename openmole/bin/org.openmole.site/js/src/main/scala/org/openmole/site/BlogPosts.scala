@@ -120,15 +120,15 @@ object BlogPosts {
 
   val newsStyle = Seq(
     backgroundColor := "#333",
-    color := "white",
     padding := 10,
     marginTop := 5,
     borderRadius := "5px"
   )
 
   val titleStyle = Seq(
-    textTransform := "uppercase"
-  ) ++ newsStyle
+    textTransform := "uppercase",
+    color := "white"
+  )
 
   val moreStyle = Seq(
     float := "right",

@@ -1,12 +1,17 @@
-
-@import org.openmole.site.tools._
+@import org.openmole.site.stylesheet._
+@import org.openmole.site.Resource._
 @import org.openmole.site._
+@import org.openmole.site.tools._
+@import org.openmole.site.Environment._
 
-@p{Transitions}
-  In OpenMOLE, transitions link tasks with each other. The following examples illustrate several kinds of transitions
-  available in OpenMOLE.
 
-  @p{Simple transition}
+
+
+@h1{Transitions}
+In OpenMOLE, transitions link tasks with each other. The following examples illustrate several kinds of transitions
+available in OpenMOLE.
+
+@sect{Simple transition}
     A transition specifies a precedence relationship between 2 tasks. In the following example, the task @i{t1} produces
     a variable @i{i} which travels along a transition to the task @i{t2}. @i{t2} uses it in turn in order to compute its
     output. Simple transitions are marked by the operator @hl.openmoleNoTest("--") between the tasks:
@@ -18,7 +23,8 @@
     val t2 = ScalaTask("val e = d / 42") set ( inputs += d, outputs += e)
 
     t1 -- (t2 hook ToStringHook())""")
-  @p{Exploration transition}
+
+@sect{Exploration transition}
     The @b{Exploration} transition links an @hl.openmole("ExplorationTask") to another task. It creates one new
     execution stream by sample point in the design of experiment of the @hl.openmole("ExplorationTask"). For instance,
     the following workflow runs the task @i{t1} 10 times. Exploration transitions use the @hl.openmoleNoTest("-<") between the
@@ -38,7 +44,7 @@
     @p You can read more about @a("Explorations and Samplings", href := DocumentationPages.advancedSampling.file)
     in the relevant section of the documentation.
 
-  @p{Combining transitions}
+@sect{Combining transitions}
     In order to automate some processes we might want to run several task in sequence after an exploration transition.
     To achieve that you can easily compose the 2 previous transitions:
     @br @hl.openmole("""
@@ -49,7 +55,7 @@
     val exploration = ExplorationTask( d in (0.0 to 99.0 by 10.0) )
 
     exploration -< t1 -- (t2 hook ToStringHook())""")
-  @p{Conditions}
+@sect{Conditions}
     When needed, it is possible to set a condition on the transition so that the task after the transition is executed
     under this condition only. Conditional transitions are specified after the @hl.openmoleNoTest("when"). For instance we can
     add a condition on the execution of @i{t2} in the previous workflow:
@@ -62,7 +68,7 @@
 
     exploration -< t1 -- (t2 hook ToStringHook() when "d < 1000")""")
     @p In this case the task @i{t2} is executed only if the variable "d" is greater than 1,000.
-  @p{Tasks in parallel}
+@sect{Tasks in parallel}
     In OpenMOLE you can also define task as being independent from each other so they can be executed concurrently.
     Parallel tasks are to be put in brackets. For instance, in this example @i{t2} and @i{t3} are executed concurrently:
     @br @hl.openmole("""
@@ -75,7 +81,7 @@
 
     exploration -< t1 -- (t2 hook ToStringHook(), (t3 hook ToStringHook()))""")
 
-  @p{Aggregating results from an exploration}
+@sect{Aggregating results from an exploration}
     We have seen how we can execute tasks for a set of values with the Exploration transition @hl.openmoleNoTest("-<"). It is
     also possible to collect all the results produced by an exploration in order to compute global indicators. The
     following workflow sums over all the results computed by the @i{t1} task in the exploration:
@@ -101,7 +107,7 @@
     next task in the workflow.
 
 
-  @p{Advanced concepts: Capsules and Slots}
+@sect{Advanced concepts: Capsules and Slots}
     Tasks are not directly linked to each-other by transitions. This has been made as transparent as possible, but two
     other notions are involved behind the scenes. Tasks are encapsulated in a so called
     @i{Capsule}. Each @i{Capsule} has one or several input @i{Slots} which
@@ -127,7 +133,7 @@
       val s1 = Slot(c1)
     """)
 
-  @p{Combining several workflow parts with +}
+@sect{Combining several workflow parts with +}
     In OpenMOLE the representation of the workflow have been designed to be as linear as possible, but actually workflows
     are just as graph of task and transitions. Sometime you cannot express complex workflows in such a linear manner. Therefore you may
     want to use the + operator to merge different part of a workflow. While the linear representation is more compact, the + notation
@@ -155,7 +161,7 @@
       (t2Capsule hook ToStringHook()) &
       (t3Capsule hook ToStringHook()))""")
 
-  @p{Loops}
+@sect{Loops}
     Loops are a direct application of the explicit definition of Capsules and Slots to wrap tasks. A task may possess
     multiple input Slots. @i{Slots} are useful to distinguish loops from synchronization points. The execution of
     a task is started @b{when all the incoming transitions belonging to the same input @i{Slot} have been triggered}. See

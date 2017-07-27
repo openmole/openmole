@@ -27,10 +27,15 @@ case class Step(name: TypedTag[_ <: String], element: TypedTag[_ <: String], lef
 class StepCarousel(step: Step) {
 
   val line = hr(classIs("line"), width := "80%", marginTop := 40)
+  val stepButtonStyle = Seq(
+    classIs(btn ++ btn_default),
+    fontSize := "18px"
+  )
+
   val render = {
     div(width := "100%")(
-      leftGlyphButton(step.previous.name, step.previous, glyph_chevron_left)(leftDetailButtons(200)),
-      rightGlyphButton(step.next.name, step.next, glyph_chevron_right)(rightDetailButtons(200)),
+      leftGlyphButton(step.previous.name, step.previous, glyph_chevron_left, buttonStyle = stepButtonStyle)(leftDetailButtons(200)),
+      rightGlyphButton(step.next.name, step.next, glyph_chevron_right, buttonStyle = stepButtonStyle)(rightDetailButtons(200)),
       div(maxHeight := 100)(
         div(stepHeader)(step.name),
         line
