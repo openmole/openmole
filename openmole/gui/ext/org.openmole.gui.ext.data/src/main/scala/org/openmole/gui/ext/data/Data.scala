@@ -242,7 +242,6 @@ case class UploadAbsolute() extends UploadType {
 
 case class DirData(isEmpty: Boolean)
 
-@JSExport
 case class TreeNodeData(
   name:    String,
   dirData: Option[DirData],
@@ -250,7 +249,6 @@ case class TreeNodeData(
   time:    Long
 )
 
-@JSExport
 case class ScriptData(scriptPath: SafePath)
 
 object Error {

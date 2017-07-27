@@ -11,14 +11,14 @@ object Libraries {
   lazy val tooltipserVersion = "3.3.0"
   lazy val netLogo5Version = "5.3.1"
   lazy val netLogo6Version = "6.0.1"
-  lazy val scalaTagsVersion = "0.6.2"
+  lazy val scalaTagsVersion = "0.6.5"
   lazy val scalaJSDomVersion = "0.9.3"
   lazy val rxVersion = "0.3.2"
   lazy val scalaUpickleVersion = "0.4.3"
   lazy val scalaAutowireVersion = "0.2.6"
   lazy val sourcecodeVersion = "0.1.2"
   lazy val scaladgetVersion = "0.9.5-SNAPSHOT"
-  lazy val scalajsVersion = "0.6.16"
+  lazy val scalajsVersion = "0.6.18"
 
   lazy val scaladgetJS = libraryDependencies += "fr.iscpif" %%% "scaladget" % scaladgetVersion
   lazy val scalajsDomJS = libraryDependencies += "org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion

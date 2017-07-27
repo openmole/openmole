@@ -7,7 +7,7 @@ addSbtPlugin("com.eed3si9n" % "sbt-unidoc" % "0.4.0")
 
 addSbtPlugin("org.openmole" % "openmole-buildsystem-plugin" % "1.6-SNAPSHOT")
 
-addSbtPlugin("org.scala-js" % "sbt-scalajs" % "0.6.17")
+addSbtPlugin("org.scala-js" % "sbt-scalajs" % "0.6.18")
 
 addSbtPlugin("ch.epfl.scala" % "sbt-web-scalajs-bundler" % "0.4.0")
 
