@@ -90,5 +90,5 @@
 
   @p Several notions from OpenMOLE are reused in this example. If you're not too familiar with
   @a("Hooks", href := DocumentationPages.hook.file) or
-  @a("Samplings", href := DocumentationPages.sampling.file), check the relevant sections of the
+  @a("Samplings", href := DocumentationPages.advancedSampling.file), check the relevant sections of the
   documentation.

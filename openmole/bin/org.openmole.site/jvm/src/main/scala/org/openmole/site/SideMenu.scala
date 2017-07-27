@@ -25,11 +25,17 @@ import scalatags.Text.all._
 
 case class Link(name: String, link: String)
 
-case class SideMenu(pages: Seq[Link], menuStyle: AttrPair = classIs(btn ++ btn_default), preText: String = "", otherTab: Boolean = false)
+case class SideMenu(links: Seq[Link], menuStyle: AttrPair = classIs(btn ++ btn_default), preText: String = "", otherTab: Boolean = false)
 
 case class SideMenuBlock(menus: Seq[SideMenu]) {
 
+  def insert(sideMenu: SideMenu): SideMenuBlock = copy(sideMenu +: menus)
+
+  def insert(sideMenu: Option[SideMenu]): SideMenuBlock = insert(sideMenu.getOrElse(SideMenu(Seq())))
+
   def add(sideMenu: SideMenu) = copy(menus :+ sideMenu)
+
+  def add(sideMenu: Option[SideMenu]): SideMenuBlock = add(sideMenu.getOrElse(SideMenu(Seq())))
 
   private def build(topDiv: TypedTag[_]) =
     div(
@@ -38,9 +44,9 @@ case class SideMenuBlock(menus: Seq[SideMenu]) {
           m ← menus
         } yield {
           div(
-            if (m.pages.isEmpty) div else div(m.preText, fontWeight := "bold", paddingTop := 20),
+            if (m.links.isEmpty) div else div(m.preText, fontWeight := "bold", paddingTop := 20),
             for {
-              p ← m.pages
+              p ← m.links
             } yield {
               div(paddingTop := 10)(linkButton(p.name, p.link, m.menuStyle, m.otherTab))
             }
@@ -64,21 +70,29 @@ object SideMenu {
 
   def details(pages: Seq[Page]) = SideMenu(pages, otherTab = true)
 
+  def fromStrings(title: String, stringMenus: String*) =
+    SideMenu(preText = title, links = stringMenus.map { a ⇒ Link(a, s"#${a.replaceAll(" ", "")}") })
+
   val model = SideMenu.block(SideMenu(DocumentationPages.modelPages, classIs(btn ++ btn_primary), "Available tasks"))
 
   val method = SideMenu.block(SideMenu(DocumentationPages.methodPages, classIs(btn ++ btn_primary), "Available methods"))
 
   val environment = SideMenu.block(SideMenu(DocumentationPages.environmentPages, classIs(btn ++ btn_primary), "Available environments"))
 
-  val more = SideMenu.block(SideMenu(Seq(DocumentationPages.documentation, DocumentationPages.gui), preText = "See also"))
+  val more = SideMenu.block(SideMenu(Seq(DocumentationPages.docSiteMap, DocumentationPages.gui), preText = "See also"))
 
-  val guiGuide =
-    SideMenu.block(
-      SideMenu(
-        Seq(
-          shared.guiGuide.overview,
-          shared.guiGuide.fileManagment
-        ).map { a ⇒ Link(a, s"#${a.replaceAll(" ", "")}") }
-      )
-    )
+  val guiGuide = fromStrings(
+    "Contents",
+    shared.guiGuide.overview,
+    shared.guiGuide.fileManagment
+  )
+
+  val clusterMenu = fromStrings(
+    "Contents",
+    shared.clusterMenu.pbsTorque,
+    shared.clusterMenu.sge,
+    shared.clusterMenu.slurm,
+    shared.clusterMenu.condor,
+    shared.clusterMenu.oar
+  )
 }

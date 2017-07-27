@@ -35,7 +35,7 @@
 
     exploration -< (t1 hook ToStringHook())""")
 
-    @p You can read more about @a("Explorations and Samplings", href := DocumentationPages.sampling.file)
+    @p You can read more about @a("Explorations and Samplings", href := DocumentationPages.advancedSampling.file)
     in the relevant section of the documentation.
 
   @p{Combining transitions}
