@@ -26,7 +26,7 @@ case class Step(name: TypedTag[_ <: String], element: TypedTag[_ <: String], lef
 
 class StepCarousel(step: Step) {
 
-  val line = hr(classIs("line"), width := "80%", marginTop := 40)
+  val line = hr(classIs("line"), width := "90%", marginTop := 40)
   val stepButtonStyle = Seq(
     classIs(btn ++ btn_default),
     fontSize := "18px"

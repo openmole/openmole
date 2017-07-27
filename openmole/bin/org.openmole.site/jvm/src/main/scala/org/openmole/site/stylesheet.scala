@@ -80,7 +80,7 @@ package object stylesheet {
     margin := "0 auto",
     minHeight := 85,
     width := "95%"
-  ) ++ center(70)
+  ) ++ center(90)
 
   val headerImg = Seq(
     padding := 10,
@@ -139,7 +139,7 @@ package object stylesheet {
 
   val h1Like = Seq(
     color := "#444",
-    fontSize := "32px",
+    fontSize := "30px",
     fontWeight := 100,
     margin := "0 0 24px",
     textTransform := "uppercase",
