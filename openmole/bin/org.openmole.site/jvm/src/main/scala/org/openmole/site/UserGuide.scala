@@ -58,8 +58,8 @@ object UserGuide {
         Step(
           headerModel(name),
           div(current.content),
-          SideMenu.model.insert(current.extraMenu).left(370),
-          SideMenu.more.right(370),
+          SideMenu.model.insert(current.extraMenu).left(350),
+          SideMenu.more.right(350),
           firstModel, firstEnvironment, firstMethod
         )
       }
@@ -67,15 +67,15 @@ object UserGuide {
         Step(
           headerMethod(current.name),
           div(current.content),
-          SideMenu.method.insert(current.extraMenu).left(370),
-          SideMenu.more.add(currentDetailMenu).add(current.extraMenu).right(370),
+          SideMenu.method.insert(current.extraMenu).left(350),
+          SideMenu.more.add(currentDetailMenu).add(current.extraMenu).right(350),
           firstMethod, firstModel, firstEnvironment
         )
       else Step(
         headerEnvironment(current.name),
         div(current.content),
-        SideMenu.environment.insert(current.extraMenu).left(370),
-        SideMenu.more.add(currentDetailMenu).right(370),
+        SideMenu.environment.insert(current.extraMenu).left(350),
+        SideMenu.more.add(currentDetailMenu).right(350),
         firstEnvironment, firstMethod, firstModel
       )
     }
