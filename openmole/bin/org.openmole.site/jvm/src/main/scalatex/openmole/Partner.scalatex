@@ -11,17 +11,20 @@
 
 @h1{Some scientific collaborations outputs}
 
-@a(img(src := Resource.img.ign.file,  smallPartners), href := shared.link.partner.ign, target := "_blank")
+@a(img(src := Resource.img.ign.file,  smallPartners), href := shared.link.partner.ign, target := "_blank", float:="left")
 @span(width := "75%")
-  An exploration of the output diversity of the @aa("SimPLU model", href := shared.link.repo.simplu) lead to this
-  decision making tool: @outerLink(shared.link.simpluDemo.split("//").last, shared.link.simpluDemo)
+  @b{Simplu3D-PSE} is the exploration of the output diversity of the @aa("SimPLU3D model", href := shared.link.repo.simplu) via the PSE method.
+  Simplu3D is a model that simulates the building and the placement of buildings, abiding by the Right To Build documents
+  of the French legislation: the PLU (Plan Local D'urbanisme). The PSE exploration
+  method led to this decision making tool: @outerLink(shared.link.simpluDemo.split("//").last, shared.link.simpluDemo)
+  enabling user to explore the effet of the PLU rules variations on the resulting morphology of the urban islet.
 
 
+@br
 @br
 @br
 
 @a(img(src := Resource.img.geocite.file,  smallPartners), href := shared.link.partner.parisgeo, target := "_blank", float:="left")
-
 @span(width := "75%")
   @b{SimPopLocal} is a theoretical geography model, simulating the emergence and the upkeep of systems of settlements (ancestors
   of system of cities) by means of spatial interactions and innovation exchanges. Main results are shown in the «Half a billion simulations: Evolutionary algorithms and distributed computing for calibrating the SimpopLocal
