@@ -25,7 +25,7 @@ import scalatags.Text.all._
 
 case class Link(name: String, link: String)
 
-case class SideMenu(links: Seq[Link], menuStyle: AttrPair = classIs(btn ++ btn_default), preText: String = "", otherTab: Boolean = false)
+case class SideMenu(links: Seq[Link], menuStyle: AttrPair = classIs(""), preText: String = "", otherTab: Boolean = false)
 
 case class SideMenuBlock(menus: Seq[SideMenu]) {
 
@@ -48,7 +48,7 @@ case class SideMenuBlock(menus: Seq[SideMenu]) {
             for {
               p ← m.links
             } yield {
-              div(paddingTop := 7)(linkButton(p.name, p.link, m.menuStyle, m.otherTab))
+              div(paddingTop := 5)(linkButton(p.name, p.link, m.menuStyle, m.otherTab))
             }
           )
         }
@@ -79,7 +79,7 @@ object SideMenu {
 
   val environment = SideMenu.block(SideMenu(DocumentationPages.environmentPages, classIs(btn ++ btn_primary), "Available environments"))
 
-  val more = SideMenu.block(SideMenu(Seq(DocumentationPages.advancedConcepts, DocumentationPages.gui), preText = "See also"))
+  val more = SideMenu.block(SideMenu(Seq(DocumentationPages.advancedConcepts, DocumentationPages.gui), classIs(btn ++ btn_default), "See also"))
 
   val guiGuide = fromStrings(
     "Contents",
