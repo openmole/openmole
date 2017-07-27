@@ -8,10 +8,8 @@
     How To contribute to the OpenMOLE project
 
 
-@h2
-    Prerequisites
+@sect{Prerequisites}
 
-@p
     You need three tools installed to get a local copy of OpenMOLE:
     @ul
         @li
@@ -22,39 +20,37 @@
             @a("sbt" ,href:="http://www.scala-sbt.org/") , the scala  building tool
 
 
-As a suggestion, we recommand the @a("IntelliJ IDE", href:="https://www.jetbrains.com/idea/") to  edit the scala source code of the project.
+    As a suggestion, we recommand the @a("IntelliJ IDE", href:="https://www.jetbrains.com/idea/") to  edit the scala source code of the project.
 
 
-@h2
-    First time setup
+@sect{First time setup}
 
-@ol
-    @li
-        Clone the OpenMOLE repository : @hl.highlight("""
-        git clone git@github.com:openmole/openmole.git
+    @ol
+        @li
+            Clone the OpenMOLE repository : @hl.highlight("""
+            git clone git@github.com:openmole/openmole.git
+            """, "plain")
+         @li
+            Set the git submodules inside the openmole subdirectory
+        @hl.highlight("""
+        cd openmole
+        git submodule update --init
         """, "plain")
-     @li
-        Set the git submodules inside the openmole subdirectory
-    @hl.highlight("""
-    cd openmole
-    git submodule update --init
-    """, "plain")
-    @li
-        Publish locally the content of the  @hl.highlight("build-system", "plain") and  @hl.highlight("libraries", "plain") subdirectory
-    @hl.highlight("""
-        cd build-system
-       sbt publishLocal
-        cd ../libraries/
-       sbt publishLocal
-       """, "plain")
+        @li
+            Publish locally the content of the  @hl.highlight("build-system", "plain") and  @hl.highlight("libraries", "plain") subdirectory
+        @hl.highlight("""
+            cd build-system
+           sbt publishLocal
+            cd ../libraries/
+           sbt publishLocal
+           """, "plain")
 
- These commands may take some time (few minutes at least)
+     These commands may take some time (few minutes at least)
 
 
 
-@h2
-    Build the app
-@p
+@sect{Build the app}
+
     To build the OpenMOLE, use the @hl.highlight("sbt assemble","plain") command inside openmole subdirectory.
 
 
@@ -69,10 +65,8 @@ As a suggestion, we recommand the @a("IntelliJ IDE", href:="https://www.jetbrain
 
 
 
-@h2
-    Build the website
+@sect{Build the website}
 
-@p
     The source code of the website and the OpenMOLE's documentation are hosted along in the code repository.
     You might spot a typo/incorrect spelling/grammar mistake/bad wording or simply want to improve a part of the
     documentation you think is unclear.
@@ -91,41 +85,35 @@ As a suggestion, we recommand the @a("IntelliJ IDE", href:="https://www.jetbrain
     ""","plain")
 
     @br
-        By default, pages are located in @hl.highlight("openmole/openmole/bin/org.openmole.site/jvm/target/site/","plain")
+    By default, pages are located in @hl.highlight("openmole/openmole/bin/org.openmole.site/jvm/target/site/","plain")
 
+    Updating the git submodules is @b{mandatory the first time} you set up your OpenMOLE development environment.
+    It pulls the examples from the MARKETLINK that are necessary to build the documentation website.
 
-    @p
-        Updating the git submodules is @b{mandatory the first time} you set up your OpenMOLE development environment.
-        It pulls the examples from the MARKETLINK that are necessary to build the documentation website.
+    Optionally you can use @hl.highlight("--no-test", "plain") in order to disable the tests of the scripts, which
+    is (really) time-consuming. The tests concerning the examples from the OpenMOLE market can in turn be disabled
+    using @hl.highlight("--no-market-test", "plain").
 
-    @p
-        Optionally you can use @hl.highlight("--no-test", "plain") in order to disable the tests of the scripts, which
-         is (really) time-consuming. The tests concerning the examples from the OpenMOLE market can in turn be disabled
-          using @hl.highlight("--no-market-test", "plain").
+@sect{Edit the source of webpages}
 
-@h2
-    Edit the source of webpages
-@p
     Sources are located in @hl.highlight("openmole/openmole/bin/org.openmole.site/jvm/src/main/scalatex/openmole","plain")
 
     They are written using @a("scalatex", href:="http://www.lihaoyi.com/Scalatex/"), a DSL to generate html content.
 
-@h2
-    Repositories
-@p
+@sect{Repositories}
+
     @a("OpenMOLE repos", href:="https://github.com/openmole/openmole") are divided into three branches.
 
-        @ul
-            @li
-                @hl.highlight("dev", "plain") contains the unstable, current version  of the platform.
-            @li
-                @hl.highlight("#version-dev", "plain")  e.g. 7-dev , is the stabilized version of the @hl.highlight("dev", "plain") branch
-            @li
-                @hl.highlight("master", "plain") is the main branch, from which  the two former branches are derived
+    @ul
+        @li
+            @hl.highlight("dev", "plain") contains the unstable, current version  of the platform.
+        @li
+            @hl.highlight("#version-dev", "plain")  e.g. 7-dev , is the stabilized version of the @hl.highlight("dev", "plain") branch
+        @li
+            @hl.highlight("master", "plain") is the main branch, from which  the two former branches are derived
 
-@h2
-    Recommended contribution procedure
-@p
+@sect{Recommended contribution procedure}
     When you want to contribute to the project (code or documentation) we recommend that you start by submitting an @b{issue}
     , so that the community can identify the nature of the potential caveat.
+    @br
     After that , send a @b{pull request} so that your potential changes can be discussed.
