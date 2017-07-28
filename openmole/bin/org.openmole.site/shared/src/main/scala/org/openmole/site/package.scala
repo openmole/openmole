@@ -69,6 +69,8 @@ package object shared {
     lazy val condor = "https://en.wikipedia.org/wiki/HTCondor"
     lazy val oar = "http://oar.imag.fr/dokuwiki/doku.php"
     lazy val ssh = "https://en.wikipedia.org/wiki/Secure_Shell"
+    lazy val geodivercity = "http://geodivercity.parisgeo.cnrs.fr/blog/"
+    lazy val ercSpringer = "http://www.springer.com/fr/book/9783319464954"
 
     object partner {
       lazy val iscpif = "http://iscpif.fr"
