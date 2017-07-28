@@ -12,7 +12,7 @@
 
 @h1{Some scientific collaborations outputs}
 
-@a(img(src := Resource.img.ign.file,  smallPartners), href := shared.link.partner.ign, target := "_blank", float:="left")
+@aa(img(src := Resource.img.ign.file,  smallPartners), href := shared.link.partner.ign, float:="left")
 @span(width := "75%")
   @b{Simplu3D-PSE} is the exploration of the output diversity of the @aa("SimPLU3D model", href := shared.link.repo.simplu) via the PSE method.
   Simplu3D is a model that simulates the building and the placement of buildings, abiding by the Right To Build documents
@@ -22,7 +22,7 @@
 
 @br
 
-@a(img(src := Resource.img.geocite.file,  smallPartners), href := shared.link.partner.parisgeo, target := "_blank", float:="left")
+@aa(img(src := Resource.img.geocite.file,  smallPartners), href := shared.link.partner.parisgeo, float:="left")
 @span(width := "75%")
   @b{SimPopLocal} is a theoretical geography model, simulating the emergence and the upkeep of systems of settlements (ancestors
   of system of cities) by means of spatial interactions and innovation exchanges. Main results are shown in the «Half a billion simulations: Evolutionary algorithms and distributed computing for calibrating the SimpopLocal
@@ -36,9 +36,9 @@
     in our @a("publication page", href := Pages.communications.file)).
 @span(width := "75%")
 @br
-    The @b{ERC @a("Geodivercity", href:="http://geodivercity.parisgeo.cnrs.fr/blog/")} was an advanced grant ERC project ,
+    The ERC @aa("Geodivercity", href:=shared.link.geodivercity) was an advanced grant ERC project ,
     led by Pr. Denise Pumain. A significant part of the  development of OpenMOLE  as a scalable platform for geographical
     simulation models experiments was founded by this project. The project led to the publication of a book publisshed by Springer,
-    available @a("on the editor site", href:="http://www.springer.com/fr/book/9783319464954")
+    available @aa("on the editor site", href:=shared.link.ercSpringer)
     and here as a pre-print open version TODO ajouter liens vers HAL pour les preprint
 

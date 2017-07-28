@@ -42,9 +42,9 @@ object Footer {
     subItem(
       div(width := "100%")(
         tools.to(link, otherTab = otherTab)(
-          img(src := image.file, height := 25, paddingBottom := 5)(span(s"$title", titleStyle))
+          img(src := image.file, height := 20, paddingBottom := 5)(span(s"$title", titleStyle))
         ),
-        div(text, fontSize := "12px")
+        div(text, fontSize := "12px", textAlign := "justify")
       )
     )
 
@@ -57,13 +57,13 @@ object Footer {
               li(span("COMMUNITY", WHITE)(
                 div(paddingTop := 15),
                 imgSubItem(Resource.img.previousVersion, "Previous versions", Pages.previousVersions.file, "Downloads and change logs of previous versions", false),
-                imgSubItem(Resource.img.email, "Forum", shared.link.mailingList, "Both forum and mailing list(subscribe first)"),
+                imgSubItem(Resource.img.email, "Forum", shared.link.mailingList, "Both forum and mailing-list (subscribe first)"),
                 imgSubItem(Resource.img.faq, "FAQ", Pages.faq.file, "Any questions you may have", false)
               ), liStyle),
               li(span("DEVELOPMENT", WHITE)(
                 div(paddingTop := 15),
-                imgSubItem(Resource.img.github, "Source Repository", shared.link.repo.openmole, "Follow the commits, submit an issue or take part to the devloppement !"),
-                imgSubItem(Resource.img.contribute, "How to contribute ?", DocumentationPages.howToContribute.file, "Get sources, compile and propose pull requests !", false)
+                imgSubItem(Resource.img.github, "Source Repository", shared.link.repo.openmole, "Follow the commits, submit an issue or take part to the dev !"),
+                imgSubItem(Resource.img.contribute, "How to contribute ?", DocumentationPages.howToContribute.file, "Get sources, compile, propose pull requests !", false)
               ), liStyle),
               li(span("ABOUT US", WHITE)(
                 div(paddingTop := 15),
@@ -74,7 +74,7 @@ object Footer {
               li(span("COMMUNICATION", WHITE)(
                 div(paddingTop := 15),
                 imgSubItem(Resource.img.blog, "Blog", shared.link.blog, "Nice stories about OpenMOLE"),
-                imgSubItem(Resource.img.twitter, "Twitter", shared.link.twitter, "#openmole #model #optimization #hpc #amazing")
+                imgSubItem(Resource.img.twitter, "Twitter", shared.link.twitter, "#openmole #optimization #hpc #model #amazing")
               ), liStyle)
             )
           )
