@@ -5,8 +5,70 @@
 @SideMenu.block(SideMenu.guiGuide).left(320)
 
 @sect{@shared.guiGuide.overview}
-    This GUI is an advanced editor for OpenMOLE scripts. It allows editing, managing and running them.
-    The description of the OpenMOLE language and concepts can be found on the
+    This GUI is an advanced editor for OpenMOLE experiment description through OpenMOLE scripts. It allows editing, managing and running them.
+    The way to write these experiments is fully explained in the @aa("main documentation of OpenMOLE", href := DocumentationPages.model.file).
+    We focus here on the way to manage them in the application.
+
+    @break
+
+    Basically, in OpenMOLE GUI, you can store, editing files, run and monitor experiments, store authentication credentials for distributed computation.
+    The application runs in a browser (Firefox, Chrome, Opera, etc). The First time you run it, you are asked for a
+    password to encrypt your settings (server port, authentication credentials, etc). Your settings data (so not your projects, which are never
+    wiped out) are preserved so long your password do not change.
+    For now OpenMOLE GUI looks like a web application but still run as a heavy client one. This should change in version 8 or 9.
+
+    @break
+
+    @img(src := Resource.img.guiGuide.overview.file,  stylesheet.centerJustify(110))
 
 @sect{@shared.guiGuide.fileManagment}
-  auieaiueaiue
+  The OpenMOLE application essentially handles files: your model files, your model inputs our outputs, and the OpenMOLE scripts,
+  where you describe your experiment.
+
+  @break
+
+  We distinguish multiple kinds of resources:
+    @ul
+        @li
+            oms (for Open Mole Script) is a file describing an OpenMOLE experiment according to the OpenMOLE language
+        @li
+            external code used in OpenMOLE scripts. Codes written in some specific programming languages (Java, Scala, Netlogo, R, Python, ...) can be edited in the application.
+             However, they will not be compiled.
+        @li
+            other external resources used as input for a model are editable in the application (CSV files, text files, ...), while binary files like images cannot be modified.
+
+    These files are managed in a file system located in the left sidebar. This side bar offers basic tools for managing files
+
+    @break
+
+    @img(src := Resource.img.guiGuide.files.file,  stylesheet.centerJustify(90))
+
+    @break
+
+    The current directory is shown at the top in the folder navigation area. When the folder hierarchy is too deep to fit in the bar, it will be replaced by "...".
+    Clicking on one folder of the stack sets it as the current folder. In the image above, the current directory is for example @i{Pi Computation}.
+
+    @break
+
+    The tool area at the top concerns the current folder and provides with
+    @ul
+        @li
+            @b{filtering} this folder by number of entries or by names. It is especially recommended for folders containing a large number of files.
+        @li
+            @b{file or folder creation} in the current folder.
+        @li
+            @b{copying files}. Clicking this icon make entering in a blue multi-selection mode. Each file selected turns to green.
+            The copy button on top permits to copy all of them. Then a @b{paste} button appears and just waits for being pressed from any other folder you go to.
+        @li
+            @b{deleting files}. Clicking this icon make entering in a blue multi-selection mode. Each file selected turns to green.
+            The red @b{Delete} button on top permits to wipe them out.
+        @li
+            checking for @aa("plugins", href := DocumentationPages.plugin.file) in the current folder.
+        @li
+            @b{uploading a file} from your local machine to the current folder
+        @li
+            @b{refreshing} the content of the current folder
+
+    @break
+
+    Then, each file on each line has a settings button permitting for @b{cloning} the current file, @b{downloading} it, @b{editing} its name or @b{removing} it.

@@ -151,8 +151,8 @@ package object stylesheet {
     marginTop := top
   )
 
-  val centerJustify = Seq(
-    width := "100%",
+  def centerJustify(ratio: Int) = Seq(
+    width := s"$ratio%",
     paddingTop := 15,
     textAlign := "justify",
     marginLeft := "auto",
