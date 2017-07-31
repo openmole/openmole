@@ -31,6 +31,8 @@ package object tools {
 
   def aa = a(targetBlank)
 
+  val break = br(br)
+
   object sect extends Section() {
     override val headerH1 = Seq(
       fontSize := "1.75em",

@@ -5,22 +5,22 @@
 @h2(textAlign := "center")
   A Computational Engine for Custom Simulation Experiments
 
-@div(stylesheet.centerJustify){
+@div(stylesheet.centerJustify(100)){
 OpenMOLE has been developped since 2008 as a @b{free and open-source} platform.
 It explores, diagnoses your numerical model and optimizes its dynamics taking advantage of distributed computing environments.
 The typical usages are model calibration, model exploration, machine learning, optimization, data processing.
 }
 
-@div(stylesheet.centerJustify){
+@div(stylesheet.centerJustify(100)){
 OpenMOLE comes with web interface, that enables you to write @b{modeling-oriented scripts}.
 You can describe how to @b{explore} your own model and how to @b{distribute} its executions on HPC environments in a few lines of code !
 }
 
 @Main.build
 
-@div(stylesheet.centerJustify, paddingTop := 100)
+@div(stylesheet.centerJustify(100), paddingTop := 100)
   @h2{Getting started}
   Take a tour in the @a("getting started section", href := Pages.gettingStarted.file), with the @a("GUI guide", href := DocumentationPages.gui.file),
   in the @a("documentation", href := DocumentationPages.model.file) and latter learn @a("advanced concepts", href := DocumentationPages.advancedConcepts.file)
 
-@div(stylesheet.centerJustify, id := shared.newsPosts)
+@div(stylesheet.centerJustify(100), id := shared.newsPosts)

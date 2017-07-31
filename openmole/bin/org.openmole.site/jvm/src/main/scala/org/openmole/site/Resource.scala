@@ -153,22 +153,12 @@ object Resource {
     val etienne = imgResource("etienne.png")
 
     val mole = imgResource("openmole.svg")
-    //Radars graph for methods
-    val m_complete = imgResource("methods_radars/complet.png")
 
-    val m_LHS = imgResource("methods_radars/LHS_sobol.png")
-
-    val m_pse = imgResource("methods_radars/pse.png")
-
-    val m_ga_mono = imgResource("methods_radars/ga_mono.png")
-
-    val m_ga_multi = imgResource("methods_radars/ga_multi.png")
-
-    val m_profile = imgResource("methods_radars/profile.png")
-
-    val m_sa = imgResource("methods_radars/sa.png")
-
-    val m_ancestor = imgResource("methods_radars/ancestor.png")
+    object guiGuide {
+      private val prefix = "guiGuide"
+      val overview = imgResource(s"$prefix/overview.svg")
+      val files = imgResource(s"$prefix/files.svg")
+    }
 
   }
 
