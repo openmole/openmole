@@ -56,6 +56,10 @@ h1{
   text-align:center;
 }
 
+h2{
+font-size:25px;
+}
+
 code{
     color: #c83771;
     font-size: small;

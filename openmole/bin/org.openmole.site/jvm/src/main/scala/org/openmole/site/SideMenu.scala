@@ -31,7 +31,11 @@ case class SideMenuBlock(menus: Seq[SideMenu]) {
 
   def insert(sideMenu: SideMenu): SideMenuBlock = copy(sideMenu +: menus)
 
-  def insert(sideMenu: Option[SideMenu]): SideMenuBlock = insert(sideMenu.getOrElse(SideMenu(Seq())))
+  def insert(sideMenu: Option[SideMenu]): SideMenuBlock =
+    sideMenu match {
+      case Some(sm: SideMenu) ⇒ insert(sm)
+      case _                  ⇒ this
+    }
 
   def add(sideMenu: SideMenu) = copy(menus :+ sideMenu)
 
@@ -64,7 +68,10 @@ case class SideMenuBlock(menus: Seq[SideMenu]) {
 object SideMenu {
 
   implicit def pageToLink(p: Page): Link = Link(p.name, p.file)
-  implicit def seqPagToSeqLink(ps: Seq[Page]): Seq[Link] = ps.map { pageToLink }
+
+  implicit def seqPagToSeqLink(ps: Seq[Page]): Seq[Link] = ps.map {
+    pageToLink
+  }
 
   def block(sideMenu: SideMenu) = SideMenuBlock(Seq(sideMenu))
 
@@ -84,7 +91,11 @@ object SideMenu {
   val guiGuide = fromStrings(
     "Contents",
     shared.guiGuide.overview,
-    shared.guiGuide.fileManagment
+    shared.guiGuide.startProject,
+    shared.guiGuide.fileManagment,
+    shared.guiGuide.playAndMonitor,
+    shared.guiGuide.authentications,
+    shared.guiGuide.plugins
   )
 
   val clusterMenu = fromStrings(
@@ -94,5 +105,12 @@ object SideMenu {
     shared.clusterMenu.slurm,
     shared.clusterMenu.condor,
     shared.clusterMenu.oar
+  )
+
+  val nativeMenu = fromStrings(
+    "Contents",
+    shared.nativeModel.rExample,
+    shared.nativeModel.pythonExample,
+    shared.nativeModel.advancedOptions
   )
 }
