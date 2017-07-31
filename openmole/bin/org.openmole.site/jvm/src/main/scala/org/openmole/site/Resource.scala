@@ -158,6 +158,7 @@ object Resource {
       private val prefix = "guiGuide"
       val overview = imgResource(s"$prefix/overview.svg")
       val files = imgResource(s"$prefix/files.svg")
+      val modelImport = imgResource(s"$prefix/modelImport.svg")
     }
 
   }
