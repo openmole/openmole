@@ -2,23 +2,49 @@
 @import org.openmole.site._
 @import org.openmole.site.stylesheet._
 
-The profile method is designed to test the sensitivity of the input parameters.
+The profile method is designed to test the sensitivity of the input parameters in a calibration context.
+Although it may look similar to traditional sensitivity analysis in principle, the calibration profile
+algorithm goes deeper, as it captures the full effect of a parameter variation on the model fitness, every other input
+ being calibrated to optimize the fitness.
+ @br
+ Profiles reveal a lot about your model, as they may show how an input (i.e. a parameter of the model) has so much effect on the model
+ dynamics that it has to be in a certain interval for the model to produce acceptable dynamics! In other cases, on the
+ contrary, Calibration Profiles show that an input can so much be compensated by other inputs that it will not have enough
+  effect to constrain the model towards acceptable dynamics by itself.
+
+@br
+
+@br
 @br
 @Resource.rawFrag(Resource.img.profileID)
+
+
+@br
+@b{Method scores:}
+@br
+The calibration profile method is perfect to reveal a model's sentitivity regarding its parameter, hence the highest score possible in sensitivity.
+However, it does not retrieve information about the input space nor the output space structures, as it focus on @b{one} parameter/input, every other input being let free.
+As the studied parameter varies, the other parameter are calibrated (see below), so this method scores very well
+regarding calibration, which is also why it can handle stochasticity since calibration does too.
+Finally, the profile method realizes calibrations on the other inputs for each interval of the input under study, so the more inputs, the more
+sensitive to dimensionality of input space.
+@hr
+
+
 
 @Resource.rawFrag(Resource.img.profileAnim)
 @br
 @basicButton("Run", classIs(btn ++ btn_danger))(id := shared.profile.button, stylesheet.svgRunButton(-70))
 
 @p
-Given a distance measure between the model output values and
-  the data, the profile of a selected parameter is constructed by
-dividing the interval within which i can vary into subintervals
-  of equal size, and calibrating the model within each to
-minimise the distance (similarly to @a("Calibration", href :=
-  DocumentationPages.calibration.file)).  The
-optimisation is made over the other parameters of the model which are
-  left free.
+    Given a distance measure between the model output values and
+    data, the profile of a selected parameter @b{i} is constructed by
+    dividing the interval within which  @b{i} can vary into subintervals
+    of equal size, and calibrating the model within each interval to
+    minimise the distance (similarly to @a("Calibration", href :=
+    DocumentationPages.calibration.file)) between outputs and data.  The
+    optimisation is made over the other parameters of the model which are
+    left free.
 
 @p
 As an example, let's consider a model with 3 parameters i, j and k,
@@ -74,6 +100,12 @@ of the task that runs the model (and refer to the model parameters),
 and @hl.code("fitness") is an output of that
   same task. The number of inputs are illimited. Here, @hl.code("x = 0")
 specifies that we are profiling @hl.code("param1").
+
+
+
+@br@br
+TODO Il manque l'explication , dire quelle question ça permet de poser /répondre
+TODO ajouter les profils types et interprétations associées, Dire que chaque point est une calibration, etc.
 
 
 

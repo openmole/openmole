@@ -38,6 +38,21 @@
     @br
     @Resource.rawFrag(Resource.img.completeID)
     @br
+    @b{Method scores:}
+    @br
+    Regular sampling or Uniform Sampling are quite good for a first Input Space exploration when you don't know anything
+    about its structure yet.
+    Since it samples from the input space, the collected values from the model executions will reveal the output values
+    obtained for "evenly spaced" inputs.
+    Sure it's not perfect, but still , it gives a little bit of insights about model sensitivity (as input values vary
+    within their domain) and if the output are fitness, it may present a little bit of optimization information (as the zone in which the fitness could be
+    minimized).
+    @br The sampling does not reveal anything about the output space structure, as there is no reason than evenly spaced inputs lead
+    to evenly spaced outputs.
+    Basic sampling is hampered by input space dimensionality as high dimension spaces need a lot of samples to be covered.
+    @hr
+
+    @br
     Complete sampling is declared as an @b{ExplorationTask}, where the bounds and discretisation quantum of each input to vary  are declared
     using the following syntax :
 
@@ -85,18 +100,15 @@
     @br
     @Resource.rawFrag(Resource.img.sobolLHSID)
     @br
-    @b{Method Rating}
+    @b{Method scores:}
     @br
-    @p
-        These two methods perform allright in terms of Input Space Exploration (which is normal as they were built for that extent).
-        They are not targetted to reveal the full sensitivity of an input TODO finir
-        @br
-        Because of their very objective, that is, @b{covering the input space}, they cannot be efficient in term of Output space exploration.
-        @br
+
+        These two methods perform allright in terms of Input Space Exploration (which is normal as they were built for that extent),
+        anyhow, they are superior to uniform sampling or grid sampling, but share the same intrinsic limitations.
         There is no special way of handling Stochasticity of the model, out of standard replications.
         @br
         These methods are not expansive @i{per se} , it depends on the magnitude of the Input Space you want to be covered.
-        @br
+        @hr
 
 
 
