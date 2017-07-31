@@ -42,7 +42,11 @@ package object shared {
 
   object guiGuide {
     lazy val overview = "Overview"
+    lazy val startProject = "Starting a project"
     lazy val fileManagment = "File Management"
+    lazy val authentications = "Authentications"
+    lazy val playAndMonitor = "Play and monitor executions"
+    lazy val plugins = "Plugins"
   }
 
   object clusterMenu {
@@ -51,6 +55,12 @@ package object shared {
     lazy val oar = "OAR"
     lazy val slurm = "Slurm"
     lazy val condor = "Condor"
+  }
+
+  object nativeModel {
+    lazy val rExample = "An example with R"
+    lazy val pythonExample = "Another example with a Python script"
+    lazy val advancedOptions = "Advanced options"
   }
 
   object link {
@@ -83,6 +93,7 @@ package object shared {
 
     object repo {
       lazy val openmole = "https://github.com/openmole/openmole"
+      lazy val market = "https://gitlab.iscpif.fr/openmole/market"
       lazy val gridscale = "https://github.com/openmole/gridscale"
       lazy val scaladget = "https://github.com/openmole/scaladaget"
       lazy val scalawui = "https://github.com/openmole/scalaWUI"

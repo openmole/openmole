@@ -21,6 +21,56 @@
 
     @img(src := Resource.img.guiGuide.overview.file,  stylesheet.centerJustify(110))
 
+@sect{@shared.guiGuide.startProject}
+    Clicking on the main red button @i{New project} in the menu bar offers 3 choices:
+    @h2{Empty project}
+    Selecting thi option creates a new script file called @i{newProject.oms} in the current folder and open the (empty) file for edition.
+
+    @h2{From market place}
+    Selecting this option pops up a dialog containing all the running projects contained in our Market Place.
+    The Market Place is a collection of projects built by users and offer different aspects of experiments that can be run on the
+    OpenMOLE platform with a large variety of programming codes, exploration methods. The sources can be found @aa("here", href := shared.link.repo.market).
+    Just select one of the market entries and click on the @i{Dowload} button to import it in the current folder.
+
+    @h2{From existing model sources}
+    The model wizard is a tool designed to quickly import your Model.
+    It both uploads your model archive and prepares the OpenMOLE script for you.
+    The wizard automatically distinguishes your model's programming language among JVM, Netlogo or native codes.
+    Then it detects the potential inputs and outputs. For each input/output, the wizard generates a variable with a relevant name if possible.
+    At the end of the import process, the should run your script without you having to do anything!
+
+    @break
+
+    To import your model, click on the @i{Your Model}. A dialog box pops up. Set your model path in it.
+    The system should now display the programming language, a list of detected inputs / outputs and the command to launch your code.
+    In most cases, you are almost done. Just press the @i{Build} button at the bottom: the wizard dialog disappears and the OpenMOLE script is generated in the wordDirectory with your uploaded code!
+    However, you may sometimes want to make some modifications if you observe the system did not correctly detect your code, its inputs/outputs or its launching command.
+
+    @break
+
+    @img(src := Resource.img.guiGuide.modelImport.file,  stylesheet.centerJustify(80))
+
+    @break
+
+    For each input / output, three actions can be triggered using the icons located on the same line:
+    @ul
+        @li
+           removes the current input/output
+        @li
+            duplicates the current input/output, so that it is both defined as input and output
+        @li
+            or switches an input to output and vice-versa.
+
+    The launching command uses the names of the previously defined input / output variables.
+    It is reactive: if the name of the input/output changes, the launching command is updated with the corresponding name.
+    For the native codes (C, C++, Python, R, ...), the following syntax is required (automatically used): i{${}}.
+
+    @break
+
+    The Netlogo applications working with the .nls extension should be previously archived. The system will extract the archives
+    and deal with the extensions as resources of the task (displayed in the resources tab)
+    A seed variable (for the Netlogo random genarator) is automatically generated and passed to the Netlogo Generator through the Netlogo Task.
+    
 @sect{@shared.guiGuide.fileManagment}
   The OpenMOLE application essentially handles files: your model files, your model inputs our outputs, and the OpenMOLE scripts,
   where you describe your experiment.
