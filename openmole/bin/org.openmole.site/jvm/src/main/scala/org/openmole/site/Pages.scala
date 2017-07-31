@@ -103,7 +103,7 @@ object DocumentationPage {
       def content = _content
       override def details = _details
       override def location = _location.getOrElse(name)
-      def extraMenu: Option[SideMenu] = _extraMenu
+      override def extraMenu = _extraMenu
     }
   }
 }
@@ -214,7 +214,8 @@ object DocumentationPages {
   lazy val native = DocumentationPage(
     name = "Native",
     content = scalatex.documentation.language.model.Native(),
-    details = Seq(nativeAPI, nativePackaging, CARETroubleshooting)
+    details = Seq(nativeAPI, nativePackaging, CARETroubleshooting),
+    extraMenu = Some(SideMenu.nativeMenu)
   )
 
   lazy val nativeAPI = DocumentationPage(name = "Native API", content = scalatex.documentation.details.NativeAPI())
@@ -236,8 +237,6 @@ object DocumentationPages {
   lazy val hook = DocumentationPage(name = "Hooks", content = scalatex.documentation.language.advanced.Hook())
   lazy val source = DocumentationPage(name = "Sources", content = scalatex.documentation.language.advanced.Source())
 
-  def environmentPages = Seq(multithread, ssh, egi, cluster, desktopGrid)
-
   lazy val environment = DocumentationPage(name = "Environments", content = scalatex.documentation.language.Environment())
 
   lazy val multithread = DocumentationPage(name = "Multi-threads", content = scalatex.documentation.language.environment.Multithread())
@@ -249,6 +248,7 @@ object DocumentationPages {
     extraMenu = Some(SideMenu.clusterMenu)
   )
 
+  def environmentPages = Seq(multithread, ssh, egi, cluster, desktopGrid)
   lazy val desktopGrid = DocumentationPage(name = "DesktopGrid", content = scalatex.documentation.language.environment.DesktopGrid())
 
   def methodPages = Seq(calibration, profile, pse, dataProcessing, otherDoE)

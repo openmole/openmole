@@ -50,7 +50,6 @@ object UserGuide {
   def addCarousel(current: Page) = {
 
     val currentDetailMenu = SideMenu.details(current.details)
-    val extraMenu = SideMenu.details(current.details)
 
     val currentStep = {
       if ((DocumentationPages.modelPages :+ DocumentationPages.model).contains(current)) {
@@ -68,7 +67,7 @@ object UserGuide {
           headerMethod(current.name),
           div(current.content),
           SideMenu.method.insert(current.extraMenu).left(350),
-          SideMenu.more.add(currentDetailMenu).add(current.extraMenu).right(350),
+          SideMenu.more.add(currentDetailMenu).right(350),
           firstMethod, firstModel, firstEnvironment
         )
       else Step(
