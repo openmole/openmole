@@ -32,7 +32,6 @@ case class SideMenuBlock(menus: Seq[SideMenu]) {
   def insert(sideMenu: SideMenu): SideMenuBlock = copy(sideMenu +: menus)
 
   def insert(sideMenu: Option[SideMenu]): SideMenuBlock = {
-    println("Insert  " + sideMenu)
     sideMenu match {
       case Some(sm: SideMenu) ⇒ insert(sm)
       case _                  ⇒ this
