@@ -292,8 +292,7 @@ package object client {
     overflow := "hidden",
     pointer,
     width := 245,
-    textOverflow := "ellipsis",
-    sheet.paddingTop(3)
+    textOverflow := "ellipsis"
   )
 
   lazy val fileIcon: ModifierSeq = Seq(
