@@ -439,8 +439,7 @@ package object client {
   lazy val tabClose: ModifierSeq = Seq(
     relativePosition,
     fontSize := 17,
-    right := -7,
-    top := 4
+    right := -7
   )
 
   //EDITOR
