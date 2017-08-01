@@ -31,11 +31,13 @@ case class SideMenuBlock(menus: Seq[SideMenu]) {
 
   def insert(sideMenu: SideMenu): SideMenuBlock = copy(sideMenu +: menus)
 
-  def insert(sideMenu: Option[SideMenu]): SideMenuBlock =
+  def insert(sideMenu: Option[SideMenu]): SideMenuBlock = {
+    println("Insert  " + sideMenu)
     sideMenu match {
       case Some(sm: SideMenu) ⇒ insert(sm)
       case _                  ⇒ this
     }
+  }
 
   def add(sideMenu: SideMenu) = copy(menus :+ sideMenu)
 
@@ -88,7 +90,7 @@ object SideMenu {
 
   val more = SideMenu.block(SideMenu(Seq(DocumentationPages.advancedConcepts, DocumentationPages.gui), classIs(btn ++ btn_default), "See also"))
 
-  val guiGuide = fromStrings(
+  lazy val guiGuide = fromStrings(
     "Contents",
     shared.guiGuide.overview,
     shared.guiGuide.startProject,
@@ -98,7 +100,7 @@ object SideMenu {
     shared.guiGuide.plugins
   )
 
-  val clusterMenu = fromStrings(
+  lazy val clusterMenu = fromStrings(
     "Contents",
     shared.clusterMenu.pbsTorque,
     shared.clusterMenu.sge,
@@ -107,7 +109,7 @@ object SideMenu {
     shared.clusterMenu.oar
   )
 
-  val nativeMenu = fromStrings(
+  lazy val nativeMenu = fromStrings(
     "Contents",
     shared.nativeModel.rExample,
     shared.nativeModel.pythonExample,
