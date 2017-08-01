@@ -40,6 +40,13 @@ package object tools {
       // padding := "2.5em 1em 0"
       margin := "20px 0 0"
     )
+
+    override val header = Seq(
+      margin := 0,
+      color := "#333",
+      textAlign.center,
+      padding := "2.5em 2em 0"
+    )
   }
 
   object hl extends Highlighter {
