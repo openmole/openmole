@@ -263,7 +263,13 @@ object DocumentationPages {
 
   lazy val profile = DocumentationPage(name = "Profiles", content = scalatex.documentation.language.method.Profile())
   lazy val pse = DocumentationPage(name = "PSE", content = scalatex.documentation.language.method.PSE())
-  lazy val otherDoE = DocumentationPage(name = "other DoE", content = scalatex.documentation.language.method.OtherDoE())
+
+  lazy val otherDoE = DocumentationPage(
+    name = "other Design of Experiment",
+    content = scalatex.documentation.language.method.OtherDoE(),
+    extraMenu = Some(SideMenu.otherDoEMenu)
+  )
+
   lazy val dataProcessing = DocumentationPage(name = "Data Processing", content = scalatex.documentation.language.method.DataProcessing())
 
   lazy val helloWorld = DocumentationPage(name = "Hello Word!", content = Pages.gettingStarted.content)

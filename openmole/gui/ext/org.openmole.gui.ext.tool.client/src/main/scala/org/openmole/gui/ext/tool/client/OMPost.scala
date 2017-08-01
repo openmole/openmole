@@ -22,11 +22,11 @@ import org.scalajs.dom._
 import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
-import scala.scalajs.js.annotation.JSExport
+import scala.scalajs.js.annotation._
 import scala.scalajs.js.timers._
 import scala.util.{ Failure, Success }
 
-@JSExport
+@JSExportTopLevel("OMPost")
 case class OMPost(timeout: Duration = 60 seconds, warningTimeout: Duration = 10 seconds, timeOutAction: (String) ⇒ Unit = (s: String) ⇒ {}, warningTimeoutAction: () ⇒ Unit = () ⇒ {}) extends autowire.Client[String, upickle.default.Reader, upickle.default.Writer] {
 
   override def doCall(req: Request): Future[String] = {

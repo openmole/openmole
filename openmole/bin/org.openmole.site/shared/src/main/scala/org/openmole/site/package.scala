@@ -44,9 +44,9 @@ package object shared {
     lazy val overview = "Overview"
     lazy val startProject = "Starting a project"
     lazy val fileManagment = "File Management"
-    lazy val authentications = "Authentications"
+    lazy val authentication = "Authentications"
     lazy val playAndMonitor = "Play and monitor executions"
-    lazy val plugins = "Plugins"
+    lazy val plugin = "Plugins"
   }
 
   object clusterMenu {
@@ -61,6 +61,14 @@ package object shared {
     lazy val rExample = "An example with R"
     lazy val pythonExample = "Another example with a Python script"
     lazy val advancedOptions = "Advanced options"
+  }
+
+  object otherDoEMenu {
+    lazy val basicSampling = "Grid Sampling and Uniform Distribution"
+    lazy val LHSSobol = "Latin Hypercube and Sobol Sequence"
+    lazy val severalInputs = "Exploration of several inputs "
+    lazy val sensitivityAnalysis = "Sensitivity Analysis"
+    lazy val sensitivityFireModel = "Real world Example"
   }
 
   object link {
@@ -81,6 +89,10 @@ package object shared {
     lazy val ssh = "https://en.wikipedia.org/wiki/Secure_Shell"
     lazy val geodivercity = "http://geodivercity.parisgeo.cnrs.fr/blog/"
     lazy val ercSpringer = "http://www.springer.com/fr/book/9783319464954"
+    lazy val git = "https://git-scm.com/"
+    lazy val sbt = "http://www.scala-sbt.org/"
+    lazy val intelliJ = "https://www.jetbrains.com/idea/"
+    lazy val scalatex = "http://www.lihaoyi.com/Scalatex/"
 
     object partner {
       lazy val iscpif = "http://iscpif.fr"

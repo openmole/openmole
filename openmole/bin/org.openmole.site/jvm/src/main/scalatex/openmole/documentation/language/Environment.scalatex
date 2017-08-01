@@ -7,28 +7,7 @@ A key feature in OpenMOLE is the possibility to delegate the workload to a remot
 
 @sect{Setting up an Authentication}
   You first need to define an authentication method for the environment(s) you want to use.
-  To do so, click on the lock icon in the menu bar:
-
-  @br
-  @img(src := Resource.img.uiAuthenticationButton.file)
-  @br
-
-  Now click on @i{New} and select the appropriate authentication method from the drop down menu.
-
-  @br
-  @img(src := Resource.img.uiAuthenticationPanel.file)
-  @br
-
-  Click @i{Save} after having filled in all the corresponding fields to store an encrypted version of your credentials in the platform.
-  You only have to do that once, the first time you access this specific environment.
-
-  Upon registering your new authentication, OpenMOLE will verify that it can contact the designated environment and report the success of this operation in the Authentication management panel.
-
-  @br
-  @img(src := Resource.img.uiAuthenticationValid.file)
-  @br
-
-  More details on the authentication methods available for a given environment are available in the dedicated sections of the documentation.
+  The way to achieve this is describe in the @aa("GUI guide", href := s"${DocumentationPages.gui.file}#${shared.guiGuide.authentication}")
 
 @sect{Defining an execution Environment}
   The actual delegation of the task is noted by the keyword @hl.openmoleNoTest("on") followed by a defined @i{Environment}:

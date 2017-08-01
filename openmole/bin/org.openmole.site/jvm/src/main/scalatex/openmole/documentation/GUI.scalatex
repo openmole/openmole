@@ -122,3 +122,59 @@
     @break
 
     Then, each file on each line has a settings button permitting for @b{cloning} the current file, @b{downloading} it, @b{editing} its name or @b{removing} it.
+
+    @sect{@shared.guiGuide.playAndMonitor}
+
+        When a .oms file is edited, a @i{Play button} appears in the top right corner to start the execution of the workflow.
+        Once the workflow has been started, the execution panel appears, listing information for each execution on a separate row.
+        At any time this execution panel can be closed (without aborting the current runnings) and re-opened by clicking on the
+        @a("running icon", href := s"#${shared.guiGuide.overview}")
+
+         @break
+
+        @img(src := Resource.img.guiGuide.running.file,  stylesheet.centerJustify(110))
+
+        @break
+        The different statuses of the executions are:
+        @ul
+            @li
+                @b{running}: some jobs are running
+            @li
+                @b{success}: the execution has successfully finished
+            @li
+                @b{failed}: the execution has failed: click on this state to see the errors
+            @li
+                @b{canceled}: the execution has been canceled (by means of the button)
+
+
+    @sect{@shared.guiGuide.authentication}
+        In OpenMOLE, the computation load can be delegated to remote @aa("environments", href := DocumentationPages.environment.file).
+        When clicking on the @a("authentication icon", href := s"#${shared.guiGuide.overview}"), panel appears with the list (initially empty)
+        of all the defined authentications.  To add one authentication, click on @i{New} button.
+        The currently supported authentications are:
+            @ul
+                @li
+                    @b{SSH authentication with login and password} (any environment accessed by means of SSH).@br
+                     Set the remote host name and your login on this machine (for example john on blueberry.org),
+                     as well as your password. Once saved, the authentication will be added to your list (by example: john@("@")blueberry.org)
+                @li
+                    @b{SSH authentication with SSH private key} (any environment accessed by means of SSH).@br
+                    Enter the same three settings as for the SSH Password. Now add your SSH private key by clicking on No certificate.
+                    A random name will be associated to your key. Once saved, the authentication will be added to your list (by example: john@("@")blueberry.org)
+                @li
+                    @b{Grid certificate} (.p12) for @aa("Grid Computing", href := shared.link.egi)@br
+                    It only requires your EGI certificate file and the associated password. Click on No certificate to select your certificate file. It will be renamed to egi.p12. Note that only one EGI certificate is required (you will not need any other one!)
+
+        @img(src := Resource.img.guiGuide.authentication.file,  stylesheet.centerJustify(110))
+
+        @break
+        An authentication can be removed by clicking on the @i{trash bin icon}.
+        An existing authentication can also be edited by clicking on the name of an authentication in the list.
+
+        @break
+
+        Each time an authentication is added, a check is made on the mentioned environment (for the EGI ones, a list of VOs to be checked can be set in the EGI authentication settings).
+        If it fails, a red label appears. When clicking on it, the error stack appears.
+
+    @sect{@shared.guiGuide.plugin}
+        uie,ua

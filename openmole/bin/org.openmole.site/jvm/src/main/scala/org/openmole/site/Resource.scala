@@ -159,6 +159,8 @@ object Resource {
       val overview = imgResource(s"$prefix/overview.svg")
       val files = imgResource(s"$prefix/files.svg")
       val modelImport = imgResource(s"$prefix/modelImport.svg")
+      val running = imgResource(s"$prefix/running.svg")
+      val authentication = imgResource(s"$prefix/authentication.svg")
     }
 
   }

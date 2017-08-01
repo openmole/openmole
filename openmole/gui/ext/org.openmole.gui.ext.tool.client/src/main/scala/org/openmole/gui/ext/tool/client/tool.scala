@@ -292,8 +292,7 @@ package object client {
     overflow := "hidden",
     pointer,
     width := 245,
-    textOverflow := "ellipsis",
-    sheet.paddingTop(3)
+    textOverflow := "ellipsis"
   )
 
   lazy val fileIcon: ModifierSeq = Seq(
@@ -440,8 +439,7 @@ package object client {
   lazy val tabClose: ModifierSeq = Seq(
     relativePosition,
     fontSize := 17,
-    right := -7,
-    top := 4
+    right := -7
   )
 
   //EDITOR

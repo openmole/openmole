@@ -31,11 +31,12 @@ case class SideMenuBlock(menus: Seq[SideMenu]) {
 
   def insert(sideMenu: SideMenu): SideMenuBlock = copy(sideMenu +: menus)
 
-  def insert(sideMenu: Option[SideMenu]): SideMenuBlock =
+  def insert(sideMenu: Option[SideMenu]): SideMenuBlock = {
     sideMenu match {
       case Some(sm: SideMenu) ⇒ insert(sm)
       case _                  ⇒ this
     }
+  }
 
   def add(sideMenu: SideMenu) = copy(menus :+ sideMenu)
 
@@ -88,17 +89,17 @@ object SideMenu {
 
   val more = SideMenu.block(SideMenu(Seq(DocumentationPages.advancedConcepts, DocumentationPages.gui), classIs(btn ++ btn_default), "See also"))
 
-  val guiGuide = fromStrings(
+  lazy val guiGuide = fromStrings(
     "Contents",
     shared.guiGuide.overview,
     shared.guiGuide.startProject,
     shared.guiGuide.fileManagment,
     shared.guiGuide.playAndMonitor,
-    shared.guiGuide.authentications,
-    shared.guiGuide.plugins
+    shared.guiGuide.authentication,
+    shared.guiGuide.plugin
   )
 
-  val clusterMenu = fromStrings(
+  lazy val clusterMenu = fromStrings(
     "Contents",
     shared.clusterMenu.pbsTorque,
     shared.clusterMenu.sge,
@@ -113,4 +114,14 @@ object SideMenu {
     shared.nativeModel.pythonExample,
     shared.nativeModel.advancedOptions
   )
+
+  val otherDoEMenu = fromStrings(
+    "Contents",
+    shared.otherDoEMenu.basicSampling,
+    shared.otherDoEMenu.LHSSobol,
+    shared.otherDoEMenu.severalInputs,
+    shared.otherDoEMenu.sensitivityAnalysis,
+    shared.otherDoEMenu.sensitivityFireModel
+  )
+
 }
