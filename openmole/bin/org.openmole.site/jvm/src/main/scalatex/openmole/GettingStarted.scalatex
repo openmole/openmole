@@ -32,7 +32,9 @@ $tasks
       i(s"${name} (version FIXMEVERSION) was released on FIXM:VERSION DATE.")
     )
 
-@p{The big picture}
+
+
+@h1{The big picture}
 
   @p When you build a model, you need to understand and/or optimize some parameters and to understand there effect on the dynamics of you model. Then embed you model in OpenMOLE (5 minutes), use one of the distributed genetic algorithms provided by OpenMOLE (5 minutes) and launch the model exploration on a distributed execution environment with thousands of machines (1 minutes). To summarize, you can design large scale model exploration reusing legacy code and advanced numeric methods in approximately 10 minutes.
 

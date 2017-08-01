@@ -15,12 +15,12 @@
         @li
             A java 8 @b{jdk} or higher (N.B. not only the JRE). Check your version by typing @hl.highlight("javac -version","plain") in a terminal
         @li
-            the @a("git" ,href:="https://git-scm.com/") software
+            the @a("git" ,href:=shared.link.git) software
         @li
-            @a("sbt" ,href:="http://www.scala-sbt.org/") , the scala  building tool
+            @a("sbt" ,href:=shared.link.sbt) , the scala  building tool
 
 
-    As a suggestion, we recommand the @a("IntelliJ IDE", href:="https://www.jetbrains.com/idea/") to  edit the scala source code of the project.
+    As a suggestion, we recommand the @a("IntelliJ IDE", href:=shared.link.intelliJ) to  edit the scala source code of the project.
 
 
 @sect{First time setup}
@@ -98,11 +98,11 @@
 
     Sources are located in @hl.highlight("openmole/openmole/bin/org.openmole.site/jvm/src/main/scalatex/openmole","plain")
 
-    They are written using @a("scalatex", href:="http://www.lihaoyi.com/Scalatex/"), a DSL to generate html content.
+    They are written using @a("scalatex", href:=shared.link.scalatex), a DSL to generate html content.
 
 @sect{Repositories}
 
-    @a("OpenMOLE repos", href:="https://github.com/openmole/openmole") are divided into three branches.
+    @a("OpenMOLE repos", href:=shared.link.repo.openmole) are divided into three branches.
 
     @ul
         @li
