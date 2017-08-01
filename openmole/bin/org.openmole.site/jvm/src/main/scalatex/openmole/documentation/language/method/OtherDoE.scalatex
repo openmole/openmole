@@ -30,7 +30,7 @@
 
 
 
-@sect{Basic sampling : Grid and Uniform Distribution}
+@sect{@shared.otherDoEMenu.basicSampling }
     @br
     For a reasonable number of dimension and discretisation quanta (steps) values, complete sampling (or grid sampling)  consists in producing every combination of
     the inputs possibles values, given their bounds and quanta of discretisation.
@@ -87,7 +87,7 @@
 
 
 
-@sect{Latin Hypercube Sampling and Sobol methods}
+@sect{@shared.otherDoEMenu.LHSSobol }
 
 
     High dimension spaces must be handled via specific methods of the literature, because otherwise cartesian product
@@ -154,7 +154,7 @@
 
 
 
-@sect{Variation of several inputs}
+@sect{@shared.otherDoEMenu.severalInputs }
     @p
 
       Exploration can be performed on several inputs domains, using the @b{cartesian product} operator: @b{x}.
@@ -224,8 +224,7 @@
 
 
 
-@sect{Sensitivity Analysis}
-
+@sect{@shared.otherDoEMenu.sensitivityAnalysis }
     @p Typical Sensitivity analysis (in a simulation experiment  context) is the study of how the variation of an input
     affect the output(s) of a model. Basically it
 
@@ -269,9 +268,8 @@
 
 
 
-
-@h2{Real World Example}
-@p
+@sect{@shared.otherDoEMenu.sensitivityFireModel }
+    @p
     the @hl.highlight("Fire.nlogo", "plain") model is a simple, one-parameter, simulation model that simulates fire propagation.
     This model features a threshold value in its unique parameter domain, below which fire fails to burn the majority
     of the forest, and beyond which fire propagates and burn most of it.

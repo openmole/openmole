@@ -63,6 +63,14 @@ package object shared {
     lazy val advancedOptions = "Advanced options"
   }
 
+  object otherDoEMenu {
+    lazy val basicSampling = "Grid Sampling and Uniform Distribution"
+    lazy val LHSSobol = "Latin Hypercube and Sobol Sequence"
+    lazy val severalInputs = "Exploration of several inputs "
+    lazy val sensitivityAnalysis = "Sensitivity Analysis"
+    lazy val sensitivityFireModel = "Real world Example"
+  }
+
   object link {
     lazy val demo = "https://demo.openmole.org"
     lazy val twitter = "https://twitter.com/OpenMOLE"
@@ -81,6 +89,10 @@ package object shared {
     lazy val ssh = "https://en.wikipedia.org/wiki/Secure_Shell"
     lazy val geodivercity = "http://geodivercity.parisgeo.cnrs.fr/blog/"
     lazy val ercSpringer = "http://www.springer.com/fr/book/9783319464954"
+    lazy val git = "https://git-scm.com/"
+    lazy val sbt = "http://www.scala-sbt.org/"
+    lazy val intelliJ = "https://www.jetbrains.com/idea/"
+    lazy val scalatex = "http://www.lihaoyi.com/Scalatex/"
 
     object partner {
       lazy val iscpif = "http://iscpif.fr"
