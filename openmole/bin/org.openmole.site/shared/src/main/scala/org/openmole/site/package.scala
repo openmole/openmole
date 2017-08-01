@@ -44,9 +44,9 @@ package object shared {
     lazy val overview = "Overview"
     lazy val startProject = "Starting a project"
     lazy val fileManagment = "File Management"
-    lazy val authentications = "Authentications"
+    lazy val authentication = "Authentications"
     lazy val playAndMonitor = "Play and monitor executions"
-    lazy val plugins = "Plugins"
+    lazy val plugin = "Plugins"
   }
 
   object clusterMenu {

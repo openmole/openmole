@@ -95,8 +95,8 @@ object SideMenu {
     shared.guiGuide.startProject,
     shared.guiGuide.fileManagment,
     shared.guiGuide.playAndMonitor,
-    shared.guiGuide.authentications,
-    shared.guiGuide.plugins
+    shared.guiGuide.authentication,
+    shared.guiGuide.plugin
   )
 
   lazy val clusterMenu = fromStrings(
