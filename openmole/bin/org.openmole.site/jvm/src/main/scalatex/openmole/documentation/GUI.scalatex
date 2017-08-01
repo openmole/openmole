@@ -125,11 +125,28 @@
 
     @sect{@shared.guiGuide.playAndMonitor}
 
-     @break
+        When a .oms file is edited, a @i{Play button} appears in the top right corner to start the execution of the workflow.
+        Once the workflow has been started, the execution panel appears, listing information for each execution on a separate row.
+        At any time this execution panel can be closed (without aborting the current runnings) and re-opened by clicking on the
+        @a("running icon", href := s"#${shared.guiGuide.overview}")
 
-    @img(src := Resource.img.guiGuide.runnings.file,  stylesheet.centerJustify(110))
+         @break
 
-    @break
+        @img(src := Resource.img.guiGuide.runnings.file,  stylesheet.centerJustify(110))
+
+        @break
+        The different statuses of the executions are:
+        @ul
+            @li
+                @b{running}: some jobs are running
+            @li
+                @b{success}: the execution has successfully finished
+            @li
+                @b{failed}: the execution has failed: click on this state to see the errors
+            @li
+                @b{canceled}: the execution has been canceled (by means of the button)
+
+
     @sect{@shared.guiGuide.authentications}
         uiaeiaue
     @sect{@shared.guiGuide.plugins}
