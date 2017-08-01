@@ -122,3 +122,15 @@
     @break
 
     Then, each file on each line has a settings button permitting for @b{cloning} the current file, @b{downloading} it, @b{editing} its name or @b{removing} it.
+
+    @sect{@shared.guiGuide.playAndMonitor}
+
+     @break
+
+    @img(src := Resource.img.guiGuide.runnings.file,  stylesheet.centerJustify(110))
+
+    @break
+    @sect{@shared.guiGuide.authentications}
+        uiaeiaue
+    @sect{@shared.guiGuide.plugins}
+        uie,ua
