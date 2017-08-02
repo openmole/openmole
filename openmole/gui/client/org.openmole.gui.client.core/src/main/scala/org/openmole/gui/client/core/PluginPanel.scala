@@ -78,8 +78,8 @@ class PluginPanel {
           docEntry
         )(
           span(p.name, docTitleEntry +++ floatLeft),
-          span(p.time, dateStyle),
-          span(bs.glyphSpan(glyph_trash, () ⇒ removePlugin(p))(grey +++ sheet.paddingTop(9) +++ "glyphitem" +++ glyph_trash))
+          span(bs.glyphSpan(glyph_trash, () ⇒ removePlugin(p))(grey +++ sheet.paddingTop(10) +++ sheet.paddingLeft(10) +++ "glyphitem" +++ glyph_trash)),
+          span(p.time, dateStyle)
         )
     }
 

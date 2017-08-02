@@ -274,7 +274,7 @@ class ExecutionPanel {
                               )
                             }
                             else tags.span(omsheet.color(BLUE) +++ ((envErrorVisible().contains(e.envId)), ms(" executionVisible"), emptyMod))(
-                              sheet.pointer +++ omsheet.bold, onclick := toggleEnvironmentErrorPanel(e.envId)
+                              sheet.pointer, onclick := toggleEnvironmentErrorPanel(e.envId)
                             )("details")
                           })).tooltip("Error details")
                         ),

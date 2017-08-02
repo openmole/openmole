@@ -239,8 +239,7 @@ object ScriptClient {
                   treeNodeTabs.render,
                   tags.div(omsheet.textVersion)(
                     tags.div(
-                      fontSize := "1em",
-                      fontWeight := "bold"
+                      fontSize := "1em"
                     )(s"${sets.version} ${sets.versionName}"),
                     tags.div(fontSize := "0.8em")(s"built the ${sets.buildTime}")
                   )
