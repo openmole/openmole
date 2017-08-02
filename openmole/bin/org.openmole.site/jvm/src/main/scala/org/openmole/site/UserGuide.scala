@@ -17,9 +17,9 @@ package org.openmole.site
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import tools._
 import stylesheet._
 import scalatags.Text.all._
+import SideMenu._
 
 object UserGuide {
 
@@ -49,8 +49,6 @@ object UserGuide {
 
   def addCarousel(current: Page) = {
 
-    val currentDetailMenu = SideMenu.details(current.details)
-
     val currentStep = {
       if ((DocumentationPages.modelPages :+ DocumentationPages.model).contains(current)) {
         val name = if (current == firstModel) "" else current.name
@@ -58,7 +56,7 @@ object UserGuide {
           headerModel(name),
           div(current.content),
           SideMenu.model.insert(current.extraMenu).left(350),
-          SideMenu.more.right(350),
+          SideMenu.more.insert(current.details).right(350),
           firstModel, firstEnvironment, firstMethod
         )
       }
@@ -67,14 +65,14 @@ object UserGuide {
           headerMethod(current.name),
           div(current.content),
           SideMenu.method.insert(current.extraMenu).left(350),
-          SideMenu.more.add(currentDetailMenu).right(350),
+          SideMenu.more.insert(current.details).right(350),
           firstMethod, firstModel, firstEnvironment
         )
       else Step(
         headerEnvironment(current.name),
         div(current.content),
         SideMenu.environment.insert(current.extraMenu).left(350),
-        SideMenu.more.add(currentDetailMenu).right(350),
+        SideMenu.more.insert(current.details).right(350),
         firstEnvironment, firstMethod, firstModel
       )
     }

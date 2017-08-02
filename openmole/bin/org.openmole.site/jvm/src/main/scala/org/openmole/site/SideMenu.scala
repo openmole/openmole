@@ -25,7 +25,9 @@ import scalatags.Text.all._
 
 case class Link(name: String, link: String)
 
-case class SideMenu(links: Seq[Link], menuStyle: AttrPair = classIs(""), preText: String = "", otherTab: Boolean = false)
+case class SideMenu(links: Seq[Link], menuStyle: AttrPair = classIs(""), preText: String = "", otherTab: Boolean = false) {
+  def insert(ls: Seq[Link]) = copy(ls ++ links)
+}
 
 case class SideMenuBlock(menus: Seq[SideMenu]) {
 
@@ -36,6 +38,11 @@ case class SideMenuBlock(menus: Seq[SideMenu]) {
       case Some(sm: SideMenu) ⇒ insert(sm)
       case _                  ⇒ this
     }
+  }
+
+  def insert(links: Seq[Link], menuNumber: Int = 0) = {
+    if (menus.size > menuNumber) copy(menus.updated(menuNumber, menus(menuNumber).insert(links)))
+    else this
   }
 
   def add(sideMenu: SideMenu) = copy(menus :+ sideMenu)
@@ -76,7 +83,7 @@ object SideMenu {
 
   def block(sideMenu: SideMenu) = SideMenuBlock(Seq(sideMenu))
 
-  def details(pages: Seq[Page]) = SideMenu(pages, otherTab = true)
+  def details(pages: Seq[Page]) = SideMenu(pages, classIs(btn ++ btn_default), otherTab = true)
 
   def fromStrings(title: String, stringMenus: String*) =
     SideMenu(preText = title, links = stringMenus.map { a ⇒ Link(a, s"#${a.replaceAll(" ", "")}") })
@@ -87,7 +94,7 @@ object SideMenu {
 
   val environment = SideMenu.block(SideMenu(DocumentationPages.environmentPages, classIs(btn ++ btn_primary), "Available environments"))
 
-  val more = SideMenu.block(SideMenu(Seq(DocumentationPages.advancedConcepts, DocumentationPages.gui), classIs(btn ++ btn_default), "See also"))
+  val more = SideMenu.block(SideMenu(Seq(DocumentationPages.advancedConcepts, DocumentationPages.gui), classIs(btn ++ btn_default), "See also", true))
 
   lazy val guiGuide = fromStrings(
     "Contents",
@@ -122,6 +129,17 @@ object SideMenu {
     shared.otherDoEMenu.severalInputs,
     shared.otherDoEMenu.sensitivityAnalysis,
     shared.otherDoEMenu.sensitivityFireModel
+  )
+
+  lazy val advancedSamplingMenu = fromStrings(
+    "Contents",
+    shared.advancedSamplingMenu.sampling,
+    shared.advancedSamplingMenu.combineSampling,
+    shared.advancedSamplingMenu.zipSampling,
+    shared.advancedSamplingMenu.filterSampling,
+    shared.advancedSamplingMenu.randomSampling,
+    shared.advancedSamplingMenu.higherLevelSampling,
+    shared.advancedSamplingMenu.isKeyword
   )
 
 }

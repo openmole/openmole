@@ -2,7 +2,7 @@
 @import org.openmole.site.tools._
 @import org.openmole.site.Environment._
 
-@p The @hl.openmole("SSHEnvironment") makes it possible to delegate tasks to a remote multi-core server through an
+The @hl.openmole("SSHEnvironment") makes it possible to delegate tasks to a remote multi-core server through an
 @aa("SSH", href := shared.link.ssh) connection.
 
 @part.SSHAuthentication()

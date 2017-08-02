@@ -5,28 +5,12 @@
 @import org.openmole.site.Environment._
 
 
-In this page are the advanced functions and tasks to fine-tune your data flows into the OpenMOLE workflow: samplings , list and combination.
-@br
-@br
-@b{Table of contents}
-@ol
-    @li
-        @sect.ref{Sampling}
-    @li
-        @sect.ref{Combine samplings}
-    @li
-        @sect.ref{Zip samplings}
-    @li
-        @sect.ref{Shrink the initial Sampling with Take, Filter, Sample}
-    @li
-        @sect.ref{Generate random samplings}
-    @li
-        @sect.ref{Higher level samplings}
-    @li
-        @sect.ref{The is keyword}
+@SideMenu.block(SideMenu.advancedSamplingMenu).left(320)
 
-@br
-@sect{Sampling}
+@h1{Advanced samplings}
+In this page are the advanced functions and tasks to fine-tune your data flows into the OpenMOLE workflow: samplings , list and combination.
+
+@sect{@shared.advancedSamplingMenu.sampling}
   Sampling are tools for exploring a space of parameter. The term @i{parameter} is understood in a very broad
   acceptation in OpenMOLE. It may concern numbers, files, random streams, images...
 
@@ -48,9 +32,8 @@ In this page are the advanced functions and tasks to fine-tune your data flows i
 
     Using the @i{x} combinator means that all the domains are @b{unrolled before being combined} with each other.
 
-@sect{Combine samplings}
-
-    @p To define samplings you can combine them with each other. As we've previously seen, the complete sampling is a
+@sect{@shared.advancedSamplingMenu.combineSampling}
+    To define samplings you can combine them with each other. As we've previously seen, the complete sampling is a
     way to achieve that. Many composition functions are implemented in OpenMOLE.
 
     @p The "x" combinator also enables domain bounds to depend on each others. Notice how the upper bound of the second
@@ -69,8 +52,8 @@ In this page are the advanced functions and tasks to fine-tune your data flows i
 
       Samplings can also be combined using variants of the zip operator.
 
-@sect{Zip samplings}
-      @p Zip Samplings come in three declinations in OpenMOLE.
+@sect{@shared.advancedSamplingMenu.zipSampling}
+      Zip Samplings come in three declinations in OpenMOLE.
 
       @p The first one is the @hl.code("ZipSampling"). It combines the elements of corresponding indices
       from two samplings. @hl.code("ZipSampling") mimics the traditional @i{zip} operation from functional
@@ -146,7 +129,7 @@ In this page are the advanced functions and tasks to fine-tune your data flows i
 
         explo -< (t hook ToStringHook())""", name = "multilevel file sampling")
 
-@sect{Shrink the initial Sampling with Take, Filter, Sample}
+@sect{@shared.advancedSamplingMenu.filterSampling}
     You can modify a Sampling using various operations in OpenMOLE.
 
     @p When calling @hl.code("take N") on a Sampling, along with @i{N} an integer, OpenMOLE will generate a
@@ -174,7 +157,8 @@ In this page are the advanced functions and tasks to fine-tune your data flows i
 
       // Sample 5 values from s1
       val s5 = s1 sample 5""", name = "sampling modifiers")
-@sect{Generate random samplings}
+
+@sect{@shared.advancedSamplingMenu.randomSampling}
     OpenMOLE can generate random samplings from an initial sampling using @hl.code("shuffle") that creates
     a new sampling which is a randomly shuffled version of the initial one.
 
@@ -196,7 +180,7 @@ In this page are the advanced functions and tasks to fine-tune your data flows i
     val seed = Val[Int]
     val s7 = s1 x (seed in (UniformDistribution[Int]() take 100))""", name = "random sampling")
 
-@sect{Higher level samplings}
+@sect{@shared.advancedSamplingMenu.higherLevelSampling}
     Some sampling combinations generate higher level samplings such as @hl.code("repeat") and
     @hl.code("bootstrap"):
       @br @hl.openmole("""
@@ -230,7 +214,7 @@ In this page are the advanced functions and tasks to fine-tune your data flows i
         val mole = e1 -< (stat hook ToStringHook())""", name = "bootstrap example sampling")
 
 
-@sect{The is keyword}
+@sect{@shared.advancedSamplingMenu.isKeyword}
     The is keyword can be use to assigned a value to variable in a sampling. For instance:
     @hl.openmole("""
     val i = Val[Int]

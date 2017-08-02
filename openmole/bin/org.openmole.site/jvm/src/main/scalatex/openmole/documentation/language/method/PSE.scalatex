@@ -4,19 +4,21 @@
 @import org.openmole.site.stylesheet._
 
 
+PSE (Pattern Space Exploration) method is used to explore the output's diversity of a model.
+Input parameter values are selected to produce new output values, such that as the exploration progresses, the region of
+the output space that is covered gets bigger. PSE reveals the potential of your model: the
+variety of the dynamics it is able to produce, even those about which you were not investigating in the first place !
 
-
-@p
-
-      PSE (Pattern Space Exploration) method is used to explore the output's diversity of a model.
-      Input parameter values are selected to produce new output values, such that as the exploration progresses, the region of
-      the output space that is covered gets bigger. PSE reveals the potential of your model: the
-      variety of the dynamics it is able to produce, even those about which you were not investigating in the first place !
 @br
+
 @Resource.rawFrag(Resource.img.pseID)
+
 @br
+
 @b{Method scores:}
+
 @br
+
 The PSE method is designed to cover the output space, hence the highest score possible in output exploration.
 PSe is all about @i{covering} output space, hence the low scores in optimization and Input Space exploration.
 As the methods discovers patterns in the output space, inputs values that lead to these patterns are available, that give litlle insights
@@ -25,8 +27,9 @@ Contrarily to calibration-based methods, PSE is sensitive to the dimensionality 
 of the output space locations covered ever since, which is rapidly costly for more than 3-4 dimensions.
 @br
 PSE handles stochasticity in the sense that the selected pattern are estimated by the median of several model execution output values.
-@hr
-@br@br
+
+@break
+
 @Resource.rawFrag(Resource.img.pseAnim)
 @br
 @basicButton("Run", classIs(btn ++ btn_danger))(id := shared.pse.button, stylesheet.svgRunButton(-50))

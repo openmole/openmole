@@ -52,7 +52,7 @@ package object stylesheet {
     top := topValue,
     right := "5%",
     textAlign := "left",
-    minWidth := 180
+    minWidth := 230
   )
 
   def leftDetailButtons(topValue: Int) = Seq(
@@ -61,7 +61,7 @@ package object stylesheet {
     top := topValue,
     left := "5%",
     textAlign := "right",
-    minWidth := 180
+    minWidth := 230
   )
 
   lazy val navigateDoc = Seq(

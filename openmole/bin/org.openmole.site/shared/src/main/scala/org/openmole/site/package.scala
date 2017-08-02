@@ -64,11 +64,21 @@ package object shared {
   }
 
   object otherDoEMenu {
-    lazy val basicSampling = "Grid Sampling and Uniform Distribution"
-    lazy val LHSSobol = "Latin Hypercube and Sobol Sequence"
+    lazy val basicSampling = "Grid Sampling, Uniform Distribution"
+    lazy val LHSSobol = "Latin Hypercube, Sobol Sequence"
     lazy val severalInputs = "Exploration of several inputs "
     lazy val sensitivityAnalysis = "Sensitivity Analysis"
     lazy val sensitivityFireModel = "Real world Example"
+  }
+
+  object advancedSamplingMenu {
+    lazy val sampling = "Sampling"
+    lazy val combineSampling = "Combine samplings"
+    lazy val zipSampling = "Zip samplings"
+    lazy val filterSampling = "Take, filter, sample samplings"
+    lazy val randomSampling = "Random samplings"
+    lazy val higherLevelSampling = "Higher level samplings"
+    lazy val isKeyword = "The is keyword"
   }
 
   object link {
