@@ -190,15 +190,8 @@ object DocumentationPages {
   lazy val topPages = Seq(
     modelPages,
     methodPages,
-    environmentPages,
-    advancedPages
+    environmentPages
   ).flatten ++ Seq(model, method, environment, advancedConcepts)
-
-  //  lazy val topPagesChildren = topPages.flatMap {
-  //    _.children
-  //  }.distinct
-
-  /* Application */
 
   lazy val docSiteMap = DocumentationPage(name = "Documentation Site Map", content = scalatex.documentation.DocSiteMap())
 
@@ -253,7 +246,11 @@ object DocumentationPages {
 
   def methodPages = Seq(calibration, profile, pse, dataProcessing, otherDoE)
 
-  lazy val method = DocumentationPage(name = "Methods", content = scalatex.documentation.language.Method())
+  lazy val method = DocumentationPage(
+    name = "Methods",
+    content = scalatex.documentation.language.Method(),
+    details = Seq(DocumentationPages.advancedSampling)
+  )
 
   lazy val calibration = DocumentationPage(name = "Calibration", content = scalatex.documentation.language.method.Calibration(), details = Seq(geneticalgo, island, stochasticity))
 
@@ -265,7 +262,7 @@ object DocumentationPages {
   lazy val pse = DocumentationPage(name = "PSE", content = scalatex.documentation.language.method.PSE())
 
   lazy val otherDoE = DocumentationPage(
-    name = "Other Designs of Experiment",
+    name = "Other DoEs",
     content = scalatex.documentation.language.method.OtherDoE(),
     extraMenu = Some(SideMenu.otherDoEMenu)
   )
@@ -273,8 +270,6 @@ object DocumentationPages {
   lazy val dataProcessing = DocumentationPage(name = "Data Processing", content = scalatex.documentation.language.method.DataProcessing())
 
   lazy val helloWorld = DocumentationPage(name = "Hello World!", content = Pages.gettingStarted.content)
-
-  def advancedPages = Seq(advancedSampling, fileExploration, transition, hook, source)
 
   lazy val advancedConcepts = DocumentationPage(name = "Advanced Concepts", content = scalatex.documentation.language.AdvancedConcepts())
 
