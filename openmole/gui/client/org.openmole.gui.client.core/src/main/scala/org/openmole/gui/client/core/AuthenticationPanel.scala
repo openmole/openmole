@@ -99,7 +99,7 @@ class AuthenticationPanel {
       lazy val render = {
         tr(omsheet.docEntry +++ (lineHeight := "35px"))(
           td(colMD(4))(
-            tags.a(testedAuth.auth.data.name, omsheet.docTitleEntry +++ floatLeft +++ omsheet.bold("white"), cursor := "pointer", onclick := { () ⇒
+            tags.a(testedAuth.auth.data.name, omsheet.docTitleEntry +++ floatLeft +++ omsheet.color(omsheet.WHITE), cursor := "pointer", onclick := { () ⇒
               authSetting() = Some(testedAuth.auth)
             })
           ),
