@@ -9,13 +9,18 @@ OpenMOLE makes it very simple to benefit from the grid.
 
  @h3
     Setup your grid credentials
-   Note: The following instructions explain how to setup the EGI authentication in console mode. If you are using the script editor you can configure it directly in the authentication panel.
+You first need to set your EGI certificate. The way to achieve this is describe in the @aa("GUI guide", href := s"${DocumentationPages.gui.file}#${shared.guiGuide.authentication}")
 
-   @p To delegate a task to EGI you need to register your certificate in OpenMOLE. In the console execute:
-   @br @hl.openmole("""
-   EGIAuthentication() = P12Certificate(encrypted, "/path/to/your/certificate.p12")""", header = """def encrypted = "" """)
+@break
 
-   @p You need to execute this operation only once and for all. OpenMOLE persists this information in your preferences folder.
+Note: The following instructions explain how to setup the EGI authentication in console mode (not recommended).
+
+To delegate a task to EGI you need to register your certificate in OpenMOLE. In the console execute:
+
+@br @hl.openmole("""
+EGIAuthentication() = P12Certificate(encrypted, "/path/to/your/certificate.p12")""", header = """def encrypted = "" """)
+
+@p You need to execute this operation only once and for all. OpenMOLE persists this information in your preferences folder.
 
   @h3
     Submitting job to EGI
