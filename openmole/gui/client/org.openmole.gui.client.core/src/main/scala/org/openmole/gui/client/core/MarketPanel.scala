@@ -66,7 +66,7 @@ class MarketPanel {
           Seq(
             div(omsheet.docEntry)(
               div(colMD(3) +++ sheet.paddingTop(7))(
-                tags.a(entry.name, cursor := "pointer", ms("whiteBold"), onclick := { () ⇒
+                tags.a(entry.name, cursor := "pointer", ms("white"), onclick := { () ⇒
                   selectedEntry() = {
                     if (isSelected) None
                     else Some(entry)

@@ -146,11 +146,6 @@ ul{
     text-align: left;
 }
 
-.whiteBold{
-    color: white;
-    font-weight: bold;
-}
-
 .whiteBold:hover{
     color: white;
     font-weight: bold;

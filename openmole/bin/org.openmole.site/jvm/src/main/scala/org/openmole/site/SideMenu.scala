@@ -108,14 +108,14 @@ object SideMenu {
     shared.clusterMenu.oar
   )
 
-  val nativeMenu = fromStrings(
+  lazy val nativeMenu = fromStrings(
     "Contents",
     shared.nativeModel.rExample,
     shared.nativeModel.pythonExample,
     shared.nativeModel.advancedOptions
   )
 
-  val otherDoEMenu = fromStrings(
+  lazy val otherDoEMenu = fromStrings(
     "Contents",
     shared.otherDoEMenu.basicSampling,
     shared.otherDoEMenu.LHSSobol,

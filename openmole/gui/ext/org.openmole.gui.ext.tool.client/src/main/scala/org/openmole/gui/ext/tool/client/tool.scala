@@ -396,7 +396,6 @@ package object client {
     absolutePosition,
     width := "100%",
     color(WHITE),
-    fontWeight := "bold",
     sheet.paddingTop(100),
     fontSize := 25,
     zIndex := 25,
@@ -479,7 +478,6 @@ package object client {
   )
 
   lazy val docTitleEntry: ModifierSeq = Seq(
-    fontWeight := "bold",
     cursor := "pointer",
     sheet.paddingTop(6)
   )
@@ -510,8 +508,7 @@ package object client {
   )
 
   lazy val executionVisible: ModifierSeq = Seq(
-    color(BLUE),
-    fontWeight := "bold"
+    color(BLUE)
   )
 
   def executionState(state: String): ModifierSeq = Seq(
@@ -539,7 +536,6 @@ package object client {
     pointer,
     color(DARK_GREY),
     fontSize := 22,
-    fontWeight := "bold",
     verticalAlign := "middle",
     opacity := 0.4
   )
@@ -681,7 +677,7 @@ package object client {
   lazy val dateStyle: ModifierSeq = Seq(
     absolutePosition,
     fontStyle := "italic",
-    sheet.paddingTop(9),
+    sheet.paddingTop(6),
     floatRight,
     right := 50,
     color("lightgrey")

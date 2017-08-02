@@ -265,14 +265,14 @@ object DocumentationPages {
   lazy val pse = DocumentationPage(name = "PSE", content = scalatex.documentation.language.method.PSE())
 
   lazy val otherDoE = DocumentationPage(
-    name = "other Design of Experiment",
+    name = "Other Designs of Experiment",
     content = scalatex.documentation.language.method.OtherDoE(),
     extraMenu = Some(SideMenu.otherDoEMenu)
   )
 
   lazy val dataProcessing = DocumentationPage(name = "Data Processing", content = scalatex.documentation.language.method.DataProcessing())
 
-  lazy val helloWorld = DocumentationPage(name = "Hello Word!", content = Pages.gettingStarted.content)
+  lazy val helloWorld = DocumentationPage(name = "Hello World!", content = Pages.gettingStarted.content)
 
   def advancedPages = Seq(advancedSampling, fileExploration, transition, hook, source)
 

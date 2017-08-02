@@ -6,27 +6,19 @@
 
 
 
-@p
-    @b{Design of Experiments} (DoE) is the art of setting up an experimentation. In a model simulation context,
-    it boils down to declare the inputs (most of the time, they're parameters) of each simulation, for a batch of several simulations.
-    Even if there are several states-of-the-art DoE methods implemented in OpenMOLE, we recommend to focus on OpenMOLE
-    new methods:  PSE, and Calibration and Profiles  which have been thought to improve the drawbacks of the classical methods.
+@b{Design of Experiments} (DoE) is the art of setting up an experimentation. In a model simulation context,
+it boils down to declare the inputs under study (most of the time, they're parameters) and the values they will take, for a batch of several simulations, with the idea of revealing a property of the model (e.g. sensitivity).
+Even if there are several state-of-the-art DoE methods implemented in OpenMOLE, we recommend to focus on OpenMOLE
+new methods:  PSE, and Calibration and Profiles  which have been thought to improve the drawbacks of the classical methods.
 
 @br
-@h4
-    Table of Contents
+@br
 
-@ol
-    @li
-        @sect.ref{Basic sampling : Grid and Uniform Distribution}, for covering  ranges of inputs by given discretisation steps or following uniform distribution.
-    @li
-        @sect.ref{Latin Hypercube Sampling and Sobol methods}, for covering high dimensionnal spaces
-    @li
-        @sect.ref{Variation of several inputs} details the types of inputs to be explored by OpenMOLE and the way to combine
-        their exploration in your own experiment workflows.
-    @li
-        @sect.ref{Sensitivity Analysis} is an example of a common experiment, targetting the model sensitivity of a
-        model to one on its inputs.
+Your model inputs can be sampled in the traditional way, by using @a("grid (or regular)  sampling" , href:=shared.otherDoEMenu.basicSampling) , or by @a("sampling uniformly", href:=shared.otherDoEMenu.basicSampling) inside their domain.
+@br
+For higher dimension input space, specific statistics techniques like @a("Latin Hypercube Sampling and SobolSequence", href:=shared.otherDoEMenu.LHSSobol) are available.
+@br
+By defining your own exploration task on @a("several types of input", href:= shared.otherDoEMenu.severalInputs), you will be able to highlight some of your model inner properties like those revealed by @a("sensitivity analysis", href:=shared.otherDoEMenu.sensitivityAnalysis), as shown in a toy example on a @a("real world example", href:=shared.otherDoEMenu.sensitivityFireModel)
 
 
 

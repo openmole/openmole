@@ -1,7 +1,16 @@
 @import org.openmole.site._
 @import org.openmole.site.tools._
-@import Resource._
+@import org.openmole.site.stylesheet._
 @import DocumentationPages._
+
+
+@figure
+ @img(src := Resource.img.openmoleTransp.file, width:= "10%", center(50))
+
+
+
+
+@SideMenu.more.right(320)
 
 @def tasks = """
   // Define the variables that are transmitted between the tasks
@@ -25,45 +34,47 @@ $tasks
   """
 
 
-  @div(`class` := "text-center")(
-      a(`class` := "btn btn-default btn-sm", id := "download-button", href := script.openmole.file)(s"Download OpenMOLE FIXMEVERSION"),
-      br,
-      hr(style := "width:200px; height:1px;"),
-      i(s"${name} (version FIXMEVERSION) was released on FIXM:VERSION DATE.")
-    )
 
 
+@h1{Getting started with OpenMOLE}
 
-@h1{The big picture}
+@sect{The big picture}
+    When you build a model, you need to understand and/or optimize some parameters and to understand their effect on the dynamics of your model. OpenMOLE has been built for that!
+    @br@br
+    First, you @a("embed your model", href:= DocumentationPages.model.file) in OpenMOLE (5 minutes),
+    @br
+    Then, you pick one of the distributed @a("calibration genetic algorithms", href:=DocumentationPages.calibration.file) provided by OpenMOLE (5 minutes) and
+     @br
+     Finally, you launch the model exploration on a @a("distributed execution environment", href:=DocumentationPages.environment.file) with thousands of machines (1 minute once authentication is set up). To summarize, you can design large scale model exploration reusing legacy code and advanced numeric methods in approximately 10 minutes.
 
-  @p When you build a model, you need to understand and/or optimize some parameters and to understand there effect on the dynamics of you model. Then embed you model in OpenMOLE (5 minutes), use one of the distributed genetic algorithms provided by OpenMOLE (5 minutes) and launch the model exploration on a distributed execution environment with thousands of machines (1 minutes). To summarize, you can design large scale model exploration reusing legacy code and advanced numeric methods in approximately 10 minutes.
-
-@p{Try it}
+@sect{Try it !}
 
   @p You can try OpenMOLE online using the @a("OpenMOLE demonstration site", href := "http://demo.openmole.org").
 
-@p{Install it}
+@sect{Install it !}
 
-  @p OpenMOLE requires that Java version 8 or above is set as the default java on your computer. To make sure of that you can check our @a("FAQ", href := Pages.faq.file). Then just extract the archive, and you're done! OpenMOLE is installed and works out of the box!
+    OpenMOLE requires that Java version 8 or above is set as the default java on your computer. To make sure of that you can check our @a("FAQ", href := Pages.faq.file). Then just extract the archive, available HERE TODO pointer vers archive locale , somewhere and you're done! OpenMOLE is installed and works out of the box!
 
-  @p Once installed you can launch OpenMOLE by executing the @i{openmole} file in the installation directory (it is called @i{openmole.bat} for windozers). It will bring up the OpenMOLE @a("application", href := application.file) that runs in your web browser (OpenMOLE supports Firefox and Chrome).
+    Once installed you can launch OpenMOLE by executing the @i{openmole} file in the installation directory (it is called @i{openmole.bat} for windozers). It will bring up the OpenMOLE @a("application", href := application.file) that runs in your web browser (OpenMOLE supports Firefox and Chrome).
 
-@p{Your first exploration}
-  Let's explore one variable, multiply it by 2 and then displays each result. The computation is executed in a multi-threaded environment on the local machine.
+@sect{Your first exploration}
+    Let's explore one variable, multiply it by 2 and then displays each result. The computation is executed in a multi-threaded environment on the local machine.
 
-  @p In the OpenMOLE interface, first create a file named @i{example.oms} @("(the file extension matters")). Open it and write the following:
+    In the OpenMOLE interface, first create a file named @i{example.oms} @("(the file extension matters")). Open it and write the following:
 
-  @br @hl.openmole(s"""
-  $localScript
-  // Define the design of experiment
-  DirectSampling(
-    evaluation = model on env hook ToStringHook(),
-    sampling = i in (0.0 to 100.0 by 1.0)
-  )""", name = "first script")
+      @br @hl.openmole(s"""
+      $localScript
+      // Define the design of experiment
+      DirectSampling(
+        evaluation = model on env hook ToStringHook(),
+        sampling = i in (0.0 to 100.0 by 1.0)
+      )""", name = "first script")
 
-  @p You can run it by clicking on the execution button.
+  @p You can run it by clicking on the execution button (see @a("GUI documentation", href:=DocumentationPages.gui.file))
+   .
 
-  @p To distribute the exact same execution to a remote cluster just switch the environment definition. The only configuration step required for this to work is to have an account on the cluster and to provide your authentication to OpenMOLE. Configuring authentications is explained in the GUI documenation LINK and in the console documentation in the section dedicated to each @a("environment", href := environment.file).
+  @break To distribute the exact same execution to a remote cluster, just switch the environment definition. The only configuration step required for this to work is to have an account on the cluster and to provide your authentication to OpenMOLE.
+  Configuring authentications is explained in the section dedicated to each @a("environment", href := environment.file).
 
   @br @hl.openmole(s"""
   val env = SLURMEnvironment("myLogin", "cluster.iscpif.fr")
@@ -72,12 +83,15 @@ $tasks
     evaluation = model on env hook ToStringHook() on env,
     sampling = i in (0.0 to 100.0 by 1.0)
   )""", header = tasks, name = "first delegation")
+@br
 
-  @p This is just a tiny bit of what OpenMOLE can achieve! Now you might want to discover how to:
+
+@sect{Unleash the power of the MOLE}
+  This was just a tiny bit of what OpenMOLE can achieve! Now you might want to discover how to:
   @ul
-    @li{include your program in the @a("Model documentation", href := model.file),}
-    @li{define your environment in the @a("environment documentation", href := environment.file),}
-    @li{describe your design of experiments in the @a("workflow and sampling documentation", href := DocumentationPages.advancedConcepts.file).}
+    @li{include your own code/program: look at the @a("Model section", href := model.file),}
+    @li{define your environment: look at the @a("environment section", href := environment.file),}
+    @li{describe your design of experiments: look at the @a("workflow and sampling documentation", href := DocumentationPages.advancedConcepts.file).}
 
-@p{Get help}
+@sect{Get help}
   To get help you are more than welcome to contact the OpenMOLE user mailing list. To do so, you should @a("subscribe here", href := "http://list.openmole.org/"), and then you can post your question to the list users 'at' list.openmole.org. We're also present on the @b{#openmole} channel of the @a("ISC-PIF's RocketChat", href := "https://chat.iscpif.fr/channel/openmole").

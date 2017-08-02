@@ -90,12 +90,8 @@ object AlertPanel {
     div(
       tags.div(message),
       () ⇒ {
-        println("XX")
         stackPanel.content() = detail
-        println("XX11")
-        executionPanel.dialog.show
-        println("XX22")
-        // stackPanel.dialog.show
+        stackPanel.dialog.show
       }, cancelaction, transform, zone, alertType, buttonGroupClass, "Details"
     )
 }

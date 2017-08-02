@@ -38,6 +38,8 @@ object Resource {
 
     val openmole = imgResource("openmole.png")
 
+    val openmoleTransp = imgResource("openmoleTransp.svg")
+
     val ants = imgResource("ants.png")
 
     val modelIO = imgResource("modelIO.png")
@@ -161,6 +163,7 @@ object Resource {
       val modelImport = imgResource(s"$prefix/modelImport.svg")
       val running = imgResource(s"$prefix/running.svg")
       val authentication = imgResource(s"$prefix/authentication.svg")
+      val plugin = imgResource(s"$prefix/plugin.svg")
     }
 
   }

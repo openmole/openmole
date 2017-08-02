@@ -404,7 +404,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
   //PLUGINS
   def addPlugins(nodes: Seq[String]): Seq[Error] = {
     val plugins = nodes.map(Utils.pluginUpdoadDirectory / _)
-    val errors = module.addPluginsFiles(plugins, true)
+    val errors = module.addPluginsFiles(plugins, true, Some(module.pluginDirectory))
     plugins.foreach(_.recursiveDelete)
     errors.map(e ⇒ ErrorBuilder(e._2))
   }

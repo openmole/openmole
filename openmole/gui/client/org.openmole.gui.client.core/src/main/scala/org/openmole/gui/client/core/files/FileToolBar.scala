@@ -289,11 +289,11 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
         }).call().foreach {
           errs ⇒
             if (errs.isEmpty) {
-              unselectToolAndRefreshTree
               pluginPanel.dialog.show
             }
             else AlertPanel.detail("Plugin import failed", errs.head.stackTrace, transform = RelativeCenterPosition, zone = FileZone)
         }
+        unselectToolAndRefreshTree
     }
   })
 

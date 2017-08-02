@@ -177,4 +177,17 @@
         If it fails, a red label appears. When clicking on it, the error stack appears.
 
     @sect{@shared.guiGuide.plugin}
-        uie,ua
+        New features can be dynamically inserted in the OpenMOLE platform through plugins.
+        Advanced users build their own plugins to express concepts that might not be present (yet) in OpenMOLE. In OpenMOLE, plugins take the form of jar files.
+        It can also be a JVM based model provided as a plugin. The way to build plugins in OpenMOLE is full described @aa("here", href := DocumentationPages.plugin.file)
+
+        @break
+        To add a plugin, open the @a("plugin management panel", href := s"#${shared.guiGuide.overview}").
+        You can upload a new plugin by clicking on the blue top right-hand corner and selecting the corresponding jar file.
+        Once uploaded, the plugin appears in the list.
+
+        @break
+
+        @img(src := Resource.img.guiGuide.plugin.file,  stylesheet.centerJustify(100))
+
+        @break
