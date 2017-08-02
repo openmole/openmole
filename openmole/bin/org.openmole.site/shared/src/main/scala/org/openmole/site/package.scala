@@ -71,6 +71,16 @@ package object shared {
     lazy val sensitivityFireModel = "Real world Example"
   }
 
+  object advancedSamplingMenu {
+    lazy val sampling = "Sampling"
+    lazy val combineSampling = "Combine samplings"
+    lazy val zipSampling = "Zip samplings"
+    lazy val filterSampling = "Take, filter, sample samplings"
+    lazy val randomSampling = "Random samplings"
+    lazy val higherLevelSampling = "Higher level samplings"
+    lazy val isKeyword = "The is keyword"
+  }
+
   object link {
     lazy val demo = "https://demo.openmole.org"
     lazy val twitter = "https://twitter.com/OpenMOLE"

@@ -191,7 +191,7 @@ object DocumentationPages {
     modelPages,
     methodPages,
     environmentPages
-  ).flatten ++ Seq(model, method, environment, advancedConcepts)
+  ).flatten ++ Seq(model, method, environment)
 
   lazy val docSiteMap = DocumentationPage(name = "Documentation Site Map", content = scalatex.documentation.DocSiteMap())
 
@@ -222,7 +222,7 @@ object DocumentationPages {
   lazy val mole = DocumentationPage(name = "Mole", content = scalatex.documentation.language.model.MoleTask())
   lazy val model = DocumentationPage(name = "Models", content = scalatex.documentation.language.Model())
 
-  def languagePages = Seq(model, environment, method, advancedConcepts)
+  def languagePages = Seq(model, environment, method)
 
   lazy val language = DocumentationPage(name = "Language", content = scalatex.documentation.Language())
 

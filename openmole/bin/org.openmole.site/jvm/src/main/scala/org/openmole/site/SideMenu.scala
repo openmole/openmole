@@ -94,7 +94,7 @@ object SideMenu {
 
   val environment = SideMenu.block(SideMenu(DocumentationPages.environmentPages, classIs(btn ++ btn_primary), "Available environments"))
 
-  val more = SideMenu.block(SideMenu(Seq(DocumentationPages.advancedConcepts, DocumentationPages.gui), classIs(btn ++ btn_default), "See also"))
+  val more = SideMenu.block(SideMenu(Seq(DocumentationPages.advancedConcepts, DocumentationPages.gui), classIs(btn ++ btn_default), "See also", true))
 
   lazy val guiGuide = fromStrings(
     "Contents",
@@ -129,6 +129,17 @@ object SideMenu {
     shared.otherDoEMenu.severalInputs,
     shared.otherDoEMenu.sensitivityAnalysis,
     shared.otherDoEMenu.sensitivityFireModel
+  )
+
+  lazy val advancedSamplingMenu = fromStrings(
+    "Contents",
+    shared.advancedSamplingMenu.sampling,
+    shared.advancedSamplingMenu.combineSampling,
+    shared.advancedSamplingMenu.zipSampling,
+    shared.advancedSamplingMenu.filterSampling,
+    shared.advancedSamplingMenu.randomSampling,
+    shared.advancedSamplingMenu.higherLevelSampling,
+    shared.advancedSamplingMenu.isKeyword
   )
 
 }

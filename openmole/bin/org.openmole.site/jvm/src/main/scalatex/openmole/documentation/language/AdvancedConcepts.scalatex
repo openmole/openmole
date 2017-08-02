@@ -5,7 +5,7 @@
 @import org.openmole.site.Environment._
 
 
-
+@h1{Advanced concepts}
 OpenMOLE has a lot of handy features that allows the familiar user to tune the workflow of execution into much more details
 that previously described in the @a("Model", href:=DocumentationPages.model.file) and @a("Method",
 href:=DocumentationPages.model.file) sections.
