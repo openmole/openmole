@@ -42,13 +42,12 @@ By defining your own exploration task on @a("several types of input", href:= sha
     @br The sampling does not reveal anything about the output space structure, as there is no reason than evenly spaced inputs lead
     to evenly spaced outputs.
     Basic sampling is hampered by input space dimensionality as high dimension spaces need a lot of samples to be covered.
-    @hr
 
-    @br
+    @break
     Complete sampling is declared as an @b{ExplorationTask}, where the bounds and discretisation quantum of each input to vary  are declared
     using the following syntax :
 
-    @br @br
+    @break
     @hl.openmole("""
        val input_i = Val[Int]
        val input_j = Val[Double]
@@ -61,8 +60,7 @@ By defining your own exploration task on @a("several types of input", href:= sha
 
     In this example ExplorationTask, two inputs are varying at the same time, using the cartesian product, see the  @sect.ref{Variation of several inputs}
     to get more details on the input combination.
-    @br
-    @br
+    @break
 
     Sampling can also be performed via a @hl.code("UniformDistribution(maximum)"), that generates values uniformly
     distributed between zero and the maximum provided argument.
@@ -86,12 +84,12 @@ By defining your own exploration task on @a("several types of input", href:= sha
     would be too memory consuming .
     OpenMOLE includes two of these methods: @a("Sobol Sequence", href:="https://en.wikipedia.org/wiki/Sobol_sequence")
      and  @a("Latin Hypercube Sampling", href:="https://en.wikipedia.org/wiki/Latin_hypercube_sampling") , defined as specifications of the @hl.highlight("ExplorationTask","plain"):
-    @br
 
+    @break
 
-    @br
     @Resource.rawFrag(Resource.img.sobolLHSID)
     @br
+
     @b{Method scores:}
     @br
 
@@ -100,11 +98,9 @@ By defining your own exploration task on @a("several types of input", href:= sha
         There is no special way of handling Stochasticity of the model, out of standard replications.
         @br
         These methods are not expansive @i{per se} , it depends on the magnitude of the Input Space you want to be covered.
-        @hr
 
 
-
-    @br@br
+    @break
 
      @h3{Latin Hypercube Sampling}
 
@@ -188,14 +184,8 @@ By defining your own exploration task on @a("several types of input", href:= sha
 
     @br
 
-
-
-
-
     The UniformDistribution[T]() take 10 is a uniform sampling of 10 numbers of the Long type,
     taken in the [Long.MIN_VALUE; Long.MAX_VALUE] domain of the Long native type.
-
-
 
     @br
 
@@ -227,8 +217,7 @@ By defining your own exploration task on @a("several types of input", href:= sha
     @basicButton("Run", classIs(btn ++ btn_danger))(id := shared.sensitivity.button, stylesheet.svgRunButton(10))
 
 
-    @br
-    @br
+    @break
 
     @h3{Prerequisites}
 

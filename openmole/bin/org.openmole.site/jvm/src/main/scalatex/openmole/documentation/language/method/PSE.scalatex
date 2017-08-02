@@ -25,8 +25,9 @@ Contrarily to calibration-based methods, PSE is sensitive to the dimensionality 
 of the output space locations covered ever since, which is rapidly costly for more than 3-4 dimensions.
 @br
 PSE handles stochasticity in the sense that the selected pattern are estimated by the median of several model execution output values.
-@hr
-@br@br
+
+@break
+
 @Resource.rawFrag(Resource.img.pseAnim)
 @br
 @basicButton("Run", classIs(btn ++ btn_danger))(id := shared.pse.button, stylesheet.svgRunButton(-50))

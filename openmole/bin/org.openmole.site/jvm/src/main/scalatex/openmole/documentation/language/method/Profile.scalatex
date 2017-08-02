@@ -12,10 +12,7 @@ algorithm goes deeper, as it captures the full effect of a parameter variation o
  contrary, Calibration Profiles show that an input can so much be compensated by other inputs that it will not have enough
   effect to constrain the model towards acceptable dynamics by itself.
 
-@br
-
-@br
-@br
+@break
 @Resource.rawFrag(Resource.img.profileID)
 
 
@@ -28,9 +25,6 @@ As the studied parameter varies, the other parameter are calibrated (see below),
 regarding calibration, which is also why it can handle stochasticity since calibration does too.
 Finally, the profile method realizes calibrations on the other inputs for each interval of the input under study, so the more inputs, the more
 sensitive to dimensionality of input space.
-@hr
-
-
 
 @Resource.rawFrag(Resource.img.profileAnim)
 @br
@@ -103,14 +97,12 @@ specifies that we are profiling @hl.code("param1").
 
 
 
-@br@br
+@break
 TODO Il manque l'explication , dire quelle question ça permet de poser /répondre
 TODO ajouter les profils types et interprétations associées, Dire que chaque point est une calibration, etc.
 
+@break
 
-
-@br
-@br
 The calibration profile algorithm has been published in the following paper:
 
 Romain Reuillon, Clara Schmitt, Ricardo De Aldama, and Jean-Baptiste Mouret, «A New Method to Evaluate Simulation
