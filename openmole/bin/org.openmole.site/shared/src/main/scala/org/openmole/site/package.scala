@@ -101,6 +101,14 @@ package object shared {
     lazy val run = "Run scripts"
   }
 
+  object gaWithNetlogo {
+    lazy val antModel = "The ant model"
+    lazy val defineProblem = "An optimisation problem"
+    lazy val runOpeMOLE = "Run it in OpenMOLE"
+    lazy val optimizationAlgo = "The optimisation algorithm"
+    lazy val scaleUp = "Scale up"
+  }
+
   object link {
     lazy val demo = "https://demo.openmole.org"
     lazy val twitter = "https://twitter.com/OpenMOLE"
@@ -123,6 +131,7 @@ package object shared {
     lazy val sbt = "http://www.scala-sbt.org/"
     lazy val intelliJ = "https://www.jetbrains.com/idea/"
     lazy val scalatex = "http://www.lihaoyi.com/Scalatex/"
+    lazy val netlogoAnts = "http://ccl.northwestern.edu/netlogo/models/Ants"
 
     object partner {
       lazy val iscpif = "http://iscpif.fr"

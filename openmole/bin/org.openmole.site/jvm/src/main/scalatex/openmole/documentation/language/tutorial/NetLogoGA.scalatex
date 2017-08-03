@@ -2,6 +2,8 @@
 @import org.openmole.site.tools._
 @import org.openmole.site._
 
+@SideMenu.gaWithNetlogoMenu.toBlock.left(350)
+
 @def model = """
     // Define the input variables
     val gPopulation = Val[Double]
@@ -33,7 +35,7 @@
       )"""
 
 
-@h2
+@h1
     Calibrating a NetLogo model using Genetic Algorithms
 
 @p
@@ -43,12 +45,10 @@
     For more generic details regarding the exploitation of Genetic Algorithms using OpenMOLE, you can check the
     @a("GA section of the methods documentation", href := DocumentationPages.method.file + "#Geneticalgorithms")
 
-@h3
-    The ant model
+@sect{@shared.gaWithNetlogo.antModel}
 
-@p
     We demonstrate this tutorial using the ants foraging model present in the Netlogo library. This model was created by
-    Ury Wilensky. According to @a("NetLogo's website", href := "http://ccl.northwestern.edu/netlogo/models/Ants"),
+    Ury Wilensky. According to @a("NetLogo's website", href := shared.link.netlogoAnts),
     this model is described as:
     @br @i{In this project, a colony of ants forages for food. Though each ant follows a set of simple rules, the colony
     as a whole acts in a sophisticated way. When an ant finds a piece of food, it carries the food back to the nest,
@@ -59,11 +59,10 @@
     @br @img(src := Resource.img.ants.file)
 
     @p In this tutorial we use @a("a headless version", href := DocumentationPages.headlessNetLogo.file) of the
-    model. This modified version is available @a("here", href := Resource.script.antsNLogo.file).
+    model. This modified version is available @aa("here", href := Resource.script.antsNLogo.file).
 
-@h3
-    Define the problem to solve as an optimisation problem
-@p
+@sect{@shared.gaWithNetlogo.defineProblem}
+
     This model manipulates three parameters:
     @ul
       @li{Population: number of Ants in the model,}
@@ -105,9 +104,7 @@
     process.
 
 
-@h3
-    Getting the ant model to run in OpenMOLE
-@p
+@sect{@shared.gaWithNetlogo.runOpeMOLE}
     When building a calibration or optimisation workflow, the first step is to make the model run in
     OpenMOLE. This script simply embeds the NetLogo model and runs one single execution of the model with arbitrary
     parameters. More details about the NetLogo5 task used in this script can be found in
@@ -125,9 +122,7 @@
     @p The result of this execution should look like:
     @br @hl.highlight("{food1=746.0, food2=1000.0, food3=2109.0}", "plain")
 
-@h3
-    The optimisation algorithm
-@p
+@sect{@shared.gaWithNetlogo.optimizationAlgo}
     We will try to find the parameter settings minimising these estimators.
     This script describes how to use the NSGA2 multi-objective optimisation algorithm in OpenMOLE.
     The result files are written to @hl.highlight("/tmp/ants", "plain").
@@ -167,18 +162,14 @@
     (evolution hook savePopulationHook)
     """, header = model, name = "ga netlogo evolution")
 
-    @br
-
-@h3
-    Scale up
-@p
+@sect{@shared.gaWithNetlogo.scaleUp}
     If you use distributed computing, it might be a good idea to opt for an Island model. Islands are better suited to
     exploit distributed computing resources than classical generational genetic algorithms. See how the end of the
     script changes to implement islands in the workflow. Here we compute 2,000 islands in parallel, each running during
     1 hour on the European grid:
 
     @br @hl.openmole("""
-  val evolution =
+    val evolution =
     SteadyStateEvolution(
       algorithm =
         NSGA2(
@@ -191,19 +182,19 @@
         termination = 1 hour
     )
 
-  // Define the island model with 1,000 concurrent islands. Each island gets 50 individuals sampled from the global
-  // population. The algorithm stops after 100,000 islands evaluations.
-  val island =
+    // Define the island model with 1,000 concurrent islands. Each island gets 50 individuals sampled from the global
+    // population. The algorithm stops after 100,000 islands evaluations.
+    val island =
     IslandEvolution(
       evolution,
       parallelism = 1000,
       termination = 100000
     )
 
-  val savePopulationHook = SavePopulationHook(island, workDirectory / "results")
+    val savePopulationHook = SavePopulationHook(island, workDirectory / "results")
 
-  // Define the execution environment
-  val env = EGIEnvironment("biomed", openMOLEMemory = 1200 megabytes, cpuTime = 4 hours)
+    // Define the execution environment
+    val env = EGIEnvironment("biomed", openMOLEMemory = 1200 megabytes, cpuTime = 4 hours)
 
-  // Define the workflow
-  (island on env hook savePopulationHook)""", header = model, name = "ga netlogo islands")
+    // Define the workflow
+    (island on env hook savePopulationHook)""", header = model, name = "ga netlogo islands")

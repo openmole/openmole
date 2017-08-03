@@ -164,4 +164,13 @@ object SideMenu {
     shared.hookMenu.displayHook
   )
 
+  lazy val gaWithNetlogoMenu = fromStrings(
+    "Contents",
+    shared.gaWithNetlogo.antModel,
+    shared.gaWithNetlogo.defineProblem,
+    shared.gaWithNetlogo.runOpeMOLE,
+    shared.gaWithNetlogo.optimizationAlgo,
+    shared.gaWithNetlogo.scaleUp
+  )
+
 }
