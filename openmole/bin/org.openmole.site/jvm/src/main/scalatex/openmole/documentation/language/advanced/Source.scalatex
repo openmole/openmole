@@ -5,17 +5,17 @@
 @import org.openmole.site.Environment._
 
 
+@SideMenu.sourceMenu.toBlock.left(350)
 
+@h1{Source}
+Sources have been designed as a possible way to inject data in the dataflow from diverse sources: CSV files,
+databases, sensors...
 
-@p{Source}
-  Sources have been designed as a possible way to inject data in the dataflow from diverse sources: CSV files,
-  databases, sensors...
+@p At the moment, only file-based Sources are available in OpenMOLE. If you need to interface OpenMOLE with an
+external datasource, check the @a("contact information page", href := Pages.whoAreWe.file) to see how to reach the
+OpenMOLE development team.
 
-  @p At the moment, only file-based Sources are available in OpenMOLE. If you need to interface OpenMOLE with an
-  external datasource, check the @a("contact information page", href := Pages.whoAreWe.file) to see how to reach the
-  OpenMOLE development team.
-
-  @p{Plug a source}
+@sect{@shared.sourceMenu.plugSource}
     Sources are plugged in the data flow in a similar fashion to @a("hooks", href := DocumentationPages.hook.file ). Let's
     consider this simple workflow:
     @br @hl.openmole("""
@@ -36,7 +36,7 @@
     @b{each execution} of @i{hello}. You can also plug multiple sources on the same task using the syntax:
     @hl.code("hello source (s1, s2, s3)").
 
-  @p{List files in a directory}
+@sect{@shared.sourceMenu.listFiles}
     This source lists directories and injects an array of @i{File} objects into the dataflow. See how the range of files
     selected can be filtered using a regular expression as a last parameter to the source builder.
     @br @hl.openmole("""
@@ -49,9 +49,9 @@
     val s2 =
       ListFilesSource(workDirectory / "/${someVariable}/", txtFiles, ".*\\.txt") set (
         inputs += someVariable
-      )""", name = "list file source")
+  )""", name = "list file source")
 
-  @p{List directories in a directory}
+@sect{@shared.sourceMenu.listDirectories}
     Likewise, you can inject an array of directories in the dataflow. Directories are also represented as @i{File}
     objects. Again, the selection can be done either by passing a complete directory name, or a glob pattern that will
     be matched against the names of the directories found.
@@ -71,13 +71,12 @@
       )""", name = "list directories source")
 
     @p Sources store each entry found in an Array. In most cases, you will want each of the entries to feed a different
-    task. Let's now see how this can be done by reusing what we've discovered with
-    @a("files exploration", href := DocumentationPages.dataProcessing.file).
+    task. Let's now see how this can be done by reusing what we've discovered with the
+    @aa("data processing sampling", href := DocumentationPages.dataProcessing.file).
 
-  @p{A complete example: exploring directories in a workflow}
-
+@sect{@shared.sourceMenu.example}
     Here, we are collecting all the directories which named "care_archive". See how they are gathered in an
-    @i{Array[File]} container and can be explored by an @a("ExplorationTask", href := DocumentationPages.dataProcessing.file) using
+    @i{Array[File]} container and can be explored by an @aa("ExplorationTask", href := DocumentationPages.dataProcessing.file) using
     the keyword @hl.openmoleNoTest("in"). This exploration generates one @i{analysisTask} per directory collected by the
     source.
 
