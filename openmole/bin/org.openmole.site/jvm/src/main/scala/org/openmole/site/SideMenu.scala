@@ -131,6 +131,12 @@ object SideMenu {
     shared.otherDoEMenu.sensitivityFireModel
   )
 
+  lazy val dataProcessingMenu = fromStrings(
+    "Contents",
+    shared.dataProcessingMenu.setOfFiles,
+    shared.dataProcessingMenu.csvFileSampling
+  )
+
   lazy val advancedSamplingMenu = fromStrings(
     "Contents",
     shared.advancedSamplingMenu.sampling,
@@ -140,6 +146,12 @@ object SideMenu {
     shared.advancedSamplingMenu.randomSampling,
     shared.advancedSamplingMenu.higherLevelSampling,
     shared.advancedSamplingMenu.isKeyword
+  )
+
+  lazy val consoleMenu = fromStrings(
+    "Contents",
+    shared.consoleMenu.run,
+    shared.consoleMenu.authentication
   )
 
 }

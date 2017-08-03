@@ -81,6 +81,8 @@ trait Page {
   def file = Pages.file(this)
   def details: Seq[Page]
   def extraMenu: Option[SideMenu]
+
+  def anchor(name: String) = s"$file#${name.replaceAll(" ", "")}"
 }
 
 case class Parent[T](parent: Option[T])
@@ -180,11 +182,10 @@ object DocumentationPages {
     otherDoE,
     advancedConcepts,
     advancedSampling,
-    fileExploration,
     transition,
     hook,
-    source
-
+    source,
+    console
   )
 
   lazy val topPages = Seq(
@@ -267,14 +268,17 @@ object DocumentationPages {
     extraMenu = Some(SideMenu.otherDoEMenu)
   )
 
-  lazy val dataProcessing = DocumentationPage(name = "Data Processing", content = scalatex.documentation.language.method.DataProcessing())
+  lazy val dataProcessing = DocumentationPage(
+    name = "Data Processing",
+    content = scalatex.documentation.language.method.DataProcessing(),
+    extraMenu = Some(SideMenu.dataProcessingMenu)
+  )
 
   lazy val helloWorld = DocumentationPage(name = "Hello World!", content = Pages.gettingStarted.content)
 
   lazy val advancedConcepts = DocumentationPage(name = "Advanced Concepts", content = scalatex.documentation.language.AdvancedConcepts())
 
   lazy val advancedSampling = DocumentationPage(name = "Advanced Sampling", content = scalatex.documentation.language.advanced.AdvancedSampling())
-  lazy val fileExploration = DocumentationPage(name = "Files Exploration", content = scalatex.documentation.language.advanced.FileExploration())
 
   def tutorialPages = Seq(helloWorld, resume, headlessNetLogo, netLogoGA, capsule) //++ marketTutorials
 
@@ -284,7 +288,7 @@ object DocumentationPages {
   lazy val netLogoGA = DocumentationPage(name = "GA with NetLogo", content = scalatex.documentation.language.tutorial.NetLogoGA())
   lazy val capsule = DocumentationPage(name = "Capsule", content = scalatex.documentation.language.tutorial.Capsule())
 
-  def developmentPages = Seq(compilation, documentationWebsite, plugin, branching, webserver)
+  def developmentPages = Seq(compilation, documentationWebsite, plugin, branching, webserver, console)
 
   lazy val development = DocumentationPage(name = "Development", content = scalatex.documentation.Development())
   lazy val compilation = DocumentationPage(name = "Compilation", content = scalatex.documentation.development.Compilation())
@@ -292,7 +296,8 @@ object DocumentationPages {
   lazy val plugin = DocumentationPage(name = "Plugins", content = scalatex.documentation.development.Plugin())
   lazy val branching = DocumentationPage(name = "Branching model", content = scalatex.documentation.development.Branching())
   lazy val webserver = DocumentationPage(name = "Web Server", content = scalatex.documentation.development.WebServer())
-  lazy val howToContribute = DocumentationPage(name = "HowToContribute", content = scalatex.documentation.development.howToContribute())
+  lazy val howToContribute = DocumentationPage(name = "How to Contribute", content = scalatex.documentation.development.howToContribute())
+  lazy val console = DocumentationPage(name = "Console mode", content = scalatex.documentation.development.Console(), extraMenu = Some(SideMenu.consoleMenu))
 
   //    val market = new DocumentationPage {
   //      override def content: Text.all.Frag = div(tagContent(marketEntries))

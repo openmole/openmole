@@ -200,8 +200,8 @@ By defining your own exploration task on @a("several types of input", href:= sha
 
     @br
         If your input is one file among many,  or  a line among a CSV file, use the
-        @a("CSVSampling task", href := DocumentationPages.fileExploration.file)
-        and @a("FileSampling task", href := DocumentationPages.fileExploration.file)
+        @a("CSVSampling task", href := DocumentationPages.dataProcessing.file)
+        and @a("FileSampling task", href := DocumentationPages.dataProcessing.file)
 
 
 

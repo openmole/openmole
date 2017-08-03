@@ -9,7 +9,7 @@ OpenMOLE makes it very simple to benefit from the grid.
 
  @h3
     Setup your grid credentials
-You first need to set your EGI certificate. The way to achieve this is describe in the @aa("GUI guide", href := s"${DocumentationPages.gui.file}#${shared.guiGuide.authentication}")
+You first need to set your EGI certificate. The way to achieve this is describe in the @aa("GUI guide", href := DocumentationPages.gui.anchor(shared.guiGuide.authentication))")
 
 @break
 

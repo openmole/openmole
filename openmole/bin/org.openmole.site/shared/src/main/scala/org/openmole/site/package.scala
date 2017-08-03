@@ -71,6 +71,11 @@ package object shared {
     lazy val sensitivityFireModel = "Real world Example"
   }
 
+  object dataProcessingMenu {
+    lazy val setOfFiles = "Exploring a set of files"
+    lazy val csvFileSampling = "CSV files Sampling"
+  }
+
   object advancedSamplingMenu {
     lazy val sampling = "Sampling"
     lazy val combineSampling = "Combine samplings"
@@ -79,6 +84,11 @@ package object shared {
     lazy val randomSampling = "Random samplings"
     lazy val higherLevelSampling = "Higher level samplings"
     lazy val isKeyword = "The is keyword"
+  }
+
+  object consoleMenu {
+    lazy val authentication = "Authentications"
+    lazy val run = "Run scripts"
   }
 
   object link {

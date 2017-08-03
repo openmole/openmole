@@ -1,10 +1,10 @@
 
 @import org.openmole.site.tools._
 
-@p{Hook}
- @p Tasks are mute pieces of software. They are not conceived to write files, display values, nor more generally present
-  any side effects at all. Tasks' role is to compute some output data from their input data. That's what guaranties that
-  their execution can be deported to other machines.
+@h1{Hook}
+Tasks are mute pieces of software. They are not conceived to write files, display values, nor more generally present
+any side effects at all. Tasks' role is to compute some output data from their input data. That's what guaranties that
+their execution can be deported to other machines.
 
 @p OpenMOLE introduces a mechanism called @b{Hooks} to save or display results generated on remote environments. Hooks
   are conceived to perform an action upon completion of the task they are attached to.

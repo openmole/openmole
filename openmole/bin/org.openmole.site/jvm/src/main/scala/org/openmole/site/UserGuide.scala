@@ -47,6 +47,7 @@ object UserGuide {
     paddingRight := 15
   )
 
+  DocumentationPages.dataProcessing
   def addCarousel(current: Page) = {
 
     val currentStep = {

@@ -5,9 +5,7 @@
 Many distributed computing environments offer @aa("batch processing", href := shared.link.batchProcessing) capabilities. OpenMOLE supports most of the batch systems. Batch systems generally work by exposing an entry point on which the user can log in and submit jobs. OpenMOLE accesses this entry point using SSH.
 Different environments can be assigned to delegate the workload resulting of different tasks or groups of tasks. However, not all clusters expose the same features, so options may vary from one environment to another.
 
-@p You should first provide your authentication information to OpenMOLE to be able to use your batch system.
-
-@part.SSHAuthentication()
+@p You should first provide your @aa("authentication", href := DocumentationPages.gui.anchor(shared.guiGuide.authentication)) information to OpenMOLE to be able to use your batch system.
 
 @sect{@shared.clusterMenu.pbsTorque}
   @aa("PBS", href := shared.link.batchSystem) is a venerable batch system for clusters. You may use a PBS computing environment as follow:
