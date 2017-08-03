@@ -107,7 +107,7 @@ Un peu relou cet exemple finalement TODO à virer ?
     Dummy Model Optimization Example
 
 @p
-    This workflow optimises a dummy model using the generational NSGA II multi-objective algorithm. You can replace the instances of @i{model} by your own model and adapt the variation range of its input variables. If you're not familiar with parameter tuning using Genetic Algorithms (GA), you should first consult the @a("tutorial explaining how to calibrate a NetLogo model with a GA", href := DocumentationPages.netLogoGA.file).
+    This workflow optimises a dummy model using the generational NSGA II multi-objective algorithm. You can replace the instances of @i{model} by your own model and adapt the variation range of its input variables. If you're not familiar with parameter tuning using Genetic Algorithms (GA), you should first consult the @aa("tutorial explaining how to calibrate a NetLogo model with a GA", href := DocumentationPages.netLogoGA.file).
 
     @br @hl.openmole(s"""
   $model

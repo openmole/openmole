@@ -71,6 +71,11 @@ package object shared {
     lazy val sensitivityFireModel = "Real world Example"
   }
 
+  object dataProcessingMenu {
+    lazy val setOfFiles = "Exploring a set of files"
+    lazy val csvFileSampling = "CSV files Sampling"
+  }
+
   object advancedSamplingMenu {
     lazy val sampling = "Sampling"
     lazy val combineSampling = "Combine samplings"
@@ -79,6 +84,29 @@ package object shared {
     lazy val randomSampling = "Random samplings"
     lazy val higherLevelSampling = "Higher level samplings"
     lazy val isKeyword = "The is keyword"
+  }
+
+  object hookMenu {
+    lazy val plugHook = "Plug a Hook"
+    lazy val appendToFileHook = "Append to file"
+    lazy val copyFileHook = "Copy file"
+    lazy val toStringHook = "Display variables"
+    lazy val displayHook = "Display results in the stdout"
+    lazy val csvHook = "CSV Hook"
+
+  }
+
+  object consoleMenu {
+    lazy val authentication = "Authentications"
+    lazy val run = "Run scripts"
+  }
+
+  object gaWithNetlogo {
+    lazy val antModel = "The ant model"
+    lazy val defineProblem = "An optimisation problem"
+    lazy val runOpeMOLE = "Run it in OpenMOLE"
+    lazy val optimizationAlgo = "The optimisation algorithm"
+    lazy val scaleUp = "Scale up"
   }
 
   object link {
@@ -103,6 +131,7 @@ package object shared {
     lazy val sbt = "http://www.scala-sbt.org/"
     lazy val intelliJ = "https://www.jetbrains.com/idea/"
     lazy val scalatex = "http://www.lihaoyi.com/Scalatex/"
+    lazy val netlogoAnts = "http://ccl.northwestern.edu/netlogo/models/Ants"
 
     object partner {
       lazy val iscpif = "http://iscpif.fr"

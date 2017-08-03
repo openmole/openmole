@@ -7,7 +7,8 @@ A key feature in OpenMOLE is the possibility to delegate the workload to a remot
 
 @sect{Setting up an Authentication}
   You first need to define an authentication method for the environment(s) you want to use.
-  The way to achieve this is describe in the @aa("GUI guide", href := s"${DocumentationPages.gui.file}#${shared.guiGuide.authentication}")
+  The way to achieve this is describe in the @aa("GUI guide", href := DocumentationPages.gui.anchor(shared.guiGuide.authentication))
+  Have a look @aa("here", href := DocumentationPages.console.anchor(shared.consoleMenu.authentication)) to set up authentication in console mode.
 
 @sect{Defining an execution Environment}
   The actual delegation of the task is noted by the keyword @hl.openmoleNoTest("on") followed by a defined @i{Environment}:
@@ -44,11 +45,15 @@ A key feature in OpenMOLE is the possibility to delegate the workload to a remot
   """)
 
 @sect{Available environments}
-  @p Multiple environments are available to delegate your workload, check the following sections:
-  @ul
-    @li{@a("Multi-thread", href := DocumentationPages.multithread.file), to execute the tasks concurrently on your machine,}
-    @li{@a("SSH", href := DocumentationPages.ssh.file), to execute tasks on remote server through SSH,}
-    @li{@a("Clusters", href := DocumentationPages.cluster.file), to execute tasks on a cluster managed by @a("PBS/Torque", href := DocumentationPages.cluster.file + "#PBS/Torque"), @a("SGE", href := DocumentationPages.cluster.file + "#SGE"), @a("Slurm", href := DocumentationPages.cluster.file + "#SLURM"), @a("Condor", href := DocumentationPages.cluster.file + "#Condor"), or @a("OAR", href := DocumentationPages.cluster.file + "#OAR").}
-    @li{@a("EGI", href := DocumentationPages.egi.file), to execute tasks on the @a("EGI grid", href := "http://www.egi.eu/"),}
-    @li{@a("Ad-hoc Desktop Grid", href := DocumentationPages.desktopGrid.file), to distribute your workflows on a set of desktop/laptop computers.}
+  @p Multiple environments are available to delegate your workload, depending the kind of resources you have on disposal.
+  @p The @a("Multi-thread", href := DocumentationPages.multithread.file) permits to execute the tasks concurrently on your machine,
+   the @a("SSH", href := DocumentationPages.ssh.file) one to execute tasks on remote server through SSH.
+   You can also access a wide variety of @aa("clusters", href := DocumentationPages.cluster.file) like
+   @aa("PBS/Torque", href := DocumentationPages.cluster.anchor(shared.clusterMenu.pbsTorque)),
+   @aa("SGE", href := DocumentationPages.cluster.anchor(shared.clusterMenu.sge)),
+   @aa("Slurm", href := DocumentationPages.cluster.anchor(shared.clusterMenu.slurm)),
+   @aa("Condor", href := DocumentationPages.cluster.anchor(shared.clusterMenu.condor)),
+   or @aa("OAR", href := DocumentationPages.cluster.anchor(shared.clusterMenu.oar)).
+   You can also use @aa("EGI", href := DocumentationPages.egi.file) to execute tasks on the @a("EGI grid", href := "http://www.egi.eu/"),
+   or the @aa("Ad-hoc Desktop Grid", href := DocumentationPages.desktopGrid.file) to distribute your workflows on a set of desktop/laptop computers.
 

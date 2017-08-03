@@ -10,7 +10,7 @@
     @li{@a("Get started with OpenMOLE and a simple workflow", href := DocumentationPages.helloWorld.file)}
     @li{@a("Build a headless version of you NetLogo model to integrate in into OpenMOLE",
     href := DocumentationPages.headlessNetLogo.file)}
-    @li{@a("Calibrate a NetLogo model using genetic algorithms", href := DocumentationPages.netLogoGA.file)}
+    @li{@aa("Calibrate a NetLogo model using genetic algorithms", href := DocumentationPages.netLogoGA.file)}
     @li{@a("Use advanced features of Capsules", href := DocumentationPages.capsule.file)}
 
   @p Feel free to suggest new tutorial on topics you'd like us to describe more thoroughly. You can even write your own

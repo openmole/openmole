@@ -6,7 +6,7 @@ TODO refaire le texte avec un vrai exemple  de la vraie vie véritable : des imp
 @p
 You can program your data processing tasks using the @hl.openmole("ScalaTask"). For instance the following
 workflow sums all the elements of an array using a @hl.openmole("ScalaTask") and displays the results. To get more
-details on the hook part you can check the doc on @a("hooks", href := DocumentationPages.hook.file).
+details on the hook part you can check the doc on @aa("hooks", href := DocumentationPages.hook.file).
 
 @br @hl.openmole("""
 val array = Val[Array[Double]]

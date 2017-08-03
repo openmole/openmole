@@ -2,7 +2,7 @@
 @import org.openmole.site._
 
 @h1{GUI guide}
-@SideMenu.block(SideMenu.guiGuide).left(320)
+@SideMenu.guiGuide.toBlock.left(320)
 
 @sect{@shared.guiGuide.overview}
     This GUI is an advanced editor for OpenMOLE experiment description through OpenMOLE scripts. It allows editing, managing and running them.

@@ -72,12 +72,12 @@
 
     @p Sources store each entry found in an Array. In most cases, you will want each of the entries to feed a different
     task. Let's now see how this can be done by reusing what we've discovered with
-    @a("files exploration", href := DocumentationPages.fileExploration.file).
+    @a("files exploration", href := DocumentationPages.dataProcessing.file).
 
   @p{A complete example: exploring directories in a workflow}
 
     Here, we are collecting all the directories which named "care_archive". See how they are gathered in an
-    @i{Array[File]} container and can be explored by an @a("ExplorationTask", href := DocumentationPages.fileExploration.file) using
+    @i{Array[File]} container and can be explored by an @a("ExplorationTask", href := DocumentationPages.dataProcessing.file) using
     the keyword @hl.openmoleNoTest("in"). This exploration generates one @i{analysisTask} per directory collected by the
     source.
 

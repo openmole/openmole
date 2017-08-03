@@ -65,5 +65,5 @@
 
   @p The program is now ready to be parameterised and manipulated by OpenMOLE \o/
 
-  @p Think you're ready for the next level? Check this other tutorial to learn how OpenMOLE can help you @a("calibrate your NetLogo model using Genetic Algorithms",
+  @p Think you're ready for the next level? Check this other tutorial to learn how OpenMOLE can help you @aa("calibrate your NetLogo model using Genetic Algorithms",
   href := DocumentationPages.netLogoGA.file).

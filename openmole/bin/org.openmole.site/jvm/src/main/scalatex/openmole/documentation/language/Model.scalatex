@@ -59,7 +59,7 @@ OpenMOLE handles your model execution by framing it in a @b{workflow}.
     }and the @b{execution environment}.
     @br@br
     Some of the tasks are made to frame your program,
-    some others are made to generate inputs: @a("Samplings", href:=DocumentationPages.advancedSampling.file) or to capture the outputs : @a("Hooks", href:=DocumentationPages.hook.file)
+    some others are made to generate inputs: @a("Samplings", href:=DocumentationPages.advancedSampling.file) or to capture the outputs : @aa("Hooks", href:=DocumentationPages.hook.file)
 
     As you will progress into the world of OpenMOLE, you will discover how to define these various elements and build your own workflows.
     For now let's give a fake example.
