@@ -93,7 +93,13 @@ package object shared {
     lazy val toStringHook = "Display variables"
     lazy val displayHook = "Display results in the stdout"
     lazy val csvHook = "CSV Hook"
+  }
 
+  object sourceMenu {
+    lazy val plugSource = "Plug a source"
+    lazy val listFiles = "List files in a directory"
+    lazy val listDirectories = "List directories in a directory"
+    lazy val example = "A complete example"
   }
 
   object consoleMenu {

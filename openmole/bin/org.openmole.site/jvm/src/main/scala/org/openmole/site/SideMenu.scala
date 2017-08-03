@@ -164,6 +164,14 @@ object SideMenu {
     shared.hookMenu.displayHook
   )
 
+  lazy val sourceMenu = fromStrings(
+    "Contents",
+    shared.sourceMenu.plugSource,
+    shared.sourceMenu.listFiles,
+    shared.sourceMenu.listDirectories,
+    shared.sourceMenu.example
+  )
+
   lazy val gaWithNetlogoMenu = fromStrings(
     "Contents",
     shared.gaWithNetlogo.antModel,
