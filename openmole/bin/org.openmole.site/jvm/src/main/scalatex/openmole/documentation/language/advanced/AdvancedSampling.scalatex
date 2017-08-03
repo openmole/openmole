@@ -5,7 +5,7 @@
 @import org.openmole.site.Environment._
 
 
-@SideMenu.block(SideMenu.advancedSamplingMenu).left(350)
+@SideMenu.advancedSamplingMenu.toBlock.left(350)
 @SideMenu.more.right(350)
 
 @h1{Advanced samplings}

@@ -86,6 +86,16 @@ package object shared {
     lazy val isKeyword = "The is keyword"
   }
 
+  object hookMenu {
+    lazy val plugHook = "Plug a Hook"
+    lazy val appendToFileHook = "Append to file"
+    lazy val copyFileHook = "Copy file"
+    lazy val toStringHook = "Display variables"
+    lazy val displayHook = "Display results in the stdout"
+    lazy val csvHook = "CSV Hook"
+
+  }
+
   object consoleMenu {
     lazy val authentication = "Authentications"
     lazy val run = "Run scripts"

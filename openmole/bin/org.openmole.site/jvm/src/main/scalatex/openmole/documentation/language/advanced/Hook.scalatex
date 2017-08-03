@@ -1,5 +1,7 @@
-
+@import org.openmole.site._
 @import org.openmole.site.tools._
+
+@SideMenu.hookMenu.toBlock.left(350)
 
 @h1{Hook}
 Tasks are mute pieces of software. They are not conceived to write files, display values, nor more generally present
@@ -8,39 +10,52 @@ their execution can be deported to other machines.
 
 @p OpenMOLE introduces a mechanism called @b{Hooks} to save or display results generated on remote environments. Hooks
   are conceived to perform an action upon completion of the task they are attached to.
-  @p{Plug a hook}
-     Let's consider this simple workflow:
-     @br @hl.openmole("""
-     val i = Val[Int]
-     val hello = ScalaTask("i = i * 2") set (
-       inputs += i,
-       outputs += i
-     )
 
-     val exploration = ExplorationTask(i in (0 to 9))
+@sect{@shared.hookMenu.plugHook}
+    Let's consider this simple workflow:
+    @br @hl.openmole("""
+    val i = Val[Int]
+    val hello = ScalaTask("i = i * 2") set (
+    inputs += i,
+    outputs += i
+    )
 
-     val h = ToStringHook()
+    val exploration = ExplorationTask(i in (0 to 9))
 
-     exploration -< (hello hook h)""", name = "plug a hook")
-     @p The hook @i{h} is plugged to the end of the @i{hello} task. Everytime @i{hello} finishes, the hook @i{h} is
-     executed. Multiple hooks can also be plugged to the same task as in the present example:
-     @br @hl.openmole("""
-     val i = Val[Int]
+    val h = ToStringHook()
 
-     val hello = ScalaTask("val i = 2") set (
-       outputs += i
-     )
+    exploration -< (hello hook h)""", name = "plug a hook")
+    @p The hook @i{h} is plugged to the end of the @i{hello} task. Everytime @i{hello} finishes, the hook @i{h} is
+    executed. Multiple hooks can also be plugged to the same task as in the present example:
+    @br @hl.openmole("""
+    val i = Val[Int]
 
-     val h1 = ToStringHook()
-     val h2 = ToStringHook()
-     val h3 = ToStringHook()
+    val hello = ScalaTask("val i = 2") set (
+    outputs += i
+    )
 
-     (hello hook (h1, h2, h3))""", name = "plug multiple hooks").
+    val h1 = ToStringHook()
+    val h2 = ToStringHook()
+    val h3 = ToStringHook()
 
-  @p Hooks come in various declinations, with different actions on the results. The available hooks are described
-  hereafter.
+    (hello hook (h1, h2, h3))""", name = "plug multiple hooks")
 
-  @p{Save your data as CSV}
+    @p Hooks come in various declinations, with different actions on the results. The available hooks are described
+    hereafter.
+
+@sect{@shared.hookMenu.appendToFileHook}
+    Similarly to the @i{AppendToFileHook}, any string can be appended to a file, using the more general
+    @i{AppendToFileHook}. The appended strings can be a combination of variables from the dataflow and plain text.
+    @br @hl.openmole("""
+    val h = AppendToFileHook("/path/of/the/file.txt", "string ${i} to append")""", name = "append to file hook")
+
+    @p{Append a file to another file}
+    Use the @i{AppendFileFileHook} as well.
+    @br @hl.openmole("""
+    val file = Val[File]
+    val h = AppendToFileHook("${file.content}", "/path/of/the/file")""", name = "append file to file hook")
+
+@sect{@shared.hookMenu.csvHook}
     The @i{CSVHook} takes data from the dataflow and appends it to a file formatted as CSV:
     @br @hl.openmole("""
     val i = Val[Int]
@@ -67,7 +82,7 @@ their execution can be deported to other machines.
         arraysOnSingleRow := true
       )""", name = "csv hook with headers")
 
-  @p{Save files computed by your tasks}
+@sect{@shared.hookMenu.copyFileHook}
     The @i{CopyFileHook} makes it possible to copy a file / directory from the dataflow to a given location on the machine
     running OpenMOLE.
     @br @hl.openmole("""
@@ -75,19 +90,8 @@ their execution can be deported to other machines.
     val i = Val[Int]
 
     val h = CopyFileHook(file, "/path/to/copy/the/file${i}.txt")""", name = "copy file hook")
-  @p{Append some content to a file}
-    Similarly to the @i{AppendToFileHook}, any string can be appended to a file, using the more general
-    @i{AppendToFileHook}. The appended strings can be a combination of variables from the dataflow and plain text.
-    @br @hl.openmole("""
-    val h = AppendToFileHook("/path/of/the/file.txt", "string ${i} to append")""", name = "append to file hook")
 
-  @p{Append a file to another file}
-    Use the @i{AppendFileFileHook} as well.
-    @br @hl.openmole("""
-    val file = Val[File]
-    val h = AppendToFileHook("${file.content}", "/path/of/the/file")""", name = "append file to file hook")
-
-  @p{Display variables}
+@sect{@shared.hookMenu.toStringHook}
     To display a variable in the console, use the @i{ToStringHook}:
     @br @hl.openmole("""
     val i = Val[Int]
@@ -95,7 +99,8 @@ their execution can be deported to other machines.
 
     val h = ToStringHook(i, j)""", name = "to string hook")
     If no variable is specified, @i{ToStringHook} displays the whole dataflow.
-  @p{Display results in the console}
+
+@sect{@shared.hookMenu.displayHook}
     To display a string formed of variables and plain text in the console, use the @i{DisplayHook}. You can think of the
     @i{DisplayHook} as an OpenMOLE equivalent to Scala's @i{println}.
     @br @hl.openmole("""

@@ -27,6 +27,8 @@ case class Link(name: String, link: String)
 
 case class SideMenu(links: Seq[Link], menuStyle: AttrPair = classIs(""), preText: String = "", otherTab: Boolean = false) {
   def insert(ls: Seq[Link]) = copy(ls ++ links)
+
+  def toBlock = SideMenuBlock(Seq(this))
 }
 
 case class SideMenuBlock(menus: Seq[SideMenu]) {
@@ -81,20 +83,18 @@ object SideMenu {
     pageToLink
   }
 
-  def block(sideMenu: SideMenu) = SideMenuBlock(Seq(sideMenu))
-
   def details(pages: Seq[Page]) = SideMenu(pages, classIs(btn ++ btn_default), otherTab = true)
 
   def fromStrings(title: String, stringMenus: String*) =
     SideMenu(preText = title, links = stringMenus.map { a ⇒ Link(a, s"#${a.replaceAll(" ", "")}") })
 
-  val model = SideMenu.block(SideMenu(DocumentationPages.modelPages, classIs(btn ++ btn_primary), "Available tasks"))
+  val model = SideMenu(DocumentationPages.modelPages, classIs(btn ++ btn_primary), "Available tasks").toBlock
 
-  val method = SideMenu.block(SideMenu(DocumentationPages.methodPages, classIs(btn ++ btn_primary), "Available methods"))
+  val method = SideMenu(DocumentationPages.methodPages, classIs(btn ++ btn_primary), "Available methods").toBlock
 
-  val environment = SideMenu.block(SideMenu(DocumentationPages.environmentPages, classIs(btn ++ btn_primary), "Available environments"))
+  val environment = SideMenu(DocumentationPages.environmentPages, classIs(btn ++ btn_primary), "Available environments").toBlock
 
-  val more = SideMenu.block(SideMenu(Seq(DocumentationPages.advancedConcepts, DocumentationPages.gui), classIs(btn ++ btn_default), "See also", true))
+  val more = SideMenu(Seq(DocumentationPages.advancedConcepts, DocumentationPages.gui), classIs(btn ++ btn_default), "See also", true).toBlock
 
   lazy val guiGuide = fromStrings(
     "Contents",
@@ -152,6 +152,16 @@ object SideMenu {
     "Contents",
     shared.consoleMenu.run,
     shared.consoleMenu.authentication
+  )
+
+  lazy val hookMenu = fromStrings(
+    "Contents",
+    shared.hookMenu.plugHook,
+    shared.hookMenu.appendToFileHook,
+    shared.hookMenu.csvHook,
+    shared.hookMenu.copyFileHook,
+    shared.hookMenu.toStringHook,
+    shared.hookMenu.displayHook
   )
 
 }
