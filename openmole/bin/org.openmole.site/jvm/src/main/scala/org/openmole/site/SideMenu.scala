@@ -122,6 +122,16 @@ object SideMenu {
     shared.nativeModel.advancedOptions
   )
 
+  lazy val netlogoMenu = fromStrings(
+    "Contents",
+    shared.netlogoMenu.simulation,
+    shared.netlogoMenu.doe,
+    shared.netlogoMenu.task,
+    shared.netlogoMenu.storing,
+    shared.netlogoMenu.together,
+    shared.netlogoMenu.further
+  )
+
   lazy val otherDoEMenu = fromStrings(
     "Contents",
     shared.otherDoEMenu.basicSampling,

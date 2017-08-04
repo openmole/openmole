@@ -16,6 +16,7 @@ package org.openmole.site
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 import scalatags.Text.all._
 
 package object shared {
@@ -62,6 +63,15 @@ package object shared {
     lazy val rExample = "An example with R"
     lazy val pythonExample = "Another example with a Python script"
     lazy val advancedOptions = "Advanced options"
+  }
+
+  object netlogoMenu {
+    lazy val simulation = "The simulation"
+    lazy val doe = "The Design of Experiment"
+    lazy val task = "The NetLogo task"
+    lazy val storing = "Storing the results"
+    lazy val together = "Bringing all the pieces together"
+    lazy val further = "Going further"
   }
 
   object otherDoEMenu {
