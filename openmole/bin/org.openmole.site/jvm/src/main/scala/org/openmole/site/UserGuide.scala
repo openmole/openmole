@@ -28,17 +28,17 @@ object UserGuide {
   val firstEnvironment = DocumentationPages.environment
 
   def headerModel(model: String) = span(
-    tools.to(DocumentationPages.model)(img(src := Resource.img.codeAnimated.file, headerImg)),
+    tools.to(DocumentationPages.model)(img(src := Resource.img.model.codeAnimated.file, headerImg)),
     span(s"Run your own $model model", h1Like)
   )
 
   def headerMethod(method: String) = span(
-    tools.to(DocumentationPages.method)(img(src := Resource.img.exploreMapAnimated.file, headerImg)),
+    tools.to(DocumentationPages.method)(img(src := Resource.img.method.exploreMapAnimated.file, headerImg)),
     span(s"Explore with $method", h1Like)
   )
 
   def headerEnvironment(env: String) = span(
-    tools.to(DocumentationPages.environment)(img(src := Resource.img.scaleAnimated.file, headerImg)),
+    tools.to(DocumentationPages.environment)(img(src := Resource.img.environment.scaleAnimated.file, headerImg)),
     span(s"Scale on $env "), h1Like
   )
 

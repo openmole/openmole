@@ -29,7 +29,7 @@ object Main {
     div(classIs(row), paddingTop := 100)(
       div(classIs(colMD(4)))(
         div(centerBox)(
-          img(src := Resource.img.code.file, width := 100),
+          img(src := Resource.img.model.code.file, width := 100),
           div(mainTitle, "RUN"),
           div(mainText, "OpenMOLE runs your own program, whatever the language. Java, Binary exe, NetLogo, R, SciLab, Python, C++..."),
           readMore(DocumentationPages.model)
@@ -37,7 +37,7 @@ object Main {
       ),
       div(classIs(colMD(4)))(
         div(centerBox)(
-          img(src := Resource.img.exploreMap.file, width := 100),
+          img(src := Resource.img.method.exploreMap.file, width := 100),
           div(mainTitle, "EXPLORE"),
           div(mainText, "Explore spaces of parameters, optimize, test the sensitivity of your model through innovative and integrated methods"),
           readMore(DocumentationPages.method)
@@ -45,7 +45,7 @@ object Main {
       ),
       div(classIs(colMD(4)))(
         div(centerBox)(
-          img(src := Resource.img.scale.file, width := 100),
+          img(src := Resource.img.environment.scale.file, width := 100),
           div(mainTitle, "SCALE"),
           div(mainText, "Scale up your experimentations with no effort on servers, clusters, grid, cloud, ..."),
           readMore(DocumentationPages.environment)

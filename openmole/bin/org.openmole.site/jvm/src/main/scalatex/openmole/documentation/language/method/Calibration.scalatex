@@ -12,9 +12,9 @@ For more details on the calibration using genetic algorithms, see the @a("GA det
 
 @sect{Single criterion Calibration}
 
-    @br
-    @Resource.rawFrag(Resource.img.GAsingleID)
-    @br@br
+    @break
+    @Resource.rawFrag(Resource.img.method.GAsingleID)
+    @break
     @b{Method scores :}
     @br
     The single criterion Calibration method is @i{designed} to solve an optimization problem, so unsurprisingly it performs well
@@ -33,20 +33,18 @@ For more details on the calibration using genetic algorithms, see the @a("GA det
      evolve can be tremendous, as well as its fitness gradient hardly tractable.
 
 
-    @br@br
+    @break
     @figure
-     @img(src := Resource.img.thumbnail_calib_mono.file, width:= "70%",center(50))
-     @figcaption
-        Figure: Single criterion calibration answers the question :  For a given target value of output o1, what is(are) the
-        parameter set(s) (i, j , k) that produce the closest values of o1 to the target ?
-
-
+     @img(src := Resource.img.method.calibrationMono.file, center(70))
+     @br
+     Single criterion calibration answers the question :  For a given target value of output o1, what is(are) the
+     parameter set(s) (i, j , k) that produce the closest values of o1 to the target ?
 
 @sect{Multi-criteria Calibration}
 
     @br
-    @Resource.rawFrag(Resource.img.GAmultiID)
-    @br@br
+    @Resource.rawFrag(Resource.img.method.GAmultiID)
+    @break
 
     @b{Method scores :}
     @br
@@ -60,21 +58,16 @@ For more details on the calibration using genetic algorithms, see the @a("GA det
     Multi-criteria Calibration is more robust to the dimensionality of the inputs because ?
     TODO guillaume / romain : pourquoi c'est un peu moins sensible à la dimensionalité en input que le mon objectif ? ?
 
+    @break
 
-
-
-    @br@br
     @figure
-      @img(src := Resource.img.thumbnail_calib_multi.file, width:= "70%", center(50))
+      @img(src := Resource.img.method.calibrationMulti.file, center(70))
       @figcaption
         Figure: Multi-criteria answers the question : For a given target pattern (o1,o2) what are the parameters sets (i,j) that produce
         closest output values to the target pattern ? Sometimes a Pareto Frontier may appear !
 
 
-@br
-@br
-
-
+@break
 
 
 

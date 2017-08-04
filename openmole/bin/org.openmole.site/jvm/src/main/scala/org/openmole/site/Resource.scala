@@ -24,6 +24,17 @@ object Resource {
 
   def imgResource(name: String) = fileResource(s"img/$name")
 
+  def modelResource(name: String) = imgResource(s"model/$name")
+  def methodResource(name: String) = imgResource(s"method/$name")
+  def environmentResource(name: String) = imgResource(s"environment/$name")
+  def peopleResource(name: String) = imgResource(s"people/$name")
+  def partnerResource(name: String) = imgResource(s"partner/$name")
+  def menuResource(name: String) = imgResource(s"menu/$name")
+  def footerResource(name: String) = imgResource(s"footer/$name")
+  def moleResource(name: String) = imgResource(s"mole/$name")
+  def exampleResource(name: String) = imgResource(s"example/$name")
+  def guiGuideResource(name: String) = imgResource(s"guiGuide/$name")
+
   def jsResource(name: String) = fileResource(s"js/$name")
 
   def cssResource(name: String) = fileResource(s"css/$name")
@@ -36,134 +47,141 @@ object Resource {
 
   object img {
 
-    val openmole = imgResource("openmole.png")
+    object model {
+      val code = modelResource("code.svg")
+      val codeAnimated = modelResource("codeAnimated.svg")
+    }
 
-    val openmoleTransp = imgResource("openmoleTransp.svg")
+    object method {
+      val exploreMap = methodResource("map.svg")
+      val exploreMapAnimated = methodResource("mapAnimated.svg")
 
-    val ants = imgResource("ants.png")
+      val modelIO = methodResource("modelIO.png")
 
-    val modelIO = imgResource("modelIO.png")
+      val profileAnim = methodResource("profileAnim.svg")
+      val profileID = methodResource("profileID.svg")
 
-    val profileAnim = imgResource("profileAnim.svg")
+      val calibrationMono = methodResource("calibrationMono.png")
+      val calibrationMulti = methodResource("calibrationMulti.png")
 
-    val thumbnail_ancestors = imgResource("ancestors.png")
+      val sensitivityAnim = methodResource("sensitivityAnim.svg")
 
-    val thumbnail_calib_mono = imgResource("calibrage_mono.png")
+      val pseAnim = methodResource("pseAnim.svg")
+      val pseID = methodResource("pseID.svg")
 
-    val thumbnail_calib_multi = imgResource("calibrage_multi.png")
+      val GAsingleID = methodResource("GAsingleID.svg")
 
-    val sensitivityAnim = imgResource("sensitivityAnim.svg")
+      val GAmultiID = methodResource("GAmultiID.svg")
 
-    val profileID = imgResource("profileID.svg")
+      val completeID = methodResource("completeID.svg")
 
-    val pseID = imgResource("pseID.svg")
+      val sobolLHSID = methodResource("sobolLHSID.svg")
 
-    val GAsingleID = imgResource("GAsingleID.svg")
+      val ancestors = methodResource("ancestors.png")
+    }
 
-    val GAmultiID = imgResource("GAmultiID.svg")
+    object environment {
+      val scale = environmentResource("scale.svg")
+      val scaleAnimated = environmentResource("scaleAnimated.svg")
 
-    val completeID = imgResource("completeID.svg")
+    }
+    object example {
+      val antNumbers = exampleResource("antnumbers.png")
 
-    val sobolLHSID = imgResource("sobolLHSID.svg")
+      val fireScreen = exampleResource("firescreen.png")
 
-    val pseAnim = imgResource("pseAnim.svg")
+      val fireGlobals = exampleResource("fireGlobals.png")
 
-    val antNumbers = imgResource("antnumbers.png")
+      val fireNewGlobals = exampleResource("fireNewGlobals.png")
 
-    val fireScreen = imgResource("firescreen.png")
+      val fireMyDensity = exampleResource("fireMyDensity.png")
 
-    val fireGlobals = imgResource("fireGlobals.png")
+      val fireNewFunction = exampleResource("fireNewFunction.png")
 
-    val fireNewGlobals = imgResource("fireNewGlobals.png")
+      val fireOldSetup = exampleResource("fireOldSetup.png")
 
-    val fireMyDensity = imgResource("fireMyDensity.png")
+      val fireRemoveClearAll = exampleResource("fireRemoveClearAll.png")
 
-    val fireNewFunction = imgResource("fireNewFunction.png")
+      val ants = exampleResource("ants.png")
+    }
 
-    val fireOldSetup = imgResource("fireOldSetup.png")
+    object people {
+      val romain = peopleResource("romain.png")
 
-    val fireRemoveClearAll = imgResource("fireRemoveClearAll.png")
+      val mathieu = peopleResource("mathieu.png")
 
-    val logo = imgResource("openmole.png")
+      val jo = peopleResource("jo.png")
 
-    val uiScreenshot = imgResource("openmoleUI.png")
+      val paul = peopleResource("paul.png")
 
-    val uiAuthenticationButton = imgResource("authentications.png")
+      val guillaume = peopleResource("guillaume.png")
 
-    val uiAuthenticationPanel = imgResource("authentications_panel.png")
+      val julien = peopleResource("julien.png")
 
-    val uiAuthenticationValid = imgResource("authentication_valid.png")
+      val etienne = peopleResource("etienne.png")
+    }
 
-    val iscpif = imgResource("iscpif.svg")
+    object partner {
+      val iscpif = partnerResource("iscpif.svg")
 
-    val geocite = imgResource("geocite.png")
+      val geocite = partnerResource("geocite.png")
 
-    val biomedia = imgResource("biomedia.png")
+      val biomedia = partnerResource("biomedia.png")
 
-    val idf = imgResource("idf.svg")
+      val idf = partnerResource("idf.svg")
 
-    val paris = imgResource("mairieParis.svg")
+      val paris = partnerResource("mairieParis.svg")
 
-    val ign = imgResource("ign.png")
+      val ign = partnerResource("ign.png")
+    }
 
-    val scale = imgResource("scale.svg")
+    object menu {
+      val search = menuResource("search.svg")
+    }
 
-    val scaleAnimated = imgResource("scaleAnimated.svg")
+    object footer {
 
-    val code = imgResource("code.svg")
+      val github = footerResource("github.svg")
 
-    val codeAnimated = imgResource("codeAnimated.svg")
+      val email = footerResource("email.svg")
 
-    val exploreMap = imgResource("map.svg")
+      val twitter = footerResource("twitter.svg")
 
-    val exploreMapAnimated = imgResource("mapAnimated.svg")
+      val faq = footerResource("faq.svg")
 
-    val github = imgResource("github.svg")
+      val blog = footerResource("blog.svg")
 
-    val email = imgResource("email.svg")
+      val partner = footerResource("partner.svg")
 
-    val twitter = imgResource("twitter.svg")
+      val previousVersion = footerResource("previousVersion.svg")
 
-    val faq = imgResource("faq.svg")
+      val paper = footerResource("paper.svg")
 
-    val search = imgResource("search.svg")
+      val whoarwe = footerResource("mole.svg")
 
-    val blog = imgResource("blog.svg")
+      val contribute = footerResource("contribute.svg")
+    }
 
-    val partner = imgResource("partner.svg")
+    object mole {
+      val logo = moleResource("openmole.png")
 
-    val previousVersion = imgResource("previousVersion.svg")
+      val uiScreenshot = moleResource("openmoleUI.png")
 
-    val paper = imgResource("paper.svg")
+      val openmole = moleResource("openmole.svg")
 
-    val whoarwe = imgResource("mole.svg")
+      val openmoleText = moleResource("openmole.png")
 
-    val contribute = imgResource("contribute.svg")
-
-    val romain = imgResource("romain.png")
-
-    val mathieu = imgResource("mathieu.png")
-
-    val jo = imgResource("jo.png")
-
-    val paul = imgResource("paul.png")
-
-    val guillaume = imgResource("guillaume.png")
-
-    val julien = imgResource("julien.png")
-
-    val etienne = imgResource("etienne.png")
-
-    val mole = imgResource("openmole.svg")
+      val openmoleTransp = moleResource("openmoleTransp.svg")
+    }
 
     object guiGuide {
       private val prefix = "guiGuide"
-      val overview = imgResource(s"$prefix/overview.svg")
-      val files = imgResource(s"$prefix/files.svg")
-      val modelImport = imgResource(s"$prefix/modelImport.svg")
-      val running = imgResource(s"$prefix/running.svg")
-      val authentication = imgResource(s"$prefix/authentication.svg")
-      val plugin = imgResource(s"$prefix/plugin.svg")
+      val overview = guiGuideResource("overview.svg")
+      val files = guiGuideResource("files.svg")
+      val modelImport = guiGuideResource("modelImport.svg")
+      val running = guiGuideResource("running.svg")
+      val authentication = guiGuideResource("authentication.svg")
+      val plugin = guiGuideResource("plugin.svg")
     }
 
   }
@@ -238,6 +256,8 @@ object Resource {
 }
 
 sealed trait Resource
+
 case class FileResource(file: String) extends Resource
+
 //case class ArchiveResource(source: String, file: String) extends Resource
 //case class MarketResource(marketEntry: GeneratedMarketEntry) extends Resource
