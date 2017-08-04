@@ -2,7 +2,11 @@
 @import org.openmole.site.tools._
 @import org.openmole.site._
 
-@p{Strainer capsule}
+
+@SideMenu.capsuleMenu.toBlock.left(350)
+@h1{Advanced Capsule}
+
+@sect{@shared.capsuleMenu.strainer}
   In a general manner you are expected to specify the inputs and outputs of each task. Capsules' strainer mode transmits all the variables arriving through the input transition as if they were inputs and ouptuts of the task.
 
   @p For instance, variable @i{i} is transmitted to the hook without adding it explicitly in input and output of the task @i{t2}, in the following workflow:
@@ -20,7 +24,7 @@
 
   @p This workflow displays @hl.highlight("{i=42, j=84}", "plain")
 
-@p{Master/Slave workflows}
+@sect{@shared.capsuleMenu.master}
   OpenMOLE provides a very flexible workflow formalism. It even makes it possible to design workflows with a part that mimics a @b{master / slave} @("(also known as Map/Reduce)") distribution scheme. This schemes involves many slave jobs computing partial results and a master gathering the whole result.
 
   @p You can think of a steady state genetic algorithm of instance as an typical use case. This use case would see a global solution population maintained and a bunch of slave workers computing fitnesses in a distributed manner. Each time a worker ends, its result is used to update the global population and a new worker is launched. To achieve such a distribution scheme, one should use the @i{Master Capsule} along with an end-exploration transition.

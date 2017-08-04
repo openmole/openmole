@@ -55,6 +55,7 @@ available in OpenMOLE.
     val exploration = ExplorationTask( d in (0.0 to 99.0 by 10.0) )
 
     exploration -< t1 -- (t2 hook ToStringHook())""")
+
 @sect{Conditions}
     When needed, it is possible to set a condition on the transition so that the task after the transition is executed
     under this condition only. Conditional transitions are specified after the @hl.openmoleNoTest("when"). For instance we can
@@ -68,6 +69,7 @@ available in OpenMOLE.
 
     exploration -< t1 -- (t2 hook ToStringHook() when "d < 1000")""")
     @p In this case the task @i{t2} is executed only if the variable "d" is greater than 1,000.
+
 @sect{Tasks in parallel}
     In OpenMOLE you can also define task as being independent from each other so they can be executed concurrently.
     Parallel tasks are to be put in brackets. For instance, in this example @i{t2} and @i{t3} are executed concurrently:
@@ -132,6 +134,8 @@ available in OpenMOLE.
       val c1 = Capsule(t1)
       val s1 = Slot(c1)
     """)
+
+    Other specific capsules are defined in OpenMOLE. They are described in the @aa("Advanced capsule", href := DocumentationPages.capsule.file) section
 
 @sect{Combining several workflow parts with +}
     In OpenMOLE the representation of the workflow have been designed to be as linear as possible, but actually workflows

@@ -172,6 +172,12 @@ object SideMenu {
     shared.sourceMenu.example
   )
 
+  lazy val capsuleMenu = fromStrings(
+    "Contents",
+    shared.capsuleMenu.strainer,
+    shared.capsuleMenu.master
+  )
+
   lazy val gaWithNetlogoMenu = fromStrings(
     "Contents",
     shared.gaWithNetlogo.antModel,

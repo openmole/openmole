@@ -103,6 +103,11 @@ package object shared {
     lazy val example = "A complete example"
   }
 
+  object capsuleMenu {
+    lazy val strainer = "Strainer capsule"
+    lazy val master = "Master capsule"
+  }
+
   object consoleMenu {
     lazy val authentication = "Authentications"
     lazy val run = "Run scripts"
