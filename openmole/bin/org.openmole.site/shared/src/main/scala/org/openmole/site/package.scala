@@ -16,6 +16,7 @@ package org.openmole.site
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import scalatags.Text.all._
 
 package object shared {
   lazy val searchDiv = "search-div"
@@ -163,7 +164,7 @@ package object shared {
 
   def rawFrag(content: String) = {
     val builder = new scalatags.text.Builder()
-    scalatags.Text.all.raw(content).applyTo(builder)
-    builder.children.head
+    raw(content).applyTo(builder)
+    div(textAlign := "center")(builder.children.head)
   }
 }
