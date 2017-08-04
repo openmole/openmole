@@ -7,7 +7,7 @@
   applications or programming languages serving as a use case. These tutorials are more about how to do things
   the OpenMOLE way. You can discover how to:
   @ul
-    @li{@a("Get started with OpenMOLE and a simple workflow", href := DocumentationPages.helloWorld.file)}
+    @li{@a("Get started with OpenMOLE and a simple workflow", href := Pages.gettingStarted.file)}
     @li{@a("Build a headless version of you NetLogo model to integrate in into OpenMOLE",
     href := DocumentationPages.headlessNetLogo.file)}
     @li{@aa("Calibrate a NetLogo model using genetic algorithms", href := DocumentationPages.netLogoGA.file)}
