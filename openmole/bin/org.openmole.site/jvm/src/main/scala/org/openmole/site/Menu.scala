@@ -33,7 +33,7 @@ object Menu {
         div(classIs(navbar_header))(
           div(classIs(navbar_brand), href := "#", padding := 0),
           to(Pages.index)(
-            img(alt := "", src := Resource.img.openmole.file, Seq(width := 240, paddingTop := 5, pointer))
+            img(alt := "", src := Resource.img.mole.openmoleText.file, Seq(width := 240, paddingTop := 5, pointer))
           )
         ),
         div(classIs(collapse ++ navbar_collapse), paddingTop := 10)(
@@ -42,7 +42,7 @@ object Menu {
             li(outerLink("DEMO", shared.link.demo), liStyle),
             li(innerLink(Pages.training, "TRAINING"), liStyle),
             li(linkButton("DOWNLOAD", Resource.script.openmole.file, classIs(btn ++ btn_primary))),
-            li(inputStyle)(img(id := shared.searchImg, src := Resource.img.search.file, Seq(width := 35, paddingTop := 5, paddingLeft := 10, pointer)))(
+            li(inputStyle)(img(id := shared.searchImg, src := Resource.img.menu.search.file, Seq(width := 35, paddingTop := 5, paddingLeft := 10, pointer)))(
               div(id := shared.searchDiv)
             )
           )

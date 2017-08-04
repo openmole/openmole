@@ -3,15 +3,15 @@
 @import org.openmole.site.stylesheet._
 
 @h1{Financial partners}
-@a(img(src := Resource.img.iscpif.file,  partners), href := shared.link.partner.iscpif, target := "_blank")
-@a(img(src := Resource.img.geocite.file, partners), href := shared.link.partner.parisgeo, target := "_blank")
-@a(img(src := Resource.img.biomedia.file, partners), href := shared.link.partner.biomedic, target := "_blank")
-@a(img(src := Resource.img.idf.file, partners), href := shared.link.partner.idf, target := "_blank")
-@a(img(src := Resource.img.paris.file, partners), href := shared.link.partner.paris, target := "_blank")
+@a(img(src := Resource.img.partner.iscpif.file,  partners), href := shared.link.partner.iscpif, target := "_blank")
+@a(img(src := Resource.img.partner.geocite.file, partners), href := shared.link.partner.parisgeo, target := "_blank")
+@a(img(src := Resource.img.partner.biomedia.file, partners), href := shared.link.partner.biomedic, target := "_blank")
+@a(img(src := Resource.img.partner.idf.file, partners), href := shared.link.partner.idf, target := "_blank")
+@a(img(src := Resource.img.partner.paris.file, partners), href := shared.link.partner.paris, target := "_blank")
 
 @h1{Some scientific collaborations outputs}
 
-@aa(img(src := Resource.img.ign.file,  smallPartners), href := shared.link.partner.ign, float:="left")
+@aa(img(src := Resource.img.partner.ign.file,  smallPartners), href := shared.link.partner.ign, float:="left")
 @span(width := "75%")
   @b{Simplu3D-PSE} is the exploration of the output diversity of the @aa("SimPLU3D model", href := shared.link.repo.simplu) via the PSE method.
   Simplu3D is a model that simulates the building and the placement of buildings, abiding by the Right To Build documents
@@ -24,7 +24,7 @@
 @br
 @br
 
-@aa(img(src := Resource.img.geocite.file,  smallPartners), href := shared.link.partner.parisgeo, float:="left")
+@aa(img(src := Resource.img.partner.geocite.file,  smallPartners), href := shared.link.partner.parisgeo, float:="left")
 @span(width := "75%")
   @b{SimPopLocal} is a theoretical geography model, simulating the emergence and the upkeep of systems of settlements (ancestors
   of system of cities) by means of spatial interactions and innovation exchanges. Main results are shown in the «Half a billion simulations: Evolutionary algorithms and distributed computing for calibrating the SimpopLocal

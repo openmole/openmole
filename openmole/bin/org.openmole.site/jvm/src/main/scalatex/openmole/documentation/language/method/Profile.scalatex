@@ -13,7 +13,7 @@ algorithm goes deeper, as it captures the full effect of a parameter variation o
   effect to constrain the model towards acceptable dynamics by itself.
 
 @break
-@Resource.rawFrag(Resource.img.profileID)
+@Resource.rawFrag(Resource.img.method.profileID)
 
 
 @br
@@ -26,7 +26,7 @@ regarding calibration, which is also why it can handle stochasticity since calib
 Finally, the profile method realizes calibrations on the other inputs for each interval of the input under study, so the more inputs, the more
 sensitive to dimensionality of input space.
 
-@Resource.rawFrag(Resource.img.profileAnim)
+@Resource.rawFrag(Resource.img.method.profileAnim)
 @br
 @basicButton("Run", classIs(btn ++ btn_danger))(id := shared.profile.button, stylesheet.svgRunButton(-70))
 

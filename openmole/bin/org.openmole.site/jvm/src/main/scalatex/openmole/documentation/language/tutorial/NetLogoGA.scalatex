@@ -56,7 +56,7 @@
     more ants carry food to the nest, they reinforce the chemical trail.}
 
     @p A visual representation of this model looks like that:
-    @br @img(src := Resource.img.ants.file)
+    @br @img(src := Resource.img.example.ants.file)
 
     @p In this tutorial we use @a("a headless version", href := DocumentationPages.headlessNetLogo.file) of the
     model. This modified version is available @aa("here", href := Resource.script.antsNLogo.file).
@@ -71,7 +71,7 @@
 
     @p Ants forage from three sources of food (see the number in the picture below). Each source is positioned at
     different distances from the Ant colony.
-    @br @img(src := Resource.img.antNumbers.file)
+    @br @img(src := Resource.img.example.antNumbers.file)
 
     @p It can be interesting to search the @b{best combination of the two parameters}
     @hl.highlight("evaporation-rate", "plain") and @hl.highlight("diffusion-rate", "plain")

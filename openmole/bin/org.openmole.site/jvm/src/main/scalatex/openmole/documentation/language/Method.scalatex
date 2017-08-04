@@ -28,7 +28,7 @@ sensitivity, robustnesss and diversity} of your model capabilities
     Simulation models can be abstracted as a program that transforms a set of @b{inputs} into a set of @b{outputs}.
 @br
 
-    @img(src := Resource.img.modelIO.file, center(40))
+    @img(src := Resource.img.method.modelIO.file, center(40))
 @br
     Even though any type of data can be used as inputs for simulation models  (parameters , pictures, CSV files, DB connections, etc.),
     simulation experiments revolves mostly around @b{parameters space exploration} (e.g. sensitivity analysis).

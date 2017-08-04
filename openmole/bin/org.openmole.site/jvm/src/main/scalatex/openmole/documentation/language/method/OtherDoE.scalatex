@@ -28,7 +28,7 @@ By defining your own exploration task on @a("several types of input", href:= sha
     the inputs possibles values, given their bounds and quanta of discretisation.
     @br
     @br
-    @Resource.rawFrag(Resource.img.completeID)
+    @Resource.rawFrag(Resource.img.method.completeID)
     @br
     @b{Method scores:}
     @br
@@ -87,7 +87,7 @@ By defining your own exploration task on @a("several types of input", href:= sha
 
     @break
 
-    @Resource.rawFrag(Resource.img.sobolLHSID)
+    @Resource.rawFrag(Resource.img.method.sobolLHSID)
     @br
 
     @b{Method scores:}
@@ -211,7 +211,7 @@ By defining your own exploration task on @a("several types of input", href:= sha
     affect the output(s) of a model. Basically it
 
     TODO: Fix sensitivity animation
-    @Resource.rawFrag(Resource.img.sensitivityAnim)
+    @Resource.rawFrag(Resource.img.method.sensitivityAnim)
 
     @basicButton("Run", classIs(btn ++ btn_danger))(id := shared.sensitivity.button, stylesheet.svgRunButton(10))
 
