@@ -94,7 +94,13 @@ object SideMenu {
 
   val environment = SideMenu(DocumentationPages.environmentPages, classIs(btn ++ btn_primary), "Available environments").toBlock
 
-  val more = SideMenu(Seq(DocumentationPages.advancedConcepts, DocumentationPages.gui), classIs(btn ++ btn_default), "See also", true).toBlock
+  val more = SideMenu(
+    Seq(
+      DocumentationPages.language,
+      DocumentationPages.gui,
+      DocumentationPages.advancedConcepts
+    ), classIs(btn ++ btn_default), "See also", true
+  ).toBlock
 
   lazy val guiGuide = fromStrings(
     "Contents",

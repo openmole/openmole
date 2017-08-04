@@ -244,6 +244,10 @@ object Resource {
 
   }
 
+  object paper {
+    val fgcs2013 = "http://www.openmole.org/files/FGCS2013.pdf"
+  }
+
   val api = fileResource("api")
 
   def rawFrag(fileResource: FileResource) = shared.rawFrag(content(fileResource))
