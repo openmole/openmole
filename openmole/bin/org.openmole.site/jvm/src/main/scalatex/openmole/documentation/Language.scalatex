@@ -26,7 +26,7 @@
          @p It means that @i{value1} and @i{value2} are the values for the first two parameters and that the parameter named @i{otherParam} is set to the value @i{otherValue}. Unspecified parameters are set to their default value.
 
  @p{Going further}
-   What you have read so far should be sufficient in order to get started with OpenMOLE. To begin with the OpenMOLE syntax you should have a look at the @a("Hello World tutorial", href := DocumentationPages.helloWorld.file). You may also want to look at the @a("Task documentation", href := DocumentationPages.model.file) and other sections detailing specific concepts.
+   What you have read so far should be sufficient in order to get started with OpenMOLE. To begin with the OpenMOLE syntax you should have a look at the @a("Getting started", href := Pages.gettingStarted.file). You may also want to look at the @a("Task documentation", href := DocumentationPages.model.file) and other sections detailing specific concepts.
 
    @p Scala is a very nice language with an extensive very well designed standard library. To get more insights on this language, check these links:
    @ul

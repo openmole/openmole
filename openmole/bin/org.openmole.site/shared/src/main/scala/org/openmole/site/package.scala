@@ -125,6 +125,7 @@ package object shared {
     lazy val demo = "https://demo.openmole.org"
     lazy val twitter = "https://twitter.com/OpenMOLE"
     lazy val blog = "https://blog.openmole.org"
+    lazy val chat = "https://chat.iscpif.fr/channel/openmole"
     lazy val simpluDemo = "https://simplu.openmole.org"
     lazy val mailingList = "http://ask.openmole.org"
     lazy val shortTraining = "https://iscpif.fr/events/formationsjedi/"
