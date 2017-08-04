@@ -8,7 +8,12 @@
    version="1.1"
    viewBox="0 0 164.62714 66.386947"
    height="66.386948mm"
-   width="164.62712mm">
+   width="164.62712mm"
+   class="center-svg"
+   fit-margin-top="5"
+   fit-margin-left="5"
+   fit-margin-right="5"
+   fit-margin-bottom="5">
   <defs
      id="defs4847" />
   <metadata

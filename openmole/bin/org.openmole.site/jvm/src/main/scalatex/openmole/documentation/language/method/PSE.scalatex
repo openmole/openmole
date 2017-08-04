@@ -9,11 +9,7 @@ Input parameter values are selected to produce new output values, such that as t
 the output space that is covered gets bigger. PSE reveals the potential of your model: the
 variety of the dynamics it is able to produce, even those about which you were not investigating in the first place !
 
-@br
-
 @Resource.rawFrag(Resource.img.pseID)
-
-@br
 
 @b{Method scores:}
 

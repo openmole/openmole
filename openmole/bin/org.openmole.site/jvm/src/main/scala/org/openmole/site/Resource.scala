@@ -52,7 +52,7 @@ object Resource {
 
     val thumbnail_calib_multi = imgResource("calibrage_multi.png")
 
-    val thumbnail_sensitivity = imgResource("sensitivity.svg")
+    val sensitivityAnim = imgResource("sensitivityAnim.svg")
 
     val profileID = imgResource("profileID.svg")
 

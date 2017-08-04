@@ -210,10 +210,9 @@ By defining your own exploration task on @a("several types of input", href:= sha
     @p Typical Sensitivity analysis (in a simulation experiment  context) is the study of how the variation of an input
     affect the output(s) of a model. Basically it
 
+    TODO: Fix sensitivity animation
+    @Resource.rawFrag(Resource.img.sensitivityAnim)
 
-    @br
-    @Resource.rawFrag(Resource.img.thumbnail_sensitivity)
-    @br
     @basicButton("Run", classIs(btn ++ btn_danger))(id := shared.sensitivity.button, stylesheet.svgRunButton(10))
 
 
