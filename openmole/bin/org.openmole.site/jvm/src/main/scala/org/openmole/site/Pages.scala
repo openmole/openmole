@@ -230,6 +230,7 @@ object DocumentationPages {
   lazy val transition = DocumentationPage(name = "Transitions", content = scalatex.documentation.language.advanced.Transition())
   lazy val hook = DocumentationPage(name = "Hooks", content = scalatex.documentation.language.advanced.Hook())
   lazy val source = DocumentationPage(name = "Sources", content = scalatex.documentation.language.advanced.Source())
+  lazy val capsule = DocumentationPage(name = "Capsule", content = scalatex.documentation.language.advanced.Capsule())
 
   lazy val environment = DocumentationPage(name = "Environments", content = scalatex.documentation.language.Environment())
 
@@ -280,15 +281,10 @@ object DocumentationPages {
 
   lazy val advancedSampling = DocumentationPage(name = "Advanced Sampling", content = scalatex.documentation.language.advanced.AdvancedSampling())
 
-  def tutorialPages = Seq(helloWorld, resume, headlessNetLogo, netLogoGA, capsule) //++ marketTutorials
-
   lazy val tutorial = DocumentationPage(name = "Tutorials", content = scalatex.documentation.language.Tutorial())
   lazy val resume = DocumentationPage(name = "Resume Workflow", content = scalatex.documentation.language.tutorial.Resume())
   lazy val headlessNetLogo = DocumentationPage(name = "Netlogo Headless", content = scalatex.documentation.language.tutorial.HeadlessNetLogo())
   lazy val netLogoGA = DocumentationPage(name = "GA with NetLogo", content = scalatex.documentation.language.tutorial.NetLogoGA())
-  lazy val capsule = DocumentationPage(name = "Capsule", content = scalatex.documentation.language.tutorial.Capsule())
-
-  def developmentPages = Seq(compilation, documentationWebsite, plugin, branching, webserver, console)
 
   lazy val development = DocumentationPage(name = "Development", content = scalatex.documentation.Development())
   lazy val compilation = DocumentationPage(name = "Compilation", content = scalatex.documentation.development.Compilation())
