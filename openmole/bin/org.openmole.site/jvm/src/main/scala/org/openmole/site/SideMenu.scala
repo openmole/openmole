@@ -166,8 +166,8 @@ object SideMenu {
 
   lazy val consoleMenu = fromStrings(
     "Contents",
-    shared.consoleMenu.run,
-    shared.consoleMenu.authentication
+    shared.consoleMenu.authentication,
+    shared.consoleMenu.run
   )
 
   lazy val hookMenu = fromStrings(

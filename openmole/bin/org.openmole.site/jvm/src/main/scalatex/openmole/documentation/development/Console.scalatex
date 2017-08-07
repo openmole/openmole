@@ -40,4 +40,4 @@ To do so, use the @i("-c") argument in your console : @hl.highlight("""./openmol
 
     @break
 
-    To cancel the execution you should use: hl.higlight("ex.cancel", "plain").
+    To cancel the execution you should use: @hl.highlight("ex.cancel", "plain").
