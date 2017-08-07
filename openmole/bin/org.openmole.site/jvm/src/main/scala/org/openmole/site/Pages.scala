@@ -172,7 +172,6 @@ object DocumentationPages {
     development,
     compilation,
     plugin,
-    branching,
     webserver,
     dataProcessing,
     otherDoE,
@@ -284,7 +283,6 @@ object DocumentationPages {
   lazy val development = DocumentationPage(name = "Development", content = scalatex.documentation.Development())
   lazy val compilation = DocumentationPage(name = "Compilation", content = scalatex.documentation.development.Compilation())
   lazy val plugin = DocumentationPage(name = "Plugins", content = scalatex.documentation.development.Plugin())
-  lazy val branching = DocumentationPage(name = "Branching model", content = scalatex.documentation.development.Branching())
   lazy val webserver = DocumentationPage(name = "Web Server", content = scalatex.documentation.development.WebServer())
   lazy val howToContribute = DocumentationPage(name = "How to Contribute", content = scalatex.documentation.development.howToContribute())
   lazy val console = DocumentationPage(name = "Console mode", content = scalatex.documentation.development.Console(), extraMenu = Some(SideMenu.consoleMenu))

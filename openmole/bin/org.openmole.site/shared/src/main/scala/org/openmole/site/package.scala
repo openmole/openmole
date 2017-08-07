@@ -159,6 +159,7 @@ package object shared {
     lazy val intelliJ = "https://www.jetbrains.com/idea/"
     lazy val scalatex = "http://www.lihaoyi.com/Scalatex/"
     lazy val netlogoAnts = "http://ccl.northwestern.edu/netlogo/models/Ants"
+    lazy val branchingModel = "http://nvie.com/posts/a-successful-git-branching-model/"
 
     object partner {
       lazy val iscpif = "http://iscpif.fr"
