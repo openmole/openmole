@@ -169,7 +169,6 @@ object DocumentationPages {
     headlessNetLogo,
     netLogoGA,
     capsule,
-    compilation,
     plugin,
     webserver,
     dataProcessing,
@@ -279,10 +278,13 @@ object DocumentationPages {
   lazy val headlessNetLogo = DocumentationPage(name = "Netlogo Headless", content = scalatex.documentation.language.advanced.HeadlessNetLogo())
   lazy val netLogoGA = DocumentationPage(name = "GA with NetLogo", content = scalatex.documentation.language.tutorial.NetLogoGA())
 
-  lazy val compilation = DocumentationPage(name = "Compilation", content = scalatex.documentation.development.Compilation())
   lazy val plugin = DocumentationPage(name = "Plugins", content = scalatex.documentation.development.Plugin())
   lazy val webserver = DocumentationPage(name = "Web Server", content = scalatex.documentation.development.WebServer())
-  lazy val howToContribute = DocumentationPage(name = "How to Contribute", content = scalatex.documentation.development.howToContribute())
+  lazy val howToContribute = DocumentationPage(
+    name = "How to Contribute",
+    content = scalatex.documentation.development.howToContribute(),
+    extraMenu = Some(SideMenu.howToContributeMenu)
+  )
   lazy val console = DocumentationPage(name = "Console mode", content = scalatex.documentation.development.Console(), extraMenu = Some(SideMenu.consoleMenu))
 
   //    val market = new DocumentationPage {

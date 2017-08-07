@@ -204,4 +204,21 @@ object SideMenu {
     shared.gaWithNetlogo.scaleUp
   )
 
+  lazy val howToContributeMenu = fromStrings(
+    "Contents",
+    shared.howToContributeMenu.prerequisites,
+    shared.howToContributeMenu.firstTimeSetup,
+    shared.howToContributeMenu.buildAppFromSources,
+    shared.howToContributeMenu.standaloneArchive,
+    shared.howToContributeMenu.compileDocker,
+    shared.howToContributeMenu.buildWebsite,
+    shared.howToContributeMenu.webpagesSources,
+    shared.howToContributeMenu.repositories,
+    shared.howToContributeMenu.projectOrganization,
+    shared.howToContributeMenu.devVersion,
+    shared.howToContributeMenu.bugReport,
+    shared.howToContributeMenu.contributionProcedure,
+    shared.howToContributeMenu.branchingModel
+  )
+
 }

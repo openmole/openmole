@@ -124,6 +124,22 @@ package object shared {
     lazy val run = "Run scripts"
   }
 
+  object howToContributeMenu {
+    lazy val prerequisites = "Prerequisites"
+    lazy val firstTimeSetup = "First time setup"
+    lazy val buildAppFromSources = "Build App from Sources"
+    lazy val standaloneArchive = "Create a standalone archive"
+    lazy val compileDocker = "Compile within docker"
+    lazy val buildWebsite = "Build the website"
+    lazy val repositories = "Repositories"
+    lazy val webpagesSources = "Edit the source of webpages"
+    lazy val devVersion = "Dev version (site and software)"
+    lazy val projectOrganization = "Project organization"
+    lazy val bugReport = "Bug Report"
+    lazy val contributionProcedure = "Recommended contribution procedure"
+    lazy val branchingModel = "Branching model"
+  }
+
   object gaWithNetlogo {
     lazy val antModel = "The ant model"
     lazy val defineProblem = "An optimisation problem"
