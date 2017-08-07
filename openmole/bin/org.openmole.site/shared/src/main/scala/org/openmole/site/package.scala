@@ -129,7 +129,7 @@ package object shared {
     lazy val firstTimeSetup = "First time setup"
     lazy val buildAppFromSources = "Build App from Sources"
     lazy val standaloneArchive = "Create a standalone archive"
-    lazy val compileDocker = "Compile within docker"
+    lazy val compileDocker = "Compile within Docker"
     lazy val buildWebsite = "Build the website"
     lazy val repositories = "Repositories"
     lazy val webpagesSources = "Edit the source of webpages"

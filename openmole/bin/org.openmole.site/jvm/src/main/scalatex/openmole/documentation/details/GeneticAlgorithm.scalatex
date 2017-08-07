@@ -20,12 +20,9 @@
 
 
 
-@sect{Genetic Algorithms in OpenMOLE}
+@h1{Genetic Algorithms in OpenMOLE}
 
-    OpenMOLE make an intensive use of genetic algorithms (GA) in its various @a("methods", href:= DocumentationPages
-    .method
-    .file) : whereas it deals with model calibration (which is an optimization problem) or a diversity of outputs
-    research like in @a("PSE", href:= DocumentationPages.pse.file) (which boils down to Genetic algorithms with a novelty incentive).
+OpenMOLE make an intensive use of genetic algorithms (GA) in its various @a("methods", href:= DocumentationPages.method.file) : whereas it deals with model calibration (which is an optimization problem) or a diversity of outputs     research like in @a("PSE", href:= DocumentationPages.pse.file) (which boils down to Genetic algorithms with a novelty incentive).
 
     @br@br
     GAs can be smartly distributed on grid environments using @a("islands scheme", href:= DocumentationPages.island.file), and and be able to deal with model @a("stochasticity", href:=DocumentationPages.stochasticity.file) .
@@ -35,43 +32,38 @@
 
 
 
-@h2
-    Automatic parameters calibration methods using Genetic Algorithms
 
 
-@p
+
+
+@sect{About Calibration and GA }
     OpenMOLE provides advanced methods to help you calibrate your model.
     These methods automatically generate workflows to explore your model's parameter space towards the best parameter
     set according to a previously defined @b{goal} (or @b{objective} or @b{criterion}) .
     This is commonly addressed in literature as a calibration/optimization methods.
 
-@p
 
 
-@h3
-    Context
-@p
-    Calibration methods explore the parameter space of a simulation model, looking for parameter sets that will produce
-    outputs  that reach one or several given @b{objectives}.
+    @p
+    Calibration methods of OpenMOLE use Genetic Algorithms to explore the parameter space of a simulation model, looking for parameter sets that will produce outputs  that reach one or several given @b{objectives}.
 
-    Usually, objectives are quantities -computed from model outputs- that have to be minimized or maximized.
-    It's a quantification of the characteristics of what is a @i{good model output} according to what
-    you're looking for.
+    @b{Objectives functions},also called @b{fitness functions}, compute quantities from model outputs that have to be minimized or maximized ; they're a quantification of the characteristics of what is the @i{optimal model output} according to what  you're looking for.
 
-@br
+    @br@br
 
-    One common use case is when you want to fit some data. Objective function could be
+    One common use case is optimization to fit some data. Objective function could be
     a distance function between simulation results and data ; a classical example is the Squared Error function.
-@br
+    @br
 
     If you want your model to reproduce several characteristics (sometimes called stylised facts), you need
-    several objectives, each of them quantifying the closeness, or similarity between your model outputs
+    several objectives, each of them quantifying the similarity between your model outputs
     and the characteristics you want to reproduce.
 
-@br
-Un peu relou cet exemple finalement TODO à virer ?
+    @br@br
+    TODO  Un peu relou cet exemple finalement : à virer ?
     For example, if your ideal dynamic is such that one of your model outputs reaches a certain value V
-    after a certain time T, in a linear way, you want to reach  three distinct objectives :
+    after a certain time T, in a linear way, the ideal solution reaches  three distinct objectives at the same
+    time:
     @ul
         @li
             the given value V
@@ -84,24 +76,22 @@ Un peu relou cet exemple finalement TODO à virer ?
     the difference between target time  T and the simulation time at which the value V is reached by the model output,
     and the quality of the linear adjustment of the model output time serie from 0 to T.
 
-@p
+    @p
 
-    To calibrate your model with OpenMOLE, you need to define:
+    To calibrate your model, you need to define:
 
      @ul
         @li
             the @b{genome} of your model, i.e. the parameters to be calibrated. They are the dimensions of the parameter
-             space that will be explored by the genetic algorithm.
+             space that will be explored by the genetic algorithm. GA will try different genomes, and keep the best
+             discovered ever since.
         @li
-            the @b{objectives} you want to reach, expressed as a variables to be @b{minimized}.
+            the @b{objectives} you want to reach, expressed as  variables to be @b{minimized}.
         @li
-            a @b{termination criterion}, to stop the method
+            a @b{termination criterion}, to stop the method eventually
 
-@h3
+@sect{Dummy Model Optimization Example}
 
-    Dummy Model Optimization Example
-
-@p
     This workflow optimises a dummy model using the generational NSGA II multi-objective algorithm. You can replace the instances of @i{model} by your own model and adapt the variation range of its input variables. If you're not familiar with parameter tuning using Genetic Algorithms (GA), you should first consult the @aa("tutorial explaining how to calibrate a NetLogo model with a GA", href := DocumentationPages.netLogoGA.file).
 
     @br @hl.openmole(s"""
@@ -136,92 +126,23 @@ Un peu relou cet exemple finalement TODO à virer ?
   // Here the generated workflow will run using 4 threads of the local machine.
   (evolution hook savePopulation on LocalEnvironment(4))""", name = "nsga2 example")
 
-@br
+    @br
 
-Notice that the objectives are given as a sequence of model outputs variables to @b{minimize}.
+    Notice that the objectives are given as a sequence of model outputs variables to @b{minimize}.
 So if you want to reach specific target values, like Pi and 42  you should have written your objectives as
+    @br
+    @hl.highlight("evaluation = Delta(model, o1 -> math.Pi, o2 -> 42)", "plain")
+    @br
+    NB: in this case the results in the saved file in will be the difference between the outputs of the model and your objectives.
+    @br
 
-@hl.code("""evaluation = Delta(model, o1 -> math.Pi, o2 -> 42)""")
+    TODO checker syntaxe et écriture d'une task dédiée avant d'écrire ça  o1 -> 22 , o2 -> math.Pi
+    Il faut pouvoir facilement définir les target values : je veux optimiser mon modèle pour qu'il me donne 25 , il faut que
+     ce soit limpide à la lecture du script oms
 
-NB: in this case the results in the saved file in will be the difference between the outputs of the model and your objectives.
-@br
+    @br
+    Obviously, maximization problem are  performed by taking the opposite of variables as objectives.
 
-TODO checker syntaxe et écriture d'une task dédiée avant d'écrire ça  o1 -> 22 , o2 -> math.Pi
-Il faut pouvoir facilement définir les target values : je veux optimiser mon modèle pour qu'il me donne 25 , il faut que
- ce soit limpide à la lecture du script oms
-
-
-Obviously, maximization problem are  performed by taking the opposite of variables as objectives.
-
-@h3
-    Scaling Up the calibration using Island Model
-
-
-  @p For distributed environments the island distribution scheme is well adapted. Islands of population evolve for a
-  while on a remote node. When an island is finished, its final population is merged back into a global archive.
-  A new island is then generated until the termination criterion: i.e. the total number of islands to generate is met.
-  Islands can be used as follows:
-
-  @br @hl.openmole("""
-  val evolution =
-    SteadyStateEvolution(
-      // Definition of the optimisation algorithm
-      // mu is the size of the population
-      // genome is the inputs prototype and their variation ranges
-      // objectives are the objectives to minimise
-      algorithm =
-        NSGA2(
-          mu = 100,
-          genome = Seq(x in (0.0, 1.0), y in (0.0, 1.0)),
-          objectives = Seq(o1, o2)
-        ),
-      evaluation = model,
-      termination = 100
-    )
-
-  // Generate a workflow that orchestrates 100 concurrent islands.
-  // The workflow stops when 10,000 islands have completed.
-  val island =
-    IslandEvolution(
-      evolution,
-      parallelism = 100,
-      termination = 10000
-    )
-
-  // Definition of a hook to save the population of solutions on the local machine running OpenMOLE
-  val savePopulation = SavePopulationHook(island, workDirectory / "evolution")
-
-  // Construction of the complete mole with the execution environment, and the hook.
-  // Here the generated workflow will run using 4 threads of the local machine.
-  (island on LocalEnvironment(4) hook savePopulation)""", header = model, name = "nsga2 islands")
-
-  @p Calibration of stochastic models leads to noisy fitness functions. An efficient strategy to deal with such
-  fitness functions is implemented in OpenMOLE. This strategy automatically balances the need for replications and
-  the discovery of new solutions. In case you want to explore a stochastic model with a genetic algorithm you can do:
-
-  @br @hl.openmole("""
-  val seed = Val[Long]
-
-  val evolution =
-    SteadyStateEvolution(
-      // Definition of the optimisation algorithm
-      // mu is the size of the population
-      // genome is the inputs prototype and their variation ranges
-      // objectives are the objectives to minimise
-      algorithm =
-        NSGA2(
-          mu = 100,
-          genome = Seq(x in (0.0, 1.0), y in (0.0, 1.0)),
-          objectives = Seq(o1, o2),
-          // OpenMOLE provide a seed for your stochastic model to use (it is optional)
-          // 20% of the evaluations are used for replicating existing solutions
-          // 100 replication are stored at max for each individual
-          stochastic = Stochastic(seed = seed, reevaluate = 0.2, replications = 100)
-        ),
-      evaluation = model,
-      termination = 100
-    )""", header = model, name = "nsga2 stochastic")
-
-
-
+    @br@br
+    TODO pointer vers example tutorial NetlogoGA
 
