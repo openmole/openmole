@@ -166,8 +166,8 @@ object SideMenu {
 
   lazy val consoleMenu = fromStrings(
     "Contents",
-    shared.consoleMenu.run,
-    shared.consoleMenu.authentication
+    shared.consoleMenu.authentication,
+    shared.consoleMenu.run
   )
 
   lazy val hookMenu = fromStrings(
@@ -190,6 +190,7 @@ object SideMenu {
 
   lazy val capsuleMenu = fromStrings(
     "Contents",
+    shared.capsuleMenu.definition,
     shared.capsuleMenu.strainer,
     shared.capsuleMenu.master
   )
@@ -201,6 +202,23 @@ object SideMenu {
     shared.gaWithNetlogo.runOpeMOLE,
     shared.gaWithNetlogo.optimizationAlgo,
     shared.gaWithNetlogo.scaleUp
+  )
+
+  lazy val howToContributeMenu = fromStrings(
+    "Contents",
+    shared.howToContributeMenu.prerequisites,
+    shared.howToContributeMenu.firstTimeSetup,
+    shared.howToContributeMenu.buildAppFromSources,
+    shared.howToContributeMenu.standaloneArchive,
+    shared.howToContributeMenu.compileDocker,
+    shared.howToContributeMenu.buildWebsite,
+    shared.howToContributeMenu.webpagesSources,
+    shared.howToContributeMenu.repositories,
+    shared.howToContributeMenu.projectOrganization,
+    shared.howToContributeMenu.devVersion,
+    shared.howToContributeMenu.bugReport,
+    shared.howToContributeMenu.contributionProcedure,
+    shared.howToContributeMenu.branchingModel
   )
 
 }

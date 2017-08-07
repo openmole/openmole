@@ -136,9 +136,7 @@ object DocumentationPages {
 
   def allPages = Vector[DocumentationPage](
     docSiteMap,
-    application,
     gui,
-    migration,
     scala,
     java,
     native,
@@ -171,11 +169,7 @@ object DocumentationPages {
     headlessNetLogo,
     netLogoGA,
     capsule,
-    development,
-    compilation,
-    documentationWebsite,
     plugin,
-    branching,
     webserver,
     dataProcessing,
     otherDoE,
@@ -195,9 +189,7 @@ object DocumentationPages {
 
   lazy val docSiteMap = DocumentationPage(name = "Documentation Site Map", content = scalatex.documentation.DocSiteMap())
 
-  lazy val application = DocumentationPage(name = "Application", content = scalatex.documentation.Application())
   lazy val gui = DocumentationPage(name = "GUI guide", content = scalatex.documentation.GUI())
-  lazy val migration = DocumentationPage(name = "Migration", content = scalatex.documentation.application.Migration())
 
   def modelPages = Seq(scala, java, rscript, python, ccplusplus, native, netLogo, mole)
 
@@ -286,13 +278,13 @@ object DocumentationPages {
   lazy val headlessNetLogo = DocumentationPage(name = "Netlogo Headless", content = scalatex.documentation.language.advanced.HeadlessNetLogo())
   lazy val netLogoGA = DocumentationPage(name = "GA with NetLogo", content = scalatex.documentation.language.tutorial.NetLogoGA())
 
-  lazy val development = DocumentationPage(name = "Development", content = scalatex.documentation.Development())
-  lazy val compilation = DocumentationPage(name = "Compilation", content = scalatex.documentation.development.Compilation())
-  lazy val documentationWebsite = DocumentationPage(name = "Documentation", content = scalatex.documentation.development.DocumentationWebsite())
   lazy val plugin = DocumentationPage(name = "Plugins", content = scalatex.documentation.development.Plugin())
-  lazy val branching = DocumentationPage(name = "Branching model", content = scalatex.documentation.development.Branching())
   lazy val webserver = DocumentationPage(name = "Web Server", content = scalatex.documentation.development.WebServer())
-  lazy val howToContribute = DocumentationPage(name = "How to Contribute", content = scalatex.documentation.development.howToContribute())
+  lazy val howToContribute = DocumentationPage(
+    name = "How to Contribute",
+    content = scalatex.documentation.development.howToContribute(),
+    extraMenu = Some(SideMenu.howToContributeMenu)
+  )
   lazy val console = DocumentationPage(name = "Console mode", content = scalatex.documentation.development.Console(), extraMenu = Some(SideMenu.consoleMenu))
 
   //    val market = new DocumentationPage {

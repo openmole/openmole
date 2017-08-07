@@ -4,7 +4,7 @@
 @h1{The OpenMOLE language}
 @p The OpenMOLE console language is an extension of the Scala language designed for distributed computing. It supports all the scala constructs and additional operators and classes especially designed to compose workflows. OpenMOLE workflows expose explicit parallel aspect of the workload that can be delegated to distributed computing environments in a transparent manner. The philosophy of OpenMOLE is test small (on your computer) and scale for free (on remote distributed computing environments).
 
-@p A good way to get a first glimpse at what OpenMOLE can do is to read this @a("research paper", href := Resource.paper.fgcs2013).
+@p A good way to get a first glimpse at what OpenMOLE can do is to read this @aa("research paper", href := Resource.paper.fgcs2013.file).
 
 @sect{Basic scala constructs}
    You need only a very basic understanding of the scala language in order to design OpenMOLE workflows.

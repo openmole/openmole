@@ -7,8 +7,12 @@
 @h1
     How To contribute to the OpenMOLE project
 
+@SideMenu.howToContributeMenu.toBlock.left(320)
 
-@sect{Prerequisites}
+This page is dedicated to explain the organization of the project, the tools you need and the procedures to follow if
+you want to contribute painlessly to the OpenMOLE project (software and documentation).
+
+@sect{@shared.howToContributeMenu.prerequisites}
 
     You need three tools installed to get a local copy of OpenMOLE:
     @ul
@@ -23,7 +27,7 @@
     As a suggestion, we recommand the @a("IntelliJ IDE", href:=shared.link.intelliJ) to  edit the scala source code of the project.
 
 
-@sect{First time setup}
+@sect{@shared.howToContributeMenu.firstTimeSetup}
 
     @ol
         @li
@@ -49,7 +53,7 @@
 
 
 
-@sect{Build the app}
+@sect{@shared.howToContributeMenu.buildAppFromSources}
 
     To build the OpenMOLE, use the @hl.highlight("sbt assemble","plain") command inside openmole subdirectory.
 
@@ -64,8 +68,36 @@
     Then, the app should pop up in your default web browser, the URL is something like @hl.highlight("http://localhost:44961/app","plain")
 
 
+@sect{@shared.howToContributeMenu.standaloneArchive}
+        You can create a standalone archive of your fresh OpenMOLE build and ship it around by using the task @i{openmole:tar}:
+        @br @hl.highlight("""sbt openmole:tar""", "plain")
+        @p You will find the resulting archive in @i{bin/openmole/target/openmole.tar.gz}.
+      @p{Publish the bundles}
+        @hl.highlight("""
+        cd build-system
+        sbt publish
+        cd ../libraries
+        sbt publish
+        cd ../openmole
+        sbt publish""", "plain")
 
-@sect{Build the website}
+
+@sect{@shared.howToContributeMenu.compileDocker}
+      An easy way to get an OpenMOLE compilation environment up and running is to use docker. Once docker is installed on you machine you can do:
+      @br @hl.highlight("""
+      git clone https://github.com/openmole/docker-build.git
+      cd docker-build
+      ./run -v /a/local/path/on/your/system
+      # You should be in the docker container now, execute
+      clone
+      compile
+      """, "plain")
+      @p You can now find the compile OpenMOLE in @i{/a/local/path/on/your/system/openmole/openmole/bin/openmole/target/assemble/}
+
+
+
+
+@sect{@shared.howToContributeMenu.buildWebsite}
 
     The source code of the website and the OpenMOLE's documentation are hosted along in the code repository.
     You might spot a typo/incorrect spelling/grammar mistake/bad wording or simply want to improve a part of the
@@ -94,13 +126,13 @@
     is (really) time-consuming. The tests concerning the examples from the OpenMOLE market can in turn be disabled
     using @hl.highlight("--no-market-test", "plain").
 
-@sect{Edit the source of webpages}
+@sect{@shared.howToContributeMenu.webpagesSources}
 
     Sources are located in @hl.highlight("openmole/openmole/bin/org.openmole.site/jvm/src/main/scalatex/openmole","plain")
 
     They are written using @a("scalatex", href:=shared.link.scalatex), a DSL to generate html content.
 
-@sect{Repositories}
+@sect{@shared.howToContributeMenu.repositories}
 
     @a("OpenMOLE repos", href:=shared.link.repo.openmole) are divided into three branches.
 
@@ -112,8 +144,42 @@
         @li
             @hl.highlight("master", "plain") is the main branch, from which  the two former branches are derived
 
-@sect{Recommended contribution procedure}
+
+
+
+@sect{@shared.howToContributeMenu.projectOrganization}
+    OpenMOLE is made of three different projects:
+          @ul
+            @li{ @i{openmole/openmole}: the main project containing the source code for the core and plugins }
+            @li{ @i{openmole/libraries}: contains the libraries which OpenMOLE depends on but are not available as OSGi bundles from their developers. This project takes all these dependencies, wraps them in OSGi projects and generates the corresponding bundles to be later imported by OpenMOLE's main project.}
+            @li{ @i{openmole/build-system}: As its name stands, that's the build system :) It's very unlikely that you'll have to modify this project.}
+
+
+@sect{@shared.howToContributeMenu.devVersion}
+    The development version of the OpenMOLE site and software is compiled and distributed several times an hour at @a( "this url", href := "http://next.openmole.org").
+
+@sect{@shared.howToContributeMenu.bugReport}
+    Please report bugs you may find in OpenMOLE on the @a("bug tracker", href := "https://github.com/openmole/openmole/issues").
+
+
+
+@sect{@shared.howToContributeMenu.contributionProcedure}
     When you want to contribute to the project (code or documentation) we recommend that you start by submitting an @b{issue}
     , so that the community can identify the nature of the potential caveat.
     @br
     After that , send a @b{pull request} so that your potential changes can be discussed.
+
+
+@sect{@shared.howToContributeMenu.branchingModel}
+   TODO vérfier si ce model de branchement est encore d'actualité et si c'est bien celui qui est appliqué
+  OpenMOLE applies a branching model derived from @a("Vincent Driessen's", href := shared.link.branchingModel). Some slight differences should be noted:
+  @ul
+	@li{The next version of OpenMOLE is in the master, it's our development branch;}
+	@li{Disrupting features are developed in branches, branching off master;}
+    @li{New features are merged into the master branch as soon as they are working satisfyingly enough to be operational in the next release;}
+	@li{With each release, a maintenance branch is created to be able to patch the last released version, this branch is called version-dev. These are the so-called stable branches for each release;}
+	@li{Hotfixes should be developed by branching off the corresponding version-dev branch and merged back into their upstream branch and master.}
+
+  @p The advantage of this model is that new features are tested early in interaction with each others. This scheme serves an hybrid, date-based / feature-based release schedule.
+
+  @p At the beginning of a development cycle, an approximate date is given for the next release. This date depends on what are the new features planned for this milestone. This date is flexible and can be modulated given the progress of the new developments.

@@ -114,6 +114,7 @@ package object shared {
   }
 
   object capsuleMenu {
+    lazy val definition = "Definition"
     lazy val strainer = "Strainer capsule"
     lazy val master = "Master capsule"
   }
@@ -121,6 +122,22 @@ package object shared {
   object consoleMenu {
     lazy val authentication = "Authentications"
     lazy val run = "Run scripts"
+  }
+
+  object howToContributeMenu {
+    lazy val prerequisites = "Prerequisites"
+    lazy val firstTimeSetup = "First time setup"
+    lazy val buildAppFromSources = "Build App from Sources"
+    lazy val standaloneArchive = "Create a standalone archive"
+    lazy val compileDocker = "Compile within Docker"
+    lazy val buildWebsite = "Build the website"
+    lazy val repositories = "Repositories"
+    lazy val webpagesSources = "Edit the source of webpages"
+    lazy val devVersion = "Dev version (site and software)"
+    lazy val projectOrganization = "Project organization"
+    lazy val bugReport = "Bug Report"
+    lazy val contributionProcedure = "Recommended contribution procedure"
+    lazy val branchingModel = "Branching model"
   }
 
   object gaWithNetlogo {
@@ -158,6 +175,7 @@ package object shared {
     lazy val intelliJ = "https://www.jetbrains.com/idea/"
     lazy val scalatex = "http://www.lihaoyi.com/Scalatex/"
     lazy val netlogoAnts = "http://ccl.northwestern.edu/netlogo/models/Ants"
+    lazy val branchingModel = "http://nvie.com/posts/a-successful-git-branching-model/"
 
     object partner {
       lazy val iscpif = "http://iscpif.fr"
