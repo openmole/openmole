@@ -51,10 +51,24 @@ $tasks
 @sect{Install it !}
     OpenMOLE requires that Java version 8 or above is set as the default java on your computer. To make sure of that you can check our @a("FAQ", href := Pages.faq.file). Then just extract the archive, available HERE TODO pointer vers archive locale , somewhere and you're done! OpenMOLE is installed and works out of the box!
 
-    Once installed you can launch OpenMOLE by executing the @i{openmole} file in the installation directory (it is called @i{openmole.bat} for windozers). It will bring up the OpenMOLE @aa("application", href := application.file) that runs in your web browser (OpenMOLE supports Firefox and Chrome).
+    Once installed you can launch OpenMOLE by executing the @i{openmole} file in the installation directory (it is called @i{openmole.bat} for windozers). It will bring up you web browser. OpenMOLE supports Chrome and Firefox. So if you are using another default web browser please copy paste the OpenMOLE url (http://localhost:port) in one of these browser.
+  @p You should see something like this :
+  @br
+  @img(src := Resource.img.mole.uiScreenshot.file, `class` := "uiScreenshot").
+
+@sect{Launching parameters}
+    OpenMOLE proposes several launching options. Execute @hl.highlight("openmole -h to", "plain") list all the available options.
+
+@sect{OpenMOLE Editor on remote machine}
+  To run OpenMOLE on a remote machine and connect to using a web browser you should run: @hl.highlight("openmole --remote --port portnumber", "plain"). The first time you launch it, it asks you for a password. Then you can remotely connect to OpenMOLE using the url https://remotemachine:portnumber - @b("https:// is important"). When you connect it asks you for the password you've entered previously.
+
+@sect{OpenMOLE Headless mode}
+      OpenMOLE proposes a headless mode for running scripts. You can enable it thanks to the -s option: @hl.highlight("./openmole -s /path/to/you/mole/script", "plain")
+      @br
+      In that case OpenMOLE still asks for your preferences cyphering password. To provide it at launch time use the -pw option: @hl.highlight("./openmole -s /path/to/your/mole/script --password password", "plain"). A better practice is to write this password in a file readable by OpenMOLE only and use @hl.highlight("./openmole -s /path/to/your/mole/script --password-file password.txt", "plain").
 
 @sect{Your first exploration}
-    Let's explore one variable, multiply it by 2 and then displays each result. The computation is executed in a multi-threaded environment on the local machine.
+    Let's explore (i.e. iterate within its domain) one variable, multiply it by 2 and then displays each result. The computation is executed in a multi-threaded environment on the local machine.
 
     In the OpenMOLE interface, first create a file named @i{example.oms} @("(the file extension matters")). Open it and write the following:
 

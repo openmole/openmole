@@ -20,20 +20,15 @@
 
 
 
-@h1{Genetic Algorithms in OpenMOLE}
+@sect{Genetic Algorithms in OpenMOLE}
 
-@p
+    OpenMOLE make an intensive use of genetic algorithms (GA) in its various @a("methods", href:= DocumentationPages
+    .method
+    .file) : whereas it deals with model calibration (which is an optimization problem) or a diversity of outputs
+    research like in @a("PSE", href:= DocumentationPages.pse.file) (which boils down to Genetic algorithms with a novelty incentive).
 
-Trucs à dire
-@br
-optimization problem  => NSGA2
-@br
-DIstributed environments=>  islands
-@br
-Diversity => GA with novelty incentive
-@br
-
-Stochasticity => balance exploration pour nouvelles solutions et réplications des simulations
+    @br@br
+    GAs can be smartly distributed on grid environments using @a("islands scheme", href:= DocumentationPages.island.file), and and be able to deal with model @a("stochasticity", href:=DocumentationPages.stochasticity.file) .
 
 
 
@@ -159,7 +154,7 @@ Il faut pouvoir facilement définir les target values : je veux optimiser mon mo
 Obviously, maximization problem are  performed by taking the opposite of variables as objectives.
 
 @h3
-    Scaling Up the calibration
+    Scaling Up the calibration using Island Model
 
 
   @p For distributed environments the island distribution scheme is well adapted. Islands of population evolve for a

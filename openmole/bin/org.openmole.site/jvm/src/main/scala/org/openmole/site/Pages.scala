@@ -136,7 +136,6 @@ object DocumentationPages {
 
   def allPages = Vector[DocumentationPage](
     docSiteMap,
-    application,
     gui,
     scala,
     java,
@@ -193,7 +192,6 @@ object DocumentationPages {
 
   lazy val docSiteMap = DocumentationPage(name = "Documentation Site Map", content = scalatex.documentation.DocSiteMap())
 
-  lazy val application = DocumentationPage(name = "Application", content = scalatex.documentation.Application())
   lazy val gui = DocumentationPage(name = "GUI guide", content = scalatex.documentation.GUI())
 
   def modelPages = Seq(scala, java, rscript, python, ccplusplus, native, netLogo, mole)

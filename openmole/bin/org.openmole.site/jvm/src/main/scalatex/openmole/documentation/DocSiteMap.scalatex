@@ -19,7 +19,7 @@
     To specify your workflow in OpenMOLE you will use a high-level workflow language. To get started with OpenMOLE, you
    might want to first have a look at the @a("getting started tutorial", href := Pages.gettingStarted.file) and at
     @a("the OpenMOLE market place", href := "https://github.com/openmole/openmole-market") containing workflow examples,
-    check how to handle the @a("OpenMOLE application", href := DocumentationPages.application.file) and go through
+    and go through
     the concept in OpenMOLE: @a("Tasks", href := DocumentationPages.model.file),
      @a("Transitions", href := DocumentationPages.transition.file),
      @a("Environments", href := DocumentationPages.environment.file),
