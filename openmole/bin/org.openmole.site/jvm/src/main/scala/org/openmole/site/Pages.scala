@@ -138,7 +138,6 @@ object DocumentationPages {
     docSiteMap,
     application,
     gui,
-    migration,
     scala,
     java,
     native,
@@ -196,7 +195,6 @@ object DocumentationPages {
 
   lazy val application = DocumentationPage(name = "Application", content = scalatex.documentation.Application())
   lazy val gui = DocumentationPage(name = "GUI guide", content = scalatex.documentation.GUI())
-  lazy val migration = DocumentationPage(name = "Migration", content = scalatex.documentation.application.Migration())
 
   def modelPages = Seq(scala, java, rscript, python, ccplusplus, native, netLogo, mole)
 
