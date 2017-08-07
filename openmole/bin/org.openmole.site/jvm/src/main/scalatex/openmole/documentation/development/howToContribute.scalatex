@@ -112,6 +112,15 @@
         @li
             @hl.highlight("master", "plain") is the main branch, from which  the two former branches are derived
 
+
+@sect{Dev version (site and software)}
+    The development version of the OpenMOLE site and software is compiled and distributed several times an hour at @a( "this url", href := "http://next.openmole.org").
+
+@sect{Bug report}
+    Please report bugs you may find in OpenMOLE on the @a("bug tracker", href := "https://github.com/openmole/openmole/issues").
+
+
+
 @sect{Recommended contribution procedure}
     When you want to contribute to the project (code or documentation) we recommend that you start by submitting an @b{issue}
     , so that the community can identify the nature of the potential caveat.
