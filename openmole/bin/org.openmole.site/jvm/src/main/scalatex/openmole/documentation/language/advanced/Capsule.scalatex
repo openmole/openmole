@@ -6,6 +6,34 @@
 @SideMenu.capsuleMenu.toBlock.left(350)
 @h1{Advanced Capsule}
 
+@sect{@shared.capsuleMenu.definition}
+    Tasks are not directly linked to each-other by transitions. This has been made as transparent as possible, but two
+    other notions are involved behind the scenes. Tasks are encapsulated in a so called
+    @i{Capsule}. Each @i{Capsule} has one or several input @i{Slots} which
+    transitions are plugged to. This code snippet explicitly encapsulates the task @i{t1} in the Capsule @i{c1}:
+    @br @hl.openmole("""
+      val t1 = ScalaTask("1 + 1")
+      val c1 = Capsule(t1)
+      """)
+    @p Capsules are the atomic element in the workflow which transitions are plugged to. Capsules also serve as an entry
+    point on which @a("Hooks", href := DocumentationPages.hook.file), @a("Sources", href := DocumentationPages.source.file) and
+    @a("Execution Environments", href := DocumentationPages.environment.file) are specified.
+
+    @p When a task is directly linked to another without explicitly specifying a Capsule, @b{a new capsule is created}.
+    It means that for several transitions to reach the same task, the Capsule should be created explicitly.
+
+    @p Capsules might own several input Slots to which transition are plugged. Slots make it possible to specify
+    iterative workflows (with cycles) as well as synchronisation points between several parts of a workflow. The rule is
+    that the task encapsulated in the Capsule is executed each time all the transitions reaching a given input slot have
+    been triggered. To specify slots explicitly you should write:
+    @br @hl.openmole("""
+      val t1 = ScalaTask("1 + 1")
+      val c1 = Capsule(t1)
+      val s1 = Slot(c1)
+    """)
+
+    Other specific capsules are defined in OpenMOLE. They are described in the @aa("Advanced capsule", href := DocumentationPages.capsule.file) section
+
 @sect{@shared.capsuleMenu.strainer}
   In a general manner you are expected to specify the inputs and outputs of each task. Capsules' strainer mode transmits all the variables arriving through the input transition as if they were inputs and ouptuts of the task.
 

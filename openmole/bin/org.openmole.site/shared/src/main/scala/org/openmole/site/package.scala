@@ -114,6 +114,7 @@ package object shared {
   }
 
   object capsuleMenu {
+    lazy val definition = "Definition"
     lazy val strainer = "Strainer capsule"
     lazy val master = "Master capsule"
   }

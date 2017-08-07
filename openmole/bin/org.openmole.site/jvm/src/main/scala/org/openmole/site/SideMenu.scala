@@ -190,6 +190,7 @@ object SideMenu {
 
   lazy val capsuleMenu = fromStrings(
     "Contents",
+    shared.capsuleMenu.definition,
     shared.capsuleMenu.strainer,
     shared.capsuleMenu.master
   )
