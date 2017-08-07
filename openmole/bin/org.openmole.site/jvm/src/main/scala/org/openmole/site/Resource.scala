@@ -34,6 +34,7 @@ object Resource {
   def moleResource(name: String) = imgResource(s"mole/$name")
   def exampleResource(name: String) = imgResource(s"example/$name")
   def guiGuideResource(name: String) = imgResource(s"guiGuide/$name")
+  def paperResource(name: String) = imgResource(s"paper/$name")
 
   def jsResource(name: String) = fileResource(s"js/$name")
 
@@ -245,7 +246,7 @@ object Resource {
   }
 
   object paper {
-    val fgcs2013 = "http://www.openmole.org/files/FGCS2013.pdf"
+    val fgcs2013 = paperResource("FGCS2013.pdf")
   }
 
   val api = fileResource("api")
