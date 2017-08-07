@@ -20,7 +20,7 @@ You can describe how to @b{explore} your own model and how to @b{distribute} its
 
 @div(stylesheet.centerJustify(100), paddingTop := 100)
   @h2{Getting started}
-  Take a tour in the @a("getting started section", href := Pages.gettingStarted.file), with the @a("GUI guide", href := DocumentationPages.gui.file),
-  in the @a("documentation", href := DocumentationPages.model.file) and latter learn @a("advanced concepts", href := DocumentationPages.advancedConcepts.file)
+  Take a tour in the @a("Getting started section", href := Pages.gettingStarted.file), with the @a("GUI guide", href := DocumentationPages.gui.file),
+  in the @a("Documentation", href := DocumentationPages.model.file) and latter learn @a("Advanced concepts", href := DocumentationPages.advancedConcepts.file)
 
 @div(stylesheet.centerJustify(100), id := shared.newsPosts)

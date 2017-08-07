@@ -50,6 +50,7 @@ object Footer {
 
   val build = {
     div(
+      img(src := Resource.img.mole.openmole.file, stylesheet.leftMole),
       tags2.nav(classIs(navbar_default ++ navbar_inverse), stylesheet.footer)(
         div(classIs(container_fluid), stylesheet.center(50))(
           div(classIs(collapse ++ navbar_collapse))(

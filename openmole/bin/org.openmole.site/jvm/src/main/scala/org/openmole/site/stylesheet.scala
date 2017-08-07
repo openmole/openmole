@@ -41,8 +41,8 @@ package object stylesheet {
   )
 
   lazy val mainDiv = Seq(
-    paddingTop := 150,
-    paddingBottom := 150,
+    paddingTop := 100,
+    paddingBottom := 50,
     minHeight := 800
   ) ++ center(50)
 
@@ -118,7 +118,15 @@ package object stylesheet {
     right := 0,
     bottom := 0,
     left := 0,
-    padding := "1rem"
+    padding := "1rem",
+    top := 120
+  )
+
+  val leftMole = Seq(
+    float := "left",
+    marginLeft := 20,
+    textAlign := "right",
+    maxHeight := 100
   )
 
   val memberStyle = Seq(
