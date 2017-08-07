@@ -183,6 +183,7 @@ object Resource {
       val running = guiGuideResource("running.svg")
       val authentication = guiGuideResource("authentication.svg")
       val plugin = guiGuideResource("plugin.svg")
+      val market = guiGuideResource("market.png")
     }
 
   }
