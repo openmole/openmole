@@ -840,6 +840,7 @@ buildSite := {
     IO.copyDirectory(resourceDirectory / "img", siteTarget / "img")
     IO.copyDirectory(resourceDirectory / "bibtex", siteTarget / "bibtex")
     IO.copyDirectory(resourceDirectory / "script", siteTarget / "script")
+    IO.copyDirectory(resourceDirectory / "paper", siteTarget / "paper")
   }
 
   copySiteResources((fullOptJS in siteJS in Compile).value.data, (resourceDirectory in siteJVM in Compile).value, siteTarget)
