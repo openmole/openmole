@@ -136,7 +136,7 @@ package object shared {
     lazy val devVersion = "Dev version (site and software)"
     lazy val projectOrganization = "Project organization"
     lazy val bugReport = "Bug Report"
-    lazy val contributionProcedure = "Recommended contribution procedure"
+    lazy val contributionProcedure = "Contribution procedure"
     lazy val branchingModel = "Branching model"
   }
 
@@ -176,6 +176,8 @@ package object shared {
     lazy val scalatex = "http://www.lihaoyi.com/Scalatex/"
     lazy val netlogoAnts = "http://ccl.northwestern.edu/netlogo/models/Ants"
     lazy val branchingModel = "http://nvie.com/posts/a-successful-git-branching-model/"
+    lazy val issue = "https://github.com/openmole/openmole/issues"
+    lazy val next = "https://next.openmole.org/"
 
     object partner {
       lazy val iscpif = "http://iscpif.fr"
