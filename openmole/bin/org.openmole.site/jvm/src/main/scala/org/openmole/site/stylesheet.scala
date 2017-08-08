@@ -109,9 +109,8 @@ package object stylesheet {
   )
 
   lazy val centerBox = Seq(
-    textAlign := "center",
-    width := "60%"
-  ) ++ center(50)
+    textAlign := "center"
+  ) ++ center(70)
 
   lazy val footer = Seq(
     position := "relative",
