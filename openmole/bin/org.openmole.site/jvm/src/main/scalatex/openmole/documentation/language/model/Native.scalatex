@@ -1,38 +1,10 @@
 
 @import org.openmole.site.tools._
 @import org.openmole.site._
-
-In OpenMOLE, a generic task named @hl.openmole("CARETask") offers to run external applications packaged with @a("CARE", href := Resource.script.care.file).
-The site (proposing an outdated version of CARE for now, but a great documentation) can be found @a("here", href := "https://proot-me.github.io/").
-CARE makes it possible to package your application from any Linux computer, and then re-execute it on any other Linux computer. The CARE / OpenMOLE pair is a very efficient way to distribute your application at very large scale with very little effort. Please note that this packaging step is only necessary if you plan distribute your workflow to an heterogeneous computing environment such as the EGI grid. If you target local clusters, running the same operating system and sharing a network file system, you can directly jump to the @a("SystemExecTask", href := DocumentationPages.native.file + "#Usingalocalexecutable(innonportabletasks)"), section.
-
-@p You should first install CARE:
-@ul
-  @li{download the CARE binary from @a("here", href := Resource.script.care.file)}
-  @li{make it executable (@hl.highlight("chmod +x care", "plain"))}
-  @li{add the path to the executable to your PATH variable (@hl.highlight("export PATH=/path/to/the/care/folder:$PATH", "plain"))}
-
-@p The @hl.openmole("CARETask") has been designed to embed native binaries such as programs compiled from C, C++, Fortran, Python, R, Scilab... Embedding an application in a @hl.openmole("CARETask") happens in 2 steps:
-
-@p @b{First} you should package your application using the CARE binary you just installed, so that it executes on any Linux environment. This usually consists in prepending your command line with @hl.highlight("care -o /path/to/myarchive.tgz.bin -r ~ -p /path/to/mydata1 -p /path/to/mydata2 mycommand myparam1 myparam2", "plain"). Before going any further, here are a few notes about the options passed to CARE:
-  @ul
-    @li{@hl.highlight("-o", "plain") indicates where to store the archive. At the moment, OpenMOLE prefers to work with archives stored in .tgz.bin, so please don't toy with the extension ;)}
-    @li{@hl.highlight("-r ~", "plain") is not compulsory but it has proved mandatory in some cases. So as rule of thumb, if you encounter problems when packaging your application, try adding / removing it.}
-    @li{@hl.highlight("-p /path", "plain") asks CARE not to archive /path. This is particularly useful for input data that will change with your parameters. @b{You probably do not want} to embed this data in the archive, and we'll see further down how to inject the necessary input data in the archive from OpenMOLE.}
-
-@p @b{Second}, just provide the resulting package along with some other information to OpenMOLE. Et voila! If you encounter any problem to package your application, please refer to the corresponding entry in the @a("FAQ", href := Pages.faq.file + "#Ican'tgetCARE/PRoottowork")
-
-@p One very important aspect of CARE is that you only need to package your application @b{once}. As long as the execution you use to package your application makes uses of all the dependencies, you should not have any problem re-executing this archive with other parameters.
+@import org.openmole.site.NativeDocPageCommons._
 
 
-The utility of the CARE tool for reproducible science has been covered in the following paper :
-@br
-    Jonathan Passerat-Palmbach, Romain Reuillon, Mathieu Leclaire, Antonios Makropoulos, Emma C. Robinson, Sarah
-    Parisot and Daniel Rueckert,? Reproducible Large-Scale Neuroimaging Studies with the OpenMOLE Workflow
-    Management System?, published in @i{Frontiers in Neuroinformatics}, Vol 11, 2017.
-    @br
-    @a("[online version]" , href:="http://journal.frontiersin.org/article/10.3389/fninf.2017.00021/full#")
-    @a("[bibteX]", href:= Resource.bibtex.frontierBib.file)
+
 
 
   @p Let's study two concrete use cases that take an existing application, package it with CARE, and embed it in OpenMOLE. You should be able to achieve exactly the same process with almost any executable running on Linux. We've chosen an @a("R code", href := DocumentationPages.native.file + "#AnexamplewithR") and a @a("Python script", href := DocumentationPages.native.file + "#AnotherexamplewithaPythonscript").
@@ -208,7 +180,3 @@ The utility of the CARE tool for reproducible science has been covered in the fo
     @p In this case the bash script might depend on program installed on the remote host. Similarly, we @b{assume the presence} of @hl.highlight("/bin/hostname", "plain") on the execution node. Therefore this task cannot be considered as portable.
 
     @p Note that each execution is isolated in separate folder on the execution host and that the task execution is considered as failed if the script return a value different from 0. If you need another behaviour you can use the same advanced options as the @i{CARETask} regarding the return code.
-
-  @p{Troubleshooting}
-    @p You should always try to re-execute your application outside of OpenMOLE first. This allows you to ensure the packaging process with CARE was successful. If something goes wrong at this stage, you should check the official @a("CARE documentation", href := "https://proot-me.github.io/") or the archives of the @a("CARE mailing list", href := "https://groups.google.com/forum/?fromgroups#!forum/reproducible").
-    @p If the packaged application re-executes as you'd expect, but you still struggle to embed it in OpenMOLE, then get in touch with our user community via our the @a("OpenMOLE user mailing-list", href := "http://list.openmole.org/").

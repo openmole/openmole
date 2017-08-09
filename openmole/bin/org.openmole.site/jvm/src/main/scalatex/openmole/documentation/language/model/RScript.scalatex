@@ -3,88 +3,68 @@
 @import org.openmole.site._
 
 
-In OpenMOLE, a generic task named @hl.openmole("CARETask") offers to run external applications packaged with @a("CARE", href := Resource.script.care.file). The site (proposing an outdated version of CARE for now, but a great documentation) can be found @a("here", href := "https://proot-me.github.io/"). CARE makes it possible to package your application from any Linux computer, and then re-execute it on any other Linux computer. The CARE / OpenMOLE pair is a very efficient way to distribute your application at very large scale with very little effort. Please note that this packaging step is only necessary if you plan distribute your workflow to an heterogeneous computing environment such as the EGI grid. If you target local clusters, running the same operating system and sharing a network file system, you can directly jump to the @a("SystemExecTask", href := DocumentationPages.native.file + "#Usingalocalexecutable(innonportabletasks)"), section.
 
-@p You should first install CARE:
-@ul
-  @li{download the CARE binary from @a("here", href := Resource.script.care.file)}
-  @li{make it executable (@hl.highlight("chmod +x care", "plain"))}
-  @li{add the path to the executable to your PATH variable (@hl.highlight("export PATH=/path/to/the/care/folder:$PATH", "plain"))}
+@sect{Embedding R code}
 
-@p The @hl.openmole("CARETask") has been designed to embed native binaries such as programs compiled from C, C++, Fortran, Python, R, Scilab... Embedding an application in a @hl.openmole("CARETask") happens in 2 steps:
+    Our first example is an R script contained in a file @i{myscript.R}. We want to distribute the execution of this R code to the @a("EGI grid", href := DocumentationPages.egi.file).
 
-@p @b{First} you should package your application using the CARE binary you just installed, so that it executes on any Linux environment. This usually consists in prepending your command line with @hl.highlight("care -o /path/to/myarchive.tgz.bin -r ~ -p /path/to/mydata1 -p /path/to/mydata2 mycommand myparam1 myparam2", "plain"). Before going any further, here are a few notes about the options passed to CARE:
-  @ul
-    @li{@hl.highlight("-o", "plain") indicates where to store the archive. At the moment, OpenMOLE prefers to work with archives stored in .tgz.bin, so please don't toy with the extension ;)}
-    @li{@hl.highlight("-r ~", "plain") is not compulsory but it has proved mandatory in some cases. So as rule of thumb, if you encounter problems when packaging your application, try adding / removing it.}
-    @li{@hl.highlight("-p /path", "plain") asks CARE not to archive /path. This is particularly useful for input data that will change with your parameters. @b{You probably do not want} to embed this data in the archive, and we'll see further down how to inject the necessary input data in the archive from OpenMOLE.}
+    @p First your script should run in headless mode with no input required from the user during the execution. Your script should produce files or write its results to the standard output so that OpenMOLE can retrieve them from the remote execution environment.
 
-@p @b{Second}, just provide the resulting package along with some other information to OpenMOLE. Et voila! If you encounter any problem to package your application, please refer to the corresponding entry in the @a("FAQ", href := Pages.faq.file + "#Ican'tgetCARE/PRoottowork")
+    @p Here is an example R script matching these criteria:
+    @br @hl.highlight("""
+      args<-commandArgs(trailingOnly = TRUE)
+      data<-read.csv("data.csv",header=T,sep=",")
+      result<-as.numeric(args[1])*data
+      write.csv(result,"result.csv", row.names=FALSE)""", "R")
 
-@p One very important aspect of CARE is that you only need to package your application @b{once}. As long as the execution you use to package your application makes uses of all the dependencies, you should not have any problem re-executing this archive with other parameters.
+    @p With an example @i{data.csv}:
+    @br @hl.highlight("""
+    h1,h2,h3
+    7,8,9
+    9,7,3
+    1,1,1""", "plain")
 
+    @p This reads a file called @i{data.csv}, multiply its content by a number provided on the command line and writes the result to an output file called @i{results.csv}. To call this script from the command line you should type: @hl.highlight("R -f script.R --slave --args 4", "plain"), considering you have @i{R} installed on your system.
 
-@p{An example with R}
+    @p Once the script is up and running, remember that the first step to run it from OpenMOLE is to package it. This is done using CARE on your system.
+    @br @hl.highlight("""care -r /home/reuillon/ -o r.tgz.bin R -f script.R --slave --args 4""", "plain")
 
-Our first example is an R script contained in a file @i{myscript.R}. We want to distribute the execution of this R code to the @a("EGI grid", href := DocumentationPages.egi.file).
+    @p Notice how the command line is identical to the original one. The call to the @i{R} script remains unchanged, as CARE and its options are inserted at the beginning of the command line.
 
-@p First your script should run in headless mode with no input required from the user during the execution. Your script should produce files or write its results to the standard output so that OpenMOLE can retrieve them from the remote execution environment.
+    @p A @i{care.tgz.bin} file is created. It is an archive containing a portable version of your execution. It can be extracted and executed on any other Linux platform.
 
-@p Here is an example R script matching these criteria:
-@br @hl.highlight("""
-  args<-commandArgs(trailingOnly = TRUE)
-  data<-read.csv("data.csv",header=T,sep=",")
-  result<-as.numeric(args[1])*data
-  write.csv(result,"result.csv", row.names=FALSE)""", "R")
+    @p The method described here packages everything, including @i{R} itself! Therefore there is no need to install @i{R} on the target execution machine. All that is needed is for the remote execution host to run Linux, which is the case for the vast majority of (decent) high performance computing environments.
 
-@p With an example @i{data.csv}:
-@br @hl.highlight("""
-h1,h2,h3
-7,8,9
-9,7,3
-1,1,1""", "plain")
+    @p Packaging an application is done @b{once and for all} by running the original application against CARE. CARE's re-execution mechanisms allows you to change the original command line when re-running your application. This way you can update the parameters passed on the command line and the re-execution will be impacted accordingly. As long as all the configuration files, libraries, ... were used during the original execution, there is no need to package the application multiple times with different input parameters.
 
-@p This reads a file called @i{data.csv}, multiply its content by a number provided on the command line and writes the result to an output file called @i{results.csv}. To call this script from the command line you should type: @hl.highlight("R -f script.R --slave --args 4", "plain"), considering you have @i{R} installed on your system.
+    @p You can now upload this archive to your OpenMOLE workspace along with a @i{data.csv} file in a subfolder named data. Let's now explore a complete combination of all the data files with OpenMOLE. The input data files are located in @i{data} and the result files are written to a folder called @i{results}. A second input parameter is a numeric value @i{i} ranging from 1 to 10. The corresponding OpenMOLE script looks like this: TODO verifier si le commentaire concernant le path de rtask est juste
+    @p @hl.openmole("""
+    // Declare the variable
+    val i = Val[Double]
+    val input = Val[File]
+    val inputName = Val[String]
+    val output = Val[File]
 
-@p Once the script is up and running, remember that the first step to run it from OpenMOLE is to package it. This is done using CARE on your system.
-@br @hl.highlight("""care -r /home/reuillon/ -o r.tgz.bin R -f script.R --slave --args 4""", "plain")
+    // R task
+    // "workdirectory" is a path on the original system on which you packaged R
+    val rTask = CARETask(workDirectory / "r.tgz.bin", "R --slave -f script.R --args ${i}") set (
+      (inputs, outputs) += (i, inputName),
+      inputFiles += (input, "data.csv"),
+      outputFiles += ("result.csv", output)
+    )
 
-@p Notice how the command line is identical to the original one. The call to the @i{R} script remains unchanged, as CARE and its options are inserted at the beginning of the command line.
+    val exploration =
+      ExplorationTask(
+        (i in (1.0 to 10.0 by 1.0)) x
+        (input in (workDirectory / "data").files withName inputName)
+      )
 
-@p A @i{care.tgz.bin} file is created. It is an archive containing a portable version of your execution. It can be extracted and executed on any other Linux platform.
+    val copy = CopyFileHook(output, workDirectory / "result" / "${inputName}-${i}.csv")
+    exploration -< (rTask hook copy hook ToStringHook())""")
 
-@p The method described here packages everything, including @i{R} itself! Therefore there is no need to install @i{R} on the target execution machine. All that is needed is for the remote execution host to run Linux, which is the case for the vast majority of (decent) high performance computing environments.
+    @p The @hl.openmole("CARETask") performs two actions: it first unarchives the CARE container by running @hl.highlight("r.tgz.bin", "plain"). Then the actual execution takes place as a second command. Note that for each execution of the @i("CARETask"), any command starting with @i("/") is @b{relative to the root of the CARE archive}, and @b{any other command is executed in the current directory}. The current directory @b{defaults to the original packaging directory}.
 
-@p Packaging an application is done @b{once and for all} by running the original application against CARE. CARE's re-execution mechanisms allows you to change the original command line when re-running your application. This way you can update the parameters passed on the command line and the re-execution will be impacted accordingly. As long as all the configuration files, libraries, ... were used during the original execution, there is no need to package the application multiple times with different input parameters.
-
-@p You can now upload this archive to your OpenMOLE workspace along with a @i{data.csv} file in a subfolder named data. Let's now explore a complete combination of all the data files with OpenMOLE. The input data files are located in @i{data} and the result files are written to a folder called @i{results}. A second input parameter is a numeric value @i{i} ranging from 1 to 10. The corresponding OpenMOLE script looks like this:
-@p @hl.openmole("""
-// Declare the variable
-val i = Val[Double]
-val input = Val[File]
-val inputName = Val[String]
-val output = Val[File]
-
-// R task
-// "path/on/your/system" is a path on the original system on which you packaged R
-val rTask = CARETask(workDirectory / "r.tgz.bin", "R --slave -f script.R --args ${i}") set (
-  (inputs, outputs) += (i, inputName),
-  inputFiles += (input, "data.csv"),
-  outputFiles += ("result.csv", output)
-)
-
-val exploration =
-  ExplorationTask(
-    (i in (1.0 to 10.0 by 1.0)) x
-    (input in (workDirectory / "data").files withName inputName)
-  )
-
-val copy = CopyFileHook(output, workDirectory / "result" / "${inputName}-${i}.csv")
-exploration -< (rTask hook copy hook ToStringHook())""")
-
-@p The @hl.openmole("CARETask") performs two actions: it first unarchives the CARE container by running @hl.highlight("r.tgz.bin", "plain"). Then the actual execution takes place as a second command. Note that for each execution of the @i("CARETask"), any command starting with @i("/") is @b{relative to the root of the CARE archive}, and @b{any other command is executed in the current directory}. The current directory @b{defaults to the original packaging directory}.
-
-@p Several notions from OpenMOLE are reused in this example. If you're not too familiar with
-@a("Hooks", href := DocumentationPages.hook.file) or
-@a("Samplings", href := DocumentationPages.advancedSampling.file), check the relevant sections of the
-documentation.
+    @p Several notions from OpenMOLE are reused in this example. If you're not too familiar with
+    @a("Hooks", href := DocumentationPages.hook.file) or
+    @a("Samplings", href := DocumentationPages.advancedSampling.file), check the relevant sections of the
+    documentation.

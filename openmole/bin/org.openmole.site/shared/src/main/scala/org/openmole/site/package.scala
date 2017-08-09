@@ -61,8 +61,15 @@ package object shared {
 
   object nativeModel {
     lazy val rExample = "An example with R"
-    lazy val pythonExample = "Another example with a Python script"
+    lazy val pythonExample = "Another example with Python"
     lazy val advancedOptions = "Advanced options"
+  }
+  object nativePackagingMenu {
+    lazy val introCARE = "Packaging with CARE"
+    lazy val advancedOptions = "Advanced Options"
+    lazy val localResources = "Using local Resources"
+    lazy val localExecutable = "Using local executable"
+
   }
 
   object netlogoMenu {
@@ -127,13 +134,13 @@ package object shared {
   object howToContributeMenu {
     lazy val prerequisites = "Prerequisites"
     lazy val firstTimeSetup = "First time setup"
-    lazy val buildAppFromSources = "Build App from Sources"
-    lazy val standaloneArchive = "Create a standalone archive"
+    lazy val buildAppFromSources = "Build from Sources"
+    lazy val standaloneArchive = "Standalone archive"
     lazy val compileDocker = "Compile within Docker"
     lazy val buildWebsite = "Build the website"
     lazy val repositories = "Repositories"
-    lazy val webpagesSources = "Edit the source of webpages"
-    lazy val devVersion = "Dev version (site and software)"
+    lazy val webpagesSources = "Edit Documentation pages"
+    lazy val devVersion = "Dev versions "
     lazy val projectOrganization = "Project organization"
     lazy val bugReport = "Bug Report"
     lazy val contributionProcedure = "Contribution procedure"
@@ -178,6 +185,7 @@ package object shared {
     lazy val branchingModel = "http://nvie.com/posts/a-successful-git-branching-model/"
     lazy val issue = "https://github.com/openmole/openmole/issues"
     lazy val next = "https://next.openmole.org/"
+    lazy val CAREsite = "https://proot-me.github.io/"
 
     object partner {
       lazy val iscpif = "http://iscpif.fr"
