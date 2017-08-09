@@ -80,6 +80,8 @@ object Resource {
       val sobolLHSID = methodResource("sobolLHSID.svg")
 
       val ancestors = methodResource("ancestors.png")
+
+      val legendOfIDs = methodResource("legendOfIDs.svg")
     }
 
     object environment {

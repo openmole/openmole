@@ -67,3 +67,16 @@ Calibration methods make an extensive use of @a("Genetic Algorithms", href := Do
 Specific task are available to handle the @a("stochasticity ", href := DocumentationPages.stochasticity.file) of your
 model
 as well as @a("distribution schemes", href := DocumentationPages.island.file) specifically designed for distributed computing environment.
+
+
+@h2
+    Methods characteristics
+    @br
+Each of OpenMOLE methods comes with an image summarizing the performance and  characteristics regarding criterion they have in common e.g. coverage rate of input/out of sensitivity to dimensionality.
+@break
+
+@Resource.rawFrag(Resource.img.method.legendOfIDs)
+
+@break
+
+These performance scores are defined relatively to each other and are not absolute values.
