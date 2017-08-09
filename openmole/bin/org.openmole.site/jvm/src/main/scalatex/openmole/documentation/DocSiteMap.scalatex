@@ -62,6 +62,8 @@ They are the three main steps of the OpenMOLE use case
                 @a("Desktop grid  ", href:= DocumentationPages.desktopGrid.file)
             @li
                 @a("Multithreading  ", href:= DocumentationPages.multithread.file)
+            @li
+                @a("Multicore server via SSH   ", href:= DocumentationPages.ssh.file)
 
 
 
@@ -71,16 +73,16 @@ They are the three main steps of the OpenMOLE use case
 The @a("tutorial page", href:= DocumentationPages.tutorial.file) gathers the tutorials and the Market Place with use cases.
 Tutorials available so far :
 @ul
-    @li{@a("Get started with OpenMOLE and a simple workflow", href := Pages.gettingStarted.file)}
+    @li{@a("Getting started with OpenMOLE and a simple workflow", href := Pages.gettingStarted.file)}
     @li{@aa("Calibrate a NetLogo model using genetic algorithms", href := DocumentationPages.netLogoGA.file)}
-
+    @li{@a("How to build a resumable workflow", href := DocumentationPages.resume.file)}
 
 
 
 @h2
     Details Pages
 
-These pages focus on a specific aspect of experimenting with OpenMOLE from scientific methods to code embedding.
+These pages focus on a specific aspect of experimenting with OpenMOLE, from scientific methods to code embedding.
 
 @ul
     @li
@@ -88,7 +90,16 @@ These pages focus on a specific aspect of experimenting with OpenMOLE from scien
     @li
         @a("Island repartition scheme", href:=DocumentationPages.island.file)
     @li
-        @a("Stochasticity Managment", href:=DocumentationPages.stochasticity.file)
+        @a("Stochasticity Management", href:=DocumentationPages.stochasticity.file)
+    @li
+        @a("Advanced Sampling", href:=DocumentationPages.advancedSampling.file)
+
+    @li
+        @a("Native Code Packaging", href:=DocumentationPages.nativePackaging.file)
+    @li
+        @a("Headless version of Netlog model", href:= DocumentationPages.headlessNetLogo.file)
+    @li
+        @a("CARE Task Options / NativeAPI ", href:=DocumentationPages.nativeAPI.file)
     @li
         @a("GUIGuide", href := DocumentationPages.gui.file),
     @li
@@ -100,35 +111,55 @@ These pages focus on a specific aspect of experimenting with OpenMOLE from scien
     Advanced Concepts
 
 The @a("advanced concepts", href:=DocumentationPages.advancedConcepts.file) page  gathers Technical documentation and Development Documentation
+@div(textIndent := "2em")
+    @h4
+        Technical Documentation
+    @ul
+        @li
+            @a("Transitions", href := DocumentationPages.transition.file),
+        @li
+            @a("Hook", href := DocumentationPages.hook.file),
+        @li
+            @a("Source", href := DocumentationPages.source.file),
+        @li
+            @a("Capsule", href := DocumentationPages.capsule.file),
 
-@h4
-    Technical Documentation
-@ul
-    @li
-        @a("Transitions", href := DocumentationPages.transition.file),
-    @li
-        @a("Hook", href := DocumentationPages.hook.file),
-    @li
-        @a("Source", href := DocumentationPages.source.file),
+    @h4
+        Development Documentation
 
-@h4
-    Development Documentation
-
-@ul
-    @li
-        @a("Plugin", href := DocumentationPages.plugin.file),
-    @li
-        @a("Webserver and Rest API", href := DocumentationPages.webserver.file),
-    @li
-        @a("Console mode", href := DocumentationPages.console.file),
+    @ul
+        @li
+            @a("Plugin", href := DocumentationPages.plugin.file),
+        @li
+            @a("Webserver and Rest API", href := DocumentationPages.webserver.file),
+        @li
+            @a("Console mode", href := DocumentationPages.console.file),
 
 
 
 @h2
-    Community
+    Community and Communication
 
 
-
+@ul
+    @li
+        @a("FAQ", href := Pages.faq.file),
+    @li
+        @a("Partners and collaborations ", href := Pages.partner.file),
+    @li
+        @a("Scientific papers using OpenMOLE ", href := Pages.communications.file)
+    @li
+        @a("Previous Versions of OpenMOLE", href := Pages.previousVersions.file),
+    @li
+        @a("Live Training sessions ", href := Pages.training.file),
+    @li
+        @a("Webserver and Rest API", href := DocumentationPages.webserver.file),
+    @li
+        @a("Who are we ? ", href := Pages.whoAreWe.file),
+    @li
+        @a("Home page", href := Pages.index.file)
+    @li
+        @a("Getting started with OpenMOLE", href := Pages.gettingStarted.file)
 
 
 

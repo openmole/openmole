@@ -1,6 +1,12 @@
 
 @import org.openmole.site.tools._
 @import org.openmole.site._
+@import org.openmole.site.NativeDocPageCommons._
+
+
+
+@introPackagingForRPythonCplusplus
+@hr
 
 @sect{Embedding a Python script}
 

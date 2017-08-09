@@ -12,7 +12,7 @@ object NativeDocPageCommons {
 
   def paragraph(body: Frag*): Frag = Seq[Frag](body)
 
-  def preamble = paragraph("In OpenMOLE, a generic task named ", hl.highlight("CARETask", "plain"), "offers to run external applications packaged with ", a("CARE", href := Resource.script.care.file),
+  def preamble = paragraph("In OpenMOLE, a generic task named ", hl.highlight("CARETask", "plain"), " offers to run external applications packaged with ", a("CARE", href := Resource.script.care.file),
     ". The site (proposing an outdated version of CARE for now, but a great documentation) can be found ", a("here", href := shared.link.CAREsite), ".",
     "CARE makes it possible to package your application from any Linux computer, and then re-execute it on any other Linux computer. The CARE / OpenMOLE pair is a very efficient way to distribute your application at very large scale with very little effort. Please note that this packaging step is only necessary if you plan distribute your workflow to an heterogeneous computing environment such as the EGI grid. If you target local clusters, running the same operating system and sharing a network file system, you can directly jump to the ", a("SystemExecTask", href := DocumentationPages.native.file + "#Usingalocalexecutable(innonportabletasks)"), ", section. TODO lien mort Native Usinglocal executable")
 
@@ -37,5 +37,10 @@ object NativeDocPageCommons {
   def secondStep = paragraph(p(b("Second"), ", just provide the resulting package along with some other information to OpenMOLE. Et voila! If you encounter any problem to package your application, please refer to the corresponding entry in the ", a("FAQ", href := Pages.faq.file + "#Ican'tgetCARE/PRoottowork")))
 
   def importantAspectCARE = paragraph(p("One very important aspect of CARE is that you only need to package your application @b{once}. As long as the execution you use to package your application makes uses of all the dependencies, you should not have any problem re-executing this archive with other parameters."))
+
+  def introPackagingForRPythonCplusplus = paragraph(
+    "Most of the time, model code is not designed to be portable. For now, OpenMOLE handles Java, Scala, NetLogo and R (in the near future) via specific Tasks, but it is still far from covering the languages used to develop models around the world.",
+    p("Meanwhile, you have to package your code using CARE, as explained on ", a("this page", href := DocumentationPages.nativePackaging.file), ". The followings contents expose directly how to handle your packaged model within OpenMOLE")
+  )
 
 }

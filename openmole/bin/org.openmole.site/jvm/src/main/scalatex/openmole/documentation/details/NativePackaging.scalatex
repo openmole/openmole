@@ -7,6 +7,9 @@
 
 
   @h1{Native Code Packaging}
+@break
+When your model is written in a language for which a specific OpenMOLE task doesn't exist, or if it uses an assembly of tools, libraries, binaries, etc..  you have to package it in a single piece of executable code, so that you can send it to any machine (with potentially varying OS installations). You will learn to do that on this page, thanks to the CARE packaging tool.
+@hr
 
 @sect{@shared.nativePackagingMenu.introCARE}
       @preamble
