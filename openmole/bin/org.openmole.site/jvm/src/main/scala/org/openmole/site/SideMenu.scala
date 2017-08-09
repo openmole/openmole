@@ -133,7 +133,8 @@ object SideMenu {
     shared.nativePackagingMenu.introCARE,
     shared.nativePackagingMenu.advancedOptions,
     shared.nativePackagingMenu.localResources,
-    shared.nativePackagingMenu.localExecutable
+    shared.nativePackagingMenu.localExecutable,
+    shared.nativePackagingMenu.troubleshooting
   )
 
   lazy val netlogoMenu = fromStrings(

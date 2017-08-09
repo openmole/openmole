@@ -49,9 +49,11 @@ $tasks
     You can try OpenMOLE online using the @aa("OpenMOLE demonstration site", href := "http://demo.openmole.org").
 
 @sect{Install it !}
-    OpenMOLE requires that Java version 8 or above is set as the default java on your computer. To make sure of that you can check our @a("FAQ", href := Pages.faq.file). Then just extract the archive, available HERE TODO pointer vers archive locale , somewhere and you're done! OpenMOLE is installed and works out of the box!
-
-    Once installed you can launch OpenMOLE by executing the @i{openmole} file in the installation directory (it is called @i{openmole.bat} for windozers). It will bring up you web browser. OpenMOLE supports Chrome and Firefox. So if you are using another default web browser please copy paste the OpenMOLE url (http://localhost:port) in one of these browser.
+    OpenMOLE requires that Java version 8 or above is set as the default java on your computer. To make sure of that you can check our @a("FAQ", href := Pages.faq.file).
+    @br
+    Then just extract the archive, available HERE TODO pointer vers archive locale , somewhere and you're done! OpenMOLE is installed and works out of the box!
+    @break
+    Once installed, you can launch OpenMOLE by executing the @i{openmole} file in the installation directory (it is called @i{openmole.bat} for windozers). It will bring up you web browser. OpenMOLE supports Chrome and Firefox. So if you are using another default web browser please copy paste the OpenMOLE url (http://localhost:port) in one of these browser.
   @p You should see something like this :
   @br
   @img(src := Resource.img.mole.uiScreenshot.file, `class` := "uiScreenshot").

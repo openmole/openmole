@@ -142,7 +142,6 @@ object DocumentationPages {
     native,
     nativeAPI,
     nativePackaging,
-    CARETroubleshooting,
     ccplusplus,
     rscript,
     python,
@@ -199,7 +198,7 @@ object DocumentationPages {
   lazy val native = DocumentationPage(
     name = "Other Languages",
     content = scalatex.documentation.language.model.Native(),
-    details = Seq(nativeAPI, nativePackaging, CARETroubleshooting),
+    details = Seq(nativeAPI, nativePackaging),
     extraMenu = Some(SideMenu.nativeMenu)
   )
 
@@ -209,11 +208,10 @@ object DocumentationPages {
     content = scalatex.documentation.details.NativePackaging(),
     extraMenu = Some(SideMenu.nativePackagingMenu)
   )
-  lazy val CARETroubleshooting = DocumentationPage(name = "CARE Troubleshooting", content = scalatex.documentation.details.CARETroubleShooting())
 
-  lazy val ccplusplus = DocumentationPage(name = "C++", location = Some("cplusplus"), content = scalatex.documentation.language.model.CCplusplus(), details = Seq(nativeAPI, nativePackaging, CARETroubleshooting))
-  lazy val rscript = DocumentationPage(name = "R Script", content = scalatex.documentation.language.model.RScript(), details = Seq(nativeAPI, nativePackaging, CARETroubleshooting))
-  lazy val python = DocumentationPage(name = "Python", content = scalatex.documentation.language.model.Python(), details = Seq(nativeAPI, nativePackaging, CARETroubleshooting))
+  lazy val ccplusplus = DocumentationPage(name = "C++", location = Some("cplusplus"), content = scalatex.documentation.language.model.CCplusplus(), details = Seq(nativeAPI, nativePackaging))
+  lazy val rscript = DocumentationPage(name = "R Script", content = scalatex.documentation.language.model.RScript(), details = Seq(nativeAPI, nativePackaging))
+  lazy val python = DocumentationPage(name = "Python", content = scalatex.documentation.language.model.Python(), details = Seq(nativeAPI, nativePackaging))
   lazy val netLogo = DocumentationPage(
     name = "NetLogo",
     content = scalatex.documentation.language.model.NetLogo()
@@ -256,7 +254,7 @@ object DocumentationPages {
 
   lazy val geneticalgo = DocumentationPage(name = "Genetic Algorithms", content = scalatex.documentation.details.GeneticAlgorithm())
   lazy val island = DocumentationPage(name = "Islands Scheme", content = scalatex.documentation.details.Island())
-  lazy val stochasticity = DocumentationPage(name = "Stochasticity mangement", content = scalatex.documentation.details.StochasticityManagement())
+  lazy val stochasticity = DocumentationPage(name = "Stochasticity management", content = scalatex.documentation.details.StochasticityManagement())
 
   lazy val profile = DocumentationPage(name = "Profiles", content = scalatex.documentation.language.method.Profile())
   lazy val pse = DocumentationPage(name = "PSE", content = scalatex.documentation.language.method.PSE())

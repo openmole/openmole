@@ -99,3 +99,7 @@ The utility of the CARE tool for reproducible science has been covered in the fo
     @p In this case the bash script might depend on program installed on the remote host. Similarly, we @b{assume the presence} of @hl.highlight("/bin/hostname", "plain") on the execution node. Therefore this task cannot be considered as portable.
 
     @p Note that each execution is isolated in separate folder on the execution host and that the task execution is considered as failed if the script return a value different from 0. If you need another behaviour you can use the same advanced options as the @i{CARETask} regarding the return code.
+
+@sect{@shared.nativePackagingMenu.troubleshooting}
+        @p You should always try to re-execute your application outside of OpenMOLE first. This allows you to ensure the packaging process with CARE was successful. If something goes wrong at this stage, you should check the official @a("CARE documentation", href := shared.link.CAREsite) or the archives of the @a("CARE mailing list", href := shared.link.CAREmailing).
+        @p If the packaged application re-executes as you'd expect, but you still struggle to embed it in OpenMOLE, then get in touch with our user community via our the @a("OpenMOLE user mailing-list", href := shared.link.mailingList) or @a("chat", href:=shared.link.chat).

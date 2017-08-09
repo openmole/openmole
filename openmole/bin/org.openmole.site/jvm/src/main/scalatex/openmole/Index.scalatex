@@ -19,7 +19,7 @@ You can describe how to @b{explore} your own model and how to @b{distribute} its
 @Main.build
 
 @div(stylesheet.centerJustify(100), paddingTop := 100)
-  @h2{Getting started}
+  @h2{GETTING STARTED}
   Take a tour in the @a("Getting started section", href := Pages.gettingStarted.file), with the @a("GUI guide", href := DocumentationPages.gui.file),
   in the @a("Documentation", href := DocumentationPages.model.file) and latter learn @a("Advanced concepts", href := DocumentationPages.advancedConcepts.file)
 

@@ -69,7 +69,7 @@ package object shared {
     lazy val advancedOptions = "Advanced Options"
     lazy val localResources = "Using local Resources"
     lazy val localExecutable = "Using local executable"
-
+    lazy val troubleshooting = "CARE Troubleshooting"
   }
 
   object netlogoMenu {
@@ -186,6 +186,7 @@ package object shared {
     lazy val issue = "https://github.com/openmole/openmole/issues"
     lazy val next = "https://next.openmole.org/"
     lazy val CAREsite = "https://proot-me.github.io/"
+    lazy val CAREmailing = "https://groups.google.com/forum/?fromgroups#!forum/reproducible"
 
     object partner {
       lazy val iscpif = "http://iscpif.fr"

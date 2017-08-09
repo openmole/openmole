@@ -37,7 +37,7 @@
 
     @p Packaging an application is done @b{once and for all} by running the original application against CARE. CARE's re-execution mechanisms allows you to change the original command line when re-running your application. This way you can update the parameters passed on the command line and the re-execution will be impacted accordingly. As long as all the configuration files, libraries, ... were used during the original execution, there is no need to package the application multiple times with different input parameters.
 
-    @p You can now upload this archive to your OpenMOLE workspace along with a @i{data.csv} file in a subfolder named data. Let's now explore a complete combination of all the data files with OpenMOLE. The input data files are located in @i{data} and the result files are written to a folder called @i{results}. A second input parameter is a numeric value @i{i} ranging from 1 to 10. The corresponding OpenMOLE script looks like this: TODO verifier si le commentaire concernant le path de rtask est juste
+    @p You can now upload this archive to your OpenMOLE workspace along with a @i{data.csv} file in a subfolder named data. Let's now explore a complete combination of all the data files with OpenMOLE. The input data files are located in @i{data} and the result files are written to a folder called @i{results}. A second input parameter is a numeric value @i{i} ranging from 1 to 10. The corresponding OpenMOLE script looks like this: TODO verifier si le commentaire concernant le path de rtask/CARETask  est juste
     @p @hl.openmole("""
     // Declare the variable
     val i = Val[Double]

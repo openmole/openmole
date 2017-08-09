@@ -3,70 +3,132 @@
 @import org.openmole.site._
 
 @h1
-    Documentation
+    Documentation Site Map (attempt)
 @p
-  Welcome to the OpenMOLE documentation.
-
-@p
-
-
-  OpenMOLE is a scientific workflow engine that works with your own programs and on your own execution environments.
-   OpenMOLE has a wide range of use cases from high-performance parameter tuning, to large datasets exploration, model
-   calibration, and pretty much any other thing you can think of :)
-
-@p
-
-    To specify your workflow in OpenMOLE you will use a high-level workflow language. To get started with OpenMOLE, you
-   might want to first have a look at the @a("getting started tutorial", href := Pages.gettingStarted.file) and at
-    @a("the OpenMOLE market place", href := "https://github.com/openmole/openmole-market") containing workflow examples,
-    and go through
-    the concept in OpenMOLE: @a("Tasks", href := DocumentationPages.model.file),
-     @a("Transitions", href := DocumentationPages.transition.file),
-     @a("Environments", href := DocumentationPages.environment.file),
-     Workflow, @a("Hooks", href := DocumentationPages.hook.file)...
-
-@p
-
-    The OpenMOLE community is very friendly. To get some help, don't hesitate to post your questions on the OpenMOLE
-  user mailing list: users 'at' list.openmole.org (you should @a("subscribe", href := "http://list.openmole.org/") first).
+  Welcome to the OpenMOLE documentation site map.
+  It's more a list than a map, in fact, but hey, layout propositions of the various pages are welcome !
 
 
-
-
-@h1
-    Contents of the Documentation
-
-    @a("Transitions", href := DocumentationPages.transition.file),
 
 
 @h2
     OpenMOLE Concepts
+They are the three main steps of the OpenMOLE use case
+@ul
+    @li
+        @a("1.Model", href := DocumentationPages.model.file),
+        @ul
+            @li
+                @a("Java Models", href:= DocumentationPages.java.file)
+            @li
+                @a("Scala Models", href:= DocumentationPages.scala.file)
+            @li
+                @a("R Models", href:= DocumentationPages.rscript.file)
+            @li
+                @a("C/C++ Models", href:= DocumentationPages.ccplusplus.file)
+            @li
+                @a("Python Models", href:= DocumentationPages.python.file)
+            @li
+                @a("Netlogo Models", href:= DocumentationPages.netLogo.file)
+            @li
+                @a("OpenMOLE Models", href:= DocumentationPages.mole.file)
+            @li
+                @a("Native Models", href:= DocumentationPages.native.file)
+    @li
+        @a("2.Method", href := DocumentationPages.method.file),
 
-    @a("1.Model", href := DocumentationPages.model.file),
-    @a("2.Method", href := DocumentationPages.method.file),
-    @a("3.Environment", href := DocumentationPages.environment.file),
+        @ul
+            @li
+                @a("Calibration method", href:= DocumentationPages.calibration.file)
+            @li
+                @a("PSE method", href:= DocumentationPages.pse.file)
+            @li
+                @a("Data processing ", href:= DocumentationPages.dataProcessing.file)
+            @li
+                @a("Calibration Profile method", href:= DocumentationPages.profile.file)
+            @li
+                @a("Other Design of Experiments", href:= DocumentationPages.otherDoE.file)
 
 
-@h3
+
+    @li
+        @a("3.Environment", href := DocumentationPages.environment.file),
+        @ul
+            @li
+                @a("Clusters", href:= DocumentationPages.cluster.file)
+            @li
+                @a("European Grid Infrastructure ", href:= DocumentationPages.egi.file)
+            @li
+                @a("Desktop grid  ", href:= DocumentationPages.desktopGrid.file)
+            @li
+                @a("Multithreading  ", href:= DocumentationPages.multithread.file)
+
+
+
+@h2
     Tutorials
 
-@h3
-    Details
+The @a("tutorial page", href:= DocumentationPages.tutorial.file) gathers the tutorials and the Market Place with use cases.
+Tutorials available so far :
+@ul
+    @li{@a("Get started with OpenMOLE and a simple workflow", href := Pages.gettingStarted.file)}
+    @li{@aa("Calibrate a NetLogo model using genetic algorithms", href := DocumentationPages.netLogoGA.file)}
+
+
 
 
 @h2
+    Details Pages
+
+These pages focus on a specific aspect of experimenting with OpenMOLE from scientific methods to code embedding.
+
+@ul
+    @li
+        @a("Genetic Algorithms", href := DocumentationPages.geneticalgo.file),
+    @li
+        @a("Island repartition scheme", href:=DocumentationPages.island.file)
+    @li
+        @a("Stochasticity Managment", href:=DocumentationPages.stochasticity.file)
+    @li
+        @a("GUIGuide", href := DocumentationPages.gui.file),
+    @li
+        @a("OpenMOLE language", href := DocumentationPages.language.file),
+
+
+
+@h2
+    Advanced Concepts
+
+The @a("advanced concepts", href:=DocumentationPages.advancedConcepts.file) page  gathers Technical documentation and Development Documentation
+
+@h4
     Technical Documentation
+@ul
+    @li
+        @a("Transitions", href := DocumentationPages.transition.file),
+    @li
+        @a("Hook", href := DocumentationPages.hook.file),
+    @li
+        @a("Source", href := DocumentationPages.source.file),
 
-    @a("Transitions", href := DocumentationPages.transition.file),
-    @a("Hook", href := DocumentationPages.hook.file),
-    @a("Source", href := DocumentationPages.source.file),
-
-
-@h2
-
+@h4
     Development Documentation
+
+@ul
+    @li
+        @a("Plugin", href := DocumentationPages.plugin.file),
+    @li
+        @a("Webserver and Rest API", href := DocumentationPages.webserver.file),
+    @li
+        @a("Console mode", href := DocumentationPages.console.file),
+
+
 
 @h2
     Community
+
+
+
+
 
 
