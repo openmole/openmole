@@ -160,7 +160,12 @@ We recognize the log from our initial code ! hurray !
 @break
 
 
-The results files , called something like @hl.highlight("cpp2.01.0.txt", "plain") are located at the root of the directory where we uploaded our care archive.
-This is not a smart move if you have a lot of file to manage, so we should put them in a result directory, to compress the whole thing and download the resulting archive of results .
+The results files , called something like @hl.highlight("cpp2.01.0.txt", "plain"), are located in the directory where we uploaded our CARE packaged code.
+This is not a smart move if you have a lot of file to manage, so we should put them in a result dedicated directory, in order to compress the whole thing at the end of the experiment and download the resulting archive of results .
+To do that , first we create a directory named  @hl.highlight("results", "plain") we modifiy the @hl.highlight("CopyFileHook", "plain") line by the following:
 
-    TODO finir
+
+    @hl.openmole("""
+    val copy = CopyFileHook(output, workDirectory /"results/cpp${arg1}${arg2}.txt")
+    """)
+
