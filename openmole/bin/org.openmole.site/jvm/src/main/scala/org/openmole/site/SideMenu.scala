@@ -128,6 +128,15 @@ object SideMenu {
     shared.nativeModel.advancedOptions
   )
 
+  lazy val nativePackagingMenu = fromStrings(
+    "Contents",
+    shared.nativePackagingMenu.introCARE,
+    shared.nativePackagingMenu.advancedOptions,
+    shared.nativePackagingMenu.localResources,
+    shared.nativePackagingMenu.localExecutable,
+    shared.nativePackagingMenu.troubleshooting
+  )
+
   lazy val netlogoMenu = fromStrings(
     "Contents",
     shared.netlogoMenu.simulation,

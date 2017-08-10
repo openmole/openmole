@@ -11,6 +11,7 @@
 
 This page is dedicated to explain the organization of the project, the tools you need and the procedures to follow if
 you want to contribute painlessly to the OpenMOLE project (software and documentation).
+It also explains the various versions of OpenMOLE you may want to use/deploy, from local desktop to distant server.
 
 @sect{@shared.howToContributeMenu.prerequisites}
 
@@ -134,7 +135,7 @@ you want to contribute painlessly to the OpenMOLE project (software and document
 
 @sect{@shared.howToContributeMenu.repositories}
 
-    @a("OpenMOLE repos", href:=shared.link.repo.openmole) are divided into three branches.
+    @aa("OpenMOLE repos", href:=shared.link.repo.openmole) are divided into three branches.
 
     @ul
         @li
@@ -156,15 +157,15 @@ you want to contribute painlessly to the OpenMOLE project (software and document
 
 
 @sect{@shared.howToContributeMenu.devVersion}
-    The development version of the OpenMOLE site and software is compiled and distributed several times an hour at @a( "this url", href := "http://next.openmole.org").
+    The development version of the OpenMOLE site and software is compiled and distributed several times an hour at @aa(shared.link.next, href := shared.link.next).
 
 @sect{@shared.howToContributeMenu.bugReport}
-    Please report bugs you may find in OpenMOLE on the @a("bug tracker", href := "https://github.com/openmole/openmole/issues").
+    Please report bugs you may find in OpenMOLE on the @aa("bug tracker", href := shared.link.issue).
 
 
 
 @sect{@shared.howToContributeMenu.contributionProcedure}
-    When you want to contribute to the project (code or documentation) we recommend that you start by submitting an @b{issue}
+    When you want to contribute to the project (code or documentation) we recommend that you to start by submitting an @aa("issue", href := shared.link.issue)
     , so that the community can identify the nature of the potential caveat.
     @br
     After that , send a @b{pull request} so that your potential changes can be discussed.

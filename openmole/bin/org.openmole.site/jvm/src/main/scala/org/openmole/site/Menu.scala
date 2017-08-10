@@ -38,7 +38,7 @@ object Menu {
         ),
         div(classIs(collapse ++ navbar_collapse), paddingTop := 10)(
           ul(classIs(nav ++ navbar_nav ++ navbar_right))(
-            li(innerLink(DocumentationPages.scala, "DOCUMENTATION"), liStyle),
+            li(innerLink(DocumentationPages.model, "DOCUMENTATION"), liStyle),
             li(outerLink("DEMO", shared.link.demo), liStyle),
             li(innerLink(DocumentationPages.tutorial, "EXAMPLES"), liStyle),
             li(innerLink(Pages.training, "TRAINING"), liStyle),

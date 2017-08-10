@@ -2,14 +2,14 @@
 @import org.openmole.site.tools._
 @import org.openmole.site._
 
-@p{Web Server}
-  Warning: The REST API of OpenMOLE is still experimental, it might be subject to some backward incompatible changes in the future.
+@sect{Web Server}
+    Warning: The REST API of OpenMOLE is still experimental, it might be subject to some backward incompatible changes in the future.
 
-  @p OpenMOLE ships with a web server providing a REST API to @b{start} workflows, @b{manage} their execution and @b{retrieve} their output data. To start the OpenMOLE REST API, run the command: "openmole --rest --port 8843" from the console. If you need to launch it automatically in a deamon for instance you should also you the --password-file argument to provide the password for encryption of the preferences.
+    @p OpenMOLE ships with a web server providing a REST API to @b{start} workflows, @b{manage} their execution and @b{retrieve} their output data. To start the OpenMOLE REST API, run the command: "openmole --rest --port 8843" from the console. If you need to launch it automatically in a deamon for instance you should also you the --password-file argument to provide the password for encryption of the preferences.
 
-  @p The web server can be accessed at the URL https://localhost:8443. Replace @i{localhost} with the remote machine's hostname or IP address if the web server is not running on your local system.
+    @p The web server can be accessed at the URL https://localhost:8443. Replace @i{localhost} with the remote machine's hostname or IP address if the web server is not running on your local system.
 
-  @p{API Reference}
+@sect{API Reference}
     @p The API of the web server uses exclusively the POST method:
     @ul
       @li{@b{token} - return a temporary token in order to use the web service. It has the following parameters:

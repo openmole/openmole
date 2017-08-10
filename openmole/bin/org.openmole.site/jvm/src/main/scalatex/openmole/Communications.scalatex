@@ -4,97 +4,85 @@
 
 
 @h1{Publications}
-@br
-@h2
-    How to cite OpenMOLE
 
-@ul
-    @li
-        Romain Reuillon, Mathieu Leclaire, Sebastien Rey-Coyrehourcq, «OpenMOLE, a workflow engine specifically tailored for
-        the distributed exploration of simulation models» published in @i{Future Generation Computer Systems}, 2013.
-        @br
-          @a("[editor version]" , href:="http://www.sciencedirect.com/science/article/pii/S0167739X13001027")
+@sect{How to cite OpenMOLE}
+    @ul
+        @li
+            Romain Reuillon, Mathieu Leclaire, Sebastien Rey-Coyrehourcq, «OpenMOLE, a workflow engine specifically tailored for
+            the distributed exploration of simulation models» published in @i{Future Generation Computer Systems}, 2013.
+            @br
+              @a("[editor version]" , href:="http://www.sciencedirect.com/science/article/pii/S0167739X13001027")
 
-          @a("[online preprint]" , href:="https://hal-paris1.archives-ouvertes.fr/hal-00840744/")
+              @a("[online preprint]" , href:="https://hal-paris1.archives-ouvertes.fr/hal-00840744/")
 
-           @a("[bibteX]", href:= Resource.bibtex.FGCSRefBib.file)  TODO lien direct download du fichier  pdf ?
-    @li
-        Romain Reuillon, Florent Chuffart, Mathieu Leclaire, Thierry Faure, Nicolas Dumoulin, and  David R.C. Hill,
-        «Declarative Task Delegation in OpenMOLE», proceedings of @i{High Performance Computing and Simulation (HPCS)}
-        international conference, 2010.
-        @br
-             @a("[editor version]" , href:="http://ieeexplore.ieee.org/document/5547155/")
+               @a("[bibteX]", href:= Resource.bibtex.FGCSRefBib.file)  TODO lien direct download du fichier  pdf ?
+        @li
+            Romain Reuillon, Florent Chuffart, Mathieu Leclaire, Thierry Faure, Nicolas Dumoulin, and  David R.C. Hill,
+            «Declarative Task Delegation in OpenMOLE», proceedings of @i{High Performance Computing and Simulation (HPCS)}
+            international conference, 2010.
+            @br
+                 @a("[editor version]" , href:="http://ieeexplore.ieee.org/document/5547155/")
 
-             @a("[bibteX]", href:= Resource.bibtex.HPCSRefBib.file) TODO lien direct download vers fichier pdf ?
+                 @a("[bibteX]", href:= Resource.bibtex.HPCSRefBib.file) TODO lien direct download vers fichier pdf ?
 
 
+@sect{Scientific Publications about OpenMOLE methods}
+    @ul
+        @li
+           Romain Reuillon, Clara Schmitt, Ricardo De Aldama, and Jean-Baptiste Mouret, «A New Method to Evaluate Simulation
+           Models: The Calibration Profile (CP) Algorithm » published in @i{Journal of Artificial Societies and Social Simulation}
+            (JASSS) , Vol 18, Issue 1, 2015.
+            @br
+                @a("[online version]" , href:="http://jasss.soc.surrey.ac.uk/18/1/12.html")  @a("[bibteX]", href:= Resource.bibtex.profilemethodBib.file)
 
-
-
-
-@h2
-    Scientific Publications about OpenMOLE methods
-
-
-@ul
-    @li
-       Romain Reuillon, Clara Schmitt, Ricardo De Aldama, and Jean-Baptiste Mouret, «A New Method to Evaluate Simulation
-       Models: The Calibration Profile (CP) Algorithm » published in @i{Journal of Artificial Societies and Social Simulation}
-        (JASSS) , Vol 18, Issue 1, 2015.
-        @br
-            @a("[online version]" , href:="http://jasss.soc.surrey.ac.uk/18/1/12.html")  @a("[bibteX]", href:= Resource.bibtex.profilemethodBib.file)
-
-    @li
-        Guillaume Chérel, Clémentine Cottineau and Romain Reuillon, « Beyond Corroboration: Strengthening Model
-        Validation by Looking for Unexpected Patterns» published in @i{PLOS ONE} 10(9), 2015.
-        @br
-            @a("[online version]" , href:="http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0138212")  @a("[bibteX]", href:= Resource.bibtex.PSEmethodBib.file)
+        @li
+            Guillaume Chérel, Clémentine Cottineau and Romain Reuillon, « Beyond Corroboration: Strengthening Model
+            Validation by Looking for Unexpected Patterns» published in @i{PLOS ONE} 10(9), 2015.
+            @br
+                @a("[online version]" , href:="http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0138212")  @a("[bibteX]", href:= Resource.bibtex.PSEmethodBib.file)
 
 
 
 
 
-@h2
-    (a selection of) Scientific papers/conference proceedings using OpenMOLE features
+@sect{(a selection of) Scientific papers/conference proceedings using OpenMOLE features}
+    @ul
+        @li
+            Clara Schmitt, Sébastien Rey-Coyrehourcq, Romain Reuillon and Denise Pumain, «Half a billion simulations:
+            Evolutionary algorithms and distributed computing for calibrating the SimpopLocal geographical model» published
+            in @i{Environment and Planning B: Urban Analytics and City Science}, Vol 42, Issue 2, 2015.
+            @br
+                @a("[open-access version]", href:="https://hal.archives-ouvertes.fr/hal-01118918")   @a("[editor version]", href:="http://journals.sagepub.com/doi/abs/10.1068/b130064p")  @a("[bibteX]", href:= Resource.bibtex.halfbillionBib.file)
 
 
-@ul
-    @li
-        Clara Schmitt, Sébastien Rey-Coyrehourcq, Romain Reuillon and Denise Pumain, «Half a billion simulations:
-        Evolutionary algorithms and distributed computing for calibrating the SimpopLocal geographical model» published
-        in @i{Environment and Planning B: Urban Analytics and City Science}, Vol 42, Issue 2, 2015.
-        @br
-            @a("[open-access version]", href:="https://hal.archives-ouvertes.fr/hal-01118918")   @a("[editor version]", href:="http://journals.sagepub.com/doi/abs/10.1068/b130064p")  @a("[bibteX]", href:= Resource.bibtex.halfbillionBib.file)
+        @li
+            Clémentine Cottineau, Paul Chapron and Romain Reuillon, «Growing models from the bottom up. An evaluation-based
+             incremental modelling method (EBIMM) applied to the simulation of systems of cities», published in
+             @i{Journal of Artificial Societies and Social Simulation} (JASSS) , Vol 18, Issue 4,  2015.
+             @br
+                @a("[online version]" , href:="http://jasss.soc.surrey.ac.uk/18/4/9.html")   @a("[bibteX]", href:= Resource.bibtex.EBIMMBib.file)
 
 
-    @li
-        Clémentine Cottineau, Paul Chapron and Romain Reuillon, «Growing models from the bottom up. An evaluation-based
-         incremental modelling method (EBIMM) applied to the simulation of systems of cities», published in
-         @i{Journal of Artificial Societies and Social Simulation} (JASSS) , Vol 18, Issue 4,  2015.
-         @br
-            @a("[online version]" , href:="http://jasss.soc.surrey.ac.uk/18/4/9.html")   @a("[bibteX]", href:= Resource.bibtex.EBIMMBib.file)
+        @li
+
+            Clémentine Cottineau, Romain Reuillon, Paul Chapron Sébastien Rey-Coyrehourcq and Denise Pumain, «A modular
+            modelling framework for hypotheses testing in the simulation of urbanisation», published in @i{Systems}, Vol 3,
+            Issue 4, 2015.
+            @br
+                @a("[open-access version]" , href:="http://www.mdpi.com/2079-8954/3/4/348")   @a("[bibteX]", href:= Resource.bibtex.EBIMMBib.file)
 
 
-    @li
-
-        Clémentine Cottineau, Romain Reuillon, Paul Chapron Sébastien Rey-Coyrehourcq and Denise Pumain, «A modular
-        modelling framework for hypotheses testing in the simulation of urbanisation», published in @i{Systems}, Vol 3,
-        Issue 4, 2015.
-        @br
-            @a("[open-access version]" , href:="http://www.mdpi.com/2079-8954/3/4/348")   @a("[bibteX]", href:= Resource.bibtex.EBIMMBib.file)
+        @li
+            SAGEO 2017 (To be added) TODO ajouter bibtex quand c'est publié
 
 
-    @li
-        SAGEO 2017 (To be added) TODO ajouter bibtex quand c'est publié
-
-
-    @li
-         Jonathan Passerat-Palmbach, Romain Reuillon, Mathieu Leclaire, Antonios Makropoulos, Emma C. Robinson, Sarah
-         Parisot and Daniel Rueckert,« Reproducible Large-Scale Neuroimaging Studies with the OpenMOLE Workflow
-         Management System», published in @i{Frontiers in Neuroinformatics}, Vol 11, 2017.
-          @br
-                @a("[online version]" , href:="http://journal.frontiersin.org/article/10.3389/fninf.2017.00021/full#")
-                 @a("[bibteX]", href:= Resource.bibtex.frontierBib.file)
+        @li
+             Jonathan Passerat-Palmbach, Romain Reuillon, Mathieu Leclaire, Antonios Makropoulos, Emma C. Robinson, Sarah
+             Parisot and Daniel Rueckert,« Reproducible Large-Scale Neuroimaging Studies with the OpenMOLE Workflow
+             Management System», published in @i{Frontiers in Neuroinformatics}, Vol 11, 2017.
+              @br
+                    @a("[online version]" , href:="http://journal.frontiersin.org/article/10.3389/fninf.2017.00021/full#")
+                     @a("[bibteX]", href:= Resource.bibtex.frontierBib.file)
 
 
 

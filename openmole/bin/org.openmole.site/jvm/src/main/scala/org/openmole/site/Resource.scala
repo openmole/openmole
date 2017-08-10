@@ -34,7 +34,6 @@ object Resource {
   def moleResource(name: String) = imgResource(s"mole/$name")
   def exampleResource(name: String) = imgResource(s"example/$name")
   def guiGuideResource(name: String) = imgResource(s"guiGuide/$name")
-  def paperResource(name: String) = imgResource(s"paper/$name")
 
   def jsResource(name: String) = fileResource(s"js/$name")
 
@@ -43,6 +42,8 @@ object Resource {
   def scriptResource(name: String) = fileResource(s"script/$name")
 
   def bibtexResource(name: String) = fileResource(s"bibtex/$name")
+
+  def paperResource(name: String) = fileResource(s"paper/$name")
 
   def fileResource(name: String) = FileResource(name)
 
@@ -79,6 +80,8 @@ object Resource {
       val sobolLHSID = methodResource("sobolLHSID.svg")
 
       val ancestors = methodResource("ancestors.png")
+
+      val legendOfIDs = methodResource("legendOfIDs.svg")
     }
 
     object environment {
