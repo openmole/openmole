@@ -140,7 +140,7 @@ exploration -< (cppTask hook copy on env)
     @br
     First, create a directory to put our CARE archive (see the @a("GUI guide", href:= DocumentationPages.gui.file))
     @br
-    Then, inside this directory,  create a new file, give it a name and a @b{.oms} extension. This is our OmpenMOLE scrit.
+    Then, inside this directory,  create a new file, give it a name and a @b{.oms} extension. This is our OmpenMOLE script.
     @br
     Finally,  paste the script above and press "Play".
 
