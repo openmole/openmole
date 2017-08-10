@@ -158,7 +158,7 @@ the @hl.highlight("PROOT_NO_SECCOMP", "plain") environment variable to be set to
 
 @div For more information about this specific problem, you can join this @a("discussion", href := "https://github.com/proot-me/PRoot/issues/106").
 
-@div{I get an error relate to file on linux and there is "too many open files" written somewhere in the error}
+@question("I get an error relate to file on linux and there is 'too many open files' written somewhere in the error")
 @div On linux server the number of file a use can open is generally limited to 1024. OpenMOLE increase it to 4096 when on launch, but it doesn't seem to work on your system, you might want to understand why. To check the current of you system limit execute @i{ulimit -a} in a terminal:
 
 @div @hl.highlight("""

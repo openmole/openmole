@@ -7,5 +7,160 @@
 
 @introPackagingForRPythonCplusplus
 @hr
-TODO tout reste à faire
 
+
+@sect{Example C++ code}
+    The toy model for this example is the following :
+    @break
+    @hl.highlight("""
+    #include <iostream>
+    #include <sstream>
+    #include <fstream>
+    using namespace std;
+
+    double* model_computation(double param1, double param2, double output[]){
+      std::cout << "model computation with  parameters " << param1 << "and " << param2 << " \n" ;
+      output[0] = param1 * 10 ;
+      output[1] = param2 * 20 ;
+      return output ;
+    }
+
+    int main(int argc , char* argv[]){
+      // extract args from command line
+      std::istringstream iss1 (argv[1]) ;
+      std::istringstream iss2 (argv[2]) ;
+      double val1 ;
+      double val2 ;
+      double output[2];
+
+      if (iss1 >> val1 && iss2 >> val2 ){
+       double* result = model_computation(val1, val2, output) ; //model computation call
+       std::cout << "log : compute first result "<< result[0] << '\n' ;
+       std::cout << "log : compute second result " <<  result[1]  << '\n' ;
+       //CSV file dump
+       ofstream myfile;
+       myfile.open ("results.txt");
+       myfile << result[0] << ','<< result[1]<< "\n";
+       myfile.close();
+       return 0;
+     }
+     else{
+       std::cout << "Wrong arg : not a double " ;
+       return -1;
+     }
+    }""", "C++")
+
+    @br
+    In this toy example, the "model code" is outside the main function, on purpose.
+    @br
+     The main function has three steps: first the inputs are extracted from command line, then the model function called with extracted values,  and finally the results are displayed on standard output, and  written in a text file.
+
+@sect{Packaging it with CARE}
+
+    before launching CARE on this piece of code, lets check that the compilation/exec is ok, for the code itself :
+
+
+    @hl.highlight("""
+    >g++ hello_world.cpp
+    >./a.out 12.24 24
+    """, "shell")
+    @br
+    we obtain the following result :
+    @hl.highlight("""
+    model computation with  parameters 12.24and 24
+    log : compute first result 122.4
+    log : compute second result 480
+    """, "shell")
+
+    @break
+
+    IN the directory where the @b("hello_world.cpp") file is, (N.B. we used the 64 bit version of CARE. The normal CARE version may not work on OpenMOLE, depending on the kind of CPU your target environment has TODO vérifier que je raconte pas de conneries sur les architectures et CARE) we do :
+
+    @hl.highlight("""
+    care-x86_64 -o ./cpp.tgz.bin -r ~ ./a.out 12.24 24
+    """, "shell")
+
+    Producing the following output :
+
+    @hl.highlight("""
+care info: concealed path: $HOME /home/paul
+care info: concealed path: /tmp
+care info: revealed path: $PWD /home/paul/dev/cppExampleDocOpenMOLE
+care info: revealed path: /home/paul/dev/cppExampleDocOpenMOLE/a.out
+care info: revealed path: /home/paul
+care info: ----------------------------------------------------------------------
+main function call
+model computation with  parameters 12.34and 24
+log : compute first result 122.4
+log : compute second result 480
+care info: ----------------------------------------------------------------------
+care info: Hints:
+care info:   - search for "conceal" in `care -h` if the execution didn't go as expected.
+care info:   - run `././cpp.tgz.bin` or `care -x ./cpp.tgz.bin` to extract the output archive correctly.
+        """, "plain")
+
+    @br
+
+    Notice the lines written in between the care info messages: there are the log message of our initial code. Everything is ok so far.
+    @br
+    Two files have been created during the packaging : @hl.highlight("cpp.tgz.bin", "plain") and @hl.highlight("results.txt", "plain"), the CARE archive and the results file.
+@sect{Running it in OpenMOLE}
+
+    We will now use OpenMOLE @b("ExplorationTask") to run the model several times with different values, with this script:
+
+
+    @hl.openmole("""
+// Declare the variables (from the OpenMOLE point of view)
+val arg1 = Val[Double]
+val arg2 = Val[Double]
+val output = Val[File]
+
+// exploration of the inputs range
+val exploration = ExplorationTask(
+ (arg1 in (0.0 to 5.0 by 1.0)) x
+  (arg2 in (0.0 until 4.0 by 1.0))
+)
+
+//  the care task for our archive
+val cppTask =
+  CARETask(workDirectory / "cpp.tgz.bin", "./a.out  ${arg1} ${arg2}") set (
+    inputs += (arg1, arg2),
+    outputFiles += ("results.txt", output),
+    outputs += (arg1, arg2)
+  )
+
+// we fetch the data via a CopyFileHook, for each input combination
+val copy = CopyFileHook(output, workDirectory / "cpp${arg1}${arg2}.txt")
+// we run that locally , on 4 cores
+val env = LocalEnvironment(4)
+// the workflow
+exploration -< (cppTask hook copy on env)
+""")
+
+    @br
+    First, create a directory to put our CARE archive (see the @a("GUI guide", href:= DocumentationPages.gui.file))
+    @br
+    Then, inside this directory,  create a new file, give it a name and a @b{.oms} extension. This is our OmpenMOLE scrit.
+    @br
+    Finally,  paste the script above and press "Play".
+
+    @break
+
+    Looking at the output stream , we have lines looking like
+    @hl.highlight("""
+    model computation with  parameters 4and 2
+    log : compute first result 40
+    log : compute second result 40
+    model computation with  parameters 3and 9
+    log : compute first result 30
+    log : compute second result 180""", "plain")
+@br
+
+We recognize the log from our initial code ! hurray !
+@break
+
+
+The results files , called something like @hl.highlight("cpp2.01.0.txt", "plain") are located at the root of the directory where we uploaded our care archive.
+This is not a smart move if you have a lot of file to manage, so we should put them in a result directory, to compress the whole thing and download the resulting archive of results .
+
+    TODO finir

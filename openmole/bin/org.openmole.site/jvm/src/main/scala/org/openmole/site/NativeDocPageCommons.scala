@@ -21,7 +21,7 @@ object NativeDocPageCommons {
   def listInstallCARE = htmlList(
     listItem("download the CARE binary from ", a("here", href := Resource.script.care.file)),
     listItem("make it executable (", hl.highlight("chmod +x care", "plain"), ")"),
-    listItem("add the path to the executable to your PATH variable (", hl.highlight("export PATH=/path/to/the/care/folder:$PATH", "plain"))
+    listItem("add the path to the executable to your PATH variable (", hl.highlight("export PATH=/path/to/the/care/folder:$PATH", "plain"), ")")
   )
 
   def paragraphEmbed = paragraph(p("The ", hl.openmole("CARETask"), " has been designed to embed native binaries such as programs compiled from C, C++, Fortran, Python, R, Scilab... Embedding an application in a ", hl.openmole("CARETask"), "happens in 2 steps:"))
