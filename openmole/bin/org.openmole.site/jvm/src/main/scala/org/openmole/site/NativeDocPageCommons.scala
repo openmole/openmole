@@ -21,7 +21,7 @@ object NativeDocPageCommons {
   def listInstallCARE = htmlList(
     listItem("download the CARE binary from ", a("here", href := Resource.script.care.file)),
     listItem("make it executable (", hl.highlight("chmod +x care", "plain"), ")"),
-    listItem("add the path to the executable to your PATH variable (", hl.highlight("export PATH=/path/to/the/care/folder:$PATH", "plain"))
+    listItem("add the path to the executable to your PATH variable (", hl.highlight("export PATH=/path/to/the/care/folder:$PATH", "plain"), ")")
   )
 
   def paragraphEmbed = paragraph(p("The ", hl.openmole("CARETask"), " has been designed to embed native binaries such as programs compiled from C, C++, Fortran, Python, R, Scilab... Embedding an application in a ", hl.openmole("CARETask"), "happens in 2 steps:"))
@@ -40,7 +40,7 @@ object NativeDocPageCommons {
 
   def introPackagingForRPythonCplusplus = paragraph(
     "Most of the time, model code is not designed to be portable. For now, OpenMOLE handles Java, Scala, NetLogo and R (in the near future) via specific Tasks, but it is still far from covering the languages used to develop models around the world.",
-    p("Meanwhile, you have to package your code using CARE, as explained on ", a("this page", href := DocumentationPages.nativePackaging.file), ". The followings contents expose directly how to handle your packaged model within OpenMOLE")
+    p("Meanwhile, you have to package your code using CARE, as explained in the ", a("Native Packaging section", href := DocumentationPages.nativePackaging.file, targetBlank), ". The followings contents expose directly how to handle your packaged model within OpenMOLE")
   )
 
 }
