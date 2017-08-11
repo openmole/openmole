@@ -187,6 +187,7 @@ package object shared {
     lazy val next = "https://next.openmole.org/"
     lazy val CAREsite = "https://proot-me.github.io/"
     lazy val CAREmailing = "https://groups.google.com/forum/?fromgroups#!forum/reproducible"
+    lazy val ggplot2 = "http://ggplot2.tidyverse.org/reference/"
 
     object partner {
       lazy val iscpif = "http://iscpif.fr"

@@ -138,6 +138,9 @@ exploration -< (cppTask hook copy on env)
 """)
 
     @br
+
+    In this script, we use a @a("Hook", href := DocumentationPages.hook.file) to catch the output file ; check its page for more details.
+    @br
     First, create a directory to put our CARE archive (see the @a("GUI guide", href:= DocumentationPages.gui.file))
     @br
     Then, inside this directory,  create a new file, give it a name and a @b{.oms} extension. This is our OmpenMOLE script.

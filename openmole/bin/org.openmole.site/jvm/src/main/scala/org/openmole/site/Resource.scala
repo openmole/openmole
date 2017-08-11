@@ -82,6 +82,11 @@ object Resource {
       val ancestors = methodResource("ancestors.png")
 
       val legendOfIDs = methodResource("legendOfIDs.svg")
+
+      val densityBurned = methodResource("densityBurned.svg")
+      val densityBurnedZoom = methodResource("densityBurnedZoom.svg")
+      val densitySeedBox = methodResource("densitySeedBox.svg")
+
     }
 
     object environment {
