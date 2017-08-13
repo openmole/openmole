@@ -18,12 +18,10 @@
 package org.openmole.site
 
 import org.openmole.site.tools._
+import org.openmole.site.tools.api._
 import scalatags.Text.all._
 
 object Environment {
-
-  def envEntryTitle(entryName: String): Frag = Seq[Frag](b(entryName), ": ")
-  def newEntry(name: String, body: Frag*): Frag = Seq[Frag](envEntryTitle(name), body)
 
   def provideOptions = """You also can set options by providing additional parameters to the environment (..., option = value, ...)"""
   def wallTime = newEntry("walltime", " the maximum time a job is permitted to run before being killed, for instance ", hl.openmoleNoTest("wallTime = 1 hour"))

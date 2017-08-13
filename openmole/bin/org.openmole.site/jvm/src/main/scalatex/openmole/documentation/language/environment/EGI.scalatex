@@ -1,5 +1,6 @@
 @import org.openmole.site._
 @import org.openmole.site.tools._
+@import org.openmole.site.tools.api._
 @import org.openmole.site.Environment._
 
 
@@ -32,14 +33,14 @@ EGIAuthentication() = P12Certificate(encrypted, "/path/to/your/certificate.p12")
 
     @p Options available for DIRAC are:
     @ul
-      @li{@envEntryTitle{cpuTime} the maximum duration for the job in terms of CPU consumption, for instance 1 hour,}
+      @li{@apiEntryTitle{cpuTime} the maximum duration for the job in terms of CPU consumption, for instance 1 hour,}
       @li{@openMOLEMemory,}
-      @li{@envEntryTitle{service} a DIRAC REST API,}
-      @li{@envEntryTitle{group} the name of the DIRAC group,}
-      @li{@envEntryTitle{bdii} the BDII to use for listing resources accessible from this VO. The BDII in your preference file is used, when this field is left unspecified.}
-      @li{@envEntryTitle{vomsURL} the URL of the VOMS server used for the authentication,}
-      @li{@envEntryTitle{fqan} additional flags for authentication,}
-      @li{@envEntryTitle{setup} setup to use on the DIRAC server. It is set to "Dirac-Production" by default,}
+      @li{@apiEntryTitle{service} a DIRAC REST API,}
+      @li{@apiEntryTitle{group} the name of the DIRAC group,}
+      @li{@apiEntryTitle{bdii} the BDII to use for listing resources accessible from this VO. The BDII in your preference file is used, when this field is left unspecified.}
+      @li{@apiEntryTitle{vomsURL} the URL of the VOMS server used for the authentication,}
+      @li{@apiEntryTitle{fqan} additional flags for authentication,}
+      @li{@apiEntryTitle{setup} setup to use on the DIRAC server. It is set to "Dirac-Production" by default,}
       @li{@name.}
 
     @p The @hl.openmoleNoTest{EGIEnvironment} can be tuned using the previous options as in this example:
