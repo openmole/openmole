@@ -70,6 +70,7 @@ package object shared {
     lazy val localResources = "Using local Resources"
     lazy val localExecutable = "Using local executable"
     lazy val troubleshooting = "CARE Troubleshooting"
+    lazy val nativeAPI = "Native API"
   }
 
   object netlogoMenu {

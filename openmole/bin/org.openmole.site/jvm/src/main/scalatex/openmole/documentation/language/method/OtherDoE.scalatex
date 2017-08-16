@@ -41,7 +41,7 @@ By defining your own exploration task on @a("several types of input", href:= sha
     minimized).
     @br The sampling does not reveal anything about the output space structure, as there is no reason than evenly spaced inputs lead
     to evenly spaced outputs.
-    Basic sampling is hampered by input space dimensionality as high dimension spaces need a lot of samples to be covered.
+    Basic sampling is hampered by input space dimensionality as high dimension spaces need a lot of samples to be covered, as well as a lot of memory to store them.
 
     @break
     Complete sampling is declared as an @b{ExplorationTask}, where the bounds and discretisation quantum of each input to vary  are declared
@@ -210,7 +210,6 @@ By defining your own exploration task on @a("several types of input", href:= sha
     @p Typical Sensitivity analysis (in a simulation experiment  context) is the study of how the variation of an input
     affect the output(s) of a model. Basically it
 
-    TODO: Fix sensitivity animation
     @Resource.rawFrag(Resource.img.method.sensitivityAnim)
 
     @basicButton("Run", classIs(btn ++ btn_danger))(id := shared.sensitivity.button, stylesheet.svgRunButton(10))
@@ -324,7 +323,7 @@ We obtain the following results, displayed as boxplots every percent (but result
 @br
     As we can see, stochasticity has an high effect right in the middle of the transition of regime, reaching maximum at 54%.
     Another interesting thing to investigate what would be the density from which the fire propagates to the end of the zone (right side of NetLogo World). A slight modification of the model code would do the trick (hint:
-    @hl.highlight("any? patches with-max [pxcor] ... ","plain") would be a good starting point :-) but we let you do it on your own (any successful attempt would win the right to be displayed right here ! ) 
+    @hl.highlight("any? patches with-max [pxcor] ... ","plain") would be a good starting point :-) but we let you do it on your own (any successful attempt would win the right to be displayed right here ! )
 
 
 @p

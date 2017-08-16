@@ -95,11 +95,10 @@ These pages focus on a specific aspect of experimenting with OpenMOLE, from scie
         @a("Advanced Sampling", href:=DocumentationPages.advancedSampling.file)
 
     @li
-        @a("Native Code Packaging", href:=DocumentationPages.nativePackaging.file)
+        @a("Native Code Packaging, CARE Task Options", href:=DocumentationPages.nativePackaging.file)
     @li
         @a("Headless version of Netlog model", href:= DocumentationPages.headlessNetLogo.file)
-    @li
-        @a("CARE Task Options / NativeAPI ", href:=DocumentationPages.nativeAPI.file)
+
     @li
         @a("GUIGuide", href := DocumentationPages.gui.file),
     @li

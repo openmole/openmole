@@ -64,6 +64,10 @@ The utility of the CARE tool for reproducible science has been covered in the fo
 
     @p You will note that @b{options holding a single value} are set using the @hl.openmoleNoTest(":=") operator. Also, the OpenMOLE variables containing the standard and error outputs are @b{automatically marked as outputs} of the task, and must not be added to the @hl.openmoleNoTest("outputs") list.
 
+@sect{@shared.nativePackagingMenu.nativeAPI}
+    TODO insert API options here
+
+
 @sect{@shared.nativePackagingMenu.localResources}
     @p To access data present on the execution node (outside the CARE filesystem) you should use a dedicated option of the @i{CARETask}: @i{hostFiles}. This option takes the path of a file on the execution host and binds it to the same path in the CARE filesystem. Optionally you can provide a second argument to specify the path explicitly. For instance:
     @br @hl.openmole("""

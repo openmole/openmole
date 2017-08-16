@@ -45,7 +45,9 @@
     @p Two things should be noted from this example:
      @ul
        @li{The procedure to package an application @b{is always the same} regardless of the underlying programming language / framework used.}
-       @li{The CARETask is not different from the @a("SystemExecTask", href := DocumentationPages.native.file + "#Usingalocalexecutable(innonportabletasks)") TODO refaire le lien pointer vers native packaging, to the extent of the archive given as a first parameter.}
-    These two aspects make it really easy to embed native applications in OpenMOLE.
+       @li{The CARETask is not different from the @a("SystemExecTask", href := DocumentationPages.nativePackaging.anchor(shared.nativePackagingMenu.localExecutable)), to the extent of the archive given as a first parameter.}
+
+
+     These two aspects make it really easy to embed native applications in OpenMOLE.
 
 
