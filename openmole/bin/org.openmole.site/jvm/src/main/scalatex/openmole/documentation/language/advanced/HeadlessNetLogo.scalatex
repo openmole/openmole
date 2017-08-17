@@ -2,6 +2,7 @@
 
 @import org.openmole.site.tools._
 @import org.openmole.site._
+@import org.openmole.site.stylesheet._
 
 @h1{Build a headless version of a NetLogo code}
 
@@ -10,14 +11,14 @@ For this combination to work, some rules have to be applied to your program.
 
 @sect{Guidelines}
     @ul
-    @li{ Limit your usage of widget implicit globals. We prefer explicit globals using the globals primitive, because
+    @li{ @b{Limit your usage of widget implicit globals.} We prefer explicit globals using the globals primitive, because
     you need to re-define all the important values from your program in OpenMoLE before you launch it on a remote
     computing environment.}
-    @li{ Do not use the same functions @i{setup} and @i{go} to setup your program on a remote environment. On the remote environment,
+    @li{ @b{Do not use the same functions @i{setup} and @i{go} to setup your program on a remote environment}. On the remote environment,
     the NetLogo program is initialised and launched only once, so there is no need to call a @i{clear-all} primitive with each
     setup. When running on distributed environments, @i{clear-all} is @b{not} your best friend. @i{clear-all} erases all the
     globals passed by OpenMoLE to your program before it starts and will make it crash.}
-    @li{ Do not directly use the implicit globals created by means of a widget. Although you can you can access and
+    @li{ @b{Do not directly use the implicit globals created by means of a widget.} Although you can you can access and
     overwrite implicit globals in OpenMole, it prevents OpenMoLE from mapping explicitly its Prototypes to the NetLogo
     globals.}
 
@@ -33,34 +34,41 @@ For this combination to work, some rules have to be applied to your program.
     models prior to any run of your NetLogo models in OpenMOLE.
 
 @sect{Application to the Fire model}
-    @i{Fire} has a widget slider named @i{density} which is a global implicit.
+    @i{Fire.nlogo} has a widget slider named @i{density} which is a global implicit.
 
-    @br @img(src := Resource.img.example.fireScreen.file)
+    @break @img(src := Resource.img.example.fireScreen.file)
 
     @p This excerpt shows the @i{initial-trees} and @i{burned-trees} variables which are explicit globals. They can be
     used directly in OpenMOLE.
 
-    @br @img(src := Resource.img.example.fireGlobals.file)
+    @br @img(src := Resource.img.example.fireGlobals.file, center(50))
 
     @p We propose here a simple method to better organise your code in order to make it manipulable by OpenMOLE:
     @ul
-    @li{First we do not use the implicit globals, so we create an explicit global variable @i{myDensity} corresponding
-    to the implicit one (@i{density}) :
-      @img(src := Resource.img.example.fireNewGlobals.file)
-    }
-    @li{Second, we use this new variable in the setup procedure:
-      @img(src := Resource.img.example.fireMyDensity.file)
-    }
-    @li{At this moment, your program does not work any more in NetLogo, @b{it’s normal, don’t panic :)}.
-      @img(src := Resource.img.example.fireNewFunction.file)
-    }
-    @li{Fourth, we call this function in our setup function, after the clear-all primitives.
-      @img(src := Resource.img.example.fireOldSetup.file)
-    }
-    @li{Now, the program works in NetLogo’s graphical mode. We still need to create another setup function without the
-     call to @i{clear-all} and to @i{init-globals}. Remember that these two calls don't cope well with distributed
-     executions.
-      @img(src := Resource.img.example.fireRemoveClearAll.file)
+    @li
+        First we do not use the implicit globals, so we create an @b{explicit global variable}, @i{myDensity}, corresponding to the implicit one (@i{density}) :
+        @br
+        @img(src := Resource.img.example.fireNewGlobals.file, center(60))
+
+    @li
+        Second, we use this new variable in the setup procedure (it replaces the former):
+        @br
+        @img(src := Resource.img.example.fireMyDensity.file, center(55))
+        @break
+        And we update the explicit variable with the former implicit density variable
+        @img(src := Resource.img.example.fireNewFunction.file, center(70))
+                @br
+        At this moment, your program does not work any more in NetLogo, @b{it’s normal, don’t panic :)}.
+        @break
+    @li
+        Third, we call this function in our setup function, after the clear-all primitives.
+        @img(src := Resource.img.example.fireOldSetup.file, center(50))
+
+    @li
+        Now, the program works in NetLogo’s graphical mode. We still need to create another setup function without the
+        call to @i{clear-all} and to @i{init-globals}. Remember that these two calls don't cope well with distributed
+        executions.
+      @img(src := Resource.img.example.fireRemoveClearAll.file,center(50) )
     }
 
     @p The program is now ready to be parameterised and manipulated by OpenMOLE \o/

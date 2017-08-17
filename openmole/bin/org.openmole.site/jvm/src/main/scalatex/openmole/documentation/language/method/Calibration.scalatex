@@ -56,7 +56,7 @@ For more details on the calibration using genetic algorithms, see the @a("GA det
     of your model outputs, which is not bad after all !
     @br
     Multi-criteria Calibration is more robust to the dimensionality of the inputs because ?
-    TODO guillaume / romain : pourquoi c'est un peu moins sensible à la dimensionalité en input que le mon objectif ? ?
+    TODO guillaume / romain : pourquoi c'est un peu moins sensible à la dimensionalité en input que le mono objectif ? ?
 
     @break
 
