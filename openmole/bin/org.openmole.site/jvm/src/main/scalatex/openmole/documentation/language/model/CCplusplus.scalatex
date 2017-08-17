@@ -9,7 +9,7 @@
 @hr
 
 
-@sect{Example C++ code}
+@sect{C++ code example}
     The toy model for this example is the following :
     @break
     @hl.highlight("""
@@ -75,6 +75,7 @@
     @break
 
     IN the directory where the @b("hello_world.cpp") file is, (N.B. we used the 64 bit version of CARE. The normal CARE version may not work on OpenMOLE, depending on the kind of CPU your target environment has TODO vérifier que je raconte pas de conneries sur les architectures et CARE) we do :
+    Please see the @a("Native packaging page", href:=DocumentationPages.nativePackaging.file) for more details.
 
     @hl.highlight("""
     care-x86_64 -o ./cpp.tgz.bin -r ~ ./a.out 12.24 24

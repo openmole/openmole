@@ -144,5 +144,6 @@ So if you want to reach specific target values, like Pi and 42  you should have 
     Obviously, maximization problem are  performed by taking the opposite of variables as objectives.
 
     @br@br
-    TODO pointer vers example tutorial NetlogoGA
+@sect{Real world Example}
+    @a("This tutorial exposes", href:=DocumentationPages.netLogoGA.file)  how to use Genetic Algorithms to perform optimization on a NetlogModel.
 

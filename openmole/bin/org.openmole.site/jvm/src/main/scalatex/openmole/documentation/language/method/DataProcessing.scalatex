@@ -52,7 +52,7 @@ Model inputs come in many shapes; this is why OpenMOLE features some file handli
     Path describes a file's location but not its content.
     The explored files won't be automatically copied by OpenMOLE in this case, so this does not fit a grid environment for instance.
     @br
-    More details on the difference between manipulating Files and Paths can be found in the dedicated entry of the FAQ. TODO lien interne à la FAQ
+    More details on the difference between manipulating Files and Paths can be found in the dedicated entry of the @aa("FAQ", href:=Pages.faq.file).
     @br
     @br
     If you wish to select one single file for each value of i you may use the @hl.highlight("select", "plain") operation:

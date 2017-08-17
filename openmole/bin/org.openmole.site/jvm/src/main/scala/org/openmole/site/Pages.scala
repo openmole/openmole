@@ -140,7 +140,6 @@ object DocumentationPages {
     scala,
     java,
     native,
-    nativeAPI,
     nativePackaging,
     ccplusplus,
     rscript,
@@ -198,20 +197,19 @@ object DocumentationPages {
   lazy val native = DocumentationPage(
     name = "Other Languages",
     content = scalatex.documentation.language.model.Native(),
-    details = Seq(nativeAPI, nativePackaging),
+    details = Seq(nativePackaging),
     extraMenu = Some(SideMenu.nativeMenu)
   )
 
-  lazy val nativeAPI = DocumentationPage(name = "Native API", content = scalatex.documentation.details.NativeAPI())
   lazy val nativePackaging = DocumentationPage(
     name = "Native Packaging",
     content = scalatex.documentation.details.NativePackaging(),
     extraMenu = Some(SideMenu.nativePackagingMenu)
   )
 
-  lazy val ccplusplus = DocumentationPage(name = "C++", location = Some("cplusplus"), content = scalatex.documentation.language.model.CCplusplus(), details = Seq(nativeAPI, nativePackaging))
-  lazy val rscript = DocumentationPage(name = "R Script", content = scalatex.documentation.language.model.RScript(), details = Seq(nativeAPI, nativePackaging))
-  lazy val python = DocumentationPage(name = "Python", content = scalatex.documentation.language.model.Python(), details = Seq(nativeAPI, nativePackaging))
+  lazy val ccplusplus = DocumentationPage(name = "C++", location = Some("cplusplus"), content = scalatex.documentation.language.model.CCplusplus(), details = Seq(nativePackaging))
+  lazy val rscript = DocumentationPage(name = "R Script", content = scalatex.documentation.language.model.RScript(), details = Seq(nativePackaging))
+  lazy val python = DocumentationPage(name = "Python", content = scalatex.documentation.language.model.Python(), details = Seq(nativePackaging))
   lazy val netLogo = DocumentationPage(
     name = "NetLogo",
     content = scalatex.documentation.language.model.NetLogo()
