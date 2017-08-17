@@ -30,7 +30,7 @@ import scalaz.Reader
 
 object Pages {
 
-  val index = Page("Home", scalatex.Index(), title = Some("OpenMOLE: scientific workflow, distributed computing, parameter tuning"))
+  val index = Page("index", scalatex.Index(), title = Some("OpenMOLE: scientific workflow, distributed computing, parameter tuning"))
 
   def gettingStarted = Page("Getting started", scalatex.GettingStarted(), title = Some("Getting started with OpenMOLE - introductory tutorial"))
 
