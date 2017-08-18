@@ -49,6 +49,12 @@ package object tools {
     )
   }
 
+  object api {
+
+    def apiEntryTitle(entryName: String): Frag = Seq[Frag](b(entryName), ": ")
+    def newEntry(name: String, body: Frag*): Frag = Seq[Frag](apiEntryTitle(name), body)
+  }
+
   object hl extends Highlighter {
 
     object OptionalName {
