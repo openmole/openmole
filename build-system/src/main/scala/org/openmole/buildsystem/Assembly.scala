@@ -43,18 +43,16 @@ object Assembly {
 
   private def rename(srcPath: File, depMap: Map[Regex, String ⇒ String]) =
     depMap.keys.find(
-      _.findFirstIn(srcPath.getName).isDefined
-    ).map(k ⇒ depMap(k)(srcPath.getName)).getOrElse {
-      srcPath.getName
-    }
+      _.findFirstIn(srcPath.getName).isDefined).map(k ⇒ depMap(k)(srcPath.getName)).getOrElse {
+        srcPath.getName
+      }
 
   private def copyLibraryDependencies(
     externalDependencies: Seq[Attributed[File]],
     out:                  File,
     rename:               ModuleID ⇒ String,
     depFilter:            (ModuleID, Artifact) ⇒ Boolean,
-    streams:              TaskStreams
-  ) = {
+    streams:              TaskStreams) = {
     (externalDependencies).distinct.flatMap { attributed ⇒
       (attributed.get(Keys.moduleID.key), attributed.get(Keys.artifact.key)) match {
         case (Some(moduleId), Some(artifact)) ⇒
@@ -91,9 +89,7 @@ object Assembly {
         assemblyDependenciesPath.value,
         dependencyName.value,
         dependencyFilter.value,
-        streams.value
-      )
-  )
+        streams.value))
 
   def urlDownloader(urls: Seq[(URL, String)], assembleDir: File, ivyPaths: IvyPaths, s: TaskStreams) = {
     val targetDir = ivyPaths.ivyHome.get / "cache" / "url"

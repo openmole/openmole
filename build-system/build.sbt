@@ -1,7 +1,7 @@
 import scalariform.formatter.preferences._
 import com.typesafe.sbt.SbtScalariform.ScalariformKeys
 
-scalariformSettings
+scalariformSettings(autoformat = true)
 
 ScalariformKeys.preferences := ScalariformKeys.preferences (p =>
   p.setPreference(DoubleIndentClassDeclaration, true)
@@ -18,7 +18,7 @@ name := "openmole-buildsystem-plugin"
 
 organization := "org.openmole"
 
-resolvers += Classpaths.sbtPluginSnapshots
+//resolvers += Classpaths.sbtPluginSnapshots
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-osgi" % "0.9.1")
 
@@ -29,4 +29,3 @@ libraryDependencies ++= Seq(
   "com.jsuereth" %% "scala-arm" % "1.3",
   "org.apache.commons" % "commons-compress" % "1.10")
 
-releaseSettings

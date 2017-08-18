@@ -22,8 +22,7 @@ object OsgiProject {
 
     install in Compile := (publishLocal in Compile).value,
     installRemote in Compile := (publish in Compile).value,
-    bundleType := Set("default")
-  )
+    bundleType := Set("default"))
 
   def apply(
     directory:       File,
@@ -35,8 +34,7 @@ object OsgiProject {
     bundleActivator: Option[String]  = None,
     dynamicImports:  Seq[String]     = Seq(),
     imports:         Seq[String]     = Seq("*;resolution:=optional"),
-    global:          Boolean         = false
-  ) = {
+    global:          Boolean         = false) = {
 
     val base = directory / artifactId
     val exportedPackages = if (exports.isEmpty) Seq(artifactId + ".*") else exports
@@ -57,8 +55,7 @@ object OsgiProject {
       OsgiKeys.privatePackage := privatePackages,
       OsgiKeys.dynamicImportPackage := dynamicImports,
       OsgiKeys.importPackage := imports,
-      OsgiKeys.bundleActivator := (OsgiKeys.bundleActivator { bA ⇒ bundleActivator.orElse(bA) }).value
-    )
+      OsgiKeys.bundleActivator := (OsgiKeys.bundleActivator { bA ⇒ bundleActivator.orElse(bA) }).value)
   }
 }
 
@@ -69,7 +66,6 @@ object OsgiGUIProject {
     artifactId: String,
     ext:        ClasspathDep[ProjectReference],
     client:     ClasspathDep[ProjectReference],
-    server:     ClasspathDep[ProjectReference]
-  ) = OsgiProject(directory, artifactId) dependsOn (ext, client, server)
+    server:     ClasspathDep[ProjectReference]) = OsgiProject(directory, artifactId) dependsOn (ext, client, server)
 
 }

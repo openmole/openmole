@@ -25,8 +25,7 @@ object TarPlugin extends AutoPlugin {
     tarName := "assemble.tar.gz",
     tarPath := target.value / tarName.value,
     tarInnerFolder := "",
-    tar := tarImpl(tarFolder.value, tarPath.value, target.value, tarInnerFolder.value, streams.value)
-  )
+    tar := tarImpl(tarFolder.value, tarPath.value, target.value, tarInnerFolder.value, streams.value))
 
   def tarImpl(folder: File, tarFile: File, target: File, innerFolder: String, streams: TaskStreams): File = {
     val out = tarFile

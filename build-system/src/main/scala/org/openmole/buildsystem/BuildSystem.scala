@@ -23,7 +23,6 @@ object BuildSystem {
           .setPreference(RewriteArrowSymbols, true)
           .setPreference(AlignParameters, true)
           .setPreference(AlignSingleLineCaseStatements, true)
-          .setPreference(CompactControlReadability, true)).value
-    ) ++ scalariformSettings
+          .setPreference(CompactControlReadability, true)).value) ++ scalariformSettings
 
 }
