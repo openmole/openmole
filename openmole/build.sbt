@@ -12,7 +12,7 @@ name := "openmole-root"
 def macroParadise =
   addCompilerPlugin("org.scalamacros" %% "paradise" % "2.1.0" cross CrossVersion.fullMapped(_ ⇒ scalaVersionValue))
 
-lazy val scalaVersionValue = "2.12.2"
+lazy val scalaVersionValue = "2.12.3"
 
 def defaultSettings = BuildSystem.settings ++
   Seq(
