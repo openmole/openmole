@@ -7,11 +7,6 @@ import scalatags.Text.all._
 
 object NativeDocPageCommons {
 
-  def listItem(content: Frag*): Frag = li(content)
-  def htmlList(items: Frag*): Frag = ul(items)
-
-  def paragraph(body: Frag*): Frag = Seq[Frag](body)
-
   def preamble = paragraph("In OpenMOLE, a generic task named ", hl.highlight("CARETask", "plain"), " offers to run external applications packaged with ", a("CARE", href := Resource.script.care.file),
     ". The site (proposing an outdated version of CARE for now, but a great documentation) can be found ", a("here", href := shared.link.CAREsite), ".",
     "CARE makes it possible to package your application from any Linux computer, and then re-execute it on any other Linux computer. The CARE / OpenMOLE pair is a very efficient way to distribute your application at very large scale with very little effort. Please note that this packaging step is only necessary if you plan distribute your workflow to an heterogeneous computing environment such as the EGI grid. If you target local clusters, running the same operating system and sharing a network file system, you can directly jump to the ", a("SystemExecTask", href := DocumentationPages.native.file + "#Usingalocalexecutable(innonportabletasks)"), ", section. TODO lien mort Native Usinglocal executable")

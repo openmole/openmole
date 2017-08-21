@@ -27,6 +27,11 @@ package object tools {
   import scalatags.Text.all._
   import scalatex.site.{ Highlighter, Section }
 
+  def listItem(content: Frag*): Frag = li(content)
+  def htmlList(items: Frag*): Frag = ul(items)
+
+  def paragraph(body: Frag*): Frag = Seq[Frag](body)
+
   def question(content: String) = div(`class` := "question", content)
 
   def aa = a(targetBlank)
