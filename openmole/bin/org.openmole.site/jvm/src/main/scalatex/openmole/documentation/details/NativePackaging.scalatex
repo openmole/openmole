@@ -1,5 +1,6 @@
 @import org.openmole.site.tools._
 @import org.openmole.site._
+@import org.openmole.site.tools.api._
 @import org.openmole.site.NativeDocPageCommons._
 
 @SideMenu.nativePackagingMenu.toBlock.left(320)
@@ -71,8 +72,28 @@ The utility of the CARE tool for reproducible science has been covered in the fo
     @p You will note that @b{options holding a single value} are set using the @hl.openmoleNoTest(":=") operator. Also, the OpenMOLE variables containing the standard and error outputs are @b{automatically marked as outputs} of the task, and must not be added to the @hl.openmoleNoTest("outputs") list.
 
 @sect{@shared.nativePackagingMenu.nativeAPI}
-    TODO insert API options here
+  You can configure the execution of the @hl.openmoleNoTest{CARETask} using the @hl.openmoleNoTest{set} operator on a freshly defined task.
 
+   @hl.openmole{
+   val out = Val[Int]
+
+   val careTask = CARETask("care.tgz.bin", "executable arg1 arg2 /path/to/my/file /virtual/path arg4") set (
+     hostFiles += ("/path/to/my/file"),
+     workDirectory := "/tmp",
+     returnValue := out
+   )
+   }
+
+  The available options are described hereafter:
+
+  @ul
+     @li{@apiEntryTitle{hostFiles} takes the path of a file on the execution host and binds it to the same path in the CARE filesystem. Optionally you can provide a second argument to specify the path explicitly. @i{Example:} @hl.openmoleNoTest{hostFiles += ("/etc/hosts")} @i{or with a specific path} @hl.openmoleNoTest{hostFiles += ("/etc/bash.bashrc", "/home/foo/.bashrc")}}
+     @li{@apiEntryTitle{environmentVariables} is used to set the value of an environment variable within the context of the execution. @i{Example:} @hl.openmoleNoTest{environmentVariables += ("VARIABLE1", "42")}. Multiple hl.openmoleNoTest{hostFiles} entries can be used within the same @hl.openmoleNoTest{set} block.}
+     @li{@apiEntryTitle{workDirectory} sets the directory within the archive where to start the execution from. @i{Example:} @hl.openmoleNoTest{workDirectory := "/tmp"}}
+     @li{@apiEntryTitle{returnValue} captures the return code of the execution in an OpenMOLE @hl.openmoleNoTest{Val[Int]} variable. @i{Example:} @hl.openmoleNoTest{returnValue := out}}
+     @li{@apiEntryTitle{errorOnReturnValue} tells OpenMOLE to ignore a return code different from 0. The task won't be resubmitted. @i{Example:} @hl.openmoleNoTest{errorOnReturnValue := false}}
+     @li{@apiEntryTitle{stdOut} captures the standard output of the execution in an OpenMOLE @hl.openmoleNoTest{Val[String]} variable. @i{Example:} @hl.openmoleNoTest{stdOut := output}}
+     @li{@apiEntryTitle{stdErr} captures the error ouput of the execution in an OpenMOLE @hl.openmoleNoTest{Val[String]} variable. @i{Example:} @hl.openmoleNoTest{stdErr := error}}
 
 @sect{@shared.nativePackagingMenu.localResources}
     @p To access data present on the execution node (outside the CARE filesystem) you should use a dedicated option of the @i{CARETask}: @i{hostFiles}. This option takes the path of a file on the execution host and binds it to the same path in the CARE filesystem. Optionally you can provide a second argument to specify the path explicitly. For instance:
