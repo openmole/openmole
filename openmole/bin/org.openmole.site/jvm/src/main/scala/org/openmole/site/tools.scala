@@ -3,7 +3,6 @@ package org.openmole.site
 import java.util.UUID
 
 import scalatags.Text.TypedTag
-import scalatags.generic.StylePair
 
 /*
  * Copyright (C) 01/04/16 // mathieu.leclaire@openmole.org
@@ -32,7 +31,19 @@ package object tools {
 
   def paragraph(body: Frag*): Frag = Seq[Frag](body)
 
-  def question(content: String) = div(`class` := "question", content)
+  /** heavily inspired from Section.scala */
+  object links {
+
+    def munge(name: String): String = name.replace(" ", "")
+
+    def anchor(name: String) = a(
+      name,
+      href := s"#${munge(name)}",
+      i(cls := "fa fa-link")
+    )
+  }
+
+  def question(content: String) = div(`class` := "question", id := links.munge(content), links.anchor(content))
 
   def aa = a(targetBlank)
 
@@ -104,7 +115,7 @@ package object tools {
 
   def outerLink(linkName: String, link: String, otherTab: Boolean = true) = to(link, otherTab = true)(span(linkName))
 
-  // CONVINIENT KEYS
+  // CONVENIENT KEYS
   implicit class SString(ss: String) {
     def ++(s: String) = s"$ss $s"
   }
