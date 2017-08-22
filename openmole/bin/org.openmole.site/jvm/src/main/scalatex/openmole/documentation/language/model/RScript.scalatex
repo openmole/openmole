@@ -78,4 +78,7 @@
     @p Several notions from OpenMOLE are reused in this example. If you're not too familiar with
     @a("Hooks", href := DocumentationPages.hook.file) or
     @a("Samplings", href := DocumentationPages.advancedSampling.file), check the relevant sections of the
-    documentation. You can also read more about packaging your native models for OpenMOLE in @a("the dedicated section", href := DocumentationPages.nativePackaging.file).
+    documentation.
+
+    @hr
+    @NativeDocPageCommons.footer

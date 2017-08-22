@@ -40,14 +40,7 @@
     val env = LocalEnvironment(4)
     exploration -< (pythonTask hook copy on env by 2)""")
 
-    @p Notions from OpenMOLE are reused in this example. If you're not too familiar with @a("Environments", href := DocumentationPages.environment.file) or @a("Groupings", href := DocumentationPages.environment.file + "#Grouping"), check the relevant sections of the documentation.
+    @p Notions from OpenMOLE are reused in this example. If you're not too familiar with @a("Environments", href := DocumentationPages.environment.file), @a("Groupings", href := DocumentationPages.environment.file + "#Grouping"), @a("Hooks", href := DocumentationPages.hook.file) or @a("Samplings", href := DocumentationPages.advancedSampling.file), check the relevant sections of the documentation.
 
-    @p Two things should be noted from this example:
-     @ul
-       @li{The procedure to package an application @b{is always the same} regardless of the underlying programming language / framework used.}
-       @li{The @hl.openmoleNoTest{CARETask} is not different from the @a("SystemExecTask", href := DocumentationPages.nativePackaging.anchor(shared.nativePackagingMenu.localExecutable)), to the extent of the archive given as a first parameter.}
-
-
-     These two aspects make it really @b{easy to embed native applications} in OpenMOLE.
-
-
+    @hr
+    @NativeDocPageCommons.footer
