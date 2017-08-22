@@ -193,7 +193,7 @@ package object shared {
     object partner {
       lazy val iscpif = "http://iscpif.fr"
       lazy val parisgeo = "http://www.parisgeo.cnrs.fr/"
-      lazy val biomedic = "http://biomedic.doc.ic.ac.uk/"
+      lazy val biomedia = "https://biomedia.doc.ic.ac.uk/"
       lazy val idf = "https://www.iledefrance.fr/"
       lazy val paris = "https://www.paris.fr/"
       lazy val ign = "http://www.ign.fr/"
