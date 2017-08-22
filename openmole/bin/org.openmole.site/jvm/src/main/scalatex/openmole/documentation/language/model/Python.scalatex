@@ -20,7 +20,9 @@
     @p This script is saved to @i{hello.py}. We first package it using CARE:
     @br @hl.highlight("""care -o hello.tgz.bin python hello.py 42 test.txt""", "plain")
 
-    @p We can now run it in OpenMOLE using the following script:
+    @NativeDocPageCommons.scriptsCommon("python", "python hello.py 42 test.txt")
+
+    @p You can now @b{upload this archive to your OpenMOLE workspace} and run it using the following script:
     @br @hl.openmole("""
     // Declare the variable
     val arg = Val[Int]
