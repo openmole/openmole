@@ -18,7 +18,7 @@
     exit(0)""", "python")
 
     @p This script is saved to @i{hello.py}. We first package it using CARE:
-    @hl.highlight("""care -o hello.tgz.bin python hello.py 42 test.txt""", "plain")
+    @br @hl.highlight("""care -o hello.tgz.bin python hello.py 42 test.txt""", "plain")
 
     @p We can now run it in OpenMOLE using the following script:
     @br @hl.openmole("""
@@ -40,14 +40,14 @@
     val env = LocalEnvironment(4)
     exploration -< (pythonTask hook copy on env by 2)""")
 
-    @p Notions from OpenMOLE are reused in this example. If you're not too familiar with @a("Environments", href := DocumentationPages.environment.file) or @i{Groupings}, check the relevant sections of the documentation.
+    @p Notions from OpenMOLE are reused in this example. If you're not too familiar with @a("Environments", href := DocumentationPages.environment.file) or @a("Groupings", href := DocumentationPages.environment.file + "#Grouping"), check the relevant sections of the documentation.
 
     @p Two things should be noted from this example:
      @ul
        @li{The procedure to package an application @b{is always the same} regardless of the underlying programming language / framework used.}
-       @li{The CARETask is not different from the @a("SystemExecTask", href := DocumentationPages.nativePackaging.anchor(shared.nativePackagingMenu.localExecutable)), to the extent of the archive given as a first parameter.}
+       @li{The @hl.openmoleNoTest{CARETask} is not different from the @a("SystemExecTask", href := DocumentationPages.nativePackaging.anchor(shared.nativePackagingMenu.localExecutable)), to the extent of the archive given as a first parameter.}
 
 
-     These two aspects make it really easy to embed native applications in OpenMOLE.
+     These two aspects make it really @b{easy to embed native applications} in OpenMOLE.
 
 
