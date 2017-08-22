@@ -17,8 +17,7 @@
     f.write(sys.argv[1])
     exit(0)""", "python")
 
-    @p This script is saved to @i{hello.py}. We first package it using CARE:
-    @br @hl.highlight("""care -o hello.tgz.bin python hello.py 42 test.txt""", "plain")
+    @p We save this to @i{hello.py}. It does nothing but printing its first argument to the file passed as a second argument.
 
     @NativeDocPageCommons.scriptsCommon("python", "python hello.py 42 test.txt")
 
