@@ -79,7 +79,7 @@ The utility of the CARE tool for reproducible science has been covered in the fo
 
   @ul
      @li{@apiEntryTitle{hostFiles} takes the path of a file on the execution host and binds it to the same path in the CARE filesystem. Optionally you can provide a second argument to specify the path explicitly. @i{Example:} @hl.openmoleNoTest{hostFiles += ("/etc/hosts")} @i{or with a specific path} @hl.openmoleNoTest{hostFiles += ("/etc/bash.bashrc", "/home/foo/.bashrc")}}
-     @li{@apiEntryTitle{environmentVariables} is used to set the value of an environment variable within the context of the execution. @i{Example:} @hl.openmoleNoTest{environmentVariables += ("VARIABLE1", "42")}. Multiple hl.openmoleNoTest{hostFiles} entries can be used within the same @hl.openmoleNoTest{set} block.}
+     @li{@apiEntryTitle{environmentVariables} is used to set the value of an environment variable within the context of the execution. @i{Example:} @hl.openmoleNoTest{environmentVariables += ("VARIABLE1", "42")}. Multiple @hl.openmoleNoTest{hostFiles} entries can be used within the same @hl.openmoleNoTest{set} block.}
      @li{@apiEntryTitle{workDirectory} sets the directory within the archive where to start the execution from. @i{Example:} @hl.openmoleNoTest{workDirectory := "/tmp"}}
      @li{@apiEntryTitle{returnValue} captures the return code of the execution in an OpenMOLE @hl.openmoleNoTest{Val[Int]} variable. @i{Example:} @hl.openmoleNoTest{returnValue := out}}
      @li{@apiEntryTitle{errorOnReturnValue} tells OpenMOLE to ignore a return code different from 0. The task won't be resubmitted. @i{Example:} @hl.openmoleNoTest{errorOnReturnValue := false}}
