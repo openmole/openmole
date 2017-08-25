@@ -176,6 +176,7 @@ package object shared {
     lazy val geodivercity = "http://geodivercity.parisgeo.cnrs.fr/blog/"
     lazy val ercSpringer = "http://www.springer.com/fr/book/9783319464954"
     lazy val git = "https://git-scm.com/"
+    lazy val gitlfs = "https://git-lfs.github.com/"
     lazy val sbt = "http://www.scala-sbt.org/"
     lazy val scala = "http://www.scala-lang.org/"
     lazy val scalaBook = "http://www.scala-lang.org/node/959"
@@ -185,6 +186,7 @@ package object shared {
     lazy val netlogoAnts = "http://ccl.northwestern.edu/netlogo/models/Ants"
     lazy val branchingModel = "http://nvie.com/posts/a-successful-git-branching-model/"
     lazy val issue = "https://github.com/openmole/openmole/issues"
+    lazy val pullRequests = "https://github.com/openmole/openmole/pulls"
     lazy val next = "https://next.openmole.org/"
     lazy val CAREsite = "https://proot-me.github.io/"
     lazy val CAREmailing = "https://groups.google.com/forum/?fromgroups#!forum/reproducible"
@@ -201,7 +203,7 @@ package object shared {
 
     object repo {
       lazy val openmole = "https://github.com/openmole/openmole"
-      lazy val market = "https://gitlab.iscpif.fr/openmole/market"
+      lazy val market = "https://github.com/openmole/openmole-market"
       lazy val gridscale = "https://github.com/openmole/gridscale"
       lazy val scaladget = "https://github.com/openmole/scaladaget"
       lazy val scalawui = "https://github.com/openmole/scalaWUI"
