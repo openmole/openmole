@@ -116,7 +116,7 @@ lazy val netlogo5 = OsgiProject(
       "asm" % "asm-all" % "3.3.1" % "provided",
       "org.picocontainer" % "picocontainer" % "2.13.6" % "provided"), version := netLogo5Version, scalaVersion := "2.9.2", crossPaths := false) settings(settings: _*)
 
-lazy val netLogo6Version = "6.0.1"
+lazy val netLogo6Version = "6.0.2"
 
 lazy val netlogo6 = OsgiProject(
   dir,
