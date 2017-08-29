@@ -20,7 +20,7 @@ It also explains the various versions of OpenMOLE you may want to use/deploy, fr
         @li
             A java 8 @b{jdk} or higher (N.B. not only the JRE). Check your version by typing @hl.highlight("javac -version","plain") in a terminal
         @li
-            the @a("git" ,href:=shared.link.git) software
+            the @a("git" ,href:=shared.link.git) software and the @a("LFS" ,href:=shared.link.gitlfs) extension
         @li
             @a("sbt" ,href:=shared.link.sbt) , the scala  building tool
 
@@ -33,13 +33,13 @@ It also explains the various versions of OpenMOLE you may want to use/deploy, fr
     @ol
         @li
             Clone the OpenMOLE repository : @hl.highlight("""
-            git clone git@github.com:openmole/openmole.git
+            git lfs clone git@github.com:openmole/openmole.git
             """, "plain")
          @li
             Set the git submodules inside the openmole subdirectory
         @hl.highlight("""
         cd openmole
-        git submodule update --init
+        git submodule update --init --remote
         """, "plain")
         @li
             Publish locally the content of the  @hl.highlight("build-system", "plain") and  @hl.highlight("libraries", "plain") subdirectory
@@ -50,13 +50,13 @@ It also explains the various versions of OpenMOLE you may want to use/deploy, fr
            sbt publishLocal
            """, "plain")
 
-     These commands may take some time (few minutes at least)
+     These commands may take some time (a few minutes at least).
 
 
 
 @sect{@shared.howToContributeMenu.buildAppFromSources}
 
-    To build the OpenMOLE, use the @hl.highlight("sbt assemble","plain") command inside openmole subdirectory.
+    To build the OpenMOLE application, use the @hl.highlight("sbt assemble","plain") command inside openmole subdirectory.
 
 
     @hl.highlight("""
@@ -100,11 +100,10 @@ It also explains the various versions of OpenMOLE you may want to use/deploy, fr
 
 @sect{@shared.howToContributeMenu.buildWebsite}
 
-    The source code of the website and the OpenMOLE's documentation are hosted along in the code repository.
+    The source code of the website and the OpenMOLE documentation are hosted along in the code repository.
     You might spot a typo/incorrect spelling/grammar mistake/bad wording or simply want to improve a part of the
     documentation you think is unclear.
-    If so, you're more than welcome to correct our mistakes and improve the documentation. To check your changes before
-     sending us a Pull Request, here is how to build a local copy of the website/documentation.
+    If so, you're more than welcome to correct our mistakes and improve the documentation. To check your changes locally before sending us a Pull Request, here is how to build a local copy of the website/documentation.
 
     @hl.highlight("""
     cd openmole/openmole
@@ -121,7 +120,7 @@ It also explains the various versions of OpenMOLE you may want to use/deploy, fr
     By default, pages are located in @hl.highlight("openmole/openmole/bin/org.openmole.site/jvm/target/site/","plain")
 
     Updating the git submodules is @b{mandatory the first time} you set up your OpenMOLE development environment.
-    It pulls the examples from the MARKETLINK that are necessary to build the documentation website.
+    It pulls the examples from the @aa("market place", href := shared.link.repo.market) that are necessary to build the documentation website.
 
     Optionally you can use @hl.highlight("--no-test", "plain") in order to disable the tests of the scripts, which
     is (really) time-consuming. The tests concerning the examples from the OpenMOLE market can in turn be disabled
@@ -165,22 +164,20 @@ It also explains the various versions of OpenMOLE you may want to use/deploy, fr
 
 
 @sect{@shared.howToContributeMenu.contributionProcedure}
-    When you want to contribute to the project (code or documentation) we recommend that you to start by submitting an @aa("issue", href := shared.link.issue)
-    , so that the community can identify the nature of the potential caveat.
+    When you want to contribute to the project (code or documentation) we recommend that you to start by submitting an @aa("issue", href := shared.link.issue), so that the community can identify the nature of the potential caveat.
     @br
-    After that , send a @b{pull request} so that your potential changes can be discussed.
+    After that, send a @aa("pull request", href := shared.link.pullRequests) so that your potential changes can be discussed.
 
 
 @sect{@shared.howToContributeMenu.branchingModel}
-   TODO vérfier si ce model de branchement est encore d'actualité et si c'est bien celui qui est appliqué
   OpenMOLE applies a branching model derived from @a("Vincent Driessen's", href := shared.link.branchingModel). Some slight differences should be noted:
   @ul
-	@li{The next version of OpenMOLE is in the master, it's our development branch;}
-	@li{Disrupting features are developed in branches, branching off master;}
-    @li{New features are merged into the master branch as soon as they are working satisfyingly enough to be operational in the next release;}
+	@li{The next version of OpenMOLE is in the @b{dev} branch, it's our development branch;}
+	@li{Disrupting features are developed in branches, branching off @b{dev};}
+    @li{New features are merged into the @b{dev} branch as soon as they are working satisfyingly enough to be operational in the next release;}
 	@li{With each release, a maintenance branch is created to be able to patch the last released version, this branch is called version-dev. These are the so-called stable branches for each release;}
-	@li{Hotfixes should be developed by branching off the corresponding version-dev branch and merged back into their upstream branch and master.}
+	@li{Hotfixes should be developed by branching off the corresponding version-dev branch and merged back into their upstream branch and @b{master}.}
 
-  @p The advantage of this model is that new features are tested early in interaction with each others. This scheme serves an hybrid, date-based / feature-based release schedule.
+  @p The advantage of this model is that new features are tested early in interaction with each others. This scheme serves an hybrid, date-based/feature-based release schedule.
 
   @p At the beginning of a development cycle, an approximate date is given for the next release. This date depends on what are the new features planned for this milestone. This date is flexible and can be modulated given the progress of the new developments.

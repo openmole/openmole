@@ -24,7 +24,7 @@
 
 @member(Resource.img.people.jo, "Jonathan PASSERAT-PALMBACH")
 @div(width := "75%", paddingLeft := 70)
-    Bla bla
+  Research associate at Imperial College London, in the @a("BioMedIA group", href := shared.link.partner.biomedia). Developer of the OpenMOLE Platform, he co-developed @aa("GridScale", href := shared.link.repo.gridscale). Regularly inserts bugs in the code to keep his team-mates on task.
 
 @h1{Active community}
 

@@ -16,10 +16,9 @@
     #include <iostream>
     #include <sstream>
     #include <fstream>
-    using namespace std;
 
     double* model_computation(double param1, double param2, double output[]){
-      std::cout << "model computation with  parameters " << param1 << "and " << param2 << " \n" ;
+      std::cout << "model computation with  parameters " << param1 << " and " << param2 << " \n" ;
       output[0] = param1 * 10 ;
       output[1] = param2 * 20 ;
       return output ;
@@ -38,7 +37,7 @@
        std::cout << "log : compute first result "<< result[0] << '\n' ;
        std::cout << "log : compute second result " <<  result[1]  << '\n' ;
        //CSV file dump
-       ofstream myfile;
+       std::ofstream myfile;
        myfile.open ("results.txt");
        myfile << result[0] << ','<< result[1]<< "\n";
        myfile.close();
@@ -53,35 +52,43 @@
     @br
     In this toy example, the "model code" is outside the main function, on purpose.
     @br
-     The main function has three steps: first the inputs are extracted from command line, then the model function called with extracted values,  and finally the results are displayed on standard output, and  written in a text file.
+     The main function has three steps:
+     @ul
+        @li
+            first the inputs are extracted from command line,
+        @li
+            then the model function called with extracted values,
+        @li
+            and finally the results are displayed on standard output, and  written in a text file.
 
 @sect{Packaging it with CARE}
 
-    before launching CARE on this piece of code, lets check that the compilation/exec is ok, for the code itself :
+    Before launching CARE on this piece of code, let's check that the compilation and executions are running fine for the code itself:
 
 
     @hl.highlight("""
-    >g++ hello_world.cpp
-    >./a.out 12.24 24
+    > g++ hello_world.cpp
+    > ./a.out 12.24 24
     """, "shell")
     @br
     we obtain the following result :
     @hl.highlight("""
-    model computation with  parameters 12.24and 24
+    model computation with  parameters 12.24 and 24
     log : compute first result 122.4
     log : compute second result 480
     """, "shell")
 
     @break
 
-    IN the directory where the @b("hello_world.cpp") file is, (N.B. we used the 64 bit version of CARE. The normal CARE version may not work on OpenMOLE, depending on the kind of CPU your target environment has TODO vérifier que je raconte pas de conneries sur les architectures et CARE) we do :
-    Please see the @a("Native packaging page", href:=DocumentationPages.nativePackaging.file) for more details.
+    In the directory where the @b("hello_world.cpp") file is, we do:
 
     @hl.highlight("""
     care-x86_64 -o ./cpp.tgz.bin -r ~ ./a.out 12.24 24
     """, "shell")
 
-    Producing the following output :
+    @i{Please see the @a("Native packaging page", href:=DocumentationPages.nativePackaging.file) for more details.}
+
+    @p The packaging step produces the following output:
 
     @hl.highlight("""
 care info: concealed path: $HOME /home/paul
@@ -91,7 +98,7 @@ care info: revealed path: /home/paul/dev/cppExampleDocOpenMOLE/a.out
 care info: revealed path: /home/paul
 care info: ----------------------------------------------------------------------
 main function call
-model computation with  parameters 12.34and 24
+model computation with  parameters 12.34 and 24
 log : compute first result 122.4
 log : compute second result 480
 care info: ----------------------------------------------------------------------
@@ -102,12 +109,12 @@ care info:   - run `././cpp.tgz.bin` or `care -x ./cpp.tgz.bin` to extract the o
 
     @br
 
-    Notice the lines written in between the care info messages: there are the log message of our initial code. Everything is ok so far.
+    Notice the lines in between the CARE info messages: these are the log messages of our initial code. Everything is ok so far.
     @br
-    Two files have been created during the packaging : @hl.highlight("cpp.tgz.bin", "plain") and @hl.highlight("results.txt", "plain"), the CARE archive and the results file.
+    The packaging has created two files: @hl.highlight("cpp.tgz.bin", "plain") and @hl.highlight("results.txt", "plain"), respectively the CARE archive and the results file.
 @sect{Running it in OpenMOLE}
 
-    We will now use OpenMOLE @b("ExplorationTask") to run the model several times with different values, with this script:
+    We will now use OpenMOLE's @hl.openmoleNoTest{ExplorationTask} to run the model @b{several times with different input values}, with this script:
 
 
     @hl.openmole("""
@@ -138,19 +145,18 @@ val env = LocalEnvironment(4)
 exploration -< (cppTask hook copy on env)
 """)
 
-    @br
+    This script uses a @hl.openmoleNoTest{Hook} to catch the output file, check the @a("dedicated page", href := DocumentationPages.hook.file) for more details.
 
-    In this script, we use a @a("Hook", href := DocumentationPages.hook.file) to catch the output file ; check its page for more details.
-    @br
-    First, create a directory to put our CARE archive (see the @a("GUI guide", href:= DocumentationPages.gui.file))
-    @br
-    Then, inside this directory,  create a new file, give it a name and a @b{.oms} extension. This is our OmpenMOLE script.
-    @br
-    Finally,  paste the script above and press "Play".
+    @p Let's try this example on your own machine:
+    @ul
+        @li
+            First, create a directory to put the CARE archive (see the @a("GUI guide", href:= DocumentationPages.gui.file))
+        @li
+            Then, inside this directory, create a new file with a @b{.oms} extension. This is our OpenMOLE script.
+        @li
+            Finally, paste the script above and press "Play".
 
-    @break
-
-    Looking at the output stream , we have lines looking like
+    @p Looking at the output stream , we have lines looking like:
     @hl.highlight("""
     model computation with  parameters 4and 2
     log : compute first result 40
@@ -158,15 +164,15 @@ exploration -< (cppTask hook copy on env)
     model computation with  parameters 3and 9
     log : compute first result 30
     log : compute second result 180""", "plain")
-@br
-
-We recognize the log from our initial code ! hurray !
-@break
 
 
-The results files , called something like @hl.highlight("cpp2.01.0.txt", "plain"), are located in the directory where we uploaded our CARE packaged code.
-This is not a smart move if you have a lot of file to manage, so we should put them in a result dedicated directory, in order to compress the whole thing at the end of the experiment and download the resulting archive of results .
-To do that , first we create a directory named  @hl.highlight("results", "plain") we modifiy the @hl.highlight("CopyFileHook", "plain") line by the following:
+@p It looks a lot like the log from our initial code! Hooray!
+
+
+@p The results files, called something like @hl.highlight("cpp2.01.0.txt", "plain"), are located in the directory where we uploaded our CARE packaged code.
+
+@p This is not a smart move if you have a lot of file to manage, so we should put them in a @i{result} dedicated directory, in order to compress the whole thing at the end of the experiment and download the resulting archive.
+To do that, let's replace the @hl.openmoleNoTest{CopyFileHook} line by the following:
 
 
     @hl.openmole("""
