@@ -5,7 +5,9 @@
 
 @h1{Publications}
 
-@sect{How to cite OpenMOLE}
+@sect{How to cite OpenMOLE?}
+
+    @h3{Whenever you're using the platform}
     @ul
         @li
             Romain Reuillon, Mathieu Leclaire, Sebastien Rey-Coyrehourcq, «OpenMOLE, a workflow engine specifically tailored for
@@ -24,6 +26,10 @@
                  @a("[editor version]" , href:="http://ieeexplore.ieee.org/document/5547155/")
 
                  @a("[bibteX]", href:= Resource.bibtex.HPCSRefBib.file) TODO lien direct download vers fichier pdf ?
+    @h3{When you're using the @a("reproducibility features", href := DocumentationPages.nativePackaging.file) (@hl.openmoleNoTest{CARETask}, ...)}
+    @ul
+        @li
+            @Papers.frontiers2017
 
 
 @sect{Scientific Publications about OpenMOLE methods}
