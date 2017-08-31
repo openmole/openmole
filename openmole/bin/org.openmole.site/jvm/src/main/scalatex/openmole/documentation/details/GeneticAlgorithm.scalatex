@@ -74,7 +74,7 @@ OpenMOLE make an intensive use of genetic algorithms (GA) in its various @a("met
 
     Corresponding function to minimize could be the difference between the target value and the output at time T,
     the difference between target time  T and the simulation time at which the value V is reached by the model output,
-    and the quality of the linear adjustment of the model output time serie from 0 to T.
+    and 1-R² for the quality of the linear adjustment between model outputs  and a linear function from 0,0 to T,V.
 
     @p
 
@@ -127,7 +127,7 @@ OpenMOLE make an intensive use of genetic algorithms (GA) in its various @a("met
   (evolution hook savePopulation on LocalEnvironment(4))""", name = "nsga2 example")
 
     @br
- TODO Romain: (rappel du contexte) : on avait parlé  d'un moyen de fixer un objectif à atteindre en donnant la valeur en clair dans le script.  Si la task existe , remplacer par la syntaxe courrante le texte ci dessous , en se rappelant   qu'il faut que  ce soit limpide à la lecture du script oms qu'on cible une valeur
+ TODO Romain: (rappel du contexte) : on avait parlé  d'un moyen de fixer un objectif à atteindre en donnant la valeur en clair dans le script.  Si la task existe , remplacer par la syntaxe courrante le texte ci dessous , en se rappelant   qu'il faut que  ce soit limpide à la lecture du script oms qu'on cible une valeur donnée en argument: reach(42) , target(42) qqch comme ça
 
     Notice that the objectives are given as a sequence of model outputs variables to @b{minimize}.
 So if you want to reach specific target values, like Pi and 42  you should have written your objectives as
