@@ -127,18 +127,18 @@ OpenMOLE make an intensive use of genetic algorithms (GA) in its various @a("met
   (evolution hook savePopulation on LocalEnvironment(4))""", name = "nsga2 example")
 
     @br
+ TODO Romain: (rappel du contexte) : on avait parlé  d'un moyen de fixer un objectif à atteindre en donnant la valeur en clair dans le script.  Si la task existe , remplacer par la syntaxe courrante le texte ci dessous , en se rappelant   qu'il faut que  ce soit limpide à la lecture du script oms qu'on cible une valeur
 
     Notice that the objectives are given as a sequence of model outputs variables to @b{minimize}.
 So if you want to reach specific target values, like Pi and 42  you should have written your objectives as
+
+
     @br
     @hl.highlight("evaluation = Delta(model, o1 -> math.Pi, o2 -> 42)", "plain")
     @br
     NB: in this case the results in the saved file in will be the difference between the outputs of the model and your objectives.
     @br
 
-    TODO checker syntaxe et écriture d'une task dédiée avant d'écrire ça  o1 -> 22 , o2 -> math.Pi
-    Il faut pouvoir facilement définir les target values : je veux optimiser mon modèle pour qu'il me donne 25 , il faut que
-     ce soit limpide à la lecture du script oms
 
     @br
     Obviously, maximization problem are  performed by taking the opposite of variables as objectives.

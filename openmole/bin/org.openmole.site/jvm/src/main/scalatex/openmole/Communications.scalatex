@@ -17,7 +17,9 @@
 
               @a("[online preprint]" , href:="https://hal-paris1.archives-ouvertes.fr/hal-00840744/")
 
-               @a("[bibteX]", href:= Resource.bibtex.FGCSRefBib.file)  TODO lien direct download du fichier  pdf ?
+               @a("[bibteX]", href:= Resource.bibtex.FGCSRefBib.file)
+
+               @a("[pdf]", href:=Resource.paper.fgcs2013.file)
         @li
             Romain Reuillon, Florent Chuffart, Mathieu Leclaire, Thierry Faure, Nicolas Dumoulin, and  David R.C. Hill,
             «Declarative Task Delegation in OpenMOLE», proceedings of @i{High Performance Computing and Simulation (HPCS)}
@@ -25,7 +27,12 @@
             @br
                  @a("[editor version]" , href:="http://ieeexplore.ieee.org/document/5547155/")
 
-                 @a("[bibteX]", href:= Resource.bibtex.HPCSRefBib.file) TODO lien direct download vers fichier pdf ?
+                 @a("[bibteX]", href:= Resource.bibtex.HPCSRefBib.file)
+                 @a("[pdf]", href:=Resource.paper.hpcs2010.file)
+
+
+
+
     @h3{When you're using the @a("reproducibility features", href := DocumentationPages.nativePackaging.file) (@hl.openmoleNoTest{CARETask}, ...)}
     @ul
         @li
