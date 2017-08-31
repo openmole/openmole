@@ -37,7 +37,7 @@
 @div(width := "75%", paddingLeft := 70)
   CNRS Research Engineer at ISC-PIF. Scientific computing and simulation researcher,
   he worked on the conception of methods for simulation experiments and
-  parameter space exploration and worked on the development of MGO.
+  parameter space exploration and worked on the development of @aa("MGO", href := shared.link.repo.mgo).
 
 @member(Resource.img.people.etienne, "Étienne DELAY")
 @div(width := "75%", paddingLeft := 70)
@@ -47,3 +47,7 @@
 @member(Resource.img.people.julien, "Julien PERRET")
 @div(width := "75%", paddingLeft := 70)
   Sustainable development Researcher at IGN and EHESS.
+
+@member(Resource.img.people.seb, "Sebastien REY-COYREHOURCQ")
+@div(width := "75%", paddingLeft := 70)
+  Research Engineer in Geomatics at UMR IDEES Rouen. I love Complex Systems, Agent Based Models, and Evolutionary Algorithm. I probably compile and beta test every dev version of OpenMOLE since 2010 :) I also participate in developing the @aa("MGO", href := shared.link.repo.mgo) framework and the @aa("Gama-plugin", href := shared.link.repo.gamaPlugin).
