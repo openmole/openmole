@@ -210,6 +210,7 @@ package object shared {
       lazy val mgo = "https://github.com/openmole/mgo"
       lazy val simplu = "https://github.com/IGNF/simplu3D"
       lazy val myOpenmolePlugin = "https://github.com/openmole/myopenmoleplugin"
+      lazy val gamaPlugin = "https://github.com/openmole/gama-plugin"
     }
 
   }

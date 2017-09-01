@@ -34,7 +34,6 @@
      @li{ @aa("Standard API documentation", href := shared.link.scalaDoc) }
 
 @sect{API documentation}
-    TODO: is the doc still generated ?
-    You can browse OpenMOLE's @a("automatically generated documentation", href := Resource.api.file + "/index.html")
+      You can browse OpenMOLE's @a("automatically generated documentation", href := Resource.api.file + "/index.html")
 
 

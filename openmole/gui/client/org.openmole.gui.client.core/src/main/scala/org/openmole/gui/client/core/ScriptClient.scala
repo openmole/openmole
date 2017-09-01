@@ -136,8 +136,6 @@ object ScriptClient {
 
       val envItem = navItem(div(glyph_exclamation, itemStyle).render, () ⇒ stackPanel.open)
 
-      val docItem = navItem(div(OMTags.glyph_book, itemStyle).tooltip("Documentation"), () ⇒ docPanel.dialog.show)
-
       dom.window.onkeydown = (k: KeyboardEvent) ⇒ {
         if ((k.keyCode == 83 && k.ctrlKey)) {
           k.preventDefault
@@ -178,8 +176,7 @@ object ScriptClient {
             navItem(menuActions.selector),
             execItem,
             authenticationItem,
-            pluginItem,
-            docItem
+            pluginItem
           ).render
         }
       )
