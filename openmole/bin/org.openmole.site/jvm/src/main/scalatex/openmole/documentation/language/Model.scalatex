@@ -12,14 +12,14 @@ OpenMOLE handles your model execution by framing it in a @b{workflow}.
     @b{inputs}, @b{outputs} and @b{optional default values}.
 
     @br
-    Tasks are the atomic computing element of OpenMOLE, they describe what OpenMOLE should execute and delegate
-    to remote environments. They are also the ones that embed your own models and/or programs.
+    Tasks are the atomic computing elements of OpenMOLE, they describe what OpenMOLE should execute and delegate
+    to remote environments. They are also what embeds your own models and/or programs.
     @br@br
      Depending on what kind of program (binary executable, Java...) you want to embed in OpenMOLE you have to choose the
     adequate task.
     @br
-    Tasks execution @b{depends on inputs variables}, which are provided by the dataflow, and each task
-    @b{produces outputs} which are provided to the dataflow and transmitted to the input of consecutive tasks.
+    Task execution @b{depends on inputs variables} and each task
+    @b{produces outputs} which transmitted to the inputs of subsequent tasks.
 
 
     Below is a dummy task  to illustrate all this jargon:
@@ -28,12 +28,13 @@ OpenMOLE handles your model execution by framing it in a @b{workflow}.
     @hl.openmole("""
     // Define a variable i of type Int
     val i = Val[Int]
+    val j = Val[Int]
 
-    // Instantiate a task that does nothing
-    // this task takes the i variable in input and provides it back as an output to the dataflow for the next task
+    // Instantiate a task that does nothing.
+    // This task uses the variable i as input and j as output. Any task immediately following this one in the workflow (i.e. linked with a transition) will be able to use the variable j containing the result of this task. 
     val t = EmptyTask() set (
     inputs += i,
-    outputs += i
+    outputs += j
     )""")
 
     @br@br
@@ -43,10 +44,11 @@ OpenMOLE handles your model execution by framing it in a @b{workflow}.
     @br
     @hl.openmole("""
     val i = Val[Int]
+    val j = Val[Int]
 
     val t = EmptyTask() set (
     inputs += i,
-    outputs += i,
+    outputs += j,
     // set i's default value to 0
     i := 0
     )""")
@@ -55,14 +57,14 @@ OpenMOLE handles your model execution by framing it in a @b{workflow}.
     @br
 
 @sect{OpenMOLE scripts}
-    An OpenMOLE script consists in defining @b{tasks}, their @b{inputs} and @b{outputs}, the @b{wiring between the tasks
+    Writing an OpenMOLE script consists in defining @b{tasks}, their @b{inputs} and @b{outputs}, the @b{transitions between the tasks
     }and the @b{execution environment}.
     @br@br
     Some of the tasks are made to frame your program,
     some others are made to generate inputs: @a("Samplings", href:=DocumentationPages.advancedSampling.file) or to capture the outputs : @aa("Hooks", href:=DocumentationPages.hook.file)
 
     As you will progress into the world of OpenMOLE, you will discover how to define these various elements and build your own workflows.
-    For now let's give a fake example.
+    For now let's give a dummy example.
 
     @br@br
     Let's say you have a model that take a string as input and do some stuff with it, like launching a simulation
@@ -77,10 +79,10 @@ OpenMOLE handles your model execution by framing it in a @b{workflow}.
         // crawl the big file and take the lines
         val all_the_lines = CSVSampling("EmpiricalData.CSV")
 
-        // say "I want to look at every piece of all_the_lines content"
+        // say "I want to consider each line contained in all_the_lines"
         val exploration = ExplorationTask(all_the_lines)
 
-        // encapsulates your model in a "execution" task that calls the main routine
+        // encapsulates your model in an "execution" task that calls the main routine
         val  my_model_execution = ScalaTask( "mainRun",
                                             inputs += inputString
                                             outputs += Digits
@@ -92,6 +94,6 @@ OpenMOLE handles your model execution by framing it in a @b{workflow}.
         val lab_Cluster = UberClusterEnvironment(login, machineIP)
 
         // the workflow. Bascically it says : explore the lines and run a model execution for each,
-        // save the outputs, all that on the cluster
+        // save the outputs, all that on the cluster (results are not brought back to the local computer yet).
         exploration -< (my_model_execution on env hook catch_output)        """)
 
