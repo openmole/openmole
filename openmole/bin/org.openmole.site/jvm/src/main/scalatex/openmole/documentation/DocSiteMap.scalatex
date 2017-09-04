@@ -3,7 +3,7 @@
 @import org.openmole.site._
 
 @h1
-    Documentation Site Map (attempt)
+    Documentation Site Map
 @p
   Welcome to the OpenMOLE documentation site map.
   It's more a list than a map, in fact, but hey, layout propositions of the various pages are welcome !
