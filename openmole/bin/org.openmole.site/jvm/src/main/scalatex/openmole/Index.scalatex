@@ -7,12 +7,12 @@
 
 @div(stylesheet.centerJustify(100)){
 OpenMOLE has been developped since 2008 as a @b{free and open-source} platform.
-It explores, diagnoses your numerical model and optimizes its dynamics taking advantage of distributed computing environments.
+It explores, diagnoses your numerical model and optimizes its dynamics, taking advantage of distributed computing environments.
 The typical usages are model calibration, model exploration, machine learning, optimization, data processing.
 }
 
 @div(stylesheet.centerJustify(100)){
-OpenMOLE comes with web interface, that enables you to write @b{modeling-oriented scripts}.
+OpenMOLE comes with a web interface that enables you to write @b{scripts around your models}.
 You can describe how to @b{explore} your own model and how to @b{distribute} its executions on HPC environments in a few lines of code !
 }
 

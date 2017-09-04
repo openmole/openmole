@@ -128,6 +128,8 @@ object Resource {
       val julien = peopleResource("julien.png")
 
       val etienne = peopleResource("etienne.png")
+
+      val seb = peopleResource("seb.png")
     }
 
     object partner {

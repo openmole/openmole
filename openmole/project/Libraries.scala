@@ -17,7 +17,7 @@ object Libraries {
   lazy val scalaUpickleVersion = "0.4.4"
   lazy val scalaAutowireVersion = "0.2.6"
   lazy val sourcecodeVersion = "0.1.3"
-  lazy val scaladgetVersion = "0.9.5-SNAPSHOT"
+  lazy val scaladgetVersion = "0.9.5"
   lazy val json4sVersion = "3.5.0"
   lazy val circeVersion = "0.8.0"
   lazy val catsVersion = "0.9.0"
