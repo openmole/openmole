@@ -26,7 +26,7 @@ object ElitismTask {
   def apply[T](algorithm: T)(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name) = {
     val t = wfi(algorithm)
     ClosureTask("ElitismTask") { (context, _, _) ⇒
-      val (newState, newPopulation) = t.integration.run(context(t.statePrototype), t.operations.elitism.run(context(t.populationPrototype) ++ context(t.offspringPrototype)))
+      val (newState, newPopulation) = t.operations.elitism(context(t.populationPrototype) ++ context(t.offspringPrototype)).run(context(t.statePrototype)).value
 
       Context(
         Variable(t.populationPrototype, newPopulation),

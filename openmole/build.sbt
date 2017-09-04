@@ -30,6 +30,8 @@ def defaultSettings = BuildSystem.settings ++
     publishArtifact in (packageDoc in install) := false,
     publishArtifact in (packageSrc in install) := false,
     macroParadise,
+    addCompilerPlugin("org.scalameta" % "paradise" % "3.0.0-M10" cross CrossVersion.full),
+    scalacOptions += "-Xplugin-require:macroparadise",
     shellPrompt := { s => Project.extract(s).currentProject.id + " > " }
   )
 
@@ -653,7 +655,7 @@ def binDir = file("bin")
 
 def bundleFilter(m: ModuleID, artifact: Artifact) = {
   def exclude =
-    (m.organization != "org.openmole.library" && m.name.contains("slick")) || (m.name contains "sshj") || (m.name contains "scala-xml")
+    (m.organization != "org.openmole.library" && m.name.contains("slick")) || (m.name contains "sshj") || (m.name contains "scala-xml") || (m.name contains "protobuf")
 
   def include = (artifact.`type` == "bundle" && m.name != "osgi") ||
     m.organization == "org.bouncycastle" ||
