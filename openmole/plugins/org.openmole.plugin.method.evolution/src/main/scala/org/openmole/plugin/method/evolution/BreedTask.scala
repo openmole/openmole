@@ -31,7 +31,7 @@ object BreedTask {
 
       if (p.isEmpty) {
         val s = context(t.statePrototype)
-        val (news, gs) = t.integration.run(s, t.operations.initialGenomes(size))
+        val (news, gs) = t.operations.initialGenomes(size).run(s).value
 
         Context(
           Variable(t.genomePrototype.array, gs.toArray(t.genomePrototype.`type`.manifest)),
@@ -40,7 +40,7 @@ object BreedTask {
       }
       else {
         val s = context(t.statePrototype)
-        val (newState, breeded) = t.integration.run(s, t.operations.breeding(size).run(p))
+        val (newState, breeded) = t.operations.breeding(p, size).run(s).value
 
         Context(
           Variable(t.genomePrototype.array, breeded.toArray(t.genomePrototype.`type`.manifest)),

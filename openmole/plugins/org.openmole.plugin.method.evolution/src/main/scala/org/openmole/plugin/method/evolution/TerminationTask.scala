@@ -29,7 +29,7 @@ object TerminationTask {
     ClosureTask("TerminationTask") { (context, _, _) ⇒
       val term = OMTermination.toTermination(termination, t)
 
-      val (newState, te) = t.integration.run(context(t.statePrototype), term.run(context(t.populationPrototype)))
+      val (newState, te) = term(context(t.populationPrototype)).run(context(t.statePrototype)).value
 
       Context(
         Variable(t.terminatedPrototype, te),

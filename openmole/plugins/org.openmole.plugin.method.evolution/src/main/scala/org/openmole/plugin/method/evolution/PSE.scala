@@ -50,24 +50,58 @@ object PSE {
 
     import mgo.algorithm._
     import mgo.algorithm.pse._
-    import context._
-    import context.implicits._
+    import cats.data._
+    import freedsl.dsl._
+    import mgo.contexts._
 
-    implicit def integration = new MGOAPI.Integration[DeterministicParams, Vector[Double], Vector[Double]] {
-      type M[A] = context.M[A]
+    implicit def integration = new MGOAPI.Integration[DeterministicParams, Vector[Double], Vector[Double]] { api ⇒
       type G = mgo.algorithm.pse.Genome
       type I = Individual
-      type S = EvolutionState[HitMap]
+      type S = EvolutionState[HitMapState]
 
       def iManifest = implicitly
       def gManifest = implicitly
       def sManifest = implicitly
 
-      def mMonad = implicitly
-      def mGeneration = implicitly
-      def mStartTime = implicitly
+      private def interpret[U](f: mgo.algorithm.pse.PSE.PSEImplicits ⇒ (S, U)) = State[S, U] { (s: S) ⇒
+        mgo.algorithm.pse.PSE(s)(f)
+      }
+
+      private def zipWithState[M[_]: cats.Monad: StartTime: Random: Generation: HitMapM, T](op: M[T]): M[(S, T)] = {
+        import cats.implicits._
+        for {
+          t ← op
+          newState ← pse.state[M]
+        } yield (newState, t)
+      }
+
+      def initialGenomes(om: DeterministicParams)(n: Int): M[Vector[G]] = interpret { impl ⇒
+        import impl._
+        zipWithState(pse.initialGenomes[DSL](n, om.genomeSize)).eval
+      }
+
+      def breeding(om: DeterministicParams)(individuals: Vector[Individual], n: Int) = interpret { impl ⇒
+        import impl._
+        zipWithState(pse.breeding[DSL](n, om.pattern, om.operatorExploration).run(individuals)).eval
+      }
+
+      def elitism(om: DeterministicParams)(individuals: Vector[Individual]) = interpret { impl ⇒
+        import impl._
+        zipWithState(pse.elitism[DSL](om.pattern).run(individuals)).eval
+      }
+
+      def afterGeneration(g: Long, population: Vector[I]): M[Boolean] = interpret { impl ⇒
+        import impl._
+        zipWithState(mgo.afterGeneration[DSL, I](g).run(population)).eval
+      }
+
+      def afterDuration(d: squants.Time, population: Vector[I]): M[Boolean] = interpret { impl ⇒
+        import impl._
+        zipWithState(mgo.afterDuration[DSL, I](d).run(population)).eval
+      }
 
       def operations(om: DeterministicParams) = new Ops {
+
         def randomLens = GenLens[S](_.random)
         def startTimeLens = GenLens[S](_.startTime)
         def generation(s: S) = s.generation
@@ -75,23 +109,18 @@ object PSE {
         def genome(i: I) = Individual.genome.get(i)
         def phenotype(individual: I): Vector[Double] = vectorPhenotype.get(individual)
         def buildIndividual(genome: G, phenotype: Vector[Double]) = pse.buildIndividual(genome, phenotype)
-        def initialState(rng: util.Random) = EvolutionState[HitMap](random = rng, s = Map())
-        def initialGenomes(n: Int): M[Vector[G]] = pse.initialGenomes(n, om.genomeSize)
-        def breeding(n: Int) = pse.breeding(n, om.pattern, om.operatorExploration)
-        def elitism = pse.elitism(om.pattern)
+        def initialState(rng: util.Random) = EvolutionState[HitMapState](random = rng, s = Map())
+        def initialGenomes(n: Int) = api.initialGenomes(om)(n)
+        def breeding(individuals: Vector[Individual], n: Int) = api.breeding(om)(individuals, n)
+        def elitism(individuals: Vector[Individual]) = api.elitism(om)(individuals)
+        def afterGeneration(g: Long, population: Vector[I]) = api.afterGeneration(g, population)
+        def afterDuration(d: squants.Time, population: Vector[I]) = api.afterDuration(d, population)
+
         def migrateToIsland(population: Vector[I]) = population.map(Individual.foundedIsland.set(true))
         def migrateFromIsland(population: Vector[I]) =
           population.filter(i ⇒ !Individual.foundedIsland.get(i)).map(Individual.mapped.set(false))
       }
 
-      def run[A](s: S, x: M[A]) = {
-        val res =
-          for {
-            xv ← x
-            s ← pse.state[M]
-          } yield (s, xv)
-        interpreter(s).run(res).right.get
-      }
     }
   }
 
@@ -118,24 +147,72 @@ object PSE {
   )
 
   object StochasticParams {
+
     import mgo.algorithm._
     import mgo.algorithm.noisypse._
-    import context._
-    import context.implicits._
+    import cats.data._
+    import freedsl.dsl._
+    import mgo.contexts._
 
-    implicit def integration = new MGOAPI.Integration[StochasticParams, Vector[Double], Vector[Double]] with MGOAPI.Stochastic {
-      type M[A] = context.M[A]
+    implicit def integration = new MGOAPI.Integration[StochasticParams, Vector[Double], Vector[Double]] with MGOAPI.Stochastic { api ⇒
       type G = mgo.algorithm.noisypse.Genome
       type I = Individual
-      type S = EvolutionState[noisypse.HitMap]
+      type S = EvolutionState[pse.HitMapState]
 
       def iManifest = implicitly
       def gManifest = implicitly
       def sManifest = implicitly
 
-      def mMonad = implicitly
-      def mGeneration = implicitly
-      def mStartTime = implicitly
+      private def interpret[U](f: mgo.algorithm.pse.PSE.PSEImplicits ⇒ (S, U)) = State[S, U] { (s: S) ⇒
+        mgo.algorithm.noisypse.NoisyPSE(s)(f)
+      }
+
+      private def zipWithState[M[_]: cats.Monad: StartTime: Random: Generation: pse.HitMapM, T](op: M[T]): M[(S, T)] = {
+        import cats.implicits._
+        for {
+          t ← op
+          newState ← noisypse.state[M]
+        } yield (newState, t)
+      }
+
+      def initialGenomes(om: StochasticParams)(n: Int) = interpret { impl ⇒
+        import impl._
+        zipWithState(noisypse.initialGenomes[DSL](n, om.genomeSize)).eval
+      }
+
+      def breeding(om: StochasticParams)(individuals: Vector[Individual], n: Int) = interpret { impl ⇒
+        import impl._
+        zipWithState(
+          noisypse.breeding[DSL](
+            lambda = n,
+            operatorExploration = om.operatorExploration,
+            cloneProbability = om.cloneProbability,
+            aggregation = om.aggregation,
+            pattern = om.pattern
+          ).run(individuals)
+        ).eval
+      }
+
+      def elitism(om: StochasticParams)(individuals: Vector[Individual]) = interpret { impl ⇒
+        import impl._
+        zipWithState(
+          noisypse.elitism[DSL](
+            pattern = om.pattern,
+            historySize = om.historySize,
+            aggregation = om.aggregation
+          ).run(individuals)
+        ).eval
+      }
+
+      def afterGeneration(g: Long, population: Vector[I]): M[Boolean] = interpret { impl ⇒
+        import impl._
+        zipWithState(mgo.afterGeneration[DSL, I](g).run(population)).eval
+      }
+
+      def afterDuration(d: squants.Time, population: Vector[I]): M[Boolean] = interpret { impl ⇒
+        import impl._
+        zipWithState(mgo.afterDuration[DSL, I](d).run(population)).eval
+      }
 
       def operations(om: StochasticParams) = new Ops {
         def randomLens = GenLens[S](_.random)
@@ -145,23 +222,14 @@ object PSE {
         def genome(i: I) = Individual.genome.get(i)
         def phenotype(individual: I): Vector[Double] = om.aggregation(vectorPhenotype.get(individual))
         def buildIndividual(genome: G, phenotype: Vector[Double]) = noisypse.buildIndividual(genome, phenotype)
-        def initialState(rng: util.Random) = EvolutionState[noisypse.HitMap](random = rng, s = Map())
-        def initialGenomes(n: Int) = noisypse.initialGenomes(n, om.genomeSize)
-        def breeding(n: Int) =
-          noisypse.breeding(
-            lambda = n,
-            operatorExploration = om.operatorExploration,
-            cloneProbability = om.cloneProbability,
-            aggregation = om.aggregation,
-            pattern = om.pattern
-          )
+        def initialState(rng: util.Random) = EvolutionState[pse.HitMapState](random = rng, s = Map())
 
-        def elitism =
-          noisypse.elitism(
-            pattern = om.pattern,
-            historySize = om.historySize,
-            aggregation = om.aggregation
-          )
+        def initialGenomes(n: Int) = api.initialGenomes(om)(n)
+        def breeding(individuals: Vector[Individual], n: Int) = api.breeding(om)(individuals, n)
+        def elitism(individuals: Vector[Individual]) = api.elitism(om)(individuals)
+
+        def afterGeneration(g: Long, population: Vector[I]) = api.afterGeneration(g, population)
+        def afterDuration(d: squants.Time, population: Vector[I]) = api.afterDuration(d, population)
 
         def migrateToIsland(population: Vector[I]) =
           population.map(Individual.foundedIsland.set(true)).map(Individual.historyAge.set(0))
@@ -174,15 +242,6 @@ object PSE {
                 (Individual.mapped.set(true) andThen Individual.foundedIsland.set(false))(i1)
               else Individual.mapped.set(false)(i1)
           }
-      }
-
-      def run[A](s: S, x: M[A]) = {
-        val res =
-          for {
-            xv ← x
-            s ← pse.state[M]
-          } yield (s, xv)
-        interpreter(s).run(res).right.get
       }
 
       def samples(i: I): Long = i.phenotypeHistory.size

@@ -292,7 +292,7 @@ object MGOAPI {
   import squants._
 
   trait Integration[A, V, P] {
-    type M[_]
+    type M[T] = cats.data.State[S, T]
     type I
     type G
     type S
@@ -300,10 +300,6 @@ object MGOAPI {
     implicit def iManifest: Manifest[I]
     implicit def gManifest: Manifest[G]
     implicit def sManifest: Manifest[S]
-
-    implicit def mMonad: Monad[M]
-    implicit def mGeneration: Generation[M]
-    implicit def mStartTime: StartTime[M]
 
     def operations(a: A): Ops
 
@@ -318,16 +314,14 @@ object MGOAPI {
       def randomLens: monocle.Lens[S, util.Random]
       def startTimeLens: monocle.Lens[S, Long]
       def generation(s: S): Long
-      def breeding(n: Int): Breeding[M, I, G]
-      def elitism: Elitism[M, I]
+      def breeding(individuals: Vector[I], n: Int): M[Vector[G]]
+      def elitism(individuals: Vector[I]): M[Vector[I]]
       def migrateToIsland(i: Vector[I]): Vector[I]
       def migrateFromIsland(population: Vector[I]): Vector[I]
+      def afterGeneration(g: Long, population: Vector[I]): M[Boolean] //= mgo.afterGeneration[M, I](g)
+      def afterDuration(d: Time, population: Vector[I]): M[Boolean] // = mgo.afterDuration[M, I](d)
     }
 
-    def run[T](s: S, m: M[T]): (S, T)
-
-    def afterGeneration(g: Long) = mgo.afterGeneration[M, I](g)
-    def afterDuration(d: Time) = mgo.afterDuration[M, I](d)
   }
 
   trait Stochastic { self: Integration[_, _, _] ⇒

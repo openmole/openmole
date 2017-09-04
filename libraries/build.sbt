@@ -7,7 +7,6 @@ def settings = Seq(
   resolvers += DefaultMavenRepository,
   resolvers += Resolver.sonatypeRepo("snapshots"),
   resolvers += Resolver.sonatypeRepo("releases"),
-  resolvers += Resolver.bintrayRepo("projectseptemberinc", "maven"), // For freek
   scalaVersion in Global := "2.12.3",
   scalacOptions ++= Seq("-deprecation"),
   publishArtifact in (packageDoc in publishLocal) := false,
@@ -202,10 +201,19 @@ lazy val cats =
     version := catsVersion
   ) settings(settings: _*)
 
+lazy val freedslVersion = "0.17"
+
 lazy val freedsl =
-  OsgiProject(dir, "freedsl", exports = Seq("freedsl.*", "freek.*")) settings (
-    libraryDependencies += "fr.iscpif.freedsl" %% "all" % "0.10",
-    version := "0.10"
+  OsgiProject(dir, "freedsl", exports = Seq("freedsl.*", "freestyle.*", "mainecoon.*")) settings (
+    libraryDependencies += "fr.iscpif.freedsl" %% "freedsl" % freedslVersion,
+    libraryDependencies += "fr.iscpif.freedsl" %% "random" % freedslVersion,
+    libraryDependencies += "fr.iscpif.freedsl" %% "system" % freedslVersion,
+    libraryDependencies += "fr.iscpif.freedsl" %% "io" % freedslVersion,
+    libraryDependencies += "fr.iscpif.freedsl" %% "filesystem" % freedslVersion,
+    libraryDependencies += "fr.iscpif.freedsl" %% "errorhandler" % freedslVersion,
+    libraryDependencies += "fr.iscpif.freedsl" %% "tool" % freedslVersion,
+    libraryDependencies += "fr.iscpif.freedsl" %% "dsl" % freedslVersion,
+    version := freedslVersion
   ) dependsOn(cats) settings(settings: _*)
 
 lazy val mgoVersion = "3.0-SNAPSHOT"

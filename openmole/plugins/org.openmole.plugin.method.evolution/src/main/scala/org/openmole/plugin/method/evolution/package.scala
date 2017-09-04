@@ -160,8 +160,8 @@ package object evolution {
   object OMTermination {
     def toTermination(oMTermination: OMTermination, integration: EvolutionWorkflow) =
       oMTermination match {
-        case AfterGeneration(s) ⇒ integration.integration.afterGeneration(s)
-        case AfterDuration(d)   ⇒ integration.integration.afterDuration(d)
+        case AfterGeneration(s) ⇒ (population: Vector[integration.I]) ⇒ integration.operations.afterGeneration(s, population)
+        case AfterDuration(d) ⇒ (population: Vector[integration.I]) ⇒ integration.operations.afterDuration(d, population)
       }
   }
 

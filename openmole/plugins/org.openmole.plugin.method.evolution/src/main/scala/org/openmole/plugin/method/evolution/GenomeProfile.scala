@@ -33,11 +33,11 @@ object GenomeProfile {
 
     import mgo.algorithm._
     import mgo.algorithm.profile._
-    import context._
-    import context.implicits._
+    import cats.data._
+    import freedsl.dsl._
+    import mgo.contexts._
 
     implicit def integration = new MGOAPI.Integration[DeterministicParams, Vector[Double], Double] with MGOAPI.Profile[DeterministicParams] {
-      type M[A] = context.M[A]
       type G = mgo.algorithm.profile.Genome
       type I = Individual
       type S = EvolutionState[Unit]
@@ -46,9 +46,17 @@ object GenomeProfile {
       def gManifest = implicitly
       def sManifest = implicitly
 
-      def mMonad = implicitly
-      def mGeneration = implicitly
-      def mStartTime = implicitly
+      private def interpret[U](f: mgo.contexts.run.Implicits ⇒ (S, U)) = State[S, U] { (s: S) ⇒
+        mgo.algorithm.profile.Profile(s)(f)
+      }
+
+      private def zipWithState[M[_]: cats.Monad: StartTime: Random: Generation, T](op: M[T]): M[(S, T)] = {
+        import cats.implicits._
+        for {
+          t ← op
+          newState ← mgo.algorithm.profile.state[M]
+        } yield (newState, t)
+      }
 
       def operations(om: DeterministicParams) = new Ops {
         def randomLens = GenLens[S](_.random)
@@ -59,20 +67,34 @@ object GenomeProfile {
         def phenotype(individual: I): Double = Individual.fitness.get(individual)
         def buildIndividual(genome: G, phenotype: Double) = Individual(genome, phenotype, 0)
         def initialState(rng: util.Random) = EvolutionState[Unit](random = rng, s = ())
-        def initialGenomes(n: Int) = mgo.algorithm.profile.initialGenomes(n, om.genomeSize)
-        def breeding(n: Int) = mgo.algorithm.profile.breeding(n, om.niche, om.operatorExploration)
-        def elitism = mgo.algorithm.profile.elitism(om.niche)
+
+        def initialGenomes(n: Int) = interpret { impl ⇒
+          import impl._
+          zipWithState(mgo.algorithm.profile.initialGenomes[DSL](n, om.genomeSize)).eval
+        }
+
+        def breeding(population: Vector[Individual], n: Int) = interpret { impl ⇒
+          import impl._
+          zipWithState(mgo.algorithm.profile.breeding[DSL](n, om.niche, om.operatorExploration).run(population)).eval
+        }
+
+        def elitism(population: Vector[Individual]) = interpret { impl ⇒
+          import impl._
+          zipWithState(mgo.algorithm.profile.elitism[DSL](om.niche).run(population)).eval
+        }
+
+        def afterGeneration(g: Long, population: Vector[I]): M[Boolean] = interpret { impl ⇒
+          import impl._
+          zipWithState(mgo.afterGeneration[DSL, I](g).run(population)).eval
+        }
+
+        def afterDuration(d: squants.Time, population: Vector[I]): M[Boolean] = interpret { impl ⇒
+          import impl._
+          zipWithState(mgo.afterDuration[DSL, I](d).run(population)).eval
+        }
+
         def migrateToIsland(population: Vector[I]) = population
         def migrateFromIsland(population: Vector[I]) = population
-      }
-
-      def run[A](s: S, x: M[A]) = {
-        val res =
-          for {
-            xv ← x
-            s ← mgo.algorithm.profile.state[M]
-          } yield (s, xv)
-        interpreter(s).run(res).right.get
       }
 
       def profile(om: DeterministicParams)(population: Vector[I]) = population
@@ -163,11 +185,11 @@ object GenomeProfile {
   object StochasticParams {
     import mgo.algorithm._
     import mgo.algorithm.noisyprofile._
-    import context._
-    import context.implicits._
+    import cats.data._
+    import freedsl.dsl._
+    import mgo.contexts._
 
     implicit def integration = new MGOAPI.Integration[StochasticParams, Vector[Double], Double] with MGOAPI.Stochastic with MGOAPI.Profile[StochasticParams] {
-      type M[A] = context.M[A]
       type G = mgo.algorithm.noisyprofile.Genome
       type I = Individual
       type S = EvolutionState[Unit]
@@ -176,9 +198,17 @@ object GenomeProfile {
       def gManifest = implicitly
       def sManifest = implicitly
 
-      def mMonad = implicitly
-      def mGeneration = implicitly
-      def mStartTime = implicitly
+      private def interpret[U](f: mgo.contexts.run.Implicits ⇒ (S, U)) = State[S, U] { (s: S) ⇒
+        mgo.algorithm.noisyprofile.NoisyProfile(s)(f)
+      }
+
+      private def zipWithState[M[_]: cats.Monad: StartTime: Random: Generation, T](op: M[T]): M[(S, T)] = {
+        import cats.implicits._
+        for {
+          t ← op
+          newState ← mgo.algorithm.noisyprofile.state[M]
+        } yield (newState, t)
+      }
 
       def operations(om: StochasticParams) = new Ops {
         def randomLens = GenLens[S](_.random)
@@ -189,24 +219,37 @@ object GenomeProfile {
         def phenotype(individual: I): Double = om.aggregation(vectorFitness.get(individual))
         def buildIndividual(genome: G, phenotype: Double) = noisyprofile.buildIndividual(genome, phenotype)
         def initialState(rng: util.Random) = EvolutionState[Unit](random = rng, s = ())
-        def initialGenomes(n: Int) = noisyprofile.initialGenomes(n, om.genomeSize)
-        def breeding(n: Int) = noisyprofile.breeding(n, om.niche, om.operatorExploration, om.cloneProbability, om.aggregation)
-        def elitism = noisyprofile.elitism(om.mu, om.niche, om.historySize, om.aggregation)
+
+        def initialGenomes(n: Int) = interpret { impl ⇒
+          import impl._
+          zipWithState(noisyprofile.initialGenomes[DSL](n, om.genomeSize)).eval
+        }
+
+        def breeding(population: Vector[Individual], n: Int) = interpret { impl ⇒
+          import impl._
+          zipWithState(noisyprofile.breeding[DSL](n, om.niche, om.operatorExploration, om.cloneProbability, om.aggregation).run(population)).eval
+        }
+
+        def elitism(population: Vector[Individual]) = interpret { impl ⇒
+          import impl._
+          zipWithState(noisyprofile.elitism[DSL](om.mu, om.niche, om.historySize, om.aggregation).run(population)).eval
+        }
+
+        def afterGeneration(g: Long, population: Vector[I]): M[Boolean] = interpret { impl ⇒
+          import impl._
+          zipWithState(mgo.afterGeneration[DSL, I](g).run(population)).eval
+        }
+
+        def afterDuration(d: squants.Time, population: Vector[I]): M[Boolean] = interpret { impl ⇒
+          import impl._
+          zipWithState(mgo.afterDuration[DSL, I](d).run(population)).eval
+        }
 
         def migrateToIsland(population: Vector[I]) = population.map(_.copy(historyAge = 0))
         def migrateFromIsland(population: Vector[I]) =
           population.filter(_.historyAge != 0).map {
             i ⇒ Individual.fitnessHistory.modify(_.take(math.min(i.historyAge, om.historySize).toInt))(i)
           }
-      }
-
-      def run[A](s: S, x: M[A]) = {
-        val res =
-          for {
-            xv ← x
-            s ← noisyprofile.state[M]
-          } yield (s, xv)
-        interpreter(s).run(res).right.get
       }
 
       def samples(i: I): Long = i.fitnessHistory.size
