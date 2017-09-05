@@ -848,6 +848,10 @@ buildSite := {
   siteTarget
 }
 
+lazy val buildOpenMOLE = inputKey[File]("buildOpenMOLE")
+buildOpenMOLE := {
+  (assemble in openmole).value
+}
 
 def siteTests = Def.taskDyn {
   val testTarget = (target in siteJVM).value / "tests"
