@@ -1,170 +1,175 @@
 @import org.openmole.site.tools._
 @import org.openmole.site._
 
-OpenMOLE makes it simple to include your own Java code in a workflow. Since the Scala compiler can
-compile Java code, Java code can be directly fed to the ScalaTask as shown in @aa("the ScalaTask example", href := DocumentationPages.scala.file). Additionally, a compiled Java program can be encapsulated in a ScalaTask as a jar file through the @hl.openmoleNoTest("libraries") parameter as below.
+@p
+  OpenMOLE makes it simple to include your own Java code in a workflow. Since the Scala compiler can compile Java code, Java code can be directly fed to the ScalaTask as shown in @aa("the ScalaTask example", href := DocumentationPages.scala.file). Additionally, a compiled Java program can be encapsulated in a ScalaTask as a jar file through the @hl.openmoleNoTest("libraries") parameter as below.
 
 @p
   Let us consider the simple code @em{Hello.java} in a directory named @i{hello} @("(to respect Java's package structure)"):
-  @hl.highlight("""
-package hello;
 
-public class Hello {
-  public static void run(int arg) {
-    System.out.println("Hello from Java! " + arg);
-  }
-}""", "java")
+  @hl.highlight("""
+  package hello;
+
+  public class Hello {
+    public static void run(int arg) {
+      System.out.println("Hello from Java! " + arg);
+    }
+  }""", "java")
 
 @p 
   We compile the code and generate the JAR file as follows:
+
   @hl.highlight("""
-mkdir hello
-mv Hello.java hello
-cd hello
-javac Hello.java
-cd ..
-jar cvf Hello.jar hello""", "plain")
+  mkdir hello
+  mv Hello.java hello
+  cd hello
+  javac Hello.java
+  cd ..
+  jar cvf Hello.jar hello""", "plain")
 
 @p 
   You should upload the Hello.jar file in a folder in OpenMOLE [TODO: rephrase. What does it mean?]. Then you can call the Java program from a ScalaTask with the following OpenMOLE code:
+
   @hl.openmole("""
-val proto1 = Val[Int]
+  val proto1 = Val[Int]
 
-val explo = ExplorationTask(proto1 in (0 until 10))
+  val explo = ExplorationTask(proto1 in (0 until 10))
 
-//Defines the task to perform the hello function
-val javaTask = ScalaTask("hello.Hello.run(proto1)") set (
-  libraries += workDirectory / "Hello.jar",
-  inputs += proto1
-)
+  //Defines the task to perform the hello function
+  val javaTask = ScalaTask("hello.Hello.run(proto1)") set (
+    libraries += workDirectory / "Hello.jar",
+    inputs += proto1
+  )
 
-explo -< javaTask""")
+  explo -< javaTask""")
 
 @p 
   The output should look like that (the order in which the lines are printed might be different in your case):
+
   @hl.highlight("""
-Hello from Java! 0
-Hello from Java! 1
-Hello from Java! 2
-Hello from Java! 3
-Hello from Java! 4
-Hello from Java! 5
-Hello from Java! 6
-Hello from Java! 7
-Hello from Java! 8
-Hello from Java! 9
-Hello from Java! 10""", "plain")
+  Hello from Java! 0
+  Hello from Java! 1
+  Hello from Java! 2
+  Hello from Java! 3
+  Hello from Java! 4
+  Hello from Java! 5
+  Hello from Java! 6
+  Hello from Java! 7
+  Hello from Java! 8
+  Hello from Java! 9
+  Hello from Java! 10""", "plain")
 
 
 @p 
-  In the general case a task is used to compute some output values depending on some input values. To illustrate
-  that, let's consider another Java code:
-  @hl.highlight("""
-package hello;
+  In the general case a task is used to compute some output values depending on some input values. To illustrate that, let's consider another Java code:
 
-public class Hello {
-  public static double[] run(double arg1, double arg2) {
-    return double[]{arg1 * 10, arg2 * 10};
+  @hl.highlight("""
+  package hello;
+
+  public class Hello {
+    public static double[] run(double arg1, double arg2) {
+      return double[]{arg1 * 10, arg2 * 10};
+    }
   }
-}
-""", "java")
+  """, "java")
 
 @p
-  You can compile it and package as "Hello.jar" in the same manner as the previous example.
-  You can then use the task input variables when calling the Java function, and assign the function result to the task output variable like so:
+  You can compile it and package as "Hello.jar" in the same manner as the previous example. You can then use the task input variables when calling the Java function, and assign the function result to the task output variable like so:
+
   @hl.openmole("""
-val arg1 = Val[Double]
-val arg2 = Val[Double]
-val out1 = Val[Double]
-val out2 = Val[Double]
+  val arg1 = Val[Double]
+  val arg2 = Val[Double]
+  val out1 = Val[Double]
+  val out2 = Val[Double]
 
-val explo = ExplorationTask(
-  (arg1 in (0.0 to 10.0 by 1.0)) x
-  (arg2 in (0.0 until 10.0 by 1.0))
-)
+  val explo = ExplorationTask(
+    (arg1 in (0.0 to 10.0 by 1.0)) x
+    (arg2 in (0.0 until 10.0 by 1.0))
+  )
 
-val javaTask = ScalaTask("Array(out1, out2) = hello.Hello.run(arg1, arg2)") set (
-  libraries += workDirectory / "Hello.jar",
-  inputs += (arg1, arg2),
-  outputs += (arg1, arg2, out1, out2)
-)
+  val javaTask = ScalaTask("Array(out1, out2) = hello.Hello.run(arg1, arg2)") set (
+    libraries += workDirectory / "Hello.jar",
+    inputs += (arg1, arg2),
+    outputs += (arg1, arg2, out1, out2)
+  )
 
-// save the result in a CSV file
-val csvHook = AppendToCSVFileHook(workDirectory / "result.csv")
+  // save the result in a CSV file
+  val csvHook = AppendToCSVFileHook(workDirectory / "result.csv")
 
-explo -< (javaTask hook csvHook)""")
+  explo -< (javaTask hook csvHook)""")
+
+@p
   This workflow will call the function @i{hello} with both arguments varying from 0 to 10 and save the results in a CSV file. Variables @i{arg1} and @i{arg2} are specified in the task output so that they are also written to the CSV file by the hook (see @aa("Hooks", href := DocumentationPages.hook.file))
 
-@h2{Working with files}
+@sect{Working with files}
 
-[TODO Is there a generic section explaining the following? This seems common to all tasks and shouldn't belong to this page]
-@p
-  When a task needs to access (read from or write to) external files, OpenMOLE needs to know it so it can pass them around to distant computing nodes.
+  [TODO Is there a generic section explaining the following? This seems common to all tasks and shouldn't belong to this page]
+  @p
+    When a task needs to access (read from or write to) external files, OpenMOLE needs to know it so it can pass them around to distant computing nodes.
 
-@p Let's consider another "hello world" code Hello.java. This program reads the content of a file and writes it to
-another file.
-@hl.highlight("""
-package hello;
+  @p Let's consider another "hello world" code Hello.java. This program reads the content of a file and writes it to another file.
 
-import java.io.*;
+    @hl.highlight("""
+    package hello;
 
-public class Hello {
+    import java.io.*;
 
-  public static void run(int arg, File input, File output) throws IOException {
-    //Read the input file
-    String content = readFileAsString(input);
-    PrintStream myStream = new PrintStream(new FileOutputStream(output));
-    try {
-      myStream.println(content + "  " + arg);
-    } finally {
-      myStream.close();
-    }
-  }
+    public class Hello {
 
-  private static String readFileAsString(File file) throws IOException {
-    byte[] buffer = new byte[(int) file.length()];
-    BufferedInputStream f = null;
-    try {
-      f = new BufferedInputStream(new FileInputStream(file));
-      f.read(buffer);
-    } finally {
-      if (f != null) try { f.close(); } catch (IOException ignored) { }
-    }
-    return new String(buffer);
-  }
-}""", "java")
+      public static void run(int arg, File input, File output) throws IOException {
+        //Read the input file
+        String content = readFileAsString(input);
+        PrintStream myStream = new PrintStream(new FileOutputStream(output));
+        try {
+          myStream.println(content + "  " + arg);
+        } finally {
+          myStream.close();
+        }
+      }
 
-@p
-  You can compile it and package as "Hello.jar" in the same manner as the previous example. For the program to access external files, give them to the task as @i{inputFile}.
+      private static String readFileAsString(File file) throws IOException {
+        byte[] buffer = new byte[(int) file.length()];
+        BufferedInputStream f = null;
+        try {
+          f = new BufferedInputStream(new FileInputStream(file));
+          f.read(buffer);
+        } finally {
+          if (f != null) try { f.close(); } catch (IOException ignored) { }
+        }
+        return new String(buffer);
+      }
+    }""", "java")
 
-@hl.openmole("""
-val proto1 = Val[Int]
-val inputFile = Val[File]
-val outputFile = Val[File]
+  @p
+    You can compile it and package as "Hello.jar" in the same manner as the previous example. For the program to access external files, give them to the task as @i{inputFile}.
 
-val explo = ExplorationTask(proto1 in (0 to 10))
+    @hl.openmole("""
+    val proto1 = Val[Int]
+    val inputFile = Val[File]
+    val outputFile = Val[File]
 
-//Defines the scala task as a launcher of the hello executable
-val javaTask =
-ScalaTask("val outputFile = newFile(); hello.Hello.run(proto1, inputFile, outputFile)") set (
-  libraries += workDirectory / "Hello.jar",
-  inputs += (proto1, inputFile),
-  outputs += (proto1, outputFile),
-  inputFile := workDirectory / "input.txt"
-)
+    val explo = ExplorationTask(proto1 in (0 to 10))
 
-  //Save the output file locally
-  val copyHook =
-    CopyFileHook(
-      outputFile,
-      workDirectory / "out-${proto1}.txt"
+    //Defines the scala task as a launcher of the hello executable
+    val javaTask =
+    ScalaTask("val outputFile = newFile(); hello.Hello.run(proto1, inputFile, outputFile)") set (
+      libraries += workDirectory / "Hello.jar",
+      inputs += (proto1, inputFile),
+      outputs += (proto1, outputFile),
+      inputFile := workDirectory / "input.txt"
     )
 
-  explo -< (javaTask hook copyHook)""")
+      //Save the output file locally
+      val copyHook =
+        CopyFileHook(
+          outputFile,
+          workDirectory / "out-${proto1}.txt"
+        )
 
-@p
-  For this example to work you should create a file named "input.txt" in the work directory of your project.
+      explo -< (javaTask hook copyHook)""")
 
-@p
-  This tutorial works for simple Java programs. For more ambitious developments, you should consider embedding
-  your code in an @a("OpenMOLE plugin"/*, href := DocumentationPages.root.development.plugin.file*/) [TODO lien].
+  @p
+    For this example to work you should create a file named "input.txt" in the work directory of your project.
+
+  @p
+    This tutorial works for simple Java programs. For more ambitious developments, you should consider embedding your code in an @a("OpenMOLE plugin"/*, href := DocumentationPages.root.development.plugin.file*/) [TODO lien].
