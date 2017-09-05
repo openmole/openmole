@@ -27,24 +27,23 @@ object Footer {
 
   val titleStyle = Seq(
     fontSize := "15px",
-    marginLeft := 10
+    marginLeft := 4
   )
 
-  val liStyle = Seq(
-    paddingLeft := 20,
+  def liStyle(ratio: Int) = Seq(
+    WHITE,
     padding := 20,
-    width := "25%"
+    width := s"$ratio%"
   )
 
   def subItem(i: TypedTag[String]) = div(paddingTop := 15)(i)
 
-  def imgSubItem(image: FileResource, title: String, link: String, text: String = "", otherTab: Boolean = true) =
+  def imgSubItem(image: FileResource, title: String, link: String, otherTab: Boolean = true) =
     subItem(
       div(width := "100%")(
         tools.to(link, otherTab = otherTab)(
           img(src := image.file, height := 20, paddingBottom := 5)(span(s"$title", titleStyle))
-        ),
-        div(text, fontSize := "12px", textAlign := "justify")
+        )
       )
     )
 
@@ -55,28 +54,32 @@ object Footer {
         div(classIs(container_fluid), stylesheet.center(50))(
           div(classIs(collapse ++ navbar_collapse))(
             ul(classIs(nav ++ navbar_nav))(
-              li(span("COMMUNITY", WHITE)(
+              li(liStyle(23))(
+                span("COMMUNITY", textAlign := "center"),
                 div(paddingTop := 15),
-                imgSubItem(Resource.img.footer.previousVersion, "Previous versions", Pages.previousVersions.file, "Downloads and change logs of previous versions", false),
-                imgSubItem(Resource.img.footer.email, "Forum", shared.link.mailingList, "Both forum and mailing-list (subscribe first)"),
-                imgSubItem(Resource.img.footer.faq, "FAQ", Pages.faq.file, "Any questions you may have", false)
-              ), liStyle),
-              li(span("DEVELOPMENT", WHITE)(
+                imgSubItem(Resource.img.footer.previousVersion, "Previously", Pages.previousVersions.file, false),
+                imgSubItem(Resource.img.footer.email, "Forum", shared.link.mailingList),
+                imgSubItem(Resource.img.footer.faq, "FAQ", Pages.faq.file, false)
+              ),
+              li(liStyle(26))(
+                span("DEVELOPMENT", textAlign := "center"),
                 div(paddingTop := 15),
-                imgSubItem(Resource.img.footer.github, "Source Repository", shared.link.repo.openmole, "Follow the commits, submit an issue or take part to the dev !"),
-                imgSubItem(Resource.img.footer.contribute, "How to contribute ?", DocumentationPages.howToContribute.file, "Get sources, compile, propose pull requests !", false)
-              ), liStyle),
-              li(span("ABOUT US", WHITE)(
+                imgSubItem(Resource.img.footer.github, "Source code", shared.link.repo.openmole),
+                imgSubItem(Resource.img.footer.contribute, "Contribute !", DocumentationPages.howToContribute.file, false)
+              ),
+              li(liStyle(27))(
+                span("ABOUT US", textAlign := "center"),
                 div(paddingTop := 15),
-                imgSubItem(Resource.img.footer.paper, "Publications", Pages.communications.file, "Papers referencing OpenMOLE. How to cite us.", true),
-                imgSubItem(Resource.img.footer.whoarwe, "Who are we ?", Pages.whoAreWe.file, "Developpment team, partners", false),
-                imgSubItem(Resource.img.footer.partner, "Partners", Pages.partner.file, "Developpment team, partners", false)
-              ), liStyle),
-              li(span("COMMUNICATION", WHITE)(
+                imgSubItem(Resource.img.footer.paper, "Publications", Pages.communications.file, true),
+                imgSubItem(Resource.img.footer.whoarwe, "Who are we ?", Pages.whoAreWe.file, false),
+                imgSubItem(Resource.img.footer.partner, "Partners", Pages.partner.file, false)
+              ),
+              li(liStyle(22))(
+                span("COMMUNICATION", textAlign := "center"),
                 div(paddingTop := 15),
-                imgSubItem(Resource.img.footer.blog, "Blog", shared.link.blog, "Nice stories about OpenMOLE"),
-                imgSubItem(Resource.img.footer.twitter, "Twitter", shared.link.twitter, "#openmole #optimization #hpc #model #amazing")
-              ), liStyle)
+                imgSubItem(Resource.img.footer.blog, "Blog", shared.link.blog),
+                imgSubItem(Resource.img.footer.twitter, "Twitter", shared.link.twitter)
+              )
             )
           )
         )

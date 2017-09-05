@@ -1,6 +1,0 @@
-
-
-@import org.openmole.site._
-
-@sect{OpenMOLE citations}
-  @Communication.all
