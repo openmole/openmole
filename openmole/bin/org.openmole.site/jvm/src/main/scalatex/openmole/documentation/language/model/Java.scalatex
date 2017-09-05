@@ -93,7 +93,7 @@ val javaTask = ScalaTask("Array(out1, out2) = hello.Hello.run(arg1, arg2)") set 
 val csvHook = AppendToCSVFileHook(workDirectory / "result.csv")
 
 explo -< (javaTask hook csvHook)""")
-  This workflow will call the function @i{hello} with both arguments varying from 0 to 10 and save the results in a CSV file.
+  This workflow will call the function @i{hello} with both arguments varying from 0 to 10 and save the results in a CSV file. Variables @i{arg1} and @i{arg2} are specified in the task output so that they are also written to the CSV file by the hook (see @aa("Hooks", href := DocumentationPages.hook.file))
 
 @h2{Working with files}
 
