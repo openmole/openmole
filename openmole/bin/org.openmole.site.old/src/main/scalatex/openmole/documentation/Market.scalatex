@@ -1,7 +1,0 @@
-
-@import org.openmole.site._
-
-@sect{The Market Place}
-    This is the OpenMOLE Market Place. It gathers working examples of OpenMOLE workflow. To execute a market place entry you can either import it directly from within the OpenMOLE editor using the market place menu or download it from here, upload it in you workspace and then extract it.
-    @p You can contribute to the market place either by providing a pull request on the OpenMOLE on the @a("central OpenMOLE market place on github", href := "https://github.com/openmole/openmole-market") or by providing your example workflows on your own git repository and post it to the user mailing list.
-    @p To contribute to the market place you should provide self-contained working examples. All resources needed to execute the workfow should be located in a single directory. One or several @i("oms") files can be provided and a README.md must explain what the workflow computes. A workflow is included in this section only if it compiles within the matching OpenMOLE version.
