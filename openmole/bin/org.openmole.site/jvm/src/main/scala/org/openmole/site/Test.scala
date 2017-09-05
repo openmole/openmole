@@ -8,7 +8,6 @@ import scala.collection.mutable.ListBuffer
 object Test {
 
   var testing = false
-
   var allTests = ListBuffer[Test]()
 
   def generate(target: File) = synchronized {
@@ -27,14 +26,11 @@ object Test {
 
     target.mkdirs()
 
-    val duplicatedName = tests.flatMap(_.name).groupBy(n ⇒ n).mapValues(_.size).filter(_._2 > 1)
-    if (!duplicatedName.isEmpty) throw new RuntimeException(s"Some test names are not unique: ${duplicatedName.keys.toVector.mkString(", ")}")
-
     for {
       (t, i) ← tests.zipWithIndex
     } {
-      def name: String = t.name.getOrElse(s"test${i}") + ".omt"
-      (target / name).content =
+      def name: String = t.name.getOrElse(s"test${i}")
+      (target / s"${i}_$name.omt").content =
         s"""${t.code}
            |EmptyTask()
          """.stripMargin
