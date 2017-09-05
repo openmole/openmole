@@ -856,7 +856,7 @@ def siteTests = Def.taskDyn {
 }
 
 lazy val tests = Project("tests", binDir / "tests") settings (defaultSettings: _*) settings (assemblySettings: _*) settings (
-  resourcesAssemble += (siteTests.value -> (assemblyPath.value / "site")),
+  resourcesAssemble += (siteTests.value -> (assemblyPath.value / "tests")),
   dependencyFilter := noDependencyFilter
 )
 
