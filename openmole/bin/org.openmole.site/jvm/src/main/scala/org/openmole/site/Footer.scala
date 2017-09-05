@@ -67,14 +67,14 @@ object Footer {
                 imgSubItem(Resource.img.footer.github, "Source code", shared.link.repo.openmole),
                 imgSubItem(Resource.img.footer.contribute, "Contribute !", DocumentationPages.howToContribute.file, false)
               ),
-              li(liStyle(26))(
+              li(liStyle(27))(
                 span("ABOUT US", textAlign := "center"),
                 div(paddingTop := 15),
                 imgSubItem(Resource.img.footer.paper, "Publications", Pages.communications.file, true),
                 imgSubItem(Resource.img.footer.whoarwe, "Who are we ?", Pages.whoAreWe.file, false),
                 imgSubItem(Resource.img.footer.partner, "Partners", Pages.partner.file, false)
               ),
-              li(liStyle(23))(
+              li(liStyle(22))(
                 span("COMMUNICATION", textAlign := "center"),
                 div(paddingTop := 15),
                 imgSubItem(Resource.img.footer.blog, "Blog", shared.link.blog),
