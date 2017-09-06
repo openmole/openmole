@@ -92,6 +92,6 @@
 
   val skel = exploration -< modelSlot1 -- (selectCaps hook displayHook)
   val loop = selectCaps -- modelSlot2
-  val terminate = selectCaps >| (Capsule(finalTask, strain = true) hook displayHook, "archive.size >= 10")
+  val terminate = selectCaps >| (Capsule(finalTask, strain = true) hook DisplayHook("archive.size >= 10"))
 
   skel & loop & terminate""")
