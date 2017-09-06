@@ -34,7 +34,7 @@ The only difference between the script in the console mode and the ones from the
     you cancel it and you follow the execution progress.
 
     A console workflow is launched like this:
-    @hl.openmole("""
+    @hl.code("""
     val ex = exploration -< (model on env) start""")
 
     Note that you need to invoke the @hl.highlight("start", "plain") on your workflow, in contrary to Editor mode.
