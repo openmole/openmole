@@ -17,7 +17,7 @@ object Libraries {
   lazy val scalaUpickleVersion = "0.4.4"
   lazy val scalaAutowireVersion = "0.2.6"
   lazy val sourcecodeVersion = "0.1.3"
-  lazy val scaladgetVersion = "0.9.5-SNAPSHOT"
+  lazy val scaladgetVersion = "0.9.5"
   lazy val json4sVersion = "3.5.0"
   lazy val circeVersion = "0.8.0"
   lazy val catsVersion = "0.9.0"
@@ -42,6 +42,8 @@ object Libraries {
   /** ------- Bundles -------------- */
 
 
+  lazy val addScalaLang = libraryDependencies += "org.openmole.library" %% "org-scala-lang-scala-library" % scalaVersion.value
+
   lazy val scalatra = "org.openmole.library" %% "org-scalatra" % "2.5.0"
   lazy val logback = "org.openmole.library" %% "ch-qos-logback" % "1.0.9"
   lazy val h2 = "org.openmole.library" %% "org-h2" % "1.4.195"
@@ -49,7 +51,6 @@ object Libraries {
   lazy val slick = "org.openmole.library" %% "com-typesafe-slick" % "3.2.0"
   lazy val slf4j = "org.openmole.library" %% "org-slf4j" % "1.7.10"
   lazy val xstream = "org.openmole.library" %% "com-thoughtworks-xstream" % "1.4.9"
-  lazy val scalaLang = "org.openmole.library" %% "org-scala-lang-scala-library" % "2.12.2"
   lazy val jasypt = "org.openmole.library" %% "org-jasypt-encryption" % "1.9.2"
   lazy val opencsv = "org.openmole.library" %% "au-com-bytecode-opencsv" % "2.3"
   lazy val arm = "org.openmole.library" %% "com-jsuereth-scala-arm" % "2.0"

@@ -39,7 +39,7 @@ object Main {
         div(centerBox)(
           img(src := Resource.img.method.exploreMap.file, width := 120),
           div(mainTitle, "EXPLORE"),
-          div(mainText, "Explore spaces of parameters, optimize, test the sensitivity of your model through innovative and integrated methods"),
+          div(mainText, "Explore spaces of parameters, optimize, test the sensitivity of your model through innovative methods"),
           readMore(DocumentationPages.method)
         )
       ),
@@ -47,7 +47,7 @@ object Main {
         div(centerBox)(
           img(src := Resource.img.environment.scale.file, width := 120),
           div(mainTitle, "SCALE"),
-          div(mainText, "Scale up your experimentations with no effort on servers, clusters, grid, cloud, ..."),
+          div(mainText, "Scale up your experimentations with no effort on servers, clusters, grids, clouds, ..."),
           readMore(DocumentationPages.environment)
         )
       )

@@ -70,7 +70,7 @@ The utility of the CARE tool for reproducible science has been covered in the fo
 
    val careTask = CARETask("care.tgz.bin", "executable arg1 arg2 /path/to/my/file /virtual/path arg4") set (
      hostFiles += ("/path/to/my/file"),
-     workDirectory := "/tmp",
+     customWorkDirectory := "/tmp",
      returnValue := out
    )
    }
