@@ -2,6 +2,13 @@
 @import org.openmole.site._
 
 
+
+@def variables = """
+  val inputString = Val[String]
+  val Digits = Val[Double]"""
+
+
+
 OpenMOLE handles your model execution by framing it in a @b{workflow}.
 Select the language of your model on your left to see how it is done .
 
@@ -63,8 +70,10 @@ Select the language of your model on your left to see how it is done .
       val exploration = ExplorationTask(all_the_lines)
 
       // encapsulates your model in an "execution" task that calls the main routine
+
+
       val  my_model_execution = ScalaTask( "mainRun",
-                                          inputs += inputString
+                                          inputs += inputString,
                                           outputs += Digits
                                           )
       // a hook to catch the outputs of your model execution and put them in a CSV file
@@ -75,5 +84,5 @@ Select the language of your model on your left to see how it is done .
 
       // the workflow. Bascically it says : explore the lines and run a model execution for each,
       // save the outputs, all that on the cluster (results are not brought back to the local computer yet).
-      exploration -< (my_model_execution on env hook catch_output)        """)
+      exploration -< (my_model_execution on env hook catch_output)        """, header=variables)
 
