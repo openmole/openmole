@@ -4,6 +4,20 @@
 @import org.openmole.site.stylesheet._
 
 
+@def modelAndVariables = """
+val param1 = Val[Double]
+val param2 = Val[Double]
+val distance1 = Val[Double]
+val distance2 = Val[Double]
+val output1 = Val[Double]
+val output2 = Val[Double]
+val modelTask = EmptyTask() set (
+    inputs += (param1,param2),
+    outputs += (output1, output2)
+    )
+"""
+
+
 Using Genetic Algorithms (GA), OpenMOLE find the inputs set matching one or several criteria: this is called @b{calibration}.
 In practice, calibration is used when you want to target @b{one} specific scenario or dynamic.
 Usually, one uses a fitness function that is commensurable to a distance from your target, so if your model is not
@@ -138,6 +152,6 @@ For more details on the calibration using genetic algorithms, see the @a("GA det
         parallelism = 10,
         termination = 100
       )
-    )""", name = "Calibration")
+    """, header= modelAndVariables, name = "Calibration")
     where @hl.code("param1") and @hl.code("param2") are input of the @hl.code("modelTask"), and @hl.code("distance1") and @hl.code("distance2") are its outputs.
     @p
