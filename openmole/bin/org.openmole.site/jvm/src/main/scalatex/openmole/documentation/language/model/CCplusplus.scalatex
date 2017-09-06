@@ -5,6 +5,13 @@
 
 
 
+@def variables = """
+  val arg1 = Val[Double]
+  val arg2 = Val[Double]
+  val output = Val[File]"""
+
+
+
 @introPackagingForRPythonCplusplus
 @hr
 
@@ -57,9 +64,9 @@
         @li
             first the inputs are extracted from command line,
         @li
-            then the model function called with extracted values,
+            then the model function is called with extracted values,
         @li
-            and finally the results are displayed on standard output, and  written in a text file.
+           finally the results are displayed on standard output, and  written in a text file.
 
 @sect{Packaging it with CARE}
 
@@ -177,5 +184,5 @@ To do that, let's replace the @hl.openmoleNoTest{CopyFileHook} line by the follo
 
     @hl.openmole("""
     val copy = CopyFileHook(output, workDirectory /"results/cpp${arg1}${arg2}.txt")
-    """)
+    """,  header= variables)
 
