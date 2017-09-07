@@ -86,8 +86,9 @@
 
 
         @li
-            SAGEO 2017 (To be added) TODO add bibtex when paper is published
-
+            Denise Pumain, Romain Reuillon, Sébastien Rey-Coyrehourcq, Arnaud Banos, Paul Chapron, et al.. "Urban Dynamics and Simulation Models". Springer, ISBN 978-3-319-46495-4, 2017.
+            @br
+                @a("[pre-print version]" , href:=shared.link.urbanDynamics)   @a("[bibteX]", href:= shared.link.urbanDynamicsBib)
 
         @li
              Jonathan Passerat-Palmbach, Romain Reuillon, Mathieu Leclaire, Antonios Makropoulos, Emma C. Robinson, Sarah

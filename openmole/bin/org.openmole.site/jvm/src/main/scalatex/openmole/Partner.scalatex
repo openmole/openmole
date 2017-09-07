@@ -36,10 +36,10 @@
     is the last born of the Simpop family of model, and addresses the dynamics of Russia/ former URSS from 1950 to 2010.
     See «A modular modelling framework for hypotheses testing in the simulation of urbanisation»,
     in our @a("publication page", href := Pages.communications.file)).
+    @br
 @span(width := "75%")
 @br
-    The ERC @aa("Geodivercity", href:=shared.link.geodivercity) was an advanced grant ERC project ,
+    The ERC @aa("Geodivercity", href:=shared.link.geodivercity) was an advanced grant ERC project,
     led by Pr. Denise Pumain. A significant part of the  development of OpenMOLE  as a scalable platform for geographical
     simulation models experiments was founded by this project. The project led to the publication of a book published by Springer,
-    available @aa("on the editor site", href:=shared.link.ercSpringer)
-    and here as a pre-print open version TODO Romain ajouter liens vers HAL pour les preprint
+    available @aa("on the editor site", href:=shared.link.ercSpringer) and @aa("here as a pre-print open version", href := shared.link.urbanDynamics).
