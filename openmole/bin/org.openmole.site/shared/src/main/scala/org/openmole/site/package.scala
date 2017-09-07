@@ -191,6 +191,8 @@ package object shared {
     lazy val CAREsite = "https://proot-me.github.io/"
     lazy val CAREmailing = "https://groups.google.com/forum/?fromgroups#!forum/reproducible"
     lazy val ggplot2 = "http://ggplot2.tidyverse.org/reference/"
+    lazy val urbanDynamics = "https://hal.archives-ouvertes.fr/view/index/docid/1583528"
+    lazy val urbanDynamicsBib = "https://hal.archives-ouvertes.fr/hal-01583528v1/bibtex"
 
     object partner {
       lazy val iscpif = "http://iscpif.fr"
