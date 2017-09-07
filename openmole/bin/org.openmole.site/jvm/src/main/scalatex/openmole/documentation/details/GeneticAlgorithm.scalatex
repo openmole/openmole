@@ -130,18 +130,55 @@ OpenMOLE make an intensive use of genetic algorithms (GA) in its various @a("met
  TODO Romain: (rappel du contexte) : on avait parlé  d'un moyen de fixer un objectif à atteindre en donnant la valeur en clair dans le script.  Si la task existe , remplacer par la syntaxe courrante le texte ci dessous , en se rappelant   qu'il faut que  ce soit limpide à la lecture du script oms qu'on cible une valeur donnée en argument: reach(42) , target(42) qqch comme ça
 
     Notice that the objectives are given as a sequence of model outputs variables to @b{minimize}.
-So if you want to reach specific target values, like Pi and 42  you should have written your objectives as
+So if you want to reach specific target values, like Pi and 42  you can use the DeltaTask an plug it after your model:
 
+    @br @hl.openmole(s"""
+  $model
 
-    @br
-    @hl.highlight("evaluation = Delta(model, o1 -> math.Pi, o2 -> 42)", "plain")
+  val evolution =
+    SteadyStateEvolution(
+      // Definition of the optimisation algorithm
+      // mu is the size of the population
+      // genome is the inputs prototype and their variation ranges
+      // objectives are the objectives to minimise
+      algorithm =
+        NSGA2(
+          mu = 100,
+          genome = Seq(x in (0.0, 1.0), y in (0.0, 1.0)),
+          objectives = Seq(o1, o2)
+        ),
+        evaluation = model -- DeltaTask(o1 -> math.Pi, o2 -> 42),
+        parallelism = 10,
+        termination = 100
+    )""", name = "nsga2 delta example")
     @br
     NB: in this case the results in the saved file in will be the difference between the outputs of the model and your objectives.
     @br
 
-
     @br
-    Obviously, maximization problem are  performed by taking the opposite of variables as objectives.
+    Obviously, maximization problem are performed by taking the opposite of variables as objectives. You may use a ScalaTask in place of the DeltaTask to perform such a small computations in the workflow.
+@br @hl.openmole(s"""
+  $model
+
+  val maximize = ScalaTask("o1 = -o1") set ((inputs, outputs) += (o1, o2))
+
+  val evolution =
+    SteadyStateEvolution(
+      // Definition of the optimisation algorithm
+      // mu is the size of the population
+      // genome is the inputs prototype and their variation ranges
+      // objectives are the objectives to minimise
+      algorithm =
+        NSGA2(
+          mu = 100,
+          genome = Seq(x in (0.0, 1.0), y in (0.0, 1.0)),
+          objectives = Seq(o1, o2)
+        ),
+        evaluation = model -- maximize,
+        parallelism = 10,
+        termination = 100
+    )""", name = "nsga2 maximize example")
+
 
     @br@br
 @sect{Real world Example}
