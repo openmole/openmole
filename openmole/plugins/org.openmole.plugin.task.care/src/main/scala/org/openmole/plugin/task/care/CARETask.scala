@@ -33,6 +33,7 @@ import org.openmole.tool.random._
 import org.openmole.plugin.task.container
 import cats.implicits._
 import org.openmole.core.preference.ConfigurationLocation
+import org.openmole.plugin.task.container.HostFiles
 
 object CARETask extends Logger {
 
