@@ -42,6 +42,7 @@ import org.openmole.tool.file._
 import io.circe.generic.extras.auto._
 import io.circe.jawn.{ decode, decodeFile }
 import io.circe.syntax._
+import org.openmole.plugin.task.container.HostFiles
 
 import scala.language.postfixOps
 

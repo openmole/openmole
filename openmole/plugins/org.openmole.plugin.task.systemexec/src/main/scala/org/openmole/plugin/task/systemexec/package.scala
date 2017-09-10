@@ -91,10 +91,6 @@ package systemexec {
     def workDirectory: Lens[T, Option[String]]
   }
 
-  trait HostFiles[T] {
-    def hostFiles: Lens[T, Vector[(String, Option[String])]]
-  }
-
   trait SystemExecPackage {
 
     lazy val errorOnReturnValue =
@@ -152,11 +148,6 @@ package systemexec {
         def :=[T: WorkDirectory](s: OptionalArgument[String]) =
           implicitly[WorkDirectory[T]].workDirectory.set(s)
       }
-
-    lazy val hostFiles = new {
-      def +=[T: HostFiles](hostFile: String, binding: OptionalArgument[String] = None) =
-        implicitly[HostFiles[T]].hostFiles add (hostFile, binding)
-    }
 
   }
 }

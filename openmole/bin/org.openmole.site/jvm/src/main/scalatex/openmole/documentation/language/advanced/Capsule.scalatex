@@ -6,8 +6,6 @@
 @SideMenu.capsuleMenu.toBlock.left(350)
 @h1{Advanced Capsule}
 
-<<<<<<< HEAD:openmole/bin/org.openmole.site/jvm/src/main/scalatex/openmole/documentation/language/advanced/Capsule.scalatex
-=======
 @sect{@shared.capsuleMenu.definition}
     Tasks are not directly linked to each-other by transitions. This has been made as transparent as possible, but two
     other notions are involved behind the scenes. Tasks are encapsulated in a so called
@@ -36,7 +34,6 @@
 
     Other specific capsules are defined in OpenMOLE. They are described in the @aa("Advanced capsule", href := DocumentationPages.capsule.file) section
 
->>>>>>> master:openmole/bin/org.openmole.site/jvm/src/main/scalatex/openmole/documentation/language/advanced/Capsule.scalatex
 @sect{@shared.capsuleMenu.strainer}
   In a general manner you are expected to specify the inputs and outputs of each task. Capsules' strainer mode transmits all the variables arriving through the input transition as if they were inputs and ouptuts of the task.
 
@@ -95,6 +92,6 @@
 
   val skel = exploration -< modelSlot1 -- (selectCaps hook displayHook)
   val loop = selectCaps -- modelSlot2
-  val terminate = selectCaps >| (Capsule(finalTask, strain = true) hook displayHook, "archive.size >= 10")
+  val terminate = selectCaps >| (Capsule(finalTask, strain = true) hook DisplayHook("archive.size >= 10"))
 
   skel & loop & terminate""")

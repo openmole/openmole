@@ -5,6 +5,12 @@
 @import org.openmole.site.Environment._
 
 
+@def variables = """
+val density = Val[Double]
+val seed = Val[Int]
+val burned = Val[Double]
+"""
+
 
 @b{Design of Experiments} (DoE) is the art of setting up an experimentation. In a model simulation context,
 it boils down to declare the inputs under study (most of the time, they're parameters) and the values they will take, for a batch of several simulations, with the idea of revealing a property of the model (e.g. sensitivity).
@@ -266,7 +272,7 @@ By defining your own exploration task on @a("several types of input", href:= sha
         (density in (20.0 to 80.0 by 1.0)) x
         (seed in (UniformDistribution[Int]() take 10))
       )
-      """)
+      """, header=variables)
     @break
     This is the resulting scatterplot of Number of burned trees according to density varying from 20% to 80% by 1% steps.
     @br@br
@@ -281,7 +287,7 @@ By defining your own exploration task on @a("several types of input", href:= sha
             (density in (50.0 to 75.0 by 0.1)) x
             (seed in (UniformDistribution[Int]() take 10))
           )
-          """)
+          """, header=variables)
 
     @break
 
@@ -305,7 +311,7 @@ That's pretty cool already ! The estimator gives us a nice sigmoïd shape on whi
            ExplorationTask(
              (density in (50.0 to 70.0 by 0.1)) x
              (seed in (UniformDistribution[Int]() take 100))
-           )""")
+           )""", header= variables)
 
 
 

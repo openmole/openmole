@@ -157,4 +157,4 @@ available in OpenMOLE.
       val s1 = Slot(c1)
       val s2 = Slot(c1)
 
-      (t0 -- s1 -- (s2, "i < 100") & (c1 hook ToStringHook()))""")
+      (t0 -- s1 -- (s2 when "i < 100") & (c1 hook ToStringHook()))""")

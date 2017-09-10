@@ -57,7 +57,7 @@ object Libraries {
   lazy val scalajHttp = "org.openmole.library" %% "org-scalaj-scalaj-http" % "0.3.15"
   lazy val scopt = "org.openmole.library" %% "com-github-scopt" % "3.5.0"
   lazy val scalabc = "org.openmole.library" %% "fr-iscpif-scalabc" % "0.4"
-  lazy val scalatexSite = "org.openmole.library" %% "com-lihaoyi-scalatex-site" % "0.3.7"
+  lazy val scalatexSite = "org.openmole.library" %% "com-lihaoyi-scalatex-site" % "0.3.11"
   lazy val math = "org.openmole.library" %% "org-apache-commons-math" % "3.6.1"
   lazy val collections = "org.openmole.library" %% "org-apache-commons-collections" % "4.1"
   lazy val exec = "org.openmole.library" %% "org-apache-commons-exec" % "1.3"

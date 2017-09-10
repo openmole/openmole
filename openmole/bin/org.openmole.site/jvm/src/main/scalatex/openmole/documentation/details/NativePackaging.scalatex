@@ -66,13 +66,13 @@ The utility of the CARE tool for reproducible science has been covered in the fo
   You can configure the execution of the @hl.openmoleNoTest{CARETask} using the @hl.openmoleNoTest{set} operator on a freshly defined task.
 
    @hl.openmole{
-   val out = Val[Int]
+     val out = Val[Int]
 
-   val careTask = CARETask("care.tgz.bin", "executable arg1 arg2 /path/to/my/file /virtual/path arg4") set (
-     hostFiles += ("/path/to/my/file"),
-     customWorkDirectory := "/tmp",
-     returnValue := out
-   )
+     val careTask = CARETask("care.tgz.bin", "executable arg1 arg2 /path/to/my/file /virtual/path arg4") set (
+       hostFiles += ("/path/to/my/file"),
+       customWorkDirectory := "/tmp",
+       returnValue := out
+     )
    }
 
   The available options are described hereafter:

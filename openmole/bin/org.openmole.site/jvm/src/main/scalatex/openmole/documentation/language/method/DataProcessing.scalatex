@@ -72,12 +72,12 @@ Model inputs come in many shapes; this is why OpenMOLE features some file handli
 @sect{CSV files Sampling}
     As an extension to undifferientiated files, you can inject your own sampling in OpenMOLE through a CSV file. Considering a CSV file like:
 
-    @hl.openmole("""
+    @hl.highlight("""
     coldD,  colFileName,    i
     0.7,    fic1,           8
     0.9,    fic2,           19
     0.8,    fic2,           19
-    """)
+    """, "plain")
     The corresponding CSVSampling is:
     @hl.openmole("""
     val i = Val[Int]

@@ -100,11 +100,7 @@
     To overcome these limitations, OpenMOLE uses an auto-adaptive strategy called "stochastic resampling".
 
 @br
-TODO Romain: ci-dessous garder la ref de Branke ?
-@br
-    The idea (loosely related to the idea of resampling best solutions so they are more precisely evaluated, cf
-    [Branke, 1998]) is to  evaluate individuals with only one replication and, at the next generation
-     ,  to keep and re-inject a sample of the individuals of the current population in the newly created population..
+    The idea is to  evaluate individuals with only one replication and, at the next generation, to keep and re-inject a sample of the individuals of the current population in the newly created population..
 @br
 
     For instance, at each generation, 90% of the individuals offspring genomes are @b{new genomes} obtained by
