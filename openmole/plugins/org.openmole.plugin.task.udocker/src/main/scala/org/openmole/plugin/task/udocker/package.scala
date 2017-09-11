@@ -26,6 +26,12 @@ package udocker {
           implicitly[ReuseContainer[T]].reuseContainer.set(b)
       }
 
+    lazy val udockerUser =
+      new {
+        def :=[T: UDockerUser](b: Option[String]) =
+          implicitly[UDockerUser[T]].udockerUser.set(b)
+      }
+
   }
 }
 
@@ -42,6 +48,10 @@ package object udocker extends UDockerPackage {
 
   trait ReuseContainer[T] {
     def reuseContainer: Lens[T, Boolean]
+  }
+
+  trait UDockerUser[T] {
+    def udockerUser: Lens[T, Option[String]]
   }
 
   import cats.data._
@@ -143,7 +153,8 @@ package object udocker extends UDockerPackage {
     hostFiles:            Vector[(String, Option[String])]      = Vector.empty,
     installCommands:      Vector[FromContext[String]]           = Vector.empty,
     workDirectory:        Option[String]                        = None,
-    reuseContainer:       Boolean                               = true
+    reuseContainer:       Boolean                               = true,
+    udockerUser:          Option[String]                        = None
   )
 
   def runCommand(uDocker: UDocker)(udocker: File, volumes: Vector[MountPoint], runId: String, command: FromContext[String]): FromContext[String] = FromContext { p ⇒
@@ -153,8 +164,13 @@ package object udocker extends UDockerPackage {
 
     def volumesArgument(volumes: Vector[MountPoint]) = volumes.map { case (host, container) ⇒ s"""-v "$host":"$container"""" }.mkString(" ")
 
+    val userArgument = uDocker.udockerUser match {
+      case None    ⇒ ""
+      case Some(x) ⇒ s"""--user="$x""""
+    }
+
     val variablesArgument = uDocker.environmentVariables.map { case (name, variable) ⇒ s"""-e $name="${variable.from(context)}"""" }.mkString(" ")
-    command.map(cmd ⇒ s"""${udocker.getAbsolutePath} run --workdir="$workDirectory" $variablesArgument ${volumesArgument(volumes)} $runId $cmd""").from(context)
+    command.map(cmd ⇒ s"""${udocker.getAbsolutePath} run --workdir="$workDirectory" $userArgument  $variablesArgument ${volumesArgument(volumes)} $runId $cmd""").from(context)
   }
 
   def userWorkDirectory(uDocker: UDocker) = {

@@ -53,7 +53,7 @@ object UDockerTask {
   implicit def isTask: InputOutputBuilder[UDockerTask] = InputOutputBuilder(UDockerTask._config)
   implicit def isExternal: ExternalBuilder[UDockerTask] = ExternalBuilder(UDockerTask.external)
 
-  implicit def isBuilder = new ReturnValue[UDockerTask] with ErrorOnReturnValue[UDockerTask] with StdOutErr[UDockerTask] with EnvironmentVariables[UDockerTask] with HostFiles[UDockerTask] with ReuseContainer[UDockerTask] with WorkDirectory[UDockerTask] { builder ⇒
+  implicit def isBuilder = new ReturnValue[UDockerTask] with ErrorOnReturnValue[UDockerTask] with StdOutErr[UDockerTask] with EnvironmentVariables[UDockerTask] with HostFiles[UDockerTask] with ReuseContainer[UDockerTask] with WorkDirectory[UDockerTask] with UDockerUser[UDockerTask] { builder ⇒
     override def returnValue = UDockerTask.returnValue
     override def errorOnReturnValue = UDockerTask.errorOnReturnValue
     override def stdOut = UDockerTask.stdOut
@@ -62,6 +62,7 @@ object UDockerTask {
     override def hostFiles = UDockerTask.uDocker composeLens UDocker.hostFiles
     override def reuseContainer = UDockerTask.uDocker composeLens UDocker.reuseContainer
     override def workDirectory = UDockerTask.uDocker composeLens UDocker.workDirectory
+    override def udockerUser = UDockerTask.uDocker composeLens UDocker.udockerUser
   }
 
   def apply(
