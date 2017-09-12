@@ -15,7 +15,6 @@ import org.openmole.tool.cache.{ CacheKey, WithInstance }
 import org.openmole.tool.file._
 import org.openmole.tool.stream._
 import org.openmole.tool.lock._
-import org.openmole.core.dsl.OptionalArgument
 
 package udocker {
 
@@ -27,10 +26,10 @@ package udocker {
           implicitly[ReuseContainer[T]].reuseContainer.set(b)
       }
 
-    lazy val udockerUser =
+    lazy val uDockerUser =
       new {
-        def :=[T: UDockerUser](b: OptionalArgument[String]) =
-          implicitly[UDockerUser[T]].udockerUser.set(b.option)
+        def :=[T: UDockerUser](b: String) =
+          implicitly[UDockerUser[T]].uDockerUser.set(Some(b))
       }
 
   }
@@ -52,7 +51,7 @@ package object udocker extends UDockerPackage {
   }
 
   trait UDockerUser[T] {
-    def udockerUser: Lens[T, Option[String]]
+    def uDockerUser: Lens[T, Option[String]]
   }
 
   import cats.data._
@@ -155,7 +154,7 @@ package object udocker extends UDockerPackage {
     installCommands:      Vector[FromContext[String]]           = Vector.empty,
     workDirectory:        Option[String]                        = None,
     reuseContainer:       Boolean                               = true,
-    udockerUser:          Option[String]                        = None
+    uDockerUser:          Option[String]                        = None
   )
 
   def runCommand(uDocker: UDocker)(udocker: File, volumes: Vector[MountPoint], runId: String, command: FromContext[String]): FromContext[String] = FromContext { p ⇒
@@ -165,7 +164,7 @@ package object udocker extends UDockerPackage {
 
     def volumesArgument(volumes: Vector[MountPoint]) = volumes.map { case (host, container) ⇒ s"""-v "$host":"$container"""" }.mkString(" ")
 
-    val userArgument = uDocker.udockerUser match {
+    val userArgument = uDocker.uDockerUser match {
       case None    ⇒ ""
       case Some(x) ⇒ s"""--user="$x""""
     }

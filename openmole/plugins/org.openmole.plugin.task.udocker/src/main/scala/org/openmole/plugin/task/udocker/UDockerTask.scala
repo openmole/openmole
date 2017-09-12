@@ -62,7 +62,7 @@ object UDockerTask {
     override def hostFiles = UDockerTask.uDocker composeLens UDocker.hostFiles
     override def reuseContainer = UDockerTask.uDocker composeLens UDocker.reuseContainer
     override def workDirectory = UDockerTask.uDocker composeLens UDocker.workDirectory
-    override def udockerUser = UDockerTask.uDocker composeLens UDocker.udockerUser
+    override def uDockerUser = UDockerTask.uDocker composeLens UDocker.uDockerUser
   }
 
   def apply(
