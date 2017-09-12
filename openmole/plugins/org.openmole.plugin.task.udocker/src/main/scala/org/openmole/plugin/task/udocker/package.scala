@@ -15,6 +15,7 @@ import org.openmole.tool.cache.{ CacheKey, WithInstance }
 import org.openmole.tool.file._
 import org.openmole.tool.stream._
 import org.openmole.tool.lock._
+import org.openmole.core.dsl.OptionalArgument
 
 package udocker {
 
@@ -28,8 +29,8 @@ package udocker {
 
     lazy val udockerUser =
       new {
-        def :=[T: UDockerUser](b: Option[String]) =
-          implicitly[UDockerUser[T]].udockerUser.set(b)
+        def :=[T: UDockerUser](b: OptionalArgument[String]) =
+          implicitly[UDockerUser[T]].udockerUser.set(b.option)
       }
 
   }
