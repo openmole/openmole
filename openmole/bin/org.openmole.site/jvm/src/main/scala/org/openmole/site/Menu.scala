@@ -3,6 +3,7 @@ package org.openmole.site
 import scalatags.Text.tags2
 import scalatags.Text.all._
 import org.openmole.site.tools._
+import org.openmole.core.buildinfo._
 
 /*
  * Copyright (C) 22/06/17 // mathieu.leclaire@openmole.org
@@ -42,7 +43,7 @@ object Menu {
             li(outerLink("DEMO", shared.link.demo), liStyle),
             li(innerLink(DocumentationPages.tutorial, "EXAMPLES"), liStyle),
             li(innerLink(Pages.training, "TRAINING"), liStyle),
-            li(linkButton("DOWNLOAD", Resource.script.openmole.file, classIs(btn ++ btn_primary))),
+            li(divLinkButton(div(maxWidth := 140)(span("DOWNLOAD"), span(version.value, fontSize := "10px", paddingLeft := 7)), Resource.script.openmole.file, classIs(btn ++ btn_primary))),
             li(inputStyle)(img(id := shared.searchImg, src := Resource.img.menu.search.file, Seq(width := 35, paddingTop := 5, paddingLeft := 10, pointer)))(
               div(id := shared.searchDiv)
             )
