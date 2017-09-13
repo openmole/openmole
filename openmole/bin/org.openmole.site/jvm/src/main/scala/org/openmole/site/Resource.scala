@@ -86,7 +86,7 @@ object Resource {
       val densityBurned = methodResource("densityBurned.svg")
       val densityBurnedZoom = methodResource("densityBurnedZoom.svg")
       val densitySeedBox = methodResource("densitySeedBox.svg")
-
+      val profileInterpretation = methodResource("profileInterpretation.png")
     }
 
     object environment {
