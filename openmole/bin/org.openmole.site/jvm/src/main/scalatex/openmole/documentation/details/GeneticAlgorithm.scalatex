@@ -30,19 +30,11 @@ OpenMOLE make an intensive use of genetic algorithms (GA) in its various @a("met
 
 
 
-
-
-
-
-
-
 @sect{About Calibration and GA }
     OpenMOLE provides advanced methods to help you calibrate your model.
     These methods automatically generate workflows to explore your model's parameter space towards the best parameter
     set according to a previously defined @b{goal} (or @b{objective} or @b{criterion}) .
     This is commonly addressed in literature as a calibration/optimization methods.
-
-
 
     @p
     Calibration methods of OpenMOLE use Genetic Algorithms to explore the parameter space of a simulation model, looking for parameter sets that will produce outputs  that reach one or several given @b{objectives}.
@@ -59,25 +51,7 @@ OpenMOLE make an intensive use of genetic algorithms (GA) in its various @a("met
     several objectives, each of them quantifying the similarity between your model outputs
     and the characteristics you want to reproduce.
 
-    @br@br
-    TODO  Un peu relou cet exemple finalement : à virer ?
-    For example, if your ideal dynamic is such that one of your model outputs reaches a certain value V
-    after a certain time T, in a linear way, the ideal solution reaches  three distinct objectives at the same
-    time:
-    @ul
-        @li
-            the given value V
-        @li
-            the given time T
-        @li
-            the linear progression of the model output time-serie from (0,0) to (T, V)
-
-    Corresponding function to minimize could be the difference between the target value and the output at time T,
-    the difference between target time  T and the simulation time at which the value V is reached by the model output,
-    and 1-R² for the quality of the linear adjustment between model outputs  and a linear function from 0,0 to T,V.
-
     @p
-
     To calibrate your model, you need to define:
 
      @ul
@@ -127,8 +101,6 @@ OpenMOLE make an intensive use of genetic algorithms (GA) in its various @a("met
   (evolution hook savePopulation on LocalEnvironment(4))""", name = "nsga2 example")
 
     @br
- TODO Romain: (rappel du contexte) : on avait parlé  d'un moyen de fixer un objectif à atteindre en donnant la valeur en clair dans le script.  Si la task existe , remplacer par la syntaxe courrante le texte ci dessous , en se rappelant   qu'il faut que  ce soit limpide à la lecture du script oms qu'on cible une valeur donnée en argument: reach(42) , target(42) qqch comme ça
-
     Notice that the objectives are given as a sequence of model outputs variables to @b{minimize}.
 So if you want to reach specific target values, like Pi and 42  you can use the DeltaTask an plug it after your model:
 
