@@ -172,4 +172,4 @@
     For this example to work you should create a file named "input.txt" in the work directory of your project.
 
   @p
-    This tutorial works for simple Java programs. For more ambitious developments, you should consider embedding your code in an @a("OpenMOLE plugin"/*, href := DocumentationPages.root.development.plugin.file*/) [TODO lien].
+    This tutorial works for simple Java programs. For more ambitious developments, you should consider embedding your code in an @a("OpenMOLE plugin", href := DocumentationPages.plugin.file).

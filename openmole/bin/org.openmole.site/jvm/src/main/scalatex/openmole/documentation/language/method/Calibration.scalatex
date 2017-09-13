@@ -69,7 +69,8 @@ For more details on the calibration using genetic algorithms, see the @a("GA det
     regarding the others. This is not @i{genuine sensitivity} as in sensitivity analysis, but still, it reveals a variation
     of your model outputs, which is not bad after all !
     @br
-    TODO paul / mathieu changer les couleurs des vignettes mono et multi, fleche input verte fleche output rouge, identique pour les deux
+    @todo
+      paul / mathieu changer les couleurs des vignettes mono et multi, fleche input verte fleche output rouge, identique pour les deux
 
     @break
 

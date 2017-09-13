@@ -63,6 +63,8 @@ Select the language of your model on your left to see how it is done .
     Let's say you have a model that take a string as input and do some stuff with it, like launching a simulation with the parameters contained in the input string. People from the lab gave you a huge CSV file where each line contains various experimental setup parameters. What you want is to run a simulation for each line of this file, execute it on the lab's cluster, and gather theirs results.  Your openMOLE script would look like that (the syntax is wrong for sake of clarity) [TODO. This is confusing. Explain what is wrong or give a correct code.]:
 
   @hl.openmoleNoTest("""
+      val inputsParameter: Val[Int]
+
       // crawl the big file and take the lines
       val all_the_lines = CSVSampling("EmpiricalData.CSV")
 
@@ -70,19 +72,19 @@ Select the language of your model on your left to see how it is done .
       val exploration = ExplorationTask(all_the_lines)
 
       // encapsulates your model in an "execution" task that calls the main routine
+      val  my_model_execution =
+        ScalaTask("mainRun(inputString)",
+          inputs += inputString,
+          outputs += Digits
+        )
 
-
-      val  my_model_execution = ScalaTask( "mainRun",
-                                          inputs += inputString,
-                                          outputs += Digits
-                                          )
       // a hook to catch the outputs of your model execution and put them in a CSV file
       val catch_output = CSVHook("path/to/save/it")
 
       // declare your computing environment
-      val lab_Cluster = UberClusterEnvironment(login, machineIP)
+      val lab_Cluster = ClusterEnvironment(login, machineIP)
 
       // the workflow. Bascically it says : explore the lines and run a model execution for each,
       // save the outputs, all that on the cluster (results are not brought back to the local computer yet).
-      exploration -< (my_model_execution on env hook catch_output)        """)
+      exploration -< (my_model_execution on env hook catch_output)""")
 

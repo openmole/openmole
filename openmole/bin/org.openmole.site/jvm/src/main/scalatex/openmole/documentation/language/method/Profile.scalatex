@@ -78,7 +78,7 @@ The Profile method takes the following parameters:
   @ul
   @li{@hl.code("inputs"): a list of the model parameters with their minimum and maximum bounds,}
   @li{@hl.code("objective"): a variable defined in the OpenMOLE script that contains the distance between the data and the model output,}
-  @li{@hl.code("x"): the parameter which is being profiled (refers to the index of the parameter in the list "inputs", starting to 0) TODO Romain : à la compil, il demande un Double pour x, ce qui fait bizarre vu que c'est un index d'après ce texte, est ce que c'est encore valable ?}
+  @li{@hl.code("x"): the parameter which is being profiled,}
   @li{@hl.code("nX"): the size of the subintervals.}
   @li{@hl.code("stochastic"): the seed provider, mandatory if your model contains randomness}
 @p
@@ -115,7 +115,8 @@ specifies that we are profiling @hl.code("param1").
 
 
 @break
-TODO Guillaume/romain ? Il manque l'explication et l'usage dans un contexte expérimental: , dire quelle question ça permet de poser , les profils types et interprétations associées, Dire que chaque point est une calibration, etc.
+@todo
+  Guillaume/romain ? Il manque l'explication et l'usage dans un contexte expérimental: , dire quelle question ça permet de poser , les profils types et interprétations associées, Dire que chaque point est une calibration, etc.
 
 @break
 
