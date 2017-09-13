@@ -13,27 +13,17 @@ span.hljs-tag, span.hljs-symbol{
 body{
     font-family:gi;
     font-size: 15px;
+
+
     }
 
 p{
   padding-top:30px;
 }
 
-.fade-in {
-	opacity: 1;
-	animation-name: fadeInOpacity;
-	animation-iteration-count: 1;
-	animation-timing-function: ease-in;
-	animation-duration: 0.4s;
-}
-
-@keyframes fadeInOpacity {
-	0% {
-		opacity: 0;
-	}
-	100% {
-		opacity: 1;
-	}
+html {
+  height: 100%;
+  box-sizing: border-box;
 }
 
 
@@ -42,3 +32,50 @@ p{
     padding-top: 20px;
     font-size: 17px;
 }
+
+a {
+ color: #4096c5;
+}
+
+
+.btn-mole{
+ color: #333;
+ border-color: #a6bf26;
+ background-color: #a6bf26;
+}
+
+.line {
+border-bottom: 1px solid #eee;
+}
+
+h1{
+  color: #444;
+  font-size: 40px;
+  font-weight: 100;
+  margin: 0 0 24px;
+  padding-top: 30px;
+  text-transform: uppercase;
+  text-align:center;
+}
+
+h2{
+font-size:22px;
+}
+
+code{
+    color: #c83771;
+    font-size: small;
+    background-color:white;
+    font-weight:bold;
+}
+
+.scalatex-site-Styles-content{
+  text-align: justify;
+}
+
+ .center-svg{
+   margin-left:auto;
+   margin-right:auto;
+   display:block;
+   width:100%;
+  }

@@ -1,108 +1,188 @@
 
 @import org.openmole.site.tools._
 @import org.openmole.site._
+@import org.openmole.site.NativeDocPageCommons._
 
-@p{Embedding C/C++ code }
 
-  In OpenMOLE, a generic task named @hl.openmole("CARETask") offers to run external applications packaged with @a("CARE", href := Resource.care.file). The site (proposing an outdated version of CARE for now, but a great documentation) can be found @a("here", href := "https://proot-me.github.io/"). CARE makes it possible to package your application from any Linux computer, and then re-execute it on any other Linux computer. The CARE / OpenMOLE pair is a very efficient way to distribute your application at very large scale with very little effort. Please note that this packaging step is only necessary if you plan distribute your workflow to an heterogeneous computing environment such as the EGI grid. If you target local clusters, running the same operating system and sharing a network file system, you can directly jump to the @a("SystemExecTask", href := DocumentationPages.root.language.model.native.file + "#Usingalocalexecutable(innonportabletasks)"), section.
 
-  @p You should first install CARE:
+@def variables = """
+  val arg1 = Val[Double]
+  val arg2 = Val[Double]
+  val output = Val[File]"""
+
+
+
+@introPackagingForRPythonCplusplus
+@hr
+
+
+@sect{C++ code example}
+    The toy model for this example is the following :
+    @break
+    @hl.highlight("""
+    #include <iostream>
+    #include <sstream>
+    #include <fstream>
+
+    double* model_computation(double param1, double param2, double output[]){
+      std::cout << "model computation with  parameters " << param1 << " and " << param2 << " \n" ;
+      output[0] = param1 * 10 ;
+      output[1] = param2 * 20 ;
+      return output ;
+    }
+
+    int main(int argc , char* argv[]){
+      // extract args from command line
+      std::istringstream iss1 (argv[1]) ;
+      std::istringstream iss2 (argv[2]) ;
+      double val1 ;
+      double val2 ;
+      double output[2];
+
+      if (iss1 >> val1 && iss2 >> val2 ){
+       double* result = model_computation(val1, val2, output) ; //model computation call
+       std::cout << "log : compute first result "<< result[0] << '\n' ;
+       std::cout << "log : compute second result " <<  result[1]  << '\n' ;
+       //CSV file dump
+       std::ofstream myfile;
+       myfile.open ("results.txt");
+       myfile << result[0] << ','<< result[1]<< "\n";
+       myfile.close();
+       return 0;
+     }
+     else{
+       std::cout << "Wrong arg : not a double " ;
+       return -1;
+     }
+    }""", "C++")
+
+    @br
+    In this toy example, the "model code" is outside the main function, on purpose.
+    @br
+     The main function has three steps:
+     @ul
+        @li
+            first the inputs are extracted from command line,
+        @li
+            then the model function is called with extracted values,
+        @li
+           finally the results are displayed on standard output, and  written in a text file.
+
+@sect{Packaging it with CARE}
+
+    Before launching CARE on this piece of code, let's check that the compilation and executions are running fine for the code itself:
+
+
+    @hl.highlight("""
+    > g++ hello_world.cpp
+    > ./a.out 12.24 24
+    """, "shell")
+    @br
+    we obtain the following result :
+    @hl.highlight("""
+    model computation with  parameters 12.24 and 24
+    log : compute first result 122.4
+    log : compute second result 480
+    """, "shell")
+
+    @break
+
+    In the directory where the @b("hello_world.cpp") file is, we do:
+
+    @hl.highlight("""
+    care-x86_64 -o ./cpp.tgz.bin -r ~ ./a.out 12.24 24
+    """, "shell")
+
+    @i{Please see the @a("Native packaging page", href:=DocumentationPages.nativePackaging.file) for more details.}
+
+    @p The packaging step produces the following output:
+
+    @hl.highlight("""
+care info: concealed path: $HOME /home/paul
+care info: concealed path: /tmp
+care info: revealed path: $PWD /home/paul/dev/cppExampleDocOpenMOLE
+care info: revealed path: /home/paul/dev/cppExampleDocOpenMOLE/a.out
+care info: revealed path: /home/paul
+care info: ----------------------------------------------------------------------
+main function call
+model computation with  parameters 12.34 and 24
+log : compute first result 122.4
+log : compute second result 480
+care info: ----------------------------------------------------------------------
+care info: Hints:
+care info:   - search for "conceal" in `care -h` if the execution didn't go as expected.
+care info:   - run `././cpp.tgz.bin` or `care -x ./cpp.tgz.bin` to extract the output archive correctly.
+        """, "plain")
+
+    @br
+
+    Notice the lines in between the CARE info messages: these are the log messages of our initial code. Everything is ok so far.
+    @br
+    The packaging has created two files: @hl.highlight("cpp.tgz.bin", "plain") and @hl.highlight("results.txt", "plain"), respectively the CARE archive and the results file.
+@sect{Running it in OpenMOLE}
+
+    We will now use OpenMOLE's @hl.openmoleNoTest{ExplorationTask} to run the model @b{several times with different input values}, with this script:
+
+
+    @hl.openmole("""
+// Declare the variables (from the OpenMOLE point of view)
+val arg1 = Val[Double]
+val arg2 = Val[Double]
+val output = Val[File]
+
+// exploration of the inputs range
+val exploration = ExplorationTask(
+ (arg1 in (0.0 to 5.0 by 1.0)) x
+  (arg2 in (0.0 until 4.0 by 1.0))
+)
+
+//  the care task for our archive
+val cppTask =
+  CARETask(workDirectory / "cpp.tgz.bin", "./a.out  ${arg1} ${arg2}") set (
+    inputs += (arg1, arg2),
+    outputFiles += ("results.txt", output),
+    outputs += (arg1, arg2)
+  )
+
+// we fetch the data via a CopyFileHook, for each input combination
+val copy = CopyFileHook(output, workDirectory / "cpp${arg1}${arg2}.txt")
+// we run that locally , on 4 cores
+val env = LocalEnvironment(4)
+// the workflow
+exploration -< (cppTask hook copy on env)
+""")
+
+    This script uses a @hl.openmoleNoTest{Hook} to catch the output file, check the @a("dedicated page", href := DocumentationPages.hook.file) for more details.
+
+    @p Let's try this example on your own machine:
     @ul
-      @li{download the CARE binary from @a("here", href := Resource.care.file)}
-      @li{make it executable (@hl.highlight("chmod +x care", "plain"))}
-      @li{add the path to the executable to your PATH variable (@hl.highlight("export PATH=/path/to/the/care/folder:$PATH", "plain"))}
+        @li
+            First, create a directory to put the CARE archive (see the @a("GUI guide", href:= DocumentationPages.gui.file))
+        @li
+            Then, inside this directory, create a new file with a @b{.oms} extension. This is our OpenMOLE script.
+        @li
+            Finally, paste the script above and press "Play".
 
-  @p The @hl.openmole("CARETask") has been designed to embed native binaries such as programs compiled from C, C++, Fortran, Python, R, Scilab... Embedding an application in a @hl.openmole("CARETask") happens in 2 steps:
-
-  @p @b{First} you should package your application using the CARE binary you just installed, so that it executes on any Linux environment. This usually consists in prepending your command line with @hl.highlight("care -o /path/to/myarchive.tgz.bin -r ~ -p /path/to/mydata1 -p /path/to/mydata2 mycommand myparam1 myparam2", "plain"). Before going any further, here are a few notes about the options passed to CARE:
-      @ul
-        @li{@hl.highlight("-o", "plain") indicates where to store the archive. At the moment, OpenMOLE prefers to work with archives stored in .tgz.bin, so please don't toy with the extension ;)}
-        @li{@hl.highlight("-r ~", "plain") is not compulsory but it has proved mandatory in some cases. So as rule of thumb, if you encounter problems when packaging your application, try adding / removing it.}
-        @li{@hl.highlight("-p /path", "plain") asks CARE not to archive /path. This is particularly useful for input data that will change with your parameters. @b{You probably do not want} to embed this data in the archive, and we'll see further down how to inject the necessary input data in the archive from OpenMOLE.}
-
-  @p @b{Second}, just provide the resulting package along with some other information to OpenMOLE. Et voila! If you encounter any problem to package your application, please refer to the corresponding entry in the @a("FAQ", href := Pages.faq.file + "#Ican'tgetCARE/PRoottowork")
-
-  @p One very important aspect of CARE is that you only need to package your application @b{once}. As long as the execution you use to package your application makes uses of all the dependencies, you should not have any problem re-executing this archive with other parameters.
-
-  @p Let's study two concrete use cases that take an existing application, package it with CARE, and embed it in OpenMOLE. You should be able to achieve exactly the same process with almost any executable running on Linux. We've chosen an @a("R code", href := DocumentationPages.root.language.model.native.file + "#AnexamplewithR") and a @a("Python script", href := DocumentationPages.root.language.model.native.file + "#AnotherexamplewithaPythonscript").
+    @p Looking at the output stream , we have lines looking like:
+    @hl.highlight("""
+    model computation with  parameters 4and 2
+    log : compute first result 40
+    log : compute second result 40
+    model computation with  parameters 3and 9
+    log : compute first result 30
+    log : compute second result 180""", "plain")
 
 
-  @p The @hl.openmole("CARETask") performs two actions: it first unarchives the CARE container by running @hl.highlight("r.tgz.bin", "plain"). Then the actual execution takes place as a second command. Note that for each execution of the @i("CARETask"), any command starting with @i("/") is @b{relative to the root of the CARE archive}, and @b{any other command is executed in the current directory}. The current directory @b{defaults to the original packaging directory}.
-
-  @p Several notions from OpenMOLE are reused in this example. If you're not too familiar with
-  @a("Hooks", href := DocumentationPages.root.language.hook.file) or
-  @a("Samplings", href := DocumentationPages.root.language.sampling.file), check the relevant sections of the
-  documentation.
+@p It looks a lot like the log from our initial code! Hooray!
 
 
-  @p{Advanced options}
+@p The results files, called something like @hl.highlight("cpp2.01.0.txt", "plain"), are located in the directory where we uploaded our CARE packaged code.
 
-    @p The @i{CARETask} can be customised to fit the needs of a specific application. For instance, some applications disregarding standards might not return the expected 0 value upon completion. The return value of the application is used by OpenMOLE to determine whether the task has been successfully executed, or needs to be re-executed. Setting the boolean flag @hl.openmoleNoTest("errorOnReturnValue") to @i{false} will prevent OpenMOLE from re-scheduling a @i{CARETask} that have reported a return code different from 0. You can also get the return code in a variable using the @hl.openmoleNoTest("returnValue") setting.
+@p This is not a smart move if you have a lot of file to manage, so we should put them in a @i{result} dedicated directory, in order to compress the whole thing at the end of the experiment and download the resulting archive.
+To do that, let's replace the @hl.openmoleNoTest{CopyFileHook} line by the following:
 
-    @p Another default behaviour is to print the standard and error outputs of each task in the OpenMOLE console. Such raw prints might not be suitable when a very large number of tasks is involved or that further processing are to be performed on the outputs. A @i{CARETask}'s standard and error outputs can be assigned to OpenMOLE variable and thus injected in the dataflow by summoning respectively the @hl.openmoleNoTest("stdOut") and @hl.openmoleNoTest("stdErr") actions on the task.
 
-    @p As any other process, the applications contained in OpenMOLE's native tasks accept environment variables to influence their behaviour.
-    Variables from the dataflow can be injected as environment variables using the @hl.openmoleNoTest{environmentVariable += (variable, "variableName")} field.
-    If no name is specified, the environment variable is named after the OpenMOLE variable.
-    Environment variables injected from the dataflow are @b{inserted in the pre-existing set of environment variables from the execution host}. This shows particularly useful to preserve
-    the behaviour of some toolkits when executed on local environments (ssh, clusters, ...) where users control their work environment.
+    @hl.openmole("""
+    val copy = CopyFileHook(output, workDirectory /"results/cpp${arg1}${arg2}.txt")
+    """,  header= variables)
 
-    @p The following snippet creates a task that employs the features described in this section:
-    @br @hl.openmole("""
-    // Declare the variable
-    val output = Val[String]
-    val error  = Val[String]
-    val value = Val[Int]
-
-    // Any task
-    val pythonTask =
-      CARETask("hello.tgz.bin", "python hello.py") set (
-        stdOut := output,
-        stdErr := error,
-        returnValue := value,
-        environmentVariable += (value, "I_AM_AN_ENV_VAR")
-      )""")
-
-    @p You will note that @b{options holding a single value} are set using the @hl.openmoleNoTest(":=") operator. Also, the OpenMOLE variables containing the standard and error outputs are @b{automatically marked as outputs} of the task, and must not be added to the @hl.openmoleNoTest("outputs") list.
-
-  @p{Using local resources}
-    @p To access data present on the execution node (outside the CARE filesystem) you should use a dedicated option of the @i{CARETask}: @i{hostFiles}. This option takes the path of a file on the execution host and binds it to the same path in the CARE filesystem. Optionally you can provide a second argument to specify the path explicitly. For instance:
-    @br @hl.openmole("""
-      val careTask = CARETask("care.tgz.bin", "executable arg1 arg2 /path/to/my/file /virtual/path arg4") set (
-        hostFiles += ("/path/to/my/file"),
-        hostFiles += ("/path/to/another/file", "/virtual/path")
-      )""")
-
-    @p This CARE task will thus be able to access @i{/path/to/my/file} and @i{/virtual/path}.
-
-  @p{Using a local executable (in non portable tasks)}
-    @p The @i{CARETask} was designed to be portable from one machine to another. However, some use-cases require executing specific commands installed on a given cluster. To achieve that you should use another task called @i{SystemExecTask}. This task is made to launch native commands on the execution host. There is two modes for using this task:
-    @ul
-      @li{Calling a command that is @b{assumed to be available on any execution node of the environment}. The command will be looked for in the system as it would from a traditional command line: searching in the default @i{PATH} or an absolute location.}
-      @li{Copying a @b{local script not installed on the remote environment}. Applications and scripts can be copied to the task's work directory using the @hl.openmoleNoTest("resources") field. Please note that contrary to the CARETask, there is @b{no guarantee that an application passed as a resource to a SystemExecTask will re-execute successfully on a remote environment}}.
-
-    @p The @i{SystemExecTask} accepts an arbitrary number of commands. These commands will be @b{executed sequentially on the same execution node} where the task is instantiated. In other words, it is not possible to split the execution of multiple commands grouped in the same @i{SystemExecTask}.
-
-    @p The following example first copies and runs a bash script on the remote host, before calling the remote's host @hl.highlight("/bin/hostname", "plain"). Both commands' standard and error outputs are gathered and concatenated to a single OpenMOLE variable: respectively @hl.openmoleNoTest("stdOut") and @hl.openmoleNoTest("stdErr").  To achieve that you should use a @i{SystemExecTask}:
-     @br @hl.openmole("""
-      // Declare the variable
-      val output = Val[String]
-      val error  = Val[String]
-
-      // Any task
-      val scriptTask =
-        SystemExecTask("bash script.sh", "hostname") set (
-          resources += workDirectory / "script.sh",
-          stdOut := output,
-          stdErr := error
-        )
-
-       scriptTask hook ToStringHook()""")
-
-    @p In this case the bash script might depend on program installed on the remote host. Similarly, we @b{assume the presence} of @hl.highlight("/bin/hostname", "plain") on the execution node. Therefore this task cannot be considered as portable.
-
-    @p Note that each execution is isolated in separate folder on the execution host and that the task execution is considered as failed if the script return a value different from 0. If you need another behaviour you can use the same advanced options as the @i{CARETask} regarding the return code.
-
-  @p{Troubleshooting}
-    @p You should always try to re-execute your application outside of OpenMOLE first. This allows you to ensure the packaging process with CARE was successful. If something goes wrong at this stage, you should check the official @a("CARE documentation", href := "https://proot-me.github.io/") or the archives of the @a("CARE mailing list", href := "https://groups.google.com/forum/?fromgroups#!forum/reproducible").
-    @p If the packaged application re-executes as you'd expect, but you still struggle to embed it in OpenMOLE, then get in touch with our user community via our the @a("OpenMOLE user mailing-list", href := "http://list.openmole.org/").

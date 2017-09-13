@@ -1,6 +1,11 @@
 
 @import org.openmole.site.tools._
 @import org.openmole.site._
+@import org.openmole.site.stylesheet._
+
+@p
+OpenMOLE built-in methods are designed to explore your model and answer several questions regarding @b{optimization,
+sensitivity, robustnesss and diversity} of your model capabilities
 
 @def model = """
   val x = Val[Double]
@@ -16,104 +21,62 @@
     )
 """
 
-@p{Automatic parameter exploration methods}
-  OpenMOLE provides advanced methods to help you explore your application's space of parameters. These methods automatically generate workflows in order to solve exploration problems.
-
-  @p{Genetic algorithms}
-    This workflow optimises a dummy model using the generational NSGA II multi-objective algorithm. You can replace the instances of @i{model} by your own model and adapt the variation range of its input variables. If you're not familiar with parameter tuning using Genetic Algorithms (GA), you should first consult the @a("tutorial explaining how to calibrate a NetLogo model with a GA", href := DocumentationPages.root.tutorial.netLogoGA.file).
-
-    @br @hl.openmole(s"""
-  $model
-
-  // Construction of the workflow orchestrating the genetic algorithm
-  // termination is the termination criterion, here it runs for 100 generations. A time limit could be set as an
-  // alternative by replacing 100 by 1 hour (hour is a duration type understood by OpenMOLE).
-  // the parallelism specifies how many evaluation are concurrently submitted to the execution environment
-  val evolution =
-    SteadyStateEvolution(
-      // Definition of the optimisation algorithm
-      // mu is the size of the population
-      // genome is the inputs prototype and their variation ranges
-      // objectives are the objectives to minimise
-      algorithm =
-        NSGA2(
-          mu = 100,
-          genome = Seq(x in (0.0, 1.0), y in (0.0, 1.0)),
-          objectives = Seq(o1, o2)
-        ),
-        evaluation = model,
-        parallelism = 10,
-        termination = 100
-    )
 
 
-  // Definition of a hook to save the population of solutions to /tmp/evolution on the local machine running OpenMOLE
-  val savePopulation = SavePopulationHook(evolution, workDirectory / "evolution/")
+@h2{Context}
+@p
+    Simulation models can be abstracted as a program that transforms a set of @b{inputs} into a set of @b{outputs}.
+@br
 
-  // Construction of the complete mole with the execution environment, and the hook.
-  // Here the generated workflow will run using 4 threads of the local machine.
-  (evolution hook savePopulation on LocalEnvironment(4))""")
+    @img(src := Resource.img.method.modelIO.file, center(40))
+@br
+    Even though any type of data can be used as inputs for simulation models  (parameters , pictures, CSV files, DB connections, etc.),
+    simulation experiments revolves mostly around @b{parameters space exploration} (e.g. sensitivity analysis).
+    Likewise, considered outputs in simulation experiments are most of times @b{measures} computed on the dynamics produced by a simulation run  (e.g. fitness or error functions)
 
-  @p For distributed environments the island distribution scheme is well adapted. Islands of population evolve for a
-  while on a remote node. When an island is finished, its final population is merged back into a global archive.
-  A new island is then generated until the termination criterion: i.e. the total number of islands to generate is met.
-  Islands can be used as follows:
+@h2
+    Questionning your model
 
-  @br @hl.openmole("""
-  val evolution =
-    SteadyStateEvolution(
-      // Definition of the optimisation algorithm
-      // mu is the size of the population
-      // genome is the inputs prototype and their variation ranges
-      // objectives are the objectives to minimise
-      algorithm =
-        NSGA2(
-          mu = 100,
-          genome = Seq(x in (0.0, 1.0), y in (0.0, 1.0)),
-          objectives = Seq(o1, o2)
-        ),
-      evaluation = model,
-      termination = 100
-    )
+@p
+    There is four types of general questions that can be addressed by OpenMOLE methods.
 
-  // Generate a workflow that orchestrates 100 concurrent islands.
-  // The workflow stops when 10,000 islands have completed.
-  val island =
-    IslandEvolution(
-      evolution,
-      parallelism = 100,
-      termination = 10000
-    )
+@br
 
-  // Definition of a hook to save the population of solutions on the local machine running OpenMOLE
-  val savePopulation = SavePopulationHook(island, workDirectory / "evolution")
+@ol
+    @li{What are all the possible inputs producing a given output ?} @br
+    @li{What is the effect of an input variation on the output ?} @br
+    @li{How do the inputs participate to produce the outputs ? @br Are every parameter compulsory to produce outputs ?
+    @br What are the robustness intervals of the inputs that lead to a desired output ?} @br
+    @li{What are the possible outputs of the model ?}
 
-  // Construction of the complete mole with the execution environment, and the hook.
-  // Here the generated workflow will run using 4 threads of the local machine.
-  (island on LocalEnvironment(4) hook savePopulation)""", header = model)
+@br
+Question 1 is referred as a @b{calibration} or @b{optimization problem} and solved via Genetic Algorithms.
+@br
+Question 2 is addressed by performing a @b{sensitivity analysis} via custom Exploration tasks.
+@br
+Question 3 is addressed using @b{Calibration Profiles Algorithm}, that extends the results of a sensitivity analysis.
+@br
+Question 4 is addressed by using the @b{Pattern Space Exploration} (PSE) method.
 
-  @p Calibration of stochastic models leads to noisy fitness functions. An efficient strategy to deal with such fitness functions is implemented in OpenMOLE. This strategy automatically balances the need for replications and the discovery of new solutions. In case you want to explore a stochastic model with a genetic algorithm you can do:
+@p
 
-  @br @hl.openmole("""
-  val seed = Val[Long]
 
-  val evolution =
-    SteadyStateEvolution(
-      // Definition of the optimisation algorithm
-      // mu is the size of the population
-      // genome is the inputs prototype and their variation ranges
-      // objectives are the objectives to minimise
-      algorithm =
-        NSGA2(
-          mu = 100,
-          genome = Seq(x in (0.0, 1.0), y in (0.0, 1.0)),
-          objectives = Seq(o1, o2),
-          // OpenMOLE provide a seed for your stochastic model to use (it is optional)
-          // 20% of the evaluations are used for replicating existing solutions
-          // 100 replication are stored at max for each individual
-          stochastic = Stochastic(seed = seed, reevaluate = 0.2, replications = 100)
-        ),
-      evaluation = model,
-      termination = 100
-    )""", header = model)
 
+Calibration methods make an extensive use of @a("Genetic Algorithms", href := DocumentationPages.geneticalgo.file).
+@br
+Specific task are available to handle the @a("stochasticity ", href := DocumentationPages.stochasticity.file) of your
+model
+as well as @a("distribution schemes", href := DocumentationPages.island.file) specifically designed for distributed computing environment.
+
+
+@h2
+    Methods characteristics
+    @br
+Each of OpenMOLE methods comes with an image summarizing the performance and  characteristics regarding criterion they have in common e.g. coverage rate of input/out of sensitivity to dimensionality.
+@break
+
+@Resource.rawFrag(Resource.img.method.legendOfIDs)
+
+@break
+
+These performance scores are defined relatively to each other and are not absolute values.

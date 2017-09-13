@@ -46,10 +46,9 @@ import scala.scalajs.js.timers._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-@JSExportTopLevel("ScriptClient")
 object ScriptClient {
 
-  @JSExport
+  @JSExportTopLevel("connection")
   def connection(): Unit = withBootstrapNative {
     div(
       Connection.render,
@@ -57,7 +56,7 @@ object ScriptClient {
     ).render
   }
 
-  @JSExport
+  @JSExportTopLevel("stopped")
   def stopped(): Unit = withBootstrapNative {
 
     val stoppedDiv = div(omsheet.connectionTabOverlay)(
@@ -73,7 +72,7 @@ object ScriptClient {
     stoppedDiv
   }
 
-  @JSExport
+  @JSExportTopLevel("restarted")
   def restarted(): Unit = withBootstrapNative {
     val timer: Var[Option[SetIntervalHandle]] = Var(None)
 
@@ -104,7 +103,7 @@ object ScriptClient {
     restartedDiv
   }
 
-  @JSExport
+  @JSExportTopLevel("resetPassword")
   def resetPassword(): Unit = {
     val resetPassword = new ResetPassword
     withBootstrapNative {
@@ -115,7 +114,7 @@ object ScriptClient {
     }
   }
 
-  @JSExport
+  @JSExportTopLevel("run")
   def run(): Unit = {
     implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
@@ -136,8 +135,6 @@ object ScriptClient {
       val pluginItem = navItem(div(OMTags.glyph_plug, itemStyle).tooltip("Plugins"), () ⇒ pluginPanel.dialog.show)
 
       val envItem = navItem(div(glyph_exclamation, itemStyle).render, () ⇒ stackPanel.open)
-
-      val docItem = navItem(div(OMTags.glyph_book, itemStyle).tooltip("Documentation"), () ⇒ docPanel.dialog.show)
 
       dom.window.onkeydown = (k: KeyboardEvent) ⇒ {
         if ((k.keyCode == 83 && k.ctrlKey)) {
@@ -179,8 +176,7 @@ object ScriptClient {
             navItem(menuActions.selector),
             execItem,
             authenticationItem,
-            pluginItem,
-            docItem
+            pluginItem
           ).render
         }
       )
@@ -240,8 +236,7 @@ object ScriptClient {
                   treeNodeTabs.render,
                   tags.div(omsheet.textVersion)(
                     tags.div(
-                      fontSize := "1em",
-                      fontWeight := "bold"
+                      fontSize := "1em"
                     )(s"${sets.version} ${sets.versionName}"),
                     tags.div(fontSize := "0.8em")(s"built the ${sets.buildTime}")
                   )

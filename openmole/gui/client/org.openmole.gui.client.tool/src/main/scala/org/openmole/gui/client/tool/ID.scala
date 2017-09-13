@@ -19,11 +19,11 @@ package org.openmole.gui.client.tool
 
 import java.util.UUID
 
-import scala.scalajs.js.annotation.JSExport
+import scala.scalajs.js.annotation.JSExportTopLevel
 
 object ID {
   def get: String = UUID.randomUUID.toString
 }
 
-@JSExport("ID")
+@JSExportTopLevel("ID")
 case class ID(id: String = ID.get)

@@ -141,15 +141,15 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
   // def stopped = html("OM.ScriptClient().stopped();")
 
   //  def resetPassword = html("OM.ScriptClient().resetPassword();")
-  def connection = html("ScriptClient.connection();")
+  def connection = html("connection();")
 
-  def application = html("ScriptClient.run();")
+  def application = html("run();")
 
-  def stopped = html("ScriptClient.stopped();")
+  def stopped = html("stopped();")
 
-  def restarted = html("ScriptClient.restarted();")
+  def restarted = html("restarted();")
 
-  def resetPassword = html("ScriptClient.resetPassword();")
+  def resetPassword = html("resetPassword();")
 
   def html(javascritMethod: String) = tags.html(
     tags.head(

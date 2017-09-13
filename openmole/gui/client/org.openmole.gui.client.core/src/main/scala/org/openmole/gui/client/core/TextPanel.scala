@@ -37,13 +37,16 @@ class TextPanel(title: String) {
     tags.span(tags.b(title))
   )
 
-  dialog.body(
-    tags.div(
-      Rx {
-        bs.textArea(30)(scalatags.generic.Attr("wrap") := "off", content())
-      }
-    )
-  )
+  val textArea = bs.scrollableText("")
+
+  content.trigger {
+    println("Trigger " + content.now)
+    textArea.setContent(content.now)
+  }
+
+  dialog.body(div(
+    textArea.sRender
+  ))
 
   dialog.footer(bs.ModalDialog.closeButton(dialog, all.btn_default, "Close"))
 

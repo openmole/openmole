@@ -1,5 +1,7 @@
 package org.openmole.site
 
+import org.openmole.core.buildinfo.version
+
 /*
  * Copyright (C) 2015 Romain Reuillon
  *
@@ -18,6 +20,12 @@ package org.openmole.site
  */
 
 object Config {
-  var testScript = true
   val baseURL = "http://www.openmole.org"
+
+  lazy val closedIssues = Map(
+    version.value → "https://github.com/openmole/openmole/milestone/3?closed=1",
+    "6.2" → "",
+    "6.1" → "https://github.com/openmole/openmole/milestone/6?closed=1",
+    "6.0" → "https://github.com/openmole/openmole/milestone/2?closed=1"
+  )
 }

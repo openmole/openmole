@@ -82,7 +82,7 @@ object MoleExecution extends Logger {
       listOfTupleToMap(hooks),
       environments,
       grouping,
-      defaultEnvironment.getOrElse(LocalEnvironment()),
+      defaultEnvironment.getOrElse(LocalEnvironment(name = "local")),
       cleanOnFinish,
       implicits,
       executionContext.getOrElse(MoleExecutionContext())

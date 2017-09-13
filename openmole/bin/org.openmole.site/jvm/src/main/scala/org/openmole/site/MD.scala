@@ -22,7 +22,7 @@ import java.util
 
 import com.github.rjeschke._
 import org.apache.commons.lang3.StringEscapeUtils
-import org.openmole.site.market.GeneratedMarketEntry
+//import org.openmole.marketindex.GeneratedMarketEntry
 
 import scala.collection.JavaConversions._
 import scalaz._
@@ -79,12 +79,12 @@ object MD {
     prefixLink(prefix)(xml.XML.loadString(escaped)).mkString
   }
 
-  def generatePage(entry: GeneratedMarketEntry)(implicit parent: Parent[DocumentationPage]) =
-    entry.readme.map { md ⇒
-      println("md " + Seq(entry.entry.name, entry.entry.name))
-      import scalatags.Text.all._
-      def frag = RawFrag(relativiseLinks(MD.mdToHTML(md), entry.entry.name + "/"))
-      DocumentationPages(entry.entry.name, frag, location = Some(Seq(entry.entry.name, entry.entry.name)))
-    }
+  //  def generatePage(entry:
+  // )(implicit parent: Parent[DocumentationPage]) =
+  //    entry.readme.map { md ⇒
+  //      import scalatags.Text.all._
+  //      def frag = RawFrag(relativiseLinks(MD.mdToHTML(md), entry.entry.name + "/"))
+  //      DocumentationPages(entry.entry.name, frag, location = Some(Seq(entry.entry.name, entry.entry.name)))
+  //    }
 
 }

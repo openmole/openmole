@@ -1,6 +1,5 @@
 package org.openmole.buildsystem
 
-import org.apache.commons.compress.archivers.tar.{ TarArchiveEntry, TarArchiveOutputStream }
 import sbt._
 import Keys._
 
@@ -18,12 +17,6 @@ import com.typesafe.sbt.osgi.OsgiKeys._
 import org.json4s.jsonwritable
 
 object Assembly {
-
-  lazy val tarProject: Seq[Setting[_]] = Seq(
-    Tar.name := "assemble.tar.gz",
-    Tar.innerFolder := "",
-    Tar.tar := tarImpl(Tar.folder.value, target.value, Tar.name.value, Tar.innerFolder.value, streams.value)
-  )
 
   private def recursiveCopy(from: File, to: File, streams: TaskStreams): Unit = {
     if (from.isDirectory) {
@@ -88,7 +81,7 @@ object Assembly {
       setExecutable.value.foreach(f ⇒ new File(assemblyPath.value, f).setExecutable(true))
       assemblyPath.value
     },
-    Tar.folder := assemble.value,
+    TarPlugin.autoImport.tarFolder := assemble.value,
     dependencyName := { (_: ModuleID).name + ".jar" },
     dependencyFilter := { (_, _) ⇒ true },
     (copyResources in assemble) := resourcesAssemble.value.map { case (from, to) ⇒ copyFileTask(from, to, streams.value) },
@@ -101,51 +94,6 @@ object Assembly {
         streams.value
       )
   )
-
-  def tarImpl(folder: File, t: File, name: String, innerFolder: String, streams: TaskStreams): File = {
-    val out = t / name
-
-    val tgzOS = managed {
-      val tos = new TarArchiveOutputStream(new BufferedOutputStream(new GZIPOutputStream(new FileOutputStream(out))))
-      tos.setLongFileMode(TarArchiveOutputStream.LONGFILE_GNU)
-      tos
-    }
-
-    def findFiles(f: File): Set[File] = if (f.isDirectory) (f.listFiles map findFiles flatten).toSet else Set(f)
-
-    val files: Set[File] = findFiles(folder).toSet
-
-    val fn = FileFunction.cached(t / "zip-cache", FilesInfo.lastModified, FilesInfo.exists) {
-      fileSet ⇒
-        streams.log.info("Zipping:\n\t")
-
-        val lCP = folder
-
-        for {
-          os ← tgzOS
-          file ← fileSet
-          is ← managed(Source.fromFile(file)(scala.io.Codec.ISO8859))
-        } {
-          val relativeFile = innerFolder + "/" + (file relativeTo lCP).get.getPath
-          streams.log.info("\t - " + relativeFile)
-
-          val entry = new TarArchiveEntry(file, relativeFile)
-          entry.setSize(file.length)
-          if (file.canExecute) entry.setMode(TarArchiveEntry.DEFAULT_FILE_MODE | 111)
-
-          os.putArchiveEntry(entry)
-
-          for (c ← is.iter) {
-            os.write(c.toByte)
-          }
-
-          os.closeArchiveEntry()
-        }
-        Set(out)
-    }
-
-    fn(files).head
-  }
 
   def urlDownloader(urls: Seq[(URL, String)], assembleDir: File, ivyPaths: IvyPaths, s: TaskStreams) = {
     val targetDir = ivyPaths.ivyHome.get / "cache" / "url"

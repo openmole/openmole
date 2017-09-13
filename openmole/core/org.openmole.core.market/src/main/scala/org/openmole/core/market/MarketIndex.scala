@@ -26,6 +26,6 @@ object MarketIndex {
 }
 
 case class MarketIndexEntry(name: String, archive: String, readme: Option[String], tags: Seq[String]) {
-  def url: String = org.openmole.core.buildinfo.url(archive)
+  def url: String = org.openmole.core.buildinfo.marketURL(archive)
 }
 case class MarketIndex(entries: Seq[MarketIndexEntry])

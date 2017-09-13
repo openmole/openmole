@@ -123,7 +123,7 @@ object CARETask extends Logger {
 
       val inputDirectory = taskWorkDirectory / "inputs"
 
-      def inputPathResolver = container.inputPathResolver(inputDirectory, userWorkDirectory) _
+      def inputPathResolver(path: String) = container.inputPathResolver(inputDirectory, userWorkDirectory)(path)
 
       val (preparedContext, preparedFilesInfo) = external.prepareAndListInputFiles(context, inputPathResolver)
 
@@ -131,7 +131,13 @@ object CARETask extends Logger {
       val proot = extractedArchive / "proot"
       proot move (extractedArchive / "proot.origin")
 
-      def preparedFileBindings = preparedFilesInfo.map { case (f, d) ⇒ d.getAbsolutePath → f.name }
+      def preparedFileBindings =
+        preparedFilesInfo.map {
+          case (f, d) ⇒
+            val absoluteBindingPath: String = if (File(f.expandedUserPath).isAbsolute) f.expandedUserPath else (File(userWorkDirectory) / f.expandedUserPath).getCanonicalPath
+            d.getAbsolutePath → absoluteBindingPath
+        }
+
       def hostFileBindings = hostFiles.map { case (f, b) ⇒ f → b.getOrElse(f) }
       def bindings = preparedFileBindings ++ hostFileBindings
 

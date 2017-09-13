@@ -116,7 +116,7 @@ lazy val netlogo5 = OsgiProject(
       "asm" % "asm-all" % "3.3.1" % "provided",
       "org.picocontainer" % "picocontainer" % "2.13.6" % "provided"), version := netLogo5Version, scalaVersion := "2.9.2", crossPaths := false) settings(settings: _*)
 
-lazy val netLogo6Version = "6.0.1"
+lazy val netLogo6Version = "6.0.2"
 
 lazy val netlogo6 = OsgiProject(
   dir,
@@ -134,12 +134,12 @@ lazy val netlogo6 = OsgiProject(
     "org.parboiled" %% "parboiled" % "2.1.3" % "provided"
   ), version := netLogo6Version, scalaVersion := "2.12.1", crossPaths := false) settings(settings: _*)
 
-lazy val scalaTagsVersion = "0.6.2"
+lazy val scalaTagsVersion = "0.6.5"
 lazy val scalaRxVersion = "0.3.2"
-lazy val scalaDomVersion = "0.9.1"
+lazy val scalaDomVersion = "0.9.3"
 lazy val scalaUpickleVersion = "0.4.3"
 lazy val scalaAutowireVersion = "0.2.6"
-lazy val scalajsVersion = "0.6.16"
+lazy val scalajsVersion = "0.6.18"
 
 lazy val rx = OsgiProject(dir, "rx", exports = Seq("rx.*")) settings(
   libraryDependencies ++= Seq("com.lihaoyi" %% "scalarx" % scalaRxVersion),

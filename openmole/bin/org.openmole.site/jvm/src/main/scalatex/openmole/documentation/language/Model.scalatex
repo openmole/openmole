@@ -1,37 +1,92 @@
 @import org.openmole.site.tools._
 @import org.openmole.site._
 
-@p{Task}
-    This section explains how you can embed your programs and compose them in simple OpenMOLE workflows.
 
-    @p A workflow is a set of @b{tasks} linked with each other through
-    @b{@a("transitions", href := DocumentationPages.root.language.transition.file)}. From a high level point of view, tasks comprise
-    @b{inputs}, @b{outputs} and @b{optional default values}. Tasks are the atomic computing element of OpenMOLE.
-    They describe what OpenMOLE should execute and delegate to remote environments. They embed your own programs.
-    Depending on what kind of program (binary executable, Java...) you want to embed in OpenMOLE you have to choose the
-    matching task. Tasks execution @b{depends on inputs variables}, which are provided by the dataflow, and each task
-    @b{produces outputs} which are provided to the dataflow and transmitted to the input of consecutive tasks.
 
-    @p Let's begin by a very useless task that does nothing to illustrate all this jargon:
-    @br @hl.openmole("""
-      // Define a variable i of type Int
-      val i = Val[Int]
+@def variables = """
+  val inputString = Val[String]
+  val Digits = Val[Double]"""
 
-      // Instantiate a task that does nothing
-      // this task takes the i variable in input and provides it back as an output to the dataflow for the next task
-      val t = EmptyTask() set (
-        inputs += i,
-        outputs += i
-      )""")
 
-    @p It is also possible to specify default values which are used by the task in case no input data was provided in
-    the dataflow:
-    @br @hl.openmole("""
-      val i = Val[Int]
 
-      val t = EmptyTask() set (
-        inputs += i,
-        outputs += i,
-        // set i's default value to 0
-        i := 0
-      )""")
+OpenMOLE handles your model execution by framing it in a @b{workflow}.
+Select the language of your model on your left to see how it is done .
+
+@sect{Of Models and Workflows}
+  @p
+    A workflow is a set of @b{tasks} linked with each other through @b{@a("transitions", href := DocumentationPages.transition.file)}. From a high level point of view, tasks comprise @b{inputs}, @b{outputs} and @b{optional default values}.
+
+  @p
+    Tasks are the atomic computing elements of OpenMOLE, they describe what OpenMOLE should execute and delegate to remote environments. They are also what embeds your own models and/or programs.
+
+  @p
+    Depending on what kind of program (binary executable, Java...) you want to embed in OpenMOLE you have to choose the adequate task.
+
+  @p
+    Task execution @b{depends on inputs variables} and each task @b{produces outputs} which transmitted to the inputs of subsequent tasks. Below is a dummy task  to illustrate all this jargon:
+
+  @hl.openmole("""
+  // Define a variable i of type Int
+  val i = Val[Int]
+  val j = Val[Int]
+
+  // Instantiate a task that does nothing.
+  // This task uses the variable i as input and j as output. Any task immediately following this one in the workflow (i.e. linked with a transition) will be able to use the variable j containing the result of this task. 
+  val t = EmptyTask() set (
+  inputs += i,
+  outputs += j
+  )""")
+
+  @p
+    It is also possible to specify default values which are used by the task in case no input data was provided in the dataflow:
+
+  @hl.openmole("""
+  val i = Val[Int]
+  val j = Val[Int]
+
+  val t = EmptyTask() set (
+  inputs += i,
+  outputs += j,
+  // set i's default value to 0
+  i := 0
+  )""")
+
+
+@sect{OpenMOLE scripts}
+  @p
+    Writing an OpenMOLE script consists in defining @b{tasks}, their @b{inputs} and @b{outputs}, the @b{transitions between the tasks }and the @b{execution environment}.
+
+  @p
+    Some of the tasks are made to frame your program, some others are made to generate inputs: @a("Samplings", href:=DocumentationPages.advancedSampling.file) or to capture the outputs : @aa("Hooks", href:=DocumentationPages.hook.file). As you will progress into the world of OpenMOLE, you will discover how to define these various elements and build your own workflows. For now let's give a dummy example.
+
+  @p
+    Let's say you have a model that take a string as input and do some stuff with it, like launching a simulation with the parameters contained in the input string. People from the lab gave you a huge CSV file where each line contains various experimental setup parameters. What you want is to run a simulation for each line of this file, execute it on the lab's cluster, and gather theirs results. Your openMOLE script would look like that:
+
+  @hl.openmoleNoTest("""
+      val inputsParameter: Val[Int]
+      val result: Val[Double]
+
+      // crawl the big file and take the lines
+      val all_the_lines = CSVSampling("EmpiricalData.CSV") set (columns += inputParameter)
+
+      // say "I want to consider each line contained in all_the_lines"
+      val exploration = ExplorationTask(all_the_lines)
+
+      // encapsulates your model in an "execution" task that calls the main routine
+      val  my_model_execution =
+        ScalaTask("mainRun(inputParameter)",
+          inputs += inputString,
+          outputs += result
+        )
+
+      // a hook to catch the outputs of your model execution and put them in a CSV file
+      val catch_output = CSVHook("path/to/save/it")
+
+      // declare your computing environment
+      val lab_Cluster = ClusterEnvironment(login, machineIP)
+
+      // the workflow. Bascically it says : explore the lines and run a model execution for each,
+      // save the outputs, all that on the cluster (results are not brought back to the local computer yet).
+      exploration -< (my_model_execution on env hook catch_output)""")
+
+

@@ -93,6 +93,10 @@ package object stream {
         (if (replace) Seq(StandardCopyOption.REPLACE_EXISTING) else Seq()): _*
       )
 
+    def content =
+      try scala.io.Source.fromInputStream(is).mkString
+      finally is.close()
+
   }
 
   def withClosable[C <: { def close() }, T](open: ⇒ C)(f: C ⇒ T): T = {

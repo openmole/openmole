@@ -74,7 +74,7 @@ class Execution {
       case (envId, e) ⇒ {
         EnvironmentState(
           envId,
-          e.environment.toString,
+          e.environment.simpleName,
           e.environment.running,
           e.environment.done,
           e.environment.submitted,

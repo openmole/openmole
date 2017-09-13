@@ -28,6 +28,9 @@ import org.openmole.core.preference.Preference
 import org.openmole.core.workspace._
 import org.openmole.tool.random._
 import org.openmole.tool.tar.TarInputStream
+import java.io.IOException
+
+import org.openmole.core.exception.InternalProcessingError
 
 package object market {
 
@@ -40,13 +43,16 @@ package object market {
 
   def marketIndex(implicit preference: Preference, randomProvider: RandomProvider, newFile: NewFile) = HTTPStorage.download(indexURL)(Serialization.read[MarketIndex](_))
 
-  def downloadEntry(entry: MarketIndexEntry, path: File) = {
+  def downloadEntry(entry: MarketIndexEntry, path: File) = try {
     HTTPStorage.download(entry.url) { is ⇒
       val tis = new TarInputStream(new GZIPInputStream(is))
       try tis.extract(path)
       finally tis.close
       path.applyRecursive(_.setExecutable(true))
     }
+  }
+  catch {
+    case e: IOException ⇒ throw new InternalProcessingError(s"Cannot download entry at url ${entry.url}", e)
   }
 
 }

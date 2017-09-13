@@ -1,6 +1,138 @@
-
 @import org.openmole.site.tools._
-@import org.openmole.site.Environment._
+@import org.openmole.site._
+@import org.openmole.site.stylesheet._
 
-@p{Profile Method}
-    @p The method aims at testing the validity intervals of input parameters
+
+@def modelAndVariables = """
+val param1 = Val[Double]
+val param2 = Val[Double]
+val output1 = Val[Double]
+val output2 = Val[Double]
+val modelTask = EmptyTask() set (
+    inputs += (param1,param2),
+    outputs += (output1, output2)
+    )
+val myseed = Val[Int]
+val x = Val[Double]
+val fitness = Val[Double]"""
+
+
+
+The profile method is designed to test the sensitivity of the input parameters in a calibration context.
+Although it may look similar to traditional sensitivity analysis in principle, the calibration profile
+algorithm goes deeper, as it captures the full effect of a parameter variation on the model fitness, every other input
+ being calibrated to optimize the fitness.
+ @br
+ Profiles reveal a lot about your model, as they may show how an input (i.e. a parameter of the model) has so much effect on the model
+ dynamics that it has to be in a certain interval for the model to produce acceptable dynamics! In other cases, on the
+ contrary, Calibration Profiles show that an input can so much be compensated by other inputs that it will not have enough
+  effect to constrain the model towards acceptable dynamics by itself.
+
+@break
+@Resource.rawFrag(Resource.img.method.profileID)
+
+
+@br
+@b{Method scores:}
+@br
+The calibration profile method is perfect to reveal a model's sentitivity regarding its parameter, hence the highest score possible in sensitivity.
+However, it does not retrieve information about the input space nor the output space structures, as it focus on @b{one} parameter/input, every other input being let free.
+As the studied parameter varies, the other parameter are calibrated (see below), so this method scores very well
+regarding calibration, which is also why it can handle stochasticity since calibration does too.
+Finally, the profile method realizes calibrations on the other inputs for each interval of the input under study, so the more inputs, the more
+sensitive to dimensionality of input space.
+
+@Resource.rawFrag(Resource.img.method.profileAnim)
+@br
+@basicButton("Run", classIs(btn ++ btn_danger))(id := shared.profile.button, stylesheet.svgRunButton(-70))
+
+@p
+    Given a distance measure between the model output values and
+    data, the profile of a selected parameter @b{i} is constructed by
+    dividing the interval within which  @b{i} can vary into subintervals
+    of equal size, and calibrating the model within each interval to
+    minimise the distance (similarly to @a("Calibration", href :=
+    DocumentationPages.calibration.file)) between outputs and data.  The
+    optimisation is made over the other parameters of the model which are
+    left free.
+
+@p
+As an example, let's consider a model with 3 parameters i, j and k,
+each taking real values between 1 and 10. The profile of the parameter
+  i is made by splitting the [1,10] interval into (for example) 9
+intervals of size 1. Calibration is performed in parallel within each
+  interval. At the end of the minimisation, we obtain sets of parameter
+values minimising the given distance with i taking values in each
+subinterval. By plotting the distance against the values of i, one
+can visually determine what values i must take for the model to be
+  able to reproduce the data.
+
+@p
+By defining a threshold below which the distance between the model output and the data
+is considered acceptable, the results of the profile methods can be interpreted as
+  the subset of values of the parameter for which the model output reproduces the data
+sufficiently well.
+
+@p
+The Profile method takes the following parameters:
+  @ul
+  @li{@hl.code("inputs"): a list of the model parameters with their minimum and maximum bounds,}
+  @li{@hl.code("objective"): a variable defined in the OpenMOLE script that contains the distance between the data and the model output,}
+  @li{@hl.code("x"): the parameter which is being profiled,}
+  @li{@hl.code("nX"): the size of the subintervals.}
+  @li{@hl.code("stochastic"): the seed provider, mandatory if your model contains randomness}
+@p
+You will also need an evolutionary scheme and can use SteadyStateEvolution as described in @a("Calibration", href :=
+  DocumentationPages.calibration.file))
+
+@p To profile a parameter, use the GenomeProfile constructor like so:
+  @br @hl.openmole("""
+  val exploration =
+    GenomeProfile(
+      x = param1,
+      nX = 20,
+      genome =
+        Seq(
+          param1 in (0.0, 99.0),
+          param2 in (0.0, 99.0)),
+      objective = fitness,
+      stochastic = Stochastic(seed = myseed))
+
+val evolution =
+  SteadyStateEvolution(
+    algorithm = exploration,
+    evaluation = modelTask,
+    parallelism = 10,
+    termination = 100
+  )
+""", header= modelAndVariables , name = "Profile")
+where @hl.code("param1") and @hl.code("param2") are inputs
+of the task that runs the model (and refer to the model parameters),
+and @hl.code("fitness") is an output of that
+  same task. The number of inputs are illimited. Here, @hl.code("x = 0")
+specifies that we are profiling @hl.code("param1").
+
+@break
+@br
+@b{Interpretation of the profiles:}
+@br
+A calibration profile is a 2D curve with the value of the parameter under study represented on the X-axis and the best possible calibration error on the Y-axis. To ease the interpretation of the profiles we propose to define an acceptance threshold on the calibration error: under this acceptance threshold the calibration error is considered sufficiently satisfying and the dynamics exposed by the model sufficiently acceptable, over this acceptance threshold the calibration error is considered too high and the dynamics exposed by the model are considered unacceptable.
+
+@br The computed calibration profiles may take very diverse shapes depending on the effect of the parameter of the model dynamics, however some of this shapes are recurrent. The most typical shapes are shown on the figure bellow. They have been discriminated by according to the variation of the values of the profile compared to the threshold value :
+@ul
+  @li {The shape 1 is exposed when a parameter is restricting with respect to the calibration criterion and when the model is able produce acceptable dynamics only for a specific range of the parameter. In this case a connected validity interval can be established for the parameter.}
+  @li {The shape 2  is exposed  when a parameter is restricting with respect to the calibration criterion, but the validity domain of the parameter is not connected. It might mean that several qualitatively different dynamics of the model meet the calibration requirement. In this case model dynamics should be observed directly to determine if the different kinds of dynamics are all suitable or if some of them are mistakenly accepted by the calibration objective.}
+  @li {The shape 3 is exposed when the model is not possible to calibrate. The profile doesn’t expose any acceptable dynamic according to the calibration criterion. In this case, the model should be improved or the calibration criterion should be adapted.}
+  @li {The shape 4 is exposed when a parameter doesn’t restrict the the model dynamics with regards to the calibration criterion. The model can always be calibrated whatever the value of the parameter is. In this case this parameter constitute a superfluous degree of liberty for the model since it’s effect can always be compensated by a variation on the other parameters. In general it means that this parameter should be fixed, that a mechanism of the model should be removed or that the model should be reduced by expressing the value of this parameter in function of the value of the other parameters.}
+
+@br @img(src := Resource.img.method.profileInterpretation.file, center(70))
+
+@break
+
+The calibration profile algorithm has been published in the following paper:
+
+Romain Reuillon, Clara Schmitt, Ricardo De Aldama, and Jean-Baptiste Mouret, «A New Method to Evaluate Simulation
+       Models: The Calibration Profile (CP) Algorithm » published in @i{Journal of Artificial Societies and Social Simulation}
+        (JASSS) , Vol 18, Issue 1, 2015.
+        @br
+            @a("[online version]" , href:="http://jasss.soc.surrey.ac.uk/18/1/12.html")  @a("[bibteX]", href:= Resource.bibtex.profilemethodBib.file)

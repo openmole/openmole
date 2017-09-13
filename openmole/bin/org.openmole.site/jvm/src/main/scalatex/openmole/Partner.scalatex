@@ -1,0 +1,45 @@
+@import org.openmole.site.tools._
+@import org.openmole.site._
+@import org.openmole.site.stylesheet._
+
+@h1{Financial partners}
+@a(img(src := Resource.img.partner.iscpif.file,  partners), href := shared.link.partner.iscpif, target := "_blank")
+@a(img(src := Resource.img.partner.geocite.file, partners), href := shared.link.partner.parisgeo, target := "_blank")
+@a(img(src := Resource.img.partner.biomedia.file, partners), href := shared.link.partner.biomedia, target := "_blank")
+@a(img(src := Resource.img.partner.idf.file, partners), href := shared.link.partner.idf, target := "_blank")
+@a(img(src := Resource.img.partner.paris.file, partners), href := shared.link.partner.paris, target := "_blank")
+
+@h1{Some scientific collaborations outputs}
+
+@aa(img(src := Resource.img.partner.ign.file,  smallPartners), href := shared.link.partner.ign, float:="left")
+@span(width := "75%")
+  @b{Simplu3D-PSE} is the exploration of the output diversity of the @aa("SimPLU3D model", href := shared.link.repo.simplu) via the PSE method.
+  Simplu3D is a model that simulates the building and the placement of buildings, abiding by the Right To Build documents
+  of the French legislation: the PLU (Plan Local D'urbanisme). The PSE exploration
+  method led to this decision making tool: @outerLink(shared.link.simpluDemo.split("//").last, shared.link.simpluDemo)
+  enabling user to explore the effet of the PLU rules variations on the resulting morphology of the urban islet.
+
+
+@br
+@br
+@br
+
+@aa(img(src := Resource.img.partner.geocite.file,  smallPartners), href := shared.link.partner.parisgeo, float:="left")
+@span(width := "75%")
+  @b{SimPopLocal} is a theoretical geography model, simulating the emergence and the upkeep of systems of settlements (ancestors
+  of system of cities) by means of spatial interactions and innovation exchanges. Main results are shown in the «Half a billion simulations: Evolutionary algorithms and distributed computing for calibrating the SimpopLocal
+  geographical model» article in our  @a("publication page", href := Pages.communications.file)
+
+@span(width := "75%")
+    @br
+    @b{MARIUS} ("Modélisation des Agglomérations de Russie Imperiale et ex-Union Soviétique," french for Former URSS agglomerations model)
+    is the last born of the Simpop family of model, and addresses the dynamics of Russia/ former URSS from 1950 to 2010.
+    See «A modular modelling framework for hypotheses testing in the simulation of urbanisation»,
+    in our @a("publication page", href := Pages.communications.file)).
+    @br
+@span(width := "75%")
+@br
+    The ERC @aa("Geodivercity", href:=shared.link.geodivercity) was an advanced grant ERC project,
+    led by Pr. Denise Pumain. A significant part of the  development of OpenMOLE  as a scalable platform for geographical
+    simulation models experiments was founded by this project. The project led to the publication of a book published by Springer,
+    available @aa("on the editor site", href:=shared.link.ercSpringer) and @aa("here as a pre-print open version", href := shared.link.urbanDynamics).

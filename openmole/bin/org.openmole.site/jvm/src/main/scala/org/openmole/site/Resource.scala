@@ -17,119 +17,264 @@
 
 package org.openmole.site
 
-//import org.openmole.core.buildinfo
-import org.openmole.site.market.GeneratedMarketEntry
-import org.openmole.site.market.Market._
+import org.openmole.tool.stream._
 
 //TODO automatically generate this object as a managed source using sbt
 object Resource {
 
-  //FIXME
-  def buildinfoVersion = "7.0-SNAPSHOT"
+  def imgResource(name: String) = fileResource(s"img/$name")
 
-  def imgResource(name: String) = FileResource(s"img/$name")
+  def modelResource(name: String) = imgResource(s"model/$name")
+  def methodResource(name: String) = imgResource(s"method/$name")
+  def environmentResource(name: String) = imgResource(s"environment/$name")
+  def peopleResource(name: String) = imgResource(s"people/$name")
+  def partnerResource(name: String) = imgResource(s"partner/$name")
+  def menuResource(name: String) = imgResource(s"menu/$name")
+  def footerResource(name: String) = imgResource(s"footer/$name")
+  def moleResource(name: String) = imgResource(s"mole/$name")
+  def exampleResource(name: String) = imgResource(s"example/$name")
+  def guiGuideResource(name: String) = imgResource(s"guiGuide/$name")
 
-  def jsResource(name: String) = FileResource(s"js/$name")
+  def jsResource(name: String) = fileResource(s"js/$name")
 
-  def cssResource(name: String) = FileResource(s"css/$name")
+  def cssResource(name: String) = fileResource(s"css/$name")
 
-  def scriptResource(name: String) = FileResource(s"script/$name")
+  def scriptResource(name: String) = fileResource(s"script/$name")
 
-  def FileResource(name: String) = RenameFileResource(name, name)
+  def bibtexResource(name: String) = fileResource(s"bibtex/$name")
 
-  //def css = FileResource("openMOLEStyles.css")
+  def paperResource(name: String) = fileResource(s"paper/$name")
 
-  def ants = imgResource("ants.png")
+  def fileResource(name: String) = FileResource(name)
 
-  def antNumbers = imgResource("antnumbers.png")
+  object img {
 
-  def antsNLogo = scriptResource("ants.nlogo")
+    object model {
+      val code = modelResource("code.svg")
+      val codeAnimated = modelResource("codeAnimated.svg")
+    }
 
-  def bootstrapCss = cssResource("bootstrap.min-3.3.7.css")
+    object method {
+      val exploreMap = methodResource("map.svg")
+      val exploreMapAnimated = methodResource("mapAnimated.svg")
 
-  def github = cssResource("github.css")
+      val modelIO = methodResource("modelIO.png")
 
-  def docStyle = cssResource("docstyle.css")
+      val profileAnim = methodResource("profileAnim.svg")
+      val profileID = methodResource("profileID.svg")
 
-  def bootstrapJS = jsResource("bootstrap-native.min.js")
+      val calibrationMono = methodResource("calibrationMono.png")
+      val calibrationMulti = methodResource("calibrationMulti.png")
 
-  def highlightJS = jsResource("highlight.pack.js")
+      val sensitivityAnim = methodResource("sensitivityAnim.svg")
 
-  def siteJS = jsResource("sitejs.js")
+      val pseAnim = methodResource("pseAnim.svg")
+      val pseID = methodResource("pseID.svg")
 
-  def care = scriptResource("care")
+      val GAsingleID = methodResource("GAsingleID.svg")
 
-  def fireNLogo = scriptResource("Fire.nlogo")
+      val GAmultiID = methodResource("GAmultiID.svg")
 
-  def fireScreen = imgResource("firescreen.png")
+      val completeID = methodResource("completeID.svg")
 
-  def fireGlobals = imgResource("fireGlobals.png")
+      val sobolLHSID = methodResource("sobolLHSID.svg")
 
-  def fireNewGlobals = imgResource("fireNewGlobals.png")
+      val ancestors = methodResource("ancestors.png")
 
-  def fireMyDensity = imgResource("fireMyDensity.png")
+      val legendOfIDs = methodResource("legendOfIDs.svg")
 
-  def fireNewFunction = imgResource("fireNewFunction.png")
+      val densityBurned = methodResource("densityBurned.svg")
+      val densityBurnedZoom = methodResource("densityBurnedZoom.svg")
+      val densitySeedBox = methodResource("densitySeedBox.svg")
+      val profileInterpretation = methodResource("profileInterpretation.png")
+    }
 
-  def fireOldSetup = imgResource("fireOldSetup.png")
+    object environment {
+      val scale = environmentResource("scale.svg")
+      val scaleAnimated = environmentResource("scaleAnimated.svg")
 
-  def fireRemoveClearAll = imgResource("fireRemoveClearAll.png")
+    }
+    object example {
+      val antNumbers = exampleResource("antnumbers.png")
 
-  def logo = imgResource("openmole.png")
+      val fireScreen = exampleResource("firescreen.png")
 
-  def uiScreenshot = imgResource("openmoleUI.png")
+      val fireGlobals = exampleResource("fireGlobals.png")
 
-  def iscpif = imgResource("iscpif.svg")
+      val fireNewGlobals = exampleResource("fireNewGlobals.png")
 
-  def geocite = imgResource("geocite.png")
+      val fireMyDensity = exampleResource("fireMyDensity.png")
 
-  def biomedia = imgResource("biomedia.png")
+      val fireNewFunction = exampleResource("fireNewFunction.png")
 
-  def openmole = RenameFileResource("openmole.tar.gz", s"openmole-${buildinfoVersion}.tar.gz")
+      val fireOldSetup = exampleResource("fireOldSetup.png")
 
-  def openmoleDaemon = RenameFileResource("openmole-daemon.tar.gz", s"openmole-daemon-${buildinfoVersion}.tar.gz")
+      val fireRemoveClearAll = exampleResource("fireRemoveClearAll.png")
 
-  def api = ArchiveResource("openmole-api.tar.gz", "api")
+      val ants = exampleResource("ants.png")
+    }
 
-  def lunr = jsResource("lunr.min.js")
+    object people {
+      val romain = peopleResource("romain.png")
 
-  def index = jsResource("index.js")
+      val mathieu = peopleResource("mathieu.png")
 
-  def marketResources(entries: Seq[GeneratedMarketEntry]) =
-    entries.filter(_.tags.exists(_ == market.Market.Tags.tutorial)).map { tuto ⇒ MarketResource(tuto) }
+      val jo = peopleResource("jo.png")
 
-  def all = Seq[Resource](
-    docStyle,
-    github,
-    highlightJS,
-    siteJS,
-    bootstrapCss,
-    bootstrapJS,
-    logo,
-    openmole,
-    openmoleDaemon,
-    api,
-    ants,
-    antNumbers,
-    antsNLogo,
-    fireNLogo,
-    fireScreen,
-    fireGlobals,
-    fireNewGlobals,
-    fireNewFunction,
-    fireOldSetup,
-    fireRemoveClearAll,
-    uiScreenshot,
-    iscpif,
-    geocite,
-    biomedia,
-    lunr,
-    care
-  )
+      val paul = peopleResource("paul.png")
+
+      val guillaume = peopleResource("guillaume.png")
+
+      val julien = peopleResource("julien.png")
+
+      val etienne = peopleResource("etienne.png")
+
+      val seb = peopleResource("seb.png")
+    }
+
+    object partner {
+      val iscpif = partnerResource("iscpif.svg")
+
+      val geocite = partnerResource("geocite.png")
+
+      val biomedia = partnerResource("biomedia.png")
+
+      val idf = partnerResource("idf.svg")
+
+      val paris = partnerResource("mairieParis.svg")
+
+      val ign = partnerResource("ign.png")
+    }
+
+    object menu {
+      val search = menuResource("search.svg")
+    }
+
+    object footer {
+
+      val github = footerResource("github.svg")
+
+      val email = footerResource("email.svg")
+
+      val twitter = footerResource("twitter.svg")
+
+      val faq = footerResource("faq.svg")
+
+      val blog = footerResource("blog.svg")
+
+      val partner = footerResource("partner.svg")
+
+      val previousVersion = footerResource("previousVersion.svg")
+
+      val paper = footerResource("paper.svg")
+
+      val whoarwe = footerResource("mole.svg")
+
+      val contribute = footerResource("contribute.svg")
+    }
+
+    object mole {
+      val logo = moleResource("openmole.png")
+
+      val uiScreenshot = moleResource("openmoleUI.png")
+
+      val openmole = moleResource("openmole.svg")
+
+      val openmoleText = moleResource("openmole.png")
+
+      val openmoleTransp = moleResource("openmoleTransp.svg")
+    }
+
+    object guiGuide {
+      private val prefix = "guiGuide"
+      val overview = guiGuideResource("overview.svg")
+      val files = guiGuideResource("files.svg")
+      val modelImport = guiGuideResource("modelImport.svg")
+      val running = guiGuideResource("running.svg")
+      val authentication = guiGuideResource("authentication.svg")
+      val plugin = guiGuideResource("plugin.svg")
+      val market = guiGuideResource("market.png")
+    }
+
+  }
+
+  object script {
+
+    val antsNLogo = scriptResource("ants.nlogo")
+
+    val fireNLogo = scriptResource("Fire.nlogo")
+
+    val care = scriptResource("care")
+
+    val openmole = fileResource("openmole.tar.gz")
+
+    val openmoleDaemon = fileResource("daemon.tar.gz")
+
+  }
+
+  object css {
+
+    val github = cssResource("github.css")
+
+    val docStyle = cssResource("docstyle.css")
+
+    val bootstrap = cssResource("bootstrap.min-3.3.7.css")
+
+  }
+
+  object js {
+
+    val bootstrapJS = jsResource("bootstrap-native.min.js")
+
+    val highlight = jsResource("highlight.pack.js")
+
+    val siteJS = jsResource("sitejs.js")
+
+    val lunr = jsResource("lunr.min.js")
+
+    val index = jsResource("index.js")
+
+  }
+
+  object bibtex {
+
+    val PSEmethodBib = bibtexResource("cherelpse2015.bib")
+
+    val multimodelBib = bibtexResource("cottineau2015multimodel.bib")
+
+    val EBIMMBib = bibtexResource("cottineauEBIMM2015.bib")
+
+    val HPCSRefBib = bibtexResource("reuillon2010HPCS.bib")
+
+    val FGCSRefBib = bibtexResource("reuillon2013FGCS.bib")
+
+    val profilemethodBib = bibtexResource("reuillonProfile2015.bib")
+
+    val halfbillionBib = bibtexResource("Schmitt2015halfbillion.bib")
+
+    val frontierBib = bibtexResource("passerat2017frontier.bib")
+
+  }
+
+  object paper {
+    val fgcs2013 = paperResource("FGCS2013.pdf")
+    val hpcs2010 = paperResource("hpcs2010.pdf")
+  }
+
+  val api = fileResource("api")
+
+  def rawFrag(fileResource: FileResource) = shared.rawFrag(content(fileResource))
+
+  def content(fileResource: FileResource) =
+    this.getClass.getClassLoader.getResourceAsStream(fileResource.file).content
+
+  //  val marketResources(entries: Seq[GeneratedMarketEntry]) =
+  //    entries.filter(_.tags.exists(_ == Market.Tags.tutorial)).map { tuto ⇒ MarketResource(tuto) }
 }
 
 sealed trait Resource
-case class RenameFileResource(source: String, file: String) extends Resource
-case class ArchiveResource(source: String, file: String) extends Resource
-case class MarketResource(marketEntry: GeneratedMarketEntry) extends Resource
 
+case class FileResource(file: String) extends Resource
+
+//case class ArchiveResource(source: String, file: String) extends Resource
+//case class MarketResource(marketEntry: GeneratedMarketEntry) extends Resource

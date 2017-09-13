@@ -39,7 +39,6 @@ import org.openmole.tool.stream.StringOutputStream
 import org.openmole.tool.tar._
 import java.nio.file.attribute._
 
-import org.openmole.core.exception.UserBadDataError
 import org.openmole.gui.ext.plugin.server.PluginActivator
 import org.openmole.gui.ext.tool.server.OMRouter
 import org.openmole.gui.server.jscompile.JSPack
@@ -47,7 +46,7 @@ import org.openmole.gui.server.jscompile.JSPack
 import scala.io.{ BufferedSource, Codec }
 import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
 import org.openmole.core.services._
-import org.openmole.tool.crypto.Cypher
+import org.openmole.core.module
 
 object Utils extends Logger {
 
@@ -56,8 +55,11 @@ object Utils extends Logger {
   implicit def fileToExtension(f: File): FileExtension = DataUtils.fileToExtension(f.getName)
 
   def pluginUpdoadDirectory()(implicit workspace: Workspace) = workspace.tmpDir / "pluginUpload"
+
   def webUIDirectory()(implicit workspace: Workspace) = workspace.location /> "webui"
+
   def projectsDirectory()(implicit workspace: Workspace) = webUIDirectory /> "projects"
+
   def workspaceRoot()(implicit workspace: Workspace) = workspace.location
 
   def isPlugin(path: SafePath)(implicit workspace: Workspace): Boolean = {
@@ -280,6 +282,7 @@ object Utils extends Logger {
   def copyToPluginUploadDirectory(safePaths: Seq[SafePath])(implicit workspace: Workspace) = {
     safePaths.map { sp ⇒
       val from = safePathToFile(sp)(ServerFileSytemContext.project, workspace)
+      pluginUpdoadDirectory.mkdirs
       copy(from, pluginUpdoadDirectory)
     }
   }

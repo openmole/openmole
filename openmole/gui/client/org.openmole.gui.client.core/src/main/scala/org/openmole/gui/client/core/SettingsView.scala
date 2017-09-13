@@ -57,6 +57,7 @@ object SettingsView {
 
   lazy val dropdownApp: Dropdown[_] = bs.vForm(width := "auto")(
     jvmInfoButton,
+    docButton,
     jvmInfosDiv,
     resetPasswordButton.render,
     restartButton,
@@ -77,6 +78,9 @@ object SettingsView {
         alertPanel(warnMessage, route)
       }
     )
+
+  val docButton =
+    div(a(href := "https://next.openmole.org/GUI+guide.html")(target := "_blank", tags.span("Documentation"))).render
 
   val jvmInfoButton = bs.button("JVM stats", btn_default +++ sheet.marginLeft(12), glyph_stats, () ⇒ timer.now match {
     case Some(t) ⇒ stopJVMTimer(t)

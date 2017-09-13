@@ -18,11 +18,9 @@
 
 package org.openmole.site
 
-import org.openmole.site.market._
-
 import scalatags.Text.all._
 import com.github.rjeschke._
-import org.openmole.site.market.Market.Tags
+import org.apache.commons.math3.genetics.GeneticAlgorithm
 
 import scalatex.{ openmole ⇒ scalatex }
 import org.openmole.tool.file._
@@ -32,95 +30,95 @@ import scalaz.Reader
 
 object Pages {
 
-  def index = Page("index", scalatex.Index(), title = Some("OpenMOLE: scientific workflow, distributed computing, parameter tuning"))
+  val index = Page("index", scalatex.Index(), title = Some("OpenMOLE: scientific workflow, distributed computing, parameter tuning"))
 
-  def gettingStarted = Page("getting_started", scalatex.GettingStarted(), title = Some("Getting started with OpenMOLE - introductory tutorial"))
+  def gettingStarted = Page("Getting started", scalatex.GettingStarted(), title = Some("Getting started with OpenMOLE - introductory tutorial"))
 
-  def whoAreWe = Page("who_are_we", scalatex.WhoAreWe(), title = Some("Developers, reference publications, contact information - OpenMOLE"))
+  def whoAreWe = Page("Who are we", scalatex.WhoAreWe(), title = Some("Developers, reference publications, contact information - OpenMOLE"))
 
-  def communications = Page("communications", scalatex.Communications(), title = Some("Related papers, conference slides, videos, OpenMOLE in the news"))
+  def partner = Page("Partners", scalatex.Partner(), title = Some("OpenMOLE partners"))
+
+  val communications = Page("Communications", scalatex.Communications(), title = Some("Related papers, conference slides, videos, OpenMOLE in the news"))
 
   def faq = Page("faq", scalatex.FAQ(), title = Some("FAQ"))
 
-  def all: Seq[Page] = DocumentationPages.allPages ++ Seq(index, gettingStarted, whoAreWe, faq, communications)
+  def previousVersions = Page("Previous versions", scalatex.PreviousVersions(), title = Some("Previous versions"))
 
-  def file(page: Page) = page.location.mkString("_") + ".html"
+  val training = Page("Trainings", scalatex.Training(), title = Some("Trainings"))
+
+  val all: Seq[Page] = DocumentationPages.allPages ++ Seq(index, gettingStarted, whoAreWe, partner, faq, communications, previousVersions, training)
+
+  //def rawFile(page: Page) = page.location.mkString("_") + ".html"
+  def file(page: Page) = java.net.URLEncoder.encode(page.location, "UTF-8") + ".html"
 
   def isDoc(page: Page) = page match {
     case d: DocumentationPage ⇒ true
     case _                    ⇒ false
   }
 
-  def isTopDoc(page: Page) = DocumentationPages.topPages.map {
-    _.children
-  }
-
 }
 
 object Page {
-  def apply(name: String, content: Frag, details: Seq[Page] = Seq(), title: Option[String] = None) = {
-    val (_name, _content, _details, _title) = (name, content, details, title)
+  def apply(name: String, content: Frag, details: Seq[Page] = Seq(), title: Option[String] = None, extraMenu: Option[SideMenu] = None) = {
+    val (_name, _content, _details, _title, _extraMenu) = (name, content, details, title, extraMenu)
 
     new Page {
       override def name: String = _name
-
       override def content = _content
-
       override def title = _title
-
       override def details = _details
+      override def extraMenu = _extraMenu
     }
   }
 }
 
-case class PageIntro(intro: scalatags.Text.all.Frag, more: Option[scalatags.Text.all.Frag] = None)
-
 trait Page {
   def content: Frag
-
   def name: String
 
-  def id: String = name
-
-  def title: Option[String]
-
-  def location = Seq(id)
-
+  def title: Option[String] = Some(s"OpenMOLE - $name")
+  def location: String = name
   def file = Pages.file(this)
-
   def details: Seq[Page]
+  def extraMenu: Option[SideMenu]
 
-  def intro: Option[PageIntro] = None
+  def anchor(name: String) = s"$file#${name.replaceAll(" ", "")}"
 }
 
 case class Parent[T](parent: Option[T])
 
-abstract class DocumentationPage(implicit p: Parent[DocumentationPage] = Parent(None)) extends Page {
-  def parent = p.parent
-
-  implicit def thisIsParent = Parent[DocumentationPage](Some(this))
-
-  def content: Frag
-
-  def name: String
-
-  def children: Seq[DocumentationPage]
-
-  def title: Option[String] = None
-
-  override def location: Seq[String] =
-    parent match {
-      case None    ⇒ Seq(id)
-      case Some(p) ⇒ p.location ++ Seq(id)
+object DocumentationPage {
+  def apply(
+    name:      String,
+    content:   ⇒ Frag,
+    details:   ⇒ Seq[DocumentationPage] = Seq.empty,
+    location:  Option[String]           = None,
+    extraMenu: Option[SideMenu]         = None
+  ) = {
+    def _name = name
+    def _content = content
+    def _details = details
+    def _location = location
+    def _extraMenu = extraMenu
+    new DocumentationPage {
+      def name = _name
+      def content = _content
+      override def details = _details
+      override def location = _location.getOrElse(name)
+      override def extraMenu = _extraMenu
     }
-
-  def allPages: Seq[Page] = {
-    {
-      def pages(p: DocumentationPage): List[Page] =
-        p.children.toList ::: p.details.toList ::: p.children.flatMap(_.allPages).toList
-      this :: pages(this)
-    }.distinct
   }
+}
+
+abstract class DocumentationPage extends Page {
+
+  //  def allPages: Seq[Page] = {
+  //    {
+  //      def pages(p: DocumentationPage): List[Page] =
+  //        p.children.toList ::: p.details.toList ::: p.children.flatMap(_.allPages).toList
+  //      this :: pages(this)
+  //    }.distinct
+  //  }
 
   override def equals(o: scala.Any): Boolean =
     o match {
@@ -134,633 +132,199 @@ abstract class DocumentationPage(implicit p: Parent[DocumentationPage] = Parent(
 object DocumentationPages {
   index ⇒
 
-  var marketEntries: Seq[GeneratedMarketEntry] = Seq()
+  //var marketEntries: Seq[GeneratedMarketEntry] = Seq()
 
-  def apply(
-    name:     String,
-    content:  Frag,
-    children: Seq[DocumentationPage] = Seq.empty,
-    details:  Seq[DocumentationPage] = Seq.empty,
-    location: Option[Seq[String]]    = None,
-    intro:    Option[PageIntro]      = None
-  )(implicit p: Parent[DocumentationPage] = Parent(None)) = {
-    val (_name, _content, _details, _children, _location, _intro) = (name, content, details, children, location, intro)
-    new DocumentationPage {
-      override def children = _children
-
-      override def name = _name
-
-      override def content = _content
-
-      override def details = _details
-
-      override def location = _location.getOrElse(super.location)
-
-      override def intro = _intro
-    }
-  }
-
-  def allPages = root.allPages
-
-  lazy val topPages = Seq(
-    root.language.model,
-    root.language.method,
-    root.language.environment
+  def allPages = Vector[DocumentationPage](
+    docSiteMap,
+    gui,
+    scala,
+    java,
+    native,
+    nativePackaging,
+    ccplusplus,
+    rscript,
+    python,
+    netLogo,
+    mole,
+    model,
+    language,
+    howToContribute,
+    environment,
+    multithread,
+    ssh,
+    egi,
+    cluster,
+    desktopGrid,
+    method,
+    calibration,
+    geneticalgo,
+    island,
+    stochasticity,
+    profile,
+    pse,
+    tutorial,
+    resume,
+    headlessNetLogo,
+    netLogoGA,
+    capsule,
+    plugin,
+    webserver,
+    dataProcessing,
+    otherDoE,
+    advancedConcepts,
+    advancedSampling,
+    transition,
+    hook,
+    source,
+    console
   )
 
-  lazy val topPagesChildren = topPages.flatMap {
-    _.children
-  }.distinct
+  lazy val topPages = Seq(
+    modelPages,
+    methodPages,
+    environmentPages
+  ).flatten ++ Seq(model, method, environment)
+
+  lazy val docSiteMap = DocumentationPage(name = "Documentation Site Map", content = scalatex.documentation.DocSiteMap())
+
+  lazy val gui = DocumentationPage(name = "GUI guide", content = scalatex.documentation.GUI())
+
+  def modelPages = Seq(scala, java, rscript, python, ccplusplus, netLogo, mole, native)
+
+  lazy val scala = DocumentationPage(name = "Scala", content = scalatex.documentation.language.model.Scala())
+  lazy val java = DocumentationPage(name = "Java", content = scalatex.documentation.language.model.Java())
+
+  lazy val native = DocumentationPage(
+    name = "Other Languages",
+    content = scalatex.documentation.language.model.Native(),
+    details = Seq(nativePackaging),
+    extraMenu = Some(SideMenu.nativeMenu)
+  )
+
+  lazy val nativePackaging = DocumentationPage(
+    name = "Native Packaging",
+    content = scalatex.documentation.details.NativePackaging(),
+    extraMenu = Some(SideMenu.nativePackagingMenu)
+  )
+
+  lazy val ccplusplus = DocumentationPage(name = "C++", location = Some("cplusplus"), content = scalatex.documentation.language.model.CCplusplus(), details = Seq(nativePackaging))
+  lazy val rscript = DocumentationPage(name = "R Script", content = scalatex.documentation.language.model.RScript(), details = Seq(nativePackaging))
+  lazy val python = DocumentationPage(name = "Python", content = scalatex.documentation.language.model.Python(), details = Seq(nativePackaging))
+  lazy val netLogo = DocumentationPage(
+    name = "NetLogo",
+    content = scalatex.documentation.language.model.NetLogo()
+  )
+  lazy val mole = DocumentationPage(name = "Mole", content = scalatex.documentation.language.model.MoleTask())
+  lazy val model = DocumentationPage(name = "Models", content = scalatex.documentation.language.Model())
+
+  def languagePages = Seq(model, environment, method)
+
+  lazy val language = DocumentationPage(name = "Language", content = scalatex.documentation.Language())
+
+  lazy val transition = DocumentationPage(name = "Transitions", content = scalatex.documentation.language.advanced.Transition())
+  lazy val hook = DocumentationPage(name = "Hooks", content = scalatex.documentation.language.advanced.Hook())
+  lazy val source = DocumentationPage(name = "Sources", content = scalatex.documentation.language.advanced.Source())
+  lazy val capsule = DocumentationPage(name = "Capsule", content = scalatex.documentation.language.advanced.Capsule())
+
+  lazy val environment = DocumentationPage(name = "Environments", content = scalatex.documentation.language.Environment())
+
+  lazy val multithread = DocumentationPage(name = "Multi-threads", content = scalatex.documentation.language.environment.Multithread())
+  lazy val ssh = DocumentationPage(name = "SSH", content = scalatex.documentation.language.environment.SSH())
+  lazy val egi = DocumentationPage(name = "EGI", content = scalatex.documentation.language.environment.EGI())
+  lazy val cluster = DocumentationPage(
+    name = "Clusters",
+    content = scalatex.documentation.language.environment.Cluster(),
+    extraMenu = Some(SideMenu.clusterMenu)
+  )
+
+  def environmentPages = Seq(multithread, ssh, egi, cluster, desktopGrid)
+  lazy val desktopGrid = DocumentationPage(name = "DesktopGrid", content = scalatex.documentation.language.environment.DesktopGrid())
+
+  def methodPages = Seq(calibration, profile, pse, dataProcessing, otherDoE)
+
+  lazy val method = DocumentationPage(
+    name = "Methods",
+    content = scalatex.documentation.language.Method(),
+    details = Seq(DocumentationPages.advancedSampling)
+  )
+
+  lazy val calibration = DocumentationPage(name = "Calibration", content = scalatex.documentation.language.method.Calibration(), details = Seq(geneticalgo, island, stochasticity))
+
+  lazy val geneticalgo = DocumentationPage(name = "Genetic Algorithms", content = scalatex.documentation.details.GeneticAlgorithm())
+  lazy val island = DocumentationPage(name = "Islands Scheme", content = scalatex.documentation.details.Island())
+  lazy val stochasticity = DocumentationPage(name = "Stochasticity management", content = scalatex.documentation.details.StochasticityManagement())
+
+  lazy val profile = DocumentationPage(name = "Profiles", content = scalatex.documentation.language.method.Profile())
+  lazy val pse = DocumentationPage(name = "PSE", content = scalatex.documentation.language.method.PSE())
+
+  lazy val otherDoE = DocumentationPage(
+    name = "Other DoEs",
+    content = scalatex.documentation.language.method.OtherDoE(),
+    extraMenu = Some(SideMenu.otherDoEMenu)
+  )
+
+  lazy val dataProcessing = DocumentationPage(
+    name = "Data Processing",
+    content = scalatex.documentation.language.method.DataProcessing(),
+    extraMenu = Some(SideMenu.dataProcessingMenu)
+  )
+
+  lazy val advancedConcepts = DocumentationPage(name = "Advanced Concepts", content = scalatex.documentation.language.AdvancedConcepts())
+
+  lazy val advancedSampling = DocumentationPage(name = "Advanced Sampling", content = scalatex.documentation.language.advanced.AdvancedSampling())
+
+  lazy val tutorial = DocumentationPage(name = "Tutorials", content = scalatex.documentation.language.Tutorial())
+  lazy val resume = DocumentationPage(name = "Resume Workflow", content = scalatex.documentation.language.tutorial.Resume())
+  lazy val headlessNetLogo = DocumentationPage(name = "Netlogo Headless", content = scalatex.documentation.language.advanced.HeadlessNetLogo())
+  lazy val netLogoGA = DocumentationPage(name = "GA with NetLogo", content = scalatex.documentation.language.tutorial.NetLogoGA())
+
+  lazy val plugin = DocumentationPage(name = "Plugins", content = scalatex.documentation.development.Plugin())
+  lazy val webserver = DocumentationPage(name = "Web Server", content = scalatex.documentation.development.WebServer())
+  lazy val howToContribute = DocumentationPage(
+    name = "How to Contribute",
+    content = scalatex.documentation.development.howToContribute(),
+    extraMenu = Some(SideMenu.howToContributeMenu)
+  )
+  lazy val console = DocumentationPage(name = "Console mode", content = scalatex.documentation.development.Console(), extraMenu = Some(SideMenu.consoleMenu))
+
+  //    val market = new DocumentationPage {
+  //      override def content: Text.all.Frag = div(tagContent(marketEntries))
+  //
+  //      override def children: Seq[DocumentationPage] = Seq()
+  //
+  //      override def name: String = "Market"
+  //
+  //      override def details: Seq[Page] = Seq()
+  //
+  //      def tagContent(entries: Seq[GeneratedMarketEntry]) =
+  //        ul(
+  //          entries.sortBy(_.entry.name.toLowerCase).map {
+  //            de ⇒ li(entryContent(de))
+  //          }: _*
+  //        )
+  //
+  //      def entryContent(deployedMarketEntry: GeneratedMarketEntry) = {
+  //        def title: Modifier =
+  //          deployedMarketEntry.viewURL match {
+  //            case None    ⇒ deployedMarketEntry.entry.name
+  //            case Some(l) ⇒ a(deployedMarketEntry.entry.name, href := l)
+  //          }
+  //
+  //        def content =
+  //          Seq[Modifier](
+  //            deployedMarketEntry.readme.map {
+  //              rm ⇒ RawFrag(txtmark.Processor.process(rm))
+  //            }.getOrElse(p("No README.md available yet.")),
+  //            a("Packaged archive", href := deployedMarketEntry.archive), " (can be imported in OpenMOLE)"
+  //          ) ++ deployedMarketEntry.viewURL.map(u ⇒ br(a("Source repository", href := u)))
+  //
+  //        div(scalatags.Text.all.id := "market-entry")(content: _*)
+  //      }
+  //
+  //      def themes: Seq[Market.Tag] = {
+  //        marketEntries.flatMap(_.entry.tags).distinct.sortBy(_.label.toLowerCase)
+  //      }
+  //
+  //    }
 
-  val root = new DocumentationPage {
-    def name = "Documentation"
-
-    override def title = Some(name)
-
-    def content = scalatex.documentation.Documentation()
-
-    def details = Seq()
-
-    def children = Seq(application, language, tutorial, market, development)
-
-    val application = new DocumentationPage {
-      def name = "Application"
-
-      override def title = Some(name)
-
-      def children = Seq(migration)
-
-      def content = scalatex.documentation.Application()
-
-      def details = Seq()
-
-      val migration = new DocumentationPage() {
-        def children: Seq[DocumentationPage] = Seq()
-
-        def name: String = "Migration"
-
-        override def title = Some(name)
-
-        def content = scalatex.documentation.application.Migration()
-
-        def details = Seq()
-      }
-    }
-
-    val language =
-      new DocumentationPage {
-        def name = "Language"
-
-        override def title = Some(name)
-
-        def children = Seq(model, sampling, transition, hook, environment, source, method)
-
-        def content = scalatex.documentation.Language()
-
-        def details = Seq()
-
-        val model = new DocumentationPage {
-          def name = "Models"
-
-          override def title = Some(name)
-
-          def children = Seq(scala, java, rscript, python, /*ccplusplus,*/ native, netLogo, mole)
-
-          def content = scalatex.documentation.language.Model()
-
-          def details = Seq()
-
-          lazy val modelIntro = Some(PageIntro(scalatex.documentation.language.ModelIntro(), Some(scalatex.documentation.language.Model())))
-
-          val scala = new DocumentationPage {
-            def name = "Scala"
-
-            override def title = Some(name)
-
-            def children = Seq()
-
-            def details = Seq()
-
-            def content = scalatex.documentation.language.model.Scala()
-
-            override def intro = modelIntro
-          }
-
-          val java = new DocumentationPage {
-            def name = "Java"
-
-            override def title = Some(name)
-
-            def children = Seq()
-
-            def details = Seq()
-
-            def content = scalatex.documentation.language.model.Java()
-
-            override def intro = modelIntro
-          }
-
-          val native = new DocumentationPage {
-            def name = "Native"
-
-            override def title = Some(name)
-
-            def children = Seq()
-
-            def details = Seq(nativeAPI, nativePackaging, CARETroubleshooting)
-
-            def content = scalatex.documentation.language.model.Native()
-
-            override def intro = modelIntro
-          }
-
-          val ccplusplus = new DocumentationPage {
-            def name = "C/C++"
-
-            override def title = Some(name)
-
-            def children = Seq()
-
-            def details = Seq(nativeAPI, nativePackaging, CARETroubleshooting)
-
-            def content = scalatex.documentation.language.model.CCplusplus()
-
-            override def intro = modelIntro
-          }
-
-          val rscript = new DocumentationPage {
-            def name = "R Script"
-
-            override def title = Some(name)
-
-            def children = Seq()
-
-            def details = Seq(nativeAPI, nativePackaging, CARETroubleshooting)
-
-            def content = scalatex.documentation.language.model.RScript()
-
-            override def intro = modelIntro
-          }
-
-          val python = new DocumentationPage {
-            def name = "Python"
-
-            override def title = Some(name)
-
-            def children = Seq()
-
-            def details = Seq(nativeAPI, nativePackaging, CARETroubleshooting)
-
-            def content = scalatex.documentation.language.model.Python()
-
-            override def intro = modelIntro
-          }
-
-          val netLogo = new DocumentationPage {
-            def name = "NetLogo"
-
-            override def title = Some(name)
-
-            def children = Seq()
-
-            def details = Seq()
-
-            def content = scalatex.documentation.language.model.NetLogo()
-
-            override def intro = modelIntro
-          }
-
-          val mole = new DocumentationPage {
-            def name = "Mole"
-
-            override def title = Some(name)
-
-            def children = Seq()
-
-            def details = Seq()
-
-            def content = scalatex.documentation.language.model.MoleTask()
-
-            override def intro = modelIntro
-          }
-
-          //details
-          val nativeAPI = new DocumentationPage {
-            override def id = "NativeAPI"
-
-            def name = "API"
-
-            override def title = Some(name)
-
-            def children = Seq()
-
-            def details = Seq()
-
-            def content = scalatex.documentation.details.NativeAPI()
-          }
-
-          val nativePackaging = new DocumentationPage {
-            override def id = "NativePackaging"
-
-            def name = "Native Packaging"
-
-            override def title = Some(name)
-
-            def children = Seq()
-
-            def details = Seq()
-
-            def content = scalatex.documentation.details.NativePackaging()
-          }
-
-          //troubleshooting care
-          val CARETroubleshooting = new DocumentationPage {
-            override def id = "CARETroubleshooting"
-
-            def name = "CARE Troubleshooting"
-
-            override def title = Some(name)
-
-            def children = Seq()
-
-            def details = Seq()
-
-            def content = scalatex.documentation.details.CARETroubleShooting()
-          }
-        }
-
-        val sampling = new DocumentationPage {
-          def name = "Samplings"
-
-          override def title = Some(name)
-
-          def children = Seq()
-
-          def details = Seq()
-
-          def content = scalatex.documentation.language.Sampling()
-        }
-
-        val transition = new DocumentationPage {
-          def name = "Transitions"
-
-          override def title = Some(name)
-
-          def children = Seq()
-
-          def details = Seq()
-
-          def content = scalatex.documentation.language.Transition()
-        }
-
-        val hook = new DocumentationPage {
-          def name = "Hooks"
-
-          override def title = Some(name)
-
-          def children = Seq()
-
-          def details = Seq()
-
-          def content = scalatex.documentation.language.Hook()
-        }
-
-        val environment = new DocumentationPage {
-          def name = "Environments"
-
-          override def title = Some(name)
-
-          def children = Seq(multithread, ssh, egi, cluster, desktopGrid)
-
-          def content = scalatex.documentation.language.Environment()
-
-          def details = Seq()
-
-          lazy val envIntro = Some(PageIntro(scalatex.documentation.language.environment.EnvironmentIntro(), Some(scalatex.documentation.language.Environment())))
-
-          val multithread = new DocumentationPage {
-            override def id = "MultiThread"
-
-            def name = "Multi-threads"
-
-            override def title = Some(name)
-
-            def children = Seq()
-
-            def details = Seq()
-
-            def content = scalatex.documentation.language.environment.Multithread()
-
-            override def intro = envIntro
-          }
-
-          val ssh = new DocumentationPage {
-            def name = "SSH"
-
-            override def title = Some(name)
-
-            def children = Seq()
-
-            def details = Seq()
-
-            def content = scalatex.documentation.language.environment.SSH()
-
-            override def intro = envIntro
-          }
-
-          val egi = new DocumentationPage {
-            def name = "EGI"
-
-            override def title = Some(name)
-
-            def children = Seq()
-
-            def details = Seq()
-
-            def content = scalatex.documentation.language.environment.EGI()
-
-            override def intro = envIntro
-          }
-
-          val cluster = new DocumentationPage {
-            def name = "Clusters"
-
-            override def title = Some(name)
-
-            def children = Seq()
-
-            def details = Seq()
-
-            def content = scalatex.documentation.language.environment.Cluster()
-
-            override def intro = envIntro
-          }
-
-          val desktopGrid = new DocumentationPage {
-            override def id = "DesktopGrid"
-
-            def name = "Desktop Grid"
-
-            override def title = Some(name)
-
-            def children = Seq()
-
-            def details = Seq()
-
-            def content = scalatex.documentation.language.environment.DesktopGrid()
-
-            override def intro = envIntro
-          }
-
-        }
-
-        def source = new DocumentationPage {
-          def name = "Sources"
-
-          override def title = Some(name)
-
-          def children = Seq()
-
-          def details = Seq()
-
-          def content = scalatex.documentation.language.Source()
-        }
-
-        def method = new DocumentationPage {
-          def name = "Methods"
-
-          override def title = Some(name)
-
-          def children = Seq(pse, profile)
-
-          def details = Seq()
-
-          lazy val methIntro = Some(PageIntro(scalatex.documentation.language.method.MethodIntro(), Some(scalatex.documentation.language.Method())))
-
-          def content = scalatex.documentation.language.Method()
-
-          def pse = new DocumentationPage {
-            def name = "PSE"
-
-            override def title = Some(name)
-
-            def children = Seq()
-
-            def details = Seq()
-
-            def content = scalatex.documentation.language.method.PSE()
-
-            override def intro = methIntro
-          }
-
-          def profile = new DocumentationPage {
-            def name = "Profiles"
-
-            override def title = Some(name)
-
-            def children = Seq()
-
-            def details = Seq()
-
-            def content = scalatex.documentation.language.method.Profile()
-
-            override def intro = methIntro
-          }
-        }
-      }
-
-    lazy val tutorial = new DocumentationPage {
-      def name = "Tutorials"
-
-      override def title = Some(name)
-
-      def children = Seq(helloWorld, resume, headlessNetLogo, netLogoGA, capsule)
-
-      def details = Seq()
-
-      def content = scalatex.documentation.language.Tutorial()
-
-      marketEntries.filter(_.tags.exists(_ == Tags.tutorial)).flatMap(MD.generatePage(_))
-
-      val helloWorld = new DocumentationPage {
-        override def id = "HelloWord"
-
-        def name = "Hello World"
-
-        override def title = Some(name)
-
-        def children = Seq()
-
-        def details = Seq()
-
-        def content = Pages.gettingStarted.content
-      }
-
-      val resume = new DocumentationPage {
-        override def id = "ResumeWorkflow"
-
-        def name = "Resume workflow"
-
-        override def title = Some(name)
-
-        def children = Seq()
-
-        def details = Seq()
-
-        def content = scalatex.documentation.language.tutorial.Resume()
-      }
-
-      val headlessNetLogo = new DocumentationPage {
-        override def id = "NetlogoHeadless"
-
-        def name = "NetLogo Headless"
-
-        override def title = Some(name)
-
-        def children = Seq()
-
-        def details = Seq()
-
-        def content = scalatex.documentation.language.tutorial.HeadlessNetLogo()
-      }
-
-      val netLogoGA = new DocumentationPage {
-        override def id = "GAwithNetLogo"
-
-        def name = "GA with NetLogo"
-
-        override def title = Some(name)
-
-        def children = Seq()
-
-        def details = Seq()
-
-        def content = scalatex.documentation.language.tutorial.NetLogoGA()
-      }
-
-      val capsule = new DocumentationPage {
-        def name = "Capsule"
-
-        override def title = Some(name)
-
-        def children = Seq()
-
-        def details = Seq()
-
-        def content = scalatex.documentation.language.tutorial.Capsule()
-      }
-    }
-
-    val market = new DocumentationPage {
-      override def content: Text.all.Frag = div(tagContent(marketEntries))
-
-      override def children: Seq[DocumentationPage] = Seq()
-
-      override def name: String = "Market"
-
-      override def details: Seq[Page] = Seq()
-
-      def tagContent(entries: Seq[GeneratedMarketEntry]) =
-        ul(
-          entries.sortBy(_.entry.name.toLowerCase).map {
-            de ⇒ li(entryContent(de))
-          }: _*
-        )
-
-      def entryContent(deployedMarketEntry: GeneratedMarketEntry) = {
-        def title: Modifier =
-          deployedMarketEntry.viewURL match {
-            case None    ⇒ deployedMarketEntry.entry.name
-            case Some(l) ⇒ a(deployedMarketEntry.entry.name, href := l)
-          }
-
-        def content =
-          Seq[Modifier](
-            deployedMarketEntry.readme.map {
-              rm ⇒ RawFrag(txtmark.Processor.process(rm))
-            }.getOrElse(p("No README.md available yet.")),
-            a("Packaged archive", href := deployedMarketEntry.archive), " (can be imported in OpenMOLE)"
-          ) ++ deployedMarketEntry.viewURL.map(u ⇒ br(a("Source repository", href := u)))
-
-        div(scalatags.Text.all.id := "market-entry")(content: _*)
-      }
-
-      def themes: Seq[Market.Tag] = {
-        marketEntries.flatMap(_.entry.tags).distinct.sortBy(_.label.toLowerCase)
-      }
-
-    }
-
-    def development = new DocumentationPage {
-      def name = "Development"
-
-      override def title = Some(name)
-
-      def children = Seq(compilation, documentationWebsite, plugin, branching, webserver)
-
-      def content = scalatex.documentation.Development()
-
-      def details = Seq()
-
-      def compilation = new DocumentationPage {
-        def name = "Compilation"
-
-        override def title = Some(name)
-
-        def children = Seq()
-
-        def details = Seq()
-
-        def content = scalatex.documentation.development.Compilation()
-      }
-
-      def documentationWebsite = new DocumentationPage {
-        def name = "Documentation"
-
-        override def title = Some(name)
-
-        def children = Seq()
-
-        def details = Seq()
-
-        def content = scalatex.documentation.development.DocumentationWebsite()
-      }
-
-      def plugin = new DocumentationPage {
-        def name = "Plugins"
-
-        override def title = Some(name)
-
-        def children = Seq()
-
-        def details = Seq()
-
-        def content = scalatex.documentation.development.Plugin()
-      }
-
-      def branching = new DocumentationPage {
-        def name = "Branching model"
-
-        override def title = Some(name)
-
-        def children = Seq()
-
-        def details = Seq()
-
-        def content = scalatex.documentation.development.Branching()
-      }
-
-      def webserver = new DocumentationPage {
-        def name = "Web Server"
-
-        override def title = Some(name)
-
-        def children = Seq()
-
-        def details = Seq()
-
-        def content = scalatex.documentation.development.WebServer()
-      }
-    }
-  }
 }
