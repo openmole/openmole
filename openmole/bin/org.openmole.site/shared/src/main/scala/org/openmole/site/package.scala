@@ -88,6 +88,7 @@ package object shared {
     lazy val severalInputs = "Exploration of several inputs "
     lazy val sensitivityAnalysis = "Sensitivity Analysis"
     lazy val sensitivityFireModel = "Real world Example"
+    lazy val csvSampling = "CSV Sampling"
   }
 
   object dataProcessingMenu {
