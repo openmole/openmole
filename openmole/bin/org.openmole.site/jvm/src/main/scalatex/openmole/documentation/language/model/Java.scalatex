@@ -28,9 +28,8 @@
   jar cvf Hello.jar hello""", "plain")
 
 @p 
-  You should upload the Hello.jar file in a folder in OpenMOLE [TODO: rephrase. What does it mean?]. Then you can call the Java program from a ScalaTask with the following OpenMOLE code:
-
-  @hl.openmole("""
+  To call this scala code we will use a ScalaTask which is able to call Java code. In order to do that you should first create a folder in the OpenMOLE we interface and then upload the Hello.jar file in this folder in OpenMOLE. In the same folder you may then write script (script.oms) which looks like that:
+@hl.openmole("""
   val proto1 = Val[Int]
 
   val explo = ExplorationTask(proto1 in (0 until 10))
@@ -103,7 +102,8 @@
 
 @sect{Working with files}
 
-  [TODO Is there a generic section explaining the following? This seems common to all tasks and shouldn't belong to this page]
+  @todo
+    Is there a generic section explaining the following? This seems common to all tasks and shouldn't belong to this page]
   @p
     When a task needs to access (read from or write to) external files, OpenMOLE needs to know it so it can pass them around to distant computing nodes.
 
@@ -172,4 +172,4 @@
     For this example to work you should create a file named "input.txt" in the work directory of your project.
 
   @p
-    This tutorial works for simple Java programs. For more ambitious developments, you should consider embedding your code in an @a("OpenMOLE plugin"/*, href := DocumentationPages.root.development.plugin.file*/) [TODO lien].
+    This tutorial works for simple Java programs. For more ambitious developments, you should consider embedding your code in an @a("OpenMOLE plugin", href := DocumentationPages.plugin.file).

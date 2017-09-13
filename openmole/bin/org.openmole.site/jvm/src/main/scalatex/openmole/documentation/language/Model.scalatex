@@ -60,29 +60,33 @@ Select the language of your model on your left to see how it is done .
     Some of the tasks are made to frame your program, some others are made to generate inputs: @a("Samplings", href:=DocumentationPages.advancedSampling.file) or to capture the outputs : @aa("Hooks", href:=DocumentationPages.hook.file). As you will progress into the world of OpenMOLE, you will discover how to define these various elements and build your own workflows. For now let's give a dummy example.
 
   @p
-    Let's say you have a model that take a string as input and do some stuff with it, like launching a simulation with the parameters contained in the input string. People from the lab gave you a huge CSV file where each line contains various experimental setup parameters. What you want is to run a simulation for each line of this file, execute it on the lab's cluster, and gather theirs results.  Your openMOLE script would look like that (the syntax is wrong for sake of clarity) [TODO. This is confusing. Explain what is wrong or give a correct code.]:
+    Let's say you have a model that take a string as input and do some stuff with it, like launching a simulation with the parameters contained in the input string. People from the lab gave you a huge CSV file where each line contains various experimental setup parameters. What you want is to run a simulation for each line of this file, execute it on the lab's cluster, and gather theirs results. Your openMOLE script would look like that:
 
   @hl.openmoleNoTest("""
+      val inputsParameter: Val[Int]
+      val result: Val[Double]
+
       // crawl the big file and take the lines
-      val all_the_lines = CSVSampling("EmpiricalData.CSV")
+      val all_the_lines = CSVSampling("EmpiricalData.CSV") set (columns += inputParameter)
 
       // say "I want to consider each line contained in all_the_lines"
       val exploration = ExplorationTask(all_the_lines)
 
       // encapsulates your model in an "execution" task that calls the main routine
+      val  my_model_execution =
+        ScalaTask("mainRun(inputParameter)",
+          inputs += inputString,
+          outputs += result
+        )
 
-
-      val  my_model_execution = ScalaTask( "mainRun",
-                                          inputs += inputString,
-                                          outputs += Digits
-                                          )
       // a hook to catch the outputs of your model execution and put them in a CSV file
       val catch_output = CSVHook("path/to/save/it")
 
       // declare your computing environment
-      val lab_Cluster = UberClusterEnvironment(login, machineIP)
+      val lab_Cluster = ClusterEnvironment(login, machineIP)
 
       // the workflow. Bascically it says : explore the lines and run a model execution for each,
       // save the outputs, all that on the cluster (results are not brought back to the local computer yet).
-      exploration -< (my_model_execution on env hook catch_output)        """)
+      exploration -< (my_model_execution on env hook catch_output)""")
+
 
