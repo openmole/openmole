@@ -69,38 +69,5 @@ Model inputs come in many shapes; this is why OpenMOLE features some file handli
     @br
     Files can also be injected in the dataflow through Sources. They provide more powerful file filtering possibilities using regular expressions and can also target directories only.
 
-@sect{CSV files Sampling}
-    As an extension to undifferientiated files, you can inject your own sampling in OpenMOLE through a CSV file. Considering a CSV file like:
-
-    @hl.highlight("""
-    coldD,  colFileName,    i
-    0.7,    fic1,           8
-    0.9,    fic2,           19
-    0.8,    fic2,           19
-    """, "plain")
-    The corresponding CSVSampling is:
-    @hl.openmole("""
-    val i = Val[Int]
-    val d = Val[Double]
-    val f = Val[File]
-
-    //Only comma separated files with header are supported for now
-    val s = CSVSampling("/path/to/a/file.csv") set (
-      columns += i,
-      columns += ("colD", d),
-      fileColumns += ("colFileName", "/path/of/the/base/dir/", f),
-      // comma ',' is the default separator, but you can specify a different one using
-      separator := ','
-    )
-
-    val exploration = ExplorationTask(s)
-    """)
-    @br
-    In this example the column @b{i} in the CSV file is mapped to the variable @b{i} of OpenMOLE.
-    The column name @b{colD} is mapped to the variable @b{d}. The column named @b{colFileName} is appended to the base directory
-    "/path/of/the/base/dir/" and used as a file in OpenMOLE.
-    As a sampling, the CSVSampling can directly be injected in an ExplorationTask. It will generate a different task for each entry in the file.
-
-
-@sect{Particular Use case}
-    TODO si Jo a un truc tout fait .
+@todo
+  Particular Use case: Jo a un truc tout fait .
