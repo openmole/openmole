@@ -179,18 +179,15 @@ object UDockerTask {
       val layersConfigs = layersNames.map(path ⇒ s"${path.split("/").head}/json")
 
       val imageLayers =
-        layersNames.map(l ⇒ moveLayerElement[Layer](extractedImage, l, "layer", Layer.apply))
-      val configs = layersConfigs.map(c ⇒ moveLayerElement[LayerConfig](extractedImage, c, "json", LayerConfig.apply))
+        layersNames.map(l ⇒ moveLayerElement[Layer](extractedImage, l, "layer", Layer.apply, layersDirectory(workspace)))
+      val configs = layersConfigs.map(c ⇒ moveLayerElement[LayerConfig](extractedImage, c, "json", LayerConfig.apply, layersDirectory(workspace)))
 
       val imageAndTag = topLevelManifest.RepoTags.map(_.split(":")).headOption
       val imageJSONName = topLevelManifest.Config
 
       validateDockerImage(DockerImageData(imageAndTag, imageJSONName)) bimap (
-
         errors ⇒ errors.foldLeft(Err("\n")) { case (acc, err) ⇒ acc + err },
-
         validImage ⇒ {
-
           val ValidDockerImageData((image: String, tag: String), imageJSONName) = validImage
           val imageJSONString = (extractedImage / imageJSONName).content
           (image, tag, imageJSONString, imageLayers, configs)

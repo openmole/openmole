@@ -92,11 +92,9 @@ package object udocker extends UDockerPackage {
    * @param elementSuffix <"layer"|"json">
    * @return newly created destination file
    */
-  def moveLayerElement[T <: LayerElement](extracted: File, layerElement: String, elementSuffix: String, builder: (String) ⇒ T)(implicit workspace: Workspace): LayerAndConfig[T] = {
+  def moveLayerElement[T <: LayerElement](extracted: File, layerElement: String, elementSuffix: String, builder: (String) ⇒ T, layerDir: File): LayerAndConfig[T] = {
 
     import org.openmole.tool.hash._
-
-    val layerDir = layersDirectory(workspace)
 
     val fileName = layerElement.split("/").headOption.map(s ⇒ s"$s.$elementSuffix")
 
