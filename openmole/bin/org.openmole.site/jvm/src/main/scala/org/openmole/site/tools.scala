@@ -125,6 +125,9 @@ package object tools {
   def linkButton(title: String, link: String, buttonStyle: AttrPair = classIs(btn ++ btn_default), openInOtherTab: Boolean = true) =
     a(href := link)(if (openInOtherTab) targetBlank else "")(span(buttonStyle, `type` := "button", title))
 
+  def divLinkButton(content: TypedTag[_], link: String, buttonStyle: AttrPair = classIs(btn ++ btn_default), openInOtherTab: Boolean = true) =
+    a(href := link)(if (openInOtherTab) targetBlank else "")(span(content)(buttonStyle, `type` := "button"))
+
   def pageLinkButton(title: String, page: Page, openInOtherTab: Boolean = true, buttonStyle: Seq[Modifier] = Seq(classIs(btn ++ btn_default))) =
     to(page)(if (openInOtherTab) targetBlank else "")(span(buttonStyle, `type` := "button", title))
 
