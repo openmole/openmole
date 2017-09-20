@@ -202,7 +202,7 @@ object UDockerTask {
       imageJSON ← decode[ImageJSON](imageJSONString).leftMap(l ⇒ Err(l.toString))
     } yield {
 
-      val (fsLayers, history) = imageLayers.zip(configs).map {
+      val (fsLayers, history) = imageLayers.zip(configs).reverse.map {
         case ((imageLayer, _), (_, layerConfigFile)) ⇒
           val layerDigest = DockerMetadata.Digest(imageLayer.digest)
           val imageJSON = decodeFile[ImageJSON](layerConfigFile)
