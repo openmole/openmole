@@ -44,19 +44,28 @@ object ScalaCompilation {
 
   def priorityBundles(plugins: Seq[File]) = plugins.flatMap(PluginManager.bundle) ++ PluginManager.bundleForClass(this.getClass)
 
-  def compile(code: String, plugins: Seq[File], libraries: Seq[File])(implicit newFile: NewFile, fileService: FileService) = Try[Any] {
+  def compile(code: String, plugins: Seq[File], libraries: Seq[File])(implicit newFile: NewFile, fileService: FileService) = {
+    val osgiMode = org.openmole.core.console.Activator.osgi
     val interpreter =
-      if (org.openmole.core.console.Activator.osgi) Interpreter(priorityBundles(plugins), libraries)
+      if (osgiMode) Interpreter(priorityBundles(plugins), libraries)
       else Interpreter(jars = libraries)
 
-    val evaluated = interpreter.eval(addImports(code))
+    Try[Any] {
+      val evaluated = interpreter.eval(addImports(code))
 
-    if (evaluated == null) throw new InternalProcessingError(
-      s"""The return value of the script was null:
-         |$code""".stripMargin
-    )
+      if (evaluated == null) throw new InternalProcessingError(
+        s"""The return value of the script was null:
+           |$code""".stripMargin
+      )
 
-    evaluated
+      evaluated
+    } match {
+      case util.Success(s) ⇒ Success(s)
+      case util.Failure(e) ⇒
+        def msg = if (osgiMode) s"""in osgi mode with priority bundles ${priorityBundles(plugins).map(_.getSymbolicName).mkString(", ")} and libraries ${libraries.mkString(", ")}"""
+        else s"""in non osgi mode with libraries ${libraries.mkString(", ")}"""
+        util.Failure(new InternalProcessingError(s"Error while compiling with intepreter $msg", e))
+    }
   }
 
   def toScalaNativeType(t: ValType[_]): ValType[_] = {
