@@ -44,6 +44,7 @@ import util.{ Failure, Success }
 import org.openmole.core.workflow.execution.Environment.RuntimeLog
 import org.openmole.tool.cache.KeyValueCache
 import org.openmole.tool.lock._
+import org.openmole.tool.file._
 
 object Runtime extends Logger {
   val NbRetry = 3
@@ -108,7 +109,12 @@ class Runtime {
       val plugins =
         for {
           plugin ← executionMessage.plugins
-        } yield plugin → getReplicatedFile(plugin, TransferOptions(raw = true))
+        } yield {
+          val pluginFile = getReplicatedFile(plugin, TransferOptions(raw = true))
+          val pluginWithJarExtension = newFile.newFile("plugin", "jar")
+          pluginWithJarExtension createLinkTo pluginFile
+          plugin → pluginWithJarExtension
+        }
 
       logger.fine("Downloaded plugins. " + plugins.unzip._2.mkString(", "))
 
