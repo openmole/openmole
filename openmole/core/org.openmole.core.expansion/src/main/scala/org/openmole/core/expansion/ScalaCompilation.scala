@@ -62,7 +62,7 @@ object ScalaCompilation {
     } match {
       case util.Success(s) ⇒ Success(s)
       case util.Failure(e) ⇒
-        def msg = if (osgiMode) s"""in osgi mode with priority bundles ${priorityBundles(plugins).map(_.getSymbolicName).mkString(", ")} and libraries ${libraries.mkString(", ")}"""
+        def msg = if (osgiMode) s"""in osgi mode with priority bundles [${priorityBundles(plugins).map(b ⇒ s"${b.getSymbolicName}").mkString(", ")}], libraries [${libraries.mkString(", ")}], classpath [${OSGiScalaCompiler.classPath(priorityBundles(plugins), libraries).mkString(", ")}]."""
         else s"""in non osgi mode with libraries ${libraries.mkString(", ")}"""
         util.Failure(new InternalProcessingError(s"Error while compiling with intepreter $msg", e))
     }
