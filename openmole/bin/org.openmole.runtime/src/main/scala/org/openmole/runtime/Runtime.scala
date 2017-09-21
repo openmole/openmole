@@ -110,9 +110,11 @@ class Runtime {
           plugin ← executionMessage.plugins
         } yield plugin → getReplicatedFile(plugin, TransferOptions(raw = true))
 
-      logger.fine("Plugins " + plugins.unzip._2)
+      logger.fine("Downloaded plugins. " + plugins.unzip._2.mkString(", "))
 
       PluginManager.tryLoad(plugins.unzip._2).foreach { case (f, e) ⇒ logger.log(WARNING, s"Error loading bundle $f", e) }
+
+      logger.fine("Loaded plugins: " + PluginManager.bundles.map(_.getSymbolicName).mkString(", "))
 
       for { (p, f) ← plugins } usedFiles.put(p.originalPath, f)
 
