@@ -111,7 +111,7 @@ class Runtime {
           plugin ← executionMessage.plugins
         } yield {
           val pluginFile = getReplicatedFile(plugin, TransferOptions(raw = true))
-          val pluginWithJarExtension = newFile.newFile("plugin", "jar")
+          val pluginWithJarExtension = newFile.newFile("plugin", ".jar")
           pluginWithJarExtension createLinkTo pluginFile
           plugin → pluginWithJarExtension
         }
