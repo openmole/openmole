@@ -181,7 +181,10 @@ class ReplicaCatalog(database: Database, preference: Preference) {
         query(replicas.filter(_.id === replica.id).map(_.lastCheckExists).update(newReplica.lastCheckExists).transactionally)
         newReplica
       }
-      else uploadAndGetLocked(upload, srcPath, hash, storage, cacheKey)
+      else {
+        query(replicas.filter(_.id === replica.id).delete)
+        uploadAndGetLocked(upload, srcPath, hash, storage, cacheKey)
+      }
     }
     else replica
   }
