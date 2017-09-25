@@ -68,7 +68,8 @@ object GUIServer {
     services:           GUIServices,
     password:           Option[String],
     applicationControl: ApplicationControl,
-    webapp:             File
+    webapp:             File,
+    extraHeader:        String
   )
 
   case class ApplicationControl(restart: () ⇒ Unit, stop: () ⇒ Unit)
@@ -90,7 +91,7 @@ class GUIBootstrap extends LifeCycle {
 
 import GUIServer._
 
-class GUIServer(port: Int, localhost: Boolean, http: Boolean, services: GUIServices, password: Option[String]) {
+class GUIServer(port: Int, localhost: Boolean, http: Boolean, services: GUIServices, password: Option[String], extraHeader: String) {
 
   val server = new Server()
   var exitStatus: GUIServer.ExitStatus = GUIServer.Ok
@@ -125,7 +126,7 @@ class GUIServer(port: Int, localhost: Boolean, http: Boolean, services: GUIServi
 
   val webappCache = webapp
 
-  context.setAttribute(GUIServer.servletArguments, GUIServer.ServletArguments(services, password, applicationControl, webappCache))
+  context.setAttribute(GUIServer.servletArguments, GUIServer.ServletArguments(services, password, applicationControl, webappCache, extraHeader))
   context.setContextPath("/")
 
   import services._
