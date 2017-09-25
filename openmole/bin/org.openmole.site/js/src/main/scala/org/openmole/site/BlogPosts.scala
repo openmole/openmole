@@ -39,6 +39,7 @@ object BlogPosts {
   val linkTag = "link"
   val dateTag = "pubDate"
   val categoryTag = "category"
+  val dateTasg = "date"
   val searchedTags = Seq(titleTag, linkTag, dateTag, categoryTag)
 
   val newsCategory = "News"
@@ -46,10 +47,10 @@ object BlogPosts {
   val longTrainingCategory = "LongTraining"
 
   case class ReadNode(index: Int, name: String, value: String)
-  case class BlogPost(title: String = "", category: Category = newsCategory, link: String = "", date: String = "")
+  case class BlogPost(title: String = "", category: Category = newsCategory, link: String = "", date: Option[scalajs.js.Date] = None)
 
   val all: Var[Seq[BlogPost]] = Var(Seq())
-  private def allBy(category: Category) = all.now.filter { _.category == category }.take(3)
+  private def allBy(category: Category) = all.now.filter { _.category == category }.sortBy(_.date.get.getTime()).reverse.take(3)
 
   all.trigger {
     if (!all.now.isEmpty) {
@@ -93,6 +94,7 @@ object BlogPosts {
           case n if n.startsWith(titleTag)    ⇒ blogPost.copy(title = value)
           case n if n.startsWith(categoryTag) ⇒ blogPost.copy(category = value)
           case n if n.startsWith(linkTag)     ⇒ blogPost.copy(link = value)
+          case n if n.startsWith(dateTag)     ⇒ blogPost.copy(date = Some(new scalajs.js.Date(value)))
           case _                              ⇒ blogPost
         }
       })
@@ -147,8 +149,10 @@ object BlogPosts {
       for {
         bp ← blogPosts
       } yield {
+        val d = bp.date.get
+        val dateString = s"${d.toLocaleDateString()}"
         div(
-          span(bp.title)(titleStyle),
+          span(s"$dateString: ${bp.title}")(titleStyle),
           span(a(href := bp.link, target := "_blank")("Read more"))(moreStyle)
         )(newsStyle)
       }

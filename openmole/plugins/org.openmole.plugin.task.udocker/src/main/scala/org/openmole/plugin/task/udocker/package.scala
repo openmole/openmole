@@ -26,6 +26,12 @@ package udocker {
           implicitly[ReuseContainer[T]].reuseContainer.set(b)
       }
 
+    lazy val uDockerUser =
+      new {
+        def :=[T: UDockerUser](b: String) =
+          implicitly[UDockerUser[T]].uDockerUser.set(Some(b))
+      }
+
   }
 }
 
@@ -42,6 +48,10 @@ package object udocker extends UDockerPackage {
 
   trait ReuseContainer[T] {
     def reuseContainer: Lens[T, Boolean]
+  }
+
+  trait UDockerUser[T] {
+    def uDockerUser: Lens[T, Option[String]]
   }
 
   import cats.data._
@@ -82,11 +92,9 @@ package object udocker extends UDockerPackage {
    * @param elementSuffix <"layer"|"json">
    * @return newly created destination file
    */
-  def moveLayerElement[T <: LayerElement](extracted: File, layerElement: String, elementSuffix: String, builder: (String) ⇒ T)(implicit workspace: Workspace): LayerAndConfig[T] = {
+  def moveLayerElement[T <: LayerElement](extracted: File, layerElement: String, elementSuffix: String, builder: (String) ⇒ T, layerDir: File): LayerAndConfig[T] = {
 
     import org.openmole.tool.hash._
-
-    val layerDir = layersDirectory(workspace)
 
     val fileName = layerElement.split("/").headOption.map(s ⇒ s"$s.$elementSuffix")
 
@@ -143,7 +151,8 @@ package object udocker extends UDockerPackage {
     hostFiles:            Vector[(String, Option[String])]      = Vector.empty,
     installCommands:      Vector[FromContext[String]]           = Vector.empty,
     workDirectory:        Option[String]                        = None,
-    reuseContainer:       Boolean                               = true
+    reuseContainer:       Boolean                               = true,
+    uDockerUser:          Option[String]                        = None
   )
 
   def runCommand(uDocker: UDocker)(udocker: File, volumes: Vector[MountPoint], runId: String, command: FromContext[String]): FromContext[String] = FromContext { p ⇒
@@ -153,8 +162,13 @@ package object udocker extends UDockerPackage {
 
     def volumesArgument(volumes: Vector[MountPoint]) = volumes.map { case (host, container) ⇒ s"""-v "$host":"$container"""" }.mkString(" ")
 
+    val userArgument = uDocker.uDockerUser match {
+      case None    ⇒ ""
+      case Some(x) ⇒ s"""--user="$x""""
+    }
+
     val variablesArgument = uDocker.environmentVariables.map { case (name, variable) ⇒ s"""-e $name="${variable.from(context)}"""" }.mkString(" ")
-    command.map(cmd ⇒ s"""${udocker.getAbsolutePath} run --workdir="$workDirectory" $variablesArgument ${volumesArgument(volumes)} $runId $cmd""").from(context)
+    command.map(cmd ⇒ s"""${udocker.getAbsolutePath} run --workdir="$workDirectory" $userArgument  $variablesArgument ${volumesArgument(volumes)} $runId $cmd""").from(context)
   }
 
   def userWorkDirectory(uDocker: UDocker) = {

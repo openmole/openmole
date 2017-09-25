@@ -53,7 +53,7 @@ object UDockerTask {
   implicit def isTask: InputOutputBuilder[UDockerTask] = InputOutputBuilder(UDockerTask._config)
   implicit def isExternal: ExternalBuilder[UDockerTask] = ExternalBuilder(UDockerTask.external)
 
-  implicit def isBuilder = new ReturnValue[UDockerTask] with ErrorOnReturnValue[UDockerTask] with StdOutErr[UDockerTask] with EnvironmentVariables[UDockerTask] with HostFiles[UDockerTask] with ReuseContainer[UDockerTask] with WorkDirectory[UDockerTask] { builder ⇒
+  implicit def isBuilder = new ReturnValue[UDockerTask] with ErrorOnReturnValue[UDockerTask] with StdOutErr[UDockerTask] with EnvironmentVariables[UDockerTask] with HostFiles[UDockerTask] with ReuseContainer[UDockerTask] with WorkDirectory[UDockerTask] with UDockerUser[UDockerTask] { builder ⇒
     override def returnValue = UDockerTask.returnValue
     override def errorOnReturnValue = UDockerTask.errorOnReturnValue
     override def stdOut = UDockerTask.stdOut
@@ -62,6 +62,7 @@ object UDockerTask {
     override def hostFiles = UDockerTask.uDocker composeLens UDocker.hostFiles
     override def reuseContainer = UDockerTask.uDocker composeLens UDocker.reuseContainer
     override def workDirectory = UDockerTask.uDocker composeLens UDocker.workDirectory
+    override def uDockerUser = UDockerTask.uDocker composeLens UDocker.uDockerUser
   }
 
   def apply(
@@ -178,18 +179,15 @@ object UDockerTask {
       val layersConfigs = layersNames.map(path ⇒ s"${path.split("/").head}/json")
 
       val imageLayers =
-        layersNames.map(l ⇒ moveLayerElement[Layer](extractedImage, l, "layer", Layer.apply))
-      val configs = layersConfigs.map(c ⇒ moveLayerElement[LayerConfig](extractedImage, c, "json", LayerConfig.apply))
+        layersNames.map(l ⇒ moveLayerElement[Layer](extractedImage, l, "layer", Layer.apply, layersDirectory(workspace)))
+      val configs = layersConfigs.map(c ⇒ moveLayerElement[LayerConfig](extractedImage, c, "json", LayerConfig.apply, layersDirectory(workspace)))
 
       val imageAndTag = topLevelManifest.RepoTags.map(_.split(":")).headOption
       val imageJSONName = topLevelManifest.Config
 
       validateDockerImage(DockerImageData(imageAndTag, imageJSONName)) bimap (
-
         errors ⇒ errors.foldLeft(Err("\n")) { case (acc, err) ⇒ acc + err },
-
         validImage ⇒ {
-
           val ValidDockerImageData((image: String, tag: String), imageJSONName) = validImage
           val imageJSONString = (extractedImage / imageJSONName).content
           (image, tag, imageJSONString, imageLayers, configs)
@@ -204,7 +202,7 @@ object UDockerTask {
       imageJSON ← decode[ImageJSON](imageJSONString).leftMap(l ⇒ Err(l.toString))
     } yield {
 
-      val (fsLayers, history) = imageLayers.zip(configs).map {
+      val (fsLayers, history) = imageLayers.zip(configs).reverse.map {
         case ((imageLayer, _), (_, layerConfigFile)) ⇒
           val layerDigest = DockerMetadata.Digest(imageLayer.digest)
           val imageJSON = decodeFile[ImageJSON](layerConfigFile)
