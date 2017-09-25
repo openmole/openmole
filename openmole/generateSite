@@ -13,8 +13,8 @@ mkdir -p "$TARGET" && \
   sbt "project openmole" clean "set (tarPath := new File(\"$TARGET/openmole.tar.gz\"))" tar && \
   sbt "project org-openmole-daemon" clean "set (tarPath := new File(\"$TARGET/daemon.tar.gz\"))" tar && \
   rm -rf "$TARGET/api" && \
-  sbt "project api" "set (crossTarget in api) := new File(\"$TARGET\")" unidoc && \
-  mv "$TARGET/unidoc" "$TARGET/api" && \
+  #sbt "project api" "set (crossTarget in api) := new File(\"$TARGET\")" unidoc && \
+  #mv "$TARGET/unidoc" "$TARGET/api" && \
   sbt "project marketindex" "run --target \"$TARGET/market\" --market \"./bin/org.openmole.marketindex/src/main/resources/openmole-market/\"" && \
   sbt "project org-openmole-modules" assemble && \
   ./bin/org.openmole.modules/target/assemble/modules --target "$TARGET/modules"

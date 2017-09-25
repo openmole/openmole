@@ -36,7 +36,7 @@ object ProcessUtil {
       try process.waitFor
       catch {
         case e: Throwable ⇒
-          process.destroy
+          process.destroyForcibly()
           throw e
       }
       finally {

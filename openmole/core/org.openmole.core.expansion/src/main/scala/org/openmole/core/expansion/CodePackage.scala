@@ -33,6 +33,13 @@ trait CodePackage extends FilePackage with StatisticsPackage {
     dir.mkdirs
     dir
   }
+
+  def classLoader[C: Manifest] = manifest[C].erasure.getClassLoader
+  def classLoader(a: Any) = a.getClass.getClassLoader
+
+  def withThreadClassLoader[R](classLoader: ClassLoader)(f: ⇒ R) =
+    org.openmole.tool.thread.withThreadClassLoader(classLoader)(f)
+
 }
 
 object CodePackage extends CodePackage {

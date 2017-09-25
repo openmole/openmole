@@ -33,6 +33,16 @@ import java.io.{ File, PrintWriter, StringWriter }
 import java.net.URL
 
 object OSGiScalaCompiler {
+
+  def classPath(priorityBundles: Seq[Bundle], jars: Seq[File]) = {
+    def toPath(b: Bundle) = new URL(b.getLocation).getPath
+
+    priorityBundles.map(toPath) ++
+      jars.map(_.getCanonicalPath) ++
+      PluginManager.bundlesForClass(OSGiScalaCompiler.getClass).map(toPath) ++
+      Activator.bundleContext.get.getBundles.filter(!_.isSystem).map(toPath)
+  }.distinct
+
   def createSettings(settings: Settings, priorityBundles: Seq[Bundle], jars: Seq[File], classDirectory: File) =
     if (!Activator.osgi) {
       val newSettings = settings.copy()
@@ -42,15 +52,9 @@ object OSGiScalaCompiler {
       newSettings
     }
     else {
-      def toPath(b: Bundle) = new URL(b.getLocation).getPath
-
       //def dependencies(b: Bundle) = PluginManager.allDependingBundles(b, _=> true).map(toPath)
 
-      def bundles: Seq[String] = {
-        priorityBundles.map(toPath) ++
-          jars.map(_.getCanonicalPath) ++
-          PluginManager.bundlesForClass(OSGiScalaCompiler.getClass).map(toPath) ++ Activator.bundleContext.get.getBundles.filter(!_.isSystem).map(toPath)
-      }.distinct
+      def bundles: Seq[String] = classPath(priorityBundles, jars)
 
       val newSettings = settings.copy()
 

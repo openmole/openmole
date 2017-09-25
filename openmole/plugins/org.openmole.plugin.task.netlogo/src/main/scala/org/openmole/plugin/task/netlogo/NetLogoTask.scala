@@ -27,7 +27,6 @@ import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.validation._
 import org.openmole.plugin.task.external._
-import org.openmole.tool.thread._
 
 object NetLogoTask {
   case class Workspace(script: String, workspace: OptionalArgument[String] = None)
