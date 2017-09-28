@@ -176,14 +176,70 @@ package object systemexec extends external.ExternalPackage with SystemExecPackag
 
   case class ExecutionResult(returnCode: Int, output: Option[String], errorOutput: Option[String])
 
-  def commandLine(cmd: String) = CommandLine.parse(cmd).toStrings
+  def commandLine(cmd: String) = parse(cmd).toArray
 
   def commandLine(
     cmd:     FromContext[String],
     workDir: String
   ) = FromContext { p ⇒
     import p._
-    CommandLine.parse(cmd.from(context + Variable(External.PWD, workDir))).toStrings
+    parse(cmd.from(context + Variable(External.PWD, workDir))).toArray
+  }
+
+  def parse(line: String) = {
+    var inDoubleQuote = false
+    var inSingleQuote = false
+    var blocked = false
+    var afterSpace = false
+
+    val arguments = collection.mutable.ListBuffer[String]()
+    val currentArguments = new StringBuilder
+
+    def addArgument() = {
+      arguments += currentArguments.toString()
+      currentArguments.clear()
+    }
+
+    for (character ← line) {
+      (inDoubleQuote, inSingleQuote, blocked, character, afterSpace) match {
+        case (_, _, true, c, _) ⇒
+          currentArguments.append(c)
+          blocked = false
+
+        case (_, _, false, '\\', _) ⇒
+          blocked = true
+
+        case (false, false, false, ' ', _) ⇒
+          if (!currentArguments.isEmpty) addArgument()
+
+        case (false, false, false, '"', _) ⇒
+          inDoubleQuote = true
+        // currentArguments.append(character)
+
+        case (true, false, false, '"', false) ⇒
+          inDoubleQuote = false
+        //currentArguments.append(character)
+
+        case (false, false, false, ''', _) ⇒
+          inSingleQuote = true
+        //currentArguments.append(character)
+
+        case (false, true, false, ''', false) ⇒
+          inSingleQuote = false
+        //currentArguments.append(character)
+
+        case (false, false, false, c, _) ⇒ currentArguments.append(c)
+        case (true, false, false, c, _)  ⇒ currentArguments.append(c)
+        case (false, true, false, c, _)  ⇒ currentArguments.append(c)
+        case _                           ⇒ throw new RuntimeException(s"Error while parsing command line: $line")
+      }
+
+      afterSpace = character == ' '
+    }
+
+    if (!currentArguments.isEmpty) addArgument()
+
+    arguments.toVector
   }
 
   def execute(
@@ -269,9 +325,10 @@ package object systemexec extends external.ExternalPackage with SystemExecPackag
     cmds match {
       case Nil ⇒ acc
       case cmd :: t ⇒
-        val commandline = commandLine(cmd, workDirectory.getAbsolutePath).from(context)
-        val result = execute(commandline, workDirectory, environmentVariables, returnOutput = stdOut.isDefined, returnError = stdErr.isDefined, errorOnReturnValue = false)
-        if (errorOnReturnValue && !returnValue.isDefined && result.returnCode != 0) throw error(commandline.toVector, result)
+        val cl = commandLine(cmd, workDirectory.getAbsolutePath).from(context)
+        "[" + println(cl.toList.mkString(";")) + "]"
+        val result = execute(cl, workDirectory, environmentVariables, returnOutput = stdOut.isDefined, returnError = stdErr.isDefined, errorOnReturnValue = false)
+        if (errorOnReturnValue && !returnValue.isDefined && result.returnCode != 0) throw error(cl.toVector, result)
         else executeAll(workDirectory, environmentVariables, errorOnReturnValue, returnValue, stdOut, stdErr, t, ExecutionResult.append(acc, result))(p)
     }
   }
