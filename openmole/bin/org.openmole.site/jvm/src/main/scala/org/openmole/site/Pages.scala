@@ -167,6 +167,7 @@ object DocumentationPages {
     headlessNetLogo,
     netLogoGA,
     capsule,
+    dataflow,
     plugin,
     webserver,
     dataProcessing,

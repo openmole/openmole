@@ -1,21 +1,22 @@
 @import org.openmole.site.tools._
 @import org.openmole.site._
 
-@p{Dataflow}
-  In OpenMOLE tasks are mute pieces of software. They are conceived to be executed in a contained environment. The exchange of information between tasks is carried through the exchange of variable values. Files and directory are taken into account as a piece of data. If a variable of type @hl.code("Val[File]") is transmitted between two tasks the data contained in the file or in the folder is transmitted from the previous task to the subsequent one independently on where they are executed. For instance:
+@h1{Dataflow}
 
-  @br @hl.openmole(s"""
-    val f = Val[File]
+In OpenMOLE tasks are mute pieces of software. They are conceived to be executed in a contained environment. The exchange of information between tasks is carried through the exchange of variable values. Files and directory are taken into account as a piece of data. If a variable of type @hl.code("Val[File]") is transmitted between two tasks the data contained in the file or in the folder is transmitted from the previous task to the subsequent one independently on where they are executed. For instance:
 
-    val create = ScalaTask($tq
-      val f = newFile()
-      f.content = "Hello you!"
-      $tq) set ( outputs += f )
+@br @hl.openmole(s"""
+  val f = Val[File]
 
-    val use = ScalaTask(${tq}println(f.content)${tq}) set ( inputs += f )
+  val create = ScalaTask($tq
+    val f = newFile()
+    f.content = "Hello you!"
+    $tq) set ( outputs += f )
 
-    val env = SLURMEnvironment("user", "master.cluster.org")
+  val use = ScalaTask(${tq}println(f.content)${tq}) set ( inputs += f )
 
-    (create on env) -- use""")
+  val env = SLURMEnvironment("user", "master.cluster.org")
 
-  In this example, the task "create" creates a file. This task is executed remotely on a cluster. The task "use" is executed locally and uses the file. The content  of the file is transmitted transparently from the cluster to the local machine by OpenMOLE. You can transmit directory using "Val[File]" in the same way. Note however that the name and the path on the files/directories transmitted to from one environment to another are not preserved. If you need to transmit the name of a file from one task to another you should you a variable of type String ("Val[String]").
+  (create on env) -- use""")
+
+In this example, the task "create" creates a file. This task is executed remotely on a cluster. The task "use" is executed locally and uses the file. The content  of the file is transmitted transparently from the cluster to the local machine by OpenMOLE. You can transmit directory using "Val[File]" in the same way. Note however that the name and the path on the files/directories transmitted to from one environment to another are not preserved. If you need to transmit the name of a file from one task to another you should you a variable of type String ("Val[String]").
