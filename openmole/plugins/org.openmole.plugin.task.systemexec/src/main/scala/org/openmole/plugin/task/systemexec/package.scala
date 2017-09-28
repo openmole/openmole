@@ -326,7 +326,6 @@ package object systemexec extends external.ExternalPackage with SystemExecPackag
       case Nil ⇒ acc
       case cmd :: t ⇒
         val cl = commandLine(cmd, workDirectory.getAbsolutePath).from(context)
-        "[" + println(cl.toList.mkString(";")) + "]"
         val result = execute(cl, workDirectory, environmentVariables, returnOutput = stdOut.isDefined, returnError = stdErr.isDefined, errorOnReturnValue = false)
         if (errorOnReturnValue && !returnValue.isDefined && result.returnCode != 0) throw error(cl.toVector, result)
         else executeAll(workDirectory, environmentVariables, errorOnReturnValue, returnValue, stdOut, stdErr, t, ExecutionResult.append(acc, result))(p)
