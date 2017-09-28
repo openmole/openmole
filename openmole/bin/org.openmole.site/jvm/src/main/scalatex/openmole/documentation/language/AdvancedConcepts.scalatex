@@ -23,7 +23,9 @@ We present here the relevant elements of the OpenMOLE framework:
         @li
           The @aa("Sources", href := DocumentationPages.source.file) permit to inject data in the data-flow,
         @li
-          The way that OpenMOLE transmit data from one task to another is described on the @aa("Dataflow", href := DocumentationPages.dataflow.file).
+          The way that OpenMOLE transmit data from one task to another is described on the @aa("Dataflow", href := DocumentationPages.dataflow.file),
+        @li
+          Embed you own java/scala code and libraries into OpenMOLE though an OpenMOLE @a("plugin", href := DocumentationPages.plugin.file).
 
 @sect{Development Documentation}
 
