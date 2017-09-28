@@ -1,5 +1,4 @@
 @import org.openmole.site.stylesheet._
-@import org.openmole.site.Resource._
 @import org.openmole.site._
 @import org.openmole.site.tools._
 @import org.openmole.site.Environment._
@@ -249,7 +248,7 @@ By defining your own exploration task on @a("several types of input", href:= sha
     @p Typical Sensitivity analysis (in a simulation experiment  context) is the study of how the variation of an input
     affect the output(s) of a model. Basically it
 
-    @Resource.rawFrag(Resource.img.method.sensitivityAnim)
+    @img(src := Resource.img.method.sensitivityAnim.file, stylesheet.center(80))
 
     @basicButton("Run", classIs(btn ++ btn_danger))(id := shared.sensitivity.button, stylesheet.svgRunButton(10))
 
@@ -309,7 +308,7 @@ By defining your own exploration task on @a("several types of input", href:= sha
     @break
     This is the resulting scatterplot of Number of burned trees according to density varying from 20% to 80% by 1% steps.
     @br@br
-    @Resource.rawFrag(Resource.img.method.densityBurned)
+    @img(src := Resource.img.method.densityBurned.file, stylesheet.center(80))
 
     @br
     The change of regime clearly appears between 50% and 75% percent density, so we are going to take a closer look at this domain: we change the exploration task to have the density taken from 50% to 75% by step of 0.1%, still with 10 replications:
@@ -327,7 +326,7 @@ By defining your own exploration task on @a("several types of input", href:= sha
     This gives us the following scatter plot, where we added an "estimator" (or predictor)  curve (geom_smooth() from @a("ggplot2 R library", href:=shared.link.ggplot2) to be precise) that acts like a floating estimator in the collection of points, giving the statistical tendency of the Y-Axis values of points along the X-axis.
 
     @br@br
-    @Resource.rawFrag(Resource.img.method.densityBurnedZoom)
+    @img(src := org.openmole.site.Resource.img.method.densityBurnedZoom.file, stylesheet.center(80))
 
     @br
 
@@ -356,7 +355,7 @@ We obtain the following results, displayed as boxplots every percent (but result
 
     @br@br
 
-    @Resource.rawFrag(Resource.img.method.densitySeedBox)
+    @img(src := Resource.img.method.densitySeedBox.file, stylesheet.center(80))
 
 
 @br
