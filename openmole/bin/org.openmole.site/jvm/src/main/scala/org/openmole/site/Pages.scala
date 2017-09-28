@@ -32,19 +32,19 @@ object Pages {
 
   val index = Page("index", scalatex.Index(), title = Some("OpenMOLE: scientific workflow, distributed computing, parameter tuning"))
 
-  def gettingStarted = Page("Getting started", scalatex.GettingStarted(), title = Some("Getting started with OpenMOLE - introductory tutorial"))
+  def gettingStarted = Page("Getting started", scalatex.GettingStarted(), title = Some("Getting started with OpenMOLE - introductory tutorial with a simple workflow"))
 
-  def whoAreWe = Page("Who are we", scalatex.WhoAreWe(), title = Some("Developers, reference publications, contact information - OpenMOLE"))
+  def whoAreWe = Page("Who are we", scalatex.WhoAreWe(), title = Some("OpenMOLE Developers, reference publications, contact information"))
 
-  def partner = Page("Partners", scalatex.Partner(), title = Some("OpenMOLE partners"))
+  def partner = Page("Partners", scalatex.Partner(), title = Some("OpenMOLE partners and collaborations"))
 
-  val communications = Page("Communications", scalatex.Communications(), title = Some("Related papers, conference slides, videos, OpenMOLE in the news"))
+  val communications = Page("Communications", scalatex.Communications(), title = Some("Related scientific papers, conference slides, videos, OpenMOLE in the news"))
 
   def faq = Page("faq", scalatex.FAQ(), title = Some("FAQ"))
 
-  def previousVersions = Page("Previous versions", scalatex.PreviousVersions(), title = Some("Previous versions"))
+  def previousVersions = Page("Previous versions", scalatex.PreviousVersions(), title = Some("Previous versions of OpenMOLE"))
 
-  val training = Page("Trainings", scalatex.Training(), title = Some("Trainings"))
+  val training = Page("Trainings", scalatex.Training(), title = Some("Live training sessions"))
 
   val all: Seq[Page] = DocumentationPages.allPages ++ Seq(index, gettingStarted, whoAreWe, partner, faq, communications, previousVersions, training)
 
@@ -93,19 +93,22 @@ object DocumentationPage {
     content:   ⇒ Frag,
     details:   ⇒ Seq[DocumentationPage] = Seq.empty,
     location:  Option[String]           = None,
-    extraMenu: Option[SideMenu]         = None
+    extraMenu: Option[SideMenu]         = None,
+    title:     Option[String]           = None
   ) = {
     def _name = name
     def _content = content
     def _details = details
     def _location = location
     def _extraMenu = extraMenu
+    def _title = title
     new DocumentationPage {
       def name = _name
       def content = _content
       override def details = _details
       override def location = _location.getOrElse(name)
       override def extraMenu = _extraMenu
+      override def title = _title.orElse(Some(name))
     }
   }
 }
@@ -205,7 +208,8 @@ object DocumentationPages {
   lazy val nativePackaging = DocumentationPage(
     name = "Native Packaging",
     content = scalatex.documentation.details.NativePackaging(),
-    extraMenu = Some(SideMenu.nativePackagingMenu)
+    extraMenu = Some(SideMenu.nativePackagingMenu),
+    title = Some("Native Code Packaging, CARE Task Options")
   )
 
   lazy val ccplusplus = DocumentationPage(name = "C++", location = Some("cplusplus"), content = scalatex.documentation.language.model.CCplusplus(), details = Seq(nativePackaging))
@@ -220,7 +224,7 @@ object DocumentationPages {
 
   def languagePages = Seq(model, environment, method)
 
-  lazy val language = DocumentationPage(name = "Language", content = scalatex.documentation.Language())
+  lazy val language = DocumentationPage(name = "Language", content = scalatex.documentation.Language(), title = Some("OpenMOLE Domain Specific Language"))
 
   lazy val transition = DocumentationPage(name = "Transitions", content = scalatex.documentation.language.advanced.Transition())
   lazy val hook = DocumentationPage(name = "Hooks", content = scalatex.documentation.language.advanced.Hook())
@@ -244,6 +248,41 @@ object DocumentationPages {
 
   def methodPages = Seq(calibration, profile, pse, dataProcessing, otherDoE)
 
+  lazy val tutorialPages = Seq(Pages.gettingStarted, netLogoGA, resume)
+
+  lazy val detailsPages = Seq(
+    geneticalgo,
+    island,
+    stochasticity,
+    advancedSampling,
+    nativePackaging,
+    headlessNetLogo,
+    gui,
+    language
+  )
+
+  lazy val advancedPages = Seq(
+    transition,
+    hook,
+    source,
+    capsule
+  )
+
+  lazy val developmentPages = Seq(
+    plugin,
+    webserver,
+    console
+  )
+
+  lazy val communityCommunicationPages = Seq(
+    Pages.faq,
+    Pages.partner,
+    Pages.communications,
+    Pages.previousVersions,
+    Pages.training,
+    Pages.whoAreWe
+  )
+
   lazy val method = DocumentationPage(
     name = "Methods",
     content = scalatex.documentation.language.Method(),
@@ -253,7 +292,7 @@ object DocumentationPages {
   lazy val calibration = DocumentationPage(name = "Calibration", content = scalatex.documentation.language.method.Calibration(), details = Seq(geneticalgo, island, stochasticity))
 
   lazy val geneticalgo = DocumentationPage(name = "Genetic Algorithms", content = scalatex.documentation.details.GeneticAlgorithm())
-  lazy val island = DocumentationPage(name = "Islands Scheme", content = scalatex.documentation.details.Island())
+  lazy val island = DocumentationPage(name = "Islands Scheme", content = scalatex.documentation.details.Island(), title = Some("Island repartition scheme"))
   lazy val stochasticity = DocumentationPage(name = "Stochasticity management", content = scalatex.documentation.details.StochasticityManagement())
 
   lazy val profile = DocumentationPage(name = "Profiles", content = scalatex.documentation.language.method.Profile())
@@ -276,12 +315,12 @@ object DocumentationPages {
   lazy val advancedSampling = DocumentationPage(name = "Advanced Sampling", content = scalatex.documentation.language.advanced.AdvancedSampling())
 
   lazy val tutorial = DocumentationPage(name = "Tutorials", content = scalatex.documentation.language.Tutorial())
-  lazy val resume = DocumentationPage(name = "Resume Workflow", content = scalatex.documentation.language.tutorial.Resume())
-  lazy val headlessNetLogo = DocumentationPage(name = "Netlogo Headless", content = scalatex.documentation.language.advanced.HeadlessNetLogo())
-  lazy val netLogoGA = DocumentationPage(name = "GA with NetLogo", content = scalatex.documentation.language.tutorial.NetLogoGA())
+  lazy val resume = DocumentationPage(name = "Resume Workflow", content = scalatex.documentation.language.tutorial.Resume(), title = Some("How to build a resumable workflow"))
+  lazy val headlessNetLogo = DocumentationPage(name = "Netlogo Headless", content = scalatex.documentation.language.advanced.HeadlessNetLogo(), title = Some("Headless version of Netlog model"))
+  lazy val netLogoGA = DocumentationPage(name = "GA with NetLogo", content = scalatex.documentation.language.tutorial.NetLogoGA(), title = Some("Calibrate a NetLogo model using genetic algorithms"))
 
   lazy val plugin = DocumentationPage(name = "Plugins", content = scalatex.documentation.development.Plugin())
-  lazy val webserver = DocumentationPage(name = "Web Server", content = scalatex.documentation.development.WebServer())
+  lazy val webserver = DocumentationPage(name = "Web Server", content = scalatex.documentation.development.WebServer(), title = Some("Webserver and Rest API"))
   lazy val howToContribute = DocumentationPage(
     name = "How to Contribute",
     content = scalatex.documentation.development.howToContribute(),
