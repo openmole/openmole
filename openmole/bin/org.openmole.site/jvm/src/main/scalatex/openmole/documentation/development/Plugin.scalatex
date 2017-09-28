@@ -3,12 +3,10 @@
 @import org.openmole.site._
 
 @h1{Plugin development}
-@p OpenMOLE is a pluggable platform. It means that you can easily write your own extension and plug it into OpenMOLE.
-This tutorial explains how to write an OpenMOLE plugin using Scala and SBT. OpenMOLE is based on the JVM so you can
-create OpenMOLE plugins using Scala or any other JVM based languages such as Java, Groovy, Clojure, Jython...
 
-@p This tutorial exposes how to design a plugin. The prerequisites are to have @aa("git", href := shared.link.git) and
-@aa("SBT", href := shared.link.sbt) installed on your system.
+@p OpenMOLE is a plugable platform. It means that you can easily write include you own java/scala code plug it into OpenMOLE. This tutorial explains how to write an OpenMOLE plugin using Scala and SBT. OpenMOLE is based on the JVM so you can create OpenMOLE plugins using Scala or any other JVM based languages such as Java, Groovy, Clojure, Jython...
+
+@p OpenMOLE plugins are generally used to import you own code and libraries in OpenMOLE. They are actully simple OSGi bundles. This tutorial exposes how to design a plugin. The prerequisites are to have @aa("git", href := shared.link.git) and @aa("SBT", href := shared.link.sbt) installed on your system.
 
 @p The first step is to clone the code available @aa("here", href := shared.link.repo.myOpenmolePlugin):
 @br @hl.highlight("git clone git://github.com/openmole/myopenmoleplugin.git", "plain")

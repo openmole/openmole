@@ -83,9 +83,10 @@ object Resource {
 
       val legendOfIDs = methodResource("legendOfIDs.svg")
 
-      val densityBurned = methodResource("densityBurned.svg")
-      val densityBurnedZoom = methodResource("densityBurnedZoom.svg")
-      val densitySeedBox = methodResource("densitySeedBox.svg")
+      //As png cause it is lighter than svg versions
+      val densityBurned = methodResource("densityBurned.png")
+      val densityBurnedZoom = methodResource("densityBurnedZoom.png")
+      val densitySeedBox = methodResource("densitySeedBox.png")
       val profileInterpretation = methodResource("profileInterpretation.png")
     }
 
