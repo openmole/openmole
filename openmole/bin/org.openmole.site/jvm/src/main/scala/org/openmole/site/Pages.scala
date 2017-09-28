@@ -248,6 +248,41 @@ object DocumentationPages {
 
   def methodPages = Seq(calibration, profile, pse, dataProcessing, otherDoE)
 
+  lazy val tutorialPages = Seq(Pages.gettingStarted, netLogoGA, resume)
+
+  lazy val detailsPages = Seq(
+    geneticalgo,
+    island,
+    stochasticity,
+    advancedSampling,
+    nativePackaging,
+    headlessNetLogo,
+    gui,
+    language
+  )
+
+  lazy val advancedPages = Seq(
+    transition,
+    hook,
+    source,
+    capsule
+  )
+
+  lazy val developmentPages = Seq(
+    plugin,
+    webserver,
+    console
+  )
+
+  lazy val communityCommunicationPages = Seq(
+    Pages.faq,
+    Pages.partner,
+    Pages.communications,
+    Pages.previousVersions,
+    Pages.training,
+    Pages.whoAreWe
+  )
+
   lazy val method = DocumentationPage(
     name = "Methods",
     content = scalatex.documentation.language.Method(),
