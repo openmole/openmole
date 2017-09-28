@@ -170,6 +170,7 @@ object DocumentationPages {
     headlessNetLogo,
     netLogoGA,
     capsule,
+    dataflow,
     plugin,
     webserver,
     dataProcessing,
@@ -229,6 +230,7 @@ object DocumentationPages {
   lazy val hook = DocumentationPage(name = "Hooks", content = scalatex.documentation.language.advanced.Hook())
   lazy val source = DocumentationPage(name = "Sources", content = scalatex.documentation.language.advanced.Source())
   lazy val capsule = DocumentationPage(name = "Capsule", content = scalatex.documentation.language.advanced.Capsule())
+  lazy val dataflow = DocumentationPage(name = "Dataflow", content = scalatex.documentation.language.advanced.Dataflow())
 
   lazy val environment = DocumentationPage(name = "Environments", content = scalatex.documentation.language.Environment())
 
