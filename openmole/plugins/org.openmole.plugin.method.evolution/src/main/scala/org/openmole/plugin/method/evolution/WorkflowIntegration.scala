@@ -25,6 +25,7 @@ import scala.language.higherKinds
 import scala.util.Random
 import cats._
 import cats.implicits._
+import org.openmole.core.workflow.tools.ScalarOrSequence
 
 object GASeeder {
 
@@ -221,7 +222,7 @@ trait EvolutionWorkflow {
 object GAIntegration {
 
   def scaled(inputs: UniqueGenome, values: Seq[Double]) = FromContext { p ⇒
-    Genome.InputConverter.scaled(inputs.inputs.toList, values.toList)(p.context, p.random, p.newFile, p.fileService)
+    ScalarOrSequence.scaled(inputs.inputs.toList, values.toList)(p.context, p.random, p.newFile, p.fileService)
   }
 
   def genomesOfPopulationToVariables[I](inputs: UniqueGenome, population: Vector[I], genomeValues: I ⇒ Vector[Double]) =
