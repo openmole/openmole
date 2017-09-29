@@ -27,6 +27,6 @@ object MasterCapsule {
 
 class MasterCapsule(task: Task, val persist: Seq[String] = Seq.empty, strainer: Boolean) extends Capsule(task, strainer) {
   def toPersist(context: Context): Context =
-    persist.flatMap { n ⇒ context.variable(n).toList }
+    persist.map { n ⇒ context(n) }
 
 }
