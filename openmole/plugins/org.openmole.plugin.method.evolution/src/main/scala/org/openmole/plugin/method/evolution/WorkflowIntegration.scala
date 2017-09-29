@@ -221,9 +221,7 @@ trait EvolutionWorkflow {
 
 object GAIntegration {
 
-  def scaled(inputs: UniqueGenome, values: Seq[Double]) = FromContext { p ⇒
-    ScalarOrSequence.scaled(inputs.inputs.toList, values.toList)(p.context, p.random, p.newFile, p.fileService)
-  }
+  def scaled(inputs: UniqueGenome, values: Seq[Double]) = ScalarOrSequence.scaled(inputs.inputs.toList, values.toList)
 
   def genomesOfPopulationToVariables[I](inputs: UniqueGenome, population: Vector[I], genomeValues: I ⇒ Vector[Double]) =
     for {
