@@ -5,6 +5,12 @@
 
 @h1{@version.value | @version.name}
 @ul
+  @li{Simplificaton of the workflow construction: every method scheme has now its builder}
+  @li{Revamp the MGO library}
+  @li{Heavy code refactoring}
+  @li{First refactoring toward OpenMOLE as a library}
+  @li{Better resource cleaning after an execution}
+  @li{Refactoring of the build-system}
   @li{Full integration of bootstrap.native lib through the scaladget DSL, meaning that both bootstrap and jquery dependencies have been wiped out}
   @li{New accessibility for starting a new project thanks to the New project option button. It gathers creating a new oms file, importing a code file or downloading a market entry.}
   @li{GUI Plugins are back ! All authentications in the web interface are now plugins. An example of what is looks like can be found here. Model wizards will follow. Anyway, it is now possible to build graphical extensions !}
@@ -13,6 +19,7 @@
   @li{Support Desktop grid environments}
   @li{Support both care tar.gz.bin and tgz.bn archives in the model wizard section.}
   @li{Display JVM processor and memory infos}
+  @li{Revamp the website}
 
 @div
   @aa("Bug fixes", href := closedIssues(version.value))
