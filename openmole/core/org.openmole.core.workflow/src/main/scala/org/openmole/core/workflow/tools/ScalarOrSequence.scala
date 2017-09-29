@@ -34,10 +34,19 @@ object Scalable {
   case class ScaledSequence(prototype: Val[Array[Double]], s: Array[Double]) extends Scaled
   case class ScaledScalar(prototype: Val[Double], v: Double) extends Scaled
 
-  implicit def scalarIsScalable = new Scalable[Scalar] {
-    override def prototype(t: Scalar): Val[_] = t.prototype
-    override def size(t: Scalar): Int = 1
-    override def scaled(s: Scalar)(genomePart: Seq[Double]): FromContext[Scaled] = {
+  case class ScalableNumber(prototype: Val[Double], min: FromContext[Double], max: FromContext[Double])
+  object ScalableSequence {
+    def apply(prototype: Val[Array[Double]], min: FromContext[Double], max: FromContext[Double], size: Int): ScalableSequence =
+      ScalableSequence(prototype, Seq.fill(size)(min), Seq.fill(size)(max))
+  }
+
+  case class ScalableSequence(prototype: Val[Array[Double]], min: Seq[FromContext[Double]], max: Seq[FromContext[Double]])
+
+  implicit def scalarIsScalable = new Scalable[ScalableNumber] {
+    override def inputs(t: ScalableNumber) = Seq(t.prototype)
+    override def prototype(t: ScalableNumber): Val[_] = t.prototype
+    override def size(t: ScalableNumber): Int = 1
+    override def scaled(s: ScalableNumber)(genomePart: Seq[Double]): FromContext[Scaled] = {
       val g = genomePart.head
       assert(!g.isNaN)
 
@@ -46,14 +55,15 @@ object Scalable {
         ScaledScalar(s.prototype, sc)
       }
     }
-    override def toVariable(t: Scalar)(value: Seq[Any]): Variable[_] =
+    override def toVariable(t: ScalableNumber)(value: Seq[Any]): Variable[_] =
       Variable.unsecure(prototype(t).toArray, value.map(_.asInstanceOf[Double]).toArray[Double])
   }
 
-  implicit def sequenceIsScalable = new Scalable[Sequence] {
-    override def prototype(t: Sequence): Val[_] = t.prototype
-    override def size(t: Sequence): Int = math.min(t.min.size, t.max.size)
-    override def scaled(s: Sequence)(values: Seq[Double]): FromContext[Scaled] = {
+  implicit def sequenceIsScalable = new Scalable[ScalableSequence] {
+    override def inputs(t: ScalableSequence) = Seq(t.prototype)
+    override def prototype(t: ScalableSequence): Val[_] = t.prototype
+    override def size(t: ScalableSequence): Int = math.min(t.min.size, t.max.size)
+    override def scaled(s: ScalableSequence)(values: Seq[Double]): FromContext[Scaled] = {
       def scaled =
         (values zip (s.min zip s.max)).toVector traverseU {
           case (g, (min, max)) ⇒ (min map2 max)(g.scale(_, _))
@@ -62,14 +72,15 @@ object Scalable {
       scaled.map { sc ⇒ ScaledSequence(s.prototype, sc.toArray) }
     }
 
-    override def toVariable(t: Sequence)(value: Seq[Any]): Variable[_] =
+    override def toVariable(t: ScalableSequence)(value: Seq[Any]): Variable[_] =
       Variable.unsecure(prototype(t).toArray, value.map(_.asInstanceOf[Array[Double]]).toArray[Array[Double]])
   }
 
   def factorToScalar[D](f: Factor[D, Double])(implicit bounded: Bounds[D, Double]) =
-    Scalar(f.prototype, bounded.min(f.domain), bounded.max(f.domain))
+    ScalableNumber(f.prototype, bounded.min(f.domain), bounded.max(f.domain))
 
   implicit def factorIsScalable[D](implicit bounded: Bounds[D, Double]) = new Scalable[Factor[D, Double]] {
+    override def inputs(t: Factor[D, Double]): PrototypeSet = Seq(prototype(t))
     override def prototype(t: Factor[D, Double]): Val[_] = scalarIsScalable.prototype(factorToScalar(t))
     override def size(t: Factor[D, Double]): Int = scalarIsScalable.size(factorToScalar(t))
     override def scaled(t: Factor[D, Double])(genomePart: Seq[Double]): FromContext[Scaled] =
@@ -81,39 +92,37 @@ object Scalable {
 }
 
 trait Scalable[T] {
+  def inputs(t: T): PrototypeSet
   def prototype(t: T): Val[_]
   def size(t: T): Int
   def scaled(t: T)(values: Seq[Double]): FromContext[Scalable.Scaled]
   def toVariable(t: T)(value: Seq[Any]): Variable[_]
 }
 
-case class Scalar(prototype: Val[Double], min: FromContext[Double], max: FromContext[Double])
-
-object Sequence {
-  def apply(prototype: Val[Array[Double]], min: FromContext[Double], max: FromContext[Double], size: Int): Sequence =
-    Sequence(prototype, Seq.fill(size)(min), Seq.fill(size)(max))
-}
-
-case class Sequence(prototype: Val[Array[Double]], min: Seq[FromContext[Double]], max: Seq[FromContext[Double]])
-
 object ScalarOrSequence {
-  @tailrec def scaled(scales: List[ScalarOrSequence[_]], values: List[Double], acc: List[Variable[_]] = Nil)(context: ⇒ Context, rng: RandomProvider, newFile: NewFile, fileService: FileService): List[Variable[_]] =
-    if (scales.isEmpty || values.isEmpty) acc.reverse
-    else {
-      val input = scales.head
-      val (variable, tail) =
-        input.scaled(values).map {
-          case Scalable.ScaledScalar(p, v)   ⇒ Variable(p, v) → values.tail
-          case Scalable.ScaledSequence(p, v) ⇒ Variable(p, v) → values.drop(input.size)
-        }.from(context)(rng, newFile, fileService)
 
-      scaled(scales.tail, tail, variable :: acc)({ context + variable }, rng, newFile, fileService)
-    }
+  def scaled(scales: Seq[ScalarOrSequence[_]], values: Seq[Double]): FromContext[List[Variable[_]]] = {
+    @tailrec def scaled0(scales: List[ScalarOrSequence[_]], values: List[Double], acc: List[Variable[_]] = Nil)(context: ⇒ Context, rng: RandomProvider, newFile: NewFile, fileService: FileService): List[Variable[_]] =
+      if (scales.isEmpty || values.isEmpty) acc.reverse
+      else {
+        val input = scales.head
+        val (variable, tail) =
+          input.scaled(values).map {
+            case Scalable.ScaledScalar(p, v)   ⇒ Variable(p, v) → values.tail
+            case Scalable.ScaledSequence(p, v) ⇒ Variable(p, v) → values.drop(input.size)
+          }.from(context)(rng, newFile, fileService)
+
+        scaled0(scales.tail, tail, variable :: acc)({ context + variable }, rng, newFile, fileService)
+      }
+
+    FromContext { p ⇒ scaled0(scales.toList, values.toList)(p.context, p.random, p.newFile, p.fileService) }
+  }
 
   implicit def fromScalable[T: Scalable](t: T): ScalarOrSequence[T] = new ScalarOrSequence(t, implicitly[Scalable[T]])
 }
 
 class ScalarOrSequence[T](t: T, scalable: Scalable[T]) {
+  def inputs = scalable.inputs(t)
   def prototype = scalable.prototype(t)
   def size = scalable.size(t)
   def scaled(genomePart: Seq[Double]) = scalable.scaled(t)(genomePart)
