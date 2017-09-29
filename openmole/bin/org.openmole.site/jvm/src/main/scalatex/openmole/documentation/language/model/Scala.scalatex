@@ -19,6 +19,8 @@
 
   You can embed you own Scala/Java code and libraries in OpenMOLE using an OpenMOLE @a("Plugin", href := DocumentationPages.plugin.file).
 
+@p In addition to scala code, OpenMOLE provides @a("a few useful function to aggregate data, create files, create random number generators", href := DocumentationPages.scalaFunction.file).
+
 @p
   Multiple @i{ScalaTasks} can be joined to compose a workflow. Lets imagine that you want to perform an expensive computation on every element of an array. For the sake of simplicity, the "expensive computation" is here a multiplication by 2.
 
@@ -43,4 +45,6 @@
 
 @p
   The execution of this workflow can be distributed using OpenMOLE's environments. Check the page dedicated to @a("environments", href := DocumentationPages.environment.file) to learn more on this process.
+
+
 

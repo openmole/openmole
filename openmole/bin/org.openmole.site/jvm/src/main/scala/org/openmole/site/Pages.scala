@@ -171,6 +171,7 @@ object DocumentationPages {
     netLogoGA,
     capsule,
     dataflow,
+    scalaFunction,
     plugin,
     webserver,
     dataProcessing,
@@ -231,6 +232,7 @@ object DocumentationPages {
   lazy val source = DocumentationPage(name = "Sources", content = scalatex.documentation.language.advanced.Source())
   lazy val capsule = DocumentationPage(name = "Capsule", content = scalatex.documentation.language.advanced.Capsule())
   lazy val dataflow = DocumentationPage(name = "Dataflow", content = scalatex.documentation.language.advanced.Dataflow())
+  lazy val scalaFunction = DocumentationPage(name = "Scala Function", content = scalatex.documentation.language.advanced.ScalaFunction())
 
   lazy val environment = DocumentationPage(name = "Environments", content = scalatex.documentation.language.Environment())
 

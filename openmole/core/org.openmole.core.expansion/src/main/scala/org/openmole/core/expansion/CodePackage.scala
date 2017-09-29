@@ -20,11 +20,20 @@ import org.openmole.core.tools.service
 import org.openmole.core.workspace.{ NewFile, Workspace }
 import org.openmole.tool.file.FilePackage
 import org.openmole.tool.random
+import org.openmole.tool.random.RandomProvider
 import org.openmole.tool.statistics.StatisticsPackage
 
 trait CodePackage extends FilePackage with StatisticsPackage {
-  def Random(seed: Long) = random.Random.apply(seed)
-  def newRNG(seed: Long) = Random(seed)
+  def Random(seed: Long): java.util.Random = random.Random.apply(seed)
+  def Random()(implicit randomProvider: RandomProvider): java.util.Random = newRandom(randomProvider().nextLong())
+
+  @deprecated("8.0")
+  def newRNG(seed: Long): java.util.Random = Random(seed)
+  @deprecated("8.0")
+  def newRNG()(implicit randomProvider: RandomProvider): java.util.Random = Random()
+
+  def newRandom(seed: Long): java.util.Random = Random(seed)
+  def newRandom()(implicit randomProvider: RandomProvider): java.util.Random = Random()
 
   def newFile(prefix: String = Workspace.fixedPrefix, suffix: String = Workspace.fixedPostfix)(implicit newFile: NewFile) = newFile.newFile(prefix, suffix)
   def newDir(prefix: String = Workspace.fixedDir)(implicit newFile: NewFile) = newFile.newDir(prefix)
