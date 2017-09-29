@@ -252,7 +252,7 @@ package object evolution {
 
     val puzzle =
       ((firstCapsule -- masterSlave -- scalingIndividualsSlot) >| (Capsule(last, strain = true) when t.terminatedPrototype)) &
-        (firstCapsule oo evaluationCapsule)
+        (firstCapsule oo (evaluationCapsule, filter = Block(t.populationPrototype, t.statePrototype)))
 
     val gaPuzzle =
       new OutputEnvironmentPuzzleContainer(puzzle, scalingIndividualsSlot.capsule, evaluationCapsule) {
