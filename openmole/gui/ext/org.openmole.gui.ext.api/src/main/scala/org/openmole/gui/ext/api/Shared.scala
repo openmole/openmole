@@ -42,8 +42,8 @@ trait Api {
   def addDirectory(safePath: SafePath, directoryName: String): Boolean
   def addFile(safePath: SafePath, fileName: String): Boolean
   def extractTGZ(safePath: SafePath): ExtractResult
-  def deleteFile(safePath: SafePath, context: ServerFileSytemContext): Unit
-  def deleteFiles(safePath: Seq[SafePath], context: ServerFileSytemContext): Unit
+  def deleteFile(safePath: SafePath, context: ServerFileSystemContext): Unit
+  def deleteFiles(safePath: Seq[SafePath], context: ServerFileSystemContext): Unit
   def temporaryFile(): SafePath
   def exists(safePath: SafePath): Boolean
   def existsExcept(exception: SafePath, exceptItSelf: Boolean): Boolean

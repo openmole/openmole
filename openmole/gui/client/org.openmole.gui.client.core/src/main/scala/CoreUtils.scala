@@ -63,13 +63,13 @@ object CoreUtils {
     }
 
   def trashNode(path: SafePath)(ontrashed: () ⇒ Unit): Unit = {
-    post()[Api].deleteFile(path, ServerFileSytemContext.project).call().foreach { d ⇒
+    post()[Api].deleteFile(path, ServerFileSystemContext.project).call().foreach { d ⇒
       TreeNodePanel.refreshAnd(ontrashed)
     }
   }
 
   def trashNodes(paths: Seq[SafePath])(ontrashed: () ⇒ Unit): Unit = {
-    post()[Api].deleteFiles(paths, ServerFileSytemContext.project).call().foreach { d ⇒
+    post()[Api].deleteFiles(paths, ServerFileSystemContext.project).call().foreach { d ⇒
       TreeNodePanel.refreshAnd(ontrashed)
     }
   }

@@ -296,7 +296,7 @@ class ModelWizardPanel {
                       post()[Api].copyAllTmpTo(tempFile, tp).call().foreach {
                         b ⇒
                           buildForm(uploadPath, fileType)
-                          post()[Api].deleteFile(tempFile, ServerFileSytemContext.absolute).call()
+                          post()[Api].deleteFile(tempFile, ServerFileSystemContext.absolute).call()
                       }
                   }
                 }
@@ -311,7 +311,7 @@ class ModelWizardPanel {
                       post()[Api].copyFromTmp(tempFile, optionsDiv.result /*, fp ++ fileName*/ ).call().foreach {
                         b ⇒
                           buildForm(uploadPath, fileType)
-                          post()[Api].deleteFile(tempFile, ServerFileSytemContext.absolute).call()
+                          post()[Api].deleteFile(tempFile, ServerFileSystemContext.absolute).call()
                       }
                     }, () ⇒ {
                     }, buttonGroupClass = "right"

@@ -75,7 +75,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
 
   //GENERAL
   def settings: OMSettings = {
-    import org.openmole.gui.ext.data.ServerFileSytemContext.project
+    import org.openmole.gui.ext.data.ServerFileSystemContext.project
 
     OMSettings(
       Utils.projectsDirectory(),
@@ -120,27 +120,27 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
 
   // FILES
   def addDirectory(safePath: SafePath, directoryName: String): Boolean = {
-    import org.openmole.gui.ext.data.ServerFileSytemContext.project
+    import org.openmole.gui.ext.data.ServerFileSystemContext.project
     new File(safePath, directoryName).mkdirs
   }
 
   def addFile(safePath: SafePath, fileName: String): Boolean = {
-    import org.openmole.gui.ext.data.ServerFileSytemContext.project
+    import org.openmole.gui.ext.data.ServerFileSystemContext.project
     new File(safePath, fileName).createNewFile
   }
 
-  def deleteFile(safePath: SafePath, context: ServerFileSytemContext): Unit = Utils.deleteFile(safePath, context)
+  def deleteFile(safePath: SafePath, context: ServerFileSystemContext): Unit = Utils.deleteFile(safePath, context)
 
-  def deleteFiles(safePaths: Seq[SafePath], context: ServerFileSytemContext): Unit = Utils.deleteFiles(safePaths, context)
+  def deleteFiles(safePaths: Seq[SafePath], context: ServerFileSystemContext): Unit = Utils.deleteFiles(safePaths, context)
 
-  private def getExtractedArchiveTo(from: File, to: File)(implicit context: ServerFileSytemContext): Seq[SafePath] = {
+  private def getExtractedArchiveTo(from: File, to: File)(implicit context: ServerFileSystemContext): Seq[SafePath] = {
     extractArchiveFromFiles(from, to)
     to.listFiles.toSeq
   }
 
   def unknownFormat(name: String) = ExtractResult(Some(ErrorBuilder("Unknown compression format for " + name)))
 
-  private def extractArchiveFromFiles(from: File, to: File)(implicit context: ServerFileSytemContext): ExtractResult = {
+  private def extractArchiveFromFiles(from: File, to: File)(implicit context: ServerFileSystemContext): ExtractResult = {
     Try {
       val ext = DataUtils.fileToExtension(from.getName)
       ext match {
@@ -162,15 +162,15 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
   def extractTGZ(safePath: SafePath): ExtractResult = {
     DataUtils.fileToExtension(safePath.name) match {
       case FileExtension.TGZ | FileExtension.TAR | FileExtension.ZIP ⇒
-        val archiveFile = safePathToFile(safePath)(ServerFileSytemContext.project, workspace)
-        val toFile: File = safePathToFile(safePath.parent)(ServerFileSytemContext.project, workspace)
-        extractArchiveFromFiles(archiveFile, toFile)(ServerFileSytemContext.project)
+        val archiveFile = safePathToFile(safePath)(ServerFileSystemContext.project, workspace)
+        val toFile: File = safePathToFile(safePath.parent)(ServerFileSystemContext.project, workspace)
+        extractArchiveFromFiles(archiveFile, toFile)(ServerFileSystemContext.project)
       case _ ⇒ unknownFormat(safePath.name)
     }
   }
 
   def temporaryFile(): SafePath = {
-    import org.openmole.gui.ext.data.ServerFileSytemContext.absolute
+    import org.openmole.gui.ext.data.ServerFileSystemContext.absolute
     val dir = services.newFile.newDir("openmoleGUI")
     dir.mkdirs()
     dir
@@ -196,7 +196,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
     // import org.openmole.gui.ext.data.ServerFileSytemContext.absolute
 
     def test(sps: Seq[SafePath], inDir: SafePath = in) = {
-      import org.openmole.gui.ext.data.ServerFileSytemContext.absolute
+      import org.openmole.gui.ext.data.ServerFileSystemContext.absolute
 
       val toTest: Seq[SafePath] = if (sps.size == 1) sps.flatMap { f ⇒
         if (f.isDirectory) f.listFiles.map {
@@ -217,13 +217,13 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
         case j: JavaLikeLanguage ⇒ test(Seq(safePathToTest))
         case _ ⇒
           // val emptyFile = new File("")
-          val from: File = safePathToFile(safePathToTest)(ServerFileSytemContext.absolute, workspace)
-          val to: File = safePathToFile(safePathToTest.parent)(ServerFileSytemContext.absolute, workspace)
-          val extracted = getExtractedArchiveTo(from, to)(ServerFileSytemContext.absolute).filterNot {
+          val from: File = safePathToFile(safePathToTest)(ServerFileSystemContext.absolute, workspace)
+          val to: File = safePathToFile(safePathToTest.parent)(ServerFileSystemContext.absolute, workspace)
+          val extracted = getExtractedArchiveTo(from, to)(ServerFileSystemContext.absolute).filterNot {
             _ == safePathToTest
           }
           val toTest = in ++ safePathToTest.nameWithNoExtension
-          val toTestFile: File = safePathToFile(in ++ safePathToTest.nameWithNoExtension)(ServerFileSytemContext.project, workspace)
+          val toTestFile: File = safePathToFile(in ++ safePathToTest.nameWithNoExtension)(ServerFileSystemContext.project, workspace)
           new File(to, from.getName).recursiveDelete
 
           if (toTestFile.exists) {
@@ -236,7 +236,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
   }
 
   private def safePath(safePath: SafePath): SafePath = {
-    import org.openmole.gui.ext.data.ServerFileSytemContext.project
+    import org.openmole.gui.ext.data.ServerFileSystemContext.project
     safePathToFile(safePath)
   }
 
@@ -247,17 +247,17 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
   }
 
   def listFiles(sp: SafePath, fileFilter: data.FileFilter): ListFilesData = atomic { implicit ctx ⇒
-    Utils.listFiles(sp, fileFilter)(org.openmole.gui.ext.data.ServerFileSytemContext.project, workspace)
+    Utils.listFiles(sp, fileFilter)(org.openmole.gui.ext.data.ServerFileSystemContext.project, workspace)
   }
 
   def isEmpty(sp: SafePath): Boolean = {
-    import org.openmole.gui.ext.data.ServerFileSytemContext.project
+    import org.openmole.gui.ext.data.ServerFileSystemContext.project
     val f: File = safePathToFile(sp)
     f.isDirectoryEmpty
   }
 
   def move(from: SafePath, to: SafePath): Unit = {
-    import org.openmole.gui.ext.data.ServerFileSytemContext.project
+    import org.openmole.gui.ext.data.ServerFileSystemContext.project
     val fromFile = safePathToFile(from)
     val toFile = safePathToFile(to)
     Utils.move(fromFile, toFile)
@@ -266,12 +266,12 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
   def replicate(safePath: SafePath, newName: String): SafePath = Utils.replicate(safePath, newName)
 
   def mdToHtml(safePath: SafePath): String = {
-    import org.openmole.gui.ext.data.ServerFileSytemContext.project
+    import org.openmole.gui.ext.data.ServerFileSystemContext.project
     MarkDownProcessor(safePathToFile(safePath).content)
   }
 
   def renameFile(safePath: SafePath, name: String): SafePath = {
-    import org.openmole.gui.ext.data.ServerFileSytemContext.project
+    import org.openmole.gui.ext.data.ServerFileSystemContext.project
 
     val targetFile = new File(safePath.parent, name)
 
@@ -280,7 +280,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
   }
 
   def saveFile(path: SafePath, fileContent: String): Unit = {
-    import org.openmole.gui.ext.data.ServerFileSytemContext.project
+    import org.openmole.gui.ext.data.ServerFileSystemContext.project
     safePathToFile(path).content = fileContent
   }
 
@@ -289,7 +289,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
   }
 
   def size(safePath: SafePath): Long = {
-    import org.openmole.gui.ext.data.ServerFileSytemContext.project
+    import org.openmole.gui.ext.data.ServerFileSystemContext.project
     safePathToFile(safePath).length
   }
 
@@ -298,7 +298,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
   def removeExecution(id: ExecutionId): Unit = execution.remove(id)
 
   def runScript(scriptData: ScriptData): Unit = {
-    import org.openmole.gui.ext.data.ServerFileSytemContext.project
+    import org.openmole.gui.ext.data.ServerFileSystemContext.project
 
     val execId = ExecutionId(getUUID)
     val script = safePathToFile(scriptData.scriptPath)
@@ -396,7 +396,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
   }
 
   def getMarketEntry(entry: MarketIndexEntry, path: SafePath) = {
-    import org.openmole.gui.ext.data.ServerFileSytemContext.project
+    import org.openmole.gui.ext.data.ServerFileSystemContext.project
     market.downloadEntry(entry, safePathToFile(path))
     autoAddPlugins(path)
   }
@@ -410,7 +410,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
   }
 
   def autoAddPlugins(path: SafePath) = {
-    import org.openmole.gui.ext.data.ServerFileSytemContext.project
+    import org.openmole.gui.ext.data.ServerFileSystemContext.project
     val file = safePathToFile(path)
 
     def recurse(f: File): List[File] = {
@@ -474,7 +474,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
     libraries:      Option[String],
     resources:      Resources
   ): SafePath = {
-    import org.openmole.gui.ext.data.ServerFileSytemContext.project
+    import org.openmole.gui.ext.data.ServerFileSystemContext.project
     val modelTaskFile = new File(path, scriptName + ".oms")
 
     val os = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(modelTaskFile)))
@@ -544,7 +544,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
   }
 
   def expandResources(resources: Resources): Resources = {
-    import org.openmole.gui.ext.data.ServerFileSytemContext.project
+    import org.openmole.gui.ext.data.ServerFileSystemContext.project
     val paths = safePath(resources.all.map {
       _.safePath
     }).distinct.map { sp ⇒ Resource(sp, safePathToFile(sp).length) }
