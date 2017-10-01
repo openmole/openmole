@@ -23,11 +23,19 @@ import org.openmole.tool.file._
 object Imports {
 
   lazy val parent = "_parent_"
+  lazy val file = "_file_"
+
   def separators = Array('\n', ';')
   def space = Set('\t', ' ')
   def removeHeadingSpaces(s: String) = s.dropWhile(space.contains)
   def trimSpaces(s: String) = removeHeadingSpaces(removeHeadingSpaces(s).reverse).reverse
   def arrow = Set("=>", "⇒")
+
+  def isFileImport(i: Import) = i.stableIdentifier.headOption match {
+    case Some(`parent`) ⇒ true
+    case Some(`file`)   ⇒ true
+    case _              ⇒ false
+  }
 
   def parseImport(i: String): Seq[Import] = {
     val (namespace, entity) =
@@ -89,7 +97,7 @@ object Imports {
   def parseImports(script: String) = {
     def lines = script.split(separators)
     def imports = lines.map(removeHeadingSpaces).filter(_.startsWith("import")).map(i ⇒ removeHeadingSpaces(i.drop("import".size)))
-    imports.flatMap(parseImport)
+    imports.flatMap(parseImport).filter(isFileImport)
   }
 
   def level1ImportedFiles(imports: Seq[Import], directory: File): Seq[ImportedFile] = {
@@ -148,6 +156,7 @@ object Imports {
       (d, n) ⇒
         n match {
           case `parent` ⇒ d.getParentFile
+          case `file`   ⇒ d
           case _        ⇒ d / n
         }
     }
