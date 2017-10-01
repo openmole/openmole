@@ -26,12 +26,13 @@ object BreedTask {
   def apply[T: WorkflowIntegration](algorithm: T, size: Int)(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name) = {
     val t = wfi(algorithm)
 
-    ClosureTask("BreedTask") { (context, _, _) ⇒
-      val p = context(t.populationPrototype)
+    FromContextTask("BreedTask") { p ⇒
+      import p._
+      val population = context(t.populationPrototype)
 
-      if (p.isEmpty) {
+      if (population.isEmpty) {
         val s = context(t.statePrototype)
-        val (news, gs) = t.operations.initialGenomes(size).run(s).value
+        val (news, gs) = t.operations.initialGenomes(size)(context).run(s).value
 
         Context(
           Variable(t.genomePrototype.array, gs.toArray(t.genomePrototype.`type`.manifest)),
@@ -40,7 +41,7 @@ object BreedTask {
       }
       else {
         val s = context(t.statePrototype)
-        val (newState, breeded) = t.operations.breeding(p, size).run(s).value
+        val (newState, breeded) = t.operations.breeding(population, size).run(s).value
 
         Context(
           Variable(t.genomePrototype.array, breeded.toArray(t.genomePrototype.`type`.manifest)),

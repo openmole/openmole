@@ -304,7 +304,7 @@ object MGOAPI {
 
     trait Ops {
       def initialState(rng: util.Random): S
-      def initialGenomes(n: Int): M[Vector[G]]
+      def initialGenomes(n: Int): FromContext[M[Vector[G]]]
       def buildIndividual(genome: G, phenotype: P): I
       def values(genome: G): V
       def genome(individual: I): G

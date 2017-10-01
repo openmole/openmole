@@ -27,6 +27,8 @@ import cats.implicits._
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.workspace.NewFile
 
+import scala.annotation.tailrec
+
 trait LowPriorityToFromContext {
   implicit def fromTToContext[T] = ToFromContext[T, T](t ⇒ FromContext.value[T](t))
 }
@@ -68,6 +70,32 @@ trait LowPriorityFromContext {
 }
 
 object FromContext extends LowPriorityFromContext {
+
+  object asMonad {
+    implicit val monad: Monad[FromContext] = new Monad[FromContext] {
+      def tailRecM[A, B](a: A)(f: A ⇒ FromContext[Either[A, B]]): FromContext[B] = {
+
+        @tailrec def computeB(a: A, context: Context)(implicit rng: RandomProvider, newFile: NewFile, fileService: FileService): B = {
+          f(a)(context) match {
+            case Left(a)  ⇒ computeB(a, context)
+            case Right(b) ⇒ b
+          }
+        }
+
+        FromContext { p ⇒
+          import p._
+          computeB(a, context)
+        }
+      }
+
+      override def flatMap[A, B](fa: FromContext[A])(f: A ⇒ FromContext[B]): FromContext[B] = FromContext { p ⇒
+        import p._
+        val faVal = fa(context)
+        f(faVal)(context)
+      }
+      override def pure[A](x: A): FromContext[A] = FromContext.value(x)
+    }
+  }
 
   implicit val applicative: Applicative[FromContext] = new Applicative[FromContext] {
     override def pure[A](x: A): FromContext[A] = FromContext.value(x)

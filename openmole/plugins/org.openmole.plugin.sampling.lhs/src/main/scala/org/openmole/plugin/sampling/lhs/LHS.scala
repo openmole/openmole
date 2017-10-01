@@ -41,7 +41,7 @@ sealed class LHS(val samples: FromContext[Int], val factors: ScalarOrSequence[_]
   override def apply() = FromContext { p ⇒
     import p._
     val s = samples.from(context)
-    val vectorSize = factors.map(_.size).sum
+    val vectorSize = factors.map(_.size(context)).sum
 
     def vs = Vector.fill(vectorSize) {
       (0 until s).shuffled(random()).map { i ⇒ (i + random().nextDouble) / s }

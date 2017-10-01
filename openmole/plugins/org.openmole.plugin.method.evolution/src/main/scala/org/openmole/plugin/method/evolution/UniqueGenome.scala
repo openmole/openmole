@@ -32,7 +32,10 @@ import org.openmole.core.workspace.NewFile
 import org.openmole.tool.random.RandomProvider
 
 object UniqueGenome {
-  def size(g: UniqueGenome) = g.inputs.map(_.size).sum
+
+  import FromContext.asMonad._
+  def size(g: UniqueGenome) =
+    g.inputs.toVector.map(_.size).foldM(0)((b, s) ⇒ s.map(_ + b))
 
   def apply(inputs: Genome): UniqueGenome = {
     val prototypes = inputs.map(_.prototype).distinct
