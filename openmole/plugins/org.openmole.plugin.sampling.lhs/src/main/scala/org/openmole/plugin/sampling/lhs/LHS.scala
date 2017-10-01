@@ -43,11 +43,11 @@ sealed class LHS(val samples: FromContext[Int], val factors: ScalarOrSequence[_]
     val s = samples.from(context)
     val vectorSize = factors.map(_.size(context)).sum
 
-    def vs = Vector.fill(vectorSize) {
-      (0 until s).shuffled(random()).map { i ⇒ (i + random().nextDouble) / s }
+    def vs = Array.fill(vectorSize) {
+      (0 until s).shuffled(random()).map { i ⇒ (i + random().nextDouble) / s }.toArray
     }.transpose
 
-    vs.traverse(v ⇒ ScalarOrSequence.scaled(factors, v)).apply(p.context).toIterator
+    vs.map(v ⇒ ScalarOrSequence.scaled(factors, v).from(context)).toIterator
   }
 
 }
