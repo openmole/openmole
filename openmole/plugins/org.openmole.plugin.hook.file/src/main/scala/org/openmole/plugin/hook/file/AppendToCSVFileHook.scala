@@ -73,11 +73,6 @@ object AppendToCSVFileHook {
 
     f.withLock {
       fos ⇒
-        if (f.size == 0)
-          fos.appendLine {
-            def defaultHeader = ps.map { _.name }.mkString(",")
-            header.map(_.from(context)) getOrElse defaultHeader
-          }
 
         val lists = ps.map {
           p ⇒
@@ -90,6 +85,19 @@ object AppendToCSVFileHook {
               case None ⇒ List("not found")
             }
         }.toList
+
+        if (f.size == 0)
+          fos.appendLine {
+            def defaultHeader =
+              (ps zip lists).flatMap {
+                case (p, l) ⇒
+                  if (arraysOnSingleRow && moreThanOneElement(l))
+                    (0 until l.size).map(i ⇒ s"${p.name}$i")
+                  else List(p.name)
+              }.mkString(",")
+
+            header.map(_.from(context)) getOrElse defaultHeader
+          }
 
         def moreThanOneElement(l: List[_]) = !l.isEmpty && !l.tail.isEmpty
 
