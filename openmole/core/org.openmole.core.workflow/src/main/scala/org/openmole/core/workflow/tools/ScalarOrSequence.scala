@@ -43,7 +43,7 @@ object Scalable {
   case class ScalableSequence(prototype: Val[Array[Double]], min: Seq[FromContext[Double]], max: Seq[FromContext[Double]])
 
   implicit def scalarIsScalable = new Scalable[ScalableNumber] {
-    override def inputs(t: ScalableNumber) = Seq(t.prototype)
+    override def inputs(t: ScalableNumber) = Seq()
     override def prototype(t: ScalableNumber): Val[_] = t.prototype
     override def size(t: ScalableNumber): FromContext[Int] = 1
     override def scaled(s: ScalableNumber)(genomePart: Seq[Double]): FromContext[Scaled] = {
@@ -58,29 +58,12 @@ object Scalable {
     override def toVariable(t: ScalableNumber)(value: Seq[Any]): Variable[_] =
       Variable.unsecure(prototype(t).toArray, value.map(_.asInstanceOf[Double]).toArray[Double])
   }
-  //
-  //  implicit def sequenceIsScalable = new Scalable[ScalableSequence] {
-  //    override def inputs(t: ScalableSequence) = Seq(t.prototype)
-  //    override def prototype(t: ScalableSequence): Val[_] = t.prototype
-  //    override def size(t: ScalableSequence): Int = math.min(t.min.size, t.max.size)
-  //    override def scaled(s: ScalableSequence)(values: Seq[Double]): FromContext[Scaled] = {
-  //      def scaled =
-  //        (values zip (s.min zip s.max)).toVector traverseU {
-  //          case (g, (min, max)) ⇒ (min map2 max)(g.scale(_, _))
-  //        }
-  //
-  //      scaled.map { sc ⇒ ScaledSequence(s.prototype, sc.toArray) }
-  //    }
-  //
-  //    override def toVariable(t: ScalableSequence)(value: Seq[Any]): Variable[_] =
-  //      Variable.unsecure(prototype(t).toArray, value.map(_.asInstanceOf[Array[Double]]).toArray[Array[Double]])
-  //  }
-  //
+
   private def factorToScalar[D](f: Factor[D, Double])(implicit bounded: Bounds[D, Double]) =
     ScalableNumber(f.prototype, bounded.min(f.domain), bounded.max(f.domain))
 
   implicit def factorIsScalable[D](implicit bounded: Bounds[D, Double]) = new Scalable[Factor[D, Double]] {
-    override def inputs(t: Factor[D, Double]): PrototypeSet = Seq(prototype(t))
+    override def inputs(t: Factor[D, Double]): PrototypeSet = Seq()
     override def prototype(t: Factor[D, Double]): Val[_] = scalarIsScalable.prototype(factorToScalar(t))
     override def size(t: Factor[D, Double]) = scalarIsScalable.size(factorToScalar(t))
     override def scaled(t: Factor[D, Double])(genomePart: Seq[Double]): FromContext[Scaled] =
@@ -91,7 +74,7 @@ object Scalable {
 
   implicit def factorOfSequenceIsScalable[D](implicit bounded: Bounds[D, Array[Double]]) = new Scalable[Factor[D, Array[Double]]] {
 
-    override def inputs(t: Factor[D, Array[Double]]) = Seq(t.prototype)
+    override def inputs(t: Factor[D, Array[Double]]) = Seq()
     override def prototype(t: Factor[D, Array[Double]]): Val[_] = t.prototype
 
     override def size(t: Factor[D, Array[Double]]): FromContext[Int] =

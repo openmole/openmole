@@ -50,31 +50,4 @@ sealed class LHS(val samples: FromContext[Int], val factors: ScalarOrSequence[_]
     vs.traverse(v ⇒ ScalarOrSequence.scaled(factors, v)).apply(p.context).toIterator
   }
 
-  //
-  //    FromContext { p ⇒
-  //    import p._
-  //    val s = samples.from(context)
-  //    val vectorSize = factors.map(_.size).sum
-  //
-  //    val values =
-  //      Vector.fill(vectorSize) {
-  //        (0 until s).shuffled(random()).map { i ⇒ (i + random().nextDouble) / s }
-  //      }.transpose
-  //
-  //    ScalarOrSequence.scaled(factors, values)(context, random, fileService, newFile)
-  //
-
-  //    factors.map {
-  //      f ⇒
-  //        (0 until s).shuffled(random()).map {
-  //          i ⇒
-  //            Variable(
-  //              f.prototype,
-  //              ((i + random().nextDouble) / s).scale(
-  //                bounds.min(f.domain).from(context),
-  //                bounds.max(f.domain).from(context))
-  //            )
-  //        }
-  //    }.transpose.toIterator
-
 }
