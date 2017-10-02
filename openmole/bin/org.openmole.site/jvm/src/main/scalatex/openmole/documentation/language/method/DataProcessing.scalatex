@@ -5,7 +5,7 @@
 Data processing often revolves about massive computation using big bunch of files.
 
 
-Model inputs come in many shapes; this is why OpenMOLE features some file handlings functions to explore them as easily as possible.
+Model inputs come in many shapes; this is why OpenMOLE features some file exploration functions to manipulate your datasets as easily as possible.
 
 @sect{Exploring a set of files}
     OpenMOLE introduces the concept of @b{Domains} as a variable ranging along a set of files. For instance, to run a program
@@ -27,8 +27,8 @@ Model inputs come in many shapes; this is why OpenMOLE features some file handli
       )
     """)
     @br
-    The filter modifier filters according to some rules, use the filter function .
-    You can filter using any function from File (see javadoc) to Boolean, such as hl.highlight("startsWith(), contains(), endsWith() ", "plain").
+    The @hl.openmoleNoTest{filter} modifier filters the initial file sampling according to a predicate.
+    You can filter using any function taking a @hl.openmoleNoTest{File} and producing a @hl.openmoleNoTest{Boolean} (see the corresponding @a("javadoc", href := "https://docs.oracle.com/javase/8/docs/api/java/io/File.html") or create your own). Some predicate functions available out of the box are @hl.highlight("startsWith(), contains(), endsWith() ", "plain").
     @br
     @hl.openmole("""
     val f = Val[File]
@@ -43,18 +43,6 @@ Model inputs come in many shapes; this is why OpenMOLE features some file handli
 
     @break
 
-    As its name suggests, the files selector manipulates File instances and directly injects them in the dataflow.
-    If you plan to delegate your workflow to a local cluster environment equipped with a shared file system across all nodes,
-    you don't need data to be automatically copied by OpenMOLE.
-    In this case, you might prefer the paths selector instead.
-    Paths works exactly like files and accepts the very same options.
-    The only difference between the two selectors is that paths will inject @hl.highlight("Path","plain") variables in the dataflow.
-    Path describes a file's location but not its content.
-    The explored files won't be automatically copied by OpenMOLE in this case, so this does not fit a grid environment for instance.
-    @br
-    More details on the difference between manipulating Files and Paths can be found in the dedicated entry of the @aa("FAQ", href:=Pages.faq.file).
-    @br
-    @br
     If you wish to select one single file for each value of i you may use the @hl.highlight("select", "plain") operation:
     @hl.openmole("""
     val i = Val[Int]
@@ -66,8 +54,25 @@ Model inputs come in many shapes; this is why OpenMOLE features some file handli
         (f in File("/path/to/a/dir").select("file${i}.txt"))
       )
     """)
+
+@sect{Files vs Paths}
+    As its name suggests, the files selector manipulates @hl.highlight("File", "plain") instances and directly injects them in the dataflow.
+    If you plan to delegate your workflow to a @aa("local cluster environment", href :=  DocumentationPages.cluster.file) equipped with a shared file system across all nodes, you don't need data to be automatically copied by OpenMOLE.
+    In this case, you might prefer the paths selector instead.
+    Paths works exactly like files and accept the very same options.
+    The only difference between the two selectors is that paths will inject @hl.highlight("Path","plain") variables in the dataflow.
+    @b{Path describes a file's location but not its content}.
+    The @b{explored files won't be automatically copied by OpenMOLE when using @hl.openmoleNoTest{Path}}, so this @b{does not fit a grid environment} for instance.
     @br
-    Files can also be injected in the dataflow through Sources. They provide more powerful file filtering possibilities using regular expressions and can also target directories only.
+    More details on the difference between manipulating @hl.openmoleNoTest{Files} and @hl.openmoleNoTest{Paths} can be found in the dedicated entry of the @aa("FAQ", href:= Pages.faq.file).
+    @br
+    @br
+
+
+@sect{Going further}
+    Files can also be injected in the dataflow through @a("Sources", href := DocumentationPages.source.file). They provide more powerful file filtering possibilities using regular expressions and can also target directories only.
+
+
 
 @todo
   Particular Use case: Jo a un truc tout fait .
