@@ -209,7 +209,7 @@ care -o myapp.tgz.bin xvfb-run python3 myapp.py param1 param2
 
 @question("My problem is not listed here")
 @div If you could not resolve your problems, feel free to post your problem on the @a("mailing-list",
-href := "http://list.openmole.org").
+href := shared.link.mailingList).
 
 @div If you think your problem is induced by a bug in OpenMOLE, please report the issue exhaustively on our @a(
-"GitHub page", href := "https://github.com/openmole/openmole/issues").
+"GitHub page", href := shared.link.issue).
