@@ -251,7 +251,7 @@ package object evolution {
     )
 
     val puzzle =
-      ((firstCapsule -- masterSlave -- scalingIndividualsSlot) >| (Capsule(last, strain = true), trigger = t.terminatedPrototype)) &
+      ((firstCapsule -- masterSlave -- scalingIndividualsSlot) >| (Capsule(last, strain = true) when t.terminatedPrototype)) &
         (firstCapsule oo evaluationCapsule)
 
     val gaPuzzle =
@@ -369,7 +369,7 @@ package object evolution {
     val scalingIndividualsSlot = Slot(scalingIndividualsTask)
 
     val puzzle =
-      ((firstCapsule -- masterSlave -- scalingIndividualsSlot) >| (Capsule(last, strain = true), trigger = t.terminatedPrototype)) &
+      ((firstCapsule -- masterSlave -- scalingIndividualsSlot) >| (Capsule(last, strain = true) when t.terminatedPrototype)) &
         (firstCapsule oo (islandCapsule, Block(t.populationPrototype, t.statePrototype)))
 
     val gaPuzzle =
