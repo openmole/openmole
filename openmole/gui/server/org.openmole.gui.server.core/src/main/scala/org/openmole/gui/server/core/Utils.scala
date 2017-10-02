@@ -99,13 +99,19 @@ object Utils extends Logger {
     fileToSafePath
   }
 
-  implicit def fileToTreeNodeData(f: File)(implicit context: ServerFileSytemContext = ProjectFileSystem): TreeNodeData = {
-    val time = java.nio.file.Files.readAttributes(f, classOf[BasicFileAttributes]).lastModifiedTime.toMillis
+  def fileToTreeNodeData(f: File)(implicit context: ServerFileSytemContext = ProjectFileSystem): Option[TreeNodeData] = {
+
+    val time = if (f.exists) Some(
+      java.nio.file.Files.readAttributes(f, classOf[BasicFileAttributes]).lastModifiedTime.toMillis
+    )
+    else None
+
     val dirData = if (f.isDirectory) Some(DirData(f.isDirectoryEmpty)) else None
-    TreeNodeData(f.getName, dirData, f.length, time)
+
+    time.map(t ⇒ TreeNodeData(f.getName, dirData, f.length, t))
   }
 
-  implicit def seqfileToSeqTreeNodeData(fs: Seq[File])(implicit context: ServerFileSytemContext): Seq[TreeNodeData] = fs.map {
+  implicit def seqfileToSeqTreeNodeData(fs: Seq[File])(implicit context: ServerFileSytemContext): Seq[TreeNodeData] = fs.flatMap {
     fileToTreeNodeData(_)
   }
 

@@ -3,7 +3,7 @@
 @import org.openmole.core.buildinfo._
 @import org.openmole.site.Config._
 
-@h1{@version.value | @version.name}
+@h1{@links.anchor(version.value + "|" + version.name)}
 @ul
   @li{Simplificaton of the workflow construction: every method scheme has now its builder}
   @li{Revamp the MGO library}
@@ -15,9 +15,9 @@
   @li{New accessibility for starting a new project thanks to the New project option button. It gathers creating a new oms file, importing a code file or downloading a market entry.}
   @li{GUI Plugins are back ! All authentications in the web interface are now plugins. An example of what is looks like can be found here. Model wizards will follow. Anyway, it is now possible to build graphical extensions !}
   @li{A top banner gives information about failed, succeeded runs or about any trouble in reaching the server.}
-  @li{Support zip archives}
+  @li{Supportcd . zip archives}
   @li{Support Desktop grid environments}
-  @li{Support both care tar.gz.bin and tgz.bn archives in the model wizard section.}
+  @li{Support both care tar.gz.bin and tgz.bin archives in the model wizard section.}
   @li{Display JVM processor and memory infos}
   @li{Revamp the website}
 
@@ -25,7 +25,7 @@
   @aa("Bug fixes", href := closedIssues(version.value))
 
 
-@h1{6.0 | Mostly Magic}
+@h1{@links.anchor{6.0 | Mostly Magic}}
 
 Long time, no release! More than a year!
 The OpenMOLE team is very proud to disclose "Mostly Magic", the 6th major version of OpenMOLE.
@@ -62,7 +62,7 @@ The possibility to delegate computation to cloud provider such as Amazon, Azure.
   @aa("Bug fixes", href := closedIssues("6.0"))
 
 
-@h2{0.6.1}
+@h2{@links.anchor{6.1}}
 @ul
   @li{CARE required a kernel version greater than 3.2 which is no suitable for grid executions. A new version as been released and linked in the doc which depends on the Linux kernel 2.6.32.}
   @li{The CARETask was failing on some systems due to argument parsing.}
@@ -73,7 +73,7 @@ The possibility to delegate computation to cloud provider such as Amazon, Azure.
 @aa("Bug fixes", href := closedIssues("6.1"))
 
 
-@h2{0.6.2}
+@h2{@links.anchor{0.6.2}}
 Fix the deserialization of the authentications.
 
 @div
