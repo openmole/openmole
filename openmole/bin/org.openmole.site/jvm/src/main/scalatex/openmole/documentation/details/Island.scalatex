@@ -33,10 +33,6 @@
 
 @br
 
-
-@todo
-  add more text and illustrations ?
-
 @p
 
   Islands scheme  is  used via a specific task, @hl.code("""IslandEvolution""") to be added in the workflow.

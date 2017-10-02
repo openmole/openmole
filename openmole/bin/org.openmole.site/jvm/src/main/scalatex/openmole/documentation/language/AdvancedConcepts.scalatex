@@ -17,14 +17,15 @@ We present here the relevant elements of the OpenMOLE framework:
     @br
     @ul
         @li
-            In OpenMOLE, transitions link tasks with each other. Here are presented several kinds of @aa("Transitions", href := DocumentationPages.transition.file) available in OpenMOLE
+          In OpenMOLE, transitions link tasks with each other. Here are presented several kinds of @aa("Transitions", href := DocumentationPages.transition.file) available in OpenMOLE
         @li
-            Model tasks are represented as functions, taking arguments, and producing outputs. The @aa("Hook", href := DocumentationPages.hook.file) mechanism helps to make side effects on them (like displaying outputs, storing them in files, etc)
+          Model tasks are represented as functions, taking arguments, and producing outputs. The @aa("Hook", href := DocumentationPages.hook.file) mechanism helps to make side effects on them (like displaying outputs, storing them in files, etc)
         @li
-            Capsules
+          The @aa("Sources", href := DocumentationPages.source.file) permit to inject data in the data-flow,
         @li
-            The @aa("Sources", href := DocumentationPages.source.file) permit to inject data in the data-flow
-
+          The way that OpenMOLE transmit data from one task to another is described on the @aa("Dataflow", href := DocumentationPages.dataflow.file),
+        @li
+          Embed you own java/scala code and libraries into OpenMOLE though an OpenMOLE @a("plugin", href := DocumentationPages.plugin.file).
 
 @sect{Development Documentation}
 

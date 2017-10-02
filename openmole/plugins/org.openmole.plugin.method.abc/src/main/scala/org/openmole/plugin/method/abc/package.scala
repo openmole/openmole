@@ -71,11 +71,11 @@ package object abc {
     val modelVariables = algorithm.priorPrototypes ++ algorithm.targetPrototypes
 
     val puzzle =
-      (exploration -< (preModel, filter = Block(statePrototype)) -- model -- postModel >- analyse -- (last, terminated)) &
-        (exploration -- (analyse, filter = Block(modelVariables: _*))) &
+      (exploration -< (preModel filter Block(statePrototype)) -- model -- postModel >- analyse -- (last when terminated)) &
+        (exploration -- (analyse filter Block(modelVariables: _*))) &
         (preModel -- postModel) &
         (exploration oo (model.firstSlot, filter = Block(modelVariables: _*))) &
-        (analyse -- (exploration, !terminated, filter = Block(modelVariables: _*)))
+        (analyse -- (exploration when !terminated filter Block(modelVariables: _*)))
 
     val _algorithm = algorithm
 
