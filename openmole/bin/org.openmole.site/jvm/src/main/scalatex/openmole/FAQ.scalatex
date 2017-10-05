@@ -220,7 +220,7 @@ care -o myapp.tgz.bin xvfb-run python3 myapp.py param1 param2
 
 @div This optimisation is only available for @a("cluster", href := DocumentationPages.cluster.file) and @b{not} for the @a("EGI grid", href := DocumentationPages.egi.file).
 
-@div You can find an example of using @hl.openmoleNoTest{Path} variables in the dataflow in the @a("data processing section", href := DocumentationPages.dataProcessing.file).
+@div You can find an example of using @hl.openmoleNoTest{Path} variables in the dataflow in the @a("data processing section", href := DocumentationPages.dataProcessing.file), and learn more about the OpenMOLE dataflow in the @a("dedicated section", href := DocumentationPages.dataflow.file).
 
 
 

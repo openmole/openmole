@@ -265,7 +265,8 @@ object DocumentationPages {
     transition,
     hook,
     source,
-    capsule
+    capsule,
+    dataflow
   )
 
   lazy val developmentPages = Seq(
