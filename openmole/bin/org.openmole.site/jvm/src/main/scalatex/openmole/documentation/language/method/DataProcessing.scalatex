@@ -56,23 +56,47 @@ Model inputs come in many shapes; this is why OpenMOLE features some file explor
     """)
 
 @sect{Files vs Paths}
-    As its name suggests, the files selector manipulates @hl.highlight("File", "plain") instances and directly injects them in the dataflow.
-    If you plan to delegate your workflow to a @aa("local cluster environment", href :=  DocumentationPages.cluster.file) equipped with a shared file system across all nodes, you don't need data to be automatically copied by OpenMOLE.
-    In this case, you might prefer the paths selector instead.
+
+    @p As its name suggests, the @hl.openmoleNoTest{files} selector manipulates @hl.highlight("File", "plain") instances and directly injects them in the dataflow.
+
+
+    @p If you plan to delegate your workflow to a @aa("local cluster environment", href :=  DocumentationPages.cluster.file) equipped with a shared file system across all nodes, you don't need data to be automatically copied by OpenMOLE.
+
+
+    @p In this case, you might prefer the paths selector instead.
     Paths works exactly like files and accept the very same options.
-    The only difference between the two selectors is that paths will inject @hl.highlight("Path","plain") variables in the dataflow.
-    @b{Path describes a file's location but not its content}.
+    The only difference between the two selectors is that @hl.openmoleNoTest{paths} will inject @hl.highlight("Path","plain") variables in the dataflow.
+
+
+
+    @p @b{Path describes a file's location but not its content}.
     The @b{explored files won't be automatically copied by OpenMOLE when using @hl.openmoleNoTest{Path}}, so this @b{does not fit a grid environment} for instance.
     @br
-    More details on the difference between manipulating @hl.openmoleNoTest{Files} and @hl.openmoleNoTest{Paths} can be found in the dedicated entry of the @aa("FAQ", href:= Pages.faq.file).
-    @br
-    @br
 
+    @p @hl.openmole("""
+    import java.nio.file.Path
+
+    val dataDir     = "/vol/vipdata/data/HCP100"
+
+    val subjectPath = Val[Path]
+    val subjectID   = Val[String]
+    val exploIDsTask = ExplorationTask ( subjectPath in File(dataDir).paths(filter=".*\\.nii.gz") withName subjectID)
+
+    ( exploIDsTask hook ToStringHook() ) -- EmptyTask()
+    """)
+
+    @p More details on the difference between manipulating @hl.openmoleNoTest{Files} and @hl.openmoleNoTest{Paths} can be found in the dedicated entry of the @aa("FAQ", href:= Pages.faq.file + "#WhenshallIusePathoverFile?").
+
+
+@sect{More examples}
+
+    You can find full examples using OpenMOLE's capabilities to process a dataset in the following entries of the marketplace:
+    @ul
+        @li
+            @a("FSL-Fast", href := shared.link.repo.market + "/tree/7-dev/fsl-fast")
+        @li
+            @a("Random Forest", href := shared.link.repo.market + "/tree/7-dev/randomforest")
 
 @sect{Going further}
+
     Files can also be injected in the dataflow through @a("Sources", href := DocumentationPages.source.file). They provide more powerful file filtering possibilities using regular expressions and can also target directories only.
-
-
-
-@todo
-  Particular Use case: Jo a un truc tout fait .
