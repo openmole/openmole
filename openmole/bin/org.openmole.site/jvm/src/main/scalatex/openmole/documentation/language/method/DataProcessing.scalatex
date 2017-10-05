@@ -85,7 +85,7 @@ Model inputs come in many shapes; this is why OpenMOLE features some file explor
     ( exploIDsTask hook ToStringHook() ) -- EmptyTask()
     """)
 
-    @p More details on the difference between manipulating @hl.openmoleNoTest{Files} and @hl.openmoleNoTest{Paths} can be found in the dedicated entry of the @aa("FAQ", href:= Pages.faq.file + "#WhenshallIusePathoverFile?").
+    @p More details on the difference between manipulating @hl.openmoleNoTest{Files} and @hl.openmoleNoTest{Paths} can be found in the dedicated entry of the @aa("FAQ", href:= Pages.faq.file + "#WhenshallIusePathoverFile?"). You can also learn more about the OpenMOLE dataflow in the @a("dedicated section", href := DocumentationPages.dataflow.file).
 
 
 @sect{More examples}
