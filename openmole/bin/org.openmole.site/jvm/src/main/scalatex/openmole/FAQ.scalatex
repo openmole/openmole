@@ -104,7 +104,7 @@ ln -s /data/openmole_data ~/.openmole
 
 @div In order for this procedure to work, you'll want to ensure the target folder (@i{/data/openmole} in the example) can be reached from all the machines running your OpenMOLE installation.
 
-@div Moving your @i{.openmole} to a different location is also @b{strongly advised on remote execution hosts (typically clusters) on which you own a personal account} used with OpenMOLE. In the case of remote environments, the OpenMOLE runtime and the input files of your workflow will be copied to the @i{.openmole} folder, again leading to problematic over quotas on these systems.
+@div Moving your @i{.openmole} to a different location is also @b{strongly advised on remote execution hosts (typically clusters) on which you own a personal account} used with OpenMOLE. In the case of remote environments, the OpenMOLE runtime and the input files of your workflow will be copied to the @i{.openmole} folder, again leading to problematic over quotas on these systems. For this specific case, we @b{recommend using} the @hl.openmoleNoTest{sharedDirectory} option of the @a("cluster environment", href := DocumentationPages.cluster.file) to set the location where OpenMOLE should copy your files without any hitting quota restrictions.
 
 
 @question("My sampling generates a type error")
