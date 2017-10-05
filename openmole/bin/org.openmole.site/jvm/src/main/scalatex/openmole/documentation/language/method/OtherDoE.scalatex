@@ -172,8 +172,8 @@ By defining your own exploration task on @a("several types of input", href:= sha
       ExplorationTask (
         SobolSampling(
           100, // Number of points
-          i in Range(0.0, 10.0),
-          j in Range(0.0, 5.0),
+          i in (0.0, 10.0),
+          j in (0.0, 5.0),
           values in Vector((0, 1), (0, 10), (5, 9)) // Generate part of the sobol sampling inside the array of values
         )
       )
