@@ -126,28 +126,8 @@ object SSHEnvironment {
       }
   }
 
-  implicit def server[A: ssh.SSHAuthentication](t: SSHEnvironment[A]): ssh.SSHServer = ssh.SSHServer(t.host, t.port, t.timeout)(t.authentication)
-
-  import org.openmole.tool.cache.Lazy
-
-  implicit def isStorage[A: ssh.SSHAuthentication](implicit interpreter: ssh.SSHInterpreter): StorageInterface[SSHEnvironment[A]] = new StorageInterface[SSHEnvironment[A]] {
-
-    override def child(t: SSHEnvironment[A], parent: String, child: String): String = gridscale.RemotePath.child(parent, child)
-    override def parent(t: SSHEnvironment[A], path: String): Option[String] = gridscale.RemotePath.parent(path)
-    override def name(t: SSHEnvironment[A], path: String): String = gridscale.RemotePath.name(path)
-    override def home(t: SSHEnvironment[A]) = ssh.home[DSL](t()).eval
-
-    override def exists(t: SSHEnvironment[A], path: String): Boolean = ssh.exists[DSL](t(), path).eval
-    override def list(t: SSHEnvironment[A], path: String): Seq[gridscale.ListEntry] = ssh.list[DSL](t(), path).eval
-    override def makeDir(t: SSHEnvironment[A], path: String): Unit = ssh.makeDir[DSL](t(), path).eval
-    override def rmDir(t: SSHEnvironment[A], path: String): Unit = ssh.rmDir[DSL](t(), path).eval
-    override def rmFile(t: SSHEnvironment[A], path: String): Unit = ssh.rmFile[DSL](t(), path).eval
-    override def mv(t: SSHEnvironment[A], from: String, to: String): Unit = ssh.mv[DSL](t(), from, to).eval
-
-    override def upload(t: SSHEnvironment[A], src: File, dest: String, options: TransferOptions): Unit =
-      StorageInterface.upload(false, ssh.writeFile[DSL](t(), _, _).eval)(src, dest, options)
-    override def download(t: SSHEnvironment[A], src: String, dest: File, options: TransferOptions): Unit =
-      StorageInterface.download(false, ssh.readFile[DSL, Unit](t(), _, _).eval)(src, dest, options)
+  implicit def asSSHServer[A: ssh.SSHAuthentication] = new AsSSHServer[SSHEnvironment[A]] {
+    override def apply(t: SSHEnvironment[A]) = ssh.SSHServer(t.host, t.port, t.timeout)(t.authentication)
   }
 
   case class SSHJob(id: Long) extends AnyVal
@@ -269,6 +249,7 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
         storageInterface.child(env, home, ".openmole/.tmp/ssh/")
     }
 
+    val remoteStorage = StorageInterface.remote(LogicalLinkStorage())(LogicalLinkStorage.isStorage(gridscale.local.LocalInterpreter()))
     def id = new URI("ssh", user, host, port, root, null, null).toString
 
     def isConnectionError(t: Throwable) = t match {
@@ -277,7 +258,6 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
       case _ ⇒ false
     }
 
-    val remoteStorage = StorageInterface.remote(LogicalLinkStorage())(LogicalLinkStorage.isStorage(gridscale.local.LocalInterpreter()))
     new StorageService(env, root, id, env, remoteStorage, usageControl, isConnectionError)
   }
 

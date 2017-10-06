@@ -16,13 +16,41 @@
  */
 package org.openmole.plugin.environment
 
-import org.openmole.tool.crypto.Cypher
-
-//import org.openmole.plugin.environment.batch.storage.SimpleStorage
-//import org.openmole.plugin.environment.gridscale._
+import freedsl.dsl._
+import org.openmole.core.communication.storage.TransferOptions
+import org.openmole.core.workflow.dsl.File
+import org.openmole.plugin.environment.batch.storage.StorageInterface
+import simulacrum.typeclass
 
 package object ssh {
   //  class RemoteLogicalLinkStorage(val root: String) extends LogicalLinkStorage with SimpleStorage
   //  class RemoveLocalStorage(val root: String) extends LocalStorage with SimpleStorage
+
+  @typeclass trait AsSSHServer[S] {
+    def apply(s: S): _root_.gridscale.ssh.SSHServer
+  }
+
+  implicit def toSSHServer[S: AsSSHServer](s: S) = implicitly[AsSSHServer[S]].apply(s)
+
+  import _root_.gridscale.{ ssh ⇒ gssh }
+
+  implicit def isStorage[S: AsSSHServer](implicit interpreter: gssh.SSHInterpreter): StorageInterface[S] = new StorageInterface[S] {
+    override def child(t: S, parent: String, child: String): String = _root_.gridscale.RemotePath.child(parent, child)
+    override def parent(t: S, path: String): Option[String] = _root_.gridscale.RemotePath.parent(path)
+    override def name(t: S, path: String): String = _root_.gridscale.RemotePath.name(path)
+    override def home(t: S) = gssh.home[DSL](t).eval
+
+    override def exists(t: S, path: String): Boolean = gssh.exists[DSL](t, path).eval
+    override def list(t: S, path: String) = gssh.list[DSL](t, path).eval
+    override def makeDir(t: S, path: String): Unit = gssh.makeDir[DSL](t, path).eval
+    override def rmDir(t: S, path: String): Unit = gssh.rmDir[DSL](t, path).eval
+    override def rmFile(t: S, path: String): Unit = gssh.rmFile[DSL](t, path).eval
+    override def mv(t: S, from: String, to: String): Unit = gssh.mv[DSL](t, from, to).eval
+
+    override def upload(t: S, src: File, dest: String, options: TransferOptions): Unit =
+      StorageInterface.upload(false, gssh.writeFile[DSL](t, _, _).eval)(src, dest, options)
+    override def download(t: S, src: String, dest: File, options: TransferOptions): Unit =
+      StorageInterface.download(false, gssh.readFile[DSL, Unit](t, _, _).eval)(src, dest, options)
+  }
 
 }
