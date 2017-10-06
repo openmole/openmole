@@ -33,7 +33,7 @@ import org.openmole.core.workspace._
 import org.openmole.plugin.environment.batch.control._
 import org.openmole.plugin.environment.batch.jobservice._
 import org.openmole.plugin.environment.batch.storage._
-import org.openmole.plugin.environment.gridscale.{ GridScaleJobService, LogicalLinkStorage }
+import org.openmole.plugin.environment.gridscale.{ GridScaleJobService, LocalStorage, LogicalLinkStorage }
 import org.openmole.tool.crypto._
 import org.openmole.tool.lock._
 import squants.information._
@@ -93,32 +93,6 @@ object SSHEnvironment {
             (job, desc) ← toSubmit
           } env.submit(job, desc)
 
-          import freedsl.tool._
-          import freedsl.dsl._
-
-          // Clean submitted
-          //              val keep = js.submitted.filter(j ⇒ j.state == RUNNING || j.state == READY || j.state == SUBMITTED)
-          //              js.submitted.clear()
-          //              js.submitted.pushAll(keep)
-          //
-          //              //Clean queue
-          //              val keepQueued = js.queue.filter(j ⇒ j.state == READY || j.state == SUBMITTED)
-          //              js.queue.clear()
-          //              js.queue.pushAll(keepQueued)
-          //
-          //              var numberToSubmit = js.nbSlots - js.submitted.size
-          //
-          //              val toSubmit = mutable.Stack[SSHBatchJob]()
-          //              while (!js.queue.isEmpty && numberToSubmit > 0) {
-          //                val j = js.queue.pop()
-          //                toSubmit.push(j)
-          //                numberToSubmit -= 1
-          //                j
-          //              }
-          //
-          //              toSubmit
-
-          //toSubmit.foreach(_.submit)
           !stop
         case None ⇒ false
       }
@@ -139,27 +113,6 @@ object SSHEnvironment {
     override type J = SSHJob
 
     override def submit(env: SSHEnvironment[A], serializedJob: SerializedJob): BatchJob[J] = env.register(serializedJob)
-    //    {
-    //      val (remoteScript, result) = buildScript(serializedJob)
-    //
-    //      val _jobDescription = gridscale.ssh.SSHJobDescription (
-    //        command = s"/bin/bash $remoteScript",
-    //        workDirectory = sharedFS.root
-    //      )
-    //
-    //      val sshBatchJob = new SSHBatchJob {
-    //        val jobService = js
-    //        val jobDescription = _jobDescription
-    //        val resultPath = result
-    //      }
-    //
-    //      SSHJobService.Log.logger.fine(s"SSHJobService: Queueing /bin/bash $remoteScript in directory ${sharedFS.root}")
-    //
-    //      queuesLock { queue.push(sshBatchJob) }
-    //
-    //      sshBatchJob
-    //    }
-    //
     override def state(env: SSHEnvironment[A], j: J): ExecutionState.ExecutionState = env.state(j)
     override def delete(env: SSHEnvironment[A], j: J): Unit = env.delete(j)
     override def stdOutErr(js: SSHEnvironment[A], j: SSHJob) = js.stdOutErr(j)
@@ -179,7 +132,7 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
     val storageSharedLocally: Boolean,
     override val name:        Option[String],
     val authentication:       A
-)(implicit val services: BatchEnvironment.Services) extends BatchEnvironment /*with SSHPersistentStorage*/ { env ⇒
+)(implicit val services: BatchEnvironment.Services) extends BatchEnvironment { env ⇒
 
   override def updateInterval = UpdateInterval.fixed(env.services.preference(SSHEnvironment.UpdateInterval))
 
@@ -220,16 +173,21 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
         storageInterface.child(env, home, ".openmole/.tmp/ssh/")
     }
 
-    val remoteStorage = StorageInterface.remote(LogicalLinkStorage())(LogicalLinkStorage.isStorage(gridscale.local.LocalInterpreter()))
+    implicit def logicalLinkStorage = LogicalLinkStorage.isStorage(gridscale.local.LocalInterpreter())
+    implicit def localStorage = LocalStorage.isStorage(gridscale.local.LocalInterpreter())
+
+    val remoteStorage = StorageInterface.remote(LogicalLinkStorage())
     def id = new URI("ssh", user, host, port, root, null, null).toString
 
-    def isConnectionError(t: Throwable) = t match {
-      case _: gridscale.ssh.ConnectionError ⇒ true
-      case _: gridscale.authentication.AuthenticationException ⇒ true
-      case _ ⇒ false
+    if (storageSharedLocally) new StorageService(LocalStorage(), root, id, env, remoteStorage, usageControl, t ⇒ false)
+    else {
+      def isConnectionError(t: Throwable) = t match {
+        case _: gridscale.ssh.ConnectionError ⇒ true
+        case _: gridscale.authentication.AuthenticationException ⇒ true
+        case _ ⇒ false
+      }
+      new StorageService(env, root, id, env, remoteStorage, usageControl, isConnectionError)
     }
-
-    new StorageService(env, root, id, env, remoteStorage, usageControl, isConnectionError)
   }
 
   override def trySelectStorage(files: ⇒ Vector[File]) = BatchEnvironment.trySelectSingleStorage(storageService)
@@ -260,13 +218,13 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
       workDirectory = workDirectory
     )
 
-    val registred = queuesLock {
+    val registered = queuesLock {
       val job = SSHEnvironment.SSHJob(jobId.getAndIncrement())
       jobsStates.put(job, SSHEnvironment.Queued(jobDescription))
       job
     }
 
-    BatchJob(registred, result)
+    BatchJob(registered, result)
   }
 
   def submit(job: SSHEnvironment.SSHJob, description: gridscale.ssh.SSHJobDescription) =
@@ -328,53 +286,3 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
   lazy val jobService = new BatchJobService(env, usageControl)
   override def trySelectJobService() = BatchEnvironment.trySelectSingleJobService(jobService)
 }
-
-//class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
-//                                                          val user:                 String,
-//                                                          val host:                 String,
-//                                                          val nbSlots:              Int,
-//                                                          val port:        Int,
-//                                                          val sharedDirectory:      Option[String],
-//                                                          val workDirectory:        Option[String],
-//                                                          val openMOLEMemory:       Option[Information],
-//                                                          override val threads:     Option[Int],
-//                                                          val storageSharedLocally: Boolean,
-//                                                          override val name:        Option[String]
-//                                                        )(val credential: A)(implicit val services: BatchEnvironment.Services) extends BatchEnvironment /*with SSHPersistentStorage*/ { env ⇒
-//
-//  type JS = SSHJobService
-//
-//  def id = new URI("ssh", env.user, env.host, env.port, null, null, null).toString
-//
-//  val usageControl =
-//    new LimitedAccess(
-//      preference(SSHEnvironment.MaxConnections),
-//      preference(SSHEnvironment.MaxOperationsByMinute)
-//    )
-//
-//  import services.threadProvider
-//
-//  val jobService = SSHJobService(
-//    slots = nbSlots,
-//    sharedFS = storage,
-//    environment = env,
-//    workDirectory = env.workDirectory,
-//    credential = credential,
-//    host = host,
-//    user = user,
-//    port = port
-//  )
-//
-//  override def updateInterval = UpdateInterval.fixed(preference(SSHEnvironment.UpdateInterval))
-//
-//  override def start() = {
-//    super.start()
-//    jobService.start()
-//  }
-//
-//  override def stop() = {
-//    super.stop()
-//    jobService.stop()
-//  }
-//
-//}

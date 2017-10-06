@@ -58,25 +58,27 @@ object BatchEnvironment extends Logger {
   }
 
   case class BeginUpload(id: Long, file: File, path: String, storage: StorageService[_]) extends Event[BatchEnvironment] with Transfer
-  case class EndUpload(id: Long, file: File, path: String, storage: StorageService[_], exception: Option[Throwable]) extends Event[BatchEnvironment] with Transfer {
+  case class EndUpload(id: Long, file: File, path: String, storage: StorageService[_], exception: Option[Throwable], size: Long) extends Event[BatchEnvironment] with Transfer {
     def success = exception.isEmpty
   }
 
   case class BeginDownload(id: Long, file: File, path: String, storage: StorageService[_]) extends Event[BatchEnvironment] with Transfer
   case class EndDownload(id: Long, file: File, path: String, storage: StorageService[_], exception: Option[Throwable]) extends Event[BatchEnvironment] with Transfer {
     def success = exception.isEmpty
+    def size = file.size
   }
 
   def signalUpload[T](id: Long, upload: ⇒ T, file: File, path: String, storage: StorageService[_])(implicit eventDispatcher: EventDispatcher): T = {
+    val size = file.size
     eventDispatcher.trigger(storage.environment, BeginUpload(id, file, path, storage))
     val res =
       try upload
       catch {
         case e: Throwable ⇒
-          eventDispatcher.trigger(storage.environment, EndUpload(id, file, path, storage, Some(e)))
+          eventDispatcher.trigger(storage.environment, EndUpload(id, file, path, storage, Some(e), size))
           throw e
       }
-    eventDispatcher.trigger(storage.environment, EndUpload(id, file, path, storage, None))
+    eventDispatcher.trigger(storage.environment, EndUpload(id, file, path, storage, None, size))
     res
   }
 
