@@ -20,11 +20,11 @@ package org.openmole.plugin.environment.batch.jobservice
 import org.openmole.core.workflow.execution.ExecutionState._
 import org.openmole.plugin.environment.batch.control._
 
-trait BatchJobId extends BatchJob {
-  def id: jobService.J
-
-  def kill(implicit token: AccessToken) = super.kill(id)
-  def updateState(implicit token: AccessToken): ExecutionState = super.updateState(id)
-
-  override def toString = id.toString
-}
+//trait BatchJobId extends BatchJob {
+//  def id: jobService.J
+//
+//  def kill(implicit token: AccessToken) = super.kill(id)
+//  def updateState(implicit token: AccessToken): ExecutionState = super.updateState(id)
+//
+//  override def toString = id.toString
+//}

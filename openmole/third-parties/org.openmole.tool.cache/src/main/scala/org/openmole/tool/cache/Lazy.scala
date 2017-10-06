@@ -2,7 +2,7 @@ package org.openmole.tool.cache
 
 object Lazy {
 
-  def apply[T](t: ⇒ T) = new Lazy[T] {
+  def apply[T](t: ⇒ T): Lazy[T] = new Lazy[T] {
     override lazy val content = t
   }
 

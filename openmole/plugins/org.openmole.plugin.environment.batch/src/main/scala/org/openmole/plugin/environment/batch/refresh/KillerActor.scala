@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.environment.batch.refresh
 
-import org.openmole.plugin.environment.batch.environment.BatchEnvironment
+import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, BatchService }
 import org.openmole.tool.logger.Logger
 
 object KillerActor extends Logger {
@@ -26,8 +26,8 @@ object KillerActor extends Logger {
     import services._
 
     val KillBatchJob(bj) = msg
-    try bj.jobService.tryWithToken {
-      case Some(t) ⇒ bj.kill(t)
+    try BatchService.tryWithToken(bj.usageControl) {
+      case Some(t) ⇒ bj.delete(t)
       case None ⇒
         JobManager ! Delay(msg, BatchEnvironment.getTokenInterval)
     } catch {

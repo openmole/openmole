@@ -17,28 +17,30 @@
 
 package org.openmole.plugin.environment.ssh
 
-import fr.iscpif.gridscale.ssh.SSHConnectionCache
-import org.openmole.core.communication.storage.RemoteStorage
-import org.openmole.core.workspace.Workspace
-import org.openmole.plugin.environment.batch.environment.BatchEnvironment
 import org.openmole.plugin.environment.batch.storage.StorageService
-import org.openmole.plugin.environment.gridscale.GridScaleStorage
-import squants.time.TimeConversions._
 
-trait SSHStorageService extends StorageService with SSHService with GridScaleStorage { ss ⇒
+//import fr.iscpif.gridscale.ssh.SSHConnectionCache
+//import org.openmole.core.communication.storage.RemoteStorage
+//import org.openmole.core.workspace.Workspace
+//import org.openmole.plugin.environment.batch.environment.BatchEnvironment
+//import org.openmole.plugin.environment.batch.storage.StorageService
+//import org.openmole.plugin.environment.gridscale.GridScaleStorage
+//import squants.time.TimeConversions._
 
-  val environment: BatchEnvironment with SSHAccess
-
-  lazy val storage =
-    new fr.iscpif.gridscale.ssh.SSHStorage with SSHConnectionCache {
-      override def timeout = environment.services.preference(SSHService.timeout)
-      override def credential = environment.credential
-      override def host: String = environment.host
-      override def port: Int = environment.port
-    }
-
-  lazy val home = storage.home
-
-  lazy val remoteStorage: RemoteStorage = new RemoteLogicalLinkStorage(ss.root)
-
-}
+//trait SSHStorageService extends StorageService with SSHService with GridScaleStorage { ss ⇒
+//
+//  val environment: BatchEnvironment with SSHAccess
+//
+//  lazy val storage =
+//    new fr.iscpif.gridscale.ssh.SSHStorage with SSHConnectionCache {
+//      override def timeout = environment.services.preference(SSHService.timeout)
+//      override def credential = environment.credential
+//      override def host: String = environment.host
+//      override def port: Int = environment.port
+//    }
+//
+//  lazy val home = storage.home
+//
+//  lazy val remoteStorage: RemoteStorage = new RemoteLogicalLinkStorage(ss.root)
+//
+//}

@@ -17,9 +17,9 @@
 
 package org.openmole.plugin.environment.batch.refresh
 
+import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.workflow.execution.ExecutionState._
-import org.openmole.plugin.environment.batch.environment.BatchEnvironment
-import org.openmole.plugin.environment.batch.environment.ResubmitException
+import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, BatchService, ResubmitException }
 import org.openmole.tool.logger.Logger
 
 object RefreshActor extends Logger {
@@ -29,7 +29,7 @@ object RefreshActor extends Logger {
 
     val Refresh(job, sj, bj, delay, updateErrorsInARow) = refresh
     if (!job.state.isFinal) {
-      try bj.jobService.tryWithToken {
+      try BatchService.tryWithToken(bj.usageControl) {
         case Some(t) ⇒
           val oldState = job.state
           job.state = bj.updateState(t)
@@ -41,6 +41,11 @@ object RefreshActor extends Logger {
               else job.environment.updateInterval.minUpdateInterval
             JobManager ! Delay(Refresh(job, sj, bj, newDelay, 0), newDelay)
           }
+          else if (job.state == FAILED) {
+            val exception = new InternalProcessingError(s"""Job status is FAILED""".stripMargin)
+            JobManager ! Error(job, exception, Some(bj))
+            JobManager ! Kill(job)
+          }
           else JobManager ! Kill(job)
         case None ⇒ JobManager ! Delay(Refresh(job, sj, bj, delay, updateErrorsInARow), BatchEnvironment.getTokenInterval)
       } catch {
@@ -48,7 +53,7 @@ object RefreshActor extends Logger {
           JobManager ! Resubmit(job, sj.storage)
         case e: Throwable ⇒
           if (updateErrorsInARow >= preference(BatchEnvironment.MaxUpdateErrorsInARow)) {
-            JobManager ! Error(job, e)
+            JobManager ! Error(job, e, Some(bj))
             JobManager ! Kill(job)
           }
           else {

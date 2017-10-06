@@ -1,5 +1,5 @@
 ///*
-// * Copyright (C) 2015 Romain Reuillon
+// * Copyright (C) 2017 Romain Reuillon
 // *
 // * This program is free software: you can redistribute it and/or modify
 // * it under the terms of the GNU Affero General Public License as published by
@@ -14,12 +14,20 @@
 // * You should have received a copy of the GNU General Public License
 // * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // */
+//
 //package org.openmole.plugin.environment.ssh
 //
-//import fr.iscpif.gridscale.ssh.SSHHost
-//import org.openmole.plugin.environment.gridscale.GridScaleJobService
+//import freedsl.dsl.DSL
+//import org.openmole.core.communication.storage._
+//import org.openmole.plugin.environment.batch.storage._
+//import org.openmole.plugin.environment.gridscale._
+//import org.openmole.tool.file.File
+//import gridscale.ssh
+//import freedsl.dsl._
 //
-//trait ClusterJobService extends GridScaleJobService with SSHHost with SharedStorage {
-//  val environment: ClusterEnvironment
-//  def usageControl = environment.usageControl
+//object SSHStorage {
+//
+//
 //}
+//
+//case class SSHStorage(user: String, host: String, port: Int, timeout: squants.Time)

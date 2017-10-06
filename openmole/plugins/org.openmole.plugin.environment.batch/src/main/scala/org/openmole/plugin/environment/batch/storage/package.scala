@@ -24,11 +24,11 @@ import org.openmole.core.workspace.NewFile
 
 package object storage {
 
-  implicit class SimpleRemoteStorage(s: SimpleStorage) extends RemoteStorage {
-    val storage = s
-    override def child(parent: String, child: String): String = storage.child(parent, child)
-    override def download(src: String, dest: File, options: TransferOptions)(implicit newFile: NewFile) = storage.download(src, dest, options)
-    override def upload(src: File, dest: String, options: TransferOptions)(implicit newFile: NewFile) = storage.upload(src, dest, options)
-  }
+  //  implicit class SimpleRemoteStorage[S](s: S)(implicit storage: Storage[S]) extends RemoteStorage {
+  //    override def child(parent: String, child: String): String = storage.child(s, parent, child)
+  //    
+  //    override def download(src: String, dest: File, options: TransferOptions)(implicit newFile: NewFile) = storage.download(s, src, dest, options)
+  //    override def upload(src: File, dest: String, options: TransferOptions)(implicit newFile: NewFile) = storage.upload(s, src, dest, options)
+  //  }
 
 }

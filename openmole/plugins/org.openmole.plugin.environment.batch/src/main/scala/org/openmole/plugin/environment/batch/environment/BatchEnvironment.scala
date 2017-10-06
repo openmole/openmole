@@ -57,17 +57,17 @@ object BatchEnvironment extends Logger {
     def id: Long
   }
 
-  case class BeginUpload(id: Long, file: File, path: String, storage: StorageService) extends Event[BatchEnvironment] with Transfer
-  case class EndUpload(id: Long, file: File, path: String, storage: StorageService, exception: Option[Throwable]) extends Event[BatchEnvironment] with Transfer {
+  case class BeginUpload(id: Long, file: File, path: String, storage: StorageService[_]) extends Event[BatchEnvironment] with Transfer
+  case class EndUpload(id: Long, file: File, path: String, storage: StorageService[_], exception: Option[Throwable]) extends Event[BatchEnvironment] with Transfer {
     def success = exception.isEmpty
   }
 
-  case class BeginDownload(id: Long, file: File, path: String, storage: StorageService) extends Event[BatchEnvironment] with Transfer
-  case class EndDownload(id: Long, file: File, path: String, storage: StorageService, exception: Option[Throwable]) extends Event[BatchEnvironment] with Transfer {
+  case class BeginDownload(id: Long, file: File, path: String, storage: StorageService[_]) extends Event[BatchEnvironment] with Transfer
+  case class EndDownload(id: Long, file: File, path: String, storage: StorageService[_], exception: Option[Throwable]) extends Event[BatchEnvironment] with Transfer {
     def success = exception.isEmpty
   }
 
-  def signalUpload[T](id: Long, upload: ⇒ T, file: File, path: String, storage: StorageService)(implicit eventDispatcher: EventDispatcher): T = {
+  def signalUpload[T](id: Long, upload: ⇒ T, file: File, path: String, storage: StorageService[_])(implicit eventDispatcher: EventDispatcher): T = {
     eventDispatcher.trigger(storage.environment, BeginUpload(id, file, path, storage))
     val res =
       try upload
@@ -80,7 +80,7 @@ object BatchEnvironment extends Logger {
     res
   }
 
-  def signalDownload[T](id: Long, download: ⇒ T, path: String, storage: StorageService, file: File)(implicit eventDispatcher: EventDispatcher): T = {
+  def signalDownload[T](id: Long, download: ⇒ T, path: String, storage: StorageService[_], file: File)(implicit eventDispatcher: EventDispatcher): T = {
     eventDispatcher.trigger(storage.environment, BeginDownload(id, file, path, storage))
     val res =
       try download
@@ -149,19 +149,26 @@ object BatchEnvironment extends Logger {
     implicit val eventDispatcher:   EventDispatcher
   )
 
+  def trySelectSingleStorage(s: StorageService[_]) =
+    BatchService.tryGetToken(s.usageControl).map(t ⇒ (s, t))
+
+  def trySelectSingleJobService(jobService: BatchJobService[_]) =
+    BatchService.tryGetToken(jobService.usageControl).map(t ⇒ (jobService, t))
+
 }
 
 trait BatchEnvironment extends SubmissionEnvironment { env ⇒
-  type SS <: StorageService
-  type JS <: JobService
 
   implicit val services: BatchEnvironment.Services
-  implicit def preference = services.preference
+  //implicit def preference = services.preference
   implicit def eventDispatcher = services.eventDispatcher
+  def exceptions = services.preference(Environment.maxExceptionsLog)
 
-  def executionJob(job: Job): BatchExecutionJob
+  def trySelectStorage(files: ⇒ Vector[File]): Option[(StorageService[_], AccessToken)]
+  def trySelectJobService(): Option[(BatchJobService[_], AccessToken)]
 
-  lazy val batchJobWatcher = new BatchJobWatcher(WeakReference(this), preference)
+  def executionJob(job: Job) = new BatchExecutionJob(job, this)
+  lazy val batchJobWatcher = new BatchJobWatcher(WeakReference(this), services.preference)
   def jobs = batchJobWatcher.executionJobs
 
   lazy val replBundleCache = new AssociativeCache[ReferencedClasses, FileCache]()
@@ -207,33 +214,10 @@ trait BatchEnvironment extends SubmissionEnvironment { env ⇒
 
 }
 
-class SimpleBatchExecutionJob(val job: Job, val environment: SimpleBatchEnvironment) extends ExecutionJob with BatchExecutionJob { bej ⇒
+class BatchExecutionJob(val job: Job, val environment: BatchEnvironment) extends ExecutionJob { bej ⇒
 
-  def trySelectStorage(files: ⇒ Vector[File]) = {
-    val s = environment.storage
-    s.tryGetToken.map(t ⇒ (s, t))
-  }
-  def trySelectJobService() = {
-    val js = environment.jobService
-    js.tryGetToken.map(t ⇒ (js, t))
-  }
-
-}
-
-trait SimpleBatchEnvironment <: BatchEnvironment { env ⇒
-  type BEJ = SimpleBatchExecutionJob
-
-  def executionJob(job: Job): BEJ = new SimpleBatchExecutionJob(job, this)
-
-  def storage: SS
-  def jobService: JS
-}
-
-trait BatchExecutionJob extends ExecutionJob { bej ⇒
-
-  def job: Job
   var serializedJob: Option[SerializedJob] = None
-  var batchJob: Option[BatchJob] = None
+  var batchJob: Option[BatchJobControl] = None
 
   def moleJobs = job.moleJobs
   def runnableTasks = job.moleJobs.map(RunnableTask(_))
@@ -275,10 +259,5 @@ trait BatchExecutionJob extends ExecutionJob { bej ⇒
       environment.plugins ++ plugins).distinct
 
   def usedFileHashes = usedFiles.map(f ⇒ (f, environment.services.fileService.hash(f)(environment.services.newFile)))
-
-  def environment: BatchEnvironment
-
-  def trySelectStorage(files: ⇒ Vector[File]): Option[(StorageService, AccessToken)]
-  def trySelectJobService(): Option[(JobService, AccessToken)]
 
 }

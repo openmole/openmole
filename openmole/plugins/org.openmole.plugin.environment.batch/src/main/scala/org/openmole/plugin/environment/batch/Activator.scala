@@ -21,7 +21,7 @@ import org.openmole.core.pluginmanager.PluginInfo
 import org.openmole.core.preference.ConfigurationInfo
 import org.openmole.core.replication.ReplicaCatalog
 import org.openmole.plugin.environment.batch.environment.BatchEnvironment
-import org.openmole.plugin.environment.batch.storage.{ Storage, StorageService }
+import org.openmole.plugin.environment.batch.storage.{ StorageInterface, StorageService }
 import org.osgi.framework.{ BundleActivator, BundleContext }
 
 class Activator extends BundleActivator {

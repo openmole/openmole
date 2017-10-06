@@ -19,21 +19,21 @@ package org.openmole.plugin.environment.batch.storage
 
 import java.io.{ ByteArrayInputStream, File, InputStream }
 
-import fr.iscpif.gridscale.storage.ListEntry
+import gridscale.ListEntry
 import org.openmole.core.communication.storage._
 import org.openmole.core.workspace.NewFile
 
-trait SimpleStorage extends Storage {
-  def exists(path: String): Boolean = _exists(path)
-  def listNames(path: String): Seq[String] = _listNames(path)
-  def list(path: String): Seq[ListEntry] = _list(path)
-  def makeDir(path: String): Unit = _makeDir(path)
-  def rmDir(path: String): Unit = _rmDir(path)
-  def rmFile(path: String): Unit = _rmFile(path)
-  def mv(from: String, to: String) = _mv(from, to)
-  def uploadStream(src: InputStream, dest: String, options: TransferOptions = TransferOptions.default): Unit = _uploadStream(src, dest, options)
-  def downloadStream(src: String, options: TransferOptions = TransferOptions.default): InputStream = _downloadStream(src, options)
-  def upload(src: File, dest: String, options: TransferOptions = TransferOptions.default)(implicit newFile: NewFile): Unit = _upload(src, dest, options)
-  def download(src: String, dest: File, options: TransferOptions = TransferOptions.default)(implicit newFile: NewFile): Unit = _download(src, dest, options)
-  def create(dest: String) = uploadStream(new ByteArrayInputStream("".getBytes), dest)
-}
+//trait SimpleStorage extends Storage {
+//  def exists(path: String): Boolean = _exists(path)
+//  def listNames(path: String): Seq[String] = _listNames(path)
+//  def list(path: String): Seq[ListEntry] = _list(path)
+//  def makeDir(path: String): Unit = _makeDir(path)
+//  def rmDir(path: String): Unit = _rmDir(path)
+//  def rmFile(path: String): Unit = _rmFile(path)
+//  def mv(from: String, to: String) = _mv(from, to)
+//  def uploadStream(src: InputStream, dest: String, options: TransferOptions = TransferOptions.default): Unit = _uploadStream(src, dest, options)
+//  def downloadStream(src: String, options: TransferOptions = TransferOptions.default): InputStream = _downloadStream(src, options)
+//  def upload(src: File, dest: String, options: TransferOptions = TransferOptions.default)(implicit newFile: NewFile): Unit = _upload(src, dest, options)
+//  def download(src: String, dest: File, options: TransferOptions = TransferOptions.default)(implicit newFile: NewFile): Unit = _download(src, dest, options)
+//
+//}

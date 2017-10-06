@@ -16,10 +16,13 @@
  */
 package org.openmole.plugin.environment
 
-import org.openmole.plugin.environment.batch.storage.SimpleStorage
-import org.openmole.plugin.environment.gridscale._
+import org.openmole.tool.crypto.Cypher
+
+//import org.openmole.plugin.environment.batch.storage.SimpleStorage
+//import org.openmole.plugin.environment.gridscale._
 
 package object ssh {
-  class RemoteLogicalLinkStorage(val root: String) extends LogicalLinkStorage with SimpleStorage
-  class RemoveLocalStorage(val root: String) extends LocalStorage with SimpleStorage
+  //  class RemoteLogicalLinkStorage(val root: String) extends LogicalLinkStorage with SimpleStorage
+  //  class RemoveLocalStorage(val root: String) extends LocalStorage with SimpleStorage
+
 }

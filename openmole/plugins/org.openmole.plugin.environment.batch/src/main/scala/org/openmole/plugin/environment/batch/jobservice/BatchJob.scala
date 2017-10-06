@@ -24,40 +24,39 @@ import org.openmole.core.workflow.execution.ExecutionState._
 import org.openmole.plugin.environment.batch.control._
 
 object BatchJob {
-  case class StateChanged(newState: ExecutionState.ExecutionState, oldState: ExecutionState.ExecutionState) extends Event[BatchJob]
+  case class StateChanged(newState: ExecutionState.ExecutionState, oldState: ExecutionState.ExecutionState) extends Event[BatchJob[_]]
 }
 
-trait BatchJob { bj ⇒
+case class BatchJob[J](id: J, resultPath: String)
 
-  val jobService: JobService
-  def resultPath: String
-
-  var _state: ExecutionState = READY
-
-  protected[jobservice] def state_=(state: ExecutionState) = synchronized {
-    if (_state < state) {
-      jobService.environment.eventDispatcher.trigger(this, new BatchJob.StateChanged(state, _state))
-      _state = state
-    }
-  }
-
-  def hasBeenSubmitted: Boolean = state.compareTo(SUBMITTED) >= 0
-
-  def kill(implicit token: AccessToken)
-  def updateState(implicit token: AccessToken): ExecutionState
-
-  def kill(id: jobService.J)(implicit token: AccessToken) =
-    synchronized {
-      try if (state != KILLED) jobService.delete(id)
-      finally state = KILLED
-    }
-
-  def updateState(id: jobService.J)(implicit token: AccessToken): ExecutionState =
-    synchronized {
-      state = jobService.state(id)
-      state
-    }
-
-  def state: ExecutionState = _state
-
-}
+//{ bj ⇒
+//
+//  var _state: ExecutionState = READY
+//
+//  protected[jobservice] def state_=(state: ExecutionState) = synchronized {
+//    if (_state < state) {
+//      jobService.environment.eventDispatcher.trigger(this, new BatchJob.StateChanged(state, _state))
+//      _state = state
+//    }
+//  }
+//
+//  def hasBeenSubmitted: Boolean = state.compareTo(SUBMITTED) >= 0
+//
+//  def kill(implicit token: AccessToken) = batchJobInterface.kill()
+//  def updateState(implicit token: AccessToken): ExecutionState
+//
+//  def kill(id: J)(implicit token: AccessToken) =
+//    synchronized {
+//      try if (state != KILLED) jobService.delete(id)
+//      finally state = KILLED
+//    }
+//
+//  def updateState(id: J)(implicit token: AccessToken): ExecutionState =
+//    synchronized {
+//      state = jobService.state(id)
+//      state
+//    }
+//
+//  def state: ExecutionState = _state
+//
+//}

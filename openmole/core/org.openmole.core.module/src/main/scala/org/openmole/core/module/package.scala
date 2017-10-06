@@ -20,8 +20,7 @@ package org.openmole.core
 import java.io.File
 import java.nio.file.FileAlreadyExistsException
 
-import fr.iscpif.gridscale.storage._
-import fr.iscpif.gridscale.http.HTTPStorage
+import gridscale.http
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.workspace.{ NewFile, Workspace }
 import org.openmole.tool.file._
@@ -50,8 +49,8 @@ package object module {
   import org.json4s.jackson.Serialization
   implicit val formats = Serialization.formats(NoTypeHints)
 
-  def modules(url: String) = HTTPStorage.download(url)(Serialization.read[Seq[Module]](_))
-  def selectableModules(url: String) = modules(url).map(m ⇒ SelectableModule(Storage.parent(url).get, m))
+  def modules(url: String) = http.get(url).map(Serialization.read[Seq[Module]](_)).get
+  def selectableModules(url: String) = modules(url).map(m ⇒ SelectableModule(gridscale.RemotePath.parent(url).get, m))
 
   case class SelectableModule(baseURL: String, module: Module)
 
@@ -61,8 +60,8 @@ package object module {
     val hashes = downloadableComponents.map(_.component.hash).distinct.toSet -- PluginManager.bundleHashes.map(_.toString)
     val files = downloadableComponents.filter(c ⇒ hashes.contains(c.component.hash)).map {
       c ⇒
-        val f = dir / Storage.name(c.component.location)
-        HTTPStorage.download(Storage.child(c.baseURL, c.component.location))(_.copy(f))
+        val f = dir / gridscale.RemotePath.name(c.component.location)
+        http.getStream(gridscale.RemotePath.child(c.baseURL, c.component.location))(_.copy(f))
         f
     }
     addPluginsFiles(files, true)

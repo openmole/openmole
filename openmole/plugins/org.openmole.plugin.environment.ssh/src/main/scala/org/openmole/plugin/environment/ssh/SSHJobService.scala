@@ -18,146 +18,124 @@
 
 package org.openmole.plugin.environment.ssh
 
-import java.util.concurrent.locks.{ Lock, ReentrantLock }
+import org.openmole.core.workflow.execution.ExecutionState
+import org.openmole.plugin.environment.batch.environment.SerializedJob
+import org.openmole.plugin.environment.batch.jobservice.{ BatchJob, BatchJobService, JobServiceInterface }
+//
+//import java.util.concurrent.locks.{ Lock, ReentrantLock }
+//
+//import fr.iscpif.gridscale.ssh.{ SSHConnectionCache, SSHJobDescription, SSHJobService ⇒ GSSSHJobService }
+//import org.openmole.core.preference.Preference
+//import org.openmole.core.threadprovider.{ IUpdatable, ThreadProvider, Updater }
+//import org.openmole.core.workflow.execution.ExecutionState._
+//import org.openmole.plugin.environment.batch.environment._
+//import org.openmole.plugin.environment.batch.storage._
+//import org.openmole.plugin.environment.gridscale._
+//import org.openmole.tool.logger.Logger
+//import squants.time.TimeConversions._
+//import org.openmole.tool.lock._
+//import org.openmole.tool.thread._
+//
+//import scala.collection.mutable
+//import scala.ref.WeakReference
+//
+//object SSHJobService extends Logger {
+//
+//  def apply(
+//    slots:         Int,
+//    sharedFS:      StorageService,
+//    environment:   SSHEnvironment,
+//    workDirectory: Option[String],
+//    credential:    fr.iscpif.gridscale.ssh.SSHAuthentication,
+//    host:          String,
+//    user:          String,
+//    port:          Int
+//  )(implicit threadProvider: ThreadProvider, preference: Preference) = {
+//    val (_slots, _sharedFS, _environment, _workDirectory, _credential, _host, _user, _port) =
+//      (slots, sharedFS, environment, workDirectory, credential, host, user, port)
+//
+//    val js =
+//      new SSHJobService {
+//        def nbSlots = _slots
+//        def sharedFS = _sharedFS
+//        val environment = _environment
+//        def workDirectory = _workDirectory
+//        override def credential = _credential
+//        override def host = _host
+//        override def user = _user
+//        override def port = _port
+//      }
+//
+//    js
+//  }
+//
 
-import fr.iscpif.gridscale.ssh.{ SSHConnectionCache, SSHJobDescription, SSHJobService ⇒ GSSSHJobService }
-import org.openmole.core.preference.Preference
-import org.openmole.core.threadprovider.{ IUpdatable, ThreadProvider, Updater }
-import org.openmole.core.workflow.execution.ExecutionState._
-import org.openmole.plugin.environment.batch.environment._
-import org.openmole.plugin.environment.batch.storage._
-import org.openmole.plugin.environment.gridscale._
-import org.openmole.tool.logger.Logger
-import squants.time.TimeConversions._
-import org.openmole.tool.lock._
-import org.openmole.tool.thread._
-
-import scala.collection.mutable
-import scala.ref.WeakReference
-
-object SSHJobService extends Logger {
-
-  def apply(
-    slots:         Int,
-    sharedFS:      StorageService,
-    environment:   SSHEnvironment,
-    workDirectory: Option[String],
-    credential:    fr.iscpif.gridscale.ssh.SSHAuthentication,
-    host:          String,
-    user:          String,
-    port:          Int
-  )(implicit threadProvider: ThreadProvider, preference: Preference) = {
-    val (_slots, _sharedFS, _environment, _workDirectory, _credential, _host, _user, _port) =
-      (slots, sharedFS, environment, workDirectory, credential, host, user, port)
-
-    val js =
-      new SSHJobService {
-        def nbSlots = _slots
-        def sharedFS = _sharedFS
-        val environment = _environment
-        def workDirectory = _workDirectory
-        override def credential = _credential
-        override def host = _host
-        override def user = _user
-        override def port = _port
-      }
-
-    js
-  }
-
-  class Updater(jobService: WeakReference[SSHJobService]) extends IUpdatable {
-
-    var stop = false
-
-    def update() =
-      jobService.get match {
-        case Some(js) ⇒
-          val toSubmit =
-            js.queuesLock {
-              // Clean submitted
-              val keep = js.submitted.filter(j ⇒ j.state == RUNNING || j.state == READY || j.state == SUBMITTED)
-              js.submitted.clear()
-              js.submitted.pushAll(keep)
-
-              //Clean queue
-              val keepQueued = js.queue.filter(j ⇒ j.state == READY || j.state == SUBMITTED)
-              js.queue.clear()
-              js.queue.pushAll(keepQueued)
-
-              var numberToSubmit = js.nbSlots - js.submitted.size
-
-              val toSubmit = mutable.Stack[SSHBatchJob]()
-              while (!js.queue.isEmpty && numberToSubmit > 0) {
-                val j = js.queue.pop()
-                toSubmit.push(j)
-                numberToSubmit -= 1
-                j
-              }
-
-              toSubmit
-            }
-
-          toSubmit.foreach(_.submit)
-          !stop
-        case None ⇒ false
-      }
-  }
-
-}
-
-trait SSHJobService extends GridScaleJobService with SharedStorage { js ⇒
-
-  val environment: SSHEnvironment
-
-  def nbSlots: Int
-  override def usageControl = environment.usageControl
-
-  val jobService = new GSSSHJobService with SSHConnectionCache {
-    override def timeout = environment.preference(SSHService.timeout)
-    override def credential = environment.credential
-    override def host = environment.host
-    override def port = environment.port
-  }
-
-  val queuesLock = new ReentrantLock()
-  val queue = mutable.Stack[SSHBatchJob]()
-  val submitted = mutable.Stack[SSHBatchJob]()
-
-  protected def _submit(serializedJob: SerializedJob) = {
-    val (remoteScript, result) = buildScript(serializedJob)
-
-    val _jobDescription = SSHJobDescription(
-      executable = "/bin/bash",
-      arguments = remoteScript,
-      workDirectory = sharedFS.root
-    )
-
-    val sshBatchJob = new SSHBatchJob {
-      val jobService = js
-      val jobDescription = _jobDescription
-      val resultPath = result
-    }
-
-    SSHJobService.Log.logger.fine(s"SSHJobService: Queueing /bin/bash $remoteScript in directory ${sharedFS.root}")
-
-    queuesLock { queue.push(sshBatchJob) }
-
-    sshBatchJob
-  }
-
-  private[ssh] def submit(description: SSHJobDescription) =
-    jobService.submit(description)
-
-  lazy val jobUpdater = new SSHJobService.Updater(WeakReference(this))
-
-  def start() = {
-    import environment.preference
-    import environment.services.threadProvider
-    Updater.delay(jobUpdater, preference(SSHEnvironment.UpdateInterval))
-  }
-
-  def stop() = {
-    jobUpdater.stop = true
-  }
-
-}
+//
+//}
+//
+//trait SSHJobService extends GridScaleJobService with SharedStorage { js ⇒
+//
+//  val environment: SSHEnvironment
+//
+//  def nbSlots: Int
+//  override def usageControl = environment.usageControl
+//
+//  val jobService = new GSSSHJobService with SSHConnectionCache {
+//    override def timeout = environment.preference(SSHService.timeout)
+//    override def credential = environment.credential
+//    override def host = environment.host
+//    override def port = environment.port
+//  }
+//
+//  val queuesLock = new ReentrantLock()
+//  val queue = mutable.Stack[SSHBatchJob]()
+//  val submitted = mutable.Stack[SSHBatchJob]()
+//
+//  protected def _submit(serializedJob: SerializedJob) = {
+//    val (remoteScript, result) = buildScript(serializedJob)
+//
+//    val _jobDescription = SSHJobDescription(
+//      executable = "/bin/bash",
+//      arguments = remoteScript,
+//      workDirectory = sharedFS.root
+//    )
+//
+//    val sshBatchJob = new SSHBatchJob {
+//      val jobService = js
+//      val jobDescription = _jobDescription
+//      val resultPath = result
+//    }
+//
+//    SSHJobService.Log.logger.fine(s"SSHJobService: Queueing /bin/bash $remoteScript in directory ${sharedFS.root}")
+//
+//    queuesLock { queue.push(sshBatchJob) }
+//
+//    sshBatchJob
+//  }
+//
+//  private[ssh] def submit(description: SSHJobDescription) =
+//    jobService.submit(description)
+//
+//  lazy val jobUpdater = new SSHJobService.Updater(WeakReference(this))
+//
+//  def start() = {
+//    import environment.preference
+//    import environment.services.threadProvider
+//    Updater.delay(jobUpdater, preference(SSHEnvironment.UpdateInterval))
+//  }
+//
+//  def stop() = {
+//    jobUpdater.stop = true
+//  }
+//
+//}
+//
+//import freedsl.dsl._
+//
+//object SSHJobService {
+//
+//
+//}
+//
+//case class SSHJobService(slots: Int)
+//case class SSHJob(id: Long) extends AnyVal

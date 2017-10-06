@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.environment.batch.refresh
 
-import org.openmole.plugin.environment.batch.environment.BatchEnvironment
+import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, BatchService }
 import org.openmole.tool.logger.Logger
 
 object CleanerActor extends Logger {
@@ -27,7 +27,7 @@ object CleanerActor extends Logger {
     val CleanSerializedJob(sj) = msg
     try
       sj.synchronized {
-        if (!sj.cleaned) sj.storage.tryWithToken {
+        if (!sj.cleaned) BatchService.tryWithToken(sj.storage.usageControl) {
           case Some(t) ⇒
             sj.storage.rmDir(sj.path)(t)
             sj.cleaned = true

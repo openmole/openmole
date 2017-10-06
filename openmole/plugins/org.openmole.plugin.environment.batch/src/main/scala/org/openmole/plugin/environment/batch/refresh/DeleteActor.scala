@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.environment.batch.refresh
 
-import org.openmole.plugin.environment.batch.environment.BatchEnvironment
+import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, BatchService }
 import org.openmole.tool.logger.Logger
 
 object DeleteActor extends Logger {
@@ -25,7 +25,7 @@ object DeleteActor extends Logger {
     import services._
 
     val DeleteFile(storage, path, directory) = msg
-    try storage.tryWithToken {
+    try BatchService.tryWithToken(storage.usageControl) {
       case Some(t) ⇒
         if (directory) storage.rmDir(path)(t) else storage.rmFile(path)(t)
       case None ⇒

@@ -22,6 +22,7 @@ import org.openmole.core.threadprovider.IUpdatableWithVariableDelay
 import org.openmole.core.workflow.execution.ExecutionState._
 import org.openmole.core.workflow.job.Job
 import org.openmole.core.workspace.Workspace
+import org.openmole.plugin.environment.batch.environment._
 import org.openmole.plugin.environment.batch.refresh.{ JobManager, Kill }
 import org.openmole.tool.logger.Logger
 

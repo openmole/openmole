@@ -53,11 +53,11 @@ sealed trait Environment <: Name {
   private[execution] val _done = new AtomicLong(0L)
   private[execution] val _failed = new AtomicLong(0L)
 
-  implicit def preference: Preference
-  implicit def eventDispatcher: EventDispatcher
+  def eventDispatcher: EventDispatcher
+  def exceptions: Int
 
   private lazy val _errors = new SlidingList[ExceptionEvent]
-  def error(e: ExceptionEvent) = _errors.put(e, preference(maxExceptionsLog))
+  def error(e: ExceptionEvent) = _errors.put(e, exceptions)
   def errors: List[ExceptionEvent] = _errors.elements
   def clearErrors: List[ExceptionEvent] = _errors.clear()
 
@@ -95,6 +95,7 @@ class LocalEnvironment(
   val pool = Cache(new ExecutorPool(nbThreads, WeakReference(this), threadProvider))
 
   def nbJobInQueue = pool().waiting
+  def exceptions = preference(Environment.maxExceptionsLog)
 
   def submit(job: Job, executionContext: TaskExecutionContext): Unit =
     submit(new LocalExecutionJob(executionContext, job.moleJobs, Some(job.moleExecution)))

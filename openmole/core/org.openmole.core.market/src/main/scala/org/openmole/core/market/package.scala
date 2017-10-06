@@ -21,7 +21,7 @@ import java.util.zip.GZIPInputStream
 
 import org.openmole.tool.file._
 import org.openmole.tool.tar._
-import fr.iscpif.gridscale.http.HTTPStorage
+import gridscale.http
 import org.openmole.core.context._
 import org.openmole.core.expansion._
 import org.openmole.core.fileservice.FileService
@@ -42,10 +42,11 @@ package object market {
   def indexURL(implicit preference: Preference, randomProvider: RandomProvider, newFile: NewFile, fileService: FileService) =
     ExpandedString(preference(MarketIndex.marketIndexLocation)).from(Context("version" → buildinfo.version))
 
-  def marketIndex(implicit preference: Preference, randomProvider: RandomProvider, newFile: NewFile, fileService: FileService) = HTTPStorage.download(indexURL)(Serialization.read[MarketIndex](_))
+  def marketIndex(implicit preference: Preference, randomProvider: RandomProvider, newFile: NewFile, fileService: FileService) =
+    http.get(indexURL).map(Serialization.read[MarketIndex](_)).get
 
   def downloadEntry(entry: MarketIndexEntry, path: File) = try {
-    HTTPStorage.download(entry.url) { is ⇒
+    http.getStream(entry.url) { is ⇒
       val tis = new TarInputStream(new GZIPInputStream(is))
       try tis.extract(path)
       finally tis.close

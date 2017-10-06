@@ -20,9 +20,9 @@ package org.openmole.plugin.environment.batch.environment
 import org.openmole.plugin.environment.batch.storage._
 
 case class SerializedJob(
-  storage:     StorageService,
+  storage:     StorageService[_],
   path:        String,
   inputFile:   String,
   runtime:     Runtime,
-  var cleaned: Boolean        = false
+  var cleaned: Boolean           = false
 )

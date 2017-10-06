@@ -327,3 +327,31 @@ lazy val sourceCode = OsgiProject(dir, "sourcecode") settings (
   libraryDependencies += "com.lihaoyi" %% "sourcecode" % "0.1.3",
   version := "0.1.3"
 ) settings(settings: _*)
+
+
+def gridscaleVersion = "2.0-SNAPSHOT"
+
+lazy val gridscale = OsgiProject(dir, "gridscale", imports = Seq("*")) settings (
+  libraryDependencies += "fr.iscpif.gridscale" %% "gridscale" % gridscaleVersion,
+  version := gridscaleVersion
+) settings(settings: _*) dependsOn(freedsl)
+
+lazy val gridscaleLocal = OsgiProject(dir, "gridscale.local", imports = Seq("*")) settings (
+  libraryDependencies += "fr.iscpif.gridscale" %% "local" % gridscaleVersion,
+  version := gridscaleVersion
+) settings(settings: _*) dependsOn(gridscale)
+
+lazy val gridscaleHTTP = OsgiProject(dir, "gridscale.http") settings (
+  libraryDependencies += "fr.iscpif.gridscale" %% "http" % gridscaleVersion,
+  version := gridscaleVersion
+) settings(settings: _*) dependsOn(gridscale)
+
+lazy val gridscaleSSH = OsgiProject(dir, "gridscale.ssh", imports = Seq("*"), privatePackages = Seq("gridscale.http.*"/*, "net.schmizz.*", "com.hierynomus.sshj.*", "com.jcraft.jzlib.*", "djb.*", "net.i2p.crypto.*", "sshj.properties"*/)) settings (
+  libraryDependencies += "fr.iscpif.gridscale" %% "ssh" % gridscaleVersion,
+  version := gridscaleVersion
+) settings(settings: _*) dependsOn(jzlib) dependsOn(gridscale)
+
+lazy val jzlib = OsgiProject(dir, "com.jcraft.jzlib", imports = Seq("*")) settings (
+  libraryDependencies += "com.jcraft" % "jzlib" % "1.1.3",
+  version := "1.1.3"
+) settings(settings: _*)

@@ -46,7 +46,9 @@ object SimExplorer extends Logger {
         path:          Option[String] = None,
         pluginPath:    Option[String] = None,
         nbThread:      Option[Int]    = None,
-        workspace:     Option[String] = None
+        workspace:     Option[String] = None,
+        test:          Boolean        = false,
+        debug:         Boolean        = false
       )
 
       val parser = new OptionParser[Config]("OpenMOLE") {
@@ -72,41 +74,49 @@ object SimExplorer extends Logger {
         opt[String]('w', "workspace") text ("Workspace location") action {
           (v, c) ⇒ c.copy(workspace = Some(v))
         }
+        opt[Unit]('d', "debug") text ("Switch on the debug mode") action {
+          (_, c) ⇒ c.copy(debug = true)
+        }
+        opt[Unit]("test") text ("Switch on test mode") action {
+          (_, c) ⇒ c.copy(test = true)
+        }
       }
 
-      val debug = args.contains("-d")
-      val filteredArgs = args.filterNot((_: String) == "-d")
-      if (debug) LoggerService.level("ALL")
+      parser.parse(args, Config()) foreach { config ⇒
+        config.test match {
+          case false ⇒
 
-      parser.parse(filteredArgs, Config()) foreach { config ⇒
+            if (config.debug) LoggerService.level("ALL")
 
-        implicit val workspace = Workspace(new File(config.workspace.get).getCanonicalFile)
-        implicit val newFile = NewFile(workspace)
-        implicit val serializerService = SerializerService()
-        implicit val preference = Preference.memory()
-        implicit val threadProvider = ThreadProvider()
-        implicit val fileService = FileService()
-        implicit val eventDispatcher = EventDispatcher()
+            implicit val workspace = Workspace(new File(config.workspace.get).getCanonicalFile)
+            implicit val newFile = NewFile(workspace)
+            implicit val serializerService = SerializerService()
+            implicit val preference = Preference.memory()
+            implicit val threadProvider = ThreadProvider()
+            implicit val fileService = FileService()
+            implicit val eventDispatcher = EventDispatcher()
 
-        try {
+            try {
 
-          PluginManager.startAll.foreach { case (b, e) ⇒ logger.log(WARNING, s"Error starting bundle $b", e) }
-          logger.fine("plugins: " + config.pluginPath.get + " " + new File(config.pluginPath.get).listFilesSafe.mkString(","))
-          PluginManager.tryLoad(new File(config.pluginPath.get).listFilesSafe).foreach { case (f, e) ⇒ logger.log(WARNING, s"Error loading bundle $f", e) }
+              PluginManager.startAll.foreach { case (b, e) ⇒ logger.log(WARNING, s"Error starting bundle $b", e) }
+              logger.fine("plugins: " + config.pluginPath.get + " " + new File(config.pluginPath.get).listFilesSafe.mkString(","))
+              PluginManager.tryLoad(new File(config.pluginPath.get).listFilesSafe).foreach { case (f, e) ⇒ logger.log(WARNING, s"Error loading bundle $f", e) }
 
-          val (storage, _) = serializerService.deserialiseAndExtractFiles[RemoteStorage](new File(config.storage.get))
+              val (storage, _) = serializerService.deserialiseAndExtractFiles[RemoteStorage](new File(config.storage.get))
 
-          new Runtime().apply(
-            storage,
-            config.path.get,
-            config.inputMessage.get,
-            config.outputMessage.get,
-            config.nbThread.getOrElse(1),
-            debug
-          )
-        }
-        finally {
-          threadProvider.stop()
+              new Runtime().apply(
+                storage,
+                config.path.get,
+                config.inputMessage.get,
+                config.outputMessage.get,
+                config.nbThread.getOrElse(1),
+                config.debug
+              )
+            }
+            finally {
+              threadProvider.stop()
+            }
+          case true ⇒ logger.info("The runtime is working")
         }
 
       }

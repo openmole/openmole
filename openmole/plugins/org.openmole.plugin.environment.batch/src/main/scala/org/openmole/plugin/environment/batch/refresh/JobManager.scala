@@ -20,8 +20,7 @@ package org.openmole.plugin.environment.batch.refresh
 import java.io.FileNotFoundException
 import java.util.concurrent.{ TimeUnit }
 
-import fr.iscpif.gridscale.authentication._
-import org.openmole.core.event.EventDispatcher
+import gridscale.authentication._
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.workflow.execution._
 import org.openmole.plugin.environment.batch.environment._
@@ -51,6 +50,7 @@ object JobManager extends Logger { self ⇒
         case msg: KillBatchJob       ⇒ KillerActor.receive(msg)
         case msg: DeleteFile         ⇒ DeleteActor.receive(msg)
         case msg: CleanSerializedJob ⇒ CleanerActor.receive(msg)
+        case msg: Error              ⇒ ErrorActor.receive(msg)
       }
   }
 
@@ -64,6 +64,7 @@ object JobManager extends Logger { self ⇒
     case msg: KillBatchJob       ⇒ dispatch(msg)
     case msg: DeleteFile         ⇒ dispatch(msg)
     case msg: CleanSerializedJob ⇒ dispatch(msg)
+    case msg: Error              ⇒ dispatch(msg)
 
     case Manage(job) ⇒
       self ! Upload(job)
@@ -88,19 +89,6 @@ object JobManager extends Logger { self ⇒
       killAndClean(job)
       job.state = ExecutionState.READY
       dispatch(Upload(job))
-
-    case Error(job, exception) ⇒
-      val level = exception match {
-        case _: AuthenticationException     ⇒ SEVERE
-        case _: UserBadDataError            ⇒ SEVERE
-        case _: FileNotFoundException       ⇒ SEVERE
-        case _: JobRemoteExecutionException ⇒ WARNING
-        case _                              ⇒ FINE
-      }
-      val er = Environment.ExceptionRaised(job, exception, level)
-      job.environment.error(er)
-      services.eventDispatcher.trigger(job.environment: Environment, er)
-      logger.log(FINE, "Error in job refresh", exception)
 
     case MoleJobError(mj, j, e) ⇒
       val er = Environment.MoleJobExceptionRaised(j, e, WARNING, mj)
