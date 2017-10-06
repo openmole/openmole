@@ -176,17 +176,21 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
     implicit def logicalLinkStorage = LogicalLinkStorage.isStorage(gridscale.local.LocalInterpreter())
     implicit def localStorage = LocalStorage.isStorage(gridscale.local.LocalInterpreter())
 
-    val remoteStorage = StorageInterface.remote(LogicalLinkStorage())
-    def id = new URI("ssh", user, host, port, root, null, null).toString
+    import env.services.{ threadProvider, preference }
 
-    if (storageSharedLocally) new StorageService(LocalStorage(), root, id, env, remoteStorage, usageControl, t ⇒ false)
+    val remoteStorage = StorageInterface.remote(LogicalLinkStorage())
+    if (storageSharedLocally) {
+      def id = new URI("file", user, "localhost", -1, sharedDirectory.orNull, null, null).toString
+      StorageService(LocalStorage(), root, id, env, remoteStorage, usageControl, t ⇒ false)
+    }
     else {
+      def id = new URI("ssh", user, host, port, root, null, null).toString
       def isConnectionError(t: Throwable) = t match {
         case _: gridscale.ssh.ConnectionError ⇒ true
         case _: gridscale.authentication.AuthenticationException ⇒ true
         case _ ⇒ false
       }
-      new StorageService(env, root, id, env, remoteStorage, usageControl, isConnectionError)
+      StorageService(env, root, id, env, remoteStorage, usageControl, isConnectionError)
     }
   }
 

@@ -53,6 +53,20 @@ object StorageService extends Logger {
     override def exists(storage: StorageService[S], path: String): Boolean = storage.exists(path)
     override def id(storage: StorageService[S]): String = storage.id
   }
+
+  def apply[S](
+    s:                 S,
+    root:              String,
+    id:                String,
+    environment:       BatchEnvironment,
+    remoteStorage:     RemoteStorage,
+    usageControl:      UsageControl,
+    isConnectionError: Throwable ⇒ Boolean
+  )(implicit storageInterface: StorageInterface[S], threadProvider: ThreadProvider, preference: Preference) = {
+    val storage = new StorageService[S](s, root, id, environment, remoteStorage, usageControl, isConnectionError)
+    startGC(storage)
+    storage
+  }
 }
 
 import org.openmole.plugin.environment.batch.storage.StorageService.Log._
