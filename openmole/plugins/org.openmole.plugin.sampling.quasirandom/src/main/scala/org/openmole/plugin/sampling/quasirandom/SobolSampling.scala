@@ -23,17 +23,18 @@ import org.openmole.core.expansion._
 import org.openmole.core.tools.math._
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.sampling._
+import org.openmole.core.workflow.tools._
 
 object SobolSampling {
 
-  def apply[D](samples: FromContext[Int], factors: Factor[D, Double]*)(implicit bounds: Bounds[D, Double], domainInputs: DomainInputs[D]) =
+  def apply(samples: FromContext[Int], factors: ScalarOrSequence[_]*) =
     new SobolSampling(samples, factors: _*)
 
 }
 
-sealed class SobolSampling[D](val samples: FromContext[Int], val factors: Factor[D, Double]*)(implicit bounds: Bounds[D, Double], domainInputs: DomainInputs[D]) extends Sampling {
+sealed class SobolSampling[D](val samples: FromContext[Int], val factors: ScalarOrSequence[_]*) extends Sampling {
 
-  override def inputs = PrototypeSet(factors.flatMap(f ⇒ domainInputs.inputs(f.domain)))
+  override def inputs = factors.flatMap(_.inputs)
   override def prototypes = factors.map { _.prototype }
 
   override def apply() = FromContext { p ⇒
@@ -43,12 +44,6 @@ sealed class SobolSampling[D](val samples: FromContext[Int], val factors: Factor
 
     for {
       v ← Iterator.continually(sequence.nextVector()).take(s)
-    } yield (factors zip v).map {
-      case (f, v) ⇒
-        Variable(
-          f.prototype,
-          v.scale(bounds.min(f.domain).from(context), bounds.max(f.domain).from(context))
-        )
-    }
+    } yield ScalarOrSequence.scaled(factors, v.toSeq)(context)
   }
 }

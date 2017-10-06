@@ -37,16 +37,6 @@ package sampling {
         domain.map(v ⇒ Vector(v))
     }
 
-    implicit def tupleOfStringToBoundOfDouble[T: FromString: Manifest] = new Bounds[(String, String), T] {
-      override def min(domain: (String, String)): FromContext[T] = FromContext.codeToFromContext[T](domain._1)
-      override def max(domain: (String, String)): FromContext[T] = FromContext.codeToFromContext[T](domain._2)
-    }
-
-    implicit def tupleIsBounds[T] = new Bounds[(T, T), T] {
-      override def min(domain: (T, T)) = domain._1
-      override def max(domain: (T, T)) = domain._2
-    }
-
     implicit def discreteFactorIsSampling[D, T](f: Factor[D, T])(implicit discrete: Discrete[D, T]) = FactorSampling(f)
   }
 }

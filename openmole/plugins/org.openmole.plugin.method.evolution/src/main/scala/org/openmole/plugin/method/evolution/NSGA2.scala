@@ -18,7 +18,9 @@
 package org.openmole.plugin.method.evolution
 
 import monocle.macros._
+import org.openmole.core.expansion.FromContext
 import squants.Time
+import cats.implicits._
 
 object NSGA2 {
 
@@ -61,9 +63,11 @@ object NSGA2 {
         def buildIndividual(genome: G, phenotype: Vector[Double]) = nsga2.buildIndividual(genome, phenotype)
         def initialState(rng: util.Random) = EvolutionState[Unit](random = rng, s = ())
 
-        def initialGenomes(n: Int) = interpret { impl ⇒
-          import impl._
-          zipWithState(nsga2.initialGenomes[DSL](n, om.genomeSize)).eval
+        def initialGenomes(n: Int) = om.genomeSize.map { size ⇒
+          interpret { impl ⇒
+            import impl._
+            zipWithState(nsga2.initialGenomes[DSL](n, size)).eval
+          }
         }
 
         def breeding(individuals: Vector[Individual], n: Int) = interpret { impl ⇒
@@ -94,7 +98,7 @@ object NSGA2 {
 
   }
 
-  case class DeterministicParams(mu: Int, genomeSize: Int, operatorExploration: Double)
+  case class DeterministicParams(mu: Int, genomeSize: FromContext[Int], operatorExploration: Double)
 
   def apply(
     mu:         Int,
@@ -148,9 +152,11 @@ object NSGA2 {
         def buildIndividual(genome: G, phenotype: Vector[Double]) = noisynsga2.buildIndividual(genome, phenotype)
         def initialState(rng: util.Random) = EvolutionState[Unit](random = rng, s = ())
 
-        def initialGenomes(n: Int) = interpret { impl ⇒
-          import impl._
-          zipWithState(noisynsga2.initialGenomes[DSL](n, om.genomeSize)).eval
+        def initialGenomes(n: Int) = om.genomeSize.map { size ⇒
+          interpret { impl ⇒
+            import impl._
+            zipWithState(noisynsga2.initialGenomes[DSL](n, size)).eval
+          }
         }
 
         def breeding(individuals: Vector[Individual], n: Int) = interpret { impl ⇒
@@ -187,7 +193,7 @@ object NSGA2 {
   case class StochasticParams(
     mu:                  Int,
     operatorExploration: Double,
-    genomeSize:          Int,
+    genomeSize:          FromContext[Int],
     historySize:         Int,
     cloneProbability:    Double,
     aggregation:         Vector[Vector[Double]] ⇒ Vector[Double]

@@ -185,19 +185,19 @@ object SafePath {
 
 import org.openmole.gui.ext.data.SafePath._
 
-sealed trait ServerFileSytemContext
+sealed trait ServerFileSystemContext
 
-object AbsoluteFileSystem extends ServerFileSytemContext
+object AbsoluteFileSystem extends ServerFileSystemContext
 
-object ProjectFileSystem extends ServerFileSytemContext
+object ProjectFileSystem extends ServerFileSystemContext
 
-object ServerFileSytemContext {
-  implicit val absolute: ServerFileSytemContext = AbsoluteFileSystem
-  implicit val project: ServerFileSytemContext = ProjectFileSystem
+object ServerFileSystemContext {
+  implicit val absolute: ServerFileSystemContext = AbsoluteFileSystem
+  implicit val project: ServerFileSystemContext = ProjectFileSystem
 }
 
 //The path it relative to the project root directory
-case class SafePath(path: Seq[String], context: ServerFileSytemContext = ProjectFileSystem) {
+case class SafePath(path: Seq[String]) {
 
   def ++(s: String) = sp(this.path :+ s)
 

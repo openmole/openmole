@@ -68,9 +68,11 @@ object GenomeProfile {
         def buildIndividual(genome: G, phenotype: Double) = Individual(genome, phenotype, 0)
         def initialState(rng: util.Random) = EvolutionState[Unit](random = rng, s = ())
 
-        def initialGenomes(n: Int) = interpret { impl ⇒
-          import impl._
-          zipWithState(mgo.algorithm.profile.initialGenomes[DSL](n, om.genomeSize)).eval
+        def initialGenomes(n: Int) = om.genomeSize.map { size ⇒
+          interpret { impl ⇒
+            import impl._
+            zipWithState(mgo.algorithm.profile.initialGenomes[DSL](n, size)).eval
+          }
         }
 
         def breeding(population: Vector[Individual], n: Int) = interpret { impl ⇒
@@ -101,7 +103,7 @@ object GenomeProfile {
     }
   }
 
-  case class DeterministicParams(niche: Niche[mgo.algorithm.profile.Individual, Int], genomeSize: Int, operatorExploration: Double)
+  case class DeterministicParams(niche: Niche[mgo.algorithm.profile.Individual, Int], genomeSize: FromContext[Int], operatorExploration: Double)
 
   object DeterministicGenomeProfile {
 
@@ -176,7 +178,7 @@ object GenomeProfile {
     mu:                  Int,
     niche:               Niche[mgo.algorithm.noisyprofile.Individual, Int],
     operatorExploration: Double,
-    genomeSize:          Int,
+    genomeSize:          FromContext[Int],
     historySize:         Int,
     cloneProbability:    Double,
     aggregation:         Vector[Double] ⇒ Double
@@ -220,9 +222,11 @@ object GenomeProfile {
         def buildIndividual(genome: G, phenotype: Double) = noisyprofile.buildIndividual(genome, phenotype)
         def initialState(rng: util.Random) = EvolutionState[Unit](random = rng, s = ())
 
-        def initialGenomes(n: Int) = interpret { impl ⇒
-          import impl._
-          zipWithState(noisyprofile.initialGenomes[DSL](n, om.genomeSize)).eval
+        def initialGenomes(n: Int) = om.genomeSize.map { size ⇒
+          interpret { impl ⇒
+            import impl._
+            zipWithState(noisyprofile.initialGenomes[DSL](n, size)).eval
+          }
         }
 
         def breeding(population: Vector[Individual], n: Int) = interpret { impl ⇒

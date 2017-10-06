@@ -40,8 +40,6 @@ object ProcessUtil {
           throw e
       }
       finally {
-        out.flush()
-        err.flush()
         pump.stop
       }
     }

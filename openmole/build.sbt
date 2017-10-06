@@ -311,7 +311,7 @@ lazy val sftpserver = OsgiProject(pluginDir, "org.openmole.plugin.tool.sftpserve
 
 /* Domain */
 
-def allDomain = Seq(collectionDomain, distributionDomain, fileDomain, modifierDomain, rangeDomain)
+def allDomain = Seq(collectionDomain, distributionDomain, fileDomain, modifierDomain, rangeDomain, boundsDomain)
 
 lazy val collectionDomain = OsgiProject(pluginDir, "org.openmole.plugin.domain.collection", imports = Seq("*")) dependsOn (openmoleDSL) settings (pluginSettings: _*)
 
@@ -325,6 +325,8 @@ lazy val modifierDomain = OsgiProject(pluginDir, "org.openmole.plugin.domain.mod
   ) settings (pluginSettings: _*)
 
 lazy val rangeDomain = OsgiProject(pluginDir, "org.openmole.plugin.domain.range", imports = Seq("*")) dependsOn (openmoleDSL) settings (pluginSettings: _*)
+
+lazy val boundsDomain = OsgiProject(pluginDir, "org.openmole.plugin.domain.bounds", imports = Seq("*")) dependsOn (openmoleDSL) settings (pluginSettings: _*)
 
 
 /* Environment */

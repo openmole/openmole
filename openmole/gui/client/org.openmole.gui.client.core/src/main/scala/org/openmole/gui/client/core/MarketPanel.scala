@@ -122,7 +122,7 @@ class MarketPanel {
   }
 
   def deleteFile(sp: SafePath, marketIndexEntry: MarketIndexEntry) =
-    post()[Api].deleteFile(sp, ServerFileSytemContext.project).call().foreach { d ⇒
+    post()[Api].deleteFile(sp, ServerFileSystemContext.project).call().foreach { d ⇒
       download(marketIndexEntry)
     }
 

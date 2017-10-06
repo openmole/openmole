@@ -83,7 +83,8 @@ object Application extends Logger {
       remote:               Boolean         = false,
       http:                 Boolean         = false,
       browse:               Boolean         = true,
-      args:                 List[String]    = Nil
+      args:                 List[String]    = Nil,
+      extraHeader:          Option[File]    = None
     )
 
     def takeArg(args: List[String]) =
@@ -115,6 +116,7 @@ object Application extends Logger {
       |[--remote] enable remote connection to the web interface
       |[--http] force http connection instead of https in remote mode for the web interface
       |[--no-browser] don't automatically launch the browser in GUI mode
+      |[--extra-header path] specify a file containing a piece of html code to be inserted in the GUI html header file
       |[--load-workspace-plugins] load the plugins of the OpenMOLE workspace (these plugins are always loaded in GUI mode)
       |[--console-work-directory] specify the workDirectory variable in console mode (it is set to the current directory by default)
       |[--reset] reset all preferences and authentications
@@ -147,6 +149,7 @@ object Application extends Logger {
         case "--remote" :: tail                 ⇒ parse(tail, c.copy(remote = true))
         case "--http" :: tail                   ⇒ parse(tail, c.copy(http = true))
         case "--no-browser" :: tail             ⇒ parse(tail, c.copy(browse = false))
+        case "--extra-header" :: tail           ⇒ parse(dropArg(tail), c.copy(extraHeader = Some(new File(takeArg(tail)))))
         case "--reset" :: tail                  ⇒ parse(tail, c.copy(launchMode = Reset(initialisePassword = false)))
         case "--host-name" :: tail              ⇒ parse(tail.tail, c.copy(hostName = Some(tail.head)))
         case "--reset-password" :: tail         ⇒ parse(tail, c.copy(launchMode = Reset(initialisePassword = true)))
@@ -255,6 +258,8 @@ object Application extends Logger {
             GUIServer.initialisePreference(preference)
             val port = config.port.getOrElse(preference(GUIServer.port))
 
+            val extraHeader = config.extraHeader.map { _.content }.getOrElse("")
+
             def useHTTP = config.http || !config.remote
 
             def protocol = if (useHTTP) "http" else "https"
@@ -264,7 +269,7 @@ object Application extends Logger {
             GUIServer.urlFile.content = url
 
             GUIServices.withServices(workspace) { services ⇒
-              val server = new GUIServer(port, config.remote, useHTTP, services, config.password)
+              val server = new GUIServer(port, config.remote, useHTTP, services, config.password, extraHeader)
               server.start()
               if (config.browse && !config.remote) browse(url)
               logger.info(s"Server listening on port $port.")

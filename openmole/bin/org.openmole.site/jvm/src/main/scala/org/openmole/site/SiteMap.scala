@@ -1,5 +1,6 @@
-/*
- * Copyright (C) 2012 Romain Reuillon
+/**
+ * Copyright (C) 2015 Jonathan Passerat-Palmbach
+ * Copyright (C) 2015 Mathieu Leclaire
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,18 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.workflow.mole
+package org.openmole.site
 
-import org.openmole.core.context.{ Context, Val }
-import org.openmole.core.workflow.task._
+import scalatags.Text.all._
 
-object MasterCapsule {
-  def apply(task: Task, persist: Seq[Val[_]], strain: Boolean) = new MasterCapsule(task, persist.map(_.name), strain)
-  def apply(t: Task, persist: Val[_]*): MasterCapsule = apply(t, persist, false)
-}
+object SiteMap {
 
-class MasterCapsule(task: Task, val persist: Seq[String] = Seq.empty, strainer: Boolean) extends Capsule(task, strainer) {
-  def toPersist(context: Context): Context =
-    persist.map { n ⇒ context.variable(n).get }
+  def siteMapSection(docSection: Seq[Page]) = for {
+    page ← docSection
+  } yield li(a(page.title, href := page.file))
 
 }

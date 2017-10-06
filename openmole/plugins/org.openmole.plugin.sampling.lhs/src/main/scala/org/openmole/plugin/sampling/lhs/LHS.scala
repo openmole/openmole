@@ -22,33 +22,32 @@ import org.openmole.core.expansion._
 import org.openmole.core.tools.math._
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.sampling._
+import org.openmole.core.workflow.tools._
 import org.openmole.tool.random._
+import cats.implicits._
 
 object LHS {
 
-  def apply[D](samples: FromContext[Int], factors: Factor[D, Double]*)(implicit bounds: Bounds[D, Double], domainInputs: DomainInputs[D]) =
-    new LHS[D](samples, factors: _*)
+  def apply(samples: FromContext[Int], factors: ScalarOrSequence[_]*) =
+    new LHS(samples, factors: _*)
 
 }
 
-sealed class LHS[D](val samples: FromContext[Int], val factors: Factor[D, Double]*)(implicit bounds: Bounds[D, Double], domainInputs: DomainInputs[D]) extends Sampling {
+sealed class LHS(val samples: FromContext[Int], val factors: ScalarOrSequence[_]*) extends Sampling {
 
-  override def inputs = PrototypeSet(factors.flatMap(f ⇒ domainInputs.inputs(f.domain)))
+  override def inputs = factors.flatMap(_.inputs)
   override def prototypes = factors.map { _.prototype }
 
   override def apply() = FromContext { p ⇒
     import p._
     val s = samples.from(context)
-    factors.map {
-      f ⇒
-        (0 until s).shuffled(random()).map {
-          i ⇒
-            Variable(
-              f.prototype,
-              ((i + random().nextDouble) / s).scale(bounds.min(f.domain).from(context), bounds.max(f.domain).from(context))
-            )
-        }
-    }.transpose.toIterator
+    val vectorSize = factors.map(_.size(context)).sum
 
+    def vs = Array.fill(vectorSize) {
+      (0 until s).shuffled(random()).map { i ⇒ (i + random().nextDouble) / s }.toArray
+    }.transpose
+
+    vs.map(v ⇒ ScalarOrSequence.scaled(factors, v).from(context)).toIterator
   }
+
 }

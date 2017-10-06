@@ -21,7 +21,7 @@
     "while [any? turtles] [go]")
 
   val fireTask =
-    NetLogo5Task("/path/to/the/Fire.nlogo", cmds) set (
+    NetLogo6Task("/path/to/the/Fire.nlogo", cmds) set (
       inputs += seed,
       outputs += (density, seed),
       netLogoInputs += (density, "density"),

@@ -26,12 +26,15 @@ package builder {
   class Inputs {
     def +=[T: InputBuilder](d: Val[_]*): T ⇒ T =
       implicitly[InputBuilder[T]].inputs.modify(_ ++ d)
+    def ++=[T: InputBuilder](d: Iterable[Val[_]]*): T ⇒ T =
+      +=[T](d.flatten: _*)
   }
 
   class Outputs {
     def +=[T: OutputBuilder](d: Val[_]*): T ⇒ T =
       implicitly[OutputBuilder[T]].outputs.modify(_ ++ d)
-
+    def ++=[T: OutputBuilder](d: Iterable[Val[_]]*): T ⇒ T =
+      +=[T](d.flatten: _*)
   }
 
   class ExploredOutputs {
@@ -40,21 +43,33 @@ package builder {
       def add = ds.filter(d ⇒ !outputs.get(t).contains(d))
       (outputs.modify(_ ++ add) andThen outputs.modify(_.explore(ds.map(_.name): _*)))(t)
     }
+    def ++=[T: OutputBuilder](d: Iterable[Val[_ <: Array[_]]]*): T ⇒ T =
+      +=[T](d.flatten: _*)
   }
 
   class Defaults {
     def +=[U: DefaultBuilder](d: Default[_]*): U ⇒ U =
       implicitly[DefaultBuilder[U]].defaults.modify(_.toSeq ++ d)
+    def ++=[T: DefaultBuilder](d: Iterable[Default[_]]*): T ⇒ T =
+      +=[T](d.flatten: _*)
   }
 
   class AssignDefault[T](p: Val[T]) {
     def :=[U: DefaultBuilder](v: T, `override`: Boolean): U ⇒ U =
-      implicitly[DefaultBuilder[U]].defaults.modify(_ + Default[T](p, v, `override`))
+      this := (v: FromContext[T], `override`)
     def :=[U: DefaultBuilder](v: T): U ⇒ U = this.:=(v, false)
     def :=[U: DefaultBuilder](v: FromContext[T], `override`: Boolean): U ⇒ U =
       implicitly[DefaultBuilder[U]].defaults.modify(_ + Default[T](p, v, `override`))
     def :=[U: DefaultBuilder](v: FromContext[T]): U ⇒ U =
       this.:=(v, false)
+  }
+
+  class AssignDefaultSeq[T](p: Iterable[Val[T]]) {
+    def :=[U: DefaultBuilder](v: Iterable[T], `override`: Boolean): U ⇒ U = { u ⇒
+      (p zip v).foldLeft(u) { case (u, (p, v)) ⇒ (new AssignDefault(p).:=[U](v, `override`)).apply(u) }
+    }
+
+    def :=[U: DefaultBuilder](v: Iterable[T]): U ⇒ U = this.:=(v, false)
   }
 
   class Name {
@@ -71,6 +86,8 @@ package builder {
     implicit class InputsOutputsDecorator(io: (Inputs, Outputs)) {
       def +=[T: InputBuilder: OutputBuilder](ps: Val[_]*): T ⇒ T =
         (inputs += (ps: _*)) andThen (outputs += (ps: _*))
+      def ++=[T: InputBuilder: OutputBuilder](ps: Iterable[Val[_]]*): T ⇒ T =
+        (inputs ++= (ps: _*)) andThen (outputs ++= (ps: _*))
     }
 
     implicit def prototypeToAssignDefault[T](p: Val[T]) = new AssignDefault[T](p)

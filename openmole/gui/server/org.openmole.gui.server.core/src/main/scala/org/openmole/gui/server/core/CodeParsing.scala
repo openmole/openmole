@@ -143,7 +143,7 @@ object CodeParsing {
 
   def netlogoParsing(safePath: SafePath)(implicit workspace: Workspace): LaunchingCommand = {
 
-    import org.openmole.gui.ext.data.ServerFileSytemContext.project
+    import org.openmole.gui.ext.data.ServerFileSystemContext.project
 
     val lines = Source.fromFile(safePath).getLines.toArray
 

@@ -133,95 +133,101 @@ class TransitionSpec extends FlatSpec with Matchers {
     executed should equal(1)
   }
 
-  /*
-
-  - NOTE: This spec has been revoked due to the impossibility of achieving it thoroughly in the general case and the relatively
-  low usage of it in all the workflow developed until now
-
-  A conjonctive pattern" should "aggregate variable of the same name in an array of closest common supertype" in {
-
-    val p1 = Prototype[java.lang.Long]("p")
-    val p2 = Prototype[java.lang.Integer]("p")
-    val pArray = Prototype[Array[java.lang.Number]]("p")
-
-    val init = EmptyTask()
-
-    val t1 = new TestTask {
-      val name = "Test write 1"
-      override def outputs = DataSet(p1)
-      override def process(context: Context) = context + (p1 -> new java.lang.Long(1L))
-    }
-
-    val t2 = new TestTask {
-      val name = "Test write 2"
-      override def outputs = DataSet(p2)
-      override def process(context: Context) = context + (p2 -> new java.lang.Integer(2))
-    }
-
-    val t3 = new TestTask {
-      val name = "Test read"
-      override def inputs = DataSet(pArray)
-      override def process(context: Context) = {
-        context(pArray).map(_.intValue).contains(1) should equal(true)
-        context(pArray).map(_.intValue).contains(2) should equal(true)
-
-        context(pArray).getClass should equal(classOf[Array[java.lang.Number]])
-        context
-      }
-    }
-
-    val initc = Capsule(init)
-    val t1c = Capsule(t1)
-    val t2c = Capsule(t2)
-    val t3c = Slot(t3)
-
-    val ex = (initc -- t1c -- t3c) + (initc -- t2c -- t3c)
-    ex.start.waitUntilEnded
-
+  "Transition syntax" should "should support a sequence task as parameter" in {
+    val t1 = EmptyTask()
+    val to = Seq.fill(3)(EmptyTask())
+    t1 -- (to: _*)
   }
 
+  /*
 
-  "A conjonctive pattern" should "aggregate array variable of the same name in an array of array of the closest common supertype" in {
+    - NOTE: This spec has been revoked due to the impossibility of achieving it thoroughly in the general case and the relatively
+    low usage of it in all the workflow developed until now
 
-    val p1 = Prototype[Array[java.lang.Long]]("p")
-    val p2 = Prototype[Array[java.lang.Integer]]("p")
-    val pArray = Prototype[Array[Array[java.lang.Number]]]("p")
+    A conjonctive pattern" should "aggregate variable of the same name in an array of closest common supertype" in {
 
-    val init = EmptyTask()
+      val p1 = Prototype[java.lang.Long]("p")
+      val p2 = Prototype[java.lang.Integer]("p")
+      val pArray = Prototype[Array[java.lang.Number]]("p")
 
-    val t1 = new TestTask {
-      val name = "Test write 1"
-      override def outputs = DataSet(p1)
-      override def process(context: Context) = context + (p1 -> Array(new java.lang.Long(1L)))
-    }
+      val init = EmptyTask()
 
-    val t2 = new TestTask {
-      val name = "Test write 2"
-      override def outputs = DataSet(p2)
-      override def process(context: Context) = context + (p2 -> Array(new java.lang.Integer(2)))
-    }
-
-    val t3 = new TestTask {
-      val name = "Test read"
-      override def inputs = DataSet(pArray)
-      override def process(context: Context) = {
-        val res = IndexedSeq(context(pArray)(0).deep, context(pArray)(1).deep)
-
-        res.contains(Array(new java.lang.Integer(1)).deep) should equal(true)
-        res.contains(Array(new java.lang.Long(2L)).deep) should equal(true)
-
-        context(pArray).getClass should equal(classOf[Array[Array[java.lang.Number]]])
-        context
+      val t1 = new TestTask {
+        val name = "Test write 1"
+        override def outputs = DataSet(p1)
+        override def process(context: Context) = context + (p1 -> new java.lang.Long(1L))
       }
+
+      val t2 = new TestTask {
+        val name = "Test write 2"
+        override def outputs = DataSet(p2)
+        override def process(context: Context) = context + (p2 -> new java.lang.Integer(2))
+      }
+
+      val t3 = new TestTask {
+        val name = "Test read"
+        override def inputs = DataSet(pArray)
+        override def process(context: Context) = {
+          context(pArray).map(_.intValue).contains(1) should equal(true)
+          context(pArray).map(_.intValue).contains(2) should equal(true)
+
+          context(pArray).getClass should equal(classOf[Array[java.lang.Number]])
+          context
+        }
+      }
+
+      val initc = Capsule(init)
+      val t1c = Capsule(t1)
+      val t2c = Capsule(t2)
+      val t3c = Slot(t3)
+
+      val ex = (initc -- t1c -- t3c) + (initc -- t2c -- t3c)
+      ex.start.waitUntilEnded
+
     }
 
-    val initc = Capsule(init)
-    val t1c = Capsule(t1)
-    val t2c = Capsule(t2)
-    val t3c = Slot(t3)
 
-    val mole = (initc -- t1c -- t3c) + (initc -- t2c -- t3c)
-    mole.start.waitUntilEnded
-  }*/
+    "A conjonctive pattern" should "aggregate array variable of the same name in an array of array of the closest common supertype" in {
+
+      val p1 = Prototype[Array[java.lang.Long]]("p")
+      val p2 = Prototype[Array[java.lang.Integer]]("p")
+      val pArray = Prototype[Array[Array[java.lang.Number]]]("p")
+
+      val init = EmptyTask()
+
+      val t1 = new TestTask {
+        val name = "Test write 1"
+        override def outputs = DataSet(p1)
+        override def process(context: Context) = context + (p1 -> Array(new java.lang.Long(1L)))
+      }
+
+      val t2 = new TestTask {
+        val name = "Test write 2"
+        override def outputs = DataSet(p2)
+        override def process(context: Context) = context + (p2 -> Array(new java.lang.Integer(2)))
+      }
+
+      val t3 = new TestTask {
+        val name = "Test read"
+        override def inputs = DataSet(pArray)
+        override def process(context: Context) = {
+          val res = IndexedSeq(context(pArray)(0).deep, context(pArray)(1).deep)
+
+          res.contains(Array(new java.lang.Integer(1)).deep) should equal(true)
+          res.contains(Array(new java.lang.Long(2L)).deep) should equal(true)
+
+          context(pArray).getClass should equal(classOf[Array[Array[java.lang.Number]]])
+          context
+        }
+      }
+
+      val initc = Capsule(init)
+      val t1c = Capsule(t1)
+      val t2c = Capsule(t2)
+      val t3c = Slot(t3)
+
+      val mole = (initc -- t1c -- t3c) + (initc -- t2c -- t3c)
+      mole.start.waitUntilEnded
+    }*/
 
 }

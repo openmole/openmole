@@ -22,6 +22,8 @@ import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.sampling._
 import org.openmole.tool.random._
 import monocle.macros._
+import cats.implicits._
+import org.openmole.core.expansion.FromContext
 
 object PSE {
 
@@ -42,7 +44,7 @@ object PSE {
 
   case class DeterministicParams(
     pattern:             Vector[Double] ⇒ Vector[Int],
-    genomeSize:          Int,
+    genomeSize:          FromContext[Int],
     operatorExploration: Double
   )
 
@@ -75,9 +77,11 @@ object PSE {
         } yield (newState, t)
       }
 
-      def initialGenomes(om: DeterministicParams)(n: Int): M[Vector[G]] = interpret { impl ⇒
-        import impl._
-        zipWithState(pse.initialGenomes[DSL](n, om.genomeSize)).eval
+      def initialGenomes(om: DeterministicParams)(n: Int) = om.genomeSize.map { size ⇒
+        interpret { impl ⇒
+          import impl._
+          zipWithState(pse.initialGenomes[DSL](n, size)).eval
+        }
       }
 
       def breeding(om: DeterministicParams)(individuals: Vector[Individual], n: Int) = interpret { impl ⇒
@@ -140,7 +144,7 @@ object PSE {
   case class StochasticParams(
     pattern:             Vector[Double] ⇒ Vector[Int],
     aggregation:         Vector[Vector[Double]] ⇒ Vector[Double],
-    genomeSize:          Int,
+    genomeSize:          FromContext[Int],
     historySize:         Int,
     cloneProbability:    Double,
     operatorExploration: Double
@@ -175,9 +179,11 @@ object PSE {
         } yield (newState, t)
       }
 
-      def initialGenomes(om: StochasticParams)(n: Int) = interpret { impl ⇒
-        import impl._
-        zipWithState(noisypse.initialGenomes[DSL](n, om.genomeSize)).eval
+      def initialGenomes(om: StochasticParams)(n: Int) = om.genomeSize.map { size ⇒
+        interpret { impl ⇒
+          import impl._
+          zipWithState(noisypse.initialGenomes[DSL](n, size)).eval
+        }
       }
 
       def breeding(om: StochasticParams)(individuals: Vector[Individual], n: Int) = interpret { impl ⇒
