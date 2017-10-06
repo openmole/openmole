@@ -162,37 +162,19 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
       services.preference(SSHEnvironment.MaxOperationsByMinute)
     )
 
-  // TODO take shared locally into account
-  lazy val storageService = {
-    val storageInterface = StorageInterface[SSHEnvironment[A]]
+  import env.services.{ threadProvider, preference }
 
-    val root = sharedDirectory match {
-      case Some(p) ⇒ p
-      case None ⇒
-        val home = storageInterface.home(env)
-        storageInterface.child(env, home, ".openmole/.tmp/ssh/")
-    }
-
-    implicit def logicalLinkStorage = LogicalLinkStorage.isStorage(gridscale.local.LocalInterpreter())
-    implicit def localStorage = LocalStorage.isStorage(gridscale.local.LocalInterpreter())
-
-    import env.services.{ threadProvider, preference }
-
-    val remoteStorage = StorageInterface.remote(LogicalLinkStorage())
-    if (storageSharedLocally) {
-      def id = new URI("file", user, "localhost", -1, sharedDirectory.orNull, null, null).toString
-      StorageService(LocalStorage(), root, id, env, remoteStorage, usageControl, t ⇒ false)
-    }
-    else {
-      def id = new URI("ssh", user, host, port, root, null, null).toString
-      def isConnectionError(t: Throwable) = t match {
-        case _: gridscale.ssh.ConnectionError ⇒ true
-        case _: gridscale.authentication.AuthenticationException ⇒ true
-        case _ ⇒ false
-      }
-      StorageService(env, root, id, env, remoteStorage, usageControl, isConnectionError)
-    }
-  }
+  lazy val storageService =
+    sshStorageService(
+      user = user,
+      host = host,
+      port = port,
+      storage = env,
+      environment = env,
+      usageControl = usageControl,
+      sharedDirectory = sharedDirectory,
+      storageSharedLocally = storageSharedLocally
+    )
 
   override def trySelectStorage(files: ⇒ Vector[File]) = BatchEnvironment.trySelectSingleStorage(storageService)
 
@@ -210,13 +192,13 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
     }
   }
 
-  def buildScript(serializedJob: SerializedJob) = {
-    import services._
-    SharedStorage.buildScript(env.installRuntime, env.workDirectory, env.openMOLEMemory, env.threads, serializedJob, env.storageService)
-  }
-
   def register(serializedJob: SerializedJob) = {
-    val (remoteScript, result, workDirectory) = env.buildScript(serializedJob)
+    def buildScript(serializedJob: SerializedJob) = {
+      import services._
+      SharedStorage.buildScript(env.installRuntime, env.workDirectory, env.openMOLEMemory, env.threads, serializedJob, env.storageService)
+    }
+
+    val (remoteScript, result, workDirectory) = buildScript(serializedJob)
     val jobDescription = gridscale.ssh.SSHJobDescription(
       command = s"/bin/bash $remoteScript",
       workDirectory = workDirectory

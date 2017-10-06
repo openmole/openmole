@@ -16,10 +16,17 @@
  */
 package org.openmole.plugin.environment
 
+import java.net.URI
+
 import freedsl.dsl._
 import org.openmole.core.communication.storage.TransferOptions
+import org.openmole.core.preference.Preference
+import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.workflow.dsl.File
-import org.openmole.plugin.environment.batch.storage.StorageInterface
+import org.openmole.plugin.environment.batch.control.UsageControl
+import org.openmole.plugin.environment.batch.environment.BatchEnvironment
+import org.openmole.plugin.environment.batch.storage.{ StorageInterface, StorageService }
+import org.openmole.plugin.environment.gridscale.{ LocalStorage, LogicalLinkStorage }
 import simulacrum.typeclass
 
 package object ssh {
@@ -51,6 +58,43 @@ package object ssh {
       StorageInterface.upload(false, gssh.writeFile[DSL](t, _, _).eval)(src, dest, options)
     override def download(t: S, src: String, dest: File, options: TransferOptions): Unit =
       StorageInterface.download(false, gssh.readFile[DSL, Unit](t, _, _).eval)(src, dest, options)
+  }
+
+  def sshStorageService[S](
+    user:                 String,
+    host:                 String,
+    port:                 Int,
+    storage:              S,
+    environment:          BatchEnvironment,
+    usageControl:         UsageControl,
+    sharedDirectory:      Option[String],
+    storageSharedLocally: Boolean
+  )(implicit storageInterface: StorageInterface[S], threadProvider: ThreadProvider, preference: Preference) = {
+
+    val root = sharedDirectory match {
+      case Some(p) ⇒ p
+      case None ⇒
+        val home = storageInterface.home(storage)
+        storageInterface.child(storage, home, ".openmole/.tmp/ssh/")
+    }
+
+    implicit def logicalLinkStorage = LogicalLinkStorage.isStorage(_root_.gridscale.local.LocalInterpreter())
+    implicit def localStorage = LocalStorage.isStorage(_root_.gridscale.local.LocalInterpreter())
+
+    val remoteStorage = StorageInterface.remote(LogicalLinkStorage())
+    if (storageSharedLocally) {
+      def id = new URI("file", user, "localhost", -1, sharedDirectory.orNull, null, null).toString
+      StorageService(LocalStorage(), root, id, environment, remoteStorage, usageControl, t ⇒ false)
+    }
+    else {
+      def id = new URI("ssh", user, host, port, root, null, null).toString
+      def isConnectionError(t: Throwable) = t match {
+        case _: _root_.gridscale.ssh.ConnectionError ⇒ true
+        case _: _root_.gridscale.authentication.AuthenticationException ⇒ true
+        case _ ⇒ false
+      }
+      StorageService(storage, root, id, environment, remoteStorage, usageControl, isConnectionError)
+    }
   }
 
 }
