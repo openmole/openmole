@@ -108,7 +108,7 @@ object Libraries {
 //  lazy val gridscaleGlite = "fr.iscpif.gridscale.bundle" %% "egi" % gridscaleVersion
   lazy val gridscaleHTTP = httpClient ++ Seq("org.openmole.library" %% "gridscale-http" % gridscaleVersion)
   lazy val gridscaleLocal = "org.openmole.library" %% "gridscale-local" % gridscaleVersion
-//  lazy val gridscaleOAR = "fr.iscpif.gridscale.bundle" %% "oar" % gridscaleVersion
+  lazy val gridscaleOAR = "org.openmole.library" %% "gridscale-oar" % gridscaleVersion
 
   lazy val scalaz = "org.scalaz" %% "scalaz-core" % "7.2.8"
   lazy val guava = "com.google.guava" % "guava" % "19.0"

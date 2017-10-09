@@ -178,24 +178,25 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
 
   override def trySelectStorage(files: ⇒ Vector[File]) = BatchEnvironment.trySelectSingleStorage(storageService)
 
-  val installMap = collection.mutable.Map[Runtime, String]()
-
-  def installRuntime(runtime: Runtime) = installMap.synchronized {
-    installMap.get(runtime) match {
-      case Some(p) ⇒ p
-      case None ⇒
-        import services._
-        val sshServer = gridscale.ssh.SSHServer(host, port, preference(SSHEnvironment.TimeOut))(authentication)
-        val p = SharedStorage.installRuntime(runtime, storageService, sshServer)
-        installMap.put(runtime, p)
-        p
-    }
-  }
+  val installRuntime = new RuntimeInstallation(
+    host = host,
+    port = port,
+    timeout = timeout,
+    storageService = storageService,
+    authentication = authentication
+  )
 
   def register(serializedJob: SerializedJob) = {
     def buildScript(serializedJob: SerializedJob) = {
       import services._
-      SharedStorage.buildScript(env.installRuntime, env.workDirectory, env.openMOLEMemory, env.threads, serializedJob, env.storageService)
+      SharedStorage.buildScript(
+        env.installRuntime.apply,
+        env.workDirectory,
+        env.openMOLEMemory,
+        env.threads,
+        serializedJob,
+        env.storageService
+      )
     }
 
     val (remoteScript, result, workDirectory) = buildScript(serializedJob)

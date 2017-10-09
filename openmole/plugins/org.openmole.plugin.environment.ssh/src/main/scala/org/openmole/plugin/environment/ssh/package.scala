@@ -24,10 +24,11 @@ import org.openmole.core.preference.Preference
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.workflow.dsl.File
 import org.openmole.plugin.environment.batch.control.UsageControl
-import org.openmole.plugin.environment.batch.environment.BatchEnvironment
+import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, Runtime }
 import org.openmole.plugin.environment.batch.storage.{ StorageInterface, StorageService }
 import org.openmole.plugin.environment.gridscale.{ LocalStorage, LogicalLinkStorage }
 import simulacrum.typeclass
+import squants.time.Time
 
 package object ssh {
   //  class RemoteLogicalLinkStorage(val root: String) extends LogicalLinkStorage with SimpleStorage
@@ -94,6 +95,29 @@ package object ssh {
         case _ ⇒ false
       }
       StorageService(storage, root, id, environment, remoteStorage, usageControl, isConnectionError)
+    }
+  }
+
+  class RuntimeInstallation[A: _root_.gridscale.ssh.SSHAuthentication](
+      host:           String,
+      port:           Int,
+      timeout:        Time,
+      authentication: A,
+      storageService: StorageService[_]
+  )(implicit services: BatchEnvironment.Services, sshInterpreter: _root_.gridscale.ssh.SSHInterpreter, systemInterpreter: freedsl.system.SystemInterpreter) {
+
+    val installMap = collection.mutable.Map[Runtime, String]()
+
+    def apply(runtime: Runtime) = installMap.synchronized {
+      installMap.get(runtime) match {
+        case Some(p) ⇒ p
+        case None ⇒
+          import services._
+          val sshServer = _root_.gridscale.ssh.SSHServer(host, port, timeout)(authentication)
+          val p = SharedStorage.installRuntime(runtime, storageService, sshServer)
+          installMap.put(runtime, p)
+          p
+      }
     }
   }
 

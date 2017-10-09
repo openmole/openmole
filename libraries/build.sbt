@@ -351,6 +351,18 @@ lazy val gridscaleSSH = OsgiProject(dir, "gridscale.ssh", imports = Seq("*"), pr
   version := gridscaleVersion
 ) settings(settings: _*) dependsOn(jzlib) dependsOn(gridscale)
 
+
+lazy val gridscaleCluster = OsgiProject(dir, "gridscale.cluster", imports = Seq("*")) settings (
+  libraryDependencies += "fr.iscpif.gridscale" %% "cluster" % gridscaleVersion,
+  version := gridscaleVersion
+) settings(settings: _*) dependsOn(gridscaleSSH)
+
+lazy val gridscaleOAR = OsgiProject(dir, "gridscale.oar", imports = Seq("*")) settings (
+  libraryDependencies += "fr.iscpif.gridscale" %% "oar" % gridscaleVersion,
+  version := gridscaleVersion
+) settings(settings: _*) dependsOn(gridscale, gridscaleCluster)
+
+
 lazy val jzlib = OsgiProject(dir, "com.jcraft.jzlib", imports = Seq("*")) settings (
   libraryDependencies += "com.jcraft" % "jzlib" % "1.1.3",
   version := "1.1.3"

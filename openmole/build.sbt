@@ -331,7 +331,7 @@ lazy val boundsDomain = OsgiProject(pluginDir, "org.openmole.plugin.domain.bound
 
 /* Environment */
 
-def allEnvironment = Seq(batch, gridscale, ssh) //, oar, desktopgrid, egi, gridscale, pbs, sge, condor, slurm, ssh)
+def allEnvironment = Seq(batch, gridscale, ssh, oar) //, desktopgrid, egi, gridscale, pbs, sge, condor, slurm, ssh)
 
 lazy val batch = OsgiProject(pluginDir, "org.openmole.plugin.environment.batch", imports = Seq("*")) dependsOn(
   workflow, workspace, tools, event, replication, exception,
@@ -346,9 +346,9 @@ lazy val batch = OsgiProject(pluginDir, "org.openmole.plugin.environment.batch",
   )
   ) settings (pluginSettings: _*)
 
-//lazy val oar = OsgiProject(pluginDir, "org.openmole.plugin.environment.oar", imports = Seq("*")) dependsOn(openmoleDSL, batch, gridscale, ssh) settings
-//  (libraryDependencies += Libraries.gridscaleOAR) settings (pluginSettings: _*)
-//
+lazy val oar = OsgiProject(pluginDir, "org.openmole.plugin.environment.oar", imports = Seq("*")) dependsOn(openmoleDSL, batch, gridscale, ssh) settings
+  (libraryDependencies += Libraries.gridscaleOAR) settings (pluginSettings: _*)
+
 //lazy val desktopgrid = OsgiProject(pluginDir, "org.openmole.plugin.environment.desktopgrid", imports = Seq("*")) dependsOn(
 //  openmoleDSL,
 //  batch, sftpserver, gridscale
