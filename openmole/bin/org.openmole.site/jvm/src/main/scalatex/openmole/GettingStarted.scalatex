@@ -108,4 +108,4 @@ $tasks
     @li{describe your design of experiments: look at the @aa("workflow and sampling documentation", href := DocumentationPages.advancedConcepts.file).}
 
 @sect{Get help}
-  To get help you are more than welcome to contact the OpenMOLE user mailing list. To do so, you should @aa("subscribe here", href := shared.link.mailingList), and then you can post your question to the list users 'at' list.openmole.org. We're also present on the @b{#openmole} channel of the @a("ISC-PIF's RocketChat", href := shared.link.chat).
+  To get help you are more than welcome to contact the OpenMOLE user mailing list. To do so, you should @aa("subscribe here", href := shared.link.mailingList), and then you can post your question to the list users. We're also present on the @b{#openmole} channel of the @a("ISC-PIF's RocketChat", href := shared.link.chat).

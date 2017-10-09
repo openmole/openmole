@@ -104,7 +104,7 @@ ln -s /data/openmole_data ~/.openmole
 
 @div In order for this procedure to work, you'll want to ensure the target folder (@i{/data/openmole} in the example) can be reached from all the machines running your OpenMOLE installation.
 
-@div Moving your @i{.openmole} to a different location is also @b{strongly advised on remote execution hosts (typically clusters) on which you own a personal account} used with OpenMOLE. In the case of remote environments, the OpenMOLE runtime and the input files of your workflow will be copied to the @i{.openmole} folder, again leading to problematic over quotas on these systems.
+@div Moving your @i{.openmole} to a different location is also @b{strongly advised on remote execution hosts (typically clusters) on which you own a personal account} used with OpenMOLE. In the case of remote environments, the OpenMOLE runtime and the input files of your workflow will be copied to the @i{.openmole} folder, again leading to problematic over quotas on these systems. For this specific case, we @b{recommend using} the @hl.openmoleNoTest{sharedDirectory} option of the @a("cluster environment", href := DocumentationPages.cluster.file) to set the location where OpenMOLE should copy your files without any hitting quota restrictions.
 
 
 @question("My sampling generates a type error")
@@ -207,9 +207,26 @@ care -o myapp.tgz.bin xvfb-run python3 myapp.py param1 param2
 
 @div And that's it. After that, no connection to the display server will be attempted.
 
+
+@question{When shall I use Path over File?}
+
+@div OpenMOLE takes care of everything for you, from connecting to remote environments, to submitting jobs and copying your files. However, most @a("cluster", href := DocumentationPages.cluster.file) installations take advantage from a shared file system between the nodes.
+
+@div If the file structure you're exploring is located on a shared filesystem, you do not need OpenMOLE to duplicate the target files, as they are available to the compute node directly from the shared filesystem.
+
+@div In case you're manipulating very large files, it might not even be possible to duplicate them.
+
+@div When you find yourself in such a use case, you might want to try the @hl.openmoleNoTest{Path} optimisation for your scripts. By replacing the @hl.openmoleNoTest{Val[File]} variables by @hl.openmoleNoTest{Val[Path]} in your scripts, OpenMOLE will store the file's @b{location} and not its @b{content} as it would when using @hl.openmoleNoTest{Val[File]}.
+
+@div This optimisation is only available for @a("cluster", href := DocumentationPages.cluster.file) and @b{not} for the @a("EGI grid", href := DocumentationPages.egi.file).
+
+@div You can find an example of using @hl.openmoleNoTest{Path} variables in the dataflow in the @a("data processing section", href := DocumentationPages.dataProcessing.file), and learn more about the OpenMOLE dataflow in the @a("dedicated section", href := DocumentationPages.dataflow.file).
+
+
+
 @question("My problem is not listed here")
 @div If you could not resolve your problems, feel free to post your problem on the @a("mailing-list",
-href := "http://list.openmole.org").
+href := shared.link.mailingList).
 
 @div If you think your problem is induced by a bug in OpenMOLE, please report the issue exhaustively on our @a(
-"GitHub page", href := "https://github.com/openmole/openmole/issues").
+"GitHub page", href := shared.link.issue).
