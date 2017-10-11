@@ -93,7 +93,6 @@ package object shared {
 
   object dataProcessingMenu {
     lazy val setOfFiles = "Exploring a set of files"
-    lazy val csvFileSampling = "CSV files Sampling"
   }
 
   object advancedSamplingMenu {
