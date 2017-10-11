@@ -93,6 +93,9 @@ package object shared {
 
   object dataProcessingMenu {
     lazy val setOfFiles = "Exploring a set of files"
+    lazy val pathsVsFiles = "Files vs Paths"
+    lazy val example = "More examples"
+    lazy val further = "Going further"
   }
 
   object advancedSamplingMenu {

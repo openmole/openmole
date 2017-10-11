@@ -159,7 +159,10 @@ object SideMenu {
 
   lazy val dataProcessingMenu = fromStrings(
     "Contents",
-    shared.dataProcessingMenu.setOfFiles
+    shared.dataProcessingMenu.setOfFiles,
+    shared.dataProcessingMenu.pathsVsFiles,
+    shared.dataProcessingMenu.example,
+    shared.dataProcessingMenu.further
   )
 
   lazy val advancedSamplingMenu = fromStrings(
