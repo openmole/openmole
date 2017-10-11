@@ -93,7 +93,7 @@ class MasterCapsuleSpec extends FlatSpec with Matchers {
 
     val selectCaps = MasterCapsule(select, n)
 
-    val ex = exc -< slot1 -- selectCaps -- (slot2, "n <= 100")
+    val ex = exc -< slot1 -- selectCaps -- (slot2 when "n <= 100")
 
     ex.start.waitUntilEnded
   }
@@ -144,7 +144,7 @@ class MasterCapsuleSpec extends FlatSpec with Matchers {
 
     val skel = exploration -< modelSlot1 -- selectCaps
     val loop = selectCaps -- modelSlot2
-    val terminate = selectCaps >| (finalTask, "archive.size >= 1")
+    val terminate = selectCaps >| (finalTask when "archive.size >= 1")
 
     val ex = skel & loop & terminate
 

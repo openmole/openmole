@@ -21,6 +21,7 @@ Different environments can be assigned to delegate the workload resulting of dif
  @ul
    @li{@port,}
    @li{@sharedDirectory,}
+   @li{@storageSharedLocally,}
    @li{@workDirectory,}
    @li{@queue,}
    @li{@wallTime,}
@@ -43,6 +44,7 @@ Different environments can be assigned to delegate the workload resulting of dif
   @ul
     @li{@port,}
     @li{@sharedDirectory,}
+    @li{@storageSharedLocally}
     @li{@workDirectory,}
     @li{@queue,}
     @li{@wallTime,}
@@ -66,6 +68,7 @@ Different environments can be assigned to delegate the workload resulting of dif
   @ul
     @li{@port,}
     @li{@sharedDirectory,}
+    @li{@storageSharedLocally}
     @li{@workDirectory,}
     @li{@queue,}
     @li{@wallTime,}
@@ -91,6 +94,7 @@ Different environments can be assigned to delegate the workload resulting of dif
   @ul
     @li{@port,}
     @li{@sharedDirectory,}
+    @li{@storageSharedLocally}
     @li{@workDirectory,}
     @li{@memory,}
     @li{@openMOLEMemory,}
@@ -109,6 +113,7 @@ Different environments can be assigned to delegate the workload resulting of dif
   @ul
     @li{@port,}
     @li{@sharedDirectory,}
+    @li{@storageSharedLocally}
     @li{@workDirectory,}
     @li{@queue,}
     @li{@wallTime,}
