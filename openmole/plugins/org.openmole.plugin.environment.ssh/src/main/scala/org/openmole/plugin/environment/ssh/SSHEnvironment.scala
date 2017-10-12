@@ -128,9 +128,9 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
     val sharedDirectory:      Option[String],
     val workDirectory:        Option[String],
     val openMOLEMemory:       Option[Information],
-    override val threads:     Option[Int],
+    val threads:              Option[Int],
     val storageSharedLocally: Boolean,
-    override val name:        Option[String],
+    val name:                 Option[String],
     val authentication:       A
 )(implicit val services: BatchEnvironment.Services) extends BatchEnvironment { env ⇒
 

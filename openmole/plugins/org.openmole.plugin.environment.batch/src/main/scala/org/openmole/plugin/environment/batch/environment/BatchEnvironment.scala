@@ -159,7 +159,7 @@ object BatchEnvironment extends Logger {
 
 }
 
-trait BatchEnvironment extends SubmissionEnvironment { env ⇒
+abstract class BatchEnvironment extends SubmissionEnvironment { env ⇒
 
   implicit val services: BatchEnvironment.Services
   //implicit def preference = services.preference
@@ -176,9 +176,6 @@ trait BatchEnvironment extends SubmissionEnvironment { env ⇒
   lazy val replBundleCache = new AssociativeCache[ReferencedClasses, FileCache]()
 
   lazy val plugins = PluginManager.pluginsForClass(this.getClass)
-
-  def threads: Option[Int] = None
-  def openMOLEMemory: Option[Information]
 
   override def submit(job: Job) = {
     val bej = executionJob(job)

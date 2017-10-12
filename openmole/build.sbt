@@ -346,6 +346,9 @@ lazy val batch = OsgiProject(pluginDir, "org.openmole.plugin.environment.batch",
   )
   ) settings (pluginSettings: _*)
 
+
+//lazy val cluster = OsgiProject(pluginDir, "org.openmole.plugin.environment.cluster", imports = Seq("*")) dependsOn(openmoleDSL, batch, gridscale, ssh) settings (pluginSettings: _*)
+
 lazy val oar = OsgiProject(pluginDir, "org.openmole.plugin.environment.oar", imports = Seq("*")) dependsOn(openmoleDSL, batch, gridscale, ssh) settings
   (libraryDependencies += Libraries.gridscaleOAR) settings (pluginSettings: _*)
 

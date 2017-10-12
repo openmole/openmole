@@ -46,10 +46,12 @@ object OAREnvironment {
     threads:              OptionalArgument[Int]         = None,
     storageSharedLocally: Boolean                       = false,
     name:                 OptionalArgument[String]      = None,
-    bestEffort:           Boolean                       = true
+    bestEffort:           Boolean                       = true,
+    timeout:              OptionalArgument[Time]        = None
   )(implicit services: BatchEnvironment.Services, authenticationStore: AuthenticationStore, cypher: Cypher, varName: sourcecode.Name) = {
     import services._
-    new OAREnvironment(
+
+    val parameters = Parameters(
       user = user,
       host = host,
       port = port,
@@ -62,14 +64,19 @@ object OAREnvironment {
       workDirectory = workDirectory,
       threads = threads,
       storageSharedLocally = storageSharedLocally,
-      name = Some(name.getOrElse(varName.value)),
       bestEffort = bestEffort,
+      timeout = timeout.getOrElse(services.preference(SSHEnvironment.TimeOut))
+    )
+
+    new OAREnvironment(
+      parameters,
+      name = Some(name.getOrElse(varName.value)),
       authentication = SSHAuthentication.find(user, host, port).apply
     )
   }
 
   implicit def asSSHServer[A: gridscale.ssh.SSHAuthentication]: AsSSHServer[OAREnvironment[A]] = new AsSSHServer[OAREnvironment[A]] {
-    override def apply(t: OAREnvironment[A]) = gridscale.ssh.SSHServer(t.host, t.port, t.timeout)(t.authentication)
+    override def apply(t: OAREnvironment[A]) = gridscale.ssh.SSHServer(t.parameters.host, t.parameters.port, t.parameters.timeout)(t.authentication)
   }
 
   implicit def isJobService[A]: JobServiceInterface[OAREnvironment[A]] = new JobServiceInterface[OAREnvironment[A]] {
@@ -80,24 +87,29 @@ object OAREnvironment {
     override def stdOutErr(js: OAREnvironment[A], j: J) = js.stdOutErr(j)
   }
 
+  case class Parameters(
+    val user:                 String,
+    val host:                 String,
+    val port:                 Int,
+    val queue:                Option[String],
+    val core:                 Option[Int],
+    val cpu:                  Option[Int],
+    val wallTime:             Option[Time],
+    val openMOLEMemory:       Option[Information],
+    val sharedDirectory:      Option[String],
+    val workDirectory:        Option[String],
+    val threads:              Option[Int],
+    val storageSharedLocally: Boolean,
+    val bestEffort:           Boolean,
+    val timeout:              Time
+  )
+
 }
 
 class OAREnvironment[A: gridscale.ssh.SSHAuthentication](
-    val user:                    String,
-    val host:                    String,
-    val port:                    Int,
-    val queue:                   Option[String],
-    val core:                    Option[Int],
-    val cpu:                     Option[Int],
-    val wallTime:                Option[Time],
-    override val openMOLEMemory: Option[Information],
-    val sharedDirectory:         Option[String],
-    val workDirectory:           Option[String],
-    override val threads:        Option[Int],
-    val storageSharedLocally:    Boolean,
-    override val name:           Option[String],
-    val bestEffort:              Boolean,
-    val authentication:          A
+    val parameters:     OAREnvironment.Parameters,
+    val name:           Option[String],
+    val authentication: A
 )(implicit val services: BatchEnvironment.Services) extends BatchEnvironment { env ⇒
 
   lazy val usageControl =
@@ -106,7 +118,6 @@ class OAREnvironment[A: gridscale.ssh.SSHAuthentication](
       services.preference(SSHEnvironment.MaxOperationsByMinute)
     )
 
-  def timeout = services.preference(SSHEnvironment.TimeOut)
   implicit val sshInterpreter = gridscale.ssh.SSHInterpreter()
   implicit val systemInterpreter = freedsl.system.SystemInterpreter()
   implicit val errorHandler = freedsl.errorhandler.ErrorHandlerInterpreter()
@@ -121,20 +132,20 @@ class OAREnvironment[A: gridscale.ssh.SSHAuthentication](
 
   lazy val storageService =
     sshStorageService(
-      user = user,
-      host = host,
-      port = port,
+      user = parameters.user,
+      host = parameters.host,
+      port = parameters.port,
       storage = env,
       environment = env,
       usageControl = usageControl,
-      sharedDirectory = sharedDirectory,
-      storageSharedLocally = storageSharedLocally
+      sharedDirectory = parameters.sharedDirectory,
+      storageSharedLocally = parameters.storageSharedLocally
     )
 
   override def trySelectStorage(files: ⇒ Vector[File]) = BatchEnvironment.trySelectSingleStorage(storageService)
 
   val installRuntime = new RuntimeInstallation(
-    Frontend.ssh(host, port, timeout, authentication),
+    Frontend.ssh(parameters.host, parameters.port, parameters.timeout, authentication),
     storageService = storageService
   )
 
@@ -143,9 +154,9 @@ class OAREnvironment[A: gridscale.ssh.SSHAuthentication](
       import services._
       SharedStorage.buildScript(
         env.installRuntime.apply,
-        env.workDirectory,
-        env.openMOLEMemory,
-        env.threads,
+        parameters.workDirectory,
+        parameters.openMOLEMemory,
+        parameters.threads,
         serializedJob,
         env.storageService
       )
@@ -155,11 +166,11 @@ class OAREnvironment[A: gridscale.ssh.SSHAuthentication](
     val description = gridscale.oar.OARJobDescription(
       command = s"/bin/bash $remoteScript",
       workDirectory = workDirectory,
-      queue = env.queue,
-      cpu = env.cpu,
-      core = env.core,
-      wallTime = env.wallTime,
-      bestEffort = env.bestEffort
+      queue = parameters.queue,
+      cpu = parameters.cpu,
+      core = parameters.core,
+      wallTime = parameters.wallTime,
+      bestEffort = parameters.bestEffort
     )
 
     val id = gridscale.oar.submit[DSL, _root_.gridscale.ssh.SSHServer](env, description).eval
