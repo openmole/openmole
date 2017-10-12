@@ -179,11 +179,8 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
   override def trySelectStorage(files: ⇒ Vector[File]) = BatchEnvironment.trySelectSingleStorage(storageService)
 
   val installRuntime = new RuntimeInstallation(
-    host = host,
-    port = port,
-    timeout = timeout,
     storageService = storageService,
-    authentication = authentication
+    frontend = Frontend.ssh(host, port, timeout, authentication)
   )
 
   def register(serializedJob: SerializedJob) = {

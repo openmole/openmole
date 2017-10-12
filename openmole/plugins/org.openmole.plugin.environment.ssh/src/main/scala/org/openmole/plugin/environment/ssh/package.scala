@@ -20,6 +20,7 @@ import java.net.URI
 
 import freedsl.dsl._
 import org.openmole.core.communication.storage.TransferOptions
+import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.preference.Preference
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.workflow.dsl.File
@@ -29,6 +30,8 @@ import org.openmole.plugin.environment.batch.storage.{ StorageInterface, Storage
 import org.openmole.plugin.environment.gridscale.{ LocalStorage, LogicalLinkStorage }
 import simulacrum.typeclass
 import squants.time.Time
+
+import scala.util.Try
 
 package object ssh {
   //  class RemoteLogicalLinkStorage(val root: String) extends LogicalLinkStorage with SimpleStorage
@@ -98,13 +101,10 @@ package object ssh {
     }
   }
 
-  class RuntimeInstallation[A: _root_.gridscale.ssh.SSHAuthentication](
-      host:           String,
-      port:           Int,
-      timeout:        Time,
-      authentication: A,
+  class RuntimeInstallation(
+      frontend:       Frontend,
       storageService: StorageService[_]
-  )(implicit services: BatchEnvironment.Services, sshInterpreter: _root_.gridscale.ssh.SSHInterpreter, systemInterpreter: freedsl.system.SystemInterpreter) {
+  )(implicit services: BatchEnvironment.Services) {
 
     val installMap = collection.mutable.Map[Runtime, String]()
 
@@ -113,12 +113,28 @@ package object ssh {
         case Some(p) ⇒ p
         case None ⇒
           import services._
-          val sshServer = _root_.gridscale.ssh.SSHServer(host, port, timeout)(authentication)
-          val p = SharedStorage.installRuntime(runtime, storageService, sshServer)
+          val p = SharedStorage.installRuntime(runtime, storageService, frontend)
           installMap.put(runtime, p)
           p
       }
     }
+  }
+
+  object Frontend {
+    def ssh(frontend: _root_.gridscale.ssh.SSHServer)(implicit sshInterpreter: _root_.gridscale.ssh.SSHInterpreter, systemInterpreter: freedsl.system.SystemInterpreter): Frontend = new Frontend {
+      override def run(command: String) =
+        _root_.gridscale.ssh.run[DSL](frontend, command, verbose = true).tryEval
+    }
+
+    def ssh[A: _root_.gridscale.ssh.SSHAuthentication](host: String, port: Int, timeout: Time, authentication: A)(implicit sshInterpreter: _root_.gridscale.ssh.SSHInterpreter, systemInterpreter: freedsl.system.SystemInterpreter): Frontend = {
+      val sshServer = _root_.gridscale.ssh.SSHServer(host, port, timeout)(authentication)
+      ssh(sshServer)
+    }
+
+  }
+
+  trait Frontend {
+    def run(command: String): util.Try[_root_.gridscale.ExecutionResult]
   }
 
 }

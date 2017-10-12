@@ -41,7 +41,7 @@ import squants.information.Information
 //
 object SharedStorage extends Logger {
 
-  def installRuntime(runtime: Runtime, sharedFS: StorageService[_], frontend: gridscale.ssh.SSHServer)(implicit preference: Preference, newFile: NewFile, sshInterpreter: gridscale.ssh.SSHInterpreter, systemInterpreter: SystemInterpreter) =
+  def installRuntime(runtime: Runtime, sharedFS: StorageService[_], frontend: Frontend)(implicit preference: Preference, newFile: NewFile) =
     BatchService.withToken(sharedFS.usageControl) { implicit token ⇒
       val runtimePrefix = "runtime"
       val runtimeInstall = runtimePrefix + runtime.runtime.hash
@@ -84,7 +84,7 @@ object SharedStorage extends Logger {
 
       Log.logger.fine("Begin install")
 
-      gridscale.ssh.run[DSL](frontend, command, verbose = true).tryEval match {
+      frontend.run(command) match {
         case util.Failure(e) ⇒ throw new InternalProcessingError(e, "There was an error during the runtime installation process.")
         case util.Success(r) ⇒
           r.returnCode match {
@@ -93,6 +93,7 @@ object SharedStorage extends Logger {
               throw new InternalProcessingError(s"Unexpected return status for the install process ${r.returnCode}.\nstdout:\n${r.stdOut}\nstderr:\n${r.stdErr}")
           }
       }
+
       val path = sharedFS.child(workdir, runtimeInstall)
 
       //installJobService.execute(jobDescription)
