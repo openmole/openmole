@@ -35,7 +35,7 @@ object SaltelliSampling {
 class SaltelliSampling(val samples: FromContext[Int], val factors: ScalarOrSequence[_]*) extends Sampling {
 
   override def inputs = factors.flatMap(_.inputs)
-  override def prototypes = factors.map { _.prototype }
+  override def prototypes = factors.map { _.prototype } ++ SaltelliSampling.matrix
 
   override def apply() = FromContext { p ⇒
     import p._
