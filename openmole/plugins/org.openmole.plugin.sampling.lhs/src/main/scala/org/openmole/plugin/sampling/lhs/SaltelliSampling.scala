@@ -23,9 +23,9 @@ object SaltelliSampling {
 
   val namespace = Namespace("saltelli")
   val matrixName = Val[String]("matrix", namespace = namespace)
-  val matrixIndice = Val[Int]("indice", namespace = namespace)
+  val matrixIndex = Val[Int]("index", namespace = namespace)
 
-  def matrix = Seq(matrixName, matrixIndice)
+  def matrix = Seq(matrixName, matrixIndex)
 
   def apply(samples: FromContext[Int], factors: ScalarOrSequence[_]*) =
     new SaltelliSampling(samples, factors: _*)
@@ -57,7 +57,7 @@ class SaltelliSampling(val samples: FromContext[Int], val factors: ScalarOrSeque
       matrix.zipWithIndex.map {
         case (l, index) ⇒
           def line = ScalarOrSequence.scaled(factors, l).from(context)
-          Variable(SaltelliSampling.matrixName, m) :: Variable(SaltelliSampling.matrixIndice, index) :: line
+          Variable(SaltelliSampling.matrixName, m) :: Variable(SaltelliSampling.matrixIndex, index) :: line
       }.toList
 
     def aVariables = toVariables(a, "a")
