@@ -149,6 +149,7 @@ class Val[T](val simpleName: String, val `type`: ValType[T], val namespace: Name
 
   def withName(name: String) = Val[T](name, namespace = namespace)(`type`)
   def withType[T: ValType] = Val[T](simpleName, namespace = namespace)
+  def withNamespace(namespace: Namespace) = Val[T](name, namespace = namespace)(`type`)
 
   def from(context: ⇒ Context): T = context(this)
 

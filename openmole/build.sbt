@@ -429,7 +429,7 @@ lazy val csvSampling = OsgiProject(pluginDir, "org.openmole.plugin.sampling.csv"
   libraryDependencies += Libraries.scalatest
   ) settings (pluginSettings: _*)
 
-lazy val lhsSampling = OsgiProject(pluginDir, "org.openmole.plugin.sampling.lhs", imports = Seq("*")) dependsOn(exception, workflow, workspace) settings (pluginSettings: _*)
+lazy val lhsSampling = OsgiProject(pluginDir, "org.openmole.plugin.sampling.lhs", imports = Seq("*")) dependsOn(exception, workflow, workspace, openmoleDSL) settings (pluginSettings: _*)
 
 lazy val quasirandomSampling = OsgiProject(pluginDir, "org.openmole.plugin.sampling.quasirandom", imports = Seq("*")) dependsOn(exception, workflow, workspace) settings (
   libraryDependencies += Libraries.math

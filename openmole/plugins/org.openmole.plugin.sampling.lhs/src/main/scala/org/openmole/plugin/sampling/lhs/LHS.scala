@@ -23,13 +23,16 @@ import org.openmole.core.tools.math._
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.tools._
-import org.openmole.tool.random._
 import cats.implicits._
 
 object LHS {
 
   def apply(samples: FromContext[Int], factors: ScalarOrSequence[_]*) =
     new LHS(samples, factors: _*)
+
+  def lhsValues(dimensions: Int, samples: Int, rng: scala.util.Random) = Array.fill(dimensions) {
+    org.openmole.tool.random.shuffled(0 until samples)(rng).map { i ⇒ (i + rng.nextDouble) / samples }.toArray
+  }.transpose
 
 }
 
@@ -42,12 +45,8 @@ sealed class LHS(val samples: FromContext[Int], val factors: ScalarOrSequence[_]
     import p._
     val s = samples.from(context)
     val vectorSize = factors.map(_.size(context)).sum
-
-    def vs = Array.fill(vectorSize) {
-      (0 until s).shuffled(random()).map { i ⇒ (i + random().nextDouble) / s }.toArray
-    }.transpose
-
-    vs.map(v ⇒ ScalarOrSequence.scaled(factors, v).from(context)).toIterator
+    def values = LHS.lhsValues(vectorSize, s, random())
+    values.map(v ⇒ ScalarOrSequence.scaled(factors, v).from(context)).toIterator
   }
 
 }
