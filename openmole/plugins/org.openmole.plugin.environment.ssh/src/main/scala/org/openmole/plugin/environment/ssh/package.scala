@@ -30,6 +30,7 @@ import org.openmole.plugin.environment.batch.storage.{ StorageInterface, Storage
 import org.openmole.plugin.environment.gridscale.{ LocalStorage, LogicalLinkStorage }
 import simulacrum.typeclass
 import squants.time.Time
+import sun.util.resources.ro.CalendarData_ro
 
 import scala.util.Try
 
@@ -62,6 +63,12 @@ package object ssh {
       StorageInterface.upload(false, gssh.writeFile[DSL](t, _, _).eval)(src, dest, options)
     override def download(t: S, src: String, dest: File, options: TransferOptions): Unit =
       StorageInterface.download(false, gssh.readFile[DSL, Unit](t, _, _).eval)(src, dest, options)
+  }
+
+  def localStorageService(environment: BatchEnvironment, usageControl: UsageControl, root: String, sharedDirectory: Option[String])(implicit threadProvider: ThreadProvider, preference: Preference, localInterpreter: _root_.gridscale.local.LocalInterpreter) = {
+    val remoteStorage = StorageInterface.remote(LogicalLinkStorage())
+    def id = new URI("file", null, "localhost", -1, sharedDirectory.orNull, null, null).toString
+    StorageService(LocalStorage(), root, id, environment, remoteStorage, usageControl, t ⇒ false)
   }
 
   def sshStorageService[S](
@@ -129,6 +136,12 @@ package object ssh {
     def ssh[A: _root_.gridscale.ssh.SSHAuthentication](host: String, port: Int, timeout: Time, authentication: A)(implicit sshInterpreter: _root_.gridscale.ssh.SSHInterpreter, systemInterpreter: freedsl.system.SystemInterpreter): Frontend = {
       val sshServer = _root_.gridscale.ssh.SSHServer(host, port, timeout)(authentication)
       ssh(sshServer)
+    }
+
+    def local(implicit localInterpreter: _root_.gridscale.local.LocalInterpreter) = new Frontend {
+      override def run(command: String) = {
+        _root_.gridscale.local.execute[DSL](command).tryEval
+      }
     }
 
   }

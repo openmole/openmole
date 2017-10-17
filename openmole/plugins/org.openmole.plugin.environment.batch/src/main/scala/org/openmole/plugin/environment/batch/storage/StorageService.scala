@@ -73,8 +73,7 @@ import org.openmole.plugin.environment.batch.storage.StorageService.Log._
 import org.openmole.plugin.environment.batch.storage.StorageService._
 
 class StorageService[S](
-    s: S,
-    //val url:           URI,
+    s:                 S,
     val root:          String,
     val id:            String,
     val environment:   BatchEnvironment,
