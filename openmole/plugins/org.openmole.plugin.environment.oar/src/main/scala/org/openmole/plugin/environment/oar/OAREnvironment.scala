@@ -20,7 +20,6 @@ package org.openmole.plugin.environment.oar
 import org.openmole.core.authentication._
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.execution._
-import org.openmole.plugin.environment.batch.control.{ LimitedAccess, UnlimitedAccess }
 import org.openmole.plugin.environment.batch.environment._
 import org.openmole.plugin.environment.batch.jobservice._
 import org.openmole.plugin.environment.ssh._
@@ -99,16 +98,16 @@ object OAREnvironment {
   }
 
   case class Parameters(
-    val queue:                Option[String],
-    val core:                 Option[Int],
-    val cpu:                  Option[Int],
-    val wallTime:             Option[Time],
-    val openMOLEMemory:       Option[Information],
-    val sharedDirectory:      Option[String],
-    val workDirectory:        Option[String],
-    val threads:              Option[Int],
-    val storageSharedLocally: Boolean,
-    val bestEffort:           Boolean
+    queue:                Option[String],
+    core:                 Option[Int],
+    cpu:                  Option[Int],
+    wallTime:             Option[Time],
+    openMOLEMemory:       Option[Information],
+    sharedDirectory:      Option[String],
+    workDirectory:        Option[String],
+    threads:              Option[Int],
+    storageSharedLocally: Boolean,
+    bestEffort:           Boolean
   )
 
 }
@@ -123,19 +122,15 @@ class OAREnvironment[A: gridscale.ssh.SSHAuthentication](
     val authentication: A
 )(implicit val services: BatchEnvironment.Services) extends BatchEnvironment { env ⇒
 
-  lazy val usageControl =
-    new LimitedAccess(
-      services.preference(SSHEnvironment.MaxConnections),
-      services.preference(SSHEnvironment.MaxOperationsByMinute)
-    )
+  def usageControls = List(storageService.usageControl, jobService.usageControl)
 
   implicit val sshInterpreter = gridscale.ssh.SSHInterpreter()
   implicit val systemInterpreter = freedsl.system.SystemInterpreter()
   implicit val errorHandler = freedsl.errorhandler.ErrorHandlerInterpreter()
 
-  override def stop() = {
-    try super.stop()
-    finally sshInterpreter.close()
+  override def close() = {
+    super.close()
+    sshInterpreter.close()
   }
 
   import env.services.{ threadProvider, preference }
@@ -148,7 +143,7 @@ class OAREnvironment[A: gridscale.ssh.SSHAuthentication](
       port = port,
       storage = env,
       environment = env,
-      usageControl = usageControl,
+      concurrency = services.preference(SSHEnvironment.MaxConnections),
       sharedDirectory = parameters.sharedDirectory,
       storageSharedLocally = parameters.storageSharedLocally
     )
@@ -203,7 +198,7 @@ class OAREnvironment[A: gridscale.ssh.SSHAuthentication](
     op.eval
   }
 
-  lazy val jobService = new BatchJobService(env, usageControl)
+  lazy val jobService = BatchJobService(env, concurrency = services.preference(SSHEnvironment.MaxConnections))
   override def trySelectJobService() = BatchEnvironment.trySelectSingleJobService(jobService)
 }
 
@@ -222,7 +217,8 @@ class OARLocalEnvironment(
     val name:       Option[String]
 )(implicit val services: BatchEnvironment.Services) extends BatchEnvironment { env ⇒
 
-  lazy val usageControl = UnlimitedAccess
+  lazy val usageControl = UsageControl(services.preference(SSHEnvironment.MaxLocalOperations))
+  def usageControls = List(storageService.usageControl, jobService.usageControl)
 
   implicit val localInterpreter = gridscale.local.LocalInterpreter()
   implicit val systemInterpreter = freedsl.system.SystemInterpreter()
@@ -234,7 +230,7 @@ class OARLocalEnvironment(
   lazy val storageService =
    localStorageService(
       environment = env,
-      usageControl = usageControl,
+      concurrency = services.preference(SSHEnvironment.MaxLocalOperations),
       root = "",
       sharedDirectory = parameters.sharedDirectory,
     )
@@ -292,6 +288,6 @@ class OARLocalEnvironment(
     op.eval
   }
 
-  lazy val jobService = new BatchJobService(env, usageControl)
+  lazy val jobService = BatchJobService(env, concurrency = services.preference(SSHEnvironment.MaxLocalOperations))
   override def trySelectJobService() = BatchEnvironment.trySelectSingleJobService(jobService)
 }

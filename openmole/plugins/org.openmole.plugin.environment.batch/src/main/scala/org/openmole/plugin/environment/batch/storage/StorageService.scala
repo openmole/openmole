@@ -18,19 +18,15 @@
 package org.openmole.plugin.environment.batch.storage
 
 import java.io._
-import java.net.{ SocketTimeoutException, URI }
 import java.util.concurrent.{ Callable, TimeUnit, TimeoutException }
 
 import com.google.common.cache.CacheBuilder
 import gridscale._
 import org.openmole.core.communication.storage._
-import org.openmole.core.fileservice.{ FileDeleter, FileService }
 import org.openmole.core.preference.{ ConfigurationLocation, Preference }
 import org.openmole.core.replication.{ ReplicaCatalog, ReplicationStorage }
 import org.openmole.core.serializer._
 import org.openmole.core.threadprovider.{ ThreadProvider, Updater }
-import org.openmole.core.workspace.{ NewFile, Workspace }
-import org.openmole.plugin.environment.batch.control._
 import org.openmole.plugin.environment.batch.environment._
 import org.openmole.plugin.environment.batch.refresh._
 import org.openmole.tool.cache._
@@ -60,9 +56,10 @@ object StorageService extends Logger {
     id:                String,
     environment:       BatchEnvironment,
     remoteStorage:     RemoteStorage,
-    usageControl:      UsageControl,
+    concurrency:       Int,
     isConnectionError: Throwable ⇒ Boolean
   )(implicit storageInterface: StorageInterface[S], threadProvider: ThreadProvider, preference: Preference) = {
+    val usageControl = UsageControl(concurrency)
     val storage = new StorageService[S](s, root, id, environment, remoteStorage, usageControl, isConnectionError)
     startGC(storage)
     storage

@@ -18,7 +18,7 @@
 package org.openmole.plugin.environment.batch.refresh
 
 import org.openmole.core.workflow.execution.ExecutionState._
-import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, BatchService }
+import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, UsageControl }
 
 object SubmitActor {
 
@@ -26,14 +26,17 @@ object SubmitActor {
     import services._
 
     val Submit(job, sj) = submit
+
     if (!job.state.isFinal) {
       try job.environment.trySelectJobService match {
         case Some((js, token)) ⇒
-          val bj =
-            try js.submit(sj)(token)
-            finally BatchService.releaseToken(js.usageControl, token)
-          job.state = SUBMITTED
-          JobManager ! Submitted(job, sj, bj)
+          try {
+            val bj = js.submit(sj)(token)
+            job.state = SUBMITTED
+            job.batchJob = Some(bj)
+            JobManager ! Submitted(job, sj, bj)
+          }
+          finally UsageControl.releaseToken(js.usageControl, token)
         case None ⇒ JobManager ! Delay(submit, BatchEnvironment.getTokenInterval)
       }
       catch {

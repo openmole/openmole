@@ -16,13 +16,7 @@
  */
 
 package org.openmole.plugin.environment.ssh
-//
-//
-//import org.openmole.core.exception.InternalProcessingError
-//import org.openmole.core.preference.Preference
-//import org.openmole.core.workspace.Workspace
-//import org.openmole.plugin.environment.batch.environment._
-//import org.openmole.plugin.environment.batch.storage._
+
 import java.util.UUID
 
 import org.openmole.tool.file._
@@ -34,15 +28,12 @@ import org.openmole.core.communication.storage._
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.tool.logger.Logger
 import freedsl.dsl._
-import freedsl.system.SystemInterpreter
 import squants.information.Information
-//
-//import scala.util.Try
-//
+
 object SharedStorage extends Logger {
 
   def installRuntime(runtime: Runtime, sharedFS: StorageService[_], frontend: Frontend)(implicit preference: Preference, newFile: NewFile) =
-    BatchService.withToken(sharedFS.usageControl) { implicit token ⇒
+    UsageControl.withToken(sharedFS.usageControl) { implicit token ⇒
       val runtimePrefix = "runtime"
       val runtimeInstall = runtimePrefix + runtime.runtime.hash
 
@@ -122,7 +113,7 @@ object SharedStorage extends Logger {
         script.content = content
 
         val remoteScript = sharedFS.child(serializedJob.path, uniqName("run", ".sh"))
-        BatchService.withToken(sharedFS.usageControl) { sharedFS.upload(script, remoteScript, options = TransferOptions(raw = true, forceCopy = true, canMove = true))(_) }
+        UsageControl.withToken(sharedFS.usageControl) { sharedFS.upload(script, remoteScript, options = TransferOptions(raw = true, forceCopy = true, canMove = true))(_) }
         remoteScript
       }
     (remoteScript, result, baseWorkDirectory)

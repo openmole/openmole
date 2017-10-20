@@ -29,10 +29,7 @@ import org.openmole.core.preference.{ ConfigurationLocation, Preference }
 import org.openmole.core.threadprovider.{ IUpdatable, Updater }
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.execution._
-import org.openmole.core.workspace._
-import org.openmole.plugin.environment.batch.control._
 import org.openmole.plugin.environment.batch.jobservice._
-import org.openmole.plugin.environment.batch.storage._
 import org.openmole.plugin.environment.gridscale.{ GridScaleJobService, LocalStorage, LogicalLinkStorage }
 import org.openmole.tool.crypto._
 import org.openmole.tool.lock._
@@ -45,8 +42,9 @@ import scala.ref.WeakReference
 
 object SSHEnvironment {
 
-  val MaxConnections = ConfigurationLocation("SSHEnvironment", "MaxConnections", Some(10))
-  val MaxOperationsByMinute = ConfigurationLocation("SSHEnvironment", "MaxOperationByMinute", Some(500))
+  val MaxLocalOperations = ConfigurationLocation("ClusterEnvironment", "MaxLocalOperations", Some(100))
+  val MaxConnections = ConfigurationLocation("SSHEnvironment", "MaxConnections", Some(5))
+
   val UpdateInterval = ConfigurationLocation("SSHEnvironment", "UpdateInterval", Some(10 seconds))
   val TimeOut = ConfigurationLocation("SSHEnvironment", "Timeout", Some(1 minutes))
 
@@ -150,17 +148,15 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
 
   override def stop() = {
     try super.stop()
-    finally {
-      jobUpdater.stop = true
-      sshInterpreter.close()
-    }
+    finally jobUpdater.stop = true
   }
 
-  lazy val usageControl =
-    new LimitedAccess(
-      services.preference(SSHEnvironment.MaxConnections),
-      services.preference(SSHEnvironment.MaxOperationsByMinute)
-    )
+  override def close() = {
+    super.close()
+    sshInterpreter.close()
+  }
+
+  def usageControls = List(storageService.usageControl, jobService.usageControl)
 
   import env.services.{ threadProvider, preference }
 
@@ -171,7 +167,7 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
       port = port,
       storage = env,
       environment = env,
-      usageControl = usageControl,
+      concurrency = preference(SSHEnvironment.MaxConnections),
       sharedDirectory = sharedDirectory,
       storageSharedLocally = storageSharedLocally
     )
@@ -267,6 +263,6 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
   type PID = Int
   val submittedJobs = collection.mutable.Map[SSHEnvironment.SSHJob, PID]()
 
-  lazy val jobService = new BatchJobService(env, usageControl)
+  lazy val jobService = BatchJobService(env, concurrency = preference(SSHEnvironment.MaxConnections))
   override def trySelectJobService() = BatchEnvironment.trySelectSingleJobService(jobService)
 }

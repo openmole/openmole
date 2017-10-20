@@ -23,12 +23,7 @@ import java.util.UUID
 import org.openmole.core.communication.message._
 import org.openmole.core.communication.storage._
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.fileservice.FileService
-import org.openmole.core.serializer._
-import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.workflow.job._
-import org.openmole.core.workspace.{ NewFile, Workspace }
-import org.openmole.plugin.environment.batch.control._
 import org.openmole.plugin.environment.batch.environment.BatchEnvironment.signalUpload
 import org.openmole.plugin.environment.batch.environment._
 import org.openmole.plugin.environment.batch.storage._
@@ -50,9 +45,10 @@ object UploadActor extends Logger {
           try {
             implicit val implicitToken = token
             val sj = initCommunication(job, storage)
+            job.serializedJob = Some(sj)
             JobManager ! Uploaded(job, sj)
           }
-          finally BatchService.releaseToken(storage.usageControl, token)
+          finally UsageControl.releaseToken(storage.usageControl, token)
         case None ⇒ JobManager ! Delay(msg, BatchEnvironment.getTokenInterval)
       }
       catch {

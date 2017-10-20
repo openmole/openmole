@@ -19,7 +19,7 @@ package org.openmole.plugin.environment.batch.refresh
 
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.workflow.execution.ExecutionState._
-import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, BatchService, ResubmitException }
+import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, ResubmitException, UsageControl }
 import org.openmole.tool.logger.Logger
 
 object RefreshActor extends Logger {
@@ -29,7 +29,7 @@ object RefreshActor extends Logger {
 
     val Refresh(job, sj, bj, delay, updateErrorsInARow) = refresh
     if (!job.state.isFinal) {
-      try BatchService.tryWithToken(bj.usageControl) {
+      try UsageControl.tryWithToken(bj.usageControl) {
         case Some(t) ⇒
           val oldState = job.state
           job.state = bj.updateState(t)

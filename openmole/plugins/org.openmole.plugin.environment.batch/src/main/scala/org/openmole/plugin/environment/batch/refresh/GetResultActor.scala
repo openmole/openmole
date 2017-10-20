@@ -30,7 +30,6 @@ import org.openmole.core.tools.service.Retry._
 import org.openmole.core.workflow.execution
 import org.openmole.core.workflow.execution._
 import org.openmole.core.workspace.{ NewFile, Workspace }
-import org.openmole.plugin.environment.batch.control._
 import org.openmole.plugin.environment.batch.environment.BatchEnvironment._
 import org.openmole.plugin.environment.batch.environment._
 import org.openmole.plugin.environment.batch.storage._
@@ -45,7 +44,7 @@ object GetResultActor extends Logger {
     import services._
 
     val GetResult(job, sj, resultPath) = msg
-    try BatchService.tryWithToken(sj.storage.usageControl) {
+    try UsageControl.tryWithToken(sj.storage.usageControl) {
       case Some(token) ⇒
         getResult(sj.storage, resultPath, job)(token, services)
         JobManager ! Kill(job)

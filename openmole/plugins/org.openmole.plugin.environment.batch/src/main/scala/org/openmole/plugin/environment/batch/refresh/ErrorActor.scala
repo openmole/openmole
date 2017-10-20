@@ -5,8 +5,7 @@ import java.io.FileNotFoundException
 import gridscale.authentication.AuthenticationException
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.workflow.execution.Environment
-import org.openmole.core.workflow.execution.ExecutionState.SUBMITTED
-import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, BatchExecutionJob, BatchService }
+import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, BatchExecutionJob, UsageControl }
 import org.openmole.tool.logger.Logger
 
 object ErrorActor extends Logger {
@@ -18,7 +17,7 @@ object ErrorActor extends Logger {
     bj match {
       case None ⇒ processError(job, exception, None)
       case Some(bj) ⇒
-        BatchService.tryGetToken(bj.usageControl) match {
+        UsageControl.tryGetToken(bj.usageControl) match {
           case Some(token) ⇒
             val output = util.Try(bj.stdOutErr(token)).toOption
             processError(job, exception, output)

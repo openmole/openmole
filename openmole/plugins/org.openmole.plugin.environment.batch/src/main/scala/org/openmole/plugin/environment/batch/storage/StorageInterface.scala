@@ -58,16 +58,6 @@ object StorageInterface {
       override def child(parent: String, child: String): String = storage.child(s, parent, child)
     }
 
-  //  private def compressedUploadStream(src: () => InputStream, dest: String, options: TransferOptions, uploadStream: (() => InputStream, String, TransferOptions) ⇒ Unit) =
-  //
-  //  def compressedDownloadStream[T](src: String, f: InputStream => T, options: TransferOptions, downloadStream: (String, InputStream => T, TransferOptions) ⇒ T): T = {
-  //    def uncompressed(inputStream: InputStream): T = f(inputStream.toGZ)
-  //    if (!options.raw) downloadStream(src, uncompressed, options) else downloadStream(src, options)
-  //  }
-  //
-  //  //  def create[T: Storage](t: T, dest: String) =
-  //  //    implicitly[Storage[T]].uploadStream(t, new ByteArrayInputStream("".getBytes), dest)
-
   def upload(compressed: Boolean, uploadStream: (() ⇒ InputStream, String) ⇒ Unit)(src: File, dest: String, options: TransferOptions = TransferOptions.default): Unit = {
     def fileStream() = src.bufferedInputStream
 

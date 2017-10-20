@@ -35,7 +35,6 @@ import org.openmole.core.threadprovider.{ ThreadProvider, Updater }
 import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.job._
 import org.openmole.core.workspace._
-import org.openmole.plugin.environment.batch.control._
 import org.openmole.plugin.environment.batch.jobservice._
 import org.openmole.plugin.environment.batch.refresh._
 import org.openmole.plugin.environment.batch.storage._
@@ -109,6 +108,8 @@ object BatchEnvironment extends Logger {
   val RuntimeMemoryMargin = ConfigurationLocation("BatchEnvironment", "RuntimeMemoryMargin", Some(400 megabytes))
 
   val downloadResultRetry = ConfigurationLocation("BatchEnvironment", "DownloadResultRetry", Some(3))
+  val killJobRetry = ConfigurationLocation("BatchEnvironment", "KillJobRetry", Some(3))
+  val cleanJobRetry = ConfigurationLocation("BatchEnvironment", "KillJobRetry", Some(3))
 
   private def runtimeDirLocation = openMOLELocation / "runtime"
 
@@ -152,20 +153,20 @@ object BatchEnvironment extends Logger {
   )
 
   def trySelectSingleStorage(s: StorageService[_]) =
-    BatchService.tryGetToken(s.usageControl).map(t ⇒ (s, t))
+    UsageControl.tryGetToken(s.usageControl).map(t ⇒ (s, t))
 
   def trySelectSingleJobService(jobService: BatchJobService[_]) =
-    BatchService.tryGetToken(jobService.usageControl).map(t ⇒ (jobService, t))
+    UsageControl.tryGetToken(jobService.usageControl).map(t ⇒ (jobService, t))
 
 }
 
 abstract class BatchEnvironment extends SubmissionEnvironment { env ⇒
 
   implicit val services: BatchEnvironment.Services
-  //implicit def preference = services.preference
   implicit def eventDispatcher = services.eventDispatcher
   def exceptions = services.preference(Environment.maxExceptionsLog)
 
+  def usageControls: List[UsageControl]
   def trySelectStorage(files: ⇒ Vector[File]): Option[(StorageService[_], AccessToken)]
   def trySelectJobService(): Option[(BatchJobService[_], AccessToken)]
 
@@ -207,9 +208,11 @@ abstract class BatchEnvironment extends SubmissionEnvironment { env ⇒
 
   override def stop() = {
     super.stop()
-    jobs.foreach(ej ⇒ JobManager ! Kill(ej))
     batchJobWatcher.stop = true
+    JobManager ! StopEnvironment(this)
   }
+
+  def close(): Unit = {}
 
 }
 

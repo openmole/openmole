@@ -20,7 +20,6 @@ package org.openmole.plugin.environment.batch.jobservice
 
 import org.openmole.core.event.EventDispatcher
 import org.openmole.core.workflow.execution.ExecutionState._
-import org.openmole.plugin.environment.batch.control._
 import org.openmole.plugin.environment.batch.environment._
 import org.openmole.tool.logger.Logger
 
@@ -36,8 +35,8 @@ trait JobServiceInterface[JS] {
 }
 
 object BatchJobService extends Logger {
-  def apply[JS](js: JS, usageControl: UsageControl)(implicit _jobServiceInterface: JobServiceInterface[JS], eventDispatcher: EventDispatcher) =
-    new BatchJobService[JS](js, usageControl)
+  def apply[JS](js: JS, concurrency: Int)(implicit _jobServiceInterface: JobServiceInterface[JS], eventDispatcher: EventDispatcher) =
+    new BatchJobService[JS](js, UsageControl(concurrency))
 
 }
 
