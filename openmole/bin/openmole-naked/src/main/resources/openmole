@@ -72,7 +72,7 @@ while [[ $# -gt 0 ]]; do
     m|--mem ) MEM="$2" ; shift ;;
     --debug-port ) DEBUG_PORT="$2"; shift ;;
     w|--workspace ) WORKSPACE="$2"; shift ; ARGS+=("--workspace"); ARGS+=("${WORKSPACE}") ;;
-    * ) ARGS+=("${OPTARG}");;
+    * ) ARGS+=("$1");;
   esac
   shift 
 done
