@@ -103,8 +103,7 @@ object Application extends Logger {
     def dropArgs(args: List[String]) = args.dropWhile(!_.startsWith("-"))
 
     def usage =
-      """Usage: openmole [options]
-      |
+      """OpenMOLE application options:
       |[-p | --plugin list of arg] plugins list of jar or category containing jars to be loaded
       |[-c | --console] console mode
       |[--port port] specify the port for the GUI or REST API
