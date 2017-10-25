@@ -150,6 +150,7 @@ object SideMenu {
   lazy val otherDoEMenu = fromStrings(
     "Contents",
     shared.otherDoEMenu.basicSampling,
+    shared.otherDoEMenu.csvSampling,
     shared.otherDoEMenu.LHSSobol,
     shared.otherDoEMenu.severalInputs,
     shared.otherDoEMenu.sensitivityAnalysis,
@@ -159,7 +160,9 @@ object SideMenu {
   lazy val dataProcessingMenu = fromStrings(
     "Contents",
     shared.dataProcessingMenu.setOfFiles,
-    shared.dataProcessingMenu.csvFileSampling
+    shared.dataProcessingMenu.pathsVsFiles,
+    shared.dataProcessingMenu.example,
+    shared.dataProcessingMenu.further
   )
 
   lazy val advancedSamplingMenu = fromStrings(

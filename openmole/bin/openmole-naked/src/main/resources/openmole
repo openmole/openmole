@@ -56,40 +56,26 @@ SCRIPT_ARGS=()
 
 function usage() {
 cat <<EOF
-Usage: $0 <[options]>
-Options:
+OpenMOLE launch script options:
   -d   --debug          Enable remote debugging (for developers)
   -h   --help           Show this message
-  -m   --mem=           Set OpenMOLE application's memory (default: --mem=${MEM})
-  -p   --debug-port=    Set port for remote debugging (default: --debug-port=${DEBUG_PORT})
-  -w   --workspace=     Set OpenMOLE application's workspace (default: --workspace=${HOME}/.openmole/$(hostname))
+  -m   --mem            Set OpenMOLE application's memory (default: --mem ${MEM})
+  -p   --debug-port     Set port for remote debugging (default: --debug-port ${DEBUG_PORT})
+
 EOF
-exit 0
 }
 
-# from http://stackoverflow.com/a/28466267/470341
-while getopts dhm:w:p:-: arg; do
-  case "${arg}" in
-    d )  DEBUG_MODE=true ;;
-    h )  usage ;;
-    m )  MEM="${OPTARG}" ;;
-    p )  DEBUG_PORT="${OPTARG}" ;;
-    w )  WORKSPACE="${OPTARG}"; ARGS+=("--workspace"); ARGS+=("${WORKSPACE}") ;;
-    - )  LONG_OPTARG="${OPTARG#*=}"
-      case ${OPTARG} in
-        debug    )    DEBUG_MODE=true ;;
-        help     )    usage ;;
-        mem=?*   )    MEM="${LONG_OPTARG}" ;;
-        debug-port=?* )    DEBUG_PORT="${LONG_OPTARG}" ;;
-        workspace=?*  )    WORKSPACE="${LONG_OPTARG}"; ARGS+=("--workspace"); ARGS+=("${WORKSPACE}") ;;
-        usage | debug*   )    echo "No arg allowed for --${OPTARG} option" >&2; exit 2 ;;
-        mem* | debug-port* | workspace*    )    echo "Missing arg for --${OPTARG} option" >&2; exit 2 ;;
-        '' | * )        ARGS+=("$@"); break ;; # "--" terminates argument processing
-      esac ;;
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    debug ) DEBUG_MODE=true ;;
+    h|--help ) usage ; ARGS+=("--help") ;;
+    m|--mem ) MEM="$2" ; shift ;;
+    --debug-port ) DEBUG_PORT="$2"; shift ;;
+    w|--workspace ) WORKSPACE="$2"; shift ; ARGS+=("--workspace"); ARGS+=("${WORKSPACE}") ;;
     * ) ARGS+=("${OPTARG}");;
   esac
+  shift 
 done
-shift $((OPTIND-1)) # remove parsed options and args from $@ list
 
 if [ ${DEBUG_MODE} == true ]; then
   FLAGS+=("-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=${DEBUG_PORT}")
