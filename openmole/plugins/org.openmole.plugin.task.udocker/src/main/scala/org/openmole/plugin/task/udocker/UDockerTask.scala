@@ -215,7 +215,7 @@ object UDockerTask {
         tag = Some(tag),
         architecture = Some(imageJSON.architecture),
         fsLayers = Some(fsLayers),
-        history = history.sequenceU.toOption.map(histList ⇒ histList.map(h ⇒ DockerMetadata.V1History(h.asJson.toString))),
+        history = history.sequence.toOption.map(histList ⇒ histList.map(h ⇒ DockerMetadata.V1History(h.asJson.toString))),
         schemaVersion = Some(1)
       )
 

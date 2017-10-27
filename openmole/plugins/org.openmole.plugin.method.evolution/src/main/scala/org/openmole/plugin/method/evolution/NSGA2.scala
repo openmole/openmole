@@ -72,7 +72,7 @@ object NSGA2 {
 
         def breeding(individuals: Vector[Individual], n: Int) = interpret { impl ⇒
           import impl._
-          zipWithState(nsga2.breeding[DSL](n, om.operatorExploration).run(individuals)).eval
+          zipWithState(nsga2.adaptiveBreeding[DSL](n, om.operatorExploration).run(individuals)).eval
         }
 
         def elitism(individuals: Vector[Individual]) = interpret { impl ⇒
@@ -161,7 +161,7 @@ object NSGA2 {
 
         def breeding(individuals: Vector[Individual], n: Int) = interpret { impl ⇒
           import impl._
-          zipWithState(noisynsga2.breeding[DSL](n, om.operatorExploration, om.cloneProbability, om.aggregation).run(individuals)).eval
+          zipWithState(noisynsga2.adaptiveBreeding[DSL](n, om.operatorExploration, om.cloneProbability, om.aggregation).run(individuals)).eval
         }
 
         def elitism(individuals: Vector[Individual]) = interpret { impl ⇒
