@@ -153,9 +153,9 @@ object ScriptClient {
           FileManager.download(
             toDisplay,
             onLoadEnded = (content: String) ⇒ {
-            TreeNodePanel.refreshAndDraw
-            fileDisplayer.display(toDisplay, content, FileExtension.OMS)
-          }
+              TreeNodePanel.refreshAndDraw
+              fileDisplayer.display(toDisplay, content, FileExtension.OMS)
+            }
           )
         })
       })
@@ -197,8 +197,8 @@ object ScriptClient {
         key = btn_danger,
         naming = (m: MenuAction) ⇒ m.name,
         onclose = () ⇒ menuActions.content.now.foreach {
-        _.action()
-      },
+          _.action()
+        },
         fixedTitle = Some("New project")
       )
 

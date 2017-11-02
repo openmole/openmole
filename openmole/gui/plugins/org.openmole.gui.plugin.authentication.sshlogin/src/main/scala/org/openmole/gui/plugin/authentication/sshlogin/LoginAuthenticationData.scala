@@ -20,10 +20,10 @@ import org.openmole.gui.ext.data.AuthenticationData
  */
 
 case class LoginAuthenticationData(
-    login:    String = "",
-    password: String = "",
-    target:   String = "",
-    port:     String = "22"
+  login:    String = "",
+  password: String = "",
+  target:   String = "",
+  port:     String = "22"
 ) extends AuthenticationData {
   def name = s"$login@$target"
 }

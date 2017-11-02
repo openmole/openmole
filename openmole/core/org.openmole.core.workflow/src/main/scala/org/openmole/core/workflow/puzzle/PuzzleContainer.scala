@@ -29,21 +29,21 @@ trait PuzzleContainer {
 }
 
 case class OutputPuzzleContainer(
-    puzzle: Puzzle,
-    output: Capsule,
-    hooks:  Seq[Hook] = Seq.empty
+  puzzle: Puzzle,
+  output: Capsule,
+  hooks:  Seq[Hook] = Seq.empty
 ) extends HookDecorator[OutputPuzzleContainer] with PuzzleContainer {
   def hook(hs: Hook*) = copy(hooks = hooks ++ hs)
   def buildPuzzle = puzzle.copy(hooks = puzzle.hooks ++ hooks.map(output → _))
 }
 
 case class OutputEnvironmentPuzzleContainer(
-    puzzle:      Puzzle,
-    output:      Capsule,
-    delegate:    Capsule,
-    hooks:       Seq[Hook]                   = Seq.empty,
-    environment: Option[EnvironmentProvider] = None,
-    grouping:    Option[Grouping]            = None
+  puzzle:      Puzzle,
+  output:      Capsule,
+  delegate:    Capsule,
+  hooks:       Seq[Hook]                   = Seq.empty,
+  environment: Option[EnvironmentProvider] = None,
+  grouping:    Option[Grouping]            = None
 ) extends HookDecorator[OutputEnvironmentPuzzleContainer] with EnvironmentDecorator[OutputEnvironmentPuzzleContainer] with PuzzleContainer {
 
   def on(environment: EnvironmentProvider) = copy(environment = Some(environment))

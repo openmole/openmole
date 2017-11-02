@@ -13,7 +13,7 @@ def settings = Seq(
   publishArtifact in (packageSrc in publishLocal) := false,
   organization := "org.openmole.library",
   isSnapshot := true
-) ++ BuildSystem.settings
+) 
 
 
 lazy val scalatraVersion = "2.5.0"

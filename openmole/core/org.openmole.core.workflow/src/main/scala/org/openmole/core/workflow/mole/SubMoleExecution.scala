@@ -40,8 +40,8 @@ object SubMoleExecution extends Logger
 import org.openmole.core.workflow.mole.SubMoleExecution.Log._
 
 class SubMoleExecution(
-    val parent:        Option[SubMoleExecution],
-    val moleExecution: MoleExecution
+  val parent:        Option[SubMoleExecution],
+  val moleExecution: MoleExecution
 ) {
 
   import moleExecution.executionContext.services._

@@ -52,11 +52,11 @@ object CSVSampling {
 }
 
 @Lenses case class CSVSampling(
-    file:        FromContext[File],
-    config:      InputOutputConfig,
-    columns:     Vector[(String, Val[_])],
-    fileColumns: Vector[(String, File, Val[File])],
-    separator:   Option[Char]
+  file:        FromContext[File],
+  config:      InputOutputConfig,
+  columns:     Vector[(String, Val[_])],
+  fileColumns: Vector[(String, File, Val[File])],
+  separator:   Option[Char]
 ) extends Sampling with CSVToVariables {
 
   override def inputs = InputOutputConfig.inputs.get(config)

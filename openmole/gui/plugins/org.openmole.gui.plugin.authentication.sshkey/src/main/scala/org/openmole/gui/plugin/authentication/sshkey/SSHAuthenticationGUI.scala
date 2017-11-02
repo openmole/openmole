@@ -69,11 +69,11 @@ class PrivateKeyAuthenticationGUI(val data: PrivateKeyAuthenticationData = Priva
 
   lazy val panel = vForm(
     hForm(
-    loginInput.withLabel("Login"),
-    passwordInput.withLabel("Password"),
-    targetInput.withLabel("Host"),
-    portInput.withLabel("Port")
-  ).render,
+      loginInput.withLabel("Login"),
+      passwordInput.withLabel("Password"),
+      targetInput.withLabel("Host"),
+      portInput.withLabel("Port")
+    ).render,
     privateKey.view(sheet.marginTop(10)).render.withLabel("Private key")
   )
 

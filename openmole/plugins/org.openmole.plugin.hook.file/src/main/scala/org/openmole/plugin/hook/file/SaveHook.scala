@@ -44,10 +44,10 @@ object SaveHook {
 }
 
 @Lenses case class SaveHook(
-    file:              FromContext[File],
-    prototypes:        Vector[Val[_]],
-    config:            InputOutputConfig,
-    serializerService: SerializerService
+  file:              FromContext[File],
+  prototypes:        Vector[Val[_]],
+  config:            InputOutputConfig,
+  serializerService: SerializerService
 ) extends Hook with ValidateHook {
 
   override def validate(inputs: Seq[Val[_]]) = Validate { p ⇒

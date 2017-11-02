@@ -43,10 +43,10 @@ object LoadSource {
 }
 
 @Lenses case class LoadSource(
-    file:              FromContext[String],
-    prototypes:        Vector[Val[_]],
-    config:            InputOutputConfig,
-    serializerService: SerializerService
+  file:              FromContext[String],
+  prototypes:        Vector[Val[_]],
+  config:            InputOutputConfig,
+  serializerService: SerializerService
 ) extends Source {
 
   override protected def process(executionContext: MoleExecutionContext) = FromContext { parameters ⇒

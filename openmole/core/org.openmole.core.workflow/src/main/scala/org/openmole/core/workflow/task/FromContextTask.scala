@@ -24,9 +24,9 @@ object FromContextTask {
 }
 
 @Lenses case class FromContextTask(
-    fromContext:            TaskExecutionContext ⇒ FromContext[Context],
-    override val className: String,
-    config:                 InputOutputConfig
+  fromContext:            TaskExecutionContext ⇒ FromContext[Context],
+  override val className: String,
+  config:                 InputOutputConfig
 ) extends Task {
   override protected def process(executionContext: TaskExecutionContext): FromContext[Context] = fromContext(executionContext)
 }

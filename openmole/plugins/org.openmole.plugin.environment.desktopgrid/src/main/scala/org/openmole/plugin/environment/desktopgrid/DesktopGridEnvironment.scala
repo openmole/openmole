@@ -54,11 +54,11 @@ object DesktopGridEnvironment {
 }
 
 class DesktopGridEnvironment(
-    val port:                    Int,
-    override val openMOLEMemory: Option[Information],
-    override val threads:        Option[Int],
-    override val name:           Option[String],
-    passwordHash:                Hash
+  val port:                    Int,
+  override val openMOLEMemory: Option[Information],
+  override val threads:        Option[Int],
+  override val name:           Option[String],
+  passwordHash:                Hash
 )(implicit val services: BatchEnvironment.Services) extends SimpleBatchEnvironment { env ⇒
   import services._
   import threadProvider.pool

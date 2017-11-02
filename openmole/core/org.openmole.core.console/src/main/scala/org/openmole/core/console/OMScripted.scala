@@ -28,7 +28,7 @@ object OMScripted {
 
 /* A REPL adaptor for the javax.script API. */
 class OMScripted(val factory: ScriptEngineFactory, settings: Settings, out: JPrintWriter, val omIMain: OMIMain)
-    extends AbstractScriptEngine with Compilable {
+  extends AbstractScriptEngine with Compilable {
 
   def createBindings: Bindings = new SimpleBindings
 

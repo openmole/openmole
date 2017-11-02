@@ -102,17 +102,17 @@ object MoleExecution extends Logger {
 case class JobStatuses(ready: Long, running: Long, completed: Long)
 
 class MoleExecution(
-    val mole:                        Mole,
-    val sources:                     Sources,
-    val hooks:                       Hooks,
-    val environmentProviders:        Map[Capsule, EnvironmentProvider],
-    val grouping:                    Map[Capsule, Grouping],
-    val defaultEnvironmentProvider:  LocalEnvironmentProvider,
-    val cleanOnFinish:               Boolean,
-    val implicits:                   Context,
-    val executionContext:            MoleExecutionContext,
-    val startStopDefaultEnvironment: Boolean,
-    val id:                          String
+  val mole:                        Mole,
+  val sources:                     Sources,
+  val hooks:                       Hooks,
+  val environmentProviders:        Map[Capsule, EnvironmentProvider],
+  val grouping:                    Map[Capsule, Grouping],
+  val defaultEnvironmentProvider:  LocalEnvironmentProvider,
+  val cleanOnFinish:               Boolean,
+  val implicits:                   Context,
+  val executionContext:            MoleExecutionContext,
+  val startStopDefaultEnvironment: Boolean,
+  val id:                          String
 ) {
 
   import executionContext.services._

@@ -41,9 +41,9 @@ object FileSource {
 }
 
 @Lenses case class FileSource(
-    path:      FromContext[String],
-    prototype: Val[File],
-    config:    InputOutputConfig
+  path:      FromContext[String],
+  prototype: Val[File],
+  config:    InputOutputConfig
 ) extends Source {
 
   override protected def process(executionContext: MoleExecutionContext) = FromContext { parameters ⇒

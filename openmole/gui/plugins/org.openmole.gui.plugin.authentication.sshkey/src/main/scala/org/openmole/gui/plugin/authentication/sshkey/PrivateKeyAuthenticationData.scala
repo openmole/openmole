@@ -20,11 +20,11 @@ import org.openmole.gui.ext.data.{ AuthenticationData, Test, Error }
  */
 
 case class PrivateKeyAuthenticationData(
-    privateKey:       Option[String] = None,
-    login:            String         = "",
-    cypheredPassword: String         = "",
-    target:           String         = "",
-    port:             String         = "22"
+  privateKey:       Option[String] = None,
+  login:            String         = "",
+  cypheredPassword: String         = "",
+  target:           String         = "",
+  port:             String         = "22"
 ) extends AuthenticationData {
   def name = s"$login@$target"
 

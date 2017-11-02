@@ -119,17 +119,17 @@ object SSHEnvironment {
 }
 
 class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
-    val user:                 String,
-    val host:                 String,
-    val slots:                Int,
-    val port:                 Int,
-    val sharedDirectory:      Option[String],
-    val workDirectory:        Option[String],
-    val openMOLEMemory:       Option[Information],
-    val threads:              Option[Int],
-    val storageSharedLocally: Boolean,
-    val name:                 Option[String],
-    val authentication:       A
+  val user:                 String,
+  val host:                 String,
+  val slots:                Int,
+  val port:                 Int,
+  val sharedDirectory:      Option[String],
+  val workDirectory:        Option[String],
+  val openMOLEMemory:       Option[Information],
+  val threads:              Option[Int],
+  val storageSharedLocally: Boolean,
+  val name:                 Option[String],
+  val authentication:       A
 )(implicit val services: BatchEnvironment.Services) extends BatchEnvironment { env ⇒
 
   override def updateInterval = UpdateInterval.fixed(env.services.preference(SSHEnvironment.UpdateInterval))

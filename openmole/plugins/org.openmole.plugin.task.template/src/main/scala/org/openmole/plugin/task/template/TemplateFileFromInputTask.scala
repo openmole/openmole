@@ -43,9 +43,9 @@ object TemplateFileFromInputTask {
 }
 
 @Lenses case class TemplateFileFromInputTask(
-    template: Val[File],
-    output:   Val[File],
-    config:   InputOutputConfig
+  template: Val[File],
+  output:   Val[File],
+  config:   InputOutputConfig
 ) extends Task {
 
   override protected def process(executionContext: TaskExecutionContext) = FromContext { parameters ⇒

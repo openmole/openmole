@@ -10,11 +10,27 @@ organization := "org.openmole"
 name := "openmole-root"
 
 def macroParadise =
-  addCompilerPlugin("org.scalamacros" %% "paradise" % "2.1.0" cross CrossVersion.fullMapped(_ ⇒ scalaVersionValue))
+  addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
+
+import com.typesafe.sbt.SbtScalariform.ScalariformKeys
+import scalariform.formatter.preferences._
+
+def formatSettings = 
+  scalariformSettings(true) ++
+    Seq(
+      ScalariformKeys.preferences := 
+        ScalariformKeys.preferences (p =>
+          p.setPreference(RewriteArrowSymbols, true)
+           .setPreference(AlignParameters, true)
+           .setPreference(AlignSingleLineCaseStatements, true)
+           .setPreference(DanglingCloseParenthesis, Preserve)
+           .setPreference(CompactControlReadability, true)
+        ).value
+    )
 
 lazy val scalaVersionValue = "2.12.3"
 
-def defaultSettings = BuildSystem.settings ++
+def defaultSettings = formatSettings ++
   Seq(
     organization := "org.openmole",
     updateOptions := updateOptions.value.withCachedResolution(true),
@@ -229,8 +245,8 @@ lazy val console = OsgiProject(coreDir, "org.openmole.core.console", global = tr
 
 lazy val project = OsgiProject(coreDir, "org.openmole.core.project", imports = Seq("*")) dependsOn(console, openmoleDSL, services) settings (OsgiKeys.importPackage := Seq("*")) settings (coreSettings: _*)
 
-lazy val buildinfo = OsgiProject(coreDir, "org.openmole.core.buildinfo", imports = Seq("*")) settings (buildInfoSettings: _*) settings(
-  sourceGenerators in Compile += buildInfo.taskValue,
+lazy val buildinfo = OsgiProject(coreDir, "org.openmole.core.buildinfo", imports = Seq("*")) enablePlugins(BuildInfoPlugin) settings(
+  //sourceGenerators in Compile += buildInfo.taskValue,
   buildInfoKeys :=
     Seq[BuildInfoKey](
       name,
@@ -806,7 +822,7 @@ lazy val openmoleRuntime =
 
 
 lazy val api = Project("api", binDir / "target" / "api") settings (defaultSettings: _*) enablePlugins (ScalaUnidocPlugin) settings(
-  compile := sbt.inc.Analysis.Empty,
+  //compile := sbt.inc.Analysis.Empty,
   unidocProjectFilter in(ScalaUnidoc, unidoc) := inProjects(openmoleDependencies.map(p ⇒ p: ProjectReference): _*)
   // -- inProjects(Libraries.projects.map(p ⇒ p: ProjectReference) ++ ThirdParties.projects.map(p ⇒ p: ProjectReference)*/
   //  Tar.name := "openmole-api.tar.gz",

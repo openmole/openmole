@@ -108,8 +108,8 @@ package object ssh {
   }
 
   class RuntimeInstallation(
-      frontend:       Frontend,
-      storageService: StorageService[_]
+    frontend:       Frontend,
+    storageService: StorageService[_]
   )(implicit services: BatchEnvironment.Services) {
 
     val installMap = collection.mutable.Map[Runtime, String]()

@@ -19,9 +19,9 @@ trait ToTransitionParameter[T] {
 }
 
 case class TransitionParameter(
-    puzzleParameter:    Puzzle,
-    conditionParameter: Condition = Condition.True,
-    filterParameter:    BlockList = BlockList.empty
+  puzzleParameter:    Puzzle,
+  conditionParameter: Condition = Condition.True,
+  filterParameter:    BlockList = BlockList.empty
 ) {
   def when(condition: Condition) = copy(conditionParameter = condition)
   def filter(filter: BlockList) = copy(filterParameter = filter)

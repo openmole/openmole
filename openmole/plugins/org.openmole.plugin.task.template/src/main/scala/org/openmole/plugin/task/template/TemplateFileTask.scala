@@ -39,9 +39,9 @@ object TemplateFileTask {
 }
 
 @Lenses case class TemplateFileTask(
-    template: File,
-    output:   Val[File],
-    config:   InputOutputConfig
+  template: File,
+  output:   Val[File],
+  config:   InputOutputConfig
 ) extends Task {
 
   @transient lazy val expanded = template.withInputStream { is ⇒

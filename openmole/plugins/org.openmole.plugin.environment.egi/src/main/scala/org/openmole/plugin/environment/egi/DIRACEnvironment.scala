@@ -86,17 +86,17 @@ class DiracBatchExecutionJob(val job: Job, val environment: DIRACEnvironment) ex
 }
 
 class DIRACEnvironment(
-    val voName:                  String,
-    val service:                 Option[String],
-    val group:                   Option[String],
-    val bdiis:                   Seq[BDII],
-    val vomsURLs:                Seq[String],
-    val setup:                   String,
-    val fqan:                    Option[String],
-    val cpuTime:                 Option[Time],
-    override val openMOLEMemory: Option[Information],
-    val debug:                   Boolean,
-    override val name:           Option[String]
+  val voName:                  String,
+  val service:                 Option[String],
+  val group:                   Option[String],
+  val bdiis:                   Seq[BDII],
+  val vomsURLs:                Seq[String],
+  val setup:                   String,
+  val fqan:                    Option[String],
+  val cpuTime:                 Option[Time],
+  override val openMOLEMemory: Option[Information],
+  val debug:                   Boolean,
+  override val name:           Option[String]
 )(implicit a: EGIAuthentication, val services: BatchEnvironment.Services, cypher: Cypher, workspace: Workspace) extends BatchEnvironment with BDIIStorageServers with EGIEnvironmentId { env ⇒
 
   type JS = DIRACJobService

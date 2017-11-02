@@ -39,10 +39,10 @@ object ListFilesSource {
 
 }
 @Lenses case class ListFilesSource(
-    path:      FromContext[String],
-    prototype: Val[Array[File]],
-    regExp:    FromContext[String],
-    config:    InputOutputConfig
+  path:      FromContext[String],
+  prototype: Val[Array[File]],
+  regExp:    FromContext[String],
+  config:    InputOutputConfig
 ) extends Source {
 
   override protected def process(executionContext: MoleExecutionContext) = FromContext { parameters ⇒

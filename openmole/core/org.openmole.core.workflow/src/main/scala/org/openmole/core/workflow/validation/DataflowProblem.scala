@@ -38,44 +38,44 @@ object DataflowProblem {
   }
 
   case class WrongType(
-      slot:     Slot,
-      expected: Val[_],
-      provided: Val[_]
+    slot:     Slot,
+    expected: Val[_],
+    provided: Val[_]
   ) extends SlotDataflowProblem {
 
     override def toString = "Wrong type received at " + slot + ", " + expected + " is expected but " + provided + " is provided."
   }
 
   case class MissingInput(
-      slot: Slot,
-      data: Val[_]
+    slot: Slot,
+    data: Val[_]
   ) extends SlotDataflowProblem {
 
     override def toString = "Input " + data + " is missing when reaching the " + slot + "."
   }
 
   case class DuplicatedName(
-      capsule:   Capsule,
-      name:      String,
-      prototype: Iterable[Val[_]],
-      slotType:  SlotType
+    capsule:   Capsule,
+    name:      String,
+    prototype: Iterable[Val[_]],
+    slotType:  SlotType
   ) extends DataflowProblem {
 
     override def toString = name + " has been found several time with different types in " + slotType + " of capsule " + capsule + ": " + prototype.mkString(", ") + "."
   }
 
   case class IncoherentTypesBetweenSlots(
-      capsule: Capsule,
-      name:    String,
-      types:   Iterable[ValType[_]]
+    capsule: Capsule,
+    name:    String,
+    types:   Iterable[ValType[_]]
   ) extends DataflowProblem {
 
     override def toString = name + " is present in multiple slot of capsule " + capsule + " but has different types: " + types.mkString(", ") + "."
   }
 
   case class IncoherentTypeAggregation(
-      slot:   Slot,
-      `type`: InvalidType
+    slot:   Slot,
+    `type`: InvalidType
   ) extends SlotDataflowProblem {
     override def toString = s"Cannot aggregate type for slot ${slot}, the incoming data type are inconsistent (it may be because variables with the same name but not the same type reach the slot): ${`type`}."
   }
@@ -83,19 +83,19 @@ object DataflowProblem {
   sealed trait SourceProblem extends SlotDataflowProblem
 
   case class MissingSourceInput(
-      slot:   Slot,
-      source: Source,
-      input:  Val[_]
+    slot:   Slot,
+    source: Source,
+    input:  Val[_]
   ) extends SourceProblem {
 
     override def toString = s"Input $input is missing for source $source at $slot"
   }
 
   case class WrongSourceType(
-      slot:     Slot,
-      source:   Source,
-      expected: Val[_],
-      provided: Val[_]
+    slot:     Slot,
+    source:   Source,
+    expected: Val[_],
+    provided: Val[_]
   ) extends SourceProblem {
 
     override def toString = s"Wrong type received for source $source at $slot, $expected is expected but $provided is provided."
@@ -104,26 +104,26 @@ object DataflowProblem {
   sealed trait HookProblem extends DataflowProblem
 
   case class MissingHookInput(
-      capsule: Capsule,
-      hook:    Hook,
-      input:   Val[_]
+    capsule: Capsule,
+    hook:    Hook,
+    input:   Val[_]
   ) extends HookProblem {
 
     override def toString = s"Input $input is missing for misc $hook"
   }
   case class WrongHookType(
-      capsule: Capsule,
-      hook:    Hook,
-      input:   Val[_],
-      found:   Val[_]
+    capsule: Capsule,
+    hook:    Hook,
+    input:   Val[_],
+    found:   Val[_]
   ) extends HookProblem {
 
     override def toString = s"Input has incompatible type $found whereas $input was expected for hook $hook of capsule $capsule"
   }
 
   case class MissingMoleTaskImplicit(
-      capsule:    Capsule,
-      `implicit`: String
+    capsule:    Capsule,
+    `implicit`: String
   ) extends DataflowProblem {
 
     override def toString = s"Implicit ${`implicit`} not found in input of $capsule"

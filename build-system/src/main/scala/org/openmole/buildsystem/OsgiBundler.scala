@@ -25,21 +25,21 @@ object OsgiProject {
     bundleType := Set("default"))
 
   def apply(
-    directory:       File,
-    artifactId:      String,
-    exports:         Seq[String]     = Seq(),
-    privatePackages: Seq[String]     = Seq(),
-    singleton:       Boolean         = false,
-    settings:        Seq[Setting[_]] = Nil,
-    bundleActivator: Option[String]  = None,
-    dynamicImports:  Seq[String]     = Seq(),
-    imports:         Seq[String]     = Seq("*;resolution:=optional"),
-    global:          Boolean         = false) = {
+    directory: File,
+    artifactId: String,
+    exports: Seq[String] = Seq(),
+    privatePackages: Seq[String] = Seq(),
+    singleton: Boolean = false,
+    settings: Seq[Setting[_]] = Nil,
+    bundleActivator: Option[String] = None,
+    dynamicImports: Seq[String] = Seq(),
+    imports: Seq[String] = Seq("*;resolution:=optional"),
+    global: Boolean = false) = {
 
     val base = directory / artifactId
     val exportedPackages = if (exports.isEmpty) Seq(artifactId + ".*") else exports
 
-    Project(artifactId.replace('.', '-'), base, settings = settings).enablePlugins(SbtOsgi).settings(osgiSettings: _*).settings(
+    Project(artifactId.replace('.', '-'), base).settings(settings: _*).enablePlugins(SbtOsgi).settings(osgiSettings: _*).settings(
       name := artifactId,
       Osgi.singleton := singleton,
       OsgiKeys.exportPackage := exportedPackages,
@@ -62,10 +62,10 @@ object OsgiProject {
 object OsgiGUIProject {
 
   def apply(
-    directory:  File,
+    directory: File,
     artifactId: String,
-    ext:        ClasspathDep[ProjectReference],
-    client:     ClasspathDep[ProjectReference],
-    server:     ClasspathDep[ProjectReference]) = OsgiProject(directory, artifactId) dependsOn (ext, client, server)
+    ext: ClasspathDep[ProjectReference],
+    client: ClasspathDep[ProjectReference],
+    server: ClasspathDep[ProjectReference]) = OsgiProject(directory, artifactId) dependsOn (ext, client, server)
 
 }

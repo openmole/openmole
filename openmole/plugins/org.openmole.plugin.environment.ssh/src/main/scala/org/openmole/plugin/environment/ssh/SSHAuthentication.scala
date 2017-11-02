@@ -80,20 +80,20 @@ sealed trait SSHAuthentication {
 }
 
 case class LoginPassword(
-    val login:            String,
-    val cypheredPassword: String,
-    val host:             String,
-    val port:             Int    = 22
+  val login:            String,
+  val cypheredPassword: String,
+  val host:             String,
+  val port:             Int    = 22
 ) extends SSHAuthentication with CypheredPassword {
   override def toString = s"$login@$host:$port using password"
 }
 
 case class PrivateKey(
-    val privateKey:       File,
-    val login:            String,
-    val cypheredPassword: String,
-    val host:             String,
-    val port:             Int    = 22
+  val privateKey:       File,
+  val login:            String,
+  val cypheredPassword: String,
+  val host:             String,
+  val port:             Int    = 22
 ) extends SSHAuthentication with CypheredPassword {
   override def toString = s"$login@$host:$port using private key $privateKey"
 }

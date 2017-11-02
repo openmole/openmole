@@ -24,8 +24,7 @@ object Assembly {
       for {
         f ← from.listFiles()
       } recursiveCopy(f, new File(to, f.getName), streams)
-    }
-    else copy(from, to, streams)
+    } else copy(from, to, streams)
   }
 
   private def copy(from: File, to: File, streams: TaskStreams) =
@@ -49,10 +48,10 @@ object Assembly {
 
   private def copyLibraryDependencies(
     externalDependencies: Seq[Attributed[File]],
-    out:                  File,
-    rename:               ModuleID ⇒ String,
-    depFilter:            (ModuleID, Artifact) ⇒ Boolean,
-    streams:              TaskStreams) = {
+    out: File,
+    rename: ModuleID ⇒ String,
+    depFilter: (ModuleID, Artifact) ⇒ Boolean,
+    streams: TaskStreams) = {
     (externalDependencies).distinct.flatMap { attributed ⇒
       (attributed.get(Keys.moduleID.key), attributed.get(Keys.artifact.key)) match {
         case (Some(moduleId), Some(artifact)) ⇒
@@ -107,7 +106,7 @@ object Assembly {
       if (!cacheFile.exists) {
         s.log.info("Downloading " + url + " to " + tmpFile)
         val os = managed(new BufferedOutputStream(new FileOutputStream(tmpFile)))
-        os.foreach(BasicIO.transferFully(url.openStream, _))
+        os.foreach(IO.transfer(url.openStream, _))
         tmpFile.renameTo(cacheFile)
       }
 

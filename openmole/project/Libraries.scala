@@ -41,7 +41,6 @@ object Libraries {
 
   /** ------- Bundles -------------- */
 
-
   lazy val addScalaLang = libraryDependencies += "org.openmole.library" %% "org-scala-lang-scala-library" % scalaVersion.value
 
   lazy val scalatra = "org.openmole.library" %% "org-scalatra" % "2.5.0"
@@ -117,8 +116,7 @@ object Libraries {
   lazy val equinoxOSGi = "org.eclipse" % "osgi" % "3.10.0-v20140606-1445"
   lazy val osgiCompendium = "org.osgi" % "org.osgi.compendium" % "4.3.1"
 
-  lazy val squants = "org.typelevel"  %% "squants"  % "1.3.0"
+  lazy val squants = "org.typelevel" %% "squants" % "1.3.0"
   lazy val shapeless = "com.chuusai" %% "shapeless" % "2.3.2"
-
 
 }

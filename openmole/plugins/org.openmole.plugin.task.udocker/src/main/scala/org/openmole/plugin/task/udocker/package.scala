@@ -134,12 +134,12 @@ package object udocker extends UDockerPackage {
 
   // TODO review data structure
   case class LocalDockerImage(
-      image:        String,
-      tag:          String,
-      layers:       Vector[(Registry.Layer, File)],
-      layersConfig: Vector[(Registry.LayerConfig, File)],
-      imageJSON:    String,
-      manifest:     ImageManifestV2Schema1
+    image:        String,
+    tag:          String,
+    layers:       Vector[(Registry.Layer, File)],
+    layersConfig: Vector[(Registry.LayerConfig, File)],
+    imageJSON:    String,
+    manifest:     ImageManifestV2Schema1
   ) {
     lazy val id = UUID.randomUUID().toString
   }

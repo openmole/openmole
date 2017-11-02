@@ -49,11 +49,11 @@ object MoleJob {
 import MoleJob._
 
 class MoleJob(
-    val task:               Task,
-    private var prototypes: Array[Val[Any]],
-    private var values:     Array[Any],
-    mostSignificantBits:    Long, leastSignificantBits: Long,
-    stateChangedCallBack: MoleJob.StateChangedCallBack
+  val task:               Task,
+  private var prototypes: Array[Val[Any]],
+  private var values:     Array[Any],
+  mostSignificantBits:    Long, leastSignificantBits: Long,
+  stateChangedCallBack: MoleJob.StateChangedCallBack
 ) {
 
   var exception: Option[Throwable] = None

@@ -41,9 +41,9 @@ object ConditionHook {
 }
 
 @Lenses case class ConditionHook(
-    hook:      Hook,
-    condition: Condition,
-    config:    InputOutputConfig
+  hook:      Hook,
+  condition: Condition,
+  config:    InputOutputConfig
 ) extends Hook {
 
   override protected def process(executionContext: MoleExecutionContext) = FromContext { parameters ⇒

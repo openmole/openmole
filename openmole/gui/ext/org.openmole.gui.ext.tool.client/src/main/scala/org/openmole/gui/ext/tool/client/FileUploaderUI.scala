@@ -35,10 +35,10 @@ object FileUploaderUI {
 }
 
 case class FileUploaderUI(
-    keyName: String,
-    keySet:  Boolean,
+  keyName: String,
+  keySet:  Boolean,
 
-    renaming: Option[String] = None
+  renaming: Option[String] = None
 ) {
 
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()

@@ -56,9 +56,9 @@ case class WorkDirectory(workDirectory: File) {
 
 @MultipartConfig(fileSizeThreshold = 1024 * 1024) //research scala multipart config
 trait RESTAPI extends ScalatraServlet with GZipSupport
-    with FileUploadSupport
-    with FlashMapSupport
-    with Authentication {
+  with FileUploadSupport
+  with FlashMapSupport
+  with Authentication {
 
   protected implicit val jsonFormats: Formats = DefaultFormats.withBigDecimal
   private val logger = Log.log

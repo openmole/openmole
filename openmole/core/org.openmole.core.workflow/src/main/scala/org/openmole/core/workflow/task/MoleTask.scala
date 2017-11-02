@@ -58,10 +58,10 @@ object MoleTask {
 }
 
 @Lenses case class MoleTask(
-    _mole:     Mole,
-    last:      Capsule,
-    implicits: Vector[String]    = Vector.empty,
-    config:    InputOutputConfig = InputOutputConfig()
+  _mole:     Mole,
+  last:      Capsule,
+  implicits: Vector[String]    = Vector.empty,
+  config:    InputOutputConfig = InputOutputConfig()
 ) extends Task {
 
   def mole = _mole.copy(inputs = inputs)

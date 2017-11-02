@@ -61,10 +61,10 @@ object RScriptTask {
 }
 
 @Lenses case class RScriptTask(
-    script:           FromContext[String],
-    localDockerImage: LocalDockerImage,
-    config:           InputOutputConfig,
-    external:         External
+  script:           FromContext[String],
+  localDockerImage: LocalDockerImage,
+  config:           InputOutputConfig,
+  external:         External
 ) extends Task with ValidateTask {
 
   override def validate = Validate { p ⇒

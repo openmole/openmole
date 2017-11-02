@@ -101,14 +101,14 @@ object NetLogo5Task {
 }
 
 @Lenses case class NetLogo5Task(
-    config:              InputOutputConfig,
-    external:            External,
-    netLogoInputs:       Vector[(Val[_], String)],
-    netLogoOutputs:      Vector[(String, Val[_])],
-    netLogoArrayOutputs: Vector[(String, Int, Val[_])],
-    workspace:           NetLogoTask.Workspace,
-    launchingCommands:   Seq[FromContext[String]],
-    seed:                Option[Val[Int]]
+  config:              InputOutputConfig,
+  external:            External,
+  netLogoInputs:       Vector[(Val[_], String)],
+  netLogoOutputs:      Vector[(String, Val[_])],
+  netLogoArrayOutputs: Vector[(String, Int, Val[_])],
+  workspace:           NetLogoTask.Workspace,
+  launchingCommands:   Seq[FromContext[String]],
+  seed:                Option[Val[Int]]
 ) extends NetLogoTask {
   override def netLogoFactory: NetLogoFactory = NetLogo5Task.factory
 }

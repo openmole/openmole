@@ -18,6 +18,7 @@
 package org.openmole.buildsystem
 
 import sbt._
+import sbt.internal.inc.ReflectUtilities
 
 trait ProjectListing {
   def projects: Seq[Project] = ReflectUtilities.allVals[Project](this).values.toSeq

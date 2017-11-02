@@ -70,13 +70,13 @@ import org.openmole.plugin.environment.batch.storage.StorageService.Log._
 import org.openmole.plugin.environment.batch.storage.StorageService._
 
 class StorageService[S](
-    s:                 S,
-    val root:          String,
-    val id:            String,
-    val environment:   BatchEnvironment,
-    val remoteStorage: RemoteStorage,
-    val usageControl:  UsageControl,
-    isConnectionError: Throwable ⇒ Boolean
+  s:                 S,
+  val root:          String,
+  val id:            String,
+  val environment:   BatchEnvironment,
+  val remoteStorage: RemoteStorage,
+  val usageControl:  UsageControl,
+  isConnectionError: Throwable ⇒ Boolean
 )(implicit storage: StorageInterface[S]) {
 
   import environment.services

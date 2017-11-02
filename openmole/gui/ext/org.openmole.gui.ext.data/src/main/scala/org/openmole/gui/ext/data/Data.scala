@@ -290,11 +290,11 @@ case class ErrorLevel() extends ErrorStateLevel {
 }
 
 case class EnvironmentError(
-    environmentId: EnvironmentId,
-    errorMessage:  String,
-    stack:         Error,
-    date:          Long,
-    level:         ErrorStateLevel
+  environmentId: EnvironmentId,
+  errorMessage:  String,
+  stack:         Error,
+  date:          Long,
+  level:         ErrorStateLevel
 ) extends Ordered[EnvironmentError] {
   def compare(that: EnvironmentError) = date compare that.date
 }
@@ -349,10 +349,10 @@ sealed trait ExecutionInfo {
 }
 
 case class Failed(
-    error:             Error,
-    environmentStates: Seq[EnvironmentState],
-    duration:          Long                  = 0L,
-    completed:         Long                  = 0L
+  error:             Error,
+  environmentStates: Seq[EnvironmentState],
+  duration:          Long                  = 0L,
+  completed:         Long                  = 0L
 ) extends ExecutionInfo {
   def state: String = "failed"
 
@@ -362,19 +362,19 @@ case class Failed(
 }
 
 case class Running(
-    ready:             Long,
-    running:           Long,
-    duration:          Long,
-    completed:         Long,
-    environmentStates: Seq[EnvironmentState]
+  ready:             Long,
+  running:           Long,
+  duration:          Long,
+  completed:         Long,
+  environmentStates: Seq[EnvironmentState]
 ) extends ExecutionInfo {
   def state: String = "running"
 }
 
 case class Finished(
-    duration:          Long                  = 0L,
-    completed:         Long                  = 0L,
-    environmentStates: Seq[EnvironmentState]
+  duration:          Long                  = 0L,
+  completed:         Long                  = 0L,
+  environmentStates: Seq[EnvironmentState]
 ) extends ExecutionInfo {
   def ready: Long = 0L
 
@@ -384,9 +384,9 @@ case class Finished(
 }
 
 case class Canceled(
-    environmentStates: Seq[EnvironmentState],
-    duration:          Long                  = 0L,
-    completed:         Long                  = 0L
+  environmentStates: Seq[EnvironmentState],
+  duration:          Long                  = 0L,
+  completed:         Long                  = 0L
 ) extends ExecutionInfo {
   def state: String = "canceled"
 

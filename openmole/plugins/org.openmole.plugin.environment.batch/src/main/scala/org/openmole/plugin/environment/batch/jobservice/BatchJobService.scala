@@ -50,8 +50,8 @@ trait BatchJobControl {
 }
 
 class BatchJobService[JS](
-    js:               JS,
-    val usageControl: UsageControl
+  js:               JS,
+  val usageControl: UsageControl
 )(implicit val jsInterface: JobServiceInterface[JS], eventDispatcher: EventDispatcher) { bjs ⇒
 
   type BJ = BatchJob[jsInterface.J]
