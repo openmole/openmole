@@ -39,7 +39,7 @@ lazy val json4s = OsgiProject(dir, "org.json4s",
 
 lazy val shapeless = "com.chuusai" %% "shapeless" % "2.3.2"
 
-lazy val circeVersion = "0.8.0"
+lazy val circeVersion = "0.9.0-M1"
 lazy val circe = OsgiProject(dir, "io.circe",
   exports = Seq("io.circe.*", "!cats.*", "!scala.*", "!shapeless.*"),
   privatePackages = Seq("jawn.*"),
@@ -194,14 +194,15 @@ lazy val closureCompilerVersion = "v20130603"
 lazy val closureCompiler = OsgiProject(dir, "closure-compiler", exports = Seq("com.google.javascript.*")) settings(
   libraryDependencies += "com.google.javascript" % "closure-compiler" % closureCompilerVersion, version := closureCompilerVersion) settings(settings: _*)
 
-lazy val catsVersion = "0.9.0"
+lazy val catsVersion = "1.0.0-MF"
 lazy val cats =
   OsgiProject(dir, "cats") settings (
-    libraryDependencies += "org.typelevel" %% "cats" % catsVersion,
+    libraryDependencies += "org.typelevel" %% "cats-core" % catsVersion,
+    libraryDependencies += "org.typelevel" %% "cats-free" % catsVersion,
     version := catsVersion
   ) settings(settings: _*)
 
-lazy val freedslVersion = "0.19"
+lazy val freedslVersion = "0.20"
 
 lazy val freedsl =
   OsgiProject(dir, "freedsl", exports = Seq("freedsl.*", "freestyle.*", "mainecoon.*")) settings (
@@ -216,7 +217,7 @@ lazy val freedsl =
     version := freedslVersion
   ) dependsOn(cats) settings(settings: _*)
 
-lazy val mgoVersion = "3.1"
+lazy val mgoVersion = "3.3"
 
 lazy val mgo = OsgiProject(dir, "mgo", imports = Seq("*")) settings(
   libraryDependencies += "fr.iscpif" %% "mgo" % mgoVersion,
