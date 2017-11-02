@@ -20,10 +20,10 @@ package org.openmole.plugin.task.systemexec
 import monocle.Lens
 
 trait SystemExecTaskBuilder[T] extends ReturnValue[T]
-    with ErrorOnReturnValue[T]
-    with StdOutErr[T]
-    with EnvironmentVariables[T]
-    with WorkDirectory[T] { builder ⇒
+  with ErrorOnReturnValue[T]
+  with StdOutErr[T]
+  with EnvironmentVariables[T]
+  with WorkDirectory[T] { builder ⇒
 
   def commands: Lens[T, Vector[OSCommands]]
 }

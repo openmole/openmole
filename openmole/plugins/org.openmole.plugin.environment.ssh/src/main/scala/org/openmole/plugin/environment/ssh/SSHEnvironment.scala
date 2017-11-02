@@ -64,16 +64,16 @@ object SSHEnvironment {
 }
 
 class SSHEnvironment(
-    val user:                 String,
-    val host:                 String,
-    val nbSlots:              Int,
-    override val port:        Int,
-    val sharedDirectory:      Option[String],
-    val workDirectory:        Option[String],
-    val openMOLEMemory:       Option[Information],
-    override val threads:     Option[Int],
-    val storageSharedLocally: Boolean,
-    override val name:        Option[String]
+  val user:                 String,
+  val host:                 String,
+  val nbSlots:              Int,
+  override val port:        Int,
+  val sharedDirectory:      Option[String],
+  val workDirectory:        Option[String],
+  val openMOLEMemory:       Option[Information],
+  override val threads:     Option[Int],
+  val storageSharedLocally: Boolean,
+  override val name:        Option[String]
 )(val credential: fr.iscpif.gridscale.ssh.SSHAuthentication)(implicit val services: BatchEnvironment.Services) extends SimpleBatchEnvironment with SSHPersistentStorage { env ⇒
 
   type JS = SSHJobService

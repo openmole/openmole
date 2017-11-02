@@ -31,10 +31,10 @@ import org.openmole.core.workspace.NewFile
 object Transition extends Logger
 
 class Transition(
-    val start:     Capsule,
-    val end:       Slot,
-    val condition: Condition = Condition.True,
-    val filter:    BlockList = BlockList.empty
+  val start:     Capsule,
+  val end:       Slot,
+  val condition: Condition = Condition.True,
+  val filter:    BlockList = BlockList.empty
 ) extends ITransition with ValidateTransition {
 
   override def validate(inputs: Seq[Val[_]]) = Validate { p ⇒

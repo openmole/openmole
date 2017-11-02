@@ -64,20 +64,20 @@ object OAREnvironment {
 }
 
 class OAREnvironment(
-    val user:                    String,
-    val host:                    String,
-    override val port:           Int,
-    val queue:                   Option[String],
-    val core:                    Option[Int],
-    val cpu:                     Option[Int],
-    val wallTime:                Option[Time],
-    override val openMOLEMemory: Option[Information],
-    val sharedDirectory:         Option[String],
-    val workDirectory:           Option[String],
-    override val threads:        Option[Int],
-    val storageSharedLocally:    Boolean,
-    override val name:           Option[String],
-    val bestEffort:              Boolean
+  val user:                    String,
+  val host:                    String,
+  override val port:           Int,
+  val queue:                   Option[String],
+  val core:                    Option[Int],
+  val cpu:                     Option[Int],
+  val wallTime:                Option[Time],
+  override val openMOLEMemory: Option[Information],
+  val sharedDirectory:         Option[String],
+  val workDirectory:           Option[String],
+  override val threads:        Option[Int],
+  val storageSharedLocally:    Boolean,
+  override val name:           Option[String],
+  val bestEffort:              Boolean
 )(val credential: fr.iscpif.gridscale.ssh.SSHAuthentication)(implicit val services: BatchEnvironment.Services) extends ClusterEnvironment { env ⇒
 
   type JS = OARJobService

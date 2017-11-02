@@ -1,15 +1,6 @@
 import scalariform.formatter.preferences._
 import com.typesafe.sbt.SbtScalariform.ScalariformKeys
 
-scalariformSettings(autoformat = true)
-
-ScalariformKeys.preferences := ScalariformKeys.preferences (p =>
-  p.setPreference(DoubleIndentClassDeclaration, true)
-  .setPreference(RewriteArrowSymbols, true)
-  .setPreference(AlignParameters, true)
-  .setPreference(AlignSingleLineCaseStatements, true)
-  .setPreference(CompactControlReadability, true)).value
-
 scalacOptions += "-optimize"
 
 sbtPlugin := true
@@ -20,12 +11,9 @@ organization := "org.openmole"
 
 //resolvers += Classpaths.sbtPluginSnapshots
 
-addSbtPlugin("com.typesafe.sbt" % "sbt-osgi" % "0.9.1")
-
-addSbtPlugin("org.scalariform" % "sbt-scalariform" % "1.6.0")
-
+addSbtPlugin("com.typesafe.sbt" % "sbt-osgi" % "0.9.2")
 
 libraryDependencies ++= Seq(
-  "com.jsuereth" %% "scala-arm" % "1.3",
-  "org.apache.commons" % "commons-compress" % "1.10")
-
+  "com.jsuereth" %% "scala-arm" % "2.0",
+  "org.apache.commons" % "commons-compress" % "1.10",
+  "org.json4s" %% "json4s-native" % "3.5.3")

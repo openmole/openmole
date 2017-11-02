@@ -37,9 +37,9 @@ object TemplateTask {
 }
 
 @Lenses case class TemplateTask(
-    template: String,
-    output:   Val[File],
-    config:   InputOutputConfig = InputOutputConfig()
+  template: String,
+  output:   Val[File],
+  config:   InputOutputConfig = InputOutputConfig()
 ) extends Task {
 
   val expanded = ExpandedString(template)

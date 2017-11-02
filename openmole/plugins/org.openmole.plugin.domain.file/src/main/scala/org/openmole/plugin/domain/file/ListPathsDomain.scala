@@ -42,10 +42,10 @@ object ListPathsDomain {
 }
 
 class ListPathsDomain(
-    base:      File,
-    directory: Option[FromContext[String]] = None,
-    recursive: Boolean                     = false,
-    filter:    Option[FromContext[String]] = None
+  base:      File,
+  directory: Option[FromContext[String]] = None,
+  recursive: Boolean                     = false,
+  filter:    Option[FromContext[String]] = None
 ) {
 
   def computeValues: FromContext[Iterable[Path]] =

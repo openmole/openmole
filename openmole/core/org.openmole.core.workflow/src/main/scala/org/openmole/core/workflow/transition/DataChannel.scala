@@ -42,9 +42,9 @@ object DataChannel {
  * @param filter the filter of the variable transported by this data channel
  */
 class DataChannel(
-    val start:  Capsule,
-    val end:    Slot,
-    val filter: BlockList
+  val start:  Capsule,
+  val end:    Slot,
+  val filter: BlockList
 ) {
 
   /**

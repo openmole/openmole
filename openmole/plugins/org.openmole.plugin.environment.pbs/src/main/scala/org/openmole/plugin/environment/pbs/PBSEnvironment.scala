@@ -64,20 +64,20 @@ object PBSEnvironment {
 }
 
 class PBSEnvironment(
-    val user:                    String,
-    val host:                    String,
-    override val port:           Int,
-    val queue:                   Option[String],
-    override val openMOLEMemory: Option[Information],
-    val wallTime:                Option[Time],
-    val memory:                  Option[Information],
-    val nodes:                   Option[Int],
-    val coreByNode:              Option[Int],
-    val sharedDirectory:         Option[String],
-    val workDirectory:           Option[String],
-    override val threads:        Option[Int],
-    val storageSharedLocally:    Boolean,
-    override val name:           Option[String]
+  val user:                    String,
+  val host:                    String,
+  override val port:           Int,
+  val queue:                   Option[String],
+  override val openMOLEMemory: Option[Information],
+  val wallTime:                Option[Time],
+  val memory:                  Option[Information],
+  val nodes:                   Option[Int],
+  val coreByNode:              Option[Int],
+  val sharedDirectory:         Option[String],
+  val workDirectory:           Option[String],
+  override val threads:        Option[Int],
+  val storageSharedLocally:    Boolean,
+  override val name:           Option[String]
 )(val credential: fr.iscpif.gridscale.ssh.SSHAuthentication)(implicit val services: BatchEnvironment.Services) extends ClusterEnvironment { env ⇒
 
   type JS = PBSJobService

@@ -43,10 +43,10 @@ object ListFilesDomain extends Logger {
 import org.openmole.plugin.domain.file.ListFilesDomain.Log._
 
 class ListFilesDomain(
-    base:      File,
-    directory: Option[FromContext[String]] = None,
-    recursive: Boolean                     = false,
-    filter:    Option[FromContext[String]] = None
+  base:      File,
+  directory: Option[FromContext[String]] = None,
+  recursive: Boolean                     = false,
+  filter:    Option[FromContext[String]] = None
 ) {
 
   def computeValues = FromContext[Iterable[File]] { p ⇒

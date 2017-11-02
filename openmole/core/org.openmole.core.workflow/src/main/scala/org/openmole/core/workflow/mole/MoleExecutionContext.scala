@@ -56,14 +56,14 @@ object MoleServices {
 }
 
 class MoleServices(
-    implicit
-    val preference:      Preference,
-    val seeder:          Seeder,
-    val threadProvider:  ThreadProvider,
-    val eventDispatcher: EventDispatcher,
-    val newFile:         NewFile,
-    val workspace:       Workspace,
-    val fileService:     FileService
+  implicit
+  val preference:      Preference,
+  val seeder:          Seeder,
+  val threadProvider:  ThreadProvider,
+  val eventDispatcher: EventDispatcher,
+  val newFile:         NewFile,
+  val workspace:       Workspace,
+  val fileService:     FileService
 ) {
   def newRandom = Lazy(seeder.newRNG)
   implicit lazy val defaultRandom = newRandom

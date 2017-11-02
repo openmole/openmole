@@ -63,11 +63,11 @@ object ScalaTask {
 }
 
 @Lenses case class ScalaTask(
-    sourceCode: String,
-    plugins:    Vector[File],
-    libraries:  Vector[File],
-    config:     InputOutputConfig,
-    external:   External
+  sourceCode: String,
+  plugins:    Vector[File],
+  libraries:  Vector[File],
+  config:     InputOutputConfig,
+  external:   External
 ) extends Task with ValidateTask with Plugins {
 
   lazy val compilation = CacheKey[ScalaCompilation.ContextClosure[java.util.Map[String, Any]]]()

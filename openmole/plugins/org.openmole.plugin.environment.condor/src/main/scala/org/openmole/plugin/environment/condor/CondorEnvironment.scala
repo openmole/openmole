@@ -66,23 +66,23 @@ object CondorEnvironment {
 }
 
 class CondorEnvironment(
-    val user:          String,
-    val host:          String,
-    override val port: Int,
-    // TODO not available in the GridScale plugin yet
-    //val queue: Option[String],
-    override val openMOLEMemory: Option[Information],
-    // TODO not available in the GridScale plugin yet
-    //val wallTime: Option[Duration],
-    val memory:               Option[Information],
-    val nodes:                Option[Int]               = None,
-    val coresByNode:          Option[Int]               = None,
-    val sharedDirectory:      Option[String],
-    val workDirectory:        Option[String],
-    val requirements:         Option[CondorRequirement],
-    override val threads:     Option[Int],
-    val storageSharedLocally: Boolean,
-    override val name:        Option[String]
+  val user:          String,
+  val host:          String,
+  override val port: Int,
+  // TODO not available in the GridScale plugin yet
+  //val queue: Option[String],
+  override val openMOLEMemory: Option[Information],
+  // TODO not available in the GridScale plugin yet
+  //val wallTime: Option[Duration],
+  val memory:               Option[Information],
+  val nodes:                Option[Int]               = None,
+  val coresByNode:          Option[Int]               = None,
+  val sharedDirectory:      Option[String],
+  val workDirectory:        Option[String],
+  val requirements:         Option[CondorRequirement],
+  override val threads:     Option[Int],
+  val storageSharedLocally: Boolean,
+  override val name:        Option[String]
 )(val credential: fr.iscpif.gridscale.ssh.SSHAuthentication)(implicit val services: BatchEnvironment.Services) extends ClusterEnvironment { env ⇒
 
   type JS = CondorJobService

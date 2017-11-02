@@ -29,10 +29,10 @@ package dsl {
   import squants.information._
 
   trait DSLPackage <: Commands
-      with Serializer
-      with Classes
-      with workflow.ExportedPackage
-      with cats.instances.AllInstances {
+    with Serializer
+    with Classes
+    with workflow.ExportedPackage
+    with cats.instances.AllInstances {
 
     implicit lazy val implicitContext = Context.empty
 

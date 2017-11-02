@@ -6,12 +6,12 @@
  *  it under the terms of the GNU Affero General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- * 
+ *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU Affero General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -70,17 +70,17 @@ object CARETask extends Logger {
 }
 
 @Lenses case class CARETask(
-    archive:              File,
-    hostFiles:            Vector[(String, Option[String])],
-    command:              FromContext[String],
-    workDirectory:        Option[String],
-    errorOnReturnValue:   Boolean,
-    returnValue:          Option[Val[Int]],
-    stdOut:               Option[Val[String]],
-    stdErr:               Option[Val[String]],
-    environmentVariables: Vector[(String, FromContext[String])],
-    _config:              InputOutputConfig,
-    external:             External
+  archive:              File,
+  hostFiles:            Vector[(String, Option[String])],
+  command:              FromContext[String],
+  workDirectory:        Option[String],
+  errorOnReturnValue:   Boolean,
+  returnValue:          Option[Val[Int]],
+  stdOut:               Option[Val[String]],
+  stdErr:               Option[Val[String]],
+  environmentVariables: Vector[(String, FromContext[String])],
+  _config:              InputOutputConfig,
+  external:             External
 ) extends Task with ValidateTask {
 
   def config = InputOutputConfig.outputs.modify(_ ++ Seq(stdOut, stdErr, returnValue).flatten)(_config)

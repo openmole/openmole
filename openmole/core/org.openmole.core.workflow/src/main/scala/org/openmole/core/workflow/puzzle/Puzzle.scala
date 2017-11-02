@@ -100,11 +100,11 @@ object PuzzlePiece {
 }
 
 case class PuzzlePiece(
-    slot:        Slot,
-    sources:     Iterable[Source]            = Iterable.empty,
-    hooks:       Iterable[Hook]              = Iterable.empty,
-    environment: Option[EnvironmentProvider] = None,
-    grouping:    Option[Grouping]            = None
+  slot:        Slot,
+  sources:     Iterable[Source]            = Iterable.empty,
+  hooks:       Iterable[Hook]              = Iterable.empty,
+  environment: Option[EnvironmentProvider] = None,
+  grouping:    Option[Grouping]            = None
 ) {
   def capsule = slot.capsule
 
@@ -123,14 +123,14 @@ case class PuzzlePiece(
 }
 
 case class Puzzle(
-    firstSlot:    Slot,
-    lasts:        Iterable[Capsule]                 = Iterable.empty,
-    transitions:  Iterable[ITransition]             = Iterable.empty,
-    dataChannels: Iterable[DataChannel]             = Iterable.empty,
-    sources:      Iterable[(Capsule, Source)]       = Iterable.empty,
-    hooks:        Iterable[(Capsule, Hook)]         = Iterable.empty,
-    environments: Map[Capsule, EnvironmentProvider] = Map.empty,
-    grouping:     Map[Capsule, Grouping]            = Map.empty
+  firstSlot:    Slot,
+  lasts:        Iterable[Capsule]                 = Iterable.empty,
+  transitions:  Iterable[ITransition]             = Iterable.empty,
+  dataChannels: Iterable[DataChannel]             = Iterable.empty,
+  sources:      Iterable[(Capsule, Source)]       = Iterable.empty,
+  hooks:        Iterable[(Capsule, Hook)]         = Iterable.empty,
+  environments: Map[Capsule, EnvironmentProvider] = Map.empty,
+  grouping:     Map[Capsule, Grouping]            = Map.empty
 ) {
 
   def this(p: Puzzle) =

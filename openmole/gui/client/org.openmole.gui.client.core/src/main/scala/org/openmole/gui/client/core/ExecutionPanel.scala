@@ -299,13 +299,13 @@ class ExecutionPanel {
                 div(
                   omsheet.monospace,
                   staticPanel(
-                  id,
-                  errorTextAreas,
-                  () ⇒ scrollableText(),
-                  (sT: ScrollableText) ⇒ sT.setContent(new String(details.error.map {
-                    _.stackTrace
-                  }.getOrElse("")))
-                ).view
+                    id,
+                    errorTextAreas,
+                    () ⇒ scrollableText(),
+                    (sT: ScrollableText) ⇒ sT.setContent(new String(details.error.map {
+                      _.stackTrace
+                    }.getOrElse("")))
+                  ).view
                 ),
               outputStreamID → staticPanel(
                 id,
@@ -417,9 +417,9 @@ class ExecutionPanel {
       b("Executions"),
       div(omsheet.panelHeaderSettings)(
         settingsForm.dropdown(
-        buttonModifierSeq = btn_default,
-        buttonIcon = glyph_settings
-      ).render
+          buttonModifierSeq = btn_default,
+          buttonIcon = glyph_settings
+        ).render
       )
     )
   )

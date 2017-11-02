@@ -49,11 +49,11 @@ object CSVSource {
 }
 
 @Lenses case class CSVSource(
-    path:        FromContext[String],
-    config:      InputOutputConfig,
-    columns:     Vector[(String, Val[_])],
-    fileColumns: Vector[(String, File, Val[File])],
-    separator:   Option[Char]
+  path:        FromContext[String],
+  config:      InputOutputConfig,
+  columns:     Vector[(String, Val[_])],
+  fileColumns: Vector[(String, File, Val[File])],
+  separator:   Option[Char]
 ) extends Source with CSVToVariables {
 
   override protected def process(executionContext: MoleExecutionContext) = FromContext { parameters ⇒

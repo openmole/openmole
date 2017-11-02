@@ -41,8 +41,8 @@ object ToStringHook {
 }
 
 @Lenses case class ToStringHook(
-    prototypes: Vector[Val[_]],
-    config:     InputOutputConfig
+  prototypes: Vector[Val[_]],
+  config:     InputOutputConfig
 ) extends Hook {
 
   override protected def process(executionContext: MoleExecutionContext) = FromContext { parameters ⇒

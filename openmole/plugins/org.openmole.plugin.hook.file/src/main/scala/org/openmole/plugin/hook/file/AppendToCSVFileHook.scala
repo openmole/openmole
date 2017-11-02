@@ -50,11 +50,11 @@ object AppendToCSVFileHook {
 }
 
 @Lenses case class AppendToCSVFileHook(
-    file:              FromContext[File],
-    prototypes:        Vector[Val[_]],
-    header:            Option[FromContext[String]],
-    arraysOnSingleRow: Boolean,
-    config:            InputOutputConfig
+  file:              FromContext[File],
+  prototypes:        Vector[Val[_]],
+  header:            Option[FromContext[String]],
+  arraysOnSingleRow: Boolean,
+  config:            InputOutputConfig
 ) extends Hook with ValidateHook {
 
   override def validate(inputs: Seq[Val[_]]) = Validate { p ⇒

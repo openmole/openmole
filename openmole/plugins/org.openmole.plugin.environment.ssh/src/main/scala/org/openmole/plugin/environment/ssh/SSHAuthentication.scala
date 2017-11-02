@@ -63,10 +63,10 @@ trait SSHAuthentication {
 }
 
 case class LoginPassword(
-    val login:            String,
-    val cypheredPassword: String,
-    val host:             String,
-    val port:             Int    = 22
+  val login:            String,
+  val cypheredPassword: String,
+  val host:             String,
+  val port:             Int    = 22
 ) extends SSHAuthentication with CypheredPassword { a ⇒
 
   def apply(implicit cypher: Cypher) =
@@ -76,11 +76,11 @@ case class LoginPassword(
 }
 
 case class PrivateKey(
-    val privateKey:       File,
-    val login:            String,
-    val cypheredPassword: String,
-    val host:             String,
-    val port:             Int    = 22
+  val privateKey:       File,
+  val login:            String,
+  val cypheredPassword: String,
+  val host:             String,
+  val port:             Int    = 22
 ) extends SSHAuthentication with CypheredPassword { a ⇒
 
   override def apply(implicit cypher: Cypher) =

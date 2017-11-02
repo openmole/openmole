@@ -36,8 +36,8 @@ object DisplayHook {
 }
 
 @Lenses case class DisplayHook(
-    toDisplay: FromContext[String],
-    config:    InputOutputConfig
+  toDisplay: FromContext[String],
+  config:    InputOutputConfig
 ) extends Hook with ValidateHook {
 
   override def validate(inputs: Seq[Val[_]]) = Validate { p ⇒

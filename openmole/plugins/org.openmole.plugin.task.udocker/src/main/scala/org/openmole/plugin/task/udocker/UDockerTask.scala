@@ -232,13 +232,13 @@ object UDockerTask {
 }
 
 @Lenses case class UDockerTask(
-    uDocker:            UDocker,
-    errorOnReturnValue: Boolean,
-    returnValue:        Option[Val[Int]],
-    stdOut:             Option[Val[String]],
-    stdErr:             Option[Val[String]],
-    _config:            InputOutputConfig,
-    external:           External
+  uDocker:            UDocker,
+  errorOnReturnValue: Boolean,
+  returnValue:        Option[Val[Int]],
+  stdOut:             Option[Val[String]],
+  stdErr:             Option[Val[String]],
+  _config:            InputOutputConfig,
+  external:           External
 ) extends Task with ValidateTask { self ⇒
   override def config = InputOutputConfig.outputs.modify(_ ++ Seq(stdOut, stdErr, returnValue).flatten)(_config)
   override def validate =

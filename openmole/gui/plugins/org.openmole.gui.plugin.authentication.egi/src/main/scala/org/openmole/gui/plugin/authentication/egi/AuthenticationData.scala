@@ -21,8 +21,8 @@ import org.openmole.gui.ext.data.{ AuthenticationData, Error, Test }
  */
 
 case class EGIAuthenticationData(
-    cypheredPassword: String         = "",
-    privateKey:       Option[String] = None
+  cypheredPassword: String         = "",
+  privateKey:       Option[String] = None
 ) extends AuthenticationData {
   def name = "egi.p12"
 }

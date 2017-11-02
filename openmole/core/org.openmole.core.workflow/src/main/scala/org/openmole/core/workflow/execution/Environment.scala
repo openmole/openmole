@@ -87,9 +87,9 @@ object LocalEnvironment {
 }
 
 class LocalEnvironment(
-    val nbThreads:     Int,
-    val deinterleave:  Boolean,
-    override val name: Option[String]
+  val nbThreads:     Int,
+  val deinterleave:  Boolean,
+  override val name: Option[String]
 )(implicit val preference: Preference, threadProvider: ThreadProvider, val eventDispatcher: EventDispatcher) extends Environment {
 
   val pool = Cache(new ExecutorPool(nbThreads, WeakReference(this), threadProvider))

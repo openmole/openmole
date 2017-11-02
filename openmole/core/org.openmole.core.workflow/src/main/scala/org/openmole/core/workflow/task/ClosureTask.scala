@@ -35,9 +35,9 @@ object ClosureTask {
 }
 
 @Lenses case class ClosureTask(
-    closure:                (Context, RandomProvider, TaskExecutionContext) ⇒ Context,
-    override val className: String,
-    config:                 InputOutputConfig
+  closure:                (Context, RandomProvider, TaskExecutionContext) ⇒ Context,
+  override val className: String,
+  config:                 InputOutputConfig
 ) extends Task {
   override protected def process(executionContext: TaskExecutionContext): FromContext[Context] = FromContext { p ⇒
     closure(p.context, p.random, executionContext)
