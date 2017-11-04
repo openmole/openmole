@@ -70,7 +70,7 @@ object ScalaTask {
   val scalaCompilation = Cache {
     ScalaWrappedCompilation.static(
       sourceCode,
-      inputs.toSeq,
+      inputs.toSeq ++ Seq(JVMLanguageTask.workDirectory),
       ScalaWrappedCompilation.WrappedOutput(outputs),
       libraries = libraries,
       plugins = plugins
