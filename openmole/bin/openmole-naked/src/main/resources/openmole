@@ -51,6 +51,8 @@ case "$JVMVERSION" in
   *1\.7\.*) FLAGS+=("-XX:MaxPermSize=128M");;
 esac
 
+WORKSPACE="${HOME}/.openmole"
+
 ARGS=()
 SCRIPT_ARGS=()
 
