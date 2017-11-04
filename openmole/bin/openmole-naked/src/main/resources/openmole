@@ -45,6 +45,8 @@ case "$JVMVERSION" in
   *1\.7\.*) FLAG="$FLAG -XX:MaxPermSize=128M";;
 esac
 
+WORKSPACE="${HOME}/.openmole"
+
 ARGS=()
 while [[ $# -gt 0 ]]; do
   case "$1" in
