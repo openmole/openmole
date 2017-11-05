@@ -2,46 +2,90 @@
 @import org.openmole.site._
 
 
-@p
-  You can program tasks in Scala using the @hl.openmole("ScalaTask"). For instance the following workflow sums all the elements of an array using a @hl.openmole("ScalaTask") and displays the results. Similarly, you could use such a task to generate some model parameter values or perform some data analysis. To get more details on the hook part you can check the doc on @aa("hooks", href := DocumentationPages.hook.file).
+@h2("Simple ScalaTask")
 
-  @hl.openmole("""
-  val array = Val[Array[Double]]
-  val result = Val[Double]
+You can program tasks in Scala using the @hl.openmole("ScalaTask"). For instance the following workflow sums all the elements of an array using a @hl.openmole("ScalaTask") and displays the results. Similarly, you could use such a task to generate some model parameter values or perform some data analysis. To get more details on the hook part you can check the doc on @aa("hooks", href := DocumentationPages.hook.file).
 
-  val sum = ScalaTask("val result = array.sum") set (
-      inputs += array,
-      outputs += result,
-      array := Array(8.0, 9.0, 10.0)
-    )
+@hl.openmole("""
+val array = Val[Array[Double]]
+val result = Val[Double]
 
-  (sum hook ToStringHook())""")
-
-  You can embed you own Scala/Java code and libraries in OpenMOLE using an OpenMOLE @a("Plugin", href := DocumentationPages.plugin.file).
-
-@p In addition to scala code, OpenMOLE provides @a("a few useful function to aggregate data, create files, create random number generators", href := DocumentationPages.scalaFunction.file).
-
-@p
-  Multiple @i{ScalaTasks} can be joined to compose a workflow. Lets imagine that you want to perform an expensive computation on every element of an array. For the sake of simplicity, the "expensive computation" is here a multiplication by 2.
-
-  @hl.openmole("""
-  val element = Val[Double]
-  val multiplied = Val[Double]
-  val result = Val[Double]
-
-  val expensive = ScalaTask("val multiplied = element * 2") set (
-    inputs += element,
-    outputs += multiplied
+val sum =
+  ScalaTask("val result = array.sum") set (
+    inputs += array,
+    outputs += result,
+    array := Array(8.0, 9.0, 10.0)
   )
 
-  val exploration = ExplorationTask(element in List(8.0, 9.0, 10.0))
+(sum hook ToStringHook())""")
 
-  val sum = ScalaTask("val result = multiplied.sum") set (
-    inputs += multiplied.toArray,
-    outputs += result
-  )
+You can embed you own Scala/Java code and libraries in OpenMOLE using an OpenMOLE @a("Plugin", href := DocumentationPages.plugin.file).
 
-  exploration -< expensive >- (sum hook ToStringHook())""")
+@h2("Useful functions")
+
+In addition to scala code, OpenMOLE provides @a("a few useful functions to aggregate data, create files, create random number generators", href := DocumentationPages.scalaFunction.file).
+
+@h2("Input files")
+
+If your Java or Scala code requires some files you can add them to the resources and use the @code("workDirectory") variable to access them:
+
+@hl.openmole(s"""
+val content = Val[Double]
+
+val read =
+  ScalaTask(${tq}val content = (workDirectory / "myFile.txt").content${tq}) set (
+    resources += workDirectory / "myFile.txt",
+    outputs += content
+  )""")
+
+You can have the same behaviour for a file taken as input using the @code("inputFiles") function:
+
+@hl.openmole(s"""
+  val myFile = Val[File]
+  val content = Val[String]
+
+  val read =
+    ScalaTask(${tq}val content = (workDirectory / "myFile.txt").content${tq}) set (
+      inputFiles += (myFile, "myFile.txt"),
+      myFile := workDirectory / "myFile.txt",
+      outputs += content
+    )""")
+
+If you don't care about the file name you can directly use the variable containing the file. In this case the file name won't be preserved when delegating to a remote execution environment, only the file content will be:
+
+@hl.openmole("""
+  val myFile = Val[File]
+  val content = Val[String]
+
+  val read =
+    ScalaTask("val content = myFile.content") set (
+      myFile := workDirectory / "myFile.txt",
+      outputs += content
+    )""")
+
+
+@h2("Workflow example")
+
+Multiple @i{ScalaTasks} can be joined to compose a workflow. Lets imagine that you want to perform an expensive computation on every element of an array. For the sake of simplicity, the "expensive computation" is here a multiplication by 2.
+
+@hl.openmole("""
+val element = Val[Double]
+val multiplied = Val[Double]
+val result = Val[Double]
+
+val expensive = ScalaTask("val multiplied = element * 2") set (
+  inputs += element,
+  outputs += multiplied
+)
+
+val exploration = ExplorationTask(element in List(8.0, 9.0, 10.0))
+
+val sum = ScalaTask("val result = multiplied.sum") set (
+  inputs += multiplied.toArray,
+  outputs += result
+)
+
+exploration -< expensive >- (sum hook ToStringHook())""")
 
 @p
   The execution of this workflow can be distributed using OpenMOLE's environments. Check the page dedicated to @a("environments", href := DocumentationPages.environment.file) to learn more on this process.

@@ -46,9 +46,10 @@ It might be useful to create files an folder in ScalaTask code. To do that use o
 @p
   It might sometime be useful to create new random number generator. To do that use @hl.code("def newRandom(seed: Long): Random"). The seed is optional. If it is not provided OpenMOLE will take care of the generator initialisation in a sound manner. It would generally be called @hl.code("newRNG()").
 
-@h2{Technical f}
 
 @todo("""julien
+  @h2{Technical functions}
+
   def classLoader[C: Manifest] = manifest[C].erasure.getClassLoader
   def classLoader(a: Any) = a.getClass.getClassLoader
 
