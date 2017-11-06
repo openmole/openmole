@@ -332,7 +332,7 @@ lazy val sourceCode = OsgiProject(dir, "sourcecode") settings (
 
 def gridscaleVersion = "2.0-SNAPSHOT"
 
-lazy val gridscale = OsgiProject(dir, "gridscale", imports = Seq("*")) settings (
+lazy val gridscale = OsgiProject(dir, "gridscale", imports = Seq("*"), exports = Seq("gridscale.*", "enumeratum.*")) settings (
   libraryDependencies += "fr.iscpif.gridscale" %% "gridscale" % gridscaleVersion,
   version := gridscaleVersion
 ) settings(settings: _*) dependsOn(freedsl)
@@ -363,6 +363,21 @@ lazy val gridscaleOAR = OsgiProject(dir, "gridscale.oar", imports = Seq("*")) se
   version := gridscaleVersion
 ) settings(settings: _*) dependsOn(gridscale, gridscaleCluster)
 
+
+lazy val gridscaleEGI = OsgiProject(dir, "gridscale.egi", imports = Seq("*")) settings (
+  libraryDependencies += "fr.iscpif.gridscale" %% "egi" % gridscaleVersion,
+  version := gridscaleVersion
+) settings(settings: _*) dependsOn(gridscale, gridscaleHTTP)
+
+lazy val gridscaleDIRAC = OsgiProject(dir, "gridscale.dirac", imports = Seq("*")) settings (
+  libraryDependencies += "fr.iscpif.gridscale" %% "dirac" % gridscaleVersion,
+  version := gridscaleVersion
+) settings(settings: _*) dependsOn(gridscale, gridscaleHTTP)
+
+lazy val gridscaleWebDAV = OsgiProject(dir, "gridscale.webdav", imports = Seq("*")) settings (
+  libraryDependencies += "fr.iscpif.gridscale" %% "webdav" % gridscaleVersion,
+  version := gridscaleVersion
+) settings(settings: _*) dependsOn(gridscale, gridscaleHTTP)
 
 lazy val jzlib = OsgiProject(dir, "com.jcraft.jzlib", imports = Seq("*")) settings (
   libraryDependencies += "com.jcraft" % "jzlib" % "1.1.3",

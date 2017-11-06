@@ -17,11 +17,19 @@
 
 package org.openmole.plugin.environment
 
+import java.net.URI
+
 import org.openmole.core.authentication.AuthenticationStore
 import org.openmole.core.exception._
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.workspace.Workspace
 
 package object egi {
-  implicit def egiAuthentication(implicit workspace: Workspace, authenticationStore: AuthenticationStore, serializerService: SerializerService): EGIAuthentication = EGIAuthentication().getOrElse(throw new UserBadDataError("No authentication was found"))
+  //  implicit def egiAuthentication(implicit workspace: Workspace, authenticationStore: AuthenticationStore, serializerService: SerializerService): EGIAuthentication = EGIAuthentication().getOrElse(throw new UserBadDataError("No authentication was found"))
+
+  implicit def stringToBDII(s: String) = {
+    val uri = new URI(s)
+    _root_.gridscale.egi.BDIIServer(uri.getHost, uri.getPort)
+  }
+
 }

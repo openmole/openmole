@@ -31,8 +31,7 @@ class Activator extends BundleActivator {
     PluginInfo.add(this.getClass)
     ConfigurationInfo.add(
       this.getClass,
-      ConfigurationInfo.list(EGIEnvironment) ++
-        ConfigurationInfo.list(DIRACEnvironment)
+      ConfigurationInfo.list(EGIEnvironment) //++ ConfigurationInfo.list(DIRACEnvironment)
     )
   }
 }

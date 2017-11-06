@@ -20,7 +20,7 @@ package org.openmole.plugin.environment.ssh
 import java.io.File
 
 import org.openmole.core.exception._
-import org.openmole.plugin.environment.batch.authentication.CypheredPassword
+import org.openmole.plugin.environment.batch.authentication._
 import org.openmole.core.authentication._
 import org.openmole.core.preference.Preference
 import org.openmole.core.serializer.SerializerService

@@ -347,7 +347,7 @@ lazy val boundsDomain = OsgiProject(pluginDir, "org.openmole.plugin.domain.bound
 
 /* Environment */
 
-def allEnvironment = Seq(batch, gridscale, ssh, oar) //, desktopgrid, egi, gridscale, pbs, sge, condor, slurm, ssh)
+def allEnvironment = Seq(batch, gridscale, ssh, oar, egi) //, desktopgrid, egi, gridscale, pbs, sge, condor, slurm, ssh)
 
 lazy val batch = OsgiProject(pluginDir, "org.openmole.plugin.environment.batch", imports = Seq("*")) dependsOn(
   workflow, workspace, tools, event, replication, exception,
@@ -373,13 +373,9 @@ lazy val oar = OsgiProject(pluginDir, "org.openmole.plugin.environment.oar", imp
 //  batch, sftpserver, gridscale
 //) settings (pluginSettings: _*)
 //
-//lazy val egi = OsgiProject(pluginDir, "org.openmole.plugin.environment.egi", imports = Seq("!org.apache.http.*", "!fr.iscpif.gridscale.libraries.srmstub", "!fr.iscpif.gridscale.libraries.lbstub", "!fr.iscpif.gridscale.libraries.wmsstub", "!com.google.common.cache", "*")) dependsOn(openmoleDSL,
-//  batch,
-//  workspace, fileService, gridscale) settings (
-//  libraryDependencies ++= Seq(Libraries.gridscaleGlite, Libraries.gridscaleHTTP),
-//    Libraries.addScalaLang,
-//  ) settings (pluginSettings: _*)
-//
+lazy val egi = OsgiProject(pluginDir, "org.openmole.plugin.environment.egi") dependsOn(openmoleDSL, batch, workspace, fileService, gridscale) settings (
+  libraryDependencies ++= Libraries.gridscaleEGI, Libraries.addScalaLang) settings (pluginSettings: _*)
+
 
 lazy val gridscale = OsgiProject(pluginDir, "org.openmole.plugin.environment.gridscale", imports = Seq("*")) settings(
   libraryDependencies += Libraries.gridscaleLocal)dependsOn(openmoleDSL, tools, batch, exception) settings (pluginSettings: _*)
@@ -685,7 +681,6 @@ def bundleFilter(m: ModuleID, artifact: Artifact) = {
     (m.name == "httpclient-osgi") || (m.name == "httpcore-osgi") ||
     (m.organization == "org.osgi" && m.name != "osgi")
 
-
   include && !exclude
 }
 
@@ -700,8 +695,7 @@ def rename(m: ModuleID): String = {
       case s => s
     }
 
-  if (m.name.exists(_ == '-') == false) s"${m.organization.replaceAllLiterally(".", "-")}-${m.name}_${m.revision}.jar"
-  else s"${m.name}_${revision}.jar"
+  s"${m.organization.replaceAllLiterally(".", "-")}-${m.name}_${m.revision}.jar"
 }
 
 

@@ -18,31 +18,33 @@
 package org.openmole.plugin.environment.egi
 
 import java.io.{ File, _ }
-import java.net.URI
-import java.nio.file.FileSystems
-import java.util.zip.GZIPInputStream
+import org.openmole.plugin.environment.batch.authentication._
 
-import fr.iscpif.gridscale.authentication.P12Authentication
-import fr.iscpif.gridscale.egi._
-import fr.iscpif.gridscale.http._
-import org.openmole.core.exception.UserBadDataError
+//import java.net.URI
+//import java.nio.file.FileSystems
+import java.util.zip.GZIPInputStream
+//
+//import fr.iscpif.gridscale.authentication.P12Authentication
+//import fr.iscpif.gridscale.egi._
+//import fr.iscpif.gridscale.http._
+import org.openmole.core.exception._
 import org.openmole.core.fileservice._
-import org.openmole.plugin.environment.batch.authentication.CypheredPassword
-import org.openmole.plugin.environment.egi.EGIEnvironment._
+//import org.openmole.plugin.environment.batch.authentication.CypheredPassword
+//import org.openmole.plugin.environment.egi.EGIEnvironment._
 import org.openmole.tool.file._
 import org.openmole.tool.logger.Logger
 import org.openmole.tool.stream._
-import org.openmole.core.authentication._
-import org.openmole.core.preference.Preference
-import org.openmole.core.serializer.SerializerService
+//import org.openmole.core.authentication._
+import org.openmole.core.preference._
+//import org.openmole.core.serializer.SerializerService
 import org.openmole.core.workspace.Workspace
-import org.openmole.plugin.environment.batch.environment.BatchEnvironment
-import org.openmole.tool.crypto.Cypher
+//import org.openmole.plugin.environment.batch.environment.BatchEnvironment
+//import org.openmole.tool.crypto.Cypher
 import org.openmole.tool.tar.TarInputStream
-import squants.time.TimeConversions._
-
-import scala.util.Try
-
+//import squants.time.TimeConversions._
+//
+//import scala.util.Try
+//
 object EGIAuthentication extends Logger {
 
   import Log._
@@ -50,63 +52,60 @@ object EGIAuthentication extends Logger {
   val updatedFile = ".updated"
 
   def CACertificatesDir(implicit workspace: Workspace, preference: Preference): File =
-    (workspace.persistentDir / "CACertificates").updateIfTooOld(preference(CACertificatesCacheTime)) {
+    (workspace.persistentDir / "CACertificates").updateIfTooOld(preference(EGIEnvironment.CACertificatesCacheTime)) {
       caDir ⇒
         caDir.mkdir
         downloadCACertificates(preference(EGIEnvironment.CACertificatesSite), caDir)
     }
 
   def downloadCACertificates(address: String, dir: File)(implicit preference: Preference) = {
-    val fs = FileSystems.getDefault
+    import freedsl.dsl._
+    implicit val httpIntepreter = gridscale.http.HTTPInterpreter()
 
-    val site = HTTPStorage(url = address, preference(EGIEnvironment.CACertificatesDownloadTimeOut))
-    for (tarUrl ← site.listNames("/")) {
+    val site = gridscale.http.Server(address, preference(EGIEnvironment.CACertificatesDownloadTimeOut))
+    for {
+      tarEntry ← gridscale.http.list[DSL](site, "/").eval
+      if tarEntry.`type` != gridscale.FileType.Directory
+    } {
       try {
-        //val child = site.child(tarUrl)
-        val is = site.read(tarUrl)
+        def downloadCertificate(is: InputStream) = {
+          val tis = new TarInputStream(new GZIPInputStream(new BufferedInputStream(is)))
 
-        val tis = new TarInputStream(new GZIPInputStream(new BufferedInputStream(is)))
+          try {
+            val links = Iterator.continually(tis.getNextEntry).drop(1).takeWhile(_ != null).flatMap {
+              tarEntry ⇒
+                val destForName = new File(dir, tarEntry.getName)
+                val dest = new File(dir, destForName.getName)
 
-        try {
-          val links = Iterator.continually(tis.getNextEntry).drop(1).takeWhile(_ != null).flatMap {
-            tarEntry ⇒
-              val destForName = new File(dir, tarEntry.getName)
-              val dest = new File(dir, destForName.getName)
+                if (dest.exists) dest.delete
+                if (!tarEntry.getLinkName.isEmpty) Some(dest → tarEntry.getLinkName)
+                else {
+                  tis.copy(dest)
+                  None
+                }
+            }.toList
 
-              if (dest.exists) dest.delete
-              if (!tarEntry.getLinkName.isEmpty) Some(dest → tarEntry.getLinkName)
-              else {
-                tis.copy(dest)
-                None
-              }
-          }.toList
-
-          links.foreach {
-            case (file, linkTo) ⇒ file.createLinkTo(linkTo)
+            links.foreach {
+              case (file, linkTo) ⇒ file.createLinkTo(linkTo)
+            }
+          }
+          catch {
+            case (e: IOException) ⇒ logger.log(WARNING, s"Unable to untar ${tarEntry.name} from $site", e)
           }
         }
-        catch {
-          case (e: IOException) ⇒ logger.log(WARNING, "Unable to untar " + tarUrl, e)
-        }
-        finally tis.close
+
+        gridscale.http.readStream[DSL, Unit](site, tarEntry.name, downloadCertificate(_)).eval
       }
       catch {
-        case e: Throwable ⇒ throw new IOException(tarUrl, e)
+        case e: Throwable ⇒ throw new IOException(s"Reading tarEntry on $site", e)
       }
     }
   }
 
   def voCards(implicit workspace: Workspace, preference: Preference) =
-    (workspace.persistentDir / "voCards.xml").updateIfTooOld(preference(VOCardCacheTime)) {
+    (workspace.persistentDir / "voCards.xml").updateIfTooOld(preference(EGIEnvironment.VOCardCacheTime)) {
       voCards ⇒
-        HTTPStorage.withConnection(
-          new URI(preference(EGIEnvironment.VOInformationSite)),
-          preference(EGIEnvironment.VOCardDownloadTimeOut)
-        ) { http ⇒
-            val is: InputStream = http.getInputStream
-            try is.copy(voCards)
-            finally is.close
-          }
+        gridscale.http.getStream(preference(EGIEnvironment.VOInformationSite)) { _.copy(voCards) }
     }
 
   def getVOMS(vo: String)(implicit workspace: Workspace, preference: Preference): Option[Seq[String]] = getVOMS(vo, xml.XML.loadFile(voCards))
@@ -135,57 +134,57 @@ object EGIAuthentication extends Logger {
         vomses.map(vomsUrl)
     }
   }
-
-  def update(a: EGIAuthentication, test: Boolean = true)(implicit cypher: Cypher, workspace: Workspace, authenticationStore: AuthenticationStore, serializerService: SerializerService) = {
-    if (test) testPassword(a).get
-    Authentication.set(a)
-  }
-
-  def apply()(implicit workspace: Workspace, authenticationStore: AuthenticationStore, serializerService: SerializerService) =
-    Authentication.allByCategory.
-      getOrElse(classOf[EGIAuthentication].getName, Seq.empty).
-      map(_.asInstanceOf[EGIAuthentication]).headOption
-
-  def clear(implicit workspace: Workspace, authenticationStore: AuthenticationStore) = Authentication.clear[EGIAuthentication]
-
-  def initialise(a: EGIAuthentication)(
-    serverURLs: Seq[String],
-    voName:     String,
-    fqan:       Option[String]
-  )(implicit cypher: Cypher, workspace: Workspace, preference: Preference): () ⇒ GlobusAuthentication.Proxy =
-    a match {
-      case a: P12Certificate ⇒
-        VOMSAuthentication.setCARepository(EGIAuthentication.CACertificatesDir)
-        val p12 =
-          P12VOMSAuthentication(
-            P12Authentication(a.certificate, a.password),
-            EGIEnvironment.proxyTime,
-            serverURLs,
-            voName,
-            EGIEnvironment.proxyRenewalTime,
-            fqan
-          )
-
-        () ⇒ implicitly[GlobusAuthenticationProvider[P12VOMSAuthentication]].apply(p12)
-    }
-
-  def testPassword(a: EGIAuthentication)(implicit cypher: Cypher) =
-    a match {
-      case a: P12Certificate ⇒
-        Try(P12Authentication.loadKeyStore(P12Authentication(a.certificate, a.password))).map(_ ⇒ true)
-    }
-
-  def testProxy(a: EGIAuthentication, voName: String)(implicit cypher: Cypher, workspace: Workspace, preference: Preference) = {
-    val vomses = EGIAuthentication.getVMOSOrError(voName)
-    Try(initialise(a)(vomses, voName, None).apply()).map(_ ⇒ true)
-  }
-
-  def testDIRACAccess(a: EGIAuthentication, voName: String)(implicit cypher: Cypher, services: BatchEnvironment.Services, workspace: Workspace) = {
-    implicit val authentication = a
-    Try(DIRACEnvironment(voName).jobService.getToken).map(_ ⇒ true)
-  }
-
-  def DIRACVos = fr.iscpif.gridscale.egi.DIRACJobService.supportedVOs()
+  //
+  //  def update(a: EGIAuthentication, test: Boolean = true)(implicit cypher: Cypher, workspace: Workspace, authenticationStore: AuthenticationStore, serializerService: SerializerService) = {
+  //    if (test) testPassword(a).get
+  //    Authentication.set(a)
+  //  }
+  //
+  //  def apply()(implicit workspace: Workspace, authenticationStore: AuthenticationStore, serializerService: SerializerService) =
+  //    Authentication.allByCategory.
+  //      getOrElse(classOf[EGIAuthentication].getName, Seq.empty).
+  //      map(_.asInstanceOf[EGIAuthentication]).headOption
+  //
+  //  def clear(implicit workspace: Workspace, authenticationStore: AuthenticationStore) = Authentication.clear[EGIAuthentication]
+  //
+  //  def initialise(a: EGIAuthentication)(
+  //    serverURLs: Seq[String],
+  //    voName:     String,
+  //    fqan:       Option[String]
+  //  )(implicit cypher: Cypher, workspace: Workspace, preference: Preference): () ⇒ GlobusAuthentication.Proxy =
+  //    a match {
+  //      case a: P12Certificate ⇒
+  //        VOMSAuthentication.setCARepository(EGIAuthentication.CACertificatesDir)
+  //        val p12 =
+  //          P12VOMSAuthentication(
+  //            P12Authentication(a.certificate, a.password),
+  //            EGIEnvironment.proxyTime,
+  //            serverURLs,
+  //            voName,
+  //            EGIEnvironment.proxyRenewalTime,
+  //            fqan
+  //          )
+  //
+  //        () ⇒ implicitly[GlobusAuthenticationProvider[P12VOMSAuthentication]].apply(p12)
+  //    }
+  //
+  //  def testPassword(a: EGIAuthentication)(implicit cypher: Cypher) =
+  //    a match {
+  //      case a: P12Certificate ⇒
+  //        Try(P12Authentication.loadKeyStore(P12Authentication(a.certificate, a.password))).map(_ ⇒ true)
+  //    }
+  //
+  //  def testProxy(a: EGIAuthentication, voName: String)(implicit cypher: Cypher, workspace: Workspace, preference: Preference) = {
+  //    val vomses = EGIAuthentication.getVMOSOrError(voName)
+  //    Try(initialise(a)(vomses, voName, None).apply()).map(_ ⇒ true)
+  //  }
+  //
+  //  def testDIRACAccess(a: EGIAuthentication, voName: String)(implicit cypher: Cypher, services: BatchEnvironment.Services, workspace: Workspace) = {
+  //    implicit val authentication = a
+  //    Try(DIRACEnvironment(voName).jobService.getToken).map(_ ⇒ true)
+  //  }
+  //
+  //  def DIRACVos = fr.iscpif.gridscale.egi.DIRACJobService.supportedVOs()
 }
 
 sealed trait EGIAuthentication
