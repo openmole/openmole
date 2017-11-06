@@ -76,7 +76,7 @@ object ScalaTask {
     implicit def m = manifest[java.util.Map[String, Any]]
     ScalaCompilation.static(
       sourceCode,
-      inputs.toSeq,
+      inputs.toSeq ++ Seq(JVMLanguageTask.workDirectory),
       ScalaCompilation.WrappedOutput(outputs),
       libraries = libraries,
       plugins = plugins

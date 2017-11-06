@@ -51,6 +51,8 @@ case "$JVMVERSION" in
   *1\.7\.*) FLAGS+=("-XX:MaxPermSize=128M");;
 esac
 
+WORKSPACE="${HOME}/.openmole"
+
 ARGS=()
 SCRIPT_ARGS=()
 
@@ -85,8 +87,8 @@ fi
 if [[ $(ulimit -S -n) -lt 4096 ]]; then ulimit -S -n 4096 2>/dev/null; fi
 
 function run {
-  mkdir -p "$HOME/.openmole/.tmp/"
-  CONFIGDIR=$HOME/.openmole/.tmp/$(date +%s)_$RANDOM
+  mkdir -p "${WORKSPACE}/.tmp/"
+  CONFIGDIR=${WORKSPACE}/.tmp/`date +%s`_$RANDOM
 
   java -Xss2M -Dfile.encoding=UTF-8 -Duser.country=US -Duser.language=en -Djava.security.egd=file:/dev/./urandom -Dosgi.locking=none -Dopenmole.location="${LOCATION}" -Dosgi.classloader.singleThreadLoads=true  -Dosgi.configuration.area="${CONFIGDIR}" "-Xmx${MEM}" "${FLAGS[@]}" \
      -XX:+UseG1GC -XX:CICompilerCount=2 -XX:ParallelGCThreads=2 -XX:ConcGCThreads=2 -XX:G1ConcRefinementThreads=2 \

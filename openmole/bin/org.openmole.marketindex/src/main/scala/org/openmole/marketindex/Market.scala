@@ -111,10 +111,10 @@ object Market {
 import org.openmole.marketindex.Market._
 
 case class GeneratedMarketEntry(
-    archive:  String,
-    entry:    MarketEntry,
-    location: File,
-    viewURL:  Option[String]
+  archive:  String,
+  entry:    MarketEntry,
+  location: File,
+  viewURL:  Option[String]
 ) {
 
   def readme = (location / "README.md").contentOption
