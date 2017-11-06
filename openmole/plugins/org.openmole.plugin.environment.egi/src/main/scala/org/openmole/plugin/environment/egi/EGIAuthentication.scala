@@ -18,15 +18,17 @@
 package org.openmole.plugin.environment.egi
 
 import java.io.{ File, _ }
+
+import gridscale.authentication.P12Authentication
+import gridscale.egi.EGIInterpreter
+import org.openmole.core.authentication.{ Authentication, AuthenticationStore }
+import org.openmole.core.serializer.SerializerService
 import org.openmole.plugin.environment.batch.authentication._
+import org.openmole.tool.crypto.Cypher
 
 //import java.net.URI
 //import java.nio.file.FileSystems
 import java.util.zip.GZIPInputStream
-//
-//import fr.iscpif.gridscale.authentication.P12Authentication
-//import fr.iscpif.gridscale.egi._
-//import fr.iscpif.gridscale.http._
 import org.openmole.core.exception._
 import org.openmole.core.fileservice._
 //import org.openmole.plugin.environment.batch.authentication.CypheredPassword
@@ -48,6 +50,7 @@ import org.openmole.tool.tar.TarInputStream
 object EGIAuthentication extends Logger {
 
   import Log._
+  import freedsl.dsl._
 
   val updatedFile = ".updated"
 
@@ -59,7 +62,6 @@ object EGIAuthentication extends Logger {
     }
 
   def downloadCACertificates(address: String, dir: File)(implicit preference: Preference) = {
-    import freedsl.dsl._
     implicit val httpIntepreter = gridscale.http.HTTPInterpreter()
 
     val site = gridscale.http.Server(address, preference(EGIEnvironment.CACertificatesDownloadTimeOut))
@@ -128,9 +130,9 @@ object EGIAuthentication extends Logger {
         def vomsUrl(voms: Node) = {
           val host = (voms \ "hostname").head.text
           val port = (voms.attribute("VomsesPort").get.text)
-          val dn = (voms \ "X509Cert" \ "DN").headOption.map(_.text)
-
-          s"voms://$host:${port}${dn.getOrElse("")}"
+          //val dn = (voms \ "X509Cert" \ "DN").headOption.map(_.text)
+          //s"voms://$host:${port}${dn.getOrElse("")}"
+          s"$host:$port"
         }
 
         vomses.map(vomsUrl)
@@ -142,13 +144,13 @@ object EGIAuthentication extends Logger {
   //    Authentication.set(a)
   //  }
   //
-  //  def apply()(implicit workspace: Workspace, authenticationStore: AuthenticationStore, serializerService: SerializerService) =
-  //    Authentication.allByCategory.
-  //      getOrElse(classOf[EGIAuthentication].getName, Seq.empty).
-  //      map(_.asInstanceOf[EGIAuthentication]).headOption
-  //
-  //  def clear(implicit workspace: Workspace, authenticationStore: AuthenticationStore) = Authentication.clear[EGIAuthentication]
-  //
+  def apply()(implicit workspace: Workspace, authenticationStore: AuthenticationStore, serializerService: SerializerService) =
+    Authentication.allByCategory.
+      getOrElse(classOf[EGIAuthentication].getName, Seq.empty).
+      map(_.asInstanceOf[EGIAuthentication]).headOption
+
+  // def clear(implicit workspace: Workspace, authenticationStore: AuthenticationStore) = Authentication.clear[EGIAuthentication]
+
   //  def initialise(a: EGIAuthentication)(
   //    serverURLs: Seq[String],
   //    voName:     String,
@@ -170,16 +172,49 @@ object EGIAuthentication extends Logger {
   //        () ⇒ implicitly[GlobusAuthenticationProvider[P12VOMSAuthentication]].apply(p12)
   //    }
   //
-  //  def testPassword(a: EGIAuthentication)(implicit cypher: Cypher) =
-  //    a match {
-  //      case a: P12Certificate ⇒
-  //        Try(P12Authentication.loadKeyStore(P12Authentication(a.certificate, a.password))).map(_ ⇒ true)
+
+  def proxy(
+    a:      EGIAuthentication,
+    voName: String,
+    fqan:   Option[String])(implicit cypher: Cypher, workspace: Workspace, preference: Preference): util.Try[gridscale.egi.VOMS.VOMSCredential] = EGIInterpreter { implicits ⇒
+    import implicits._
+    import freedsl.dsl._
+
+    def proxy0(vomses: List[String]): util.Try[gridscale.egi.VOMS.VOMSCredential] =
+      vomses match {
+        case h :: t ⇒
+          a match {
+            case a: P12Certificate ⇒
+              def proxy =
+                gridscale.egi.VOMS.proxy[DSL](
+                  h,
+                  P12Authentication(a.certificate, a.password),
+                  EGIAuthentication.CACertificatesDir,
+                  EGIEnvironment.proxyTime,
+                  fqan
+                )
+
+              (proxy.tryEval, t) match {
+                case (e: util.Failure[_], Nil) ⇒ e
+                case (e: util.Failure[_], t)   ⇒ proxy0(t)
+                case (s: util.Success[_], _)   ⇒ s
+              }
+          }
+      }
+
+    getVOMS(voName).map(vomses ⇒ proxy0(vomses.toList)).getOrElse(util.Failure(new UserBadDataError(s"No VOMS server found in vo cards for vo $voName")))
+  }
+
+  def testPassword(a: EGIAuthentication)(implicit cypher: Cypher) =
+    a match {
+      case a: P12Certificate ⇒ P12Authentication.testPassword(P12Authentication(a.certificate, a.password))
+    }
+
+  //    def testProxy(a: EGIAuthentication, voName: String)(implicit cypher: Cypher, workspace: Workspace, preference: Preference) = {
+  //      val vomses = EGIAuthentication.getVMOSOrError(voName)
+  //      //gridscale.egi.VOMS.proxy(voName)
+  //      Try(initialise(a)(vomses, voName, None).apply()).map(_ ⇒ true)
   //    }
-  //
-  //  def testProxy(a: EGIAuthentication, voName: String)(implicit cypher: Cypher, workspace: Workspace, preference: Preference) = {
-  //    val vomses = EGIAuthentication.getVMOSOrError(voName)
-  //    Try(initialise(a)(vomses, voName, None).apply()).map(_ ⇒ true)
-  //  }
   //
   //  def testDIRACAccess(a: EGIAuthentication, voName: String)(implicit cypher: Cypher, services: BatchEnvironment.Services, workspace: Workspace) = {
   //    implicit val authentication = a
