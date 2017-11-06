@@ -63,43 +63,45 @@ object EGIAuthentication extends Logger {
     implicit val httpIntepreter = gridscale.http.HTTPInterpreter()
 
     val site = gridscale.http.Server(address, preference(EGIEnvironment.CACertificatesDownloadTimeOut))
-    for {
-      tarEntry ← gridscale.http.list[DSL](site, "/").eval
-      if tarEntry.`type` != gridscale.FileType.Directory
-    } {
+
+    def downloadCertificate(entryName: String)(is: InputStream) = {
+      val tis = new TarInputStream(new GZIPInputStream(new BufferedInputStream(is)))
+
       try {
-        def downloadCertificate(is: InputStream) = {
-          val tis = new TarInputStream(new GZIPInputStream(new BufferedInputStream(is)))
+        val links = Iterator.continually(tis.getNextEntry).drop(1).takeWhile(_ != null).flatMap {
+          tarEntry ⇒
+            val destForName = new File(dir, tarEntry.getName)
+            val dest = new File(dir, destForName.getName)
 
-          try {
-            val links = Iterator.continually(tis.getNextEntry).drop(1).takeWhile(_ != null).flatMap {
-              tarEntry ⇒
-                val destForName = new File(dir, tarEntry.getName)
-                val dest = new File(dir, destForName.getName)
-
-                if (dest.exists) dest.delete
-                if (!tarEntry.getLinkName.isEmpty) Some(dest → tarEntry.getLinkName)
-                else {
-                  tis.copy(dest)
-                  None
-                }
-            }.toList
-
-            links.foreach {
-              case (file, linkTo) ⇒ file.createLinkTo(linkTo)
+            if (dest.exists) dest.delete
+            if (!tarEntry.getLinkName.isEmpty) Some(dest → tarEntry.getLinkName)
+            else {
+              tis.copy(dest)
+              None
             }
-          }
-          catch {
-            case (e: IOException) ⇒ logger.log(WARNING, s"Unable to untar ${tarEntry.name} from $site", e)
-          }
-        }
+        }.toList
 
-        gridscale.http.readStream[DSL, Unit](site, tarEntry.name, downloadCertificate(_)).eval
+        links.foreach {
+          case (file, linkTo) ⇒ file.createLinkTo(linkTo)
+        }
       }
       catch {
-        case e: Throwable ⇒ throw new IOException(s"Reading tarEntry on $site", e)
+        case (e: IOException) ⇒ logger.log(WARNING, s"Unable to untar ${entryName} from $site", e)
       }
     }
+
+    import cats.implicits._
+
+    val dl = for {
+      tarEntries ← gridscale.http.list[DSL](site, "/")
+      _ ← tarEntries.traverse { tarEntry ⇒
+        if (tarEntry.`type` != gridscale.FileType.Directory)
+          gridscale.http.readStream[DSL, Unit](site, tarEntry.name, downloadCertificate(tarEntry.name))
+        else ().pure[DSL]
+      }
+    } yield ()
+
+    dl.eval
   }
 
   def voCards(implicit workspace: Workspace, preference: Preference) =
