@@ -17,18 +17,19 @@
 
 package org.openmole.tool.cache
 
-class TimeCache[T] {
+class TimeCache[T](f: () ⇒ (T, Long)) {
 
   var cache: Option[T] = None
-  var cacheTime = System.currentTimeMillis
+  var cacheExpiration = Long.MinValue
 
-  def apply(f: ⇒ T, ms: Long) = synchronized {
-    if (cacheTime + ms < System.currentTimeMillis) cache = None
+  def apply() = synchronized {
+    if (System.currentTimeMillis > cacheExpiration) cache = None
     cache match {
       case None ⇒
-        cache = Some(f)
-        cacheTime = System.currentTimeMillis
-        cache.get
+        val (v, t) = f()
+        cache = Some(v)
+        cacheExpiration = System.currentTimeMillis + t
+        v
       case Some(c) ⇒ c
     }
   }

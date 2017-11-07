@@ -644,11 +644,11 @@ def guiPluginSettings = defaultSettings ++ Seq(defaultActivator)
 
 def guiPluginDir = guiDir / "plugins"
 
-//lazy val guiEnvironmentEGIPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.authentication.egi") settings(
-//  guiPluginSettings,
-//  libraryDependencies += Libraries.equinoxOSGi
-//) dependsOn(extPluginGUIServer, extClientTool, dataGUI, workspace, egi) enablePlugins (ScalaJSPlugin)
-//
+lazy val guiEnvironmentEGIPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.authentication.egi") settings(
+  guiPluginSettings,
+  libraryDependencies += Libraries.equinoxOSGi
+) dependsOn(extPluginGUIServer, extClientTool, dataGUI, workspace, egi) enablePlugins (ScalaJSPlugin)
+
 lazy val guiEnvironmentSSHKeyPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.authentication.sshkey") settings(
   guiPluginSettings,
   libraryDependencies += Libraries.equinoxOSGi
@@ -664,7 +664,7 @@ lazy val guiEnvironmentSSHLoginPlugin = OsgiProject(guiPluginDir, "org.openmole.
 //  libraryDependencies += Libraries.equinoxOSGi
 //) dependsOn(extPluginGUIServer, extClientTool, dataGUI, workspace, desktopgrid) enablePlugins (ScalaJSPlugin)
 
-val guiPlugins = Seq(guiEnvironmentSSHLoginPlugin, guiEnvironmentSSHKeyPlugin) //Seq(guiEnvironmentEGIPlugin, , guiEnvironmentDesktopGridPlugin)
+val guiPlugins = Seq(guiEnvironmentSSHLoginPlugin, guiEnvironmentSSHKeyPlugin, guiEnvironmentEGIPlugin) //, guiEnvironmentDesktopGridPlugin)
 
 /* -------------------- Bin ------------------------- */
 
