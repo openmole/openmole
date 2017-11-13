@@ -17,7 +17,13 @@
 
 package org.openmole.tool.cache
 
-class TimeCache[T](f: () ⇒ (T, Long)) {
+import squants._
+
+object TimeCache {
+  def apply[T](f: () ⇒ (T, Time)) = new TimeCache[T](f)
+}
+
+class TimeCache[T](f: () ⇒ (T, Time)) {
 
   var cache: Option[T] = None
   var cacheExpiration = Long.MinValue
@@ -28,7 +34,7 @@ class TimeCache[T](f: () ⇒ (T, Long)) {
       case None ⇒
         val (v, t) = f()
         cache = Some(v)
-        cacheExpiration = System.currentTimeMillis + t
+        cacheExpiration = System.currentTimeMillis + t.millis
         v
       case Some(c) ⇒ c
     }

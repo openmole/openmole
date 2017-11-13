@@ -19,7 +19,7 @@ package org.openmole.gui.plugin.authentication.egi
 
 import org.openmole.core.preference.ConfigurationLocation
 import org.openmole.gui.ext.data._
-import org.openmole.plugin.environment.egi.{ EGIAuthentication, P12Certificate }
+import org.openmole.plugin.environment.egi.{ EGIAuthenticationInterface, P12Certificate }
 import org.openmole.gui.ext.tool.server
 import org.openmole.core.services._
 
@@ -55,25 +55,25 @@ class EGIAuthenticationAPIImpl(s: Services) extends EGIAuthenticationAPI {
 
   def addAuthentication(data: EGIAuthenticationData): Unit = {
     coreObject(data).foreach { a ⇒
-      EGIAuthentication.update(a, test = false)
+      EGIAuthenticationInterface.update(a, test = false)
     }
   }
 
-  def removeAuthentication = EGIAuthentication.clear
+  def removeAuthentication = EGIAuthenticationInterface.clear
 
   // To be used for ssh private key
   def deleteAuthenticationKey(keyName: String): Unit = authenticationFile(keyName).delete
 
   def testAuthentication(data: EGIAuthenticationData): Seq[Test] = {
 
-    def testPassword(data: EGIAuthenticationData, test: EGIAuthentication ⇒ Try[Boolean]): Test = coreObject(data).map { d ⇒
+    def testPassword(data: EGIAuthenticationData, test: EGIAuthenticationInterface ⇒ Try[Boolean]): Test = coreObject(data).map { d ⇒
       test(d) match {
         case Success(_) ⇒ Test.passed()
         case Failure(f) ⇒ Test.error("Invalid Password", ErrorBuilder(f))
       }
     }.getOrElse(Test.error("Unknown error", Error("Unknown " + data.name)))
 
-    def test(data: EGIAuthenticationData, voName: String, test: (EGIAuthentication, String) ⇒ Try[Boolean]): Test = coreObject(data).map { d ⇒
+    def test(data: EGIAuthenticationData, voName: String, test: (EGIAuthenticationInterface, String) ⇒ Try[Boolean]): Test = coreObject(data).map { d ⇒
       test(d, voName) match {
         case Success(_) ⇒ Test.passed(voName)
         case Failure(f) ⇒ Test.error("Invalid Password", ErrorBuilder(f))
@@ -86,9 +86,9 @@ class EGIAuthenticationAPIImpl(s: Services) extends EGIAuthenticationAPI {
       Try {
         EGIAuthenticationTest(
           voName,
-          testPassword(data, EGIAuthentication.testPassword),
-          test(data, voName, EGIAuthentication.testProxy),
-          test(data, voName, EGIAuthentication.testDIRACAccess)
+          testPassword(data, EGIAuthenticationInterface.testPassword),
+          test(data, voName, EGIAuthenticationInterface.testProxy),
+          test(data, voName, EGIAuthenticationInterface.testDIRACAccess)
         )
       } match {
         case Success(a) ⇒ a

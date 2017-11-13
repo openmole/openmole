@@ -18,18 +18,31 @@
 package org.openmole.plugin.environment
 
 import java.net.URI
-
-import org.openmole.core.authentication.AuthenticationStore
-import org.openmole.core.exception._
-import org.openmole.core.serializer.SerializerService
-import org.openmole.core.workspace.Workspace
+import scala.util.{ Failure, Success, Try }
 
 package object egi {
-  //  implicit def egiAuthentication(implicit workspace: Workspace, authenticationStore: AuthenticationStore, serializerService: SerializerService): EGIAuthentication = EGIAuthentication().getOrElse(throw new UserBadDataError("No authentication was found"))
 
   implicit def stringToBDII(s: String) = {
     val uri = new URI(s)
     _root_.gridscale.egi.BDIIServer(uri.getHost, uri.getPort)
+  }
+
+  def findWorking[S, T](servers: Seq[S], f: S ⇒ T, service: String = "server"): T = {
+    def findWorking0(servers: List[S]): Try[T] =
+      servers match {
+        case Nil      ⇒ Failure(new RuntimeException(s"List of $service is empty"))
+        case h :: Nil ⇒ Try(f(h))
+        case h :: tail ⇒
+          Try(f(h)) match {
+            case Failure(_) ⇒ findWorking0(tail)
+            case s          ⇒ s
+          }
+      }
+
+    findWorking0(servers.toList) match {
+      case Failure(t) ⇒ throw new RuntimeException(s"No $service is working among $servers", t)
+      case Success(t) ⇒ t
+    }
   }
 
 }
