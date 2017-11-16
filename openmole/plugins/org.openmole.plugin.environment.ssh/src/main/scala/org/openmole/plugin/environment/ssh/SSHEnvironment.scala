@@ -21,8 +21,7 @@ import java.net.URI
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.locks.ReentrantLock
 
-import freedsl.dsl._
-import freedsl.system.SystemInterpreter
+import effectaside._
 import gridscale.ssh
 import org.openmole.core.authentication.AuthenticationStore
 import org.openmole.core.preference.{ ConfigurationLocation, Preference }
@@ -35,8 +34,8 @@ import org.openmole.tool.crypto._
 import org.openmole.tool.lock._
 import squants.information._
 import squants.time.TimeConversions._
-import freedsl.dsl._
 import org.openmole.plugin.environment.batch.environment._
+import org.openmole.plugin.environment.batch.refresh.{ JobManager, StopEnvironment }
 
 import scala.ref.WeakReference
 
@@ -132,6 +131,7 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
   val authentication:       A
 )(implicit val services: BatchEnvironment.Services) extends BatchEnvironment { env ⇒
 
+  import services._
   override def updateInterval = UpdateInterval.fixed(env.services.preference(SSHEnvironment.UpdateInterval))
 
   lazy val jobUpdater = new SSHEnvironment.Updater(WeakReference(this))
@@ -141,22 +141,18 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
     Updater.delay(jobUpdater, services.preference(SSHEnvironment.UpdateInterval))
   }
 
-  implicit val sshInterpreter = new gridscale.ssh.SSHInterpreter()
-  implicit val systemInterpreter = SystemInterpreter()
+  implicit val sshInterpreter = gridscale.ssh.SSH()
+  implicit val systemInterpreter = System()
 
   def timeout = services.preference(SSHEnvironment.TimeOut)
 
-  override def stop() = {
+  override def stop() =
     try super.stop()
-    finally jobUpdater.stop = true
-  }
-
-  override def close() = {
-    super.close()
-    sshInterpreter.close()
-  }
-
-  def usageControls = List(storageService.usageControl, jobService.usageControl)
+    finally {
+      jobUpdater.stop = true
+      def usageControls = List(storageService.usageControl, jobService.usageControl)
+      JobManager ! StopEnvironment(this, usageControls, Some(sshInterpreter().close))
+    }
 
   import env.services.{ threadProvider, preference }
 
@@ -209,7 +205,7 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
 
   def submit(job: SSHEnvironment.SSHJob, description: gridscale.ssh.SSHJobDescription) =
     try {
-      val id = gridscale.ssh.submit[DSL](env, description).eval
+      val id = gridscale.ssh.submit(env, description)
       queuesLock { jobsStates.put(job, SSHEnvironment.Submitted(id)) }
     }
     catch {
@@ -223,14 +219,14 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
       case None                               ⇒ ExecutionState.DONE
       case Some(state: SSHEnvironment.Queued) ⇒ ExecutionState.SUBMITTED
       case Some(SSHEnvironment.Failed)        ⇒ ExecutionState.FAILED
-      case Some(SSHEnvironment.Submitted(id)) ⇒ GridScaleJobService.translateStatus(gridscale.ssh.state[DSL](env, id).eval)
+      case Some(SSHEnvironment.Submitted(id)) ⇒ GridScaleJobService.translateStatus(gridscale.ssh.state(env, id))
     }
   }
 
   def delete(job: SSHEnvironment.SSHJob): Unit = {
     val jobState = queuesLock { jobsStates.remove(job) }
     jobState match {
-      case Some(SSHEnvironment.Submitted(id)) ⇒ gridscale.ssh.clean[DSL](env, id).eval
+      case Some(SSHEnvironment.Submitted(id)) ⇒ gridscale.ssh.clean(env, id)
       case _                                  ⇒
     }
   }
@@ -238,22 +234,14 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
   def stdOutErr(j: SSHEnvironment.SSHJob) = {
     val jobState = queuesLock { jobsStates.get(j) }
     jobState match {
-      case Some(SSHEnvironment.Submitted(id)) ⇒
-        val op =
-          for {
-            o ← gridscale.ssh.stdOut[DSL](env, id)
-            e ← gridscale.ssh.stdErr[DSL](env, id)
-          } yield (o, e)
-        op.eval
-      case _ ⇒ ("", "")
+      case Some(SSHEnvironment.Submitted(id)) ⇒ (gridscale.ssh.stdOut(env, id), gridscale.ssh.stdErr(env, id))
+      case _                                  ⇒ ("", "")
     }
   }
 
   def numberOfRunningJobs: Int = {
-    import freedsl.dsl._
-    import cats.implicits._
     val sshJobIds = env.queuesLock { env.jobsStates.toSeq.collect { case (j, SSHEnvironment.Submitted(id)) ⇒ id } }
-    sshJobIds.toList.traverse(id ⇒ gridscale.ssh.SSHJobDescription.jobIsRunning[DSL](env, id)).eval.count(_ == true)
+    sshJobIds.toList.map(id ⇒ gridscale.ssh.SSHJobDescription.jobIsRunning(env, id)).count(_ == true)
   }
 
   val queuesLock = new ReentrantLock()

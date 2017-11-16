@@ -20,7 +20,7 @@ package org.openmole.plugin.environment.egi
 import java.io.{ File, _ }
 
 import gridscale.authentication.P12Authentication
-import gridscale.egi.EGIInterpreter
+import gridscale.egi._
 import org.openmole.core.authentication._
 import org.openmole.core.serializer.SerializerService
 import org.openmole.plugin.environment.batch.authentication._
@@ -35,12 +35,10 @@ import org.openmole.tool.stream._
 import org.openmole.core.preference._
 import org.openmole.core.workspace.Workspace
 import org.openmole.tool.tar.TarInputStream
-import simulacrum.typeclass
 
 object EGIAuthentication extends Logger {
 
   import Log._
-  import freedsl.dsl._
 
   val updatedFile = ".updated"
 
@@ -52,7 +50,7 @@ object EGIAuthentication extends Logger {
     }
 
   def downloadCACertificates(address: String, dir: File)(implicit preference: Preference) = {
-    implicit val httpIntepreter = gridscale.http.HTTPInterpreter()
+    implicit val httpIntepreter = gridscale.http.HTTP()
 
     val site = gridscale.http.Server(address, preference(EGIEnvironment.CACertificatesDownloadTimeOut))
 
@@ -82,18 +80,11 @@ object EGIAuthentication extends Logger {
       }
     }
 
-    import cats.implicits._
-
-    val dl = for {
-      tarEntries ← gridscale.http.list[DSL](site, "/")
-      _ ← tarEntries.traverse { tarEntry ⇒
-        if (tarEntry.`type` != gridscale.FileType.Directory)
-          gridscale.http.readStream[DSL, Unit](site, tarEntry.name, downloadCertificate(tarEntry.name))
-        else ().pure[DSL]
-      }
-    } yield ()
-
-    dl.eval
+    val tarEntries = gridscale.http.list(site, "/")
+    tarEntries.foreach { tarEntry ⇒
+      if (tarEntry.`type` != gridscale.FileType.Directory)
+        gridscale.http.readStream[Unit](site, tarEntry.name, downloadCertificate(tarEntry.name))
+    }
   }
 
   def voCards(implicit workspace: Workspace, preference: Preference) =
@@ -167,22 +158,21 @@ object EGIAuthentication extends Logger {
   def proxy[A: EGIAuthenticationInterface](
     a:      A,
     voName: String,
-    fqan:   Option[String])(implicit workspace: Workspace, preference: Preference): util.Try[gridscale.egi.VOMS.VOMSCredential] = EGIInterpreter { implicits ⇒
+    fqan:   Option[String])(implicit workspace: Workspace, preference: Preference): util.Try[gridscale.egi.VOMS.VOMSCredential] = EGI { implicits ⇒
     import implicits._
-    import freedsl.dsl._
 
     def queryProxy(h: String) = {
       def proxy =
-        gridscale.egi.VOMS.proxy[DSL](
+        gridscale.egi.VOMS.proxy(
           h,
-          EGIAuthenticationInterface[A].apply(a),
+          implicitly[EGIAuthenticationInterface[A]].apply(a),
           EGIAuthentication.CACertificatesDir,
           preference(EGIEnvironment.ProxyLifeTime),
           fqan,
           timeout = preference(EGIEnvironment.VOMSTimeout)
         )
 
-      proxy.tryEval
+      util.Try(proxy)
     }
 
     findWorking(getVOMS(voName).map(_.toList).getOrElse(Nil), queryProxy, "VOMS server")
@@ -199,23 +189,18 @@ object EGIAuthentication extends Logger {
   def testDIRACAccess[A: EGIAuthenticationInterface](a: A, voName: String)(implicit workspace: Workspace, preference: Preference) =
     util.Try(getToken(a, voName)).map(_ ⇒ true)
 
-  def getToken[A: EGIAuthenticationInterface](a: A, voName: String)(implicit workspace: Workspace, preference: Preference) = EGIInterpreter { implicits ⇒
+  def getToken[A: EGIAuthenticationInterface](a: A, voName: String)(implicit workspace: Workspace, preference: Preference) = EGI { implicits ⇒
     import implicits._
     import gridscale.dirac._
-    def query =
-      for {
-        service ← getService[DSL](voName, preference(EGIEnvironment.DiracConnectionTimeout))
-        s ← server[DSL](service, EGIAuthenticationInterface[A].apply(a), CACertificatesDir)
-        t ← token[DSL](s)
-      } yield t
-
-    query.eval
+    val service = getService(voName, preference(EGIEnvironment.DiracConnectionTimeout))
+    val s = server(service, implicitly[EGIAuthenticationInterface[A]].apply(a), CACertificatesDir)
+    token(s)
 
   }
 
-  def DIRACVos(implicit preference: Preference) = EGIInterpreter { implicits ⇒
+  def DIRACVos(implicit preference: Preference) = EGI { implicits ⇒
     import implicits._
-    gridscale.dirac.supportedVOs[DSL](preference(EGIEnvironment.DiracConnectionTimeout)).eval
+    gridscale.dirac.supportedVOs(preference(EGIEnvironment.DiracConnectionTimeout))
   }
 
 }
@@ -234,11 +219,11 @@ object EGIAuthenticationInterface {
     new EGIAuthenticationInterface[EGIAuthentication] {
       override def apply(a: EGIAuthentication) =
         a match {
-          case p12: gridscale.authentication.P12Authentication ⇒ P12Authentication(p12.certificate, p12.password)
+          case p12: P12Certificate ⇒ P12Authentication(p12.certificate, p12.password)
         }
     }
 }
 
-@typeclass trait EGIAuthenticationInterface[A] {
+trait EGIAuthenticationInterface[A] {
   def apply(a: A): gridscale.authentication.P12Authentication
 }

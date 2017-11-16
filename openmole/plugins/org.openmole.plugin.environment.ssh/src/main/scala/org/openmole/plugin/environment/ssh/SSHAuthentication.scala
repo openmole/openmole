@@ -63,11 +63,11 @@ object SSHAuthentication {
 
   private def eq(a1: SSHAuthentication, a2: SSHAuthentication) = (a1.getClass, a1.login, a1.host, a1.port) == (a2.getClass, a2.login, a2.host, a2.port)
 
-  def test(a: SSHAuthentication)(implicit cypher: Cypher, authenticationStore: AuthenticationStore, serializerService: SerializerService, preference: Preference) = gridscale.ssh.SSHInterpreter { implicit intp ⇒
-    import freedsl.dsl._
+  def test(a: SSHAuthentication)(implicit cypher: Cypher, authenticationStore: AuthenticationStore, serializerService: SerializerService, preference: Preference) = gridscale.ssh.SSH { implicit intp ⇒
+    import intp._
     Try {
       val server = gridscale.ssh.SSHServer(a.host, a.port, preference(SSHEnvironment.TimeOut))(a)
-      gridscale.ssh.home[DSL](server).eval
+      gridscale.ssh.home(server)
     }.map(_ ⇒ true)
   }
 

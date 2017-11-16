@@ -76,7 +76,7 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
 
                     moleJob.perform(executionJob.executionContext)
                     moleJob.exception match {
-                      case Some(e) ⇒ environment.eventDispatcher.trigger(environment: Environment, MoleJobExceptionRaised(executionJob, e, SEVERE, moleJob))
+                      case Some(e) ⇒ environment.eventDispatcherService.trigger(environment: Environment, MoleJobExceptionRaised(executionJob, e, SEVERE, moleJob))
                       case _       ⇒
                     }
 
@@ -95,7 +95,7 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
                 display(stream, s"Error of local execution", error)
             }
 
-            environment.eventDispatcher.trigger(environment: Environment, Environment.JobCompleted(executionJob, log, service.localRuntimeInfo))
+            environment.eventDispatcherService.trigger(environment: Environment, Environment.JobCompleted(executionJob, log, service.localRuntimeInfo))
           }
           catch {
             case e: InterruptedException ⇒ throw e
@@ -104,7 +104,7 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
               val er = ExceptionRaised(executionJob, e, SEVERE)
               environment.error(er)
               logger.log(SEVERE, "Error in execution", e)
-              environment.eventDispatcher.trigger(environment: Environment, er)
+              environment.eventDispatcherService.trigger(environment: Environment, er)
           }
           finally executionJob.state = ExecutionState.KILLED
         case None ⇒ stop = true

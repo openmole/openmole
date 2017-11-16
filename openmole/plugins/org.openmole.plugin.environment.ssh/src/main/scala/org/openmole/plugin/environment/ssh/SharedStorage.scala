@@ -27,7 +27,6 @@ import org.openmole.plugin.environment.batch.storage._
 import org.openmole.core.communication.storage._
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.tool.logger.Logger
-import freedsl.dsl._
 import squants.information.Information
 
 object SharedStorage extends Logger {

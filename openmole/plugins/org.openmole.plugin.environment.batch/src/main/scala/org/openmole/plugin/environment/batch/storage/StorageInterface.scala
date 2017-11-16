@@ -21,14 +21,9 @@ import java.nio.file.Files
 
 import gridscale._
 import org.openmole.core.communication.storage._
-import org.openmole.core.threadprovider.Updater
 import org.openmole.core.workspace._
-import org.openmole.plugin.environment.batch.environment.BatchEnvironment
 import org.openmole.tool.file._
 import org.openmole.tool.stream._
-import simulacrum.typeclass
-import squants.time.TimeConversions._
-import squants.information.InformationConversions._
 
 import scala.ref.WeakReference
 
@@ -79,7 +74,7 @@ object StorageInterface {
 
 }
 
-@typeclass trait StorageInterface[T] {
+trait StorageInterface[T] {
   def home(t: T): String
   def child(t: T, parent: String, child: String): String
   def parent(t: T, path: String): Option[String]

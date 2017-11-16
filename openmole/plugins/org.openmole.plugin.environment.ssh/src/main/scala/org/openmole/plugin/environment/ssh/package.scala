@@ -18,7 +18,7 @@ package org.openmole.plugin.environment
 
 import java.net.URI
 
-import freedsl.dsl._
+import effectaside._
 import org.openmole.core.communication.storage.TransferOptions
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.preference.Preference
@@ -27,17 +27,14 @@ import org.openmole.core.workflow.dsl.File
 import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, Runtime, UsageControl }
 import org.openmole.plugin.environment.batch.storage.{ StorageInterface, StorageService }
 import org.openmole.plugin.environment.gridscale.{ LocalStorage, LogicalLinkStorage }
-import simulacrum.typeclass
 import squants.time.Time
-import sun.util.resources.ro.CalendarData_ro
-
-import scala.util.Try
+import effectaside._
 
 package object ssh {
   //  class RemoteLogicalLinkStorage(val root: String) extends LogicalLinkStorage with SimpleStorage
   //  class RemoveLocalStorage(val root: String) extends LocalStorage with SimpleStorage
 
-  @typeclass trait AsSSHServer[S] {
+  trait AsSSHServer[S] {
     def apply(s: S): _root_.gridscale.ssh.SSHServer
   }
 
@@ -45,26 +42,26 @@ package object ssh {
 
   import _root_.gridscale.{ ssh ⇒ gssh }
 
-  implicit def isStorage[S: AsSSHServer](implicit interpreter: gssh.SSHInterpreter): StorageInterface[S] = new StorageInterface[S] {
+  implicit def isStorage[S: AsSSHServer](implicit interpreter: Effect[gssh.SSH]): StorageInterface[S] = new StorageInterface[S] {
     override def child(t: S, parent: String, child: String): String = _root_.gridscale.RemotePath.child(parent, child)
     override def parent(t: S, path: String): Option[String] = _root_.gridscale.RemotePath.parent(path)
     override def name(t: S, path: String): String = _root_.gridscale.RemotePath.name(path)
-    override def home(t: S) = gssh.home[DSL](t).eval
+    override def home(t: S) = gssh.home(t)
 
-    override def exists(t: S, path: String): Boolean = gssh.exists[DSL](t, path).eval
-    override def list(t: S, path: String) = gssh.list[DSL](t, path).eval
-    override def makeDir(t: S, path: String): Unit = gssh.makeDir[DSL](t, path).eval
-    override def rmDir(t: S, path: String): Unit = gssh.rmDir[DSL](t, path).eval
-    override def rmFile(t: S, path: String): Unit = gssh.rmFile[DSL](t, path).eval
-    override def mv(t: S, from: String, to: String): Unit = gssh.mv[DSL](t, from, to).eval
+    override def exists(t: S, path: String): Boolean = gssh.exists(t, path)
+    override def list(t: S, path: String) = gssh.list(t, path)
+    override def makeDir(t: S, path: String): Unit = gssh.makeDir(t, path)
+    override def rmDir(t: S, path: String): Unit = gssh.rmDir(t, path)
+    override def rmFile(t: S, path: String): Unit = gssh.rmFile(t, path)
+    override def mv(t: S, from: String, to: String): Unit = gssh.mv(t, from, to)
 
     override def upload(t: S, src: File, dest: String, options: TransferOptions): Unit =
-      StorageInterface.upload(false, gssh.writeFile[DSL](t, _, _).eval)(src, dest, options)
+      StorageInterface.upload(false, gssh.writeFile(t, _, _))(src, dest, options)
     override def download(t: S, src: String, dest: File, options: TransferOptions): Unit =
-      StorageInterface.download(false, gssh.readFile[DSL, Unit](t, _, _).eval)(src, dest, options)
+      StorageInterface.download(false, gssh.readFile[Unit](t, _, _))(src, dest, options)
   }
 
-  def localStorageService(environment: BatchEnvironment, concurrency: Int, root: String, sharedDirectory: Option[String])(implicit threadProvider: ThreadProvider, preference: Preference, localInterpreter: _root_.gridscale.local.LocalInterpreter) = {
+  def localStorageService(environment: BatchEnvironment, concurrency: Int, root: String, sharedDirectory: Option[String])(implicit threadProvider: ThreadProvider, preference: Preference, localInterpreter: Effect[_root_.gridscale.local.Local]) = {
     val remoteStorage = StorageInterface.remote(LogicalLinkStorage())
     def id = new URI("file", null, "localhost", -1, sharedDirectory.orNull, null, null).toString
     StorageService(LocalStorage(), root, id, environment, remoteStorage, concurrency, t ⇒ false)
@@ -88,8 +85,8 @@ package object ssh {
         storageInterface.child(storage, home, ".openmole/.tmp/ssh/")
     }
 
-    implicit def logicalLinkStorage = LogicalLinkStorage.isStorage(_root_.gridscale.local.LocalInterpreter())
-    implicit def localStorage = LocalStorage.isStorage(_root_.gridscale.local.LocalInterpreter())
+    implicit def logicalLinkStorage = LogicalLinkStorage.isStorage(_root_.gridscale.local.Local())
+    implicit def localStorage = LocalStorage.isStorage(_root_.gridscale.local.Local())
 
     val remoteStorage = StorageInterface.remote(LogicalLinkStorage())
     if (storageSharedLocally) {
@@ -127,20 +124,19 @@ package object ssh {
   }
 
   object Frontend {
-    def ssh(frontend: _root_.gridscale.ssh.SSHServer)(implicit sshInterpreter: _root_.gridscale.ssh.SSHInterpreter, systemInterpreter: freedsl.system.SystemInterpreter): Frontend = new Frontend {
+    def ssh(frontend: _root_.gridscale.ssh.SSHServer)(implicit ssh: Effect[_root_.gridscale.ssh.SSH], system: Effect[System]): Frontend = new Frontend {
       override def run(command: String) =
-        _root_.gridscale.ssh.run[DSL](frontend, command, verbose = true).tryEval
+        util.Try(_root_.gridscale.ssh.run(frontend, command, verbose = true))
     }
 
-    def ssh[A: _root_.gridscale.ssh.SSHAuthentication](host: String, port: Int, timeout: Time, authentication: A)(implicit sshInterpreter: _root_.gridscale.ssh.SSHInterpreter, systemInterpreter: freedsl.system.SystemInterpreter): Frontend = {
+    def ssh[A: _root_.gridscale.ssh.SSHAuthentication](host: String, port: Int, timeout: Time, authentication: A)(implicit sshEffect: Effect[_root_.gridscale.ssh.SSH], system: Effect[System]): Frontend = {
       val sshServer = _root_.gridscale.ssh.SSHServer(host, port, timeout)(authentication)
       ssh(sshServer)
     }
 
-    def local(implicit localInterpreter: _root_.gridscale.local.LocalInterpreter) = new Frontend {
-      override def run(command: String) = {
-        _root_.gridscale.local.execute[DSL](command).tryEval
-      }
+    def local(implicit local: Effect[_root_.gridscale.local.Local]) = new Frontend {
+      override def run(command: String) =
+        util.Try(_root_.gridscale.local.execute(command))
     }
 
   }

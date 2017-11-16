@@ -53,7 +53,7 @@ sealed trait Environment <: Name {
   private[execution] val _done = new AtomicLong(0L)
   private[execution] val _failed = new AtomicLong(0L)
 
-  def eventDispatcher: EventDispatcher
+  def eventDispatcherService: EventDispatcher
   def exceptions: Int
 
   private lazy val _errors = new SlidingList[ExceptionEvent]
@@ -90,7 +90,7 @@ class LocalEnvironment(
   val nbThreads:     Int,
   val deinterleave:  Boolean,
   override val name: Option[String]
-)(implicit val preference: Preference, threadProvider: ThreadProvider, val eventDispatcher: EventDispatcher) extends Environment {
+)(implicit val preference: Preference, threadProvider: ThreadProvider, val eventDispatcherService: EventDispatcher) extends Environment {
 
   val pool = Cache(new ExecutorPool(nbThreads, WeakReference(this), threadProvider))
 
@@ -106,7 +106,7 @@ class LocalEnvironment(
   private def submit(ejob: LocalExecutionJob): Unit = {
     pool().enqueue(ejob)
     ejob.state = ExecutionState.SUBMITTED
-    eventDispatcher.trigger(this, new Environment.JobSubmitted(ejob))
+    eventDispatcherService.trigger(this, new Environment.JobSubmitted(ejob))
   }
 
   def submitted: Long = pool().waiting

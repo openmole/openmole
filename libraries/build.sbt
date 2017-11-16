@@ -202,7 +202,7 @@ lazy val cats =
     version := catsVersion
   ) settings(settings: _*)
 
-lazy val freedslVersion = "0.21-SNAPSHOT"
+lazy val freedslVersion = "0.21"
 
 lazy val freedsl =
   OsgiProject(dir, "freedsl", exports = Seq("freedsl.*", "freestyle.*", "mainecoon.*")) settings (
@@ -330,12 +330,17 @@ lazy val sourceCode = OsgiProject(dir, "sourcecode") settings (
 ) settings(settings: _*)
 
 
-def gridscaleVersion = "2.0-SNAPSHOT"
+def effectasideVersion = "0.1"
+lazy val effectaside = OsgiProject(dir, "effectaside", imports = Seq("*")) settings (
+  libraryDependencies += "fr.iscpif.effectaside" %% "effect"% effectasideVersion,
+  version := effectasideVersion
+)
 
+def gridscaleVersion = "2.0-SNAPSHOT"
 lazy val gridscale = OsgiProject(dir, "gridscale", imports = Seq("*"), exports = Seq("gridscale.*", "enumeratum.*")) settings (
   libraryDependencies += "fr.iscpif.gridscale" %% "gridscale" % gridscaleVersion,
   version := gridscaleVersion
-) settings(settings: _*) dependsOn(freedsl)
+) settings(settings: _*) dependsOn(effectaside)
 
 lazy val gridscaleLocal = OsgiProject(dir, "gridscale.local", imports = Seq("*")) settings (
   libraryDependencies += "fr.iscpif.gridscale" %% "local" % gridscaleVersion,

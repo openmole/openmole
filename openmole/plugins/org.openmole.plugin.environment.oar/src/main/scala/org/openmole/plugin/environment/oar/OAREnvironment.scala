@@ -26,7 +26,8 @@ import org.openmole.plugin.environment.ssh._
 import org.openmole.tool.crypto.Cypher
 import squants._
 import squants.information._
-import freedsl.dsl._
+import effectaside._
+import org.openmole.plugin.environment.batch.refresh.{JobManager, StopEnvironment}
 import org.openmole.plugin.environment.gridscale._
 
 object OAREnvironment {
@@ -122,16 +123,17 @@ class OAREnvironment[A: gridscale.ssh.SSHAuthentication](
     val authentication: A
 )(implicit val services: BatchEnvironment.Services) extends BatchEnvironment { env ⇒
 
-  def usageControls = List(storageService.usageControl, jobService.usageControl)
+  import services._
 
-  implicit val sshInterpreter = gridscale.ssh.SSHInterpreter()
-  implicit val systemInterpreter = freedsl.system.SystemInterpreter()
-  implicit val errorHandler = freedsl.errorhandler.ErrorHandlerInterpreter()
+  implicit val sshInterpreter = gridscale.ssh.SSH()
+  implicit val systemInterpreter = effectaside.System()
 
-  override def close() = {
-    super.close()
-    sshInterpreter.close()
-  }
+  override def stop() =
+    try super.stop()
+    finally  {
+      def usageControls = List(storageService.usageControl, jobService.usageControl)
+      JobManager ! StopEnvironment(this, usageControls, Some(sshInterpreter().close))
+    }
 
   import env.services.{ threadProvider, preference }
   import org.openmole.plugin.environment.ssh._
@@ -179,24 +181,18 @@ class OAREnvironment[A: gridscale.ssh.SSHAuthentication](
       bestEffort = parameters.bestEffort
     )
 
-    val id = gridscale.oar.submit[DSL, _root_.gridscale.ssh.SSHServer](env, description).eval
+    val id = gridscale.oar.submit[_root_.gridscale.ssh.SSHServer](env, description)
     BatchJob(id, result)
   }
 
   def state(id: gridscale.cluster.BatchScheduler.BatchJob) =
-    GridScaleJobService.translateStatus(gridscale.oar.state[DSL, _root_.gridscale.ssh.SSHServer](env, id).eval)
+    GridScaleJobService.translateStatus(gridscale.oar.state[_root_.gridscale.ssh.SSHServer](env, id))
 
   def delete(id: gridscale.cluster.BatchScheduler.BatchJob) =
-    gridscale.oar.clean[DSL, _root_.gridscale.ssh.SSHServer](env, id).eval
+    gridscale.oar.clean[_root_.gridscale.ssh.SSHServer](env, id)
 
-  def stdOutErr(id: gridscale.cluster.BatchScheduler.BatchJob) = {
-    val op =
-      for {
-        o ← gridscale.oar.stdOut[DSL, _root_.gridscale.ssh.SSHServer](env, id)
-        e ← gridscale.oar.stdErr[DSL, _root_.gridscale.ssh.SSHServer](env, id)
-      } yield (o, e)
-    op.eval
-  }
+  def stdOutErr(id: gridscale.cluster.BatchScheduler.BatchJob) =
+    (gridscale.oar.stdOut[_root_.gridscale.ssh.SSHServer](env, id), gridscale.oar.stdErr[_root_.gridscale.ssh.SSHServer](env, id))
 
   lazy val jobService = BatchJobService(env, concurrency = services.preference(SSHEnvironment.MaxConnections))
   override def trySelectJobService() = BatchEnvironment.trySelectSingleJobService(jobService)
@@ -217,12 +213,13 @@ class OARLocalEnvironment(
     val name:       Option[String]
 )(implicit val services: BatchEnvironment.Services) extends BatchEnvironment { env ⇒
 
+  import services._
+
   lazy val usageControl = UsageControl(services.preference(SSHEnvironment.MaxLocalOperations))
   def usageControls = List(storageService.usageControl, jobService.usageControl)
 
-  implicit val localInterpreter = gridscale.local.LocalInterpreter()
-  implicit val systemInterpreter = freedsl.system.SystemInterpreter()
-  implicit val errorHandler = freedsl.errorhandler.ErrorHandlerInterpreter()
+  implicit val localInterpreter = gridscale.local.Local()
+  implicit val systemInterpreter = effectaside.System()
 
   import env.services.{ threadProvider, preference }
   import org.openmole.plugin.environment.ssh._
@@ -269,25 +266,28 @@ class OARLocalEnvironment(
       bestEffort = parameters.bestEffort
     )
 
-    val id = gridscale.oar.submit[DSL, LocalHost](LocalHost(), description).eval
+    val id = gridscale.oar.submit(LocalHost(), description)
     BatchJob(id, result)
   }
 
   def state(id: gridscale.cluster.BatchScheduler.BatchJob) =
-    GridScaleJobService.translateStatus(gridscale.oar.state[DSL, LocalHost](LocalHost(), id).eval)
+    GridScaleJobService.translateStatus(gridscale.oar.state(LocalHost(), id))
 
   def delete(id: gridscale.cluster.BatchScheduler.BatchJob) =
-    gridscale.oar.clean[DSL, LocalHost](LocalHost(), id).eval
+    gridscale.oar.clean(LocalHost(), id)
 
-  def stdOutErr(id: gridscale.cluster.BatchScheduler.BatchJob) = {
-    val op =
-      for {
-        o ← gridscale.oar.stdOut[DSL, LocalHost](LocalHost(), id)
-        e ← gridscale.oar.stdErr[DSL, LocalHost](LocalHost(), id)
-      } yield (o, e)
-    op.eval
-  }
+  def stdOutErr(id: gridscale.cluster.BatchScheduler.BatchJob) =
+    (gridscale.oar.stdOut(LocalHost(), id), gridscale.oar.stdErr(LocalHost(), id))
+
 
   lazy val jobService = BatchJobService(env, concurrency = services.preference(SSHEnvironment.MaxLocalOperations))
   override def trySelectJobService() = BatchEnvironment.trySelectSingleJobService(jobService)
+
+
+  override def stop() =
+    try super.stop()
+    finally  {
+      def usageControls = List(storageService.usageControl, jobService.usageControl)
+      JobManager ! StopEnvironment(this, usageControls)
+    }
 }

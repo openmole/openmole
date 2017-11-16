@@ -15,7 +15,6 @@
 // * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // */
 //
-//package org.openmole.plugin.environment.egi
 //
 //import java.io.{ File, IOException, InputStream }
 //import java.net.URI
@@ -50,6 +49,8 @@
 //  override def uploadStream(is: InputStream, path: String, transferOptions: TransferOptions)(implicit token: AccessToken) = quality { super.uploadStream(is, path, transferOptions)(token) }
 //}
 //
+
+package org.openmole.plugin.environment.egi
 
 import org.openmole.core.communication.storage._
 import org.openmole.core.workspace.NewFile
@@ -166,9 +167,9 @@ object CurlRemoteStorage {
   }
 }
 
-case class CurlRemoteStorage(host: String, port: Int, voName: String, debug: Boolean, timeout: Time) extends RemoteStorage {
+case class CurlRemoteStorage(location: String, voName: String, debug: Boolean, timeout: Time) extends RemoteStorage {
 
-  @transient lazy val url = new URI("https", null, host, port, null, null, null)
+  @transient lazy val url = new URI(location)
   @transient lazy val curl = CurlRemoteStorage.Curl(voName, debug, timeout)
 
   override def upload(src: File, dest: String, options: storage.TransferOptions)(implicit newFile: NewFile): Unit =

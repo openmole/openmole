@@ -43,7 +43,7 @@ package object market {
     ExpandedString(preference(MarketIndex.marketIndexLocation)).from(Context("version" → buildinfo.version))
 
   def marketIndex(implicit preference: Preference, randomProvider: RandomProvider, newFile: NewFile, fileService: FileService) =
-    http.get(indexURL).map(Serialization.read[MarketIndex](_)).get
+    Serialization.read[MarketIndex](http.get(indexURL))
 
   def downloadEntry(entry: MarketIndexEntry, path: File) = try {
     http.getStream(entry.url) { is ⇒

@@ -76,7 +76,8 @@ class StorageService[S](
   val environment:   BatchEnvironment,
   val remoteStorage: RemoteStorage,
   val usageControl:  UsageControl,
-  isConnectionError: Throwable ⇒ Boolean
+  isConnectionError: Throwable ⇒ Boolean,
+  qualityHysteresis: Int                 = 100
 )(implicit storage: StorageInterface[S]) {
 
   import environment.services
@@ -206,23 +207,22 @@ class StorageService[S](
 
   override def toString: String = id
 
-  def exists(path: String)(implicit token: AccessToken): Boolean = token.access { storage.exists(s, path) }
-  def listNames(path: String)(implicit token: AccessToken): Seq[String] = token.access { storage.list(s, path).map(_.name) }
-  def list(path: String)(implicit token: AccessToken): Seq[ListEntry] = token.access { storage.list(s, path) }
-  def makeDir(path: String)(implicit token: AccessToken): Unit = token.access { storage.makeDir(s, path) }
-  def rmDir(path: String)(implicit token: AccessToken): Unit = token.access { storage.rmDir(s, path) }
-  def rmFile(path: String)(implicit token: AccessToken): Unit = token.access { storage.rmFile(s, path) }
-  def mv(from: String, to: String)(implicit token: AccessToken) = token.access { storage.mv(s, from, to) }
+  lazy val quality = QualityControl(qualityHysteresis)
 
-  //def downloadStream(path: String, options: TransferOptions = TransferOptions.default)(implicit token: AccessToken): InputStream = token.access { storage.downloadStream(s, path, options) }
-  //def uploadStream(is: InputStream, path: String, options: TransferOptions = TransferOptions.default)(implicit token: AccessToken): Unit = token.access { storage.uploadStream(s, is, path, options) }
+  def exists(path: String)(implicit token: AccessToken): Boolean = token.access { quality { storage.exists(s, path) } }
+  def listNames(path: String)(implicit token: AccessToken): Seq[String] = token.access { quality { storage.list(s, path).map(_.name) } }
+  def list(path: String)(implicit token: AccessToken): Seq[ListEntry] = token.access { quality { storage.list(s, path) } }
+  def makeDir(path: String)(implicit token: AccessToken): Unit = token.access { quality { storage.makeDir(s, path) } }
+  def rmDir(path: String)(implicit token: AccessToken): Unit = token.access { quality { storage.rmDir(s, path) } }
+  def rmFile(path: String)(implicit token: AccessToken): Unit = token.access { quality { storage.rmFile(s, path) } }
+  def mv(from: String, to: String)(implicit token: AccessToken) = token.access { quality { storage.mv(s, from, to) } }
 
   def parent(path: String): Option[String] = storage.parent(s, path)
   def name(path: String) = storage.name(s, path)
   def child(path: String, name: String) = storage.child(s, path, name)
 
-  def upload(src: File, dest: String, options: TransferOptions = TransferOptions.default)(implicit token: AccessToken) = token.access { storage.upload(s, src, dest, options) }
-  def download(src: String, dest: File, options: TransferOptions = TransferOptions.default)(implicit token: AccessToken) = token.access { storage.download(s, src, dest, options) }
+  def upload(src: File, dest: String, options: TransferOptions = TransferOptions.default)(implicit token: AccessToken) = token.access { quality { storage.upload(s, src, dest, options) } }
+  def download(src: String, dest: File, options: TransferOptions = TransferOptions.default)(implicit token: AccessToken) = token.access { quality { storage.download(s, src, dest, options) } }
 
   def baseDirName = "openmole-" + preference(Preference.uniqueID) + '/'
 

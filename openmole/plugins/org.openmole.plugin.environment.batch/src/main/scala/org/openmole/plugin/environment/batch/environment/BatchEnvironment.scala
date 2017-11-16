@@ -163,10 +163,11 @@ object BatchEnvironment extends Logger {
 abstract class BatchEnvironment extends SubmissionEnvironment { env ⇒
 
   implicit val services: BatchEnvironment.Services
-  implicit def eventDispatcher = services.eventDispatcher
+  def eventDispatcherService = services.eventDispatcher
+
   def exceptions = services.preference(Environment.maxExceptionsLog)
 
-  def usageControls: List[UsageControl]
+  //def usageControls: List[UsageControl]
   def trySelectStorage(files: ⇒ Vector[File]): Option[(StorageService[_], AccessToken)]
   def trySelectJobService(): Option[(BatchJobService[_], AccessToken)]
 
@@ -181,7 +182,7 @@ abstract class BatchEnvironment extends SubmissionEnvironment { env ⇒
   override def submit(job: Job) = {
     val bej = executionJob(job)
     batchJobWatcher.register(bej)
-    eventDispatcher.trigger(this, new Environment.JobSubmitted(bej))
+    eventDispatcherService.trigger(this, new Environment.JobSubmitted(bej))
     JobManager ! Manage(bej)
   }
 
@@ -209,10 +210,7 @@ abstract class BatchEnvironment extends SubmissionEnvironment { env ⇒
   override def stop() = {
     super.stop()
     batchJobWatcher.stop = true
-    JobManager ! StopEnvironment(this)
   }
-
-  def close(): Unit = {}
 
 }
 

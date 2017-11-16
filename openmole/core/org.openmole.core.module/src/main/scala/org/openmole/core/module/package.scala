@@ -49,7 +49,7 @@ package object module {
   import org.json4s.jackson.Serialization
   implicit val formats = Serialization.formats(NoTypeHints)
 
-  def modules(url: String) = http.get(url).map(Serialization.read[Seq[Module]](_)).get
+  def modules(url: String) = Serialization.read[Seq[Module]](http.get(url))
   def selectableModules(url: String) = modules(url).map(m ⇒ SelectableModule(gridscale.RemotePath.parent(url).get, m))
 
   case class SelectableModule(baseURL: String, module: Module)

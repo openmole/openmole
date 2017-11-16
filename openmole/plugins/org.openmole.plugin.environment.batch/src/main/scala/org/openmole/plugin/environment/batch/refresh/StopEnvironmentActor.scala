@@ -5,8 +5,10 @@ import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, Bat
 object StopEnvironmentActor {
 
   def receive(stop: StopEnvironment)(implicit services: BatchEnvironment.Services) = try {
-    stop.environment.usageControls.foreach(UsageControl.stop)
-    stop.environment.usageControls.foreach(UsageControl.waitUnused)
+    stop.environment.jobs.foreach(_.state = ExecutionState.KILLED)
+
+    stop.usageControls.foreach(UsageControl.stop)
+    stop.usageControls.foreach(UsageControl.waitUnused)
 
     val token = UsageControl.faucetToken
 
@@ -18,6 +20,6 @@ object StopEnvironmentActor {
 
     stop.environment.jobs.foreach(kill)
   }
-  finally stop.environment.close()
+  finally stop.close.foreach(_())
 
 }
