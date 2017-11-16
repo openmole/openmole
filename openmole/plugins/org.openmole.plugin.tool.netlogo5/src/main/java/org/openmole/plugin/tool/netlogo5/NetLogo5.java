@@ -30,7 +30,17 @@ import java.util.Map;
  */
 public class NetLogo5 implements NetLogo {
 
-    protected HeadlessWorkspace workspace = HeadlessWorkspace.newInstance();
+    protected HeadlessWorkspace workspace = createWorkspace();
+
+    private HeadlessWorkspace createWorkspace() {
+        ClassLoader threadClassLoader = Thread.currentThread().getContextClassLoader();
+        Thread.currentThread().setContextClassLoader(getNetLogoClassLoader());
+        try {
+            return HeadlessWorkspace.newInstance();
+        } finally {
+            Thread.currentThread().setContextClassLoader(threadClassLoader);
+        }
+    }
 
     @Override
     public void open(String script) throws Exception {
