@@ -4,6 +4,12 @@
 @import org.openmole.core.buildinfo._
 @import org.openmole.site.Config._
 
+@h1{@links.anchor{8.0 | TODO Set version }}
+@ul
+  @li{Migrate to build to SBT 1.0}
+  @li{Migrate to Scala 2.12: faster script compilation, more concise and more efficient byte code for OpenMOLE}
+  @li{More reliable an efficient distributed execution through a complete refactor of the execution environments and migration to gridscale 2}
+  @li{Use binary serialisation (boopickle) to communicate between the web app and the server: more efficient in term of CPU and bandwidth}
 
 @h1{@links.anchor{7.0 | Nano Ninja}}
 @ul
