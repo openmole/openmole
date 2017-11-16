@@ -153,6 +153,8 @@ object Resource {
 
     object footer {
 
+      val chat = footerResource("blog.svg")
+
       val github = footerResource("github.svg")
 
       val email = footerResource("email.svg")
