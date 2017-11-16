@@ -57,21 +57,22 @@ object Footer {
               li(liStyle(23))(
                 span("COMMUNITY", textAlign := "center"),
                 div(paddingTop := 15),
-                imgSubItem(Resource.img.footer.previousVersion, "Previously", Pages.previousVersions.file, false),
                 imgSubItem(Resource.img.footer.email, "Forum", shared.link.mailingList),
+                imgSubItem(Resource.img.footer.chat, "Chat", shared.link.chat),
                 imgSubItem(Resource.img.footer.faq, "FAQ", Pages.faq.file, false)
               ),
               li(liStyle(26))(
                 span("DEVELOPMENT", textAlign := "center"),
                 div(paddingTop := 15),
+                imgSubItem(Resource.img.footer.previousVersion, "Changes", Pages.previousVersions.file, false),
                 imgSubItem(Resource.img.footer.github, "Source code", shared.link.repo.openmole),
-                imgSubItem(Resource.img.footer.contribute, "Contribute !", DocumentationPages.howToContribute.file, false)
+                imgSubItem(Resource.img.footer.contribute, "Contribute!", DocumentationPages.howToContribute.file, false)
               ),
               li(liStyle(27))(
                 span("ABOUT US", textAlign := "center"),
                 div(paddingTop := 15),
                 imgSubItem(Resource.img.footer.paper, "Publications", Pages.communications.file, true),
-                imgSubItem(Resource.img.footer.whoarwe, "Who are we ?", Pages.whoAreWe.file, false),
+                imgSubItem(Resource.img.footer.whoarwe, "Who are we?", Pages.whoAreWe.file, false),
                 imgSubItem(Resource.img.footer.partner, "Partners", Pages.partner.file, false)
               ),
               li(liStyle(22))(
