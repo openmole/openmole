@@ -22,10 +22,10 @@ import org.openmole.gui.client.core.alert.{ AbsolutePositioning, AlertPanel }
 import AbsolutePositioning.CenterPagePosition
 import scaladget.api.{ BootstrapTags ⇒ bs }
 import org.openmole.gui.ext.data.{ ProcessState, Processing }
-import org.openmole.gui.client.tool._
 import org.openmole.gui.ext.tool.client.JsRxTags._
 import org.openmole.gui.ext.tool.client._
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+import scala.concurrent.ExecutionContext.Implicits.global
+import boopickle.Default._
 import org.openmole.gui.client.core.files.TreeNodePanel
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
 import scaladget.stylesheet.{ all ⇒ sheet }

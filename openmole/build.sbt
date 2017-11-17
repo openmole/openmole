@@ -1,9 +1,7 @@
 import org.openmole.buildsystem._
 import OMKeys._
-
 import sbt._
-import Keys._
-
+import Keys.{libraryDependencies, _}
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 
 organization := "org.openmole"
@@ -536,11 +534,11 @@ lazy val dataGUI = OsgiProject(guiExt, "org.openmole.gui.ext.data") enablePlugin
 
 lazy val extServerTool = OsgiProject(guiExt, "org.openmole.gui.ext.tool.server") dependsOn(dataGUI, workspace) settings(
   libraryDependencies += Libraries.autowire,
-  libraryDependencies += Libraries.upickle
+  libraryDependencies += Libraries.boopickle
 ) settings (defaultSettings: _*)
 
 lazy val extClientTool = OsgiProject(guiExt, "org.openmole.gui.ext.tool.client") enablePlugins (ScalaJSPlugin) dependsOn(dataGUI, sharedGUI) settings(
-  Libraries.upickleJS,
+  Libraries.boopickleJS,
   Libraries.autowireJS,
   Libraries.rxJS,
   Libraries.scalajsDomJS,
@@ -599,9 +597,9 @@ lazy val clientGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.core") e
 ) settings (defaultSettings: _*)
 
 
-lazy val clientToolGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.tool", privatePackages = Seq("autowire.*", "upickle.*", "sourcecode.*", "rx.*", "org.scalajs.dom.*", "scalatags.*", "scaladget.*")) enablePlugins (ScalaJSPlugin) dependsOn (workspace) settings(
+lazy val clientToolGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.tool", privatePackages = Seq("autowire.*", "boopickle.*" ,"sourcecode.*", "rx.*", "org.scalajs.dom.*", "scalatags.*", "scaladget.*")) enablePlugins (ScalaJSPlugin) dependsOn (workspace) settings(
   Libraries.autowireJS,
-  Libraries.upickleJS,
+  Libraries.boopickleJS,
   Libraries.scalajsDomJS,
   Libraries.scalaTagsJS,
   Libraries.scaladgetJS,
@@ -613,7 +611,7 @@ lazy val clientToolGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.tool
 def guiServerDir = guiDir / "server"
 
 lazy val serverGUI = OsgiProject(guiServerDir, "org.openmole.gui.server.core") settings
-  (libraryDependencies ++= Seq(Libraries.autowire, Libraries.upickle, Libraries.scalaTags, Libraries.logback, Libraries.scalatra, Libraries.clapper, Libraries.arm)) dependsOn(
+  (libraryDependencies ++= Seq(Libraries.arm, Libraries.autowire, Libraries.boopickle, Libraries.circe, Libraries.scalaTags, Libraries.logback, Libraries.scalatra, Libraries.clapper)) dependsOn(
   sharedGUI,
   dataGUI,
   workflow,
@@ -918,9 +916,9 @@ lazy val launcher = OsgiProject(binDir, "org.openmole.launcher", imports = Seq("
 ) settings (defaultSettings: _*)
 
 
-lazy val consoleBin = OsgiProject(binDir, "org.openmole.console", imports = Seq("*")) settings (
-  libraryDependencies += Libraries.upickle
-  ) dependsOn(
+lazy val consoleBin = OsgiProject(binDir, "org.openmole.console", imports = Seq("*")) settings(
+  libraryDependencies += Libraries.boopickle
+) dependsOn(
   workflow,
   console,
   project,

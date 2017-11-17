@@ -14,7 +14,7 @@ object Libraries {
   lazy val scalaTagsVersion = "0.6.5"
   lazy val scalaJSDomVersion = "0.9.3"
   lazy val rxVersion = "0.3.2"
-  lazy val scalaUpickleVersion = "0.4.4"
+  lazy val boopickleVersion = "1.2.6"
   lazy val scalaAutowireVersion = "0.2.6"
   lazy val sourcecodeVersion = "0.1.3"
   lazy val scaladgetVersion = "0.9.5"
@@ -28,7 +28,7 @@ object Libraries {
   lazy val rxJS = libraryDependencies += "com.lihaoyi" %%% "scalarx" % rxVersion
   lazy val scalaTagsJS = libraryDependencies += "com.lihaoyi" %%% "scalatags" % scalaTagsVersion
   lazy val autowireJS = libraryDependencies += "com.lihaoyi" %%% "autowire" % scalaAutowireVersion
-  lazy val upickleJS = libraryDependencies += "com.lihaoyi" %%% "upickle" % scalaUpickleVersion
+  lazy val boopickleJS = libraryDependencies += "io.suzaku" %%% "boopickle" % boopickleVersion
   lazy val sourcecodeJS = libraryDependencies += "com.lihaoyi" %%% "sourcecode" % sourcecodeVersion
   lazy val scalajsMarked = libraryDependencies += "com.github.karasiq" %%% "scalajs-marked" % "1.0.2"
   lazy val htmlparser2 = libraryDependencies += "com.definitelyscala" %%% "scala-js-htmlparser2" % "1.0.2"
@@ -80,7 +80,7 @@ object Libraries {
   lazy val mgo = "org.openmole.library" %% "mgo" % "3.3"
   lazy val family = "org.openmole.library" %% "fr-iscpif-family" % "1.3"
   lazy val monocle = "org.openmole.library" %% "monocle" % "1.4.0"
-  lazy val upickle = "org.openmole.library" %% "upickle" % scalaUpickleVersion
+  lazy val boopickle = "org.openmole.library" %% "boopickle" % boopickleVersion
   lazy val autowire = "org.openmole.library" %% "autowire" % scalaAutowireVersion
   lazy val scalaTags = "org.openmole.library" %% "com-scalatags" % scalaTagsVersion
   lazy val rx = "org.openmole.library" %% "rx" % rxVersion

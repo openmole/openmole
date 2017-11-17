@@ -17,18 +17,15 @@
  */
 package org.openmole.gui.plugin.authentication.egi
 
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
-import org.openmole.gui.ext.data.{ AuthenticationPlugin, AuthenticationPluginFactory, Test }
+import scala.concurrent.ExecutionContext.Implicits.global
+import boopickle.Default._
+import org.openmole.gui.ext.data.{ AuthenticationPlugin, AuthenticationPluginFactory }
 import org.openmole.gui.ext.tool.client.{ FileUploaderUI, OMPost }
-import org.openmole.gui.ext.tool.client.JsRxTags._
 import scaladget.api.{ BootstrapTags ⇒ bs }
 import scaladget.stylesheet.{ all ⇒ sheet }
 import autowire._
 import sheet._
 import bs._
-import org.openmole.gui.ext.api.Api
-import org.scalajs.dom.raw.HTMLInputElement
-import rx._
 
 import scala.concurrent.Future
 import scala.scalajs.js.annotation._

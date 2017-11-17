@@ -23,7 +23,8 @@ import org.openmole.gui.ext.data._
 import org.openmole.gui.client.core.panels._
 import autowire._
 import org.scalajs.dom.html.TextArea
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+import scala.concurrent.ExecutionContext.Implicits.global
+import boopickle.Default._
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
 import org.scalajs.dom.raw.{ HTMLDivElement, HTMLInputElement }
 import org.openmole.gui.ext.tool.client._
@@ -337,7 +338,7 @@ class ModelWizardPanel {
             }
 
           // Other archive: tgz, tar.gz
-          case UndefinedLanguage ⇒
+          case UndefinedLanguage() ⇒
             post()[Api].models(uploadPath).call().foreach {
               models ⇒
                 fileToUploadPath() = models.headOption

@@ -54,6 +54,9 @@ lazy val circe = OsgiProject(dir, "io.circe",
   libraryDependencies += shapeless,
   version := circeVersion) settings(settings: _*)
 
+lazy val akkautil = OsgiProject(dir, "com.typesafe.akka", exports = Seq("akka.util.*"), dynamicImports = Seq("*")) settings
+	(libraryDependencies += "com.typesafe.akka" % "akka-actor_2.12" % "2.5.6", version := "2.5.6") settings(settings: _*)
+
 lazy val logback = OsgiProject(dir, "ch.qos.logback", exports = Seq("ch.qos.logback.*", "org.slf4j.impl"), dynamicImports = Seq("*")) settings
   (libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.0.9", version := "1.0.9") settings(settings: _*)
 
@@ -154,6 +157,7 @@ lazy val scalaTagsVersion = "0.6.5"
 lazy val scalaRxVersion = "0.3.2"
 lazy val scalaDomVersion = "0.9.3"
 lazy val scalaUpickleVersion = "0.4.4"
+lazy val scalaBoopickleVersion = "1.2.6"
 lazy val scalaAutowireVersion = "0.2.6"
 lazy val scalajsVersion = "0.6.18"
 
@@ -181,6 +185,10 @@ lazy val scalatexSite =
 lazy val upickle = OsgiProject(dir, "upickle", exports = Seq("upickle.*", "jawn.*", "derive.*", "sourcecode.*"), imports = Seq("*")) settings(
   libraryDependencies ++= Seq("com.lihaoyi" %% "upickle" % scalaUpickleVersion),
   version := scalaUpickleVersion) settings(settings: _*)
+
+lazy val boopickle = OsgiProject(dir, "boopickle", exports = Seq("boopickle.*"), imports = Seq("*")) settings(
+  libraryDependencies ++= Seq("io.suzaku" %% "boopickle" % scalaBoopickleVersion),
+  version := scalaBoopickleVersion) settings(settings: _*)
 
 lazy val autowire = OsgiProject(dir, "autowire", exports = Seq("autowire.*")) settings(
   libraryDependencies ++= Seq("com.lihaoyi" %% "autowire" % scalaAutowireVersion),

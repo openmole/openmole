@@ -17,19 +17,28 @@ package org.openmole.gui.ext.tool.client
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import boopickle.Default._
+import java.nio.ByteBuffer
+
 import org.scalajs.dom._
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.scalajs.js.annotation._
 import scala.scalajs.js.timers._
+import scala.scalajs.js.typedarray.{ ArrayBuffer, TypedArrayBuffer }
 import scala.util.{ Failure, Success }
 
 @JSExportTopLevel("OMPost")
-case class OMPost(timeout: Duration = 60 seconds, warningTimeout: Duration = 10 seconds, timeOutAction: (String) ⇒ Unit = (s: String) ⇒ {}, warningTimeoutAction: () ⇒ Unit = () ⇒ {}) extends autowire.Client[String, upickle.default.Reader, upickle.default.Writer] {
+case class OMPost(
+  timeout:              Duration        = 60 seconds,
+  warningTimeout:       Duration        = 10 seconds,
+  timeOutAction:        (String) ⇒ Unit = (s: String) ⇒ {},
+  warningTimeoutAction: () ⇒ Unit       = () ⇒ {}
+) extends autowire.Client[ByteBuffer, Pickler, Pickler] {
 
-  override def doCall(req: Request): Future[String] = {
+  override def doCall(req: Request): Future[ByteBuffer] = {
     val url = req.path.mkString("/")
 
     val timeoutSet = setTimeout(warningTimeout.toMillis) {
@@ -40,11 +49,11 @@ case class OMPost(timeout: Duration = 60 seconds, warningTimeout: Duration = 10 
 
     val future = ext.Ajax.post(
       url = s"$url",
-      data = upickle.default.write(req.args),
+      data = Pickle.intoBytes(req.args),
+      responseType = "arraybuffer",
+      headers = Map("Content-Type" → "application/octet-stream"),
       timeout = timeout.toMillis.toInt
-    ).map {
-        _.responseText
-      }
+    ).map(r ⇒ TypedArrayBuffer.wrap(r.response.asInstanceOf[ArrayBuffer]))
 
     future.onComplete {
       case Failure(t) ⇒
@@ -56,7 +65,7 @@ case class OMPost(timeout: Duration = 60 seconds, warningTimeout: Duration = 10 
     future
   }
 
-  def read[Result: upickle.default.Reader](p: String) = upickle.default.read[Result](p)
+  override def read[Result: Pickler](p: ByteBuffer) = Unpickle[Result].fromBytes(p)
 
-  def write[Result: upickle.default.Writer](r: Result) = upickle.default.write(r)
+  override def write[Result: Pickler](r: Result) = Pickle.intoBytes(r)
 }

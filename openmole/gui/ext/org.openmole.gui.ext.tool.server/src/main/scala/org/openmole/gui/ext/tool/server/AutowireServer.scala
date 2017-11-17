@@ -1,6 +1,9 @@
 package org.openmole.gui.ext.tool.server
 
+import boopickle.Default._
+
 import scala.reflect.ClassTag
+import java.nio.ByteBuffer
 
 /*
  * Copyright (C) 30/11/16 // mathieu.leclaire@openmole.org
@@ -18,10 +21,13 @@ import scala.reflect.ClassTag
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-object AutowireServer extends autowire.Server[String, upickle.default.Reader, upickle.default.Writer] {
-  def read[Result: upickle.default.Reader](p: String) = upickle.default.read[Result](p)
 
-  def write[Result: upickle.default.Writer](r: Result) = upickle.default.write(r)
+object AutowireServer extends autowire.Server[ByteBuffer, Pickler, Pickler] {
+
+  def read[R: Pickler](p: ByteBuffer) = Unpickle[R].fromBytes(p)
+
+  def write[R: Pickler](r: R) = Pickle.intoBytes(r)
+
 }
 
 object OMRouter {

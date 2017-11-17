@@ -47,6 +47,7 @@ import scala.io.{ BufferedSource, Codec }
 import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
 import org.openmole.core.services._
 import org.openmole.core.module
+import resource._
 
 object Utils extends Logger {
 
@@ -78,15 +79,15 @@ object Utils extends Logger {
 
   implicit def fileToSafePath(f: File)(implicit context: ServerFileSystemContext, workspace: Workspace): SafePath = {
     context match {
-      case ProjectFileSystem ⇒ SafePath(getPathArray(f, projectsDirectory))
-      case _                 ⇒ SafePath(getPathArray(f, new File("")))
+      case _: ProjectFileSystem ⇒ SafePath(getPathArray(f, projectsDirectory))
+      case _                    ⇒ SafePath(getPathArray(f, new File("")))
     }
   }
 
   implicit def safePathToFile(s: SafePath)(implicit context: ServerFileSystemContext, workspace: Workspace): File = {
     context match {
-      case ProjectFileSystem ⇒ getFile(webUIDirectory, s.path)
-      case _                 ⇒ getFile(new File(""), s.path)
+      case _: ProjectFileSystem ⇒ getFile(webUIDirectory, s.path)
+      case _                    ⇒ getFile(new File(""), s.path)
     }
 
   }
@@ -99,7 +100,7 @@ object Utils extends Logger {
     fileToSafePath
   }
 
-  def fileToTreeNodeData(f: File)(implicit context: ServerFileSystemContext = ProjectFileSystem): Option[TreeNodeData] = {
+  def fileToTreeNodeData(f: File)(implicit context: ServerFileSystemContext = ProjectFileSystem()): Option[TreeNodeData] = {
 
     val time = if (f.exists) Some(
       java.nio.file.Files.readAttributes(f, classOf[BasicFileAttributes]).lastModifiedTime.toMillis
@@ -176,8 +177,8 @@ object Utils extends Logger {
     val nbFiles = allFiles.size
 
     fileFilter.firstLast match {
-      case First ⇒ ListFilesData(sorted.take(threshold), nbFiles)
-      case Last  ⇒ ListFilesData(sorted.takeRight(threshold).reverse, nbFiles)
+      case First() ⇒ ListFilesData(sorted.take(threshold), nbFiles)
+      case Last()  ⇒ ListFilesData(sorted.takeRight(threshold).reverse, nbFiles)
     }
   }
 
@@ -344,8 +345,6 @@ object Utils extends Logger {
       deleteFile(sp, context)
     }
   }
-
-  import resource._
 
   def managedArchive(careArchive: File) = managed(new RandomAccessFile(careArchive, "r")) map (_.getChannel)
 

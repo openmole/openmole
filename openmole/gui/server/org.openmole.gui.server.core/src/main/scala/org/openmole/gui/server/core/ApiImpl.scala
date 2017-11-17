@@ -193,7 +193,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
   // Test whether safePathToTest exists in "in"
   def extractAndTestExistence(safePathToTest: SafePath, in: SafePath): Seq[SafePath] = {
 
-    // import org.openmole.gui.ext.data.ServerFileSytemContext.absolute
+    // import org.openmole.gui.ext.data.ServerFileSystemContext.absolute
 
     def test(sps: Seq[SafePath], inDir: SafePath = in) = {
       import org.openmole.gui.ext.data.ServerFileSystemContext.absolute

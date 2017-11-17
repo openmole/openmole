@@ -16,22 +16,23 @@
  */
 package org.openmole.gui.server.core
 
+import java.nio.ByteBuffer
+
 import org.scalatra._
 import org.scalatra.auth.{ ScentryConfig, ScentrySupport }
 import org.scalatra.auth.strategy.BasicAuthSupport
 import org.scalatra.servlet.{ FileItem, FileUploadSupport, MultipartConfig }
 import org.scalatra.util.MultiMapHeadView
+import boopickle.Default._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.concurrent.Await
 import scalatags.Text.all._
 import scalatags.Text.{ all ⇒ tags }
-import java.io.File
 import java.util.concurrent.atomic.AtomicReference
 
 import org.openmole.core.authentication.AuthenticationStore
-import org.openmole.core.db.DBServerInfo
 import org.openmole.core.event.EventDispatcher
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.preference.Preference
@@ -50,23 +51,36 @@ import org.openmole.tool.random.{ RandomProvider, Seeder }
 import org.openmole.tool.stream._
 import org.openmole.tool.tar._
 
+import scala.collection.mutable.ArrayBuffer
 import scala.util.{ Failure, Success, Try }
 
 object GUIServices {
 
   case class ServicesProvider(guiServices: GUIServices, cypherProvider: () ⇒ Cypher) extends Services {
     implicit def services = guiServices
+
     implicit def workspace = guiServices.workspace
+
     implicit def preference = guiServices.preference
+
     implicit def cypher = cypherProvider()
+
     implicit def threadProvider = guiServices.threadProvider
+
     implicit def seeder = guiServices.seeder
+
     implicit def replicaCatalog = guiServices.replicaCatalog
+
     implicit def newFile = guiServices.newFile
+
     implicit def authenticationStore = guiServices.authenticationStore
+
     implicit def serializerService = guiServices.serializerService
+
     implicit def fileService = guiServices.fileService
+
     implicit def randomProvider = guiServices.randomProvider
+
     implicit def eventDispatcher: EventDispatcher = guiServices.eventDispatcher
   }
 
@@ -280,7 +294,7 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
   }
 
   get(connectionRoute) {
-    if (passwordIsChosen && passwordIsCorrect) redirect("/app")
+    if (passwordIsChosen && passwordIsCorrect) redirect(appRoute)
     else if (passwordIsChosen) {
       response.setHeader("Access-Control-Allow-Origin", "*")
       response.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, UPDATE, OPTIONS")
@@ -306,7 +320,9 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
   }
 
   def passwordProvided = arguments.password.isDefined
+
   def passwordIsChosen = Preference.passwordChosen(arguments.services.preference)
+
   def passwordIsCorrect = Preference.passwordIsCorrect(cypher.get, arguments.services.preference)
 
   get(appRoute) {
@@ -333,16 +349,30 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
   addRouter(OMRouter[Api](AutowireServer.route[Api](apiImpl)))
 
   def addRouter(router: OMRouter): Unit = {
-    val bp = classOf[org.openmole.gui.ext.api.Api].getPackage.getName.replace('.', '/')
     post(s"/${router.route}/*") {
-      val coreRequest = autowire.Core.Request(
-        router.route.split("/").toSeq ++ multiParams("splat").head.split("/"),
-        upickle.default.read[Map[String, String]](request.body)
+      val req = Await.result(
+        {
+
+          val is = request.getInputStream
+          val bytes: Array[Byte] = Iterator.continually(is.read()).takeWhile(_ != -1).map(_.asInstanceOf[Byte]).toArray[Byte]
+          val bb = ByteBuffer.wrap(bytes)
+          //val un = Unpickle[Map[String, ByteBuffer]].fromBytes(bb)
+          router.router(
+            autowire.Core.Request(
+              router.route.split("/").toSeq ++ multiParams("splat").head.split("/"),
+              Unpickle[Map[String, ByteBuffer]].fromBytes(bb)
+            )
+          )
+
+        },
+        Duration.Inf
       )
-      Await.result(router.router(coreRequest), Duration.Inf)
+
+      val data = Array.ofDim[Byte](req.remaining)
+      req.get(data)
+      Ok(data)
     }
   }
-
 }
 
 case class UserID(id: String)

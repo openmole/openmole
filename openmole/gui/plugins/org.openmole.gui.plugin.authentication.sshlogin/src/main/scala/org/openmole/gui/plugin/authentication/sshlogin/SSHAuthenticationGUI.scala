@@ -17,16 +17,15 @@
  */
 package org.openmole.gui.plugin.authentication.sshlogin
 
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+import scala.concurrent.ExecutionContext.Implicits.global
+import boopickle.Default._
 import org.openmole.gui.ext.data.{ AuthenticationPlugin, AuthenticationPluginFactory }
 import org.openmole.gui.ext.tool.client.OMPost
-import org.openmole.gui.ext.tool.client.JsRxTags._
 import scaladget.api.{ BootstrapTags ⇒ bs }
 import scaladget.stylesheet.{ all ⇒ sheet }
 import autowire._
 import sheet._
 import bs._
-import org.openmole.core.workspace.Workspace
 import org.scalajs.dom.raw.HTMLElement
 import org.openmole.gui.ext.data._
 

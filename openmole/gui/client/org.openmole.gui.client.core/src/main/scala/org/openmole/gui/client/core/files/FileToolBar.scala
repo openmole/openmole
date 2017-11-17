@@ -17,7 +17,8 @@ import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager
 import org.openmole.gui.ext.tool.client.JsRxTags._
 import autowire._
 import org.openmole.gui.ext.tool.client._
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+import scala.concurrent.ExecutionContext.Implicits.global
+import boopickle.Default._
 import org.scalajs.dom.raw.{ HTMLButtonElement, HTMLElement, HTMLInputElement, HTMLSpanElement }
 import rx._
 import org.openmole.gui.client.core.Waiter._
@@ -305,17 +306,17 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
   }
 
   def switchAlphaSorting = {
-    updateFilter(fileFilter.now.switchTo(AlphaSorting))
+    updateFilter(fileFilter.now.switchTo(AlphaSorting()))
     treeNodePanel.invalidCacheAndDraw
   }
 
   def switchTimeSorting = {
-    updateFilter(fileFilter.now.switchTo(TimeSorting))
+    updateFilter(fileFilter.now.switchTo(TimeSorting()))
     treeNodePanel.invalidCacheAndDraw
   }
 
   def switchSizeSorting = {
-    updateFilter(fileFilter.now.switchTo(SizeSorting))
+    updateFilter(fileFilter.now.switchTo(SizeSorting()))
     treeNodePanel.invalidCacheAndDraw
   }
 

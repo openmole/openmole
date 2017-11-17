@@ -18,6 +18,7 @@ package org.openmole.gui.plugin.authentication.desktopgrid
 
 import org.openmole.gui.ext.plugin.server.{ PluginActivator, PluginInfo }
 import org.openmole.gui.ext.tool.server.{ AutowireServer, OMRouter }
+import boopickle.Default._
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class Activator extends PluginActivator {
