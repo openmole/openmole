@@ -374,8 +374,10 @@ lazy val gridscaleEGI = OsgiProject(dir, "gridscale.egi", imports = Seq("*")) se
   version := gridscaleVersion
 ) settings(settings: _*) dependsOn(gridscale, gridscaleHTTP)
 
-lazy val gridscaleDIRAC = OsgiProject(dir, "gridscale.dirac", imports = Seq("*"), privatePackages = Seq("gridscale.dirac.*", "org.apache.commons.compress.*", "org.brotli.*")) settings (
+lazy val gridscaleDIRAC = OsgiProject(dir, "gridscale.dirac", imports = Seq("*"), privatePackages = Seq("gridscale.dirac.*", "org.apache.commons.compress.*", "org.brotli.*", "org.tukaani.*")) settings (
   libraryDependencies += "fr.iscpif.gridscale" %% "dirac" % gridscaleVersion,
+  libraryDependencies += "org.brotli" % "dec" % "0.1.2",
+  libraryDependencies += "org.tukaani" % "xz" % "1.6",
   version := gridscaleVersion
 ) settings(settings: _*) dependsOn(gridscale, gridscaleHTTP)
 
