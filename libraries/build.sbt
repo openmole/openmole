@@ -54,9 +54,6 @@ lazy val circe = OsgiProject(dir, "io.circe",
   libraryDependencies += shapeless,
   version := circeVersion) settings(settings: _*)
 
-lazy val akkautil = OsgiProject(dir, "com.typesafe.akka", exports = Seq("akka.util.*"), dynamicImports = Seq("*")) settings
-	(libraryDependencies += "com.typesafe.akka" % "akka-actor_2.12" % "2.5.6", version := "2.5.6") settings(settings: _*)
-
 lazy val logback = OsgiProject(dir, "ch.qos.logback", exports = Seq("ch.qos.logback.*", "org.slf4j.impl"), dynamicImports = Seq("*")) settings
   (libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.0.9", version := "1.0.9") settings(settings: _*)
 
