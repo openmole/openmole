@@ -4,9 +4,16 @@
 @import org.openmole.core.buildinfo._
 @import org.openmole.site.Config._
 
-@h1{@links.anchor(version.value + "|" + version.name)}
+@h1{@links.anchor{8.0 | TODO Set version }}
 @ul
-  @li{Simplificaton of the workflow construction: every method scheme has now its builder}
+  @li{Migrate to build to SBT 1.0}
+  @li{Migrate to Scala 2.12: faster script compilation, more concise and more efficient byte code for OpenMOLE}
+  @li{More reliable an efficient distributed execution through a complete refactor of the execution environments and migration to gridscale 2}
+  @li{Use binary serialisation (boopickle) to communicate between the web app and the server: more efficient in term of CPU and bandwidth}
+
+@h1{@links.anchor{7.0 | Nano Ninja}}
+@ul
+  @li{Simplification of the workflow construction: every method scheme has now its builder}
   @li{Revamp the MGO library}
   @li{Heavy code refactoring}
   @li{First refactoring toward OpenMOLE as a library}
@@ -14,17 +21,20 @@
   @li{Refactoring of the build-system}
   @li{Full integration of bootstrap.native lib through the scaladget DSL, meaning that both bootstrap and jquery dependencies have been wiped out}
   @li{New accessibility for starting a new project thanks to the New project option button. It gathers creating a new oms file, importing a code file or downloading a market entry.}
-  @li{GUI Plugins are back ! All authentications in the web interface are now plugins. An example of what is looks like can be found here. Model wizards will follow. Anyway, it is now possible to build graphical extensions !}
+  @li{GUI Plugins are back! All authentications in the web interface are now plugins. An example of what is looks like can be found here. Model wizards will follow. Anyway, it is now possible to build graphical extensions !}
   @li{A top banner gives information about failed, succeeded runs or about any trouble in reaching the server.}
-  @li{Supportcd . zip archives}
+  @li{Support zip archives}
   @li{Support Desktop grid environments}
   @li{Support both care tar.gz.bin and tgz.bin archives in the model wizard section.}
-  @li{Display JVM processor and memory infos}
+  @li{Display JVM processor and memory info}
   @li{Revamp the website}
 
-@div
-  @aa("Bug fixes", href := closedIssues(version.value))
+@h2{@links.anchor{7.1}}
+@ul
+  @li{Fix bug with NetLogo precompiled code}
 
+@div
+  @aa("Bug fixes", href := closedIssues("7"))
 
 @h1{@links.anchor{6.0 | Mostly Magic}}
 
