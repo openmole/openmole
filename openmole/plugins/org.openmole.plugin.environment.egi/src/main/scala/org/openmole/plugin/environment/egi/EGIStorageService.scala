@@ -179,7 +179,7 @@ case class CurlRemoteStorage(location: String, voName: String, debug: Boolean, t
         if (options.raw) CurlRemoteStorage.run(curl.upload(src.getAbsolutePath, resolve(dest)))
         else newFile.withTmpFile { tmpFile ⇒
           src.copyCompressFile(tmpFile)
-          upload(tmpFile, dest)
+          CurlRemoteStorage.run(curl.upload(tmpFile.getAbsolutePath, resolve(dest)))
         }
       }
       catch {
@@ -196,7 +196,7 @@ case class CurlRemoteStorage(location: String, voName: String, debug: Boolean, t
     try {
       if (options.raw) CurlRemoteStorage.run(curl.download(resolve(src), dest.getAbsolutePath))
       else newFile.withTmpFile { tmpFile ⇒
-        download(src, tmpFile)
+        CurlRemoteStorage.run(curl.download(resolve(src), tmpFile.getAbsolutePath))
         tmpFile.copyUncompressFile(dest)
       }
     }
