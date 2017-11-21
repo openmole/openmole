@@ -158,6 +158,7 @@ object EGIAuthentication extends Logger {
   def proxy[A: EGIAuthenticationInterface](
     a:      A,
     voName: String,
+    voms:   Option[Seq[String]],
     fqan:   Option[String])(implicit workspace: Workspace, preference: Preference): util.Try[gridscale.egi.VOMS.VOMSCredential] = EGI { implicits ⇒
     import implicits._
 
@@ -175,7 +176,9 @@ object EGIAuthentication extends Logger {
       util.Try(proxy)
     }
 
-    findWorking(getVOMS(voName).map(_.toList).getOrElse(Nil), queryProxy, "VOMS server")
+    def vomses = voms orElse getVOMS(voName)
+
+    findWorking(vomses.map(_.toList).getOrElse(Nil), queryProxy, "VOMS server")
   }
 
   def testPassword[A: EGIAuthenticationInterface](a: A)(implicit cypher: Cypher) =
@@ -184,7 +187,7 @@ object EGIAuthentication extends Logger {
     }
 
   def testProxy[A: EGIAuthenticationInterface](a: A, voName: String)(implicit workspace: Workspace, preference: Preference) =
-    proxy(a, voName, None).map(_ ⇒ true)
+    proxy(a, voName, None, None).map(_ ⇒ true)
 
   def testDIRACAccess[A: EGIAuthenticationInterface](a: A, voName: String)(implicit workspace: Workspace, preference: Preference) =
     util.Try(getToken(a, voName)).map(_ ⇒ true)
@@ -202,6 +205,9 @@ object EGIAuthentication extends Logger {
     import implicits._
     gridscale.dirac.supportedVOs(preference(EGIEnvironment.DiracConnectionTimeout))
   }
+
+  implicit def defaultAuthentication(implicit workspace: Workspace, authenticationStore: AuthenticationStore, serializerService: SerializerService): EGIAuthentication =
+    EGIAuthentication().getOrElse(throw new UserBadDataError("No authentication was found"))
 
 }
 

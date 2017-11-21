@@ -330,7 +330,7 @@ lazy val sourceCode = OsgiProject(dir, "sourcecode") settings (
 ) settings(settings: _*)
 
 
-def effectasideVersion = "0.1"
+def effectasideVersion = "0.2"
 lazy val effectaside = OsgiProject(dir, "effectaside", imports = Seq("*")) settings (
   libraryDependencies += "fr.iscpif.effectaside" %% "effect"% effectasideVersion,
   version := effectasideVersion
@@ -350,7 +350,7 @@ lazy val gridscaleLocal = OsgiProject(dir, "gridscale.local", imports = Seq("*")
 lazy val gridscaleHTTP = OsgiProject(dir, "gridscale.http", imports = Seq("*"), privatePackages = Seq("org.htmlparser.*")) settings (
   libraryDependencies += "fr.iscpif.gridscale" %% "http" % gridscaleVersion,
   version := gridscaleVersion
-) settings(settings: _*) dependsOn(gridscale)
+) settings(settings: _*) dependsOn(gridscale, codec)
 
 lazy val gridscaleSSH = OsgiProject(dir, "gridscale.ssh", imports = Seq("*")) settings (
   libraryDependencies += "fr.iscpif.gridscale" %% "ssh" % gridscaleVersion,

@@ -19,6 +19,7 @@ package org.openmole.plugin.environment.egi
 
 import java.io.File
 
+import org.openmole.core.authentication.AuthenticationStore
 import org.openmole.core.communication.storage
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.workspace.Workspace
@@ -27,6 +28,7 @@ import org.openmole.plugin.environment.batch.jobservice.{ BatchJob, BatchJobServ
 import org.openmole.plugin.environment.batch.refresh.{ JobManager, StopEnvironment }
 import org.openmole.plugin.environment.batch.storage.{ StorageInterface, StorageService }
 import org.openmole.plugin.environment.egi.EGIEnvironment.WebDavLocation
+import org.openmole.tool.crypto.Cypher
 import squants._
 import squants.information._
 
@@ -35,7 +37,7 @@ import squants.information._
 //import fr.iscpif.gridscale.egi.BDII
 //import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.preference.{ ConfigurationLocation, Preference }
-//import org.openmole.core.workflow.dsl._
+import org.openmole.core.workflow.dsl._
 //import org.openmole.core.workspace.Workspace
 //import org.openmole.plugin.environment.batch.control._
 //import org.openmole.plugin.environment.batch.environment._
@@ -174,35 +176,33 @@ object EGIEnvironment extends Logger {
   //            selectedBS.tryGetToken.map(selectedBS → _)
   //        }
   //
-  //  def apply(
-  //    voName:         String,
-  //    service:        OptionalArgument[String]      = None,
-  //    group:          OptionalArgument[String]      = None,
-  //    bdii:           OptionalArgument[String]      = None,
-  //    vomsURLs:       OptionalArgument[Seq[String]] = None,
-  //    setup:          OptionalArgument[String]      = None,
-  //    fqan:           OptionalArgument[String]      = None,
-  //    cpuTime:        OptionalArgument[Time]        = None,
-  //    openMOLEMemory: OptionalArgument[Information] = None,
-  //    debug:          Boolean                       = false,
-  //    name:           OptionalArgument[String]      = None
-  //  )(implicit authentication: EGIAuthentication, services: BatchEnvironment.Services, cypher: Cypher, workspace: Workspace, varName: sourcecode.Name) =
-  //    DIRACEnvironment(
-  //      voName = voName,
-  //      service = service,
-  //      group = group,
-  //      bdii = bdii,
-  //      vomsURLs = vomsURLs,
-  //      setup = setup,
-  //      fqan = fqan,
-  //      cpuTime = cpuTime,
-  //      openMOLEMemory = openMOLEMemory,
-  //      debug = debug,
-  //      name = name
-  //    )(authentication, services, cypher, workspace, varName)
-  //
+  def apply(
+    voName:         String,
+    service:        OptionalArgument[String]      = None,
+    group:          OptionalArgument[String]      = None,
+    bdii:           OptionalArgument[String]      = None,
+    vomsURLs:       OptionalArgument[Seq[String]] = None,
+    fqan:           OptionalArgument[String]      = None,
+    cpuTime:        OptionalArgument[Time]        = None,
+    openMOLEMemory: OptionalArgument[Information] = None,
+    debug:          Boolean                       = false,
+    name:           OptionalArgument[String]      = None
+  )(implicit authentication: EGIAuthentication, services: BatchEnvironment.Services, cypher: Cypher, workspace: Workspace, varName: sourcecode.Name) = {
 
-  // implicit def egiAuthentication(implicit workspace: Workspace, authenticationStore: AuthenticationStore, serializerService: SerializerService): EGIAuthenticationInterface = EGIAuthenticationInterface().getOrElse(throw new UserBadDataError("No authentication was found"))
+    new EGIEnvironment(
+      voName = voName,
+      service = service,
+      group = group,
+      bdiiURL = bdii,
+      vomsURLs = vomsURLs,
+      fqan = fqan,
+      cpuTime = cpuTime,
+      openMOLEMemory = openMOLEMemory,
+      debug = debug,
+      name = name,
+      authentication = authentication
+    )
+  }
 
 }
 
@@ -210,9 +210,8 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
   val voName:         String,
   val service:        Option[String],
   val group:          Option[String],
-  val bdiis:          Seq[gridscale.egi.BDIIServer],
-  val vomsURLs:       Seq[String],
-  val setup:          String,
+  val bdiiURL:        Option[String],
+  val vomsURLs:       Option[Seq[String]],
   val fqan:           Option[String],
   val cpuTime:        Option[Time],
   val openMOLEMemory: Option[Information],
@@ -229,7 +228,7 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
   import interpreters._
 
   lazy val proxyCache = TimeCache { () ⇒
-    val proxy = EGIAuthentication.proxy(authentication, voName, fqan).get
+    val proxy = EGIAuthentication.proxy(authentication, voName, vomsURLs, fqan).get
     (proxy, preference(EGIEnvironment.ProxyRenewalTime))
   }
 
@@ -266,6 +265,9 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
       StorageInterface.download(true, gridscale.webdav.readStream[Unit](webdavServer(t), _, _))(src, dest, options)
 
   }
+
+  def bdiis: Seq[gridscale.egi.BDIIServer] =
+    bdiiURL.map(b ⇒ Seq(EGIEnvironment.toBDII(new java.net.URI(b)))).getOrElse(EGIEnvironment.defaultBDIIs)
 
   val storages = Cache {
     val webdavStorages = findWorking(bdiis, (b: BDIIServer) ⇒ webDAVs(b, voName))
@@ -352,8 +354,14 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
   import gridscale.dirac._
 
   lazy val diracService = {
-    val service = getService(voName)
-    val s = server(service, implicitly[EGIAuthenticationInterface[A]].apply(authentication), EGIAuthentication.CACertificatesDir)
+    def userDiracService =
+      for {
+        s ← service
+        g ← group
+      } yield gridscale.dirac.Service(s, g)
+
+    val diracService = userDiracService getOrElse getService(voName)
+    val s = server(diracService, implicitly[EGIAuthenticationInterface[A]].apply(authentication), EGIAuthentication.CACertificatesDir)
     delegate(s, implicitly[EGIAuthenticationInterface[A]].apply(authentication), tokenCache())
     s
   }
@@ -364,7 +372,7 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
   def submit(serializedJob: SerializedJob) = {
     import org.openmole.tool.file._
 
-    def storageURLs = storages().map(id ⇒ id._1 -> new java.net.URI(id._1)).toMap
+    def storageLocations = storages().map(id ⇒ id._1 -> id._1).toMap
 
     def jobScript =
       JobScript(
@@ -372,7 +380,7 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
         memory = BatchEnvironment.openMOLEMemoryValue(openMOLEMemory).toMegabytes.toInt,
         threads = 1,
         debug = debug,
-        storageURLs
+        storageLocations
       )
 
     val outputFilePath = serializedJob.storage.child(serializedJob.path, uniqName("job", ".out"))
@@ -383,7 +391,7 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
       val jobDescription =
         JobDescription(
           executable = "/bin/bash",
-          arguments = script.getName,
+          arguments = s"-x ${script.getName}",
           inputSandbox = Seq(script),
           stdOut = Some(EGIEnvironment.stdOutFileName),
           stdErr = Some(EGIEnvironment.stdErrFileName),
@@ -413,7 +421,16 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
     import org.openmole.tool.file._
     tmpDir.mkdirs()
     gridscale.dirac.downloadOutputSandbox(diracService, tokenCache(), id, tmpDir)
-    ((tmpDir / EGIEnvironment.stdOutFileName).content, (tmpDir / EGIEnvironment.stdErrFileName).content)
+
+    def stdOut =
+      if ((tmpDir / EGIEnvironment.stdOutFileName) exists) (tmpDir / EGIEnvironment.stdOutFileName).content
+      else ""
+
+    def stdErr =
+      if ((tmpDir / EGIEnvironment.stdErrFileName) exists) (tmpDir / EGIEnvironment.stdErrFileName).content
+      else ""
+
+    (stdOut, stdErr)
   }
 
   lazy val batchJobService = BatchJobService(env, preference(EGIEnvironment.ConnectionsToDIRAC))

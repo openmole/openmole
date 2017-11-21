@@ -162,45 +162,46 @@ object CurlRemoteStorage {
     @transient lazy val curl =
       s"curl ${if (debug) "--verbose" else ""} --connect-timeout ${timeout.toSeconds.toInt.toString} --max-time ${timeout.toSeconds.toInt.toString} --cert $$X509_USER_PROXY --key $$X509_USER_PROXY --cacert $$X509_USER_PROXY --capath $$X509_CERT_DIR -f "
 
-    def upload(from: String, to: URI) = s"$curl -T $from -L $to"
-    def download(from: URI, to: String) = s"$curl -L $from -o $to"
+    def upload(from: String, to: String) = s"$curl -T $from -L $to"
+    def download(from: String, to: String) = s"$curl -L $from -o $to"
   }
 }
 
 case class CurlRemoteStorage(location: String, voName: String, debug: Boolean, timeout: Time) extends RemoteStorage {
 
-  @transient lazy val url = new URI(location)
+  //@transient lazy val url = new URI(location)
   @transient lazy val curl = CurlRemoteStorage.Curl(voName, debug, timeout)
+  def resolve(dest: String) = gridscale.RemotePath.child(location, dest)
 
   override def upload(src: File, dest: String, options: storage.TransferOptions)(implicit newFile: NewFile): Unit =
     try {
       try {
-        if (options.raw) CurlRemoteStorage.run(curl.upload(src.getAbsolutePath, url.resolve(dest)))
+        if (options.raw) CurlRemoteStorage.run(curl.upload(src.getAbsolutePath, resolve(dest)))
         else newFile.withTmpFile { tmpFile ⇒
           src.copyCompressFile(tmpFile)
           upload(tmpFile, dest)
         }
       }
       catch {
-        case e: Throwable ⇒ throw new java.io.IOException(s"Error uploading $src to $dest from $url with option $options", e)
+        case e: Throwable ⇒ throw new java.io.IOException(s"Error uploading $src to $dest from $location with option $options", e)
       }
     }
     catch {
       case t: Throwable ⇒
-        util.Try(CurlRemoteStorage.run(s"${curl} -X DELETE ${url.resolve(dest)}"))
+        util.Try(CurlRemoteStorage.run(s"${curl} -X DELETE ${resolve(dest)}"))
         throw t
     }
 
   override def download(src: String, dest: File, options: storage.TransferOptions)(implicit newFile: NewFile): Unit = {
     try {
-      if (options.raw) CurlRemoteStorage.run(curl.download(url.resolve(src), dest.getAbsolutePath))
+      if (options.raw) CurlRemoteStorage.run(curl.download(resolve(src), dest.getAbsolutePath))
       else newFile.withTmpFile { tmpFile ⇒
         download(src, tmpFile)
         tmpFile.copyUncompressFile(dest)
       }
     }
     catch {
-      case e: Throwable ⇒ throw new java.io.IOException(s"Error downloading $src to $dest from $url with option $options", e)
+      case e: Throwable ⇒ throw new java.io.IOException(s"Error downloading $src to $dest from $location with option $options", e)
     }
   }
   override def child(parent: String, child: String): String = gridscale.RemotePath.child(parent, child)

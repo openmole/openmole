@@ -25,7 +25,7 @@ import org.openmole.plugin.environment.batch.environment.SerializedJob
 
 import scala.collection.mutable.ListBuffer
 
-case class JobScript(voName: String, memory: Int, threads: Int, debug: Boolean, storageURLs: String ⇒ URI) {
+case class JobScript(voName: String, memory: Int, threads: Int, debug: Boolean, storageLocations: String ⇒ String) {
 
   def apply(
     serializedJob: SerializedJob,
@@ -38,10 +38,11 @@ case class JobScript(voName: String, memory: Int, threads: Int, debug: Boolean, 
 
     assert(runtime.runtime.path != null)
 
-    val storageURL = storageURLs(serializedJob.storage.id)
+    val storageLocation = storageLocations(serializedJob.storage.id)
+    def resolve(dest: String) = gridscale.RemotePath.child(storageLocation, dest)
 
     val debugInfo =
-      if (debug) s"echo ${storageURL} ; cat /proc/meminfo ; ulimit -a ; " + "env ; echo $X509_USER_PROXY ; cat $X509_USER_PROXY ; "
+      if (debug) s"echo ${storageLocation} ; cat /proc/meminfo ; ulimit -a ; " + "env ; echo $X509_USER_PROXY ; cat $X509_USER_PROXY ; "
       else ""
 
     val init = {
@@ -67,11 +68,11 @@ case class JobScript(voName: String, memory: Int, threads: Int, debug: Boolean, 
 
       script +=
         "if [ `uname -m` = x86_64 ]; then " +
-        cpCommand.download(storageURL.resolve(runtime.jvmLinuxX64.path), "$PWD/jvm.tar.gz") + "; else " +
+        cpCommand.download(resolve(runtime.jvmLinuxX64.path), "$PWD/jvm.tar.gz") + "; else " +
         """echo "Unsupported architecture: " `uname -m`; exit 1; fi"""
       script += "tar -xzf jvm.tar.gz >/dev/null"
       script += "rm -f jvm.tar.gz"
-      script += cpCommand.download(storageURL.resolve(runtime.runtime.path), "$PWD/openmole.tar.gz")
+      script += cpCommand.download(resolve(runtime.runtime.path), "$PWD/openmole.tar.gz")
       script += "tar -xzf openmole.tar.gz >/dev/null"
       script += "rm -f openmole.tar.gz"
       script.mkString(" && ")
@@ -82,10 +83,10 @@ case class JobScript(voName: String, memory: Int, threads: Int, debug: Boolean, 
 
       for { (plugin, index) ← runtime.environmentPlugins.zipWithIndex } {
         assert(plugin.path != null)
-        script += cpCommand.download(storageURL.resolve(plugin.path), "$CUR/envplugins/plugin" + index + ".jar")
+        script += cpCommand.download(resolve(plugin.path), "$CUR/envplugins/plugin" + index + ".jar")
       }
 
-      script += cpCommand.download(storageURL.resolve(runtime.storage.path), "$CUR/storage.xml")
+      script += cpCommand.download(resolve(runtime.storage.path), "$CUR/storage.xml")
 
       "mkdir envplugins && " + script.mkString(" && ")
     }
