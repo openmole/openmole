@@ -15,7 +15,8 @@ import sheet._
 import bs._
 import org.scalajs.dom.KeyboardEvent
 
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+import scala.concurrent.ExecutionContext.Implicits.global
+import boopickle.Default._
 import autowire._
 import scaladget.api.Selector.Options
 import org.openmole.gui.client.core.alert.{ AlertPanel, BannerAlert }

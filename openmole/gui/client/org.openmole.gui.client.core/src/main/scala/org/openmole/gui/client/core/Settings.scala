@@ -18,10 +18,11 @@ package org.openmole.gui.client.core
  */
 
 import scala.concurrent.Future
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.data.OMSettings
+import scala.concurrent.ExecutionContext.Implicits.global
+import boopickle.Default._
 
 object Settings {
 

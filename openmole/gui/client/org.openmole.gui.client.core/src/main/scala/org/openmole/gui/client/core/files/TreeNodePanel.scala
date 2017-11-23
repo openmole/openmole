@@ -18,7 +18,8 @@ import scalatags.JsDom.all._
 import scalatags.JsDom.{ TypedTag, tags }
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
 
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+import scala.concurrent.ExecutionContext.Implicits.global
+import boopickle.Default._
 import TreeNode._
 import autowire._
 import rx._
@@ -409,8 +410,8 @@ class TreeNodePanel {
     }
 
     def timeOrSize(tn: TreeNode): String = fileToolBar.fileFilter.now.fileSorting match {
-      case TimeSorting ⇒ CoreUtils.longTimeToString(tn.time)
-      case _           ⇒ CoreUtils.readableByteCountAsString(tn.size)
+      case TimeSorting() ⇒ CoreUtils.longTimeToString(tn.time)
+      case _             ⇒ CoreUtils.readableByteCountAsString(tn.size)
     }
 
     def clearSelectionExecpt(safePath: SafePath) = {

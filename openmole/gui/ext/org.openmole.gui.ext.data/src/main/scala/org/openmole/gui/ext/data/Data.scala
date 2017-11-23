@@ -187,17 +187,17 @@ import org.openmole.gui.ext.data.SafePath._
 
 sealed trait ServerFileSystemContext
 
-object AbsoluteFileSystem extends ServerFileSystemContext
+case class AbsoluteFileSystem() extends ServerFileSystemContext
 
-object ProjectFileSystem extends ServerFileSystemContext
+case class ProjectFileSystem() extends ServerFileSystemContext
 
 object ServerFileSystemContext {
-  implicit val absolute: ServerFileSystemContext = AbsoluteFileSystem
-  implicit val project: ServerFileSystemContext = ProjectFileSystem
+  implicit val absolute: ServerFileSystemContext = AbsoluteFileSystem()
+  implicit val project: ServerFileSystemContext = ProjectFileSystem()
 }
 
 //The path it relative to the project root directory
-case class SafePath(path: Seq[String]) {
+case class SafePath(path: Seq[String], context: ServerFileSystemContext = ProjectFileSystem()) {
 
   def ++(s: String) = sp(this.path :+ s)
 
@@ -454,18 +454,18 @@ object FileType {
   def apply(safePath: SafePath): FileType = apply(safePath.name)
 
   def apply(fileName: String): FileType = {
-    if (fileName.endsWith("tar.gz.bin") || fileName.endsWith("tgz.bin")) CodeFile(UndefinedLanguage)
+    if (fileName.endsWith("tar.gz.bin") || fileName.endsWith("tgz.bin")) CodeFile(UndefinedLanguage())
     else if (fileName.endsWith("nlogo")) CodeFile(NetLogoLanguage())
     else if (fileName.endsWith("jar")) Archive(JavaLikeLanguage())
-    else if (fileName.endsWith("tgz") || fileName.endsWith("tar.gz")) Archive(UndefinedLanguage)
+    else if (fileName.endsWith("tgz") || fileName.endsWith("tar.gz")) Archive(UndefinedLanguage())
     else UndefinedFileType
   }
 
   def isSupportedLanguage(fileName: String): Boolean = apply(fileName) match {
     case CodeFile(_) ⇒ true
     case a: Archive ⇒ a.language match {
-      case UndefinedLanguage ⇒ false
-      case _                 ⇒ true
+      case UndefinedLanguage() ⇒ false
+      case _                   ⇒ true
     }
     case _ ⇒ false
   }
@@ -501,7 +501,7 @@ case class JavaLikeLanguage() extends Language {
   val taskType = ScalaTaskType()
 }
 
-object UndefinedLanguage extends Language {
+case class UndefinedLanguage() extends Language {
   val name = ""
   val extension = ""
   val taskType = UndefinedTaskType()
@@ -633,30 +633,30 @@ case class Resources(all: Seq[Resource], implicits: Seq[Resource], number: Int) 
 
 sealed trait FirstLast
 
-object First extends FirstLast
+case class First() extends FirstLast
 
-object Last extends FirstLast
+case class Last() extends FirstLast
 
 sealed trait ListOrdering
 
-object Ascending extends ListOrdering
+case class Ascending() extends ListOrdering
 
-object Descending extends ListOrdering
+case class Descending() extends ListOrdering
 
 sealed trait ListSorting
 
-object AlphaSorting extends ListSorting
+case class AlphaSorting() extends ListSorting
 
-object SizeSorting extends ListSorting
+case class SizeSorting() extends ListSorting
 
-object TimeSorting extends ListSorting
+case class TimeSorting() extends ListSorting
 
-object LevelSorting extends ListSorting
+case class LevelSorting() extends ListSorting
 
-case class ListSortingAndOrdering(fileSorting: ListSorting = AlphaSorting, fileOrdering: ListOrdering = Ascending)
+case class ListSortingAndOrdering(fileSorting: ListSorting = AlphaSorting(), fileOrdering: ListOrdering = Ascending())
 
 object ListSortingAndOrdering {
-  def defaultSorting = ListSortingAndOrdering(AlphaSorting, Ascending)
+  def defaultSorting = ListSortingAndOrdering(AlphaSorting(), Ascending())
 }
 
 object FileSizeOrdering extends Ordering[TreeNodeData] {
@@ -688,23 +688,23 @@ object ListSorting {
 
   implicit def sortingToOrdering(fs: ListSorting): Ordering[TreeNodeData] =
     fs match {
-      case AlphaSorting ⇒ AlphaOrdering
-      case SizeSorting  ⇒ FileSizeOrdering
-      case _            ⇒ TimeOrdering
+      case AlphaSorting() ⇒ AlphaOrdering
+      case SizeSorting()  ⇒ FileSizeOrdering
+      case _              ⇒ TimeOrdering
     }
 }
 
-case class FileFilter(firstLast: FirstLast = First, threshold: Option[Int] = Some(20), nameFilter: String = "", fileSorting: ListSorting = AlphaSorting) {
+case class FileFilter(firstLast: FirstLast = First(), threshold: Option[Int] = Some(20), nameFilter: String = "", fileSorting: ListSorting = AlphaSorting()) {
 
   def switchTo(newFileSorting: ListSorting) = {
     val fl = {
       if (fileSorting == newFileSorting) {
         firstLast match {
-          case First ⇒ Last
-          case _     ⇒ First
+          case First() ⇒ Last()
+          case _       ⇒ First()
         }
       }
-      else First
+      else First()
     }
     copy(fileSorting = newFileSorting, firstLast = fl)
   }
@@ -713,7 +713,7 @@ case class FileFilter(firstLast: FirstLast = First, threshold: Option[Int] = Som
 case class ListFilesData(list: Seq[TreeNodeData], nbFilesOnServer: Int)
 
 object FileFilter {
-  def defaultFilter = FileFilter.this(First, Some(100), "", AlphaSorting)
+  def defaultFilter = FileFilter.this(First(), Some(100), "", AlphaSorting())
 }
 
 case class OMSettings(workspace: SafePath, version: String, versionName: String, buildTime: String)
@@ -739,7 +739,7 @@ sealed trait Test {
   def errorStack: Error
 }
 
-object PendingTest extends Test {
+case class PendingTest() extends Test {
   def passed = false
 
   def message = "pending"
@@ -760,7 +760,7 @@ case class PassedTest(message: String) extends Test {
 object Test {
   def passed(message: String = "OK") = PassedTest(message)
 
-  def pending = PendingTest
+  def pending = PendingTest()
 
   def error(msg: String, err: Error) = FailedTest(msg, err)
 }

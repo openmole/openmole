@@ -25,7 +25,8 @@ import org.openmole.gui.ext.tool.client._
 import org.openmole.gui.ext.tool.client.JsRxTags._
 
 import scala.concurrent.Future
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+import boopickle.Default._
+import scala.concurrent.ExecutionContext.Implicits.global
 import scaladget.stylesheet.{ all ⇒ sheet }
 import org.openmole.gui.ext.data._
 import sheet._
@@ -88,7 +89,7 @@ class AuthenticationPanel {
         )
         test match {
           case PassedTest(_) ⇒ lab(label_success).render
-          case PendingTest   ⇒ lab(label_warning).render
+          case PendingTest() ⇒ lab(label_warning).render
           case _ ⇒ lab(label_danger +++ pointer)(onclick := { () ⇒
             currentStack() = test.errorStack.stackTrace
             errorOn() = !errorOn.now

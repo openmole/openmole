@@ -4,8 +4,8 @@ import org.openmole.gui.ext.data._
 import org.scalajs.dom.raw._
 import autowire._
 import org.openmole.gui.ext.api.Api
-
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+import boopickle.Default._
+import scala.concurrent.ExecutionContext.Implicits.global
 
 /*
  * Copyright (C) 29/04/15 // mathieu.leclaire@openmole.org

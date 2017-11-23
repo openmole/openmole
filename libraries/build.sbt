@@ -154,6 +154,7 @@ lazy val scalaTagsVersion = "0.6.5"
 lazy val scalaRxVersion = "0.3.2"
 lazy val scalaDomVersion = "0.9.3"
 lazy val scalaUpickleVersion = "0.4.4"
+lazy val scalaBoopickleVersion = "1.2.6"
 lazy val scalaAutowireVersion = "0.2.6"
 lazy val scalajsVersion = "0.6.18"
 
@@ -181,6 +182,10 @@ lazy val scalatexSite =
 lazy val upickle = OsgiProject(dir, "upickle", exports = Seq("upickle.*", "jawn.*", "derive.*", "sourcecode.*"), imports = Seq("*")) settings(
   libraryDependencies ++= Seq("com.lihaoyi" %% "upickle" % scalaUpickleVersion),
   version := scalaUpickleVersion) settings(settings: _*)
+
+lazy val boopickle = OsgiProject(dir, "boopickle", exports = Seq("boopickle.*"), imports = Seq("*")) settings(
+  libraryDependencies ++= Seq("io.suzaku" %% "boopickle" % scalaBoopickleVersion),
+  version := scalaBoopickleVersion) settings(settings: _*)
 
 lazy val autowire = OsgiProject(dir, "autowire", exports = Seq("autowire.*")) settings(
   libraryDependencies ++= Seq("com.lihaoyi" %% "autowire" % scalaAutowireVersion),

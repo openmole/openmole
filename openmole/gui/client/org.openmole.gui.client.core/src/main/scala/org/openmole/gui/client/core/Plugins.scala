@@ -4,17 +4,11 @@ import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.data.{ AllPluginExtensionData, AuthenticationPluginFactory }
 import autowire._
 
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+import scala.concurrent.ExecutionContext.Implicits.global
+import boopickle.Default._
 import rx._
 
-import scalatags.JsDom.all._
-import org.openmole.gui.ext.tool.client.JsRxTags._
-
-import scalatags.JsDom.tags
 import scala.scalajs.js
-import js.annotation._
-import scala.concurrent.Future
-
 /*
  * Copyright (C) 30/11/16 // mathieu.leclaire@openmole.org
  *

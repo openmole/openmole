@@ -20,6 +20,7 @@ package org.openmole.gui.plugin.authentication.sshlogin
 import org.openmole.gui.ext.plugin.server.{ PluginActivator, PluginInfo }
 import org.openmole.gui.ext.tool.server.{ AutowireServer, OMRouter }
 import scala.concurrent.ExecutionContext.Implicits.global
+import boopickle.Default._
 
 class Activator extends PluginActivator {
 

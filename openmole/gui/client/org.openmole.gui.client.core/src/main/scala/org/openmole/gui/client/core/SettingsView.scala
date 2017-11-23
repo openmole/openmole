@@ -4,7 +4,8 @@ import scaladget.stylesheet.all._
 import org.openmole.gui.client.core.alert.AbsolutePositioning.CenterPagePosition
 
 import scalatags.JsDom._
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+import scala.concurrent.ExecutionContext.Implicits.global
+import boopickle.Default._
 import org.openmole.gui.client.core.alert.AlertPanel
 import scaladget.api.{ BootstrapTags ⇒ bs }
 import org.openmole.gui.client.core.panels._

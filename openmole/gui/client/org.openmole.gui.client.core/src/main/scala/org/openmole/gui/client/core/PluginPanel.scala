@@ -9,7 +9,8 @@ import scalatags.JsDom.all._
 import scaladget.api.{ BootstrapTags ⇒ bs }
 
 import scalatags.JsDom.tags
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+import scala.concurrent.ExecutionContext.Implicits.global
+import boopickle.Default._
 import org.openmole.gui.ext.tool.client.JsRxTags._
 import org.openmole.gui.ext.tool.client._
 import autowire._

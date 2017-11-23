@@ -2,7 +2,8 @@ package org.openmole.gui.client.core.files
 
 import org.openmole.gui.ext.data._
 
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+import scala.concurrent.ExecutionContext.Implicits.global
+import boopickle.Default._
 import autowire._
 import org.openmole.gui.ext.tool.client.Utils._
 import scaladget.stylesheet.{ all ⇒ sheet }

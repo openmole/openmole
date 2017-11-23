@@ -7,10 +7,13 @@ import org.openmole.gui.client.core.alert.AbsolutePositioning.{ FileZone, Relati
 import org.openmole.gui.client.core.alert.AlertPanel
 
 import scala.concurrent.Future
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+import scala.concurrent.ExecutionContext.Implicits.global
+import boopickle.Default._
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
 import org.openmole.gui.ext.api.Api
+import org.openmole.gui.ext.tool.client.OMPost
 
+import scala.util.{ Failure, Success }
 import scalatags.JsDom.all._
 
 /*

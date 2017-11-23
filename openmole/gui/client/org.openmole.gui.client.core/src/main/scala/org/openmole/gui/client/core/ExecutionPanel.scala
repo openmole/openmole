@@ -31,7 +31,8 @@ import org.openmole.gui.ext.tool.client.JsRxTags._
 import org.openmole.gui.ext.tool.client._
 
 import scala.scalajs.js.timers._
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+import scala.concurrent.ExecutionContext.Implicits.global
+import boopickle.Default._
 import scaladget.stylesheet.{ all ⇒ sheet }
 import sheet._
 import autowire._

@@ -39,7 +39,7 @@ class EnvironmentErrorPanel {
 
   val scrollableTable = scrollableDiv()
   val scrollableStack = scrollableText()
-  val sortingAndOrdering: Var[ListSortingAndOrdering] = Var(ListSortingAndOrdering(TimeSorting, Descending))
+  val sortingAndOrdering: Var[ListSortingAndOrdering] = Var(ListSortingAndOrdering(TimeSorting(), Descending()))
   val currentData: Var[Option[EnvironmentErrorData]] = Var(None)
 
   val topTriangle = glyph_triangle_top +++ (fontSize := 10)
@@ -69,14 +69,14 @@ class EnvironmentErrorPanel {
       } yield (error.errorMessage, mostRecentDate, occurrences, error.level, error.stack)
 
     val sorted = sortingAndOrdering.fileSorting match {
-      case AlphaSorting ⇒ lines.sortBy(_._1)
-      case TimeSorting  ⇒ lines.sortBy(_._2)
-      case _            ⇒ lines.sortBy(_._4.name)
+      case AlphaSorting() ⇒ lines.sortBy(_._1)
+      case TimeSorting()  ⇒ lines.sortBy(_._2)
+      case _              ⇒ lines.sortBy(_._4.name)
     }
 
     sortingAndOrdering.fileOrdering match {
-      case Ascending ⇒ sorted
-      case _         ⇒ sorted.reverse
+      case Ascending() ⇒ sorted
+      case _           ⇒ sorted.reverse
     }
   }
 
@@ -112,10 +112,10 @@ class EnvironmentErrorPanel {
     val errorTable = tags.table(sheet.table +++ ms("EnvError") +++ (width := "100%"))(
       thead(
         tr(row)(
-          th(exclusiveButton("Error", () ⇒ setSorting(AlphaSorting, Ascending), () ⇒ setSorting(AlphaSorting, Descending))),
+          th(exclusiveButton("Error", () ⇒ setSorting(AlphaSorting(), Ascending()), () ⇒ setSorting(AlphaSorting(), Descending()))),
           th(""),
-          th(exclusiveButton("Date", () ⇒ setSorting(TimeSorting, Ascending), () ⇒ setSorting(TimeSorting, Descending))),
-          th(exclusiveButton("Level", () ⇒ setSorting(LevelSorting, Ascending), () ⇒ setSorting(LevelSorting, Descending)))
+          th(exclusiveButton("Date", () ⇒ setSorting(TimeSorting(), Ascending()), () ⇒ setSorting(TimeSorting(), Descending()))),
+          th(exclusiveButton("Level", () ⇒ setSorting(LevelSorting(), Ascending()), () ⇒ setSorting(LevelSorting(), Descending())))
         )
       ), Rx {
         tbody(

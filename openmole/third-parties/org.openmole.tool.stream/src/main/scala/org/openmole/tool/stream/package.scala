@@ -68,11 +68,22 @@ package object stream {
     }
 
     def toGZ = new GZIPOutputStream(os)
+
     def append(content: String) = new PrintWriter(os).append(content).flush
+
     def appendLine(line: String) = append(line + "\n")
   }
 
   implicit class InputStreamDecorator(is: InputStream) {
+
+    def toByteArray = {
+      val os = new ByteArrayOutputStream()
+      try {
+        copy(os)
+        os.toByteArray
+      }
+      finally is.close()
+    }
 
     def copy(to: OutputStream): Unit = stream.copy(is, to)
 
@@ -82,7 +93,9 @@ package object stream {
       }
 
     def copy(to: OutputStream, maxRead: Int, timeout: Time)(implicit pool: ThreadPoolExecutor) = stream.copy(is, to, maxRead, timeout)
+
     def toGZiped = new GZipedInputStream(is)
+
     def toGZ = new GZIPInputStream(is)
 
     // this one must have REPLACE_EXISTING enabled but does not support COPY_ATTRIBUTES, nor NOFOLLOW_LINKS
@@ -115,4 +128,5 @@ package object stream {
       to.flush()
     }
   }
+
 }
