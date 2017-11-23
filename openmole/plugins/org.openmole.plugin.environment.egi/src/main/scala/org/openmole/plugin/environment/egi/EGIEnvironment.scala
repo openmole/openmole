@@ -22,6 +22,7 @@ import java.io.File
 import org.openmole.core.authentication.AuthenticationStore
 import org.openmole.core.communication.storage
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
+import org.openmole.core.threadprovider.Updater
 import org.openmole.core.workspace.Workspace
 import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, SerializedJob, UsageControl }
 import org.openmole.plugin.environment.batch.jobservice.{ BatchJob, BatchJobService, JobServiceInterface }
@@ -31,6 +32,8 @@ import org.openmole.plugin.environment.egi.EGIEnvironment.WebDavLocation
 import org.openmole.tool.crypto.Cypher
 import squants._
 import squants.information._
+
+import scala.ref.WeakReference
 
 //import java.net.URI
 //
@@ -63,9 +66,12 @@ object EGIEnvironment extends Logger {
   val VOCardDownloadTimeOut = ConfigurationLocation("EGIEnvironment", "VOCardDownloadTimeOut", Some(2 minutes))
   val VOCardCacheTime = ConfigurationLocation("EGIEnvironment", "VOCardCacheTime", Some(6 hours))
   //
-  //  val EagerSubmissionInterval = ConfigurationLocation("EGIEnvironment", "EagerSubmissionInterval", Some(2 minutes))
-  //  val EagerSubmissionMinNumberOfJob = ConfigurationLocation("EGIEnvironment", "EagerSubmissionMinNumberOfJob", Some(100))
-  //  val EagerSubmissionNumberOfJobUnderMin = ConfigurationLocation("EGIEnvironment", "EagerSubmissionNumberOfJobUnderMin", Some(10))
+  val EagerSubmissionInterval = ConfigurationLocation("EGIEnvironment", "EagerSubmissionInterval", Some(2 minutes))
+  val EagerSubmissionMinNumberOfJobs = ConfigurationLocation("EGIEnvironment", "EagerSubmissionMinNumberOfJobs", Some(100))
+  val RunningHistoryDuration = ConfigurationLocation("EGIEnvironment", "RunningHistoryDuration", Some(12 hours))
+  val EagerSubmissionThreshold = ConfigurationLocation("EGIEnvironment", "EagerSubmissionThreshold", Some(0.5))
+  val EagerSubmissionNumberOfJobs = ConfigurationLocation("EGIEnvironment", "EagerSubmissionNumberOfJobs", Some(5))
+
   //  val EagerSubmissionNbSampling = ConfigurationLocation("EGIEnvironment", "EagerSubmissionNbSampling", Some(10))
   //  val EagerSubmissionSamplingWindowFactor = ConfigurationLocation("EGIEnvironment", "EagerSubmissionSamplingWindowFactor", Some(5))
   //
@@ -99,8 +105,6 @@ object EGIEnvironment extends Logger {
   //  val JobServiceAvailabilityFactor = ConfigurationLocation("EGIEnvironment", "JobServiceAvailabilityFactor", Some(10.0))
   //  val JobServiceSuccessRateFactor = ConfigurationLocation("EGIEnvironment", "JobServiceSuccessRateFactor", Some(1.0))
   //
-  //  val RunningHistoryDuration = ConfigurationLocation("EGIEnvironment", "RunningHistoryDuration", Some(12 hours))
-  //  val EagerSubmissionThreshold = ConfigurationLocation("EGIEnvironment", "EagerSubmissionThreshold", Some(0.5))
 
   val DiracConnectionTimeout = ConfigurationLocation("EGIEnvironment", "DiracConnectionTimeout", Some(1 minutes))
   val VOMSTimeout = ConfigurationLocation("EGIEnvironment", "VOMSTimeout", Some(1 minutes))
@@ -222,7 +226,7 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
 
   import services._
 
-  //lazy val eagerSubmissionAgent = new EagerSubmissionAgent(WeakReference(this))
+  lazy val eagerSubmissionAgent = new EagerSubmissionAgent(WeakReference(this))
 
   implicit val interpreters = EGI()
   import interpreters._
@@ -237,9 +241,15 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
     (token, token.lifetime - preference(EGIEnvironment.TokenRenewalMarginTime))
   }
 
+  override def start() = {
+    Updater.delay(eagerSubmissionAgent)
+    super.start()
+  }
+
   override def stop() =
     try super.stop()
     finally {
+      eagerSubmissionAgent.stop = true
       def usageControls = storages().map(_._2.usageControl) ++ List(batchJobService.usageControl)
       JobManager ! StopEnvironment(this, usageControls)
     }
