@@ -26,7 +26,7 @@ def formatSettings =
         ).value
     )
 
-lazy val scalaVersionValue = "2.12.3"
+lazy val scalaVersionValue = "2.12.4"
 
 def defaultSettings = formatSettings ++
   Seq(
@@ -245,6 +245,14 @@ lazy val project = OsgiProject(coreDir, "org.openmole.core.project", imports = S
 
 lazy val buildinfo = OsgiProject(coreDir, "org.openmole.core.buildinfo", imports = Seq("*")) enablePlugins(BuildInfoPlugin) settings(
   //sourceGenerators in Compile += buildInfo.taskValue,
+  (sourceGenerators in Compile) := Seq(
+    Def.taskDyn {
+      val src = (sourceManaged in Compile).value
+      val buildInfoDirectory = src / "sbt-buildinfo"
+      if(buildInfoDirectory.exists && !buildInfoDirectory.list().isEmpty) Def.task { buildInfoDirectory.listFiles.toSeq }
+      else (buildInfo in Compile)
+    }.taskValue
+  ),
   buildInfoKeys :=
     Seq[BuildInfoKey](
       name,
