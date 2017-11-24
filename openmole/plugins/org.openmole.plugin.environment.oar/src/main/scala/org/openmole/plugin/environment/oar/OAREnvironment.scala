@@ -111,7 +111,7 @@ object OAREnvironment {
     bestEffort:           Boolean
   )
 
-  def nbCores(parameters: Parameters) = parameters.core.map(c => math.min(c, parameters.threads.getOrElse(1)))
+  def nbCores(parameters: Parameters) = parameters.core orElse parameters.threads
 
 }
 

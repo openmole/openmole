@@ -383,12 +383,11 @@ lazy val pbs = OsgiProject(pluginDir, "org.openmole.plugin.environment.pbs", imp
 lazy val sge = OsgiProject(pluginDir, "org.openmole.plugin.environment.sge", imports = Seq("*")) dependsOn(openmoleDSL, batch, gridscale, ssh) settings
   (libraryDependencies += Libraries.gridscaleSGE) settings (pluginSettings: _*)
 
-//lazy val condor = OsgiProject(pluginDir, "org.openmole.plugin.environment.condor", imports = Seq("*")) dependsOn(openmoleDSL, batch, gridscale, ssh) settings
-//  (libraryDependencies += Libraries.gridscaleCondor) settings (pluginSettings: _*)
-//
-//lazy val slurm = OsgiProject(pluginDir, "org.openmole.plugin.environment.slurm", imports = Seq("*")) dependsOn(openmoleDSL, batch, gridscale, ssh) settings
-//  (libraryDependencies += Libraries.gridscaleSLURM) settings (pluginSettings: _*)
+lazy val condor = OsgiProject(pluginDir, "org.openmole.plugin.environment.condor", imports = Seq("*")) dependsOn(openmoleDSL, batch, gridscale, ssh) settings
+  (libraryDependencies += Libraries.gridscaleCondor) settings (pluginSettings: _*)
 
+lazy val slurm = OsgiProject(pluginDir, "org.openmole.plugin.environment.slurm", imports = Seq("*")) dependsOn(openmoleDSL, batch, gridscale, ssh) settings
+  (libraryDependencies += Libraries.gridscaleSLURM) settings (pluginSettings: _*)
 
 lazy val ssh = OsgiProject(pluginDir, "org.openmole.plugin.environment.ssh", imports = Seq("*")) dependsOn(openmoleDSL, event, batch, gridscale) settings
   (libraryDependencies += Libraries.gridscaleSSH) settings (pluginSettings: _*)

@@ -117,8 +117,6 @@ object PBSEnvironment {
     threads:              Option[Int],
     storageSharedLocally: Boolean,
     flavour:              gridscale.pbs.PBSFlavour)
-
-  def nbCores(parameters: Parameters) = parameters.coreByNode.map(c => math.min(c, parameters.threads.getOrElse(1)))
 }
 
 class PBSEnvironment[A: gridscale.ssh.SSHAuthentication](
@@ -186,7 +184,7 @@ class PBSEnvironment[A: gridscale.ssh.SSHAuthentication](
       wallTime = parameters.wallTime,
       memory = Some(BatchEnvironment.requiredMemory(parameters.openMOLEMemory, parameters.memory)),
       nodes = parameters.nodes,
-      coreByNode = PBSEnvironment.nbCores(parameters),
+      coreByNode = parameters.coreByNode orElse environment.threads,
       flavour = parameters.flavour
     )
 
@@ -280,7 +278,7 @@ class PBSLocalEnvironment(
       wallTime = parameters.wallTime,
       memory = Some(BatchEnvironment.requiredMemory(parameters.openMOLEMemory, parameters.memory)),
       nodes = parameters.nodes,
-      coreByNode = PBSEnvironment.nbCores(parameters),
+      coreByNode = parameters.coreByNode orElse environment.threads,
       flavour = parameters.flavour
     )
 

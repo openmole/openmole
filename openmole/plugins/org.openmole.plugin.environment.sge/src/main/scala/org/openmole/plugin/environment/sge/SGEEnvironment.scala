@@ -165,7 +165,7 @@ class SGEEnvironment[A: gridscale.ssh.SSHAuthentication](
     val description = _root_.gridscale.sge.SGEJobDescription(
       command = s"/bin/bash $remoteScript",
       queue = parameters.queue,
-      workDirectory = serializedJob.path,
+      workDirectory = workDirectory,
       wallTime = parameters.wallTime,
       memory = Some(BatchEnvironment.requiredMemory(parameters.openMOLEMemory, parameters.memory)),
     )
@@ -256,7 +256,7 @@ class SGELocalEnvironment(
     val description = _root_.gridscale.sge.SGEJobDescription(
       command = s"/bin/bash $remoteScript",
       queue = parameters.queue,
-      workDirectory = serializedJob.path,
+      workDirectory = workDirectory,
       wallTime = parameters.wallTime,
       memory = Some(BatchEnvironment.requiredMemory(parameters.openMOLEMemory, parameters.memory)),
     )
