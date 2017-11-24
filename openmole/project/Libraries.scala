@@ -100,7 +100,7 @@ object Libraries {
 
   lazy val gridscale = "org.openmole.library" %% "gridscale" % gridscaleVersion
   lazy val gridscaleSSH = "org.openmole.library" %% "gridscale-ssh" % gridscaleVersion
-//  lazy val gridscalePBS = "fr.iscpif.gridscale.bundle" %% "pbs" % gridscaleVersion
+  lazy val gridscalePBS = "org.openmole.library" %% "gridscale-pbs" % gridscaleVersion
 //  lazy val gridscaleSGE = "fr.iscpif.gridscale.bundle" %% "sge" % gridscaleVersion
 //  lazy val gridscaleCondor = "fr.iscpif.gridscale.bundle" %% "condor" % gridscaleVersion
 //  lazy val gridscaleSLURM = "fr.iscpif.gridscale.bundle" %% "slurm" % gridscaleVersion

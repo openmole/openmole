@@ -111,6 +111,8 @@ object OAREnvironment {
     bestEffort:           Boolean
   )
 
+  def nbCores(parameters: Parameters) = parameters.core.map(c => math.min(c, parameters.threads.getOrElse(1)))
+
 }
 
 class OAREnvironment[A: gridscale.ssh.SSHAuthentication](
@@ -176,7 +178,7 @@ class OAREnvironment[A: gridscale.ssh.SSHAuthentication](
       workDirectory = workDirectory,
       queue = parameters.queue,
       cpu = parameters.cpu,
-      core = parameters.core,
+      core = OAREnvironment.nbCores(parameters),
       wallTime = parameters.wallTime,
       bestEffort = parameters.bestEffort
     )
@@ -261,7 +263,7 @@ class OARLocalEnvironment(
       workDirectory = workDirectory,
       queue = parameters.queue,
       cpu = parameters.cpu,
-      core = parameters.core,
+      core = OAREnvironment.nbCores(parameters),
       wallTime = parameters.wallTime,
       bestEffort = parameters.bestEffort
     )

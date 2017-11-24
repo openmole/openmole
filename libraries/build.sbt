@@ -373,6 +373,26 @@ lazy val gridscaleOAR = OsgiProject(dir, "gridscale.oar", imports = Seq("*")) se
   version := gridscaleVersion
 ) settings(settings: _*) dependsOn(gridscale, gridscaleCluster)
 
+lazy val gridscalePBS = OsgiProject(dir, "gridscale.pbs", imports = Seq("*")) settings (
+  libraryDependencies += "fr.iscpif.gridscale" %% "pbs" % gridscaleVersion,
+  version := gridscaleVersion
+) settings(settings: _*) dependsOn(gridscale, gridscaleCluster)
+
+lazy val gridscaleSGE = OsgiProject(dir, "gridscale.sge", imports = Seq("*")) settings (
+  libraryDependencies += "fr.iscpif.gridscale" %% "sge" % gridscaleVersion,
+  version := gridscaleVersion
+) settings(settings: _*) dependsOn(gridscale, gridscaleCluster)
+
+lazy val gridscaleCondor = OsgiProject(dir, "gridscale.condor", imports = Seq("*")) settings (
+  libraryDependencies += "fr.iscpif.gridscale" %% "condor" % gridscaleVersion,
+  version := gridscaleVersion
+) settings(settings: _*) dependsOn(gridscale, gridscaleCluster)
+
+lazy val gridscaleSLURM = OsgiProject(dir, "gridscale.slurm", imports = Seq("*")) settings (
+  libraryDependencies += "fr.iscpif.gridscale" %% "slurm" % gridscaleVersion,
+  version := gridscaleVersion
+) settings(settings: _*) dependsOn(gridscale, gridscaleCluster)
+
 
 lazy val gridscaleEGI = OsgiProject(dir, "gridscale.egi", imports = Seq("*")) settings (
   libraryDependencies += "fr.iscpif.gridscale" %% "egi" % gridscaleVersion,
