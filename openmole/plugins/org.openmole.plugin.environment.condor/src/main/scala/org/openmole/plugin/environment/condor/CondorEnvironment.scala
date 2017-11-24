@@ -18,19 +18,25 @@
 
 package org.openmole.plugin.environment.condor
 
-import fr.iscpif.gridscale.condor.CondorRequirement
-import org.openmole.core.authentication.AuthenticationStore
+import org.openmole.core.authentication._
 import org.openmole.core.workflow.dsl._
+import org.openmole.core.workflow.execution._
 import org.openmole.plugin.environment.batch.environment._
+import org.openmole.plugin.environment.batch.jobservice._
 import org.openmole.plugin.environment.ssh._
 import org.openmole.tool.crypto.Cypher
+import squants.{ Time, _ }
 import squants.information._
+import effectaside._
+import org.openmole.plugin.environment.batch.refresh.{ JobManager, StopEnvironment }
+import org.openmole.plugin.environment.gridscale._
 
 object CondorEnvironment {
+
   def apply(
-    user: String,
-    host: String,
-    port: Int    = 22,
+    user: OptionalArgument[String]                           = None,
+    host: OptionalArgument[String]                           = None,
+    port: OptionalArgument[Int]                              = 22,
     // TODO not available in the GridScale plugin yet
     //  queue: Option[String] = None,
     openMOLEMemory: OptionalArgument[Information] = None,
@@ -41,16 +47,17 @@ object CondorEnvironment {
     coresByNode:          OptionalArgument[Int]               = None,
     sharedDirectory:      OptionalArgument[String]            = None,
     workDirectory:        OptionalArgument[String]            = None,
-    requirements:         OptionalArgument[CondorRequirement] = None,
+    requirements:         OptionalArgument[String]            = None,
+    timeout:              OptionalArgument[Time]              = None,
     threads:              OptionalArgument[Int]               = None,
     storageSharedLocally: Boolean                             = false,
+    localSubmission: Boolean                                  = false,
     name:                 OptionalArgument[String]            = None
   )(implicit services: BatchEnvironment.Services, authenticationStore: AuthenticationStore, cypher: Cypher, varName: sourcecode.Name) = {
+
     import services._
-    new CondorEnvironment(
-      user = user,
-      host = host,
-      port = port,
+
+    val parameters = Parameters(
       openMOLEMemory = openMOLEMemory,
       memory = memory,
       nodes = nodes,
@@ -59,48 +66,278 @@ object CondorEnvironment {
       workDirectory = workDirectory,
       requirements = requirements,
       threads = threads,
-      storageSharedLocally = storageSharedLocally,
-      name = Some(name.getOrElse(varName.value))
-    )(SSHAuthentication.find(user, host, port).apply)
+      storageSharedLocally = storageSharedLocally)
+
+    if(!localSubmission) {
+      val userValue = user.mustBeDefined("user")
+      val hostValue = host.mustBeDefined("host")
+      val portValue = port.mustBeDefined("port")
+
+      new CondorEnvironment(
+        user = userValue,
+        host = hostValue,
+        port = portValue,
+        timeout = timeout.getOrElse(services.preference(SSHEnvironment.TimeOut)),
+        parameters = parameters,
+        name = Some(name.getOrElse(varName.value)),
+        authentication = SSHAuthentication.find(userValue, hostValue, portValue).apply
+      )
+    } else
+      new CondorLocalEnvironment(
+        parameters = parameters,
+        name = Some(name.getOrElse(varName.value))
+      )
+
+  }
+
+  implicit def asSSHServer[A: gridscale.ssh.SSHAuthentication]: AsSSHServer[CondorEnvironment[A]] = new AsSSHServer[CondorEnvironment[A]] {
+    override def apply(t: CondorEnvironment[A]) = gridscale.ssh.SSHServer(t.host, t.port, t.timeout)(t.authentication)
+  }
+
+  implicit def isJobService[A]: JobServiceInterface[CondorEnvironment[A]] = new JobServiceInterface[CondorEnvironment[A]] {
+    override type J = gridscale.cluster.BatchScheduler.BatchJob
+    override def submit(env: CondorEnvironment[A], serializedJob: SerializedJob): BatchJob[J] = env.submit(serializedJob)
+    override def state(env: CondorEnvironment[A], j: J): ExecutionState.ExecutionState = env.state(j)
+    override def delete(env: CondorEnvironment[A], j: J): Unit = env.delete(j)
+    override def stdOutErr(js: CondorEnvironment[A], j: J) = js.stdOutErr(j)
+  }
+
+  case class Parameters(
+    openMOLEMemory:       Option[Information],
+    memory:               Option[Information],
+    nodes:                Option[Int],
+    coresByNode:          Option[Int],
+    sharedDirectory:      Option[String],
+    workDirectory:        Option[String],
+    requirements:         Option[String],
+    threads:              Option[Int],
+    storageSharedLocally: Boolean)
+
+}
+
+class CondorEnvironment[A: gridscale.ssh.SSHAuthentication](
+  val user:           String,
+  val host:           String,
+  val port:           Int,
+  val timeout:        Time,
+  val parameters:     CondorEnvironment.Parameters,
+  val name:           Option[String],
+  val authentication: A)(implicit val services: BatchEnvironment.Services) extends BatchEnvironment {
+  env ⇒
+
+  import services._
+
+  implicit val sshInterpreter = gridscale.ssh.SSH()
+  implicit val systemInterpreter = effectaside.System()
+
+  override def stop() =
+    try super.stop()
+    finally {
+      def usageControls = List(storageService.usageControl, jobService.usageControl)
+      JobManager ! StopEnvironment(this, usageControls, Some(sshInterpreter().close))
+    }
+
+  import env.services.{ threadProvider, preference }
+  import org.openmole.plugin.environment.ssh._
+
+  lazy val storageService =
+    sshStorageService(
+      user = user,
+      host = host,
+      port = port,
+      storage = env,
+      environment = env,
+      concurrency = services.preference(SSHEnvironment.MaxConnections),
+      sharedDirectory = parameters.sharedDirectory,
+      storageSharedLocally = parameters.storageSharedLocally
+    )
+
+  override def trySelectStorage(files: ⇒ Vector[File]) = BatchEnvironment.trySelectSingleStorage(storageService)
+
+  val installRuntime = new RuntimeInstallation(
+    Frontend.ssh(host, port, timeout, authentication),
+    storageService = storageService
+  )
+
+  def submit(serializedJob: SerializedJob) = {
+    def buildScript(serializedJob: SerializedJob) = {
+      import services._
+      SharedStorage.buildScript(
+        env.installRuntime.apply,
+        parameters.workDirectory,
+        parameters.openMOLEMemory,
+        parameters.threads,
+        serializedJob,
+        env.storageService
+      )
+    }
+
+    val (remoteScript, result, workDirectory) = buildScript(serializedJob)
+
+    val description = _root_.gridscale.condor.CondorJobDescription(
+      executable = "/bin/bash",
+      arguments = remoteScript,
+      workDirectory = workDirectory,
+      memory = Some(BatchEnvironment.requiredMemory(parameters.openMOLEMemory, parameters.memory)),
+      nodes = parameters.nodes,
+      coreByNode = parameters.coresByNode orElse parameters.threads,
+      requirements = parameters.requirements.map(_root_.gridscale.condor.CondorRequirement.apply)
+    )
+
+    val id = gridscale.condor.submit[_root_.gridscale.ssh.SSHServer](env, description)
+    BatchJob(id, result)
+  }
+
+  def state(id: gridscale.cluster.BatchScheduler.BatchJob) =
+    GridScaleJobService.translateStatus(gridscale.condor.state[_root_.gridscale.ssh.SSHServer](env, id))
+
+  def delete(id: gridscale.cluster.BatchScheduler.BatchJob) =
+    gridscale.condor.clean[_root_.gridscale.ssh.SSHServer](env, id)
+
+  def stdOutErr(id: gridscale.cluster.BatchScheduler.BatchJob) =
+    (gridscale.condor.stdOut[_root_.gridscale.ssh.SSHServer](env, id), gridscale.condor.stdErr[_root_.gridscale.ssh.SSHServer](env, id))
+
+  lazy val jobService = BatchJobService(env, concurrency = services.preference(SSHEnvironment.MaxConnections))
+  override def trySelectJobService() = BatchEnvironment.trySelectSingleJobService(jobService)
+}
+
+
+
+
+object CondorLocalEnvironment {
+  implicit def isJobService: JobServiceInterface[CondorLocalEnvironment] = new JobServiceInterface[CondorLocalEnvironment] {
+    override type J = gridscale.cluster.BatchScheduler.BatchJob
+    override def submit(env: CondorLocalEnvironment, serializedJob: SerializedJob): BatchJob[J] = env.submit(serializedJob)
+    override def state(env: CondorLocalEnvironment, j: J): ExecutionState.ExecutionState = env.state(j)
+    override def delete(env: CondorLocalEnvironment, j: J): Unit = env.delete(j)
+    override def stdOutErr(js: CondorLocalEnvironment, j: J) = js.stdOutErr(j)
   }
 }
 
-class CondorEnvironment(
-  val user:          String,
-  val host:          String,
-  override val port: Int,
-  // TODO not available in the GridScale plugin yet
-  //val queue: Option[String],
-  override val openMOLEMemory: Option[Information],
-  // TODO not available in the GridScale plugin yet
-  //val wallTime: Option[Duration],
-  val memory:               Option[Information],
-  val nodes:                Option[Int]               = None,
-  val coresByNode:          Option[Int]               = None,
-  val sharedDirectory:      Option[String],
-  val workDirectory:        Option[String],
-  val requirements:         Option[CondorRequirement],
-  override val threads:     Option[Int],
-  val storageSharedLocally: Boolean,
-  override val name:        Option[String]
-)(val credential: fr.iscpif.gridscale.ssh.SSHAuthentication)(implicit val services: BatchEnvironment.Services) extends ClusterEnvironment { env ⇒
 
-  type JS = CondorJobService
+class CondorLocalEnvironment(
+  val parameters:     CondorEnvironment.Parameters,
+  val name:           Option[String])(implicit val services: BatchEnvironment.Services) extends BatchEnvironment { env =>
 
-  val jobService =
-    new CondorJobService {
-      // TODO not available in the GridScale plugin yet
-      //def queue = env.queue
-      val environment = env
-      def sharedFS = storage
-      def workDirectory = env.workDirectory
-      def timeout = env.timeout
-      def credential = env.credential
-      def user = env.user
-      def host = env.host
-      def port = env.port
+  import services._
+
+  lazy val usageControl = UsageControl(services.preference(SSHEnvironment.MaxLocalOperations))
+  def usageControls = List(storageService.usageControl, jobService.usageControl)
+
+  implicit val localInterpreter = gridscale.local.Local()
+  implicit val systemInterpreter = effectaside.System()
+
+  import env.services.{ threadProvider, preference }
+  import org.openmole.plugin.environment.ssh._
+
+  override def stop() =
+    try super.stop()
+    finally  {
+      def usageControls = List(storageService.usageControl, jobService.usageControl)
+      JobManager ! StopEnvironment(this, usageControls)
     }
 
-  def allJobServices = List(jobService)
+  lazy val storageService =
+    localStorageService(
+      environment = env,
+      concurrency = services.preference(SSHEnvironment.MaxLocalOperations),
+      root = "",
+      sharedDirectory = parameters.sharedDirectory,
+    )
+
+
+  override def trySelectStorage(files: ⇒ Vector[File]) = BatchEnvironment.trySelectSingleStorage(storageService)
+
+  val installRuntime = new RuntimeInstallation(
+    Frontend.local,
+    storageService = storageService
+  )
+
+  import _root_.gridscale.local.LocalHost
+
+  def submit(serializedJob: SerializedJob) = {
+    def buildScript(serializedJob: SerializedJob) = {
+      import services._
+      SharedStorage.buildScript(
+        env.installRuntime.apply,
+        parameters.workDirectory,
+        parameters.openMOLEMemory,
+        parameters.threads,
+        serializedJob,
+        env.storageService
+      )
+    }
+
+    val (remoteScript, result, workDirectory) = buildScript(serializedJob)
+
+    val description = _root_.gridscale.condor.CondorJobDescription(
+      executable = "/bin/bash",
+      arguments = remoteScript,
+      workDirectory = workDirectory,
+      memory = Some(BatchEnvironment.requiredMemory(parameters.openMOLEMemory, parameters.memory)),
+      nodes = parameters.nodes,
+      coreByNode = parameters.coresByNode orElse parameters.threads,
+      requirements = parameters.requirements.map(_root_.gridscale.condor.CondorRequirement.apply)
+    )
+
+    val id = gridscale.condor.submit(LocalHost(), description)
+    BatchJob(id, result)
+  }
+
+  def state(id: gridscale.cluster.BatchScheduler.BatchJob) =
+    GridScaleJobService.translateStatus(gridscale.condor.state(LocalHost(), id))
+
+  def delete(id: gridscale.cluster.BatchScheduler.BatchJob) =
+    gridscale.condor.clean(LocalHost(), id)
+
+  def stdOutErr(id: gridscale.cluster.BatchScheduler.BatchJob) =
+    (gridscale.condor.stdOut(LocalHost(), id), gridscale.condor.stdErr(LocalHost(), id))
+
+
+  lazy val jobService = BatchJobService(env, concurrency = services.preference(SSHEnvironment.MaxLocalOperations))
+  override def trySelectJobService() = BatchEnvironment.trySelectSingleJobService(jobService)
 
 }
+
+
+
+//
+//class CondorEnvironment(
+//  val user:          String,
+//  val host:          String,
+//  override val port: Int,
+//  // TODO not available in the GridScale plugin yet
+//  //val queue: Option[String],
+//  override val openMOLEMemory: Option[Information],
+//  // TODO not available in the GridScale plugin yet
+//  //val wallTime: Option[Duration],
+//  val memory:               Option[Information],
+//  val nodes:                Option[Int]               = None,
+//  val coresByNode:          Option[Int]               = None,
+//  val sharedDirectory:      Option[String],
+//  val workDirectory:        Option[String],
+//  val requirements:         Option[CondorRequirement],
+//  override val threads:     Option[Int],
+//  val storageSharedLocally: Boolean,
+//  override val name:        Option[String]
+//)(val credential: fr.iscpif.gridscale.ssh.SSHAuthentication)(implicit val services: BatchEnvironment.Services) extends ClusterEnvironment { env ⇒
+//
+//  type JS = CondorJobService
+//
+//  val jobService =
+//    new CondorJobService {
+//      // TODO not available in the GridScale plugin yet
+//      //def queue = env.queue
+//      val environment = env
+//      def sharedFS = storage
+//      def workDirectory = env.workDirectory
+//      def timeout = env.timeout
+//      def credential = env.credential
+//      def user = env.user
+//      def host = env.host
+//      def port = env.port
+//    }
+//
+//  def allJobServices = List(jobService)
+//
+//}
