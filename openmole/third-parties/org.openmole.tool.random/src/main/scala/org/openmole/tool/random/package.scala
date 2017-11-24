@@ -78,4 +78,17 @@ package object random {
     def toScala = new util.Random(this)
   }
 
+  def multinomialDraw[T](s: Vector[(Double, T)])(implicit rng: util.Random) = {
+    assert(!s.isEmpty, "Input sequence should not be empty")
+    def select(remaining: List[(Double, T)], value: Double, begin: List[(Double, T)] = List.empty): (T, List[(Double, T)]) =
+      remaining match {
+        case (weight, e) :: tail ⇒
+          if (value <= weight) (e, begin.reverse ::: tail)
+          else select(tail, value - weight, (weight, e) :: begin)
+        case _ ⇒ sys.error(s"Bug $remaining $value $begin")
+      }
+    val totalWeight = s.unzip._1.sum
+    select(s.toList, rng.nextDouble * totalWeight)._1
+  }
+
 }

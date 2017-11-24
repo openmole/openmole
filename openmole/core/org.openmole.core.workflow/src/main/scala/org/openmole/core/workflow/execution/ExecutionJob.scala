@@ -40,7 +40,7 @@ trait ExecutionJob {
       }
 
       if (state != this.state) {
-        environment.eventDispatcher.trigger(environment, new Environment.JobStateChanged(this, state, this.state))
+        environment.eventDispatcherService.trigger(environment, new Environment.JobStateChanged(this, state, this.state))
       }
 
       _state = state

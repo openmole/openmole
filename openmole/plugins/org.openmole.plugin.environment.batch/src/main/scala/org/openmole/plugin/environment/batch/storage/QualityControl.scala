@@ -15,57 +15,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.environment.egi
+package org.openmole.plugin.environment.batch.storage
 
-import org.openmole.plugin.environment.batch.control._
 import org.openmole.tool.statistics.MovingAverage
 
-object AvailabilityQuality {
-  def apply(_usageControl: UsageControl, _hysteresis: Int) =
-    new AvailabilityQuality {
-      val usageControl = _usageControl
-      val hysteresis = _hysteresis
-    }
-}
-
-trait AvailabilityQuality extends QualityControl with UsageControl {
-  val usageControl: UsageControl
-  def available: Int = usageControl.available
-  def releaseToken(token: AccessToken): Unit = usageControl.releaseToken(token)
-
-  def tryGetToken = {
-    val token = usageControl.tryGetToken
-    token match {
-      case Some(_) ⇒ wasAvailable
-      case None    ⇒ wasNotAvailable
-    }
-    token
-  }
-
-  def waitAToken = usageControl.waitAToken
-}
-
-trait QualityControl {
-  def hysteresis: Int
+case class QualityControl(hysteresis: Int) {
 
   def isEmpty = _successRate.isEmpty || operationTime.isEmpty
 
   private lazy val _successRate = new MovingAverage(hysteresis)
   private lazy val operationTime = new MovingAverage(hysteresis)
-  private lazy val _availability = new MovingAverage(hysteresis, 1.0)
-
-  def wasAvailable = _availability.put(1.0)
-  def wasNotAvailable = _availability.put(0.0)
 
   def failed = _successRate.put(0.0)
   def success = _successRate.put(1.0)
 
   def successRate = _successRate.get
-
   def time = operationTime.get
-  def availability = _availability.get
 
-  def quality[A](op: ⇒ A): A = timed {
+  def apply[A](op: ⇒ A): A = timed {
     try {
       val ret = op
       success

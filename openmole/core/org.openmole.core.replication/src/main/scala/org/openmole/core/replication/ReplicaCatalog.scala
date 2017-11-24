@@ -27,7 +27,6 @@ import org.openmole.core.db
 import org.openmole.core.preference._
 import org.openmole.core.db.{ DBServerInfo, Replica, replicas }
 import org.openmole.core.workspace.Workspace
-import org.openmole.tool.cache.TimeCache
 import org.openmole.tool.lock.LockRepository
 import org.openmole.tool.logger.Logger
 import slick.jdbc.H2Profile.api._

@@ -31,8 +31,7 @@ class Activator extends BundleActivator {
     PluginInfo.add(this.getClass)
     ConfigurationInfo.add(
       this.getClass,
-      ConfigurationInfo.list(SSHEnvironment) ++
-        ConfigurationInfo.list(SSHService)
+      ConfigurationInfo.list(SSHEnvironment)
     )
   }
 }

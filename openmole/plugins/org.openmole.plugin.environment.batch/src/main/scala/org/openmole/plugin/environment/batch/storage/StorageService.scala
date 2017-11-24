@@ -18,19 +18,15 @@
 package org.openmole.plugin.environment.batch.storage
 
 import java.io._
-import java.net.{ SocketTimeoutException, URI }
 import java.util.concurrent.{ Callable, TimeUnit, TimeoutException }
 
 import com.google.common.cache.CacheBuilder
-import fr.iscpif.gridscale.storage._
+import gridscale._
 import org.openmole.core.communication.storage._
-import org.openmole.core.fileservice.{ FileDeleter, FileService }
 import org.openmole.core.preference.{ ConfigurationLocation, Preference }
 import org.openmole.core.replication.{ ReplicaCatalog, ReplicationStorage }
 import org.openmole.core.serializer._
 import org.openmole.core.threadprovider.{ ThreadProvider, Updater }
-import org.openmole.core.workspace.{ NewFile, Workspace }
-import org.openmole.plugin.environment.batch.control._
 import org.openmole.plugin.environment.batch.environment._
 import org.openmole.plugin.environment.batch.refresh._
 import org.openmole.tool.cache._
@@ -45,25 +41,44 @@ object StorageService extends Logger {
   val persistent = "persistent/"
   val tmp = "tmp/"
 
-  def startGC(storage: StorageService)(implicit threadProvider: ThreadProvider, preference: Preference) =
+  def startGC(storage: StorageService[_])(implicit threadProvider: ThreadProvider, preference: Preference) =
     Updater.delay(new StoragesGC(WeakReference(storage)), preference(BatchEnvironment.StoragesGCUpdateInterval))
 
-  implicit def replicationStorage(implicit token: AccessToken): ReplicationStorage[StorageService] = new ReplicationStorage[StorageService] {
-    override def backgroundRmFile(storage: StorageService, path: String): Unit = storage.backgroundRmFile(path)
-    override def exists(storage: StorageService, path: String): Boolean = storage.exists(path)
-    override def id(storage: StorageService): String = storage.id
+  implicit def replicationStorage[S](implicit token: AccessToken): ReplicationStorage[StorageService[S]] = new ReplicationStorage[StorageService[S]] {
+    override def backgroundRmFile(storage: StorageService[S], path: String): Unit = storage.backgroundRmFile(path)
+    override def exists(storage: StorageService[S], path: String): Boolean = storage.exists(path)
+    override def id(storage: StorageService[S]): String = storage.id
+  }
+
+  def apply[S](
+    s:                 S,
+    root:              String,
+    id:                String,
+    environment:       BatchEnvironment,
+    remoteStorage:     RemoteStorage,
+    concurrency:       Int,
+    isConnectionError: Throwable ⇒ Boolean
+  )(implicit storageInterface: StorageInterface[S], threadProvider: ThreadProvider, preference: Preference) = {
+    val usageControl = UsageControl(concurrency)
+    val storage = new StorageService[S](s, root, id, environment, remoteStorage, usageControl, isConnectionError)
+    startGC(storage)
+    storage
   }
 }
 
 import org.openmole.plugin.environment.batch.storage.StorageService.Log._
 import org.openmole.plugin.environment.batch.storage.StorageService._
 
-trait StorageService extends BatchService with Storage {
-
-  def url: URI
-  def id: String
-
-  val remoteStorage: RemoteStorage
+class StorageService[S](
+  s:                 S,
+  val root:          String,
+  val id:            String,
+  val environment:   BatchEnvironment,
+  val remoteStorage: RemoteStorage,
+  val usageControl:  UsageControl,
+  isConnectionError: Throwable ⇒ Boolean,
+  qualityHysteresis: Int                 = 100
+)(implicit storage: StorageInterface[S]) {
 
   import environment.services
   import environment.services._
@@ -98,7 +113,7 @@ trait StorageService extends BatchService with Storage {
 
   protected def createBasePath(implicit token: AccessToken) = {
     val rootPath = mkRootDir
-    val basePath = child(rootPath, baseDirName)
+    val basePath = storage.child(s, rootPath, baseDirName)
     util.Try(makeDir(basePath)) match {
       case util.Success(_) ⇒ basePath
       case util.Failure(e) ⇒
@@ -111,11 +126,11 @@ trait StorageService extends BatchService with Storage {
 
     paths.tail.foldLeft(paths.head.toString) {
       (path, file) ⇒
-        val childPath = child(path, name(file))
+        val childPath = storage.child(s, path, storage.name(s, file))
         try makeDir(childPath)
         catch {
-          case e: fr.iscpif.gridscale.ConnectionError ⇒ throw e
-          case e: Throwable                           ⇒ logger.log(FINE, "Error creating base directory " + root, e)
+          case e: Throwable if isConnectionError(e) ⇒ throw e
+          case e: Throwable                         ⇒ logger.log(FINE, "Error creating base directory " + root, e)
         }
         childPath
     }
@@ -125,7 +140,7 @@ trait StorageService extends BatchService with Storage {
     unwrap { directoryCache.get("persistentDir", () ⇒ createPersistentDir) }
 
   private def createPersistentDir(implicit token: AccessToken) = {
-    val persistentPath = child(baseDir, persistent)
+    val persistentPath = storage.child(s, baseDir, persistent)
     if (!exists(persistentPath)) makeDir(persistentPath)
 
     def graceIsOver(name: String) =
@@ -134,13 +149,13 @@ trait StorageService extends BatchService with Storage {
       }.getOrElse(true)
 
     val names = listNames(persistentPath)
-    val inReplica = replicaCatalog.forPaths(names.map { child(persistentPath, _) }, Seq(this.id)).map(_.path).toSet
+    val inReplica = replicaCatalog.forPaths(names.map { storage.child(s, persistentPath, _) }, Seq(this.id)).map(_.path).toSet
 
     for {
       name ← names
       if graceIsOver(name)
     } {
-      val path = child(persistentPath, name)
+      val path = storage.child(s, persistentPath, name)
       if (!inReplica.contains(path)) backgroundRmFile(path)
     }
 
@@ -153,13 +168,13 @@ trait StorageService extends BatchService with Storage {
   private def createTmpDir(implicit token: AccessToken) = {
     val time = System.currentTimeMillis
 
-    val tmpNoTime = child(baseDir, tmp)
+    val tmpNoTime = storage.child(s, baseDir, tmp)
     if (!exists(tmpNoTime)) makeDir(tmpNoTime)
 
     val removalDate = System.currentTimeMillis - preference(TmpDirRemoval).toMillis
 
     for (entry ← list(tmpNoTime)) {
-      val childPath = child(tmpNoTime, entry.name)
+      val childPath = storage.child(s, tmpNoTime, entry.name)
 
       def rmDir =
         try {
@@ -171,10 +186,10 @@ trait StorageService extends BatchService with Storage {
         }
 
       entry.`type` match {
-        case DirectoryType ⇒ rmDir
-        case FileType      ⇒ backgroundRmFile(childPath)
-        case LinkType      ⇒ backgroundRmFile(childPath)
-        case UnknownType ⇒
+        case FileType.Directory ⇒ rmDir
+        case FileType.File      ⇒ backgroundRmFile(childPath)
+        case FileType.Link      ⇒ backgroundRmFile(childPath)
+        case FileType.Unknown ⇒
           try rmDir
           catch {
             case e: Throwable ⇒ backgroundRmFile(childPath)
@@ -182,7 +197,7 @@ trait StorageService extends BatchService with Storage {
       }
     }
 
-    val tmpTimePath = child(tmpNoTime, time.toString)
+    val tmpTimePath = storage.child(s, tmpNoTime, time.toString)
     util.Try(makeDir(tmpTimePath)) match {
       case util.Success(_) ⇒ tmpTimePath
       case util.Failure(e) ⇒
@@ -192,21 +207,22 @@ trait StorageService extends BatchService with Storage {
 
   override def toString: String = id
 
-  def exists(path: String)(implicit token: AccessToken): Boolean = token.access { _exists(path) }
-  def listNames(path: String)(implicit token: AccessToken): Seq[String] = token.access { _listNames(path) }
-  def list(path: String)(implicit token: AccessToken): Seq[ListEntry] = token.access { _list(path) }
-  def makeDir(path: String)(implicit token: AccessToken): Unit = token.access { _makeDir(path) }
-  def rmDir(path: String)(implicit token: AccessToken): Unit = token.access { _rmDir(path) }
-  def rmFile(path: String)(implicit token: AccessToken): Unit = token.access { _rmFile(path) }
-  def mv(from: String, to: String)(implicit token: AccessToken) = token.access { _mv(from, to) }
-  def downloadStream(path: String, options: TransferOptions = TransferOptions.default)(implicit token: AccessToken): InputStream = token.access { _downloadStream(path, options) }
-  def uploadStream(is: InputStream, path: String, options: TransferOptions = TransferOptions.default)(implicit token: AccessToken): Unit = token.access { _uploadStream(is, path, options) }
+  lazy val quality = QualityControl(qualityHysteresis)
 
-  def parent(path: String): Option[String] = _parent(path)
-  def name(path: String) = _name(path)
+  def exists(path: String)(implicit token: AccessToken): Boolean = token.access { quality { storage.exists(s, path) } }
+  def listNames(path: String)(implicit token: AccessToken): Seq[String] = token.access { quality { storage.list(s, path).map(_.name) } }
+  def list(path: String)(implicit token: AccessToken): Seq[ListEntry] = token.access { quality { storage.list(s, path) } }
+  def makeDir(path: String)(implicit token: AccessToken): Unit = token.access { quality { storage.makeDir(s, path) } }
+  def rmDir(path: String)(implicit token: AccessToken): Unit = token.access { quality { storage.rmDir(s, path) } }
+  def rmFile(path: String)(implicit token: AccessToken): Unit = token.access { quality { storage.rmFile(s, path) } }
+  def mv(from: String, to: String)(implicit token: AccessToken) = token.access { quality { storage.mv(s, from, to) } }
 
-  def upload(src: File, dest: String, options: TransferOptions = TransferOptions.default)(implicit token: AccessToken) = token.access { _upload(src, dest, options) }
-  def download(src: String, dest: File, options: TransferOptions = TransferOptions.default)(implicit token: AccessToken) = token.access { _download(src, dest, options) }
+  def parent(path: String): Option[String] = storage.parent(s, path)
+  def name(path: String) = storage.name(s, path)
+  def child(path: String, name: String) = storage.child(s, path, name)
+
+  def upload(src: File, dest: String, options: TransferOptions = TransferOptions.default)(implicit token: AccessToken) = token.access { quality { storage.upload(s, src, dest, options) } }
+  def download(src: String, dest: File, options: TransferOptions = TransferOptions.default)(implicit token: AccessToken) = token.access { quality { storage.download(s, src, dest, options) } }
 
   def baseDirName = "openmole-" + preference(Preference.uniqueID) + '/'
 

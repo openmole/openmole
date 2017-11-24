@@ -72,15 +72,15 @@ class EagerSubmissionAgent(environment: WeakReference[BatchEnvironment])(implici
         logger.fine("still running " + stillRunning)
 
         val maxTotal = runningHistory.map(_.total).max
-        val shouldBeRunning = runningHistory.map(_.running).max * preference(DIRACEnvironment.EagerSubmissionThreshold)
+        val shouldBeRunning = runningHistory.map(_.running).max * preference(EGIEnvironment.EagerSubmissionThreshold)
 
-        val minOversub = preference(EGIEnvironment.EagerSubmissionMinNumberOfJob)
+        val minOversub = preference(EGIEnvironment.EagerSubmissionMinNumberOfJobs)
 
         var nbRessub =
           if (jobSize < minOversub) minOversub - jobSize
           else if (jobSize < maxTotal) shouldBeRunning - (stillRunning + stillReady) else 0
 
-        val numberOfSimultaneousExecutionForAJobWhenUnderMinJob = preference(EGIEnvironment.EagerSubmissionNumberOfJobUnderMin)
+        val numberOfSimultaneousExecutionForAJob = preference(EGIEnvironment.EagerSubmissionNumberOfJobs)
 
         logger.fine("resubmit " + nbRessub)
 
@@ -91,14 +91,14 @@ class EagerSubmissionAgent(environment: WeakReference[BatchEnvironment])(implici
 
           for (job ← executionJobs.keys) {
             val nb = executionJobs(job).size
-            if (nb < numberOfSimultaneousExecutionForAJobWhenUnderMinJob) {
+            if (nb < numberOfSimultaneousExecutionForAJob) {
               order.addBinding(nb, job)
               keys += nb
             }
           }
 
           if (!keys.isEmpty) {
-            while (nbRessub > 0 && keys.head < numberOfSimultaneousExecutionForAJobWhenUnderMinJob) {
+            while (nbRessub > 0 && keys.head < numberOfSimultaneousExecutionForAJob) {
               val key = keys.head
               val jobs = order(keys.head)
               val job =

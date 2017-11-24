@@ -207,7 +207,7 @@ lazy val cats =
     version := catsVersion
   ) settings(settings: _*)
 
-lazy val freedslVersion = "0.20"
+lazy val freedslVersion = "0.21"
 
 lazy val freedsl =
   OsgiProject(dir, "freedsl", exports = Seq("freedsl.*", "freestyle.*", "mainecoon.*")) settings (
@@ -222,7 +222,7 @@ lazy val freedsl =
     version := freedslVersion
   ) dependsOn(cats) settings(settings: _*)
 
-lazy val mgoVersion = "3.3"
+lazy val mgoVersion = "3.4-SNAPSHOT"
 
 lazy val mgo = OsgiProject(dir, "mgo", imports = Seq("*")) settings(
   libraryDependencies += "fr.iscpif" %% "mgo" % mgoVersion,
@@ -332,4 +332,86 @@ lazy val config = OsgiProject(dir, "org.apache.commons.configuration2",
 lazy val sourceCode = OsgiProject(dir, "sourcecode") settings (
   libraryDependencies += "com.lihaoyi" %% "sourcecode" % "0.1.3",
   version := "0.1.3"
+) settings(settings: _*)
+
+
+def effectasideVersion = "0.2"
+lazy val effectaside = OsgiProject(dir, "effectaside", imports = Seq("*")) settings (
+  libraryDependencies += "fr.iscpif.effectaside" %% "effect"% effectasideVersion,
+  version := effectasideVersion
+)
+
+def gridscaleVersion = "2.0"
+lazy val gridscale = OsgiProject(dir, "gridscale", imports = Seq("*"), exports = Seq("gridscale.*", "enumeratum.*")) settings (
+  libraryDependencies += "fr.iscpif.gridscale" %% "gridscale" % gridscaleVersion,
+  version := gridscaleVersion
+) settings(settings: _*) dependsOn(effectaside)
+
+lazy val gridscaleLocal = OsgiProject(dir, "gridscale.local", imports = Seq("*")) settings (
+  libraryDependencies += "fr.iscpif.gridscale" %% "local" % gridscaleVersion,
+  version := gridscaleVersion
+) settings(settings: _*) dependsOn(gridscale)
+
+lazy val gridscaleHTTP = OsgiProject(dir, "gridscale.http", imports = Seq("*"), privatePackages = Seq("org.htmlparser.*")) settings (
+  libraryDependencies += "fr.iscpif.gridscale" %% "http" % gridscaleVersion,
+  version := gridscaleVersion
+) settings(settings: _*) dependsOn(gridscale, codec)
+
+lazy val gridscaleSSH = OsgiProject(dir, "gridscale.ssh", imports = Seq("*")) settings (
+  libraryDependencies += "fr.iscpif.gridscale" %% "ssh" % gridscaleVersion,
+  version := gridscaleVersion
+) settings(settings: _*) dependsOn(jzlib) dependsOn(gridscale)
+
+
+lazy val gridscaleCluster = OsgiProject(dir, "gridscale.cluster", imports = Seq("*")) settings (
+  libraryDependencies += "fr.iscpif.gridscale" %% "cluster" % gridscaleVersion,
+  version := gridscaleVersion
+) settings(settings: _*) dependsOn(gridscaleSSH)
+
+lazy val gridscaleOAR = OsgiProject(dir, "gridscale.oar", imports = Seq("*")) settings (
+  libraryDependencies += "fr.iscpif.gridscale" %% "oar" % gridscaleVersion,
+  version := gridscaleVersion
+) settings(settings: _*) dependsOn(gridscale, gridscaleCluster)
+
+lazy val gridscalePBS = OsgiProject(dir, "gridscale.pbs", imports = Seq("*")) settings (
+  libraryDependencies += "fr.iscpif.gridscale" %% "pbs" % gridscaleVersion,
+  version := gridscaleVersion
+) settings(settings: _*) dependsOn(gridscale, gridscaleCluster)
+
+lazy val gridscaleSGE = OsgiProject(dir, "gridscale.sge", imports = Seq("*")) settings (
+  libraryDependencies += "fr.iscpif.gridscale" %% "sge" % gridscaleVersion,
+  version := gridscaleVersion
+) settings(settings: _*) dependsOn(gridscale, gridscaleCluster)
+
+lazy val gridscaleCondor = OsgiProject(dir, "gridscale.condor", imports = Seq("*")) settings (
+  libraryDependencies += "fr.iscpif.gridscale" %% "condor" % gridscaleVersion,
+  version := gridscaleVersion
+) settings(settings: _*) dependsOn(gridscale, gridscaleCluster)
+
+lazy val gridscaleSLURM = OsgiProject(dir, "gridscale.slurm", imports = Seq("*")) settings (
+  libraryDependencies += "fr.iscpif.gridscale" %% "slurm" % gridscaleVersion,
+  version := gridscaleVersion
+) settings(settings: _*) dependsOn(gridscale, gridscaleCluster)
+
+
+lazy val gridscaleEGI = OsgiProject(dir, "gridscale.egi", imports = Seq("*")) settings (
+  libraryDependencies += "fr.iscpif.gridscale" %% "egi" % gridscaleVersion,
+  version := gridscaleVersion
+) settings(settings: _*) dependsOn(gridscale, gridscaleHTTP)
+
+lazy val gridscaleDIRAC = OsgiProject(dir, "gridscale.dirac", imports = Seq("*"), privatePackages = Seq("gridscale.dirac.*", "org.apache.commons.compress.*", "org.brotli.*", "org.tukaani.*")) settings (
+  libraryDependencies += "fr.iscpif.gridscale" %% "dirac" % gridscaleVersion,
+  libraryDependencies += "org.brotli" % "dec" % "0.1.2",
+  libraryDependencies += "org.tukaani" % "xz" % "1.6",
+  version := gridscaleVersion
+) settings(settings: _*) dependsOn(gridscale, gridscaleHTTP)
+
+lazy val gridscaleWebDAV = OsgiProject(dir, "gridscale.webdav", imports = Seq("*")) settings (
+  libraryDependencies += "fr.iscpif.gridscale" %% "webdav" % gridscaleVersion,
+  version := gridscaleVersion
+) settings(settings: _*) dependsOn(gridscale, gridscaleHTTP)
+
+lazy val jzlib = OsgiProject(dir, "com.jcraft.jzlib", imports = Seq("*")) settings (
+  libraryDependencies += "com.jcraft" % "jzlib" % "1.1.3",
+  version := "1.1.3"
 ) settings(settings: _*)

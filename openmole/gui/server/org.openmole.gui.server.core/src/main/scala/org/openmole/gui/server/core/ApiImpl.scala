@@ -18,7 +18,6 @@ import java.io._
 import java.nio.file._
 import java.util.concurrent.atomic.AtomicReference
 
-import fr.iscpif.gridscale.http.HTTPStorage
 import org.openmole.core.authentication.AuthenticationStore
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.market.{ MarketIndex, MarketIndexEntry }

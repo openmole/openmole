@@ -37,7 +37,7 @@ object Runnings {
 
     case (env, edl: EndDownload) ⇒ Runnings.update(envId) {
       RunningEnvironment.networkActivity.modify { na ⇒
-        val size = na.downloadedSize + (if (edl.success) FileDecorator(edl.file).size else 0)
+        val size = na.downloadedSize + (if (edl.success) edl.size else 0)
 
         na.copy(
           downloadingFiles = na.downloadingFiles - 1,
@@ -52,7 +52,7 @@ object Runnings {
 
     case (env, eul: EndUpload) ⇒ Runnings.update(envId) {
       RunningEnvironment.networkActivity.modify { na ⇒
-        val size = na.uploadedSize + (if (eul.success) FileDecorator(eul.file).size else 0)
+        val size = na.uploadedSize + (if (eul.success) eul.size else 0)
 
         na.copy(
           uploadedSize = size,

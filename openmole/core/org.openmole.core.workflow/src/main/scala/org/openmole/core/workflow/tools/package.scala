@@ -25,6 +25,7 @@ import cats._
 
 package tools {
 
+  import org.openmole.core.exception.UserBadDataError
   import org.openmole.core.expansion.{ Expandable, ExpandedString, FromContext, ToFromContext }
   import org.openmole.core.fileservice.FileService
   import org.openmole.core.workspace.NewFile
@@ -56,10 +57,13 @@ package tools {
       implicit def valueToOptionalOfForContext[T](v: T)(implicit toFromContext: ToFromContext[T, T]) = OptionalArgument(Some(FromContext.contextConverter(v)))
       implicit def valueToOptionalArgument[T](v: T) = OptionalArgument(Some(v))
       implicit def noneToOptionalArgument[T](n: None.type) = OptionalArgument[T](n)
+
       def apply[T](t: T): OptionalArgument[T] = OptionalArgument(Some(t))
     }
 
-    case class OptionalArgument[T](option: Option[T] = None)
+    case class OptionalArgument[T](option: Option[T] = None) {
+      def mustBeDefined(name: String) = option.getOrElse(throw new UserBadDataError(s"Parameter $name has not been set."))
+    }
 
     implicit def optionalArgumentToOption[T](optionalArgument: OptionalArgument[T]) = optionalArgument.option
     implicit def fromStringToExpandedStringOptionalArgument(s: String) = OptionalArgument[FromContext[String]](Some(ExpandedString(s)))

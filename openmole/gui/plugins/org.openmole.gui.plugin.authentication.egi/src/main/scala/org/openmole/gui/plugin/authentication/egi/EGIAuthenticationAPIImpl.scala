@@ -19,7 +19,7 @@ package org.openmole.gui.plugin.authentication.egi
 
 import org.openmole.core.preference.ConfigurationLocation
 import org.openmole.gui.ext.data._
-import org.openmole.plugin.environment.egi.{ EGIAuthentication, P12Certificate }
+import org.openmole.plugin.environment.egi._
 import org.openmole.gui.ext.tool.server
 import org.openmole.core.services._
 
@@ -86,9 +86,9 @@ class EGIAuthenticationAPIImpl(s: Services) extends EGIAuthenticationAPI {
       Try {
         EGIAuthenticationTest(
           voName,
-          testPassword(data, EGIAuthentication.testPassword),
-          test(data, voName, EGIAuthentication.testProxy),
-          test(data, voName, EGIAuthentication.testDIRACAccess)
+          testPassword(data, EGIAuthentication.testPassword(_)),
+          test(data, voName, EGIAuthentication.testProxy(_, _)),
+          test(data, voName, EGIAuthentication.testDIRACAccess(_, _))
         )
       } match {
         case Success(a) ⇒ a

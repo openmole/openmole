@@ -25,23 +25,24 @@ import org.openmole.plugin.environment.batch.environment.SerializedJob
 
 import scala.collection.mutable.ListBuffer
 
-case class JobScript(voName: String, memory: Int, threads: Int, debug: Boolean) {
+case class JobScript(voName: String, memory: Int, threads: Int, debug: Boolean, storageLocations: String ⇒ String) {
 
   def apply(
     serializedJob: SerializedJob,
     resultPath:    String,
-    runningPath:   Option[String] = None,
-    finishedPath:  Option[String] = None,
     proxy:         Option[String] = None
   )(implicit preference: Preference) = {
     import serializedJob._
 
-    def cpCommand = Curl(voName, debug, preference(EGIEnvironment.RemoteCopyTimeout))
+    def cpCommand = CurlRemoteStorage.Curl(voName, debug, preference(EGIEnvironment.RemoteCopyTimeout))
 
     assert(runtime.runtime.path != null)
 
+    val storageLocation = storageLocations(serializedJob.storage.id)
+    def resolve(dest: String) = gridscale.RemotePath.child(storageLocation, dest)
+
     val debugInfo =
-      if (debug) s"echo ${serializedJob.storage.url} ; cat /proc/meminfo ; ulimit -a ; " + "env ; echo $X509_USER_PROXY ; cat $X509_USER_PROXY ; "
+      if (debug) s"echo ${storageLocation} ; cat /proc/meminfo ; ulimit -a ; " + "env ; echo $X509_USER_PROXY ; cat $X509_USER_PROXY ; "
       else ""
 
     val init = {
@@ -59,7 +60,7 @@ case class JobScript(voName: String, memory: Int, threads: Int, debug: Boolean) 
       script += "cd $CUR"
       script += "export OPENMOLE_HOME=$CUR"
 
-      runningPath.map(p ⇒ touch(storage.url.resolve(p), cpCommand) + "; ").getOrElse("") + script.mkString(" && ")
+      script.mkString(" && ")
     }
 
     val install = {
@@ -67,11 +68,11 @@ case class JobScript(voName: String, memory: Int, threads: Int, debug: Boolean) 
 
       script +=
         "if [ `uname -m` = x86_64 ]; then " +
-        cpCommand.download(storage.url.resolve(runtime.jvmLinuxX64.path), "$PWD/jvm.tar.gz") + "; else " +
+        cpCommand.download(resolve(runtime.jvmLinuxX64.path), "$PWD/jvm.tar.gz") + "; else " +
         """echo "Unsupported architecture: " `uname -m`; exit 1; fi"""
       script += "tar -xzf jvm.tar.gz >/dev/null"
       script += "rm -f jvm.tar.gz"
-      script += cpCommand.download(storage.url.resolve(runtime.runtime.path), "$PWD/openmole.tar.gz")
+      script += cpCommand.download(resolve(runtime.runtime.path), "$PWD/openmole.tar.gz")
       script += "tar -xzf openmole.tar.gz >/dev/null"
       script += "rm -f openmole.tar.gz"
       script.mkString(" && ")
@@ -82,10 +83,10 @@ case class JobScript(voName: String, memory: Int, threads: Int, debug: Boolean) 
 
       for { (plugin, index) ← runtime.environmentPlugins.zipWithIndex } {
         assert(plugin.path != null)
-        script += cpCommand.download(storage.url.resolve(plugin.path), "$CUR/envplugins/plugin" + index + ".jar")
+        script += cpCommand.download(resolve(plugin.path), "$CUR/envplugins/plugin" + index + ".jar")
       }
 
-      script += cpCommand.download(storage.url.resolve(runtime.storage.path), "$CUR/storage.xml")
+      script += cpCommand.download(resolve(runtime.storage.path), "$CUR/storage.xml")
 
       "mkdir envplugins && " + script.mkString(" && ")
     }
@@ -103,15 +104,9 @@ case class JobScript(voName: String, memory: Int, threads: Int, debug: Boolean) 
 
     val postDebugInfo = if (debug) "cat *.log ; " else ""
 
-    val finish =
-      finishedPath.map { p ⇒ touch(storage.url.resolve(p), cpCommand) + "; " }.getOrElse("") + "cd .. &&  rm -rf $CUR"
+    val finish = "cd .. &&  rm -rf $CUR"
 
     debugInfo + init + " && " + install + " && " + dl + " && " + run + s"; RETURNCODE=${if (debug) "0" else "$?"};" + postDebugInfo + finish + "; exit $RETURNCODE;"
-  }
-
-  protected def touch(dest: URI, cpCommand: CpCommands) = {
-    val name = UUID.randomUUID.toString
-    s"echo $name >$name && ${cpCommand.upload(name, dest)}; rm -f $name"
   }
 
   private def background(s: String) = "( " + s + " & )"

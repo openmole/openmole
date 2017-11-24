@@ -18,13 +18,14 @@
 package org.openmole.plugin.environment.batch.refresh
 
 import java.io.FileNotFoundException
-import java.util.concurrent.{ TimeUnit }
+import java.util.concurrent.TimeUnit
 
-import fr.iscpif.gridscale.authentication._
-import org.openmole.core.event.EventDispatcher
+import gridscale.authentication._
 import org.openmole.core.exception.UserBadDataError
+import org.openmole.core.tools.service.Retry.retry
 import org.openmole.core.workflow.execution._
 import org.openmole.plugin.environment.batch.environment._
+import org.openmole.plugin.environment.batch.jobservice.BatchJobControl
 import org.openmole.tool.logger.Logger
 import org.openmole.tool.thread._
 
@@ -51,6 +52,8 @@ object JobManager extends Logger { self ⇒
         case msg: KillBatchJob       ⇒ KillerActor.receive(msg)
         case msg: DeleteFile         ⇒ DeleteActor.receive(msg)
         case msg: CleanSerializedJob ⇒ CleanerActor.receive(msg)
+        case msg: Error              ⇒ ErrorActor.receive(msg)
+        case msg: StopEnvironment    ⇒ StopEnvironmentActor.receive(msg)
       }
   }
 
@@ -64,6 +67,8 @@ object JobManager extends Logger { self ⇒
     case msg: KillBatchJob       ⇒ dispatch(msg)
     case msg: DeleteFile         ⇒ dispatch(msg)
     case msg: CleanSerializedJob ⇒ dispatch(msg)
+    case msg: Error              ⇒ dispatch(msg)
+    case msg: StopEnvironment    ⇒ dispatch(msg)
 
     case Manage(job) ⇒
       self ! Upload(job)
@@ -71,13 +76,9 @@ object JobManager extends Logger { self ⇒
     case Delay(msg, delay) ⇒
       services.threadProvider.scheduler.schedule((self ! msg): Runnable, delay.millis, TimeUnit.MILLISECONDS)
 
-    case Uploaded(job, sj) ⇒
-      job.serializedJob = Some(sj)
-      self ! Submit(job, sj)
+    case Uploaded(job, sj) ⇒ self ! Submit(job, sj)
 
     case Submitted(job, sj, bj) ⇒
-      import services._
-      job.batchJob = Some(bj)
       self ! Delay(Refresh(job, sj, bj, job.environment.updateInterval.minUpdateInterval), job.environment.updateInterval.minUpdateInterval)
 
     case Kill(job) ⇒
@@ -88,19 +89,6 @@ object JobManager extends Logger { self ⇒
       killAndClean(job)
       job.state = ExecutionState.READY
       dispatch(Upload(job))
-
-    case Error(job, exception) ⇒
-      val level = exception match {
-        case _: AuthenticationException     ⇒ SEVERE
-        case _: UserBadDataError            ⇒ SEVERE
-        case _: FileNotFoundException       ⇒ SEVERE
-        case _: JobRemoteExecutionException ⇒ WARNING
-        case _                              ⇒ FINE
-      }
-      val er = Environment.ExceptionRaised(job, exception, level)
-      job.environment.error(er)
-      services.eventDispatcher.trigger(job.environment: Environment, er)
-      logger.log(FINE, "Error in job refresh", exception)
 
     case MoleJobError(mj, j, e) ⇒
       val er = Environment.MoleJobExceptionRaised(j, e, WARNING, mj)
@@ -116,4 +104,13 @@ object JobManager extends Logger { self ⇒
     job.serializedJob.foreach(j ⇒ self ! CleanSerializedJob(j))
     job.serializedJob = None
   }
+
+  def killBatchJob(bj: BatchJobControl, t: AccessToken)(implicit services: BatchEnvironment.Services) =
+    retry(services.preference(BatchEnvironment.killJobRetry))(bj.delete(t))
+
+  def cleanSerializedJob(sj: SerializedJob, t: AccessToken)(implicit services: BatchEnvironment.Services) = sj.synchronized {
+    retry(services.preference(BatchEnvironment.cleanJobRetry))(sj.storage.rmDir(sj.path)(t))
+    sj.cleaned = true
+  }
+
 }

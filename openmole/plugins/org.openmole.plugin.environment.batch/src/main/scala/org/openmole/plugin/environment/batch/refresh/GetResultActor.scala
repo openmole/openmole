@@ -22,6 +22,7 @@ import java.io.PrintStream
 import org.openmole.core.communication.message._
 import org.openmole.core.communication.storage._
 import org.openmole.core.event.EventDispatcher
+import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.preference.Preference
 import org.openmole.core.serializer.SerializerService
@@ -29,7 +30,6 @@ import org.openmole.core.tools.service.Retry._
 import org.openmole.core.workflow.execution
 import org.openmole.core.workflow.execution._
 import org.openmole.core.workspace.{ NewFile, Workspace }
-import org.openmole.plugin.environment.batch.control._
 import org.openmole.plugin.environment.batch.environment.BatchEnvironment._
 import org.openmole.plugin.environment.batch.environment._
 import org.openmole.plugin.environment.batch.storage._
@@ -44,7 +44,7 @@ object GetResultActor extends Logger {
     import services._
 
     val GetResult(job, sj, resultPath) = msg
-    try sj.storage.tryWithToken {
+    try UsageControl.tryWithToken(sj.storage.usageControl) {
       case Some(token) ⇒
         getResult(sj.storage, resultPath, job)(token, services)
         JobManager ! Kill(job)
@@ -53,12 +53,12 @@ object GetResultActor extends Logger {
     } catch {
       case e: Throwable ⇒
         job.state = ExecutionState.FAILED
-        JobManager ! Error(job, e)
+        JobManager ! Error(job, e, job.batchJob)
         JobManager ! Kill(job)
     }
   }
 
-  def getResult(storage: StorageService, outputFilePath: String, batchJob: BatchExecutionJob)(implicit token: AccessToken, services: BatchEnvironment.Services): Unit = {
+  def getResult(storage: StorageService[_], outputFilePath: String, batchJob: BatchExecutionJob)(implicit token: AccessToken, services: BatchEnvironment.Services): Unit = {
     import batchJob.job
     import services._
 
@@ -88,7 +88,7 @@ object GetResultActor extends Logger {
     }
   }
 
-  private def getRuntimeResult(outputFilePath: String, storage: StorageService)(implicit token: AccessToken, services: BatchEnvironment.Services): RuntimeResult = {
+  private def getRuntimeResult(outputFilePath: String, storage: StorageService[_])(implicit token: AccessToken, services: BatchEnvironment.Services): RuntimeResult = {
     import services._
     retry(preference(BatchEnvironment.downloadResultRetry)) {
       newFile.withTmpFile { resultFile ⇒
@@ -100,14 +100,14 @@ object GetResultActor extends Logger {
     }
   }
 
-  private def display(output: Option[File], description: String, storage: StorageService, stream: PrintStream)(implicit token: AccessToken) = {
+  private def display(output: Option[File], description: String, storage: StorageService[_], stream: PrintStream)(implicit token: AccessToken) = {
     output.foreach { file ⇒
       execution.display(stream, description, file.content)
       file.delete()
     }
   }
 
-  private def getContextResults(serializedResults: SerializedContextResults, storage: StorageService)(implicit token: AccessToken, services: BatchEnvironment.Services): ContextResults = {
+  private def getContextResults(serializedResults: SerializedContextResults, storage: StorageService[_])(implicit token: AccessToken, services: BatchEnvironment.Services): ContextResults = {
     import services._
     serializedResults match {
       case serializedResults: IndividualFilesContextResults ⇒

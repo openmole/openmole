@@ -22,6 +22,6 @@ import org.openmole.core.communication.message._
 case class Runtime(
   storage:            FileMessage,
   runtime:            FileMessage,
-  environmentPlugins: Iterable[FileMessage],
+  environmentPlugins: Set[FileMessage],
   jvmLinuxX64:        FileMessage
 )

@@ -23,12 +23,7 @@ import java.util.UUID
 import org.openmole.core.communication.message._
 import org.openmole.core.communication.storage._
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.fileservice.FileService
-import org.openmole.core.serializer._
-import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.workflow.job._
-import org.openmole.core.workspace.{ NewFile, Workspace }
-import org.openmole.plugin.environment.batch.control._
 import org.openmole.plugin.environment.batch.environment.BatchEnvironment.signalUpload
 import org.openmole.plugin.environment.batch.environment._
 import org.openmole.plugin.environment.batch.storage._
@@ -45,19 +40,20 @@ object UploadActor extends Logger {
 
     val job = msg.job
     if (!job.state.isFinal) {
-      try job.trySelectStorage(jobFiles(job)) match {
+      try job.environment.trySelectStorage(jobFiles(job)) match {
         case Some((storage, token)) ⇒
           try {
             implicit val implicitToken = token
             val sj = initCommunication(job, storage)
+            job.serializedJob = Some(sj)
             JobManager ! Uploaded(job, sj)
           }
-          finally storage.releaseToken(token)
+          finally UsageControl.releaseToken(storage.usageControl, token)
         case None ⇒ JobManager ! Delay(msg, BatchEnvironment.getTokenInterval)
       }
       catch {
         case e: Throwable ⇒
-          JobManager ! Error(job, e)
+          JobManager ! Error(job, e, None)
           JobManager ! msg
       }
     }
@@ -69,7 +65,7 @@ object UploadActor extends Logger {
       job.environment.plugins ++
       Seq(job.environment.jvmLinuxX64, job.environment.runtime)
 
-  private def initCommunication(job: BatchExecutionJob, storage: StorageService)(implicit token: AccessToken, services: BatchEnvironment.Services): SerializedJob = services.newFile.withTmpFile("job", ".tar") { jobFile ⇒
+  private def initCommunication(job: BatchExecutionJob, storage: StorageService[_])(implicit token: AccessToken, services: BatchEnvironment.Services): SerializedJob = services.newFile.withTmpFile("job", ".tar") { jobFile ⇒
     import services._
 
     serializerService.serialise(job.runnableTasks, jobFile)
@@ -102,7 +98,7 @@ object UploadActor extends Logger {
     SerializedJob(storage, communicationPath, inputPath, runtime)
   }
 
-  def toReplicatedFile(file: File, storage: StorageService, transferOptions: TransferOptions)(implicit token: AccessToken, services: BatchEnvironment.Services): ReplicatedFile = {
+  def toReplicatedFile(file: File, storage: StorageService[_], transferOptions: TransferOptions)(implicit token: AccessToken, services: BatchEnvironment.Services): ReplicatedFile = {
     import services._
 
     if (!file.exists) throw new UserBadDataError(s"File $file is required but doesn't exist.")
@@ -132,7 +128,7 @@ object UploadActor extends Logger {
   def replicateTheRuntime(
     job:         Job,
     environment: BatchEnvironment,
-    storage:     StorageService
+    storage:     StorageService[_]
   )(implicit token: AccessToken, services: BatchEnvironment.Services) = {
     val environmentPluginPath = shuffled(environment.plugins)(services.randomProvider()).map { p ⇒ toReplicatedFile(p, storage, TransferOptions(raw = true)) }.map { FileMessage(_) }
     val runtimeFileMessage = FileMessage(toReplicatedFile(environment.runtime, storage, TransferOptions(raw = true)))
@@ -143,7 +139,7 @@ object UploadActor extends Logger {
     Runtime(
       storageReplication,
       runtimeFileMessage,
-      environmentPluginPath,
+      environmentPluginPath.toSet,
       jvmLinuxX64FileMessage
     )
   }
@@ -153,7 +149,7 @@ object UploadActor extends Logger {
     jobFile:             File,
     serializationFile:   Iterable[File],
     serializationPlugin: Iterable[File],
-    storage:             StorageService,
+    storage:             StorageService[_],
     path:                String
   )(implicit token: AccessToken, services: BatchEnvironment.Services): ExecutionMessage = {
 

@@ -4,7 +4,7 @@ import sbt._
 
 object Libraries {
 
-  lazy val gridscaleVersion = "1.100"
+  lazy val gridscaleVersion = "2.0"
   lazy val bouncyCastleVersion = "1.50"
   lazy val aceVersion = "01.08.2014"
   lazy val d3Version = "3.5.12"
@@ -63,7 +63,6 @@ object Libraries {
   lazy val log4j = "org.openmole.library" %% "org-apache-log4j" % "1.2.17"
   lazy val logging = "org.openmole.library" %% "org-apache-commons-logging" % "1.2"
   lazy val lang3 = "org.openmole.library" %% "org-apache-commons-lang3" % "3.4"
-  lazy val httpClient = "org.apache.httpcomponents" % "httpclient-osgi" % "4.5.2"
   lazy val sshd = "org.openmole.library" %% "org-apache-sshd" % "1.2.0"
   lazy val ant = "org.openmole.library" %% "org-apache-ant" % "1.8.0"
   lazy val codec = "org.openmole.library" %% "org-apache-commons-codec" % "1.10"
@@ -89,23 +88,38 @@ object Libraries {
   lazy val sourceCode = "org.openmole.library" %% "sourcecode" % sourcecodeVersion
   lazy val txtmark = "org.openmole.library" %% "com-github-rjeschke-txtmark" % "0.13"
 
+  def httpClientVersion = "4.5.3"
+  lazy val httpClient =
+    Seq(
+      "org.apache.httpcomponents" % "httpclient-osgi" % httpClientVersion,
+      "org.apache.httpcomponents" % "httpmime" % httpClientVersion,
+      "org.apache.httpcomponents" % "httpcore-osgi" % "4.4.7"
+    )
+
   lazy val toolxitBibtex = "org.openmole" %% "toolxit-bibtex" % "0.2"
 
-  lazy val gridscale = "fr.iscpif.gridscale.bundle" %% "gridscale" % gridscaleVersion
-  lazy val gridscaleSSH = "fr.iscpif.gridscale.bundle" %% "ssh" % gridscaleVersion
-  lazy val gridscalePBS = "fr.iscpif.gridscale.bundle" %% "pbs" % gridscaleVersion
-  lazy val gridscaleSGE = "fr.iscpif.gridscale.bundle" %% "sge" % gridscaleVersion
-  lazy val gridscaleCondor = "fr.iscpif.gridscale.bundle" %% "condor" % gridscaleVersion
-  lazy val gridscaleSLURM = "fr.iscpif.gridscale.bundle" %% "slurm" % gridscaleVersion
-  lazy val gridscaleGlite = "fr.iscpif.gridscale.bundle" %% "egi" % gridscaleVersion
-  lazy val gridscaleHTTP = "fr.iscpif.gridscale.bundle" %% "http" % gridscaleVersion
-  lazy val gridscaleOAR = "fr.iscpif.gridscale.bundle" %% "oar" % gridscaleVersion
+  lazy val gridscale = "org.openmole.library" %% "gridscale" % gridscaleVersion
+  lazy val gridscaleSSH = "org.openmole.library" %% "gridscale-ssh" % gridscaleVersion
+  lazy val gridscalePBS = "org.openmole.library" %% "gridscale-pbs" % gridscaleVersion
+  lazy val gridscaleSGE = "org.openmole.library" %% "gridscale-sge" % gridscaleVersion
+  lazy val gridscaleCondor = "org.openmole.library" %% "gridscale-condor" % gridscaleVersion
+  lazy val gridscaleSLURM = "org.openmole.library" %% "gridscale-slurm" % gridscaleVersion
+
+  lazy val gridscaleEGI = Seq(
+    "org.openmole.library" %% "gridscale-egi" % gridscaleVersion,
+    "org.openmole.library" %% "gridscale-webdav" % gridscaleVersion,
+    "org.openmole.library" %% "gridscale-dirac" % gridscaleVersion)
+
+  lazy val gridscaleHTTP = httpClient ++ Seq("org.openmole.library" %% "gridscale-http" % gridscaleVersion)
+  lazy val gridscaleLocal = "org.openmole.library" %% "gridscale-local" % gridscaleVersion
+  lazy val gridscaleOAR = "org.openmole.library" %% "gridscale-oar" % gridscaleVersion
 
   lazy val scalaz = "org.scalaz" %% "scalaz-core" % "7.2.8"
   lazy val guava = "com.google.guava" % "guava" % "19.0"
   lazy val spray = "io.spray" %% "spray-json" % "1.3.2"
   lazy val bouncyCastle = "org.bouncycastle" % "bcpkix-jdk15on" % bouncyCastleVersion
   lazy val equinoxOSGi = "org.eclipse" % "osgi" % "3.10.0-v20140606-1445"
+  lazy val osgiCompendium = "org.osgi" % "org.osgi.compendium" % "4.3.1"
 
   lazy val squants = "org.typelevel" %% "squants" % "1.3.0"
   lazy val shapeless = "com.chuusai" %% "shapeless" % "2.3.2"

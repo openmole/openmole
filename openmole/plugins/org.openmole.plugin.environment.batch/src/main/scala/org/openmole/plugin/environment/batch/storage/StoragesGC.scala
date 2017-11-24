@@ -31,7 +31,7 @@ object StoragesGC extends Logger
 
 import org.openmole.plugin.environment.batch.storage.StoragesGC.Log._
 
-class StoragesGC(storageRef: WeakReference[StorageService]) extends IUpdatable {
+class StoragesGC(storageRef: WeakReference[StorageService[_]]) extends IUpdatable {
 
   override def update: Boolean =
     storageRef.get match {
