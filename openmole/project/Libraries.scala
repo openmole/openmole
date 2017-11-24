@@ -21,7 +21,7 @@ object Libraries {
   lazy val json4sVersion = "3.5.0"
   lazy val circeVersion = "0.9.0-M1"
   lazy val catsVersion = "1.0.0-MF"
-  lazy val scalajsVersion = "0.6.18"
+  lazy val scalajsVersion = "0.6.21"
 
   lazy val scaladgetJS = libraryDependencies += "fr.iscpif" %%% "scaladget" % scaladgetVersion
   lazy val scalajsDomJS = libraryDependencies += "org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion
