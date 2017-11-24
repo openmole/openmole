@@ -7,7 +7,7 @@ def settings = Seq(
   resolvers += DefaultMavenRepository,
   resolvers += Resolver.sonatypeRepo("snapshots"),
   resolvers += Resolver.sonatypeRepo("releases"),
-  scalaVersion in Global := "2.12.3",
+  scalaVersion in Global := "2.12.4",
   scalacOptions ++= Seq("-deprecation"),
   publishArtifact in (packageDoc in publishLocal) := false,
   publishArtifact in (packageSrc in publishLocal) := false,
@@ -156,7 +156,7 @@ lazy val scalaDomVersion = "0.9.3"
 lazy val scalaUpickleVersion = "0.4.4"
 lazy val scalaBoopickleVersion = "1.2.6"
 lazy val scalaAutowireVersion = "0.2.6"
-lazy val scalajsVersion = "0.6.18"
+lazy val scalajsVersion = "0.6.21"
 
 lazy val rx = OsgiProject(dir, "rx", exports = Seq("rx.*")) settings(
   libraryDependencies ++= Seq("com.lihaoyi" %% "scalarx" % scalaRxVersion),
