@@ -46,10 +46,10 @@ object PBSEnvironment {
       workDirectory:        OptionalArgument[String]      = None,
       threads:              OptionalArgument[Int]         = None,
       storageSharedLocally: Boolean                       = false,
-          timeout:              OptionalArgument[Time]        = None,
+      timeout:              OptionalArgument[Time]        = None,
       flavour:              gridscale.pbs.PBSFlavour = Torque,
       name:                 OptionalArgument[String]      = None,
-          localSubmission: Boolean                            = false
+      localSubmission: Boolean                            = false
     )(implicit services: BatchEnvironment.Services, authenticationStore: AuthenticationStore, cypher: Cypher, varName: sourcecode.Name) = {
       import services._
 
@@ -116,8 +116,7 @@ object PBSEnvironment {
     workDirectory:        Option[String],
     threads:              Option[Int],
     storageSharedLocally: Boolean,
-    flavour:              gridscale.pbs.PBSFlavour
-                       )
+    flavour:              gridscale.pbs.PBSFlavour)
 
   def nbCores(parameters: Parameters) = parameters.coreByNode.map(c => math.min(c, parameters.threads.getOrElse(1)))
 }
@@ -185,7 +184,7 @@ class PBSEnvironment[A: gridscale.ssh.SSHAuthentication](
       workDirectory = workDirectory,
       queue = parameters.queue,
       wallTime = parameters.wallTime,
-      memory = parameters.memory,
+      memory = Some(BatchEnvironment.requiredMemory(parameters.openMOLEMemory, parameters.memory)),
       nodes = parameters.nodes,
       coreByNode = PBSEnvironment.nbCores(parameters),
       flavour = parameters.flavour
@@ -279,7 +278,7 @@ class PBSLocalEnvironment(
       workDirectory = workDirectory,
       queue = parameters.queue,
       wallTime = parameters.wallTime,
-      memory = parameters.memory,
+      memory = Some(BatchEnvironment.requiredMemory(parameters.openMOLEMemory, parameters.memory)),
       nodes = parameters.nodes,
       coreByNode = PBSEnvironment.nbCores(parameters),
       flavour = parameters.flavour
