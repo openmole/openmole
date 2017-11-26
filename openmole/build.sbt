@@ -936,6 +936,7 @@ lazy val dockerBin = Project("docker", binDir / "docker") enablePlugins (sbtdock
               ln -s /openmole/openmole /usr/bin/openmole""")
     expose(8443)
     user("openmole")
-    cmdShell("/openmole/openmole", "--port", "8443", "--remote")
+    volume("/var/openmole")
+    cmdShell("openmole", "--port", "8443", "--remote")
   }
 )
