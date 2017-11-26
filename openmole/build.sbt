@@ -675,8 +675,6 @@ def bundleFilter(m: ModuleID, artifact: Artifact) = {
     (m.name == "httpclient-osgi") || (m.name == "httpcore-osgi") ||
     (m.organization == "org.osgi" && m.name != "osgi")
 
-  println(m + " " + (include && !exclude))
-
   include && !exclude
 }
 
