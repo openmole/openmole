@@ -282,7 +282,7 @@ def corePlugins =
     allDomain ++
     allTools
 
-def allTools = Seq(netLogoAPI, netLogo5API, netLogo6API, csv, pattern, sftpserver)
+def allTools = Seq(netLogoAPI, netLogo5API, netLogo6API, csv, pattern)
 
 lazy val defaultActivator = OsgiKeys.bundleActivator := Some(name.value + ".Activator")
 
@@ -327,8 +327,6 @@ lazy val csv = OsgiProject(pluginDir, "org.openmole.plugin.tool.csv", imports = 
 ) settings (toolsSettings: _*)
 
 lazy val pattern = OsgiProject(pluginDir, "org.openmole.plugin.tool.pattern", imports = Seq("*")) dependsOn(exception, openmoleDSL) settings (toolsSettings: _*) settings (defaultActivator)
-
-lazy val sftpserver = OsgiProject(pluginDir, "org.openmole.plugin.tool.sftpserver", imports = Seq("*")) dependsOn (tools) settings (libraryDependencies += Libraries.sshd) settings (toolsSettings: _*)
 
 
 /* Domain */

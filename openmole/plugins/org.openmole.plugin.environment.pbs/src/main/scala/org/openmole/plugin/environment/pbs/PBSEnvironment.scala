@@ -184,7 +184,7 @@ class PBSEnvironment[A: gridscale.ssh.SSHAuthentication](
       wallTime = parameters.wallTime,
       memory = Some(BatchEnvironment.requiredMemory(parameters.openMOLEMemory, parameters.memory)),
       nodes = parameters.nodes,
-      coreByNode = parameters.coreByNode orElse environment.threads,
+      coreByNode = parameters.coreByNode orElse parameters.threads,
       flavour = parameters.flavour
     )
 
@@ -278,7 +278,7 @@ class PBSLocalEnvironment(
       wallTime = parameters.wallTime,
       memory = Some(BatchEnvironment.requiredMemory(parameters.openMOLEMemory, parameters.memory)),
       nodes = parameters.nodes,
-      coreByNode = parameters.coreByNode orElse environment.threads,
+      coreByNode = parameters.coreByNode orElse parameters.threads,
       flavour = parameters.flavour
     )
 
