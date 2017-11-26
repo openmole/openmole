@@ -266,8 +266,8 @@ class MoleExecution(
     val jobs = moleJobs
 
     val runningSet: java.util.HashSet[UUID] = {
-      def executionJobs =
-        environmentProviders.values.toSeq.collect { case e: SubmissionEnvironment ⇒ e }.toIterator.flatMap(_.jobs.toIterator)
+      def submissionEnvironments = environments.values.toSeq.collect { case e: SubmissionEnvironment ⇒ e }
+      def executionJobs = submissionEnvironments.toIterator.flatMap(_.jobs.toIterator)
 
       val set = new java.util.HashSet[UUID](jobs.size + 1, 1.0f)
 

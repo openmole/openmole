@@ -167,7 +167,6 @@ abstract class BatchEnvironment extends SubmissionEnvironment { env ⇒
 
   def exceptions = services.preference(Environment.maxExceptionsLog)
 
-  //def usageControls: List[UsageControl]
   def trySelectStorage(files: ⇒ Vector[File]): Option[(StorageService[_], AccessToken)]
   def trySelectJobService(): Option[(BatchJobService[_], AccessToken)]
 
