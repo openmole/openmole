@@ -157,7 +157,6 @@ object DocumentationPages {
     ssh,
     egi,
     cluster,
-    desktopGrid,
     method,
     calibration,
     geneticalgo,
@@ -245,8 +244,7 @@ object DocumentationPages {
     extraMenu = Some(SideMenu.clusterMenu)
   )
 
-  def environmentPages = Seq(multithread, ssh, egi, cluster, desktopGrid)
-  lazy val desktopGrid = DocumentationPage(name = "DesktopGrid", content = scalatex.documentation.language.environment.DesktopGrid())
+  def environmentPages = Seq(multithread, ssh, egi, cluster)
 
   def methodPages = Seq(calibration, profile, pse, dataProcessing, otherDoE)
 

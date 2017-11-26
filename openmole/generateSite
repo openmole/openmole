@@ -11,7 +11,7 @@ TARGET=$1
 mkdir -p "$TARGET" && \
   sbt "buildSite --target \"$TARGET\"" && \
   sbt "project openmole" clean "set (tarPath := new File(\"$TARGET/openmole.tar.gz\"))" tar && \
-  sbt "project org-openmole-daemon" clean "set (tarPath := new File(\"$TARGET/daemon.tar.gz\"))" tar && \
+  #sbt "project org-openmole-daemon" clean "set (tarPath := new File(\"$TARGET/daemon.tar.gz\"))" tar && \
   rm -rf "$TARGET/api" && \
   #sbt "project api" "set (crossTarget in api) := new File(\"$TARGET\")" unidoc && \
   #mv "$TARGET/unidoc" "$TARGET/api" && \

@@ -374,11 +374,6 @@ lazy val batch = OsgiProject(pluginDir, "org.openmole.plugin.environment.batch",
 lazy val oar = OsgiProject(pluginDir, "org.openmole.plugin.environment.oar", imports = Seq("*")) dependsOn(openmoleDSL, batch, gridscale, ssh) settings
   (libraryDependencies += Libraries.gridscaleOAR) settings (pluginSettings: _*)
 
-//lazy val desktopgrid = OsgiProject(pluginDir, "org.openmole.plugin.environment.desktopgrid", imports = Seq("*")) dependsOn(
-//  openmoleDSL,
-//  batch, sftpserver, gridscale
-//) settings (pluginSettings: _*)
-//
 lazy val egi = OsgiProject(pluginDir, "org.openmole.plugin.environment.egi") dependsOn(openmoleDSL, batch, workspace, fileService, gridscale) settings (
   libraryDependencies ++= Libraries.gridscaleEGI, Libraries.addScalaLang) settings (pluginSettings: _*)
 
@@ -663,11 +658,6 @@ lazy val guiEnvironmentSSHLoginPlugin = OsgiProject(guiPluginDir, "org.openmole.
   libraryDependencies += Libraries.equinoxOSGi
 ) dependsOn(extPluginGUIServer, extClientTool, dataGUI, workspace, ssh) enablePlugins (ScalaJSPlugin)
 
-//lazy val guiEnvironmentDesktopGridPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.authentication.desktopgrid") settings(
-//  guiPluginSettings,
-//  libraryDependencies += Libraries.equinoxOSGi
-//) dependsOn(extPluginGUIServer, extClientTool, dataGUI, workspace, desktopgrid) enablePlugins (ScalaJSPlugin)
-
 val guiPlugins = Seq(guiEnvironmentSSHLoginPlugin, guiEnvironmentSSHKeyPlugin, guiEnvironmentEGIPlugin) //, guiEnvironmentDesktopGridPlugin)
 
 /* -------------------- Bin ------------------------- */
@@ -795,30 +785,6 @@ lazy val openmoleRuntime =
     dependencyName := rename
   ) dependsOn (toDependencies(allCore): _*) settings (defaultSettings: _*)
 
-
-//lazy val daemon = OsgiProject(binDir, "org.openmole.daemon")  enablePlugins(TarPlugin) settings(assemblySettings: _*) dependsOn(workflow, workflow, communication, workspace,
-//  fileService, exception, tools, logging, desktopgrid) settings(
-//  assemblyDependenciesPath := assemblyPath.value / "plugins",
-//  resourcesAssemble ++= (Osgi.bundleDependencies in Compile).value.map(b ⇒ b → (assemblyPath.value / "plugins" / b.getName)),
-//  resourcesAssemble += (resourceDirectory in Compile).value -> assemblyPath.value,
-//  resourcesAssemble += (assemble in launcher).value -> (assemblyPath.value / "launcher"),
-//  libraryDependencies ++= Seq(
-//    Libraries.sshd,
-//    Libraries.gridscale,
-//    Libraries.gridscaleSSH,
-//    Libraries.bouncyCastle,
-//    Libraries.logging,
-//    Libraries.scopt
-//  ),
-//  Libraries.addScalaLang,
-//  defaultActivator,
-//  assemblyDependenciesPath := assemblyPath.value / "plugins",
-//  dependencyFilter := bundleFilter,
-//  dependencyName := rename,
-//  setExecutable ++= Seq("openmole-daemon", "openmole-daemon.bat"),
-//  tarName := "openmole-daemon.tar.gz",
-//  tarInnerFolder := "openmole-daemon"
-//) settings (defaultSettings: _*)
 
 
 lazy val api = Project("api", binDir / "target" / "api") settings (defaultSettings: _*) enablePlugins (ScalaUnidocPlugin) settings(
