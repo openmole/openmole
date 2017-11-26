@@ -353,7 +353,7 @@ lazy val boundsDomain = OsgiProject(pluginDir, "org.openmole.plugin.domain.bound
 
 /* Environment */
 
-def allEnvironment = Seq(batch, gridscale, ssh, oar, egi) //, desktopgrid, egi, gridscale, pbs, sge, condor, slurm, ssh)
+def allEnvironment = Seq(batch, gridscale, ssh, oar, egi, pbs, sge, condor, slurm)
 
 lazy val batch = OsgiProject(pluginDir, "org.openmole.plugin.environment.batch", imports = Seq("*")) dependsOn(
   workflow, workspace, tools, event, replication, exception,
