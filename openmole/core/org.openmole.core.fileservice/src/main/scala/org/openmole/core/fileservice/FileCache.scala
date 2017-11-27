@@ -24,5 +24,5 @@ object FileCache {
 }
 
 class FileCache(val file: File, fileService: FileService) {
-  override protected def finalize = fileService.assynchonousRemove(file)
+  override protected def finalize = fileService.asynchronousRemove(file)
 }
