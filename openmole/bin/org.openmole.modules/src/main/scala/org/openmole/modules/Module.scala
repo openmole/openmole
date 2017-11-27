@@ -19,7 +19,6 @@ package org.openmole.modules
 
 import org.openmole.core.module._
 import org.openmole.plugin.environment.condor.CondorEnvironment
-import org.openmole.plugin.environment.desktopgrid.DesktopGridEnvironment
 import org.openmole.plugin.environment.egi._
 import org.openmole.plugin.environment.oar.OAREnvironment
 import org.openmole.plugin.environment.pbs.PBSEnvironment
@@ -44,14 +43,13 @@ object module {
 
   def allModules =
     Seq[ModuleEntry](
-      ModuleEntry("Condor", "Delegate workload to a Condor cluster", components[CondorEnvironment]),
-      ModuleEntry("DesktopGrid", "Delegate workload to an adhoc desktop grid", components[DesktopGridEnvironment]),
-      ModuleEntry("EGI", "Delegate workload to EGI", components[DIRACEnvironment]),
-      ModuleEntry("OAR", "Delegate workload to an OAR cluster", components[OAREnvironment]),
-      ModuleEntry("PBS", "Delegate workload to a PBS cluster", components[PBSEnvironment]),
-      ModuleEntry("SGE", "Delegate workload to an SGE cluster", components[SGEEnvironment]),
-      ModuleEntry("SLURM", "Delegate workload to a SLURM cluster", components[SLURMEnvironment]),
-      ModuleEntry("SSH", "Delegate workload to a server via SSH", components[SSHEnvironment]),
+      ModuleEntry("Condor", "Delegate workload to a Condor cluster", components(CondorEnvironment)),
+      ModuleEntry("EGI", "Delegate workload to EGI", components(EGIEnvironment)),
+      ModuleEntry("OAR", "Delegate workload to an OAR cluster", components(OAREnvironment)),
+      ModuleEntry("PBS", "Delegate workload to a PBS cluster", components(PBSEnvironment)),
+      ModuleEntry("SGE", "Delegate workload to an SGE cluster", components(SGEEnvironment)),
+      ModuleEntry("SLURM", "Delegate workload to a SLURM cluster", components(SLURMEnvironment)),
+      ModuleEntry("SSH", "Delegate workload to a server via SSH", components(SSHEnvironment)),
       ModuleEntry("CARE", "Execute CARE archive", components[CARETask]),
       ModuleEntry("NetLogo5", "Execute NetLogo 5 simulation models", components[NetLogo5Task]),
       ModuleEntry("SystemExec", "Execute system command", components[SystemExecTask]),
