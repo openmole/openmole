@@ -91,7 +91,7 @@ class FileService(implicit preference: Preference) {
   }
 
   def deleteWhenEmpty(directory: File) =
-    if(directory.isEmpty) directory.recursiveDelete
+    if (directory.isEmpty) directory.recursiveDelete
     else deleteEmpty.synchronized { deleteEmpty += directory }
 
   def asynchronousRemove(file: File): Boolean = fileDeleter.asynchronousRemove(file)
