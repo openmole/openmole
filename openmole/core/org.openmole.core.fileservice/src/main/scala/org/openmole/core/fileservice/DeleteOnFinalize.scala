@@ -23,7 +23,7 @@ class DeleteOnFinalize(path: String, fileDeleter: FileDeleter) {
 
   override protected def finalize = {
     super.finalize
-    fileDeleter.assynchonousRemove(new File(path))
+    fileDeleter.asynchronousRemove(new File(path))
   }
 
 }

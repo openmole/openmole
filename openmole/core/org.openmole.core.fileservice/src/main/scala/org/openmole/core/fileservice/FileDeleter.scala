@@ -31,7 +31,7 @@ private class FileDeleter(fileService: WeakReference[FileService]) { fd ⇒
   def stop = !fileService.get.isDefined
 
   private val cleanFiles = new LinkedBlockingQueue[File]
-  def assynchonousRemove(file: File) = cleanFiles.add(file)
+  def asynchronousRemove(file: File) = cleanFiles.add(file)
 
   private def run: Runnable =
     while (!cleanFiles.isEmpty || !stop) cleanFiles.take.recursiveDelete
