@@ -728,6 +728,8 @@ def openmoleNakedDependencies = allCore ++ Seq(openmoleUI) ++ minimumPlugins
 
 def openmoleDependencies = openmoleNakedDependencies ++ corePlugins ++ guiPlugins
 
+def requieredRuntimeLibraries = Seq(Libraries.osgiCompendium, Libraries.logging)
+
 lazy val openmoleNaked =
   Project("openmole-naked", binDir / "openmole-naked") settings (assemblySettings: _*) settings(
     setExecutable ++= Seq("openmole", "openmole.bat"),
@@ -743,8 +745,7 @@ lazy val openmoleNaked =
     },
     resourcesAssemble += (assemble in launcher).value -> (assemblyPath.value / "launcher"),
     resourcesAssemble ++= (Osgi.bundleDependencies in Compile).value.map(b ⇒ b → (assemblyPath.value / "plugins" / b.getName)),
-    libraryDependencies += Libraries.logging,
-    libraryDependencies += Libraries.osgiCompendium,
+    libraryDependencies ++= requieredRuntimeLibraries,
     dependencyFilter := bundleFilter,
     dependencyName := rename,
     assemblyDependenciesPath := assemblyPath.value / "plugins",
@@ -774,9 +775,8 @@ lazy val openmoleRuntime =
     resourcesAssemble ++= (Osgi.bundleDependencies in Compile).value.map(b ⇒ b → (assemblyPath.value / "plugins" / b.getName)),
     setExecutable ++= Seq("run.sh"),
     tarName := "runtime.tar.gz",
-    libraryDependencies += Libraries.osgiCompendium,
+    libraryDependencies ++= requieredRuntimeLibraries,
     libraryDependencies += Libraries.scopt,
-    libraryDependencies += Libraries.logging,
     dependencyFilter := bundleFilter,
     dependencyName := rename
   ) dependsOn (toDependencies(allCore): _*) settings (defaultSettings: _*)
@@ -875,17 +875,18 @@ lazy val modules =
     imports = Seq("*"),
     settings = defaultSettings ++ assemblySettings
   ) settings(
-  assemblyDependenciesPath := assemblyPath.value / "plugins",
-  setExecutable ++= Seq("modules"),
-  resourcesAssemble += {
-    val bundle = OsgiKeys.bundle.value
-    bundle -> (assemblyPath.value / "plugins" / bundle.getName)
-  },
-  resourcesAssemble ++= (Osgi.bundleDependencies in Compile).value.map(b ⇒ b → (assemblyPath.value / "plugins" / b.getName)),
-  resourcesAssemble += ((resourceDirectory in Compile).value / "modules") -> (assemblyPath.value / "modules"),
-  resourcesAssemble += (assemble in launcher).value -> (assemblyPath.value / "launcher"),
-  dependencyFilter := bundleFilter,
-  dependencyName := rename) dependsOn (toDependencies(openmoleNakedDependencies): _*) dependsOn (toDependencies(openmoleDependencies): _*)
+    assemblyDependenciesPath := assemblyPath.value / "plugins",
+    setExecutable ++= Seq("modules"),
+    resourcesAssemble += {
+      val bundle = OsgiKeys.bundle.value
+      bundle -> (assemblyPath.value / "plugins" / bundle.getName)
+    },
+    resourcesAssemble ++= (Osgi.bundleDependencies in Compile).value.map(b ⇒ b → (assemblyPath.value / "plugins" / b.getName)),
+    resourcesAssemble += ((resourceDirectory in Compile).value / "modules") -> (assemblyPath.value / "modules"),
+    resourcesAssemble += (assemble in launcher).value -> (assemblyPath.value / "launcher"),
+    libraryDependencies ++= requieredRuntimeLibraries,
+    dependencyFilter := bundleFilter,
+    dependencyName := rename) dependsOn (toDependencies(openmoleNakedDependencies): _*) dependsOn (toDependencies(openmoleDependencies): _*)
 
 
 lazy val launcher = OsgiProject(binDir, "org.openmole.launcher", imports = Seq("*"), settings = assemblySettings) settings(
