@@ -6,6 +6,8 @@ import java.util.concurrent._
 import org.openmole.core.preference._
 import org.openmole.tool.collection._
 
+import scala.concurrent.ExecutionContext
+
 object ThreadProvider {
 
   val maxPoolSize = ConfigurationLocation("ThreadProvider", "MaxPoolSize", Some(50))

@@ -42,8 +42,11 @@ import org.openmole.tool.file._
 import io.circe.generic.extras.auto._
 import io.circe.jawn.{ decode, decodeFile }
 import io.circe.syntax._
+import org.openmole.core.threadprovider._
 import org.openmole.plugin.task.container.HostFiles
 
+import scala.concurrent.duration.Duration
+import scala.concurrent.{ Await, Future }
 import scala.language.postfixOps
 
 object UDockerTask {
@@ -69,7 +72,7 @@ object UDockerTask {
     image:           ContainerImage,
     command:         FromContext[String],
     installCommands: Vector[FromContext[String]] = Vector.empty
-  )(implicit name: sourcecode.Name, newFile: NewFile, workspace: Workspace, preference: Preference): UDockerTask = {
+  )(implicit name: sourcecode.Name, newFile: NewFile, workspace: Workspace, preference: Preference, threadProvider: ThreadProvider): UDockerTask = {
     val uDocker =
       UDocker(
         localDockerImage = toLocalImage(image) match {
@@ -98,7 +101,7 @@ object UDockerTask {
 
   def repositoriesDirectory(workspace: Workspace) = workspace.persistentDir /> "udocker" /> "repos"
 
-  def downloadImage(dockerImage: DockerImage, timeout: Time)(implicit newFile: NewFile, workspace: Workspace) = {
+  def downloadImage(dockerImage: DockerImage, timeout: Time)(implicit newFile: NewFile, workspace: Workspace, threadProvider: ThreadProvider) = {
     import Registry._
 
     def layerFile(workspace: Workspace, layer: Layer) = layersDirectory(workspace) / layer.digest
@@ -106,15 +109,17 @@ object UDockerTask {
     val m = manifest(dockerImage, timeout)
     val lDirectory = layersDirectory(workspace)
 
-    val localLayers =
+    def localLayersFutures =
       for {
         manif ← m.toSeq.toVector
         l ← layers(manif.value)
-      } yield {
+      } yield Future {
         val lf = layerFile(workspace, l)
         if (!lf.exists) downloadLayer(dockerImage, l, lDirectory, lf, timeout)
         l → lf
       }
+
+    val localLayers = localLayersFutures.map(f ⇒ Await.result(f, Duration.Inf))
 
     for {
       manif ← m
@@ -223,7 +228,7 @@ object UDockerTask {
     }
   }
 
-  def toLocalImage(containerImage: ContainerImage)(implicit preference: Preference, newFile: NewFile, workspace: Workspace): Either[Err, LocalDockerImage] =
+  def toLocalImage(containerImage: ContainerImage)(implicit preference: Preference, newFile: NewFile, workspace: Workspace, threadProvider: ThreadProvider): Either[Err, LocalDockerImage] =
     containerImage match {
       case i: DockerImage      ⇒ downloadImage(i, preference(RegistryTimeout))
       case i: SavedDockerImage ⇒ loadImage(i)
