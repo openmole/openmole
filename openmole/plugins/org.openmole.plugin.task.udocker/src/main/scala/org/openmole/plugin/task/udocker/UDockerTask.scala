@@ -71,7 +71,7 @@ object UDockerTask {
   def apply(
     image:           ContainerImage,
     command:         FromContext[String],
-    installCommands: Vector[FromContext[String]] = Vector.empty
+    installCommands: Vector[String]      = Vector.empty
   )(implicit name: sourcecode.Name, newFile: NewFile, workspace: Workspace, preference: Preference, threadProvider: ThreadProvider): UDockerTask = {
     val uDocker =
       UDocker(
@@ -247,13 +247,12 @@ object UDockerTask {
 ) extends Task with ValidateTask { self ⇒
   override def config = InputOutputConfig.outputs.modify(_ ++ Seq(stdOut, stdErr, returnValue).flatten)(_config)
   override def validate =
-    container.validateContainer(Vector(uDocker.command) ++ uDocker.installCommands, uDocker.environmentVariables, external, inputs)
+    container.validateContainer(Vector(uDocker.command), uDocker.environmentVariables, external, inputs)
 
   override def process(executionContext: TaskExecutionContext) = FromContext[Context] { parameters ⇒
 
     import parameters._
-
-    val (uDockerFile, installVariables) = installUDocker(executionContext, executionContext.tmpDirectory)
+    val (uDockerExecutable, uDockerInstallDirectory, uDockerTarball) = installUDocker(executionContext, executionContext.tmpDirectory)
     UDockerTask.buildRepoV2(uDocker.localDockerImage)(executionContext.workspace)
 
     External.withWorkDir(executionContext) { taskWorkDirectory ⇒
@@ -263,15 +262,15 @@ object UDockerTask {
         if (uDocker.reuseContainer) executionContext.tmpDirectory /> "containers" /> uDocker.localDockerImage.id
         else taskWorkDirectory /> "containers" /> uDocker.localDockerImage.id
 
-      def udockerVariables(logLevel: Int = 1) =
-        Vector(
-          "UDOCKER_TMPDIR" → executionContext.tmpDirectory.getAbsolutePath,
-          "UDOCKER_LOGLEVEL" → logLevel.toString,
-          "HOME" → taskWorkDirectory.getAbsolutePath,
-          "UDOCKER_CONTAINERS" → containersDirectory.getAbsolutePath,
-          "UDOCKER_REPOS" → UDockerTask.repositoriesDirectory(executionContext.workspace).getAbsolutePath,
-          "UDOCKER_LAYERS" → UDockerTask.layersDirectory(executionContext.workspace).getAbsolutePath
-        ) ++ installVariables
+      def uDockerVariables = uDockerEnvironmentVariables(
+        tmpDirectory = executionContext.tmpDirectory,
+        homeDirectory = taskWorkDirectory,
+        containersDirectory = containersDirectory,
+        repositoryDirectory = UDockerTask.repositoriesDirectory(executionContext.workspace),
+        layersDirectory = UDockerTask.layersDirectory(executionContext.workspace),
+        installDirectory = uDockerInstallDirectory,
+        tarball = uDockerTarball
+      )
 
       def prepareVolumes(
         preparedFilesInfo:     Iterable[FileInfo],
@@ -300,51 +299,42 @@ object UDockerTask {
         rootDirectory
       ) _
 
-      val volumes = prepareVolumes(preparedFilesInfo, containerPathResolver, uDocker.hostFiles)
-
-      def newContainer(imageId: String)() = newFile.withTmpDir { tmpDirectory ⇒
-        val name = containerName(UUID.randomUUID().toString).take(10)
-
-        val cl = commandLine(s"${uDockerFile.getAbsolutePath} create --name=$name $imageId")
-        execute(cl.toArray, tmpDirectory, udockerVariables(), returnOutput = true, returnError = true)
-
-        if (!uDocker.installCommands.isEmpty) {
-          val runInstall = uDocker.installCommands.map(ic ⇒ runCommand(uDocker)(uDockerFile, volumes.toVector, name, ic))
-
-          executeAll(
-            tmpDirectory,
-            udockerVariables(),
-            true,
-            None,
-            None,
-            None,
-            runInstall.toList
-          )(parameters.copy(context = preparedContext))
-        }
-
-        name
-      }
+      val volumes = prepareVolumes(preparedFilesInfo, containerPathResolver, uDocker.hostFiles).toVector
 
       val imageId = s"${uDocker.localDockerImage.image}:${uDocker.localDockerImage.tag}"
 
       val pool =
-        if (uDocker.reuseContainer) executionContext.cache.getOrElseUpdate(containerPoolKey, Pool[ContainerId](newContainer(imageId)))
-        else WithNewInstance[ContainerId](newContainer(imageId))
+        if (uDocker.reuseContainer) executionContext.cache.getOrElseUpdate(containerPoolKey, Pool[ContainerId](() ⇒ newContainer(uDocker, uDockerExecutable, uDockerVariables, volumes, imageId)))
+        else WithNewInstance[ContainerId](() ⇒ newContainer(uDocker, uDockerExecutable, uDockerVariables, volumes, imageId))
 
       pool { runId ⇒
 
         def runContainer = {
           val rootDirectory = containersDirectory / runId / "ROOT"
 
+          val containerEnvironmentVariables =
+            uDocker.environmentVariables.map { case (name, variable) ⇒ name -> variable.from(preparedContext) }
+
+          val preparedParameters = parameters.copy(context = preparedContext)
+
           val executionResult = executeAll(
             taskWorkDirectory,
-            udockerVariables(),
+            uDockerVariables,
             errorOnReturnValue,
             returnValue,
             stdOut,
             stdErr,
-            List(runCommand(uDocker)(uDockerFile, volumes.toVector, runId, uDocker.command))
-          )(parameters.copy(context = preparedContext))
+            List(
+              uDockerRunCommand(
+                uDocker.uDockerUser,
+                containerEnvironmentVariables,
+                volumes,
+                userWorkDirectory(uDocker),
+                uDockerExecutable,
+                runId,
+                uDocker.command)
+            )
+          )(preparedParameters)
 
           val retContext = external.fetchOutputFiles(outputs, preparedContext, outputPathResolver(rootDirectory), rootDirectory)
           external.cleanWorkDirectory(outputs, retContext, taskWorkDirectory)

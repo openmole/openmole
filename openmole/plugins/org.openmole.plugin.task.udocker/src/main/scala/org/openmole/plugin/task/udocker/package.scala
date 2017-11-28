@@ -2,15 +2,16 @@ package org.openmole.plugin.task
 
 import java.util.UUID
 
+import cats.Applicative
 import monocle.Lens
 import monocle.macros.Lenses
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.task.TaskExecutionContext
-import org.openmole.core.workspace.Workspace
+import org.openmole.core.workspace.{ NewFile, Workspace }
 import org.openmole.plugin.task.external.External
+import org.openmole.plugin.task.systemexec._
 import org.openmole.plugin.task.udocker.DockerMetadata.{ ContainerID, ImageManifestV2Schema1 }
 import org.openmole.plugin.task.udocker.Registry.LayerElement
-import org.openmole.plugin.task.udocker.UDockerTask.layersDirectory
 import org.openmole.tool.cache.{ CacheKey, WithInstance }
 import org.openmole.tool.file._
 import org.openmole.tool.stream._
@@ -149,26 +150,31 @@ package object udocker extends UDockerPackage {
     command:              FromContext[String],
     environmentVariables: Vector[(String, FromContext[String])] = Vector.empty,
     hostFiles:            Vector[(String, Option[String])]      = Vector.empty,
-    installCommands:      Vector[FromContext[String]]           = Vector.empty,
+    installCommands:      Vector[String]                        = Vector.empty,
     workDirectory:        Option[String]                        = None,
     reuseContainer:       Boolean                               = true,
     uDockerUser:          Option[String]                        = None
   )
 
-  def runCommand(uDocker: UDocker)(udocker: File, volumes: Vector[MountPoint], runId: String, command: FromContext[String]): FromContext[String] = FromContext { p ⇒
-    import p._
-
-    val workDirectory = userWorkDirectory(uDocker)
+  def uDockerRunCommand[A[_]: Applicative](
+    user:                 Option[String],
+    environmentVariables: Vector[(String, String)],
+    volumes:              Vector[MountPoint],
+    workDirectory:        String,
+    uDocker:              File,
+    runId:                String,
+    command:              A[String]): A[String] = {
 
     def volumesArgument(volumes: Vector[MountPoint]) = volumes.map { case (host, container) ⇒ s"""-v "$host":"$container"""" }.mkString(" ")
 
-    val userArgument = uDocker.uDockerUser match {
+    val userArgument = user match {
       case None    ⇒ ""
       case Some(x) ⇒ s"""--user="$x""""
     }
 
-    val variablesArgument = uDocker.environmentVariables.map { case (name, variable) ⇒ s"""-e $name="${variable.from(context)}"""" }.mkString(" ")
-    command.map(cmd ⇒ s"""${udocker.getAbsolutePath} run --workdir="$workDirectory" $userArgument  $variablesArgument ${volumesArgument(volumes)} $runId $cmd""").from(context)
+    val variablesArgument = environmentVariables.map { case (name, variable) ⇒ s"""-e ${name}="${variable}"""" }.mkString(" ")
+
+    command.map { cmd ⇒ s"""${uDocker.getAbsolutePath} run --workdir="$workDirectory" $userArgument  $variablesArgument ${volumesArgument(volumes)} $runId $cmd""" }
   }
 
   def userWorkDirectory(uDocker: UDocker) = {
@@ -209,12 +215,62 @@ package object udocker extends UDockerPackage {
       retrieveResource(udockerFile, "udocker", executable = true)
     }
 
-    val variables =
-      Vector(
-        "UDOCKER_DIR" → udockerInstallDirectory.getAbsolutePath,
-        "UDOCKER_TARBALL" → udockerTarBall.getAbsolutePath
-      )
-
-    (udockerFile, variables)
+    (udockerFile, udockerInstallDirectory, udockerTarBall)
   }
+
+  def uDockerEnvironmentVariables(
+    tmpDirectory:        File,
+    homeDirectory:       File,
+    containersDirectory: File,
+    repositoryDirectory: File,
+    layersDirectory:     File,
+    installDirectory:    File,
+    tarball:             File,
+    logLevel:            Int  = 1) =
+    Vector(
+      "UDOCKER_TMPDIR" → tmpDirectory.getAbsolutePath,
+      "UDOCKER_LOGLEVEL" → logLevel.toString,
+      "HOME" → homeDirectory.getAbsolutePath,
+      "UDOCKER_CONTAINERS" → containersDirectory.getAbsolutePath,
+      "UDOCKER_REPOS" → repositoryDirectory.getAbsolutePath,
+      "UDOCKER_LAYERS" → layersDirectory.getAbsolutePath,
+      "UDOCKER_DIR" → installDirectory.getAbsolutePath,
+      "UDOCKER_TARBALL" → tarball.getAbsolutePath
+    )
+
+  def newContainer(uDocker: UDocker, uDockerExecutable: File, uDockerVariables: Vector[(String, String)], uDockerVolumes: Vector[(String, String)], imageId: String)(implicit newFile: NewFile) = newFile.withTmpDir { tmpDirectory ⇒
+    val name = containerName(UUID.randomUUID().toString).take(10)
+
+    val cl = commandLine(s"${uDockerExecutable.getAbsolutePath} create --name=$name $imageId")
+    execute(cl.toArray, tmpDirectory, uDockerVariables, returnOutput = true, returnError = true)
+
+    import cats._
+
+    if (!uDocker.installCommands.isEmpty) {
+      val runInstall = uDocker.installCommands.map {
+        ic ⇒
+          uDockerRunCommand(
+            uDocker.uDockerUser,
+            Vector.empty,
+            uDockerVolumes,
+            userWorkDirectory(uDocker),
+            uDockerExecutable,
+            name,
+            ic: Id[String])
+      }
+
+      executeAllNoExpand(
+        tmpDirectory,
+        uDockerVariables,
+        true,
+        None,
+        None,
+        None,
+        runInstall.toList
+      )
+    }
+
+    name
+  }
+
 }

@@ -19,7 +19,7 @@ import org.openmole.core.threadprovider.ThreadProvider
 
 object RTask {
 
-  def installLibraries(libraries: Seq[String]): Vector[FromContext[String]] =
+  def installLibraries(libraries: Seq[String]): Vector[String] =
     if (libraries.isEmpty) Vector()
     else Vector(s"""R -e 'install.packages(c(${libraries.map(lib ⇒ '"' + s"$lib" + '"').mkString(",")}), dependencies = T)'""")
 
@@ -47,6 +47,7 @@ object RScriptTask {
   implicit def isTask: InputOutputBuilder[RScriptTask] = InputOutputBuilder(RScriptTask.config)
   implicit def isExternal: ExternalBuilder[RScriptTask] = ExternalBuilder(RScriptTask.external)
 
+  // FIXME libraries not taken into account
   def apply(
     script:    FromContext[String],
     libraries: Seq[String]              = Seq.empty,

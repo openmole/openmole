@@ -332,4 +332,24 @@ package object systemexec extends external.ExternalPackage with SystemExecPackag
     }
   }
 
+  @annotation.tailrec
+  def executeAllNoExpand(
+    workDirectory:        File,
+    environmentVariables: Vector[(String, String)],
+    errorOnReturnValue:   Boolean,
+    returnValue:          Option[Val[Int]],
+    stdOut:               Option[Val[String]],
+    stdErr:               Option[Val[String]],
+    cmds:                 List[String],
+    acc:                  ExecutionResult          = ExecutionResult.empty
+  ): ExecutionResult =
+    cmds match {
+      case Nil ⇒ acc
+      case cmd :: t ⇒
+        val cl = parse(cmd)
+        val result = execute(cl.toArray, workDirectory, environmentVariables, returnOutput = stdOut.isDefined, returnError = stdErr.isDefined, errorOnReturnValue = false)
+        if (errorOnReturnValue && !returnValue.isDefined && result.returnCode != 0) throw error(cl.toVector, result)
+        else executeAllNoExpand(workDirectory, environmentVariables, errorOnReturnValue, returnValue, stdOut, stdErr, t, ExecutionResult.append(acc, result))
+    }
+
 }
