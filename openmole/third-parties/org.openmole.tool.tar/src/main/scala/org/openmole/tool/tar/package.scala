@@ -93,9 +93,9 @@ package object tar {
         _.archive(file, time)
       }
 
-    def extract(dest: File) =
+    def extract(dest: File, overwrite: Boolean = false) =
       withClosable(new TarInputStream(file.bufferedInputStream)) {
-        _.extract(dest)
+        _.extract(dest, overwrite)
       }
 
     def extractUncompress(dest: File, overwrite: Boolean = false) =

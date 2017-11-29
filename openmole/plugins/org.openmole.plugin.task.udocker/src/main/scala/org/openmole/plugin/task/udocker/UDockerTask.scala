@@ -44,6 +44,7 @@ import io.circe.jawn.{ decode, decodeFile }
 import io.circe.syntax._
 import org.openmole.core.threadprovider._
 import org.openmole.plugin.task.container.HostFiles
+import org.openmole.tool.lock.LockKey
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{ Await, Future }
@@ -103,6 +104,8 @@ object UDockerTask {
 
   def repositoriesDirectory(workspace: Workspace) = workspace.persistentDir /> "udocker" /> "repos"
 
+  lazy val containerPoolKey = CacheKey[WithInstance[ContainerID]]()
+  lazy val installLockKey = LockKey()
 }
 
 @Lenses case class UDockerTask(
@@ -121,7 +124,10 @@ object UDockerTask {
   override def process(executionContext: TaskExecutionContext) = FromContext[Context] { parameters ⇒
 
     import parameters._
-    val (uDockerExecutable, uDockerInstallDirectory, uDockerTarball) = UDocker.install(executionContext, executionContext.tmpDirectory)
+    val (uDockerExecutable, uDockerInstallDirectory, uDockerTarball) =
+      executionContext.lockRepository.withLock(UDockerTask.installLockKey) {
+        UDocker.install(executionContext.tmpDirectory)
+      }
     UDocker.buildRepoV2(uDocker.localDockerImage)(executionContext.workspace)
 
     External.withWorkDir(executionContext) { taskWorkDirectory ⇒
@@ -173,7 +179,7 @@ object UDockerTask {
       val imageId = s"${uDocker.localDockerImage.image}:${uDocker.localDockerImage.tag}"
 
       val pool =
-        if (uDocker.reuseContainer) executionContext.cache.getOrElseUpdate(containerPoolKey, Pool[ContainerId](() ⇒ UDocker.newContainer(uDocker, uDockerExecutable, uDockerVariables, volumes, imageId)))
+        if (uDocker.reuseContainer) executionContext.cache.getOrElseUpdate(UDockerTask.containerPoolKey, Pool[ContainerId](() ⇒ UDocker.newContainer(uDocker, uDockerExecutable, uDockerVariables, volumes, imageId)))
         else WithNewInstance[ContainerId](() ⇒ UDocker.newContainer(uDocker, uDockerExecutable, uDockerVariables, volumes, imageId))
 
       pool { runId ⇒
