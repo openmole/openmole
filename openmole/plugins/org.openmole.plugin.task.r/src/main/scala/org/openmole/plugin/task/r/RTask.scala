@@ -67,7 +67,7 @@ object RScriptTask {
 
 @Lenses case class RScriptTask(
   script:           FromContext[String],
-  localDockerImage: LocalDockerImage,
+  localDockerImage: UDocker.LocalDockerImage,
   config:           InputOutputConfig,
   external:         External
 ) extends Task with ValidateTask {
