@@ -51,7 +51,8 @@ object OsgiProject {
               (if (!omScope.isEmpty) Some("OpenMOLE-Scope" → omScope.mkString(",")) else None) ++
               (if (global) Some("Eclipse-BuddyPolicy" → "global") else None)
         }).value,
-      OsgiKeys.requireCapability := """osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))""""",
+      OsgiKeys.requireCapability := """osgi.ee; osgi.ee="JavaSE";version:List="1.8,1.9""""",
+      //OsgiKeys.bundleRequiredExecutionEnvironment := Seq("JavaSE-1.8", "JavaSE-1.9"),
       OsgiKeys.privatePackage := privatePackages,
       OsgiKeys.dynamicImportPackage := dynamicImports,
       OsgiKeys.importPackage := imports,

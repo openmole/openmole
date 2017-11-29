@@ -75,6 +75,8 @@ public class Launcher {
         osgiConfig.put(Constants.FRAMEWORK_STORAGE, "");
         osgiConfig.put(Constants.FRAMEWORK_STORAGE_CLEAN, "true");
         osgiConfig.put(Constants.FRAMEWORK_BOOTDELEGATION, "*");
+        osgiConfig.put(Constants.FRAMEWORK_SYSTEMCAPABILITIES, "osgi.ee; osgi.ee=\"JavaSE\";version:List=\"1.0,1.1,1.2,1.3,1.4,1.5,1.6,1.7,1.8,1.9,1.10,1.11,1.12\"");
+        osgiConfig.put(Constants.FRAMEWORK_EXECUTIONENVIRONMENT, "J2SE-1.12,JavaSE-1.12,J2SE-1.11,JavaSE-1.11,J2SE-1.10,JavaSE-1.10,J2SE-1.9,JavaSE-1.9,J2SE-1.8,JavaSE-1.8,J2SE-1.7,JavaSE-1.7,J2SE-1.6,JavaSE-1.6,J2SE-1.5,JavaSE-1.5,J2SE-1.4,JavaSE-1.4,J2SE-1.3,JavaSE-1.3,J2SE-1.2,,JavaSE-1.2,CDC-1.1/Foundation-1.1,CDC-1.0/Foundation-1.0,J2ME,OSGi/Minimum-1.1,OSGi/Minimum-1.0");
         if(osgiDirectory !=  null) osgiConfig.put(Constants.FRAMEWORK_STORAGE, osgiDirectory);
 
         Framework framework = frameworkFactory.newFramework(osgiConfig);

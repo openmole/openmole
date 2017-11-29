@@ -22,6 +22,7 @@ object Libraries {
   lazy val circeVersion = "0.9.0-M1"
   lazy val catsVersion = "1.0.0-MF"
   lazy val scalajsVersion = "0.6.21"
+  lazy val squantsVersion = "1.3.0"
 
   lazy val scaladgetJS = libraryDependencies += "fr.iscpif" %%% "scaladget" % scaladgetVersion
   lazy val scalajsDomJS = libraryDependencies += "org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion
@@ -45,7 +46,7 @@ object Libraries {
 
   lazy val scalatra = "org.openmole.library" %% "org-scalatra" % "2.5.0"
   lazy val logback = "org.openmole.library" %% "ch-qos-logback" % "1.0.9"
-  lazy val h2 = "org.openmole.library" %% "org-h2" % "1.4.195"
+  lazy val h2 = "org.openmole.library" %% "org-h2" % "1.4.196"
   lazy val bonecp = "org.openmole.library" %% "com-jolbox-bonecp" % "0.8.0-rc1"
   lazy val slick = "org.openmole.library" %% "com-typesafe-slick" % "3.2.0"
   lazy val slf4j = "org.openmole.library" %% "org-slf4j" % "1.7.10"
@@ -68,9 +69,10 @@ object Libraries {
   lazy val async = "org.openmole.library" %% "scala-async" % "0.9.6"
   lazy val jgit = "org.openmole.library" %% "org-eclipse-jgit" % "3.7.1"
   lazy val cats = "org.openmole.library" %% "cats" % catsVersion
+  lazy val squants = "org.openmole.library" %% "squants" % squantsVersion
   lazy val clapper = "org.openmole.library" %% "org-clapper" % "1.1.2"
   lazy val asm = "org.openmole.library" %% "org-objectweb-asm" % "5.1"
-  lazy val configuration = "org.openmole.library" %% "org-apache-commons-configuration2" % "2.1"
+  lazy val configuration = "org.openmole.library" %% "org-apache-commons-configuration2" % "2.2"
   lazy val json4s = "org.openmole.library" %% "org-json4s" % json4sVersion
   lazy val circe = "org.openmole.library" %% "io-circe" % circeVersion
   lazy val scalajsTools = "org.openmole.library" %% "scalajs-tools" % scalajsVersion
@@ -117,10 +119,9 @@ object Libraries {
   lazy val guava = "com.google.guava" % "guava" % "19.0"
   lazy val spray = "io.spray" %% "spray-json" % "1.3.2"
   lazy val bouncyCastle = "org.bouncycastle" % "bcpkix-jdk15on" % bouncyCastleVersion
-  lazy val equinoxOSGi = "org.eclipse" % "osgi" % "3.10.0-v20140606-1445"
+  lazy val equinoxOSGi = "org.eclipse.tycho" % "org.eclipse.osgi" % "3.12.1.v20170821-1548"
   lazy val osgiCompendium = "org.osgi" % "org.osgi.compendium" % "4.3.1"
 
-  lazy val squants = "org.typelevel" %% "squants" % "1.3.0"
   lazy val shapeless = "com.chuusai" %% "shapeless" % "2.3.2"
 
 }

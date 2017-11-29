@@ -664,8 +664,13 @@ def binDir = file("bin")
 
 
 def bundleFilter(m: ModuleID, artifact: Artifact) = {
+  def excludedLibraryDependencies = Set("slick", "squants")
+
   def exclude =
-    (m.organization != "org.openmole.library" && m.name.contains("slick")) || (m.name contains "scala-xml") || (m.name contains "protobuf")
+    (m.organization != "org.openmole.library" && excludedLibraryDependencies.exists(m.name.contains)) ||
+      (m.name contains "scala-xml") ||
+      (m.name contains "protobuf")
+
 
   def include = (artifact.`type` == "bundle" && m.name != "osgi") ||
     (m.name == "sshj") ||

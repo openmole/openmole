@@ -57,7 +57,7 @@ lazy val circe = OsgiProject(dir, "io.circe",
 lazy val logback = OsgiProject(dir, "ch.qos.logback", exports = Seq("ch.qos.logback.*", "org.slf4j.impl"), dynamicImports = Seq("*")) settings
   (libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.0.9", version := "1.0.9") settings(settings: _*)
 
-lazy val h2Version = "1.4.195"
+lazy val h2Version = "1.4.196"
 lazy val h2 = OsgiProject(dir, "org.h2", dynamicImports = Seq("*"), privatePackages = Seq("META-INF.*")) settings
   (libraryDependencies += "com.h2database" % "h2" % h2Version, version := h2Version) settings(settings: _*)
 
@@ -89,7 +89,7 @@ lazy val xstream = OsgiProject(
     "!sun.misc.*",
     "!org.joda.time.*",
     "*"),
-  privatePackages = Seq("!scala.*", "META-INF.*", "*")) settings(
+  privatePackages = Seq("!scala.*", "META-INF.services.*", "*")) settings(
   libraryDependencies ++= Seq("com.thoughtworks.xstream" % "xstream" % "1.4.9", "net.sf.kxml" % "kxml2" % "2.3.0"),
   version := "1.4.9") settings(settings: _*)
 
@@ -208,6 +208,14 @@ lazy val cats =
   ) settings(settings: _*)
 
 lazy val freedslVersion = "0.21"
+lazy val squantsVersion = "1.3.0"
+
+lazy val squants = 
+  OsgiProject(dir, "squants") settings (
+    libraryDependencies += "org.typelevel" %% "squants" % squantsVersion,
+    version := squantsVersion
+  ) settings(settings: _*)
+
 
 lazy val freedsl =
   OsgiProject(dir, "freedsl", exports = Seq("freedsl.*", "freestyle.*", "mainecoon.*")) settings (
@@ -220,7 +228,7 @@ lazy val freedsl =
     libraryDependencies += "fr.iscpif.freedsl" %% "tool" % freedslVersion,
     libraryDependencies += "fr.iscpif.freedsl" %% "dsl" % freedslVersion,
     version := freedslVersion
-  ) dependsOn(cats) settings(settings: _*)
+  ) dependsOn(cats, squants) settings(settings: _*)
 
 lazy val mgoVersion = "3.3"
 
@@ -322,9 +330,9 @@ lazy val asm = OsgiProject(dir, "org.objectweb.asm") settings (
 lazy val config = OsgiProject(dir, "org.apache.commons.configuration2",
   privatePackages = Seq("!scala.*", "!org.apache.commons.logging.*","*"),
   imports = Seq("org.apache.commons.logging.*")) settings (
-  libraryDependencies += "org.apache.commons" % "commons-configuration2" % "2.1",
+  libraryDependencies += "org.apache.commons" % "commons-configuration2" % "2.2",
   libraryDependencies += "commons-beanutils" % "commons-beanutils" % "1.9.2",
-  version := "2.1") settings(settings: _*) dependsOn (logging)
+  version := "2.2") settings(settings: _*) dependsOn (logging)
 
 lazy val sourceCode = OsgiProject(dir, "sourcecode") settings (
   libraryDependencies += "com.lihaoyi" %% "sourcecode" % "0.1.3",
