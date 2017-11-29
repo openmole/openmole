@@ -86,7 +86,7 @@ object RScriptTask {
       scriptFile.content = script.from(context)
 
       val uDocker =
-        UDocker(
+        UDockerArguments(
           localDockerImage,
           s"R --slave -f ${scriptFile.getName}"
         )

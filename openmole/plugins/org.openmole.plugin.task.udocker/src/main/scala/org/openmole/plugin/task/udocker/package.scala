@@ -145,7 +145,7 @@ package object udocker extends UDockerPackage {
     lazy val id = UUID.randomUUID().toString
   }
 
-  @Lenses case class UDocker(
+  @Lenses case class UDockerArguments(
     localDockerImage:     LocalDockerImage,
     command:              FromContext[String],
     environmentVariables: Vector[(String, FromContext[String])] = Vector.empty,
@@ -177,7 +177,7 @@ package object udocker extends UDockerPackage {
     command.map { cmd ⇒ s"""${uDocker.getAbsolutePath} run --workdir="$workDirectory" $userArgument  $variablesArgument ${volumesArgument(volumes)} $runId $cmd""" }
   }
 
-  def userWorkDirectory(uDocker: UDocker) = {
+  def userWorkDirectory(uDocker: UDockerArguments) = {
     import io.circe.generic.extras.auto._
     import io.circe.jawn.{ decode, decodeFile }
     import io.circe.syntax._
@@ -196,81 +196,5 @@ package object udocker extends UDockerPackage {
 
   lazy val installLockKey = LockKey()
   lazy val containerPoolKey = CacheKey[WithInstance[ContainerID]]()
-
-  def installUDocker(executionContext: TaskExecutionContext, installDirectory: File) = {
-    val udockerInstallDirectory = installDirectory /> "udocker"
-    val udockerTarBall = udockerInstallDirectory / "udockertarball.tar.gz"
-    val udockerFile = udockerInstallDirectory / "udocker"
-
-    def retrieveResource(candidateFile: File, resourceName: String, executable: Boolean = false) =
-      if (!candidateFile.exists()) {
-        withClosable(this.getClass.getClassLoader.getResourceAsStream(resourceName))(_.copy(candidateFile))
-        if (executable) candidateFile.setExecutable(true)
-        candidateFile
-      }
-
-    // lock in any case since file.exists() might return for an incomplete file
-    executionContext.lockRepository.withLock(installLockKey) {
-      retrieveResource(udockerTarBall, "udocker.tar.gz")
-      retrieveResource(udockerFile, "udocker", executable = true)
-    }
-
-    (udockerFile, udockerInstallDirectory, udockerTarBall)
-  }
-
-  def uDockerEnvironmentVariables(
-    tmpDirectory:        File,
-    homeDirectory:       File,
-    containersDirectory: File,
-    repositoryDirectory: File,
-    layersDirectory:     File,
-    installDirectory:    File,
-    tarball:             File,
-    logLevel:            Int  = 1) =
-    Vector(
-      "UDOCKER_TMPDIR" → tmpDirectory.getAbsolutePath,
-      "UDOCKER_LOGLEVEL" → logLevel.toString,
-      "HOME" → homeDirectory.getAbsolutePath,
-      "UDOCKER_CONTAINERS" → containersDirectory.getAbsolutePath,
-      "UDOCKER_REPOS" → repositoryDirectory.getAbsolutePath,
-      "UDOCKER_LAYERS" → layersDirectory.getAbsolutePath,
-      "UDOCKER_DIR" → installDirectory.getAbsolutePath,
-      "UDOCKER_TARBALL" → tarball.getAbsolutePath
-    )
-
-  def newContainer(uDocker: UDocker, uDockerExecutable: File, uDockerVariables: Vector[(String, String)], uDockerVolumes: Vector[(String, String)], imageId: String)(implicit newFile: NewFile) = newFile.withTmpDir { tmpDirectory ⇒
-    val name = containerName(UUID.randomUUID().toString).take(10)
-
-    val cl = commandLine(s"${uDockerExecutable.getAbsolutePath} create --name=$name $imageId")
-    execute(cl.toArray, tmpDirectory, uDockerVariables, returnOutput = true, returnError = true)
-
-    import cats._
-
-    if (!uDocker.installCommands.isEmpty) {
-      val runInstall = uDocker.installCommands.map {
-        ic ⇒
-          uDockerRunCommand(
-            uDocker.uDockerUser,
-            Vector.empty,
-            uDockerVolumes,
-            userWorkDirectory(uDocker),
-            uDockerExecutable,
-            name,
-            ic: Id[String])
-      }
-
-      executeAllNoExpand(
-        tmpDirectory,
-        uDockerVariables,
-        true,
-        None,
-        None,
-        None,
-        runInstall.toList
-      )
-    }
-
-    name
-  }
 
 }
