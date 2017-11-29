@@ -55,7 +55,7 @@ object RScriptTask {
   )(implicit name: sourcecode.Name, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider): RScriptTask =
     RScriptTask(
       script,
-      UDockerTask.toLocalImage(RTask.rImage(version)) match {
+      UDocker.toLocalImage(RTask.rImage(version)) match {
         case Right(x) ⇒ x
         case Left(x)  ⇒ throw new UserBadDataError(x.msg)
       },
