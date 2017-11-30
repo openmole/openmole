@@ -264,9 +264,6 @@ object UDocker {
     executeAll(
       tmpDirectory,
       uDockerVariables,
-      errorOnReturnValue = true,
-      captureOutput = false,
-      captureError = false,
       commands = runInstall.toList
     )
   }

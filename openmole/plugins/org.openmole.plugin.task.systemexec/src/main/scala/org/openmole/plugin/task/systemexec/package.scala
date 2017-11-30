@@ -240,20 +240,21 @@ package object systemexec extends external.ExternalPackage with SystemExecPackag
     environmentVariables: Vector[(String, String)],
     returnOutput:         Boolean,
     returnError:          Boolean,
-    errorOnReturnValue:   Boolean                  = true
+    errorOnReturnValue:   Boolean                  = true,
+    stdOut:               PrintStream              = System.out,
+    stdErr:               PrintStream              = System.err
   ) = {
     try {
-
       val outBuilder = new StringOutputStream
       val errBuilder = new StringOutputStream
 
-      val out = if (returnOutput) new PrintStream(outBuilder) else System.out
-      val err = if (returnError) new PrintStream(errBuilder) else System.err
+      val out = if (returnOutput) new PrintStream(outBuilder) else stdOut
+      val err = if (returnError) new PrintStream(errBuilder) else stdErr
 
       val runtime = Runtime.getRuntime
 
-      import collection.JavaConversions._
-      val inheritedEnvironment = System.getenv.map { case (key, value) ⇒ s"$key=$value" }.toArray
+      import collection.JavaConverters._
+      val inheritedEnvironment = System.getenv.asScala.map { case (key, value) ⇒ s"$key=$value" }.toArray
 
       val openmoleEnvironment = environmentVariables.map { case (name, value) ⇒ name + "=" + value }.toArray
 
@@ -310,7 +311,9 @@ package object systemexec extends external.ExternalPackage with SystemExecPackag
     errorOnReturnValue:   Boolean                  = true,
     captureOutput:        Boolean                  = false,
     captureError:         Boolean                  = false,
-    acc:                  ExecutionResult          = ExecutionResult.empty
+    acc:                  ExecutionResult          = ExecutionResult.empty,
+    stdOut:               PrintStream              = System.out,
+    stdErr:               PrintStream              = System.err
   ): ExecutionResult =
     commands match {
       case Nil ⇒ acc
