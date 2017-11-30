@@ -149,7 +149,7 @@ class Runtime {
       environment.start()
 
       try {
-        val taskExecutionContext = TaskExecutionContext(newFile.newDir("runtime"), environment, preference, threadProvider, fileService, workspace, KeyValueCache(), LockRepository[LockKey]())
+        val taskExecutionContext = TaskExecutionContext(newFile.makeNewDir("runtime"), environment, preference, threadProvider, fileService, workspace, KeyValueCache(), LockRepository[LockKey]())
         for (toProcess ← allMoleJobs) environment.submit(toProcess, taskExecutionContext)
         saver.waitAllFinished
       }
