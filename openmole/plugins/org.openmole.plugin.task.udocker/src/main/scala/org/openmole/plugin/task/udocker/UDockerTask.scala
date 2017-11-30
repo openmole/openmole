@@ -237,26 +237,24 @@ object UDockerTask {
           val containerEnvironmentVariables =
             uDocker.environmentVariables.map { case (name, variable) ⇒ name -> variable.from(preparedContext) }
 
-          val preparedParameters = parameters.copy(context = preparedContext)
+          val expandedCommand =
+            UDocker.uDockerRunCommand(
+              uDocker.uDockerUser,
+              containerEnvironmentVariables,
+              volumes,
+              userWorkDirectory(uDocker),
+              uDockerExecutable,
+              runId,
+              uDocker.command.from(preparedContext))
 
           val executionResult = executeAll(
             taskWorkDirectory,
             uDockerVariables,
-            errorOnReturnValue,
-            returnValue,
-            stdOut,
-            stdErr,
-            List(
-              UDocker.uDockerRunCommand(
-                uDocker.uDockerUser,
-                containerEnvironmentVariables,
-                volumes,
-                userWorkDirectory(uDocker),
-                uDockerExecutable,
-                runId,
-                uDocker.command)
-            )
-          )(preparedParameters)
+            List(expandedCommand),
+            errorOnReturnValue && !returnValue.isDefined,
+            stdOut.isDefined,
+            stdErr.isDefined
+          )
 
           val retContext = external.fetchOutputFiles(outputs, preparedContext, outputPathResolver(rootDirectory), rootDirectory)
           external.cleanWorkDirectory(outputs, retContext, taskWorkDirectory)

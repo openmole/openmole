@@ -178,14 +178,6 @@ package object systemexec extends external.ExternalPackage with SystemExecPackag
 
   def commandLine(cmd: String) = parse(cmd).toArray
 
-  def commandLine(
-    cmd:     FromContext[String],
-    workDir: String
-  ) = FromContext { p ⇒
-    import p._
-    parse(cmd.from(context + Variable(External.PWD, workDir))).toArray
-  }
-
   def parse(line: String) = {
     var inDoubleQuote = false
     var inSingleQuote = false
@@ -314,43 +306,19 @@ package object systemexec extends external.ExternalPackage with SystemExecPackag
   def executeAll(
     workDirectory:        File,
     environmentVariables: Vector[(String, String)],
-    errorOnReturnValue:   Boolean,
-    returnValue:          Option[Val[Int]],
-    stdOut:               Option[Val[String]],
-    stdErr:               Option[Val[String]],
-    cmds:                 List[FromContext[String]],
-    acc:                  ExecutionResult           = ExecutionResult.empty
-  )(p: FromContext.Parameters): ExecutionResult = {
-    import p._
-    cmds match {
-      case Nil ⇒ acc
-      case cmd :: t ⇒
-        val cl = commandLine(cmd, workDirectory.getAbsolutePath).from(context)
-        val result = execute(cl, workDirectory, environmentVariables, returnOutput = stdOut.isDefined, returnError = stdErr.isDefined, errorOnReturnValue = false)
-        if (errorOnReturnValue && !returnValue.isDefined && result.returnCode != 0) throw error(cl.toVector, result)
-        else executeAll(workDirectory, environmentVariables, errorOnReturnValue, returnValue, stdOut, stdErr, t, ExecutionResult.append(acc, result))(p)
-    }
-  }
-
-  @annotation.tailrec
-  def executeAllNoExpand(
-    workDirectory:        File,
-    environmentVariables: Vector[(String, String)],
-    errorOnReturnValue:   Boolean,
-    returnValue:          Option[Val[Int]],
-    stdOut:               Option[Val[String]],
-    stdErr:               Option[Val[String]],
-    cmds:                 List[String],
+    commands:             List[String],
+    errorOnReturnValue:   Boolean                  = true,
     captureOutput:        Boolean                  = false,
+    captureError:         Boolean                  = false,
     acc:                  ExecutionResult          = ExecutionResult.empty
   ): ExecutionResult =
-    cmds match {
+    commands match {
       case Nil ⇒ acc
       case cmd :: t ⇒
         val cl = parse(cmd)
-        val result = execute(cl.toArray, workDirectory, environmentVariables, returnOutput = (stdOut.isDefined | captureOutput), returnError = (stdErr.isDefined | captureOutput), errorOnReturnValue = false)
-        if (errorOnReturnValue && !returnValue.isDefined && result.returnCode != 0) throw error(cl.toVector, result)
-        else executeAllNoExpand(workDirectory, environmentVariables, errorOnReturnValue, returnValue, stdOut, stdErr, t, captureOutput, ExecutionResult.append(acc, result))
+        val result = execute(cl.toArray, workDirectory, environmentVariables, returnOutput = captureOutput, returnError = captureError, errorOnReturnValue = false)
+        if (errorOnReturnValue && result.returnCode != 0) throw error(cl.toVector, result)
+        else executeAll(workDirectory, environmentVariables, t, errorOnReturnValue, captureOutput, captureError, ExecutionResult.append(acc, result))
     }
 
 }

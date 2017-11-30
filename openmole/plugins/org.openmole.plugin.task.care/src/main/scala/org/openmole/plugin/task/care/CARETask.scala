@@ -177,7 +177,7 @@ object CARETask extends Logger {
 
       reExecute.setExecutable(true)
 
-      val cl = commandLine(command.map(s"./${reExecute.getName} " + _), userWorkDirectory).from(preparedContext)
+      val cl = commandLine(command.map(s"./${reExecute.getName} " + _).from(preparedContext))
 
       def prootNoSeccomp = if (preference(CARETask.disableSeccomp)) Vector(("PROOT_NO_SECCOMP", "1")) else Vector()
 

@@ -19,7 +19,7 @@ import io.circe.generic.extras.auto._
 import io.circe.jawn.{ decode, decodeFile }
 import io.circe.syntax._
 import monocle.macros.Lenses
-import org.openmole.plugin.task.systemexec.{ commandLine, execute, executeAllNoExpand }
+import org.openmole.plugin.task.systemexec.{ commandLine, execute, executeAll }
 import org.openmole.tool.file._
 import org.openmole.tool.stream._
 import org.openmole.tool.stream.withClosable
@@ -261,15 +261,13 @@ object UDocker {
           ic: Id[String])
     }
 
-    executeAllNoExpand(
+    executeAll(
       tmpDirectory,
       uDockerVariables,
-      true,
-      None,
-      None,
-      None,
-      runInstall.toList,
-      captureOutput = true
+      errorOnReturnValue = true,
+      captureOutput = false,
+      captureError = false,
+      commands = runInstall.toList
     )
   }
 
@@ -297,14 +295,14 @@ object UDocker {
 
   def imageId(uDocker: UDockerArguments) = s"${uDocker.localDockerImage.image}:${uDocker.localDockerImage.tag}"
 
-  def uDockerRunCommand[A[_]: Applicative](
+  def uDockerRunCommand(
     user:                 Option[String],
     environmentVariables: Vector[(String, String)],
     volumes:              Vector[MountPoint],
     workDirectory:        String,
     uDocker:              File,
     runId:                String,
-    command:              A[String]): A[String] = {
+    command:              String): String = {
 
     def volumesArgument(volumes: Vector[MountPoint]) = volumes.map { case (host, container) ⇒ s"""-v "$host":"$container"""" }.mkString(" ")
 
@@ -315,7 +313,7 @@ object UDocker {
 
     val variablesArgument = environmentVariables.map { case (name, variable) ⇒ s"""-e ${name}="${variable}"""" }.mkString(" ")
 
-    command.map { cmd ⇒ s"""${uDocker.getAbsolutePath} run --workdir="$workDirectory" $userArgument  $variablesArgument ${volumesArgument(volumes)} $runId $cmd""" }
+    s"""${uDocker.getAbsolutePath} run --workdir="$workDirectory" $userArgument  $variablesArgument ${volumesArgument(volumes)} $runId $command"""
   }
 
   // TODO refactor

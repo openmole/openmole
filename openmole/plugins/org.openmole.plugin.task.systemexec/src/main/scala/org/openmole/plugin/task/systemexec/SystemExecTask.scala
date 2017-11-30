@@ -121,15 +121,16 @@ object SystemExecTask {
           cmd ⇒ cmd.expanded
         }.getOrElse(throw new UserBadDataError("No command line found for " + OS.actualOS))
 
+      val expandedCommands = osCommandLines.map(_.from(preparedContext))
+
       val executionResult = executeAll(
         workDir,
-        environmentVariables.map { case (name, variable) ⇒ name → variable.from(context) },
-        errorOnReturnValue,
-        returnValue,
-        stdOut,
-        stdErr,
-        osCommandLines.toList
-      )(p.copy(context = preparedContext))
+        environmentVariables.map { case (name, variable) ⇒ name → variable.from(preparedContext) },
+        expandedCommands.toList,
+        errorOnReturnValue && !returnValue.isDefined,
+        stdOut.isDefined,
+        stdErr.isDefined
+      )
 
       val retContext: Context = external.fetchOutputFiles(outputs, preparedContext, external.relativeResolver(workDir), tmpDir)
       external.cleanWorkDirectory(outputs, retContext, tmpDir)
