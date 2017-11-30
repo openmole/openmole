@@ -31,7 +31,7 @@ import scala.util.Try
 
 class MoleTaskSpec extends FlatSpec with Matchers {
 
-  import org.openmole.core.workflow.Services._
+  import org.openmole.core.workflow.tools.StubServices._
 
   "Implicits" should "work with mole task" in {
     val i = Val[String]("i")

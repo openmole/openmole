@@ -41,7 +41,7 @@ import scala.util.Try
 
 class AggregationTransitionSpec extends FlatSpec with Matchers {
 
-  import org.openmole.core.workflow.Services._
+  import org.openmole.core.workflow.tools.StubServices._
 
   "Aggregation transition" should "turn results of exploration into a array of values" in {
     @volatile var endCapsExecuted = 0

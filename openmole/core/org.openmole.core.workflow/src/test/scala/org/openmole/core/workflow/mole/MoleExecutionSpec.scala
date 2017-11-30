@@ -37,7 +37,7 @@ import org.openmole.core.workflow.dsl._
 
 class MoleExecutionSpec extends FlatSpec with Matchers {
 
-  import org.openmole.core.workflow.Services._
+  import org.openmole.core.workflow.tools.StubServices._
 
   class JobGroupingBy2Test extends Grouping {
 

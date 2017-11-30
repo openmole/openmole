@@ -31,7 +31,7 @@ import org.openmole.core.workflow.dsl._
 
 class ExplorationTransitionSpec extends FlatSpec with Matchers {
 
-  import org.openmole.core.workflow.Services._
+  import org.openmole.core.workflow.tools.StubServices._
 
   "Exploration transition" should "submit one MoleJob for each value in the sampling" in {
 

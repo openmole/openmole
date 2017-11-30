@@ -31,7 +31,7 @@ import org.scalatest.junit._
 
 class HookSpec extends FlatSpec with Matchers {
 
-  import org.openmole.core.workflow.Services._
+  import org.openmole.core.workflow.tools.StubServices._
 
   "A capsule execution misc" should "intercept the execution of a capsule" in {
     var executed = false
