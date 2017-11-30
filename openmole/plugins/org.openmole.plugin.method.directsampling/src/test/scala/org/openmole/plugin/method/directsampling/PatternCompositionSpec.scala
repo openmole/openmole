@@ -4,12 +4,13 @@ package org.openmole.plugin.method.directsampling
 import java.util.concurrent.atomic.AtomicInteger
 
 import org.openmole.core.dsl._
-import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.task.ClosureTask
 import org.openmole.core.workflow.sampling.ExplicitSampling
 import org.openmole.plugin.tool.pattern._
 import org.scalatest._
 
 class PatternCompositionSpec extends FlatSpec with Matchers {
+  import org.openmole.core.workflow.tools.StubServices._
 
   "Direct samplings" should "compose with loop" in {
     val counter = new AtomicInteger(0)
@@ -45,4 +46,33 @@ class PatternCompositionSpec extends FlatSpec with Matchers {
 
     counter.intValue() should equal(12)
   }
+
+  "Direct samplings" should "transmit inputs" in {
+    val l = Val[Double]
+    val i = Val[Int]
+
+    val init = EmptyTask() set (
+      (inputs, outputs) += l,
+      l := 2.0
+    )
+
+    val model =
+      ClosureTask("model") {
+        (context, _, _) ⇒
+          context(l) should equal(2.0)
+          context
+      } set (
+        inputs += l
+      )
+
+    val mole =
+      init --
+        DirectSampling(
+          model,
+          ExplicitSampling(i, Seq(1))
+        )
+
+    mole.start.waitUntilEnded
+  }
+
 }
