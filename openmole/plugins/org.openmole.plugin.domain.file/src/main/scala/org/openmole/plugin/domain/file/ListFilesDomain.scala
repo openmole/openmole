@@ -23,9 +23,9 @@ import org.openmole.core.context.Context
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.dsl._
-import org.openmole.tool.logger.Logger
+import org.openmole.tool.logger.JavaLogger
 
-object ListFilesDomain extends Logger {
+object ListFilesDomain extends JavaLogger {
 
   implicit def isFinite: Finite[ListFilesDomain, File] = new Finite[ListFilesDomain, File] {
     override def computeValues(domain: ListFilesDomain) = domain.computeValues

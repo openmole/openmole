@@ -24,7 +24,7 @@ import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.output.OutputManager
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.workflow.task.TaskExecutionContext
-import org.openmole.tool.logger.Logger
+import org.openmole.tool.logger.JavaLogger
 import org.openmole.core.tools.service.Retry
 import org.openmole.core.workspace.{ NewFile, Workspace }
 import org.openmole.core.tools.service._
@@ -46,7 +46,7 @@ import org.openmole.tool.cache.KeyValueCache
 import org.openmole.tool.lock._
 import org.openmole.tool.file._
 
-object Runtime extends Logger {
+object Runtime extends JavaLogger {
   val NbRetry = 3
   def retry[T](f: ⇒ T) = Retry.retry(f, NbRetry)
 }

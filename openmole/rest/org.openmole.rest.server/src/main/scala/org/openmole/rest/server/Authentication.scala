@@ -18,7 +18,7 @@ import javax.servlet.http.HttpServletRequest
 import org.openmole.core.preference.Preference
 import org.openmole.tool.collection._
 import org.openmole.tool.crypto.Cypher
-import org.openmole.tool.logger.Logger
+import org.openmole.tool.logger.JavaLogger
 
 import scala.concurrent.stm._
 import scala.util.{ Failure, Success, Try }
@@ -48,7 +48,7 @@ class TokenHandler extends DataHandler[String, AuthenticationToken] {
 
 case class InvalidPasswordException(message: String) extends Exception(message)
 
-object Authentication extends Logger
+object Authentication extends JavaLogger
 
 trait Authentication { self ⇒
   import Authentication.Log._

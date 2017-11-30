@@ -22,13 +22,13 @@ import org.openmole.core.expansion.Condition
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.validation._
-import org.openmole.tool.logger.Logger
+import org.openmole.tool.logger.JavaLogger
 import cats.implicits._
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.workflow.dsl
 import org.openmole.core.workspace.NewFile
 
-object Transition extends Logger
+object Transition extends JavaLogger
 
 class Transition(
   val start:     Capsule,

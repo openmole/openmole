@@ -34,11 +34,11 @@ import org.openmole.plugin.environment.batch.environment.BatchEnvironment._
 import org.openmole.plugin.environment.batch.environment._
 import org.openmole.plugin.environment.batch.storage._
 import org.openmole.tool.file._
-import org.openmole.tool.logger.Logger
+import org.openmole.tool.logger.JavaLogger
 
 import scala.util.{ Failure, Success }
 
-object GetResultActor extends Logger {
+object GetResultActor extends JavaLogger {
 
   def receive(msg: GetResult)(implicit services: BatchEnvironment.Services) = {
     import services._

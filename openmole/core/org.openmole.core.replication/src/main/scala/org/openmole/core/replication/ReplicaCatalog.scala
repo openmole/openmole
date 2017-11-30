@@ -28,7 +28,7 @@ import org.openmole.core.preference._
 import org.openmole.core.db.{ DBServerInfo, Replica, replicas }
 import org.openmole.core.workspace.Workspace
 import org.openmole.tool.lock.LockRepository
-import org.openmole.tool.logger.Logger
+import org.openmole.tool.logger.JavaLogger
 import slick.jdbc.H2Profile.api._
 import squants.time.TimeConversions._
 
@@ -37,7 +37,7 @@ import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 import scala.util.{ Success, Try }
 
-object ReplicaCatalog extends Logger {
+object ReplicaCatalog extends JavaLogger {
   val NoAccessCleanTime = ConfigurationLocation("ReplicaCatalog", "NoAccessCleanTime", Some(30 days))
   val ReplicaCacheTime = ConfigurationLocation("ReplicaCatalog", "ReplicaCacheTime", Some(30 minutes))
   val ReplicaCacheSize = ConfigurationLocation("ReplicaCatalog", "ReplicaCacheSize", Some(1000))

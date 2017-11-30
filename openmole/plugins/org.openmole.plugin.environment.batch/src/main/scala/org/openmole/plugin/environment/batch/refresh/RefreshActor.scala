@@ -20,9 +20,9 @@ package org.openmole.plugin.environment.batch.refresh
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.workflow.execution.ExecutionState._
 import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, ResubmitException, UsageControl }
-import org.openmole.tool.logger.Logger
+import org.openmole.tool.logger.JavaLogger
 
-object RefreshActor extends Logger {
+object RefreshActor extends JavaLogger {
 
   def receive(refresh: Refresh)(implicit services: BatchEnvironment.Services) = {
     import services._

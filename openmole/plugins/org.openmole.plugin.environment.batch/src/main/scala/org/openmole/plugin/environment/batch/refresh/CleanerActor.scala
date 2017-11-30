@@ -18,9 +18,9 @@
 package org.openmole.plugin.environment.batch.refresh
 
 import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, UsageControl }
-import org.openmole.tool.logger.Logger
+import org.openmole.tool.logger.JavaLogger
 
-object CleanerActor extends Logger {
+object CleanerActor extends JavaLogger {
   def receive(msg: CleanSerializedJob)(implicit services: BatchEnvironment.Services) = {
     import services._
 

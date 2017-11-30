@@ -37,7 +37,7 @@ object ListPathsDomain {
     directory: OptionalArgument[FromContext[String]] = OptionalArgument(),
     recursive: Boolean                               = false,
     filter:    OptionalArgument[FromContext[String]] = OptionalArgument()
-  ) = new ListPathsDomain(base, directory, recursive, filter)
+  ): ListPathsDomain = new ListPathsDomain(base, directory, recursive, filter)
 
 }
 

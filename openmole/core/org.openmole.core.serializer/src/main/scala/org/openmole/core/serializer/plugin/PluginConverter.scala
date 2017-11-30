@@ -28,9 +28,9 @@ import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.console._
 
 import org.openmole.core.serializer.PluginAndFilesListing
-import org.openmole.tool.logger.Logger
+import org.openmole.tool.logger.JavaLogger
 
-object PluginConverter extends Logger
+object PluginConverter extends JavaLogger
 
 import PluginConverter._
 

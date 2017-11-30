@@ -29,7 +29,7 @@ import org.openmole.core.logging.LoggerService
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.workspace.Workspace
 import org.openmole.rest.server.RESTServer
-import org.openmole.tool.logger.Logger
+import org.openmole.tool.logger.JavaLogger
 
 import annotation.tailrec
 import org.openmole.gui.server.core._
@@ -40,7 +40,7 @@ import org.openmole.core.module
 import org.openmole.core.preference._
 import org.openmole.core.services._
 
-object Application extends Logger {
+object Application extends JavaLogger {
 
   import Log._
 

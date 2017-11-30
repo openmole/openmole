@@ -26,10 +26,10 @@ import org.openmole.core.tools.service.Retry.retry
 import org.openmole.core.workflow.execution._
 import org.openmole.plugin.environment.batch.environment._
 import org.openmole.plugin.environment.batch.jobservice.BatchJobControl
-import org.openmole.tool.logger.Logger
+import org.openmole.tool.logger.JavaLogger
 import org.openmole.tool.thread._
 
-object JobManager extends Logger { self ⇒
+object JobManager extends JavaLogger { self ⇒
   import Log._
 
   def messagePriority(message: DispatchedMessage) =

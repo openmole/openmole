@@ -18,13 +18,13 @@
 package org.openmole.tool
 
 import java.util.concurrent._
-import org.openmole.tool.logger.Logger
+import org.openmole.tool.logger.JavaLogger
 
 import scala.concurrent.duration.Duration
 import scala.util.{ Failure, Success, Try }
 
 package object thread {
-  object L extends Logger
+  object L extends JavaLogger
   import L._
 
   implicit def future2Function[A](f: Future[A]) = () ⇒ f.get

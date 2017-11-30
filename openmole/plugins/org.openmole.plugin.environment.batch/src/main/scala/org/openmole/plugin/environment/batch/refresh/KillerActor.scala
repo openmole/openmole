@@ -18,10 +18,10 @@
 package org.openmole.plugin.environment.batch.refresh
 
 import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, UsageControl }
-import org.openmole.tool.logger.Logger
+import org.openmole.tool.logger.JavaLogger
 import org.openmole.core.tools.service.Retry._
 
-object KillerActor extends Logger {
+object KillerActor extends JavaLogger {
 
   def receive(msg: KillBatchJob)(implicit services: BatchEnvironment.Services) = {
     import services._

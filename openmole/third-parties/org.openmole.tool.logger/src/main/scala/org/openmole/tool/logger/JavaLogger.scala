@@ -19,7 +19,7 @@ package org.openmole.tool.logger
 
 import java.util.logging.{ Logger ⇒ JLogger, Level }
 
-trait Logger { l ⇒
+trait JavaLogger { l ⇒
 
   object Log {
     @transient lazy val logger = JLogger.getLogger(l.getClass.getName)

@@ -40,7 +40,7 @@ import org.openmole.plugin.environment.batch.refresh._
 import org.openmole.plugin.environment.batch.storage._
 import org.openmole.tool.cache._
 import org.openmole.tool.file._
-import org.openmole.tool.logger.Logger
+import org.openmole.tool.logger.JavaLogger
 import org.openmole.tool.random.{ RandomProvider, Seeder }
 import squants.time.TimeConversions._
 import squants.information.Information
@@ -50,7 +50,7 @@ import org.openmole.core.location._
 import scala.ref.WeakReference
 import scala.util.Random
 
-object BatchEnvironment extends Logger {
+object BatchEnvironment extends JavaLogger {
 
   trait Transfer {
     def id: Long

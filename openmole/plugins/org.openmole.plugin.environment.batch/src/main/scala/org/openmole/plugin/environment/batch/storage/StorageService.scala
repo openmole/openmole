@@ -30,12 +30,12 @@ import org.openmole.core.threadprovider.{ ThreadProvider, Updater }
 import org.openmole.plugin.environment.batch.environment._
 import org.openmole.plugin.environment.batch.refresh._
 import org.openmole.tool.cache._
-import org.openmole.tool.logger.Logger
+import org.openmole.tool.logger.JavaLogger
 import squants.time.TimeConversions._
 
 import scala.ref.WeakReference
 
-object StorageService extends Logger {
+object StorageService extends JavaLogger {
   val DirRegenerate = ConfigurationLocation("StorageService", "DirRegenerate", Some(1 hours))
   val TmpDirRemoval = ConfigurationLocation("StorageService", "TmpDirRemoval", Some(30 days))
   val persistent = "persistent/"

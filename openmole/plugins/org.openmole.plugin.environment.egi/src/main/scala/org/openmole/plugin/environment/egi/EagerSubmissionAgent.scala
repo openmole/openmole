@@ -22,7 +22,7 @@ import org.openmole.core.threadprovider.IUpdatableWithVariableDelay
 import org.openmole.core.workflow.execution.ExecutionState._
 import org.openmole.core.workflow.job.Job
 import org.openmole.plugin.environment.batch.environment.BatchEnvironment
-import org.openmole.tool.logger.Logger
+import org.openmole.tool.logger.JavaLogger
 import squants.time.Time
 
 import scala.collection.immutable.TreeSet
@@ -30,7 +30,7 @@ import scala.collection.mutable
 import scala.collection.mutable.{ HashMap, MultiMap, Set }
 import scala.ref.WeakReference
 
-object EagerSubmissionAgent extends Logger {
+object EagerSubmissionAgent extends JavaLogger {
 
   case class HistoryPoint(running: Int, total: Int, time: Long = System.currentTimeMillis)
 

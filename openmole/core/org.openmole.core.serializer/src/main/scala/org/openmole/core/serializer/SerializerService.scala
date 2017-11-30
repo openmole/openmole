@@ -30,7 +30,7 @@ import org.openmole.core.serializer.converter._
 import java.util.concurrent.locks.{ ReadWriteLock, ReentrantReadWriteLock }
 
 import org.openmole.core.workspace.{ NewFile, Workspace }
-import org.openmole.tool.logger.Logger
+import org.openmole.tool.logger.JavaLogger
 import org.openmole.tool.stream
 import org.openmole.tool.tar._
 import org.openmole.tool.lock._

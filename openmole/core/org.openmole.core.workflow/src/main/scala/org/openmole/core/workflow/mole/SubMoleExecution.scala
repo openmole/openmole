@@ -35,7 +35,7 @@ import org.openmole.tool.thread._
 import scala.collection.mutable.Buffer
 import scala.concurrent.stm._
 
-object SubMoleExecution extends Logger
+object SubMoleExecution extends JavaLogger
 
 import org.openmole.core.workflow.mole.SubMoleExecution.Log._
 

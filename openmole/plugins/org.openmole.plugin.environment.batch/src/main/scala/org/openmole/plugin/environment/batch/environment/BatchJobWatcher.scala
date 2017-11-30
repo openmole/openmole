@@ -24,12 +24,12 @@ import org.openmole.core.workflow.job.Job
 import org.openmole.core.workspace.Workspace
 import org.openmole.plugin.environment.batch.environment._
 import org.openmole.plugin.environment.batch.refresh.{ JobManager, Kill }
-import org.openmole.tool.logger.Logger
+import org.openmole.tool.logger.JavaLogger
 
 import scala.concurrent.stm._
 import scala.ref._
 
-object BatchJobWatcher extends Logger {
+object BatchJobWatcher extends JavaLogger {
 
   class ExecutionJobRegistry {
     val jobs = TMap[Job, List[BatchExecutionJob]]()

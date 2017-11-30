@@ -26,10 +26,10 @@ import org.openmole.plugin.environment.batch.environment._
 import org.openmole.plugin.environment.batch.storage._
 import org.openmole.core.communication.storage._
 import org.openmole.core.exception.InternalProcessingError
-import org.openmole.tool.logger.Logger
+import org.openmole.tool.logger.JavaLogger
 import squants.information.Information
 
-object SharedStorage extends Logger {
+object SharedStorage extends JavaLogger {
 
   def installRuntime(runtime: Runtime, sharedFS: StorageService[_], frontend: Frontend)(implicit preference: Preference, newFile: NewFile) =
     UsageControl.withToken(sharedFS.usageControl) { implicit token ⇒

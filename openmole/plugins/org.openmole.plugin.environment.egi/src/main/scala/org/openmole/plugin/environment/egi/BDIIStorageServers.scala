@@ -29,9 +29,9 @@ import org.openmole.plugin.environment.batch.environment.BatchEnvironment
 import org.openmole.tool.cache.Cache
 import org.openmole.tool.file._
 import org.openmole.tool.hash.Hash
-import org.openmole.tool.logger.Logger
+import org.openmole.tool.logger.JavaLogger
 
-object BDIIStorageServers extends Logger
+object BDIIStorageServers extends JavaLogger
 
 import org.openmole.plugin.environment.egi.BDIIStorageServers.Log._
 //

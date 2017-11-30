@@ -28,12 +28,12 @@ import org.openmole.plugin.environment.batch.environment.BatchEnvironment.signal
 import org.openmole.plugin.environment.batch.environment._
 import org.openmole.plugin.environment.batch.storage._
 import org.openmole.tool.file.{ uniqName, _ }
-import org.openmole.tool.logger.Logger
+import org.openmole.tool.logger.JavaLogger
 import org.openmole.tool.random._
 
 import scala.collection.immutable.TreeSet
 
-object UploadActor extends Logger {
+object UploadActor extends JavaLogger {
 
   def receive(msg: Upload)(implicit services: BatchEnvironment.Services) = {
     import services._

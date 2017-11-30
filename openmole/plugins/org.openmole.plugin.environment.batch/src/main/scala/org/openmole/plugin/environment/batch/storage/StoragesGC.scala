@@ -22,12 +22,12 @@ import java.io.File
 import org.openmole.core.db._
 import org.openmole.core.replication.ReplicaCatalog
 import org.openmole.core.threadprovider.IUpdatable
-import org.openmole.tool.logger.Logger
+import org.openmole.tool.logger.JavaLogger
 import slick.driver.H2Driver.api._
 
 import scala.ref.WeakReference
 
-object StoragesGC extends Logger
+object StoragesGC extends JavaLogger
 
 import org.openmole.plugin.environment.batch.storage.StoragesGC.Log._
 

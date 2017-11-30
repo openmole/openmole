@@ -12,9 +12,9 @@ import scala.concurrent.{ Await, Future }
 import scala.concurrent.duration.Duration
 import scala.io.Source
 import org.openmole.tool.file._
-import org.openmole.tool.logger.Logger
+import org.openmole.tool.logger.JavaLogger
 
-package object db extends Logger {
+package object db extends JavaLogger {
 
   case class DBServerInfo(port: Int, user: String, password: String)
 

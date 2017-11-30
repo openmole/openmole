@@ -20,7 +20,7 @@ package org.openmole.runtime
 import org.openmole.core.logging.LoggerService
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.tool.file._
-import org.openmole.tool.logger.Logger
+import org.openmole.tool.logger.JavaLogger
 import scopt._
 import java.io.File
 
@@ -32,7 +32,7 @@ import org.openmole.core.preference.Preference
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.workspace.{ NewFile, Workspace }
 
-object SimExplorer extends Logger {
+object SimExplorer extends JavaLogger {
 
   import Log._
 

@@ -31,7 +31,7 @@ import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.data.ListSorting._
 import java.io._
 
-import org.openmole.tool.logger.Logger
+import org.openmole.tool.logger.JavaLogger
 import org.openmole.tool.file._
 import org.openmole.core.fileservice._
 import org.openmole.tool.stream._
@@ -49,7 +49,7 @@ import org.openmole.core.services._
 import org.openmole.core.module
 import resource._
 
-object Utils extends Logger {
+object Utils extends JavaLogger {
 
   import Log._
 

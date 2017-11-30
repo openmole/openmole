@@ -27,7 +27,7 @@ import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.execution.Environment._
 import org.openmole.core.workflow.job._
 import org.openmole.core.workflow.task._
-import org.openmole.tool.logger.Logger
+import org.openmole.tool.logger.JavaLogger
 import org.openmole.tool.stream._
 
 import ref.WeakReference
@@ -35,7 +35,7 @@ import org.openmole.core.workflow.mole.{ MoleExecution, StrainerCapsule, Straine
 import org.openmole.core.event._
 import org.openmole.tool.network.LocalHostName
 
-object LocalExecutor extends Logger {
+object LocalExecutor extends JavaLogger {
 
   def containsMoleTask(moleJob: MoleJob) =
     moleJob.task match {

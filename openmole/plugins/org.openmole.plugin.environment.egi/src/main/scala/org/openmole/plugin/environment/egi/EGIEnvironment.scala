@@ -45,7 +45,7 @@ import org.openmole.core.workflow.dsl._
 //import org.openmole.plugin.environment.batch.control._
 //import org.openmole.plugin.environment.batch.environment._
 //import org.openmole.tool.crypto.Cypher
-import org.openmole.tool.logger.Logger
+import org.openmole.tool.logger.JavaLogger
 //import org.openmole.tool.random._
 //import squants.information.Information
 import squants.time.Time
@@ -54,7 +54,7 @@ import org.openmole.tool.cache._
 import gridscale.egi._
 import effectaside._
 
-object EGIEnvironment extends Logger {
+object EGIEnvironment extends JavaLogger {
 
   import util._
 

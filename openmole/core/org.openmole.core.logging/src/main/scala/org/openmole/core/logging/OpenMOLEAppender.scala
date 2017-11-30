@@ -22,9 +22,9 @@ import java.io.{ ByteArrayOutputStream, IOException }
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.AppenderBase
-import org.openmole.tool.logger.Logger
+import org.openmole.tool.logger.JavaLogger
 
-class OpenMOLEAppender extends AppenderBase[ILoggingEvent] with Logger {
+class OpenMOLEAppender extends AppenderBase[ILoggingEvent] with JavaLogger {
 
   val byteOutputStream = new ByteArrayOutputStream
   var encoder = new PatternLayoutEncoder

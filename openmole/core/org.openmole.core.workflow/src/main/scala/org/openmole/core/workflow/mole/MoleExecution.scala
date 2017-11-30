@@ -37,14 +37,14 @@ import org.openmole.core.workflow.validation._
 import org.openmole.core.workspace.{ NewFile, Workspace }
 import org.openmole.tool.cache.KeyValueCache
 import org.openmole.tool.lock._
-import org.openmole.tool.logger.Logger
+import org.openmole.tool.logger.JavaLogger
 import org.openmole.tool.random
 import org.openmole.tool.random.Seeder
 
 import scala.collection.mutable.Buffer
 import scala.concurrent.stm._
 
-object MoleExecution extends Logger {
+object MoleExecution extends JavaLogger {
 
   class Starting extends Event[MoleExecution]
   case class Finished(canceled: Boolean) extends Event[MoleExecution]

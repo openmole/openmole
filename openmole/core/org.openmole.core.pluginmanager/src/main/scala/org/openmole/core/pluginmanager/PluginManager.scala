@@ -23,7 +23,7 @@ import java.util.concurrent.Semaphore
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.pluginmanager.internal.Activator
 import org.openmole.tool.file._
-import org.openmole.tool.logger.Logger
+import org.openmole.tool.logger.JavaLogger
 import org.openmole.tool.hash._
 import org.osgi.framework._
 import org.osgi.framework.wiring.{ BundleWiring, FrameworkWiring }
@@ -42,7 +42,7 @@ case class BundlesInfo(
   lazy val hashes = files.keys.map(f ⇒ f → f.hash()).toMap
 }
 
-object PluginManager extends Logger {
+object PluginManager extends JavaLogger {
 
   import Log._
 

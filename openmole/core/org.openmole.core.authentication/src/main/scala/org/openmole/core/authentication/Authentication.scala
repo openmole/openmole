@@ -23,11 +23,11 @@ import java.util.UUID
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.workspace.Workspace
 import org.openmole.tool.file._
-import org.openmole.tool.logger.Logger
+import org.openmole.tool.logger.JavaLogger
 
 import scala.util.{ Failure, Success, Try }
 
-object Authentication extends Logger {
+object Authentication extends JavaLogger {
 
   val pattern = "[-0-9A-z]+\\.key"
 

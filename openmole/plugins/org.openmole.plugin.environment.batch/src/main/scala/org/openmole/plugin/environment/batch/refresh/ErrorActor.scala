@@ -6,9 +6,9 @@ import gridscale.authentication.AuthenticationException
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.workflow.execution.Environment
 import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, BatchExecutionJob, UsageControl }
-import org.openmole.tool.logger.Logger
+import org.openmole.tool.logger.JavaLogger
 
-object ErrorActor extends Logger {
+object ErrorActor extends JavaLogger {
   def receive(msg: Error)(implicit services: BatchEnvironment.Services) = {
     import services._
 

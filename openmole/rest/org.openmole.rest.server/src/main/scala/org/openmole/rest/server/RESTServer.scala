@@ -7,7 +7,7 @@ import org.eclipse.jetty.servlet.DefaultServlet
 import org.eclipse.jetty.util.resource.{ Resource ⇒ Res }
 import org.eclipse.jetty.webapp.WebAppContext
 import org.openmole.core.workspace._
-import org.openmole.tool.logger.Logger
+import org.openmole.tool.logger.JavaLogger
 import org.scalatra.ScalatraBase
 import org.scalatra.servlet.ScalatraListener
 import org.eclipse.jetty.security.{ ConstraintMapping, ConstraintSecurityHandler }
@@ -21,7 +21,7 @@ import org.openmole.tool.file._
 import org.openmole.tool.random.Seeder
 import org.openmole.core.services._
 
-object RESTServer extends Logger {
+object RESTServer extends JavaLogger {
   def isPasswordCorrect(cypher: Cypher)(implicit preference: Preference) =
     Preference.passwordIsCorrect(cypher, preference)
 }

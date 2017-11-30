@@ -22,12 +22,12 @@ import java.util.concurrent.Semaphore
 import org.openmole.core.context._
 import org.openmole.core.workflow.job._
 import org.openmole.core.workflow.job.State._
-import org.openmole.tool.logger.Logger
+import org.openmole.tool.logger.JavaLogger
 
 import scala.collection.immutable.TreeMap
 import util.{ Failure, Success, Try }
 
-object ContextSaver extends Logger
+object ContextSaver extends JavaLogger
 
 import ContextSaver.Log._
 

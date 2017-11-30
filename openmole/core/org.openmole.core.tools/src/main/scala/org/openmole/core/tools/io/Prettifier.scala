@@ -19,11 +19,11 @@ package org.openmole.core.tools.io
 
 import java.io.{ PrintWriter, StringWriter }
 
-import org.openmole.tool.logger.Logger
+import org.openmole.tool.logger.JavaLogger
 
 import collection.JavaConversions._
 
-object Prettifier extends Logger {
+object Prettifier extends JavaLogger {
 
   import Log._
 

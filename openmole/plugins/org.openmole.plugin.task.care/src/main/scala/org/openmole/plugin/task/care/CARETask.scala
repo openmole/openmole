@@ -28,14 +28,14 @@ import org.openmole.core.workflow.validation._
 import org.openmole.plugin.task.external.{ External, ExternalBuilder }
 import org.openmole.plugin.task.systemexec._
 import org.openmole.core.expansion._
-import org.openmole.tool.logger.Logger
+import org.openmole.tool.logger.JavaLogger
 import org.openmole.tool.random._
 import org.openmole.plugin.task.container
 import cats.implicits._
 import org.openmole.core.preference.ConfigurationLocation
 import org.openmole.plugin.task.container.HostFiles
 
-object CARETask extends Logger {
+object CARETask extends JavaLogger {
 
   val disableSeccomp = ConfigurationLocation("CARETask", "DisableSeccomp", Some(false))
 

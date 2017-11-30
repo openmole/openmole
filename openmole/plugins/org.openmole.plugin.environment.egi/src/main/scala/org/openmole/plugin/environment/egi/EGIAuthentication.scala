@@ -30,13 +30,13 @@ import java.util.zip.GZIPInputStream
 import org.openmole.core.exception._
 import org.openmole.core.fileservice._
 import org.openmole.tool.file._
-import org.openmole.tool.logger.Logger
+import org.openmole.tool.logger.JavaLogger
 import org.openmole.tool.stream._
 import org.openmole.core.preference._
 import org.openmole.core.workspace.Workspace
 import org.openmole.tool.tar.TarInputStream
 
-object EGIAuthentication extends Logger {
+object EGIAuthentication extends JavaLogger {
 
   import Log._
 
