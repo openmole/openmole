@@ -55,7 +55,7 @@ class ExecutionPanel {
 
   case class PanelInfo(
     executionInfos: Seq[(ExecutionId, ExecutionInfo)],
-    outputsInfos:   Seq[RunningOutputData]
+    outputsInfos:   Seq[OutputStreamData]
   )
 
   val execInfo = Var(PanelInfo(Seq(), Seq()))

@@ -317,7 +317,7 @@ object EnvironmentErrorData {
 // datedError is a triplet of (EnvironmentError, most recent occurrence, number of occurrences)
 case class EnvironmentErrorData(datedErrors: Seq[(EnvironmentError, Long, Int)])
 
-case class RunningOutputData(id: ExecutionId, output: String)
+case class OutputStreamData(id: ExecutionId, output: String)
 
 case class StaticExecutionInfo(path: SafePath, script: String, startDate: Long = 0L)
 
@@ -340,9 +340,7 @@ sealed trait ExecutionInfo {
   def duration: Long
 
   def ready: Long
-
   def running: Long
-
   def completed: Long
 
   def environmentStates: Seq[EnvironmentState]
@@ -399,11 +397,8 @@ case class Ready() extends ExecutionInfo {
   def state: String = "ready"
 
   def duration: Long = 0L
-
   def completed: Long = 0L
-
   def ready: Long = 0L
-
   def running = 0L
 
   def environmentStates: Seq[EnvironmentState] = Seq()

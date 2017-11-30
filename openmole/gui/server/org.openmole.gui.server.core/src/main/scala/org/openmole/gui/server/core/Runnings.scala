@@ -107,10 +107,6 @@ object Runnings {
     instance.runningEnvironments.get(id).foreach(_.environment.clearErrors)
   }
 
-  def outputsDatas(id: ExecutionId, lines: Int) = atomic { implicit ctx ⇒
-    RunningOutputData(id, instance.outputs(id).toString.lines.toSeq.takeRight(lines).mkString("\n"))
-  }
-
   def environmentIds = atomic { implicit ctx ⇒
     instance.environmentIds
   }

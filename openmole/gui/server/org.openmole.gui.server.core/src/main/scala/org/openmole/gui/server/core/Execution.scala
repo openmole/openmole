@@ -26,27 +26,32 @@ import org.openmole.tool.stream.StringPrintStream
 
 import scala.concurrent.stm._
 
-case class DynamicExecutionInfo(
-  moleExecution: MoleExecution,
-  outputStream:  StringPrintStream
-)
+//case class DynamicExecutionInfo(
+//  moleExecution: MoleExecution,
+//  outputStream:  StringPrintStream
+//)
 
 class Execution {
 
   private lazy val staticExecutionInfo = TMap[ExecutionId, StaticExecutionInfo]()
-  private lazy val dynamicExecutionInfo = TMap[ExecutionId, DynamicExecutionInfo]()
+  private lazy val moleExecutions = TMap[ExecutionId, MoleExecution]()
+  private lazy val outputStreams = TMap[ExecutionId, StringPrintStream]()
   private lazy val errors = TMap[ExecutionId, Failed]()
 
   def addStaticInfo(key: ExecutionId, staticInfo: StaticExecutionInfo) = atomic { implicit ctx ⇒
     staticExecutionInfo(key) = staticInfo
   }
 
-  def addDynamicInfo(key: ExecutionId, info: DynamicExecutionInfo) = atomic { implicit ctx ⇒
+  def addMoleExecution(key: ExecutionId, moleExecution: MoleExecution) = atomic { implicit ctx ⇒
     if (staticExecutionInfo.contains(key)) {
-      dynamicExecutionInfo(key) = info
+      moleExecutions(key) = moleExecution
       true
     }
     else false
+  }
+
+  def addOutputStreams(key: ExecutionId, out: StringPrintStream) = atomic { implicit ctx ⇒
+    outputStreams(key) = out
   }
 
   def addError(key: ExecutionId, error: Failed) = atomic { implicit ctx ⇒
@@ -54,9 +59,9 @@ class Execution {
   }
 
   def cancel(key: ExecutionId) =
-    dynamicExecutionInfo.single.get(key) match {
-      case Some(dynamic) ⇒ dynamic.moleExecution.cancel
-      case _             ⇒
+    moleExecutions.single.get(key) match {
+      case Some(moleExecution) ⇒ moleExecution.cancel
+      case _                   ⇒
     }
 
   def remove(key: ExecutionId) = {
@@ -64,7 +69,8 @@ class Execution {
     atomic { implicit ctx ⇒
       Runnings.remove(key)
       staticExecutionInfo.remove(key)
-      dynamicExecutionInfo.remove(key)
+      moleExecutions.remove(key)
+      outputStreams.remove(key)
       errors.remove(key)
     }
   }
@@ -86,11 +92,9 @@ class Execution {
     }
 
   def executionInfo(key: ExecutionId): ExecutionInfo = atomic { implicit ctx ⇒
-    (errors.get(key), dynamicExecutionInfo.get(key)) match {
+    (errors.get(key), moleExecutions.get(key)) match {
       case (Some(error), _) ⇒ error
-      case (_, Some(dynamic)) ⇒
-        val moleExecution = dynamic.moleExecution
-        val output = dynamic.outputStream
+      case (_, Some(moleExecution)) ⇒
 
         val d = moleExecution.duration.getOrElse(0L)
         moleExecution.exception match {
@@ -125,12 +129,16 @@ class Execution {
     } yield (k, s)
   }
 
-  def allStates(lines: Int): (Seq[(ExecutionId, ExecutionInfo)], Seq[RunningOutputData]) = atomic { implicit ctx ⇒
+  def allStates(lines: Int): (Seq[(ExecutionId, ExecutionInfo)], Seq[OutputStreamData]) = atomic { implicit ctx ⇒
 
     val envIds = Runnings.environmentIds
 
+    def outputStreamData(id: ExecutionId, lines: Int) = atomic { implicit ctx ⇒
+      OutputStreamData(id, outputStreams(id).toString.lines.toSeq.takeRight(lines).mkString("\n"))
+    }
+
     val outputs = envIds.keys.toSeq.map {
-      Runnings.outputsDatas(_, lines)
+      outputStreamData(_, lines)
     }
 
     val executions = for {

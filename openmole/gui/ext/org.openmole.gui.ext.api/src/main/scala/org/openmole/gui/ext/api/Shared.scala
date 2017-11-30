@@ -66,7 +66,7 @@ trait Api {
   def size(safePath: SafePath): Long
 
   //EXECUTIONS
-  def allStates(lines: Int): (Seq[(ExecutionId, ExecutionInfo)], Seq[RunningOutputData])
+  def allStates(lines: Int): (Seq[(ExecutionId, ExecutionInfo)], Seq[OutputStreamData])
   def staticInfos(): Seq[(ExecutionId, StaticExecutionInfo)]
   def cancelExecution(id: ExecutionId): Unit
   def removeExecution(id: ExecutionId): Unit

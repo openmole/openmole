@@ -302,11 +302,12 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
     val execId = ExecutionId(getUUID)
     val script = safePathToFile(scriptData.scriptPath)
     val content = script.content
+    val outputStream = StringPrintStream(Some(preference(outputSize)))
 
     execution.addStaticInfo(execId, StaticExecutionInfo(scriptData.scriptPath, content, System.currentTimeMillis()))
+    execution.addOutputStreams(execId, outputStream)
 
     def error(t: Throwable): Unit = execution.addError(execId, Failed(ErrorBuilder(t), Seq()))
-
     def message(message: String): Unit = execution.addError(execId, Failed(Error(message), Seq()))
 
     try {
@@ -317,7 +318,6 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
         case ErrorInCompiler(e)        ⇒ error(e)
         case compiled: Compiled ⇒
 
-          val outputStream = StringPrintStream(Some(preference(outputSize)))
           Runnings.setOutput(execId, outputStream)
 
           def catchAll[T](f: ⇒ T): Try[T] = {
@@ -343,7 +343,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
                   Try(ex.start) match {
                     case Failure(e) ⇒ error(e)
                     case Success(_) ⇒
-                      val inserted = execution.addDynamicInfo(execId, DynamicExecutionInfo(ex, outputStream))
+                      val inserted = execution.addMoleExecution(execId, ex)
                       if (!inserted) ex.cancel
                   }
                 case Failure(e) ⇒ error(e)
