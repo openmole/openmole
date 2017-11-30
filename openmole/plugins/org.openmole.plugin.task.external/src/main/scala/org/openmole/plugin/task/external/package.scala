@@ -39,7 +39,7 @@ package external {
        * @param link @see addResource
        *
        */
-      def +=[T: ExternalBuilder: InputOutputBuilder](p: Val[File], name: FromContext[String], link: Boolean = false, toWorkDirectory: Boolean = true): T ⇒ T =
+      def +=[T: ExternalBuilder: InputOutputBuilder](p: Val[File], name: FromContext[String], link: Boolean = false): T ⇒ T =
         (implicitly[ExternalBuilder[T]].inputFiles add External.InputFile(p, name, link)) andThen
           (inputs += p)
     }
