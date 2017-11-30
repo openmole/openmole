@@ -80,32 +80,11 @@ package object udocker extends UDockerPackage {
     command:              FromContext[String],
     environmentVariables: Vector[(String, FromContext[String])] = Vector.empty,
     hostFiles:            Vector[(String, Option[String])]      = Vector.empty,
-    installCommands:      Vector[String]                        = Vector.empty,
     workDirectory:        Option[String]                        = None,
     reuseContainer:       Boolean                               = true,
-    uDockerUser:          Option[String]                        = None
+    uDockerUser:          Option[String]                        = None,
+    mode:                 Option[String]                        = None
   )
-
-  def uDockerRunCommand[A[_]: Applicative](
-    user:                 Option[String],
-    environmentVariables: Vector[(String, String)],
-    volumes:              Vector[MountPoint],
-    workDirectory:        String,
-    uDocker:              File,
-    runId:                String,
-    command:              A[String]): A[String] = {
-
-    def volumesArgument(volumes: Vector[MountPoint]) = volumes.map { case (host, container) ⇒ s"""-v "$host":"$container"""" }.mkString(" ")
-
-    val userArgument = user match {
-      case None    ⇒ ""
-      case Some(x) ⇒ s"""--user="$x""""
-    }
-
-    val variablesArgument = environmentVariables.map { case (name, variable) ⇒ s"""-e ${name}="${variable}"""" }.mkString(" ")
-
-    command.map { cmd ⇒ s"""${uDocker.getAbsolutePath} run --workdir="$workDirectory" $userArgument  $variablesArgument ${volumesArgument(volumes)} $runId $cmd""" }
-  }
 
   def userWorkDirectory(uDocker: UDockerArguments) = {
     import io.circe.generic.extras.auto._

@@ -341,15 +341,16 @@ package object systemexec extends external.ExternalPackage with SystemExecPackag
     stdOut:               Option[Val[String]],
     stdErr:               Option[Val[String]],
     cmds:                 List[String],
+    captureOutput:        Boolean                  = false,
     acc:                  ExecutionResult          = ExecutionResult.empty
   ): ExecutionResult =
     cmds match {
       case Nil ⇒ acc
       case cmd :: t ⇒
         val cl = parse(cmd)
-        val result = execute(cl.toArray, workDirectory, environmentVariables, returnOutput = stdOut.isDefined, returnError = stdErr.isDefined, errorOnReturnValue = false)
+        val result = execute(cl.toArray, workDirectory, environmentVariables, returnOutput = (stdOut.isDefined | captureOutput), returnError = (stdErr.isDefined | captureOutput), errorOnReturnValue = false)
         if (errorOnReturnValue && !returnValue.isDefined && result.returnCode != 0) throw error(cl.toVector, result)
-        else executeAllNoExpand(workDirectory, environmentVariables, errorOnReturnValue, returnValue, stdOut, stdErr, t, ExecutionResult.append(acc, result))
+        else executeAllNoExpand(workDirectory, environmentVariables, errorOnReturnValue, returnValue, stdOut, stdErr, t, captureOutput, ExecutionResult.append(acc, result))
     }
 
 }

@@ -18,7 +18,7 @@ import cats.data.{ Validated, ValidatedNel }
 import io.circe.generic.extras.auto._
 import io.circe.jawn.{ decode, decodeFile }
 import io.circe.syntax._
-import org.openmole.core.workflow.task.TaskExecutionContext
+import monocle.macros.Lenses
 import org.openmole.plugin.task.systemexec.{ commandLine, execute, executeAllNoExpand }
 import org.openmole.tool.file._
 import org.openmole.tool.stream._
@@ -33,35 +33,35 @@ object UDocker {
       layersConfig: Vector[(Registry.LayerConfig, File)])
   }
 
-  case class LocalDockerImage(
+  @Lenses case class LocalDockerImage(
     image:     String,
     tag:       String,
     content:   LocalDockerImage.Layered,
     imageJSON: String,
-    manifest:  ImageManifestV2Schema1
+    manifest:  ImageManifestV2Schema1,
+    container: Option[File]             = None
   ) {
     lazy val id = UUID.randomUUID().toString
   }
 
-  def downloadImage(dockerImage: DockerImage, timeout: Time)(implicit newFile: NewFile, workspace: Workspace, threadProvider: ThreadProvider) = {
+  def downloadImage(dockerImage: DockerImage, layersDirectory: File, timeout: Time)(implicit newFile: NewFile, threadProvider: ThreadProvider) = {
     import Registry._
 
-    def layerFile(workspace: Workspace, layer: Layer) = layersDirectory(workspace) / layer.digest
+    def layerFile(layer: Layer) = layersDirectory / layer.digest
 
     val m = manifest(dockerImage, timeout)
-    val lDirectory = layersDirectory(workspace)
 
     def localLayersFutures =
       for {
         manif ← m.toSeq.toVector
         l ← layers(manif.value)
       } yield Future {
-        val lf = layerFile(workspace, l)
-        if (!lf.exists) downloadLayer(dockerImage, l, lDirectory, lf, timeout)
+        val lf = layerFile(l)
+        if (!lf.exists) downloadLayer(dockerImage, l, layersDirectory, lf, timeout)
         l → lf
       }
 
-    val localLayers = localLayersFutures.map(f ⇒ Await.result(f, Duration.Inf))
+    val localLayers = localLayersFutures.map(f ⇒ Await.result(f, Duration.Inf)).reverse
 
     for {
       manif ← m
@@ -69,28 +69,25 @@ object UDocker {
       hist = Either.cond(history.isDefined, history.get, Err("No history field in Docker manifest"))
       v1 ← hist.map(_.head)
     } yield {
-      val conent = LocalDockerImage.Layered(localLayers, Vector.empty)
+      val content = LocalDockerImage.Layered(localLayers, Vector.empty)
       // FIXME how reliable is it to assume config in first v1Compat string?
       val imageConfig = v1.v1Compatibility
-      LocalDockerImage(dockerImage.image, dockerImage.tag, conent, imageConfig, manif.value)
+      LocalDockerImage(dockerImage.image, dockerImage.tag, content, imageConfig, manif.value)
     }
   }
 
-  def buildRepoV2(localDockerImage: LocalDockerImage)(implicit workspace: Workspace): Unit = {
-    val layerDir = layersDirectory(workspace)
-    val reposDir = repositoriesDirectory(workspace)
-    val imageRepositoryDirectory = reposDir /> localDockerImage.image /> localDockerImage.tag
+  def buildRepoV2(repositoryDirectory: File, layersDirectory: File, localDockerImage: LocalDockerImage): Unit = {
+    val imageRepositoryDirectory = repositoryDirectory /> localDockerImage.image /> localDockerImage.tag
 
     // move layer file in persistent/layers and create link to layer in persistent/repos
     for {
       layer ← localDockerImage.content.layers
     } {
-
-      val layerFileInLayers = layerDir / layer._1.digest
+      val layerFileInLayers = layersDirectory / layer._1.digest
       val layerFileInRepos = imageRepositoryDirectory / layer._1.digest
 
       // lock before existence tests to account for incomplete files
-      layerDir.withLockInDirectory {
+      layersDirectory.withLockInDirectory {
         if (!layerFileInLayers.exists()) layer._2 move layerFileInLayers
         if (!layerFileInRepos.exists()) layerFileInRepos createLinkTo layerFileInLayers.getAbsolutePath
       }
@@ -99,7 +96,7 @@ object UDocker {
     val imageId = s"${localDockerImage.image}:${localDockerImage.tag}"
 
     imageRepositoryDirectory / "manifest" content = localDockerImage.manifest.asJson.toString
-    imageRepositoryDirectory / "TAG" content = s"$reposDir/$imageId"
+    imageRepositoryDirectory / "TAG" content = s"$repositoryDirectory/$imageId"
     imageRepositoryDirectory / "v2" content = ""
   }
 
@@ -207,12 +204,6 @@ object UDocker {
     }
   }
 
-  def toLocalImage(containerImage: ContainerImage)(implicit preference: Preference, newFile: NewFile, workspace: Workspace, threadProvider: ThreadProvider): Either[Err, LocalDockerImage] =
-    containerImage match {
-      case i: DockerImage      ⇒ downloadImage(i, preference(RegistryTimeout))
-      case i: SavedDockerImage ⇒ loadImage(i)
-    }
-
   def install(installDirectory: File) = {
     val udockerInstallDirectory = installDirectory /> "udocker"
     val udockerTarBall = udockerInstallDirectory / "udockertarball.tar.gz"
@@ -251,39 +242,80 @@ object UDocker {
       "UDOCKER_TARBALL" → tarball.getAbsolutePath
     )
 
-  def newContainer(uDocker: UDockerArguments, uDockerExecutable: File, uDockerVariables: Vector[(String, String)], uDockerVolumes: Vector[(String, String)], imageId: String)(implicit newFile: NewFile) = newFile.withTmpDir { tmpDirectory ⇒
-    val name = containerName(UUID.randomUUID().toString).take(10)
-
-    val cl = commandLine(s"${uDockerExecutable.getAbsolutePath} create --name=$name $imageId")
-    execute(cl.toArray, tmpDirectory, uDockerVariables, returnOutput = true, returnError = true)
-
-    import cats._
-
-    if (!uDocker.installCommands.isEmpty) {
-      val runInstall = uDocker.installCommands.map {
-        ic ⇒
-          uDockerRunCommand(
-            uDocker.uDockerUser,
-            Vector.empty,
-            uDockerVolumes,
-            userWorkDirectory(uDocker),
-            uDockerExecutable,
-            name,
-            ic: Id[String])
-      }
-
-      executeAllNoExpand(
-        tmpDirectory,
-        uDockerVariables,
-        true,
-        None,
-        None,
-        None,
-        runInstall.toList
-      )
+  def runCommands(
+    uDocker:           UDockerArguments,
+    uDockerExecutable: File,
+    uDockerVariables:  Vector[(String, String)],
+    uDockerVolumes:    Vector[(String, String)],
+    container:         String,
+    commands:          Seq[String])(implicit newFile: NewFile) = newFile.withTmpDir { tmpDirectory ⇒
+    val runInstall = commands.map {
+      ic ⇒
+        uDockerRunCommand(
+          uDocker.uDockerUser,
+          Vector.empty,
+          uDockerVolumes,
+          userWorkDirectory(uDocker),
+          uDockerExecutable,
+          container,
+          ic: Id[String])
     }
 
-    name
+    executeAllNoExpand(
+      tmpDirectory,
+      uDockerVariables,
+      true,
+      None,
+      None,
+      None,
+      runInstall.toList,
+      captureOutput = true
+    )
+  }
+
+  def createContainer(uDocker: UDockerArguments, uDockerExecutable: File, containerDirectory: File, uDockerVariables: Vector[(String, String)], uDockerVolumes: Vector[(String, String)], imageId: String)(implicit newFile: NewFile) = newFile.withTmpDir { tmpDirectory ⇒
+
+    val id =
+      uDocker.localDockerImage.container match {
+        case None ⇒
+          //        val cl = commandLine(s"${uDockerExecutable.getAbsolutePath} create --name=$name $imageId")
+          val cl = commandLine(s"${uDockerExecutable.getAbsolutePath} create $imageId")
+          execute(cl, tmpDirectory, uDockerVariables, returnOutput = true, returnError = true).output.get.split("\n").head
+        case Some(directory) ⇒
+          val name = containerName(UUID.randomUUID().toString) //.take(10)
+          directory.copy(containerDirectory / name)
+          name
+      }
+
+    uDocker.mode.foreach { mode ⇒
+      val cl = commandLine(s"""${uDockerExecutable.getAbsolutePath} setup --execmode=$mode $id""")
+      execute(cl, tmpDirectory, uDockerVariables, returnOutput = true, returnError = true)
+    }
+
+    id
+  }
+
+  def imageId(uDocker: UDockerArguments) = s"${uDocker.localDockerImage.image}:${uDocker.localDockerImage.tag}"
+
+  def uDockerRunCommand[A[_]: Applicative](
+    user:                 Option[String],
+    environmentVariables: Vector[(String, String)],
+    volumes:              Vector[MountPoint],
+    workDirectory:        String,
+    uDocker:              File,
+    runId:                String,
+    command:              A[String]): A[String] = {
+
+    def volumesArgument(volumes: Vector[MountPoint]) = volumes.map { case (host, container) ⇒ s"""-v "$host":"$container"""" }.mkString(" ")
+
+    val userArgument = user match {
+      case None    ⇒ ""
+      case Some(x) ⇒ s"""--user="$x""""
+    }
+
+    val variablesArgument = environmentVariables.map { case (name, variable) ⇒ s"""-e ${name}="${variable}"""" }.mkString(" ")
+
+    command.map { cmd ⇒ s"""${uDocker.getAbsolutePath} run --workdir="$workDirectory" $userArgument  $variablesArgument ${volumesArgument(volumes)} $runId $cmd""" }
   }
 
   // TODO refactor

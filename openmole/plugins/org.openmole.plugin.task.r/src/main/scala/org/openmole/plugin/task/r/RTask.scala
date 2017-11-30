@@ -55,7 +55,7 @@ object RScriptTask {
   )(implicit name: sourcecode.Name, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider): RScriptTask =
     RScriptTask(
       script,
-      UDocker.toLocalImage(RTask.rImage(version)) match {
+      UDockerTask.toLocalImage(RTask.rImage(version)) match {
         case Right(x) ⇒ x
         case Left(x)  ⇒ throw new UserBadDataError(x.msg)
       },
@@ -69,8 +69,7 @@ object RScriptTask {
   script:           FromContext[String],
   localDockerImage: UDocker.LocalDockerImage,
   config:           InputOutputConfig,
-  external:         External
-) extends Task with ValidateTask {
+  external:         External) extends Task with ValidateTask {
 
   override def validate = Validate { p ⇒
     import p._

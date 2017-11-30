@@ -34,14 +34,14 @@ import org.openmole.plugin.task.systemexec._
 import org.openmole.core.preference._
 import org.openmole.plugin.task.container
 import org.openmole.plugin.task.udocker.DockerMetadata._
-import org.openmole.plugin.task.udocker.Registry._
 import org.openmole.tool.cache._
+import org.openmole.core.workflow.dsl._
 import squants._
 import squants.time.TimeConversions._
-import org.openmole.tool.file._
 import io.circe.generic.extras.auto._
 import io.circe.jawn.{ decode, decodeFile }
 import io.circe.syntax._
+import org.openmole.core.fileservice.FileService
 import org.openmole.core.threadprovider._
 import org.openmole.plugin.task.container.HostFiles
 import org.openmole.tool.lock.LockKey
@@ -74,8 +74,9 @@ object UDockerTask {
   def apply(
     image:           ContainerImage,
     command:         FromContext[String],
-    installCommands: Vector[String]      = Vector.empty
-  )(implicit name: sourcecode.Name, newFile: NewFile, workspace: Workspace, preference: Preference, threadProvider: ThreadProvider): UDockerTask = {
+    installCommands: Seq[String]              = Vector.empty,
+    mode:            OptionalArgument[String] = None
+  )(implicit name: sourcecode.Name, newFile: NewFile, workspace: Workspace, preference: Preference, threadProvider: ThreadProvider, fileService: FileService): UDockerTask = {
     val uDocker =
       UDockerArguments(
         localDockerImage = toLocalImage(image) match {
@@ -83,11 +84,54 @@ object UDockerTask {
           case Left(x)  ⇒ throw new UserBadDataError(x.msg)
         },
         command = command,
-        installCommands = installCommands
+        mode = mode orElse Some("P2")
       )
 
-    fromUDocker(uDocker)
+    val installedUDocker =
+      if (installCommands.isEmpty) uDocker
+      else newFile.withTmpFile { tmpDirectory ⇒
+        val layersDirectory = UDockerTask.layersDirectory(workspace)
+        val repositoryDirectory = UDockerTask.repositoryDirectory(workspace)
+        UDocker.buildRepoV2(repositoryDirectory, layersDirectory, uDocker.localDockerImage)
+
+        val (uDockerExecutable, uDockerInstallDirectory, uDockerTarball) = UDocker.install(tmpDirectory)
+
+        val containersDirectory = tmpDirectory / "containers"
+
+        def uDockerVariables = UDocker.environmentVariables(
+          tmpDirectory = tmpDirectory,
+          homeDirectory = tmpDirectory,
+          containersDirectory = containersDirectory,
+          repositoryDirectory = repositoryDirectory,
+          layersDirectory = layersDirectory,
+          installDirectory = uDockerInstallDirectory,
+          tarball = uDockerTarball
+        )
+
+        val container = UDocker.createContainer(uDocker, uDockerExecutable, containersDirectory, uDockerVariables, Vector.empty, imageId(uDocker))
+
+        runCommands(
+          uDocker,
+          uDockerExecutable,
+          uDockerVariables,
+          uDockerVolumes = Vector.empty,
+          container,
+          installCommands)
+
+        val createdContainer = newFile.newDir("container")
+        (containersDirectory / container) move createdContainer
+        fileService.deleteWhenGarbageCollected(createdContainer)
+        (UDockerArguments.localDockerImage composeLens LocalDockerImage.container) set Some(createdContainer) apply uDocker
+      }
+
+    fromUDocker(installedUDocker)
   }
+
+  def toLocalImage(containerImage: ContainerImage)(implicit preference: Preference, newFile: NewFile, workspace: Workspace, threadProvider: ThreadProvider): Either[Err, LocalDockerImage] =
+    containerImage match {
+      case i: DockerImage      ⇒ downloadImage(i, layersDirectory(workspace), preference(RegistryTimeout))
+      case i: SavedDockerImage ⇒ loadImage(i)
+    }
 
   def fromUDocker(uDocker: UDockerArguments)(implicit name: sourcecode.Name, newFile: NewFile, workspace: Workspace, preference: Preference): UDockerTask =
     new UDockerTask(
@@ -102,7 +146,7 @@ object UDockerTask {
 
   def layersDirectory(workspace: Workspace) = workspace.persistentDir /> "udocker" /> "layers"
 
-  def repositoriesDirectory(workspace: Workspace) = workspace.persistentDir /> "udocker" /> "repos"
+  def repositoryDirectory(workspace: Workspace) = workspace.persistentDir /> "udocker" /> "repos"
 
   lazy val containerPoolKey = CacheKey[WithInstance[ContainerID]]()
   lazy val installLockKey = LockKey()
@@ -128,7 +172,10 @@ object UDockerTask {
       executionContext.lockRepository.withLock(UDockerTask.installLockKey) {
         UDocker.install(executionContext.tmpDirectory)
       }
-    UDocker.buildRepoV2(uDocker.localDockerImage)(executionContext.workspace)
+
+    val layersDirectory = UDockerTask.layersDirectory(executionContext.workspace)
+    val repositoryDirectory = UDockerTask.repositoryDirectory(executionContext.workspace)
+    UDocker.buildRepoV2(repositoryDirectory, layersDirectory, uDocker.localDockerImage)
 
     External.withWorkDir(executionContext) { taskWorkDirectory ⇒
       taskWorkDirectory.mkdirs()
@@ -141,8 +188,8 @@ object UDockerTask {
         tmpDirectory = executionContext.tmpDirectory,
         homeDirectory = taskWorkDirectory,
         containersDirectory = containersDirectory,
-        repositoryDirectory = UDockerTask.repositoriesDirectory(executionContext.workspace),
-        layersDirectory = UDockerTask.layersDirectory(executionContext.workspace),
+        repositoryDirectory = repositoryDirectory,
+        layersDirectory = layersDirectory,
         installDirectory = uDockerInstallDirectory,
         tarball = uDockerTarball
       )
@@ -179,8 +226,8 @@ object UDockerTask {
       val imageId = s"${uDocker.localDockerImage.image}:${uDocker.localDockerImage.tag}"
 
       val pool =
-        if (uDocker.reuseContainer) executionContext.cache.getOrElseUpdate(UDockerTask.containerPoolKey, Pool[ContainerId](() ⇒ UDocker.newContainer(uDocker, uDockerExecutable, uDockerVariables, volumes, imageId)))
-        else WithNewInstance[ContainerId](() ⇒ UDocker.newContainer(uDocker, uDockerExecutable, uDockerVariables, volumes, imageId))
+        if (uDocker.reuseContainer) executionContext.cache.getOrElseUpdate(UDockerTask.containerPoolKey, Pool[ContainerId](() ⇒ UDocker.createContainer(uDocker, uDockerExecutable, containersDirectory, uDockerVariables, volumes, imageId)))
+        else WithNewInstance[ContainerId](() ⇒ UDocker.createContainer(uDocker, uDockerExecutable, containersDirectory, uDockerVariables, volumes, imageId))
 
       pool { runId ⇒
 
@@ -200,7 +247,7 @@ object UDockerTask {
             stdOut,
             stdErr,
             List(
-              uDockerRunCommand(
+              UDocker.uDockerRunCommand(
                 uDocker.uDockerUser,
                 containerEnvironmentVariables,
                 volumes,
