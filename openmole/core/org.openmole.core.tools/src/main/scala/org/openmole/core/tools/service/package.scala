@@ -25,7 +25,7 @@ import org.openmole.tool.random.Random
 package object service {
 
   @transient lazy val localRuntimeInfo =
-    RuntimeInfo(LocalHostName.localHostName.toOption.getOrElse("fake:" + UUID.randomUUID().toString))
+    RuntimeInfo(LocalHostName.localHostName.getOrElse("fake:" + UUID.randomUUID().toString))
 
   case class RuntimeInfo(hostName: String)
 

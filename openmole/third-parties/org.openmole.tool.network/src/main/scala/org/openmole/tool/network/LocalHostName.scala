@@ -23,7 +23,10 @@ import scala.util.Try
 
 object LocalHostName {
 
-  @transient lazy val localHostName: Try[String] =
-    Try { InetAddress.getLocalHost.getCanonicalHostName }
+  @transient lazy val localHostName: Option[String] =
+    try Some(InetAddress.getLocalHost.getCanonicalHostName)
+    catch {
+      case _: Throwable => None
+    }
 
 }
