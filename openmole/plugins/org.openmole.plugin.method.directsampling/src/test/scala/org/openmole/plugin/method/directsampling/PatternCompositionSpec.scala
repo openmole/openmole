@@ -75,4 +75,34 @@ class PatternCompositionSpec extends FlatSpec with Matchers {
     mole.start.waitUntilEnded
   }
 
+  "Direct samplings" should "transmit explored value" in {
+    val l = Val[Double]
+    val i = Val[Int]
+    val seed = Val[Int]
+
+    val init = EmptyTask() set (
+      (inputs, outputs) += l,
+      l := 2.0
+    )
+
+    val model =
+      EmptyTask() set (
+        inputs += (l, seed)
+      )
+
+    val agg =
+      EmptyTask() set (
+        (inputs, outputs) += i
+      )
+
+    val mole =
+      init --
+        DirectSampling(
+          Replication(model, seed, 10, aggregation = agg),
+          ExplicitSampling(i, Seq(1, 2))
+        )
+
+    mole.start.waitUntilEnded
+  }
+
 }

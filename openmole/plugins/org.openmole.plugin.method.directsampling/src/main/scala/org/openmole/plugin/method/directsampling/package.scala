@@ -52,7 +52,7 @@ package object directsampling {
     val exploration = ExplorationTask(sampling)
     val explorationCapsule = Capsule(exploration, strain = true)
 
-    explorationCapsule -< evaluation >- aggregation
+    explorationCapsule -< evaluation >- aggregation & (explorationCapsule -- aggregation)
   }
 
   private def defaultAggregation =
