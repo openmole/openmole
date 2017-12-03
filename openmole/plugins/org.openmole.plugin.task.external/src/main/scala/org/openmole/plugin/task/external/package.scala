@@ -92,4 +92,28 @@ package external {
   }
 }
 
-package object external extends ExternalPackage
+package object external extends ExternalPackage {
+  import org.openmole.tool.file._
+
+  def directoryContentInformation(directory: File, margin: String = "  ") = {
+    def fileInformation(file: File) = {
+      def permissions = {
+        val w = if (file.canWrite) "w" else ""
+        val r = if (file.canRead) "r" else ""
+        val x = if (file.canExecute) "x" else ""
+        s"$r$w$x"
+      }
+
+      def fileType =
+        if (file.isDirectory) "directory"
+        else if (file.isSymbolicLink) "link"
+        else if (file.isFile) "file"
+        else "unknown"
+
+      s"""${directory.toPath.relativize(file.toPath)} (type=$fileType, permissions=$permissions)"""
+    }
+
+    directory.listRecursive(_ ⇒ true).map(fileInformation).map(i ⇒ s"$margin$i").mkString("\n")
+  }
+
+}

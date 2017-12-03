@@ -284,8 +284,8 @@ package object systemexec extends external.ExternalPackage with SystemExecPackag
         e,
         s"""Error executing: ${command.mkString(" ")}
 
-            |The content of the working directory was:
-            |${workDir.listRecursive(_ ⇒ true).map(_.getPath).mkString("\n")}
+            |The content of the working directory was ($workDir):
+            |${directoryContentInformation(workDir)}
           """.stripMargin
       )
     }
