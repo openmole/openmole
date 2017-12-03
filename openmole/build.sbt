@@ -934,6 +934,7 @@ lazy val dockerBin = Project("docker", binDir / "docker") enablePlugins (sbtdock
     runRaw(
       """groupadd -r openmole && \
               useradd -r -g openmole openmole --home-dir /var/openmole/ --create-home && \
+              mkdir /workspace && chown openmole:openmole -R /workspace && \ // hack requiered for some eclipse plugins to work (no openmole ones though)
               chmod +x /openmole/openmole && \
               ln -s /openmole/openmole /usr/bin/openmole""")
     expose(8443)
