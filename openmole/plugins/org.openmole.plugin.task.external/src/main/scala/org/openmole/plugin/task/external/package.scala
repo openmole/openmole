@@ -113,7 +113,7 @@ package object external extends ExternalPackage {
       s"""${directory.toPath.relativize(file.toPath)} (type=$fileType, permissions=$permissions)"""
     }
 
-    directory.listRecursive(_ ⇒ true).map(fileInformation).map(i ⇒ s"$margin$i").mkString("\n")
+    directory.listRecursive(_ ⇒ true).filter(_ != directory).map(fileInformation).map(i ⇒ s"$margin$i").mkString("\n")
   }
 
 }
