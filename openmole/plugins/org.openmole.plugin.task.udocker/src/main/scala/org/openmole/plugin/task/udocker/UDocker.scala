@@ -1,5 +1,6 @@
 package org.openmole.plugin.task.udocker
 
+import java.io.PrintStream
 import java.util.UUID
 
 import org.openmole.core.preference._
@@ -248,7 +249,13 @@ object UDocker {
     uDockerVariables:  Vector[(String, String)],
     uDockerVolumes:    Vector[(String, String)],
     container:         String,
-    commands:          Seq[String])(implicit newFile: NewFile) = newFile.withTmpDir { tmpDirectory ⇒
+    commands:          Seq[String],
+    captureOutput:     Boolean                  = false,
+    captureError:      Boolean                  = false,
+    displayOutput:     Boolean                  = true,
+    displayError:      Boolean                  = true,
+    stdOut:            PrintStream              = System.out,
+    stdErr:            PrintStream              = System.err)(implicit newFile: NewFile) = newFile.withTmpDir { tmpDirectory ⇒
     val runInstall = commands.map {
       ic ⇒
         uDockerRunCommand(
@@ -264,7 +271,13 @@ object UDocker {
     executeAll(
       tmpDirectory,
       uDockerVariables,
-      commands = runInstall.toList
+      commands = runInstall.toList,
+      captureOutput = captureOutput,
+      captureError = captureError,
+      displayOutput = displayOutput,
+      displayError = displayError,
+      stdOut = stdOut,
+      stdErr = stdErr
     )
   }
 
@@ -275,7 +288,7 @@ object UDocker {
         case None ⇒
           //        val cl = commandLine(s"${uDockerExecutable.getAbsolutePath} create --name=$name $imageId")
           val cl = commandLine(s"${uDockerExecutable.getAbsolutePath} create $imageId")
-          execute(cl, tmpDirectory, uDockerVariables, returnOutput = true, returnError = true).output.get.split("\n").head
+          execute(cl, tmpDirectory, uDockerVariables, captureOutput = true, captureError = true).output.get.split("\n").head
         case Some(directory) ⇒
           val name = containerName(UUID.randomUUID().toString) //.take(10)
           directory.copy(containerDirectory / name)
@@ -284,7 +297,7 @@ object UDocker {
 
     uDocker.mode.foreach { mode ⇒
       val cl = commandLine(s"""${uDockerExecutable.getAbsolutePath} setup --execmode=$mode $id""")
-      execute(cl, tmpDirectory, uDockerVariables, returnOutput = true, returnError = true)
+      execute(cl, tmpDirectory, uDockerVariables, captureOutput = true, captureError = true)
     }
 
     id

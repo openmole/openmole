@@ -116,7 +116,8 @@ object UDockerTask {
           uDockerVariables,
           uDockerVolumes = Vector.empty,
           container,
-          installCommands)
+          installCommands
+        )
 
         val createdContainer = newFile.newDir("container")
         (containersDirectory / container) move createdContainer

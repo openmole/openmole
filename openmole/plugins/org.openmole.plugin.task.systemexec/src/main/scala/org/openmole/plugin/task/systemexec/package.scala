@@ -238,18 +238,34 @@ package object systemexec extends external.ExternalPackage with SystemExecPackag
     command:              Array[String],
     workDir:              File,
     environmentVariables: Vector[(String, String)],
-    returnOutput:         Boolean,
-    returnError:          Boolean,
+    captureOutput:        Boolean,
+    captureError:         Boolean,
     errorOnReturnValue:   Boolean                  = true,
+    displayOutput:        Boolean                  = true,
+    displayError:         Boolean                  = true,
     stdOut:               PrintStream              = System.out,
     stdErr:               PrintStream              = System.err
   ) = {
     try {
+
       val outBuilder = new StringOutputStream
       val errBuilder = new StringOutputStream
 
-      val out = if (returnOutput) new PrintStream(outBuilder) else stdOut
-      val err = if (returnError) new PrintStream(errBuilder) else stdErr
+      val out: PrintStream =
+        (displayOutput, captureOutput) match {
+          case (true, false)  ⇒ stdOut
+          case (false, true)  ⇒ new PrintStream(outBuilder)
+          case (true, true)   ⇒ new PrintStream(MultiplexedOutputStream(outBuilder, stdOut))
+          case (false, false) ⇒ new PrintStream(new NullOutputStream)
+        }
+
+      val err =
+        (displayError, captureError) match {
+          case (true, false)  ⇒ stdErr
+          case (false, true)  ⇒ new PrintStream(errBuilder)
+          case (true, true)   ⇒ new PrintStream(MultiplexedOutputStream(errBuilder, stdErr))
+          case (false, false) ⇒ new PrintStream(new NullOutputStream)
+        }
 
       val runtime = Runtime.getRuntime
 
@@ -272,8 +288,8 @@ package object systemexec extends external.ExternalPackage with SystemExecPackag
       val result =
         ExecutionResult(
           returnCode,
-          if (returnOutput) Some(outBuilder.toString) else None,
-          if (returnError) Some(errBuilder.toString) else None
+          if (captureOutput) Some(outBuilder.toString) else None,
+          if (captureError) Some(errBuilder.toString) else None
         )
 
       if (errorOnReturnValue && result.returnCode != 0) throw error(command.toVector, result)
@@ -303,7 +319,6 @@ package object systemexec extends external.ExternalPackage with SystemExecPackag
     )
   }
 
-  @annotation.tailrec
   def executeAll(
     workDirectory:        File,
     environmentVariables: Vector[(String, String)],
@@ -311,17 +326,24 @@ package object systemexec extends external.ExternalPackage with SystemExecPackag
     errorOnReturnValue:   Boolean                  = true,
     captureOutput:        Boolean                  = false,
     captureError:         Boolean                  = false,
-    acc:                  ExecutionResult          = ExecutionResult.empty,
+    displayOutput:        Boolean                  = true,
+    displayError:         Boolean                  = true,
     stdOut:               PrintStream              = System.out,
     stdErr:               PrintStream              = System.err
-  ): ExecutionResult =
-    commands match {
-      case Nil ⇒ acc
-      case cmd :: t ⇒
-        val cl = parse(cmd)
-        val result = execute(cl.toArray, workDirectory, environmentVariables, returnOutput = captureOutput, returnError = captureError, errorOnReturnValue = false)
-        if (errorOnReturnValue && result.returnCode != 0) throw error(cl.toVector, result)
-        else executeAll(workDirectory, environmentVariables, t, errorOnReturnValue, captureOutput, captureError, ExecutionResult.append(acc, result))
-    }
+  ): ExecutionResult = {
+
+    @annotation.tailrec
+    def executeAll0(acc: ExecutionResult): ExecutionResult =
+      commands match {
+        case Nil ⇒ acc
+        case cmd :: t ⇒
+          val cl = parse(cmd)
+          val result = execute(cl.toArray, workDirectory, environmentVariables, captureOutput = captureOutput, captureError = captureError, errorOnReturnValue = false)
+          if (errorOnReturnValue && result.returnCode != 0) throw error(cl.toVector, result)
+          else executeAll0(ExecutionResult.append(acc, result))
+      }
+
+    executeAll0(ExecutionResult.empty)
+  }
 
 }

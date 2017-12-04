@@ -109,7 +109,7 @@ object CARETask extends JavaLogger {
 
       // unarchiving in task's work directory
       // no need to retrieve error => will throw exception if failing
-      execute(Array(archive.getAbsolutePath), taskWorkDirectory, Vector.empty, returnOutput = true, returnError = true)
+      execute(Array(archive.getAbsolutePath), taskWorkDirectory, Vector.empty, captureOutput = true, captureError = true)
 
       val extractedArchive = taskWorkDirectory.listFilesSafe.headOption.getOrElse(
         throw new InternalProcessingError("Work directory should contain extracted archive, but is empty")
