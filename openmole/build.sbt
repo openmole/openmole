@@ -928,14 +928,17 @@ lazy val dockerBin = Project("docker", binDir / "docker") enablePlugins (sbtdock
     )
   ),
   dockerfile in docker := new Dockerfile {
-    from("openjdk:9-jre")
+    from("openjdk:8-jre-slim")
     maintainer("Romain Reuillon <romain.reuillon@iscpif.fr>, Jonathan Passerat-Palmbach <j.passerat-palmbach@imperial.ac.uk>")
     copy((assemble in openmole).value, s"/openmole")
-    runRaw("apt update && apt install -y python python-pycurl bash tar gzip && rm -rf /var/lib/apt/lists/*")
+    runRaw("""apt update && \
+              apt install -y python python-pycurl bash tar gzip ca-certificates ca-certificates-java && \
+              rm -rf /var/lib/apt/lists/* && \
+              mkdir -p /lib/modules""")
     runRaw(
       """groupadd -r openmole && \
               useradd -r -g openmole openmole --home-dir /var/openmole/ --create-home && \
-              mkdir /workspace && chown openmole:openmole -R /workspace && \  
+              mkdir /workspace && chown openmole:openmole -R /workspace && \
               chmod +x /openmole/openmole && \
               ln -s /openmole/openmole /usr/bin/openmole""")
     expose(8443)
