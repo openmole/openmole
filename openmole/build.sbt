@@ -928,7 +928,7 @@ lazy val dockerBin = Project("docker", binDir / "docker") enablePlugins (sbtdock
     )
   ),
   dockerfile in docker := new Dockerfile {
-    from("openjdk:9-jre-slim")
+    from("openjdk:9-jre")
     maintainer("Romain Reuillon <romain.reuillon@iscpif.fr>, Jonathan Passerat-Palmbach <j.passerat-palmbach@imperial.ac.uk>")
     copy((assemble in openmole).value, s"/openmole")
     runRaw("apt update && apt install -y python python-pycurl bash tar gzip && rm -rf /var/lib/apt/lists/*")
