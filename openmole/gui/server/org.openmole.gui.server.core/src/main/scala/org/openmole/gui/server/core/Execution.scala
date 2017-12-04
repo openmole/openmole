@@ -130,14 +130,13 @@ class Execution {
   }
 
   def allStates(lines: Int): (Seq[(ExecutionId, ExecutionInfo)], Seq[OutputStreamData]) = atomic { implicit ctx ⇒
-
-    val envIds = Runnings.environmentIds
+    val executionIds = staticExecutionInfo.map(_._1)
 
     def outputStreamData(id: ExecutionId, lines: Int) = atomic { implicit ctx ⇒
       OutputStreamData(id, outputStreams(id).toString.lines.toSeq.takeRight(lines).mkString("\n"))
     }
 
-    val outputs = envIds.keys.toSeq.map {
+    val outputs = executionIds.toSeq.map {
       outputStreamData(_, lines)
     }
 
