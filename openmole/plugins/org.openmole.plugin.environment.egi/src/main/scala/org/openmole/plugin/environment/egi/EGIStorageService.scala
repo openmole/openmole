@@ -164,6 +164,7 @@ object CurlRemoteStorage {
 
     def upload(from: String, to: String) = s"$curl -T $from -L $to"
     def download(from: String, to: String) = s"$curl -L $from -o $to"
+    def delete(location: String) = s"""$curl -X "DELETE" $location"""
   }
 }
 
@@ -183,7 +184,9 @@ case class CurlRemoteStorage(location: String, voName: String, debug: Boolean, t
         }
       }
       catch {
-        case e: Throwable ⇒ throw new java.io.IOException(s"Error uploading $src to $dest to $location with option $options", e)
+        case e: Throwable ⇒
+          util.Try(CurlRemoteStorage.run(curl.delete(resolve(dest))))
+          throw new java.io.IOException(s"Error uploading $src to $dest to $location with option $options", e)
       }
     }
     catch {
