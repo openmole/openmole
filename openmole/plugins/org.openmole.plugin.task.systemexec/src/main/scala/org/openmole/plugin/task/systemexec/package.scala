@@ -333,17 +333,17 @@ package object systemexec extends external.ExternalPackage with SystemExecPackag
   ): ExecutionResult = {
 
     @annotation.tailrec
-    def executeAll0(acc: ExecutionResult): ExecutionResult =
+    def executeAll0(commands: List[String], acc: ExecutionResult): ExecutionResult =
       commands match {
         case Nil ⇒ acc
         case cmd :: t ⇒
           val cl = parse(cmd)
           val result = execute(cl.toArray, workDirectory, environmentVariables, captureOutput = captureOutput, captureError = captureError, errorOnReturnValue = false)
           if (errorOnReturnValue && result.returnCode != 0) throw error(cl.toVector, result)
-          else executeAll0(ExecutionResult.append(acc, result))
+          else executeAll0(t, ExecutionResult.append(acc, result))
       }
 
-    executeAll0(ExecutionResult.empty)
+    executeAll0(commands, ExecutionResult.empty)
   }
 
 }
