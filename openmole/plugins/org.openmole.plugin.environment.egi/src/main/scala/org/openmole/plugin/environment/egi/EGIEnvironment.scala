@@ -24,7 +24,7 @@ import org.openmole.core.communication.storage
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.threadprovider.Updater
 import org.openmole.core.workspace.Workspace
-import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, SerializedJob, UsageControl }
+import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, SerializedJob, UpdateInterval, UsageControl }
 import org.openmole.plugin.environment.batch.jobservice.{ BatchJob, BatchJobService, JobServiceInterface }
 import org.openmole.plugin.environment.batch.refresh.{ JobManager, StopEnvironment }
 import org.openmole.plugin.environment.batch.storage.{ StorageInterface, StorageService }
@@ -447,5 +447,8 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
 
   override def trySelectJobService() =
     UsageControl.tryGetToken(batchJobService.usageControl).map(token ⇒ (batchJobService, token))
+
+  override def updateInterval =
+    UpdateInterval.fixed(preference(EGIEnvironment.JobGroupRefreshInterval))
 
 }
