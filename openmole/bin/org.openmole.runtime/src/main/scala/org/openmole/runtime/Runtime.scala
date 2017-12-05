@@ -217,7 +217,7 @@ class Runtime {
     logger.fine("Upload the result message")
     newFile.withTmpFile("output", ".tgz") { outputLocal ⇒
       serializerService.serialiseAndArchiveFiles(runtimeResult, outputLocal)
-      retry(storage.upload(outputLocal, outputMessagePath, TransferOptions(forceCopy = true, canMove = true)), Some(10 seconds))
+      retry(storage.upload(outputLocal, outputMessagePath, TransferOptions(forceCopy = true, canMove = true)), Some(5 seconds))
     }
 
     result
