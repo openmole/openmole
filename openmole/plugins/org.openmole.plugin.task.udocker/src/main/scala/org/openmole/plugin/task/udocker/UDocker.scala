@@ -286,9 +286,8 @@ object UDocker {
     val id =
       uDocker.localDockerImage.container match {
         case None ⇒
-          //        val cl = commandLine(s"${uDockerExecutable.getAbsolutePath} create --name=$name $imageId")
           val cl = commandLine(s"${uDockerExecutable.getAbsolutePath} create $imageId")
-          execute(cl, tmpDirectory, uDockerVariables, captureOutput = true, captureError = true).output.get.split("\n").head
+          execute(cl, tmpDirectory, uDockerVariables, captureOutput = true, captureError = true, displayOutput = false, displayError = false).output.get.split("\n").head
         case Some(directory) ⇒
           val name = containerName(UUID.randomUUID().toString) //.take(10)
           directory.copy(containerDirectory / name)
