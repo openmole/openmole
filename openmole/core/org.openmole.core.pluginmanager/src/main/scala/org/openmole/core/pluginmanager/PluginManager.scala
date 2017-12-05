@@ -227,7 +227,11 @@ object PluginManager extends JavaLogger {
 
   def directDependencies(b: Bundle) =
     if (b.isFullDynamic) List.empty
-    else b.adapt(classOf[BundleWiring]).getRequiredWires(null).map(_.getProvider.getBundle).filter(_.getBundleId != Constants.SYSTEM_BUNDLE_ID).distinct
+    else {
+      val wires = b.adapt(classOf[BundleWiring]).getRequiredWires(null).filter(_ != null)
+      val bundles = wires.flatMap(w ⇒ Option(w.getProvider)).flatMap(p ⇒ Option(p.getBundle))
+      bundles.filter(_.getBundleId != Constants.SYSTEM_BUNDLE_ID).distinct
+    }
 
   def directDependingBundles(b: Bundle) =
     b.adapt(classOf[BundleWiring]).
