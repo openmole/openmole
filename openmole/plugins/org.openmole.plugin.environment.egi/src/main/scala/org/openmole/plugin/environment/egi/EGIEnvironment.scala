@@ -414,7 +414,7 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
     }
   }
 
-  val jobStateCache = TimeCache { () ⇒
+  lazy val jobStateCache = TimeCache { () ⇒
     val states = gridscale.dirac.queryGroupState(diracService, tokenCache(), diracJobGroup)
     states.toMap -> preference(EGIEnvironment.JobGroupRefreshInterval)
   }
