@@ -242,6 +242,7 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
   }
 
   override def start() = {
+    gridscale.dirac.delegate(diracService, implicitly[EGIAuthenticationInterface[A]].apply(authentication), tokenCache())
     Updater.delay(eagerSubmissionAgent)
     super.start()
   }
