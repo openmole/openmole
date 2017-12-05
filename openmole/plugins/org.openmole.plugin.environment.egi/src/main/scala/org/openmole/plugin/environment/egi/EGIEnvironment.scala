@@ -82,7 +82,7 @@ object EGIEnvironment extends JavaLogger {
   val ProxyLifeTime = ConfigurationLocation("EGIEnvironment", "ProxyTime", Some(24 hours))
   //  val MyProxyTime = ConfigurationLocation("EGIEnvironment", "MyProxyTime", Some(7 days))
   val ProxyRenewalTime = ConfigurationLocation("EGIEnvironment", "ProxyRenewalTime", Some(1 hours))
-  val TokenRenewalMarginTime = ConfigurationLocation("EGIEnvironment", "TokenRenewalMarginTime", Some(1 hours))
+  val TokenRenewalTime = ConfigurationLocation("EGIEnvironment", "TokenRenewalTime", Some(1 hours))
   val JobGroupRefreshInterval = ConfigurationLocation("EGIEnvironment", "JobGroupRefreshInterval", Some(1 minutes))
   //  val JobShakingHalfLife = ConfigurationLocation("EGIEnvironment", "JobShakingHalfLife", Some(30 minutes))
   //  val JobShakingMaxReady = ConfigurationLocation("EGIEnvironment", "JobShakingMaxReady", Some(100))
@@ -238,7 +238,7 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
 
   lazy val tokenCache = TimeCache { () ⇒
     val token = EGIAuthentication.getToken(authentication, voName)
-    (token, token.lifetime - preference(EGIEnvironment.TokenRenewalMarginTime))
+    (token, preference(EGIEnvironment.TokenRenewalTime))
   }
 
   override def start() = {
