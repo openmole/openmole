@@ -45,10 +45,12 @@ import org.openmole.core.workflow.execution.Environment.RuntimeLog
 import org.openmole.tool.cache.KeyValueCache
 import org.openmole.tool.lock._
 import org.openmole.tool.file._
+import squants.time.TimeConversions._
+import squants._
 
 object Runtime extends JavaLogger {
   val NbRetry = 3
-  def retry[T](f: ⇒ T) = Retry.retry(f, NbRetry)
+  def retry[T](f: ⇒ T, coolDown: Option[Time] = None) = Retry.retry(f, NbRetry, coolDown)
 }
 
 class Runtime {
@@ -215,7 +217,7 @@ class Runtime {
     logger.fine("Upload the result message")
     newFile.withTmpFile("output", ".tgz") { outputLocal ⇒
       serializerService.serialiseAndArchiveFiles(runtimeResult, outputLocal)
-      retry(storage.upload(outputLocal, outputMessagePath, TransferOptions(forceCopy = true, canMove = true)))
+      retry(storage.upload(outputLocal, outputMessagePath, TransferOptions(forceCopy = true, canMove = true)), Some(10 seconds))
     }
 
     result

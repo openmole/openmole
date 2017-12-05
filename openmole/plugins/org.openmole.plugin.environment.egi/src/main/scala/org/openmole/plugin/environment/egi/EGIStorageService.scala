@@ -183,7 +183,7 @@ case class CurlRemoteStorage(location: String, voName: String, debug: Boolean, t
         }
       }
       catch {
-        case e: Throwable ⇒ throw new java.io.IOException(s"Error uploading $src to $dest from $location with option $options", e)
+        case e: Throwable ⇒ throw new java.io.IOException(s"Error uploading $src to $dest to $location with option $options", e)
       }
     }
     catch {
