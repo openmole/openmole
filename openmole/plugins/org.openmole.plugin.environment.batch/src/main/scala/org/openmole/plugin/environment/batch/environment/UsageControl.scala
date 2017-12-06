@@ -26,6 +26,7 @@ object UsageControl {
   def releaseToken(usageControl: UsageControl, token: AccessToken) = atomic { implicit txn ⇒
     usageControl.usedToken -= token
     usageControl.tokens() = token :: usageControl.tokens()
+    assert(usageControl.usedToken.size + usageControl.tokens().size == usageControl.nbTokens)
   }
 
   def tryGetToken(usageControl: UsageControl): Option[AccessToken] = atomic { implicit txn ⇒
@@ -35,12 +36,13 @@ object UsageControl {
         case h :: t ⇒
           usageControl.tokens() = t
           usageControl.usedToken += h
+          assert(usageControl.usedToken.size + usageControl.tokens().size == usageControl.nbTokens)
           Some(h)
         case Nil ⇒ None
       }
   }
 
-  def getToken(usageControl: UsageControl) = atomic { implicit txn ⇒
+  private def getToken(usageControl: UsageControl) = atomic { implicit txn ⇒
     if (usageControl.stopped()) throw new InternalProcessingError("Service has been stopped")
     tryGetToken(usageControl) match {
       case Some(t) ⇒ t

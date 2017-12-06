@@ -17,7 +17,7 @@ object ErrorActor extends JavaLogger {
     bj match {
       case None ⇒ processError(job, exception, None)
       case Some(bj) ⇒
-        UsageControl.tryGetToken(bj.usageControl) match {
+        UsageControl.tryWithToken(bj.usageControl) {
           case Some(token) ⇒
             val output = util.Try(bj.stdOutErr(token)).toOption
             processError(job, exception, output)

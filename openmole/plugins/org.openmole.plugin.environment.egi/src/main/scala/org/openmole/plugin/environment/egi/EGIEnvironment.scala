@@ -242,7 +242,6 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
   }
 
   override def start() = {
-    gridscale.dirac.delegate(diracService, implicitly[EGIAuthenticationInterface[A]].apply(authentication), tokenCache())
     Updater.delay(eagerSubmissionAgent)
     super.start()
   }
@@ -428,7 +427,7 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
   def delete(id: gridscale.dirac.JobID) =
     gridscale.dirac.delete(diracService, tokenCache(), id) //clean(LocalHost(), id)
 
-  def stdOutErr(id: gridscale.dirac.JobID) = newFile.withTmpDir { tmpDir ⇒
+  def stdOutErr(id: gridscale.dirac.JobID) = newFile.withTmpDirjo { tmpDir ⇒
     import org.openmole.tool.file._
     tmpDir.mkdirs()
     gridscale.dirac.downloadOutputSandbox(diracService, tokenCache(), id, tmpDir)
