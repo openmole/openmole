@@ -26,7 +26,6 @@ object UsageControl {
   def releaseToken(usageControl: UsageControl, token: AccessToken) = atomic { implicit txn ⇒
     usageControl.usedToken -= token
     usageControl.tokens() = token :: usageControl.tokens()
-    assert(usageControl.usedToken.size + usageControl.tokens().size == usageControl.nbTokens)
   }
 
   def tryGetToken(usageControl: UsageControl): Option[AccessToken] = atomic { implicit txn ⇒
@@ -36,7 +35,6 @@ object UsageControl {
         case h :: t ⇒
           usageControl.tokens() = t
           usageControl.usedToken += h
-          assert(usageControl.usedToken.size + usageControl.tokens().size == usageControl.nbTokens)
           Some(h)
         case Nil ⇒ None
       }

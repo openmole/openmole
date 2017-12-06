@@ -377,7 +377,6 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
   }
 
   lazy val diracJobGroup = java.util.UUID.randomUUID().toString.filter(_ != '-')
-  lazy val jobService = BatchJobService(env, concurrency = preference(EGIEnvironment.ConnexionsByWebDAVSE))
 
   def submit(serializedJob: SerializedJob) = {
     import org.openmole.tool.file._
