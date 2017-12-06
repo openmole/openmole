@@ -427,7 +427,7 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
   def delete(id: gridscale.dirac.JobID) =
     gridscale.dirac.delete(diracService, tokenCache(), id) //clean(LocalHost(), id)
 
-  def stdOutErr(id: gridscale.dirac.JobID) = newFile.withTmpDirjo { tmpDir ⇒
+  def stdOutErr(id: gridscale.dirac.JobID) = newFile.withTmpDir { tmpDir ⇒
     import org.openmole.tool.file._
     tmpDir.mkdirs()
     gridscale.dirac.downloadOutputSandbox(diracService, tokenCache(), id, tmpDir)
