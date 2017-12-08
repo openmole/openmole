@@ -41,9 +41,7 @@ case class JobScript(voName: String, memory: Int, threads: Int, debug: Boolean, 
     val storageLocation = storageLocations(serializedJob.storage.id)
     def resolve(dest: String) = gridscale.RemotePath.child(storageLocation, dest)
 
-    val debugInfo =
-      if (debug) s"echo ${storageLocation} ; cat /proc/meminfo ; ulimit -a ; " + "env ; echo $X509_USER_PROXY ; cat $X509_USER_PROXY ; "
-      else ""
+    val debugInfo = s"echo ${storageLocation} ; hostname ; date -R ; cat /proc/meminfo ; ulimit -a ; " + "env ; echo $X509_USER_PROXY ; "
 
     val init = {
       val script = ListBuffer[String]()
