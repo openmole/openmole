@@ -1,8 +1,8 @@
 package org.openmole.gui.client.core.alert
 
-import scaladget.stylesheet.{ all ⇒ sheet }
+import scaladget.tools._
 import org.openmole.gui.ext.tool.client._
-import sheet._
+
 import scalatags.JsDom.all._
 
 /*

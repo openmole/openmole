@@ -6,15 +6,16 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
 import autowire._
 import org.openmole.gui.ext.tool.client.Utils._
-import scaladget.stylesheet.{ all ⇒ sheet }
+
+import scaladget.bootstrapnative.bsn._
+import scaladget.tools._
 import org.openmole.gui.ext.api.Api
 import org.scalajs.dom.raw.{ HTMLDivElement, HTMLElement }
-import sheet._
+
 import rx._
 import scalatags.JsDom.all.{ raw, _ }
-import scalatags.JsDom.{ TypedTag, tags }
+import scalatags.JsDom.TypedTag
 import scala.scalajs.js.timers._
-import org.openmole.gui.ext.tool.client.JsRxTags._
 import org.openmole.gui.ext.tool.client._
 import org.openmole.gui.client.core._
 import org.openmole.gui.ext.tool.client.FileManager
@@ -114,18 +115,18 @@ object TreeNodeTabs {
     }
 
     val editButton = Rx {
-      if (editable()) tags.div()
+      if (editable()) div()
       else
-        tags.button("Edit", btn_primary +++ executionElement)(onclick := { () ⇒
+        button("Edit", btn_primary +++ executionElement, onclick := { () ⇒
           editable() = !editable.now
         })
     }
 
-    def controlElement = tags.div(
-      if (editable.now) tags.div else editButton
+    def controlElement = div(
+      if (editable.now) div else editButton
     )
 
-    lazy val overlayElement = tags.div
+    lazy val overlayElement = div
 
     lazy val block = Rx {
       div(
@@ -152,8 +153,8 @@ object TreeNodeTabs {
     val editorElement =
       div(editorContainer +++ container)(
         overflowY := "scroll",
-        div(panel +++ panelDefault)(
-          div(sheet.panelBody)(
+        div(panelClass +++ panelDefault)(
+          div(panelBody)(
             ms("mdRendering") +++ (padding := 10),
             RawFrag(htmlContent)
           )
@@ -183,7 +184,7 @@ object TreeNodeTabs {
 
     def refresh(onsaved: () ⇒ Unit) = save(onsaved)
 
-    val runButton = tags.button("Play", btn_primary)(onclick := { () ⇒
+    val runButton = button("Play", btn_primary, onclick := { () ⇒
       computation() = Pending
       onrun
     })
@@ -318,10 +319,10 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
     div(role := "tabpanel")(
       //Headers
       Rx {
-        ul(sheet.nav +++ sheet.navTabs, role := "tablist")(
+        ul(nav +++ navTabs, role := "tablist")(
           for (t ← tabs()) yield {
             li(
-              sheet.paddingTop(35),
+              paddingTop := 35,
               role := "presentation",
               `class` := {
                 t.activity() match {
@@ -342,7 +343,7 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
                     setActive(t)
                   }
                 )(
-                    tags.button(ms("close") +++ tabClose, `type` := "button", onclick := { () ⇒ --(t) })(raw("&#215")),
+                    button(ms("close") +++ tabClose, `type` := "button", onclick := { () ⇒ --(t) })(raw("&#215")),
                     t.tabName()
                   )
               )
@@ -367,7 +368,7 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
                     t match {
                       case oms: OMSTabControl ⇒
                         temporaryControl() = Some(oms.computation() match {
-                          case Pending ⇒ tags.div()
+                          case Pending ⇒ div()
                           case _       ⇒ oms.controlElement
                         })
                         oms.block()
@@ -381,7 +382,7 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
                   case UnActive ⇒
                     t.computation() match {
                       case Pending ⇒ Waiter.waiter
-                      case _       ⇒ tags.div()
+                      case _       ⇒ div()
                     }
 
                 }

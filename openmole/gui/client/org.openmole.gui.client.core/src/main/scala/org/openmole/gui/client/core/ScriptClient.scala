@@ -2,23 +2,20 @@ package org.openmole.gui.client.core
 
 import org.openmole.gui.client.core.panels._
 
-import scalatags.JsDom.tags
 import scala.scalajs.js.annotation._
-import org.openmole.gui.ext.tool.client.JsRxTags._
 import org.scalajs.dom
 import rx._
 
 import scalatags.JsDom.all._
-import scaladget.api.{ BootstrapTags ⇒ bs }
-import scaladget.stylesheet.{ all ⇒ sheet }
-import sheet._
-import bs._
+
+import scaladget.bootstrapnative.bsn._
+import scaladget.tools._
 import org.scalajs.dom.KeyboardEvent
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
 import autowire._
-import scaladget.api.Selector.Options
+import scaladget.bootstrapnative.Selector.Options
 import org.openmole.gui.client.core.alert.{ AlertPanel, BannerAlert }
 import org.openmole.gui.client.core.files.TreeNodePanel
 import org.openmole.gui.client.tool.OMTags
@@ -50,15 +47,14 @@ import scala.scalajs.js.timers._
 object ScriptClient {
 
   @JSExportTopLevel("connection")
-  def connection(): Unit = withBootstrapNative {
+  def connection(): Unit =
     div(
       Connection.render,
       alert
     ).render
-  }
 
   @JSExportTopLevel("stopped")
-  def stopped(): Unit = withBootstrapNative {
+  def stopped(): Unit = {
 
     val stoppedDiv = div(omsheet.connectionTabOverlay)(
       div(
@@ -70,11 +66,11 @@ object ScriptClient {
     ).render
 
     post()[Api].shutdown().call()
-    stoppedDiv
+    dom.document.body.appendChild(stoppedDiv)
   }
 
   @JSExportTopLevel("restarted")
-  def restarted(): Unit = withBootstrapNative {
+  def restarted(): Unit = {
     val timer: Var[Option[SetIntervalHandle]] = Var(None)
 
     def setTimer = {
@@ -101,18 +97,16 @@ object ScriptClient {
     ).render
 
     post()[Api].restart().call()
-    restartedDiv
+    dom.document.body.appendChild(restartedDiv)
   }
 
   @JSExportTopLevel("resetPassword")
   def resetPassword(): Unit = {
     val resetPassword = new ResetPassword
-    withBootstrapNative {
-      div(
-        resetPassword.resetPassDiv,
-        alert
-      ).render
-    }
+    div(
+      resetPassword.resetPassDiv,
+      alert
+    ).render
   }
 
   @JSExportTopLevel("run")
@@ -120,7 +114,7 @@ object ScriptClient {
     implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
     Plugins.fetch { _ ⇒
-      val maindiv = tags.div()
+      val maindiv = div()
       //  val settingsView = new SettingsView
 
       val authenticationPanel = new AuthenticationPanel
@@ -129,9 +123,9 @@ object ScriptClient {
 
       val itemStyle = lineHeight := "35px"
 
-      val execItem = navItem(tags.div(glyph_flash, itemStyle).tooltip("Executions"), () ⇒ executionPanel.dialog.show)
+      val execItem = navItem(div(glyph_flash, itemStyle).tooltip("Executions"), () ⇒ executionPanel.dialog.show)
 
-      val authenticationItem = navItem(tags.div(glyph_lock, itemStyle).tooltip("Authentications"), () ⇒ authenticationPanel.dialog.show)
+      val authenticationItem = navItem(div(glyph_lock, itemStyle).tooltip("Authentications"), () ⇒ authenticationPanel.dialog.show)
 
       val pluginItem = navItem(div(OMTags.glyph_plug, itemStyle).tooltip("Plugins"), () ⇒ pluginPanel.dialog.show)
 
@@ -162,10 +156,10 @@ object ScriptClient {
       })
 
       //START BUTTON
-      lazy val navBar = tags.div(
+      lazy val theNavBar = div(
         Rx {
-          bs.navBar(
-            omsheet.absoluteFullWidth +++ sheet.nav +++ navbar_pills +++ navbar_inverse +++ (fontSize := 20) +++ navbar_staticTop +++ {
+          navBar(
+            omsheet.absoluteFullWidth +++ nav +++ navbar_pills +++ navbar_inverse +++ (fontSize := 20) +++ navbar_staticTop +++ {
               if (openFileTree()) mainNav370 else mainNav0
             },
             navItem(
@@ -182,7 +176,7 @@ object ScriptClient {
         }
       )
 
-      lazy val menuBar = new MenuBar(navBar, treeNodeTabs)
+      lazy val menuBar = new MenuBar(theNavBar, treeNodeTabs)
 
       lazy val importModel = MenuAction("Import your model", () ⇒ {
         modelWizardPanel.dialog.show
@@ -206,46 +200,43 @@ object ScriptClient {
       // Define the option sequence
 
       Settings.settings.map { sets ⇒
-
-        withBootstrapNative {
-          div(
-            tags.div(`class` := "fullpanel")(
-              BannerAlert.banner,
-              menuBar.render,
-              SettingsView.renderApp,
-              tags.div(
-                `class` := Rx {
-                  "leftpanel " + {
-                    CoreUtils.ifOrNothing(openFileTree(), "open")
-                  }
+        div(
+          div(`class` := "fullpanel")(
+            BannerAlert.banner,
+            menuBar.render,
+            SettingsView.renderApp,
+            div(
+              `class` := Rx {
+                "leftpanel " + {
+                  CoreUtils.ifOrNothing(openFileTree(), "open")
                 }
-              )(
-                  tags.div(omsheet.relativePosition +++ sheet.paddingTop(-15))(
-                    treeNodePanel.fileToolBar.div,
-                    treeNodePanel.fileControler,
-                    treeNodePanel.labelArea,
-                    treeNodePanel.view.render
-                  )
-                ),
-              tags.div(
-                `class` := Rx {
-                  "centerpanel " +
-                    CoreUtils.ifOrNothing(openFileTree(), "reduce") +
-                    CoreUtils.ifOrNothing(BannerAlert.isOpen(), " banneropen")
-                }
-              )(
-                  treeNodeTabs.render,
-                  tags.div(omsheet.textVersion)(
-                    tags.div(
-                      fontSize := "1em"
-                    )(s"${sets.version} ${sets.versionName}"),
-                    tags.div(fontSize := "0.8em")(s"built the ${sets.buildTime}")
-                  )
+              }
+            )(
+                div(omsheet.relativePosition +++ (paddingTop := -15))(
+                  treeNodePanel.fileToolBar.div,
+                  treeNodePanel.fileControler,
+                  treeNodePanel.labelArea,
+                  treeNodePanel.view.render
                 )
-            ),
-            alert
-          ).render
-        }
+              ),
+            div(
+              `class` := Rx {
+                "centerpanel " +
+                  CoreUtils.ifOrNothing(openFileTree(), "reduce") +
+                  CoreUtils.ifOrNothing(BannerAlert.isOpen(), " banneropen")
+              }
+            )(
+                treeNodeTabs.render,
+                div(omsheet.textVersion)(
+                  div(
+                    fontSize := "1em"
+                  )(s"${sets.version} ${sets.versionName}"),
+                  div(fontSize := "0.8em")(s"built the ${sets.buildTime}")
+                )
+              )
+          ),
+          alert
+        ).render
       }
     }
   }

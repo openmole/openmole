@@ -1,13 +1,10 @@
 package org.openmole.gui.client.core
 
-import scaladget.stylesheet.{ all ⇒ sheet }
+import scaladget.bootstrapnative.bsn._
 
-import scaladget.api.{ BootstrapTags ⇒ bs }
 import org.openmole.gui.ext.tool.client._
-import org.openmole.gui.ext.tool.client.JsRxTags._
 import org.scalajs.dom.raw.HTMLFormElement
-import rx.{ Ctx, Rx }
-import sheet._
+
 import scalatags.JsDom.all._
 import scalatags.JsDom.tags
 
@@ -32,11 +29,11 @@ object Connection {
 
   lazy val connectButton = tags.button("Connect", btn_primary, `type` := "submit").render
 
-  val passwordInput = bs.input("")(
+  val passwordInput = input("")(
     placeholder := "Password",
     `type` := "password",
     width := "130px",
-    sheet.marginBottom(15),
+    marginBottom := 15,
     name := "password",
     autofocus := true
   ).render

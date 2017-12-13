@@ -21,10 +21,7 @@ import org.openmole.gui.client.core.alert.AlertPanel
 import org.openmole.gui.client.core.CoreUtils
 import org.openmole.gui.ext.data.{ FileFilter, ListFilesData, SafePath }
 import rx._
-import autowire._
 import org.openmole.gui.client.core.files.TreeNode.ListFiles
-import org.openmole.gui.ext.api.Api
-import org.scalajs.dom.FileList
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global

@@ -14,7 +14,7 @@ import com.typesafe.sbt.SbtScalariform.ScalariformKeys
 import scalariform.formatter.preferences._
 
 def formatSettings = 
-  scalariformSettings(true) ++
+ // scalariformSettings(true) ++
     Seq(
       ScalariformKeys.preferences := 
         ScalariformKeys.preferences (p =>
@@ -541,7 +541,8 @@ lazy val extClientTool = OsgiProject(guiExt, "org.openmole.gui.ext.tool.client")
   Libraries.autowireJS,
   Libraries.rxJS,
   Libraries.scalajsDomJS,
-  Libraries.scaladgetJS,
+  Libraries.scaladgetTools,
+  Libraries.bootstrapnative,
   Libraries.scalaTagsJS
 ) settings (defaultSettings: _*)
 
@@ -583,16 +584,17 @@ lazy val jsCompile = OsgiProject(guiServerDir, "org.openmole.gui.server.jscompil
 )*/
 
 def guiClientDir = guiDir / "client"
-lazy val clientGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.core") enablePlugins (ScalaJSPlugin) dependsOn
+lazy val clientGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.core") enablePlugins (ScalaJSBundlerPlugin) dependsOn
   (sharedGUI, clientToolGUI, market, dataGUI, extClientTool) settings(
   //webpackSettings,
   libraryDependencies += Libraries.async,
   skip in packageJSDependencies := false,
   jsDependencies += ProvidedJS / "openmole_grammar.js",
-  jsDependencies += Libraries.ace / acePath,
-  jsDependencies += Libraries.ace / "src-min/mode-sh.js" dependsOn acePath,
-  jsDependencies += Libraries.ace / "src-min/mode-scala.js" dependsOn acePath,
-  jsDependencies += Libraries.ace / "src-min/theme-github.js" dependsOn acePath
+  Libraries.ace,
+//  jsDependencies += Libraries.ace / acePath,
+//  jsDependencies += Libraries.ace / "src-min/mode-sh.js" dependsOn acePath,
+//  jsDependencies += Libraries.ace / "src-min/mode-scala.js" dependsOn acePath,
+//  jsDependencies += Libraries.ace / "src-min/theme-github.js" dependsOn acePath
 ) settings (defaultSettings: _*)
 
 
@@ -601,7 +603,8 @@ lazy val clientToolGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.tool
   Libraries.boopickleJS,
   Libraries.scalajsDomJS,
   Libraries.scalaTagsJS,
-  Libraries.scaladgetJS,
+  Libraries.bootstrapnative,
+  Libraries.scaladgetTools,
   Libraries.rxJS) dependsOn (extClientTool) settings (defaultSettings: _*)
 
 
@@ -643,18 +646,21 @@ def guiPluginDir = guiDir / "plugins"
 
 lazy val guiEnvironmentEGIPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.authentication.egi") settings(
   guiPluginSettings,
-  libraryDependencies += Libraries.equinoxOSGi
-) dependsOn(extPluginGUIServer, extClientTool, dataGUI, workspace, egi) enablePlugins (ScalaJSPlugin)
+  libraryDependencies += Libraries.equinoxOSGi,
+  Libraries.bootstrapnative
+) dependsOn(extPluginGUIServer, extClientTool, dataGUI, workspace, egi) enablePlugins (ScalaJSBundlerPlugin)
 
 lazy val guiEnvironmentSSHKeyPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.authentication.sshkey") settings(
   guiPluginSettings,
-  libraryDependencies += Libraries.equinoxOSGi
-) dependsOn(extPluginGUIServer, extClientTool, dataGUI, workspace, ssh) enablePlugins (ScalaJSPlugin)
+  libraryDependencies += Libraries.equinoxOSGi,
+  Libraries.bootstrapnative
+) dependsOn(extPluginGUIServer, extClientTool, dataGUI, workspace, ssh) enablePlugins (ScalaJSBundlerPlugin)
 
 lazy val guiEnvironmentSSHLoginPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.authentication.sshlogin") settings(
   guiPluginSettings,
-  libraryDependencies += Libraries.equinoxOSGi
-) dependsOn(extPluginGUIServer, extClientTool, dataGUI, workspace, ssh) enablePlugins (ScalaJSPlugin)
+  libraryDependencies += Libraries.equinoxOSGi,
+  Libraries.bootstrapnative
+) dependsOn(extPluginGUIServer, extClientTool, dataGUI, workspace, ssh) enablePlugins (ScalaJSBundlerPlugin)
 
 val guiPlugins = Seq(guiEnvironmentSSHLoginPlugin, guiEnvironmentSSHKeyPlugin, guiEnvironmentEGIPlugin) //, guiEnvironmentDesktopGridPlugin)
 
@@ -736,13 +742,13 @@ def openmoleDependencies = openmoleNakedDependencies ++ corePlugins ++ guiPlugin
 def requieredRuntimeLibraries = Seq(Libraries.osgiCompendium, Libraries.logging)
 
 lazy val openmoleNaked =
-  Project("openmole-naked", binDir / "openmole-naked") settings (assemblySettings: _*) settings(
+  Project("openmole-naked", binDir / "openmole-naked") settings (assemblySettings: _*) enablePlugins (ScalaJSBundlerPlugin) settings(
     setExecutable ++= Seq("openmole", "openmole.bat"),
     Osgi.bundleDependencies in Compile := OsgiKeys.bundle.all(ScopeFilter(inDependencies(ThisProject, includeRoot = false))).value,
     resourcesAssemble += (resourceDirectory in Compile).value -> assemblyPath.value,
     resourcesAssemble += ((resourceDirectory in serverGUI in Compile).value / "webapp") → (assemblyPath.value / "webapp"),
-    //  resourcesAssemble += (webpack in(clientGUI, fullOptJS) in Compile).value.head -> (assemblyPath.value / "webapp/js/openmole.js"),
-    resourcesAssemble += (fullOptJS in clientGUI in Compile).value.data -> (assemblyPath.value / "webapp/js/openmole.js"),
+    resourcesAssemble += (webpack in fullOptJS in clientGUI in Compile).value.head.data -> (assemblyPath.value / "webapp/js/openmole.js"),
+   // resourcesAssemble += (fullOptJS in clientGUI in Compile).value.data -> (assemblyPath.value / "webapp/js/openmole.js"),
     resourcesAssemble += (packageMinifiedJSDependencies in clientGUI in Compile).value -> (assemblyPath.value / "webapp/js/deps.js"),
     resourcesAssemble += {
       val tarFile = (tar in openmoleRuntime).value
@@ -806,7 +812,8 @@ lazy val site = crossProject.in(binDir / "org.openmole.site") settings (defaultS
   libraryDependencies += Libraries.scalaTags
 ) jsSettings(
   Libraries.rxJS,
-  Libraries.scaladgetJS,
+  Libraries.bootstrapnative,
+  Libraries.scaladgetTools,
   Libraries.scalajsDomJS,
   Libraries.scalajsMarked
 )

@@ -1,17 +1,13 @@
 package org.openmole.gui.client.core
 
-import scaladget.stylesheet.{ all ⇒ sheet }
+import scaladget.bootstrapnative.bsn._
+import scaladget.tools._
+
 import org.openmole.gui.ext.data._
-import scaladget.api.{ BootstrapTags ⇒ bs }
-import org.scalajs.dom.html.TableSection
-import org.openmole.gui.ext.tool.client.JsRxTags._
 import org.openmole.gui.ext.tool.client._
 
 import scalatags.JsDom.{ TypedTag, tags }
 import scalatags.JsDom.all._
-import sheet._
-import bs._
-import scaladget.api.BootstrapTags.ScrollableTextArea.NoScroll
 import org.openmole.gui.ext.tool.client.Utils
 import org.scalajs.dom.raw.HTMLLabelElement
 import rx._
@@ -90,7 +86,7 @@ class EnvironmentErrorPanel {
 
     val render = tags.tr(row)(
       tags.td(colMD(9), wordWrap := "break-word")(tags.a(message, pointer +++ (fontSize := 13), onclick := { () ⇒ toggleDetails })), //(width := 400)
-      tags.td(colMD(1) +++ textCenter)(bs.badge(occurrences, environmentErrorBadge)),
+      tags.td(colMD(1) +++ textCenter)(badge(occurrences, environmentErrorBadge)),
       tags.td(colMD(1) +++ (fontSize := 13) +++ textCenter)(date),
       tags.td(colMD(1) +++ textCenter)(levelLabel)
     )
@@ -109,7 +105,7 @@ class EnvironmentErrorPanel {
   })
 
   val view = {
-    val errorTable = tags.table(sheet.table +++ ms("EnvError") +++ (width := "100%"))(
+    val errorTable = tags.table(tableClass +++ ms("EnvError") +++ (width := "100%"))(
       thead(
         tr(row)(
           th(exclusiveButton("Error", () ⇒ setSorting(AlphaSorting(), Ascending()), () ⇒ setSorting(AlphaSorting(), Descending()))),

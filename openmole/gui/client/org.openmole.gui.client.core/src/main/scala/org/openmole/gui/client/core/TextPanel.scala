@@ -2,10 +2,9 @@ package org.openmole.gui.client.core
 
 import scalatags.JsDom.tags
 import scalatags.JsDom.all._
-import scaladget.api.{ BootstrapTags ⇒ bs }
-import scaladget.stylesheet.all
+import scaladget.bootstrapnative.bsn._
+
 import rx._
-import org.openmole.gui.ext.tool.client.JsRxTags._
 import org.openmole.gui.ext.tool.client._
 
 /*
@@ -27,17 +26,19 @@ import org.openmole.gui.ext.tool.client._
 
 class TextPanel(title: String) {
 
+  implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
+
   val content: Var[String] = Var("")
 
   def open = dialog.show
 
-  val dialog = bs.ModalDialog(omsheet.panelWidth(65))
+  val dialog = ModalDialog(omsheet.panelWidth(65))
 
   dialog.header(
     tags.span(tags.b(title))
   )
 
-  val textArea = bs.scrollableText("")
+  val textArea = scrollableText("")
 
   content.trigger {
     println("Trigger " + content.now)
@@ -48,6 +49,6 @@ class TextPanel(title: String) {
     textArea.sRender
   ))
 
-  dialog.footer(bs.ModalDialog.closeButton(dialog, all.btn_default, "Close"))
+  dialog.footer(ModalDialog.closeButton(dialog, btn_default, "Close"))
 
 }

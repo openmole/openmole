@@ -6,21 +6,19 @@ import org.openmole.gui.client.tool.OMTags
 import org.scalajs.dom.raw.HTMLInputElement
 
 import scalatags.JsDom.all._
-import scaladget.api.{ BootstrapTags ⇒ bs }
+import scaladget.bootstrapnative.bsn._
+import scaladget.tools._
 
 import scalatags.JsDom.tags
 import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
-import org.openmole.gui.ext.tool.client.JsRxTags._
+
 import org.openmole.gui.ext.tool.client._
 import autowire._
 import rx._
-import bs._
-import scaladget.stylesheet.{ all ⇒ sheet }
 import org.openmole.gui.client.core.alert.AlertPanel
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.tool.client.FileManager
-import sheet._
 
 /*
  * Copyright (C) 10/08/15 // mathieu.leclaire@openmole.org
@@ -79,7 +77,7 @@ class PluginPanel {
           docEntry
         )(
           span(p.name, docTitleEntry +++ floatLeft),
-          span(bs.glyphSpan(glyph_trash, () ⇒ removePlugin(p))(grey +++ sheet.paddingTop(10) +++ sheet.paddingLeft(10) +++ "glyphitem" +++ glyph_trash)),
+          span(glyphSpan(glyph_trash, () ⇒ removePlugin(p))(grey +++ Seq(paddingTop := 10, paddingLeft := 10) +++ "glyphitem" +++ glyph_trash)),
           span(p.time, dateStyle)
         )
     }
@@ -109,12 +107,12 @@ class PluginPanel {
         getPlugins
     }
 
-  lazy val dialog = bs.ModalDialog(onopen = () ⇒ getPlugins)
+  lazy val dialog = ModalDialog(onopen = () ⇒ getPlugins)
 
   dialog.header(
     tags.span(
       tags.b("Plugins"),
-      bs.inputGroup(navbar_right)(
+      inputGroup(navbar_right)(
         uploadPluginButton
       )
     )
@@ -124,7 +122,7 @@ class PluginPanel {
 
   dialog.footer(
     tags.div(
-      bs.ModalDialog.closeButton(dialog, btn_default, "Close")
+      ModalDialog.closeButton(dialog, btn_default, "Close")
     )
   )
 

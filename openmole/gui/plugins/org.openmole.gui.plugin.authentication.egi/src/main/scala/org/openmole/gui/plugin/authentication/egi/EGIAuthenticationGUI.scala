@@ -18,14 +18,14 @@
 package org.openmole.gui.plugin.authentication.egi
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import boopickle.Default._
 import org.openmole.gui.ext.data.{ AuthenticationPlugin, AuthenticationPluginFactory }
 import org.openmole.gui.ext.tool.client.{ FileUploaderUI, OMPost }
-import scaladget.api.{ BootstrapTags ⇒ bs }
-import scaladget.stylesheet.{ all ⇒ sheet }
+
+import scaladget.bootstrapnative.bsn._
+import scaladget.tools._
+
+import boopickle.Default._
 import autowire._
-import sheet._
-import bs._
 
 import scala.concurrent.Future
 import scala.scalajs.js.annotation._
@@ -53,10 +53,10 @@ class EGIAuthenticationGUI(val data: EGIAuthenticationData = EGIAuthenticationDa
     passwordType
   )
 
-  val password = bs.input(data.cypheredPassword)(placeholder := "Password", passwordStyle).render
+  val password = input(data.cypheredPassword)(placeholder := "Password", passwordStyle).render
   val privateKey = FileUploaderUI(data.privateKey.getOrElse(""), data.privateKey.isDefined, Some("egi.p12"))
 
-  val voInput = bs.input("")(placeholder := "vo1,vo2").render
+  val voInput = input("")(placeholder := "vo1,vo2").render
 
   OMPost()[EGIAuthenticationAPI].geVOTest().call().foreach {
     _.foreach { c ⇒
@@ -72,8 +72,8 @@ class EGIAuthenticationGUI(val data: EGIAuthenticationData = EGIAuthenticationDa
 
   lazy val panel = vForm(
     password.withLabel("Password"),
-    privateKey.view(sheet.marginTop(10)).render.withLabel("Certificate"),
-    voInput.withLabel("Test EGI credential on", sheet.paddingTop(40))
+    privateKey.view(marginTop := 10).render.withLabel("Certificate"),
+    voInput.withLabel("Test EGI credential on", paddingTop := 40)
   )
 
   def save(onsave: () ⇒ Unit) = {

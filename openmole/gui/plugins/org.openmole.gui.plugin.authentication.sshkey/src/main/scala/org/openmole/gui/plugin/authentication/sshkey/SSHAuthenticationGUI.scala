@@ -21,11 +21,11 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
 import org.openmole.gui.ext.data.{ AuthenticationPlugin, AuthenticationPluginFactory }
 import org.openmole.gui.ext.tool.client.{ FileUploaderUI, OMPost }
-import scaladget.api.{ BootstrapTags ⇒ bs }
-import scaladget.stylesheet.{ all ⇒ sheet }
+
+import scaladget.bootstrapnative.bsn._
+import scaladget.tools._
+
 import autowire._
-import sheet._
-import bs._
 
 import scala.concurrent.Future
 import scala.scalajs.js.annotation._
@@ -54,13 +54,13 @@ class PrivateKeyAuthenticationGUI(val data: PrivateKeyAuthenticationData = Priva
   )
   val privateKey = new FileUploaderUI(data.privateKey.getOrElse(""), data.privateKey.isDefined)
 
-  val loginInput = bs.input(data.login)(placeholder := "Login").render
+  val loginInput = input(data.login)(placeholder := "Login").render
 
-  val passwordInput = bs.input(data.cypheredPassword)(placeholder := "Password", passwordType).render
+  val passwordInput = input(data.cypheredPassword)(placeholder := "Password", passwordType).render
 
-  val targetInput = bs.input(data.target)(placeholder := "Host").render
+  val targetInput = input(data.target)(placeholder := "Host").render
 
-  val portInput = bs.input(data.port)(placeholder := "Port").render
+  val portInput = input(data.port)(placeholder := "Port").render
 
   def factory = new PrivateKeyAuthenticationFactory
 
@@ -75,7 +75,7 @@ class PrivateKeyAuthenticationGUI(val data: PrivateKeyAuthenticationData = Priva
       targetInput.withLabel("Host"),
       portInput.withLabel("Port")
     ).render,
-    privateKey.view(sheet.marginTop(10)).render.withLabel("Private key")
+    privateKey.view(marginTop := 10).render.withLabel("Private key")
   )
 
   def save(onsave: () ⇒ Unit) = {

@@ -20,7 +20,9 @@ package org.openmole.gui.client.tool
 import org.scalajs.dom.Event
 
 import scalatags.JsDom.all._
-import scaladget.api.{ BootstrapTags ⇒ bs }
+import scaladget.bootstrapnative.bsn._
+import scaladget.tools._
+
 import org.openmole.gui.ext.tool.client.Utils
 import rx._
 
@@ -37,7 +39,7 @@ object InputFilter {
 class InputFilter(initValue: String, pHolder: String, inputID: String, size: String = "100%") {
   val nameFilter: Var[String] = Var("")
 
-  val tag = bs.input(
+  val tag = input(
     initValue
   )(
     id := inputID,

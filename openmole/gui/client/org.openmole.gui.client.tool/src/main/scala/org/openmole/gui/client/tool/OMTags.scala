@@ -1,15 +1,12 @@
 package org.openmole.gui.client.tool
 
-import org.scalajs.dom.html._
 import org.scalajs.dom.raw._
-import scaladget.api.{ BootstrapTags ⇒ bs }
-import scaladget.stylesheet.{ all ⇒ sheet }
+import scaladget.bootstrapnative.bsn._
+import scaladget.tools._
+
 import scalatags.JsDom.{ tags ⇒ tags }
-import org.openmole.gui.ext.tool.client.JsRxTags._
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
-import sheet._
-import rx._
 
 /*
  * Copyright (C) 02/09/15 // mathieu.leclaire@openmole.org
@@ -51,7 +48,7 @@ object OMTags {
 
   case class AlertAction(action: () ⇒ Unit)
 
-  def alert(alertType: ModifierSeq, content: TypedTag[HTMLDivElement], actions: Seq[AlertAction], buttonGroupClass: ModifierSeq = sheet.floatLeft +++ sheet.marginLeft(20), okString: String = "OK"): TypedTag[HTMLDivElement] =
+  def alert(alertType: ModifierSeq, content: TypedTag[HTMLDivElement], actions: Seq[AlertAction], buttonGroupClass: ModifierSeq = floatLeft +++ (marginLeft := 20), okString: String = "OK"): TypedTag[HTMLDivElement] =
     actions.size match {
       case 1 ⇒ alert(alertType, content, actions.head.action, buttonGroupClass, okString)
       case 2 ⇒ alert(alertType, content, actions.head.action, actions(1).action, buttonGroupClass, okString)
@@ -61,16 +58,16 @@ object OMTags {
   def alert(alertType: ModifierSeq, content: TypedTag[HTMLDivElement], todook: () ⇒ Unit, buttonGroupClass: ModifierSeq, okString: String): TypedTag[HTMLDivElement] =
     tags.div(role := "alert")(
       content,
-      bs.button(okString, alertType +++ sheet.paddingTop(20), todook)
+      button(okString, alertType +++ (paddingTop := 20), onclick := todook)
     )
 
   def alert(alertType: ModifierSeq, content: TypedTag[HTMLDivElement], todook: () ⇒ Unit, todocancel: () ⇒ Unit, buttonGroupClass: ModifierSeq, okString: String): TypedTag[HTMLDivElement] =
     tags.div(role := "alert")(
       content,
-      div(sheet.paddingTop(20))(
-        bs.buttonGroup(buttonGroupClass)(
-          bs.button(okString, alertType, todook),
-          bs.button("Cancel", btn_default, todocancel)
+      div(paddingTop := 20)(
+        buttonGroup(buttonGroupClass)(
+          button(okString, alertType, onclick := todook),
+          button("Cancel", btn_default, onclick := todocancel)
         )
       )
     )
@@ -83,7 +80,7 @@ object OMTags {
   def uploadButton(todo: HTMLInputElement ⇒ Unit): TypedTag[HTMLSpanElement] = {
     span(ms("btn-file"), cursor := "pointer", id := "success-like")(
       glyphSpan(glyph_upload),
-      bs.fileInputMultiple(todo)
+      fileInputMultiple(todo)
     )
   }
 }

@@ -19,26 +19,19 @@ package org.openmole.gui.client.core
 
 import java.util.concurrent.atomic.AtomicBoolean
 
-import scaladget.api.BootstrapTags.ScrollableTextArea.BottomScroll
-import scaladget.api.{ BootstrapTags ⇒ bs }
-
 import scala.util.{ Failure, Success }
 import scalatags.JsDom.all._
 import org.openmole.gui.client.tool.Expander._
 
 import scalatags.JsDom._
-import org.openmole.gui.ext.tool.client.JsRxTags._
 import org.openmole.gui.ext.tool.client._
 
 import scala.scalajs.js.timers._
 import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
-import scaladget.stylesheet.{ all ⇒ sheet }
-import sheet._
 import autowire._
 import org.openmole.gui.ext.data.{ Error ⇒ ExecError }
 import org.openmole.gui.ext.data._
-import bs._
 import org.openmole.gui.client.core.alert.BannerAlert
 import org.openmole.gui.client.core.alert.BannerAlert.BannerMessage
 import org.openmole.gui.client.core.files.TreeNodeTabs.StandBy
@@ -48,7 +41,10 @@ import org.openmole.gui.ext.tool.client.Utils
 import rx._
 
 import concurrent.duration._
-import scala.scalajs.js
+import scaladget.bootstrapnative.bsn._
+import scaladget.tools._
+import scaladget.bootstrapnative.bsn.ScrollableText
+import scaladget.bootstrapnative.bsn.ScrollableTextArea.BottomScroll
 
 class ExecutionPanel {
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
@@ -160,8 +156,8 @@ class ExecutionPanel {
 
   val envLevel: Var[ErrorStateLevel] = Var(ErrorLevel())
 
-  val outputHistory = bs.input("500")(placeholder := "# outputs").render
-  val envErrorHistory = bs.input("500")(placeholder := "# environment errors").render
+  val outputHistory = input("500")(placeholder := "# outputs").render
+  val envErrorHistory = input("500")(placeholder := "# environment errors").render
 
   def ratio(completed: Long, running: Long, ready: Long) = s"${completed} / ${completed + running + ready}"
 
@@ -186,7 +182,7 @@ class ExecutionPanel {
     val envID: ColumnID = "env"
     val errorID: ColumnID = "error"
     val outputStreamID: ColumnID = "outputStream"
-    tags.table(sheet.table)(
+    tags.table(tableClass)(
       thead,
       Rx {
         tbody({
@@ -260,22 +256,22 @@ class ExecutionPanel {
                           td(colMD(2) +++ textCenter)(tags.span(CoreUtils.approximatedYearMonthDay(e.executionActivity.executionTime))).tooltip("Full computation time"),
                           td(colMD(2) +++ textCenter)(glyphAndText(glyph_upload, s" ${e.networkActivity.uploadingFiles} ${displaySize(e.networkActivity.uploadedSize, e.networkActivity.readableUploadedSize)}")).tooltip("Uploads"),
                           td(colMD(2) +++ textCenter)(glyphAndText(glyph_download, s" ${e.networkActivity.downloadingFiles} ${displaySize(e.networkActivity.downloadedSize, e.networkActivity.readableDownloadedSize)}")).tooltip("Downloads"),
-                          td(colMD(1) +++ textCenter)(glyphAndText(glyph_road +++ sheet.paddingBottom(7), e.submitted.toString)).tooltip("Submitted jobs"),
-                          td(colMD(1) +++ textCenter)(glyphAndText(glyph_flash +++ sheet.paddingBottom(7), e.running.toString)).tooltip(("Running jobs")),
-                          td(colMD(1) +++ textCenter)(glyphAndText(glyph_flag +++ sheet.paddingBottom(7), e.done.toString)).tooltip("Finished jobs"),
-                          td(colMD(1) +++ textCenter)(glyphAndText(glyph_fire +++ sheet.paddingBottom(7), e.failed.toString)).tooltip("Failed jobs"),
+                          td(colMD(1) +++ textCenter)(glyphAndText(glyph_road +++ (paddingBottom := 7), e.submitted.toString)).tooltip("Submitted jobs"),
+                          td(colMD(1) +++ textCenter)(glyphAndText(glyph_flash +++ (paddingBottom := 7), e.running.toString)).tooltip(("Running jobs")),
+                          td(colMD(1) +++ textCenter)(glyphAndText(glyph_flag +++ (paddingBottom := 7), e.done.toString)).tooltip("Finished jobs"),
+                          td(colMD(1) +++ textCenter)(glyphAndText(glyph_fire +++ (paddingBottom := 7), e.failed.toString)).tooltip("Failed jobs"),
                           td(colMD(3) +++ textCenter)(({
                             if (envErrorVisible().contains(e.envId)) {
                               tags.div(rowLayout +++ (width := 100))(
-                                bs.buttonGroup(columnLayout +++ (width := 80))(
-                                  bs.button(glyphicon = glyph_refresh, todo = () ⇒ updateEnvErrors(e.envId)).tooltip("Refresh environment errors"),
-                                  bs.button(buttonStyle = btn_default, glyphicon = glyph_repeat, todo = () ⇒ { clearEnvErrors(e.envId) }).tooltip("Reset environment errors")
+                                buttonGroup(columnLayout +++ (width := 80))(
+                                  buttonIcon(glyphicon = glyph_refresh, todo = { () ⇒ updateEnvErrors(e.envId) }).tooltip("Refresh environment errors"),
+                                  buttonIcon(buttonStyle = btn_default, glyphicon = glyph_repeat, todo = { () ⇒ { clearEnvErrors(e.envId) } }).tooltip("Reset environment errors")
                                 ),
                                 tags.span(onclick := toggleEnvironmentErrorPanel(e.envId), columnLayout +++ closeDetails)(raw("&#215"))
                               )
                             }
                             else tags.span(omsheet.color(BLUE) +++ ((envErrorVisible().contains(e.envId)), ms(" executionVisible"), emptyMod))(
-                              sheet.pointer, onclick := toggleEnvironmentErrorPanel(e.envId)
+                              pointer, onclick := toggleEnvironmentErrorPanel(e.envId)
                             )("details")
                           })).tooltip("Error details")
                         ),
@@ -395,12 +391,12 @@ class ExecutionPanel {
     expanderIfVisible(expandID, columnID, ex ⇒
       tags.span(omsheet.executionVisible +++ extraStyle, modifier), tags.span(extraStyle, modifier))
 
-  val settingsForm = bs.vForm(width := 200)(
+  val settingsForm = vForm(width := 200)(
     outputHistory.withLabel("# outputs"),
     envErrorHistory.withLabel("# environment errors")
   )
 
-  val dialog = bs.ModalDialog(
+  val dialog = ModalDialog(
     omsheet.panelWidth(92),
     onopen = () ⇒ {
       setTimerOn

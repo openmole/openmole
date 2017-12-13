@@ -7,9 +7,10 @@ import org.openmole.gui.client.core.CoreUtils
 import org.openmole.gui.client.core.Waiter._
 import org.openmole.gui.ext.data._
 import org.openmole.gui.client.core.panels._
-import org.openmole.gui.ext.tool.client.JsRxTags._
 import org.openmole.gui.ext.tool.client._
-import scaladget.api.{ BootstrapTags ⇒ bs }
+
+import scaladget.bootstrapnative.bsn._
+import scaladget.tools._
 import org.scalajs.dom.html.Input
 import org.scalajs.dom.raw._
 import org.openmole.gui.client.core._
@@ -23,12 +24,9 @@ import boopickle.Default._
 import TreeNode._
 import autowire._
 import rx._
-import bs._
-import scaladget.stylesheet.{ all ⇒ sheet }
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.tool.client.{ FileManager, Utils }
 import org.scalajs.dom
-import sheet._
 
 /*
  * Copyright (C) 16/04/15 // mathieu.leclaire@openmole.org
@@ -77,7 +75,7 @@ class TreeNodePanel {
   val fileToolBar = new FileToolBar(this)
   val tree: Var[TypedTag[HTMLElement]] = Var(tags.div())
 
-  val editNodeInput: Input = bs.input()(
+  val editNodeInput: Input = input()(
     placeholder := "Name",
     width := "240px",
     height := "24px",
@@ -380,12 +378,12 @@ class TreeNodePanel {
       )
 
       tn match {
-        case fn: FileNode ⇒ span(span(sheet.paddingTop(4)), omsheet.file +++ style)(div(omsheet.fileNameOverflow)(tn.name.now))
+        case fn: FileNode ⇒ span(span(paddingTop := 4), omsheet.file +++ style)(div(omsheet.fileNameOverflow)(tn.name.now))
         case dn: DirNode ⇒
           span(
             span(ms(dn.isEmpty, emptyMod, omsheet.fileIcon +++ glyph_plus)),
             (omsheet.dir +++ style)
-          )(div(omsheet.fileNameOverflow +++ sheet.paddingLeft(22))(tn.name.now))
+          )(div(omsheet.fileNameOverflow +++ (paddingLeft := 22))(tn.name.now))
       }
     }
 
@@ -427,8 +425,8 @@ class TreeNodePanel {
     def addToSelection: Unit = addToSelection(!treeStates.now.selected)
 
     val render: TypedTag[dom.html.TableRow] = {
-      val baseGlyph = sheet.marginTop(2) +++ "glyphitem"
-      val settingsGlyph = ms("glyphitem") +++ glyph_settings +++ sheet.paddingLeft(4)
+      val baseGlyph = ms("glyphitem") +++ (marginTop := 2)
+      val settingsGlyph = ms("glyphitem") +++ glyph_settings +++ (paddingLeft := 4)
       val trash = baseGlyph +++ glyph_trash
       val edit = baseGlyph +++ glyph_edit
       val download_alt = baseGlyph +++ glyph_download_alt
@@ -517,9 +515,9 @@ class TreeNodePanel {
                           }
                         }
 
-                        val replicateInput = bs.input(newName).render
+                        val replicateInput = input(newName).render
                         AlertPanel.div(
-                          div(width := 250, sheet.floatRight, sheet.marginRight(70), replicateInput),
+                          div(width := 250, floatRight, marginRight := 70, replicateInput),
                           () ⇒ CoreUtils.replicate(tnSafePath, replicateInput.value),
                           transform = RelativeCenterPosition,
                           zone = FileZone,

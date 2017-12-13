@@ -21,8 +21,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
 import org.openmole.gui.ext.data.{ AuthenticationPlugin, AuthenticationPluginFactory }
 import org.openmole.gui.ext.tool.client.OMPost
-import scaladget.api.{ BootstrapTags ⇒ bs }
-import scaladget.stylesheet.{ all ⇒ sheet }
+import scaladget.bootstrapnative.bsn._
+import scaladget.tools._
+
 import autowire._
 import sheet._
 import bs._

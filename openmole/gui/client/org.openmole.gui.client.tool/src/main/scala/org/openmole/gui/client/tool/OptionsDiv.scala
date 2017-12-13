@@ -17,15 +17,15 @@ package org.openmole.gui.client.tool
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scaladget.api.{ BootstrapTags ⇒ bs }
-import scaladget.stylesheet.{ all ⇒ sheet }
+import scaladget.bootstrapnative.bsn._
+import scaladget.tools._
+
 import org.openmole.gui.ext.tool.client.omsheet
 import org.scalajs.dom.html.Input
 import org.scalajs.dom.raw.HTMLInputElement
 
 import scalatags.JsDom.tags
 import scalatags.JsDom.all._
-import sheet._
 
 object OptionsDiv {
 
@@ -44,10 +44,10 @@ import OptionsDiv._
 class OptionsDiv[T](options: Seq[T], naming: T ⇒ String) {
 
   val boxedOptions = options.map { o ⇒
-    BoxedOption(o, naming, bs.checkbox(true).render)
+    BoxedOption(o, naming, checkbox(true).render)
   }
 
-  val div = tags.div(sheet.paddingTop(20))(
+  val div = tags.div(paddingTop := 20)(
     for {
       bo ← boxedOptions
     } yield tags.div(

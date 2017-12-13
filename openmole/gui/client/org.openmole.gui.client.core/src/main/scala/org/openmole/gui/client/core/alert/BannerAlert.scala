@@ -20,16 +20,15 @@ package org.openmole.gui.client.core.alert
 import rx._
 
 import scalatags.JsDom.all._
-import scaladget.stylesheet.{ all ⇒ sheet }
+
+import scaladget.bootstrapnative.bsn._
+import scaladget.tools._
 
 import scalatags.JsDom.all.{ onclick, raw, span }
 import org.openmole.gui.ext.tool.client._
-import org.openmole.gui.ext.tool.client.JsRxTags._
-import scaladget.api.BootstrapTags._
 import org.scalajs.dom.raw.HTMLDivElement
 
 import scalatags.JsDom.{ TypedTag, tags }
-import sheet._
 
 object BannerAlert {
 

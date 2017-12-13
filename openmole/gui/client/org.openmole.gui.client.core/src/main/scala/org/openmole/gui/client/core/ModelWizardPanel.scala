@@ -28,19 +28,16 @@ import boopickle.Default._
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
 import org.scalajs.dom.raw.{ HTMLDivElement, HTMLInputElement }
 import org.openmole.gui.ext.tool.client._
-import org.openmole.gui.ext.tool.client.JsRxTags._
 import rx._
 import scalatags.JsDom.{ TypedTag, tags }
 import scalatags.JsDom.all._
-import scaladget.api.{ BootstrapTags ⇒ bs }
 import Waiter._
 import org.openmole.gui.ext.data.DataUtils._
-import scaladget.stylesheet.{ all ⇒ sheet }
-import sheet._
-import bs._
+import scaladget.bootstrapnative.bsn._
+import scaladget.tools._
 import org.openmole.gui.client.tool.{ OMTags, OptionsDiv }
 import org.openmole.gui.ext.api.Api
-import scaladget.api.Selector.Options
+import scaladget.bootstrapnative.Selector.Options
 import org.openmole.gui.ext.tool.client.FileManager
 
 class ModelWizardPanel {
@@ -174,7 +171,7 @@ class ModelWizardPanel {
       autoMode() = !autoMode.now
   })
 
-  val scriptNameInput = bs.input()(modelNameInput, placeholder := "Script name").render
+  val scriptNameInput = input()(modelNameInput, placeholder := "Script name").render
   val languages: Seq[Language] = Seq(Binary(), JavaLikeLanguage(), PythonLanguage(), NetLogoLanguage(), RLanguage())
   val codeSelector: Options[Language] = languages.options(0, btn_default, (l: Language) ⇒ l.name)
 
@@ -193,7 +190,7 @@ class ModelWizardPanel {
   def buttonStyle(i: Int): ModifierSeq = {
     if (i == currentTab.now) btn_primary
     else btn_default
-  } +++ sheet.marginRight(20)
+  } +++ (marginRight := 20)
 
   def nbInputs = inputs(currentReactives.now).size
 
@@ -446,9 +443,9 @@ class ModelWizardPanel {
       " By default he systems detects automatically your Variable changes and update the launching command. However, this option can be desactivated.")
   )
 
-  val autoModeTag = div(onecolumn +++ sheet.paddingTop(20))(
+  val autoModeTag = div(onecolumn +++ (paddingTop := 20))(
     tags.b("Launching Command"),
-    div(sheet.paddingTop(4) +++ floatRight)(
+    div(floatRight +++ (paddingTop := 4))(
       "Automatic ",
       autoModeCheckBox,
       span(grey)(" It is automatically updated (default), or it can be set manually")
@@ -587,20 +584,20 @@ class ModelWizardPanel {
       updatableTable() = true
     }
 
-    val mappingInput: HTMLInputElement = bs.input(role.content.prototype.mapping.getOrElse(""))(oninput := { () ⇒
+    val mappingInput: HTMLInputElement = inputTag(role.content.prototype.mapping.getOrElse(""))(oninput := { () ⇒
       saveWithoutTableUpdate
       updateLaunchingCommand
     }).render
 
-    val nameInput: HTMLInputElement = bs.input(role.content.prototype.name)(oninput := { () ⇒
+    val nameInput: HTMLInputElement = inputTag(role.content.prototype.name)(oninput := { () ⇒
       saveWithoutTableUpdate
       updateLaunchingCommand
     }).render
 
     val line = {
-      val glyphModifier = grey +++ sheet.paddingTop(2) +++ pointer +++ (opacity := 0.5)
+      val glyphModifier = grey +++ (paddingTop := 2) +++ pointer +++ (opacity := 0.5)
       tags.tr(
-        td(colMD(3) +++ sheet.paddingTop(7))(nameInput),
+        td(colMD(3) +++ (paddingTop := 7))(nameInput),
         td(colMD(2))(label(role.content.prototype.`type`.name.split('.').last)(label_primary)),
         td(colMD(1) +++ grey)(role.content.prototype.default),
         td(colMD(3))(if (role.content.prototype.mapping.isDefined) mappingInput else tags.div()),
@@ -616,18 +613,22 @@ class ModelWizardPanel {
   def setBodyContent: Unit = bodyContent() = Some({
     val reactives = currentReactives.now
     val topButtons = Rx {
-      div(sheet.paddingTop(20))(
-        bs.button(
+      div(paddingTop := 20)(
+        button(
           "I/O",
-          buttonStyle(0), () ⇒ {
-            currentTab() = 0
+          buttonStyle(0), onclick := { () ⇒
+            {
+              currentTab() = 0
+              setBodyContent
+            }
+          })(badge(s"$nbInputs/$nbOutputs")),
+        button("Resources", buttonStyle(1), onclick := { () ⇒
+          {
+            currentTab() = 1
             setBodyContent
           }
-        )(bs.badge(s"$nbInputs/$nbOutputs")),
-        bs.button("Resources", buttonStyle(1), () ⇒ {
-          currentTab() = 1
-          setBodyContent
-        })(badge(s"${
+        }
+        )(badge(s"${
           resources().number
         }"))
       )
@@ -646,7 +647,7 @@ class ModelWizardPanel {
       },
       fileToUploadPath.now.map {
         _ ⇒
-          div(sheet.paddingTop(20))(
+          div(paddingTop := 20)(
             tags.h4("Step2: Task configuration"), step2,
             topButtons,
             if (currentTab.now == 0) {
@@ -662,8 +663,8 @@ class ModelWizardPanel {
                   }
                 ))
 
-                div(sheet.paddingTop(30))(
-                  div(sheet.paddingRight(10) +++ twocolumns)(
+                div(paddingTop := 30)(
+                  div(twocolumns +++ (paddingRight := 10))(
                     idiv,
                     tags.table(striped)(
                       head,
@@ -698,7 +699,7 @@ class ModelWizardPanel {
                   td(colMD(2))(CoreUtils.readableByteCountAsString(i.size))
                 ).render)
               }
-              tags.table(striped +++ sheet.paddingTop(20))(body)
+              tags.table(striped +++ (paddingTop := 20))(body)
             }
           )
       }.getOrElse(tags.div())
@@ -707,7 +708,7 @@ class ModelWizardPanel {
 
   lazy val dialog = {
     setBodyContent
-    bs.ModalDialog(omsheet.panelWidth(92))
+    ModalDialog(omsheet.panelWidth(92))
   }
 
   dialog.header(
@@ -723,9 +724,9 @@ class ModelWizardPanel {
   )
 
   dialog.footer(buttonGroup(Seq(width := 200, right := 100))(
-    bs.inputGroupButton(bs.ModalDialog.closeButton(dialog, btn_default, "Close")),
-    bs.inputGroupButton(scriptNameInput),
-    bs.inputGroupButton(buildModelTaskButton)
+    inputGroupButton(ModalDialog.closeButton(dialog, btn_default, "Close")),
+    inputGroupButton(scriptNameInput),
+    inputGroupButton(buildModelTaskButton)
   ))
 
 }

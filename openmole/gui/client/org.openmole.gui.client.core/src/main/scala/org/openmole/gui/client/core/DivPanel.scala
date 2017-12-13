@@ -4,9 +4,7 @@ import org.scalajs.dom.raw.HTMLDivElement
 
 import scalatags.JsDom.{ TypedTag, tags }
 import scalatags.JsDom.all._
-import scaladget.api.{ BootstrapTags ⇒ bs }
-import bs._
-import scaladget.stylesheet.all
+import scaladget.bootstrapnative.bsn._
 
 /*
  * Copyright (C) 26/08/15 // mathieu.leclaire@openmole.org
@@ -29,7 +27,7 @@ class DivPanel(title: String, div: TypedTag[HTMLDivElement]) {
 
   def open = dialog.show
 
-  val dialog = bs.ModalDialog()
+  val dialog = ModalDialog()
 
   dialog.header(
     tags.span(tags.b(title))
@@ -37,6 +35,6 @@ class DivPanel(title: String, div: TypedTag[HTMLDivElement]) {
 
   dialog.body(div)
 
-  dialog.footer(ModalDialog.closeButton(dialog, all.btn_default, "Close"))
+  dialog.footer(ModalDialog.closeButton(dialog, btn_default, "Close"))
 
 }

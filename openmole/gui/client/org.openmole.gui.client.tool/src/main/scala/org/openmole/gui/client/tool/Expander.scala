@@ -1,7 +1,7 @@
 package org.openmole.gui.client.tool
 
-import scaladget.api.{ BootstrapTags ⇒ bs }
-import scaladget.stylesheet.all._
+import scaladget.tools._
+
 import rx._
 import scalatags.JsDom.{ tags ⇒ tags }
 import scalatags.JsDom.all._

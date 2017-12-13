@@ -18,22 +18,19 @@ package org.openmole.gui.client.core
  */
 
 import scalatags.JsDom.all._
-import scaladget.api.{ Popup, BootstrapTags ⇒ bs }
+import scaladget.bootstrapnative.bsn._
+import scaladget.tools._
 
 import scalatags.JsDom.tags
 import org.openmole.gui.ext.tool.client._
-import org.openmole.gui.ext.tool.client.JsRxTags._
 
 import scala.concurrent.Future
 import boopickle.Default._
 import scala.concurrent.ExecutionContext.Implicits.global
-import scaladget.stylesheet.{ all ⇒ sheet }
 import org.openmole.gui.ext.data._
-import sheet._
+
 import rx._
-import bs._
-import scaladget.api.Selector.{ Dropdown, Options }
-import org.scalajs.dom.raw.HTMLDivElement
+import scaladget.bootstrapnative.Selector.{ Dropdown, Options }
 
 class AuthenticationPanel {
 
@@ -104,7 +101,7 @@ class AuthenticationPanel {
               authSetting() = Some(testedAuth.auth)
             })
           ),
-          td(colMD(4) +++ sheet.paddingTop(5))(label(testedAuth.auth.factory.name, label_primary)),
+          td(colMD(4) +++ (paddingTop := 5))(label(testedAuth.auth.factory.name, label_primary)),
           td(colMD(2))({
             val tests: Var[Seq[Test]] = Var(Seq(Test.pending))
             testedAuth.tests.foreach { ts ⇒
@@ -117,7 +114,7 @@ class AuthenticationPanel {
             }
           }),
           td(colMD(2))(
-            bs.glyphSpan(glyph_trash, () ⇒ removeAuthentication(testedAuth.auth))(omsheet.grey +++ sheet.paddingTop(9) +++ "glyphitem" +++ glyph_trash)
+            glyphSpan(glyph_trash, () ⇒ removeAuthentication(testedAuth.auth))(omsheet.grey +++ (paddingTop := 9) +++ "glyphitem" +++ glyph_trash)
           )
         )
       }
@@ -125,7 +122,7 @@ class AuthenticationPanel {
 
     Rx {
       authSetting() match {
-        case Some(p: AuthenticationPlugin) ⇒ div(sheet.paddingTop(20))(p.panel)
+        case Some(p: AuthenticationPlugin) ⇒ div(paddingTop := 20)(p.panel)
         case _ ⇒
           tags.table(fixedTable)(
             thead,
@@ -151,23 +148,29 @@ class AuthenticationPanel {
     }
   }
 
-  val newButton = bs.button("New", btn_primary, () ⇒ authSetting() = Plugins.authenticationFactories.now.headOption.map {
-    _.buildEmpty
+  val newButton = button("New", btn_primary, onclick := { () ⇒
+    authSetting() = Plugins.authenticationFactories.now.headOption.map {
+      _.buildEmpty
+    }
   })
 
-  val saveButton = bs.button("Save", btn_primary, () ⇒ {
-    save
+  val saveButton = button("Save", btn_primary, onclick := { () ⇒
+    {
+      save
+    }
   })
 
-  val cancelButton = bs.button("Cancel", btn_default, () ⇒ {
-    authSetting.now match {
-      case None ⇒ dialog.hide
-      case _    ⇒ authSetting() = None
+  val cancelButton = button("Cancel", btn_default, onclick := { () ⇒
+    {
+      authSetting.now match {
+        case None ⇒ dialog.hide
+        case _    ⇒ authSetting() = None
+      }
     }
   })
 
   val dialog: ModalDialog =
-    bs.ModalDialog(
+    ModalDialog(
       omsheet.panelWidth(52),
       onopen = () ⇒ {
         if (!initialCheck.now) {
@@ -199,7 +202,7 @@ class AuthenticationPanel {
   dialog.footer(
     tags.div(
       Rx {
-        bs.buttonGroup()(
+        buttonGroup()(
           authSetting() match {
             case Some(_) ⇒ saveButton
             case _       ⇒ newButton

@@ -17,30 +17,26 @@ package org.openmole.gui.client.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scaladget.stylesheet.{ all ⇒ sheet }
+import scaladget.bootstrapnative.bsn._
+import scaladget.tools._
 
-import scaladget.api.{ BootstrapTags ⇒ bs }
 import org.scalajs.dom.raw.HTMLFormElement
-import rx.{ Ctx, Rx }
-import sheet._
 import org.openmole.gui.ext.tool.client._
 import scalatags.JsDom.all._
 import scalatags.JsDom.tags
-import org.openmole.gui.ext.tool.client.JsRxTags._
-
 class ResetPassword {
 
-  val passwordInput = bs.input("")(
+  val passwordInput = input("")(
     placeholder := "Password",
     `type` := "password",
     width := "130px",
-    sheet.marginBottom(15),
+    marginBottom := 15,
     name := "password",
     autofocus := true
   ).render
 
   val passwordAgainInput =
-    bs.input("")(
+    input("")(
       placeholder := "Password again",
       `type` := "password",
       width := "130px",
@@ -48,7 +44,7 @@ class ResetPassword {
       autofocus
     ).render
 
-  lazy val resetButton = tags.button("Set password", btn_primary +++ sheet.marginTop(15), `type` := "submit").render
+  lazy val resetButton = tags.button("Set password", btn_primary +++ (marginTop := 15), `type` := "submit").render
 
   def setPasswordForm: HTMLFormElement =
     tags.form(

@@ -11,8 +11,10 @@ import scala.scalajs.js.{ Dynamic ⇒ Dyn }
 import scalatags.JsDom.all._
 import scalatags.JsDom.tags
 import scala.async.Async.{ async, await }
-import scaladget.mapping.ace._
-import scaladget.stylesheet.{ all ⇒ sheet }
+import scaladget.ace._
+import scaladget.bootstrapnative.bsn._
+import scaladget.tools._
+
 import org.openmole.gui.ext.tool.client._
 
 /*
@@ -43,10 +45,9 @@ class EditorPanelUI(bindings: Seq[(String, String, () ⇒ Any)], initCode: Strin
   initEditor
 
   val view = {
-    import sheet._
     div(editorContainer +++ container)(
-      div(panel +++ panelDefault)(
-        div(sheet.panelBody)(
+      div(panelClass +++ panelDefault)(
+        div(panelBody)(
           editor.container
         )
       )
@@ -69,7 +70,7 @@ class EditorPanelUI(bindings: Seq[(String, String, () ⇒ Any)], initCode: Strin
 
   def complete() = {
     if (editor.completer == null)
-      editor.completer = scaladget.mapping.ace.autocomplete //scaladget.ace.autocomplete
+      editor.completer = scaladget.ace.autocomplete //scaladget.ace.autocomplete
     js.Dynamic.global.window.ed = editor
     editor.completer.showPopup(editor)
 
@@ -109,14 +110,14 @@ class EditorPanelUI(bindings: Seq[(String, String, () ⇒ Any)], initCode: Strin
     def row = editor.getCursorPosition().row.asInstanceOf[Int]
 
     def completions() = async {
-      val code = editor.getSession().getValue().asInstanceOf[String]
+      val code = editor.getSession().getValue()
 
       val intOffset = column + code.split("\n")
         .take(row)
         .map(_.length + 1)
         .sum
 
-      val flag = if (code.take(intOffset).endsWith(".")) "member" else "scope"
+      //  val flag = if (code.take(intOffset).endsWith(".")) "member" else "scope"
 
       //FIXME: CALL FOR COMPILATION AND  COMPLETION
       val res = await(Future {

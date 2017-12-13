@@ -7,14 +7,11 @@ import scala.util.Try
 import scalatags.JsDom.tags
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
-import scaladget.api.{ BootstrapTags ⇒ bs }
-import bs._
-import scaladget.api.Selector.Options
-import scaladget.stylesheet.{ all ⇒ sheet }
+import scaladget.bootstrapnative.bsn._
+import scaladget.tools._
+import scaladget.bootstrapnative.Selector.Options
 import org.openmole.gui.client.core.CoreUtils
-import sheet._
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
-import org.openmole.gui.ext.tool.client.JsRxTags._
 import autowire._
 import org.openmole.gui.ext.tool.client._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -146,7 +143,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
   })
 
   def fInputMultiple(todo: HTMLInputElement ⇒ Unit) = {
-    lazy val input: HTMLInputElement = bs.input()(ms("upload"), `type` := "file", multiple := "")(onchange := { () ⇒
+    lazy val input: HTMLInputElement = inputTag()(ms("upload"), `type` := "file", multiple := "")(onchange := { () ⇒
       todo(input)
     }).render
     input
@@ -163,7 +160,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
   })
 
   // New file tool
-  val newNodeInput: Input = bs.input()(
+  val newNodeInput: Input = inputTag()(
     placeholder := "File name",
     width := "130px",
     left := "-2px",
@@ -192,7 +189,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
   val nameTag = "names"
   val thresholdChanged = Var(false)
 
-  val thresholdInput = bs.input(fileNumberThreshold.toString)(
+  val thresholdInput = inputTag(fileNumberThreshold.toString)(
     id := thresholdTag,
     width := "60px",
     autofocus,
@@ -204,7 +201,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
     }
   ).render
 
-  val nameInput = bs.input("")(
+  val nameInput = inputTag("")(
     id := nameTag,
     width := "70px",
     autofocus
@@ -244,8 +241,8 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
     }
   }
 
-  val createFileTool = bs.inputGroup()(
-    bs.inputGroupButton(addRootDirButton.selector),
+  val createFileTool = inputGroup()(
+    inputGroupButton(addRootDirButton.selector),
     form(newNodeInput, onsubmit := {
       () ⇒
         createNewNode
@@ -270,31 +267,37 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
     selectedTool() = None
   }
 
-  val deleteButton = bs.button("Delete", btn_danger, () ⇒ {
-    CoreUtils.trashNodes(manager.selected.now) {
-      () ⇒
-        unselectToolAndRefreshTree
+  val deleteButton = button("Delete", btn_danger, onclick := { () ⇒
+    {
+      CoreUtils.trashNodes(manager.selected.now) {
+        () ⇒
+          unselectToolAndRefreshTree
+      }
     }
   })
 
-  val copyButton = bs.button("Copy", btn_default, () ⇒ {
-    manager.setSelectedAsCopied
-    unselectTool
+  val copyButton = button("Copy", btn_default, onclick := { () ⇒
+    {
+      manager.setSelectedAsCopied
+      unselectTool
+    }
   })
 
-  val pluginButton = bs.button("Plug", btn_default, () ⇒ {
-    post()[Api].copyToPluginUploadDir(manager.selected.now).call().foreach {
-      c ⇒
-        post()[Api].addPlugins(manager.selected.now.map {
-          _.name
-        }).call().foreach {
-          errs ⇒
-            if (errs.isEmpty) {
-              pluginPanel.dialog.show
-            }
-            else AlertPanel.detail("Plugin import failed", errs.head.stackTrace, transform = RelativeCenterPosition, zone = FileZone)
-        }
-        unselectToolAndRefreshTree
+  val pluginButton = button("Plug", btn_default, onclick := { () ⇒
+    {
+      post()[Api].copyToPluginUploadDir(manager.selected.now).call().foreach {
+        c ⇒
+          post()[Api].addPlugins(manager.selected.now.map {
+            _.name
+          }).call().foreach {
+            errs ⇒
+              if (errs.isEmpty) {
+                pluginPanel.dialog.show
+              }
+              else AlertPanel.detail("Plugin import failed", errs.head.stackTrace, transform = RelativeCenterPosition, zone = FileZone)
+          }
+          unselectToolAndRefreshTree
+      }
     }
   })
 
@@ -323,7 +326,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
   val sortingGroup = {
     val topTriangle = glyph_triangle_top +++ (fontSize := 10)
     val bottomTriangle = glyph_triangle_bottom +++ (fontSize := 10)
-    bs.exclusiveButtonGroup(omsheet.sortingBar, ms("sortingTool"), ms("selectedSortingTool"))(
+    exclusiveButtonGroup(omsheet.sortingBar, ms("sortingTool"), ms("selectedSortingTool"))(
       ExclusiveButton.twoGlyphSpan(
         topTriangle,
         bottomTriangle,
@@ -344,7 +347,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
         bottomTriangle,
         () ⇒ switchSizeSorting,
         () ⇒ switchSizeSorting,
-        preGlyph = twoGlyphButton +++ OMTags.glyph_data +++ sheet.paddingTop(10) +++ (fontSize := 12)
+        preGlyph = twoGlyphButton +++ OMTags.glyph_data +++ Seq(paddingTop := 10, fontSize := 12)
       )
     )
   }
@@ -356,7 +359,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
 
   lazy val div = {
 
-    tags.div(sheet.paddingBottom(10), sheet.paddingTop(50))(
+    tags.div(paddingBottom := 10, paddingTop := 50)(
       tags.div(centerElement)(
         buildSpan(RefreshTool, "Refresh the current folder", () ⇒ {
           treeNodePanel.invalidCacheAndDraw

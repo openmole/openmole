@@ -1,27 +1,25 @@
 package org.openmole.gui.client.core
 
-import scaladget.stylesheet.all._
 import org.openmole.gui.client.core.alert.AbsolutePositioning.CenterPagePosition
 
 import scalatags.JsDom._
 import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
 import org.openmole.gui.client.core.alert.AlertPanel
-import scaladget.api.{ BootstrapTags ⇒ bs }
 import org.openmole.gui.client.core.panels._
 import org.scalajs.dom
-import bs._
-import scaladget.api.Selector.Dropdown
+
+import scaladget.bootstrapnative.bsn._
+import scaladget.tools._
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.data.{ JVMInfos, routes }
 import org.openmole.gui.ext.tool.client._
 import autowire._
 import rx._
-import org.openmole.gui.ext.tool.client.JsRxTags._
-import scaladget.stylesheet.{ all ⇒ sheet }
 
 import scala.scalajs.js.timers
 import scala.scalajs.js.timers.SetIntervalHandle
+import scaladget.bootstrapnative.Selector.Dropdown
 import scalatags.JsDom.all._
 
 /*
@@ -56,23 +54,23 @@ object SettingsView {
     transform = CenterPagePosition
   )
 
-  lazy val dropdownApp: Dropdown[_] = bs.vForm(width := "auto")(
+  lazy val dropdownApp: Dropdown[_] = vForm(width := "auto")(
     jvmInfoButton,
     docButton,
     jvmInfosDiv,
     resetPasswordButton.render,
     restartButton,
     shutdownButton
-  ).dropdownWithTrigger(bs.glyphSpan(glyph_menu_hamburger), omsheet.resetBlock, Seq(left := "initial", right := 0))
+  ).dropdownWithTrigger(glyphSpan(glyph_menu_hamburger), omsheet.resetBlock, Seq(left := "initial", right := 0))
 
-  lazy val dropdownConnection: Dropdown[_] = bs.vForm(width := "auto")(
+  lazy val dropdownConnection: Dropdown[_] = vForm(width := "auto")(
     resetPasswordButton.render
-  ).dropdownWithTrigger(bs.glyphSpan(glyph_menu_hamburger), omsheet.resetBlock +++ (right := 20), Seq(left := "initial", right := 0))
+  ).dropdownWithTrigger(glyphSpan(glyph_menu_hamburger), omsheet.resetBlock +++ (right := 20), Seq(left := "initial", right := 0))
 
   private def serverActions(message: String, messageGlyph: Glyphicon, warnMessage: String, route: String) =
     div(rowLayout +++ (lineHeight := "7px"))(
-      bs.glyphSpan(messageGlyph +++ omsheet.shutdownButton +++ columnLayout),
-      span(message, settingsItemStyle +++ columnLayout +++ (paddingAll(top = 3, left = 5))),
+      glyphSpan(messageGlyph +++ omsheet.shutdownButton +++ columnLayout),
+      span(message, Seq(paddingTop := 3, paddingLeft := 5) +++ settingsItemStyle +++ columnLayout),
       onclick := { () ⇒
         dropdownApp.close
         dropdownConnection.close
@@ -83,9 +81,11 @@ object SettingsView {
   val docButton =
     div(a(href := "https://next.openmole.org/GUI+guide.html")(target := "_blank", tags.span("Documentation"))).render
 
-  val jvmInfoButton = bs.button("JVM stats", btn_default +++ sheet.marginLeft(12), glyph_stats, () ⇒ timer.now match {
-    case Some(t) ⇒ stopJVMTimer(t)
-    case _       ⇒ setJVMTimer
+  val jvmInfoButton = button("JVM stats", btn_default +++ (marginLeft := 12), glyph_stats, onclick := { () ⇒
+    timer.now match {
+      case Some(t) ⇒ stopJVMTimer(t)
+      case _       ⇒ setJVMTimer
+    }
   }).render
 
   def updateJVMInfos = {
@@ -131,7 +131,7 @@ object SettingsView {
             tags.div(smallHalfColumn)(s"Total memory (${readableTotalMemory.units})")
           ),
           tags.div(smallLine)(
-            tags.div(smallHalfColumn +++ textCenter +++ sheet.paddingTop(5))(s"${j.javaVersion}")
+            tags.div(smallHalfColumn +++ textCenter +++ (paddingTop := 5))(s"${j.javaVersion}")
           ),
           tags.div(smallLine)(
             tags.div(smallHalfColumn +++ textCenter)(s"${j.jvmImplementation}")

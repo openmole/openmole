@@ -17,8 +17,8 @@ package org.openmole.gui.ext.tool
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scaladget.stylesheet.all._
-import scaladget.stylesheet.{ all ⇒ sheet }
+import scaladget.bootstrapnative.bsn._
+import scaladget.tools._
 import org.scalajs.dom
 
 import scalatags.JsDom.all._
@@ -57,7 +57,7 @@ package object client {
   lazy val textNoWrap = ms("text-nowrap")
 
   lazy val tableTag: ModifierSeq = Seq(
-    sheet.marginLeft(3),
+    marginLeft := 3,
     fontSize := 14,
     relativePosition,
     top := 4
@@ -92,18 +92,18 @@ package object client {
   lazy val shutdown: ModifierSeq = Seq(
     color(DARK_GREY),
     fontStyle := "italic",
-    sheet.paddingTop(40),
-    sheet.marginLeft(-25)
+    paddingTop := 40,
+    marginLeft := -25
   )
   // SCRIPT CLIENT
   lazy val mainNav0: ModifierSeq = Seq(
-    sheet.paddingLeft(0),
+    paddingLeft := 0,
     borderColor := DARK_GREY,
     zIndex := 10
   )
 
   lazy val mainNav370: ModifierSeq = Seq(
-    sheet.paddingLeft(370),
+    paddingLeft := 370,
     borderColor := DARK_GREY,
     zIndex := 10
   )
@@ -112,7 +112,7 @@ package object client {
     lineHeight := "10px",
     top := 10,
     left := -30,
-    sheet.paddingRight(20)
+    paddingRight := 20
   )
 
   lazy val mainNav: ModifierSeq = Seq(
@@ -149,7 +149,7 @@ package object client {
 
   lazy val panelReduce: ModifierSeq = Seq(
     styles.left := 330,
-    sheet.paddingRight(340),
+    paddingRight := 340,
     fixedPosition,
     top := 60,
     transition := "all 0.1 s ease - out 0 s",
@@ -163,8 +163,8 @@ package object client {
 
   lazy val centerpanel: ModifierSeq = Seq(
     height := "89%",
-    sheet.paddingLeft(15),
-    sheet.paddingRight(15),
+    paddingLeft := 15,
+    paddingRight := 15,
     relativePosition,
     top := 30,
     width := "100%"
@@ -176,7 +176,7 @@ package object client {
     styles.left := -320,
     opacity := 1,
     overflowY := "auto",
-    sheet.paddingLeft(7),
+    paddingLeft := 7,
     absolutePosition,
     top := 37,
     transition := "all 0.1 s ease - out 0 s",
@@ -208,7 +208,7 @@ package object client {
     relativePosition,
     top := 18,
     zIndex := 10,
-    sheet.paddingRight(15),
+    paddingRight := 15,
     fontSize := 20
   )
 
@@ -225,7 +225,7 @@ package object client {
   lazy val shutdownButton: ModifierSeq = Seq(
     fontSize := 12,
     verticalAlign := "middle",
-    sheet.marginLeft(10),
+    marginLeft := 10,
     zIndex := 1101
   )
 
@@ -239,7 +239,7 @@ package object client {
     display := "inline-block",
     textAlign := "right",
     float := "right",
-    sheet.marginRight(15)
+    marginRight := 15
   )
 
   lazy val textVersion: ModifierSeq = Seq(
@@ -253,11 +253,11 @@ package object client {
 
   //TREENODE PANEL
   lazy val fileInfo: ModifierSeq = Seq(
-    sheet.floatRight,
+    floatRight,
     absolutePosition,
     width := 100,
     right := 2,
-    sheet.marginTop(6),
+    marginTop := 6,
     textAlign := "right"
   )
 
@@ -278,9 +278,9 @@ package object client {
     color(WHITE),
     display := "inline-block",
     height := 20,
-    sheet.marginBottom(3),
-    sheet.marginTop(2),
-    sheet.marginLeft(1),
+    marginBottom := 3,
+    marginTop := 2,
+    marginLeft := 1,
     padding := 2,
     width := 20,
     borderRadius := "4px"
@@ -296,29 +296,29 @@ package object client {
   )
 
   lazy val fileIcon: ModifierSeq = Seq(
-    sheet.paddingLeft(5),
-    sheet.paddingTop(3),
+    paddingLeft := 5,
+    paddingTop := 3,
     fontSize := 8,
-    sheet.marginBottom(-16),
+    marginBottom := -16,
     zIndex := 2
   )
 
   lazy val divAlertPosition: ModifierSeq = Seq(
     floatRight,
-    sheet.marginRight(70),
-    sheet.marginTop(20)
+    marginRight := 70,
+    marginTop := 20
   )
 
   lazy val treeprogress: ModifierSeq = Seq(
-    sheet.marginTop(20),
+    marginTop := 20,
     width := "100%"
   )
 
   lazy val message: ModifierSeq = Seq(
     color("#999"),
     fontStyle := "italic",
-    sheet.marginLeft(25),
-    sheet.marginTop(38)
+    marginLeft := 25,
+    marginTop := 38
   )
 
   lazy val fileSelectionOverlay: ModifierSeq = Seq(
@@ -326,8 +326,8 @@ package object client {
     pointer,
     width := 360,
     height := 24,
-    sheet.marginLeft(-5),
-    sheet.marginBottom(1),
+    marginLeft := -5,
+    marginBottom := 1,
     borderRadius := "2px"
   )
 
@@ -372,7 +372,7 @@ package object client {
   //TREENODE TABS
 
   lazy val tabContent: ModifierSeq = Seq(
-    sheet.marginTop(-1),
+    marginTop := -1,
     relativePosition,
     width := "100%"
   )
@@ -396,7 +396,7 @@ package object client {
     absolutePosition,
     width := "100%",
     color(WHITE),
-    sheet.paddingTop(100),
+    paddingTop := 100,
     fontSize := 25,
     zIndex := 25,
     textAlign := "center"
@@ -425,10 +425,10 @@ package object client {
       absolutePosition,
       fontSize := 14,
       listStyleType := "none",
-      sheet.marginTop(50),
-      sheet.paddingBottom(30),
-      sheet.marginLeft(-7),
-      sheet.paddingLeft(10),
+      marginTop := 50,
+      paddingBottom := 30,
+      marginLeft := -7,
+      paddingLeft := 10,
       width := 370,
       overflowY := "auto",
       zIndex := -1
@@ -469,33 +469,33 @@ package object client {
     color(WHITE),
     backgroundColor := DARK_GREY,
     borderRadius := "4px",
-    sheet.marginTop(3),
-    sheet.paddingTop(6),
+    marginTop := 3,
+    paddingTop := 6,
     verticalAlign := "middle",
-    sheet.paddingBottom(4),
-    sheet.paddingLeft(15),
+    paddingBottom := 4,
+    paddingLeft := 15,
     minHeight := 46
   )
 
   lazy val docTitleEntry: ModifierSeq = Seq(
     cursor := "pointer",
-    sheet.paddingTop(6)
+    paddingTop := 6
   )
 
   //EXECUTION PANEL
   lazy val panelHeaderSettings: ModifierSeq = Seq(
     floatRight,
-    sheet.marginRight(200)
+    marginRight := 200
   )
 
   lazy val execOutput: ModifierSeq = Seq(
-    sheet.marginRight(-10),
-    sheet.marginTop(5)
+    marginRight := -10,
+    marginTop := 5
   )
 
   lazy val execLevel: ModifierSeq = Seq(
-    sheet.marginRight(-25),
-    sheet.marginTop(-3)
+    marginRight := -25,
+    marginTop := -3
   )
 
   lazy val errorTable: ModifierSeq = Seq(
@@ -548,15 +548,15 @@ package object client {
   //OPTON DIVS
   lazy val optionsdiv: ModifierSeq = Seq(
     relativePosition,
-    sheet.marginRight(10),
+    marginRight := 10,
     top := -3
   )
 
   // SELECTS
   lazy val selectFilter: ModifierSeq = Seq(
-    sheet.marginTop(6),
+    marginTop := 6,
     fontSize := 14,
-    sheet.paddingLeft(5),
+    paddingLeft := 5,
     borderBottomRightRadius := 0,
     borderBottomLeftRadius := 0
   )
@@ -651,21 +651,21 @@ package object client {
   lazy val modelIO: ModifierSeq = Seq(
     relativePosition,
     left := "50%",
-    sheet.marginLeft(-60),
-    sheet.paddingBottom(20)
+    marginLeft := -60,
+    paddingBottom := 20
   )
 
   // PLUGIN PANEL
   lazy val uploadPlugin: ModifierSeq = Seq(
-    sheet.marginRight(50),
-    sheet.paddingBottom(30),
+    marginRight := 50,
+    paddingBottom := 30,
     width := 45,
     height := 30
   )
 
   lazy val pluginRight: ModifierSeq = Seq(
     right := -5,
-    sheet.marginTop(-9)
+    marginTop := -9
   )
 
   lazy val spinnerStyle: ModifierSeq = Seq(
@@ -677,7 +677,7 @@ package object client {
   lazy val dateStyle: ModifierSeq = Seq(
     absolutePosition,
     fontStyle := "italic",
-    sheet.paddingTop(6),
+    paddingTop := 6,
     floatRight,
     right := 50,
     color("lightgrey")
@@ -715,22 +715,22 @@ package object client {
 
   lazy val smallInput: ModifierSeq = Seq(
     width := 60,
-    sheet.paddingTop(5),
-    sheet.paddingLeft(3),
+    paddingTop := 5,
+    paddingLeft := 3,
     textAlign := "center",
-    height := (28),
+    height := 28,
     fontSize := 14
   )
 
   lazy val filterElement: ModifierSeq = Seq(
-    sheet.floatLeft,
+    floatLeft,
     height := 30,
-    sheet.paddingLeft(4),
+    paddingLeft := 4,
     fontSize := 12
   )
 
   lazy val selectedButton: ModifierSeq = Seq(
-    sheet.btn,
+    btn,
     backgroundColor := "#e3dbdb"
   )
 
@@ -742,7 +742,7 @@ package object client {
   )
 
   lazy val labelStyle: ModifierSeq = Seq(
-    sheet.marginTop(4),
+    marginTop := 4,
     color(WHITE),
     width := "auto",
     fontSize := 14
@@ -750,8 +750,8 @@ package object client {
 
   lazy val tdStyle: ModifierSeq = Seq(
     colMD(2),
-    sheet.marginBottom(8),
-    sheet.paddingLeft(5),
+    marginBottom := 8,
+    paddingLeft := 5,
     width := "auto",
     height := 25
   )
@@ -784,7 +784,7 @@ package object client {
   lazy val glyphText: ModifierSeq = Seq(
     color("#a6bf26"),
     fontSize := 22,
-    sheet.paddingRight(5)
+    paddingRight := 5
   )
 
   lazy val docContent: ModifierSeq = Seq(
@@ -805,8 +805,9 @@ package object client {
     relativePosition,
     color(WHITE),
     opacity := 0.9,
-    paddingAll(top = 10, left = 15, bottom = 15)
-
+    paddingTop := 10,
+    paddingLeft := 15,
+    paddingBottom := 15
   )
 
   //GENERAL SETTINGS
@@ -819,7 +820,7 @@ package object client {
 
   lazy val generalSettings: ModifierSeq = Seq(
     height := 185,
-    sheet.marginBottom(20)
+    marginBottom := 20
   )
 
   lazy val smallLine: ModifierSeq = Seq(

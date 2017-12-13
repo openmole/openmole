@@ -21,11 +21,11 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
 import org.openmole.gui.ext.data.{ AuthenticationPlugin, AuthenticationPluginFactory }
 import org.openmole.gui.ext.tool.client.OMPost
-import scaladget.api.{ BootstrapTags ⇒ bs }
-import scaladget.stylesheet.{ all ⇒ sheet }
+import scaladget.bootstrapnative.bsn._
+import scaladget.tools._
+
 import autowire._
-import sheet._
-import bs._
+
 import org.scalajs.dom.raw.HTMLElement
 import org.openmole.gui.ext.data._
 
@@ -57,13 +57,13 @@ class LoginAuthenticationGUI(val data: LoginAuthenticationData = LoginAuthentica
     onremove()
   }
 
-  val loginInput = bs.input(data.login)(placeholder := "Login").render
+  val loginInput = input(data.login)(placeholder := "Login").render
 
-  val passwordInput = bs.input(data.password)(placeholder := "Password", passwordType).render
+  val passwordInput = input(data.password)(placeholder := "Password", passwordType).render
 
-  val targetInput = bs.input(data.target)(placeholder := "Host").render
+  val targetInput = input(data.target)(placeholder := "Host").render
 
-  val portInput = bs.input(data.port)(placeholder := "Port").render
+  val portInput = input(data.port)(placeholder := "Port").render
 
   def panel: TypedTag[HTMLElement] = hForm(
     loginInput.withLabel("Login"),

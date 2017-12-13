@@ -17,12 +17,10 @@ package org.openmole.gui.ext.tool.client
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scaladget.api.{ BootstrapTags ⇒ bs }
-import scaladget.stylesheet.all._
-import scaladget.stylesheet.{ all ⇒ sheet }
+import scaladget.bootstrapnative.bsn._
+import scaladget.tools._
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.data._
-import org.openmole.gui.ext.tool.client.JsRxTags._
 import org.scalajs.dom.raw.HTMLInputElement
 import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
@@ -49,7 +47,7 @@ case class FileUploaderUI(
   val view = upButton
 
   lazy val upButton = label(
-    bs.fileInput((fInput: HTMLInputElement) ⇒ {
+    fileInput((fInput: HTMLInputElement) ⇒ {
       FileManager.upload(
         fInput,
         SafePath.empty,
@@ -70,5 +68,5 @@ case class FileUploaderUI(
     }), Rx {
       if (pathSet()) fileName else "No certificate"
     }
-  )(sheet.paddingTop(5) +++ omsheet.certificate +++ "inputFileStyle" +++ sheet.marginTop(40))
+  )(Seq(paddingTop := 5, marginTop := 40) +++ omsheet.certificate +++ "inputFileStyle")
 }

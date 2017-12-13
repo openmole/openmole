@@ -17,14 +17,16 @@ object Libraries {
   lazy val boopickleVersion = "1.2.6"
   lazy val scalaAutowireVersion = "0.2.6"
   lazy val sourcecodeVersion = "0.1.3"
-  lazy val scaladgetVersion = "0.9.5"
+  lazy val scaladgetVersion = "1.0.0-M1"
   lazy val json4sVersion = "3.5.0"
   lazy val circeVersion = "0.9.0-M1"
   lazy val catsVersion = "1.0.0-MF"
   lazy val scalajsVersion = "0.6.21"
   lazy val squantsVersion = "1.3.0"
 
-  lazy val scaladgetJS = libraryDependencies += "fr.iscpif" %%% "scaladget" % scaladgetVersion
+  lazy val bootstrapnative = libraryDependencies += "scaladget" %%% "bootstrapnative" % scaladgetVersion
+  lazy val ace = libraryDependencies += "scaladget" %%% "ace" % scaladgetVersion
+  lazy val scaladgetTools = libraryDependencies += "scaladget" %%% "tools" % scaladgetVersion
   lazy val scalajsDomJS = libraryDependencies += "org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion
   lazy val rxJS = libraryDependencies += "com.lihaoyi" %%% "scalarx" % rxVersion
   lazy val scalaTagsJS = libraryDependencies += "com.lihaoyi" %%% "scalatags" % scalaTagsVersion
@@ -33,10 +35,6 @@ object Libraries {
   lazy val sourcecodeJS = libraryDependencies += "com.lihaoyi" %%% "sourcecode" % sourcecodeVersion
   lazy val scalajsMarked = libraryDependencies += "com.github.karasiq" %%% "scalajs-marked" % "1.0.2"
   lazy val htmlparser2 = libraryDependencies += "com.definitelyscala" %%% "scala-js-htmlparser2" % "1.0.2"
-
-  lazy val d3 = "org.webjars" % "d3js" % d3Version
-  lazy val ace = "org.webjars" % "ace" % aceVersion
-  lazy val tooltipster = "org.webjars" % "tooltipster" % tooltipserVersion
 
   lazy val scalatest = "org.scalatest" %% "scalatest" % "3.0.1" % "test"
 

@@ -5,7 +5,7 @@ import org.scalajs.dom.raw._
 import rx._
 
 import scalatags.JsDom.tags
-import org.openmole.gui.ext.tool.client.JsRxTags._
+import scaladget.tools._
 
 import scalatags.JsDom.TypedTag
 

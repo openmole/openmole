@@ -17,7 +17,8 @@ package org.openmole.gui.client.core.alert
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scaladget.stylesheet.{ all ⇒ sheet }
+import scaladget.bootstrapnative.bsn._
+import scaladget.tools._
 import org.openmole.gui.client.core.alert.AbsolutePositioning._
 import org.openmole.gui.client.core.files.{ TreeNodeComment, TreeNodeError }
 import org.openmole.gui.client.core.panels._
@@ -25,10 +26,8 @@ import org.openmole.gui.client.tool.OMTags._
 import org.openmole.gui.ext.data.SafePath
 import org.openmole.gui.client.tool._
 import org.openmole.gui.ext.tool.client._
-import org.openmole.gui.ext.tool.client.JsRxTags._
 import org.scalajs.dom.html.Div
 import org.scalajs.dom.raw.HTMLDivElement
-import sheet._
 import rx._
 
 import scalatags.JsDom.all._
@@ -75,7 +74,7 @@ object AlertPanel {
     transform:        Position    = CenterPagePosition,
     zone:             Zone        = FullPage,
     alertType:        ModifierSeq = btn_danger,
-    buttonGroupClass: ModifierSeq = floatLeft +++ sheet.marginLeft(20)
+    buttonGroupClass: ModifierSeq = Seq(floatLeft, marginLeft := 20)
   ): Unit = div(tags.div(message), okaction, cancelaction, transform, zone, alertType, buttonGroupClass)
 
   def detail(
@@ -85,7 +84,7 @@ object AlertPanel {
     transform:        Position    = CenterPagePosition,
     zone:             Zone        = FullPage,
     alertType:        ModifierSeq = btn_danger,
-    buttonGroupClass: ModifierSeq = floatLeft +++ sheet.marginLeft(20)
+    buttonGroupClass: ModifierSeq = Seq(floatLeft, marginLeft := 20)
   ): Unit =
     div(
       tags.div(message),
