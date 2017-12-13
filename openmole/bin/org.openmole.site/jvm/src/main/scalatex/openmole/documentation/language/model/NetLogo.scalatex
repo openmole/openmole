@@ -32,7 +32,15 @@
   val csvHook = AppendToCSVFileHook("result.csv", density, burned, seed)"""
 
 In this example, we present step by step how to explore a NetLogo model. @a("The Fire model", href := Resource.script.fireNLogo.file) is a
-common NetLogo example. It studies the percolation of a fire in a forest depending on the density of the forest.
+common NetLogo example. It studies the percolation of a fire in a forest depending on the density of the forest. This model has one input : @i{density} and one output : @i{percent-burned}
+
+
+    @br
+    @br
+    @br
+    @img(src := Resource.img.example.fireScreen.file, stylesheet.center(50))
+    @br
+
 
 @sect{@shared.netlogoMenu.simulation}
     We would like to study the impact of the @i{density} factor for a fixed population size. To do this, let's
@@ -51,7 +59,7 @@ common NetLogo example. It studies the percolation of a fire in a forest dependi
     @i{density} exploration. These 2 variables are:
     @ul
       @li{an integer (Int) representing the seed of the random number generator for exploring the replications,}
-      @li{and a Double to set the value of @i{density},}
+      @li{a Double to set the value of @i{density},}
 
     @br @hl.openmole(variables, name = "netlogo variables")
 
@@ -75,11 +83,15 @@ common NetLogo example. It studies the percolation of a fire in a forest dependi
     @ul
       @li{the path where to find the NetLogo model, i.e. the nlogo source file,}
       @li{the list of NetLogo commands that OpenMOLE needs to run}
+    @p The NetlogoTask comes in two versions : @b{Netlogo5Task} and @b{Netlogo6Task}, be sure to select
+    the right version of the task according to the version of Netlogo you used, 5 or 6 .
+
+
     @p In this example, the commands list contains:
     @ul
       @li{@i{random-seed} that initialises the random number generator of NetLogo using the seed provided by OpenMOLE,}
       @li{@i{setup} that calls the setup function of the netlogo file to initialise the model,}
-      @li{@i{go}, a function that runs the model, for this particular model this function is called until no more turttle are active.}
+      @li{@i{go}, a function that runs the model. For this particular model, this function is called until no more turttle are active.}
     @p The function @i{go-openMOLE} takes three parameters:
 
     @br @hl.openmole(netlogo, header =
