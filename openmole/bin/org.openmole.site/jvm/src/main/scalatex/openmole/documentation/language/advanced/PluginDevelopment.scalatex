@@ -5,20 +5,17 @@
 @import org.openmole.site.Environment._
 
 
-Plugin development
+@h1{Plugin development}
 
 OpenMOLE is a plugable platform. It means that you can easily write your own extension and plug it into OpenMOLE. This tutorial explains how to write an OpenMOLE plugin using Scala and SBT. OpenMOLE is based on the JVM so you can create OpenMOLE plugins using Scala or any other JVM based languages such as Java, Groovy, Clojure, Jython...
 
-The -p option loads plugins in the OpenMOLE console: ./openmole -c -p /path/to/plugin.jar /path/to/anotherplugin.jar
+@p This tutorial exposes how to design a plugin. The prerequisites are to have git and SBT installed on your system.
 
-This tutorial exposes how to design a plugin. The prerequisites are to have git and SBT installed on your system.
+@p The first step is to clone the code available here:
+@br @hl.plain("git clone git://github.com/openmole/myopenmoleplugin.git")
 
-The first step is to clone the code available here:
-git clone git://github.com/openmole/myopenmoleplugin.git
-
-This repository contains a template to help you create OpenMOLE plugins easily. The hello directory contains the source code of the plugin and the materials to build it:
-
-@hl.code("""
+@p This repository contains a template to help you create OpenMOLE plugins easily. The hello directory contains the source code of the plugin and the materials to build it:
+@br @hl.code("""
 package myopenmoleplugin
 
 object Hello {
@@ -26,9 +23,8 @@ object Hello {
 }
 """)
 
-The file build.sbt contains the building instructions for SBT. The most important part are the OSGi instructions:
-
-@hl.plain(s"""
+@p The file build.sbt contains the building instructions for SBT. The most important part are the OSGi instructions:
+@br @hl.plain(s"""
 enablePlugins(SbtOsgi)
 
 OsgiKeys.exportPackage := Seq("myopenmoleplugin.*")
@@ -40,13 +36,12 @@ OsgiKeys.privatePackage := Seq("*")
 OsgiKeys.requireCapability := ${tq}osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"${tq}
 """)
 
-The exportPackage instruction makes the myopenmole package visible to OpenMOLE. The importPackage instruction means that every package that is not included into the plugin should be imported. The privatePackage means that every package in the project, or in the dependencies, should be embedded except for the package starting by the scala word. The scala packages provided by OpenMOLE will be used by the plugin instead.
+@p The exportPackage instruction makes the myopenmole package visible to OpenMOLE. The importPackage instruction means that every package that is not included into the plugin should be imported. The privatePackage means that every package in the project, or in the dependencies, should be embedded except for the package starting by the scala word. The scala packages provided by OpenMOLE will be used by the plugin instead.
 
-To build the plugin execute: @hl.plain("sbt osgiBundle").
+@p To build the plugin execute: @hl.plain("sbt osgiBundle").
 
-SBT constructs the plugin in target/scala-2.12/myopenmoleplugin_2.12-1.0.jar. This JAR file contains the classes you have developed (*.class) along with the metadata realtive to imports and exports in the MANIFEST.INF file:
-
-@hl.plain("""
+@p SBT constructs the plugin in target/scala-2.12/myopenmoleplugin_2.12-1.0.jar. This JAR file contains the classes you have developed (*.class) along with the metadata realtive to imports and exports in the MANIFEST.INF file:
+@br @hl.plain("""
 META-INF/MANIFEST.MF
 myopenmoleplugin/
 myopenmoleplugin/Hello$.class
@@ -55,12 +50,11 @@ myopenmoleplugin/Hello.class
 
 You can check in the MANIFEST.MF that you namespace is exported.
 
-To enable this plugin in OpenMOLE, either use the plugin panel of in the interface or use the option -p:
-@hl.plain("openmole -p target/scala-2.12/myopenmoleplugin_2.12-1.0.jar")
+@p To enable this plugin in OpenMOLE, either use the plugin panel of in the interface or use the option -p:
+@br @hl.plain("openmole -p target/scala-2.12/myopenmoleplugin_2.12-1.0.jar")
 
-You can now use the Hello object in your workflows:
-
-@hl.openmole("""
+@p You can now use the Hello object in your workflows:
+@br @hl.openmole("""
 // Declare the variable
 val i = Val[Int]
 val j = Val[Int]
