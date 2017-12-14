@@ -8,11 +8,9 @@
   val burned = Val[Double]"""
 
 @def exploration = """
-  val exploration =
-    ExplorationTask(
-      (density in (20.0 to 80.0 by 10.0)) x
-      (seed in (UniformDistribution[Int]() take 10))
-    )"""
+  val sampling =
+    (density in (20.0 to 80.0 by 10.0)) x
+    (seed in (UniformDistribution[Int]() take 10))"""
 
 @def netlogo = """
   val cmds = List(
@@ -21,7 +19,7 @@
     "while [any? turtles] [go]")
 
   val fireTask =
-    NetLogo6Task("/path/to/the/Fire.nlogo", cmds) set (
+    NetLogo6Task(workDirectory / "Fire.nlogo", cmds) set (
       inputs += seed,
       outputs += (density, seed),
       netLogoInputs += (density, "density"),
@@ -29,7 +27,7 @@
     )"""
 
 @def csvHook = """
-  val csvHook = AppendToCSVFileHook("result.csv", density, burned, seed)"""
+  val csvHook = AppendToCSVFileHook(workDirectory / "result.csv", density, burned, seed)"""
 
 In this example, we present step by step how to explore a NetLogo model. @a("The Fire model", href := Resource.script.fireNLogo.file) is a
 common NetLogo example. It studies the percolation of a fire in a forest depending on the density of the forest.
@@ -119,10 +117,10 @@ common NetLogo example. It studies the percolation of a fire in a forest dependi
     $netlogo
     $csvHook
 
-    exploration -< (fireTask hook csvHook)""", name = "netlogo full workflow")
-
-    @p The progress of the simulation can be monitored by printing the state of the execution variable:
-    @hl.code("print(ex)").
+    DirectSampling(
+      evaluation = fireTask hook csvHook,
+      sampling = sampling
+    )""", name = "netlogo full workflow")
 
     @p At the end of the execution, you will find the output values in a file called @i{result.csv}.
 
