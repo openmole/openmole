@@ -17,7 +17,14 @@
 @p{Interactive console mode}
   OpenMOLE also proposes an interactive console mode. To launch the console execute openmole -c in a console. The only difference between the script in the console mode and the ones from the editor concerns the way you launch the execution, you cancel it and you follow the execution progress. An console workflow is launched like this:
 
-  @br @hl.code("""val ex = exploration -< (model on env) start""")
+  @br @hl.code("""
+  val exploration =
+    DirectSampling(
+      evaluation = myModel on env,
+      sampling = mySampling
+    )
+    
+  val ex = exploration start""")
 
   @p Using the ex and the env variables you can follow the progress of the execution by using the commands: print(ex) and print(env). To cancel the execution you should use: ex.cancel.
 
