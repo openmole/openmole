@@ -19,7 +19,8 @@ new methods:  PSE, and Calibration and Profiles  which have been thought to impr
 @br
 @br
 
-Your model inputs can be sampled in the traditional way, by using @a("grid (or regular)  sampling", href:=shared.otherDoEMenu.basicSampling), by @a("sampling uniformly", href:=shared.otherDoEMenu.basicSampling) inside their domain.
+Your model inputs can be sampled in the traditional way, by using @a("grid (or regular)  sampling", href:=shared.otherDoEMenu.gridSampling), by @a("sampling uniformly", href:=shared.otherDoEMenu.uniformSampling) inside their domain.
+Your model inputs can be sampled in the traditional way, by using @a("grid (or regular)  sampling", href:=shared.otherDoEMenu.gridSampling), by @a("sampling uniformly", href:=shared.otherDoEMenu.uniformSampling) inside their domain.
 @br
 For higher dimension input space, specific statistics techniques like @a("Latin Hypercube Sampling and SobolSequence", href:=shared.otherDoEMenu.LHSSobol) are available.
 @br
@@ -29,7 +30,7 @@ If you want to use design of experiments of your own you may also want to provid
 By defining your own exploration task on @a("several types of input", href:= shared.otherDoEMenu.severalInputs), you will be able to highlight some of your model inner properties like those revealed by @a("sensitivity analysis", href:=shared.otherDoEMenu.sensitivityAnalysis), as shown in a toy example on a @a("real world example", href:=shared.otherDoEMenu.sensitivityFireModel)
 
 
-@sect{@shared.otherDoEMenu.basicSampling }
+@sect{@shared.otherDoEMenu.gridSampling }
     @br
     For a reasonable number of dimension and discretisation quanta (steps) values, complete sampling (or grid sampling)  consists in producing every combination of
     the inputs possibles values, given their bounds and quanta of discretisation.

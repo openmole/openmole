@@ -149,7 +149,8 @@ object SideMenu {
 
   lazy val otherDoEMenu = fromStrings(
     "Contents",
-    shared.otherDoEMenu.basicSampling,
+    shared.otherDoEMenu.gridSampling,
+    shared.otherDoEMenu.uniformSampling,
     shared.otherDoEMenu.csvSampling,
     shared.otherDoEMenu.LHSSobol,
     shared.otherDoEMenu.severalInputs,
