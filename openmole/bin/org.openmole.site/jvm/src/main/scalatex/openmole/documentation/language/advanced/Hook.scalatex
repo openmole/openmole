@@ -16,22 +16,23 @@ their execution can be deported to other machines.
     @br @hl.openmole("""
     val i = Val[Int]
     val hello = ScalaTask("i = i * 2") set (
-    inputs += i,
-    outputs += i
+      inputs += i,
+      outputs += i
     )
-
-    val exploration = ExplorationTask(i in (0 to 9))
 
     val h = ToStringHook()
 
-    exploration -< (hello hook h)""", name = "plug a hook")
+    DirectSampling(
+      evaluation = (hello hook h),
+      sampling = i in (0 to 9)
+    )""", name = "plug a hook")
     @p The hook @i{h} is plugged to the end of the @i{hello} task. Everytime @i{hello} finishes, the hook @i{h} is
     executed. Multiple hooks can also be plugged to the same task as in the present example:
     @br @hl.openmole("""
     val i = Val[Int]
 
     val hello = ScalaTask("val i = 2") set (
-    outputs += i
+      outputs += i
     )
 
     val h1 = ToStringHook()
