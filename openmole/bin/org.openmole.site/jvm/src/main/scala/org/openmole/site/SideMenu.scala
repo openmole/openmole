@@ -23,6 +23,10 @@ import stylesheet._
 import scalatags.Text.TypedTag
 import scalatags.Text.all._
 
+object Link {
+  def intern(name: String) = s"#${name.replaceAll(" ", "")}"
+}
+
 case class Link(name: String, link: String)
 
 case class SideMenu(links: Seq[Link], menuStyle: AttrPair = classIs(""), preText: String = "", otherTab: Boolean = false) {
@@ -86,7 +90,7 @@ object SideMenu {
   def details(pages: Seq[Page]) = SideMenu(pages, classIs(btn ++ btn_default), otherTab = true)
 
   def fromStrings(title: String, stringMenus: String*) =
-    SideMenu(preText = title, links = stringMenus.map { a ⇒ Link(a, s"#${a.replaceAll(" ", "")}") })
+    SideMenu(preText = title, links = stringMenus.map { a ⇒ Link(a, Link.intern(a)) })
 
   val model = SideMenu(DocumentationPages.modelPages, classIs(btn ++ btn_primary), "Available tasks").toBlock
 
