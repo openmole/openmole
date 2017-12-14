@@ -35,7 +35,7 @@ sensitivity, robustnesss and diversity} of your model capabilities
     Likewise, considered outputs in simulation experiments are most of times @b{measures} computed on the dynamics produced by a simulation run  (e.g. fitness or error functions)
 
 @h2
-    Questionning your model
+    Questioning your model
 
 @p
     There is four types of general questions that can be addressed by OpenMOLE methods.

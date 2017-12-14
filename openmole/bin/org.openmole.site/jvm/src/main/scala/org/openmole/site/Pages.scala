@@ -320,7 +320,7 @@ object DocumentationPages {
   lazy val headlessNetLogo = DocumentationPage(name = "Netlogo Headless", content = scalatex.documentation.language.advanced.HeadlessNetLogo(), title = Some("Headless version of Netlog model"))
   lazy val netLogoGA = DocumentationPage(name = "GA with NetLogo", content = scalatex.documentation.language.tutorial.NetLogoGA(), title = Some("Calibrate a NetLogo model using genetic algorithms"))
 
-  lazy val plugin = DocumentationPage(name = "Plugins", content = scalatex.documentation.development.Plugin())
+  lazy val plugin = DocumentationPage(name = "Plugin", content = scalatex.documentation.language.advanced.PluginDevelopment())
   lazy val webserver = DocumentationPage(name = "Web Server", content = scalatex.documentation.development.WebServer(), title = Some("Webserver and Rest API"))
   lazy val howToContribute = DocumentationPage(
     name = "How to Contribute",

@@ -19,7 +19,7 @@
     // Define the NetlogoTask
     val cmds = Seq("run-to-grid")
     val ants =
-      NetLogo5Task(workDirectory / "Ants.nlogo", cmds, seed = seed) set (
+      NetLogo6Task(workDirectory / "Ants.nlogo", cmds, seed = seed) set (
         // Map the OpenMOLE variables to NetLogo variables
         netLogoInputs += (gPopulation, "gpopulation"),
         netLogoInputs += (gDiffusionRate, "gdiffusion-rate"),

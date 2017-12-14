@@ -42,11 +42,11 @@ It also explains the various versions of OpenMOLE you may want to use/deploy, fr
         git submodule update --init --remote
         """, "plain")
         @li
-            Publish locally the content of the  @hl.highlight("build-system", "plain") and  @hl.highlight("libraries", "plain") subdirectory
+           Publish locally the content of the  @hl.highlight("build-system", "plain") and  @hl.highlight("libraries", "plain") subdirectory
         @hl.highlight("""
-            cd build-system
+           cd build-system
            sbt publishLocal
-            cd ../libraries/
+           cd ../libraries/
            sbt publishLocal
            """, "plain")
 

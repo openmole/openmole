@@ -33,8 +33,8 @@ Select the language of your model on your left to see how it is done .
   // Instantiate a task that does nothing.
   // This task uses the variable i as input and j as output. Any task immediately following this one in the workflow (i.e. linked with a transition) will be able to use the variable j containing the result of this task. 
   val t = EmptyTask() set (
-  inputs += i,
-  outputs += j
+    inputs += i,
+    outputs += j
   )""")
 
   @p
@@ -45,10 +45,10 @@ Select the language of your model on your left to see how it is done .
   val j = Val[Int]
 
   val t = EmptyTask() set (
-  inputs += i,
-  outputs += j,
-  // set i's default value to 0
-  i := 0
+    inputs += i,
+    outputs += j,
+    // set i's default value to 0
+    i := 0
   )""")
 
 
@@ -69,9 +69,6 @@ Select the language of your model on your left to see how it is done .
       // crawl the big file and take the lines
       val all_the_lines = CSVSampling("EmpiricalData.CSV") set (columns += inputParameter)
 
-      // say "I want to consider each line contained in all_the_lines"
-      val exploration = ExplorationTask(all_the_lines)
-
       // encapsulates your model in an "execution" task that calls the main routine
       val  my_model_execution =
         ScalaTask("mainRun(inputParameter)",
@@ -87,6 +84,9 @@ Select the language of your model on your left to see how it is done .
 
       // the workflow. Bascically it says : explore the lines and run a model execution for each,
       // save the outputs, all that on the cluster (results are not brought back to the local computer yet).
-      exploration -< (my_model_execution on env hook catch_output)""")
+      DirectSampling(
+        evaluation = my_model_execution on env hook catch_output,
+        sampling = all_the_lines
+      )""")
 
 

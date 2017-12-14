@@ -55,14 +55,14 @@
       outputFiles += ("result.csv", output)
     )
 
-    val exploration =
-      ExplorationTask(
+    val copy = CopyFileHook(output, workDirectory / "result" / "${inputName}-${i}.csv")
+
+    DirectSampling(
+      evaluation = rTask hook copy hook ToStringHook(),
+      sampling =
         (i in (1.0 to 10.0 by 1.0)) x
         (input in (workDirectory / "data").files withName inputName)
-      )
-
-    val copy = CopyFileHook(output, workDirectory / "result" / "${inputName}-${i}.csv")
-    exploration -< (rTask hook copy hook ToStringHook())""")
+    )""")
 
     @p The @hl.openmoleNoTest("CARETask") performs two actions: it first unarchives the CARE container by running @hl.highlight("R.tgz.bin", "plain"). Then the actual execution takes place as a second command. Note that for each execution of the @hl.openmoleNoTest("CARETask"), any command starting with @i("/") is @b{relative to the root of the CARE archive}, and @b{any other command is executed in the current directory}. The current directory @b{defaults to the original packaging directory}.
 

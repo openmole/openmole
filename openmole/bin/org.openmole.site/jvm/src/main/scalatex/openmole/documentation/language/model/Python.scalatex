@@ -35,11 +35,13 @@
         outputs += arg
       )
 
-    val exploration = ExplorationTask(arg in (0 to 10))
-
     val copy = CopyFileHook(output, workDirectory / "hello${arg}.txt")
     val env = LocalEnvironment(4)
-    exploration -< (pythonTask hook copy on env by 2)""")
+
+    DirectSampling(
+      evaluation = pythonTask hook copy on env by 2,
+      sampling = arg in (0 to 10)
+    )""")
 
     @p Notions from OpenMOLE are reused in this example. If you're not too familiar with @a("Environments", href := DocumentationPages.environment.file), @a("Groupings", href := DocumentationPages.environment.file + "#Grouping"), @a("Hooks", href := DocumentationPages.hook.file) or @a("Samplings", href := DocumentationPages.advancedSampling.file), check the relevant sections of the documentation.
 
