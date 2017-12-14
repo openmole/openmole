@@ -83,7 +83,8 @@ package object shared {
   }
 
   object otherDoEMenu {
-    lazy val basicSampling = "Grid Sampling, Uniform Distribution"
+    lazy val gridSampling = "Grid Sampling"
+    lazy val uniformSampling = "Uniform Distribution Sampling"
     lazy val LHSSobol = "Latin Hypercube, Sobol Sequence"
     lazy val severalInputs = "Exploration of several inputs "
     lazy val sensitivityAnalysis = "Sensitivity Analysis"
