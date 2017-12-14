@@ -87,6 +87,7 @@ package object tools {
     }
 
     def code(code: String) = openmoleNoTest(code)
+    def plain(code: String) = highlight(code, "plain")
     def openmoleNoTest(code: String) = highlight(code, "scala")
   }
 
