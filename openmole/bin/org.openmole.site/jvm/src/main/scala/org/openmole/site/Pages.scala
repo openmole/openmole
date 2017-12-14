@@ -176,6 +176,7 @@ object DocumentationPages {
     dataProcessing,
     otherDoE,
     advancedConcepts,
+    basicSampling,
     advancedSampling,
     transition,
     hook,
@@ -246,7 +247,7 @@ object DocumentationPages {
 
   def environmentPages = Seq(multithread, ssh, egi, cluster)
 
-  def methodPages = Seq(calibration, profile, pse, dataProcessing, otherDoE)
+  def methodPages = Seq(basicSampling, calibration, profile, pse, dataProcessing, otherDoE)
 
   lazy val tutorialPages = Seq(Pages.gettingStarted, netLogoGA, resume)
 
@@ -303,6 +304,12 @@ object DocumentationPages {
     name = "Other DoEs",
     content = scalatex.documentation.language.method.OtherDoE(),
     extraMenu = Some(SideMenu.otherDoEMenu)
+  )
+
+  lazy val basicSampling = DocumentationPage(
+    name = "Basic Sampling",
+    content = scalatex.documentation.language.method.BasicSampling(),
+    extraMenu = Some(SideMenu.basicSamplingMenu)
   )
 
   lazy val dataProcessing = DocumentationPage(

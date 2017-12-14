@@ -83,13 +83,17 @@ package object shared {
   }
 
   object otherDoEMenu {
-    lazy val gridSampling = "Grid Sampling"
-    lazy val uniformSampling = "Uniform Distribution Sampling"
+
     lazy val LHSSobol = "Latin Hypercube, Sobol Sequence"
     lazy val severalInputs = "Exploration of several inputs "
     lazy val sensitivityAnalysis = "Sensitivity Analysis"
     lazy val sensitivityFireModel = "Real world Example"
     lazy val csvSampling = "CSV Sampling"
+  }
+
+  object basicSamplingMenu {
+    lazy val gridSampling = "Grid Sampling"
+    lazy val uniformSampling = "Uniform Distribution Sampling"
   }
 
   object dataProcessingMenu {
@@ -197,6 +201,8 @@ package object shared {
     lazy val ggplot2 = "http://ggplot2.tidyverse.org/reference/"
     lazy val urbanDynamics = "https://hal.archives-ouvertes.fr/view/index/docid/1583528"
     lazy val urbanDynamicsBib = "https://hal.archives-ouvertes.fr/hal-01583528v1/bibtex"
+    lazy val sobol = "https://en.wikipedia.org/wiki/Sobol_sequence"
+    lazy val lhs = "https://en.wikipedia.org/wiki/Latin_hypercube_sampling"
 
     object partner {
       lazy val iscpif = "http://iscpif.fr"

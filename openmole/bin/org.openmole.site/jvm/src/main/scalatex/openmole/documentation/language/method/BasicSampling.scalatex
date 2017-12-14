@@ -1,0 +1,143 @@
+@import org.openmole.site.stylesheet._
+@import org.openmole.site._
+@import org.openmole.site.tools._
+@import org.openmole.site.Environment._
+
+
+@def variables = """
+val density = Val[Double]
+val seed = Val[Int]
+val burned = Val[Double]
+"""
+
+
+@b{Design of Experiments} (DoE) is the art of setting up an experimentation. In a model simulation context,
+it boils down to declare the inputs under study (most of the time, they're parameters) and the values they will take, for a batch of several simulations, with the idea of revealing a property of the model (e.g. sensitivity).
+Even if there are several state-of-the-art DoE methods implemented in OpenMOLE, we recommend to focus on OpenMOLE
+new methods:  PSE, and Calibration and Profiles  which have been thought to improve the drawbacks of the classical methods.
+
+@br
+@br
+Your model inputs can be sampled in the traditional way, by using @a("grid (or regular)  sampling", href:=shared.basicSamplingMenu.gridSampling), by @a("sampling uniformly", href:=shared.basicSamplingMenu.uniformSampling) inside their domain.
+@br
+For higher dimension input space, specific statistics techniques ensuring low discrepency like @a("Latin Hypercube Sampling and SobolSequence", href:=shared.otherDoEMenu.LHSSobol) are available.
+@br
+If you want to use design of experiments of your own you may also want to provide @a("a csv file with your samples" , href:=shared.otherDoEMenu.csvSampling) to OpenMOLE.
+
+@br
+By defining your own exploration task on @a("several types of input", href:= shared.otherDoEMenu.severalInputs), you will be able to highlight some of your model inner properties like those revealed by @a("sensitivity analysis", href:=shared.otherDoEMenu.sensitivityAnalysis), as shown in a toy example on a @a("real world example", href:=shared.otherDoEMenu.sensitivityFireModel)
+
+@sect{@shared.basicSamplingMenu.gridSampling }
+
+    @br
+    For a reasonable number of dimension and discretisation quanta (steps) values, complete sampling (or grid sampling)  consists in producing every combination of
+    the inputs possibles values, given their bounds and quanta of discretisation.
+    @br
+    @br
+    @Resource.rawFrag(Resource.img.method.completeID)
+    @br
+    @b{Method scores:}
+    @br
+    Regular sampling or Uniform Sampling are quite good for a first Input Space exploration when you don't know anything  about its structure yet.
+    Since it samples from the input space, the collected values from the model executions will reveal the output values
+    obtained for "evenly spaced" inputs.
+    Sure it's not perfect, but still , it gives a little bit of insights about model sensitivity (as input values vary
+    within their domain) and if the output are fitness, it may present a little bit of optimization information (as the zone in which the fitness could be
+    minimized).
+    @br The sampling does not reveal anything about the output space structure, as there is no reason than evenly spaced inputs lead
+    to evenly spaced outputs.
+    Basic sampling is hampered by input space dimensionality as high dimension spaces need a lot of samples to be covered, as well as a lot of memory to store them.
+
+    @break
+    Basic Sampling is declared via a @b{DirectSampling Task}, where the bounds and discretisation quantum of each input to vary  are declared  for each input
+
+    @break
+    @hl.openmole("""
+       val input_i = Val[Int]
+       val input_j = Val[Double]
+
+         DirectSampling(
+             evaluation = my_own_evaluation  ,
+             sampling =   (input_i in (0 to 10 by 2)) x
+                                   (input_j in (0.0 to 5.0 by 0.5)),
+             aggregation= my_aggregation
+           )
+         """, name = "syntax of DirectSampling Task")
+
+@br
+with
+    @ul
+    @li{@b{@hl.code(" evaluation")} is the task (or a composition of tasks) that uses your inputs, typically your model task and a hook.}
+    @li{@b{@hl.code("sampling")} is the sampling task}
+    @li{@b{@hl.code("aggregation")} (@i{optional}) is an aggregation task to be performed on the outputs of your evaluation task}
+
+@break
+    Let's see it in action within a dummy workflow; Suppose we want to explore a model written in java, taking an integer value as input, and generating a String as output.
+
+The exploration script would look like:
+
+@hl.openmole("""
+//inputs and outputs declaration
+val i = Val[Int]
+val o = Val[String]
+
+//Defines the "model" task
+val myModel = ScalaTask("val o = i * 2") set (
+                 inputs += i,
+                 outputs += (i,o)
+               )
+)
+//
+val average =
+  ScalaTask("val avg = k.average") set (
+    inputs += k.toArray,
+    outputs += avg
+  )
+
+
+val exploration =
+  DirectSampling(
+    evaluation = myModel hook ToStringHook(),
+    sampling = i in (0 to 10 by 1)
+    aggregation = average
+  )
+
+exploration""", name="concrete example of direct sampling")
+
+Some details:
+@ul
+@li{@hl.code("myModel") is the task that multiply the input by 2}
+@li{the @hl.code("evaluation") attribute of the @hl.code("DirectSampling") task is the composition of myModel and a hook}
+@li{the @hl.code("aggregation") attribute of the @hl.code("DirectSampling") task is the @hl.code("average") task, a ScalaTask that compute the average of an array Double values}
+
+@li{the task declared under the name @hl.code("exploration") is a DirectSampling task, which means it will generate parallel executions of myModel, one for each sample generated by the sampling task}
+
+@break
+
+
+@b{DirectSampling} generates a workflow that is illustrated below. You may recognize the @i{map reduce} design pattern, provided that an aggregation operator is defined (otherwise it would just be a @i{map} :-) )
+
+@img(src := Resource.img.method.directSampling.file, stylesheet.center(60))
+
+@break
+@sect{@shared.basicSamplingMenu.uniformSampling }
+
+
+    Sampling can also be performed at random within a domain via a @hl.code("UniformDistribution(maximum)").
+     This task generates values uniformly distributed between zero and the maximum argument.
+    Custom domains can be defined using transformations, as in the example below that generates values between -10 and + 10.
+
+     @hl.openmole("""
+    val my_input = Val[Double]
+    val my_model = EmptyTask() set( (inputs, outputs) += my_input)
+
+    val exploration = DirectSampling(
+        evaluation = my_model hook ToStringHook()
+        sampling= (my_input in (UniformDistribution[Double](max=20) take 100)).map(x => x -10)
+        )
+    )""", name = "uniform sampling example")
+
+
+@br N.B. @hl.code("DirectSampling") usage is not limited to uniform or grid sampling, and accepts any type of more @a("advanced sampling", href := DocumentationPages.advancedSampling.file).
+@br
+@br

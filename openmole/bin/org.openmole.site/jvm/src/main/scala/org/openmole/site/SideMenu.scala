@@ -141,6 +141,13 @@ object SideMenu {
     shared.nativePackagingMenu.troubleshooting
   )
 
+  lazy val basicSamplingMenu = fromStrings(
+    "Contents",
+    shared.basicSamplingMenu.gridSampling,
+    shared.basicSamplingMenu.uniformSampling
+
+  )
+
   lazy val netlogoMenu = fromStrings(
     "Contents",
     shared.netlogoMenu.simulation,
@@ -153,8 +160,6 @@ object SideMenu {
 
   lazy val otherDoEMenu = fromStrings(
     "Contents",
-    shared.otherDoEMenu.gridSampling,
-    shared.otherDoEMenu.uniformSampling,
     shared.otherDoEMenu.csvSampling,
     shared.otherDoEMenu.LHSSobol,
     shared.otherDoEMenu.severalInputs,
