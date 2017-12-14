@@ -42,7 +42,7 @@ OsgiKeys.requireCapability := ${tq}osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1
 
 The exportPackage instruction makes the myopenmole package visible to OpenMOLE. The importPackage instruction means that every package that is not included into the plugin should be imported. The privatePackage means that every package in the project, or in the dependencies, should be embedded except for the package starting by the scala word. The scala packages provided by OpenMOLE will be used by the plugin instead.
 
-To build the plugin execute: sbt osgi-bundle
+To build the plugin execute: @hl.plain("sbt osgiBundle").
 
 SBT constructs the plugin in target/scala-2.12/myopenmoleplugin_2.12-1.0.jar. This JAR file contains the classes you have developed (*.class) along with the metadata realtive to imports and exports in the MANIFEST.INF file:
 
@@ -53,19 +53,22 @@ myopenmoleplugin/Hello$.class
 myopenmoleplugin/Hello.class
 """)
 
-To enable this plugin in OpenMOLE, use the option -p:
-openmole -p target/scala-2.12/myopenmoleplugin_2.12-1.0.jar -c
+You can check in the MANIFEST.MF that you namespace is exported.
+
+To enable this plugin in OpenMOLE, either use the plugin panel of in the interface or use the option -p:
+@hl.plain("openmole -p target/scala-2.12/myopenmoleplugin_2.12-1.0.jar")
 
 You can now use the Hello object in your workflows:
 
 @hl.openmole("""
 // Declare the variable
 val i = Val[Int]
+val j = Val[Int]
 
 // Hello task
-val hello = ScalaTask("i = myopenmoleplugin.Hello.world(i)") set (
+val hello = ScalaTask("val j = myopenmoleplugin.Hello.world(i)") set (
   inputs += i,
-  outputs += i,
+  outputs += (i, j),
   plugins += pluginsOf(myopenmoleplugin.Hello)
 )
 
