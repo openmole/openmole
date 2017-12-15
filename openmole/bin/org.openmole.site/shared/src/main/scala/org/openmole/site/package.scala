@@ -91,7 +91,7 @@ package object shared {
     lazy val csvSampling = "CSV Sampling"
   }
 
-  object basicSamplingMenu {
+  object directSamplingMenu {
     lazy val gridSampling = "Grid Sampling"
     lazy val uniformSampling = "Uniform Distribution Sampling"
   }

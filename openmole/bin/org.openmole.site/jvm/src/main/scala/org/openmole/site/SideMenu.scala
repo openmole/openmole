@@ -141,10 +141,10 @@ object SideMenu {
     shared.nativePackagingMenu.troubleshooting
   )
 
-  lazy val basicSamplingMenu = fromStrings(
+  lazy val directSamplingMenu = fromStrings(
     "Contents",
-    shared.basicSamplingMenu.gridSampling,
-    shared.basicSamplingMenu.uniformSampling
+    shared.directSamplingMenu.gridSampling,
+    shared.directSamplingMenu.uniformSampling
 
   )
 
