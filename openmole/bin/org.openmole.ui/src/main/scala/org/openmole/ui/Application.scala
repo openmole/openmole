@@ -285,6 +285,7 @@ object Application extends JavaLogger {
         }
       case TestCompile(files) ⇒
 
+        def success(f: File) = f.getParentFileSafe / s"${f.getName}.success"
         def toFile(f: File) = if (f.isDirectory) f.listFiles().toList else Seq(f)
 
         val results = Test.withTmpServices { implicit services ⇒
@@ -295,14 +296,22 @@ object Application extends JavaLogger {
               c match {
                 case s: ScriptFileDoesNotExists ⇒ util.Failure(new IOException("File doesn't exists"))
                 case s: CompilationError        ⇒ util.Failure(s.error)
-                case s: Compiled                ⇒ util.Success("Compilation succeded")
+                case s: Compiled                ⇒ util.Success("Compilation succeeded")
               }
 
-            val project = Project(file.getParentFileSafe)
-            println(s"Testing: ${file.getName}")
-            val res = file → processResult(project.compile(file, args))
+            val res = if (!success(file).exists) {
+              val project = Project(file.getParentFileSafe)
+              println(s"Testing: ${file.getName}")
+              file → processResult(project.compile(file, args))
+            }
+            else {
+              file -> util.Success("Compilation succeeded (from previous test)")
+            }
+
+            success(file) < "success"
             print("\33[1A\33[2K")
             println(s"${res._1.getName}: ${res._2}")
+
             res
           }
         }
