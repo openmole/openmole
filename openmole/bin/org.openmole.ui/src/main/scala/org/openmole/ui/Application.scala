@@ -284,13 +284,15 @@ object Application extends JavaLogger {
           }
         }
       case TestCompile(files) ⇒
+        import org.openmole.tool.hash._
 
-        def success(f: File) = f.getParentFileSafe / s"${f.getName}.success"
+        def success(f: File) = f.getParentFileSafe / (f.hash().toString + ".success")
         def toFile(f: File) = if (f.isDirectory) f.listFiles().toList else Seq(f)
+        def isTestable(f: File) = f.getName.endsWith(".omt") || f.getName.endsWith(".oms")
 
         val results = Test.withTmpServices { implicit services ⇒
           import services._
-          files.flatMap(toFile).map { file ⇒
+          files.flatMap(toFile).filter(isTestable).map { file ⇒
 
             def processResult(c: CompileResult) =
               c match {
@@ -308,7 +310,7 @@ object Application extends JavaLogger {
               file -> util.Success("Compilation succeeded (from previous test)")
             }
 
-            success(file) < "success"
+            if (res._2.isSuccess) success(file) < "success"
             print("\33[1A\33[2K")
             println(s"${res._1.getName}: ${res._2}")
 

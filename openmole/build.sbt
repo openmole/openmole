@@ -866,11 +866,32 @@ def siteTests = Def.taskDyn {
   (run in siteJVM in Compile).toTask(" --test --target " + testTarget).map(_ => testTarget)
 }
 
-
 lazy val tests = Project("tests", binDir / "tests") settings (defaultSettings: _*) settings (assemblySettings: _*) settings(
   resourcesAssemble += (siteTests.value -> (assemblyPath.value / "tests")),
   dependencyFilter := noDependencyFilter
 )
+
+lazy val testSiteClean = inputKey[Unit]("testSiteClean")
+testSiteClean := {
+  (clean in tests).value
+}
+
+lazy val testSite = inputKey[Unit]("testSite")
+testSite := {
+  import _root_.scala.sys.process._
+
+  val ret =
+    Process(
+      Seq(
+        ((assemble in openmole).value / "openmole").getAbsolutePath,
+        "--test-compile",
+        ((assemble in tests).value / "tests").getAbsolutePath)
+    ) !
+
+  if(ret != 0) sys.error("Some tests have failed")
+  else sLog.value.info("All tests successful")
+}
+
 
 lazy val modules =
   OsgiProject(
