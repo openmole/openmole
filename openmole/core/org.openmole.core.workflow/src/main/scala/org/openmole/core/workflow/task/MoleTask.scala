@@ -103,6 +103,8 @@ object MoleTask {
       case e: InterruptedException ⇒
         execution.cancel
         throw e
+    } finally {
+      fileService.deleteWhenEmpty(newFile.baseDir)
     }
     finally {
       fileService.deleteWhenEmpty(newFile.baseDir)
