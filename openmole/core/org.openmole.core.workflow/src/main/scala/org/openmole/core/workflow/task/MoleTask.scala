@@ -106,9 +106,6 @@ object MoleTask {
     } finally {
       fileService.deleteWhenEmpty(newFile.baseDir)
     }
-    finally {
-      fileService.deleteWhenEmpty(newFile.baseDir)
-    }
 
     lastContext.getOrElse(throw new UserBadDataError("Last capsule " + last + " has never been executed."))
   }
