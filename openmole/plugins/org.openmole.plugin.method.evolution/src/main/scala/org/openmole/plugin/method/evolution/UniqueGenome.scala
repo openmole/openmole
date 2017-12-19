@@ -27,7 +27,7 @@ import scala.annotation.tailrec
 import cats._
 import cats.implicits._
 import org.openmole.core.fileservice.FileService
-import org.openmole.core.workflow.tools.ScalarOrSequence
+import org.openmole.core.workflow.tools.ScalarOrSequenceOfDouble
 import org.openmole.core.workspace.NewFile
 import org.openmole.tool.random.RandomProvider
 
@@ -42,7 +42,7 @@ object UniqueGenome {
     new UniqueGenome(prototypes.map(p ⇒ inputs.reverse.find(_.prototype == p).get))
   }
 
-  implicit def genomeToSeqOfInput(g: UniqueGenome): Seq[ScalarOrSequence[_]] = g.inputs
+  implicit def genomeToSeqOfInput(g: UniqueGenome): Seq[ScalarOrSequenceOfDouble[_]] = g.inputs
 }
 
-class UniqueGenome(val inputs: Seq[ScalarOrSequence[_]]) extends AnyVal
+class UniqueGenome(val inputs: Seq[ScalarOrSequenceOfDouble[_]]) extends AnyVal

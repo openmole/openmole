@@ -40,7 +40,7 @@ package object evolution {
   val operatorExploration = 0.1
 
   object Genome {
-    def apply(inputs: ScalarOrSequence[_]*) = UniqueGenome(inputs)
+    def apply(inputs: ScalarOrSequenceOfDouble[_]*) = UniqueGenome(inputs)
   }
 
   object Objective {
@@ -51,7 +51,7 @@ package object evolution {
 
   type Objectives = Seq[Objective]
   type FitnessAggregation = Seq[Double] ⇒ Double
-  type Genome = Seq[ScalarOrSequence[_]]
+  type Genome = Seq[ScalarOrSequenceOfDouble[_]]
 
   implicit def intToCounterTerminationConverter(n: Long): AfterGeneration = AfterGeneration(n)
   implicit def durationToDurationTerminationConverter(d: Time): AfterDuration = AfterDuration(d)

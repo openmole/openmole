@@ -27,12 +27,12 @@ import org.openmole.core.workflow.tools._
 
 object SobolSampling {
 
-  def apply(samples: FromContext[Int], factors: ScalarOrSequence[_]*) =
+  def apply(samples: FromContext[Int], factors: ScalarOrSequenceOfDouble[_]*) =
     new SobolSampling(samples, factors: _*)
 
 }
 
-sealed class SobolSampling[D](val samples: FromContext[Int], val factors: ScalarOrSequence[_]*) extends Sampling {
+sealed class SobolSampling[D](val samples: FromContext[Int], val factors: ScalarOrSequenceOfDouble[_]*) extends Sampling {
 
   override def inputs = factors.flatMap(_.inputs)
   override def prototypes = factors.map { _.prototype }
@@ -44,6 +44,6 @@ sealed class SobolSampling[D](val samples: FromContext[Int], val factors: Scalar
 
     for {
       v ← Iterator.continually(sequence.nextVector()).take(s)
-    } yield ScalarOrSequence.scaled(factors, v.toSeq)(context)
+    } yield ScalarOrSequenceOfDouble.scaled(factors, v.toSeq)(context)
   }
 }

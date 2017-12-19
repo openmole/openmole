@@ -110,10 +110,10 @@ trait Scalable[T] {
   def toVariable(t: T)(value: Seq[Any]): Variable[_]
 }
 
-object ScalarOrSequence {
+object ScalarOrSequenceOfDouble {
 
-  def scaled(scales: Seq[ScalarOrSequence[_]], values: Seq[Double]): FromContext[List[Variable[_]]] = {
-    @tailrec def scaled0(scales: List[ScalarOrSequence[_]], values: List[Double], acc: List[Variable[_]] = Nil)(context: ⇒ Context, rng: RandomProvider, newFile: NewFile, fileService: FileService): List[Variable[_]] =
+  def scaled(scales: Seq[ScalarOrSequenceOfDouble[_]], values: Seq[Double]): FromContext[List[Variable[_]]] = {
+    @tailrec def scaled0(scales: List[ScalarOrSequenceOfDouble[_]], values: List[Double], acc: List[Variable[_]] = Nil)(context: ⇒ Context, rng: RandomProvider, newFile: NewFile, fileService: FileService): List[Variable[_]] =
       if (scales.isEmpty || values.isEmpty) acc.reverse
       else {
         val input = scales.head
@@ -129,14 +129,14 @@ object ScalarOrSequence {
     FromContext { p ⇒ scaled0(scales.toList, values.toList)(p.context, p.random, p.newFile, p.fileService) }
   }
 
-  implicit def fromScalable[T: Scalable](t: T): ScalarOrSequence[T] = new ScalarOrSequence(t, implicitly[Scalable[T]])
+  implicit def fromScalable[T: Scalable](t: T): ScalarOrSequenceOfDouble[T] = new ScalarOrSequenceOfDouble(t, implicitly[Scalable[T]])
 }
 
-class ScalarOrSequence[T](t: T, scalable: Scalable[T]) {
+class ScalarOrSequenceOfDouble[T](t: T, scalable: Scalable[T]) {
   def isScalar = scalable.isScalar(t)
   def inputs = scalable.inputs(t)
   def prototype = scalable.prototype(t)
   def size = scalable.size(t)
-  def scaled(genomePart: Seq[Double]) = scalable.scaled(t)(genomePart)
+  def scaled(values: Seq[Double]) = scalable.scaled(t)(values)
   def toVariable(value: Seq[Any]): Variable[_] = scalable.toVariable(t)(value)
 }

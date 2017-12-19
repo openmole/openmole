@@ -27,7 +27,7 @@ import cats.implicits._
 
 object LHS {
 
-  def apply(samples: FromContext[Int], factors: ScalarOrSequence[_]*) =
+  def apply(samples: FromContext[Int], factors: ScalarOrSequenceOfDouble[_]*) =
     new LHS(samples, factors: _*)
 
   def lhsValues(dimensions: Int, samples: Int, rng: scala.util.Random) = Array.fill(dimensions) {
@@ -36,7 +36,7 @@ object LHS {
 
 }
 
-sealed class LHS(val samples: FromContext[Int], val factors: ScalarOrSequence[_]*) extends Sampling {
+sealed class LHS(val samples: FromContext[Int], val factors: ScalarOrSequenceOfDouble[_]*) extends Sampling {
 
   override def inputs = factors.flatMap(_.inputs)
   override def prototypes = factors.map { _.prototype }
@@ -46,7 +46,7 @@ sealed class LHS(val samples: FromContext[Int], val factors: ScalarOrSequence[_]
     val s = samples.from(context)
     val vectorSize = factors.map(_.size(context)).sum
     def values = LHS.lhsValues(vectorSize, s, random())
-    values.map(v ⇒ ScalarOrSequence.scaled(factors, v).from(context)).toIterator
+    values.map(v ⇒ ScalarOrSequenceOfDouble.scaled(factors, v).from(context)).toIterator
   }
 
 }
