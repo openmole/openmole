@@ -31,23 +31,16 @@ import scala.collection.mutable.{ HashMap, MultiMap, Set }
 import scala.ref.WeakReference
 
 object EagerSubmissionAgent extends JavaLogger {
-
   case class HistoryPoint(running: Int, total: Int, time: Long = System.currentTimeMillis)
-
-  implicit class FiniteQueue[A <: { def time: Long }](q: mutable.Queue[A]) {
-    def enqueueFinite(elem: A, keepTime: Time) = {
-      q.enqueue(elem)
-      q.dequeueFirst(e ⇒ e.time + keepTime.millis < System.currentTimeMillis)
-    }
-  }
 }
 
+import collection.JavaConverters._
 import org.openmole.plugin.environment.egi.EagerSubmissionAgent._
 import Log._
 
 class EagerSubmissionAgent(environment: WeakReference[BatchEnvironment])(implicit preference: Preference) extends IUpdatableWithVariableDelay {
 
-  @transient lazy val runningHistory = new mutable.Queue[HistoryPoint]
+  @transient lazy val runningHistory = new java.util.LinkedList[HistoryPoint]()
   var stop = false
 
   override def delay = preference(EGIEnvironment.EagerSubmissionInterval)
@@ -64,15 +57,12 @@ class EagerSubmissionAgent(environment: WeakReference[BatchEnvironment])(implici
         val stillRunning = jobs.count(_.state == RUNNING)
         val stillReady = jobs.count(_.state == READY)
 
-        runningHistory.enqueueFinite(
-          HistoryPoint(running = stillRunning, total = jobSize),
-          preference(EGIEnvironment.RunningHistoryDuration)
-        )
-
+        runningHistory.removeIf(_.time + preference(EGIEnvironment.RunningHistoryDuration).millis < System.currentTimeMillis)
+        runningHistory.add(HistoryPoint(running = stillRunning, total = jobSize))
         logger.fine("still running " + stillRunning)
 
-        val maxTotal = runningHistory.map(_.total).max
-        val shouldBeRunning = runningHistory.map(_.running).max * preference(EGIEnvironment.EagerSubmissionThreshold)
+        val maxTotal = runningHistory.asScala.map(_.total).max
+        val shouldBeRunning = runningHistory.asScala.map(_.running).max * preference(EGIEnvironment.EagerSubmissionThreshold)
 
         val minOversub = preference(EGIEnvironment.EagerSubmissionMinNumberOfJobs)
 
