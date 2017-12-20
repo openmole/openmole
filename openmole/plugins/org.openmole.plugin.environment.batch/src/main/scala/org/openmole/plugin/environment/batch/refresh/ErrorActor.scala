@@ -46,8 +46,7 @@ object ErrorActor extends JavaLogger {
                |$stdOut
                |stderr was:
                |$stdErr
-               """.stripMargin
-          )
+               """.stripMargin, exception)
       }
 
     val er = Environment.ExceptionRaised(job, detailedException, level)
