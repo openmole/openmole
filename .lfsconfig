@@ -1,2 +1,2 @@
 [lfs]
-	url = https://gitlab.iscpif.fr/openmole/openmole.git/info/lfs
+	url = ssh://git@gitlab.iscpif.fr:20022/openmole/openmole.git
