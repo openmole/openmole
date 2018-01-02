@@ -57,7 +57,16 @@ class EagerSubmissionAgent(environment: WeakReference[BatchEnvironment])(implici
         val stillRunning = jobs.count(_.state == RUNNING)
         val stillReady = jobs.count(_.state == READY)
 
-        runningHistory.removeIf(_.time + preference(EGIEnvironment.RunningHistoryDuration).millis < System.currentTimeMillis)
+        def removeOld() = {
+          val iter = runningHistory.iterator
+          while (iter.hasNext) {
+            val elt = iter.next
+            if (elt.time + preference(EGIEnvironment.RunningHistoryDuration).millis < System.currentTimeMillis) iter.remove
+          }
+        }
+
+        removeOld()
+
         runningHistory.add(HistoryPoint(running = stillRunning, total = jobSize))
         logger.fine("still running " + stillRunning)
 
