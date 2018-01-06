@@ -73,9 +73,9 @@ case class SideMenuBlock(menus: Seq[SideMenu]) {
       )
     )
 
-  def right(top: Int) = build(div(rightDetailButtons(top)))
+  def right(top: Int) = build(div(id := "sidebar-right"))
 
-  def left(top: Int) = build(div(leftDetailButtons(top)))
+  def left(top: Int) = build(div(id := "sidebar-left"))
 
 }
 

@@ -34,8 +34,8 @@ class StepCarousel(step: Step) {
 
   val render = {
     div(width := "100%")(
-      leftGlyphButton(step.previous.name, step.previous, glyph_chevron_left, buttonStyle = stepButtonStyle)(leftDetailButtons(200)),
-      rightGlyphButton(step.next.name, step.next, glyph_chevron_right, buttonStyle = stepButtonStyle)(rightDetailButtons(200)),
+      leftGlyphButton(step.previous.name, step.previous, glyph_chevron_left, buttonStyle = stepButtonStyle)(id := "sidebar-left"),
+      rightGlyphButton(step.next.name, step.next, glyph_chevron_right, buttonStyle = stepButtonStyle)(id := "sidebar-right"),
       div(maxHeight := 100)(
         div(stepHeader)(step.name),
         line

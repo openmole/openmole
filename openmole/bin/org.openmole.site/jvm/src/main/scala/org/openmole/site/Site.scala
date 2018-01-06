@@ -134,7 +134,7 @@ object Site extends App {
 
           body(position := "relative", minHeight := "100%")(
             Menu.build,
-            div(stylesheet.mainDiv)(
+            div(id := "main-content")(
               if (DocumentationPages.topPages.contains(page)) UserGuide.addCarousel(page)
               else page.content
             ),

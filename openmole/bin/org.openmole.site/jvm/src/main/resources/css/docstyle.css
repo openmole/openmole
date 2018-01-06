@@ -79,3 +79,152 @@ code{
    display:block;
    width:100%;
   }
+
+/*Workaround for bug in highlight.js IDEA theme*/
+span.hljs-tag, span.hljs-symbol{
+  background: none;
+}
+
+@font-face {
+    font-family: 'gi';
+    src: url('../fonts/gi.otf');
+    font-weight: normal;
+    font-style: normal;
+}
+
+body{
+    font-family:gi;
+    font-size: 15px;
+    }
+
+p{
+  padding-top:30px;
+}
+
+.fade-in {
+	opacity: 1;
+	animation-name: fadeInOpacity;
+	animation-iteration-count: 1;
+	animation-timing-function: ease-in;
+	animation-duration: 0.4s;
+}
+
+@keyframes fadeInOpacity {
+	0% {
+		opacity: 0;
+	}
+	100% {
+		opacity: 1;
+	}
+}
+
+
+.question{
+    font-weight: bold;
+    padding-top: 20px;
+    font-size: 17px;
+}
+
+
+
+/*Responsive columns*/
+
+#footer {
+background-color : #222;
+}
+
+#sidebar-left {
+    background-color: #e3e9ee;
+}
+
+#sidebar-right {
+    background-color: #dbe1e6;
+}
+
+/*Base Mobile Layout*/
+.wrap {
+    width: 90%;
+    margin: 0 auto;
+}
+
+#main-content, #sidebar-left, #sidebar-right, #footer {
+    width: 100%;
+    float: left;
+}
+
+/*3 Column Layout*/
+@media only screen and (min-width: 1024px) {
+    .wrap {
+        width: 1024px;
+        margin: 0 auto;
+    }
+
+
+    #main-content {
+        width: 50%;
+        float: left;
+    }
+
+    #sidebar-left {
+        width: 25%;
+        float: left;
+    }
+
+    #sidebar-right {
+        width: 25%;
+        float: left;
+    }
+}
+
+/*Wide Layout*/
+@media only screen and (min-width: 1200px) {
+    .wrap {
+        width: 1140px;
+        margin: 0 auto;
+    }
+}
+
+/*Move Sidebar Position*/
+@media only screen and (min-width: 1024px) {
+    .wrap, #main-content, #sidebar-left, #sidebar-right {
+        position: relative;
+    }
+
+    #main-content, #sidebar-left, #sidebar-right {
+        top: 0;
+    }
+
+    #sidebar-right {
+        right: 0;
+    }
+
+    #sidebar-left {
+        left: -50%; /*Width of #main-content*/
+    }
+
+    #main-content {
+        left: 25%; /*Width of #left-sidebar*/
+    }
+}
+
+/*Optional 2 Column Layout*/
+@media only screen and (min-width: 768px) and (max-width: 1024px) {
+    #sidebar-right {
+        width: 50%;
+    }
+    #sidebar-left {
+        width: 50%;
+    }
+    #main-content {
+        position: relative;
+        top: 0;
+        left: 0;
+    }
+}
+
+.container {
+ padding-right:15px;
+ padding-left:15px;
+ margin-right:auto;
+ margin-left:auto;
+}
