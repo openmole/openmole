@@ -225,7 +225,7 @@ object GAIntegration {
       case (p, i) ⇒
         Variable(
           p.prototype.withType[Array[Double]],
-          phenotypeValues.map(ind ⇒ ind(i)).toArray
+          phenotypeValues.map(_(i)).toArray
         )
     }
   }
@@ -240,25 +240,11 @@ object StochasticGAIntegration {
       case None       ⇒ values.transpose.map(_.median)
     }
 
-  //def aggregate(aggregation: Option[FitnessAggregation], values: Seq[Double]): Double = aggregation.map(_(values)).getOrElse(values.median)
-
   def genomeToVariables(
     genome: Genome,
     values: (Vector[Double], Vector[Int]),
     seeder: GASeeder
   ) = (Genome.toVariables(genome, values._1, values._2) map2 FromContext { p ⇒ seeder(p.random()) })(_ ++ _)
-
-  //  def populationToVariables[I](
-  //    genome:           Genome,
-  //    objectives:       Objectives,
-  //    genomeValues:     I ⇒ (Vector[Double], Vector[Int]),
-  //    phenotypeValues:  I ⇒ Vector[Double],
-  //    samplesPrototype: Val[Long],
-  //    samples:          I ⇒ Long
-  //  )(population: Vector[I]) =
-  //    GAIntegration.populationToVariables[I](genome, objectives, genomeValues, phenotypeValues)(population).map {
-  //      _ ++ Seq(Variable(samplesPrototype.toArray, population.map(samples).toArray))
-  //    }
 
 }
 
@@ -304,14 +290,6 @@ object MGOAPI {
     }
 
   }
-
-  //  trait Stochastic { self: Integration[_, _, _] ⇒
-  //    def samples(s: I): Long
-  //  }
-  //
-  //  trait Profile[A] { self: Integration[A, _, _] ⇒
-  //    def profile(a: A)(population: Vector[I]): Vector[I]
-  //  }
 
   def paired[G, C, D](continuous: G ⇒ C, discrete: G ⇒ D) = (g: G) ⇒ (continuous(g), discrete(g))
 

@@ -61,7 +61,8 @@ package object csv extends CSVPackage {
     prototypes:        Seq[Val[_]],
     context:           Context,
     arraysOnSingleRow: Boolean        = false,
-    header:            Option[String] = None): Unit = {
+    header:            Option[String] = None,
+    overwrite:         Boolean        = false): Unit = {
 
     file.createParentDir
 
@@ -71,6 +72,8 @@ package object csv extends CSVPackage {
 
     file.withLock {
       fos ⇒
+
+        if (overwrite) file.content = ""
 
         val lists = ps.map {
           p ⇒
