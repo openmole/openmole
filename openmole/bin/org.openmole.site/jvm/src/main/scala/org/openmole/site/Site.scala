@@ -38,6 +38,8 @@ import scalatags.Text.all._
 
 import scala.annotation.tailrec
 import spray.json._
+import tools._
+import stylesheet._
 
 object Site extends App {
 
@@ -132,12 +134,18 @@ object Site extends App {
          */
         def bodyFrag(page: org.openmole.site.Page) = {
 
+          val sitePage = UserGuide.currentStep(page)
+
           body(position := "relative", minHeight := "100%")(
             Menu.build,
             div(id := "main-content")(
-              if (DocumentationPages.topPages.contains(page)) UserGuide.addCarousel(page)
-              else page.content
+              sitePage.name,
+              sitePage.element
             ),
+            sitePage match {
+              case s: Step ⇒ Seq(s.leftMenu, s.rightMenu)
+              case _       ⇒ div
+            },
             Footer.build,
             onload := onLoadString(page)
           )

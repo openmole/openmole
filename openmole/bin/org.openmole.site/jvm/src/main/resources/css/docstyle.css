@@ -128,17 +128,19 @@ p{
 
 
 /*Responsive columns*/
+#main-content{
+    padding-top: 150px;
+}
+
 
 #footer {
 background-color : #222;
 }
 
 #sidebar-left {
-    background-color: #e3e9ee;
 }
 
 #sidebar-right {
-    background-color: #dbe1e6;
 }
 
 /*Base Mobile Layout*/
@@ -148,6 +150,7 @@ background-color : #222;
 }
 
 #main-content, #sidebar-left, #sidebar-right, #footer {
+    padding:20px;
     width: 100%;
     float: left;
 }
@@ -166,11 +169,14 @@ background-color : #222;
     }
 
     #sidebar-left {
+        text-align:right;
         width: 25%;
         float: left;
     }
 
     #sidebar-right {
+        text-align: left;
+        padding-eft : 50px;
         width: 25%;
         float: left;
     }

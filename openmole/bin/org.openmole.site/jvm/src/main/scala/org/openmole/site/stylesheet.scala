@@ -46,23 +46,16 @@ package object stylesheet {
     minHeight := 800
   ) ++ center(50)*/
 
-  /* def rightDetailButtons(topValue: Int) = Seq(
-    float := "right",
-    fixedPosition,
+  def rightDetailButtons(topValue: Int) = Seq(
     top := topValue,
-    right := "5%",
-    textAlign := "left",
     minWidth := 230
   )
 
   def leftDetailButtons(topValue: Int) = Seq(
-    float := "left",
-    fixedPosition,
     top := topValue,
-    left := "5%",
-    textAlign := "right",
+    paddingRight := 50,
     minWidth := 230
-  )*/
+  )
 
   lazy val navigateDoc = Seq(
     fixedPosition,
