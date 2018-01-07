@@ -25,7 +25,6 @@ import scala.language.higherKinds
 import scala.util.Random
 import cats._
 import cats.implicits._
-import org.openmole.core.workflow.tools.ScalarOrSequenceOfDouble
 
 object GASeeder {
 
@@ -78,7 +77,7 @@ object WorkflowIntegration {
       type MGOAG = AG
       def mgoAG = a.ag
 
-      type V = Vector[Double]
+      type V = (Vector[Double], Vector[Int])
       type P = Vector[Double]
 
       lazy val integration = a.algorithm
@@ -86,20 +85,14 @@ object WorkflowIntegration {
       def buildIndividual(genome: G, context: Context): I =
         operations.buildIndividual(genome, variablesToPhenotype(context))
 
-      def inputPrototypes = a.genome.inputs.map(_.prototype)
+      def inputPrototypes = Genome.vals(a.genome)
       def objectives = a.objectives
       def resultPrototypes = (inputPrototypes ++ outputPrototypes).distinct
 
-      def genomeToVariables(genome: G): FromContext[Seq[Variable[_]]] =
-        GAIntegration.scaled(a.genome, operations.values(genome))
-
-      def populationToVariables(population: Pop): FromContext[Seq[Variable[_]]] =
-        GAIntegration.populationToVariables[I](
-          a.genome,
-          a.objectives,
-          operations.genomeValues,
-          operations.phenotype
-        )(population)
+      def genomeToVariables(genome: G): FromContext[Vector[Variable[_]]] = {
+        val (cs, is) = operations.genomeValues(genome)
+        Genome.toVariables(a.genome, cs, is)
+      }
 
       def variablesToPhenotype(context: Context) = a.objectives.map(o ⇒ o.fromContext(context)).toVector
     }
@@ -109,41 +102,28 @@ object WorkflowIntegration {
       type MGOAG = AG
       def mgoAG = a.ag
 
-      type V = Vector[Double]
+      type V = (Vector[Double], Vector[Int])
       type P = Vector[Double]
 
       lazy val integration = a.algorithm
 
-      def samples = Val[Long]("samples", namespace)
-
       def buildIndividual(genome: G, context: Context): I =
         operations.buildIndividual(genome, variablesToPhenotype(context))
 
-      def inputPrototypes = a.genome.inputs.map(_.prototype) ++ a.replication.seed.prototype
+      def inputPrototypes = Genome.vals(a.genome) ++ a.replication.seed.prototype
       def objectives = a.objectives
-      def resultPrototypes = (a.genome.inputs.map(_.prototype) ++ outputPrototypes ++ Seq(samples)).distinct
 
       def genomeToVariables(genome: G): FromContext[Seq[Variable[_]]] =
-        StochasticGAIntegration.genomeToVariables(a.genome, operations.values(genome), a.replication.seed)
-
-      def populationToVariables(population: Pop): FromContext[Seq[Variable[_]]] =
-        StochasticGAIntegration.populationToVariables[I](
-          a.genome,
-          a.objectives,
-          operations.genomeValues,
-          operations.phenotype,
-          samples,
-          integration.samples
-        )(population)
+        StochasticGAIntegration.genomeToVariables(a.genome, operations.genomeValues(genome), a.replication.seed)
 
       def variablesToPhenotype(context: Context) = a.objectives.map(o ⇒ o.fromContext(context)).toVector
     }
 
   case class DeterministicGA[AG](
     ag:         AG,
-    genome:     UniqueGenome,
+    genome:     Genome,
     objectives: Objectives
-  )(implicit val algorithm: MGOAPI.Integration[AG, Vector[Double], Vector[Double]])
+  )(implicit val algorithm: MGOAPI.Integration[AG, (Vector[Double], Vector[Int]), Vector[Double]])
 
   object DeterministicGA {
     implicit def deterministicGAIntegration[AG] = new WorkflowIntegration[DeterministicGA[AG]] {
@@ -153,12 +133,12 @@ object WorkflowIntegration {
 
   case class StochasticGA[AG](
     ag:          AG,
-    genome:      UniqueGenome,
+    genome:      Genome,
     objectives:  Objectives,
     replication: Stochastic[Seq]
   )(
     implicit
-    val algorithm: MGOAPI.Integration[AG, Vector[Double], Vector[Double]] with MGOAPI.Stochastic
+    val algorithm: MGOAPI.Integration[AG, (Vector[Double], Vector[Int]), Vector[Double]]
   )
 
   object StochasticGA {
@@ -200,16 +180,13 @@ trait EvolutionWorkflow {
   def buildIndividual(genome: G, context: Context): I
 
   def inputPrototypes: Seq[Val[_]]
-  def resultPrototypes: Seq[Val[_]]
-
   def objectives: Seq[Objective]
   def outputPrototypes: Seq[Val[Double]] = objectives.map(_.prototype.withType[Double])
 
   def genomeToVariables(genome: G): FromContext[Seq[Variable[_]]]
-  def populationToVariables(population: Pop): FromContext[Seq[Variable[_]]]
 
   // Variables
-  def namespace = Namespace("evolution")
+  import GAIntegration.namespace
   def genomePrototype = Val[G]("genome", namespace)(genomeType)
   def individualPrototype = Val[I]("individual", namespace)(individualType)
   def populationPrototype = Val[Pop]("population", namespace)(populationType)
@@ -221,33 +198,38 @@ trait EvolutionWorkflow {
 
 object GAIntegration {
 
-  def scaled(inputs: UniqueGenome, values: Seq[Double]) = ScalarOrSequenceOfDouble.scaled(inputs.inputs.toList, values.toList)
+  def namespace = Namespace("evolution")
+  def samples = Val[Int]("samples", namespace)
 
-  def genomesOfPopulationToVariables[I](inputs: UniqueGenome, population: Vector[I], genomeValues: I ⇒ Vector[Double]) =
-    for {
-      scaledValues ← population.traverse[FromContext, List[Variable[_]]](i ⇒ scaled(inputs, genomeValues(i)))
-    } yield {
-      inputs.zipWithIndex.map { case (input, i) ⇒ input.toVariable(scaledValues.map(_(i).value)) }.toList
+  def genomesOfPopulationToVariables[I](
+    genome: Genome,
+    values: Vector[(Vector[Double], Vector[Int])]): FromContext[Vector[Variable[_]]] = {
+
+    val variables =
+      values.traverse[FromContext, Vector[Variable[_]]] {
+        case (continuous, discrete) ⇒
+          Genome.toVariables(genome, continuous, discrete)
+      }
+
+    variables.map {
+      v ⇒
+        genome.zipWithIndex.map {
+          case (g, i) ⇒ Genome.toArrayVariable(g, v.map(_(i).value))
+        }.toVector
     }
+  }
 
-  def objectivesOfPopulationToVariables[I](objectives: Objectives, population: Vector[I], phenotypeValues: I ⇒ Vector[Double]) =
-    objectives.zipWithIndex.map {
+  def objectivesOfPopulationToVariables[I](objectives: Objectives, phenotypeValues: Vector[Vector[Double]]): FromContext[Vector[Variable[_]]] = {
+
+    objectives.toVector.zipWithIndex.map {
       case (p, i) ⇒
         Variable(
           p.prototype.withType[Array[Double]],
-          population.map(ind ⇒ phenotypeValues(ind)(i)).toArray
+          phenotypeValues.map(ind ⇒ ind(i)).toArray
         )
     }
+  }
 
-  def populationToVariables[I](
-    genome:          UniqueGenome,
-    objectives:      Objectives,
-    genomeValues:    I ⇒ Vector[Double],
-    phenotypeValues: I ⇒ Vector[Double]
-  )(population: Vector[I]) =
-    GAIntegration.genomesOfPopulationToVariables(genome, population, genomeValues).map {
-      _ ++ GAIntegration.objectivesOfPopulationToVariables(objectives, population, phenotypeValues)
-    }
 }
 
 object StochasticGAIntegration {
@@ -258,25 +240,25 @@ object StochasticGAIntegration {
       case None       ⇒ values.transpose.map(_.median)
     }
 
-  def aggregate(aggregation: Option[FitnessAggregation], values: Seq[Double]): Double = aggregation.map(_(values)).getOrElse(values.median)
+  //def aggregate(aggregation: Option[FitnessAggregation], values: Seq[Double]): Double = aggregation.map(_(values)).getOrElse(values.median)
 
   def genomeToVariables(
-    genome: UniqueGenome,
-    values: Seq[Double],
+    genome: Genome,
+    values: (Vector[Double], Vector[Int]),
     seeder: GASeeder
-  ) = (GAIntegration.scaled(genome, values) map2 FromContext { p ⇒ seeder(p.random()) })(_ ++ _)
+  ) = (Genome.toVariables(genome, values._1, values._2) map2 FromContext { p ⇒ seeder(p.random()) })(_ ++ _)
 
-  def populationToVariables[I](
-    genome:           UniqueGenome,
-    objectives:       Objectives,
-    genomeValues:     I ⇒ Vector[Double],
-    phenotypeValues:  I ⇒ Vector[Double],
-    samplesPrototype: Val[Long],
-    samples:          I ⇒ Long
-  )(population: Vector[I]) =
-    GAIntegration.populationToVariables[I](genome, objectives, genomeValues, phenotypeValues)(population).map {
-      _ ++ Seq(Variable(samplesPrototype.toArray, population.map(samples).toArray))
-    }
+  //  def populationToVariables[I](
+  //    genome:           Genome,
+  //    objectives:       Objectives,
+  //    genomeValues:     I ⇒ (Vector[Double], Vector[Int]),
+  //    phenotypeValues:  I ⇒ Vector[Double],
+  //    samplesPrototype: Val[Long],
+  //    samples:          I ⇒ Long
+  //  )(population: Vector[I]) =
+  //    GAIntegration.populationToVariables[I](genome, objectives, genomeValues, phenotypeValues)(population).map {
+  //      _ ++ Seq(Variable(samplesPrototype.toArray, population.map(samples).toArray))
+  //    }
 
 }
 
@@ -306,30 +288,32 @@ object MGOAPI {
       def initialState(rng: util.Random): S
       def initialGenomes(n: Int): FromContext[M[Vector[G]]]
       def buildIndividual(genome: G, phenotype: P): I
-      def values(genome: G): V
+      def genomeValues(genome: G): V
       def genome(individual: I): G
       def phenotype(individual: I): P
-      def genomeValues(individual: I) = values(genome(individual))
       def randomLens: monocle.Lens[S, util.Random]
       def startTimeLens: monocle.Lens[S, Long]
       def generation(s: S): Long
-      def breeding(individuals: Vector[I], n: Int): M[Vector[G]]
-      def elitism(individuals: Vector[I]): M[Vector[I]]
+      def breeding(individuals: Vector[I], n: Int): FromContext[M[Vector[G]]]
+      def elitism(individuals: Vector[I]): FromContext[M[Vector[I]]]
       def migrateToIsland(i: Vector[I]): Vector[I]
       def migrateFromIsland(population: Vector[I]): Vector[I]
-      def afterGeneration(g: Long, population: Vector[I]): M[Boolean] //= mgo.afterGeneration[M, I](g)
-      def afterDuration(d: Time, population: Vector[I]): M[Boolean] // = mgo.afterDuration[M, I](d)
+      def afterGeneration(g: Long, population: Vector[I]): M[Boolean]
+      def afterDuration(d: Time, population: Vector[I]): M[Boolean]
+      def result(population: Vector[I]): FromContext[Seq[Variable[_]]]
     }
 
   }
 
-  trait Stochastic { self: Integration[_, _, _] ⇒
-    def samples(s: I): Long
-  }
+  //  trait Stochastic { self: Integration[_, _, _] ⇒
+  //    def samples(s: I): Long
+  //  }
+  //
+  //  trait Profile[A] { self: Integration[A, _, _] ⇒
+  //    def profile(a: A)(population: Vector[I]): Vector[I]
+  //  }
 
-  trait Profile[A] { self: Integration[A, _, _] ⇒
-    def profile(a: A)(population: Vector[I]): Vector[I]
-  }
+  def paired[G, C, D](continuous: G ⇒ C, discrete: G ⇒ D) = (g: G) ⇒ (continuous(g), discrete(g))
 
 }
 

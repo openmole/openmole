@@ -19,9 +19,11 @@ package org.openmole.plugin.tool
 
 import java.io.File
 
-import org.openmole.core.context.Val
+import org.openmole.core.context.{ Context, Val }
 import org.openmole.core.dsl._
 import org.openmole.core.workflow.builder._
+
+import scala.annotation.tailrec
 
 package csv {
 
@@ -48,4 +50,79 @@ package csv {
   }
 }
 
-package object csv extends CSVPackage
+package object csv extends CSVPackage {
+
+  import org.openmole.tool.file._
+  import org.openmole.tool.stream._
+  import org.openmole.core.tools.io.Prettifier._
+
+  def writeVariablesToCSV(
+    file:              File,
+    prototypes:        Seq[Val[_]],
+    context:           Context,
+    arraysOnSingleRow: Boolean        = false,
+    header:            Option[String] = None): Unit = {
+
+    file.createParentDir
+
+    val ps =
+      if (prototypes.isEmpty) context.values.map { _.prototype }
+      else prototypes
+
+    file.withLock {
+      fos ⇒
+
+        val lists = ps.map {
+          p ⇒
+            context.option(p) match {
+              case Some(v) ⇒
+                v match {
+                  case v: Array[_] ⇒ v.toList
+                  case v           ⇒ List(v)
+                }
+              case None ⇒ List("not found")
+            }
+        }.toList
+
+        if (file.size == 0)
+          fos.appendLine {
+            def defaultHeader =
+              (ps zip lists).flatMap {
+                case (p, l) ⇒
+                  if (arraysOnSingleRow && moreThanOneElement(l))
+                    (0 until l.size).map(i ⇒ s"${p.name}$i")
+                  else List(p.name)
+              }.mkString(",")
+
+            header getOrElse defaultHeader
+          }
+
+        def moreThanOneElement(l: List[_]) = !l.isEmpty && !l.tail.isEmpty
+
+        def flatAny(o: Any): List[Any] = o match {
+          case o: List[_] ⇒ o
+          case _          ⇒ List(o)
+        }
+
+        @tailrec def write(lists: List[List[_]]): Unit =
+          if (arraysOnSingleRow || !lists.exists(moreThanOneElement))
+            writeLine(lists.flatten(flatAny))
+          else {
+            writeLine(lists.map { _.head })
+            write(lists.map { l ⇒ if (moreThanOneElement(l)) l.tail else l })
+          }
+
+        def writeLine[T](list: List[T]) = {
+          fos.appendLine(list.map(l ⇒ {
+            val prettified = l.prettify()
+            def shouldBeQuoted = prettified.contains(',') || prettified.contains('"')
+            def quote(s: String) = '"' + s.replaceAll("\"", "\"\"") + '"'
+            if (shouldBeQuoted) quote(prettified) else prettified
+          }).mkString(","))
+        }
+
+        write(lists)
+    }
+  }
+
+}

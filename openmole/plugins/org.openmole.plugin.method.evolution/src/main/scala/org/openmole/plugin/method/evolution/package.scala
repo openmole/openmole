@@ -27,10 +27,10 @@ import org.openmole.plugin.tool.pattern._
 import org.openmole.core.context._
 import org.openmole.core.expansion._
 import org.openmole.tool.types._
-import shapeless._
 import squants.time.Time
 import mgo.double2Scalable
 import org.openmole.core.fileservice.FileService
+
 import org.openmole.core.workflow.tools._
 
 import scala.annotation.tailrec
@@ -40,7 +40,112 @@ package object evolution {
   val operatorExploration = 0.1
 
   object Genome {
-    def apply(inputs: ScalarOrSequenceOfDouble[_]*) = UniqueGenome(inputs)
+
+    sealed trait GenomeBound
+
+    object GenomeBound {
+      case class SequenceOfDouble(v: Val[Array[Double]], low: FromContext[Array[Double]], high: FromContext[Array[Double]]) extends GenomeBound
+      case class ScalarDouble(v: Val[Double], low: FromContext[Double], high: FromContext[Double]) extends GenomeBound
+      case class SequenceOfInt(v: Val[Array[Int]], low: FromContext[Array[Int]], high: FromContext[Array[Int]]) extends GenomeBound
+      case class ScalarInt(v: Val[Int], low: FromContext[Int], high: FromContext[Int]) extends GenomeBound
+      case class Enumeration[T](v: Val[T], values: Vector[T]) extends GenomeBound
+
+      import org.openmole.core.workflow.domain._
+      import org.openmole.core.workflow.sampling._
+
+      implicit def factorToBoundDouble[D](f: Factor[D, Double])(implicit bounded: Bounds[D, Double]) =
+        ScalarDouble(f.prototype, bounded.min(f.domain), bounded.max(f.domain))
+
+      implicit def factorToBoundInt[D](f: Factor[D, Int])(implicit bounded: Bounds[D, Int]) =
+        ScalarInt(f.prototype, bounded.min(f.domain), bounded.max(f.domain))
+
+      implicit def factorOfSequenceIsScalableDouble[D](f: Factor[D, Array[Double]])(implicit bounded: Bounds[D, Array[Double]]) =
+        SequenceOfDouble(f.prototype, bounded.min(f.domain), bounded.max(f.domain))
+
+      implicit def factorOfSequenceIsScalableInt[D](f: Factor[D, Array[Int]])(implicit bounded: Bounds[D, Array[Int]]) =
+        SequenceOfInt(f.prototype, bounded.min(f.domain), bounded.max(f.domain))
+
+      implicit def fixIsEnumeration[D, T](f: Factor[D, T])(implicit fix: Fix[D, T]) =
+        Enumeration(f.prototype, fix.apply(f.domain).toVector)
+
+    }
+
+    import _root_.mgo.{ C, D }
+    import cats.implicits._
+
+    def continuous(genome: Genome) = {
+      val bounds = genome.toVector.collect {
+        case s: GenomeBound.ScalarDouble ⇒
+          (s.low map2 s.high) { case (l, h) ⇒ Vector(C(l, h)) }
+        case s: GenomeBound.SequenceOfDouble ⇒
+          (s.low map2 s.high) { case (low, high) ⇒ (low zip high).toVector.map { case (l, h) ⇒ C(l, h) } }
+      }
+      bounds.sequence.map(_.flatten)
+    }
+
+    def discrete(genome: Genome) = {
+      val bounds = genome.toVector.collect {
+        case s: GenomeBound.ScalarInt ⇒
+          (s.low map2 s.high) { case (l, h) ⇒ Vector(D(l, h)) }
+        case s: GenomeBound.SequenceOfInt ⇒
+          (s.low map2 s.high) { case (low, high) ⇒ (low zip high).toVector.map { case (l, h) ⇒ D(l, h) } }
+        case s: GenomeBound.Enumeration[_] ⇒
+          FromContext { _ ⇒ Vector(D(0, s.values.size - 1)) }
+      }
+      bounds.sequence.map(_.flatten)
+    }
+
+    def vals(genome: Genome) =
+      genome.map {
+        case b: GenomeBound.ScalarDouble     ⇒ b.v
+        case b: GenomeBound.ScalarInt        ⇒ b.v
+        case b: GenomeBound.SequenceOfDouble ⇒ b.v
+        case b: GenomeBound.SequenceOfInt    ⇒ b.v
+        case b: GenomeBound.Enumeration[_]   ⇒ b.v
+      }
+
+    def toArrayVariable(genomeBound: GenomeBound, value: Seq[Any]) = genomeBound match {
+      case b: GenomeBound.ScalarDouble ⇒
+        Variable(b.v.toArray, value.map(_.asInstanceOf[Double]).toArray[Double])
+      case b: GenomeBound.ScalarInt ⇒
+        Variable(b.v.toArray, value.map(_.asInstanceOf[Int]).toArray[Int])
+      case b: GenomeBound.SequenceOfDouble ⇒
+        Variable(b.v.toArray, value.map(_.asInstanceOf[Array[Double]]).toArray[Array[Double]])
+      case b: GenomeBound.SequenceOfInt ⇒
+        Variable(b.v.toArray, value.map(_.asInstanceOf[Array[Int]]).toArray[Array[Int]])
+      case b: GenomeBound.Enumeration[_] ⇒
+        Variable.unsecure(b.v.toArray, value.map(_.asInstanceOf[Int]).map(i ⇒ b.values(i)).toArray(b.v.`type`.manifest))
+    }
+
+    def toVariables(genome: Genome, continuousValues: Vector[Double], discreteValue: Vector[Int]) = {
+
+      def toVariables0(genome: List[Genome.GenomeBound], continuousValues: List[Double], discreteValues: List[Int], acc: List[Variable[_]]): FromContext[Vector[Variable[_]]] = FromContext { p ⇒
+        import p._
+        genome match {
+          case Nil ⇒ acc.reverse.toVector
+          case (h: GenomeBound.ScalarDouble) :: t ⇒
+            val v = Variable(h.v, continuousValues.head.scale(h.low.from(context), h.high.from(context)))
+            toVariables0(t, continuousValues.tail, discreteValues, v :: acc).from(context)
+          case (h: GenomeBound.SequenceOfDouble) :: t ⇒
+            val value = (h.low.from(context) zip h.high.from(context) zip continuousValues) map { case ((l, h), v) ⇒ v.scale(l, h) }
+            val v = Variable(h.v, value)
+            toVariables0(t, continuousValues.drop(value.size), discreteValues, v :: acc).from(context)
+          case (h: GenomeBound.ScalarInt) :: t ⇒
+            val v = Variable(h.v, discreteValues.head)
+            toVariables0(t, continuousValues, discreteValues.tail, v :: acc).from(context)
+          case (h: GenomeBound.SequenceOfInt) :: t ⇒
+            val value = (h.low.from(context) zip h.high.from(context) zip discreteValues) map { case (_, v) ⇒ v }
+            val v = Variable(h.v, value)
+            toVariables0(t, continuousValues, discreteValues.drop(value.size), v :: acc).from(context)
+          case (h: GenomeBound.Enumeration[_]) :: t ⇒
+            val value = h.values(discreteValue.head)
+            val v = Variable(h.v, value)
+            toVariables0(t, continuousValues, discreteValues.tail, v :: acc).from(context)
+        }
+      }
+
+      toVariables0(genome.toList, continuousValues.toList, discreteValue.toList, List.empty)
+    }
   }
 
   object Objective {
@@ -51,7 +156,7 @@ package object evolution {
 
   type Objectives = Seq[Objective]
   type FitnessAggregation = Seq[Double] ⇒ Double
-  type Genome = Seq[ScalarOrSequenceOfDouble[_]]
+  type Genome = Seq[Genome.GenomeBound]
 
   implicit def intToCounterTerminationConverter(n: Long): AfterGeneration = AfterGeneration(n)
   implicit def durationToDurationTerminationConverter(d: Time): AfterDuration = AfterDuration(d)
@@ -67,6 +172,8 @@ package object evolution {
   sealed trait OMTermination
   case class AfterGeneration(steps: Long) extends OMTermination
   case class AfterDuration(duration: Time) extends OMTermination
+
+  import shapeless._
 
   def SteadyStateEvolution[T](algorithm: T, evaluation: Puzzle, termination: OMTermination, parallelism: Int = 1)(implicit wfi: WorkflowIntegration[T]) = {
     val t = wfi(algorithm)
@@ -93,13 +200,6 @@ package object evolution {
     val terminationTask = TerminationTask(algorithm, termination) set (name := "termination")
 
     val breed = BreedTask(algorithm, 1) set (name := "breed")
-
-    val scalingIndividualsTask = ScalingPopulationTask(algorithm) set (name := "scalingIndividuals") set (
-      (inputs, outputs) += (t.generationPrototype, t.terminatedPrototype, t.statePrototype),
-      outputs += t.populationPrototype
-    )
-
-    val scalingIndividualsSlot = Slot(scalingIndividualsTask)
 
     val masterFirst =
       EmptyTask() set (
@@ -151,11 +251,11 @@ package object evolution {
     )
 
     val puzzle =
-      ((firstCapsule -- masterSlave -- scalingIndividualsSlot) >| (Capsule(last, strain = true) when t.terminatedPrototype)) &
+      ((firstCapsule -- masterSlave) >| (Capsule(last, strain = true) when t.terminatedPrototype)) &
         (firstCapsule oo (evaluationCapsule, filter = Block(t.populationPrototype, t.statePrototype)))
 
     val gaPuzzle =
-      new OutputEnvironmentPuzzleContainer(puzzle, scalingIndividualsSlot.capsule, evaluationCapsule) {
+      new OutputEnvironmentPuzzleContainer(puzzle, masterSlave.last, evaluationCapsule) {
         def generation = t.generationPrototype
         def population = t.populationPrototype
         def state = t.statePrototype
@@ -252,11 +352,6 @@ package object evolution {
       t.populationPrototype, t.statePrototype
     )
 
-    val scalingIndividualsTask = ScalingPopulationTask(algorithm) set (name := "scalingIndividuals") set (
-      (inputs, outputs) += (t.generationPrototype, t.terminatedPrototype, t.statePrototype),
-      outputs += t.populationPrototype
-    )
-
     val firstTask = InitialStateTask(algorithm) set (name := "first")
 
     val firstCapsule = Capsule(firstTask, strain = true)
@@ -266,14 +361,12 @@ package object evolution {
       (inputs, outputs) += (t.populationPrototype, t.statePrototype)
     )
 
-    val scalingIndividualsSlot = Slot(scalingIndividualsTask)
-
     val puzzle =
-      ((firstCapsule -- masterSlave -- scalingIndividualsSlot) >| (Capsule(last, strain = true) when t.terminatedPrototype)) &
+      ((firstCapsule -- masterSlave) >| (Capsule(last, strain = true) when t.terminatedPrototype)) &
         (firstCapsule oo (islandCapsule, Block(t.populationPrototype, t.statePrototype)))
 
     val gaPuzzle =
-      new OutputEnvironmentPuzzleContainer(puzzle, scalingIndividualsSlot.capsule, islandCapsule) {
+      new OutputEnvironmentPuzzleContainer(puzzle, masterSlave.last, islandCapsule) {
         def generation = t.generationPrototype
         def population = t.populationPrototype
         def state = t.statePrototype

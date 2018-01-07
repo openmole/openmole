@@ -18,18 +18,39 @@
 package org.openmole.plugin.method.evolution
 
 import org.openmole.core.context.Val
-import org.openmole.core.expansion.{ ExpandedString, FromContext }
+import org.openmole.core.expansion._
 import org.openmole.core.workflow.dsl._
-import org.openmole.plugin.hook.file._
+import org.openmole.core.context._
+import monocle.macros._
+import org.openmole.core.workflow.builder._
+import org.openmole.core.workflow.mole._
+import org.openmole.core.workflow.validation._
+import org.openmole.tool.file._
 
 object SavePopulationHook {
 
   def apply[T](algorithm: T, dir: FromContext[File])(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name) = {
     val t = wfi(algorithm)
 
-    val fileName = dir / ExpandedString("population${" + t.generationPrototype.name + "}.csv")
-    val prototypes = Seq[Val[_]](t.generationPrototype) ++ t.resultPrototypes.map(_.toArray)
-    AppendToCSVFileHook(fileName, prototypes: _*)
+    FromContextHook("SavePopulationHook") { p ⇒
+      import p._
+
+      val resultFileLocation = dir / ExpandedString("population${" + t.generationPrototype.name + "}.csv")
+
+      val resultVariables = t.operations.result(context(t.populationPrototype)).from(context)
+
+      import org.openmole.plugin.tool.csv._
+
+      writeVariablesToCSV(
+        resultFileLocation.from(context),
+        resultVariables.map(_.prototype.array),
+        resultVariables
+      )
+
+      context
+    } set (inputs += t.populationPrototype)
+
   }
 
 }
+

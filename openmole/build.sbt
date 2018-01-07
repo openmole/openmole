@@ -282,7 +282,7 @@ def corePlugins =
     allDomain ++
     allTools
 
-def allTools = Seq(netLogoAPI, netLogo5API, netLogo6API, csv, pattern)
+def allTools = Seq(netLogoAPI, netLogo5API, netLogo6API, csvTool, pattern)
 
 lazy val defaultActivator = OsgiKeys.bundleActivator := Some(name.value + ".Activator")
 
@@ -321,7 +321,7 @@ lazy val netLogo6API = OsgiProject(pluginDir, "org.openmole.plugin.tool.netlogo6
   libraryDependencies -= Libraries.scalatest
 ) settings (toolsSettings: _*)
 
-lazy val csv = OsgiProject(pluginDir, "org.openmole.plugin.tool.csv", imports = Seq("*")) dependsOn(exception, openmoleDSL) settings(
+lazy val csvTool = OsgiProject(pluginDir, "org.openmole.plugin.tool.csv", imports = Seq("*")) dependsOn(exception, openmoleDSL) settings(
   libraryDependencies += Libraries.opencsv,
   defaultActivator
 ) settings (toolsSettings: _*)
@@ -409,7 +409,7 @@ def allHook = Seq(displayHook, fileHook, modifierHook)
 
 lazy val displayHook = OsgiProject(pluginDir, "org.openmole.plugin.hook.display", imports = Seq("*")) dependsOn (openmoleDSL) settings (pluginSettings: _*)
 
-lazy val fileHook = OsgiProject(pluginDir, "org.openmole.plugin.hook.file", imports = Seq("*")) dependsOn(openmoleDSL, replication % "test") settings (
+lazy val fileHook = OsgiProject(pluginDir, "org.openmole.plugin.hook.file", imports = Seq("*")) dependsOn(openmoleDSL, csvTool, replication % "test") settings (
   libraryDependencies += Libraries.scalatest
   ) settings (pluginSettings: _*)
 
@@ -423,7 +423,7 @@ lazy val modifierHook = OsgiProject(pluginDir, "org.openmole.plugin.hook.modifie
 def allMethod = Seq(evolution, directSampling)
 
 lazy val evolution = OsgiProject(pluginDir, "org.openmole.plugin.method.evolution", imports = Seq("*")) dependsOn(
-  openmoleDSL, fileHook, toolsTask, pattern, collectionDomain % "test"
+  openmoleDSL, csvTool, toolsTask, pattern, collectionDomain % "test"
 ) settings(libraryDependencies += Libraries.mgo, libraryDependencies += Libraries.shapeless) settings (pluginSettings: _*)
 
 //lazy val abc = OsgiProject(pluginDir, "org.openmole.plugin.method.abc", imports = Seq("*")) dependsOn(openmoleDSL, fileHook, tools) settings
@@ -439,7 +439,7 @@ def allSampling = Seq(combineSampling, csvSampling, lhsSampling, quasirandomSamp
 
 lazy val combineSampling = OsgiProject(pluginDir, "org.openmole.plugin.sampling.combine", imports = Seq("*")) dependsOn(exception, modifierDomain, collectionDomain, workflow) settings (pluginSettings: _*)
 
-lazy val csvSampling = OsgiProject(pluginDir, "org.openmole.plugin.sampling.csv", imports = Seq("*")) dependsOn(exception, workflow, csv) settings (
+lazy val csvSampling = OsgiProject(pluginDir, "org.openmole.plugin.sampling.csv", imports = Seq("*")) dependsOn(exception, workflow, csvTool) settings (
   libraryDependencies += Libraries.scalatest
   ) settings (pluginSettings: _*)
 
@@ -454,7 +454,7 @@ lazy val quasirandomSampling = OsgiProject(pluginDir, "org.openmole.plugin.sampl
 
 def allSource = Seq(fileSource)
 
-lazy val fileSource = OsgiProject(pluginDir, "org.openmole.plugin.source.file", imports = Seq("*")) dependsOn(openmoleDSL, serializer, exception, csv) settings (pluginSettings: _*)
+lazy val fileSource = OsgiProject(pluginDir, "org.openmole.plugin.source.file", imports = Seq("*")) dependsOn(openmoleDSL, serializer, exception, csvTool) settings (pluginSettings: _*)
 
 
 /* Task */

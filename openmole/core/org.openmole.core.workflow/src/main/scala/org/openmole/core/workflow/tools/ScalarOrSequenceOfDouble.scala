@@ -47,6 +47,7 @@ object Scalable {
     override def inputs(t: ScalableNumber) = Seq()
     override def prototype(t: ScalableNumber): Val[_] = t.prototype
     override def size(t: ScalableNumber): FromContext[Int] = 1
+
     override def scaled(s: ScalableNumber)(genomePart: Seq[Double]): FromContext[Scaled] = {
       val g = genomePart.head
       assert(!g.isNaN)

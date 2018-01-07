@@ -25,9 +25,6 @@ import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfi
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.validation._
 import org.openmole.core.workflow.dsl._
-import org.openmole.tool.stream._
-
-import scala.annotation.tailrec
 
 object AppendToCSVFileHook {
 
@@ -64,67 +61,8 @@ object AppendToCSVFileHook {
 
   override protected def process(executionContext: MoleExecutionContext) = FromContext { parameters ⇒
     import parameters._
-    val f = file.from(context)
-    f.createParentDir
-
-    val ps =
-      if (prototypes.isEmpty) context.values.map { _.prototype }
-      else prototypes
-
-    f.withLock {
-      fos ⇒
-
-        val lists = ps.map {
-          p ⇒
-            context.option(p) match {
-              case Some(v) ⇒
-                v match {
-                  case v: Array[_] ⇒ v.toList
-                  case v           ⇒ List(v)
-                }
-              case None ⇒ List("not found")
-            }
-        }.toList
-
-        if (f.size == 0)
-          fos.appendLine {
-            def defaultHeader =
-              (ps zip lists).flatMap {
-                case (p, l) ⇒
-                  if (arraysOnSingleRow && moreThanOneElement(l))
-                    (0 until l.size).map(i ⇒ s"${p.name}$i")
-                  else List(p.name)
-              }.mkString(",")
-
-            header.map(_.from(context)) getOrElse defaultHeader
-          }
-
-        def moreThanOneElement(l: List[_]) = !l.isEmpty && !l.tail.isEmpty
-
-        def flatAny(o: Any): List[Any] = o match {
-          case o: List[_] ⇒ o
-          case _          ⇒ List(o)
-        }
-
-        @tailrec def write(lists: List[List[_]]): Unit =
-          if (arraysOnSingleRow || !lists.exists(moreThanOneElement))
-            writeLine(lists.flatten(flatAny))
-          else {
-            writeLine(lists.map { _.head })
-            write(lists.map { l ⇒ if (moreThanOneElement(l)) l.tail else l })
-          }
-
-        def writeLine[T](list: List[T]) = {
-          fos.appendLine(list.map(l ⇒ {
-            val prettified = l.prettify()
-            def shouldBeQuoted = prettified.contains(',') || prettified.contains('"')
-            def quote(s: String) = '"' + s.replaceAll("\"", "\"\"") + '"'
-            if (shouldBeQuoted) quote(prettified) else prettified
-          }).mkString(","))
-        }
-
-        write(lists)
-    }
+    import org.openmole.plugin.tool.csv._
+    writeVariablesToCSV(file.from(context), prototypes, context, arraysOnSingleRow, header.map(_.from(context)))
     context
   }
 
