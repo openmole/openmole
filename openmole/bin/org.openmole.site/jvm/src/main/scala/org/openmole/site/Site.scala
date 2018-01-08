@@ -17,29 +17,15 @@
 
 package org.openmole.site
 
-import java.io.{ File, FileInputStream }
+import java.io.File
 import java.nio.CharBuffer
-import java.nio.file.Paths
-import java.util.zip.GZIPInputStream
 
 import ammonite.ops.{ Path, write }
-//import org.openmole.core.workspace.Workspace
-import org.openmole.tool.file._
-import org.openmole.tool.tar._
-import org.openmole.tool.stream._
 
-import scalatags.Text.all
+import scalatags.Text.{ TypedTag, all }
 import scalatags.Text.all._
-//import scala.sys.process.BasicIO
-//import org.openmole.site.credits._
-//import spray.json.JsArray
-//import module._
-//import org.openmole.core.buildinfo
-
 import scala.annotation.tailrec
 import spray.json._
-import tools._
-import stylesheet._
 
 object Site extends App {
 
@@ -143,8 +129,10 @@ object Site extends App {
               sitePage.element
             ),
             sitePage match {
-              case s: Step ⇒ Seq(s.leftMenu, s.rightMenu)
-              case _       ⇒ div
+              case s: StepPage ⇒ Seq(s.leftMenu, s.rightMenu)
+              case _ ⇒
+                val menus: Seq[TypedTag[_ <: String]] = SideMenu.menus.get(page.name).getOrElse(Seq(div))
+                menus
             },
             Footer.build,
             onload := onLoadString(page)

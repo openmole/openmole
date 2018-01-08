@@ -34,7 +34,7 @@ object UserGuide {
   val line = hr(classIs("line"), width := "90%", marginTop := 10)
 
   def header(sp: TypedTag[_ <: String]) =
-    div(minHeight := 300, paddingTop := 120)(
+    div(minHeight := 300, paddingTop := 100)(
       div(stepHeader)(sp),
       line
     )
@@ -65,27 +65,27 @@ object UserGuide {
       if (DocumentationPages.topPages.contains(current)) {
         if ((DocumentationPages.modelPages :+ DocumentationPages.model).contains(current)) {
           val name = if (current == firstModel) "" else current.name
-          Step(
+          StepPage(
             headerModel(name),
             div(current.content),
-            SideMenu.model.insert(current.extraMenu).left(350),
-            SideMenu.more.insert(current.details).right(350),
+            SideMenu.model.insert(current.extraMenu).left,
+            SideMenu.more.insert(current.details).right,
             firstModel, firstEnvironment, firstMethod
           )
         }
         else if ((DocumentationPages.methodPages :+ DocumentationPages.method).contains(current))
-          Step(
+          StepPage(
             headerMethod(current.name),
             div(current.content),
-            SideMenu.method.insert(current.extraMenu).left(350),
-            SideMenu.more.insert(current.details).right(350),
+            SideMenu.method.insert(current.extraMenu).left,
+            SideMenu.more.insert(current.details).right,
             firstMethod, firstModel, firstEnvironment
           )
-        else Step(
+        else StepPage(
           headerEnvironment(current.name),
           div(current.content),
-          SideMenu.environment.insert(current.extraMenu).left(350),
-          SideMenu.more.insert(current.details).right(350),
+          SideMenu.environment.insert(current.extraMenu).left,
+          SideMenu.more.insert(current.details).right,
           firstEnvironment, firstMethod, firstModel
         )
       }

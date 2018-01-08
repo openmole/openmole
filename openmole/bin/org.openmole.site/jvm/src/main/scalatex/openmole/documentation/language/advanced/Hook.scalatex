@@ -1,8 +1,6 @@
 @import org.openmole.site._
 @import org.openmole.site.tools._
 
-@SideMenu.hookMenu.toBlock.left(350)
-
 @h1{Hook}
 Tasks are mute pieces of software. They are not conceived to write files, display values, nor more generally present
 any side effects at all. Tasks' role is to compute some output data from their input data. That's what guaranties that

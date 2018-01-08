@@ -5,9 +5,6 @@
 @import org.openmole.site.Environment._
 
 
-@SideMenu.advancedSamplingMenu.toBlock.left(350)
-@SideMenu.more.right(350)
-
 @h1{Advanced samplings}
 In this page are the advanced functions and tasks to fine-tune your data flows into the OpenMOLE workflow: samplings , list and combination.
 
