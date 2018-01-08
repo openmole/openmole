@@ -143,6 +143,8 @@ background-color : #222;
 #sidebar-right {
 }
 
+
+
 /*Base Mobile Layout*/
 .wrap {
     width: 90%;
@@ -179,6 +181,11 @@ background-color : #222;
         padding-eft : 50px;
         width: 25%;
         float: left;
+    }
+
+    .inner-footer {
+     margin: 0 auto;
+     width: 700px;
     }
 }
 
