@@ -104,6 +104,34 @@ package object evolution {
         case b: GenomeBound.Enumeration[_]   ⇒ b.v
       }
 
+    def size(g: GenomeBound.SequenceOfDouble) = (g.low map2 g.high) { case (l, h) ⇒ math.min(l.size, h.size) }
+    def size(g: GenomeBound.SequenceOfInt) = (g.low map2 g.high) { case (l, h) ⇒ math.min(l.size, h.size) }
+
+    def continuousIndex(genome: Genome, v: Val[_]): Option[FromContext[Int]] = {
+      def indexOf0(l: List[GenomeBound], index: FromContext[Int]): Option[FromContext[Int]] = {
+        l match {
+          case Nil                                    ⇒ None
+          case (h: GenomeBound.ScalarDouble) :: t     ⇒ if (h.v == v) Some(index) else indexOf0(t, index.map(_ + 1))
+          case (h: GenomeBound.SequenceOfDouble) :: t ⇒ if (h.v == v) Some(index) else indexOf0(t, (index map2 size(h)) { case (i, h) ⇒ i + h })
+          case h :: t                                 ⇒ indexOf0(t, index)
+        }
+      }
+      indexOf0(genome.toList, 0)
+    }
+
+    def discreteIndex(genome: Genome, v: Val[_]): Option[FromContext[Int]] = {
+      def indexOf0(l: List[GenomeBound], index: FromContext[Int]): Option[FromContext[Int]] = {
+        l match {
+          case Nil                                  ⇒ None
+          case (h: GenomeBound.ScalarInt) :: t      ⇒ if (h.v == v) Some(index) else indexOf0(t, index.map(_ + 1))
+          case (h: GenomeBound.Enumeration[_]) :: t ⇒ if (h.v == v) Some(index) else indexOf0(t, index.map(_ + 1))
+          case (h: GenomeBound.SequenceOfInt) :: t  ⇒ if (h.v == v) Some(index) else indexOf0(t, (index map2 size(h)) { case (i, h) ⇒ i + h })
+          case h :: t                               ⇒ indexOf0(t, index)
+        }
+      }
+      indexOf0(genome.toList, 0)
+    }
+
     def toArrayVariable(genomeBound: GenomeBound, value: Seq[Any]) = genomeBound match {
       case b: GenomeBound.ScalarDouble ⇒
         Variable(b.v.toArray, value.map(_.asInstanceOf[Double]).toArray[Double])

@@ -25,12 +25,35 @@ import org.openmole.core.workflow.dsl._
 import cats._
 import cats.implicits._
 import mgo.algorithm.CDGenome
+import mgo.algorithm.NoisyPSE.Individual
 import mgo.niche._
 import monocle.macros._
 
 object GenomeProfile {
 
-  def nichePrototype = Val[Int]("niche", GAIntegration.namespace)
+  object ProfileElement {
+    case class ContinuousElement(v: Val[Double], n: Int) extends ProfileElement
+    case class ContinuousSequenceElement(v: Val[Array[Double]], i: Int, n: Int) extends ProfileElement
+    case class DiscreteElement(v: Val[Int], n: Int) extends ProfileElement
+    case class DiscreteSequenceElement(v: Val[Array[Int]], i: Int, n: Int) extends ProfileElement
+  }
+
+  sealed trait ProfileElement
+
+  def niche[I](genome: Genome, profiled: Seq[ProfileElement], continuousProfile: (Int, Int) ⇒ Niche[I, Int], discreteProfile: Int ⇒ Niche[I, Int]) = {
+
+    def notFound(v: Val[_]) = throw new UserBadDataError(s"Variable $v not found in the genome")
+
+    val niches =
+      profiled.toVector.map {
+        case c: ProfileElement.ContinuousElement         ⇒ Genome.continuousIndex(genome, c.v).getOrElse(notFound(c.v)).map { index ⇒ continuousProfile(index, c.n) }
+        case c: ProfileElement.ContinuousSequenceElement ⇒ Genome.continuousIndex(genome, c.v).getOrElse(notFound(c.v)).map { index ⇒ continuousProfile(index + c.i, c.n) }
+        case c: ProfileElement.DiscreteElement           ⇒ Genome.discreteIndex(genome, c.v).getOrElse(notFound(c.v)).map { index ⇒ discreteProfile(index) }
+        case c: ProfileElement.DiscreteSequenceElement   ⇒ Genome.discreteIndex(genome, c.v).getOrElse(notFound(c.v)).map { index ⇒ discreteProfile(index + c.i) }
+      }.sequence
+
+    niches.map { ns ⇒ Profile.sequenceNiches[I, Int](ns) }
+  }
 
   object DeterministicParams {
 
@@ -75,12 +98,11 @@ object GenomeProfile {
         def result(population: Vector[I]) = FromContext { p ⇒
           import p._
 
-          val res = Profile.result(population, om.niche, Genome.continuous(om.genome).from(context))
+          val res = Profile.result(population, om.niche.from(context), Genome.continuous(om.genome).from(context))
           val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete)).from(context)
           val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness)).from(context)
-          val niches = Variable(nichePrototype.array, res.map(_.niche).toArray)
 
-          genomes ++ fitness ++ Seq(niches)
+          genomes ++ fitness
         }
 
         def initialGenomes(n: Int) =
@@ -99,19 +121,19 @@ object GenomeProfile {
             }
           }
 
-        def elitism(population: Vector[I]) =
-          Genome.continuous(om.genome).map { continuous ⇒
-            interpret { impl ⇒
-              import impl._
-              def step =
-                for {
-                  elited ← Profile.elitism[DSL, Int](om.niche, 1, continuous) apply population
-                  _ ← mgo.elitism.incrementGeneration[DSL]
-                } yield elited
+        def elitism(population: Vector[I]) = FromContext { p ⇒
+          import p._
+          interpret { impl ⇒
+            import impl._
+            def step =
+              for {
+                elited ← Profile.elitism[DSL, Vector[Int]](om.niche.from(context), 1, Genome.continuous(om.genome).from(context)) apply population
+                _ ← mgo.elitism.incrementGeneration[DSL]
+              } yield elited
 
-              zipWithState(step).eval
-            }
+            zipWithState(step).eval
           }
+        }
 
         def afterGeneration(g: Long, population: Vector[I]): M[Boolean] = interpret { impl ⇒
           import impl._
@@ -131,7 +153,7 @@ object GenomeProfile {
   }
 
   case class DeterministicParams(
-    niche:               Niche[CDGenome.DeterministicIndividual.Individual, Int],
+    niche:               FromContext[Niche[CDGenome.DeterministicIndividual.Individual, Vector[Int]]],
     genome:              Genome,
     objectives:          Objectives,
     operatorExploration: Double)
@@ -141,26 +163,28 @@ object GenomeProfile {
     nX:        Int,
     genome:    Genome,
     objective: Objective
-  ) = {
+  ): WorkflowIntegration.DeterministicGA[DeterministicParams] =
+    apply(
+      Vector(ProfileElement.ContinuousElement(x, nX)),
+      genome,
+      objective
+    )
 
-    val xIndex =
-      Genome.vals(genome).indexWhere(_ == x) match {
-        case -1 ⇒ throw new UserBadDataError(s"Variable $x not found in the genome")
-        case x  ⇒ x
-      }
-
+  def apply(
+    profiled:  Seq[ProfileElement],
+    genome:    Genome,
+    objective: Objective
+  ): WorkflowIntegration.DeterministicGA[DeterministicParams] =
     new WorkflowIntegration.DeterministicGA(
       DeterministicParams(
         genome = genome,
         objectives = Seq(objective),
-        niche = Profile.genomeProfile(xIndex, nX),
+        niche = niche[CDGenome.DeterministicIndividual.Individual](genome, profiled, Profile.continuousProfile, Profile.discreteProfile),
         operatorExploration = operatorExploration
       ),
       genome,
       Seq(objective)
     )
-
-  }
 
   object StochasticParams {
     import mgo.algorithm._
@@ -203,7 +227,7 @@ object GenomeProfile {
         def result(population: Vector[I]) = FromContext { p ⇒
           import p._
 
-          val res = NoisyProfile.result(population, om.aggregation, om.niche, Genome.continuous(om.genome).from(context))
+          val res = NoisyProfile.result(population, om.aggregation, om.niche.from(context), Genome.continuous(om.genome).from(context))
           val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete)).from(context)
           val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness)).from(context)
           val samples = Variable(GAIntegration.samples.array, res.map(_.replications).toArray)
@@ -228,17 +252,18 @@ object GenomeProfile {
           }
 
         def elitism(individuals: Vector[I]) =
-          Genome.continuous(om.genome).map { continuous ⇒
+          FromContext { p ⇒
+            import p._
             interpret { impl ⇒
               import impl._
               def step =
                 for {
-                  elited ← NoisyProfile.elitism[DSL, Int](
-                    om.niche,
+                  elited ← NoisyProfile.elitism[DSL, Vector[Int]](
+                    om.niche.from(context),
                     om.muByNiche,
                     om.historySize,
                     om.aggregation,
-                    continuous) apply individuals
+                    Genome.continuous(om.genome).from(context)) apply individuals
                   _ ← mgo.elitism.incrementGeneration[DSL]
                 } yield elited
 
@@ -268,7 +293,7 @@ object GenomeProfile {
 
   case class StochasticParams(
     muByNiche:           Int,
-    niche:               Niche[mgo.algorithm.CDGenome.NoisyIndividual.Individual, Int],
+    niche:               FromContext[Niche[mgo.algorithm.CDGenome.NoisyIndividual.Individual, Vector[Int]]],
     operatorExploration: Double,
     genome:              Genome,
     objectives:          Objectives,
@@ -281,15 +306,20 @@ object GenomeProfile {
     nX:         Int,
     genome:     Genome,
     objective:  Objective,
-    stochastic: Stochastic[Id],
-    nicheSize:  Int            = 20
-  ) = {
+    stochastic: Stochastic[Id]
+  ): WorkflowIntegration.StochasticGA[StochasticParams] = apply(
+    Vector(ProfileElement.ContinuousElement(x, nX)),
+    genome,
+    objective,
+    stochastic
+  )
 
-    val xIndex =
-      Genome.vals(genome).indexWhere(_ == x) match {
-        case -1 ⇒ throw new UserBadDataError(s"Variable $x not found in the genome")
-        case x  ⇒ x
-      }
+  def apply(
+    profiled:   Seq[ProfileElement],
+    genome:     Genome,
+    objective:  Objective,
+    stochastic: Stochastic[Id],
+    nicheSize:  Int                 = 20): WorkflowIntegration.StochasticGA[StochasticParams] = {
 
     import org.openmole.core.dsl.seqIsFunctor
 
@@ -307,7 +337,7 @@ object GenomeProfile {
     WorkflowIntegration.StochasticGA(
       StochasticParams(
         muByNiche = nicheSize,
-        niche = NoisyProfile.genomeProfile(xIndex, nX),
+        niche = niche[CDGenome.NoisyIndividual.Individual](genome, profiled, NoisyProfile.continuousProfile, NoisyProfile.discreteProfile),
         operatorExploration = operatorExploration,
         genome = genome,
         objectives = Seq(objective),
@@ -319,20 +349,6 @@ object GenomeProfile {
       seqStochastic
     )
 
-    //      StochasticGenomeProfile(
-    //        StochasticParams(
-    //          mu = paretoSize,
-    //          niche = StochasticGenomeProfile.niche(xIndex, nX),
-    //          operatorExploration = operatorExploration,
-    //          genomeSize = UniqueGenome.size(ug),
-    //          historySize = stochastic.replications,
-    //          cloneProbability = stochastic.reevaluate,
-    //          aggregation = aggregation
-    //        ),
-    //        ug,
-    //        objective,
-    //        stochastic
-    //      )
   }
 
 }
