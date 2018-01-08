@@ -202,10 +202,11 @@ background-color : #222;
 
     #sidebar-right {
         right: 0;
+        position: fixed;
     }
 
     #sidebar-left {
-        left: -50%; /*Width of #main-content*/
+        position: fixed;
     }
 
     #main-content {
