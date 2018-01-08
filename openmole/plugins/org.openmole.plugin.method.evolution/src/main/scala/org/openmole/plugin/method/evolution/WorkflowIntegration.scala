@@ -91,7 +91,7 @@ object WorkflowIntegration {
 
       def genomeToVariables(genome: G): FromContext[Vector[Variable[_]]] = {
         val (cs, is) = operations.genomeValues(genome)
-        Genome.toVariables(a.genome, cs, is)
+        Genome.toVariables(a.genome, cs, is, scale = true)
       }
 
       def variablesToPhenotype(context: Context) = a.objectives.map(o ⇒ o.fromContext(context)).toVector
@@ -113,8 +113,11 @@ object WorkflowIntegration {
       def inputPrototypes = Genome.vals(a.genome) ++ a.replication.seed.prototype
       def objectives = a.objectives
 
-      def genomeToVariables(genome: G): FromContext[Seq[Variable[_]]] =
-        StochasticGAIntegration.genomeToVariables(a.genome, operations.genomeValues(genome), a.replication.seed)
+      def genomeToVariables(genome: G): FromContext[Seq[Variable[_]]] = {
+        val (continuous, discrete) = operations.genomeValues(genome)
+        val seeder = a.replication.seed
+        (Genome.toVariables(a.genome, continuous, discrete, scale = true) map2 FromContext { p ⇒ seeder(p.random()) })(_ ++ _)
+      }
 
       def variablesToPhenotype(context: Context) = a.objectives.map(o ⇒ o.fromContext(context)).toVector
     }
@@ -203,12 +206,12 @@ object GAIntegration {
 
   def genomesOfPopulationToVariables[I](
     genome: Genome,
-    values: Vector[(Vector[Double], Vector[Int])]): FromContext[Vector[Variable[_]]] = {
+    values: Vector[(Vector[Double], Vector[Int])],
+    scale:  Boolean): FromContext[Vector[Variable[_]]] = {
 
     val variables =
       values.traverse[FromContext, Vector[Variable[_]]] {
-        case (continuous, discrete) ⇒
-          Genome.toVariables(genome, continuous, discrete)
+        case (continuous, discrete) ⇒ Genome.toVariables(genome, continuous, discrete, scale)
       }
 
     variables.map {
@@ -219,8 +222,7 @@ object GAIntegration {
     }
   }
 
-  def objectivesOfPopulationToVariables[I](objectives: Objectives, phenotypeValues: Vector[Vector[Double]]): FromContext[Vector[Variable[_]]] = {
-
+  def objectivesOfPopulationToVariables[I](objectives: Objectives, phenotypeValues: Vector[Vector[Double]]): FromContext[Vector[Variable[_]]] =
     objectives.toVector.zipWithIndex.map {
       case (p, i) ⇒
         Variable(
@@ -228,7 +230,6 @@ object GAIntegration {
           phenotypeValues.map(_(i)).toArray
         )
     }
-  }
 
 }
 
@@ -240,12 +241,11 @@ object StochasticGAIntegration {
       case None       ⇒ values.transpose.map(_.median)
     }
 
-  def genomeToVariables(
-    genome: Genome,
-    values: (Vector[Double], Vector[Int]),
-    seeder: GASeeder
-  ) = (Genome.toVariables(genome, values._1, values._2) map2 FromContext { p ⇒ seeder(p.random()) })(_ ++ _)
-
+  //  def genomeToVariables(
+  //    genome: Genome,
+  //    values: (Vector[Double], Vector[Int]),
+  //    seeder: GASeeder
+  //  ) =
 }
 
 object MGOAPI {

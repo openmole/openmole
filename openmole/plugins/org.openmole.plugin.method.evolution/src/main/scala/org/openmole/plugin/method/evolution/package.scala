@@ -145,17 +145,18 @@ package object evolution {
         Variable.unsecure(b.v.toArray, value.map(_.asInstanceOf[Int]).map(i ⇒ b.values(i)).toArray(b.v.`type`.manifest))
     }
 
-    def toVariables(genome: Genome, continuousValues: Vector[Double], discreteValue: Vector[Int]) = {
+    def toVariables(genome: Genome, continuousValues: Vector[Double], discreteValue: Vector[Int], scale: Boolean) = {
 
       def toVariables0(genome: List[Genome.GenomeBound], continuousValues: List[Double], discreteValues: List[Int], acc: List[Variable[_]]): FromContext[Vector[Variable[_]]] = FromContext { p ⇒
         import p._
         genome match {
           case Nil ⇒ acc.reverse.toVector
           case (h: GenomeBound.ScalarDouble) :: t ⇒
-            val v = Variable(h.v, continuousValues.head.scale(h.low.from(context), h.high.from(context)))
+            val value = if (scale) continuousValues.head.scale(h.low.from(context), h.high.from(context)) else continuousValues.head
+            val v = Variable(h.v, value)
             toVariables0(t, continuousValues.tail, discreteValues, v :: acc).from(context)
           case (h: GenomeBound.SequenceOfDouble) :: t ⇒
-            val value = (h.low.from(context) zip h.high.from(context) zip continuousValues) map { case ((l, h), v) ⇒ v.scale(l, h) }
+            val value = (h.low.from(context) zip h.high.from(context) zip continuousValues) map { case ((l, h), v) ⇒ if (scale) v.scale(l, h) else v }
             val v = Variable(h.v, value)
             toVariables0(t, continuousValues.drop(value.size), discreteValues, v :: acc).from(context)
           case (h: GenomeBound.ScalarInt) :: t ⇒
