@@ -27,25 +27,33 @@ object Menu {
   val navClass = classIs(navbar ++ navbar_default ++ navbar_staticTop ++ navbar_fixedTop ++ navbar_inverse)
   val liStyle = paddingTop := 8
   val inputStyle = paddingTop := 15
+  val navId = "omwesite"
 
   val build = {
-    tags2.nav(navClass, paddingRight := 20)(
-      div(classIs(container_fluid))(
-        div(classIs(navbar_header))(
-          div(classIs(navbar_brand), href := "#", padding := 0),
-          to(Pages.index)(
-            img(alt := "", src := Resource.img.mole.openmoleText.file, Seq(width := 240, paddingTop := 5, pointer))
-          )
-        ),
-        div(classIs(collapse ++ navbar_collapse), paddingTop := 10)(
-          ul(classIs(nav ++ navbar_nav ++ navbar_right))(
-            li(innerLink(DocumentationPages.model, "DOCUMENTATION"), liStyle),
-            li(outerLink("DEMO", shared.link.demo), liStyle),
-            li(innerLink(DocumentationPages.tutorial, "EXAMPLES"), liStyle),
-            li(innerLink(Pages.training, "TRAINING"), liStyle),
-            li(divLinkButton(div(maxWidth := 140)(span("DOWNLOAD"), span(version.value, fontSize := "10px", paddingLeft := 7)), Resource.script.openmole.file, classIs(btn ++ btn_primary))),
-            li(inputStyle)(img(id := shared.searchImg, src := Resource.img.menu.search.file, Seq(width := 35, paddingTop := 5, paddingLeft := 10, pointer)))(
-              div(id := shared.searchDiv)
+    div(classIs("container"))(
+      tags2.nav(navClass, paddingRight := 20)(
+        div(classIs(container_fluid))(
+          div(classIs(navbar_header))(
+            button(`type` := "button", `class` := "navbar-toggle", data("toggle") := "collapse", data("target") := s"#$navId")(
+              span(classIs("icon-bar")),
+              span(classIs("icon-bar")),
+              span(classIs("icon-bar"))
+            ),
+            a(classIs(navbar_brand), href := "#", padding := 0),
+            to(Pages.index)(
+              img(alt := "", src := Resource.img.mole.openmoleText.file, Seq(width := 240, paddingTop := 5, pointer))
+            )
+          ),
+          div(classIs(collapse ++ navbar_collapse), aria.expanded := false, paddingTop := 10, id := navId)(
+            ul(classIs(nav ++ navbar_nav ++ navbar_right))(
+              li(innerLink(DocumentationPages.model, "DOCUMENTATION"), liStyle),
+              li(outerLink("DEMO", shared.link.demo), liStyle),
+              li(innerLink(DocumentationPages.tutorial, "EXAMPLES"), liStyle),
+              li(innerLink(Pages.training, "TRAINING"), liStyle),
+              li(divLinkButton(div(maxWidth := 140)(span("DOWNLOAD"), span(version.value, fontSize := "10px", paddingLeft := 7)), Resource.script.openmole.file, classIs(btn ++ btn_primary))),
+              li(inputStyle)(img(id := shared.searchImg, src := Resource.img.menu.search.file, Seq(width := 35, paddingTop := 5, paddingLeft := 10, pointer)))(
+                div(id := shared.searchDiv)
+              )
             )
           )
         )
