@@ -116,7 +116,8 @@ object SideMenu {
     DocumentationPages.gui.name -> Seq(SideMenu.guiGuide.toBlock.left),
     DocumentationPages.console.name -> Seq(SideMenu.consoleMenu.toBlock.left),
     DocumentationPages.howToContribute.name -> Seq(SideMenu.howToContributeMenu.toBlock.left),
-    DocumentationPages.nativePackaging.name -> Seq(SideMenu.nativePackagingMenu.toBlock.left)
+    DocumentationPages.nativePackaging.name -> Seq(SideMenu.nativePackagingMenu.toBlock.left),
+    Pages.gettingStarted.name -> Seq(SideMenu.more.right)
   )
 
   lazy val guiGuide = fromStrings(
