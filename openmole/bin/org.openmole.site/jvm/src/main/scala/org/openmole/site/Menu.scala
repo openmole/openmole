@@ -34,7 +34,7 @@ object Menu {
       tags2.nav(navClass, paddingRight := 20)(
         div(classIs(container_fluid))(
           div(classIs(navbar_header))(
-            button(`type` := "button", `class` := "navbar-toggle", data("toggle") := "collapse", data("target") := s"#$navId")(
+            button(`type` := "button", `class` := "navbar-toggle", data("toggle") := "collapse", data("target") := s"#$navId", marginTop := 25)(
               span(classIs("icon-bar")),
               span(classIs("icon-bar")),
               span(classIs("icon-bar"))
