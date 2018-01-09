@@ -1,5 +1,6 @@
 @import org.openmole.site.tools._
 @import org.openmole.site._
+@import org.openmole.site.stylesheet._
 
 @h1{GUI guide}
 
@@ -18,7 +19,7 @@
 
     @break
 
-    @img(src := Resource.img.guiGuide.overview.file,  stylesheet.centerJustify(110))
+    @img(src := Resource.img.guiGuide.overview.file, center(100))
 
 @sect{@shared.guiGuide.startProject}
     Clicking on the main red button @i{New project} in the menu bar offers 3 choices:
@@ -47,7 +48,7 @@
 
     @break
 
-    @img(src := Resource.img.guiGuide.modelImport.file,  stylesheet.centerJustify(80))
+    @img(src := Resource.img.guiGuide.modelImport.file, center(100))
 
     @break
 
@@ -90,7 +91,7 @@
 
     @break
 
-    @img(src := Resource.img.guiGuide.files.file,  stylesheet.centerJustify(90))
+    @img(src := Resource.img.guiGuide.files.file, center(90))
 
     @break
 
@@ -131,7 +132,7 @@
 
          @break
 
-        @img(src := Resource.img.guiGuide.running.file,  stylesheet.centerJustify(110))
+        @img(src := Resource.img.guiGuide.running.file, center(100))
 
         @break
         The different statuses of the executions are:
@@ -164,7 +165,7 @@
                     @b{Grid certificate} (.p12) for @aa("Grid Computing", href := shared.link.egi)@br
                     It only requires your EGI certificate file and the associated password. Click on No certificate to select your certificate file. It will be renamed to egi.p12. Note that only one EGI certificate is required (you will not need any other one!)
 
-        @img(src := Resource.img.guiGuide.authentication.file,  stylesheet.centerJustify(110))
+        @img(src := Resource.img.guiGuide.authentication.file, center(100))
 
         @break
         An authentication can be removed by clicking on the @i{trash bin icon}.
@@ -187,6 +188,6 @@
 
         @break
 
-        @img(src := Resource.img.guiGuide.plugin.file,  stylesheet.centerJustify(100))
+        @img(src := Resource.img.guiGuide.plugin.file, center(100))
 
         @break
