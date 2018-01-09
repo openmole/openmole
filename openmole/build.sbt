@@ -13,8 +13,7 @@ def macroParadise =
 import com.typesafe.sbt.SbtScalariform.ScalariformKeys
 import scalariform.formatter.preferences._
 
-def formatSettings = 
-  scalariformSettings(true) ++
+def formatSettings =
     Seq(
       ScalariformKeys.preferences := 
         ScalariformKeys.preferences (p =>
@@ -23,7 +22,8 @@ def formatSettings =
            .setPreference(AlignSingleLineCaseStatements, true)
            .setPreference(DanglingCloseParenthesis, Preserve)
            .setPreference(CompactControlReadability, true)
-        ).value
+        ).value,
+      scalariformAutoformat := true
     )
 
 lazy val scalaVersionValue = "2.12.4"
