@@ -34,7 +34,7 @@ object UserGuide {
   val line = hr(classIs("line"), width := "90%", marginTop := 10)
 
   def header(sp: TypedTag[_ <: String]) =
-    div(minHeight := 300, paddingTop := 100)(
+    div(minHeight := 250, paddingTop := 100)(
       div(stepHeader)(sp),
       line
     )
@@ -91,10 +91,6 @@ object UserGuide {
       }
       else ContentPage(div(paddingTop := 100), div(current.content))
     }
-
-    //    new StepCarousel(
-    //      currentStep
-    //    ).render
 
     currentStep
   }

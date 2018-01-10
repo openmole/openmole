@@ -118,14 +118,35 @@ object Site extends App {
         /**
          * The body of this site's HTML page
          */
+
         def bodyFrag(page: org.openmole.site.Page) = {
 
           val sitePage = UserGuide.currentStep(page)
+
+          val navigationStyle = Seq(
+            backgroundColor := "#4096c5",
+            color := "white",
+            borderRadius := "50%",
+            textDecoration := "none",
+            display := "inline-block",
+            padding := "2px 12px",
+            fontSize := "20px",
+            fontWeight := "bold"
+          )
 
           body(position := "relative", minHeight := "100%")(
             Menu.build,
             div(id := "main-content")(
               sitePage.name,
+              div(margin := "0 auto", width := 250, paddingBottom := 40)(
+                sitePage match {
+                  case s: StepPage ⇒
+                    Seq(
+                      span(tools.to(s.previous)(navigationStyle)(raw("&#8249;")), s" ${s.previous.name}", paddingRight := 30),
+                      span(s"${s.next.name} ", tools.to(s.next)(navigationStyle)(raw("&#8250;")))
+                    )
+                  case _ ⇒ Seq[Modifier]()
+                }),
               sitePage.element
             ),
             sitePage match {
