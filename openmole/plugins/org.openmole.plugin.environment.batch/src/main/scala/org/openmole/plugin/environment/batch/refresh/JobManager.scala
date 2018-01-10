@@ -39,6 +39,7 @@ object JobManager extends JavaLogger { self ⇒
       case msg: Refresh      ⇒ 5
       case msg: GetResult    ⇒ 50
       case msg: KillBatchJob ⇒ 2
+      case msg: Error        ⇒ 100 // This is very quick to process
       case _                 ⇒ 1
     }
 
