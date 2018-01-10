@@ -29,9 +29,9 @@ import org.openmole.tool.stream.StringPrintStream
 import scala.concurrent.stm._
 
 @Lenses case class RunningEnvironment(
-  environment:      Environment,
-  networkActivity:  NetworkActivity   = NetworkActivity(),
-  executionActivty: ExecutionActivity = ExecutionActivity())
+                                       environment:      Environment,
+                                       networkActivity:  NetworkActivity   = NetworkActivity(),
+                                       executionActivity: ExecutionActivity = ExecutionActivity())
 
 class Execution {
 
@@ -159,7 +159,7 @@ class Execution {
           e.environment.submitted,
           e.environment.failed,
           e.networkActivity,
-          e.executionActivty
+          e.executionActivity
         )
       }
     }
