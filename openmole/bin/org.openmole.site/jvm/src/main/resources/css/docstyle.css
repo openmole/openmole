@@ -130,6 +130,7 @@ p{
 /*Responsive columns*/
 #main-content{
     padding-top: 150px;
+    min-height: 800px;
 }
 
 
