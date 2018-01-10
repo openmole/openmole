@@ -36,8 +36,11 @@ lazy val json4s = OsgiProject(dir, "org.json4s",
   libraryDependencies +=  "org.json4s" %% "json4s-jackson" % "3.5.0",
   version := "3.5.0") settings(settings: _*)
 
-
-lazy val shapeless = "com.chuusai" %% "shapeless" % "2.3.2"
+lazy val shapelessVersion = "2.3.2"
+lazy val shapeless =  OsgiProject(dir, "com.chuusai.shapeless", exports = Seq("shapeless.*")) settings (
+  libraryDependencies += "com.chuusai" %% "shapeless" % shapelessVersion,
+  version := shapelessVersion
+) settings(settings: _*)
 
 lazy val circeVersion = "0.9.0"
 lazy val circe = OsgiProject(dir, "io.circe",
@@ -51,8 +54,7 @@ lazy val circe = OsgiProject(dir, "io.circe",
     "io.circe" %% "circe-generic-extras",
     "io.circe" %% "circe-parser"
   ).map(_ % circeVersion),
-  libraryDependencies += shapeless,
-  version := circeVersion) settings(settings: _*)
+  version := circeVersion) settings(settings: _*) dependsOn(shapeless)
 
 lazy val logback = OsgiProject(dir, "ch.qos.logback", exports = Seq("ch.qos.logback.*", "org.slf4j.impl"), dynamicImports = Seq("*")) settings
   (libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.0.9", version := "1.0.9") settings(settings: _*)
@@ -317,9 +319,8 @@ lazy val monocle = OsgiProject(dir, "monocle",
     "com.github.julien-truffaut" %% "monocle-generic",
     "com.github.julien-truffaut" %% "monocle-macro"
   ).map(_ % monocleVersion),
-  libraryDependencies += shapeless,
   version := monocleVersion
-  ) settings(settings: _*)
+  ) settings(settings: _*) dependsOn(shapeless)
 
 val asmVersion = "5.1"
 

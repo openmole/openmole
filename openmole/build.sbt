@@ -664,7 +664,7 @@ def binDir = file("bin")
 
 
 def bundleFilter(m: ModuleID, artifact: Artifact) = {
-  def excludedLibraryDependencies = Set("slick", "squants")
+  def excludedLibraryDependencies = Set("slick", "squants", "shapeless")
 
   def exclude =
     (m.organization != "org.openmole.library" && excludedLibraryDependencies.exists(m.name.contains)) ||
