@@ -2,8 +2,6 @@
 @import org.openmole.site._
 
 
-@SideMenu.consoleMenu.toBlock.left(320)
-
 @h1("Console mode")
 @aa("OpenMOLE GUI", href := DocumentationPages.gui.file) implements all the OpenMOLE features. However you may be interested in using OpenMOLE in interactive console mode.
 To do so, use the @i("-c") argument in your console : @hl.highlight("""./openmole -c""", "plain")

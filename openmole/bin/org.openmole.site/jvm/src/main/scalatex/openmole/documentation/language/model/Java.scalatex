@@ -1,8 +1,7 @@
 @import org.openmole.site.tools._
 @import org.openmole.site._
 
-@p
-  OpenMOLE makes it simple to include your own Java code in a workflow. Since the Scala compiler can compile Java code, Java code can be directly fed to the ScalaTask as shown in @aa("the ScalaTask example", href := DocumentationPages.scala.file). Additionally, a compiled Java program can be encapsulated in a ScalaTask as a jar file through the @hl.openmoleNoTest("libraries") parameter as below.
+OpenMOLE makes it simple to include your own Java code in a workflow. Since the Scala compiler can compile Java code, Java code can be directly fed to the ScalaTask as shown in @aa("the ScalaTask example", href := DocumentationPages.scala.file). Additionally, a compiled Java program can be encapsulated in a ScalaTask as a jar file through the @hl.openmoleNoTest("libraries") parameter as below.
 
 @p
   /!\: This tutorial works for simple Java programs. For more ambitious developments, you should absolutely consider embedding your code in an @a("OpenMOLE plugin", href := DocumentationPages.plugin.file). It is pretty strait forward since they are simple OSGi bundles.

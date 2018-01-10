@@ -56,7 +56,7 @@ package object tools {
       fontSize := "1.75em",
       textAlign := "left",
       // padding := "2.5em 1em 0"
-      margin := "20px 0 0"
+      margin := "30px 0 0"
     )
 
     override val header = Seq(

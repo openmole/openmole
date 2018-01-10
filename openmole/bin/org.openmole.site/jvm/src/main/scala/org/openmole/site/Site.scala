@@ -17,25 +17,13 @@
 
 package org.openmole.site
 
-import java.io.{ File, FileInputStream }
+import java.io.File
 import java.nio.CharBuffer
-import java.nio.file.Paths
-import java.util.zip.GZIPInputStream
 
 import ammonite.ops.{ Path, write }
-//import org.openmole.core.workspace.Workspace
-import org.openmole.tool.file._
-import org.openmole.tool.tar._
-import org.openmole.tool.stream._
 
-import scalatags.Text.all
+import scalatags.Text.{ TypedTag, all }
 import scalatags.Text.all._
-//import scala.sys.process.BasicIO
-//import org.openmole.site.credits._
-//import spray.json.JsArray
-//import module._
-//import org.openmole.core.buildinfo
-
 import scala.annotation.tailrec
 import spray.json._
 
@@ -130,14 +118,43 @@ object Site extends App {
         /**
          * The body of this site's HTML page
          */
+
         def bodyFrag(page: org.openmole.site.Page) = {
+
+          val sitePage = UserGuide.currentStep(page)
+
+          val navigationStyle = Seq(
+            backgroundColor := "#4096c5",
+            color := "white",
+            borderRadius := "50%",
+            textDecoration := "none",
+            display := "inline-block",
+            padding := "2px 12px",
+            fontSize := "20px",
+            fontWeight := "bold"
+          )
 
           body(position := "relative", minHeight := "100%")(
             Menu.build,
-            div(stylesheet.mainDiv)(
-              if (DocumentationPages.topPages.contains(page)) UserGuide.addCarousel(page)
-              else page.content
+            div(id := "main-content")(
+              sitePage.name,
+              div(margin := "0 auto", width := 250, paddingBottom := 40)(
+                sitePage match {
+                  case s: StepPage ⇒
+                    Seq(
+                      span(tools.to(s.previous)(navigationStyle)(raw("&#8249;")), s" ${s.previous.name}", paddingRight := 30),
+                      span(s"${s.next.name} ", tools.to(s.next)(navigationStyle)(raw("&#8250;")))
+                    )
+                  case _ ⇒ Seq[Modifier]()
+                }),
+              sitePage.element
             ),
+            sitePage match {
+              case s: StepPage ⇒ Seq(s.leftMenu, s.rightMenu)
+              case _ ⇒
+                val menus: Seq[TypedTag[_ <: String]] = SideMenu.menus.get(page.name).getOrElse(Seq(div))
+                menus
+            },
             Footer.build,
             onload := onLoadString(page)
           )

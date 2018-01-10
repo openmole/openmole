@@ -2,8 +2,6 @@
 @import org.openmole.site.tools._
 @import org.openmole.site._
 
-@SideMenu.gaWithNetlogoMenu.toBlock.left(350)
-
 @def model = """
     // Define the input variables
     val gPopulation = Val[Double]
