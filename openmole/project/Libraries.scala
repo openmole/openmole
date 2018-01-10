@@ -19,8 +19,8 @@ object Libraries {
   lazy val sourcecodeVersion = "0.1.3"
   lazy val scaladgetVersion = "0.9.5"
   lazy val json4sVersion = "3.5.0"
-  lazy val circeVersion = "0.9.0-M1"
-  lazy val catsVersion = "1.0.0-MF"
+  lazy val circeVersion = "0.9.0"
+  lazy val catsVersion = "1.0.1"
   lazy val scalajsVersion = "0.6.21"
   lazy val squantsVersion = "1.3.0"
 
@@ -77,7 +77,7 @@ object Libraries {
   lazy val circe = "org.openmole.library" %% "io-circe" % circeVersion
   lazy val scalajsTools = "org.openmole.library" %% "scalajs-tools" % scalajsVersion
   lazy val scalajs = "org.openmole.library" %% "scalajs" % scalajsVersion
-  lazy val mgo = "org.openmole.library" %% "mgo" % "3.6"
+  lazy val mgo = "org.openmole.library" %% "mgo" % "3.7"
   lazy val family = "org.openmole.library" %% "fr-iscpif-family" % "1.3"
   lazy val monocle = "org.openmole.library" %% "monocle" % "1.4.0"
   lazy val boopickle = "org.openmole.library" %% "boopickle" % boopickleVersion
