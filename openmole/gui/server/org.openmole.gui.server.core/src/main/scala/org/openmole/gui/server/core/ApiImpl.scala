@@ -318,8 +318,6 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
         case ErrorInCompiler(e)        ⇒ error(e)
         case compiled: Compiled ⇒
 
-          Runnings.setOutput(execId, outputStream)
-
           def catchAll[T](f: ⇒ T): Try[T] = {
             val res =
               try Success(f)
@@ -337,8 +335,8 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
               Try(puzzle.toExecution(executionContext = MoleExecutionContext(out = outputStream))) match {
                 case Success(ex) ⇒
                   val envIds = (ex.allEnvironments).map { env ⇒ EnvironmentId(getUUID, execId) → env }
-                  Runnings.add(execId, envIds)
-                  envIds.foreach { case (envId, env) ⇒ env.listen(Runnings.environmentListener(envId)) }
+                  execution.addRunning(execId, envIds)
+                  envIds.foreach { case (envId, env) ⇒ env.listen(execution.environmentListener(envId)) }
 
                   Try(ex.start) match {
                     case Failure(e) ⇒ error(e)
@@ -360,10 +358,10 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
 
   def staticInfos() = execution.staticInfos()
 
-  def clearEnvironmentErrors(environmentId: EnvironmentId): Unit = Runnings.deleteErrors(environmentId)
+  def clearEnvironmentErrors(environmentId: EnvironmentId): Unit = execution.deleteEnvironmentErrors(environmentId)
 
   def runningErrorEnvironmentData(environmentId: EnvironmentId, lines: Int): EnvironmentErrorData = atomic { implicit ctx ⇒
-    val errorMap = Runnings.runningEnvironments(environmentId).toMap
+    val errorMap = execution.getRunningEnvironments(environmentId).toMap
     val info = errorMap(environmentId)
 
     val environmentErrors =
