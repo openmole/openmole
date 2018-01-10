@@ -29,9 +29,9 @@ import org.openmole.tool.stream.StringPrintStream
 import scala.concurrent.stm._
 
 @Lenses case class RunningEnvironment(
-                                       environment:      Environment,
-                                       networkActivity:  NetworkActivity   = NetworkActivity(),
-                                       executionActivity: ExecutionActivity = ExecutionActivity())
+  environment:       Environment,
+  networkActivity:   NetworkActivity   = NetworkActivity(),
+  executionActivity: ExecutionActivity = ExecutionActivity())
 
 class Execution {
 
@@ -80,7 +80,7 @@ class Execution {
 
     case (env, j: Environment.JobCompleted) ⇒
       updateRunningEnvironment(envId) {
-        RunningEnvironment.executionActivty composeLens ExecutionActivity.executionTime modify (_ + (j.log.executionEndTime - j.log.executionBeginTime))
+        RunningEnvironment.executionActivity composeLens ExecutionActivity.executionTime modify (_ + (j.log.executionEndTime - j.log.executionBeginTime))
       }
   }
 
