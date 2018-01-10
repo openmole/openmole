@@ -17,7 +17,6 @@
 
 package org.openmole.plugin.environment.egi
 
-import java.net.URI
 import java.util.UUID
 
 import org.openmole.core.preference.Preference
@@ -41,7 +40,7 @@ case class JobScript(voName: String, memory: Int, threads: Int, debug: Boolean, 
     val storageLocation = storageLocations(serializedJob.storage.id)
     def resolve(dest: String) = gridscale.RemotePath.child(storageLocation, dest)
 
-    val debugInfo = s"echo ${storageLocation} ; hostname ; date -R ; cat /proc/meminfo ; ulimit -a ; " + "env ; echo $X509_USER_PROXY ; "
+    val debugInfo = s"echo $storageLocation ; hostname ; date -R ; cat /proc/meminfo ; ulimit -a ; " + "env ; echo $X509_USER_PROXY ; "
 
     val init = {
       val script = ListBuffer[String]()
