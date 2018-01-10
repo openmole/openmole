@@ -95,6 +95,7 @@ object MoleTask {
     }
 
     execution.start(context)
+
     try execution.waitUntilEnded
     catch {
       case e: ThreadDeath ⇒

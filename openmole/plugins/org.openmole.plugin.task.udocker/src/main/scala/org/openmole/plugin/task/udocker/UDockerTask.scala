@@ -18,14 +18,12 @@
 
 package org.openmole.plugin.task.udocker
 
-import java.util.UUID
-
 import monocle.macros._
 import cats.implicits._
+import org.openmole.core.context.{ Variable, Context }
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.validation._
 import org.openmole.core.workspace._
-import org.openmole.core.context._
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.workflow.builder._
 import org.openmole.core.expansion._
@@ -35,19 +33,12 @@ import org.openmole.core.preference._
 import org.openmole.plugin.task.container
 import org.openmole.plugin.task.udocker.DockerMetadata._
 import org.openmole.tool.cache._
-import org.openmole.core.workflow.dsl._
-import squants._
-import squants.time.TimeConversions._
-import io.circe.generic.extras.auto._
-import io.circe.jawn.{ decode, decodeFile }
-import io.circe.syntax._
+import org.openmole.core.dsl._
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.threadprovider._
 import org.openmole.plugin.task.container.HostFiles
 import org.openmole.tool.lock.LockKey
 
-import scala.concurrent.duration.Duration
-import scala.concurrent.{ Await, Future }
 import scala.language.postfixOps
 
 object UDockerTask {
@@ -75,7 +66,8 @@ object UDockerTask {
     image:           ContainerImage,
     command:         FromContext[String],
     installCommands: Seq[String]              = Vector.empty,
-    mode:            OptionalArgument[String] = None
+    mode:            OptionalArgument[String] = None,
+    cachedKey:       OptionalArgument[String] = None
   )(implicit name: sourcecode.Name, newFile: NewFile, workspace: Workspace, preference: Preference, threadProvider: ThreadProvider, fileService: FileService): UDockerTask = {
     val uDocker =
       UDockerArguments(
@@ -87,9 +79,12 @@ object UDockerTask {
         mode = mode orElse Some("P2")
       )
 
-    val installedUDocker =
-      if (installCommands.isEmpty) uDocker
-      else newFile.withTmpFile { tmpDirectory ⇒
+    fromUDocker(installLibraries(uDocker, installCommands, cachedKey))
+  }
+
+  def installLibraries(uDocker: UDockerArguments, installCommands: Seq[String], cachedKey: Option[String])(implicit newFile: NewFile, workspace: Workspace, fileService: FileService) = {
+    def installLibrariesInContainer(destination: File) =
+      newFile.withTmpFile { tmpDirectory ⇒
         val layersDirectory = UDockerTask.layersDirectory(workspace)
         val repositoryDirectory = UDockerTask.repositoryDirectory(workspace)
         UDocker.buildRepoV2(repositoryDirectory, layersDirectory, uDocker.localDockerImage)
@@ -119,13 +114,30 @@ object UDockerTask {
           installCommands
         )
 
-        val createdContainer = newFile.newDir("container")
-        (containersDirectory / container) move createdContainer
-        fileService.deleteWhenGarbageCollected(createdContainer)
-        (UDockerArguments.localDockerImage composeLens LocalDockerImage.container) set Some(createdContainer) apply uDocker
+        (containersDirectory / container) move destination
       }
 
-    fromUDocker(installedUDocker)
+    def installedUDockerContainer() =
+      if (installCommands.isEmpty) uDocker
+      else {
+        cachedKey match {
+          case Some(cacheKey) ⇒
+            val cacheDirectory = installCacheDirectory(workspace)
+            cacheDirectory.withLockInDirectory {
+              val cachedContainer = cacheDirectory / cacheKey
+              if (!cachedContainer.exists()) installLibrariesInContainer(cachedContainer)
+              (UDockerArguments.localDockerImage composeLens LocalDockerImage.container) set Some(cachedContainer) apply uDocker
+            }
+
+          case None ⇒
+            val createdContainer = newFile.newDir("container")
+            installLibrariesInContainer(createdContainer)
+            fileService.deleteWhenGarbageCollected(createdContainer)
+            (UDockerArguments.localDockerImage composeLens LocalDockerImage.container) set Some(createdContainer) apply uDocker
+        }
+      }
+
+    installedUDockerContainer()
   }
 
   def toLocalImage(containerImage: ContainerImage)(implicit preference: Preference, newFile: NewFile, workspace: Workspace, threadProvider: ThreadProvider): Either[Err, LocalDockerImage] =
@@ -145,8 +157,8 @@ object UDockerTask {
       external = External()
     )
 
+  def installCacheDirectory(workspace: Workspace) = workspace.persistentDir /> "udocker" /> "cached"
   def layersDirectory(workspace: Workspace) = workspace.persistentDir /> "udocker" /> "layers"
-
   def repositoryDirectory(workspace: Workspace) = workspace.persistentDir /> "udocker" /> "repos"
 
   lazy val containerPoolKey = CacheKey[WithInstance[ContainerID]]()
