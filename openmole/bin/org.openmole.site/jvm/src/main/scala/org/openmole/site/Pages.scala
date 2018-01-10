@@ -196,7 +196,7 @@ object DocumentationPages {
 
   def modelPages = Seq(scala, java, rscript, python, ccplusplus, netLogo, mole, native)
 
-  lazy val scala = DocumentationPage(name = "Scala", content = scalatex.documentation.language.model.Scala())
+  lazy val scala = DocumentationPage(name = "Scala", content = scalatex.documentation.language.model.Scala(), details = Seq(scalaFunction))
   lazy val java = DocumentationPage(name = "Java", content = scalatex.documentation.language.model.Java())
 
   lazy val native = DocumentationPage(
@@ -232,7 +232,7 @@ object DocumentationPages {
   lazy val source = DocumentationPage(name = "Sources", content = scalatex.documentation.language.advanced.Source())
   lazy val capsule = DocumentationPage(name = "Capsule", content = scalatex.documentation.language.advanced.Capsule())
   lazy val dataflow = DocumentationPage(name = "Dataflow", content = scalatex.documentation.language.advanced.Dataflow())
-  lazy val scalaFunction = DocumentationPage(name = "Scala Function", content = scalatex.documentation.language.advanced.ScalaFunction())
+  lazy val scalaFunction = DocumentationPage(name = "Utility Scala functions", content = scalatex.documentation.language.advanced.ScalaFunction())
 
   lazy val environment = DocumentationPage(name = "Environments", content = scalatex.documentation.language.Environment())
 

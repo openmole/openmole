@@ -22,27 +22,17 @@ import tools._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-case class Step(name: TypedTag[_ <: String], element: TypedTag[_ <: String], leftMenu: TypedTag[_ <: String], rightMenu: TypedTag[_ <: String], page: DocumentationPage, previous: DocumentationPage, next: DocumentationPage)
-
-class StepCarousel(step: Step) {
-
-  val line = hr(classIs("line"), width := "90%", marginTop := 10)
-  val stepButtonStyle = Seq(
-    classIs(btn ++ btn_default),
-    fontSize := "18px"
-  )
-
-  val render = {
-    div(width := "100%")(
-      leftGlyphButton(step.previous.name, step.previous, glyph_chevron_left, buttonStyle = stepButtonStyle)(leftDetailButtons(200)),
-      rightGlyphButton(step.next.name, step.next, glyph_chevron_right, buttonStyle = stepButtonStyle)(rightDetailButtons(200)),
-      div(maxHeight := 100)(
-        div(stepHeader)(step.name),
-        line
-      ),
-      div(paddingTop := 60)(step.element),
-      step.leftMenu,
-      step.rightMenu
-    )
-  }
+trait SitePage {
+  def element: TypedTag[_ <: String]
+  def name: TypedTag[_ <: String]
 }
+case class StepPage(
+  name:      TypedTag[_ <: String],
+  element:   TypedTag[_ <: String],
+  leftMenu:  TypedTag[_ <: String],
+  rightMenu: TypedTag[_ <: String],
+  page:      DocumentationPage,
+  previous:  DocumentationPage,
+  next:      DocumentationPage) extends SitePage
+
+case class ContentPage(name: TypedTag[_ <: String], element: TypedTag[_ <: String]) extends SitePage

@@ -17,6 +17,7 @@ package org.openmole.site
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import org.openmole.site
 import tools._
 import stylesheet._
 
@@ -73,9 +74,9 @@ case class SideMenuBlock(menus: Seq[SideMenu]) {
       )
     )
 
-  def right(top: Int) = build(div(rightDetailButtons(top)))
+  val right = build(div(rightDetailButtons(220), id := "sidebar-right"))
 
-  def left(top: Int) = build(div(leftDetailButtons(top)))
+  val left = build(div(leftDetailButtons(220), id := "sidebar-left"))
 
 }
 
@@ -105,6 +106,19 @@ object SideMenu {
       DocumentationPages.advancedConcepts
     ), classIs(btn ++ btn_default), "See also", true
   ).toBlock
+
+  lazy val menus = Map(
+    DocumentationPages.advancedSampling.name -> Seq(advancedSamplingMenu.toBlock.left, SideMenu.more.right),
+    DocumentationPages.netLogoGA.name -> Seq(SideMenu.gaWithNetlogoMenu.toBlock.left),
+    DocumentationPages.capsule.name -> Seq(SideMenu.capsuleMenu.toBlock.left),
+    DocumentationPages.source.name -> Seq(SideMenu.sourceMenu.toBlock.left),
+    DocumentationPages.hook.name -> Seq(SideMenu.hookMenu.toBlock.left),
+    DocumentationPages.gui.name -> Seq(SideMenu.guiGuide.toBlock.left),
+    DocumentationPages.console.name -> Seq(SideMenu.consoleMenu.toBlock.left),
+    DocumentationPages.howToContribute.name -> Seq(SideMenu.howToContributeMenu.toBlock.left),
+    DocumentationPages.nativePackaging.name -> Seq(SideMenu.nativePackagingMenu.toBlock.left),
+    Pages.gettingStarted.name -> Seq(SideMenu.more.right)
+  )
 
   lazy val guiGuide = fromStrings(
     "Contents",

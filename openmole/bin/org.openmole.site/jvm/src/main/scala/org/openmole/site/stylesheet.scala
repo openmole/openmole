@@ -40,27 +40,20 @@ package object stylesheet {
     display := "block"
   )
 
-  lazy val mainDiv = Seq(
+  /* lazy val mainDiv = Seq(
     paddingTop := 100,
     paddingBottom := 50,
     minHeight := 800
-  ) ++ center(50)
+  ) ++ center(50)*/
 
   def rightDetailButtons(topValue: Int) = Seq(
-    float := "right",
-    fixedPosition,
     top := topValue,
-    right := "5%",
-    textAlign := "left",
     minWidth := 230
   )
 
   def leftDetailButtons(topValue: Int) = Seq(
-    float := "left",
-    fixedPosition,
     top := topValue,
-    left := "5%",
-    textAlign := "right",
+    paddingRight := 50,
     minWidth := 230
   )
 
@@ -113,12 +106,14 @@ package object stylesheet {
   ) ++ center(70)
 
   lazy val footer = Seq(
+    paddingTop := 30,
+    paddingBottom := 20,
     position := "relative",
-    right := 0,
-    bottom := 0,
-    left := 0,
-    padding := "1rem",
-    top := 120
+    marginTop := -210,
+    minHeight := 210,
+    clear := "both",
+    backgroundColor := "#222",
+    color := "white"
   )
 
   val leftMole = Seq(

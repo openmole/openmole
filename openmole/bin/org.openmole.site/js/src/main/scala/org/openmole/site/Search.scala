@@ -17,13 +17,17 @@ package org.openmole.site
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import org.scalajs.dom.KeyboardEvent
+
 import scaladget.stylesheet.{ all ⇒ sheet }
 import scaladget.api.{ BootstrapTags ⇒ bs }
 import scaladget.tools.JsRxTags._
 import scalatags.JsDom.all._
 import org.scalajs.dom.raw.MouseEvent
+
 import sheet._
 import rx._
+
 import scaladget.api.Selector.Dropdown
 import scaladget.mapping.lunr.IIndexSearchResult
 
@@ -42,6 +46,9 @@ object Search {
     val searchInput = bs.input("")(placeholder := "Search", centerSearch).render
     val result: Var[Seq[IIndexSearchResult]] = Var(Seq())
 
+    case class Item(index: Int = 0, ref: String = "", maxSize: Int = 0)
+    val item = Var(Item())
+
     val resultStyle: ModifierSeq = Seq(
       color := "black",
       left := -160,
@@ -50,26 +57,60 @@ object Search {
 
     def search = () ⇒ {
       result() = SiteJS.search(searchInput.value)
+      item() = Item()
       false
     }
 
-    val resultDiv = div(
-      form(
-        div(
-          searchInput,
-          Rx {
-            div(scalatags.JsDom.all.paddingTop := 20)(
-              for {
-                r ← result().take(10)
-              } yield {
-                div(a(pointer, href := r.ref)(SiteJS.entries.get(r.ref)))
-              }
-            )
+    val resultDiv = {
+      lazy val results = div(
+        onkeypress := { (k: KeyboardEvent) ⇒
+          val curItem = item.now
+          if (k.keyCode == 40 && curItem.index < curItem.maxSize - 1) {
+            item() = curItem.copy(index = curItem.index + 1)
+            false
           }
-        ),
-        onkeyup := search
+          else if (k.keyCode == 38 && curItem.index > 0) {
+            item() = curItem.copy(index = curItem.index - 1)
+            false
+          }
+        },
+        searchInput,
+        Rx {
+          val rr = result().take(10).zipWithIndex
+          div(scalatags.JsDom.all.paddingTop := 20)(
+            for {
+              r ← rr
+            } yield {
+              div(
+                a(pointer, href := r._1.ref)(SiteJS.entries.get(r._1.ref)), {
+                  if (r._2 == item().index) {
+                    item() = item.now.copy(ref = r._1.ref, maxSize = rr.size)
+                    backgroundColor := "#ddd"
+                  }
+                  else color := "black"
+                }
+              )
+            }
+          )
+        }
       )
-    )
+
+      div(
+        form(
+          results,
+          onkeyup := {
+            (k: KeyboardEvent) ⇒
+              if (k.keyCode != 38 && k.keyCode != 40)
+                search()
+          },
+          onsubmit := { () ⇒
+            if (item.now.ref != "")
+              org.scalajs.dom.window.location.href = item.now.ref
+            false
+          }
+        )
+      )
+    }
 
     val dd = new Dropdown(resultDiv, div, emptyMod, resultStyle, () ⇒ {})
 

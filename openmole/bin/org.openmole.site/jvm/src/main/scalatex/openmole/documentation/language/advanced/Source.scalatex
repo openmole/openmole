@@ -4,9 +4,6 @@
 @import org.openmole.site.tools._
 @import org.openmole.site.Environment._
 
-
-@SideMenu.sourceMenu.toBlock.left(350)
-
 @h1{Source}
 Sources have been designed as a possible way to inject data in the dataflow from diverse sources: CSV files,
 databases, sensors...

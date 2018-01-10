@@ -8,8 +8,6 @@
  @img(src := Resource.img.mole.openmoleTransp.file, center(30))
 
 
-@SideMenu.more.right(320)
-
 @def tasks = """
   // Define the variables that are transmitted between the tasks
   val i = Val[Double]
@@ -57,7 +55,7 @@ $tasks
 
   @p You should see something like this :
   @br
-  @img(src := Resource.img.mole.uiScreenshot.file, `class` := "uiScreenshot").
+  @img(src := Resource.img.mole.uiScreenshot.file, `class` := "uiScreenshot", center(100)).
 
 @sect{Launching parameters}
     OpenMOLE proposes several launching options. Execute @hl.highlight("openmole -h to", "plain") list all the available options.

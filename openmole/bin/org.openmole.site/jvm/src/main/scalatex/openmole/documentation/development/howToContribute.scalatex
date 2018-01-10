@@ -7,8 +7,6 @@
 @h1
     How To contribute to the OpenMOLE project
 
-@SideMenu.howToContributeMenu.toBlock.left(320)
-
 This page is dedicated to explain the organization of the project, the tools you need and the procedures to follow if
 you want to contribute painlessly to the OpenMOLE project (software and documentation).
 It also explains the various versions of OpenMOLE you may want to use/deploy, from local desktop to distant server.
