@@ -138,7 +138,7 @@ The syntax of the Sobol sequence sampling is the following :
 
     @h3{Usage in DirectSampling tasks}
 
-Once a sampling is defined, you can just add it to a @a("DirectSampling task", href:=DocumentationPages.directSampling.anchor(shared.directSamplingMenu.gridSampling)) , under the @hl.highlight("sampling", "plain") argument. For example, supposing you have already declared inputs, outputs, and a model taskcalled myModel, the sampling could be used like :
+Once a sampling is defined, you can just add it to a @a("DirectSampling task", href:=DocumentationPages.DirectSampling.anchor(shared.directSamplingMenu.gridSampling)) , under the @hl.highlight("sampling", "plain") argument. For example, supposing you have already declared inputs, outputs, and a model taskcalled myModel, the sampling could be used like :
 
 
     @hl.openmoleNoTest("""
@@ -155,7 +155,7 @@ Once a sampling is defined, you can just add it to a @a("DirectSampling task", h
 @sect{@shared.otherDoEMenu.severalInputs }
     @p
 
-      Sampling can be performed on several inputs domains as well as on @b{several input types}, using the @b{cartesian product} operator: @b{x}, introduced in the @a("grid sampling",href:=DocumentationPages.directSampling.anchor(shared.directSamplingMenu.gridSampling))  dedicated section.
+      Sampling can be performed on several inputs domains as well as on @b{several input types}, using the @b{cartesian product} operator: @b{x}, introduced in the @a("grid sampling",href:=DocumentationPages.DirectSampling.anchor(shared.directSamplingMenu.gridSampling))  dedicated section.
 
     Here is an example, still supposing you have already defined a task used for evaluation called myModel:
 
