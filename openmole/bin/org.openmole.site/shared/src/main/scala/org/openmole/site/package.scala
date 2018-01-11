@@ -215,7 +215,6 @@ package object shared {
     lazy val noveltySearch = "http://eplex.cs.ucf.edu/noveltysearch/userspage/"
     lazy val javaString = "https://docs.oracle.com/javase/7/docs/api/java/lang/String.html"
     lazy val javaFile = "https://docs.oracle.com/javase/8/docs/api/java/io/File.html"
-    lazy val netlogoSegregation = "http://www.openmole.org/files/segregation.nlogo"
 
     object paper {
       lazy val jassCP = "http://jasss.soc.surrey.ac.uk/18/1/12.html"
@@ -340,7 +339,6 @@ package object shared {
     openMOLEWiki,
     noveltySearch,
     javaString,
-    javaFile,
-    netlogoSegregation
+    javaFile
   )
 }
