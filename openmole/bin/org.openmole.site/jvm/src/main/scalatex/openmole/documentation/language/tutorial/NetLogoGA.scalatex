@@ -96,9 +96,9 @@
 
     @p The combination of the three objectives indicates the quality of the parameters used to run the simulation.
     This situation is a
-    @a("multi-objective optimisation", href := "http://en.wikipedia.org/wiki/Multiobjective_optimization") problem. In
+    @a("multi-objective optimisation", href := shared.link.multiobjectiveOptimization) problem. In
     case there is a compromise between these 3 objectives, we will obtain a
-    @a("Pareto frontier", href := "http://en.wikipedia.org/wiki/Pareto_efficiency") at the end of the optimisation
+    @a("Pareto frontier", href := shared.link.paretoEfficency) at the end of the optimisation
     process.
 
 

@@ -28,7 +28,7 @@ Model inputs come in many shapes; this is why OpenMOLE features some file explor
     """)
     @br
     The @hl.openmoleNoTest{filter} modifier filters the initial file sampling according to a predicate.
-    You can filter using any function taking a @hl.openmoleNoTest{File} and producing a @hl.openmoleNoTest{Boolean} (see the corresponding @a("javadoc", href := "https://docs.oracle.com/javase/8/docs/api/java/io/File.html") or create your own). Some predicate functions available out of the box are @hl.highlight("startsWith(), contains(), endsWith() ", "plain").
+    You can filter using any function taking a @hl.openmoleNoTest{File} and producing a @hl.openmoleNoTest{Boolean} (see the corresponding @a("javadoc", href := shared.link.javaFile) or create your own). Some predicate functions available out of the box are @hl.highlight("startsWith(), contains(), endsWith() ", "plain").
     @br
     @hl.openmole("""
     val f = Val[File]

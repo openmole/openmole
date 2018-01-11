@@ -50,7 +50,7 @@ common NetLogo example. It studies the percolation of a fire in a forest dependi
     any formal conclusion).
 
     @p You can get the NetLogo implementation of the model
-    @a("here", href := "http://www.openmole.org/files/segregation.nlogo").
+    @a("here", href := shared.link.netlogoSegregation).
 
 @sect{@shared.netlogoMenu.doe}
     We first need to define 2 OpenMOLE variables in order to repeat our experience 10 times for every step of the

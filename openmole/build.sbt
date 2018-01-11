@@ -803,7 +803,8 @@ lazy val site = crossProject.in(binDir / "org.openmole.site") settings (defaultS
   libraryDependencies += Libraries.json4s,
   libraryDependencies += Libraries.spray,
   libraryDependencies += Libraries.txtmark,
-  libraryDependencies += Libraries.scalaTags
+  libraryDependencies += Libraries.scalaTags,
+  libraryDependencies += Libraries.scalajHttp,
 ) jsSettings(
   Libraries.rxJS,
   Libraries.scaladgetJS,

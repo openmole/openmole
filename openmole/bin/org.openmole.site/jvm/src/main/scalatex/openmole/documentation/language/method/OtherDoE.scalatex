@@ -178,7 +178,7 @@ If you want to use design of experiments of your own you may also want to provid
      optionally filtered with any @hl.code("String => Boolean")  functions  such as  @hl.highlight("contains(), startswith(), endswith()", "plain")
 
 
-     (see  the @a("Java Class String Documentation", href:="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html")
+     (see  the @a("Java Class String Documentation", href:= shared.link.javaString)
      for more details)
 
 

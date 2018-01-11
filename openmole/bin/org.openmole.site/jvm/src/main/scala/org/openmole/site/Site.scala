@@ -27,6 +27,8 @@ import scalatags.Text.all._
 import scala.annotation.tailrec
 import spray.json._
 
+import scalaj.http._
+
 object Site extends App {
 
   lazy val piwik =
@@ -54,35 +56,32 @@ object Site extends App {
 
   override def main(args: Array[String]): Unit = {
     case class Parameters(
-      target:  Option[File] = None,
-      test:    Boolean      = false,
-      ignored: List[String] = Nil
+      target:   Option[File] = None,
+      test:     Boolean      = false,
+      testUrls: Boolean      = false,
+      ignored:  List[String] = Nil
     )
 
     @tailrec def parse(args: List[String], c: Parameters = Parameters()): Parameters = args match {
-      case "--target" :: tail ⇒ parse(tail.tail, c.copy(target = tail.headOption.map(new File(_))))
-      case "--test" :: tail   ⇒ parse(tail, c.copy(test = true))
-      //  case "--test" :: tail        ⇒ parse(tail, c.copy(test = true))
-      //case "--market-test" :: tail ⇒ parse(tail, c.copy(marketTest = true))
-      //case "--resources" :: tail ⇒ parse(tail.tail, c.copy(resources = tail.headOption.map(new File(_))))
-      case s :: tail          ⇒ parse(tail, c.copy(ignored = s :: c.ignored))
-      case Nil                ⇒ c
+      case "--target" :: tail    ⇒ parse(tail.tail, c.copy(target = tail.headOption.map(new File(_))))
+      case "--test" :: tail      ⇒ parse(tail, c.copy(test = true))
+      case "--test-urls" :: tail ⇒ parse(tail, c.copy(testUrls = true))
+      case s :: tail             ⇒ parse(tail, c.copy(ignored = s :: c.ignored))
+      case Nil                   ⇒ c
     }
 
     val parameters = parse(args.toList.map(_.trim))
-
-    // Config.testScript = parameters.test
 
     val dest = parameters.target match {
       case Some(t) ⇒ t
       case None    ⇒ throw new RuntimeException("Missing argument --target")
     }
 
-    //    val marketEntries = generateMarket(parameters.resources.get, dest, dest / buildinfo.marketName, parameters.test && parameters.marketTest)
-    //    DocumentationPages.marketEntries = marketEntries
-
     if (parameters.test) {
       Test.generate(dest)
+    }
+    else if (parameters.testUrls) {
+      Test.urls
     }
     else {
       case class PageFrag(page: Page, frag: Frag)

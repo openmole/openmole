@@ -71,5 +71,5 @@ A key feature in OpenMOLE is the possibility to delegate the workload to a remot
    @aa("Slurm", href := DocumentationPages.cluster.anchor(shared.clusterMenu.slurm)),
    @aa("Condor", href := DocumentationPages.cluster.anchor(shared.clusterMenu.condor)),
    or @aa("OAR", href := DocumentationPages.cluster.anchor(shared.clusterMenu.oar)).
-   You can also use @aa("EGI", href := DocumentationPages.egi.file) to execute tasks on the @a("EGI grid", href := "http://www.egi.eu/").
+   You can also use @aa("EGI", href := DocumentationPages.egi.file) to execute tasks on the @aa("EGI grid", href := shared.link.egi).
 
