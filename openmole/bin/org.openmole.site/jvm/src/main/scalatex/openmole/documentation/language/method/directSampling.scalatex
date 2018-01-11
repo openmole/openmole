@@ -18,14 +18,14 @@ new methods:  PSE, and Calibration and Profiles  which have been thought to impr
 
 @br
 @br
-Your model inputs can be sampled in the traditional way, by using @a("grid (or regular)  sampling", href:=shared.directSamplingMenu.gridSampling), by @a("sampling uniformly", href:=shared.directSamplingMenu.uniformSampling) inside their domain.
+Your model inputs can be sampled in the traditional way, by using @a("grid (or regular)  sampling", href:=Link.intern(shared.directSamplingMenu.gridSampling)),or by @a("sampling uniformly", href:=Link.intern(shared.directSamplingMenu.uniformSampling)) inside their domain.
 @br
-For higher dimension input space, specific statistics techniques ensuring low discrepency like @a("Latin Hypercube Sampling and SobolSequence", href:=shared.otherDoEMenu.LHSSobol) are available.
+For higher dimension input space, specific statistics techniques ensuring low discrepency like @a("Latin Hypercube Sampling and SobolSequence", href:=DocumentationPages.otherDoE.anchor(shared.otherDoEMenu.LHSSobol)) are available.
 @br
-If you want to use design of experiments of your own you may also want to provide @a("a csv file with your samples" , href:=shared.otherDoEMenu.csvSampling) to OpenMOLE.
+If you want to use design of experiments of your own you may also want to provide @a("a csv file with your samples" , href:=DocumentationPages.otherDoE.anchor(shared.otherDoEMenu.csvSampling)) to OpenMOLE.
 
 @br
-By defining your own exploration task on @a("several types of input", href:= shared.otherDoEMenu.severalInputs), you will be able to highlight some of your model inner properties like those revealed by @a("sensitivity analysis", href:=shared.otherDoEMenu.sensitivityAnalysis), as shown in a toy example on a @a("real world example", href:=shared.otherDoEMenu.sensitivityFireModel)
+By defining your own exploration task on @a("several types of input", href:= DocumentationPages.otherDoE.anchor(shared.otherDoEMenu.severalInputs)), you will be able to highlight some of your model inner properties like those revealed by @a("sensitivity analysis", href:=DocumentationPages.otherDoE.anchor(shared.otherDoEMenu.sensitivityAnalysis)), as shown in a toy example on a @a("real world example", href:=DocumentationPages.otherDoE.anchor(shared.otherDoEMenu.sensitivityFireModel))
 
 @sect{@shared.directSamplingMenu.gridSampling }
 
