@@ -84,7 +84,7 @@ It also explains the various versions of OpenMOLE you may want to use/deploy, fr
 @sect{@shared.howToContributeMenu.compileDocker}
       An easy way to get an OpenMOLE compilation environment up and running is to use docker. Once docker is installed on you machine you can do:
       @br @hl.highlight("""
-      git clone https://github.com/openmole/docker-build.git
+      git clone shared.link.openMOLEDockerBuild
       cd docker-build
       ./run -v /a/local/path/on/your/system
       # You should be in the docker container now, execute

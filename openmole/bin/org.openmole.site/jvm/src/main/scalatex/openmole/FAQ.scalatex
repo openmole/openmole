@@ -11,7 +11,7 @@ you're running by typing @hl.highlight("java -version", "plain") in a console.
 
 @div If you use the closed-source Oracle Java virtual machine (which is probably the case if you are working on Mac or
 Windows), you have to install the  Java Cryptography Extension (JCE) available at the bottom of this
-@a("page", href := "http://www.oracle.com/technetwork/java/javase/downloads/index.html") in order for OpenMOLE to be
+@aa("page", href := shared.link.jce) in order for OpenMOLE to be
 fully functional.
 
 @div JCE is an archive containing a bunch of files that you should replace in the @i{jre/lib/security}
@@ -24,7 +24,7 @@ containing @i{.../bin/java}).
 
 
 @question("Where can I find the old versions of OpenMOLE?")
-@div Old versions of OpenMOLE software and documentation are available @a("here", href := "http://www.openmole.org/all/"). Due to a data loss in 2016, the versions from OpenMOLE 6 are available only.
+@div Old versions of OpenMOLE software and documentation are available @aa("here", href := shared.link.allOpenMOLE). Due to a data loss in 2016, the versions from OpenMOLE 6 are available only.
 
 
 @question("OpenMOLE cannot connect to my environment using SSH")
@@ -141,9 +141,9 @@ downloaded CARE before the release of OpenMOLE 6.0, you might be faced with this
 
 @div @hl.highlight("care info: pid 24238: terminated with signal 11", "plain").
 
-@div The easiest option to solve this problem is to download a fixed version from @a("GitHub", href := "https://github.com/proot-me/proot-static-build/releases/download/v5.1.1/care_2.2.2_x86_64_rc1--no-seccomp").
+@div The easiest option to solve this problem is to download a fixed version from @aa("GitHub", href := shared.link.care).
 
-@div This binary only works for 64 bits machines, which might not be the case of your workstation. Older versions of CARE are still available for different computer architecture from @a("GitHub", href := "https://github.com/proot-me/proot-static-build/tree/master/static"). These versions require
+@div This binary only works for 64 bits machines, which might not be the case of your workstation. Older versions of CARE are still available for different computer architecture from @aa("GitHub", href := shared.link.prootStatic). These versions require
 the @hl.highlight("PROOT_NO_SECCOMP", "plain") environment variable to be set to 1 when running CARE. The packaging command line becomes:
 
 @div @hl.highlight("PROOT_NO_SECCOMP=1 care -o foo.tgz.bin -r ~ my_app -input 42", "plain")
@@ -156,7 +156,7 @@ the @hl.highlight("PROOT_NO_SECCOMP", "plain") environment variable to be set to
 
 @div There is nothing to change in your OpenMOLE scripts, the good folks at OpenMOLE have everything under control ;)
 
-@div For more information about this specific problem, you can join this @a("discussion", href := "https://github.com/proot-me/PRoot/issues/106").
+@div For more information about this specific problem, you can join this @aa("discussion", href := shared.link.prootIssue106).
 
 @question("I get an error relate to file on linux and there is 'too many open files' written somewhere in the error")
 @div On linux server the number of file a use can open is generally limited to 1024. OpenMOLE increase it to 4096 when on launch, but it doesn't seem to work on your system, you might want to understand why. To check the current of you system limit execute @i{ulimit -a} in a terminal:
@@ -199,7 +199,7 @@ proot terminated with signal 6
 care -o myapp.tgz.bin python3 myapp.py param1 param2
 """, "plain")
 
-@div The workaround uses @a("xvfb", href := "https://www.x.org/releases/X11R7.7/doc/man/man1/Xvfb.1.xhtml"), a virtual framebuffer X server. The only thing you have to do is to run you command through xvfb. In our example, that would be:
+@div The workaround uses @aa("xvfb", href := shared.link.xvfb), a virtual framebuffer X server. The only thing you have to do is to run you command through xvfb. In our example, that would be:
 
 @hl.highlight("""
 care -o myapp.tgz.bin xvfb-run python3 myapp.py param1 param2
@@ -218,7 +218,7 @@ care -o myapp.tgz.bin xvfb-run python3 myapp.py param1 param2
 
 @div When you find yourself in such a use case, you might want to try the @hl.openmoleNoTest{Path} optimisation for your scripts. By replacing the @hl.openmoleNoTest{Val[File]} variables by @hl.openmoleNoTest{Val[Path]} in your scripts, OpenMOLE will store the file's @b{location} and not its @b{content} as it would when using @hl.openmoleNoTest{Val[File]}.
 
-@div This optimisation is only available for @a("cluster", href := DocumentationPages.cluster.file) and @b{not} for the @a("EGI grid", href := DocumentationPages.egi.file).
+@div This optimisation is only available for @aa("cluster", href := DocumentationPages.cluster.file) and @b{not} for the @aa("EGI grid", href := DocumentationPages.egi.file).
 
 @div You can find an example of using @hl.openmoleNoTest{Path} variables in the dataflow in the @a("data processing section", href := DocumentationPages.dataProcessing.file), and learn more about the OpenMOLE dataflow in the @a("dedicated section", href := DocumentationPages.dataflow.file).
 
@@ -228,5 +228,5 @@ care -o myapp.tgz.bin xvfb-run python3 myapp.py param1 param2
 @div If you could not resolve your problems, feel free to post your problem on the @a("mailing-list",
 href := shared.link.mailingList).
 
-@div If you think your problem is induced by a bug in OpenMOLE, please report the issue exhaustively on our @a(
+@div If you think your problem is induced by a bug in OpenMOLE, please report the issue exhaustively on our @aa(
 "GitHub page", href := shared.link.issue).

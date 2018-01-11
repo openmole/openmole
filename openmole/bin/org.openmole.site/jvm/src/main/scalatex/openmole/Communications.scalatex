@@ -46,7 +46,7 @@
            Models: The Calibration Profile (CP) Algorithm » published in @i{Journal of Artificial Societies and Social Simulation}
             (JASSS) , Vol 18, Issue 1, 2015.
             @br
-                @a("[online version]" , href:="http://jasss.soc.surrey.ac.uk/18/1/12.html")  @a("[bibteX]", href:= Resource.bibtex.profilemethodBib.file)
+                @a("[online version]" , href:= shared.link.paper.jassCP)  @a("[bibteX]", href:= Resource.bibtex.profilemethodBib.file)
 
         @li
             Guillaume Chérel, Clémentine Cottineau and Romain Reuillon, « Beyond Corroboration: Strengthening Model
