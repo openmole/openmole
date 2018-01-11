@@ -42,7 +42,7 @@ This task takes place after an exploration and compute the average of many value
 
 @h2{File creation}
 
-It might be useful to create files an folder in ScalaTask code. To do that use one of the folowing functions:
+It might be useful to create files and folders in ScalaTask code. To do that use one of the folowing functions:
 @ul
     @li
         @hl.code("def newFile(prefix: String, suffix: String): File"), this function creates a new file in the OpenMOLE workspace. You may optionally provide a prefix and suffix for the file name. It would generally be called @hl.code("newFile()").
