@@ -46,10 +46,10 @@ By defining your own exploration task on @a("several types of input", href:= Doc
     minimized).
     @br The sampling does not reveal anything about the output space structure, as there is no reason than evenly spaced inputs lead
     to evenly spaced outputs.
-    Basic sampling is hampered by input space dimensionality as high dimension spaces need a lot of samples to be covered, as well as a lot of memory to store them.
+    Grid sampling is hampered by input space dimensionality as high dimension spaces need a lot of samples to be covered, as well as a lot of memory to store them.
 
     @break
-    Basic Sampling is declared via a @b{DirectSampling Task}, where the bounds and discretisation quantum of each input to vary  are declared  for each input
+    Grid Sampling is declared via a @b{DirectSampling Task}, where the bounds and discretisation quantum of each input to vary  are declared  for each input
 
     @break
     @hl.openmole("""
