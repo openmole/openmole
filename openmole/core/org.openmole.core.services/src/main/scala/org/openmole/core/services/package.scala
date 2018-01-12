@@ -52,6 +52,35 @@ package object services {
       preference.clear()
     }
 
+    def copy(services: Services)(
+      workspace:           Workspace           = services.workspace,
+      preference:          Preference          = services.preference,
+      cypher:              Cypher              = services.cypher,
+      threadProvider:      ThreadProvider      = services.threadProvider,
+      seeder:              Seeder              = services.seeder,
+      replicaCatalog:      ReplicaCatalog      = services.replicaCatalog,
+      newFile:             NewFile             = services.newFile,
+      authenticationStore: AuthenticationStore = services.authenticationStore,
+      serializerService:   SerializerService   = services.serializerService,
+      fileService:         FileService         = services.fileService,
+      randomProvider:      RandomProvider      = services.randomProvider,
+      eventDispatcher:     EventDispatcher     = services.eventDispatcher
+    ) =
+      new ServicesContainer()(
+        workspace = workspace,
+        preference = preference,
+        cypher = cypher,
+        threadProvider = threadProvider,
+        seeder = seeder,
+        replicaCatalog = replicaCatalog,
+        newFile = newFile,
+        authenticationStore = authenticationStore,
+        serializerService = serializerService,
+        fileService = fileService,
+        randomProvider = randomProvider,
+        eventDispatcher = eventDispatcher
+      )
+
   }
 
   trait Services {

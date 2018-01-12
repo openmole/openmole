@@ -176,7 +176,7 @@ object DocumentationPages {
     dataProcessing,
     otherDoE,
     advancedConcepts,
-    directSampling,
+    DirectSampling,
     advancedSampling,
     transition,
     hook,
@@ -247,7 +247,7 @@ object DocumentationPages {
 
   def environmentPages = Seq(multithread, ssh, egi, cluster)
 
-  def methodPages = Seq(directSampling, calibration, profile, pse, dataProcessing, otherDoE)
+  def methodPages = Seq(DirectSampling, calibration, profile, pse, dataProcessing, otherDoE)
 
   lazy val tutorialPages = Seq(Pages.gettingStarted, netLogoGA, resume)
 
@@ -306,9 +306,9 @@ object DocumentationPages {
     extraMenu = Some(SideMenu.otherDoEMenu)
   )
 
-  lazy val directSampling = DocumentationPage(
+  lazy val DirectSampling = DocumentationPage(
     name = "Direct Sampling",
-    content = scalatex.documentation.language.method.directSampling(),
+    content = scalatex.documentation.language.method.DirectSampling(),
     extraMenu = Some(SideMenu.directSamplingMenu)
   )
 

@@ -15,12 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.logging.internal
+package org.openmole.core.logconfig
 
-import org.openmole.core.logging.LoggerService
 import org.openmole.core.tools.service.OSGiActivator
-import org.osgi.framework.BundleActivator
-import org.osgi.framework.BundleContext
+import org.osgi.framework.{ BundleActivator, BundleContext }
 
 object Activator extends OSGiActivator {
   var context: Option[BundleContext] = None
@@ -31,7 +29,7 @@ class Activator extends BundleActivator {
   override def start(context: BundleContext) = {
     Activator.context = Some(context)
     // SLF4JBridgeHandler.install
-    LoggerService.init
+    LoggerConfig.init
   }
 
   override def stop(context: BundleContext) = {

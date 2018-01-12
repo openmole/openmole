@@ -17,7 +17,7 @@
 
 package org.openmole.runtime
 
-import org.openmole.core.logging.LoggerService
+import org.openmole.core.logconfig.LoggerConfig
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.tool.file._
 import org.openmole.tool.logger.JavaLogger
@@ -86,7 +86,7 @@ object SimExplorer extends JavaLogger {
         config.test match {
           case false ⇒
 
-            if (config.debug) LoggerService.level("ALL")
+            if (config.debug) LoggerConfig.level("ALL")
 
             implicit val workspace = Workspace(new File(config.workspace.get).getCanonicalFile)
             implicit val newFile = NewFile(workspace)
