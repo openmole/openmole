@@ -44,7 +44,7 @@ $tasks
      Finally, you launch the model exploration on a @aa("distributed execution environment", href:=DocumentationPages.environment.file) with thousands of machines (1 minute once authentication is set up). To summarize, you can design large scale model exploration reusing legacy code and advanced numeric methods in approximately 10 minutes.
 
 @sect{Try it !}
-    You can try OpenMOLE online using the @aa("OpenMOLE demonstration site", href := "http://demo.openmole.org").
+    You can try OpenMOLE online using the @aa("OpenMOLE demonstration site", href := shared.link.demo).
 
 @sect{Install it !}
     OpenMOLE requires that Java version 8 or above is set as the default java on your computer. To make sure of that you can check our @a("FAQ", href := Pages.faq.file).

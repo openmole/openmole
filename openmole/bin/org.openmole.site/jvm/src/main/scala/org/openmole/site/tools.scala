@@ -43,8 +43,6 @@ package object tools {
     )
   }
 
-  def question(content: String) = div(`class` := "question", id := links.munge(content), links.anchor(content))
-
   def aa = a(targetBlank)
 
   def todo(content: String) = ""

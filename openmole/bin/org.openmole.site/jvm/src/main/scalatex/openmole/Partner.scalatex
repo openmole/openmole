@@ -29,4 +29,4 @@
     @br
 @span(width := "75%")
 @br
-    The ERC @aa("Geodivercity", href:=shared.link.geodivercity) was an advanced grant ERC project, led by Pr. Denise Pumain. A significant part of the  development of OpenMOLE  as a scalable platform for geographical simulation models experiments was founded by this project. The project led to the publication of a book published by Springer, available @aa("on the editor site", href:=shared.link.ercSpringer) and @aa("here as a pre-print open version", href := shared.link.urbanDynamics).
+    The ERC @aa("Geodivercity", href:=shared.link.geodivercity) was an advanced grant ERC project, led by Pr. Denise Pumain. A significant part of the  development of OpenMOLE  as a scalable platform for geographical simulation models experiments was founded by this project. The project led to the publication of a book published by Springer, available @aa("on the editor site", href:=shared.link.ercSpringer) and @aa("here as a pre-print open version", href := shared.link.paper.urbanDynamics).

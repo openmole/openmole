@@ -119,5 +119,5 @@ of inputs and outputs are illimited.
 Guillaume Chérel, Clémentine Cottineau and Romain Reuillon, « Beyond Corroboration: Strengthening Model
         Validation by Looking for Unexpected Patterns» published in @i{PLOS ONE} 10(9), 2015.
         @br
-            @a("[online version]" , href:=shared.link.beyondCorroboration)  @a("[bibteX]", href:= Resource.bibtex.PSEmethodBib.file)
+            @a("[online version]" , href:=shared.link.paper.beyondCorroboration)  @a("[bibteX]", href:= Resource.bibtex.PSEmethodBib.file)
 

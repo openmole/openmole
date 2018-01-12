@@ -117,7 +117,24 @@ object SideMenu {
     DocumentationPages.console.name -> Seq(SideMenu.consoleMenu.toBlock.left),
     DocumentationPages.howToContribute.name -> Seq(SideMenu.howToContributeMenu.toBlock.left),
     DocumentationPages.nativePackaging.name -> Seq(SideMenu.nativePackagingMenu.toBlock.left),
-    Pages.gettingStarted.name -> Seq(SideMenu.more.right)
+    Pages.gettingStarted.name -> Seq(SideMenu.more.right),
+    Pages.faq.name -> Seq(SideMenu.faqMenu.toBlock.left)
+  )
+
+  lazy val faqMenu = fromStrings(
+    "",
+    shared.faq.javaVersion,
+    shared.faq.oldVersions,
+    shared.faq.sshConnectionBug,
+    shared.faq.passwordAuthentication,
+    shared.faq.isOpenMOLEup,
+    shared.faq.homeQuota,
+    shared.faq.sampleError,
+    shared.faq.cannotGetCare,
+    shared.faq.tooManyOpenFiles,
+    shared.faq.qxcbConnection,
+    shared.faq.pathOverFile,
+    shared.faq.notListed
   )
 
   lazy val guiGuide = fromStrings(

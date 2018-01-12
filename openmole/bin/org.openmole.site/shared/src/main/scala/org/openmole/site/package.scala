@@ -42,6 +42,21 @@ package object shared {
     val animation = "startSensitivityAnim"
   }
 
+  object faq {
+    lazy val javaVersion = "Which Java version should I use?"
+    lazy val oldVersions = "Where can I find the old versions of OpenMOLE?"
+    lazy val sshConnectionBug = "OpenMOLE cannot connect to my environment using SSH"
+    lazy val passwordAuthentication = "Password authentication"
+    lazy val isOpenMOLEup = "Is OpenMOLE doing something?"
+    lazy val homeQuota = "I've reached my home folder size / file quota"
+    lazy val sampleError = "My sampling generates a type error"
+    lazy val cannotGetCare = "I can't get CARE / PRoot to work"
+    lazy val tooManyOpenFiles = "I get an error relate to file on linux and there is 'too many open files' written somewhere in the error"
+    lazy val qxcbConnection = "My workflow fails with QXcbConnection: Could not connect to display"
+    lazy val pathOverFile = "When shall I use Path over File?"
+    lazy val notListed = "My problem is not listed here"
+  }
+
   object guiGuide {
     lazy val overview = "Overview"
     lazy val startProject = "Starting a project"
@@ -201,8 +216,6 @@ package object shared {
     lazy val CAREsite = "https://proot-me.github.io/"
     lazy val CAREmailing = "https://groups.google.com/forum/?fromgroups#!forum/reproducible"
     lazy val ggplot2 = "http://ggplot2.tidyverse.org/reference/"
-    lazy val urbanDynamics = "https://hal.archives-ouvertes.fr/view/index/docid/1583528"
-    lazy val urbanDynamicsBib = "https://hal.archives-ouvertes.fr/hal-01583528v1/bibtex"
     lazy val sobol = "https://en.wikipedia.org/wiki/Sobol_sequence"
     lazy val lhs = "https://en.wikipedia.org/wiki/Latin_hypercube_sampling"
     lazy val jce = "http://www.oracle.com/technetwork/java/javase/downloads/index.html"
@@ -215,13 +228,22 @@ package object shared {
     lazy val paretoEfficency = "http://en.wikipedia.org/wiki/Pareto_efficiency"
     lazy val openMOLEWiki = "https://github.com/openmole/openmole/wiki"
     lazy val noveltySearch = "http://eplex.cs.ucf.edu/noveltysearch/userspage/"
-    lazy val beyondCorroboration = "http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0138212"
     lazy val javaString = "https://docs.oracle.com/javase/7/docs/api/java/lang/String.html"
     lazy val javaFile = "https://docs.oracle.com/javase/8/docs/api/java/io/File.html"
-    lazy val netlogoSegregation = "http://www.openmole.org/files/segregation.nlogo"
 
     object paper {
       lazy val jassCP = "http://jasss.soc.surrey.ac.uk/18/1/12.html"
+      lazy val fgcs2013 = "http://www.sciencedirect.com/science/article/pii/S0167739X13001027"
+      lazy val fgcs2013preprint = "https://hal-paris1.archives-ouvertes.fr/hal-00840744/"
+      lazy val hpcs2010 = "http://ieeexplore.ieee.org/document/5547155/"
+      lazy val beyondCorroboration = "http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0138212"
+      lazy val halfBillionOA = "https://hal.archives-ouvertes.fr/hal-01118918"
+      lazy val halfBillionEditor = "http://journals.sagepub.com/doi/abs/10.1068/b130064p"
+      lazy val jass2015 = "http://jasss.soc.surrey.ac.uk/18/4/9.html"
+      lazy val mdpi2015 = "http://www.mdpi.com/2079-8954/3/4/348"
+      lazy val frontier2017 = "http://journal.frontiersin.org/article/10.3389/fninf.2017.00021/full#"
+      lazy val urbanDynamics = "https://hal.archives-ouvertes.fr/view/index/docid/1583528"
+      lazy val urbanDynamicsBib = "https://hal.archives-ouvertes.fr/hal-01583528v1/bibtex"
     }
 
     object partner {
@@ -264,6 +286,17 @@ package object shared {
     partner.paris,
     partner.ign,
     paper.jassCP,
+    paper.fgcs2013,
+    paper.fgcs2013preprint,
+    paper.hpcs2010,
+    paper.beyondCorroboration,
+    paper.halfBillionOA,
+    paper.halfBillionEditor,
+    paper.jass2015,
+    paper.mdpi2015,
+    paper.frontier2017,
+    paper.urbanDynamics,
+    paper.urbanDynamicsBib,
     repo.openmole,
     repo.market,
     repo.gridscale,
@@ -308,8 +341,6 @@ package object shared {
     CAREsite,
     CAREmailing,
     ggplot2,
-    urbanDynamics,
-    urbanDynamicsBib,
     sobol,
     lhs,
     jce,
@@ -322,9 +353,7 @@ package object shared {
     paretoEfficency,
     openMOLEWiki,
     noveltySearch,
-    beyondCorroboration,
     javaString,
-    javaFile,
-    netlogoSegregation
+    javaFile
   )
 }
