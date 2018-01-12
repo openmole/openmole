@@ -19,6 +19,7 @@ import io.circe.generic.extras.auto._
 import io.circe.jawn.{ decode, decodeFile }
 import io.circe.syntax._
 import monocle.macros.Lenses
+import org.openmole.core.outputredirection.OutputRedirection
 import org.openmole.plugin.task.systemexec.{ commandLine, execute, executeAll }
 import org.openmole.tool.file._
 import org.openmole.tool.stream._
@@ -44,7 +45,7 @@ object UDocker {
     lazy val id = UUID.randomUUID().toString
   }
 
-  def downloadImage(dockerImage: DockerImage, layersDirectory: File, timeout: Time)(implicit newFile: NewFile, threadProvider: ThreadProvider) = {
+  def downloadImage(dockerImage: DockerImage, layersDirectory: File, timeout: Time)(implicit newFile: NewFile, threadProvider: ThreadProvider, outputRedirection: OutputRedirection) = {
     import Registry._
 
     def layerFile(layer: Layer) = layersDirectory / layer.digest
@@ -57,7 +58,10 @@ object UDocker {
         l ← layers(manif.value)
       } yield Future {
         val lf = layerFile(l)
-        if (!lf.exists) downloadLayer(dockerImage, l, layersDirectory, lf, timeout)
+        if (!lf.exists) {
+          outputRedirection.output.println(s"Downloading docker layer: ${l.digest}")
+          downloadLayer(dockerImage, l, layersDirectory, lf, timeout)
+        }
         l → lf
       }
 

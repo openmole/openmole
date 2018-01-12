@@ -47,7 +47,7 @@ object DisplayHook {
 
   override protected def process(executionContext: MoleExecutionContext) = FromContext { parameters ⇒
     import parameters._
-    executionContext.out.println(toDisplay.from(context))
+    executionContext.services.outputRedirection.output.println(toDisplay.from(context))
     context
   }
 

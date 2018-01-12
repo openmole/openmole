@@ -23,7 +23,7 @@ import org.openmole.core.fileservice.FileService
 import org.openmole.core.market.{ MarketIndex, MarketIndexEntry }
 
 import scala.util.{ Failure, Success, Try }
-import org.openmole.core.workflow.mole.MoleExecutionContext
+import org.openmole.core.workflow.mole.{ MoleExecutionContext, MoleServices }
 import org.openmole.tool.stream.StringPrintStream
 
 import scala.concurrent.stm._
@@ -32,6 +32,7 @@ import org.openmole.tool.tar._
 import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.module
 import org.openmole.core.market
+import org.openmole.core.outputredirection.OutputRedirection
 import org.openmole.core.preference.{ ConfigurationLocation, Preference }
 import org.openmole.core.project._
 import org.openmole.core.replication.ReplicaCatalog
@@ -312,7 +313,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
 
     try {
       val project = Project(script.getParentFileSafe)
-      project.compile(script, Seq.empty) match {
+      project.compile(script, Seq.empty)(Services.copy(services)(outputRedirection = OutputRedirection(outputStream))) match {
         case ScriptFileDoesNotExists() ⇒ message("Script file does not exist")
         case ErrorInCode(e)            ⇒ error(e)
         case ErrorInCompiler(e)        ⇒ error(e)
@@ -332,7 +333,8 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
             case Success(o) ⇒
               val puzzle = o.buildPuzzle
 
-              Try(puzzle.toExecution(executionContext = MoleExecutionContext(out = outputStream))) match {
+              val services = MoleServices.copy(MoleServices.create)(outputRedirection = OutputRedirection(outputStream))
+              Try(puzzle.toExecution(executionContext = MoleExecutionContext()(services))) match {
                 case Success(ex) ⇒
                   val envIds = (ex.allEnvironments).map { env ⇒ EnvironmentId(getUUID, execId) → env }
                   execution.addRunning(execId, envIds)

@@ -163,7 +163,8 @@ lazy val workflow = OsgiProject(coreDir, "org.openmole.core.workflow", imports =
   context,
   preference,
   expansion,
-  threadProvider) settings (coreSettings: _*)
+  threadProvider,
+  outputRedirection) settings (coreSettings: _*)
 
 lazy val serializer = OsgiProject(coreDir, "org.openmole.core.serializer", global = true, imports = Seq("*")) settings(
   libraryDependencies += Libraries.xstream,

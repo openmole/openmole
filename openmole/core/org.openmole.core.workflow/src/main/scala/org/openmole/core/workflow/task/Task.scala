@@ -22,6 +22,7 @@ import java.io.File
 import org.openmole.core.context._
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.fileservice.FileService
+import org.openmole.core.outputredirection._
 import org.openmole.core.preference.Preference
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.workflow.builder.InputOutputConfig
@@ -35,14 +36,15 @@ import org.openmole.tool.random._
 import org.openmole.tool.thread._
 
 case class TaskExecutionContext(
-  tmpDirectory:                File,
-  localEnvironment:            LocalEnvironment,
-  implicit val preference:     Preference,
-  implicit val threadProvider: ThreadProvider,
-  fileService:                 FileService,
-  implicit val workspace:      Workspace,
-  cache:                       KeyValueCache,
-  lockRepository:              LockRepository[LockKey]
+  tmpDirectory:                   File,
+  localEnvironment:               LocalEnvironment,
+  implicit val preference:        Preference,
+  implicit val threadProvider:    ThreadProvider,
+  fileService:                    FileService,
+  implicit val workspace:         Workspace,
+  implicit val outputRedirection: OutputRedirection,
+  cache:                          KeyValueCache,
+  lockRepository:                 LockRepository[LockKey]
 )
 
 object Task {

@@ -9,6 +9,7 @@ import org.openmole.core.expansion._
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.tool.hash._
 import org.openmole.core.dsl._
+import org.openmole.core.outputredirection.OutputRedirection
 
 object RTask {
 
@@ -36,7 +37,7 @@ object RTask {
     install: Seq[InstallCommand]      = Seq.empty,
     version: OptionalArgument[String] = None,
     cache:   Boolean                  = true
-  )(implicit name: sourcecode.Name, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider) = {
+  )(implicit name: sourcecode.Name, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection) = {
     val scriptVariable = Val[File]("script", org.openmole.core.context.Namespace("RTask"))
 
     val scriptContent = FromContext[File] { p ⇒

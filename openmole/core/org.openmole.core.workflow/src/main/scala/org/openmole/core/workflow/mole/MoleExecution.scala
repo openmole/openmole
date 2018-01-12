@@ -184,7 +184,7 @@ class MoleExecution(
       val env = environments.getOrElse(capsule, defaultEnvironment)
       env match {
         case env: SubmissionEnvironment ⇒ env.submit(job)
-        case env: LocalEnvironment      ⇒ env.submit(job, TaskExecutionContext(newFile.baseDir, env, preference, threadProvider, fileService, workspace, taskCache, lockRepository))
+        case env: LocalEnvironment      ⇒ env.submit(job, TaskExecutionContext(newFile.baseDir, env, preference, threadProvider, fileService, workspace, outputRedirection, taskCache, lockRepository))
       }
       eventDispatcher.trigger(this, new MoleExecution.JobSubmitted(job, capsule, env))
     }

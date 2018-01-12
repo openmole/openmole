@@ -122,9 +122,9 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
     executionJob.moleExecution match {
       case Some(execution) if deinterleave ⇒
         val (res, out) = OutputManager.withStringOutput(f)
-        res → Some(Output(execution.executionContext.out, out.output, out.error))
+        res → Some(Output(execution.executionContext.services.outputRedirection.output, out.output, out.error))
       case Some(execution) ⇒
-        val res = OutputManager.withStreamOutputs(execution.executionContext.out, execution.executionContext.out)(f)
+        val res = OutputManager.withStreamOutputs(execution.executionContext.services.outputRedirection.output, execution.executionContext.services.outputRedirection.output)(f)
         res → None
       case _ ⇒
         f → None

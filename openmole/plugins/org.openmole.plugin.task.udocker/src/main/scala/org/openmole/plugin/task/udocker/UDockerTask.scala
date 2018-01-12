@@ -20,7 +20,7 @@ package org.openmole.plugin.task.udocker
 
 import monocle.macros._
 import cats.implicits._
-import org.openmole.core.context.{ Variable, Context }
+import org.openmole.core.context.{ Context, Variable }
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.validation._
 import org.openmole.core.workspace._
@@ -35,6 +35,7 @@ import org.openmole.plugin.task.udocker.DockerMetadata._
 import org.openmole.tool.cache._
 import org.openmole.core.dsl._
 import org.openmole.core.fileservice.FileService
+import org.openmole.core.outputredirection.OutputRedirection
 import org.openmole.core.threadprovider._
 import org.openmole.plugin.task.container.HostFiles
 import org.openmole.tool.lock.LockKey
@@ -68,7 +69,7 @@ object UDockerTask {
     installCommands: Seq[String]              = Vector.empty,
     mode:            OptionalArgument[String] = None,
     cachedKey:       OptionalArgument[String] = None
-  )(implicit name: sourcecode.Name, newFile: NewFile, workspace: Workspace, preference: Preference, threadProvider: ThreadProvider, fileService: FileService): UDockerTask = {
+  )(implicit name: sourcecode.Name, newFile: NewFile, workspace: Workspace, preference: Preference, threadProvider: ThreadProvider, fileService: FileService, outputRedirection: OutputRedirection): UDockerTask = {
     val uDocker =
       UDockerArguments(
         localDockerImage = toLocalImage(image) match {
@@ -82,7 +83,7 @@ object UDockerTask {
     fromUDocker(installLibraries(uDocker, installCommands, cachedKey))
   }
 
-  def installLibraries(uDocker: UDockerArguments, installCommands: Seq[String], cachedKey: Option[String])(implicit newFile: NewFile, workspace: Workspace, fileService: FileService) = {
+  def installLibraries(uDocker: UDockerArguments, installCommands: Seq[String], cachedKey: Option[String])(implicit newFile: NewFile, workspace: Workspace, fileService: FileService, outputRedirection: OutputRedirection) = {
     def installLibrariesInContainer(destination: File) =
       newFile.withTmpFile { tmpDirectory ⇒
         val layersDirectory = UDockerTask.layersDirectory(workspace)
@@ -111,7 +112,9 @@ object UDockerTask {
           uDockerVariables,
           uDockerVolumes = Vector.empty,
           container,
-          installCommands
+          installCommands,
+          stdOut = outputRedirection.output,
+          stdErr = outputRedirection.output
         )
 
         (containersDirectory / container) move destination
@@ -140,7 +143,7 @@ object UDockerTask {
     installedUDockerContainer()
   }
 
-  def toLocalImage(containerImage: ContainerImage)(implicit preference: Preference, newFile: NewFile, workspace: Workspace, threadProvider: ThreadProvider): Either[Err, LocalDockerImage] =
+  def toLocalImage(containerImage: ContainerImage)(implicit preference: Preference, newFile: NewFile, workspace: Workspace, threadProvider: ThreadProvider, outputRedirection: OutputRedirection): Either[Err, LocalDockerImage] =
     containerImage match {
       case i: DockerImage      ⇒ downloadImage(i, layersDirectory(workspace), preference(RegistryTimeout))
       case i: SavedDockerImage ⇒ loadImage(i)
@@ -266,7 +269,9 @@ object UDockerTask {
             List(expandedCommand),
             errorOnReturnValue && !returnValue.isDefined,
             stdOut.isDefined,
-            stdErr.isDefined
+            stdErr.isDefined,
+            stdOut = executionContext.outputRedirection.output,
+            stdErr = executionContext.outputRedirection.output
           )
 
           val retContext = external.fetchOutputFiles(outputs, preparedContext, outputPathResolver(rootDirectory), rootDirectory)
