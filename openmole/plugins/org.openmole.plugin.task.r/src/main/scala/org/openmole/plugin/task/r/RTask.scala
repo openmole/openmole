@@ -14,20 +14,19 @@ import org.openmole.core.outputredirection.OutputRedirection
 object RTask {
 
   sealed trait InstallCommand
-  object InstallCommands {
+  object InstallCommand {
     case class RLibrary(name: String) extends InstallCommand
 
     def toCommand(installCommands: InstallCommand) = {
       installCommands match {
         case RLibrary(name) ⇒
           //Vector(s"""R -e 'install.packages(c(${names.map(lib ⇒ '"' + s"$lib" + '"').mkString(",")}), dependencies = T)'""")
-          s"""R -e 'install.packages(c("$name")}), dependencies = T)'"""
+          s"""R -e 'install.packages(c("$name"), dependencies = T)'"""
       }
     }
 
-    implicit def stringToRLibrary(name: String) = RLibrary(name)
-
-    def installCommands(libraries: Vector[InstallCommand]): Vector[String] = libraries.map(InstallCommands.toCommand)
+    implicit def stringToRLibrary(name: String): InstallCommand = RLibrary(name)
+    def installCommands(libraries: Vector[InstallCommand]): Vector[String] = libraries.map(InstallCommand.toCommand)
   }
 
   def rImage(version: OptionalArgument[String]) = DockerImage("r-base", version.getOrElse("latest"))
@@ -47,7 +46,7 @@ object RTask {
       scriptFile
     }
 
-    val installCommands = InstallCommands.installCommands(install.toVector)
+    val installCommands = InstallCommand.installCommands(install.toVector)
     val cacheKey: Option[String] = if (cache) Some((Seq(rImage(version).image, rImage(version).tag) ++ installCommands).mkString("\n").hash().toString) else None
 
     UDockerTask(
