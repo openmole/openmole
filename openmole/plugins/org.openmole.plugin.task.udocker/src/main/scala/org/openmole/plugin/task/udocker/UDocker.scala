@@ -3,7 +3,6 @@ package org.openmole.plugin.task.udocker
 import java.io.PrintStream
 import java.util.UUID
 
-import org.openmole.core.preference._
 import org.openmole.core.threadprovider._
 import org.openmole.core.workspace._
 import org.openmole.plugin.task.udocker.DockerMetadata._

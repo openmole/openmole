@@ -29,7 +29,7 @@ import org.openmole.tool.stream.StringPrintStream
 import scala.concurrent.stm._
 import org.openmole.tool.file._
 import org.openmole.tool.tar._
-import org.openmole.core.output.OutputManager
+import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.module
 import org.openmole.core.market
 import org.openmole.core.preference.{ ConfigurationLocation, Preference }

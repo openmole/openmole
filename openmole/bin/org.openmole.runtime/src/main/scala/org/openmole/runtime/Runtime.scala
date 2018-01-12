@@ -21,7 +21,7 @@ import java.io.File
 import java.io.PrintStream
 
 import org.openmole.core.exception.InternalProcessingError
-import org.openmole.core.output.OutputManager
+import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.workflow.task.TaskExecutionContext
 import org.openmole.tool.logger.JavaLogger

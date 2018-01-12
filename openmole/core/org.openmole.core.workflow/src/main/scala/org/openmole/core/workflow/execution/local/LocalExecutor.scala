@@ -20,7 +20,7 @@ package org.openmole.core.workflow.execution.local
 import java.io.{ OutputStream, PrintStream }
 
 import org.openmole.core.event.EventDispatcher
-import org.openmole.core.output.OutputManager
+import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.tools.service
 import org.openmole.core.workflow.execution.ExecutionState
 import org.openmole.core.workflow.execution._

@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package org.openmole.core.output
+package org.openmole.core.outputmanager
 
 import org.osgi.framework.BundleContext
 

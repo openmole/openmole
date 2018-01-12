@@ -21,7 +21,7 @@ import java.io.{ File, PrintStream }
 
 import org.openmole.core.event.EventDispatcher
 import org.openmole.core.fileservice.FileService
-import org.openmole.core.output.OutputManager
+import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.preference.Preference
 import org.openmole.core.serializer._
 import org.openmole.core.threadprovider._
