@@ -17,8 +17,6 @@
 
 package org.openmole.core.pluginmanager
 
-import internal.Activator
-
 object PluginManagerInfo {
   def enabled = Activator.enabled
 }

@@ -25,7 +25,7 @@ import org.openmole.console.Console.ExitCodes
 import org.openmole.core.project._
 import org.openmole.core.console.ScalaREPL
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.logging.LoggerService
+import org.openmole.core.logconfig.LoggerConfig
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.workspace.Workspace
 import org.openmole.rest.server.RESTServer
@@ -165,7 +165,7 @@ object Application extends JavaLogger {
 
     val config = parse(args.map(_.trim).toList)
 
-    config.loggerLevel.foreach(LoggerService.level)
+    config.loggerLevel.foreach(LoggerConfig.level)
     val workspaceDirectory = config.workspace.getOrElse(org.openmole.core.workspace.defaultOpenMOLEDirectory)
     implicit val workspace = Workspace(workspaceDirectory)
     import org.openmole.tool.thread._

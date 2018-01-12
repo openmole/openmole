@@ -20,7 +20,7 @@ package org.openmole.core
 package dsl {
 
   import org.openmole.core.context._
-  import org.openmole.core.logging.LoggerService
+  import org.openmole.core.logconfig.LoggerConfig
   import org.openmole.core.workspace._
   import cats._
   import org.openmole.tool.crypto.Cypher
@@ -37,7 +37,7 @@ package dsl {
     implicit lazy val implicitContext = Context.empty
 
     //implicit lazy val workspace = Workspace
-    lazy val logger = LoggerService
+    lazy val logger = LoggerConfig
 
     //implicit def decrypt = Decrypt(workspace)
 
