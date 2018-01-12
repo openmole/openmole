@@ -346,62 +346,56 @@ sealed trait ExecutionInfo {
   def environmentStates: Seq[EnvironmentState]
 }
 
-case class Failed(
-  error:             Error,
-  environmentStates: Seq[EnvironmentState],
-  duration:          Long                  = 0L,
-  completed:         Long                  = 0L
-) extends ExecutionInfo {
-  def state: String = "failed"
+object ExecutionInfo {
 
-  def running = 0L
+  case class Failed(
+    error:             Error,
+    environmentStates: Seq[EnvironmentState],
+    duration:          Long                  = 0L,
+    completed:         Long                  = 0L) extends ExecutionInfo {
+    def state: String = "failed"
+    def running = 0L
+    def ready: Long = 0L
+  }
 
-  def ready: Long = 0L
-}
+  case class Running(
+    ready:             Long,
+    running:           Long,
+    duration:          Long,
+    completed:         Long,
+    environmentStates: Seq[EnvironmentState]) extends ExecutionInfo {
+    def state: String = "running"
+  }
 
-case class Running(
-  ready:             Long,
-  running:           Long,
-  duration:          Long,
-  completed:         Long,
-  environmentStates: Seq[EnvironmentState]
-) extends ExecutionInfo {
-  def state: String = "running"
-}
+  case class Finished(
+    duration:          Long                  = 0L,
+    completed:         Long                  = 0L,
+    environmentStates: Seq[EnvironmentState]) extends ExecutionInfo {
+    def ready: Long = 0L
+    def running: Long = 0L
+    def state: String = "finished"
+  }
 
-case class Finished(
-  duration:          Long                  = 0L,
-  completed:         Long                  = 0L,
-  environmentStates: Seq[EnvironmentState]
-) extends ExecutionInfo {
-  def ready: Long = 0L
+  case class Canceled(
+    environmentStates: Seq[EnvironmentState],
+    duration:          Long                  = 0L,
+    completed:         Long                  = 0L) extends ExecutionInfo {
+    def state: String = "canceled"
 
-  def running: Long = 0L
+    def running = 0L
+    def ready: Long = 0L
+  }
 
-  def state: String = "finished"
-}
+  case class Launching() extends ExecutionInfo {
+    def state: String = "launching"
 
-case class Canceled(
-  environmentStates: Seq[EnvironmentState],
-  duration:          Long                  = 0L,
-  completed:         Long                  = 0L
-) extends ExecutionInfo {
-  def state: String = "canceled"
+    def duration: Long = 0L
+    def completed: Long = 0L
+    def ready: Long = 0L
+    def running = 0L
+    def environmentStates: Seq[EnvironmentState] = Seq()
+  }
 
-  def running = 0L
-
-  def ready: Long = 0L
-}
-
-case class Ready() extends ExecutionInfo {
-  def state: String = "ready"
-
-  def duration: Long = 0L
-  def completed: Long = 0L
-  def ready: Long = 0L
-  def running = 0L
-
-  def environmentStates: Seq[EnvironmentState] = Seq()
 }
 
 case class PasswordState(chosen: Boolean, hasBeenSet: Boolean)

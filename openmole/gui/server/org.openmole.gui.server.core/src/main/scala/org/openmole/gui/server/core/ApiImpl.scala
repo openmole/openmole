@@ -66,6 +66,8 @@ import org.openmole.tool.random.{ RandomProvider, Seeder }
 
 class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
 
+  import ExecutionInfo._
+
   implicit def services = s
   import s._
 
@@ -308,52 +310,57 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
     execution.addStaticInfo(execId, StaticExecutionInfo(scriptData.scriptPath, content, System.currentTimeMillis()))
     execution.addOutputStreams(execId, outputStream)
 
-    def error(t: Throwable): Unit = execution.addError(execId, Failed(ErrorBuilder(t), Seq()))
-    def message(message: String): Unit = execution.addError(execId, Failed(Error(message), Seq()))
+    val compilationFuture =
+      services.threadProvider.pool.submit { () ⇒
 
-    try {
-      val project = Project(script.getParentFileSafe)
-      project.compile(script, Seq.empty)(Services.copy(services)(outputRedirection = OutputRedirection(outputStream))) match {
-        case ScriptFileDoesNotExists() ⇒ message("Script file does not exist")
-        case ErrorInCode(e)            ⇒ error(e)
-        case ErrorInCompiler(e)        ⇒ error(e)
-        case compiled: Compiled ⇒
+        def error(t: Throwable): Unit = execution.addError(execId, Failed(ErrorBuilder(t), Seq()))
 
-          def catchAll[T](f: ⇒ T): Try[T] = {
-            val res =
-              try Success(f)
-              catch {
-                case t: Throwable ⇒ Failure(t)
-              }
-            res
-          }
+        def message(message: String): Unit = execution.addError(execId, Failed(Error(message), Seq()))
 
-          catchAll(OutputManager.withStreamOutputs(outputStream, outputStream)(compiled.eval)) match {
-            case Failure(e) ⇒ error(e)
-            case Success(o) ⇒
-              val puzzle = o.buildPuzzle
+        try {
+          val project = Project(script.getParentFileSafe)
+          project.compile(script, Seq.empty)(Services.copy(services)(outputRedirection = OutputRedirection(outputStream))) match {
+            case ScriptFileDoesNotExists() ⇒ message("Script file does not exist")
+            case ErrorInCode(e)            ⇒ error(e)
+            case ErrorInCompiler(e)        ⇒ error(e)
+            case compiled: Compiled ⇒
 
-              val services = MoleServices.copy(MoleServices.create)(outputRedirection = OutputRedirection(outputStream))
-              Try(puzzle.toExecution(executionContext = MoleExecutionContext()(services))) match {
-                case Success(ex) ⇒
-                  val envIds = (ex.allEnvironments).map { env ⇒ EnvironmentId(getUUID, execId) → env }
-                  execution.addRunning(execId, envIds)
-                  envIds.foreach { case (envId, env) ⇒ env.listen(execution.environmentListener(envId)) }
-
-                  Try(ex.start) match {
-                    case Failure(e) ⇒ error(e)
-                    case Success(_) ⇒
-                      val inserted = execution.addMoleExecution(execId, ex)
-                      if (!inserted) ex.cancel
+              def catchAll[T](f: ⇒ T): Try[T] = {
+                val res =
+                  try Success(f)
+                  catch {
+                    case t: Throwable ⇒ Failure(t)
                   }
+                res
+              }
+
+              catchAll(OutputManager.withStreamOutputs(outputStream, outputStream)(compiled.eval)) match {
                 case Failure(e) ⇒ error(e)
+                case Success(o) ⇒
+                  val puzzle = o.buildPuzzle
+
+                  val services = MoleServices.copy(MoleServices.create)(outputRedirection = OutputRedirection(outputStream))
+                  Try(puzzle.toExecution(executionContext = MoleExecutionContext()(services))) match {
+                    case Success(ex) ⇒
+                      val envIds = (ex.allEnvironments).map { env ⇒ EnvironmentId(getUUID, execId) → env }
+                      execution.addRunning(execId, envIds)
+                      envIds.foreach { case (envId, env) ⇒ env.listen(execution.environmentListener(envId)) }
+
+                      Try(ex.start) match {
+                        case Failure(e) ⇒ error(e)
+                        case Success(_) ⇒
+                          val inserted = execution.addMoleExecution(execId, ex)
+                          if (!inserted) ex.cancel
+                      }
+                    case Failure(e) ⇒ error(e)
+                  }
               }
           }
+        }
+        catch {
+          case t: Throwable ⇒ error(t)
+        }
       }
-    }
-    catch {
-      case t: Throwable ⇒ error(t)
-    }
   }
 
   def allStates(lines: Int) = execution.allStates(lines)

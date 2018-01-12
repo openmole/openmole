@@ -222,23 +222,23 @@ class ExecutionPanel {
             )
 
             val details = executionInfo match {
-              case f: Failed ⇒
+              case f: ExecutionInfo.Failed ⇒
                 ExecutionDetails("0", 0, Some(f.error), f.environmentStates)
-              case f: Finished ⇒
+              case f: ExecutionInfo.Finished ⇒
                 addToBanner(id, BannerAlert.div(succesDiv))
                 ExecutionDetails(ratio(f.completed, f.running, f.ready), f.running, envStates = f.environmentStates)
-              case r: Running ⇒ ExecutionDetails(ratio(r.completed, r.running, r.ready), r.running, envStates = r.environmentStates)
-              case c: Canceled ⇒
+              case r: ExecutionInfo.Running ⇒ ExecutionDetails(ratio(r.completed, r.running, r.ready), r.running, envStates = r.environmentStates)
+              case c: ExecutionInfo.Canceled ⇒
                 hasBeenDisplayed(id)
                 ExecutionDetails("0", 0, envStates = c.environmentStates)
-              case r: Ready ⇒ ExecutionDetails("0", 0, envStates = r.environmentStates)
+              case r: ExecutionInfo.Launching ⇒ ExecutionDetails("0", 0, envStates = r.environmentStates)
             }
 
             val scriptLink = expander(id.id, ex ⇒ ex.getLink(staticInfo.now(id).path.name, scriptID))
             val envLink = expander(id.id, ex ⇒ ex.getGlyph(glyph_stats, "Env", envID))
             val stateLink = expander(id.id, ex ⇒
               executionInfo match {
-                case f: Failed ⇒
+                case f: ExecutionInfo.Failed ⇒
                   addToBanner(id, BannerAlert.div(failedDiv(ex)).critical)
                   ex.getLink(executionInfo.state, errorID).render
                 case _ ⇒ tags.span(executionInfo.state).render
@@ -329,7 +329,7 @@ class ExecutionPanel {
                 td(colMD(2) +++ textCenter)(glyphAndText(glyph_flash, details.running.toString)).tooltip("Running jobs"),
                 td(colMD(2) +++ textCenter)(glyphAndText(glyph_flag, details.ratio.toString)).tooltip("Finished/Total jobs"),
                 td(colMD(1) +++ textCenter)(div(durationString)).tooltip("Elapsed time"),
-                td(colMD(1) +++ textCenter)(visibleClass(id.id, errorID, stateLink, omsheet.executionState(executionInfo.state))).tooltip("Execution state"),
+                td(colMD(1) +++ textCenter)(visibleClass(id.id, errorID, stateLink, omsheet.executionState(executionInfo))).tooltip("Execution state"),
                 td(colMD(1) +++ textCenter, pointer)(visibleClass(id.id, envID, envLink)).tooltip("Computation environment details"),
                 td(colMD(1) +++ textCenter, pointer)(visibleClass(id.id, outputStreamID, outputLink)).tooltip("Standard output"),
                 td(colMD(1) +++ textCenter)(tags.span(glyph_remove +++ ms("removeExecution"), onclick := { () ⇒
