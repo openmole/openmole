@@ -36,7 +36,7 @@ class SynchronizedBuilder() extends Builder {
     builder.clear()
     content
   }
-  override def toString = builder.mkString
+  override def toString = builder.synchronized { builder.mkString }
 }
 
 class SynchronizedRingBuilder(size: Int) extends Builder {
@@ -50,7 +50,7 @@ class SynchronizedRingBuilder(size: Int) extends Builder {
     content
   }
 
-  override def toString = buffer.iterator().toArray.mkString
+  override def toString = buffer.synchronized { buffer.iterator().toArray.mkString }
 
 }
 
@@ -85,4 +85,5 @@ class StringPrintStream(os: StringOutputStream) extends PrintStream(os) {
     flush()
     os.toString
   }
+
 }
