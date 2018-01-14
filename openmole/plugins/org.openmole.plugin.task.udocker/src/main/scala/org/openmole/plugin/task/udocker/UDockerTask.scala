@@ -68,7 +68,8 @@ object UDockerTask {
     command:         FromContext[String],
     installCommands: Seq[String]              = Vector.empty,
     mode:            OptionalArgument[String] = None,
-    cachedKey:       OptionalArgument[String] = None
+    cachedKey:       OptionalArgument[String] = None,
+    forceUpdate:     Boolean                  = false
   )(implicit name: sourcecode.Name, newFile: NewFile, workspace: Workspace, preference: Preference, threadProvider: ThreadProvider, fileService: FileService, outputRedirection: OutputRedirection): UDockerTask = {
     val uDocker =
       UDockerArguments(
@@ -80,10 +81,10 @@ object UDockerTask {
         mode = mode orElse Some("P2")
       )
 
-    fromUDocker(installLibraries(uDocker, installCommands, cachedKey))
+    fromUDocker(installLibraries(uDocker, installCommands, cachedKey, forceUpdate))
   }
 
-  def installLibraries(uDocker: UDockerArguments, installCommands: Seq[String], cachedKey: Option[String])(implicit newFile: NewFile, workspace: Workspace, fileService: FileService, outputRedirection: OutputRedirection) = {
+  def installLibraries(uDocker: UDockerArguments, installCommands: Seq[String], cachedKey: Option[String], forceUpdate: Boolean)(implicit newFile: NewFile, workspace: Workspace, fileService: FileService, outputRedirection: OutputRedirection) = {
     def installLibrariesInContainer(destination: File) =
       newFile.withTmpFile { tmpDirectory ⇒
         val layersDirectory = UDockerTask.layersDirectory(workspace)
@@ -123,8 +124,8 @@ object UDockerTask {
     def installedUDockerContainer() =
       if (installCommands.isEmpty) uDocker
       else {
-        cachedKey match {
-          case Some(cacheKey) ⇒
+        (forceUpdate, cachedKey) match {
+          case (false, Some(cacheKey)) ⇒
             val cacheDirectory = installCacheDirectory(workspace)
             cacheDirectory.withLockInDirectory {
               val cachedContainer = cacheDirectory / cacheKey
@@ -132,7 +133,7 @@ object UDockerTask {
               (UDockerArguments.localDockerImage composeLens LocalDockerImage.container) set Some(cachedContainer) apply uDocker
             }
 
-          case None ⇒
+          case _ ⇒
             val createdContainer = newFile.newDir("container")
             installLibrariesInContainer(createdContainer)
             fileService.deleteWhenGarbageCollected(createdContainer)

@@ -32,10 +32,10 @@ object RTask {
   def rImage(version: OptionalArgument[String]) = DockerImage("r-base", version.getOrElse("latest"))
 
   def apply(
-    script:  FromContext[String],
-    install: Seq[InstallCommand]      = Seq.empty,
-    version: OptionalArgument[String] = None,
-    cache:   Boolean                  = true
+    script:      FromContext[String],
+    install:     Seq[InstallCommand]      = Seq.empty,
+    version:     OptionalArgument[String] = None,
+    forceUpdate: Boolean                  = true
   )(implicit name: sourcecode.Name, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection) = {
     val scriptVariable = Val[File]("script", org.openmole.core.context.Namespace("RTask"))
 
@@ -47,13 +47,14 @@ object RTask {
     }
 
     val installCommands = InstallCommand.installCommands(install.toVector)
-    val cacheKey: Option[String] = if (cache) Some((Seq(rImage(version).image, rImage(version).tag) ++ installCommands).mkString("\n").hash().toString) else None
+    val cacheKey: Option[String] = Some((Seq(rImage(version).image, rImage(version).tag) ++ installCommands).mkString("\n").hash().toString)
 
     UDockerTask(
       rImage(version),
       s"R --slave -f script.R",
       installCommands = installCommands,
-      cachedKey = OptionalArgument(cacheKey)
+      cachedKey = OptionalArgument(cacheKey),
+      forceUpdate = forceUpdate
     ) set (
         inputFiles += (scriptVariable, "script.R", true),
         scriptVariable := scriptContent,

@@ -50,12 +50,12 @@ object UDocker {
 
     def layerFile(layer: Layer) = layersDirectory / layer.digest
 
-    val m = manifest(dockerImage, timeout)
+    val manifestData = manifest(dockerImage, timeout)
 
     def localLayersFutures =
       for {
-        manif ← m.toSeq.toVector
-        l ← layers(manif.value)
+        m ← manifestData.toSeq.toVector
+        l ← layers(m.value)
       } yield Future {
         val lf = layerFile(l)
         if (!lf.exists) {
@@ -68,15 +68,15 @@ object UDocker {
     val localLayers = localLayersFutures.map(f ⇒ Await.result(f, Duration.Inf)).reverse
 
     for {
-      manif ← m
-      history = manif.value.history
+      m ← manifestData
+      history = m.value.history
       hist = Either.cond(history.isDefined, history.get, Err("No history field in Docker manifest"))
       v1 ← hist.map(_.head)
     } yield {
       val content = LocalDockerImage.Layered(localLayers, Vector.empty)
       // FIXME how reliable is it to assume config in first v1Compat string?
       val imageConfig = v1.v1Compatibility
-      LocalDockerImage(dockerImage.image, dockerImage.tag, content, imageConfig, manif.value)
+      LocalDockerImage(dockerImage.image, dockerImage.tag, content, imageConfig, m.value)
     }
   }
 
@@ -289,6 +289,7 @@ object UDocker {
     val id =
       uDocker.localDockerImage.container match {
         case None ⇒
+
           val cl = commandLine(s"${uDockerExecutable.getAbsolutePath} create $imageId")
           execute(cl, tmpDirectory, uDockerVariables, captureOutput = true, captureError = true, displayOutput = false, displayError = false).output.get.split("\n").head
         case Some(directory) ⇒
