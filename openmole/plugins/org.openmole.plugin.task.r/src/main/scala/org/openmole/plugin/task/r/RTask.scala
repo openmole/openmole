@@ -10,6 +10,7 @@ import org.openmole.core.expansion._
 import org.openmole.core.threadprovider._
 import org.openmole.tool.hash._
 import org.openmole.core.dsl._
+import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.outputredirection._
 import org.openmole.core.workflow.builder._
 import org.openmole.plugin.task.container._
@@ -94,6 +95,20 @@ object RTask {
     )
   }
 
+  def toJSONValue(v: Any): org.json4s.JValue = {
+    import org.json4s._
+    import org.json4s.jackson.JsonMethods._
+    v match {
+      case v: Int      ⇒ JInt(v)
+      case v: Long     ⇒ JLong(v)
+      case v: String   ⇒ JString(v)
+      case v: Float    ⇒ JDouble(v)
+      case v: Double   ⇒ JDouble(v)
+      case v: Array[_] ⇒ JArray(v.map(toJSONValue).toList)
+      case _           ⇒ throw new UserBadDataError(s"Value $v of type ${v.getClass} is not convertible to JSON")
+    }
+  }
+
 }
 
 @Lenses case class RTask(
@@ -115,16 +130,32 @@ object RTask {
     import org.json4s._
     import org.json4s.jackson.JsonMethods._
 
+    def writeInputsJSON(file: File) =
+      file.content = compact(render(RTask.toJSONValue(rInputs.map { case (v, _) ⇒ context(v) }.toArray)))
+
+    def rMapping(arrayName: String) =
+      rInputs.zipWithIndex.map { case ((_, name), i) ⇒ s"$name = $arrayName[[${i + 1}]]" }.mkString("\n")
+
     newFile.withTmpFile("script", ".R") { scriptFile ⇒
-      scriptFile.content = script.from(p.context)(p.random, p.newFile, p.fileService)
+      newFile.withTmpFile("inputs", ".json") { jsonInputs ⇒
 
-      def uDockerTask = UDockerTask(uDocker, s"R --slave -f script.R", errorOnReturnValue, returnValue, stdOut, stdErr, _config, external) set (
-        resources += (scriptFile, "script.R", true),
-        reuseContainer := true
-      )
+        writeInputsJSON(jsonInputs)
+        scriptFile.content = s"""
+          |require("jsonlite")
+          |inputs = read_json("inputs.json")
+          |${rMapping("inputs")}
+          |${script.from(p.context)(p.random, p.newFile, p.fileService)}
+          """.stripMargin
 
-      rInputs.map { case (v, _) ⇒ context(v) }
-      uDockerTask.process(executionContext).from(context)
+        def uDockerTask = UDockerTask(uDocker, s"R --slave -f script.R", errorOnReturnValue, returnValue, stdOut, stdErr, _config, external) set (
+          resources += (scriptFile, "script.R", true),
+          resources += (jsonInputs, "inputs.json", true),
+          reuseContainer := true
+        )
+
+        rInputs.map { case (v, _) ⇒ context(v) }
+        uDockerTask.process(executionContext).from(context)
+      }
     }
   }
 }
