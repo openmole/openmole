@@ -114,7 +114,7 @@ package object message {
       serialiserService.deserialiseAndExtractFiles[RuntimeResult](file)
   }
 
-  case class RuntimeResult(stdOut: Option[File], stdErr: Option[File], result: Try[(SerializedContextResults, RuntimeLog)], info: RuntimeInfo)
+  case class RuntimeResult(stdOut: Option[File], result: Try[(SerializedContextResults, RuntimeLog)], info: RuntimeInfo)
   sealed trait SerializedContextResults
   case class ArchiveContextResults(contextResults: File) extends SerializedContextResults
   case class IndividualFilesContextResults(contextResults: File, files: Iterable[ReplicatedFile]) extends SerializedContextResults

@@ -9,34 +9,34 @@ import org.openmole.core.expansion._
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.tool.hash._
 import org.openmole.core.dsl._
+import org.openmole.core.outputredirection.OutputRedirection
 
 object RTask {
 
   sealed trait InstallCommand
-  object InstallCommands {
+  object InstallCommand {
     case class RLibrary(name: String) extends InstallCommand
 
     def toCommand(installCommands: InstallCommand) = {
       installCommands match {
         case RLibrary(name) ⇒
           //Vector(s"""R -e 'install.packages(c(${names.map(lib ⇒ '"' + s"$lib" + '"').mkString(",")}), dependencies = T)'""")
-          s"""R -e 'install.packages(c("$name")}), dependencies = T)'"""
+          s"""R -e 'install.packages(c("$name"), dependencies = T)'"""
       }
     }
 
-    implicit def stringToRLibrary(name: String) = RLibrary(name)
-
-    def installCommands(libraries: Vector[InstallCommand]): Vector[String] = libraries.map(InstallCommands.toCommand)
+    implicit def stringToRLibrary(name: String): InstallCommand = RLibrary(name)
+    def installCommands(libraries: Vector[InstallCommand]): Vector[String] = libraries.map(InstallCommand.toCommand)
   }
 
   def rImage(version: OptionalArgument[String]) = DockerImage("r-base", version.getOrElse("latest"))
 
   def apply(
-    script:  FromContext[String],
-    install: Seq[InstallCommand]      = Seq.empty,
-    version: OptionalArgument[String] = None,
-    cache:   Boolean                  = true
-  )(implicit name: sourcecode.Name, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider) = {
+    script:      FromContext[String],
+    install:     Seq[InstallCommand]      = Seq.empty,
+    version:     OptionalArgument[String] = None,
+    forceUpdate: Boolean                  = true
+  )(implicit name: sourcecode.Name, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection) = {
     val scriptVariable = Val[File]("script", org.openmole.core.context.Namespace("RTask"))
 
     val scriptContent = FromContext[File] { p ⇒
@@ -46,14 +46,15 @@ object RTask {
       scriptFile
     }
 
-    val installCommands = InstallCommands.installCommands(install.toVector)
-    val cacheKey: Option[String] = if (cache) Some((Seq(rImage(version).image, rImage(version).tag) ++ installCommands).mkString("\n").hash().toString) else None
+    val installCommands = InstallCommand.installCommands(install.toVector)
+    val cacheKey: Option[String] = Some((Seq(rImage(version).image, rImage(version).tag) ++ installCommands).mkString("\n").hash().toString)
 
     UDockerTask(
       rImage(version),
       s"R --slave -f script.R",
       installCommands = installCommands,
-      cachedKey = OptionalArgument(cacheKey)
+      cachedKey = OptionalArgument(cacheKey),
+      forceUpdate = forceUpdate
     ) set (
         inputFiles += (scriptVariable, "script.R", true),
         scriptVariable := scriptContent,

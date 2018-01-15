@@ -129,7 +129,9 @@ object SystemExecTask {
         expandedCommands.toList,
         errorOnReturnValue && !returnValue.isDefined,
         stdOut.isDefined,
-        stdErr.isDefined
+        stdErr.isDefined,
+        stdOut = executionContext.outputRedirection.output,
+        stdErr = executionContext.outputRedirection.output
       )
 
       val retContext: Context = external.fetchOutputFiles(outputs, preparedContext, external.relativeResolver(workDir), tmpDir)

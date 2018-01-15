@@ -67,9 +67,8 @@ object GetResultActor extends JavaLogger {
 
     val runtimeResult = getRuntimeResult(outputFilePath, storage)
 
-    val stream = job.moleExecution.executionContext.out
+    val stream = job.moleExecution.executionContext.services.outputRedirection.output
     display(runtimeResult.stdOut, s"Output on ${runtimeResult.info.hostName}", storage, stream)
-    display(runtimeResult.stdErr, s"Error output ${runtimeResult.info.hostName}", storage, stream)
 
     runtimeResult.result match {
       case Failure(exception) ⇒ throw new JobRemoteExecutionException(exception, "Fatal exception thrown during the execution of the job execution on the execution node")

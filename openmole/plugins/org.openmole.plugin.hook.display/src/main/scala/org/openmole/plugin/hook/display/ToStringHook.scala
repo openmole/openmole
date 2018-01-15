@@ -49,9 +49,9 @@ object ToStringHook {
     import parameters._
     if (!prototypes.isEmpty) {
       val filtered = Context(prototypes.flatMap(p ⇒ context.variable(p.asInstanceOf[Val[Any]])): _*)
-      executionContext.out.println(filtered.toString)
+      executionContext.services.outputRedirection.output.println(filtered.toString)
     }
-    else executionContext.out.println(context.toString)
+    else executionContext.services.outputRedirection.output.println(context.toString)
     context
   }
 

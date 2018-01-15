@@ -20,7 +20,7 @@ package org.openmole.plugin.task.udocker
 
 import monocle.macros._
 import cats.implicits._
-import org.openmole.core.context.{ Variable, Context }
+import org.openmole.core.context.{ Context, Variable }
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.validation._
 import org.openmole.core.workspace._
@@ -35,6 +35,7 @@ import org.openmole.plugin.task.udocker.DockerMetadata._
 import org.openmole.tool.cache._
 import org.openmole.core.dsl._
 import org.openmole.core.fileservice.FileService
+import org.openmole.core.outputredirection.OutputRedirection
 import org.openmole.core.threadprovider._
 import org.openmole.plugin.task.container.HostFiles
 import org.openmole.tool.lock.LockKey
@@ -67,8 +68,9 @@ object UDockerTask {
     command:         FromContext[String],
     installCommands: Seq[String]              = Vector.empty,
     mode:            OptionalArgument[String] = None,
-    cachedKey:       OptionalArgument[String] = None
-  )(implicit name: sourcecode.Name, newFile: NewFile, workspace: Workspace, preference: Preference, threadProvider: ThreadProvider, fileService: FileService): UDockerTask = {
+    cachedKey:       OptionalArgument[String] = None,
+    forceUpdate:     Boolean                  = false
+  )(implicit name: sourcecode.Name, newFile: NewFile, workspace: Workspace, preference: Preference, threadProvider: ThreadProvider, fileService: FileService, outputRedirection: OutputRedirection): UDockerTask = {
     val uDocker =
       UDockerArguments(
         localDockerImage = toLocalImage(image) match {
@@ -79,10 +81,10 @@ object UDockerTask {
         mode = mode orElse Some("P2")
       )
 
-    fromUDocker(installLibraries(uDocker, installCommands, cachedKey))
+    fromUDocker(installLibraries(uDocker, installCommands, cachedKey, forceUpdate))
   }
 
-  def installLibraries(uDocker: UDockerArguments, installCommands: Seq[String], cachedKey: Option[String])(implicit newFile: NewFile, workspace: Workspace, fileService: FileService) = {
+  def installLibraries(uDocker: UDockerArguments, installCommands: Seq[String], cachedKey: Option[String], forceUpdate: Boolean)(implicit newFile: NewFile, workspace: Workspace, fileService: FileService, outputRedirection: OutputRedirection) = {
     def installLibrariesInContainer(destination: File) =
       newFile.withTmpFile { tmpDirectory ⇒
         val layersDirectory = UDockerTask.layersDirectory(workspace)
@@ -111,7 +113,9 @@ object UDockerTask {
           uDockerVariables,
           uDockerVolumes = Vector.empty,
           container,
-          installCommands
+          installCommands,
+          stdOut = outputRedirection.output,
+          stdErr = outputRedirection.output
         )
 
         (containersDirectory / container) move destination
@@ -120,8 +124,8 @@ object UDockerTask {
     def installedUDockerContainer() =
       if (installCommands.isEmpty) uDocker
       else {
-        cachedKey match {
-          case Some(cacheKey) ⇒
+        (forceUpdate, cachedKey) match {
+          case (false, Some(cacheKey)) ⇒
             val cacheDirectory = installCacheDirectory(workspace)
             cacheDirectory.withLockInDirectory {
               val cachedContainer = cacheDirectory / cacheKey
@@ -129,7 +133,7 @@ object UDockerTask {
               (UDockerArguments.localDockerImage composeLens LocalDockerImage.container) set Some(cachedContainer) apply uDocker
             }
 
-          case None ⇒
+          case _ ⇒
             val createdContainer = newFile.newDir("container")
             installLibrariesInContainer(createdContainer)
             fileService.deleteWhenGarbageCollected(createdContainer)
@@ -140,7 +144,7 @@ object UDockerTask {
     installedUDockerContainer()
   }
 
-  def toLocalImage(containerImage: ContainerImage)(implicit preference: Preference, newFile: NewFile, workspace: Workspace, threadProvider: ThreadProvider): Either[Err, LocalDockerImage] =
+  def toLocalImage(containerImage: ContainerImage)(implicit preference: Preference, newFile: NewFile, workspace: Workspace, threadProvider: ThreadProvider, outputRedirection: OutputRedirection): Either[Err, LocalDockerImage] =
     containerImage match {
       case i: DockerImage      ⇒ downloadImage(i, layersDirectory(workspace), preference(RegistryTimeout))
       case i: SavedDockerImage ⇒ loadImage(i)
@@ -266,7 +270,9 @@ object UDockerTask {
             List(expandedCommand),
             errorOnReturnValue && !returnValue.isDefined,
             stdOut.isDefined,
-            stdErr.isDefined
+            stdErr.isDefined,
+            stdOut = executionContext.outputRedirection.output,
+            stdErr = executionContext.outputRedirection.output
           )
 
           val retContext = external.fetchOutputFiles(outputs, preparedContext, outputPathResolver(rootDirectory), rootDirectory)

@@ -139,9 +139,7 @@ object Registry {
   def downloadLayer(dockerImage: DockerImage, layer: Layer, layersDirectory: OMFile, layerFile: File, timeout: Time)(implicit newFile: NewFile): Unit =
     newFile.withTmpFile { tmpFile ⇒
       blob(dockerImage, layer, tmpFile, timeout)
-      layersDirectory.withLockInDirectory {
-        if (!layerFile.exists) tmpFile move layerFile
-      }
+      layersDirectory.withLockInDirectory { if (!layerFile.exists) tmpFile move layerFile }
     }
 
 }

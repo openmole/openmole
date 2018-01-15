@@ -15,8 +15,6 @@ object OMKeys {
 
   val openMoleStandardVer = SettingKey[String]("openmole-version")
 
-  val eclipseBuddyPolicy = SettingKey[Option[String]]("OSGi.eclipseBuddyPolicy", "The eclipse buddy policy thing.")
-
   val assemblyPath = SettingKey[File]("assemblyPath", "A setting to control assembly outputs directory.")
 
   val assemblyDependenciesPath = SettingKey[File]("assemblyDependenciesPath", "A setting to control assembly outputs directory for dependencies.")

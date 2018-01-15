@@ -17,6 +17,8 @@ package org.openmole.gui.server.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import java.util.concurrent.Future
+
 import monocle.macros.Lenses
 import org.openmole.core.event.Listner
 import org.openmole.core.workflow.execution.Environment
@@ -35,10 +37,13 @@ import scala.concurrent.stm._
 
 class Execution {
 
+  import ExecutionInfo._
+
   private lazy val staticExecutionInfo = TMap[ExecutionId, StaticExecutionInfo]()
   private lazy val moleExecutions = TMap[ExecutionId, MoleExecution]()
   private lazy val outputStreams = TMap[ExecutionId, StringPrintStream]()
   private lazy val errors = TMap[ExecutionId, Failed]()
+  private lazy val compilation = TMap[ExecutionId, Future[_]]()
 
   private lazy val environmentIds = TMap[ExecutionId, Seq[EnvironmentId]]()
   private lazy val runningEnvironments = TMap[EnvironmentId, RunningEnvironment]()
@@ -131,11 +136,10 @@ class Execution {
     errors(key) = error
   }
 
-  def cancel(key: ExecutionId) =
-    moleExecutions.single.get(key) match {
-      case Some(moleExecution) ⇒ moleExecution.cancel
-      case _                   ⇒
-    }
+  def cancel(key: ExecutionId) = {
+    moleExecutions.single.get(key).foreach(_.cancel)
+    compilation.single.get(key).foreach(_.cancel(true))
+  }
 
   def remove(key: ExecutionId) = {
     cancel(key)
@@ -145,6 +149,7 @@ class Execution {
       moleExecutions.remove(key)
       outputStreams.remove(key)
       errors.remove(key)
+      compilation.remove(key)
     }
   }
 
@@ -190,9 +195,9 @@ class Execution {
                 environmentStates = environmentState(key)
               )
             }
-            else Ready()
+            else Launching()
         }
-      case _ ⇒ Ready()
+      case _ ⇒ Launching()
     }
   }
 
