@@ -152,7 +152,7 @@ package systemexec {
   }
 }
 
-package object systemexec extends external.ExternalPackage with SystemExecPackage {
+package object systemexec extends SystemExecPackage {
 
   private[systemexec] def pack = this
 

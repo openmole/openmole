@@ -19,4 +19,6 @@ package org.openmole.plugin.task.r
 
 import org.openmole.core.pluginmanager._
 
-class Activator extends PluginInfoActivator
+class Activator extends PluginInfoActivator {
+  override def keyWordTraits = List(classOf[RPackage])
+}

@@ -70,18 +70,35 @@ object UDockerTask {
     mode:            OptionalArgument[String] = None,
     cachedKey:       OptionalArgument[String] = None,
     forceUpdate:     Boolean                  = false
-  )(implicit name: sourcecode.Name, newFile: NewFile, workspace: Workspace, preference: Preference, threadProvider: ThreadProvider, fileService: FileService, outputRedirection: OutputRedirection): UDockerTask = {
+  )(implicit name: sourcecode.Name, newFile: NewFile, workspace: Workspace, preference: Preference, threadProvider: ThreadProvider, fileService: FileService, outputRedirection: OutputRedirection): UDockerTask =
+    UDockerTask(
+      uDocker = createUDocker(image, installCommands, mode, cachedKey, forceUpdate),
+      command = command,
+      errorOnReturnValue = true,
+      returnValue = None,
+      stdOut = None,
+      stdErr = None,
+      _config = InputOutputConfig(),
+      external = External()
+    )
+
+  def createUDocker(
+    image:           ContainerImage,
+    installCommands: Seq[String]              = Vector.empty,
+    mode:            OptionalArgument[String] = None,
+    cachedKey:       OptionalArgument[String] = None,
+    forceUpdate:     Boolean                  = false)(implicit newFile: NewFile, preference: Preference, threadProvider: ThreadProvider, workspace: Workspace, fileService: FileService, outputRedirection: OutputRedirection) = {
     val uDocker =
       UDockerArguments(
         localDockerImage = toLocalImage(image) match {
           case Right(x) ⇒ x
           case Left(x)  ⇒ throw new UserBadDataError(x.msg)
         },
-        command = command,
         mode = mode orElse Some("P2")
       )
 
-    fromUDocker(installLibraries(uDocker, installCommands, cachedKey, forceUpdate))
+    installLibraries(uDocker, installCommands, cachedKey, forceUpdate)
+
   }
 
   def installLibraries(uDocker: UDockerArguments, installCommands: Seq[String], cachedKey: Option[String], forceUpdate: Boolean)(implicit newFile: NewFile, workspace: Workspace, fileService: FileService, outputRedirection: OutputRedirection) = {
@@ -150,27 +167,24 @@ object UDockerTask {
       case i: SavedDockerImage ⇒ loadImage(i)
     }
 
-  def fromUDocker(uDocker: UDockerArguments)(implicit name: sourcecode.Name, newFile: NewFile, workspace: Workspace, preference: Preference): UDockerTask =
-    new UDockerTask(
-      uDocker = uDocker,
-      errorOnReturnValue = true,
-      returnValue = None,
-      stdOut = None,
-      stdErr = None,
-      _config = InputOutputConfig(),
-      external = External()
-    )
-
   def installCacheDirectory(workspace: Workspace) = workspace.persistentDir /> "udocker" /> "cached"
   def layersDirectory(workspace: Workspace) = workspace.persistentDir /> "udocker" /> "layers"
   def repositoryDirectory(workspace: Workspace) = workspace.persistentDir /> "udocker" /> "repos"
 
   lazy val containerPoolKey = CacheKey[WithInstance[ContainerID]]()
   lazy val installLockKey = LockKey()
+
+  def config(
+    config:      InputOutputConfig,
+    returnValue: Option[Val[Int]],
+    stdOut:      Option[Val[String]],
+    stdErr:      Option[Val[String]]) = config.addOutput(Seq(stdOut, stdErr, returnValue).flatten: _*)
+
 }
 
 @Lenses case class UDockerTask(
   uDocker:            UDockerArguments,
+  command:            FromContext[String],
   errorOnReturnValue: Boolean,
   returnValue:        Option[Val[Int]],
   stdOut:             Option[Val[String]],
@@ -178,13 +192,13 @@ object UDockerTask {
   _config:            InputOutputConfig,
   external:           External
 ) extends Task with ValidateTask { self ⇒
-  override def config = InputOutputConfig.outputs.modify(_ ++ Seq(stdOut, stdErr, returnValue).flatten)(_config)
-  override def validate =
-    container.validateContainer(Vector(uDocker.command), uDocker.environmentVariables, external, inputs)
+
+  override def config = UDockerTask.config(_config, returnValue, stdOut, stdErr)
+  override def validate = container.validateContainer(Vector(command), uDocker.environmentVariables, external, inputs)
 
   override def process(executionContext: TaskExecutionContext) = FromContext[Context] { parameters ⇒
-
     import parameters._
+
     val (uDockerExecutable, uDockerInstallDirectory, uDockerTarball) =
       executionContext.lockRepository.withLock(UDockerTask.installLockKey) {
         UDocker.install(executionContext.tmpDirectory)
@@ -262,7 +276,7 @@ object UDockerTask {
               userWorkDirectory(uDocker),
               uDockerExecutable,
               runId,
-              uDocker.command.from(preparedContext))
+              command.from(preparedContext))
 
           val executionResult = executeAll(
             taskWorkDirectory,

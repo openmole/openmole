@@ -77,7 +77,6 @@ package object udocker extends UDockerPackage {
 
   @Lenses case class UDockerArguments(
     localDockerImage:     UDocker.LocalDockerImage,
-    command:              FromContext[String],
     environmentVariables: Vector[(String, FromContext[String])] = Vector.empty,
     hostFiles:            Vector[(String, Option[String])]      = Vector.empty,
     workDirectory:        Option[String]                        = None,
