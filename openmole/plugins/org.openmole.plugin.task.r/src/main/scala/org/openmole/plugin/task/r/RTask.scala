@@ -176,21 +176,26 @@ object RTask {
     newFile.withTmpFile("script", ".R") { scriptFile ⇒
       newFile.withTmpFile("inputs", ".json") { jsonInputs ⇒
 
+        def inputArrayName = "generatedomarray"
+        def rScriptName = "generatedomscript.R"
+        def inputJSONName = "generatedominputs.json"
+        def outputJSONName = "generatedomoutputs.json"
+
         writeInputsJSON(jsonInputs)
         scriptFile.content = s"""
           |require("jsonlite")
-          |inputs = read_json("inputs.json")
-          |${rInputMapping("inputs")}
+          |$inputArrayName = read_json("$inputJSONName")
+          |${rInputMapping(inputArrayName)}
           |${script.from(p.context)(p.random, p.newFile, p.fileService)}
-          |write_json(${rOutputMapping}, "outputs.json", always_decimal = TRUE)
+          |write_json($rOutputMapping, "$outputJSONName", always_decimal = TRUE)
           """.stripMargin
 
         val outputFile = Val[File]("outputFile", Namespace("RTask"))
 
-        def uDockerTask = UDockerTask(uDocker, s"R --slave -f script.R", errorOnReturnValue, returnValue, stdOut, stdErr, _config, external) set (
-          resources += (scriptFile, "script.R", true),
-          resources += (jsonInputs, "inputs.json", true),
-          outputFiles += ("outputs.json", outputFile),
+        def uDockerTask = UDockerTask(uDocker, s"R --slave -f $rScriptName", errorOnReturnValue, returnValue, stdOut, stdErr, _config, external) set (
+          resources += (scriptFile, rScriptName, true),
+          resources += (jsonInputs, inputJSONName, true),
+          outputFiles += (outputJSONName, outputFile),
           reuseContainer := true
         )
 
