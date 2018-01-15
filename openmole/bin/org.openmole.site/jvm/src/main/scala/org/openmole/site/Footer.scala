@@ -75,7 +75,7 @@ object Footer {
                 ),
                 div(classIs(colMD(3)), footerColStyle)(
                   span("ABOUT US", textAlign := "center"),
-                  imgSubItem(Resource.img.footer.paper, "Publications", Pages.communications.file, true),
+                  imgSubItem(Resource.img.footer.paper, "Publications", Pages.communications.file, false),
                   imgSubItem(Resource.img.footer.whoarwe, "Who are we?", Pages.whoAreWe.file, false),
                   imgSubItem(Resource.img.footer.partner, "Partners", Pages.partner.file, false)
                 ),
