@@ -1,6 +1,8 @@
 package org.openmole.plugin.task.r
 
 import monocle.macros.Lenses
+import org.json4s.JsonAST.JValue
+import org.openmole.core.context.{ Namespace, Variable }
 import org.openmole.plugin.task.udocker._
 import org.openmole.core.fileservice._
 import org.openmole.core.preference._
@@ -54,14 +56,6 @@ object RTask {
 
   def rImage(version: String) = DockerImage("r-base", version)
 
-  //jsonlite
-  //toJSON(list(a, "tsrn", list("eui", "eui")), auto_unbox = TRUE)
-  // e = fromJSON('[9,"tsrn",["eui","eui"]]')
-  //i = e[[1]]
-
-  //write(toJSON( iris ),'jstest')
-  //res <- fromJSON( file="jstest")
-
   def apply(
     script:      FromContext[String],
     install:     Seq[InstallCommand] = Seq.empty,
@@ -97,7 +91,7 @@ object RTask {
 
   def toJSONValue(v: Any): org.json4s.JValue = {
     import org.json4s._
-    import org.json4s.jackson.JsonMethods._
+
     v match {
       case v: Int      ⇒ JInt(v)
       case v: Long     ⇒ JLong(v)
@@ -107,6 +101,39 @@ object RTask {
       case v: Array[_] ⇒ JArray(v.map(toJSONValue).toList)
       case _           ⇒ throw new UserBadDataError(s"Value $v of type ${v.getClass} is not convertible to JSON")
     }
+  }
+
+  def jValueToVariable(jvalue: JValue, v: Val[_]): Variable[_] = {
+    import org.json4s._
+    import shapeless._
+
+    val caseBoolean = TypeCase[Val[Boolean]]
+    val caseInt = TypeCase[Val[Int]]
+    val caseLong = TypeCase[Val[Long]]
+    val caseDouble = TypeCase[Val[Double]]
+    val caseString = TypeCase[Val[String]]
+    val caseArrayBoolean = TypeCase[Val[Array[Boolean]]]
+    val caseArrayInt = TypeCase[Val[Array[Int]]]
+    val caseArrayLong = TypeCase[Val[Array[Long]]]
+    val caseArrayDouble = TypeCase[Val[Array[Double]]]
+    val caseArrayString = TypeCase[Val[Array[String]]]
+
+    (jvalue, v) match {
+      case (value: JDouble, caseInt(v))         ⇒ Variable(v, value.num.intValue)
+      case (value: JDouble, caseLong(v))        ⇒ Variable(v, value.num.longValue)
+      case (value: JDouble, caseDouble(v))      ⇒ Variable(v, value.num)
+      case (value: JString, caseString(v))      ⇒ Variable(v, value.s)
+      case (value: JBool, caseBoolean(v))       ⇒ Variable(v, value.value)
+
+      case (value: JArray, caseArrayInt(v))     ⇒ Variable(v, value.arr.map(_.asInstanceOf[JDouble].num.intValue).toArray[Int])
+      case (value: JArray, caseArrayLong(v))    ⇒ Variable(v, value.arr.map(_.asInstanceOf[JDouble].num.longValue).toArray[Long])
+      case (value: JArray, caseArrayDouble(v))  ⇒ Variable(v, value.arr.map(_.asInstanceOf[JDouble].num).toArray[Double])
+      case (value: JArray, caseArrayString(v))  ⇒ Variable(v, value.arr.map(_.asInstanceOf[JString].s).toArray[String])
+      case (value: JArray, caseArrayBoolean(v)) ⇒ Variable(v, value.arr.map(_.asInstanceOf[JBool].value).toArray[Boolean])
+
+      case (jvalue, v)                          ⇒ throw new UserBadDataError(s"Impossible to store R output with value $jvalue in OpenMOLE variable $v.")
+    }
+
   }
 
 }
@@ -133,8 +160,18 @@ object RTask {
     def writeInputsJSON(file: File) =
       file.content = compact(render(RTask.toJSONValue(rInputs.map { case (v, _) ⇒ context(v) }.toArray)))
 
-    def rMapping(arrayName: String) =
+    def rInputMapping(arrayName: String) =
       rInputs.zipWithIndex.map { case ((_, name), i) ⇒ s"$name = $arrayName[[${i + 1}]]" }.mkString("\n")
+
+    def rOutputMapping =
+      s"""c(${rOutputs.map { case (name, _) ⇒ name }.mkString(",")})"""
+
+    def readOutputJSON(file: File) = {
+      import org.json4s._
+      import org.json4s.jackson.JsonMethods._
+      val outputValues = parse(file.content)
+      (outputValues.asInstanceOf[JArray].arr zip rOutputs.map(_._2)).map { case (jvalue, v) ⇒ RTask.jValueToVariable(jvalue, v) }
+    }
 
     newFile.withTmpFile("script", ".R") { scriptFile ⇒
       newFile.withTmpFile("inputs", ".json") { jsonInputs ⇒
@@ -143,18 +180,22 @@ object RTask {
         scriptFile.content = s"""
           |require("jsonlite")
           |inputs = read_json("inputs.json")
-          |${rMapping("inputs")}
+          |${rInputMapping("inputs")}
           |${script.from(p.context)(p.random, p.newFile, p.fileService)}
+          |write_json(${rOutputMapping}, "outputs.json", always_decimal = TRUE)
           """.stripMargin
+
+        val outputFile = Val[File]("outputFile", Namespace("RTask"))
 
         def uDockerTask = UDockerTask(uDocker, s"R --slave -f script.R", errorOnReturnValue, returnValue, stdOut, stdErr, _config, external) set (
           resources += (scriptFile, "script.R", true),
           resources += (jsonInputs, "inputs.json", true),
+          outputFiles += ("outputs.json", outputFile),
           reuseContainer := true
         )
 
-        rInputs.map { case (v, _) ⇒ context(v) }
-        uDockerTask.process(executionContext).from(context)
+        val resultContext = uDockerTask.process(executionContext).from(context)
+        resultContext ++ readOutputJSON(resultContext(outputFile))
       }
     }
   }

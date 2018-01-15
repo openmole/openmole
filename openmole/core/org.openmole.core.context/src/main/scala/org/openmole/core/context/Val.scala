@@ -19,6 +19,7 @@ package org.openmole.core.context
 
 import org.openmole.core.tools.obj.ClassUtils._
 import org.openmole.core.tools.obj.{ ClassUtils, Id }
+import shapeless.Typeable
 
 import scala.annotation.tailrec
 import scala.reflect._
@@ -106,6 +107,16 @@ object Val {
     override def compare(left: Val[_], right: Val[_]) =
       left.name compare right.name
   }
+
+  implicit def isTypeable[T: Manifest]: Typeable[Val[T]] =
+    new Typeable[Val[T]] {
+      def cast(t: Any): Option[Val[T]] =
+        t match {
+          case v: Val[_] if v.`type`.manifest == manifest[T] ⇒ Some(v.asInstanceOf[Val[T]])
+          case _ ⇒ None
+        }
+      def describe = s"Val[${manifest[T].toString}]"
+    }
 
 }
 

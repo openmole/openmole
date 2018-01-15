@@ -20,7 +20,9 @@ package org.openmole.core.context
 import org.openmole.core.tools.io.Prettifier._
 import org.openmole.core.workspace.Workspace
 import org.openmole.tool.random
+import shapeless.Typeable
 
+import scala.reflect.ClassTag
 import scala.util.Random
 
 object Variable {
