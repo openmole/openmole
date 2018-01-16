@@ -51,19 +51,23 @@ object RTask {
     }
 
     implicit def stringToRLibrary(name: String): InstallCommand = RLibrary(name)
-    def installCommands(libraries: Vector[InstallCommand]): Vector[String] = libraries.map(InstallCommand.toCommand)
+    def installCommands(libraries: Vector[InstallCommand]): Vector[String] = {
+      libraries.map(InstallCommand.toCommand)
+    }
   }
 
   def rImage(version: String) = DockerImage("r-base", version)
 
   def apply(
     script:      FromContext[String],
-    install:     Seq[InstallCommand] = Seq.empty,
+    install:     Seq[String]         = Seq.empty,
+    libraries:   Seq[InstallCommand] = Seq.empty,
     version:     String              = "3.4.3",
     forceUpdate: Boolean             = false
   )(implicit name: sourcecode.Name, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection): RTask = {
 
-    val installCommands = InstallCommand.installCommands(install.toVector ++ Seq(InstallCommand.RLibrary("jsonlite")))
+    val installCommands =
+      install ++ InstallCommand.installCommands(libraries.toVector ++ Seq(InstallCommand.RLibrary("jsonlite")))
     val cacheKey: Option[String] =
       Some((Seq(rImage(version).image, rImage(version).tag) ++ installCommands).mkString("\n").hash().toString)
 
@@ -72,7 +76,8 @@ object RTask {
         rImage(version),
         installCommands = installCommands,
         cachedKey = OptionalArgument(cacheKey),
-        forceUpdate = forceUpdate
+        forceUpdate = forceUpdate,
+        mode = "P1"
       )
 
     RTask(
@@ -119,6 +124,7 @@ object RTask {
     val caseArrayString = TypeCase[Val[Array[String]]]
 
     (jvalue, v) match {
+
       case (value: JDouble, caseInt(v))         ⇒ Variable(v, value.num.intValue)
       case (value: JDouble, caseLong(v))        ⇒ Variable(v, value.num.longValue)
       case (value: JDouble, caseDouble(v))      ⇒ Variable(v, value.num)

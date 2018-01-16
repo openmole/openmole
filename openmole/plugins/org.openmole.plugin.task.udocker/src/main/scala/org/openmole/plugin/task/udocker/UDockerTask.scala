@@ -94,7 +94,7 @@ object UDockerTask {
           case Right(x) ⇒ x
           case Left(x)  ⇒ throw new UserBadDataError(x.msg)
         },
-        mode = mode orElse Some("P2")
+        mode = mode orElse Some("P1")
       )
 
     installLibraries(uDocker, installCommands, cachedKey, forceUpdate)
