@@ -142,6 +142,7 @@ object DocumentationPages {
     gui,
     scala,
     java,
+    r,
     native,
     nativePackaging,
     ccplusplus,
@@ -194,10 +195,11 @@ object DocumentationPages {
 
   lazy val gui = DocumentationPage(name = "GUI guide", content = scalatex.documentation.GUI())
 
-  def modelPages = Seq(scala, java, rscript, python, ccplusplus, netLogo, mole, native)
+  def modelPages = Seq(scala, java, r, rscript, python, ccplusplus, netLogo, mole, native)
 
   lazy val scala = DocumentationPage(name = "Scala", content = scalatex.documentation.language.model.Scala(), details = Seq(scalaFunction))
   lazy val java = DocumentationPage(name = "Java", content = scalatex.documentation.language.model.Java())
+  lazy val r = DocumentationPage(name = "R", content = scalatex.documentation.language.model.R())
 
   lazy val native = DocumentationPage(
     name = "Other Languages",
