@@ -135,18 +135,19 @@ object UDockerTask {
           stdErr = outputRedirection.output
         )
 
+        if (forceUpdate) destination.recursiveDelete
         (containersDirectory / container) move destination
       }
 
     def installedUDockerContainer() =
       if (installCommands.isEmpty) uDocker
       else {
-        (forceUpdate, cachedKey) match {
-          case (false, Some(cacheKey)) ⇒
+        cachedKey match {
+          case Some(cacheKey) ⇒
             val cacheDirectory = installCacheDirectory(workspace)
             cacheDirectory.withLockInDirectory {
               val cachedContainer = cacheDirectory / cacheKey
-              if (!cachedContainer.exists()) installLibrariesInContainer(cachedContainer)
+              if (forceUpdate || !cachedContainer.exists()) installLibrariesInContainer(cachedContainer)
               (UDockerArguments.localDockerImage composeLens LocalDockerImage.container) set Some(cachedContainer) apply uDocker
             }
 
