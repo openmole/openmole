@@ -183,7 +183,7 @@ object RTask {
 
         writeInputsJSON(jsonInputs)
         scriptFile.content = s"""
-          |require("jsonlite")
+          |library("jsonlite")
           |$inputArrayName = read_json("$inputJSONName")
           |${rInputMapping(inputArrayName)}
           |${script.from(p.context)(p.random, p.newFile, p.fileService)}
