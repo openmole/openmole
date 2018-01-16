@@ -361,6 +361,8 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
           case t: Throwable ⇒ error(t)
         }
       }
+
+    execution.addCompilation(execId, compilationFuture)
   }
 
   def allStates(lines: Int) = execution.allStates(lines)

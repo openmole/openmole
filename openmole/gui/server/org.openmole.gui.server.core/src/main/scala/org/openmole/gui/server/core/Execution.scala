@@ -52,6 +52,10 @@ class Execution {
     runningEnvironments.get(envId).foreach { env ⇒ runningEnvironments(envId) = update(env) }
   }
 
+  def addCompilation(ex: ExecutionId, future: Future[_]) = atomic { implicit ctx ⇒
+    compilation.put(ex, future)
+  }
+
   def environmentListener(envId: EnvironmentId): Listner[Environment] = {
     case (env, bdl: BeginDownload) ⇒
       updateRunningEnvironment(envId) { RunningEnvironment.networkActivity composeLens NetworkActivity.downloadingFiles modify (_ + 1) }
@@ -142,15 +146,18 @@ class Execution {
   }
 
   def remove(key: ExecutionId) = {
-    cancel(key)
-    atomic { implicit ctx ⇒
-      removeRunningEnvironments(key)
-      staticExecutionInfo.remove(key)
-      moleExecutions.remove(key)
-      outputStreams.remove(key)
-      errors.remove(key)
-      compilation.remove(key)
-    }
+    val (compil, exec) =
+      atomic { implicit ctx ⇒
+        removeRunningEnvironments(key)
+        staticExecutionInfo.remove(key)
+        val exec = moleExecutions.remove(key)
+        outputStreams.remove(key)
+        errors.remove(key)
+        val compil = compilation.remove(key)
+        (compil, exec)
+      }
+    compil.foreach(_.cancel(true))
+    exec.foreach(_.cancel)
   }
 
   def environmentState(id: ExecutionId): Seq[EnvironmentState] =
