@@ -140,20 +140,45 @@ object RTask {
         case _            ⇒ throw new UserBadDataError(s"Can not convert value of type $jv to Long for OpenMOLE variable $v.")
       }
 
+    def jValueToDouble(jv: JValue) =
+      jv match {
+        case jv: JDouble  ⇒ jv.num.doubleValue
+        case jv: JInt     ⇒ jv.num.doubleValue
+        case jv: JLong    ⇒ jv.num.doubleValue
+        case jv: JDecimal ⇒ jv.num.doubleValue
+        case _            ⇒ throw new UserBadDataError(s"Can not convert value of type $jv to Long for OpenMOLE variable $v.")
+      }
+
+    def jValueToString(jv: JValue) =
+      jv match {
+        case jv: JDouble  ⇒ jv.num.toString
+        case jv: JInt     ⇒ jv.num.toString
+        case jv: JLong    ⇒ jv.num.toString
+        case jv: JDecimal ⇒ jv.num.toString
+        case jv: JString  ⇒ jv.s
+        case _            ⇒ throw new UserBadDataError(s"Can not convert value of type $jv to Long for OpenMOLE variable $v.")
+      }
+
+    def jValueToBoolean(jv: JValue) =
+      jv match {
+        case jv: JBool ⇒ jv.value
+        case _         ⇒ throw new UserBadDataError(s"Can not convert value of type $jv to Long for OpenMOLE variable $v.")
+      }
+
     (jvalue, v) match {
 
-      case (value: JValue, caseInt(v))          ⇒ Variable(v, jValueToInt(value))
-      case (value: JValue, caseLong(v))         ⇒ Variable(v, jValueToLong(value))
+      case (value: JArray, caseInt(v))          ⇒ Variable(v, jValueToInt(value.arr.head))
+      case (value: JArray, caseLong(v))         ⇒ Variable(v, jValueToLong(value.arr.head))
 
-      case (value: JDouble, caseDouble(v))      ⇒ Variable(v, value.num)
-      case (value: JString, caseString(v))      ⇒ Variable(v, value.s)
-      case (value: JBool, caseBoolean(v))       ⇒ Variable(v, value.value)
+      case (value: JArray, caseDouble(v))       ⇒ Variable(v, jValueToDouble(value.arr.head))
+      case (value: JArray, caseString(v))       ⇒ Variable(v, jValueToString(value.arr.head))
+      case (value: JArray, caseBoolean(v))      ⇒ Variable(v, jValueToBoolean(value.arr.head))
 
       case (value: JArray, caseArrayInt(v))     ⇒ Variable(v, value.arr.map(jValueToInt).toArray[Int])
       case (value: JArray, caseArrayLong(v))    ⇒ Variable(v, value.arr.map(jValueToLong).toArray[Long])
-      case (value: JArray, caseArrayDouble(v))  ⇒ Variable(v, value.arr.map(_.asInstanceOf[JDouble].num).toArray[Double])
-      case (value: JArray, caseArrayString(v))  ⇒ Variable(v, value.arr.map(_.asInstanceOf[JString].s).toArray[String])
-      case (value: JArray, caseArrayBoolean(v)) ⇒ Variable(v, value.arr.map(_.asInstanceOf[JBool].value).toArray[Boolean])
+      case (value: JArray, caseArrayDouble(v))  ⇒ Variable(v, value.arr.map(jValueToDouble).toArray[Double])
+      case (value: JArray, caseArrayString(v))  ⇒ Variable(v, value.arr.map(jValueToString).toArray[String])
+      case (value: JArray, caseArrayBoolean(v)) ⇒ Variable(v, value.arr.map(jValueToBoolean).toArray[Boolean])
 
       case (jvalue, v)                          ⇒ throw new UserBadDataError(s"Impossible to store R output with value $jvalue in OpenMOLE variable $v.")
     }
@@ -188,7 +213,7 @@ object RTask {
       rInputs.zipWithIndex.map { case ((_, name), i) ⇒ s"$name = $arrayName[[${i + 1}]]" }.mkString("\n")
 
     def rOutputMapping =
-      s"""c(${rOutputs.map { case (name, _) ⇒ name }.mkString(",")})"""
+      s"""list(${rOutputs.map { case (name, _) ⇒ name }.mkString(",")})"""
 
     def readOutputJSON(file: File) = {
       import org.json4s._
