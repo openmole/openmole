@@ -3,7 +3,7 @@
 @import org.openmole.site.stylesheet._
 
 
-@h1{Financial partners}
+@h1{Institutional partners}
 @a(img(src := Resource.img.partner.iscpif.file,  partners), href := shared.link.partner.iscpif, target := "_blank")
 @a(img(src := Resource.img.partner.geocite.file, partners), href := shared.link.partner.parisgeo, target := "_blank")
 @a(img(src := Resource.img.partner.biomedia.file, partners), href := shared.link.partner.biomedia, target := "_blank")
