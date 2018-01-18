@@ -116,11 +116,18 @@ object RTask {
     val caseLong = TypeCase[Val[Long]]
     val caseDouble = TypeCase[Val[Double]]
     val caseString = TypeCase[Val[String]]
+
     val caseArrayBoolean = TypeCase[Val[Array[Boolean]]]
     val caseArrayInt = TypeCase[Val[Array[Int]]]
     val caseArrayLong = TypeCase[Val[Array[Long]]]
     val caseArrayDouble = TypeCase[Val[Array[Double]]]
     val caseArrayString = TypeCase[Val[Array[String]]]
+
+    val caseArrayArrayBoolean = TypeCase[Val[Array[Array[Boolean]]]]
+    val caseArrayArrayInt = TypeCase[Val[Array[Array[Int]]]]
+    val caseArrayArrayLong = TypeCase[Val[Array[Array[Long]]]]
+    val caseArrayArrayDouble = TypeCase[Val[Array[Array[Double]]]]
+    val caseArrayArrayString = TypeCase[Val[Array[Array[String]]]]
 
     def jValueToInt(jv: JValue) =
       jv match {
@@ -165,22 +172,33 @@ object RTask {
         case _         ⇒ throw new UserBadDataError(s"Can not convert value of type $jv to Long for OpenMOLE variable $v.")
       }
 
+    def jValueToArray[T: Manifest](jv: JValue, convert: JValue ⇒ T) =
+      jv match {
+        case jv: JArray ⇒ jv.arr.map(convert).toArray[T]
+        case _          ⇒ throw new UserBadDataError(s"Can not convert value of type $jv to Long for OpenMOLE variable $v.")
+      }
+
     (jvalue, v) match {
 
-      case (value: JArray, caseInt(v))          ⇒ Variable(v, jValueToInt(value.arr.head))
-      case (value: JArray, caseLong(v))         ⇒ Variable(v, jValueToLong(value.arr.head))
+      case (value: JArray, caseInt(v))               ⇒ Variable(v, jValueToInt(value.arr.head))
+      case (value: JArray, caseLong(v))              ⇒ Variable(v, jValueToLong(value.arr.head))
+      case (value: JArray, caseDouble(v))            ⇒ Variable(v, jValueToDouble(value.arr.head))
+      case (value: JArray, caseString(v))            ⇒ Variable(v, jValueToString(value.arr.head))
+      case (value: JArray, caseBoolean(v))           ⇒ Variable(v, jValueToBoolean(value.arr.head))
 
-      case (value: JArray, caseDouble(v))       ⇒ Variable(v, jValueToDouble(value.arr.head))
-      case (value: JArray, caseString(v))       ⇒ Variable(v, jValueToString(value.arr.head))
-      case (value: JArray, caseBoolean(v))      ⇒ Variable(v, jValueToBoolean(value.arr.head))
+      case (value: JArray, caseArrayInt(v))          ⇒ Variable(v, jValueToArray(value, jValueToInt))
+      case (value: JArray, caseArrayLong(v))         ⇒ Variable(v, jValueToArray(value, jValueToLong))
+      case (value: JArray, caseArrayDouble(v))       ⇒ Variable(v, jValueToArray(value, jValueToDouble))
+      case (value: JArray, caseArrayString(v))       ⇒ Variable(v, jValueToArray(value, jValueToString))
+      case (value: JArray, caseArrayBoolean(v))      ⇒ Variable(v, jValueToArray(value, jValueToBoolean))
 
-      case (value: JArray, caseArrayInt(v))     ⇒ Variable(v, value.arr.map(jValueToInt).toArray[Int])
-      case (value: JArray, caseArrayLong(v))    ⇒ Variable(v, value.arr.map(jValueToLong).toArray[Long])
-      case (value: JArray, caseArrayDouble(v))  ⇒ Variable(v, value.arr.map(jValueToDouble).toArray[Double])
-      case (value: JArray, caseArrayString(v))  ⇒ Variable(v, value.arr.map(jValueToString).toArray[String])
-      case (value: JArray, caseArrayBoolean(v)) ⇒ Variable(v, value.arr.map(jValueToBoolean).toArray[Boolean])
+      case (value: JArray, caseArrayArrayInt(v))     ⇒ Variable(v, jValueToArray(value, jValueToArray(_, jValueToInt)))
+      case (value: JArray, caseArrayArrayLong(v))    ⇒ Variable(v, jValueToArray(value, jValueToArray(_, jValueToLong)))
+      case (value: JArray, caseArrayArrayDouble(v))  ⇒ Variable(v, jValueToArray(value, jValueToArray(_, jValueToDouble)))
+      case (value: JArray, caseArrayArrayString(v))  ⇒ Variable(v, jValueToArray(value, jValueToArray(_, jValueToString)))
+      case (value: JArray, caseArrayArrayBoolean(v)) ⇒ Variable(v, jValueToArray(value, jValueToArray(_, jValueToBoolean)))
 
-      case (jvalue, v)                          ⇒ throw new UserBadDataError(s"Impossible to store R output with value $jvalue in OpenMOLE variable $v.")
+      case (jvalue, v)                               ⇒ throw new UserBadDataError(s"Impossible to store R output with value $jvalue in OpenMOLE variable $v.")
     }
 
   }
