@@ -51,28 +51,28 @@ object UDockerTask {
   implicit def isTask: InputOutputBuilder[UDockerTask] = InputOutputBuilder(UDockerTask._config)
   implicit def isExternal: ExternalBuilder[UDockerTask] = ExternalBuilder(UDockerTask.external)
 
-  implicit def isBuilder = new ReturnValue[UDockerTask] with ErrorOnReturnValue[UDockerTask] with StdOutErr[UDockerTask] with EnvironmentVariables[UDockerTask] with HostFiles[UDockerTask] with ReuseContainer[UDockerTask] with WorkDirectory[UDockerTask] with UDockerUser[UDockerTask] { builder ⇒
+  implicit def isBuilder = new ReturnValue[UDockerTask] with ErrorOnReturnValue[UDockerTask] with StdOutErr[UDockerTask] with EnvironmentVariables[UDockerTask] with HostFiles[UDockerTask] with WorkDirectory[UDockerTask] { builder ⇒
     override def returnValue = UDockerTask.returnValue
     override def errorOnReturnValue = UDockerTask.errorOnReturnValue
     override def stdOut = UDockerTask.stdOut
     override def stdErr = UDockerTask.stdErr
     override def environmentVariables = UDockerTask.uDocker composeLens UDockerArguments.environmentVariables
     override def hostFiles = UDockerTask.uDocker composeLens UDockerArguments.hostFiles
-    override def reuseContainer = UDockerTask.uDocker composeLens UDockerArguments.reuseContainer
     override def workDirectory = UDockerTask.uDocker composeLens UDockerArguments.workDirectory
-    override def uDockerUser = UDockerTask.uDocker composeLens UDockerArguments.uDockerUser
   }
 
   def apply(
     image:           ContainerImage,
     command:         FromContext[String],
     installCommands: Seq[String]              = Vector.empty,
+    user:            OptionalArgument[String] = None,
     mode:            OptionalArgument[String] = None,
     cachedKey:       OptionalArgument[String] = None,
+    reuseContainer:  Boolean                  = false,
     forceUpdate:     Boolean                  = false
   )(implicit name: sourcecode.Name, newFile: NewFile, workspace: Workspace, preference: Preference, threadProvider: ThreadProvider, fileService: FileService, outputRedirection: OutputRedirection): UDockerTask =
     UDockerTask(
-      uDocker = createUDocker(image, installCommands, mode, cachedKey, forceUpdate),
+      uDocker = createUDocker(image, installCommands, user, mode, cachedKey, forceUpdate, reuseContainer),
       command = command,
       errorOnReturnValue = true,
       returnValue = None,
@@ -85,17 +85,20 @@ object UDockerTask {
   def createUDocker(
     image:           ContainerImage,
     installCommands: Seq[String]              = Vector.empty,
+    user:            OptionalArgument[String] = None,
     mode:            OptionalArgument[String] = None,
     cachedKey:       OptionalArgument[String] = None,
-    forceUpdate:     Boolean                  = false)(implicit newFile: NewFile, preference: Preference, threadProvider: ThreadProvider, workspace: Workspace, fileService: FileService, outputRedirection: OutputRedirection) = {
+    forceUpdate:     Boolean                  = false,
+    reuseContainer:  Boolean                  = true)(implicit newFile: NewFile, preference: Preference, threadProvider: ThreadProvider, workspace: Workspace, fileService: FileService, outputRedirection: OutputRedirection) = {
     val uDocker =
       UDockerArguments(
         localDockerImage = toLocalImage(image) match {
           case Right(x) ⇒ x
           case Left(x)  ⇒ throw new UserBadDataError(x.msg)
         },
-        mode = mode orElse Some("P1")
-      )
+        mode = mode orElse Some("P1"),
+        reuseContainer = reuseContainer,
+        user = user)
 
     installLibraries(uDocker, installCommands, cachedKey, forceUpdate)
 
@@ -271,7 +274,7 @@ object UDockerTask {
 
           val expandedCommand =
             UDocker.uDockerRunCommand(
-              uDocker.uDockerUser,
+              uDocker.user,
               containerEnvironmentVariables,
               volumes,
               userWorkDirectory(uDocker),
