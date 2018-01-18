@@ -26,16 +26,14 @@ object RTask {
   implicit def isTask: InputOutputBuilder[RTask] = InputOutputBuilder(RTask._config)
   implicit def isExternal: ExternalBuilder[RTask] = ExternalBuilder(RTask.external)
 
-  implicit def isBuilder = new ReturnValue[RTask] with ErrorOnReturnValue[RTask] with StdOutErr[RTask] with EnvironmentVariables[RTask] with HostFiles[RTask] with ReuseContainer[RTask] with WorkDirectory[RTask] with UDockerUser[RTask] { builder ⇒
+  implicit def isBuilder = new ReturnValue[RTask] with ErrorOnReturnValue[RTask] with StdOutErr[RTask] with EnvironmentVariables[RTask] with HostFiles[RTask] with WorkDirectory[RTask] { builder ⇒
     override def returnValue = RTask.returnValue
     override def errorOnReturnValue = RTask.errorOnReturnValue
     override def stdOut = RTask.stdOut
     override def stdErr = RTask.stdErr
     override def environmentVariables = RTask.uDocker composeLens UDockerArguments.environmentVariables
     override def hostFiles = RTask.uDocker composeLens UDockerArguments.hostFiles
-    override def reuseContainer = RTask.uDocker composeLens UDockerArguments.reuseContainer
     override def workDirectory = RTask.uDocker composeLens UDockerArguments.workDirectory
-    override def uDockerUser = RTask.uDocker composeLens UDockerArguments.uDockerUser
   }
 
   sealed trait InstallCommand
@@ -77,7 +75,8 @@ object RTask {
         installCommands = installCommands,
         cachedKey = OptionalArgument(cacheKey),
         forceUpdate = forceUpdate,
-        mode = "P1"
+        mode = "P1",
+        reuseContainer = true
       )
 
     RTask(
@@ -123,16 +122,35 @@ object RTask {
     val caseArrayDouble = TypeCase[Val[Array[Double]]]
     val caseArrayString = TypeCase[Val[Array[String]]]
 
+    def jValueToInt(jv: JValue) =
+      jv match {
+        case jv: JDouble  ⇒ jv.num.intValue
+        case jv: JInt     ⇒ jv.num.intValue
+        case jv: JLong    ⇒ jv.num.intValue
+        case jv: JDecimal ⇒ jv.num.intValue
+        case _            ⇒ throw new UserBadDataError(s"Can not convert value of type $jv to Int for OpenMOLE variable $v.")
+      }
+
+    def jValueToLong(jv: JValue) =
+      jv match {
+        case jv: JDouble  ⇒ jv.num.longValue
+        case jv: JInt     ⇒ jv.num.longValue
+        case jv: JLong    ⇒ jv.num.longValue
+        case jv: JDecimal ⇒ jv.num.longValue
+        case _            ⇒ throw new UserBadDataError(s"Can not convert value of type $jv to Long for OpenMOLE variable $v.")
+      }
+
     (jvalue, v) match {
 
-      case (value: JDouble, caseInt(v))         ⇒ Variable(v, value.num.intValue)
-      case (value: JDouble, caseLong(v))        ⇒ Variable(v, value.num.longValue)
+      case (value: JValue, caseInt(v))          ⇒ Variable(v, jValueToInt(value))
+      case (value: JValue, caseLong(v))         ⇒ Variable(v, jValueToLong(value))
+
       case (value: JDouble, caseDouble(v))      ⇒ Variable(v, value.num)
       case (value: JString, caseString(v))      ⇒ Variable(v, value.s)
       case (value: JBool, caseBoolean(v))       ⇒ Variable(v, value.value)
 
-      case (value: JArray, caseArrayInt(v))     ⇒ Variable(v, value.arr.map(_.asInstanceOf[JDouble].num.intValue).toArray[Int])
-      case (value: JArray, caseArrayLong(v))    ⇒ Variable(v, value.arr.map(_.asInstanceOf[JDouble].num.longValue).toArray[Long])
+      case (value: JArray, caseArrayInt(v))     ⇒ Variable(v, value.arr.map(jValueToInt).toArray[Int])
+      case (value: JArray, caseArrayLong(v))    ⇒ Variable(v, value.arr.map(jValueToLong).toArray[Long])
       case (value: JArray, caseArrayDouble(v))  ⇒ Variable(v, value.arr.map(_.asInstanceOf[JDouble].num).toArray[Double])
       case (value: JArray, caseArrayString(v))  ⇒ Variable(v, value.arr.map(_.asInstanceOf[JString].s).toArray[String])
       case (value: JArray, caseArrayBoolean(v)) ⇒ Variable(v, value.arr.map(_.asInstanceOf[JBool].value).toArray[Boolean])
@@ -198,12 +216,13 @@ object RTask {
 
         val outputFile = Val[File]("outputFile", Namespace("RTask"))
 
-        def uDockerTask = UDockerTask(uDocker, s"R --slave -f $rScriptName", errorOnReturnValue, returnValue, stdOut, stdErr, _config, external) set (
-          resources += (scriptFile, rScriptName, true),
-          resources += (jsonInputs, inputJSONName, true),
-          outputFiles += (outputJSONName, outputFile),
-          reuseContainer := true
-        )
+        def uDockerTask =
+          UDockerTask(
+            uDocker, s"R --slave -f $rScriptName", errorOnReturnValue, returnValue, stdOut, stdErr, _config, external) set (
+            resources += (scriptFile, rScriptName, true),
+            resources += (jsonInputs, inputJSONName, true),
+            outputFiles += (outputJSONName, outputFile)
+          )
 
         val resultContext = uDockerTask.process(executionContext).from(context)
         resultContext ++ readOutputJSON(resultContext(outputFile))
