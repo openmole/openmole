@@ -107,7 +107,7 @@ object RTask {
     }
   }
 
-  def jValueToVariable(jvalue: JValue, v: Val[_]): Variable[_] = {
+  def jValueToVariable(jValue: JValue, v: Val[_]): Variable[_] = {
     import org.json4s._
     import shapeless._
 
@@ -129,13 +129,15 @@ object RTask {
     val caseArrayArrayDouble = TypeCase[Val[Array[Array[Double]]]]
     val caseArrayArrayString = TypeCase[Val[Array[Array[String]]]]
 
+    def cannotConvert = throw new UserBadDataError(s"Can not convert value of type $jValue to Int for OpenMOLE variable $v.")
+
     def jValueToInt(jv: JValue) =
       jv match {
         case jv: JDouble  ⇒ jv.num.intValue
         case jv: JInt     ⇒ jv.num.intValue
         case jv: JLong    ⇒ jv.num.intValue
         case jv: JDecimal ⇒ jv.num.intValue
-        case _            ⇒ throw new UserBadDataError(s"Can not convert value of type $jv to Int for OpenMOLE variable $v.")
+        case _            ⇒ cannotConvert
       }
 
     def jValueToLong(jv: JValue) =
@@ -144,7 +146,7 @@ object RTask {
         case jv: JInt     ⇒ jv.num.longValue
         case jv: JLong    ⇒ jv.num.longValue
         case jv: JDecimal ⇒ jv.num.longValue
-        case _            ⇒ throw new UserBadDataError(s"Can not convert value of type $jv to Long for OpenMOLE variable $v.")
+        case _            ⇒ cannotConvert
       }
 
     def jValueToDouble(jv: JValue) =
@@ -153,7 +155,7 @@ object RTask {
         case jv: JInt     ⇒ jv.num.doubleValue
         case jv: JLong    ⇒ jv.num.doubleValue
         case jv: JDecimal ⇒ jv.num.doubleValue
-        case _            ⇒ throw new UserBadDataError(s"Can not convert value of type $jv to Long for OpenMOLE variable $v.")
+        case _            ⇒ cannotConvert
       }
 
     def jValueToString(jv: JValue) =
@@ -163,23 +165,22 @@ object RTask {
         case jv: JLong    ⇒ jv.num.toString
         case jv: JDecimal ⇒ jv.num.toString
         case jv: JString  ⇒ jv.s
-        case _            ⇒ throw new UserBadDataError(s"Can not convert value of type $jv to Long for OpenMOLE variable $v.")
+        case _            ⇒ cannotConvert
       }
 
     def jValueToBoolean(jv: JValue) =
       jv match {
         case jv: JBool ⇒ jv.value
-        case _         ⇒ throw new UserBadDataError(s"Can not convert value of type $jv to Long for OpenMOLE variable $v.")
+        case _         ⇒ cannotConvert
       }
 
     def jValueToArray[T: Manifest](jv: JValue, convert: JValue ⇒ T) =
       jv match {
         case jv: JArray ⇒ jv.arr.map(convert).toArray[T]
-        case _          ⇒ throw new UserBadDataError(s"Can not convert value of type $jv to Long for OpenMOLE variable $v.")
+        case _          ⇒ cannotConvert
       }
 
-    (jvalue, v) match {
-
+    (jValue, v) match {
       case (value: JArray, caseInt(v))               ⇒ Variable(v, jValueToInt(value.arr.head))
       case (value: JArray, caseLong(v))              ⇒ Variable(v, jValueToLong(value.arr.head))
       case (value: JArray, caseDouble(v))            ⇒ Variable(v, jValueToDouble(value.arr.head))
@@ -198,7 +199,7 @@ object RTask {
       case (value: JArray, caseArrayArrayString(v))  ⇒ Variable(v, jValueToArray(value, jValueToArray(_, jValueToString)))
       case (value: JArray, caseArrayArrayBoolean(v)) ⇒ Variable(v, jValueToArray(value, jValueToArray(_, jValueToBoolean)))
 
-      case (jvalue, v)                               ⇒ throw new UserBadDataError(s"Impossible to store R output with value $jvalue in OpenMOLE variable $v.")
+      case _                                         ⇒ cannotConvert
     }
 
   }
