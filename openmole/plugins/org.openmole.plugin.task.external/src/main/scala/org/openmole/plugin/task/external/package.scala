@@ -88,6 +88,9 @@ package external {
          */
         def +=[T: ExternalBuilder](file: File, name: OptionalArgument[FromContext[String]] = None, link: Boolean = false, os: OS = OS()): T ⇒ T =
           implicitly[ExternalBuilder[T]].resources add External.Resource(file, name.getOrElse(file.getName), link, os)
+
+        def +=[T: ExternalBuilder](file: File*): T ⇒ T = file.map(f ⇒ +=(f, None, false, OS()))
+
       }
   }
 }
