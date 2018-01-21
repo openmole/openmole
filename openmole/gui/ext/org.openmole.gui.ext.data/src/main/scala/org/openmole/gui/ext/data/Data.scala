@@ -339,60 +339,54 @@ sealed trait ExecutionInfo {
 
   def duration: Long
 
-  def ready: Long
-  def running: Long
-  def completed: Long
+  def capsules: Vector[(ExecutionInfo.CapsuleId, ExecutionInfo.JobStatuses)]
+
+  def ready: Long = capsules.map(_._2.ready).sum
+  def running: Long = capsules.map(_._2.running).sum
+  def completed: Long = capsules.map(_._2.completed).sum
 
   def environmentStates: Seq[EnvironmentState]
 }
 
 object ExecutionInfo {
 
+  type CapsuleId = String
+  case class JobStatuses(ready: Long, running: Long, completed: Long)
+
   case class Failed(
+    capsules:          Vector[(ExecutionInfo.CapsuleId, ExecutionInfo.JobStatuses)],
     error:             Error,
     environmentStates: Seq[EnvironmentState],
-    duration:          Long                  = 0L,
-    completed:         Long                  = 0L) extends ExecutionInfo {
+    duration:          Long                                                         = 0L) extends ExecutionInfo {
     def state: String = "failed"
-    def running = 0L
-    def ready: Long = 0L
   }
 
   case class Running(
-    ready:             Long,
-    running:           Long,
+    capsules:          Vector[(ExecutionInfo.CapsuleId, ExecutionInfo.JobStatuses)],
     duration:          Long,
-    completed:         Long,
     environmentStates: Seq[EnvironmentState]) extends ExecutionInfo {
     def state: String = "running"
   }
 
   case class Finished(
-    duration:          Long                  = 0L,
-    completed:         Long                  = 0L,
+    capsules:          Vector[(ExecutionInfo.CapsuleId, ExecutionInfo.JobStatuses)],
+    duration:          Long                                                         = 0L,
     environmentStates: Seq[EnvironmentState]) extends ExecutionInfo {
-    def ready: Long = 0L
-    def running: Long = 0L
     def state: String = "finished"
   }
 
   case class Canceled(
+    capsules:          Vector[(ExecutionInfo.CapsuleId, ExecutionInfo.JobStatuses)],
     environmentStates: Seq[EnvironmentState],
-    duration:          Long                  = 0L,
-    completed:         Long                  = 0L) extends ExecutionInfo {
+    duration:          Long                                                         = 0L) extends ExecutionInfo {
     def state: String = "canceled"
-
-    def running = 0L
-    def ready: Long = 0L
   }
 
   case class Launching() extends ExecutionInfo {
     def state: String = "launching"
 
     def duration: Long = 0L
-    def completed: Long = 0L
-    def ready: Long = 0L
-    def running = 0L
+    def capsules = Vector.empty
     def environmentStates: Seq[EnvironmentState] = Seq()
   }
 

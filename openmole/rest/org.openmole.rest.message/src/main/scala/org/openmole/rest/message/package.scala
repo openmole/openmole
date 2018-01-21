@@ -44,8 +44,9 @@ package object message {
     def state: ExecutionState.ExecutionState
   }
   case class Failed(error: Error, state: ExecutionState.ExecutionState = ExecutionState.failed) extends State
-  case class Running(ready: Long, running: Long, completed: Long, environments: Seq[EnvironmentStatus], state: ExecutionState.ExecutionState = ExecutionState.running) extends State
+  case class Running(ready: Long, running: Long, completed: Long, capsules: Vector[(String, CapsuleState)], environments: Seq[EnvironmentStatus], state: ExecutionState.ExecutionState = ExecutionState.running) extends State
   case class Finished(state: ExecutionState.ExecutionState = ExecutionState.finished) extends State
 
   case class EnvironmentStatus(name: Option[String], submitted: Long, running: Long, done: Long, failed: Long, errors: Seq[Error])
+  case class CapsuleState(ready: Long, running: Long, completed: Long)
 }
