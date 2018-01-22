@@ -49,9 +49,9 @@ object PluginInfo {
 
   case class KeyWordTrait(value: String)
 
-  def keyWords = plugins.flatMap(_._2.keyWords)
-  def nameSpaces = plugins.flatMap(_._2.namespaces)
-  def keyWordTraits = plugins.flatMap(_._2.keyWordTraits)
+  def keyWords = pluginsInfo.flatMap(_.keyWords)
+  def nameSpaces = pluginsInfo.flatMap(_.namespaces)
+  def keyWordTraits = pluginsInfo.flatMap(_.keyWordTraits)
 }
 
 case class PluginInfo(

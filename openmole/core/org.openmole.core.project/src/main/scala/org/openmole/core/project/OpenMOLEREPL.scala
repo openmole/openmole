@@ -43,8 +43,7 @@ object OpenMOLEREPL {
 
   def dslImport = Seq(
     classOf[org.openmole.core.dsl.DSLPackage].getPackage.getName + "._"
-  ) ++
-    autoImports
+  ) ++ autoImports
 
   def imports = initialisationCommands(dslImport).mkString("\n")
 
