@@ -29,27 +29,27 @@ import mgo.algorithm.NoisyPSE.Individual
 import mgo.niche._
 import monocle.macros._
 
-object GenomeProfile {
+object NichedNSGA2 {
 
-  object ProfileElement {
-    case class ContinuousElement(v: Val[Double], n: Int) extends ProfileElement
-    case class ContinuousSequenceElement(v: Val[Array[Double]], i: Int, n: Int) extends ProfileElement
-    case class DiscreteElement(v: Val[Int], n: Int) extends ProfileElement
-    case class DiscreteSequenceElement(v: Val[Array[Int]], i: Int, n: Int) extends ProfileElement
+  object NichedElement {
+    case class Continuous(v: Val[Double], n: Int) extends NichedElement
+    case class ContinuousSequence(v: Val[Array[Double]], i: Int, n: Int) extends NichedElement
+    case class Discrete(v: Val[Int], n: Int) extends NichedElement
+    case class DiscreteSequence(v: Val[Array[Int]], i: Int, n: Int) extends NichedElement
   }
 
-  sealed trait ProfileElement
+  sealed trait NichedElement
 
-  def niche[I](genome: Genome, profiled: Seq[ProfileElement], continuousProfile: (Int, Int) ⇒ Niche[I, Int], discreteProfile: Int ⇒ Niche[I, Int]) = {
+  def niche[I](genome: Genome, profiled: Seq[NichedElement], continuousProfile: (Int, Int) ⇒ Niche[I, Int], discreteProfile: Int ⇒ Niche[I, Int]) = {
 
     def notFound(v: Val[_]) = throw new UserBadDataError(s"Variable $v not found in the genome")
 
     val niches =
       profiled.toVector.map {
-        case c: ProfileElement.ContinuousElement         ⇒ Genome.continuousIndex(genome, c.v).getOrElse(notFound(c.v)).map { index ⇒ continuousProfile(index, c.n) }
-        case c: ProfileElement.ContinuousSequenceElement ⇒ Genome.continuousIndex(genome, c.v).getOrElse(notFound(c.v)).map { index ⇒ continuousProfile(index + c.i, c.n) }
-        case c: ProfileElement.DiscreteElement           ⇒ Genome.discreteIndex(genome, c.v).getOrElse(notFound(c.v)).map { index ⇒ discreteProfile(index) }
-        case c: ProfileElement.DiscreteSequenceElement   ⇒ Genome.discreteIndex(genome, c.v).getOrElse(notFound(c.v)).map { index ⇒ discreteProfile(index + c.i) }
+        case c: NichedElement.Continuous         ⇒ Genome.continuousIndex(genome, c.v).getOrElse(notFound(c.v)).map { index ⇒ continuousProfile(index, c.n) }
+        case c: NichedElement.ContinuousSequence ⇒ Genome.continuousIndex(genome, c.v).getOrElse(notFound(c.v)).map { index ⇒ continuousProfile(index + c.i, c.n) }
+        case c: NichedElement.Discrete           ⇒ Genome.discreteIndex(genome, c.v).getOrElse(notFound(c.v)).map { index ⇒ discreteProfile(index) }
+        case c: NichedElement.DiscreteSequence   ⇒ Genome.discreteIndex(genome, c.v).getOrElse(notFound(c.v)).map { index ⇒ discreteProfile(index + c.i) }
       }.sequence
 
     niches.map { ns ⇒ Profile.sequenceNiches[I, Int](ns) }
@@ -159,19 +159,7 @@ object GenomeProfile {
     operatorExploration: Double)
 
   def apply(
-    x:         Val[Double],
-    nX:        Int,
-    genome:    Genome,
-    objective: Objective
-  ): WorkflowIntegration.DeterministicGA[DeterministicParams] =
-    apply(
-      Vector(ProfileElement.ContinuousElement(x, nX)),
-      genome,
-      objective
-    )
-
-  def apply(
-    profiled:  Seq[ProfileElement],
+    profiled:  Seq[NichedElement],
     genome:    Genome,
     objective: Objective
   ): WorkflowIntegration.DeterministicGA[DeterministicParams] =
@@ -302,24 +290,11 @@ object GenomeProfile {
     aggregation:         Vector[Vector[Double]] ⇒ Vector[Double])
 
   def apply(
-    x:          Val[Double],
-    nX:         Int,
-    genome:     Genome,
-    objective:  Objective,
-    stochastic: Stochastic[Id]
-  ): WorkflowIntegration.StochasticGA[StochasticParams] = apply(
-    Vector(ProfileElement.ContinuousElement(x, nX)),
-    genome,
-    objective,
-    stochastic
-  )
-
-  def apply(
-    profiled:   Seq[ProfileElement],
+    profiled:   Seq[NichedElement],
     genome:     Genome,
     objective:  Objective,
     stochastic: Stochastic[Id],
-    nicheSize:  Int                 = 20): WorkflowIntegration.StochasticGA[StochasticParams] = {
+    nicheSize:  Int                = 20): WorkflowIntegration.StochasticGA[StochasticParams] = {
 
     import org.openmole.core.dsl.seqIsFunctor
 
@@ -350,5 +325,35 @@ object GenomeProfile {
     )
 
   }
+
+}
+
+object GenomeProfile {
+
+  def apply(
+    x:         Val[Double],
+    nX:        Int,
+    genome:    Genome,
+    objective: Objective
+  ): WorkflowIntegration.DeterministicGA[NichedNSGA2.DeterministicParams] =
+    NichedNSGA2(
+      Vector(NichedNSGA2.NichedElement.Continuous(x, nX)),
+      genome,
+      objective
+    )
+
+  def apply(
+    x:          Val[Double],
+    nX:         Int,
+    genome:     Genome,
+    objective:  Objective,
+    stochastic: Stochastic[Id]
+  ): WorkflowIntegration.StochasticGA[NichedNSGA2.StochasticParams] =
+    NichedNSGA2(
+      Vector(NichedNSGA2.NichedElement.Continuous(x, nX)),
+      genome,
+      objective,
+      stochastic
+    )
 
 }
