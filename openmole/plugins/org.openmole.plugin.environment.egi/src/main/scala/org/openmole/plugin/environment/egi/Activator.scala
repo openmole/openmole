@@ -28,7 +28,14 @@ class Activator extends BundleActivator {
   }
 
   override def start(context: BundleContext): Unit = {
-    PluginInfo.register(this, Vector(this.getClass.getPackage))
+    import org.openmole.core.pluginmanager.KeyWord._
+
+    val keyWords =
+      Vector(
+        Environment(classOf[EGIEnvironment[_]])
+      )
+
+    PluginInfo.register(this, Vector(this.getClass.getPackage), keyWords = keyWords)
     ConfigurationInfo.register(
       this,
       ConfigurationInfo.list(EGIEnvironment) //++ ConfigurationInfo.list(DIRACEnvironment)

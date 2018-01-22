@@ -17,8 +17,6 @@
 
 package org.openmole.plugin.domain.range
 
-import org.openmole.core.pluginmanager.PluginInfoActivator
-
 import org.openmole.core.pluginmanager.{ KeyWord, PluginInfo }
 import org.osgi.framework._
 
