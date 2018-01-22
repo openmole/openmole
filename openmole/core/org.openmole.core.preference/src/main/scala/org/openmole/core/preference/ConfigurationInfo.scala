@@ -7,10 +7,10 @@ import scala.reflect.macros.whitebox._
 
 object ConfigurationInfo {
 
-  val all = new ConcurrentHashMap[Class[_], Seq[ConfigurationLocation[_]]]().asScala
+  val all = new ConcurrentHashMap[AnyRef, Seq[ConfigurationLocation[_]]]().asScala
 
-  def add(clazz: Class[_], configurations: Seq[ConfigurationLocation[_]]) = all += (clazz → configurations)
-  def remove(clazz: Class[_]) = all -= clazz
+  def register(id: AnyRef, configurations: Seq[ConfigurationLocation[_]]) = all += (id → configurations)
+  def unregister(clazz: AnyRef) = all -= clazz
 
   import scala.language.experimental.macros
 

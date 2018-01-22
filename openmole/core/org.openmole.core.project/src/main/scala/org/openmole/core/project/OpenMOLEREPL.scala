@@ -32,9 +32,9 @@ object OpenMOLEREPL {
 
   def keywordNamespaceCode = {
     def withPart = {
-      val keyWordTraits = PluginInfo.pluginsInfo.flatMap(_.keywordTraits)
+      val keyWordTraits = PluginInfo.pluginsInfo.flatMap(_.keyWordTraits)
       if (keyWordTraits.isEmpty) ""
-      else s"""with ${PluginInfo.pluginsInfo.flatMap(_.keywordTraits).mkString(" with ")}"""
+      else s"""with ${PluginInfo.pluginsInfo.flatMap(_.keyWordTraits).mkString(" with ")}"""
     }
     s"""
        |object $keywordNamespace extends ${classOf[DSLPackage].getCanonicalName} $withPart

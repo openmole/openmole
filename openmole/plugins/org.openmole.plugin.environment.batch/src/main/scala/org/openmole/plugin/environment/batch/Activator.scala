@@ -26,13 +26,13 @@ import org.osgi.framework.{ BundleActivator, BundleContext }
 
 class Activator extends BundleActivator {
   override def stop(context: BundleContext): Unit = {
-    PluginInfo.remove(this.getClass)
-    ConfigurationInfo.remove(this.getClass)
+    PluginInfo.unregister(this)
+    ConfigurationInfo.unregister(this)
   }
 
   override def start(context: BundleContext): Unit = {
-    PluginInfo.add(this.getClass)
-    ConfigurationInfo.add(
+    PluginInfo.register(this, Vector(this.getClass.getPackage))
+    ConfigurationInfo.register(
       this.getClass,
       ConfigurationInfo.list(BatchEnvironment) ++
         ConfigurationInfo.list(ReplicaCatalog) ++
