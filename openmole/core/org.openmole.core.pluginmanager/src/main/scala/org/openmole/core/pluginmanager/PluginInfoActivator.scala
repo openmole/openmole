@@ -64,7 +64,10 @@ sealed trait KeyWord {
 }
 
 object KeyWord {
+
+  implicit def fromString(s: String) = Word(s)
   implicit def classToString(c: Class[_]) = c.getSimpleName
+
   case class Task(name: String) extends KeyWord
   case class Hook(name: String) extends KeyWord
   case class Source(name: String) extends KeyWord
@@ -75,6 +78,7 @@ object KeyWord {
   case class Transition(name: String) extends KeyWord
   case class Sampling(name: String) extends KeyWord
   case class Word(name: String) extends KeyWord
+  case class Domain(name: String) extends KeyWord
 }
 
 trait PluginInfoActivator extends BundleActivator {

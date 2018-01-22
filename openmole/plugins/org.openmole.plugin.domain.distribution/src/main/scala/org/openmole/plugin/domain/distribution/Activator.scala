@@ -17,6 +17,20 @@
 
 package org.openmole.plugin.domain.distribution
 
-import org.openmole.core.pluginmanager.PluginInfoActivator
+import org.openmole.core.pluginmanager.PluginInfo
+import org.osgi.framework._
 
-class Activator extends PluginInfoActivator
+class Activator extends BundleActivator {
+  override def stop(context: BundleContext): Unit = {
+    PluginInfo.unregister(this)
+  }
+
+  override def start(context: BundleContext): Unit = {
+    import org.openmole.core.pluginmanager.KeyWord._
+
+    val keyWords = Vector(Domain(classOf[UniformDistribution[_]]))
+
+    PluginInfo.register(this, namespaces = Vector(this.getClass.getPackage), keyWords = keyWords)
+  }
+}
+
