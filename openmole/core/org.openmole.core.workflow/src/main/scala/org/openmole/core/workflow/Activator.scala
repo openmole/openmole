@@ -29,6 +29,8 @@ class Activator extends BundleActivator {
         Word(classOf[Puzzle]),
         Word("in"),
         Word("is"),
+        Word("on"),
+        Word("by"),
         Transition("--"),
         Transition("-<"),
         Transition(">-"),
