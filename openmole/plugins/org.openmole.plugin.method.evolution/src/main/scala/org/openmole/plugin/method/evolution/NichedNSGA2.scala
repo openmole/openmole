@@ -15,10 +15,13 @@ import monocle.macros._
 object NichedNSGA2 {
 
   object NichedElement {
+    implicit def fromValDouble(v: (Val[Double], Int)) = Continuous(v._1, v._2)
+    implicit def fromValInt(v: Val[Int]) = Discrete(v)
+
     case class Continuous(v: Val[Double], n: Int) extends NichedElement
     case class ContinuousSequence(v: Val[Array[Double]], i: Int, n: Int) extends NichedElement
-    case class Discrete(v: Val[Int], n: Int) extends NichedElement
-    case class DiscreteSequence(v: Val[Array[Int]], i: Int, n: Int) extends NichedElement
+    case class Discrete(v: Val[Int]) extends NichedElement
+    case class DiscreteSequence(v: Val[Array[Int]], i: Int) extends NichedElement
   }
 
   sealed trait NichedElement
