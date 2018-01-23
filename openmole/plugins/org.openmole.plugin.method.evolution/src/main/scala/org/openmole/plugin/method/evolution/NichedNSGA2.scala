@@ -17,11 +17,12 @@ object NichedNSGA2 {
   object NichedElement {
     implicit def fromValDouble(v: (Val[Double], Int)) = Continuous(v._1, v._2)
     implicit def fromValInt(v: Val[Int]) = Discrete(v)
+    implicit def fromValString(v: Val[String]) = Discrete(v)
 
     case class Continuous(v: Val[Double], n: Int) extends NichedElement
     case class ContinuousSequence(v: Val[Array[Double]], i: Int, n: Int) extends NichedElement
-    case class Discrete(v: Val[Int]) extends NichedElement
-    case class DiscreteSequence(v: Val[Array[Int]], i: Int) extends NichedElement
+    case class Discrete(v: Val[_]) extends NichedElement
+    case class DiscreteSequence(v: Val[Array[_]], i: Int) extends NichedElement
   }
 
   sealed trait NichedElement
@@ -146,7 +147,7 @@ object NichedNSGA2 {
     operatorExploration: Double)
 
   def apply(
-    profiled:   Seq[NichedElement],
+    niche:      Seq[NichedElement],
     genome:     Genome,
     objectives: Objectives,
     muByNiche:  Int): WorkflowIntegration.DeterministicGA[DeterministicParams] =
@@ -154,7 +155,7 @@ object NichedNSGA2 {
       DeterministicParams(
         genome = genome,
         objectives = objectives,
-        niche = niche[CDGenome.DeterministicIndividual.Individual](genome, profiled, Profile.continuousProfile, Profile.discreteProfile),
+        niche = NichedNSGA2.niche[CDGenome.DeterministicIndividual.Individual](genome, niche, Profile.continuousProfile, Profile.discreteProfile),
         operatorExploration = operatorExploration,
         muByNiche = muByNiche
       ),
@@ -278,7 +279,7 @@ object NichedNSGA2 {
     aggregation:         Vector[Vector[Double]] ⇒ Vector[Double])
 
   def apply(
-    profiled:   Seq[NichedElement],
+    niche:      Seq[NichedElement],
     genome:     Genome,
     objectives: Objectives,
     stochastic: Stochastic[Id],
@@ -300,7 +301,7 @@ object NichedNSGA2 {
     WorkflowIntegration.StochasticGA(
       StochasticParams(
         muByNiche = nicheSize,
-        niche = niche[CDGenome.NoisyIndividual.Individual](genome, profiled, NoisyProfile.continuousProfile, NoisyProfile.discreteProfile),
+        niche = NichedNSGA2.niche[CDGenome.NoisyIndividual.Individual](genome, niche, NoisyProfile.continuousProfile, NoisyProfile.discreteProfile),
         operatorExploration = operatorExploration,
         genome = genome,
         objectives = objectives,
