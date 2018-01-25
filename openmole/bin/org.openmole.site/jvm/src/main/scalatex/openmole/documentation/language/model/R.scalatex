@@ -3,3 +3,289 @@
 
 
 @h2("R Task")
+
+
+
+@sect{Simple RTask}
+
+    @p The toy R script for this first test case is:
+
+    @br
+    @hl.highlight("""
+        f= function(x){
+            x+1
+            }
+        j=f(2)""", "R")
+
+    @p We save this to @i{Rscript1.R}, it will be used in the second part.
+    Here we create a function @i{f}, and a variable @i{j} in which we
+    store the result of the evalution of the function by 2.
+
+    We use an Rtask in openMole to run this R script. In the RTsak we write code in R !
+
+    @br For this first OM script, I write the R script in the Rtask, we will see after how to
+    import it from a @i{file.R}, and deal with libraries.
+    For this first example, the Rtask does not communicate with other variable in the OM script, and
+    we just execute the R script, we will see then how to input and output OM variable in the Rtask.
+
+
+    @br @hl.openmole( s"""
+        val rTask1 =
+         RTask(${tq}
+        #  Here you write code in R
+         f= function(x){
+              x+1
+              }
+         j=f(2)
+         ${tq}   )
+
+        rTask1 """  )
+
+
+
+
+@sect{Upload your script}
+
+    @p You can now upload @i{Rscript1.R} to your OpenMOLE workspace.
+
+    Here is the OM script to use it in the Rtask. We need to specify the name of the @i{file.R}, and its path.
+
+
+    @br @hl.openmole( s"""
+        val rTask2 =
+        RTask(${tq}
+        source("Rscript1.R")
+        ${tq}  ) set(
+        resources += workDirectory / "Rscript1.R"
+        )
+
+        rTask2
+        """)
+
+
+
+
+
+@sect{Input and output values}
+
+    @p  In this script we want to pass the OM variable @i{i} to the Rtask, we thus have to add @i{set} to the task.
+    In practise, @i{i} it can be a variable whose value is given by a previous task, here we set in manually to 3.
+    Remark, here the OM variable has the same name as the R variable @i{i}, of course, it is not an obligation as seen after
+
+
+    @br @hl.openmole( s"""
+        val i = Val[Int]
+
+          val rTask3 =
+          RTask(${tq}
+            f= function(x){
+              x+1
+              }
+            j=f(i)
+            ${tq}   ) set(
+            rInputs += i,
+            i := 3
+          )
+          rTask3
+            """)
+
+
+
+    @p  In the script below, we add an output variable @i{j}, and we change the name of the R variable (now @i{varRi})
+    that is map to the OM variable @i{i}.
+
+
+    @br @hl.openmole( s"""
+
+        val i = Val[Int]
+        val j = Val[Int]
+
+        val rTask4 =
+          RTask(${tq}
+            f= function(x){
+              x+1
+              }
+            j=f(varRi)
+            ${tq}      ) set(
+            rInputs += (i,"varRi" ),
+            rOutputs += ( j),
+            i := 3
+          )
+
+
+          rTask4 hook ToStringHook()
+         """)
+
+
+    @p Remark : if you have several outputs, you can put them all in an routputs +=(Routput1,OMoutput1,Routput2,OMoutput2)
+    or simply several rOutputs, see @i{Rtask5}.
+      à VOIR AVEC ROMAIN !
+
+       @br @hl.openmole( s"""
+            rOutputs += ( "j",j),
+            rOutputs += ( "k",c),
+            rOutputs += ( c, "k" , j , "j"),
+            rOutputs += ( "k",c,"j",j)
+             """)
+
+
+     Remark that the variable in the rOutputs are directly store in the output,
+     but you can add output that are not in the R task, for example,
+
+
+
+            @br @hl.openmole( s"""
+                 val i = Val[Int]
+                 val j = Val[Double]
+                 val c = Val[Double]
+
+                 val rTask5 =
+                   RTask(${tq}
+                     f= function(x){
+                       x+1
+                       }
+                     j=f(i)
+                     k=18
+                     ${tq}       ) set(
+                     rInputs += (i ),
+                     rOutputs += ( "j",j),
+                     rOutputs += ( "k",c),
+                     rOutputs += ( c, "k" , j , "j"),
+                     rOutputs += ( "k",c,"j",j),
+                     outputs += i ,
+                     i := 3
+                   )
+                   rTask5 hook ToStringHook()
+
+                  """)
+
+
+
+     This technic can be used when you have a chain of tasks and that you want to use a hook (the hook concerns only the output of the
+      last task, thus we can add a variable of interest in the output of the rTask even if it does not appear in this ask,
+      also think to add those variables as input).
+
+
+
+
+@sect{Input and output values}
+
+    @p faire avec des fichiers, passés comme variable OM, bien insiter avec la différence du hook qui affiche la fichier.
+
+    @p It is also possible to pass file as argument of the rTask. We illustrate this in the following workflow.
+    We have first a ScalaTask that write numbers in a file. The file is the openMole variable  @i{g}. In order to have access
+    to this file in the RTask, we put  @i{g} as output of the ScalaTask.
+    The script R in the RTask read a file, called @i{fileForR} (it is supposed to have numeric values, seperated by a simple space),
+    create a R varaible @i{temp2}, which is a vector that contains the value of the file @i{fileForR}. We then apply the function
+    @i{f} to that vector.  The end of the workflow just ask openMole to chain the two task and to display the outputs of the
+    last task (here the Om variable @i{resR}).
+
+    @p Remark that the @i{g} is an openMole variable. If you want to see the file created in your workspace, you can use a hook
+    @aa("hooks", href := DocumentationPages.hook.file), but you have to put @i{g} as output of the RTask (see the last
+     section to have a worflow example).
+
+
+
+           @br @hl.openmole( s"""
+               val g = Val[File]
+
+               val task1 = ScalaTask(
+               ${tq}
+                  import better.files._
+                   val g = newFile()
+                   g.toScala.overwrite("3 6 4")
+                ${tq}) set (
+                  outputs += (g)
+                  )
+
+               /////////////////////////////
+
+               val resR =  Val[Array[Double]]
+
+
+               val rTask =
+                 RTask(${tq}
+                   temp1=read.table("fileForR", sep="")
+                   temp2=as.vector(temp1,mode = "numeric")
+
+                   f= function(x){
+                   x+1
+                   }
+                   k=f(temp2)
+                   ${tq},
+                 ) set(
+                   inputFiles += (g, "fileForR"),
+                   rOutputs += ("k", resR)
+                   )
+
+
+               (task1 -- rTask ) hook ToStringHook(resR)
+
+
+                 """)
+
+
+
+
+
+
+
+@sect{Use a library}
+
+    @p Here we give an example of how to use a library in a RTask. We use the function @i{CHullArea} of
+    the library @i{GeoRange} to calculate the area of a set of points (the area of its convex envelop).
+    Write the name of the package you need in your Rscript in the field @i{libraries}, and the  ..... in @i{install}.
+
+    @p Remark : the first time you use R with libraires it takes some time to install them, but for the next uses
+    the libraries will be store in the cash, and thus it is quicker.
+
+
+
+
+
+    @br @hl.openmole( s"""
+                      val area = Val[Double]
+
+                      val rTask3 =
+                        RTask(${tq}
+                          library(GeoRange)
+                          n=40
+                          x = rexp(n, 5)
+                          y = rexp(n, 5)
+
+                      # to have the convex envelopp of the set of points we created
+                          liste = chull(x,y)
+                          hull <- cbind(x,y) [liste,]
+
+                          #require GeoRange
+                          area=CHullArea(hull[,1],hull[,2])
+                          ${tq},
+                          install = Seq("apt update", "apt install -y libgdal-dev libproj-dev"),
+                          libraries = Seq("GeoRange")
+                        ) set(
+                          rOutputs += (area)
+                          )
+
+                      rTask3 hook ToStringHook()
+                 """)
+
+
+
+
+
+
+
+
+@sect{A complete worflow}
+
+
+
+    @p faire un exmple complet de worflow avec lescture de file créé par une scala task (éventuellement un hook pour imprimer)
+    qui part dans une R task avec libraries
+
+
+
+
+
+
+
