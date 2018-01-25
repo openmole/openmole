@@ -18,15 +18,15 @@
         j=f(2)""", "R")
 
     @p We save this to @i{Rscript1.R}, it will be used in the second part.
-    Here we create a function @i{f}, and a variable @i{j} in which we
+    Here we crate a function @i{f}, and a variable @i{j} in which we
     store the result of the evalution of the function by 2.
 
-    We use an Rtask in openMole to run this R script. In the RTsak we write code in R !
+    @br We use an Rtask in OpenMOLE to run this R script. In the RTsak we write code in R !
 
-    @br For this first OM script, I write the R script in the Rtask, we will see after how to
-    import it from a @i{file.R}, and deal with libraries.
-    For this first example, the Rtask does not communicate with other variable in the OM script, and
-    we just execute the R script, we will see then how to input and output OM variable in the Rtask.
+    @br For this first OpenMOLE  script, I write the R script in the Rtask, we will see after how to
+    import it from a @i{file.R}, and deal with libraries.  Moreover, this Rtask does not communicate with other
+    variables in the OpenMOLE script, and we just execute the R script .
+    We will see in the sections below how to input and output OpenMOLE variables in the Rtask.
 
 
     @br @hl.openmole( s"""
@@ -48,7 +48,8 @@
 
     @p You can now upload @i{Rscript1.R} to your OpenMOLE workspace.
 
-    Here is the OM script to use it in the Rtask. We need to specify the name of the @i{file.R}, and its path.
+    Here is the OpenMOLE script to use it in the Rtask. In the @i{resource} of the Rtask'set, you have to precise the location
+    of the @i{file.R} (imported in the R script thanks to @i{source()}).
 
 
     @br @hl.openmole( s"""
@@ -68,9 +69,12 @@
 
 @sect{Input and output values}
 
-    @p  In this script we want to pass the OM variable @i{i} to the Rtask, we thus have to add @i{set} to the task.
-    In practise, @i{i} it can be a variable whose value is given by a previous task, here we set in manually to 3.
-    Remark, here the OM variable has the same name as the R variable @i{i}, of course, it is not an obligation as seen after
+    @p  In this script we want to pass the OpenMOLE variable @i{i} to the Rtask. It is possibble through an @i{input}
+    in the @i{set} of the task.
+
+    @br In practise, @i{i} can be a variable whose value is given by a previous task, here we set in manually to 3.
+
+    @br Remark : here the OpenMOLE variable has the same name as the R variable @i{i}, but it is not an obligation as seen after.
 
 
     @br @hl.openmole( s"""
@@ -91,8 +95,8 @@
 
 
 
-    @p  In the script below, we add an output variable @i{j}, and we change the name of the R variable (now @i{varRi})
-    that is map to the OM variable @i{i}.
+    @p  In the script below (@i{rTask4}), we add an output variable @i{j}, and we change the name of the R variable (now @i{varRi})
+    that is map to the OpenMOLE variable @i{i}.
 
 
     @br @hl.openmole( s"""
@@ -119,18 +123,17 @@
 
     @p Remark : if you have several outputs, you can put them all in an routputs +=(Routput1,OMoutput1,Routput2,OMoutput2)
     or simply several rOutputs, see @i{Rtask5}.
-      à VOIR AVEC ROMAIN !
+    @p ROMAIN, I'm not sure it works to put multiple outputs in a @i{routputs}
 
        @br @hl.openmole( s"""
             rOutputs += ( "j",j),
-            rOutputs += ( "k",c),
+            rOutputs += ( "k",c), // the 2 first lines it's ok but not the last
             rOutputs += ( c, "k" , j , "j"),
-            rOutputs += ( "k",c,"j",j)
              """)
 
 
-     Remark that the variable in the rOutputs are directly store in the output,
-     but you can add output that are not in the R task, for example,
+     @p Remark that variables in the rOutputs are directly store in the output, but you can add outputs
+      that are not in the R task (for example, the variable @i{c} in @i{rTask5 } below).
 
 
 
@@ -145,15 +148,13 @@
                        x+1
                        }
                      j=f(i)
-                     k=18
                      ${tq}       ) set(
                      rInputs += (i ),
+                     inputs += c,
                      rOutputs += ( "j",j),
-                     rOutputs += ( "k",c),
-                     rOutputs += ( c, "k" , j , "j"),
-                     rOutputs += ( "k",c,"j",j),
-                     outputs += i ,
-                     i := 3
+                     outputs += (i,c) ,
+                     i := 3 ,
+                     c:=2
                    )
                    rTask5 hook ToStringHook()
 
@@ -161,26 +162,28 @@
 
 
 
-     This technic can be used when you have a chain of tasks and that you want to use a hook (the hook concerns only the output of the
-      last task, thus we can add a variable of interest in the output of the rTask even if it does not appear in this ask,
-      also think to add those variables as input).
+      @p This technique can be used when you have a chain of tasks and you want to use a hook. Indeed, the hook only concerns the output
+       of the last task, thus we can add a variable of interest in the output of the task even if it does not appear in this task (
+      also think to add those variables as inputs).
 
 
 
 
 @sect{Working with files}
 
-    @p It is also possible to pass file as argument of the rTask. We illustrate this in the following workflow.
-    We have first a ScalaTask that write numbers in a file. The file is the openMole variable  @i{g}. In order to have access
-    to this file in the RTask, we put  @i{g} as output of the ScalaTask.
-    The script R in the RTask read a file, called @i{fileForR} (it is supposed to have numeric values, seperated by a simple space),
-    create a R varaible @i{temp2}, which is a vector that contains the value of the file @i{fileForR}. We then apply the function
-    @i{f} to that vector.  The end of the workflow just ask openMole to chain the two task and to display the outputs of the
-    last task (here the Om variable @i{resR}).
+    @p It is also possible to pass file as argument of the rTask. We illustrate this in the following workflow (@i{rTask}).
 
-    @p Remark that the @i{g} is an openMole variable. If you want to see the file created in your workspace, you can use a hook
+    @br We have first a ScalaTask that writes numbers in a file. The file is the openMole variable  @i{g}. In order to have access
+    to this file in the RTask, we put  @i{g} as output of the ScalaTask.
+
+    @br The R script in the RTask read a file named @i{fileForR} (it is supposed to have numeric values, separated by a simple space),
+    and create a R varaible @i{temp2}, which is a vector that contains the value of the file @i{fileForR}. We then apply the function
+    @i{f} to that vector.  The end of the workflow just asks OpenMOLE to chain the two tasks and to display the outputs of the
+    last task (here the OpenMOLE  variable @i{resR}).
+
+    @p Remark that the @i{g} is an openMole variable. If you want to see the file created in your workspace, you can use a
     @aa("hooks", href := DocumentationPages.hook.file), but you have to put @i{g} as output of the RTask (see the
-     section A complete worflow) to have a worflow example).
+     section "A complete worflow", below to have a worflow example).
 
 
 
@@ -232,13 +235,14 @@
 
     @p Here we give an example of how to use a library in a RTask. We use the function @i{CHullArea} of
     the library @i{GeoRange} to calculate the area of a set of points (the area of its convex envelop).
-    Write the name of the package you need in your Rscript in the field @i{libraries}, and the  ..... in @i{install}.
+
+    @br Write the name of the package you need in the field @i{libraries}, and the  add the package in @i{install}.
+
+    ROMAIN, can you precise what to put in @i{install}, is that R packages ?
+
 
     @p Remark : the first time you use R with libraires it takes some time to install them, but for the next uses
-    the libraries will be store in the cash, and thus it is quicker.
-
-
-
+    the libraries will be stored, and the execution is quicker.
 
 
     @br @hl.openmole( s"""
@@ -278,25 +282,32 @@
 
 
 
-    @p Here is a complete worflow using a Rtask. The two first task are Scala classes whose aim is to create OM variables
-    that will be used in the RTask?
+    @p Here is a complete worflow using a Rtask. The two first task are ScalaTask whose aim is to create OpenMOLE variables
+    that will be used in the RTask.
 
-    @br The @i{task1} creates a file @i{g}, the @i{task2} creates @i{y} an @i{Array[Double]}. We both put them in the @i{Rtask} using
+    @br  @i{task1} creates a file @i{g} and @i{task2} creates @i{y}, an @i{Array[Double]}. We both put them in the @i{Rtask} using
     respectively @i{inputFiles} and @i{rInputs}.
 
-    @br Remark that the conversion from the OM type (scala) @i{Array[Double]} to the R type vector is made directly by the @i{rInputs}
+    @br Remark that the conversion from the OpenMOLE type (scala) @i{Array[Double]} to the R type vector is made directly by the @i{rInputs}
+
+    @br The hook stored the file @i{g} in your @b{Workspace}, and display the @i{area}
+
+
+
+    @br @hl.openmole( s"""
+              //  coming soon !
+                 """)
 
 
 
 
-
-@sect{Remarq about the worflow}
+@sect{Remark about the worflow}
 
 
     @p Here is an example of the worflow that avoid passing all the arguments in @i{ inputs / outputs}, when you
     don't need them in the intermediary task. It uses @i{slot} and @i{capsule}.
-    Remark that @i{a} is not an @i{output} of the @i{task2}, and if you try a classical chain @i{task1 -- task2 -- task3}, OM
-    will inform you that
+    Remark that @i{a} is not an @i{output} of the @i{task2}, and if you try a classical chain @i{task1 -- task2 -- task3},
+    OpenMOLE will inform you that @i{Input (a: Int) is missing when reaching the slot270273838:task3-1057250483.}
 
 
                    @br @hl.openmole( s"""
