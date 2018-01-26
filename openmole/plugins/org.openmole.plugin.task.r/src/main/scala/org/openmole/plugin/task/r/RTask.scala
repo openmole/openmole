@@ -225,8 +225,10 @@ object RTask {
     import org.json4s._
     import org.json4s.jackson.JsonMethods._
 
-    def writeInputsJSON(file: File) =
-      file.content = compact(render(RTask.toJSONValue(rInputs.map { case (v, _) ⇒ context(v) }.toArray)))
+    def writeInputsJSON(file: File) = {
+      def values = rInputs.map { case (v, _) ⇒ context(v) }
+      file.content = compact(render(RTask.toJSONValue(values.toArray)))
+    }
 
     def rInputMapping(arrayName: String) =
       rInputs.zipWithIndex.map { case ((_, name), i) ⇒ s"$name = $arrayName[[${i + 1}]]" }.mkString("\n")
@@ -252,7 +254,7 @@ object RTask {
         writeInputsJSON(jsonInputs)
         scriptFile.content = s"""
           |library("jsonlite")
-          |$inputArrayName = fromJSON("$inputJSONName")
+          |$inputArrayName = fromJSON("$inputJSONName", simplifyMatrix = FALSE)
           |${rInputMapping(inputArrayName)}
           |${script.from(p.context)(p.random, p.newFile, p.fileService)}
           |write_json($rOutputMapping, "$outputJSONName", always_decimal = TRUE)
