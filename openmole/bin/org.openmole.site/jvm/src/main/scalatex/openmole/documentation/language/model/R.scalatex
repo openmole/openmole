@@ -17,14 +17,14 @@
         j=f(2)""", "R")
 
     @p We save this to @i{Rscript1.R}, it will be used in the second part.
-    Here we crate a function @i{f}, and a variable @i{j} in which we
+    Here we create a function @i{f}, and a variable @i{j} in which we
     store the result of the evalution of the function by 2.
 
     @br We use an Rtask in OpenMOLE to run this R script. In the RTsak we write code in R !
 
-    @br For this first OpenMOLE  script, I write the R script in the Rtask, we will see after how to
+    @br For this first OpenMOLE  script, we write the R script in the Rtask, we will see after how to
     import it from a @i{file.R}, and deal with libraries.  Moreover, this Rtask does not communicate with other
-    variables in the OpenMOLE script, and we just execute the R script .
+    variables in the workflow, and we just executes the R script .
     We will see in the sections below how to input and output OpenMOLE variables in the Rtask.
 
 
@@ -120,18 +120,26 @@
          """)
 
 
-    @p Remark : if you have several outputs, you can put them all in an routputs +=(Routput1,OMoutput1,Routput2,OMoutput2)
-    or simply several rOutputs, see @i{Rtask5}.
-    @p ROMAIN, I'm not sure it works to put multiple outputs in a @i{routputs}
+     @p Remark : if you have several outputs, two cases :
 
-       @br @hl.openmole( s"""
-            rOutputs += ( "j",j),
-            rOutputs += ( "k",c), // the 2 first lines it's ok but not the last
-            rOutputs += ( c, "k" , j , "j"),
-             """)
+     @li if they have the same name as OpenMole variables and R variables, you can pass them as a list in
+     @i{rInputs} :
+
+         @br @hl.openmole( s"""
+            inputs += (c,d,e)
+              """)
 
 
-     @p Remark that variables in the rOutputs are directly store in the output, but you can add outputs
+     @li if they have different name as OpenMole variables and R variables, you have to use  several
+     @i{rInputs("Rvariable",OMvariable)}.
+
+
+         @br @hl.openmole( s"""
+         rInputs += ("a_R", aOM )
+         rInputs += ("b_R", bOM)
+              """)
+
+    @p Remark that variables in the rOutputs are directly store in the output, but you can add outputs
       that are not in the R task (for example, the variable @i{c} in @i{rTask5 } below).
 
 
@@ -161,27 +169,31 @@
 
 
 
-      @p This technique can be used when you have a chain of tasks and you want to use a hook. Indeed, the hook only concerns the output
-       of the last task, thus we can add a variable of interest in the output of the task even if it does not appear in this task (
-      also think to add those variables as inputs).
+      @p This technique can be used when you have a chain of tasks and you want to use a hook. Indeed, the hook only concerns outputs
+       of the last task, thus we can add a variable of interest in the output of the task even if it does not appear in this task (also
+        think to add those variables as inputs). Note that the last section present an alternative
 
 
 
 
 @sect{Working with files}
 
-    @p It is also possible to pass file as argument of the rTask. We illustrate this in the following workflow (@i{rTask}).
+    @p It is also possible to pass file as argument of the rTask. However, we can't pass them with @i{rInputs} as seen before, otherwise
+    you have an error like  @i{type class java.io.File is not convertible to JSON}.
 
-    @br We have first a ScalaTask that writes numbers in a file. The file is the openMole variable  @i{g}. In order to have access
-    to this file in the RTask, we put  @i{g} as output of the ScalaTask.
 
-    @br The R script in the RTask read a file named @i{fileForR} (it is supposed to have numeric values, separated by a simple space),
+    @br We thus use @i{inputFiles}, and  we give an illustration in the following workflow (@i{rTask}).
+
+    @br We have first a ScalaTask that writes numbers in a file. The file is the OpenMole variable  @i{g} of type @i{java.io.File } .
+     In order to have access to this file in the RTask, we put  @i{g} as output of the ScalaTask.
+
+    @br The R script in the RTask read a file named @i{fileForR} (in the R script presented here, it is supposed to have numeric values, separated by a simple space),
     and create a R varaible @i{temp2}, which is a vector that contains the value of the file @i{fileForR}. We then apply the function
     @i{f} to that vector.  The end of the workflow just asks OpenMOLE to chain the two tasks and to display the outputs of the
     last task (here the OpenMOLE  variable @i{resR}).
 
     @p Remark that the @i{g} is an openMole variable. If you want to see the file created in your workspace, you can use a
-    @aa("hooks", href := DocumentationPages.hook.file), but you have to put @i{g} as output of the RTask (see the
+    @aa("hooks", href := DocumentationPages.hook.file). Note that you have to put @i{g} as output of the RTask (see the
      section "A complete worflow", below to have a worflow example).
 
 
@@ -235,12 +247,12 @@
     @p Here we give an example of how to use a library in a RTask. We use the function @i{CHullArea} of
     the library @i{GeoRange} to calculate the area of a set of points (the area of its convex envelop).
 
-    @br Write the name of the package you need in the field @i{libraries}, and the add the package in @i{install}. The @i{install} argument is a sequence of system commands that are executed prior to the installation of the R libraries. It can be used to install the packages which are requiered by the R libraries. The R task is based on a debian container, therefore you can use any debian command here including @i{apt} installation tool.
+    @br Write the names of the libraries you need in the field @i{libraries}, and the add the package in @i{install}. The @i{install} argument is a sequence of system commands that are executed prior to the installation of the R libraries. It can be used to install the packages which are requiered by the R libraries. The R task is based on a debian container, therefore you can use any debian command here including @i{apt} installation tool.
    
     @br The @i{libraries} argument is a sequence of libraries that are installed from the CRAN repository.
 
-    @p Remark : the first time you use R with libraires it takes some time to install them, but for the next uses
-    the libraries will be stored, and the execution is quicker.
+    @p Remark : the first time you use R with @i{libraries} or @i{packages}, it takes some time to install them, but for the next uses
+   those libraries will be stored, and the execution is quicker.
 
 
     @br @hl.openmole( s"""
@@ -280,7 +292,9 @@
 
 
 
-    @p Here is a complete worflow using a Rtask. The two first task are ScalaTask whose aim is to create OpenMOLE variables
+    @p Here is an example of an (almost complete) workflow using a Rtask, it uses @i{rInputs, inputFiles , install} (you can add your R script using  @i{resource})
+
+    @br The two first tasks are ScalaTask whose aim is to create OpenMOLE variables
     that will be used in the RTask.
 
     @br  @i{task1} creates a file @i{g} and @i{task2} creates @i{y}, an @i{Array[Double]}. We both put them in the @i{Rtask} using
@@ -293,7 +307,79 @@
 
 
     @br @hl.openmole( s"""
-              //  coming soon !
+        //////  Create a file for the Rtask
+
+        val n = Val[Int]
+        val g = Val[File]
+
+        val task1 = ScalaTask(
+        ${tq}
+           import better.files._
+           import org.apache.commons.math3.distribution._
+           import scala.util.Random
+
+          val dist_Unif= new UniformRealDistribution()
+          val dist1=  List.fill(n)(dist_Unif.sample()).mkString(" ")
+
+           val g = newFile()
+            g.toScala.overwrite( dist1)
+         ${tq}) set (
+           inputs += n ,
+           n := 10 ,
+           outputs += (g,n)
+           )
+
+
+        //////  Create a variable for the Rtask
+           val y =  Val[Array[Double]]
+
+           val task2 = ScalaTask(
+        ${tq}
+           import org.apache.commons.math3.distribution._
+            val dist_Unif= new UniformRealDistribution()
+            val y =  List.fill(n)(dist_Unif.sample()).toArray
+         ${tq}) set (
+           inputs += (n,g),
+           outputs += (y,n,g)
+           )
+
+        //////////////////////////
+
+        val res =  Val[Double]
+
+        val rTask =
+          RTask(${tq}
+            library(GeoRange)
+
+            # Read the file created by the first scala task
+            temp1=read.table("fileForR", sep="")
+            x=as.vector(temp1,mode = "numeric")
+
+            # y is the variable created in the second task
+
+            # requiered for the function CHullArea
+            liste = chull(x,y)
+            hull <- cbind(x,y) [liste,]
+
+            #require GeoRange
+            area=CHullArea(hull[,1],hull[,2])
+
+            ${tq},
+            install = Seq("apt update", "apt install -y libgdal-dev libproj-dev"),
+            libraries = Seq("GeoRange")
+            ) set(
+            inputs += n ,
+            inputFiles += (g, "fileForR"),
+            rInputs += (y,"y"),  // same as  rInputs += (y)
+            rOutputs += ("area", res),
+            outputs += (g,n)
+            )
+
+
+        val h1 = CopyFileHook(g, workDirectory / "random_points.txt")
+
+        (task1 -- task2 -- rTask ) hook (h1,ToStringHook(res,n) )
+
                  """)
 
 
