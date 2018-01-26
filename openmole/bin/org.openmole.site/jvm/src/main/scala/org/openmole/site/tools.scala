@@ -73,6 +73,8 @@ package object tools {
 
   object hl extends Highlighter {
 
+    def apply(code: String, lang: String) = highlight(code, lang)
+
     object OptionalName {
       implicit def fromString(s: String) = OptionalName(Some(s))
     }
@@ -88,6 +90,10 @@ package object tools {
     def plain(code: String) = highlight(code, "plain")
     def openmoleNoTest(code: String) = highlight(code, "scala")
   }
+
+  def openmole(code: String, header: String = "", name: hl.OptionalName = hl.OptionalName(None)) = hl.openmole(code, header, name)
+  def code(code: String) = hl.code(code)
+  def plain(code: String) = hl.plain(code)
 
   case class Parameter(name: String, `type`: String, description: String)
 
