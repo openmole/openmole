@@ -126,7 +126,7 @@
      @i{rInputs} :
 
          @br @hl.openmole( s"""
-            inputs += (c,d,e)
+            rInputs += (c,d,e)
               """)
 
 
