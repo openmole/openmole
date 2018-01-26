@@ -70,7 +70,7 @@ The toy R script for this first test case is:
            f = function(x){
                  x+1
                }
-           j = f(2)you have to
+           j = f(2)
            $tq)
 
         rTask1""" )
