@@ -153,6 +153,7 @@ object DocumentationPages {
     gui,
     scala,
     java,
+    r,
     native,
     nativePackaging,
     ccplusplus,
@@ -205,11 +206,12 @@ object DocumentationPages {
 
   lazy val gui = DocumentationPage.fromScalatex(name = "GUI guide", content = scalatex.documentation.GUI)
 
-  def modelPages = Seq(scala, java, rscript, python, ccplusplus, netLogo, mole, native)
+  def modelPages = Seq(scala, java, r, rscript, python, ccplusplus, netLogo, mole, native)
 
   lazy val scala = DocumentationPage.fromScalatex(name = "Scala", content = scalatex.documentation.language.model.Scala, details = Seq(scalaFunction))
   lazy val java = DocumentationPage.fromScalatex(name = "Java", content = scalatex.documentation.language.model.Java)
 
+  lazy val r = DocumentationPage.fromScalatex(name = "R", content = scalatex.documentation.language.model.R)
   lazy val native = DocumentationPage.fromScalatex(name = "Other Languages", content = scalatex.documentation.language.model.Native, details = Seq(nativePackaging), extraMenu = Some(SideMenu.nativeMenu))
 
   lazy val nativePackaging = DocumentationPage.fromScalatex(name = "Native Packaging", content = scalatex.documentation.details.NativePackaging, extraMenu = Some(SideMenu.nativePackagingMenu), title = Some("Native Code Packaging, CARE Task Options"))
