@@ -156,9 +156,9 @@ object DocumentationPages {
     r,
     native,
     nativePackaging,
-    ccplusplus,
+    pakagedCPlusPlus,
     packagedR,
-    python,
+    packagedPython,
     netLogo,
     mole,
     model,
@@ -206,7 +206,7 @@ object DocumentationPages {
 
   lazy val gui = DocumentationPage.fromScalatex(name = "GUI guide", content = scalatex.documentation.GUI)
 
-  def modelPages = Seq(scala, java, r, packagedR, python, ccplusplus, netLogo, mole, native)
+  def modelPages = Seq(scala, java, r, packagedR, packagedPython, pakagedCPlusPlus, netLogo, mole, native)
 
   lazy val scala = DocumentationPage.fromScalatex(name = "Scala", content = scalatex.documentation.language.model.Scala, details = Seq(scalaFunction))
   lazy val java = DocumentationPage.fromScalatex(name = "Java", content = scalatex.documentation.language.model.Java)
@@ -216,9 +216,9 @@ object DocumentationPages {
 
   lazy val nativePackaging = DocumentationPage.fromScalatex(name = "Native Packaging", content = scalatex.documentation.details.NativePackaging, extraMenu = Some(SideMenu.nativePackagingMenu), title = Some("Native Code Packaging, CARE Task Options"))
 
-  lazy val ccplusplus = DocumentationPage.fromScalatex(name = "C++", location = Some("cplusplus"), content = scalatex.documentation.language.model.CCplusplus, details = Seq(nativePackaging))
+  lazy val pakagedCPlusPlus = DocumentationPage.fromScalatex(name = "Packaged C++", location = Some("cplusplus"), content = scalatex.documentation.language.model.PackagedCCplusplus, details = Seq(nativePackaging))
   lazy val packagedR = DocumentationPage.fromScalatex(name = "Packaged R", content = scalatex.documentation.language.model.PackagedR, details = Seq(nativePackaging))
-  lazy val python = DocumentationPage.fromScalatex(name = "Python", content = scalatex.documentation.language.model.Python, details = Seq(nativePackaging))
+  lazy val packagedPython = DocumentationPage.fromScalatex(name = "Packaged Python", content = scalatex.documentation.language.model.PackagedPython, details = Seq(nativePackaging))
   lazy val netLogo = DocumentationPage.fromScalatex(name = "NetLogo", content = scalatex.documentation.language.model.NetLogo)
   lazy val mole = DocumentationPage.fromScalatex(name = "Mole", content = scalatex.documentation.language.model.MoleTask)
   lazy val model = DocumentationPage.fromScalatex(name = "Models", content = scalatex.documentation.language.Model)
