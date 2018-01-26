@@ -262,7 +262,7 @@ object UDocker {
     val runInstall = commands.map {
       ic ⇒
         uDockerRunCommand(
-          uDocker.uDockerUser,
+          uDocker.user,
           Vector.empty,
           uDockerVolumes,
           userWorkDirectory(uDocker),

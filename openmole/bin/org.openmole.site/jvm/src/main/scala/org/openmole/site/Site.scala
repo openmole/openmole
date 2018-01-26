@@ -146,6 +146,8 @@ object Site extends App {
                     )
                   case _ ⇒ Seq[Modifier]()
                 }),
+
+              page.source.map(source ⇒ a(href := tools.modificationLink(source), "Propose a modification to the current page")),
               sitePage.element
             ),
             sitePage match {

@@ -184,7 +184,12 @@ trait RESTAPI extends ScalatraServlet with GZipSupport
               EnvironmentStatus(name = env.name, submitted = env.submitted, running = env.running, done = env.done, failed = env.failed, environmentErrors)
           }
           val statuses = moleExecution.jobStatuses
-          Running(statuses.ready, statuses.running, statuses.completed, environmentStatus)
+          val capsuleStates = statuses.toVector.map { case (c, states) ⇒ c.toString -> CapsuleState(states.ready, states.running, states.completed) }
+          val ready = capsuleStates.map(_._2.ready).sum
+          val running = capsuleStates.map(_._2.running).sum
+          val completed = capsuleStates.map(_._2.completed).sum
+
+          Running(ready, running, completed, capsuleStates, environmentStatus)
       }
       Ok(state.toJson)
     }

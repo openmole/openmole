@@ -23,14 +23,21 @@ import org.osgi.framework.{ BundleActivator, BundleContext }
 
 class Activator extends BundleActivator {
   override def stop(context: BundleContext): Unit = {
-    PluginInfo.remove(this.getClass)
-    ConfigurationInfo.remove(this.getClass)
+    PluginInfo.unregister(this)
+    ConfigurationInfo.unregister(this)
   }
 
   override def start(context: BundleContext): Unit = {
-    PluginInfo.add(this.getClass)
-    ConfigurationInfo.add(
-      this.getClass,
+    import org.openmole.core.pluginmanager.KeyWord._
+
+    val keyWords =
+      Vector(
+        Environment(classOf[EGIEnvironment[_]])
+      )
+
+    PluginInfo.register(this, Vector(this.getClass.getPackage), keyWords = keyWords)
+    ConfigurationInfo.register(
+      this,
       ConfigurationInfo.list(EGIEnvironment) //++ ConfigurationInfo.list(DIRACEnvironment)
     )
   }

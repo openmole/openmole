@@ -132,19 +132,6 @@ package object evolution {
       indexOf0(genome.toList, 0)
     }
 
-    def toArrayVariable(genomeBound: GenomeBound, value: Seq[Any]) = genomeBound match {
-      case b: GenomeBound.ScalarDouble ⇒
-        Variable(b.v.toArray, value.map(_.asInstanceOf[Double]).toArray[Double])
-      case b: GenomeBound.ScalarInt ⇒
-        Variable(b.v.toArray, value.map(_.asInstanceOf[Int]).toArray[Int])
-      case b: GenomeBound.SequenceOfDouble ⇒
-        Variable(b.v.toArray, value.map(_.asInstanceOf[Array[Double]]).toArray[Array[Double]])
-      case b: GenomeBound.SequenceOfInt ⇒
-        Variable(b.v.toArray, value.map(_.asInstanceOf[Array[Int]]).toArray[Array[Int]])
-      case b: GenomeBound.Enumeration[_] ⇒
-        Variable.unsecure(b.v.toArray, value.map(_.asInstanceOf[Int]).map(i ⇒ b.values(i)).toArray(b.v.`type`.manifest))
-    }
-
     def toVariables(genome: Genome, continuousValues: Vector[Double], discreteValue: Vector[Int], scale: Boolean) = {
 
       def toVariables0(genome: List[Genome.GenomeBound], continuousValues: List[Double], discreteValues: List[Int], acc: List[Variable[_]]): FromContext[Vector[Variable[_]]] = FromContext { p ⇒

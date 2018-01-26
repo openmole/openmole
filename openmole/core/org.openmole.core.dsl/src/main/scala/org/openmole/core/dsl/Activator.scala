@@ -15,28 +15,55 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.environment.batch
+package org.openmole.core.dsl
 
 import org.openmole.core.pluginmanager.PluginInfo
 import org.openmole.core.preference.ConfigurationInfo
-import org.openmole.core.replication.ReplicaCatalog
-import org.openmole.plugin.environment.batch.environment.BatchEnvironment
-import org.openmole.plugin.environment.batch.storage.{ StorageInterface, StorageService }
 import org.osgi.framework.{ BundleActivator, BundleContext }
 
 class Activator extends BundleActivator {
   override def stop(context: BundleContext): Unit = {
     PluginInfo.unregister(this)
-    ConfigurationInfo.unregister(this)
   }
 
   override def start(context: BundleContext): Unit = {
-    PluginInfo.register(this, Vector(this.getClass.getPackage))
-    ConfigurationInfo.register(
-      this.getClass,
-      ConfigurationInfo.list(BatchEnvironment) ++
-        ConfigurationInfo.list(ReplicaCatalog) ++
-        ConfigurationInfo.list(StorageService)
+    import org.openmole.core.pluginmanager.KeyWord._
+
+    val keyWords = Vector(
+      Word("byte"),
+      Word("bytes"),
+      Word("kilobyte"),
+      Word("kilobytes"),
+      Word("megabyte"),
+      Word("megabytes"),
+      Word("gigabyte"),
+      Word("gigabytes"),
+      Word("terabyte"),
+      Word("terabytes"),
+      Word("petabyte"),
+      Word("petabytes"),
+      Word("exabyte"),
+      Word("exabytes"),
+      Word("zettabyte"),
+      Word("zettabytes"),
+      Word("yottabyte"),
+      Word("yottabytes"),
+      Word("nanosecond"),
+      Word("nanoseconds"),
+      Word("microsecond"),
+      Word("microseconds"),
+      Word("millisecond"),
+      Word("milliseconds"),
+      Word("second"),
+      Word("seconds"),
+      Word("minute"),
+      Word("minutes"),
+      Word("hour"),
+      Word("hours"),
+      Word("day"),
+      Word("days")
     )
+
+    PluginInfo.register(this, keyWords = keyWords)
   }
 }

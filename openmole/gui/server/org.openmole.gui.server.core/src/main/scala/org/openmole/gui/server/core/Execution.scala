@@ -52,6 +52,10 @@ class Execution {
     runningEnvironments.get(envId).foreach { env ⇒ runningEnvironments(envId) = update(env) }
   }
 
+  def addCompilation(ex: ExecutionId, future: Future[_]) = atomic { implicit ctx ⇒
+    compilation.put(ex, future)
+  }
+
   def environmentListener(envId: EnvironmentId): Listner[Environment] = {
     case (env, bdl: BeginDownload) ⇒
       updateRunningEnvironment(envId) { RunningEnvironment.networkActivity composeLens NetworkActivity.downloadingFiles modify (_ + 1) }
@@ -142,15 +146,18 @@ class Execution {
   }
 
   def remove(key: ExecutionId) = {
-    cancel(key)
-    atomic { implicit ctx ⇒
-      removeRunningEnvironments(key)
-      staticExecutionInfo.remove(key)
-      moleExecutions.remove(key)
-      outputStreams.remove(key)
-      errors.remove(key)
-      compilation.remove(key)
-    }
+    val (compil, exec) =
+      atomic { implicit ctx ⇒
+        removeRunningEnvironments(key)
+        staticExecutionInfo.remove(key)
+        val exec = moleExecutions.remove(key)
+        outputStreams.remove(key)
+        errors.remove(key)
+        val compil = compilation.remove(key)
+        (compil, exec)
+      }
+    compil.foreach(_.cancel(true))
+    exec.foreach(_.cancel)
   }
 
   def environmentState(id: ExecutionId): Seq[EnvironmentState] =
@@ -175,26 +182,36 @@ class Execution {
       case (_, Some(moleExecution)) ⇒
 
         val d = moleExecution.duration.getOrElse(0L)
+        def convertStatuses(s: MoleExecution.JobStatuses) = ExecutionInfo.JobStatuses(s.ready, s.running, s.completed)
+        lazy val statuses = moleExecution.jobStatuses.toVector.map { case (k, v) ⇒ k.toString -> convertStatuses(v) }
+
         moleExecution.exception match {
-          case Some(t) ⇒ Failed(ErrorBuilder(t.exception), environmentStates = environmentState(key), duration = moleExecution.duration.getOrElse(0))
+          case Some(t) ⇒
+            Failed(
+              capsules = statuses,
+              error = ErrorBuilder(t.exception),
+              environmentStates = environmentState(key),
+              duration = moleExecution.duration.getOrElse(0)
+            )
           case _ ⇒
-            if (moleExecution.canceled) Canceled(environmentStates = environmentState(key), duration = moleExecution.duration.get)
+            if (moleExecution.canceled)
+              Canceled(
+                capsules = statuses,
+                environmentStates = environmentState(key),
+                duration = moleExecution.duration.get
+              )
             else if (moleExecution.finished)
               Finished(
+                capsules = statuses,
                 duration = moleExecution.duration.get,
-                completed = moleExecution.jobStatuses.completed,
                 environmentStates = environmentState(key)
               )
-            else if (moleExecution.started) {
-              val statuses = moleExecution.jobStatuses
+            else if (moleExecution.started)
               Running(
-                ready = statuses.ready,
-                running = statuses.running,
+                capsules = statuses,
                 duration = d,
-                completed = statuses.completed,
                 environmentStates = environmentState(key)
               )
-            }
             else Launching()
         }
       case _ ⇒ Launching()

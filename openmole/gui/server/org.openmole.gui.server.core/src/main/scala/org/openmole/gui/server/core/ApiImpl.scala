@@ -313,9 +313,8 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
     val compilationFuture =
       services.threadProvider.pool.submit { () ⇒
 
-        def error(t: Throwable): Unit = execution.addError(execId, Failed(ErrorBuilder(t), Seq()))
-
-        def message(message: String): Unit = execution.addError(execId, Failed(Error(message), Seq()))
+        def error(t: Throwable): Unit = execution.addError(execId, Failed(Vector.empty, ErrorBuilder(t), Seq()))
+        def message(message: String): Unit = execution.addError(execId, Failed(Vector.empty, Error(message), Seq()))
 
         try {
           val project = Project(script.getParentFileSafe)
@@ -361,6 +360,8 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
           case t: Throwable ⇒ error(t)
         }
       }
+
+    execution.addCompilation(execId, compilationFuture)
   }
 
   def allStates(lines: Int) = execution.allStates(lines)

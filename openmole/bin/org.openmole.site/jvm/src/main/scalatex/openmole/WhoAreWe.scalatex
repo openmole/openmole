@@ -9,6 +9,10 @@
       span(name, memberStyle)
     )
 
+@h1{Hosting institutions}
+@div(margin := "0 auto")
+  @a(img(src := Resource.img.partner.iscpif.file,  partners), href := shared.link.partner.iscpif, target := "_blank")
+  @a(img(src := Resource.img.partner.geocite.file, partners), href := shared.link.partner.parisgeo, target := "_blank")
 
 @h1{Community leaders}
 

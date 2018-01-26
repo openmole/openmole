@@ -26,16 +26,14 @@ object RTask {
   implicit def isTask: InputOutputBuilder[RTask] = InputOutputBuilder(RTask._config)
   implicit def isExternal: ExternalBuilder[RTask] = ExternalBuilder(RTask.external)
 
-  implicit def isBuilder = new ReturnValue[RTask] with ErrorOnReturnValue[RTask] with StdOutErr[RTask] with EnvironmentVariables[RTask] with HostFiles[RTask] with ReuseContainer[RTask] with WorkDirectory[RTask] with UDockerUser[RTask] { builder ⇒
+  implicit def isBuilder = new ReturnValue[RTask] with ErrorOnReturnValue[RTask] with StdOutErr[RTask] with EnvironmentVariables[RTask] with HostFiles[RTask] with WorkDirectory[RTask] { builder ⇒
     override def returnValue = RTask.returnValue
     override def errorOnReturnValue = RTask.errorOnReturnValue
     override def stdOut = RTask.stdOut
     override def stdErr = RTask.stdErr
     override def environmentVariables = RTask.uDocker composeLens UDockerArguments.environmentVariables
     override def hostFiles = RTask.uDocker composeLens UDockerArguments.hostFiles
-    override def reuseContainer = RTask.uDocker composeLens UDockerArguments.reuseContainer
     override def workDirectory = RTask.uDocker composeLens UDockerArguments.workDirectory
-    override def uDockerUser = RTask.uDocker composeLens UDockerArguments.uDockerUser
   }
 
   sealed trait InstallCommand
@@ -51,19 +49,23 @@ object RTask {
     }
 
     implicit def stringToRLibrary(name: String): InstallCommand = RLibrary(name)
-    def installCommands(libraries: Vector[InstallCommand]): Vector[String] = libraries.map(InstallCommand.toCommand)
+    def installCommands(libraries: Vector[InstallCommand]): Vector[String] = {
+      libraries.map(InstallCommand.toCommand)
+    }
   }
 
   def rImage(version: String) = DockerImage("r-base", version)
 
   def apply(
     script:      FromContext[String],
-    install:     Seq[InstallCommand] = Seq.empty,
+    install:     Seq[String]         = Seq.empty,
+    libraries:   Seq[InstallCommand] = Seq.empty,
     version:     String              = "3.4.3",
     forceUpdate: Boolean             = false
   )(implicit name: sourcecode.Name, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection): RTask = {
 
-    val installCommands = InstallCommand.installCommands(install.toVector ++ Seq(InstallCommand.RLibrary("jsonlite")))
+    val installCommands =
+      install ++ InstallCommand.installCommands(libraries.toVector ++ Seq(InstallCommand.RLibrary("jsonlite")))
     val cacheKey: Option[String] =
       Some((Seq(rImage(version).image, rImage(version).tag) ++ installCommands).mkString("\n").hash().toString)
 
@@ -72,7 +74,9 @@ object RTask {
         rImage(version),
         installCommands = installCommands,
         cachedKey = OptionalArgument(cacheKey),
-        forceUpdate = forceUpdate
+        forceUpdate = forceUpdate,
+        mode = "P1",
+        reuseContainer = true
       )
 
     RTask(
@@ -103,7 +107,7 @@ object RTask {
     }
   }
 
-  def jValueToVariable(jvalue: JValue, v: Val[_]): Variable[_] = {
+  def jValueToVariable(jValue: JValue, v: Val[_]): Variable[_] = {
     import org.json4s._
     import shapeless._
 
@@ -112,26 +116,90 @@ object RTask {
     val caseLong = TypeCase[Val[Long]]
     val caseDouble = TypeCase[Val[Double]]
     val caseString = TypeCase[Val[String]]
+
     val caseArrayBoolean = TypeCase[Val[Array[Boolean]]]
     val caseArrayInt = TypeCase[Val[Array[Int]]]
     val caseArrayLong = TypeCase[Val[Array[Long]]]
     val caseArrayDouble = TypeCase[Val[Array[Double]]]
     val caseArrayString = TypeCase[Val[Array[String]]]
 
-    (jvalue, v) match {
-      case (value: JDouble, caseInt(v))         ⇒ Variable(v, value.num.intValue)
-      case (value: JDouble, caseLong(v))        ⇒ Variable(v, value.num.longValue)
-      case (value: JDouble, caseDouble(v))      ⇒ Variable(v, value.num)
-      case (value: JString, caseString(v))      ⇒ Variable(v, value.s)
-      case (value: JBool, caseBoolean(v))       ⇒ Variable(v, value.value)
+    val caseArrayArrayBoolean = TypeCase[Val[Array[Array[Boolean]]]]
+    val caseArrayArrayInt = TypeCase[Val[Array[Array[Int]]]]
+    val caseArrayArrayLong = TypeCase[Val[Array[Array[Long]]]]
+    val caseArrayArrayDouble = TypeCase[Val[Array[Array[Double]]]]
+    val caseArrayArrayString = TypeCase[Val[Array[Array[String]]]]
 
-      case (value: JArray, caseArrayInt(v))     ⇒ Variable(v, value.arr.map(_.asInstanceOf[JDouble].num.intValue).toArray[Int])
-      case (value: JArray, caseArrayLong(v))    ⇒ Variable(v, value.arr.map(_.asInstanceOf[JDouble].num.longValue).toArray[Long])
-      case (value: JArray, caseArrayDouble(v))  ⇒ Variable(v, value.arr.map(_.asInstanceOf[JDouble].num).toArray[Double])
-      case (value: JArray, caseArrayString(v))  ⇒ Variable(v, value.arr.map(_.asInstanceOf[JString].s).toArray[String])
-      case (value: JArray, caseArrayBoolean(v)) ⇒ Variable(v, value.arr.map(_.asInstanceOf[JBool].value).toArray[Boolean])
+    def cannotConvert = throw new UserBadDataError(s"Can not convert value of type $jValue to Int for OpenMOLE variable $v.")
 
-      case (jvalue, v)                          ⇒ throw new UserBadDataError(s"Impossible to store R output with value $jvalue in OpenMOLE variable $v.")
+    def jValueToInt(jv: JValue) =
+      jv match {
+        case jv: JDouble  ⇒ jv.num.intValue
+        case jv: JInt     ⇒ jv.num.intValue
+        case jv: JLong    ⇒ jv.num.intValue
+        case jv: JDecimal ⇒ jv.num.intValue
+        case _            ⇒ cannotConvert
+      }
+
+    def jValueToLong(jv: JValue) =
+      jv match {
+        case jv: JDouble  ⇒ jv.num.longValue
+        case jv: JInt     ⇒ jv.num.longValue
+        case jv: JLong    ⇒ jv.num.longValue
+        case jv: JDecimal ⇒ jv.num.longValue
+        case _            ⇒ cannotConvert
+      }
+
+    def jValueToDouble(jv: JValue) =
+      jv match {
+        case jv: JDouble  ⇒ jv.num.doubleValue
+        case jv: JInt     ⇒ jv.num.doubleValue
+        case jv: JLong    ⇒ jv.num.doubleValue
+        case jv: JDecimal ⇒ jv.num.doubleValue
+        case _            ⇒ cannotConvert
+      }
+
+    def jValueToString(jv: JValue) =
+      jv match {
+        case jv: JDouble  ⇒ jv.num.toString
+        case jv: JInt     ⇒ jv.num.toString
+        case jv: JLong    ⇒ jv.num.toString
+        case jv: JDecimal ⇒ jv.num.toString
+        case jv: JString  ⇒ jv.s
+        case _            ⇒ cannotConvert
+      }
+
+    def jValueToBoolean(jv: JValue) =
+      jv match {
+        case jv: JBool ⇒ jv.value
+        case _         ⇒ cannotConvert
+      }
+
+    def jValueToArray[T: Manifest](jv: JValue, convert: JValue ⇒ T) =
+      jv match {
+        case jv: JArray ⇒ jv.arr.map(convert).toArray[T]
+        case _          ⇒ cannotConvert
+      }
+
+    (jValue, v) match {
+      case (value: JArray, caseInt(v))               ⇒ Variable(v, jValueToInt(value.arr.head))
+      case (value: JArray, caseLong(v))              ⇒ Variable(v, jValueToLong(value.arr.head))
+      case (value: JArray, caseDouble(v))            ⇒ Variable(v, jValueToDouble(value.arr.head))
+      case (value: JArray, caseString(v))            ⇒ Variable(v, jValueToString(value.arr.head))
+      case (value: JArray, caseBoolean(v))           ⇒ Variable(v, jValueToBoolean(value.arr.head))
+
+      case (value: JArray, caseArrayInt(v))          ⇒ Variable(v, jValueToArray(value, jValueToInt))
+      case (value: JArray, caseArrayLong(v))         ⇒ Variable(v, jValueToArray(value, jValueToLong))
+      case (value: JArray, caseArrayDouble(v))       ⇒ Variable(v, jValueToArray(value, jValueToDouble))
+      case (value: JArray, caseArrayString(v))       ⇒ Variable(v, jValueToArray(value, jValueToString))
+      case (value: JArray, caseArrayBoolean(v))      ⇒ Variable(v, jValueToArray(value, jValueToBoolean))
+
+      case (value: JArray, caseArrayArrayInt(v))     ⇒ Variable(v, jValueToArray(value, jValueToArray(_, jValueToInt)))
+      case (value: JArray, caseArrayArrayLong(v))    ⇒ Variable(v, jValueToArray(value, jValueToArray(_, jValueToLong)))
+      case (value: JArray, caseArrayArrayDouble(v))  ⇒ Variable(v, jValueToArray(value, jValueToArray(_, jValueToDouble)))
+      case (value: JArray, caseArrayArrayString(v))  ⇒ Variable(v, jValueToArray(value, jValueToArray(_, jValueToString)))
+      case (value: JArray, caseArrayArrayBoolean(v)) ⇒ Variable(v, jValueToArray(value, jValueToArray(_, jValueToBoolean)))
+
+      case _                                         ⇒ cannotConvert
     }
 
   }
@@ -157,14 +225,16 @@ object RTask {
     import org.json4s._
     import org.json4s.jackson.JsonMethods._
 
-    def writeInputsJSON(file: File) =
-      file.content = compact(render(RTask.toJSONValue(rInputs.map { case (v, _) ⇒ context(v) }.toArray)))
+    def writeInputsJSON(file: File) = {
+      def values = rInputs.map { case (v, _) ⇒ context(v) }
+      file.content = compact(render(RTask.toJSONValue(values.toArray)))
+    }
 
     def rInputMapping(arrayName: String) =
       rInputs.zipWithIndex.map { case ((_, name), i) ⇒ s"$name = $arrayName[[${i + 1}]]" }.mkString("\n")
 
     def rOutputMapping =
-      s"""c(${rOutputs.map { case (name, _) ⇒ name }.mkString(",")})"""
+      s"""list(${rOutputs.map { case (name, _) ⇒ name }.mkString(",")})"""
 
     def readOutputJSON(file: File) = {
       import org.json4s._
@@ -184,7 +254,7 @@ object RTask {
         writeInputsJSON(jsonInputs)
         scriptFile.content = s"""
           |library("jsonlite")
-          |$inputArrayName = read_json("$inputJSONName")
+          |$inputArrayName = fromJSON("$inputJSONName", simplifyMatrix = FALSE)
           |${rInputMapping(inputArrayName)}
           |${script.from(p.context)(p.random, p.newFile, p.fileService)}
           |write_json($rOutputMapping, "$outputJSONName", always_decimal = TRUE)
@@ -192,12 +262,13 @@ object RTask {
 
         val outputFile = Val[File]("outputFile", Namespace("RTask"))
 
-        def uDockerTask = UDockerTask(uDocker, s"R --slave -f $rScriptName", errorOnReturnValue, returnValue, stdOut, stdErr, _config, external) set (
-          resources += (scriptFile, rScriptName, true),
-          resources += (jsonInputs, inputJSONName, true),
-          outputFiles += (outputJSONName, outputFile),
-          reuseContainer := true
-        )
+        def uDockerTask =
+          UDockerTask(
+            uDocker, s"R --slave -f $rScriptName", errorOnReturnValue, returnValue, stdOut, stdErr, _config, external) set (
+            resources += (scriptFile, rScriptName, true),
+            resources += (jsonInputs, inputJSONName, true),
+            outputFiles += (outputJSONName, outputFile)
+          )
 
         val resultContext = uDockerTask.process(executionContext).from(context)
         resultContext ++ readOutputJSON(resultContext(outputFile))

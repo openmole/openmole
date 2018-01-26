@@ -21,19 +21,8 @@ package udocker {
 
   trait UDockerPackage {
 
-    lazy val reuseContainer =
-      new {
-        def :=[T: ReuseContainer](b: Boolean) =
-          implicitly[ReuseContainer[T]].reuseContainer.set(b)
-      }
-
-    lazy val uDockerUser =
-      new {
-        def :=[T: UDockerUser](b: String) =
-          implicitly[UDockerUser[T]].uDockerUser.set(Some(b))
-      }
-
   }
+
 }
 
 package object udocker extends UDockerPackage {
@@ -46,14 +35,6 @@ package object udocker extends UDockerPackage {
   sealed trait ContainerImage
   case class DockerImage(image: String, tag: String = "latest", registry: String = "https://registry-1.docker.io") extends ContainerImage
   case class SavedDockerImage(file: java.io.File) extends ContainerImage
-
-  trait ReuseContainer[T] {
-    def reuseContainer: Lens[T, Boolean]
-  }
-
-  trait UDockerUser[T] {
-    def uDockerUser: Lens[T, Option[String]]
-  }
 
   import cats.data._
   import cats.implicits._
@@ -81,9 +62,8 @@ package object udocker extends UDockerPackage {
     hostFiles:            Vector[(String, Option[String])]      = Vector.empty,
     workDirectory:        Option[String]                        = None,
     reuseContainer:       Boolean                               = true,
-    uDockerUser:          Option[String]                        = None,
-    mode:                 Option[String]                        = None
-  )
+    user:                 Option[String]                        = None,
+    mode:                 Option[String]                        = None)
 
   def userWorkDirectory(uDocker: UDockerArguments) = {
     import io.circe.generic.extras.auto._

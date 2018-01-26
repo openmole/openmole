@@ -178,8 +178,8 @@ lazy val scalaTags = OsgiProject(dir, "com.scalatags", exports = Seq("scalatags.
 
 lazy val scalatexSite =
   OsgiProject(dir, "com.lihaoyi.scalatex-site", exports = Seq("scalatex.*", "ammonite.*", "fastparse.*"), privatePackages = Seq("META-INF.**", "pprint.*", "scalaj.*", "scalaparse.*", "geny.*"), imports = Seq("*")) settings (
-    libraryDependencies += "com.lihaoyi" %% "scalatex-site" % "0.3.11",
-    version := "0.3.11") settings(settings: _*)
+    libraryDependencies += "com.lihaoyi" %% "scalatex-site" % "0.3.12",
+    version := "0.3.12") settings(settings: _*)
 
 lazy val upickle = OsgiProject(dir, "upickle", exports = Seq("upickle.*", "jawn.*", "derive.*", "sourcecode.*"), imports = Seq("*")) settings(
   libraryDependencies ++= Seq("com.lihaoyi" %% "upickle" % scalaUpickleVersion),
@@ -232,7 +232,7 @@ lazy val freedsl =
     version := freedslVersion
   ) dependsOn(cats, squants) settings(settings: _*)
 
-lazy val mgoVersion = "3.7"
+lazy val mgoVersion = "3.8-SNAPSHOT"
 
 lazy val mgo = OsgiProject(dir, "mgo", imports = Seq("*")) settings(
   libraryDependencies += "fr.iscpif" %% "mgo" % mgoVersion,

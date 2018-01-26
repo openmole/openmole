@@ -17,20 +17,27 @@
 
 package org.openmole.plugin.environment.ssh
 
-import org.openmole.core.pluginmanager.{ PluginInfo, PluginInfoActivator }
+import org.openmole.core.pluginmanager.{ KeyWord, PluginInfo, PluginInfoActivator }
 import org.openmole.core.preference.ConfigurationInfo
 import org.osgi.framework.{ BundleActivator, BundleContext }
 
 class Activator extends BundleActivator {
   override def stop(context: BundleContext): Unit = {
-    PluginInfo.remove(this.getClass)
-    ConfigurationInfo.remove(this.getClass)
+    PluginInfo.unregister(this)
+    ConfigurationInfo.unregister(this)
   }
 
   override def start(context: BundleContext): Unit = {
-    PluginInfo.add(this.getClass)
-    ConfigurationInfo.add(
-      this.getClass,
+    import org.openmole.core.pluginmanager.KeyWord._
+
+    val keyWords: Vector[KeyWord] =
+      Vector(
+        Environment(classOf[SSHEnvironment[_]])
+      )
+
+    PluginInfo.register(this, Vector(this.getClass.getPackage), keyWords = keyWords)
+    ConfigurationInfo.register(
+      this,
       ConfigurationInfo.list(SSHEnvironment)
     )
   }
