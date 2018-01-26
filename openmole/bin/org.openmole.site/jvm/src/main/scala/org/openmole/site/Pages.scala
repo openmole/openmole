@@ -206,7 +206,7 @@ object DocumentationPages {
 
   lazy val gui = DocumentationPage.fromScalatex(name = "GUI guide", content = scalatex.documentation.GUI)
 
-  def modelPages = Seq(scala, java, r, packagedR, packagedPython, pakagedCPlusPlus, netLogo, mole, native)
+  def modelPages = Seq(scala, java, r, netLogo, packagedPython, pakagedCPlusPlus, packagedR,, mole, native)
 
   lazy val scala = DocumentationPage.fromScalatex(name = "Scala", content = scalatex.documentation.language.model.Scala, details = Seq(scalaFunction))
   lazy val java = DocumentationPage.fromScalatex(name = "Java", content = scalatex.documentation.language.model.Java)
