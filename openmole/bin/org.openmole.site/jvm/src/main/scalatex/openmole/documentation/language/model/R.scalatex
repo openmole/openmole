@@ -3,8 +3,7 @@
 
 
 @h2("R Task")
-
-
+  @br Preliminary remark: this task works on Linux only. If you are running OpenMOLE on a different system you won't be able to use it. This limitation may be overcome in the future by using docker on MacOS and Windows.
 
 @sect{Simple RTask}
 
@@ -236,10 +235,9 @@
     @p Here we give an example of how to use a library in a RTask. We use the function @i{CHullArea} of
     the library @i{GeoRange} to calculate the area of a set of points (the area of its convex envelop).
 
-    @br Write the name of the package you need in the field @i{libraries}, and the  add the package in @i{install}.
-
-    ROMAIN, can you precise what to put in @i{install}, is that R packages ?
-
+    @br Write the name of the package you need in the field @i{libraries}, and the add the package in @i{install}. The @i{install} argument is a sequence of system commands that are executed prior to the installation of the R libraries. It can be used to install the packages which are requiered by the R libraries. The R task is based on a debian container, therefore you can use any debian command here including @i{apt} installation tool.
+   
+    @br The @i{libraries} argument is a sequence of libraries that are installed from the CRAN repository.
 
     @p Remark : the first time you use R with libraires it takes some time to install them, but for the next uses
     the libraries will be stored, and the execution is quicker.
