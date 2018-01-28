@@ -1,10 +1,10 @@
 @import org.openmole.site.tools._
 @import org.openmole.site._
-
+@import org.openmole.site.content.Native._
 
 @h2{Preliminary remark}
 
-The @code("RTask") works only on Linux systems. If you are running OpenMOLE on a different system you won't be able to use it. This limitation may be overcome in the future when docker is installed on MacOS and Windows.
+@linuxOnly("RTask")
 
 @h2{Simple RTask}
 

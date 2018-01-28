@@ -2,15 +2,15 @@
 package org.openmole.site.content
 
 import org.openmole.site.tools._
-import org.openmole.site.{ DocumentationPages, Pages, Resource, shared }
+import org.openmole.site.{DocumentationPages, Pages, Resource, shared}
 
-import scalatags.Text.all._
+import scalatags.Text.all.{br, _}
 
 object Native {
 
   def preamble = paragraph("In OpenMOLE, a generic task named ", hl.highlight("CARETask", "plain"), " offers to run external applications packaged with ", a("CARE", href := Resource.script.care.file),
     ". The site (proposing an outdated version of CARE for now, but a great documentation) can be found ", a("here", href := shared.link.CAREsite), ". ",
-    "CARE makes it possible to package your application from any Linux computer, and then re-execute it on any other Linux computer. The CARE / OpenMOLE pair is a very efficient way to distribute your application at very large scale with very little effort. Please note that this packaging step is only necessary if you plan distribute your workflow to an heterogeneous computing environment such as the EGI grid. If you target local clusters, running the same operating system and sharing a network file system, you can directly jump to the ", a("SystemExecTask.", href := DocumentationPages.nativePackaging.file + "#Usinglocalexecutable"))
+    "CARE makes it possible to package your application from any Linux computer, and then re-execute it on any other Linux computer. The CARE / OpenMOLE pair is a very efficient way to distribute your application at very large scale with very little effort. Please note that this packaging step is only necessary if you plan distribute your workflow to an heterogeneous computing environment such as the EGI grid. If you target local clusters, running the same operating system and sharing a network file system, you can directly jump to the ", a("SystemExecTask.", href := DocumentationPages.native.file + "#Usinglocalexecutable"))
 
   def installCARE = paragraph(p("You should first install CARE:"), listInstallCARE)
 
@@ -35,9 +35,13 @@ object Native {
   def importantAspectCARE = paragraph(p("One very important aspect of CARE is that ", b("you only need to package your application once"), ". As long as the execution you use to package your application makes uses of all the dependencies (libraries, packages, ...), you should not have any problem re-executing this archive with other parameters."))
 
   def introPackagingForRPythonCplusplus = paragraph(
-    "Most of the time, model code is not designed to be portable. For now, OpenMOLE handles Java, Scala, NetLogo and R (in the near future) via specific Tasks, but it is still far from covering the languages used to develop models around the world.",
-    p("Meanwhile, you have to package your code using CARE, as explained in the ", a("Native Packaging section", href := DocumentationPages.nativePackaging.file, targetBlank), ". The following contents expose how to handle your packaged model within OpenMOLE.")
-  )
+    "Most of the time, model code is not designed to be portable. OpenMOLE handles natively Java, Scala, NetLogo and R via specific Tasks. However, if no specific task has yet been designed for the language/platform you can still embed you code into OpenMOLE using:",
+      ul(
+        li("either the ", a("container task documentation", href := DocumentationPages.container.file, targetBlank)),
+        li("or the ", a("native packaging documentation", href := DocumentationPages.native.file, targetBlank), "."),
+      )
+    )
+
 
   def scriptsCommon(language: String, commandLine: String) = paragraph(
     p, "To call this script from the command line you should type: ",
@@ -61,9 +65,16 @@ object Native {
     p, "Two things should be noted from this example:",
     ul,
     li(RawFrag(s"The procedure to package an application ${b("is always the same")},  regardless of the underlying programming language / framework used.")),
-    li(RawFrag(s"The ${hl.openmoleNoTest("CARETask")} is not different from the ${a("SystemExecTask", href := DocumentationPages.nativePackaging.anchor(shared.nativePackagingMenu.localExecutable))} to the extent of the archive given as a first parameter.")),
+    li(RawFrag(s"The ${hl.openmoleNoTest("CARETask")} is not different from the ${a("SystemExecTask", href := DocumentationPages.native.anchor(shared.nativePackagingMenu.localExecutable))} to the extent of the archive given as a first parameter.")),
 
-    p, "These two aspects make it really ", b("easy to embed native applications"), " in OpenMOLE. You can also read more about packaging your native models for OpenMOLE in ", a("the dedicated section", href := DocumentationPages.nativePackaging.file), "."
+    p, "These two aspects make it really ", b("easy to embed native applications"), " in OpenMOLE. You can also read more about packaging your native models for OpenMOLE in ", a("the dedicated section", href := DocumentationPages.native.file), "."
   )
+
+  def linuxOnly(taskName: String) =
+    paragraph(
+      "The ",
+      org.openmole.site.tools.code(taskName),
+      s""" works only on Linux systems. If you are running OpenMOLE on a different system you won't be able to use it. This limitation may be overcome in the future when docker is installed on MacOS and Windows."""
+    )
 
 }

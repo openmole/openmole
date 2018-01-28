@@ -151,16 +151,6 @@ object DocumentationPages {
   def allPages = Vector[DocumentationPage](
     docSiteMap,
     gui,
-    scala,
-    java,
-    r,
-    native,
-    nativePackaging,
-    pakagedCPlusPlus,
-    packagedR,
-    packagedPython,
-    netLogo,
-    mole,
     model,
     language,
     howToContribute,
@@ -194,7 +184,7 @@ object DocumentationPages {
     hook,
     source,
     console
-  )
+  ) ++ modelPages ++ extraModelPages
 
   lazy val topPages = Seq(
     modelPages,
@@ -206,19 +196,19 @@ object DocumentationPages {
 
   lazy val gui = DocumentationPage.fromScalatex(name = "GUI guide", content = scalatex.documentation.GUI)
 
-  def modelPages = Seq(scala, java, r, netLogo, packagedPython, pakagedCPlusPlus, packagedR, mole, native)
+  def modelPages = Seq(scala, java, r, netLogo, container, mole, native)
+  def extraModelPages = Seq(packagedR, packagedPython, packagedCPlusPlus)
 
   lazy val scala = DocumentationPage.fromScalatex(name = "Scala", content = scalatex.documentation.language.model.Scala, details = Seq(scalaFunction))
   lazy val java = DocumentationPage.fromScalatex(name = "Java", content = scalatex.documentation.language.model.Java)
 
   lazy val r = DocumentationPage.fromScalatex(name = "R", content = scalatex.documentation.language.model.R)
-  lazy val native = DocumentationPage.fromScalatex(name = "Other Languages", content = scalatex.documentation.language.model.Native, details = Seq(nativePackaging), extraMenu = Some(SideMenu.nativeMenu))
+  lazy val container = DocumentationPage.fromScalatex(name = "Container", content = scalatex.documentation.language.model.Container)
+  lazy val native = DocumentationPage.fromScalatex(name = "Native", content = scalatex.documentation.language.model.Native, extraMenu = Some(SideMenu.nativePackagingMenu), title = Some("Native Code Packaging, CARE Task Options"))
 
-  lazy val nativePackaging = DocumentationPage.fromScalatex(name = "Native Packaging", content = scalatex.documentation.details.NativePackaging, extraMenu = Some(SideMenu.nativePackagingMenu), title = Some("Native Code Packaging, CARE Task Options"))
-
-  lazy val pakagedCPlusPlus = DocumentationPage.fromScalatex(name = "Packaged C++", location = Some("cplusplus"), content = scalatex.documentation.language.model.PackagedCCplusplus, details = Seq(nativePackaging))
-  lazy val packagedR = DocumentationPage.fromScalatex(name = "Packaged R", content = scalatex.documentation.language.model.PackagedR, details = Seq(nativePackaging))
-  lazy val packagedPython = DocumentationPage.fromScalatex(name = "Packaged Python", content = scalatex.documentation.language.model.PackagedPython, details = Seq(nativePackaging))
+  lazy val packagedCPlusPlus = DocumentationPage.fromScalatex(name = "Packaged C++", location = Some("cplusplus"), content = scalatex.documentation.language.model.PackagedCCplusplus, details = Seq(native))
+  lazy val packagedR = DocumentationPage.fromScalatex(name = "Packaged R", content = scalatex.documentation.language.model.PackagedR, details = Seq(native))
+  lazy val packagedPython = DocumentationPage.fromScalatex(name = "Packaged Python", content = scalatex.documentation.language.model.PackagedPython, details = Seq(native))
   lazy val netLogo = DocumentationPage.fromScalatex(name = "NetLogo", content = scalatex.documentation.language.model.NetLogo)
   lazy val mole = DocumentationPage.fromScalatex(name = "Mole", content = scalatex.documentation.language.model.MoleTask)
   lazy val model = DocumentationPage.fromScalatex(name = "Models", content = scalatex.documentation.language.Model)
@@ -256,7 +246,7 @@ object DocumentationPages {
     island,
     stochasticity,
     advancedSampling,
-    nativePackaging,
+    native,
     headlessNetLogo,
     gui,
     language
