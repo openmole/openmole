@@ -20,7 +20,7 @@ import org.openmole.tool.lock._
 package udocker {
 
   trait UDockerPackage {
-
+    lazy val ContainerTask = UDockerTask
   }
 
 }
