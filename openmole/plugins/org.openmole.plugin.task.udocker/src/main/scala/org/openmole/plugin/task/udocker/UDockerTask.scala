@@ -62,22 +62,26 @@ object UDockerTask {
   }
 
   def apply(
-    image:           ContainerImage,
-    command:         FromContext[String],
-    installCommands: Seq[String]              = Vector.empty,
-    user:            OptionalArgument[String] = None,
-    mode:            OptionalArgument[String] = None,
-    cachedKey:       OptionalArgument[String] = None,
-    reuseContainer:  Boolean                  = false,
-    forceUpdate:     Boolean                  = false
+    image:              ContainerImage,
+    command:            FromContext[String],
+    installCommands:    Seq[String]                   = Vector.empty,
+    user:               OptionalArgument[String]      = None,
+    mode:               OptionalArgument[String]      = None,
+    cachedKey:          OptionalArgument[String]      = None,
+    reuseContainer:     Boolean                       = false,
+    forceUpdate:        Boolean                       = false,
+    returnValue:        OptionalArgument[Val[Int]]    = None,
+    stdOut:             OptionalArgument[Val[String]] = None,
+    stdErr:             OptionalArgument[Val[String]] = None,
+    errorOnReturnValue: Boolean                       = true
   )(implicit name: sourcecode.Name, newFile: NewFile, workspace: Workspace, preference: Preference, threadProvider: ThreadProvider, fileService: FileService, outputRedirection: OutputRedirection): UDockerTask =
     UDockerTask(
       uDocker = createUDocker(image, installCommands, user, mode, cachedKey, forceUpdate, reuseContainer),
       command = command,
-      errorOnReturnValue = true,
-      returnValue = None,
-      stdOut = None,
-      stdErr = None,
+      errorOnReturnValue = errorOnReturnValue,
+      returnValue = returnValue,
+      stdOut = stdOut,
+      stdErr = stdErr,
       _config = InputOutputConfig(),
       external = External()
     )
