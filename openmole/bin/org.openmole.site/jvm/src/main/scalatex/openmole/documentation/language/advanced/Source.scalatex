@@ -2,7 +2,6 @@
 @import org.openmole.site.Resource._
 @import org.openmole.site._
 @import org.openmole.site.tools._
-@import org.openmole.site.Environment._
 
 @h1{Source}
 Sources have been designed as a possible way to inject data in the dataflow from diverse sources: CSV files,

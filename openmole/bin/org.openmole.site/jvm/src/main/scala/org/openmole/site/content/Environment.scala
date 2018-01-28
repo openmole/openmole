@@ -15,10 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.site
+package org.openmole.site.content
 
 import org.openmole.site.tools._
 import org.openmole.site.tools.api._
+
 import scalatags.Text.all._
 
 object Environment {

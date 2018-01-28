@@ -1,7 +1,7 @@
 @import org.openmole.site._
 @import org.openmole.site.tools._
 @import org.openmole.site.tools.api._
-@import org.openmole.site.Environment._
+@import org.openmole.site.content.Environment._
 
 
 @aa("EGI", href := shared.link.egi) is a grid infrastructure gathering computing resources from all over the world.

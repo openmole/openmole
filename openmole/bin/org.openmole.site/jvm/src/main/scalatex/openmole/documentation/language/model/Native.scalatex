@@ -1,7 +1,7 @@
 
 @import org.openmole.site.tools._
 @import org.openmole.site._
-@import org.openmole.site.NativeDocPageCommons._
+@import org.openmole.site.content.Native._
 
 
 @introPackagingForRPythonCplusplus

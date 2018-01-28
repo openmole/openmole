@@ -1,7 +1,6 @@
 @import org.openmole.site.stylesheet._
 @import org.openmole.site._
 @import org.openmole.site.tools._
-@import org.openmole.site.Environment._
 
 
 @def variables = """

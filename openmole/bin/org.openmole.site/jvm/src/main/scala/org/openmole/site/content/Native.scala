@@ -1,11 +1,12 @@
 
-package org.openmole.site
+package org.openmole.site.content
 
 import org.openmole.site.tools._
+import org.openmole.site.{ DocumentationPages, Pages, Resource, shared }
 
 import scalatags.Text.all._
 
-object NativeDocPageCommons {
+object Native {
 
   def preamble = paragraph("In OpenMOLE, a generic task named ", hl.highlight("CARETask", "plain"), " offers to run external applications packaged with ", a("CARE", href := Resource.script.care.file),
     ". The site (proposing an outdated version of CARE for now, but a great documentation) can be found ", a("here", href := shared.link.CAREsite), ". ",

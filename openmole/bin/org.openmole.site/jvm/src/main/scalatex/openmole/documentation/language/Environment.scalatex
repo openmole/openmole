@@ -1,6 +1,6 @@
 @import org.openmole.site.tools._
 @import org.openmole.site._
-@import org.openmole.site.Environment._
+@import org.openmole.site.content.Environment._
 
 @def tasks = """
   // Define the variables that are transmitted between the tasks

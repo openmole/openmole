@@ -1,7 +1,7 @@
 
 @import org.openmole.site.tools._
 @import org.openmole.site._
-@import org.openmole.site.NativeDocPageCommons._
+@import org.openmole.site.content.Native._
 
 
 
@@ -19,7 +19,7 @@
 
     @p We save this to @i{hello.py}. It does nothing but printing its first argument to the file passed as a second argument.
 
-    @NativeDocPageCommons.scriptsCommon("python", "python hello.py 42 test.txt")
+    @scriptsCommon("python", "python hello.py 42 test.txt")
 
     @p You can now @b{upload this archive to your OpenMOLE workspace} and run it using the following script:
     @br @hl.openmole("""
@@ -46,4 +46,4 @@
     @p Notions from OpenMOLE are reused in this example. If you're not too familiar with @a("Environments", href := DocumentationPages.environment.file), @a("Groupings", href := DocumentationPages.environment.file + "#Grouping"), @a("Hooks", href := DocumentationPages.hook.file) or @a("Samplings", href := DocumentationPages.advancedSampling.file), check the relevant sections of the documentation.
 
     @hr
-    @NativeDocPageCommons.footer
+    @footer

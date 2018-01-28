@@ -1,7 +1,7 @@
 
 @import org.openmole.site.tools._
 @import org.openmole.site._
-@import org.openmole.site.NativeDocPageCommons._
+@import org.openmole.site.content.Native._
 
 
 
@@ -37,7 +37,7 @@
 
     @p This reads a file called @i{data.csv}, multiply its content by a number provided on the command line and writes the result to an output file called @i{results.csv}.
 
-    @NativeDocPageCommons.scriptsCommon("R", "R -f script.R --slave --args 4")
+    @scriptsCommon("R", "R -f script.R --slave --args 4")
 
     @p You can now @b{upload this archive to your OpenMOLE workspace} along with a @i{data.csv} file to a subfolder named @i{data}. Let's now explore a complete combination of all the data files with OpenMOLE. The input data files are located in @i{data} and the result files are written to a folder called @i{results}. A second input parameter is a numeric value @i{i} ranging from 1 to 10. The corresponding OpenMOLE script looks like this:
     @p @hl.openmole("""
@@ -72,4 +72,4 @@
     documentation.
 
     @hr
-    @NativeDocPageCommons.footer
+    @footer
