@@ -67,7 +67,7 @@ class FileService(implicit preference: Preference) {
   private[fileservice] val deleteEmpty = ListBuffer[File]()
 
   def hash(file: File)(implicit newFile: NewFile): Hash = {
-    def hash = computeHash(if (file.isDirectory) archiveForDir(file).file else file)
+    def hash = hashFile(if (file.isDirectory) archiveForDir(file).file else file)
     hashCache.get(file.getCanonicalPath, hash)
   }
 

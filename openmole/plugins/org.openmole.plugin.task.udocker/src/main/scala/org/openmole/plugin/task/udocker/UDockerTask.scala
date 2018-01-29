@@ -38,6 +38,7 @@ import org.openmole.core.fileservice.FileService
 import org.openmole.core.outputredirection.OutputRedirection
 import org.openmole.core.threadprovider._
 import org.openmole.plugin.task.container.HostFiles
+import org.openmole.tool.hash.Hash
 import org.openmole.tool.lock.LockKey
 
 import scala.language.postfixOps
@@ -67,16 +68,17 @@ object UDockerTask {
     installCommands:    Seq[String]                   = Vector.empty,
     user:               OptionalArgument[String]      = None,
     mode:               OptionalArgument[String]      = None,
-    cachedKey:          OptionalArgument[String]      = None,
     reuseContainer:     Boolean                       = false,
+    cacheInstall:       Boolean                       = true,
     forceUpdate:        Boolean                       = false,
     returnValue:        OptionalArgument[Val[Int]]    = None,
     stdOut:             OptionalArgument[Val[String]] = None,
     stdErr:             OptionalArgument[Val[String]] = None,
     errorOnReturnValue: Boolean                       = true
-  )(implicit name: sourcecode.Name, newFile: NewFile, workspace: Workspace, preference: Preference, threadProvider: ThreadProvider, fileService: FileService, outputRedirection: OutputRedirection): UDockerTask =
+  )(implicit name: sourcecode.Name, newFile: NewFile, workspace: Workspace, preference: Preference, threadProvider: ThreadProvider, fileService: FileService, outputRedirection: OutputRedirection): UDockerTask = {
+
     UDockerTask(
-      uDocker = createUDocker(image, installCommands, user, mode, cachedKey, forceUpdate, reuseContainer),
+      uDocker = createUDocker(image, installCommands, user, mode, cacheInstall, forceUpdate, reuseContainer),
       command = command,
       errorOnReturnValue = errorOnReturnValue,
       returnValue = returnValue,
@@ -85,13 +87,14 @@ object UDockerTask {
       _config = InputOutputConfig(),
       external = External()
     )
+  }
 
   def createUDocker(
     image:           ContainerImage,
     installCommands: Seq[String]              = Vector.empty,
     user:            OptionalArgument[String] = None,
     mode:            OptionalArgument[String] = None,
-    cachedKey:       OptionalArgument[String] = None,
+    cacheInstall:    Boolean                  = true,
     forceUpdate:     Boolean                  = false,
     reuseContainer:  Boolean                  = true)(implicit newFile: NewFile, preference: Preference, threadProvider: ThreadProvider, workspace: Workspace, fileService: FileService, outputRedirection: OutputRedirection) = {
     val uDocker =
@@ -104,11 +107,11 @@ object UDockerTask {
         reuseContainer = reuseContainer,
         user = user)
 
-    installLibraries(uDocker, installCommands, cachedKey, forceUpdate)
+    installLibraries(uDocker, installCommands, cacheInstall, forceUpdate)
 
   }
 
-  def installLibraries(uDocker: UDockerArguments, installCommands: Seq[String], cachedKey: Option[String], forceUpdate: Boolean)(implicit newFile: NewFile, workspace: Workspace, fileService: FileService, outputRedirection: OutputRedirection) = {
+  def installLibraries(uDocker: UDockerArguments, installCommands: Seq[String], cacheInstall: Boolean, forceUpdate: Boolean)(implicit newFile: NewFile, workspace: Workspace, fileService: FileService, outputRedirection: OutputRedirection) = {
     def installLibrariesInContainer(destination: File) =
       newFile.withTmpFile { tmpDirectory ⇒
         val layersDirectory = UDockerTask.layersDirectory(workspace)
@@ -149,8 +152,10 @@ object UDockerTask {
     def installedUDockerContainer() =
       if (installCommands.isEmpty) uDocker
       else {
-        cachedKey match {
-          case Some(cacheKey) ⇒
+        cacheInstall match {
+          case true ⇒
+            import org.openmole.tool.hash._
+            val cacheKey: String = hashString((uDocker.localDockerImage.content.layers.map(_._1.digest) ++ installCommands).mkString("\n")).toString
             val cacheDirectory = installCacheDirectory(workspace)
             cacheDirectory.withLockInDirectory {
               val cachedContainer = cacheDirectory / cacheKey
@@ -158,7 +163,7 @@ object UDockerTask {
               (UDockerArguments.localDockerImage composeLens LocalDockerImage.container) set Some(cachedContainer) apply uDocker
             }
 
-          case _ ⇒
+          case false ⇒
             val createdContainer = newFile.newDir("container")
             installLibrariesInContainer(createdContainer)
             fileService.deleteWhenGarbageCollected(createdContainer)

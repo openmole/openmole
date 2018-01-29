@@ -66,14 +66,12 @@ object RTask {
 
     val installCommands =
       install ++ InstallCommand.installCommands(libraries.toVector ++ Seq(InstallCommand.RLibrary("jsonlite")))
-    val cacheKey: Option[String] =
-      Some((Seq(rImage(version).image, rImage(version).tag) ++ installCommands).mkString("\n").hash().toString)
 
     val uDockerArguments =
       UDockerTask.createUDocker(
         rImage(version),
         installCommands = installCommands,
-        cachedKey = OptionalArgument(cacheKey),
+        cacheInstall = true,
         forceUpdate = forceUpdate,
         mode = "P1",
         reuseContainer = true
