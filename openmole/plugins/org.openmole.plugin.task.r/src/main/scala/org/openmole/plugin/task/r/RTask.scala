@@ -70,7 +70,7 @@ object RTask {
     val uDockerArguments =
       UDockerTask.createUDocker(
         rImage(version),
-        installCommands = installCommands,
+        install = installCommands,
         cacheInstall = true,
         forceUpdate = forceUpdate,
         mode = "P1",

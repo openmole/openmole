@@ -6,3 +6,70 @@
 
 @linuxOnly("ContainerTask")
 
+The container task runs docker container in OpenMOLE. It is based on a container engine running without administration privileges called @a("udocker", href := "https://github.com/indigo-dc/udocker"). Using this task you can run containers from the @a("docker hub", href := "https://hub.docker.com/") or container exported from docker.
+
+@h2{Containers from the docker hub}
+
+A simple task running a python container would look like:
+@openmole(s"""
+val container =
+  ContainerTask(
+    "python:3.6-stretch",
+    ${tq}python -c 'print("youpi")'${tq}
+  )
+""")
+
+
+@hl("""
+import sys
+import numpy
+from numpy import *
+from array import *
+import csv
+
+input = open(sys.argv[1],'r')
+n = float(sys.argv[2])
+
+print("reading the matrix")
+data = csv.reader(input)
+headers = next(data, None)
+
+array = numpy.array(list(data)).astype(float)
+
+print(array)
+print(n)
+mult = array * n
+
+print("saving the matrix")
+numpy.savetxt(sys.argv[3], mult, fmt='%g')
+""", "python")
+
+@openmole(s"""
+val dataFile = Val[File]
+val dataFileName = Val[String]
+val i = Val[Int]
+val resultFile = Val[File]
+
+val container =
+  ContainerTask(
+    "python:3.6-stretch",
+    ${tq}python matrix.py data.csv $${i} out.csv${tq},
+    install = Seq("pip install numpy")
+  ) set (
+    resources += workDirectory / "matrix.py",
+    inputFiles += (dataFile, "data.csv"),
+    outputFiles += ("out.csv", resultFile),
+    (inputs, outputs) += (i, dataFileName)
+  )
+
+DirectSampling(
+  sampling =
+    (dataFile in (workDirectory / "data") withName dataFileName) x
+    (i in (0 to 3)),
+  evaluation =
+    container hook CopyFileHook(resultFile, workDirectory / "results/$${dataFileName.dropRight(4)}_$${i}.csv")
+)
+
+""")
+
+

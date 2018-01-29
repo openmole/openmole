@@ -38,7 +38,6 @@ import org.openmole.core.fileservice.FileService
 import org.openmole.core.outputredirection.OutputRedirection
 import org.openmole.core.threadprovider._
 import org.openmole.plugin.task.container.HostFiles
-import org.openmole.tool.hash.Hash
 import org.openmole.tool.lock.LockKey
 
 import scala.language.postfixOps
@@ -65,10 +64,10 @@ object UDockerTask {
   def apply(
     image:              ContainerImage,
     command:            FromContext[String],
-    installCommands:    Seq[String]                   = Vector.empty,
+    install:            Seq[String]                   = Vector.empty,
     user:               OptionalArgument[String]      = None,
     mode:               OptionalArgument[String]      = None,
-    reuseContainer:     Boolean                       = false,
+    reuseContainer:     Boolean                       = true,
     cacheInstall:       Boolean                       = true,
     forceUpdate:        Boolean                       = false,
     returnValue:        OptionalArgument[Val[Int]]    = None,
@@ -83,7 +82,7 @@ object UDockerTask {
     }
 
     UDockerTask(
-      uDocker = createUDocker(image, installCommands, user, mode, cacheInstall, forceUpdate, reuseContainer),
+      uDocker = createUDocker(image, install, user, mode, cacheInstall, forceUpdate, reuseContainer),
       command = command.map(blockChars),
       errorOnReturnValue = errorOnReturnValue,
       returnValue = returnValue,
@@ -95,13 +94,13 @@ object UDockerTask {
   }
 
   def createUDocker(
-    image:           ContainerImage,
-    installCommands: Seq[String]              = Vector.empty,
-    user:            OptionalArgument[String] = None,
-    mode:            OptionalArgument[String] = None,
-    cacheInstall:    Boolean                  = true,
-    forceUpdate:     Boolean                  = false,
-    reuseContainer:  Boolean                  = true)(implicit newFile: NewFile, preference: Preference, threadProvider: ThreadProvider, workspace: Workspace, fileService: FileService, outputRedirection: OutputRedirection) = {
+    image:          ContainerImage,
+    install:        Seq[String]              = Vector.empty,
+    user:           OptionalArgument[String] = None,
+    mode:           OptionalArgument[String] = None,
+    cacheInstall:   Boolean                  = true,
+    forceUpdate:    Boolean                  = false,
+    reuseContainer: Boolean                  = true)(implicit newFile: NewFile, preference: Preference, threadProvider: ThreadProvider, workspace: Workspace, fileService: FileService, outputRedirection: OutputRedirection) = {
     val uDocker =
       UDockerArguments(
         localDockerImage = toLocalImage(image) match {
@@ -112,7 +111,7 @@ object UDockerTask {
         reuseContainer = reuseContainer,
         user = user)
 
-    installLibraries(uDocker, installCommands, cacheInstall, forceUpdate)
+    installLibraries(uDocker, install, cacheInstall, forceUpdate)
 
   }
 
