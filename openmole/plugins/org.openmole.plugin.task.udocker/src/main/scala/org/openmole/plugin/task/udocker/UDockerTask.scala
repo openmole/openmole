@@ -77,9 +77,14 @@ object UDockerTask {
     errorOnReturnValue: Boolean                       = true
   )(implicit name: sourcecode.Name, newFile: NewFile, workspace: Workspace, preference: Preference, threadProvider: ThreadProvider, fileService: FileService, outputRedirection: OutputRedirection): UDockerTask = {
 
+    def blockChars(s: String): String = {
+      val blocked = Set(''', '"', '\\')
+      s.flatMap { c ⇒ if (blocked.contains(c)) s"\\$c" else s"$c" }
+    }
+
     UDockerTask(
       uDocker = createUDocker(image, installCommands, user, mode, cacheInstall, forceUpdate, reuseContainer),
-      command = command,
+      command = command.map(blockChars),
       errorOnReturnValue = errorOnReturnValue,
       returnValue = returnValue,
       stdOut = stdOut,
