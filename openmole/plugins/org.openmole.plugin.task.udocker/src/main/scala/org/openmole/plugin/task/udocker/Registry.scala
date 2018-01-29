@@ -14,12 +14,10 @@ import io.circe.parser._
 import squants.time._
 import cats.implicits._
 import org.openmole.core.workspace.NewFile
+import org.openmole.tool.stream._
 import org.openmole.tool.file.{ File ⇒ OMFile, FileDecorator }
 
 object Registry {
-
-  def copy(is: InputStream, os: OutputStream) =
-    Iterator.continually(is.read()).takeWhile(_ != -1).foreach { os.write }
 
   def content(response: HttpResponse) = scala.io.Source.fromInputStream(response.getEntity.getContent).mkString
 
