@@ -29,7 +29,13 @@ package object udocker extends UDockerPackage {
 
   object ContainerImage {
     implicit def fileToContainerImage(f: java.io.File) = SavedDockerImage(f)
-    implicit def stringToContainerImage(s: String) = DockerImage(s)
+    implicit def stringToContainerImage(s: String) =
+      if (s.contains(":")) {
+        val Vector(image, tag) = s.split(":").toVector
+        DockerImage(image, tag)
+      }
+      else DockerImage(s)
+
   }
 
   sealed trait ContainerImage
