@@ -45,12 +45,22 @@ object UDocker {
     lazy val id = UUID.randomUUID().toString
   }
 
-  def downloadImage(dockerImage: DockerImage, layersDirectory: File, timeout: Time)(implicit newFile: NewFile, threadProvider: ThreadProvider, outputRedirection: OutputRedirection) = {
+  def downloadImage(dockerImage: DockerImage, manifestDirectory: File, layersDirectory: File, timeout: Time)(implicit newFile: NewFile, threadProvider: ThreadProvider, outputRedirection: OutputRedirection) = {
     import Registry._
 
     def layerFile(layer: Layer) = layersDirectory / layer.digest
+    lazy val manifestFile = manifestDirectory / s"${dockerImage.image}_${dockerImage.tag}"
 
-    val manifestData = manifest(dockerImage, timeout)
+    val manifestContent = util.Try(downloadManifest(dockerImage, timeout)) match {
+      case util.Failure(e) ⇒
+        if (manifestFile.exists) manifestFile.withLock { _ ⇒ manifestFile.content }
+        else throw e
+      case util.Success(c) ⇒
+        manifestFile.withLock { _ ⇒ manifestFile.content = c }
+        c
+    }
+
+    val manifestData = manifest(dockerImage, manifestContent)
 
     def localLayersFutures =
       for {

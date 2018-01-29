@@ -176,13 +176,14 @@ object UDockerTask {
 
   def toLocalImage(containerImage: ContainerImage)(implicit preference: Preference, newFile: NewFile, workspace: Workspace, threadProvider: ThreadProvider, outputRedirection: OutputRedirection): Either[Err, LocalDockerImage] =
     containerImage match {
-      case i: DockerImage      ⇒ downloadImage(i, layersDirectory(workspace), preference(RegistryTimeout))
+      case i: DockerImage      ⇒ downloadImage(i, manifestDirectory(workspace), layersDirectory(workspace), preference(RegistryTimeout))
       case i: SavedDockerImage ⇒ loadImage(i)
     }
 
   def installCacheDirectory(workspace: Workspace) = workspace.persistentDir /> "udocker" /> "cached"
   def layersDirectory(workspace: Workspace) = workspace.persistentDir /> "udocker" /> "layers"
   def repositoryDirectory(workspace: Workspace) = workspace.persistentDir /> "udocker" /> "repos"
+  def manifestDirectory(workspace: Workspace) = workspace.persistentDir /> "udocker" /> "manifest"
 
   lazy val containerPoolKey = CacheKey[WithInstance[ContainerID]]()
   lazy val installLockKey = LockKey()

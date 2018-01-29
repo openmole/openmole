@@ -98,11 +98,13 @@ object Registry {
     s"${image.registry}/v2/$path"
   }
 
-  def manifest(image: DockerImage, timeout: Time): Either[Err, Manifest] = {
-
+  def downloadManifest(image: DockerImage, timeout: Time): String = {
     val url = s"${baseURL(image)}/manifests/${image.tag}"
     val httpResponse = client.execute(Token.withToken(url, timeout))
-    val manifestContent = content(httpResponse)
+    content(httpResponse)
+  }
+
+  def manifest(image: DockerImage, manifestContent: String): Either[Err, Manifest] = {
     val manifestsE = decode[ImageManifestV2Schema1](manifestContent)
 
     val manifest = for {
