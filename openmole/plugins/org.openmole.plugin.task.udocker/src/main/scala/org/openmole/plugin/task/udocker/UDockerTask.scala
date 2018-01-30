@@ -44,6 +44,15 @@ import scala.language.postfixOps
 
 object UDockerTask {
 
+  @Lenses case class Commands(value: Vector[FromContext[String]])
+
+  object Commands {
+    implicit def fromContext(f: FromContext[String]) = Commands(Vector(f))
+    implicit def fromString(f: String) = Commands(Vector(f))
+    implicit def seqOfString(f: Seq[String]) = Commands(f.map(x ⇒ x: FromContext[String]).toVector)
+    implicit def seqOfFromContext(f: Seq[FromContext[String]]) = Commands(f.toVector)
+  }
+
   import UDocker._
 
   val RegistryTimeout = ConfigurationLocation("UDockerTask", "RegistryTimeout", Some(1 minutes))
@@ -63,7 +72,7 @@ object UDockerTask {
 
   def apply(
     image:              ContainerImage,
-    command:            FromContext[String],
+    run:                Commands,
     install:            Seq[String]                   = Vector.empty,
     user:               OptionalArgument[String]      = None,
     mode:               OptionalArgument[String]      = None,
@@ -83,7 +92,7 @@ object UDockerTask {
 
     UDockerTask(
       uDocker = createUDocker(image, install, user, mode, cacheInstall, forceUpdate, reuseContainer),
-      command = command.map(blockChars),
+      commands = Commands.value.modify(_.map(_.map(blockChars)))(run),
       errorOnReturnValue = errorOnReturnValue,
       returnValue = returnValue,
       stdOut = stdOut,
@@ -202,7 +211,7 @@ object UDockerTask {
 
 @Lenses case class UDockerTask(
   uDocker:            UDockerArguments,
-  command:            FromContext[String],
+  commands:           UDockerTask.Commands,
   errorOnReturnValue: Boolean,
   returnValue:        Option[Val[Int]],
   stdOut:             Option[Val[String]],
@@ -212,7 +221,7 @@ object UDockerTask {
 ) extends Task with ValidateTask { self ⇒
 
   override def config = UDockerTask.config(_config, returnValue, stdOut, stdErr)
-  override def validate = container.validateContainer(Vector(command), uDocker.environmentVariables, external, inputs)
+  override def validate = container.validateContainer(commands.value, uDocker.environmentVariables, external, inputs)
 
   override def process(executionContext: TaskExecutionContext) = FromContext[Context] { parameters ⇒
     import parameters._
@@ -286,7 +295,7 @@ object UDockerTask {
           val containerEnvironmentVariables =
             uDocker.environmentVariables.map { case (name, variable) ⇒ name -> variable.from(preparedContext) }
 
-          val expandedCommand =
+          def expandCommand(command: FromContext[String]) =
             UDocker.uDockerRunCommand(
               uDocker.user,
               containerEnvironmentVariables,
@@ -299,7 +308,7 @@ object UDockerTask {
           val executionResult = executeAll(
             taskWorkDirectory,
             uDockerVariables,
-            List(expandedCommand),
+            commands.value.map(expandCommand).toList,
             errorOnReturnValue && !returnValue.isDefined,
             stdOut.isDefined,
             stdErr.isDefined,
