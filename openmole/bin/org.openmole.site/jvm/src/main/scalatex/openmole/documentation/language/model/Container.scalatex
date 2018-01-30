@@ -6,7 +6,7 @@
 
 @linuxOnly("ContainerTask")
 
-The container task runs docker container in OpenMOLE. It is based on a container engine running without administration privileges called @a("udocker", href := "https://github.com/indigo-dc/udocker"). Using this task you can run containers from the @a("docker hub", href := "https://hub.docker.com/") or container exported from docker.
+@br The container task runs docker container in OpenMOLE. It is based on a container engine running without administration privileges called @a("udocker", href := "https://github.com/indigo-dc/udocker"). Using this task you can run containers from the @a("docker hub", href := "https://hub.docker.com/") or container exported from docker.
 
 @h2{Containers from the docker hub}
 
@@ -19,6 +19,9 @@ val container =
   )
 """)
 
+You can run this task. At launch time it download the python image from the docker hub in order to be able to run afterwards.
+
+@br Let's imagine a slightly more complete example. In this example we use this python script, that uses the @i{numpy} library to multiply a matrix (stored in a csv file) by a scalar number:
 
 @hl("""
 import sys
@@ -43,6 +46,16 @@ mult = array * n
 print("saving the matrix")
 numpy.savetxt(sys.argv[3], mult, fmt='%g')
 """, "python")
+
+@br An example input file would look like this:
+
+@hl("""
+col1,col2,col3
+31,82,80
+4,48,7
+""", "csv")
+
+@br For this example we consider that we have a @i{data} directory, containing a set of csv files in the @i{workDirectory}. We want to compute the python script for each of this csv file and for a set of value for the second argument of the python script. The OpenMOLE workflow would then look like this:
 
 @openmole(s"""
 val dataFile = Val[File]
@@ -71,5 +84,7 @@ DirectSampling(
 )
 
 """)
+
+@br The install parameter contains a set of command used to install some components in the container once and for all when the task is instantiated.
 
 
