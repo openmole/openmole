@@ -1,5 +1,7 @@
 package org.openmole.core
 
+import java.io.PrintStream
+
 import org.openmole.core.authentication._
 import org.openmole.core.event._
 import org.openmole.core.fileservice._

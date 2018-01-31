@@ -51,27 +51,32 @@ object OutputManager {
 
   private def redirectedOutput[T](f: OutputStream ⇒ T) = output.synchronized {
     findRedirect(Thread.currentThread().getThreadGroup, output) match {
-      case None     ⇒ f(systemOutput)
-      case Some(os) ⇒ f(os)
+      case None                               ⇒ f(systemOutput)
+      case Some(os) if os == outputDispatcher ⇒ f(systemOutput)
+      case Some(os)                           ⇒ f(os)
     }
   }
 
   private def redirectedError[T](f: OutputStream ⇒ T) = error.synchronized {
     findRedirect(Thread.currentThread().getThreadGroup, error) match {
-      case None     ⇒ f(systemError)
-      case Some(os) ⇒ f(os)
+      case None                              ⇒ f(systemError)
+      case Some(os) if os == errorDispatcher ⇒ f(systemError)
+      case Some(os)                          ⇒ f(os)
     }
   }
 
-  lazy val dispatchOutput = new OutputStream {
+  class RedirectedOutput extends OutputStream {
     override def write(i: Int): Unit = redirectedOutput(_.write(i))
     override def flush(): Unit = redirectedOutput(_.flush())
   }
 
-  lazy val dispatchError = new OutputStream {
+  class RedirectError extends OutputStream {
     override def write(i: Int): Unit = redirectedError(_.write(i))
     override def flush(): Unit = redirectedError(_.flush())
   }
+
+  lazy val dispatchOutput = new RedirectedOutput
+  lazy val dispatchError = new RedirectError
 
   def redirectSystemOutput(ps: PrintStream) = {
     System.setOut(ps)
