@@ -11,6 +11,8 @@ import mgo.algorithm.CDGenome
 import mgo.algorithm.NoisyPSE.Individual
 import mgo.niche._
 import monocle.macros._
+import org.openmole.core.workflow.sampling._
+import org.openmole.core.workflow.domain._
 
 object NichedNSGA2 {
 
@@ -18,7 +20,9 @@ object NichedNSGA2 {
     implicit def fromValDouble(v: (Val[Double], Int)) = Continuous(v._1, v._2)
     implicit def fromValInt(v: Val[Int]) = Discrete(v)
     implicit def fromValString(v: Val[String]) = Discrete(v)
+    implicit def fromDoubleDomainToPatternAxe[D](f: Factor[D, Double])(implicit fix: Fix[D, Double]) = GridContinuous(f.prototype, fix(f.domain).toVector)
 
+    case class GridContinuous(v: Val[Double], intervals: Vector[Double]) extends NichedElement
     case class Continuous(v: Val[Double], n: Int) extends NichedElement
     case class ContinuousSequence(v: Val[Array[Double]], i: Int, n: Int) extends NichedElement
     case class Discrete(v: Val[_]) extends NichedElement
@@ -27,22 +31,31 @@ object NichedNSGA2 {
 
   sealed trait NichedElement
 
-  def niche[I](genome: Genome, profiled: Seq[NichedElement], continuousProfile: (Int, Int) ⇒ Niche[I, Int], discreteProfile: Int ⇒ Niche[I, Int]) = {
-
-    def notFound(v: Val[_]) = throw new UserBadDataError(s"Variable $v not found in the genome")
-
-    val niches =
-      profiled.toVector.map {
-        case c: NichedElement.Continuous         ⇒ Genome.continuousIndex(genome, c.v).getOrElse(notFound(c.v)).map { index ⇒ continuousProfile(index, c.n) }
-        case c: NichedElement.ContinuousSequence ⇒ Genome.continuousIndex(genome, c.v).getOrElse(notFound(c.v)).map { index ⇒ continuousProfile(index + c.i, c.n) }
-        case c: NichedElement.Discrete           ⇒ Genome.discreteIndex(genome, c.v).getOrElse(notFound(c.v)).map { index ⇒ discreteProfile(index) }
-        case c: NichedElement.DiscreteSequence   ⇒ Genome.discreteIndex(genome, c.v).getOrElse(notFound(c.v)).map { index ⇒ discreteProfile(index + c.i) }
-      }.sequence
-
-    niches.map { ns ⇒ Profile.sequenceNiches[I, Int](ns) }
-  }
-
   object DeterministicParams {
+
+    def niche(genome: Genome, objectives: Objectives, profiled: Seq[NichedElement]) = {
+
+      def notFoundInGenome(v: Val[_]) = throw new UserBadDataError(s"Variable $v not found in the genome")
+
+      val niches =
+        profiled.toVector.map {
+          case c: NichedElement.Continuous         ⇒ Genome.continuousIndex(genome, c.v).getOrElse(notFoundInGenome(c.v)).map { index ⇒ Profile.continuousProfile(index, c.n) }
+          case c: NichedElement.ContinuousSequence ⇒ Genome.continuousIndex(genome, c.v).getOrElse(notFoundInGenome(c.v)).map { index ⇒ Profile.continuousProfile(index + c.i, c.n) }
+          case c: NichedElement.Discrete           ⇒ Genome.discreteIndex(genome, c.v).getOrElse(notFoundInGenome(c.v)).map { index ⇒ Profile.discreteProfile(index) }
+          case c: NichedElement.DiscreteSequence   ⇒ Genome.discreteIndex(genome, c.v).getOrElse(notFoundInGenome(c.v)).map { index ⇒ Profile.discreteProfile(index + c.i) }
+          case c: NichedElement.GridContinuous ⇒ FromContext { p ⇒
+            import p._
+            (Genome.continuousIndex(genome, c.v).from(context), Objective.index(objectives, c.v)) match {
+              case (Some(index), _) ⇒ Profile.gridContinuousProfile(Genome.continuous(genome).from(context), index.from(context), c.intervals)
+              case (_, Some(index)) ⇒ Profile.gridObjectiveProfile(index, c.intervals)
+              case _                ⇒ throw new UserBadDataError(s"Variable ${c.v} not found neither in the genome nor in the objectives")
+            }
+
+          }
+        }.sequence
+
+      niches.map { ns ⇒ Profile.sequenceNiches[CDGenome.DeterministicIndividual.Individual, Int](ns) }
+    }
 
     import CDGenome.DeterministicIndividual
     import mgo.algorithm._
@@ -155,7 +168,7 @@ object NichedNSGA2 {
       DeterministicParams(
         genome = genome,
         objectives = objectives,
-        niche = NichedNSGA2.niche[CDGenome.DeterministicIndividual.Individual](genome, niche, Profile.continuousProfile, Profile.discreteProfile),
+        niche = DeterministicParams.niche(genome, objectives, niche),
         operatorExploration = operatorExploration,
         muByNiche = muByNiche
       ),
@@ -169,6 +182,30 @@ object NichedNSGA2 {
     import cats.data._
     import freedsl.dsl._
     import mgo.contexts._
+
+    def niche(genome: Genome, objectives: Objectives, aggregation: Vector[Vector[Double]] ⇒ Vector[Double], profiled: Seq[NichedElement]) = {
+
+      def notFoundInGenome(v: Val[_]) = throw new UserBadDataError(s"Variable $v not found in the genome")
+
+      val niches =
+        profiled.toVector.map {
+          case c: NichedElement.Continuous         ⇒ Genome.continuousIndex(genome, c.v).getOrElse(notFoundInGenome(c.v)).map { index ⇒ NoisyProfile.continuousProfile(index, c.n) }
+          case c: NichedElement.ContinuousSequence ⇒ Genome.continuousIndex(genome, c.v).getOrElse(notFoundInGenome(c.v)).map { index ⇒ NoisyProfile.continuousProfile(index + c.i, c.n) }
+          case c: NichedElement.Discrete           ⇒ Genome.discreteIndex(genome, c.v).getOrElse(notFoundInGenome(c.v)).map { index ⇒ NoisyProfile.discreteProfile(index) }
+          case c: NichedElement.DiscreteSequence   ⇒ Genome.discreteIndex(genome, c.v).getOrElse(notFoundInGenome(c.v)).map { index ⇒ NoisyProfile.discreteProfile(index + c.i) }
+          case c: NichedElement.GridContinuous ⇒ FromContext { p ⇒
+            import p._
+            (Genome.continuousIndex(genome, c.v).from(context), Objective.index(objectives, c.v)) match {
+              case (Some(index), _) ⇒ NoisyProfile.gridContinuousProfile(Genome.continuous(genome).from(context), index.from(context), c.intervals)
+              case (_, Some(index)) ⇒ NoisyProfile.gridObjectiveProfile(aggregation, index, c.intervals)
+              case _                ⇒ throw new UserBadDataError(s"Variable ${c.v} not found neither in the genome nor in the objectives")
+            }
+
+          }
+        }.sequence
+
+      niches.map { ns ⇒ Profile.sequenceNiches[CDGenome.NoisyIndividual.Individual, Int](ns) }
+    }
 
     implicit def integration = new MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Vector[Double]] {
       type G = CDGenome.Genome
@@ -301,7 +338,7 @@ object NichedNSGA2 {
     WorkflowIntegration.StochasticGA(
       StochasticParams(
         muByNiche = nicheSize,
-        niche = NichedNSGA2.niche[CDGenome.NoisyIndividual.Individual](genome, niche, NoisyProfile.continuousProfile, NoisyProfile.discreteProfile),
+        niche = StochasticParams.niche(genome, objectives, aggregation, niche),
         operatorExploration = operatorExploration,
         genome = genome,
         objectives = objectives,
