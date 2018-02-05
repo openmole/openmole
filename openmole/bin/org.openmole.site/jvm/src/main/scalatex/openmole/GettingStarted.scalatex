@@ -29,81 +29,117 @@ $tasks
   val env = LocalEnvironment(4)
   """
 
-
-
-
 @h1{Getting started with OpenMOLE}
 
-@sect{The big picture}
-    When you build a model, you need to understand and/or optimize some parameters and to understand their effect on the dynamics of your model. OpenMOLE has been built for that!
-    @break
+@h2{The big picture}
+
+When you build a model, you need to understand the behavior of your parameters in order to know their
+effect on your model's dynamics and optimize them. OpenMOLE has been built for that!
+@break
+
+@ul
+  @li
     First, you @aa("embed your model", href:= DocumentationPages.model.file) in OpenMOLE (5 minutes),
-    @br
-    Then, you pick one of the distributed @aa("calibration genetic algorithms", href:=DocumentationPages.calibration.file) provided by OpenMOLE (5 minutes) and
-     @br
-     Finally, you launch the model exploration on a @aa("distributed execution environment", href:=DocumentationPages.environment.file) with thousands of machines (1 minute once authentication is set up). To summarize, you can design large scale model exploration reusing legacy code and advanced numeric methods in approximately 10 minutes.
+  @li
+    Then, you pick one of the distributed
+    @aa("calibration genetic algorithms", href:=DocumentationPages.calibration.file)
+    provided by OpenMOLE (5 minutes), and
+  @li
+    Finally, you launch the model exploration on a
+    @aa("distributed execution environment", href:=DocumentationPages.environment.file)
+    with thousands of machines (1 minute once authentication is set up).
+@br
+To summarize, you can design a large scale model exploration reusing legacy code and advanced numeric
+methods in approximately 10 minutes.
 
-@sect{Try it !}
-    You can try OpenMOLE online using the @aa("OpenMOLE demonstration site", href := shared.link.demo).
+@h2{Try it !}
 
-@sect{Install it !}
-    OpenMOLE requires that Java version 8 or above is set as the default java on your computer. To make sure of that you can check our @a("FAQ", href := Pages.faq.file).
-    @br
-    Then just extract the archive, available  @a("here", href:=Resource.script.openmole.file), somewhere and you're done! OpenMOLE is installed and works out of the box!
-    @break
-    Once installed, you can launch OpenMOLE by executing the @i{openmole} file in the installation directory (it is called @i{openmole.bat} for windozers). It will bring up you web browser. OpenMOLE supports Chrome and Firefox. So if you are using another default web browser please copy paste the OpenMOLE url (http://localhost:port) in one of these browser.
+You can try OpenMOLE online using the @aa("OpenMOLE demonstration website", href := shared.link.demo).
 
-  @p You should see something like this :
-  @br
-  @img(src := Resource.img.mole.uiScreenshot.file, `class` := "uiScreenshot", center(100)).
+@h2{Install it !}
 
-@sect{Launching parameters}
-    OpenMOLE proposes several launching options. Execute @hl.highlight("openmole -h to", "plain") list all the available options.
+OpenMOLE requires Java version 8 or above to be set as default on your computer. To make sure of that
+you can check our @a("FAQ", href := Pages.faq.file).
+@br
+Then just extract the archive, available  @a("here", href:=Resource.script.openmole.file), somewhere and
+you're done! OpenMOLE is installed and works out of the box!
+@break
+Once installed, you can launch OpenMOLE by executing the @i{openmole} file in the installation directory
+(it is called @i{openmole.bat} for windozers). It will bring up you web browser. OpenMOLE supports
+Chrome and Firefox. If you are using another default web browser, please copy paste the OpenMOLE url
+(http://localhost:port) in one of these browsers.
 
-@sect{OpenMOLE Editor on remote machine}
-  To run OpenMOLE on a remote machine and connect to using a web browser you should run: @hl.highlight("openmole --remote --port portnumber", "plain"). The first time you launch it, it asks you for a password. Then you can remotely connect to OpenMOLE using the url https://remotemachine:portnumber - @b("https:// is important"). When you connect it asks you for the password you've entered previously.
+@p You should see something like this :
+@br
+@img(src := Resource.img.mole.uiScreenshot.file, `class` := "uiScreenshot", center(100)).
 
-@sect{OpenMOLE Headless mode}
-      OpenMOLE proposes a headless mode for running scripts. You can enable it thanks to the -s option: @hl.highlight("./openmole -s /path/to/you/mole/script", "plain")
-      @br
-      In that case OpenMOLE still asks for your preferences cyphering password. To provide it at launch time use the -pw option: @hl.highlight("./openmole -s /path/to/your/mole/script --password password", "plain"). A better practice is to write this password in a file readable by OpenMOLE only and use @hl.highlight("./openmole -s /path/to/your/mole/script --password-file password.txt", "plain").
+@h2{Launching parameters}
+
+OpenMOLE proposes several launching options. Execute @hl.highlight("openmole -h", "plain") to list all
+the available options.
+
+@h2{OpenMOLE Editor on remote machine}
+
+To run OpenMOLE on a remote machine using a web browser, you should run:
+@hl.highlight("openmole --remote --port portnumber", "plain"). On the first run you'll be asked to set a
+password, then you can remotely connect to OpenMOLE using the url https://remotemachine:portnumber -
+@b("https:// is important"). When you connect you'll be prompted for the password you've entered previously.
+
+@h2{OpenMOLE Headless mode}
+
+OpenMOLE proposes a headless mode for running scripts. You can enable it thanks to the -s option:
+@hl.highlight("./openmole -s /path/to/you/mole/script", "plain")
+@br
+In that case OpenMOLE still asks for your preferences cyphering password. To provide it at launch time
+use the -pw option: @hl.highlight("./openmole -s /path/to/your/mole/script --password password", "plain").
+A better practice is to write this password in a file readable by OpenMOLE only and use
+@hl.highlight("./openmole -s /path/to/your/mole/script --password-file password.txt", "plain").
 
 
-@sect{Your first exploration}
-    Let's explore (i.e. iterate within its domain) one variable, multiply it by 2 and then displays each result. The computation is executed in a multi-threaded environment on the local machine.
+@h2{Your first exploration}
 
-    In the OpenMOLE interface, first create a file named @i{example.oms} @("(the file extension matters")). Open it and write the following:
-
-      @br @hl.openmole(s"""
-      $localScript
-      // Define the design of experiment
-      DirectSampling(
-        evaluation = model on env hook ToStringHook(),
-        sampling = i in (0.0 to 100.0 by 1.0)
-      )""", name = "first script")
-
-  @p You can run it by clicking on the execution button (see the @aa("GUI guide", href:=DocumentationPages.gui.file))
-   .
-
-  @break To distribute the exact same execution to a remote cluster, just switch the environment definition. The only configuration step required for this to work is to have an account on the cluster and to provide your authentication to OpenMOLE.
-  Configuring authentications is explained in the section dedicated to each @aa("environment", href := environment.file).
+Let's explore one variable (i.e. iterate within its domain), multiply it by 2 and then display each result.
+The computation is executed in a multi-threaded environment on the local machine.
+@br
+In the OpenMOLE interface, first create a file named @i{example.oms} @("(the file extension matters")).
+Open it and write the following:
 
   @br @hl.openmole(s"""
-  val env = SLURMEnvironment("myLogin", "cluster.iscpif.fr")
-
+  $localScript
+  // Define the design of experiment
   DirectSampling(
-    evaluation = model on env hook ToStringHook() on env,
+    evaluation = model on env hook ToStringHook(),
     sampling = i in (0.0 to 100.0 by 1.0)
-  )""", header = tasks, name = "first delegation")
+  )""", name = "first script")
+
+@p You can run it by clicking on the execution button (see the @aa("GUI guide", href:=DocumentationPages.gui.file)).
+
+@break To distribute the exact same execution to a remote cluster, just switch the environment definition.
+The only configuration step required for this to work is to have an account on the cluster, and to provide your
+authentication to OpenMOLE.
+Configuring authentications is explained in the section dedicated to each @aa("environment", href := environment.file).
+
+@br @hl.openmole(s"""
+val env = SLURMEnvironment("myLogin", "cluster.iscpif.fr")
+
+DirectSampling(
+  evaluation = model on env hook ToStringHook() on env,
+  sampling = i in (0.0 to 100.0 by 1.0)
+)""", header = tasks, name = "first delegation")
 @br
 
 
-@sect{Unleash the power of the MOLE}
-  This was just a tiny bit of what OpenMOLE can achieve! Now you might want to discover how to:
-  @ul
-    @li{include your own code/program: look at the @aa("Model section", href := model.file),}
-    @li{define your environment: look at the @aa("environment section", href := environment.file)}
-    @li{describe your design of experiments: look at the @aa("workflow and sampling documentation", href := DocumentationPages.advancedConcepts.file).}
+@h2{Unleash the power of the MOLE}
 
-@sect{Get help}
-  To get help you are more than welcome to contact the OpenMOLE user mailing list. To do so, you should @aa("subscribe here", href := shared.link.mailingList), and then you can post your question to the list users. We're also present on the @b{#openmole} channel of the @a("ISC-PIF's RocketChat", href := shared.link.chat).
+This was just a tiny bit of what OpenMOLE can achieve! Now you might want to discover how to:
+@ul
+  @li{include your own code/program: look at the @aa("Model section", href := model.file),}
+  @li{define your environment: look at the @aa("environment section", href := environment.file),}
+  @li{describe your design of experiments: look at the
+  @aa("workflow and sampling documentation", href := DocumentationPages.advancedConcepts.file).}
+
+@h2{Get help}
+
+To get help you are more than welcome to contact the OpenMOLE user mailing list. To do so, you should
+@aa("subscribe here", href := shared.link.mailingList), and then you can post your question to the list users.
+We're also present on the @b{#openmole} channel of the @a("ISC-PIF's RocketChat", href := shared.link.chat).
