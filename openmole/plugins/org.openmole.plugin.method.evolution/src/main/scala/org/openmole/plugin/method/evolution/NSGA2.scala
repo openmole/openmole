@@ -232,11 +232,8 @@ object NSGA2 {
           zipWithState(mgo.afterDuration[DSL, I](d).run(population)).eval
         }
 
-        def migrateToIsland(population: Vector[I]) = population.map(_.copy(historyAge = 0))
-        def migrateFromIsland(population: Vector[I]) =
-          population.filter(_.historyAge != 0).map {
-            i ⇒ CDGenome.NoisyIndividual.Individual.fitnessHistory.modify(_.take(scala.math.min(i.historyAge, om.historySize).toInt))(i)
-          }
+        def migrateToIsland(population: Vector[I]) = StochasticGAIntegration.migrateToIsland(population)
+        def migrateFromIsland(population: Vector[I]) = StochasticGAIntegration.migrateFromIsland(population, om.historySize)
       }
 
     }

@@ -258,11 +258,12 @@ object StochasticGAIntegration {
       case None       ⇒ values.transpose.map(_.median)
     }
 
-  //  def genomeToVariables(
-  //    genome: Genome,
-  //    values: (Vector[Double], Vector[Int]),
-  //    seeder: GASeeder
-  //  ) =
+  def migrateToIsland(population: Vector[mgo.algorithm.CDGenome.NoisyIndividual.Individual]) = population.map(_.copy(historyAge = 0))
+  def migrateFromIsland(population: Vector[mgo.algorithm.CDGenome.NoisyIndividual.Individual], historySize: Int) =
+    population.filter(_.historyAge != 0).map {
+      i ⇒ mgo.algorithm.CDGenome.NoisyIndividual.Individual.fitnessHistory.modify(_.take(math.min(i.historyAge, historySize).toInt))(i)
+    }
+
 }
 
 object MGOAPI {
