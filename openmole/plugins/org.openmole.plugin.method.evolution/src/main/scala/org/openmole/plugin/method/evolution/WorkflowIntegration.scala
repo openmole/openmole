@@ -293,8 +293,6 @@ object MGOAPI {
       def initialGenomes(n: Int): FromContext[M[Vector[G]]]
       def buildIndividual(genome: G, phenotype: P): I
       def genomeValues(genome: G): V
-      def genome(individual: I): G
-      def phenotype(individual: I): P
       def randomLens: monocle.Lens[S, util.Random]
       def startTimeLens: monocle.Lens[S, Long]
       def generation(s: S): Long

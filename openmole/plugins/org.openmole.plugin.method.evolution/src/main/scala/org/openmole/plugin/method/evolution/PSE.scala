@@ -93,9 +93,6 @@ object PSE {
         def generation(s: S) = s.generation
 
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get _, CDGenome.discreteValues.get _)(genome)
-        def genome(i: I) = MGOPSE.Individual.genome.get(i)
-
-        def phenotype(individual: I): Vector[Double] = MGOPSE.vectorPhenotype.get(individual)
         def buildIndividual(genome: G, phenotype: Vector[Double]) = MGOPSE.buildIndividual(genome, phenotype)
 
         def initialState(rng: util.Random) = EvolutionState[MGOPSE.HitMapState](random = rng, s = Map())
@@ -231,9 +228,7 @@ object PSE {
 
         def generation(s: S) = s.generation
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get _, CDGenome.discreteValues.get _)(genome)
-        def genome(i: I) = MGONoisyPSE.Individual.genome.get(i)
 
-        def phenotype(individual: I): Vector[Double] = om.aggregation(MGONoisyPSE.vectorPhenotype.get(individual))
         def buildIndividual(genome: G, phenotype: Vector[Double]) = MGONoisyPSE.buildIndividual(genome, phenotype)
         def initialState(rng: util.Random) = EvolutionState[MGOPSE.HitMapState](random = rng, s = Map())
 

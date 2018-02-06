@@ -59,8 +59,6 @@ object NSGA2 {
         def startTimeLens = GenLens[S](_.startTime)
         def generation(s: EvolutionState[Unit]) = s.generation
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get _, CDGenome.discreteValues.get _)(genome)
-        def genome(i: I) = CDGenome.DeterministicIndividual.Individual.genome.get(i)
-        def phenotype(individual: I): Vector[Double] = CDGenome.DeterministicIndividual.vectorFitness.get(individual)
         def buildIndividual(genome: G, phenotype: Vector[Double]) = CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype)
         def initialState(rng: util.Random) = EvolutionState[Unit](random = rng, s = ())
 
@@ -175,9 +173,7 @@ object NSGA2 {
         def startTimeLens = GenLens[S](_.startTime)
         def generation(s: S) = s.generation
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get _, CDGenome.discreteValues.get _)(genome)
-        def genome(i: I) = CDGenome.NoisyIndividual.Individual.genome.get(i)
 
-        def phenotype(individual: I): Vector[Double] = om.aggregation(CDGenome.NoisyIndividual.vectorFitness.get(individual))
         def buildIndividual(genome: G, phenotype: Vector[Double]) = CDGenome.NoisyIndividual.buildIndividual(genome, phenotype)
         def initialState(rng: util.Random) = EvolutionState[Unit](random = rng, s = ())
 
