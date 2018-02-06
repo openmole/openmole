@@ -268,14 +268,6 @@ object StochasticGAIntegration {
 
 object MGOAPI {
 
-  import cats.Monad
-  import mgo.{ breeding, contexts, elitism }
-
-  import contexts._
-  import breeding._
-  import elitism._
-  import squants._
-
   trait Integration[A, V, P] {
     type M[T] = cats.data.State[S, T]
     type I
@@ -302,7 +294,7 @@ object MGOAPI {
       def migrateFromIsland(population: Vector[I]): Vector[I]
 
       def afterGeneration(g: Long, population: Vector[I]): M[Boolean]
-      def afterDuration(d: Time, population: Vector[I]): M[Boolean]
+      def afterDuration(d: squants.Time, population: Vector[I]): M[Boolean]
 
       def result(population: Vector[I]): FromContext[Seq[Variable[_]]]
     }
