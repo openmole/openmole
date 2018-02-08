@@ -33,7 +33,7 @@ object GenomeProfile {
       Vector(NichedNSGA2.NichedElement.Continuous(x, nX)),
       genome,
       objectives = Seq(objective),
-      muByNiche = 1,
+      nicheSize = 1,
     )
 
   def apply(

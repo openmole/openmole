@@ -125,7 +125,7 @@ object NichedNSGA2 {
             import impl._
             def step =
               for {
-                elited ← Profile.elitism[DSL, Vector[Int]](om.niche.from(context), om.muByNiche, Genome.continuous(om.genome).from(context)) apply population
+                elited ← Profile.elitism[DSL, Vector[Int]](om.niche.from(context), om.nicheSize, Genome.continuous(om.genome).from(context)) apply population
                 _ ← mgo.elitism.incrementGeneration[DSL]
               } yield elited
 
@@ -151,7 +151,7 @@ object NichedNSGA2 {
   }
 
   case class DeterministicParams(
-    muByNiche:           Int,
+    nicheSize:           Int,
     niche:               FromContext[Niche[CDGenome.DeterministicIndividual.Individual, Vector[Int]]],
     genome:              Genome,
     objectives:          Objectives,
@@ -161,14 +161,14 @@ object NichedNSGA2 {
     niche:      Seq[NichedElement],
     genome:     Genome,
     objectives: Objectives,
-    muByNiche:  Int): WorkflowIntegration.DeterministicGA[DeterministicParams] =
+    nicheSize:  Int): WorkflowIntegration.DeterministicGA[DeterministicParams] =
     new WorkflowIntegration.DeterministicGA(
       DeterministicParams(
         genome = genome,
         objectives = objectives,
         niche = DeterministicParams.niche(genome, objectives, niche),
         operatorExploration = operatorExploration,
-        muByNiche = muByNiche
+        nicheSize = nicheSize
       ),
       genome,
       objectives
@@ -270,7 +270,7 @@ object NichedNSGA2 {
                 for {
                   elited ← NoisyProfile.elitism[DSL, Vector[Int]](
                     om.niche.from(context),
-                    om.muByNiche,
+                    om.nicheSize,
                     om.historySize,
                     om.aggregation,
                     Genome.continuous(om.genome).from(context)) apply individuals
@@ -299,7 +299,7 @@ object NichedNSGA2 {
   }
 
   case class StochasticParams(
-    muByNiche:           Int,
+    nicheSize:           Int,
     niche:               FromContext[Niche[mgo.algorithm.CDGenome.NoisyIndividual.Individual, Vector[Int]]],
     operatorExploration: Double,
     genome:              Genome,
@@ -330,7 +330,7 @@ object NichedNSGA2 {
 
     WorkflowIntegration.StochasticGA(
       StochasticParams(
-        muByNiche = nicheSize,
+        nicheSize = nicheSize,
         niche = StochasticParams.niche(genome, objectives, aggregation, niche),
         operatorExploration = operatorExploration,
         genome = genome,
