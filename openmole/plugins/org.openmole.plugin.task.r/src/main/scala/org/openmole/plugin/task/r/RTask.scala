@@ -224,12 +224,12 @@ object RTask {
     import org.json4s.jackson.JsonMethods._
 
     def writeInputsJSON(file: File) = {
-      def values = rInputs.map { case (v, _) ⇒ context(v) }
+      def values = rInputs.map { case (v, _) ⇒ Array(context(v)) }
       file.content = compact(render(RTask.toJSONValue(values.toArray)))
     }
 
     def rInputMapping(arrayName: String) =
-      rInputs.zipWithIndex.map { case ((_, name), i) ⇒ s"$name = $arrayName[[${i + 1}]]" }.mkString("\n")
+      rInputs.zipWithIndex.map { case ((_, name), i) ⇒ s"$name = $arrayName[[${i + 1}]][[1]]" }.mkString("\n")
 
     def rOutputMapping =
       s"""list(${rOutputs.map { case (name, _) ⇒ name }.mkString(",")})"""
