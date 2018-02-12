@@ -14,10 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.openmole.core.expansion
+package org.openmole.core.code
 
-import org.openmole.core.tools.service
-import org.openmole.core.workspace.{ NewFile, Workspace }
+import org.openmole.core.workspace._
 import org.openmole.tool.file.FilePackage
 import org.openmole.tool.random
 import org.openmole.tool.random.RandomProvider

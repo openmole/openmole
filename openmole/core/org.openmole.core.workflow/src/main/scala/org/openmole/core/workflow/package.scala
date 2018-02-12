@@ -19,6 +19,7 @@ package org.openmole.core
 
 package workflow {
 
+  import org.openmole.core.code.CodePackage
   import org.openmole.core.context.ContextPackage
   import org.openmole.core.expansion._
   import org.openmole.core.workflow.builder.BuilderPackage

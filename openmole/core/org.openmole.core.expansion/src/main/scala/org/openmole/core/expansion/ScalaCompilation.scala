@@ -32,9 +32,7 @@ import scala.util._
 
 object ScalaCompilation {
 
-  //def plugins: Seq[File]
-  //def libraries: Seq[File]
-  def openMOLEImports = Seq(s"${CodePackage.namespace}._")
+  def openMOLEImports = Seq(s"${org.openmole.core.code.CodePackage.namespace}._")
 
   def addImports(code: String) =
     s"""
@@ -80,12 +78,6 @@ object ScalaCompilation {
     native getOrElse t
   }
 
-  //type RETURN
-  //def returnType: ValType[_ <: RETURN]
-
-  //def wrapping: OutputWrapping[RETURN]
-  //def source: String
-
   def prefix = "_input_value_"
 
   def function[RETURN](inputs: Seq[Val[_]], source: String, plugins: Seq[File], libraries: Seq[File], wrapping: OutputWrapping[RETURN], returnType: ValType[_ <: RETURN])(implicit newFile: NewFile, fileService: FileService) = {
@@ -115,10 +107,6 @@ object ScalaCompilation {
        |  ${wrapping.wrapOutput}
        |}: ${toScalaNativeType(returnType)}""".stripMargin
 
-  //def apply[RETURN]()(implicit newFile: NewFile, fileService: FileService): FromContext[RETURN] = FromContext { p ⇒ compiled[RETURN](p.context).get(p.context, p.random, p.newFile) }
-
-  //def compiled[RETURN](context: Context)(implicit newFile: NewFile, fileService: FileService): Try[ContextClosure[RETURN]]
-
   def inputObject = "input"
 
   def static[R](
@@ -131,7 +119,6 @@ object ScalaCompilation {
     closure[R](inputs, code, plugins, libraries, wrapping, ValType(m)).get
 
   def dynamic[R: Manifest](code: String, wrapping: OutputWrapping[R] = RawOutput[R]()) = {
-    //val _wrapping = wrapping
 
     class ScalaWrappedCompilation {
       def returnType = ValType.apply[R]
