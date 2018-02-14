@@ -147,8 +147,9 @@ lazy val netlogo6 = OsgiProject(
     "org.nlogo" % "netlogo" % netLogo6Version % "provided" from s"https://dl.bintray.com/netlogo/NetLogo-JVM/org/nlogo/netlogo/$netLogo6Version/netlogo-$netLogo6Version.jar",
     "org.scala-lang" % "scala-library" % "2.12.1" % "provided",
     "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4" % "provided",
-     "org.ow2.asm" % "asm-all" % "5.0.4" % "provided",
-     "org.picocontainer" % "picocontainer" % "2.13.6" % "provided",
+    "commons-codec" % "commons-codec" % "1.11" % "provided",
+    "org.ow2.asm" % "asm-all" % "5.0.4" % "provided",
+    "org.picocontainer" % "picocontainer" % "2.13.6" % "provided",
     "org.parboiled" %% "parboiled" % "2.1.3" % "provided"
   ), version := netLogo6Version, scalaVersion := "2.12.1", crossPaths := false) settings(settings: _*)
 
