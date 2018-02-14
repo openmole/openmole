@@ -77,13 +77,18 @@ object External {
   }
 
   def validate(external: External)(inputs: Seq[Val[_]]) = Validate { p ⇒
+    def resourceExists(resource: External.Resource) =
+      if (!resource.file.exists()) Seq(new UserBadDataError(s"""File resource "${resource.file} doesn't exsist.""")) else Seq.empty
+
     import p._
     external.inputFileArrays.flatMap(_.prefix.validate(inputs)) ++
       external.inputFileArrays.flatMap(_.suffix.validate(inputs)) ++
       external.inputFiles.flatMap(_.destination.validate(inputs)) ++
       external.outputFiles.flatMap(_.origin.validate(inputs)) ++
-      external.resources.flatMap(_.destination.validate(inputs))
+      external.resources.flatMap(_.destination.validate(inputs)) ++
+      external.resources.flatMap(resourceExists)
   }
+
 }
 
 import org.openmole.plugin.task.external.External._
