@@ -2,15 +2,13 @@
 //resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/"
  
 
-//addSbtPlugin("com.typesafe.sbt" % "sbt-native-packager" % "0.6.0")
-
 addSbtPlugin("com.eed3si9n" % "sbt-unidoc" % "0.4.1")
 
 addSbtPlugin("org.openmole" % "openmole-buildsystem-plugin" % "1.8-SNAPSHOT")
 
-addSbtPlugin("org.scala-js" % "sbt-scalajs" % "0.6.19")
+addSbtPlugin("org.scala-js" % "sbt-scalajs" % "0.6.22")
 
-addSbtPlugin("ch.epfl.scala" % "sbt-scalajs-bundler" % "0.9.0")
+addSbtPlugin("fr.iscpif" % "scalajs-execnpm" % "0.1")
 
 addSbtPlugin("com.lihaoyi" % "scalatex-sbt-plugin" % "0.3.11")
 

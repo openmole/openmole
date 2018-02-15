@@ -584,7 +584,7 @@ lazy val jsCompile = OsgiProject(guiServerDir, "org.openmole.gui.server.jscompil
 )*/
 
 def guiClientDir = guiDir / "client"
-lazy val clientGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.core") enablePlugins (ScalaJSBundlerPlugin) dependsOn
+lazy val clientGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.core") enablePlugins (ExecNpmPlugin) dependsOn
   (sharedGUI, clientToolGUI, market, dataGUI, extClientTool) settings(
   //webpackSettings,
   libraryDependencies += Libraries.async,
@@ -648,19 +648,19 @@ lazy val guiEnvironmentEGIPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.p
   guiPluginSettings,
   libraryDependencies += Libraries.equinoxOSGi,
   Libraries.bootstrapnative
-) dependsOn(extPluginGUIServer, extClientTool, dataGUI, workspace, egi) enablePlugins (ScalaJSBundlerPlugin)
+) dependsOn(extPluginGUIServer, extClientTool, dataGUI, workspace, egi) enablePlugins (ExecNpmPlugin)
 
 lazy val guiEnvironmentSSHKeyPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.authentication.sshkey") settings(
   guiPluginSettings,
   libraryDependencies += Libraries.equinoxOSGi,
   Libraries.bootstrapnative
-) dependsOn(extPluginGUIServer, extClientTool, dataGUI, workspace, ssh) enablePlugins (ScalaJSBundlerPlugin)
+) dependsOn(extPluginGUIServer, extClientTool, dataGUI, workspace, ssh) enablePlugins (ExecNpmPlugin)
 
 lazy val guiEnvironmentSSHLoginPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.authentication.sshlogin") settings(
   guiPluginSettings,
   libraryDependencies += Libraries.equinoxOSGi,
   Libraries.bootstrapnative
-) dependsOn(extPluginGUIServer, extClientTool, dataGUI, workspace, ssh) enablePlugins (ScalaJSBundlerPlugin)
+) dependsOn(extPluginGUIServer, extClientTool, dataGUI, workspace, ssh) enablePlugins (ExecNpmPlugin)
 
 val guiPlugins = Seq(guiEnvironmentSSHLoginPlugin, guiEnvironmentSSHKeyPlugin, guiEnvironmentEGIPlugin) //, guiEnvironmentDesktopGridPlugin)
 
@@ -742,14 +742,12 @@ def openmoleDependencies = openmoleNakedDependencies ++ corePlugins ++ guiPlugin
 def requieredRuntimeLibraries = Seq(Libraries.osgiCompendium, Libraries.logging)
 
 lazy val openmoleNaked =
-  Project("openmole-naked", binDir / "openmole-naked") settings (assemblySettings: _*) enablePlugins (ScalaJSBundlerPlugin) settings(
+  Project("openmole-naked", binDir / "openmole-naked") settings (assemblySettings: _*) enablePlugins (ExecNpmPlugin) settings(
     setExecutable ++= Seq("openmole", "openmole.bat"),
     Osgi.bundleDependencies in Compile := OsgiKeys.bundle.all(ScopeFilter(inDependencies(ThisProject, includeRoot = false))).value,
     resourcesAssemble += (resourceDirectory in Compile).value -> assemblyPath.value,
     resourcesAssemble += ((resourceDirectory in serverGUI in Compile).value / "webapp") → (assemblyPath.value / "webapp"),
-    resourcesAssemble += (webpack in fullOptJS in clientGUI in Compile).value.head.data -> (assemblyPath.value / "webapp/js/openmole.js"),
-   // resourcesAssemble += (fullOptJS in clientGUI in Compile).value.data -> (assemblyPath.value / "webapp/js/openmole.js"),
-    resourcesAssemble += (packageMinifiedJSDependencies in clientGUI in Compile).value -> (assemblyPath.value / "webapp/js/deps.js"),
+    resourcesAssemble += (dependencyFile in clientGUI in Compile).value -> (assemblyPath.value / "webapp/js/deps.js"),
     resourcesAssemble += {
       val tarFile = (tar in openmoleRuntime).value
       tarFile -> (assemblyPath.value / "runtime" / tarFile.getName)
