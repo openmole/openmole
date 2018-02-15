@@ -356,7 +356,7 @@ package object evolution {
         outputs += t.populationPrototype
       )
 
-    val islandCapsule = Slot(MoleTask(selectPuzzle(island)))
+    val islandCapsule = Slot(MoleTask(selectPuzzle(island)) set (name := "island"))
 
     val slaveFist = EmptyTask() set (
       name := "slaveFirst",
