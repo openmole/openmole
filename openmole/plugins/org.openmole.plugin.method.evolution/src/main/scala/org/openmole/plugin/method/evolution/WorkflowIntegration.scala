@@ -250,6 +250,10 @@ object GAIntegration {
 
 }
 
+object DeterministicGAIntegration {
+  def migrateToIsland(population: Vector[mgo.algorithm.CDGenome.DeterministicIndividual.Individual]) = population.map(_.copy(age = 0))
+}
+
 object StochasticGAIntegration {
 
   def aggregateVector(aggregation: Option[Seq[FitnessAggregation]], values: Vector[Vector[Double]]): Vector[Double] =
@@ -258,11 +262,8 @@ object StochasticGAIntegration {
       case None       ⇒ values.transpose.map(_.median)
     }
 
-  def migrateToIsland(population: Vector[mgo.algorithm.CDGenome.NoisyIndividual.Individual]) = population.map(_.copy(historyAge = 0))
-  def migrateFromIsland(population: Vector[mgo.algorithm.CDGenome.NoisyIndividual.Individual], historySize: Int) =
-    population.filter(_.historyAge != 0).map {
-      i ⇒ mgo.algorithm.CDGenome.NoisyIndividual.Individual.fitnessHistory.modify(_.take(math.min(i.historyAge, historySize).toInt))(i)
-    }
+  def migrateToIsland(population: Vector[mgo.algorithm.CDGenome.NoisyIndividual.Individual]) = population.map(_.copy(historyAge = 0).copy(age = 0))
+  def migrateFromIsland(population: Vector[mgo.algorithm.CDGenome.NoisyIndividual.Individual], historySize: Int) = population
 
 }
 
