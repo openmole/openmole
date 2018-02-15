@@ -17,15 +17,10 @@ package org.openmole.gui.ext.tool
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-<<<<<<< HEAD
 import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
-=======
 import org.openmole.gui.ext.data.ExecutionInfo
 
-import scaladget.stylesheet.all._
-import scaladget.stylesheet.{ all ⇒ sheet }
->>>>>>> dev
 import org.scalajs.dom
 
 import scalatags.JsDom.all._
