@@ -40,7 +40,7 @@ import Log._
 
 class EagerSubmissionAgent(environment: WeakReference[BatchEnvironment])(implicit preference: Preference) extends IUpdatableWithVariableDelay {
 
-  @transient lazy val runningHistory = new java.util.LinkedList[HistoryPoint]()
+  @transient var runningHistory = Vector[HistoryPoint]()
   var stop = false
 
   override def delay = preference(EGIEnvironment.EagerSubmissionInterval)
@@ -57,21 +57,11 @@ class EagerSubmissionAgent(environment: WeakReference[BatchEnvironment])(implici
         val stillRunning = jobs.count(_.state == RUNNING)
         val stillReady = jobs.count(_.state == READY)
 
-        def removeOld() = {
-          val iter = runningHistory.iterator
-          while (iter.hasNext) {
-            val elt = iter.next
-            if (elt.time + preference(EGIEnvironment.RunningHistoryDuration).millis < System.currentTimeMillis) iter.remove
-          }
-        }
-
-        removeOld()
-
-        runningHistory.add(HistoryPoint(running = stillRunning, total = jobSize))
+        runningHistory = runningHistory.filterNot(elt ⇒ elt.time + preference(EGIEnvironment.RunningHistoryDuration).millis < System.currentTimeMillis) ++ Seq(HistoryPoint(running = stillRunning, total = jobSize))
         logger.fine("still running " + stillRunning)
 
-        val maxTotal = runningHistory.asScala.map(_.total).max
-        val shouldBeRunning = runningHistory.asScala.map(_.running).max * preference(EGIEnvironment.EagerSubmissionThreshold)
+        val maxTotal = runningHistory.map(_.total).max
+        val shouldBeRunning = runningHistory.map(_.running).max * preference(EGIEnvironment.EagerSubmissionThreshold)
 
         val minOversub = preference(EGIEnvironment.EagerSubmissionMinNumberOfJobs)
 
