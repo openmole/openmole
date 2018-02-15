@@ -1,8 +1,19 @@
 @import org.openmole.site.tools._
 @import org.openmole.site._
-@import org.openmole.site.Environment._
+@import org.openmole.site.content.Environment._
 
-@p
+@def tasks = """
+  // Define the variables that are transmitted between the tasks
+  val i = Val[Double]
+  val res = Val[Double]
+
+  // Define the model, here it is a simple task executing "res = i * 2", but it can be your model
+  val model =
+    ScalaTask("val res = i * 2") set (
+      inputs += i,
+      outputs += (i, res)
+    )"""
+
 A key feature in OpenMOLE is the possibility to delegate the workload to a remote execution environment. Tasks in OpenMOLE have been designed so that the delegation a part of the workload to a remote environment is declarative.
 
 @sect{Setting up an Authentication}
@@ -12,14 +23,17 @@ A key feature in OpenMOLE is the possibility to delegate the workload to a remot
 
 @sect{Defining an execution Environment}
   The actual delegation of the task is noted by the keyword @hl.openmoleNoTest("on") followed by a defined @i{Environment}:
-  @br @hl.openmole("""
+  @br @hl.openmole(s"""
+  $tasks
+
+  // Declare a local environment using 10 cores of the local machine
   val env = LocalEnvironment(10)
 
-  val t1 = EmptyTask()
-  val t2 = EmptyTask()
-  val t3 = EmptyTask()
-
-  val mole = t1 -- (t2 on env) -- t3""")
+  // Make the model run on the the local environment
+  DirectSampling(
+    evaluation = model on env hook ToStringHook(),
+    sampling = i in (0.0 to 100.0 by 1.0)
+  )""")
 
   @p You do not need to install anything or perform any kind of configuration on the target execution environment for
   OpenMOLE to work. It reuses the infrastructure in place. You will however be required to provide the authentication
@@ -35,13 +49,16 @@ A key feature in OpenMOLE is the possibility to delegate the workload to a remot
   @p The use of a batch environment is generally not suited for short tasks (less than a 1 minute for a cluster, or less
   than 1 hour for a grid). In case your tasks are short you can group several executions. To group the execution by 100
   in each job submitted to the environment, use the keyword @hl.openmoleNoTest("by"):
-  @br @hl.openmole("""
-  val mole = explo -< (t1 on env by 100)
+  @br @hl.openmole(s"""
+  $tasks
+
+  // Make the model run on the the local environment
+  DirectSampling(
+    evaluation = model on env by 100 hook ToStringHook(),
+    sampling = i in (0.0 to 1000.0 by 1.0)
+  )
   """, header = """
   val env = LocalEnvironment(10)
-  val t1 = EmptyTask()
-  val i = Val[Int]
-  val explo = ExplorationTask(i in (0 to 10000))
   """)
 
 @sect{Available environments}
@@ -54,5 +71,5 @@ A key feature in OpenMOLE is the possibility to delegate the workload to a remot
    @aa("Slurm", href := DocumentationPages.cluster.anchor(shared.clusterMenu.slurm)),
    @aa("Condor", href := DocumentationPages.cluster.anchor(shared.clusterMenu.condor)),
    or @aa("OAR", href := DocumentationPages.cluster.anchor(shared.clusterMenu.oar)).
-   You can also use @aa("EGI", href := DocumentationPages.egi.file) to execute tasks on the @a("EGI grid", href := "http://www.egi.eu/").
+   You can also use @aa("EGI", href := DocumentationPages.egi.file) to execute tasks on the @aa("EGI grid", href := shared.link.egi).
 

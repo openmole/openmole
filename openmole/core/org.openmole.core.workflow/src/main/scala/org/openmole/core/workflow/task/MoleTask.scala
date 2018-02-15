@@ -75,6 +75,7 @@ object MoleTask {
     import executionContext.preference
     import executionContext.threadProvider
     import executionContext.workspace
+    import executionContext.outputRedirection
 
     val execution =
       MoleExecution(
@@ -95,6 +96,7 @@ object MoleTask {
     }
 
     execution.start(context)
+
     try execution.waitUntilEnded
     catch {
       case e: ThreadDeath ⇒

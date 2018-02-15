@@ -4,10 +4,13 @@
 @h1{Utility Scala functions}
 
 Some useful functions are usable anywhere in OpenMOLE where you would use scala code. For instance you can use them in:
-@ul
-  @li @a("ScalaTask", href := DocumentationPages.scala.file) code,
-  @li string expanded by OpenMOLE (${scala code}),
-  @li OpenMOLE scripts.
+    @ul
+        @li
+            @a("ScalaTask", href := DocumentationPages.scala.file) code,
+        @li
+            string expanded by OpenMOLE (${scala code}),
+        @li
+            OpenMOLE scripts.
 
 @h2{Data processing}
 
@@ -26,18 +29,27 @@ val average =
 
 This task takes place after an exploration and compute the average of many values of pi. The presently available functions are:
 @ul
-  @li @hl.code("""def median: Double"""), compute the median of the vector,
-  @li @hl.code("""def medianAbsoluteDeviation: Double"""), compute the median absolute deviation of the vector,
-  @li @hl.code("""def average: Double"""), compute the average of the vector,
-  @li @hl.code("""def meanSquaredError: Double"""), compute the mean square error of the vector,
-  @li @hl.code("""def rootMeanSquaredError: Double"""), compute the root of the mean square error of the vector.
+  @li
+    @hl.code("""def median: Double"""), compute the median of the vector,
+  @li
+    @hl.code("""def medianAbsoluteDeviation: Double"""), compute the median absolute deviation of the vector,
+  @li
+    @hl.code("""def average: Double"""), compute the average of the vector,
+  @li
+    @hl.code("""def meanSquaredError: Double"""), compute the mean square error of the vector,
+  @li
+    @hl.code("""def rootMeanSquaredError: Double"""), compute the root of the mean square error of the vector.
 
 @h2{File creation}
 
-It might be useful to create files an folder in ScalaTask code. To do that use one of the folowing functions:
-@ul @hl.code("def newFile(prefix: String, suffix: String): File"), this function creates a new file in the OpenMOLE workspace. You may optionally provide a prefix and suffix for the file name. It would generally be called @hl.code("newFile()").
-@ul @hl.code("def newDir(prefix: String): File"), this function creates a new directory in the OpenMOLE workspace. You may optionally provide a prefix for the directory name. It would generally be called @hl.code("newDir()"). This function doesn't create the directory.
-@ul @hl.code("def mkDir(prefix: String): File"), this function creates a new directory in the OpenMOLE workspace. You may optionally provide a prefix for the directory name. It would generally be called @hl.code("mkDir()"). This function creates the directory.
+It might be useful to create files and folders in ScalaTask code. To do that use one of the folowing functions:
+@ul
+    @li
+        @hl.code("def newFile(prefix: String, suffix: String): File"), this function creates a new file in the OpenMOLE workspace. You may optionally provide a prefix and suffix for the file name. It would generally be called @hl.code("newFile()").
+    @li
+        @hl.code("def newDir(prefix: String): File"), this function creates a new directory in the OpenMOLE workspace. You may optionally provide a prefix for the directory name. It would generally be called @hl.code("newDir()"). This function doesn't create the directory.
+    @li
+        @hl.code("def mkDir(prefix: String): File"), this function creates a new directory in the OpenMOLE workspace. You may optionally provide a prefix for the directory name. It would generally be called @hl.code("mkDir()"). This function creates the directory.
 
 @h2{Random number generator}
 

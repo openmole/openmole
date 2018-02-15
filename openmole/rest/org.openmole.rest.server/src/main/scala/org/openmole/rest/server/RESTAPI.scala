@@ -13,7 +13,7 @@ import org.openmole.core.project._
 import org.openmole.core.event._
 import org.openmole.core.workflow.execution.Environment
 import org.openmole.core.workflow.execution.Environment.ExceptionRaised
-import org.openmole.core.workflow.mole.{ MoleExecution, MoleExecutionContext }
+import org.openmole.core.workflow.mole.{ MoleExecution, MoleExecutionContext, MoleServices }
 import org.openmole.core.workflow.puzzle._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workspace.Workspace
@@ -28,6 +28,7 @@ import org.openmole.tool.tar._
 import scala.util.{ Failure, Success, Try }
 import org.openmole.tool.collection._
 import org.json4s.jackson.JsonMethods._
+import org.openmole.core.outputredirection.OutputRedirection
 import org.openmole.core.preference.Preference
 
 case class EnvironmentException(environment: Environment, error: Error)
@@ -125,14 +126,15 @@ trait RESTAPI extends ScalatraServlet with GZipSupport
           case compiled: Compiled ⇒
             Try(compiled.eval) match {
               case Success(res) ⇒
-                Try(
-                  res.buildPuzzle.toExecution(executionContext = MoleExecutionContext(out = directory.outputStream))
-                ) match {
-                    case Success(ex) ⇒
-                      ex listen { case (ex, ev: MoleExecution.Finished) ⇒ }
-                      start(ex)
-                    case Failure(e) ⇒ error(e)
-                  }
+                Try {
+                  val services = MoleServices.copy(MoleServices.create)(outputRedirection = OutputRedirection(directory.outputStream))
+                  res.buildPuzzle.toExecution(executionContext = MoleExecutionContext()(services))
+                } match {
+                  case Success(ex) ⇒
+                    ex listen { case (ex, ev: MoleExecution.Finished) ⇒ }
+                    start(ex)
+                  case Failure(e) ⇒ error(e)
+                }
               case Failure(e) ⇒ error(e)
             }
 
@@ -182,7 +184,12 @@ trait RESTAPI extends ScalatraServlet with GZipSupport
               EnvironmentStatus(name = env.name, submitted = env.submitted, running = env.running, done = env.done, failed = env.failed, environmentErrors)
           }
           val statuses = moleExecution.jobStatuses
-          Running(statuses.ready, statuses.running, statuses.completed, environmentStatus)
+          val capsuleStates = statuses.toVector.map { case (c, states) ⇒ c.toString -> CapsuleState(states.ready, states.running, states.completed) }
+          val ready = capsuleStates.map(_._2.ready).sum
+          val running = capsuleStates.map(_._2.running).sum
+          val completed = capsuleStates.map(_._2.completed).sum
+
+          Running(ready, running, completed, capsuleStates, environmentStatus)
       }
       Ok(state.toJson)
     }

@@ -64,6 +64,31 @@ object SystemExecTask {
       _config = InputOutputConfig(),
       external = External()
     ) set (pack.commands += (OS(), commands: _*))
+
+  /**
+   * System exec task execute an external process.
+   * To communicate with the dataflow the result should be either a file / category or the return
+   * value of the process.
+   */
+  def apply(
+    commands:           Seq[Command],
+    workDirectory:      OptionalArgument[String]      = None,
+    errorOnReturnValue: Boolean                       = true,
+    returnValue:        OptionalArgument[Val[Int]]    = None,
+    stdOut:             OptionalArgument[Val[String]] = None,
+    stdErr:             OptionalArgument[Val[String]] = None)(implicit name: sourcecode.Name): SystemExecTask =
+    new SystemExecTask(
+      command = commands.map(c ⇒ OSCommands(OS(), c)).toVector,
+      workDirectory = workDirectory,
+      errorOnReturnValue = errorOnReturnValue,
+      returnValue = returnValue,
+      stdOut = stdOut,
+      stdErr = stdErr,
+      environmentVariables = Vector.empty,
+      _config = InputOutputConfig(),
+      external = External()
+    )
+
 }
 
 @Lenses case class SystemExecTask(
@@ -129,7 +154,9 @@ object SystemExecTask {
         expandedCommands.toList,
         errorOnReturnValue && !returnValue.isDefined,
         stdOut.isDefined,
-        stdErr.isDefined
+        stdErr.isDefined,
+        stdOut = executionContext.outputRedirection.output,
+        stdErr = executionContext.outputRedirection.output
       )
 
       val retContext: Context = external.fetchOutputFiles(outputs, preparedContext, external.relativeResolver(workDir), tmpDir)

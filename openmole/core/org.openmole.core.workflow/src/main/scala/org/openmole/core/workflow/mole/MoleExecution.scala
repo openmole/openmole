@@ -97,9 +97,10 @@ object MoleExecution extends JavaLogger {
     )
   }
 
-}
+  type CapsuleStatuses = Map[Capsule, JobStatuses]
+  case class JobStatuses(ready: Long, running: Long, completed: Long)
 
-case class JobStatuses(ready: Long, running: Long, completed: Long)
+}
 
 class MoleExecution(
   val mole:                        Mole,
@@ -130,7 +131,7 @@ class MoleExecution(
     TMap(grouping.map { case (c, g) ⇒ c → TMap.empty[MoleJobGroup, Ref[List[MoleJob]]] }.toSeq: _*)
 
   private val nbWaiting = Ref(0)
-  private val _completed = Ref(0L)
+  private val _completed = TMap[Capsule, Long]()
 
   lazy val environmentInstances = environmentProviders.toVector.map { case (k, v) ⇒ v }.distinct.map { v ⇒ v → v() }.toMap
   lazy val environments = environmentProviders.toVector.map { case (k, v) ⇒ k → environmentInstances(v) }.toMap
@@ -184,7 +185,7 @@ class MoleExecution(
       val env = environments.getOrElse(capsule, defaultEnvironment)
       env match {
         case env: SubmissionEnvironment ⇒ env.submit(job)
-        case env: LocalEnvironment      ⇒ env.submit(job, TaskExecutionContext(newFile.baseDir, env, preference, threadProvider, fileService, workspace, taskCache, lockRepository))
+        case env: LocalEnvironment      ⇒ env.submit(job, TaskExecutionContext(newFile.baseDir, env, preference, threadProvider, fileService, workspace, outputRedirection, taskCache, lockRepository))
       }
       eventDispatcher.trigger(this, new MoleExecution.JobSubmitted(job, capsule, env))
     }
@@ -262,7 +263,7 @@ class MoleExecution(
     this
   }
 
-  def jobStatuses: JobStatuses = {
+  def jobStatuses: MoleExecution.CapsuleStatuses = {
     val jobs = moleJobs
 
     val runningSet: java.util.HashSet[UUID] = {
@@ -282,28 +283,45 @@ class MoleExecution(
 
     def isRunningOnEnvironment(moleJob: MoleJob): Boolean = runningSet.contains(moleJob.id)
 
-    var ready = 0L
-    var running = 0L
+    val ready = collection.mutable.Map[Capsule, Long]()
+    val running = collection.mutable.Map[Capsule, Long]()
+
+    def increment(map: collection.mutable.Map[Capsule, Long], key: Capsule) = {
+      val value = map.getOrElse(key, 0L)
+      map.update(key, value + 1)
+    }
 
     for {
-      moleJob ← jobs
+      (capsule, moleJob) ← jobs
     } {
-      if (isRunningOnEnvironment(moleJob)) running += 1
+      if (isRunningOnEnvironment(moleJob)) increment(running, capsule)
       else
         moleJob.state match {
-          case READY   ⇒ ready += 1
-          case RUNNING ⇒ running += 1
+          case READY   ⇒ increment(ready, capsule)
+          case RUNNING ⇒ increment(running, capsule)
           case _       ⇒
         }
     }
 
-    val completed = _completed.single()
-    JobStatuses(ready, running, completed)
+    val completed = _completed.single().snapshot
+
+    mole.capsules.map { c ⇒
+      c ->
+        MoleExecution.JobStatuses(
+          ready = ready.getOrElse(c, 0L),
+          running = running.getOrElse(c, 0L),
+          completed = completed.getOrElse(c, 0L)
+        )
+    }.toMap
   }
 
   private[mole] def jobFailedOrCanceled(moleJob: MoleJob, capsule: Capsule) = jobOutputTransitionsPerformed(moleJob, capsule)
   private[mole] def jobFinished(moleJob: MoleJob, capsule: Capsule) = {
-    _completed.single() += 1
+    atomic { implicit ctx ⇒
+      val currentValue = _completed.getOrElse(capsule, 0L)
+      _completed.update(capsule, currentValue + 1)
+    }
+
     jobOutputTransitionsPerformed(moleJob, capsule)
   }
 

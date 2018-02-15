@@ -2,11 +2,7 @@
 @import org.openmole.site.Resource._
 @import org.openmole.site._
 @import org.openmole.site.tools._
-@import org.openmole.site.Environment._
 
-
-@SideMenu.advancedSamplingMenu.toBlock.left(350)
-@SideMenu.more.right(350)
 
 @h1{Advanced samplings}
 In this page are the advanced functions and tasks to fine-tune your data flows into the OpenMOLE workflow: samplings , list and combination.
@@ -16,13 +12,12 @@ In this page are the advanced functions and tasks to fine-tune your data flows i
   acceptation in OpenMOLE. It may concern numbers, files, random streams, images...
 
   @p{Complete sampling}
-    The most common way of exploring a model is by using a complete sampling:
+    The most common way of exploring a model is by using a "complete" sampling, or @b{DirectSampling}, which generates every combination of parameters values:
     @br @hl.openmole("""
     val i = Val[Int]
     val j = Val[Double]
     val k = Val[String]
     val l = Val[Long]
-
     val explo =
       ExplorationTask (
         (i in (0 to 10 by 2)) x
@@ -34,7 +29,7 @@ In this page are the advanced functions and tasks to fine-tune your data flows i
     Using the @i{x} combinator means that all the domains are @b{unrolled before being combined} with each other.
 
 @sect{@shared.advancedSamplingMenu.combineSampling}
-    To define samplings you can combine them with each other. As we've previously seen, the complete sampling is a
+    To define samplings, you can combine them with each other. As we've previously seen, the complete sampling is a
     way to achieve that. Many composition functions are implemented in OpenMOLE.
 
     @p The "x" combinator also enables domain bounds to depend on each others. Notice how the upper bound of the second

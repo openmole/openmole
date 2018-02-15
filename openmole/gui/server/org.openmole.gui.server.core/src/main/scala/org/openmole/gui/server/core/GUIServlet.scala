@@ -35,6 +35,7 @@ import java.util.concurrent.atomic.AtomicReference
 import org.openmole.core.authentication.AuthenticationStore
 import org.openmole.core.event.EventDispatcher
 import org.openmole.core.fileservice.FileService
+import org.openmole.core.outputredirection.OutputRedirection
 import org.openmole.core.preference.Preference
 import org.openmole.core.replication.ReplicaCatalog
 import org.openmole.core.serializer.SerializerService
@@ -58,30 +59,19 @@ object GUIServices {
 
   case class ServicesProvider(guiServices: GUIServices, cypherProvider: () ⇒ Cypher) extends Services {
     implicit def services = guiServices
-
     implicit def workspace = guiServices.workspace
-
     implicit def preference = guiServices.preference
-
     implicit def cypher = cypherProvider()
-
     implicit def threadProvider = guiServices.threadProvider
-
     implicit def seeder = guiServices.seeder
-
     implicit def replicaCatalog = guiServices.replicaCatalog
-
     implicit def newFile = guiServices.newFile
-
     implicit def authenticationStore = guiServices.authenticationStore
-
     implicit def serializerService = guiServices.serializerService
-
     implicit def fileService = guiServices.fileService
-
     implicit def randomProvider = guiServices.randomProvider
-
     implicit def eventDispatcher: EventDispatcher = guiServices.eventDispatcher
+    implicit def outputRedirection: OutputRedirection = guiServices.outputRedirection
   }
 
   def apply(workspace: Workspace) = {
@@ -96,6 +86,7 @@ object GUIServices {
     implicit val fileService = FileService()
     implicit val randomProvider = RandomProvider(seeder.newRNG)
     implicit val eventDispatcher = EventDispatcher()
+    implicit val outputRedirection = OutputRedirection()
 
     new GUIServices()
   }
@@ -125,7 +116,8 @@ class GUIServices(
   val serializerService:   SerializerService,
   val fileService:         FileService,
   val randomProvider:      RandomProvider,
-  val eventDispatcher:     EventDispatcher
+  val eventDispatcher:     EventDispatcher,
+  val outputRedirection:   OutputRedirection
 )
 
 object GUIServlet {

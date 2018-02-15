@@ -47,39 +47,43 @@ object Footer {
       )
     )
 
+  val footerColStyle = Seq(
+    paddingTop := 25,
+    paddingLeft := 25,
+    width := 150
+  )
+
   val build = {
     div(
-      img(src := Resource.img.mole.openmole.file, stylesheet.leftMole),
-      tags2.nav(classIs(navbar_default ++ navbar_inverse), stylesheet.footer)(
-        div(classIs(container_fluid), stylesheet.center(50))(
-          div(classIs(collapse ++ navbar_collapse))(
-            ul(classIs(nav ++ navbar_nav))(
-              li(liStyle(23))(
-                span("COMMUNITY", textAlign := "center"),
-                div(paddingTop := 15),
-                imgSubItem(Resource.img.footer.email, "Forum", shared.link.mailingList),
-                imgSubItem(Resource.img.footer.chat, "Chat", shared.link.chat),
-                imgSubItem(Resource.img.footer.faq, "FAQ", Pages.faq.file, false)
-              ),
-              li(liStyle(26))(
-                span("DEVELOPMENT", textAlign := "center"),
-                div(paddingTop := 15),
-                imgSubItem(Resource.img.footer.previousVersion, "Changes", Pages.previousVersions.file, false),
-                imgSubItem(Resource.img.footer.github, "Source code", shared.link.repo.openmole),
-                imgSubItem(Resource.img.footer.contribute, "Contribute!", DocumentationPages.howToContribute.file, false)
-              ),
-              li(liStyle(27))(
-                span("ABOUT US", textAlign := "center"),
-                div(paddingTop := 15),
-                imgSubItem(Resource.img.footer.paper, "Publications", Pages.communications.file, true),
-                imgSubItem(Resource.img.footer.whoarwe, "Who are we?", Pages.whoAreWe.file, false),
-                imgSubItem(Resource.img.footer.partner, "Partners", Pages.partner.file, false)
-              ),
-              li(liStyle(22))(
-                span("COMMUNICATION", textAlign := "center"),
-                div(paddingTop := 15),
-                imgSubItem(Resource.img.footer.blog, "Blog", shared.link.blog),
-                imgSubItem(Resource.img.footer.twitter, "Twitter", shared.link.twitter)
+      //img(src := Resource.img.mole.openmole.file, stylesheet.leftMole),
+      div(stylesheet.footer)(
+        div(classIs("container"))(
+          div(id := "footer")(
+            div(classIs("inner-footer"))(
+              div(classIs(s"$row"))(
+                div(classIs(colMD(3)), footerColStyle)(
+                  span("COMMUNITY", textAlign := "center"),
+                  imgSubItem(Resource.img.footer.email, "Forum", shared.link.mailingList),
+                  imgSubItem(Resource.img.footer.chat, "Chat", shared.link.chat),
+                  imgSubItem(Resource.img.footer.faq, "FAQ", Pages.faq.file, false)
+                ),
+                div(classIs(colMD(3)), footerColStyle)(
+                  span("DEVELOPMENT", textAlign := "center"),
+                  imgSubItem(Resource.img.footer.previousVersion, "Changes", Pages.previousVersions.file, false),
+                  imgSubItem(Resource.img.footer.github, "Source code", shared.link.repo.openmole),
+                  imgSubItem(Resource.img.footer.contribute, "Contribute!", DocumentationPages.howToContribute.file, false)
+                ),
+                div(classIs(colMD(3)), footerColStyle)(
+                  span("ABOUT US", textAlign := "center"),
+                  imgSubItem(Resource.img.footer.paper, "Publications", Pages.communications.file, false),
+                  imgSubItem(Resource.img.footer.whoarwe, "Who are we?", Pages.whoAreWe.file, false),
+                  imgSubItem(Resource.img.footer.partner, "Partners", Pages.partner.file, false)
+                ),
+                div(classIs(colMD(3)), footerColStyle)(
+                  span("COMMUNICATION", textAlign := "center"),
+                  imgSubItem(Resource.img.footer.blog, "Blog", shared.link.blog),
+                  imgSubItem(Resource.img.footer.twitter, "Twitter", shared.link.twitter)
+                )
               )
             )
           )

@@ -42,6 +42,21 @@ package object shared {
     val animation = "startSensitivityAnim"
   }
 
+  object faq {
+    lazy val javaVersion = "Which Java version should I use?"
+    lazy val oldVersions = "Where can I find the old versions of OpenMOLE?"
+    lazy val sshConnectionBug = "OpenMOLE cannot connect to my environment using SSH"
+    lazy val passwordAuthentication = "Password authentication"
+    lazy val isOpenMOLEup = "Is OpenMOLE doing something?"
+    lazy val homeQuota = "I've reached my home folder size / file quota"
+    lazy val sampleError = "My sampling generates a type error"
+    lazy val cannotGetCare = "I can't get CARE / PRoot to work"
+    lazy val tooManyOpenFiles = "I get an error relate to file on linux and there is 'too many open files' written somewhere in the error"
+    lazy val qxcbConnection = "My workflow fails with QXcbConnection: Could not connect to display"
+    lazy val pathOverFile = "When shall I use Path over File?"
+    lazy val notListed = "My problem is not listed here"
+  }
+
   object guiGuide {
     lazy val overview = "Overview"
     lazy val startProject = "Starting a project"
@@ -64,6 +79,7 @@ package object shared {
     lazy val pythonExample = "Another example with Python"
     lazy val advancedOptions = "Advanced options"
   }
+
   object nativePackagingMenu {
     lazy val introCARE = "Packaging with CARE"
     lazy val advancedOptions = "Advanced Options"
@@ -83,12 +99,17 @@ package object shared {
   }
 
   object otherDoEMenu {
-    lazy val basicSampling = "Grid Sampling, Uniform Distribution"
+
     lazy val LHSSobol = "Latin Hypercube, Sobol Sequence"
     lazy val severalInputs = "Exploration of several inputs "
     lazy val sensitivityAnalysis = "Sensitivity Analysis"
     lazy val sensitivityFireModel = "Real world Example"
     lazy val csvSampling = "CSV Sampling"
+  }
+
+  object directSamplingMenu {
+    lazy val gridSampling = "Grid Sampling"
+    lazy val uniformSampling = "Uniform Distribution Sampling"
   }
 
   object dataProcessingMenu {
@@ -160,14 +181,15 @@ package object shared {
   }
 
   object link {
+
     lazy val demo = "http://demo.openmole.org"
     lazy val twitter = "https://twitter.com/OpenMOLE"
     lazy val blog = "https://blog.openmole.org"
     lazy val chat = "https://chat.iscpif.fr/channel/openmole"
     lazy val simpluDemo = "https://simplu.openmole.org"
     lazy val mailingList = "http://ask.openmole.org"
-    lazy val shortTraining = "https://iscpif.fr/events/formationsjedi/"
-    lazy val longTraining = "http://cnrsformation.cnrs.fr"
+    lazy val shortTrainings = "https://iscpif.fr/events/formationsjedi/"
+    lazy val longTrainings = "http://cnrsformation.cnrs.fr"
     lazy val egi = "http://www.egi.eu/"
     lazy val batchProcessing = "https://en.wikipedia.org/wiki/Batch_processing"
     lazy val batchSystem = "http://en.wikipedia.org/wiki/Portable_Batch_System"
@@ -194,8 +216,35 @@ package object shared {
     lazy val CAREsite = "https://proot-me.github.io/"
     lazy val CAREmailing = "https://groups.google.com/forum/?fromgroups#!forum/reproducible"
     lazy val ggplot2 = "http://ggplot2.tidyverse.org/reference/"
-    lazy val urbanDynamics = "https://hal.archives-ouvertes.fr/view/index/docid/1583528"
-    lazy val urbanDynamicsBib = "https://hal.archives-ouvertes.fr/hal-01583528v1/bibtex"
+    lazy val sobol = "https://en.wikipedia.org/wiki/Sobol_sequence"
+    lazy val lhs = "https://en.wikipedia.org/wiki/Latin_hypercube_sampling"
+    lazy val jce = "http://www.oracle.com/technetwork/java/javase/downloads/index.html"
+    lazy val allOpenMOLE = "http://www.openmole.org/all/"
+    lazy val care = "https://github.com/proot-me/proot-static-build/releases/download/v5.1.1/care_2.2.2_x86_64_rc2--no-seccomp"
+    lazy val prootIssue106 = "https://github.com/proot-me/PRoot/issues/106"
+    lazy val xvfb = "https://www.x.org/releases/X11R7.7/doc/man/man1/Xvfb.1.xhtml"
+    lazy val prootStatic = "https://github.com/proot-me/proot-static-build/tree/master/static"
+    lazy val multiobjectiveOptimization = "http://en.wikipedia.org/wiki/Multiobjective_optimization"
+    lazy val paretoEfficency = "http://en.wikipedia.org/wiki/Pareto_efficiency"
+    lazy val openMOLEWiki = "https://github.com/openmole/openmole/wiki"
+    lazy val noveltySearch = "http://eplex.cs.ucf.edu/noveltysearch/userspage/"
+    lazy val javaString = "https://docs.oracle.com/javase/7/docs/api/java/lang/String.html"
+    lazy val javaFile = "https://docs.oracle.com/javase/8/docs/api/java/io/File.html"
+
+    object paper {
+      lazy val jassCP = "http://jasss.soc.surrey.ac.uk/18/1/12.html"
+      lazy val fgcs2013 = "http://www.sciencedirect.com/science/article/pii/S0167739X13001027"
+      lazy val fgcs2013preprint = "https://hal-paris1.archives-ouvertes.fr/hal-00840744/"
+      lazy val hpcs2010 = "http://ieeexplore.ieee.org/document/5547155/"
+      lazy val beyondCorroboration = "http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0138212"
+      lazy val halfBillionOA = "https://hal.archives-ouvertes.fr/hal-01118918"
+      lazy val halfBillionEditor = "http://journals.sagepub.com/doi/abs/10.1068/b130064p"
+      lazy val jass2015 = "http://jasss.soc.surrey.ac.uk/18/4/9.html"
+      lazy val mdpi2015 = "http://www.mdpi.com/2079-8954/3/4/348"
+      lazy val frontier2017 = "http://journal.frontiersin.org/article/10.3389/fninf.2017.00021/full#"
+      lazy val urbanDynamics = "https://hal.archives-ouvertes.fr/view/index/docid/1583528"
+      lazy val urbanDynamicsBib = "https://hal.archives-ouvertes.fr/hal-01583528v1/bibtex"
+    }
 
     object partner {
       lazy val iscpif = "http://iscpif.fr"
@@ -210,12 +259,13 @@ package object shared {
       lazy val openmole = "https://github.com/openmole/openmole"
       lazy val market = "https://github.com/openmole/openmole-market"
       lazy val gridscale = "https://github.com/openmole/gridscale"
-      lazy val scaladget = "https://github.com/openmole/scaladaget"
+      lazy val scaladget = "https://github.com/openmole/scaladget"
       lazy val scalawui = "https://github.com/openmole/scalaWUI"
       lazy val mgo = "https://github.com/openmole/mgo"
       lazy val simplu = "https://github.com/IGNF/simplu3D"
       lazy val myOpenmolePlugin = "https://github.com/openmole/myopenmoleplugin"
       lazy val gamaPlugin = "https://github.com/openmole/gama-plugin"
+      lazy val openMOLEDockerBuild = "https://github.com/openmole/docker-build.git"
     }
 
   }
@@ -225,4 +275,85 @@ package object shared {
     raw(content).applyTo(builder)
     div(textAlign := "center")(builder.children.head)
   }
+
+  import link._
+
+  val links = Seq(
+    partner.iscpif,
+    partner.parisgeo,
+    partner.biomedia,
+    partner.idf,
+    partner.paris,
+    partner.ign,
+    paper.jassCP,
+    paper.fgcs2013,
+    paper.fgcs2013preprint,
+    paper.hpcs2010,
+    paper.beyondCorroboration,
+    paper.halfBillionOA,
+    paper.halfBillionEditor,
+    paper.jass2015,
+    paper.mdpi2015,
+    paper.frontier2017,
+    paper.urbanDynamics,
+    paper.urbanDynamicsBib,
+    repo.openmole,
+    repo.market,
+    repo.gridscale,
+    repo.scaladget,
+    repo.scalawui,
+    repo.mgo,
+    repo.simplu,
+    repo.myOpenmolePlugin,
+    repo.gamaPlugin,
+    repo.openMOLEDockerBuild,
+    demo,
+    twitter,
+    blog,
+    chat,
+    simpluDemo,
+    mailingList,
+    shortTrainings,
+    longTrainings,
+    egi,
+    batchProcessing,
+    batchSystem,
+    grieEngine,
+    slurm,
+    condor,
+    oar,
+    ssh,
+    geodivercity,
+    ercSpringer,
+    git,
+    gitlfs,
+    sbt,
+    scala,
+    scalaBook,
+    scalaDoc,
+    intelliJ,
+    scalatex,
+    netlogoAnts,
+    branchingModel,
+    issue,
+    pullRequests,
+    next,
+    CAREsite,
+    CAREmailing,
+    ggplot2,
+    sobol,
+    lhs,
+    jce,
+    allOpenMOLE,
+    care,
+    prootIssue106,
+    xvfb,
+    prootStatic,
+    multiobjectiveOptimization,
+    paretoEfficency,
+    openMOLEWiki,
+    noveltySearch,
+    javaString,
+    javaFile
+  )
 }

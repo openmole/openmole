@@ -24,5 +24,5 @@ the OpenMOLE way. You can discover them through the Market place or tutorials.
 @break
 
 Feel free to suggest new tutorial on topics you'd like us to describe more thoroughly. You can even write your own
-and share it with the OpenMOLE community on the @a("wiki", href := "https://github.com/openmole/openmole/wiki")! We'll
+and share it with the OpenMOLE community on the @a("wiki", href := shared.link.openMOLEWiki)! We'll
 make sure to integrate it in the next release.

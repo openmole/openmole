@@ -1,7 +1,6 @@
 @import org.openmole.site.stylesheet._
 @import org.openmole.site._
 @import org.openmole.site.tools._
-@import org.openmole.site.Environment._
 
 
 @def variables = """
@@ -12,88 +11,31 @@ val burned = Val[Double]
 
 
 @b{Design of Experiments} (DoE) is the art of setting up an experimentation. In a model simulation context,
-it boils down to declare the inputs under study (most of the time, they're parameters) and the values they will take, for a batch of several simulations, with the idea of revealing a property of the model (e.g. sensitivity).
+it boils down to declare the inputs under study (most of the time, they're parameters) and the values they will take for a batch of several simulations, with the idea of revealing a property of the model (e.g. sensitivity).
 Even if there are several state-of-the-art DoE methods implemented in OpenMOLE, we recommend to focus on OpenMOLE
 new methods:  PSE, and Calibration and Profiles  which have been thought to improve the drawbacks of the classical methods.
 
 @br
 @br
-
-Your model inputs can be sampled in the traditional way, by using @a("grid (or regular)  sampling", href:=shared.otherDoEMenu.basicSampling), by @a("sampling uniformly", href:=shared.otherDoEMenu.basicSampling) inside their domain.
 @br
-For higher dimension input space, specific statistics techniques like @a("Latin Hypercube Sampling and SobolSequence", href:=shared.otherDoEMenu.LHSSobol) are available.
+For higher dimension input space, specific statistics techniques ensuring low discrepency like @a("Latin Hypercube Sampling and SobolSequence", href:=Link.intern(shared.otherDoEMenu.LHSSobol)) are available.
 @br
-If you want to use design of experiments of your own you may also want to provide @a("a csv file with your samples" , href:=shared.otherDoEMenu.csvSampling) to OpenMOLE.
+If you want to use design of experiments of your own you may also want to provide @a("a csv file with your samples" , href:=Link.intern(shared.otherDoEMenu.csvSampling)) to OpenMOLE.
 
 @br
-By defining your own exploration task on @a("several types of input", href:= shared.otherDoEMenu.severalInputs), you will be able to highlight some of your model inner properties like those revealed by @a("sensitivity analysis", href:=shared.otherDoEMenu.sensitivityAnalysis), as shown in a toy example on a @a("real world example", href:=shared.otherDoEMenu.sensitivityFireModel)
-
-
-@sect{@shared.otherDoEMenu.basicSampling }
-    @br
-    For a reasonable number of dimension and discretisation quanta (steps) values, complete sampling (or grid sampling)  consists in producing every combination of
-    the inputs possibles values, given their bounds and quanta of discretisation.
-    @br
-    @br
-    @Resource.rawFrag(Resource.img.method.completeID)
-    @br
-    @b{Method scores:}
-    @br
-    Regular sampling or Uniform Sampling are quite good for a first Input Space exploration when you don't know anything
-    about its structure yet.
-    Since it samples from the input space, the collected values from the model executions will reveal the output values
-    obtained for "evenly spaced" inputs.
-    Sure it's not perfect, but still , it gives a little bit of insights about model sensitivity (as input values vary
-    within their domain) and if the output are fitness, it may present a little bit of optimization information (as the zone in which the fitness could be
-    minimized).
-    @br The sampling does not reveal anything about the output space structure, as there is no reason than evenly spaced inputs lead
-    to evenly spaced outputs.
-    Basic sampling is hampered by input space dimensionality as high dimension spaces need a lot of samples to be covered, as well as a lot of memory to store them.
-
-    @break
-    Complete sampling is declared as an @b{ExplorationTask}, where the bounds and discretisation quantum of each input to vary  are declared
-    using the following syntax :
-
-    @break
-    @hl.openmole("""
-       val input_i = Val[Int]
-       val input_j = Val[Double]
-
-       val exploration =
-         ExplorationTask (
-           (input_i in (0 to 10 by 2)) x
-           (input_j in (0.0 to 5.0 by 0.5))
-         )""", name = "cartesian product for sensitivity")
-
-    In this example ExplorationTask, two inputs are varying at the same time, using the cartesian product, see the  @sect.ref{Variation of several inputs}
-    to get more details on the input combination.
-    @break
-
-    Sampling can also be performed via a @hl.code("UniformDistribution(maximum)"), that generates values uniformly
-    distributed between zero and the maximum provided argument.
-    Custom domains can be defined using transformations, as in the example below that generates values between -10 and + 10.
-
-     @hl.openmole("""
-    val my_input = Val[Double]
-    val exploration = ExplorationTask(
-        (my_input in (UniformDistribution[Double](max=20) take 100)).map(x => x -10)
-    )""", name = "uniform distribution in sensitivity")
-
-
-    @br
-
 @sect{@shared.otherDoEMenu.csvSampling}
     You can inject your own sampling in OpenMOLE through a CSV file. Considering a CSV file like:
 
     @hl.highlight("""
-    coldD,  colFileName,    i
+    colD,  colFileName,    i
     0.7,    fic1,           8
     0.9,    fic2,           19
     0.8,    fic2,           19
     """, "plain")
-    The corresponding CSVSampling is:
+    Here is an example of the @hl.highlight("CSVSampling","plain")  used in a simple workflow to sample values stored in a file  :
     @hl.openmole("""
     val i = Val[Int]
+    val o = Val[Int]
     val d = Val[Double]
     val f = Val[File]
 
@@ -106,22 +48,34 @@ By defining your own exploration task on @a("several types of input", href:= sha
       separator := ','
     )
 
-    val exploration = ExplorationTask(s)
+    //Defines the "model" task, here it just takes i as input
+    val myModel =
+      ScalaTask("val o = i * 2 ") set (
+        inputs += i,
+        outputs += (i,o)
+      )
+
+    // Define the exploration of myModel for various i values sampled in the file.
+    val exploration = DirectSampling(
+      evaluation = myModel hook toStringHook() ,
+      sampling = s
+    )
+
+    exploration
+
     """)
     @br
     In this example the column @b{i} in the CSV file is mapped to the variable @b{i} of OpenMOLE.
     The column name @b{colD} is mapped to the variable @b{d}. The column named @b{colFileName} is appended to the base directory
     "/path/of/the/base/dir/" and used as a file in OpenMOLE.
-    As a sampling, the CSVSampling can directly be injected in an ExplorationTask. It will generate a different task for each entry in the file.
+    As a sampling, the @hl.highlight("CSVSampling","plain") can directly be injected in an @hl.highlight("DirectSampling","plain") task. It will generate a different task for each entry in the file.
 
 
 @sect{@shared.otherDoEMenu.LHSSobol }
 
 
-    High dimension spaces must be handled via specific methods of the literature, because otherwise cartesian product
-    would be too memory consuming .
-    OpenMOLE includes two of these methods: @a("Sobol Sequence", href:="https://en.wikipedia.org/wiki/Sobol_sequence")
-     and  @a("Latin Hypercube Sampling", href:="https://en.wikipedia.org/wiki/Latin_hypercube_sampling") , defined as specifications of the @hl.highlight("ExplorationTask","plain"):
+    High dimension spaces must be handled via specific methods of the literature, because otherwise cartesian product  would be too memory consuming .
+    OpenMOLE includes two of these methods: @b{Sobol Sequence} and @b{Latin Hypercube Sampling}, that can be passed as an argument to the @hl.highlight("DirectSampling","plain") task:
 
     @break
 
@@ -142,6 +96,9 @@ By defining your own exploration task on @a("several types of input", href:= sha
 
      @h3{Latin Hypercube Sampling}
 
+The syntax of the LHS sampling is the following :
+    @br
+    @br
 
     @hl.openmole("""
     val i = Val[Double]
@@ -149,27 +106,25 @@ By defining your own exploration task on @a("several types of input", href:= sha
     val values = Val[Array[Double]]
 
     val my_LHS_sampling =
-      ExplorationTask (
         LHS(
           100, // Number of points of the LHS
           i in (0.0, 10.0),
           j in (0.0, 5.0),
-          values in Vector((0, 1), (0, 10), (5, 9)) // Generate part of the lhs sampling inside the array of values
+          values in Vector((0, 1), (0, 10), (5, 9)) // Generate part of the LHS sampling inside the array of values
         )
-      )
     """, name = "lhs sampling in sensitivity")
 
     @br
-
      @h3{Sobol Sequence}
-
+The syntax of the Sobol sequence sampling is the following :
+    @br
+    @br
     @hl.openmole("""
     val i = Val[Double]
     val j = Val[Double]
     val values = Val[Array[Double]]
 
     val my_sobol_sampling =
-      ExplorationTask (
         SobolSampling(
           100, // Number of points
           i in (0.0, 10.0),
@@ -179,31 +134,31 @@ By defining your own exploration task on @a("several types of input", href:= sha
       )
     """, name = "sobol sampling in sensitivity")
 
+    @h3{Usage in DirectSampling tasks}
+
+Once a sampling is defined, you can just add it to a @a("DirectSampling task", href:=DocumentationPages.DirectSampling.anchor(shared.directSamplingMenu.gridSampling)) , under the @hl.highlight("sampling", "plain") argument. For example, supposing you have already declared inputs, outputs, and a model taskcalled myModel, the sampling could be used like :
 
 
+    @hl.openmoleNoTest("""
+        val myExploration = DirectSampling(
+          evaluation = myModel ,
+          sampling = my_sobol_sampling,
+          aggregation = mean
+        )
+
+        myExploration
+        """)
 
 
 @sect{@shared.otherDoEMenu.severalInputs }
     @p
 
-      Exploration can be performed on several inputs domains, using the @b{cartesian product} operator: @b{x}.
-    The basic syntax to explore 2 inputs (i.e. every combination of 2 inputs values) is
-       @hl.openmole("""
-       val i = Val[Int]
-       val j = Val[Double]
+      Sampling can be performed on several inputs domains as well as on @b{several input types}, using the @b{cartesian product} operator: @b{x}, introduced in the @a("grid sampling",href:=DocumentationPages.DirectSampling.anchor(shared.directSamplingMenu.gridSampling))  dedicated section.
 
-       val exploration =
-         ExplorationTask (
-           (i in (0 to 10 by 2)) x
-           (j in (0.0 to 5.0 by 0.5))
-         )""", name = "cartesian product for sensitivity")
+    Here is an example, still supposing you have already defined a task used for evaluation called myModel:
 
 
-    @h3{Different Types of inputs}
-    @br
-
-    The cartesian product operator can handle different data types :
-     @hl.openmole("""
+     @hl.openmoleNoTest("""
        val i = Val[Int]
        val j = Val[Double]
        val k = Val[String]
@@ -211,23 +166,25 @@ By defining your own exploration task on @a("several types of input", href:= sha
        val m = Val[File]
 
        val exploration =
-         ExplorationTask (
+         DirectSampling (
+         evaluation = myModel,
+         sampling =
            (i in (0 to 10 by 2)) x
            (j in (0.0 to 5.0 by 0.5)) x
            (k in List("Leonardo", "Donatello", "Raphaël", "Michelangelo")) x
            (l in (UniformDistribution[Long]() take 10)) x
            (m in (workDirectory / "dir").files().filter(f => f.getName.startsWith("exp") && f.getName.endsWith(".csv")))
          )
-        """, name = "data on cartesian product sampling in sensitivity")
-
-    This task performs every combination between the 5 inputs i,j,k,l and m. It can handle several types of inputs :
-    Integer (i) , Double (j), Strings (k), Long (l), Files (m).
+        """)
+    @br
+    DirectSampling performs every combination between the 5 inputs of various types: Integer (i) , Double (j), Strings (k), Long (l), Files (m).
 
     @br
-
+    @br
     The UniformDistribution[T]() take 10 is a uniform sampling of 10 numbers of the Long type,
     taken in the [Long.MIN_VALUE; Long.MAX_VALUE] domain of the Long native type.
 
+    @br
     @br
 
     Files are explored as items of a list.
@@ -235,14 +192,14 @@ By defining your own exploration task on @a("several types of input", href:= sha
      optionally filtered with any @hl.code("String => Boolean")  functions  such as  @hl.highlight("contains(), startswith(), endswith()", "plain")
 
 
-     (see  the @a("Java Class String Documentation", href:="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html")
+     (see  the @a("Java Class String Documentation", href:= shared.link.javaString)
      for more details)
 
 
     @br
         If your input is one file among many,  or  a line among a CSV file, use the
-        @a("CSVSampling task", href := DocumentationPages.dataProcessing.file)
-        and @a("FileSampling task", href := DocumentationPages.dataProcessing.file)
+        @a("CSVSampling task", href := Link.intern(shared.otherDoEMenu.csvSampling))
+        and @a("FileSampling task", href := DocumentationPages.dataProcessing.anchor(shared.dataProcessingMenu.setOfFiles)).
 
 
 

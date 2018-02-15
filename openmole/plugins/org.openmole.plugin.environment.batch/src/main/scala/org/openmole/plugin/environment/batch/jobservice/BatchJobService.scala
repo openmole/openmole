@@ -44,6 +44,7 @@ trait BatchJobControl {
   def updateState(implicit token: AccessToken): ExecutionState
   def delete(implicit token: AccessToken): Unit
   def stdOutErr(implicit token: AccessToken): (String, String)
+  def tryStdOutErr(implicit token: AccessToken) = util.Try(stdOutErr(token)).toOption
   def state: ExecutionState
   def usageControl: UsageControl
   def resultPath: String

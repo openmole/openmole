@@ -21,7 +21,7 @@ import java.io.File
 import java.io.PrintStream
 
 import org.openmole.core.exception.InternalProcessingError
-import org.openmole.core.output.OutputManager
+import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.workflow.task.TaskExecutionContext
 import org.openmole.tool.logger.JavaLogger
@@ -33,6 +33,7 @@ import org.openmole.core.communication.message._
 import org.openmole.core.communication.storage._
 import org.openmole.core.event.EventDispatcher
 import org.openmole.core.fileservice.FileService
+import org.openmole.core.outputredirection.OutputRedirection
 import org.openmole.core.preference.Preference
 import org.openmole.core.serializer._
 import org.openmole.core.threadprovider.ThreadProvider
@@ -82,14 +83,11 @@ class Runtime {
     val oldErr = System.err
 
     val out = newFile.newFile("openmole", ".out")
-    val err = newFile.newFile("openmole", ".err")
-
     val outSt = new PrintStream(out)
-    val errSt = new PrintStream(err)
 
     if (!debug) {
       OutputManager.redirectSystemOutput(outSt)
-      OutputManager.redirectSystemError(errSt)
+      OutputManager.redirectSystemError(outSt)
     }
 
     def getReplicatedFile(replicatedFile: ReplicatedFile, transferOptions: TransferOptions) =
@@ -151,7 +149,8 @@ class Runtime {
       environment.start()
 
       try {
-        val taskExecutionContext = TaskExecutionContext(newFile.makeNewDir("runtime"), environment, preference, threadProvider, fileService, workspace, KeyValueCache(), LockRepository[LockKey]())
+        val outputRedirection = OutputRedirection(outSt)
+        val taskExecutionContext = TaskExecutionContext(newFile.makeNewDir("runtime"), environment, preference, threadProvider, fileService, workspace, outputRedirection, KeyValueCache(), LockRepository[LockKey]())
         for (toProcess ← allMoleJobs) environment.submit(toProcess, taskExecutionContext)
         saver.waitAllFinished
       }
@@ -203,16 +202,13 @@ class Runtime {
     }
     finally {
       outSt.close
-      errSt.close
-
       System.setOut(oldOut)
       System.setErr(oldErr)
     }
 
     val outputMessage = if (out.length != 0) Some(out) else None
-    val errorMessage = if (err.length != 0) Some(err) else None
 
-    val runtimeResult = RuntimeResult(outputMessage, errorMessage, result, localRuntimeInfo)
+    val runtimeResult = RuntimeResult(outputMessage, result, localRuntimeInfo)
 
     logger.fine("Upload the result message")
     newFile.withTmpFile("output", ".tgz") { outputLocal ⇒

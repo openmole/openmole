@@ -1,0 +1,75 @@
+
+@import org.openmole.site.tools._
+@import org.openmole.site._
+@import org.openmole.site.content.Native._
+
+
+
+@introPackagingForRPythonCplusplus
+@hr
+
+
+
+@sect{Embedding R code}
+
+    Our first example is an R script contained in a file @i{myscript.R}. We want to distribute the execution of this R code to the @a("EGI grid", href := DocumentationPages.egi.file).
+
+    @p First your script should:
+    @ul
+        @li
+            Run in @b{headless mode} with no input required from the user during the execution;
+        @li
+            @b{Produce files or write its results to the standard output} so that OpenMOLE can retrieve them from the remote execution environment.
+
+    @p Here is an example R script matching these criteria:
+    @br @hl.highlight("""
+      args<-commandArgs(trailingOnly = TRUE)
+      data<-read.csv("data.csv",header=T,sep=",")
+      result<-as.numeric(args[1])*data
+      write.csv(result,"result.csv", row.names=FALSE)""", "R")
+
+    With an example @i{data.csv}:
+    @br @hl.highlight("""
+    h1,h2,h3
+    7,8,9
+    9,7,3
+    1,1,1""", "plain")
+
+    @p This reads a file called @i{data.csv}, multiply its content by a number provided on the command line and writes the result to an output file called @i{results.csv}.
+
+    @scriptsCommon("R", "R -f script.R --slave --args 4")
+
+    @p You can now @b{upload this archive to your OpenMOLE workspace} along with a @i{data.csv} file to a subfolder named @i{data}. Let's now explore a complete combination of all the data files with OpenMOLE. The input data files are located in @i{data} and the result files are written to a folder called @i{results}. A second input parameter is a numeric value @i{i} ranging from 1 to 10. The corresponding OpenMOLE script looks like this:
+    @p @hl.openmole("""
+    // Declare the variable
+    val i = Val[Double]
+    val input = Val[File]
+    val inputName = Val[String]
+    val output = Val[File]
+
+    // R task
+    // "workDirectory" is automatically set to the location of your .oms script in your OpenMOLE workspace
+    val rTask = CARETask(workDirectory / "data/R.tgz.bin", "R --slave -f script.R --args ${i}") set (
+      (inputs, outputs) += (i, inputName),
+      inputFiles += (input, "data.csv"),
+      outputFiles += ("result.csv", output)
+    )
+
+    val copy = CopyFileHook(output, workDirectory / "result" / "${inputName}-${i}.csv")
+
+    DirectSampling(
+      evaluation = rTask hook copy hook ToStringHook(),
+      sampling =
+        (i in (1.0 to 10.0 by 1.0)) x
+        (input in (workDirectory / "data").files withName inputName)
+    )""")
+
+    @p The @hl.openmoleNoTest("CARETask") performs two actions: it first unarchives the CARE container by running @hl.highlight("R.tgz.bin", "plain"). Then the actual execution takes place as a second command. Note that for each execution of the @hl.openmoleNoTest("CARETask"), any command starting with @i("/") is @b{relative to the root of the CARE archive}, and @b{any other command is executed in the current directory}. The current directory @b{defaults to the original packaging directory}.
+
+    @p Several notions from OpenMOLE are reused in this example. If you're not too familiar with
+    @a("Hooks", href := DocumentationPages.hook.file) or
+    @a("Samplings", href := DocumentationPages.advancedSampling.file), check the relevant sections of the
+    documentation.
+
+    @hr
+    @footer

@@ -24,23 +24,66 @@ import org.osgi.framework.{ BundleActivator, BundleContext }
 import scala.collection.JavaConverters._
 
 object PluginInfo {
-  val plugins = new ConcurrentHashMap[Class[_], PluginInfo]().asScala
-  def addPlugin(c: Class[_], info: PluginInfo) = plugins += c → info
-  def removePlugin(c: Class[_]) = plugins -= c
+
+  val plugins = new ConcurrentHashMap[AnyRef, PluginInfo]().asScala
+
+  def addPlugin(c: AnyRef, info: PluginInfo) = plugins += c → info
+  def removePlugin(c: AnyRef) = plugins -= c
   def pluginsInfo = plugins.values
 
-  def add(clazz: Class[_], keywordTraits: List[Class[_]] = Nil): Unit = {
-    val info = PluginInfo(List(clazz.getPackage.getName), keywordTraits.map(_.getCanonicalName))
-    PluginInfo.addPlugin(clazz, info)
+  def register(id: AnyRef, namespaces: Vector[NameSpace] = Vector(), keywordTraits: Vector[KeyWordTrait] = Vector.empty, keyWords: Vector[KeyWord] = Vector()): Unit = {
+    val info = PluginInfo(namespaces.map(_.value), keywordTraits.map(_.value), keyWords)
+    PluginInfo.addPlugin(id, info)
   }
 
-  def remove(clazz: Class[_]): Unit = PluginInfo.removePlugin(clazz)
+  def unregister(id: AnyRef): Unit = PluginInfo.removePlugin(id)
+
+  object NameSpace {
+    implicit def apply(p: Package): NameSpace = NameSpace(p.getName)
+  }
+  case class NameSpace(value: String)
+
+  object KeyWordTrait {
+    implicit def apply(c: Class[_]): KeyWordTrait = KeyWordTrait(c.getCanonicalName)
+  }
+
+  case class KeyWordTrait(value: String)
+
+  def keyWords = pluginsInfo.flatMap(_.keyWords)
+  def nameSpaces = pluginsInfo.flatMap(_.namespaces)
+  def keyWordTraits = pluginsInfo.flatMap(_.keyWordTraits)
 }
 
-case class PluginInfo(namespaces: List[String], keywordTraits: List[String])
+case class PluginInfo(
+  namespaces:    Vector[String],
+  keyWordTraits: Vector[String],
+  keyWords:      Vector[KeyWord])
+
+sealed trait KeyWord {
+  def name: String
+}
+
+object KeyWord {
+
+  implicit def fromString(s: String) = Word(s)
+  implicit def classToString(c: Class[_]) = c.getSimpleName
+
+  case class Task(name: String) extends KeyWord
+  case class Hook(name: String) extends KeyWord
+  case class Source(name: String) extends KeyWord
+  case class Environment(name: String) extends KeyWord
+  case class Setter(name: String) extends KeyWord
+  case class Adder(name: String) extends KeyWord
+  case class Pattern(name: String) extends KeyWord
+  case class Transition(name: String) extends KeyWord
+  case class Sampling(name: String) extends KeyWord
+  case class Word(name: String) extends KeyWord
+  case class Domain(name: String) extends KeyWord
+}
 
 trait PluginInfoActivator extends BundleActivator {
   def keyWordTraits: List[Class[_]] = Nil
-  override def start(bundleContext: BundleContext): Unit = PluginInfo.add(this.getClass, keyWordTraits)
-  override def stop(bundleContext: BundleContext): Unit = PluginInfo.remove(this.getClass)
+  override def start(bundleContext: BundleContext): Unit = PluginInfo.register(this, Vector(this.getClass.getPackage), keyWordTraits.toVector.map(PluginInfo.KeyWordTrait(_)))
+  override def stop(bundleContext: BundleContext): Unit = PluginInfo.unregister(this)
 }
+

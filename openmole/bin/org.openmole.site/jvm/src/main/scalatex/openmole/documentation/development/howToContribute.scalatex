@@ -7,8 +7,6 @@
 @h1
     How To contribute to the OpenMOLE project
 
-@SideMenu.howToContributeMenu.toBlock.left(320)
-
 This page is dedicated to explain the organization of the project, the tools you need and the procedures to follow if
 you want to contribute painlessly to the OpenMOLE project (software and documentation).
 It also explains the various versions of OpenMOLE you may want to use/deploy, from local desktop to distant server.
@@ -30,24 +28,27 @@ It also explains the various versions of OpenMOLE you may want to use/deploy, fr
 
 @sect{@shared.howToContributeMenu.firstTimeSetup}
 
+
+    The following commands are to be typed in your command shell (prompt $> )
+
     @ol
         @li
             Clone the OpenMOLE repository : @hl.highlight("""
-            git lfs clone git@github.com:openmole/openmole.git
+            $> git lfs clone git@github.com:openmole/openmole.git
             """, "plain")
          @li
             Set the git submodules inside the openmole subdirectory
         @hl.highlight("""
-        cd openmole
-        git submodule update --init --remote
+        $> cd openmole
+        $> git submodule update --init --remote
         """, "plain")
         @li
-            Publish locally the content of the  @hl.highlight("build-system", "plain") and  @hl.highlight("libraries", "plain") subdirectory
+           Publish locally the content of the  @hl.highlight("build-system", "plain") and  @hl.highlight("libraries", "plain") subdirectory
         @hl.highlight("""
-            cd build-system
-           sbt publishLocal
-            cd ../libraries/
-           sbt publishLocal
+           $> cd build-system
+           $> sbt publishLocal
+           $> cd ../libraries/
+           $> sbt publishLocal
            """, "plain")
 
      These commands may take some time (a few minutes at least).
@@ -60,8 +61,11 @@ It also explains the various versions of OpenMOLE you may want to use/deploy, fr
 
 
     @hl.highlight("""
-    cd openmole
-    sbt assemble
+    $> cd openmole
+    $> sbt
+    # following commands occur inside sbt prompt
+    sbt:openmole-root> project openmole
+    openmole> assemble
     """, "plain")
 
     Upon completion, the executable is placed  under @hl.highlight("/openmole/openmole/bin/openmole/target/assemble", "plain")
@@ -75,20 +79,20 @@ It also explains the various versions of OpenMOLE you may want to use/deploy, fr
         @p You will find the resulting archive in @i{bin/openmole/target/openmole.tar.gz}.
       @p{Publish the bundles}
         @hl.highlight("""
-        cd build-system
-        sbt publish
-        cd ../libraries
-        sbt publish
-        cd ../openmole
-        sbt publish""", "plain")
+        $> cd build-system
+        $> sbt publish
+        $> cd ../libraries
+        $> sbt publish
+        $> cd ../openmole
+        $> sbt publish""", "plain")
 
 
 @sect{@shared.howToContributeMenu.compileDocker}
       An easy way to get an OpenMOLE compilation environment up and running is to use docker. Once docker is installed on you machine you can do:
       @br @hl.highlight("""
-      git clone https://github.com/openmole/docker-build.git
-      cd docker-build
-      ./run -v /a/local/path/on/your/system
+      $> git clone shared.link.openMOLEDockerBuild
+      $> cd docker-build
+      $> ./run -v /a/local/path/on/your/system
       # You should be in the docker container now, execute
       clone
       compile
@@ -106,8 +110,8 @@ It also explains the various versions of OpenMOLE you may want to use/deploy, fr
     If so, you're more than welcome to correct our mistakes and improve the documentation. To check your changes locally before sending us a Pull Request, here is how to build a local copy of the website/documentation.
 
     @hl.highlight("""
-    cd openmole/openmole
-    sbt
+    $> cd openmole/openmole
+    $> sbt
     """, "plain")
 
     Once sbt is launched, use the @hl.highlight("buildSite","plain") command inside sbt to build the webpages.

@@ -1,6 +1,4 @@
-//resolvers += Classpaths.sbtPluginSnapshots
-//resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/"
- 
+resolvers += Resolver.sonatypeRepo("staging")
 
 addSbtPlugin("com.eed3si9n" % "sbt-unidoc" % "0.4.1")
 
@@ -10,7 +8,7 @@ addSbtPlugin("org.scala-js" % "sbt-scalajs" % "0.6.22")
 
 addSbtPlugin("fr.iscpif" % "scalajs-execnpm" % "0.1")
 
-addSbtPlugin("com.lihaoyi" % "scalatex-sbt-plugin" % "0.3.11")
+addSbtPlugin("com.lihaoyi" % "scalatex-sbt-plugin" % "0.3.12")
 
 addSbtPlugin("com.eed3si9n" % "sbt-buildinfo" % "0.7.0")
 

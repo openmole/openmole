@@ -49,7 +49,7 @@ PSE handles stochasticity in the sense that the selected pattern are estimated b
     The PSE method searches for diverse output values. As with all
     evolutionary algorithms, PSE generates new individuals through
     a combination of genetic inheritance from parent individuals
-    and mutation. PSE (inspired by @a("novelty search", href := "http://eplex.cs.ucf.edu/noveltysearch/userspage/")) selects for
+    and mutation. PSE (inspired by @a("novelty search", href := shared.link.noveltySearch)) selects for
     the parents whose output values are rare compared to the rest of
     the population and to the previous generations. In order to evaluate
     the rarity of a the output values, PSE discretises the output space,
@@ -119,5 +119,5 @@ of inputs and outputs are illimited.
 Guillaume Chérel, Clémentine Cottineau and Romain Reuillon, « Beyond Corroboration: Strengthening Model
         Validation by Looking for Unexpected Patterns» published in @i{PLOS ONE} 10(9), 2015.
         @br
-            @a("[online version]" , href:="http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0138212")  @a("[bibteX]", href:= Resource.bibtex.PSEmethodBib.file)
+            @a("[online version]" , href:=shared.link.paper.beyondCorroboration)  @a("[bibteX]", href:= Resource.bibtex.PSEmethodBib.file)
 

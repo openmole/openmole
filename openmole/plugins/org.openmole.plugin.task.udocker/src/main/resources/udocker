@@ -1989,6 +1989,16 @@ class ExecutionEngineCommon(object):
         Msg().err("Error: invalid working directory: ", self.opt["cwd"])
         return False
 
+    def _getquote(self, arg):
+        """Obtain the quote character from string"""
+        double_p = arg.find('"')
+        single_p = arg.find("'")
+        if double_p != -1 and (double_p < single_p or single_p == -1):
+            return "'"
+        if single_p != -1 and (single_p < double_p or double_p == -1):
+            return '"'
+        return "'"
+
     def _quote(self, argv):
         """Iterate over argv and quote items containing spaces. This is
         useful in case an interpreter is used in the command e.g.:
@@ -1996,9 +2006,10 @@ class ExecutionEngineCommon(object):
         """
         _argv = []
         for arg in argv:
-            quote_ch = '"'
+            quote_ch = self._getquote(arg)
             if ' ' in arg:
-                arg = '%s%s%s' % (quote_ch, arg.replace('"', '\\"'), quote_ch)
+                #arg = "'%s'" % (arg)
+                arg = '%s%s%s' % (quote_ch, arg, quote_ch)
             _argv.append(arg)
         return _argv
 
@@ -2516,15 +2527,12 @@ class PRootEngine(ExecutionEngineCommon):
         else:
             proot_verbose = ""
 
-        proot_kill_on_exit = "--kill-on-exit"
-
         # build the actual command
         cmd_t = (r"unset VTE_VERSION;",
                  " ".join(self.opt["env"]),
                  self._set_cpu_affinity(),
                  self.proot_exec,
                  proot_verbose,
-                 proot_kill_on_exit,
                  self._get_volume_bindings(),
                  self._set_uid_map(),
                  "-k", self._kernel,

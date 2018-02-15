@@ -1,8 +1,11 @@
 @import org.openmole.site.tools._
 @import org.openmole.site._
 
+OpenMOLE makes it simple to include your own Java code in a workflow. Since the Scala compiler can compile Java code, Java code can be directly fed to the ScalaTask as shown in @aa("the ScalaTask example", href := DocumentationPages.scala.file). Additionally, a compiled Java program can be encapsulated in a ScalaTask as a jar file through the @hl.openmoleNoTest("libraries") parameter as below.
+
 @p
-  OpenMOLE makes it simple to include your own Java code in a workflow. Since the Scala compiler can compile Java code, Java code can be directly fed to the ScalaTask as shown in @aa("the ScalaTask example", href := DocumentationPages.scala.file). Additionally, a compiled Java program can be encapsulated in a ScalaTask as a jar file through the @hl.openmoleNoTest("libraries") parameter as below.
+  /!\: This tutorial works for simple Java programs. For more ambitious developments, you should absolutely consider embedding your code in an @a("OpenMOLE plugin", href := DocumentationPages.plugin.file). It is pretty strait forward since they are simple OSGi bundles.
+
 
 @p
   Let us consider the simple code @em{Hello.java} in a directory named @i{hello} @("(to respect Java's package structure)"):
@@ -32,15 +35,16 @@
 @hl.openmole("""
   val proto1 = Val[Int]
 
-  val explo = ExplorationTask(proto1 in (0 until 10))
-
   //Defines the task to perform the hello function
   val javaTask = ScalaTask("hello.Hello.run(proto1)") set (
     libraries += workDirectory / "Hello.jar",
     inputs += proto1
   )
 
-  explo -< javaTask""")
+  DirectSampling(
+    evaluation = javaTask,
+    sampling = proto1 in (0 until 10)
+  )""")
 
 @p 
   The output should look like that (the order in which the lines are printed might be different in your case):
@@ -81,11 +85,6 @@
   val out1 = Val[Double]
   val out2 = Val[Double]
 
-  val explo = ExplorationTask(
-    (arg1 in (0.0 to 10.0 by 1.0)) x
-    (arg2 in (0.0 until 10.0 by 1.0))
-  )
-
   val javaTask = ScalaTask("Array(out1, out2) = hello.Hello.run(arg1, arg2)") set (
     libraries += workDirectory / "Hello.jar",
     inputs += (arg1, arg2),
@@ -95,7 +94,12 @@
   // save the result in a CSV file
   val csvHook = AppendToCSVFileHook(workDirectory / "result.csv")
 
-  explo -< (javaTask hook csvHook)""")
+  DirectSampling(
+    evaluation = javaTask hook csvHook,
+    sampling =
+      (arg1 in (0.0 to 10.0 by 1.0)) x
+      (arg2 in (0.0 until 10.0 by 1.0))
+  )""")
 
 @p
   This workflow will call the function @i{hello} with both arguments varying from 0 to 10 and save the results in a CSV file. Variables @i{arg1} and @i{arg2} are specified in the task output so that they are also written to the CSV file by the hook (see @aa("Hooks", href := DocumentationPages.hook.file))
@@ -148,8 +152,6 @@
     val inputFile = Val[File]
     val outputFile = Val[File]
 
-    val explo = ExplorationTask(proto1 in (0 to 10))
-
     //Defines the scala task as a launcher of the hello executable
     val javaTask =
     ScalaTask("val outputFile = newFile(); hello.Hello.run(proto1, inputFile, outputFile)") set (
@@ -159,17 +161,18 @@
       inputFile := workDirectory / "input.txt"
     )
 
-      //Save the output file locally
-      val copyHook =
-        CopyFileHook(
-          outputFile,
-          workDirectory / "out-${proto1}.txt"
-        )
+    //Save the output file locally
+    val copyHook =
+      CopyFileHook(
+        outputFile,
+        workDirectory / "out-${proto1}.txt"
+      )
 
-      explo -< (javaTask hook copyHook)""")
+    DirectSampling(
+      evaluation = javaTask hook copyHook,
+      sampling = proto1 in (0 to 10)
+    )""")
 
   @p
     For this example to work you should create a file named "input.txt" in the work directory of your project.
 
-  @p
-    This tutorial works for simple Java programs. For more ambitious developments, you should consider embedding your code in an @a("OpenMOLE plugin", href := DocumentationPages.plugin.file).

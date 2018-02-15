@@ -54,24 +54,6 @@ package builder {
       +=[T](d.flatten: _*)
   }
 
-  class AssignDefault[T](p: Val[T]) {
-    def :=[U: DefaultBuilder](v: T, `override`: Boolean): U ⇒ U =
-      this := (v: FromContext[T], `override`)
-    def :=[U: DefaultBuilder](v: T): U ⇒ U = this.:=(v, false)
-    def :=[U: DefaultBuilder](v: FromContext[T], `override`: Boolean): U ⇒ U =
-      implicitly[DefaultBuilder[U]].defaults.modify(_ + Default[T](p, v, `override`))
-    def :=[U: DefaultBuilder](v: FromContext[T]): U ⇒ U =
-      this.:=(v, false)
-  }
-
-  class AssignDefaultSeq[T](p: Iterable[Val[T]]) {
-    def :=[U: DefaultBuilder](v: Iterable[T], `override`: Boolean): U ⇒ U = { u ⇒
-      (p zip v).foldLeft(u) { case (u, (p, v)) ⇒ (new AssignDefault(p).:=[U](v, `override`)).apply(u) }
-    }
-
-    def :=[U: DefaultBuilder](v: Iterable[T]): U ⇒ U = this.:=(v, false)
-  }
-
   class Name {
     def :=[T: NameBuilder](name: String): T ⇒ T =
       implicitly[NameBuilder[T]].name.set(Some(name))
@@ -88,6 +70,25 @@ package builder {
         (inputs += (ps: _*)) andThen (outputs += (ps: _*))
       def ++=[T: InputBuilder: OutputBuilder](ps: Iterable[Val[_]]*): T ⇒ T =
         (inputs ++= (ps: _*)) andThen (outputs ++= (ps: _*))
+    }
+
+    class AssignDefault[T](p: Val[T]) {
+      def :=[U: DefaultBuilder: InputBuilder](v: T, `override`: Boolean): U ⇒ U =
+        (this := (v: FromContext[T], `override`)) andThen (inputs += p)
+      def :=[U: DefaultBuilder: InputBuilder](v: T): U ⇒ U = this.:=(v, false)
+      def :=[U: DefaultBuilder: InputBuilder](v: FromContext[T], `override`: Boolean): U ⇒ U =
+        implicitly[DefaultBuilder[U]].defaults.modify(_ + Default[T](p, v, `override`)) andThen (inputs += p)
+      def :=[U: DefaultBuilder: InputBuilder](v: FromContext[T]): U ⇒ U =
+        this.:=(v, false)
+    }
+
+    class AssignDefaultSeq[T](p: Iterable[Val[T]]) {
+      def :=[U: DefaultBuilder: InputBuilder](v: Iterable[T], `override`: Boolean): U ⇒ U = {
+        def defaults(u: U) = (p zip v).foldLeft(u) { case (u, (p, v)) ⇒ (new AssignDefault(p).:=[U](v, `override`)).apply(u) }
+        defaults _ andThen (inputs ++= p)
+      }
+
+      def :=[U: DefaultBuilder: InputBuilder](v: Iterable[T]): U ⇒ U = this.:=(v, false)
     }
 
     implicit def prototypeToAssignDefault[T](p: Val[T]) = new AssignDefault[T](p)

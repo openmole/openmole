@@ -17,27 +17,17 @@
 
 package org.openmole.site
 
-import java.io.{ File, FileInputStream }
+import java.io.File
 import java.nio.CharBuffer
-import java.nio.file.Paths
-import java.util.zip.GZIPInputStream
 
 import ammonite.ops.{ Path, write }
-//import org.openmole.core.workspace.Workspace
-import org.openmole.tool.file._
-import org.openmole.tool.tar._
-import org.openmole.tool.stream._
 
-import scalatags.Text.all
+import scalatags.Text.{ TypedTag, all }
 import scalatags.Text.all._
-//import scala.sys.process.BasicIO
-//import org.openmole.site.credits._
-//import spray.json.JsArray
-//import module._
-//import org.openmole.core.buildinfo
-
 import scala.annotation.tailrec
 import spray.json._
+
+import scalaj.http._
 
 object Site extends App {
 
@@ -66,35 +56,32 @@ object Site extends App {
 
   override def main(args: Array[String]): Unit = {
     case class Parameters(
-      target:  Option[File] = None,
-      test:    Boolean      = false,
-      ignored: List[String] = Nil
+      target:   Option[File] = None,
+      test:     Boolean      = false,
+      testUrls: Boolean      = false,
+      ignored:  List[String] = Nil
     )
 
     @tailrec def parse(args: List[String], c: Parameters = Parameters()): Parameters = args match {
-      case "--target" :: tail ⇒ parse(tail.tail, c.copy(target = tail.headOption.map(new File(_))))
-      case "--test" :: tail   ⇒ parse(tail, c.copy(test = true))
-      //  case "--test" :: tail        ⇒ parse(tail, c.copy(test = true))
-      //case "--market-test" :: tail ⇒ parse(tail, c.copy(marketTest = true))
-      //case "--resources" :: tail ⇒ parse(tail.tail, c.copy(resources = tail.headOption.map(new File(_))))
-      case s :: tail          ⇒ parse(tail, c.copy(ignored = s :: c.ignored))
-      case Nil                ⇒ c
+      case "--target" :: tail    ⇒ parse(tail.tail, c.copy(target = tail.headOption.map(new File(_))))
+      case "--test" :: tail      ⇒ parse(tail, c.copy(test = true))
+      case "--test-urls" :: tail ⇒ parse(tail, c.copy(testUrls = true))
+      case s :: tail             ⇒ parse(tail, c.copy(ignored = s :: c.ignored))
+      case Nil                   ⇒ c
     }
 
     val parameters = parse(args.toList.map(_.trim))
-
-    // Config.testScript = parameters.test
 
     val dest = parameters.target match {
       case Some(t) ⇒ t
       case None    ⇒ throw new RuntimeException("Missing argument --target")
     }
 
-    //    val marketEntries = generateMarket(parameters.resources.get, dest, dest / buildinfo.marketName, parameters.test && parameters.marketTest)
-    //    DocumentationPages.marketEntries = marketEntries
-
     if (parameters.test) {
       Test.generate(dest)
+    }
+    else if (parameters.testUrls) {
+      Test.urls
     }
     else {
       case class PageFrag(page: Page, frag: Frag)
@@ -130,14 +117,45 @@ object Site extends App {
         /**
          * The body of this site's HTML page
          */
+
         def bodyFrag(page: org.openmole.site.Page) = {
+
+          val sitePage = UserGuide.currentStep(page)
+
+          val navigationStyle = Seq(
+            backgroundColor := "#4096c5",
+            color := "white",
+            borderRadius := "50%",
+            textDecoration := "none",
+            display := "inline-block",
+            padding := "2px 12px",
+            fontSize := "20px",
+            fontWeight := "bold"
+          )
 
           body(position := "relative", minHeight := "100%")(
             Menu.build,
-            div(stylesheet.mainDiv)(
-              if (DocumentationPages.topPages.contains(page)) UserGuide.addCarousel(page)
-              else page.content
+            div(id := "main-content")(
+              sitePage.name,
+              div(margin := "0 auto", width := 250, paddingBottom := 40)(
+                sitePage match {
+                  case s: StepPage ⇒
+                    Seq(
+                      span(tools.to(s.previous)(navigationStyle)(raw("&#8249;")), s" ${s.previous.name}", paddingRight := 30),
+                      span(s"${s.next.name} ", tools.to(s.next)(navigationStyle)(raw("&#8250;")))
+                    )
+                  case _ ⇒ Seq[Modifier]()
+                }),
+
+              page.source.map(source ⇒ a(href := tools.modificationLink(source), "Propose a modification to the current page")),
+              sitePage.element
             ),
+            sitePage match {
+              case s: StepPage ⇒ Seq(s.leftMenu, s.rightMenu)
+              case _ ⇒
+                val menus: Seq[TypedTag[_ <: String]] = SideMenu.menus.get(page.name).getOrElse(Seq(div))
+                menus
+            },
             Footer.build,
             onload := onLoadString(page)
           )

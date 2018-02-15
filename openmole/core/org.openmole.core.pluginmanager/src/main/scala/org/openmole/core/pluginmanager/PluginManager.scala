@@ -21,7 +21,6 @@ import java.io.File
 import java.util.concurrent.Semaphore
 
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
-import org.openmole.core.pluginmanager.internal.Activator
 import org.openmole.tool.file._
 import org.openmole.tool.logger.JavaLogger
 import org.openmole.tool.hash._

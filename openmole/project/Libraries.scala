@@ -19,8 +19,8 @@ object Libraries {
   lazy val sourcecodeVersion = "0.1.3"
   lazy val scaladgetVersion = "1.0.0-M3"
   lazy val json4sVersion = "3.5.0"
-  lazy val circeVersion = "0.9.0-M1"
-  lazy val catsVersion = "1.0.0-MF"
+  lazy val circeVersion = "0.9.0"
+  lazy val catsVersion = "1.0.1"
   lazy val scalajsVersion = "0.6.21"
   lazy val squantsVersion = "1.3.0"
 
@@ -52,10 +52,10 @@ object Libraries {
   lazy val jasypt = "org.openmole.library" %% "org-jasypt-encryption" % "1.9.2"
   lazy val opencsv = "org.openmole.library" %% "au-com-bytecode-opencsv" % "2.3"
   lazy val arm = "org.openmole.library" %% "com-jsuereth-scala-arm" % "2.0"
-  lazy val scalajHttp = "org.openmole.library" %% "org-scalaj-scalaj-http" % "0.3.15"
+  lazy val scalajHttp = "org.openmole.library" %% "org-scalaj-scalaj-http" % "2.3.0"
   lazy val scopt = "org.openmole.library" %% "com-github-scopt" % "3.5.0"
   lazy val scalabc = "org.openmole.library" %% "fr-iscpif-scalabc" % "0.4"
-  lazy val scalatexSite = "org.openmole.library" %% "com-lihaoyi-scalatex-site" % "0.3.11"
+  lazy val scalatexSite = "org.openmole.library" %% "com-lihaoyi-scalatex-site" % "0.3.12"
   lazy val math = "org.openmole.library" %% "org-apache-commons-math" % "3.6.1"
   lazy val collections = "org.openmole.library" %% "org-apache-commons-collections" % "4.1"
   lazy val exec = "org.openmole.library" %% "org-apache-commons-exec" % "1.3"
@@ -75,7 +75,7 @@ object Libraries {
   lazy val circe = "org.openmole.library" %% "io-circe" % circeVersion
   lazy val scalajsTools = "org.openmole.library" %% "scalajs-tools" % scalajsVersion
   lazy val scalajs = "org.openmole.library" %% "scalajs" % scalajsVersion
-  lazy val mgo = "org.openmole.library" %% "mgo" % "3.3"
+  lazy val mgo = "org.openmole.library" %% "mgo" % "3.8-SNAPSHOT"
   lazy val family = "org.openmole.library" %% "fr-iscpif-family" % "1.3"
   lazy val monocle = "org.openmole.library" %% "monocle" % "1.4.0"
   lazy val boopickle = "org.openmole.library" %% "boopickle" % boopickleVersion
@@ -120,6 +120,6 @@ object Libraries {
   lazy val equinoxOSGi = "org.eclipse.tycho" % "org.eclipse.osgi" % "3.12.1.v20170821-1548"
   lazy val osgiCompendium = "org.osgi" % "org.osgi.compendium" % "4.3.1"
 
-  lazy val shapeless = "com.chuusai" %% "shapeless" % "2.3.2"
+  lazy val shapeless = "org.openmole.library" %% "com-chuusai-shapeless" % "2.3.2"
 
 }

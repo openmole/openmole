@@ -2,17 +2,27 @@
 @import org.openmole.site._
 
 
-@def model = """
+@def model = s"""
   //model inputs
   val x = Val[Double]
   val y = Val[Double]
+  val s = Val[String]
+
   //model outputs
   val o1 = Val[Double]
   val o2 = Val[Double]
 
   val model =
-    ScalaTask("val o1 = x; val o2 = y") set (
-      inputs += (x, y),
+    ScalaTask($tq
+    val o1 = x
+    val o2 =
+      s match {
+        case "apple" => y
+        case "banana" => -y
+        case "strawberry" => -2 * y
+      }
+    $tq) set (
+      inputs += (x, y, s),
       outputs += (o1, o2)
     )
 """
@@ -84,7 +94,10 @@ OpenMOLE make an intensive use of genetic algorithms (GA) in its various @a("met
       algorithm =
         NSGA2(
           mu = 100,
-          genome = Seq(x in (0.0, 1.0), y in (0.0, 1.0)),
+          genome = Seq(
+            x in (0.0, 1.0),
+            y in (0.0, 1.0),
+            s in List("apple", "banana", "strawberry")),
           objectives = Seq(o1, o2)
         ),
         evaluation = model,
@@ -116,7 +129,10 @@ So if you want to reach specific target values, like Pi and 42  you can use the 
       algorithm =
         NSGA2(
           mu = 100,
-          genome = Seq(x in (0.0, 1.0), y in (0.0, 1.0)),
+          genome = Seq(
+            x in (0.0, 1.0),
+            y in (0.0, 1.0),
+            s in List("apple", "banana", "strawberry")),
           objectives = Seq(o1, o2)
         ),
         evaluation = model -- DeltaTask(o1 -> math.Pi, o2 -> 42),
@@ -143,7 +159,10 @@ So if you want to reach specific target values, like Pi and 42  you can use the 
       algorithm =
         NSGA2(
           mu = 100,
-          genome = Seq(x in (0.0, 1.0), y in (0.0, 1.0)),
+          genome = Seq(
+            x in (0.0, 1.0),
+            y in (0.0, 1.0),
+            s in List("apple", "banana", "strawberry")),
           objectives = Seq(o1, o2)
         ),
         evaluation = model -- maximize,

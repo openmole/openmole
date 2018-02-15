@@ -1,9 +1,10 @@
 package org.openmole.core.workflow.task
 
 import monocle.macros.Lenses
-import org.openmole.core.context.Context
+import org.openmole.core.context.{ Context, Val }
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
+import org.openmole.core.workflow.validation._
 
 object FromContextTask {
 
@@ -27,6 +28,12 @@ object FromContextTask {
   fromContext:            TaskExecutionContext ⇒ FromContext[Context],
   override val className: String,
   config:                 InputOutputConfig
-) extends Task {
+) extends Task with ValidateTask {
+
+  override def validate = Validate { p ⇒
+    import p._
+    fromContext.validate(inputs.toSeq)
+  }
+
   override protected def process(executionContext: TaskExecutionContext): FromContext[Context] = fromContext(executionContext)
 }

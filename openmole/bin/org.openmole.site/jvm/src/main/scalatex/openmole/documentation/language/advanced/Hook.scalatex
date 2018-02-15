@@ -1,8 +1,6 @@
 @import org.openmole.site._
 @import org.openmole.site.tools._
 
-@SideMenu.hookMenu.toBlock.left(350)
-
 @h1{Hook}
 Tasks are mute pieces of software. They are not conceived to write files, display values, nor more generally present
 any side effects at all. Tasks' role is to compute some output data from their input data. That's what guaranties that
@@ -16,22 +14,23 @@ their execution can be deported to other machines.
     @br @hl.openmole("""
     val i = Val[Int]
     val hello = ScalaTask("i = i * 2") set (
-    inputs += i,
-    outputs += i
+      inputs += i,
+      outputs += i
     )
-
-    val exploration = ExplorationTask(i in (0 to 9))
 
     val h = ToStringHook()
 
-    exploration -< (hello hook h)""", name = "plug a hook")
+    DirectSampling(
+      evaluation = (hello hook h),
+      sampling = i in (0 to 9)
+    )""", name = "plug a hook")
     @p The hook @i{h} is plugged to the end of the @i{hello} task. Everytime @i{hello} finishes, the hook @i{h} is
     executed. Multiple hooks can also be plugged to the same task as in the present example:
     @br @hl.openmole("""
     val i = Val[Int]
 
     val hello = ScalaTask("val i = 2") set (
-    outputs += i
+      outputs += i
     )
 
     val h1 = ToStringHook()

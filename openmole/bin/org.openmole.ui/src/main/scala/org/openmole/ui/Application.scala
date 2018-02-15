@@ -25,7 +25,7 @@ import org.openmole.console.Console.ExitCodes
 import org.openmole.core.project._
 import org.openmole.core.console.ScalaREPL
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.logging.LoggerService
+import org.openmole.core.logconfig.LoggerConfig
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.workspace.Workspace
 import org.openmole.rest.server.RESTServer
@@ -37,6 +37,8 @@ import org.openmole.console._
 import org.openmole.tool.file._
 import org.openmole.tool.hash._
 import org.openmole.core.module
+import org.openmole.core.outputmanager.OutputManager
+import org.openmole.core.outputredirection.OutputRedirection
 import org.openmole.core.preference._
 import org.openmole.core.services._
 
@@ -46,13 +48,13 @@ object Application extends JavaLogger {
 
   lazy val consoleSplash =
     """
-      |  ___                   __  __  ___  _     _____   _____
-      | / _ \ _ __   ___ _ __ |  \/  |/ _ \| |   | ____| |___  |
-      || | | | '_ \ / _ \ '_ \| |\/| | | | | |   |  _|      / /
-      || |_| | |_) |  __/ | | | |  | | |_| | |___| |___    / /
-      | \___/| .__/ \___|_| |_|_|  |_|\___/|_____|_____|  /_/
+      |  ___                   __  __  ___  _     _____    ___
+      | / _ \ _ __   ___ _ __ |  \/  |/ _ \| |   | ____|  ( _ )
+      || | | | '_ \ / _ \ '_ \| |\/| | | | | |   |  _|    / _ \
+      || |_| | |_) |  __/ | | | |  | | |_| | |___| |___  | (_) |
+      | \___/| .__/ \___|_| |_|_|  |_|\___/|_____|_____|  \___/
       |      |_|
-    """.stripMargin
+      |""".stripMargin
 
   lazy val consoleUsage = "(Type :q to quit)"
 
@@ -165,7 +167,7 @@ object Application extends JavaLogger {
 
     val config = parse(args.map(_.trim).toList)
 
-    config.loggerLevel.foreach(LoggerService.level)
+    config.loggerLevel.foreach(LoggerConfig.level)
     val workspaceDirectory = config.workspace.getOrElse(org.openmole.core.workspace.defaultOpenMOLEDirectory)
     implicit val workspace = Workspace(workspaceDirectory)
     import org.openmole.tool.thread._
@@ -284,25 +286,36 @@ object Application extends JavaLogger {
           }
         }
       case TestCompile(files) ⇒
+        import org.openmole.tool.hash._
 
+        def success(f: File) = f.getParentFileSafe / (f.hash().toString + ".success")
         def toFile(f: File) = if (f.isDirectory) f.listFiles().toList else Seq(f)
+        def isTestable(f: File) = f.getName.endsWith(".omt") || f.getName.endsWith(".oms")
 
         val results = Test.withTmpServices { implicit services ⇒
           import services._
-          files.flatMap(toFile).map { file ⇒
+          files.flatMap(toFile).filter(isTestable).map { file ⇒
 
             def processResult(c: CompileResult) =
               c match {
                 case s: ScriptFileDoesNotExists ⇒ util.Failure(new IOException("File doesn't exists"))
                 case s: CompilationError        ⇒ util.Failure(s.error)
-                case s: Compiled                ⇒ util.Success("Compilation succeded")
+                case s: Compiled                ⇒ util.Success("Compilation succeeded")
               }
 
-            val project = Project(file.getParentFileSafe)
-            println(s"Testing: ${file.getName}")
-            val res = file → processResult(project.compile(file, args))
+            val res = if (!success(file).exists) {
+              val project = Project(file.getParentFileSafe)
+              println(s"Testing: ${file.getName}")
+              file → processResult(project.compile(file, args))
+            }
+            else {
+              file -> util.Success("Compilation succeeded (from previous test)")
+            }
+
+            if (res._2.isSuccess) success(file) < "success"
             print("\33[1A\33[2K")
             println(s"${res._1.getName}: ${res._2}")
+
             res
           }
         }

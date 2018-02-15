@@ -34,12 +34,14 @@ object JobManager extends JavaLogger { self ⇒
 
   def messagePriority(message: DispatchedMessage) =
     message match {
-      case msg: Upload       ⇒ 10
-      case msg: Submit       ⇒ 50
-      case msg: Refresh      ⇒ 5
-      case msg: GetResult    ⇒ 50
-      case msg: KillBatchJob ⇒ 2
-      case _                 ⇒ 1
+      case msg: Upload          ⇒ 10
+      case msg: Submit          ⇒ 50
+      case msg: Refresh         ⇒ 5
+      case msg: GetResult       ⇒ 50
+      case msg: KillBatchJob    ⇒ 2
+      case msg: Error           ⇒ 100 // This is very quick to process
+      case msg: StopEnvironment ⇒ 200
+      case _                    ⇒ 1
     }
 
   object DispatcherActor {

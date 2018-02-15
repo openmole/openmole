@@ -104,12 +104,12 @@ class SubMoleExecution(
   private def -=(submoleExecution: SubMoleExecution) =
     _children.single -= submoleExecution
 
-  def jobs: Seq[MoleJob] =
+  def jobs: Seq[(Capsule, MoleJob)] =
     atomic { implicit txn ⇒
       def allChildren(subMoleExecution: SubMoleExecution): Seq[SubMoleExecution] =
         subMoleExecution.children.toSeq ++ subMoleExecution.children.toSeq.flatMap(allChildren)
 
-      (Seq(this) ++ allChildren(this)).flatMap(_._jobs.keys.toSeq)
+      (Seq(this) ++ allChildren(this)).flatMap(_._jobs.toVector.map { case (mj, (c, _)) ⇒ c -> mj })
     }
 
   private def jobFailedOrCanceled(job: MoleJob) = {
@@ -218,7 +218,7 @@ class SubMoleExecution(
             val moleJob: MoleJob = MoleJob(capsule.task, implicits + sourced + context + savedContext, moleExecution.nextJobId, stateChanged)
             eventDispatcher.trigger(moleExecution, new MoleExecution.JobCreated(moleJob, capsule))
             addJob(moleJob, capsule, ticket)
-            moleJob.perform(TaskExecutionContext(newFile.baseDir, moleExecution.defaultEnvironment, preference, threadProvider, fileService, workspace, moleExecution.taskCache, moleExecution.lockRepository))
+            moleJob.perform(TaskExecutionContext(newFile.baseDir, moleExecution.defaultEnvironment, preference, threadProvider, fileService, workspace, outputRedirection, moleExecution.taskCache, moleExecution.lockRepository))
             masterCapsuleRegistry.register(c, ticket.parentOrException, c.toPersist(moleJob.context))
             finalState(moleJob, moleJob.state)
           }

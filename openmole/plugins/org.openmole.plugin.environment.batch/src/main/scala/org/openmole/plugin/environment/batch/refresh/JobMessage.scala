@@ -32,7 +32,7 @@ case class Submitted(job: BatchExecutionJob, serializedJob: SerializedJob, batch
 case class Refresh(job: BatchExecutionJob, serializedJob: SerializedJob, batchJob: BatchJobControl, delay: Time, consecutiveUpdateErrors: Int = 0) extends JobMessage with DispatchedMessage
 case class Resubmit(job: BatchExecutionJob, storage: StorageService[_]) extends JobMessage
 case class Delay(msg: JobMessage, delay: Time) extends JobMessage
-case class Error(job: BatchExecutionJob, exception: Throwable, batchJob: Option[BatchJobControl]) extends JobMessage with DispatchedMessage
+case class Error(job: BatchExecutionJob, exception: Throwable, batchJob: Option[(String, String)]) extends JobMessage with DispatchedMessage
 case class Kill(job: BatchExecutionJob) extends JobMessage
 case class KillBatchJob(batchJob: BatchJobControl) extends JobMessage with DispatchedMessage
 case class GetResult(job: BatchExecutionJob, serializedJob: SerializedJob, outputFilePath: String) extends JobMessage with DispatchedMessage

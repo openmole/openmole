@@ -1,6 +1,8 @@
 package org.openmole.ui
 
 import java.io.File
+
+import org.openmole.core.outputredirection.OutputRedirection
 import org.openmole.core.services.{ Services, ServicesContainer }
 import org.openmole.tool.file._
 
@@ -35,6 +37,8 @@ object Test {
       implicit val fileService = FileService()
       implicit val randomProvider = RandomProvider(seeder.newRNG)
       implicit val eventDispatcher = EventDispatcher()
+      implicit val outputRedirection = OutputRedirection()
+
       new ServicesContainer()
     }
 

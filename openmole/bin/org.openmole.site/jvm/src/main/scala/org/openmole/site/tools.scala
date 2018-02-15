@@ -43,8 +43,6 @@ package object tools {
     )
   }
 
-  def question(content: String) = div(`class` := "question", id := links.munge(content), links.anchor(content))
-
   def aa = a(targetBlank)
 
   def todo(content: String) = ""
@@ -56,7 +54,7 @@ package object tools {
       fontSize := "1.75em",
       textAlign := "left",
       // padding := "2.5em 1em 0"
-      margin := "20px 0 0"
+      margin := "30px 0 0"
     )
 
     override val header = Seq(
@@ -75,6 +73,8 @@ package object tools {
 
   object hl extends Highlighter {
 
+    def apply(code: String, lang: String) = highlight(code, lang)
+
     object OptionalName {
       implicit def fromString(s: String) = OptionalName(Some(s))
     }
@@ -87,8 +87,13 @@ package object tools {
     }
 
     def code(code: String) = openmoleNoTest(code)
+    def plain(code: String) = highlight(code, "plain")
     def openmoleNoTest(code: String) = highlight(code, "scala")
   }
+
+  def openmole(code: String, header: String = "", name: hl.OptionalName = hl.OptionalName(None)) = hl.openmole(code, header, name)
+  def code(code: String) = hl.code(code)
+  def plain(code: String) = hl.plain(code)
 
   case class Parameter(name: String, `type`: String, description: String)
 
@@ -141,6 +146,9 @@ package object tools {
         span(s" $title")
       )
     )
+
+  def modificationLink(source: String) =
+    s"https://github.com/openmole/openmole/edit/dev/openmole/bin/org.openmole.site/jvm/src/main/scalatex/$source"
 
   def rightGlyphButton(title: String, page: Page, glyph: String, openInOtherTab: Boolean = false, buttonStyle: Seq[Modifier] = Seq(classIs(btn ++ btn_default))) =
     to(page)(if (openInOtherTab) targetBlank else "")(

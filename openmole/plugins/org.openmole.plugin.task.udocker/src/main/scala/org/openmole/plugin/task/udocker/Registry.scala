@@ -14,12 +14,10 @@ import io.circe.parser._
 import squants.time._
 import cats.implicits._
 import org.openmole.core.workspace.NewFile
+import org.openmole.tool.stream._
 import org.openmole.tool.file.{ File ⇒ OMFile, FileDecorator }
 
 object Registry {
-
-  def copy(is: InputStream, os: OutputStream) =
-    Iterator.continually(is.read()).takeWhile(_ != -1).foreach { os.write }
 
   def content(response: HttpResponse) = scala.io.Source.fromInputStream(response.getEntity.getContent).mkString
 
@@ -98,11 +96,13 @@ object Registry {
     s"${image.registry}/v2/$path"
   }
 
-  def manifest(image: DockerImage, timeout: Time): Either[Err, Manifest] = {
-
+  def downloadManifest(image: DockerImage, timeout: Time): String = {
     val url = s"${baseURL(image)}/manifests/${image.tag}"
     val httpResponse = client.execute(Token.withToken(url, timeout))
-    val manifestContent = content(httpResponse)
+    content(httpResponse)
+  }
+
+  def manifest(image: DockerImage, manifestContent: String): Either[Err, Manifest] = {
     val manifestsE = decode[ImageManifestV2Schema1](manifestContent)
 
     val manifest = for {
@@ -139,9 +139,7 @@ object Registry {
   def downloadLayer(dockerImage: DockerImage, layer: Layer, layersDirectory: OMFile, layerFile: File, timeout: Time)(implicit newFile: NewFile): Unit =
     newFile.withTmpFile { tmpFile ⇒
       blob(dockerImage, layer, tmpFile, timeout)
-      layersDirectory.withLockInDirectory {
-        if (!layerFile.exists) tmpFile move layerFile
-      }
+      layersDirectory.withLockInDirectory { if (!layerFile.exists) tmpFile move layerFile }
     }
 
 }

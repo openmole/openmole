@@ -67,9 +67,13 @@ class Command(val console: ScalaREPL, val variables: ConsoleVariables) { command
 
   def print(moleExecution: MoleExecution): Unit = {
     val statuses = moleExecution.jobStatuses
-    println(s"Ready: ${statuses.ready}")
-    println(s"Running: ${statuses.running}")
-    println(s"Completed: ${statuses.completed}")
+
+    val msg =
+      for {
+        (capsule, stat) ← statuses
+      } yield s"${capsule}: ${stat.ready} ready, ${stat.running} running, ${stat.completed} completed"
+
+    println(msg.mkString("\n"))
     moleExecution.exception match {
       case Some(e) ⇒
         System.out.println(s"Mole execution failed while executing ${e.capsule}:")

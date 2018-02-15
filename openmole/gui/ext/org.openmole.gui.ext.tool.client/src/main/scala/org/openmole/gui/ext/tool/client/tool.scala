@@ -17,8 +17,15 @@ package org.openmole.gui.ext.tool
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+<<<<<<< HEAD
 import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
+=======
+import org.openmole.gui.ext.data.ExecutionInfo
+
+import scaladget.stylesheet.all._
+import scaladget.stylesheet.{ all ⇒ sheet }
+>>>>>>> dev
 import org.scalajs.dom
 
 import scalatags.JsDom.all._
@@ -511,13 +518,13 @@ package object client {
     color(BLUE)
   )
 
-  def executionState(state: String): ModifierSeq = Seq(
+  def executionState(state: ExecutionInfo): ModifierSeq = Seq(
     state match {
-      case "failed"   ⇒ color("#CC3A36")
-      case "running"  ⇒ color("yellow")
-      case "finished" ⇒ color("#a6bf26")
-      case "canceled" ⇒ color("orange")
-      case _          ⇒ color(WHITE)
+      case _: ExecutionInfo.Failed   ⇒ color("#CC3A36")
+      case _: ExecutionInfo.Running  ⇒ color("yellow")
+      case _: ExecutionInfo.Finished ⇒ color("#a6bf26")
+      case _: ExecutionInfo.Canceled ⇒ color("orange")
+      case _                         ⇒ color(WHITE)
     },
     fontWeight := "bold"
   )

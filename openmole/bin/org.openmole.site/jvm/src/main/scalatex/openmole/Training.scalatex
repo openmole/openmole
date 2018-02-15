@@ -6,7 +6,7 @@ These trainings are given around every 2 months. In 3 hours, you will learn how 
 the application, what are the main concepts and how to build your first experiments. They take place
 at the ISC-PIF lab, Paris.
 @p
-@linkButton("Program and registration", shared.link.shortTraining, classIs(btn ++ btn_danger))
+@linkButton("Program and registration", shared.link.shortTrainings, classIs(btn ++ btn_danger))
 
 
 @h1{Long trainings}
@@ -16,4 +16,4 @@ optimization methods are explained and experienced in detail.
 
 
 @p
-@linkButton("Program and registration", shared.link.longTraining, classIs(btn ++ btn_danger))
+@linkButton("Program and registration", shared.link.longTrainings, classIs(btn ++ btn_danger))

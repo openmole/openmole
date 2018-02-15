@@ -28,18 +28,20 @@ package object hash {
   object SHA256 extends HashType
 
   implicit class StringHashDecorator(s: String) {
-    def hash(hashType: HashType = SHA1) = computeHash(new StringInputStream(s), hashType)
+    def hash(hashType: HashType = SHA1) = hashString(s, hashType)
   }
 
   implicit class FileHashServiceDecorator(file: File) {
-    def hash(hashType: HashType = SHA1) = computeHash(file, hashType)
+    def hash(hashType: HashType = SHA1) = hashFile(file, hashType)
   }
 
   implicit class InputStreamHashServiceDecorator(is: InputStream) {
     def hash(hashType: HashType = SHA1) = computeHash(is, hashType)
   }
 
-  def computeHash(file: File, hashType: HashType = SHA1): Hash = {
+  def hashString(s: String, hashType: HashType = SHA1) = computeHash(new StringInputStream(s), hashType)
+
+  def hashFile(file: File, hashType: HashType = SHA1): Hash = {
     val is = new FileInputStream(file)
     try hash.computeHash(is, hashType)
     finally is.close

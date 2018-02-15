@@ -18,8 +18,12 @@ package org.openmole.site
  */
 
 import stylesheet._
+
 import scalatags.Text.all._
 import SideMenu._
+import org.openmole.site.tools.classIs
+
+import scalatags.Text.TypedTag
 
 object UserGuide {
 
@@ -27,20 +31,27 @@ object UserGuide {
   val firstMethod = DocumentationPages.method
   val firstEnvironment = DocumentationPages.environment
 
-  def headerModel(model: String) = span(
+  val line = hr(classIs("line"), width := "90%", marginTop := 10)
+
+  def header(sp: TypedTag[_ <: String]) =
+    div(minHeight := 250, paddingTop := 100)(
+      div(stepHeader)(sp),
+      line
+    )
+  def headerModel(model: String) = header(span(
     tools.to(DocumentationPages.model)(img(src := Resource.img.model.codeAnimated.file, headerImg)),
     span(s"Run your own $model model", h1Like)
-  )
+  ))
 
-  def headerMethod(method: String) = span(
+  def headerMethod(method: String) = header(span(
     tools.to(DocumentationPages.method)(img(src := Resource.img.method.exploreMapAnimated.file, headerImg)),
     span(s"Explore with $method", h1Like)
-  )
+  ))
 
-  def headerEnvironment(env: String) = span(
+  def headerEnvironment(env: String) = header(span(
     tools.to(DocumentationPages.environment)(img(src := Resource.img.environment.scaleAnimated.file, headerImg)),
     span(s"Scale on $env "), h1Like
-  )
+  ))
 
   lazy val imgStyle = Seq(
     width := 100,
@@ -48,40 +59,40 @@ object UserGuide {
   )
 
   DocumentationPages.dataProcessing
-  def addCarousel(current: Page) = {
+  def currentStep(current: Page): SitePage = {
 
     val currentStep = {
-      if ((DocumentationPages.modelPages :+ DocumentationPages.model).contains(current)) {
-        val name = if (current == firstModel) "" else current.name
-        Step(
-          headerModel(name),
+      if (DocumentationPages.topPages.contains(current)) {
+        if ((DocumentationPages.modelPages :+ DocumentationPages.model).contains(current)) {
+          val name = if (current == firstModel) "" else current.name
+          StepPage(
+            headerModel(name),
+            div(current.content),
+            SideMenu.model.insert(current.extraMenu).left,
+            SideMenu.more.insert(current.details).right,
+            firstModel, firstEnvironment, firstMethod
+          )
+        }
+        else if ((DocumentationPages.methodPages :+ DocumentationPages.method).contains(current))
+          StepPage(
+            headerMethod(current.name),
+            div(current.content),
+            SideMenu.method.insert(current.extraMenu).left,
+            SideMenu.more.insert(current.details).right,
+            firstMethod, firstModel, firstEnvironment
+          )
+        else StepPage(
+          headerEnvironment(current.name),
           div(current.content),
-          SideMenu.model.insert(current.extraMenu).left(350),
-          SideMenu.more.insert(current.details).right(350),
-          firstModel, firstEnvironment, firstMethod
+          SideMenu.environment.insert(current.extraMenu).left,
+          SideMenu.more.insert(current.details).right,
+          firstEnvironment, firstMethod, firstModel
         )
       }
-      else if ((DocumentationPages.methodPages :+ DocumentationPages.method).contains(current))
-        Step(
-          headerMethod(current.name),
-          div(current.content),
-          SideMenu.method.insert(current.extraMenu).left(350),
-          SideMenu.more.insert(current.details).right(350),
-          firstMethod, firstModel, firstEnvironment
-        )
-      else Step(
-        headerEnvironment(current.name),
-        div(current.content),
-        SideMenu.environment.insert(current.extraMenu).left(350),
-        SideMenu.more.insert(current.details).right(350),
-        firstEnvironment, firstMethod, firstModel
-      )
+      else ContentPage(div(paddingTop := 100), div(current.content))
     }
 
-    new StepCarousel(
-      currentStep
-    ).render
-
+    currentStep
   }
 
 }

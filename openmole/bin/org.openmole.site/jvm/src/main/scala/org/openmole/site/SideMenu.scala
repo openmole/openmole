@@ -17,11 +17,16 @@ package org.openmole.site
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import org.openmole.site
 import tools._
 import stylesheet._
 
 import scalatags.Text.TypedTag
 import scalatags.Text.all._
+
+object Link {
+  def intern(name: String) = s"#${name.replaceAll(" ", "")}"
+}
 
 case class Link(name: String, link: String)
 
@@ -69,9 +74,9 @@ case class SideMenuBlock(menus: Seq[SideMenu]) {
       )
     )
 
-  def right(top: Int) = build(div(rightDetailButtons(top)))
+  val right = build(div(rightDetailButtons(220), id := "sidebar-right"))
 
-  def left(top: Int) = build(div(leftDetailButtons(top)))
+  val left = build(div(leftDetailButtons(220), id := "sidebar-left"))
 
 }
 
@@ -86,7 +91,7 @@ object SideMenu {
   def details(pages: Seq[Page]) = SideMenu(pages, classIs(btn ++ btn_default), otherTab = true)
 
   def fromStrings(title: String, stringMenus: String*) =
-    SideMenu(preText = title, links = stringMenus.map { a ⇒ Link(a, s"#${a.replaceAll(" ", "")}") })
+    SideMenu(preText = title, links = stringMenus.map { a ⇒ Link(a, Link.intern(a)) })
 
   val model = SideMenu(DocumentationPages.modelPages, classIs(btn ++ btn_primary), "Available tasks").toBlock
 
@@ -101,6 +106,36 @@ object SideMenu {
       DocumentationPages.advancedConcepts
     ), classIs(btn ++ btn_default), "See also", true
   ).toBlock
+
+  lazy val menus = Map(
+    DocumentationPages.advancedSampling.name -> Seq(advancedSamplingMenu.toBlock.left, SideMenu.more.right),
+    DocumentationPages.netLogoGA.name -> Seq(SideMenu.gaWithNetlogoMenu.toBlock.left),
+    DocumentationPages.capsule.name -> Seq(SideMenu.capsuleMenu.toBlock.left),
+    DocumentationPages.source.name -> Seq(SideMenu.sourceMenu.toBlock.left),
+    DocumentationPages.hook.name -> Seq(SideMenu.hookMenu.toBlock.left),
+    DocumentationPages.gui.name -> Seq(SideMenu.guiGuide.toBlock.left),
+    DocumentationPages.console.name -> Seq(SideMenu.consoleMenu.toBlock.left),
+    DocumentationPages.howToContribute.name -> Seq(SideMenu.howToContributeMenu.toBlock.left),
+    DocumentationPages.care.name -> Seq(SideMenu.nativePackagingMenu.toBlock.left),
+    Pages.gettingStarted.name -> Seq(SideMenu.more.right),
+    Pages.faq.name -> Seq(SideMenu.faqMenu.toBlock.left)
+  )
+
+  lazy val faqMenu = fromStrings(
+    "",
+    shared.faq.javaVersion,
+    shared.faq.oldVersions,
+    shared.faq.sshConnectionBug,
+    shared.faq.passwordAuthentication,
+    shared.faq.isOpenMOLEup,
+    shared.faq.homeQuota,
+    shared.faq.sampleError,
+    shared.faq.cannotGetCare,
+    shared.faq.tooManyOpenFiles,
+    shared.faq.qxcbConnection,
+    shared.faq.pathOverFile,
+    shared.faq.notListed
+  )
 
   lazy val guiGuide = fromStrings(
     "Contents",
@@ -137,6 +172,13 @@ object SideMenu {
     shared.nativePackagingMenu.troubleshooting
   )
 
+  lazy val directSamplingMenu = fromStrings(
+    "Contents",
+    shared.directSamplingMenu.gridSampling,
+    shared.directSamplingMenu.uniformSampling
+
+  )
+
   lazy val netlogoMenu = fromStrings(
     "Contents",
     shared.netlogoMenu.simulation,
@@ -149,7 +191,6 @@ object SideMenu {
 
   lazy val otherDoEMenu = fromStrings(
     "Contents",
-    shared.otherDoEMenu.basicSampling,
     shared.otherDoEMenu.csvSampling,
     shared.otherDoEMenu.LHSSobol,
     shared.otherDoEMenu.severalInputs,

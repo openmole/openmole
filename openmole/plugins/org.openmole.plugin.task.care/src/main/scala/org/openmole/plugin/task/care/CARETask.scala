@@ -52,16 +52,22 @@ object CARETask extends JavaLogger {
     override def stdErr = CARETask.stdErr
   }
 
-  def apply(archive: File, command: String)(implicit sourceCodeName: sourcecode.Name): CARETask =
+  def apply(
+    archive:            File,
+    command:            String,
+    returnValue:        OptionalArgument[Val[Int]]    = None,
+    stdOut:             OptionalArgument[Val[String]] = None,
+    stdErr:             OptionalArgument[Val[String]] = None,
+    errorOnReturnValue: Boolean                       = true)(implicit sourceCodeName: sourcecode.Name): CARETask =
     new CARETask(
       archive = archive,
       command = command,
       hostFiles = Vector.empty,
       workDirectory = None,
-      errorOnReturnValue = true,
-      returnValue = None,
-      stdOut = None,
-      stdErr = None,
+      errorOnReturnValue = errorOnReturnValue,
+      returnValue = returnValue,
+      stdOut = stdOut,
+      stdErr = stdErr,
       environmentVariables = Vector.empty,
       _config = InputOutputConfig(),
       external = External()

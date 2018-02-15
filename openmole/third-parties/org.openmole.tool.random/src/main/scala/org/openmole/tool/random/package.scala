@@ -17,7 +17,9 @@
  */
 package org.openmole.tool
 
-import org.apache.commons.math3.random.RandomGenerator
+import java.util.concurrent.atomic.AtomicInteger
+
+import org.apache.commons.math3.random.{ RandomAdaptor, RandomGenerator }
 import org.openmole.tool.cache._
 
 package object random {
@@ -74,7 +76,14 @@ package object random {
     override def nextInt = synchronized { generator.nextInt }
     override def nextInt(n: Int) = synchronized { generator.nextInt(n) }
     override def nextLong = synchronized { generator.nextLong }
-    override def setSeed(seed: Long) = synchronized { generator.setSeed(seed) }
+    override def setSeed(seed: Long) = synchronized {
+      def isCalledFromInitRandom() = {
+        def isRandomInit(stackTraceElement: StackTraceElement) = stackTraceElement.getMethodName == "<init>" && stackTraceElement.getClassName == "java.util.Random"
+        Thread.currentThread().getStackTrace.exists(isRandomInit)
+      }
+
+      if (!isCalledFromInitRandom()) generator.setSeed(seed)
+    }
     def toScala = new util.Random(this)
   }
 

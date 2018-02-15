@@ -3,7 +3,6 @@ package org.openmole.plugin.task.udocker
 import java.io.PrintStream
 import java.util.UUID
 
-import org.openmole.core.preference._
 import org.openmole.core.threadprovider._
 import org.openmole.core.workspace._
 import org.openmole.plugin.task.udocker.DockerMetadata._
@@ -20,6 +19,7 @@ import io.circe.generic.extras.auto._
 import io.circe.jawn.{ decode, decodeFile }
 import io.circe.syntax._
 import monocle.macros.Lenses
+import org.openmole.core.outputredirection.OutputRedirection
 import org.openmole.plugin.task.systemexec.{ commandLine, execute, executeAll }
 import org.openmole.tool.file._
 import org.openmole.tool.stream._
@@ -45,35 +45,48 @@ object UDocker {
     lazy val id = UUID.randomUUID().toString
   }
 
-  def downloadImage(dockerImage: DockerImage, layersDirectory: File, timeout: Time)(implicit newFile: NewFile, threadProvider: ThreadProvider) = {
+  def downloadImage(dockerImage: DockerImage, manifestDirectory: File, layersDirectory: File, timeout: Time)(implicit newFile: NewFile, threadProvider: ThreadProvider, outputRedirection: OutputRedirection) = {
     import Registry._
 
     def layerFile(layer: Layer) = layersDirectory / layer.digest
+    lazy val manifestFile = manifestDirectory / s"${dockerImage.image}_${dockerImage.tag}"
 
-    val m = manifest(dockerImage, timeout)
+    val manifestContent = util.Try(downloadManifest(dockerImage, timeout)) match {
+      case util.Failure(e) ⇒
+        if (manifestFile.exists) manifestFile.withLock { _ ⇒ manifestFile.content }
+        else throw e
+      case util.Success(c) ⇒
+        manifestFile.withLock { _ ⇒ manifestFile.content = c }
+        c
+    }
+
+    val manifestData = manifest(dockerImage, manifestContent)
 
     def localLayersFutures =
       for {
-        manif ← m.toSeq.toVector
-        l ← layers(manif.value)
+        m ← manifestData.toSeq.toVector
+        l ← layers(m.value)
       } yield Future {
         val lf = layerFile(l)
-        if (!lf.exists) downloadLayer(dockerImage, l, layersDirectory, lf, timeout)
+        if (!lf.exists) {
+          outputRedirection.output.println(s"Downloading docker layer: ${l.digest}")
+          downloadLayer(dockerImage, l, layersDirectory, lf, timeout)
+        }
         l → lf
       }
 
     val localLayers = localLayersFutures.map(f ⇒ Await.result(f, Duration.Inf)).reverse
 
     for {
-      manif ← m
-      history = manif.value.history
+      m ← manifestData
+      history = m.value.history
       hist = Either.cond(history.isDefined, history.get, Err("No history field in Docker manifest"))
       v1 ← hist.map(_.head)
     } yield {
       val content = LocalDockerImage.Layered(localLayers, Vector.empty)
       // FIXME how reliable is it to assume config in first v1Compat string?
       val imageConfig = v1.v1Compatibility
-      LocalDockerImage(dockerImage.image, dockerImage.tag, content, imageConfig, manif.value)
+      LocalDockerImage(dockerImage.image, dockerImage.tag, content, imageConfig, m.value)
     }
   }
 
@@ -259,7 +272,7 @@ object UDocker {
     val runInstall = commands.map {
       ic ⇒
         uDockerRunCommand(
-          uDocker.uDockerUser,
+          uDocker.user,
           Vector.empty,
           uDockerVolumes,
           userWorkDirectory(uDocker),
@@ -286,6 +299,7 @@ object UDocker {
     val id =
       uDocker.localDockerImage.container match {
         case None ⇒
+
           val cl = commandLine(s"${uDockerExecutable.getAbsolutePath} create $imageId")
           execute(cl, tmpDirectory, uDockerVariables, captureOutput = true, captureError = true, displayOutput = false, displayError = false).output.get.split("\n").head
         case Some(directory) ⇒

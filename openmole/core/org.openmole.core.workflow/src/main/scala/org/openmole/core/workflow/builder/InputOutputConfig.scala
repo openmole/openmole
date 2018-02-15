@@ -18,7 +18,7 @@
 package org.openmole.core.workflow.builder
 
 import monocle.macros.Lenses
-import org.openmole.core.context.PrototypeSet
+import org.openmole.core.context.{ PrototypeSet, Val }
 import org.openmole.core.workflow.tools.DefaultSet
 
 object InputOutputConfig {
@@ -28,6 +28,16 @@ object InputOutputConfig {
     defaults: DefaultSet   = DefaultSet.empty
   )(implicit name: sourcecode.Name): InputOutputConfig =
     InputOutputConfig(inputs, outputs, defaults, Some(name.value))
+
+  implicit class ConfigDecoration(config: InputOutputConfig) {
+    def add(inputs: Seq[Val[_]] = Seq.empty, outputs: Seq[Val[_]] = Seq.empty) = InputOutputConfig.add(inputs, outputs)(config)
+    def addInput(input: Val[_]*) = add(inputs = input)
+    def addOutput(output: Val[_]*) = add(outputs = output)
+  }
+
+  def add(inputs: Seq[Val[_]] = Seq.empty, outputs: Seq[Val[_]] = Seq.empty) =
+    InputOutputConfig.inputs.modify(_ ++ outputs) andThen
+      InputOutputConfig.outputs.modify(_ ++ outputs)
 }
 
 @Lenses case class InputOutputConfig(

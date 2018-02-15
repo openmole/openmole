@@ -7,12 +7,14 @@
 @def modelAndVariables = """
 val param1 = Val[Double]
 val param2 = Val[Double]
+val param3 = Val[Int]
+val param4 = Val[String]
 val distance1 = Val[Double]
 val distance2 = Val[Double]
 val output1 = Val[Double]
 val output2 = Val[Double]
 val modelTask = EmptyTask() set (
-    inputs += (param1,param2),
+    inputs += (param1,param2, param3, param4),
     outputs += (output1, output2)
     )
 """
@@ -139,7 +141,9 @@ For more details on the calibration using genetic algorithms, see the @a("GA det
         mu = 50,
         genome = Seq(
           param1 in (0.0, 99.0),
-          param2 in (0.0, 99.0)),
+          param2 in (0.0, 99.0),
+          param3 in (0, 5),
+          param4 in List("apple", "banana", "strawberry")),
         objectives = Seq(distance1, distance2)
       )
 

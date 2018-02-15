@@ -20,40 +20,27 @@ import org.openmole.tool.lock._
 package udocker {
 
   trait UDockerPackage {
-
-    lazy val reuseContainer =
-      new {
-        def :=[T: ReuseContainer](b: Boolean) =
-          implicitly[ReuseContainer[T]].reuseContainer.set(b)
-      }
-
-    lazy val uDockerUser =
-      new {
-        def :=[T: UDockerUser](b: String) =
-          implicitly[UDockerUser[T]].uDockerUser.set(Some(b))
-      }
-
+    lazy val ContainerTask = UDockerTask
   }
+
 }
 
 package object udocker extends UDockerPackage {
 
   object ContainerImage {
     implicit def fileToContainerImage(f: java.io.File) = SavedDockerImage(f)
-    implicit def stringToContainerImage(s: String) = DockerImage(s)
+    implicit def stringToContainerImage(s: String) =
+      if (s.contains(":")) {
+        val Vector(image, tag) = s.split(":").toVector
+        DockerImage(image, tag)
+      }
+      else DockerImage(s)
+
   }
 
   sealed trait ContainerImage
   case class DockerImage(image: String, tag: String = "latest", registry: String = "https://registry-1.docker.io") extends ContainerImage
   case class SavedDockerImage(file: java.io.File) extends ContainerImage
-
-  trait ReuseContainer[T] {
-    def reuseContainer: Lens[T, Boolean]
-  }
-
-  trait UDockerUser[T] {
-    def uDockerUser: Lens[T, Option[String]]
-  }
 
   import cats.data._
   import cats.implicits._
@@ -77,14 +64,12 @@ package object udocker extends UDockerPackage {
 
   @Lenses case class UDockerArguments(
     localDockerImage:     UDocker.LocalDockerImage,
-    command:              FromContext[String],
     environmentVariables: Vector[(String, FromContext[String])] = Vector.empty,
     hostFiles:            Vector[(String, Option[String])]      = Vector.empty,
     workDirectory:        Option[String]                        = None,
     reuseContainer:       Boolean                               = true,
-    uDockerUser:          Option[String]                        = None,
-    mode:                 Option[String]                        = None
-  )
+    user:                 Option[String]                        = None,
+    mode:                 Option[String]                        = None)
 
   def userWorkDirectory(uDocker: UDockerArguments) = {
     import io.circe.generic.extras.auto._

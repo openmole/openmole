@@ -13,9 +13,9 @@
             Romain Reuillon, Mathieu Leclaire, Sebastien Rey-Coyrehourcq, «OpenMOLE, a workflow engine specifically tailored for
             the distributed exploration of simulation models» published in @i{Future Generation Computer Systems}, 2013.
             @br
-              @a("[editor version]" , href:="http://www.sciencedirect.com/science/article/pii/S0167739X13001027")
+              @aa("[editor version]" , href:= shared.link.paper.fgcs2013)
 
-              @a("[online preprint]" , href:="https://hal-paris1.archives-ouvertes.fr/hal-00840744/")
+              @aa("[online preprint]" , href:= shared.link.paper.fgcs2013preprint)
 
                @a("[bibteX]", href:= Resource.bibtex.FGCSRefBib.file)
 
@@ -25,7 +25,7 @@
             «Declarative Task Delegation in OpenMOLE», proceedings of @i{High Performance Computing and Simulation (HPCS)}
             international conference, 2010.
             @br
-                 @a("[editor version]" , href:="http://ieeexplore.ieee.org/document/5547155/")
+                 @aa("[editor version]" , href:= shared.link.paper.hpcs2010)
 
                  @a("[bibteX]", href:= Resource.bibtex.HPCSRefBib.file)
                  @a("[pdf]", href:=Resource.paper.hpcs2010.file)
@@ -33,7 +33,7 @@
 
 
 
-    @h3{When you're using the @a("reproducibility features", href := DocumentationPages.nativePackaging.file) (@hl.openmoleNoTest{CARETask}, ...)}
+    @h3{When you're using the @a("reproducibility features", href := DocumentationPages.care.file) (@hl.openmoleNoTest{CARETask}, ...)}
     @ul
         @li
             @Papers.frontiers2017
@@ -46,13 +46,13 @@
            Models: The Calibration Profile (CP) Algorithm » published in @i{Journal of Artificial Societies and Social Simulation}
             (JASSS) , Vol 18, Issue 1, 2015.
             @br
-                @a("[online version]" , href:="http://jasss.soc.surrey.ac.uk/18/1/12.html")  @a("[bibteX]", href:= Resource.bibtex.profilemethodBib.file)
+                @aa("[online version]" , href:= shared.link.paper.jassCP)  @a("[bibteX]", href:= Resource.bibtex.profilemethodBib.file)
 
         @li
             Guillaume Chérel, Clémentine Cottineau and Romain Reuillon, « Beyond Corroboration: Strengthening Model
             Validation by Looking for Unexpected Patterns» published in @i{PLOS ONE} 10(9), 2015.
             @br
-                @a("[online version]" , href:="http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0138212")  @a("[bibteX]", href:= Resource.bibtex.PSEmethodBib.file)
+                @aa("[online version]" , href:= shared.link.paper.beyondCorroboration)  @a("[bibteX]", href:= Resource.bibtex.PSEmethodBib.file)
 
 
 
@@ -65,7 +65,7 @@
             Evolutionary algorithms and distributed computing for calibrating the SimpopLocal geographical model» published
             in @i{Environment and Planning B: Urban Analytics and City Science}, Vol 42, Issue 2, 2015.
             @br
-                @a("[open-access version]", href:="https://hal.archives-ouvertes.fr/hal-01118918")   @a("[editor version]", href:="http://journals.sagepub.com/doi/abs/10.1068/b130064p")  @a("[bibteX]", href:= Resource.bibtex.halfbillionBib.file)
+                @aa("[open-access version]", href:= shared.link.paper.halfBillionOA)   @aa("[editor version]", href:= shared.link.paper.halfBillionEditor)  @a("[bibteX]", href:= Resource.bibtex.halfbillionBib.file)
 
 
         @li
@@ -73,7 +73,7 @@
              incremental modelling method (EBIMM) applied to the simulation of systems of cities», published in
              @i{Journal of Artificial Societies and Social Simulation} (JASSS) , Vol 18, Issue 4,  2015.
              @br
-                @a("[online version]" , href:="http://jasss.soc.surrey.ac.uk/18/4/9.html")   @a("[bibteX]", href:= Resource.bibtex.EBIMMBib.file)
+                @aa("[online version]" , href:= shared.link.paper.jass2015)   @a("[bibteX]", href:= Resource.bibtex.EBIMMBib.file)
 
 
         @li
@@ -82,20 +82,20 @@
             modelling framework for hypotheses testing in the simulation of urbanisation», published in @i{Systems}, Vol 3,
             Issue 4, 2015.
             @br
-                @a("[open-access version]" , href:="http://www.mdpi.com/2079-8954/3/4/348")   @a("[bibteX]", href:= Resource.bibtex.EBIMMBib.file)
+                @aa("[open-access version]" , href:= shared.link.paper.mdpi2015)   @a("[bibteX]", href:= Resource.bibtex.EBIMMBib.file)
 
 
         @li
             Denise Pumain, Romain Reuillon, Sébastien Rey-Coyrehourcq, Arnaud Banos, Paul Chapron, et al.. "Urban Dynamics and Simulation Models". Springer, ISBN 978-3-319-46495-4, 2017.
             @br
-                @a("[pre-print version]" , href:=shared.link.urbanDynamics)   @a("[bibteX]", href:= shared.link.urbanDynamicsBib)
+                @aa("[pre-print version]" , href:=shared.link.paper.urbanDynamics)   @a("[bibteX]", href:= shared.link.paper.urbanDynamicsBib)
 
         @li
              Jonathan Passerat-Palmbach, Romain Reuillon, Mathieu Leclaire, Antonios Makropoulos, Emma C. Robinson, Sarah
              Parisot and Daniel Rueckert,« Reproducible Large-Scale Neuroimaging Studies with the OpenMOLE Workflow
              Management System», published in @i{Frontiers in Neuroinformatics}, Vol 11, 2017.
               @br
-                    @a("[online version]" , href:="http://journal.frontiersin.org/article/10.3389/fninf.2017.00021/full#")
+                    @aa("[online version]" , href:= shared.link.paper.frontier2017)
                      @a("[bibteX]", href:= Resource.bibtex.frontierBib.file)
 
 

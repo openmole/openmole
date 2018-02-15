@@ -17,6 +17,33 @@
 
 package org.openmole.plugin.domain.modifier
 
-import org.openmole.core.pluginmanager.PluginInfoActivator
+import org.openmole.core.pluginmanager.{ KeyWord, PluginInfo }
+import org.osgi.framework._
 
-class Activator extends PluginInfoActivator
+class Activator extends BundleActivator {
+  override def stop(context: BundleContext): Unit = {
+    PluginInfo.unregister(this)
+  }
+
+  override def start(context: BundleContext): Unit = {
+    import org.openmole.core.pluginmanager.KeyWord._
+
+    val keyWords: Vector[KeyWord] =
+      Vector(
+        "take",
+        "group",
+        "sliding",
+        "map",
+        "filter",
+        "zipWith",
+        "zipWithIndex",
+        "zipWithName",
+        "sort",
+        "sortBy",
+        "shuffle"
+      )
+
+    PluginInfo.register(this, namespaces = Vector(this.getClass.getPackage), keyWords = keyWords)
+  }
+}
+

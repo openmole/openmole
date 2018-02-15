@@ -27,12 +27,12 @@ object SaltelliSampling {
 
   def matrix = Seq(matrixName, matrixIndex)
 
-  def apply(samples: FromContext[Int], factors: ScalarOrSequence[_]*) =
+  def apply(samples: FromContext[Int], factors: ScalarOrSequenceOfDouble[_]*) =
     new SaltelliSampling(samples, factors: _*)
 
 }
 
-class SaltelliSampling(val samples: FromContext[Int], val factors: ScalarOrSequence[_]*) extends Sampling {
+class SaltelliSampling(val samples: FromContext[Int], val factors: ScalarOrSequenceOfDouble[_]*) extends Sampling {
 
   override def inputs = factors.flatMap(_.inputs)
   override def prototypes = factors.map { _.prototype } ++ SaltelliSampling.matrix
@@ -56,7 +56,7 @@ class SaltelliSampling(val samples: FromContext[Int], val factors: ScalarOrSeque
     ): List[Iterable[Variable[_]]] =
       matrix.zipWithIndex.map {
         case (l, index) ⇒
-          def line = ScalarOrSequence.scaled(factors, l).from(context)
+          def line = ScalarOrSequenceOfDouble.scaled(factors, l).from(context)
           Variable(SaltelliSampling.matrixName, m) :: Variable(SaltelliSampling.matrixIndex, index) :: line
       }.toList
 

@@ -36,10 +36,13 @@ lazy val json4s = OsgiProject(dir, "org.json4s",
   libraryDependencies +=  "org.json4s" %% "json4s-jackson" % "3.5.0",
   version := "3.5.0") settings(settings: _*)
 
+lazy val shapelessVersion = "2.3.2"
+lazy val shapeless =  OsgiProject(dir, "com.chuusai.shapeless", exports = Seq("shapeless.*")) settings (
+  libraryDependencies += "com.chuusai" %% "shapeless" % shapelessVersion,
+  version := shapelessVersion
+) settings(settings: _*)
 
-lazy val shapeless = "com.chuusai" %% "shapeless" % "2.3.2"
-
-lazy val circeVersion = "0.9.0-M1"
+lazy val circeVersion = "0.9.0"
 lazy val circe = OsgiProject(dir, "io.circe",
   exports = Seq("io.circe.*", "!cats.*", "!scala.*", "!shapeless.*"),
   privatePackages = Seq("jawn.*"),
@@ -51,8 +54,7 @@ lazy val circe = OsgiProject(dir, "io.circe",
     "io.circe" %% "circe-generic-extras",
     "io.circe" %% "circe-parser"
   ).map(_ % circeVersion),
-  libraryDependencies += shapeless,
-  version := circeVersion) settings(settings: _*)
+  version := circeVersion) settings(settings: _*) dependsOn(shapeless)
 
 lazy val logback = OsgiProject(dir, "ch.qos.logback", exports = Seq("ch.qos.logback.*", "org.slf4j.impl"), dynamicImports = Seq("*")) settings
   (libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.0.9", version := "1.0.9") settings(settings: _*)
@@ -145,8 +147,9 @@ lazy val netlogo6 = OsgiProject(
     "org.nlogo" % "netlogo" % netLogo6Version % "provided" from s"https://dl.bintray.com/netlogo/NetLogo-JVM/org/nlogo/netlogo/$netLogo6Version/netlogo-$netLogo6Version.jar",
     "org.scala-lang" % "scala-library" % "2.12.1" % "provided",
     "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4" % "provided",
-     "org.ow2.asm" % "asm-all" % "5.0.4" % "provided",
-     "org.picocontainer" % "picocontainer" % "2.13.6" % "provided",
+    "commons-codec" % "commons-codec" % "1.11" % "provided",
+    "org.ow2.asm" % "asm-all" % "5.0.4" % "provided",
+    "org.picocontainer" % "picocontainer" % "2.13.6" % "provided",
     "org.parboiled" %% "parboiled" % "2.1.3" % "provided"
   ), version := netLogo6Version, scalaVersion := "2.12.1", crossPaths := false) settings(settings: _*)
 
@@ -176,8 +179,8 @@ lazy val scalaTags = OsgiProject(dir, "com.scalatags", exports = Seq("scalatags.
 
 lazy val scalatexSite =
   OsgiProject(dir, "com.lihaoyi.scalatex-site", exports = Seq("scalatex.*", "ammonite.*", "fastparse.*"), privatePackages = Seq("META-INF.**", "pprint.*", "scalaj.*", "scalaparse.*", "geny.*"), imports = Seq("*")) settings (
-    libraryDependencies += "com.lihaoyi" %% "scalatex-site" % "0.3.11",
-    version := "0.3.11") settings(settings: _*)
+    libraryDependencies += "com.lihaoyi" %% "scalatex-site" % "0.3.12",
+    version := "0.3.12") settings(settings: _*)
 
 lazy val upickle = OsgiProject(dir, "upickle", exports = Seq("upickle.*", "jawn.*", "derive.*", "sourcecode.*"), imports = Seq("*")) settings(
   libraryDependencies ++= Seq("com.lihaoyi" %% "upickle" % scalaUpickleVersion),
@@ -199,7 +202,7 @@ lazy val closureCompilerVersion = "v20130603"
 lazy val closureCompiler = OsgiProject(dir, "closure-compiler", exports = Seq("com.google.javascript.*")) settings(
   libraryDependencies += "com.google.javascript" % "closure-compiler" % closureCompilerVersion, version := closureCompilerVersion) settings(settings: _*)
 
-lazy val catsVersion = "1.0.0-MF"
+lazy val catsVersion = "1.0.1"
 lazy val cats =
   OsgiProject(dir, "cats") settings (
     libraryDependencies += "org.typelevel" %% "cats-core" % catsVersion,
@@ -207,7 +210,7 @@ lazy val cats =
     version := catsVersion
   ) settings(settings: _*)
 
-lazy val freedslVersion = "0.21"
+lazy val freedslVersion = "0.23"
 lazy val squantsVersion = "1.3.0"
 
 lazy val squants = 
@@ -230,7 +233,7 @@ lazy val freedsl =
     version := freedslVersion
   ) dependsOn(cats, squants) settings(settings: _*)
 
-lazy val mgoVersion = "3.3"
+lazy val mgoVersion = "3.8-SNAPSHOT"
 
 lazy val mgo = OsgiProject(dir, "mgo", imports = Seq("*")) settings(
   libraryDependencies += "fr.iscpif" %% "mgo" % mgoVersion,
@@ -317,9 +320,8 @@ lazy val monocle = OsgiProject(dir, "monocle",
     "com.github.julien-truffaut" %% "monocle-generic",
     "com.github.julien-truffaut" %% "monocle-macro"
   ).map(_ % monocleVersion),
-  libraryDependencies += shapeless,
   version := monocleVersion
-  ) settings(settings: _*)
+  ) settings(settings: _*) dependsOn(shapeless)
 
 val asmVersion = "5.1"
 

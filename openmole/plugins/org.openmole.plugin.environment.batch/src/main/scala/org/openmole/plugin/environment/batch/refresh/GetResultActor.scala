@@ -44,17 +44,20 @@ object GetResultActor extends JavaLogger {
     import services._
 
     val GetResult(job, sj, resultPath) = msg
-    try UsageControl.tryWithToken(sj.storage.usageControl) {
+    UsageControl.tryWithToken(sj.storage.usageControl) {
       case Some(token) ⇒
-        getResult(sj.storage, resultPath, job)(token, services)
-        JobManager ! Kill(job)
+        try {
+          getResult(sj.storage, resultPath, job)(token, services)
+          JobManager ! Kill(job)
+        }
+        catch {
+          case e: Throwable ⇒
+            job.state = ExecutionState.FAILED
+            JobManager ! Error(job, e, job.batchJob.flatMap(_.tryStdOutErr(token)))
+            JobManager ! Kill(job)
+        }
       case None ⇒
         JobManager ! Delay(msg, getTokenInterval)
-    } catch {
-      case e: Throwable ⇒
-        job.state = ExecutionState.FAILED
-        JobManager ! Error(job, e, job.batchJob)
-        JobManager ! Kill(job)
     }
   }
 
@@ -64,9 +67,8 @@ object GetResultActor extends JavaLogger {
 
     val runtimeResult = getRuntimeResult(outputFilePath, storage)
 
-    val stream = job.moleExecution.executionContext.out
+    val stream = job.moleExecution.executionContext.services.outputRedirection.output
     display(runtimeResult.stdOut, s"Output on ${runtimeResult.info.hostName}", storage, stream)
-    display(runtimeResult.stdErr, s"Error output ${runtimeResult.info.hostName}", storage, stream)
 
     runtimeResult.result match {
       case Failure(exception) ⇒ throw new JobRemoteExecutionException(exception, "Fatal exception thrown during the execution of the job execution on the execution node")

@@ -152,7 +152,7 @@ package systemexec {
   }
 }
 
-package object systemexec extends external.ExternalPackage with SystemExecPackage {
+package object systemexec extends SystemExecPackage {
 
   private[systemexec] def pack = this
 
@@ -339,7 +339,7 @@ package object systemexec extends external.ExternalPackage with SystemExecPackag
         case cmd :: t ⇒
           val cl = parse(cmd)
           val result = execute(cl.toArray, workDirectory, environmentVariables, captureOutput = captureOutput, captureError = captureError, errorOnReturnValue = false)
-          if (errorOnReturnValue && result.returnCode != 0) throw error(cl.toVector, result)
+          if (errorOnReturnValue && result.returnCode != 0) throw error(cl, result)
           else executeAll0(t, ExecutionResult.append(acc, result))
       }
 

@@ -43,28 +43,33 @@ object OSGiScalaCompiler {
       Activator.bundleContext.get.getBundles.filter(!_.isSystem).map(toPath)
   }.distinct
 
-  def createSettings(settings: Settings, priorityBundles: Seq[Bundle], jars: Seq[File], classDirectory: File) =
-    if (!Activator.osgi) {
-      val newSettings = settings.copy()
-      case class Plop()
-      newSettings.embeddedDefaults[Plop]
-      //settings.usejavacp.value = true
-      newSettings
-    }
-    else {
-      //def dependencies(b: Bundle) = PluginManager.allDependingBundles(b, _=> true).map(toPath)
+  def createSettings(settings: Settings, priorityBundles: Seq[Bundle], jars: Seq[File], classDirectory: File) = {
+    val newSettings =
+      if (!Activator.osgi) {
+        val newSettings = settings.copy()
+        case class Plop()
+        newSettings.embeddedDefaults[Plop]
+        //settings.usejavacp.value = true
+        newSettings
+      }
+      else {
+        //def dependencies(b: Bundle) = PluginManager.allDependingBundles(b, _=> true).map(toPath)
 
-      def bundles: Seq[String] = classPath(priorityBundles, jars)
+        def bundles: Seq[String] = classPath(priorityBundles, jars)
 
-      val newSettings = settings.copy()
+        val newSettings = settings.copy()
 
-      classDirectory.mkdirs()
-      newSettings.outputDirs.setSingleOutput(AbstractFile.getDirectory(classDirectory))
-      newSettings.classpath.append(classDirectory.getCanonicalPath)
-      bundles.foreach(newSettings.classpath.append)
+        classDirectory.mkdirs()
+        newSettings.outputDirs.setSingleOutput(AbstractFile.getDirectory(classDirectory))
+        newSettings.classpath.append(classDirectory.getCanonicalPath)
+        bundles.foreach(newSettings.classpath.append)
 
-      newSettings
-    }
+        newSettings
+      }
+
+    newSettings.maxClassfileName.value = 100
+    newSettings
+  }
 
   def apply(settings: Settings, reporter: Reporter, priorityBundles: Seq[Bundle], jars: Seq[File]) =
     new OSGiScalaCompiler(settings, reporter)

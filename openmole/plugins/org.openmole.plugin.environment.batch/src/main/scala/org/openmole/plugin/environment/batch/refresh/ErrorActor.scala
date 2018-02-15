@@ -10,20 +10,8 @@ import org.openmole.tool.logger.JavaLogger
 
 object ErrorActor extends JavaLogger {
   def receive(msg: Error)(implicit services: BatchEnvironment.Services) = {
-    import services._
-
-    val Error(job, exception, bj) = msg
-
-    bj match {
-      case None ⇒ processError(job, exception, None)
-      case Some(bj) ⇒
-        UsageControl.tryWithToken(bj.usageControl) {
-          case Some(token) ⇒
-            val output = util.Try(bj.stdOutErr(token)).toOption
-            processError(job, exception, output)
-          case None ⇒ JobManager ! Delay(msg, BatchEnvironment.getTokenInterval)
-        }
-    }
+    val Error(job, exception, output) = msg
+    processError(job, exception, output)
   }
 
   def processError(job: BatchExecutionJob, exception: Throwable, output: Option[(String, String)])(implicit services: BatchEnvironment.Services) = {
@@ -46,8 +34,7 @@ object ErrorActor extends JavaLogger {
                |$stdOut
                |stderr was:
                |$stdErr
-               """.stripMargin
-          )
+               """.stripMargin, exception)
       }
 
     val er = Environment.ExceptionRaised(job, detailedException, level)

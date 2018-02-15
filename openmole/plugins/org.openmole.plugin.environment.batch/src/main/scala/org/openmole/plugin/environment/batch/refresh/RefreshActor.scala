@@ -29,37 +29,40 @@ object RefreshActor extends JavaLogger {
 
     val Refresh(job, sj, bj, delay, updateErrorsInARow) = refresh
     if (!job.state.isFinal) {
-      try UsageControl.tryWithToken(bj.usageControl) {
+      UsageControl.tryWithToken(bj.usageControl) {
         case Some(t) ⇒
-          val oldState = job.state
-          job.state = bj.updateState(t)
-          if (job.state == DONE) JobManager ! GetResult(job, sj, bj.resultPath)
-          else if (!job.state.isFinal) {
-            val newDelay =
-              if (oldState == job.state)
-                (delay + job.environment.updateInterval.incrementUpdateInterval) min job.environment.updateInterval.maxUpdateInterval
-              else job.environment.updateInterval.minUpdateInterval
-            JobManager ! Delay(Refresh(job, sj, bj, newDelay, 0), newDelay)
+          try {
+            val oldState = job.state
+            job.state = bj.updateState(t)
+            if (job.state == DONE) JobManager ! GetResult(job, sj, bj.resultPath)
+            else if (!job.state.isFinal) {
+              val newDelay =
+                if (oldState == job.state)
+                  (delay + job.environment.updateInterval.incrementUpdateInterval) min job.environment.updateInterval.maxUpdateInterval
+                else job.environment.updateInterval.minUpdateInterval
+              JobManager ! Delay(Refresh(job, sj, bj, newDelay, 0), newDelay)
+            }
+            else if (job.state == FAILED) {
+              val exception = new InternalProcessingError(s"""Job status is FAILED""".stripMargin)
+              JobManager ! Error(job, exception, bj.tryStdOutErr(t))
+              JobManager ! Kill(job)
+            }
+            else JobManager ! Kill(job)
           }
-          else if (job.state == FAILED) {
-            val exception = new InternalProcessingError(s"""Job status is FAILED""".stripMargin)
-            JobManager ! Error(job, exception, Some(bj))
-            JobManager ! Kill(job)
+          catch {
+            case _: ResubmitException ⇒
+              JobManager ! Resubmit(job, sj.storage)
+            case e: Throwable ⇒
+              if (updateErrorsInARow >= preference(BatchEnvironment.MaxUpdateErrorsInARow)) {
+                JobManager ! Error(job, e, bj.tryStdOutErr(t))
+                JobManager ! Kill(job)
+              }
+              else {
+                Log.logger.log(Log.FINE, s"${updateErrorsInARow + 1} errors in a row during job refresh", e)
+                JobManager ! Delay(Refresh(job, sj, bj, delay, updateErrorsInARow + 1), delay)
+              }
           }
-          else JobManager ! Kill(job)
         case None ⇒ JobManager ! Delay(Refresh(job, sj, bj, delay, updateErrorsInARow), BatchEnvironment.getTokenInterval)
-      } catch {
-        case _: ResubmitException ⇒
-          JobManager ! Resubmit(job, sj.storage)
-        case e: Throwable ⇒
-          if (updateErrorsInARow >= preference(BatchEnvironment.MaxUpdateErrorsInARow)) {
-            JobManager ! Error(job, e, Some(bj))
-            JobManager ! Kill(job)
-          }
-          else {
-            Log.logger.log(Log.FINE, s"${updateErrorsInARow + 1} errors in a row during job refresh", e)
-            JobManager ! Delay(Refresh(job, sj, bj, delay, updateErrorsInARow + 1), delay)
-          }
       }
     }
   }
