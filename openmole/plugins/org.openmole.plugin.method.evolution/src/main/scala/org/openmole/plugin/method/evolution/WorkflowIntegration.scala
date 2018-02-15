@@ -172,7 +172,7 @@ trait EvolutionWorkflow {
   type V
   type P
 
-  type Pop = Vector[I]
+  type Pop = Array[I]
 
   def genomeType = ValType[G]
   def stateType = ValType[S]
