@@ -612,6 +612,7 @@ lazy val clientToolGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.tool
   Libraries.boopickleJS,
   Libraries.scalajsDomJS,
   Libraries.scalaTagsJS,
+  Libraries.ace,
   Libraries.bootstrapnative,
   Libraries.scaladgetTools,
   Libraries.rxJS) dependsOn (extClientTool) settings (defaultSettings: _*)
