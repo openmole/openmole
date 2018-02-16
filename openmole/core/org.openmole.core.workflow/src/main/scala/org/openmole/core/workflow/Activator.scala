@@ -39,13 +39,13 @@ class Activator extends BundleActivator {
         Transition("--="),
         Transition("oo"),
         Environment(classOf[LocalEnvironment]),
-        Task(EmptyTask.getClass),
-        Task(ExplorationTask.getClass),
-        Task(ClosureTask.getClass),
-        Task(ToArrayTask.getClass),
-        Task(MoleTask.getClass),
-        Task(FromContextTask.getClass),
-        Hook(FromContextHook.getClass)
+        Task(objectName(EmptyTask)),
+        Task(objectName(ExplorationTask)),
+        Task(objectName(ClosureTask)),
+        Task(objectName(ToArrayTask)),
+        Task(objectName(MoleTask)),
+        Task(objectName(FromContextTask)),
+        Hook(objectName(FromContextHook))
       )
     }
 
