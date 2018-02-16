@@ -165,7 +165,9 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
       tags.script(tags.`type` := "text/javascript", tags.src := "js/deps.js"),
       RawFrag(arguments.extraHeader)
     ),
-    tags.body(tags.onload := javascritMethod)
+    tags.body(
+      tags.script(javascritMethod)
+    )
   )
 
   // Get all the css files in the workspace (it is not working with js because of the order)

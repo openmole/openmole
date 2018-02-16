@@ -57,13 +57,13 @@ class LoginAuthenticationGUI(val data: LoginAuthenticationData = LoginAuthentica
     onremove()
   }
 
-  val loginInput = input(data.login)(placeholder := "Login").render
+  val loginInput = inputTag(data.login)(placeholder := "Login").render
 
-  val passwordInput = input(data.password)(placeholder := "Password", passwordType).render
+  val passwordInput = inputTag(data.password)(placeholder := "Password", passwordType).render
 
-  val targetInput = input(data.target)(placeholder := "Host").render
+  val targetInput = inputTag(data.target)(placeholder := "Host").render
 
-  val portInput = input(data.port)(placeholder := "Port").render
+  val portInput = inputTag(data.port)(placeholder := "Port").render
 
   def panel: TypedTag[HTMLElement] = hForm(
     loginInput.withLabel("Login"),

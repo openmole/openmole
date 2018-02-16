@@ -39,7 +39,7 @@ object InputFilter {
 class InputFilter(initValue: String, pHolder: String, inputID: String, size: String = "100%") {
   val nameFilter: Var[String] = Var("")
 
-  val tag = input(
+  val tag = inputTag(
     initValue
   )(
     id := inputID,

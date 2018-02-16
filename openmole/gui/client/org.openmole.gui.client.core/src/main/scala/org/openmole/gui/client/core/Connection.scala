@@ -29,7 +29,7 @@ object Connection {
 
   lazy val connectButton = tags.button("Connect", btn_primary, `type` := "submit").render
 
-  val passwordInput = input("")(
+  val passwordInput = inputTag("")(
     placeholder := "Password",
     `type` := "password",
     width := "130px",

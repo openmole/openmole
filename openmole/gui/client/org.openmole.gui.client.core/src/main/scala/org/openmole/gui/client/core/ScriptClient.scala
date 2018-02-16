@@ -7,7 +7,6 @@ import org.scalajs.dom
 import rx._
 
 import scalatags.JsDom.all._
-
 import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
 import org.scalajs.dom.KeyboardEvent
@@ -15,6 +14,7 @@ import org.scalajs.dom.KeyboardEvent
 import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
 import autowire._
+
 import scaladget.bootstrapnative.Selector.Options
 import org.openmole.gui.client.core.alert.{ AlertPanel, BannerAlert }
 import org.openmole.gui.client.core.files.TreeNodePanel
@@ -23,6 +23,7 @@ import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.data._
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
 import org.openmole.gui.ext.tool.client._
+import org.scalajs.dom.raw.HTMLDivElement
 
 import scala.concurrent.duration._
 import scala.scalajs.js.timers._
@@ -48,10 +49,12 @@ object ScriptClient {
 
   @JSExportTopLevel("connection")
   def connection(): Unit =
-    div(
-      Connection.render,
-      alert
-    ).render
+    dom.document.body.appendChild(
+      div(
+        Connection.render,
+        alert
+      ).render
+    )
 
   @JSExportTopLevel("stopped")
   def stopped(): Unit = {
@@ -103,10 +106,12 @@ object ScriptClient {
   @JSExportTopLevel("resetPassword")
   def resetPassword(): Unit = {
     val resetPassword = new ResetPassword
-    div(
-      resetPassword.resetPassDiv,
-      alert
-    ).render
+    dom.document.body.appendChild(
+      div(
+        resetPassword.resetPassDiv,
+        alert
+      ).render
+    )
   }
 
   @JSExportTopLevel("run")
@@ -200,43 +205,45 @@ object ScriptClient {
       // Define the option sequence
 
       Settings.settings.map { sets ⇒
-        div(
-          div(`class` := "fullpanel")(
-            BannerAlert.banner,
-            menuBar.render,
-            SettingsView.renderApp,
-            div(
-              `class` := Rx {
-                "leftpanel " + {
-                  CoreUtils.ifOrNothing(openFileTree(), "open")
+        dom.document.body.appendChild(
+          div(
+            div(`class` := "fullpanel")(
+              BannerAlert.banner,
+              menuBar.render,
+              SettingsView.renderApp,
+              div(
+                `class` := Rx {
+                  "leftpanel " + {
+                    CoreUtils.ifOrNothing(openFileTree(), "open")
+                  }
                 }
-              }
-            )(
-                div(omsheet.relativePosition +++ (paddingTop := -15))(
-                  treeNodePanel.fileToolBar.div,
-                  treeNodePanel.fileControler,
-                  treeNodePanel.labelArea,
-                  treeNodePanel.view.render
+              )(
+                  div(omsheet.relativePosition +++ (paddingTop := -15))(
+                    treeNodePanel.fileToolBar.div,
+                    treeNodePanel.fileControler,
+                    treeNodePanel.labelArea,
+                    treeNodePanel.view.render
+                  )
+                ),
+              div(
+                `class` := Rx {
+                  "centerpanel " +
+                    CoreUtils.ifOrNothing(openFileTree(), "reduce") +
+                    CoreUtils.ifOrNothing(BannerAlert.isOpen(), " banneropen")
+                }
+              )(
+                  treeNodeTabs.render,
+                  div(omsheet.textVersion)(
+                    div(
+                      fontSize := "1em"
+                    )(s"${sets.version} ${sets.versionName}"),
+                    div(fontSize := "0.8em")(s"built the ${sets.buildTime}")
+                  )
                 )
-              ),
-            div(
-              `class` := Rx {
-                "centerpanel " +
-                  CoreUtils.ifOrNothing(openFileTree(), "reduce") +
-                  CoreUtils.ifOrNothing(BannerAlert.isOpen(), " banneropen")
-              }
-            )(
-                treeNodeTabs.render,
-                div(omsheet.textVersion)(
-                  div(
-                    fontSize := "1em"
-                  )(s"${sets.version} ${sets.versionName}"),
-                  div(fontSize := "0.8em")(s"built the ${sets.buildTime}")
-                )
-              )
-          ),
-          alert
-        ).render
+            ),
+            alert
+          ).render
+        )
       }
     }
   }

@@ -597,9 +597,9 @@ lazy val clientGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.core") e
   (sharedGUI, clientToolGUI, market, dataGUI, extClientTool) settings(
   //webpackSettings,
   libraryDependencies += Libraries.async,
-  skip in packageJSDependencies := false,
-  jsDependencies += ProvidedJS / "openmole_grammar.js",
+ // skip in packageJSDependencies := false,
   Libraries.ace,
+ // jsDependencies += ProvidedJS / "openmole_grammar.js",
 //  jsDependencies += Libraries.ace / acePath,
 //  jsDependencies += Libraries.ace / "src-min/mode-sh.js" dependsOn acePath,
 //  jsDependencies += Libraries.ace / "src-min/mode-scala.js" dependsOn acePath,

@@ -53,10 +53,10 @@ class EGIAuthenticationGUI(val data: EGIAuthenticationData = EGIAuthenticationDa
     passwordType
   )
 
-  val password = input(data.cypheredPassword)(placeholder := "Password", passwordStyle).render
+  val password = inputTag(data.cypheredPassword)(placeholder := "Password", passwordStyle).render
   val privateKey = FileUploaderUI(data.privateKey.getOrElse(""), data.privateKey.isDefined, Some("egi.p12"))
 
-  val voInput = input("")(placeholder := "vo1,vo2").render
+  val voInput = inputTag("")(placeholder := "vo1,vo2").render
 
   OMPost()[EGIAuthenticationAPI].geVOTest().call().foreach {
     _.foreach { c ⇒

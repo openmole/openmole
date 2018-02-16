@@ -75,7 +75,7 @@ class TreeNodePanel {
   val fileToolBar = new FileToolBar(this)
   val tree: Var[TypedTag[HTMLElement]] = Var(tags.div())
 
-  val editNodeInput: Input = input()(
+  val editNodeInput: Input = inputTag()(
     placeholder := "Name",
     width := "240px",
     height := "24px",
@@ -515,7 +515,7 @@ class TreeNodePanel {
                           }
                         }
 
-                        val replicateInput = input(newName).render
+                        val replicateInput = inputTag(newName).render
                         AlertPanel.div(
                           div(width := 250, floatRight, marginRight := 70, replicateInput),
                           () ⇒ CoreUtils.replicate(tnSafePath, replicateInput.value),

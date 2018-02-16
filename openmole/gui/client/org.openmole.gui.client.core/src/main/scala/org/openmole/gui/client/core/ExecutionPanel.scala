@@ -156,8 +156,8 @@ class ExecutionPanel {
 
   val envLevel: Var[ErrorStateLevel] = Var(ErrorLevel())
 
-  val outputHistory = input("500")(placeholder := "# outputs").render
-  val envErrorHistory = input("500")(placeholder := "# environment errors").render
+  val outputHistory = inputTag("500")(placeholder := "# outputs").render
+  val envErrorHistory = inputTag("500")(placeholder := "# environment errors").render
 
   def ratio(completed: Long, running: Long, ready: Long) = s"${completed} / ${completed + running + ready}"
 

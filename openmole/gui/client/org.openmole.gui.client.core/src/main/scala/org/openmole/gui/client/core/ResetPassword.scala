@@ -26,7 +26,7 @@ import scalatags.JsDom.all._
 import scalatags.JsDom.tags
 class ResetPassword {
 
-  val passwordInput = input("")(
+  val passwordInput = inputTag("")(
     placeholder := "Password",
     `type` := "password",
     width := "130px",
@@ -36,7 +36,7 @@ class ResetPassword {
   ).render
 
   val passwordAgainInput =
-    input("")(
+    inputTag("")(
       placeholder := "Password again",
       `type` := "password",
       width := "130px",

@@ -171,7 +171,7 @@ class ModelWizardPanel {
       autoMode() = !autoMode.now
   })
 
-  val scriptNameInput = input()(modelNameInput, placeholder := "Script name").render
+  val scriptNameInput = inputTag()(modelNameInput, placeholder := "Script name").render
   val languages: Seq[Language] = Seq(Binary(), JavaLikeLanguage(), PythonLanguage(), NetLogoLanguage(), RLanguage())
   val codeSelector: Options[Language] = languages.options(0, btn_default, (l: Language) ⇒ l.name)
 

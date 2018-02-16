@@ -66,7 +66,7 @@ class OptionsDiv[T](options: Seq[T], naming: T ⇒ String) {
 
 class CheckBox(name: String, default: Boolean, classKey: ModifierSeq)(onchecked: HTMLInputElement ⇒ Unit) {
 
-  private lazy val cb: Input = tags.input(`type` := "checkbox", if (default) checked := true else "", onclick := { () ⇒ onchecked(cb) }).render
+  private lazy val cb: Input = inputTag()(`type` := "checkbox", if (default) checked := true else "", onclick := { () ⇒ onchecked(cb) }).render
   private val cbSpan = tags.span(name, style := "position: relative; margin-right:5px; margin-left:5px; top: -3px;")
 
   lazy val withNameFirst = div(classKey)(

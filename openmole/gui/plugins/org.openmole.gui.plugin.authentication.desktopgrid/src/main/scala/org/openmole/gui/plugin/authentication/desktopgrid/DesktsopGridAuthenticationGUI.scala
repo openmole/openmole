@@ -58,7 +58,7 @@ class DesktopGridAuthenticationGUI(val data: DesktopGridAuthenticationData = Des
     onremove()
   }
 
-  val passwordInput = bs.input(data.password)(placeholder := "Password", passwordType).render
+  val passwordInput = bs.inputTag(data.password)(placeholder := "Password", passwordType).render
 
   def panel: TypedTag[HTMLElement] = hForm(
     passwordInput.withLabel("Password")
