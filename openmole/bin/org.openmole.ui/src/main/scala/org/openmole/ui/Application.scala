@@ -36,7 +36,7 @@ import org.openmole.gui.server.core._
 import org.openmole.console._
 import org.openmole.tool.file._
 import org.openmole.tool.hash._
-import org.openmole.core.module
+import org.openmole.core.{ location, module }
 import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.outputredirection.OutputRedirection
 import org.openmole.core.preference._
@@ -256,6 +256,8 @@ object Application extends JavaLogger {
         GUIServer.lockFile.withFileOutputStream { fos ⇒
           val launch = (config.remote || fos.getChannel.tryLock != null)
           if (launch) {
+
+            Utils.expandDepsFile(location.openMOLELocation / "webapp/js" / "deps.js")
             GUIServer.initialisePreference(preference)
             val port = config.port.getOrElse(preference(GUIServer.port))
 

@@ -34,8 +34,7 @@ var OpenMOLEHighlightRules = function() {
             "override|package|private|protected|sealed|super|this|trait|type|val|var|with|" +
             "assert|assume|require|print|println|printf|readLine|readBoolean|readByte|readShort|" + // package scala
             "readChar|readInt|readLong|readFloat|readDouble|"+
-            "set|inputs|inputFiles|outputFiles|outputs|netLogoInputs|netLogoOutputs|on|by|hook|when|--|-<|>-|in|to|withIndex|workDirectory|filter|sample|shuffle" +
-            "repeat|bootstrap|toArray|columns|fileColumns"// package scala
+            ##OMKeywords##
     );
 
     var buildinConstants = ("true|false");
@@ -75,12 +74,7 @@ var OpenMOLEHighlightRules = function() {
         "Product|Proxy|Range|Responder|Seq|Serializable|Set|Specializable|Stream|" +
         "StringContext|Symbol|Traversable|TraversableOnce|Tuple|Vector|Pair|Triple|" +
 
-        "ScalaTask|CARETask|ExplorationTask|NetLogo5Task|NetLogo6Task|SystemExecTask|TemplateTask|TemplateFileTask|TemplateFileFromInputTask|UDockerTask|" +
-        "SobolSampling|Replication|DirectSampling|LHS|PSE|NSGA2|SteadyStateEvolution|IslandEvolution" +
-        "CondorEnvironment|DesktopGridEnvironment|EGIEnvironment|OAREnvironment|PBSEnvironment|SGEEnvironment|SLURMEnvironment|SSHEnvironment|LocalEnvironment" +
-        "DisplayHook|ToStringHook|AppendToCSVFileHook|AppendToFileHook|CopyFileHook|SaveHook|SavePopulationHook" +
-        "ListFilesSource|ListDirectoriesSource" +
-        "Range|Capsule|Slot|Val"
+        ##OMClasses##
     );
 
 var keywordMapper = this.createKeywordMapper({

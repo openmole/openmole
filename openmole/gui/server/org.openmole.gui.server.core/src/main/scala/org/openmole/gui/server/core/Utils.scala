@@ -24,7 +24,7 @@ import java.util.logging.Level
 import java.util.zip._
 
 import scala.collection.JavaConversions.enumerationAsScalaIterator
-import org.openmole.core.pluginmanager.PluginManager
+import org.openmole.core.pluginmanager.{ PluginInfo, PluginManager }
 import org.openmole.core.workspace.{ NewFile, Workspace }
 import org.openmole.gui.ext.data
 import org.openmole.gui.ext.data._
@@ -47,6 +47,8 @@ import scala.io.{ BufferedSource, Codec }
 import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
 import org.openmole.core.services._
 import org.openmole.core.module
+import org.openmole.core.pluginmanager.KeyWord
+import org.openmole.core.workflow.tools.StubServices
 import resource._
 
 object Utils extends JavaLogger {
@@ -448,6 +450,22 @@ object Utils extends JavaLogger {
     if (!jsFile.exists) update
     else jsPluginDirectory.updateIfChanged { _ ⇒ update }
     jsFile
+  }
+
+  def expandDepsFile(depsFile: File) = {
+
+    val rules = PluginInfo.keyWords.partition { kw ⇒
+      kw match {
+        case _@ (KeyWord.Task(_) | KeyWord.Source(_) | KeyWord.Environment(_) | KeyWord.Hook(_) | KeyWord.Sampling(_) | KeyWord.Domain(_)) ⇒ false
+        case _ ⇒ true
+      }
+    }
+
+    println("HIL " + rules)
+
+    depsFile.content = depsFile.content
+      .replace("##OMKeywords##", s""" "${rules._1.map { _.name }.mkString("|")}" """)
+      .replace("##OMClasses##", s""" "${rules._2.map { _.name }.mkString("|")}" """)
   }
 
   def addPluginRoutes(route: OMRouter ⇒ Unit, services: Services) = {
