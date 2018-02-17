@@ -143,7 +143,7 @@ object NichedNSGA2 {
           zipWithState(mgo.afterDuration[DSL, I](d).run(population)).eval
         }
 
-        def migrateToIsland(population: Vector[I]) = population
+        def migrateToIsland(population: Vector[I]) = DeterministicGAIntegration.migrateToIsland(population)
         def migrateFromIsland(population: Vector[I]) = population
       }
 

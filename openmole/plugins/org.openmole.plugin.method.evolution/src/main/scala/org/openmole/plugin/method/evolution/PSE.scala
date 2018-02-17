@@ -149,7 +149,8 @@ object PSE {
             }
           }
 
-        def migrateToIsland(population: Vector[I]) = population.map(MGOPSE.Individual.foundedIsland.set(true))
+        def migrateToIsland(population: Vector[I]) =
+          population.map(MGOPSE.Individual.foundedIsland.set(true)).map(MGOPSE.Individual.age.set(0))
         def migrateFromIsland(population: Vector[I]) =
           population.filter(i ⇒ !MGOPSE.Individual.foundedIsland.get(i)).map(MGOPSE.Individual.mapped.set(false))
       }

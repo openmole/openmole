@@ -60,7 +60,7 @@ object RTask {
     script:      FromContext[String],
     install:     Seq[String]         = Seq.empty,
     libraries:   Seq[InstallCommand] = Seq.empty,
-    version:     String              = "3.4.3",
+    version:     String              = "3.4.2",
     forceUpdate: Boolean             = false
   )(implicit name: sourcecode.Name, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection): RTask = {
 

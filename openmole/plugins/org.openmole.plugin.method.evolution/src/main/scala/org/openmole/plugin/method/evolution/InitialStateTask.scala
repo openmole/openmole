@@ -35,7 +35,7 @@ object InitialStateTask {
       inputs += (t.statePrototype, t.populationPrototype),
       outputs += (t.statePrototype, t.populationPrototype),
       t.statePrototype := FromContext(p ⇒ t.operations.initialState(p.random())),
-      t.populationPrototype := Vector.empty
+      t.populationPrototype := Array.empty[t.I](t.integration.iManifest)
     )
   }
 

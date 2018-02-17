@@ -41,7 +41,7 @@ object BreedTask {
       }
       else {
         val s = context(t.statePrototype)
-        val (newState, breeded) = t.operations.breeding(population, size).from(context).run(s).value
+        val (newState, breeded) = t.operations.breeding(population.toVector, size).from(context).run(s).value
 
         Context(
           Variable(t.genomePrototype.array, breeded.toArray(t.genomePrototype.`type`.manifest)),

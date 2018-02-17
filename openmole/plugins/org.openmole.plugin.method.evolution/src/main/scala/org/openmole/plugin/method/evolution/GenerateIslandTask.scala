@@ -37,10 +37,12 @@ object GenerateIslandTask {
           case Some(s) ⇒ Vector.fill(s) {
             p(rng().nextInt(p.size))
           }
-          case None ⇒ p
+          case None ⇒ p.toVector
         }
 
-      def populations = Array.fill(size)(t.operations.migrateToIsland(samples))
+      import t.integration.iManifest
+
+      def populations = Array.fill(size)(t.operations.migrateToIsland(samples).toArray)
       Variable(outputPopulation.toArray, populations)
     } set (
       inputs += t.populationPrototype,

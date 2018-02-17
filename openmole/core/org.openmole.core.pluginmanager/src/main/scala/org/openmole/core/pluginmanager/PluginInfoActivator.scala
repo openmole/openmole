@@ -68,6 +68,8 @@ object KeyWord {
   implicit def fromString(s: String) = Word(s)
   implicit def classToString(c: Class[_]) = c.getSimpleName
 
+  def objectName(o: Any) = o.getClass.getSimpleName.reverse.dropWhile(_ == '$').reverse
+
   case class Task(name: String) extends KeyWord
   case class Hook(name: String) extends KeyWord
   case class Source(name: String) extends KeyWord
