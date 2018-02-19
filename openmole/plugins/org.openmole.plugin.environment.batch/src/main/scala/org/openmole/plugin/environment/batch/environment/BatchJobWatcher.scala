@@ -32,17 +32,18 @@ import scala.ref._
 object BatchJobWatcher extends JavaLogger {
 
   class ExecutionJobRegistry {
-    val jobs = TMap[Job, List[BatchExecutionJob]]()
+    val jobs = TMap[Job, Array[BatchExecutionJob]]()
     def allJobs = jobs.single.keys
-    def executionJobs(job: Job): List[BatchExecutionJob] = jobs.single.getOrElse(job, List.empty)
+    def executionJobs(job: Job): Vector[BatchExecutionJob] = jobs.single.getOrElse(job, Array.empty).toVector
 
-    def update(job: Job, ejobs: List[BatchExecutionJob]) = atomic { implicit ctx ⇒
-      jobs(job) = ejobs
+    def update(job: Job, ejobs: Vector[BatchExecutionJob]) = atomic { implicit ctx ⇒
+      jobs(job) = ejobs.toArray
     }
+
     def isEmpty: Boolean = jobs.single.isEmpty
 
     def register(ejob: BatchExecutionJob) = atomic { implicit ctx ⇒
-      val newJobs = ejob :: jobs.getOrElse(ejob.job, List.empty)
+      val newJobs = (ejob :: jobs.getOrElse(ejob.job, Array.empty).toList).toArray
       jobs(ejob.job) = newJobs
     }
 
