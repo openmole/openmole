@@ -256,8 +256,6 @@ object Application extends JavaLogger {
         GUIServer.lockFile.withFileOutputStream { fos ⇒
           val launch = (config.remote || fos.getChannel.tryLock != null)
           if (launch) {
-
-            Utils.expandDepsFile(location.openMOLELocation / "webapp/js" / "deps.js")
             GUIServer.initialisePreference(preference)
             val port = config.port.getOrElse(preference(GUIServer.port))
 

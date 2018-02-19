@@ -45,7 +45,8 @@ object GUIServer {
     val from = openMOLELocation / "webapp"
     val to = newFile.newDir("webapp")
     from.copy(to)
-    Utils.openmoleFile copy (to /> "js" / "openmole.js")
+    Utils.expandDepsFile(from / "js" / "deps.js", to /> "js" / Utils.depsFileName)
+    Utils.openmoleFile copy (to /> "js" / Utils.openmoleFileName)
     to
   }
 
