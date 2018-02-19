@@ -54,15 +54,16 @@ object RTask {
     }
   }
 
-  def rImage(version: String) = DockerImage("r-base", version)
+  def rImage(version: String) = DockerImage("openmole/r-base", version)
 
   def apply(
     script:      FromContext[String],
     install:     Seq[String]         = Seq.empty,
     libraries:   Seq[InstallCommand] = Seq.empty,
-    version:     String              = "3.4.2",
     forceUpdate: Boolean             = false
   )(implicit name: sourcecode.Name, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection): RTask = {
+
+    def version = "3.3.3"
 
     val installCommands =
       install ++ InstallCommand.installCommands(libraries.toVector ++ Seq(InstallCommand.RLibrary("jsonlite")))

@@ -51,6 +51,8 @@ object UDocker {
     def layerFile(layer: Layer) = layersDirectory / layer.digest
     lazy val manifestFile = manifestDirectory / s"${dockerImage.image}_${dockerImage.tag}"
 
+    manifestFile.getParentFile.mkdirs()
+
     val manifestContent = util.Try(downloadManifest(dockerImage, timeout)) match {
       case util.Failure(e) ⇒
         if (manifestFile.exists) manifestFile.withLock { _ ⇒ manifestFile.content }
