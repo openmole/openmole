@@ -17,8 +17,36 @@
 
 package org.openmole.plugin.task.netlogo
 
-import org.openmole.core.pluginmanager.PluginInfoActivator
+import org.openmole.core.pluginmanager._
+import org.openmole.core.preference.ConfigurationInfo
+import org.osgi.framework.BundleContext
 
 class Activator extends PluginInfoActivator {
   override def keyWordTraits = List(classOf[NetLogoPackage])
+
+  override def stop(context: BundleContext): Unit = {
+    PluginInfo.unregister(this)
+    ConfigurationInfo.unregister(this)
+  }
+
+  override def start(context: BundleContext): Unit = {
+    import org.openmole.core.pluginmanager.KeyWord._
+
+    val keyWords: Vector[KeyWord] =
+      Vector(
+        Word("workspace"),
+        Word("launchingCommands"),
+        Word("netLogoInputs"),
+        Word("netLogoOutputs"),
+        Word("netLogoArrayOutputs"),
+        Word("netLogoFactory"),
+        Word("external")
+      )
+
+    PluginInfo.register(this, Vector(this.getClass.getPackage), keyWords = keyWords)
+    ConfigurationInfo.register(
+      this,
+      ConfigurationInfo.list()
+    )
+  }
 }
