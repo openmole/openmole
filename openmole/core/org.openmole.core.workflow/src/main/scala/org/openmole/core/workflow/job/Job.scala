@@ -23,7 +23,6 @@ sealed trait Job {
   def moleJobs: Iterable[MoleJob]
   def finished: Boolean = moleJobs.forall { _.finished }
   def moleExecution: MoleExecution
-
 }
 
 object Job {
