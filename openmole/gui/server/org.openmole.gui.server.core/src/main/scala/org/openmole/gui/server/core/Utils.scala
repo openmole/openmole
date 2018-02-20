@@ -458,7 +458,7 @@ object Utils extends JavaLogger {
 
     val rules = PluginInfo.keyWords.partition { kw ⇒
       kw match {
-        case _@ (KeyWord.Task(_) | KeyWord.Source(_) | KeyWord.Environment(_) | KeyWord.Hook(_) | KeyWord.Sampling(_) | KeyWord.Domain(_)) ⇒ false
+        case _@ (KeyWord.Task(_) | KeyWord.Source(_) | KeyWord.Environment(_) | KeyWord.Hook(_) | KeyWord.Sampling(_) | KeyWord.Domain(_) | KeyWord.Pattern(_)) ⇒ false
         case _ ⇒ true
       }
     }

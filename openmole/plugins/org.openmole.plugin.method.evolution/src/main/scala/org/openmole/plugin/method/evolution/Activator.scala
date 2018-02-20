@@ -17,6 +17,46 @@
 
 package org.openmole.plugin.method.evolution
 
-import org.openmole.core.pluginmanager.PluginInfoActivator
+import org.openmole.core.pluginmanager._
+import org.openmole.core.preference.ConfigurationInfo
+import org.osgi.framework.BundleContext
 
-class Activator extends PluginInfoActivator
+class Activator extends PluginInfoActivator {
+
+  override def stop(context: BundleContext): Unit = {
+    PluginInfo.unregister(this)
+    ConfigurationInfo.unregister(this)
+  }
+
+  override def start(context: BundleContext): Unit = {
+    import org.openmole.core.pluginmanager.KeyWord._
+
+    val keyWords: Vector[KeyWord] =
+      Vector(
+        Task(objectName(BreedTask)),
+        Task(objectName(DeltaTask)),
+        Task(objectName(ElitismTask)),
+        Task(objectName(FromIslandTask)),
+        Task(objectName(GenerateIslandTask)),
+        Task(objectName(ReassignStateRNGTask)),
+        Task(objectName(ScalingGenomeTask)),
+        Task(objectName(TerminationTask)),
+        Task(objectName(InitialStateTask)),
+        Pattern(objectName(NichedNSGA2)),
+        Pattern(objectName(GenomeProfile)),
+        Pattern(objectName(NSGA2)),
+        Pattern(objectName(PSE)),
+        Pattern(objectName(GenomeProfile)),
+        Pattern("SteadyStateEvolution"),
+        Pattern("IslandEvolution"),
+        Pattern("Stochastic"),
+        Hook(objectName(SavePopulationHook))
+      )
+
+    PluginInfo.register(this, Vector(this.getClass.getPackage), keyWords = keyWords)
+    ConfigurationInfo.register(
+      this,
+      ConfigurationInfo.list()
+    )
+  }
+}

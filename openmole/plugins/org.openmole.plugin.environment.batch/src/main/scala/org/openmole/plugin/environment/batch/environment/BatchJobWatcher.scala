@@ -21,42 +21,40 @@ import org.openmole.core.preference.Preference
 import org.openmole.core.threadprovider.IUpdatableWithVariableDelay
 import org.openmole.core.workflow.execution.ExecutionState._
 import org.openmole.core.workflow.job.Job
-import org.openmole.core.workspace.Workspace
 import org.openmole.plugin.environment.batch.environment._
 import org.openmole.plugin.environment.batch.refresh.{ JobManager, Kill }
 import org.openmole.tool.logger.JavaLogger
 
-import scala.concurrent.stm._
 import scala.ref._
 
 object BatchJobWatcher extends JavaLogger {
 
-  class ExecutionJobRegistry {
-    val jobs = TMap[Job, Array[BatchExecutionJob]]()
-    def allJobs = jobs.single.keys
-    def executionJobs(job: Job): Vector[BatchExecutionJob] = jobs.single.getOrElse(job, Array.empty).toVector
+  private class ExecutionJobRegistry {
+    val jobs = collection.mutable.Map[Job, Array[BatchExecutionJob]]()
+    def allJobs = synchronized { jobs.keys }
+    def executionJobs(job: Job): Vector[BatchExecutionJob] = synchronized { jobs.getOrElse(job, Array.empty).toVector }
 
-    def update(job: Job, ejobs: Vector[BatchExecutionJob]) = atomic { implicit ctx ⇒
+    def update(job: Job, ejobs: Vector[BatchExecutionJob]) = synchronized {
       jobs(job) = ejobs.toArray
     }
 
-    def isEmpty: Boolean = jobs.single.isEmpty
+    def isEmpty: Boolean = synchronized { jobs.isEmpty }
 
-    def register(ejob: BatchExecutionJob) = atomic { implicit ctx ⇒
+    def register(ejob: BatchExecutionJob) = synchronized {
       val newJobs = (ejob :: jobs.getOrElse(ejob.job, Array.empty).toList).toArray
       jobs(ejob.job) = newJobs
     }
 
-    def removeJob(job: Job) = jobs.single -= job
+    def removeJob(job: Job) = synchronized { jobs -= job }
 
-    def allExecutionJobs = jobs.single.values.flatten
+    def allExecutionJobs = synchronized { jobs.values.flatten }
   }
 
 }
 
 class BatchJobWatcher(environment: WeakReference[BatchEnvironment], preference: Preference) extends IUpdatableWithVariableDelay { watch ⇒
 
-  val registry = new BatchJobWatcher.ExecutionJobRegistry
+  private val registry = new BatchJobWatcher.ExecutionJobRegistry
   var stop = false
 
   import BatchJobWatcher._
@@ -71,7 +69,7 @@ class BatchJobWatcher(environment: WeakReference[BatchEnvironment], preference: 
         Log.logger.fine("Watch jobs " + registry.allJobs.size)
 
         val (toKill, toSubmit) =
-          atomic { implicit ctx ⇒
+          registry.synchronized {
 
             val remove = registry.allJobs.filter(_.finished)
             val toKill = remove.flatMap(j ⇒ registry.executionJobs(j).filter(_.state != KILLED))
