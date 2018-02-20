@@ -3,6 +3,7 @@ import OMKeys._
 import sbt.{io, _}
 import Keys.{libraryDependencies, _}
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
+import execnpm.NpmDeps.Dep
 
 organization := "org.openmole"
 name := "openmole-root"
@@ -583,6 +584,7 @@ lazy val clientGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.core") e
   (sharedGUI, clientToolGUI, market, dataGUI, extClientTool) settings(
   libraryDependencies += Libraries.async,
   Libraries.ace,
+  npmDeps in Compile += Dep("ace-builds", "1.2.9", List("mode-scala.js", "theme-github.js"), true)
 ) settings (defaultSettings: _*)
 
 
