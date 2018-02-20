@@ -435,6 +435,7 @@ object Utils extends JavaLogger {
 
   val openmoleFileName = "openmole.js"
   val depsFileName = "deps.js"
+  val openmoleGrammarName = "openmole_grammar_template.js"
 
   def openmoleFile(implicit workspace: Workspace, newFile: NewFile, fileService: FileService) = {
     val jsPluginDirectory = webUIDirectory / "jsplugin"
@@ -453,7 +454,7 @@ object Utils extends JavaLogger {
     jsFile
   }
 
-  def expandDepsFile(from: File, to: File) = {
+  def expandDepsFile(from: File, template: File, to: File) = {
 
     val rules = PluginInfo.keyWords.partition { kw ⇒
       kw match {
@@ -462,7 +463,7 @@ object Utils extends JavaLogger {
       }
     }
 
-    to.content = from.content
+    to.content = s"""${from.content}\n${template.content}""" // ${AceOpenMOLEMode.content}
       .replace("##OMKeywords##", s""" "${rules._1.map { _.name }.mkString("|")}" """)
       .replace("##OMClasses##", s""" "${rules._2.map { _.name }.mkString("|")}" """)
 

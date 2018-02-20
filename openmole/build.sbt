@@ -1,6 +1,6 @@
 import org.openmole.buildsystem._
 import OMKeys._
-import sbt._
+import sbt.{io, _}
 import Keys.{libraryDependencies, _}
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 
@@ -582,7 +582,6 @@ def guiClientDir = guiDir / "client"
 lazy val clientGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.core") enablePlugins (ExecNpmPlugin) dependsOn
   (sharedGUI, clientToolGUI, market, dataGUI, extClientTool) settings(
   libraryDependencies += Libraries.async,
-  jsDependencies in Compile += ProvidedJS / "openmole_grammar_template.js",
   Libraries.ace,
 ) settings (defaultSettings: _*)
 
