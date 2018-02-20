@@ -17,6 +17,36 @@
 
 package org.openmole.plugin.sampling.combine
 
-import org.openmole.core.pluginmanager.PluginInfoActivator
+import org.openmole.core.pluginmanager._
+import org.openmole.core.preference.ConfigurationInfo
+import org.osgi.framework.BundleContext
 
-class Activator extends PluginInfoActivator
+class Activator extends PluginInfoActivator {
+  override def stop(context: BundleContext): Unit = {
+    PluginInfo.unregister(this)
+    ConfigurationInfo.unregister(this)
+  }
+
+  override def start(context: BundleContext): Unit = {
+    import org.openmole.core.pluginmanager.KeyWord._
+
+    val keyWords: Vector[KeyWord] =
+      Vector(
+        Sampling(classOf[CompleteSampling]),
+        Sampling(classOf[ConcatenateSampling]),
+        Sampling(classOf[FilteredSampling]),
+        Sampling(classOf[RepeatSampling]),
+        Sampling(classOf[SampleSampling]),
+        Sampling(classOf[ShuffleSampling]),
+        Sampling(classOf[TakeSampling]),
+        Sampling(classOf[ZipWithIndexSampling]),
+        Sampling(classOf[ZipWithNameSampling[_, _]])
+      )
+
+    PluginInfo.register(this, Vector(this.getClass.getPackage), keyWords = keyWords)
+    ConfigurationInfo.register(
+      this,
+      ConfigurationInfo.list()
+    )
+  }
+}
