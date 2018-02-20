@@ -25,10 +25,11 @@ object ToOffspringTask {
 
   def apply[T](algorithm: T)(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name) = {
     val t = wfi(algorithm)
+    import t.integration.iManifest
 
     ClosureTask("ToOffspringTask") { (context, _, _) ⇒
       val i = t.buildIndividual(context(t.genomePrototype), context)
-      Context(Variable(t.offspringPrototype, Vector(i)))
+      Context(Variable(t.offspringPrototype, Array(i)))
     } set (
       inputs += (t.objectives.map(_.prototype): _*),
       inputs += (t.genomePrototype, t.statePrototype),

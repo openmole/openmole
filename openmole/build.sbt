@@ -578,32 +578,12 @@ lazy val jsCompile = OsgiProject(guiServerDir, "org.openmole.gui.server.jscompil
     Seq()
   })
 
-
-/* -------------- Client ------------------- */
-
-/*val webpackSettings = Seq(
- webpackConfigFile := Some((resourceDirectory in Compile).value / "webpack.config.js"),
-  webpackEntries in(Compile, fullOptJS) := {
-    val sjsOutput = (fullOptJS in Compile).value.data
-    Seq((sjsOutput.name.stripSuffix(".js"), sjsOutput))
-  },
-  scalaJSLauncher in(Compile, fullOptJS) := {
-    Attributed.blank[VirtualJSFile](FileVirtualJSFile((fullOptJS in Compile).value.data))
-  }
-)*/
-
 def guiClientDir = guiDir / "client"
 lazy val clientGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.core") enablePlugins (ExecNpmPlugin) dependsOn
   (sharedGUI, clientToolGUI, market, dataGUI, extClientTool) settings(
-  //webpackSettings,
   libraryDependencies += Libraries.async,
- // skip in packageJSDependencies := false,
+  jsDependencies in Compile += ProvidedJS / "openmole_grammar_template.js",
   Libraries.ace,
- // jsDependencies += ProvidedJS / "openmole_grammar.js",
-//  jsDependencies += Libraries.ace / acePath,
-//  jsDependencies += Libraries.ace / "src-min/mode-sh.js" dependsOn acePath,
-//  jsDependencies += Libraries.ace / "src-min/mode-scala.js" dependsOn acePath,
-//  jsDependencies += Libraries.ace / "src-min/theme-github.js" dependsOn acePath
 ) settings (defaultSettings: _*)
 
 
