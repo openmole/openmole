@@ -45,7 +45,6 @@ object GUIServer {
     val from = openMOLELocation / "webapp"
     val to = newFile.newDir("webapp")
     from.copy(to)
-    println("TOOO " + (to /> "js" / Utils.depsFileName).getAbsolutePath)
     Utils.expandDepsFile(from / "js" / Utils.depsFileName, from / "js" / Utils.openmoleGrammarName, to /> "js" / Utils.depsFileName)
     Utils.openmoleFile copy (to /> "js" / Utils.openmoleFileName)
     to
