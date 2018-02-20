@@ -434,6 +434,7 @@ object Utils extends JavaLogger {
   }
 
   val openmoleFileName = "openmole.js"
+  val depsFileName = "deps.js"
 
   def openmoleFile(implicit workspace: Workspace, newFile: NewFile, fileService: FileService) = {
     val jsPluginDirectory = webUIDirectory / "jsplugin"
@@ -452,7 +453,7 @@ object Utils extends JavaLogger {
     jsFile
   }
 
-  def expandDepsFile(depsFile: File) = {
+  def expandDepsFile(from: File, to: File) = {
 
     val rules = PluginInfo.keyWords.partition { kw ⇒
       kw match {
@@ -461,11 +462,10 @@ object Utils extends JavaLogger {
       }
     }
 
-    println("HIL " + rules)
-
-    depsFile.content = depsFile.content
+    to.content = from.content
       .replace("##OMKeywords##", s""" "${rules._1.map { _.name }.mkString("|")}" """)
       .replace("##OMClasses##", s""" "${rules._2.map { _.name }.mkString("|")}" """)
+
   }
 
   def addPluginRoutes(route: OMRouter ⇒ Unit, services: Services) = {

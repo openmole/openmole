@@ -27,6 +27,7 @@ import org.openmole.core.preference.Preference
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.execution._
+import org.openmole.core.workflow.job
 import org.openmole.core.workflow.job.State._
 import org.openmole.core.workflow.job._
 import org.openmole.core.workflow.mole.MoleExecution.MoleExecutionFailed
@@ -171,11 +172,11 @@ class MoleExecution(
           if (strategy.complete(jobs())) {
             groups -= category
             nbWaiting -= jobs().size
-            Some(new Job(this, jobs()) → capsule)
+            Some(Job(this, jobs()) → capsule)
           }
           else None
         case None ⇒
-          val job = new Job(this, List(moleJob))
+          val job = Job(this, List(moleJob))
           Some(job → capsule)
       }
     }.map { case (j, c) ⇒ submit(j, c) }
@@ -190,7 +191,7 @@ class MoleExecution(
       eventDispatcher.trigger(this, new MoleExecution.JobSubmitted(job, capsule, env))
     }
 
-  def submitAll =
+  private def submitAll =
     atomic { implicit txn ⇒
       val jobs =
         for {
@@ -201,7 +202,7 @@ class MoleExecution(
       waitingJobs.clear
       jobs
     }.foreach {
-      case (capsule, jobs) ⇒ submit(new Job(this, jobs), capsule)
+      case (capsule, jobs) ⇒ submit(Job(this, jobs), capsule)
     }
 
   def allWaiting = atomic { implicit txn ⇒ numberOfJobs <= nbWaiting() }

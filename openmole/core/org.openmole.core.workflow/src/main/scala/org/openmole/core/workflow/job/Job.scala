@@ -19,6 +19,27 @@ package org.openmole.core.workflow.job
 
 import org.openmole.core.workflow.mole.MoleExecution
 
-class Job(val moleExecution: MoleExecution, val moleJobs: Iterable[MoleJob]) {
+sealed trait Job {
+  def moleJobs: Iterable[MoleJob]
   def finished: Boolean = moleJobs.forall { _.finished }
+  def moleExecution: MoleExecution
+
+}
+
+object Job {
+
+  def apply(moleExecution: MoleExecution, moleJobs: Iterable[MoleJob]) =
+    (moleJobs.size == 1) match {
+      case true  ⇒ new SingleJob(moleExecution, moleJobs.head)
+      case false ⇒ new MultiJob(moleExecution, moleJobs.toArray)
+    }
+
+  class SingleJob(val moleExecution: MoleExecution, val moleJob: MoleJob) extends Job {
+    def moleJobs = Vector(moleJob)
+  }
+
+  class MultiJob(val moleExecution: MoleExecution, _moleJobs: Array[MoleJob]) extends Job {
+    def moleJobs = _moleJobs.toIterable
+  }
+
 }
