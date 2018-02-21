@@ -128,18 +128,6 @@ object NSGA2 {
     objectives:          Objectives,
     operatorExploration: Double)
 
-  def apply(
-    mu:         Int,
-    genome:     Genome,
-    objectives: Objectives
-  ) = {
-    new WorkflowIntegration.DeterministicGA(
-      DeterministicParams(mu, genome, objectives, operatorExploration),
-      genome,
-      objectives
-    )
-  }
-
   object StochasticParams {
     import mgo.algorithm.{ NoisyNSGA2 ⇒ MGONoisyNSGA2, _ }
     import mgo.algorithm.CDGenome
@@ -244,6 +232,17 @@ object NSGA2 {
     cloneProbability:    Double,
     aggregation:         Vector[Vector[Double]] ⇒ Vector[Double]
   )
+
+  def apply(
+    mu:         Int,
+    genome:     Genome,
+    objectives: Objectives) = {
+    new WorkflowIntegration.DeterministicGA(
+      DeterministicParams(mu, genome, objectives, operatorExploration),
+      genome,
+      objectives
+    )
+  }
 
   def apply(
     mu:         Int,
