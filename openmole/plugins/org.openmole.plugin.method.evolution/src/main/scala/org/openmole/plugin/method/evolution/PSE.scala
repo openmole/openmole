@@ -150,9 +150,11 @@ object PSE {
           }
 
         def migrateToIsland(population: Vector[I]) =
-          population.map(MGOPSE.Individual.foundedIsland.set(true)).map(MGOPSE.Individual.age.set(0))
+          population.map(MGOPSE.Individual.foundedIsland.set(true))
         def migrateFromIsland(population: Vector[I]) =
-          population.filter(i ⇒ !MGOPSE.Individual.foundedIsland.get(i)).map(MGOPSE.Individual.mapped.set(false))
+          population.filter(i ⇒ !MGOPSE.Individual.foundedIsland.get(i)).
+            map(MGOPSE.Individual.mapped.set(false)).
+            map(MGOPSE.Individual.foundedIsland.set(false))
       }
 
     }
@@ -292,13 +294,10 @@ object PSE {
           population.map(MGONoisyPSE.Individual.foundedIsland.set(true)).map(MGONoisyPSE.Individual.historyAge.set(0))
 
         def migrateFromIsland(population: Vector[I]) =
-          population.filter(_.historyAge != 0).map {
-            i ⇒
-              val i1 = MGONoisyPSE.Individual.phenotypeHistory.modify(_.take(math.min(i.historyAge, om.historySize).toInt))(i)
-              if (MGONoisyPSE.Individual.foundedIsland.get(i1))
-                (MGONoisyPSE.Individual.mapped.set(true) andThen MGONoisyPSE.Individual.foundedIsland.set(false))(i1)
-              else MGONoisyPSE.Individual.mapped.set(false)(i1)
-          }
+          population.filter(i ⇒ !MGONoisyPSE.Individual.foundedIsland.get(i)).
+            map(MGONoisyPSE.Individual.mapped.set(false)).
+            map(MGONoisyPSE.Individual.foundedIsland.set(false))
+
       }
 
     }
