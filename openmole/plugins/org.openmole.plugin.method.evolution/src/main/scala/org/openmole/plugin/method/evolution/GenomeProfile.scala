@@ -42,14 +42,14 @@ object GenomeProfile {
     genome:     Genome,
     objective:  Objective,
     stochastic: Stochastic[Id],
-    muByNiche: Int = 20
+    nicheSize: Int = 20
   ): WorkflowIntegration.StochasticGA[NichedNSGA2.StochasticParams] =
     NichedNSGA2(
       Vector(NichedNSGA2.NichedElement.Continuous(x, nX)),
       genome,
       Seq(objective),
       stochastic,
-      muByNiche
+      nicheSize
     )
 
 }

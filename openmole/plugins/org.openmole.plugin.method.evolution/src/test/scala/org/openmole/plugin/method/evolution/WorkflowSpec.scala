@@ -21,6 +21,7 @@ import org.openmole.core.workflow.validation.Validation
 import org.openmole.plugin.domain.collection._
 import org.scalatest._
 import org.openmole.tool.types._
+import org.openmole.plugin.domain.bounds._
 
 class WorkflowSpec extends FlatSpec with Matchers {
 
@@ -78,6 +79,8 @@ class WorkflowSpec extends FlatSpec with Matchers {
       termination = 10
     )
   }
+
+  import org.openmole.core.workflow.tools.StubServices._
 
   "Steady state workflow" should "have no validation error" in {
     Validation(nsga2.head.toMole).toList match {

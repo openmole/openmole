@@ -111,9 +111,7 @@ class Runtime {
           plugin ← executionMessage.plugins
         } yield {
           val pluginFile = getReplicatedFile(plugin, TransferOptions(raw = true))
-          val pluginWithJarExtension = newFile.newFile("plugin", ".jar")
-          pluginWithJarExtension createLinkTo pluginFile
-          plugin → pluginWithJarExtension
+          plugin → pluginFile
         }
 
       logger.fine("Downloaded plugins. " + plugins.unzip._2.mkString(", "))
@@ -176,13 +174,14 @@ class Runtime {
         val pac = serializerService.pluginsAndFiles(contextResults)
 
         val replicated =
-          pac.files.map {
-            _.upload {
-              f ⇒
-                val name = storage.child(communicationDirPath, uniqName("resultFile", ".bin"))
-                retry(storage.upload(f, name, TransferOptions(forceCopy = true, canMove = true)))
-                name
+          pac.files.map { file ⇒
+            def uploadOnStorage(f: File) = {
+              val name = storage.child(communicationDirPath, uniqName("resultFile", ".bin"))
+              retry(storage.upload(f, name, TransferOptions(forceCopy = true, canMove = true)))
+              name
             }
+
+            ReplicatedFile.upload(file, uploadOnStorage)
           }
 
         IndividualFilesContextResults(contextResultFile, replicated)

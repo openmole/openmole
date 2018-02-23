@@ -31,16 +31,14 @@ object GenerateIslandTask {
     ClosureTask("GenerateIslandTask") { (context, rng, _) ⇒
       val p = context(t.populationPrototype)
 
+      import t.integration.iManifest
+
       def samples =
         if (p.isEmpty) Vector.empty
         else sample match {
-          case Some(s) ⇒ Vector.fill(s) {
-            p(rng().nextInt(p.size))
-          }
-          case None ⇒ p.toVector
+          case Some(s) ⇒ rng().shuffle(p.toVector).take(s)
+          case None    ⇒ p.toVector
         }
-
-      import t.integration.iManifest
 
       def populations = Array.fill(size)(t.operations.migrateToIsland(samples).toArray)
       Variable(outputPopulation.toArray, populations)
