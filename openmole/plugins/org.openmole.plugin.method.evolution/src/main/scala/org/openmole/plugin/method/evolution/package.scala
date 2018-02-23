@@ -154,7 +154,7 @@ package object evolution {
             val v = Variable(h.v, value)
             toVariables0(t, continuousValues, discreteValues.drop(value.size), v :: acc).from(context)
           case (h: GenomeBound.Enumeration[_]) :: t ⇒
-            val value = h.values(discreteValue.head)
+            val value = h.values(discreteValues.head)
             val v = Variable(h.v, value)
             toVariables0(t, continuousValues, discreteValues.tail, v :: acc).from(context)
         }

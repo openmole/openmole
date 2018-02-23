@@ -174,7 +174,7 @@ class Runtime {
         val pac = serializerService.pluginsAndFiles(contextResults)
 
         val replicated =
-          pac.files.map { file =>
+          pac.files.map { file ⇒
             def uploadOnStorage(f: File) = {
               val name = storage.child(communicationDirPath, uniqName("resultFile", ".bin"))
               retry(storage.upload(f, name, TransferOptions(forceCopy = true, canMove = true)))
