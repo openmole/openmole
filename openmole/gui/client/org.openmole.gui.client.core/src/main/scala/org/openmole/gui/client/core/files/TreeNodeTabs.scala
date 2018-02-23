@@ -11,14 +11,16 @@ import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
 import org.openmole.gui.ext.api.Api
 import org.scalajs.dom.raw.{ HTMLDivElement, HTMLElement }
-
 import rx._
+
 import scalatags.JsDom.all.{ raw, _ }
 import scalatags.JsDom.TypedTag
 import scala.scalajs.js.timers._
 import org.openmole.gui.ext.tool.client._
 import org.openmole.gui.client.core._
 import org.openmole.gui.ext.tool.client.FileManager
+
+import net.scalapro.sortable._
 
 /*
  * Copyright (C) 11/05/15 // mathieu.leclaire@openmole.org
@@ -319,11 +321,11 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
     div(role := "tabpanel")(
       //Headers
       Rx {
-        ul(nav +++ navTabs, role := "tablist")(
+        val tabList = ul(nav +++ navTabs, tab_list_role)(
           for (t ← tabs()) yield {
             li(
               paddingTop := 35,
-              role := "presentation",
+              presentation_role,
               `class` := {
                 t.activity() match {
                   case Active ⇒ "active"
@@ -334,7 +336,7 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
                 a(
                   href := "#" + t.id,
                   aria.controls := t.id,
-                  role := "tab",
+                  tab_role,
                   t.activity() match {
                     case Active ⇒ activeTab
                     case _      ⇒ unActiveTab
@@ -348,7 +350,18 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
                   )
               )
           }
-        )
+        ).render
+
+        new Sortable(tabList, new SortableProps {
+          override val onEnd = scala.scalajs.js.defined {
+            (event: EventS) ⇒
+              val oldI = event.oldIndex.asInstanceOf[Int]
+              val newI = event.newIndex.asInstanceOf[Int]
+              tabs() = tabs.now.updated(oldI, tabs.now(newI)).updated(newI, tabs.now(oldI))
+              setActive(tabs.now(newI))
+          }
+        })
+        tabList
       },
       //Panes
       div(tabContent)(
