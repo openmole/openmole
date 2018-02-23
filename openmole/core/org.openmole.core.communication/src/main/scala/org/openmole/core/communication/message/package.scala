@@ -41,8 +41,49 @@ package object message {
     def apply(replicatedFile: ReplicatedFile): FileMessage = apply(replicatedFile.path, replicatedFile.hash)
   }
 
-  implicit class FileToReplicatedFileDecorator(file: File) {
-    def upload(upload: File ⇒ String)(implicit newFile: NewFile) = {
+  object RunnableTask {
+    def apply(moleJob: MoleJob) = new RunnableTask(moleJob.task, moleJob.context, moleJob.id)
+  }
+
+  class RunnableTask(val task: Task, val context: Context, val id: MoleJobId) {
+    def toMoleJob(stateChangedCallBack: StateChangedCallBack) = MoleJob(task, context, id, stateChangedCallBack)
+  }
+
+  case class FileMessage(path: String, hash: String)
+
+  object ReplicatedFile {
+    def download(replicatedFile: ReplicatedFile)(download: (String, File) ⇒ Unit, verifyHash: Boolean = false)(implicit newFile: NewFile, fileService: FileService) = {
+      val localDirectory = newFile.makeNewDir("replica")
+      try {
+        def verify(cache: File) =
+          if (verifyHash) {
+            val cacheHash = cache.hash().toString
+            if (cacheHash != replicatedFile.hash) throw new InternalProcessingError("Hash is incorrect for file " + replicatedFile.originalPath + " replicated at " + replicatedFile.path)
+          }
+
+        val dl =
+          if (replicatedFile.directory) {
+            val cache = localDirectory.newFile("archive", "tgz")
+            val local = localDirectory / replicatedFile.name
+            cache.extract(local)
+            local.mode = replicatedFile.mode
+            cache.delete
+            local
+          }
+          else {
+            val cache = localDirectory / replicatedFile.name
+            verify(cache)
+            download(replicatedFile.path, cache)
+            cache.mode = replicatedFile.mode
+            cache
+          }
+
+        dl
+      }
+      finally fileService.deleteWhenEmpty(localDirectory)
+    }
+
+    def upload(file: File, upload: File ⇒ String)(implicit newFile: NewFile) = {
       val isDir = file.isDirectory
 
       val toReplicate =
@@ -56,49 +97,12 @@ package object message {
       val mode = file.mode
       val hash = toReplicate.hash().toString
       val uploaded = upload(toReplicate)
-      ReplicatedFile(file.getPath, isDir, hash, uploaded, mode)
+      ReplicatedFile(file.getPath, file.getName, isDir, hash, uploaded, mode)
     }
+
   }
 
-  object RunnableTask {
-    def apply(moleJob: MoleJob) = new RunnableTask(moleJob.task, moleJob.context, moleJob.id)
-  }
-
-  class RunnableTask(val task: Task, val context: Context, val id: MoleJobId) {
-    def toMoleJob(stateChangedCallBack: StateChangedCallBack) = MoleJob(task, context, id, stateChangedCallBack)
-  }
-
-  case class FileMessage(path: String, hash: String)
-
-  object ReplicatedFile {
-    def download(replicatedFile: ReplicatedFile)(download: (String, File) ⇒ Unit, verifyHash: Boolean = false)(implicit newFile: NewFile) = {
-      val cache = newFile.newFile()
-
-      download(replicatedFile.path, cache)
-
-      if (verifyHash) {
-        val cacheHash = cache.hash().toString
-        if (cacheHash != replicatedFile.hash) throw new InternalProcessingError("Hash is incorrect for file " + replicatedFile.originalPath + " replicated at " + replicatedFile.path)
-      }
-
-      val dl =
-        if (replicatedFile.directory) {
-          val local = newFile.newDir("dirReplica")
-          cache.extract(local)
-          local.mode = replicatedFile.mode
-          cache.delete
-          local
-        }
-        else {
-          cache.mode = replicatedFile.mode
-          cache
-        }
-
-      dl
-    }
-  }
-
-  case class ReplicatedFile(originalPath: String, directory: Boolean, hash: String, path: String, mode: Int)
+  case class ReplicatedFile(originalPath: String, name: String, directory: Boolean, hash: String, path: String, mode: Int)
   case class RuntimeSettings(archiveResult: Boolean)
 
   object ExecutionMessage {

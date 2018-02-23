@@ -122,7 +122,7 @@ object UploadActor extends JavaLogger {
     }
 
     val replica = services.replicaCatalog.uploadAndGet(upload, toReplicatePath, hash, storage)
-    ReplicatedFile(file.getPath, isDir, hash, replica.path, fileMode)
+    ReplicatedFile(file.getPath, file.getName, isDir, hash, replica.path, fileMode)
   }
 
   def replicateTheRuntime(
