@@ -32,29 +32,29 @@
 
 @h1{Genetic Algorithms in OpenMOLE}
 
-OpenMOLE make an intensive use of genetic algorithms (GA) in its various @a("methods", href:= DocumentationPages.method.file) : whereas it deals with model calibration (which is an optimization problem) or a diversity of outputs     research like in @a("PSE", href:= DocumentationPages.pse.file) (which boils down to Genetic algorithms with a novelty incentive).
+    The various @a("methods", href:= DocumentationPages.method.file) available in OpenMOLE make an extensive use of genetic algorithms (GA).
+    For instance, it is the case for the model calibration (LINK TO CALIBRATION PAGE?) method (which is an optimization problem), or the search for output diversity with the @a("PSE", href:= DocumentationPages.pse.file) method (which boils down to a GA with a novelty incentive).
 
     @br@br
-    GAs can be smartly distributed on grid environments using @a("islands scheme", href:= DocumentationPages.island.file), and and be able to deal with model @a("stochasticity", href:=DocumentationPages.stochasticity.file) .
-
+    GAs can be smartly distributed on grid environments using an @a("island scheme", href:= DocumentationPages.island.file), and are able to deal with @a("stochastic", href:=DocumentationPages.stochasticity.file) models.
 
 
 
 @sect{About Calibration and GA }
     OpenMOLE provides advanced methods to help you calibrate your model.
-    These methods automatically generate workflows to explore your model's parameter space towards the best parameter
-    set according to a previously defined @b{goal} (or @b{objective} or @b{criterion}) .
-    This is commonly addressed in literature as a calibration/optimization methods.
+    These methods automatically generate workflows to explore the parameter space of your model towards the best parameter set, according to a previously defined @b{criterion} or @b{objective}.
+    This is commonly addressed in the literature as a calibration/optimization problem.
 
     @p
-    Calibration methods of OpenMOLE use Genetic Algorithms to explore the parameter space of a simulation model, looking for parameter sets that will produce outputs  that reach one or several given @b{objectives}.
+    The different calibration methods in OpenMOLE use GAs to explore the parameter space of a simulation model, looking for parameter sets that will produce outputs reaching one or several given @b{objectives}.
 
-    @b{Objectives functions},also called @b{fitness functions}, compute quantities from model outputs that have to be minimized or maximized ; they're a quantification of the characteristics of what is the @i{optimal model output} according to what  you're looking for.
+    @b{Objectives functions}, also called @b{fitness functions}, compute quantities from the model outputs that have to be minimized or maximized.
+    They are a quantification of the @i{optimal model output} you are looking for.
 
     @br@br
 
-    One common use case is optimization to fit some data. Objective function could be
-    a distance function between simulation results and data ; a classical example is the Squared Error function.
+    A common optimization problem is data fitting.
+    In this particular case, the objective function could compute the distance between simulation results and data, a classical example is the Squared Error function.
     @br
 
     If you want your model to reproduce several characteristics (sometimes called stylised facts), you need
@@ -67,18 +67,20 @@ OpenMOLE make an intensive use of genetic algorithms (GA) in its various @a("met
      @ul
         @li
             the @b{genome} of your model, i.e. the parameters to be calibrated. They are the dimensions of the parameter
-             space that will be explored by the genetic algorithm. GA will try different genomes, and keep the best
-             discovered ever since.
+             space that will be explored by the GA. The GA will try different genomes, and keep the best one
+             discovered yet.
         @li
-            the @b{objectives} you want to reach, expressed as  variables to be @b{minimized}.
+            the @b{objectives} you want to reach, expressed as variables to be @b{minimized}.
         @li
-            a @b{termination criterion}, to stop the method eventually
+            a @b{termination criterion}, to stop the method eventually.
+
+
 
 @sect{Dummy Model Optimization Example}
 
-    This workflow optimises a dummy model using the generational NSGA II multi-objective algorithm. You can replace the instances of @i{model} by your own model and adapt the variation range of its input variables. If you're not familiar with parameter tuning using Genetic Algorithms (GA), you should first consult the @aa("tutorial explaining how to calibrate a NetLogo model with a GA", href := DocumentationPages.netLogoGA.file).
+    This workflow optimizes a dummy model using the generational NSGA II multi-objective algorithm. You can replace the instances of @i{model} by your own model, and adapt the variation range of the input variables. If you are not familiar with parameter tuning using GA, you should first consult the @aa("tutorial explaining how to calibrate a NetLogo model with a GA", href := DocumentationPages.netLogoGA.file).
 
-    @br @hl.openmole(s"""
+    @br@br @hl.openmole(s"""
   $model
 
   // Construction of the workflow orchestrating the genetic algorithm
@@ -87,10 +89,10 @@ OpenMOLE make an intensive use of genetic algorithms (GA) in its various @a("met
   // the parallelism specifies how many evaluation are concurrently submitted to the execution environment
   val evolution =
     SteadyStateEvolution(
-      // Definition of the optimisation algorithm
+      // Definition of the optimization algorithm
       // mu is the size of the population
       // genome is the inputs prototype and their variation ranges
-      // objectives are the objectives to minimise
+      // objectives are the objectives to minimize
       algorithm =
         NSGA2(
           mu = 100,
@@ -115,17 +117,17 @@ OpenMOLE make an intensive use of genetic algorithms (GA) in its various @a("met
 
     @br
     Notice that the objectives are given as a sequence of model outputs variables to @b{minimize}.
-So if you want to reach specific target values, like Pi and 42  you can use the DeltaTask an plug it after your model:
+So if you want to reach specific target values, like Pi and 42  you can use the DeltaTask and plug it after your model:
 
     @br @hl.openmole(s"""
   $model
 
   val evolution =
     SteadyStateEvolution(
-      // Definition of the optimisation algorithm
+      // Definition of the optimization algorithm
       // mu is the size of the population
       // genome is the inputs prototype and their variation ranges
-      // objectives are the objectives to minimise
+      // objectives are the objectives to minimize
       algorithm =
         NSGA2(
           mu = 100,
@@ -140,11 +142,11 @@ So if you want to reach specific target values, like Pi and 42  you can use the 
         termination = 100
     )""", name = "nsga2 delta example")
     @br
-    NB: in this case the results in the saved file in will be the difference between the outputs of the model and your objectives.
+    NB: in this case the results in the saved file will be the difference between the outputs of the model and your objectives.
     @br
 
     @br
-    Obviously, maximization problem are performed by taking the opposite of variables as objectives. You may use a ScalaTask in place of the DeltaTask to perform such a small computations in the workflow.
+    Obviously, maximization problems are performed by taking the opposite of variables as objectives. You may use a ScalaTask in place of the DeltaTask to perform such a small computation in the workflow.
 @br @hl.openmole(s"""
   $model
 
@@ -152,10 +154,10 @@ So if you want to reach specific target values, like Pi and 42  you can use the 
 
   val evolution =
     SteadyStateEvolution(
-      // Definition of the optimisation algorithm
+      // Definition of the optimization algorithm
       // mu is the size of the population
       // genome is the inputs prototype and their variation ranges
-      // objectives are the objectives to minimise
+      // objectives are the objectives to minimize
       algorithm =
         NSGA2(
           mu = 100,
@@ -173,5 +175,5 @@ So if you want to reach specific target values, like Pi and 42  you can use the 
 
     @br@br
 @sect{Real world Example}
-    @a("This tutorial exposes", href:=DocumentationPages.netLogoGA.file)  how to use Genetic Algorithms to perform optimization on a NetlogModel.
+    @a("This tutorial exposes", href:=DocumentationPages.netLogoGA.file) how to use Genetic Algorithms to perform optimization on a NetLogo model.
 
