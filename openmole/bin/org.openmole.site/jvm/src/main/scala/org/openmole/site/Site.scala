@@ -146,10 +146,10 @@ object Site extends App {
                     )
                   case _ ⇒ Seq[Modifier]()
                 }),
-
-              page.source.map(source ⇒ a(href := tools.modificationLink(source), "Propose a modification to the current page")),
-              sitePage.element
-            ),
+              sitePage.element,
+              div(paddingTop := 30)(
+                page.source.map(source ⇒ a(href := tools.modificationLink(source), "Propose a modification to the current page"))
+              )),
             sitePage match {
               case s: StepPage ⇒ Seq(s.leftMenu, s.rightMenu)
               case _ ⇒
