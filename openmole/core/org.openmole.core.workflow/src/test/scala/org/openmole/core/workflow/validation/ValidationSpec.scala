@@ -44,7 +44,7 @@ class ValidationSpec extends FlatSpec with Matchers {
     val c1 = Capsule(t1)
     val c2 = Capsule(t2)
 
-    val mole = c1 -- c2
+    val mole = (c1 -- c2).toMole
 
     val errors = Validation.taskTypeErrors(mole)(mole.capsules, Iterable.empty, Sources.empty, Hooks.empty)
     errors.headOption match {
@@ -65,7 +65,7 @@ class ValidationSpec extends FlatSpec with Matchers {
     val c1 = Capsule(t1)
     val c2 = Capsule(t2)
 
-    val mole = c1 -- c2
+    val mole = (c1 -- c2) toMole
 
     Validation.taskTypeErrors(mole)(mole.capsules, Iterable.empty, Sources.empty, Hooks.empty).isEmpty should equal(true)
   }
@@ -80,7 +80,7 @@ class ValidationSpec extends FlatSpec with Matchers {
     val c1 = Capsule(t1)
     val c2 = Capsule(t2)
 
-    val mole = c1 -- c2
+    val mole = (c1 -- c2) toMole
 
     val errors = Validation.taskTypeErrors(mole)(mole.capsules, Iterable.empty, Sources.empty, Hooks.empty)
     errors.headOption match {
@@ -100,7 +100,7 @@ class ValidationSpec extends FlatSpec with Matchers {
     val c1 = Slot(t1)
     val c2 = Capsule(t2)
 
-    val mole = c1 -< c2 -- c1
+    val mole = (c1 -< c2 -- c1) toMole
 
     val errors = Validation.topologyErrors(mole)
     errors.isEmpty should equal(false)
@@ -113,7 +113,7 @@ class ValidationSpec extends FlatSpec with Matchers {
     val c1 = Capsule(t1)
     val c2 = Slot(t2)
 
-    val mole = (c1 -- c2) & (c1 -- c2)
+    val mole = ((c1 -- c2) & (c1 -- c2)) toMole
 
     val errors = Validation.duplicatedTransitions(mole)
     errors.isEmpty should equal(false)
@@ -134,7 +134,7 @@ class ValidationSpec extends FlatSpec with Matchers {
     val c2 = Capsule(t2)
     val c3 = Slot(t3)
 
-    val mole = (c1 -- c2 -- c3) & (c1 oo (c3, Block(p)))
+    val mole = ((c1 -- c2 -- c3) & (c1 oo (c3, Block(p)))) toMole
 
     val errors = Validation.taskTypeErrors(mole)(mole.capsules, Iterable.empty, Sources.empty, Hooks.empty)
 
@@ -182,7 +182,7 @@ class ValidationSpec extends FlatSpec with Matchers {
 
     val mtC = Capsule(mt)
 
-    val mole = c1 -- mtC
+    val mole = (c1 -- mtC) toMole
 
     val errors = Validation(mole)
     errors.isEmpty should equal(true)
@@ -208,7 +208,7 @@ class ValidationSpec extends FlatSpec with Matchers {
 
     val mtC = Capsule(mt)
 
-    val mole = c1 -- mtC
+    val mole = (c1 -- mtC) toMole
 
     val errors = Validation(mole)
     errors.isEmpty should equal(true)
@@ -309,7 +309,7 @@ class ValidationSpec extends FlatSpec with Matchers {
     val noOPC = Capsule(noOP)
     val aggC = Slot(aggT)
 
-    val mole = (exc -< testC -- noOPC >- aggC) & (testC oo aggC)
+    val mole = ((exc -< testC -- noOPC >- aggC) & (testC oo aggC)) toMole
 
     val errors = Validation.dataChannelErrors(mole)
 
@@ -337,7 +337,8 @@ class ValidationSpec extends FlatSpec with Matchers {
 
     val aggSlot = Slot(agg)
 
-    val mole = (explorationCaps -< t1Caps >- aggSlot) & (explorationCaps -- aggSlot)
+    val mole = ((explorationCaps -< t1Caps >- aggSlot) & (explorationCaps -- aggSlot)) toMole
+
     Validation(mole).isEmpty should equal(true)
   }
 
@@ -389,9 +390,7 @@ class ValidationSpec extends FlatSpec with Matchers {
 
     val puzzle = (Capsule(exploration, strain = true) -< Capsule(t1, strain = true) -- t2)
 
-    val ex = puzzle start
-
-    ex.waitUntilEnded
+    puzzle run
   }
 
 }

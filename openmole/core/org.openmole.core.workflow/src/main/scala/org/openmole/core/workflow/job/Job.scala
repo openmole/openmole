@@ -27,11 +27,14 @@ sealed trait Job {
 
 object Job {
 
-  def apply(moleExecution: MoleExecution, moleJobs: Iterable[MoleJob]) =
+  def apply(moleExecution: MoleExecution, moleJobs: Iterable[MoleJob]): Job =
     (moleJobs.size == 1) match {
-      case true  ⇒ new SingleJob(moleExecution, moleJobs.head)
+      case true  ⇒ Job(moleExecution, moleJobs.head)
       case false ⇒ new MultiJob(moleExecution, moleJobs.toArray)
     }
+
+  def apply(moleExecution: MoleExecution, moleJob: MoleJob): Job =
+    new SingleJob(moleExecution, moleJob)
 
   class SingleJob(val moleExecution: MoleExecution, val moleJob: MoleJob) extends Job {
     def moleJobs = Vector(moleJob)

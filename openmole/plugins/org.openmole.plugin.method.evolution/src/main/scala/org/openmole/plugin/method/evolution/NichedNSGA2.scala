@@ -39,14 +39,22 @@ object NichedNSGA2 {
 
       val niches =
         profiled.toVector.map {
-          case c: NichedElement.Continuous         ⇒ Genome.continuousIndex(genome, c.v).getOrElse(notFoundInGenome(c.v)).map { index ⇒ Profile.continuousProfile(index, c.n) }
-          case c: NichedElement.ContinuousSequence ⇒ Genome.continuousIndex(genome, c.v).getOrElse(notFoundInGenome(c.v)).map { index ⇒ Profile.continuousProfile(index + c.i, c.n) }
-          case c: NichedElement.Discrete           ⇒ Genome.discreteIndex(genome, c.v).getOrElse(notFoundInGenome(c.v)).map { index ⇒ Profile.discreteProfile(index) }
-          case c: NichedElement.DiscreteSequence   ⇒ Genome.discreteIndex(genome, c.v).getOrElse(notFoundInGenome(c.v)).map { index ⇒ Profile.discreteProfile(index + c.i) }
+          case c: NichedElement.Continuous ⇒
+            val index = Genome.continuousIndex(genome, c.v).getOrElse(notFoundInGenome(c.v))
+            Profile.continuousProfile(index, c.n).pure[FromContext]
+          case c: NichedElement.ContinuousSequence ⇒
+            val index = Genome.continuousIndex(genome, c.v).getOrElse(notFoundInGenome(c.v))
+            Profile.continuousProfile(index + c.i, c.n).pure[FromContext]
+          case c: NichedElement.Discrete ⇒
+            val index = Genome.discreteIndex(genome, c.v).getOrElse(notFoundInGenome(c.v))
+            Profile.discreteProfile(index).pure[FromContext]
+          case c: NichedElement.DiscreteSequence ⇒
+            val index = Genome.discreteIndex(genome, c.v).getOrElse(notFoundInGenome(c.v))
+            Profile.discreteProfile(index + c.i).pure[FromContext]
           case c: NichedElement.GridContinuous ⇒ FromContext { p ⇒
             import p._
-            (Genome.continuousIndex(genome, c.v).from(context), Objective.index(objectives, c.v)) match {
-              case (Some(index), _) ⇒ Profile.gridContinuousProfile(Genome.continuous(genome).from(context), index.from(context), c.intervals)
+            (Genome.continuousIndex(genome, c.v), Objective.index(objectives, c.v)) match {
+              case (Some(index), _) ⇒ Profile.gridContinuousProfile(Genome.continuous(genome).from(context), index, c.intervals)
               case (_, Some(index)) ⇒ Profile.gridObjectiveProfile(index, c.intervals)
               case _                ⇒ throw new UserBadDataError(s"Variable ${c.v} not found neither in the genome nor in the objectives")
             }
@@ -187,14 +195,22 @@ object NichedNSGA2 {
 
       val niches =
         profiled.toVector.map {
-          case c: NichedElement.Continuous         ⇒ Genome.continuousIndex(genome, c.v).getOrElse(notFoundInGenome(c.v)).map { index ⇒ NoisyProfile.continuousProfile(index, c.n) }
-          case c: NichedElement.ContinuousSequence ⇒ Genome.continuousIndex(genome, c.v).getOrElse(notFoundInGenome(c.v)).map { index ⇒ NoisyProfile.continuousProfile(index + c.i, c.n) }
-          case c: NichedElement.Discrete           ⇒ Genome.discreteIndex(genome, c.v).getOrElse(notFoundInGenome(c.v)).map { index ⇒ NoisyProfile.discreteProfile(index) }
-          case c: NichedElement.DiscreteSequence   ⇒ Genome.discreteIndex(genome, c.v).getOrElse(notFoundInGenome(c.v)).map { index ⇒ NoisyProfile.discreteProfile(index + c.i) }
+          case c: NichedElement.Continuous ⇒
+            val index = Genome.continuousIndex(genome, c.v).getOrElse(notFoundInGenome(c.v))
+            NoisyProfile.continuousProfile(index, c.n).pure[FromContext]
+          case c: NichedElement.ContinuousSequence ⇒
+            val index = Genome.continuousIndex(genome, c.v).getOrElse(notFoundInGenome(c.v))
+            NoisyProfile.continuousProfile(index + c.i, c.n).pure[FromContext]
+          case c: NichedElement.Discrete ⇒
+            val index = Genome.discreteIndex(genome, c.v).getOrElse(notFoundInGenome(c.v))
+            NoisyProfile.discreteProfile(index).pure[FromContext]
+          case c: NichedElement.DiscreteSequence ⇒
+            val index = Genome.discreteIndex(genome, c.v).getOrElse(notFoundInGenome(c.v))
+            NoisyProfile.discreteProfile(index + c.i).pure[FromContext]
           case c: NichedElement.GridContinuous ⇒ FromContext { p ⇒
             import p._
-            (Genome.continuousIndex(genome, c.v).from(context), Objective.index(objectives, c.v)) match {
-              case (Some(index), _) ⇒ NoisyProfile.gridContinuousProfile(Genome.continuous(genome).from(context), index.from(context), c.intervals)
+            (Genome.continuousIndex(genome, c.v), Objective.index(objectives, c.v)) match {
+              case (Some(index), _) ⇒ NoisyProfile.gridContinuousProfile(Genome.continuous(genome).from(context), index, c.intervals)
               case (_, Some(index)) ⇒ NoisyProfile.gridObjectiveProfile(aggregation, index, c.intervals)
               case _                ⇒ throw new UserBadDataError(s"Variable ${c.v} not found neither in the genome nor in the objectives")
             }

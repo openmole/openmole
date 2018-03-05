@@ -77,7 +77,6 @@ object Console extends JavaLogger {
     def incorrectPassword = 1
     def scriptDoesNotExist = 2
     def compilationError = 3
-    def validationError = 5
     def executionError = 6
     def restart = 254
   }
@@ -129,18 +128,12 @@ class Console(script: Option[String] = None) {
               case Success(res) ⇒
                 MoleServices.create
                 val ex = res.toExecution()
-                Try(ex.start) match {
+                Try(ex.run) match {
                   case Failure(e) ⇒
                     println(e.stackString)
-                    ExitCodes.validationError
+                    ExitCodes.executionError
                   case Success(_) ⇒
-                    Try(ex.waitUntilEnded) match {
-                      case Success(_) ⇒ ExitCodes.ok
-                      case Failure(e) ⇒
-                        println("Error during script execution: ")
-                        print(e.stackString)
-                        ExitCodes.executionError
-                    }
+                    ExitCodes.ok
                 }
               case Failure(e) ⇒
                 println(s"Error during script evaluation: ")

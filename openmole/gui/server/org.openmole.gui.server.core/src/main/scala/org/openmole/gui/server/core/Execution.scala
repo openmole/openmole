@@ -183,7 +183,7 @@ class Execution {
 
         val d = moleExecution.duration.getOrElse(0L)
         def convertStatuses(s: MoleExecution.JobStatuses) = ExecutionInfo.JobStatuses(s.ready, s.running, s.completed)
-        lazy val statuses = moleExecution.jobStatuses.toVector.map { case (k, v) ⇒ k.toString -> convertStatuses(v) }
+        lazy val statuses = moleExecution.capsuleStatuses.toVector.map { case (k, v) ⇒ k.toString -> convertStatuses(v) }
 
         moleExecution.exception match {
           case Some(t) ⇒

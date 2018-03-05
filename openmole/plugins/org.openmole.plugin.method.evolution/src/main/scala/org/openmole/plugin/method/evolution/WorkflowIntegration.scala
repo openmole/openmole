@@ -69,7 +69,7 @@ case class Stochastic[A[_]: Functor](
 object WorkflowIntegration {
 
   implicit def hlistContainingIntegration[H <: shapeless.HList, U](implicit hwi: WorkflowIntegrationSelector[H, U]) = new WorkflowIntegration[H] {
-    def apply(h: H) = hwi.wi(hwi(h))
+    def apply(h: H) = hwi.selected(hwi(h))
   }
 
   def deterministicGAIntegration[AG](a: DeterministicGA[AG]) =

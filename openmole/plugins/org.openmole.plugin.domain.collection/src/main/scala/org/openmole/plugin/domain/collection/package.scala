@@ -32,12 +32,20 @@ package object collection {
     override def apply(domain: Iterable[T]): Iterable[T] = domain
   }
 
+  implicit def iterableIsSized[T] = new Sized[Iterable[T]] {
+    override def apply(domain: Iterable[T]) = domain.size
+  }
+
   implicit def arrayIsFinite[T] = new Finite[Array[T], T] {
     override def computeValues(domain: Array[T]) = domain.toIterable
   }
 
   implicit def arrayIsFix[T] = new Fix[Array[T], T] {
     override def apply(domain: Array[T]): Iterable[T] = domain.toIterable
+  }
+
+  implicit def arrayIsSized[T] = new Sized[Array[T]] {
+    override def apply(domain: Array[T]) = domain.size
   }
 
   implicit def iteratorIsDiscrete[T] = new Discrete[Iterator[T], T] {

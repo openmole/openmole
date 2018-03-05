@@ -26,8 +26,8 @@ object TestSource {
 }
 
 @Lenses case class TestSource(
-    f:      Context ⇒ Context = identity[Context],
-    config: InputOutputConfig = InputOutputConfig()
+  f:      Context ⇒ Context = identity[Context],
+  config: InputOutputConfig = InputOutputConfig()
 ) extends Source {
   override protected def process(executionContext: MoleExecutionContext) = FromContext { p ⇒ f(p.context) }
 }

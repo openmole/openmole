@@ -17,4 +17,6 @@
 
 package org.openmole.core.workflow.transition
 
+import org.openmole.core.expansion.Condition
+
 trait IExplorationTransition extends ITransition

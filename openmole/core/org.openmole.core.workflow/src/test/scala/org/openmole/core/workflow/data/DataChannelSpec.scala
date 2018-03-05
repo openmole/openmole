@@ -63,9 +63,11 @@ class DataChannelSpec extends FlatSpec with Matchers {
     val t2c = Capsule(t2)
     val t3c = Slot(Capsule(t3))
 
+    toPuzzle(t1c) -- t2c
+
     val ex = (t1c -- t2c -- t3c) & (t1c oo t3c)
 
-    ex.start.waitUntilEnded
+    ex.run()
   }
 
   "A data channel" should "be able to transmit the value to the multiple execution of an explored task" in {
@@ -102,7 +104,7 @@ class DataChannelSpec extends FlatSpec with Matchers {
     val tc = Slot(t)
 
     val ex = (twc -- exc -< tc) & (twc oo tc)
-    ex.start.waitUntilEnded
+    ex.run
     res.toArray.sorted.deep should equal(data.toArray.deep)
   }
 

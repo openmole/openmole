@@ -2,7 +2,7 @@ package org.openmole.core.workflow.transition
 
 import org.openmole.core.context.Val
 import org.openmole.core.expansion.Condition
-import org.openmole.core.workflow.puzzle.{ Puzzle, ToPuzzle }
+import org.openmole.core.workflow.puzzle.{ Puzzle, ToPuzzle, ToPuzzlePiece }
 
 object ToTransitionParameter {
   def apply[T](f: T ⇒ TransitionParameter): ToTransitionParameter[T] =
@@ -11,7 +11,8 @@ object ToTransitionParameter {
     }
 
   implicit val transitionParameter: ToTransitionParameter[TransitionParameter] = ToTransitionParameter[TransitionParameter](identity)
-  implicit def puzzleToTransitionParameter[T](implicit toPuzzle: ToPuzzle[T]): ToTransitionParameter[T] = ToTransitionParameter[T](t ⇒ TransitionParameter(toPuzzle.toPuzzle(t)))
+  implicit def toPuzzleToTransitionParameter[T](implicit toPuzzle: ToPuzzle[T]): ToTransitionParameter[T] = ToTransitionParameter[T](t ⇒ TransitionParameter(toPuzzle.toPuzzle(t)))
+
 }
 
 trait ToTransitionParameter[T] {

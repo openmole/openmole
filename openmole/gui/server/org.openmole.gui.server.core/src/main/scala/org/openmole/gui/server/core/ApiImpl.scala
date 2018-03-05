@@ -310,6 +310,8 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
     execution.addStaticInfo(execId, StaticExecutionInfo(scriptData.scriptPath, content, System.currentTimeMillis()))
     execution.addOutputStreams(execId, outputStream)
 
+    import org.openmole.tool.thread._
+
     val compilationFuture =
       services.threadProvider.pool.submit { () ⇒
 
@@ -335,9 +337,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
 
               catchAll(OutputManager.withStreamOutputs(outputStream, outputStream)(compiled.eval)) match {
                 case Failure(e) ⇒ error(e)
-                case Success(o) ⇒
-                  val puzzle = o.buildPuzzle
-
+                case Success(puzzle) ⇒
                   val services = MoleServices.copy(MoleServices.create)(outputRedirection = OutputRedirection(outputStream))
                   Try(puzzle.toExecution(executionContext = MoleExecutionContext()(services))) match {
                     case Success(ex) ⇒

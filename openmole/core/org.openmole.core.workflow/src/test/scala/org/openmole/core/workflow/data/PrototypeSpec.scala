@@ -18,7 +18,6 @@
 package org.openmole.core.workflow.data
 
 import org.openmole.core.context.Val
-import org.openmole.core.workflow.data._
 import org.scalatest._
 import org.scalatest.junit._
 

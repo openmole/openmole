@@ -80,7 +80,37 @@ class WorkflowSpec extends FlatSpec with Matchers {
     )
   }
 
+  def boundArray = {
+    val xArray = Val[Array[Double]]
+    val yArray = Val[Array[Int]]
+
+    NSGA2(
+      mu = 200,
+      genome = Seq(xArray in Vector.fill(5)((0.0, 1.0)), yArray in Vector.fill(5)(("0", "1"))),
+      objectives = Seq()
+    )
+  }
+
   import org.openmole.core.workflow.tools.StubServices._
+
+  "Bound array" should "compile" in {
+    SteadyStateEvolution(
+      algorithm = boundArray(),
+      evaluation = EmptyTask(),
+      parallelism = 10,
+      termination = 10
+    )
+  }
+
+  "Island evolution" should "compile" in {
+    val steady = SteadyStateEvolution(
+      algorithm = boundArray(),
+      evaluation = EmptyTask(),
+      parallelism = 10,
+      termination = 10
+    )
+    IslandEvolution(steady, 10, 10)
+  }
 
   "Steady state workflow" should "have no validation error" in {
     Validation(nsga2.head.toMole).toList match {

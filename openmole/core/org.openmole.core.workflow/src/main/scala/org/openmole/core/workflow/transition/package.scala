@@ -27,7 +27,7 @@ package transition {
   import org.openmole.core.expansion.{ Condition, FromContext }
 
   trait TransitionDecorator {
-    def from: Puzzle
+    val from: Puzzle
 
     def when(condition: Condition) = TransitionParameter(from, condition)
     def filter(filter: BlockList) = TransitionParameter(from, filterParameter = filter)

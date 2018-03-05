@@ -17,7 +17,6 @@
 
 package org.openmole.core.workflow.sampling
 
-import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.sampling._
 
 import scala.util.Random

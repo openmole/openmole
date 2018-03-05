@@ -36,21 +36,25 @@ class EndExplorationTransition(val start: Capsule, val end: Slot, val trigger: C
     trigger.validate(inputs)
   }
 
-  override def perform(context: Context, ticket: Ticket, subMole: SubMoleExecution, executionContext: MoleExecutionContext) = {
-    def perform() {
-      val parentTicket = ticket.parent.getOrElse(throw new UserBadDataError("End exploration transition should take place after an exploration."))
-      val subMoleParent = subMole.parent.getOrElse(throw new InternalProcessingError("Submole execution has no parent"))
-      subMoleParent.transitionLock { ITransition.submitNextJobsIfReady(this)(context.values, parentTicket, subMoleParent) }
-      subMole.cancel
-    }
+  override def perform(context: Context, ticket: Ticket, moleExecution: MoleExecution, subMole: SubMoleExecution, executionContext: MoleExecutionContext) = MoleExecutionMessage.send(moleExecution) {
+    MoleExecutionMessage.PerformTransition(subMole) { subMoleState ⇒
+      def perform() {
+        val parentTicket = ticket.parent.getOrElse(throw new UserBadDataError("End exploration transition should take place after an exploration."))
+        val subMoleParent = subMoleState.parent.getOrElse(throw new InternalProcessingError("Submole execution has no parent"))
+        //subMoleParent.transitionLock { ITransition.submitNextJobsIfReady(this)(context.values, parentTicket, subMoleParent) }
+        ITransition.submitNextJobsIfReady(this)(context.values, parentTicket, subMoleParent)
+        MoleExecution.cancel(subMoleState) //.cancel
+      }
 
-    import executionContext.services._
+      import executionContext.services._
 
-    Try(!subMole.canceled && trigger.from(context)) match {
-      case Success(true) ⇒ perform()
-      case Failure(t) ⇒
-        subMole.cancel; throw t
-      case _ ⇒
+      Try( /*!subMoleState.canceled && */ trigger.from(context)) match {
+        case Success(true)  ⇒ perform()
+        case Success(false) ⇒
+        case Failure(t) ⇒
+          MoleExecution.cancel(subMoleState)
+          throw t
+      }
     }
   }
 

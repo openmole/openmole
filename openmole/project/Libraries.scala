@@ -42,7 +42,7 @@ object Libraries {
 
   /** ------- Bundles -------------- */
 
-  lazy val addScalaLang = libraryDependencies += "org.openmole.library" %% "org-scala-lang-scala-library" % scalaVersion.value
+  def addScalaLang(scalaVersion: String) = libraryDependencies += "org.openmole.library" %% "org-scala-lang-scala-library" % scalaVersion
 
   lazy val scalatra = "org.openmole.library" %% "org-scalatra" % "2.5.0"
   lazy val logback = "org.openmole.library" %% "ch-qos-logback" % "1.0.9"

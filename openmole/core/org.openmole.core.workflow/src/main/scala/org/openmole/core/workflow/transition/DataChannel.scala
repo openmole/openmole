@@ -28,6 +28,55 @@ object DataChannel {
     mole.level(dataChannel.end.capsule) - mole.level(dataChannel.start)
 
   def apply(start: Capsule, end: Slot, filter: BlockList) = new DataChannel(start, end, filter)
+
+  /**
+   * Consums the provided variables and construct a context for them.
+   *
+   * @param ticket the ticket of the current execution
+   * @param moleExecution the current mole execution
+   * @return the variables which have been transmitted through this data channel
+   */
+  def consums(dataChannel: DataChannel, ticket: Ticket, moleExecution: MoleExecution): Iterable[Variable[_]] = {
+    val delta = dataChannel.levelDelta(moleExecution.mole)
+    val dataChannelRegistry = moleExecution.dataChannelRegistry
+
+    val vars =
+      if (delta <= 0) dataChannelRegistry.remove(dataChannel, ticket).getOrElse(new ListBuffer[Variable[_]])
+      else {
+        val workingOnTicket = (0 until delta).foldLeft(ticket) {
+          (c, e) ⇒ c.parent.getOrElse(throw new InternalProcessingError("Bug should never get to root."))
+        }
+        dataChannelRegistry.consult(dataChannel, workingOnTicket) getOrElse (new ListBuffer[Variable[_]])
+      }
+
+    vars.toVector
+  }
+
+  /**
+   * Provides the variable for future consuption by the matching execution of
+   * the ending task.
+   *
+   * @param fromContext the context containing the variables
+   * @param ticket the ticket of the current execution
+   * @param moleExecution the current mole execution
+   */
+  def provides(dataChannel: DataChannel, fromContext: Context, ticket: Ticket, moleExecution: MoleExecution): Unit = {
+    val delta = dataChannel.levelDelta(moleExecution.mole)
+    val dataChannelRegistry = moleExecution.dataChannelRegistry
+
+    if (delta >= 0) {
+      val toContext = ListBuffer() ++ fromContext.values.filterNot(v ⇒ dataChannel.filter(v.prototype))
+      dataChannelRegistry.register(dataChannel, ticket, toContext)
+    }
+    else {
+      val workingOnTicket = (delta until 0).foldLeft(ticket) {
+        (c, e) ⇒ c.parent.getOrElse(throw new InternalProcessingError("Bug should never get to root."))
+      }
+      val toContext = dataChannelRegistry.getOrElseUpdate(dataChannel, workingOnTicket, new ListBuffer[Variable[_]])
+      toContext ++= fromContext.values.filterNot(v ⇒ dataChannel.filter(v.prototype))
+    }
+  }
+
 }
 
 /**
@@ -46,53 +95,6 @@ class DataChannel(
   val end:    Slot,
   val filter: BlockList
 ) {
-
-  /**
-   * Consums the provided variables and construct a context for them.
-   *
-   * @param ticket the ticket of the current execution
-   * @param moleExecution the current mole execution
-   * @return the variables which have been transmitted through this data channel
-   */
-  def consums(ticket: Ticket, moleExecution: MoleExecution): Iterable[Variable[_]] = moleExecution.synchronized {
-    val delta = levelDelta(moleExecution.mole)
-    val dataChannelRegistry = moleExecution.dataChannelRegistry
-
-    {
-      if (delta <= 0) dataChannelRegistry.remove(this, ticket).getOrElse(new ListBuffer[Variable[_]])
-      else {
-        val workingOnTicket = (0 until delta).foldLeft(ticket) {
-          (c, e) ⇒ c.parent.getOrElse(throw new InternalProcessingError("Bug should never get to root."))
-        }
-        dataChannelRegistry.consult(this, workingOnTicket) getOrElse (new ListBuffer[Variable[_]])
-      }
-    }.toIterable
-  }
-
-  /**
-   * Provides the variable for future consuption by the matching execution of
-   * the ending task.
-   *
-   * @param fromContext the context containing the variables
-   * @param ticket the ticket of the current execution
-   * @param moleExecution the current mole execution
-   */
-  def provides(fromContext: Context, ticket: Ticket, moleExecution: MoleExecution): Unit = moleExecution.synchronized[Unit] {
-    val delta = levelDelta(moleExecution.mole)
-    val dataChannelRegistry = moleExecution.dataChannelRegistry
-
-    if (delta >= 0) {
-      val toContext = ListBuffer() ++ fromContext.values.filterNot(v ⇒ filter(v.prototype))
-      dataChannelRegistry.register(this, ticket, toContext)
-    }
-    else {
-      val workingOnTicket = (delta until 0).foldLeft(ticket) {
-        (c, e) ⇒ c.parent.getOrElse(throw new InternalProcessingError("Bug should never get to root."))
-      }
-      val toContext = dataChannelRegistry.getOrElseUpdate(this, workingOnTicket, new ListBuffer[Variable[_]])
-      toContext ++= fromContext.values.filterNot(v ⇒ filter(v.prototype))
-    }
-  }
 
   /**
    *

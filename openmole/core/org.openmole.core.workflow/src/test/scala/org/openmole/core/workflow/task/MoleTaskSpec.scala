@@ -44,7 +44,7 @@ class MoleTaskSpec extends FlatSpec with Matchers {
         i := "test"
       )
 
-    MoleExecution(Mole(moleTask)).start.waitUntilEnded
+    MoleExecution(Mole(moleTask)).run
   }
 
   "MoleTask" should "propagate errors" in {
@@ -55,10 +55,9 @@ class MoleTaskSpec extends FlatSpec with Matchers {
 
     val moleTask = MoleTask(error)
 
-    val ex = moleTask.start
-    Try { ex.waitUntilEnded }
+    val res = Try { moleTask.run }
 
-    ex.exception shouldNot equal(None)
+    res shouldBe a[util.Failure[_]]
 
   }
 
@@ -70,12 +69,12 @@ class MoleTaskSpec extends FlatSpec with Matchers {
     val emptyT = EmptyTask() set (inputs += i, name := "EmptyT")
     val emptyC = Capsule(emptyT)
 
-    val moleTask = MoleTask(tm1 -- emptyC, emptyC) set (
+    val moleTask = MoleTask((tm1 -- emptyC) toMole, emptyC) set (
       inputs += i,
       i := "test"
     )
 
-    MoleExecution(Mole(moleTask)).start.waitUntilEnded
+    MoleExecution(Mole(moleTask)).run
   }
 
 }

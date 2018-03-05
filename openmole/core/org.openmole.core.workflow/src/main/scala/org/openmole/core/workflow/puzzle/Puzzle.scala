@@ -17,6 +17,7 @@
 
 package org.openmole.core.workflow.puzzle
 
+import monocle.macros.Lenses
 import org.openmole.core.context.Context
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.execution._
@@ -26,77 +27,26 @@ import org.openmole.core.workflow.transition._
 import org.openmole.core.workspace.{ NewFile, Workspace }
 import shapeless._
 import ops.hlist._
+import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.workflow.validation._
 import org.openmole.core.preference._
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.tool.random._
 import org.openmole.tool.thread._
 
-object ToPuzzle {
-
-  def apply[T](f: T ⇒ Puzzle): ToPuzzle[T] = new ToPuzzle[T] {
-    override def toPuzzle(t: T): Puzzle = f(t)
+object ToPuzzlePiece {
+  def apply[T](f: T ⇒ PuzzlePiece): ToPuzzlePiece[T] = new ToPuzzlePiece[T] {
+    override def apply(t: T): PuzzlePiece = f(t)
   }
 
-  implicit val puzzleToPuzzle = ToPuzzle[Puzzle](identity)
-  implicit val puzzlePieceToPuzzle = ToPuzzle[PuzzlePiece](_.buildPuzzle)
-  implicit val puzzleContainerToPuzzle = ToPuzzle[PuzzleContainer](_.buildPuzzle)
-  implicit val slotToPuzzle = ToPuzzle[Slot](_.toPuzzle)
-  implicit val capsuleToPuzzle = ToPuzzle[Capsule](_.toPuzzle)
-  implicit val taskToPuzzle = ToPuzzle[Task](p ⇒ Capsule(p).toPuzzle)
-  implicit def hlistCanBeToPuzzle[P: ToPuzzle, H <: HList](implicit select: Selector[H, P]) = ToPuzzle[H](h ⇒ implicitly[ToPuzzle[P]].toPuzzle(select(h)))
+  implicit def slotToPuzzlePiece = ToPuzzlePiece[Slot](s ⇒ PuzzlePiece(s))
+  implicit def capsuleToPuzzlePiece = ToPuzzlePiece[Capsule](capsule ⇒ PuzzlePiece(Slot(capsule)))
+  implicit def taskToPuzzlePieceConverter = ToPuzzlePiece[Task](task ⇒ PuzzlePiece(Slot(Capsule(task))))
 
 }
 
-trait ToPuzzle[-T] {
-  def toPuzzle(t: T): Puzzle
-}
-
-object Puzzle {
-
-  implicit def toPuzzle[P: ToPuzzle](p: P): Puzzle = implicitly[ToPuzzle[P]].toPuzzle(p)
-
-  def merge[P1: ToPuzzle, P2: ToPuzzle](p1: P1, p2: P2) =
-    new Puzzle(
-      p1.firstSlot,
-      p1.lasts,
-      p1.transitions.toList ::: p2.transitions.toList,
-      p1.dataChannels.toList ::: p2.dataChannels.toList,
-      p1.sources.toList ::: p2.sources.toList,
-      p1.hooks.toList ::: p2.hooks.toList,
-      p1.environments ++ p2.environments,
-      p1.grouping ++ p2.grouping
-    )
-
-  def merge(
-    first:        Slot,
-    lasts:        Iterable[Capsule],
-    puzzles:      Iterable[Puzzle],
-    transitions:  Iterable[ITransition] = Iterable.empty,
-    dataChannels: Iterable[DataChannel] = Iterable.empty
-  ) =
-    new Puzzle(
-      first,
-      lasts,
-      transitions.toList ::: puzzles.flatMap { _.transitions }.toList,
-      dataChannels.toList ::: puzzles.flatMap { _.dataChannels }.toList,
-      puzzles.flatMap(_.sources),
-      puzzles.flatMap(_.hooks),
-      puzzles.flatMap { _.environments }.toMap,
-      puzzles.flatMap { _.grouping }.toMap
-    )
-
-  def transitionOutputs(puzzle: Puzzle, lastTransition: (Puzzle, Puzzle) ⇒ Puzzle) = {
-    val last = Slot(EmptyTask())
-    val _puzzle = lastTransition(puzzle, last)
-    TypeUtil.receivedTypes(_puzzle.toMole, _puzzle.sources, _puzzle.hooks)(last) toSeq
-  }
-}
-
-object PuzzlePiece {
-  implicit def slotToPuzzlePieceConverter(slot: Slot) = slot.toPuzzlePiece
-  implicit def capsuleToPuzzlePieceConverter(capsule: Capsule) = capsule.toPuzzlePiece
-  implicit def taskToPuzzlePieceConverter(task: Task) = Capsule(task).toPuzzlePiece
+trait ToPuzzlePiece[-T] {
+  def apply(t: T): PuzzlePiece
 }
 
 case class PuzzlePiece(
@@ -122,7 +72,90 @@ case class PuzzlePiece(
 
 }
 
-case class Puzzle(
+object ToPuzzle {
+
+  def apply[T](f: T ⇒ Puzzle): ToPuzzle[T] = new ToPuzzle[T] {
+    override def toPuzzle(t: T): Puzzle = f(t)
+  }
+
+  implicit val puzzleToPuzzle = ToPuzzle[Puzzle](identity)
+  implicit val puzzlePieceToPuzzle = ToPuzzle[PuzzlePiece](_.buildPuzzle)
+  implicit val slotToPuzzle = ToPuzzle[Slot](s ⇒ Puzzle(s, lasts = Seq(s.capsule)))
+  implicit val capsuleToPuzzle = ToPuzzle[Capsule](c ⇒ Puzzle(Slot(c), lasts = Seq(c)))
+  implicit val taskToPuzzle =
+    ToPuzzle[Task] { p: Task ⇒
+      val capsule = Capsule(p)
+      Puzzle(Slot(capsule), lasts = Seq(capsule))
+    }
+
+  implicit def hListCanBeToPuzzle[P: ToPuzzle, H <: HList](implicit select: Selector[H, P]) = ToPuzzle[H](h ⇒ implicitly[ToPuzzle[P]].toPuzzle(select(h)))
+
+}
+
+trait ToPuzzle[-T] {
+  def toPuzzle(t: T): Puzzle
+}
+
+object Puzzle {
+
+  def merge[P1: ToPuzzle, P2: ToPuzzle](p1: P1, p2: P2) = {
+    new Puzzle(
+      p1.firstSlot,
+      p1.lasts,
+      p1.transitions.toList ::: p2.transitions.toList,
+      p1.dataChannels.toList ::: p2.dataChannels.toList,
+      (p1.sources.toList ::: p2.sources.toList).distinct,
+      (p1.hooks.toList ::: p2.hooks.toList).distinct,
+      p1.environments ++ p2.environments,
+      p1.grouping ++ p2.grouping
+    )
+  }
+
+  def merge(
+    first:        Slot,
+    lasts:        Iterable[Capsule],
+    puzzles:      Iterable[Puzzle],
+    transitions:  Iterable[ITransition] = Iterable.empty,
+    dataChannels: Iterable[DataChannel] = Iterable.empty
+  ) =
+    new Puzzle(
+      first,
+      lasts,
+      transitions.toList ::: puzzles.flatMap { _.transitions }.toList,
+      dataChannels.toList ::: puzzles.flatMap { _.dataChannels }.toList,
+      puzzles.flatMap(_.sources).toVector.distinct,
+      puzzles.flatMap(_.hooks).toVector.distinct,
+      puzzles.flatMap { _.environments }.toMap,
+      puzzles.flatMap { _.grouping }.toMap
+    )
+
+  def transitionOutputs(puzzle: Puzzle, lastTransition: (Puzzle, Puzzle) ⇒ Puzzle) = {
+    val last = Slot(EmptyTask())
+    val _puzzle = lastTransition(puzzle, last)
+    TypeUtil.receivedTypes(_puzzle.toMole, _puzzle.sources, _puzzle.hooks)(last) toSeq
+  }
+
+  trait PuzzleSelector[L <: HList] {
+    def apply(l: L): Puzzle
+  }
+
+  object PuzzleSelector {
+
+    def apply[L <: HList](implicit selector: PuzzleSelector[L]): PuzzleSelector[L] = selector
+
+    implicit def select[H, T <: HList](implicit pz: ToPuzzle[H]): PuzzleSelector[H :: T] =
+      new PuzzleSelector[H :: T] {
+        def apply(l: H :: T) = pz.toPuzzle(l.head)
+      }
+
+    implicit def recurse[H, T <: HList](implicit st: PuzzleSelector[T], pz: ToPuzzle[T]): PuzzleSelector[H :: T] =
+      new PuzzleSelector[H :: T] {
+        def apply(l: H :: T) = st(l.tail)
+      }
+  }
+}
+
+@Lenses case class Puzzle(
   firstSlot:    Slot,
   lasts:        Iterable[Capsule]                 = Iterable.empty,
   transitions:  Iterable[ITransition]             = Iterable.empty,
@@ -173,10 +206,9 @@ case class Puzzle(
 
   def inputs = first.inputs(toMole, sources, hooks).toSeq
   def defaults = first.task.defaults
+
   def exploredOutputs = Puzzle.transitionOutputs(this, _ -< _)
   def aggregatedOutputs = Puzzle.transitionOutputs(this, _ >- _)
   def outputs = Puzzle.transitionOutputs(this, _ -- _)
-
-  def buildPuzzle = this
 
 }

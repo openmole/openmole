@@ -17,7 +17,7 @@ set FLAG="-XX:+UseCompressedOops"
 set SCRIPT_ARGS=
 
 :run
-java -Xss2M -Dfile.encoding=UTF-8 -Duser.country=US -Duser.language=en -Dosgi.locking=none -Dopenmole.location="%PWD%" -Dosgi.classloader.singleThreadLoads=true -Dosgi.configuration.area=%ran% -XX:MaxPermSize=128M -XX:+UseG1GC -XX:CICompilerCount=2 -XX:ParallelGCThreads=2 -XX:ConcGCThreads=2 -XX:G1ConcRefinementThreads=2 -Xmx%MEMORY%m -XX:MaxPermSize=128M %FLAG% -cp "%PWD%/launcher/*" org.openmole.launcher.Launcher  --plugins "%PWD%/plugins/" --run org.openmole.ui.Application --priority "logging" --osgi-directory %ran% -- %* %SCRIPT_ARGS%
+java -Xss8M -Dfile.encoding=UTF-8 -Duser.country=US -Duser.language=en -Dosgi.locking=none -Dopenmole.location="%PWD%" -Dosgi.classloader.singleThreadLoads=true -Dosgi.configuration.area=%ran% -XX:MaxPermSize=128M -XX:+UseG1GC -XX:CICompilerCount=2 -XX:ParallelGCThreads=2 -XX:ConcGCThreads=2 -XX:G1ConcRefinementThreads=2 -Xmx%MEMORY%m -XX:MaxPermSize=128M %FLAG% -cp "%PWD%/launcher/*" org.openmole.launcher.Launcher  --plugins "%PWD%/plugins/" --run org.openmole.ui.Application --priority "logging" --osgi-directory %ran% -- %* %SCRIPT_ARGS%
 set ret=%errorlevel%
 rmdir /s /q %ran%
 

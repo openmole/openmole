@@ -59,5 +59,6 @@ class PriorityQueue[T] {
 
   def all = synchronized { queues.values.toVector.flatMap(_.iterator().asScala.toVector) }
   def clear() = synchronized { queues.clear() }
+  def isEmpty = synchronized(size == 0)
 
 }

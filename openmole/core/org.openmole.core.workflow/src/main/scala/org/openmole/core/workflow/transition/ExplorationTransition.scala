@@ -24,6 +24,7 @@ import org.openmole.core.expansion.{ Condition, FromContext }
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.workflow.dsl
 import org.openmole.core.workflow.dsl._
+import org.openmole.core.workflow.mole.MoleExecution.SubMoleExecutionState
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.validation._
@@ -32,30 +33,45 @@ import org.openmole.tool.lock._
 
 import scala.collection.mutable.{ HashSet, ListBuffer }
 
-class ExplorationTransition(val start: Capsule, val end: Slot, val condition: Condition = Condition.True, val filter: BlockList = BlockList.empty) extends IExplorationTransition with ValidateTransition {
+object ExplorationTransition {
 
-  override def validate(inputs: Seq[Val[_]]) = Validate { p ⇒
-    import p._
-    condition.validate(inputs)
+  def registerAggregationTransitions(transition: ExplorationTransition, ticket: Ticket, subMoleExecution: SubMoleExecutionState, executionContext: MoleExecutionContext) = {
+    val alreadySeen = new HashSet[Capsule]
+    val toProcess = new ListBuffer[(Capsule, Int)]
+    toProcess += ((transition.end.capsule, 0))
+    while (!toProcess.isEmpty) {
+      val cur = toProcess.remove(0)
+      val capsule = cur._1
+      val level = cur._2
+
+      if (!alreadySeen(capsule)) {
+        alreadySeen += capsule
+
+        subMoleExecution.moleExecution.mole.outputTransitions(capsule).foreach {
+          case t: IAggregationTransition ⇒
+            if (level > 0) toProcess += t.end.capsule → (level - 1)
+            else if (level == 0) {
+              subMoleExecution.aggregationTransitionRegistry.register(t, ticket, new ListBuffer)
+              subMoleExecution.onFinish += { se ⇒ AggregationTransition.aggregate(t, se, ticket, executionContext) }
+            }
+          case t: IExplorationTransition ⇒ toProcess += t.end.capsule → (level + 1)
+          case t                         ⇒ toProcess += t.end.capsule → level
+        }
+      }
+    }
   }
 
-  override def perform(context: Context, ticket: Ticket, subMole: SubMoleExecution, executionContext: MoleExecutionContext) = {
-    val subSubMole = subMole.newChild
-    registerAggregationTransitions(ticket, subSubMole, executionContext)
-    subSubMole.transitionLock { submitIn(filtered(context), ticket, subSubMole, executionContext) }
-  }
-
-  def submitIn(context: Context, ticket: Ticket, subMole: SubMoleExecution, executionContext: MoleExecutionContext) = {
+  def submitIn(transition: ExplorationTransition, context: Context, ticket: Ticket, subMole: SubMoleExecutionState, executionContext: MoleExecutionContext) = {
     val moleExecution = subMole.moleExecution
     val mole = moleExecution.mole
-    def explored = ExplorationTask.explored(start)
-    val (factors, outputs) = start.outputs(mole, moleExecution.sources, moleExecution.hooks).partition(explored)
+    def explored = ExplorationTask.explored(transition.start)
+    val (factors, outputs) = transition.start.outputs(mole, moleExecution.sources, moleExecution.hooks).partition(explored)
 
     val typedFactors = factors.map(_.asInstanceOf[Val[Array[Any]]])
     val values = typedFactors.toList.map(context(_).toIterable).transpose
 
     for (value ← values) {
-      val newTicket = subMole.moleExecution.nextTicket(ticket)
+      val newTicket = MoleExecution.nextTicket(moleExecution, ticket)
       val variables = new ListBuffer[Variable[_]]
 
       for (in ← outputs)
@@ -72,35 +88,25 @@ class ExplorationTransition(val start: Capsule, val end: Slot, val condition: Co
 
       import executionContext.services._
 
-      if (condition().from(variables)) { ITransition.submitNextJobsIfReady(this)(ListBuffer() ++ variables, newTicket, subMole) }
+      if (transition.condition.from(variables)) { ITransition.submitNextJobsIfReady(transition)(ListBuffer() ++ variables, newTicket, subMole) }
     }
 
   }
 
-  private def registerAggregationTransitions(ticket: Ticket, subMoleExecution: SubMoleExecution, executionContext: MoleExecutionContext) = {
-    val alreadySeen = new HashSet[Capsule]
-    val toProcess = new ListBuffer[(Capsule, Int)]
-    toProcess += ((end.capsule, 0))
+}
 
-    while (!toProcess.isEmpty) {
-      val cur = toProcess.remove(0)
-      val capsule = cur._1
-      val level = cur._2
+class ExplorationTransition(val start: Capsule, val end: Slot, val condition: Condition = Condition.True, val filter: BlockList = BlockList.empty) extends IExplorationTransition with ValidateTransition {
 
-      if (!alreadySeen(capsule)) {
-        alreadySeen += capsule
+  override def validate(inputs: Seq[Val[_]]) = Validate { p ⇒
+    import p._
+    condition.validate(inputs)
+  }
 
-        subMoleExecution.moleExecution.mole.outputTransitions(capsule).foreach {
-          case t: IAggregationTransition ⇒
-            if (level > 0) toProcess += t.end.capsule → (level - 1)
-            else if (level == 0) {
-              subMoleExecution.aggregationTransitionRegistry.register(t, ticket, new ListBuffer)
-              subMoleExecution.onFinish { (se, ticket) ⇒ t.aggregate(se, ticket, executionContext) }
-            }
-          case t: IExplorationTransition ⇒ toProcess += t.end.capsule → (level + 1)
-          case t                         ⇒ toProcess += t.end.capsule → level
-        }
-      }
+  override def perform(context: Context, ticket: Ticket, moleExecution: MoleExecution, subMole: SubMoleExecution, executionContext: MoleExecutionContext) = MoleExecutionMessage.send(moleExecution) {
+    MoleExecutionMessage.PerformTransition(subMole) { subMoleState ⇒
+      val subSubMole = MoleExecution.newChildSubMoleExecution(subMoleState)
+      ExplorationTransition.registerAggregationTransitions(this, ticket, subSubMole, executionContext)
+      ExplorationTransition.submitIn(this, filtered(context), ticket, subSubMole, executionContext)
     }
   }
 

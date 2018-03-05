@@ -95,20 +95,8 @@ object MoleTask {
         lastContextLock { if (ev.capsule == last) lastContext = Some(ev.moleJob.context) }
     }
 
-    execution.start(context)
-
-    try execution.waitUntilEnded
-    catch {
-      case e: ThreadDeath ⇒
-        execution.cancel
-        throw e
-      case e: InterruptedException ⇒
-        execution.cancel
-        throw e
-    }
-    finally {
-      fileService.deleteWhenEmpty(newFile.baseDir)
-    }
+    try execution.run(Some(context), validate = false)
+    finally fileService.deleteWhenEmpty(newFile.baseDir)
 
     lastContext.getOrElse(throw new UserBadDataError("Last capsule " + last + " has never been executed."))
   }

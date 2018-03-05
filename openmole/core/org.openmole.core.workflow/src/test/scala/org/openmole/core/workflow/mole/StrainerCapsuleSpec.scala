@@ -56,7 +56,7 @@ class StrainerCapsuleSpec extends FlatSpec with Matchers {
     val t2c = Capsule(t2)
 
     val ex = t1c -- strainerC -- t2c
-    ex.start.waitUntilEnded
+    ex.run
   }
 
   "The strainer capsule" should "let the data pass through even if linked with a data channel to the root" in {
@@ -86,7 +86,7 @@ class StrainerCapsuleSpec extends FlatSpec with Matchers {
     val strainerC = Slot(Capsule(strainer, strain = true))
 
     val ex = (root -- tNone -- (Capsule(t1), tNone2) -- strainerC -- t2) & (root oo strainerC)
-    ex.start.waitUntilEnded
+    ex.run
   }
 
 }

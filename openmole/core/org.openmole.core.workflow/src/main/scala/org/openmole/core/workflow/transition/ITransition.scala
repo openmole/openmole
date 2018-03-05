@@ -20,48 +20,39 @@ package org.openmole.core.workflow.transition
 import org.openmole.core.context._
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.expansion.FromContext
+import org.openmole.core.workflow.mole.MoleExecution.SubMoleExecutionState
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.tools.ContextAggregator._
 import org.openmole.core.workflow.validation.TypeUtil._
 
 object ITransition {
 
-  def nextTaskReady(end: Slot)(ticket: Ticket, subMole: SubMoleExecution): Boolean = {
-    val registry = subMole.transitionRegistry
-    val mole = subMole.moleExecution.mole
-    mole.inputTransitions(end).forall(registry.isRegistred(_, ticket))
-  }
+  def nextTaskReady(end: Slot)(ticket: Ticket, registry: MoleExecution.TransitionRegistry, mole: Mole): Boolean = mole.inputTransitions(end).forall(registry.isRegistred(_, ticket))
 
-  def submitNextJobsIfReady(transition: ITransition)(context: Iterable[Variable[_]], ticket: Ticket, subMole: SubMoleExecution) = {
-    val moleExecution = subMole.moleExecution
-    val registry = subMole.transitionRegistry
-    val mole = subMole.moleExecution.mole
+  def submitNextJobsIfReady(transition: ITransition)(context: Iterable[Variable[_]], ticket: Ticket, subMoleState: SubMoleExecutionState) = {
+    val mole = subMoleState.moleExecution.mole
+    subMoleState.transitionRegistry.register(transition, ticket, context)
+    if (nextTaskReady(transition.end)(ticket, subMoleState.transitionRegistry, mole)) {
+      val dataChannelVariables = mole.inputDataChannels(transition.end).toList.flatMap { d ⇒ DataChannel.consums(d, ticket, subMoleState.moleExecution) }
 
-    import transition.end
-
-    registry.register(transition, ticket, context)
-    if (nextTaskReady(end)(ticket, subMole)) {
-      val dataChannelVariables = mole.inputDataChannels(end).toList.flatMap { _.consums(ticket, moleExecution) }
-
-      def removeVariables(t: ITransition) = registry.remove(t, ticket).getOrElse(throw new InternalProcessingError("BUG context should be registered")).toIterable
+      def removeVariables(t: ITransition) = subMoleState.transitionRegistry.remove(t, ticket).getOrElse(throw new InternalProcessingError("BUG context should be registered")).toIterable
 
       val transitionsVariables: Iterable[Variable[_]] =
-        mole.inputTransitions(end).toList.flatMap {
+        mole.inputTransitions(transition.end).toList.flatMap {
           t ⇒ removeVariables(t)
         }
 
       val combinasion = (dataChannelVariables ++ transitionsVariables)
 
       val newTicket =
-        if (mole.slots(end.capsule).size <= 1) ticket
-        else moleExecution.nextTicket(ticket.parent.getOrElse(throw new InternalProcessingError("BUG should never reach root ticket")))
+        if (mole.slots(transition.end.capsule).size <= 1) ticket
+        else MoleExecution.nextTicket(subMoleState.moleExecution, ticket.parent.getOrElse(throw new InternalProcessingError("BUG should never reach root ticket")))
 
       val toArrayManifests =
-        validTypes(mole, moleExecution.sources, moleExecution.hooks)(end).filter(_.toArray).map(ct ⇒ ct.name → ct.`type`).toMap[String, ValType[_]]
+        validTypes(mole, subMoleState.moleExecution.sources, subMoleState.moleExecution.hooks)(transition.end).filter(_.toArray).map(ct ⇒ ct.name → ct.`type`).toMap[String, ValType[_]]
 
-      val newContext = aggregate(end.capsule.inputs(mole, moleExecution.sources, moleExecution.hooks), toArrayManifests, combinasion.map(ticket.content → _))
-
-      subMole.submit(end.capsule, newContext, newTicket)
+      val newContext = aggregate(transition.end.capsule.inputs(mole, subMoleState.moleExecution.sources, subMoleState.moleExecution.hooks), toArrayManifests, combinasion.map(ticket.content → _))
+      MoleExecution.submit(subMoleState, transition.end.capsule, newContext, newTicket)
     }
   }
 }
@@ -116,7 +107,7 @@ trait ITransition {
    * @param ticket    ticket of the previous job
    * @param subMole   current submole
    */
-  def perform(context: Context, ticket: Ticket, subMole: SubMoleExecution, moleExecutionContext: MoleExecutionContext): Unit
+  def perform(context: Context, ticket: Ticket, moleExecution: MoleExecution, subMole: SubMoleExecution, moleExecutionContext: MoleExecutionContext): Unit
 
   protected def filtered(context: Context): Context = context.filterNot { case (_, v) ⇒ filter(v.prototype) }
 
