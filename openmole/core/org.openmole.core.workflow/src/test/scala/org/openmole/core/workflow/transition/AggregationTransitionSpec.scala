@@ -41,104 +41,104 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
 
   import org.openmole.core.workflow.tools.StubServices._
 
-  //  "Aggregation transition" should "turn results of exploration into a array of values" in {
-  //    @volatile var endCapsExecuted = 0
-  //
-  //    val data = List("A", "A", "B", "C")
-  //    val i = Val[String]("i")
-  //
-  //    val sampling = new ExplicitSampling(i, data)
-  //
-  //    val exc = Capsule(ExplorationTask(sampling))
-  //
-  //    val emptyT = EmptyTask() set ((inputs, outputs) += i)
-  //
-  //    val emptyC = Capsule(emptyT)
-  //
-  //    val testT = TestTask { context ⇒
-  //      context.contains(i.toArray) should equal(true)
-  //      context(i.toArray).sorted.deep should equal(data.toArray.deep)
-  //      endCapsExecuted += 1
-  //      context
-  //    } set (
-  //      name := "Test",
-  //      inputs += i.array
-  //    )
-  //
-  //    val testC = Capsule(testT)
-  //
-  //    val mole = exc -< emptyC >- testC toMole
-  //
-  //    MoleExecution(mole).start.waitUntilEnded
-  //    endCapsExecuted should equal(1)
-  //    MoleExecution(mole).start.waitUntilEnded
-  //    endCapsExecuted should equal(2)
-  //  }
-  //
-  //  "Aggregation transition" should "should also work for native types" in {
-  //    @volatile var endCapsExecuted = 0
-  //
-  //    val data = List(1, 2, 3, 2)
-  //    val i = Val[Int]("i")
-  //
-  //    val sampling = new ExplicitSampling(i, data)
-  //
-  //    val exc = Capsule(ExplorationTask(sampling))
-  //
-  //    val emptyT = EmptyTask() set ((inputs, outputs) += i)
-  //    val emptyC = Capsule(emptyT)
-  //
-  //    val testT = TestTask { context ⇒
-  //      context.contains(i.toArray) should equal(true)
-  //      context(i.toArray).getClass should equal(classOf[Array[Int]])
-  //      context(i.toArray).sorted.deep should equal(data.sorted.toArray.deep)
-  //      endCapsExecuted += 1
-  //      context
-  //    } set (
-  //      name := "Test",
-  //      inputs += i.array
-  //    )
-  //
-  //    val testC = Capsule(testT)
-  //
-  //    val ex = exc -< emptyC >- testC
-  //
-  //    ex.start.waitUntilEnded
-  //    endCapsExecuted should equal(1)
-  //  }
-  //
-  //  "Aggregation transition" should "support cancel and start of a new execution" in {
-  //    val endCapsExecuted = new AtomicInteger()
-  //
-  //    val data = 0 to 1000
-  //    val i = Val[Int]("i")
-  //
-  //    val sampling = new ExplicitSampling(i, data)
-  //
-  //    val exc = Capsule(ExplorationTask(sampling))
-  //
-  //    val emptyT = EmptyTask() set ((inputs, outputs) += i)
-  //
-  //    val emptyC = Capsule(emptyT)
-  //
-  //    val testT = TestTask { context ⇒
-  //      context.contains(i.toArray) should equal(true)
-  //      context(i.toArray).sorted.deep should equal(data.toArray.deep)
-  //      endCapsExecuted.incrementAndGet()
-  //      context
-  //    } set (
-  //      name := "Test",
-  //      inputs += i.array
-  //    )
-  //
-  //    val testC = Capsule(testT)
-  //    val mole = exc -< emptyC >- testC toMole
-  //
-  //    MoleExecution(mole).start.cancel
-  //    endCapsExecuted.set(0)
-  //    MoleExecution(mole).start.waitUntilEnded
-  //    endCapsExecuted.get() should equal(1)
-  //  }
+  "Aggregation transition" should "turn results of exploration into a array of values" in {
+    @volatile var endCapsExecuted = 0
+
+    val data = List("A", "A", "B", "C")
+    val i = Val[String]("i")
+
+    val sampling = new ExplicitSampling(i, data)
+
+    val exc = Capsule(ExplorationTask(sampling))
+
+    val emptyT = EmptyTask() set ((inputs, outputs) += i)
+
+    val emptyC = Capsule(emptyT)
+
+    val testT = TestTask { context ⇒
+      context.contains(i.toArray) should equal(true)
+      context(i.toArray).sorted.deep should equal(data.toArray.deep)
+      endCapsExecuted += 1
+      context
+    } set (
+      name := "Test",
+      inputs += i.array
+    )
+
+    val testC = Capsule(testT)
+
+    val mole = exc -< emptyC >- testC toMole
+
+    MoleExecution(mole).run
+    endCapsExecuted should equal(1)
+    MoleExecution(mole).run
+    endCapsExecuted should equal(2)
+  }
+
+  "Aggregation transition" should "should also work for native types" in {
+    @volatile var endCapsExecuted = 0
+
+    val data = List(1, 2, 3, 2)
+    val i = Val[Int]("i")
+
+    val sampling = new ExplicitSampling(i, data)
+
+    val exc = Capsule(ExplorationTask(sampling))
+
+    val emptyT = EmptyTask() set ((inputs, outputs) += i)
+    val emptyC = Capsule(emptyT)
+
+    val testT = TestTask { context ⇒
+      context.contains(i.toArray) should equal(true)
+      context(i.toArray).getClass should equal(classOf[Array[Int]])
+      context(i.toArray).sorted.deep should equal(data.sorted.toArray.deep)
+      endCapsExecuted += 1
+      context
+    } set (
+      name := "Test",
+      inputs += i.array
+    )
+
+    val testC = Capsule(testT)
+
+    val ex = exc -< emptyC >- testC
+
+    ex.run
+    endCapsExecuted should equal(1)
+  }
+
+  "Aggregation transition" should "support cancel and start of a new execution" in {
+    val endCapsExecuted = new AtomicInteger()
+
+    val data = 0 to 1000
+    val i = Val[Int]("i")
+
+    val sampling = new ExplicitSampling(i, data)
+
+    val exc = Capsule(ExplorationTask(sampling))
+
+    val emptyT = EmptyTask() set ((inputs, outputs) += i)
+
+    val emptyC = Capsule(emptyT)
+
+    val testT = TestTask { context ⇒
+      context.contains(i.toArray) should equal(true)
+      context(i.toArray).sorted.deep should equal(data.toArray.deep)
+      endCapsExecuted.incrementAndGet()
+      context
+    } set (
+      name := "Test",
+      inputs += i.array
+    )
+
+    val testC = Capsule(testT)
+    val mole = exc -< emptyC >- testC toMole
+
+    MoleExecution(mole).start.cancel
+    endCapsExecuted.set(0)
+    MoleExecution(mole).run
+    endCapsExecuted.get() should equal(1)
+  }
 
   "Aggregation transition" should "not be executed when a task failed in exploration" in {
     val data = 0 to 1000
