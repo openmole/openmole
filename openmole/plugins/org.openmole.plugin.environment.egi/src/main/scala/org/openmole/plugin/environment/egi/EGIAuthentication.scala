@@ -29,6 +29,7 @@ import java.util.zip.GZIPInputStream
 
 import org.openmole.core.exception._
 import org.openmole.core.fileservice._
+import org.openmole.core.outputmanager.OutputManager
 import org.openmole.tool.file._
 import org.openmole.tool.logger.JavaLogger
 import org.openmole.tool.stream._
@@ -162,23 +163,19 @@ object EGIAuthentication extends JavaLogger {
     fqan:   Option[String])(implicit workspace: Workspace, preference: Preference): util.Try[gridscale.egi.VOMS.VOMSCredential] = EGI { implicits ⇒
     import implicits._
 
-    def queryProxy(h: String) = {
-      def proxy =
-        gridscale.egi.VOMS.proxy(
-          h,
-          implicitly[EGIAuthenticationInterface[A]].apply(a),
-          EGIAuthentication.CACertificatesDir,
-          preference(EGIEnvironment.ProxyLifeTime),
-          fqan,
-          timeout = preference(EGIEnvironment.VOMSTimeout)
-        )
-
-      util.Try(proxy)
-    }
+    def queryProxy(h: String) =
+      gridscale.egi.VOMS.proxy(
+        h,
+        implicitly[EGIAuthenticationInterface[A]].apply(a),
+        EGIAuthentication.CACertificatesDir,
+        preference(EGIEnvironment.ProxyLifeTime),
+        fqan,
+        timeout = preference(EGIEnvironment.VOMSTimeout)
+      )
 
     def vomses = voms orElse getVOMS(voName)
 
-    findWorking(vomses.map(_.toList).getOrElse(Nil), queryProxy, "VOMS server")
+    util.Try(findWorking(vomses.map(_.toList).getOrElse(Nil), queryProxy, "VOMS server"))
   }
 
   def testPassword[A: EGIAuthenticationInterface](a: A)(implicit cypher: Cypher) =

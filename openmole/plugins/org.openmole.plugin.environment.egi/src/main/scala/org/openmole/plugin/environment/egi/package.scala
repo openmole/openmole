@@ -28,20 +28,20 @@ package object egi {
   }
 
   def findWorking[S, T](servers: Seq[S], f: S ⇒ T, service: String = "server"): T = {
-    def findWorking0(servers: List[S]): Try[T] =
+    def findWorking0(servers: List[S]): T =
       servers match {
-        case Nil      ⇒ Failure(new RuntimeException(s"List of $service is empty"))
-        case h :: Nil ⇒ Try(f(h))
+        case Nil      ⇒ throw new RuntimeException(s"List of $service is empty")
+        case h :: Nil ⇒ f(h)
         case h :: tail ⇒
-          Try(f(h)) match {
-            case Failure(_) ⇒ findWorking0(tail)
-            case s          ⇒ s
+          try f(h)
+          catch {
+            case t: Throwable ⇒ findWorking0(tail)
           }
       }
 
-    findWorking0(servers.toList) match {
-      case Failure(t) ⇒ throw new RuntimeException(s"No $service is working among $servers", t)
-      case Success(t) ⇒ t
+    try findWorking0(servers.toList)
+    catch {
+      case t: Throwable ⇒ throw new RuntimeException(s"No $service is working among $servers", t)
     }
   }
 
