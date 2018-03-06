@@ -345,7 +345,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
                       execution.addRunning(execId, envIds)
                       envIds.foreach { case (envId, env) ⇒ env.listen(execution.environmentListener(envId)) }
 
-                      Try(ex.start) match {
+                      catchAll(ex.start) match {
                         case Failure(e) ⇒ error(e)
                         case Success(_) ⇒
                           val inserted = execution.addMoleExecution(execId, ex)

@@ -574,15 +574,15 @@ class MoleExecution(
 
   def run: Unit = run(None)
 
+  def validate = {
+    import executionContext.services._
+    val validationErrors = Validation(mole, implicits, sources, hooks)
+    if (!validationErrors.isEmpty) throw new UserBadDataError(s"Formal validation of your mole has failed, ${validationErrors.size} error(s) has(ve) been found.\n" + validationErrors.mkString("\n") + s"\nIn mole: $mole")
+  }
+
   def run(context: Option[Context] = None, validate: Boolean = true) = {
     if (!_started) {
-      import executionContext.services._
-
-      if (validate) {
-        val validationErrors = Validation(mole, implicits, sources, hooks)
-        if (!validationErrors.isEmpty) throw new UserBadDataError(s"Formal validation of your mole has failed, ${validationErrors.size} error(s) has(ve) been found.\n" + validationErrors.mkString("\n") + s"\nIn mole: $mole")
-      }
-
+      if (validate) this.validate
       MoleExecutionMessage.send(this)(MoleExecutionMessage.StartMoleExecution(context))
       MoleExecutionMessage.dispatcher(this)
       _exception.foreach(e ⇒ throw e.exception)
@@ -593,7 +593,8 @@ class MoleExecution(
   }
 
   def start = {
-    val t = executionContext.services.threadProvider.newThread { () ⇒ run }
+    validate
+    val t = executionContext.services.threadProvider.newThread { () ⇒ run(None, validate = false) }
     t.start()
     this
   }
