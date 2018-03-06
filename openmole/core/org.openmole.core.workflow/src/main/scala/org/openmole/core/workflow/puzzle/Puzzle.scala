@@ -39,6 +39,7 @@ object ToPuzzlePiece {
     override def apply(t: T): PuzzlePiece = f(t)
   }
 
+  implicit def puzzlePieceToPuzzlePiece = ToPuzzlePiece[PuzzlePiece](identity)
   implicit def slotToPuzzlePiece = ToPuzzlePiece[Slot](s ⇒ PuzzlePiece(s))
   implicit def capsuleToPuzzlePiece = ToPuzzlePiece[Capsule](capsule ⇒ PuzzlePiece(Slot(capsule)))
   implicit def taskToPuzzlePieceConverter = ToPuzzlePiece[Task](task ⇒ PuzzlePiece(Slot(Capsule(task))))
