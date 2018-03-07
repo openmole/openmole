@@ -111,12 +111,12 @@ class FileToolBox(initSafePath: SafePath) {
       case prefix.editInput ⇒ true
       case prefix.confirmRename ⇒
         safePath.foreach { sp ⇒
-          testRename(sp, parent)
+          testRename(sp, parent, () ⇒ parentNode(parent, 2).replaceChild(buildTitleRoot(editTitle.value), parentNode(parent, 1)))
         }
         true
       case prefix.confirmOverwrite ⇒
         safePath.foreach { sp ⇒
-          rename(sp, (safePath: SafePath) ⇒ {})
+          rename(sp, () ⇒ {})
           parentNode(parent, 3).replaceChild(buildTitleRoot(sp.name), parentNode(parent, 2))
           closeAll()
         }
@@ -132,8 +132,6 @@ class FileToolBox(initSafePath: SafePath) {
     }
   }
 
-  //def safePath = treenodemanager.instance.current.now ++ treeNode.name.now
-
   val editTitle = inputTag()(
     placeholder := "File name",
     //  width := 200,
@@ -147,8 +145,7 @@ class FileToolBox(initSafePath: SafePath) {
       () ⇒
         {
           treeNodePanel.currentSafePath.now.foreach { sp ⇒
-            testRename(sp, editForm.parentNode)
-            // rename((safePath: SafePath) ⇒ parentNode(editForm, 2).replaceChild(buildTitleRoot(safePath.name), parentNode(editForm, 1)))
+            testRename(sp, editTitle, () ⇒ parentNode(editForm, 2).replaceChild(buildTitleRoot(editTitle.value), parentNode(editForm, 1)))
           }
           false
         }
@@ -173,19 +170,19 @@ class FileToolBox(initSafePath: SafePath) {
     trashTrigger
   )
 
-  def testRename(safePath: SafePath, parent: Node) = {
+  def testRename(safePath: SafePath, parent: Node, replacing: () ⇒ Unit) = {
     val newTitle = editTitle.value
     val newSafePath = safePath.parent ++ newTitle
     treeNodeTabs.saveAllTabs(() ⇒ {
       post()[Api].existsExcept(newSafePath, false).call().foreach {
         b ⇒
           if (b) parent.parentNode.replaceChild(editDiv(CONFIRM_OVERWRITE, "Overwrite ?"), parent)
-          else rename(safePath, (safePath: SafePath) ⇒ parentNode(parent, 2).replaceChild(buildTitleRoot(safePath.name), parentNode(parent, 1)))
+          else rename(safePath, replacing)
       }
     })
   }
 
-  def rename(safePath: SafePath, replacing: SafePath ⇒ Unit) = {
+  def rename(safePath: SafePath, replacing: () ⇒ Unit) = {
     val newTitle = editTitle.value
     post()[Api].renameFile(safePath, newTitle).call().foreach {
       newNode ⇒
@@ -193,7 +190,7 @@ class FileToolBox(initSafePath: SafePath) {
         treeNodePanel.invalidCacheAndDraw
         treeNodeTabs.checkTabs
         treeNodePanel.currentSafePath() = Some(safePath.parent ++ newTitle)
-        replacing(newNode)
+        replacing()
     }
   }
 
