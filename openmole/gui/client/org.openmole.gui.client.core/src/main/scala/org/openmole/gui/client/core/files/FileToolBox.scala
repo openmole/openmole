@@ -111,7 +111,7 @@ class FileToolBox(initSafePath: SafePath) {
       case prefix.editInput ⇒ true
       case prefix.confirmRename ⇒
         safePath.foreach { sp ⇒
-          testRename(sp, parent, () ⇒ parentNode(parent, 2).replaceChild(buildTitleRoot(editTitle.value), parentNode(parent, 1)))
+          testRename(sp, parent, parent, element.parentNode)
         }
         true
       case prefix.confirmOverwrite ⇒
@@ -139,18 +139,30 @@ class FileToolBox(initSafePath: SafePath) {
     id := EDIT_INPUT
   ).render
 
+  val overwriting = Var(false)
+
   val editForm: HTMLFormElement = form(
     editTitle,
     onsubmit := {
       () ⇒
         {
           treeNodePanel.currentSafePath.now.foreach { sp ⇒
-            testRename(sp, editTitle, () ⇒ parentNode(editForm, 2).replaceChild(buildTitleRoot(editTitle.value), parentNode(editForm, 1)))
+            if (overwriting.now) {
+              rename(sp, () ⇒ {})
+              treeNodePanel.closeAllPopovers
+            }
+            else
+              testRename(sp, editTitle, editForm, editForm.parentNode.lastChild)
           }
           false
         }
     }
   ).render
+
+  def replaceTitle(element: Node) = {
+    parentNode(element, 2).replaceChild(buildTitleRoot(editTitle.value), parentNode(element, 1))
+    ()
+  }
 
   def editDiv(tag: String, confirmString: String) = span(height := 24, width := 250)(
     editForm,
@@ -170,14 +182,21 @@ class FileToolBox(initSafePath: SafePath) {
     trashTrigger
   )
 
-  def testRename(safePath: SafePath, parent: Node, replacing: () ⇒ Unit) = {
+  def testRename(safePath: SafePath, parent: Node, pivot: Node, cancelNode: Node) = {
     val newTitle = editTitle.value
     val newSafePath = safePath.parent ++ newTitle
     treeNodeTabs.saveAllTabs(() ⇒ {
       post()[Api].existsExcept(newSafePath, false).call().foreach {
         b ⇒
-          if (b) parent.parentNode.replaceChild(editDiv(CONFIRM_OVERWRITE, "Overwrite ?"), parent)
-          else rename(safePath, replacing)
+          if (b) {
+            overwriting() = true
+            cancelNode.parentNode.replaceChild(editDiv(CONFIRM_OVERWRITE, "Overwrite ?"), cancelNode)
+            editTitle.focus()
+          }
+          else {
+            overwriting() = false
+            rename(safePath, () ⇒ replaceTitle(pivot))
+          }
       }
     })
   }
