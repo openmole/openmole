@@ -255,9 +255,8 @@ package object client {
 
   //TREENODE PANEL
   lazy val fileInfo: ModifierSeq = Seq(
-    floatRight,
     absolutePosition,
-    width := 100,
+    width := 120,
     right := 2,
     marginTop := 6,
     textAlign := "right"
@@ -428,6 +427,7 @@ package object client {
       fontSize := 14,
       listStyleType := "none",
       marginTop := 50,
+      paddingTop := 5,
       paddingBottom := 30,
       marginLeft := -7,
       paddingLeft := 10,

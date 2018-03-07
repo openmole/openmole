@@ -25,8 +25,10 @@ import TreeNode._
 import autowire._
 import rx._
 import org.openmole.gui.ext.api.Api
-import org.openmole.gui.ext.tool.client.{ FileManager, Utils }
 import org.scalajs.dom
+
+import scaladget.bootstrapnative.Popup
+import scaladget.bootstrapnative.Popup.Manual
 
 /*
  * Copyright (C) 16/04/15 // mathieu.leclaire@openmole.org
@@ -314,22 +316,6 @@ class TreeNodePanel {
   def stringAlertWithDetails(message: String, detail: String) =
     AlertPanel.detail(message, detail, transform = RelativeCenterPosition, zone = FileZone)
 
-  def trashNode(safePath: SafePath): Unit = {
-    stringAlert(
-      s"Do you really want to delete ${
-        safePath.name
-      }?",
-      () ⇒ {
-        CoreUtils.trashNode(safePath) {
-          () ⇒
-            treeNodeTabs -- safePath
-            treeNodeTabs.checkTabs
-            invalidCacheAndDraw
-        }
-      }
-    )
-  }
-
   def extractTGZ(safePath: SafePath) =
     post()[Api].extractTGZ(safePath).call().foreach {
       r ⇒
@@ -338,6 +324,14 @@ class TreeNodePanel {
           case _                                        ⇒ invalidCacheAndDraw
         }
     }
+
+  val popovers: Var[Seq[Popover]] = Var(Seq())
+
+  def closeAllPopovers = popovers.now.foreach {
+    _.hide
+  }
+
+  var currentSafePath: Var[Option[SafePath]] = Var(None)
 
   object ReactiveLine {
     def apply(tn: TreeNode, treeNodeType: TreeNodeType, todo: () ⇒ Unit) = new ReactiveLine(tn, treeNodeType, todo)
@@ -387,26 +381,6 @@ class TreeNodePanel {
       }
     }
 
-    def renameNode(safePath: SafePath, newName: String, replicateMode: Boolean) = {
-      def rename = post()[Api].renameFile(safePath, newName).call().foreach {
-        newNode ⇒
-          treeNodeTabs.rename(safePath, newNode)
-          treeStates.now.editionOff
-          invalidCacheAndDraw
-          treeNodeTabs.checkTabs
-      }
-
-      treeNodeTabs.saveAllTabs(() ⇒ {
-        post()[Api].existsExcept(safePath.copy(path = safePath.path.dropRight(1) :+ newName), replicateMode).call().foreach {
-          b ⇒
-            if (b) stringAlert(s"${
-              newName
-            } already exists, overwrite ?", () ⇒ rename)
-            else rename
-        }
-      })
-    }
-
     def timeOrSize(tn: TreeNode): String = fileToolBar.fileFilter.now.fileSorting match {
       case TimeSorting() ⇒ CoreUtils.longTimeToString(tn.time)
       case _             ⇒ CoreUtils.readableByteCountAsString(tn.size)
@@ -424,14 +398,48 @@ class TreeNodePanel {
 
     def addToSelection: Unit = addToSelection(!treeStates.now.selected)
 
+    val toolBox = FileToolBox(tnSafePath)
+
+    def inPopover(element: HTMLElement) = {
+      val popClass = "popover"
+      def inPopover0(e: HTMLElement, depth: Int): Boolean = {
+        val b = e.className.contains(popClass)
+        if (b || depth > 2) b
+        else inPopover0(e.parentElement, depth + 1)
+      }
+      inPopover0(element, 0)
+    }
+
+    dom.document.body.onclick = { (e: Event) ⇒
+      if (!toolBox.actions(e.target.asInstanceOf[HTMLElement], () ⇒ closeAllPopovers))
+        if (!inPopover(e.target.asInstanceOf[HTMLElement]))
+          closeAllPopovers
+    }
+
+    def buildManualPopover(trigger: TypedTag[HTMLElement]) = {
+      lazy val pop = trigger.popover(toolBox.contentRoot.toString, Popup.Right, Manual, title = Some(toolBox.titleRoot.toString))
+      val popRender = pop.render
+
+      popRender.onclick = { (e: Event) ⇒
+        popovers.now.foreach { p ⇒
+          p.hide
+          currentSafePath() = None
+        }
+        currentSafePath() = Some(tnSafePath)
+        pop.toggle
+        e.stopPropagation
+      }
+
+      popovers() = popovers.now :+ pop
+      popRender
+    }
+
     val render: TypedTag[dom.html.TableRow] = {
-      val baseGlyph = ms("glyphitem") +++ (marginTop := 2)
-      val settingsGlyph = ms("glyphitem") +++ glyph_settings +++ (paddingLeft := 4)
-      val trash = baseGlyph +++ glyph_trash
-      val edit = baseGlyph +++ glyph_edit
-      val download_alt = baseGlyph +++ glyph_download_alt
-      val archive = baseGlyph +++ glyph_archive
-      val arrow_right_and_left = baseGlyph +++ glyph_arrow_right_and_left
+      val settingsGlyph = ms("glyphitem") +++ glyph_settings +++ omsheet.color(WHITE) +++ (paddingLeft := 4)
+      //      val edit = baseGlyph +++ glyph_edit
+      //      val download_alt = baseGlyph +++ glyph_download_alt
+      //      val archive = baseGlyph +++ glyph_archive
+      //      val arrow_right_and_left = baseGlyph +++ glyph_arrow_right_and_left
 
       tr(
         Rx {
@@ -445,7 +453,7 @@ class TreeNodePanel {
                   () ⇒
                     {
                       treeStates().editionOff
-                      renameNode(tnSafePath, editNodeInput.value, treeStates().replication)
+                      //  renameNode(tnSafePath, editNodeInput.value, treeStates().replication)
                       false
                     }
                 }
@@ -483,59 +491,78 @@ class TreeNodePanel {
               },
               clickablePair, {
                 div(fileInfo)(
-                  if (treeStates().settingsSet) {
-                    span(
-                      span(onclick := { () ⇒ treeStates().settingsOff }, baseGlyph)(
-                        raw("&#215")
-                      ),
-                      tags.span(onclick := { () ⇒
-                        trashNode(tnSafePath)
-                        treeStates().settingsOff
-                      }, trash),
-                      span(onclick := { () ⇒
-                        treeStates().editionOn
-                      }, edit),
-                      a(
-                        span(onclick := { () ⇒ treeStates().settingsOff })(download_alt),
-                        href := s"downloadFile?path=${Utils.toURI(tnSafePath.path)}"
-                      ),
-                      DataUtils.fileToExtension(tn.name.now) match {
-                        case FileExtension.TGZ | FileExtension.TAR | FileExtension.ZIP ⇒
-                          span(archive, onclick := { () ⇒
-                            extractTGZ(tnSafePath)
-                          })
-                        case _ ⇒
-                      },
-                      span(onclick := { () ⇒
-                        val newName = {
-                          val prefix = tnSafePath.path.last
-                          tn match {
-                            case _: DirNode ⇒ prefix + "_1"
-                            case _          ⇒ prefix.replaceFirst("[.]", "_1.")
-                          }
-                        }
+                  span(omsheet.fileSize)(
+                    tags.i(timeOrSize(tn)),
+                    //                      tags.span(onclick := { () ⇒
+                    //                        treeStates().settingsOn
+                    //                      }, settingsGlyph)
 
-                        val replicateInput = inputTag(newName).render
-                        AlertPanel.div(
-                          div(width := 250, floatRight, marginRight := 70, replicateInput),
-                          () ⇒ CoreUtils.replicate(tnSafePath, replicateInput.value),
-                          transform = RelativeCenterPosition,
-                          zone = FileZone,
-                          alertType = btn_primary,
-                          buttonGroupClass = omsheet.divAlertPosition
-                        )
-                      })(arrow_right_and_left)
+                    buildManualPopover(
+                      div(settingsGlyph)
                     )
-                  }
-                  else
-                    span(omsheet.fileSize)(
-                      tags.i(timeOrSize(tn)),
-                      tags.span(onclick := { () ⇒
-                        treeStates().settingsOn
-                      }, settingsGlyph)
-                    )
+                  )
                 )
-              },
+              } // )
+              //                (
+              //                  if (treeStates().settingsSet) {
+              //                    span(
+              //                      span(onclick := { () ⇒ treeStates().settingsOff }, baseGlyph)(
+              //                        raw("&#215")
+              //                      ),
+              //                      tags.span(onclick := { () ⇒
+              //                        trashNode(tnSafePath)
+              //                        treeStates().settingsOff
+              //                      }, trash),
+              //                      span(onclick := { () ⇒
+              //                        treeStates().editionOn
+              //                      }, edit),
+              //                      a(
+              //                        span(onclick := { () ⇒ treeStates().settingsOff })(download_alt),
+              //                        href := s"downloadFile?path=${Utils.toURI(tnSafePath.path)}"
+              //                      ),
+              //                      DataUtils.fileToExtension(tn.name.now) match {
+              //                        case FileExtension.TGZ | FileExtension.TAR | FileExtension.ZIP ⇒
+              //                          span(archive, onclick := { () ⇒
+              //                            extractTGZ(tnSafePath)
+              //                          })
+              //                        case _ ⇒
+              //                      },
+              //                      span(onclick := { () ⇒
+              //                        val newName = {
+              //                          val prefix = tnSafePath.path.last
+              //                          tn match {
+              //                            case _: DirNode ⇒ prefix + "_1"
+              //                            case _          ⇒ prefix.replaceFirst("[.]", "_1.")
+              //                          }
+              //                        }
+              //
+              //                        val replicateInput = inputTag(newName).render
+              //                        AlertPanel.div(
+              //                          div(width := 250, floatRight, marginRight := 70, replicateInput),
+              //                          () ⇒ CoreUtils.replicate(tnSafePath, replicateInput.value),
+              //                          transform = RelativeCenterPosition,
+              //                          zone = FileZone,
+              //                          alertType = btn_primary,
+              //                          buttonGroupClass = omsheet.divAlertPosition
+              //                        )
+              //                      })(arrow_right_and_left)
+              //                    )
+              //                  }
+              //                  else
+              //                    span(omsheet.fileSize)(
+              //                      tags.i(timeOrSize(tn)),
+              //                      //                      tags.span(onclick := { () ⇒
+              //                      //                        treeStates().settingsOn
+              //                      //                      }, settingsGlyph)
+              //
+              //                      buildManualPopover(div(settingsGlyph), tags.span(onclick := { () ⇒
+              //                        trashNode(tnSafePath)
+              //                        //  treeStates().settingsOff
+              //                      }, trash),
+              //                        tn.name())
+              //                    )
+              //                )
+              ,
               div(
                 width := "100%",
                 if (treeStates().selected) {
@@ -551,6 +578,7 @@ class TreeNodePanel {
             )
         }
       )
+      //   )
     }
   }
 
