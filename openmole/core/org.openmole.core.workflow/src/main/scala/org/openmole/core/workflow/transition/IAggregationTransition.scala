@@ -17,9 +17,12 @@
 
 package org.openmole.core.workflow.transition
 
+import org.openmole.core.expansion.Condition
 import org.openmole.core.workflow.mole._
 
 trait IAggregationTransition extends ITransition {
-  def aggregate(subMole: SubMoleExecution, ticket: Ticket, executionContext: MoleExecutionContext)
-  def hasBeenPerformed(subMole: SubMoleExecution, ticket: Ticket): Boolean
-}
+  def condition: Condition
+} /*{
+  def aggregate(moleExecution: MoleExecution, subMole: SubMoleExecution, ticket: Ticket, executionContext: MoleExecutionContext)
+  def hasBeenPerformed(moleExecution: MoleExecution, subMole: SubMoleExecution, ticket: Ticket): Boolean
+}*/ 

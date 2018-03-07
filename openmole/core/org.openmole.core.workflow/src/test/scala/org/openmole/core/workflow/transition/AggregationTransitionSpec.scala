@@ -21,13 +21,11 @@ import java.util.concurrent.atomic.AtomicInteger
 
 import org.openmole.core.context.Val
 import org.openmole.core.exception._
-import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.transition._
-import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.puzzle._
@@ -71,9 +69,9 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
 
     val mole = exc -< emptyC >- testC toMole
 
-    MoleExecution(mole).start.waitUntilEnded
+    MoleExecution(mole).run
     endCapsExecuted should equal(1)
-    MoleExecution(mole).start.waitUntilEnded
+    MoleExecution(mole).run
     endCapsExecuted should equal(2)
   }
 
@@ -105,7 +103,7 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
 
     val ex = exc -< emptyC >- testC
 
-    ex.start.waitUntilEnded
+    ex.run
     endCapsExecuted should equal(1)
   }
 
@@ -138,7 +136,7 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
 
     MoleExecution(mole).start.cancel
     endCapsExecuted.set(0)
-    MoleExecution(mole).start.waitUntilEnded
+    MoleExecution(mole).run
     endCapsExecuted.get() should equal(1)
   }
 
@@ -166,8 +164,7 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
       inputs += i.array
     )
 
-    val ex = (exploration -< run >- test).start
-    Try { ex.waitUntilEnded }
+    val ex = Try { (exploration -< run >- test).run }
 
     endCapsExecuted.get() should equal(0)
   }
@@ -193,38 +190,42 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
         inputs += v.array
       )
 
-    val ex = exploration -< main >- (test, test) start
+    val ex: MoleExecution = (exploration -< main >- (test, test))
 
-    ex.waitUntilEnded
+    ex.run
+
     executed.get should equal(2)
   }
 
   "Order" should "be preserved" in {
-    val v = Val[Double]("v")
-    val s = Val[Double]("s")
+    def test = {
+      val v = Val[Double]("v")
+      val s = Val[Double]("s")
 
-    val executed = new AtomicInteger()
+      val executed = new AtomicInteger()
 
-    def exploration = ExplorationTask(ExplicitSampling(v, 0.0 until 100.0 by 1.0))
+      def exploration = ExplorationTask(ExplicitSampling(v, 0.0 until 100.0 by 1.0))
 
-    def main =
-      EmptyTask() set (
-        name := "main",
-        (inputs, outputs) += v
-      )
+      def main =
+        EmptyTask() set (
+          name := "main",
+          (inputs, outputs) += v
+        )
 
-    def test =
-      TestTask { ctx ⇒ executed.incrementAndGet(); ctx(v.toArray).toSeq.sorted should equal(ctx(v.toArray).toSeq); ctx } set (
-        name := "mean",
-        inputs += v.array
-      )
+      def test =
+        TestTask { ctx ⇒ executed.incrementAndGet(); ctx(v.toArray).toSeq.sorted should equal(ctx(v.toArray).toSeq); ctx } set (
+          name := "mean",
+          inputs += v.array
+        )
 
-    val env = LocalEnvironment(100)
+      val env = LocalEnvironment(10)
 
-    val ex = exploration -< (main on env) >- test start
+      (exploration -< (main on env) >- test) run ()
 
-    ex.waitUntilEnded
-    executed.get should equal(1)
+      executed.get should equal(1)
+    }
+
+    for (i ← 0 until 10) test
   }
 
 }

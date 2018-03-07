@@ -19,7 +19,6 @@ package org.openmole.core.workflow.transition
 
 import org.openmole.core.context.Val
 import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.builder._
@@ -56,7 +55,7 @@ class ExplorationTransitionSpec extends FlatSpec with Matchers {
     )
 
     val ex = exc -< t
-    ex.start.waitUntilEnded
+    ex.run()
     res.toArray.sorted.deep should equal(data.toArray.deep)
   }
 
@@ -79,7 +78,7 @@ class ExplorationTransitionSpec extends FlatSpec with Matchers {
       inputs += i
     )
 
-    (explo -< t).start.waitUntilEnded
+    (explo -< t).run()
     res.toArray.sorted.deep should equal(data.toArray.deep)
   }
 
@@ -105,7 +104,7 @@ class ExplorationTransitionSpec extends FlatSpec with Matchers {
     )
 
     val ex = exc -< (t when "i % 2 != 0")
-    ex.start.waitUntilEnded
+    ex.run()
     res.toArray.sorted.deep should equal(data.toArray.filter(_ % 2 != 0).deep)
   }
 }

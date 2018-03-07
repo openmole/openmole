@@ -22,6 +22,7 @@ import java.io.File
 import org.openmole.core.authentication.AuthenticationStore
 import org.openmole.core.communication.storage
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
+import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.threadprovider.Updater
 import org.openmole.core.workspace.Workspace
 import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, SerializedJob, UpdateInterval, UsageControl }

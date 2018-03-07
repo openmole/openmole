@@ -21,7 +21,6 @@ import org.openmole.core.context.{ Context, Val, Variable }
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
 import org.openmole.core.workflow.sampling._
-import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.job._
 import org.openmole.core.workflow.mole._
@@ -76,15 +75,15 @@ class MoleExecutionSpec extends FlatSpec with Matchers {
     val ex = exc -< emptyC >- testC
 
     MoleExecution(
-      mole = ex,
+      mole = ex.toMole,
       grouping = Map(emptyC → new JobGroupingBy2Test)
-    ).start.waitUntilEnded
+    ).run
   }
 
   "Implicits" should "be used when input is missing" in {
     val i = Val[String]("i")
     val emptyT = EmptyTask() set (inputs += i)
     val emptyC = Capsule(emptyT)
-    MoleExecution(mole = Mole(emptyC), implicits = Context(Variable(i, "test"))).start.waitUntilEnded
+    MoleExecution(mole = Mole(emptyC), implicits = Context(Variable(i, "test"))).run
   }
 }

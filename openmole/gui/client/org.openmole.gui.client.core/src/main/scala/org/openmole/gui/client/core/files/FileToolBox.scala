@@ -85,7 +85,7 @@ class FileToolBox(initSafePath: SafePath) {
     val parent = element.parentNode
     prefix(element.id) match {
       case prefix.trash ⇒
-        
+
         parent.replaceChild(confirmationGroup, element)
         true
       case prefix.confirmTrash ⇒

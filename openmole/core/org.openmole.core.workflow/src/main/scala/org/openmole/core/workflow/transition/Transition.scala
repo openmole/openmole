@@ -26,6 +26,7 @@ import org.openmole.tool.logger.JavaLogger
 import cats.implicits._
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.workflow.dsl
+import org.openmole.core.workflow.mole.MoleExecutionMessage.PerformTransition
 import org.openmole.core.workspace.NewFile
 
 object Transition extends JavaLogger
@@ -42,9 +43,11 @@ class Transition(
     condition.validate(inputs)
   }
 
-  override def perform(context: Context, ticket: Ticket, subMole: SubMoleExecution, moleExecutionContext: MoleExecutionContext) = {
-    import moleExecutionContext.services._
-    if (condition().from(context)) ITransition.submitNextJobsIfReady(this)(filtered(context).values, ticket, subMole)
+  override def perform(context: Context, ticket: Ticket, moleExecution: MoleExecution, subMole: SubMoleExecution, moleExecutionContext: MoleExecutionContext) = MoleExecutionMessage.send(moleExecution) {
+    PerformTransition(subMole) { subMoleState ⇒
+      import moleExecutionContext.services._
+      if (condition().from(context)) ITransition.submitNextJobsIfReady(this)(filtered(context).values, ticket, subMoleState)
+    }
   }
 
   override def toString = s"$start -- $end"

@@ -21,7 +21,7 @@ import org.openmole.core.workflow.mole._
 
 object Slot {
 
-  def apply(c: Capsule) = new Slot {
+  def apply(c: Capsule): Slot = new Slot {
     val capsule = c
   }
 

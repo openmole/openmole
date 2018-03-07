@@ -128,7 +128,7 @@ trait RESTAPI extends ScalatraServlet with GZipSupport
               case Success(res) ⇒
                 Try {
                   val services = MoleServices.copy(MoleServices.create)(outputRedirection = OutputRedirection(directory.outputStream))
-                  res.buildPuzzle.toExecution(executionContext = MoleExecutionContext()(services))
+                  res.toExecution(executionContext = MoleExecutionContext()(services))
                 } match {
                   case Success(ex) ⇒
                     ex listen { case (ex, ev: MoleExecution.Finished) ⇒ }
@@ -183,7 +183,7 @@ trait RESTAPI extends ScalatraServlet with GZipSupport
               def environmentErrors = env.clearErrors.map(e ⇒ Error(e.exception).copy(level = Some(e.level.toString)))
               EnvironmentStatus(name = env.name, submitted = env.submitted, running = env.running, done = env.done, failed = env.failed, environmentErrors)
           }
-          val statuses = moleExecution.jobStatuses
+          val statuses = moleExecution.capsuleStatuses
           val capsuleStates = statuses.toVector.map { case (c, states) ⇒ c.toString -> CapsuleState(states.ready, states.running, states.completed) }
           val ready = capsuleStates.map(_._2.ready).sum
           val running = capsuleStates.map(_._2.running).sum

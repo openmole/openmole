@@ -135,7 +135,7 @@ class Capsule(_task: Task, val strainer: Boolean) {
       prototypes
     }
 
-  override def toString = task.toString
+  override def toString = s"capsule@$hashCode:$task"
 }
 
 class StrainerTaskDecorator(val task: Task) extends Task {

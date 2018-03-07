@@ -26,6 +26,7 @@ import org.openmole.core.expansion.{ FromContext, ScalaCompilation }
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.serializer.plugin.Plugins
 import org.openmole.core.workflow.builder._
+import org.openmole.core.workflow.mole.FromContextHook
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.validation._
 import org.openmole.core.workspace.NewFile

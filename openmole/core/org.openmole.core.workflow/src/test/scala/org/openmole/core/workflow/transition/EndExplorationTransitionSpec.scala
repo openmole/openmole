@@ -63,7 +63,7 @@ class EndExplorationTransitionSpec extends FlatSpec with Matchers {
 
     val ex = exc -< emptyC >| (testC when "true")
 
-    ex.start.waitUntilEnded
+    ex.run
     endCapsExecuted should equal(1)
   }
 

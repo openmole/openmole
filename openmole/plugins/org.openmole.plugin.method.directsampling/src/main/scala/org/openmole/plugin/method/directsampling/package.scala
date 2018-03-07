@@ -18,6 +18,7 @@
 package org.openmole.plugin.method
 
 import org.openmole.core.context._
+import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.puzzle._
@@ -51,8 +52,7 @@ package object directsampling {
   ): Puzzle = {
     val exploration = ExplorationTask(sampling)
     val explorationCapsule = Capsule(exploration, strain = true)
-
-    explorationCapsule -< evaluation >- aggregation & (explorationCapsule -- aggregation)
+    (explorationCapsule -< evaluation >- aggregation) & (explorationCapsule -- aggregation)
   }
 
   private def defaultAggregation =

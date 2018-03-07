@@ -21,8 +21,6 @@ import org.openmole.core.context.{ Val, Variable }
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.transition._
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
 import org.scalatest._
@@ -60,7 +58,7 @@ class MasterCapsuleSpec extends FlatSpec with Matchers {
 
     val ex = t1c -- t2c toExecution
 
-    ex.start.waitUntilEnded
+    ex.run
   }
 
   "A master capsule" should "keep value of a variable from on execution to another" in {
@@ -95,7 +93,7 @@ class MasterCapsuleSpec extends FlatSpec with Matchers {
 
     val ex = exc -< slot1 -- selectCaps -- (slot2 when "n <= 100")
 
-    ex.start.waitUntilEnded
+    ex.run
   }
 
   "A end of exploration transition" should "end the master slave process" in {
@@ -120,7 +118,7 @@ class MasterCapsuleSpec extends FlatSpec with Matchers {
     val modelSlot2 = Slot(modelCapsule)
 
     val select = TestTask { context ⇒
-      context.contains(archive) should equal(true)
+      assert(context.contains(archive))
       selectTaskExecuted += 1
       context + Variable(archive, (context(i) :: context(archive).toList) toArray)
     } set (
@@ -133,8 +131,8 @@ class MasterCapsuleSpec extends FlatSpec with Matchers {
     val selectCaps = MasterCapsule(select, archive)
 
     val finalTask = TestTask { context ⇒
-      context.contains(archive) should equal(true)
-      context(archive).size should equal(1)
+      assert(context.contains(archive))
+      assert(context(archive).size == 1)
       endCapsExecuted += 1
       context
     } set (
@@ -147,10 +145,9 @@ class MasterCapsuleSpec extends FlatSpec with Matchers {
     val terminate = selectCaps >| (finalTask when "archive.size >= 1")
 
     val ex = skel & loop & terminate
-
-    ex.toExecution(defaultEnvironment = LocalEnvironment(1)).start.waitUntilEnded
-    //(selectTaskExecuted < 10) should equal(true)
+    (noException shouldBe thrownBy(ex.run))
     endCapsExecuted should equal(1)
+
   }
 
   "A master capsule" should "work with mole tasks" in {
@@ -169,7 +166,7 @@ class MasterCapsuleSpec extends FlatSpec with Matchers {
 
     val ex = explo -< t1c
 
-    ex.start.waitUntilEnded
+    ex.run
   }
 
 }

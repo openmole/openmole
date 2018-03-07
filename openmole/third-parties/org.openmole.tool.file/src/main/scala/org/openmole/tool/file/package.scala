@@ -206,7 +206,11 @@ package file {
       //////// general operations ///////
       def size: Long =
         if (file.isDirectory) file.listFilesSafe(f ⇒ !f.isSymbolicLink).map(_.size).sum
-        else Files.size(file)
+        else
+          try Files.size(file)
+          catch {
+            case e: NoSuchFileException ⇒ 0L
+          }
 
       def mode = {
         val f = file.realPath;

@@ -66,7 +66,7 @@ class Command(val console: ScalaREPL, val variables: ConsoleVariables) { command
   }
 
   def print(moleExecution: MoleExecution): Unit = {
-    val statuses = moleExecution.jobStatuses
+    val statuses = moleExecution.capsuleStatuses
 
     val msg =
       for {
