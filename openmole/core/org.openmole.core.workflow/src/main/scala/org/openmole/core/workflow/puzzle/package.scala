@@ -23,53 +23,14 @@ import org.openmole.core.workflow.transition._
 
 package puzzle {
 
-  import org.openmole.core.event.EventDispatcher
-  import org.openmole.core.outputmanager.OutputManager
-  import org.openmole.core.preference.Preference
-  import org.openmole.core.threadprovider.ThreadProvider
-  import org.openmole.core.workflow.execution.{ Environment, EnvironmentProvider }
-  import org.openmole.core.workspace.NewFile
-  import org.openmole.tool.random.Seeder
-
   trait PuzzlePackage {
 
-    class PuzzlePieceDecorator(puzzle: PuzzlePiece) extends HookDecorator[PuzzlePiece] with EnvironmentDecorator[PuzzlePiece] with SourceDecorator[PuzzlePiece] {
-      def from = puzzle.buildPuzzle
-
-      def on(env: EnvironmentProvider) =
-        puzzle.copy(environment = Some(env))
-
-      def hook(hooks: Hook*) =
-        puzzle.copy(hooks = puzzle.hooks.toList ::: hooks.toList)
-
-      def source(sources: Source*) =
-        puzzle.copy(sources = puzzle.sources.toList ::: sources.toList)
-
-      def by(strategy: Grouping) =
-        puzzle.copy(grouping = Some(strategy))
-    }
-
     implicit def toPuzzlePiece[P: ToPuzzlePiece](p: P): PuzzlePiece = implicitly[ToPuzzlePiece[P]].apply(p)
-    implicit def toPuzzlePieceDecorator[P: ToPuzzlePiece](p: P): PuzzlePieceDecorator = new PuzzlePieceDecorator(p)
-    implicit def taskToPuzzlePieceDecorator(p: Task): PuzzlePieceDecorator = new PuzzlePieceDecorator(p)
-    implicit def capsuleToPuzzlePieceDecorator(p: Capsule): PuzzlePieceDecorator = new PuzzlePieceDecorator(p)
-    implicit def slotToPuzzlePieceDecorator(p: Slot): PuzzlePieceDecorator = new PuzzlePieceDecorator(p)
 
-    //    implicit def capsuleToPuzzlePieceDecorator(capsule: Capsule) = new {
-    //      def toPuzzlePiece: PuzzlePiece = PuzzlePiece(Slot(capsule))
-    //    }
-    //
-    //    implicit def slotToPuzzlePieceDecorator(slot: Slot) = new {
-    //      def toPuzzlePiece: PuzzlePiece = PuzzlePiece(slot)
-    //    }
-    //
-    //    implicit def capsulePuzzleDecorator(capsule: Capsule) = new {
-    //      def toPuzzle: Puzzle = Puzzle(Slot(capsule), List(capsule))
-    //    }
-    //
-    //    implicit def slotDecorator(slot: Slot) = new {
-    //      def toPuzzle: Puzzle = Puzzle(slot, List(slot.capsule))
-    //    }
+    // implicit def toPuzzlePieceDecorator[P: ToPuzzlePiece](p: P): PuzzlePiece = implicitly[ToPuzzlePiece[P]].apply(p)
+    implicit def taskToPuzzlePieceDecorator(p: Task): PuzzlePiece = implicitly[ToPuzzlePiece[Task]].apply(p)
+    implicit def capsuleToPuzzlePieceDecorator(p: Capsule): PuzzlePiece = implicitly[ToPuzzlePiece[Capsule]].apply(p)
+    implicit def slotToPuzzlePieceDecorator(p: Slot): PuzzlePiece = implicitly[ToPuzzlePiece[Slot]].apply(p)
 
     class PuzzleDecorator[P: ToPuzzle](val puzzle: P) extends TransitionDecorator {
       val from = puzzle

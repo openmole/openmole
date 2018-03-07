@@ -71,6 +71,11 @@ case class PuzzlePiece(
       Map() ++ grouping.map(capsule → _)
     )
 
+  def on(env: EnvironmentProvider) = copy(environment = Some(env))
+  def hook(hooks: Hook*) = copy(hooks = hooks.toList ::: hooks.toList)
+  def source(sources: Source*) = copy(sources = sources.toList ::: sources.toList)
+  def by(strategy: Grouping) = copy(grouping = Some(strategy))
+
 }
 
 object ToPuzzle {
@@ -79,11 +84,11 @@ object ToPuzzle {
     override def toPuzzle(t: T): Puzzle = f(t)
   }
 
-  implicit val puzzleToPuzzle = ToPuzzle[Puzzle](identity)
-  implicit val puzzlePieceToPuzzle = ToPuzzle[PuzzlePiece](_.buildPuzzle)
-  implicit val slotToPuzzle = ToPuzzle[Slot](s ⇒ Puzzle(s, lasts = Seq(s.capsule)))
-  implicit val capsuleToPuzzle = ToPuzzle[Capsule](c ⇒ Puzzle(Slot(c), lasts = Seq(c)))
-  implicit val taskToPuzzle =
+  implicit def puzzleToPuzzle = ToPuzzle[Puzzle](identity)
+  implicit def puzzlePieceToPuzzle = ToPuzzle[PuzzlePiece](_.buildPuzzle)
+  implicit def slotToPuzzle = ToPuzzle[Slot](s ⇒ Puzzle(s, lasts = Seq(s.capsule)))
+  implicit def capsuleToPuzzle = ToPuzzle[Capsule](c ⇒ Puzzle(Slot(c), lasts = Seq(c)))
+  implicit def taskToPuzzle =
     ToPuzzle[Task] { p: Task ⇒
       val capsule = Capsule(p)
       Puzzle(Slot(capsule), lasts = Seq(capsule))
