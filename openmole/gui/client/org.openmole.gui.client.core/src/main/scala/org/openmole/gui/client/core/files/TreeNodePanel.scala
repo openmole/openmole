@@ -113,7 +113,7 @@ class TreeNodePanel {
       Rx {
         tree()
       }
-    )
+    ).render
   }
 
   private def paste(safePaths: Seq[SafePath], to: SafePath) = {
@@ -402,18 +402,23 @@ class TreeNodePanel {
 
     def inPopover(element: HTMLElement) = {
       val popClass = "popover"
+
       def inPopover0(e: HTMLElement, depth: Int): Boolean = {
         val b = e.className.contains(popClass)
         if (b || depth > 2) b
         else inPopover0(e.parentElement, depth + 1)
       }
+
       inPopover0(element, 0)
     }
 
     dom.document.body.onclick = { (e: Event) ⇒
-      if (!toolBox.actions(e.target.asInstanceOf[HTMLElement], () ⇒ closeAllPopovers))
+      if (!toolBox.actions(e.target.asInstanceOf[HTMLElement], () ⇒ closeAllPopovers)) {
         if (!inPopover(e.target.asInstanceOf[HTMLElement]))
           closeAllPopovers
+      }
+      else
+        e.preventDefault()
     }
 
     def buildManualPopover(trigger: TypedTag[HTMLElement]) = {
