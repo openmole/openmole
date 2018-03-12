@@ -222,7 +222,7 @@ object ScriptClient {
                     treeNodePanel.fileToolBar.div,
                     treeNodePanel.fileControler,
                     treeNodePanel.labelArea,
-                    treeNodePanel.view.render
+                    treeNodePanel.view
                   )
                 ),
               div(

@@ -13,7 +13,7 @@ import scaladget.bootstrapnative.bsn._
 import org.openmole.gui.client.core.panels._
 import org.openmole.gui.ext.data.SafePath
 import org.openmole.gui.ext.tool.client._
-import org.scalajs.dom.raw.{ HTMLElement, HTMLFormElement, Node }
+import org.scalajs.dom.raw._
 import rx._
 
 import scala.annotation.tailrec
@@ -33,6 +33,7 @@ object FileToolBox {
     val confirmOverwrite: Prefix = "co-overwrite"
     val cancelRename: Prefix = "ca-rename"
 
+    val download: Prefix = "download"
   }
 
   def apply(initSafePath: SafePath) = {
@@ -56,6 +57,7 @@ class FileToolBox(initSafePath: SafePath) {
   val arrow_right_and_left = baseGlyph +++ glyph_arrow_right_and_left
 
   val trashTrigger = span(trash, id := fileaction.trash)
+  val downloadTrigger = a(span(download_alt, id := fileaction.download)).render
   val confirmTrashTrigger = button(btn_danger, "Delete file", id := fileaction.confirmTrash)
   val cancelTrashTrigger = button(btn_default, "Cancel", id := fileaction.cancelTrash)
   val confirmationGroup = buttonGroup()(confirmTrashTrigger, cancelTrashTrigger)
@@ -112,6 +114,11 @@ class FileToolBox(initSafePath: SafePath) {
           parent.parentNode.parentNode.replaceChild(buildTitleRoot(sp.name), parent.parentNode)
         }
         true
+      case fileaction.download ⇒
+        treeNodePanel.currentSafePath.now.foreach { tn ⇒
+          org.scalajs.dom.document.location.href = s"downloadFile?path=${Utils.toURI(tn.path)}"
+        }
+        true
       case _ ⇒
         println("unknown")
         false
@@ -165,6 +172,7 @@ class FileToolBox(initSafePath: SafePath) {
 
   val titleRoot = buildTitleRoot(initSafePath.name)
   val contentRoot = div(
+    downloadTrigger,
     trashTrigger
   )
 
