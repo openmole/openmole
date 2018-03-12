@@ -21,23 +21,19 @@ import scala.annotation.tailrec
 object FileToolBox {
 
   type Prefix = String
-  type UID = String
 
-  object prefix {
-    val trash: Prefix = "tra"
-    val confirmTrash: Prefix = "cot"
-    val cancelTrash: Prefix = "cat"
+  object fileaction {
+    val trash: Prefix = "trash"
+    val confirmTrash: Prefix = "co-trash"
+    val cancelTrash: Prefix = "ca-trash"
 
-    val rename: Prefix = "ren"
-    val editInput: Prefix = "edi"
-    val confirmRename: Prefix = "cor"
-    val confirmOverwrite: Prefix = "coo"
-    val cancelRename: Prefix = "car"
+    val rename: Prefix = "rename"
+    val editInput: Prefix = "edit-input"
+    val confirmRename: Prefix = "co-rename"
+    val confirmOverwrite: Prefix = "co-overwrite"
+    val cancelRename: Prefix = "ca-rename"
 
   }
-
-  def uid(prefix: Prefix): UID = uuID.short(prefix)
-  def prefix(id: UID): Prefix = id.take(3)
 
   def apply(initSafePath: SafePath) = {
     new FileToolBox(initSafePath)
@@ -59,36 +55,26 @@ class FileToolBox(initSafePath: SafePath) {
   val archive = baseGlyph +++ glyph_archive
   val arrow_right_and_left = baseGlyph +++ glyph_arrow_right_and_left
 
-  val TRASH = uid(prefix.trash)
-  val CONFIRM_TRASH = uid(prefix.confirmTrash)
-  val CANCEL_TRASH = uid(prefix.cancelTrash)
-
-  val RENAME = uid(prefix.rename)
-  val EDIT_INPUT = uid(prefix.editInput)
-  val CONFIRM_RENAME = uid(prefix.confirmRename)
-  val CONFIRM_OVERWRITE = uid(prefix.confirmOverwrite)
-  val CANCEL_RENAME = uid(prefix.cancelRename)
-
-  val trashTrigger = span(trash, id := TRASH)
-  val confirmTrashTrigger = button(btn_danger, "Delete file", id := CONFIRM_TRASH)
-  val cancelTrashTrigger = button(btn_default, "Cancel", id := CANCEL_TRASH)
+  val trashTrigger = span(trash, id := fileaction.trash)
+  val confirmTrashTrigger = button(btn_danger, "Delete file", id := fileaction.confirmTrash)
+  val cancelTrashTrigger = button(btn_default, "Cancel", id := fileaction.cancelTrash)
   val confirmationGroup = buttonGroup()(confirmTrashTrigger, cancelTrashTrigger)
 
-  val renameTrigger = span(edit, id := RENAME)
+  val renameTrigger = span(edit, id := fileaction.rename)
 
   def confirmRename(tag: String, confirmString: String) = button(btn_danger, confirmString, id := tag)
 
-  val cancelRename = button(btn_default, "Cancel", id := CANCEL_RENAME)
+  val cancelRename = button(btn_default, "Cancel", id := fileaction.cancelRename)
 
   def actions(element: HTMLElement, closeAll: () ⇒ Unit): Boolean = {
     val safePath = treeNodePanel.currentSafePath.now
     val parent = element.parentNode
-    prefix(element.id) match {
-      case prefix.trash ⇒
+    element.id match {
+      case fileaction.trash ⇒
 
         parent.replaceChild(confirmationGroup, element)
         true
-      case prefix.confirmTrash ⇒
+      case fileaction.confirmTrash ⇒
         treeNodePanel.currentSafePath.now.foreach { safePath ⇒
           CoreUtils.trashNode(safePath) {
             () ⇒
@@ -99,29 +85,29 @@ class FileToolBox(initSafePath: SafePath) {
           }
         }
         true
-      case prefix.cancelTrash ⇒
+      case fileaction.cancelTrash ⇒
         parent.parentNode.replaceChild(contentRoot, parent)
         true
-      case prefix.rename ⇒
+      case fileaction.rename ⇒
         safePath.foreach { sp ⇒
           editTitle.value = sp.name
-          parent.parentNode.replaceChild(editDiv(CONFIRM_RENAME, "Rename"), parent)
+          parent.parentNode.replaceChild(editDiv(fileaction.confirmRename, "Rename"), parent)
         }
         true
-      case prefix.editInput ⇒ true
-      case prefix.confirmRename ⇒
+      case fileaction.editInput ⇒ true
+      case fileaction.confirmRename ⇒
         safePath.foreach { sp ⇒
           testRename(sp, parent, parent, element.parentNode)
         }
         true
-      case prefix.confirmOverwrite ⇒
+      case fileaction.confirmOverwrite ⇒
         safePath.foreach { sp ⇒
           rename(sp, () ⇒ {})
           parentNode(parent, 3).replaceChild(buildTitleRoot(sp.name), parentNode(parent, 2))
           closeAll()
         }
         true
-      case prefix.cancelRename ⇒
+      case fileaction.cancelRename ⇒
         safePath.foreach { sp ⇒
           parent.parentNode.parentNode.replaceChild(buildTitleRoot(sp.name), parent.parentNode)
         }
@@ -136,7 +122,7 @@ class FileToolBox(initSafePath: SafePath) {
     placeholder := "File name",
     //  width := 200,
     autofocus,
-    id := EDIT_INPUT
+    id := fileaction.editInput
   ).render
 
   val overwriting = Var(false)
@@ -190,7 +176,7 @@ class FileToolBox(initSafePath: SafePath) {
         b ⇒
           if (b) {
             overwriting() = true
-            cancelNode.parentNode.replaceChild(editDiv(CONFIRM_OVERWRITE, "Overwrite ?"), cancelNode)
+            cancelNode.parentNode.replaceChild(editDiv(fileaction.confirmOverwrite, "Overwrite ?"), cancelNode)
             editTitle.focus()
           }
           else {
