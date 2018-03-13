@@ -197,7 +197,7 @@ class FileToolBox(initSafePath: SafePath) {
   )
 
   def buildTitleRoot(title: String) = div(
-    span(title),
+    span(wordWrap := "break-word", title),
     renameTrigger
   )
 
