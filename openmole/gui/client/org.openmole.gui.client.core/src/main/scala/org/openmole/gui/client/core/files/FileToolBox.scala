@@ -4,6 +4,8 @@ import org.openmole.gui.client.core._
 import org.openmole.gui.client.core.panels.treeNodeTabs
 import autowire._
 import boopickle.Default._
+import org.openmole.gui.client.core.alert.AbsolutePositioning._
+import org.openmole.gui.client.core.alert.AlertPanel
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.openmole.gui.ext.api.Api
@@ -11,7 +13,7 @@ import org.openmole.gui.ext.api.Api
 import scalatags.JsDom.all._
 import scaladget.bootstrapnative.bsn._
 import org.openmole.gui.client.core.panels._
-import org.openmole.gui.ext.data.SafePath
+import org.openmole.gui.ext.data.{ DataUtils, FileExtension, SafePath }
 import org.openmole.gui.ext.tool.client._
 import org.scalajs.dom.raw._
 import rx._
@@ -19,21 +21,23 @@ import rx._
 import scala.annotation.tailrec
 
 object FileToolBox {
-
-  type Prefix = String
+  type FileAction = String
 
   object fileaction {
-    val trash: Prefix = "trash"
-    val confirmTrash: Prefix = "co-trash"
-    val cancelTrash: Prefix = "ca-trash"
+    val trash: FileAction = "trash"
+    val confirmTrash: FileAction = "co-trash"
+    val cancelTrash: FileAction = "ca-trash"
 
-    val rename: Prefix = "rename"
-    val editInput: Prefix = "edit-input"
-    val confirmRename: Prefix = "co-rename"
-    val confirmOverwrite: Prefix = "co-overwrite"
-    val cancelRename: Prefix = "ca-rename"
+    val rename: FileAction = "rename"
+    val editInput: FileAction = "edit-input"
+    val confirmRename: FileAction = "co-rename"
+    val confirmOverwrite: FileAction = "co-overwrite"
+    val cancelRename: FileAction = "ca-rename"
 
-    val download: Prefix = "download"
+    val download: FileAction = "download"
+
+    val extract: FileAction = "extract"
+    val duplicate: FileAction = "duplicate"
   }
 
   def apply(initSafePath: SafePath) = {
@@ -45,7 +49,6 @@ object FileToolBox {
 import FileToolBox._
 
 class FileToolBox(initSafePath: SafePath) {
-  implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
   import scaladget.tools._
 
@@ -57,7 +60,7 @@ class FileToolBox(initSafePath: SafePath) {
   val arrow_right_and_left = baseGlyph +++ glyph_arrow_right_and_left
 
   val trashTrigger = span(trash, id := fileaction.trash)
-  val downloadTrigger = a(span(download_alt, id := fileaction.download)).render
+  val downloadTrigger = a(span(download_alt, id := fileaction.download))
   val confirmTrashTrigger = button(btn_danger, "Delete file", id := fileaction.confirmTrash)
   val cancelTrashTrigger = button(btn_default, "Cancel", id := fileaction.cancelTrash)
   val confirmationGroup = buttonGroup()(confirmTrashTrigger, cancelTrashTrigger)
@@ -68,7 +71,7 @@ class FileToolBox(initSafePath: SafePath) {
 
   val cancelRename = button(btn_default, "Cancel", id := fileaction.cancelRename)
 
-  def actions(element: HTMLElement, closeAll: () ⇒ Unit): Boolean = {
+  def actions(element: HTMLElement): Boolean = {
     val safePath = treeNodePanel.currentSafePath.now
     val parent = element.parentNode
     element.id match {
@@ -83,7 +86,7 @@ class FileToolBox(initSafePath: SafePath) {
               treeNodeTabs -- safePath
               treeNodeTabs.checkTabs
               treeNodePanel.invalidCacheAndDraw
-              closeAll()
+              treeNodePanel.closeAllPopovers
           }
         }
         true
@@ -106,7 +109,7 @@ class FileToolBox(initSafePath: SafePath) {
         safePath.foreach { sp ⇒
           rename(sp, () ⇒ {})
           parentNode(parent, 3).replaceChild(buildTitleRoot(sp.name), parentNode(parent, 2))
-          closeAll()
+          treeNodePanel.closeAllPopovers
         }
         true
       case fileaction.cancelRename ⇒
@@ -117,6 +120,11 @@ class FileToolBox(initSafePath: SafePath) {
       case fileaction.download ⇒
         treeNodePanel.currentSafePath.now.foreach { tn ⇒
           org.scalajs.dom.document.location.href = s"downloadFile?path=${Utils.toURI(tn.path)}"
+        }
+        true
+      case fileaction.extract ⇒
+        treeNodePanel.currentSafePath.now.foreach { sp ⇒
+          extractTGZ(sp)
         }
         true
       case _ ⇒
@@ -171,10 +179,29 @@ class FileToolBox(initSafePath: SafePath) {
   )
 
   val titleRoot = buildTitleRoot(initSafePath.name)
-  val contentRoot = div(
-    downloadTrigger,
-    trashTrigger
-  )
+
+  val contentRoot = {
+    div(
+      downloadTrigger,
+      DataUtils.fileToExtension(initSafePath.name) match {
+        case FileExtension.TGZ | FileExtension.TAR | FileExtension.ZIP ⇒
+          span(archive, id := fileaction.extract)
+        case _ ⇒ span
+      },
+      trashTrigger
+    )
+  }
+
+  def extractTGZ(safePath: SafePath) =
+    post()[Api].extractTGZ(safePath).call().foreach {
+      r ⇒
+        r.error match {
+          case Some(e: org.openmole.gui.ext.data.Error) ⇒
+            treeNodePanel.closeAllPopovers
+            AlertPanel.detail("An error occurred during extraction", e.stackTrace, transform = RelativeCenterPosition, zone = FileZone)
+          case _ ⇒ treeNodePanel.invalidCacheAndDraw
+        }
+    }
 
   def testRename(safePath: SafePath, parent: Node, pivot: Node, cancelNode: Node) = {
     val newTitle = editTitle.value

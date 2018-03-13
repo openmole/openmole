@@ -316,14 +316,14 @@ class TreeNodePanel {
   def stringAlertWithDetails(message: String, detail: String) =
     AlertPanel.detail(message, detail, transform = RelativeCenterPosition, zone = FileZone)
 
-  def extractTGZ(safePath: SafePath) =
-    post()[Api].extractTGZ(safePath).call().foreach {
-      r ⇒
-        r.error match {
-          case Some(e: org.openmole.gui.ext.data.Error) ⇒ stringAlertWithDetails("An error occurred during extraction", e.stackTrace)
-          case _                                        ⇒ invalidCacheAndDraw
-        }
-    }
+  //  def extractTGZ(safePath: SafePath) =
+  //    post()[Api].extractTGZ(safePath).call().foreach {
+  //      r ⇒
+  //        r.error match {
+  //          case Some(e: org.openmole.gui.ext.data.Error) ⇒ stringAlertWithDetails("An error occurred during extraction", e.stackTrace)
+  //          case _                                        ⇒ invalidCacheAndDraw
+  //        }
+  //    }
 
   val popovers: Var[Seq[Popover]] = Var(Seq())
 
@@ -413,7 +413,7 @@ class TreeNodePanel {
     }
 
     dom.document.body.onclick = { (e: Event) ⇒
-      if (!toolBox.actions(e.target.asInstanceOf[HTMLElement], () ⇒ closeAllPopovers)) {
+      if (!toolBox.actions(e.target.asInstanceOf[HTMLElement])) {
         if (!inPopover(e.target.asInstanceOf[HTMLElement]))
           closeAllPopovers
       }
