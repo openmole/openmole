@@ -73,6 +73,8 @@ package object client {
     fontWeight := "bold"
   )
 
+  val giFontFamily = fontFamily := "gi"
+
   lazy val relativePosition: ModifierSeq = position := "relative"
 
   lazy val absolutePosition: ModifierSeq = position := "absolute"

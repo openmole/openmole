@@ -59,8 +59,9 @@ class FileToolBox(initSafePath: SafePath) {
   val archive = baseGlyph +++ glyph_archive
   val arrow_right_and_left = baseGlyph +++ glyph_arrow_right_and_left
 
-  val trashTrigger = span(trash, id := fileaction.trash)
-  val downloadTrigger = a(span(download_alt, id := fileaction.download))
+  def actionText(text: String) = div(text, giFontFamily, fontSize := "12px", paddingTop := 5)
+  val trashTrigger = div(id := fileaction.trash)(trash, actionText("delete"))
+  val downloadTrigger = div(id := fileaction.download)(download_alt, actionText("download"))
   val confirmTrashTrigger = button(btn_danger, "Delete file", id := fileaction.confirmTrash)
   val cancelTrashTrigger = button(btn_default, "Cancel", id := fileaction.cancelTrash)
   val confirmationGroup = buttonGroup()(confirmTrashTrigger, cancelTrashTrigger)
@@ -71,7 +72,7 @@ class FileToolBox(initSafePath: SafePath) {
 
   val cancelRename = button(btn_default, "Cancel", id := fileaction.cancelRename)
 
-  val duplicateTrigger = span(arrow_right_and_left, id := fileaction.duplicate)
+  val duplicateTrigger = div(arrow_right_and_left, id := fileaction.duplicate, actionText("duplicate"))
 
   def actions(element: HTMLElement): Boolean = {
     val parent = element.parentNode
