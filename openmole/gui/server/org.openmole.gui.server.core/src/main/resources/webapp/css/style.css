@@ -280,11 +280,11 @@ li.selectElement{
     top: 0;
     display: inline-block;
     float: right;
-    opacity: 0.2;
+    opacity: 0.4;
     padding-right: 5px;
     cursor: pointer;
     transition: transform 0.1s ease-out 0s;
-    font-size: 12px;
+    font-size: 15px;
 }
 
 .glyphitem:hover {

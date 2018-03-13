@@ -52,7 +52,7 @@ class FileToolBox(initSafePath: SafePath) {
 
   import scaladget.tools._
 
-  val baseGlyph = ms("glyphitem") +++ omsheet.color(DARK_GREY) +++ (marginTop := 2)
+  val baseGlyph = ms("glyphitem") +++ omsheet.color(DARK_GREY) +++ Seq(marginTop := 3, marginLeft := 8)
   val trash = baseGlyph +++ glyph_trash
   val edit = baseGlyph +++ glyph_edit
   val download_alt = baseGlyph +++ glyph_download_alt
@@ -203,7 +203,7 @@ class FileToolBox(initSafePath: SafePath) {
   val titleRoot = buildTitleRoot(initSafePath.name)
 
   val contentRoot = {
-    div(
+    div(omsheet.centerElement)(
       downloadTrigger,
       DataUtils.fileToExtension(initSafePath.name) match {
         case FileExtension.TGZ | FileExtension.TAR | FileExtension.ZIP ⇒
