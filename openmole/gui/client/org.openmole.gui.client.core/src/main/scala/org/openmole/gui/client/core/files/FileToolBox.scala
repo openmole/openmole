@@ -71,16 +71,16 @@ class FileToolBox(initSafePath: SafePath) {
 
   val cancelRename = button(btn_default, "Cancel", id := fileaction.cancelRename)
 
+  val duplicateTrigger = span(arrow_right_and_left, id := fileaction.duplicate)
+
   def actions(element: HTMLElement): Boolean = {
-    val safePath = treeNodePanel.currentSafePath.now
     val parent = element.parentNode
     element.id match {
       case fileaction.trash ⇒
-
         parent.replaceChild(confirmationGroup, element)
         true
       case fileaction.confirmTrash ⇒
-        treeNodePanel.currentSafePath.now.foreach { safePath ⇒
+        withSafePath { safePath ⇒
           CoreUtils.trashNode(safePath) {
             () ⇒
               treeNodeTabs -- safePath
@@ -94,37 +94,54 @@ class FileToolBox(initSafePath: SafePath) {
         parent.parentNode.replaceChild(contentRoot, parent)
         true
       case fileaction.rename ⇒
-        safePath.foreach { sp ⇒
+        withSafePath { sp ⇒
           editTitle.value = sp.name
           parent.parentNode.replaceChild(editDiv(fileaction.confirmRename, "Rename"), parent)
         }
         true
       case fileaction.editInput ⇒ true
       case fileaction.confirmRename ⇒
-        safePath.foreach { sp ⇒
+        withSafePath { sp ⇒
           testRename(sp, parent, parent, element.parentNode)
         }
         true
       case fileaction.confirmOverwrite ⇒
-        safePath.foreach { sp ⇒
+        withSafePath { sp ⇒
           rename(sp, () ⇒ {})
           parentNode(parent, 3).replaceChild(buildTitleRoot(sp.name), parentNode(parent, 2))
           treeNodePanel.closeAllPopovers
         }
         true
       case fileaction.cancelRename ⇒
-        safePath.foreach { sp ⇒
+        withSafePath { sp ⇒
           parent.parentNode.parentNode.replaceChild(buildTitleRoot(sp.name), parent.parentNode)
         }
         true
       case fileaction.download ⇒
-        treeNodePanel.currentSafePath.now.foreach { tn ⇒
-          org.scalajs.dom.document.location.href = s"downloadFile?path=${Utils.toURI(tn.path)}"
+        withSafePath { sp ⇒
+          org.scalajs.dom.document.location.href = s"downloadFile?path=${Utils.toURI(sp.path)}"
+          treeNodePanel.closeAllPopovers
         }
         true
       case fileaction.extract ⇒
-        treeNodePanel.currentSafePath.now.foreach { sp ⇒
+        withSafePath { sp ⇒
           extractTGZ(sp)
+        }
+        true
+      case fileaction.duplicate ⇒
+        withSafePath { sp ⇒
+          val newName = {
+            val prefix = sp.path.last
+            sp match {
+              case _: DirNode ⇒ prefix + "_1"
+              case _ ⇒
+                if (prefix.contains("."))
+                  prefix.replaceFirst("[.]", "_1.")
+                else prefix + "_1"
+            }
+          }
+          CoreUtils.replicate(sp, newName)
+          treeNodePanel.closeAllPopovers
         }
         true
       case _ ⇒
@@ -132,6 +149,11 @@ class FileToolBox(initSafePath: SafePath) {
         false
     }
   }
+
+  def withSafePath(action: SafePath ⇒ Unit) =
+    treeNodePanel.currentSafePath.now.foreach { sp ⇒
+      action(sp)
+    }
 
   val editTitle = inputTag()(
     placeholder := "File name",
@@ -147,7 +169,7 @@ class FileToolBox(initSafePath: SafePath) {
     onsubmit := {
       () ⇒
         {
-          treeNodePanel.currentSafePath.now.foreach { sp ⇒
+          withSafePath { sp ⇒
             if (overwriting.now) {
               rename(sp, () ⇒ {})
               treeNodePanel.closeAllPopovers
@@ -188,6 +210,7 @@ class FileToolBox(initSafePath: SafePath) {
           span(archive, id := fileaction.extract)
         case _ ⇒ span
       },
+      duplicateTrigger,
       trashTrigger
     )
   }
@@ -197,7 +220,6 @@ class FileToolBox(initSafePath: SafePath) {
       r ⇒
         r.error match {
           case Some(e: org.openmole.gui.ext.data.Error) ⇒
-            treeNodePanel.closeAllPopovers
             AlertPanel.detail("An error occurred during extraction", e.stackTrace, transform = RelativeCenterPosition, zone = FileZone)
           case _ ⇒ treeNodePanel.invalidCacheAndDraw
         }
@@ -217,6 +239,7 @@ class FileToolBox(initSafePath: SafePath) {
           else {
             overwriting() = false
             rename(safePath, () ⇒ replaceTitle(pivot))
+            treeNodePanel.closeAllPopovers
           }
       }
     })
