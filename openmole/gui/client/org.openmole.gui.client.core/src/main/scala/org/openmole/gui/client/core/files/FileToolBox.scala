@@ -59,9 +59,10 @@ class FileToolBox(initSafePath: SafePath) {
   val archive = baseGlyph +++ glyph_archive
   val arrow_right_and_left = baseGlyph +++ glyph_arrow_right_and_left
 
-  def actionText(text: String) = div(text, giFontFamily, fontSize := "12px", paddingTop := 5)
-  val trashTrigger = div(id := fileaction.trash)(trash, actionText("delete"))
-  val downloadTrigger = div(id := fileaction.download)(download_alt, actionText("download"))
+  def iconAction(faction: FileAction, icon: ModifierSeq, text: String) = div(id := faction)(icon, div(text, giFontFamily, fontSize := "12px", paddingTop := 5))
+
+  val trashTrigger = iconAction(fileaction.trash, trash, "delete")
+  val downloadTrigger = iconAction(fileaction.download, download_alt, "download")
   val confirmTrashTrigger = button(btn_danger, "Delete file", id := fileaction.confirmTrash)
   val cancelTrashTrigger = button(btn_default, "Cancel", id := fileaction.cancelTrash)
   val confirmationGroup = buttonGroup()(confirmTrashTrigger, cancelTrashTrigger)
@@ -72,11 +73,14 @@ class FileToolBox(initSafePath: SafePath) {
 
   val cancelRename = button(btn_default, "Cancel", id := fileaction.cancelRename)
 
-  val duplicateTrigger = div(arrow_right_and_left, id := fileaction.duplicate, actionText("duplicate"))
+  val duplicateTrigger = iconAction(fileaction.duplicate, arrow_right_and_left, "duplicate")
 
-  def actions(element: HTMLElement): Boolean = {
-    val parent = element.parentNode
-    element.id match {
+  def actions(element0: HTMLElement): Boolean = {
+    val parent0 = element0.parentNode
+    val (testID, element, parent) =
+      if (element0.id.isEmpty) (element0.parentElement.id, parent0, parent0.parentNode)
+      else (element0.id, element0, parent0)
+    testID match {
       case fileaction.trash ⇒
         parent.parentNode.replaceChild(confirmationGroup, parent)
         true
@@ -127,19 +131,15 @@ class FileToolBox(initSafePath: SafePath) {
       case fileaction.extract ⇒
         withSafePath { sp ⇒
           extractTGZ(sp)
+          treeNodePanel.closeAllPopovers
         }
         true
       case fileaction.duplicate ⇒
         withSafePath { sp ⇒
           val newName = {
             val prefix = sp.path.last
-            sp match {
-              case _: DirNode ⇒ prefix + "_1"
-              case _ ⇒
-                if (prefix.contains("."))
-                  prefix.replaceFirst("[.]", "_1.")
-                else prefix + "_1"
-            }
+            if (prefix.contains(".")) prefix.replaceFirst("[.]", "_1.")
+            else prefix + "_1"
           }
           CoreUtils.replicate(sp, newName)
           treeNodePanel.closeAllPopovers
@@ -208,7 +208,7 @@ class FileToolBox(initSafePath: SafePath) {
       downloadTrigger,
       DataUtils.fileToExtension(initSafePath.name) match {
         case FileExtension.TGZ | FileExtension.TAR | FileExtension.ZIP ⇒
-          span(archive, id := fileaction.extract)
+          iconAction(fileaction.extract, archive, "extract")
         case _ ⇒ span
       },
       duplicateTrigger,
