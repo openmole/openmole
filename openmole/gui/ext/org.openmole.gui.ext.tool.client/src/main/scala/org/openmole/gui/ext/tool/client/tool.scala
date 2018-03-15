@@ -405,16 +405,6 @@ package object client {
     textAlign := "center"
   )
 
-  lazy val executionElement: ModifierSeq = Seq(
-    relativePosition,
-    floatRight,
-    right := 200,
-    top := 15,
-    margin := "auto",
-    width := 50,
-    zIndex := 18
-  )
-
   lazy val executionTable: ModifierSeq = Seq(
     backgroundColor := DARK_GREY,
     color(WHITE)

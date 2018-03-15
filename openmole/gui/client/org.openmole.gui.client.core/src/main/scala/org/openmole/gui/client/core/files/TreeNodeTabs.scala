@@ -117,11 +117,16 @@ object TreeNodeTabs {
     }
 
     val editButton = Rx {
-      if (editable()) div()
-      else
-        button("Edit", btn_primary +++ executionElement, onclick := { () ⇒
-          editable() = !editable.now
-        })
+      div(
+        button("Table", btn_default +++ (marginRight := 15), onclick := { () ⇒
+          println("TABLE")
+        }),
+        if (editable()) div()
+        else
+          button("Edit", btn_primary, onclick := { () ⇒
+            editable() = !editable.now
+          })
+      )
     }
 
     def controlElement = div(
@@ -191,7 +196,7 @@ object TreeNodeTabs {
       onrun
     })
 
-    val controlElement = div(executionElement)(runButton)
+    val controlElement = runButton
 
     def onrun: Unit
 
@@ -217,7 +222,7 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
 
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
   val timer: Var[Option[SetIntervalHandle]] = Var(None)
-  val temporaryControl: Var[Option[TypedTag[HTMLElement]]] = Var(None)
+  val temporaryControl: Var[Seq[TypedTag[HTMLElement]]] = Var(Seq())
 
   def stopTimerIfNoTabs = {
     if (tabs.now.isEmpty) {
@@ -380,16 +385,16 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
                   case Active ⇒
                     t match {
                       case oms: OMSTabControl ⇒
-                        temporaryControl() = Some(oms.computation() match {
+                        temporaryControl() = Seq(oms.computation() match {
                           case Pending ⇒ div()
                           case _       ⇒ oms.controlElement
                         })
                         oms.block()
                       case etc: LockedEditionNodeTab ⇒
-                        temporaryControl() = Some(etc.controlElement)
+                        temporaryControl() = Seq(etc.controlElement)
                         etc.block()
                       case _ ⇒
-                        temporaryControl() = None
+                        temporaryControl() = Seq()
                         Var(div(t.editorElement))
                     }
                   case UnActive ⇒

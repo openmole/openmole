@@ -136,6 +136,13 @@ object ScriptClient {
 
       val envItem = navItem(div(glyph_exclamation, itemStyle).render, () ⇒ stackPanel.open)
 
+      val actionItem = navItem(div(
+        Rx {
+          div(
+            treeNodeTabs.temporaryControl(): _*
+          )
+        }).render)
+
       dom.window.onkeydown = (k: KeyboardEvent) ⇒ {
         if ((k.keyCode == 83 && k.ctrlKey)) {
           k.preventDefault
@@ -176,12 +183,11 @@ object ScriptClient {
             navItem(menuActions.selector),
             execItem,
             authenticationItem,
-            pluginItem
+            pluginItem,
+            actionItem
           ).render
         }
       )
-
-      lazy val menuBar = new MenuBar(theNavBar, treeNodeTabs)
 
       lazy val importModel = MenuAction("Import your model", () ⇒ {
         modelWizardPanel.dialog.show
@@ -209,7 +215,7 @@ object ScriptClient {
           div(
             div(`class` := "fullpanel")(
               BannerAlert.banner,
-              menuBar.render,
+              theNavBar,
               SettingsView.renderApp,
               div(
                 `class` := Rx {
