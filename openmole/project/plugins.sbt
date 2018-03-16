@@ -6,7 +6,7 @@ addSbtPlugin("org.openmole" % "openmole-buildsystem-plugin" % "1.8-SNAPSHOT")
 
 addSbtPlugin("org.scala-js" % "sbt-scalajs" % "0.6.22")
 
-addSbtPlugin("fr.iscpif" % "scalajs-execnpm" % "0.2")
+addSbtPlugin("fr.iscpif" % "scalajs-execnpm" % "0.1")
 
 addSbtPlugin("com.lihaoyi" % "scalatex-sbt-plugin" % "0.3.12")
 
