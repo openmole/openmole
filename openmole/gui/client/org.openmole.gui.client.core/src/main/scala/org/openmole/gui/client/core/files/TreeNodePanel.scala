@@ -173,6 +173,7 @@ class TreeNodePanel {
       () ⇒
         fileToolBar.clearMessage
         manager.switch(safePath)
+        manager.emptyCopied
         fileToolBar.unselectTool
         drawTree
     }
