@@ -53,8 +53,8 @@ object DataUtils {
 
   implicit def fileToExtension(fileName: String): FileExtension = fileName match {
     case x if x.endsWith(".oms") ⇒ OMS
-    case x if x.endsWith(".csv") |
-      x.endsWith(".nlogo") |
+    case x if x.endsWith(".csv") ⇒ CSV
+    case x if x.endsWith(".nlogo") |
       x.endsWith(".gaml") |
       x.endsWith(".nls") |
       x.endsWith(".py") |

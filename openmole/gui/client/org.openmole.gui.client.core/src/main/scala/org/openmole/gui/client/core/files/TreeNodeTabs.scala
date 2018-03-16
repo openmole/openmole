@@ -19,7 +19,7 @@ import scala.scalajs.js.timers._
 import org.openmole.gui.ext.tool.client._
 import org.openmole.gui.client.core._
 import org.openmole.gui.ext.tool.client.FileManager
-
+import DataUtils._
 import net.scalapro.sortable._
 
 /*
@@ -117,10 +117,16 @@ object TreeNodeTabs {
     }
 
     val editButton = Rx {
+      val ext: FileExtension = safePathTab.now.name
       div(
-        button("Table", btn_default +++ (marginRight := 15), onclick := { () ⇒
-          println("TABLE")
-        }),
+        ext match {
+          case FileExtension.CSV ⇒
+            button("Table", btn_default +++ (marginRight := 15), onclick := {
+              () ⇒
+                println("TABLE")
+            })
+          case _ ⇒ div()
+        },
         if (editable()) div()
         else
           button("Edit", btn_primary, onclick := { () ⇒
