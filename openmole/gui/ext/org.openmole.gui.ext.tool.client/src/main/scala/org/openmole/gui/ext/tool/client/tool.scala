@@ -352,9 +352,9 @@ package object client {
 
   lazy val pasteLabel: ModifierSeq = Seq(
     relativePosition,
-    top := 25,
+    top := 30,
     pointer,
-    fontSize := 12,
+    paddingBottom := 7,
     width := 50
   )
 
@@ -731,8 +731,8 @@ package object client {
   lazy val sortingBar: ModifierSeq = Seq(
     relativePosition,
     height := 20,
-    right := -240,
-    top := -120
+    floatRight,
+    top := -130
   )
 
   lazy val labelStyle: ModifierSeq = Seq(
