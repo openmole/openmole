@@ -63,7 +63,7 @@ package object message {
 
         val dl =
           if (replicatedFile.directory) {
-            val cache = localDirectory.newFile("archive", "tgz")
+            val cache = localDirectory.newFile("archive", ".tgz")
             val local = localDirectory / replicatedFile.name
             cache.extract(local)
             local.mode = replicatedFile.mode
