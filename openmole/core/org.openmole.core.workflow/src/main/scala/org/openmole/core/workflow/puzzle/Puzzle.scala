@@ -72,8 +72,8 @@ case class PuzzlePiece(
     )
 
   def on(env: EnvironmentProvider) = copy(environment = Some(env))
-  def hook(hooks: Hook*) = copy(hooks = hooks.toList ::: hooks.toList)
-  def source(sources: Source*) = copy(sources = sources.toList ::: sources.toList)
+  def hook(hooks: Hook*) = copy(hooks = this.hooks.toList ::: hooks.toList)
+  def source(sources: Source*) = copy(sources = this.sources.toList ::: sources.toList)
   def by(strategy: Grouping) = copy(grouping = Some(strategy))
 
 }
