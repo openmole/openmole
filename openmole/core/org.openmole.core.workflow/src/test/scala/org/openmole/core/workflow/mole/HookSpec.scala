@@ -33,8 +33,8 @@ class HookSpec extends FlatSpec with Matchers {
 
   import org.openmole.core.workflow.tools.StubServices._
 
-  "A capsule execution misc" should "intercept the execution of a capsule" in {
-    var executed = new AtomicInteger(0)
+  "A hook" should "intercept the execution of a capsule" in {
+    val executed = new AtomicInteger(0)
 
     val p = Val[String]("p")
 
@@ -60,8 +60,8 @@ class HookSpec extends FlatSpec with Matchers {
     executed.get should equal(1)
   }
 
-  "A capsule execution misc" should "intercept the execution of a master capsule" in {
-    var executed = false
+  "A hook" should "intercept the execution of a master capsule" in {
+    @transient var executed = false
 
     val p = Val[String]("p")
 
