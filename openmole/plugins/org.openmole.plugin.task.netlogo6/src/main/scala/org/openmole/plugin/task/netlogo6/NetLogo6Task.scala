@@ -48,12 +48,14 @@ object NetLogo6Task {
     workspace:         File,
     script:            String,
     launchingCommands: Seq[FromContext[String]],
-    seed:              OptionalArgument[Val[Int]] = None
+    seed:              OptionalArgument[Val[Int]] = None,
+    ignoreError:       Boolean                    = false
   )(implicit name: sourcecode.Name): NetLogo6Task =
     withDefaultArgs(
       workspace = Workspace(script = script, workspace = workspace.getName),
       launchingCommands = launchingCommands,
-      seed = seed
+      seed = seed,
+      ignoreError = ignoreError
     ) set (
         inputs += (seed.option.toSeq: _*),
         resources += workspace
@@ -62,12 +64,14 @@ object NetLogo6Task {
   def file(
     script:            File,
     launchingCommands: Seq[FromContext[String]],
-    seed:              OptionalArgument[Val[Int]] = None
+    seed:              OptionalArgument[Val[Int]] = None,
+    ignoreError:       Boolean                    = false
   )(implicit name: sourcecode.Name): NetLogo6Task =
     withDefaultArgs(
       workspace = Workspace(script = script.getName),
       launchingCommands = launchingCommands,
-      seed = seed
+      seed = seed,
+      ignoreError = ignoreError
     ) set (
         inputs += (seed.option.toSeq: _*),
         resources += script
@@ -77,15 +81,17 @@ object NetLogo6Task {
     script:            File,
     launchingCommands: Seq[FromContext[String]],
     embedWorkspace:    Boolean                    = false,
-    seed:              OptionalArgument[Val[Int]] = None
+    seed:              OptionalArgument[Val[Int]] = None,
+    ignoreError:       Boolean                    = false
   )(implicit name: sourcecode.Name): NetLogo6Task =
-    if (embedWorkspace) workspace(script.getCanonicalFile.getParentFile, script.getName, launchingCommands, seed)
-    else file(script, launchingCommands, seed)
+    if (embedWorkspace) workspace(script.getCanonicalFile.getParentFile, script.getName, launchingCommands, seed = seed, ignoreError = ignoreError)
+    else file(script, launchingCommands, seed = seed, ignoreError = ignoreError)
 
   private def withDefaultArgs(
     workspace:         NetLogoTask.Workspace,
     launchingCommands: Seq[FromContext[String]],
-    seed:              Option[Val[Int]]
+    seed:              Option[Val[Int]],
+    ignoreError:       Boolean
   )(implicit name: sourcecode.Name) =
     NetLogo6Task(
       config = InputOutputConfig(),
@@ -95,7 +101,8 @@ object NetLogo6Task {
       netLogoArrayOutputs = Vector.empty,
       workspace = workspace,
       launchingCommands = launchingCommands,
-      seed = seed
+      seed = seed,
+      ignoreError = ignoreError
     )
 
 }
@@ -108,7 +115,8 @@ object NetLogo6Task {
   netLogoArrayOutputs: Vector[(String, Int, Val[_])],
   workspace:           NetLogoTask.Workspace,
   launchingCommands:   Seq[FromContext[String]],
-  seed:                Option[Val[Int]]
+  seed:                Option[Val[Int]],
+  ignoreError:         Boolean
 ) extends NetLogoTask {
   override def netLogoFactory: NetLogoFactory = NetLogo6Task.factory
 }

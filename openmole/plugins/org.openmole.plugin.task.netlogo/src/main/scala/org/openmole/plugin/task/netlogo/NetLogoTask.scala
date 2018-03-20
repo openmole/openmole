@@ -40,6 +40,7 @@ trait NetLogoTask extends Task with ValidateTask {
   def netLogoOutputs: Iterable[(String, Val[_])]
   def netLogoArrayOutputs: Iterable[(String, Int, Val[_])]
   def netLogoFactory: NetLogoFactory
+  def ignoreError: Boolean
   def seed: Option[Val[Int]]
   def external: External
 
@@ -92,7 +93,10 @@ trait NetLogoTask extends Task with ValidateTask {
             executeNetLogo("set " + inBinding._2 + " " + v)
           }
 
-          for (cmd ← launchingCommands.map(_.from(context))) executeNetLogo(cmd)
+          try for (cmd ← launchingCommands.map(_.from(context))) executeNetLogo(cmd)
+          catch {
+            case t: Throwable ⇒ if (!ignoreError) throw t
+          }
 
           val contextResult =
             external.fetchOutputFiles(outputs, preparedContext, external.relativeResolver(workDir), tmpDir) ++ netLogoOutputs.map {
