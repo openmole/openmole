@@ -17,7 +17,7 @@
 
 package org.openmole.tool.file
 
-import java.nio.file.Files
+import java.nio.file.{ Files, Paths }
 
 import org.openmole.tool.file._
 import org.openmole.tool.stream._
@@ -26,17 +26,17 @@ import org.scalatest._
 
 class FileUtilSpec extends FlatSpec with Matchers {
 
-  "A string" should "be append to the stream" in {
+  "A string" should "be appended to the stream" in {
     val t = "TestString"
     val sis = new StringOutputStream
     try {
       sis.append(t)
       sis.toString should equal(t)
     }
-    finally sis.close
+    finally sis.close()
   }
 
-  "A string" should "be append to the file" in {
+  "A string" should "be appended to the file" in {
     val file = Files.createTempFile("test", ".tmp").toFile
     try {
       val t1 = "TestString"
@@ -46,6 +46,33 @@ class FileUtilSpec extends FlatSpec with Matchers {
       file.content should equal(t1 + t2)
     }
     finally file.delete
+  }
+
+  "A broken symbolic link" should "be reported as such" in {
+    val brokenPath = Paths.get("/tmp/gibberish")
+    val link = Paths.get("/tmp/linktarget").toFile
+    link createLinkTo brokenPath
+    try {
+      link.isSymbolicLink should equal(true)
+      link.isBrokenSymbolicLink should equal(true)
+    }
+    finally {
+      link.delete()
+    }
+  }
+
+  "A valid symbolic link" should "be reported as such" in {
+    val file = Files.createTempFile("test", ".tmp").toFile
+    val link = Paths.get("/tmp/linktarget").toFile
+    link createLinkTo file
+    try {
+      link.isSymbolicLink should equal(true)
+      link.isBrokenSymbolicLink should equal(false)
+    }
+    finally {
+      link.delete()
+      file.delete()
+    }
   }
 
 }

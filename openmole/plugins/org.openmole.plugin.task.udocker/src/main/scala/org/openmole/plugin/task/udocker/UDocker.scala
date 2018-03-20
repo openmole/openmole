@@ -105,7 +105,11 @@ object UDocker {
       // lock before existence tests to account for incomplete files
       layersDirectory.withLockInDirectory {
         if (!layerFileInLayers.exists()) layer._2 move layerFileInLayers
-        if (!layerFileInRepos.exists()) layerFileInRepos createLinkTo layerFileInLayers.getAbsolutePath
+        if (!layerFileInRepos.exists()) {
+          // clean potential broken link before recreating a valid one
+          if (layerFileInRepos.isBrokenSymbolicLink) layerFileInRepos.delete()
+          layerFileInRepos createLinkTo layerFileInLayers.getAbsolutePath
+        }
       }
     }
 
