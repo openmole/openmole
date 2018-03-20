@@ -1,18 +1,14 @@
 package org.openmole.site
 
 import org.scalajs.dom._
-import org.scalajs.dom.raw.{ HTMLDivElement, HTMLElement }
+import org.scalajs.dom.raw.HTMLElement
 
 import scala.util.{ Failure, Success }
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import scalatags.JsDom.all._
 import rx._
 
-import scalatags.Text.RawFrag
 import scalatags.Text.all.{ backgroundColor, padding }
-import scaladget.api.{ BootstrapTags ⇒ bs }
-import bs._
-import scalatags.JsDom.TypedTag
 
 /*
  * Copyright (C) 13/07/17 // mathieu.leclaire@openmole.org

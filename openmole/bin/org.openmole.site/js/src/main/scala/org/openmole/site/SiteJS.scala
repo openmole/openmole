@@ -1,13 +1,13 @@
 package org.openmole.site
 
-import scaladget.api.{ BootstrapTags ⇒ bs }
+import scaladget.bootstrapnative.bsn._
+import scaladget.tools.JsRxTags._
 import scala.scalajs.js.JSApp
 import scala.scalajs.js.annotation._
 import scalatags.JsDom.all._
-import bs._
 import rx._
 
-import scaladget.mapping.lunr.{ IIndexSearchResult, Importedjs, Index }
+import scaladget.lunr.{ IIndexSearchResult, Importedjs, Index }
 import scala.scalajs.js.Dynamic.{ literal ⇒ lit }
 import scala.scalajs.js
 
@@ -33,10 +33,8 @@ object SiteJS extends JSApp {
 
   @JSExport()
   def main(): Unit = {
-    withBootstrapNative {
-      Highlighting.init
-      div.render
-    }
+    Highlighting.init
+    div.render
   }
 
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
