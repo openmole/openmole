@@ -104,6 +104,16 @@ common NetLogo example. It studies the percolation of a fire in a forest dependi
     @p Similarly, 1 output of the model is considered and collected by OpenMOLE at the end of each model execution.
     It is noted as @i{netLogoOutputs} in the task definition.
 
+    @p The arguments for a NetLogoTask are the following :
+    @ul
+      @li{@i{script} netlogo model (File), mandatory}
+      @li{@i{launchingCommands} netlogo commands to be executed, mandatory}
+      @li{@i{embedWorkspace} should the workspace be embedded for execution of the model (use if you have source files or extensions in the model directory), optional, defaults to false}
+      @li{@i{seed} random seed, optional, defaults to None}
+      @li{@i{netLogoInputs} vector of couples (Val,String) to establish the link between workflow variables that are input and the corresponding netlogo variables, optional}
+      @li{@i{netLogoOutputs} vector of couples (String,Val) to collect outputs of the model (the string can be any NetLogo command), optional}
+      @li{@i{netLogoArrayOutputs} vector of triples (String,Int,Val) to collect outputs from lists in the model (gets the item at the given index), optional}
+
 @sect{@shared.netlogoMenu.storing}
     OpenMOLE usually delegates the tasks execution to many different computers. To gather the results of these remote
     executions, we use a mechanism called @i{hooks}. Hooks can be assimilated to a listener that saves or display
