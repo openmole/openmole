@@ -182,6 +182,8 @@ package file {
 
       def isSymbolicLink = Files.isSymbolicLink(Paths.get(file.getAbsolutePath))
 
+      def isBrokenSymbolicLink = Files.notExists(Files.readSymbolicLink(file))
+
       def directoryContainsNoFileRecursive: Boolean = {
         val toProceed = new ListBuffer[File]
         toProceed += file
