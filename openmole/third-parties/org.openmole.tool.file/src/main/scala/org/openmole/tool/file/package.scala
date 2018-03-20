@@ -38,6 +38,7 @@ package file {
   import java.nio.file.DirectoryStream.Filter
   import java.nio.file.attribute.PosixFilePermissions
   import java.util.concurrent.ThreadPoolExecutor
+  import java.util.concurrent.atomic.AtomicLong
 
   import org.openmole.tool.file
   import squants.time.Time
@@ -205,14 +206,37 @@ package file {
         true
       }
 
+      import java.io.IOException
+      import java.nio.file.FileVisitResult
+      import java.nio.file.Files
+      import java.nio.file.SimpleFileVisitor
+      import java.nio.file.attribute.BasicFileAttributes
+
       //////// general operations ///////
-      def size: Long =
-        if (file.isDirectory) file.listFilesSafe(f ⇒ !f.isSymbolicLink).map(_.size).sum
+      def size: Long = {
+        def sizeOfDirectory(directory: File) = {
+          val size = new AtomicLong()
+
+          Files.walkFileTree(
+            directory,
+            new SimpleFileVisitor[Path]() {
+              override def visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult = {
+                if (attrs.isRegularFile) size.addAndGet(attrs.size)
+                FileVisitResult.CONTINUE
+              }
+            })
+
+          size.get()
+        }
+
+        if (!file.exists()) 0L
+        else if (file.isDirectory) sizeOfDirectory(file)
         else
           try Files.size(file)
           catch {
             case e: NoSuchFileException ⇒ 0L
           }
+      }
 
       def mode = {
         val f = file.realPath;
