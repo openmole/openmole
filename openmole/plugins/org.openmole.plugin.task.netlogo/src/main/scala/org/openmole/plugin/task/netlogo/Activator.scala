@@ -34,13 +34,15 @@ class Activator extends PluginInfoActivator {
 
     val keyWords: Vector[KeyWord] =
       Vector(
-        Word("workspace"),
+        Word("script"),
         Word("launchingCommands"),
+        Word("seed"),
         Word("netLogoInputs"),
         Word("netLogoOutputs"),
         Word("netLogoArrayOutputs"),
-        Word("netLogoFactory"),
-        Word("external")
+        Word("embedWorkspace")
+        //Word("netLogoFactory"),
+        //Word("external")
       )
 
     PluginInfo.register(this, Vector(this.getClass.getPackage), keyWords = keyWords)
