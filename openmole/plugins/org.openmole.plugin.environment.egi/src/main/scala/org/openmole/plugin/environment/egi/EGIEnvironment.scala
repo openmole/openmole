@@ -313,7 +313,8 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
 
     case class FileInfo(size: Long, hash: String)
 
-    val usedFilesInfo = usedFiles.map { f ⇒ f → FileInfo(f.size, fileService.hash(f).toString) }.toMap
+    def fileSize(file: File) = (if (file.isDirectory) fileService.archiveForDir(file).file else file).size
+    val usedFilesInfo = usedFiles.map { f ⇒ f → FileInfo(fileSize(f), fileService.hash(f).toString) }.toMap
     val totalFileSize = usedFilesInfo.values.toSeq.map(_.size).sum
     val onStorage = replicaCatalog.forHashes(usedFilesInfo.values.toVector.map(_.hash), sss.map(_.id)).groupBy(_.storage)
 
