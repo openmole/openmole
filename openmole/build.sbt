@@ -808,6 +808,7 @@ lazy val site = crossProject.in(binDir / "org.openmole.site") settings (defaultS
 ) jsSettings(
   Libraries.rxJS,
   Libraries.bootstrapnative,
+  Libraries.lunr,
   Libraries.scaladgetTools,
   Libraries.scalajsDomJS,
   Libraries.scalajsMarked

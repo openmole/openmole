@@ -18,18 +18,13 @@ package org.openmole.site
  */
 
 import org.scalajs.dom.KeyboardEvent
-
-import scaladget.stylesheet.{ all ⇒ sheet }
-import scaladget.api.{ BootstrapTags ⇒ bs }
-import scaladget.tools.JsRxTags._
+import scaladget.bootstrapnative.bsn._
+import scaladget.tools._
+import scaladget.lunr.IIndexSearchResult
 import scalatags.JsDom.all._
 import org.scalajs.dom.raw.MouseEvent
-
-import sheet._
 import rx._
-
-import scaladget.api.Selector.Dropdown
-import scaladget.mapping.lunr.IIndexSearchResult
+import scaladget.bootstrapnative.Selector.Dropdown
 
 object Search {
 
@@ -43,7 +38,7 @@ object Search {
       display := "block"
     )
 
-    val searchInput = bs.input("")(placeholder := "Search", centerSearch).render
+    val searchInput = inputTag("")(placeholder := "Search", centerSearch).render
     val result: Var[Seq[IIndexSearchResult]] = Var(Seq())
 
     case class Item(index: Int = 0, ref: String = "", maxSize: Int = 0)
