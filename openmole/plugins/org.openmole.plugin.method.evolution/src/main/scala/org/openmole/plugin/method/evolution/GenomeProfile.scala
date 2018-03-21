@@ -17,7 +17,6 @@
 
 package org.openmole.plugin.method.evolution
 
-
 import org.openmole.core.dsl._
 import cats._
 
@@ -28,12 +27,12 @@ object GenomeProfile {
     nX:        Int,
     genome:    Genome,
     objective: Objective
-  ): WorkflowIntegration.DeterministicGA[NichedNSGA2.DeterministicParams] =
+  ) =
     NichedNSGA2(
       Vector(NichedNSGA2.NichedElement.Continuous(x, nX)),
       genome,
       objectives = Seq(objective),
-      nicheSize = 1,
+      nicheSize = 1
     )
 
   def apply(
@@ -41,15 +40,15 @@ object GenomeProfile {
     nX:         Int,
     genome:     Genome,
     objective:  Objective,
-    stochastic: Stochastic[Id],
-    nicheSize: Int = 20
-  ): WorkflowIntegration.StochasticGA[NichedNSGA2.StochasticParams] =
+    stochastic: Stochastic,
+    nicheSize:  Int         = 20
+  ) =
     NichedNSGA2(
       Vector(NichedNSGA2.NichedElement.Continuous(x, nX)),
       genome,
       Seq(objective),
-      stochastic,
-      nicheSize
+      nicheSize,
+      stochastic = stochastic
     )
 
 }

@@ -59,11 +59,11 @@ trait GASeeder {
   def prototype: Option[Val[_]]
 }
 
-case class Stochastic[A[_]: Functor](
-  seed:         GASeeder                                = GASeeder.empty,
-  replications: Int                                     = 100,
-  reevaluate:   Double                                  = 0.2,
-  aggregation:  OptionalArgument[A[FitnessAggregation]] = None
+case class Stochastic(
+  seed:         GASeeder                                  = GASeeder.empty,
+  replications: Int                                       = 100,
+  reevaluate:   Double                                    = 0.2,
+  aggregation:  OptionalArgument[Seq[FitnessAggregation]] = None
 )
 
 object WorkflowIntegration {
@@ -72,7 +72,7 @@ object WorkflowIntegration {
     def apply(h: H) = hwi.selected(hwi(h))
   }
 
-  def deterministicGAIntegration[AG](a: DeterministicGA[AG]) =
+  def deterministicGAIntegration[AG](a: DeterministicGA[AG]): EvolutionWorkflow =
     new EvolutionWorkflow {
       type MGOAG = AG
       def mgoAG = a.ag
@@ -97,7 +97,7 @@ object WorkflowIntegration {
       def variablesToPhenotype(context: Context) = a.objectives.map(o ⇒ o.fromContext(context)).toVector
     }
 
-  def stochasticGAIntegration[AG](a: StochasticGA[AG]) =
+  def stochasticGAIntegration[AG](a: StochasticGA[AG]): EvolutionWorkflow =
     new EvolutionWorkflow {
       type MGOAG = AG
       def mgoAG = a.ag
@@ -129,31 +129,41 @@ object WorkflowIntegration {
   )(implicit val algorithm: MGOAPI.Integration[AG, (Vector[Double], Vector[Int]), Vector[Double]])
 
   object DeterministicGA {
-    implicit def deterministicGAIntegration[AG] = new WorkflowIntegration[DeterministicGA[AG]] {
+    implicit def deterministicGAIntegration[AG]: WorkflowIntegration[DeterministicGA[AG]] = new WorkflowIntegration[DeterministicGA[AG]] {
       def apply(a: DeterministicGA[AG]) = WorkflowIntegration.deterministicGAIntegration(a)
     }
+
+    def toEvolutionWorkflow(a: DeterministicGA[_]): EvolutionWorkflow = WorkflowIntegration.deterministicGAIntegration(a)
   }
 
   case class StochasticGA[AG](
     ag:          AG,
     genome:      Genome,
     objectives:  Objectives,
-    replication: Stochastic[Seq]
+    replication: Stochastic
   )(
     implicit
     val algorithm: MGOAPI.Integration[AG, (Vector[Double], Vector[Int]), Vector[Double]]
   )
 
   object StochasticGA {
-    implicit def stochasticGAIntegration[AG] = new WorkflowIntegration[StochasticGA[AG]] {
+    implicit def stochasticGAIntegration[AG]: WorkflowIntegration[StochasticGA[AG]] = new WorkflowIntegration[StochasticGA[AG]] {
       override def apply(a: StochasticGA[AG]) = WorkflowIntegration.stochasticGAIntegration(a)
     }
+
+    def toEvolutionWorkflow(a: StochasticGA[_]): EvolutionWorkflow = WorkflowIntegration.stochasticGAIntegration(a)
   }
 
 }
 
 trait WorkflowIntegration[T] {
   def apply(t: T): EvolutionWorkflow
+}
+
+object EvolutionWorkflow {
+  implicit def isWorkflowIntegration: WorkflowIntegration[EvolutionWorkflow] = new WorkflowIntegration[EvolutionWorkflow] {
+    def apply(t: EvolutionWorkflow) = t
+  }
 }
 
 trait EvolutionWorkflow {
