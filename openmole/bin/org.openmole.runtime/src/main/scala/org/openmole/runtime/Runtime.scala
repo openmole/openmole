@@ -126,7 +126,6 @@ class Runtime {
       logger.fine("Downloading files")
 
       for (repliURI ← executionMessage.files) {
-
         // To avoid getting twice the same plugin
         if (!usedFiles.containsKey(repliURI.originalPath)) {
           val local = getReplicatedFile(repliURI, TransferOptions())
