@@ -25,71 +25,76 @@ package external {
   import java.io._
 
   import org.openmole.core.context.Val
-  import org.openmole.core.expansion.FromContext
+  import org.openmole.core.expansion.{ FromContext, ToFromContext }
   import org.openmole.core.workflow.builder.InputOutputBuilder
 
   trait ExternalPackage {
 
+    implicit class InputFileAsDecorator(v: Val[File]) {
+      def as(name: FromContext[String], link: Boolean = false) = External.InputFile(v, name, link)
+    }
+
+    implicit class InputFileArrayAsDecorator(v: Val[Array[File]]) {
+      def as(prefix: FromContext[String], suffix: FromContext[String] = "", link: Boolean = false) = External.InputFileArray(v, prefix, suffix, link)
+    }
+
+    implicit class ResourceDecorator[T](file: File) {
+      def as(name: OptionalArgument[FromContext[String]] = None, link: Boolean = false, os: OS = OS()) =
+        External.Resource(file, name.getOrElse(file.getName), link = link, os = os)
+    }
+
+    implicit class OutputFileDecorator[T](t: T)(implicit toFromContext: ToFromContext[T, String]) {
+      def as(p: Val[File]) = External.OutputFile(toFromContext(t), p)
+    }
+
     lazy val inputFiles = new {
       /**
        * Copy a file or directory from the dataflow to the task workspace
-       *
-       * @param p the prototype of the data containing the file to be copied
-       * @param name the destination name of the file in the task workspace
-       * @param link @see addResource
-       *
        */
-      def +=[T: ExternalBuilder: InputOutputBuilder](p: Val[File], name: FromContext[String], link: Boolean = false): T ⇒ T =
-        (implicitly[ExternalBuilder[T]].inputFiles add External.InputFile(p, name, link)) andThen
-          (inputs += p)
+      def +=[T: ExternalBuilder: InputOutputBuilder](inputFile: External.InputFile): T ⇒ T =
+        implicitly[ExternalBuilder[T]].inputFiles add inputFile andThen (inputs += inputFile.prototype)
+
+      @deprecated
+      def +=[T: ExternalBuilder: InputOutputBuilder](p: Val[File], name: FromContext[String], link: Boolean = false): T ⇒ T = this += (p as (name, link))
     }
 
     lazy val inputFileArrays = new {
       /**
        * Copy an array of files or directory from the dataflow to the task workspace. The files
        * in the array are named prefix$nSuffix where $n i the index of the file in the array.
-       *
-       * @param p the prototype of the data containing the array of files to be copied
-       * @param prefix the prefix for naming the files
-       * @param suffix the suffix for naming the files
-       * @param link @see addResource
-       *
        */
+      def +=[T: ExternalBuilder: InputOutputBuilder](inputFileArray: External.InputFileArray): T ⇒ T =
+        (implicitly[ExternalBuilder[T]].inputFileArrays add inputFileArray) andThen (inputs += inputFileArray.prototype)
+
+      @deprecated
       def +=[T: ExternalBuilder: InputOutputBuilder](p: Val[Array[File]], prefix: FromContext[String], suffix: FromContext[String] = "", link: Boolean = false): T ⇒ T =
-        (implicitly[ExternalBuilder[T]].inputFileArrays add External.InputFileArray(prototype = p, prefix = prefix, suffix = suffix, link = link)) andThen
-          (inputs += p)
+        this += (p as (prefix = prefix, suffix = suffix, link = link))
     }
 
     lazy val outputFiles = new {
       /**
        * Get a file generate by the task and inject it in the dataflow
        *
-       * @param name the name of the file to be injected
-       * @param p the prototype that is injected
-       *
        */
+      def +=[T: ExternalBuilder: InputOutputBuilder](outputFile: External.OutputFile): T ⇒ T =
+        (implicitly[ExternalBuilder[T]].outputFiles add outputFile) andThen (outputs += outputFile.prototype)
+
+      @deprecated
       def +=[T: ExternalBuilder: InputOutputBuilder](name: FromContext[String], p: Val[File]): T ⇒ T =
-        (implicitly[ExternalBuilder[T]].outputFiles add External.OutputFile(name, p)) andThen
-          (outputs += p)
+        this += (name as p)
     }
 
     lazy val resources =
       new {
         /**
          * Copy a file from your computer in the workspace of the task
-         *
-         * @param file the file or directory to copy in the task workspace
-         * @param name the destination name of the file in the task workspace, by
-         * default it is the same as the original file name
-         * @param link tels if the entire content of the file should be copied or
-         * if a symbolic link is suitable. In the case link is set to true openmole will
-         * try to use a symbolic link if available on your system.
-         *
          */
-        def +=[T: ExternalBuilder](file: File, name: OptionalArgument[FromContext[String]] = None, link: Boolean = false, os: OS = OS()): T ⇒ T =
-          implicitly[ExternalBuilder[T]].resources add External.Resource(file, name.getOrElse(file.getName), link, os)
+        def +=[T: ExternalBuilder](resource: External.Resource*): T ⇒ T =
+          resource.map(implicitly[ExternalBuilder[T]].resources add _)
 
-        def +=[T: ExternalBuilder](file: File*): T ⇒ T = file.map(f ⇒ +=(f, None, false, OS()))
+        @deprecated
+        def +=[T: ExternalBuilder](file: File, name: OptionalArgument[FromContext[String]] = None, link: Boolean = false, os: OS = OS()): T ⇒ T =
+          implicitly[ExternalBuilder[T]].resources add (file as (name, link, os))
 
       }
   }
