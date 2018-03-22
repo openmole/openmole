@@ -17,8 +17,24 @@
 
 package org.openmole.plugin.task.external
 
-import org.openmole.core.pluginmanager.PluginInfoActivator
+import org.openmole.core.pluginmanager._
+import org.osgi.framework.BundleContext
 
 class Activator extends PluginInfoActivator {
   override def keyWordTraits = List(classOf[ExternalPackage])
+
+  override def stop(context: BundleContext): Unit = {
+    PluginInfo.unregister(this)
+  }
+
+  override def start(context: BundleContext): Unit = {
+    import org.openmole.core.pluginmanager.KeyWord._
+
+    val keyWords: Vector[KeyWord] =
+      Vector(
+        Word("as")
+      )
+
+    PluginInfo.register(this, Vector(this.getClass.getPackage), keyWords = keyWords)
+  }
 }
