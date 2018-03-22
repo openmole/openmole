@@ -32,7 +32,11 @@ class Activator extends PluginInfoActivator {
 
     val keyWords: Vector[KeyWord] =
       Vector(
-        Word("as")
+        Word("as"),
+        Word("inputFiles"),
+        Word("outputFiles"),
+        Word("resources"),
+        Word("inputFileArrays")
       )
 
     PluginInfo.register(this, Vector(this.getClass.getPackage), keyWords = keyWords)
