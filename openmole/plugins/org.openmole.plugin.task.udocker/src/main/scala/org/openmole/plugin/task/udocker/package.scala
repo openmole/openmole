@@ -28,7 +28,10 @@ package udocker {
 package object udocker extends UDockerPackage {
 
   object ContainerImage {
-    implicit def fileToContainerImage(f: java.io.File) = SavedDockerImage(f)
+    implicit def fileToContainerImage(f: java.io.File) = {
+      def compressed = f.getName.endsWith(".tgz") || f.getName.endsWith(".gz")
+      SavedDockerImage(f, compressed)
+    }
     implicit def stringToContainerImage(s: String) =
       if (s.contains(":")) {
         val Vector(image, tag) = s.split(":").toVector
@@ -40,7 +43,7 @@ package object udocker extends UDockerPackage {
 
   sealed trait ContainerImage
   case class DockerImage(image: String, tag: String = "latest", registry: String = "https://registry-1.docker.io") extends ContainerImage
-  case class SavedDockerImage(file: java.io.File) extends ContainerImage
+  case class SavedDockerImage(file: java.io.File, compressed: Boolean) extends ContainerImage
 
   import cats.data._
   import cats.implicits._

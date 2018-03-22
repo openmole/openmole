@@ -164,7 +164,8 @@ object UDocker {
 
     import org.openmole.tool.tar._
 
-    dockerImage.file.extract(extractedImage)
+    if (!dockerImage.compressed) dockerImage.file.extract(extractedImage)
+    else dockerImage.file.extractUncompress(extractedImage)
 
     val manifestContent = (extractedImage / "manifest.json").content
     val topLevelManifests = decode[List[TopLevelImageManifest]](manifestContent)
