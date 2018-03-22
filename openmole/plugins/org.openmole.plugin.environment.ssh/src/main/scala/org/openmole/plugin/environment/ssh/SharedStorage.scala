@@ -54,7 +54,7 @@ object SharedStorage extends JavaLogger {
               """else echo "Unsupported architecture: " `uname -m`; exit 1; fi; } && """ +
               "gunzip jvm.tar.gz && tar -xf jvm.tar && rm jvm.tar && " +
               s"cp ${runtime.runtime.path} runtime.tar.gz && gunzip runtime.tar.gz && tar -xf runtime.tar; rm runtime.tar && " +
-              s"mkdir envplugins && PLUGIN=0 && " +
+              s"mkdir -p envplugins && PLUGIN=0 && " +
               runtime.environmentPlugins.map { p ⇒ "cp " + p.path + " envplugins/plugin$PLUGIN.jar && PLUGIN=`expr $PLUGIN + 1`" }.mkString(" && ") + " && " +
               s"PATH=$$PATH:$$PWD/jre/bin /bin/bash -x run.sh 256m test_run --test && rm -rf test_run && " +
               s"cd .. && { if [ -d $runtimeInstall ]; then rm -rf $tmpDirName; exit 0; fi } && " +
@@ -163,7 +163,7 @@ object SharedStorage extends JavaLogger {
 //                """else echo "Unsupported architecture: " `uname -m`; exit 1; fi) && """ +
 //                "gunzip jvm.tar.gz && tar -xf jvm.tar && rm jvm.tar && " +
 //                s"cp ${runtime.runtime.path} runtime.tar.gz && gunzip runtime.tar.gz && tar -xf runtime.tar; rm runtime.tar && " +
-//                s"mkdir envplugins && PLUGIN=0 && " +
+//                s"mkdir -p envplugins && PLUGIN=0 && " +
 //                runtime.environmentPlugins.map { p ⇒ "cp " + p.path + " envplugins/plugin$PLUGIN.jar && PLUGIN=`expr $PLUGIN + 1`" }.mkString(" && ") + " && " +
 //                s"cd .. && (if [ -d $runtimeInstall ]; then rm -rf $tmpDirName; exit 0; fi) && " +
 //                s"mv $tmpDirName $runtimeInstall && rm -rf $tmpDirName && rm $scriptName && ( ls $runtimePrefix* | grep -v '^$runtimeInstall' | xargs rm -rf )"

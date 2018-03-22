@@ -85,7 +85,7 @@ case class JobScript(voName: String, memory: Int, threads: Int, debug: Boolean, 
 
       script += cpCommand.download(resolve(runtime.storage.path), "$CUR/storage.xml")
 
-      "mkdir envplugins && " + script.mkString(" && ")
+      "mkdir -p envplugins && " + script.mkString(" && ")
     }
 
     val run = {
