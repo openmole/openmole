@@ -10,7 +10,7 @@ object Libraries {
   lazy val d3Version = "3.5.12"
   lazy val tooltipserVersion = "3.3.0"
   lazy val netLogo5Version = "5.3.1"
-  lazy val netLogo6Version = "6.0.2"
+  lazy val netLogo6Version = "6.0.3"
   lazy val scalaTagsVersion = "0.6.5"
   lazy val scalaJSDomVersion = "0.9.3"
   lazy val rxVersion = "0.3.2"
