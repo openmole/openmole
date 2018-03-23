@@ -38,6 +38,7 @@ object SimExplorer extends JavaLogger {
 
   def run(args: Array[String]): Int = {
     try {
+      logger.finest("Running OpenMOLE runtime")
 
       case class Config(
         storage:       Option[String] = None,

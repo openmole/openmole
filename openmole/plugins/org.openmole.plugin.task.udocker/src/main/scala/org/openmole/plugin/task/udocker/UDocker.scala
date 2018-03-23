@@ -19,6 +19,7 @@ import io.circe.generic.extras.auto._
 import io.circe.jawn.{ decode, decodeFile }
 import io.circe.syntax._
 import monocle.macros.Lenses
+import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.outputredirection.OutputRedirection
 import org.openmole.plugin.task.systemexec.{ commandLine, execute, executeAll }
 import org.openmole.tool.file._
@@ -105,9 +106,8 @@ object UDocker {
       // lock before existence tests to account for incomplete files
       layersDirectory.withLockInDirectory {
         if (!layerFileInLayers.exists()) layer._2 move layerFileInLayers
-        if (!layerFileInRepos.exists()) {
-          // clean potential broken link before recreating a valid one
-          if (layerFileInRepos.isBrokenSymbolicLink) layerFileInRepos.delete()
+        if (!layerFileInRepos.exists() || layerFileInRepos.isBrokenSymbolicLink) {
+          layerFileInRepos.delete()
           layerFileInRepos createLinkTo layerFileInLayers.getAbsolutePath
         }
       }
@@ -164,7 +164,8 @@ object UDocker {
 
     import org.openmole.tool.tar._
 
-    dockerImage.file.extract(extractedImage)
+    if (!dockerImage.compressed) dockerImage.file.extract(extractedImage)
+    else dockerImage.file.extractUncompress(extractedImage)
 
     val manifestContent = (extractedImage / "manifest.json").content
     val topLevelManifests = decode[List[TopLevelImageManifest]](manifestContent)

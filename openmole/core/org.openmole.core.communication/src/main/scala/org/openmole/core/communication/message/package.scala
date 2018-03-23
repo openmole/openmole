@@ -65,21 +65,29 @@ package object message {
           if (replicatedFile.directory) {
             val cache = localDirectory.newFile("archive", ".tgz")
             download(replicatedFile.path, cache)
+            verify(cache)
+
             val local = localDirectory / replicatedFile.name
             cache.extract(local)
-            local.mode = replicatedFile.mode
             cache.delete
+            local.mode = replicatedFile.mode
             local
           }
           else {
             val cache = localDirectory / replicatedFile.name
-            verify(cache)
             download(replicatedFile.path, cache)
+            verify(cache)
+
             cache.mode = replicatedFile.mode
             cache
           }
 
         dl
+      }
+      catch {
+        case t: Throwable ⇒
+          localDirectory.recursiveDelete
+          throw t
       }
       finally fileService.deleteWhenEmpty(localDirectory)
     }

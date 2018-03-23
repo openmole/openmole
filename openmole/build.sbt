@@ -27,7 +27,7 @@ def formatSettings =
     scalariformAutoformat := true
   )
 
-lazy val scalaVersionValue = "2.12.4"
+lazy val scalaVersionValue = "2.12.5"
 
 def defaultSettings = formatSettings ++
   Seq(

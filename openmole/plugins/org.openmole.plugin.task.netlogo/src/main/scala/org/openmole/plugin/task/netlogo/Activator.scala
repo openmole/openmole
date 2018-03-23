@@ -41,8 +41,8 @@ class Activator extends PluginInfoActivator {
         Word("netLogoOutputs"),
         Word("netLogoArrayOutputs"),
         Word("embedWorkspace")
-        //Word("netLogoFactory"),
-        //Word("external")
+      //Word("netLogoFactory"),
+      //Word("external")
       )
 
     PluginInfo.register(this, Vector(this.getClass.getPackage), keyWords = keyWords)

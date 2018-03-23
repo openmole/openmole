@@ -160,22 +160,6 @@ object PSE {
     }
   }
 
-  def apply(
-    genome:     Genome,
-    objectives: Seq[PatternAxe]
-  ) = {
-
-    WorkflowIntegration.DeterministicGA(
-      DeterministicParams(
-        mgo.algorithm.PSE.irregularGrid(objectives.map(_.scale).toVector),
-        genome,
-        objectives.map(_.p),
-        operatorExploration),
-      genome,
-      objectives.map(_.p)
-    )
-  }
-
   case class StochasticParams(
     pattern:             Vector[Double] ⇒ Vector[Int],
     aggregation:         Vector[Vector[Double]] ⇒ Vector[Double],
@@ -303,26 +287,42 @@ object PSE {
     }
   }
 
+  import org.openmole.core.dsl._
+
   def apply(
     genome:     Genome,
     objectives: Seq[PatternAxe],
-    stochastic: Stochastic[Seq]
-  ) = {
+    stochastic: OptionalArgument[Stochastic] = None
+  ) = stochastic.option match {
+    case None ⇒
+      val integration: WorkflowIntegration.DeterministicGA[_] = WorkflowIntegration.DeterministicGA(
+        DeterministicParams(
+          mgo.algorithm.PSE.irregularGrid(objectives.map(_.scale).toVector),
+          genome,
+          objectives.map(_.p),
+          operatorExploration),
+        genome,
+        objectives.map(_.p)
+      )
 
-    WorkflowIntegration.StochasticGA(
-      StochasticParams(
-        pattern = mgo.algorithm.PSE.irregularGrid(objectives.map(_.scale).toVector),
-        aggregation = StochasticGAIntegration.aggregateVector(stochastic.aggregation, _),
-        genome = genome,
-        objectives = objectives.map(_.p),
-        historySize = stochastic.replications,
-        cloneProbability = stochastic.reevaluate,
-        operatorExploration = operatorExploration
-      ),
-      genome,
-      objectives.map(_.p),
-      stochastic
-    )
+      WorkflowIntegration.DeterministicGA.toEvolutionWorkflow(integration)
+    case Some(stochastic) ⇒
+      val integration: WorkflowIntegration.StochasticGA[_] = WorkflowIntegration.StochasticGA(
+        StochasticParams(
+          pattern = mgo.algorithm.PSE.irregularGrid(objectives.map(_.scale).toVector),
+          aggregation = StochasticGAIntegration.aggregateVector(stochastic.aggregation, _),
+          genome = genome,
+          objectives = objectives.map(_.p),
+          historySize = stochastic.replications,
+          cloneProbability = stochastic.reevaluate,
+          operatorExploration = operatorExploration
+        ),
+        genome,
+        objectives.map(_.p),
+        stochastic
+      )
+
+      WorkflowIntegration.StochasticGA.toEvolutionWorkflow(integration)
   }
 
 }

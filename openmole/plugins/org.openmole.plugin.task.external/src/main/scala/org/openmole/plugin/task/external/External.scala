@@ -35,6 +35,10 @@ import org.openmole.core.workflow.validation._
 object External {
   val PWD = Val[String]("PWD")
 
+  trait ToInputFile[T] {
+    def apply(t: T): InputFile
+  }
+
   case class InputFile(
     prototype:   Val[File],
     destination: FromContext[String],

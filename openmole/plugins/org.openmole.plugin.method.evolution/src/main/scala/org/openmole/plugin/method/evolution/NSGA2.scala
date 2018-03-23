@@ -233,33 +233,36 @@ object NSGA2 {
     aggregation:         Vector[Vector[Double]] ⇒ Vector[Double]
   )
 
-  def apply(
-    mu:         Int,
-    genome:     Genome,
-    objectives: Objectives) = {
-    new WorkflowIntegration.DeterministicGA(
-      DeterministicParams(mu, genome, objectives, operatorExploration),
-      genome,
-      objectives
-    )
-  }
+  import org.openmole.core.dsl._
 
   def apply(
-    mu:         Int,
     genome:     Genome,
     objectives: Objectives,
-    stochastic: Stochastic[Seq]
-  ) = {
-    def aggregation(h: Vector[Vector[Double]]) =
-      StochasticGAIntegration.aggregateVector(stochastic.aggregation, h)
+    mu:         Int                          = 200,
+    stochastic: OptionalArgument[Stochastic] = None
+  ): EvolutionWorkflow =
+    stochastic.option match {
+      case None ⇒
+        val integration: WorkflowIntegration.DeterministicGA[_] = WorkflowIntegration.DeterministicGA(
+          DeterministicParams(mu, genome, objectives, operatorExploration),
+          genome,
+          objectives
+        )(DeterministicParams.integration)
 
-    WorkflowIntegration.StochasticGA(
-      StochasticParams(mu, operatorExploration, genome, objectives, stochastic.replications, stochastic.reevaluate, aggregation),
-      genome,
-      objectives,
-      stochastic
-    )
-  }
+        WorkflowIntegration.DeterministicGA.toEvolutionWorkflow(integration)
+      case Some(stochastic) ⇒
+        def aggregation(h: Vector[Vector[Double]]) =
+          StochasticGAIntegration.aggregateVector(stochastic.aggregation.option, h)
+
+        val integration: WorkflowIntegration.StochasticGA[_] = WorkflowIntegration.StochasticGA(
+          StochasticParams(mu, operatorExploration, genome, objectives, stochastic.replications, stochastic.reevaluate, aggregation),
+          genome,
+          objectives,
+          stochastic
+        )(StochasticParams.integration)
+
+        WorkflowIntegration.StochasticGA.toEvolutionWorkflow(integration)
+    }
 
 }
 

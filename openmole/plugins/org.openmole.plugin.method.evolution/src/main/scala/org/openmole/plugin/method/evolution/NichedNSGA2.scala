@@ -165,23 +165,6 @@ object NichedNSGA2 {
     objectives:          Objectives,
     operatorExploration: Double)
 
-  def apply(
-    niche:      Seq[NichedElement],
-    genome:     Genome,
-    objectives: Objectives,
-    nicheSize:  Int): WorkflowIntegration.DeterministicGA[DeterministicParams] =
-    new WorkflowIntegration.DeterministicGA(
-      DeterministicParams(
-        genome = genome,
-        objectives = objectives,
-        niche = DeterministicParams.niche(genome, objectives, niche),
-        operatorExploration = operatorExploration,
-        nicheSize = nicheSize
-      ),
-      genome,
-      objectives
-    )
-
   object StochasticParams {
     import mgo.algorithm._
     import mgo.algorithm.NoisyProfile
@@ -328,38 +311,54 @@ object NichedNSGA2 {
     niche:      Seq[NichedElement],
     genome:     Genome,
     objectives: Objectives,
-    stochastic: Stochastic[Id],
-    nicheSize:  Int): WorkflowIntegration.StochasticGA[StochasticParams] = {
+    nicheSize:  Int,
+    stochastic: OptionalArgument[Stochastic] = None) =
+    stochastic.option match {
+      case None ⇒
+        val integration: WorkflowIntegration.DeterministicGA[_] = new WorkflowIntegration.DeterministicGA(
+          DeterministicParams(
+            genome = genome,
+            objectives = objectives,
+            niche = DeterministicParams.niche(genome, objectives, niche),
+            operatorExploration = operatorExploration,
+            nicheSize = nicheSize
+          ),
+          genome,
+          objectives
+        )
 
-    import org.openmole.core.dsl.seqIsFunctor
+        WorkflowIntegration.DeterministicGA.toEvolutionWorkflow(integration)
+      case Some(stochastic) ⇒
+        import org.openmole.core.dsl.seqIsFunctor
 
-    val seqStochastic: Stochastic[Seq] =
-      Stochastic[Seq](
-        seed = stochastic.seed,
-        replications = stochastic.replications,
-        reevaluate = stochastic.reevaluate,
-        aggregation = OptionalArgument(stochastic.aggregation.map { a: FitnessAggregation ⇒ Seq(a) })
-      )
+        val seqStochastic: Stochastic =
+          Stochastic(
+            seed = stochastic.seed,
+            replications = stochastic.replications,
+            reevaluate = stochastic.reevaluate,
+            aggregation = stochastic.aggregation
+          )
 
-    def aggregation(h: Vector[Vector[Double]]) =
-      StochasticGAIntegration.aggregateVector(seqStochastic.aggregation, h)
+        def aggregation(h: Vector[Vector[Double]]) =
+          StochasticGAIntegration.aggregateVector(seqStochastic.aggregation, h)
 
-    WorkflowIntegration.StochasticGA(
-      StochasticParams(
-        nicheSize = nicheSize,
-        niche = StochasticParams.niche(genome, objectives, aggregation, niche),
-        operatorExploration = operatorExploration,
-        genome = genome,
-        objectives = objectives,
-        historySize = stochastic.replications,
-        cloneProbability = stochastic.reevaluate,
-        aggregation = aggregation),
-      genome,
-      objectives,
-      seqStochastic
-    )
+        val integration: WorkflowIntegration.StochasticGA[_] = WorkflowIntegration.StochasticGA(
+          StochasticParams(
+            nicheSize = nicheSize,
+            niche = StochasticParams.niche(genome, objectives, aggregation, niche),
+            operatorExploration = operatorExploration,
+            genome = genome,
+            objectives = objectives,
+            historySize = stochastic.replications,
+            cloneProbability = stochastic.reevaluate,
+            aggregation = aggregation),
+          genome,
+          objectives,
+          seqStochastic
+        )
 
-  }
+        WorkflowIntegration.StochasticGA.toEvolutionWorkflow(integration)
+    }
 
 }
 

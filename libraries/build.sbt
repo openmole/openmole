@@ -7,7 +7,7 @@ def settings = Seq(
   resolvers += DefaultMavenRepository,
   resolvers += Resolver.sonatypeRepo("snapshots"),
   resolvers += Resolver.sonatypeRepo("releases"),
-  scalaVersion in Global := "2.12.4",
+  scalaVersion in Global := "2.12.5",
   scalacOptions ++= Seq("-deprecation"),
   publishArtifact in (packageDoc in publishLocal) := false,
   publishArtifact in (packageSrc in publishLocal) := false,
@@ -134,7 +134,7 @@ lazy val netlogo5 = OsgiProject(
       "asm" % "asm-all" % "3.3.1" % "provided",
       "org.picocontainer" % "picocontainer" % "2.13.6" % "provided"), version := netLogo5Version, scalaVersion := "2.9.2", crossPaths := false) settings(settings: _*)
 
-lazy val netLogo6Version = "6.0.2"
+lazy val netLogo6Version = "6.0.3"
 
 lazy val netlogo6 = OsgiProject(
   dir,

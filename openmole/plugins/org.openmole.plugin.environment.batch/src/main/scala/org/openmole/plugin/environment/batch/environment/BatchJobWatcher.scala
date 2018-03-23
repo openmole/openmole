@@ -70,7 +70,6 @@ class BatchJobWatcher(environment: WeakReference[BatchEnvironment], preference: 
 
         val (toKill, toSubmit) =
           registry.synchronized {
-
             val remove = registry.allJobs.filter(_.finished)
             val toKill = remove.flatMap(j ⇒ registry.executionJobs(j).filter(_.state != KILLED))
             for (j ← remove) registry.removeJob(j)

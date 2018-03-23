@@ -55,6 +55,7 @@ object ToFromContext extends LowPriorityToFromContext {
   implicit def stringToString = ToFromContext[String, String](s ⇒ ExpandedString(s))
   implicit def stringToFile = ToFromContext[String, File](s ⇒ ExpandedString(s).map(s ⇒ File(s)))
   implicit def fileToFile = ToFromContext[File, File](f ⇒ ExpandedString(f.getPath).map(s ⇒ File(s)))
+  implicit def fromContextToFromContext[T] = ToFromContext[FromContext[T], T](identity)
 
   implicit def booleanToCondition = ToFromContext[Boolean, Boolean](b ⇒ FromContext.value(b))
   implicit def prototypeIsFromContext[T]: ToFromContext[Val[T], T] = ToFromContext[Val[T], T](p ⇒ prototype(p))

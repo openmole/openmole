@@ -40,7 +40,7 @@ case class JobScript(voName: String, memory: Int, threads: Int, debug: Boolean, 
     val storageLocation = storageLocations(serializedJob.storage.id)
     def resolve(dest: String) = gridscale.RemotePath.child(storageLocation, dest)
 
-    val debugInfo = s"echo $storageLocation ; hostname ; date -R ; cat /proc/meminfo ; ulimit -a ; " + "env ; echo $X509_USER_PROXY ; "
+    val debugInfo = s"echo $storageLocation ; hostname ; date -R ; cat /proc/meminfo ; ulimit -n 10240 ; ulimit -a ; " + "env ; echo $X509_USER_PROXY ; "
 
     val init = {
       val script = ListBuffer[String]()
@@ -85,7 +85,7 @@ case class JobScript(voName: String, memory: Int, threads: Int, debug: Boolean, 
 
       script += cpCommand.download(resolve(runtime.storage.path), "$CUR/storage.xml")
 
-      "mkdir envplugins && " + script.mkString(" && ")
+      "mkdir -p envplugins && " + script.mkString(" && ")
     }
 
     val run = {
