@@ -169,8 +169,8 @@ that is map to the OpenMOLE variable @i{i}.
      val aOM = Val[Double]
      val bOM = Val[Double]
 
-     rInputs += ("a_R", aOM )
-     rInputs += ("b_R", bOM)
+     rInputs += (aOM, "a_R")
+     rInputs += (bOM, "b_R")
      """)
 
 @p Remark that variables in the rOutputs are directly store in the output, but you can add outputs
@@ -381,7 +381,7 @@ respectively @i{inputFiles} and @i{rInputs}.
         ) set(
           inputs += n ,
           inputFiles += (g, "fileForR"),
-          rInputs += (y,"y"),  // same as  rInputs += (y)
+          rInputs += (y, "y"),  // same as  rInputs += (y)
           rOutputs += ("area", res),
           outputs += (g,n)
         )
@@ -427,7 +427,7 @@ val task3 =
   ScalaTask($tq
     val res = b + a + j
   $tq) set (
-    inputs += (a,b,j),
+    inputs += (a, b, j),
     outputs += res
   )
 

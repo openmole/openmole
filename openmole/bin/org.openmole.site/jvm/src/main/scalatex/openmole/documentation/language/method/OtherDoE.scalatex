@@ -57,7 +57,7 @@ If you want to use design of experiments of your own you may also want to provid
 
     // Define the exploration of myModel for various i values sampled in the file.
     val exploration = DirectSampling(
-      evaluation = myModel hook toStringHook() ,
+      evaluation = myModel hook ToStringHook() ,
       sampling = s
     )
 
@@ -110,7 +110,7 @@ The syntax of the LHS sampling is the following :
           100, // Number of points of the LHS
           i in (0.0, 10.0),
           j in (0.0, 5.0),
-          values in Vector((0, 1), (0, 10), (5, 9)) // Generate part of the LHS sampling inside the array of values
+          values in Vector((0.0, 1.0), (0.0, 10.0), (5.0, 9.0)) // Generate part of the LHS sampling inside the array of values
         )
     """, name = "lhs sampling in sensitivity")
 
@@ -125,12 +125,11 @@ The syntax of the Sobol sequence sampling is the following :
     val values = Val[Array[Double]]
 
     val my_sobol_sampling =
-        SobolSampling(
-          100, // Number of points
-          i in (0.0, 10.0),
-          j in (0.0, 5.0),
-          values in Vector((0, 1), (0, 10), (5, 9)) // Generate part of the sobol sampling inside the array of values
-        )
+      SobolSampling(
+        100, // Number of points
+        i in (0.0, 10.0),
+        j in (0.0, 5.0),
+        values in Vector((0.0, 1.0), (0.0, 10.0), (5.0, 9.0)) // Generate part of the sobol sampling inside the array of values
       )
     """, name = "sobol sampling in sensitivity")
 
