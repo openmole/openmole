@@ -18,6 +18,7 @@
 package org.openmole.plugin.task.systemexec
 
 import monocle.Lens
+import org.openmole.plugin.task.external._
 
 trait SystemExecTaskBuilder[T] extends ReturnValue[T]
   with ErrorOnReturnValue[T]

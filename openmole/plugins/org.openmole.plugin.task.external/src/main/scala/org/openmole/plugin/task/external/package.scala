@@ -18,6 +18,7 @@
 package org.openmole.plugin.task
 
 import org.openmole.core.dsl._
+import org.openmole.core.expansion.{ FromContext, ToFromContext }
 import org.openmole.core.tools.service.OS
 
 package external {
@@ -25,37 +26,16 @@ package external {
   import java.io._
 
   import org.openmole.core.context.Val
-  import org.openmole.core.expansion.{ FromContext, ToFromContext }
   import org.openmole.core.workflow.builder.InputOutputBuilder
 
   trait ExternalPackage {
-
-    implicit class InputFileAsDecorator(v: Val[File]) {
-      def as(name: FromContext[String], link: Boolean = false) = External.InputFile(v, name, link)
-    }
-
-    implicit class InputFileArrayAsDecorator(v: Val[Array[File]]) {
-      def as(prefix: FromContext[String], suffix: FromContext[String] = "", link: Boolean = false) = External.InputFileArray(v, prefix, suffix, link)
-    }
-
-    implicit class ResourceDecorator[T](file: File) {
-      def as(name: OptionalArgument[FromContext[String]] = None, link: Boolean = false, os: OS = OS()) =
-        External.Resource(file, name.getOrElse(file.getName), link = link, os = os)
-    }
-
-    implicit class OutputFileDecorator[T](t: T)(implicit toFromContext: ToFromContext[T, String]) {
-      def as(p: Val[File]) = External.OutputFile(toFromContext(t), p)
-    }
 
     lazy val inputFiles = new {
       /**
        * Copy a file or directory from the dataflow to the task workspace
        */
-      def +=[T: ExternalBuilder: InputOutputBuilder](inputFile: External.InputFile): T ⇒ T =
-        implicitly[ExternalBuilder[T]].inputFiles add inputFile andThen (inputs += inputFile.prototype)
-
-      @deprecated
-      def +=[T: ExternalBuilder: InputOutputBuilder](p: Val[File], name: FromContext[String], link: Boolean = false): T ⇒ T = this += (p as (name, link))
+      def +=[T: ExternalBuilder: InputOutputBuilder](p: Val[File], name: FromContext[String], link: Boolean = false): T ⇒ T =
+        implicitly[ExternalBuilder[T]].inputFiles add External.InputFile(p, name, link) andThen (inputs += p)
     }
 
     lazy val inputFileArrays = new {
@@ -63,12 +43,8 @@ package external {
        * Copy an array of files or directory from the dataflow to the task workspace. The files
        * in the array are named prefix$nSuffix where $n i the index of the file in the array.
        */
-      def +=[T: ExternalBuilder: InputOutputBuilder](inputFileArray: External.InputFileArray): T ⇒ T =
-        (implicitly[ExternalBuilder[T]].inputFileArrays add inputFileArray) andThen (inputs += inputFileArray.prototype)
-
-      @deprecated
       def +=[T: ExternalBuilder: InputOutputBuilder](p: Val[Array[File]], prefix: FromContext[String], suffix: FromContext[String] = "", link: Boolean = false): T ⇒ T =
-        this += (p as (prefix = prefix, suffix = suffix, link = link))
+        (implicitly[ExternalBuilder[T]].inputFileArrays add External.InputFileArray(p, prefix, suffix, link)) andThen (inputs += p)
     }
 
     lazy val outputFiles = new {
@@ -76,12 +52,8 @@ package external {
        * Get a file generate by the task and inject it in the dataflow
        *
        */
-      def +=[T: ExternalBuilder: InputOutputBuilder](outputFile: External.OutputFile): T ⇒ T =
-        (implicitly[ExternalBuilder[T]].outputFiles add outputFile) andThen (outputs += outputFile.prototype)
-
-      @deprecated
       def +=[T: ExternalBuilder: InputOutputBuilder](name: FromContext[String], p: Val[File]): T ⇒ T =
-        this += (name as p)
+        (implicitly[ExternalBuilder[T]].outputFiles add External.OutputFile(name, p)) andThen (outputs += p)
     }
 
     lazy val resources =
@@ -89,18 +61,42 @@ package external {
         /**
          * Copy a file from your computer in the workspace of the task
          */
-        def +=[T: ExternalBuilder](resource: External.Resource*): T ⇒ T =
-          resource.map(implicitly[ExternalBuilder[T]].resources add _)
-
-        @deprecated
         def +=[T: ExternalBuilder](file: File, name: OptionalArgument[FromContext[String]] = None, link: Boolean = false, os: OS = OS()): T ⇒ T =
-          implicitly[ExternalBuilder[T]].resources add (file as (name, link, os))
+          implicitly[ExternalBuilder[T]].resources add External.Resource(file, name.getOrElse(file.getName), link = link, os = os)
 
+      }
+
+    @deprecated("Use environmentVariables", "7")
+    lazy val environmentVariable = environmentVariables
+
+    lazy val environmentVariables =
+      new {
+        /**
+         * Add variable from openmole to the environment of the system exec task. The
+         * environment variable is set using a toString of the openmole variable content.
+         *
+         * @param prototype the prototype of the openmole variable to inject in the environment
+         * @param variable the name of the environment variable. By default the name of the environment
+         *                 variable is the same as the one of the openmole protoype.
+         */
+
+        import cats.implicits._
+        def +=[T: EnvironmentVariables: InputOutputBuilder](prototype: Val[_], variable: OptionalArgument[String] = None): T ⇒ T =
+          this.+=(variable.getOrElse(prototype.name), FromContext.prototype(prototype).map(_.toString)) andThen
+            (inputs += prototype)
+
+        def +=[T: EnvironmentVariables: InputOutputBuilder](variable: String, value: FromContext[String]): T ⇒ T =
+          (implicitly[EnvironmentVariables[T]].environmentVariables add (variable → value))
       }
   }
 }
 
 package object external extends ExternalPackage {
+
+  trait EnvironmentVariables[T] {
+    def environmentVariables: monocle.Lens[T, Vector[(String, FromContext[String])]]
+  }
+
   import org.openmole.tool.file._
 
   def directoryContentInformation(directory: File, margin: String = "  ") = {

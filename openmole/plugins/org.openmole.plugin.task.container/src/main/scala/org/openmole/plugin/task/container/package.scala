@@ -29,14 +29,16 @@ package container {
 
   import monocle.Lens
 
+  case class HostFile(path: String, destination: String)
+
   trait HostFiles[T] {
-    def hostFiles: Lens[T, Vector[(String, Option[String])]]
+    def hostFiles: Lens[T, Vector[HostFile]]
   }
 
   trait ContainerPackage {
     lazy val hostFiles = new {
-      def +=[T: HostFiles](hostFile: String, binding: OptionalArgument[String] = None) =
-        implicitly[HostFiles[T]].hostFiles add (hostFile, binding)
+      def +=[T: HostFiles](path: String, destination: OptionalArgument[String] = None): T ⇒ T =
+        implicitly[HostFiles[T]].hostFiles add HostFile(path, destination.getOrElse(path))
     }
   }
 
