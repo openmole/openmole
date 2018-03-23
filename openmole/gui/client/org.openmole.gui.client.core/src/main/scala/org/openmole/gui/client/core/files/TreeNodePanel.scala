@@ -8,13 +8,11 @@ import org.openmole.gui.client.core.Waiter._
 import org.openmole.gui.ext.data._
 import org.openmole.gui.client.core.panels._
 import org.openmole.gui.ext.tool.client._
-
 import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
 import org.scalajs.dom.html.Input
 import org.scalajs.dom.raw._
 import org.openmole.gui.client.core._
-
 import scalatags.JsDom.all._
 import scalatags.JsDom.{ TypedTag, tags }
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
@@ -26,9 +24,9 @@ import autowire._
 import rx._
 import org.openmole.gui.ext.api.Api
 import org.scalajs.dom
-
 import scaladget.bootstrapnative.Popup
 import scaladget.bootstrapnative.Popup.Manual
+import sun.java2d.xr.XRUtils
 
 /*
  * Copyright (C) 16/04/15 // mathieu.leclaire@openmole.org
@@ -232,6 +230,9 @@ class TreeNodePanel {
             },
             for (tn ← sons.list) yield {
               drawNode(tn).render
+            },
+            onscroll := { () ⇒
+              Popover.hide
             }
 
           )
@@ -326,12 +327,6 @@ class TreeNodePanel {
   //        }
   //    }
 
-  val popovers: Var[Seq[Popover]] = Var(Seq())
-
-  def closeAllPopovers = popovers.now.foreach {
-    _.hide
-  }
-
   var currentSafePath: Var[Option[SafePath]] = Var(None)
 
   object ReactiveLine {
@@ -416,7 +411,7 @@ class TreeNodePanel {
     dom.document.body.onclick = { (e: Event) ⇒
       if (!toolBox.actions(e.target.asInstanceOf[HTMLElement])) {
         if (!inPopover(e.target.asInstanceOf[HTMLElement]))
-          closeAllPopovers
+          Popover.hide
       }
       else
         e.preventDefault()
@@ -427,16 +422,18 @@ class TreeNodePanel {
       val popRender = pop.render
 
       popRender.onclick = { (e: Event) ⇒
-        popovers.now.foreach { p ⇒
-          p.hide
-          currentSafePath() = None
+        if (Popover.current.now == Some(pop)) Popover.hide
+        else {
+          Popover.current.now match {
+            case Some(p) ⇒ Popover.toggle(p)
+            case _       ⇒
+          }
+          Popover.toggle(pop)
         }
         currentSafePath() = Some(tnSafePath)
-        pop.toggle
         e.stopPropagation
       }
 
-      popovers() = popovers.now :+ pop
       popRender
     }
 
@@ -504,7 +501,7 @@ class TreeNodePanel {
                     //                      }, settingsGlyph)
 
                     buildManualPopover(
-                      div(settingsGlyph)
+                      div(settingsGlyph, onclick := { () ⇒ Popover.hide })
                     )
                   )
                 )
