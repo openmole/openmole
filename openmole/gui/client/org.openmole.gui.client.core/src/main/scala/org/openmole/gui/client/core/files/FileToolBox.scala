@@ -91,7 +91,7 @@ class FileToolBox(initSafePath: SafePath) {
               treeNodeTabs -- safePath
               treeNodeTabs.checkTabs
               treeNodePanel.invalidCacheAndDraw
-              treeNodePanel.closeAllPopovers
+              Popover.hide
           }
         }
         true
@@ -114,7 +114,7 @@ class FileToolBox(initSafePath: SafePath) {
         withSafePath { sp ⇒
           rename(sp, () ⇒ {})
           parentNode(parent, 3).replaceChild(buildTitleRoot(sp.name), parentNode(parent, 2))
-          treeNodePanel.closeAllPopovers
+          Popover.hide
         }
         true
       case fileaction.cancelRename ⇒
@@ -125,13 +125,13 @@ class FileToolBox(initSafePath: SafePath) {
       case fileaction.download ⇒
         withSafePath { sp ⇒
           org.scalajs.dom.document.location.href = s"downloadFile?path=${Utils.toURI(sp.path)}"
-          treeNodePanel.closeAllPopovers
+          Popover.hide
         }
         true
       case fileaction.extract ⇒
         withSafePath { sp ⇒
           extractTGZ(sp)
-          treeNodePanel.closeAllPopovers
+          Popover.hide
         }
         true
       case fileaction.duplicate ⇒
@@ -142,7 +142,7 @@ class FileToolBox(initSafePath: SafePath) {
             else prefix + "_1"
           }
           CoreUtils.replicate(sp, newName)
-          treeNodePanel.closeAllPopovers
+          Popover.hide
         }
         true
       case _ ⇒
@@ -173,7 +173,7 @@ class FileToolBox(initSafePath: SafePath) {
           withSafePath { sp ⇒
             if (overwriting.now) {
               rename(sp, () ⇒ {})
-              treeNodePanel.closeAllPopovers
+              Popover.hide
             }
             else
               testRename(sp, editTitle, editForm, editForm.parentNode.lastChild)
@@ -240,7 +240,7 @@ class FileToolBox(initSafePath: SafePath) {
           else {
             overwriting() = false
             rename(safePath, () ⇒ replaceTitle(pivot))
-            treeNodePanel.closeAllPopovers
+            Popover.hide
           }
       }
     })
