@@ -39,6 +39,7 @@ import org.openmole.core.outputredirection.OutputRedirection
 import org.openmole.core.threadprovider._
 import org.openmole.plugin.task.container.HostFiles
 import org.openmole.tool.lock.LockKey
+import org.openmole.plugin.task.container._
 
 import scala.language.postfixOps
 
@@ -259,7 +260,7 @@ object UDockerTask {
         volumesInfo:           List[VolumeInfo]   = List.empty[VolumeInfo]
       ): Iterable[MountPoint] =
         preparedFilesInfo.map { case (f, d) ⇒ d.getAbsolutePath → containerPathResolver(f.expandedUserPath).toString } ++
-          hostFiles.map { case (f, b) ⇒ f → b.getOrElse(f) } ++
+          hostFiles.map { h ⇒ h.path → h.destination } ++
           volumesInfo.map { case (f, d) ⇒ f.toString → d }
 
       val userWorkDirectoryValue = userWorkDirectory(uDocker)
@@ -273,7 +274,7 @@ object UDockerTask {
 
       def outputPathResolver(rootDirectory: File) = container.outputPathResolver(
         preparedFilesInfo.map { case (f, d) ⇒ f.toString → d.toString },
-        uDocker.hostFiles.map { case (f, b) ⇒ f.toString → b.getOrElse(f) },
+        uDocker.hostFiles.map { h ⇒ h.path → h.destination },
         inputDirectory,
         userWorkDirectoryValue.toString,
         rootDirectory

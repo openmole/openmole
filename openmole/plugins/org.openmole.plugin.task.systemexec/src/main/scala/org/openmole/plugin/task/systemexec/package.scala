@@ -83,10 +83,6 @@ package systemexec {
     def stdErr: Lens[T, Option[Val[String]]]
   }
 
-  trait EnvironmentVariables[T] {
-    def environmentVariables: Lens[T, Vector[(String, FromContext[String])]]
-  }
-
   trait WorkDirectory[T] {
     def workDirectory: Lens[T, Option[String]]
   }
@@ -121,27 +117,6 @@ package systemexec {
       def +=[T: SystemExecTaskBuilder](os: OS, cmd: Command*): T ⇒ T =
         (implicitly[SystemExecTaskBuilder[T]].commands add OSCommands(os, cmd: _*))
     }
-
-    @deprecated("Use environmentVariables", "7")
-    lazy val environmentVariable = environmentVariables
-
-    lazy val environmentVariables =
-      new {
-        /**
-         * Add variable from openmole to the environment of the system exec task. The
-         * environment variable is set using a toString of the openmole variable content.
-         *
-         * @param prototype the prototype of the openmole variable to inject in the environment
-         * @param variable the name of the environment variable. By default the name of the environment
-         *                 variable is the same as the one of the openmole protoype.
-         */
-        def +=[T: EnvironmentVariables: InputOutputBuilder](prototype: Val[_], variable: OptionalArgument[String] = None): T ⇒ T =
-          this.+=(variable.getOrElse(prototype.name), FromContext.prototype(prototype).map(_.toString)) andThen
-            (inputs += prototype)
-
-        def +=[T: EnvironmentVariables: InputOutputBuilder](variable: String, value: FromContext[String]): T ⇒ T =
-          (implicitly[EnvironmentVariables[T]].environmentVariables add (variable → value))
-      }
 
     lazy val customWorkDirectory =
       new {

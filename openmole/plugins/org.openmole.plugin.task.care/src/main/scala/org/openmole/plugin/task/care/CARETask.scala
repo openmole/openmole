@@ -33,7 +33,8 @@ import org.openmole.tool.random._
 import org.openmole.plugin.task.container
 import cats.implicits._
 import org.openmole.core.preference.ConfigurationLocation
-import org.openmole.plugin.task.container.HostFiles
+import org.openmole.plugin.task.external._
+import org.openmole.plugin.task.container._
 
 object CARETask extends JavaLogger {
 
@@ -77,7 +78,7 @@ object CARETask extends JavaLogger {
 
 @Lenses case class CARETask(
   archive:              File,
-  hostFiles:            Vector[(String, Option[String])],
+  hostFiles:            Vector[HostFile],
   command:              FromContext[String],
   workDirectory:        Option[String],
   errorOnReturnValue:   Boolean,
@@ -146,7 +147,7 @@ object CARETask extends JavaLogger {
             d.getAbsolutePath → absoluteBindingPath
         }
 
-      def hostFileBindings = hostFiles.map { case (f, b) ⇒ f → b.getOrElse(f) }
+      def hostFileBindings = hostFiles.map { h ⇒ h.path → h.destination }
       def bindings = preparedFileBindings ++ hostFileBindings
 
       def createDestination(binding: (String, String)) = {

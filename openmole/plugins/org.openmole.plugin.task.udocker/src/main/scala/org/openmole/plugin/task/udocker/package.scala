@@ -17,6 +17,8 @@ import org.openmole.tool.file._
 import org.openmole.tool.stream._
 import org.openmole.tool.lock._
 
+import org.openmole.plugin.task.container._
+
 package udocker {
 
   trait UDockerPackage {
@@ -60,7 +62,6 @@ package object udocker extends UDockerPackage {
   }
 
   type FileInfo = (External.ToPut, File)
-  type HostFile = (String, Option[String])
   type VolumeInfo = (File, String)
   type MountPoint = (String, String)
   type ContainerId = String
@@ -68,7 +69,7 @@ package object udocker extends UDockerPackage {
   @Lenses case class UDockerArguments(
     localDockerImage:     UDocker.LocalDockerImage,
     environmentVariables: Vector[(String, FromContext[String])] = Vector.empty,
-    hostFiles:            Vector[(String, Option[String])]      = Vector.empty,
+    hostFiles:            Vector[HostFile]                      = Vector.empty,
     workDirectory:        Option[String]                        = None,
     reuseContainer:       Boolean                               = true,
     user:                 Option[String]                        = None,

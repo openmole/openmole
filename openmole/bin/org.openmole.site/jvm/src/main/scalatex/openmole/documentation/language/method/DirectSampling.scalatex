@@ -61,7 +61,7 @@ By defining your own exploration task on @a("several types of input", href:= Doc
            (input_i in (0 to 10 by 2)) x
            (input_j in (0.0 to 5.0 by 0.5)),
          aggregation= my_aggregation
-       )""", name = "syntax of DirectSampling Task")
+       )""", name = "syntax of DirectSampling Task", header = "val my_own_evaluation = EmptyTask(); val my_aggregation = EmptyTask()")
 
 @br
 with
@@ -78,18 +78,19 @@ The exploration script would look like:
 @hl.openmole("""
 //inputs and outputs declaration
 val i = Val[Int]
-val o = Val[String]
+val o = Val[Double]
+val avg = Val[Double]
 
 //Defines the "model" task
 val myModel =
   ScalaTask("val o = i * 2") set (
     inputs += i,
-    outputs += (i,o)
+    outputs += (i, o)
   )
 
 val average =
-  ScalaTask("val avg = k.average") set (
-    inputs += k.toArray,
+  ScalaTask("val avg = o.average") set (
+    inputs += o.toArray,
     outputs += avg
   )
 
@@ -97,7 +98,7 @@ val exploration =
   DirectSampling(
     evaluation = myModel hook ToStringHook(),
     sampling = i in (0 to 10 by 1),
-    aggregation = average
+    aggregation = average hook ToStringHook()
   )
 
 exploration""", name="concrete example of direct sampling")
