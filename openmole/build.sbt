@@ -814,7 +814,7 @@ lazy val site = crossProject.in(binDir / "org.openmole.site") settings (defaultS
   Libraries.scalajsMarked
 )
 
-lazy val siteJS = site.js
+lazy val siteJS = site.js enablePlugins(ExecNpmPlugin)
 lazy val siteJVM = site.jvm dependsOn(tools, project, serializer, marketIndex) settings (
   libraryDependencies += Libraries.sourceCode) dependsOn (marketIndex)
 
@@ -842,8 +842,9 @@ buildSite := {
     (run in siteJVM in Compile).toTask(" " + args.mkString(" ")).map(_ => siteTarget)
   }.evaluated
 
-  def copySiteResources(siteBuildJS: File, resourceDirectory: File, siteTarget: File) = {
+  def copySiteResources(siteBuildJS: File, dependencyFile: File, resourceDirectory: File, siteTarget: File) = {
     IO.copyFile(siteBuildJS, siteTarget / "js/sitejs.js")
+    IO.copyFile(dependencyFile, siteTarget / "js/deps.js")
     IO.copyDirectory(resourceDirectory / "js", siteTarget / "js")
     IO.copyDirectory(resourceDirectory / "css", siteTarget / "css")
     IO.copyDirectory(resourceDirectory / "fonts", siteTarget / "fonts")
@@ -853,7 +854,10 @@ buildSite := {
     IO.copyDirectory(resourceDirectory / "paper", siteTarget / "paper")
   }
 
-  copySiteResources((fullOptJS in siteJS in Compile).value.data, (resourceDirectory in siteJVM in Compile).value, siteTarget)
+  copySiteResources((fullOptJS in siteJS in Compile).value.data,
+    (dependencyFile in siteJS in Compile).value,
+    (resourceDirectory in siteJVM in Compile).value,
+    siteTarget)
 
   siteTarget
 }

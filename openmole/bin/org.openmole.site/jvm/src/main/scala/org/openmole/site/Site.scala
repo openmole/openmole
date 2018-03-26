@@ -108,7 +108,7 @@ object Site extends App {
             link(rel := "stylesheet", href := Resource.css.docStyle.file),
             script(src := Resource.js.highlight.file),
             script(`type` := "text/javascript", src := Resource.js.siteJS.file),
-            script(src := Resource.js.lunr.file),
+            script(`type` := "text/javascript", src := Resource.js.depsJS.file),
             script(src := Resource.js.index.file),
             meta(charset := "UTF-8"),
             piwik

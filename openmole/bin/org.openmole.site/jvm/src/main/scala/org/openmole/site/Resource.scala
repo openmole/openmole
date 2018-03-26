@@ -228,14 +228,11 @@ object Resource {
   }
 
   object js {
-
-    val bootstrapJS = jsResource("bootstrap-native.min.js")
-
     val highlight = jsResource("highlight.pack.js")
 
     val siteJS = jsResource("sitejs.js")
 
-    val lunr = jsResource("lunr.min.js")
+    val depsJS = jsResource("deps.js")
 
     val index = jsResource("index.js")
 
