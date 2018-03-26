@@ -297,14 +297,14 @@ object UDockerTask {
             uDocker.environmentVariables.map { case (name, variable) ⇒ name -> variable.from(preparedContext) }
 
           def expandCommand(command: FromContext[String]) =
-            UDocker.uDockerRunCommand(
+            ExecutionCommand.Raw(UDocker.uDockerRunCommand(
               uDocker.user,
               containerEnvironmentVariables,
               volumes,
               userWorkDirectory(uDocker),
               uDockerExecutable,
               runId,
-              command.from(preparedContext))
+              command.from(preparedContext)))
 
           val executionResult = executeAll(
             taskWorkDirectory,

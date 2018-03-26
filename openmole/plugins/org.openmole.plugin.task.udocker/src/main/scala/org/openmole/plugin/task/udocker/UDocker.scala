@@ -21,7 +21,7 @@ import io.circe.syntax._
 import monocle.macros.Lenses
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.outputredirection.OutputRedirection
-import org.openmole.plugin.task.systemexec.{ commandLine, execute, executeAll }
+import org.openmole.plugin.task.systemexec.{ ExecutionCommand, commandLine, execute, executeAll }
 import org.openmole.tool.file._
 import org.openmole.tool.stream._
 import org.openmole.tool.stream.withClosable
@@ -278,14 +278,14 @@ object UDocker {
     stdErr:            PrintStream              = System.err)(implicit newFile: NewFile) = newFile.withTmpDir { tmpDirectory ⇒
     val runInstall = commands.map {
       ic ⇒
-        uDockerRunCommand(
+        ExecutionCommand.Raw(uDockerRunCommand(
           uDocker.user,
           Vector.empty,
           uDockerVolumes,
           userWorkDirectory(uDocker),
           uDockerExecutable,
           container,
-          ic: Id[String])
+          ic: Id[String]))
     }
 
     executeAll(

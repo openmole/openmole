@@ -294,10 +294,25 @@ package object systemexec extends SystemExecPackage {
     )
   }
 
+  sealed trait ExecutionCommand
+  object ExecutionCommand {
+
+    case class Raw(command: String) extends ExecutionCommand
+    case class Parsed(command: String*) extends ExecutionCommand
+
+    def parse(executionCommand: ExecutionCommand): Vector[String] =
+      executionCommand match {
+        case c: Raw    ⇒ systemexec.parse(c.command)
+        case p: Parsed ⇒ p.command.toVector
+      }
+
+    implicit def stringToRaw(c: String) = Raw(c)
+  }
+
   def executeAll(
     workDirectory:        File,
     environmentVariables: Vector[(String, String)],
-    commands:             List[String],
+    commands:             List[ExecutionCommand],
     errorOnReturnValue:   Boolean                  = true,
     captureOutput:        Boolean                  = false,
     captureError:         Boolean                  = false,
@@ -308,11 +323,11 @@ package object systemexec extends SystemExecPackage {
   ): ExecutionResult = {
 
     @annotation.tailrec
-    def executeAll0(commands: List[String], acc: ExecutionResult): ExecutionResult =
+    def executeAll0(commands: List[ExecutionCommand], acc: ExecutionResult): ExecutionResult =
       commands match {
         case Nil ⇒ acc
         case cmd :: t ⇒
-          val cl = parse(cmd)
+          val cl = ExecutionCommand.parse(cmd)
           val result = execute(cl.toArray, workDirectory, environmentVariables, captureOutput = captureOutput, captureError = captureError, errorOnReturnValue = false)
           if (errorOnReturnValue && result.returnCode != 0) throw error(cl, result)
           else executeAll0(t, ExecutionResult.append(acc, result))
@@ -320,5 +335,9 @@ package object systemexec extends SystemExecPackage {
 
     executeAll0(commands, ExecutionResult.empty)
   }
+
+  sealed trait Shell
+  case object NoShell extends Shell
+  case object Bash extends Shell
 
 }

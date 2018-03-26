@@ -38,7 +38,7 @@ object SystemExecTask {
   implicit def isTask: InputOutputBuilder[SystemExecTask] = InputOutputBuilder(SystemExecTask._config)
   implicit def isExternal: ExternalBuilder[SystemExecTask] = ExternalBuilder(SystemExecTask.external)
   implicit def isSystemExec = new SystemExecTaskBuilder[SystemExecTask] {
-    override def commands = SystemExecTask.command
+    override def commands = SystemExecTask.commands
     override def environmentVariables = SystemExecTask.environmentVariables
     override def returnValue = SystemExecTask.returnValue
     override def errorOnReturnValue = SystemExecTask.errorOnReturnValue
@@ -53,16 +53,8 @@ object SystemExecTask {
    * value of the process.
    */
   def apply(commands: Command*)(implicit name: sourcecode.Name): SystemExecTask =
-    new SystemExecTask(
-      command = Vector.empty,
-      workDirectory = None,
-      errorOnReturnValue = true,
-      returnValue = None,
-      stdOut = None,
-      stdErr = None,
-      environmentVariables = Vector.empty,
-      _config = InputOutputConfig(),
-      external = External()
+    SystemExecTask(
+      commands = Vector.empty,
     ) set (pack.commands += (OS(), commands: _*))
 
   /**
@@ -76,14 +68,16 @@ object SystemExecTask {
     errorOnReturnValue: Boolean                       = true,
     returnValue:        OptionalArgument[Val[Int]]    = None,
     stdOut:             OptionalArgument[Val[String]] = None,
-    stdErr:             OptionalArgument[Val[String]] = None)(implicit name: sourcecode.Name): SystemExecTask =
+    stdErr:             OptionalArgument[Val[String]] = None,
+    shell:              Shell                         = Bash)(implicit name: sourcecode.Name): SystemExecTask =
     new SystemExecTask(
-      command = commands.map(c ⇒ OSCommands(OS(), c)).toVector,
+      commands = commands.map(c ⇒ OSCommands(OS(), c)).toVector,
       workDirectory = workDirectory,
       errorOnReturnValue = errorOnReturnValue,
       returnValue = returnValue,
       stdOut = stdOut,
       stdErr = stdErr,
+      shell = shell,
       environmentVariables = Vector.empty,
       _config = InputOutputConfig(),
       external = External()
@@ -92,12 +86,13 @@ object SystemExecTask {
 }
 
 @Lenses case class SystemExecTask(
-  command:              Vector[OSCommands],
+  commands:              Vector[OSCommands],
   workDirectory:        Option[String],
   errorOnReturnValue:   Boolean,
   returnValue:          Option[Val[Int]],
   stdOut:               Option[Val[String]],
   stdErr:               Option[Val[String]],
+  shell:                Shell,
   environmentVariables: Vector[(String, FromContext[String])],
   _config:              InputOutputConfig,
   external:             External
@@ -115,7 +110,7 @@ object SystemExecTask {
 
       val commandsError =
         for {
-          c ← command
+          c ← commands
           exp ← c.expanded
           e ← exp.validate(allInputs)
         } yield e
@@ -142,22 +137,29 @@ object SystemExecTask {
       val preparedContext = external.prepareInputFiles(context, external.relativeResolver(workDir))
 
       val osCommandLines =
-        command.find { _.os.compatible }.map {
+        commands.find { _.os.compatible }.map {
           cmd ⇒ cmd.expanded
         }.getOrElse(throw new UserBadDataError("No command line found for " + OS.actualOS))
 
       val expandedCommands = osCommandLines.map(_.from(preparedContext))
 
-      val executionResult = executeAll(
-        workDir,
-        environmentVariables.map { case (name, variable) ⇒ name → variable.from(preparedContext) },
-        expandedCommands.toList,
-        errorOnReturnValue && !returnValue.isDefined,
-        stdOut.isDefined,
-        stdErr.isDefined,
-        stdOut = executionContext.outputRedirection.output,
-        stdErr = executionContext.outputRedirection.output
-      )
+      val shellCommands =
+        shell match {
+          case Bash ⇒ expandedCommands.map(cmd => ExecutionCommand.Parsed("bash", "-c", cmd))
+          case NoShell ⇒ expandedCommands.map(ExecutionCommand.Raw(_))
+        }
+
+      val executionResult =
+        executeAll(
+          workDir,
+          environmentVariables.map { case (name, variable) ⇒ name → variable.from(preparedContext) },
+          shellCommands.toList,
+          errorOnReturnValue && !returnValue.isDefined,
+          stdOut.isDefined,
+          stdErr.isDefined,
+          stdOut = executionContext.outputRedirection.output,
+          stdErr = executionContext.outputRedirection.output
+        )
 
       val retContext: Context = external.fetchOutputFiles(outputs, preparedContext, external.relativeResolver(workDir), tmpDir)
       external.cleanWorkDirectory(outputs, retContext, tmpDir)
