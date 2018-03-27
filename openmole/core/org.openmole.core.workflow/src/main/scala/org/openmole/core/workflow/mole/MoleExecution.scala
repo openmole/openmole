@@ -57,6 +57,17 @@ object MoleExecution extends JavaLogger {
   case class JobSubmitted(moleJob: Job, capsule: Capsule, environment: Environment) extends Event[MoleExecution]
   case class JobFinished(moleJob: MoleJob, capsule: Capsule) extends Event[MoleExecution]
 
+  object MoleExecutionFailed {
+    def exception(moleExecutionError: MoleExecutionFailed) = moleExecutionError.exception
+    def capsule(moleExecutionError: MoleExecutionFailed) = moleExecutionError match {
+      case e: JobFailed             ⇒ Some(e.capsule)
+      case e: ExceptionRaised       ⇒ Some(e.capsule)
+      case e: SourceExceptionRaised ⇒ Some(e.capsule)
+      case e: HookExceptionRaised   ⇒ Some(e.capsule)
+      case e: MoleExecutionError    ⇒ None
+    }
+  }
+
   sealed trait MoleExecutionFailed {
     def exception: Throwable
   }
