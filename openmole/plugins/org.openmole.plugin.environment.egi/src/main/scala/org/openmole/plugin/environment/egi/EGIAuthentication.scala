@@ -175,7 +175,10 @@ object EGIAuthentication extends JavaLogger {
 
     def vomses = voms orElse getVOMS(voName)
 
-    util.Try(findWorking(vomses.map(_.toList).getOrElse(Nil), queryProxy, "VOMS server"))
+    vomses match {
+      case Some(vomses) ⇒ util.Try(findFirstWorking(vomses)(queryProxy, "VOMS server"))
+      case None         ⇒ util.Failure(new UserBadDataError(s"No VOMS server found for VO $voName"))
+    }
   }
 
   def testPassword[A: EGIAuthenticationInterface](a: A)(implicit cypher: Cypher) =

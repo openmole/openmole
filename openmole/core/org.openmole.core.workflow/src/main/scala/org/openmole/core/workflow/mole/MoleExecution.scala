@@ -57,8 +57,8 @@ object MoleExecution extends JavaLogger {
   case class JobSubmitted(moleJob: Job, capsule: Capsule, environment: Environment) extends Event[MoleExecution]
   case class JobFinished(moleJob: MoleJob, capsule: Capsule) extends Event[MoleExecution]
 
-  sealed trait MoleExecutionFailed extends ExceptionEvent {
-    def capsule: Capsule
+  sealed trait MoleExecutionFailed {
+    def exception: Throwable
   }
 
   case class JobFailed(moleJob: MoleJob, capsule: Capsule, exception: Throwable) extends Event[MoleExecution] with MoleExecutionFailed {
@@ -70,6 +70,7 @@ object MoleExecution extends JavaLogger {
   case class SourceExceptionRaised(source: Source, capsule: Capsule, exception: Throwable, level: Level) extends Event[MoleExecution] with MoleExecutionFailed
 
   case class HookExceptionRaised(hook: Hook, capsule: Capsule, moleJob: MoleJob, exception: Throwable, level: Level) extends Event[MoleExecution] with MoleExecutionFailed
+  case class MoleExecutionError(exception: Throwable) extends MoleExecutionFailed
 
   private def listOfTupleToMap[K, V](l: Traversable[(K, V)]): Map[K, Traversable[V]] = l.groupBy(_._1).mapValues(_.map(_._2))
 
@@ -477,20 +478,25 @@ object MoleExecutionMessage {
     moleExecution.messageQueue.put(moleExecutionMessage)
 
   def dispatch(moleExecution: MoleExecution, msg: MoleExecutionMessage) = moleExecution.synchronized {
-    if (!moleExecution._canceled)
-      msg match {
-        case msg: PerformTransition ⇒
-          val state = moleExecution.subMoleExecutions(msg.subMoleExecution)
-          if (!state.canceled) msg.operation(state)
-          MoleExecution.checkIfSubMoleIsFinished(state)
-        case msg: JobFinished ⇒
-          val state = moleExecution.subMoleExecutions(msg.subMoleExecution)
-          MoleExecution.finalState(state, msg.job, msg.state)
-          MoleExecution.checkIfSubMoleIsFinished(state)
-        case msg: WithMoleExecutionSate ⇒ msg.operation(moleExecution)
-        case msg: StartMoleExecution    ⇒ MoleExecution.start(moleExecution, msg.context)
-        case msg: CancelMoleExecution   ⇒ MoleExecution.cancel(moleExecution, None)
-      }
+    try {
+      if (!moleExecution._canceled)
+        msg match {
+          case msg: PerformTransition ⇒
+            val state = moleExecution.subMoleExecutions(msg.subMoleExecution)
+            if (!state.canceled) msg.operation(state)
+            MoleExecution.checkIfSubMoleIsFinished(state)
+          case msg: JobFinished ⇒
+            val state = moleExecution.subMoleExecutions(msg.subMoleExecution)
+            MoleExecution.finalState(state, msg.job, msg.state)
+            MoleExecution.checkIfSubMoleIsFinished(state)
+          case msg: WithMoleExecutionSate ⇒ msg.operation(moleExecution)
+          case msg: StartMoleExecution    ⇒ MoleExecution.start(moleExecution, msg.context)
+          case msg: CancelMoleExecution   ⇒ MoleExecution.cancel(moleExecution, None)
+        }
+    }
+    catch {
+      case t: Throwable ⇒ MoleExecution.cancel(moleExecution, Some(MoleExecution.MoleExecutionError(t)))
+    }
 
     MoleExecution.checkAllWaiting(moleExecution)
     MoleExecution.checkMoleExecutionIsFinished(moleExecution)

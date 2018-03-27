@@ -59,7 +59,7 @@ object EGIEnvironment extends JavaLogger {
 
   import util._
 
-  val FetchResourcesTimeOut = ConfigurationLocation("EGIEnvironment", "FetchResourcesTimeOut", Some(2 minutes))
+  val FetchResourcesTimeOut = ConfigurationLocation("EGIEnvironment", "FetchResourcesTimeOut", Some(1 minutes))
   val CACertificatesSite = ConfigurationLocation("EGIEnvironment", "CACertificatesSite", Some("http://dist.eugridpma.info/distribution/igtf/current/accredited/tgz/"))
   val CACertificatesCacheTime = ConfigurationLocation("EGIEnvironment", "CACertificatesCacheTime", Some(7 days))
   val CACertificatesDownloadTimeOut = ConfigurationLocation("EGIEnvironment", "CACertificatesDownloadTimeOut", Some(2 minutes))
@@ -124,7 +124,8 @@ object EGIEnvironment extends JavaLogger {
 
   def toBDII(bdii: java.net.URI)(implicit preference: Preference) = BDIIServer(bdii.getHost, bdii.getPort, preference(FetchResourcesTimeOut))
 
-  def defaultBDIIs(implicit preference: Preference) = preference(EGIEnvironment.DefaultBDIIs).map(b ⇒ new java.net.URI(b)).map(toBDII)
+  def defaultBDIIs(implicit preference: Preference) =
+    preference(EGIEnvironment.DefaultBDIIs).map(b ⇒ new java.net.URI(b)).map(toBDII)
 
   case class WebDavLocation(url: String)
 
@@ -243,6 +244,7 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
   }
 
   override def start() = {
+    proxyCache()
     Updater.delay(eagerSubmissionAgent)
     super.start()
   }
@@ -280,8 +282,8 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
   def bdiis: Seq[gridscale.egi.BDIIServer] =
     bdiiURL.map(b ⇒ Seq(EGIEnvironment.toBDII(new java.net.URI(b)))).getOrElse(EGIEnvironment.defaultBDIIs)
 
-  val storages = Cache {
-    val webdavStorages = findWorking(bdiis, (b: BDIIServer) ⇒ webDAVs(b, voName))
+  lazy val storages = Cache {
+    val webdavStorages = findFirstWorking(bdiis) { b: BDIIServer ⇒ webDAVs(b, voName) }
     if (!webdavStorages.isEmpty) webdavStorages.map { location ⇒
       def isConnectionError(t: Throwable) = t match {
         case _: _root_.gridscale.authentication.AuthenticationException ⇒ true
