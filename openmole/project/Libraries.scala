@@ -27,6 +27,7 @@ object Libraries {
 
   lazy val bootstrapnative = libraryDependencies += "fr.iscpif.scaladget" %%% "bootstrapnative" % scaladgetVersion
   lazy val lunr = libraryDependencies += "fr.iscpif.scaladget" %%% "lunr" % scaladgetVersion
+
   lazy val sortable = libraryDependencies += "net.scalapro" %%% "sortable-js-facade" % sortableVersion
   lazy val ace = libraryDependencies += "fr.iscpif.scaladget" %%% "ace" % scaladgetVersion
   lazy val scaladgetTools = libraryDependencies += "fr.iscpif.scaladget" %%% "tools" % scaladgetVersion

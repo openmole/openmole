@@ -4,14 +4,14 @@
 @import org.openmole.core.buildinfo._
 @import org.openmole.site.Config._
 
-@h1{@links.anchor{8.0 | TODO Set version }}
+@h1{8.0 | TODO Set version }
 @ul
   @li{Migrate to build to SBT 1.0}
   @li{Migrate to Scala 2.12: faster script compilation, more concise and more efficient byte code for OpenMOLE}
   @li{More reliable an efficient distributed execution through a complete refactor of the execution environments and migration to gridscale 2}
   @li{Use binary serialisation (boopickle) to communicate between the web app and the server: more efficient in term of CPU and bandwidth}
 
-@h1{@links.anchor{7.0 | Nano Ninja}}
+@h1{7.0 | Nano Ninja}
 @ul
   @li{Simplification of the workflow construction: every method scheme has now its builder}
   @li{Revamp the MGO library}
@@ -29,14 +29,14 @@
   @li{Display JVM processor and memory info}
   @li{Revamp the website}
 
-@h2{@links.anchor{7.1}}
+@h2{7.1}
 @ul
   @li{Fix bug with NetLogo precompiled code}
 
 @div
   @aa("Bug fixes", href := closedIssues("7"))
 
-@h1{@links.anchor{6.0 | Mostly Magic}}
+@h1{6.0 | Mostly Magic}
 
 Long time, no release! More than a year!
 The OpenMOLE team is very proud to disclose "Mostly Magic", the 6th major version of OpenMOLE.
@@ -73,7 +73,7 @@ The possibility to delegate computation to cloud provider such as Amazon, Azure.
   @aa("Bug fixes", href := closedIssues("6.0"))
 
 
-@h2{@links.anchor{6.1}}
+@h2{6.1}
 @ul
   @li{CARE required a kernel version greater than 3.2 which is no suitable for grid executions. A new version as been released and linked in the doc which depends on the Linux kernel 2.6.32.}
   @li{The CARETask was failing on some systems due to argument parsing.}
@@ -84,7 +84,7 @@ The possibility to delegate computation to cloud provider such as Amazon, Azure.
 @aa("Bug fixes", href := closedIssues("6.1"))
 
 
-@h2{@links.anchor{0.6.2}}
+@h2{6.2}
 Fix the deserialization of the authentications.
 
 @div

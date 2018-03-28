@@ -229,13 +229,9 @@ object Resource {
 
   object js {
     val highlight = jsResource("highlight.pack.js")
-
     val siteJS = jsResource("sitejs.js")
-
     val depsJS = jsResource("deps.js")
-
     val index = jsResource("index.js")
-
   }
 
   object bibtex {

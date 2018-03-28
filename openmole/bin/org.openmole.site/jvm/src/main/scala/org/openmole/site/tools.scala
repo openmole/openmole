@@ -31,18 +31,6 @@ package object tools {
 
   def paragraph(body: Frag*): Frag = Seq[Frag](body)
 
-  /** heavily inspired from Section.scala */
-  object links {
-
-    def munge(name: String): String = name.replace(" ", "")
-
-    def anchor(name: String) = a(
-      name,
-      href := s"#${munge(name)}",
-      i(cls := "fa fa-link")
-    )
-  }
-
   def aa = a(targetBlank)
 
   def todo(content: String) = ""
@@ -94,6 +82,35 @@ package object tools {
   def openmole(code: String, header: String = "", name: hl.OptionalName = hl.OptionalName(None)) = hl.openmole(code, header, name)
   def code(code: String) = hl.code(code)
   def plain(code: String) = hl.plain(code)
+
+  /** heavily inspired from Section.scala */
+  object links {
+
+    def anchor(elements: Seq[Any]): Seq[Modifier] =
+      link(elements) match {
+        case Some(t) ⇒ Seq(id := s"${t.filter(_ != ' ')}", `class` := "sidemenu")
+        case None    ⇒ Seq()
+      }
+
+    def link(elements: Seq[Any]) = elements.collect { case x: String ⇒ x }.headOption
+    def withLink(elements: Seq[Any]): Seq[Modifier] =
+      link(elements) match {
+        case Some(t) ⇒ Seq(" ", a(href := s"#${t.filter(_ != ' ')}", "\uD83D\uDD17"))
+        case None    ⇒ Seq()
+      }
+
+    def toModifier(element: Any): Modifier =
+      element match {
+        case e: String           ⇒ e
+        case e: TypedTag[String] ⇒ e
+        case _                   ⇒ throw new RuntimeException("Unknown element type " + element.getClass)
+      }
+
+  }
+
+  def h1(elements: Any*) = scalatags.Text.all.h1(links.anchor(elements): _*)(elements.map(links.toModifier): _*)
+  def h2(elements: Any*) = scalatags.Text.all.h2(links.anchor(elements): _*)(elements.map(links.toModifier) ++ links.withLink(elements): _*)
+  def h3(elements: Any*) = scalatags.Text.all.h3(links.anchor(elements): _*)(elements.map(links.toModifier) ++ links.withLink(elements): _*)
 
   case class Parameter(name: String, `type`: String, description: String)
 
