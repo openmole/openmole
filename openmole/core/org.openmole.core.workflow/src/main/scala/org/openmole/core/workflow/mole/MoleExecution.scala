@@ -379,7 +379,7 @@ object MoleExecution extends JavaLogger {
   }
 
   def checkIfSubMoleIsFinished(subMoleExecutionState: SubMoleExecutionState) = {
-    def hasMessages = subMoleExecutionState.moleExecution.messageQueue.asScala.exists(MoleExecutionMessage.msgForSubMole(_, subMoleExecutionState))
+    def hasMessages = subMoleExecutionState.moleExecution.messageQueue.all.exists(MoleExecutionMessage.msgForSubMole(_, subMoleExecutionState))
 
     if (subMoleExecutionState.nbJobs == 0 && !hasMessages) {
       subMoleExecutionState.onFinish.foreach(_(subMoleExecutionState))
@@ -485,8 +485,14 @@ object MoleExecutionMessage {
     case _                      ⇒ false
   }
 
+  def priority(moleExcutionMessage: MoleExecutionMessage) =
+    moleExcutionMessage match {
+      case _: PerformTransition ⇒ 10
+      case _                    ⇒ 1
+    }
+
   def send(moleExecution: MoleExecution)(moleExecutionMessage: MoleExecutionMessage) =
-    moleExecution.messageQueue.put(moleExecutionMessage)
+    moleExecution.messageQueue.enqueue(moleExecutionMessage, priority(moleExecutionMessage))
 
   def dispatch(moleExecution: MoleExecution, msg: MoleExecutionMessage) = moleExecution.synchronized {
     try {
@@ -515,7 +521,7 @@ object MoleExecutionMessage {
 
   def dispatcher(moleExecution: MoleExecution) =
     while (!(moleExecution._finished || moleExecution._canceled)) {
-      val msg = moleExecution.messageQueue.take()
+      val msg = moleExecution.messageQueue.dequeue()
       dispatch(moleExecution, msg)
     }
 
@@ -535,7 +541,7 @@ class MoleExecution(
   val id:                          String
 ) {
 
-  val messageQueue = new LinkedBlockingQueue[MoleExecutionMessage]()
+  val messageQueue = new PriorityQueue[MoleExecutionMessage]()
 
   private[mole] var _started = false
   private[mole] var _canceled = false

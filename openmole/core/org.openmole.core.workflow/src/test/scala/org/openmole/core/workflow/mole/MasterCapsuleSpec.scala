@@ -132,7 +132,7 @@ class MasterCapsuleSpec extends FlatSpec with Matchers {
 
     val finalTask = TestTask { context ⇒
       assert(context.contains(archive))
-      assert(context(archive).size == 1)
+      assert(context(archive).size >= 10 && context(archive).size < 21)
       endCapsExecuted += 1
       context
     } set (
@@ -142,12 +142,12 @@ class MasterCapsuleSpec extends FlatSpec with Matchers {
 
     val skel = exploration -< modelSlot1 -- selectCaps
     val loop = selectCaps -- modelSlot2
-    val terminate = selectCaps >| (finalTask when "archive.size >= 1")
+    val terminate = selectCaps >| (finalTask when "archive.size >= 10")
 
     val ex = skel & loop & terminate
+
     (noException shouldBe thrownBy(ex.run))
     endCapsExecuted should equal(1)
-
   }
 
   "A master capsule" should "work with mole tasks" in {
