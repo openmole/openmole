@@ -39,7 +39,6 @@ If you want to use design of experiments of your own you may also want to provid
     val d = Val[Double]
     val f = Val[File]
 
-    //Only comma separated files with header are supported for now
     val s = CSVSampling("/path/to/a/file.csv") set (
       columns += i,
       columns += ("colD", d),
