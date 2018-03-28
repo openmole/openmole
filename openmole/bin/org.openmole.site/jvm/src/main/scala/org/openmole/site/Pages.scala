@@ -161,9 +161,6 @@ object DocumentationPages {
     cluster,
     method,
     calibration,
-    geneticalgo,
-    island,
-    stochasticity,
     profile,
     pse,
     tutorial,
@@ -171,7 +168,6 @@ object DocumentationPages {
     headlessNetLogo,
     netLogoGA,
     capsule,
-    dataflow,
     scalaFunction,
     plugin,
     webserver,
@@ -179,12 +175,11 @@ object DocumentationPages {
     otherDoE,
     advancedConcepts,
     DirectSampling,
-    advancedSampling,
     transition,
     hook,
     source,
     console
-  ) ++ modelPages ++ extraModelPages
+  ) ++ modelPages ++ extraModelPages ++ detailsPages ++ advancedPages
 
   lazy val topPages = Seq(
     modelPages,
@@ -209,6 +204,7 @@ object DocumentationPages {
   lazy val packagedCPlusPlus = DocumentationPage.fromScalatex(name = "Packaged C++", location = Some("cplusplus"), content = scalatex.documentation.language.model.PackagedCCplusplus, details = Seq(care))
   lazy val packagedR = DocumentationPage.fromScalatex(name = "Packaged R", content = scalatex.documentation.language.model.PackagedR, details = Seq(care))
   lazy val packagedPython = DocumentationPage.fromScalatex(name = "Packaged Python", content = scalatex.documentation.language.model.PackagedPython, details = Seq(care))
+
   lazy val netLogo = DocumentationPage.fromScalatex(name = "NetLogo", content = scalatex.documentation.language.model.NetLogo)
   lazy val mole = DocumentationPage.fromScalatex(name = "Mole Task", content = scalatex.documentation.language.model.MoleTask)
   lazy val model = DocumentationPage.fromScalatex(name = "Models", content = scalatex.documentation.language.Model)
@@ -223,6 +219,7 @@ object DocumentationPages {
   lazy val capsule = DocumentationPage.fromScalatex(name = "Capsule", content = scalatex.documentation.language.advanced.Capsule)
   lazy val dataflow = DocumentationPage.fromScalatex(name = "Dataflow", content = scalatex.documentation.language.advanced.Dataflow)
   lazy val scalaFunction = DocumentationPage.fromScalatex(name = "Utility Scala functions", content = scalatex.documentation.language.advanced.ScalaFunction)
+  lazy val fileManagement = DocumentationPage.fromScalatex(name = "File Management", content = scalatex.documentation.language.advanced.FileManagement)
 
   lazy val environment = DocumentationPage.fromScalatex(name = "Environments", content = scalatex.documentation.language.Environment)
 
@@ -252,12 +249,13 @@ object DocumentationPages {
     language
   )
 
-  lazy val advancedPages = Seq(
+  def advancedPages = Seq(
     transition,
     hook,
     source,
     capsule,
-    dataflow
+    dataflow,
+    fileManagement
   )
 
   lazy val developmentPages = Seq(

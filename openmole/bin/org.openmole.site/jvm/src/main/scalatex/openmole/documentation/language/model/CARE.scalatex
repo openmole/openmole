@@ -13,7 +13,7 @@ When your model is written in a language for which a specific OpenMOLE task does
   @li{@a(href := DocumentationPages.packagedCPlusPlus.file, "C++")}
   @li{@a(href := DocumentationPages.packagedR.file, "R")}
 
-@br If by any chance, you have an example of a successful packaging for a language or software that may benefit to other users, share it ! For that check @a("how to contribute", href := DocumentationPages.howToContribute.file).
+@br If you have an example of a successful packaging for a language or software that may benefit to other users, share it ! For that check @a("how to contribute", href := DocumentationPages.howToContribute.file).
 
 @sect{@shared.nativePackagingMenu.introCARE}
       @preamble
@@ -125,6 +125,9 @@ When your model is written in a language for which a specific OpenMOLE task does
 @sect{@shared.nativePackagingMenu.troubleshooting}
         @p You should always try to re-execute your application outside of OpenMOLE first. This allows you to ensure the packaging process with CARE was successful. If something goes wrong at this stage, you should check the official @a("CARE documentation", href := shared.link.CAREsite) or the archives of the @a("CARE mailing list", href := shared.link.CAREmailing).
         @p If the packaged application re-executes as you'd expect, but you still struggle to embed it in OpenMOLE, then get in touch with our user community via our the @a("OpenMOLE user forum", href := shared.link.mailingList) or @a("chat", href:=shared.link.chat).
+
+@sect{File management}
+  To provide files as input of a @code{CARETask} or @code{SystemExecTask} and to get file produced by these task you should use the @code{inputFiles} and @code{outputFiles} keywords. See the @a("documentation on file management", href := DocumentationPages.fileManagement.file).
 
 @sect{Research paper}
   Using CARE and OpenMOLE for reproducible science has been covered in the following paper :

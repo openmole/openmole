@@ -1,0 +1,155 @@
+@import org.openmole.site._
+@import org.openmole.site.tools._
+
+@h1{File management}
+
+OpenMOLE implements mechanisms to conveniently make use of data stored as file in your experiments. OpenMOLE make very few distinction between file and directories. In this part when we use the "file" word it can generally be replaced by the "directory" word and the sentence hold.
+
+@br The files in OpenMOLE tasks have 2 main use cases:
+@ul
+  @li{they can be provided to a task (cf. input files, resources),}
+  @li{they can be produced by a task (cf. output files).}
+
+@h2{Input files and resources}
+
+Input files and resources are used to provide files to a task prior to its execution. It may then make use of it when the task is executed. The difference between inputs files and resources is that inputs files are generally produced dynamically by another task in the workflow, whereas resources are used for preexisting files.
+
+@br Considering inputs files and resources, the ScalaTask and the other tasks have very different behaviour. Despite the other tasks, the scala task is able to make use of @code{Val[File]} directly. Let's first talk about the general case non-ScalaTask or external tasks.
+
+@h3{External Tasks}
+
+In order to provide files to that kind of tasks (phython, R, Netlogo...) OpenMOLE need to copy (link) the file to a known path on the local hard drive in order for the task to open it when it runs.
+
+Let's first consider a simple case in which an external task require a file to be executed, always the same. In this case we use the @code{resource} keyword.
+
+@openmole("""
+  val task = SystemExecTask("cat file.txt") set (
+    resources += workDirectory / "file.txt"
+  )
+
+  task
+""")
+
+In this case the ls process is executed by openmole in a directory where the only file is "file.txt". We can do the same with a directory.
+
+@openmole("""
+    val task = SystemExecTask("ls mydirectory") set (
+      resources += workDirectory / "mydirectory"
+    )
+
+    task
+  """)
+
+You can provide a second argument to rename the file. In this case the directory in which the task is executed contains an file with the same content but a different name. For instance:
+
+@openmole("""
+   val task = SystemExecTask("cat bettername.txt") set (
+     resources += (workDirectory / "file.txt", "bettername.txt")
+   )
+
+   task
+ """)
+
+The @code{resources} keyword is useful for files, existing before the workflow execution. In other cases you might want to produce a file in a task an provide it to a subsequent task. For this use the @code{inputFiles} keyword.
+
+@openmole("""
+  val f = Val[File]
+
+  val producer = ScalaTask($tq
+    val f = newFile()
+    f.content = "I love tofu"
+  $tq) set (
+    outputs += f
+  )
+
+  val task = SystemExecTask("cat love.txt") set (
+    inputFiles += (f, "love.txt")
+  )
+
+  producer -- task
+""")
+
+@h3{Scala Tasks}
+
+Since the @code{ScalaTask} is able to directly access the file variable it is easier to provide files to a @code{ScalaTask}. Files are just plain simple inputs, in the same manner as the other inputs.
+
+
+@openmole("""
+  val f = Val[File]
+
+  val task = ScalaTask(@tq
+    println(f.content)
+  @tq) set (
+    inputs += f,
+    f := workDirectory / "file.txt"
+  )
+
+  task
+""")
+
+In this case the file is provided using a default argument. You can of course produce it in another task.
+
+@openmole("""
+  val f = Val[File]
+
+  val producer = ScalaTask($tq
+    val f = newFile()
+    f.content = "I love tofu"
+  $tq) set (
+    outputs += f
+  )
+
+  val task = ScalaTask(@tq
+    println(f.content)
+  @tq) set (
+    inputs += f
+  )
+
+  producer -- task
+""")
+
+Note that the type of variable @code{f} is @code{java.io.File}. It can be provided it as an argument to java or scala function call as it is.
+
+@h2{Output files}
+
+When file are produced by a task they should be set as output of task in order to be collected and persist longer than the task execution time lapse. These files are assigned to a variable of type @code{Val[File]} and can be transmitted to another task or copied in the work directory using @code{CopyFileHook}. For external tasks (all but the ScalaTask), the manner to collect files after a task execution is by using the @code{outputFiles} keyword. The case of the @code{ScalaTask} is explain in a separate section.
+
+@h3{External Tasks}
+
+When a task produces a file it has to be set as an output of the task in order to be saved in you OpenMOLE workDirectory and/or to be used by a subsequent task. The general mechanism is to link the path of produced file to a variable of type @code{Val[File]} using the @code{outputFiles} keyword.
+
+@openmole("""
+val f = Val[File]
+
+val task = SystemExecTask("echo I love tofu >output.txt") set (
+  outputFiles += ("output.txt", f)
+)
+
+task hook CopyFileHook(f, workDirectory / "taskOutput.txt")""")
+
+@code{outputFiles} get a file with a given name and assign it to an OpenMOLE variable once the execution of the task is completed.
+
+@h3{Scala Task}
+
+When using the @code{ScalaTask} files are simple variable and are manipulated like any variable. To output a file variable you can just set it as any usual output:
+
+@openmole("""
+  val f = Val[File]
+
+  val producer = ScalaTask($tq
+    val f = newFile()
+    f.content = "I love tofu"
+  $tq) set (
+    outputs += f
+  )""")
+
+@h2{Complementary information}
+
+@ul
+  @li{@a("Documentation on data processing", href := DocumentationPages.dataProcessing.file)}
+  @li{@a("Utility functions of the ScalaTask", href := DocumentationPages.scalaFunction.file)}
+  @li{@a("Documentation of the RTask", href := DocumentationPages.r.file)}
+  @li{@a("Documentation of the CARETask and the SystemExecTask", href := DocumentationPages.care.file)}
+  @li{@a("Example in python", href := DocumentationPages.packagedPython.file)}
+  @li{@a("Example in R", href := DocumentationPages.packagedR.file)}
+  @li{@a("Example in C++", href := DocumentationPages.packagedCPlusPlus.file)}
