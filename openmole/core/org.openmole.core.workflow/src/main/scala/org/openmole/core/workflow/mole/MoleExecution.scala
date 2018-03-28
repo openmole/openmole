@@ -487,8 +487,9 @@ object MoleExecutionMessage {
 
   def priority(moleExcutionMessage: MoleExecutionMessage) =
     moleExcutionMessage match {
-      case _: PerformTransition ⇒ 10
-      case _                    ⇒ 1
+      case _: CancelMoleExecution ⇒ 100
+      case _: PerformTransition   ⇒ 10
+      case _                      ⇒ 1
     }
 
   def send(moleExecution: MoleExecution)(moleExecutionMessage: MoleExecutionMessage) =
