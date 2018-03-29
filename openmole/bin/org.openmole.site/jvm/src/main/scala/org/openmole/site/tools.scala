@@ -3,6 +3,7 @@ package org.openmole.site
 import java.util.UUID
 
 import scalatags.Text.TypedTag
+import scalatags.generic.StylePair
 
 /*
  * Copyright (C) 01/04/16 // mathieu.leclaire@openmole.org
