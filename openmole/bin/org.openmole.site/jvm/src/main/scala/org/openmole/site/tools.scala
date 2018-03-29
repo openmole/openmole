@@ -102,9 +102,10 @@ package object tools {
 
     def toModifier(element: Any): Modifier =
       element match {
-        case e: String           ⇒ e
+        case e: String ⇒ e
         case e: TypedTag[String] ⇒ e
-        case _                   ⇒ throw new RuntimeException("Unknown element type " + element.getClass)
+        case e: scalatags.generic.StylePair[Any, String] ⇒ e.s := e.v
+        case _ ⇒ throw new RuntimeException("Unknown element type " + element.getClass)
       }
 
   }
