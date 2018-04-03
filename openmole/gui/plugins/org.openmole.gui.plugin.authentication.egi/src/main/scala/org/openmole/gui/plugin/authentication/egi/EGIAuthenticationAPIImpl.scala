@@ -34,7 +34,10 @@ class EGIAuthenticationAPIImpl(s: Services) extends EGIAuthenticationAPI {
   implicit val services = s
   import services._
 
-  private def authenticationFile(key: String) = new java.io.File(server.Utils.authenticationKeysFile, key)
+  private def authenticationFile(p: String) = {
+    def path = p.replace(EGIAuthenticationData.authenticationDirectory, server.Utils.authenticationKeysFile.getAbsolutePath)
+    new java.io.File(path)
+  }
 
   private def coreObject(data: EGIAuthenticationData) = data.privateKey.map { pk ⇒
     P12Certificate(
@@ -48,16 +51,15 @@ class EGIAuthenticationAPIImpl(s: Services) extends EGIAuthenticationAPI {
       case Some(p12: P12Certificate) ⇒
         Seq(EGIAuthenticationData(
           cypher.decrypt(p12.cypheredPassword),
-          Some(p12.certificate.getName)
+          Some(p12.certificate.getPath)
         ))
       case x: Any ⇒ Seq()
     }
 
-  def addAuthentication(data: EGIAuthenticationData): Unit = {
+  def addAuthentication(data: EGIAuthenticationData): Unit =
     coreObject(data).foreach { a ⇒
       EGIAuthentication.update(a, test = false)
     }
-  }
 
   def removeAuthentication = EGIAuthentication.clear
 
