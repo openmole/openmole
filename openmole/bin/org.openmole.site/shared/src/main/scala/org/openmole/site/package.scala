@@ -100,16 +100,15 @@ package object shared {
 
   object otherDoEMenu {
 
-    lazy val LHSSobol = "Latin Hypercube, Sobol Sequence"
-    lazy val severalInputs = "Exploration of several inputs "
-    lazy val sensitivityAnalysis = "Sensitivity Analysis"
-    lazy val sensitivityFireModel = "Real world Example"
-    lazy val csvSampling = "CSV Sampling"
   }
 
   object directSamplingMenu {
     lazy val gridSampling = "Grid Sampling"
     lazy val uniformSampling = "Uniform Distribution Sampling"
+    lazy val LHSSobol = "Latin Hypercube, Sobol Sequence"
+    lazy val severalInputs = "Exploration of several inputs "
+    lazy val csvSampling = "CSV Sampling"
+
   }
 
   object dataProcessingMenu {
@@ -180,6 +179,12 @@ package object shared {
     lazy val scaleUp = "Scale up"
   }
 
+  object simpleSAFireMenu {
+    lazy val sensitivityAnalysis = "Sensitivity Analysis"
+    lazy val sensitivityFireModel = "Real world Example"
+
+  }
+
   object link {
 
     lazy val demo = "http://demo.openmole.org"
@@ -230,6 +235,7 @@ package object shared {
     lazy val noveltySearch = "http://eplex.cs.ucf.edu/noveltysearch/userspage/"
     lazy val javaString = "https://docs.oracle.com/javase/7/docs/api/java/lang/String.html"
     lazy val javaFile = "https://docs.oracle.com/javase/8/docs/api/java/io/File.html"
+    lazy val npm = "https://www.npmjs.com/get-npm"
 
     object paper {
       lazy val jassCP = "http://jasss.soc.surrey.ac.uk/18/1/12.html"

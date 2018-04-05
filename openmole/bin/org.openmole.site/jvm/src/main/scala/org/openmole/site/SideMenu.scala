@@ -110,6 +110,7 @@ object SideMenu {
   lazy val menus = Map(
     DocumentationPages.advancedSampling.name -> Seq(advancedSamplingMenu.toBlock.left, SideMenu.more.right),
     DocumentationPages.netLogoGA.name -> Seq(SideMenu.gaWithNetlogoMenu.toBlock.left),
+    DocumentationPages.simpleSAFire.name -> Seq(SideMenu.simpleSAFireMenu.toBlock.left),
     DocumentationPages.capsule.name -> Seq(SideMenu.capsuleMenu.toBlock.left),
     DocumentationPages.source.name -> Seq(SideMenu.sourceMenu.toBlock.left),
     DocumentationPages.hook.name -> Seq(SideMenu.hookMenu.toBlock.left),
@@ -175,8 +176,10 @@ object SideMenu {
   lazy val directSamplingMenu = fromStrings(
     "Contents",
     shared.directSamplingMenu.gridSampling,
-    shared.directSamplingMenu.uniformSampling
-
+    shared.directSamplingMenu.uniformSampling,
+    shared.directSamplingMenu.csvSampling,
+    shared.directSamplingMenu.LHSSobol,
+    shared.directSamplingMenu.severalInputs
   )
 
   lazy val netlogoMenu = fromStrings(
@@ -187,15 +190,6 @@ object SideMenu {
     shared.netlogoMenu.storing,
     shared.netlogoMenu.together,
     shared.netlogoMenu.further
-  )
-
-  lazy val otherDoEMenu = fromStrings(
-    "Contents",
-    shared.otherDoEMenu.csvSampling,
-    shared.otherDoEMenu.LHSSobol,
-    shared.otherDoEMenu.severalInputs,
-    shared.otherDoEMenu.sensitivityAnalysis,
-    shared.otherDoEMenu.sensitivityFireModel
   )
 
   lazy val dataProcessingMenu = fromStrings(
@@ -255,6 +249,12 @@ object SideMenu {
     shared.gaWithNetlogo.runOpeMOLE,
     shared.gaWithNetlogo.optimizationAlgo,
     shared.gaWithNetlogo.scaleUp
+  )
+
+  lazy val simpleSAFireMenu = fromStrings(
+    "Contents",
+    shared.simpleSAFireMenu.sensitivityAnalysis,
+    shared.simpleSAFireMenu.sensitivityFireModel
   )
 
   lazy val howToContributeMenu = fromStrings(

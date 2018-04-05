@@ -164,11 +164,11 @@ object Site extends App {
 
         private def onLoadString(sitepage: org.openmole.site.Page) = {
           val toBeAppended = sitepage match {
-            case Pages.index | Pages.training ⇒ "org.openmole.site.SiteJS().loadBlogPosts();"
-            case DocumentationPages.profile   ⇒ "org.openmole.site.SiteJS().profileAnimation();"
-            case DocumentationPages.pse       ⇒ "org.openmole.site.SiteJS().pseAnimation();"
-            case DocumentationPages.otherDoE  ⇒ "org.openmole.site.SiteJS().sensitivityAnimation();"
-            case _                            ⇒ ""
+            case Pages.index | Pages.training    ⇒ "org.openmole.site.SiteJS().loadBlogPosts();"
+            case DocumentationPages.profile      ⇒ "org.openmole.site.SiteJS().profileAnimation();"
+            case DocumentationPages.pse          ⇒ "org.openmole.site.SiteJS().pseAnimation();"
+            case DocumentationPages.simpleSAFire ⇒ "org.openmole.site.SiteJS().sensitivityAnimation();"
+            case _                               ⇒ ""
           }
 
           "org.openmole.site.SiteJS().main();org.openmole.site.SiteJS().loadIndex(index);" + toBeAppended
