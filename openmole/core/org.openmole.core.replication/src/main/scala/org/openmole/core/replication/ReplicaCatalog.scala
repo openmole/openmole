@@ -43,7 +43,7 @@ object ReplicaCatalog extends JavaLogger {
   val ReplicaCacheSize = ConfigurationLocation("ReplicaCatalog", "ReplicaCacheSize", Some(1000))
   val ReplicaGraceTime = ConfigurationLocation("ReplicaCatalog", "ReplicaGraceTime", Some(1 days))
   val LockTimeout = ConfigurationLocation("ReplicaCatalog", "LockTimeout", Some(1 minutes))
-  val CheckFileExistsInterval = ConfigurationLocation("ReplicaCatalog", "CheckFileExistsInterval", Some(1 hours))
+  val CheckFileExistsInterval = ConfigurationLocation("ReplicaCatalog", "CheckFileExistsInterval", Some(30 minutes))
 
   def apply(workspace: Workspace)(implicit preference: Preference): ReplicaCatalog = {
     val dbDirectory = org.openmole.core.db.dbDirectory(workspace.location)
@@ -155,7 +155,8 @@ class ReplicaCatalog(database: Database, preference: Preference) {
                 case AlreadyInDb(remoteFile, replica) ⇒
                   replicationStorage.backgroundRmFile(storage, remoteFile)
                   replica
-                case Inserted(replica) ⇒ replica
+                case Inserted(replica) ⇒
+                  replica
               }
             }
           }
@@ -194,9 +195,15 @@ class ReplicaCatalog(database: Database, preference: Preference) {
   def deleteReplicas[S](storageId: S)(implicit replicationStorage: ReplicationStorage[S]): Unit = deleteReplicas(replicationStorage.id(storageId))
   def deleteReplicas(storageId: String): Unit = query { replicas.filter { _.storage === storageId }.delete }
 
-  def remove(id: Long) = query {
+  private def cacheKey(r: Replica) = (r.source, r.hash, r.storage)
+
+  def remove(id: Long) = {
     logger.fine(s"Remove replica with id $id")
-    replicas.filter { _.id === id }.delete
+
+    val replica = query { replicas.filter(_.id === id).result }.headOption
+    query { replicas.filter { _.id === id }.delete }
+
+    replica.foreach { r ⇒ replicaCache.invalidate(cacheKey(r)) }
   }
 
   def timeOfPersistent(name: String) = {
