@@ -78,11 +78,6 @@ class ReplicaCatalog(database: Database, preference: Preference) {
     expireAfterAccess(preference(ReplicaCacheTime).millis, TimeUnit.MILLISECONDS).
     build[ReplicaCacheKey, Replica]
 
-  private def inCatalogQuery: Map[String, Set[String]] = {
-    val all = query(replicas.map { replica ⇒ (replica.storage, replica.hash) }.result)
-    all.groupBy(_._1).mapValues { _.map { case (_, hash) ⇒ hash }.toSet }.withDefaultValue(Set.empty)
-  }
-
   def uploadAndGet[S](
     upload:  ⇒ String,
     srcPath: File,
@@ -128,37 +123,40 @@ class ReplicaCatalog(database: Database, preference: Preference) {
 
             import scala.concurrent.ExecutionContext.Implicits.global
 
-            query(getReplica.result).lastOption.getOrElse {
-              val newFile = upload
+            query(getReplica.result).lastOption match {
+              case Some(r) ⇒ r
+              case None ⇒
+                val newFile = upload
 
-              sealed trait InsertionResult
-              case class AlreadyInDb(remoteFile: String, replica: Replica) extends InsertionResult
-              case class Inserted(replica: Replica) extends InsertionResult
+                sealed trait InsertionResult
+                case class AlreadyInDb(remoteFile: String, replica: Replica) extends InsertionResult
+                case class Inserted(replica: Replica) extends InsertionResult
 
-              val inserted =
-                query {
-                  getReplica.result.map(_.lastOption).flatMap {
-                    case Some(r) ⇒ DBIO.successful(AlreadyInDb(newFile, r))
-                    case None ⇒
-                      val newReplica = Replica(
-                        source = srcPath.getCanonicalPath,
-                        storage = replicationStorage.id(storage),
-                        path = newFile,
-                        hash = hash,
-                        lastCheckExists = System.currentTimeMillis
-                      )
+                val inserted =
+                  query {
+                    val insert = getReplica.result.map(_.lastOption).flatMap {
+                      case Some(r) ⇒ DBIO.successful(AlreadyInDb(newFile, r))
+                      case None ⇒
+                        val newReplica = Replica(
+                          source = srcPath.getCanonicalPath,
+                          storage = replicationStorage.id(storage),
+                          path = newFile,
+                          hash = hash,
+                          lastCheckExists = System.currentTimeMillis
+                        )
 
-                      (replicas += newReplica).map(_ ⇒ Inserted(newReplica))
-                  }.transactionally
+                        (replicas += newReplica).map(_ ⇒ Inserted(newReplica))
+                    }
+
+                    insert.transactionally
+                  }
+
+                inserted match {
+                  case AlreadyInDb(remoteFile, replica) ⇒
+                    replicationStorage.backgroundRmFile(storage, remoteFile)
+                    replica
+                  case Inserted(replica) ⇒ replica
                 }
-
-              inserted match {
-                case AlreadyInDb(remoteFile, replica) ⇒
-                  replicationStorage.backgroundRmFile(storage, remoteFile)
-                  replica
-                case Inserted(replica) ⇒
-                  replica
-              }
             }
           }
 
