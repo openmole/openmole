@@ -118,6 +118,7 @@ class ReplicaCatalog(database: Database, preference: Preference) {
                 logger.fine(s"Remove obsolete $replica")
                 replicationStorage.backgroundRmFile(storage, replica.path)
             }
+
             query(getReplicasForSrcWithOtherHash.delete)
           }
 
@@ -175,13 +176,14 @@ class ReplicaCatalog(database: Database, preference: Preference) {
       }
 
     if (itsTimeToCheck(replica)) {
-      replicaCache.invalidate(cacheKey)
       if (stillExists(replica)) {
         val newReplica = replica.copy(lastCheckExists = System.currentTimeMillis())
         query(replicas.filter(_.id === replica.id).map(_.lastCheckExists).update(newReplica.lastCheckExists).transactionally)
+        replicaCache.put(cacheKey, newReplica)
         newReplica
       }
       else {
+        replicaCache.invalidate(cacheKey)
         query(replicas.filter(_.id === replica.id).delete)
         uploadAndGetLocked(upload, srcPath, hash, storage, cacheKey)
       }
@@ -193,15 +195,21 @@ class ReplicaCatalog(database: Database, preference: Preference) {
   def forHashes(hashes: Seq[String], storageId: Seq[String]) = query { replicas.filter(r ⇒ (r.hash inSetBind hashes) && (r.storage inSetBind storageId)).result }
 
   def deleteReplicas[S](storageId: S)(implicit replicationStorage: ReplicationStorage[S]): Unit = deleteReplicas(replicationStorage.id(storageId))
-  def deleteReplicas(storageId: String): Unit = query { replicas.filter { _.storage === storageId }.delete }
+  def deleteReplicas(storageId: String): Unit = {
+    def q = replicas.filter { _.storage === storageId }
+    val replica = query { q.result }.headOption
+    query { q.delete }
+    replica.foreach { r ⇒ replicaCache.invalidate(cacheKey(r)) }
+  }
 
   private def cacheKey(r: Replica) = (r.source, r.hash, r.storage)
 
   def remove(id: Long) = {
     logger.fine(s"Remove replica with id $id")
 
-    val replica = query { replicas.filter(_.id === id).result }.headOption
-    query { replicas.filter { _.id === id }.delete }
+    def q = replicas.filter(_.id === id)
+    val replica = query { q.result }.headOption
+    query { q.delete }
 
     replica.foreach { r ⇒ replicaCache.invalidate(cacheKey(r)) }
   }
