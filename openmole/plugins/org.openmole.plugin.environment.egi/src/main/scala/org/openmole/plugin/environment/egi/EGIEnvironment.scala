@@ -274,7 +274,7 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
 
     override def upload(t: WebDavLocation, src: File, dest: String, options: storage.TransferOptions): Unit = {
       StorageInterface.upload(true, gridscale.webdav.writeStream(webdavServer(t), _, _))(src, dest, options)
-      if (!exists(t, dest)) throw new InternalProcessingError(s"File $src has been successfully uploaded to $dest on $t but does not exist.")
+      //if (!exists(t, dest)) throw new InternalProcessingError(s"File $src has been successfully uploaded to $dest on $t but does not exist.")
     }
 
     override def download(t: WebDavLocation, src: String, dest: File, options: storage.TransferOptions): Unit =
