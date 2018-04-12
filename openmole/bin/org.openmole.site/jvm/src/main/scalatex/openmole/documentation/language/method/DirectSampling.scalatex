@@ -116,7 +116,9 @@ Some details:
 
 @b{DirectSampling} generates a workflow that is illustrated below. You may recognize the @i{map reduce} design pattern, provided that an aggregation operator is defined (otherwise it would just be a @i{map} :-) )
 
-@img(src := Resource.img.method.directSampling.file, stylesheet.center(60))
+@Resource.rawFrag(Resource.img.method.directSampling)
+
+
 
 @break
 @sect{@shared.directSamplingMenu.uniformSampling }
