@@ -210,7 +210,7 @@ lazy val cats =
     version := catsVersion
   ) settings(settings: _*)
 
-lazy val freedslVersion = "0.23"
+lazy val freedslVersion = "0.26"
 lazy val squantsVersion = "1.3.0"
 
 lazy val squants = 
