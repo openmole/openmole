@@ -73,4 +73,10 @@ object DataUtils {
   implicit class CleanName(s: String) {
     def clean = s.split('-').reduce(_ + _.capitalize).filterNot(Seq('?', ' ').contains)
   }
+
+  def isCSV(safePath: SafePath) = {
+    val name = safePath.name
+    if (name.length > 4) name.takeRight(4) == ".csv"
+    else false
+  }
 }

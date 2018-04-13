@@ -37,7 +37,6 @@ div table tr {
 label {
     display: block;
     text-align: left;
-    width: 150px;
 }
 
 .opaque{
@@ -55,7 +54,7 @@ ul{
 /* EDITOR */
 #editor {
     font-family: monospace;
-    height: 95%;
+    height: 100%;
 }
 
 .ace_gutter-layer {
@@ -435,7 +434,7 @@ li.selectElement{
     position: relative;
     top: 60px;
     width: 100%;
-    height: calc(100% - 152px);
+    height: 75%;
 }
 
 .centerpanel.banneropen{
@@ -455,8 +454,6 @@ padding-bottom: 90px;
     top: 61px;
     transition: all 0.1s ease-out 0s;
     width: 99%;
-    height: calc(100% - 145px);
-    padding-bottom: 35px;
 }
 
 .fullpanel .open {

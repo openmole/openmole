@@ -609,7 +609,7 @@ lazy val clientToolGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.tool
 def guiServerDir = guiDir / "server"
 
 lazy val serverGUI = OsgiProject(guiServerDir, "org.openmole.gui.server.core") settings
-  (libraryDependencies ++= Seq(Libraries.arm, Libraries.autowire, Libraries.boopickle, Libraries.circe, Libraries.scalaTags, Libraries.logback, Libraries.scalatra, Libraries.clapper)) dependsOn(
+  (libraryDependencies ++= Seq(Libraries.arm, Libraries.autowire, Libraries.boopickle, Libraries.circe, Libraries.scalaTags, Libraries.logback, Libraries.scalatra, Libraries.clapper, Libraries.opencsv)) dependsOn(
   sharedGUI,
   dataGUI,
   workflow,

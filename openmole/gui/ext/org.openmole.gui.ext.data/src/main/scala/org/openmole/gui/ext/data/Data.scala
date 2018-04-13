@@ -121,10 +121,9 @@ object SVGExtension extends FileExtension {
   val displayable = true
 }
 
-case class EditableOnDemandFile(highlighter: String, tabulable: Boolean) extends FileExtension with EditableFile {
+case class EditableOnDemandFile(highlighter: String) extends FileExtension with EditableFile {
   val displayable = true
 }
-
 object BinaryFile extends FileExtension {
   val displayable = false
 }
@@ -143,12 +142,12 @@ object Zip extends FileExtension {
 
 object FileExtension {
   val OMS = OpenMOLEScript
-  val SCALA = EditableOnDemandFile("scala", false)
+  val SCALA = EditableOnDemandFile("scala")
   val MD = MDScript
-  val SH = EditableOnDemandFile("sh", false)
-  val TEXT = EditableOnDemandFile("text", false)
-  val CSV = EditableOnDemandFile("text", true)
-  val NO_EXTENSION = EditableOnDemandFile("text", false)
+  val SH = EditableOnDemandFile("sh")
+  val TEXT = EditableOnDemandFile("text")
+  val CSV = EditableOnDemandFile("text")
+  val NO_EXTENSION = EditableOnDemandFile("text")
   val SVG = SVGExtension
   val TGZ = TarGz
   val TAR = Tar
@@ -159,8 +158,6 @@ object FileExtension {
 sealed trait FileContent
 
 case class AlterableFileContent(path: SafePath, content: String) extends FileContent
-
-case class AlterableOnDemandFileContent(path: SafePath, content: String, editable: () ⇒ Boolean) extends FileContent
 
 case class ReadOnlyFileContent() extends FileContent
 

@@ -34,7 +34,6 @@ import org.openmole.gui.ext.data.{ Error ⇒ ExecError }
 import org.openmole.gui.ext.data._
 import org.openmole.gui.client.core.alert.BannerAlert
 import org.openmole.gui.client.core.alert.BannerAlert.BannerMessage
-import org.openmole.gui.client.core.files.TreeNodeTabs.StandBy
 import org.openmole.gui.client.tool.Expander
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.tool.client.Utils
@@ -354,18 +353,18 @@ class ExecutionPanel {
     else envErrorVisible() = envErrorVisible.now :+ envID
   }
 
-  private def setIDTabInStandBy(id: ExecutionId) =
-    staticInfo.now.get(id).foreach { st ⇒ panels.treeNodeTabs.set(st.path, StandBy) }
+  //  private def setIDTabInStandBy(id: ExecutionId) =
+  //    staticInfo.now.get(id).foreach { st ⇒ panels.treeNodeTabs.set(st.path, StandBy) }
 
   def cancelExecution(id: ExecutionId) = {
-    setIDTabInStandBy(id)
+    // setIDTabInStandBy(id)
     post()[Api].cancelExecution(id).call().foreach { r ⇒
       updateExecutionInfo
     }
   }
 
   def removeExecution(id: ExecutionId) = {
-    setIDTabInStandBy(id)
+    //setIDTabInStandBy(id)
     post()[Api].removeExecution(id).call().foreach { r ⇒
       updateExecutionInfo
     }

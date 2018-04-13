@@ -7,37 +7,23 @@ import boopickle.Default._
 import autowire._
 import org.openmole.gui.ext.tool.client.Utils._
 
+import scala.concurrent.duration._
 import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
 import org.openmole.gui.ext.api.Api
-import org.scalajs.dom.raw.{ HTMLDivElement, HTMLElement }
+import org.scalajs.dom.raw.{ HTMLElement }
 import rx._
-
 import scalatags.JsDom.all.{ raw, _ }
 import scalatags.JsDom.TypedTag
-import scala.scalajs.js.timers._
+
 import org.openmole.gui.ext.tool.client._
 import org.openmole.gui.client.core._
 import org.openmole.gui.ext.tool.client.FileManager
 import DataUtils._
 import net.scalapro.sortable._
+import org.openmole.gui.client.core.files.TreeNodeTab.EditableView
 
-/*
- * Copyright (C) 11/05/15 // mathieu.leclaire@openmole.org
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+import scala.scalajs.js.timers._
 
 object TreeNodeTabs {
 
@@ -47,188 +33,199 @@ object TreeNodeTabs {
 
   object UnActive extends Activity
 
-  sealed trait Computation
-
-  object Pending extends Computation
-
-  object StandBy extends Computation
-
-  sealed trait TreeNodeTab {
-
-    implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
-    val safePathTab: Var[SafePath]
-    val activity: Var[Activity] = Var(UnActive)
-    val computation: Var[Computation] = Var(StandBy)
-
-    val tabName = Var(safePathTab.now.name)
-    val id: String = getUUID
-
-    def activate = activity() = Active
-
-    def desactivate = activity() = UnActive
-
-    def suspend = computation() = Pending
-
-    def standby = computation() = StandBy
-
-    val editorElement: TypedTag[HTMLDivElement]
-
-    def fileContent: FileContent
-
-    def refresh(afterRefresh: () ⇒ Unit = () ⇒ {}): Unit
-
-    def block: Rx.Dynamic[TypedTag[_ <: HTMLElement]]
-
-  }
-
-  trait Save <: TreeNodeTab {
-    val editor: EditorPanelUI
-
-    def save(afterSave: () ⇒ Unit) = editor.synchronized {
-      post()[Api].saveFile(safePathTab.now, editor.code).call().foreach(_ ⇒ afterSave())
-    }
-  }
-
-  trait Update <: TreeNodeTab {
-    val editor: EditorPanelUI
-
-    def update(afterUpdate: () ⇒ Unit) = editor.synchronized {
-      FileManager.download(
-        safePathTab.now,
-        (p: ProcessState) ⇒ {},
-        (content: String) ⇒ {
-          editor.setCode(content)
-          afterUpdate()
-        }
-      )
-    }
-  }
-
-  class LockedEditionNodeTab(
-    val safePathTab: Var[SafePath],
-    val editor:      EditorPanelUI,
-    _editable:       Boolean       = false
-  ) extends TreeNodeTab with Save with Update {
-    val editorElement = editor.view
-    val editable = Var(_editable)
-
-    editable.trigger {
-      editor.setReadOnly(!editable.now)
-    }
-
-    val editButton = Rx {
-      val ext: FileExtension = safePathTab.now.name
-      div(
-        ext match {
-          case FileExtension.CSV ⇒
-            button("Table", btn_default +++ (marginRight := 15), onclick := {
-              () ⇒
-                println("TABLE")
-            })
-          case _ ⇒ div()
-        },
-        if (editable()) div()
-        else
-          button("Edit", btn_primary, onclick := { () ⇒
-            editable() = !editable.now
-          })
-      )
-    }
-
-    def controlElement = div(
-      if (editable.now) div else editButton
-    )
-
-    lazy val overlayElement = div
-
-    lazy val block = Rx {
-      div(
-        editorElement,
-        overlayElement
-      )
-    }
-
-    def fileContent = AlterableOnDemandFileContent(safePathTab.now, editor.code, () ⇒ editable.now)
-
-    def refresh(afterRefresh: () ⇒ Unit) = {
-      if (editable.now) save(afterRefresh)
-      else {
-        val scrollPosition = editor.getScrollPostion
-        update(() ⇒ {
-          afterRefresh()
-          editor.setScrollPosition(scrollPosition)
-        })
-      }
-    }
-  }
-
-  class HTMLTab(val safePathTab: Var[SafePath], htmlContent: String) extends TreeNodeTab {
-    val editorElement =
-      div(editorContainer +++ container)(
-        overflowY := "scroll",
-        div(panelClass +++ panelDefault)(
-          div(panelBody)(
-            ms("mdRendering") +++ (padding := 10),
-            RawFrag(htmlContent)
-          )
-        )
-      )
-
-    def fileContent = ReadOnlyFileContent()
-
-    def refresh(onsaved: () ⇒ Unit) = onsaved()
-
-    lazy val block = Rx {
-      editorElement
-    }
-  }
-
-  def apply(tabs: TreeNodeTab*) = new TreeNodeTabs(Var(tabs.toSeq))
-
-  trait TabControl {
-    def controlElement: TypedTag[HTMLElement]
-  }
-
-  abstract class OMSTabControl(val safePathTab: Var[SafePath], val editor: EditorPanelUI) extends TabControl with TreeNodeTab with Save {
-
-    val editorElement = editor.view
-
-    def fileContent = AlterableFileContent(safePathTab.now, editor.code)
-
-    def refresh(onsaved: () ⇒ Unit) = save(onsaved)
-
-    val runButton = button("Play", btn_primary, onclick := { () ⇒
-      computation() = Pending
-      onrun
-    })
-
-    val controlElement = runButton
-
-    def onrun: Unit
-
-    val block = {
-      computation.flatMap { c ⇒
-        tabName.map { n ⇒
-          div(
-            div(if (c == Pending) playTabOverlay else emptyMod),
-            if (c == Pending) div(overlayElement)(s"Starting ${n}, please wait ...")
-            else div,
-            editorElement
-          )
-        }
-      }
-    }
-  }
-
 }
 
-import org.openmole.gui.client.core.files.TreeNodeTabs._
+import TreeNodeTabs._
 
-class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
+sealed trait TreeNodeTab {
 
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
+
+  val safePathTab: Var[SafePath]
+  val activity: Var[Activity] = Var(UnActive)
+
+  val tabName = Var(safePathTab.now.name)
+  val id: String = getUUID
+
+  def activate = activity() = Active
+
+  def desactivate = activity() = UnActive
+
+  def extension: FileExtension = safePathTab.now.name
+
+  // Get the file content to be saved
+  def content: String
+
+  def editable: Boolean
+
+  def refresh(afterRefresh: () ⇒ Unit = () ⇒ {}): Unit
+
+  // controller to be added in menu bar
+  val controlElement: TypedTag[HTMLElement]
+
+  // Graphical representation
+  val block: TypedTag[_ <: HTMLElement]
+}
+
+object TreeNodeTab {
+
+  def save(safePath: SafePath, editorPanelUI: EditorPanelUI, afterSave: () ⇒ Unit) =
+    editorPanelUI.synchronized {
+      post()[Api].saveFile(safePath, editorPanelUI.code).call().foreach(_ ⇒ afterSave())
+    }
+
+  def oms(safePath: SafePath, initialContent: String) = new TreeNodeTab {
+
+    lazy val safePathTab = Var(safePath)
+
+    val editor = EditorPanelUI(FileExtension.OMS, initialContent)
+    editor.initEditor
+
+    def editable = true
+
+    def content = editor.code
+
+    def refresh(onsaved: () ⇒ Unit) = save(safePathTab.now, editor, onsaved)
+
+    lazy val controlElement = button("Play", btn_primary, onclick := { () ⇒
+      refresh(() ⇒
+        post(timeout = 120 seconds, warningTimeout = 60 seconds)[Api].runScript(ScriptData(safePathTab.now)).call().foreach { execInfo ⇒
+          org.openmole.gui.client.core.panels.executionPanel.dialog.show
+        })
+    })
+
+    lazy val block = editor.view
+  }
+
+  def html(safePath: SafePath, htmlContent: String) = new TreeNodeTab {
+    lazy val safePathTab = Var(safePath)
+
+    def content: String = htmlContent
+
+    def editable: Boolean = false
+
+    def refresh(afterRefresh: () ⇒ Unit): Unit = () ⇒ {}
+
+    lazy val controlElement: TypedTag[HTMLElement] = div()
+
+    lazy val block: TypedTag[_ <: HTMLElement] = div(editorContainer +++ container)(
+      div(panelClass +++ panelDefault)(
+        div(panelBody)(
+          ms("mdRendering") +++ (padding := 10),
+          RawFrag(htmlContent)
+        )
+      )
+    )
+  }
+
+  sealed trait EditableView {
+    toString: String
+  }
+
+  object Raw extends EditableView {
+    override def toString = "Raw"
+  }
+
+  object Table extends EditableView {
+    override def toString = "Table"
+  }
+
+  def editable(safePath: SafePath, initialContent: String, initialSequence: Seq[Array[String]], view: EditableView = Raw): TreeNodeTab = new TreeNodeTab {
+    lazy val safePathTab = Var(safePath)
+    lazy val isEditable = Var(false)
+
+    isEditable.trigger {
+      editor.setReadOnly(!isEditable.now)
+    }
+
+    def content: String = editor.code
+
+    def isCSV = DataUtils.isCSV(safePath)
+
+    // Updated only when editable is true
+    val sequence = Var(initialSequence)
+
+    lazy val editor = EditorPanelUI(extension, initialContent, if (isCSV) paddingBottom := 80 else emptyMod)
+    editor.initEditor
+
+    def editable = isEditable.now
+
+    def refresh(afterRefresh: () ⇒ Unit): Unit = {
+      if (editable) TreeNodeTab.save(safePathTab.now, editor, afterRefresh)
+      else
+        editor.synchronized {
+          FileManager.download(
+            safePathTab.now,
+            (p: ProcessState) ⇒ {},
+            (cont: String) ⇒ {
+              editor.setCode(cont)
+              if (editable && isCSV) {
+                post()[Api].sequence(safePathTab.now).call().foreach { seq ⇒
+                  sequence() = seq
+                }
+              }
+              afterRefresh()
+            }
+          )
+        }
+    }
+
+    lazy val controlElement: TypedTag[HTMLElement] =
+      div(
+        Rx {
+          if (editable) div()
+          else
+            button("Edit", btn_primary, onclick := { () ⇒
+              isEditable() = !isEditable.now
+            })
+        }
+      )
+
+    lazy val editorView = editor.view
+
+    val switchString = view match {
+      case Table ⇒ Raw.toString
+      case _     ⇒ Table.toString
+    }
+
+    def switchView = {
+      val newView = view match {
+        case Table ⇒ Raw
+        case _     ⇒ Table
+      }
+      panels.treeNodeTabs.switchEditableTo(this, sequence.now, newView)
+    }
+
+    lazy val switchButton = button(switchString, btn_default, margin := 20, onclick := { () ⇒
+      switchView
+    })
+
+    lazy val block: TypedTag[_ <: HTMLElement] = div(
+      if (isCSV) switchButton else div,
+      view match {
+        case Table ⇒
+          div(
+            Rx {
+              sequence().tail.foldLeft(scaladget.bootstrapnative.bsn.table.
+                addHeaders(sequence().head: _*))(
+                (table, line) ⇒ table.addRow(line: _*)).
+                style(bordered_table).sortable.render(width := sequence().head.length * 50)
+            }
+          )
+        case _ ⇒ editorView
+      }
+    )
+
+  }
+}
+
+class TreeNodeTabs() {
+
+  implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
+
+  val tabs: Var[Seq[TreeNodeTab]] = Var(Seq())
   val timer: Var[Option[SetIntervalHandle]] = Var(None)
-  val temporaryControl: Var[Seq[TypedTag[HTMLElement]]] = Var(Seq())
+  val temporaryControl: Var[TypedTag[HTMLElement]] = Var(div())
 
   def stopTimerIfNoTabs = {
     if (tabs.now.isEmpty) {
@@ -290,14 +287,29 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
     }
   }
 
-  def alterables: Seq[AlterableFileContent] = tabs.now.map {
-    _.fileContent
-  }.collect {
-    case a: AlterableFileContent                               ⇒ a
-    case aod: AlterableOnDemandFileContent if (aod.editable()) ⇒ AlterableFileContent(aod.path, aod.content)
+  def switchEditableTo(tab: TreeNodeTab, sequence: Seq[Array[String]], editableView: EditableView) = {
+    val index = {
+      val i = tabs.now.indexOf(tab)
+      if (i == -1) tabs.now.size
+      else i
+    }
+
+    removeTab(tab)
+
+    val newTab = TreeNodeTab.editable(tab.safePathTab.now, tab.content, sequence, editableView)
+    tabs() = tabs.now.take(index) ++ Seq(newTab) ++ tabs.now.takeRight(tabs.now.size - index)
+
+    setActive(newTab)
   }
 
+  def alterables: Seq[AlterableFileContent] = tabs.now.filter {
+    _.editable
+  }.map { t ⇒ AlterableFileContent(t.safePathTab.now, t.content) }
+
   def saveAllTabs(onsave: () ⇒ Unit) = {
+    println("Alterables " + alterables.map {
+      _.path.name
+    })
     org.openmole.gui.client.core.post()[Api].saveFiles(alterables).call().foreach { s ⇒
       onsave()
     }
@@ -320,12 +332,6 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
     t.safePathTab.now == safePath
   }
 
-  def set(safePath: SafePath, c: Computation) = {
-    find(safePath).foreach {
-      _.computation() = c
-    }
-  }
-
   implicit def modToModSeq(m: Modifier): ModifierSeq = Seq(m)
 
   val render = div({
@@ -345,9 +351,9 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
               }
             )(
                 a(
-                  href := "#" + t.id,
-                  aria.controls := t.id,
+                  id := t.id,
                   tab_role,
+                  pointer,
                   t.activity() match {
                     case Active ⇒ activeTab
                     case _      ⇒ unActiveTab
@@ -389,32 +395,17 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
             )({
                 t.activity() match {
                   case Active ⇒
-                    t match {
-                      case oms: OMSTabControl ⇒
-                        temporaryControl() = Seq(oms.computation() match {
-                          case Pending ⇒ div()
-                          case _       ⇒ oms.controlElement
-                        })
-                        oms.block()
-                      case etc: LockedEditionNodeTab ⇒
-                        temporaryControl() = Seq(etc.controlElement)
-                        etc.block()
-                      case _ ⇒
-                        temporaryControl() = Seq()
-                        Var(div(t.editorElement))
-                    }
-                  case UnActive ⇒
-                    t.computation() match {
-                      case Pending ⇒ Waiter.waiter
-                      case _       ⇒ div()
-                    }
-
+                    temporaryControl() = t.controlElement
+                    t.block
+                  case UnActive ⇒ div()
                 }
-              })
+              }
+              )
           }
         }
       )
     )
-  })
+  }
 
+  )
 }

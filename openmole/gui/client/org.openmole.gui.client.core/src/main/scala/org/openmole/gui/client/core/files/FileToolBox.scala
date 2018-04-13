@@ -76,79 +76,85 @@ class FileToolBox(initSafePath: SafePath) {
   val duplicateTrigger = iconAction(fileaction.duplicate, arrow_right_and_left, "duplicate")
 
   def actions(element0: HTMLElement): Boolean = {
-    val parent0 = element0.parentNode
-    val (testID, element, parent) =
-      if (element0.id.isEmpty) (element0.parentElement.id, parent0, parent0.parentNode)
-      else (element0.id, element0, parent0)
-    testID match {
-      case fileaction.trash ⇒
-        parent.parentNode.replaceChild(confirmationGroup, parent)
-        true
-      case fileaction.confirmTrash ⇒
-        withSafePath { safePath ⇒
-          CoreUtils.trashNode(safePath) {
-            () ⇒
-              treeNodeTabs -- safePath
-              treeNodeTabs.checkTabs
-              treeNodePanel.invalidCacheAndDraw
+    if (element0 != null) {
+      val parent0 = element0.parentNode
+      if (parent0 != null) {
+        val (testID, element, parent) =
+          if (element0.id.isEmpty) (element0.parentElement.id, parent0, parent0.parentNode)
+          else (element0.id, element0, parent0)
+        testID match {
+          case fileaction.trash ⇒
+            parent.parentNode.replaceChild(confirmationGroup, parent)
+            true
+          case fileaction.confirmTrash ⇒
+            withSafePath { safePath ⇒
+              CoreUtils.trashNode(safePath) {
+                () ⇒
+                  treeNodeTabs -- safePath
+                  treeNodeTabs.checkTabs
+                  treeNodePanel.invalidCacheAndDraw
+                  Popover.hide
+              }
+            }
+            true
+          case fileaction.cancelTrash ⇒
+            parent.parentNode.replaceChild(contentRoot, parent)
+            true
+          case fileaction.rename ⇒
+            withSafePath { sp ⇒
+              editTitle.value = sp.name
+              parent.parentNode.replaceChild(editDiv(fileaction.confirmRename, "Rename"), parent)
+            }
+            true
+          case fileaction.editInput ⇒ true
+          case fileaction.confirmRename ⇒
+            withSafePath { sp ⇒
+              testRename(sp, parent, parent, element.parentNode)
+            }
+            true
+          case fileaction.confirmOverwrite ⇒
+            withSafePath { sp ⇒
+              rename(sp, () ⇒ {})
+              parentNode(parent, 3).replaceChild(buildTitleRoot(sp.name), parentNode(parent, 2))
               Popover.hide
-          }
+            }
+            true
+          case fileaction.cancelRename ⇒
+            withSafePath { sp ⇒
+              parent.parentNode.parentNode.replaceChild(buildTitleRoot(sp.name), parent.parentNode)
+            }
+            true
+          case fileaction.download ⇒
+            withSafePath { sp ⇒
+              org.scalajs.dom.document.location.href = s"downloadFile?path=${Utils.toURI(sp.path)}"
+              Popover.hide
+            }
+            true
+          case fileaction.extract ⇒
+            withSafePath { sp ⇒
+              extractTGZ(sp)
+              Popover.hide
+            }
+            true
+          case fileaction.duplicate ⇒
+            withSafePath { sp ⇒
+              val newName = {
+                val prefix = sp.path.last
+                if (prefix.contains(".")) prefix.replaceFirst("[.]", "_1.")
+                else prefix + "_1"
+              }
+              CoreUtils.replicate(sp, newName)
+              Popover.hide
+            }
+            true
+          case _ ⇒
+            println("unknown")
+            false
         }
-        true
-      case fileaction.cancelTrash ⇒
-        parent.parentNode.replaceChild(contentRoot, parent)
-        true
-      case fileaction.rename ⇒
-        withSafePath { sp ⇒
-          editTitle.value = sp.name
-          parent.parentNode.replaceChild(editDiv(fileaction.confirmRename, "Rename"), parent)
-        }
-        true
-      case fileaction.editInput ⇒ true
-      case fileaction.confirmRename ⇒
-        withSafePath { sp ⇒
-          testRename(sp, parent, parent, element.parentNode)
-        }
-        true
-      case fileaction.confirmOverwrite ⇒
-        withSafePath { sp ⇒
-          rename(sp, () ⇒ {})
-          parentNode(parent, 3).replaceChild(buildTitleRoot(sp.name), parentNode(parent, 2))
-          Popover.hide
-        }
-        true
-      case fileaction.cancelRename ⇒
-        withSafePath { sp ⇒
-          parent.parentNode.parentNode.replaceChild(buildTitleRoot(sp.name), parent.parentNode)
-        }
-        true
-      case fileaction.download ⇒
-        withSafePath { sp ⇒
-          org.scalajs.dom.document.location.href = s"downloadFile?path=${Utils.toURI(sp.path)}"
-          Popover.hide
-        }
-        true
-      case fileaction.extract ⇒
-        withSafePath { sp ⇒
-          extractTGZ(sp)
-          Popover.hide
-        }
-        true
-      case fileaction.duplicate ⇒
-        withSafePath { sp ⇒
-          val newName = {
-            val prefix = sp.path.last
-            if (prefix.contains(".")) prefix.replaceFirst("[.]", "_1.")
-            else prefix + "_1"
-          }
-          CoreUtils.replicate(sp, newName)
-          Popover.hide
-        }
-        true
-      case _ ⇒
-        println("unknown")
-        false
+      }
+      else false
     }
+    else false
   }
 
   def withSafePath(action: SafePath ⇒ Unit) =
