@@ -18,6 +18,7 @@ package org.openmole.plugin.tool.netlogo5;
 
 import org.nlogo.agent.Observer;
 import org.nlogo.agent.World;
+import org.nlogo.api.LogoException;
 import org.nlogo.headless.HeadlessWorkspace;
 import org.nlogo.nvm.Procedure;
 import org.openmole.plugin.tool.netlogo.NetLogo;
@@ -50,6 +51,11 @@ public class NetLogo5 implements NetLogo {
     @Override
     public void command(String cmd) throws Exception {
         workspace.command(cmd);
+    }
+
+    @Override
+    public boolean isNetLogoException(Throwable e) {
+        return LogoException.class.isAssignableFrom(e.getClass());
     }
 
     @Override

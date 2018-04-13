@@ -18,8 +18,10 @@ package org.openmole.plugin.tool.netlogo6;
 
 import org.nlogo.agent.Observer;
 import org.nlogo.agent.World;
+import org.nlogo.api.LogoException;
 import org.nlogo.headless.HeadlessWorkspace;
 import org.nlogo.nvm.Procedure;
+import org.nlogo.nvm.RuntimePrimitiveException;
 import org.openmole.plugin.tool.netlogo.NetLogo;
 import scala.collection.JavaConverters;
 
@@ -52,6 +54,11 @@ public class NetLogo6 implements NetLogo {
     @Override
     public void command(String cmd) throws Exception {
         workspace.command(cmd);
+    }
+
+    @Override
+    public boolean isNetLogoException(Throwable e) {
+        return LogoException.class.isAssignableFrom(e.getClass());
     }
 
     @Override

@@ -20,6 +20,10 @@ import org.openmole.gui.ext.data.{ AuthenticationData, Error, Test }
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+object EGIAuthenticationData {
+  def authenticationDirectory = "${AUTHENTICATION_DIRECTORY}"
+}
+
 case class EGIAuthenticationData(
   cypheredPassword: String         = "",
   privateKey:       Option[String] = None

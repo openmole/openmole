@@ -62,7 +62,7 @@ object NichedNSGA2 {
           }
         }.sequence
 
-      niches.map { ns ⇒ Profile.sequenceNiches[CDGenome.DeterministicIndividual.Individual, Int](ns) }
+      niches.map { ns ⇒ mgo.niche.sequenceNiches[CDGenome.DeterministicIndividual.Individual, Int](ns) }
     }
 
     import CDGenome.DeterministicIndividual
@@ -201,7 +201,7 @@ object NichedNSGA2 {
           }
         }.sequence
 
-      niches.map { ns ⇒ Profile.sequenceNiches[CDGenome.NoisyIndividual.Individual, Int](ns) }
+      niches.map { ns ⇒ mgo.niche.sequenceNiches[CDGenome.NoisyIndividual.Individual, Int](ns) }
     }
 
     implicit def integration = new MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Vector[Double]] {

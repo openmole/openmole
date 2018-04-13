@@ -22,7 +22,6 @@ import org.openmole.gui.ext.data.{ AuthenticationPlugin, AuthenticationPluginFac
 import org.openmole.gui.ext.tool.client.{ FileUploaderUI, OMPost }
 
 import scaladget.bootstrapnative.bsn._
-import scaladget.tools._
 
 import boopickle.Default._
 import autowire._
@@ -48,13 +47,17 @@ class EGIAuthenticationGUIFactory extends AuthenticationPluginFactory {
 class EGIAuthenticationGUI(val data: EGIAuthenticationData = EGIAuthenticationData()) extends AuthenticationPlugin {
   type AuthType = EGIAuthenticationData
 
-  val passwordStyle: ModifierSeq = Seq(
+  val passwordStyle: scaladget.tools.ModifierSeq = Seq(
     width := 130,
-    passwordType
+    scaladget.tools.passwordType
   )
 
   val password = inputTag(data.cypheredPassword)(placeholder := "Password", passwordStyle).render
-  val privateKey = FileUploaderUI(data.privateKey.getOrElse(""), data.privateKey.isDefined, Some("egi.p12"))
+
+  def shorten(path: String): String = if (path.length > 10) s"...${path.takeRight(10)}" else path
+
+  val privateKey =
+    FileUploaderUI(data.privateKey.map(shorten).getOrElse(""), data.privateKey.isDefined, Some("egi.p12"))
 
   val voInput = inputTag("")(placeholder := "vo1,vo2").render
 
@@ -70,18 +73,21 @@ class EGIAuthenticationGUI(val data: EGIAuthenticationData = EGIAuthenticationDa
     onremove()
   }
 
-  lazy val panel = vForm(
-    password.withLabel("Password"),
-    privateKey.view(marginTop := 10).render.withLabel("Certificate"),
-    voInput.withLabel("Test EGI credential on", paddingTop := 40)
-  )
+  lazy val panel = {
+    import scaladget.tools._
+    vForm(
+      password.withLabel("Password"),
+      privateKey.view(marginTop := 10).render.withLabel("Certificate"),
+      voInput.withLabel("Test EGI credential on", paddingTop := 40)
+    )
+  }
 
   def save(onsave: () ⇒ Unit) = {
     OMPost()[EGIAuthenticationAPI].removeAuthentication().call().foreach {
       d ⇒
         OMPost()[EGIAuthenticationAPI].addAuthentication(EGIAuthenticationData(
           cypheredPassword = password.value,
-          privateKey = if (privateKey.pathSet.now) Some("egi.p12") else None
+          privateKey = if (privateKey.pathSet.now) Some(EGIAuthenticationData.authenticationDirectory + "/egi.p12") else None
         )).call().foreach {
           b ⇒
             onsave()

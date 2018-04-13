@@ -167,12 +167,12 @@ object DocumentationPages {
     resume,
     headlessNetLogo,
     netLogoGA,
+    simpleSAFire,
     capsule,
     scalaFunction,
     plugin,
     webserver,
     dataProcessing,
-    otherDoE,
     advancedConcepts,
     DirectSampling,
     transition,
@@ -234,7 +234,7 @@ object DocumentationPages {
 
   def environmentPages = Seq(multithread, ssh, egi, cluster)
 
-  def methodPages = Seq(DirectSampling, calibration, profile, pse, dataProcessing, otherDoE)
+  def methodPages = Seq(DirectSampling, calibration, profile, pse, dataProcessing)
 
   lazy val tutorialPages = Seq(Pages.gettingStarted, netLogoGA, resume)
 
@@ -283,8 +283,6 @@ object DocumentationPages {
   lazy val profile = DocumentationPage.fromScalatex(name = "Profiles", content = scalatex.documentation.language.method.Profile)
   lazy val pse = DocumentationPage.fromScalatex(name = "PSE", content = scalatex.documentation.language.method.PSE)
 
-  lazy val otherDoE = DocumentationPage.fromScalatex(name = "Other DoEs", content = scalatex.documentation.language.method.OtherDoE, extraMenu = Some(SideMenu.otherDoEMenu))
-
   lazy val DirectSampling = DocumentationPage.fromScalatex(name = "Direct Sampling", content = scalatex.documentation.language.method.DirectSampling, extraMenu = Some(SideMenu.directSamplingMenu))
 
   lazy val dataProcessing = DocumentationPage.fromScalatex(name = "Data Processing", content = scalatex.documentation.language.method.DataProcessing, extraMenu = Some(SideMenu.dataProcessingMenu))
@@ -296,7 +294,9 @@ object DocumentationPages {
   lazy val tutorial = DocumentationPage.fromScalatex(name = "Tutorials", content = scalatex.documentation.language.Tutorial)
   lazy val resume = DocumentationPage.fromScalatex(name = "Resume Workflow", content = scalatex.documentation.language.tutorial.Resume, title = Some("How to build a resumable workflow"))
   lazy val headlessNetLogo = DocumentationPage.fromScalatex(name = "Netlogo Headless", content = scalatex.documentation.language.advanced.HeadlessNetLogo, title = Some("Headless version of Netlog model"))
+
   lazy val netLogoGA = DocumentationPage.fromScalatex(name = "GA with NetLogo", content = scalatex.documentation.language.tutorial.NetLogoGA, title = Some("Calibrate a NetLogo model using genetic algorithms"))
+  lazy val simpleSAFire = DocumentationPage.fromScalatex(name = "Sensitivity Analysis on NetLogo", content = scalatex.documentation.language.tutorial.simpleSAFire, title = Some("One factor Senstivity Analysis on a Netlogo model"))
 
   lazy val plugin = DocumentationPage.fromScalatex(name = "Plugin", content = scalatex.documentation.language.advanced.PluginDevelopment)
   lazy val webserver = DocumentationPage.fromScalatex(name = "Web Server", content = scalatex.documentation.development.WebServer, title = Some("Webserver and Rest API"))

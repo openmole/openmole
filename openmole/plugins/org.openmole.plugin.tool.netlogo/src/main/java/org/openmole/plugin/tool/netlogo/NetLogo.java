@@ -23,6 +23,7 @@ public interface NetLogo {
   public String[] reporters() throws Exception;
   public void open(String script) throws Exception;
   void command(String cmd) throws Exception;
+  boolean isNetLogoException(Throwable exception);
   Object report(String variable) throws Exception;
   void dispose() throws Exception;
   ClassLoader getNetLogoClassLoader();

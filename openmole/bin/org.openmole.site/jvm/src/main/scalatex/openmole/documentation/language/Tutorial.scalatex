@@ -20,6 +20,7 @@ the OpenMOLE way. You can discover them through the Market place or tutorials.
     @ul
         @li{@a("Get started with OpenMOLE and a simple workflow", href := Pages.gettingStarted.file)}
         @li{@aa("Calibrate a NetLogo model using genetic algorithms", href := DocumentationPages.netLogoGA.file)}
+        @li{@aa("One factor Sensitivity Analysis on Netlogo Model ", href := DocumentationPages.simpleSAFire.file)}
 
 @break
 

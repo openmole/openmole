@@ -79,8 +79,12 @@ trait NetLogoTask extends Task with ValidateTask {
             netLogo.open(script.getAbsolutePath)
           }
 
-          def executeNetLogo(cmd: String) = wrapError(s"Error while executing command $cmd") {
-            netLogo.command(cmd)
+          def executeNetLogo(cmd: String, ignoreError: Boolean = false) = wrapError(s"Error while executing command $cmd") {
+            try netLogo.command(cmd)
+            catch {
+              case t: Throwable ⇒
+                if (ignoreError && netLogo.isNetLogoException(t)) {} else throw t
+            }
           }
 
           seed.foreach { s ⇒ executeNetLogo(s"random-seed ${context(s)}") }
@@ -93,10 +97,7 @@ trait NetLogoTask extends Task with ValidateTask {
             executeNetLogo("set " + inBinding._2 + " " + v)
           }
 
-          try for (cmd ← launchingCommands.map(_.from(context))) executeNetLogo(cmd)
-          catch {
-            case t: Throwable ⇒ if (!ignoreError) throw t
-          }
+          for (cmd ← launchingCommands.map(_.from(context))) executeNetLogo(cmd, ignoreError)
 
           val contextResult =
             external.fetchOutputFiles(outputs, preparedContext, external.relativeResolver(workDir), tmpDir) ++ netLogoOutputs.map {

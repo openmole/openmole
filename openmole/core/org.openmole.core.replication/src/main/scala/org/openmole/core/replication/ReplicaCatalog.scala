@@ -43,7 +43,7 @@ object ReplicaCatalog extends JavaLogger {
   val ReplicaCacheSize = ConfigurationLocation("ReplicaCatalog", "ReplicaCacheSize", Some(1000))
   val ReplicaGraceTime = ConfigurationLocation("ReplicaCatalog", "ReplicaGraceTime", Some(1 days))
   val LockTimeout = ConfigurationLocation("ReplicaCatalog", "LockTimeout", Some(1 minutes))
-  val CheckFileExistsInterval = ConfigurationLocation("ReplicaCatalog", "CheckFileExistsInterval", Some(1 hours))
+  val CheckFileExistsInterval = ConfigurationLocation("ReplicaCatalog", "CheckFileExistsInterval", Some(30 minutes))
 
   def apply(workspace: Workspace)(implicit preference: Preference): ReplicaCatalog = {
     val dbDirectory = org.openmole.core.db.dbDirectory(workspace.location)
@@ -77,11 +77,6 @@ class ReplicaCatalog(database: Database, preference: Preference) {
     maximumSize(preference(ReplicaCacheSize)).
     expireAfterAccess(preference(ReplicaCacheTime).millis, TimeUnit.MILLISECONDS).
     build[ReplicaCacheKey, Replica]
-
-  private def inCatalogQuery: Map[String, Set[String]] = {
-    val all = query(replicas.map { replica ⇒ (replica.storage, replica.hash) }.result)
-    all.groupBy(_._1).mapValues { _.map { case (_, hash) ⇒ hash }.toSet }.withDefaultValue(Set.empty)
-  }
 
   def uploadAndGet[S](
     upload:  ⇒ String,
@@ -118,6 +113,7 @@ class ReplicaCatalog(database: Database, preference: Preference) {
                 logger.fine(s"Remove obsolete $replica")
                 replicationStorage.backgroundRmFile(storage, replica.path)
             }
+
             query(getReplicasForSrcWithOtherHash.delete)
           }
 
@@ -127,36 +123,40 @@ class ReplicaCatalog(database: Database, preference: Preference) {
 
             import scala.concurrent.ExecutionContext.Implicits.global
 
-            query(getReplica.result).lastOption.getOrElse {
-              val newFile = upload
+            query(getReplica.result).lastOption match {
+              case Some(r) ⇒ r
+              case None ⇒
+                val newFile = upload
 
-              sealed trait InsertionResult
-              case class AlreadyInDb(remoteFile: String, replica: Replica) extends InsertionResult
-              case class Inserted(replica: Replica) extends InsertionResult
+                sealed trait InsertionResult
+                case class AlreadyInDb(remoteFile: String, replica: Replica) extends InsertionResult
+                case class Inserted(replica: Replica) extends InsertionResult
 
-              val inserted =
-                query {
-                  getReplica.result.map(_.lastOption).flatMap {
-                    case Some(r) ⇒ DBIO.successful(AlreadyInDb(newFile, r))
-                    case None ⇒
-                      val newReplica = Replica(
-                        source = srcPath.getCanonicalPath,
-                        storage = replicationStorage.id(storage),
-                        path = newFile,
-                        hash = hash,
-                        lastCheckExists = System.currentTimeMillis
-                      )
+                val inserted =
+                  query {
+                    val insert = getReplica.result.map(_.lastOption).flatMap {
+                      case Some(r) ⇒ DBIO.successful(AlreadyInDb(newFile, r))
+                      case None ⇒
+                        val newReplica = Replica(
+                          source = srcPath.getCanonicalPath,
+                          storage = replicationStorage.id(storage),
+                          path = newFile,
+                          hash = hash,
+                          lastCheckExists = System.currentTimeMillis
+                        )
 
-                      (replicas += newReplica).map(_ ⇒ Inserted(newReplica))
-                  }.transactionally
+                        (replicas += newReplica).map(_ ⇒ Inserted(newReplica))
+                    }
+
+                    insert.transactionally
+                  }
+
+                inserted match {
+                  case AlreadyInDb(remoteFile, replica) ⇒
+                    replicationStorage.backgroundRmFile(storage, remoteFile)
+                    replica
+                  case Inserted(replica) ⇒ replica
                 }
-
-              inserted match {
-                case AlreadyInDb(remoteFile, replica) ⇒
-                  replicationStorage.backgroundRmFile(storage, remoteFile)
-                  replica
-                case Inserted(replica) ⇒ replica
-              }
             }
           }
 
@@ -174,13 +174,14 @@ class ReplicaCatalog(database: Database, preference: Preference) {
       }
 
     if (itsTimeToCheck(replica)) {
-      replicaCache.invalidate(cacheKey)
       if (stillExists(replica)) {
         val newReplica = replica.copy(lastCheckExists = System.currentTimeMillis())
         query(replicas.filter(_.id === replica.id).map(_.lastCheckExists).update(newReplica.lastCheckExists).transactionally)
+        replicaCache.put(cacheKey, newReplica)
         newReplica
       }
       else {
+        replicaCache.invalidate(cacheKey)
         query(replicas.filter(_.id === replica.id).delete)
         uploadAndGetLocked(upload, srcPath, hash, storage, cacheKey)
       }
@@ -192,11 +193,23 @@ class ReplicaCatalog(database: Database, preference: Preference) {
   def forHashes(hashes: Seq[String], storageId: Seq[String]) = query { replicas.filter(r ⇒ (r.hash inSetBind hashes) && (r.storage inSetBind storageId)).result }
 
   def deleteReplicas[S](storageId: S)(implicit replicationStorage: ReplicationStorage[S]): Unit = deleteReplicas(replicationStorage.id(storageId))
-  def deleteReplicas(storageId: String): Unit = query { replicas.filter { _.storage === storageId }.delete }
+  def deleteReplicas(storageId: String): Unit = {
+    def q = replicas.filter { _.storage === storageId }
+    val replica = query { q.result }.headOption
+    query { q.delete }
+    replica.foreach { r ⇒ replicaCache.invalidate(cacheKey(r)) }
+  }
 
-  def remove(id: Long) = query {
+  private def cacheKey(r: Replica) = (r.source, r.hash, r.storage)
+
+  def remove(id: Long) = {
     logger.fine(s"Remove replica with id $id")
-    replicas.filter { _.id === id }.delete
+
+    def q = replicas.filter(_.id === id)
+    val replica = query { q.result }.headOption
+    query { q.delete }
+
+    replica.foreach { r ⇒ replicaCache.invalidate(cacheKey(r)) }
   }
 
   def timeOfPersistent(name: String) = {

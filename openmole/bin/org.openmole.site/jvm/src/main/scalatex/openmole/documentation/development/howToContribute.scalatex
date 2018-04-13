@@ -21,9 +21,15 @@ It also explains the various versions of OpenMOLE you may want to use/deploy, fr
             the @a("git" ,href:=shared.link.git) software and the @a("LFS" ,href:=shared.link.gitlfs) extension
         @li
             @a("sbt" ,href:=shared.link.sbt) , the scala  building tool
+        @li
+            @a("npm" , href:=shared.link.npm) is required to build the website.
+
 
 
     As a suggestion, we recommand the @a("IntelliJ IDE", href:=shared.link.intelliJ) to  edit the scala source code of the project.
+
+
+
 
 
 @sect{@shared.howToContributeMenu.firstTimeSetup}
