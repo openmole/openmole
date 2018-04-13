@@ -400,17 +400,21 @@ class TreeNodePanel {
       val popClass = "popover"
 
       def inPopover0(e: HTMLElement, depth: Int): Boolean = {
-        val b = e.className.contains(popClass)
-        if (b || depth > 2) b
-        else inPopover0(e.parentElement, depth + 1)
+        if (e != null) {
+          val b = e.className.contains(popClass)
+          if (b || depth > 2) b
+          else inPopover0(e.parentElement, depth + 1)
+        }
+        else false
       }
 
       inPopover0(element, 0)
     }
 
     dom.document.body.onclick = { (e: Event) ⇒
-      if (!toolBox.actions(e.target.asInstanceOf[HTMLElement])) {
-        if (!inPopover(e.target.asInstanceOf[HTMLElement]))
+      val element = e.target.asInstanceOf[HTMLElement]
+      if (!toolBox.actions(element)) {
+        if (!inPopover(element))
           Popover.hide
       }
       else

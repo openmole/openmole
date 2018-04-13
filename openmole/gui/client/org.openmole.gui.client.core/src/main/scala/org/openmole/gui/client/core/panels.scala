@@ -20,12 +20,12 @@ import org.openmole.gui.client.core.files.{ FileDisplayer, TreeNodePanel, TreeNo
  */
 
 package object panels {
-  val treeNodeTabs = TreeNodeTabs()
+  val executionPanel = new ExecutionPanel
+  val treeNodeTabs = new TreeNodeTabs()
   val fileDisplayer = new FileDisplayer(treeNodeTabs)
   val treeNodePanel = TreeNodePanel()
   val modelWizardPanel = new ModelWizardPanel
   val marketPanel = new MarketPanel
   val pluginPanel = new PluginPanel
-  val executionPanel = new ExecutionPanel
   val stackPanel = new TextPanel("Error stack")
 }
