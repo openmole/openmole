@@ -956,7 +956,7 @@ lazy val dockerBin = Project("docker", binDir / "docker") enablePlugins (sbtdock
     )
   ),
   dockerfile in docker := new Dockerfile {
-    from("openjdk:8-jre-slim")
+    from("openjdk:10-jre-slim")
     maintainer("Romain Reuillon <romain.reuillon@iscpif.fr>, Jonathan Passerat-Palmbach <j.passerat-palmbach@imperial.ac.uk>")
     copy((assemble in openmole).value, s"/openmole")
     runRaw(

@@ -235,7 +235,7 @@ lazy val freedsl =
 
 lazy val mgoVersion = "3.8"
 
-lazy val mgo = OsgiProject(dir, "mgo", imports = Seq("*")) settings(
+lazy val mgo = OsgiProject(dir, "mgo", imports = Seq("!better.*", "*")) settings(
   libraryDependencies += "fr.iscpif" %% "mgo" % mgoVersion,
   version := mgoVersion) dependsOn(monocle, freedsl, math) settings(settings: _*)
 
