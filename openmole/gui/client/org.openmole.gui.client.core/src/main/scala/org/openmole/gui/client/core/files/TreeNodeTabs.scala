@@ -11,17 +11,16 @@ import scala.concurrent.duration._
 import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
 import org.openmole.gui.ext.api.Api
-import org.scalajs.dom.raw.{ HTMLElement }
+import org.scalajs.dom.raw.HTMLElement
 import rx._
 import scalatags.JsDom.all.{ raw, _ }
 import scalatags.JsDom.TypedTag
-
 import org.openmole.gui.ext.tool.client._
 import org.openmole.gui.client.core._
 import org.openmole.gui.ext.tool.client.FileManager
 import DataUtils._
 import net.scalapro.sortable._
-import org.openmole.gui.client.core.files.TreeNodeTab.EditableView
+import org.openmole.gui.client.core.files.TreeNodeTab.{ EditableView, RowFilter }
 
 import scala.scalajs.js.timers._
 
@@ -130,7 +129,15 @@ object TreeNodeTab {
     override def toString = "Table"
   }
 
-  def editable(safePath: SafePath, initialContent: String, initialSequence: Seq[Array[String]], view: EditableView = Raw): TreeNodeTab = new TreeNodeTab {
+  sealed trait RowFilter
+
+  object First100 extends RowFilter
+
+  object Last100 extends RowFilter
+
+  object All extends RowFilter
+
+  def editable(safePath: SafePath, initialContent: String, initialSequence: Seq[Array[String]], view: EditableView = Raw, filter: RowFilter = First100): TreeNodeTab = new TreeNodeTab {
     lazy val safePathTab = Var(safePath)
     lazy val isEditable = Var(false)
 
@@ -144,6 +151,11 @@ object TreeNodeTab {
 
     // Updated only when editable is true
     val sequence = Var(initialSequence)
+    val filteredSequence = filter match {
+      case First100 ⇒ sequence.now.take(100)
+      case Last100  ⇒ sequence.now.takeRight(100)
+      case _        ⇒ sequence.now
+    }
 
     lazy val editor = EditorPanelUI(extension, initialContent, if (isCSV) paddingBottom := 80 else emptyMod)
     editor.initEditor
@@ -193,28 +205,50 @@ object TreeNodeTab {
         case Table ⇒ Raw
         case _     ⇒ Table
       }
-      panels.treeNodeTabs.switchEditableTo(this, sequence.now, newView)
+
+      panels.treeNodeTabs.switchEditableTo(this, sequence.now, newView, filter)
     }
+
+    def toView(filter: RowFilter) = panels.treeNodeTabs.switchEditableTo(this, sequence.now, view, filter)
 
     lazy val switchButton = button(switchString, btn_default, margin := 20, onclick := { () ⇒
       switchView
     })
 
-    lazy val block: TypedTag[_ <: HTMLElement] = div(
-      if (isCSV) switchButton else div,
-      view match {
-        case Table ⇒
-          div(
-            Rx {
-              sequence().tail.foldLeft(scaladget.bootstrapnative.bsn.table.
-                addHeaders(sequence().head: _*))(
-                (table, line) ⇒ table.addRow(line: _*)).
-                style(bordered_table).sortable.render(width := sequence().head.length * 50)
-            }
-          )
-        case _ ⇒ editorView
-      }
+    lazy val filterRadios = radios()(
+      selectableButton("First 100", filter == First100, onclick = () ⇒ toView(First100)),
+      selectableButton("Last 100", filter == Last100, onclick = () ⇒ toView(Last100)),
+      selectableButton("All", filter == All, modifierSeq = btn_danger, onclick = () ⇒ toView(All))
     )
+
+    lazy val block: TypedTag[_ <: HTMLElement] = {
+      div(
+        if (isCSV) {
+          scalatags.JsDom.all.span(switchButton, view match {
+            case Table ⇒ filterRadios.render
+            case _     ⇒ div.render
+          })
+        }
+        else div,
+        view match {
+          case Table ⇒
+            div(
+              {
+                val h = filteredSequence.head
+                val table =
+                  scaladget.bootstrapnative.Table(
+                    h.toSeq,
+                    filteredSequence.tail.map {
+                      scaladget.bootstrapnative.Row(_)
+                    }.toSeq,
+                    scaladget.bootstrapnative.BSTableStyle(bordered_table, emptyMod), true)
+                table.render(width := h.length * 50)
+              }
+            )
+          case _ ⇒ editorView
+        }
+      )
+    }
 
   }
 }
@@ -287,7 +321,7 @@ class TreeNodeTabs() {
     }
   }
 
-  def switchEditableTo(tab: TreeNodeTab, sequence: Seq[Array[String]], editableView: EditableView) = {
+  def switchEditableTo(tab: TreeNodeTab, sequence: Seq[Array[String]], editableView: EditableView, filter: RowFilter) = {
     val index = {
       val i = tabs.now.indexOf(tab)
       if (i == -1) tabs.now.size
@@ -296,7 +330,7 @@ class TreeNodeTabs() {
 
     removeTab(tab)
 
-    val newTab = TreeNodeTab.editable(tab.safePathTab.now, tab.content, sequence, editableView)
+    val newTab = TreeNodeTab.editable(tab.safePathTab.now, tab.content, sequence, editableView, filter)
     tabs() = tabs.now.take(index) ++ Seq(newTab) ++ tabs.now.takeRight(tabs.now.size - index)
 
     setActive(newTab)
@@ -334,78 +368,78 @@ class TreeNodeTabs() {
 
   implicit def modToModSeq(m: Modifier): ModifierSeq = Seq(m)
 
-  val render = div({
-    div(role := "tabpanel")(
-      //Headers
-      Rx {
-        val tabList = ul(nav +++ navTabs, tab_list_role)(
-          for (t ← tabs()) yield {
-            li(
-              paddingTop := 35,
-              presentation_role,
-              `class` := {
-                t.activity() match {
-                  case Active ⇒ "active"
-                  case _      ⇒ ""
-                }
+  val render = div(
+    //Headers
+    Rx {
+      val tabList = ul(nav +++ navTabs, tab_list_role)(
+        for (t ← tabs()) yield {
+          li(
+            paddingTop := 35,
+            presentation_role,
+            `class` := {
+              t.activity() match {
+                case Active ⇒ "active"
+                case _      ⇒ ""
               }
-            )(
-                a(
-                  id := t.id,
-                  tab_role,
-                  pointer,
-                  t.activity() match {
-                    case Active ⇒ activeTab
-                    case _      ⇒ unActiveTab
-                  },
-                  data("toggle") := "tab", onclick := { () ⇒
-                    setActive(t)
-                  }
-                )(
-                    button(ms("close") +++ tabClose, `type` := "button", onclick := { () ⇒ --(t) })(raw("&#215")),
-                    t.tabName()
-                  )
-              )
-          }
-        ).render
+            }
+          )(
+              a(
+                id := t.id,
+                tab_role,
+                pointer,
+                t.activity() match {
+                  case Active ⇒ activeTab
+                  case _      ⇒ unActiveTab
+                },
+                data("toggle") := "tab", onclick := { () ⇒
+                  setActive(t)
+                }
+              )(
+                  button(ms("close") +++ tabClose, `type` := "button", onclick := { () ⇒ --(t) })(raw("&#215")),
+                  t.tabName()
+                )
+            )
+        }
+      ).render
 
-        new Sortable(tabList, new SortableProps {
-          override val onEnd = scala.scalajs.js.defined {
-            (event: EventS) ⇒
-              val oldI = event.oldIndex.asInstanceOf[Int]
-              val newI = event.newIndex.asInstanceOf[Int]
-              tabs() = tabs.now.updated(oldI, tabs.now(newI)).updated(newI, tabs.now(oldI))
-              setActive(tabs.now(newI))
-          }
-        })
-        tabList
-      },
       //Panes
-      div(tabContent)(
-        Rx {
-          for (t ← tabs()) yield {
-            div(
-              role := "tabpanel",
-              ms("tab-pane " + {
-                t.activity() match {
-                  case Active ⇒ "active"
-                  case _      ⇒ ""
-                }
-              }), id := t.id
-            )({
-                t.activity() match {
-                  case Active ⇒
-                    temporaryControl() = t.controlElement
-                    t.block
-                  case UnActive ⇒ div()
-                }
+      val tabDiv = div(tabContent)(
+        for (t ← tabs()) yield {
+          div(
+            role := "tabpanel",
+            ms("tab-pane " + {
+              t.activity() match {
+                case Active ⇒ "active"
+                case _      ⇒ ""
               }
-              )
-          }
+            }), id := t.id
+          )({
+              t.activity() match {
+                case Active ⇒
+                  temporaryControl() = t.controlElement
+                  t.block
+                case UnActive ⇒ div()
+              }
+            }
+            )
         }
       )
-    )
-  }
 
+      new Sortable(tabList, new SortableProps {
+        override val onEnd = scala.scalajs.js.defined {
+          (event: EventS) ⇒
+            val oldI = event.oldIndex.asInstanceOf[Int]
+            val newI = event.newIndex.asInstanceOf[Int]
+            tabs() = tabs.now.updated(oldI, tabs.now(newI)).updated(newI, tabs.now(oldI))
+            setActive(tabs.now(newI))
+        }
+      })
+
+      div(role := "tabpanel")(
+        tabList,
+        tabDiv
+      )
+    }
   )
+
 }
