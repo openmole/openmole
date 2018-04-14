@@ -297,10 +297,11 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
     safePathToFile(safePath).length
   }
 
-  def sequence(safePath: SafePath): Seq[Array[String]] = {
+  def sequence(safePath: SafePath): SequenceData = {
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
     val reader = new CSVReader(new FileReader(safePath), ',')
-    reader.readAll.asScala.toSeq
+    val content = reader.readAll.asScala.toSeq
+    SequenceData(content.head, content.tail)
   }
 
   // EXECUTIONS

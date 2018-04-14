@@ -143,7 +143,7 @@ object TreeNodeTab {
 
   object All extends RowFilter
 
-  def editable(safePath: SafePath, initialContent: String, initialSequence: Seq[Array[String]], view: EditableView = Raw, initialEditing: Boolean = false, filter: RowFilter = First100): TreeNodeTab = new TreeNodeTab {
+  def editable(safePath: SafePath, initialContent: String, initialSequence: SequenceData, view: EditableView = Raw, initialEditing: Boolean = false, filter: RowFilter = First100): TreeNodeTab = new TreeNodeTab {
     lazy val safePathTab = Var(safePath)
     lazy val isEditing = Var(initialEditing)
 
@@ -152,15 +152,14 @@ object TreeNodeTab {
     }
 
     def content: String = editor.code
+    val sequence = Var(initialSequence)
 
     def isCSV = DataUtils.isCSV(safePath)
 
-    // Updated only when editable is true
-    val sequence = Var(initialSequence)
     val filteredSequence = filter match {
-      case First100 ⇒ sequence.now.take(100)
-      case Last100  ⇒ sequence.now.takeRight(100)
-      case _        ⇒ sequence.now
+      case First100 ⇒ sequence.now.content.take(100)
+      case Last100  ⇒ sequence.now.content.takeRight(100)
+      case _        ⇒ sequence.now.content
     }
 
     lazy val editor = EditorPanelUI(extension, initialContent, if (isCSV) paddingBottom := 80 else emptyMod)
@@ -252,15 +251,14 @@ object TreeNodeTab {
           case Table ⇒
             div(overflow := "auto", height := "90%")(
               {
-                val h = filteredSequence.head
                 val table =
                   scaladget.bootstrapnative.Table(
-                    h.toSeq,
+                    sequence.now.header,
                     filteredSequence.tail.map {
                       scaladget.bootstrapnative.Row(_)
                     }.toSeq,
                     scaladget.bootstrapnative.BSTableStyle(bordered_table, emptyMod), true)
-                table.render(minWidth := h.length * 90)
+                table.render(minWidth := sequence.now.header.length * 90)
               }
             )
           case _ ⇒ editorView
@@ -339,7 +337,7 @@ class TreeNodeTabs() {
     }
   }
 
-  def switchEditableTo(tab: TreeNodeTab, sequence: Seq[Array[String]], editableView: EditableView, filter: RowFilter, editing: Boolean) = {
+  def switchEditableTo(tab: TreeNodeTab, sequence: SequenceData, editableView: EditableView, filter: RowFilter, editing: Boolean) = {
     val index = {
       val i = tabs.now.indexOf(tab)
       if (i == -1) tabs.now.size

@@ -64,7 +64,7 @@ trait Api {
   def saveFile(path: SafePath, fileContent: String): Unit
   def saveFiles(fileContents: Seq[AlterableFileContent]): Unit
   def size(safePath: SafePath): Long
-  def sequence(safePath: SafePath): Seq[Array[String]]
+  def sequence(safePath: SafePath): SequenceData
 
   //EXECUTIONS
   def allStates(lines: Int): (Seq[(ExecutionId, ExecutionInfo)], Seq[OutputStreamData])

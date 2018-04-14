@@ -747,3 +747,5 @@ object Test {
 }
 
 case class JVMInfos(javaVersion: String, jvmImplementation: String, processorAvailable: Int, allocatedMemory: Long, totalMemory: Long)
+
+case class SequenceData(header: Seq[String], content: Seq[Array[String]])

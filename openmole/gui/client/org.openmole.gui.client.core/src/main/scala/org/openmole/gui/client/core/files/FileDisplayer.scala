@@ -57,18 +57,10 @@ class FileDisplayer(val tabs: TreeNodeTabs) {
             }
           }
           else {
-            tabs ++ TreeNodeTab.editable(safePath, content, Seq(), TreeNodeTab.Raw)
+            tabs ++ TreeNodeTab.editable(safePath, content, SequenceData(Seq(), Seq()), TreeNodeTab.Raw)
           }
         case _ ⇒ //FIXME for GUI workflows
       }
-    }
-  }
-
-  def getSequence(safePath: SafePath): Future[Seq[Array[String]]] = {
-    val fileExtension: FileExtension = safePath.name
-    fileExtension match {
-      case FileExtension.CSV ⇒ post()[Api].sequence(safePath).call()
-      case _                 ⇒ Future(Seq())
     }
   }
 
