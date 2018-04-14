@@ -57,6 +57,8 @@ sealed trait TreeNodeTab {
 
   def editable: Boolean
 
+  def editing: Boolean
+
   def refresh(afterRefresh: () ⇒ Unit = () ⇒ {}): Unit
 
   // controller to be added in menu bar
@@ -82,6 +84,8 @@ object TreeNodeTab {
 
     def editable = true
 
+    def editing = true
+
     def content = editor.code
 
     def refresh(onsaved: () ⇒ Unit) = save(safePathTab.now, editor, onsaved)
@@ -102,6 +106,8 @@ object TreeNodeTab {
     def content: String = htmlContent
 
     def editable: Boolean = false
+
+    def editing: Boolean = false
 
     def refresh(afterRefresh: () ⇒ Unit): Unit = () ⇒ {}
 
@@ -137,12 +143,12 @@ object TreeNodeTab {
 
   object All extends RowFilter
 
-  def editable(safePath: SafePath, initialContent: String, initialSequence: Seq[Array[String]], view: EditableView = Raw, filter: RowFilter = First100): TreeNodeTab = new TreeNodeTab {
+  def editable(safePath: SafePath, initialContent: String, initialSequence: Seq[Array[String]], view: EditableView = Raw, initialEditing: Boolean = false, filter: RowFilter = First100): TreeNodeTab = new TreeNodeTab {
     lazy val safePathTab = Var(safePath)
-    lazy val isEditable = Var(false)
+    lazy val isEditing = Var(initialEditing)
 
-    isEditable.trigger {
-      editor.setReadOnly(!isEditable.now)
+    isEditing.trigger {
+      editor.setReadOnly(!isEditing.now)
     }
 
     def content: String = editor.code
@@ -160,35 +166,40 @@ object TreeNodeTab {
     lazy val editor = EditorPanelUI(extension, initialContent, if (isCSV) paddingBottom := 80 else emptyMod)
     editor.initEditor
 
-    def editable = isEditable.now
+    def editable = true
 
-    def refresh(afterRefresh: () ⇒ Unit): Unit = {
-      if (editable) TreeNodeTab.save(safePathTab.now, editor, afterRefresh)
-      else
-        editor.synchronized {
-          FileManager.download(
-            safePathTab.now,
-            (p: ProcessState) ⇒ {},
-            (cont: String) ⇒ {
-              editor.setCode(cont)
-              if (editable && isCSV) {
-                post()[Api].sequence(safePathTab.now).call().foreach { seq ⇒
-                  sequence() = seq
-                }
-              }
+    def editing = isEditing.now
+
+    def download(afterRefresh: () ⇒ Unit) = editor.synchronized {
+      FileManager.download(
+        safePathTab.now,
+        (p: ProcessState) ⇒ {},
+        (cont: String) ⇒ {
+          editor.setCode(cont)
+          if (isCSV) {
+            post()[Api].sequence(safePathTab.now).call().foreach { seq ⇒
+              sequence() = seq
               afterRefresh()
             }
-          )
+          }
         }
+      )
+    }
+
+    def refresh(afterRefresh: () ⇒ Unit): Unit = {
+      if (editing && (view == Raw))
+        TreeNodeTab.save(safePathTab.now, editor, afterRefresh)
+      else
+        download(afterRefresh)
     }
 
     lazy val controlElement: TypedTag[HTMLElement] =
       div(
         Rx {
-          if (editable) div()
+          if (isEditing()) div()
           else
             button("Edit", btn_primary, onclick := { () ⇒
-              isEditable() = !isEditable.now
+              isEditing() = !isEditing.now
             })
         }
       )
@@ -201,15 +212,22 @@ object TreeNodeTab {
     }
 
     def switchView = {
-      val newView = view match {
-        case Table ⇒ Raw
-        case _     ⇒ Table
-      }
 
-      panels.treeNodeTabs.switchEditableTo(this, sequence.now, newView, filter)
+      def switch(newView: EditableView) = panels.treeNodeTabs.switchEditableTo(this, sequence.now, newView, filter, editing)
+
+      view match {
+        case Table ⇒
+          switch(Raw)
+        case _ ⇒
+          if (editing)
+            refresh(() ⇒ {
+              download(() ⇒ switch(Table))
+            })
+          else switch(Table)
+      }
     }
 
-    def toView(filter: RowFilter) = panels.treeNodeTabs.switchEditableTo(this, sequence.now, view, filter)
+    def toView(filter: RowFilter) = panels.treeNodeTabs.switchEditableTo(this, sequence.now, view, filter, editing)
 
     lazy val switchButton = button(switchString, btn_default, margin := 20, onclick := { () ⇒
       switchView
@@ -232,7 +250,7 @@ object TreeNodeTab {
         else div,
         view match {
           case Table ⇒
-            div(
+            div(overflow := "auto", height := "90%")(
               {
                 val h = filteredSequence.head
                 val table =
@@ -242,7 +260,7 @@ object TreeNodeTab {
                       scaladget.bootstrapnative.Row(_)
                     }.toSeq,
                     scaladget.bootstrapnative.BSTableStyle(bordered_table, emptyMod), true)
-                table.render(width := h.length * 50)
+                table.render(minWidth := h.length * 90)
               }
             )
           case _ ⇒ editorView
@@ -321,7 +339,7 @@ class TreeNodeTabs() {
     }
   }
 
-  def switchEditableTo(tab: TreeNodeTab, sequence: Seq[Array[String]], editableView: EditableView, filter: RowFilter) = {
+  def switchEditableTo(tab: TreeNodeTab, sequence: Seq[Array[String]], editableView: EditableView, filter: RowFilter, editing: Boolean) = {
     val index = {
       val i = tabs.now.indexOf(tab)
       if (i == -1) tabs.now.size
@@ -330,7 +348,7 @@ class TreeNodeTabs() {
 
     removeTab(tab)
 
-    val newTab = TreeNodeTab.editable(tab.safePathTab.now, tab.content, sequence, editableView, filter)
+    val newTab = TreeNodeTab.editable(tab.safePathTab.now, tab.content, sequence, editableView, editing, filter)
     tabs() = tabs.now.take(index) ++ Seq(newTab) ++ tabs.now.takeRight(tabs.now.size - index)
 
     setActive(newTab)
@@ -341,9 +359,6 @@ class TreeNodeTabs() {
   }.map { t ⇒ AlterableFileContent(t.safePathTab.now, t.content) }
 
   def saveAllTabs(onsave: () ⇒ Unit) = {
-    println("Alterables " + alterables.map {
-      _.path.name
-    })
     org.openmole.gui.client.core.post()[Api].saveFiles(alterables).call().foreach { s ⇒
       onsave()
     }
