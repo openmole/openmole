@@ -42,7 +42,7 @@ lazy val shapeless =  OsgiProject(dir, "com.chuusai.shapeless", exports = Seq("s
   version := shapelessVersion
 ) settings(settings: _*)
 
-lazy val circeVersion = "0.9.0"
+lazy val circeVersion = "0.9.1"
 lazy val circe = OsgiProject(dir, "io.circe",
   exports = Seq("io.circe.*", "!cats.*", "!scala.*", "!shapeless.*"),
   privatePackages = Seq("jawn.*"),
@@ -233,7 +233,7 @@ lazy val freedsl =
     version := freedslVersion
   ) dependsOn(cats, squants) settings(settings: _*)
 
-lazy val mgoVersion = "3.8"
+lazy val mgoVersion = "3.9"
 
 lazy val mgo = OsgiProject(dir, "mgo", imports = Seq("!better.*", "*")) settings(
   libraryDependencies += "fr.iscpif" %% "mgo" % mgoVersion,
@@ -311,7 +311,7 @@ lazy val clapperVersion = "1.1.2"
 lazy val clapper = OsgiProject(dir, "org.clapper", exports = Seq("!scala.*","!grizzled.*","!jline.*","!org.fusesource.*","!org.slf4j.*","*")) settings (
   libraryDependencies += "org.clapper" %% "classutil" % clapperVersion, version := clapperVersion) settings(settings: _*)
 
-val monocleVersion = "1.4.0"
+val monocleVersion = "1.5.0"
 lazy val monocle = OsgiProject(dir, "monocle",
   privatePackages = Seq("!scala.*", "!scalaz.*", "!shapeless.*", "*"),
   imports = Seq("scala.*", "shapeless.*", "scalaz.*")) settings(
