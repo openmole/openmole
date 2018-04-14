@@ -99,7 +99,16 @@ class TreeNodePanel {
       Rx {
         div(
           if (manager.copied().isEmpty) tags.div
-          else tags.label("paste")(label_danger, omsheet.pasteLabel, onclick := { () ⇒ paste(manager.copied(), manager.current()) }),
+          else
+            buttonGroup(omsheet.pasteLabel)(
+              button(btn_danger, "Paste", onclick := { () ⇒ paste(manager.copied(), manager.current()) }),
+              button(btn_default, "Cancel", onclick := { () ⇒
+                manager.emptyCopied
+                fileToolBar.unselectTool
+                drawTree
+              }
+              )
+            ),
           fileToolBar.sortingGroup.div
         )
       }
@@ -171,8 +180,6 @@ class TreeNodePanel {
       () ⇒
         fileToolBar.clearMessage
         manager.switch(safePath)
-        manager.emptyCopied
-        fileToolBar.unselectTool
         drawTree
     }
   )
@@ -437,74 +444,57 @@ class TreeNodePanel {
 
       tr(
         Rx {
-          if (treeStates().edition) {
-            editNodeInput.value = tn.name.now
-            td(
-              height := 26,
-              form(
-                editNodeInput,
-                onsubmit := {
-                  () ⇒
-                    {
-                      treeStates().editionOff
-                      false
-                    }
+          td(
+            onclick := { (e: MouseEvent) ⇒
+              {
+                if (selectionMode.now) {
+                  addToSelection
+                  if (e.ctrlKey) clearSelectionExecpt(tnSafePath)
                 }
-              )
-            )
-          }
-          else
-            td(
-              onclick := { (e: MouseEvent) ⇒
-                {
-                  if (selectionMode.now) {
-                    addToSelection
-                    if (e.ctrlKey) clearSelectionExecpt(tnSafePath)
-                  }
-                }
-              },
-              ondragstart := { (e: DragEvent) ⇒
-                e.dataTransfer.setData("text/plain", "nothing") //  FIREFOX TRICK
-                draggedNode.now match {
-                  case Some(t: TreeNode) ⇒
-                  case _                 ⇒ draggedNode() = Some(tn)
-                }
-                true
-              },
-              ondragenter := { (e: DragEvent) ⇒
-                false
-              },
-              ondragover := { (e: DragEvent) ⇒
-                e.dataTransfer.dropEffect = "move"
-                e.preventDefault
-                false
-              },
-              ondrop := {
-                dropAction(tn)
-              },
-              clickablePair, {
-                div(fileInfo)(
-                  span(omsheet.fileSize)(
-                    tags.i(timeOrSize(tn)),
-                    buildManualPopover(
-                      div(settingsGlyph, onclick := { () ⇒ Popover.hide })
-                    )
+              }
+            },
+            ondragstart := { (e: DragEvent) ⇒
+              e.dataTransfer.setData("text/plain", "nothing") //  FIREFOX TRICK
+              draggedNode.now match {
+                case Some(t: TreeNode) ⇒
+                case _                 ⇒ draggedNode() = Some(tn)
+              }
+              true
+            },
+            ondragenter := { (e: DragEvent) ⇒
+              false
+            },
+            ondragover := { (e: DragEvent) ⇒
+              e.dataTransfer.dropEffect = "move"
+              e.preventDefault
+              false
+            },
+            ondrop := {
+              dropAction(tn)
+            },
+            clickablePair, {
+              div(fileInfo)(
+                span(omsheet.fileSize)(
+                  tags.i(timeOrSize(tn)),
+                  buildManualPopover(
+                    div(settingsGlyph, onclick := { () ⇒ Popover.hide })
                   )
                 )
-              },
-              div(
-                width := "100%",
-                if (treeStates().selected) {
-                  fileToolBar.selectedTool() match {
-                    case Some(TrashTool) ⇒ omsheet.fileSelectedForDeletion
-                    case Some(PluginTool) if manager.pluggables().contains(tn) ⇒ omsheet.fileSelected
-                    case _ ⇒ omsheet.fileSelected
-                  }
-                }
-                else omsheet.fileSelectionOverlay,
-                span(omsheet.fileSelectionMessage)
               )
+            },
+            div(
+              width := "100%",
+              if (treeStates().selected) {
+                fileToolBar.selectedTool() match {
+                  case Some(TrashTool) ⇒ omsheet.fileSelectedForDeletion
+                  case Some(PluginTool) if manager.pluggables().contains(tn) ⇒ omsheet.fileSelected
+                  case _ ⇒ omsheet.fileSelected
+                }
+              }
+              else omsheet.fileSelectionOverlay,
+              span(omsheet.fileSelectionMessage)
             )
+          )
         }
       )
     }

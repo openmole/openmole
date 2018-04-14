@@ -354,8 +354,7 @@ package object client {
     relativePosition,
     top := 30,
     pointer,
-    paddingBottom := 7,
-    width := 50
+    paddingBottom := 7
   )
 
   lazy val moreEntries: ModifierSeq = Seq(
