@@ -21,11 +21,11 @@ import rx._
 
 import scalatags.JsDom.all._
 
-import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
 
 import scalatags.JsDom.all.{ onclick, raw, span }
 import org.openmole.gui.ext.tool.client._
+import org.openmole.gui.ext.tool.client.Utils._
 import org.scalajs.dom.raw.HTMLDivElement
 
 import scalatags.JsDom.{ TypedTag, tags }
@@ -65,7 +65,11 @@ object BannerAlert {
     )
   )(height := 60)
 
-  lazy val banner = bannerMessages.map { bm ⇒ !bm.isEmpty }.expand(bannerDiv)
+  lazy val banner = isOpen.expandDiv(bannerDiv, () ⇒ {
+    org.openmole.gui.client.core.panels.treeNodeTabs.tabs.now.foreach { t ⇒
+      t.resizeEditor
+    }
+  })
 
   def clear = {
     bannerMessages() = Seq()

@@ -61,6 +61,8 @@ sealed trait TreeNodeTab {
 
   def refresh(afterRefresh: () ⇒ Unit = () ⇒ {}): Unit
 
+  def resizeEditor: Unit
+
   // controller to be added in menu bar
   val controlElement: TypedTag[HTMLElement]
 
@@ -90,6 +92,8 @@ object TreeNodeTab {
 
     def refresh(onsaved: () ⇒ Unit) = save(safePathTab.now, editor, onsaved)
 
+    def resizeEditor = editor.editor.resize()
+
     lazy val controlElement = button("Play", btn_primary, onclick := { () ⇒
       refresh(() ⇒
         post(timeout = 120 seconds, warningTimeout = 60 seconds)[Api].runScript(ScriptData(safePathTab.now)).call().foreach { execInfo ⇒
@@ -110,6 +114,8 @@ object TreeNodeTab {
     def editing: Boolean = false
 
     def refresh(afterRefresh: () ⇒ Unit): Unit = () ⇒ {}
+
+    def resizeEditor = {}
 
     lazy val controlElement: TypedTag[HTMLElement] = div()
 
@@ -152,6 +158,7 @@ object TreeNodeTab {
     }
 
     def content: String = editor.code
+
     val sequence = Var(initialSequence)
 
     def isCSV = DataUtils.isCSV(safePath)
@@ -191,6 +198,8 @@ object TreeNodeTab {
       else
         download(afterRefresh)
     }
+
+    def resizeEditor = editor.editor.resize()
 
     lazy val controlElement: TypedTag[HTMLElement] =
       div(

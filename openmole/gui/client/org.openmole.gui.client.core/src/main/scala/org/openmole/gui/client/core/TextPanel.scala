@@ -41,7 +41,6 @@ class TextPanel(title: String) {
   val textArea = scrollableText("")
 
   content.trigger {
-    println("Trigger " + content.now)
     textArea.setContent(content.now)
   }
 
