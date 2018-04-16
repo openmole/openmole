@@ -6,5 +6,5 @@ git lfs fetch
 (cd libraries && sbt publishLocal)
 (cd openmole && sbt "project openmole" assemble)
 
-(echo openmole is ready in openmole/bin/openmole/assemble/)
+(echo openmole is ready in openmole/bin/openmole/target/assemble/)
 
