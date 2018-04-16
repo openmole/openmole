@@ -1,16 +1,15 @@
 package org.openmole.gui.client.core.files
 
-import TreeNodeTabs._
-import org.openmole.gui.ext.data.ScriptData
 import org.openmole.gui.ext.data._
-import scala.concurrent.duration._
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
 import autowire._
-import rx._
-import org.openmole.gui.client.core.panels._
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.client.core._
+import org.openmole.gui.ext.data.DataUtils._
+
+import scala.concurrent.Future
 
 /*
  * Copyright (C) 07/05/15 // mathieu.leclaire@openmole.org
@@ -34,8 +33,6 @@ object FileDisplayer {
 
 }
 
-import FileDisplayer._
-
 class FileDisplayer(val tabs: TreeNodeTabs) {
 
   def alreadyDisplayed(safePath: SafePath) =
@@ -43,34 +40,25 @@ class FileDisplayer(val tabs: TreeNodeTabs) {
       t.safePathTab.now.path == safePath.path
     }
 
-  class EditableNodeTabWithOMSTabControl(sp: SafePath, ed: EditorPanelUI) /*extends EditableNodeTab(tn, ed)*/ extends OMSTabControl(Var(sp), ed) {
-
-    def onrun = {
-      refresh(() ⇒
-        post(timeout = 120 seconds, warningTimeout = 60 seconds)[Api].runScript(ScriptData(safePathTab.now)).call().foreach { execInfo ⇒
-          if (computation.now == Pending) executionPanel.dialog.show
-          standby
-        })
-    }
-  }
-
-  def displayOMS(safePath: SafePath, content: String) = {
-    val ed = editor(FileExtension.OMS, content)
-    tabs ++ new EditableNodeTabWithOMSTabControl(safePath, ed)
-  }
-
   def display(safePath: SafePath, content: String, fileExtension: FileExtension) = {
     alreadyDisplayed(safePath) match {
-      case Some(t: TreeNodeTab) ⇒
-        tabs.setActive(t)
+      case Some(t: TreeNodeTab) ⇒ tabs.setActive(t)
       case _ ⇒ fileExtension match {
-        case OpenMOLEScript ⇒ displayOMS(safePath, content)
-        case MDScript ⇒ post()[Api].mdToHtml(safePath).call.foreach { htmlString ⇒
-          tabs ++ new HTMLTab(Var(safePath), htmlString)
+        case OpenMOLEScript ⇒
+          tabs ++ TreeNodeTab.oms(safePath, content)
+        case MDScript ⇒ post()[Api].mdToHtml(safePath).call().foreach { htmlString ⇒
+          tabs ++ TreeNodeTab.html(safePath, htmlString)
         }
-        case SVGExtension ⇒ tabs ++ new HTMLTab(Var(safePath), content)
+        case SVGExtension ⇒ tabs ++ TreeNodeTab.html(safePath, content)
         case dod: EditableOnDemandFile ⇒
-          tabs ++ new LockedEditionNodeTab(Var(safePath), editor(fileExtension, content))
+          if (DataUtils.isCSV(safePath)) {
+            post()[Api].sequence(safePath).call().foreach { seq ⇒
+              tabs ++ TreeNodeTab.editable(safePath, content, seq, TreeNodeTab.Table)
+            }
+          }
+          else {
+            tabs ++ TreeNodeTab.editable(safePath, content, SequenceData(Seq(), Seq()), TreeNodeTab.Raw)
+          }
         case _ ⇒ //FIXME for GUI workflows
       }
     }

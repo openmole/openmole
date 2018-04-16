@@ -34,18 +34,15 @@ import org.openmole.gui.ext.tool.client._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class EditorPanelUI(bindings: Seq[(String, String, () ⇒ Any)], initCode: String, fileType: FileExtension) {
-
-  lazy val Autocomplete = ace.require("ace/autocomplete").Autocomplete
+class EditorPanelUI(initCode: String, fileType: FileExtension, containerModifierSeq: ModifierSeq) {
 
   def save(onsave: () ⇒ Unit) = {}
 
   val editorDiv = tags.div(id := "editor")
   val editor = ace.edit(editorDiv.render)
-  initEditor
 
   val view = {
-    div(editorContainer +++ container)(
+    div(editorContainer +++ container +++ containerModifierSeq)(
       div(panelClass +++ panelDefault)(
         div(panelBody)(
           editor.container
@@ -64,20 +61,6 @@ class EditorPanelUI(bindings: Seq[(String, String, () ⇒ Any)], initCode: Strin
 
   def setReadOnly(b: Boolean) = editor.setReadOnly(b)
 
-  def getScrollPostion = sess.getScrollTop
-
-  def setScrollPosition(pos: Double) = sess.setScrollTop(pos)
-
-  def complete() = {
-    if (editor.completer == null)
-      editor.completer = scaladget.ace.autocomplete //scaladget.ace.autocomplete
-    js.Dynamic.global.window.ed = editor
-    editor.completer.showPopup(editor)
-
-    // needed for firefox on mac
-    editor.completer.cancelContextMenu()
-  }
-
   def initEditor = {
     fileType match {
       case ef: EditableFile ⇒ editor.getSession().setMode("ace/mode/" + ef.highlighter)
@@ -88,80 +71,25 @@ class EditorPanelUI(bindings: Seq[(String, String, () ⇒ Any)], initCode: Strin
     editor.setTheme("ace/theme/github")
     editor.renderer.setShowGutter(true)
     editor.setShowPrintMargin(true)
+    editor.setAutoScrollEditorIntoView(true)
 
-    for ((name, key, func) ← bindings) {
-      val binding = s"Ctrl-$key|Cmd-$key"
-
-      editor.commands.addCommand(
-        lit(
-          "name" → name,
-          "bindKey" → lit(
-            "win" → binding,
-            "mac" → binding,
-            "sender" → "editor|cli"
-          ),
-          "exec" → func
-        )
-      )
-    }
-
-    def column = editor.getCursorPosition().column.asInstanceOf[Int]
-
-    def row = editor.getCursorPosition().row.asInstanceOf[Int]
-
-    def completions() = async {
-      val code = editor.getSession().getValue()
-
-      val intOffset = column + code.split("\n")
-        .take(row)
-        .map(_.length + 1)
-        .sum
-
-      //  val flag = if (code.take(intOffset).endsWith(".")) "member" else "scope"
-
-      //FIXME: CALL FOR COMPILATION AND  COMPLETION
-      val res = await(Future {
-        List(("ss", "auie"))
-      })
-      //await(Post[Api].completeStuff(code, flag, intOffset).call())
-      //  log("Done")
-      //  logln()
-      res
-    }
-
-    editor.completers = js.Array(lit(
-      "getCompletions" → { (editor: Editor, session: IEditSession, pos: Dyn, prefix: Dyn, callback: Dyn) ⇒
-        async {
-          val things = await(completions()).map {
-            case (name, value) ⇒
-              lit(
-                "value" → value,
-                "caption" → (value + name)
-              ).value
-          }
-          callback(null, js.Array(things: _*))
-        }
-      }
-    ).value)
-    editor.getSession().setTabSize(2)
+    // editor.getSession().setTabSize(2)
   }
 
 }
 
 object EditorPanelUI {
 
-  def apply(fileType: FileExtension, initCode: String) = fileType match {
-    case OMS   ⇒ editor(initCode, OMS)
-    case SCALA ⇒ editor(initCode, SCALA)
-    case _     ⇒ empty(initCode)
+  def apply(fileType: FileExtension, initCode: String, containerModifierSeq: ModifierSeq = emptyMod) = fileType match {
+    case OMS   ⇒ editor(initCode, OMS, containerModifierSeq)
+    case SCALA ⇒ editor(initCode, SCALA, containerModifierSeq)
+    case _     ⇒ empty(initCode, containerModifierSeq)
   }
 
-  def empty(initCode: String) = new EditorPanelUI(Seq(), initCode, NO_EXTENSION)
+  def empty(initCode: String, containerModifierSeq: ModifierSeq) = new EditorPanelUI(initCode, NO_EXTENSION, containerModifierSeq)
 
-  private def editor(initCode: String = "", language: FileExtension) = new EditorPanelUI(Seq(
-    ("Compile", "Enter", () ⇒ println("Compile  !"))
-  ), initCode, language)
+  private def editor(initCode: String = "", language: FileExtension, containerModifierSeq: ModifierSeq = emptyMod) = new EditorPanelUI(initCode, language, containerModifierSeq)
 
-  def sh(initCode: String = "") = new EditorPanelUI(Seq(), initCode, SH)
+  def sh(initCode: String = "") = EditorPanelUI(SH, initCode)
 
 }

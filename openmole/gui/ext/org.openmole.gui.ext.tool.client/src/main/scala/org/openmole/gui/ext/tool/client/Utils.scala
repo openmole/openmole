@@ -17,10 +17,34 @@ package org.openmole.gui.ext.tool.client
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import org.scalajs.dom.raw.{ Event, HTMLElement }
+import scalatags.JsDom.all._
+import rx.Rx
+import scalatags.JsDom.TypedTag
+import scaladget.tools._
+
 import scala.scalajs.js.Date
 
 object Utils {
   def getUUID: String = java.util.UUID.randomUUID.toString
+
   def toURI(path: Seq[String]): String = new java.net.URI(null, null, path.mkString("/"), null).toString
+
   def longToDate(date: Long) = s"${new Date(date).toLocaleDateString}, ${new Date(date).toLocaleTimeString}"
+
+  implicit class TagCollapserOnClickRX(triggerCondition: Rx[Boolean]) {
+    def expandDiv(inner: TypedTag[_ <: HTMLElement], onended: () ⇒ Unit = () ⇒ {}) = {
+      val expanded = div(`class` := Rx {
+        if (triggerCondition()) "hidden-div expanded"
+        else "hidden-div"
+      })(inner).render
+
+      expanded.addEventListener("transitionend", (e: Event) ⇒ {
+        onended()
+      })
+
+      expanded
+    }
+  }
+
 }

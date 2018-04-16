@@ -103,20 +103,15 @@ package object client {
   lazy val mainNav0: ModifierSeq = Seq(
     paddingLeft := 0,
     borderColor := DARK_GREY,
-    zIndex := 10
+    zIndex := 10,
+    paddingRight := 40
   )
 
   lazy val mainNav370: ModifierSeq = Seq(
     paddingLeft := 370,
     borderColor := DARK_GREY,
-    zIndex := 10
-  )
-
-  lazy val fileChevronStyle: ModifierSeq = Seq(
-    lineHeight := "10px",
-    top := 10,
-    left := -30,
-    paddingRight := 20
+    zIndex := 10,
+    paddingRight := 40
   )
 
   lazy val mainNav: ModifierSeq = Seq(
@@ -203,6 +198,11 @@ package object client {
     top := 20,
     zIndex := 1101,
     fontSize := 22,
+    color(BLUE)
+  )
+
+  lazy val settingsBlock: ModifierSeq = Seq(
+    paddingTop := 8,
     color(BLUE)
   )
 
@@ -354,8 +354,7 @@ package object client {
     relativePosition,
     top := 30,
     pointer,
-    paddingBottom := 7,
-    width := 50
+    paddingBottom := 7
   )
 
   lazy val moreEntries: ModifierSeq = Seq(
@@ -801,6 +800,7 @@ package object client {
     opacity := 0.9,
     paddingTop := 10,
     paddingLeft := 15,
+    paddingRight := 15,
     paddingBottom := 15
   )
 

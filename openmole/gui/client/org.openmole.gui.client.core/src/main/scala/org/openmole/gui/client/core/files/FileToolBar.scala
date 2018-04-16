@@ -280,6 +280,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
     {
       manager.setSelectedAsCopied
       unselectTool
+      treeNodePanel.drawTree
     }
   })
 

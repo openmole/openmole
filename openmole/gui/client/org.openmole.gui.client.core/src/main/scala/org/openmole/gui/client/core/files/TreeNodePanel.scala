@@ -99,7 +99,16 @@ class TreeNodePanel {
       Rx {
         div(
           if (manager.copied().isEmpty) tags.div
-          else tags.label("paste")(label_danger, omsheet.pasteLabel, onclick := { () ⇒ paste(manager.copied(), manager.current()) }),
+          else
+            buttonGroup(omsheet.pasteLabel)(
+              button(btn_danger, "Paste", onclick := { () ⇒ paste(manager.copied(), manager.current()) }),
+              button(btn_default, "Cancel", onclick := { () ⇒
+                manager.emptyCopied
+                fileToolBar.unselectTool
+                drawTree
+              }
+              )
+            ),
           fileToolBar.sortingGroup.div
         )
       }
@@ -171,8 +180,6 @@ class TreeNodePanel {
       () ⇒
         fileToolBar.clearMessage
         manager.switch(safePath)
-        manager.emptyCopied
-        fileToolBar.unselectTool
         drawTree
     }
   )
@@ -318,15 +325,6 @@ class TreeNodePanel {
   def stringAlertWithDetails(message: String, detail: String) =
     AlertPanel.detail(message, detail, transform = RelativeCenterPosition, zone = FileZone)
 
-  //  def extractTGZ(safePath: SafePath) =
-  //    post()[Api].extractTGZ(safePath).call().foreach {
-  //      r ⇒
-  //        r.error match {
-  //          case Some(e: org.openmole.gui.ext.data.Error) ⇒ stringAlertWithDetails("An error occurred during extraction", e.stackTrace)
-  //          case _                                        ⇒ invalidCacheAndDraw
-  //        }
-  //    }
-
   var currentSafePath: Var[Option[SafePath]] = Var(None)
 
   object ReactiveLine {
@@ -400,17 +398,21 @@ class TreeNodePanel {
       val popClass = "popover"
 
       def inPopover0(e: HTMLElement, depth: Int): Boolean = {
-        val b = e.className.contains(popClass)
-        if (b || depth > 2) b
-        else inPopover0(e.parentElement, depth + 1)
+        if (e != null) {
+          val b = e.className.contains(popClass)
+          if (b || depth > 2) b
+          else inPopover0(e.parentElement, depth + 1)
+        }
+        else false
       }
 
       inPopover0(element, 0)
     }
 
     dom.document.body.onclick = { (e: Event) ⇒
-      if (!toolBox.actions(e.target.asInstanceOf[HTMLElement])) {
-        if (!inPopover(e.target.asInstanceOf[HTMLElement]))
+      val element = e.target.asInstanceOf[HTMLElement]
+      if (!toolBox.actions(element)) {
+        if (!inPopover(element))
           Popover.hide
       }
       else
@@ -439,149 +441,62 @@ class TreeNodePanel {
 
     val render: TypedTag[dom.html.TableRow] = {
       val settingsGlyph = ms("glyphitem") +++ glyph_settings +++ omsheet.color(WHITE) +++ (paddingLeft := 4)
-      //      val edit = baseGlyph +++ glyph_edit
-      //      val download_alt = baseGlyph +++ glyph_download_alt
-      //      val archive = baseGlyph +++ glyph_archive
-      //      val arrow_right_and_left = baseGlyph +++ glyph_arrow_right_and_left
 
       tr(
         Rx {
-          if (treeStates().edition) {
-            editNodeInput.value = tn.name.now
-            td(
-              height := 26,
-              form(
-                editNodeInput,
-                onsubmit := {
-                  () ⇒
-                    {
-                      treeStates().editionOff
-                      //  renameNode(tnSafePath, editNodeInput.value, treeStates().replication)
-                      false
-                    }
+          td(
+            onclick := { (e: MouseEvent) ⇒
+              {
+                if (selectionMode.now) {
+                  addToSelection
+                  if (e.ctrlKey) clearSelectionExecpt(tnSafePath)
                 }
-              )
-            )
-          }
-          else
-            td(
-              onclick := { (e: MouseEvent) ⇒
-                {
-                  if (selectionMode.now) {
-                    addToSelection
-                    if (e.ctrlKey) clearSelectionExecpt(tnSafePath)
-                  }
-                }
-              },
-              ondragstart := { (e: DragEvent) ⇒
-                e.dataTransfer.setData("text/plain", "nothing") //  FIREFOX TRICK
-                draggedNode.now match {
-                  case Some(t: TreeNode) ⇒
-                  case _                 ⇒ draggedNode() = Some(tn)
-                }
-                true
-              },
-              ondragenter := { (e: DragEvent) ⇒
-                false
-              },
-              ondragover := { (e: DragEvent) ⇒
-                e.dataTransfer.dropEffect = "move"
-                e.preventDefault
-                false
-              },
-              ondrop := {
-                dropAction(tn)
-              },
-              clickablePair, {
-                div(fileInfo)(
-                  span(omsheet.fileSize)(
-                    tags.i(timeOrSize(tn)),
-                    //                      tags.span(onclick := { () ⇒
-                    //                        treeStates().settingsOn
-                    //                      }, settingsGlyph)
-
-                    buildManualPopover(
-                      div(settingsGlyph, onclick := { () ⇒ Popover.hide })
-                    )
+              }
+            },
+            ondragstart := { (e: DragEvent) ⇒
+              e.dataTransfer.setData("text/plain", "nothing") //  FIREFOX TRICK
+              draggedNode.now match {
+                case Some(t: TreeNode) ⇒
+                case _                 ⇒ draggedNode() = Some(tn)
+              }
+              true
+            },
+            ondragenter := { (e: DragEvent) ⇒
+              false
+            },
+            ondragover := { (e: DragEvent) ⇒
+              e.dataTransfer.dropEffect = "move"
+              e.preventDefault
+              false
+            },
+            ondrop := {
+              dropAction(tn)
+            },
+            clickablePair, {
+              div(fileInfo)(
+                span(omsheet.fileSize)(
+                  tags.i(timeOrSize(tn)),
+                  buildManualPopover(
+                    div(settingsGlyph, onclick := { () ⇒ Popover.hide })
                   )
                 )
-              } // )
-              //                (
-              //                  if (treeStates().settingsSet) {
-              //                    span(
-              //                      span(onclick := { () ⇒ treeStates().settingsOff }, baseGlyph)(
-              //                        raw("&#215")
-              //                      ),
-              //                      tags.span(onclick := { () ⇒
-              //                        trashNode(tnSafePath)
-              //                        treeStates().settingsOff
-              //                      }, trash),
-              //                      span(onclick := { () ⇒
-              //                        treeStates().editionOn
-              //                      }, edit),
-              //                      a(
-              //                        span(onclick := { () ⇒ treeStates().settingsOff })(download_alt),
-              //                        href := s"downloadFile?path=${Utils.toURI(tnSafePath.path)}"
-              //                      ),
-              //                      DataUtils.fileToExtension(tn.name.now) match {
-              //                        case FileExtension.TGZ | FileExtension.TAR | FileExtension.ZIP ⇒
-              //                          span(archive, onclick := { () ⇒
-              //                            extractTGZ(tnSafePath)
-              //                          })
-              //                        case _ ⇒
-              //                      },
-              //                      span(onclick := { () ⇒
-              //                        val newName = {
-              //                          val prefix = tnSafePath.path.last
-              //                          tn match {
-              //                            case _: DirNode ⇒ prefix + "_1"
-              //                            case _          ⇒ prefix.replaceFirst("[.]", "_1.")
-              //                          }
-              //                        }
-              //
-              //                        val replicateInput = inputTag(newName).render
-              //                        AlertPanel.div(
-              //                          div(width := 250, floatRight, marginRight := 70, replicateInput),
-              //                          () ⇒ CoreUtils.replicate(tnSafePath, replicateInput.value),
-              //                          transform = RelativeCenterPosition,
-              //                          zone = FileZone,
-              //                          alertType = btn_primary,
-              //                          buttonGroupClass = omsheet.divAlertPosition
-              //                        )
-              //                      })(arrow_right_and_left)
-              //                    )
-              //                  }
-              //                  else
-              //                    span(omsheet.fileSize)(
-              //                      tags.i(timeOrSize(tn)),
-              //                      //                      tags.span(onclick := { () ⇒
-              //                      //                        treeStates().settingsOn
-              //                      //                      }, settingsGlyph)
-              //
-              //                      buildManualPopover(div(settingsGlyph), tags.span(onclick := { () ⇒
-              //                        trashNode(tnSafePath)
-              //                        //  treeStates().settingsOff
-              //                      }, trash),
-              //                        tn.name())
-              //                    )
-              //                )
-              ,
-              div(
-                width := "100%",
-                if (treeStates().selected) {
-                  fileToolBar.selectedTool() match {
-                    case Some(TrashTool) ⇒ omsheet.fileSelectedForDeletion
-                    case Some(PluginTool) if manager.pluggables().contains(tn) ⇒ omsheet.fileSelected
-                    case _ ⇒ omsheet.fileSelected
-                  }
-                }
-                else omsheet.fileSelectionOverlay,
-                span(omsheet.fileSelectionMessage)
               )
+            },
+            div(
+              width := "100%",
+              if (treeStates().selected) {
+                fileToolBar.selectedTool() match {
+                  case Some(TrashTool) ⇒ omsheet.fileSelectedForDeletion
+                  case Some(PluginTool) if manager.pluggables().contains(tn) ⇒ omsheet.fileSelected
+                  case _ ⇒ omsheet.fileSelected
+                }
+              }
+              else omsheet.fileSelectionOverlay,
+              span(omsheet.fileSelectionMessage)
             )
+          )
         }
       )
-      //   )
     }
   }
 

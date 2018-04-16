@@ -58,7 +58,7 @@ object PSE {
     implicit def integration = new MGOAPI.Integration[DeterministicParams, (Vector[Double], Vector[Int]), Vector[Double]] { api ⇒
       type G = CDGenome.Genome
       type I = MGOPSE.Individual
-      type S = EvolutionState[MGOPSE.HitMapState]
+      type S = EvolutionState[HitMapState]
 
       def iManifest = implicitly
       def gManifest = implicitly
@@ -68,7 +68,7 @@ object PSE {
         MGOPSE.run(s)(f)
       }
 
-      private def zipWithState[M[_]: cats.Monad: StartTime: Random: Generation: MGOPSE.HitMapM, T](op: M[T]): M[(S, T)] = {
+      private def zipWithState[M[_]: cats.Monad: StartTime: Random: Generation: HitMap, T](op: M[T]): M[(S, T)] = {
         import cats.implicits._
         for {
           t ← op
@@ -95,7 +95,7 @@ object PSE {
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get _, CDGenome.discreteValues.get _)(genome)
         def buildIndividual(genome: G, phenotype: Vector[Double]) = MGOPSE.buildIndividual(genome, phenotype)
 
-        def initialState(rng: util.Random) = EvolutionState[MGOPSE.HitMapState](random = rng, s = Map())
+        def initialState(rng: util.Random) = EvolutionState[HitMapState](random = rng, s = Map())
 
         def afterGeneration(g: Long, population: Vector[I]) = api.afterGeneration(g, population)
         def afterDuration(d: squants.Time, population: Vector[I]) = api.afterDuration(d, population)
@@ -181,7 +181,7 @@ object PSE {
     implicit def integration = new MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Vector[Double]] { api ⇒
       type G = CDGenome.Genome
       type I = NoisyPSE.Individual
-      type S = EvolutionState[MGOPSE.HitMapState]
+      type S = EvolutionState[HitMapState]
 
       def iManifest = implicitly
       def gManifest = implicitly
@@ -191,7 +191,7 @@ object PSE {
         mgo.algorithm.NoisyPSE.run(s)(f)
       }
 
-      private def zipWithState[M[_]: cats.Monad: StartTime: Random: Generation: MGOPSE.HitMapM, T](op: M[T]): M[(S, T)] = {
+      private def zipWithState[M[_]: cats.Monad: StartTime: Random: Generation: HitMap, T](op: M[T]): M[(S, T)] = {
         import cats.implicits._
         for {
           t ← op
@@ -217,7 +217,7 @@ object PSE {
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get _, CDGenome.discreteValues.get _)(genome)
 
         def buildIndividual(genome: G, phenotype: Vector[Double]) = MGONoisyPSE.buildIndividual(genome, phenotype)
-        def initialState(rng: util.Random) = EvolutionState[MGOPSE.HitMapState](random = rng, s = Map())
+        def initialState(rng: util.Random) = EvolutionState[HitMapState](random = rng, s = Map())
 
         def result(population: Vector[I]) = FromContext { p ⇒
           import p._
@@ -297,7 +297,7 @@ object PSE {
     case None ⇒
       val integration: WorkflowIntegration.DeterministicGA[_] = WorkflowIntegration.DeterministicGA(
         DeterministicParams(
-          mgo.algorithm.PSE.irregularGrid(objectives.map(_.scale).toVector),
+          mgo.niche.irregularGrid(objectives.map(_.scale).toVector),
           genome,
           objectives.map(_.p),
           operatorExploration),
@@ -309,7 +309,7 @@ object PSE {
     case Some(stochastic) ⇒
       val integration: WorkflowIntegration.StochasticGA[_] = WorkflowIntegration.StochasticGA(
         StochasticParams(
-          pattern = mgo.algorithm.PSE.irregularGrid(objectives.map(_.scale).toVector),
+          pattern = mgo.niche.irregularGrid(objectives.map(_.scale).toVector),
           aggregation = StochasticGAIntegration.aggregateVector(stochastic.aggregation, _),
           genome = genome,
           objectives = objectives.map(_.p),

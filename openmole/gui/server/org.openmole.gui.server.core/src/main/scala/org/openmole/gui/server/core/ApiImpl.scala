@@ -18,6 +18,7 @@ import java.io._
 import java.nio.file._
 import java.util.concurrent.atomic.AtomicReference
 
+import au.com.bytecode.opencsv.CSVReader
 import org.openmole.core.authentication.AuthenticationStore
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.market.{ MarketIndex, MarketIndexEntry }
@@ -46,6 +47,7 @@ import org.openmole.gui.ext.tool.server.Utils.authenticationKeysFile
 import org.openmole.gui.server.core.GUIServer.ApplicationControl
 import org.openmole.tool.crypto.Cypher
 import org.openmole.tool.random.{ RandomProvider, Seeder }
+import scala.collection.JavaConverters._
 
 /*
  * Copyright (C) 21/07/14 // mathieu.leclaire@openmole.org
@@ -293,6 +295,13 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
   def size(safePath: SafePath): Long = {
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
     safePathToFile(safePath).length
+  }
+
+  def sequence(safePath: SafePath): SequenceData = {
+    import org.openmole.gui.ext.data.ServerFileSystemContext.project
+    val reader = new CSVReader(new FileReader(safePath), ',')
+    val content = reader.readAll.asScala.toSeq
+    SequenceData(content.head, content.tail)
   }
 
   // EXECUTIONS
