@@ -2,9 +2,40 @@
 @import org.openmole.site._
 @import org.openmole.site.content.Native._
 
+@def rVersion = "3.3.3"
+
+
+@h2{RTask}
+
+R is a scripted language initially designed for statistics, but which application range is much broader today (for example GIS, operational research, linear algebra, web applications, etc.).
+, thanks to its large community and the variety of packages. It may be convenient to use some specific R libraries within a workflow, and OpenMOLE provides therefore a specific @i{RTask}.
+
 @h2{Preliminary remark}
 
 @linuxOnly("RTask")
+
+
+@h2{RTask syntax}
+
+@p The @openmole("RTask") relies on an underlying @openmole("ContainerTask") but is designed to be transparent and takes only R-related arguments.
+The current version of R used is @i{s"$rVersion"}.
+It takes the following arguments :
+
+@ul
+   @li @i{script} : String, mandatory. The R script to be executed.
+   @li @i{install} : Sequence of strings, optional (default = empty). The commands to be executed prior to any R packages installation and R script execution (see example below : some R libraries may have system dependencies, that have to be installed first).
+   @li @i{libraries} : Sequence of strings, optional (default = empty). The name of R libraries that will be used by the script and need to be installed before (note : as detailed below, installations are done only at the first use, and OpenMOLE keeps the docker image in cache. To force an update, use the @i{forceUpdate} argument)
+   @li @i{forceUpdate} : Boolean, optional (default = false). Should the library installation be forced (to ensure an update for example). If true, the task will perform the installation (and thus the update) even if the library was already installed.
+
+@p It has the following specific properties to be extended using @i{set} :
+
+@ul
+   @li @i{rInputs} : correspondences between workflow variables in input and R variables (add couples @i{(Val,String)})
+   @li @i{rOutputs} : correspondences between R variables and workflow variables in output (add couples @i{(String,Val)}
+
+@p We develop below a detailed example of how to use a RTask, from a very simple use to a more elaborate with system libraries and R libraries.
+
+
 
 @h2{Simple RTask}
 
@@ -21,7 +52,7 @@ The toy R script for this first test case is:
 Here we create a function @i{f}, and a variable @i{j} in which we
 store the result of the evalution of the function by 2.
 
-@br We use an Rtask in OpenMOLE to run this R script. In the RTsak we write code in R !
+@br We use an Rtask in OpenMOLE to run this R script. In the RTask we write code in R !
 
 @br For this first OpenMOLE  script, we write the R script in the Rtask, we will see after how to
 import it from a @i{file.R}, and deal with libraries.  Moreover, this Rtask does not communicate with other
@@ -215,7 +246,7 @@ It is also possible to pass file as argument of the rTask. However, we can't pas
 you have an error like  @i{type class java.io.File is not convertible to JSON}.
 
 
-@br We thus use @i{inputFiles}, and  we give an illustration in the following workflow (@i{rTask}).
+@br We thus use @i{inputFiles}, and  we give an illustration in the following workflow (@i{rTask}). We precise that @i{inputFiles} must be used here (and not @i{resources}), since it is used as a Val and can be acted upon in a workflow, whereas @{resources} acts differently since it is fixed.
 
 @br We have first a ScalaTask that writes numbers in a file. The file is the OpenMole variable  @i{g} of type @i{java.io.File } .
  In order to have access to this file in the RTask, we put  @i{g} as output of the ScalaTask.
