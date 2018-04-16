@@ -8,6 +8,7 @@ import boopickle.Default._
 import org.openmole.gui.client.core.alert.AlertPanel
 import org.openmole.gui.client.core.panels._
 import org.scalajs.dom
+import org.openmole.gui.ext.tool.client.Utils._
 
 import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
@@ -61,7 +62,7 @@ object SettingsView {
     resetPasswordButton.render,
     restartButton,
     shutdownButton
-  ).dropdownWithTrigger(glyphSpan(glyph_menu_hamburger), omsheet.resetBlock, Seq(left := "initial", right := 0))
+  ).dropdownWithTrigger(glyphSpan(glyph_menu_hamburger), omsheet.settingsBlock, Seq(left := "initial", right := 0))
 
   lazy val dropdownConnection: Dropdown[_] = vForm(width := "auto")(
     resetPasswordButton.render
@@ -111,7 +112,7 @@ object SettingsView {
 
   val jvmInfosDiv = timer.map {
     _.isDefined
-  }.expand(tags.div(generalSettings)(
+  }.expandDiv(tags.div(generalSettings)(
     Rx {
       for (
         j ← jvmInfos()
@@ -139,7 +140,7 @@ object SettingsView {
         )
       }
     }
-  )).render
+  ))
 
   val resetPasswordButton =
     serverActions(

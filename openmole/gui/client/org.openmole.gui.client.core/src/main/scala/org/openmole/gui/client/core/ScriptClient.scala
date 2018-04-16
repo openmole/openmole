@@ -136,6 +136,8 @@ object ScriptClient {
 
       val envItem = navItem(div(glyph_exclamation, itemStyle).render, () ⇒ stackPanel.open)
 
+      val settingsItem = navItem(div(SettingsView.renderApp, itemStyle).render, () ⇒ {}).right
+
       val actionItem = navItem(div(
         Rx {
           div(
@@ -175,7 +177,7 @@ object ScriptClient {
               if (openFileTree()) mainNav370 else mainNav0
             },
             navItem(
-              if (openFileTree()) div(glyph_chevron_left, fileChevronStyle).render else div(glyph_chevron_right, fileChevronStyle).render,
+              if (openFileTree()) div(glyph_chevron_left).render else div(glyph_chevron_right).render,
               todo = () ⇒ {
                 openFileTree() = !openFileTree.now
               }
@@ -184,7 +186,8 @@ object ScriptClient {
             execItem,
             authenticationItem,
             pluginItem,
-            actionItem
+            actionItem,
+            settingsItem
           ).render
         }
       )
@@ -216,7 +219,6 @@ object ScriptClient {
             div(`class` := "fullpanel")(
               BannerAlert.banner,
               theNavBar,
-              SettingsView.renderApp,
               div(
                 `class` := Rx {
                   "leftpanel " + {
