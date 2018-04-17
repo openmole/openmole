@@ -22,27 +22,30 @@ import java.io.PrintStream
 import monocle.macros.Lenses
 import org.openmole.core.context.{ Context, Val }
 import org.openmole.core.expansion.FromContext
-import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
+import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.mole._
 
 object ToStringHook {
 
   implicit def isIO: InputOutputBuilder[ToStringHook] = InputOutputBuilder(ToStringHook.config)
+  implicit def isInfo = InfoBuilder(info)
 
-  def apply(prototypes: Val[_]*)(implicit name: sourcecode.Name): ToStringHook =
+  def apply(prototypes: Val[_]*)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): ToStringHook =
     apply(System.out, prototypes: _*)
 
-  def apply(out: PrintStream, prototypes: Val[_]*)(implicit name: sourcecode.Name) =
+  def apply(out: PrintStream, prototypes: Val[_]*)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     new ToStringHook(
       prototypes.toVector,
-      config = InputOutputConfig()
+      config = InputOutputConfig(),
+      info = InfoConfig()
     )
 
 }
 
 @Lenses case class ToStringHook(
   prototypes: Vector[Val[_]],
-  config:     InputOutputConfig
+  config:     InputOutputConfig,
+  info:       InfoConfig
 ) extends Hook {
 
   override protected def process(executionContext: MoleExecutionContext) = FromContext { parameters ⇒

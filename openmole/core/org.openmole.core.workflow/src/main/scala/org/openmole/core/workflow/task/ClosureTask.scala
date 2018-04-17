@@ -26,18 +26,21 @@ import org.openmole.tool.random._
 object ClosureTask {
 
   implicit def isBuilder: InputOutputBuilder[ClosureTask] = InputOutputBuilder(ClosureTask.config)
+  implicit def isInfo: InfoBuilder[ClosureTask] = InfoBuilder(ClosureTask.info)
 
-  def apply(className: String)(closure: (Context, RandomProvider, TaskExecutionContext) ⇒ Context)(implicit name: sourcecode.Name): ClosureTask = new ClosureTask(
+  def apply(className: String)(closure: (Context, RandomProvider, TaskExecutionContext) ⇒ Context)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): ClosureTask = new ClosureTask(
     closure,
     className = className,
-    config = InputOutputConfig()
+    config = InputOutputConfig(),
+    info = InfoConfig()
   )
 }
 
 @Lenses case class ClosureTask(
   closure:                (Context, RandomProvider, TaskExecutionContext) ⇒ Context,
   override val className: String,
-  config:                 InputOutputConfig
+  config:                 InputOutputConfig,
+  info:                   InfoConfig
 ) extends Task {
   override protected def process(executionContext: TaskExecutionContext): FromContext[Context] = FromContext { p ⇒
     closure(p.context, p.random, executionContext)

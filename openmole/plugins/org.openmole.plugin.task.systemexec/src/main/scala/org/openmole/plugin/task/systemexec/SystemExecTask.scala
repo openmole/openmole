@@ -20,23 +20,24 @@ package org.openmole.plugin.task.systemexec
 import java.io.File
 
 import monocle.macros.Lenses
-import org.openmole.core.context.{ Context, Val, Variable }
-import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
+import org.openmole.core.context.{Context, Val, Variable}
+import org.openmole.core.exception.{InternalProcessingError, UserBadDataError}
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.tools.service.OS
-import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
+import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.validation._
 import org.openmole.plugin.task.external._
 import org.openmole.tool.random._
-
 import cats.syntax.traverse._
 
 object SystemExecTask {
 
   implicit def isTask: InputOutputBuilder[SystemExecTask] = InputOutputBuilder(SystemExecTask._config)
   implicit def isExternal: ExternalBuilder[SystemExecTask] = ExternalBuilder(SystemExecTask.external)
+  implicit def isInfo = InfoBuilder(info)
+
   implicit def isSystemExec = new SystemExecTaskBuilder[SystemExecTask] {
     override def commands = SystemExecTask.commands
     override def environmentVariables = SystemExecTask.environmentVariables
@@ -52,7 +53,7 @@ object SystemExecTask {
    * To communicate with the dataflow the result should be either a file / category or the return
    * value of the process.
    */
-  def apply(commands: Command*)(implicit name: sourcecode.Name): SystemExecTask =
+  def apply(commands: Command*)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): SystemExecTask =
     SystemExecTask(
       commands = Vector.empty,
     ) set (pack.commands += (OS(), commands: _*))
@@ -69,7 +70,7 @@ object SystemExecTask {
     returnValue:        OptionalArgument[Val[Int]]    = None,
     stdOut:             OptionalArgument[Val[String]] = None,
     stdErr:             OptionalArgument[Val[String]] = None,
-    shell:              Shell                         = Bash)(implicit name: sourcecode.Name): SystemExecTask =
+    shell:              Shell                         = Bash)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): SystemExecTask =
     new SystemExecTask(
       commands = commands.map(c ⇒ OSCommands(OS(), c)).toVector,
       workDirectory = workDirectory,
@@ -80,7 +81,8 @@ object SystemExecTask {
       shell = shell,
       environmentVariables = Vector.empty,
       _config = InputOutputConfig(),
-      external = External()
+      external = External(),
+      info = InfoConfig()
     )
 
 }
@@ -95,7 +97,8 @@ object SystemExecTask {
   shell:                Shell,
   environmentVariables: Vector[(String, FromContext[String])],
   _config:              InputOutputConfig,
-  external:             External
+  external:             External,
+  info: InfoConfig
 ) extends Task with ValidateTask {
 
   import SystemExecTask._

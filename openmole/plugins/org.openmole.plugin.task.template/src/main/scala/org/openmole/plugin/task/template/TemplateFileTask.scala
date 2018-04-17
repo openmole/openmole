@@ -30,18 +30,28 @@ import org.openmole.core.workflow.task._
 object TemplateFileTask {
 
   implicit def isTask: InputOutputBuilder[TemplateFileTask] = InputOutputBuilder(TemplateFileTask.config)
+  implicit def isInfo = InfoBuilder(info)
 
   def apply(
     template: File,
     output:   Val[File]
-  )(implicit name: sourcecode.Name) = new TemplateFileTask(template, output, InputOutputConfig()) set (dsl.outputs += output)
+  )(implicit name: sourcecode.Name, definitionScope: DefinitionScope) = new TemplateFileTask(template, output, InputOutputConfig(), InfoConfig()) set (dsl.outputs += output)
+
+  def apply(
+    template: Val[File],
+    output:   Val[File])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
+    new TemplateFileFromInputTask(template, output, InputOutputConfig(), InfoConfig()) set (
+      dsl.inputs += template,
+      dsl.outputs += output
+    )
 
 }
 
 @Lenses case class TemplateFileTask(
   template: File,
   output:   Val[File],
-  config:   InputOutputConfig
+  config:   InputOutputConfig,
+  info:     InfoConfig
 ) extends Task {
 
   @transient lazy val expanded = template.withInputStream { is ⇒
@@ -52,6 +62,29 @@ object TemplateFileTask {
     import parameters._
     val file = executionContext.tmpDirectory.newFile(template.getName, ".tmp")
     file.content = expanded.from(context)
+    context + (output → file)
+  }
+}
+
+object TemplateFileFromInputTask {
+
+  implicit def isTask: InputOutputBuilder[TemplateFileFromInputTask] = InputOutputBuilder(TemplateFileFromInputTask.config)
+  implicit def isInfo = InfoBuilder(info)
+
+}
+
+@Lenses case class TemplateFileFromInputTask(
+  template: FromContext[File],
+  output:   Val[File],
+  config:   InputOutputConfig,
+  info:     InfoConfig
+) extends Task {
+
+  override protected def process(executionContext: TaskExecutionContext) = FromContext { parameters ⇒
+    import parameters._
+    val expanded = template.from(context).withInputStream { is ⇒ ExpandedString(is).from(context) }
+    val file = executionContext.tmpDirectory.newFile("template", ".tmp")
+    file.content = expanded
     context + (output → file)
   }
 }

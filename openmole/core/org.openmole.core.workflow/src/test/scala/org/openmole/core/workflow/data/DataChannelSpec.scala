@@ -37,7 +37,7 @@ import scala.collection.mutable.ListBuffer
 
 class DataChannelSpec extends FlatSpec with Matchers {
 
-  import org.openmole.core.workflow.tools.StubServices._
+  import org.openmole.core.workflow.tools.Stubs._
 
   "A datachannel" should "enable variable values to be transmitted from a task to another" in {
     val p = Val[String]("p")

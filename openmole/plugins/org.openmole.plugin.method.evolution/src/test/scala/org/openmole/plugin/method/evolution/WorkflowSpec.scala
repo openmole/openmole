@@ -91,7 +91,7 @@ class WorkflowSpec extends FlatSpec with Matchers {
     )
   }
 
-  import org.openmole.core.workflow.tools.StubServices._
+  import org.openmole.core.workflow.tools.Stubs._
 
   "Bound array" should "compile" in {
     SteadyStateEvolution(

@@ -25,18 +25,20 @@ import org.openmole.core.dsl._
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.serializer._
-import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
+import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.mole._
 
 object LoadSource {
 
   implicit def isIO = InputOutputBuilder(LoadSource.config)
+  implicit def isInfo = InfoBuilder(info)
 
-  def apply(file: FromContext[String], prototypes: Val[_]*)(implicit serializerService: SerializerService, name: sourcecode.Name) =
+  def apply(file: FromContext[String], prototypes: Val[_]*)(implicit serializerService: SerializerService, name: sourcecode.Name, definitionScope: DefinitionScope) =
     new LoadSource(
       file,
       prototypes.toVector,
       config = InputOutputConfig(),
+      info = InfoConfig(),
       serializerService = serializerService
     ) set (outputs += (prototypes: _*))
 
@@ -46,6 +48,7 @@ object LoadSource {
   file:              FromContext[String],
   prototypes:        Vector[Val[_]],
   config:            InputOutputConfig,
+  info:              InfoConfig,
   serializerService: SerializerService
 ) extends Source {
 

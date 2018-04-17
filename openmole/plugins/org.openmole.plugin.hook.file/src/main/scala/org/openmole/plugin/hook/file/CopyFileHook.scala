@@ -40,6 +40,7 @@ object CopyFileHook {
   }
 
   implicit def isIO: InputOutputBuilder[CopyFileHook] = InputOutputBuilder(CopyFileHook.config)
+  implicit def isInfo = InfoBuilder(info)
 
   implicit def isCopy: CopyFileHookBuilder[CopyFileHook] = new CopyFileHookBuilder[CopyFileHook] {
     override def copies = CopyFileHook.copies
@@ -51,20 +52,22 @@ object CopyFileHook {
     remove:      Boolean           = false,
     compress:    Boolean           = false,
     move:        Boolean           = false
-  )(implicit name: sourcecode.Name): CopyFileHook =
+  )(implicit name: sourcecode.Name, definitionScope: DefinitionScope): CopyFileHook =
     apply() set (pack.copies += (prototype, destination, remove, compress, move))
 
-  def apply()(implicit name: sourcecode.Name): CopyFileHook =
+  def apply()(implicit name: sourcecode.Name, definitionScope: DefinitionScope): CopyFileHook =
     new CopyFileHook(
       Vector.empty,
-      config = InputOutputConfig()
+      config = InputOutputConfig(),
+      info = InfoConfig()
     )
 
 }
 
 @Lenses case class CopyFileHook(
   copies: Vector[(Val[File], FromContext[File], CopyOptions)],
-  config: InputOutputConfig
+  config: InputOutputConfig,
+  info:   InfoConfig
 ) extends Hook with ValidateHook {
 
   override def validate(inputs: Seq[Val[_]]) = Validate { p ⇒

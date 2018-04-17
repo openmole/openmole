@@ -29,6 +29,7 @@ import org.openmole.core.expansion._
 import org.openmole.tool.types._
 import squants.time.Time
 import mgo.double2Scalable
+import org.openmole.core.workflow.builder.DefinitionScope.internal._
 
 package object evolution {
 

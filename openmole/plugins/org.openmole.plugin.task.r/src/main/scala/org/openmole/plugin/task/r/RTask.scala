@@ -25,6 +25,7 @@ object RTask {
 
   implicit def isTask: InputOutputBuilder[RTask] = InputOutputBuilder(RTask._config)
   implicit def isExternal: ExternalBuilder[RTask] = ExternalBuilder(RTask.external)
+  implicit def isInfo = InfoBuilder(info)
 
   implicit def isBuilder = new ReturnValue[RTask] with ErrorOnReturnValue[RTask] with StdOutErr[RTask] with EnvironmentVariables[RTask] with HostFiles[RTask] with WorkDirectory[RTask] { builder ⇒
     override def returnValue = RTask.returnValue
@@ -61,7 +62,7 @@ object RTask {
     install:     Seq[String]         = Seq.empty,
     libraries:   Seq[InstallCommand] = Seq.empty,
     forceUpdate: Boolean             = false
-  )(implicit name: sourcecode.Name, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection): RTask = {
+  )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection): RTask = {
 
     def version = "3.3.3"
 
@@ -87,6 +88,7 @@ object RTask {
       stdErr = None,
       _config = InputOutputConfig(),
       external = External(),
+      info = InfoConfig(),
       rInputs = Vector.empty,
       rOutputs = Vector.empty
     )
@@ -214,6 +216,7 @@ object RTask {
   stdErr:             Option[Val[String]],
   _config:            InputOutputConfig,
   external:           External,
+  info:               InfoConfig,
   rInputs:            Vector[(Val[_], String)], rOutputs: Vector[(String, Val[_])]) extends Task with ValidateTask {
 
   override def config = UDockerTask.config(_config, returnValue, stdOut, stdErr)
@@ -263,7 +266,7 @@ object RTask {
 
         def uDockerTask =
           UDockerTask(
-            uDocker, s"R --slave -f $rScriptName", errorOnReturnValue, returnValue, stdOut, stdErr, _config, external) set (
+            uDocker, s"R --slave -f $rScriptName", errorOnReturnValue, returnValue, stdOut, stdErr, _config, external, info) set (
             resources += (scriptFile, rScriptName, true),
             resources += (jsonInputs, inputJSONName, true),
             outputFiles += (outputJSONName, outputFile)

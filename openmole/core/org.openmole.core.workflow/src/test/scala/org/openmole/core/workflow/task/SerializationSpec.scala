@@ -29,7 +29,7 @@ import org.openmole.core.workflow.tools.DefaultSet
 
 class SerializationSpec extends FlatSpec with Matchers {
 
-  import org.openmole.core.workflow.tools.StubServices._
+  import org.openmole.core.workflow.tools.Stubs._
 
   def serializeDeserialize[T](o: T) = {
     val builder = new ByteArrayOutputStream()

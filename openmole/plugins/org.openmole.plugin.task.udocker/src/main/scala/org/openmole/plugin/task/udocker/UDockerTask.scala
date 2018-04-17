@@ -60,6 +60,7 @@ object UDockerTask {
 
   implicit def isTask: InputOutputBuilder[UDockerTask] = InputOutputBuilder(UDockerTask._config)
   implicit def isExternal: ExternalBuilder[UDockerTask] = ExternalBuilder(UDockerTask.external)
+  implicit def isInfo = InfoBuilder(info)
 
   implicit def isBuilder = new ReturnValue[UDockerTask] with ErrorOnReturnValue[UDockerTask] with StdOutErr[UDockerTask] with EnvironmentVariables[UDockerTask] with HostFiles[UDockerTask] with WorkDirectory[UDockerTask] { builder ⇒
     override def returnValue = UDockerTask.returnValue
@@ -84,7 +85,7 @@ object UDockerTask {
     stdOut:             OptionalArgument[Val[String]] = None,
     stdErr:             OptionalArgument[Val[String]] = None,
     errorOnReturnValue: Boolean                       = true
-  )(implicit name: sourcecode.Name, newFile: NewFile, workspace: Workspace, preference: Preference, threadProvider: ThreadProvider, fileService: FileService, outputRedirection: OutputRedirection): UDockerTask = {
+  )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: NewFile, workspace: Workspace, preference: Preference, threadProvider: ThreadProvider, fileService: FileService, outputRedirection: OutputRedirection): UDockerTask = {
 
     def blockChars(s: String): String = {
       val blocked = Set(''', '"', '\\')
@@ -99,7 +100,8 @@ object UDockerTask {
       stdOut = stdOut,
       stdErr = stdErr,
       _config = InputOutputConfig(),
-      external = External()
+      external = External(),
+      info = InfoConfig()
     )
   }
 
@@ -218,7 +220,8 @@ object UDockerTask {
   stdOut:             Option[Val[String]],
   stdErr:             Option[Val[String]],
   _config:            InputOutputConfig,
-  external:           External
+  external:           External,
+  info:               InfoConfig
 ) extends Task with ValidateTask { self ⇒
 
   override def config = UDockerTask.config(_config, returnValue, stdOut, stdErr)

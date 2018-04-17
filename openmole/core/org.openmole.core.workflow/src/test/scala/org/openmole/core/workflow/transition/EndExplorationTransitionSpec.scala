@@ -34,7 +34,7 @@ import org.openmole.core.workflow.dsl._
 
 class EndExplorationTransitionSpec extends FlatSpec with Matchers {
 
-  import org.openmole.core.workflow.tools.StubServices._
+  import org.openmole.core.workflow.tools.Stubs._
 
   "EndExploration transition" should "kill the submole when triggered" in {
     @volatile var endCapsExecuted = 0

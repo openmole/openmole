@@ -136,6 +136,7 @@ object Puzzle {
     )
 
   def transitionOutputs(puzzle: Puzzle, lastTransition: (Puzzle, Puzzle) ⇒ Puzzle) = {
+    import org.openmole.core.workflow.builder.DefinitionScope.internal._
     val last = Slot(EmptyTask())
     val _puzzle = lastTransition(puzzle, last)
     TypeUtil.receivedTypes(_puzzle.toMole, _puzzle.sources, _puzzle.hooks)(last) toSeq

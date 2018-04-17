@@ -10,15 +10,17 @@ import org.openmole.core.workflow.validation.ValidateHook
 object FromContextHook {
 
   implicit def isBuilder: InputOutputBuilder[FromContextHook] = InputOutputBuilder(config)
+  implicit def isInfo = InfoBuilder(FromContextHook.info)
 
-  def apply(className: String)(fromContext: FromContext.Parameters ⇒ Context)(implicit name: sourcecode.Name): FromContextHook =
-    FromContextHook(className, FromContext(fromContext), InputOutputConfig())
+  def apply(className: String)(fromContext: FromContext.Parameters ⇒ Context)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): FromContextHook =
+    FromContextHook(className, FromContext(fromContext), InputOutputConfig(), InfoConfig())
 }
 
 @Lenses case class FromContextHook(
   override val className: String,
   fromContext:            FromContext[Context],
-  config:                 InputOutputConfig) extends Hook with ValidateHook {
+  config:                 InputOutputConfig,
+  info:                   InfoConfig) extends Hook with ValidateHook {
 
   override def validate(inputs: Seq[Val[_]]): validation.Validate = validation.Validate { p ⇒
     import p._

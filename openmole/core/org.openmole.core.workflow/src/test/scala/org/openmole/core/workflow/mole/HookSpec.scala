@@ -31,7 +31,7 @@ import org.scalatest.junit._
 
 class HookSpec extends FlatSpec with Matchers {
 
-  import org.openmole.core.workflow.tools.StubServices._
+  import org.openmole.core.workflow.tools.Stubs._
 
   "A hook" should "intercept the execution of a capsule" in {
     val executed = new AtomicInteger(0)

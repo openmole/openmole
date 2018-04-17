@@ -26,10 +26,12 @@ import org.openmole.core.workflow.sampling._
 import scala.collection.immutable.TreeMap
 import scala.collection.mutable.ArrayBuffer
 import cats.implicits._
+import org.openmole.core.workflow.builder._
+import org.openmole.core.workflow.tools._
 
 object ExplorationTask {
 
-  def apply(sampling: Sampling)(implicit name: sourcecode.Name) =
+  def apply(sampling: Sampling)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     FromContextTask("ExplorationTask") { p ⇒
       import p._
       val variablesValues = TreeMap.empty[Val[_], ArrayBuffer[Any]] ++ sampling.prototypes.map { p ⇒ p → ArrayBuffer[Any]() }

@@ -27,12 +27,14 @@ import org.openmole.core.workflow.mole._
 object ConditionHook {
 
   implicit def isIO = InputOutputBuilder(ConditionHook.config)
+  implicit def isInfo = InfoBuilder(info)
 
-  def apply(hook: Hook, condition: Condition)(implicit name: sourcecode.Name) =
+  def apply(hook: Hook, condition: Condition)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     new ConditionHook(
       hook,
       condition,
-      config = InputOutputConfig()
+      config = InputOutputConfig(),
+      info = InfoConfig()
     ) set (
       inputs += (hook.inputs.toSeq: _*),
       outputs += (hook.outputs.toSeq: _*)
@@ -43,7 +45,8 @@ object ConditionHook {
 @Lenses case class ConditionHook(
   hook:      Hook,
   condition: Condition,
-  config:    InputOutputConfig
+  config:    InputOutputConfig,
+  info:      InfoConfig
 ) extends Hook {
 
   override protected def process(executionContext: MoleExecutionContext) = FromContext { parameters ⇒

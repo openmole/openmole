@@ -26,6 +26,8 @@ import org.openmole.core.workflow.validation.TypeUtil
 
 object Strain {
 
+  import org.openmole.core.workflow.builder.DefinitionScope.internal._
+
   def apply(task: Task) = Capsule(task, strain = true)
 
   def apply(puzzle: Puzzle): Puzzle = {

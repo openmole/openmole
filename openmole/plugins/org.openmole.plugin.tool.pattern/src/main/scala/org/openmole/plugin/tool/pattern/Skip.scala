@@ -25,6 +25,8 @@ import org.openmole.core.expansion._
 
 object Skip {
 
+  import org.openmole.core.workflow.builder.DefinitionScope.internal._
+
   def apply(puzzle: Puzzle, condition: Condition) = {
     val first = Capsule(EmptyTask(), strain = true)
     val firstSlot = Slot(first)

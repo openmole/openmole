@@ -29,7 +29,7 @@ import org.openmole.tool.file._
 
 object SavePopulationHook {
 
-  def apply[T](algorithm: T, dir: FromContext[File])(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name) = {
+  def apply[T](algorithm: T, dir: FromContext[File])(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name, definitionScope: DefinitionScope) = {
     val t = wfi(algorithm)
 
     FromContextHook("SavePopulationHook") { p ⇒

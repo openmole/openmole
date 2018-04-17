@@ -12,7 +12,7 @@ import org.openmole.core.workflow.task._
 import scala.util.Try
 
 class PuzzleSpec extends FlatSpec with Matchers {
-  import org.openmole.core.workflow.tools.StubServices._
+  import org.openmole.core.workflow.tools.Stubs._
 
   "HList containing puzzle" should "be implicily convertible to a ToPuzze" in {
     import shapeless._

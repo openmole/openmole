@@ -18,12 +18,13 @@
 package org.openmole.plugin.method.evolution
 
 import org.openmole.core.context.{ Context, Variable }
+import org.openmole.core.workflow.builder.DefinitionScope
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.task._
 
 object TerminationTask {
 
-  def apply[T](algorithm: T, termination: OMTermination)(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name) = {
+  def apply[T](algorithm: T, termination: OMTermination)(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name, definitionScope: DefinitionScope) = {
     val t = wfi(algorithm)
 
     ClosureTask("TerminationTask") { (context, _, _) ⇒

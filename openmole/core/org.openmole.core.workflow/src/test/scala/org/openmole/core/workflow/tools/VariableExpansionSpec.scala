@@ -27,7 +27,7 @@ import scala.util.Random
 
 class VariableExpansionSpec extends FlatSpec with Matchers {
 
-  import StubServices._
+  import Stubs._
 
   "A expandData" should "expand all the ${} top level sequence from an inputStream and return a parsed OuputStream" in {
     val template = """My first line

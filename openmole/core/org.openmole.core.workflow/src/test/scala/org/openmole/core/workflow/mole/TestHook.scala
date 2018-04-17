@@ -21,6 +21,8 @@ import org.openmole.core.context.Context
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.builder._
 
+import org.openmole.core.workflow.tools.Stubs._
+
 object TestHook {
 
   implicit def isBuilder: InputOutputBuilder[TestHook] = InputOutputBuilder(config)
@@ -29,7 +31,8 @@ object TestHook {
 
 @Lenses case class TestHook(
   f:      Context ⇒ Context = identity[Context],
-  config: InputOutputConfig = InputOutputConfig()
+  config: InputOutputConfig = InputOutputConfig(),
+  info:   InfoConfig        = InfoConfig()
 ) extends Hook {
   override protected def process(executionContext: MoleExecutionContext) = FromContext { p ⇒ f(p.context) }
 }

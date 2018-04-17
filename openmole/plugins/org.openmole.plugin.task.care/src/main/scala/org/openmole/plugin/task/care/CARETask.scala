@@ -21,7 +21,7 @@ package org.openmole.plugin.task.care
 import monocle.macros.Lenses
 import org.openmole.core.context.{ Context, Val, Variable }
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
-import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
+import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.validation._
@@ -42,6 +42,7 @@ object CARETask extends JavaLogger {
 
   implicit def isTask: InputOutputBuilder[CARETask] = InputOutputBuilder(CARETask._config)
   implicit def isExternal: ExternalBuilder[CARETask] = ExternalBuilder(CARETask.external)
+  implicit def isInfo = InfoBuilder(info)
 
   implicit def isBuilder = new ReturnValue[CARETask] with ErrorOnReturnValue[CARETask] with StdOutErr[CARETask] with EnvironmentVariables[CARETask] with WorkDirectory[CARETask] with HostFiles[CARETask] {
     override def hostFiles = CARETask.hostFiles
@@ -59,7 +60,7 @@ object CARETask extends JavaLogger {
     returnValue:        OptionalArgument[Val[Int]]    = None,
     stdOut:             OptionalArgument[Val[String]] = None,
     stdErr:             OptionalArgument[Val[String]] = None,
-    errorOnReturnValue: Boolean                       = true)(implicit sourceCodeName: sourcecode.Name): CARETask =
+    errorOnReturnValue: Boolean                       = true)(implicit sourceCodeName: sourcecode.Name, definitionScope: DefinitionScope): CARETask =
     new CARETask(
       archive = archive,
       command = command,
@@ -71,7 +72,8 @@ object CARETask extends JavaLogger {
       stdErr = stdErr,
       environmentVariables = Vector.empty,
       _config = InputOutputConfig(),
-      external = External()
+      external = External(),
+      info = InfoConfig()
     )
 
 }
@@ -87,7 +89,8 @@ object CARETask extends JavaLogger {
   stdErr:               Option[Val[String]],
   environmentVariables: Vector[(String, FromContext[String])],
   _config:              InputOutputConfig,
-  external:             External
+  external:             External,
+  info:                 InfoConfig
 ) extends Task with ValidateTask {
 
   def config = InputOutputConfig.outputs.modify(_ ++ Seq(stdOut, stdErr, returnValue).flatten)(_config)

@@ -40,25 +40,27 @@ object ScalaTask {
 
   implicit def isTask: InputOutputBuilder[ScalaTask] = InputOutputBuilder(ScalaTask.config)
   implicit def isExternal: ExternalBuilder[ScalaTask] = ExternalBuilder(ScalaTask.external)
+  implicit def isInfo = InfoBuilder(info)
 
   implicit def isJVM: JVMLanguageBuilder[ScalaTask] = new JVMLanguageBuilder[ScalaTask] {
     override def libraries = ScalaTask.libraries
     override def plugins = ScalaTask.plugins
   }
 
-  def apply(source: String)(implicit name: sourcecode.Name) =
+  def apply(source: String)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     new ScalaTask(
       source,
       plugins = Vector.empty,
       libraries = Vector.empty,
       config = InputOutputConfig(),
-      external = External()
+      external = External(),
+      info = InfoConfig()
     )
 
-  def apply(f: (Context, ⇒ Random) ⇒ Seq[Variable[_]])(implicit name: sourcecode.Name) =
+  def apply(f: (Context, ⇒ Random) ⇒ Seq[Variable[_]])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     ClosureTask("ScalaTask")((ctx, rng, _) ⇒ Context(f(ctx, rng()): _*))
 
-  def apply(f: Context ⇒ Seq[Variable[_]])(implicit name: sourcecode.Name) =
+  def apply(f: Context ⇒ Seq[Variable[_]])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     ClosureTask("ScalaTask")((ctx, _, _) ⇒ Context(f(ctx): _*))
 
 }
@@ -68,7 +70,8 @@ object ScalaTask {
   plugins:    Vector[File],
   libraries:  Vector[File],
   config:     InputOutputConfig,
-  external:   External
+  external:   External,
+  info:       InfoConfig
 ) extends Task with ValidateTask with Plugins {
 
   lazy val compilation = CacheKey[ScalaCompilation.ContextClosure[java.util.Map[String, Any]]]()
