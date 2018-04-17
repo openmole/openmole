@@ -63,8 +63,7 @@ class TreeNodePanel {
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
   val selectionMode = Var(false)
   val treeWarning = Var(true)
-  val dragState: Var[String] = Var("")
-  val draggedNode: Var[Option[TreeNode]] = Var(None)
+  val draggedNode: Var[Option[SafePath]] = Var(None)
 
   selectionMode.trigger {
     if (!selectionMode.now) manager.clearSelection
@@ -175,14 +174,29 @@ class TreeNodePanel {
     )
   }
 
-  def goToDirButton(safePath: SafePath, ck: ModifierSeq, name: String = "") = span(ck)(name)(
-    onclick := {
-      () ⇒
-        fileToolBar.clearMessage
-        manager.switch(safePath)
-        drawTree
-    }
-  )
+  def goToDirButton(safePath: SafePath, ck: ModifierSeq, name: String = ""): TypedTag[_ <: HTMLElement] =
+    span(ck)(name)(
+      onclick := {
+        () ⇒
+          fileToolBar.clearMessage
+          manager.switch(safePath)
+          drawTree
+      },
+      dropPairs,
+      ondragenter := {
+        (e: DragEvent) ⇒
+          false
+      },
+      ondragleave := {
+        (e: DragEvent) ⇒
+          false
+      },
+      ondrop := { (e: DragEvent) ⇒
+        e.dataTransfer
+        e.preventDefault()
+        dropAction(safePath, true)
+      }
+    )
 
   def invalidCacheAndDraw = {
     invalidCacheAnd(() ⇒ {
@@ -274,49 +288,6 @@ class TreeNodePanel {
         })
       }
     case _ ⇒
-  }
-
-  def dropPairs(dn: DirNode) = Seq(
-    draggable := true, ondrop := {
-      dropAction(dn)
-    },
-    ondragenter := {
-      (e: DragEvent) ⇒
-        false
-    },
-    ondragover := {
-      (e: DragEvent) ⇒
-        e.dataTransfer.dropEffect = "move"
-        e.preventDefault
-        false
-    }
-  )
-
-  def dropAction(tn: TreeNode) = {
-    val currentPath = manager.current.now
-    val tnPath = currentPath ++ tn.name.now
-    (e: DragEvent) ⇒
-      e.preventDefault
-      draggedNode.now.map {
-        sp ⇒
-          val spPath = currentPath ++ sp.name.now
-          tn match {
-            case d: DirNode ⇒
-              val dPath = currentPath ++ d.name.now
-              if (spPath != dPath) {
-                treeNodeTabs.saveAllTabs(() ⇒
-                  post()[Api].move(spPath, tnPath).call().foreach {
-                    b ⇒
-                      manager.invalidCache(tnPath)
-                      TreeNodePanel.refreshAndDraw
-                      treeNodeTabs.checkTabs
-                  })
-              }
-            case _ ⇒
-          }
-      }
-      draggedNode() = None
-      false
   }
 
   def stringAlert(message: String, okaction: () ⇒ Unit) =
@@ -453,24 +424,22 @@ class TreeNodePanel {
                 }
               }
             },
+            dropPairs,
             ondragstart := { (e: DragEvent) ⇒
               e.dataTransfer.setData("text/plain", "nothing") //  FIREFOX TRICK
-              draggedNode.now match {
-                case Some(t: TreeNode) ⇒
-                case _                 ⇒ draggedNode() = Some(tn)
-              }
-              true
+              draggedNode() = Some(tnSafePath)
             },
-            ondragenter := { (e: DragEvent) ⇒
-              false
+            ondrop := { (e: DragEvent) ⇒
+              e.dataTransfer
+              e.preventDefault()
+              dropAction(manager.current.now ++ tn.name.now, tn match {
+                case _: DirNode ⇒ true
+                case _          ⇒ false
+              })
             },
-            ondragover := { (e: DragEvent) ⇒
-              e.dataTransfer.dropEffect = "move"
-              e.preventDefault
-              false
-            },
-            ondrop := {
-              dropAction(tn)
+            ondragenter := {
+              (e: DragEvent) ⇒
+                false
             },
             clickablePair, {
               div(fileInfo)(
@@ -498,6 +467,41 @@ class TreeNodePanel {
         }
       )
     }
+  }
+
+  def dropPairs: ModifierSeq = Seq(
+    draggable := true,
+    ondragenter := {
+      (e: DragEvent) ⇒
+        false
+    },
+    ondragover := {
+      (e: DragEvent) ⇒
+        e.dataTransfer.dropEffect = "move"
+        e.preventDefault
+        false
+    }
+  )
+
+  def dropAction(to: SafePath, isDir: Boolean) = {
+    draggedNode.now.map {
+      dragged ⇒
+        if (isDir) {
+          if (dragged != to) {
+            treeNodeTabs.saveAllTabs(() ⇒ {
+              post()[Api].move(dragged, to).call().foreach {
+                b ⇒
+                  manager.invalidCache(to)
+                  manager.invalidCache(dragged)
+                  TreeNodePanel.refreshAndDraw
+                  treeNodeTabs.checkTabs
+              }
+            })
+          }
+        }
+    }
+    draggedNode() = None
+    false
   }
 
 }
