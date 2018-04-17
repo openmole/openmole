@@ -13,7 +13,7 @@ import org.openmole.gui.ext.api.Api
 import scalatags.JsDom.all._
 import scaladget.bootstrapnative.bsn._
 import org.openmole.gui.client.core.panels._
-import org.openmole.gui.ext.data.{ DataUtils, FileExtension, SafePath }
+import org.openmole.gui.ext.data.{ DataUtils, FileExtension, SafePath, ScriptData }
 import org.openmole.gui.ext.tool.client._
 import org.scalajs.dom.raw._
 import rx._
@@ -38,6 +38,7 @@ object FileToolBox {
 
     val extract: FileAction = "extract"
     val duplicate: FileAction = "duplicate"
+    val execute: FileAction = "execute"
   }
 
   def apply(initSafePath: SafePath) = {
@@ -58,6 +59,7 @@ class FileToolBox(initSafePath: SafePath) {
   val download_alt = baseGlyph +++ glyph_download_alt
   val archive = baseGlyph +++ glyph_archive
   val arrow_right_and_left = baseGlyph +++ glyph_arrow_right_and_left
+  val execute = baseGlyph +++ glyph_flash
 
   def iconAction(faction: FileAction, icon: ModifierSeq, text: String) = div(id := faction)(icon, div(text, giFontFamily, fontSize := "12px", paddingTop := 5))
 
@@ -147,6 +149,15 @@ class FileToolBox(initSafePath: SafePath) {
               Popover.hide
             }
             true
+          case fileaction.execute ⇒
+            import scala.concurrent.duration._
+            withSafePath { sp ⇒
+              post(timeout = 120 seconds, warningTimeout = 60 seconds)[Api].runScript(ScriptData(sp)).call().foreach { execInfo ⇒
+                Popover.hide
+                org.openmole.gui.client.core.panels.executionPanel.dialog.show
+              }
+            }
+            true
           case _ ⇒
             println("unknown")
             false
@@ -215,6 +226,11 @@ class FileToolBox(initSafePath: SafePath) {
       DataUtils.fileToExtension(initSafePath.name) match {
         case FileExtension.TGZ | FileExtension.TAR | FileExtension.ZIP ⇒
           iconAction(fileaction.extract, archive, "extract")
+        case _ ⇒ span
+      },
+      DataUtils.fileToExtension(initSafePath.name) match {
+        case FileExtension.OMS ⇒
+          iconAction(fileaction.execute, execute, "run")
         case _ ⇒ span
       },
       duplicateTrigger,
