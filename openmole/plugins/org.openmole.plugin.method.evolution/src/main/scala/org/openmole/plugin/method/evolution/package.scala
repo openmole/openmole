@@ -58,7 +58,7 @@ package object evolution {
   def SteadyStateEvolution[T](algorithm: T, evaluation: Puzzle, termination: OMTermination, parallelism: Int = 1)(implicit wfi: WorkflowIntegration[T]) = {
     val t = wfi(algorithm)
 
-    val evaluationCapsule = Slot(MoleTask(evaluation))
+    val evaluationCapsule = Slot(MoleTask(evaluation) set (inputs += (t.inputPrototypes: _*), outputs += (t.outputPrototypes: _*)))
 
     val randomGenomes =
       BreedTask(algorithm, parallelism) set (

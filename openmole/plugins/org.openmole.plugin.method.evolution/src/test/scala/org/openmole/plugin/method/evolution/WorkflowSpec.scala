@@ -17,6 +17,7 @@
 package org.openmole.plugin.method.evolution
 
 import org.openmole.core.dsl._
+import org.openmole.core.workflow.puzzle.{ OutputEnvironmentPuzzleContainer, ToPuzzle }
 import org.openmole.core.workflow.validation.Validation
 import org.openmole.plugin.domain.collection._
 import org.scalatest._
@@ -41,9 +42,8 @@ class WorkflowSpec extends FlatSpec with Matchers {
     SteadyStateEvolution(
       algorithm =
         NSGA2(
-          mu = 100,
           genome = Seq(x in (0.0, 1.0), y in ("0.0", "1.0")),
-          objectives = Seq(x, y, z),
+          objectives = Seq(x, y),
           stochastic = Stochastic()
         ),
       evaluation = puzzle,

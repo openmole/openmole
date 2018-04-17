@@ -127,7 +127,7 @@ of the @i{file.R} (imported in the R script thanks to @i{source()}).
 
 @h2{Input and output values}
 
-In this script we want to pass the OpenMOLE variable @i{i} to the Rtask. It is possibble through an @i{input}
+In this script we want to pass the OpenMOLE variable @i{i} to the Rtask. It is possible through an @i{input}
 in the @i{set} of the task.
 
 @br In practise, @i{i} can be a variable whose value is given by a previous task, here we set in manually to 3.
@@ -246,7 +246,7 @@ It is also possible to pass file as argument of the rTask. However, we can't pas
 you have an error like  @i{type class java.io.File is not convertible to JSON}.
 
 
-@br We thus use @i{inputFiles}, and  we give an illustration in the following workflow (@i{rTask}). We precise that @i{inputFiles} must be used here (and not @i{resources}), since it is used as a Val and can be acted upon in a workflow, whereas @{resources} acts differently since it is fixed.
+@br We thus use @i{inputFiles}, and  we give an illustration in the following workflow (@i{rTask}). We precise that @i{inputFiles} must be used here (and not @i{resources}), since it is used as a Val and can be acted upon in a workflow, whereas @i{resources} acts differently since it is fixed.
 
 @br We have first a ScalaTask that writes numbers in a file. The file is the OpenMole variable  @i{g} of type @i{java.io.File } .
  In order to have access to this file in the RTask, we put  @i{g} as output of the ScalaTask.

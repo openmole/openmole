@@ -32,7 +32,7 @@ package object services {
       implicit val ws = Workspace(workspace)
       implicit val cypher = Cypher(password)
       implicit val preference = Services.preference(ws)
-      implicit val newFile = NewFile(workspace)
+      implicit val newFile = NewFile(ws)
       implicit val seeder = Seeder()
       implicit val serializerService = SerializerService()
       implicit val threadProvider = ThreadProvider()

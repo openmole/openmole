@@ -29,8 +29,73 @@
 @def csvHook = """
   val csvHook = AppendToCSVFileHook(workDirectory / "result.csv", density, burned, seed)"""
 
-In this example, we present step by step how to explore a NetLogo model. @a("The Fire model", href := Resource.script.fireNLogo.file) is a
-common NetLogo example. It studies the percolation of a fire in a forest depending on the density of the forest. This model has one input : @i{density} and one output : @i{percent-burned}
+
+
+
+@h2{@shared.netlogoMenu.task}
+
+    NetLogo is a widely used Agent-based Modeling platform and language developed by CCL at Northwestern University (see @aa("the official website", href:= "https://ccl.northwestern.edu/netlogo/")).
+    It is conceived to be accessible to non-programmers and thus enhance inter-disciplinarity in the construction of simulation models, but can also be used for large scale complex models (despite its bad reputation, see @aa("this paper", href := "http://jasss.soc.surrey.ac.uk/20/1/3.html") testing netlogo speed performance and suggesting code improvements).
+    As it runs on the JVM, it is naturally integrated into OpenMOLE.
+
+    OpenMOLE provides a
+     NetLogoTask that expects the following parameters definitions:
+    @ul
+      @li{the path where to find the NetLogo model, i.e. the nlogo source file,}
+      @li{the list of NetLogo commands that OpenMOLE needs to run}
+    @p The NetlogoTask comes in two versions : @b{Netlogo5Task} and @b{Netlogo6Task}, be sure to select
+    the right version of the task according to the version of Netlogo you used, 5 or 6 .
+
+    @p A task is written the following way, here for a model file @b{Fire.nlogo}.
+
+    @br @hl.openmole(netlogo, header =
+    s"""
+    $variables
+    $exploration
+    """, name = "netlogo task")
+
+    @p In this example, the commands list contains:
+        @ul
+          @li{@i{random-seed} that initialises the random number generator of NetLogo using the seed provided by OpenMOLE,}
+          @li{@i{setup} that calls the setup function of the netlogo file to initialise the model,}
+          @li{@i{go}, a function that runs the model. For this particular model, this function is called until no more turtle are active.}
+
+    @p The @i{replication} and the @i{density} OpenMOLE variables are used as parameters of the NetLogo program.
+    Therefore they appear as inputs of the NetLogoTask.
+
+    @p Similarly, 1 output of the model is considered and collected by OpenMOLE at the end of each model execution.
+    It is noted as @i{netLogoOutputs} in the definition of the task.
+
+    @p The arguments for a NetLogoTask are the following :
+    @ul
+      @li{@i{script} netlogo model (File), mandatory}
+      @li{@i{launchingCommands} netlogo commands to be executed, mandatory}
+      @li{@i{embedWorkspace} should the workspace be embedded for execution of the model (use if you have source files or extensions in the model directory), optional, defaults to false}
+      @li{@i{seed} random seed, optional, defaults to None}
+
+    @p The properties to be adjusted with @b{set} :
+    @ul
+      @li{@i{netLogoInputs} vector of couples (Val,String) to establish the link between workflow variables that are input and the corresponding netlogo variables}
+      @li{@i{netLogoOutputs} vector of couples (String,Val) to collect outputs of the model (the string can be any NetLogo command)}
+      @li{@i{netLogoArrayOutputs} vector of triples (String,Int,Val) to collect outputs from lists in the model (gets the item at the given index)}
+
+
+@h2{Embedding NetLogo extensions and sources}
+
+@p Several NetLogo models relies on extensions (which are basically jars providing new primitives in interaction with the NetLogo workspace).
+By default, NetLogo will search extensions in its installation folder (what will not work as OpenMole embeds NetLogo as a jar), but also in the model directory.
+To be able to run a model with extensions, put the extension folder in the same directory as the model source, and activate the option @i{embedWorkspace}.
+
+@p It goes the same for all additional source files (@b{.nls} for large models) or configuration files.
+
+
+
+@h2{An example of NetLogo model exploration}
+
+
+We present now step by step how to explore a NetLogo model. @a("The Fire model", href := Resource.script.fireNLogo.file) is a
+common NetLogo example available in the NetLogo common model library.
+It studies the percolation of a fire in a forest depending on the density of the forest. This model has one input : @i{density} and one output : @i{percent-burned}
 
 
     @br
@@ -40,24 +105,26 @@ common NetLogo example. It studies the percolation of a fire in a forest dependi
     @br
 
 
-@sect{@shared.netlogoMenu.simulation}
+@h3{@shared.netlogoMenu.simulation}
     We would like to study the impact of the @i{density} factor for a fixed population size. To do this, let's
     build a design of experiment where the @i{density} factor ranges from 20% to 80% by steps of 10.
 
     @p Since the Fire model is stochastic, we are interested in doing replications for each instance of the
     @i{density} factor. Results for each replication will be stored it in a @i{CSV} file.
-    In this example case, we will perform 10 replications per step (even though it is a way too small sample to draw up
-    any formal conclusion).
+    In this example case, we will perform 10 replications per step. This stays a too small sample to draw up
+    any robust conclusion on this simple model, but we take this value here for the sake of illustration.
+    When designing your experiment, you will have to find a compromise between the precision on stochasticity and the number of parameter points explored.
+    More elaborated methods, in the case of a calibration of a stochastic model with a genetic algorithm for example, will automatically deal with this compromise (@i{link to GA calibration})
 
     @p You can get the NetLogo implementation of the model
     @a("here", href :=  Resource.script.fireNLogo.file).
 
-@sect{@shared.netlogoMenu.doe}
+@h3{@shared.netlogoMenu.doe}
     We first need to define 2 OpenMOLE variables in order to repeat our experience 10 times for every step of the
     @i{density} exploration. These 2 variables are:
     @ul
       @li{an integer (Int) representing the seed of the random number generator for exploring the replications,}
-      @li{a Double to set the value of @i{density},}
+      @li{a Double to set the value of @i{density}}
 
     @br @hl.openmole(variables, name = "netlogo variables")
 
@@ -75,46 +142,8 @@ common NetLogo example. It studies the percolation of a fire in a forest dependi
     @p We now need to compose this design of experiment in a complete workflow in order to run the 70 distinct
     experiments.
 
-@sect{@shared.netlogoMenu.task}
-    Let's first construct the main task of the workflow. This task runs the actual NetLogo code. OpenMOLE provides a
-     NetLogoTask that expects the following parameters definitions:
-    @ul
-      @li{the path where to find the NetLogo model, i.e. the nlogo source file,}
-      @li{the list of NetLogo commands that OpenMOLE needs to run}
-    @p The NetlogoTask comes in two versions : @b{Netlogo5Task} and @b{Netlogo6Task}, be sure to select
-    the right version of the task according to the version of Netlogo you used, 5 or 6 .
 
-
-    @p In this example, the commands list contains:
-    @ul
-      @li{@i{random-seed} that initialises the random number generator of NetLogo using the seed provided by OpenMOLE,}
-      @li{@i{setup} that calls the setup function of the netlogo file to initialise the model,}
-      @li{@i{go}, a function that runs the model. For this particular model, this function is called until no more turttle are active.}
-    @p The function @i{go-openMOLE} takes three parameters:
-
-    @br @hl.openmole(netlogo, header =
-    s"""
-    $variables
-    $exploration
-    """, name = "netlogo task")
-
-    @p The @i{replication} and the @i{density} OpenMOLE variables are used as parameters of the NetLogo program.
-    Therefore they appear as inputs of the NetLogoTask.
-
-    @p Similarly, 1 output of the model is considered and collected by OpenMOLE at the end of each model execution.
-    It is noted as @i{netLogoOutputs} in the task definition.
-
-    @p The arguments for a NetLogoTask are the following :
-    @ul
-      @li{@i{script} netlogo model (File), mandatory}
-      @li{@i{launchingCommands} netlogo commands to be executed, mandatory}
-      @li{@i{embedWorkspace} should the workspace be embedded for execution of the model (use if you have source files or extensions in the model directory), optional, defaults to false}
-      @li{@i{seed} random seed, optional, defaults to None}
-      @li{@i{netLogoInputs} vector of couples (Val,String) to establish the link between workflow variables that are input and the corresponding netlogo variables, optional}
-      @li{@i{netLogoOutputs} vector of couples (String,Val) to collect outputs of the model (the string can be any NetLogo command), optional}
-      @li{@i{netLogoArrayOutputs} vector of triples (String,Int,Val) to collect outputs from lists in the model (gets the item at the given index), optional}
-
-@sect{@shared.netlogoMenu.storing}
+@h3{@shared.netlogoMenu.storing}
     OpenMOLE usually delegates the tasks execution to many different computers. To gather the results of these remote
     executions, we use a mechanism called @i{hooks}. Hooks can be assimilated to a listener that saves or display
     results. They are more thoroughly described in a
@@ -130,7 +159,7 @@ common NetLogo example. It studies the percolation of a fire in a forest dependi
     $netlogo
     """, name = "netlogo hook")
 
-@sect{@shared.netlogoMenu.together}
+@h3{@shared.netlogoMenu.together}
     Now that we have defined each component, we can compose the workflow that brings all the pieces of the simulation
     together:
     @br @hl.openmole(s"""
@@ -146,7 +175,11 @@ common NetLogo example. It studies the percolation of a fire in a forest dependi
 
     @p At the end of the execution, you will find the output values in a file called @i{result.csv}.
 
-@sect{@shared.netlogoMenu.further}
-    The Netlogo code mixes graphical and pure core instructions.
+@h3{@shared.netlogoMenu.further}
+    The Netlogo combines a GUI created by the user, in which he can define parameters and run functions, which the source code in itself.
+
     Sometimes, you have to modify slightly your code to render it purely headless so that it can be run everywhere.
+
+    //@i{TODO : it is not clear when it is necessary and when a non-headless model can run. Better formulate as a recommandation ?}
+
     The way to proceed in explained in details in the @aa("Headless Netlogo", href := DocumentationPages.headlessNetLogo.file) section.
