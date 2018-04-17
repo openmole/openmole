@@ -42,7 +42,8 @@ case class OutputPuzzleContainer(
 }
 
 object OutputEnvironmentPuzzleContainer {
-  implicit def isToPuzzle = ToPuzzle[OutputEnvironmentPuzzleContainer](_.buildPuzzle)
+  implicit def isToPuzzle: ToPuzzle[OutputEnvironmentPuzzleContainer] =
+    ToPuzzle[OutputEnvironmentPuzzleContainer](_.buildPuzzle)
 }
 
 case class OutputEnvironmentPuzzleContainer(

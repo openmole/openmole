@@ -17,6 +17,7 @@
 package org.openmole.plugin.method.evolution
 
 import org.openmole.core.dsl._
+import org.openmole.core.workflow.puzzle.{ OutputEnvironmentPuzzleContainer, ToPuzzle }
 import org.openmole.core.workflow.validation.Validation
 import org.openmole.plugin.domain.collection._
 import org.scalatest._

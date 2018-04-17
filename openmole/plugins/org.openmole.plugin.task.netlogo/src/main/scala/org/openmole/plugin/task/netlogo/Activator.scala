@@ -39,10 +39,10 @@ class Activator extends PluginInfoActivator {
         Word("netLogoOutputs"),
         Word("netLogoArrayOutputs"),
         Word("embedWorkspace")
-        //Word("netLogoFactory"),// deprecated
-        //Word("external"), // deprecated
-        //Word("script"), // too general
-        //Word("seed"), // too general
+      //Word("netLogoFactory"),// deprecated
+      //Word("external"), // deprecated
+      //Word("script"), // too general
+      //Word("seed"), // too general
       )
 
     PluginInfo.register(this, Vector(this.getClass.getPackage), keyWords = keyWords)

@@ -94,7 +94,7 @@ object ToPuzzle {
       Puzzle(Slot(capsule), lasts = Seq(capsule))
     }
 
-  implicit def hListCanBeToPuzzle[P: ToPuzzle, H <: HList](implicit select: Selector[H, P]) = ToPuzzle[H](h ⇒ implicitly[ToPuzzle[P]].toPuzzle(select(h)))
+  implicit def hListCanBeToPuzzle[H <: HList](implicit select: Puzzle.PuzzleSelector[H]) = ToPuzzle[H](h ⇒ select(h))
 
 }
 
