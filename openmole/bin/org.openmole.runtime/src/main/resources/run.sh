@@ -28,21 +28,7 @@ mkdir -p "${TMPDIR}"
 
 FLAG=""
 
-JAVA="java"
-if [ ! -z ${JAVA_HOME} ]
-then
-  # the environment variable is defined
-  if [ -e ${JAVA_HOME}/bin/java ]
-  then
-      # and this folder does exist
-      #echo "using java ${JAVA_HOME}/bin/java"
-      JAVA="${JAVA_HOME}/bin/java"
-  else
-      echo "wrong java home ${JAVA_HOME}; falling back to 'java'"
-  fi
-fi
-
-JVMVERSION=`$JAVA -version 2>&1 | tail -1 -`
+JVMVERSION=`java -version 2>&1 | tail -1 -`
 
 case "$JVMVERSION" in
   *64-Bit*) FLAG="-XX:+UseCompressedOops";;
@@ -59,7 +45,7 @@ export MALLOC_ARENA_MAX=1
 export LC_ALL="en_US.UTF-8"
 export LANG="en_US.UTF-8"
 
-$JAVA -Djava.io.tmpdir="${TMPDIR}" -Dfile.encoding=UTF-8 -Duser.country=US -Duser.language=en -Xss2M -Xms64m -Xmx${MEMORY} -Dosgi.locking=none -Dosgi.configuration.area="${CONFIGDIR}" $FLAG -XX:ReservedCodeCacheSize=128m -XX:MaxMetaspaceSize=128m -XX:CompressedClassSpaceSize=128m \
+java -Djava.io.tmpdir="${TMPDIR}" -Dfile.encoding=UTF-8 -Duser.country=US -Duser.language=en -Xss2M -Xms64m -Xmx${MEMORY} -Dosgi.locking=none -Dosgi.configuration.area="${CONFIGDIR}" $FLAG -XX:ReservedCodeCacheSize=128m -XX:MaxMetaspaceSize=128m -XX:CompressedClassSpaceSize=128m \
   -XX:+UseG1GC -XX:ParallelGCThreads=1 -XX:CICompilerCount=2 -XX:ConcGCThreads=1 -XX:G1ConcRefinementThreads=1 \
   -cp "${LOCATION}/launcher/*" org.openmole.launcher.Launcher --plugins "${LOCATION}/plugins/" --priority "logging" --run org.openmole.runtime.SimExplorer --osgi-directory "${CONFIGDIR}" -- --workspace "${TMPDIR}" $@
 
