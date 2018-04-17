@@ -32,10 +32,10 @@
 
 
 
-@sect{@shared.netlogoMenu.task}
+@h2{@shared.netlogoMenu.task}
 
-    NetLogo is a widely used Agent-based Modeling platform and language developed by CCL at Northwestern University (see @@("the official website" , href:= https://ccl.northwestern.edu/netlogo/)).
-    It is conceived to be accessible to non-programmers and thus enhance interdisciplinarity in the construction of simulation models, but can also be used for large scale complex models (despite its bad reputation, see @@("this paper", href:= http://jasss.soc.surrey.ac.uk/20/1/3.html) testing netlogo speed performance and suggesting code improvements).
+    NetLogo is a widely used Agent-based Modeling platform and language developed by CCL at Northwestern University (see @lnk("the official website" , href:= https://ccl.northwestern.edu/netlogo/)).
+    It is conceived to be accessible to non-programmers and thus enhance interdisciplinarity in the construction of simulation models, but can also be used for large scale complex models (despite its bad reputation, see @lnk("this paper", href:= http://jasss.soc.surrey.ac.uk/20/1/3.html) testing netlogo speed performance and suggesting code improvements).
     As it runs on the JVM, it is naturally integrated into OpenMOLE.
 
     OpenMOLE provides a
@@ -105,7 +105,7 @@ It studies the percolation of a fire in a forest depending on the density of the
     @br
 
 
-@sect{@shared.netlogoMenu.simulation}
+@h3{@shared.netlogoMenu.simulation}
     We would like to study the impact of the @i{density} factor for a fixed population size. To do this, let's
     build a design of experiment where the @i{density} factor ranges from 20% to 80% by steps of 10.
 
@@ -119,7 +119,7 @@ It studies the percolation of a fire in a forest depending on the density of the
     @p You can get the NetLogo implementation of the model
     @a("here", href :=  Resource.script.fireNLogo.file).
 
-@sect{@shared.netlogoMenu.doe}
+@h3{@shared.netlogoMenu.doe}
     We first need to define 2 OpenMOLE variables in order to repeat our experience 10 times for every step of the
     @i{density} exploration. These 2 variables are:
     @ul
@@ -143,7 +143,7 @@ It studies the percolation of a fire in a forest depending on the density of the
     experiments.
 
 
-@sect{@shared.netlogoMenu.storing}
+@h3{@shared.netlogoMenu.storing}
     OpenMOLE usually delegates the tasks execution to many different computers. To gather the results of these remote
     executions, we use a mechanism called @i{hooks}. Hooks can be assimilated to a listener that saves or display
     results. They are more thoroughly described in a
@@ -159,7 +159,7 @@ It studies the percolation of a fire in a forest depending on the density of the
     $netlogo
     """, name = "netlogo hook")
 
-@sect{@shared.netlogoMenu.together}
+@h3{@shared.netlogoMenu.together}
     Now that we have defined each component, we can compose the workflow that brings all the pieces of the simulation
     together:
     @br @hl.openmole(s"""
@@ -175,11 +175,11 @@ It studies the percolation of a fire in a forest depending on the density of the
 
     @p At the end of the execution, you will find the output values in a file called @i{result.csv}.
 
-@sect{@shared.netlogoMenu.further}
+@h3{@shared.netlogoMenu.further}
     The Netlogo combines a GUI created by the user, in which he can define parameters and run functions, which the source code in itself.
 
     Sometimes, you have to modify slightly your code to render it purely headless so that it can be run everywhere.
 
-    @i{TODO : it is not clear when it is necessary and when a non-headless model can run. Better formulate as a recommandation ?}
+    //@i{TODO : it is not clear when it is necessary and when a non-headless model can run. Better formulate as a recommandation ?}
 
     The way to proceed in explained in details in the @aa("Headless Netlogo", href := DocumentationPages.headlessNetLogo.file) section.
