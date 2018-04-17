@@ -92,7 +92,7 @@ trait NetLogoTask extends Task with ValidateTask {
           for (inBinding ← netLogoInputs) {
             val v = preparedContext(inBinding._1) match {
               case x: String ⇒ '"' + x + '"'
-              case x: File   ⇒ '"' + x.toString + '"'
+              case x: File   ⇒ '"' + x.getAbsolutePath + '"'
               case x         ⇒ x.toString
             }
             executeNetLogo("set " + inBinding._2 + " " + v)
