@@ -191,3 +191,60 @@ It also explains the various versions of OpenMOLE you may want to use/deploy, fr
   @p The advantage of this model is that new features are tested early in interaction with each others. This scheme serves an hybrid, date-based/feature-based release schedule.
 
   @p At the beginning of a development cycle, an approximate date is given for the next release. This date depends on what are the new features planned for this milestone. This date is flexible and can be modulated given the progress of the new developments.
+
+@sect{@shared.howToContributeMenu.tipsAndTricks}
+
+  @h3{create a pull request}
+  To create a pull request, you would have to:
+  @ul
+  @li{ apply the @aa("first time setup", href := shared.howToContributeMenu.firstTimeSetup) of the openmole development environment }
+  @li{ fork the repository of interest in github: use the fork button in the original repository and fork it into your own github account}
+  @li{ add your fork as a remote repository }
+  @li{ create a branch for you modifications, add your commits there, and push this branch to your github fork }
+  @li{ from your github fork, create a pull request of your forked repository and branch into the dev branch of the openmole repository }
+
+
+  @br
+  @h3{error: You are not allowed to push code to this project}
+  First ensure you respect the contribution procedure and the branching model.
+  You should not try to push directly to the openmole repository, but to your github fork of the repository instead.
+  @br
+  You can identify more precisely the git error by activating debug in the git command: 
+  @hl.highlight("""
+  $> GIT_TRACE=1 GIT_CURL_VERBOSE=1 git push <remote_repo> <branch_name>""", "plain")
+
+
+  @br
+  @h3{error: git-lfs [...] You are not allowed to push code to this project}
+
+  When pushing your updates to the fork, you might encounter this error:
+  @hl.highlight("""
+  $> GIT_TRACE=1 GIT_CURL_VERBOSE=1 git push <remote_repo> <branch_name>
+  13:50:17.630529 trace git-lfs: run_command: ssh -p 20022 -- git@gitlab.iscpif.fr git-lfs-authenticate openmole/openmole.git upload
+  13:50:23.191218 trace git-lfs: ssh: git@gitlab.iscpif.fr failed, error: exit status 1, message: GitLab: You are not allowed to push code to this project.
+  batch request: GitLab: You are not allowed to push code to this project.: exit status 1
+  error: impossible de pousser des références vers 'https://github.com/<your_username>/openmole.git'
+  """, "plain")
+  @br
+  In this case, the push is failing when git lfs attempts to update the binaries referenced in the git repository into the ISCPIF gitlab. 
+  If you did not change the binaries, you might just skip that step by using command line:
+  @hl.highlight("""
+  $> git push --no-verify <remote_repo> <branch_name>""", "plain")
+
+
+  @br
+  @h3{error: openmole compiles but fails at runtime because of a package not found}
+  Try a clean and complete rebuild:
+  @hl.highlight("""
+  $> ./clean.sh
+  [...]
+  $> ./build.sh""", "plain")
+
+
+  @br
+  @h3{support for developers}
+  For developers support, remember you can get in touch with the community:
+  @ul
+  @li{ the @a("chat", href := shared.link.chat) in channel "openmole-dev" }
+  @li{ the @a("OpenMOLE user forum", href := shared.link.mailingList) }
+
