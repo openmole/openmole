@@ -45,6 +45,7 @@ object RTask {
       installCommands match {
         case RLibrary(name) ⇒
           //Vector(s"""R -e 'install.packages(c(${names.map(lib ⇒ '"' + s"$lib" + '"').mkString(",")}), dependencies = T)'""")
+          // TODO add proxy 
           s"""R -e 'install.packages(c("$name"), dependencies = T)'"""
       }
     }
@@ -210,6 +211,7 @@ object RTask {
 @Lenses case class RTask(
   script:             FromContext[String],
   uDocker:            UDockerArguments,
+  uDockerProxy:       FromContext[String],
   errorOnReturnValue: Boolean,
   returnValue:        Option[Val[Int]],
   stdOut:             Option[Val[String]],
