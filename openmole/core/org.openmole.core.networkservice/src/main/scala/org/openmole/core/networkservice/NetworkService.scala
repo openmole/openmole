@@ -17,34 +17,26 @@
 
 package org.openmole.core.networkservice
 
-# TODO !!!!!!!!!!!!!!!
-
 import java.io.File
 import java.util.concurrent.TimeUnit
 
-import com.google.common.cache._
-import org.openmole.core.preference.{ ConfigurationLocation, Preference }
-import org.openmole.core.threadprovider.{ ThreadProvider, Updater }
-import org.openmole.tool.hash._
+import org.openmole.core.preference.{ ConfigurationLocation, Preference, ConfigurationString }
 import org.openmole.core.workspace._
-import org.openmole.tool.cache.AssociativeCache
-import org.openmole.tool.hash._
-import org.openmole.tool.tar._
 import org.openmole.tool.file._
-import org.openmole.tool.thread._
-import squants._
-import squants.time.TimeConversions._
 
-import scala.collection.mutable.{ ListBuffer, WeakHashMap }
-import scala.ref.WeakReference
+import org.apache.http.HttpHost
 
 object NetworkService {
-  val ProxyEnabled =  ConfigurationLocation("NetworkService", "NetworkService", Some(False))
-  val ProxyHost =     ConfigurationLocation("NetworkService", "ProxyHost", None)
-  val ProxyPort =     ConfigurationLocation("NetworkService", "ProxyPort", None)
-  val ProxyScheme =   ConfigurationLocation("NetworkService", "ProxyScheme", None)
 
-  def apply()(implicit preference: Preference, threadProvider: ThreadProvider) = {
+  val httpProxyEnabled = ConfigurationLocation("NetworkService", "HttpProxyEnabled", Some(false))
+  val httpProxyHost = ConfigurationLocation("NetworkService", "HttpProxyHost", Option.empty[String])
+  val httpProxyPort = ConfigurationLocation("NetworkService", "HttpProxyPort", Option.empty[Int])
+
+  val httpsProxyEnabled = ConfigurationLocation("NetworkService", "HttpsProxyEnabled", Some(false))
+  val httpsProxyHost = ConfigurationLocation("NetworkService", "HttpsProxyHost", Option.empty[String])
+  val httpsProxyPort = ConfigurationLocation("NetworkService", "HttpsProxyPort", Option.empty[Int])
+
+  def apply()(implicit preference: Preference) = {
     val ns = new NetworkService
     ns.start
     ns
@@ -53,8 +45,53 @@ object NetworkService {
 
 class NetworkService(implicit preference: Preference) {
 
+  /**
+   * Returns the http proxy (if any) in the form
+   * http://hostname:port
+   */
+  def httpProxyAsString(): Option[String] = {
+    val isEnabledOpt: Option[Boolean] = preference.preferenceOption(NetworkService.httpProxyEnabled)
+    val hostNameOpt: Option[String] = preference.preferenceOption(NetworkService.httpProxyHost)
+    val portOpt: Option[Int] = preference.preferenceOption(NetworkService.httpProxyPort)
+    (isEnabledOpt, hostNameOpt) match {
+      case (_, Some(host: String)) if host.trim.isEmpty ⇒ None
+      case (Some(false) | None, _)                      ⇒ None
+      case (Some(true), Some(host))                     ⇒ Some("http://" + host + ":" + portOpt.getOrElse(80))
+    }
+  }
+
+  /**
+   * Returns the https proxy (if any) in the form
+   * https://hostname:port
+   */
+  def httpsProxyAsString(): Option[String] = {
+    val isEnabledOpt: Option[Boolean] = preference.preferenceOption(NetworkService.httpsProxyEnabled)
+    val hostNameOpt: Option[String] = preference.preferenceOption(NetworkService.httpsProxyHost)
+    val portOpt: Option[Int] = preference.preferenceOption(NetworkService.httpsProxyPort)
+    (isEnabledOpt, hostNameOpt) match {
+      case (_, Some(host: String)) if host.trim.isEmpty ⇒ None
+      case (Some(false) | None, _)                      ⇒ None
+      case (Some(true), Some(host))                     ⇒ Some("http://" + host + ":" + portOpt.getOrElse(443))
+    }
+  }
+
+  /**
+   * Returns an apache HttpHost (if any)
+   * defined according to the configuration.
+   */
+  def httpProxyAsHost(): Option[HttpHost] = {
+    val isEnabledOpt: Option[Boolean] = preference.preferenceOption(NetworkService.httpProxyEnabled)
+    val hostNameOpt: Option[String] = preference.preferenceOption(NetworkService.httpProxyHost)
+    val portOpt: Option[Int] = preference.preferenceOption(NetworkService.httpProxyPort)
+    (isEnabledOpt, hostNameOpt) match {
+      case (_, Some(host)) if host.trim.isEmpty ⇒ None
+      case (Some(false), _)                     ⇒ None
+      case (Some(true), Some(host))             ⇒ Some(new HttpHost(host, portOpt.getOrElse(80), "http"))
+    }
+  }
+
   def start(implicit preference: Preference): Unit = {
-    
+
   }
 
 }
