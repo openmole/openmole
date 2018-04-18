@@ -18,7 +18,7 @@ object DeltaTask {
 object Delta {
   import org.openmole.core.workflow.builder.DefinitionScope
   implicit def scope = DefinitionScope.Internal
-  
+
   def apply(puzzle: Puzzle, objective: (Val[Double], Double)*) =
     puzzle -- DeltaTask(objective: _*)
 
