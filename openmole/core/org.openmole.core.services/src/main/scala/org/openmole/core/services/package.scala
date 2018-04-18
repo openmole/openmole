@@ -14,6 +14,7 @@ import org.openmole.tool.crypto._
 import org.openmole.tool.random._
 import org.openmole.tool.file._
 import org.openmole.core.outputredirection._
+import org.openmole.core.networkservice._
 
 package object services {
 
@@ -42,6 +43,7 @@ package object services {
       implicit val randomProvider = RandomProvider(seeder.newRNG)
       implicit val eventDispatcher = EventDispatcher()
       implicit val outputRedirection = OutputRedirection()
+      implicit val networkService = NetworkService()
       new ServicesContainer()
     }
 
@@ -68,7 +70,8 @@ package object services {
       fileService:         FileService         = services.fileService,
       randomProvider:      RandomProvider      = services.randomProvider,
       eventDispatcher:     EventDispatcher     = services.eventDispatcher,
-      outputRedirection:   OutputRedirection   = services.outputRedirection
+      outputRedirection:   OutputRedirection   = services.outputRedirection,
+      networkService:      NetworkService      = services.networkService
     ) =
       new ServicesContainer()(
         workspace = workspace,
@@ -83,7 +86,8 @@ package object services {
         fileService = fileService,
         randomProvider = randomProvider,
         eventDispatcher = eventDispatcher,
-        outputRedirection = outputRedirection
+        outputRedirection = outputRedirection,
+        networkService = networkService
       )
 
   }
@@ -102,6 +106,7 @@ package object services {
     implicit def randomProvider: RandomProvider
     implicit def eventDispatcher: EventDispatcher
     implicit def outputRedirection: OutputRedirection
+    implicit def networkService: NetworkService
   }
 
   class ServicesContainer(implicit
@@ -117,6 +122,7 @@ package object services {
                           val fileService:         FileService,
                           val randomProvider:      RandomProvider,
                           val eventDispatcher:     EventDispatcher,
-                          val outputRedirection:   OutputRedirection) extends Services
+                          val outputRedirection:   OutputRedirection,
+                          val networkService:      NetworkService) extends Services
 
 }
