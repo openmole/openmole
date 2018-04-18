@@ -36,7 +36,7 @@ object SavePopulationHook {
       import p._
 
       val resultFileLocation = dir / ExpandedString("population${" + t.generationPrototype.name + "}.csv")
-      val resultVariables = context.variable(t.generationPrototype).toSeq ++ t.operations.result(context(t.populationPrototype).toVector).from(context)
+      val resultVariables = context.variable(t.generationPrototype).toSeq ++ t.operations.result(context(t.populationPrototype).toVector, context(t.statePrototype)).from(context)
 
       import org.openmole.plugin.tool.csv._
 
@@ -48,7 +48,7 @@ object SavePopulationHook {
       )
 
       context
-    } set (inputs += t.populationPrototype)
+    } set (inputs += (t.populationPrototype, t.statePrototype))
 
   }
 

@@ -23,6 +23,7 @@ import org.openmole.plugin.domain.collection._
 import org.scalatest._
 import org.openmole.tool.types._
 import org.openmole.plugin.domain.bounds._
+import org.openmole.core.workflow.tools.Stubs._
 
 class WorkflowSpec extends FlatSpec with Matchers {
 

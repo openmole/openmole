@@ -62,7 +62,7 @@ object NSGA2 {
         def buildIndividual(genome: G, phenotype: Vector[Double]) = CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype)
         def initialState(rng: util.Random) = EvolutionState[Unit](random = rng, s = ())
 
-        def result(population: Vector[I]) = FromContext { p ⇒
+        def result(population: Vector[I], state: S) = FromContext { p ⇒
           import p._
 
           val res = MGONSGA2.result(population, Genome.continuous(om.genome).from(context))
@@ -165,7 +165,7 @@ object NSGA2 {
         def buildIndividual(genome: G, phenotype: Vector[Double]) = CDGenome.NoisyIndividual.buildIndividual(genome, phenotype)
         def initialState(rng: util.Random) = EvolutionState[Unit](random = rng, s = ())
 
-        def result(population: Vector[I]) = FromContext { p ⇒
+        def result(population: Vector[I], state: S) = FromContext { p ⇒
           import p._
 
           val res = MGONoisyNSGA2.result(population, om.aggregation, Genome.continuous(om.genome).from(context))
