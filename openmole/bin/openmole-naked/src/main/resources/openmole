@@ -38,7 +38,21 @@ DEBUG_MODE=false
 DEBUG_PORT=5005
 FLAGS=()
 
-JAVAVERSION=$(java -version 2>&1)
+JAVA="java"
+if [ ! -z ${JAVA_HOME} ]
+then
+  # the environment variable is defined
+  if [ -e ${JAVA_HOME}/bin/java ]
+  then
+      # and this folder does exist
+      #echo "using java ${JAVA_HOME}/bin/java"
+      JAVA="${JAVA_HOME}/bin/java"
+  else
+      echo "wrong java home ${JAVA_HOME}; falling back to 'java'"
+  fi
+fi
+
+JAVAVERSION=$($JAVA -version 2>&1)
 
 JVMFLAVOR=$(echo "$JAVAVERSION" | tail -1)
 case "$JVMFLAVOR" in
@@ -47,7 +61,7 @@ esac
 
 JVMVERSION=$(echo "$JAVAVERSION" | grep version | rev | cut -d' ' -f1 | rev)
 case "$JVMVERSION" in
-  *1\.6\.*) echo "Your java version is too old"; exit 1;;
+  *1\.6\.*) echo "Your java version is too old ($JAVAVERSION). You can use $JAVA_HOME to use a more recent Java."; exit 1;;
   *1\.7\.*) FLAGS+=("-XX:MaxPermSize=128M");;
 esac
 
@@ -90,7 +104,7 @@ function run {
   mkdir -p "${WORKSPACE}/.tmp/"
   CONFIGDIR=${WORKSPACE}/.tmp/`date +%s`_$RANDOM
 
-  java -Xss8M -Dfile.encoding=UTF-8 -Duser.country=US -Duser.language=en -Djava.security.egd=file:/dev/./urandom -Dosgi.locking=none -Dopenmole.location="${LOCATION}" -Dosgi.classloader.singleThreadLoads=true  -Dosgi.configuration.area="${CONFIGDIR}" "-Xmx${MEM}" "${FLAGS[@]}" \
+  $JAVA -Xss8M -Dfile.encoding=UTF-8 -Duser.country=US -Duser.language=en -Djava.security.egd=file:/dev/./urandom -Dosgi.locking=none -Dopenmole.location="${LOCATION}" -Dosgi.classloader.singleThreadLoads=true  -Dosgi.configuration.area="${CONFIGDIR}" "-Xmx${MEM}" "${FLAGS[@]}" \
      -XX:+UseG1GC -XX:CICompilerCount=2 -XX:ParallelGCThreads=2 -XX:ConcGCThreads=2 -XX:G1ConcRefinementThreads=2 \
      -cp "${LOCATION}/launcher/*" org.openmole.launcher.Launcher  --plugins "${LOCATION}/plugins/" --priority "logging" --run org.openmole.ui.Application --osgi-directory "${CONFIGDIR}" -- \
      "${ARGS[@]}" "${SCRIPT_ARGS[@]}"
