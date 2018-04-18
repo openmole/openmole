@@ -33,7 +33,7 @@ import org.openmole.plugin.tool.pattern._
 
 package object directsampling {
 
-  import DefinitionScope.internal._
+  implicit def scope = DefinitionScope.Internal
 
   def Replication[T: Distribution](
     evaluation:       Puzzle,
