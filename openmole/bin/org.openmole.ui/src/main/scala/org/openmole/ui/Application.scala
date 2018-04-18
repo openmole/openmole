@@ -85,6 +85,7 @@ object Application extends JavaLogger {
       remote:               Boolean         = false,
       http:                 Boolean         = false,
       browse:               Boolean         = true,
+      dockerProxy:          Option[String]  = None,
       args:                 List[String]    = Nil,
       extraHeader:          Option[File]    = None
     )
@@ -124,6 +125,7 @@ object Application extends JavaLogger {
       |[--reset-password] reset all preferences and ask for the a password
       |[--mem memory] allocate more memory to the JVM (not supported on windows yes), for instance --mem 2G
       |[--logger-level level] set the level of logging
+      |[--docker-proxy proxy] set the proxy to be used for loading docker images, in the form http://proxyhost.ext:3128
       |[--] end of options the remaining arguments are provided to the console in the args array
       |[-h | --help] print help""".stripMargin
 
@@ -154,6 +156,7 @@ object Application extends JavaLogger {
         case "--reset" :: tail                  ⇒ parse(tail, c.copy(launchMode = Reset(initialisePassword = false)))
         case "--host-name" :: tail              ⇒ parse(tail.tail, c.copy(hostName = Some(tail.head)))
         case "--reset-password" :: tail         ⇒ parse(tail, c.copy(launchMode = Reset(initialisePassword = true)))
+        case "--docker-proxy" :: tail           ⇒ parse(tail, c.copy(dockerProxy = Some(URI.create(tail.head))))
         case "--" :: tail                       ⇒ parse(Nil, c.copy(args = tail))
         case "-h" :: tail                       ⇒ help(tail)
         case "--help" :: tail                   ⇒ help(tail)
