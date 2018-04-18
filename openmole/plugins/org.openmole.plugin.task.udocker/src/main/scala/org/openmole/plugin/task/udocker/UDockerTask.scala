@@ -24,6 +24,7 @@ import org.openmole.core.context.{ Context, Variable }
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.validation._
 import org.openmole.core.workspace._
+import org.openmole.core.networkservice._
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.workflow.builder._
 import org.openmole.core.expansion._
@@ -85,7 +86,7 @@ object UDockerTask {
     stdOut:             OptionalArgument[Val[String]] = None,
     stdErr:             OptionalArgument[Val[String]] = None,
     errorOnReturnValue: Boolean                       = true
-  )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: NewFile, workspace: Workspace, preference: Preference, threadProvider: ThreadProvider, fileService: FileService, outputRedirection: OutputRedirection): UDockerTask = {
+  )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: NewFile, workspace: Workspace, preference: Preference, threadProvider: ThreadProvider, fileService: FileService, outputRedirection: OutputRedirection, networkservice: NetworkService): UDockerTask = {
 
     def blockChars(s: String): String = {
       val blocked = Set(''', '"', '\\')
@@ -112,7 +113,7 @@ object UDockerTask {
     mode:           OptionalArgument[String] = None,
     cacheInstall:   Boolean                  = true,
     forceUpdate:    Boolean                  = false,
-    reuseContainer: Boolean                  = true)(implicit newFile: NewFile, preference: Preference, threadProvider: ThreadProvider, workspace: Workspace, fileService: FileService, outputRedirection: OutputRedirection) = {
+    reuseContainer: Boolean                  = true)(implicit newFile: NewFile, preference: Preference, threadProvider: ThreadProvider, workspace: Workspace, fileService: FileService, outputRedirection: OutputRedirection, networkservice: NetworkService) = {
     val uDocker =
       UDockerArguments(
         localDockerImage = toLocalImage(image) match {
@@ -190,7 +191,7 @@ object UDockerTask {
     installedUDockerContainer()
   }
 
-  def toLocalImage(containerImage: ContainerImage)(implicit preference: Preference, newFile: NewFile, workspace: Workspace, threadProvider: ThreadProvider, outputRedirection: OutputRedirection): Either[Err, LocalDockerImage] =
+  def toLocalImage(containerImage: ContainerImage)(implicit preference: Preference, newFile: NewFile, workspace: Workspace, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkservice: NetworkService): Either[Err, LocalDockerImage] =
     containerImage match {
       case i: DockerImage      ⇒ downloadImage(i, manifestDirectory(workspace), layersDirectory(workspace), preference(RegistryTimeout))
       case i: SavedDockerImage ⇒ loadImage(i)

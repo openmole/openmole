@@ -5,6 +5,7 @@ import java.util.UUID
 
 import org.openmole.core.threadprovider._
 import org.openmole.core.workspace._
+import org.openmole.core.networkservice._
 import org.openmole.plugin.task.udocker.DockerMetadata._
 import org.openmole.plugin.task.udocker.Registry._
 import org.openmole.plugin.task.udocker.UDockerTask._
@@ -46,7 +47,7 @@ object UDocker {
     lazy val id = UUID.randomUUID().toString
   }
 
-  def downloadImage(dockerImage: DockerImage, manifestDirectory: File, layersDirectory: File, timeout: Time)(implicit newFile: NewFile, threadProvider: ThreadProvider, outputRedirection: OutputRedirection) = {
+  def downloadImage(dockerImage: DockerImage, manifestDirectory: File, layersDirectory: File, timeout: Time)(implicit newFile: NewFile, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkservice: NetworkService) = {
     import Registry._
 
     def layerFile(layer: Layer) = layersDirectory / layer.digest
@@ -160,7 +161,7 @@ object UDocker {
    *
    * Assume v1.x Image JSON format and registry protocol v2 Schema 1
    */
-  def loadImage(dockerImage: SavedDockerImage)(implicit newFile: NewFile, workspace: Workspace): Either[Err, LocalDockerImage] = newFile.withTmpDir { extractedImage ⇒
+  def loadImage(dockerImage: SavedDockerImage)(implicit newFile: NewFile, workspace: Workspace, networkservice: NetworkService): Either[Err, LocalDockerImage] = newFile.withTmpDir { extractedImage ⇒
 
     import org.openmole.tool.tar._
 
