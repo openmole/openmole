@@ -223,9 +223,7 @@ lazy val fileService = OsgiProject(coreDir, "org.openmole.core.fileservice", imp
   libraryDependencies += Libraries.guava
   )
 
-lazy val networkService = OsgiProject(coreDir, "org.openmole.core.networkservice", imports = Seq("*")) dependsOn(tools, workspace, preference) settings (coreSettings: _*) settings (defaultActivator) settings (
-  libraryDependencies ++= Libraries.httpClient
-  )
+lazy val networkService = OsgiProject(coreDir, "org.openmole.core.networkservice", imports = Seq("*")) dependsOn(tools, workspace, preference) settings (coreSettings: _*) settings (defaultActivator) 
 
 lazy val threadProvider = OsgiProject(coreDir, "org.openmole.core.threadprovider", imports = Seq("*")) dependsOn(tools, preference) settings (coreSettings: _*) settings (defaultActivator)
 
