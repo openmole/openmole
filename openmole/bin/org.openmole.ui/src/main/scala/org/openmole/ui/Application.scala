@@ -198,7 +198,7 @@ object Application extends JavaLogger {
 
     def password = config.password orElse config.passwordFile.map(_.lines.head)
 
-    // store the proxy settings (if any) into memory preferences
+    // store the proxy settings (if any) into current preferences
     config.proxyHost match {
       case Some(proxyHost) ⇒
         implicit val preference = Services.preference(workspace)
