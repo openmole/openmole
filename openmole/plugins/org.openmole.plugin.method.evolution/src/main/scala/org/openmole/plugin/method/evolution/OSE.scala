@@ -332,65 +332,52 @@ object OSE {
   def apply(
     origin:     Seq[OriginAxe],
     objectives: Seq[FitnessPattern],
-    genome:     Genome              = Seq(),
-    mu:         Int                 = 200) = {
+    genome:     Genome                       = Seq(),
+    mu:         Int                          = 200,
+    stochastic: OptionalArgument[Stochastic] = None): EvolutionWorkflow = stochastic.option match {
+    case None ⇒
+      val fg = OriginAxe.fullGenome(origin, genome)
+      val os = FitnessPattern.toObjectives(objectives)
 
-    val fg = OriginAxe.fullGenome(origin, genome)
-    val os = FitnessPattern.toObjectives(objectives)
+      val integration: WorkflowIntegration.DeterministicGA[_] =
+        WorkflowIntegration.DeterministicGA(
+          DeterministicParams(
+            mu = mu,
+            origin = OriginAxe.toOrigin(origin, genome),
+            genome = fg,
+            objectives = os,
+            limit = FitnessPattern.toLimit(objectives),
+            operatorExploration = operatorExploration),
+          fg,
+          os
+        )
 
-    val integration: WorkflowIntegration.DeterministicGA[_] =
-      WorkflowIntegration.DeterministicGA(
-        DeterministicParams(
-          mu = mu,
-          origin = OriginAxe.toOrigin(origin, genome),
-          genome = fg,
-          objectives = os,
-          limit = FitnessPattern.toLimit(objectives),
-          operatorExploration = operatorExploration),
-        fg,
-        os
-      )
+      WorkflowIntegration.DeterministicGA.toEvolutionWorkflow(integration)
+    case Some(stochastic) ⇒
+      val fg = OriginAxe.fullGenome(origin, genome)
+      val os = FitnessPattern.toObjectives(objectives)
 
-    WorkflowIntegration.DeterministicGA.toEvolutionWorkflow(integration)
+      def aggregation(h: Vector[Vector[Double]]) =
+        StochasticGAIntegration.aggregateVector(stochastic.aggregation.option, h)
+
+      val integration: WorkflowIntegration.StochasticGA[_] =
+        WorkflowIntegration.StochasticGA(
+          StochasticParams(
+            mu = mu,
+            origin = OriginAxe.toOrigin(origin, genome),
+            genome = fg,
+            objectives = os,
+            limit = FitnessPattern.toLimit(objectives),
+            operatorExploration = operatorExploration,
+            historySize = stochastic.replications,
+            cloneProbability = stochastic.reevaluate,
+            aggregation = aggregation),
+          fg,
+          os,
+          stochastic
+        )(StochasticParams.integration)
+
+      WorkflowIntegration.StochasticGA.toEvolutionWorkflow(integration)
   }
-
-  //
-  //  import org.openmole.core.dsl._
-  //
-  //  def apply(
-  //             genome:     Genome,
-  //             objectives: Seq[PatternAxe],
-  //             stochastic: OptionalArgument[Stochastic] = None
-  //           ) = stochastic.option match {
-  //    case None ⇒
-  //      val integration: WorkflowIntegration.DeterministicGA[_] = WorkflowIntegration.DeterministicGA(
-  //        DeterministicParams(
-  //          mgo.niche.irregularGrid(objectives.map(_.scale).toVector),
-  //          genome,
-  //          objectives.map(_.p),
-  //          operatorExploration),
-  //        genome,
-  //        objectives.map(_.p)
-  //      )
-  //
-  //      WorkflowIntegration.DeterministicGA.toEvolutionWorkflow(integration)
-  //    case Some(stochastic) ⇒
-  //      val integration: WorkflowIntegration.StochasticGA[_] = WorkflowIntegration.StochasticGA(
-  //        StochasticParams(
-  //          pattern = mgo.niche.irregularGrid(objectives.map(_.scale).toVector),
-  //          aggregation = StochasticGAIntegration.aggregateVector(stochastic.aggregation, _),
-  //          genome = genome,
-  //          objectives = objectives.map(_.p),
-  //          historySize = stochastic.replications,
-  //          cloneProbability = stochastic.reevaluate,
-  //          operatorExploration = operatorExploration
-  //        ),
-  //        genome,
-  //        objectives.map(_.p),
-  //        stochastic
-  //      )
-  //
-  //      WorkflowIntegration.StochasticGA.toEvolutionWorkflow(integration)
-  //  }
 
 }
