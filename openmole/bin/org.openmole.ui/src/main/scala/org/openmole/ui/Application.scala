@@ -207,9 +207,9 @@ object Application extends JavaLogger {
         preference.setPreference(NetworkService.httpProxyHost, proxyHost)
         preference.setPreference(NetworkService.httpsProxyHost, proxyHost)
       case None ⇒
-        implicit val preference = Services.preference(workspace)
-        preference.setPreference(NetworkService.httpProxyEnabled, false)
-        preference.setPreference(NetworkService.httpsProxyEnabled, false)
+      //implicit val preference = Services.preference(workspace)
+      //preference.setPreference(NetworkService.httpProxyEnabled, false)
+      //preference.setPreference(NetworkService.httpsProxyEnabled, false)
     }
     config.proxyPort match {
       case Some(proxyPort) ⇒
