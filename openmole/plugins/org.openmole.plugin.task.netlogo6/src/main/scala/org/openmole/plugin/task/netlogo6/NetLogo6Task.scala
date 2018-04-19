@@ -37,6 +37,7 @@ object NetLogo6Task {
 
   implicit def isTask: InputOutputBuilder[NetLogo6Task] = InputOutputBuilder(NetLogo6Task.config)
   implicit def isExternal: ExternalBuilder[NetLogo6Task] = ExternalBuilder(NetLogo6Task.external)
+  implicit def isInfo = InfoBuilder(info)
 
   implicit def isBuilder = new NetLogoTaskBuilder[NetLogo6Task] {
     override def netLogoInputs = NetLogo6Task.netLogoInputs
@@ -50,7 +51,7 @@ object NetLogo6Task {
     launchingCommands: Seq[FromContext[String]],
     seed:              OptionalArgument[Val[Int]] = None,
     ignoreError:       Boolean                    = false
-  )(implicit name: sourcecode.Name): NetLogo6Task =
+  )(implicit name: sourcecode.Name, definitionScope: DefinitionScope): NetLogo6Task =
     withDefaultArgs(
       workspace = Workspace(script = script, workspace = workspace.getName),
       launchingCommands = launchingCommands,
@@ -66,7 +67,7 @@ object NetLogo6Task {
     launchingCommands: Seq[FromContext[String]],
     seed:              OptionalArgument[Val[Int]] = None,
     ignoreError:       Boolean                    = false
-  )(implicit name: sourcecode.Name): NetLogo6Task =
+  )(implicit name: sourcecode.Name, definitionScope: DefinitionScope): NetLogo6Task =
     withDefaultArgs(
       workspace = Workspace(script = script.getName),
       launchingCommands = launchingCommands,
@@ -83,7 +84,7 @@ object NetLogo6Task {
     embedWorkspace:    Boolean                    = false,
     seed:              OptionalArgument[Val[Int]] = None,
     ignoreError:       Boolean                    = false
-  )(implicit name: sourcecode.Name): NetLogo6Task =
+  )(implicit name: sourcecode.Name, definitionScope: DefinitionScope): NetLogo6Task =
     if (embedWorkspace) workspace(script.getCanonicalFile.getParentFile, script.getName, launchingCommands, seed = seed, ignoreError = ignoreError)
     else file(script, launchingCommands, seed = seed, ignoreError = ignoreError)
 
@@ -92,10 +93,11 @@ object NetLogo6Task {
     launchingCommands: Seq[FromContext[String]],
     seed:              Option[Val[Int]],
     ignoreError:       Boolean
-  )(implicit name: sourcecode.Name) =
+  )(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     NetLogo6Task(
       config = InputOutputConfig(),
       external = External(),
+      info = InfoConfig(),
       netLogoInputs = Vector.empty,
       netLogoOutputs = Vector.empty,
       netLogoArrayOutputs = Vector.empty,
@@ -110,6 +112,7 @@ object NetLogo6Task {
 @Lenses case class NetLogo6Task(
   config:              InputOutputConfig,
   external:            External,
+  info:                InfoConfig,
   netLogoInputs:       Vector[(Val[_], String)],
   netLogoOutputs:      Vector[(String, Val[_])],
   netLogoArrayOutputs: Vector[(String, Int, Val[_])],

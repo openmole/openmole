@@ -33,13 +33,15 @@ import org.openmole.tool.file._
 object SaveHook {
 
   implicit def isIO = InputOutputBuilder(SaveHook.config)
+  implicit def isInfo = InfoBuilder(info)
 
-  def apply(file: FromContext[File], prototypes: Val[_]*)(implicit serializerService: SerializerService, name: sourcecode.Name) =
+  def apply(file: FromContext[File], prototypes: Val[_]*)(implicit serializerService: SerializerService, name: sourcecode.Name, definitionScope: DefinitionScope) =
     new SaveHook(
       file,
       prototypes.toVector,
       config = InputOutputConfig(),
-      serializerService = serializerService
+      serializerService = serializerService,
+      info = InfoConfig()
     )
 }
 
@@ -47,7 +49,8 @@ object SaveHook {
   file:              FromContext[File],
   prototypes:        Vector[Val[_]],
   config:            InputOutputConfig,
-  serializerService: SerializerService
+  serializerService: SerializerService,
+  info:              InfoConfig
 ) extends Hook with ValidateHook {
 
   override def validate(inputs: Seq[Val[_]]) = Validate { p ⇒

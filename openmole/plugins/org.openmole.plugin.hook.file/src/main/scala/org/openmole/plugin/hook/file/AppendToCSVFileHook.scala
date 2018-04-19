@@ -21,7 +21,7 @@ import monocle.macros.Lenses
 import org.openmole.core.context.{ Context, Val }
 import org.openmole.core.expansion._
 import org.openmole.core.tools.io.Prettifier._
-import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
+import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.validation._
 import org.openmole.core.workflow.dsl._
@@ -29,19 +29,21 @@ import org.openmole.core.workflow.dsl._
 object AppendToCSVFileHook {
 
   implicit def isIO: InputOutputBuilder[AppendToCSVFileHook] = InputOutputBuilder(AppendToCSVFileHook.config)
+  implicit def isInfo = InfoBuilder(info)
 
   implicit def isBuilder: AppendToCSVFileHookBuilder[AppendToCSVFileHook] = new AppendToCSVFileHookBuilder[AppendToCSVFileHook] {
     override def csvHeader = AppendToCSVFileHook.header
     override def arraysOnSingleRow = AppendToCSVFileHook.arraysOnSingleRow
   }
 
-  def apply(file: FromContext[File], prototypes: Val[_]*)(implicit name: sourcecode.Name) =
+  def apply(file: FromContext[File], prototypes: Val[_]*)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     new AppendToCSVFileHook(
       file,
       prototypes.toVector,
       header = None,
       arraysOnSingleRow = false,
-      config = InputOutputConfig()
+      config = InputOutputConfig(),
+      info = InfoConfig()
     ) set (inputs += (prototypes: _*))
 
 }
@@ -51,7 +53,8 @@ object AppendToCSVFileHook {
   prototypes:        Vector[Val[_]],
   header:            Option[FromContext[String]],
   arraysOnSingleRow: Boolean,
-  config:            InputOutputConfig
+  config:            InputOutputConfig,
+  info:              InfoConfig
 ) extends Hook with ValidateHook {
 
   override def validate(inputs: Seq[Val[_]]) = Validate { p ⇒

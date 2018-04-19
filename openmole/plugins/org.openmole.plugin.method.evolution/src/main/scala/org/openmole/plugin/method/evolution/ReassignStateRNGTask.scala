@@ -18,11 +18,12 @@ package org.openmole.plugin.method.evolution
 
 import org.openmole.core.context.{ Context, Variable }
 import org.openmole.core.dsl._
+import org.openmole.core.workflow.builder.DefinitionScope
 import org.openmole.core.workflow.task._
 
 object ReassignStateRNGTask {
 
-  def apply[T](algorithm: T)(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name) = {
+  def apply[T](algorithm: T)(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name, definitionScope: DefinitionScope) = {
     val t = wfi(algorithm)
 
     ClosureTask("ReassignStateRNGTask") { (context, _, _) ⇒

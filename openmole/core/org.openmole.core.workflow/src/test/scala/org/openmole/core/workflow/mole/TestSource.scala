@@ -19,7 +19,8 @@ package org.openmole.core.workflow.mole
 import monocle.macros.Lenses
 import org.openmole.core.context.Context
 import org.openmole.core.expansion.FromContext
-import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
+import org.openmole.core.workflow.builder.{ InfoConfig, InputOutputBuilder, InputOutputConfig }
+import org.openmole.core.workflow.tools.Stubs._
 
 object TestSource {
   implicit def isBuilder: InputOutputBuilder[TestSource] = InputOutputBuilder(config)
@@ -27,7 +28,8 @@ object TestSource {
 
 @Lenses case class TestSource(
   f:      Context ⇒ Context = identity[Context],
-  config: InputOutputConfig = InputOutputConfig()
+  config: InputOutputConfig = InputOutputConfig(),
+  info:   InfoConfig        = InfoConfig()
 ) extends Source {
   override protected def process(executionContext: MoleExecutionContext) = FromContext { p ⇒ f(p.context) }
 }

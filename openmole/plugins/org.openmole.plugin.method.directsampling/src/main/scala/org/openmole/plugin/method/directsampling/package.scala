@@ -19,6 +19,7 @@ package org.openmole.plugin.method
 
 import org.openmole.core.context._
 import org.openmole.core.outputmanager.OutputManager
+import org.openmole.core.workflow.builder.DefinitionScope
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.puzzle._
@@ -31,6 +32,8 @@ import org.openmole.plugin.domain.modifier._
 import org.openmole.plugin.tool.pattern._
 
 package object directsampling {
+
+  implicit def scope = DefinitionScope.Internal
 
   def Replication[T: Distribution](
     evaluation:       Puzzle,

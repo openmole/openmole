@@ -25,7 +25,7 @@ import org.openmole.core.fileservice.FileService
 import org.openmole.core.outputredirection._
 import org.openmole.core.preference.Preference
 import org.openmole.core.threadprovider.ThreadProvider
-import org.openmole.core.workflow.builder.InputOutputConfig
+import org.openmole.core.workflow.builder.{ InfoConfig, InputOutputConfig }
 import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workspace.{ NewFile, Workspace }
@@ -49,6 +49,7 @@ case class TaskExecutionContext(
 
 object Task {
   def buildRNG(context: Context): scala.util.Random = random.Random(context(Variable.openMOLESeed)).toScala
+  def definitionScope(t: Task) = t.info.definitionScope
 }
 
 trait Task <: Name {
@@ -67,11 +68,12 @@ trait Task <: Name {
   protected def process(executionContext: TaskExecutionContext): FromContext[Context]
 
   def config: InputOutputConfig
+  def info: InfoConfig
 
   def inputs = config.inputs
   def outputs = config.outputs
   def defaults = config.defaults
-  def name = config.name
+  def name = info.name
 
 }
 

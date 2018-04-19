@@ -19,14 +19,15 @@ package org.openmole.plugin.hook
 
 import org.openmole.core.workflow.mole._
 import org.openmole.core.expansion._
+import org.openmole.core.workflow.builder.DefinitionScope
 
 package object modifier {
 
   implicit class HookModifierDecorator(h: Hook) {
-    def when(condition: Condition) = ConditionHook(h, condition)
-    def when(condition: String) = ConditionHook(h, condition)
-    def condition(condition: Condition) = when(condition)
-    def condition(condition: String) = when(condition)
+    def when(condition: Condition)(implicit definitionScope: DefinitionScope) = ConditionHook(h, condition)
+    def when(condition: String)(implicit definitionScope: DefinitionScope) = ConditionHook(h, condition)
+    def condition(condition: Condition)(implicit definitionScope: DefinitionScope) = when(condition)
+    def condition(condition: String)(implicit definitionScope: DefinitionScope) = when(condition)
   }
 
 }

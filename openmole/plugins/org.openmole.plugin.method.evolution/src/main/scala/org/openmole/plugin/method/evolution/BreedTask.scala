@@ -18,12 +18,13 @@
 package org.openmole.plugin.method.evolution
 
 import org.openmole.core.context.{ Context, Variable }
+import org.openmole.core.workflow.builder.DefinitionScope
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.task._
 
 object BreedTask {
 
-  def apply[T: WorkflowIntegration](algorithm: T, size: Int)(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name) = {
+  def apply[T: WorkflowIntegration](algorithm: T, size: Int)(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name, definitionScope: DefinitionScope) = {
     val t = wfi(algorithm)
 
     FromContextTask("BreedTask") { p ⇒

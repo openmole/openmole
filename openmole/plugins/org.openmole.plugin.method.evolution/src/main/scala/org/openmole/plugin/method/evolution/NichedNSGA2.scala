@@ -101,7 +101,7 @@ object NichedNSGA2 {
         def buildIndividual(genome: G, phenotype: Vector[Double]) = CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype)
         def initialState(rng: util.Random) = EvolutionState[Unit](random = rng, s = ())
 
-        def result(population: Vector[I]) = FromContext { p ⇒
+        def result(population: Vector[I], state: S) = FromContext { p ⇒
           import p._
 
           val res = Profile.result(population, om.niche.from(context), Genome.continuous(om.genome).from(context))
@@ -233,7 +233,7 @@ object NichedNSGA2 {
         def buildIndividual(genome: G, phenotype: Vector[Double]) = CDGenome.NoisyIndividual.buildIndividual(genome, phenotype)
         def initialState(rng: util.Random) = EvolutionState[Unit](random = rng, s = ())
 
-        def result(population: Vector[I]) = FromContext { p ⇒
+        def result(population: Vector[I], state: S) = FromContext { p ⇒
           import p._
 
           val res = NoisyProfile.result(population, om.aggregation, om.niche.from(context), Genome.continuous(om.genome).from(context))

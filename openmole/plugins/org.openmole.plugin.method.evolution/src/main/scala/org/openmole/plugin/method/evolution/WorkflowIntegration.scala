@@ -307,7 +307,7 @@ object MGOAPI {
       def afterGeneration(g: Long, population: Vector[I]): M[Boolean]
       def afterDuration(d: squants.Time, population: Vector[I]): M[Boolean]
 
-      def result(population: Vector[I]): FromContext[Seq[Variable[_]]]
+      def result(population: Vector[I], state: S): FromContext[Seq[Variable[_]]]
     }
 
   }

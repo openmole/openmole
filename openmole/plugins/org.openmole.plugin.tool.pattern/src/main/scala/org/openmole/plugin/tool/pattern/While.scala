@@ -9,6 +9,7 @@ import org.openmole.core.context._
 import org.openmole.core.expansion._
 
 object While {
+  import org.openmole.core.workflow.builder.DefinitionScope.internal._
 
   def apply(
     puzzle:    Puzzle,

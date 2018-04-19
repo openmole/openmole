@@ -21,7 +21,7 @@ import monocle.macros.Lenses
 import org.openmole.core.context.{ Context, Val, Variable }
 import org.openmole.core.dsl._
 import org.openmole.core.expansion.FromContext
-import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
+import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.mole.{ MoleExecutionContext, Source }
 import org.openmole.plugin.tool.csv.{ CSVToVariables, CSVToVariablesBuilder }
 
@@ -30,6 +30,7 @@ import scala.reflect.ClassTag
 object CSVSource {
 
   implicit def isIO = InputOutputBuilder(CSVSource.config)
+  implicit def isInfo = InfoBuilder(CSVSource.info)
 
   implicit def isCSV = new CSVToVariablesBuilder[CSVSource] {
     override def columns = CSVSource.columns
@@ -37,10 +38,11 @@ object CSVSource {
     override def separator = CSVSource.separator
   }
 
-  def apply(path: FromContext[String])(implicit name: sourcecode.Name) =
+  def apply(path: FromContext[String])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     new CSVSource(
       path,
       config = InputOutputConfig(),
+      info = InfoConfig(),
       columns = Vector.empty,
       fileColumns = Vector.empty,
       separator = None
@@ -51,6 +53,7 @@ object CSVSource {
 @Lenses case class CSVSource(
   path:        FromContext[String],
   config:      InputOutputConfig,
+  info:        InfoConfig,
   columns:     Vector[(String, Val[_])],
   fileColumns: Vector[(String, File, Val[File])],
   separator:   Option[Char]

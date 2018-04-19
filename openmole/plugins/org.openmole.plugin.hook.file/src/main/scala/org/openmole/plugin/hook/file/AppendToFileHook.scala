@@ -22,7 +22,7 @@ import java.io.File
 import monocle.macros.Lenses
 import org.openmole.core.context.Context
 import org.openmole.core.expansion.FromContext
-import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
+import org.openmole.core.workflow.builder._
 import org.openmole.core.dsl._
 import org.openmole.core.workflow.mole.{ MoleExecutionContext, _ }
 import org.openmole.core.workflow.validation._
@@ -31,12 +31,14 @@ import org.openmole.tool.stream._
 object AppendToFileHook {
 
   implicit def isIO: InputOutputBuilder[AppendToFileHook] = InputOutputBuilder(AppendToFileHook.config)
+  implicit def isInfo = InfoBuilder(info)
 
-  def apply(file: FromContext[File], content: FromContext[String])(implicit name: sourcecode.Name) =
+  def apply(file: FromContext[File], content: FromContext[String])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     new AppendToFileHook(
       file,
       content,
-      config = InputOutputConfig()
+      config = InputOutputConfig(),
+      info = InfoConfig()
     )
 
 }
@@ -44,7 +46,8 @@ object AppendToFileHook {
 @Lenses case class AppendToFileHook(
   file:    FromContext[File],
   content: FromContext[String],
-  config:  InputOutputConfig
+  config:  InputOutputConfig,
+  info:    InfoConfig
 ) extends Hook with ValidateHook {
 
   override def validate(inputs: Seq[Val[_]]) = Validate { p ⇒

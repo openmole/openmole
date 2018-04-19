@@ -24,18 +24,20 @@ import org.openmole.core.context.{ Context, Val, Variable }
 import org.openmole.core.dsl
 import org.openmole.core.dsl._
 import org.openmole.core.expansion.FromContext
-import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
+import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.mole._
 
 object FileSource {
 
   implicit def isIO = InputOutputBuilder(FileSource.config)
+  implicit def isInfo = InfoBuilder(info)
 
-  def apply(path: FromContext[String], prototype: Val[File])(implicit name: sourcecode.Name) =
+  def apply(path: FromContext[String], prototype: Val[File])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     new FileSource(
       path,
       prototype,
-      config = InputOutputConfig()
+      config = InputOutputConfig(),
+      info = InfoConfig()
     ) set (dsl.outputs += prototype)
 
 }
@@ -43,7 +45,8 @@ object FileSource {
 @Lenses case class FileSource(
   path:      FromContext[String],
   prototype: Val[File],
-  config:    InputOutputConfig
+  config:    InputOutputConfig,
+  info:      InfoConfig
 ) extends Source {
 
   override protected def process(executionContext: MoleExecutionContext) = FromContext { parameters ⇒

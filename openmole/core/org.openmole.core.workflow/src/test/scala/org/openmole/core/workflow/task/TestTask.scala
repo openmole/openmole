@@ -19,11 +19,12 @@ package org.openmole.core.workflow.task
 
 import monocle.macros.Lenses
 import org.openmole.core.context.Context
+import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.task._
 
 object TestTask {
 
-  def apply(f: Context ⇒ Context) =
+  def apply(f: Context ⇒ Context)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     ClosureTask("TestTask")((ctx, _, _) ⇒ f(ctx))
 
 }

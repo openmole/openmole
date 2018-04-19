@@ -10,7 +10,9 @@ import org.openmole.core.workspace._
 import org.openmole.tool.crypto.Cypher
 import org.openmole.tool.random._
 
-object StubServices {
+object Stubs {
+
+  implicit val scope = org.openmole.core.workflow.builder.DefinitionScope.User
 
   val dir = java.io.File.createTempFile("test", "")
   dir.delete()

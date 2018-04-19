@@ -101,6 +101,21 @@ package builder {
     }
   }
 
+  object DefinitionScope {
+    case object Internal extends DefinitionScope
+    case object User extends DefinitionScope
+
+    lazy val internal = new {
+      implicit def default: DefinitionScope = Internal
+    }
+
+    lazy val user = new {
+      implicit def default: DefinitionScope = User
+    }
+  }
+
+  sealed trait DefinitionScope
+
 }
 
 package object builder

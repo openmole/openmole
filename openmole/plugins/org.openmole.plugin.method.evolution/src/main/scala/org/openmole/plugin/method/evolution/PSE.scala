@@ -100,7 +100,7 @@ object PSE {
         def afterGeneration(g: Long, population: Vector[I]) = api.afterGeneration(g, population)
         def afterDuration(d: squants.Time, population: Vector[I]) = api.afterDuration(d, population)
 
-        def result(population: Vector[I]) = FromContext { p ⇒
+        def result(population: Vector[I], state: S) = FromContext { p ⇒
           import p._
 
           val res = MGOPSE.result(population, Genome.continuous(om.genome).from(context), om.pattern)
@@ -219,7 +219,7 @@ object PSE {
         def buildIndividual(genome: G, phenotype: Vector[Double]) = MGONoisyPSE.buildIndividual(genome, phenotype)
         def initialState(rng: util.Random) = EvolutionState[HitMapState](random = rng, s = Map())
 
-        def result(population: Vector[I]) = FromContext { p ⇒
+        def result(population: Vector[I], state: S) = FromContext { p ⇒
           import p._
           import org.openmole.core.context._
 

@@ -29,8 +29,11 @@ import org.openmole.core.expansion._
 import org.openmole.tool.types._
 import squants.time.Time
 import mgo.double2Scalable
+import org.openmole.core.workflow.builder._
 
 package object evolution {
+
+  implicit def scope = DefinitionScope.Internal
 
   val operatorExploration = 0.1
 

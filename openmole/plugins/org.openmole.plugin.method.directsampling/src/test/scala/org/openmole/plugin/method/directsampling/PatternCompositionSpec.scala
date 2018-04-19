@@ -10,7 +10,7 @@ import org.openmole.plugin.tool.pattern._
 import org.scalatest._
 
 class PatternCompositionSpec extends FlatSpec with Matchers {
-  import org.openmole.core.workflow.tools.StubServices._
+  import org.openmole.core.workflow.tools.Stubs._
 
   "Direct samplings" should "compose with loop" in {
     val counter = new AtomicInteger(0)

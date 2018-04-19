@@ -28,18 +28,20 @@ import org.openmole.core.workflow.task._
 object TemplateTask {
 
   implicit def isBuilder: InputOutputBuilder[TemplateTask] = InputOutputBuilder(TemplateTask.config)
+  implicit def isInfo = InfoBuilder(info)
 
   def apply(
     template: String,
     output:   Val[File]
-  )(implicit name: sourcecode.Name) = new TemplateTask(template, output) set (outputs += output)
+  )(implicit name: sourcecode.Name, definitionScope: DefinitionScope) = new TemplateTask(template, output, InputOutputConfig(), InfoConfig()) set (outputs += output)
 
 }
 
 @Lenses case class TemplateTask(
   template: String,
   output:   Val[File],
-  config:   InputOutputConfig = InputOutputConfig()
+  config:   InputOutputConfig,
+  info:     InfoConfig
 ) extends Task {
 
   val expanded = ExpandedString(template)

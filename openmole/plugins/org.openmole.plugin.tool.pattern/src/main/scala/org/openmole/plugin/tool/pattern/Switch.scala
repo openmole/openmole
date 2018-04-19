@@ -30,6 +30,7 @@ object Case {
 case class Case(condition: Condition, puzzle: Puzzle)
 
 object Switch {
+  import org.openmole.core.workflow.builder.DefinitionScope.internal._
 
   def apply(cases: Case*) = {
     val first = Capsule(EmptyTask(), strain = true)

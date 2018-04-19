@@ -29,14 +29,14 @@ import org.openmole.tool.file._
 
 object SavePopulationHook {
 
-  def apply[T](algorithm: T, dir: FromContext[File])(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name) = {
+  def apply[T](algorithm: T, dir: FromContext[File])(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name, definitionScope: DefinitionScope) = {
     val t = wfi(algorithm)
 
     FromContextHook("SavePopulationHook") { p ⇒
       import p._
 
       val resultFileLocation = dir / ExpandedString("population${" + t.generationPrototype.name + "}.csv")
-      val resultVariables = context.variable(t.generationPrototype).toSeq ++ t.operations.result(context(t.populationPrototype).toVector).from(context)
+      val resultVariables = context.variable(t.generationPrototype).toSeq ++ t.operations.result(context(t.populationPrototype).toVector, context(t.statePrototype)).from(context)
 
       import org.openmole.plugin.tool.csv._
 
@@ -48,7 +48,7 @@ object SavePopulationHook {
       )
 
       context
-    } set (inputs += t.populationPrototype)
+    } set (inputs += (t.populationPrototype, t.statePrototype))
 
   }
 

@@ -36,8 +36,9 @@ import org.openmole.tool.random.Seeder
 object MoleTask {
 
   implicit def isTask = InputOutputBuilder(MoleTask.config)
+  implicit def isInfo = InfoBuilder(MoleTask.info)
 
-  def apply(puzzle: Puzzle)(implicit name: sourcecode.Name): MoleTask =
+  def apply(puzzle: Puzzle)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): MoleTask =
     apply(puzzle toMole, puzzle.lasts.head)
 
   /**
@@ -45,8 +46,8 @@ object MoleTask {
    * @param mole the mole executed by this task.
    * @param last the capsule which returns the results
    */
-  def apply(mole: Mole, last: Capsule)(implicit name: sourcecode.Name): MoleTask = {
-    val mt = new MoleTask(_mole = mole, last = last)
+  def apply(mole: Mole, last: Capsule)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): MoleTask = {
+    val mt = new MoleTask(_mole = mole, last = last, Vector.empty, InputOutputConfig(), InfoConfig())
 
     mt set (
       dsl.inputs += (mole.root.inputs(mole, Sources.empty, Hooks.empty).toSeq: _*),
@@ -60,8 +61,9 @@ object MoleTask {
 @Lenses case class MoleTask(
   _mole:     Mole,
   last:      Capsule,
-  implicits: Vector[String]    = Vector.empty,
-  config:    InputOutputConfig = InputOutputConfig()
+  implicits: Vector[String],
+  config:    InputOutputConfig,
+  info:      InfoConfig
 ) extends Task {
 
   def mole = _mole.copy(inputs = inputs)

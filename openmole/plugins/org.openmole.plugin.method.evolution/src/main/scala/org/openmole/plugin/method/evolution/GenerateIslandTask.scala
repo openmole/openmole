@@ -21,10 +21,11 @@ import org.openmole.core.context.Variable
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.task._
 import org.openmole.core.context._
+import org.openmole.core.workflow.builder.DefinitionScope
 
 object GenerateIslandTask {
 
-  def apply[T](algorithm: T, sample: Option[Int], size: Int, untypedOutputPopulation: Val[_])(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name) = {
+  def apply[T](algorithm: T, sample: Option[Int], size: Int, untypedOutputPopulation: Val[_])(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name, definitionScope: DefinitionScope) = {
     val t = wfi(algorithm)
     val outputPopulation = untypedOutputPopulation.asInstanceOf[Val[t.Pop]]
 

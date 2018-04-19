@@ -48,7 +48,7 @@ import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
 import org.openmole.core.services._
 import org.openmole.core.module
 import org.openmole.core.pluginmanager.KeyWord
-import org.openmole.core.workflow.tools.StubServices
+import org.openmole.core.workflow.tools.Stubs
 import resource._
 
 object Utils extends JavaLogger {

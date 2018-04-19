@@ -19,16 +19,17 @@ package org.openmole.core.workflow.mole
 
 import org.openmole.core.context.Context
 import org.openmole.core.expansion.FromContext
-import org.openmole.core.workflow.builder.InputOutputConfig
+import org.openmole.core.workflow.builder.{ InfoConfig, InputOutputConfig }
 import org.openmole.core.workflow.tools._
 
 trait Source <: Name {
   def config: InputOutputConfig
+  def info: InfoConfig
 
   def inputs = config.inputs
   def outputs = config.outputs
   def defaults = config.defaults
-  def name = config.name
+  def name = info.name
 
   protected def process(executionContext: MoleExecutionContext): FromContext[Context]
 

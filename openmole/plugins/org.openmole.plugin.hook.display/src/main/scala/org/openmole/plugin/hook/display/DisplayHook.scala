@@ -27,17 +27,20 @@ import org.openmole.core.workflow.validation._
 object DisplayHook {
 
   implicit def isIO: InputOutputBuilder[DisplayHook] = InputOutputBuilder(config)
+  implicit def isInfo = InfoBuilder(info)
 
-  def apply(toDisplay: FromContext[String])(implicit name: sourcecode.Name) =
+  def apply(toDisplay: FromContext[String])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     new DisplayHook(
       toDisplay,
-      config = InputOutputConfig()
+      config = InputOutputConfig(),
+      info = InfoConfig()
     )
 }
 
 @Lenses case class DisplayHook(
   toDisplay: FromContext[String],
-  config:    InputOutputConfig
+  config:    InputOutputConfig,
+  info:      InfoConfig
 ) extends Hook with ValidateHook {
 
   override def validate(inputs: Seq[Val[_]]) = Validate { p ⇒

@@ -23,18 +23,20 @@ import monocle.macros.Lenses
 import org.openmole.core.context.{ Context, Val, Variable }
 import org.openmole.core.dsl._
 import org.openmole.core.expansion.FromContext
-import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
+import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.mole._
 object ListFilesSource {
 
   implicit def isIO = InputOutputBuilder(ListFilesSource.config)
+  implicit def isInfo = InfoBuilder(info)
 
-  def apply(path: FromContext[String], prototype: Val[Array[File]], regExp: FromContext[String] = ".*")(implicit name: sourcecode.Name) =
+  def apply(path: FromContext[String], prototype: Val[Array[File]], regExp: FromContext[String] = ".*")(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     new ListFilesSource(
       path,
       prototype,
       regExp,
-      config = InputOutputConfig()
+      config = InputOutputConfig(),
+      info = InfoConfig()
     ) set (outputs += prototype)
 
 }
@@ -42,7 +44,8 @@ object ListFilesSource {
   path:      FromContext[String],
   prototype: Val[Array[File]],
   regExp:    FromContext[String],
-  config:    InputOutputConfig
+  config:    InputOutputConfig,
+  info:      InfoConfig
 ) extends Source {
 
   override protected def process(executionContext: MoleExecutionContext) = FromContext { parameters ⇒
