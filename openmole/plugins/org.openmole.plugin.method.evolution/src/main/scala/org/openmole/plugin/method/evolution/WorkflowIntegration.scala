@@ -85,7 +85,7 @@ object WorkflowIntegration {
       def buildIndividual(genome: G, context: Context): I =
         operations.buildIndividual(genome, variablesToPhenotype(context))
 
-      def inputPrototypes = Genome.vals(a.genome)
+      def inputPrototypes = Genome.toVals(a.genome)
       def objectives = a.objectives
       def resultPrototypes = (inputPrototypes ++ outputPrototypes).distinct
 
@@ -110,7 +110,7 @@ object WorkflowIntegration {
       def buildIndividual(genome: G, context: Context): I =
         operations.buildIndividual(genome, variablesToPhenotype(context))
 
-      def inputPrototypes = Genome.vals(a.genome) ++ a.replication.seed.prototype
+      def inputPrototypes = Genome.toVals(a.genome) ++ a.replication.seed.prototype
       def objectives = a.objectives
 
       def genomeToVariables(genome: G): FromContext[Seq[Variable[_]]] = {

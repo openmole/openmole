@@ -34,6 +34,15 @@ object Genome {
 
     implicit def fixIsEnumeration[D, T](f: Factor[D, T])(implicit fix: Fix[D, T]) =
       Enumeration(f.prototype, fix.apply(f.domain).toVector)
+
+    def toVal(b: GenomeBound) = b match {
+      case b: GenomeBound.ScalarDouble     ⇒ b.v
+      case b: GenomeBound.ScalarInt        ⇒ b.v
+      case b: GenomeBound.SequenceOfDouble ⇒ b.v
+      case b: GenomeBound.SequenceOfInt    ⇒ b.v
+      case b: GenomeBound.Enumeration[_]   ⇒ b.v
+    }
+
   }
 
   import _root_.mgo.{ C, D }
@@ -61,14 +70,7 @@ object Genome {
     bounds.sequence.map(_.flatten)
   }
 
-  def vals(genome: Genome) =
-    genome.map {
-      case b: GenomeBound.ScalarDouble     ⇒ b.v
-      case b: GenomeBound.ScalarInt        ⇒ b.v
-      case b: GenomeBound.SequenceOfDouble ⇒ b.v
-      case b: GenomeBound.SequenceOfInt    ⇒ b.v
-      case b: GenomeBound.Enumeration[_]   ⇒ b.v
-    }
+  def toVals(genome: Genome) = genome.map(GenomeBound.toVal)
 
   def continuousIndex(genome: Genome, v: Val[_]): Option[Int] = {
     def indexOf0(l: List[GenomeBound], index: Int): Option[Int] = {

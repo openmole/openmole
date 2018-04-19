@@ -26,21 +26,6 @@ import org.openmole.core.expansion.FromContext
 
 object PSE {
 
-  object PatternAxe {
-
-    implicit def fromDoubleDomainToPatternAxe[D](f: Factor[D, Double])(implicit fix: Fix[D, Double]): PatternAxe =
-      PatternAxe(f.prototype, fix(f.domain).toVector)
-
-    implicit def fromIntDomainToPatternAxe[D](f: Factor[D, Int])(implicit fix: Fix[D, Int]): PatternAxe =
-      PatternAxe(f.prototype, fix(f.domain).toVector.map(_.toDouble))
-
-    implicit def fromLongDomainToPatternAxe[D](f: Factor[D, Long])(implicit fix: Fix[D, Long]): PatternAxe =
-      PatternAxe(f.prototype, fix(f.domain).toVector.map(_.toDouble))
-
-  }
-
-  case class PatternAxe(p: Objective, scale: Vector[Double])
-
   case class DeterministicParams(
     pattern:             Vector[Double] ⇒ Vector[Int],
     genome:              Genome,
@@ -288,6 +273,21 @@ object PSE {
   }
 
   import org.openmole.core.dsl._
+
+  object PatternAxe {
+
+    implicit def fromDoubleDomainToPatternAxe[D](f: Factor[D, Double])(implicit fix: Fix[D, Double]): PatternAxe =
+      PatternAxe(f.prototype, fix(f.domain).toVector)
+
+    implicit def fromIntDomainToPatternAxe[D](f: Factor[D, Int])(implicit fix: Fix[D, Int]): PatternAxe =
+      PatternAxe(f.prototype, fix(f.domain).toVector.map(_.toDouble))
+
+    implicit def fromLongDomainToPatternAxe[D](f: Factor[D, Long])(implicit fix: Fix[D, Long]): PatternAxe =
+      PatternAxe(f.prototype, fix(f.domain).toVector.map(_.toDouble))
+
+  }
+
+  case class PatternAxe(p: Objective, scale: Vector[Double])
 
   def apply(
     genome:     Genome,
