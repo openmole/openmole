@@ -136,7 +136,7 @@ object PSE {
 
         def migrateToIsland(population: Vector[I]) =
           population.map(MGOPSE.Individual.foundedIsland.set(true))
-        def migrateFromIsland(population: Vector[I]) =
+        def migrateFromIsland(population: Vector[I], state: S) =
           population.filter(i ⇒ !MGOPSE.Individual.foundedIsland.get(i)).
             map(MGOPSE.Individual.mapped.set(false)).
             map(MGOPSE.Individual.foundedIsland.set(false))
@@ -262,7 +262,7 @@ object PSE {
         def migrateToIsland(population: Vector[I]) =
           population.map(MGONoisyPSE.Individual.foundedIsland.set(true)).map(MGONoisyPSE.Individual.historyAge.set(0))
 
-        def migrateFromIsland(population: Vector[I]) =
+        def migrateFromIsland(population: Vector[I], state: S) =
           population.filter(i ⇒ !MGONoisyPSE.Individual.foundedIsland.get(i)).
             map(MGONoisyPSE.Individual.mapped.set(false)).
             map(MGONoisyPSE.Individual.foundedIsland.set(false))

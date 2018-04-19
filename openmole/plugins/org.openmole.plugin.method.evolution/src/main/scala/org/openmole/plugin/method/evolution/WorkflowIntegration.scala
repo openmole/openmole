@@ -302,7 +302,7 @@ object MGOAPI {
       def breeding(individuals: Vector[I], n: Int): FromContext[M[Vector[G]]]
       def elitism(individuals: Vector[I]): FromContext[M[Vector[I]]]
       def migrateToIsland(i: Vector[I]): Vector[I]
-      def migrateFromIsland(population: Vector[I]): Vector[I]
+      def migrateFromIsland(population: Vector[I], state: S): Vector[I]
 
       def afterGeneration(g: Long, population: Vector[I]): M[Boolean]
       def afterDuration(d: squants.Time, population: Vector[I]): M[Boolean]
