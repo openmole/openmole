@@ -86,7 +86,7 @@ object Application extends JavaLogger {
       remote:               Boolean         = false,
       http:                 Boolean         = false,
       browse:               Boolean         = true,
-      proxyHost:            Option[String]  = None,
+      proxyURI:            Option[String]  = None,
       args:                 List[String]    = Nil,
       extraHeader:          Option[File]    = None
     )
@@ -126,7 +126,7 @@ object Application extends JavaLogger {
       |[--reset-password] reset all preferences and ask for the a password
       |[--mem memory] allocate more memory to the JVM (not supported on windows yes), for instance --mem 2G
       |[--logger-level level] set the level of logging
-      |[--proxy-host hostname] set the proxy to use to install containers or R packages
+      |[--proxy hostname] set the proxy to use to install containers or R packages, in the form http://myproxy.org:3128
       |[--] end of options the remaining arguments are provided to the console in the args array
       |[-h | --help] print help""".stripMargin
 
@@ -157,7 +157,7 @@ object Application extends JavaLogger {
         case "--reset" :: tail                  ⇒ parse(tail, c.copy(launchMode = Reset(initialisePassword = false)))
         case "--host-name" :: tail              ⇒ parse(tail.tail, c.copy(hostName = Some(tail.head)))
         case "--reset-password" :: tail         ⇒ parse(tail, c.copy(launchMode = Reset(initialisePassword = true)))
-        case "--proxy-host" :: tail             ⇒ parse(tail.tail, c.copy(proxyHost = Some(tail.head)))
+        case "--proxy" :: tail                  ⇒ parse(tail.tail, c.copy(proxyURI = Some(tail.head)))
         case "--" :: tail                       ⇒ parse(Nil, c.copy(args = tail))
         case "-h" :: tail                       ⇒ help(tail)
         case "--help" :: tail                   ⇒ help(tail)
@@ -221,7 +221,7 @@ object Application extends JavaLogger {
           Console.ExitCodes.incorrectPassword
         }
         else {
-          Services.withServices(workspaceDirectory, passwordString, config.proxyHost) { services ⇒
+          Services.withServices(workspaceDirectory, passwordString, config.proxyURI) { services ⇒
             val server = new RESTServer(config.port, config.hostName, services)
             server.run()
           }
@@ -243,7 +243,7 @@ object Application extends JavaLogger {
           print(consoleSplash)
           println(consoleUsage)
           Console.dealWithLoadError(loadPlugins, !config.scriptFile.isDefined)
-          Services.withServices(workspaceDirectory, passwordString, config.proxyHost) { implicit services ⇒
+          Services.withServices(workspaceDirectory, passwordString, config.proxyURI) { implicit services ⇒
             val console = new Console(config.scriptFile)
             console.run(config.args, config.consoleWorkDirectory)
           }
