@@ -265,23 +265,24 @@ object UDocker {
     )
 
   def runCommands(
-    uDocker:           UDockerArguments,
-    uDockerExecutable: File,
-    uDockerVariables:  Vector[(String, String)],
-    uDockerVolumes:    Vector[(String, String)],
-    container:         String,
-    commands:          Seq[String],
-    captureOutput:     Boolean                  = false,
-    captureError:      Boolean                  = false,
-    displayOutput:     Boolean                  = true,
-    displayError:      Boolean                  = true,
-    stdOut:            PrintStream              = System.out,
-    stdErr:            PrintStream              = System.err)(implicit newFile: NewFile) = newFile.withTmpDir { tmpDirectory ⇒
+    uDocker:              UDockerArguments,
+    uDockerExecutable:    File,
+    uDockerVariables:     Vector[(String, String)],
+    uDockerVolumes:       Vector[(String, String)],
+    container:            String,
+    commands:             Seq[String],
+    environmentVariables: Seq[(String, String)],
+    captureOutput:        Boolean                  = false,
+    captureError:         Boolean                  = false,
+    displayOutput:        Boolean                  = true,
+    displayError:         Boolean                  = true,
+    stdOut:               PrintStream              = System.out,
+    stdErr:               PrintStream              = System.err)(implicit newFile: NewFile) = newFile.withTmpDir { tmpDirectory ⇒
     val runInstall = commands.map {
       ic ⇒
         ExecutionCommand.Raw(uDockerRunCommand(
           uDocker.user,
-          Vector.empty,
+          environmentVariables.toVector,
           uDockerVolumes,
           userWorkDirectory(uDocker),
           uDockerExecutable,

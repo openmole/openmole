@@ -42,26 +42,16 @@ object RTask {
   object InstallCommand {
     case class RLibrary(name: String) extends InstallCommand
 
-    def toCommand(installCommands: InstallCommand)(implicit networkService: NetworkService) = {
-
-      val argForHttpProxy =
-        networkService.httpProxy match {
-          case Some(proxy) if NetworkService.HttpHost.isHttps(proxy) ⇒ """Sys.setenv(https_proxy="""" + NetworkService.HttpHost.toString(proxy) + """"); """
-          case Some(proxy) ⇒ """Sys.setenv(http_proxy="""" + NetworkService.HttpHost.toString(proxy) + """"); """
-          case _ ⇒ ""
-        }
-
+    def toCommand(installCommands: InstallCommand) =
       installCommands match {
         case RLibrary(name) ⇒
           //Vector(s"""R -e 'install.packages(c(${names.map(lib ⇒ '"' + s"$lib" + '"').mkString(",")}), dependencies = T)'""")
-          """R --slave -e '""" + argForHttpProxy + s"""install.packages(c("$name"), dependencies = T); library("$name")'"""
+          """R --slave -e 'install.packages(c("$name"), dependencies = T); library("$name")'"""
       }
-    }
 
     implicit def stringToRLibrary(name: String): InstallCommand = RLibrary(name)
-    def installCommands(libraries: Vector[InstallCommand])(implicit networkservice: NetworkService): Vector[String] = {
-      libraries.map(InstallCommand.toCommand)
-    }
+    def installCommands(libraries: Vector[InstallCommand]): Vector[String] = libraries.map(InstallCommand.toCommand)
+
   }
 
   def rImage(version: String) = DockerImage("openmole/r-base", version)
@@ -71,7 +61,7 @@ object RTask {
     install:     Seq[String]         = Seq.empty,
     libraries:   Seq[InstallCommand] = Seq.empty,
     forceUpdate: Boolean             = false
-  )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkservice: NetworkService): RTask = {
+  )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService): RTask = {
 
     def version = "3.3.3"
 
