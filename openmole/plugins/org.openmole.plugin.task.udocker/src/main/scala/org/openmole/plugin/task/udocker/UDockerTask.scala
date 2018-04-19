@@ -86,7 +86,7 @@ object UDockerTask {
     stdOut:             OptionalArgument[Val[String]] = None,
     stdErr:             OptionalArgument[Val[String]] = None,
     errorOnReturnValue: Boolean                       = true
-  )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: NewFile, workspace: Workspace, preference: Preference, threadProvider: ThreadProvider, fileService: FileService, outputRedirection: OutputRedirection, networkservice: NetworkService): UDockerTask = {
+  )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: NewFile, workspace: Workspace, preference: Preference, threadProvider: ThreadProvider, fileService: FileService, outputRedirection: OutputRedirection, networkService: NetworkService): UDockerTask = {
 
     def blockChars(s: String): String = {
       val blocked = Set(''', '"', '\\')
@@ -113,7 +113,7 @@ object UDockerTask {
     mode:           OptionalArgument[String] = None,
     cacheInstall:   Boolean                  = true,
     forceUpdate:    Boolean                  = false,
-    reuseContainer: Boolean                  = true)(implicit newFile: NewFile, preference: Preference, threadProvider: ThreadProvider, workspace: Workspace, fileService: FileService, outputRedirection: OutputRedirection, networkservice: NetworkService) = {
+    reuseContainer: Boolean                  = true)(implicit newFile: NewFile, preference: Preference, threadProvider: ThreadProvider, workspace: Workspace, fileService: FileService, outputRedirection: OutputRedirection, networkService: NetworkService) = {
     val uDocker =
       UDockerArguments(
         localDockerImage = toLocalImage(image) match {
@@ -128,7 +128,7 @@ object UDockerTask {
 
   }
 
-  def installLibraries(uDocker: UDockerArguments, installCommands: Seq[String], cacheInstall: Boolean, forceUpdate: Boolean)(implicit newFile: NewFile, workspace: Workspace, fileService: FileService, outputRedirection: OutputRedirection) = {
+  def installLibraries(uDocker: UDockerArguments, installCommands: Seq[String], cacheInstall: Boolean, forceUpdate: Boolean)(implicit newFile: NewFile, workspace: Workspace, fileService: FileService, outputRedirection: OutputRedirection, networkService: NetworkService) = {
     def installLibrariesInContainer(destination: File) =
       newFile.withTmpFile { tmpDirectory ⇒
         val layersDirectory = UDockerTask.layersDirectory(workspace)
@@ -151,13 +151,21 @@ object UDockerTask {
 
         val container = UDocker.createContainer(uDocker, uDockerExecutable, containersDirectory, uDockerVariables, Vector.empty, imageId(uDocker))
 
+        def httpProxy: Option[(String, String)] =
+          networkService.httpProxy match {
+            case Some(proxy) if NetworkService.HttpHost.isHttps(proxy) ⇒ Some("https_proxy", NetworkService.HttpHost.toString(proxy))
+            case Some(proxy) ⇒ Some("http_proxy", NetworkService.HttpHost.toString(proxy))
+            case _ ⇒ None
+          }
+
         runCommands(
           uDocker,
           uDockerExecutable,
           uDockerVariables,
           uDockerVolumes = Vector.empty,
-          container,
-          installCommands,
+          container = container,
+          commands = installCommands,
+          environmentVariables = httpProxy.toVector,
           stdOut = outputRedirection.output,
           stdErr = outputRedirection.output
         )
