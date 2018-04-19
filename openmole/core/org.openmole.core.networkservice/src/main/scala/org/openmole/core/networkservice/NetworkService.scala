@@ -17,12 +17,7 @@
 
 package org.openmole.core.networkservice
 
-import java.io.File
-import java.util.concurrent.TimeUnit
-
-import org.openmole.core.preference.{ ConfigurationLocation, Preference, ConfigurationString }
-import org.openmole.core.workspace._
-import org.openmole.tool.file._
+import org.openmole.core.preference.{ ConfigurationLocation, Preference }
 
 import org.apache.http.HttpHost
 
