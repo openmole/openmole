@@ -172,6 +172,10 @@ package object shared {
     lazy val tipsAndTricks = "Tips and tricks"
   }
 
+  object rTask {
+    lazy val rVersion = "3.3.3"
+  }
+
   object gaWithNetlogo {
     lazy val antModel = "The ant model"
     lazy val defineProblem = "An optimisation problem"
