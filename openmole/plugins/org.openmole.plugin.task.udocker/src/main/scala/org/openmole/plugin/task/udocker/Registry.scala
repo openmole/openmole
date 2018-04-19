@@ -27,17 +27,15 @@ object Registry {
     def builder = HttpClients.custom().setConnectionManager(new BasicHttpClientConnectionManager()).setRedirectStrategy(new LaxRedirectStrategy)
 
     def httpProxyAsHost(implicit networkService: NetworkService): Option[HttpHost] =
-      networkService.httpProxyAsHost.map { host ⇒
-        new HttpHost(host.host, host.port, host.protocol)
-      }
+      networkService.httpProxy.map { host ⇒ HttpHost.create(NetworkService.HttpHost.toString(host)) }
 
-    def client(implicit networkservice: NetworkService) = httpProxyAsHost match {
+    def client(implicit networkService: NetworkService) = httpProxyAsHost match {
       case Some(httpHost: HttpHost) ⇒ builder.setProxy(httpHost).build()
       case _                        ⇒ builder.build()
     }
 
-    def execute[T](get: HttpGet)(f: HttpResponse ⇒ T)(implicit networkservice: NetworkService) = {
-      val response = client(networkservice).execute(get)
+    def execute[T](get: HttpGet)(f: HttpResponse ⇒ T)(implicit networkService: NetworkService) = {
+      val response = client(networkService).execute(get)
       try f(response)
       finally response.close()
     }
@@ -109,9 +107,9 @@ object Registry {
     s"${image.registry}/v2/$path"
   }
 
-  def downloadManifest(image: DockerImage, timeout: Time)(implicit networkservice: NetworkService): String = {
+  def downloadManifest(image: DockerImage, timeout: Time)(implicit networkService: NetworkService): String = {
     val url = s"${baseURL(image)}/manifests/${image.tag}"
-    val httpResponse = client(networkservice).execute(Token.withToken(url, timeout))
+    val httpResponse = client(networkService).execute(Token.withToken(url, timeout))
     content(httpResponse)
   }
 

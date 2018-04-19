@@ -42,20 +42,19 @@ object RTask {
   object InstallCommand {
     case class RLibrary(name: String) extends InstallCommand
 
-    def toCommand(installCommands: InstallCommand)(implicit networkservice: NetworkService) = {
+    def toCommand(installCommands: InstallCommand)(implicit networkService: NetworkService) = {
 
-      val argForHttpProxy = networkservice.httpProxyAsString match {
-        case Some(s) ⇒ """Sys.setenv(http_proxy="""" + s + """"); """
-        case None    ⇒ ""
-      }
-      val argForHttpsProxy = networkservice.httpsProxyAsString match {
-        case Some(s) ⇒ """Sys.setenv(https_proxy="""" + s + """"); """
-        case None    ⇒ ""
-      }
+      val argForHttpProxy =
+        networkService.httpProxy match {
+          case Some(proxy) if NetworkService.HttpHost.isHttps(proxy) ⇒ """Sys.setenv(https_proxy="""" + NetworkService.HttpHost.toString(proxy) + """"); """
+          case Some(proxy) ⇒ """Sys.setenv(http_proxy="""" + NetworkService.HttpHost.toString(proxy) + """"); """
+          case _ ⇒ ""
+        }
+
       installCommands match {
         case RLibrary(name) ⇒
           //Vector(s"""R -e 'install.packages(c(${names.map(lib ⇒ '"' + s"$lib" + '"').mkString(",")}), dependencies = T)'""")
-          """R --slave -e '""" + argForHttpProxy + argForHttpsProxy + s"""install.packages(c("$name"), dependencies = T); library("$name")'"""
+          """R --slave -e '""" + argForHttpProxy + s"""install.packages(c("$name"), dependencies = T); library("$name")'"""
       }
     }
 
