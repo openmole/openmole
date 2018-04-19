@@ -55,7 +55,7 @@ object RTask {
       installCommands match {
         case RLibrary(name) ⇒
           //Vector(s"""R -e 'install.packages(c(${names.map(lib ⇒ '"' + s"$lib" + '"').mkString(",")}), dependencies = T)'""")
-          """R --slave -e '""" + argForHttpProxy + argForHttpsProxy + s"""install.packages(c("$name"), dependencies = T); library(c("$name"))'"""
+          """R --slave -e '""" + argForHttpProxy + argForHttpsProxy + s"""install.packages(c("$name"), dependencies = T); library("$name")'"""
       }
     }
 
