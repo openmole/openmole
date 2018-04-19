@@ -63,8 +63,8 @@ class EditorPanelUI(initCode: String, fileType: FileExtension, containerModifier
 
   def initEditor = {
     fileType match {
-      case ef: EditableFile ⇒ editor.getSession().setMode("ace/mode/" + ef.highlighter)
-      case _                ⇒
+      case ef: HighlightedFile ⇒ editor.getSession().setMode("ace/mode/" + ef.highlighter)
+      case _                   ⇒
     }
 
     setCode(initCode)

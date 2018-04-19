@@ -32,8 +32,7 @@ package object client {
 
   //GENERAL
   lazy val grey: ModifierSeq = Seq(
-    color("grey"),
-    opacity := 0.8
+    color("grey")
   )
 
   lazy val BLUE = "#3086b5"

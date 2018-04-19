@@ -9,11 +9,11 @@ import org.openmole.gui.client.core.alert.AlertPanel
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.openmole.gui.ext.api.Api
-
 import scalatags.JsDom.all._
 import scaladget.bootstrapnative.bsn._
 import org.openmole.gui.client.core.panels._
-import org.openmole.gui.ext.data.{ DataUtils, FileExtension, SafePath, ScriptData }
+import org.openmole.gui.client.tool.OMTags
+import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.tool.client._
 import org.scalajs.dom.raw._
 import rx._
@@ -39,6 +39,7 @@ object FileToolBox {
     val extract: FileAction = "extract"
     val duplicate: FileAction = "duplicate"
     val execute: FileAction = "execute"
+    val toScript: FileAction = "to-script"
   }
 
   def apply(initSafePath: SafePath) = {
@@ -60,6 +61,7 @@ class FileToolBox(initSafePath: SafePath) {
   val archive = baseGlyph +++ glyph_archive
   val arrow_right_and_left = baseGlyph +++ glyph_arrow_right_and_left
   val execute = baseGlyph +++ glyph_flash
+  val toScript = baseGlyph +++ OMTags.glyph_share
 
   def iconAction(faction: FileAction, icon: ModifierSeq, text: String) = div(id := faction)(icon, div(text, giFontFamily, fontSize := "12px", paddingTop := 5))
 
@@ -158,6 +160,21 @@ class FileToolBox(initSafePath: SafePath) {
               }
             }
             true
+          case fileaction.toScript ⇒
+            withSafePath { sp ⇒
+              DataUtils.fileToExtension(sp.name) match {
+                case FileExtension.R ⇒
+                  CoreUtils.buildModelScript(
+                    RLanguage(),
+                    s"""source("${sp.name}")""", sp.nameWithNoExtension, sp.parent, Resources(Seq(Resource(sp, 1)), Seq(), 1), sp.name, Seq(ProtoTypePair("i", ProtoTYPE.INT)), Seq(ProtoTypePair("o", ProtoTYPE.DOUBLE)))
+                case _ ⇒
+                  val wizardPanel = panels.modelWizardPanel
+                  wizardPanel.fromSafePath(sp)
+                  wizardPanel.dialog.show
+              }
+              Popover.hide
+            }
+            true
           case _ ⇒
             println("unknown")
             false
@@ -231,6 +248,11 @@ class FileToolBox(initSafePath: SafePath) {
       DataUtils.fileToExtension(initSafePath.name) match {
         case FileExtension.OMS ⇒
           iconAction(fileaction.execute, execute, "run")
+        case _ ⇒ span
+      },
+      DataUtils.fileToExtension(initSafePath.name) match {
+        case FileExtension.JAR | FileExtension.TGZBIN | FileExtension.NETLOGO | FileExtension.R ⇒
+          iconAction(fileaction.toScript, toScript, "to OMS")
         case _ ⇒ span
       },
       duplicateTrigger,

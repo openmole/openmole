@@ -1,6 +1,6 @@
 package org.openmole.gui.client.core
 
-import org.openmole.gui.client.core.files.TreeNodePanel
+import org.openmole.gui.client.core.files.{ FileNode, TreeNodePanel }
 import org.openmole.gui.ext.data._
 import autowire._
 import org.openmole.gui.client.core.alert.AbsolutePositioning.{ FileZone, RelativeCenterPosition }
@@ -10,8 +10,10 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
+import org.openmole.gui.client.core.panels.{ treeNodePanel, treeNodeTabs }
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.tool.client.OMPost
+import rx.Var
 
 import scala.util.{ Failure, Success }
 import scalatags.JsDom.all._
@@ -155,5 +157,24 @@ object CoreUtils {
   def readableByteCountAsString(bytes: Long): String = readableByteCount(bytes).render
 
   def ifOrNothing(condition: Boolean, classString: String) = if (condition) classString else ""
+
+  def buildModelScript(language: Language, command: String, scriptName: String, path: SafePath, resources: Resources, target: String, inputs: Seq[ProtoTypePair] = Seq(), outputs: Seq[ProtoTypePair] = Seq(), libraries: Option[String] = None) =
+
+    post()[Api].buildModelTask(
+      target,
+      scriptName,
+      command,
+      language,
+      inputs,
+      outputs,
+      path,
+      libraries,
+      resources
+    ).call().foreach {
+      b ⇒
+        treeNodeTabs -- b
+        treeNodePanel.displayNode(FileNode(Var(b.name), 0L, 0L))
+        TreeNodePanel.refreshAndDraw
+    }
 
 }

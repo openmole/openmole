@@ -104,11 +104,11 @@ sealed trait FileExtension {
   def displayable: Boolean
 }
 
-trait EditableFile {
+trait HighlightedFile {
   def highlighter: String
 }
 
-object OpenMOLEScript extends FileExtension with EditableFile {
+object OpenMOLEScript extends FileExtension with HighlightedFile {
   val displayable = true
   val highlighter = "openmole"
 }
@@ -121,7 +121,7 @@ object SVGExtension extends FileExtension {
   val displayable = true
 }
 
-case class EditableOnDemandFile(highlighter: String) extends FileExtension with EditableFile {
+case class EditableFile(highlighter: String, onDemand: Boolean = false) extends FileExtension with HighlightedFile {
   val displayable = true
 }
 object BinaryFile extends FileExtension {
@@ -140,18 +140,31 @@ object Zip extends FileExtension {
   def displayable = false
 }
 
+object TgzBin extends FileExtension {
+  def displayable = false
+}
+
+object Jar extends FileExtension {
+  def displayable = false
+}
+
 object FileExtension {
   val OMS = OpenMOLEScript
-  val SCALA = EditableOnDemandFile("scala")
+  val SCALA = EditableFile("scala")
+  val NETLOGO = EditableFile("text")
+  val R = EditableFile("R")
+  val NLS = EditableFile("text")
   val MD = MDScript
-  val SH = EditableOnDemandFile("sh")
-  val TEXT = EditableOnDemandFile("text")
-  val CSV = EditableOnDemandFile("text")
-  val NO_EXTENSION = EditableOnDemandFile("text")
+  val SH = EditableFile("sh")
+  val TEXT = EditableFile("text", true)
+  val CSV = EditableFile("text", true)
+  val NO_EXTENSION = EditableFile("text")
   val SVG = SVGExtension
   val TGZ = TarGz
   val TAR = Tar
   val ZIP = Zip
+  val TGZBIN = TgzBin
+  val JAR = Jar
   val BINARY = BinaryFile
 }
 
@@ -417,6 +430,8 @@ case class ScalaTaskType() extends TaskType
 
 case class NetLogoTaskType() extends TaskType
 
+case class RTaskType() extends TaskType
+
 case class UndefinedTaskType() extends TaskType
 
 sealed trait FileType
@@ -467,7 +482,7 @@ case class PythonLanguage() extends Language {
 case class RLanguage() extends Language {
   val name: String = "R"
   val extension = "R"
-  val taskType = CareTaskType()
+  val taskType = RTaskType()
 }
 
 case class NetLogoLanguage() extends Language {
@@ -530,25 +545,6 @@ case class BasicLaunchingCommand(language: Option[Language], codeName: String, a
     }.map {
       _.expand
     }).mkString(" ")
-  }
-
-  def updateVariables(variableArgs: Seq[VariableElement]) = copy(arguments = statics ++ variableArgs)
-}
-
-case class JavaLaunchingCommand(jarMethod: JarMethod, arguments: Seq[CommandElement] = Seq(), outputs: Seq[VariableElement]) extends LaunchingCommand {
-
-  val language = Some(JavaLikeLanguage())
-
-  def fullCommand: String = {
-    if (jarMethod.methodName.isEmpty) ""
-    else {
-      if (jarMethod.isStatic) jarMethod.clazz + "." else s"val constr = new ${jarMethod.clazz}() // You should initialize this constructor first\nconstr."
-    } +
-      jarMethod.methodName + "(" + arguments.sortBy {
-        _.index
-      }.map {
-        _.expand
-      }.mkString(", ") + ")"
   }
 
   def updateVariables(variableArgs: Seq[VariableElement]) = copy(arguments = statics ++ variableArgs)

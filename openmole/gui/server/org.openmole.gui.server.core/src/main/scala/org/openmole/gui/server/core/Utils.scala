@@ -197,11 +197,12 @@ object Utils extends JavaLogger {
     f
   }
 
-  def launchinCommands(model: SafePath)(implicit workspace: Workspace): Seq[LaunchingCommand] = {
+  def launchingCommands(model: SafePath)(implicit workspace: Workspace): Seq[LaunchingCommand] = {
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
     model.name.split('.').last match {
       case "nlogo" ⇒ Seq(CodeParsing.netlogoParsing(model))
-      case "jar"   ⇒ Seq(JavaLaunchingCommand(JarMethod("", Seq(), "", true, ""), Seq(), Seq()))
+      case "R"     ⇒ Seq(BasicLaunchingCommand(Some(RLanguage()), model.name))
+      // case "jar"   ⇒ Seq(JavaLaunchingCommand(JarMethod("", Seq(), "", true, ""), Seq(), Seq()))
       case "bin"   ⇒ Seq(CodeParsing.fromCommand(getCareBinInfos(model).commandLine.getOrElse(Seq())).get)
     }
   }

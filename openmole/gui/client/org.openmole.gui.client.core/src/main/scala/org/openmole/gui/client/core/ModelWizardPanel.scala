@@ -104,50 +104,13 @@ class ModelWizardPanel {
     }
   )
 
-  val methodSelector: Options[JarMethod] = Seq[JarMethod]().options(
-    0,
-    btn_default,
-    (jm: JarMethod) ⇒ jm.name,
-    onclickExtra = () ⇒ {
-      methodSelector.get.foreach { s ⇒
-        setJavaLaunchingCommand(s)
-      }
-    }
-  )
-
-  val classSelector: Options[FullClass] = Seq[FullClass]().options(
-    0,
-    btn_default,
-    (fc: FullClass) ⇒ fc.name,
-    onclickExtra = () ⇒ {
-      classSelector.content.now.foreach { c ⇒
-        setMethodSelector(c)
-      }
-    }
-  )
-
   def onModelChange = {
     fileToUploadPath.now.foreach {
       m ⇒
         val fileType: FileType = m
         fileType match {
           case _: CodeFile ⇒ setLaunchingCommand(m)
-          case a: Archive ⇒
-            if (a.language == JavaLikeLanguage()) getJarClasses(m)
-          case _ ⇒
-        }
-    }
-  }
-
-  def setMethodSelector(classContent: FullClass) = {
-    fileToUploadPath.now.map {
-      fn ⇒
-        post()[Api].methods(fn, classContent.name).call().foreach {
-          b ⇒
-            methodSelector.setContents(b)
-            b.headOption.map {
-              setJavaLaunchingCommand
-            }
+          case _           ⇒
         }
     }
   }
@@ -155,15 +118,6 @@ class ModelWizardPanel {
   def setScritpName = scriptNameInput.value = filePath.now.map {
     _.name.split('.').head
   }.getOrElse("model")
-
-  def setJavaLaunchingCommand(method: JarMethod) = {
-    val lc = JavaLaunchingCommand(method, method.args, method.ret.map {
-      Seq(_)
-    }.getOrElse(Seq()))
-    setReactives(lc)
-    launchingCommand() = Some(lc)
-    setScritpName
-  }
 
   val commandArea: TextArea = textArea(3).render
   val autoModeCheckBox = checkbox(autoMode.now)(onchange := {
@@ -227,7 +181,6 @@ class ModelWizardPanel {
               div(
                 fileInput((fInput: HTMLInputElement) ⇒ {
                   if (fInput.files.length > 0) {
-                    emptyJARSelectors
                     fileToUploadPath() = None
                     resources() = Resources.empty
                     val fileName = fInput.files.item(0).name
@@ -252,8 +205,6 @@ class ModelWizardPanel {
       ), {
         span(grey)(
           if (modelSelector.isContentsEmpty) div() else modelSelector.selector,
-          if (classSelector.isContentsEmpty) div() else classSelector.selector,
-          if (methodSelector.isContentsEmpty) div() else methodSelector.selector,
           codeSelector.get.map {
             case NetLogoLanguage() ⇒ div("If your Netlogo sript depends on plugins, you should upload an archive (tar.gz, tgz) containing the root workspace.")
             case _                 ⇒ div
@@ -261,6 +212,17 @@ class ModelWizardPanel {
         )
       }
     ).render
+
+  def setTargetPath(fileType: FileType, safePath: SafePath) =
+    targetPath() = Some(fileType match {
+      case a: Archive ⇒
+        a.language match {
+          case j: JavaLikeLanguage ⇒ safePath
+          case _                   ⇒ safePath.toNoExtention
+        }
+      case codeFile: CodeFile ⇒ safePath
+      case _                  ⇒ safePath
+    })
 
   def moveFilesAndBuildForm(fInput: HTMLInputElement, fileName: String, uploadPath: SafePath) =
     CoreUtils.withTmpFile {
@@ -276,16 +238,7 @@ class ModelWizardPanel {
             post()[Api].extractAndTestExistence(tempFile ++ fileName, uploadPath.parent).call().foreach {
               existing ⇒
                 val fileType: FileType = uploadPath
-
-                targetPath() = Some(fileType match {
-                  case a: Archive ⇒
-                    a.language match {
-                      case j: JavaLikeLanguage ⇒ uploadPath
-                      case _                   ⇒ uploadPath.toNoExtention
-                    }
-                  case codeFile: CodeFile ⇒ uploadPath
-                  case _                  ⇒ uploadPath
-                })
+                setTargetPath(fileType, uploadPath)
 
                 // Move files from tmp to target path
                 if (existing.isEmpty) {
@@ -320,6 +273,12 @@ class ModelWizardPanel {
         )
     }
 
+  def fromSafePath(safePath: SafePath) = {
+    labelName() = Some(safePath.name)
+    setTargetPath(safePath, safePath)
+    buildForm(safePath, safePath)
+  }
+
   def buildForm(uploadPath: SafePath, fileType: FileType) = {
 
     fileType match {
@@ -330,11 +289,9 @@ class ModelWizardPanel {
           case JavaLikeLanguage() ⇒
             modelSelector.emptyContents
             fileToUploadPath() = Some(uploadPath)
-            fileToUploadPath.now.foreach {
-              getJarClasses
-            }
-
+          // launchingCommand() = Some("Your Java/Scala method call here")
           // Other archive: tgz, tar.gz
+          // case RLanguage() ⇒xxx
           case UndefinedLanguage() ⇒
             post()[Api].models(uploadPath).call().foreach {
               models ⇒
@@ -379,22 +336,7 @@ class ModelWizardPanel {
     }
   }
 
-  def getJarClasses(jarPath: SafePath) = {
-    codeSelector.content() = Some(JavaLikeLanguage())
-    post()[Api].classes(jarPath).call().foreach {
-      b ⇒
-        val classContents = b.flatMap {
-          _.flatten
-        }
-        classSelector.setContents(classContents)
-        classContents.headOption.foreach {
-          setMethodSelector(_)
-        }
-    }
-  }
-
   def setLaunchingCommand(filePath: SafePath) = {
-    emptyJARSelectors
     post()[Api].launchingCommands(filePath).call().foreach {
       b ⇒
         TreeNodePanel.refreshAndDraw
@@ -409,11 +351,6 @@ class ModelWizardPanel {
             setReactives(lc)
         }
     }
-  }
-
-  def emptyJARSelectors = {
-    classSelector.emptyContents
-    methodSelector.emptyContents
   }
 
   def setReactives(lc: LaunchingCommand) = {
@@ -452,7 +389,7 @@ class ModelWizardPanel {
     )
   )
 
-  val buildModelTaskButton = {
+  val buildScriptButton = {
 
     tags.button("Build", btn_primary, onclick := {
       () ⇒
@@ -472,37 +409,24 @@ class ModelWizardPanel {
           case _ ⇒ ""
         }
 
-        launchingCommand.now.foreach {
-          lc ⇒
-            val path = manager.current.now
-            val scriptName = scriptNameInput.value.clean
-            val target = targetPath.now.map {
-              _.name
-            }.getOrElse("executable")
-            post()[Api].buildModelTask(
-              target + targetSuffix,
-              scriptName,
-              commandArea.value,
-              codeType,
-              inputs(currentReactives.now).map {
-                _.content.prototype
-              },
-              outputs(currentReactives.now).map {
-                _.content.prototype
-              },
-              path, classSelector.get.map {
-                _.name
-              },
-              fileToUploadPath.now.map {
-                _.name
-              }, resources.now
-            ).call().foreach {
-                b ⇒
-                  treeNodeTabs -- b
-                  treeNodePanel.displayNode(FileNode(Var(b.name), 0L, 0L))
-                  TreeNodePanel.refreshAndDraw
-              }
-        }
+        CoreUtils.buildModelScript(
+          codeType,
+          commandArea.value,
+          scriptNameInput.value.clean,
+          manager.current.now,
+          resources.now,
+          targetPath.now.map {
+            _.name
+          }.getOrElse("executable") + targetSuffix,
+          inputs(currentReactives.now).map {
+            _.content.prototype
+          },
+          outputs(currentReactives.now).map {
+            _.content.prototype
+          },
+          fileToUploadPath.now.map {
+            _.name
+          })
     })
   }
 
@@ -616,17 +540,19 @@ class ModelWizardPanel {
       div(paddingTop := 20)(
         button(
           "I/O",
-          buttonStyle(0), onclick := { () ⇒
+          buttonStyle(0), onclick := {
+            () ⇒
+              {
+                currentTab() = 0
+                setBodyContent
+              }
+          })(badge(s"$nbInputs/$nbOutputs")),
+        button("Resources", buttonStyle(1), onclick := {
+          () ⇒
             {
-              currentTab() = 0
+              currentTab() = 1
               setBodyContent
             }
-          })(badge(s"$nbInputs/$nbOutputs")),
-        button("Resources", buttonStyle(1), onclick := { () ⇒
-          {
-            currentTab() = 1
-            setBodyContent
-          }
         }
         )(badge(s"${
           resources().number
@@ -726,7 +652,7 @@ class ModelWizardPanel {
   dialog.footer(buttonGroup(Seq(width := 200, right := 100))(
     inputGroupButton(ModalDialog.closeButton(dialog, btn_default, "Close")),
     inputGroupButton(scriptNameInput),
-    inputGroupButton(buildModelTaskButton)
+    inputGroupButton(buildScriptButton)
   ))
 
 }
