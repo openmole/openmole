@@ -87,7 +87,6 @@ object Application extends JavaLogger {
       http:                 Boolean         = false,
       browse:               Boolean         = true,
       proxyHost:            Option[String]  = None,
-      proxyPort:            Option[Int]     = None,
       args:                 List[String]    = Nil,
       extraHeader:          Option[File]    = None
     )
