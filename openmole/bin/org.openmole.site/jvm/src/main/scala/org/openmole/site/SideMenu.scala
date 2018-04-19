@@ -271,7 +271,8 @@ object SideMenu {
     shared.howToContributeMenu.devVersion,
     shared.howToContributeMenu.bugReport,
     shared.howToContributeMenu.contributionProcedure,
-    shared.howToContributeMenu.branchingModel
+    shared.howToContributeMenu.branchingModel,
+    shared.howToContributeMenu.tipsAndTricks
   )
 
 }

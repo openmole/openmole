@@ -169,6 +169,11 @@ package object shared {
     lazy val bugReport = "Bug Report"
     lazy val contributionProcedure = "Contribution procedure"
     lazy val branchingModel = "Branching model"
+    lazy val tipsAndTricks = "Tips and tricks"
+  }
+
+  object rTask {
+    lazy val rVersion = "3.3.3"
   }
 
   object gaWithNetlogo {
@@ -182,7 +187,6 @@ package object shared {
   object simpleSAFireMenu {
     lazy val sensitivityAnalysis = "Sensitivity Analysis"
     lazy val sensitivityFireModel = "Real world Example"
-
   }
 
   object link {
