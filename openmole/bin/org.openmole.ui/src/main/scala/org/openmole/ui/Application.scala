@@ -127,7 +127,6 @@ object Application extends JavaLogger {
       |[--mem memory] allocate more memory to the JVM (not supported on windows yes), for instance --mem 2G
       |[--logger-level level] set the level of logging
       |[--proxy-host hostname] set the proxy to use to install containers or R packages
-      |[--proxy-port port] set the proxy to use to install containers or R packages 
       |[--] end of options the remaining arguments are provided to the console in the args array
       |[-h | --help] print help""".stripMargin
 
