@@ -19,8 +19,6 @@ package org.openmole.core.networkservice
 
 import org.openmole.core.preference.{ ConfigurationLocation, Preference }
 
-import org.apache.http.HttpHost
-
 object NetworkService {
 
   val httpProxyEnabled = ConfigurationLocation("NetworkService", "HttpProxyEnabled", Some(false))
@@ -31,11 +29,9 @@ object NetworkService {
   val httpsProxyHost = ConfigurationLocation("NetworkService", "HttpsProxyHost", Option.empty[String])
   val httpsProxyPort = ConfigurationLocation("NetworkService", "HttpsProxyPort", Option.empty[Int])
 
-  def apply()(implicit preference: Preference) = {
-    val ns = new NetworkService
-    ns.start
-    ns
-  }
+  def apply()(implicit preference: Preference) = new NetworkService
+
+  case class HttpHost(host: String, port: Int, protocol: String)
 }
 
 class NetworkService(implicit preference: Preference) {
@@ -71,22 +67,18 @@ class NetworkService(implicit preference: Preference) {
   }
 
   /**
-   * Returns an apache HttpHost (if any)
+   * Returns an HttpHost (if any)
    * defined according to the configuration.
    */
-  def httpProxyAsHost(): Option[HttpHost] = {
+  def httpProxyAsHost(): Option[NetworkService.HttpHost] = {
     val isEnabledOpt: Option[Boolean] = preference.preferenceOption(NetworkService.httpProxyEnabled)
     val hostNameOpt: Option[String] = preference.preferenceOption(NetworkService.httpProxyHost)
     val portOpt: Option[Int] = preference.preferenceOption(NetworkService.httpProxyPort)
     (isEnabledOpt, hostNameOpt) match {
       case (_, Some(host)) if host.trim.isEmpty ⇒ None
       case (Some(false), _)                     ⇒ None
-      case (Some(true), Some(host))             ⇒ Some(new HttpHost(host, portOpt.getOrElse(80), "http"))
+      case (Some(true), Some(host))             ⇒ Some(NetworkService.HttpHost(host, portOpt.getOrElse(80), "http"))
     }
-  }
-
-  def start(implicit preference: Preference): Unit = {
-
   }
 
 }

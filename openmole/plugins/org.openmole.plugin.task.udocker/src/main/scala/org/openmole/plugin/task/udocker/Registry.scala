@@ -26,9 +26,12 @@ object Registry {
   object HTTP {
     def builder = HttpClients.custom().setConnectionManager(new BasicHttpClientConnectionManager()).setRedirectStrategy(new LaxRedirectStrategy)
 
-    //def proxy: Option[HttpHost] = Services.networkservice.httpProxyAsHost
+    def httpProxyAsHost(implicit networkService: NetworkService): Option[HttpHost] =
+      networkService.httpProxyAsHost.map { host ⇒
+        new HttpHost(host.host, host.port, host.protocol)
+      }
 
-    def client(implicit networkservice: NetworkService) = networkservice.httpProxyAsHost match {
+    def client(implicit networkservice: NetworkService) = httpProxyAsHost match {
       case Some(httpHost: HttpHost) ⇒ builder.setProxy(httpHost).build()
       case _                        ⇒ builder.build()
     }
