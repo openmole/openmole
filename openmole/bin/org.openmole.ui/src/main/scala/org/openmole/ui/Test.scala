@@ -24,6 +24,7 @@ object Test {
       import org.openmole.core.workspace._
       import org.openmole.tool.crypto._
       import org.openmole.tool.random._
+      import org.openmole.core.networkservice._
 
       implicit val ws = Workspace(workspace)
       implicit val cypher = Cypher(password)
@@ -38,6 +39,7 @@ object Test {
       implicit val randomProvider = RandomProvider(seeder.newRNG)
       implicit val eventDispatcher = EventDispatcher()
       implicit val outputRedirection = OutputRedirection()
+      implicit val networkService = NetworkService()
 
       new ServicesContainer()
     }

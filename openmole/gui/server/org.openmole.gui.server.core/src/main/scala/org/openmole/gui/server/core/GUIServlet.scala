@@ -41,6 +41,7 @@ import org.openmole.core.replication.ReplicaCatalog
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.services.Services
 import org.openmole.core.threadprovider.ThreadProvider
+import org.openmole.core.networkservice.NetworkService
 import org.openmole.gui.ext.api.Api
 import org.openmole.core.workspace.{ NewFile, Workspace }
 import org.openmole.gui.ext.data.routes._
@@ -72,6 +73,7 @@ object GUIServices {
     implicit def randomProvider = guiServices.randomProvider
     implicit def eventDispatcher: EventDispatcher = guiServices.eventDispatcher
     implicit def outputRedirection: OutputRedirection = guiServices.outputRedirection
+    implicit def networkService: NetworkService = guiServices.networkService
   }
 
   def apply(workspace: Workspace) = {
@@ -87,6 +89,7 @@ object GUIServices {
     implicit val randomProvider = RandomProvider(seeder.newRNG)
     implicit val eventDispatcher = EventDispatcher()
     implicit val outputRedirection = OutputRedirection()
+    implicit val networkService = NetworkService()
 
     new GUIServices()
   }
@@ -117,7 +120,8 @@ class GUIServices(
   val fileService:         FileService,
   val randomProvider:      RandomProvider,
   val eventDispatcher:     EventDispatcher,
-  val outputRedirection:   OutputRedirection
+  val outputRedirection:   OutputRedirection,
+  val networkService:      NetworkService
 )
 
 object GUIServlet {

@@ -41,6 +41,7 @@ import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.outputredirection.OutputRedirection
 import org.openmole.core.preference._
 import org.openmole.core.services._
+import org.openmole.core.networkservice._
 
 object Application extends JavaLogger {
 
@@ -85,6 +86,8 @@ object Application extends JavaLogger {
       remote:               Boolean         = false,
       http:                 Boolean         = false,
       browse:               Boolean         = true,
+      proxyHost:            Option[String]  = None,
+      proxyPort:            Option[Int]     = None,
       args:                 List[String]    = Nil,
       extraHeader:          Option[File]    = None
     )
@@ -124,6 +127,8 @@ object Application extends JavaLogger {
       |[--reset-password] reset all preferences and ask for the a password
       |[--mem memory] allocate more memory to the JVM (not supported on windows yes), for instance --mem 2G
       |[--logger-level level] set the level of logging
+      |[--proxy-host hostname] set the proxy to use to install containers or R packages
+      |[--proxy-port port] set the proxy to use to install containers or R packages 
       |[--] end of options the remaining arguments are provided to the console in the args array
       |[-h | --help] print help""".stripMargin
 
@@ -154,6 +159,8 @@ object Application extends JavaLogger {
         case "--reset" :: tail                  ⇒ parse(tail, c.copy(launchMode = Reset(initialisePassword = false)))
         case "--host-name" :: tail              ⇒ parse(tail.tail, c.copy(hostName = Some(tail.head)))
         case "--reset-password" :: tail         ⇒ parse(tail, c.copy(launchMode = Reset(initialisePassword = true)))
+        case "--proxy-host" :: tail             ⇒ parse(tail.tail, c.copy(proxyHost = Some(tail.head)))
+        case "--proxy-port" :: tail             ⇒ parse(tail.tail, c.copy(proxyPort = Some(tail.head.toInt)))
         case "--" :: tail                       ⇒ parse(Nil, c.copy(args = tail))
         case "-h" :: tail                       ⇒ help(tail)
         case "--help" :: tail                   ⇒ help(tail)
@@ -190,6 +197,27 @@ object Application extends JavaLogger {
       load.foreach { case (f, e) ⇒ logger.log(WARNING, s"Error loading bundle $f", e) }
 
     def password = config.password orElse config.passwordFile.map(_.lines.head)
+
+    // store the proxy settings (if any) into current preferences
+    config.proxyHost match {
+      case Some(proxyHost) ⇒
+        implicit val preference = Services.preference(workspace)
+        preference.setPreference(NetworkService.httpProxyEnabled, true)
+        preference.setPreference(NetworkService.httpsProxyEnabled, true)
+        preference.setPreference(NetworkService.httpProxyHost, proxyHost)
+        preference.setPreference(NetworkService.httpsProxyHost, proxyHost)
+      case None ⇒
+      //implicit val preference = Services.preference(workspace)
+      //preference.setPreference(NetworkService.httpProxyEnabled, false)
+      //preference.setPreference(NetworkService.httpsProxyEnabled, false)
+    }
+    config.proxyPort match {
+      case Some(proxyPort) ⇒
+        implicit val preference = Services.preference(workspace)
+        preference.setPreference(NetworkService.httpProxyPort, proxyPort)
+        preference.setPreference(NetworkService.httpsProxyPort, proxyPort)
+      case None ⇒
+    }
 
     if (!config.ignored.isEmpty) logger.warning("Ignored options: " + config.ignored.reverse.mkString(" "))
 
