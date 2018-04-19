@@ -160,7 +160,6 @@ object Application extends JavaLogger {
         case "--host-name" :: tail              ⇒ parse(tail.tail, c.copy(hostName = Some(tail.head)))
         case "--reset-password" :: tail         ⇒ parse(tail, c.copy(launchMode = Reset(initialisePassword = true)))
         case "--proxy-host" :: tail             ⇒ parse(tail.tail, c.copy(proxyHost = Some(tail.head)))
-        case "--proxy-port" :: tail             ⇒ parse(tail.tail, c.copy(proxyPort = Some(tail.head.toInt)))
         case "--" :: tail                       ⇒ parse(Nil, c.copy(args = tail))
         case "-h" :: tail                       ⇒ help(tail)
         case "--help" :: tail                   ⇒ help(tail)
@@ -198,27 +197,6 @@ object Application extends JavaLogger {
 
     def password = config.password orElse config.passwordFile.map(_.lines.head)
 
-    // store the proxy settings (if any) into current preferences
-    config.proxyHost match {
-      case Some(proxyHost) ⇒
-        implicit val preference = Services.preference(workspace)
-        preference.setPreference(NetworkService.httpProxyEnabled, true)
-        preference.setPreference(NetworkService.httpsProxyEnabled, true)
-        preference.setPreference(NetworkService.httpProxyHost, proxyHost)
-        preference.setPreference(NetworkService.httpsProxyHost, proxyHost)
-      case None ⇒
-      //implicit val preference = Services.preference(workspace)
-      //preference.setPreference(NetworkService.httpProxyEnabled, false)
-      //preference.setPreference(NetworkService.httpsProxyEnabled, false)
-    }
-    config.proxyPort match {
-      case Some(proxyPort) ⇒
-        implicit val preference = Services.preference(workspace)
-        preference.setPreference(NetworkService.httpProxyPort, proxyPort)
-        preference.setPreference(NetworkService.httpsProxyPort, proxyPort)
-      case None ⇒
-    }
-
     if (!config.ignored.isEmpty) logger.warning("Ignored options: " + config.ignored.reverse.mkString(" "))
 
     config.launchMode match {
@@ -245,7 +223,7 @@ object Application extends JavaLogger {
           Console.ExitCodes.incorrectPassword
         }
         else {
-          Services.withServices(workspaceDirectory, passwordString) { services ⇒
+          Services.withServices(workspaceDirectory, passwordString, config.proxyHost) { services ⇒
             val server = new RESTServer(config.port, config.hostName, services)
             server.run()
           }
@@ -267,7 +245,7 @@ object Application extends JavaLogger {
           print(consoleSplash)
           println(consoleUsage)
           Console.dealWithLoadError(loadPlugins, !config.scriptFile.isDefined)
-          Services.withServices(workspaceDirectory, passwordString) { implicit services ⇒
+          Services.withServices(workspaceDirectory, passwordString, config.proxyHost) { implicit services ⇒
             val console = new Console(config.scriptFile)
             console.run(config.args, config.consoleWorkDirectory)
           }

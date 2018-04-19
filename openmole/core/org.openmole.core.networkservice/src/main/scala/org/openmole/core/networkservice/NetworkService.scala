@@ -17,69 +17,38 @@
 
 package org.openmole.core.networkservice
 
+import org.openmole.core.networkservice.NetworkService.HttpHost
 import org.openmole.core.preference.{ ConfigurationLocation, Preference }
 
 object NetworkService {
 
   val httpProxyEnabled = ConfigurationLocation("NetworkService", "HttpProxyEnabled", Some(false))
   val httpProxyHost = ConfigurationLocation("NetworkService", "HttpProxyHost", Option.empty[String])
-  val httpProxyPort = ConfigurationLocation("NetworkService", "HttpProxyPort", Option.empty[Int])
 
-  val httpsProxyEnabled = ConfigurationLocation("NetworkService", "HttpsProxyEnabled", Some(false))
-  val httpsProxyHost = ConfigurationLocation("NetworkService", "HttpsProxyHost", Option.empty[String])
-  val httpsProxyPort = ConfigurationLocation("NetworkService", "HttpsProxyPort", Option.empty[Int])
-
-  def apply()(implicit preference: Preference) = new NetworkService
-
-  case class HttpHost(host: String, port: Int, protocol: String)
-}
-
-class NetworkService(implicit preference: Preference) {
-
-  /**
-   * Returns the http proxy (if any) in the form
-   * http://hostname:port
-   */
-  def httpProxyAsString(): Option[String] = {
+  def httpHostFromPreferences(implicit preference: Preference): Option[HttpHost] = {
     val isEnabledOpt: Option[Boolean] = preference.preferenceOption(NetworkService.httpProxyEnabled)
     val hostNameOpt: Option[String] = preference.preferenceOption(NetworkService.httpProxyHost)
-    val portOpt: Option[Int] = preference.preferenceOption(NetworkService.httpProxyPort)
+
     (isEnabledOpt, hostNameOpt) match {
-      case (_, Some(host: String)) if host.trim.isEmpty ⇒ None
       case (Some(false) | None, _)                      ⇒ None
-      case (Some(true), Some(host))                     ⇒ Some("http://" + host + ":" + portOpt.getOrElse(80))
-    }
-  }
-
-  /**
-   * Returns the https proxy (if any) in the form
-   * https://hostname:port
-   */
-  def httpsProxyAsString(): Option[String] = {
-    val isEnabledOpt: Option[Boolean] = preference.preferenceOption(NetworkService.httpsProxyEnabled)
-    val hostNameOpt: Option[String] = preference.preferenceOption(NetworkService.httpsProxyHost)
-    val portOpt: Option[Int] = preference.preferenceOption(NetworkService.httpsProxyPort)
-    (isEnabledOpt, hostNameOpt) match {
       case (_, Some(host: String)) if host.trim.isEmpty ⇒ None
-      case (Some(false) | None, _)                      ⇒ None
-      case (Some(true), Some(host))                     ⇒ Some("http://" + host + ":" + portOpt.getOrElse(443))
+      case (_, Some(host))                              ⇒ Some(HttpHost(host))
     }
   }
 
-  /**
-   * Returns an HttpHost (if any)
-   * defined according to the configuration.
-   */
-  def httpProxyAsHost(): Option[NetworkService.HttpHost] = {
-    val isEnabledOpt: Option[Boolean] = preference.preferenceOption(NetworkService.httpProxyEnabled)
-    val hostNameOpt: Option[String] = preference.preferenceOption(NetworkService.httpProxyHost)
-    val portOpt: Option[Int] = preference.preferenceOption(NetworkService.httpProxyPort)
-    (isEnabledOpt, hostNameOpt) match {
-      case (_, Some(host)) if host.trim.isEmpty ⇒ None
-      case (Some(false), _)                     ⇒ None
-      case (Some(true), Some(host))             ⇒ Some(NetworkService.HttpHost(host, portOpt.getOrElse(80), "http"))
-    }
-  }
+  def apply(httpHost: Option[String] = None)(implicit preference: Preference) =
+    new NetworkService(httpHost.map(HttpHost(_)).orElse(httpHostFromPreferences))
 
+  case class HttpHost(host: String)
+
+  object HttpHost {
+    def isHttps(host: HttpHost) = {
+      new java.net.URL(host.host).getProtocol == "https"
+    }
+
+    def toString(host: HttpHost) = host.host
+  }
 }
+
+case class NetworkService(httpProxy: Option[HttpHost])
 

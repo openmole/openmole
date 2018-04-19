@@ -20,8 +20,8 @@ package object services {
 
   object Services {
 
-    def withServices[T](workspace: File, password: String)(f: Services ⇒ T) = {
-      val services = Services(workspace, password)
+    def withServices[T](workspace: File, password: String, httpProxy: Option[String])(f: Services ⇒ T) = {
+      val services = Services(workspace, password, httpProxy)
       try f(services)
       finally dispose(services)
     }
@@ -29,7 +29,7 @@ package object services {
     def preference(workspace: Workspace) = Preference(workspace.persistentDir)
     def authenticationStore(workspace: Workspace) = AuthenticationStore(workspace.persistentDir)
 
-    def apply(workspace: File, password: String) = {
+    def apply(workspace: File, password: String, httpProxy: Option[String]) = {
       implicit val ws = Workspace(workspace)
       implicit val cypher = Cypher(password)
       implicit val preference = Services.preference(ws)
@@ -43,7 +43,7 @@ package object services {
       implicit val randomProvider = RandomProvider(seeder.newRNG)
       implicit val eventDispatcher = EventDispatcher()
       implicit val outputRedirection = OutputRedirection()
-      implicit val networkService = NetworkService()
+      implicit val networkService = NetworkService(httpProxy)
       new ServicesContainer()
     }
 
