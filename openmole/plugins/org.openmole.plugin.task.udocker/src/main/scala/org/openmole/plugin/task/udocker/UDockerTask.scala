@@ -156,9 +156,9 @@ object UDockerTask extends JavaLogger {
 
         networkService.httpProxy match {
           case Some(proxy) ⇒
-            Log.logger.log(Log.WARNING, s"using as proxy: ", NetworkService.HttpHost.toString(proxy))
+            Log.logger.log(Log.WARNING, s"using as proxy: " + NetworkService.HttpHost.toString(proxy))
           case _ ⇒
-            Log.logger.log(Log.WARNING, s"no proxy define!")
+            Log.logger.log(Log.WARNING, s"no proxy defined!")
         }
 
         def httpProxyVars: Seq[(String, String)] =
