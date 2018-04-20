@@ -46,8 +46,7 @@ object RTask {
       installCommands match {
         case RLibrary(name) ⇒
           //Vector(s"""R -e 'install.packages(c(${names.map(lib ⇒ '"' + s"$lib" + '"').mkString(",")}), dependencies = T)'""")
-          //s"""R --slave -e 'install.packages(c("$name"), dependencies = T); library("$name")'"""
-          s"""R -e 'print(Sys.getenv("http_proxy")); print(Sys.getenv("https_proxy")); install.packages(c("$name"), dependencies = T); library("$name")'"""
+          s"""R --slave -e 'install.packages(c("$name"), dependencies = T); library("$name")'"""
       }
 
     implicit def stringToRLibrary(name: String): InstallCommand = RLibrary(name)

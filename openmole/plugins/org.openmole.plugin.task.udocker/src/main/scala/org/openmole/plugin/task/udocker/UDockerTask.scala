@@ -18,8 +18,6 @@
 
 package org.openmole.plugin.task.udocker
 
-import java.util.logging.Level
-
 import monocle.macros._
 import cats.implicits._
 import org.openmole.core.context.{ Context, Variable }
@@ -43,11 +41,10 @@ import org.openmole.core.threadprovider._
 import org.openmole.plugin.task.container.HostFiles
 import org.openmole.tool.lock.LockKey
 import org.openmole.plugin.task.container._
-import org.openmole.tool.logger.JavaLogger
 
 import scala.language.postfixOps
 
-object UDockerTask extends JavaLogger {
+object UDockerTask extends  {
 
   @Lenses case class Commands(value: Vector[FromContext[String]])
 
@@ -153,13 +150,6 @@ object UDockerTask extends JavaLogger {
         )
 
         val container = UDocker.createContainer(uDocker, uDockerExecutable, containersDirectory, uDockerVariables, Vector.empty, imageId(uDocker))
-
-        networkService.httpProxy match {
-          case Some(proxy) ⇒
-            Log.logger.log(Log.WARNING, s"using as proxy: " + NetworkService.HttpHost.toString(proxy))
-          case _ ⇒
-            Log.logger.log(Log.WARNING, s"no proxy defined!")
-        }
 
         def httpProxyVars: Seq[(String, String)] =
           networkService.httpProxy match {
