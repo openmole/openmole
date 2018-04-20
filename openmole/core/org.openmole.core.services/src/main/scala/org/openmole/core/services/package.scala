@@ -43,8 +43,10 @@ package object services {
       implicit val randomProvider = RandomProvider(seeder.newRNG)
       implicit val eventDispatcher = EventDispatcher()
       implicit val outputRedirection = OutputRedirection()
+      implicit val networkService = NetworkService(httpProxy)
       implicit val fileServiceCache = FileServiceCache()
       implicit val networkService = NetworkService(httpProxy)
+
       new ServicesContainer()
     }
 
@@ -72,6 +74,7 @@ package object services {
       randomProvider:      RandomProvider      = services.randomProvider,
       eventDispatcher:     EventDispatcher     = services.eventDispatcher,
       outputRedirection:   OutputRedirection   = services.outputRedirection,
+      networkService:      NetworkService      = services.networkService,
       fileServiceCache:    FileServiceCache    = services.fileServiceCache
       networkService:      NetworkService      = services.networkService
     ) =
@@ -109,6 +112,7 @@ package object services {
     implicit def randomProvider: RandomProvider
     implicit def eventDispatcher: EventDispatcher
     implicit def outputRedirection: OutputRedirection
+    implicit def networkService: NetworkService
     implicit def fileServiceCache: FileServiceCache
     implicit def networkService: NetworkService
   }
@@ -127,6 +131,7 @@ package object services {
                           val randomProvider:      RandomProvider,
                           val eventDispatcher:     EventDispatcher,
                           val outputRedirection:   OutputRedirection,
+                          val networkService:      NetworkService,
                           val fileServiceCache:    FileServiceCache) extends Services
                           val networkService:      NetworkService) extends Services
 

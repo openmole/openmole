@@ -31,6 +31,7 @@ object Stubs {
   implicit val fileService = FileService()
   implicit val randomProvider = RandomProvider(seeder.newRNG)
   implicit val outputRedirection = OutputRedirection()
+  implicit val network = NetworkService()
   implicit val fileServiceCache = FileServiceCache()
   implicit val network = NetworkService()
 }
