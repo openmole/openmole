@@ -14,6 +14,7 @@ import org.openmole.tool.crypto._
 import org.openmole.tool.random._
 import org.openmole.tool.file._
 import org.openmole.core.outputredirection._
+import org.openmole.core.networkservice._
 
 package object services {
 
