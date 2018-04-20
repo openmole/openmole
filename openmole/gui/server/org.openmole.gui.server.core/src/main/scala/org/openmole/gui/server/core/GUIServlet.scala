@@ -34,7 +34,7 @@ import java.util.concurrent.atomic.AtomicReference
 
 import org.openmole.core.authentication.AuthenticationStore
 import org.openmole.core.event.EventDispatcher
-import org.openmole.core.fileservice.FileService
+import org.openmole.core.fileservice.{ FileService, FileServiceCache }
 import org.openmole.core.outputredirection.OutputRedirection
 import org.openmole.core.preference.Preference
 import org.openmole.core.replication.ReplicaCatalog
@@ -90,6 +90,7 @@ object GUIServices {
     implicit val eventDispatcher = EventDispatcher()
     implicit val outputRedirection = OutputRedirection()
     implicit val networkService = NetworkService()
+    implicit val fileServiceCache = FileServiceCache()
 
     new GUIServices()
   }
@@ -118,6 +119,7 @@ class GUIServices(
   val authenticationStore: AuthenticationStore,
   val serializerService:   SerializerService,
   val fileService:         FileService,
+  val fileServiceCache:    FileServiceCache,
   val randomProvider:      RandomProvider,
   val eventDispatcher:     EventDispatcher,
   val outputRedirection:   OutputRedirection,

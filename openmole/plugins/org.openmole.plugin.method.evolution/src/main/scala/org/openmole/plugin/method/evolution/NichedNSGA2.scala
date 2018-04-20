@@ -152,7 +152,7 @@ object NichedNSGA2 {
         }
 
         def migrateToIsland(population: Vector[I]) = DeterministicGAIntegration.migrateToIsland(population)
-        def migrateFromIsland(population: Vector[I]) = population
+        def migrateFromIsland(population: Vector[I], state: S) = population
       }
 
     }
@@ -291,7 +291,7 @@ object NichedNSGA2 {
         }
 
         def migrateToIsland(population: Vector[I]) = StochasticGAIntegration.migrateToIsland(population)
-        def migrateFromIsland(population: Vector[I]) = StochasticGAIntegration.migrateFromIsland(population, om.historySize)
+        def migrateFromIsland(population: Vector[I], state: S) = StochasticGAIntegration.migrateFromIsland(population, om.historySize)
       }
 
     }

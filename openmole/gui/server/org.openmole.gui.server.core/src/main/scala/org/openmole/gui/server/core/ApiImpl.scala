@@ -71,6 +71,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
   import ExecutionInfo._
 
   implicit def services = s
+
   import s._
 
   val outputSize = ConfigurationLocation[Int]("gui", "outputsize", Some(10 * 1024 * 1024))
@@ -306,6 +307,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
 
   // EXECUTIONS
   def cancelExecution(id: ExecutionId): Unit = execution.cancel(id)
+
   def removeExecution(id: ExecutionId): Unit = execution.remove(id)
 
   def runScript(scriptData: ScriptData): Unit = {
@@ -325,6 +327,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
       services.threadProvider.pool.submit { () ⇒
 
         def error(t: Throwable): Unit = execution.addError(execId, Failed(Vector.empty, ErrorBuilder(t), Seq()))
+
         def message(message: String): Unit = execution.addError(execId, Failed(Vector.empty, Error(message), Seq()))
 
         try {
@@ -392,7 +395,9 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
       _.errorMessage
     }.toSeq.map {
       case (_, err) ⇒
-        val dates = err.map { _.date }.sorted
+        val dates = err.map {
+          _.date
+        }.sorted
         (err.head, dates.max, dates.size)
     }.takeRight(lines)
 
@@ -463,7 +468,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
   }
 
   //MODEL WIZARDS
-  def launchingCommands(path: SafePath): Seq[LaunchingCommand] = Utils.launchinCommands(path)
+  def launchingCommands(path: SafePath): Seq[LaunchingCommand] = Utils.launchingCommands(path)
 
   //Extract models from an archive
   def models(archivePath: SafePath): Seq[SafePath] = {
@@ -486,7 +491,6 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
     inputs:         Seq[ProtoTypePair],
     outputs:        Seq[ProtoTypePair],
     path:           SafePath,
-    imports:        Option[String],
     libraries:      Option[String],
     resources:      Resources
   ): SafePath = {
@@ -504,7 +508,6 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
     def default(key: String, value: String) = s"  $key := $value"
 
     try {
-      imports.foreach { i ⇒ os.write(s"import $i._\n") }
       for (p ← ((inputs ++ outputs).map { p ⇒ (p.name, p.`type`.scalaString) } distinct)) yield {
         os.write("val " + p._1 + " = Val[" + p._2 + "]\n")
       }
@@ -545,6 +548,15 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
             s"""\nval task = ScalaTask(\n\"\"\"$command\"\"\") set(\n""" +
               s"${libraries.map { l ⇒ s"""  libraries += workingDirectory / "$l",""" }.getOrElse("")}\n\n" +
               inString + ouString + imFileString + omFileString + resourcesString + defaults
+          )
+        case rt: RTaskType ⇒
+          val rInput = ioString(ins, "rInputs")
+          val rOutput = ioString(ous, "rOutputs")
+          os.write(
+            s"""\nval task = RTask(\"\"\"\n   $command\n   \"\"\") set(\n""" +
+              rInput + rOutput +
+              s"""  resources += workDirectory / \"$executableName\""""
+
           )
 
         case _ ⇒ ""

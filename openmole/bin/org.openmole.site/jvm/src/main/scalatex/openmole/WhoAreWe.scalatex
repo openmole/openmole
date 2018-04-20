@@ -23,7 +23,7 @@
 
 @member(Resource.img.people.mathieu, "Mathieu LECLAIRE")
 @div(width := "75%", paddingLeft := 70)
-    CNRS Researcher Engineer at ISC-PIF (UPS 3611) and Géographie-cité (UMR 8504).
+    CNRS Researcher Engineer at ISC-PIF (UPS 3611) and Géographie-cités (UMR 8504).
     Developer of the OpenMOLE Platform, he developed both the @aa("Scaladget", href := shared.link.repo.scaladget) library and @aa("ScalaWUI", href := shared.link.repo.scalawui) skeleton.
 
 @member(Resource.img.people.jo, "Jonathan PASSERAT-PALMBACH")
@@ -55,3 +55,9 @@
 @member(Resource.img.people.seb, "Sebastien REY-COYREHOURCQ")
 @div(width := "75%", paddingLeft := 70)
   Research Engineer in Geomatics at UMR IDEES Rouen. I love Complex Systems, Agent Based Models, and Evolutionary Algorithm. I probably compile and beta test every dev version of OpenMOLE since 2010 :) I also participate in developing the @aa("MGO", href := shared.link.repo.mgo) framework and the @aa("Gama-plugin", href := shared.link.repo.gamaPlugin).
+
+@member(Resource.img.people.juste, "Juste RAIMBAULT")
+@div(width := "75%", paddingLeft := 70)
+  CNRS Postdoc at ISC-PIF (UPS CNRS 3611) and Research Associate at Géographie-cités (UMR CNRS 8504). As a geographer, he contributes to the development of exploration methods for models of simulation.
+
+

@@ -17,7 +17,7 @@ package org.openmole.gui.server.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import java.io.File
+import java.io.{ File, _ }
 import java.lang.reflect.Modifier
 import java.nio.channels.FileChannel
 import java.util.logging.Level
@@ -29,8 +29,6 @@ import org.openmole.core.workspace.{ NewFile, Workspace }
 import org.openmole.gui.ext.data
 import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.data.ListSorting._
-import java.io._
-
 import org.openmole.tool.logger.JavaLogger
 import org.openmole.tool.file._
 import org.openmole.core.fileservice._
@@ -50,6 +48,8 @@ import org.openmole.core.module
 import org.openmole.core.pluginmanager.KeyWord
 import org.openmole.core.workflow.tools.Stubs
 import resource._
+
+import scala.util.{ Failure, Success, Try }
 
 object Utils extends JavaLogger {
 
@@ -197,11 +197,12 @@ object Utils extends JavaLogger {
     f
   }
 
-  def launchinCommands(model: SafePath)(implicit workspace: Workspace): Seq[LaunchingCommand] = {
+  def launchingCommands(model: SafePath)(implicit workspace: Workspace): Seq[LaunchingCommand] = {
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
     model.name.split('.').last match {
       case "nlogo" ⇒ Seq(CodeParsing.netlogoParsing(model))
-      case "jar"   ⇒ Seq(JavaLaunchingCommand(JarMethod("", Seq(), "", true, ""), Seq(), Seq()))
+      case "R"     ⇒ Seq(BasicLaunchingCommand(Some(RLanguage()), model.name))
+      // case "jar"   ⇒ Seq(JavaLaunchingCommand(JarMethod("", Seq(), "", true, ""), Seq(), Seq()))
       case "bin"   ⇒ Seq(CodeParsing.fromCommand(getCareBinInfos(model).commandLine.getOrElse(Seq())).get)
     }
   }
@@ -437,6 +438,28 @@ object Utils extends JavaLogger {
   val depsFileName = "deps.js"
   val openmoleGrammarName = "openmole_grammar_template.js"
 
+  def updateIfChanged(file: File)(update: File ⇒ Unit)(implicit fileService: FileService, newFile: NewFile) = {
+    import org.openmole.core.fileservice._
+
+    def hash(f: File) = new File(f + "-hash")
+    lockFile(file).withLock { _ ⇒
+      val hashFile = hash(file)
+      lazy val currentHash = fileService.hashNoCache(file).toString
+      val upToDate =
+        if (!file.exists || !hashFile.exists) false
+        else
+          Try(hashFile.content) match {
+            case Success(v) ⇒ currentHash == v
+            case Failure(_) ⇒ hashFile.delete; false
+          }
+
+      if (!upToDate) {
+        update(file)
+        hashFile.content = currentHash
+      }
+    }
+  }
+
   def openmoleFile(implicit workspace: Workspace, newFile: NewFile, fileService: FileService) = {
     val jsPluginDirectory = webUIDirectory / "jsplugin"
     updateJsPluginDirectory(jsPluginDirectory)
@@ -450,7 +473,7 @@ object Utils extends JavaLogger {
     }
 
     if (!jsFile.exists) update
-    else jsPluginDirectory.updateIfChanged { _ ⇒ update }
+    else updateIfChanged(jsPluginDirectory) { _ ⇒ update }
     jsFile
   }
 

@@ -28,10 +28,10 @@ object FromIslandTask {
     val t = wfi(algorithm)
 
     ClosureTask("FromIslandTask") { (context, _, _) ⇒
-      val population = t.operations.migrateFromIsland(context(t.populationPrototype).toVector)
+      val population = t.operations.migrateFromIsland(context(t.populationPrototype).toVector, context(t.statePrototype))
       Variable(t.populationPrototype, population.toArray(t.individualPrototype.`type`.manifest))
     } set (
-      inputs += t.populationPrototype,
+      inputs += (t.populationPrototype, t.statePrototype),
       outputs += t.populationPrototype
     )
   }

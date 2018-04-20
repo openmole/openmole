@@ -108,8 +108,8 @@ package object csv extends CSVPackage {
         }
 
         @tailrec def write(lists: List[List[_]]): Unit =
-          if (arraysOnSingleRow || !lists.exists(moreThanOneElement))
-            writeLine(lists.flatten(flatAny))
+          if (lists.exists(_.isEmpty)) Unit
+          else if (arraysOnSingleRow || !lists.exists(moreThanOneElement)) writeLine(lists.flatten(flatAny))
           else {
             writeLine(lists.map { _.head })
             write(lists.map { l ⇒ if (moreThanOneElement(l)) l.tail else l })

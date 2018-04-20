@@ -14,7 +14,6 @@ import org.openmole.tool.crypto._
 import org.openmole.tool.random._
 import org.openmole.tool.file._
 import org.openmole.core.outputredirection._
-import org.openmole.core.networkservice._
 
 package object services {
 
@@ -44,6 +43,8 @@ package object services {
       implicit val eventDispatcher = EventDispatcher()
       implicit val outputRedirection = OutputRedirection()
       implicit val networkService = NetworkService(httpProxy)
+      implicit val fileServiceCache = FileServiceCache()
+
       new ServicesContainer()
     }
 
@@ -71,7 +72,8 @@ package object services {
       randomProvider:      RandomProvider      = services.randomProvider,
       eventDispatcher:     EventDispatcher     = services.eventDispatcher,
       outputRedirection:   OutputRedirection   = services.outputRedirection,
-      networkService:      NetworkService      = services.networkService
+      networkService:      NetworkService      = services.networkService,
+      fileServiceCache:    FileServiceCache    = services.fileServiceCache
     ) =
       new ServicesContainer()(
         workspace = workspace,
@@ -84,6 +86,7 @@ package object services {
         authenticationStore = authenticationStore,
         serializerService = serializerService,
         fileService = fileService,
+        fileServiceCache = fileServiceCache,
         randomProvider = randomProvider,
         eventDispatcher = eventDispatcher,
         outputRedirection = outputRedirection,
@@ -106,6 +109,7 @@ package object services {
     implicit def randomProvider: RandomProvider
     implicit def eventDispatcher: EventDispatcher
     implicit def outputRedirection: OutputRedirection
+    implicit def fileServiceCache: FileServiceCache
     implicit def networkService: NetworkService
   }
 
@@ -123,6 +127,7 @@ package object services {
                           val randomProvider:      RandomProvider,
                           val eventDispatcher:     EventDispatcher,
                           val outputRedirection:   OutputRedirection,
+                          val fileServiceCache:    FileServiceCache,
                           val networkService:      NetworkService) extends Services
 
 }

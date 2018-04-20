@@ -105,7 +105,7 @@ object NSGA2 {
           }
 
         def migrateToIsland(population: Vector[I]) = DeterministicGAIntegration.migrateToIsland(population)
-        def migrateFromIsland(population: Vector[I]) = population
+        def migrateFromIsland(population: Vector[I], state: S) = population
 
         def afterGeneration(g: Long, population: Vector[I]): M[Boolean] = interpret { impl ⇒
           import impl._
@@ -217,7 +217,7 @@ object NSGA2 {
         }
 
         def migrateToIsland(population: Vector[I]) = StochasticGAIntegration.migrateToIsland(population)
-        def migrateFromIsland(population: Vector[I]) = StochasticGAIntegration.migrateFromIsland(population, om.historySize)
+        def migrateFromIsland(population: Vector[I], state: S) = StochasticGAIntegration.migrateFromIsland(population, om.historySize)
       }
 
     }

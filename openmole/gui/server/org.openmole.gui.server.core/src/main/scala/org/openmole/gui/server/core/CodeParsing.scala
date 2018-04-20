@@ -29,7 +29,8 @@ object CodeParsing {
   def fromCommand(command: Seq[String]) = {
     val (language, codeName, commandElements) = command.headOption match {
       case Some("python") ⇒ (Some(PythonLanguage()), command.lift(1).getOrElse(""), mapToVariableElements(indexArgs(command.drop(2), Seq()), CareTaskType()).toSeq)
-      case Some("R")      ⇒ (Some(RLanguage()), "", rParsing(command.drop(1), CareTaskType()))
+      //  case Some("R")      ⇒ (Some(RLanguage()), "", "", RTaskType())
+      //  case Some("java")   ⇒ (Some(JavaLikeLanguage()), "", rParsing(command.drop(1), CareTaskType()))
       case _              ⇒ (None, command.head, command.drop(1).zipWithIndex.map(e ⇒ StaticElement(e._2, e._1)))
     }
 

@@ -26,21 +26,6 @@ import org.openmole.core.expansion.FromContext
 
 object PSE {
 
-  object PatternAxe {
-
-    implicit def fromDoubleDomainToPatternAxe[D](f: Factor[D, Double])(implicit fix: Fix[D, Double]): PatternAxe =
-      PatternAxe(f.prototype, fix(f.domain).toVector)
-
-    implicit def fromIntDomainToPatternAxe[D](f: Factor[D, Int])(implicit fix: Fix[D, Int]): PatternAxe =
-      PatternAxe(f.prototype, fix(f.domain).toVector.map(_.toDouble))
-
-    implicit def fromLongDomainToPatternAxe[D](f: Factor[D, Long])(implicit fix: Fix[D, Long]): PatternAxe =
-      PatternAxe(f.prototype, fix(f.domain).toVector.map(_.toDouble))
-
-  }
-
-  case class PatternAxe(p: Objective, scale: Vector[Double])
-
   case class DeterministicParams(
     pattern:             Vector[Double] ⇒ Vector[Int],
     genome:              Genome,
@@ -151,7 +136,7 @@ object PSE {
 
         def migrateToIsland(population: Vector[I]) =
           population.map(MGOPSE.Individual.foundedIsland.set(true))
-        def migrateFromIsland(population: Vector[I]) =
+        def migrateFromIsland(population: Vector[I], state: S) =
           population.filter(i ⇒ !MGOPSE.Individual.foundedIsland.get(i)).
             map(MGOPSE.Individual.mapped.set(false)).
             map(MGOPSE.Individual.foundedIsland.set(false))
@@ -277,7 +262,7 @@ object PSE {
         def migrateToIsland(population: Vector[I]) =
           population.map(MGONoisyPSE.Individual.foundedIsland.set(true)).map(MGONoisyPSE.Individual.historyAge.set(0))
 
-        def migrateFromIsland(population: Vector[I]) =
+        def migrateFromIsland(population: Vector[I], state: S) =
           population.filter(i ⇒ !MGONoisyPSE.Individual.foundedIsland.get(i)).
             map(MGONoisyPSE.Individual.mapped.set(false)).
             map(MGONoisyPSE.Individual.foundedIsland.set(false))
@@ -288,6 +273,21 @@ object PSE {
   }
 
   import org.openmole.core.dsl._
+
+  object PatternAxe {
+
+    implicit def fromDoubleDomainToPatternAxe[D](f: Factor[D, Double])(implicit fix: Fix[D, Double]): PatternAxe =
+      PatternAxe(f.prototype, fix(f.domain).toVector)
+
+    implicit def fromIntDomainToPatternAxe[D](f: Factor[D, Int])(implicit fix: Fix[D, Int]): PatternAxe =
+      PatternAxe(f.prototype, fix(f.domain).toVector.map(_.toDouble))
+
+    implicit def fromLongDomainToPatternAxe[D](f: Factor[D, Long])(implicit fix: Fix[D, Long]): PatternAxe =
+      PatternAxe(f.prototype, fix(f.domain).toVector.map(_.toDouble))
+
+  }
+
+  case class PatternAxe(p: Objective, scale: Vector[Double])
 
   def apply(
     genome:     Genome,

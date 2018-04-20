@@ -20,7 +20,7 @@ package org.openmole.core.workflow.mole
 import java.io.{ File, PrintStream }
 
 import org.openmole.core.event.EventDispatcher
-import org.openmole.core.fileservice.FileService
+import org.openmole.core.fileservice.{ FileService, FileServiceCache }
 import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.outputredirection.OutputRedirection
 import org.openmole.core.preference.Preference
@@ -48,6 +48,7 @@ object MoleServices {
       newFile = NewFile(newFile.newDir("execution")),
       workspace = workspace,
       fileService = fileService,
+      fileServiceCache = FileServiceCache(),
       outputRedirection = outputRedirection
     )
   }
@@ -59,6 +60,7 @@ object MoleServices {
     eventDispatcher:   EventDispatcher   = moleServices.eventDispatcher,
     newFile:           NewFile           = moleServices.newFile,
     fileService:       FileService       = moleServices.fileService,
+    fileServiceCache:  FileServiceCache  = moleServices.fileServiceCache,
     workspace:         Workspace         = moleServices.workspace,
     outputRedirection: OutputRedirection = moleServices.outputRedirection) =
     new MoleServices()(
@@ -69,6 +71,7 @@ object MoleServices {
       newFile = newFile,
       workspace = workspace,
       fileService = fileService,
+      fileServiceCache = fileServiceCache,
       outputRedirection = outputRedirection
     )
 }
@@ -82,6 +85,7 @@ class MoleServices(
   val newFile:           NewFile,
   val workspace:         Workspace,
   val fileService:       FileService,
+  val fileServiceCache:  FileServiceCache,
   val outputRedirection: OutputRedirection
 ) {
   def newRandom = Lazy(seeder.newRNG)

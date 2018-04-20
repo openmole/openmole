@@ -26,7 +26,6 @@ import org.openmole.gui.ext.api.Api
 import org.scalajs.dom
 import scaladget.bootstrapnative.Popup
 import scaladget.bootstrapnative.Popup.Manual
-import sun.java2d.xr.XRUtils
 
 /*
  * Copyright (C) 16/04/15 // mathieu.leclaire@openmole.org
@@ -473,6 +472,18 @@ class TreeNodePanel {
     draggable := true,
     ondragenter := {
       (e: DragEvent) ⇒
+        val el = e.target.asInstanceOf[HTMLElement]
+        println("EL " + el)
+        val style = new CSSStyleDeclaration()
+        style.backgroundColor = "red"
+        el.style = style
+        false
+    },
+    ondragleave := {
+      (e: DragEvent) ⇒
+        val style = new CSSStyleDeclaration
+        style.backgroundColor = "transparent"
+        e.target.asInstanceOf[HTMLElement].style = style
         false
     },
     ondragover := {

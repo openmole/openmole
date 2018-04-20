@@ -40,6 +40,7 @@ object Test {
       implicit val eventDispatcher = EventDispatcher()
       implicit val outputRedirection = OutputRedirection()
       implicit val networkService = NetworkService()
+      implicit val fileServiceCache = FileServiceCache()
 
       new ServicesContainer()
     }

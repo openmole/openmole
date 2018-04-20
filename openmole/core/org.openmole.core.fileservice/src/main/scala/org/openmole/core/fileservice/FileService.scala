@@ -52,8 +52,11 @@ object FileService {
   }
 }
 
-class FileService(implicit preference: Preference) {
+object FileServiceCache {
+  def apply()(implicit preference: Preference) = new FileServiceCache()
+}
 
+class FileServiceCache(implicit preference: Preference) {
   private[fileservice] val hashCache =
     CacheBuilder.newBuilder.maximumSize(preference(FileService.hashCacheSize)).
       expireAfterAccess(preference(FileService.hashCacheTime).millis, TimeUnit.MILLISECONDS).
@@ -63,22 +66,33 @@ class FileService(implicit preference: Preference) {
     CacheBuilder.newBuilder.maximumSize(preference(FileService.archiveCacheSize)).
       expireAfterAccess(preference(FileService.archiveCacheTime).millis, TimeUnit.MILLISECONDS).
       build[String, FileCache]()
+}
+
+class FileService(implicit preference: Preference) {
 
   private[fileservice] val deleteEmpty = ListBuffer[File]()
 
-  def hash(file: File)(implicit newFile: NewFile): Hash = {
-    def hash = hashFile(if (file.isDirectory) archiveForDir(file).file else file)
-    hashCache.get(file.getCanonicalPath, hash)
+  def hashNoCache(file: File, hashType: HashType = SHA1)(implicit newFile: NewFile) = {
+    if (file.isDirectory) newFile.withTmpFile { archive ⇒
+      file.archive(archive, time = false)
+      hashFile(archive, hashType)
+    }
+    else hashFile(file, hashType)
   }
 
-  def archiveForDir(directory: File)(implicit newFile: NewFile): FileCache = {
+  def hash(file: File)(implicit newFile: NewFile, fileServiceCache: FileServiceCache): Hash = {
+    def hash = hashFile(if (file.isDirectory) archiveForDir(file).file else file)
+    fileServiceCache.hashCache.get(file.getCanonicalPath, hash)
+  }
+
+  def archiveForDir(directory: File)(implicit newFile: NewFile, fileServiceCache: FileServiceCache): FileCache = {
     def archive = {
       val ret = newFile.newFile("archive", ".tar")
       directory.archive(ret, time = false)
       FileCache(ret)(this)
     }
 
-    archiveCache.get(directory.getAbsolutePath, archive)
+    fileServiceCache.archiveCache.get(directory.getAbsolutePath, archive)
   }
 
   private val fileDeleter = new FileDeleter(WeakReference(this))
