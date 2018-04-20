@@ -23,30 +23,26 @@ import org.openmole.core.preference.{ ConfigurationLocation, Preference }
 object NetworkService {
 
   val httpProxyEnabled = ConfigurationLocation("NetworkService", "HttpProxyEnabled", Some(false))
-  val httpProxyHost = ConfigurationLocation("NetworkService", "HttpProxyHost", Option.empty[String])
+  val httpProxyURI = ConfigurationLocation("NetworkService", "httpProxyURI", Option.empty[String])
 
   def httpHostFromPreferences(implicit preference: Preference): Option[HttpHost] = {
     val isEnabledOpt: Option[Boolean] = preference.preferenceOption(NetworkService.httpProxyEnabled)
-    val hostNameOpt: Option[String] = preference.preferenceOption(NetworkService.httpProxyHost)
+    val hostURIOpt: Option[String] = preference.preferenceOption(NetworkService.httpProxyURI)
 
-    (isEnabledOpt, hostNameOpt) match {
-      case (Some(false) | None, _)                      ⇒ None
-      case (_, Some(host: String)) if host.trim.isEmpty ⇒ None
-      case (_, Some(host))                              ⇒ Some(HttpHost(host))
+    (isEnabledOpt, hostURIOpt) match {
+      case (Some(false) | None, _)                            ⇒ None
+      case (_, Some(hostURI: String)) if hostURI.trim.isEmpty ⇒ None
+      case (_, Some(hostURI))                                 ⇒ Some(HttpHost(hostURI))
     }
   }
 
-  def apply(httpHost: Option[String] = None)(implicit preference: Preference) =
-    new NetworkService(httpHost.map(HttpHost(_)).orElse(httpHostFromPreferences))
+  def apply(hostURI: Option[String] = None)(implicit preference: Preference) =
+    new NetworkService(hostURI.map(HttpHost(_)).orElse(httpHostFromPreferences))
 
-  case class HttpHost(host: String)
+  case class HttpHost(hostURI: String)
 
   object HttpHost {
-    def isHttps(host: HttpHost) = {
-      new java.net.URL(host.host).getProtocol == "https"
-    }
-
-    def toString(host: HttpHost) = host.host
+    def toString(host: HttpHost) = host.hostURI
   }
 }
 

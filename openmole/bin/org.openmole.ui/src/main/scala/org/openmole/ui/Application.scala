@@ -86,7 +86,7 @@ object Application extends JavaLogger {
       remote:               Boolean         = false,
       http:                 Boolean         = false,
       browse:               Boolean         = true,
-      proxyURI:            Option[String]  = None,
+      proxyURI:             Option[String]  = None,
       args:                 List[String]    = Nil,
       extraHeader:          Option[File]    = None
     )
@@ -125,7 +125,7 @@ object Application extends JavaLogger {
       |[--reset] reset all preferences and authentications
       |[--reset-password] reset all preferences and ask for the a password
       |[--mem memory] allocate more memory to the JVM (not supported on windows yes), for instance --mem 2G
-      |[--logger-level level] set the level of logging
+      |[--logger-level level] set the level of logging (OFF, SEVERE, WARNING, INFO, CONFIG, FINE, FINER, FINEST, ALL)
       |[--proxy hostname] set the proxy to use to install containers or R packages, in the form http://myproxy.org:3128
       |[--] end of options the remaining arguments are provided to the console in the args array
       |[-h | --help] print help""".stripMargin
