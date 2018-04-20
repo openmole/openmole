@@ -44,7 +44,7 @@ import org.openmole.plugin.task.container._
 
 import scala.language.postfixOps
 
-object UDockerTask extends  {
+object UDockerTask {
 
   @Lenses case class Commands(value: Vector[FromContext[String]])
 
