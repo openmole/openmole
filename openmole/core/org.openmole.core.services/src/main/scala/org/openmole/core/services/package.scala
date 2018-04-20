@@ -110,8 +110,8 @@ package object services {
     implicit def randomProvider: RandomProvider
     implicit def eventDispatcher: EventDispatcher
     implicit def outputRedirection: OutputRedirection
-    implicit def fileServiceCache: FileServiceCache
     implicit def networkService: NetworkService
+    implicit def fileServiceCache: FileServiceCache
   }
 
   class ServicesContainer(implicit
@@ -128,7 +128,7 @@ package object services {
                           val randomProvider:      RandomProvider,
                           val eventDispatcher:     EventDispatcher,
                           val outputRedirection:   OutputRedirection,
-                          val fileServiceCache:    FileServiceCache,
-                          val networkService:      NetworkService) extends Services
+                          val networkService:      NetworkService,
+                          val fileServiceCache:    FileServiceCache) extends Services
 
 }

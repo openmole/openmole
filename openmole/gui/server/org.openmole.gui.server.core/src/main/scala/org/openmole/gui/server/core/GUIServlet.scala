@@ -41,7 +41,7 @@ import org.openmole.core.replication.ReplicaCatalog
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.services.Services
 import org.openmole.core.threadprovider.ThreadProvider
-import org.openmole.core.networkservice.NetworkService
+import org.openmole.core.networkservice._
 import org.openmole.gui.ext.api.Api
 import org.openmole.core.workspace.{ NewFile, Workspace }
 import org.openmole.gui.ext.data.routes._
@@ -70,10 +70,11 @@ object GUIServices {
     implicit def authenticationStore = guiServices.authenticationStore
     implicit def serializerService = guiServices.serializerService
     implicit def fileService = guiServices.fileService
+    implicit def fileServiceCache = guiServices.fileServiceCache
     implicit def randomProvider = guiServices.randomProvider
     implicit def eventDispatcher: EventDispatcher = guiServices.eventDispatcher
-    implicit def outputRedirection: OutputRedirection = guiServices.outputRedirection
     implicit def networkService: NetworkService = guiServices.networkService
+    implicit def outputRedirection: OutputRedirection = guiServices.outputRedirection
   }
 
   def apply(workspace: Workspace) = {
