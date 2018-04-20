@@ -273,7 +273,7 @@ object Application extends JavaLogger {
 
             GUIServer.urlFile.content = url
 
-            GUIServices.withServices(workspace) { services ⇒
+            GUIServices.withServices(workspace, config.proxyURI) { services ⇒
               val server = new GUIServer(port, config.remote, useHTTP, services, config.password, extraHeader)
               server.start()
               if (config.browse && !config.remote) browse(url)

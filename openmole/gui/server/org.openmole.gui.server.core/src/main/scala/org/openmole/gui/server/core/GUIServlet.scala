@@ -75,10 +75,9 @@ object GUIServices {
     implicit def eventDispatcher: EventDispatcher = guiServices.eventDispatcher
     implicit def networkService: NetworkService = guiServices.networkService
     implicit def outputRedirection: OutputRedirection = guiServices.outputRedirection
-    implicit def networkService: NetworkService = guiServices.networkService
   }
 
-  def apply(workspace: Workspace) = {
+  def apply(workspace: Workspace, httpProxy: Option[String]) = {
     implicit val ws = workspace
     implicit val preference = Preference(ws.persistentDir)
     implicit val newFile = NewFile(workspace)
@@ -91,9 +90,8 @@ object GUIServices {
     implicit val randomProvider = RandomProvider(seeder.newRNG)
     implicit val eventDispatcher = EventDispatcher()
     implicit val outputRedirection = OutputRedirection()
-    implicit val networkService = NetworkService()
+    implicit val networkService = NetworkService(httpProxy)
     implicit val fileServiceCache = FileServiceCache()
-    implicit val networkService = NetworkService()
 
     new GUIServices()
   }
@@ -103,8 +101,8 @@ object GUIServices {
     scala.util.Try(services.threadProvider.stop())
   }
 
-  def withServices[T](workspace: Workspace)(f: GUIServices ⇒ T) = {
-    val services = GUIServices(workspace)
+  def withServices[T](workspace: Workspace, httpProxy: Option[String])(f: GUIServices ⇒ T) = {
+    val services = GUIServices(workspace, httpProxy)
     try f(services)
     finally dispose(services)
   }

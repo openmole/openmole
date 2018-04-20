@@ -36,7 +36,7 @@ object NetworkService {
     }
   }
 
-  def apply(hostURI: Option[String] = None)(implicit preference: Preference) =
+  def apply(hostURI: Option[String])(implicit preference: Preference) =
     new NetworkService(hostURI.map(HttpHost(_)).orElse(httpHostFromPreferences))
 
   case class HttpHost(hostURI: String)
@@ -46,5 +46,5 @@ object NetworkService {
   }
 }
 
-case class NetworkService(httpProxy: Option[HttpHost])
+class NetworkService(val httpProxy: Option[HttpHost])
 

@@ -45,7 +45,6 @@ package object services {
       implicit val outputRedirection = OutputRedirection()
       implicit val networkService = NetworkService(httpProxy)
       implicit val fileServiceCache = FileServiceCache()
-      implicit val networkService = NetworkService(httpProxy)
 
       new ServicesContainer()
     }
@@ -76,7 +75,6 @@ package object services {
       outputRedirection:   OutputRedirection   = services.outputRedirection,
       networkService:      NetworkService      = services.networkService,
       fileServiceCache:    FileServiceCache    = services.fileServiceCache
-      networkService:      NetworkService      = services.networkService
     ) =
       new ServicesContainer()(
         workspace = workspace,
@@ -114,7 +112,6 @@ package object services {
     implicit def outputRedirection: OutputRedirection
     implicit def networkService: NetworkService
     implicit def fileServiceCache: FileServiceCache
-    implicit def networkService: NetworkService
   }
 
   class ServicesContainer(implicit
@@ -133,6 +130,5 @@ package object services {
                           val outputRedirection:   OutputRedirection,
                           val networkService:      NetworkService,
                           val fileServiceCache:    FileServiceCache) extends Services
-                          val networkService:      NetworkService) extends Services
 
 }
