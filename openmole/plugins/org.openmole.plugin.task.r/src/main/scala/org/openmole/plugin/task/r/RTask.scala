@@ -7,6 +7,7 @@ import org.openmole.plugin.task.udocker._
 import org.openmole.core.fileservice._
 import org.openmole.core.preference._
 import org.openmole.core.workspace._
+import org.openmole.core.networkservice._
 import org.openmole.plugin.task.external._
 import org.openmole.core.expansion._
 import org.openmole.core.threadprovider._
@@ -41,18 +42,16 @@ object RTask {
   object InstallCommand {
     case class RLibrary(name: String) extends InstallCommand
 
-    def toCommand(installCommands: InstallCommand) = {
+    def toCommand(installCommands: InstallCommand) =
       installCommands match {
         case RLibrary(name) ⇒
           //Vector(s"""R -e 'install.packages(c(${names.map(lib ⇒ '"' + s"$lib" + '"').mkString(",")}), dependencies = T)'""")
-          s"""R -e 'install.packages(c("$name"), dependencies = T)'"""
+          s"""R --slave -e 'install.packages(c("$name"), dependencies = T); library("$name")'"""
       }
-    }
 
     implicit def stringToRLibrary(name: String): InstallCommand = RLibrary(name)
-    def installCommands(libraries: Vector[InstallCommand]): Vector[String] = {
-      libraries.map(InstallCommand.toCommand)
-    }
+    def installCommands(libraries: Vector[InstallCommand]): Vector[String] = libraries.map(InstallCommand.toCommand)
+
   }
 
   def rImage(version: String) = DockerImage("openmole/r-base", version)
@@ -62,7 +61,7 @@ object RTask {
     install:     Seq[String]         = Seq.empty,
     libraries:   Seq[InstallCommand] = Seq.empty,
     forceUpdate: Boolean             = false
-  )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection): RTask = {
+  )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService): RTask = {
 
     def version = "3.3.3"
 
