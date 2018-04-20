@@ -18,6 +18,8 @@
 
 package org.openmole.plugin.task.udocker
 
+import java.util.logging.Level
+
 import monocle.macros._
 import cats.implicits._
 import org.openmole.core.context.{ Context, Variable }
@@ -41,10 +43,11 @@ import org.openmole.core.threadprovider._
 import org.openmole.plugin.task.container.HostFiles
 import org.openmole.tool.lock.LockKey
 import org.openmole.plugin.task.container._
+import org.openmole.tool.logger.JavaLogger
 
 import scala.language.postfixOps
 
-object UDockerTask {
+object UDockerTask extends JavaLogger {
 
   @Lenses case class Commands(value: Vector[FromContext[String]])
 
@@ -151,11 +154,21 @@ object UDockerTask {
 
         val container = UDocker.createContainer(uDocker, uDockerExecutable, containersDirectory, uDockerVariables, Vector.empty, imageId(uDocker))
 
-        def httpProxy: Option[(String, String)] =
+        networkService.httpProxy match {
+          case Some(proxy) ⇒
+            Log.logger.log(Log.WARNING, s"using as proxy: ", NetworkService.HttpHost.toString(proxy))
+          case _ ⇒
+            Log.logger.log(Log.WARNING, s"no proxy define!")
+        }
+
+        def httpProxyVars: Seq[(String, String)] =
           networkService.httpProxy match {
-            case Some(proxy) if NetworkService.HttpHost.isHttps(proxy) ⇒ Some("https_proxy", NetworkService.HttpHost.toString(proxy))
-            case Some(proxy) ⇒ Some("http_proxy", NetworkService.HttpHost.toString(proxy))
-            case _ ⇒ None
+            case Some(proxy) ⇒
+              Seq(
+                ("http_proxy", NetworkService.HttpHost.toString(proxy)),
+                ("https_proxy", NetworkService.HttpHost.toString(proxy)))
+            case _ ⇒
+              Seq()
           }
 
         runCommands(
@@ -165,7 +178,7 @@ object UDockerTask {
           uDockerVolumes = Vector.empty,
           container = container,
           commands = installCommands,
-          environmentVariables = httpProxy.toVector,
+          environmentVariables = httpProxyVars,
           stdOut = outputRedirection.output,
           stdErr = outputRedirection.output
         )
