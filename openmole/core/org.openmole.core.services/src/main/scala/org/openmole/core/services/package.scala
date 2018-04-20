@@ -42,6 +42,7 @@ package object services {
       implicit val randomProvider = RandomProvider(seeder.newRNG)
       implicit val eventDispatcher = EventDispatcher()
       implicit val outputRedirection = OutputRedirection()
+      implicit val fileServiceCache = FileServiceCache()
       new ServicesContainer()
     }
 
@@ -68,7 +69,8 @@ package object services {
       fileService:         FileService         = services.fileService,
       randomProvider:      RandomProvider      = services.randomProvider,
       eventDispatcher:     EventDispatcher     = services.eventDispatcher,
-      outputRedirection:   OutputRedirection   = services.outputRedirection
+      outputRedirection:   OutputRedirection   = services.outputRedirection,
+      fileServiceCache:    FileServiceCache    = services.fileServiceCache
     ) =
       new ServicesContainer()(
         workspace = workspace,
@@ -81,6 +83,7 @@ package object services {
         authenticationStore = authenticationStore,
         serializerService = serializerService,
         fileService = fileService,
+        fileServiceCache = fileServiceCache,
         randomProvider = randomProvider,
         eventDispatcher = eventDispatcher,
         outputRedirection = outputRedirection
@@ -102,6 +105,7 @@ package object services {
     implicit def randomProvider: RandomProvider
     implicit def eventDispatcher: EventDispatcher
     implicit def outputRedirection: OutputRedirection
+    implicit def fileServiceCache: FileServiceCache
   }
 
   class ServicesContainer(implicit
@@ -117,6 +121,7 @@ package object services {
                           val fileService:         FileService,
                           val randomProvider:      RandomProvider,
                           val eventDispatcher:     EventDispatcher,
-                          val outputRedirection:   OutputRedirection) extends Services
+                          val outputRedirection:   OutputRedirection,
+                          val fileServiceCache:    FileServiceCache) extends Services
 
 }

@@ -1,7 +1,7 @@
 package org.openmole.core.workflow.tools
 
 import org.openmole.core.event.EventDispatcher
-import org.openmole.core.fileservice.FileService
+import org.openmole.core.fileservice.{ FileService, FileServiceCache }
 import org.openmole.core.outputredirection.OutputRedirection
 import org.openmole.core.preference.Preference
 import org.openmole.core.serializer.SerializerService
@@ -30,4 +30,5 @@ object Stubs {
   implicit val fileService = FileService()
   implicit val randomProvider = RandomProvider(seeder.newRNG)
   implicit val outputRedirection = OutputRedirection()
+  implicit val fileServiceCache = FileServiceCache()
 }

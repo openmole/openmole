@@ -26,7 +26,7 @@ import org.openmole.core.communication.message._
 import org.openmole.core.console.ScalaREPL.ReferencedClasses
 import org.openmole.core.console.{ REPLClassloader, ScalaREPL }
 import org.openmole.core.event.{ Event, EventDispatcher }
-import org.openmole.core.fileservice.{ FileCache, FileService }
+import org.openmole.core.fileservice.{ FileCache, FileService, FileServiceCache }
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.preference.{ ConfigurationLocation, Preference }
 import org.openmole.core.replication.ReplicaCatalog
@@ -149,7 +149,8 @@ object BatchEnvironment extends JavaLogger {
     implicit val seeder:            Seeder,
     implicit val randomProvider:    RandomProvider,
     implicit val replicaCatalog:    ReplicaCatalog,
-    implicit val eventDispatcher:   EventDispatcher
+    implicit val eventDispatcher:   EventDispatcher,
+    implicit val fileServiceCache:  FileServiceCache
   )
 
   def trySelectSingleStorage(s: StorageService[_]) =
@@ -257,6 +258,6 @@ class BatchExecutionJob(val job: Job, val environment: BatchEnvironment) extends
       Seq(environment.runtime, environment.jvmLinuxX64) ++
       environment.plugins ++ plugins).distinct
 
-  def usedFileHashes = usedFiles.map(f ⇒ (f, environment.services.fileService.hash(f)(environment.services.newFile)))
+  def usedFileHashes = usedFiles.map(f ⇒ (f, environment.services.fileService.hash(f)(environment.services.newFile, environment.services.fileServiceCache)))
 
 }

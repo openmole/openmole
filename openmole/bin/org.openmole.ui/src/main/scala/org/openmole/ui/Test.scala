@@ -38,6 +38,7 @@ object Test {
       implicit val randomProvider = RandomProvider(seeder.newRNG)
       implicit val eventDispatcher = EventDispatcher()
       implicit val outputRedirection = OutputRedirection()
+      implicit val fileServiceCache = FileServiceCache()
 
       new ServicesContainer()
     }
