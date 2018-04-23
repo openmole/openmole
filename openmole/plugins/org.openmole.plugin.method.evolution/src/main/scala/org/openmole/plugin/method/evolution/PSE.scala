@@ -263,7 +263,7 @@ object PSE {
         def generation(s: S) = s.generation
 
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get _, CDGenome.discreteValues.get _)(genome)
-        def buildIndividual(genome: G, phenotype: Vector[Double]) = PSEAlgorithm.buildIndividual(genome, phenotype)
+        def buildIndividual(genome: G, phenotype: Vector[Double], context: Context) = PSEAlgorithm.buildIndividual(genome, phenotype)
 
         def initialState(rng: util.Random) = EvolutionState[HitMapState](random = rng, s = Map())
 
@@ -385,7 +385,7 @@ object PSE {
         def generation(s: S) = s.generation
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get _, CDGenome.discreteValues.get _)(genome)
 
-        def buildIndividual(genome: G, phenotype: Vector[Double]) = NoisyPSEAlgorithm.buildIndividual(genome, phenotype)
+        def buildIndividual(genome: G, phenotype: Vector[Double], context: Context) = NoisyPSEAlgorithm.buildIndividual(genome, phenotype)
         def initialState(rng: util.Random) = EvolutionState[HitMapState](random = rng, s = Map())
 
         def result(population: Vector[I], state: S) = FromContext { p ⇒

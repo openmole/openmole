@@ -83,7 +83,7 @@ object WorkflowIntegration {
       lazy val integration = a.algorithm
 
       def buildIndividual(genome: G, context: Context): I =
-        operations.buildIndividual(genome, variablesToPhenotype(context))
+        operations.buildIndividual(genome, variablesToPhenotype(context), context)
 
       def inputPrototypes = Genome.toVals(a.genome)
       def objectives = a.objectives
@@ -108,7 +108,7 @@ object WorkflowIntegration {
       lazy val integration = a.algorithm
 
       def buildIndividual(genome: G, context: Context): I =
-        operations.buildIndividual(genome, variablesToPhenotype(context))
+        operations.buildIndividual(genome, variablesToPhenotype(context), context)
 
       def inputPrototypes = Genome.toVals(a.genome) ++ a.replication.seed.prototype
       def objectives = a.objectives
@@ -294,7 +294,7 @@ object MGOAPI {
     trait Ops {
       def initialState(rng: util.Random): S
       def initialGenomes(n: Int): FromContext[M[Vector[G]]]
-      def buildIndividual(genome: G, phenotype: P): I
+      def buildIndividual(genome: G, phenotype: P, context: Context): I
       def genomeValues(genome: G): V
       def randomLens: monocle.Lens[S, util.Random]
       def startTimeLens: monocle.Lens[S, Long]

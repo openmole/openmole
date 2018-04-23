@@ -21,7 +21,7 @@ import monocle.macros._
 import org.openmole.core.expansion.FromContext
 import squants.Time
 import cats.implicits._
-import org.openmole.core.context.Variable
+import org.openmole.core.context._
 
 object NSGA2 {
 
@@ -59,7 +59,7 @@ object NSGA2 {
         def startTimeLens = GenLens[S](_.startTime)
         def generation(s: EvolutionState[Unit]) = s.generation
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get _, CDGenome.discreteValues.get _)(genome)
-        def buildIndividual(genome: G, phenotype: Vector[Double]) = CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype)
+        def buildIndividual(genome: G, phenotype: Vector[Double], context: Context) = CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype)
         def initialState(rng: util.Random) = EvolutionState[Unit](random = rng, s = ())
 
         def result(population: Vector[I], state: S) = FromContext { p ⇒
@@ -162,7 +162,7 @@ object NSGA2 {
         def generation(s: S) = s.generation
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get _, CDGenome.discreteValues.get _)(genome)
 
-        def buildIndividual(genome: G, phenotype: Vector[Double]) = CDGenome.NoisyIndividual.buildIndividual(genome, phenotype)
+        def buildIndividual(genome: G, phenotype: Vector[Double], context: Context) = CDGenome.NoisyIndividual.buildIndividual(genome, phenotype)
         def initialState(rng: util.Random) = EvolutionState[Unit](random = rng, s = ())
 
         def result(population: Vector[I], state: S) = FromContext { p ⇒
