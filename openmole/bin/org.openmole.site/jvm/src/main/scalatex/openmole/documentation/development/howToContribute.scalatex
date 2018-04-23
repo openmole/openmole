@@ -40,6 +40,7 @@ It also explains the various versions of OpenMOLE you may want to use/deploy, fr
     @ol
         @li
             Clone the OpenMOLE repository : @hl.highlight("""
+            $> git lfs install
             $> git lfs clone git@github.com:openmole/openmole.git
             """, "plain")
          @li
