@@ -75,9 +75,19 @@ object Genome {
     continuous(index)
   }
 
+  def continuousSequenceValue(genome: Genome, v: Val[_], size: Int, continuous: Vector[Double]) = {
+    val index = Genome.continuousIndex(genome, v).get
+    continuous.slice(index, index + size)
+  }
+
   def discreteValue(genome: Genome, v: Val[_], discrete: Vector[Int]) = {
     val index = Genome.continuousIndex(genome, v).get
     discrete(index)
+  }
+
+  def discreteSequenceValue(genome: Genome, v: Val[_], size: Int, discrete: Vector[Int]) = {
+    val index = Genome.discreteIndex(genome, v).get
+    discrete.slice(index, index + size)
   }
 
   def toVals(genome: Genome) = genome.map(GenomeBound.toVal)

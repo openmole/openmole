@@ -262,24 +262,30 @@ object OSE {
       ContinuousOriginAxe(GenomeBound.ScalarDouble(f.prototype, domain.min, domain.max), domain)
     }
 
-    //    implicit def fromSeqOfDoubleDomainToOriginAxe[D](f: Factor[D, Array[Double]])(implicit fix: Fix[D, Array[Double]]): OriginAxe = {
-    //      val domain = fix(f.domain)
-    //      ContinuousSequenceOriginAxe(
-    //        GenomeBound.SequenceOfDouble(f.prototype, domain.map(_.min).toArray, domain.map(_.max).toArray, domain.size),
-    //        domain.toVector.map(_.toVector))
-    //    }
+    implicit def fromSeqOfDoubleDomainToOriginAxe[D](f: Factor[D, Array[Double]])(implicit fix: Fix[D, Array[Double]]): OriginAxe = {
+      val domain = fix(f.domain)
+      ContinuousSequenceOriginAxe(
+        GenomeBound.SequenceOfDouble(f.prototype, FromContext.value(domain.map(_.min).toArray), FromContext.value(domain.map(_.max).toArray), domain.size),
+        domain.toVector.map(_.toVector))
+    }
 
     implicit def fromIntDomainToPatternAxe[D](f: Factor[D, Int])(implicit fix: Fix[D, Int]): OriginAxe = {
       val domain = fix(f.domain).toVector
       DiscreteOriginAxe(GenomeBound.ScalarInt(f.prototype, domain.min, domain.max), domain)
     }
 
-    //    implicit def fromLongDomainToPatternAxe[D](f: Factor[D, Long])(implicit fix: Fix[D, Long]): PatternAxe =
-    //      PatternAxe(f.prototype, fix(f.domain).toVector.map(_.toDouble))
+    implicit def fromSeqOfIntDomainToOriginAxe[D](f: Factor[D, Array[Int]])(implicit fix: Fix[D, Array[Int]]): OriginAxe = {
+      val domain = fix(f.domain)
+      DiscreteSequenceOriginAxe(
+        GenomeBound.SequenceOfInt(f.prototype, FromContext.value(domain.map(_.min).toArray), FromContext.value(domain.map(_.max).toArray), domain.size),
+        domain.toVector.map(_.toVector))
+    }
 
     def genomeBound(originAxe: OriginAxe) = originAxe match {
-      case c: ContinuousOriginAxe ⇒ c.p
-      case d: DiscreteOriginAxe   ⇒ d.p
+      case c: ContinuousOriginAxe          ⇒ c.p
+      case d: DiscreteOriginAxe            ⇒ d.p
+      case cs: ContinuousSequenceOriginAxe ⇒ cs.p
+      case ds: DiscreteSequenceOriginAxe   ⇒ ds.p
     }
 
     def fullGenome(origin: Seq[OriginAxe], genome: Genome): Genome =
@@ -288,11 +294,13 @@ object OSE {
     def toOrigin(origin: Seq[OriginAxe], genome: Genome) = {
       val fg = fullGenome(origin, genome)
       def grid(continuous: Vector[Double], discrete: Vector[Int]): Vector[Int] =
-        origin.toVector.map {
-          case ContinuousOriginAxe(p, scale) ⇒ mgo.tools.findInterval(scale, Genome.continuousValue(fg, p.v, continuous))
-          case DiscreteOriginAxe(p, scale)   ⇒ mgo.tools.findInterval(scale, Genome.discreteValue(fg, p.v, discrete))
-          //case ContinuousSequenceOriginAxe(p, scale) =>
+        origin.toVector.flatMap {
+          case ContinuousOriginAxe(p, scale)         ⇒ Vector(mgo.tools.findInterval(scale, Genome.continuousValue(fg, p.v, continuous)))
+          case DiscreteOriginAxe(p, scale)           ⇒ Vector(mgo.tools.findInterval(scale, Genome.discreteValue(fg, p.v, discrete)))
+          case ContinuousSequenceOriginAxe(p, scale) ⇒ mgo.niche.irregularGrid[Double](scale)(Genome.continuousSequenceValue(fg, p.v, p.size, continuous))
+          case DiscreteSequenceOriginAxe(p, scale)   ⇒ mgo.niche.irregularGrid[Int](scale)(Genome.discreteSequenceValue(fg, p.v, p.size, discrete))
         }
+
       grid(_, _)
     }
 
@@ -300,8 +308,9 @@ object OSE {
 
   sealed trait OriginAxe
   case class ContinuousOriginAxe(p: Genome.GenomeBound.ScalarDouble, scale: Vector[Double]) extends OriginAxe
-  //case class ContinuousSequenceOriginAxe(p: Genome.GenomeBound, scale: Vector[Vector[Double]]) extends OriginAxe
+  case class ContinuousSequenceOriginAxe(p: Genome.GenomeBound.SequenceOfDouble, scale: Vector[Vector[Double]]) extends OriginAxe
   case class DiscreteOriginAxe(p: Genome.GenomeBound.ScalarInt, scale: Vector[Int]) extends OriginAxe
+  case class DiscreteSequenceOriginAxe(p: Genome.GenomeBound.SequenceOfInt, scale: Vector[Vector[Int]]) extends OriginAxe
 
   object FitnessPattern {
     implicit def fromPairToObjective[T](v: (Val[T], T))(implicit td: ToDouble[T]) = FitnessPattern(v._1, td(v._2))
