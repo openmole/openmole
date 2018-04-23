@@ -463,113 +463,114 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
   def getGUIPlugins(): AllPluginExtensionData = {
 
     AllPluginExtensionData(
-      authentications = PluginActivator.authentications
+      PluginActivator.authentications,
+      PluginActivator.wizards
     )
   }
 
   //MODEL WIZARDS
-  def launchingCommands(path: SafePath): Seq[LaunchingCommand] = Utils.launchingCommands(path)
+  //def launchingCommands(path: SafePath): Seq[LaunchingCommand] = Utils.launchingCommands(path)
 
   //Extract models from an archive
-  def models(archivePath: SafePath): Seq[SafePath] = {
-    val toDir = archivePath.toNoExtention
-    // extractTGZToAndDeleteArchive(archivePath, toDir)
-    (for {
-      tnd ← listFiles(toDir).list if FileType.isSupportedLanguage(tnd.name)
-    } yield tnd).map { nd ⇒ toDir ++ nd.name }
-  }
+  //  def models(archivePath: SafePath): Seq[SafePath] = {
+  //    val toDir = archivePath.toNoExtention
+  //    // extractTGZToAndDeleteArchive(archivePath, toDir)
+  //    (for {
+  //      tnd ← listFiles(toDir).list if FileType.isSupportedLanguage(tnd.name)
+  //    } yield tnd).map { nd ⇒ toDir ++ nd.name }
+  //  }
 
-  def classes(jarPath: SafePath): Seq[ClassTree] = Utils.jarClasses(jarPath)
+  //  def classes(jarPath: SafePath): Seq[ClassTree] = Utils.jarClasses(jarPath)
 
-  def methods(jarPath: SafePath, className: String): Seq[JarMethod] = Utils.jarMethods(jarPath, className)
+  //def methods(jarPath: SafePath, className: String): Seq[JarMethod] = Utils.jarMethods(jarPath, className)
 
-  def buildModelTask(
-    executableName: String,
-    scriptName:     String,
-    command:        String,
-    language:       Language,
-    inputs:         Seq[ProtoTypePair],
-    outputs:        Seq[ProtoTypePair],
-    path:           SafePath,
-    libraries:      Option[String],
-    resources:      Resources
-  ): SafePath = {
-    import org.openmole.gui.ext.data.ServerFileSystemContext.project
-    val modelTaskFile = new File(path, scriptName + ".oms")
-
-    val os = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(modelTaskFile)))
-
-    def ioString(protos: Seq[ProtoTypePair], keyString: String) = if (protos.nonEmpty) Seq(s"  $keyString += (", ")").mkString(protos.map { i ⇒ s"${i.name}" }.mkString(", ")) + ",\n" else ""
-
-    def imapString(protos: Seq[ProtoTypePair], keyString: String) = if (protos.nonEmpty) protos.map { i ⇒ s"""  $keyString += (${i.name}, "${i.mapping.get}")""" }.mkString(",\n") + ",\n" else ""
-
-    def omapString(protos: Seq[ProtoTypePair], keyString: String) = if (protos.nonEmpty) protos.map { o ⇒ s"""  $keyString += ("${o.mapping.get}", ${o.name})""" }.mkString(",\n") + ",\n" else ""
-
-    def default(key: String, value: String) = s"  $key := $value"
-
-    try {
-      for (p ← ((inputs ++ outputs).map { p ⇒ (p.name, p.`type`.scalaString) } distinct)) yield {
-        os.write("val " + p._1 + " = Val[" + p._2 + "]\n")
-      }
-
-      val (rawimappings, ins) = inputs.partition(i ⇒ i.mapping.isDefined)
-      val (rawomappings, ous) = outputs.partition(o ⇒ o.mapping.isDefined)
-      val (ifilemappings, imappings) = rawimappings.partition(_.`type` == ProtoTYPE.FILE)
-      val (ofilemappings, omappings) = rawomappings.partition(_.`type` == ProtoTYPE.FILE)
-
-      val inString = ioString(ins, "inputs")
-      val imFileString = imapString(ifilemappings, "inputFiles")
-      val ouString = ioString(ous, "outputs")
-      val omFileString = omapString(ofilemappings, "outputFiles")
-      val resourcesString = if (resources.all.nonEmpty) s"""  resources += (${resources.all.map { r ⇒ s"workDirectory / ${(r.safePath.path.drop(1).mkString("/")).mkString(",")}" }}).\n""" else ""
-      val defaults =
-        "  //Default values. Can be removed if OpenMOLE Vals are set by values coming from the workflow\n" +
-          (inputs.map { p ⇒ (p.name, testBoolean(p)) } ++
-            ifilemappings.map { p ⇒ (p.name, " workDirectory / \"" + p.mapping.getOrElse("") + "\"") }).filterNot {
-              _._2.isEmpty
-            }.map { p ⇒ default(p._1, p._2) }.mkString(",\n")
-
-      language.taskType match {
-        case ctt: CareTaskType ⇒
-          os.write(
-            s"""\nval task = CARETask(workDirectory / "$executableName", "$command") set(\n""" +
-              inString + ouString + imFileString + omFileString + resourcesString + defaults
-          )
-        case ntt: NetLogoTaskType ⇒
-          val imString = imapString(imappings, "netLogoInputs")
-          val omString = omapString(omappings, "netLogoOutputs")
-          os.write(
-            s"""\nval launch = List("${(Seq("setup", "random-seed ${seed}") ++ (command.split('\n').toSeq)).mkString("\",\"")}")
-               \nval task = NetLogo5Task(workDirectory / ${executableName.split('/').map { s ⇒ s"""\"$s\"""" }.mkString(" / ")}, launch, embedWorkspace = ${!resources.implicits.isEmpty}) set(\n""".stripMargin +
-              inString + ouString + imString + omString + imFileString + omFileString + defaults
-          )
-        case st: ScalaTaskType ⇒
-          os.write(
-            s"""\nval task = ScalaTask(\n\"\"\"$command\"\"\") set(\n""" +
-              s"${libraries.map { l ⇒ s"""  libraries += workingDirectory / "$l",""" }.getOrElse("")}\n\n" +
-              inString + ouString + imFileString + omFileString + resourcesString + defaults
-          )
-        case rt: RTaskType ⇒
-          val rInput = ioString(ins, "rInputs")
-          val rOutput = ioString(ous, "rOutputs")
-          os.write(
-            s"""\nval task = RTask(\"\"\"\n   $command\n   \"\"\") set(\n""" +
-              rInput + rOutput +
-              s"""  resources += workDirectory / \"$executableName\""""
-
-          )
-
-        case _ ⇒ ""
-      }
-      os.write("\n  )\n\ntask hook ToStringHook()")
-    }
-
-    finally {
-      os.close
-    }
-    modelTaskFile.createNewFile
-    modelTaskFile
-  }
+  //  def buildModelTask(
+  //    executableName: String,
+  //    scriptName:     String,
+  //    command:        String,
+  //    language:       Language,
+  //    inputs:         Seq[ProtoTypePair],
+  //    outputs:        Seq[ProtoTypePair],
+  //    path:           SafePath,
+  //    libraries:      Option[String],
+  //    resources:      Resources
+  //  ): SafePath = {
+  //    import org.openmole.gui.ext.data.ServerFileSystemContext.project
+  //    val modelTaskFile = new File(path, scriptName + ".oms")
+  //
+  //    val os = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(modelTaskFile)))
+  //
+  //    def ioString(protos: Seq[ProtoTypePair], keyString: String) = if (protos.nonEmpty) Seq(s"  $keyString += (", ")").mkString(protos.map { i ⇒ s"${i.name}" }.mkString(", ")) + ",\n" else ""
+  //
+  //    def imapString(protos: Seq[ProtoTypePair], keyString: String) = if (protos.nonEmpty) protos.map { i ⇒ s"""  $keyString += (${i.name}, "${i.mapping.get}")""" }.mkString(",\n") + ",\n" else ""
+  //
+  //    def omapString(protos: Seq[ProtoTypePair], keyString: String) = if (protos.nonEmpty) protos.map { o ⇒ s"""  $keyString += ("${o.mapping.get}", ${o.name})""" }.mkString(",\n") + ",\n" else ""
+  //
+  //    def default(key: String, value: String) = s"  $key := $value"
+  //
+  //    try {
+  //      for (p ← ((inputs ++ outputs).map { p ⇒ (p.name, p.`type`.scalaString) } distinct)) yield {
+  //        os.write("val " + p._1 + " = Val[" + p._2 + "]\n")
+  //      }
+  //
+  //      val (rawimappings, ins) = inputs.partition(i ⇒ i.mapping.isDefined)
+  //      val (rawomappings, ous) = outputs.partition(o ⇒ o.mapping.isDefined)
+  //      val (ifilemappings, imappings) = rawimappings.partition(_.`type` == ProtoTYPE.FILE)
+  //      val (ofilemappings, omappings) = rawomappings.partition(_.`type` == ProtoTYPE.FILE)
+  //
+  //      val inString = ioString(ins, "inputs")
+  //      val imFileString = imapString(ifilemappings, "inputFiles")
+  //      val ouString = ioString(ous, "outputs")
+  //      val omFileString = omapString(ofilemappings, "outputFiles")
+  //      val resourcesString = if (resources.all.nonEmpty) s"""  resources += (${resources.all.map { r ⇒ s"workDirectory / ${(r.safePath.path.drop(1).mkString("/")).mkString(",")}" }}).\n""" else ""
+  //      val defaults =
+  //        "  //Default values. Can be removed if OpenMOLE Vals are set by values coming from the workflow\n" +
+  //          (inputs.map { p ⇒ (p.name, testBoolean(p)) } ++
+  //            ifilemappings.map { p ⇒ (p.name, " workDirectory / \"" + p.mapping.getOrElse("") + "\"") }).filterNot {
+  //              _._2.isEmpty
+  //            }.map { p ⇒ default(p._1, p._2) }.mkString(",\n")
+  //
+  //      language.taskType match {
+  //        case ctt: CareTaskType ⇒
+  //          os.write(
+  //            s"""\nval task = CARETask(workDirectory / "$executableName", "$command") set(\n""" +
+  //              inString + ouString + imFileString + omFileString + resourcesString + defaults
+  //          )
+  //        case ntt: NetLogoTaskType ⇒
+  //          val imString = imapString(imappings, "netLogoInputs")
+  //          val omString = omapString(omappings, "netLogoOutputs")
+  //          os.write(
+  //            s"""\nval launch = List("${(Seq("setup", "random-seed ${seed}") ++ (command.split('\n').toSeq)).mkString("\",\"")}")
+  //               \nval task = NetLogo5Task(workDirectory / ${executableName.split('/').map { s ⇒ s"""\"$s\"""" }.mkString(" / ")}, launch, embedWorkspace = ${!resources.implicits.isEmpty}) set(\n""".stripMargin +
+  //              inString + ouString + imString + omString + imFileString + omFileString + defaults
+  //          )
+  //        case st: ScalaTaskType ⇒
+  //          os.write(
+  //            s"""\nval task = ScalaTask(\n\"\"\"$command\"\"\") set(\n""" +
+  //              s"${libraries.map { l ⇒ s"""  libraries += workingDirectory / "$l",""" }.getOrElse("")}\n\n" +
+  //              inString + ouString + imFileString + omFileString + resourcesString + defaults
+  //          )
+  //        case rt: RTaskType ⇒
+  //          val rInput = ioString(ins, "rInputs")
+  //          val rOutput = ioString(ous, "rOutputs")
+  //          os.write(
+  //            s"""\nval task = RTask(\"\"\"\n   $command\n   \"\"\") set(\n""" +
+  //              rInput + rOutput +
+  //              s"""  resources += workDirectory / \"$executableName\""""
+  //
+  //          )
+  //
+  //        case _ ⇒ ""
+  //      }
+  //      os.write("\n  )\n\ntask hook ToStringHook()")
+  //    }
+  //
+  //    finally {
+  //      os.close
+  //    }
+  //    modelTaskFile.createNewFile
+  //    modelTaskFile
+  //  }
 
   def expandResources(resources: Resources): Resources = {
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
@@ -585,10 +586,5 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
       implicitResource,
       paths.size + implicitResource.size
     )
-  }
-
-  def testBoolean(protoType: ProtoTypePair) = protoType.`type` match {
-    case ProtoTYPE.BOOLEAN ⇒ if (protoType.default == "1") "true" else "false"
-    case _                 ⇒ protoType.default
   }
 }

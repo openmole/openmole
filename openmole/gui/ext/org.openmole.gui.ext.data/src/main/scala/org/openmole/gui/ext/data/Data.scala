@@ -124,6 +124,7 @@ object SVGExtension extends FileExtension {
 case class EditableFile(highlighter: String, onDemand: Boolean = false) extends FileExtension with HighlightedFile {
   val displayable = true
 }
+
 object BinaryFile extends FileExtension {
   val displayable = false
 }
@@ -353,7 +354,9 @@ sealed trait ExecutionInfo {
   def capsules: Vector[(ExecutionInfo.CapsuleId, ExecutionInfo.JobStatuses)]
 
   def ready: Long = capsules.map(_._2.ready).sum
+
   def running: Long = capsules.map(_._2.running).sum
+
   def completed: Long = capsules.map(_._2.completed).sum
 
   def environmentStates: Seq[EnvironmentState]
@@ -362,6 +365,7 @@ sealed trait ExecutionInfo {
 object ExecutionInfo {
 
   type CapsuleId = String
+
   case class JobStatuses(ready: Long, running: Long, completed: Long)
 
   case class Failed(
@@ -397,7 +401,9 @@ object ExecutionInfo {
     def state: String = "launching"
 
     def duration: Long = 0L
+
     def capsules = Vector.empty
+
     def environmentStates: Seq[EnvironmentState] = Seq()
   }
 
@@ -425,6 +431,10 @@ case class CareTaskType() extends TaskType {
   override val preVariable = """${"""
   override val postVariable = "}"
 }
+
+case class NoneOSGITaskType() extends TaskType
+
+case class OSGIJarTaskType() extends TaskType
 
 case class ScalaTaskType() extends TaskType
 
@@ -700,7 +710,7 @@ sealed trait PluginExtensionType
 object AuthenticationExtension extends PluginExtensionType
 
 //TODO: add other extension points
-case class AllPluginExtensionData(authentications: Seq[GUIPluginAsJS])
+case class AllPluginExtensionData(authentications: Seq[GUIPluginAsJS], wizards: Seq[GUIPluginAsJS])
 
 case class GUIPluginAsJS(jsObject: String)
 
@@ -745,3 +755,14 @@ object Test {
 case class JVMInfos(javaVersion: String, jvmImplementation: String, processorAvailable: Int, allocatedMemory: Long, totalMemory: Long)
 
 case class SequenceData(header: Seq[String], content: Seq[Array[String]])
+
+case class WizardModelData(
+  vals:                  String,
+  inputs:                String,
+  outputs:               String,
+  inputFileMapping:      String,
+  outputFileMapping:     String,
+  defaults:              String,
+  specificInputMapping:  Option[String] = None,
+  specificOutputMapping: Option[String] = None
+)

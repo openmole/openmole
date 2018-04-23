@@ -23,6 +23,7 @@ import org.openmole.gui.ext.data._
 import org.openmole.gui.client.core.panels._
 import autowire._
 import org.scalajs.dom.html.TextArea
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
@@ -40,8 +41,14 @@ import org.openmole.gui.ext.api.Api
 import scaladget.bootstrapnative.Selector.Options
 import org.openmole.gui.ext.tool.client.FileManager
 
+import scala.concurrent.Future
+
 class ModelWizardPanel {
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
+
+  println("Wizards " + Plugins.wizardFactories.now.map {
+    _.name
+  })
 
   sealed trait VariableRole[T] {
     def content: T
@@ -94,26 +101,26 @@ class ModelWizardPanel {
   val targetPath: Var[Option[SafePath]] = Var(None)
   val fromArchive: Var[Boolean] = Var(false)
 
-  val modelSelector: Options[SafePath] = Seq[SafePath]().options(
-    0,
-    btn_default,
-    SafePath.naming,
-    onclickExtra = () ⇒ {
-      fileToUploadPath() = modelSelector.get
-      onModelChange
-    }
-  )
+  //  val modelSelector: Options[SafePath] = Seq[SafePath]().options(
+  //    0,
+  //    btn_default,
+  //    SafePath.naming,
+  //    onclickExtra = () ⇒ {
+  //      fileToUploadPath() = modelSelector.get
+  //      onModelChange
+  //    }
+  //  )
 
-  def onModelChange = {
-    fileToUploadPath.now.foreach {
-      m ⇒
-        val fileType: FileType = m
-        fileType match {
-          case _: CodeFile ⇒ setLaunchingCommand(m)
-          case _           ⇒
-        }
-    }
-  }
+  //  def onModelChange = {
+  //    fileToUploadPath.now.foreach {
+  //      m ⇒
+  //        val fileType: FileType = m
+  //        fileType match {
+  //          case _: CodeFile ⇒ setLaunchingCommand(m)
+  //          case _           ⇒
+  //        }
+  //    }
+  //  }
 
   def setScritpName = scriptNameInput.value = filePath.now.map {
     _.name.split('.').head
@@ -126,8 +133,7 @@ class ModelWizardPanel {
   })
 
   val scriptNameInput = inputTag()(modelNameInput, placeholder := "Script name").render
-  val languages: Seq[Language] = Seq(Binary(), JavaLikeLanguage(), PythonLanguage(), NetLogoLanguage(), RLanguage())
-  val codeSelector: Options[Language] = languages.options(0, btn_default, (l: Language) ⇒ l.name)
+  val factories = Plugins.wizardFactories.now
 
   launchingCommand.triggerLater {
     if (autoMode.now) {
@@ -171,7 +177,7 @@ class ModelWizardPanel {
     _.index == index
   }.headOption
 
-  def setUpButton = upButton() =
+  val setUpButton = upButton() =
     div(ms("modelWizardDivs"))(
       div(maxWidth := 250)(
         label(
@@ -197,20 +203,18 @@ class ModelWizardPanel {
                 }
               )
           }
-        ), {
-          fileToUploadPath.now.map {
-            _ ⇒ span(grey +++ floatRight)(codeSelector.selector)
-          }.getOrElse(tags.div())
-        }
-      ), {
-        span(grey)(
-          if (modelSelector.isContentsEmpty) div() else modelSelector.selector,
-          codeSelector.get.map {
-            case NetLogoLanguage() ⇒ div("If your Netlogo sript depends on plugins, you should upload an archive (tar.gz, tgz) containing the root workspace.")
-            case _                 ⇒ div
-          }.getOrElse(div)
         )
-      }
+      ),
+      span(grey)(
+        Rx {
+          div(
+            labelName.now.flatMap { factory } match {
+              case f: WizardPluginFactory ⇒ f.help
+              case _                      ⇒ ""
+            }
+          )
+        }
+      )
     ).render
 
   def setTargetPath(fileType: FileType, safePath: SafePath) =
@@ -279,39 +283,70 @@ class ModelWizardPanel {
     buildForm(safePath, safePath)
   }
 
-  def buildForm(uploadPath: SafePath, fileType: FileType) = {
+  def factory(safePath: SafePath): Option[WizardPluginFactory] = factory(safePath.name)
 
-    fileType match {
-      case archive: Archive ⇒
-        fromArchive() = true
-        archive.language match {
-          //Java case
-          case JavaLikeLanguage() ⇒
-            modelSelector.emptyContents
-            fileToUploadPath() = Some(uploadPath)
-          // launchingCommand() = Some("Your Java/Scala method call here")
-          // Other archive: tgz, tar.gz
-          // case RLanguage() ⇒xxx
-          case UndefinedLanguage() ⇒
-            post()[Api].models(uploadPath).call().foreach {
-              models ⇒
-                fileToUploadPath() = models.headOption
-                modelSelector.setContents(models, () ⇒ {
-                  TreeNodePanel.refreshAnd(() ⇒ onModelChange)
-                })
-                getResourceInfo
+  def factory(fileName: String): Option[WizardPluginFactory] = {
+    val extension = DataUtils.fileToExtension(fileName)
+    factories.filter {
+      _.extension == extension
+    }.headOption
+  }
+
+  def buildForm(safePath: SafePath, fileType: FileType) = {
+    println("factor " + factory(safePath))
+    factory(safePath).foreach {
+      factory ⇒
+        factory.parse(safePath).foreach {
+          b ⇒
+            TreeNodePanel.refreshAndDraw
+            launchingCommand() = b
+            fileToUploadPath() = Some(safePath)
+            launchingCommand.now.foreach {
+              lc ⇒
+                //            lc.language.map { l ⇒
+                //              factorySelector.contents.now.filter {
+                //                _.language == l
+                //              }.headOption.map {
+                //                factorySelector.set
+                //              }
+                //            }
+                setScritpName
+                setReactives(lc)
             }
-
-          case _ ⇒
-            fromArchive() = false
-
         }
-      case codeFile: CodeFile ⇒
-        modelSelector.emptyContents
-        resources() = resources.now.withNoImplicit
-        setLaunchingCommand(uploadPath)
-      case _ ⇒
     }
+
+    //    fileType match {
+    //      case archive: Archive ⇒
+    //        fromArchive() = true
+    //        archive.language match {
+    //          //Java case
+    //          case JavaLikeLanguage() ⇒
+    //            modelSelector.emptyContents
+    //            fileToUploadPath() = Some(uploadPath)
+    //          // launchingCommand() = Some("Your Java/Scala method call here")
+    //          // Other archive: tgz, tar.gz
+    //          // case RLanguage() ⇒xxx
+    //          case UndefinedLanguage() ⇒
+    ////            post()[Api].models(uploadPath).call().foreach {
+    ////              models ⇒
+    ////                fileToUploadPath() = models.headOption
+    ////                modelSelector.setContents(models, () ⇒ {
+    ////                  TreeNodePanel.refreshAnd(() ⇒ onModelChange)
+    ////                })
+    //           //     getResourceInfo
+    //            }
+    //
+    //          case _ ⇒
+    //            fromArchive() = false
+    //
+    //
+    //      case codeFile: CodeFile ⇒
+    //        modelSelector.emptyContents
+    //        resources() = resources.now.withNoImplicit
+    //        setLaunchingCommand(uploadPath)
+    //      case _ ⇒
+    //    }
   }
 
   def getResourceInfo = {
@@ -323,9 +358,10 @@ class ModelWizardPanel {
           b ⇒
             val l = b.list.filterNot {
               _.name == modelName
-            }.map { tn ⇒
-              val sp = resourceDir ++ tn.name
-              Resource(sp, 0L)
+            }.map {
+              tn ⇒
+                val sp = resourceDir ++ tn.name
+                Resource(sp, 0L)
             }
             resources() = resources.now.copy(implicits = l, number = l.size)
             post()[Api].expandResources(resources.now).call().foreach {
@@ -336,22 +372,27 @@ class ModelWizardPanel {
     }
   }
 
-  def setLaunchingCommand(filePath: SafePath) = {
-    post()[Api].launchingCommands(filePath).call().foreach {
-      b ⇒
-        TreeNodePanel.refreshAndDraw
-        launchingCommand() = b.headOption
-        fileToUploadPath() = Some(filePath)
-        launchingCommand.now.foreach {
-          lc ⇒
-            lc.language.map {
-              codeSelector.set
-            }
-            setScritpName
-            setReactives(lc)
-        }
-    }
-  }
+  //  def setLaunchingCommand(filePath: SafePath) =
+  //    currentFactory.now.foreach { factory ⇒
+  //      factory.parse(filePath).foreach { b ⇒
+  //        TreeNodePanel.refreshAndDraw
+  //        launchingCommand() = b
+  //        fileToUploadPath() = Some(filePath)
+  //        launchingCommand.now.foreach {
+  //          lc ⇒
+  //            currentFactory() = Some(factory)
+  //            //            lc.language.map { l ⇒
+  //            //              factorySelector.contents.now.filter {
+  //            //                _.language == l
+  //            //              }.headOption.map {
+  //            //                factorySelector.set
+  //            //              }
+  //            //            }
+  //            setScritpName
+  //            setReactives(lc)
+  //        }
+  //      }
+  //    }
 
   def setReactives(lc: LaunchingCommand) = {
     val nbArgs = lc.arguments.size
@@ -396,37 +437,61 @@ class ModelWizardPanel {
         save
         dialog.hide
 
-        val codeType = codeSelector.getOrElse(Binary())
+        //        val codeType = factorySelector.getOrElse(factories.head)
+        fileToUploadPath.now.foreach {
+          fp ⇒
+            factory(fp).map {
+              factory ⇒
+                CoreUtils.buildModelScript(
+                  factory,
+                  labelName.now.getOrElse("script"),
+                  commandArea.value,
+                  manager.current.now ++ s"${
+                    scriptNameInput.value.clean
+                  }.oms",
+                  resources.now,
+                  inputs(currentReactives.now).map {
+                    _.content.prototype
+                  },
+                  outputs(currentReactives.now).map {
+                    _.content.prototype
+                  },
+                  fileToUploadPath.now.map {
+                    _.name
+                  })
 
-        val targetSuffix = codeType match {
-          case NetLogoLanguage() ⇒
-            if (fromArchive.now) s"/${
-              fileToUploadPath.now.map {
-                _.name
-              }.getOrElse("NetLogoMODEL")
-            }"
-            else ""
-          case _ ⇒ ""
+            }
         }
 
-        CoreUtils.buildModelScript(
-          codeType,
-          commandArea.value,
-          scriptNameInput.value.clean,
-          manager.current.now,
-          resources.now,
-          targetPath.now.map {
-            _.name
-          }.getOrElse("executable") + targetSuffix,
-          inputs(currentReactives.now).map {
-            _.content.prototype
-          },
-          outputs(currentReactives.now).map {
-            _.content.prototype
-          },
-          fileToUploadPath.now.map {
-            _.name
-          })
+      //        val targetSuffix = codeType match {
+      //          case NetLogoLanguage() ⇒
+      //            if (fromArchive.now) s"/${
+      //              fileToUploadPath.now.map {
+      //                _.name
+      //              }.getOrElse("NetLogoMODEL")
+      //            }"
+      //            else ""
+      //          case _ ⇒ ""
+      //        }
+
+      //        CoreUtils.buildModelScript(
+      //          codeType,
+      //          commandArea.value,
+      //          scriptNameInput.value.clean,
+      //          manager.current.now,
+      //          resources.now,
+      //          targetPath.now.map {
+      //            _.name
+      //          }.getOrElse("executable") + targetSuffix,
+      //          inputs(currentReactives.now).map {
+      //            _.content.prototype
+      //          },
+      //          outputs(currentReactives.now).map {
+      //            _.content.prototype
+      //          },
+      //          fileToUploadPath.now.map {
+      //            _.name
+      //          })
     })
   }
 

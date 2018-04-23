@@ -1,6 +1,9 @@
 package org.openmole.gui.ext.tool.server
 
 import org.openmole.core.workspace.Workspace
+import org.openmole.gui.ext.data.{ ProjectFileSystem, SafePath, ServerFileSystemContext }
+
+import scala.io.Source
 
 /*
  * Copyright (C) 13/01/17 // mathieu.leclaire@openmole.org
@@ -23,4 +26,35 @@ import org.openmole.tool.file._
 
 object Utils {
   def authenticationKeysFile(implicit workspace: Workspace) = workspace.persistentDir / "keys"
+
+  def webUIDirectory()(implicit workspace: Workspace) = workspace.location /> "webui"
+
+  implicit def safePathToFile(s: SafePath)(implicit context: ServerFileSystemContext, workspace: Workspace): File = {
+    context match {
+      case _: ProjectFileSystem ⇒ getFile(webUIDirectory, s.path)
+      case _                    ⇒ getFile(new File(""), s.path)
+    }
+
+  }
+
+  def getFile(root: File, paths: Seq[String]): File = {
+    def getFile0(paths: Seq[String], accFile: File): File = {
+      if (paths.isEmpty) accFile
+      else getFile0(paths.tail, new File(accFile, paths.head))
+    }
+
+    getFile0(paths, root)
+  }
+
+  def lines(safePath: SafePath)(implicit context: ServerFileSystemContext, workspace: Workspace) = {
+    Source.fromFile(safePathToFile(safePath)).getLines.toArray
+  }
+
+  implicit class ASafePath(safePath: SafePath) {
+    def write(content: String)(implicit context: ServerFileSystemContext, workspace: Workspace) = {
+      val f: File = safePathToFile(safePath)
+      f.content = content
+    }
+  }
+
 }
