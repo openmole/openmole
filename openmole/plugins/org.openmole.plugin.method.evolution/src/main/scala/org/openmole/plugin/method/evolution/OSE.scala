@@ -11,21 +11,6 @@ import org.openmole.tool.types.ToDouble
 
 object OSE {
 
-  //  object PatternAxe {
-  //
-  //    implicit def fromDoubleDomainToPatternAxe[D](f: Factor[D, Double])(implicit fix: Fix[D, Double]): PatternAxe =
-  //      PatternAxe(f.prototype, fix(f.domain).toVector)
-  //
-  //    implicit def fromIntDomainToPatternAxe[D](f: Factor[D, Int])(implicit fix: Fix[D, Int]): PatternAxe =
-  //      PatternAxe(f.prototype, fix(f.domain).toVector.map(_.toDouble))
-  //
-  //    implicit def fromLongDomainToPatternAxe[D](f: Factor[D, Long])(implicit fix: Fix[D, Long]): PatternAxe =
-  //      PatternAxe(f.prototype, fix(f.domain).toVector.map(_.toDouble))
-  //
-  //  }
-  //
-  //  case class PatternAxe(p: Objective, scale: Vector[Double])
-
   case class DeterministicParams(
     mu:                  Int,
     origin:              (Vector[Double], Vector[Int]) ⇒ Vector[Int],
@@ -281,7 +266,7 @@ object OSE {
     //      val domain = fix(f.domain)
     //      ContinuousSequenceOriginAxe(
     //        GenomeBound.SequenceOfDouble(f.prototype, domain.map(_.min).toArray, domain.map(_.max).toArray, domain.size),
-    //        domain)
+    //        domain.toVector.map(_.toVector))
     //    }
 
     implicit def fromIntDomainToPatternAxe[D](f: Factor[D, Int])(implicit fix: Fix[D, Int]): OriginAxe = {
@@ -304,12 +289,9 @@ object OSE {
       val fg = fullGenome(origin, genome)
       def grid(continuous: Vector[Double], discrete: Vector[Int]): Vector[Int] =
         origin.toVector.map {
-          case ContinuousOriginAxe(p, scale) ⇒
-            val index = Genome.continuousIndex(fg, GenomeBound.toVal(p)).get
-            mgo.tools.findInterval(scale, continuous(index))
-          case DiscreteOriginAxe(p, scale) ⇒
-            val index = Genome.discreteIndex(fg, GenomeBound.toVal(p)).get
-            mgo.tools.findInterval(scale, discrete(index))
+          case ContinuousOriginAxe(p, scale) ⇒ mgo.tools.findInterval(scale, Genome.continuousValue(fg, p.v, continuous))
+          case DiscreteOriginAxe(p, scale)   ⇒ mgo.tools.findInterval(scale, Genome.discreteValue(fg, p.v, discrete))
+          //case ContinuousSequenceOriginAxe(p, scale) =>
         }
       grid(_, _)
     }
@@ -317,8 +299,9 @@ object OSE {
   }
 
   sealed trait OriginAxe
-  case class ContinuousOriginAxe(p: Genome.GenomeBound, scale: Vector[Double]) extends OriginAxe
-  case class DiscreteOriginAxe(p: Genome.GenomeBound, scale: Vector[Int]) extends OriginAxe
+  case class ContinuousOriginAxe(p: Genome.GenomeBound.ScalarDouble, scale: Vector[Double]) extends OriginAxe
+  //case class ContinuousSequenceOriginAxe(p: Genome.GenomeBound, scale: Vector[Vector[Double]]) extends OriginAxe
+  case class DiscreteOriginAxe(p: Genome.GenomeBound.ScalarInt, scale: Vector[Int]) extends OriginAxe
 
   object FitnessPattern {
     implicit def fromPairToObjective[T](v: (Val[T], T))(implicit td: ToDouble[T]) = FitnessPattern(v._1, td(v._2))

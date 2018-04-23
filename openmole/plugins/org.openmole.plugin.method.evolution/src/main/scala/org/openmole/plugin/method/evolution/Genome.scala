@@ -70,6 +70,16 @@ object Genome {
     bounds.sequence.map(_.flatten)
   }
 
+  def continuousValue(genome: Genome, v: Val[_], continuous: Vector[Double]) = {
+    val index = Genome.continuousIndex(genome, v).get
+    continuous(index)
+  }
+
+  def discreteValue(genome: Genome, v: Val[_], discrete: Vector[Int]) = {
+    val index = Genome.continuousIndex(genome, v).get
+    discrete(index)
+  }
+
   def toVals(genome: Genome) = genome.map(GenomeBound.toVal)
 
   def continuousIndex(genome: Genome, v: Val[_]): Option[Int] = {
