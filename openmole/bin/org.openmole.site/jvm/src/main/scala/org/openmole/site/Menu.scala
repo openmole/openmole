@@ -46,10 +46,9 @@ object Menu {
           ),
           div(classIs(collapse ++ navbar_collapse), aria.expanded := false, paddingTop := 10, id := navId)(
             ul(classIs(nav ++ navbar_nav ++ navbar_right))(
-              li(innerLink(DocumentationPages.model, "DOCUMENTATION"), liStyle),
+              li(innerLink(DocumentationPages.docSiteMap, "DOC"), liStyle),
               li(outerLink("DEMO", shared.link.demo), liStyle),
-              li(innerLink(DocumentationPages.tutorial, "EXAMPLES"), liStyle),
-              li(innerLink(Pages.training, "TRAINING"), liStyle),
+              li(outerLink("FORUM", shared.link.mailingList), liStyle),
               li(divLinkButton(div(maxWidth := 140)(span("DOWNLOAD"), span(version.value, fontSize := "10px", paddingLeft := 7)), Resource.script.openmole.file, classIs(btn ++ btn_primary))),
               li(inputStyle)(img(id := shared.searchImg, src := Resource.img.menu.search.file, Seq(width := 35, paddingTop := 5, paddingLeft := 10, pointer)))(
                 div(id := shared.searchDiv)
