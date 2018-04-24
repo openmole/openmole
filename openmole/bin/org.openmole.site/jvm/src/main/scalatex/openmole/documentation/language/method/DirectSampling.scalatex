@@ -302,8 +302,7 @@ Once a sampling is defined, you can just add it to a @a("DirectSampling task", h
 
     @br
     @br
-    The UniformDistribution[T]() take 10 is a uniform sampling of 10 numbers of the Long type,
-    taken in the [Long.MIN_VALUE; Long.MAX_VALUE] domain of the Long native type.
+    The UniformDistribution[Long]() take 10 is a uniform sampling of 10 numbers of the Long type, taken in the [Long.MIN_VALUE; Long.MAX_VALUE] domain of the Long native type.
 
     @br
     @br
@@ -323,3 +322,6 @@ Once a sampling is defined, you can just add it to a @a("DirectSampling task", h
         and @a("FileSampling task", href := DocumentationPages.dataProcessing.anchor(shared.dataProcessingMenu.setOfFiles)).
 
 
+@sect{Advanced sampling}
+
+  Advanced sampling features are explained on this @a("page", href := DocumentationPages.advancedSampling.file).

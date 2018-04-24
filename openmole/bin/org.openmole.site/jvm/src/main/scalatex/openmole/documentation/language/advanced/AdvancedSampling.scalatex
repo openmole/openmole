@@ -12,19 +12,22 @@ In this page are the advanced functions and tasks to fine-tune your data flows i
   acceptation in OpenMOLE. It may concern numbers, files, random streams, images...
 
   @p{Complete sampling}
-    The most common way of exploring a model is by using a "complete" sampling, or @b{DirectSampling}, which generates every combination of parameters values:
+    The most common way of exploring a model is by using a "complete" sampling, or @b{DirectSampling}, which generates every combination of parameters values and then use the DirectSampling method:
     @br @hl.openmole("""
     val i = Val[Int]
     val j = Val[Double]
     val k = Val[String]
     val l = Val[Long]
-    val explo =
-      ExplorationTask (
+
+    val exploration = DirectSampling (
+      sampling =
         (i in (0 to 10 by 2)) x
         (j in (0.0 to 5.0 by 0.5)) x
         (k in List("hello", "world")) x
-        (l in (UniformDistribution[Long]() take 10))
-      )""", name = "complete sampling")
+        (l in (UniformDistribution[Long]() take 10)),
+      evaluation = myModel
+    )
+    """, name = "complete sampling", header = "val myModel = EmptyTask()")
 
     Using the @i{x} combinator means that all the domains are @b{unrolled before being combined} with each other.
 
@@ -41,10 +44,12 @@ In this page are the advanced functions and tasks to fine-tune your data flows i
       val j = Val[Double]
 
       val explo =
-       ExplorationTask (
-         (i in (0 to 10 by 2)) x
-         (j in Range[Double]("0.0", "2 * i", "0.5"))
-       )""", name = "combine sampling")
+       DirectSampling (
+         sampling =
+           (i in (0 to 10 by 2)) x
+           (j in Range[Double]("0.0", "2 * i", "0.5")),
+         evaluation = myModel
+      """, name = "combine sampling", header = "val myModel = EmptyTask()")
 
       Samplings can also be combined using variants of the zip operator.
 
@@ -99,7 +104,10 @@ In this page are the advanced functions and tasks to fine-tune your data flows i
             outputs += (name, size)
           )
 
-          ExplorationTask(file in (workDirectory / "dir") withName name) -< (t hook ToStringHook())""", name = "zip with name sampling")
+          DirectSampling(
+            sampling = file in (workDirectory / "dir") withName name,
+            evaluation = (t hook ToStringHook())
+          )""", name = "zip with name sampling")
 
         @p If you need to go through several level of files you may use a sampling like this one:
 
@@ -117,13 +125,13 @@ In this page are the advanced functions and tasks to fine-tune your data flows i
           (inputs, outputs) += (fileName, dirName)
         )
 
-        val explo =
-          ExplorationTask(
+        DirectSampling(
+          sampling =
             (dir in (workDirectory / "test") withName dirName) x
-            (file in dir withName fileName)
-          )
-
-        explo -< (t hook ToStringHook())""", name = "multilevel file sampling")
+            (file in dir withName fileName),
+          evaluation = t hook ToStringHook()
+        )
+        """, name = "multilevel file sampling")
 
 @sect{@shared.advancedSamplingMenu.filterSampling}
     You can modify a Sampling using various operations in OpenMOLE.
@@ -200,14 +208,17 @@ In this page are the advanced functions and tasks to fine-tune your data flows i
         val f1 = p1 in (0.0 to 1.0 by 0.1)
         val f2 = p2 in (0.0 to 1.0 by 0.1)
 
-        val e1 = ExplorationTask((f1 x f2) bootstrap (5, 10))
-
         val stat = ScalaTask("val p1 = input.p1.median; val p2 = input.p2.median") set (
           inputs += (p1.toArray, p2.toArray),
           outputs += (p1, p2)
         )
 
-        val mole = e1 -< (stat hook ToStringHook())""", name = "bootstrap example sampling")
+        DirectSampling(
+          sampling = (f1 x f2) bootstrap (5, 10),
+          evaluation = stat hook ToStringHook()
+        )
+
+        """, name = "bootstrap example sampling")
 
 
 @sect{@shared.advancedSamplingMenu.isKeyword}
@@ -217,9 +228,10 @@ In this page are the advanced functions and tasks to fine-tune your data flows i
     val j = Val[Int]
     val k = Val[Int]
 
-    val exploration =
-      ExplorationTask(
+    DirectSampling(
+      sampling =
         (i in (0 until 10)) x
         (j is "i * 2") x
-        (k in Range[Int]("j", "j + 7"))
-      )""")
+        (k in Range[Int]("j", "j + 7")),
+      evaluation = myModel
+    )""", header = "val myModel = EmptyTask()")
