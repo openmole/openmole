@@ -8,12 +8,8 @@
   Welcome to the OpenMOLE documentation site map.
   It's more a list than a map, in fact, but hey, layout propositions of the various pages are welcome!
 
+@h2{OpenMOLE Concepts}
 
-@h2
-    @a("Home page", href := Pages.index.file)
-
-@h2
-    OpenMOLE Concepts
 They are the three main steps of the OpenMOLE use case
 @ul
     @li
@@ -34,8 +30,7 @@ They are the three main steps of the OpenMOLE use case
             @SiteMap.siteMapSection(DocumentationPages.environmentPages)
 
 
-@h2
-    Tutorials
+@h2{Tutorials}
 
 The @a("tutorial page", href:= DocumentationPages.tutorial.file) gathers the tutorials and the Market Place with use cases.
 Tutorials available so far:
@@ -51,8 +46,7 @@ These pages focus on a specific aspect of experimenting with OpenMOLE, from scie
     @SiteMap.siteMapSection(DocumentationPages.detailsPages)
 
 
-@h2
-    @a("Advanced concepts", href:=DocumentationPages.advancedConcepts.file)
+@h2{Advanced concepts}
 
 The @a("advanced concepts", href:=DocumentationPages.advancedConcepts.file) page  gathers Technical documentation and Development Documentation
 @div(textIndent := "2em")
