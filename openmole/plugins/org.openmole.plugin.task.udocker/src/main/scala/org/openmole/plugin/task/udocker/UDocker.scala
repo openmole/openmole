@@ -309,7 +309,7 @@ object UDocker {
       uDocker.localDockerImage.container match {
         case None ⇒
 
-          val cl = commandLine(s"${uDockerExecutable.getAbsolutePath} create $imageId")
+          val cl = commandLine(s"/usr/bin/env python2 ${uDockerExecutable.getAbsolutePath} create $imageId")
           execute(cl, tmpDirectory, uDockerVariables, captureOutput = true, captureError = true, displayOutput = false, displayError = false).output.get.split("\n").head
         case Some(directory) ⇒
           val name = containerName(UUID.randomUUID().toString) //.take(10)
@@ -318,7 +318,7 @@ object UDocker {
       }
 
     uDocker.mode.foreach { mode ⇒
-      val cl = commandLine(s"""${uDockerExecutable.getAbsolutePath} setup --execmode=$mode $id""")
+      val cl = commandLine(s"""/usr/bin/env python2 ${uDockerExecutable.getAbsolutePath} setup --execmode=$mode $id""")
       execute(cl, tmpDirectory, uDockerVariables, captureOutput = true, captureError = true)
     }
 
@@ -345,7 +345,7 @@ object UDocker {
 
     val variablesArgument = environmentVariables.map { case (name, variable) ⇒ s"""-e ${name}="${variable}"""" }.mkString(" ")
 
-    s"""${uDocker.getAbsolutePath} run --workdir="$workDirectory" $userArgument  $variablesArgument ${volumesArgument(volumes)} $runId $command"""
+    s"""/usr/bin/env python2 ${uDocker.getAbsolutePath} run --workdir="$workDirectory" $userArgument  $variablesArgument ${volumesArgument(volumes)} $runId $command"""
   }
 
   // TODO refactor
