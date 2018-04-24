@@ -33,7 +33,7 @@ import scalatags.JsDom.all._
 
 @JSExportTopLevel("org.openmole.gui.plugin.wizard.netlogo.NetlogoWizardFactory")
 class NetlogoWizardFactory extends WizardPluginFactory {
-  val extension = FileExtension.NETLOGO
+  val fileType = CodeFile(NetLogoLanguage())
 
   def build: WizardPlugin = new NetlogoWizardGUI()
 

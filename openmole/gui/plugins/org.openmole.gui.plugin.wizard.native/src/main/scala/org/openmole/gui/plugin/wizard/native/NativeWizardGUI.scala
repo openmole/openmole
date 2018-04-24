@@ -32,7 +32,7 @@ import rx._
 
 @JSExportTopLevel("org.openmole.gui.plugin.wizard.native.NativeWizardFactory")
 class NativeWizardFactory extends WizardPluginFactory {
-  val extension = FileExtension.TGZBIN
+  val fileType = CareArchive
 
   def build: WizardPlugin = new NativeWizardGUI()
 

@@ -63,7 +63,7 @@ trait WizardPlugin extends GUIPlugin {
 trait WizardPluginFactory extends GUIPluginFactory {
   def build: WizardPlugin
 
-  def extension: FileExtension
+  def fileType: FileType
 
   def parse(safePath: SafePath): Future[Option[LaunchingCommand]]
 

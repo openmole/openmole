@@ -448,32 +448,37 @@ sealed trait FileType
 
 case class CodeFile(language: Language) extends FileType
 
-case class Archive(language: Language) extends FileType
+object CareArchive extends FileType
+
+object JarArchive extends FileType
+
+object Archive extends FileType
 
 object UndefinedFileType extends FileType
 
 object FileType {
   implicit def safePathToFileType(sp: SafePath): FileType = apply(sp)
 
+  implicit def filNameToFileType(f: String): FileType = apply(f)
+
   private def extension(safePath: SafePath) = safePath.name.split('.').drop(1).mkString(".")
 
   def apply(safePath: SafePath): FileType = apply(safePath.name)
 
   def apply(fileName: String): FileType = {
-    if (fileName.endsWith("tar.gz.bin") || fileName.endsWith("tgz.bin")) CodeFile(UndefinedLanguage())
+    if (fileName.endsWith("tar.gz.bin") || fileName.endsWith("tgz.bin")) CareArchive
     else if (fileName.endsWith("nlogo")) CodeFile(NetLogoLanguage())
-    else if (fileName.endsWith("jar")) Archive(JavaLikeLanguage())
-    else if (fileName.endsWith("tgz") || fileName.endsWith("tar.gz")) Archive(UndefinedLanguage())
+    else if (fileName.endsWith("R")) CodeFile(RLanguage())
+    else if (fileName.endsWith("jar")) JarArchive
+    else if (fileName.endsWith("tgz") || fileName.endsWith("tar.gz")) Archive
     else UndefinedFileType
   }
 
-  def isSupportedLanguage(fileName: String): Boolean = apply(fileName) match {
-    case CodeFile(_) ⇒ true
-    case a: Archive ⇒ a.language match {
-      case UndefinedLanguage() ⇒ false
-      case _                   ⇒ true
+  def isSupportedLanguage(fileName: String): Boolean = {
+    apply(fileName) match {
+      case CodeFile(_) | CareArchive | JarArchive ⇒ true
+      case _                                      ⇒ false
     }
-    case _ ⇒ false
   }
 }
 

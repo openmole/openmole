@@ -218,24 +218,22 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
 
     val fileType: FileType = safePathToTest
     fileType match {
-      case a: Archive ⇒ a.language match {
-        case j: JavaLikeLanguage ⇒ test(Seq(safePathToTest))
-        case _ ⇒
-          // val emptyFile = new File("")
-          val from: File = safePathToFile(safePathToTest)(ServerFileSystemContext.absolute, workspace)
-          val to: File = safePathToFile(safePathToTest.parent)(ServerFileSystemContext.absolute, workspace)
-          val extracted = getExtractedArchiveTo(from, to)(ServerFileSystemContext.absolute).filterNot {
-            _ == safePathToTest
-          }
-          val toTest = in ++ safePathToTest.nameWithNoExtension
-          val toTestFile: File = safePathToFile(in ++ safePathToTest.nameWithNoExtension)(ServerFileSystemContext.project, workspace)
-          new File(to, from.getName).recursiveDelete
+      case Archive ⇒
+        // case j: JavaLikeLanguage ⇒ test(Seq(safePathToTest))
+        // val emptyFile = new File("")
+        val from: File = safePathToFile(safePathToTest)(ServerFileSystemContext.absolute, workspace)
+        val to: File = safePathToFile(safePathToTest.parent)(ServerFileSystemContext.absolute, workspace)
+        val extracted = getExtractedArchiveTo(from, to)(ServerFileSystemContext.absolute).filterNot {
+          _ == safePathToTest
+        }
+        val toTest = in ++ safePathToTest.nameWithNoExtension
+        val toTestFile: File = safePathToFile(in ++ safePathToTest.nameWithNoExtension)(ServerFileSystemContext.project, workspace)
+        new File(to, from.getName).recursiveDelete
 
-          if (toTestFile.exists) {
-            test(extracted, toTest)
-          }
-          else Seq()
-      }
+        if (toTestFile.exists) {
+          test(extracted, toTest)
+        }
+        else Seq()
       case _ ⇒ test(Seq(safePathToTest))
     }
   }
@@ -472,13 +470,13 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
   //def launchingCommands(path: SafePath): Seq[LaunchingCommand] = Utils.launchingCommands(path)
 
   //Extract models from an archive
-  //  def models(archivePath: SafePath): Seq[SafePath] = {
-  //    val toDir = archivePath.toNoExtention
-  //    // extractTGZToAndDeleteArchive(archivePath, toDir)
-  //    (for {
-  //      tnd ← listFiles(toDir).list if FileType.isSupportedLanguage(tnd.name)
-  //    } yield tnd).map { nd ⇒ toDir ++ nd.name }
-  //  }
+  def models(archivePath: SafePath): Seq[SafePath] = {
+    val toDir = archivePath.toNoExtention
+    // extractTGZToAndDeleteArchive(archivePath, toDir)
+    (for {
+      tnd ← listFiles(toDir).list if FileType.isSupportedLanguage(tnd.name)
+    } yield tnd).map { nd ⇒ toDir ++ nd.name }
+  }
 
   //  def classes(jarPath: SafePath): Seq[ClassTree] = Utils.jarClasses(jarPath)
 

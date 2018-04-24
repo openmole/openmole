@@ -20,6 +20,7 @@ package org.openmole.gui.client.core
 import org.openmole.gui.client.core.alert.AlertPanel
 import org.openmole.gui.client.core.files._
 import org.openmole.gui.ext.data._
+import org.openmole.gui.ext.data.FileType._
 import org.openmole.gui.client.core.panels._
 import autowire._
 import org.scalajs.dom.html.TextArea
@@ -96,31 +97,24 @@ class ModelWizardPanel {
   val resources: Var[Resources] = Var(Resources.empty)
   val currentTab: Var[Int] = Var(0)
   val autoMode = Var(true)
-  val upButton: Var[HTMLDivElement] = Var(tags.div().render)
+  //val upButton: HTMLDivElement = Var(tags.div().render)
   val fileToUploadPath: Var[Option[SafePath]] = Var(None)
   val targetPath: Var[Option[SafePath]] = Var(None)
-  val fromArchive: Var[Boolean] = Var(false)
 
-  //  val modelSelector: Options[SafePath] = Seq[SafePath]().options(
-  //    0,
-  //    btn_default,
-  //    SafePath.naming,
-  //    onclickExtra = () ⇒ {
-  //      fileToUploadPath() = modelSelector.get
-  //      onModelChange
-  //    }
-  //  )
+  fileToUploadPath.trigger {
+    fileToUploadPath.now.map {
+      buildForm
+    }
+  }
 
-  //  def onModelChange = {
-  //    fileToUploadPath.now.foreach {
-  //      m ⇒
-  //        val fileType: FileType = m
-  //        fileType match {
-  //          case _: CodeFile ⇒ setLaunchingCommand(m)
-  //          case _           ⇒
-  //        }
-  //    }
-  //  }
+  val modelSelector: Options[SafePath] = Seq[SafePath]().options(
+    0,
+    btn_default,
+    SafePath.naming,
+    onclose = () ⇒ {
+      fileToUploadPath() = modelSelector.get
+    }
+  )
 
   def setScritpName = scriptNameInput.value = filePath.now.map {
     _.name.split('.').head
@@ -177,7 +171,7 @@ class ModelWizardPanel {
     _.index == index
   }.headOption
 
-  val setUpButton = upButton() =
+  val upButton =
     div(ms("modelWizardDivs"))(
       div(maxWidth := 250)(
         label(
@@ -203,30 +197,36 @@ class ModelWizardPanel {
                 }
               )
           }
-        )
-      ),
-      span(grey)(
+        ),
         Rx {
-          div(
-            labelName.now.flatMap { factory } match {
-              case f: WizardPluginFactory ⇒ f.help
-              case _                      ⇒ ""
-            }
+          span(grey)(
+            filePath() match {
+              case Some(sp: SafePath) ⇒
+                val fileType: FileType = sp
+                if (fileType == Archive) modelSelector.selector else div.render
+              case _ ⇒ div.render
+            },
+            div(
+              labelName.now.flatMap {
+                factory
+              } match {
+                case f: WizardPluginFactory ⇒ f.help
+                case _                      ⇒ ""
+              }
+            )
           )
         }
       )
     ).render
 
   def setTargetPath(fileType: FileType, safePath: SafePath) =
-    targetPath() = Some(fileType match {
-      case a: Archive ⇒
-        a.language match {
-          case j: JavaLikeLanguage ⇒ safePath
-          case _                   ⇒ safePath.toNoExtention
-        }
-      case codeFile: CodeFile ⇒ safePath
-      case _                  ⇒ safePath
-    })
+    targetPath() = Some(safePath)
+
+  //      Some(fileType match {
+  //      case codeFile: CodeFile ⇒ safePath
+  //      case _                  ⇒ safePath
+  //    }
+  //)
 
   def moveFilesAndBuildForm(fInput: HTMLInputElement, fileName: String, uploadPath: SafePath) =
     CoreUtils.withTmpFile {
@@ -250,7 +250,8 @@ class ModelWizardPanel {
                     tp ⇒
                       post()[Api].copyAllTmpTo(tempFile, tp).call().foreach {
                         b ⇒
-                          buildForm(uploadPath, fileType)
+                          fileToUploadPath() = Some(uploadPath)
+                          //buildForm(uploadPath)
                           post()[Api].deleteFile(tempFile, ServerFileSystemContext.absolute).call()
                       }
                   }
@@ -265,7 +266,8 @@ class ModelWizardPanel {
                     () ⇒ {
                       post()[Api].copyFromTmp(tempFile, optionsDiv.result /*, fp ++ fileName*/ ).call().foreach {
                         b ⇒
-                          buildForm(uploadPath, fileType)
+                          //buildForm(uploadPath)
+                          fileToUploadPath() = Some(uploadPath)
                           post()[Api].deleteFile(tempFile, ServerFileSystemContext.absolute).call()
                       }
                     }, () ⇒ {
@@ -279,40 +281,53 @@ class ModelWizardPanel {
 
   def fromSafePath(safePath: SafePath) = {
     labelName() = Some(safePath.name)
+    fileToUploadPath() = Some(safePath)
     setTargetPath(safePath, safePath)
-    buildForm(safePath, safePath)
+    // buildForm(safePath)
   }
 
   def factory(safePath: SafePath): Option[WizardPluginFactory] = factory(safePath.name)
 
   def factory(fileName: String): Option[WizardPluginFactory] = {
-    val extension = DataUtils.fileToExtension(fileName)
+    val fileType: FileType = fileName
+
     factories.filter {
-      _.extension == extension
+      _.fileType == fileType
     }.headOption
   }
 
-  def buildForm(safePath: SafePath, fileType: FileType) = {
-    println("factor " + factory(safePath))
-    factory(safePath).foreach {
-      factory ⇒
-        factory.parse(safePath).foreach {
-          b ⇒
-            TreeNodePanel.refreshAndDraw
-            launchingCommand() = b
-            fileToUploadPath() = Some(safePath)
-            launchingCommand.now.foreach {
-              lc ⇒
-                //            lc.language.map { l ⇒
-                //              factorySelector.contents.now.filter {
-                //                _.language == l
-                //              }.headOption.map {
-                //                factorySelector.set
-                //              }
-                //            }
-                setScritpName
-                setReactives(lc)
-            }
+  def buildForm(safePath: SafePath) = {
+    val pathFileType: FileType = safePath
+    pathFileType match {
+      case Archive ⇒
+        post()[Api].models(safePath).call().foreach {
+          models ⇒
+            modelSelector.setContents(models, () ⇒ {
+              TreeNodePanel.refreshAnd(() ⇒
+                fileToUploadPath() = modelSelector.get
+              )
+            })
+        }
+      case _ ⇒
+        factory(safePath).foreach { factory ⇒
+          factory.parse(safePath).foreach {
+            b ⇒
+              TreeNodePanel.refreshAndDraw
+              launchingCommand() = b
+              fileToUploadPath() = Some(safePath)
+              launchingCommand.now.foreach {
+                lc ⇒
+                  //            lc.language.map { l ⇒
+                  //              factorySelector.contents.now.filter {
+                  //                _.language == l
+                  //              }.headOption.map {
+                  //                factorySelector.set
+                  //              }
+                  //            }
+                  setScritpName
+                  setReactives(lc)
+              }
+          }
         }
     }
 
@@ -625,16 +640,14 @@ class ModelWizardPanel {
       )
     }
 
-    setUpButton
-
     tags.div(
       fileToUploadPath.now.map {
         _ ⇒ tags.div()
       }.getOrElse(step1),
       transferring.now match {
         case _: Processing ⇒ OMTags.waitingSpan(" Uploading ...", btn_danger + "certificate")
-        case _: Processed  ⇒ upButton.now
-        case _             ⇒ upButton.now
+        case _: Processed  ⇒ upButton
+        case _             ⇒ upButton
       },
       fileToUploadPath.now.map {
         _ ⇒
