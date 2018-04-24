@@ -62,7 +62,7 @@ object ScriptClient {
     val stoppedDiv = div(omsheet.connectionTabOverlay)(
       div(
         div(
-          omsheet.centerPage,
+          omsheet.centerPage(),
           div(omsheet.shutdown, "The OpenMOLE server has been stopped")
         )
       )
@@ -93,7 +93,7 @@ object ScriptClient {
     val restartedDiv = div(omsheet.connectionTabOverlay)(
       div(
         div(
-          omsheet.centerPage,
+          omsheet.centerPage(),
           div(omsheet.shutdown, "The OpenMOLE server is restarting, please wait.")
         )
       )
