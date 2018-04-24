@@ -81,7 +81,7 @@ object Genome {
   }
 
   def discreteValue(genome: Genome, v: Val[_], discrete: Vector[Int]) = {
-    val index = Genome.continuousIndex(genome, v).get
+    val index = Genome.discreteIndex(genome, v).get
     discrete(index)
   }
 
