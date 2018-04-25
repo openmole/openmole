@@ -165,7 +165,7 @@ class ModelWizardPanel {
   }.headOption
 
   lazy val upButton =
-    div(Seq(display := "table", minWidth := 200))(
+    div(Seq(display := "table", width := 200))(
       label(
         ms("inputFileStyle"),
         transferring.withTransferWaiter {
@@ -201,14 +201,15 @@ class ModelWizardPanel {
               if (fileType == Archive) modelSelector.selector else div.render
             case _ ⇒ div.render
           },
-          div(
-            labelName.now.flatMap {
-              factory
-            } match {
-              case f: WizardPluginFactory ⇒ f.help
-              case _                      ⇒ ""
-            }
-          )
+          labelName().flatMap {
+            factory
+          } match {
+            case Some(f: WizardPluginFactory) ⇒
+              val help = f.help
+              if (help.isEmpty) div()
+              else div(modelHelp)(f.help)
+            case _ ⇒ div("")
+          }
         )
       }
     ).render
@@ -533,9 +534,7 @@ class ModelWizardPanel {
         )
       }
       tags.div(
-        fileToUploadPath().map {
-          _ ⇒ tags.div()
-        }.getOrElse(step1),
+        step1,
         transferring.now match {
           case _: Processing ⇒ OMTags.waitingSpan(" Uploading ...", btn_danger + "certificate")
           case _: Processed  ⇒ upButton

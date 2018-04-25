@@ -647,6 +647,16 @@ package object client {
     paddingBottom := 20
   )
 
+  lazy val modelHelp: ModifierSeq = Seq(
+    height := "auto",
+    backgroundColor := "rgb(255, 221, 85)",
+    padding := 10,
+    marginTop := 20,
+    top := 20,
+    borderRadius := "5px",
+    color("#444")
+  )
+
   // PLUGIN PANEL
   lazy val uploadPlugin: ModifierSeq = Seq(
     marginRight := 50,
