@@ -93,7 +93,6 @@ class ModelWizardPanel {
   val launchingCommand: Var[Option[LaunchingCommand]] = Var(None)
   val currentReactives: Var[Seq[Reactive]] = Var(Seq())
   val updatableTable: Var[Boolean] = Var(true)
-  val bodyContent: Var[Option[TypedTag[HTMLDivElement]]] = Var(None)
   val resources: Var[Resources] = Var(Resources.empty)
   val currentTab: Var[Int] = Var(0)
   val autoMode = Var(true)
@@ -135,10 +134,6 @@ class ModelWizardPanel {
     }
   }
 
-  currentReactives.triggerLater {
-    if (updatableTable.now) setBodyContent
-  }
-
   def buttonStyle(i: Int): ModifierSeq = {
     if (i == currentTab.now) btn_primary
     else btn_default
@@ -169,7 +164,7 @@ class ModelWizardPanel {
     _.index == index
   }.headOption
 
-  val upButton =
+  lazy val upButton =
     div(ms("modelWizardDivs"))(
       div(maxWidth := 250)(
         label(
@@ -189,9 +184,11 @@ class ModelWizardPanel {
                         moveFilesAndBuildForm(fInput, fileName, fp)
                     }
                   }
-                }), labelName.now match {
-                  case Some(s: String) ⇒ s
-                  case _               ⇒ "Your Model"
+                }), Rx {
+                  labelName() match {
+                    case Some(s: String) ⇒ s
+                    case _               ⇒ "Your Model"
+                  }
                 }
               )
           }
@@ -268,9 +265,9 @@ class ModelWizardPanel {
     }
 
   def fromSafePath(safePath: SafePath) = {
-    labelName() = Some(safePath.name)
     fileToUploadPath() = Some(safePath)
     filePath() = Some(safePath)
+    labelName() = Some(safePath.name)
   }
 
   def factory(safePath: SafePath): Option[WizardPluginFactory] = factory(safePath.name)
@@ -284,11 +281,9 @@ class ModelWizardPanel {
   }
 
   def buildForm(safePath: SafePath) = {
-    println("Buils f " + safePath)
     val pathFileType: FileType = safePath
     pathFileType match {
       case Archive ⇒
-        println("archive")
         post()[Api].models(safePath).call().foreach {
           models ⇒
             modelSelector.setContents(models, () ⇒ {
@@ -306,13 +301,6 @@ class ModelWizardPanel {
               fileToUploadPath() = Some(safePath)
               launchingCommand.now.foreach {
                 lc ⇒
-                  //            lc.language.map { l ⇒
-                  //              factorySelector.contents.now.filter {
-                  //                _.language == l
-                  //              }.headOption.map {
-                  //                factorySelector.set
-                  //              }
-                  //            }
                   setScritpName
                   setReactives(lc)
               }
@@ -320,37 +308,6 @@ class ModelWizardPanel {
         }
     }
 
-    //    fileType match {
-    //      case archive: Archive ⇒
-    //        fromArchive() = true
-    //        archive.language match {
-    //          //Java case
-    //          case JavaLikeLanguage() ⇒
-    //            modelSelector.emptyContents
-    //            fileToUploadPath() = Some(uploadPath)
-    //          // launchingCommand() = Some("Your Java/Scala method call here")
-    //          // Other archive: tgz, tar.gz
-    //          // case RLanguage() ⇒xxx
-    //          case UndefinedLanguage() ⇒
-    ////            post()[Api].models(uploadPath).call().foreach {
-    ////              models ⇒
-    ////                fileToUploadPath() = models.headOption
-    ////                modelSelector.setContents(models, () ⇒ {
-    ////                  TreeNodePanel.refreshAnd(() ⇒ onModelChange)
-    ////                })
-    //           //     getResourceInfo
-    //            }
-    //
-    //          case _ ⇒
-    //            fromArchive() = false
-    //
-    //
-    //      case codeFile: CodeFile ⇒
-    //        modelSelector.emptyContents
-    //        resources() = resources.now.withNoImplicit
-    //        setLaunchingCommand(uploadPath)
-    //      case _ ⇒
-    //    }
   }
 
   def getResourceInfo = {
@@ -375,28 +332,6 @@ class ModelWizardPanel {
         }
     }
   }
-
-  //  def setLaunchingCommand(filePath: SafePath) =
-  //    currentFactory.now.foreach { factory ⇒
-  //      factory.parse(filePath).foreach { b ⇒
-  //        TreeNodePanel.refreshAndDraw
-  //        launchingCommand() = b
-  //        fileToUploadPath() = Some(filePath)
-  //        launchingCommand.now.foreach {
-  //          lc ⇒
-  //            currentFactory() = Some(factory)
-  //            //            lc.language.map { l ⇒
-  //            //              factorySelector.contents.now.filter {
-  //            //                _.language == l
-  //            //              }.headOption.map {
-  //            //                factorySelector.set
-  //            //              }
-  //            //            }
-  //            setScritpName
-  //            setReactives(lc)
-  //        }
-  //      }
-  //    }
 
   def setReactives(lc: LaunchingCommand) = {
     val nbArgs = lc.arguments.size
@@ -434,14 +369,12 @@ class ModelWizardPanel {
     )
   )
 
-  val buildScriptButton = {
+  lazy val buildScriptButton = {
 
     tags.button("Build", btn_primary, onclick := {
       () ⇒
         save
         dialog.hide
-
-        //        val codeType = factorySelector.getOrElse(factories.head)
         fileToUploadPath.now.foreach {
           fp ⇒
             factory(fp).map {
@@ -466,36 +399,6 @@ class ModelWizardPanel {
 
             }
         }
-
-      //        val targetSuffix = codeType match {
-      //          case NetLogoLanguage() ⇒
-      //            if (fromArchive.now) s"/${
-      //              fileToUploadPath.now.map {
-      //                _.name
-      //              }.getOrElse("NetLogoMODEL")
-      //            }"
-      //            else ""
-      //          case _ ⇒ ""
-      //        }
-
-      //        CoreUtils.buildModelScript(
-      //          codeType,
-      //          commandArea.value,
-      //          scriptNameInput.value.clean,
-      //          manager.current.now,
-      //          resources.now,
-      //          targetPath.now.map {
-      //            _.name
-      //          }.getOrElse("executable") + targetSuffix,
-      //          inputs(currentReactives.now).map {
-      //            _.content.prototype
-      //          },
-      //          outputs(currentReactives.now).map {
-      //            _.content.prototype
-      //          },
-      //          fileToUploadPath.now.map {
-      //            _.name
-      //          })
     })
   }
 
@@ -603,104 +506,105 @@ class ModelWizardPanel {
     }
   }
 
-  def setBodyContent: Unit = bodyContent() = Some({
-    val reactives = currentReactives.now
-    val topButtons = Rx {
-      div(paddingTop := 20)(
-        button(
-          "I/O",
-          buttonStyle(0), onclick := {
+  val bodyContent = div(
+    Rx {
+      val reactives = currentReactives()
+      val filePath = fileToUploadPath()
+      val tab = currentTab()
+
+      val topButtons = Rx {
+        div(paddingTop := 20)(
+          button(
+            "I/O",
+            buttonStyle(0), onclick := {
+              () ⇒
+                {
+                  currentTab() = 0
+                }
+            })(badge(s"$nbInputs/$nbOutputs")),
+          button("Resources", buttonStyle(1), onclick := {
             () ⇒
               {
-                currentTab() = 0
-                setBodyContent
+                currentTab() = 1
               }
-          })(badge(s"$nbInputs/$nbOutputs")),
-        button("Resources", buttonStyle(1), onclick := {
-          () ⇒
-            {
-              currentTab() = 1
-              setBodyContent
-            }
-        }
-        )(badge(s"${
-          resources().number
-        }"))
-      )
-    }
+          }
+          )(badge(s"${
+            resources().number
+          }"))
+        )
+      }
+      tags.div(
+        filePath.map {
+          _ ⇒ tags.div()
+        }.getOrElse(step1),
+        transferring() match {
+          case _: Processing ⇒ OMTags.waitingSpan(" Uploading ...", btn_danger + "certificate")
+          case _: Processed  ⇒ upButton
+          case _             ⇒ upButton
+        },
+        filePath.map {
+          _ ⇒
+            div(paddingTop := 20)(
+              tags.h4("Step2: Task configuration"), step2,
+              topButtons,
+              if (tab == 0) {
+                tags.div({
 
-    tags.div(
-      fileToUploadPath.now.map {
-        _ ⇒ tags.div()
-      }.getOrElse(step1),
-      transferring.now match {
-        case _: Processing ⇒ OMTags.waitingSpan(" Uploading ...", btn_danger + "certificate")
-        case _: Processed  ⇒ upButton
-        case _             ⇒ upButton
-      },
-      fileToUploadPath.now.map {
-        _ ⇒
-          div(paddingTop := 20)(
-            tags.h4("Step2: Task configuration"), step2,
-            topButtons,
-            if (currentTab.now == 0) {
-              tags.div({
+                  val idiv = div(modelIO)(tags.h3("Inputs")).render
 
-                val idiv = div(modelIO)(tags.h3("Inputs")).render
+                  val odiv = div(modelIO)(tags.h3("Outputs")).render
 
-                val odiv = div(modelIO)(tags.h3("Outputs")).render
-
-                val head = thead(tags.tr(
-                  for (h ← Seq("Name", "Type", "Default", "Mapped with", "", "")) yield {
-                    th(textAlign := "center", h)
-                  }
-                ))
-
-                div(paddingTop := 30)(
-                  div(twocolumns +++ (paddingRight := 10))(
-                    idiv,
-                    tags.table(striped)(
-                      head,
-                      tbody(
-                        for (ip ← inputs(reactives)) yield {
-                          ip.line
-                        }
+                  val head = thead(tags.tr(
+                    for (h ← Seq("Name", "Type", "Default", "Mapped with", "", "")) yield {
+                      th(textAlign := "center", h)
+                    }
+                  ))
+                  div(paddingTop := 30)(
+                    div(twocolumns +++ (paddingRight := 10))(
+                      idiv,
+                      tags.table(striped)(
+                        head,
+                        tbody(
+                          for (ip ← inputs(reactives)) yield {
+                            ip.line
+                          }
+                        )
                       )
-                    )
-                  ),
-                  div(twocolumns)(
-                    odiv,
-                    tags.table(striped)(
-                      head,
-                      tbody(
-                        for (op ← outputs(reactives)) yield {
-                          op.line
-                        }
+                    ),
+                    div(twocolumns)(
+                      odiv,
+                      tags.table(striped)(
+                        head,
+                        tbody(
+                          for (op ← outputs(reactives)) yield {
+                            op.line
+                          }
+                        )
                       )
                     )
                   )
-                )
-              }, autoModeTag, commandArea)
-            }
-            else {
-              val body = tbody.render
-              for {
-                i ← resources.now.implicits
-              } yield {
-                body.appendChild(tags.tr(
-                  td(colMD(3))(i.safePath.name),
-                  td(colMD(2))(CoreUtils.readableByteCountAsString(i.size))
-                ).render)
+                }, autoModeTag, commandArea)
               }
-              tags.table(striped +++ (paddingTop := 20))(body)
-            }
-          )
-      }.getOrElse(tags.div())
-    )
-  })
+              else {
+                val body = tbody.render
+                for {
+                  i ← resources().implicits
+                } yield {
+                  body.appendChild(tags.tr(
+                    td(colMD(3))(i.safePath.name),
+                    td(colMD(2))(CoreUtils.readableByteCountAsString(i.size))
+                  ).render)
+                }
+                tags.table(striped +++ (paddingTop := 20))(body)
+              }
+            )
+        }.getOrElse(tags.div())
+      )
+    }
+  )
 
   lazy val dialog = {
-    setBodyContent
+    //setBodyContent
     ModalDialog(omsheet.panelWidth(92))
   }
 
@@ -708,13 +612,7 @@ class ModelWizardPanel {
     tags.span(tags.b("Model import"))
   )
 
-  dialog.body(
-    tags.div(
-      Rx {
-        bodyContent().getOrElse(tags.div())
-      }
-    )
-  )
+  dialog.body(bodyContent)
 
   dialog.footer(buttonGroup(Seq(width := 200, right := 100))(
     inputGroupButton(ModalDialog.closeButton(dialog, btn_default, "Close")),

@@ -169,8 +169,8 @@ class FileToolBox(initSafePath: SafePath) {
                 //                    s"""source("${sp.name}")""", sp.nameWithNoExtension, sp.parent, Resources(Seq(Resource(sp, 1)), Seq(), 1), sp.name, Seq(ProtoTypePair("i", ProtoTYPE.INT)), Seq(ProtoTypePair("o", ProtoTYPE.DOUBLE)))
                 case _ ⇒
                   val wizardPanel = panels.modelWizardPanel
-                  wizardPanel.fromSafePath(sp)
                   wizardPanel.dialog.show
+                  wizardPanel.fromSafePath(sp)
               }
               Popover.hide
             }
