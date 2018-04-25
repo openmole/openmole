@@ -308,6 +308,7 @@ li.selectElement{
     color: white;
     cursor: pointer;
     padding: 8px 25px 8px 20px;
+    text-align: center;
 }
 .inputFileStyle input[type="file"] {
     display: none;

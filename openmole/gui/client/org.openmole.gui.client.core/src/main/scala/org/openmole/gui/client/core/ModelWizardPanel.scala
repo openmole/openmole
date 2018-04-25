@@ -165,53 +165,52 @@ class ModelWizardPanel {
   }.headOption
 
   lazy val upButton =
-    div(ms("modelWizardDivs"))(
-      div(maxWidth := 250)(
-        label(
-          Seq(display := "table") +++ certificate +++ "inputFileStyle",
-          transferring.withTransferWaiter {
-            _ ⇒
-              div(
-                fileInput((fInput: HTMLInputElement) ⇒ {
-                  if (fInput.files.length > 0) {
-                    fileToUploadPath() = None
-                    resources() = Resources.empty
-                    val fileName = fInput.files.item(0).name
-                    labelName() = Some(fileName)
-                    filePath() = Some(manager.current.now ++ fileName)
-                    filePath.now.map {
-                      fp ⇒
-                        moveFilesAndBuildForm(fInput, fileName, fp)
-                    }
-                  }
-                }), Rx {
-                  labelName() match {
-                    case Some(s: String) ⇒ s
-                    case _               ⇒ "Your Model"
+    div(Seq(display := "table", minWidth := 200))(
+      label(
+        ms("inputFileStyle"),
+        transferring.withTransferWaiter {
+          _ ⇒
+            div(
+              fileInput((fInput: HTMLInputElement) ⇒ {
+                if (fInput.files.length > 0) {
+                  fileToUploadPath() = None
+                  resources() = Resources.empty
+                  val fileName = fInput.files.item(0).name
+                  labelName() = Some(fileName)
+                  filePath() = Some(manager.current.now ++ fileName)
+                  filePath.now.map {
+                    fp ⇒
+                      moveFilesAndBuildForm(fInput, fileName, fp)
                   }
                 }
-              )
-          }
-        ),
-        Rx {
-          span(grey)(
-            filePath() match {
-              case Some(sp: SafePath) ⇒
-                val fileType: FileType = sp
-                if (fileType == Archive) modelSelector.selector else div.render
-              case _ ⇒ div.render
-            },
-            div(
-              labelName.now.flatMap {
-                factory
-              } match {
-                case f: WizardPluginFactory ⇒ f.help
-                case _                      ⇒ ""
+              }),
+              Rx {
+                labelName() match {
+                  case Some(s: String) ⇒ s
+                  case _               ⇒ "Your Model"
+                }
               }
             )
-          )
         }
-      )
+      ).render,
+      Rx {
+        span(grey)(
+          filePath() match {
+            case Some(sp: SafePath) ⇒
+              val fileType: FileType = sp
+              if (fileType == Archive) modelSelector.selector else div.render
+            case _ ⇒ div.render
+          },
+          div(
+            labelName.now.flatMap {
+              factory
+            } match {
+              case f: WizardPluginFactory ⇒ f.help
+              case _                      ⇒ ""
+            }
+          )
+        )
+      }
     ).render
 
   def moveFilesAndBuildForm(fInput: HTMLInputElement, fileName: String, uploadPath: SafePath) =
@@ -534,10 +533,10 @@ class ModelWizardPanel {
         )
       }
       tags.div(
-        filePath.map {
+        fileToUploadPath().map {
           _ ⇒ tags.div()
         }.getOrElse(step1),
-        transferring() match {
+        transferring.now match {
           case _: Processing ⇒ OMTags.waitingSpan(" Uploading ...", btn_danger + "certificate")
           case _: Processed  ⇒ upButton
           case _             ⇒ upButton
