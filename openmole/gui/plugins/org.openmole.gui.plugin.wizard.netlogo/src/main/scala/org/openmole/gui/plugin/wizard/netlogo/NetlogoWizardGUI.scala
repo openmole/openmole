@@ -48,7 +48,7 @@ class NetlogoWizardFactory extends WizardPluginFactory {
     libraries:      Option[String],
     resources:      Resources): Future[SafePath] = OMPost()[NetlogoWizardAPI].toTask(target, executableName, command, inputs, outputs, libraries, resources).call()
 
-  def help: String = "If your Netlogo sript depends on plugins, you should upload an archive (tar.gz, tgz) containing the root workspace."
+  def help: String = "If your Netlogo sript depends on plugins, you should upload an archive (tar.gz, tgz) containing the root workspace. Then set the empeddWorkspace option to true in the oms script."
 
   def name: String = "Netlogo"
 }
