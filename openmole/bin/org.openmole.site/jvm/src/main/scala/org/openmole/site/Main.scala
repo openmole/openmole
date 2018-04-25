@@ -97,23 +97,5 @@ object Main {
       div(classIs("hidden-lg hidden-md"))(mobile)
     )
 
-    //        div(centerBox, width := 160, classIs(colMD(4)))(
-    //        div(classIs(row))(div(mainText, "OpenMOLE runs your own program, whatever the language. Java, Binary exe, NetLogo, R, SciLab, Python, C++...")),
-    //        div(classIs(row))(readMore(DocumentationPages.model))
-    //      ),
-    //      div(centerBox, width := 160, classIs(colMD(4)))(
-    //        div(classIs(row))(),
-    //        div(classIs(row))(),
-    //        div(classIs(row))(div(mainText, "Explore spaces of parameters, optimize, test the sensitivity of your model through innovative methods")),
-    //        div(classIs(row))(readMore(DocumentationPages.method))
-    //      ),
-    //      div(centerBox, width := 160, classIs(colMD(4)))(
-    //
-    //        div(classIs(row))(div(),
-    //        div(classIs(row))(div(mainText, "Scale up your experimentations with no effort on servers, clusters, grids, clouds, ...")),
-    //        div(classIs(row))(readMore(DocumentationPages.environment))
-    //      )
-    //    )
-    //    )
   }
 }
