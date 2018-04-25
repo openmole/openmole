@@ -321,6 +321,7 @@ object PSE {
 
         def migrateToIsland(population: Vector[I]) =
           population.map(PSEAlgorithm.Individual.foundedIsland.set(true))
+
         def migrateFromIsland(population: Vector[I], state: S) =
           population.filter(i ⇒ !PSEAlgorithm.Individual.foundedIsland.get(i)).
             map(PSEAlgorithm.Individual.mapped.set(false)).

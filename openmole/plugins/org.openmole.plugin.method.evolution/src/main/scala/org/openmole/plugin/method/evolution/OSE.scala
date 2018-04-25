@@ -246,7 +246,7 @@ object OSE {
 
         def afterGeneration(g: Long, population: Vector[I]) = api.afterGeneration(g, population)
         def afterDuration(d: squants.Time, population: Vector[I]) = api.afterDuration(d, population)
-        def migrateToIsland(population: Vector[I]) = population
+        def migrateToIsland(population: Vector[I]) = StochasticGAIntegration.migrateToIsland(population)
         def migrateFromIsland(population: Vector[I], state: S) = population ++ state.s._1
 
       }
