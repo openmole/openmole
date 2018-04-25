@@ -2,10 +2,10 @@
 @import org.openmole.site._
 
 @h2(textAlign := "center")
-  A Computational Engine for Custom Simulation Experiments
+  The Model Exploration Software
 
 @div(stylesheet.centerJustify(100)){
-OpenMOLE has been developped since 2008 as a @b{free and open-source} platform.
+OpenMOLE has been developed since 2008 as a @b{free and open-source} platform.
 It explores, diagnoses your numerical model and optimizes its dynamics, taking advantage of distributed computing environments.
 The typical usages are model calibration, model exploration, machine learning, optimization, data processing.
 }
@@ -17,7 +17,7 @@ You can describe how to @b{explore} your own model and how to @b{distribute} its
 
 @Main.build
 
-@div(stylesheet.centerJustify(100), paddingTop := 100)
+@div(stylesheet.centerJustify(100))
   @h2{GETTING STARTED}
   Take a tour in the @a("Getting started section", href := Pages.gettingStarted.file), with the @a("GUI guide", href := DocumentationPages.gui.file),
   in the @a("Documentation", href := DocumentationPages.model.file) and latter learn @a("Advanced concepts", href := DocumentationPages.advancedConcepts.file).

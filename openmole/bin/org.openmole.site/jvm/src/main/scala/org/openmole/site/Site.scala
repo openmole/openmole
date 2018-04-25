@@ -121,7 +121,11 @@ object Site extends App {
 
         def bodyFrag(page: org.openmole.site.Page) = {
 
-          val sitePage = UserGuide.currentStep(page)
+          val sitePage =
+            page match {
+              case Pages.index ⇒ ContentPage(div(paddingTop := 50), div(page.content))
+              case _           ⇒ UserGuide.currentStep(page)
+            }
 
           val navigationStyle = Seq(
             backgroundColor := "#4096c5",

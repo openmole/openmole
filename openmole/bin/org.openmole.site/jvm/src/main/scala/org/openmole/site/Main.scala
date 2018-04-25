@@ -26,31 +26,94 @@ object Main {
   private def readMore(page: Page) = pageLinkButton("Read more", page, false, Seq(classIs(btn ++ btn_default), marginTop := 20))
 
   def build = {
-    div(classIs(row), paddingTop := 100)(
-      div(classIs(colMD(4)))(
-        div(centerBox)(
-          img(src := Resource.img.model.code.file, width := 120),
-          div(mainTitle, "RUN"),
-          div(mainText, "OpenMOLE runs your own program, whatever the language. Java, Binary exe, NetLogo, R, SciLab, Python, C++..."),
-          readMore(DocumentationPages.model)
-        )
-      ),
-      div(classIs(colMD(4)))(
-        div(centerBox)(
-          img(src := Resource.img.method.exploreMap.file, width := 120),
-          div(mainTitle, "EXPLORE"),
-          div(mainText, "Explore spaces of parameters, optimize, test the sensitivity of your model through innovative methods"),
-          readMore(DocumentationPages.method)
-        )
-      ),
-      div(classIs(colMD(4)))(
-        div(centerBox)(
-          img(src := Resource.img.environment.scale.file, width := 120),
-          div(mainTitle, "SCALE"),
-          div(mainText, "Scale up your experimentations with no effort on servers, clusters, grids, clouds, ..."),
-          readMore(DocumentationPages.environment)
+
+    def runText = "OpenMOLE runs your own program, whatever the language. Java, Binary exe, NetLogo, R, SciLab, Python, C++..."
+    def exploreText = "Explore spaces of parameters, optimize, test the sensitivity of your model through innovative methods"
+    def scaleText = "Scale up your experimentations with no effort on servers, clusters, grids, clouds, ..."
+
+    def desktop = {
+      def colTag: Seq[Modifier] = Seq(classIs("col-md-4"), attr("align") := "center")
+      def rowTag: Seq[Modifier] = Seq(classIs(row))
+
+      div(classIs(container_fluid), paddingTop := 40, paddingBottom := 40)(
+        div(classIs(row + " centered-form center-block"))(
+          div(rowTag, paddingBottom := 5)(
+            div(colTag)(img(src := Resource.img.model.code.file, width := 120)),
+            div(colTag)(img(src := Resource.img.method.exploreMap.file, width := 120)),
+            div(colTag)(img(src := Resource.img.environment.scale.file, width := 120, paddingBottom := 10))
+          ),
+          div(rowTag)(
+            div(colTag, mainTitle)("RUN"),
+            div(colTag, mainTitle)("EXPLORE"),
+            div(colTag, mainTitle)("SCALE")
+          ),
+          div(rowTag, paddingBottom := 5)(
+            div(colTag)(div(mainText, width := 220, runText)),
+            div(colTag)(div(mainText, width := 220, exploreText)),
+            div(colTag)(div(mainText, width := 220, scaleText))
+          ),
+          div(rowTag)(
+            div(colTag)(readMore(DocumentationPages.model)),
+            div(colTag)(readMore(DocumentationPages.method)),
+            div(colTag)(readMore(DocumentationPages.environment))
+          )
         )
       )
+
+    }
+
+    def mobile = {
+      def colTag: Seq[Modifier] = Seq(classIs("col"), attr("align") := "center")
+      def rowTag: Seq[Modifier] = Seq(classIs(row))
+
+      div(classIs(container_fluid), paddingTop := 50, paddingBottom := 20)(
+        div(classIs(row + " centered-form center-block"))(
+          div(rowTag)(
+            div(colTag, paddingBottom := 30)(
+              div(rowTag)(img(src := Resource.img.model.code.file, width := 120)),
+              div(rowTag, mainTitle)("RUN"),
+              div(rowTag)(div(mainText, width := 200, runText)),
+              div(rowTag)(readMore(DocumentationPages.model))
+            ),
+            div(colTag, paddingBottom := 30)(
+              div(rowTag)(img(src := Resource.img.method.exploreMap.file, width := 120)),
+              div(rowTag, mainTitle)("EXPLORE"),
+              div(rowTag)(div(mainText, width := 200, exploreText)),
+              div(rowTag)(readMore(DocumentationPages.method))
+            ),
+            div(colTag)(
+              div(rowTag)(img(src := Resource.img.environment.scale.file, width := 120)),
+              div(rowTag, mainTitle)("SCALE"),
+              div(rowTag)(div(mainText, width := 200, scaleText)),
+              div(rowTag)(readMore(DocumentationPages.environment))
+            )
+          )
+        )
+      )
+    }
+
+    div(
+      div(classIs("visible-lg visible-md"))(desktop),
+      div(classIs("hidden-lg hidden-md"))(mobile)
     )
+
+    //        div(centerBox, width := 160, classIs(colMD(4)))(
+    //        div(classIs(row))(div(mainText, "OpenMOLE runs your own program, whatever the language. Java, Binary exe, NetLogo, R, SciLab, Python, C++...")),
+    //        div(classIs(row))(readMore(DocumentationPages.model))
+    //      ),
+    //      div(centerBox, width := 160, classIs(colMD(4)))(
+    //        div(classIs(row))(),
+    //        div(classIs(row))(),
+    //        div(classIs(row))(div(mainText, "Explore spaces of parameters, optimize, test the sensitivity of your model through innovative methods")),
+    //        div(classIs(row))(readMore(DocumentationPages.method))
+    //      ),
+    //      div(centerBox, width := 160, classIs(colMD(4)))(
+    //
+    //        div(classIs(row))(div(),
+    //        div(classIs(row))(div(mainText, "Scale up your experimentations with no effort on servers, clusters, grids, clouds, ...")),
+    //        div(classIs(row))(readMore(DocumentationPages.environment))
+    //      )
+    //    )
+    //    )
   }
 }
