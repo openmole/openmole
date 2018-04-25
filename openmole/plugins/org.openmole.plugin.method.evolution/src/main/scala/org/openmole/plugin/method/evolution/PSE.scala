@@ -133,8 +133,7 @@ object NoisyPSEAlgorithm {
     genome:           Genome,
     historyAge:       Long,
     phenotypeHistory: Array[Array[Double]],
-    mapped:           Boolean              = false,
-    foundedIsland:    Boolean              = false)
+    mapped:           Boolean              = false)
 
   def buildIndividual(genome: Genome, phenotype: Vector[Double]) = Individual(genome, 1, Array(phenotype.toArray))
   def vectorPhenotype = Individual.phenotypeHistory composeLens array2ToVectorLens
@@ -445,13 +444,11 @@ object PSE {
         def afterDuration(d: squants.Time, population: Vector[I]) = api.afterDuration(d, population)
 
         def migrateToIsland(population: Vector[I]) =
-          population.map(NoisyPSEAlgorithm.Individual.foundedIsland.set(true)).map(NoisyPSEAlgorithm.Individual.historyAge.set(0))
+          population.map(NoisyPSEAlgorithm.Individual.historyAge.set(0))
 
         def migrateFromIsland(population: Vector[I], state: S) =
-          population.filter(i ⇒ !NoisyPSEAlgorithm.Individual.foundedIsland.get(i)).
-            map(NoisyPSEAlgorithm.Individual.mapped.set(false)).
-            map(NoisyPSEAlgorithm.Individual.foundedIsland.set(false))
-
+          population.filter(i ⇒ NoisyPSEAlgorithm.Individual.historyAge.get(i) > 0).
+            map(NoisyPSEAlgorithm.Individual.mapped.set(false))
       }
 
     }
