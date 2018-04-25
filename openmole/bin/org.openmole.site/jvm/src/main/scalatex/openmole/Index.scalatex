@@ -11,7 +11,7 @@ The typical usages are model calibration, model exploration, machine learning, o
 }
 
 @div(stylesheet.centerJustify(100)){
-OpenMOLE comes with a web interface that enables you to write @b{scripts around your models}.
+OpenMOLE comes with a web interface to write @b{scripts around your models}.
 You can describe how to @b{explore} your own model and how to @b{distribute} its executions on HPC environments in a few lines of code !
 }
 
