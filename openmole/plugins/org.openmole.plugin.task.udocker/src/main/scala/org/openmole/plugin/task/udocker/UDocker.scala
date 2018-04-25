@@ -69,7 +69,7 @@ object UDocker {
     def localLayersFutures =
       for {
         m ← manifestData.toSeq.toVector
-        l ← layers(m.value)
+        l ← layers(m.value).distinct
       } yield Future {
         val lf = layerFile(l)
         if (!lf.exists) {
