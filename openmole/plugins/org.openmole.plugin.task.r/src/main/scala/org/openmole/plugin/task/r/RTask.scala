@@ -40,16 +40,19 @@ object RTask {
 
   sealed trait InstallCommand
   object InstallCommand {
-    case class RLibrary(name: String) extends InstallCommand
+    case class RLibrary(name: String, version: String) extends InstallCommand
 
     def toCommand(installCommands: InstallCommand) =
       installCommands match {
-        case RLibrary(name) ⇒
+        case RLibrary(name, "latest") ⇒
           //Vector(s"""R -e 'install.packages(c(${names.map(lib ⇒ '"' + s"$lib" + '"').mkString(",")}), dependencies = T)'""")
           s"""R --slave -e 'install.packages(c("$name"), dependencies = T); library("$name")'"""
+        case RLibrary(name, version) ⇒
+          s"""R --slave -e 'require(devtools); install_version("$name",version = "$version" dependencies = T); library("$name")'"""
       }
 
-    implicit def stringToRLibrary(name: String): InstallCommand = RLibrary(name)
+    implicit def stringToRLibrary(name: String): InstallCommand = RLibrary(name, "latest")
+    implicit def stringCoupleToRLibrary(couple: (String, String)): InstallCommand = RLibrary(couple._1, couple._2)
     def installCommands(libraries: Vector[InstallCommand]): Vector[String] = libraries.map(InstallCommand.toCommand)
 
   }
@@ -60,13 +63,15 @@ object RTask {
     script:      FromContext[String],
     install:     Seq[String]         = Seq.empty,
     libraries:   Seq[InstallCommand] = Seq.empty,
-    forceUpdate: Boolean             = false
+    forceUpdate: Boolean             = false,
+    rVersion:    String              = "3.3.3"
   )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService): RTask = {
 
-    def version = "3.3.3"
+    //def version = "3.3.3"
+    def version = rVersion
 
     val installCommands =
-      install ++ InstallCommand.installCommands(libraries.toVector ++ Seq(InstallCommand.RLibrary("jsonlite")))
+      install ++ InstallCommand.installCommands(Vector(InstallCommand.RLibrary("devtools", "latest")) ++ libraries.toVector ++ Seq(InstallCommand.RLibrary("jsonlite", "latest")))
 
     val uDockerArguments =
       UDockerTask.createUDocker(
