@@ -251,7 +251,7 @@ class FileToolBox(initSafePath: SafePath) {
         case _ ⇒ span
       },
       DataUtils.fileToExtension(initSafePath.name) match {
-        case FileExtension.JAR | FileExtension.TGZBIN | FileExtension.NETLOGO | FileExtension.R ⇒
+        case FileExtension.JAR | FileExtension.TGZBIN | FileExtension.NETLOGO | FileExtension.R | FileExtension.TGZ ⇒
           iconAction(fileaction.toScript, toScript, "to OMS")
         case _ ⇒ span
       },

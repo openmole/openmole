@@ -97,9 +97,7 @@ class ModelWizardPanel {
   val resources: Var[Resources] = Var(Resources.empty)
   val currentTab: Var[Int] = Var(0)
   val autoMode = Var(true)
-  //val upButton: HTMLDivElement = Var(tags.div().render)
   val fileToUploadPath: Var[Option[SafePath]] = Var(None)
-  val targetPath: Var[Option[SafePath]] = Var(None)
 
   fileToUploadPath.trigger {
     fileToUploadPath.now.map {
@@ -219,15 +217,6 @@ class ModelWizardPanel {
       )
     ).render
 
-  def setTargetPath(fileType: FileType, safePath: SafePath) =
-    targetPath() = Some(safePath)
-
-  //      Some(fileType match {
-  //      case codeFile: CodeFile ⇒ safePath
-  //      case _                  ⇒ safePath
-  //    }
-  //)
-
   def moveFilesAndBuildForm(fInput: HTMLInputElement, fileName: String, uploadPath: SafePath) =
     CoreUtils.withTmpFile {
       tempFile ⇒
@@ -242,18 +231,17 @@ class ModelWizardPanel {
             post()[Api].extractAndTestExistence(tempFile ++ fileName, uploadPath.parent).call().foreach {
               existing ⇒
                 val fileType: FileType = uploadPath
-                setTargetPath(fileType, uploadPath)
+                val targetPath = fileType match {
+                  case Archive ⇒ uploadPath.parent ++ uploadPath.nameWithNoExtension
+                  case _       ⇒ uploadPath
+                }
 
                 // Move files from tmp to target path
                 if (existing.isEmpty) {
-                  targetPath.now.map {
-                    tp ⇒
-                      post()[Api].copyAllTmpTo(tempFile, tp).call().foreach {
-                        b ⇒
-                          fileToUploadPath() = Some(uploadPath)
-                          //buildForm(uploadPath)
-                          post()[Api].deleteFile(tempFile, ServerFileSystemContext.absolute).call()
-                      }
+                  post()[Api].copyAllTmpTo(tempFile, targetPath).call().foreach {
+                    b ⇒
+                      fileToUploadPath() = Some(uploadPath)
+                      post()[Api].deleteFile(tempFile, ServerFileSystemContext.absolute).call()
                   }
                 }
                 else {
@@ -282,8 +270,7 @@ class ModelWizardPanel {
   def fromSafePath(safePath: SafePath) = {
     labelName() = Some(safePath.name)
     fileToUploadPath() = Some(safePath)
-    setTargetPath(safePath, safePath)
-    // buildForm(safePath)
+    filePath() = Some(safePath)
   }
 
   def factory(safePath: SafePath): Option[WizardPluginFactory] = factory(safePath.name)
@@ -297,9 +284,11 @@ class ModelWizardPanel {
   }
 
   def buildForm(safePath: SafePath) = {
+    println("Buils f " + safePath)
     val pathFileType: FileType = safePath
     pathFileType match {
       case Archive ⇒
+        println("archive")
         post()[Api].models(safePath).call().foreach {
           models ⇒
             modelSelector.setContents(models, () ⇒ {
