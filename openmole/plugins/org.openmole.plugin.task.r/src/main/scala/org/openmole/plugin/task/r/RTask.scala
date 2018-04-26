@@ -48,7 +48,9 @@ object RTask {
           //Vector(s"""R -e 'install.packages(c(${names.map(lib ⇒ '"' + s"$lib" + '"').mkString(",")}), dependencies = T)'""")
           s"""R --slave -e 'install.packages(c("$name"), dependencies = T); library("$name")'"""
         case RLibrary(name, version) ⇒
-          s"""R --slave -e 'require(devtools); install_version("$name",version = "$version" dependencies = T); library("$name")'"""
+          // need to install devtools to get older packages versions
+          //apt update; apt-get -y install libssl-dev libxml2-dev libcurl4-openssl-dev libssh2-1-dev;
+          s"""R --slave -e 'install.packages("devtools", dependencies = T); library(devtools); install_version("$name",version = "$version", dependencies = T); library("$name")'"""
       }
 
     implicit def stringToRLibrary(name: String): InstallCommand = RLibrary(name, "latest")
