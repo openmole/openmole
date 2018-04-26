@@ -72,23 +72,6 @@ package object shared {
     lazy val advancedOptions = "Advanced options"
   }
 
-  object howToContributeMenu {
-    lazy val prerequisites = "Prerequisites"
-    lazy val firstTimeSetup = "First time setup"
-    lazy val buildAppFromSources = "Build from Sources"
-    lazy val standaloneArchive = "Standalone archive"
-    lazy val compileDocker = "Compile within Docker"
-    lazy val buildWebsite = "Build the website"
-    lazy val repositories = "Repositories"
-    lazy val webpagesSources = "Edit Documentation pages"
-    lazy val devVersion = "Dev versions "
-    lazy val projectOrganization = "Project organization"
-    lazy val bugReport = "Bug Report"
-    lazy val contributionProcedure = "Contribution procedure"
-    lazy val branchingModel = "Branching model"
-    lazy val tipsAndTricks = "Tips and tricks"
-  }
-
   object rTask {
     lazy val rVersion = "3.3.3"
   }
