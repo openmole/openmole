@@ -44,7 +44,8 @@ class NativeWizardApiImpl(s: Services) extends NativeWizardAPI {
     inputs:         Seq[ProtoTypePair],
     outputs:        Seq[ProtoTypePair],
     libraries:      Option[String],
-    resources:      Resources): SafePath = {
+    resources:      Resources,
+    data:           NativeWizardData): SafePath = {
 
     val data = wizardModelData(inputs, outputs, resources, Some("netLogoInputs"), Some("netLogoOutputs"))
     val task = s"${executableName.split('.').head.toLowerCase}Task"

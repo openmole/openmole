@@ -27,7 +27,8 @@ trait NativeWizardAPI {
     inputs:         Seq[ProtoTypePair],
     outputs:        Seq[ProtoTypePair],
     libraries:      Option[String],
-    resources:      Resources): SafePath
+    resources:      Resources,
+    data:           NativeWizardData): SafePath
 
   def parse(safePath: SafePath): Option[LaunchingCommand]
 }

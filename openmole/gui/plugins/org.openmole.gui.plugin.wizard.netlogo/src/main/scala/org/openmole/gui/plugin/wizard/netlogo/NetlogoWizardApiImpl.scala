@@ -34,15 +34,16 @@ class NetlogoWizardApiImpl(s: Services) extends NetlogoWizardAPI {
     inputs:         Seq[ProtoTypePair],
     outputs:        Seq[ProtoTypePair],
     libraries:      Option[String],
-    resources:      Resources): SafePath = {
+    resources:      Resources,
+    data:           NetlogoWizardData): SafePath = {
 
-    val data = wizardModelData(inputs, outputs, resources, Some("netLogoInputs"), Some("netLogoOutputs"))
+    val modelData = wizardModelData(inputs, outputs, resources, Some("netLogoInputs"), Some("netLogoOutputs"))
     val task = s"${executableName.split('.').head.toLowerCase}Task"
 
-    val content = data.vals +
+    val content = modelData.vals +
       s"""\nval launch = List("${(Seq("setup", "random-seed ${seed}") ++ (command.split('\n').toSeq)).mkString("\",\"")}")
-            \nval $task = NetLogo6Task(workDirectory / ${executableName.split('/').map { s ⇒ s"""\"$s\"""" }.mkString(" / ")}, launch, embedWorkspace = ${!resources.implicits.isEmpty}) set(\n""".stripMargin +
-      data.inputs + data.outputs + data.specificInputMapping.getOrElse("") + data.specificInputMapping.getOrElse("") + data.inputFileMapping + data.outputFileMapping + data.defaults +
+            \nval $task = NetLogo6Task(workDirectory / ${executableName.split('/').map { s ⇒ s"""\"$s\"""" }.mkString(" / ")}, launch, embedWorkspace = ${data.embedWorkspace}) set(\n""".stripMargin +
+      modelData.inputs + modelData.outputs + modelData.specificInputMapping.getOrElse("") + modelData.specificInputMapping.getOrElse("") + modelData.inputFileMapping + modelData.outputFileMapping + modelData.defaults +
       s"""\n\n$task hook ToStringHook()"""
 
     target.write(content)(context = org.openmole.gui.ext.data.ServerFileSystemContext.project, workspace = Workspace.instance)

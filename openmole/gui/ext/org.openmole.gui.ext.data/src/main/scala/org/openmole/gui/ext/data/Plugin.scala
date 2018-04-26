@@ -54,20 +54,13 @@ trait AuthenticationPluginFactory extends GUIPluginFactory {
   def getData: Future[Seq[AuthType]]
 }
 
-trait WizardPlugin extends GUIPlugin {
+trait WizardGUIPlugin extends GUIPlugin {
+
   def factory: WizardPluginFactory
 
-  def panel: TypedTag[HTMLElement]
-}
+  val panel: TypedTag[HTMLElement]
 
-trait WizardPluginFactory extends GUIPluginFactory {
-  def build: WizardPlugin
-
-  def fileType: FileType
-
-  def parse(safePath: SafePath): Future[Option[LaunchingCommand]]
-
-  def toTask(
+  def save(
     target:         SafePath,
     executableName: String,
     command:        String,
@@ -75,6 +68,15 @@ trait WizardPluginFactory extends GUIPluginFactory {
     outputs:        Seq[ProtoTypePair],
     libraries:      Option[String],
     resources:      Resources): Future[SafePath]
+}
+
+trait WizardPluginFactory extends GUIPluginFactory {
+
+  def build: WizardGUIPlugin
+
+  def fileType: FileType
+
+  def parse(safePath: SafePath): Future[Option[LaunchingCommand]]
 
   def help: String
 }

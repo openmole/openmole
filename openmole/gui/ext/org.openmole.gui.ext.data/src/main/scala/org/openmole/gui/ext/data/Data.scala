@@ -723,6 +723,8 @@ trait AuthenticationData {
   def name: String
 }
 
+trait WizardData
+
 sealed trait Test {
   def passed: Boolean
 

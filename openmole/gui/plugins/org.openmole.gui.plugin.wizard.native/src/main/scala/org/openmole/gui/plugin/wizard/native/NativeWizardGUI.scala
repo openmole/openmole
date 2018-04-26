@@ -34,28 +34,52 @@ import rx._
 class NativeWizardFactory extends WizardPluginFactory {
   val fileType = CareArchive
 
-  def build: WizardPlugin = new NativeWizardGUI()
+  def build: WizardGUIPlugin = new NativeWizardGUI()
 
   def parse(safePath: SafePath): Future[Option[LaunchingCommand]] = OMPost()[NativeWizardAPI].parse(safePath).call()
 
-  def toTask(
-    target:         SafePath,
-    executableName: String,
-    command:        String,
-    inputs:         Seq[ProtoTypePair],
-    outputs:        Seq[ProtoTypePair],
-    libraries:      Option[String],
-    resources:      Resources): Future[SafePath] = OMPost()[NativeWizardAPI].toTask(target, executableName, command, inputs, outputs, libraries, resources).call()
+  //  def toTask(
+  //    target:         SafePath,
+  //    executableName: String,
+  //    command:        String,
+  //    inputs:         Seq[ProtoTypePair],
+  //    outputs:        Seq[ProtoTypePair],
+  //    libraries:      Option[String],
+  //    resources:      Resources,
+  //    data:           WizardGUIPlugin): Future[SafePath] = OMPost()[NativeWizardAPI].toTask(target, executableName, command, inputs, outputs, libraries, resources, data).call()
 
   def help: String = "Pick your code up among jar archive, netlogo scripts, or any code packaged on linux with Care ( like Python, C, C++, etc). In the case of a Care archive, the packaging has to be done with the -o yourmodel.tar.gz.bin or -o yourmodel.tgz.bin"
 
   def name: String = "Care"
 }
 
+case class NativeWizardData() extends WizardData
+
 @JSExportTopLevel("org.openmole.gui.plugin.wizard.native.NativeWizardGUI")
-class NativeWizardGUI() extends WizardPlugin {
+class NativeWizardGUI() extends WizardGUIPlugin {
+
+  type WizardType = NativeWizardData
 
   def factory = new NativeWizardFactory
 
-  def panel: TypedTag[HTMLElement] = div()
+  lazy val panel: TypedTag[HTMLElement] = div()
+
+  def save(
+    target:         SafePath,
+    executableName: String,
+    command:        String,
+    inputs:         Seq[ProtoTypePair],
+    outputs:        Seq[ProtoTypePair],
+    libraries:      Option[String],
+    resources:      Resources) =
+    OMPost()[NativeWizardAPI].toTask(
+      target,
+      executableName,
+      command,
+      inputs,
+      outputs,
+      libraries,
+      resources,
+      NativeWizardData()
+    ).call()
 }

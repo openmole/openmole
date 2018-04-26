@@ -28,7 +28,7 @@ import org.scalajs.dom.html.TextArea
 import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
-import org.scalajs.dom.raw.{ HTMLDivElement, HTMLInputElement }
+import org.scalajs.dom.raw.{ HTMLDivElement, HTMLElement, HTMLInputElement }
 import org.openmole.gui.ext.tool.client._
 import rx._
 import scalatags.JsDom.{ TypedTag, tags }
@@ -97,6 +97,7 @@ class ModelWizardPanel {
   val currentTab: Var[Int] = Var(0)
   val autoMode = Var(true)
   val fileToUploadPath: Var[Option[SafePath]] = Var(None)
+  val currentPluginPanel: Var[Option[WizardGUIPlugin]] = Var(None)
 
   fileToUploadPath.trigger {
     fileToUploadPath.now.map {
@@ -200,19 +201,30 @@ class ModelWizardPanel {
               val fileType: FileType = sp
               if (fileType == Archive) modelSelector.selector else div.render
             case _ ⇒ div.render
-          },
-          labelName().flatMap {
-            factory
-          } match {
-            case Some(f: WizardPluginFactory) ⇒
-              val help = f.help
-              if (help.isEmpty) div()
-              else div(modelHelp)(f.help)
-            case _ ⇒ div("")
           }
         )
       }
     ).render
+
+  val topConfiguration = Rx {
+    div(
+      upButton,
+      labelName().flatMap {
+        factory
+      } match {
+        case Some(f: WizardPluginFactory) ⇒
+          val help = f.help
+          div(row)(
+            (if (help.isEmpty) div()
+            else div(modelHelp)(f.help))(colMD(2)),
+            currentPluginPanel().map {
+              _.panel
+            }.getOrElse(div())(colMD(10))
+          )
+        case _ ⇒ div("")
+      }
+    )
+  }
 
   def moveFilesAndBuildForm(fInput: HTMLInputElement, fileName: String, uploadPath: SafePath) =
     CoreUtils.withTmpFile {
@@ -284,6 +296,7 @@ class ModelWizardPanel {
     val pathFileType: FileType = safePath
     pathFileType match {
       case Archive ⇒
+        currentPluginPanel() = None
         post()[Api].models(safePath).call().foreach {
           models ⇒
             modelSelector.setContents(models, () ⇒ {
@@ -294,6 +307,7 @@ class ModelWizardPanel {
         }
       case _ ⇒
         factory(safePath).foreach { factory ⇒
+          currentPluginPanel() = Some(factory.build)
           factory.parse(safePath).foreach {
             b ⇒
               TreeNodePanel.refreshAndDraw
@@ -379,24 +393,30 @@ class ModelWizardPanel {
           fp ⇒
             factory(fp).map {
               factory ⇒
-                CoreUtils.buildModelScript(
-                  factory,
-                  labelName.now.getOrElse("script"),
-                  commandArea.value,
-                  manager.current.now ++ s"${
-                    scriptNameInput.value.clean
-                  }.oms",
-                  resources.now,
-                  inputs(currentReactives.now).map {
-                    _.content.prototype
-                  },
-                  outputs(currentReactives.now).map {
-                    _.content.prototype
-                  },
-                  fileToUploadPath.now.map {
-                    _.name
-                  })
-
+                currentPluginPanel.now.map {
+                  _.save(
+                    manager.current.now ++ s"${
+                      scriptNameInput.value.clean
+                    }.oms",
+                    labelName.now.getOrElse("script"),
+                    commandArea.value,
+                    inputs(currentReactives.now).map {
+                      _.content.prototype
+                    },
+                    outputs(currentReactives.now).map {
+                      _.content.prototype
+                    },
+                    fileToUploadPath.now.map {
+                      _.name
+                    },
+                    resources.now
+                  ).foreach {
+                      b ⇒
+                        treeNodeTabs -- b
+                        treeNodePanel.displayNode(FileNode(Var(b.name), 0L, 0L))
+                        TreeNodePanel.refreshAndDraw
+                    }
+                }
             }
         }
     })
@@ -537,8 +557,8 @@ class ModelWizardPanel {
         step1,
         transferring.now match {
           case _: Processing ⇒ OMTags.waitingSpan(" Uploading ...", btn_danger + "certificate")
-          case _: Processed  ⇒ upButton
-          case _             ⇒ upButton
+          case _: Processed  ⇒ topConfiguration
+          case _             ⇒ topConfiguration
         },
         filePath.map {
           _ ⇒

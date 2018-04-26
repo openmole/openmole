@@ -19,12 +19,13 @@ package org.openmole.gui.plugin.wizard.netlogo
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
-import org.openmole.gui.ext.data.{ AuthenticationPlugin, AuthenticationPluginFactory, WizardPluginFactory, _ }
+import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.tool.client.OMPost
 import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
 import autowire._
 import org.scalajs.dom.raw.HTMLElement
+import scaladget.bootstrapnative.SelectableButtons
 
 import scala.concurrent.Future
 import scala.scalajs.js.annotation._
@@ -33,20 +34,23 @@ import scalatags.JsDom.all._
 
 @JSExportTopLevel("org.openmole.gui.plugin.wizard.netlogo.NetlogoWizardFactory")
 class NetlogoWizardFactory extends WizardPluginFactory {
+  type WizardType = NetlogoWizardData
+
   val fileType = CodeFile(NetLogoLanguage())
 
-  def build: WizardPlugin = new NetlogoWizardGUI()
+  def build: WizardGUIPlugin = new NetlogoWizardGUI()
 
   def parse(safePath: SafePath): Future[Option[LaunchingCommand]] = OMPost()[NetlogoWizardAPI].parse(safePath).call()
 
-  def toTask(
-    target:         SafePath,
-    executableName: String,
-    command:        String,
-    inputs:         Seq[ProtoTypePair],
-    outputs:        Seq[ProtoTypePair],
-    libraries:      Option[String],
-    resources:      Resources): Future[SafePath] = OMPost()[NetlogoWizardAPI].toTask(target, executableName, command, inputs, outputs, libraries, resources).call()
+  //  def toTask(
+  //              target: SafePath,
+  //              executableName: String,
+  //              command: String,
+  //              inputs: Seq[ProtoTypePair],
+  //              outputs: Seq[ProtoTypePair],
+  //              libraries: Option[String],
+  //              resources: Resources,
+  //              data: WizardType): Future[SafePath] = OMPost()[NetlogoWizardAPI].toTask(target, executableName, command, inputs, outputs, libraries, resources, data).call()
 
   def help: String = "If your Netlogo sript depends on plugins, you should upload an archive (tar.gz, tgz) containing the root workspace. Then set the empeddWorkspace option to true in the oms script."
 
@@ -54,9 +58,37 @@ class NetlogoWizardFactory extends WizardPluginFactory {
 }
 
 @JSExportTopLevel("org.openmole.gui.plugin.wizard.netlogo.NetlogoWizardGUI")
-class NetlogoWizardGUI() extends WizardPlugin {
+class NetlogoWizardGUI(data: NetlogoWizardData = NetlogoWizardData()) extends WizardGUIPlugin {
+  type WizardType = NetlogoWizardData
 
   def factory = new NetlogoWizardFactory
 
-  def panel: TypedTag[HTMLElement] = div()
+  lazy val embedWorkspaceCheckBox: SelectableButtons = radios()(
+    selectableButton("Yes", onclick = () ⇒ println("YES")),
+    selectableButton("No", onclick = () ⇒ println("NO"))
+  )
+
+  lazy val panel: TypedTag[HTMLElement] = hForm(
+    div(embedWorkspaceCheckBox.render)
+      .render.withLabel("EmbedWorkspace")
+  )
+
+  def save(
+    target:         SafePath,
+    executableName: String,
+    command:        String,
+    inputs:         Seq[ProtoTypePair],
+    outputs:        Seq[ProtoTypePair],
+    libraries:      Option[String],
+    resources:      Resources) =
+    OMPost()[NetlogoWizardAPI].toTask(
+      target,
+      executableName,
+      command,
+      inputs,
+      outputs,
+      libraries,
+      resources,
+      NetlogoWizardData(if (embedWorkspaceCheckBox.activeIndex == 0) true else false)).call()
+
 }
