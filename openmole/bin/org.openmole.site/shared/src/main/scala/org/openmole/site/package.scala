@@ -72,11 +72,6 @@ package object shared {
     lazy val advancedOptions = "Advanced options"
   }
 
-  object consoleMenu {
-    lazy val authentication = "Authentications"
-    lazy val run = "Run scripts"
-  }
-
   object howToContributeMenu {
     lazy val prerequisites = "Prerequisites"
     lazy val firstTimeSetup = "First time setup"
