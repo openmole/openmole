@@ -273,7 +273,6 @@ object StochasticGAIntegration {
     }
 
   def migrateToIsland(population: Vector[mgo.algorithm.CDGenome.NoisyIndividual.Individual]) = population.map(_.copy(historyAge = 0))
-  def migrateFromIsland(population: Vector[mgo.algorithm.CDGenome.NoisyIndividual.Individual], historySize: Int) = population
 
 }
 
