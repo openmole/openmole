@@ -105,7 +105,7 @@ It studies the percolation of a fire in a forest depending on the density of the
     @br
 
 
-@h3{@shared.netlogoMenu.simulation}
+@h3{The simulation}
 
 We would like to study the impact of the @i{density} factor for a fixed population size. To do this, let's
 build a design of experiment where the @i{density} factor ranges from 20% to 80% by steps of 10.
@@ -120,7 +120,7 @@ More elaborated methods, in the case of a calibration of a stochastic model with
 @p You can get the NetLogo implementation of the model
 @a("here", href :=  Resource.script.fireNLogo.file).
 
-@h3{@shared.netlogoMenu.doe}
+@h3{The Design of Experiment}
 
 We first need to define 2 OpenMOLE variables in order to repeat our experience 10 times for every step of the
 @i{density} exploration. These 2 variables are:
@@ -145,7 +145,7 @@ We first need to define 2 OpenMOLE variables in order to repeat our experience 1
 experiments.
 
 
-@h3{@shared.netlogoMenu.storing}
+@h3{Storing the results}
 
 OpenMOLE usually delegates the tasks execution to many different computers. To gather the results of these remote
 executions, we use a mechanism called @i{hooks}. Hooks can be assimilated to a listener that saves or display
@@ -162,7 +162,7 @@ $exploration
 $netlogo
 """, name = "netlogo hook")
 
-@h3{@shared.netlogoMenu.together}
+@h3{Bringing all the pieces together}
 
 Now that we have defined each component, we can compose the workflow that brings all the pieces of the simulation
 together:
@@ -179,7 +179,7 @@ DirectSampling(
 
 @p At the end of the execution, you will find the output values in a file called @i{result.csv}.
 
-@h3{@shared.netlogoMenu.further}
+@h3{Going further}
 
 The Netlogo combines a GUI created by the user, in which he can define parameters and run functions, which the source code in itself.
 

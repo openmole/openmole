@@ -72,19 +72,6 @@ package object shared {
     lazy val advancedOptions = "Advanced options"
   }
 
-  object netlogoMenu {
-    lazy val simulation = "The simulation"
-    lazy val doe = "The Design of Experiment"
-    lazy val task = "The NetLogo task"
-    lazy val storing = "Storing the results"
-    lazy val together = "Bringing all the pieces together"
-    lazy val further = "Going further"
-  }
-
-  object otherDoEMenu {
-
-  }
-
   object directSamplingMenu {
     lazy val gridSampling = "Grid Sampling"
     lazy val uniformSampling = "Uniform Distribution Sampling"
