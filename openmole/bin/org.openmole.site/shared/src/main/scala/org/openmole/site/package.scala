@@ -76,14 +76,6 @@ package object shared {
     lazy val rVersion = "3.3.3"
   }
 
-  object gaWithNetlogo {
-    lazy val antModel = "The ant model"
-    lazy val defineProblem = "An optimisation problem"
-    lazy val runOpeMOLE = "Run it in OpenMOLE"
-    lazy val optimizationAlgo = "The optimisation algorithm"
-    lazy val scaleUp = "Scale up"
-  }
-
   object simpleSAFireMenu {
     lazy val sensitivityAnalysis = "Sensitivity Analysis"
     lazy val sensitivityFireModel = "Real world Example"
