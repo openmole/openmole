@@ -72,13 +72,6 @@ package object shared {
     lazy val advancedOptions = "Advanced options"
   }
 
-  object sourceMenu {
-    lazy val plugSource = "Plug a source"
-    lazy val listFiles = "List files in a directory"
-    lazy val listDirectories = "List directories in a directory"
-    lazy val example = "A complete example"
-  }
-
   object capsuleMenu {
     lazy val definition = "Definition"
     lazy val strainer = "Strainer capsule"
