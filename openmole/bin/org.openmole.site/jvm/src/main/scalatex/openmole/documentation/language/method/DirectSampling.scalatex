@@ -321,7 +321,7 @@ Files are explored as items of a list.
 @br
     If your input is one file among many,  or  a line among a CSV file, use the
     @a("CSVSampling task", href := anchor(csvSampling))
-    and @a("FileSampling task", href := DocumentationPages.dataProcessing.anchor(shared.dataProcessingMenu.setOfFiles)).
+    and @a("FileSampling task", href := DocumentationPages.dataProcessing.file + anchor("Exploring a set of files")).
 
 
 @h2{@advancedSampling}

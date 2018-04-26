@@ -72,13 +72,6 @@ package object shared {
     lazy val advancedOptions = "Advanced options"
   }
 
-  object dataProcessingMenu {
-    lazy val setOfFiles = "Exploring a set of files"
-    lazy val pathsVsFiles = "Files vs Paths"
-    lazy val example = "More examples"
-    lazy val further = "Going further"
-  }
-
   object hookMenu {
     lazy val plugHook = "Plug a Hook"
     lazy val appendToFileHook = "Append to file"
