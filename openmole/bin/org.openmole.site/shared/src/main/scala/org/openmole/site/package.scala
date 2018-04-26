@@ -72,30 +72,11 @@ package object shared {
     lazy val advancedOptions = "Advanced options"
   }
 
-  object directSamplingMenu {
-    lazy val gridSampling = "Grid Sampling"
-    lazy val uniformSampling = "Uniform Distribution Sampling"
-    lazy val LHSSobol = "Latin Hypercube, Sobol Sequence"
-    lazy val severalInputs = "Exploration of several inputs "
-    lazy val csvSampling = "CSV Sampling"
-
-  }
-
   object dataProcessingMenu {
     lazy val setOfFiles = "Exploring a set of files"
     lazy val pathsVsFiles = "Files vs Paths"
     lazy val example = "More examples"
     lazy val further = "Going further"
-  }
-
-  object advancedSamplingMenu {
-    lazy val sampling = "Sampling"
-    lazy val combineSampling = "Combine samplings"
-    lazy val zipSampling = "Zip samplings"
-    lazy val filterSampling = "Take, filter, sample samplings"
-    lazy val randomSampling = "Random samplings"
-    lazy val higherLevelSampling = "Higher level samplings"
-    lazy val isKeyword = "The is keyword"
   }
 
   object hookMenu {
@@ -162,8 +143,9 @@ package object shared {
   object documentationSideMenu {
     lazy val cssClass = "sidemenu"
     lazy val place = "side-menu-place"
-    def toLink(title: String) = title.filter(_ != ' ')
   }
+
+  def anchor(title: String) = title.filter(c ⇒ c.isLetterOrDigit)
 
   object link {
 

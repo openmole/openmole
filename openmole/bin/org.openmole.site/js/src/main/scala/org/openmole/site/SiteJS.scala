@@ -95,8 +95,6 @@ object SiteJS extends JSApp {
   def documentationSideMenu(): Unit = {
     val nodes = org.scalajs.dom.document.getElementsByClassName(shared.documentationSideMenu.cssClass)
 
-    println((0 until nodes.length).map(i ⇒ nodes(i).textContent + " " + nodes(i).nodeName))
-
     val text = p((0 until nodes.length).map(i ⇒ nodes(i).textContent).mkString(", "))
 
     val menuContent =
@@ -105,7 +103,7 @@ object SiteJS extends JSApp {
       } yield {
         val text = nodes(i).textContent.dropRight(2)
         nodes(i).nodeName match {
-          case "H2" ⇒ Some(div(paddingTop := 5)(a(href := "#" + shared.documentationSideMenu.toLink(text))(text)))
+          case "H2" ⇒ Some(div(paddingTop := 5)(a(href := "#" + shared.anchor(text))(text)))
           case _    ⇒ None
         }
       }

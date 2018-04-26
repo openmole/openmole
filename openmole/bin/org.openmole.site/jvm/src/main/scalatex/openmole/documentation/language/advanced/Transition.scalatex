@@ -38,7 +38,7 @@ available in OpenMOLE.
 
     exploration -< (t1 hook ToStringHook())""")
 
-    @p You can read more about @a("Explorations and Samplings", href := DocumentationPages.advancedSampling.file)
+    @p You can read more about @a("Explorations and Samplings", href := DocumentationPages.directSampling.file)
     in the relevant section of the documentation.
 
 @sect{Combining transitions}

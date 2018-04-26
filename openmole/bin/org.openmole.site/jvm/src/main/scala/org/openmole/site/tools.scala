@@ -96,7 +96,7 @@ package object tools {
     def link(elements: Seq[Any]) = elements.collect { case x: String ⇒ x }.headOption
     def linkIcon(elements: Seq[Any]): Seq[Modifier] =
       link(elements) match {
-        case Some(t) ⇒ Seq(" ", a(href := s"#${shared.documentationSideMenu.toLink(t)}", tag("font")(size := 4, opacity := 0.4)("\uD83D\uDD17")))
+        case Some(t) ⇒ Seq(" ", a(href := s"#${shared.anchor(t)}", tag("font")(size := 4, opacity := 0.4)("\uD83D\uDD17")))
         case None    ⇒ Seq()
       }
 
@@ -113,6 +113,8 @@ package object tools {
   def h1(elements: Any*): Frag = Seq(div(links.anchor(elements): _*), scalatags.Text.all.h1(elements.map(links.toModifier): _*))
   def h2(elements: Any*): Frag = Seq(div(links.anchor(elements): _*), scalatags.Text.all.h2(`class` := shared.documentationSideMenu.cssClass)(elements.map(links.toModifier) ++ links.linkIcon(elements): _*))
   def h3(elements: Any*): Frag = Seq(div(links.anchor(elements): _*), scalatags.Text.all.h3(`class` := shared.documentationSideMenu.cssClass)(elements.map(links.toModifier) ++ links.linkIcon(elements): _*))
+
+  def anchor(title: String) = s"#${shared.anchor(title)}"
 
   case class Parameter(name: String, `type`: String, description: String)
 

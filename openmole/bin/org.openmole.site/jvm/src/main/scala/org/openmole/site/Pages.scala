@@ -168,7 +168,7 @@ object DocumentationPages {
     webserver,
     dataProcessing,
     advancedConcepts,
-    DirectSampling,
+    directSampling,
     transition,
     hook,
     source,
@@ -227,7 +227,7 @@ object DocumentationPages {
 
   def environmentPages = Seq(multithread, ssh, egi, cluster)
 
-  def methodPages = Seq(DirectSampling, calibration, profile, pse, dataProcessing)
+  def methodPages = Seq(directSampling, calibration, profile, pse, dataProcessing)
 
   lazy val tutorialPages = Seq(Pages.gettingStarted, netLogoGA, resume)
 
@@ -235,7 +235,6 @@ object DocumentationPages {
     geneticalgo,
     island,
     stochasticity,
-    advancedSampling,
     care,
     headlessNetLogo,
     gui,
@@ -266,7 +265,7 @@ object DocumentationPages {
     Pages.whoAreWe
   )
 
-  lazy val method = DocumentationPage.fromScalatex(name = "Methods", content = scalatex.documentation.language.Method, details = Seq(DocumentationPages.advancedSampling))
+  lazy val method = DocumentationPage.fromScalatex(name = "Methods", content = scalatex.documentation.language.Method)
 
   lazy val calibration = DocumentationPage.fromScalatex(name = "Calibration", content = scalatex.documentation.language.method.Calibration, details = Seq(geneticalgo, island, stochasticity))
   lazy val geneticalgo = DocumentationPage.fromScalatex(name = "Genetic Algorithms", content = scalatex.documentation.details.GeneticAlgorithm)
@@ -276,13 +275,11 @@ object DocumentationPages {
   lazy val profile = DocumentationPage.fromScalatex(name = "Profiles", content = scalatex.documentation.language.method.Profile)
   lazy val pse = DocumentationPage.fromScalatex(name = "PSE", content = scalatex.documentation.language.method.PSE)
 
-  lazy val DirectSampling = DocumentationPage.fromScalatex(name = "Direct Sampling", content = scalatex.documentation.language.method.DirectSampling)
+  lazy val directSampling = DocumentationPage.fromScalatex(name = "Direct Sampling", content = scalatex.documentation.language.method.DirectSampling)
 
   lazy val dataProcessing = DocumentationPage.fromScalatex(name = "Data Processing", content = scalatex.documentation.language.method.DataProcessing)
 
   lazy val advancedConcepts = DocumentationPage.fromScalatex(name = "Advanced Concepts", content = scalatex.documentation.language.AdvancedConcepts)
-
-  lazy val advancedSampling = DocumentationPage.fromScalatex(name = "Advanced Sampling", content = scalatex.documentation.language.advanced.AdvancedSampling)
 
   lazy val tutorial = DocumentationPage.fromScalatex(name = "Tutorials", content = scalatex.documentation.language.Tutorial)
   lazy val resume = DocumentationPage.fromScalatex(name = "Resume Workflow", content = scalatex.documentation.language.tutorial.Resume, title = Some("How to build a resumable workflow"))
