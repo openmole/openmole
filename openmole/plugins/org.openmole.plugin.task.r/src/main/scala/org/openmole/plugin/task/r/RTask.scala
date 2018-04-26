@@ -71,7 +71,7 @@ object RTask {
     def version = rVersion
 
     val installCommands =
-      install ++ InstallCommand.installCommands(Vector(InstallCommand.RLibrary("devtools", "latest")) ++ libraries.toVector ++ Seq(InstallCommand.RLibrary("jsonlite", "latest")))
+      install ++ InstallCommand.installCommands(libraries.toVector ++ Seq(InstallCommand.RLibrary("jsonlite", "latest")))
 
     val uDockerArguments =
       UDockerTask.createUDocker(
