@@ -96,7 +96,7 @@ package object tools {
     def link(elements: Seq[Any]) = elements.collect { case x: String ⇒ x }.headOption
     def withLink(elements: Seq[Any]): Seq[Modifier] =
       link(elements) match {
-        case Some(t) ⇒ Seq(" ", a(href := s"#${t.filter(_ != ' ')}", "\uD83D\uDD17"))
+        case Some(t) ⇒ Seq(" ", a(href := s"#${t.filter(_ != ' ')}", tag("font")(size := 4, opacity := 0.4)("\uD83D\uDD17")))
         case None    ⇒ Seq()
       }
 
