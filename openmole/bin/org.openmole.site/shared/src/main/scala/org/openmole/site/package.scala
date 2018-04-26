@@ -80,15 +80,6 @@ package object shared {
     lazy val advancedOptions = "Advanced options"
   }
 
-  object nativePackagingMenu {
-    lazy val introCARE = "Packaging with CARE"
-    lazy val advancedOptions = "Advanced Options"
-    lazy val localResources = "Using local Resources"
-    lazy val localExecutable = "Using local executable"
-    lazy val troubleshooting = "CARE Troubleshooting"
-    lazy val nativeAPI = "Native API"
-  }
-
   object netlogoMenu {
     lazy val simulation = "The simulation"
     lazy val doe = "The Design of Experiment"

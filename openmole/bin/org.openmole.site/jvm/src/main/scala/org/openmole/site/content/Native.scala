@@ -65,7 +65,7 @@ object Native {
     p, "Two things should be noted from this example:",
     ul,
     li(RawFrag(s"The procedure to package an application ${b("is always the same")},  regardless of the underlying programming language / framework used.")),
-    li(RawFrag(s"The ${hl.openmoleNoTest("CARETask")} is not different from the ${a("SystemExecTask", href := DocumentationPages.care.anchor(shared.nativePackagingMenu.localExecutable))} to the extent of the archive given as a first parameter.")),
+    li(RawFrag(s"The ${hl.openmoleNoTest("CARETask")} is not different from the SystemExecTask to the extent of the archive given as a first parameter.")),
 
     p, "These two aspects make it really ", b("easy to embed native applications"), " in OpenMOLE. You can also read more about packaging your native models for OpenMOLE in ", a("the dedicated section", href := DocumentationPages.care.file), "."
   )
