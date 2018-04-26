@@ -89,7 +89,7 @@ package object tools {
 
     def anchor(elements: Seq[Any]): Seq[Modifier] =
       link(elements) match {
-        case Some(t) ⇒ Seq(id := s"${t.filter(_ != ' ')}", `class` := "sidemenu")
+        case Some(t) ⇒ Seq(a(id := s"${t.filter(_ != ' ')}", top := -90, position := "relative", display := "block"))
         case None    ⇒ Seq()
       }
 
@@ -110,9 +110,9 @@ package object tools {
 
   }
 
-  def h1(elements: Any*) = scalatags.Text.all.h1(links.anchor(elements): _*)(elements.map(links.toModifier): _*)
-  def h2(elements: Any*) = scalatags.Text.all.h2(links.anchor(elements): _*)(elements.map(links.toModifier) ++ links.withLink(elements): _*)
-  def h3(elements: Any*) = scalatags.Text.all.h3(links.anchor(elements): _*)(elements.map(links.toModifier) ++ links.withLink(elements): _*)
+  def h1(elements: Any*): Frag = Seq(div(links.anchor(elements): _*), scalatags.Text.all.h1(elements.map(links.toModifier): _*))
+  def h2(elements: Any*): Frag = Seq(div(links.anchor(elements): _*), scalatags.Text.all.h2(`class` := "sidemenu")(elements.map(links.toModifier) ++ links.withLink(elements): _*))
+  def h3(elements: Any*): Frag = Seq(div(links.anchor(elements): _*), scalatags.Text.all.h3(`class` := "sidemenu")(elements.map(links.toModifier) ++ links.withLink(elements): _*))
 
   case class Parameter(name: String, `type`: String, description: String)
 

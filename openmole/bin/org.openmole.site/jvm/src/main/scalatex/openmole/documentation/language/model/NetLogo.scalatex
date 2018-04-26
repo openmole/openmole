@@ -107,78 +107,83 @@ It studies the percolation of a fire in a forest depending on the density of the
 
 
 @h3{@shared.netlogoMenu.simulation}
-    We would like to study the impact of the @i{density} factor for a fixed population size. To do this, let's
-    build a design of experiment where the @i{density} factor ranges from 20% to 80% by steps of 10.
 
-    @p Since the Fire model is stochastic, we are interested in doing replications for each instance of the
-    @i{density} factor. Results for each replication will be stored it in a @i{CSV} file.
-    In this example case, we will perform 10 replications per step. This stays a too small sample to draw up
-    any robust conclusion on this simple model, but we take this value here for the sake of illustration.
-    When designing your experiment, you will have to find a compromise between the precision on stochasticity and the number of parameter points explored.
-    More elaborated methods, in the case of a calibration of a stochastic model with a genetic algorithm for example, will automatically deal with this compromise (@i{link to GA calibration})
+We would like to study the impact of the @i{density} factor for a fixed population size. To do this, let's
+build a design of experiment where the @i{density} factor ranges from 20% to 80% by steps of 10.
 
-    @p You can get the NetLogo implementation of the model
-    @a("here", href :=  Resource.script.fireNLogo.file).
+@p Since the Fire model is stochastic, we are interested in doing replications for each instance of the
+@i{density} factor. Results for each replication will be stored it in a @i{CSV} file.
+In this example case, we will perform 10 replications per step. This stays a too small sample to draw up
+any robust conclusion on this simple model, but we take this value here for the sake of illustration.
+When designing your experiment, you will have to find a compromise between the precision on stochasticity and the number of parameter points explored.
+More elaborated methods, in the case of a calibration of a stochastic model with a genetic algorithm for example, will automatically deal with this compromise (@i{link to GA calibration})
+
+@p You can get the NetLogo implementation of the model
+@a("here", href :=  Resource.script.fireNLogo.file).
 
 @h3{@shared.netlogoMenu.doe}
-    We first need to define 2 OpenMOLE variables in order to repeat our experience 10 times for every step of the
-    @i{density} exploration. These 2 variables are:
-    @ul
-      @li{an integer (Int) representing the seed of the random number generator for exploring the replications,}
-      @li{a Double to set the value of @i{density}}
 
-    @br @hl.openmole(variables, name = "netlogo variables")
+We first need to define 2 OpenMOLE variables in order to repeat our experience 10 times for every step of the
+@i{density} exploration. These 2 variables are:
+@ul
+  @li{an integer (Int) representing the seed of the random number generator for exploring the replications,}
+  @li{a Double to set the value of @i{density}}
 
-    @p Given these variables, the definition of the exploration in OpenMOLE writes as follows:
+@br @hl.openmole(variables, name = "netlogo variables")
 
-    @br @hl.openmole(exploration, header = variables, name = "netlogo exploration")
+@p Given these variables, the definition of the exploration in OpenMOLE writes as follows:
 
-    @p This design of experiment will generate 70 distinct sets of input values for the NetLogo model:
-    @ul
-      @li{10 replications with 10 different seeds for @i{density} = 20%}
-      @li{10 replications with 10 different seeds for @i{density} = 30%}
-      @li{...}
-      @li{10 replications with 10 different seeds for @i{density} = 80%}
+@br @hl.openmole(exploration, header = variables, name = "netlogo exploration")
 
-    @p We now need to compose this design of experiment in a complete workflow in order to run the 70 distinct
-    experiments.
+@p This design of experiment will generate 70 distinct sets of input values for the NetLogo model:
+@ul
+  @li{10 replications with 10 different seeds for @i{density} = 20%}
+  @li{10 replications with 10 different seeds for @i{density} = 30%}
+  @li{...}
+  @li{10 replications with 10 different seeds for @i{density} = 80%}
+
+@p We now need to compose this design of experiment in a complete workflow in order to run the 70 distinct
+experiments.
 
 
 @h3{@shared.netlogoMenu.storing}
-    OpenMOLE usually delegates the tasks execution to many different computers. To gather the results of these remote
-    executions, we use a mechanism called @i{hooks}. Hooks can be assimilated to a listener that saves or display
-    results. They are more thoroughly described in a
-    @a("specific section of the documentation", href := DocumentationPages.hook.file).
 
-    @p Here we will create a hook to listen to the model executions and save the results in a CSV file at the end of
-    each of the 70 runs.
+OpenMOLE usually delegates the tasks execution to many different computers. To gather the results of these remote
+executions, we use a mechanism called @i{hooks}. Hooks can be assimilated to a listener that saves or display
+results. They are more thoroughly described in a
+@a("specific section of the documentation", href := DocumentationPages.hook.file).
 
-    @br @hl.openmole(csvHook, header =
-    s"""
-    $variables
-    $exploration
-    $netlogo
-    """, name = "netlogo hook")
+@p Here we will create a hook to listen to the model executions and save the results in a CSV file at the end of
+each of the 70 runs.
+
+@br @hl.openmole(csvHook, header =
+s"""
+$variables
+$exploration
+$netlogo
+""", name = "netlogo hook")
 
 @h3{@shared.netlogoMenu.together}
-    Now that we have defined each component, we can compose the workflow that brings all the pieces of the simulation
-    together:
-    @br @hl.openmole(s"""
-    $variables
-    $exploration
-    $netlogo
-    $csvHook
 
-    DirectSampling(
-      evaluation = fireTask hook csvHook,
-      sampling = sampling
-    )""", name = "netlogo full workflow")
+Now that we have defined each component, we can compose the workflow that brings all the pieces of the simulation
+together:
+@br @hl.openmole(s"""
+$variables
+$exploration
+$netlogo
+$csvHook
 
-    @p At the end of the execution, you will find the output values in a file called @i{result.csv}.
+DirectSampling(
+  evaluation = fireTask hook csvHook,
+  sampling = sampling
+)""", name = "netlogo full workflow")
+
+@p At the end of the execution, you will find the output values in a file called @i{result.csv}.
 
 @h3{@shared.netlogoMenu.further}
-    The Netlogo combines a GUI created by the user, in which he can define parameters and run functions, which the source code in itself.
 
-    Sometimes, you have to modify slightly your code to render it purely headless so that it can be run everywhere.
+The Netlogo combines a GUI created by the user, in which he can define parameters and run functions, which the source code in itself.
 
-    The way to proceed is explained in details in the @aa("Headless Netlogo", href := DocumentationPages.headlessNetLogo.file) section.
+Sometimes, you have to modify slightly your code to render it purely headless so that it can be run everywhere.
+
+The way to proceed is explained in details in the @aa("Headless Netlogo", href := DocumentationPages.headlessNetLogo.file) section.
