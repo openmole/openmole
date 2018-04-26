@@ -68,8 +68,8 @@ object UserGuide {
           StepPage(
             headerModel(name),
             div(current.content),
-            SideMenu.model.insert(current.extraMenu).left,
-            SideMenu.more.insert(current.details).right,
+            SideMenu.left(SideMenu.model),
+            SideMenu.right(SideMenu.more.insert(current.details)),
             firstModel, firstEnvironment, firstMethod
           )
         }
@@ -77,15 +77,15 @@ object UserGuide {
           StepPage(
             headerMethod(current.name),
             div(current.content),
-            SideMenu.method.insert(current.extraMenu).left,
-            SideMenu.more.insert(current.details).right,
+            SideMenu.left(SideMenu.method),
+            SideMenu.right(SideMenu.more.insert(current.details)),
             firstMethod, firstModel, firstEnvironment
           )
         else StepPage(
           headerEnvironment(current.name),
           div(current.content),
-          SideMenu.environment.insert(current.extraMenu).left,
-          SideMenu.more.insert(current.details).right,
+          SideMenu.left(SideMenu.environment),
+          SideMenu.right(SideMenu.more.insert(current.details)),
           firstEnvironment, firstMethod, firstModel
         )
       }

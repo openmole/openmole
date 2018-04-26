@@ -32,33 +32,14 @@ case class Link(name: String, link: String)
 
 case class SideMenu(links: Seq[Link], menuStyle: AttrPair = classIs(""), preText: String = "", otherTab: Boolean = false) {
   def insert(ls: Seq[Link]) = copy(ls ++ links)
-
-  def toBlock = SideMenuBlock(Seq(this))
 }
 
-case class SideMenuBlock(menus: Seq[SideMenu]) {
+object SideMenu {
 
-  def insert(sideMenu: SideMenu): SideMenuBlock = copy(sideMenu +: menus)
-
-  def insert(sideMenu: Option[SideMenu]): SideMenuBlock = {
-    sideMenu match {
-      case Some(sm: SideMenu) ⇒ insert(sm)
-      case _                  ⇒ this
-    }
-  }
-
-  def insert(links: Seq[Link], menuNumber: Int = 0) = {
-    if (menus.size > menuNumber) copy(menus.updated(menuNumber, menus(menuNumber).insert(links)))
-    else this
-  }
-
-  def add(sideMenu: SideMenu) = copy(menus :+ sideMenu)
-
-  def add(sideMenu: Option[SideMenu]): SideMenuBlock = add(sideMenu.getOrElse(SideMenu(Seq())))
-
-  private def build(topDiv: TypedTag[_]) =
+  private def build(menus: Seq[SideMenu], topDiv: TypedTag[_], extraDiv: Option[Frag] = None) =
     div(
       topDiv(
+        extraDiv,
         for {
           m ← menus
         } yield {
@@ -74,13 +55,9 @@ case class SideMenuBlock(menus: Seq[SideMenu]) {
       )
     )
 
-  val right = build(div(rightDetailButtons(220), id := "sidebar-right"))
-
-  val left = build(div(leftDetailButtons(220), id := "sidebar-left"))
-
-}
-
-object SideMenu {
+  def right(menus: SideMenu*) = build(menus, div(rightDetailButtons(220), id := "sidebar-right"))
+  def left(menus: SideMenu*) =
+    build(menus, div(leftDetailButtons(220), `class` := "sidebar-left"), Some(div(id := shared.documentationSideMenu.place)))
 
   implicit def pageToLink(p: Page): Link = Link(p.name, p.file)
 
@@ -93,11 +70,11 @@ object SideMenu {
   def fromStrings(title: String, stringMenus: String*) =
     SideMenu(preText = title, links = stringMenus.map { a ⇒ Link(a, Link.intern(a)) })
 
-  val model = SideMenu(DocumentationPages.modelPages, classIs(btn ++ btn_primary), "Available tasks").toBlock
+  val model = SideMenu(DocumentationPages.modelPages, classIs(btn ++ btn_primary), "Available tasks")
 
-  val method = SideMenu(DocumentationPages.methodPages, classIs(btn ++ btn_primary), "Available methods").toBlock
+  val method = SideMenu(DocumentationPages.methodPages, classIs(btn ++ btn_primary), "Available methods")
 
-  val environment = SideMenu(DocumentationPages.environmentPages, classIs(btn ++ btn_primary), "Available environments").toBlock
+  val environment = SideMenu(DocumentationPages.environmentPages, classIs(btn ++ btn_primary), "Available environments")
 
   val more = SideMenu(
     Seq(
@@ -105,22 +82,22 @@ object SideMenu {
       DocumentationPages.gui,
       DocumentationPages.advancedConcepts
     ), classIs(btn ++ btn_default), "See also", true
-  ).toBlock
-
-  lazy val menus = Map(
-    DocumentationPages.advancedSampling.name -> Seq(advancedSamplingMenu.toBlock.left, SideMenu.more.right),
-    DocumentationPages.netLogoGA.name -> Seq(SideMenu.gaWithNetlogoMenu.toBlock.left),
-    DocumentationPages.simpleSAFire.name -> Seq(SideMenu.simpleSAFireMenu.toBlock.left),
-    DocumentationPages.capsule.name -> Seq(SideMenu.capsuleMenu.toBlock.left),
-    DocumentationPages.source.name -> Seq(SideMenu.sourceMenu.toBlock.left),
-    DocumentationPages.hook.name -> Seq(SideMenu.hookMenu.toBlock.left),
-    DocumentationPages.gui.name -> Seq(SideMenu.guiGuide.toBlock.left),
-    DocumentationPages.console.name -> Seq(SideMenu.consoleMenu.toBlock.left),
-    DocumentationPages.howToContribute.name -> Seq(SideMenu.howToContributeMenu.toBlock.left),
-    DocumentationPages.care.name -> Seq(SideMenu.nativePackagingMenu.toBlock.left),
-    Pages.gettingStarted.name -> Seq(SideMenu.more.right),
-    Pages.faq.name -> Seq(SideMenu.faqMenu.toBlock.left)
   )
+
+  //  lazy val menus = Map(
+  //    DocumentationPages.advancedSampling.name -> Seq(advancedSamplingMenu.toBlock.left, SideMenu.more.right),
+  //    DocumentationPages.netLogoGA.name -> Seq(SideMenu.gaWithNetlogoMenu.toBlock.left),
+  //    DocumentationPages.simpleSAFire.name -> Seq(SideMenu.simpleSAFireMenu.toBlock.left),
+  //    DocumentationPages.capsule.name -> Seq(SideMenu.capsuleMenu.toBlock.left),
+  //    DocumentationPages.source.name -> Seq(SideMenu.sourceMenu.toBlock.left),
+  //    DocumentationPages.hook.name -> Seq(SideMenu.hookMenu.toBlock.left),
+  //    DocumentationPages.gui.name -> Seq(SideMenu.guiGuide.toBlock.left),
+  //    DocumentationPages.console.name -> Seq(SideMenu.consoleMenu.toBlock.left),
+  //    DocumentationPages.howToContribute.name -> Seq(SideMenu.howToContributeMenu.toBlock.left),
+  //    DocumentationPages.care.name -> Seq(SideMenu.nativePackagingMenu.toBlock.left),
+  //    Pages.gettingStarted.name -> Seq(SideMenu.more.right),
+  //    Pages.faq.name -> Seq(SideMenu.faqMenu.toBlock.left)
+  //  )
 
   lazy val faqMenu = fromStrings(
     "",

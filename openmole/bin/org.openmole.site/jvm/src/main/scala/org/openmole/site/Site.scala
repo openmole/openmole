@@ -158,8 +158,9 @@ object Site extends App {
             sitePage match {
               case s: StepPage ⇒ Seq(s.leftMenu, s.rightMenu)
               case _ ⇒
-                val menus: Seq[TypedTag[_ <: String]] = SideMenu.menus.get(page.name).getOrElse(Seq(div))
-                menus
+                //                val menus: Seq[TypedTag[_ <: String]] = //SideMenu.menus.get(page.name).getOrElse(Seq(div))
+                //                menus
+                div(id := shared.documentationSideMenu.place)
             },
             Footer.build,
             onload := onLoadString(page)
@@ -167,15 +168,17 @@ object Site extends App {
         }
 
         private def onLoadString(sitepage: org.openmole.site.Page) = {
-          val toBeAppended = sitepage match {
-            case Pages.index | Pages.training    ⇒ "org.openmole.site.SiteJS().loadBlogPosts();"
-            case DocumentationPages.profile      ⇒ "org.openmole.site.SiteJS().profileAnimation();"
-            case DocumentationPages.pse          ⇒ "org.openmole.site.SiteJS().pseAnimation();"
-            case DocumentationPages.simpleSAFire ⇒ "org.openmole.site.SiteJS().sensitivityAnimation();"
-            case _                               ⇒ ""
-          }
+          def siteJS = "org.openmole.site.SiteJS()"
+          def documentationJS = s"$siteJS.documentationSideMenu();"
+          def commonJS = s"$siteJS.main();$siteJS.loadIndex(index);"
 
-          "org.openmole.site.SiteJS().main();org.openmole.site.SiteJS().loadIndex(index);" + toBeAppended
+          sitepage match {
+            case Pages.index | Pages.training    ⇒ s"$siteJS.loadBlogPosts();" + commonJS
+            case DocumentationPages.profile      ⇒ s"$siteJS.profileAnimation();" + documentationJS + commonJS
+            case DocumentationPages.pse          ⇒ s"$siteJS.pseAnimation();" + documentationJS + commonJS
+            case DocumentationPages.simpleSAFire ⇒ s"$siteJS.sensitivityAnimation();" + documentationJS + commonJS
+            case _                               ⇒ documentationJS + commonJS
+          }
         }
 
         override def generateHtml(outputRoot: Path) = {

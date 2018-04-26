@@ -189,6 +189,12 @@ package object shared {
     lazy val sensitivityFireModel = "Real world Example"
   }
 
+  object documentationSideMenu {
+    lazy val cssClass = "sidemenu"
+    lazy val place = "side-menu-place"
+    def toLink(title: String) = title.filter(_ != ' ')
+  }
+
   object link {
 
     lazy val demo = "http://demo.openmole.org"
