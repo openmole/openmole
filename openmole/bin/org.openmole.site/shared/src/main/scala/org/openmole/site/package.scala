@@ -72,15 +72,6 @@ package object shared {
     lazy val advancedOptions = "Advanced options"
   }
 
-  object hookMenu {
-    lazy val plugHook = "Plug a Hook"
-    lazy val appendToFileHook = "Append to file"
-    lazy val copyFileHook = "Copy file"
-    lazy val toStringHook = "Display variables"
-    lazy val displayHook = "Display results in the stdout"
-    lazy val csvHook = "CSV Hook"
-  }
-
   object sourceMenu {
     lazy val plugSource = "Plug a source"
     lazy val listFiles = "List files in a directory"
