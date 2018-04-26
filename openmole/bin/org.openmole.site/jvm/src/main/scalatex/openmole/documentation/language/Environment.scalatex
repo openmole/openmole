@@ -19,7 +19,7 @@ A key feature in OpenMOLE is the possibility to delegate the workload to a remot
 @h2{Setting up an Authentication}
 
 You first need to define an authentication method for the environment(s) you want to use.
-The way to achieve this is describe in the @aa("GUI guide", href := DocumentationPages.gui.anchor(shared.guiGuide.authentication))
+The way to achieve this is describe in the @aa("GUI guide", href := DocumentationPages.gui.file)
 Have a look @a("here", href := DocumentationPages.console.file + anchor("Authentications")) to set up authentication in console mode.
 
 @h2{Defining an execution Environment}
