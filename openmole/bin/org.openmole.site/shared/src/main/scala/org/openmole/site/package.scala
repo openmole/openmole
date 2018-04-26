@@ -72,12 +72,6 @@ package object shared {
     lazy val advancedOptions = "Advanced options"
   }
 
-  object capsuleMenu {
-    lazy val definition = "Definition"
-    lazy val strainer = "Strainer capsule"
-    lazy val master = "Master capsule"
-  }
-
   object consoleMenu {
     lazy val authentication = "Authentications"
     lazy val run = "Run scripts"
