@@ -8,118 +8,123 @@ Different environments can be assigned to delegate the workload resulting of dif
 
 @p You should first provide your @aa("authentication", href := DocumentationPages.gui.anchor(shared.guiGuide.authentication)) information to OpenMOLE to be able to use your batch system.
 
-@sect{@shared.clusterMenu.pbsTorque}
-  @aa("PBS", href := shared.link.batchSystem) is a venerable batch system for clusters. You may use a PBS computing environment as follow:
-  @br @hl.openmole("""
-  val env =
-    PBSEnvironment(
-      "login",
-      "machine.domain"
-    )""")
+@h2{PBS}
 
- @p @provideOptions:
- @ul
-   @li{@port,}
-   @li{@sharedDirectory,}
-   @li{@storageSharedLocally,}
-   @li{@workDirectory,}
-   @li{@queue,}
-   @li{@wallTime,}
-   @li{@memory,}
-   @li{@openMOLEMemory,}
-   @li{@apiEntryTitle{nodes} Number of nodes requested,}
-   @li{@threads,}
-   @li{@apiEntryTitle{coreByNodes} An alternative to specifying the number of threads. @hl.openmoleNoTest{coreByNodes} takes the value of the @hl.openmoleNoTest{threads} when not specified, or 1 if none of them is specified.}
-   @li{@name}
+@aa("PBS", href := shared.link.batchSystem) is a venerable batch system for clusters. You may use a PBS computing environment as follow:
+@br @hl.openmole("""
+val env =
+  PBSEnvironment(
+    "login",
+    "machine.domain"
+  )""")
 
-@sect{@shared.clusterMenu.sge}
-  To delegate some computation load to a @aa("SGE", href := shared.link.grieEngine) based cluster you can use the @hl.openmoleNoTest{SGEEnvironment} as follows:
-  @br @hl.openmole("""
-  val env =
-    SGEEnvironment(
-      "login",
-      "machine.domain"
-    )""")
-  @p @provideOptions:
-  @ul
-    @li{@port,}
-    @li{@sharedDirectory,}
-    @li{@storageSharedLocally}
-    @li{@workDirectory,}
-    @li{@queue,}
-    @li{@wallTime,}
-    @li{@memory,}
-    @li{@openMOLEMemory,}
-    @li{@threads,}
-    @li{@name.}
+@p @provideOptions:
+@ul
+ @li{@port,}
+ @li{@sharedDirectory,}
+ @li{@storageSharedLocally,}
+ @li{@workDirectory,}
+ @li{@queue,}
+ @li{@wallTime,}
+ @li{@memory,}
+ @li{@openMOLEMemory,}
+ @li{@apiEntryTitle{nodes} Number of nodes requested,}
+ @li{@threads,}
+ @li{@apiEntryTitle{coreByNodes} An alternative to specifying the number of threads. @hl.openmoleNoTest{coreByNodes} takes the value of the @hl.openmoleNoTest{threads} when not specified, or 1 if none of them is specified.}
+ @li{@name}
 
-@sect{@shared.clusterMenu.slurm}
-  To delegate the workload to a @aa("Slurm", href := shared.link.slurm) based cluster you can use the @hl.openmoleNoTest{SLURMEnvironment} as follows:
-  @br @hl.openmole("""
-  val env =
-    SLURMEnvironment(
-      "login",
-      "machine.domain",
-      // optional parameters
-      gres = List( Gres("resource", 1) ),
-      constraints = List("constraint1", "constraint2")
-    )""")
-  @p @provideOptions:
-  @ul
-    @li{@port,}
-    @li{@sharedDirectory,}
-    @li{@storageSharedLocally}
-    @li{@workDirectory,}
-    @li{@queue,}
-    @li{@wallTime,}
-    @li{@memory,}
-    @li{@openMOLEMemory,}
-    @li{@apiEntryTitle{nodes} Number of nodes requested,}
-    @li{@threads,}
-    @li{@apiEntryTitle{coresByNodes} An alternative to specifying the number of threads. @i{coresByNodes} takes the value of the @{threads} when not specified, or 1 if none of them is specified.}
-    @li{@apiEntryTitle{qos} Quality of Service (QOS) as defined in the Slurm database}
-    @li{@apiEntryTitle{gres} a list of Generic Resource (GRES) requested. A Gres is a pair defined by the name of the resource and the number of resources requested (scalar). For instance @hl.openmoleNoTest{gres = List( Gres("resource", 1) )}}
-    @li{@apiEntryTitle{constraints} a list of Slurm defined constraints which selected nodes must match,}
-    @li{@name.}
+@h2{SGE}
 
-@sect{@shared.clusterMenu.condor}
-  @aa("Condor", href := shared.link.condor) clusters can be leveraged using the following syntax:
-  @br @hl.openmole("""
-  val env =
-    CondorEnvironment(
-      "login",
-      "machine.domain"
-    )""")
-  @p @provideOptions:
-  @ul
-    @li{@port,}
-    @li{@sharedDirectory,}
-    @li{@storageSharedLocally}
-    @li{@workDirectory,}
-    @li{@memory,}
-    @li{@openMOLEMemory,}
-    @li{@threads,}
-    @li{@name.}
+To delegate some computation load to a @aa("SGE", href := shared.link.grieEngine) based cluster you can use the @hl.openmoleNoTest{SGEEnvironment} as follows:
+@br @hl.openmole("""
+val env =
+  SGEEnvironment(
+    "login",
+    "machine.domain"
+  )""")
+@p @provideOptions:
+@ul
+  @li{@port,}
+  @li{@sharedDirectory,}
+  @li{@storageSharedLocally}
+  @li{@workDirectory,}
+  @li{@queue,}
+  @li{@wallTime,}
+  @li{@memory,}
+  @li{@openMOLEMemory,}
+  @li{@threads,}
+  @li{@name.}
 
-@sect{@shared.clusterMenu.oar}
-  Similarly, @aa("OAR", href := shared.link.oar) clusters are reached as follows:
-  @br @hl.openmole("""
-  val env =
-    OAREnvironment(
-      "login",
-      "machine.domain"
-    )""")
-  @p @provideOptions:
-  @ul
-    @li{@port,}
-    @li{@sharedDirectory,}
-    @li{@storageSharedLocally}
-    @li{@workDirectory,}
-    @li{@queue,}
-    @li{@wallTime,}
-    @li{@openMOLEMemory,}
-    @li{@threads,}
-    @li{@apiEntryTitle{core} number of cores allocated for each job,}
-    @li{@apiEntryTitle{cpu} number of CPUs allocated for each job,}
-    @li{@apiEntryTitle{bestEffort} a boolean for setting the best effort mode (true by default),}
-    @li{@name.}
+@h2{Slurm}
+
+To delegate the workload to a @aa("Slurm", href := shared.link.slurm) based cluster you can use the @hl.openmoleNoTest{SLURMEnvironment} as follows:
+@br @hl.openmole("""
+val env =
+  SLURMEnvironment(
+    "login",
+    "machine.domain",
+    // optional parameters
+    gres = List( Gres("resource", 1) ),
+    constraints = List("constraint1", "constraint2")
+  )""")
+@p @provideOptions:
+@ul
+  @li{@port,}
+  @li{@sharedDirectory,}
+  @li{@storageSharedLocally}
+  @li{@workDirectory,}
+  @li{@queue,}
+  @li{@wallTime,}
+  @li{@memory,}
+  @li{@openMOLEMemory,}
+  @li{@apiEntryTitle{nodes} Number of nodes requested,}
+  @li{@threads,}
+  @li{@apiEntryTitle{coresByNodes} An alternative to specifying the number of threads. @i{coresByNodes} takes the value of the @{threads} when not specified, or 1 if none of them is specified.}
+  @li{@apiEntryTitle{qos} Quality of Service (QOS) as defined in the Slurm database}
+  @li{@apiEntryTitle{gres} a list of Generic Resource (GRES) requested. A Gres is a pair defined by the name of the resource and the number of resources requested (scalar). For instance @hl.openmoleNoTest{gres = List( Gres("resource", 1) )}}
+  @li{@apiEntryTitle{constraints} a list of Slurm defined constraints which selected nodes must match,}
+  @li{@name.}
+
+@h2{Condor}
+
+@aa("Condor", href := shared.link.condor) clusters can be leveraged using the following syntax:
+@br @hl.openmole("""
+val env =
+  CondorEnvironment(
+    "login",
+    "machine.domain"
+  )""")
+@p @provideOptions:
+@ul
+  @li{@port,}
+  @li{@sharedDirectory,}
+  @li{@storageSharedLocally}
+  @li{@workDirectory,}
+  @li{@memory,}
+  @li{@openMOLEMemory,}
+  @li{@threads,}
+  @li{@name.}
+
+@h2{OAR}
+
+Similarly, @aa("OAR", href := shared.link.oar) clusters are reached as follows:
+@br @hl.openmole("""
+val env =
+  OAREnvironment(
+    "login",
+    "machine.domain"
+  )""")
+@p @provideOptions:
+@ul
+  @li{@port,}
+  @li{@sharedDirectory,}
+  @li{@storageSharedLocally}
+  @li{@workDirectory,}
+  @li{@queue,}
+  @li{@wallTime,}
+  @li{@openMOLEMemory,}
+  @li{@threads,}
+  @li{@apiEntryTitle{core} number of cores allocated for each job,}
+  @li{@apiEntryTitle{cpu} number of CPUs allocated for each job,}
+  @li{@apiEntryTitle{bestEffort} a boolean for setting the best effort mode (true by default),}
+  @li{@name.}

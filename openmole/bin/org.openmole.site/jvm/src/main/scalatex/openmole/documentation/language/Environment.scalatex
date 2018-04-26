@@ -66,10 +66,10 @@ A key feature in OpenMOLE is the possibility to delegate the workload to a remot
   @p The @a("Multi-thread", href := DocumentationPages.multithread.file) permits to execute the tasks concurrently on your machine,
    the @a("SSH", href := DocumentationPages.ssh.file) one to execute tasks on remote server through SSH.
    You can also access a wide variety of @aa("clusters", href := DocumentationPages.cluster.file) like
-   @aa("PBS/Torque", href := DocumentationPages.cluster.anchor(shared.clusterMenu.pbsTorque)),
-   @aa("SGE", href := DocumentationPages.cluster.anchor(shared.clusterMenu.sge)),
-   @aa("Slurm", href := DocumentationPages.cluster.anchor(shared.clusterMenu.slurm)),
-   @aa("Condor", href := DocumentationPages.cluster.anchor(shared.clusterMenu.condor)),
-   or @aa("OAR", href := DocumentationPages.cluster.anchor(shared.clusterMenu.oar)).
+   @aa("PBS/Torque", href := DocumentationPages.cluster.file +"#PBS"),
+   @aa("SGE", href := DocumentationPages.cluster.file + "#SGE"),
+   @aa("Slurm", href := DocumentationPages.cluster.file + "#Slurm"),
+   @aa("Condor", href := DocumentationPages.cluster.file + "#Condor"),
+   or @aa("OAR", href := DocumentationPages.cluster.file + "#OAR").
    You can also use @aa("EGI", href := DocumentationPages.egi.file) to execute tasks on the @aa("EGI grid", href := shared.link.egi).
 

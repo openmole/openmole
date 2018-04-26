@@ -66,14 +66,6 @@ package object shared {
     lazy val plugin = "Plugins"
   }
 
-  object clusterMenu {
-    lazy val pbsTorque = "PBS and Torque"
-    lazy val sge = "SGE"
-    lazy val oar = "OAR"
-    lazy val slurm = "Slurm"
-    lazy val condor = "Condor"
-  }
-
   object nativeModel {
     lazy val rExample = "An example with R"
     lazy val pythonExample = "Another example with Python"
