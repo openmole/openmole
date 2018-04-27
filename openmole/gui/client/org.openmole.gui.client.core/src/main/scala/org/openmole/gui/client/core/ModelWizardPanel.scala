@@ -114,10 +114,6 @@ class ModelWizardPanel {
     }
   )
 
-  def setScritpName = scriptNameInput.value = filePath.now.map {
-    _.name.split('.').head
-  }.getOrElse("model")
-
   val commandArea: TextArea = textArea(3).render
   val autoModeCheckBox = checkbox(autoMode.now)(onchange := {
     () ⇒
@@ -206,7 +202,7 @@ class ModelWizardPanel {
       }
     ).render
 
-  val topConfiguration = Rx {
+  lazy val topConfiguration = Rx {
     div(
       upButton,
       labelName().flatMap {
@@ -307,16 +303,16 @@ class ModelWizardPanel {
         }
       case _ ⇒
         factory(safePath).foreach { factory ⇒
-          currentPluginPanel() = Some(factory.build)
+          scriptNameInput.value = safePath.nameWithNoExtension
+          fileToUploadPath() = Some(safePath)
+          TreeNodePanel.refreshAndDraw
           factory.parse(safePath).foreach {
             b ⇒
-              TreeNodePanel.refreshAndDraw
+              currentPluginPanel() = Some(factory.build)
               launchingCommand() = b
-              fileToUploadPath() = Some(safePath)
-              launchingCommand.now.foreach {
-                lc ⇒
-                  setScritpName
-                  setReactives(lc)
+              launchingCommand.now match {
+                case Some(lc: LaunchingCommand) ⇒ setReactives(lc)
+                case None                       ⇒ currentReactives() = Seq()
               }
           }
         }
@@ -560,8 +556,8 @@ class ModelWizardPanel {
           case _: Processed  ⇒ topConfiguration
           case _             ⇒ topConfiguration
         },
-        filePath.map {
-          _ ⇒
+        launchingCommand() match {
+          case Some(lc: LaunchingCommand) ⇒
             div(paddingTop := 20)(
               tags.h4("Step2: Task configuration"), step2,
               topButtons,
@@ -569,7 +565,6 @@ class ModelWizardPanel {
                 tags.div({
 
                   val idiv = div(modelIO)(tags.h3("Inputs")).render
-
                   val odiv = div(modelIO)(tags.h3("Outputs")).render
 
                   val head = thead(tags.tr(
@@ -616,7 +611,8 @@ class ModelWizardPanel {
                 tags.table(striped +++ (paddingTop := 20))(body)
               }
             )
-        }.getOrElse(tags.div())
+          case _ ⇒ tags.div("")
+        }
       )
     }
   )

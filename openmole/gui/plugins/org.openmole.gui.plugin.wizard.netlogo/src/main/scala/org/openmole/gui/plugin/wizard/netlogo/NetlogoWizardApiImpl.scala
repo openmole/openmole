@@ -37,14 +37,16 @@ class NetlogoWizardApiImpl(s: Services) extends NetlogoWizardAPI {
     resources:      Resources,
     data:           NetlogoWizardData): SafePath = {
 
-    val modelData = wizardModelData(inputs, outputs, resources, Some("netLogoInputs"), Some("netLogoOutputs"))
+    val modelData = wizardModelData(inputs, outputs, resources.all.map {
+      _.safePath.name
+    }, Some("netLogoInputs"), Some("netLogoOutputs"))
     val task = s"${executableName.split('.').head.toLowerCase}Task"
 
     val content = modelData.vals +
       s"""\nval launch = List("${(Seq("setup", "random-seed ${seed}") ++ (command.split('\n').toSeq)).mkString("\",\"")}")
             \nval $task = NetLogo6Task(workDirectory / ${executableName.split('/').map { s ⇒ s"""\"$s\"""" }.mkString(" / ")}, launch, embedWorkspace = ${data.embedWorkspace}) set(\n""".stripMargin +
-      modelData.inputs + modelData.outputs + modelData.specificInputMapping.getOrElse("") + modelData.specificInputMapping.getOrElse("") + modelData.inputFileMapping + modelData.outputFileMapping + modelData.defaults +
-      s"""\n\n$task hook ToStringHook()"""
+      expandWizardData(modelData) +
+      s""")\n\n$task hook ToStringHook()"""
 
     target.write(content)(context = org.openmole.gui.ext.data.ServerFileSystemContext.project, workspace = Workspace.instance)
     target

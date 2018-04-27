@@ -47,12 +47,12 @@ class NativeWizardApiImpl(s: Services) extends NativeWizardAPI {
     resources:      Resources,
     data:           NativeWizardData): SafePath = {
 
-    val data = wizardModelData(inputs, outputs, resources, Some("netLogoInputs"), Some("netLogoOutputs"))
+    val data = wizardModelData(inputs, outputs, resources.all.map { _.safePath.name }, Some("netLogoInputs"), Some("netLogoOutputs"))
     val task = s"${executableName.split('.').head.toLowerCase}Task"
 
     val content = data.vals +
       s"""\n\nval $task = CARETask(workDirectory / "$executableName", "$command") set(\n""" +
-      data.inputs + data.outputs + data.inputFileMapping + data.outputFileMapping + data.defaults +
+      expandWizardData(data) +
       s""")\n\n$task hook ToStringHook()"""
 
     target.write(content)(context = org.openmole.gui.ext.data.ServerFileSystemContext.project, workspace = Workspace.instance)

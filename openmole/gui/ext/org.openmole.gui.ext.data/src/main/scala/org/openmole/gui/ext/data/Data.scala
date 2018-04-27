@@ -770,6 +770,7 @@ case class WizardModelData(
   inputFileMapping:      String,
   outputFileMapping:     String,
   defaults:              String,
+  resources: String,
   specificInputMapping:  Option[String] = None,
-  specificOutputMapping: Option[String] = None
+  specificOutputMapping: Option[String] = None,
 )

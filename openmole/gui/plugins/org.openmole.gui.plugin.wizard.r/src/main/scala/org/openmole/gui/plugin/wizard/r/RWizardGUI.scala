@@ -1,5 +1,5 @@
 /**
- * Created by Mathieu Leclaire on 19/04/18.
+ * Created by Mathieu Leclaire on 23/04/18.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,42 +15,41 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package org.openmole.gui.plugin.wizard.native
+package org.openmole.gui.plugin.wizard.r
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
-import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.tool.client.OMPost
+import scaladget.bootstrapnative.bsn._
+import scaladget.tools._
 import autowire._
+import org.openmole.gui.ext.data._
 import org.scalajs.dom.raw.HTMLElement
 
 import scala.concurrent.Future
 import scala.scalajs.js.annotation._
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
-import rx._
 
-@JSExportTopLevel("org.openmole.gui.plugin.wizard.native.NativeWizardFactory")
-class NativeWizardFactory extends WizardPluginFactory {
-  val fileType = CareArchive
+@JSExportTopLevel("org.openmole.gui.plugin.wizard.r.RWizardFactory")
+class RWizardFactory extends WizardPluginFactory {
+  val fileType = CodeFile(RLanguage())
 
-  def build: WizardGUIPlugin = new NativeWizardGUI()
+  def build: WizardGUIPlugin = new RWizardGUI()
 
-  def parse(safePath: SafePath): Future[Option[LaunchingCommand]] = OMPost()[NativeWizardAPI].parse(safePath).call()
+  def parse(safePath: SafePath): Future[Option[LaunchingCommand]] = OMPost()[RWizardAPI].parse(safePath).call()
 
-  def help: String = "Pick your code up among jar archive, netlogo scripts, or any code packaged on linux with Care ( like Python, C, C++, etc). In the case of a Care archive, the packaging has to be done with the -o yourmodel.tar.gz.bin or -o yourmodel.tgz.bin"
+  def help: String = "If your R sript depends on plugins, you should upload an archive (tar.gz, tgz) containing the root workspace."
 
-  def name: String = "Care"
+  def name: String = "R"
 }
 
-case class NativeWizardData() extends WizardData
+case class RWizardData() extends WizardData
 
-@JSExportTopLevel("org.openmole.gui.plugin.wizard.native.NativeWizardGUI")
-class NativeWizardGUI() extends WizardGUIPlugin {
+@JSExportTopLevel("org.openmole.gui.plugin.wizard.r.RWizardGUI")
+class RWizardGUI extends WizardGUIPlugin {
 
-  type WizardType = NativeWizardData
-
-  def factory = new NativeWizardFactory
+  def factory = new RWizardFactory
 
   lazy val panel: TypedTag[HTMLElement] = div()
 
@@ -62,7 +61,7 @@ class NativeWizardGUI() extends WizardGUIPlugin {
     outputs:        Seq[ProtoTypePair],
     libraries:      Option[String],
     resources:      Resources) =
-    OMPost()[NativeWizardAPI].toTask(
+    OMPost()[RWizardAPI].toTask(
       target,
       executableName,
       command,
@@ -70,6 +69,5 @@ class NativeWizardGUI() extends WizardGUIPlugin {
       outputs,
       libraries,
       resources,
-      NativeWizardData()
-    ).call()
+      RWizardData()).call()
 }
