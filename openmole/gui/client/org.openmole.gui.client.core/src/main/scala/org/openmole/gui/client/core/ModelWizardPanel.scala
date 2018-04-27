@@ -306,14 +306,16 @@ class ModelWizardPanel {
           scriptNameInput.value = safePath.nameWithNoExtension
           fileToUploadPath() = Some(safePath)
           TreeNodePanel.refreshAndDraw
-          factory.parse(safePath).foreach {
-            b ⇒
-              currentPluginPanel() = Some(factory.build)
-              launchingCommand() = b
-              launchingCommand.now match {
-                case Some(lc: LaunchingCommand) ⇒ setReactives(lc)
-                case None                       ⇒ currentReactives() = Seq()
-              }
+          factory.parse(safePath).foreach { b ⇒
+            currentPluginPanel() = Some(factory.build)
+            launchingCommand() = b
+            launchingCommand.now match {
+              case Some(lc: LaunchingCommand) ⇒ setReactives(lc)
+              case None ⇒
+                currentReactives() = Seq()
+                dialog.hide
+                buildScript(safePath)
+            }
           }
         }
     }
@@ -385,37 +387,36 @@ class ModelWizardPanel {
       () ⇒
         save
         dialog.hide
-        fileToUploadPath.now.foreach {
-          fp ⇒
-            factory(fp).map {
-              factory ⇒
-                currentPluginPanel.now.map {
-                  _.save(
-                    manager.current.now ++ s"${
-                      scriptNameInput.value.clean
-                    }.oms",
-                    labelName.now.getOrElse("script"),
-                    commandArea.value,
-                    inputs(currentReactives.now).map {
-                      _.content.prototype
-                    },
-                    outputs(currentReactives.now).map {
-                      _.content.prototype
-                    },
-                    fileToUploadPath.now.map {
-                      _.name
-                    },
-                    resources.now
-                  ).foreach {
-                      b ⇒
-                        treeNodeTabs -- b
-                        treeNodePanel.displayNode(FileNode(Var(b.name), 0L, 0L))
-                        TreeNodePanel.refreshAndDraw
-                    }
-                }
-            }
-        }
+        fileToUploadPath.now.foreach(buildScript)
     })
+  }
+
+  def buildScript(safePath: SafePath) = factory(safePath).map {
+    factory ⇒
+      currentPluginPanel.now.map {
+        _.save(
+          manager.current.now ++ s"${
+            scriptNameInput.value.clean
+          }.oms",
+          labelName.now.getOrElse("script"),
+          commandArea.value,
+          inputs(currentReactives.now).map {
+            _.content.prototype
+          },
+          outputs(currentReactives.now).map {
+            _.content.prototype
+          },
+          fileToUploadPath.now.map {
+            _.name
+          },
+          resources.now
+        ).foreach {
+            b ⇒
+              treeNodeTabs -- b
+              treeNodePanel.displayNode(FileNode(Var(b.name), 0L, 0L))
+              TreeNodePanel.refreshAndDraw
+          }
+      }
   }
 
   def save = {
