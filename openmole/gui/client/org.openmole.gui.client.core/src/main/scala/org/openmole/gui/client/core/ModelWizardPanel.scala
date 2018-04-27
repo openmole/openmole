@@ -273,8 +273,8 @@ class ModelWizardPanel {
     }
 
   def fromSafePath(safePath: SafePath) = {
-    fileToUploadPath() = Some(safePath)
     filePath() = Some(safePath)
+    fileToUploadPath() = Some(safePath)
     labelName() = Some(safePath.name)
   }
 
