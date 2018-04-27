@@ -188,13 +188,21 @@ object TreeNodeTab {
               afterRefresh()
             }
           }
+          else afterRefresh()
         }
       )
     }
 
     def refresh(afterRefresh: () ⇒ Unit): Unit = {
-      if (editing && (view == Raw))
-        TreeNodeTab.save(safePathTab.now, editor, afterRefresh)
+      def saveTab = TreeNodeTab.save(safePathTab.now, editor, afterRefresh)
+
+      if (editing) {
+        if (isCSV) {
+          if (view == Raw) saveTab
+        }
+        else
+          saveTab
+      }
       else
         download(afterRefresh)
     }
