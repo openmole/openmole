@@ -160,6 +160,7 @@ object TreeNodeTab {
     def content: String = editor.code
 
     val sequence = Var(initialSequence)
+    val nbColumns = sequence.now.header.length
 
     def isCSV = DataUtils.isCSV(safePath)
 
@@ -268,14 +269,17 @@ object TreeNodeTab {
           case Table ⇒
             div(overflow := "auto", height := "90%")(
               {
-                val table =
-                  scaladget.bootstrapnative.Table(
-                    sequence.now.header,
-                    filteredSequence.tail.map {
-                      scaladget.bootstrapnative.Row(_)
-                    }.toSeq,
-                    scaladget.bootstrapnative.BSTableStyle(bordered_table, emptyMod), true)
-                table.render(minWidth := sequence.now.header.length * 90)
+                if (!sequence.now.header.isEmpty && !filteredSequence.isEmpty) {
+                  val table =
+                    scaladget.bootstrapnative.Table(
+                      sequence.now.header,
+                      filteredSequence.map {
+                        scaladget.bootstrapnative.Row(_)
+                      }.toSeq,
+                      scaladget.bootstrapnative.BSTableStyle(bordered_table, emptyMod), true)
+                  table.render(minWidth := sequence.now.header.length * 90)
+                }
+                else div()
               }
             )
           case _ ⇒ editorView
