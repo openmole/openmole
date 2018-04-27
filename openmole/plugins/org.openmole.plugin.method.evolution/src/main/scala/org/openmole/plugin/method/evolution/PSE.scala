@@ -24,22 +24,191 @@ import monocle.macros._
 import cats.implicits._
 import org.openmole.core.expansion.FromContext
 
-object PSE {
+object PSEAlgorithm {
 
-  object PatternAxe {
+  import mgo._
+  import mgo.breeding._
+  import mgo.contexts._
+  import mgo.ranking._
+  import mgo.elitism._
+  import mgo.tools._
+  import mgo.niche._
 
-    implicit def fromDoubleDomainToPatternAxe[D](f: Factor[D, Double])(implicit fix: Fix[D, Double]): PatternAxe =
-      PatternAxe(f.prototype, fix(f.domain).toVector)
+  import monocle.macros.{ GenLens, Lenses }
 
-    implicit def fromIntDomainToPatternAxe[D](f: Factor[D, Int])(implicit fix: Fix[D, Int]): PatternAxe =
-      PatternAxe(f.prototype, fix(f.domain).toVector.map(_.toDouble))
+  import scala.language.higherKinds
+  import cats.implicits._
+  import freedsl.io.IOInterpreter
+  import freedsl.random.RandomInterpreter
+  import freedsl.system.SystemInterpreter
+  import mgo.algorithm._
 
-    implicit def fromLongDomainToPatternAxe[D](f: Factor[D, Long])(implicit fix: Fix[D, Long]): PatternAxe =
-      PatternAxe(f.prototype, fix(f.domain).toVector.map(_.toDouble))
+  import GenomeVectorDouble._
+  import CDGenome._
 
+  @Lenses case class Individual(
+    genome:        Genome,
+    phenotype:     Array[Double],
+    mapped:        Boolean       = false,
+    foundedIsland: Boolean       = false)
+
+  case class Result(continuous: Vector[Double], discrete: Vector[Int], pattern: Vector[Int], phenotype: Vector[Double])
+
+  def result(population: Vector[Individual], continuous: Vector[C], pattern: Vector[Double] ⇒ Vector[Int]) =
+    population.map { i ⇒
+      Result(
+        scaleContinuousValues(continuousValues.get(i.genome), continuous),
+        Individual.genome composeLens discreteValues get i,
+        pattern(i.phenotype.toVector),
+        i.phenotype.toVector)
+    }
+
+  def state[M[_]: cats.Monad: StartTime: Random: Generation](implicit hitmap: HitMap[M]) = for {
+    map ← hitmap.get
+    s ← mgo.algorithm.state[M, Map[Vector[Int], Int]](map)
+  } yield s
+
+  def buildIndividual(g: Genome, f: Vector[Double]) = Individual(g, f.toArray)
+  def vectorPhenotype = Individual.phenotype composeLens arrayToVectorLens
+
+  def initialGenomes[M[_]: cats.Monad: Random](lambda: Int, continuous: Vector[C], discrete: Vector[D]) =
+    CDGenome.initialGenomes[M](lambda, continuous, discrete)
+
+  def adaptiveBreeding[M[_]: Generation: Random: cats.Monad: HitMap](
+    lambda:              Int,
+    operatorExploration: Double,
+    discrete:            Vector[D],
+    pattern:             Vector[Double] ⇒ Vector[Int]): Breeding[M, Individual, Genome] =
+    PSEOperations.adaptiveBreeding[M, Individual, Genome](
+      Individual.genome.get,
+      continuousValues.get,
+      continuousOperator.get,
+      discreteValues.get,
+      discreteOperator.get,
+      discrete,
+      vectorPhenotype.get _ andThen pattern,
+      buildGenome,
+      lambda,
+      operatorExploration)
+
+  def elitism[M[_]: cats.Monad: StartTime: Random: HitMap: Generation](pattern: Vector[Double] ⇒ Vector[Int], continuous: Vector[C]) =
+    PSEOperations.elitism[M, Individual, Vector[Double]](
+      i ⇒ values(Individual.genome.get(i), continuous),
+      vectorPhenotype.get,
+      pattern,
+      Individual.mapped)
+
+  def expression(phenotype: (Vector[Double], Vector[Int]) ⇒ Vector[Double], continuous: Vector[C]): Genome ⇒ Individual =
+    deterministic.expression[Genome, Individual](
+      values(_, continuous),
+      buildIndividual,
+      phenotype)
+
+  object PSEImplicits {
+    def apply(state: EvolutionState[Map[Vector[Int], Int]]): PSEImplicits =
+      PSEImplicits()(GenerationInterpreter(state.generation), RandomInterpreter(state.random), StartTimeInterpreter(state.startTime), IOInterpreter(), HitMapInterpreter(state.s), SystemInterpreter())
   }
 
-  case class PatternAxe(p: Objective, scale: Vector[Double])
+  case class PSEImplicits(implicit generationInterpreter: GenerationInterpreter, randomInterpreter: RandomInterpreter, startTimeInterpreter: StartTimeInterpreter, iOInterpreter: IOInterpreter, hitMapInterpreter: HitMapInterpreter, systemInterpreter: SystemInterpreter)
+
+  def run[T](rng: util.Random)(f: PSEImplicits ⇒ T): T = {
+    val state = EvolutionState[Map[Vector[Int], Int]](random = rng, s = Map.empty)
+    run(state)(f)
+  }
+
+  def run[T, S](state: EvolutionState[HitMapState])(f: PSEImplicits ⇒ T): T = f(PSEImplicits(state))
+
+}
+
+object NoisyPSEAlgorithm {
+
+  import mgo._
+  import mgo.breeding._
+  import mgo.contexts._
+  import monocle.macros._
+  import mgo.algorithm._
+  import mgo.algorithm.CDGenome._
+
+  @Lenses case class Individual(
+    genome:           Genome,
+    historyAge:       Long,
+    phenotypeHistory: Array[Array[Double]],
+    mapped:           Boolean              = false)
+
+  def buildIndividual(genome: Genome, phenotype: Vector[Double]) = Individual(genome, 1, Array(phenotype.toArray))
+  def vectorPhenotype = Individual.phenotypeHistory composeLens array2ToVectorLens
+
+  def state[M[_]: cats.Monad: StartTime: Random: Generation: HitMap] = PSEAlgorithm.state[M]
+
+  def initialGenomes[M[_]: cats.Monad: Random](lambda: Int, continuous: Vector[C], discrete: Vector[D]) =
+    CDGenome.initialGenomes[M](lambda, continuous, discrete)
+
+  def adaptiveBreeding[M[_]: cats.Monad: Random: Generation: HitMap](
+    lambda:              Int,
+    operatorExploration: Double,
+    cloneProbability:    Double,
+    aggregation:         Vector[Vector[Double]] ⇒ Vector[Double],
+    discrete:            Vector[D],
+    pattern:             Vector[Double] ⇒ Vector[Int]): Breeding[M, Individual, Genome] =
+    NoisyPSEOperations.adaptiveBreeding[M, Individual, Genome](
+      Individual.genome.get,
+      continuousValues.get,
+      continuousOperator.get,
+      discreteValues.get,
+      discreteOperator.get,
+      discrete,
+      vectorPhenotype.get _ andThen aggregation andThen pattern,
+      buildGenome,
+      lambda,
+      operatorExploration,
+      cloneProbability)
+
+  def elitism[M[_]: cats.Monad: Random: HitMap: Generation](
+    pattern:     Vector[Double] ⇒ Vector[Int],
+    aggregation: Vector[Vector[Double]] ⇒ Vector[Double],
+    historySize: Int,
+    continuous:  Vector[C]) =
+    NoisyPSEOperations.elitism[M, Individual, Vector[Double]](
+      i ⇒ values(Individual.genome.get(i), continuous),
+      vectorPhenotype,
+      aggregation,
+      pattern,
+      Individual.mapped,
+      Individual.historyAge,
+      historySize)
+
+  def expression(fitness: (util.Random, Vector[Double], Vector[Int]) ⇒ Vector[Double], continuous: Vector[C]): (util.Random, Genome) ⇒ Individual =
+    noisy.expression[Genome, Individual](
+      values(_, continuous),
+      buildIndividual)(fitness)
+
+  def aggregate(i: Individual, aggregation: Vector[Vector[Double]] ⇒ Vector[Double], pattern: Vector[Double] ⇒ Vector[Int], continuous: Vector[C]) =
+    (
+      scaleContinuousValues(continuousValues.get(i.genome), continuous),
+      Individual.genome composeLens discreteValues get i,
+      aggregation(vectorPhenotype.get(i)),
+      (vectorPhenotype.get _ andThen aggregation andThen pattern)(i),
+      Individual.phenotypeHistory.get(i).size)
+
+  case class Result(continuous: Vector[Double], discrete: Vector[Int], phenotype: Vector[Double], pattern: Vector[Int], replications: Int)
+
+  def result(
+    population:  Vector[Individual],
+    aggregation: Vector[Vector[Double]] ⇒ Vector[Double],
+    pattern:     Vector[Double] ⇒ Vector[Int],
+    continuous:  Vector[C]) =
+    population.map {
+      i ⇒
+        val (c, d, f, p, r) = aggregate(i, aggregation, pattern, continuous)
+        Result(c, d, f, p, r)
+    }
+
+  def run[T](rng: util.Random)(f: PSEAlgorithm.PSEImplicits ⇒ T): T = PSEAlgorithm.run(rng)(f)
+  def run[T](state: EvolutionState[Map[Vector[Int], Int]])(f: PSEAlgorithm.PSEImplicits ⇒ T): T = PSEAlgorithm.run(state)(f)
+
+}
+
+object PSE {
 
   case class DeterministicParams(
     pattern:             Vector[Double] ⇒ Vector[Int],
@@ -50,29 +219,29 @@ object PSE {
 
   object DeterministicParams {
 
-    import mgo.algorithm.{ PSE ⇒ MGOPSE, _ }
+    import mgo.algorithm.{ PSE ⇒ _, _ }
     import cats.data._
     import freedsl.dsl._
     import mgo.contexts._
 
     implicit def integration = new MGOAPI.Integration[DeterministicParams, (Vector[Double], Vector[Int]), Vector[Double]] { api ⇒
       type G = CDGenome.Genome
-      type I = MGOPSE.Individual
+      type I = PSEAlgorithm.Individual
       type S = EvolutionState[HitMapState]
 
       def iManifest = implicitly
       def gManifest = implicitly
       def sManifest = implicitly
 
-      private def interpret[U](f: MGOPSE.PSEImplicits ⇒ (S, U)) = State[S, U] { (s: S) ⇒
-        MGOPSE.run(s)(f)
+      private def interpret[U](f: PSEAlgorithm.PSEImplicits ⇒ (S, U)) = State[S, U] { (s: S) ⇒
+        PSEAlgorithm.run(s)(f)
       }
 
       private def zipWithState[M[_]: cats.Monad: StartTime: Random: Generation: HitMap, T](op: M[T]): M[(S, T)] = {
         import cats.implicits._
         for {
           t ← op
-          newState ← MGOPSE.state[M]
+          newState ← PSEAlgorithm.state[M]
         } yield (newState, t)
       }
 
@@ -93,7 +262,7 @@ object PSE {
         def generation(s: S) = s.generation
 
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get _, CDGenome.discreteValues.get _)(genome)
-        def buildIndividual(genome: G, phenotype: Vector[Double]) = MGOPSE.buildIndividual(genome, phenotype)
+        def buildIndividual(genome: G, phenotype: Vector[Double], context: Context) = PSEAlgorithm.buildIndividual(genome, phenotype)
 
         def initialState(rng: util.Random) = EvolutionState[HitMapState](random = rng, s = Map())
 
@@ -103,7 +272,7 @@ object PSE {
         def result(population: Vector[I], state: S) = FromContext { p ⇒
           import p._
 
-          val res = MGOPSE.result(population, Genome.continuous(om.genome).from(context), om.pattern)
+          val res = PSEAlgorithm.result(population, Genome.continuous(om.genome).from(context), om.pattern)
           val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false).from(context)
           val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.phenotype)).from(context)
 
@@ -117,7 +286,7 @@ object PSE {
               implicitly[Generation[DSL]]
 
               zipWithState(
-                MGOPSE.initialGenomes[DSL](n, continuous, discrete)
+                PSEAlgorithm.initialGenomes[DSL](n, continuous, discrete)
               ).eval
             }
           }
@@ -127,7 +296,7 @@ object PSE {
             interpret { impl ⇒
               import impl._
               zipWithState(
-                MGOPSE.adaptiveBreeding[DSL](
+                PSEAlgorithm.adaptiveBreeding[DSL](
                   n,
                   om.operatorExploration,
                   discrete,
@@ -141,7 +310,7 @@ object PSE {
               import impl._
               def step =
                 for {
-                  elited ← MGOPSE.elitism[DSL](om.pattern, continuous) apply individuals
+                  elited ← PSEAlgorithm.elitism[DSL](om.pattern, continuous) apply individuals
                   _ ← mgo.elitism.incrementGeneration[DSL]
                 } yield elited
 
@@ -150,11 +319,12 @@ object PSE {
           }
 
         def migrateToIsland(population: Vector[I]) =
-          population.map(MGOPSE.Individual.foundedIsland.set(true))
-        def migrateFromIsland(population: Vector[I]) =
-          population.filter(i ⇒ !MGOPSE.Individual.foundedIsland.get(i)).
-            map(MGOPSE.Individual.mapped.set(false)).
-            map(MGOPSE.Individual.foundedIsland.set(false))
+          population.map(PSEAlgorithm.Individual.foundedIsland.set(true))
+
+        def migrateFromIsland(population: Vector[I], state: S) =
+          population.filter(i ⇒ !PSEAlgorithm.Individual.foundedIsland.get(i)).
+            map(PSEAlgorithm.Individual.mapped.set(false)).
+            map(PSEAlgorithm.Individual.foundedIsland.set(false))
       }
 
     }
@@ -172,30 +342,29 @@ object PSE {
 
   object StochasticParams {
 
-    import mgo.algorithm._
-    import mgo.algorithm.{ PSE ⇒ MGOPSE, NoisyPSE ⇒ MGONoisyPSE, _ }
+    import mgo.algorithm.{ PSE ⇒ _, NoisyPSE ⇒ _, _ }
     import cats.data._
     import freedsl.dsl._
     import mgo.contexts._
 
     implicit def integration = new MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Vector[Double]] { api ⇒
       type G = CDGenome.Genome
-      type I = NoisyPSE.Individual
+      type I = NoisyPSEAlgorithm.Individual
       type S = EvolutionState[HitMapState]
 
       def iManifest = implicitly
       def gManifest = implicitly
       def sManifest = implicitly
 
-      private def interpret[U](f: MGOPSE.PSEImplicits ⇒ (S, U)) = State[S, U] { (s: S) ⇒
-        mgo.algorithm.NoisyPSE.run(s)(f)
+      private def interpret[U](f: PSEAlgorithm.PSEImplicits ⇒ (S, U)) = State[S, U] { (s: S) ⇒
+        NoisyPSEAlgorithm.run(s)(f)
       }
 
       private def zipWithState[M[_]: cats.Monad: StartTime: Random: Generation: HitMap, T](op: M[T]): M[(S, T)] = {
         import cats.implicits._
         for {
           t ← op
-          newState ← MGONoisyPSE.state[M]
+          newState ← NoisyPSEAlgorithm.state[M]
         } yield (newState, t)
       }
 
@@ -216,14 +385,14 @@ object PSE {
         def generation(s: S) = s.generation
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get _, CDGenome.discreteValues.get _)(genome)
 
-        def buildIndividual(genome: G, phenotype: Vector[Double]) = MGONoisyPSE.buildIndividual(genome, phenotype)
+        def buildIndividual(genome: G, phenotype: Vector[Double], context: Context) = NoisyPSEAlgorithm.buildIndividual(genome, phenotype)
         def initialState(rng: util.Random) = EvolutionState[HitMapState](random = rng, s = Map())
 
         def result(population: Vector[I], state: S) = FromContext { p ⇒
           import p._
           import org.openmole.core.context._
 
-          val res = MGONoisyPSE.result(population, om.aggregation, om.pattern, Genome.continuous(om.genome).from(context))
+          val res = NoisyPSEAlgorithm.result(population, om.aggregation, om.pattern, Genome.continuous(om.genome).from(context))
           val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false).from(context)
           val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.phenotype)).from(context)
           val samples = Variable(GAIntegration.samples.array, res.map(_.replications).toArray)
@@ -235,7 +404,7 @@ object PSE {
           (Genome.continuous(om.genome) map2 Genome.discrete(om.genome)) { (continuous, discrete) ⇒
             interpret { impl ⇒
               import impl._
-              zipWithState(MGONoisyPSE.initialGenomes[DSL](n, continuous, discrete)).eval
+              zipWithState(NoisyPSEAlgorithm.initialGenomes[DSL](n, continuous, discrete)).eval
             }
           }
 
@@ -243,7 +412,7 @@ object PSE {
           Genome.discrete(om.genome).map { discrete ⇒
             interpret { impl ⇒
               import impl._
-              zipWithState(MGONoisyPSE.adaptiveBreeding[DSL](
+              zipWithState(NoisyPSEAlgorithm.adaptiveBreeding[DSL](
                 n,
                 om.operatorExploration,
                 om.cloneProbability,
@@ -259,7 +428,7 @@ object PSE {
               import impl._
               def step =
                 for {
-                  elited ← MGONoisyPSE.elitism[DSL](
+                  elited ← NoisyPSEAlgorithm.elitism[DSL](
                     om.pattern,
                     om.aggregation,
                     om.historySize,
@@ -275,19 +444,32 @@ object PSE {
         def afterDuration(d: squants.Time, population: Vector[I]) = api.afterDuration(d, population)
 
         def migrateToIsland(population: Vector[I]) =
-          population.map(MGONoisyPSE.Individual.foundedIsland.set(true)).map(MGONoisyPSE.Individual.historyAge.set(0))
+          population.map(NoisyPSEAlgorithm.Individual.historyAge.set(0))
 
-        def migrateFromIsland(population: Vector[I]) =
-          population.filter(i ⇒ !MGONoisyPSE.Individual.foundedIsland.get(i)).
-            map(MGONoisyPSE.Individual.mapped.set(false)).
-            map(MGONoisyPSE.Individual.foundedIsland.set(false))
-
+        def migrateFromIsland(population: Vector[I], state: S) =
+          population.filter(i ⇒ NoisyPSEAlgorithm.Individual.historyAge.get(i) > 0).
+            map(NoisyPSEAlgorithm.Individual.mapped.set(false))
       }
 
     }
   }
 
   import org.openmole.core.dsl._
+
+  object PatternAxe {
+
+    implicit def fromDoubleDomainToPatternAxe[D](f: Factor[D, Double])(implicit fix: Fix[D, Double]): PatternAxe =
+      PatternAxe(f.prototype, fix(f.domain).toVector)
+
+    implicit def fromIntDomainToPatternAxe[D](f: Factor[D, Int])(implicit fix: Fix[D, Int]): PatternAxe =
+      PatternAxe(f.prototype, fix(f.domain).toVector.map(_.toDouble))
+
+    implicit def fromLongDomainToPatternAxe[D](f: Factor[D, Long])(implicit fix: Fix[D, Long]): PatternAxe =
+      PatternAxe(f.prototype, fix(f.domain).toVector.map(_.toDouble))
+
+  }
+
+  case class PatternAxe(p: Objective, scale: Vector[Double])
 
   def apply(
     genome:     Genome,

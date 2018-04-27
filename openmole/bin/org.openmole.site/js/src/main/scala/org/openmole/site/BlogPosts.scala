@@ -73,11 +73,11 @@ object BlogPosts {
         case Failure(f) ⇒ f.getStackTrace.mkString(" ")
         case Success(s) ⇒
           org.scalajs.dom.window.sessionStorage.setItem(shared.blogposts, s)
-          all() = s
+          all() = stringToPost(s)
       }
     }
     else
-      all() = blogPosts
+      all() = stringToPost(blogPosts)
   }
 
   implicit def readNodeToBlogPost(rns: Seq[ReadNode]): BlogPost = {
@@ -98,7 +98,7 @@ object BlogPosts {
     toBB(rns, BlogPost())
   }
 
-  implicit def stringToPost(s: String): Seq[BlogPost] = {
+  def stringToPost(s: String): Seq[BlogPost] = {
     val parser = new DOMParser
 
     val tree = parser.parseFromString(s, "text/xml")
@@ -140,6 +140,8 @@ object BlogPosts {
   }
 
   def addNewsdiv(blogPosts: Seq[BlogPost]) = {
+    def limitLength(s: String) = if (s.size < 50) s else s"${s.take(50)} ..."
+
     val newsDiv = div(paddingTop := 20)(
       h2("News"),
       for {
@@ -148,7 +150,7 @@ object BlogPosts {
         val d = bp.date.get
         val dateString = s"${d.toLocaleDateString()}"
         div(
-          span(s"$dateString: ${bp.title}")(titleStyle),
+          span(s"$dateString: ${limitLength(bp.title)}")(titleStyle),
           span(a(href := bp.link, target := "_blank")("Read more"))(moreStyle)
         )(newsStyle)
       }

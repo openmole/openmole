@@ -51,7 +51,7 @@ object Search {
     )
 
     def search = () ⇒ {
-      result() = SiteJS.search(searchInput.value)
+      result() = SiteJS.search(s"*${searchInput.value}*")
       item() = Item()
       false
     }

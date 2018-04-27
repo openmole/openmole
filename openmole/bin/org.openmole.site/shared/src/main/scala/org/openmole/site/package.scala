@@ -57,137 +57,27 @@ package object shared {
     lazy val notListed = "My problem is not listed here"
   }
 
-  object guiGuide {
-    lazy val overview = "Overview"
-    lazy val startProject = "Starting a project"
-    lazy val fileManagment = "File Management"
-    lazy val authentication = "Authentications"
-    lazy val playAndMonitor = "Play and monitor executions"
-    lazy val plugin = "Plugins"
-  }
-
-  object clusterMenu {
-    lazy val pbsTorque = "PBS and Torque"
-    lazy val sge = "SGE"
-    lazy val oar = "OAR"
-    lazy val slurm = "Slurm"
-    lazy val condor = "Condor"
-  }
-
   object nativeModel {
     lazy val rExample = "An example with R"
     lazy val pythonExample = "Another example with Python"
     lazy val advancedOptions = "Advanced options"
   }
 
-  object nativePackagingMenu {
-    lazy val introCARE = "Packaging with CARE"
-    lazy val advancedOptions = "Advanced Options"
-    lazy val localResources = "Using local Resources"
-    lazy val localExecutable = "Using local executable"
-    lazy val troubleshooting = "CARE Troubleshooting"
-    lazy val nativeAPI = "Native API"
-  }
-
-  object netlogoMenu {
-    lazy val simulation = "The simulation"
-    lazy val doe = "The Design of Experiment"
-    lazy val task = "The NetLogo task"
-    lazy val storing = "Storing the results"
-    lazy val together = "Bringing all the pieces together"
-    lazy val further = "Going further"
-  }
-
-  object otherDoEMenu {
-
-  }
-
-  object directSamplingMenu {
-    lazy val gridSampling = "Grid Sampling"
-    lazy val uniformSampling = "Uniform Distribution Sampling"
-    lazy val LHSSobol = "Latin Hypercube, Sobol Sequence"
-    lazy val severalInputs = "Exploration of several inputs "
-    lazy val csvSampling = "CSV Sampling"
-
-  }
-
-  object dataProcessingMenu {
-    lazy val setOfFiles = "Exploring a set of files"
-    lazy val pathsVsFiles = "Files vs Paths"
-    lazy val example = "More examples"
-    lazy val further = "Going further"
-  }
-
-  object advancedSamplingMenu {
-    lazy val sampling = "Sampling"
-    lazy val combineSampling = "Combine samplings"
-    lazy val zipSampling = "Zip samplings"
-    lazy val filterSampling = "Take, filter, sample samplings"
-    lazy val randomSampling = "Random samplings"
-    lazy val higherLevelSampling = "Higher level samplings"
-    lazy val isKeyword = "The is keyword"
-  }
-
-  object hookMenu {
-    lazy val plugHook = "Plug a Hook"
-    lazy val appendToFileHook = "Append to file"
-    lazy val copyFileHook = "Copy file"
-    lazy val toStringHook = "Display variables"
-    lazy val displayHook = "Display results in the stdout"
-    lazy val csvHook = "CSV Hook"
-  }
-
-  object sourceMenu {
-    lazy val plugSource = "Plug a source"
-    lazy val listFiles = "List files in a directory"
-    lazy val listDirectories = "List directories in a directory"
-    lazy val example = "A complete example"
-  }
-
-  object capsuleMenu {
-    lazy val definition = "Definition"
-    lazy val strainer = "Strainer capsule"
-    lazy val master = "Master capsule"
-  }
-
-  object consoleMenu {
-    lazy val authentication = "Authentications"
-    lazy val run = "Run scripts"
-  }
-
-  object howToContributeMenu {
-    lazy val prerequisites = "Prerequisites"
-    lazy val firstTimeSetup = "First time setup"
-    lazy val buildAppFromSources = "Build from Sources"
-    lazy val standaloneArchive = "Standalone archive"
-    lazy val compileDocker = "Compile within Docker"
-    lazy val buildWebsite = "Build the website"
-    lazy val repositories = "Repositories"
-    lazy val webpagesSources = "Edit Documentation pages"
-    lazy val devVersion = "Dev versions "
-    lazy val projectOrganization = "Project organization"
-    lazy val bugReport = "Bug Report"
-    lazy val contributionProcedure = "Contribution procedure"
-    lazy val branchingModel = "Branching model"
-    lazy val tipsAndTricks = "Tips and tricks"
-  }
-
   object rTask {
     lazy val rVersion = "3.3.3"
-  }
-
-  object gaWithNetlogo {
-    lazy val antModel = "The ant model"
-    lazy val defineProblem = "An optimisation problem"
-    lazy val runOpeMOLE = "Run it in OpenMOLE"
-    lazy val optimizationAlgo = "The optimisation algorithm"
-    lazy val scaleUp = "Scale up"
   }
 
   object simpleSAFireMenu {
     lazy val sensitivityAnalysis = "Sensitivity Analysis"
     lazy val sensitivityFireModel = "Real world Example"
   }
+
+  object documentationSideMenu {
+    lazy val cssClass = "sidemenu"
+    lazy val place = "side-menu-place"
+  }
+
+  def anchor(title: String) = title.filter(c ⇒ c.isLetterOrDigit)
 
   object link {
 

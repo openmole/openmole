@@ -29,22 +29,6 @@ class FileServiceGC(fileService: WeakReference[FileService]) extends IUpdatable 
   override def update: Boolean =
     fileService.get match {
       case Some(fileService) ⇒
-        def invalidateArchive =
-          for {
-            file ← fileService.archiveCache.asMap().keySet().asScala.toSeq
-            if (!new File(file).exists)
-          } yield file
-
-        fileService.archiveCache.invalidateAll(invalidateArchive.asJava)
-
-        def invalidateHash =
-          for {
-            file ← fileService.hashCache.asMap().keySet().asScala.toSeq
-            if !new File(file).exists
-          } yield file
-
-        fileService.hashCache.invalidateAll(invalidateHash.asJava)
-
         fileService.deleteEmpty.synchronized {
           def deleteEmpty(files: Vector[File]): Vector[File] = {
             val (empty, nonEmpty) = files.partition(f ⇒ !f.exists() || f.isDirectoryEmpty)

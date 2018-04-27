@@ -2,7 +2,7 @@ package org.openmole.plugin.task.udocker
 
 import java.io._
 
-import org.apache.http.HttpResponse
+import org.apache.http.{ HttpResponse, HttpHost }
 import org.apache.http.client.config.RequestConfig
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.impl.client.{ HttpClients, LaxRedirectStrategy }
@@ -16,19 +16,30 @@ import cats.implicits._
 import org.openmole.core.workspace.NewFile
 import org.openmole.tool.stream._
 import org.openmole.tool.file.{ File ⇒ OMFile, FileDecorator }
+import org.openmole.core.networkservice._
+import org.openmole.core.services._
 
 object Registry {
 
   def content(response: HttpResponse) = scala.io.Source.fromInputStream(response.getEntity.getContent).mkString
 
   object HTTP {
-    def client = HttpClients.custom().setConnectionManager(new BasicHttpClientConnectionManager()).setRedirectStrategy(new LaxRedirectStrategy).build()
+    def builder = HttpClients.custom().setConnectionManager(new BasicHttpClientConnectionManager()).setRedirectStrategy(new LaxRedirectStrategy)
 
-    def execute[T](get: HttpGet)(f: HttpResponse ⇒ T) = {
-      val response = client.execute(get)
+    def httpProxyAsHost(implicit networkService: NetworkService): Option[HttpHost] =
+      networkService.httpProxy.map { host ⇒ HttpHost.create(NetworkService.HttpHost.toString(host)) }
+
+    def client(implicit networkService: NetworkService) = httpProxyAsHost match {
+      case Some(httpHost: HttpHost) ⇒ builder.setProxy(httpHost).build()
+      case _                        ⇒ builder.build()
+    }
+
+    def execute[T](get: HttpGet)(f: HttpResponse ⇒ T)(implicit networkService: NetworkService) = {
+      val response = client(networkService).execute(get)
       try f(response)
       finally response.close()
     }
+
   }
 
   import HTTP._
@@ -44,7 +55,7 @@ object Registry {
     case class AuthenticationRequest(scheme: String, realm: String, service: String, scope: String)
     case class Token(scheme: String, token: String)
 
-    def withToken(url: String, timeout: Time) = {
+    def withToken(url: String, timeout: Time)(implicit networkservice: NetworkService) = {
       val get = new HttpGet(url)
       get.setConfig(RequestConfig.custom().setConnectTimeout(timeout.millis.toInt).setConnectionRequestTimeout(timeout.millis.toInt).build())
       val authenticationRequest = authentication(get)
@@ -59,7 +70,7 @@ object Registry {
       request
     }
 
-    def authentication(get: HttpGet) = execute(get) { response ⇒
+    def authentication(get: HttpGet)(implicit networkservice: NetworkService) = execute(get) { response ⇒
       Option(response.getFirstHeader("Www-Authenticate")).map(_.getValue).map {
         a ⇒
           val Array(scheme, rest) = a.split(" ")
@@ -74,7 +85,7 @@ object Registry {
 
     }
 
-    def token(authenticationRequest: AuthenticationRequest): Either[Err, Token] = {
+    def token(authenticationRequest: AuthenticationRequest)(implicit networkservice: NetworkService): Either[Err, Token] = {
       val tokenRequest = s"${authenticationRequest.realm}?service=${authenticationRequest.service}&scope=${authenticationRequest.scope}"
       val get = new HttpGet(tokenRequest)
       execute(get) { response ⇒
@@ -96,9 +107,9 @@ object Registry {
     s"${image.registry}/v2/$path"
   }
 
-  def downloadManifest(image: DockerImage, timeout: Time): String = {
+  def downloadManifest(image: DockerImage, timeout: Time)(implicit networkService: NetworkService): String = {
     val url = s"${baseURL(image)}/manifests/${image.tag}"
-    val httpResponse = client.execute(Token.withToken(url, timeout))
+    val httpResponse = client(networkService).execute(Token.withToken(url, timeout))
     content(httpResponse)
   }
 
@@ -117,7 +128,7 @@ object Registry {
     fsLayer ← fsLayers
   } yield Layer(fsLayer.blobSum)
 
-  def blob(image: DockerImage, layer: Layer, file: File, timeout: Time): Unit = {
+  def blob(image: DockerImage, layer: Layer, file: File, timeout: Time)(implicit networkservice: NetworkService): Unit = {
     val url = s"""${baseURL(image)}/blobs/${layer.digest}"""
     execute(Token.withToken(url, timeout)) { response ⇒
       val os = new FileOutputStream(file)
@@ -136,7 +147,7 @@ object Registry {
    * @param timeout Download timeout
    * @param newFile OM temporary file creation service
    */
-  def downloadLayer(dockerImage: DockerImage, layer: Layer, layersDirectory: OMFile, layerFile: File, timeout: Time)(implicit newFile: NewFile): Unit =
+  def downloadLayer(dockerImage: DockerImage, layer: Layer, layersDirectory: OMFile, layerFile: File, timeout: Time)(implicit newFile: NewFile, networkservice: NetworkService): Unit =
     newFile.withTmpFile { tmpFile ⇒
       blob(dockerImage, layer, tmpFile, timeout)
       layersDirectory.withLockInDirectory { if (!layerFile.exists) tmpFile move layerFile }

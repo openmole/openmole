@@ -2,94 +2,95 @@
 @import org.openmole.site.tools._
 @import org.openmole.site._
 
-@h1{Advanced Capsule}
+@h2{Definition}
 
-@sect{@shared.capsuleMenu.definition}
-    Tasks are not directly linked to each-other by transitions. This has been made as transparent as possible, but two
-    other notions are involved behind the scenes. Tasks are encapsulated in a so called
-    @i{Capsule}. Each @i{Capsule} has one or several input @i{Slots} which
-    transitions are plugged to. This code snippet explicitly encapsulates the task @i{t1} in the Capsule @i{c1}:
-    @br @hl.openmole("""
-      val t1 = ScalaTask("1 + 1")
-      val c1 = Capsule(t1)
-      """)
-    @p Capsules are the atomic element in the workflow which transitions are plugged to. Capsules also serve as an entry
-    point on which @a("Hooks", href := DocumentationPages.hook.file), @a("Sources", href := DocumentationPages.source.file) and
-    @a("Execution Environments", href := DocumentationPages.environment.file) are specified.
-
-    @p When a task is directly linked to another without explicitly specifying a Capsule, @b{a new capsule is created}.
-    It means that for several transitions to reach the same task, the Capsule should be created explicitly.
-
-    @p Capsules might own several input Slots to which transition are plugged. Slots make it possible to specify
-    iterative workflows (with cycles) as well as synchronisation points between several parts of a workflow. The rule is
-    that the task encapsulated in the Capsule is executed each time all the transitions reaching a given input slot have
-    been triggered. To specify slots explicitly you should write:
-    @br @hl.openmole("""
-      val t1 = ScalaTask("1 + 1")
-      val c1 = Capsule(t1)
-      val s1 = Slot(c1)
-    """)
-
-    Other specific capsules are defined in OpenMOLE. They are described in the @aa("Advanced capsule", href := DocumentationPages.capsule.file) section
-
-@sect{@shared.capsuleMenu.strainer}
-  In a general manner you are expected to specify the inputs and outputs of each task. Capsules' strainer mode transmits all the variables arriving through the input transition as if they were inputs and ouptuts of the task.
-
-  @p For instance, variable @i{i} is transmitted to the hook without adding it explicitly in input and output of the task @i{t2}, in the following workflow:
-  @br @hl.openmole("""
-  val i = Val[Int]
-  val j = Val[Int]
-
-  val t1 = ScalaTask("val i = 42") set (outputs += i)
-
-  val t2 = ScalaTask("val j = i * 2") set (outputs += j)
-  val c2 = Capsule(t2, strain = true)
-
-  t1 -- (c2 hook ToStringHook(i, j))
+Tasks are not directly linked to each-other by transitions. This has been made as transparent as possible, but two
+other notions are involved behind the scenes. Tasks are encapsulated in a so called
+@i{Capsule}. Each @i{Capsule} has one or several input @i{Slots} which
+transitions are plugged to. This code snippet explicitly encapsulates the task @i{t1} in the Capsule @i{c1}:
+@br @hl.openmole("""
+  val t1 = ScalaTask("1 + 1")
+  val c1 = Capsule(t1)
   """)
+@p Capsules are the atomic element in the workflow which transitions are plugged to. Capsules also serve as an entry
+point on which @a("Hooks", href := DocumentationPages.hook.file), @a("Sources", href := DocumentationPages.source.file) and
+@a("Execution Environments", href := DocumentationPages.environment.file) are specified.
 
-  @p This workflow displays @hl.highlight("{i=42, j=84}", "plain")
+@p When a task is directly linked to another without explicitly specifying a Capsule, @b{a new capsule is created}.
+It means that for several transitions to reach the same task, the Capsule should be created explicitly.
 
-@sect{@shared.capsuleMenu.master}
-  OpenMOLE provides a very flexible workflow formalism. It even makes it possible to design workflows with a part that mimics a @b{master / slave} @("(also known as Map/Reduce)") distribution scheme. This schemes involves many slave jobs computing partial results and a master gathering the whole result.
+@p Capsules might own several input Slots to which transition are plugged. Slots make it possible to specify
+iterative workflows (with cycles) as well as synchronisation points between several parts of a workflow. The rule is
+that the task encapsulated in the Capsule is executed each time all the transitions reaching a given input slot have
+been triggered. To specify slots explicitly you should write:
+@br @hl.openmole("""
+  val t1 = ScalaTask("1 + 1")
+  val c1 = Capsule(t1)
+  val s1 = Slot(c1)
+""")
 
-  @p You can think of a steady state genetic algorithm of instance as an typical use case. This use case would see a global solution population maintained and a bunch of slave workers computing fitnesses in a distributed manner. Each time a worker ends, its result is used to update the global population and a new worker is launched. To achieve such a distribution scheme, one should use the @i{Master Capsule} along with an end-exploration transition.
+Other specific capsules are defined in OpenMOLE. They are described in the @aa("Advanced capsule", href := DocumentationPages.capsule.file) section
 
-  @p The @i{MasterCapsule} is a special capsule that preserve a state from one execution to another. An execution of the @i{MasterCapsule} modifies this state and the next execution gets the state that has been modified last. To ensure soundness of the state only, the @i{MasterCapsule}s are always executed locally and multiple executions of a given @i{MasterCapsule} are carried sequentially.
+@h2{Strainer capsule}
 
-  @p By using the @i{MasterCapsule}, a workflow can evolve a global archive, and compute new inputs to be evaluated from this archive. Even if it is not required, a @i{MasterCapsule} is generally executed in an exploration, in order to have several workers computing concurrently. This distribution scheme suggests that all the workers should be killed when the global archive has reached a suitable state. This is the aim of the end-exploration transition, which is noted @b{>|}.
+In a general manner you are expected to specify the inputs and outputs of each task. Capsules' strainer mode transmits all the variables arriving through the input transition as if they were inputs and ouptuts of the task.
 
-  @p The following script orchestrates a master slave distribution scheme for a dummy problem. OpenMOLE launches 10
-  workers. Along these workers, the @i{MasterCapsule} hosts the selection task. The selection task stores the numbers
-  that are multiple of 3 and relaunches a worker for the next value of @i{i}. The second argument of the
-  @i{MasterCapsule} constructor is the data that should be persisted from one execution of the @i{MasterCapsule} to
-  another.
-  @br @hl.openmole("""
-  val i = Val[Int]
-  val archive = Val[Array[Int]]
+@p For instance, variable @i{i} is transmitted to the hook without adding it explicitly in input and output of the task @i{t2}, in the following workflow:
+@br @hl.openmole("""
+val i = Val[Int]
+val j = Val[Int]
 
-  val exploration = ExplorationTask(i in (0 until 10))
+val t1 = ScalaTask("val i = 42") set (outputs += i)
 
-  val model = ScalaTask("i = i + 7") set (inputs += i, outputs += i)
+val t2 = ScalaTask("val j = i * 2") set (outputs += j)
+val c2 = Capsule(t2, strain = true)
 
-  val modelCapsule = Capsule(model)
-  val modelSlot1 = Slot(modelCapsule)
-  val modelSlot2 = Slot(modelCapsule)
+t1 -- (c2 hook ToStringHook(i, j))
+""")
 
-  val select =
-    ScalaTask("archive = archive ++ (if(i % 3 == 0) Seq(i) else Seq())") set (
-      (inputs, outputs) += (i, archive),
-      archive := Array[Int]()
-    )
+@p This workflow displays @hl.highlight("{i=42, j=84}", "plain")
 
-  val selectCaps = MasterCapsule(select, archive)
+@h2{Master capsule}
 
-  val finalTask = EmptyTask()
+OpenMOLE provides a very flexible workflow formalism. It even makes it possible to design workflows with a part that mimics a @b{master / slave} @("(also known as Map/Reduce)") distribution scheme. This schemes involves many slave jobs computing partial results and a master gathering the whole result.
 
-  val displayHook = ToStringHook()
+@p You can think of a steady state genetic algorithm of instance as an typical use case. This use case would see a global solution population maintained and a bunch of slave workers computing fitnesses in a distributed manner. Each time a worker ends, its result is used to update the global population and a new worker is launched. To achieve such a distribution scheme, one should use the @i{Master Capsule} along with an end-exploration transition.
 
-  val skel = exploration -< modelSlot1 -- (selectCaps hook displayHook)
-  val loop = selectCaps -- modelSlot2
-  val terminate = selectCaps >| (Capsule(finalTask, strain = true) hook DisplayHook("archive.size >= 10"))
+@p The @i{MasterCapsule} is a special capsule that preserve a state from one execution to another. An execution of the @i{MasterCapsule} modifies this state and the next execution gets the state that has been modified last. To ensure soundness of the state only, the @i{MasterCapsule}s are always executed locally and multiple executions of a given @i{MasterCapsule} are carried sequentially.
 
-  skel & loop & terminate""")
+@p By using the @i{MasterCapsule}, a workflow can evolve a global archive, and compute new inputs to be evaluated from this archive. Even if it is not required, a @i{MasterCapsule} is generally executed in an exploration, in order to have several workers computing concurrently. This distribution scheme suggests that all the workers should be killed when the global archive has reached a suitable state. This is the aim of the end-exploration transition, which is noted @b{>|}.
+
+@p The following script orchestrates a master slave distribution scheme for a dummy problem. OpenMOLE launches 10
+workers. Along these workers, the @i{MasterCapsule} hosts the selection task. The selection task stores the numbers
+that are multiple of 3 and relaunches a worker for the next value of @i{i}. The second argument of the
+@i{MasterCapsule} constructor is the data that should be persisted from one execution of the @i{MasterCapsule} to
+another.
+@br @hl.openmole("""
+val i = Val[Int]
+val archive = Val[Array[Int]]
+
+val exploration = ExplorationTask(i in (0 until 10))
+
+val model = ScalaTask("i = i + 7") set (inputs += i, outputs += i)
+
+val modelCapsule = Capsule(model)
+val modelSlot1 = Slot(modelCapsule)
+val modelSlot2 = Slot(modelCapsule)
+
+val select =
+  ScalaTask("archive = archive ++ (if(i % 3 == 0) Seq(i) else Seq())") set (
+    (inputs, outputs) += (i, archive),
+    archive := Array[Int]()
+  )
+
+val selectCaps = MasterCapsule(select, archive)
+
+val finalTask = EmptyTask()
+
+val displayHook = ToStringHook()
+
+val skel = exploration -< modelSlot1 -- (selectCaps hook displayHook)
+val loop = selectCaps -- modelSlot2
+val terminate = selectCaps >| (Capsule(finalTask, strain = true) hook DisplayHook("archive.size >= 10"))
+
+skel & loop & terminate""")

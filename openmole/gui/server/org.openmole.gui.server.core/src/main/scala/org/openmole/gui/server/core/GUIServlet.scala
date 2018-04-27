@@ -34,13 +34,14 @@ import java.util.concurrent.atomic.AtomicReference
 
 import org.openmole.core.authentication.AuthenticationStore
 import org.openmole.core.event.EventDispatcher
-import org.openmole.core.fileservice.FileService
+import org.openmole.core.fileservice.{ FileService, FileServiceCache }
 import org.openmole.core.outputredirection.OutputRedirection
 import org.openmole.core.preference.Preference
 import org.openmole.core.replication.ReplicaCatalog
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.services.Services
 import org.openmole.core.threadprovider.ThreadProvider
+import org.openmole.core.networkservice._
 import org.openmole.gui.ext.api.Api
 import org.openmole.core.workspace.{ NewFile, Workspace }
 import org.openmole.gui.ext.data.routes._
@@ -69,12 +70,14 @@ object GUIServices {
     implicit def authenticationStore = guiServices.authenticationStore
     implicit def serializerService = guiServices.serializerService
     implicit def fileService = guiServices.fileService
+    implicit def fileServiceCache = guiServices.fileServiceCache
     implicit def randomProvider = guiServices.randomProvider
     implicit def eventDispatcher: EventDispatcher = guiServices.eventDispatcher
+    implicit def networkService: NetworkService = guiServices.networkService
     implicit def outputRedirection: OutputRedirection = guiServices.outputRedirection
   }
 
-  def apply(workspace: Workspace) = {
+  def apply(workspace: Workspace, httpProxy: Option[String]) = {
     implicit val ws = workspace
     implicit val preference = Preference(ws.persistentDir)
     implicit val newFile = NewFile(workspace)
@@ -87,6 +90,8 @@ object GUIServices {
     implicit val randomProvider = RandomProvider(seeder.newRNG)
     implicit val eventDispatcher = EventDispatcher()
     implicit val outputRedirection = OutputRedirection()
+    implicit val networkService = NetworkService(httpProxy)
+    implicit val fileServiceCache = FileServiceCache()
 
     new GUIServices()
   }
@@ -96,8 +101,8 @@ object GUIServices {
     scala.util.Try(services.threadProvider.stop())
   }
 
-  def withServices[T](workspace: Workspace)(f: GUIServices ⇒ T) = {
-    val services = GUIServices(workspace)
+  def withServices[T](workspace: Workspace, httpProxy: Option[String])(f: GUIServices ⇒ T) = {
+    val services = GUIServices(workspace, httpProxy)
     try f(services)
     finally dispose(services)
   }
@@ -115,9 +120,11 @@ class GUIServices(
   val authenticationStore: AuthenticationStore,
   val serializerService:   SerializerService,
   val fileService:         FileService,
+  val fileServiceCache:    FileServiceCache,
   val randomProvider:      RandomProvider,
   val eventDispatcher:     EventDispatcher,
-  val outputRedirection:   OutputRedirection
+  val outputRedirection:   OutputRedirection,
+  val networkService:      NetworkService
 )
 
 object GUIServlet {

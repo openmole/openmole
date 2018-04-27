@@ -29,7 +29,7 @@ trait SitePage {
 case class StepPage(
   name:      TypedTag[_ <: String],
   element:   TypedTag[_ <: String],
-  leftMenu:  TypedTag[_ <: String],
+  leftMenu:  Frag,
   rightMenu: TypedTag[_ <: String],
   page:      DocumentationPage,
   previous:  DocumentationPage,
