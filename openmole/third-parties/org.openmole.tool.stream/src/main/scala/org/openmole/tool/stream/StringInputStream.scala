@@ -17,6 +17,9 @@
 
 package org.openmole.tool.stream
 
-import java.io.ByteArrayInputStream
+import java.io.{ InputStream }
 
-class StringInputStream(val s: String) extends ByteArrayInputStream(s.getBytes("UTF-8"))
+class StringInputStream(val s: String) extends InputStream {
+  lazy val it = s.toCharArray.toIterator
+  override def read(): Int = if (it.hasNext) it.next() else -1
+}

@@ -14,13 +14,14 @@ import org.openmole.tool.crypto._
 import org.openmole.tool.random._
 import org.openmole.tool.file._
 import org.openmole.core.outputredirection._
+import org.openmole.core.networkservice._
 
 package object services {
 
   object Services {
 
-    def withServices[T](workspace: File, password: String)(f: Services ⇒ T) = {
-      val services = Services(workspace, password)
+    def withServices[T](workspace: File, password: String, httpProxy: Option[String])(f: Services ⇒ T) = {
+      val services = Services(workspace, password, httpProxy)
       try f(services)
       finally dispose(services)
     }
@@ -28,7 +29,7 @@ package object services {
     def preference(workspace: Workspace) = Preference(workspace.persistentDir)
     def authenticationStore(workspace: Workspace) = AuthenticationStore(workspace.persistentDir)
 
-    def apply(workspace: File, password: String) = {
+    def apply(workspace: File, password: String, httpProxy: Option[String]) = {
       implicit val ws = Workspace(workspace)
       implicit val cypher = Cypher(password)
       implicit val preference = Services.preference(ws)
@@ -42,6 +43,9 @@ package object services {
       implicit val randomProvider = RandomProvider(seeder.newRNG)
       implicit val eventDispatcher = EventDispatcher()
       implicit val outputRedirection = OutputRedirection()
+      implicit val networkService = NetworkService(httpProxy)
+      implicit val fileServiceCache = FileServiceCache()
+
       new ServicesContainer()
     }
 
@@ -68,7 +72,9 @@ package object services {
       fileService:         FileService         = services.fileService,
       randomProvider:      RandomProvider      = services.randomProvider,
       eventDispatcher:     EventDispatcher     = services.eventDispatcher,
-      outputRedirection:   OutputRedirection   = services.outputRedirection
+      outputRedirection:   OutputRedirection   = services.outputRedirection,
+      networkService:      NetworkService      = services.networkService,
+      fileServiceCache:    FileServiceCache    = services.fileServiceCache
     ) =
       new ServicesContainer()(
         workspace = workspace,
@@ -81,9 +87,11 @@ package object services {
         authenticationStore = authenticationStore,
         serializerService = serializerService,
         fileService = fileService,
+        fileServiceCache = fileServiceCache,
         randomProvider = randomProvider,
         eventDispatcher = eventDispatcher,
-        outputRedirection = outputRedirection
+        outputRedirection = outputRedirection,
+        networkService = networkService
       )
 
   }
@@ -102,6 +110,8 @@ package object services {
     implicit def randomProvider: RandomProvider
     implicit def eventDispatcher: EventDispatcher
     implicit def outputRedirection: OutputRedirection
+    implicit def networkService: NetworkService
+    implicit def fileServiceCache: FileServiceCache
   }
 
   class ServicesContainer(implicit
@@ -117,6 +127,8 @@ package object services {
                           val fileService:         FileService,
                           val randomProvider:      RandomProvider,
                           val eventDispatcher:     EventDispatcher,
-                          val outputRedirection:   OutputRedirection) extends Services
+                          val outputRedirection:   OutputRedirection,
+                          val networkService:      NetworkService,
+                          val fileServiceCache:    FileServiceCache) extends Services
 
 }

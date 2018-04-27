@@ -1,28 +1,17 @@
 package org.openmole.plugin.method.evolution
 
 import monocle.macros.GenLens
+import org.openmole.core.context._
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.domain.Fix
 import org.openmole.core.workflow.sampling.Factor
 import cats.implicits._
+import org.openmole.core.outputmanager.OutputManager
+import org.openmole.plugin.method.evolution.Genome.GenomeBound
+import org.openmole.tool.types.ToDouble
 
 object OSE {
 
-  //  object PatternAxe {
-  //
-  //    implicit def fromDoubleDomainToPatternAxe[D](f: Factor[D, Double])(implicit fix: Fix[D, Double]): PatternAxe =
-  //      PatternAxe(f.prototype, fix(f.domain).toVector)
-  //
-  //    implicit def fromIntDomainToPatternAxe[D](f: Factor[D, Int])(implicit fix: Fix[D, Int]): PatternAxe =
-  //      PatternAxe(f.prototype, fix(f.domain).toVector.map(_.toDouble))
-  //
-  //    implicit def fromLongDomainToPatternAxe[D](f: Factor[D, Long])(implicit fix: Fix[D, Long]): PatternAxe =
-  //      PatternAxe(f.prototype, fix(f.domain).toVector.map(_.toDouble))
-  //
-  //  }
-  //
-  //  case class PatternAxe(p: Objective, scale: Vector[Double])
-  //
   case class DeterministicParams(
     mu:                  Int,
     origin:              (Vector[Double], Vector[Int]) ⇒ Vector[Int],
@@ -77,7 +66,7 @@ object OSE {
         def generation(s: S) = s.generation
 
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get _, CDGenome.discreteValues.get _)(genome)
-        def buildIndividual(genome: G, phenotype: Vector[Double]) = CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype)
+        def buildIndividual(genome: G, phenotype: Vector[Double], context: Context) = CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype)
 
         def initialState(rng: util.Random) = EvolutionState[OSEState](random = rng, s = (Array.empty, Array.empty))
 
@@ -132,7 +121,7 @@ object OSE {
           }
 
         def migrateToIsland(population: Vector[I]) = population
-        def migrateFromIsland(population: Vector[I]) = population
+        def migrateFromIsland(population: Vector[I], state: S) = population ++ state.s._1
       }
 
     }
@@ -197,7 +186,7 @@ object OSE {
         def generation(s: S) = s.generation
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get _, CDGenome.discreteValues.get _)(genome)
 
-        def buildIndividual(genome: G, phenotype: Vector[Double]) = CDGenome.NoisyIndividual.buildIndividual(genome, phenotype)
+        def buildIndividual(genome: G, phenotype: Vector[Double], context: Context) = CDGenome.NoisyIndividual.buildIndividual(genome, phenotype)
         def initialState(rng: util.Random) = EvolutionState[OSEState](random = rng, s = (Array.empty, Array.empty))
 
         def result(population: Vector[I], state: S) = FromContext { p ⇒
@@ -257,50 +246,131 @@ object OSE {
 
         def afterGeneration(g: Long, population: Vector[I]) = api.afterGeneration(g, population)
         def afterDuration(d: squants.Time, population: Vector[I]) = api.afterDuration(d, population)
-        def migrateToIsland(population: Vector[I]) = population
-        def migrateFromIsland(population: Vector[I]) = population
+        def migrateToIsland(population: Vector[I]) = StochasticGAIntegration.migrateToIsland(population)
+        def migrateFromIsland(population: Vector[I], state: S) = population ++ state.s._1
 
       }
 
     }
   }
-  //
-  //  import org.openmole.core.dsl._
-  //
-  //  def apply(
-  //             genome:     Genome,
-  //             objectives: Seq[PatternAxe],
-  //             stochastic: OptionalArgument[Stochastic] = None
-  //           ) = stochastic.option match {
-  //    case None ⇒
-  //      val integration: WorkflowIntegration.DeterministicGA[_] = WorkflowIntegration.DeterministicGA(
-  //        DeterministicParams(
-  //          mgo.niche.irregularGrid(objectives.map(_.scale).toVector),
-  //          genome,
-  //          objectives.map(_.p),
-  //          operatorExploration),
-  //        genome,
-  //        objectives.map(_.p)
-  //      )
-  //
-  //      WorkflowIntegration.DeterministicGA.toEvolutionWorkflow(integration)
-  //    case Some(stochastic) ⇒
-  //      val integration: WorkflowIntegration.StochasticGA[_] = WorkflowIntegration.StochasticGA(
-  //        StochasticParams(
-  //          pattern = mgo.niche.irregularGrid(objectives.map(_.scale).toVector),
-  //          aggregation = StochasticGAIntegration.aggregateVector(stochastic.aggregation, _),
-  //          genome = genome,
-  //          objectives = objectives.map(_.p),
-  //          historySize = stochastic.replications,
-  //          cloneProbability = stochastic.reevaluate,
-  //          operatorExploration = operatorExploration
-  //        ),
-  //        genome,
-  //        objectives.map(_.p),
-  //        stochastic
-  //      )
-  //
-  //      WorkflowIntegration.StochasticGA.toEvolutionWorkflow(integration)
-  //  }
+
+  import org.openmole.core.dsl._
+
+  object OriginAxe {
+
+    implicit def fromDoubleDomainToOriginAxe[D](f: Factor[D, Double])(implicit fix: Fix[D, Double]): OriginAxe = {
+      val domain = fix(f.domain).toVector
+      ContinuousOriginAxe(GenomeBound.ScalarDouble(f.prototype, domain.min, domain.max), domain)
+    }
+
+    implicit def fromSeqOfDoubleDomainToOriginAxe[D](f: Factor[D, Array[Double]])(implicit fix: Fix[D, Array[Double]]): OriginAxe = {
+      val domain = fix(f.domain)
+      ContinuousSequenceOriginAxe(
+        GenomeBound.SequenceOfDouble(f.prototype, FromContext.value(domain.map(_.min).toArray), FromContext.value(domain.map(_.max).toArray), domain.size),
+        domain.toVector.map(_.toVector))
+    }
+
+    implicit def fromIntDomainToPatternAxe[D](f: Factor[D, Int])(implicit fix: Fix[D, Int]): OriginAxe = {
+      val domain = fix(f.domain).toVector
+      DiscreteOriginAxe(GenomeBound.ScalarInt(f.prototype, domain.min, domain.max), domain)
+    }
+
+    implicit def fromSeqOfIntDomainToOriginAxe[D](f: Factor[D, Array[Int]])(implicit fix: Fix[D, Array[Int]]): OriginAxe = {
+      val domain = fix(f.domain)
+      DiscreteSequenceOriginAxe(
+        GenomeBound.SequenceOfInt(f.prototype, FromContext.value(domain.map(_.min).toArray), FromContext.value(domain.map(_.max).toArray), domain.size),
+        domain.toVector.map(_.toVector))
+    }
+
+    def genomeBound(originAxe: OriginAxe) = originAxe match {
+      case c: ContinuousOriginAxe          ⇒ c.p
+      case d: DiscreteOriginAxe            ⇒ d.p
+      case cs: ContinuousSequenceOriginAxe ⇒ cs.p
+      case ds: DiscreteSequenceOriginAxe   ⇒ ds.p
+    }
+
+    def fullGenome(origin: Seq[OriginAxe], genome: Genome): Genome =
+      origin.map(genomeBound) ++ genome
+
+    def toOrigin(origin: Seq[OriginAxe], genome: Genome) = {
+      val fg = fullGenome(origin, genome)
+      def grid(continuous: Vector[Double], discrete: Vector[Int]): Vector[Int] =
+        origin.toVector.flatMap {
+          case ContinuousOriginAxe(p, scale)         ⇒ Vector(mgo.tools.findInterval(scale, Genome.continuousValue(fg, p.v, continuous)))
+          case DiscreteOriginAxe(p, scale)           ⇒ Vector(mgo.tools.findInterval(scale, Genome.discreteValue(fg, p.v, discrete)))
+          case ContinuousSequenceOriginAxe(p, scale) ⇒ mgo.niche.irregularGrid[Double](scale)(Genome.continuousSequenceValue(fg, p.v, p.size, continuous))
+          case DiscreteSequenceOriginAxe(p, scale)   ⇒ mgo.niche.irregularGrid[Int](scale)(Genome.discreteSequenceValue(fg, p.v, p.size, discrete))
+        }
+
+      grid(_, _)
+    }
+
+  }
+
+  sealed trait OriginAxe
+  case class ContinuousOriginAxe(p: Genome.GenomeBound.ScalarDouble, scale: Vector[Double]) extends OriginAxe
+  case class ContinuousSequenceOriginAxe(p: Genome.GenomeBound.SequenceOfDouble, scale: Vector[Vector[Double]]) extends OriginAxe
+  case class DiscreteOriginAxe(p: Genome.GenomeBound.ScalarInt, scale: Vector[Int]) extends OriginAxe
+  case class DiscreteSequenceOriginAxe(p: Genome.GenomeBound.SequenceOfInt, scale: Vector[Vector[Int]]) extends OriginAxe
+
+  object FitnessPattern {
+    implicit def fromPairToObjective[T](v: (Val[T], T))(implicit td: ToDouble[T]) = FitnessPattern(v._1, td(v._2))
+
+    def toLimit(f: Seq[FitnessPattern]) = f.toVector.map(_.limit)
+    def toObjectives(f: Seq[FitnessPattern]) = f.map(_.objective)
+  }
+
+  case class FitnessPattern(objective: Objective, limit: Double)
+
+  def apply(
+    origin:     Seq[OriginAxe],
+    objectives: Seq[FitnessPattern],
+    genome:     Genome                       = Seq(),
+    mu:         Int                          = 200,
+    stochastic: OptionalArgument[Stochastic] = None): EvolutionWorkflow = stochastic.option match {
+    case None ⇒
+      val fg = OriginAxe.fullGenome(origin, genome)
+      val os = FitnessPattern.toObjectives(objectives)
+
+      val integration: WorkflowIntegration.DeterministicGA[_] =
+        WorkflowIntegration.DeterministicGA(
+          DeterministicParams(
+            mu = mu,
+            origin = OriginAxe.toOrigin(origin, genome),
+            genome = fg,
+            objectives = os,
+            limit = FitnessPattern.toLimit(objectives),
+            operatorExploration = operatorExploration),
+          fg,
+          os
+        )
+
+      WorkflowIntegration.DeterministicGA.toEvolutionWorkflow(integration)
+    case Some(stochastic) ⇒
+      val fg = OriginAxe.fullGenome(origin, genome)
+      val os = FitnessPattern.toObjectives(objectives)
+
+      def aggregation(h: Vector[Vector[Double]]) =
+        StochasticGAIntegration.aggregateVector(stochastic.aggregation.option, h)
+
+      val integration: WorkflowIntegration.StochasticGA[_] =
+        WorkflowIntegration.StochasticGA(
+          StochasticParams(
+            mu = mu,
+            origin = OriginAxe.toOrigin(origin, genome),
+            genome = fg,
+            objectives = os,
+            limit = FitnessPattern.toLimit(objectives),
+            operatorExploration = operatorExploration,
+            historySize = stochastic.replications,
+            cloneProbability = stochastic.reevaluate,
+            aggregation = aggregation),
+          fg,
+          os,
+          stochastic
+        )(StochasticParams.integration)
+
+      WorkflowIntegration.StochasticGA.toEvolutionWorkflow(integration)
+  }
 
 }

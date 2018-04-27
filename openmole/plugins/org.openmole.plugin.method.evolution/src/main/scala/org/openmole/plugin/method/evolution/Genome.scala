@@ -34,6 +34,15 @@ object Genome {
 
     implicit def fixIsEnumeration[D, T](f: Factor[D, T])(implicit fix: Fix[D, T]) =
       Enumeration(f.prototype, fix.apply(f.domain).toVector)
+
+    def toVal(b: GenomeBound) = b match {
+      case b: GenomeBound.ScalarDouble     ⇒ b.v
+      case b: GenomeBound.ScalarInt        ⇒ b.v
+      case b: GenomeBound.SequenceOfDouble ⇒ b.v
+      case b: GenomeBound.SequenceOfInt    ⇒ b.v
+      case b: GenomeBound.Enumeration[_]   ⇒ b.v
+    }
+
   }
 
   import _root_.mgo.{ C, D }
@@ -61,14 +70,27 @@ object Genome {
     bounds.sequence.map(_.flatten)
   }
 
-  def vals(genome: Genome) =
-    genome.map {
-      case b: GenomeBound.ScalarDouble     ⇒ b.v
-      case b: GenomeBound.ScalarInt        ⇒ b.v
-      case b: GenomeBound.SequenceOfDouble ⇒ b.v
-      case b: GenomeBound.SequenceOfInt    ⇒ b.v
-      case b: GenomeBound.Enumeration[_]   ⇒ b.v
-    }
+  def continuousValue(genome: Genome, v: Val[_], continuous: Vector[Double]) = {
+    val index = Genome.continuousIndex(genome, v).get
+    continuous(index)
+  }
+
+  def continuousSequenceValue(genome: Genome, v: Val[_], size: Int, continuous: Vector[Double]) = {
+    val index = Genome.continuousIndex(genome, v).get
+    continuous.slice(index, index + size)
+  }
+
+  def discreteValue(genome: Genome, v: Val[_], discrete: Vector[Int]) = {
+    val index = Genome.discreteIndex(genome, v).get
+    discrete(index)
+  }
+
+  def discreteSequenceValue(genome: Genome, v: Val[_], size: Int, discrete: Vector[Int]) = {
+    val index = Genome.discreteIndex(genome, v).get
+    discrete.slice(index, index + size)
+  }
+
+  def toVals(genome: Genome) = genome.map(GenomeBound.toVal)
 
   def continuousIndex(genome: Genome, v: Val[_]): Option[Int] = {
     def indexOf0(l: List[GenomeBound], index: Int): Option[Int] = {

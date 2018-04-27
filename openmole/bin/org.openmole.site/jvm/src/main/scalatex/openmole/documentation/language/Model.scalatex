@@ -1,29 +1,18 @@
 @import org.openmole.site.tools._
 @import org.openmole.site._
 
-
-
 @def variables = """
   val inputString = Val[String]
   val Digits = Val[Double]"""
 
+OpenMOLE handles your model execution by framing it in a task. Select the language of your model on your left to see how it is done.
 
+@h2{Tasks}
 
-OpenMOLE handles your model execution by framing it in a @b{workflow}.
-Select the language of your model on your left to see how it is done .
-
-@h2{Of Models and Workflows}
-
-A workflow is a set of @b{tasks} linked with each other through @b{@a("transitions", href := DocumentationPages.transition.file)}. From a high level point of view, tasks comprise @b{inputs}, @b{outputs} and @b{optional default values}.
+Tasks are the atomic computing elements of OpenMOLE, they describe what OpenMOLE should execute. They are a bunch of tasks especially designed in order to embeds your own models and/or programs. Depending on what kind of program (binary executable, Java...) you want to embed in OpenMOLE you have to choose the adequate task.
 
 @p
-  Tasks are the atomic computing elements of OpenMOLE, they describe what OpenMOLE should execute and delegate to remote environments. They are also what embeds your own models and/or programs.
-
-@p
-  Depending on what kind of program (binary executable, Java...) you want to embed in OpenMOLE you have to choose the adequate task.
-
-@p
-  Task execution @b{depends on inputs variables} and each task @b{produces outputs} which transmitted to the inputs of subsequent tasks. Below is a dummy task  to illustrate all this jargon:
+  Task execution @b{depends on inputs variables} and each task @b{produces outputs} which transmitted to the inputs of subsequent tasks. Below is a dummy task to illustrate all this concept:
 
 @hl.openmole("""
 // Define a variable i of type Int
@@ -51,13 +40,17 @@ val t = EmptyTask() set (
   i := 0
 )""")
 
+Once your model is properly embedded in an OpenMOLE task you can use it in an exploration method and delegate the multiple execution of the task to remote computing environments.
 
-@h2{OpenMOLE scripts}
+@h2{Exploration method}
 
-Writing an OpenMOLE script consists in defining @b{tasks}, their @b{inputs} and @b{outputs}, the @b{transitions between the tasks }and the @b{execution environment}.
-
-@p
-  Some of the tasks are made to frame your program, some others are made to generate inputs: @a("Samplings", href:=DocumentationPages.advancedSampling.file) or to capture the outputs : @aa("Hooks", href:=DocumentationPages.hook.file). As you will progress into the world of OpenMOLE, you will discover how to define these various elements and build your own workflows. For now let's give a dummy example.
+The composition a a full exploration experiment is achieved by writing a script in the OpenMOLE language. Writing an OpenMOLE exploration script consists in defining:
+ @ul
+   @li{one or several @b{tasks},}
+   @li{their @b{inputs} and @b{outputs},}
+   @li{an @a("exploration method", href := DocumentationPages.method.file),}
+   @li{one or several @a("hooks", href := DocumentationPages.hook.file),}
+   @li{possibly an @a("execution environment", href := DocumentationPages.environment.file)}.
 
 @p
   Let's say you have a model that take a string as input and do some stuff with it, like launching a simulation with the parameters contained in the input string. People from the lab gave you a huge CSV file where each line contains various experimental setup parameters. What you want is to run a simulation for each line of this file, execute it on the lab's cluster, and gather theirs results. Your openMOLE script would look like that:
@@ -77,12 +70,12 @@ Writing an OpenMOLE script consists in defining @b{tasks}, their @b{inputs} and 
       )
 
     // a hook to catch the outputs of your model execution and put them in a CSV file
-    val catch_output = CSVHook("path/to/save/it")
+    val catch_output = CSVHook(workDirectory "path/to/save/it")
 
     // declare your computing environment
     val lab_Cluster = ClusterEnvironment(login, machineIP)
 
-    // the workflow. Bascically it says : explore the lines and run a model execution for each,
+    // the Exploration method. It says: explore the lines and run a model execution for each,
     // save the outputs, all that on the cluster (results are not brought back to the local computer yet).
     DirectSampling(
       evaluation = my_model_execution on env hook catch_output,

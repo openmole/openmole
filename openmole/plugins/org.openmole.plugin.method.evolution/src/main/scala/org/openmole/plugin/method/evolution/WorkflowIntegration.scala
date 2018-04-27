@@ -83,9 +83,9 @@ object WorkflowIntegration {
       lazy val integration = a.algorithm
 
       def buildIndividual(genome: G, context: Context): I =
-        operations.buildIndividual(genome, variablesToPhenotype(context))
+        operations.buildIndividual(genome, variablesToPhenotype(context), context)
 
-      def inputPrototypes = Genome.vals(a.genome)
+      def inputPrototypes = Genome.toVals(a.genome)
       def objectives = a.objectives
       def resultPrototypes = (inputPrototypes ++ outputPrototypes).distinct
 
@@ -108,9 +108,9 @@ object WorkflowIntegration {
       lazy val integration = a.algorithm
 
       def buildIndividual(genome: G, context: Context): I =
-        operations.buildIndividual(genome, variablesToPhenotype(context))
+        operations.buildIndividual(genome, variablesToPhenotype(context), context)
 
-      def inputPrototypes = Genome.vals(a.genome) ++ a.replication.seed.prototype
+      def inputPrototypes = Genome.toVals(a.genome) ++ a.replication.seed.prototype
       def objectives = a.objectives
 
       def genomeToVariables(genome: G): FromContext[Seq[Variable[_]]] = {
@@ -273,7 +273,6 @@ object StochasticGAIntegration {
     }
 
   def migrateToIsland(population: Vector[mgo.algorithm.CDGenome.NoisyIndividual.Individual]) = population.map(_.copy(historyAge = 0))
-  def migrateFromIsland(population: Vector[mgo.algorithm.CDGenome.NoisyIndividual.Individual], historySize: Int) = population
 
 }
 
@@ -294,7 +293,7 @@ object MGOAPI {
     trait Ops {
       def initialState(rng: util.Random): S
       def initialGenomes(n: Int): FromContext[M[Vector[G]]]
-      def buildIndividual(genome: G, phenotype: P): I
+      def buildIndividual(genome: G, phenotype: P, context: Context): I
       def genomeValues(genome: G): V
       def randomLens: monocle.Lens[S, util.Random]
       def startTimeLens: monocle.Lens[S, Long]
@@ -302,7 +301,7 @@ object MGOAPI {
       def breeding(individuals: Vector[I], n: Int): FromContext[M[Vector[G]]]
       def elitism(individuals: Vector[I]): FromContext[M[Vector[I]]]
       def migrateToIsland(i: Vector[I]): Vector[I]
-      def migrateFromIsland(population: Vector[I]): Vector[I]
+      def migrateFromIsland(population: Vector[I], state: S): Vector[I]
 
       def afterGeneration(g: Long, population: Vector[I]): M[Boolean]
       def afterDuration(d: squants.Time, population: Vector[I]): M[Boolean]

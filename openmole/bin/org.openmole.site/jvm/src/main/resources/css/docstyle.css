@@ -141,7 +141,7 @@ p{
 background-color : #222;
 }
 
-#sidebar-left {
+.sidebar-left {
 }
 
 #sidebar-right {
@@ -155,7 +155,7 @@ background-color : #222;
     margin: 0 auto;
 }
 
-#main-content, #sidebar-left, #sidebar-right, #footer {
+#main-content, .sidebar-left, #sidebar-right, #footer {
     padding:20px;
     width: 100%;
     float: left;
@@ -174,7 +174,7 @@ background-color : #222;
         float: left;
     }
 
-    #sidebar-left {
+    .sidebar-left {
         text-align:right;
         width: 25%;
         float: left;
@@ -203,11 +203,11 @@ background-color : #222;
 
 /*Move Sidebar Position*/
 @media only screen and (min-width: 1024px) {
-    .wrap, #main-content, #sidebar-left, #sidebar-right {
+    .wrap, #main-content, .sidebar-left, #sidebar-right {
         position: relative;
     }
 
-    #main-content, #sidebar-left, #sidebar-right {
+    #main-content, .sidebar-left, #sidebar-right {
         top: 0;
     }
 
@@ -216,7 +216,7 @@ background-color : #222;
         position: fixed;
     }
 
-    #sidebar-left {
+    .sidebar-left {
         position: fixed;
     }
 
@@ -230,7 +230,7 @@ background-color : #222;
     #sidebar-right {
         width: 50%;
     }
-    #sidebar-left {
+    .sidebar-left {
         width: 50%;
     }
     #main-content {

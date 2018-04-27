@@ -13,35 +13,37 @@ The only difference between the script in the console mode and the ones from the
   @p Using the ex and the env variables you can follow the progress of the execution by using the commands: @hl.highlight("print(ex)", "plain") and @hl.highlight("print(env)", "plain"). To cancel the execution you should use: @hl.highlight("ex.cancel", "plain").
 
 
-@sect{@shared.consoleMenu.authentication}
-    In console mode, you can define an authentication using a pair of login / password with the following command:
-    @br @hl.openmole("""
-      SSHAuthentication += LoginPassword("login", encrypted, "machine-name")""".stripMargin, header = """def encrypted = "" """)
+@h2{Authentications}
 
-    @p Or to authenticate with a private key:
-    @br @hl.openmole("""
-        SSHAuthentication += PrivateKey("/path/to/the/private/key", "login", encrypted, "machine-name")""", header = """def encrypted = "" """)
+In console mode, you can define an authentication using a pair of login / password with the following command:
+@br @hl.openmole("""
+  SSHAuthentication += LoginPassword("login", encrypted, "machine-name")""".stripMargin, header = """def encrypted = "" """)
 
-   @p It mentions the @i{encrypted} function. This function will prompt for the password/passphrase of the private key right after the call to the builder of the @i{Environment} using this @hl.openmole("SSHAuthentication").
+@p Or to authenticate with a private key:
+@br @hl.openmole("""
+    SSHAuthentication += PrivateKey("/path/to/the/private/key", "login", encrypted, "machine-name")""", header = """def encrypted = "" """)
 
-    @p The last part of the @hl.openmole("SSHAuthentication"): "machine-name" should match exactly the address of the machine in your execution environment. OpenMOLE searches the matching ssh keys using an @b{exact match} on @i{login} and @i{machine-name} between the environment and the stored keys.
+@p It mentions the @i{encrypted} function. This function will prompt for the password/passphrase of the private key right after the call to the builder of the @i{Environment} using this @hl.openmole("SSHAuthentication").
 
-@sect{@shared.consoleMenu.run}
-    In console mode, you have to copy-paste your whole workflow to run it.
-    The only difference between the script in the console mode and the ones from the editor concerns the way you launch the execution,
-    you cancel it and you follow the execution progress.
+@p The last part of the @hl.openmole("SSHAuthentication"): "machine-name" should match exactly the address of the machine in your execution environment. OpenMOLE searches the matching ssh keys using an @b{exact match} on @i{login} and @i{machine-name} between the environment and the stored keys.
 
-    A console workflow is launched like this:
-    @hl.code("""
-    val ex = exploration -< (model on env) start""")
+@h2{Run script}
 
-    Note that you need to invoke the @hl.highlight("start", "plain") on your workflow, in contrary to Editor mode.
+In console mode, you have to copy-paste your whole workflow to run it.
+The only difference between the script in the console mode and the ones from the editor concerns the way you launch the execution,
+you cancel it and you follow the execution progress.
 
-    @break
+A console workflow is launched like this:
+@hl.code("""
+val ex = exploration -< (model on env) start""")
 
-    Using the @i{ex} and the @i{env} variables you can follow the progress of the execution by using the commands:
-    @hl.highlight("print(ex)", "plain") and @hl.highlight("print(env)","plain").
+Note that you need to invoke the @hl.highlight("start", "plain") on your workflow, in contrary to Editor mode.
 
-    @break
+@break
 
-    To cancel the execution you should use: @hl.highlight("ex.cancel", "plain").
+Using the @i{ex} and the @i{env} variables you can follow the progress of the execution by using the commands:
+@hl.highlight("print(ex)", "plain") and @hl.highlight("print(env)","plain").
+
+@break
+
+To cancel the execution you should use: @hl.highlight("ex.cancel", "plain").

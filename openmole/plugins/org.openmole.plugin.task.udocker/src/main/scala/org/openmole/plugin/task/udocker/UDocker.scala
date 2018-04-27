@@ -5,6 +5,7 @@ import java.util.UUID
 
 import org.openmole.core.threadprovider._
 import org.openmole.core.workspace._
+import org.openmole.core.networkservice._
 import org.openmole.plugin.task.udocker.DockerMetadata._
 import org.openmole.plugin.task.udocker.Registry._
 import org.openmole.plugin.task.udocker.UDockerTask._
@@ -46,7 +47,7 @@ object UDocker {
     lazy val id = UUID.randomUUID().toString
   }
 
-  def downloadImage(dockerImage: DockerImage, manifestDirectory: File, layersDirectory: File, timeout: Time)(implicit newFile: NewFile, threadProvider: ThreadProvider, outputRedirection: OutputRedirection) = {
+  def downloadImage(dockerImage: DockerImage, manifestDirectory: File, layersDirectory: File, timeout: Time)(implicit newFile: NewFile, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkservice: NetworkService) = {
     import Registry._
 
     def layerFile(layer: Layer) = layersDirectory / layer.digest
@@ -68,7 +69,7 @@ object UDocker {
     def localLayersFutures =
       for {
         m ← manifestData.toSeq.toVector
-        l ← layers(m.value)
+        l ← layers(m.value).distinct
       } yield Future {
         val lf = layerFile(l)
         if (!lf.exists) {
@@ -160,7 +161,7 @@ object UDocker {
    *
    * Assume v1.x Image JSON format and registry protocol v2 Schema 1
    */
-  def loadImage(dockerImage: SavedDockerImage)(implicit newFile: NewFile, workspace: Workspace): Either[Err, LocalDockerImage] = newFile.withTmpDir { extractedImage ⇒
+  def loadImage(dockerImage: SavedDockerImage)(implicit newFile: NewFile, workspace: Workspace, networkservice: NetworkService): Either[Err, LocalDockerImage] = newFile.withTmpDir { extractedImage ⇒
 
     import org.openmole.tool.tar._
 
@@ -264,23 +265,24 @@ object UDocker {
     )
 
   def runCommands(
-    uDocker:           UDockerArguments,
-    uDockerExecutable: File,
-    uDockerVariables:  Vector[(String, String)],
-    uDockerVolumes:    Vector[(String, String)],
-    container:         String,
-    commands:          Seq[String],
-    captureOutput:     Boolean                  = false,
-    captureError:      Boolean                  = false,
-    displayOutput:     Boolean                  = true,
-    displayError:      Boolean                  = true,
-    stdOut:            PrintStream              = System.out,
-    stdErr:            PrintStream              = System.err)(implicit newFile: NewFile) = newFile.withTmpDir { tmpDirectory ⇒
+    uDocker:              UDockerArguments,
+    uDockerExecutable:    File,
+    uDockerVariables:     Vector[(String, String)],
+    uDockerVolumes:       Vector[(String, String)],
+    container:            String,
+    commands:             Seq[String],
+    environmentVariables: Seq[(String, String)],
+    captureOutput:        Boolean                  = false,
+    captureError:         Boolean                  = false,
+    displayOutput:        Boolean                  = true,
+    displayError:         Boolean                  = true,
+    stdOut:               PrintStream              = System.out,
+    stdErr:               PrintStream              = System.err)(implicit newFile: NewFile) = newFile.withTmpDir { tmpDirectory ⇒
     val runInstall = commands.map {
       ic ⇒
         ExecutionCommand.Raw(uDockerRunCommand(
           uDocker.user,
-          Vector.empty,
+          environmentVariables.toVector,
           uDockerVolumes,
           userWorkDirectory(uDocker),
           uDockerExecutable,
@@ -307,7 +309,7 @@ object UDocker {
       uDocker.localDockerImage.container match {
         case None ⇒
 
-          val cl = commandLine(s"${uDockerExecutable.getAbsolutePath} create $imageId")
+          val cl = commandLine(s"/usr/bin/env python2 ${uDockerExecutable.getAbsolutePath} create $imageId")
           execute(cl, tmpDirectory, uDockerVariables, captureOutput = true, captureError = true, displayOutput = false, displayError = false).output.get.split("\n").head
         case Some(directory) ⇒
           val name = containerName(UUID.randomUUID().toString) //.take(10)
@@ -316,7 +318,7 @@ object UDocker {
       }
 
     uDocker.mode.foreach { mode ⇒
-      val cl = commandLine(s"""${uDockerExecutable.getAbsolutePath} setup --execmode=$mode $id""")
+      val cl = commandLine(s"""/usr/bin/env python2 ${uDockerExecutable.getAbsolutePath} setup --execmode=$mode $id""")
       execute(cl, tmpDirectory, uDockerVariables, captureOutput = true, captureError = true)
     }
 
@@ -343,7 +345,7 @@ object UDocker {
 
     val variablesArgument = environmentVariables.map { case (name, variable) ⇒ s"""-e ${name}="${variable}"""" }.mkString(" ")
 
-    s"""${uDocker.getAbsolutePath} run --workdir="$workDirectory" $userArgument  $variablesArgument ${volumesArgument(volumes)} $runId $command"""
+    s"""/usr/bin/env python2 ${uDocker.getAbsolutePath} run --workdir="$workDirectory" $userArgument  $variablesArgument ${volumesArgument(volumes)} $runId $command"""
   }
 
   // TODO refactor

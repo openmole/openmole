@@ -140,7 +140,9 @@ def allCore = Seq(
   threadProvider,
   services,
   location,
-  code)
+  code,
+  networkService
+  )
 
 
 lazy val context = OsgiProject(coreDir, "org.openmole.core.context", imports = Seq("*")) settings(
@@ -169,7 +171,8 @@ lazy val workflow = OsgiProject(coreDir, "org.openmole.core.workflow", imports =
   expansion,
   threadProvider,
   outputRedirection,
-  code) settings (coreSettings: _*)
+  code,
+  networkService) settings (coreSettings: _*)
 
 lazy val serializer = OsgiProject(coreDir, "org.openmole.core.serializer", global = true, imports = Seq("*")) settings(
   libraryDependencies += Libraries.xstream,
@@ -206,7 +209,7 @@ lazy val workspace = OsgiProject(coreDir, "org.openmole.core.workspace", imports
 
 lazy val authentication = OsgiProject(coreDir, "org.openmole.core.authentication", imports = Seq("*")) dependsOn(workspace, serializer) settings (coreSettings: _*)
 
-lazy val services = OsgiProject(coreDir, "org.openmole.core.services", imports = Seq("*")) dependsOn(workspace, serializer, preference, fileService, threadProvider, replication, authentication, outputRedirection) settings (coreSettings: _*)
+lazy val services = OsgiProject(coreDir, "org.openmole.core.services", imports = Seq("*")) dependsOn(workspace, serializer, preference, fileService, networkService, threadProvider, replication, authentication, outputRedirection) settings (coreSettings: _*)
 
 lazy val location = OsgiProject(coreDir, "org.openmole.core.location", imports = Seq("*")) dependsOn (exception) settings (coreSettings: _*)
 
@@ -220,6 +223,8 @@ lazy val pluginManager = OsgiProject(
 lazy val fileService = OsgiProject(coreDir, "org.openmole.core.fileservice", imports = Seq("*")) dependsOn(tools, workspace, openmoleTar, preference, threadProvider) settings (coreSettings: _*) settings (defaultActivator) settings (
   libraryDependencies += Libraries.guava
   )
+
+lazy val networkService = OsgiProject(coreDir, "org.openmole.core.networkservice", imports = Seq("*")) dependsOn(tools, workspace, preference) settings (coreSettings: _*) settings (defaultActivator) 
 
 lazy val threadProvider = OsgiProject(coreDir, "org.openmole.core.threadprovider", imports = Seq("*")) dependsOn(tools, preference) settings (coreSettings: _*) settings (defaultActivator)
 
@@ -500,7 +505,7 @@ lazy val container = OsgiProject(pluginDir, "org.openmole.plugin.task.container"
 lazy val care = OsgiProject(pluginDir, "org.openmole.plugin.task.care", imports = Seq("*")) dependsOn(systemexec, container) settings (
   libraryDependencies += Libraries.scalatest) settings (pluginSettings: _*)
 
-lazy val udocker = OsgiProject(pluginDir, "org.openmole.plugin.task.udocker", imports = Seq("!jawn.*", "*")) dependsOn(systemexec, container, outputRedirection) settings(
+lazy val udocker = OsgiProject(pluginDir, "org.openmole.plugin.task.udocker", imports = Seq("!jawn.*", "*")) dependsOn(systemexec, container, outputRedirection, networkService, services) settings(
   libraryDependencies += Libraries.scalatest,
   libraryDependencies += Libraries.circe,
   libraryDependencies ++= Libraries.httpClient) settings (pluginSettings: _*)

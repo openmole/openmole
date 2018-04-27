@@ -9,6 +9,10 @@ val seed = Val[Int]
 val burned = Val[Double]
 """
 
+@def gridSampling = "Grid Sampling"
+@def csvSampling = "CSV Sampling"
+@def severalInputs = "Exploration of several inputs"
+@def advancedSampling = "Advanced sampling"
 
 @b{Design of Experiments} (DoE) is the art of setting up an experimentation. In a model simulation context,
 it boils down to declare the inputs under study (most of the time, they're parameters) and the values they will take, for a batch of several simulations, with the idea of revealing a property of the model (e.g. sensitivity).
@@ -16,52 +20,51 @@ Even if there are several state-of-the-art DoE methods implemented in OpenMOLE, 
 new methods:  PSE, and Calibration and Profiles  which have been thought to improve the drawbacks of the classical methods.
 
 @br
+Your model inputs can be sampled in the traditional way, by using @a("grid (or regular) sampling", href:= anchor(gridSampling)),or by @a("sampling uniformly", href:= "#UniformDistributionSampling") inside their domain.
 @br
-Your model inputs can be sampled in the traditional way, by using @a("grid (or regular)  sampling", href:=Link.intern(shared.directSamplingMenu.gridSampling)),or by @a("sampling uniformly", href:=Link.intern(shared.directSamplingMenu.uniformSampling)) inside their domain.
+For higher dimension input space, specific statistics techniques ensuring low discrepency like @a("Latin Hypercube Sampling and SobolSequence", href := "#LatinHypercubeSobolSequence") are available.
 @br
-For higher dimension input space, specific statistics techniques ensuring low discrepency like @a("Latin Hypercube Sampling and SobolSequence", href:=Link.intern(shared.directSamplingMenu.LHSSobol)) are available.
-@br
-If you want to use design of experiments of your own you may also want to provide @a("a csv file with your samples" , href:=Link.intern(shared.directSamplingMenu.csvSampling)) to OpenMOLE.
+If you want to use design of experiments of your own you may also want to provide @a("a csv file with your samples" , href := "#CSVSampling") to OpenMOLE.
 
 @br
-By defining your own exploration task on @a("several types of input", href:= Link.intern(shared.directSamplingMenu.severalInputs)), you will be able to highlight some of your model inner properties like those revealed by @a("sensitivity analysis", href:=Link.intern(shared.simpleSAFireMenu.sensitivityAnalysis)), as shown in a toy example on a @a("real world example", href:=Link.intern(shared.simpleSAFireMenu.sensitivityFireModel))
+By defining your own exploration task on @a("several types of input", href := anchor(severalInputs)), you will be able to highlight some of your model inner properties like those revealed by @a("sensitivity analysis", href:=Link.intern(shared.simpleSAFireMenu.sensitivityAnalysis)), as shown in a toy example on a @a("real world example", href:=Link.intern(shared.simpleSAFireMenu.sensitivityFireModel))
 
-@sect{@shared.directSamplingMenu.gridSampling }
 
-    @br
-    For a reasonable number of dimension and discretisation quanta (steps) values, complete sampling (or grid sampling)  consists in producing every combination of
-    the inputs possibles values, given their bounds and quanta of discretisation.
-    @br
-    @br
-    @Resource.rawFrag(Resource.img.method.completeID)
-    @br
-    @b{Method scores:}
-    @br
-    Regular sampling or Uniform Sampling are quite good for a first Input Space exploration when you don't know anything  about its structure yet.
-    Since it samples from the input space, the collected values from the model executions will reveal the output values
-    obtained for "evenly spaced" inputs.
-    Sure it's not perfect, but still , it gives a little bit of insights about model sensitivity (as input values vary
-    within their domain) and if the output are fitness, it may present a little bit of optimization information (as the zone in which the fitness could be
-    minimized).
-    @br The sampling does not reveal anything about the output space structure, as there is no reason than evenly spaced inputs lead
-    to evenly spaced outputs.
-    Grid sampling is hampered by input space dimensionality as high dimension spaces need a lot of samples to be covered, as well as a lot of memory to store them.
+@h2{@gridSampling}
 
-    @break
-    Grid Sampling is declared via a @b{DirectSampling Task}, where the bounds and discretisation quantum of each input to vary  are declared  for each input
+For a reasonable number of dimension and discretisation quanta (steps) values, complete sampling (or grid sampling)  consists in producing every combination of
+the inputs possibles values, given their bounds and quanta of discretisation.
+@br
+@br
+@Resource.rawFrag(Resource.img.method.completeID)
+@br
+@b{Method scores:}
+@br
+Regular sampling or Uniform Sampling are quite good for a first Input Space exploration when you don't know anything  about its structure yet.
+Since it samples from the input space, the collected values from the model executions will reveal the output values
+obtained for "evenly spaced" inputs.
+Sure it's not perfect, but still , it gives a little bit of insights about model sensitivity (as input values vary
+within their domain) and if the output are fitness, it may present a little bit of optimization information (as the zone in which the fitness could be
+minimized).
+@br The sampling does not reveal anything about the output space structure, as there is no reason than evenly spaced inputs lead
+to evenly spaced outputs.
+Grid sampling is hampered by input space dimensionality as high dimension spaces need a lot of samples to be covered, as well as a lot of memory to store them.
 
-    @break
-    @hl.openmole("""
-       val input_i = Val[Int]
-       val input_j = Val[Double]
+@break
+Grid Sampling is declared via a @b{DirectSampling Task}, where the bounds and discretisation quantum of each input to vary  are declared  for each input
 
-       DirectSampling(
-         evaluation = my_own_evaluation  ,
-         sampling =
-           (input_i in (0 to 10 by 2)) x
-           (input_j in (0.0 to 5.0 by 0.5)),
-         aggregation= my_aggregation
-       )""", name = "syntax of DirectSampling Task", header = "val my_own_evaluation = EmptyTask(); val my_aggregation = EmptyTask()")
+@break
+@hl.openmole("""
+   val input_i = Val[Int]
+   val input_j = Val[Double]
+
+   DirectSampling(
+     evaluation = my_own_evaluation  ,
+     sampling =
+       (input_i in (0 to 10 by 2)) x
+       (input_j in (0.0 to 5.0 by 0.5)),
+     aggregation= my_aggregation
+   )""", name = "syntax of DirectSampling Task", header = "val my_own_evaluation = EmptyTask(); val my_aggregation = EmptyTask()")
 
 @br
 with
@@ -105,11 +108,10 @@ exploration""", name="concrete example of direct sampling")
 
 Some details:
 @ul
-@li{@hl.code("myModel") is the task that multiply the input by 2}
-@li{the @hl.code("evaluation") attribute of the @hl.code("DirectSampling") task is the composition of myModel and a hook}
-@li{the @hl.code("aggregation") attribute of the @hl.code("DirectSampling") task is the @hl.code("average") task, a ScalaTask that compute the average of an array Double values}
-
-@li{the task declared under the name @hl.code("exploration") is a DirectSampling task, which means it will generate parallel executions of myModel, one for each sample generated by the sampling task}
+ @li{@hl.code("myModel") is the task that multiply the input by 2}
+ @li{the @hl.code("evaluation") attribute of the @hl.code("DirectSampling") task is the composition of myModel and a hook}
+ @li{the @hl.code("aggregation") attribute of the @hl.code("DirectSampling") task is the @hl.code("average") task, a ScalaTask that compute the average of an array Double values}
+ @li{the task declared under the name @hl.code("exploration") is a DirectSampling task, which means it will generate parallel executions of myModel, one for each sample generated by the sampling task}
 
 @break
 
@@ -121,205 +123,439 @@ Some details:
 
 
 @break
-@sect{@shared.directSamplingMenu.uniformSampling }
 
-    Sampling can also be performed at random within a domain via a @hl.code("UniformDistribution(maximum)").
-    This task generates values uniformly distributed between zero and the maximum argument. Custom domains can be defined using transformations, as in the example below that generates values between -10 and + 10.
+@h2{Uniform Distribution Sampling}
 
-     @hl.openmole("""
-    val my_input = Val[Double]
-    val my_model = EmptyTask() set( (inputs, outputs) += my_input)
+Sampling can also be performed at random within a domain via a @hl.code("UniformDistribution(maximum)").
+This task generates values uniformly distributed between zero and the maximum argument. Custom domains can be defined using transformations, as in the example below that generates values between -10 and + 10.
 
-    val exploration =
-      DirectSampling(
-        evaluation = my_model hook ToStringHook(),
-        sampling= (my_input in (UniformDistribution[Double](max=20) take 100)).map(x => x -10)
-      )
+ @hl.openmole("""
+val my_input = Val[Double]
+val my_model = EmptyTask() set( (inputs, outputs) += my_input)
 
-    exploration""", name = "uniform sampling example")
+val exploration =
+  DirectSampling(
+    evaluation = my_model hook ToStringHook(),
+    sampling= (my_input in (UniformDistribution[Double](max=20) take 100)).map(x => x -10)
+  )
+
+exploration""", name = "uniform sampling example")
 
 
-@br N.B. @hl.code("DirectSampling") usage is not limited to uniform or grid sampling, and accepts any type of more @a("advanced sampling", href := DocumentationPages.advancedSampling.file).
+@br N.B. @hl.code("DirectSampling") usage is not limited to uniform or grid sampling, and accepts any type of more @a("advanced sampling", href := anchor(advancedSampling)).
 @br
 @br
 
-
-
 @br
-@sect{@shared.directSamplingMenu.csvSampling}
-    You can inject your own sampling in OpenMOLE through a CSV file. Considering a CSV file like:
+@h2{@csvSampling}
 
-    @hl.highlight("""
-    colD,  colFileName,    i
-    0.7,    fic1,           8
-    0.9,    fic2,           19
-    0.8,    fic2,           19
-    """, "plain")
-    Here is an example of the @hl.highlight("CSVSampling","plain")  used in a simple workflow to sample values stored in a file  :
-    @hl.openmole("""
-    val i = Val[Int]
-    val o = Val[Int]
-    val d = Val[Double]
-    val f = Val[File]
+You can inject your own sampling in OpenMOLE through a CSV file. Considering a CSV file like:
 
-    val s = CSVSampling("/path/to/a/file.csv") set (
-      columns += i,
-      columns += ("colD", d),
-      fileColumns += ("colFileName", "/path/of/the/base/dir/", f),
-      // comma ',' is the default separator, but you can specify a different one using
-      separator := ','
-    )
+@hl.highlight("""
+colD,  colFileName,    i
+0.7,    fic1,           8
+0.9,    fic2,           19
+0.8,    fic2,           19
+""", "plain")
+Here is an example of the @hl.highlight("CSVSampling","plain")  used in a simple workflow to sample values stored in a file  :
+@hl.openmole("""
+val i = Val[Int]
+val o = Val[Int]
+val d = Val[Double]
+val f = Val[File]
 
-    //Defines the "model" task, here it just takes i as input
-    val myModel =
-      ScalaTask("val o = i * 2 ") set (
-        inputs += i,
-        outputs += (i,o)
-      )
+val s = CSVSampling("/path/to/a/file.csv") set (
+  columns += i,
+  columns += ("colD", d),
+  fileColumns += ("colFileName", "/path/of/the/base/dir/", f),
+  // comma ',' is the default separator, but you can specify a different one using
+  separator := ','
+)
 
-    // Define the exploration of myModel for various i values sampled in the file.
-    val exploration = DirectSampling(
-      evaluation = myModel hook ToStringHook() ,
-      sampling = s
-    )
+//Defines the "model" task, here it just takes i as input
+val myModel =
+  ScalaTask("val o = i * 2 ") set (
+    inputs += i,
+    outputs += (i,o)
+  )
 
-    exploration
+// Define the exploration of myModel for various i values sampled in the file.
+val exploration = DirectSampling(
+  evaluation = myModel hook ToStringHook() ,
+  sampling = s
+)
 
-    """)
+exploration
+
+""")
+@br
+In this example the column @b{i} in the CSV file is mapped to the variable @b{i} of OpenMOLE.
+The column name @b{colD} is mapped to the variable @b{d}. The column named @b{colFileName} is appended to the base directory
+"/path/of/the/base/dir/" and used as a file in OpenMOLE.
+As a sampling, the @hl.highlight("CSVSampling","plain") can directly be injected in an @hl.highlight("DirectSampling","plain") task. It will generate a different task for each entry in the file.
+
+
+@h2{Latin Hypercube, Sobol Sequence}
+
+High dimension spaces must be handled via specific methods of the literature, because otherwise cartesian product  would be too memory consuming .
+OpenMOLE includes two of these methods: @b{Sobol Sequence} and @b{Latin Hypercube Sampling}, that can be passed as an argument to the @hl.highlight("DirectSampling","plain") task:
+
+@break
+
+@Resource.rawFrag(Resource.img.method.sobolLHSID)
+@br
+
+@b{Method scores:}
+@br
+
+    These two methods perform allright in terms of Input Space Exploration (which is normal as they were built for that extent),
+    anyhow, they are superior to uniform sampling or grid sampling, but share the same intrinsic limitations.
+    There is no special way of handling Stochasticity of the model, out of standard replications.
     @br
-    In this example the column @b{i} in the CSV file is mapped to the variable @b{i} of OpenMOLE.
-    The column name @b{colD} is mapped to the variable @b{d}. The column named @b{colFileName} is appended to the base directory
-    "/path/of/the/base/dir/" and used as a file in OpenMOLE.
-    As a sampling, the @hl.highlight("CSVSampling","plain") can directly be injected in an @hl.highlight("DirectSampling","plain") task. It will generate a different task for each entry in the file.
+    These methods are not expensive @i{per se} , it depends on the magnitude of the Input Space you want to be covered.
 
 
-@sect{@shared.directSamplingMenu.LHSSobol }
+@break
 
-
-    High dimension spaces must be handled via specific methods of the literature, because otherwise cartesian product  would be too memory consuming .
-    OpenMOLE includes two of these methods: @b{Sobol Sequence} and @b{Latin Hypercube Sampling}, that can be passed as an argument to the @hl.highlight("DirectSampling","plain") task:
-
-    @break
-
-    @Resource.rawFrag(Resource.img.method.sobolLHSID)
-    @br
-
-    @b{Method scores:}
-    @br
-
-        These two methods perform allright in terms of Input Space Exploration (which is normal as they were built for that extent),
-        anyhow, they are superior to uniform sampling or grid sampling, but share the same intrinsic limitations.
-        There is no special way of handling Stochasticity of the model, out of standard replications.
-        @br
-        These methods are not expensive @i{per se} , it depends on the magnitude of the Input Space you want to be covered.
-
-
-    @break
-
-     @h3{Latin Hypercube Sampling}
+@h3{Latin Hypercube Sampling}
 
 The syntax of the LHS sampling is the following :
-    @br
-    @br
+@br
+@br
 
-    @hl.openmole("""
-    val i = Val[Double]
-    val j = Val[Double]
-    val values = Val[Array[Double]]
+@hl.openmole("""
+val i = Val[Double]
+val j = Val[Double]
+val values = Val[Array[Double]]
 
-    val my_LHS_sampling =
-        LHS(
-          100, // Number of points of the LHS
-          i in (0.0, 10.0),
-          j in (0.0, 5.0),
-          values in Vector((0.0, 1.0), (0.0, 10.0), (5.0, 9.0)) // Generate part of the LHS sampling inside the array of values
-        )
-    """, name = "lhs sampling in sensitivity")
+val my_LHS_sampling =
+    LHS(
+      100, // Number of points of the LHS
+      i in (0.0, 10.0),
+      j in (0.0, 5.0),
+      values in Vector((0.0, 1.0), (0.0, 10.0), (5.0, 9.0)) // Generate part of the LHS sampling inside the array of values
+    )
+""", name = "lhs sampling in sensitivity")
 
-    @br
-     @h3{Sobol Sequence}
+@br
+ @h3{Sobol Sequence}
 The syntax of the Sobol sequence sampling is the following :
-    @br
-    @br
-    @hl.openmole("""
-    val i = Val[Double]
-    val j = Val[Double]
-    val values = Val[Array[Double]]
+@br
+@br
+@hl.openmole("""
+val i = Val[Double]
+val j = Val[Double]
+val values = Val[Array[Double]]
 
-    val my_sobol_sampling =
-      SobolSampling(
-        100, // Number of points
-        i in (0.0, 10.0),
-        j in (0.0, 5.0),
-        values in Vector((0.0, 1.0), (0.0, 10.0), (5.0, 9.0)) // Generate part of the sobol sampling inside the array of values
-      )
-    """, name = "sobol sampling in sensitivity")
+val my_sobol_sampling =
+  SobolSampling(
+    100, // Number of points
+    i in (0.0, 10.0),
+    j in (0.0, 5.0),
+    values in Vector((0.0, 1.0), (0.0, 10.0), (5.0, 9.0)) // Generate part of the sobol sampling inside the array of values
+  )
+""", name = "sobol sampling in sensitivity")
 
-    @h3{Usage in DirectSampling tasks}
+@h3{Usage in DirectSampling tasks}
 
-Once a sampling is defined, you can just add it to a @a("DirectSampling task", href:=DocumentationPages.DirectSampling.anchor(shared.directSamplingMenu.gridSampling)) , under the @hl.highlight("sampling", "plain") argument. For example, supposing you have already declared inputs, outputs, and a model taskcalled myModel, the sampling could be used like :
-
-
-    @hl.openmoleNoTest("""
-        val myExploration = DirectSampling(
-          evaluation = myModel ,
-          sampling = my_sobol_sampling,
-          aggregation = mean
-        )
-
-        myExploration
-        """)
+Once a sampling is defined, you can just add it to a @a("DirectSampling task", href:= anchor(gridSampling)) , under the @hl.highlight("sampling", "plain") argument. For example, supposing you have already declared inputs, outputs, and a model taskcalled myModel, the sampling could be used like :
 
 
-@sect{@shared.directSamplingMenu.severalInputs }
-    @p
+@hl.openmoleNoTest("""
+    val myExploration = DirectSampling(
+      evaluation = myModel ,
+      sampling = my_sobol_sampling,
+      aggregation = mean
+    )
 
-      Sampling can be performed on several inputs domains as well as on @b{several input types}, using the @b{cartesian product} operator: @b{x}, introduced in the @a("grid sampling",href:=DocumentationPages.DirectSampling.anchor(shared.directSamplingMenu.gridSampling))  dedicated section.
-
-    Here is an example, still supposing you have already defined a task used for evaluation called myModel:
-
-
-     @hl.openmoleNoTest("""
-       val i = Val[Int]
-       val j = Val[Double]
-       val k = Val[String]
-       val l = Val[Long]
-       val m = Val[File]
-
-       val exploration =
-         DirectSampling (
-         evaluation = myModel,
-         sampling =
-           (i in (0 to 10 by 2)) x
-           (j in (0.0 to 5.0 by 0.5)) x
-           (k in List("Leonardo", "Donatello", "Raphaël", "Michelangelo")) x
-           (l in (UniformDistribution[Long]() take 10)) x
-           (m in (workDirectory / "dir").files().filter(f => f.getName.startsWith("exp") && f.getName.endsWith(".csv")))
-         )
-        """)
-    @br
-    DirectSampling performs every combination between the 5 inputs of various types: Integer (i) , Double (j), Strings (k), Long (l), Files (m).
-
-    @br
-    @br
-    The UniformDistribution[T]() take 10 is a uniform sampling of 10 numbers of the Long type,
-    taken in the [Long.MIN_VALUE; Long.MAX_VALUE] domain of the Long native type.
-
-    @br
-    @br
-
-    Files are explored as items of a list.
-     The items are gathered  by the @hl.code("files()") function applied  on the @hl.highlight("dir","plain") directory,
-     optionally filtered with any @hl.code("String => Boolean")  functions  such as  @hl.highlight("contains(), startswith(), endswith()", "plain")
+    myExploration
+    """)
 
 
-     (see  the @a("Java Class String Documentation", href:= shared.link.javaString)
-     for more details)
+@h2{@severalInputs}
 
 
-    @br
-        If your input is one file among many,  or  a line among a CSV file, use the
-        @a("CSVSampling task", href := Link.intern(shared.directSamplingMenu.csvSampling))
-        and @a("FileSampling task", href := DocumentationPages.dataProcessing.anchor(shared.dataProcessingMenu.setOfFiles)).
+Sampling can be performed on several inputs domains as well as on @b{several input types}, using the @b{cartesian product} operator: @b{x}, introduced in the @a("grid sampling",href:=anchor(gridSampling))  dedicated section.
+
+Here is an example, still supposing you have already defined a task used for evaluation called myModel:
 
 
+@hl.openmoleNoTest("""
+ val i = Val[Int]
+ val j = Val[Double]
+ val k = Val[String]
+ val l = Val[Long]
+ val m = Val[File]
+
+ val exploration =
+   DirectSampling (
+   evaluation = myModel,
+   sampling =
+     (i in (0 to 10 by 2)) x
+     (j in (0.0 to 5.0 by 0.5)) x
+     (k in List("Leonardo", "Donatello", "Raphaël", "Michelangelo")) x
+     (l in (UniformDistribution[Long]() take 10)) x
+     (m in (workDirectory / "dir").files().filter(f => f.getName.startsWith("exp") && f.getName.endsWith(".csv")))
+   )
+  """)
+
+@br
+DirectSampling performs every combination between the 5 inputs of various types: Integer (i) , Double (j), Strings (k), Long (l), Files (m).
+
+@br
+@br
+The UniformDistribution[Long]() take 10 is a uniform sampling of 10 numbers of the Long type, taken in the [Long.MIN_VALUE; Long.MAX_VALUE] domain of the Long native type.
+
+@br
+@br
+
+Files are explored as items of a list.
+ The items are gathered  by the @hl.code("files()") function applied  on the @hl.highlight("dir","plain") directory,
+ optionally filtered with any @hl.code("String => Boolean")  functions  such as  @hl.highlight("contains(), startswith(), endswith()", "plain")
+
+
+ (see  the @a("Java Class String Documentation", href:= shared.link.javaString)
+ for more details)
+
+
+@br
+    If your input is one file among many,  or  a line among a CSV file, use the
+    @a("CSVSampling task", href := anchor(csvSampling))
+    and @a("FileSampling task", href := DocumentationPages.dataProcessing.file + anchor("Exploring a set of files")).
+
+
+@h2{@advancedSampling}
+
+Sampling are tools for exploring a space of parameter. The term @i{parameter} is understood in a very broad
+acceptation in OpenMOLE. It may concern numbers, files, random streams, images...
+
+@p{Complete sampling}
+  The most common way of exploring a model is by using a "complete" sampling, or @b{DirectSampling}, which generates every combination of parameters values and then use the DirectSampling method:
+  @br @hl.openmole("""
+  val i = Val[Int]
+  val j = Val[Double]
+  val k = Val[String]
+  val l = Val[Long]
+
+  val exploration = DirectSampling (
+    sampling =
+      (i in (0 to 10 by 2)) x
+      (j in (0.0 to 5.0 by 0.5)) x
+      (k in List("hello", "world")) x
+      (l in (UniformDistribution[Long]() take 10)),
+    evaluation = myModel
+  )
+  """, name = "complete sampling", header = "val myModel = EmptyTask()")
+
+  Using the @i{x} combinator means that all the domains are @b{unrolled before being combined} with each other.
+
+@h3{Combine samplings}
+
+To define samplings, you can combine them with each other. As we've previously seen, the complete sampling is a
+way to achieve that. Many composition functions are implemented in OpenMOLE.
+
+@p The "x" combinator also enables domain bounds to depend on each others. Notice how the upper bound of the second
+factor depends on the value of the first one.
+
+@p
+  @hl.openmole("""
+  val i = Val[Int]
+  val j = Val[Double]
+
+  val explo =
+   DirectSampling (
+     sampling =
+       (i in (0 to 10 by 2)) x
+       (j in Range[Double]("0.0", "2 * i", "0.5")),
+     evaluation = myModel
+  """, name = "combine sampling", header = "val myModel = EmptyTask()")
+
+  Samplings can also be combined using variants of the zip operator.
+
+@h3{Zip samplings}
+
+Zip Samplings come in three declinations in OpenMOLE.
+
+@p The first one is the @hl.code("ZipSampling"). It combines the elements of corresponding indices
+from two samplings. @hl.code("ZipSampling") mimics the traditional @i{zip} operation from functional
+programming that combining elements from two lists. OpenMOLE implements the @hl.code("ZipSampling")
+through the keyword @hl.code("zip").
+
+@p The second sampling from the Zip family is the @hl.code("ZipWithIndexSampling"). Again, this is
+inspired from a common functional programming operation called @i{zipWithIndex}. Applying @i{zipWithIndex} to a list
+would create a new list of pairs formed by the elements of the original list and the index of their position in the
+list. For instance @hl.code("List('A', 'B', 'C') zipWithIndex") would returns the new list
+@hl.code("List(('A',0), ('B',1), ('C',2))"). @hl.code("ZipWithIndexSampling") performs a
+similar operation in the dataflow. An integer variable from the dataflow is filled with the index instead of
+generating a new pair. OpenMOLE implements the @hl.code("ZipWithIndexSampling") through the keyword
+@hl.code("withIndex").
+
+@p The following code snippet gives an example of how to use these two first Zip samplings.
+
+@br @hl.openmole("""
+  val p1 = Val[Int]
+  val p2 = Val[Int]
+
+  val s1 = p1 in (0 to 100) // Code to build sampling 1
+  val s2 = p2 in (0 to 100) // Code to build sampling 2
+
+  // Create a sampling by zipping line by line s1 and s2
+  val s3 = s1 zip s2
+
+  // Create a sampling containing an id for each experiment in a variable called id
+  val id = Val[Int]
+  val s4 = s2 withIndex id""", name = "zip sampling")
+
+  @p The third and last sampling from the Zip family is the @hl.code("ZipWithNameSampling"). It maps the name
+  the files from a @i{FileDomain} @("(see the next section for more details about exploring files)") to a String variable
+  in the dataflow. In the following excerpt, we map the name of the file and print it along to its size. In OpenMOLE file
+  variables generally don't preserve the name of the file from which it was originally created. In order to save some
+  output results depending on the input filename the filename should be transmitted in a variable of type String. When running
+  this snippet, the file is renamed by the ScalaTask however, its name is saved in the @i{name} variable.
+
+  @br @hl.openmole("""
+    val file = Val[File]
+    val name = Val[String]
+    val size = Val[Long]
+
+    val t = ScalaTask("val size = new java.io.File(workDir, \"file\").length") set (
+      inputFiles += (file, "file"),
+      inputs += name,
+      outputs += (name, size)
+    )
+
+    DirectSampling(
+      sampling = file in (workDirectory / "dir") withName name,
+      evaluation = (t hook ToStringHook())
+    )""", name = "zip with name sampling")
+
+  @p If you need to go through several level of files you may use a sampling like this one:
+
+  @br @hl.openmole("""
+  val dir = Val[File]
+  val dirName = Val[String]
+  val file = Val[File]
+  val fileName = Val[String]
+  val name = Val[String]
+  val size = Val[Long]
+
+  val t = ScalaTask("val size = file.length") set (
+    inputs += file,
+    outputs += size,
+    (inputs, outputs) += (fileName, dirName)
+  )
+
+  DirectSampling(
+    sampling =
+      (dir in (workDirectory / "test") withName dirName) x
+      (file in dir withName fileName),
+    evaluation = t hook ToStringHook()
+  )
+  """, name = "multilevel file sampling")
+
+@h3{Take, filter, sample samplings}
+
+You can modify a Sampling using various operations in OpenMOLE.
+
+@p When calling @hl.code("take N") on a Sampling, along with @i{N} an integer, OpenMOLE will generate a
+new Sampling from the first @i{N} values of the initial Sampling.
+
+@p Similarly, you can use @hl.code("sample N") to create a new Sampling with @i{N} random values picked up
+at random from the initial Sampling.
+
+@p More advanced Sampling reductions happen through @hl.code("""filter ("predicate")"""). It filters out all
+the values from the initial Sampling for which the given predicate is wrong.
+
+@p The 3 sampling operations presented in this section are put into play in the following example:
+@br @hl.openmole("""
+  val p1 = Val[Int]
+  val p2 = Val[Int]
+
+  val s1 = p1 in (0 to 100) // Code to build sampling 1
+  val s2 = p2 in (0 to 100) // Code to build sampling 2
+
+  // Create a sampling containing the 10 first values of s1
+  val s3 = s1 take 10
+
+  // Create a new sampling containing only the lines of s1 for which the given predicate is true
+  val s4 = (s1 x s2) filter ("p1 + p2 < 100")
+
+  // Sample 5 values from s1
+  val s5 = s1 sample 5""", name = "sampling modifiers")
+
+@h3{Random samplings}
+
+OpenMOLE can generate random samplings from an initial sampling using @hl.code("shuffle") that creates
+a new sampling which is a randomly shuffled version of the initial one.
+
+@p OpenMOLE can also generate a fresh new Sampling made of random numbers using
+@hl.code("UniformDistribution[T]"), with @i{T} the type of random numbers to be generated.
+
+@p Check the following script to discover how to use these random-based operations in a workflow:
+
+@br @hl.openmole("""
+val p1 = Val[Int]
+val p2 = Val[Int]
+
+val s1 = p1 in (0 to 100) // Code to build sampling 1
+val s2 = p2 in (0 to 100) // Code to build sampling 2
+// Create a sampling containing the values of s1 in a random order
+val s6 = s1.shuffle
+
+// Replicate 100 times the sampling s1 and provide seed for each experiment
+val seed = Val[Int]
+val s7 = s1 x (seed in (UniformDistribution[Int]() take 100))""", name = "random sampling")
+
+@h3{Higher level samplings}
+
+Some sampling combinations generate higher level samplings such as @hl.code("repeat") and
+@hl.code("bootstrap"):
+  @br @hl.openmole("""
+    val i = Val[Int]
+
+    val s1 = i in (0 to 100)
+
+    // Re-sample 10 times s1, the output is an array of array of values
+    val s2 = s1 repeat 10
+
+    // Create 10 samples of 5 values from s1, it is equivalent to "s1 sample 5 repeat 10", the output type is an
+    // array of array of values
+    val s3 = s1 bootstrap (5, 10)""", name = "high level sampling")
+
+@p Here is how such higher level samplings would be used within a Mole:
+@br @hl.openmole("""
+    // This code compute 10 couples (for f1 and f2) of medians among 5 samples picked at random in f1 x f2
+    val p1 = Val[Double]
+    val p2 = Val[Double]
+
+    val f1 = p1 in (0.0 to 1.0 by 0.1)
+    val f2 = p2 in (0.0 to 1.0 by 0.1)
+
+    val stat = ScalaTask("val p1 = input.p1.median; val p2 = input.p2.median") set (
+      inputs += (p1.toArray, p2.toArray),
+      outputs += (p1, p2)
+    )
+
+    DirectSampling(
+      sampling = (f1 x f2) bootstrap (5, 10),
+      evaluation = stat hook ToStringHook()
+    )
+
+    """, name = "bootstrap example sampling")
+
+
+@h3{The is keyword}
+
+The is keyword can be use to assigned a value to variable in a sampling. For instance:
+@hl.openmole("""
+val i = Val[Int]
+val j = Val[Int]
+val k = Val[Int]
+
+DirectSampling(
+  sampling =
+    (i in (0 until 10)) x
+    (j is "i * 2") x
+    (k in Range[Int]("j", "j + 7")),
+  evaluation = myModel
+)""", header = "val myModel = EmptyTask()")

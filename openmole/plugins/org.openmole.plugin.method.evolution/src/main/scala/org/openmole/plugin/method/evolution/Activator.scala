@@ -43,12 +43,13 @@ class Activator extends PluginInfoActivator {
         Task(objectName(TerminationTask)),
         Task(objectName(InitialStateTask)),
         Pattern(objectName(NichedNSGA2)),
-        //        Pattern(objectName(GenomeProfile)),
+        Pattern(objectName(GenomeProfile)),
         Pattern(objectName(NSGA2)),
+        Pattern(objectName(OSE)),
         Pattern(objectName(PSE)),
         Pattern("SteadyStateEvolution"),
         Pattern("IslandEvolution"),
-        Pattern("Stochastic"),
+        Word(Stochastic.getClass),
         Hook(objectName(SavePopulationHook))
       )
 
