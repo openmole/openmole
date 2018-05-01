@@ -25,6 +25,7 @@ object Libraries {
   lazy val catsVersion = "1.0.1"
   lazy val scalajsVersion = "0.6.21"
   lazy val squantsVersion = "1.3.0"
+  lazy val xstreamVersion = "1.4.10"
 
   lazy val bootstrapnative = libraryDependencies += "fr.iscpif.scaladget" %%% "bootstrapnative" % scaladgetVersion
   lazy val lunr = libraryDependencies += "fr.iscpif.scaladget" %%% "lunr" % scaladgetVersion
@@ -53,7 +54,7 @@ object Libraries {
   lazy val bonecp = "org.openmole.library" %% "com-jolbox-bonecp" % "0.8.0-rc1"
   lazy val slick = "org.openmole.library" %% "com-typesafe-slick" % "3.2.0"
   lazy val slf4j = "org.openmole.library" %% "org-slf4j" % "1.7.10"
-  lazy val xstream = "org.openmole.library" %% "com-thoughtworks-xstream" % "1.4.9"
+  lazy val xstream = "org.openmole.library" %% "com-thoughtworks-xstream" % xstreamVersion
   lazy val jasypt = "org.openmole.library" %% "org-jasypt-encryption" % "1.9.2"
   lazy val opencsv = "org.openmole.library" %% "au-com-bytecode-opencsv" % "2.3"
   lazy val arm = "org.openmole.library" %% "com-jsuereth-scala-arm" % "2.0"
