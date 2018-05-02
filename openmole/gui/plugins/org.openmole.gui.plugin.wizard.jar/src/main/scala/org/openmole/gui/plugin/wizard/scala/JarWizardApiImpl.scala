@@ -42,7 +42,9 @@ class JarWizardApiImpl(s: Services) extends JarWizardAPI {
     resources:      Resources,
     data:           JarWizardData): SafePath = {
 
-    val modelData = WizardUtils.wizardModelData(inputs, outputs, resources.all.map { _.safePath.name })
+    val modelData = WizardUtils.wizardModelData(inputs, outputs, resources.all.map {
+      _.safePath.name
+    })
     val task = s"${executableName.split('.').head.toLowerCase}Task"
 
     val jarResourceLine = {
@@ -69,19 +71,27 @@ class JarWizardApiImpl(s: Services) extends JarWizardAPI {
     Some(BasicLaunchingCommand(Some(JavaLikeLanguage()), "nananame"))
 
   def jarClasses(jarPath: SafePath): Seq[FullClass] = {
-    println("JAR CLASSES")
+
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
     implicit val workspace = Workspace.instance
+
     val zip = new ZipInputStream(new FileInputStream(jarPath))
-    val classes = Stream.continually(zip.getNextEntry).
-      takeWhile(_ != null).filter { e ⇒
+
+    var classes: Seq[FullClass] = Seq()
+
+    try {
+      Stream.continually(zip.getNextEntry).takeWhile(_ != null).filter { e ⇒
         val name = e.getName
         name.endsWith(".class") &&
           !(name.startsWith("scala") || name.startsWith("java") || name.contains("""$anon$"""))
-      }.map { e ⇒ FullClass(e.getName.dropRight(6).replace('/', '.')) }
+      }.foreach { e ⇒
+        classes = classes :+ FullClass(e.getName.dropRight(6).replace('/', '.'))
+      }
+    }
+    finally {
+      zip.close
+    }
 
-    println("CLASSES " + classes.toSeq.length)
-    zip.close
     classes
   }
 
@@ -93,10 +103,6 @@ class JarWizardApiImpl(s: Services) extends JarWizardAPI {
     val clazz = Class.forName(classString, true, classLoader)
 
     clazz.getDeclaredMethods.map { m ⇒
-      println("method " + m.getName + " || ")
-      m.getParameters.map { _.getName }.foreach { p ⇒
-        println("Param: " + p)
-      }
       JarMethod(
         m.getName,
         m.getGenericParameterTypes.map {
