@@ -39,6 +39,8 @@ class Activator extends BundleActivator {
         Word("outputs"),
         Word("hook"),
         Word("workDirectory"),
+        Word("plugins"),
+        Word("pluginsOf"),
         Transition("--"),
         Transition("-<"),
         Transition(">-"),
