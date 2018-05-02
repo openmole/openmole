@@ -114,7 +114,7 @@ of your model outputs, which is not bad after all !
   all the distances considered. The set of all these parameter sets is
   called the Pareto-front.
 
-@h2{Single and multi-criteria calibration in OpenMOLE}
+@h2{Calibration with OpenMOLE}
 
 Single and multi-criteria calibration in OpenMOLE are both done with the NSGA2 algorithm.
 It takes the following parameters:
