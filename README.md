@@ -2,6 +2,9 @@
 
 It is a free software distributed under the [AGPLv3](http://www.gnu.org/licenses/agpl.html) free software license.
 
+* The stable version is available [here](http://openmole.org).
+* A fresh build of the developement version is available [here](http://next.openmoe.org).
+
 ## OpenMOLE by example ##
 
 Imagine that you want to understand and/or optimize some parameters of an executable that you generally set in an empirical or arbitrary manner. 
