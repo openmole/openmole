@@ -68,7 +68,7 @@ class JarWizardApiImpl(s: Services) extends JarWizardAPI {
   }
 
   def parse(safePath: SafePath): Option[LaunchingCommand] =
-    Some(BasicLaunchingCommand(Some(JavaLikeLanguage()), "nananame"))
+    Some(BasicLaunchingCommand(Some(JavaLikeLanguage()), ""))
 
   def jarClasses(jarPath: SafePath): Seq[FullClass] = {
 
