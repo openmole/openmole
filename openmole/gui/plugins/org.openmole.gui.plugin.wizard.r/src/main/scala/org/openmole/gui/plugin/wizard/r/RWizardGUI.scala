@@ -35,7 +35,7 @@ import scalatags.JsDom.all._
 class RWizardFactory extends WizardPluginFactory {
   val fileType = CodeFile(RLanguage())
 
-  def build: WizardGUIPlugin = new RWizardGUI()
+  def build(safePath: SafePath, onPanelFilled: (LaunchingCommand) ⇒ Unit = (LaunchingCommand) ⇒ {}): WizardGUIPlugin = new RWizardGUI
 
   def parse(safePath: SafePath): Future[Option[LaunchingCommand]] = OMPost()[RWizardAPI].parse(safePath).call()
 

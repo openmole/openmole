@@ -34,7 +34,7 @@ import rx._
 class NativeWizardFactory extends WizardPluginFactory {
   val fileType = CareArchive
 
-  def build: WizardGUIPlugin = new NativeWizardGUI()
+  def build(safePath: SafePath, onPanelFilled: (LaunchingCommand) ⇒ Unit = (LaunchingCommand) ⇒ {}): WizardGUIPlugin = new NativeWizardGUI
 
   def parse(safePath: SafePath): Future[Option[LaunchingCommand]] = OMPost()[NativeWizardAPI].parse(safePath).call()
 
@@ -46,7 +46,7 @@ class NativeWizardFactory extends WizardPluginFactory {
 case class NativeWizardData() extends WizardData
 
 @JSExportTopLevel("org.openmole.gui.plugin.wizard.native.NativeWizardGUI")
-class NativeWizardGUI() extends WizardGUIPlugin {
+class NativeWizardGUI extends WizardGUIPlugin {
 
   type WizardType = NativeWizardData
 

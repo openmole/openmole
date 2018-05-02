@@ -38,7 +38,7 @@ class NetlogoWizardFactory extends WizardPluginFactory {
 
   val fileType = CodeFile(NetLogoLanguage())
 
-  def build: WizardGUIPlugin = new NetlogoWizardGUI()
+  def build(safePath: SafePath, onPanelFilled: (LaunchingCommand) ⇒ Unit = (LaunchingCommand) ⇒ {}): WizardGUIPlugin = new NetlogoWizardGUI()
 
   def parse(safePath: SafePath): Future[Option[LaunchingCommand]] = OMPost()[NetlogoWizardAPI].parse(safePath).call()
 
@@ -48,7 +48,7 @@ class NetlogoWizardFactory extends WizardPluginFactory {
 }
 
 @JSExportTopLevel("org.openmole.gui.plugin.wizard.netlogo.NetlogoWizardGUI")
-class NetlogoWizardGUI(data: NetlogoWizardData = NetlogoWizardData()) extends WizardGUIPlugin {
+class NetlogoWizardGUI extends WizardGUIPlugin {
   type WizardType = NetlogoWizardData
 
   def factory = new NetlogoWizardFactory

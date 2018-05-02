@@ -247,17 +247,17 @@ object Utils extends JavaLogger {
     build(classes, Seq())
   }
 
-  //  def jarMethods(jarPath: SafePath, classString: String)(implicit workspace: Workspace): Seq[JarMethod] = {
-  //    import org.openmole.gui.ext.data.ServerFileSystemContext.project
-  //    val classLoader = new URLClassLoader(Seq(jarPath.toURI.toURL), this.getClass.getClassLoader)
-  //    val clazz = Class.forName(classString, true, classLoader)
+  //    def jarMethods(jarPath: SafePath, classString: String)(implicit workspace: Workspace): Seq[JarMethod] = {
+  //      import org.openmole.gui.ext.data.ServerFileSystemContext.project
+  //      val classLoader = new URLClassLoader(Seq(jarPath.toURI.toURL), this.getClass.getClassLoader)
+  //      val clazz = Class.forName(classString, true, classLoader)
   //
-  //    clazz.getDeclaredMethods.map { m ⇒
-  //      JarMethod(m.getName, m.getGenericParameterTypes.map {
-  //        _.toString.split("class ").last
-  //      }.toSeq, m.getReturnType.getCanonicalName, Modifier.isStatic(m.getModifiers), classString)
+  //      clazz.getDeclaredMethods.map { m ⇒
+  //        JarMethod(m.getName, m.getGenericParameterTypes.map {
+  //          _.toString.split("class ").last
+  //        }.toSeq, m.getReturnType.getCanonicalName, Modifier.isStatic(m.getModifiers), classString)
+  //      }
   //    }
-  //  }
 
   def move(from: File, to: File): Unit =
     if (from.exists && to.exists) {

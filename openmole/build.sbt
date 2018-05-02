@@ -679,6 +679,10 @@ lazy val rWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.wiza
   libraryDependencies += Libraries.equinoxOSGi,
 ) dependsOn(extPluginGUIServer, extClientTool, extServerTool, workspace) enablePlugins (ExecNpmPlugin)
 
+lazy val jarWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.wizard.jar") settings(
+  guiPluginSettings,
+  libraryDependencies += Libraries.equinoxOSGi,
+) dependsOn(extPluginGUIServer, extClientTool, extServerTool, workspace) enablePlugins (ExecNpmPlugin)
 
 val guiPlugins = Seq(
   guiEnvironmentSSHLoginPlugin,
@@ -686,7 +690,8 @@ val guiPlugins = Seq(
   guiEnvironmentEGIPlugin,
   netlogoWizardPlugin,
   nativeWizardPlugin,
-  rWizardPlugin) //, guiEnvironmentDesktopGridPlugin)
+  rWizardPlugin,
+  jarWizardPlugin) //, guiEnvironmentDesktopGridPlugin)
 
 /* -------------------- Bin ------------------------- */
 

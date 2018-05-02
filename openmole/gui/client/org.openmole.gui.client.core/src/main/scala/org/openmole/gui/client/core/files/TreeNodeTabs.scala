@@ -272,7 +272,7 @@ object TreeNodeTab {
                 if (!sequence.now.header.isEmpty && !filteredSequence.isEmpty) {
                   val table =
                     scaladget.bootstrapnative.Table(
-                      sequence.now.header,
+                      Some(scaladget.bootstrapnative.Row(sequence.now.header)),
                       filteredSequence.map {
                         scaladget.bootstrapnative.Row(_)
                       }.toSeq,

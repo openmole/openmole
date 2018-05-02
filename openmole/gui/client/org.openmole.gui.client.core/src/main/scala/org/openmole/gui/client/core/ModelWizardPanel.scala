@@ -210,12 +210,12 @@ class ModelWizardPanel {
       } match {
         case Some(f: WizardPluginFactory) ⇒
           val help = f.help
-          div(row)(
-            (if (help.isEmpty) div()
-            else div(modelHelp)(f.help))(colMD(2)),
+          div(
+            // (if (help.isEmpty) div()
+            //    else div(modelHelp)(f.help))(colMD(2)),
             currentPluginPanel().map {
               _.panel
-            }.getOrElse(div())(colMD(10))
+            }.getOrElse(div())
           )
         case _ ⇒ div("")
       }
@@ -307,19 +307,25 @@ class ModelWizardPanel {
           fileToUploadPath() = Some(safePath)
           TreeNodePanel.refreshAndDraw
           factory.parse(safePath).foreach { b ⇒
-            currentPluginPanel() = Some(factory.build)
-            launchingCommand() = b
-            launchingCommand.now match {
-              case Some(lc: LaunchingCommand) ⇒ setReactives(lc)
-              case None ⇒
-                currentReactives() = Seq()
-                dialog.hide
-                buildScript(safePath)
-            }
+            currentPluginPanel() = Some(factory.build(safePath, (lc: LaunchingCommand) ⇒ {
+              setLaunchingComand(Some(lc), safePath)
+            }))
+            setLaunchingComand(b, safePath)
           }
         }
     }
 
+  }
+
+  def setLaunchingComand(lc: Option[LaunchingCommand], safePath: SafePath) = {
+    launchingCommand() = lc
+    launchingCommand.now match {
+      case Some(lc: LaunchingCommand) ⇒ setReactives(lc)
+      case None ⇒
+        currentReactives() = Seq()
+        dialog.hide
+        buildScript(safePath)
+    }
   }
 
   def getResourceInfo = {
@@ -391,9 +397,9 @@ class ModelWizardPanel {
     })
   }
 
-  def buildScript(safePath: SafePath) = factory(safePath).map {
+  def buildScript(safePath: SafePath) = factory(safePath).foreach {
     factory ⇒
-      currentPluginPanel.now.map {
+      currentPluginPanel.now.foreach {
         _.save(
           manager.current.now ++ s"${
             scriptNameInput.value.clean
