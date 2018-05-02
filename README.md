@@ -3,7 +3,7 @@
 It is a free software distributed under the [AGPLv3](http://www.gnu.org/licenses/agpl.html) free software license.
 
 * The stable version is available [here](http://openmole.org).
-* A fresh build of the developement version is available [here](http://next.openmoe.org).
+* A fresh build of the developement version is available [here](http://next.openmole.org).
 
 ## OpenMOLE by example ##
 
