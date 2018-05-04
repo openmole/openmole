@@ -21,6 +21,7 @@ import org.openmole.plugin.task.systemexec._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.validation._
 import org.openmole.plugin.task.container
+import org.openmole.plugin.task.r.RTask.InstallCommand.RLibrary
 
 object RTask {
 
@@ -50,7 +51,7 @@ object RTask {
         case RLibrary(name, version) ⇒
           // need to install devtools to get older packages versions
           //apt update; apt-get -y install libssl-dev libxml2-dev libcurl4-openssl-dev libssh2-1-dev;
-          s"""R --slave -e 'install.packages("devtools", dependencies = T); library(devtools); install_version("$name",version = "$version", dependencies = T); library("$name")'"""
+          s"""library(devtools); install_version("$name",version = "$version", dependencies = T); library("$name")'"""
       }
 
     implicit def stringToRLibrary(name: String): InstallCommand = RLibrary(name, "latest")
@@ -72,8 +73,11 @@ object RTask {
     //def version = "3.3.3"
     def version = rVersion
 
-    val installCommands =
-      install ++ InstallCommand.installCommands(libraries.toVector ++ Seq(InstallCommand.RLibrary("jsonlite", "latest")))
+    // add additional installation of devtools only if needed
+    val installCommands = libraries.map { _ match { case RLibrary(_, v) ⇒ if (v == "latest") { 0.0 } else { 1.0 } } }.sum match {
+      case 0.0          ⇒ install ++ InstallCommand.installCommands(libraries.toVector ++ Seq(InstallCommand.RLibrary("jsonlite", "latest")))
+      case x if x > 0.0 ⇒ install ++ Seq("apt update", "apt-get -y install libssl-dev libxml2-dev libcurl4-openssl-dev libssh2-1-dev", """R --slave -e 'install.packages("devtools", dependencies = T); library(devtools);""") ++ InstallCommand.installCommands(libraries.toVector ++ Seq(InstallCommand.RLibrary("jsonlite", "latest")))
+    }
 
     val uDockerArguments =
       UDockerTask.createUDocker(
