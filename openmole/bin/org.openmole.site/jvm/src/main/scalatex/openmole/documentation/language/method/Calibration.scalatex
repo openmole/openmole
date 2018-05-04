@@ -26,59 +26,59 @@ Usually, one uses a fitness function that is commensurable to a distance from yo
  able to match the objective dynamic, the calibration will find the parameterization leading to the closest possible dynamic.
 For more details on the calibration using genetic algorithms, see the @a("GA detailed page", href:=DocumentationPages.geneticalgo.file).
 
-@sect{Single criterion Calibration}
+@h2{Single criterion Calibration}
 
-    @break
-    @Resource.rawFrag(Resource.img.method.GAsingleID)
-    @break
-    @b{Method scores :}
-    @br
-    The single criterion Calibration method is @i{designed} to solve an optimization problem, so unsurprisingly it performs well
-    regarding the optimization grade.
-    Since it's only focused towards discover the best performing individual (parameter set), this method doesn't provide
-    insights about the sensitivity  of the model regarding its inputs, as it does not keep full record of the past input samplings leading to the optimal solution.
-    @br
-    For the same reason, this method does not intend to cover the input space and the output space and thus does not perform
-    well regarding the input space and output space exploration grades.
-    It @i{does} indeed explore input space, but does not keep track of it.
-    Calibration can handle stochasticity, using a @a("specific method", href:=DocumentationPages.stochasticity.file).
-    @br
-    This method is not sensitive to the dimensionality of the model output space, as it only need a fitness value, which
-      is a single criterion (value).
-     It is, on the contrary, sensitive the input space dimensionality, as the population of potential solutions to
-     evolve can be tremendous, as well as its fitness gradient hardly tractable.
+@break
+@Resource.rawFrag(Resource.img.method.GAsingleID)
+@break
+@b{Method scores :}
+@br
+The single criterion Calibration method is @i{designed} to solve an optimization problem, so unsurprisingly it performs well
+regarding the optimization grade.
+Since it's only focused towards discover the best performing individual (parameter set), this method doesn't provide
+insights about the sensitivity  of the model regarding its inputs, as it does not keep full record of the past input samplings leading to the optimal solution.
+@br
+For the same reason, this method does not intend to cover the input space and the output space and thus does not perform
+well regarding the input space and output space exploration grades.
+It @i{does} indeed explore input space, but does not keep track of it.
+Calibration can handle stochasticity, using a @a("specific method", href:=DocumentationPages.stochasticity.file).
+@br
+This method is not sensitive to the dimensionality of the model output space, as it only need a fitness value, which
+  is a single criterion (value).
+ It is, on the contrary, sensitive the input space dimensionality, as the population of potential solutions to
+ evolve can be tremendous, as well as its fitness gradient hardly tractable.
 
 
-    @break
-    @figure
-     @img(src := Resource.img.method.calibrationMono.file, center(70))
-     @br
-     Single criterion calibration answers the question :  For a given target value of output o1, what is(are) the
-     parameter set(s) (i, j , k) that produce the closest values of o1 to the target ?
+@break
+@figure
+ @img(src := Resource.img.method.calibrationMono.file, center(70))
+ @br
+ Single criterion calibration answers the question :  For a given target value of output o1, what is(are) the
+ parameter set(s) (i, j , k) that produce the closest values of o1 to the target ?
 
-@sect{Multi-criteria Calibration}
+@h2{Multi-criteria Calibration}
 
-    @br
-    @Resource.rawFrag(Resource.img.method.GAmultiID)
-    @break
+@br
+@Resource.rawFrag(Resource.img.method.GAmultiID)
+@break
 
-    @b{Method scores :}
-    @br
-    Multi-criteria  Calibration method slightly differs from the single criterion version.
-    It suffers the same limitation regarding Input and Output space limitations.
-    However, since it may reveal a Pareto frontier and the underlying tradeoff, it reveals a little bit
-    of the model sensitivity, showing that the model performance regarding a criterion is  impacted by its performances
-    regarding the others. This is not @i{genuine sensitivity} as in sensitivity analysis, but still, it reveals a variation
-    of your model outputs, which is not bad after all !
-    @br
-   
-    @break
+@b{Method scores :}
+@br
+Multi-criteria  Calibration method slightly differs from the single criterion version.
+It suffers the same limitation regarding Input and Output space limitations.
+However, since it may reveal a Pareto frontier and the underlying tradeoff, it reveals a little bit
+of the model sensitivity, showing that the model performance regarding a criterion is  impacted by its performances
+regarding the others. This is not @i{genuine sensitivity} as in sensitivity analysis, but still, it reveals a variation
+of your model outputs, which is not bad after all !
+@br
 
-    @figure
-      @img(src := Resource.img.method.calibrationMulti.file, center(70))
-      @figcaption
-        Figure: Multi-criteria answers the question : For a given target pattern (o1,o2) what are the parameters sets (i,j) that produce
-        closest output values to the target pattern ? Sometimes a Pareto Frontier may appear !
+@break
+
+@figure
+  @img(src := Resource.img.method.calibrationMulti.file, center(70))
+  @figcaption
+    Figure: Multi-criteria answers the question : For a given target pattern (o1,o2) what are the parameters sets (i,j) that produce
+    closest output values to the target pattern ? Sometimes a Pareto Frontier may appear !
 
 
 @break
@@ -114,46 +114,47 @@ For more details on the calibration using genetic algorithms, see the @a("GA det
   all the distances considered. The set of all these parameter sets is
   called the Pareto-front.
 
-@sect{Single and multi-criteria calibration in OpenMOLE}
-    Single and multi-criteria calibration in OpenMOLE are both done with the NSGA2 algorithm.
-    It takes the following parameters:
+@h2{Calibration with OpenMOLE}
 
-    @ul
-        @li{@hl.code("mu"): the population size,}
-        @li{@hl.code("genome"): a list of the model parameters and their respective intervals,}
-        @li{@hl.code("objectives"): a list of the distance measures (which in the single criterion case will contain only one measure)}
+Single and multi-criteria calibration in OpenMOLE are both done with the NSGA2 algorithm.
+It takes the following parameters:
 
-    @p
-      You will also need a evolutionary scheme to drive the evolution and can use the SteadyStateEvolution scheme.
-      it takes the following parameters:
+@ul
+    @li{@hl.code("mu"): the population size,}
+    @li{@hl.code("genome"): a list of the model parameters and their respective intervals,}
+    @li{@hl.code("objectives"): a list of the distance measures (which in the single criterion case will contain only one measure)}
 
-    @ul
-      @li{@hl.code("algorithm"): the nsga2 algorithm defining the evolution,}
-      @li{@hl.code("evaluation"): the OpenMOLE task that runs the simulation,}
-      @li{@hl.code("parallelism"): the number of simulations that will be run in parallel,}
-      @li{@hl.code("termination"): the total number of evaluations (execution of the task passed to the parameter "evaluation") to be executed}
+@p
+  You will also need a evolutionary scheme to drive the evolution and can use the SteadyStateEvolution scheme.
+  it takes the following parameters:
 
-    @p
-      In your OpenMOLE script, the NSGA2 algorithm and SteadyStateEvolution scheme are used like so:
-    @br @hl.openmole("""
-    val nsga2 =
-      NSGA2(
-        mu = 50,
-        genome = Seq(
-          param1 in (0.0, 99.0),
-          param2 in (0.0, 99.0),
-          param3 in (0, 5),
-          param4 in List("apple", "banana", "strawberry")),
-        objectives = Seq(distance1, distance2)
-      )
+@ul
+  @li{@hl.code("algorithm"): the nsga2 algorithm defining the evolution,}
+  @li{@hl.code("evaluation"): the OpenMOLE task that runs the simulation,}
+  @li{@hl.code("parallelism"): the number of simulations that will be run in parallel,}
+  @li{@hl.code("termination"): the total number of evaluations (execution of the task passed to the parameter "evaluation") to be executed}
 
-    val evolution =
-      SteadyStateEvolution(
-        algorithm = nsga2,
-        evaluation = modelTask,
-        parallelism = 10,
-        termination = 100
-      )
-    """, header= modelAndVariables, name = "Calibration")
-    where @hl.code("param1") and @hl.code("param2") are input of the @hl.code("modelTask"), and @hl.code("distance1") and @hl.code("distance2") are its outputs.
-    @p
+@p
+  In your OpenMOLE script, the NSGA2 algorithm and SteadyStateEvolution scheme are used like so:
+@br @hl.openmole("""
+val nsga2 =
+  NSGA2(
+    mu = 50,
+    genome = Seq(
+      param1 in (0.0, 99.0),
+      param2 in (0.0, 99.0),
+      param3 in (0, 5),
+      param4 in List("apple", "banana", "strawberry")),
+    objectives = Seq(distance1, distance2)
+  )
+
+val evolution =
+  SteadyStateEvolution(
+    algorithm = nsga2,
+    evaluation = modelTask,
+    parallelism = 10,
+    termination = 100
+  )
+""", header= modelAndVariables, name = "Calibration")
+where @hl.code("param1") and @hl.code("param2") are input of the @hl.code("modelTask"), and @hl.code("distance1") and @hl.code("distance2") are its outputs.
+@p

@@ -7,7 +7,7 @@ def settings = Seq(
   resolvers += DefaultMavenRepository,
   resolvers += Resolver.sonatypeRepo("snapshots"),
   resolvers += Resolver.sonatypeRepo("releases"),
-  scalaVersion in Global := "2.12.5",
+  scalaVersion in Global := "2.12.6",
   scalacOptions ++= Seq("-deprecation"),
   publishArtifact in (packageDoc in publishLocal) := false,
   publishArtifact in (packageSrc in publishLocal) := false,
@@ -92,8 +92,8 @@ lazy val xstream = OsgiProject(
     "!org.joda.time.*",
     "*"),
   privatePackages = Seq("!scala.*", "META-INF.services.*", "*")) settings(
-  libraryDependencies ++= Seq("com.thoughtworks.xstream" % "xstream" % "1.4.9", "net.sf.kxml" % "kxml2" % "2.3.0"),
-  version := "1.4.9") settings(settings: _*)
+  libraryDependencies ++= Seq("com.thoughtworks.xstream" % "xstream" % "1.4.10", "net.sf.kxml" % "kxml2" % "2.3.0"),
+  version := "1.4.10") settings(settings: _*)
 
 lazy val scalaLang = OsgiProject(
   dir,
@@ -233,7 +233,7 @@ lazy val freedsl =
     version := freedslVersion
   ) dependsOn(cats, squants) settings(settings: _*)
 
-lazy val mgoVersion = "3.11"
+lazy val mgoVersion = "3.13"
 
 lazy val mgo = OsgiProject(dir, "mgo", imports = Seq("!better.*", "*")) settings(
   libraryDependencies += "fr.iscpif" %% "mgo" % mgoVersion,
@@ -348,7 +348,7 @@ lazy val effectaside = OsgiProject(dir, "effectaside", imports = Seq("*")) setti
   version := effectasideVersion
 )
 
-def gridscaleVersion = "2.3"
+def gridscaleVersion = "2.4"
 lazy val gridscale = OsgiProject(dir, "gridscale", imports = Seq("*"), exports = Seq("gridscale.*", "enumeratum.*")) settings (
   libraryDependencies += "fr.iscpif.gridscale" %% "gridscale" % gridscaleVersion,
   version := gridscaleVersion

@@ -224,27 +224,10 @@ object GAIntegration {
         case (continuous, discrete) ⇒ Genome.toVariables(genome, continuous, discrete, scale)
       }
 
-    import Genome.GenomeBound
-
-    def toArrayVariable(genomeBound: GenomeBound, value: Seq[Any]) = genomeBound match {
-      case b: GenomeBound.ScalarDouble ⇒
-        Variable(b.v.toArray, value.map(_.asInstanceOf[Double]).toArray[Double])
-      case b: GenomeBound.ScalarInt ⇒
-        Variable(b.v.toArray, value.map(_.asInstanceOf[Int]).toArray[Int])
-      case b: GenomeBound.SequenceOfDouble ⇒
-        Variable(b.v.toArray, value.map(_.asInstanceOf[Array[Double]]).toArray[Array[Double]])
-      case b: GenomeBound.SequenceOfInt ⇒
-        Variable(b.v.toArray, value.map(_.asInstanceOf[Array[Int]]).toArray[Array[Int]])
-      case b: GenomeBound.Enumeration[_] ⇒
-        val array = b.v.`type`.manifest.newArray(value.size)
-        value.zipWithIndex.foreach { case (v, i) ⇒ java.lang.reflect.Array.set(array, i, v) }
-        Variable.unsecure(b.v.toArray, array)
-    }
-
     variables.map {
       v ⇒
         genome.zipWithIndex.map {
-          case (g, i) ⇒ toArrayVariable(g, v.map(_(i).value))
+          case (g, i) ⇒ Genome.toArrayVariable(g, v.map(_(i).value))
         }.toVector
     }
   }

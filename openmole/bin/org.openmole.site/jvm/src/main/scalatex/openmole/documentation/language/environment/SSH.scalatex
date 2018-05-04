@@ -5,7 +5,7 @@
 The @hl.openmole("SSHEnvironment") makes it possible to delegate tasks to a remote multi-core server through an
 @aa("SSH", href := shared.link.ssh) connection.
 
-@p You should first provide your @aa("authentication", href := DocumentationPages.gui.anchor(shared.guiGuide.authentication)) information to OpenMOLE to be able to use your batch system.
+@p You should first provide your @aa("authentication", href := DocumentationPages.gui.file) information to OpenMOLE to be able to use your batch system.
 
 Then, all that is left is to define is the
   @hl.openmole("SSHEnvironment"):
