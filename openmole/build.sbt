@@ -9,7 +9,7 @@ organization := "org.openmole"
 name := "openmole-root"
 
 def macroParadise =
-  addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.Patch())
+  addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.Patch())
 
 import com.typesafe.sbt.SbtScalariform.ScalariformKeys
 import scalariform.formatter.preferences._
@@ -27,7 +27,7 @@ def formatSettings =
     scalariformAutoformat := true
   )
 
-lazy val scalaVersionValue = "2.12.5"
+lazy val scalaVersionValue = "2.12.6"
 
 def defaultSettings = formatSettings ++
   Seq(
@@ -989,7 +989,7 @@ lazy val dockerBin = Project("docker", binDir / "docker") enablePlugins (sbtdock
     )
   ),
   dockerfile in docker := new Dockerfile {
-    from("openjdk:8-jre-slim")
+    from("openjdk:10-jre-slim")
     maintainer("Romain Reuillon <romain.reuillon@iscpif.fr>, Jonathan Passerat-Palmbach <j.passerat-palmbach@imperial.ac.uk>")
     copy((assemble in openmole).value, s"/openmole")
     runRaw(

@@ -4,7 +4,8 @@ import sbt._
 
 object Libraries {
 
-  lazy val gridscaleVersion = "2.3"
+  lazy val gridscaleVersion = "2.4"
+  lazy val mgoVersion = "3.13"
   lazy val bouncyCastleVersion = "1.57"
   lazy val aceVersion = "01.08.2014"
   lazy val d3Version = "3.5.12"
@@ -24,6 +25,7 @@ object Libraries {
   lazy val catsVersion = "1.0.1"
   lazy val scalajsVersion = "0.6.21"
   lazy val squantsVersion = "1.3.0"
+  lazy val xstreamVersion = "1.4.10"
 
   lazy val bootstrapnative = libraryDependencies += "fr.iscpif.scaladget" %%% "bootstrapnative" % scaladgetVersion
   lazy val lunr = libraryDependencies += "fr.iscpif.scaladget" %%% "lunr" % scaladgetVersion
@@ -52,7 +54,7 @@ object Libraries {
   lazy val bonecp = "org.openmole.library" %% "com-jolbox-bonecp" % "0.8.0-rc1"
   lazy val slick = "org.openmole.library" %% "com-typesafe-slick" % "3.2.0"
   lazy val slf4j = "org.openmole.library" %% "org-slf4j" % "1.7.10"
-  lazy val xstream = "org.openmole.library" %% "com-thoughtworks-xstream" % "1.4.9"
+  lazy val xstream = "org.openmole.library" %% "com-thoughtworks-xstream" % xstreamVersion
   lazy val jasypt = "org.openmole.library" %% "org-jasypt-encryption" % "1.9.2"
   lazy val opencsv = "org.openmole.library" %% "au-com-bytecode-opencsv" % "2.3"
   lazy val arm = "org.openmole.library" %% "com-jsuereth-scala-arm" % "2.0"
@@ -79,7 +81,7 @@ object Libraries {
   lazy val circe = "org.openmole.library" %% "io-circe" % circeVersion
   lazy val scalajsTools = "org.openmole.library" %% "scalajs-tools" % scalajsVersion
   lazy val scalajs = "org.openmole.library" %% "scalajs" % scalajsVersion
-  lazy val mgo = "org.openmole.library" %% "mgo" % "3.11"
+  lazy val mgo = "org.openmole.library" %% "mgo" % mgoVersion
   lazy val family = "org.openmole.library" %% "fr-iscpif-family" % "1.3"
   lazy val monocle = "org.openmole.library" %% "monocle" % "1.5.0"
   lazy val boopickle = "org.openmole.library" %% "boopickle" % boopickleVersion
