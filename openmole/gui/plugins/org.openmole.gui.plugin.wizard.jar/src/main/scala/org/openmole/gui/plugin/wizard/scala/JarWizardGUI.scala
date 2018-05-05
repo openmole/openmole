@@ -26,13 +26,12 @@ import scaladget.tools._
 import autowire._
 import org.scalajs.dom.raw.HTMLElement
 import scaladget.bootstrapnative.SelectableButtons
-import scaladget.bootstrapnative.Selector.Options
 
 import scala.concurrent.Future
 import scala.scalajs.js.annotation._
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
-import org.openmole.core.workspace.Workspace
+import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.data.DataUtils._
 import rx._
 
@@ -58,6 +57,11 @@ class JarWizardGUI(safePath: SafePath, onMethodSelected: (LaunchingCommand) ⇒ 
   def factory = new JarWizardFactory
 
   val jarClasses: Var[Seq[FullClass]] = Var(Seq())
+  val isOSGI: Var[Boolean] = Var(false)
+
+  OMPost()[Api].isOSGI(safePath).call().foreach {o=>
+    isOSGI() = o
+  }
 
   lazy val embedAsPluginCheckBox: SelectableButtons = radios()(
     selectableButton("Yes", onclick = () ⇒ println("YES")),
@@ -76,7 +80,6 @@ class JarWizardGUI(safePath: SafePath, onMethodSelected: (LaunchingCommand) ⇒ 
   OMPost()[JarWizardAPI].jarClasses(safePath).call().foreach { jc ⇒
     val table = scaladget.bootstrapnative.Table(
       rows = jc.map { c ⇒
-        // println("last " + c.name.split(".").last)
         scaladget.bootstrapnative.Row(Seq(c.name))
       }.toSeq,
       bsTableStyle = scaladget.bootstrapnative.BSTableStyle(bordered_table +++ hover_table, emptyMod))
@@ -96,7 +99,6 @@ class JarWizardGUI(safePath: SafePath, onMethodSelected: (LaunchingCommand) ⇒ 
           )
 
           methodTable.now.get.selected.trigger {
-            println("Metho trigger")
             methodTable.now.get.selected.now.map(r ⇒ methodMap(r.values.head)).map { selectedMethod ⇒
               onMethodSelected(JavaLaunchingCommand(
                 selectedMethod,
@@ -127,10 +129,13 @@ class JarWizardGUI(safePath: SafePath, onMethodSelected: (LaunchingCommand) ⇒ 
 
   lazy val panel: TypedTag[HTMLElement] = div(
     div(columnCSS)(
-      hForm(
+      Rx{
+      if(isOSGI()) hForm(
         div(embedAsPluginCheckBox.render)
-          .render.withLabel("Embed jar as plugin ?")
-      ),
+          .render.withLabel("Embed jar as plugin ?"),
+        span("(Your jar is an OSGI bundle. The best way to use it is to embed it as a plugin)").render
+      ) else span("Your jar in not an OSGI bundle. An OSGI bundle is safer and more robust, so that we recomend you to render it as an OSGI bundle",
+        a(href := "http://www.openmole.org/Plugins.html", target := "_blank"))},
       h3("Classes"),
       searchClassInput.tag,
       div(tableCSS)(
@@ -174,6 +179,6 @@ class JarWizardGUI(safePath: SafePath, onMethodSelected: (LaunchingCommand) ⇒ 
       outputs,
       libraries,
       resources,
-      JarWizardData(embedAsPlugin, plugin)).call()
+      JarWizardData(embedAsPlugin, plugin, safePath)).call()
   }
 }

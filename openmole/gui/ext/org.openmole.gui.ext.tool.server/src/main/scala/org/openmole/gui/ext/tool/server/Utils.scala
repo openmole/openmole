@@ -1,8 +1,7 @@
 package org.openmole.gui.ext.tool.server
 
+import org.openmole.gui.ext.data.{ Error, ErrorBuilder, SafePath }
 import org.openmole.core.workspace.Workspace
-import org.openmole.gui.ext.data.{ ProjectFileSystem, SafePath, ServerFileSystemContext }
-
 import scala.io.Source
 
 /*
@@ -25,14 +24,15 @@ import scala.io.Source
 import org.openmole.tool.file._
 
 object Utils {
+
   def authenticationKeysFile(implicit workspace: Workspace) = workspace.persistentDir / "keys"
 
   def webUIDirectory()(implicit workspace: Workspace) = workspace.location /> "webui"
 
-  implicit def safePathToFile(s: SafePath)(implicit context: ServerFileSystemContext, workspace: Workspace): File = {
+  implicit def safePathToFile(s: SafePath)(implicit context: org.openmole.gui.ext.data.ServerFileSystemContext, workspace: Workspace): File = {
     context match {
-      case _: ProjectFileSystem ⇒ getFile(webUIDirectory, s.path)
-      case _                    ⇒ getFile(new File(""), s.path)
+      case _: org.openmole.gui.ext.data.ProjectFileSystem ⇒ getFile(webUIDirectory, s.path)
+      case _ ⇒ getFile(new File(""), s.path)
     }
 
   }
@@ -46,15 +46,28 @@ object Utils {
     getFile0(paths, root)
   }
 
-  def lines(safePath: SafePath)(implicit context: ServerFileSystemContext, workspace: Workspace) = {
+  def lines(safePath: SafePath)(implicit context: org.openmole.gui.ext.data.ServerFileSystemContext, workspace: Workspace) = {
     Source.fromFile(safePathToFile(safePath)).getLines.toArray
   }
 
   implicit class ASafePath(safePath: SafePath) {
-    def write(content: String)(implicit context: ServerFileSystemContext, workspace: Workspace) = {
+    def write(content: String)(implicit context: org.openmole.gui.ext.data.ServerFileSystemContext, workspace: Workspace) = {
       val f: File = safePathToFile(safePath)
       f.content = content
     }
+  }
+
+  def addPlugins(safePaths: Seq[SafePath])(implicit workspace: Workspace): Seq[Error] = {
+    import org.openmole.gui.ext.data.ServerFileSystemContext.project
+    val files: Seq[File] = safePaths.map {
+      safePathToFile
+    }
+    addFilePlugins(files)
+  }
+
+  def addFilePlugins(files: Seq[File]): Seq[Error] = {
+    val errors = org.openmole.core.module.addPluginsFiles(files, false, Some(org.openmole.core.module.pluginDirectory(Workspace.instance)))(Workspace.instance)
+    errors.map(e ⇒ ErrorBuilder(e._2))
   }
 
 }

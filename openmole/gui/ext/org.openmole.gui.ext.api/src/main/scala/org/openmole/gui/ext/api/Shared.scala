@@ -80,21 +80,18 @@ trait Api {
   def getMarketEntry(entry: MarketIndexEntry, safePath: SafePath): Unit
 
   //CORE PLUGINS
-  def addPlugins(nodes: Seq[String]): Seq[Error]
+  def addUploadedPlugins(nodes: Seq[String]): Seq[Error]
   def autoAddPlugins(path: SafePath): Unit
   def isPlugin(path: SafePath): Boolean
   def allPluggableIn(path: SafePath): Seq[SafePath]
   def listPlugins(): Iterable[Plugin]
   def removePlugin(plugin: Plugin): Unit
-  //
-  //  //  //GUI PLUGINS
+
+  //GUI PLUGINS
   def getGUIPlugins(): AllPluginExtensionData
+  def isOSGI(safePath: SafePath): Boolean
 
   //MODEL WIZARDS
-  // def launchingCommands(path: SafePath): Seq[LaunchingCommand]
   def models(archivePath: SafePath): Seq[SafePath]
-  // def classes(jarPath: SafePath): Seq[ClassTree]
-  // def methods(jarPath: SafePath, className: String): Seq[JarMethod]
-  //def buildModelTask(executableName: String, scriptName: String, command: String, language: Language, inputs: Seq[ProtoTypePair], outputs: Seq[ProtoTypePair], path: SafePath, libraries: Option[String], resources: Resources): SafePath
   def expandResources(resources: Resources): Resources
 }

@@ -20,15 +20,18 @@ package org.openmole.gui.plugin.wizard.jar
 import java.io.FileInputStream
 import java.lang.reflect.Modifier
 import java.util.zip.ZipInputStream
+import autowire._
+import boopickle.Default._
 
 import org.openmole.core.services._
 import org.openmole.core.workspace.Workspace
+import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.data._
+import org.openmole.gui.ext.tool.client.OMPost
 import org.openmole.gui.ext.tool.server.Utils._
 import org.openmole.gui.ext.tool.server.WizardUtils
-
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
-import scala.tools.asm.tree
 
 class JarWizardApiImpl(s: Services) extends JarWizardAPI {
 
@@ -42,14 +45,16 @@ class JarWizardApiImpl(s: Services) extends JarWizardAPI {
     resources:      Resources,
     data:           JarWizardData): SafePath = {
 
+    implicit val workspace = Workspace.instance
+
     val modelData = WizardUtils.wizardModelData(inputs, outputs, resources.all.map {
       _.safePath.name
     })
     val task = s"${executableName.split('.').head.toLowerCase}Task"
-
     val jarResourceLine = {
       if (data.embedAsPlugin) {
         data.plugin.map { p ⇒
+          org.openmole.gui.ext.tool.server.Utils.addPlugins(Seq(data.jarPath))
           s"""  plugins += pluginsOf(${p}),\n"""
         }.getOrElse("")
       }

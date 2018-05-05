@@ -2,6 +2,7 @@ package org.openmole.gui.server.core
 
 import java.io.File
 import java.text.SimpleDateFormat
+
 import org.openmole.core.buildinfo
 import org.openmole.core.event._
 import org.openmole.core.pluginmanager._
@@ -28,12 +29,14 @@ import org.openmole.core.outputredirection.OutputRedirection
 import org.openmole.core.preference.{ ConfigurationLocation, Preference }
 import org.openmole.core.project._
 import org.openmole.core.services.Services
+import org.openmole.core.workspace.Workspace
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.plugin.server._
 import org.openmole.gui.ext.tool.server.OMRouter
 import org.openmole.gui.ext.tool.server.Utils.authenticationKeysFile
 import org.openmole.gui.server.core.GUIServer.ApplicationControl
 import org.openmole.tool.crypto.Cypher
+
 import scala.collection.JavaConverters._
 
 /*
@@ -408,10 +411,10 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
   }
 
   //PLUGINS
-  def addPlugins(nodes: Seq[String]): Seq[Error] = {
-    val plugins = nodes.map(Utils.pluginUpdoadDirectory / _)
-    val errors = module.addPluginsFiles(plugins, true, Some(module.pluginDirectory))
-    plugins.foreach(_.recursiveDelete)
+  def addUploadedPlugins(nodes: Seq[String]): Seq[Error] = {
+    val files = nodes.map(Utils.pluginUpdoadDirectory / _)
+    val errors = org.openmole.core.module.addPluginsFiles(files, true, Some(org.openmole.core.module.pluginDirectory(Workspace.instance)))(Workspace.instance)
+    files.foreach(_.recursiveDelete)
     errors.map(e ⇒ ErrorBuilder(e._2))
   }
 
@@ -451,6 +454,11 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
       PluginActivator.authentications,
       PluginActivator.wizards
     )
+  }
+
+  def isOSGI(safePath: SafePath): Boolean = {
+    import org.openmole.gui.ext.data.ServerFileSystemContext.project
+    PluginManager.isOSGI(safePathToFile(safePath))
   }
 
   //MODEL WIZARDS

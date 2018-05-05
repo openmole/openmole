@@ -59,7 +59,7 @@ class PluginPanel {
         (p: ProcessState) ⇒ { transferring() = p },
         UploadPlugin(),
         () ⇒
-          post()[Api].addPlugins(FileManager.fileNames(fileInput.files)).call().foreach { ex ⇒
+          post()[Api].addUploadedPlugins(FileManager.fileNames(fileInput.files)).call().foreach { ex ⇒
             if (ex.isEmpty) getPlugins
             else AlertPanel.detail("Plugin import failed", ex.head.stackTrace)
           }
