@@ -51,7 +51,7 @@ object RTask {
         case RLibrary(name, version) ⇒
           // need to install devtools to get older packages versions
           //apt update; apt-get -y install libssl-dev libxml2-dev libcurl4-openssl-dev libssh2-1-dev;
-          s"""library(devtools); install_version("$name",version = "$version", dependencies = T); library("$name")'"""
+          s"""R --slave -e 'library(devtools); install_version("$name",version = "$version", dependencies = T); library("$name")'"""
       }
 
     implicit def stringToRLibrary(name: String): InstallCommand = RLibrary(name, "latest")
