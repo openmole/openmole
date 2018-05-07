@@ -17,17 +17,15 @@ package org.openmole.gui.client.core.alert
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import org.openmole.gui.client.core.panels.stackPanel
 import rx._
-
 import scalatags.JsDom.all._
-
 import scaladget.tools._
-
 import scalatags.JsDom.all.{ onclick, raw, span }
 import org.openmole.gui.ext.tool.client._
 import org.openmole.gui.ext.tool.client.Utils._
 import org.scalajs.dom.raw.HTMLDivElement
-
+import scaladget.bootstrapnative.bsn.btn_default
 import scalatags.JsDom.{ TypedTag, tags }
 
 object BannerAlert {
@@ -63,7 +61,7 @@ object BannerAlert {
     }, span(omsheet.closeBanner, onclick := { () ⇒ clear })(
       raw("&#215")
     )
-  )(height := 60)
+  )(height := 70)
 
   lazy val banner = isOpen.expandDiv(bannerDiv, () ⇒ {
     org.openmole.gui.client.core.panels.treeNodeTabs.tabs.now.foreach { t ⇒
@@ -77,6 +75,12 @@ object BannerAlert {
 
   def register(bannerMessage: BannerMessage) =
     bannerMessages() = (bannerMessages.now :+ bannerMessage).distinct.takeRight(2)
+
+  def registerWithDetails(message: String, details: String) =
+    BannerAlert.register(BannerMessage(tags.div(tags.span(message), tags.button(btn_default +++ (marginLeft := 10), "Details", onclick := { () ⇒
+      stackPanel.content() = details
+      stackPanel.dialog.show
+    })), CriticalBannerLevel))
 
   private def color = {
     if (bannerMessages.now.exists(_.bannerLevel == CriticalBannerLevel)) omsheet.RED

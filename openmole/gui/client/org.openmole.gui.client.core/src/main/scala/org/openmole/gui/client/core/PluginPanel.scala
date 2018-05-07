@@ -63,10 +63,7 @@ class PluginPanel {
             if (ex.isEmpty) getPlugins
             else {
               dialog.hide
-              BannerAlert.register(BannerMessage(tags.div(tags.span("Plugin import failed"), tags.button(btn_default +++ (marginLeft := 10), "Details", onclick := { () ⇒
-                stackPanel.content() = ex.head.stackTrace
-                stackPanel.dialog.show
-              })), CriticalBannerLevel))
+              BannerAlert.registerWithDetails("Plugin import failed", ex.head.stackTrace)
             }
           }
       )

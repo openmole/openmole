@@ -149,7 +149,7 @@ package object client {
     styles.left := 330,
     paddingRight := 340,
     fixedPosition,
-    top := 60,
+    top := 70,
     transition := "all 0.1 s ease - out 0 s",
     width := "99%",
     height := "calc (100 % -140 px)"
@@ -798,7 +798,7 @@ package object client {
   lazy val bannerAlert: ModifierSeq = Seq(
     width := "100%",
     absolutePosition,
-    height := 60,
+    height := 70,
     zIndex := 5
   )
 

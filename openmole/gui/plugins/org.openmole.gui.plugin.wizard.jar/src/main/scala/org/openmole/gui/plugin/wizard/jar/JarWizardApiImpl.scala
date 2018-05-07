@@ -43,7 +43,7 @@ class JarWizardApiImpl(s: Services) extends JarWizardAPI {
     outputs:        Seq[ProtoTypePair],
     libraries:      Option[String],
     resources:      Resources,
-    data:           JarWizardData): SafePath = {
+    data:           JarWizardData): WizardToTask = {
 
     implicit val workspace = Workspace.instance
 
@@ -51,14 +51,14 @@ class JarWizardApiImpl(s: Services) extends JarWizardAPI {
       _.safePath.name
     })
     val task = s"${executableName.split('.').head.toLowerCase}Task"
-    val jarResourceLine = {
+    val jarResourceLine: (String, Seq[org.openmole.gui.ext.data.Error]) = {
       if (data.embedAsPlugin) {
         data.plugin.map { p ⇒
-          org.openmole.gui.ext.tool.server.Utils.addPlugins(Seq(data.jarPath))
-          s"""  plugins += pluginsOf(${p}),\n"""
-        }.getOrElse("")
+          val errors = org.openmole.gui.ext.tool.server.Utils.addPlugins(Seq(data.jarPath)).map { e ⇒ ErrorBuilder(e.stackTrace) }
+          (s"""  plugins += pluginsOf(${p}),\n""", errors)
+        }.getOrElse(("", Seq()))
       }
-      else s"${libraries.map { l ⇒ s"""  libraries += workingDirectory / "$l",""" }.getOrElse("")}\n\n"
+      else (s"${libraries.map { l ⇒ s"""  libraries += workingDirectory / "$l",""" }.getOrElse("")}\n\n", Seq())
     }
 
     val mainOutputString = outputs.headOption.map { o ⇒ s"val ${o.name} = " }.getOrElse("")
@@ -69,7 +69,7 @@ class JarWizardApiImpl(s: Services) extends JarWizardAPI {
       s""")\n\n$task hook ToStringHook()"""
 
     target.write(content)(context = org.openmole.gui.ext.data.ServerFileSystemContext.project, workspace = Workspace.instance)
-    target
+    WizardToTask(target, jarResourceLine._2)
   }
 
   def parse(safePath: SafePath): Option[LaunchingCommand] =

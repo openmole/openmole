@@ -806,3 +806,5 @@ case class WizardModelData(
                             specificInputMapping: Option[String] = None,
                             specificOutputMapping: Option[String] = None,
                           )
+
+case class WizardToTask(safePath: SafePath, errors: Seq[Error] = Seq())
