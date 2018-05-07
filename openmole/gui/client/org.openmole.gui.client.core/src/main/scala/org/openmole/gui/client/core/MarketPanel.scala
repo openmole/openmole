@@ -21,7 +21,8 @@ import org.openmole.core.market._
 import org.openmole.gui.client.core.alert.{ AbsolutePositioning, AlertPanel }
 import AbsolutePositioning.CenterPagePosition
 import org.openmole.gui.ext.data.{ ProcessState, Processing }
-import org.openmole.gui.ext.tool.client._
+import org.openmole.gui.ext.tool.client.{ InputFilter, _ }
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
 import org.openmole.gui.client.core.files.TreeNodePanel
@@ -35,7 +36,6 @@ import autowire._
 import rx._
 import scalatags.JsDom.tags
 import scalatags.JsDom.all._
-import org.openmole.gui.client.tool.InputFilter
 import org.openmole.gui.ext.api.Api
 
 class MarketPanel {

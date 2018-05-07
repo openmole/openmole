@@ -1,4 +1,4 @@
-package org.openmole.gui.client.tool
+package org.openmole.gui.ext.tool.client
 
 /*
  * Copyright (C) 05/02/15 // mathieu.leclaire@openmole.org
@@ -18,31 +18,20 @@ package org.openmole.gui.client.tool
  */
 
 import org.scalajs.dom.Event
-
-import scalatags.JsDom.all._
-import scaladget.bootstrapnative.bsn._
-import scaladget.tools._
-
-import org.openmole.gui.ext.tool.client.Utils
 import rx._
+import scaladget.bootstrapnative.bsn._
+import scalatags.JsDom.all._
 
 object InputFilter {
-  def apply(initValue: String = "", pHolder: String = "Filter", inputID: String = filterId, size: String = "100%") = new InputFilter(initValue, pHolder, inputID, size)
-
-  val filterId: String = Utils.getUUID
-
-  val protoFilterId1: String = "protoInputFilter1"
-
-  val protoFilterId2: String = "protoInputFilter2"
+  def apply(initValue: String = "", pHolder: String = "Filter", size: String = "100%") = new InputFilter(initValue, pHolder, size)
 }
 
-class InputFilter(initValue: String, pHolder: String, inputID: String, size: String = "100%") {
+class InputFilter(initValue: String, pHolder: String, size: String = "100%") {
   val nameFilter: Var[String] = Var("")
 
   val tag = inputTag(
     initValue
   )(
-    id := inputID,
     value := initValue,
     placeholder := pHolder,
     width := size,

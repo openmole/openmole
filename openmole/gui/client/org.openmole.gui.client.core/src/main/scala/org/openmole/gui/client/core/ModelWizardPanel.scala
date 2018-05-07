@@ -20,13 +20,15 @@ package org.openmole.gui.client.core
 import org.openmole.gui.client.core.alert.AlertPanel
 import org.openmole.gui.client.core.files._
 import org.openmole.gui.ext.data._
+import org.openmole.gui.ext.data.FileType._
 import org.openmole.gui.client.core.panels._
 import autowire._
 import org.scalajs.dom.html.TextArea
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
-import org.scalajs.dom.raw.{ HTMLDivElement, HTMLInputElement }
+import org.scalajs.dom.raw.{ HTMLDivElement, HTMLElement, HTMLInputElement }
 import org.openmole.gui.ext.tool.client._
 import rx._
 import scalatags.JsDom.{ TypedTag, tags }
@@ -40,8 +42,14 @@ import org.openmole.gui.ext.api.Api
 import scaladget.bootstrapnative.Selector.Options
 import org.openmole.gui.ext.tool.client.FileManager
 
+import scala.concurrent.Future
+
 class ModelWizardPanel {
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
+
+  println("Wizards " + Plugins.wizardFactories.now.map {
+    _.name
+  })
 
   sealed trait VariableRole[T] {
     def content: T
@@ -85,39 +93,26 @@ class ModelWizardPanel {
   val launchingCommand: Var[Option[LaunchingCommand]] = Var(None)
   val currentReactives: Var[Seq[Reactive]] = Var(Seq())
   val updatableTable: Var[Boolean] = Var(true)
-  val bodyContent: Var[Option[TypedTag[HTMLDivElement]]] = Var(None)
   val resources: Var[Resources] = Var(Resources.empty)
   val currentTab: Var[Int] = Var(0)
   val autoMode = Var(true)
-  val upButton: Var[HTMLDivElement] = Var(tags.div().render)
   val fileToUploadPath: Var[Option[SafePath]] = Var(None)
-  val targetPath: Var[Option[SafePath]] = Var(None)
-  val fromArchive: Var[Boolean] = Var(false)
+  val currentPluginPanel: Var[Option[WizardGUIPlugin]] = Var(None)
+
+  fileToUploadPath.trigger {
+    fileToUploadPath.now.map {
+      buildForm
+    }
+  }
 
   val modelSelector: Options[SafePath] = Seq[SafePath]().options(
     0,
     btn_default,
     SafePath.naming,
-    onclickExtra = () ⇒ {
+    onclose = () ⇒ {
       fileToUploadPath() = modelSelector.get
-      onModelChange
     }
   )
-
-  def onModelChange = {
-    fileToUploadPath.now.foreach {
-      m ⇒
-        val fileType: FileType = m
-        fileType match {
-          case _: CodeFile ⇒ setLaunchingCommand(m)
-          case _           ⇒
-        }
-    }
-  }
-
-  def setScritpName = scriptNameInput.value = filePath.now.map {
-    _.name.split('.').head
-  }.getOrElse("model")
 
   val commandArea: TextArea = textArea(3).render
   val autoModeCheckBox = checkbox(autoMode.now)(onchange := {
@@ -126,8 +121,7 @@ class ModelWizardPanel {
   })
 
   val scriptNameInput = inputTag()(modelNameInput, placeholder := "Script name").render
-  val languages: Seq[Language] = Seq(Binary(), JavaLikeLanguage(), PythonLanguage(), NetLogoLanguage(), RLanguage())
-  val codeSelector: Options[Language] = languages.options(0, btn_default, (l: Language) ⇒ l.name)
+  val factories = Plugins.wizardFactories.now
 
   launchingCommand.triggerLater {
     if (autoMode.now) {
@@ -135,10 +129,6 @@ class ModelWizardPanel {
         _.fullCommand
       }.getOrElse("")
     }
-  }
-
-  currentReactives.triggerLater {
-    if (updatableTable.now) setBodyContent
   }
 
   def buttonStyle(i: Int): ModifierSeq = {
@@ -171,58 +161,66 @@ class ModelWizardPanel {
     _.index == index
   }.headOption
 
-  def setUpButton = upButton() =
-    div(ms("modelWizardDivs"))(
-      div(maxWidth := 250)(
-        label(
-          Seq(display := "table") +++ certificate +++ "inputFileStyle",
-          transferring.withTransferWaiter {
-            _ ⇒
-              div(
-                fileInput((fInput: HTMLInputElement) ⇒ {
-                  if (fInput.files.length > 0) {
-                    fileToUploadPath() = None
-                    resources() = Resources.empty
-                    val fileName = fInput.files.item(0).name
-                    labelName() = Some(fileName)
-                    filePath() = Some(manager.current.now ++ fileName)
-                    filePath.now.map {
-                      fp ⇒
-                        moveFilesAndBuildForm(fInput, fileName, fp)
-                    }
+  lazy val upButton =
+    div(Seq(display := "table", width := 200))(
+      label(
+        ms("inputFileStyle"),
+        transferring.withTransferWaiter {
+          _ ⇒
+            div(
+              fileInput((fInput: HTMLInputElement) ⇒ {
+                if (fInput.files.length > 0) {
+                  fileToUploadPath() = None
+                  resources() = Resources.empty
+                  val fileName = fInput.files.item(0).name
+                  labelName() = Some(fileName)
+                  filePath() = Some(manager.current.now ++ fileName)
+                  filePath.now.map {
+                    fp ⇒
+                      moveFilesAndBuildForm(fInput, fileName, fp)
                   }
-                }), labelName.now match {
+                }
+              }),
+              Rx {
+                labelName() match {
                   case Some(s: String) ⇒ s
                   case _               ⇒ "Your Model"
                 }
-              )
-          }
-        ), {
-          fileToUploadPath.now.map {
-            _ ⇒ span(grey +++ floatRight)(codeSelector.selector)
-          }.getOrElse(tags.div())
+              }
+            )
         }
-      ), {
+      ).render,
+      Rx {
         span(grey)(
-          if (modelSelector.isContentsEmpty) div() else modelSelector.selector,
-          codeSelector.get.map {
-            case NetLogoLanguage() ⇒ div("If your Netlogo sript depends on plugins, you should upload an archive (tar.gz, tgz) containing the root workspace.")
-            case _                 ⇒ div
-          }.getOrElse(div)
+          filePath() match {
+            case Some(sp: SafePath) ⇒
+              val fileType: FileType = sp
+              if (fileType == Archive) modelSelector.selector else div.render
+            case _ ⇒ div.render
+          }
         )
       }
     ).render
 
-  def setTargetPath(fileType: FileType, safePath: SafePath) =
-    targetPath() = Some(fileType match {
-      case a: Archive ⇒
-        a.language match {
-          case j: JavaLikeLanguage ⇒ safePath
-          case _                   ⇒ safePath.toNoExtention
-        }
-      case codeFile: CodeFile ⇒ safePath
-      case _                  ⇒ safePath
-    })
+  lazy val topConfiguration = Rx {
+    div(
+      upButton,
+      labelName().flatMap {
+        factory
+      } match {
+        case Some(f: WizardPluginFactory) ⇒
+          val help = f.help
+          div(
+            // (if (help.isEmpty) div()
+            //    else div(modelHelp)(f.help))(colMD(2)),
+            currentPluginPanel().map {
+              _.panel
+            }.getOrElse(div())
+          )
+        case _ ⇒ div("")
+      }
+    )
+  }
 
   def moveFilesAndBuildForm(fInput: HTMLInputElement, fileName: String, uploadPath: SafePath) =
     CoreUtils.withTmpFile {
@@ -238,17 +236,17 @@ class ModelWizardPanel {
             post()[Api].extractAndTestExistence(tempFile ++ fileName, uploadPath.parent).call().foreach {
               existing ⇒
                 val fileType: FileType = uploadPath
-                setTargetPath(fileType, uploadPath)
+                val targetPath = fileType match {
+                  case Archive ⇒ uploadPath.parent ++ uploadPath.nameWithNoExtension
+                  case _       ⇒ uploadPath
+                }
 
                 // Move files from tmp to target path
                 if (existing.isEmpty) {
-                  targetPath.now.map {
-                    tp ⇒
-                      post()[Api].copyAllTmpTo(tempFile, tp).call().foreach {
-                        b ⇒
-                          buildForm(uploadPath, fileType)
-                          post()[Api].deleteFile(tempFile, ServerFileSystemContext.absolute).call()
-                      }
+                  post()[Api].copyAllTmpTo(tempFile, targetPath).call().foreach {
+                    b ⇒
+                      fileToUploadPath() = Some(uploadPath)
+                      post()[Api].deleteFile(tempFile, ServerFileSystemContext.absolute).call()
                   }
                 }
                 else {
@@ -261,7 +259,8 @@ class ModelWizardPanel {
                     () ⇒ {
                       post()[Api].copyFromTmp(tempFile, optionsDiv.result /*, fp ++ fileName*/ ).call().foreach {
                         b ⇒
-                          buildForm(uploadPath, fileType)
+                          //buildForm(uploadPath)
+                          fileToUploadPath() = Some(uploadPath)
                           post()[Api].deleteFile(tempFile, ServerFileSystemContext.absolute).call()
                       }
                     }, () ⇒ {
@@ -274,43 +273,58 @@ class ModelWizardPanel {
     }
 
   def fromSafePath(safePath: SafePath) = {
+    filePath() = Some(safePath)
+    fileToUploadPath() = Some(safePath)
     labelName() = Some(safePath.name)
-    setTargetPath(safePath, safePath)
-    buildForm(safePath, safePath)
   }
 
-  def buildForm(uploadPath: SafePath, fileType: FileType) = {
+  def factory(safePath: SafePath): Option[WizardPluginFactory] = factory(safePath.name)
 
-    fileType match {
-      case archive: Archive ⇒
-        fromArchive() = true
-        archive.language match {
-          //Java case
-          case JavaLikeLanguage() ⇒
-            modelSelector.emptyContents
-            fileToUploadPath() = Some(uploadPath)
-          // launchingCommand() = Some("Your Java/Scala method call here")
-          // Other archive: tgz, tar.gz
-          // case RLanguage() ⇒xxx
-          case UndefinedLanguage() ⇒
-            post()[Api].models(uploadPath).call().foreach {
-              models ⇒
-                fileToUploadPath() = models.headOption
-                modelSelector.setContents(models, () ⇒ {
-                  TreeNodePanel.refreshAnd(() ⇒ onModelChange)
-                })
-                getResourceInfo
-            }
+  def factory(fileName: String): Option[WizardPluginFactory] = {
+    val fileType: FileType = fileName
 
-          case _ ⇒
-            fromArchive() = false
+    factories.filter {
+      _.fileType == fileType
+    }.headOption
+  }
 
+  def buildForm(safePath: SafePath) = {
+    val pathFileType: FileType = safePath
+    pathFileType match {
+      case Archive ⇒
+        currentPluginPanel() = None
+        post()[Api].models(safePath).call().foreach {
+          models ⇒
+            modelSelector.setContents(models, () ⇒ {
+              TreeNodePanel.refreshAnd(() ⇒
+                fileToUploadPath() = modelSelector.get
+              )
+            })
         }
-      case codeFile: CodeFile ⇒
-        modelSelector.emptyContents
-        resources() = resources.now.withNoImplicit
-        setLaunchingCommand(uploadPath)
       case _ ⇒
+        factory(safePath).foreach { factory ⇒
+          scriptNameInput.value = safePath.nameWithNoExtension
+          fileToUploadPath() = Some(safePath)
+          TreeNodePanel.refreshAndDraw
+          factory.parse(safePath).foreach { b ⇒
+            currentPluginPanel() = Some(factory.build(safePath, (lc: LaunchingCommand) ⇒ {
+              setLaunchingComand(Some(lc), safePath)
+            }))
+            setLaunchingComand(b, safePath)
+          }
+        }
+    }
+
+  }
+
+  def setLaunchingComand(lc: Option[LaunchingCommand], safePath: SafePath) = {
+    launchingCommand() = lc
+    launchingCommand.now match {
+      case Some(lc: LaunchingCommand) ⇒ setReactives(lc)
+      case None ⇒
+        currentReactives() = Seq()
+        dialog.hide
+        buildScript(safePath)
     }
   }
 
@@ -323,32 +337,16 @@ class ModelWizardPanel {
           b ⇒
             val l = b.list.filterNot {
               _.name == modelName
-            }.map { tn ⇒
-              val sp = resourceDir ++ tn.name
-              Resource(sp, 0L)
+            }.map {
+              tn ⇒
+                val sp = resourceDir ++ tn.name
+                Resource(sp, 0L)
             }
             resources() = resources.now.copy(implicits = l, number = l.size)
             post()[Api].expandResources(resources.now).call().foreach {
               lf ⇒
                 resources() = lf
             }
-        }
-    }
-  }
-
-  def setLaunchingCommand(filePath: SafePath) = {
-    post()[Api].launchingCommands(filePath).call().foreach {
-      b ⇒
-        TreeNodePanel.refreshAndDraw
-        launchingCommand() = b.headOption
-        fileToUploadPath() = Some(filePath)
-        launchingCommand.now.foreach {
-          lc ⇒
-            lc.language.map {
-              codeSelector.set
-            }
-            setScritpName
-            setReactives(lc)
         }
     }
   }
@@ -389,35 +387,25 @@ class ModelWizardPanel {
     )
   )
 
-  val buildScriptButton = {
+  lazy val buildScriptButton = {
 
     tags.button("Build", btn_primary, onclick := {
       () ⇒
         save
         dialog.hide
+        fileToUploadPath.now.foreach(buildScript)
+    })
+  }
 
-        val codeType = codeSelector.getOrElse(Binary())
-
-        val targetSuffix = codeType match {
-          case NetLogoLanguage() ⇒
-            if (fromArchive.now) s"/${
-              fileToUploadPath.now.map {
-                _.name
-              }.getOrElse("NetLogoMODEL")
-            }"
-            else ""
-          case _ ⇒ ""
-        }
-
-        CoreUtils.buildModelScript(
-          codeType,
+  def buildScript(safePath: SafePath) = factory(safePath).foreach {
+    factory ⇒
+      currentPluginPanel.now.foreach {
+        _.save(
+          manager.current.now ++ s"${
+            scriptNameInput.value.clean
+          }.oms",
+          labelName.now.getOrElse("script"),
           commandArea.value,
-          scriptNameInput.value.clean,
-          manager.current.now,
-          resources.now,
-          targetPath.now.map {
-            _.name
-          }.getOrElse("executable") + targetSuffix,
           inputs(currentReactives.now).map {
             _.content.prototype
           },
@@ -426,8 +414,15 @@ class ModelWizardPanel {
           },
           fileToUploadPath.now.map {
             _.name
-          })
-    })
+          },
+          resources.now
+        ).foreach {
+            b ⇒
+              treeNodeTabs -- b
+              treeNodePanel.displayNode(FileNode(Var(b.name), 0L, 0L))
+              TreeNodePanel.refreshAndDraw
+          }
+      }
   }
 
   def save = {
@@ -534,106 +529,103 @@ class ModelWizardPanel {
     }
   }
 
-  def setBodyContent: Unit = bodyContent() = Some({
-    val reactives = currentReactives.now
-    val topButtons = Rx {
-      div(paddingTop := 20)(
-        button(
-          "I/O",
-          buttonStyle(0), onclick := {
+  val bodyContent = div(
+    Rx {
+      val reactives = currentReactives()
+      val filePath = fileToUploadPath()
+      val tab = currentTab()
+
+      val topButtons = Rx {
+        div(paddingTop := 20)(
+          button(
+            "I/O",
+            buttonStyle(0), onclick := {
+              () ⇒
+                {
+                  currentTab() = 0
+                }
+            })(badge(s"$nbInputs/$nbOutputs")),
+          button("Resources", buttonStyle(1), onclick := {
             () ⇒
               {
-                currentTab() = 0
-                setBodyContent
+                currentTab() = 1
               }
-          })(badge(s"$nbInputs/$nbOutputs")),
-        button("Resources", buttonStyle(1), onclick := {
-          () ⇒
-            {
-              currentTab() = 1
-              setBodyContent
-            }
-        }
-        )(badge(s"${
-          resources().number
-        }"))
-      )
-    }
+          }
+          )(badge(s"${
+            resources().number
+          }"))
+        )
+      }
+      tags.div(
+        step1,
+        transferring.now match {
+          case _: Processing ⇒ OMTags.waitingSpan(" Uploading ...", btn_danger + "certificate")
+          case _: Processed  ⇒ topConfiguration
+          case _             ⇒ topConfiguration
+        },
+        launchingCommand() match {
+          case Some(lc: LaunchingCommand) ⇒
+            div(paddingTop := 20)(
+              tags.h4("Step2: Task configuration"), step2,
+              topButtons,
+              if (tab == 0) {
+                tags.div({
 
-    setUpButton
+                  val idiv = div(modelIO)(tags.h3("Inputs")).render
+                  val odiv = div(modelIO)(tags.h3("Outputs")).render
 
-    tags.div(
-      fileToUploadPath.now.map {
-        _ ⇒ tags.div()
-      }.getOrElse(step1),
-      transferring.now match {
-        case _: Processing ⇒ OMTags.waitingSpan(" Uploading ...", btn_danger + "certificate")
-        case _: Processed  ⇒ upButton.now
-        case _             ⇒ upButton.now
-      },
-      fileToUploadPath.now.map {
-        _ ⇒
-          div(paddingTop := 20)(
-            tags.h4("Step2: Task configuration"), step2,
-            topButtons,
-            if (currentTab.now == 0) {
-              tags.div({
-
-                val idiv = div(modelIO)(tags.h3("Inputs")).render
-
-                val odiv = div(modelIO)(tags.h3("Outputs")).render
-
-                val head = thead(tags.tr(
-                  for (h ← Seq("Name", "Type", "Default", "Mapped with", "", "")) yield {
-                    th(textAlign := "center", h)
-                  }
-                ))
-
-                div(paddingTop := 30)(
-                  div(twocolumns +++ (paddingRight := 10))(
-                    idiv,
-                    tags.table(striped)(
-                      head,
-                      tbody(
-                        for (ip ← inputs(reactives)) yield {
-                          ip.line
-                        }
+                  val head = thead(tags.tr(
+                    for (h ← Seq("Name", "Type", "Default", "Mapped with", "", "")) yield {
+                      th(textAlign := "center", h)
+                    }
+                  ))
+                  div(paddingTop := 30)(
+                    div(twocolumns +++ (paddingRight := 10))(
+                      idiv,
+                      tags.table(striped)(
+                        head,
+                        tbody(
+                          for (ip ← inputs(reactives)) yield {
+                            ip.line
+                          }
+                        )
                       )
-                    )
-                  ),
-                  div(twocolumns)(
-                    odiv,
-                    tags.table(striped)(
-                      head,
-                      tbody(
-                        for (op ← outputs(reactives)) yield {
-                          op.line
-                        }
+                    ),
+                    div(twocolumns)(
+                      odiv,
+                      tags.table(striped)(
+                        head,
+                        tbody(
+                          for (op ← outputs(reactives)) yield {
+                            op.line
+                          }
+                        )
                       )
                     )
                   )
-                )
-              }, autoModeTag, commandArea)
-            }
-            else {
-              val body = tbody.render
-              for {
-                i ← resources.now.implicits
-              } yield {
-                body.appendChild(tags.tr(
-                  td(colMD(3))(i.safePath.name),
-                  td(colMD(2))(CoreUtils.readableByteCountAsString(i.size))
-                ).render)
+                }, autoModeTag, commandArea)
               }
-              tags.table(striped +++ (paddingTop := 20))(body)
-            }
-          )
-      }.getOrElse(tags.div())
-    )
-  })
+              else {
+                val body = tbody.render
+                for {
+                  i ← resources().implicits
+                } yield {
+                  body.appendChild(tags.tr(
+                    td(colMD(3))(i.safePath.name),
+                    td(colMD(2))(CoreUtils.readableByteCountAsString(i.size))
+                  ).render)
+                }
+                tags.table(striped +++ (paddingTop := 20))(body)
+              }
+            )
+          case _ ⇒ tags.div("")
+        }
+      )
+    }
+  )
 
   lazy val dialog = {
-    setBodyContent
+    //setBodyContent
     ModalDialog(omsheet.panelWidth(92))
   }
 
@@ -641,13 +633,7 @@ class ModelWizardPanel {
     tags.span(tags.b("Model import"))
   )
 
-  dialog.body(
-    tags.div(
-      Rx {
-        bodyContent().getOrElse(tags.div())
-      }
-    )
-  )
+  dialog.body(bodyContent)
 
   dialog.footer(buttonGroup(Seq(width := 200, right := 100))(
     inputGroupButton(ModalDialog.closeButton(dialog, btn_default, "Close")),

@@ -4,19 +4,19 @@ import org.openmole.gui.client.core.Waiter._
 import org.openmole.gui.ext.data._
 import org.openmole.gui.client.tool.OMTags
 import org.scalajs.dom.raw.HTMLInputElement
-
 import scalatags.JsDom.all._
 import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
-
 import scalatags.JsDom.tags
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
-
 import org.openmole.gui.ext.tool.client._
 import autowire._
+import org.openmole.gui.client.core.alert.BannerAlert.{ BannerMessage, CriticalBannerLevel }
 import rx._
-import org.openmole.gui.client.core.alert.AlertPanel
+import org.openmole.gui.client.core.alert.{ AlertPanel, BannerAlert }
+import org.openmole.gui.client.core.panels.stackPanel
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.tool.client.FileManager
 
@@ -59,9 +59,15 @@ class PluginPanel {
         (p: ProcessState) ⇒ { transferring() = p },
         UploadPlugin(),
         () ⇒
-          post()[Api].addPlugins(FileManager.fileNames(fileInput.files)).call().foreach { ex ⇒
+          post()[Api].addUploadedPlugins(FileManager.fileNames(fileInput.files)).call().foreach { ex ⇒
             if (ex.isEmpty) getPlugins
-            else AlertPanel.detail("Plugin import failed", ex.head.stackTrace)
+            else {
+              dialog.hide
+              BannerAlert.register(BannerMessage(tags.div(tags.span("Plugin import failed"), tags.button(btn_default +++ (marginLeft := 10), "Details", onclick := { () ⇒
+                stackPanel.content() = ex.head.stackTrace
+                stackPanel.dialog.show
+              })), CriticalBannerLevel))
+            }
           }
       )
     })

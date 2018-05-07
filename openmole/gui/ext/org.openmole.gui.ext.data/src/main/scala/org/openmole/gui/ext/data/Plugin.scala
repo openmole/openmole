@@ -23,6 +23,7 @@ import scala.concurrent.Future
 import scalatags.JsDom.TypedTag
 
 sealed trait GUIPlugin
+
 trait AuthenticationPlugin extends GUIPlugin {
   type AuthType <: AuthenticationData
 
@@ -45,7 +46,37 @@ sealed trait GUIPluginFactory {
 
 trait AuthenticationPluginFactory extends GUIPluginFactory {
   type AuthType <: AuthenticationData
+
   def build(data: AuthType): AuthenticationPlugin
+
   def buildEmpty: AuthenticationPlugin
+
   def getData: Future[Seq[AuthType]]
+}
+
+trait WizardGUIPlugin extends GUIPlugin {
+
+  def factory: WizardPluginFactory
+
+  val panel: TypedTag[HTMLElement]
+
+  def save(
+    target:         SafePath,
+    executableName: String,
+    command:        String,
+    inputs:         Seq[ProtoTypePair],
+    outputs:        Seq[ProtoTypePair],
+    libraries:      Option[String],
+    resources:      Resources): Future[SafePath]
+}
+
+trait WizardPluginFactory extends GUIPluginFactory {
+
+  def build(safePath: SafePath, onPanelFilled: (LaunchingCommand) ⇒ Unit): WizardGUIPlugin
+
+  def fileType: FileType
+
+  def parse(safePath: SafePath): Future[Option[LaunchingCommand]]
+
+  def help: String
 }

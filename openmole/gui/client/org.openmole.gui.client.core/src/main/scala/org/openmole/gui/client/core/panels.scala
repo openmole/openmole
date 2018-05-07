@@ -24,7 +24,7 @@ package object panels {
   val treeNodeTabs = new TreeNodeTabs()
   val fileDisplayer = new FileDisplayer(treeNodeTabs)
   val treeNodePanel = TreeNodePanel()
-  val modelWizardPanel = new ModelWizardPanel
+  def modelWizardPanel = new ModelWizardPanel
   val marketPanel = new MarketPanel
   val pluginPanel = new PluginPanel
   val stackPanel = new TextPanel("Error stack")

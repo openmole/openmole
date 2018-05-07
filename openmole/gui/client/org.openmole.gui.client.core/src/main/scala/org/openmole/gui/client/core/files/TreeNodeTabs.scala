@@ -189,13 +189,21 @@ object TreeNodeTab {
               afterRefresh()
             }
           }
+          else afterRefresh()
         }
       )
     }
 
     def refresh(afterRefresh: () ⇒ Unit): Unit = {
-      if (editing && (view == Raw))
-        TreeNodeTab.save(safePathTab.now, editor, afterRefresh)
+      def saveTab = TreeNodeTab.save(safePathTab.now, editor, afterRefresh)
+
+      if (editing) {
+        if (isCSV) {
+          if (view == Raw) saveTab
+        }
+        else
+          saveTab
+      }
       else
         download(afterRefresh)
     }
@@ -264,7 +272,7 @@ object TreeNodeTab {
                 if (!sequence.now.header.isEmpty && !filteredSequence.isEmpty) {
                   val table =
                     scaladget.bootstrapnative.Table(
-                      sequence.now.header,
+                      Some(scaladget.bootstrapnative.Row(sequence.now.header)),
                       filteredSequence.map {
                         scaladget.bootstrapnative.Row(_)
                       }.toSeq,

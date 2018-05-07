@@ -36,9 +36,15 @@ object ProtoTYPE {
   val BYTE = new ProtoTYPE("Byte", "Byte", "Byte")
   val ALL = Seq(INT, DOUBLE, LONG, BOOLEAN, STRING, FILE, CHAR, SHORT, BYTE)
 
+//  implicit def scalaTypeStringToPrototype(s: String): ProtoTYPE =
+//    if (s.contains("Double")) DOUBLE
+//    else if (s.contains("Int")) INT
+//    else if (s.contains("Long")) LONG
+//    else if (s.contains("File")) FILE
+//    else STRING
 }
 
-import java.io.{ PrintWriter, StringWriter }
+import java.io.{PrintWriter, StringWriter}
 
 import org.openmole.gui.ext.data.ProtoTYPE._
 
@@ -124,6 +130,7 @@ object SVGExtension extends FileExtension {
 case class EditableFile(highlighter: String, onDemand: Boolean = false) extends FileExtension with HighlightedFile {
   val displayable = true
 }
+
 object BinaryFile extends FileExtension {
   val displayable = false
 }
@@ -254,11 +261,11 @@ case class UploadAbsolute() extends UploadType {
 case class DirData(isEmpty: Boolean)
 
 case class TreeNodeData(
-  name:    String,
-  dirData: Option[DirData],
-  size:    Long,
-  time:    Long
-)
+                         name: String,
+                         dirData: Option[DirData],
+                         size: Long,
+                         time: Long
+                       )
 
 case class ScriptData(scriptPath: SafePath)
 
@@ -301,23 +308,23 @@ case class ErrorLevel() extends ErrorStateLevel {
 }
 
 case class EnvironmentError(
-  environmentId: EnvironmentId,
-  errorMessage:  String,
-  stack:         Error,
-  date:          Long,
-  level:         ErrorStateLevel
-) extends Ordered[EnvironmentError] {
+                             environmentId: EnvironmentId,
+                             errorMessage: String,
+                             stack: Error,
+                             date: Long,
+                             level: ErrorStateLevel
+                           ) extends Ordered[EnvironmentError] {
   def compare(that: EnvironmentError) = date compare that.date
 }
 
 @Lenses case class NetworkActivity(
-  downloadingFiles:       Int    = 0,
-  downloadedSize:         Long   = 0L,
-  readableDownloadedSize: String = "",
-  uploadingFiles:         Int    = 0,
-  uploadedSize:           Long   = 0L,
-  readableUploadedSize:   String = ""
-)
+                                    downloadingFiles: Int = 0,
+                                    downloadedSize: Long = 0L,
+                                    readableDownloadedSize: String = "",
+                                    uploadingFiles: Int = 0,
+                                    uploadedSize: Long = 0L,
+                                    readableUploadedSize: String = ""
+                                  )
 
 @Lenses case class ExecutionActivity(executionTime: Long = 0)
 
@@ -333,15 +340,15 @@ case class OutputStreamData(id: ExecutionId, output: String)
 case class StaticExecutionInfo(path: SafePath, script: String, startDate: Long = 0L)
 
 case class EnvironmentState(
-  envId:             EnvironmentId,
-  taskName:          String,
-  running:           Long,
-  done:              Long,
-  submitted:         Long,
-  failed:            Long,
-  networkActivity:   NetworkActivity,
-  executionActivity: ExecutionActivity
-)
+                             envId: EnvironmentId,
+                             taskName: String,
+                             running: Long,
+                             done: Long,
+                             submitted: Long,
+                             failed: Long,
+                             networkActivity: NetworkActivity,
+                             executionActivity: ExecutionActivity
+                           )
 
 //case class Output(output: String)
 
@@ -353,7 +360,9 @@ sealed trait ExecutionInfo {
   def capsules: Vector[(ExecutionInfo.CapsuleId, ExecutionInfo.JobStatuses)]
 
   def ready: Long = capsules.map(_._2.ready).sum
+
   def running: Long = capsules.map(_._2.running).sum
+
   def completed: Long = capsules.map(_._2.completed).sum
 
   def environmentStates: Seq[EnvironmentState]
@@ -362,34 +371,35 @@ sealed trait ExecutionInfo {
 object ExecutionInfo {
 
   type CapsuleId = String
+
   case class JobStatuses(ready: Long, running: Long, completed: Long)
 
   case class Failed(
-    capsules:          Vector[(ExecutionInfo.CapsuleId, ExecutionInfo.JobStatuses)],
-    error:             Error,
-    environmentStates: Seq[EnvironmentState],
-    duration:          Long                                                         = 0L) extends ExecutionInfo {
+                     capsules: Vector[(ExecutionInfo.CapsuleId, ExecutionInfo.JobStatuses)],
+                     error: Error,
+                     environmentStates: Seq[EnvironmentState],
+                     duration: Long = 0L) extends ExecutionInfo {
     def state: String = "failed"
   }
 
   case class Running(
-    capsules:          Vector[(ExecutionInfo.CapsuleId, ExecutionInfo.JobStatuses)],
-    duration:          Long,
-    environmentStates: Seq[EnvironmentState]) extends ExecutionInfo {
+                      capsules: Vector[(ExecutionInfo.CapsuleId, ExecutionInfo.JobStatuses)],
+                      duration: Long,
+                      environmentStates: Seq[EnvironmentState]) extends ExecutionInfo {
     def state: String = "running"
   }
 
   case class Finished(
-    capsules:          Vector[(ExecutionInfo.CapsuleId, ExecutionInfo.JobStatuses)],
-    duration:          Long                                                         = 0L,
-    environmentStates: Seq[EnvironmentState]) extends ExecutionInfo {
+                       capsules: Vector[(ExecutionInfo.CapsuleId, ExecutionInfo.JobStatuses)],
+                       duration: Long = 0L,
+                       environmentStates: Seq[EnvironmentState]) extends ExecutionInfo {
     def state: String = "finished"
   }
 
   case class Canceled(
-    capsules:          Vector[(ExecutionInfo.CapsuleId, ExecutionInfo.JobStatuses)],
-    environmentStates: Seq[EnvironmentState],
-    duration:          Long                                                         = 0L) extends ExecutionInfo {
+                       capsules: Vector[(ExecutionInfo.CapsuleId, ExecutionInfo.JobStatuses)],
+                       environmentStates: Seq[EnvironmentState],
+                       duration: Long = 0L) extends ExecutionInfo {
     def state: String = "canceled"
   }
 
@@ -397,7 +407,9 @@ object ExecutionInfo {
     def state: String = "launching"
 
     def duration: Long = 0L
+
     def capsules = Vector.empty
+
     def environmentStates: Seq[EnvironmentState] = Seq()
   }
 
@@ -426,6 +438,10 @@ case class CareTaskType() extends TaskType {
   override val postVariable = "}"
 }
 
+case class NoneOSGITaskType() extends TaskType
+
+case class OSGIJarTaskType() extends TaskType
+
 case class ScalaTaskType() extends TaskType
 
 case class NetLogoTaskType() extends TaskType
@@ -438,32 +454,37 @@ sealed trait FileType
 
 case class CodeFile(language: Language) extends FileType
 
-case class Archive(language: Language) extends FileType
+object CareArchive extends FileType
+
+object JarArchive extends FileType
+
+object Archive extends FileType
 
 object UndefinedFileType extends FileType
 
 object FileType {
   implicit def safePathToFileType(sp: SafePath): FileType = apply(sp)
 
+  implicit def filNameToFileType(f: String): FileType = apply(f)
+
   private def extension(safePath: SafePath) = safePath.name.split('.').drop(1).mkString(".")
 
   def apply(safePath: SafePath): FileType = apply(safePath.name)
 
   def apply(fileName: String): FileType = {
-    if (fileName.endsWith("tar.gz.bin") || fileName.endsWith("tgz.bin")) CodeFile(UndefinedLanguage())
+    if (fileName.endsWith("tar.gz.bin") || fileName.endsWith("tgz.bin")) CareArchive
     else if (fileName.endsWith("nlogo")) CodeFile(NetLogoLanguage())
-    else if (fileName.endsWith("jar")) Archive(JavaLikeLanguage())
-    else if (fileName.endsWith("tgz") || fileName.endsWith("tar.gz")) Archive(UndefinedLanguage())
+    else if (fileName.endsWith("R")) CodeFile(RLanguage())
+    else if (fileName.endsWith("jar")) JarArchive
+    else if (fileName.endsWith("tgz") || fileName.endsWith("tar.gz")) Archive
     else UndefinedFileType
   }
 
-  def isSupportedLanguage(fileName: String): Boolean = apply(fileName) match {
-    case CodeFile(_) ⇒ true
-    case a: Archive ⇒ a.language match {
-      case UndefinedLanguage() ⇒ false
-      case _                   ⇒ true
+  def isSupportedLanguage(fileName: String): Boolean = {
+    apply(fileName) match {
+      case CodeFile(_) | CareArchive | JarArchive ⇒ true
+      case _ ⇒ false
     }
-    case _ ⇒ false
   }
 }
 
@@ -550,6 +571,25 @@ case class BasicLaunchingCommand(language: Option[Language], codeName: String, a
   def updateVariables(variableArgs: Seq[VariableElement]) = copy(arguments = statics ++ variableArgs)
 }
 
+case class JavaLaunchingCommand(jarMethod: JarMethod, arguments: Seq[CommandElement] = Seq(), outputs: Seq[VariableElement] = Seq()) extends LaunchingCommand {
+
+  val language = Some(JavaLikeLanguage())
+
+  def fullCommand: String = {
+    if (jarMethod.methodName.isEmpty) ""
+    else {
+      if (jarMethod.isStatic) jarMethod.clazz + "." else s"val constr = new ${jarMethod.clazz}() // You should initialize this constructor first\nconstr."
+    } +
+      jarMethod.methodName + "(" + arguments.sortBy {
+      _.index
+    }.map {
+      _.expand
+    }.mkString(", ") + ")"
+  }
+
+  def updateVariables(variableArgs: Seq[VariableElement]) = copy(arguments = statics ++ variableArgs)
+}
+
 case class ProtoTypePair(name: String, `type`: ProtoTYPE.ProtoTYPE, default: String = "", mapping: Option[String] = None)
 
 sealed trait ClassTree {
@@ -586,15 +626,22 @@ case class Processing(override val ratio: Int = 0) extends ProcessState {
 }
 
 case class Finalizing(
-  override val ratio:   Int    = 100,
-  override val display: String = "Finalizing..."
-) extends ProcessState
+                       override val ratio: Int = 100,
+                       override val display: String = "Finalizing..."
+                     ) extends ProcessState
 
 case class Processed(override val ratio: Int = 100) extends ProcessState
 
 case class JarMethod(methodName: String, argumentTypes: Seq[String], returnType: String, isStatic: Boolean, clazz: String) {
-  val name = methodName + "(" + argumentTypes.mkString(",") + "): " + returnType
+  val expand = methodName + "(" + argumentTypes.mkString(",") + "): " + returnType
 }
+
+//case class JarMethod(methodName: String, arguments: Seq[ProtoTypePair], returnType: String, isStatic: Boolean, clazz: String) {
+//  val expand = methodName + "(" + arguments.map {
+//    _.`type`.scalaString
+//  }.mkString(",") + "): " + returnType
+//}
+
 
 object Resources {
   def empty = Resources(Seq(), Seq(), 0)
@@ -643,7 +690,7 @@ object FileSizeOrdering extends Ordering[TreeNodeData] {
 object AlphaOrdering extends Ordering[TreeNodeData] {
   def isDirectory(tnd: TreeNodeData) = tnd.dirData match {
     case None ⇒ false
-    case _    ⇒ true
+    case _ ⇒ true
   }
 
   def compare(tn1: TreeNodeData, tn2: TreeNodeData) =
@@ -666,8 +713,8 @@ object ListSorting {
   implicit def sortingToOrdering(fs: ListSorting): Ordering[TreeNodeData] =
     fs match {
       case AlphaSorting() ⇒ AlphaOrdering
-      case SizeSorting()  ⇒ FileSizeOrdering
-      case _              ⇒ TimeOrdering
+      case SizeSorting() ⇒ FileSizeOrdering
+      case _ ⇒ TimeOrdering
     }
 }
 
@@ -678,7 +725,7 @@ case class FileFilter(firstLast: FirstLast = First(), threshold: Option[Int] = S
       if (fileSorting == newFileSorting) {
         firstLast match {
           case First() ⇒ Last()
-          case _       ⇒ First()
+          case _ ⇒ First()
         }
       }
       else First()
@@ -690,7 +737,7 @@ case class FileFilter(firstLast: FirstLast = First(), threshold: Option[Int] = S
 case class ListFilesData(list: Seq[TreeNodeData], nbFilesOnServer: Int)
 
 object FileFilter {
-  def defaultFilter = FileFilter.this(First(), Some(100), "", AlphaSorting())
+  def defaultFilter = FileFilter.this (First(), Some(100), "", AlphaSorting())
 }
 
 case class OMSettings(workspace: SafePath, version: String, versionName: String, buildTime: String)
@@ -700,13 +747,15 @@ sealed trait PluginExtensionType
 object AuthenticationExtension extends PluginExtensionType
 
 //TODO: add other extension points
-case class AllPluginExtensionData(authentications: Seq[GUIPluginAsJS])
+case class AllPluginExtensionData(authentications: Seq[GUIPluginAsJS], wizards: Seq[GUIPluginAsJS])
 
 case class GUIPluginAsJS(jsObject: String)
 
 trait AuthenticationData {
   def name: String
 }
+
+trait WizardData
 
 sealed trait Test {
   def passed: Boolean
@@ -745,3 +794,15 @@ object Test {
 case class JVMInfos(javaVersion: String, jvmImplementation: String, processorAvailable: Int, allocatedMemory: Long, totalMemory: Long)
 
 case class SequenceData(header: Seq[String], content: Seq[Array[String]])
+
+case class WizardModelData(
+                            vals: String,
+                            inputs: String,
+                            outputs: String,
+                            inputFileMapping: String,
+                            outputFileMapping: String,
+                            defaults: String,
+                            resources: String,
+                            specificInputMapping: Option[String] = None,
+                            specificOutputMapping: Option[String] = None,
+                          )

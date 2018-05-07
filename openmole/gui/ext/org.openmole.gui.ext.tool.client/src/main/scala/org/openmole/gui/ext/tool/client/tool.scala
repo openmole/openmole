@@ -586,9 +586,9 @@ package object client {
     width := 100
   )
 
-  lazy val centerPage: ModifierSeq = Seq(
+  def centerPage(topPosition: String = "45%"): ModifierSeq = Seq(
     position := "fixed",
-    top := "45%",
+    top := topPosition,
     styles.left := "50%",
     minWidth := 250,
     svgAttrs.transform := "translate (-50%,-50%)"
@@ -645,6 +645,16 @@ package object client {
     left := "50%",
     marginLeft := -60,
     paddingBottom := 20
+  )
+
+  lazy val modelHelp: ModifierSeq = Seq(
+    height := "auto",
+    backgroundColor := "rgb(255, 221, 85)",
+    padding := 10,
+    marginTop := 20,
+    top := 20,
+    borderRadius := "5px",
+    color("#444")
   )
 
   // PLUGIN PANEL

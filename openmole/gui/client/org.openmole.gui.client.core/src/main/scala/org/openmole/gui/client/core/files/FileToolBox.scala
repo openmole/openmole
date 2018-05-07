@@ -162,16 +162,9 @@ class FileToolBox(initSafePath: SafePath) {
             true
           case fileaction.toScript ⇒
             withSafePath { sp ⇒
-              DataUtils.fileToExtension(sp.name) match {
-                case FileExtension.R ⇒
-                  CoreUtils.buildModelScript(
-                    RLanguage(),
-                    s"""source("${sp.name}")""", sp.nameWithNoExtension, sp.parent, Resources(Seq(Resource(sp, 1)), Seq(), 1), sp.name, Seq(ProtoTypePair("i", ProtoTYPE.INT)), Seq(ProtoTypePair("o", ProtoTYPE.DOUBLE)))
-                case _ ⇒
-                  val wizardPanel = panels.modelWizardPanel
-                  wizardPanel.fromSafePath(sp)
-                  wizardPanel.dialog.show
-              }
+              val wizardPanel = panels.modelWizardPanel
+              wizardPanel.dialog.show
+              wizardPanel.fromSafePath(sp)
               Popover.hide
             }
             true
@@ -251,7 +244,7 @@ class FileToolBox(initSafePath: SafePath) {
         case _ ⇒ span
       },
       DataUtils.fileToExtension(initSafePath.name) match {
-        case FileExtension.JAR | FileExtension.TGZBIN | FileExtension.NETLOGO | FileExtension.R ⇒
+        case FileExtension.JAR | FileExtension.TGZBIN | FileExtension.NETLOGO | FileExtension.R | FileExtension.TGZ ⇒
           iconAction(fileaction.toScript, toScript, "to OMS")
         case _ ⇒ span
       },
