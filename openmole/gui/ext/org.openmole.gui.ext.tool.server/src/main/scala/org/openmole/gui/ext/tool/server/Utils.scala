@@ -1,7 +1,10 @@
 package org.openmole.gui.ext.tool.server
 
-import org.openmole.gui.ext.data.{ Error, ErrorBuilder, SafePath }
+import org.openmole.core.module
+import org.openmole.core.pluginmanager._
+import org.openmole.gui.ext.data._
 import org.openmole.core.workspace.Workspace
+
 import scala.io.Source
 
 /*
@@ -68,6 +71,15 @@ object Utils {
   def addFilePlugins(files: Seq[File]): Seq[Error] = {
     val errors = org.openmole.core.module.addPluginsFiles(files, false, Some(org.openmole.core.module.pluginDirectory(Workspace.instance)))(Workspace.instance)
     errors.map(e ⇒ ErrorBuilder(e._2))
+  }
+
+  def removePlugin(plugin: Plugin): Unit = synchronized {
+    val file = module.pluginDirectory(Workspace.instance) / plugin.name
+    val allDependingFiles = PluginManager.allDepending(file, b ⇒ !b.isProvided)
+    val bundle = PluginManager.bundle(file)
+    bundle.foreach(PluginManager.remove)
+    allDependingFiles.filter(f ⇒ !PluginManager.bundle(f).isDefined).foreach(_.recursiveDelete)
+    file.recursiveDelete
   }
 
 }

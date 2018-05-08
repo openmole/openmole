@@ -437,15 +437,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
   def listPlugins(): Iterable[Plugin] =
     module.pluginDirectory.listFilesSafe.map(p ⇒ Plugin(p.getName, new SimpleDateFormat("dd/MM/yyyy HH:mm").format(p.lastModified)))
 
-  def removePlugin(plugin: Plugin): Unit = synchronized {
-    val file = module.pluginDirectory / plugin.name
-    val allDependingFiles = PluginManager.allDepending(file, b ⇒ !b.isProvided)
-    val bundle = PluginManager.bundle(file)
-    bundle.foreach(PluginManager.remove)
-    allDependingFiles.filter(f ⇒ !PluginManager.bundle(f).isDefined).foreach(_.recursiveDelete)
-    file.recursiveDelete
-  }
-
+  def removePlugin(plugin: Plugin): Unit = org.openmole.gui.ext.tool.server.Utils.removePlugin(plugin)
   //GUI OM PLUGINS
 
   def getGUIPlugins(): AllPluginExtensionData = {

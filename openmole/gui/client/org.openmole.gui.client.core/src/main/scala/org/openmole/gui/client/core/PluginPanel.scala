@@ -58,14 +58,19 @@ class PluginPanel {
         SafePath.empty,
         (p: ProcessState) ⇒ { transferring() = p },
         UploadPlugin(),
-        () ⇒
-          post()[Api].addUploadedPlugins(FileManager.fileNames(fileInput.files)).call().foreach { ex ⇒
+        () ⇒ {
+          val plugins = FileManager.fileNames(fileInput.files)
+          post()[Api].addUploadedPlugins(plugins).call().foreach { ex ⇒
             if (ex.isEmpty) getPlugins
             else {
               dialog.hide
+              plugins.foreach { p ⇒
+                post()[Api].removePlugin(Plugin(p)).call()
+              }
               BannerAlert.registerWithDetails("Plugin import failed", ex.head.stackTrace)
             }
           }
+        }
       )
     })
   ).tooltip("Upload plugin")

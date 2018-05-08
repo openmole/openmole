@@ -55,6 +55,7 @@ class JarWizardApiImpl(s: Services) extends JarWizardAPI {
       if (data.embedAsPlugin) {
         data.plugin.map { p ⇒
           val errors = org.openmole.gui.ext.tool.server.Utils.addPlugins(Seq(data.jarPath)).map { e ⇒ ErrorBuilder(e.stackTrace) }
+          if (!errors.isEmpty) org.openmole.gui.ext.tool.server.Utils.removePlugin(Plugin(data.jarPath.name))
           (s"""  plugins += pluginsOf(${p}),\n""", errors)
         }.getOrElse(("", Seq()))
       }

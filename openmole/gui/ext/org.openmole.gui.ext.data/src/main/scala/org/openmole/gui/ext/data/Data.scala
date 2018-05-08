@@ -36,12 +36,12 @@ object ProtoTYPE {
   val BYTE = new ProtoTYPE("Byte", "Byte", "Byte")
   val ALL = Seq(INT, DOUBLE, LONG, BOOLEAN, STRING, FILE, CHAR, SHORT, BYTE)
 
-//  implicit def scalaTypeStringToPrototype(s: String): ProtoTYPE =
-//    if (s.contains("Double")) DOUBLE
-//    else if (s.contains("Int")) INT
-//    else if (s.contains("Long")) LONG
-//    else if (s.contains("File")) FILE
-//    else STRING
+  //  implicit def scalaTypeStringToPrototype(s: String): ProtoTYPE =
+  //    if (s.contains("Double")) DOUBLE
+  //    else if (s.contains("Int")) INT
+  //    else if (s.contains("Long")) LONG
+  //    else if (s.contains("File")) FILE
+  //    else STRING
 }
 
 import java.io.{PrintWriter, StringWriter}
@@ -417,7 +417,7 @@ object ExecutionInfo {
 
 case class PasswordState(chosen: Boolean, hasBeenSet: Boolean)
 
-case class Plugin(name: String, time: String)
+case class Plugin(name: String, time: String = "")
 
 sealed trait Language {
   def name: String
