@@ -6,7 +6,14 @@
     font-style: normal;
 }
 
-body{font-family:gi;}
+body{
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select:none;
+    user-select:none;
+    -o-user-select:none;
+    font-family:gi;
+}
 
 .table.envError>tbody>tr>td{
     border-top:none;

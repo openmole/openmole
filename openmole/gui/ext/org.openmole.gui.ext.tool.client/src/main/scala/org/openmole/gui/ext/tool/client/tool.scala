@@ -458,6 +458,7 @@ package object client {
 
   //MARKET PANEL
   lazy val docEntry: ModifierSeq = Seq(
+    pointer,
     color(WHITE),
     backgroundColor := DARK_GREY,
     borderRadius := "4px",
@@ -470,7 +471,6 @@ package object client {
   )
 
   lazy val docTitleEntry: ModifierSeq = Seq(
-    cursor := "pointer",
     paddingTop := 6
   )
 
@@ -682,7 +682,7 @@ package object client {
     paddingTop := 6,
     floatRight,
     right := 50,
-    color("lightgrey")
+    color(WHITE)
   )
 
   lazy val dropdownError: ModifierSeq = Seq(

@@ -3,7 +3,7 @@ package org.openmole.gui.client.core
 import org.openmole.gui.client.core.Waiter._
 import org.openmole.gui.ext.data._
 import org.openmole.gui.client.tool.OMTags
-import org.scalajs.dom.raw.HTMLInputElement
+import org.scalajs.dom.raw.{ HTMLInputElement, MouseEvent }
 import scalatags.JsDom.all._
 import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
@@ -13,10 +13,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
 import org.openmole.gui.ext.tool.client._
 import autowire._
-import org.openmole.gui.client.core.alert.BannerAlert.{ BannerMessage, CriticalBannerLevel }
 import rx._
-import org.openmole.gui.client.core.alert.{ AlertPanel, BannerAlert }
-import org.openmole.gui.client.core.panels.stackPanel
+import org.openmole.gui.client.core.alert.BannerAlert
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.tool.client.FileManager
 
@@ -40,12 +38,22 @@ import org.openmole.gui.ext.tool.client.FileManager
 class PluginPanel {
 
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
-  private lazy val plugins: Var[Option[Seq[Plugin]]] = Var(None)
+
+  case class IndexedPlugin(plugin: Plugin, index: Int)
+
+  implicit def indexToPlugin(i: Int): Option[IndexedPlugin] = plugins.now.find(p ⇒ p.index == i)
+
+  implicit def seqIndexToSeqPlugin(s: Seq[Int]): Seq[IndexedPlugin] = s.map {
+    indexToPlugin
+  }.flatten
+
+  private lazy val plugins: Var[Seq[IndexedPlugin]] = Var(Seq())
   lazy val transferring: Var[ProcessState] = Var(Processed())
+  private val selected: Var[Seq[IndexedPlugin]] = Var(Seq())
 
   def getPlugins = {
     post()[Api].listPlugins.call().foreach { a ⇒
-      plugins() = Some(a.toSeq)
+      plugins() = a.toSeq.zipWithIndex.map { x ⇒ IndexedPlugin(x._1, x._2) }
     }
   }
 
@@ -56,7 +64,9 @@ class PluginPanel {
       FileManager.upload(
         fileInput,
         SafePath.empty,
-        (p: ProcessState) ⇒ { transferring() = p },
+        (p: ProcessState) ⇒ {
+          transferring() = p
+        },
         UploadPlugin(),
         () ⇒ {
           val plugins = FileManager.fileNames(fileInput.files)
@@ -75,19 +85,57 @@ class PluginPanel {
     })
   ).tooltip("Upload plugin")
 
+  val deleteButton = buttonIcon("", btn_danger, glyph_trash, todo = () ⇒ {
+    selected.now.foreach { p ⇒
+      removePlugin(p.plugin)
+    }
+  })
+
   lazy val pluginTable = {
 
-    case class Reactive(p: Plugin) {
+    case class Reactive(p: IndexedPlugin) {
       val lineHovered: Var[Boolean] = Var(false)
 
       lazy val render =
-        tags.div(
-          docEntry
-        )(
-          span(p.name, docTitleEntry +++ floatLeft),
-          span(glyphSpan(glyph_trash, () ⇒ removePlugin(p))(grey +++ Seq(paddingTop := 10, paddingLeft := 10) +++ "glyphitem" +++ glyph_trash)),
-          span(p.time, dateStyle)
-        )
+        Rx {
+          div(
+            docEntry ++ (
+              if (selected().contains(p)) backgroundColor := "#87bede"
+              else emptyMod
+            ))(
+              span(p.plugin.name, docTitleEntry +++ floatLeft),
+              span(p.plugin.time, dateStyle),
+              onselect := { () ⇒ false },
+              onclick := { (e: MouseEvent) ⇒
+
+                val selectedIndex = selected.now.map {
+                  _.index
+                }
+                val range = {
+                  if (e.shiftKey) {
+                    if (!selected.now.isEmpty) {
+                      val preSel = (
+                        if (selectedIndex.contains(p.index)) selectedIndex.filterNot {
+                          _ > p.index
+                        }
+                        else p.index +: selectedIndex
+                      ).sorted
+                      Seq.range(preSel.head, preSel.last + 1, 1)
+                    }
+                    else if (!selectedIndex.contains(p.index)) selectedIndex :+ p.index
+                    else selectedIndex.filterNot(_ == p.index)
+                  }
+                  else if (!selectedIndex.contains(p.index)) selectedIndex :+ p.index
+                  else selectedIndex.filterNot(_ == p.index)
+                }
+
+                val selectedPlugins: Seq[IndexedPlugin] = range
+
+                selected() = selectedPlugins
+                e.preventDefault()
+              }
+            )
+        }
     }
 
     div(
@@ -97,13 +145,9 @@ class PluginPanel {
         }
       ),
       Rx {
-        div(
-          plugins().map { aux ⇒
-            for (a ← aux) yield {
-              Seq(Reactive(a).render)
-            }
-          }
-        )
+        plugins().map {
+          Reactive(_).render
+        }
       }
     )
 
@@ -130,7 +174,13 @@ class PluginPanel {
 
   dialog.footer(
     tags.div(
-      ModalDialog.closeButton(dialog, btn_default, "Close")
+      buttonGroup()(
+        Rx {
+          if (selected().isEmpty) span
+          else deleteButton
+        },
+        ModalDialog.closeButton(dialog, btn_default, "Close")
+      )
     )
   )
 
