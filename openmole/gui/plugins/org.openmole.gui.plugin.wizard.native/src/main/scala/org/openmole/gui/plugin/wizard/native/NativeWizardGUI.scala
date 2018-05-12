@@ -38,8 +38,6 @@ class NativeWizardFactory extends WizardPluginFactory {
 
   def parse(safePath: SafePath): Future[Option[LaunchingCommand]] = OMPost()[NativeWizardAPI].parse(safePath).call()
 
-  def help: String = "Pick your code up among jar archive, netlogo scripts, or any code packaged on linux with Care ( like Python, C, C++, etc). In the case of a Care archive, the packaging has to be done with the -o yourmodel.tar.gz.bin or -o yourmodel.tgz.bin"
-
   def name: String = "Care"
 }
 

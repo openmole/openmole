@@ -77,6 +77,4 @@ trait WizardPluginFactory extends GUIPluginFactory {
   def fileType: FileType
 
   def parse(safePath: SafePath): Future[Option[LaunchingCommand]]
-
-  def help: String
 }

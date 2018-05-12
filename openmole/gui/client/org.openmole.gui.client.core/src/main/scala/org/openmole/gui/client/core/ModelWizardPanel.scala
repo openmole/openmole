@@ -209,10 +209,7 @@ class ModelWizardPanel {
         factory
       } match {
         case Some(f: WizardPluginFactory) ⇒
-          val help = f.help
-          div(
-            // (if (help.isEmpty) div()
-            //    else div(modelHelp)(f.help))(colMD(2)),
+          div(marginTop := 20)(
             currentPluginPanel().map {
               _.panel
             }.getOrElse(div())
@@ -321,10 +318,7 @@ class ModelWizardPanel {
     launchingCommand() = lc
     launchingCommand.now match {
       case Some(lc: LaunchingCommand) ⇒ setReactives(lc)
-      case None ⇒
-        currentReactives() = Seq()
-        dialog.hide
-        buildScript(safePath)
+      case _                          ⇒
     }
   }
 

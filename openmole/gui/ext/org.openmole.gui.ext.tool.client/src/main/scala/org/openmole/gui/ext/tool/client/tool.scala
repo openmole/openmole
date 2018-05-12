@@ -657,6 +657,12 @@ package object client {
     color("#444")
   )
 
+  lazy val columnCSS: ModifierSeq = Seq(
+    width := "50%",
+    display := "inline-block",
+    padding := 15
+  )
+
   // PLUGIN PANEL
   lazy val uploadPlugin: ModifierSeq = Seq(
     marginRight := 50,
