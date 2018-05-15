@@ -58,12 +58,10 @@ package object evolution {
 
   import shapeless._
 
-  def SteadyStateEvolution[T](algorithm: T, evaluation: Puzzle, termination: OMTermination, parallelism: Int = 1, wrap: Boolean = true)(implicit wfi: WorkflowIntegration[T]) = {
+  def SteadyStateEvolution[T](algorithm: T, evaluation: Puzzle, termination: OMTermination, parallelism: Int = 1)(implicit wfi: WorkflowIntegration[T]) = {
     val t = wfi(algorithm)
 
-    val evaluationCapsule: Slot =
-      if (wrap) Slot(MoleTask(evaluation) set (inputs += (t.inputPrototypes: _*), outputs += (t.outputPrototypes: _*)))
-      else evaluation.firstSlot
+    val evaluationCapsule = Slot(MoleTask(evaluation) set (inputs += (t.inputPrototypes: _*), outputs += (t.outputPrototypes: _*)))
 
     val randomGenomes =
       BreedTask(algorithm, parallelism) set (
@@ -148,8 +146,7 @@ package object evolution {
     island:      HL,
     parallelism: Int,
     termination: OMTermination,
-    sample:      OptionalArgument[Int] = None,
-    wrap:        Boolean               = true
+    sample:      OptionalArgument[Int] = None
   )(implicit
     wfi: WorkflowIntegrationSelector[HL, T],
     selectPuzzle: Puzzle.PuzzleSelector[HL]) = {
@@ -217,9 +214,7 @@ package object evolution {
         outputs += t.populationPrototype
       )
 
-    val islandCapsule: Slot =
-      if (wrap) Slot(MoleTask(selectPuzzle(island)) set (name := "island"))
-      else selectPuzzle(island).firstSlot
+    val islandCapsule = Slot(MoleTask(selectPuzzle(island)) set (name := "island"))
 
     val slaveFist = EmptyTask() set (
       name := "slaveFirst",
