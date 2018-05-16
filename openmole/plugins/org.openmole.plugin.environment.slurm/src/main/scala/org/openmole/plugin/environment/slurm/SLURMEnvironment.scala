@@ -52,7 +52,8 @@ object SLURMEnvironment {
       timeout:              OptionalArgument[Time]        = None,
       storageSharedLocally: Boolean                       = false,
       name:                 OptionalArgument[String]      = None,
-      localSubmission: Boolean                            = false
+      localSubmission:      Boolean                       = false,
+      forceCopyOnNode:      Boolean                       = false
     )(implicit services: BatchEnvironment.Services, authenticationStore: AuthenticationStore, cypher: Cypher, varName: sourcecode.Name) = {
       import services._
 
@@ -69,7 +70,8 @@ object SLURMEnvironment {
         sharedDirectory = sharedDirectory,
         workDirectory = workDirectory,
         threads = threads,
-        storageSharedLocally = storageSharedLocally)
+        storageSharedLocally = storageSharedLocally,
+        forceCopyOnNode = forceCopyOnNode)
 
       if (!localSubmission) {
         val userValue = user.mustBeDefined("user")
@@ -120,7 +122,8 @@ object SLURMEnvironment {
     sharedDirectory:      Option[String],
     workDirectory:        Option[String],
     threads:              Option[Int],
-    storageSharedLocally: Boolean)
+    storageSharedLocally: Boolean,
+    forceCopyOnNode: Boolean)
 
 }
 
@@ -158,7 +161,8 @@ class SLURMEnvironment[A: gridscale.ssh.SSHAuthentication](
       environment = env,
       concurrency = services.preference(SSHEnvironment.MaxConnections),
       sharedDirectory = parameters.sharedDirectory,
-      storageSharedLocally = parameters.storageSharedLocally
+      storageSharedLocally = parameters.storageSharedLocally,
+      forceCopyOnRemoteStorage = parameters.forceCopyOnNode
     )
 
   override def trySelectStorage(files: ⇒ Vector[File]) = BatchEnvironment.trySelectSingleStorage(storageService)
