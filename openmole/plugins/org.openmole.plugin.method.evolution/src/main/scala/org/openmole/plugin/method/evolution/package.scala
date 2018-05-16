@@ -58,10 +58,16 @@ package object evolution {
 
   import shapeless._
 
-  def SteadyStateEvolution[T](algorithm: T, evaluation: Puzzle, termination: OMTermination, parallelism: Int = 1)(implicit wfi: WorkflowIntegration[T]) = {
+  def SteadyStateEvolution[T](algorithm: T, evaluation: Puzzle, termination: OMTermination, parallelism: Int = 1, wrap: Boolean = true)(implicit wfi: WorkflowIntegration[T]) = {
     val t = wfi(algorithm)
 
-    val evaluationCapsule = Slot(MoleTask(evaluation) set (inputs += (t.inputPrototypes: _*), outputs += (t.outputPrototypes: _*)))
+    val evaluationCapsule: Puzzle =
+      if (wrap) Slot(MoleTask(evaluation) set (inputs += (t.inputPrototypes: _*), outputs += (t.outputPrototypes: _*)))
+      else {
+        val firstEvaluation = EmptyTask() set ((inputs, outputs) += (t.inputPrototypes: _*))
+        val lastEvaluation = EmptyTask() set ((inputs, outputs) += (t.outputPrototypes: _*))
+        firstEvaluation -- evaluation -- lastEvaluation
+      }
 
     val randomGenomes =
       BreedTask(algorithm, parallelism) set (
@@ -137,7 +143,7 @@ package object evolution {
       ((firstCapsule -- masterSlave) >| (Capsule(last, strain = true) when t.terminatedPrototype)) &
         (firstCapsule oo (evaluationCapsule, filter = Block(t.populationPrototype, t.statePrototype)))
 
-    val gaPuzzle = OutputEnvironmentPuzzleContainer(puzzle, masterSlave.last, evaluationCapsule)
+    val gaPuzzle = OutputEnvironmentPuzzleContainer(puzzle, masterSlave.last, Puzzle.capsules(evaluation))
 
     gaPuzzle :: algorithm :: HNil
   }
@@ -243,7 +249,7 @@ package object evolution {
       ((firstCapsule -- masterSlave) >| (Capsule(last, strain = true) when t.terminatedPrototype)) &
         (firstCapsule oo (islandCapsule, Block(t.populationPrototype, t.statePrototype)))
 
-    val gaPuzzle = OutputEnvironmentPuzzleContainer(puzzle, masterSlave.last, islandCapsule)
+    val gaPuzzle = OutputEnvironmentPuzzleContainer(puzzle, masterSlave.last, Vector(islandCapsule))
 
     gaPuzzle :: algorithm :: HNil
   }
