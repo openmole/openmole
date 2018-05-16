@@ -61,12 +61,16 @@ package object evolution {
   def SteadyStateEvolution[T](algorithm: T, evaluation: Puzzle, termination: OMTermination, parallelism: Int = 1, wrap: Boolean = true)(implicit wfi: WorkflowIntegration[T]) = {
     val t = wfi(algorithm)
 
-    val evaluationCapsule: Puzzle =
-      if (wrap) Slot(MoleTask(evaluation) set (inputs += (t.inputPrototypes: _*), outputs += (t.outputPrototypes: _*)))
+    val (evaluationPuzzle, delegate): (Puzzle, Vector[Capsule]) =
+      if (wrap) {
+        val moleCapsule = Capsule(MoleTask(evaluation) set (inputs += (t.inputPrototypes: _*), outputs += (t.outputPrototypes: _*)))
+        (moleCapsule, Vector(moleCapsule))
+      }
       else {
         val firstEvaluation = EmptyTask() set ((inputs, outputs) += (t.inputPrototypes: _*))
         val lastEvaluation = EmptyTask() set ((inputs, outputs) += (t.outputPrototypes: _*))
-        firstEvaluation -- evaluation -- lastEvaluation
+        val puzzle = firstEvaluation -- evaluation -- lastEvaluation
+        (puzzle, Puzzle.capsules(puzzle))
       }
 
     val randomGenomes =
@@ -126,7 +130,7 @@ package object evolution {
     val masterSlave = MasterSlave(
       randomGenomes,
       masterTask,
-      scalingGenomeTask -- Strain(evaluationCapsule),
+      scalingGenomeTask -- Strain(evaluationPuzzle),
       t.populationPrototype, t.statePrototype
     )
 
@@ -141,9 +145,9 @@ package object evolution {
 
     val puzzle =
       ((firstCapsule -- masterSlave) >| (Capsule(last, strain = true) when t.terminatedPrototype)) &
-        (firstCapsule oo (evaluationCapsule, filter = Block(t.populationPrototype, t.statePrototype)))
+        (firstCapsule oo (evaluationPuzzle, filter = Block(t.populationPrototype, t.statePrototype)))
 
-    val gaPuzzle = OutputEnvironmentPuzzleContainer(puzzle, masterSlave.last, Puzzle.capsules(evaluation))
+    val gaPuzzle = OutputEnvironmentPuzzleContainer(puzzle, masterSlave.last, delegate)
 
     gaPuzzle :: algorithm :: HNil
   }
