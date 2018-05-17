@@ -10,7 +10,7 @@ Different environments can be assigned to delegate the workload resulting of dif
 
 @h2{PBS}
 
-@aa("PBS", href := shared.link.batchSystem) is a venerable batch system for clusters. You may use a PBS computing environment as follow:
+@aa("PBS", href := shared.link.batchSystem) is a venerable batch system for clusters. It is also referred to as Torque. You may use a PBS computing environment as follows:
 @br @hl.openmole("""
 val env =
   PBSEnvironment(
@@ -31,6 +31,7 @@ val env =
  @li{@apiEntryTitle{nodes} Number of nodes requested,}
  @li{@threads,}
  @li{@apiEntryTitle{coreByNodes} An alternative to specifying the number of threads. @hl.openmoleNoTest{coreByNodes} takes the value of the @hl.openmoleNoTest{threads} when not specified, or 1 if none of them is specified.}
+ @li{@apiEntryTitle{flavour} Specify the declination of PBS installed on your cluster. You can choose between @hl.openmoleNoTest{Torque} (for the open source PBS/Torque) or @hl.openmoleNoTest{PBSPro}. Defaults to @hl.openmoleNoTest{flavour = Torque}}
  @li{@name}
 
 @h2{SGE}
