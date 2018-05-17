@@ -1,17 +1,12 @@
 package org.openmole.gui.ext.tool.client
 
-import java.net.URLDecoder
-
 import org.openmole.gui.ext.data._
 import org.scalajs.dom.raw._
 import autowire._
 import org.openmole.gui.ext.api.Api
 import boopickle.Default._
-import org.apache.http.client.utils.URLEncodedUtils
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.scalajs.js.URIUtils
-import scala.scalajs.niocharset.StandardCharsets
 
 /*
  * Copyright (C) 29/04/15 // mathieu.leclaire@openmole.org

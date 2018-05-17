@@ -16,7 +16,6 @@
  */
 package org.openmole.gui.server.core
 
-import java.net.URLDecoder
 import java.nio.ByteBuffer
 
 import org.scalatra._
@@ -54,7 +53,6 @@ import org.openmole.tool.random.{ RandomProvider, Seeder }
 import org.openmole.tool.stream._
 import org.openmole.tool.tar._
 
-import scala.collection.mutable.ArrayBuffer
 import scala.util.{ Failure, Success, Try }
 
 object GUIServices {
