@@ -63,7 +63,7 @@ object OMTags {
     )
 
   def alert(alertType: ModifierSeq, content: TypedTag[HTMLDivElement], todook: () ⇒ Unit, todocancel: () ⇒ Unit, buttonGroupClass: ModifierSeq, okString: String): TypedTag[HTMLDivElement] =
-    tags.div(role := "alert")(
+    tags.div(role := "alert", overflowY := "scroll", height := 600, padding := 20)(
       content,
       div(paddingTop := 20)(
         buttonGroup(buttonGroupClass)(

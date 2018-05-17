@@ -1,26 +1,18 @@
 package org.openmole.gui.server.core
 
 import java.io.File
-import java.net.URL
 import java.text.SimpleDateFormat
-import java.util.zip.GZIPInputStream
 
-import org.openmole.plugin.environment.batch.environment.BatchEnvironment.{ BeginDownload, BeginUpload, EndDownload, EndUpload }
 import org.openmole.core.buildinfo
 import org.openmole.core.event._
-import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.pluginmanager._
 import org.openmole.gui.server.core.Utils._
-import org.openmole.core.workspace.{ NewFile, Workspace }
 import org.openmole.gui.ext.data
 import org.openmole.gui.ext.data._
 import java.io._
 import java.nio.file._
-import java.util.concurrent.atomic.AtomicReference
 
 import au.com.bytecode.opencsv.CSVReader
-import org.openmole.core.authentication.AuthenticationStore
-import org.openmole.core.fileservice.FileService
 import org.openmole.core.market.{ MarketIndex, MarketIndexEntry }
 
 import scala.util.{ Failure, Success, Try }
@@ -36,17 +28,15 @@ import org.openmole.core.market
 import org.openmole.core.outputredirection.OutputRedirection
 import org.openmole.core.preference.{ ConfigurationLocation, Preference }
 import org.openmole.core.project._
-import org.openmole.core.replication.ReplicaCatalog
-import org.openmole.core.serializer.SerializerService
 import org.openmole.core.services.Services
-import org.openmole.core.threadprovider.ThreadProvider
+import org.openmole.core.workspace.Workspace
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.plugin.server._
 import org.openmole.gui.ext.tool.server.OMRouter
 import org.openmole.gui.ext.tool.server.Utils.authenticationKeysFile
 import org.openmole.gui.server.core.GUIServer.ApplicationControl
 import org.openmole.tool.crypto.Cypher
-import org.openmole.tool.random.{ RandomProvider, Seeder }
+
 import scala.collection.JavaConverters._
 
 /*
@@ -218,24 +208,22 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
 
     val fileType: FileType = safePathToTest
     fileType match {
-      case a: Archive ⇒ a.language match {
-        case j: JavaLikeLanguage ⇒ test(Seq(safePathToTest))
-        case _ ⇒
-          // val emptyFile = new File("")
-          val from: File = safePathToFile(safePathToTest)(ServerFileSystemContext.absolute, workspace)
-          val to: File = safePathToFile(safePathToTest.parent)(ServerFileSystemContext.absolute, workspace)
-          val extracted = getExtractedArchiveTo(from, to)(ServerFileSystemContext.absolute).filterNot {
-            _ == safePathToTest
-          }
-          val toTest = in ++ safePathToTest.nameWithNoExtension
-          val toTestFile: File = safePathToFile(in ++ safePathToTest.nameWithNoExtension)(ServerFileSystemContext.project, workspace)
-          new File(to, from.getName).recursiveDelete
+      case Archive ⇒
+        // case j: JavaLikeLanguage ⇒ test(Seq(safePathToTest))
+        // val emptyFile = new File("")
+        val from: File = safePathToFile(safePathToTest)(ServerFileSystemContext.absolute, workspace)
+        val to: File = safePathToFile(safePathToTest.parent)(ServerFileSystemContext.absolute, workspace)
+        val extracted = getExtractedArchiveTo(from, to)(ServerFileSystemContext.absolute).filterNot {
+          _ == safePathToTest
+        }
+        val toTest = in ++ safePathToTest.nameWithNoExtension
+        val toTestFile: File = safePathToFile(in ++ safePathToTest.nameWithNoExtension)(ServerFileSystemContext.project, workspace)
+        new File(to, from.getName).recursiveDelete
 
-          if (toTestFile.exists) {
-            test(extracted, toTest)
-          }
-          else Seq()
-      }
+        if (toTestFile.exists) {
+          test(extracted, toTest)
+        }
+        else Seq()
       case _ ⇒ test(Seq(safePathToTest))
     }
   }
@@ -423,10 +411,10 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
   }
 
   //PLUGINS
-  def addPlugins(nodes: Seq[String]): Seq[Error] = {
-    val plugins = nodes.map(Utils.pluginUpdoadDirectory / _)
-    val errors = module.addPluginsFiles(plugins, true, Some(module.pluginDirectory))
-    plugins.foreach(_.recursiveDelete)
+  def addUploadedPlugins(nodes: Seq[String]): Seq[Error] = {
+    val files = nodes.map(Utils.pluginUpdoadDirectory / _)
+    val errors = org.openmole.core.module.addPluginsFiles(files, true, Some(org.openmole.core.module.pluginDirectory(Workspace.instance)))(Workspace.instance)
+    files.foreach(_.recursiveDelete)
     errors.map(e ⇒ ErrorBuilder(e._2))
   }
 
@@ -449,26 +437,23 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
   def listPlugins(): Iterable[Plugin] =
     module.pluginDirectory.listFilesSafe.map(p ⇒ Plugin(p.getName, new SimpleDateFormat("dd/MM/yyyy HH:mm").format(p.lastModified)))
 
-  def removePlugin(plugin: Plugin): Unit = synchronized {
-    val file = module.pluginDirectory / plugin.name
-    val allDependingFiles = PluginManager.allDepending(file, b ⇒ !b.isProvided)
-    val bundle = PluginManager.bundle(file)
-    bundle.foreach(PluginManager.remove)
-    allDependingFiles.filter(f ⇒ !PluginManager.bundle(f).isDefined).foreach(_.recursiveDelete)
-    file.recursiveDelete
-  }
-
+  def removePlugin(plugin: Plugin): Unit = org.openmole.gui.ext.tool.server.Utils.removePlugin(plugin)
   //GUI OM PLUGINS
 
   def getGUIPlugins(): AllPluginExtensionData = {
 
     AllPluginExtensionData(
-      authentications = PluginActivator.authentications
+      PluginActivator.authentications,
+      PluginActivator.wizards
     )
   }
 
+  def isOSGI(safePath: SafePath): Boolean = {
+    import org.openmole.gui.ext.data.ServerFileSystemContext.project
+    PluginManager.isOSGI(safePathToFile(safePath))
+  }
+
   //MODEL WIZARDS
-  def launchingCommands(path: SafePath): Seq[LaunchingCommand] = Utils.launchingCommands(path)
 
   //Extract models from an archive
   def models(archivePath: SafePath): Seq[SafePath] = {
@@ -477,98 +462,6 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
     (for {
       tnd ← listFiles(toDir).list if FileType.isSupportedLanguage(tnd.name)
     } yield tnd).map { nd ⇒ toDir ++ nd.name }
-  }
-
-  def classes(jarPath: SafePath): Seq[ClassTree] = Utils.jarClasses(jarPath)
-
-  def methods(jarPath: SafePath, className: String): Seq[JarMethod] = Utils.jarMethods(jarPath, className)
-
-  def buildModelTask(
-    executableName: String,
-    scriptName:     String,
-    command:        String,
-    language:       Language,
-    inputs:         Seq[ProtoTypePair],
-    outputs:        Seq[ProtoTypePair],
-    path:           SafePath,
-    libraries:      Option[String],
-    resources:      Resources
-  ): SafePath = {
-    import org.openmole.gui.ext.data.ServerFileSystemContext.project
-    val modelTaskFile = new File(path, scriptName + ".oms")
-
-    val os = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(modelTaskFile)))
-
-    def ioString(protos: Seq[ProtoTypePair], keyString: String) = if (protos.nonEmpty) Seq(s"  $keyString += (", ")").mkString(protos.map { i ⇒ s"${i.name}" }.mkString(", ")) + ",\n" else ""
-
-    def imapString(protos: Seq[ProtoTypePair], keyString: String) = if (protos.nonEmpty) protos.map { i ⇒ s"""  $keyString += (${i.name}, "${i.mapping.get}")""" }.mkString(",\n") + ",\n" else ""
-
-    def omapString(protos: Seq[ProtoTypePair], keyString: String) = if (protos.nonEmpty) protos.map { o ⇒ s"""  $keyString += ("${o.mapping.get}", ${o.name})""" }.mkString(",\n") + ",\n" else ""
-
-    def default(key: String, value: String) = s"  $key := $value"
-
-    try {
-      for (p ← ((inputs ++ outputs).map { p ⇒ (p.name, p.`type`.scalaString) } distinct)) yield {
-        os.write("val " + p._1 + " = Val[" + p._2 + "]\n")
-      }
-
-      val (rawimappings, ins) = inputs.partition(i ⇒ i.mapping.isDefined)
-      val (rawomappings, ous) = outputs.partition(o ⇒ o.mapping.isDefined)
-      val (ifilemappings, imappings) = rawimappings.partition(_.`type` == ProtoTYPE.FILE)
-      val (ofilemappings, omappings) = rawomappings.partition(_.`type` == ProtoTYPE.FILE)
-
-      val inString = ioString(ins, "inputs")
-      val imFileString = imapString(ifilemappings, "inputFiles")
-      val ouString = ioString(ous, "outputs")
-      val omFileString = omapString(ofilemappings, "outputFiles")
-      val resourcesString = if (resources.all.nonEmpty) s"""  resources += (${resources.all.map { r ⇒ s"workDirectory / ${(r.safePath.path.drop(1).mkString("/")).mkString(",")}" }}).\n""" else ""
-      val defaults =
-        "  //Default values. Can be removed if OpenMOLE Vals are set by values coming from the workflow\n" +
-          (inputs.map { p ⇒ (p.name, testBoolean(p)) } ++
-            ifilemappings.map { p ⇒ (p.name, " workDirectory / \"" + p.mapping.getOrElse("") + "\"") }).filterNot {
-              _._2.isEmpty
-            }.map { p ⇒ default(p._1, p._2) }.mkString(",\n")
-
-      language.taskType match {
-        case ctt: CareTaskType ⇒
-          os.write(
-            s"""\nval task = CARETask(workDirectory / "$executableName", "$command") set(\n""" +
-              inString + ouString + imFileString + omFileString + resourcesString + defaults
-          )
-        case ntt: NetLogoTaskType ⇒
-          val imString = imapString(imappings, "netLogoInputs")
-          val omString = omapString(omappings, "netLogoOutputs")
-          os.write(
-            s"""\nval launch = List("${(Seq("setup", "random-seed ${seed}") ++ (command.split('\n').toSeq)).mkString("\",\"")}")
-               \nval task = NetLogo5Task(workDirectory / ${executableName.split('/').map { s ⇒ s"""\"$s\"""" }.mkString(" / ")}, launch, embedWorkspace = ${!resources.implicits.isEmpty}) set(\n""".stripMargin +
-              inString + ouString + imString + omString + imFileString + omFileString + defaults
-          )
-        case st: ScalaTaskType ⇒
-          os.write(
-            s"""\nval task = ScalaTask(\n\"\"\"$command\"\"\") set(\n""" +
-              s"${libraries.map { l ⇒ s"""  libraries += workingDirectory / "$l",""" }.getOrElse("")}\n\n" +
-              inString + ouString + imFileString + omFileString + resourcesString + defaults
-          )
-        case rt: RTaskType ⇒
-          val rInput = ioString(ins, "rInputs")
-          val rOutput = ioString(ous, "rOutputs")
-          os.write(
-            s"""\nval task = RTask(\"\"\"\n   $command\n   \"\"\") set(\n""" +
-              rInput + rOutput +
-              s"""  resources += workDirectory / \"$executableName\""""
-
-          )
-
-        case _ ⇒ ""
-      }
-      os.write("\n  )\n\ntask hook ToStringHook()")
-    }
-
-    finally {
-      os.close
-    }
-    modelTaskFile.createNewFile
-    modelTaskFile
   }
 
   def expandResources(resources: Resources): Resources = {
@@ -585,10 +478,5 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
       implicitResource,
       paths.size + implicitResource.size
     )
-  }
-
-  def testBoolean(protoType: ProtoTypePair) = protoType.`type` match {
-    case ProtoTYPE.BOOLEAN ⇒ if (protoType.default == "1") "true" else "false"
-    case _                 ⇒ protoType.default
   }
 }

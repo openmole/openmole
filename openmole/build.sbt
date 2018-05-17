@@ -201,7 +201,7 @@ lazy val replication = OsgiProject(coreDir, "org.openmole.core.replication", imp
 lazy val db = OsgiProject(coreDir, "org.openmole.core.db", imports = Seq("*")) settings (
   libraryDependencies ++= Seq(Libraries.slick, Libraries.xstream, Libraries.h2, Libraries.scopt)) settings (coreSettings: _*) dependsOn(openmoleNetwork, exception, openmoleCrypto, openmoleFile, openmoleLogger)
 
-lazy val preference = OsgiProject(coreDir, "org.openmole.core.preference", imports = Seq("*")) settings (
+lazy val preference = OsgiProject(coreDir, "org.openmole.core.preference", imports = Seq("*")) settings(
   libraryDependencies ++= Seq(Libraries.configuration, Libraries.squants), Libraries.addScalaLang(scalaVersionValue)) settings (coreSettings: _*) dependsOn(openmoleNetwork, openmoleCrypto, openmoleFile, openmoleThread, openmoleTypes, openmoleLock, exception)
 
 lazy val workspace = OsgiProject(coreDir, "org.openmole.core.workspace", imports = Seq("*")) dependsOn
@@ -391,7 +391,7 @@ lazy val oar = OsgiProject(pluginDir, "org.openmole.plugin.environment.oar", imp
   (libraryDependencies += Libraries.gridscaleOAR) settings (pluginSettings: _*)
 
 
-lazy val egi = OsgiProject(pluginDir, "org.openmole.plugin.environment.egi") dependsOn(openmoleDSL, batch, workspace, fileService, gridscale) settings (
+lazy val egi = OsgiProject(pluginDir, "org.openmole.plugin.environment.egi") dependsOn(openmoleDSL, batch, workspace, fileService, gridscale) settings(
   libraryDependencies ++= Libraries.gridscaleEGI, Libraries.addScalaLang(scalaVersionValue)) settings (pluginSettings: _*)
 
 lazy val gridscale = OsgiProject(pluginDir, "org.openmole.plugin.environment.gridscale", imports = Seq("*")) settings (
@@ -524,7 +524,7 @@ lazy val server = OsgiProject(
   restDir,
   "org.openmole.rest.server",
   imports = Seq("org.h2", "!com.sun.*", "*")
-) dependsOn(workflow, openmoleTar, openmoleCollection, project, message, openmoleCrypto, services) settings (
+) dependsOn(workflow, openmoleTar, openmoleCollection, project, message, openmoleCrypto, services) settings(
   libraryDependencies ++= Seq(Libraries.bouncyCastle, Libraries.logback, Libraries.scalatra, Libraries.arm, Libraries.codec, Libraries.json4s), Libraries.addScalaLang(scalaVersionValue)) settings (defaultSettings: _*)
 
 
@@ -552,7 +552,7 @@ lazy val dataGUI = OsgiProject(guiExt, "org.openmole.gui.ext.data") enablePlugin
   libraryDependencies += Libraries.monocle
 ) settings (defaultSettings: _*)
 
-lazy val extServerTool = OsgiProject(guiExt, "org.openmole.gui.ext.tool.server") dependsOn(dataGUI, workspace) settings(
+lazy val extServerTool = OsgiProject(guiExt, "org.openmole.gui.ext.tool.server") dependsOn(dataGUI, workspace, module) settings(
   libraryDependencies += Libraries.autowire,
   libraryDependencies += Libraries.boopickle
 ) settings (defaultSettings: _*)
@@ -663,7 +663,35 @@ lazy val guiEnvironmentSSHLoginPlugin = OsgiProject(guiPluginDir, "org.openmole.
   Libraries.bootstrapnative
 ) dependsOn(extPluginGUIServer, extClientTool, dataGUI, workspace, ssh) enablePlugins (ExecNpmPlugin)
 
-val guiPlugins = Seq(guiEnvironmentSSHLoginPlugin, guiEnvironmentSSHKeyPlugin, guiEnvironmentEGIPlugin) //, guiEnvironmentDesktopGridPlugin)
+lazy val netlogoWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.wizard.netlogo") settings(
+  guiPluginSettings,
+  libraryDependencies += Libraries.equinoxOSGi
+) dependsOn(extPluginGUIServer, extClientTool, extServerTool, workspace) enablePlugins (ExecNpmPlugin)
+
+lazy val nativeWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.wizard.native") settings(
+  guiPluginSettings,
+  libraryDependencies += Libraries.equinoxOSGi,
+  libraryDependencies += Libraries.arm
+) dependsOn(extPluginGUIServer, extClientTool, extServerTool, workspace) enablePlugins (ExecNpmPlugin)
+
+lazy val rWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.wizard.r") settings(
+  guiPluginSettings,
+  libraryDependencies += Libraries.equinoxOSGi,
+) dependsOn(extPluginGUIServer, extClientTool, extServerTool, workspace) enablePlugins (ExecNpmPlugin)
+
+lazy val jarWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.wizard.jar") settings(
+  guiPluginSettings,
+  libraryDependencies += Libraries.equinoxOSGi,
+) dependsOn(extPluginGUIServer, extClientTool, extServerTool, workspace) enablePlugins (ExecNpmPlugin)
+
+val guiPlugins = Seq(
+  guiEnvironmentSSHLoginPlugin,
+  guiEnvironmentSSHKeyPlugin,
+  guiEnvironmentEGIPlugin,
+  netlogoWizardPlugin,
+  nativeWizardPlugin,
+  rWizardPlugin,
+  jarWizardPlugin) //, guiEnvironmentDesktopGridPlugin)
 
 /* -------------------- Bin ------------------------- */
 
@@ -819,7 +847,7 @@ lazy val site = crossProject.in(binDir / "org.openmole.site") settings (defaultS
   Libraries.scalajsMarked
 )
 
-lazy val siteJS = site.js enablePlugins(ExecNpmPlugin)
+lazy val siteJS = site.js enablePlugins (ExecNpmPlugin)
 lazy val siteJVM = site.jvm dependsOn(tools, project, serializer, marketIndex) settings (
   libraryDependencies += Libraries.sourceCode) dependsOn (marketIndex)
 

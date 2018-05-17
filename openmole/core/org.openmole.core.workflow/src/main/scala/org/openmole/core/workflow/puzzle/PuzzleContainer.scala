@@ -49,7 +49,7 @@ object OutputEnvironmentPuzzleContainer {
 case class OutputEnvironmentPuzzleContainer(
   puzzle:      Puzzle,
   output:      Capsule,
-  delegate:    Capsule,
+  delegate:    Vector[Capsule],
   hooks:       Seq[Hook]                   = Seq.empty,
   environment: Option[EnvironmentProvider] = None,
   grouping:    Option[Grouping]            = None
@@ -62,7 +62,16 @@ case class OutputEnvironmentPuzzleContainer(
   def buildPuzzle: Puzzle =
     puzzle.copy(
       hooks = puzzle.hooks ++ hooks.map(output → _),
-      environments = puzzle.environments ++ environment.map(delegate → _),
-      grouping = puzzle.grouping ++ grouping.map(delegate → _)
+      environments =
+        puzzle.environments ++
+          (for {
+            d ← delegate
+            e ← environment.toVector
+          } yield d -> e),
+      grouping = puzzle.grouping ++
+        (for {
+          d ← delegate
+          g ← grouping.toVector
+        } yield d -> g)
     )
 }

@@ -60,7 +60,7 @@ class ResetPassword {
       div(
         img(src := "img/openmole.png", omsheet.openmoleLogo),
         div(
-          omsheet.centerPage,
+          omsheet.centerPage(),
           div(
             omsheet.connectionBlock,
             setPasswordForm

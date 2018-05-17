@@ -158,23 +158,30 @@ object CoreUtils {
 
   def ifOrNothing(condition: Boolean, classString: String) = if (condition) classString else ""
 
-  def buildModelScript(language: Language, command: String, scriptName: String, path: SafePath, resources: Resources, target: String, inputs: Seq[ProtoTypePair] = Seq(), outputs: Seq[ProtoTypePair] = Seq(), libraries: Option[String] = None) =
-
-    post()[Api].buildModelTask(
-      target,
-      scriptName,
-      command,
-      language,
-      inputs,
-      outputs,
-      path,
-      libraries,
-      resources
-    ).call().foreach {
-      b ⇒
-        treeNodeTabs -- b
-        treeNodePanel.displayNode(FileNode(Var(b.name), 0L, 0L))
-        TreeNodePanel.refreshAndDraw
-    }
+  //  def buildModelScript[T<: WizardData](
+  //    wizardPluginFactory: WizardPluginFactory,
+  //    executableName:      String,
+  //    command:             String,
+  //    target:              SafePath,
+  //    resources:           Resources,
+  //    data:                T,
+  //    inputs:              Seq[ProtoTypePair]      = Seq(),
+  //    outputs:             Seq[ProtoTypePair]      = Seq(),
+  //    libraries:           Option[String]          = None) =
+  //    wizardPluginFactory.toTask(
+  //      target,
+  //      executableName,
+  //      command,
+  //      inputs,
+  //      outputs,
+  //      libraries,
+  //      resources,
+  //      data
+  //    ).foreach {
+  //      b ⇒
+  //        treeNodeTabs -- b
+  //        treeNodePanel.displayNode(FileNode(Var(b.name), 0L, 0L))
+  //        TreeNodePanel.refreshAndDraw
+  //    }
 
 }

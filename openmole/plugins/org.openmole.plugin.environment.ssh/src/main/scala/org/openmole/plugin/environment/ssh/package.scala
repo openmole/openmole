@@ -61,21 +61,27 @@ package object ssh {
       StorageInterface.download(false, gssh.readFile[Unit](t, _, _))(src, dest, options)
   }
 
-  def localStorageService(environment: BatchEnvironment, concurrency: Int, root: String, sharedDirectory: Option[String])(implicit threadProvider: ThreadProvider, preference: Preference, localInterpreter: Effect[_root_.gridscale.local.Local]) = {
-    val remoteStorage = StorageInterface.remote(LogicalLinkStorage())
+  def localStorageService(
+    environment:              BatchEnvironment,
+    concurrency:              Int,
+    root:                     String,
+    sharedDirectory:          Option[String],
+    forceCopyOnRemoteStorage: Boolean          = false)(implicit threadProvider: ThreadProvider, preference: Preference, localInterpreter: Effect[_root_.gridscale.local.Local]) = {
+    val remoteStorage = StorageInterface.remote(LogicalLinkStorage(forceCopy = forceCopyOnRemoteStorage))
     def id = new URI("file", null, "localhost", -1, sharedDirectory.orNull, null, null).toString
     StorageService(LocalStorage(), root, id, environment, remoteStorage, concurrency, t ⇒ false)
   }
 
   def sshStorageService[S](
-    user:                 String,
-    host:                 String,
-    port:                 Int,
-    storage:              S,
-    concurrency:          Int,
-    environment:          BatchEnvironment,
-    sharedDirectory:      Option[String],
-    storageSharedLocally: Boolean
+    user:                     String,
+    host:                     String,
+    port:                     Int,
+    storage:                  S,
+    concurrency:              Int,
+    environment:              BatchEnvironment,
+    sharedDirectory:          Option[String],
+    storageSharedLocally:     Boolean,
+    forceCopyOnRemoteStorage: Boolean          = false
   )(implicit storageInterface: StorageInterface[S], threadProvider: ThreadProvider, preference: Preference) = {
 
     val root = sharedDirectory match {
@@ -88,7 +94,7 @@ package object ssh {
     implicit def logicalLinkStorage = LogicalLinkStorage.isStorage(_root_.gridscale.local.Local())
     implicit def localStorage = LocalStorage.isStorage(_root_.gridscale.local.Local())
 
-    val remoteStorage = StorageInterface.remote(LogicalLinkStorage())
+    val remoteStorage = StorageInterface.remote(LogicalLinkStorage(forceCopy = forceCopyOnRemoteStorage))
     if (storageSharedLocally) {
       def id = new URI("file", user, "localhost", -1, sharedDirectory.orNull, null, null).toString
       StorageService(LocalStorage(), root, id, environment, remoteStorage, concurrency, t ⇒ false)

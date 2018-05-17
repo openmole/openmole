@@ -31,7 +31,7 @@ object AbsolutePositioning {
   trait Position extends LayoutModifier
 
   object CenterPagePosition extends Position {
-    lazy val modifierClass = omsheet.centerPage
+    lazy val modifierClass = omsheet.centerPage("150px")
   }
 
   object RelativeCenterPosition extends Position {

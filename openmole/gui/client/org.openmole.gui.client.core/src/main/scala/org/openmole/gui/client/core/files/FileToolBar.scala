@@ -288,7 +288,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
     {
       post()[Api].copyToPluginUploadDir(manager.selected.now).call().foreach {
         c ⇒
-          post()[Api].addPlugins(manager.selected.now.map {
+          post()[Api].addUploadedPlugins(manager.selected.now.map {
             _.name
           }).call().foreach {
             errs ⇒

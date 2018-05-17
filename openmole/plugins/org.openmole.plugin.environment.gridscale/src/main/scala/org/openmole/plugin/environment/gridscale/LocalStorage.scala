@@ -50,13 +50,3 @@ object LocalStorage {
 
 case class LocalStorage()
 
-//
-//trait LocalStorage extends GridScaleStorage {
-//  val root: String
-//  val authentication: Unit = Unit
-//  val storage = new GSLocalStorage {}
-//
-//  override protected def _mv(from: String, to: String): Unit = new File(from).move(new File(to))
-//  def home = System.getProperty("user.home")
-//}
-

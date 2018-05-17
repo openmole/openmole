@@ -19,6 +19,7 @@ package org.openmole.core.pluginmanager
 
 import java.io.File
 import java.util.concurrent.Semaphore
+import java.util.zip.ZipFile
 
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.tool.file._
@@ -149,6 +150,23 @@ object PluginManager extends JavaLogger {
 
   def isPlugin(b: Bundle): Boolean = isPlugin(b.getBundleId)
   def isPlugin(id: Long): Boolean = !infos.providedDependencies.contains(id)
+
+  def isOSGI(file: File) = {
+    Try {
+      val zip = new ZipFile(file)
+      val hasSymbolicName =
+        try {
+          val manifest = zip.getEntry("META-INF/MANIFEST.MF")
+          if (manifest != null) {
+            val content = scala.io.Source.fromInputStream(zip.getInputStream(manifest)).getLines.mkString("\n")
+            content.contains(Constants.BUNDLE_SYMBOLICNAME)
+          }
+          else false
+        }
+        finally zip.close
+      hasSymbolicName
+    }.getOrElse(false)
+  }
 
   def allPluginDependencies(b: Bundle) = atomic { implicit ctx ⇒
     resolvedPluginDependenciesCache.

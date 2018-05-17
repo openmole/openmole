@@ -18,8 +18,6 @@ package org.openmole.gui.server.core
  */
 
 import java.io.{ File, _ }
-import java.lang.reflect.Modifier
-import java.nio.channels.FileChannel
 import java.util.logging.Level
 import java.util.zip._
 
@@ -32,9 +30,6 @@ import org.openmole.gui.ext.data.ListSorting._
 import org.openmole.tool.logger.JavaLogger
 import org.openmole.tool.file._
 import org.openmole.core.fileservice._
-import org.openmole.tool.stream._
-import org.openmole.tool.stream.StringOutputStream
-import org.openmole.tool.tar._
 import java.nio.file.attribute._
 
 import org.openmole.gui.ext.plugin.server.PluginActivator
@@ -42,12 +37,8 @@ import org.openmole.gui.ext.tool.server.OMRouter
 import org.openmole.gui.server.jscompile.JSPack
 
 import scala.io.{ BufferedSource, Codec }
-import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
 import org.openmole.core.services._
-import org.openmole.core.module
 import org.openmole.core.pluginmanager.KeyWord
-import org.openmole.core.workflow.tools.Stubs
-import resource._
 
 import scala.util.{ Failure, Success, Try }
 
@@ -197,35 +188,6 @@ object Utils extends JavaLogger {
     f
   }
 
-  def launchingCommands(model: SafePath)(implicit workspace: Workspace): Seq[LaunchingCommand] = {
-    import org.openmole.gui.ext.data.ServerFileSystemContext.project
-    model.name.split('.').last match {
-      case "nlogo" ⇒ Seq(CodeParsing.netlogoParsing(model))
-      case "R"     ⇒ Seq(BasicLaunchingCommand(Some(RLanguage()), model.name))
-      // case "jar"   ⇒ Seq(JavaLaunchingCommand(JarMethod("", Seq(), "", true, ""), Seq(), Seq()))
-      case "bin"   ⇒ Seq(CodeParsing.fromCommand(getCareBinInfos(model).commandLine.getOrElse(Seq())).get)
-    }
-  }
-
-  def jarClasses(jarPath: SafePath)(implicit workspace: Workspace): Seq[ClassTree] = {
-    import org.openmole.gui.ext.data.ServerFileSystemContext.project
-    val zip = new ZipInputStream(new FileInputStream(jarPath))
-    val classes = Stream.continually(zip.getNextEntry).
-      takeWhile(_ != null).filter { e ⇒
-        e.getName.endsWith(".class")
-      }.filterNot { e ⇒
-        Seq("scala", "java").exists {
-          ex ⇒ e.getName.startsWith(ex)
-        }
-      }.map {
-        _.getName.dropRight(6).split("/").toSeq
-      }
-
-    val trees = buildClassTrees(classes)
-    zip.close
-    trees
-  }
-
   private def buildClassTrees(classes: Seq[Seq[String]]): Seq[ClassTree] = {
 
     def build(classes: Seq[Seq[String]], classTrees: Seq[ClassTree]): Seq[ClassTree] = {
@@ -245,18 +207,6 @@ object Utils extends JavaLogger {
     }
 
     build(classes, Seq())
-  }
-
-  def jarMethods(jarPath: SafePath, classString: String)(implicit workspace: Workspace): Seq[JarMethod] = {
-    import org.openmole.gui.ext.data.ServerFileSystemContext.project
-    val classLoader = new URLClassLoader(Seq(jarPath.toURI.toURL), this.getClass.getClassLoader)
-    val clazz = Class.forName(classString, true, classLoader)
-
-    clazz.getDeclaredMethods.map { m ⇒
-      JarMethod(m.getName, m.getGenericParameterTypes.map {
-        _.toString.split("class ").last
-      }.toSeq, m.getReturnType.getCanonicalName, Modifier.isStatic(m.getModifiers), classString)
-    }
   }
 
   def move(from: File, to: File): Unit =
@@ -348,82 +298,6 @@ object Utils extends JavaLogger {
       deleteFile(sp, context)
     }
   }
-
-  def managedArchive(careArchive: File) = managed(new RandomAccessFile(careArchive, "r")) map (_.getChannel)
-
-  def extractArchiveStream(archive: ManagedResource[FileChannel]) = archive.map { fileChannel ⇒
-
-    //Get the tar.gz or the tgz from the bin archive
-    val archiveSize = fileChannel.map(FileChannel.MapMode.READ_ONLY, fileChannel.size - 8L, 8L).getLong.toInt
-    fileChannel.position(0L)
-    val srcArray = new Array[Byte](archiveSize)
-
-    // Take final 100 and find I_LOVE PIZZA
-    val pizza = "I_LOVE_PIZZA".getBytes
-    val final100 = fileChannel.map(FileChannel.MapMode.READ_ONLY, fileChannel.size - 100L, 100L)
-    val array100 = new Array[Byte](100)
-    final100.get(array100, 0, 100)
-    val offset = 100L - array100.indexOfSlice(pizza).toLong
-
-    fileChannel.map(FileChannel.MapMode.READ_ONLY, fileChannel.size - offset - archiveSize, archiveSize).get(srcArray, 0, archiveSize)
-
-    //Extract and uncompress the tar.gz
-    val stream = managed(new TarInputStream(new GZIPInputStream(new ByteArrayInputStream(srcArray))))
-    stream
-  }.opt.get
-
-  case class CAREInfo(commandLine: Option[Seq[String]])
-
-  def getCareBinInfos(careArchive: File): CAREInfo = getCareBinInfos(extractArchiveStream(managedArchive(careArchive)))
-
-  /** The .opt.get at the end will force all operations to happen and close the managed resources */
-  def getCareBinInfos(extractedArchiveStream: ManagedResource[TarInputStream]) =
-    extractedArchiveStream.map { stream ⇒
-
-      Iterator.continually(stream.getNextEntry).dropWhile { te ⇒
-        val pathString = te.getName.split("/")
-        pathString.last != "re-execute.sh" || pathString.contains("rootfs")
-      }.toSeq.headOption.flatMap { _ ⇒
-
-        val linesManaged = managed(new StringOutputStream) map { stringW: StringOutputStream ⇒
-          stream copy stringW
-          stringW.toString.split("\n")
-        }
-        val lines = linesManaged.opt.get
-
-        val prootLine = lines.indexWhere(s ⇒ s.startsWith("PROOT="))
-        val commands =
-          if (prootLine != -1) {
-            // get only the command lines, and strip each component from its single quotes and final backslash
-            Some(lines.slice(7, prootLine - 1).map { l ⇒ l.dropRight(2) }.map {
-              _.drop(1)
-            }.map {
-              _.dropRight(1)
-            }.toSeq)
-          }
-          else None
-
-        Some(CAREInfo(commands))
-      }.get
-    }.opt.get
-
-  //  def passwordState = PasswordState(chosen = Workspace.passwordChosen, hasBeenSet = Workspace.passwordHasBeenSet)
-
-  //  def setPassword(pass: String, passAgain: String = ""): Boolean = {
-  //    try {
-  //      def set = {
-  //        Workspace.setPassword(pass)
-  //        true
-  //      }
-  //
-  //      if (passwordState.chosen) set
-  //      else if (pass == passAgain) set
-  //      else false
-  //    }
-  //    catch {
-  //      case e: UserBadDataError ⇒ false
-  //    }
-  //  }
 
   def getUUID: String = java.util.UUID.randomUUID.toString
 
