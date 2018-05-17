@@ -160,6 +160,14 @@ object Puzzle {
         def apply(l: H :: T) = st(l.tail)
       }
   }
+
+  def capsules(puzzle: Puzzle): Vector[Capsule] =
+    (puzzle.transitions.map(_.start).toVector ++
+      puzzle.transitions.map(_.end.capsule) ++
+      Vector(puzzle.firstSlot.capsule) ++
+      puzzle.lasts ++
+      puzzle.dataChannels.map(_.start) ++
+      puzzle.dataChannels.map(_.end.capsule)).distinct
 }
 
 @Lenses case class Puzzle(
