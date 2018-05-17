@@ -16,6 +16,7 @@
  */
 package org.openmole.gui.server.core
 
+import java.net.URLDecoder
 import java.nio.ByteBuffer
 
 import org.scalatra._
@@ -268,7 +269,8 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
   }
 
   get(downloadFileRoute) {
-    val path = new java.net.URI(null, null, params("path"), null).getPath
+
+    val path = params("path")
     val f = new File(Utils.webUIDirectory, path)
 
     if (!f.exists()) NotFound("The file " + path + " does not exist.")
