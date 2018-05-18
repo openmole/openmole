@@ -70,7 +70,7 @@ package file {
     }
 
     def getCopyOptions(followSymlinks: Boolean) = Seq(StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING) ++
-      (if (followSymlinks) Seq(LinkOption.NOFOLLOW_LINKS) else Seq.empty[CopyOption])
+      (if (followSymlinks) Seq.empty[CopyOption] else Seq(LinkOption.NOFOLLOW_LINKS))
 
     implicit class FileDecorator(file: File) {
 
