@@ -40,6 +40,7 @@ import scala.io.{ BufferedSource, Codec }
 import org.openmole.core.services._
 import org.openmole.core.pluginmanager.KeyWord
 
+import scala.annotation.tailrec
 import scala.util.{ Failure, Success, Try }
 
 object Utils extends JavaLogger {
@@ -124,12 +125,13 @@ object Utils extends JavaLogger {
       val from: File = sp
       val to: File = toPath
       if (from.exists && to.exists) {
-        from.copy(new File(to, withName.getOrElse(from.getName)))
+        FileDecorator(from).copy(toF = new File(to, withName.getOrElse(from.getName)), followSymlinks = true)
       }
     }
   }
 
   def getPathArray(f: File, until: File): Seq[String] = {
+    @tailrec
     def getParentsArray0(f: File, computedParents: Seq[String]): Seq[String] = {
       val parent = f.getParentFile
       if (parent != null) {
@@ -148,6 +150,7 @@ object Utils extends JavaLogger {
   }
 
   def getFile(root: File, paths: Seq[String]): File = {
+    @tailrec
     def getFile0(paths: Seq[String], accFile: File): File = {
       if (paths.isEmpty) accFile
       else getFile0(paths.tail, new File(accFile, paths.head))
