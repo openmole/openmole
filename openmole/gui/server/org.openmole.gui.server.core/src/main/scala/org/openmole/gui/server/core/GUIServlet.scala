@@ -53,7 +53,6 @@ import org.openmole.tool.random.{ RandomProvider, Seeder }
 import org.openmole.tool.stream._
 import org.openmole.tool.tar._
 
-import scala.collection.mutable.ArrayBuffer
 import scala.util.{ Failure, Success, Try }
 
 object GUIServices {
@@ -268,7 +267,8 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
   }
 
   get(downloadFileRoute) {
-    val path = new java.net.URI(null, null, params("path"), null).getPath
+
+    val path = params("path")
     val f = new File(Utils.webUIDirectory, path)
 
     if (!f.exists()) NotFound("The file " + path + " does not exist.")

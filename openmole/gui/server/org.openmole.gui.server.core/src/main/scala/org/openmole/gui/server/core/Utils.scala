@@ -181,11 +181,11 @@ object Utils extends JavaLogger {
     val toPath = safePath.copy(path = safePath.path.dropRight(1) :+ newName)
     if (toPath.isDirectory()) toPath.mkdir
 
-    val parent = safePath.parent
-    safePath.copy(safePath.parent, Some(newName))
+    val from: File = safePath
+    val replica: File = safePath.parent ++ newName
+    replica.content = from.content
 
-    val f: File = parent ++ newName
-    f
+    replica
   }
 
   private def buildClassTrees(classes: Seq[Seq[String]]): Seq[ClassTree] = {
