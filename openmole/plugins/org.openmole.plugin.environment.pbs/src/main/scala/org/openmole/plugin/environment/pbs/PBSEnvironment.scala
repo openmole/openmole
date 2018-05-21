@@ -193,10 +193,10 @@ class PBSEnvironment[A: gridscale.ssh.SSHAuthentication](
     val id = gridscale.pbs.submit[_root_.gridscale.ssh.SSHServer](env, description)
 
     import PBSEnvironment.Log._
-    logger.log(FINE, s"""Submitted PBS job with PBS script:
-                        |${gridscale.pbs.impl.toScript(description)(id.uniqId)}
-                        |bash script: $remoteScript
-                        |job id: ${id.jobId}""".stripMargin)
+    log(FINE, s"""Submitted PBS job with PBS script:
+      |${gridscale.pbs.impl.toScript(description)(id.uniqId)}
+      |bash script: $remoteScript
+      |job id: ${id.jobId}""".stripMargin)
 
     BatchJob(id, result)
   }
