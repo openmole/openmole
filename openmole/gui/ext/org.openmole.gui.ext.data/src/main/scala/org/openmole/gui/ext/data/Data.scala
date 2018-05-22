@@ -350,7 +350,7 @@ case class EnvironmentState(
                              executionActivity: ExecutionActivity
                            )
 
-case class CapsuleSatuses(id: ExecutionInfo.CapsuleId, name: String, statuses: ExecutionInfo.JobStatuses)
+//case class Output(output: String)
 
 sealed trait ExecutionInfo {
   def state: String
@@ -635,6 +635,12 @@ case class Processed(override val ratio: Int = 100) extends ProcessState
 case class JarMethod(methodName: String, argumentTypes: Seq[String], returnType: String, isStatic: Boolean, clazz: String) {
   val expand = methodName + "(" + argumentTypes.mkString(",") + "): " + returnType
 }
+
+//case class JarMethod(methodName: String, arguments: Seq[ProtoTypePair], returnType: String, isStatic: Boolean, clazz: String) {
+//  val expand = methodName + "(" + arguments.map {
+//    _.`type`.scalaString
+//  }.mkString(",") + "): " + returnType
+//}
 
 
 object Resources {
