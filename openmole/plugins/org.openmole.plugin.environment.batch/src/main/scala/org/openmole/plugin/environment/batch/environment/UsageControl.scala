@@ -48,8 +48,12 @@ object UsageControl {
     }
   }
 
-  def stop(usageControl: UsageControl) = {
+  def freeze(usageControl: UsageControl) = {
     usageControl.stopped.single() = true
+  }
+
+  def unfreeze(usageControl: UsageControl) = {
+    usageControl.stopped.single() = false
   }
 
   def waitUnused(usageControl: UsageControl) = atomic {
