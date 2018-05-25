@@ -17,7 +17,7 @@ object StopEnvironmentActor {
       job.serializedJob.foreach { sj ⇒ UsageControl.withToken(sj.storage.usageControl)(token ⇒ util.Try(JobManager.cleanSerializedJob(sj, token))) }
     }
 
-    val futures = stop.environment.jobs.map { j ⇒ services.threadProvider.submit(() ⇒ kill(j), 1) }
+    val futures = stop.environment.jobs.map { j ⇒ services.threadProvider.submit(() ⇒ kill(j), JobManager.killPriority) }
     futures.foreach(_.get())
   }
   finally stop.close.foreach(_())
