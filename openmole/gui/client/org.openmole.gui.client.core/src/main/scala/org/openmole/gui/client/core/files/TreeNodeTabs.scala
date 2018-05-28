@@ -271,12 +271,12 @@ object TreeNodeTab {
               {
                 if (!sequence.now.header.isEmpty && !filteredSequence.isEmpty) {
                   val table =
-                    scaladget.bootstrapnative.Table(
-                      Some(scaladget.bootstrapnative.Row(sequence.now.header)),
+                    scaladget.bootstrapnative.DataTable(
+                      Some(scaladget.bootstrapnative.Table.Header(sequence.now.header)),
                       filteredSequence.map {
-                        scaladget.bootstrapnative.Row(_)
+                        scaladget.bootstrapnative.DataTable.DataRow(_)
                       }.toSeq,
-                      scaladget.bootstrapnative.BSTableStyle(bordered_table, emptyMod), true)
+                      scaladget.bootstrapnative.Table.BSTableStyle(bordered_table, emptyMod), true)
                   table.render(minWidth := sequence.now.header.length * 90)
                 }
                 else div()

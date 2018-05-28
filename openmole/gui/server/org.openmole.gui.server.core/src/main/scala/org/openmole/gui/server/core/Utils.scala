@@ -316,6 +316,7 @@ object Utils extends JavaLogger {
     import org.openmole.core.fileservice._
 
     def hash(f: File) = new File(f + "-hash")
+
     lockFile(file).withLock { _ ⇒
       val hashFile = hash(file)
       lazy val currentHash = fileService.hashNoCache(file).toString
@@ -360,9 +361,22 @@ object Utils extends JavaLogger {
       }
     }
 
-    to.content = s"""${from.content}\n${template.content}""" // ${AceOpenMOLEMode.content}
-      .replace("##OMKeywords##", s""" "${rules._1.map { _.name }.mkString("|")}" """)
-      .replace("##OMClasses##", s""" "${rules._2.map { _.name }.mkString("|")}" """)
+    to.content =
+      s"""${from.content}\n${template.content}""" // ${AceOpenMOLEMode.content}
+        .replace(
+          "##OMKeywords##",
+          s""" "${
+            rules._1.map {
+              _.name
+            }.mkString("|")
+          }" """)
+        .replace(
+          "##OMClasses##",
+          s""" "${
+            rules._2.map {
+              _.name
+            }.mkString("|")
+          }" """)
 
   }
 

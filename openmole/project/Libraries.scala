@@ -18,7 +18,7 @@ object Libraries {
   lazy val boopickleVersion = "1.2.6"
   lazy val scalaAutowireVersion = "0.2.6"
   lazy val sourcecodeVersion = "0.1.3"
-  lazy val scaladgetVersion = "1.0.3"
+  lazy val scaladgetVersion = "1.0.4-SNAPSHOT"
   lazy val sortableVersion = "0.2.1"
   lazy val json4sVersion = "3.5.0"
   lazy val circeVersion = "0.9.1"
@@ -26,6 +26,7 @@ object Libraries {
   lazy val scalajsVersion = "0.6.21"
   lazy val squantsVersion = "1.3.0"
   lazy val xstreamVersion = "1.4.10"
+  lazy val scalaURIVersion = "1.1.1"
 
   lazy val bootstrapnative = libraryDependencies += "fr.iscpif.scaladget" %%% "bootstrapnative" % scaladgetVersion
   lazy val lunr = libraryDependencies += "fr.iscpif.scaladget" %%% "lunr" % scaladgetVersion

@@ -67,8 +67,8 @@ class JarWizardGUI(safePath: SafePath, onMethodSelected: (LaunchingCommand) ⇒ 
     selectableButton("No", onclick = () ⇒ println("NO"))
   )
 
-  val classTable: Var[Option[scaladget.bootstrapnative.Table]] = Var(None)
-  val methodTable: Var[Option[scaladget.bootstrapnative.Table]] = Var(None)
+  val classTable: Var[Option[scaladget.bootstrapnative.DataTable]] = Var(None)
+  val methodTable: Var[Option[scaladget.bootstrapnative.DataTable]] = Var(None)
 
   searchClassInput.nameFilter.trigger {
     classTable.now.foreach { t ⇒
@@ -77,11 +77,11 @@ class JarWizardGUI(safePath: SafePath, onMethodSelected: (LaunchingCommand) ⇒ 
   }
 
   OMPost()[JarWizardAPI].jarClasses(safePath).call().foreach { jc ⇒
-    val table = scaladget.bootstrapnative.Table(
+    val table = scaladget.bootstrapnative.DataTable(
       rows = jc.map { c ⇒
-        scaladget.bootstrapnative.Row(Seq(c.name))
+        scaladget.bootstrapnative.DataTable.DataRow(Seq(c.name))
       }.toSeq,
-      bsTableStyle = scaladget.bootstrapnative.BSTableStyle(bordered_table +++ hover_table, emptyMod))
+      bsTableStyle = scaladget.bootstrapnative.Table.BSTableStyle(bordered_table +++ hover_table, emptyMod))
 
     classTable() = Some(table)
 
@@ -90,11 +90,11 @@ class JarWizardGUI(safePath: SafePath, onMethodSelected: (LaunchingCommand) ⇒ 
         OMPost()[JarWizardAPI].jarMethods(safePath, s.values.head).call().foreach { jm ⇒
           val methodMap = jm.map { m ⇒ m.expand -> m }.toMap
           methodTable() = Some(
-            scaladget.bootstrapnative.Table(
+            scaladget.bootstrapnative.DataTable(
               rows = jm.map { m ⇒
-                scaladget.bootstrapnative.Row(Seq(m.expand))
+                scaladget.bootstrapnative.DataTable.DataRow(Seq(m.expand))
               }.toSeq,
-              bsTableStyle = scaladget.bootstrapnative.BSTableStyle(bordered_table +++ hover_table, emptyMod))
+              bsTableStyle = scaladget.bootstrapnative.Table.BSTableStyle(bordered_table +++ hover_table, emptyMod))
           )
 
           methodTable.now.get.selected.trigger {

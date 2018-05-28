@@ -389,7 +389,11 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
         (err.head, dates.max, dates.size)
     }.takeRight(lines)
 
-    EnvironmentErrorData(groupedErrors)
+    //EnvironmentErrorData(groupedErrors)
+    EnvironmentErrorData(Seq(
+      (EnvironmentError(environmentId, "YOur error man", Error("stansatienasitenasiruet a anuisetnasirte "), 2334454L, ErrorLevel()), 33345L, 2),
+      (EnvironmentError(environmentId, "YOur error man 4", Error("stansatienasitenasiruet a anuaeiaiueaiueaieisetnasirte "), 2334454L, ErrorLevel()), 31345L, 1)
+    ))
   }
 
   def marketIndex() = {
