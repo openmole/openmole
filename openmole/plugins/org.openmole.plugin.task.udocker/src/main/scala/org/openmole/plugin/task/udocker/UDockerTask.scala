@@ -180,22 +180,21 @@ object UDockerTask {
     def installedUDockerContainer() =
       if (installCommands.isEmpty) uDocker
       else {
-        cacheInstall match {
-          case true ⇒
-            import org.openmole.tool.hash._
-            val cacheKey: String = hashString((uDocker.localDockerImage.content.layers.map(_._1.digest) ++ installCommands).mkString("\n")).toString
-            val cacheDirectory = installCacheDirectory(workspace)
-            cacheDirectory.withLockInDirectory {
-              val cachedContainer = cacheDirectory / cacheKey
-              if (forceUpdate || !cachedContainer.exists()) installLibrariesInContainer(cachedContainer)
-              (UDockerArguments.localDockerImage composeLens LocalDockerImage.container) set Some(cachedContainer) apply uDocker
-            }
-
-          case false ⇒
-            val createdContainer = newFile.newDir("container")
-            installLibrariesInContainer(createdContainer)
-            fileService.deleteWhenGarbageCollected(createdContainer)
-            (UDockerArguments.localDockerImage composeLens LocalDockerImage.container) set Some(createdContainer) apply uDocker
+        if (cacheInstall) {
+          import org.openmole.tool.hash._
+          val cacheKey: String = hashString((uDocker.localDockerImage.content.layers.map(_._1.digest) ++ installCommands).mkString("\n")).toString
+          val cacheDirectory = installCacheDirectory(workspace)
+          cacheDirectory.withLockInDirectory {
+            val cachedContainer = cacheDirectory / cacheKey
+            if (forceUpdate || !cachedContainer.exists()) installLibrariesInContainer(cachedContainer)
+            (UDockerArguments.localDockerImage composeLens LocalDockerImage.container) set Some(cachedContainer) apply uDocker
+          }
+        }
+        else {
+          val createdContainer = newFile.newDir("container")
+          installLibrariesInContainer(createdContainer)
+          fileService.deleteWhenGarbageCollected(createdContainer)
+          (UDockerArguments.localDockerImage composeLens LocalDockerImage.container) set Some(createdContainer) apply uDocker
         }
       }
 
