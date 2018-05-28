@@ -21,9 +21,10 @@ import java.io.File
 import java.nio.CharBuffer
 
 import ammonite.ops.{ Path, write }
-
+import org.openmole.site.tools._
 import scalatags.Text.{ TypedTag, all }
 import scalatags.Text.all._
+
 import scala.annotation.tailrec
 import spray.json._
 
@@ -141,6 +142,9 @@ object Site extends App {
           body(position := "relative", minHeight := "100%")(
             Menu.build,
             div(id := "main-content")(
+              div(`id` := "sidebar-right", paddingTop := 200)(
+                page.source.map(source ⇒ tools.linkButton("Suggest edits", tools.modificationLink(source), classIs(btn ++ btn_danger))
+                )),
               sitePage.name,
               div(margin := "0 auto", width := 250, paddingBottom := 40)(
                 sitePage match {
@@ -151,10 +155,8 @@ object Site extends App {
                     )
                   case _ ⇒ Seq[Modifier]()
                 }),
-              sitePage.element,
-              div(paddingTop := 30)(
-                page.source.map(source ⇒ a(href := tools.modificationLink(source), "Propose a modification to the current page"))
-              )),
+              sitePage.element
+            ),
             sitePage match {
               case s: StepPage ⇒ Seq(s.leftMenu, s.rightMenu)
               case _ ⇒
