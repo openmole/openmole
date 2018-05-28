@@ -71,7 +71,7 @@ object Libraries {
   lazy val ant = "org.openmole.library" %% "org-apache-ant" % "1.8.0"
   lazy val codec = "org.openmole.library" %% "org-apache-commons-codec" % "1.10"
   lazy val async = "org.openmole.library" %% "scala-async" % "0.9.6"
-  lazy val jgit = "org.openmole.library" %% "org-eclipse-jgit" % "3.7.1"
+  lazy val jgit = "org.openmole.library" %% "org-eclipse-jgit" % "v4.11.0.201803080745-r"
   lazy val cats = "org.openmole.library" %% "cats" % catsVersion
   lazy val squants = "org.openmole.library" %% "squants" % squantsVersion
   lazy val clapper = "org.openmole.library" %% "org-clapper" % "1.1.2"
