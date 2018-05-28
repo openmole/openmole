@@ -80,7 +80,7 @@ public class Launcher {
         StringBuffer versions = new StringBuffer();
         StringBuffer executionEnvironments = new StringBuffer();
         int maxVersion = 20;
-        for(int version = 0; i <= maxVersion; i++) {
+        for(int version = 0; version <= maxVersion; version++) {
             versions.append("1." + version + ",");
             versions.append("" + version);
 
