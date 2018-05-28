@@ -193,7 +193,7 @@ object OSE {
           import p._
           import org.openmole.core.context._
 
-          val res = MGONoisyOSE.result(state, om.aggregation, Genome.continuous(om.genome).from(context))
+          val res = MGONoisyOSE.result(state, population, om.aggregation, Genome.continuous(om.genome).from(context), om.limit)
           val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false).from(context)
           val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness)).from(context)
           val samples = Variable(GAIntegration.samples.array, res.map(_.replications).toArray)

@@ -32,13 +32,15 @@ import org.openmole.tool.thread._
 object JobManager extends JavaLogger { self ⇒
   import Log._
 
+  def killPriority = 10
+
   def messagePriority(message: DispatchedMessage) =
     message match {
       case msg: Upload          ⇒ 10
       case msg: Submit          ⇒ 50
       case msg: Refresh         ⇒ 5
       case msg: GetResult       ⇒ 50
-      case msg: KillBatchJob    ⇒ 2
+      case msg: KillBatchJob    ⇒ killPriority
       case msg: Error           ⇒ 100 // This is very quick to process
       case msg: StopEnvironment ⇒ 200
       case _                    ⇒ 1

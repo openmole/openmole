@@ -24,7 +24,7 @@ import java.util.logging._
 object LoggerConfig {
 
   def level(levelLabel: String) = {
-    val level = Level.parse(levelLabel)
+    val level = Level.parse(levelLabel.toUpperCase)
 
     LogManager.getLogManager.reset
 

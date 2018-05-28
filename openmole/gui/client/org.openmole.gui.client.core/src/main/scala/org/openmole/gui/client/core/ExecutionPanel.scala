@@ -45,18 +45,6 @@ import scaladget.tools._
 import scaladget.bootstrapnative.bsn.ScrollableText
 import scaladget.bootstrapnative.bsn.ScrollableTextArea.BottomScroll
 
-object ExecutionPanel {
-
-  trait JobView
-
-  object CapsuleView extends JobView
-
-  object EnvironmentView extends JobView
-
-}
-
-import ExecutionPanel._
-
 class ExecutionPanel {
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
@@ -71,7 +59,6 @@ class ExecutionPanel {
   val expanders: Var[Map[ExpandID, Expander]] = Var(Map())
   val executionsDisplayedInBanner: Var[Seq[ExecutionId]] = Var(Seq())
   val timerOn = Var(false)
-  val jobViews: Var[Map[ExecutionId, JobView]] = Var(Map())
 
   val updating = new AtomicBoolean(false)
 
@@ -203,7 +190,6 @@ class ExecutionPanel {
           } yield {
             if (!expanders().keys.exists(ex ⇒ ex == id.id)) {
               expanders() = expanders() ++ Map(id.id → new Expander(id.id))
-              jobViews() = jobViews() ++ Map(id → CapsuleView)
             }
             val theExpanders = expanders()
             val duration: Duration = (executionInfo.duration milliseconds)
@@ -243,7 +229,6 @@ class ExecutionPanel {
               case r: ExecutionInfo.Launching ⇒ ExecutionDetails("0", 0, envStates = r.environmentStates)
             }
 
-            val jobTable = JobTable(id, executionInfo)
             val scriptLink = expander(id.id, ex ⇒ ex.getLink(staticInfo.now(id).path.name, scriptID))
             val envLink = expander(id.id, ex ⇒ ex.getGlyph(glyph_stats, "Env", envID))
             val stateLink = expander(id.id, ex ⇒
@@ -265,31 +250,30 @@ class ExecutionPanel {
                     thead,
                     tbody(
                       Seq(
-                        //                        tr(row +++ (fontSize := 14))(
-                        //                          td(colMD(1) +++ textCenter)(tags.span(e.taskName)),
-                        //                          td(colMD(2) +++ textCenter)(tags.span(CoreUtils.approximatedYearMonthDay(e.executionActivity.executionTime))).tooltip("Full computation time"),
-                        //                          td(colMD(2) +++ textCenter)(glyphAndText(glyph_upload, s" ${e.networkActivity.uploadingFiles} ${displaySize(e.networkActivity.uploadedSize, e.networkActivity.readableUploadedSize)}")).tooltip("Uploads"),
-                        //                          td(colMD(2) +++ textCenter)(glyphAndText(glyph_download, s" ${e.networkActivity.downloadingFiles} ${displaySize(e.networkActivity.downloadedSize, e.networkActivity.readableDownloadedSize)}")).tooltip("Downloads"),
-                        //                          td(colMD(1) +++ textCenter)(glyphAndText(glyph_road +++ (paddingBottom := 7), e.submitted.toString)).tooltip("Submitted jobs"),
-                        //                          td(colMD(1) +++ textCenter)(glyphAndText(glyph_flash +++ (paddingBottom := 7), e.running.toString)).tooltip(("Running jobs")),
-                        //                          td(colMD(1) +++ textCenter)(glyphAndText(glyph_flag +++ (paddingBottom := 7), e.done.toString)).tooltip("Finished jobs"),
-                        //                          td(colMD(1) +++ textCenter)(glyphAndText(glyph_fire +++ (paddingBottom := 7), e.failed.toString)).tooltip("Failed jobs"),
-                        //                          td(colMD(3) +++ textCenter)(({
-                        //                            if (envErrorVisible().contains(e.envId)) {
-                        //                              tags.div(rowLayout +++ (width := 100))(
-                        //                                buttonGroup(columnLayout +++ (width := 80))(
-                        //                                  buttonIcon(glyphicon = glyph_refresh, todo = { () ⇒ updateEnvErrors(e.envId) }).tooltip("Refresh environment errors"),
-                        //                                  buttonIcon(buttonStyle = btn_default, glyphicon = glyph_repeat, todo = { () ⇒ { clearEnvErrors(e.envId) } }).tooltip("Reset environment errors")
-                        //                                ),
-                        //                                tags.span(onclick := toggleEnvironmentErrorPanel(e.envId), columnLayout +++ closeDetails)(raw("&#215"))
-                        //                              )
-                        //                            }
-                        //                            else tags.span(omsheet.color(BLUE) +++ ((envErrorVisible().contains(e.envId)), ms(" executionVisible"), emptyMod))(
-                        //                              pointer, onclick := toggleEnvironmentErrorPanel(e.envId)
-                        //                            )("details")
-                        //                          })).tooltip("Error details")
-                        //                        ),
-                        tr(row)(jobTable.render),
+                        tr(row +++ (fontSize := 14))(
+                          td(colMD(1) +++ textCenter)(tags.span(e.taskName)),
+                          td(colMD(2) +++ textCenter)(tags.span(CoreUtils.approximatedYearMonthDay(e.executionActivity.executionTime))).tooltip("Full computation time"),
+                          td(colMD(2) +++ textCenter)(glyphAndText(glyph_upload, s" ${e.networkActivity.uploadingFiles} ${displaySize(e.networkActivity.uploadedSize, e.networkActivity.readableUploadedSize)}")).tooltip("Uploads"),
+                          td(colMD(2) +++ textCenter)(glyphAndText(glyph_download, s" ${e.networkActivity.downloadingFiles} ${displaySize(e.networkActivity.downloadedSize, e.networkActivity.readableDownloadedSize)}")).tooltip("Downloads"),
+                          td(colMD(1) +++ textCenter)(glyphAndText(glyph_road +++ (paddingBottom := 7), e.submitted.toString)).tooltip("Submitted jobs"),
+                          td(colMD(1) +++ textCenter)(glyphAndText(glyph_flash +++ (paddingBottom := 7), e.running.toString)).tooltip(("Running jobs")),
+                          td(colMD(1) +++ textCenter)(glyphAndText(glyph_flag +++ (paddingBottom := 7), e.done.toString)).tooltip("Finished jobs"),
+                          td(colMD(1) +++ textCenter)(glyphAndText(glyph_fire +++ (paddingBottom := 7), e.failed.toString)).tooltip("Failed jobs"),
+                          td(colMD(3) +++ textCenter)(({
+                            if (envErrorVisible().contains(e.envId)) {
+                              tags.div(rowLayout +++ (width := 100))(
+                                buttonGroup(columnLayout +++ (width := 80))(
+                                  buttonIcon(glyphicon = glyph_refresh, todo = { () ⇒ updateEnvErrors(e.envId) }).tooltip("Refresh environment errors"),
+                                  buttonIcon(buttonStyle = btn_default, glyphicon = glyph_repeat, todo = { () ⇒ { clearEnvErrors(e.envId) } }).tooltip("Reset environment errors")
+                                ),
+                                tags.span(onclick := toggleEnvironmentErrorPanel(e.envId), columnLayout +++ closeDetails)(raw("&#215"))
+                              )
+                            }
+                            else tags.span(omsheet.color(BLUE) +++ ((envErrorVisible().contains(e.envId)), ms(" executionVisible"), emptyMod))(
+                              pointer, onclick := toggleEnvironmentErrorPanel(e.envId)
+                            )("details")
+                          })).tooltip("Error details")
+                        ),
                         tr(row)(
                           {
                             td(colMD(12) +++ textCenter +++ (!envErrorVisible().contains(e.envId), omsheet.displayOff, emptyMod))(
@@ -369,6 +353,9 @@ class ExecutionPanel {
     else envErrorVisible() = envErrorVisible.now :+ envID
   }
 
+  //  private def setIDTabInStandBy(id: ExecutionId) =
+  //    staticInfo.now.get(id).foreach { st ⇒ panels.treeNodeTabs.set(st.path, StandBy) }
+
   def cancelExecution(id: ExecutionId) = {
     // setIDTabInStandBy(id)
     post()[Api].cancelExecution(id).call().foreach { r ⇒
@@ -394,6 +381,10 @@ class ExecutionPanel {
     post()[Api].runningErrorEnvironmentData(environmentId, envErrorHistory.value.toInt).call().foreach { err ⇒
       envError() = envError.now + (environmentId → err)
     }
+
+  def displaySize(size: Long, readable: String) =
+    if (size == 0L) ""
+    else s"($readable)"
 
   def visibleClass(expandID: ExpandID, columnID: ColumnID, modifier: Modifier, extraStyle: ModifierSeq = emptyMod) =
     expanderIfVisible(expandID, columnID, ex ⇒
