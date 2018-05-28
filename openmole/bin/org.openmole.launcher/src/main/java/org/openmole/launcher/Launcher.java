@@ -81,9 +81,7 @@ public class Launcher {
         StringBuffer executionEnvironments = new StringBuffer();
         int maxVersion = 20;
         for(int version = 0; version <= maxVersion; version++) {
-            versions.append("1." + version + ",");
-            versions.append("" + version);
-
+            versions.append("1." + version);
             executionEnvironments.append("J2SE-1." + version + ",");
             executionEnvironments.append("JavaSE-1." + version);
 
