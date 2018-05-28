@@ -5,6 +5,7 @@ import org.scalajs.dom.raw._
 import autowire._
 import org.openmole.gui.ext.api.Api
 import boopickle.Default._
+
 import scala.concurrent.ExecutionContext.Implicits.global
 
 /*
@@ -91,7 +92,7 @@ object FileManager {
         }
       }
 
-      xhr.open("GET", s"downloadFile?path=${Utils.toURI(safePath.path)}", true)
+      xhr.open("GET", s"downloadFile?path=${Utils.toURI(safePath.path.map { Encoding.encode })}", true)
       xhr.send()
     }
   }

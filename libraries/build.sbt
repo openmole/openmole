@@ -233,7 +233,7 @@ lazy val freedsl =
     version := freedslVersion
   ) dependsOn(cats, squants) settings(settings: _*)
 
-lazy val mgoVersion = "3.13"
+lazy val mgoVersion = "3.15"
 
 lazy val mgo = OsgiProject(dir, "mgo", imports = Seq("!better.*", "*")) settings(
   libraryDependencies += "fr.iscpif" %% "mgo" % mgoVersion,
@@ -348,7 +348,7 @@ lazy val effectaside = OsgiProject(dir, "effectaside", imports = Seq("*")) setti
   version := effectasideVersion
 )
 
-def gridscaleVersion = "2.4"
+def gridscaleVersion = "2.5"
 lazy val gridscale = OsgiProject(dir, "gridscale", imports = Seq("*"), exports = Seq("gridscale.*", "enumeratum.*")) settings (
   libraryDependencies += "fr.iscpif.gridscale" %% "gridscale" % gridscaleVersion,
   version := gridscaleVersion
