@@ -143,7 +143,7 @@ object Site extends App {
             Menu.build,
             div(id := "main-content")(
               div(`id` := "sidebar-right", paddingTop := 200)(
-                page.source.map(source ⇒ tools.linkButton("Edit page", tools.modificationLink(source), classIs(btn ++ btn_danger))
+                page.source.map(source ⇒ tools.linkButton("Suggest edits", tools.modificationLink(source), classIs(btn ++ btn_danger))
                 )),
               sitePage.name,
               div(margin := "0 auto", width := 250, paddingBottom := 40)(
