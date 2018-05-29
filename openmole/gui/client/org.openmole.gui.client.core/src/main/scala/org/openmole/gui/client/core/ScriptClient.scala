@@ -213,9 +213,27 @@ object ScriptClient {
 
       // Define the option sequence
 
+      //dom.document.head.appendChild()
+
+      val piwikString = """
+      |var _paq = _paq || [];
+      |_paq.push(["setDocumentTitle", document.domain + "/" + document.title]);
+      |_paq.push(['trackPageView']);
+      |_paq.push(['enableLinkTracking']);
+      |(function() {
+      |  var u="//piwik.iscpif.fr/";
+      |  _paq.push(['setTrackerUrl', u+'piwik.php']);
+      |  _paq.push(['setSiteId', 7]);
+      |  _paq.push(['enableLinkTracking']);
+      |  var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+      |  g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'piwik.js'; s.parentNode.insertBefore(g,s);
+      |})();""".stripMargin
+
       Settings.settings.map { sets ⇒
         dom.document.body.appendChild(
           div(
+            //script("alert(\"test\");console.log(\"log\")"),
+            script(piwikString),
             div(`class` := "fullpanel")(
               BannerAlert.banner,
               theNavBar,
