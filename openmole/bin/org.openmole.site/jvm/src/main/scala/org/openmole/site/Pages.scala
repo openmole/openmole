@@ -34,6 +34,14 @@ object Pages {
 
   def gettingStarted = Page.fromScalatex("Getting started", scalatex.GettingStarted, title = Some("Getting started with OpenMOLE - introductory tutorial with a simple workflow"))
 
+  def stepByStepIntro = Page.fromScalatex("Step by Step Introduction", scalatex.StepByStepIntro, title = Some("A step by Step introduction for OpenMOLE newcomers "))
+
+  def stepByStepTuto1 = Page.fromScalatex("Step By Step Installation Tutorial", scalatex.StepByStepTuto1, title = Some("Installation tutorial "))
+
+  def stepByStepTuto2 = Page.fromScalatex("Step By Step Model Launching Tutorial", scalatex.StepByStepTuto2, title = Some("Launching a Netlogo Model"))
+
+  def stepByStepTuto3 = Page.fromScalatex("Step By Step Methods Tutorial", scalatex.StepByStepTuto3, title = Some("Discovering Methods  Tutorial"))
+
   def whoAreWe = Page("Who are we", scalatex.WhoAreWe(), title = Some("OpenMOLE Developers, reference publications, contact information"))
 
   def partner = Page("Partners", scalatex.Partner(), title = Some("OpenMOLE partners and collaborations"))
@@ -46,7 +54,7 @@ object Pages {
 
   val training = Page.fromScalatex("Trainings", scalatex.Training, title = Some("Live training sessions"))
 
-  val all: Seq[Page] = DocumentationPages.allPages ++ Seq(index, gettingStarted, whoAreWe, partner, faq, communications, previousVersions, training)
+  val all: Seq[Page] = DocumentationPages.allPages ++ Seq(index, gettingStarted, stepByStepIntro, stepByStepTuto1, stepByStepTuto2, stepByStepTuto3, whoAreWe, partner, faq, communications, previousVersions, training)
 
   //def rawFile(page: Page) = page.location.mkString("_") + ".html"
   def file(page: Page) = java.net.URLEncoder.encode(page.location, "UTF-8") + ".html"
@@ -229,7 +237,14 @@ object DocumentationPages {
 
   def methodPages = Seq(directSampling, calibration, profile, pse, dataProcessing)
 
-  lazy val tutorialPages = Seq(Pages.gettingStarted, netLogoGA, resume)
+  lazy val tutorialPages = Seq(
+    Pages.gettingStarted,
+    Pages.stepByStepIntro,
+    Pages.stepByStepTuto1,
+    Pages.stepByStepTuto2,
+    Pages.stepByStepTuto3,
+    netLogoGA,
+    resume)
 
   lazy val detailsPages = Seq(
     geneticalgo,
