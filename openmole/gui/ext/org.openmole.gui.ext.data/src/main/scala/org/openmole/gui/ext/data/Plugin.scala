@@ -78,3 +78,16 @@ trait WizardPluginFactory extends GUIPluginFactory {
 
   def parse(safePath: SafePath): Future[Option[LaunchingCommand]]
 }
+
+trait VersioningGUIPlugin extends GUIPlugin {
+
+  def factory: VersioningPluginFactory
+
+  val panel: TypedTag[HTMLElement]
+
+  def clone(url: String): Future[SafePath]
+}
+
+trait VersioningPluginFactory extends GUIPluginFactory {
+
+}
