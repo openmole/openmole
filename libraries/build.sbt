@@ -159,13 +159,13 @@ lazy val scalaDomVersion = "0.9.3"
 lazy val scalaUpickleVersion = "0.4.4"
 lazy val scalaBoopickleVersion = "1.2.6"
 lazy val scalaAutowireVersion = "0.2.6"
-lazy val scalajsVersion = "0.6.21"
+lazy val scalajsVersion = "0.6.23"
 
 lazy val rx = OsgiProject(dir, "rx", exports = Seq("rx.*")) settings(
   libraryDependencies ++= Seq("com.lihaoyi" %% "scalarx" % scalaRxVersion),
   version := scalaRxVersion) settings(settings: _*)
 
-lazy val scalajsTools = OsgiProject(dir, "scalajs-tools", exports = Seq("scala.scalajs.*", "org.scalajs.core.tools.*", "org.scalajs.core.ir.*", "com.google.javascript.*", "com.google.common.*", "rhino_ast.java.com.google.javascript.rhino.*", "org.json.*")) settings(
+lazy val scalajsTools = OsgiProject(dir, "scalajs-tools", exports = Seq("scala.scalajs.*", "org.scalajs.core.tools.*", "org.scalajs.core.ir.*", "com.google.javascript.*", "com.google.common.*", "rhino_ast.java.com.google.javascript.rhino.*", "org.json.*", "java.nio.charset.*")) settings(
   libraryDependencies += "org.scala-js" %% "scalajs-tools" % scalajsVersion, version := scalajsVersion) settings(settings: _*)
 
 lazy val scalaJS = OsgiProject(dir, "scalajs", exports = Seq("scala.scalajs.*"), imports = Seq("*")) settings (
@@ -302,7 +302,7 @@ lazy val collections = OsgiProject(dir, "org.apache.commons.collections", export
   (libraryDependencies += "org.apache.commons" % "commons-collections4" % "4.1", version := "4.1") settings(settings: _*)
 
 lazy val jgit = OsgiProject(dir, "org.eclipse.jgit", privatePackages = Seq("!scala.*", "!org.slf4j.*", "*"))  settings (
-  libraryDependencies += "org.eclipse.jgit" % "org.eclipse.jgit.java7" % "v4.11.0.201803080745-r", version := "4.11" ) settings(settings: _*)
+  libraryDependencies += "org.eclipse.jgit" % "org.eclipse.jgit" % "4.11.0.201803080745-r", version := "4.11" ) settings(settings: _*)
 
 lazy val txtmark = OsgiProject(dir, "com.github.rjeschke.txtmark", privatePackages = Seq("!scala.*", "!org.slf4j.*", "*"))  settings (
   libraryDependencies += "com.github.rjeschke" % "txtmark" % "0.13", version := "0.13" ) settings(settings: _*)
