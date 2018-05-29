@@ -21,7 +21,7 @@ import org.openmole.tool.stream._
 import org.scalajs.core.tools.io._
 import org.scalajs.core.tools.sem._
 import org.scalajs.core.tools.linker.backend.{ ModuleKind, OutputMode }
-import org.scalajs.core.tools.linker.Linker
+import org.scalajs.core.tools.linker.{ Linker, StandardLinker }
 import org.scalajs.core.tools.logging.ScalaConsoleLogger
 import java.io.File
 
@@ -42,13 +42,12 @@ object JSPack {
         )
 
       // A bunch of options. Here we use all the defaults
-      val semantics = Semantics.Defaults
-      val outputMode = OutputMode.Default
-      val moduleKind = ModuleKind.NoModule
-      val linkerConfig = Linker.Config() //withSourceMap (false)
+      val linkerConfig = StandardLinker.Config().withOptimizer(true).withSourceMap(false)
+        .withOptimizer(true)
+        .withClosureCompilerIfAvailable(true)
 
       // Actual linking
-      val linker = Linker(semantics, outputMode, moduleKind, linkerConfig)
+      val linker = StandardLinker(linkerConfig)
       val logger = new ScalaConsoleLogger
       linker.link(sjsirFiles, WritableFileVirtualJSFile(outputJSFile), logger)
     }
