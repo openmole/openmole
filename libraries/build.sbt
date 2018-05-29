@@ -302,7 +302,7 @@ lazy val collections = OsgiProject(dir, "org.apache.commons.collections", export
   (libraryDependencies += "org.apache.commons" % "commons-collections4" % "4.1", version := "4.1") settings(settings: _*)
 
 lazy val jgit = OsgiProject(dir, "org.eclipse.jgit", privatePackages = Seq("!scala.*", "!org.slf4j.*", "*"))  settings (
-  libraryDependencies += "org.eclipse.jgit" % "org.eclipse.jgit.java7" % "3.7.1.201504261725-r", version := "3.7.1" ) settings(settings: _*)
+  libraryDependencies += "org.eclipse.jgit" % "org.eclipse.jgit.java7" % "v4.11.0.201803080745-r", version := "4.11" ) settings(settings: _*)
 
 lazy val txtmark = OsgiProject(dir, "com.github.rjeschke.txtmark", privatePackages = Seq("!scala.*", "!org.slf4j.*", "*"))  settings (
   libraryDependencies += "com.github.rjeschke" % "txtmark" % "0.13", version := "0.13" ) settings(settings: _*)
