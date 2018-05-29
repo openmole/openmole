@@ -29,7 +29,7 @@ import org.openmole.core.workspace._
 
 object JSPack {
 
-  def link(inputDirectory: File, outputJSFile: File)(implicit newFile: NewFile): Unit =
+  def link(inputDirectory: File, outputJSFile: File, optimizedJS: Boolean)(implicit newFile: NewFile): Unit =
     newFile.withTmpFile("lib", "jar") { jar ⇒
       getClass.getClassLoader.getResourceAsStream("scalajs-library.jar") copy jar
 
@@ -44,7 +44,7 @@ object JSPack {
       // A bunch of options. Here we use all the defaults
       val linkerConfig = StandardLinker.Config().withOptimizer(true).withSourceMap(false)
         .withOptimizer(true)
-        .withClosureCompilerIfAvailable(true)
+        .withClosureCompilerIfAvailable(optimizedJS)
 
       // Actual linking
       val linker = StandardLinker(linkerConfig)

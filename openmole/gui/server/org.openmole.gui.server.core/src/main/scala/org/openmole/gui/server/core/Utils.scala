@@ -334,7 +334,7 @@ object Utils extends JavaLogger {
     }
   }
 
-  def openmoleFile(implicit workspace: Workspace, newFile: NewFile, fileService: FileService) = {
+  def openmoleFile(optimizedJS: Boolean)(implicit workspace: Workspace, newFile: NewFile, fileService: FileService) = {
     val jsPluginDirectory = webUIDirectory / "jsplugin"
     updateJsPluginDirectory(jsPluginDirectory)
 
@@ -343,7 +343,7 @@ object Utils extends JavaLogger {
     def update = {
       logger.info("Building GUI plugins ...")
       jsFile.delete
-      JSPack.link(jsPluginDirectory, jsFile)
+      JSPack.link(jsPluginDirectory, jsFile, optimizedJS)
     }
 
     if (!jsFile.exists) update
