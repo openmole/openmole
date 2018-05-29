@@ -1,0 +1,96 @@
+@import org.openmole.site._
+@import org.openmole.site.tools._
+@import org.openmole.site.stylesheet._
+@import DocumentationPages._
+
+
+@figure
+ @img(src := Resource.img.mole.openmoleTransp.file, center(30))
+
+
+@def tasks = """
+  // Define the variables that are transmitted between the tasks
+  val i = Val[Double]
+  val res = Val[Double]
+
+  // Define the model, here it is a simple task executing "res = i * 2", but it can be your model
+  val model =
+    ScalaTask("val res = i * 2") set (
+      inputs += i,
+      outputs += (i, res)
+    )"""
+
+@def localScript = s"""
+$tasks
+
+  // Define the execution environment, here it is a local execution environment with 4 threads but
+  // it could be a remote cluster or a grid. The exploration will work the same way whatever the environment
+  // and no installation step is required on the execution environment.
+  val env = LocalEnvironment(4)
+  """
+
+@h1{Step by Step Introduction to  OpenMOLE}
+
+
+
+@h2{What is OpenMOLE ?}
+
+
+@h2{What can I use it for ?}
+
+
+@h2{Background and Context}
+
+Ce qu'on attend des utilisateurs + fixer le vocabulaire usuel d'OpenMOLE
+
+OpenMOLE targets simulation model analysis, by performing experiments
+These experiments are described by some scripts, called @i{worfklows} (a sequence of @i{Tasks}).
+
+
+
+Models are seen as particular machines, programs , function that transform @b{inputs} into @b{outputs}.
+
+Inputs can be of several types : @b{parameters} (Double, Integer, Boolean, String) , @b{data} (files).
+Outputs are basically the same : Valued measures (Double, Integer, Boolean, String) , @b{date} (typically .csv files).
+
+
+
+
+
+@h2{Installation and Launch}
+
+
+You can try OpenMOLE online using the @aa "OpenMOLE demonstration website", href := shared.link.demo). Notice that the service is reset every 6 hours or so, so don't be surprised if your current script vanish :-).
+
+To be installed on your own computer, OpenMOLE requires Java version 8 or above.
+Check our @a("FAQ", href := Pages.faq.file) to access your java version informations.
+
+@br
+@h3{Linux installation}
+Then just extract the archive, available  @a("here", href:=Resource.script.openmole.file), somewhere and
+you're done! OpenMOLE is installed and works out of the box!
+@break
+Once installed, you can launch OpenMOLE by executing the @i{openmole} file in the installation directory
+(it is called @i{openmole.bat} for windozers). It will bring up you web browser. OpenMOLE supports
+Chrome and Firefox. If you are using another default web browser, please copy paste the OpenMOLE url
+(http://localhost:port) in one of these browsers.
+
+@p You should see something like this :
+@br
+@img(src := Resource.img.mole.uiScreenshot.file, `class` := "uiScreenshot", center(100)).
+
+
+@h3{Windows installation}
+
+
+@h2{Launching a toy model : Ants}
+
+
+
+@hl.highlight("./openmole -s /path/to/you/mole/script", "plain")
+@br
+@h2{Get help}
+
+To get help you are more than welcome to contact the OpenMOLE user mailing list. To do so, you should
+@aa("subscribe here", href := shared.link.mailingList), and then you can post your question to the list users.
+We're also present on the @b{#openmole} channel of the @a("ISC-PIF's RocketChat", href := shared.link.chat).
