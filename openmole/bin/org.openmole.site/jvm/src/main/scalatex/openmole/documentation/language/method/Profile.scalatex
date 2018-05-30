@@ -88,7 +88,10 @@ You will also need an evolutionary scheme and can use SteadyStateEvolution as de
 @p To profile a parameter, use the GenomeProfile constructor like so:
   @br @hl.openmole("""
   val exploration =
-    GenomeProfile(
+    GenomeProfileEvolution(
+      evaluation = modelTask,
+      parallelism = 10,
+      termination = 100,
       x = param1,
       nX = 20,
       genome =
@@ -97,14 +100,6 @@ You will also need an evolutionary scheme and can use SteadyStateEvolution as de
           param2 in (0.0, 99.0)),
       objective = fitness,
       stochastic = Stochastic(seed = myseed))
-
-val evolution =
-  SteadyStateEvolution(
-    algorithm = exploration,
-    evaluation = modelTask,
-    parallelism = 10,
-    termination = 100
-  )
 """, header= modelAndVariables , name = "Profile")
 where @hl.code("param1") and @hl.code("param2") are inputs
 of the task that runs the model (and refer to the model parameters),

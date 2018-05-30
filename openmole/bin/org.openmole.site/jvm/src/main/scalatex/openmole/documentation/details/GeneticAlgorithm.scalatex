@@ -84,29 +84,22 @@ GAs can be smartly distributed on grid environments using an @a("island scheme",
   $model
 
   // Construction of the workflow orchestrating the genetic algorithm
+  // genome is the inputs prototype and their variation ranges
+  // objectives are the objectives to minimize
   // termination is the termination criterion, here it runs for 100 generations. A time limit could be set as an
   // alternative by replacing 100 by 1 hour (hour is a duration type understood by OpenMOLE).
   // the parallelism specifies how many evaluation are concurrently submitted to the execution environment
   val evolution =
-    SteadyStateEvolution(
-      // Definition of the optimization algorithm
-      // mu is the size of the population
-      // genome is the inputs prototype and their variation ranges
-      // objectives are the objectives to minimize
-      algorithm =
-        NSGA2(
-          mu = 100,
-          genome = Seq(
-            x in (0.0, 1.0),
-            y in (0.0, 1.0),
-            s in List("apple", "banana", "strawberry")),
-          objectives = Seq(o1, o2)
-        ),
-        evaluation = model,
-        parallelism = 10,
-        termination = 100
+    NSGA2Evolution(
+       genome = Seq(
+         x in (0.0, 1.0),
+         y in (0.0, 1.0),
+         s in List("apple", "banana", "strawberry")),
+      objectives = Seq(o1, o2)
+      evaluation = model,
+      parallelism = 10,
+      termination = 100
     )
-
 
   // Definition of a hook to save the population of solutions to /tmp/evolution on the local machine running OpenMOLE
   val savePopulation = SavePopulationHook(evolution, workDirectory / "evolution/")
@@ -123,23 +116,15 @@ So if you want to reach specific target values, like Pi and 42  you can use the 
   $model
 
   val evolution =
-    SteadyStateEvolution(
-      // Definition of the optimization algorithm
-      // mu is the size of the population
-      // genome is the inputs prototype and their variation ranges
-      // objectives are the objectives to minimize
-      algorithm =
-        NSGA2(
-          mu = 100,
-          genome = Seq(
-            x in (0.0, 1.0),
-            y in (0.0, 1.0),
-            s in List("apple", "banana", "strawberry")),
-          objectives = Seq(o1, o2)
-        ),
-        evaluation = model -- DeltaTask(o1 -> math.Pi, o2 -> 42),
-        parallelism = 10,
-        termination = 100
+    NSGA2Evolution(
+      genome = Seq(
+        x in (0.0, 1.0),
+        y in (0.0, 1.0),
+        s in List("apple", "banana", "strawberry")),
+      objectives = Seq(o1, o2),
+      evaluation = model -- DeltaTask(o1 -> math.Pi, o2 -> 42),
+      parallelism = 10,
+      termination = 100
     )""", name = "nsga2 delta example")
     @br
     NB: in this case the results in the saved file will be the difference between the outputs of the model and your objectives.
@@ -153,23 +138,15 @@ So if you want to reach specific target values, like Pi and 42  you can use the 
   val maximize = ScalaTask("o1 = -o1") set ((inputs, outputs) += (o1, o2))
 
   val evolution =
-    SteadyStateEvolution(
-      // Definition of the optimization algorithm
-      // mu is the size of the population
-      // genome is the inputs prototype and their variation ranges
-      // objectives are the objectives to minimize
-      algorithm =
-        NSGA2(
-          mu = 100,
-          genome = Seq(
-            x in (0.0, 1.0),
-            y in (0.0, 1.0),
-            s in List("apple", "banana", "strawberry")),
-          objectives = Seq(o1, o2)
-        ),
-        evaluation = model -- maximize,
-        parallelism = 10,
-        termination = 100
+    NSGA2Evolution(
+      genome = Seq(
+        x in (0.0, 1.0),
+        y in (0.0, 1.0),
+        s in List("apple", "banana", "strawberry")),
+      objectives = Seq(o1, o2),
+      evaluation = model -- maximize,
+      parallelism = 10,
+      termination = 100
     )""", name = "nsga2 maximize example")
 
 
