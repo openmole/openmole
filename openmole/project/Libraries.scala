@@ -1,4 +1,5 @@
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
+import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport._
 import sbt.Keys._
 import sbt._
 
@@ -23,7 +24,7 @@ object Libraries {
   lazy val json4sVersion = "3.5.0"
   lazy val circeVersion = "0.9.1"
   lazy val catsVersion = "1.0.1"
-  lazy val scalajsVersion = "0.6.21"
+  lazy val scalajsVersion = "0.6.23"
   lazy val squantsVersion = "1.3.0"
   lazy val xstreamVersion = "1.4.10"
 
@@ -71,7 +72,7 @@ object Libraries {
   lazy val ant = "org.openmole.library" %% "org-apache-ant" % "1.8.0"
   lazy val codec = "org.openmole.library" %% "org-apache-commons-codec" % "1.10"
   lazy val async = "org.openmole.library" %% "scala-async" % "0.9.6"
-  lazy val jgit = "org.openmole.library" %% "org-eclipse-jgit" % "3.7.1"
+  lazy val jgit = "org.openmole.library" %% "org-eclipse-jgit" % "4.11"
   lazy val cats = "org.openmole.library" %% "cats" % catsVersion
   lazy val squants = "org.openmole.library" %% "squants" % squantsVersion
   lazy val clapper = "org.openmole.library" %% "org-clapper" % "1.1.2"

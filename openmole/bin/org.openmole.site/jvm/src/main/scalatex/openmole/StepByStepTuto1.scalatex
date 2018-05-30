@@ -1,0 +1,6 @@
+@import org.openmole.site._
+@import org.openmole.site.tools._
+@import org.openmole.site.stylesheet._
+@import DocumentationPages._
+
+@h1{Installing OpenMOLE on your computer}
