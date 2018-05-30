@@ -73,13 +73,6 @@ class TreeNodePanel {
   val fileToolBar = new FileToolBar(this)
   val tree: Var[TypedTag[HTMLElement]] = Var(tags.div())
 
-  val editNodeInput: Input = inputTag()(
-    placeholder := "Name",
-    width := "240px",
-    height := "24px",
-    autofocus
-  ).render
-
   lazy val fileControler = Rx {
     val current = manager.current()
     div(ms("tree-path"))(
