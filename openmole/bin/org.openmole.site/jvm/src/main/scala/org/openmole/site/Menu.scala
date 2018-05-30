@@ -29,7 +29,7 @@ object Menu {
   val inputStyle = paddingTop := 15
   val navId = "omwesite"
 
-  val build = {
+  def build(sitePage: SitePage) = {
     div(classIs("container"))(
       tags2.nav(navClass, paddingRight := 20)(
         div(classIs(container_fluid))(
@@ -46,6 +46,15 @@ object Menu {
           ),
           div(classIs(collapse ++ navbar_collapse), aria.expanded := false, paddingTop := 10, id := navId)(
             ul(classIs(nav ++ navbar_nav ++ navbar_right))(
+              (sitePage match {
+                case stepPage: StepPage ⇒
+                  Seq(
+                    li(pageLinkButton("MODELS", DocumentationPages.model, false, Seq(classIs(btn ++ btn_default)))),
+                    li(pageLinkButton("METHODS", DocumentationPages.method, false, Seq(classIs(btn ++ btn_default)))),
+                    li(pageLinkButton("ENVIRONMENTS", DocumentationPages.environment, false, Seq(classIs(btn ++ btn_default))))(paddingRight := 100)
+                  )
+                case _ ⇒ Seq(li)
+              }),
               li(innerLink(DocumentationPages.docSiteMap, "DOC"), liStyle),
               li(outerLink("DEMO", shared.link.demo), liStyle),
               li(outerLink("FORUM", shared.link.mailingList), liStyle),
