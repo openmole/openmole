@@ -36,7 +36,7 @@ object Pages {
 
   def stepByStepIntro = Page.fromScalatex("Step by Step Introduction", scalatex.StepByStepIntro, title = Some("A step by Step introduction for OpenMOLE newcomers "))
 
-  def stepByStepTuto1 = Page.fromScalatex("Step By Step Installation Tutorial", scalatex.StepByStepTuto1, title = Some("Installation tutorial "))
+  def install = Page.fromScalatex("Installation Tutorial", scalatex.download.Install, title = Some("Installation tutorial "))
 
   def stepByStepTuto2 = Page.fromScalatex("Step By Step Model Launching Tutorial", scalatex.StepByStepTuto2, title = Some("Launching a Netlogo Model"))
 
@@ -50,11 +50,11 @@ object Pages {
 
   def faq = Page.fromScalatex("faq", scalatex.FAQ, title = Some("FAQ"))
 
-  def previousVersions = Page.fromScalatex("Previous versions", scalatex.PreviousVersions, title = Some("Previous versions of OpenMOLE"))
+  def previousVersions = Page.fromScalatex("Previous versions", scalatex.download.PreviousVersions, title = Some("Previous versions of OpenMOLE"))
 
   val training = Page.fromScalatex("Trainings", scalatex.Training, title = Some("Live training sessions"))
 
-  val all: Seq[Page] = DocumentationPages.allPages ++ Seq(index, gettingStarted, stepByStepIntro, stepByStepTuto1, stepByStepTuto2, stepByStepTuto3, whoAreWe, partner, faq, communications, previousVersions, training)
+  val all: Seq[Page] = DocumentationPages.allPages ++ Seq(index, gettingStarted, stepByStepIntro, install, stepByStepTuto2, stepByStepTuto3, whoAreWe, partner, faq, communications, previousVersions, training)
 
   //def rawFile(page: Page) = page.location.mkString("_") + ".html"
   def file(page: Page) = java.net.URLEncoder.encode(page.location, "UTF-8") + ".html"
@@ -240,7 +240,7 @@ object DocumentationPages {
   lazy val tutorialPages = Seq(
     Pages.gettingStarted,
     Pages.stepByStepIntro,
-    Pages.stepByStepTuto1,
+    Pages.install,
     Pages.stepByStepTuto2,
     Pages.stepByStepTuto3,
     netLogoGA,
@@ -278,6 +278,11 @@ object DocumentationPages {
     Pages.previousVersions,
     Pages.training,
     Pages.whoAreWe
+  )
+
+  lazy val HPdownloadPages = Seq(
+    Pages.install,
+    Pages.previousVersions
   )
 
   lazy val method = DocumentationPage.fromScalatex(name = "Methods", content = scalatex.documentation.language.Method)
