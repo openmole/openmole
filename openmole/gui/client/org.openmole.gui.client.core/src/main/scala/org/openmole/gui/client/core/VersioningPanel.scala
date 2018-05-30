@@ -11,22 +11,21 @@ import scaladget.bootstrapnative.Selector.Options
 
 class VersioningPanel {
 
-  val currentPanel: Var[Option[VersioningGUIPlugin]] = Var(None)
-
   val versioningSelector: Options[VersioningPluginFactory] = Plugins.versioningFactories.now.options(0, btn_primary, (a: VersioningPluginFactory) ⇒ a.name,
-    onclose = () ⇒
-      currentPanel() = versioningSelector.content.now.map {
-        _.buildEmpty
-      })
+    onclose = () ⇒ currentPanel() = versioningSelector.content.now.map {
+      _.buildEmpty
+    }
+  )
 
+  val currentPanel: Var[Option[VersioningGUIPlugin]] = Var(versioningSelector.content.now.map { _.buildEmpty })
   val dialog = ModalDialog(omsheet.panelWidth(52))
 
   dialog header (b("Clone a repository"))
+
   dialog body (hForm()(
     versioningSelector.selector,
     Rx {
       currentPanel().map { _.panel }.getOrElse(div())
     }
   ))
-
 }
