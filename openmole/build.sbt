@@ -454,7 +454,7 @@ lazy val directSampling = OsgiProject(pluginDir, "org.openmole.plugin.method.dir
 
 /* Sampling */
 
-def allSampling = Seq(combineSampling, csvSampling, lhsSampling, quasirandomSampling)
+def allSampling = Seq(combineSampling, csvSampling, lhsSampling, quasirandomSampling, sensitivitySampling)
 
 lazy val combineSampling = OsgiProject(pluginDir, "org.openmole.plugin.sampling.combine", imports = Seq("*")) dependsOn(exception, modifierDomain, collectionDomain, workflow) settings (pluginSettings: _*)
 
@@ -467,6 +467,8 @@ lazy val lhsSampling = OsgiProject(pluginDir, "org.openmole.plugin.sampling.lhs"
 lazy val quasirandomSampling = OsgiProject(pluginDir, "org.openmole.plugin.sampling.quasirandom", imports = Seq("*")) dependsOn(exception, workflow, workspace) settings (
   libraryDependencies += Libraries.math
   ) settings (pluginSettings: _*)
+
+lazy val sensitivitySampling = OsgiProject(pluginDir, "org.openmole.plugin.sampling.sensitivity", imports = Seq("*")) dependsOn(exception, workflow, workspace, openmoleDSL) settings (pluginSettings: _*)
 
 
 /* Source */
