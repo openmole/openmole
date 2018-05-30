@@ -56,6 +56,47 @@ package object evolution {
   case class AfterGeneration(steps: Long) extends OMTermination
   case class AfterDuration(duration: Time) extends OMTermination
 
+  sealed trait EvolutionPattern
+
+  object EvolutionPattern {
+    def build[T](
+      algorithm:    T,
+      evaluation:   Puzzle,
+      termination:  OMTermination,
+      stochastic:   OptionalArgument[Stochastic] = None,
+      parallelism:  Int                          = 1,
+      distribution: EvolutionPattern             = SteadyState())(implicit wfi: WorkflowIntegration[T]) =
+      distribution match {
+        case s: SteadyState ⇒
+          SteadyStateEvolution(
+            algorithm = algorithm,
+            evaluation = evaluation,
+            parallelism = parallelism,
+            termination = termination,
+            wrap = s.wrap
+          )
+        case i: Island ⇒
+          val steadyState =
+            SteadyStateEvolution(
+              algorithm = algorithm,
+              evaluation = evaluation,
+              termination = i.termination,
+              wrap = i.wrap
+            )
+
+          IslandEvolution(
+            island = steadyState,
+            parallelism = parallelism,
+            termination = termination,
+            sample = i.sample
+          )
+      }
+
+  }
+
+  case class SteadyState(wrap: Boolean = false) extends EvolutionPattern
+  case class Island(termination: OMTermination, sample: OptionalArgument[Int] = None, wrap: Boolean = false) extends EvolutionPattern
+
   import shapeless._
 
   def SteadyStateEvolution[T](algorithm: T, evaluation: Puzzle, termination: OMTermination, parallelism: Int = 1, wrap: Boolean = true)(implicit wfi: WorkflowIntegration[T]) = {
