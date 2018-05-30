@@ -95,7 +95,7 @@ GAs can be smartly distributed on grid environments using an @a("island scheme",
          x in (0.0, 1.0),
          y in (0.0, 1.0),
          s in List("apple", "banana", "strawberry")),
-      objectives = Seq(o1, o2)
+      objectives = Seq(o1, o2),
       evaluation = model,
       parallelism = 10,
       termination = 100
