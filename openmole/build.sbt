@@ -852,14 +852,19 @@ lazy val siteJVM = site.jvm dependsOn(tools, project, serializer, buildinfo, mar
   libraryDependencies += Libraries.sourceCode)
 
 lazy val cloneMarket = taskKey[Unit]("cloning market place")
+lazy val defineMarketBranch = taskKey[Option[String]]("define market place branch")
 
 lazy val marketIndex = Project("marketindex", binDir / "org.openmole.marketindex") settings (defaultSettings: _*) settings (
   libraryDependencies += Libraries.json4s,
+  defineMarketBranch := {
+    val OMversion = version.value
+    OMversion.split('.').headOption.map(v => s"$v-dev")
+  },
   cloneMarket := {
     val runner = git.runner.value
     val dir = baseDirectory.value / "src/main/resources/openmole-market"
-    // TODO set branch to current branch
-    runner.updated("https://github.com/openmole/openmole-market.git", None, dir, com.typesafe.sbt.git.NullLogger)
+    val marketBranch = defineMarketBranch.value
+    runner.updated("https://github.com/openmole/openmole-market.git", marketBranch, dir, ConsoleLogger())
   }
 ) dependsOn(buildinfo, openmoleFile, openmoleTar, market)
 
