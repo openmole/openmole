@@ -33,14 +33,16 @@ import scala.scalajs.js.annotation._
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
 
-@JSExportTopLevel("org.openmole.gui.plugin.wizard.versioning.GitFactory")
+@JSExportTopLevel("org.openmole.gui.plugin.versioning.git.GitFactory")
 class GitFactory extends VersioningPluginFactory {
 
-  def name: String = "Git Factory"
+  def name: String = "GIT"
+
+  def build(cloneIn: SafePath) = new GitGUI(cloneIn)
 }
 
-@JSExportTopLevel("org.openmole.gui.plugin.wizard.netlogo.NetlogoWizardGUI")
-class GitGUI extends VersioningGUIPlugin {
+@JSExportTopLevel("org.openmole.gui.plugin.versioning.git.GitGUI")
+class GitGUI(cloneIn: SafePath) extends VersioningGUIPlugin {
 
   def factory = new GitFactory
 

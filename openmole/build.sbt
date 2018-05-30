@@ -672,7 +672,7 @@ lazy val netlogoWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugi
   libraryDependencies += Libraries.equinoxOSGi
 ) dependsOn(extPluginGUIServer, extClientTool, extServerTool, workspace) enablePlugins (ExecNpmPlugin)
 
-lazy val gitPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.versioning.git") settings(
+lazy val gitVersioningPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.versioning.git") settings(
   guiPluginSettings,
   libraryDependencies += Libraries.equinoxOSGi,
   libraryDependencies += Libraries.jgit
@@ -702,7 +702,8 @@ val guiPlugins = Seq(
   netlogoWizardPlugin,
   nativeWizardPlugin,
   rWizardPlugin,
-  jarWizardPlugin) //, guiEnvironmentDesktopGridPlugin)
+  jarWizardPlugin,
+  gitVersioningPlugin) //, guiEnvironmentDesktopGridPlugin)
 
 /* -------------------- Bin ------------------------- */
 
