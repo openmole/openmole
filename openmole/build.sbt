@@ -848,13 +848,20 @@ lazy val site = crossProject.in(binDir / "org.openmole.site") settings (defaultS
 )
 
 lazy val siteJS = site.js enablePlugins (ExecNpmPlugin)
-lazy val siteJVM = site.jvm dependsOn(tools, project, serializer, buildinfo, marketGit) settings (
+lazy val siteJVM = site.jvm dependsOn(tools, project, serializer, buildinfo, marketIndex) settings (
   libraryDependencies += Libraries.sourceCode)
 
-lazy val marketGit = ProjectRef(uri("https://github.com/openmole/openmole-market.git"), "openmole-market")
+lazy val cloneMarket = taskKey[Unit]("cloning market place")
+
 lazy val marketIndex = Project("marketindex", binDir / "org.openmole.marketindex") settings (defaultSettings: _*) settings (
-  libraryDependencies += Libraries.json4s
-  ) dependsOn(buildinfo, openmoleFile, openmoleTar, market, marketGit)
+  libraryDependencies += Libraries.json4s,
+  cloneMarket := {
+    val runner = git.runner.value
+    val dir = baseDirectory.value / "src/main/resources/openmole-market"
+    // TODO set branch to current branch
+    runner.updated("https://github.com/openmole/openmole-market.git", None, dir, com.typesafe.sbt.git.NullLogger)
+  }
+) dependsOn(buildinfo, openmoleFile, openmoleTar, market)
 
 def parse(key: String, default: sbt.File, parsed: Seq[String]) = parsed.indexOf(key) match {
   case -1 => (default, parsed ++ Seq(key, default.getAbsolutePath))
