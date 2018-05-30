@@ -10,22 +10,22 @@
 
 @h2{OpenMOLE Concepts}
 
-They are the three main steps of the OpenMOLE use case
+There are three main steps in an OpenMOLE use case
 @ul
     @li
-        @a("1.Models", href := DocumentationPages.model.file)
+        @a("1. Models", href := DocumentationPages.model.file)
 
         @ul
             @SiteMap.siteMapSection(DocumentationPages.modelPages)
 
     @li
-        @a("2.Methods", href := DocumentationPages.method.file)
+        @a("2. Methods", href := DocumentationPages.method.file)
 
         @ul
             @SiteMap.siteMapSection(DocumentationPages.methodPages)
 
     @li
-        @a("3.Environment", href := DocumentationPages.environment.file)
+        @a("3. Environment", href := DocumentationPages.environment.file)
         @ul
             @SiteMap.siteMapSection(DocumentationPages.environmentPages)
 

@@ -13,8 +13,6 @@ When your model is written in a language for which a specific OpenMOLE task does
   @li{@a(href := DocumentationPages.packagedCPlusPlus.file, "C++")}
   @li{@a(href := DocumentationPages.packagedR.file, "R")}
 
-Note that there is henceforth a @a("specific Task for handling R", href:= DocumentationPages.r.file) code execution in OpenMOLE worlflows.
-
 @br If you have an example of a successful packaging for a language or software that may benefit to other users, share it ! For that check @a("how to contribute", href := DocumentationPages.howToContribute.file).
 
 @h2{Packaging with CARE}

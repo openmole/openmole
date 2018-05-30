@@ -42,19 +42,19 @@ object Pages {
 
   def stepByStepTuto3 = Page.fromScalatex("Step By Step Methods Tutorial", scalatex.StepByStepTuto3, title = Some("Discovering Methods  Tutorial"))
 
-  def whoAreWe = Page("Who are we", scalatex.WhoAreWe(), title = Some("OpenMOLE Developers, reference publications, contact information"))
+  def whoAreWe = Page("Who we are", scalatex.community.WhoAreWe(), title = Some("OpenMOLE Developers, reference publications, contact information"))
 
-  def partner = Page("Partners", scalatex.Partner(), title = Some("OpenMOLE partners and collaborations"))
+  def partner = Page("Partners", scalatex.community.Partner(), title = Some("OpenMOLE partners and collaborations"))
 
-  val communications = Page.fromScalatex("Communications", scalatex.Communications, title = Some("Related scientific papers, conference slides, videos, OpenMOLE in the news"))
+  val communications = Page.fromScalatex("Communications", scalatex.community.Communications, title = Some("Related scientific papers, conference slides, videos, OpenMOLE in the news"))
 
-  def faq = Page.fromScalatex("faq", scalatex.FAQ, title = Some("FAQ"))
+  def faq = Page.fromScalatex("FAQ", scalatex.community.FAQ, title = Some("Frequently Asked Questions"))
 
   def previousVersions = Page.fromScalatex("Previous versions", scalatex.download.PreviousVersions, title = Some("Previous versions of OpenMOLE"))
 
-  val training = Page.fromScalatex("Trainings", scalatex.Training, title = Some("Live training sessions"))
+  val training = Page.fromScalatex("Training Sessions", scalatex.community.Training, title = Some("Live training sessions"))
 
-  val all: Seq[Page] = DocumentationPages.allPages ++ Seq(index, gettingStarted, stepByStepIntro, install, stepByStepTuto2, stepByStepTuto3, whoAreWe, partner, faq, communications, previousVersions, training)
+  val all: Seq[Page] = DocumentationPages.allPages ++ Seq(index, gettingStarted, stepByStepIntro, install, stepByStepTuto2, stepByStepTuto3, previousVersions)
 
   //def rawFile(page: Page) = page.location.mkString("_") + ".html"
   def file(page: Page) = java.net.URLEncoder.encode(page.location, "UTF-8") + ".html"
