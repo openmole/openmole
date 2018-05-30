@@ -7,3 +7,9 @@
 
 @h1{Launching a Netlogo Model}
 
+
+
+
+
+
+Hook , environements , transition and input/output declaration are @b{mandatory}
