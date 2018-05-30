@@ -13,7 +13,7 @@
 There are three main steps in an OpenMOLE use case
 @ul
     @li
-        @a("1. Models", href := DocumentationPages.model.file)
+        @a("1. Models", href := DocumentationPages.run.file)
 
         @ul
             @SiteMap.siteMapSection(DocumentationPages.modelPages)
@@ -25,7 +25,7 @@ There are three main steps in an OpenMOLE use case
             @SiteMap.siteMapSection(DocumentationPages.methodPages)
 
     @li
-        @a("3. Environment", href := DocumentationPages.environment.file)
+        @a("3. Environment", href := DocumentationPages.scale.file)
         @ul
             @SiteMap.siteMapSection(DocumentationPages.environmentPages)
 

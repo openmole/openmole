@@ -24,7 +24,7 @@ Using Genetic Algorithms (GA), OpenMOLE find the inputs set matching one or seve
 In practice, calibration is used when you want to target @b{one} specific scenario or dynamic.
 Usually, one uses a fitness function that is commensurable to a distance from your target, so if your model is not
  able to match the objective dynamic, the calibration will find the parameterization leading to the closest possible dynamic.
-For more details on the calibration using genetic algorithms, see the @a("GA detailed page", href:=DocumentationPages.geneticalgo.file).
+For more details on the calibration using genetic algorithms, see the @a("GA detailed page", href:=DocumentationPages.geneticAlgorithm.file).
 
 @h2{Single criterion Calibration}
 
@@ -41,7 +41,7 @@ insights about the sensitivity  of the model regarding its inputs, as it does no
 For the same reason, this method does not intend to cover the input space and the output space and thus does not perform
 well regarding the input space and output space exploration grades.
 It @i{does} indeed explore input space, but does not keep track of it.
-Calibration can handle stochasticity, using a @a("specific method", href:=DocumentationPages.stochasticity.file).
+Calibration can handle stochasticity, using a @a("specific method", href:=DocumentationPages.stochasticityManagement.file).
 @br
 This method is not sensitive to the dimensionality of the model output space, as it only need a fitness value, which
   is a single criterion (value).

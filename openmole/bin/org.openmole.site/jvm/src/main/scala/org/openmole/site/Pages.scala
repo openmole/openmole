@@ -60,9 +60,9 @@ object Pages {
 
   val index = Page("index", scalatex.Index(), title = Some("OpenMOLE: the Exploration Software"))
 
-  var faq = Page.fromScalatex("FAQ", scalatex.FAQ, title = Some("Frequently Asked Questions"))
+  val faq = Page.fromScalatex("FAQ", scalatex.FAQ, title = Some("Frequently Asked Questions"))
 
-  var all: Seq[Page] = DocumentationPages.allPages ++ Seq(index, faq)
+  val all: Seq[Page] = DocumentationPages.allPages ++ Seq(index, faq)
 
   //def rawFile(page: Page) = page.location.mkString("_") + ".html"
   def file(page: Page) = java.net.URLEncoder.encode(page.location, "UTF-8") + ".html"
@@ -172,22 +172,19 @@ object DocumentationPages {
   lazy val siteMap = DocumentationPage.fromScalatex(name = "Site Map", content = scalatex.SiteMap)
 
   // Documentation
-  def docPages = Seq(
-    languagePages,
-    runPages,
-    explorePages,
-    scalePages,
-    advancedPages
-  ) ++ Seq(gui, market, commandOptions)
+  def docPages =
+    languagePages ++
+      runPages ++
+      explorePages ++
+      scalePages ++
+      advancedPages ++ Seq(gui, market, commandOptions)
 
   lazy val gui = DocumentationPage.fromScalatex(name = "GUI", content = scalatex.documentation.GUI)
   lazy val market = DocumentationPage.fromScalatex(name = "Market", content = scalatex.documentation.Market)
   lazy val commandOptions = DocumentationPage.fromScalatex(name = "Command Options", content = scalatex.documentation.CommandOptions)
 
   // Language
-  def languagePages = Seq(
-    developersPages,
-    fileManagement, hook, language, scalaFunction, source, transition)
+  def languagePages = developersPages ++ Seq(fileManagement, hook, language, scalaFunction, source, transition)
 
   lazy val fileManagement = DocumentationPage.fromScalatex(name = "File Management", content = scalatex.documentation.language.FileManagement)
   lazy val hook = DocumentationPage.fromScalatex(name = "Hook", content = scalatex.documentation.language.Hook)
@@ -241,9 +238,7 @@ object DocumentationPages {
   lazy val ssh = DocumentationPage.fromScalatex(name = "SSH", content = scalatex.documentation.scale.SSH)
 
   // Advanced Concepts
-  def advancedPages = Seq(
-    gaPages,
-    resumableWorkflow)
+  def advancedPages = gaPages :+ resumableWorkflow
 
   lazy val resumableWorkflow = DocumentationPage.fromScalatex(name = "Resumable Workflow", content = scalatex.documentation.advancedConcepts.ResumableWorkflow)
 
@@ -254,10 +249,9 @@ object DocumentationPages {
   lazy val stochasticityManagement = DocumentationPage.fromScalatex(name = "Stochasticity Management", content = scalatex.documentation.advancedConcepts.GA.StochasticityManagement)
 
   // Tutorials
-  def tutoPages = Seq(
-    gettingStartedPages,
-    netLogoPages
-  ) ++ Seq(tutorial)
+  def tutoPages =
+    gettingStartedPages ++
+      netLogoPages :+ tutorial
 
   lazy val tutorial = DocumentationPage.fromScalatex(name = "Tutorial", content = scalatex.tutorials.Tutorial)
 
@@ -377,7 +371,7 @@ object DocumentationPages {
   def methodPages = Seq(directSampling, calibration, profile, pse, dataProcessing)
 
   lazy val tutorialPages = Seq(
-    Pages.gettingStarted,
+    ).gettingStarted,
     Pages.stepByStepIntro,
     Pages.install,
     Pages.stepByStepTuto2,

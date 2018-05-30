@@ -2,6 +2,7 @@
 @import org.openmole.site.tools._
 @import org.openmole.site.stylesheet._
 @import org.openmole.site._
+@import scalatex.{ openmole ⇒ scalatex }
 
 @h1{Examples}
 
@@ -18,7 +19,7 @@ the OpenMOLE way. You can discover them through the Market place or tutorials.
 @sect{Tutorials}
     Some tutorials, wrote by users can also inspire you for building your first experiments:
     @ul
-        @li{@a("Get started with OpenMOLE and a simple workflow", href := Pages.gettingStarted.file)}
+        @li{@a("Get started with OpenMOLE and a simple workflow", href := DocumentationPages.stepByStepIntro.file)}
         @li{@aa("Calibrate a NetLogo model using genetic algorithms", href := DocumentationPages.netLogoGA.file)}
         @li{@aa("One factor Sensitivity Analysis on Netlogo Model ", href := DocumentationPages.simpleSAFire.file)}
 

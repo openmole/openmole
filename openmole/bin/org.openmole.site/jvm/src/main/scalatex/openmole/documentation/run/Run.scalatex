@@ -48,9 +48,9 @@ The composition a a full exploration experiment is achieved by writing a script 
  @ul
    @li{one or several @b{tasks},}
    @li{their @b{inputs} and @b{outputs},}
-   @li{an @a("exploration method", href := DocumentationPages.method.file),}
+   @li{an @a("exploration method", href := DocumentationPages.explore.file),}
    @li{one or several @a("hooks", href := DocumentationPages.hook.file),}
-   @li{possibly an @a("execution environment", href := DocumentationPages.environment.file)}.
+   @li{possibly an @a("execution environment", href := DocumentationPages.scale.file)}.
 
 @p
   Let's say you have a model that take a string as input and do some stuff with it, like launching a simulation with the parameters contained in the input string. People from the lab gave you a huge CSV file where each line contains various experimental setup parameters. What you want is to run a simulation for each line of this file, execute it on the lab's cluster, and gather theirs results. Your openMOLE script would look like that:

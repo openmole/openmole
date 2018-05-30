@@ -41,7 +41,7 @@
   OpenMOLE.
 @br
     For more generic details regarding the exploitation of Genetic Algorithms using OpenMOLE, you can check the
-    @a("GA section of the methods documentation", href := DocumentationPages.method.file + "#Geneticalgorithms")
+    @a("GA section of the methods documentation", href := DocumentationPages.explore.file + "#Geneticalgorithms")
 
 @h2{The ant model}
 

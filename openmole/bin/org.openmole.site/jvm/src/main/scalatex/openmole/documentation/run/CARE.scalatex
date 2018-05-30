@@ -10,8 +10,8 @@ When your model is written in a language for which a specific OpenMOLE task does
   This section intend to be general and seeks to explain how to embed any native code into OpenMOLE. More specific documentation pages on how to package some languages/platforms with CARE are available for:
 @ul
   @li{@a(href := DocumentationPages.packagedPython.file, "python")}
-  @li{@a(href := DocumentationPages.packagedCPlusPlus.file, "C++")}
-  @li{@a(href := DocumentationPages.packagedR.file, "R")}
+  @li{@a(href := DocumentationPages.packagedCCplusplus.file, "C++")}
+  @li{@a(href := DocumentationPages.r.file, "R")}
 
 @br If you have an example of a successful packaging for a language or software that may benefit to other users, share it ! For that check @a("how to contribute", href := DocumentationPages.howToContribute.file).
 

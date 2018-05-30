@@ -60,9 +60,9 @@ Question 4 is addressed by using the @b{Pattern Space Exploration} (PSE) method.
 
 
 
-Calibration methods make an extensive use of @a("Genetic Algorithms", href := DocumentationPages.geneticalgo.file).
+Calibration methods make an extensive use of @a("Genetic Algorithms", href := DocumentationPages.geneticAlgorithm.file).
 @br
-Specific task are available to handle the @a("stochasticity ", href := DocumentationPages.stochasticity.file) of your
+Specific task are available to handle the @a("stochasticity ", href := DocumentationPages.stochasticityManagement.file) of your
 model
 as well as @a("distribution schemes", href := DocumentationPages.island.file) specifically designed for distributed computing environment.
 

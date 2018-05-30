@@ -21,11 +21,11 @@
 
 @aa(img(src := Resource.img.partner.geocite.file,  smallPartners), href := shared.link.partner.parisgeo, float:="left")
 @span(width := "75%")
-  @b{SimPopLocal} is a theoretical geography model, simulating the emergence and the upkeep of systems of settlements (ancestors of system of cities) by means of spatial interactions and innovation exchanges. Main results are shown in the «Half a billion simulations: Evolutionary algorithms and distributed computing for calibrating the SimpopLocal geographical model» article in our  @a("publication page", href := Pages.communications.file)
+  @b{SimPopLocal} is a theoretical geography model, simulating the emergence and the upkeep of systems of settlements (ancestors of system of cities) by means of spatial interactions and innovation exchanges. Main results are shown in the «Half a billion simulations: Evolutionary algorithms and distributed computing for calibrating the SimpopLocal geographical model» article in our  @a("publication page", href := DocumentationPages.communications.file)
 
 @span(width := "75%")
     @br
-    @b{MARIUS} ("Modélisation des Agglomérations de Russie Imperiale et ex-Union Soviétique," french for Former URSS agglomerations model) is the last born of the Simpop family of model, and addresses the dynamics of Russia/ former URSS from 1950 to 2010. See «A modular modelling framework for hypotheses testing in the simulation of urbanisation», in our @a("publication page", href := Pages.communications.file)).
+    @b{MARIUS} ("Modélisation des Agglomérations de Russie Imperiale et ex-Union Soviétique," french for Former URSS agglomerations model) is the last born of the Simpop family of model, and addresses the dynamics of Russia/ former URSS from 1950 to 2010. See «A modular modelling framework for hypotheses testing in the simulation of urbanisation», in our @a("publication page", href := DocumentationPages.communications.file)).
     @br
 @span(width := "75%")
 @br
