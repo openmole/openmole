@@ -46,18 +46,20 @@ class GitGUI(cloneIn: SafePath) extends VersioningGUIPlugin {
 
   def factory = new GitFactory
 
-  lazy val panel: TypedTag[HTMLElement] = div("Lorem ipsum dolor sit amet, " +
-    "consectetur adipiscing elit, sed do eiusmod tempor " +
-    "incididunt ut labore et dolore magna aliqua. " +
-    "Ut enim ad minim veniam, quis nostrud exercitation ullamco " +
-    "laboris nisi ut aliquip ex ea commodo consequat. Duis aute " +
-    "irure dolor in reprehenderit in voluptate velit esse cillum dolore " +
-    "eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, " +
-    "sunt in culpa qui officia deserunt mollit anim id est laborum.", padding := 10)
+  import rx._
+
+  val inputStyle: ModifierSeq = Seq(width := 150)
+  val repositoryUrlInput = inputTag("")(placeholder := "Repository URL", inputStyle).render
+  val repositoryUrlButton = button("clone", onclick := { () ⇒ clone(repositoryUrlInput.value, cloneIn).foreach { x ⇒ println(x) } }).render
+
+  lazy val panel: TypedTag[HTMLElement] = div(
+    hForm(Seq(paddingTop := 20, width := 500).toMS)(repositoryUrlInput, repositoryUrlButton)
+  )
 
   def clone(
-    url: String) =
+    url:    String,
+    folder: SafePath) =
     OMPost()[GitAPI].clone(
-      url).call()
+      url, folder).call()
 
 }

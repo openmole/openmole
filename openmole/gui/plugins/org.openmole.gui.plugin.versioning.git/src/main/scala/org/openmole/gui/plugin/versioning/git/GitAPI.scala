@@ -21,6 +21,8 @@ import org.openmole.gui.ext.data._
 
 trait GitAPI {
 
-  def clone(url: String): SafePath
+  case class GitFile(oldPath: SafePath, newPath: SafePath, status: String)
 
+  def clone(url: String, folder: SafePath): SafePath
+  //def status(folder: SafePath, files: Seq[SafePath]): Seq[GitFile]
 }
