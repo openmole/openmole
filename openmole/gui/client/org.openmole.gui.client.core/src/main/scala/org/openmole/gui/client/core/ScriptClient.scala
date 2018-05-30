@@ -196,11 +196,15 @@ object ScriptClient {
         modelWizardPanel.dialog.show
       })
 
+      lazy val cloneRepositiory = MenuAction("Clone repository", () ⇒ {
+        versioningPanel.dialog.show
+      })
+
       lazy val marketPlaceProject = MenuAction("From market place", () ⇒ {
         marketPanel.dialog.show
       })
 
-      lazy val elements = Seq(newEmpty, importModel, marketPlaceProject)
+      lazy val elements = Seq(newEmpty, importModel, marketPlaceProject, cloneRepositiory)
 
       lazy val menuActions: Options[MenuAction] = elements.options(
         key = btn_danger,

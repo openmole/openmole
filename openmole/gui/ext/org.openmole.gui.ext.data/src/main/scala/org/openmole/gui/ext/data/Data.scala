@@ -747,7 +747,7 @@ sealed trait PluginExtensionType
 object AuthenticationExtension extends PluginExtensionType
 
 //TODO: add other extension points
-case class AllPluginExtensionData(authentications: Seq[GUIPluginAsJS], wizards: Seq[GUIPluginAsJS])
+case class AllPluginExtensionData(authentications: Seq[GUIPluginAsJS], wizards: Seq[GUIPluginAsJS], versioning: Seq[GUIPluginAsJS])
 
 case class GUIPluginAsJS(jsObject: String)
 

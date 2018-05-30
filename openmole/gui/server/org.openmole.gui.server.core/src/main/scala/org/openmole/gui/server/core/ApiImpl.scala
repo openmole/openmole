@@ -444,7 +444,8 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
 
     AllPluginExtensionData(
       PluginActivator.authentications,
-      PluginActivator.wizards
+      PluginActivator.wizards,
+      PluginActivator.versioning
     )
   }
 

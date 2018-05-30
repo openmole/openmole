@@ -18,7 +18,7 @@ package org.openmole.gui.ext.plugin.server
  *
  */
 
-import org.openmole.gui.ext.data.{ AuthenticationPluginFactory, GUIPluginAsJS, WizardPluginFactory }
+import org.openmole.gui.ext.data.{ AuthenticationPluginFactory, GUIPluginAsJS, VersioningPluginFactory, WizardPluginFactory }
 import org.osgi.framework._
 
 import collection.JavaConverters._
@@ -42,6 +42,11 @@ object PluginActivator {
   def wizards: Seq[GUIPluginAsJS] =
     instances.filter {
       classOf[WizardPluginFactory].isAssignableFrom
+    }
+
+  def versioning: Seq[GUIPluginAsJS] =
+    instances.filter {
+      classOf[VersioningPluginFactory].isAssignableFrom
     }
 }
 

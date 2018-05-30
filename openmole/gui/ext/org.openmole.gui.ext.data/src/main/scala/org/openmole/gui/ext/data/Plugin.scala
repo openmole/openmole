@@ -90,4 +90,5 @@ trait VersioningGUIPlugin extends GUIPlugin {
 
 trait VersioningPluginFactory extends GUIPluginFactory {
 
+  def buildEmpty: VersioningGUIPlugin
 }

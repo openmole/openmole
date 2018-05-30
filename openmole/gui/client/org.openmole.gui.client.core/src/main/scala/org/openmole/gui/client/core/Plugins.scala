@@ -1,7 +1,7 @@
 package org.openmole.gui.client.core
 
 import org.openmole.gui.ext.api.Api
-import org.openmole.gui.ext.data.{ AllPluginExtensionData, AuthenticationPluginFactory, WizardPluginFactory }
+import org.openmole.gui.ext.data._
 import autowire._
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -30,11 +30,13 @@ object Plugins {
 
   val authenticationFactories: Var[Seq[AuthenticationPluginFactory]] = Var(Seq())
   val wizardFactories: Var[Seq[WizardPluginFactory]] = Var(Seq())
+  val versioningFactories: Var[Seq[VersioningPluginFactory]] = Var(Seq())
 
   def fetch(f: AllPluginExtensionData ⇒ Unit) = {
     post()[Api].getGUIPlugins.call().foreach { p ⇒
       authenticationFactories() = p.authentications.map { gp ⇒ Plugins.buildJSObject(gp.jsObject).asInstanceOf[AuthenticationPluginFactory] }
       wizardFactories() = p.wizards.map { gp ⇒ Plugins.buildJSObject(gp.jsObject).asInstanceOf[WizardPluginFactory] }
+      versioningFactories() = p.versioning.map { gp ⇒ Plugins.buildJSObject(gp.jsObject).asInstanceOf[VersioningPluginFactory] }
       f(p)
     }
   }
