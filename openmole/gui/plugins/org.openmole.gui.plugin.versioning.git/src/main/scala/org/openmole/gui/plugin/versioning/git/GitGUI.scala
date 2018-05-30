@@ -38,11 +38,11 @@ class GitFactory extends VersioningPluginFactory {
 
   def name: String = "GIT"
 
-  def buildEmpty = new GitGUI
+  def build(cloneIn: SafePath) = new GitGUI(cloneIn)
 }
 
 @JSExportTopLevel("org.openmole.gui.plugin.versioning.git.GitGUI")
-class GitGUI extends VersioningGUIPlugin {
+class GitGUI(cloneIn: SafePath) extends VersioningGUIPlugin {
 
   def factory = new GitFactory
 
