@@ -249,7 +249,7 @@ Once this code is added, you can produce the OSGi bundle by simply executing a b
                  new ImageReadWriteSpi().updateRegistry(registry);
              } catch (IllegalArgumentException e) {
                  // See #10652: IAE: A descriptor is already registered against the name "ImageRead" under registry mode "rendered"
-                 System.out.println("geotools: error in JAI/ImageReadWriteSpi initialization: "+e.getMessage());
+                 System.out.println("GeoTools: error in JAI/ImageReadWriteSpi initialization: "+e.getMessage());
              }
 
              // Update registry with GeoTools registry file
@@ -260,7 +260,7 @@ Once this code is added, you can produce the OSGi bundle by simply executing a b
                      registry.updateFromStream(in);
                  }
              } catch (IOException | IllegalArgumentException e) {
-                 System.out.println("geotools: error in JAI/GeoTools initialization: "+e.getMessage());
+                 System.out.println("GeoTools: error in JAI/GeoTools initialization: "+e.getMessage());
              }
          }
 

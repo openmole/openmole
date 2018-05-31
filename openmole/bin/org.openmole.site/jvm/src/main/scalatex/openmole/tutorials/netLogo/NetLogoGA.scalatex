@@ -17,7 +17,7 @@
     // Define the NetlogoTask
     val cmds = Seq("run-to-grid")
     val ants =
-      NetLogo6Task(workDirectory / "Ants.nlogo", cmds, seed = seed) set (
+      NetLogo5Task(workDirectory / "Ants.nlogo", cmds, seed = seed) set (
         // Map the OpenMOLE variables to NetLogo variables
         netLogoInputs += (gPopulation, "gpopulation"),
         netLogoInputs += (gDiffusionRate, "gdiffusion-rate"),
@@ -114,8 +114,12 @@ $model
 // Define the hooks to collect the results
 val displayHook = ToStringHook(food1, food2, food3)
 
+//Definie the environment
+val env = LocalEnvironment(5)
+
 // Start a workflow with 1 task
-val model_execution = (ants hook displayHook) start
+val model_execution = (ants on env hook displayHook)
+model_execution
 """, name = "ga netlogo model")
 
 @p The result of this execution should look like:
