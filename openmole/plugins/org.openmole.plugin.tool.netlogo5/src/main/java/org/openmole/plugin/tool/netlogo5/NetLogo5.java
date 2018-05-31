@@ -33,6 +33,7 @@ public class NetLogo5 implements NetLogo {
 
     protected HeadlessWorkspace workspace = createWorkspace();
 
+
     private HeadlessWorkspace createWorkspace() {
         ClassLoader threadClassLoader = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(getNetLogoClassLoader());
@@ -63,6 +64,19 @@ public class NetLogo5 implements NetLogo {
         return workspace.report(variable);
     }
 
+
+    @Override
+    public void setGlobal(String variable, Object value) throws Exception {
+        workspace.world().setObserverVariableByName(variable, value);
+    }
+
+    @Override
+    public void setRandomSeed(int seed) {
+        // we set the seed of the main rng ; not sure what is the role of the auxiliary rng (and what does random-seed exactly)
+        workspace.world().mainRNG.setSeed(seed);
+    }
+
+
     @Override
     public void dispose() throws Exception {
         workspace.dispose();
@@ -78,6 +92,7 @@ public class NetLogo5 implements NetLogo {
         }
         return nlGlobalList;
     }
+
 
     public String[] reporters() {
         LinkedList<String> reporters = new LinkedList<String>();

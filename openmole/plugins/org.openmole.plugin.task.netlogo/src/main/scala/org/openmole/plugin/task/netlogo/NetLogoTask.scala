@@ -87,15 +87,40 @@ trait NetLogoTask extends Task with ValidateTask {
             }
           }
 
-          seed.foreach { s ⇒ executeNetLogo(s"random-seed ${context(s)}") }
+          def setRandomSeed(seed: Int, ignoreError: Boolean = false) = wrapError(s"Error while setting seed $seed") {
+            try netLogo.setRandomSeed(seed)
+            catch {
+              case t: Throwable ⇒
+                if (ignoreError && netLogo.isNetLogoException(t)) {} else throw t
+            }
+          }
+
+          def setGlobal(variable: String, value: AnyRef, ignoreError: Boolean = false) = wrapError(s"Error while setting $variable") {
+            try netLogo.setGlobal(variable,value)
+            catch {
+              case t: Throwable ⇒
+                if (ignoreError && netLogo.isNetLogoException(t)) {} else throw t
+            }
+          }
+
+          //seed.foreach { s ⇒ executeNetLogo(s"random-seed ${context(s)}") }
+          seed.foreach{s ⇒ setRandomSeed(context(s)) }
 
           for (inBinding ← netLogoInputs) {
-            val v = preparedContext(inBinding._1) match {
+            /*val v = preparedContext(inBinding._1) match {
               case x: String ⇒ '"' + x + '"'
               case x: File   ⇒ '"' + x.getAbsolutePath + '"'
               case x         ⇒ x.toString
             }
             executeNetLogo("set " + inBinding._2 + " " + v)
+            */
+            // keep variable types, except for file transformed into string
+            val v = preparedContext(inBinding._1) match {
+              case f: File  ⇒  f.getAbsolutePath
+              case _  ⇒ _
+            }
+            setGlobal(inBinding._2, v)
+            netLogo
           }
 
           for (cmd ← launchingCommands.map(_.from(context))) executeNetLogo(cmd, ignoreError)

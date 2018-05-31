@@ -67,6 +67,17 @@ public class NetLogo6 implements NetLogo {
     }
 
     @Override
+    public void setGlobal(String variable, Object value) throws Exception {
+        workspace.world().setObserverVariableByName(variable, value);
+    }
+
+    @Override
+    public void setRandomSeed(int seed) {
+        workspace.world().mainRNG.setSeed(seed);
+    }
+
+
+    @Override
     public void dispose() throws Exception {
         workspace.dispose();
     }
