@@ -38,21 +38,31 @@ object UserGuide {
       div(stepHeader)(sp),
       line
     )
+
   def headerModel(model: String) = header(span(
     tools.to(DocumentationPages.run)(img(src := Resource.img.model.codeAnimated.file, headerImg)),
     span(s"Run your own $model model", h1Like)
   ))
 
-  def headerMethod(method: String) = header(span(
-    tools.to(DocumentationPages.explore)(img(src := Resource.img.method.exploreMapAnimated.file, headerImg)),
-    span(s"Explore with $method", h1Like)
-  ))
-
-  def headerEnvironment(env: String) = header(span(
-    tools.to(DocumentationPages.scale)(img(src := Resource.img.environment.scaleAnimated.file, headerImg)),
-    span(s"Scale on $env "), h1Like
-  ))
-
+  def headerMethod(method: String) = method match {
+    case "Explore" ⇒ header(span(
+      tools.to(DocumentationPages.explore)(img(src := Resource.img.method.exploreMapAnimated.file, headerImg)),
+      span(s"Explore your model", h1Like)
+    ))
+    case _ ⇒ header(span(
+      tools.to(DocumentationPages.explore)(img(src := Resource.img.method.exploreMapAnimated.file, headerImg)),
+      span(s"Explore with $method", h1Like)
+    ))
+  }
+  def headerEnvironment(env: String) = env match {
+    case "Scale" ⇒ header(span(
+      tools.to(DocumentationPages.scale)(img(src := Resource.img.environment.scaleAnimated.file, headerImg)),
+      span(s"Scale on different environments "), h1Like))
+    case _ ⇒ header(span(
+      tools.to(DocumentationPages.scale)(img(src := Resource.img.environment.scaleAnimated.file, headerImg)),
+      span(s"Scale on $env "), h1Like
+    ))
+  }
   lazy val imgStyle = Seq(
     width := 100,
     paddingRight := 15
