@@ -87,24 +87,26 @@ trait NetLogoTask extends Task with ValidateTask {
             }
           }
 
-          def setRandomSeed(seed: Int, ignoreError: Boolean = false) = wrapError(s"Error while setting seed $seed") {
-            try netLogo.setRandomSeed(seed)
-            catch {
-              case t: Throwable ⇒
-                if (ignoreError && netLogo.isNetLogoException(t)) {} else throw t
-            }
-          }
+          /**
+           * def setRandomSeed(seed: Int, ignoreError: Boolean = false) = wrapError(s"Error while setting seed $seed") {
+           * try netLogo.setRandomSeed(seed)
+           * catch {
+           * case t: Throwable ⇒
+           * if (ignoreError && netLogo.isNetLogoException(t)) {} else throw t
+           * }
+           * }
+           */
 
           def setGlobal(variable: String, value: AnyRef, ignoreError: Boolean = false) = wrapError(s"Error while setting $variable") {
-            try netLogo.setGlobal(variable,value)
+            try netLogo.setGlobal(variable, value)
             catch {
               case t: Throwable ⇒
                 if (ignoreError && netLogo.isNetLogoException(t)) {} else throw t
             }
           }
 
-          //seed.foreach { s ⇒ executeNetLogo(s"random-seed ${context(s)}") }
-          seed.foreach{s ⇒ setRandomSeed(context(s)) }
+          seed.foreach { s ⇒ executeNetLogo(s"random-seed ${context(s)}") }
+          //seed.foreach { s ⇒ setRandomSeed(context(s)) }
 
           for (inBinding ← netLogoInputs) {
             /*val v = preparedContext(inBinding._1) match {
@@ -116,10 +118,10 @@ trait NetLogoTask extends Task with ValidateTask {
             */
             // keep variable types, except for file transformed into string
             val v = preparedContext(inBinding._1) match {
-              case f: File  ⇒  f.getAbsolutePath
-              case _  ⇒ _
+              case f: File ⇒ f.getAbsolutePath
+              case f       ⇒ f
             }
-            setGlobal(inBinding._2, v)
+            setGlobal(inBinding._2, v.asInstanceOf[AnyRef])
             netLogo
           }
 

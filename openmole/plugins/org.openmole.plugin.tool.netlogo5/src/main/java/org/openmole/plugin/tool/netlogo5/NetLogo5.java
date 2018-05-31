@@ -70,11 +70,15 @@ public class NetLogo5 implements NetLogo {
         workspace.world().setObserverVariableByName(variable, value);
     }
 
+
+    /*
+    // this does not work : the mainRNG has private access
     @Override
     public void setRandomSeed(int seed) {
         // we set the seed of the main rng ; not sure what is the role of the auxiliary rng (and what does random-seed exactly)
         workspace.world().mainRNG.setSeed(seed);
     }
+     */
 
 
     @Override

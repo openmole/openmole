@@ -71,10 +71,12 @@ public class NetLogo6 implements NetLogo {
         workspace.world().setObserverVariableByName(variable, value);
     }
 
+    /*
     @Override
     public void setRandomSeed(int seed) {
         workspace.world().mainRNG.setSeed(seed);
     }
+    */
 
 
     @Override
