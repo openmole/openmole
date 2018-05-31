@@ -50,8 +50,7 @@ object SettingsView {
     warnMessage,
     () ⇒ {
       fileDisplayer.tabs.saveAllTabs(() ⇒ {
-        println("H " + dom.window.location.href)
-        dom.window.location.href = route.split("/").last
+        CoreUtils.setRoute(route)
       })
     },
     transform = CenterPagePosition
