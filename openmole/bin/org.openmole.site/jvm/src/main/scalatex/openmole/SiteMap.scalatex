@@ -2,16 +2,37 @@
 @import org.openmole.site.tools._
 @import org.openmole.site._
 
-@h1
-    Documentation Site Map
+@h1{Site Map}
+
 @p
-  Welcome to the OpenMOLE documentation site map.
-  It's more a list than a map, in fact, but hey, layout propositions of the various pages are welcome!
+  Welcome to the OpenMOLE site map.
+  It's more a list than a map actually but hey, layout propositions for the various pages are welcome!
+
+  @h2{Documentation}
+
+  @ol
+    @li
+      @a("Language", href := DocumentationPages.language.file)
+      @ol
+        @sitemap.siteMapSection(DocumentationPages.languagePages                                                                                                                                                                                                                                                                                                                                                                                                                                              )
+
+  @h2{Tutorials}
+
+  fxg,
+
+  @h2{Community}
+
+  xfg,
+
+  @h2{Download}
+
+xjt
+
 
 @h2{OpenMOLE Concepts}
 
 There are three main steps in an OpenMOLE use case
-@ul
+@ol
     @li
         @a("1. Models", href := DocumentationPages.run.file)
 
