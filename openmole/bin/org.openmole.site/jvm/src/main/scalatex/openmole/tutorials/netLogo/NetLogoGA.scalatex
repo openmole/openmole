@@ -163,8 +163,10 @@ val evolution =
 val savePopulationHook = SavePopulationHook(evolution, workDirectory / "results")
 
 // Plug everything together to create the workflow
-(evolution hook savePopulationHook)
+val model_execution = (evolution hook savePopulationHook)
+model_execution
 """, header = model, name = "ga netlogo evolution")
+
 
 @h2{Scale up}
 
