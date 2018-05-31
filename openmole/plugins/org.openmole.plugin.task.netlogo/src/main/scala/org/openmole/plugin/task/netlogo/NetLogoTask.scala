@@ -117,11 +117,14 @@ trait NetLogoTask extends Task with ValidateTask {
             executeNetLogo("set " + inBinding._2 + " " + v)
             */
             // keep variable types, except for file transformed into string
+            // and iterables converted to LogoList
             val v = preparedContext(inBinding._1) match {
-              case f: File ⇒ f.getAbsolutePath
-              case f       ⇒ f
+              case x: File   ⇒ x.getAbsolutePath
+              //case x: Iterable[_ <: AnyRef] ⇒ new LogoListBuilder() // conversion to LogoList is specific to each api, must be done inside each
+              case x: AnyRef ⇒ x
             }
-            setGlobal(inBinding._2, v.asInstanceOf[AnyRef])
+            //setGlobal(inBinding._2, v.asInstanceOf[AnyRef])
+            setGlobal(inBinding._2, v)
             netLogo
           }
 

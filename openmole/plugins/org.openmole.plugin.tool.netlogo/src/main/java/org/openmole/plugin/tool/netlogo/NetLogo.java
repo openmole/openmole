@@ -18,6 +18,7 @@
 
 package org.openmole.plugin.tool.netlogo;
 
+
 public interface NetLogo {
   public String[] globals() throws Exception;
   public String[] reporters() throws Exception;
@@ -26,7 +27,15 @@ public interface NetLogo {
   boolean isNetLogoException(Throwable exception);
   Object report(String variable) throws Exception;
   void setGlobal(String variable,Object value) throws Exception;
+  //void setGlobalArray(String variable,Object[] array) throws Exception;
   //void setRandomSeed(int seed) throws Exception;
   void dispose() throws Exception;
   ClassLoader getNetLogoClassLoader();
 }
+
+
+
+
+
+
+
