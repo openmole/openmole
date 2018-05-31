@@ -150,27 +150,30 @@ object DocumentationPages {
       runPages ++
       explorePages ++
       scalePages ++
-      advancedPages ++ Seq(run, explore, scale, gui, market, commandOptions)
+      advancedPages ++
+      Seq(language, developers, run, explore, scale, advancedConcepts, tutorials, netLogo, community, gui, market, commandOptions)
 
   lazy val gui = DocumentationPage.fromScalatex(name = "GUI", content = scalatex.documentation.GUI)
   lazy val market = DocumentationPage.fromScalatex(name = "Market", content = scalatex.documentation.Market)
   lazy val commandOptions = DocumentationPage.fromScalatex(name = "Command Options", content = scalatex.documentation.CommandOptions)
 
   // Language
-  def languagePages = developersPages ++ Seq(fileManagement, hook, language, scalaFunction, source, transition)
+  lazy val language = DocumentationPage.fromScalatex(name = "Language", content = scalatex.documentation.language.Language)
+
+  def languagePages = developersPages ++ Seq(fileManagement, hook, scalaFunction, source, transition)
 
   lazy val fileManagement = DocumentationPage.fromScalatex(name = "File Management", content = scalatex.documentation.language.FileManagement)
   lazy val hook = DocumentationPage.fromScalatex(name = "Hook", content = scalatex.documentation.language.Hook)
-  lazy val language = DocumentationPage.fromScalatex(name = "Language", content = scalatex.documentation.language.Language)
   lazy val scalaFunction = DocumentationPage.fromScalatex(name = "Scala Function", content = scalatex.documentation.language.ScalaFunction)
   lazy val source = DocumentationPage.fromScalatex(name = "Source", content = scalatex.documentation.language.Source)
   lazy val transition = DocumentationPage.fromScalatex(name = "Transition", content = scalatex.documentation.language.Transition)
 
   // Developers
-  def developersPages = Seq(capsule, developers, console, moleTask, pluginDevelopment, serverRESTAPI, webServer)
+  lazy val developers = DocumentationPage.fromScalatex(name = "Developers", content = scalatex.documentation.language.developers.Developers)
+
+  def developersPages = Seq(capsule, console, moleTask, pluginDevelopment, serverRESTAPI, webServer)
 
   lazy val capsule = DocumentationPage.fromScalatex(name = "Capsule", content = scalatex.documentation.language.developers.Capsule)
-  lazy val developers = DocumentationPage.fromScalatex(name = "Developers", content = scalatex.documentation.language.developers.Developers)
   lazy val console = DocumentationPage.fromScalatex(name = "Console", content = scalatex.documentation.language.developers.Console)
   lazy val moleTask = DocumentationPage.fromScalatex(name = "Mole Task", content = scalatex.documentation.language.developers.MoleTask)
   lazy val pluginDevelopment = DocumentationPage.fromScalatex(name = "Plugin Development", content = scalatex.documentation.language.developers.PluginDevelopment)
@@ -178,6 +181,8 @@ object DocumentationPages {
   lazy val webServer = DocumentationPage.fromScalatex(name = "WebServer", content = scalatex.documentation.language.developers.WebServer)
 
   // Run
+  lazy val run = DocumentationPage.fromScalatex(name = "Run", content = scalatex.documentation.run.Run)
+
   def runPages = Seq(care, container, java, netLogo, packagedCCplusplus, packagedPython, r, scala)
 
   lazy val care = DocumentationPage.fromScalatex(name = "CARE", content = scalatex.documentation.run.CARE)
@@ -187,30 +192,33 @@ object DocumentationPages {
   lazy val packagedCCplusplus = DocumentationPage.fromScalatex(name = "Packaged C++", content = scalatex.documentation.run.PackagedCCplusplus)
   lazy val packagedPython = DocumentationPage.fromScalatex(name = "Packaged Python", content = scalatex.documentation.run.PackagedPython)
   lazy val r = DocumentationPage.fromScalatex(name = "R", content = scalatex.documentation.run.R)
-  lazy val run = DocumentationPage.fromScalatex(name = "Run", content = scalatex.documentation.run.Run)
   lazy val scala = DocumentationPage.fromScalatex(name = "Scala", content = scalatex.documentation.run.Scala)
 
   // Explore
+  lazy val explore = DocumentationPage.fromScalatex(name = "Explore", content = scalatex.documentation.explore.Explore)
+
   def explorePages = Seq(calibration, dataProcessing, directSampling, profile, pse)
 
   lazy val calibration = DocumentationPage.fromScalatex(name = "Calibration", content = scalatex.documentation.explore.Calibration)
   lazy val dataProcessing = DocumentationPage.fromScalatex(name = "Data Processing", content = scalatex.documentation.explore.DataProcessing)
   lazy val directSampling = DocumentationPage.fromScalatex(name = "Direct Sampling", content = scalatex.documentation.explore.DirectSampling)
-  lazy val explore = DocumentationPage.fromScalatex(name = "Explore", content = scalatex.documentation.explore.Explore)
   lazy val profile = DocumentationPage.fromScalatex(name = "Profile", content = scalatex.documentation.explore.Profile)
   lazy val pse = DocumentationPage.fromScalatex(name = "PSE", content = scalatex.documentation.explore.PSE)
 
   // Scale
+  lazy val scale = DocumentationPage.fromScalatex(name = "Scale", content = scalatex.documentation.scale.Scale)
+
   def scalePages = Seq(cluster, egi, island, multithread, ssh)
 
   lazy val cluster = DocumentationPage.fromScalatex(name = "Cluster", content = scalatex.documentation.scale.Cluster)
   lazy val egi = DocumentationPage.fromScalatex(name = "EGI", content = scalatex.documentation.scale.EGI)
   lazy val island = DocumentationPage.fromScalatex(name = "Island", content = scalatex.documentation.scale.Island)
   lazy val multithread = DocumentationPage.fromScalatex(name = "Multithread", content = scalatex.documentation.scale.Multithread)
-  lazy val scale = DocumentationPage.fromScalatex(name = "Scale", content = scalatex.documentation.scale.Scale)
   lazy val ssh = DocumentationPage.fromScalatex(name = "SSH", content = scalatex.documentation.scale.SSH)
 
   // Advanced Concepts
+  lazy val advancedConcepts = DocumentationPage.fromScalatex(name = "AdvancedConcepts", content = scalatex.documentation.advancedConcepts.AdvancedConcepts)
+
   def advancedPages = gaPages :+ resumableWorkflow
 
   lazy val resumableWorkflow = DocumentationPage.fromScalatex(name = "Resumable Workflow", content = scalatex.documentation.advancedConcepts.ResumableWorkflow)
@@ -222,11 +230,9 @@ object DocumentationPages {
   lazy val stochasticityManagement = DocumentationPage.fromScalatex(name = "Stochasticity Management", content = scalatex.documentation.advancedConcepts.GA.StochasticityManagement)
 
   // Tutorials
-  def tutoPages =
-    gettingStartedPages ++
-      netLogoPages :+ tutorial
+  lazy val tutorials = DocumentationPage.fromScalatex(name = "Tutorials", content = scalatex.tutorials.Tutorials)
 
-  lazy val tutorial = DocumentationPage.fromScalatex(name = "Tutorial", content = scalatex.tutorials.Tutorial)
+  def tutoPages = gettingStartedPages ++ netLogoPages
 
   // Getting Started
   def gettingStartedPages = Seq(stepByStepIntro, launchTuto, exploreTuto)
@@ -243,6 +249,8 @@ object DocumentationPages {
   lazy val simpleSAFire = DocumentationPage.fromScalatex(name = "Simple SA Fire", content = scalatex.tutorials.netLogo.SimpleSAFire)
 
   // Community
+  lazy val community = DocumentationPage.fromScalatex(name = "Community", content = scalatex.community.Community)
+
   def communityPages = Seq(communications, howToContribute, partner, training, whoWeAre)
 
   lazy val communications = DocumentationPage.fromScalatex(name = "Communications", content = scalatex.community.Communications)
