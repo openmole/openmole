@@ -70,11 +70,11 @@ object SideMenu {
   def fromStrings(title: String, stringMenus: String*) =
     SideMenu(preText = title, links = stringMenus.map { a ⇒ Link(a, Link.intern(a)) })
 
-  val model = SideMenu(DocumentationPages.runPages, classIs(btn ++ btn_primary), "Available tasks")
+  val run = SideMenu(DocumentationPages.runPages, classIs(btn ++ btn_primary), "Available tasks")
 
-  val method = SideMenu(DocumentationPages.explorePages, classIs(btn ++ btn_primary), "Available methods")
+  val explore = SideMenu(DocumentationPages.explorePages, classIs(btn ++ btn_primary), "Available methods")
 
-  val environment = SideMenu(DocumentationPages.scalePages, classIs(btn ++ btn_primary), "Available environments")
+  val scale = SideMenu(DocumentationPages.scalePages, classIs(btn ++ btn_primary), "Available environments")
 
   val more = SideMenu(
     Seq(

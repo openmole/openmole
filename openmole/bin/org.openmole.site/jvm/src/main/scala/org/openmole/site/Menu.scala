@@ -49,13 +49,13 @@ object Menu {
               (sitePage match {
                 case stepPage: StepPage ⇒
                   Seq(
-                    li(pageLinkButton("MODELS", DocumentationPages.model, false, Seq(classIs(btn ++ btn_default)))),
-                    li(pageLinkButton("METHODS", DocumentationPages.method, false, Seq(classIs(btn ++ btn_default)))),
-                    li(pageLinkButton("ENVIRONMENTS", DocumentationPages.environment, false, Seq(classIs(btn ++ btn_default))))(paddingRight := 100)
+                    li(pageLinkButton("MODELS", DocumentationPages.run, false, Seq(classIs(btn ++ btn_default)))),
+                    li(pageLinkButton("METHODS", DocumentationPages.explore, false, Seq(classIs(btn ++ btn_default)))),
+                    li(pageLinkButton("ENVIRONMENTS", DocumentationPages.scale, false, Seq(classIs(btn ++ btn_default))))(paddingRight := 100)
                   )
                 case _ ⇒ Seq(li)
               }),
-              li(innerLink(DocumentationPages.docSiteMap, "DOC"), liStyle),
+              li(innerLink(DocumentationPages.siteMap, "DOC"), liStyle),
               li(outerLink("DEMO", shared.link.demo), liStyle),
               li(outerLink("FORUM", shared.link.mailingList), liStyle),
               li(divLinkButton(div(maxWidth := 140)(span("DOWNLOAD"), span(version.value, fontSize := "10px", paddingLeft := 7)), Resource.script.openmole.file, classIs(btn ++ btn_primary))),
