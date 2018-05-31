@@ -227,7 +227,7 @@ object Application extends JavaLogger {
         }
         else {
           Services.withServices(workspaceDirectory, passwordString, config.proxyURI) { services ⇒
-            val server = new RESTServer(config.port, config.hostName, services)
+            val server = new RESTServer(config.port, config.hostName, services, config.httpSubDirectory)
             server.run()
           }
           Console.ExitCodes.ok
