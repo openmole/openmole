@@ -184,7 +184,7 @@ object DocumentationPages {
   lazy val container = DocumentationPage.fromScalatex(name = "Container", content = scalatex.documentation.run.Container)
   lazy val java = DocumentationPage.fromScalatex(name = "Java", content = scalatex.documentation.run.Java)
   lazy val netLogo = DocumentationPage.fromScalatex(name = "NetLogo", content = scalatex.documentation.run.NetLogo)
-  lazy val packagedCCplusplus = DocumentationPage.fromScalatex(name = "Packaged C++", content = scalatex.documentation.run.PackagedCCplusplus)
+  lazy val packagedCCplusplus = DocumentationPage.fromScalatex(name = "PackagedCCplusplus", content = scalatex.documentation.run.PackagedCCplusplus)
   lazy val packagedPython = DocumentationPage.fromScalatex(name = "Packaged Python", content = scalatex.documentation.run.PackagedPython)
   lazy val r = DocumentationPage.fromScalatex(name = "R", content = scalatex.documentation.run.R)
   lazy val run = DocumentationPage.fromScalatex(name = "Run", content = scalatex.documentation.run.Run)
@@ -207,7 +207,7 @@ object DocumentationPages {
   lazy val egi = DocumentationPage.fromScalatex(name = "EGI", content = scalatex.documentation.scale.EGI)
   lazy val island = DocumentationPage.fromScalatex(name = "Island", content = scalatex.documentation.scale.Island)
   lazy val multithread = DocumentationPage.fromScalatex(name = "Multithread", content = scalatex.documentation.scale.Multithread)
-  lazy val scale = DocumentationPage.fromScalatex(name = "Scale", content = scalatex.documentation.scale.Scale)
+  lazy val scale = DocumentationPage.fromScalatex(name = "Environments", content = scalatex.documentation.scale.Scale)
   lazy val ssh = DocumentationPage.fromScalatex(name = "SSH", content = scalatex.documentation.scale.SSH)
 
   // Advanced Concepts
@@ -243,7 +243,9 @@ object DocumentationPages {
   lazy val simpleSAFire = DocumentationPage.fromScalatex(name = "Simple SA Fire", content = scalatex.tutorials.netLogo.SimpleSAFire)
 
   // Community
-  def communityPages = Seq(communications, howToContribute, partner, training, whoWeAre)
+  def communityPages = Seq(communications, howToContribute, partner, training, whoWeAre, OMcommunity)
+
+  lazy val OMcommunity = DocumentationPage.fromScalatex(name = "Community", scalatex.community.OMCommunity)
 
   lazy val communications = DocumentationPage.fromScalatex(name = "Communications", content = scalatex.community.Communications)
   lazy val howToContribute = DocumentationPage.fromScalatex(name = "How To Contribute", content = scalatex.community.HowToContribute)
