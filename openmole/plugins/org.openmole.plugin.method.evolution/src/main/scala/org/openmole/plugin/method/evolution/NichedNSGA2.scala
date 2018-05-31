@@ -11,6 +11,7 @@ import mgo.niche._
 import monocle.macros._
 import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.domain._
+import org.openmole.plugin.method.evolution.NichedNSGA2.NichedElement
 
 object NichedNSGA2Algorithm {
 
@@ -533,6 +534,39 @@ object NichedNSGA2 {
 
         WorkflowIntegration.StochasticGA.toEvolutionWorkflow(integration)
     }
+
+}
+
+object NichedNSGA2Evolution {
+
+  import org.openmole.core.dsl._
+  import org.openmole.core.workflow.puzzle._
+
+  def apply(
+    evaluation:   Puzzle,
+    termination:  OMTermination,
+    niche:        Seq[NichedElement],
+    genome:       Genome,
+    objectives:   Objectives,
+    nicheSize:    Int,
+    stochastic:   OptionalArgument[Stochastic] = None,
+    parallelism:  Int                          = 1,
+    distribution: EvolutionPattern             = SteadyState()) =
+    EvolutionPattern.build(
+      algorithm =
+        NichedNSGA2(
+          niche = niche,
+          genome = genome,
+          nicheSize = nicheSize,
+          objectives = objectives,
+          stochastic = stochastic
+        ),
+      evaluation = evaluation,
+      termination = termination,
+      stochastic = stochastic,
+      parallelism = parallelism,
+      distribution = distribution
+    )
 
 }
 

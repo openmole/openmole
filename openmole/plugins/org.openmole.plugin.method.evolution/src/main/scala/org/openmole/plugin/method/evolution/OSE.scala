@@ -374,3 +374,36 @@ object OSE {
   }
 
 }
+
+object OSEEvolution {
+
+  import org.openmole.core.dsl._
+  import org.openmole.core.workflow.puzzle._
+
+  def apply(
+    origin:       Seq[OSE.OriginAxe],
+    objectives:   Seq[OSE.FitnessPattern],
+    evaluation:   Puzzle,
+    termination:  OMTermination,
+    mu:           Int                          = 200,
+    genome:       Genome                       = Seq(),
+    stochastic:   OptionalArgument[Stochastic] = None,
+    parallelism:  Int                          = 1,
+    distribution: EvolutionPattern             = SteadyState()) =
+    EvolutionPattern.build(
+      algorithm =
+        OSE(
+          origin = origin,
+          genome = genome,
+          objectives = objectives,
+          stochastic = stochastic,
+          mu = mu
+        ),
+      evaluation = evaluation,
+      termination = termination,
+      stochastic = stochastic,
+      parallelism = parallelism,
+      distribution = distribution
+    )
+
+}

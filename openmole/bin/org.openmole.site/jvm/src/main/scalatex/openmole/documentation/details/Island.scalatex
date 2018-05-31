@@ -53,35 +53,22 @@
 
 
   @br @hl.openmole("""
-  val evolution =
-    SteadyStateEvolution(
-      // Definition of the optimisation algorithm
-      // mu is the size of the population
-      // genome is the inputs prototype and their variation ranges
-      // objectives are the objectives to minimise
-      algorithm =
-        NSGA2(
-          mu = 100,
-          genome = Seq(x in (0.0, 1.0), y in (0.0, 1.0)),
-          objectives = Seq(o1, o2)
-        ),
-      evaluation = model,
-      termination = 100
-    )
-
   // Generate a workflow that orchestrates 100 concurrent islands.
-  // The workflow stops when 10,000 islands have completed.
-  val island =
-    IslandEvolution(
-      evolution,
+  // The workflow stops when 10,000 islands of 5 minutes have completed.
+  val evolution =
+    NSGA2Evolution(
+      genome = Seq(x in (0.0, 1.0), y in (0.0, 1.0)),
+      objectives = Seq(o1, o2)
+      evaluation = model,
+      termination = 10000,
       parallelism = 100,
-      termination = 10000
+      distribution = Island(5 minutes)
     )
 
   // Definition of a hook to save the population of solutions on the local machine running OpenMOLE
-  val savePopulation = SavePopulationHook(island, workDirectory / "evolution")
+  val savePopulation = SavePopulationHook(evolution, workDirectory / "evolution")
 
   // Construction of the complete mole with the execution environment, and the hook.
   // Here the generated workflow will run using 4 threads of the local machine.
-  (island on LocalEnvironment(4) hook savePopulation)""", header = model)
+  (evolution on LocalEnvironment(4) hook savePopulation)""", header = model)
 

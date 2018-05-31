@@ -1,0 +1,33 @@
+@import org.openmole.site._
+@import org.openmole.site.tools._
+@import org.openmole.site.stylesheet._
+@import DocumentationPages._
+
+
+
+
+@h2{Launching parameters}
+
+OpenMOLE proposes several launching options. Execute @hl.highlight("openmole -h", "plain") to list all
+the available options.
+
+
+
+
+@h2{OpenMOLE Editor on remote machine}
+
+To run OpenMOLE on a remote machine using a web browser, you should run:
+@hl.highlight("openmole --remote --port portnumber", "plain"). On the first run you'll be asked to set a
+password, then you can remotely connect to OpenMOLE using the url https://remotemachine:portnumber -
+@b("https:// is important"). When you connect you'll be prompted for the password you've entered previously.
+
+@h2{OpenMOLE Headless mode}
+
+OpenMOLE proposes a headless mode for running scripts. You can enable it thanks to the -s option:
+@hl.highlight("./openmole -s /path/to/you/mole/script", "plain")
+@br
+In that case OpenMOLE still asks for your preferences cyphering password. To provide it at launch time
+use the -pw option: @hl.highlight("./openmole -s /path/to/your/mole/script --password password", "plain").
+A better practice is to write this password in a file readable by OpenMOLE only and use
+@hl.highlight("./openmole -s /path/to/your/mole/script --password-file password.txt", "plain").
+
