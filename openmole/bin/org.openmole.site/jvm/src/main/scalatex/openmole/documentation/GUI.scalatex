@@ -195,6 +195,6 @@ Once uploaded, the plugin appears in the list.
 
 @break
 
-@img(src := Resource.img.guiGuide.pluginDevelopment.file, center(100))
+@img(src := Resource.img.guiGuide.plugin.file, center(100))
 
 @break

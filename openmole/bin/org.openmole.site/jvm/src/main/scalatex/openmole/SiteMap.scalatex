@@ -16,18 +16,18 @@ There are three main steps in an OpenMOLE use case
         @a("1. Models", href := DocumentationPages.run.file)
 
         @ul
-            @SiteMap.siteMapSection(DocumentationPages.modelPages)
+            @sitemap.siteMapSection(DocumentationPages.runPages)
 
     @li
-        @a("2. Methods", href := DocumentationPages.method.file)
+        @a("2. Methods", href := DocumentationPages.explore.file)
 
         @ul
-            @SiteMap.siteMapSection(DocumentationPages.methodPages)
+            @sitemap.siteMapSection(DocumentationPages.explorePages)
 
     @li
         @a("3. Environment", href := DocumentationPages.scale.file)
         @ul
-            @SiteMap.siteMapSection(DocumentationPages.environmentPages)
+            @sitemap.siteMapSection(DocumentationPages.scalePages)
 
 
 @h2{Tutorials}
@@ -35,7 +35,7 @@ There are three main steps in an OpenMOLE use case
 The @a("tutorial page", href:= DocumentationPages.tutorial.file) gathers the tutorials and the Market Place with use cases.
 Tutorials available so far:
 @ul
-    @SiteMap.siteMapSection(DocumentationPages.tutorialPages)
+    @sitemap.siteMapSection(DocumentationPages.tutoPages)
 
 @h2
     Details Pages
@@ -43,29 +43,29 @@ Tutorials available so far:
 These pages focus on a specific aspect of experimenting with OpenMOLE, from scientific methods to code embedding.
 
 @ul
-    @SiteMap.siteMapSection(DocumentationPages.detailsPages)
+    @sitemap.siteMapSection(DocumentationPages.advancedPages)
 
 
 @h2{Advanced concepts}
 
-The @a("advanced concepts", href:=DocumentationPages.advancedConcepts.file) page  gathers Technical documentation and Development Documentation
+The @a("advanced concepts", href:=DocumentationPages.developers.file) page  gathers Technical documentation and Development Documentation
 @div(textIndent := "2em")
 
 @h4
     Technical Documentation
 
 @ul
-    @SiteMap.siteMapSection(DocumentationPages.advancedPages)
+    @sitemap.siteMapSection(DocumentationPages.advancedPages)
 
 @h4
     Developers Documentation
 
 @ul
-    @SiteMap.siteMapSection(DocumentationPages.developmentPages)
+    @sitemap.siteMapSection(DocumentationPages.developersPages)
 
 
 @h2
     Community and Communication
 
 @ul
-    @SiteMap.siteMapSection(DocumentationPages.communityCommunicationPages)
+    @sitemap.siteMapSection(DocumentationPages.communityPages)

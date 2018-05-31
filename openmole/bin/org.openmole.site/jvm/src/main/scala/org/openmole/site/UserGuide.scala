@@ -62,7 +62,7 @@ object UserGuide {
   def currentStep(current: Page): SitePage = {
 
     val currentStep = {
-      if (DocumentationPages.topPages.contains(current)) {
+      if (DocumentationPages.docPages.contains(current)) {
         if ((DocumentationPages.runPages :+ DocumentationPages.run).contains(current)) {
           val name = if (current == firstModel) "" else current.name
           StepPage(

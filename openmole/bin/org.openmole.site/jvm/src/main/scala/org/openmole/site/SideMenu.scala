@@ -79,8 +79,7 @@ object SideMenu {
   val more = SideMenu(
     Seq(
       DocumentationPages.language,
-      DocumentationPages.gui,
-      DocumentationPages.advancedConcepts
+      DocumentationPages.gui
     ), classIs(btn ++ btn_default), "See also", true
   )
 
