@@ -109,6 +109,75 @@ OpenMOLE makes simple the inclusion of your own Java code in a workflow. Since t
 @p
   This workflow will call the function @i{hello} with both arguments varying from 0 to 10 and save the results in a CSV file. Variables @i{arg1} and @i{arg2} are specified in the task output so that they are also written to the CSV file by the hook (see @aa("Hooks", href := DocumentationPages.hook.file))
 
+    @h2("Example of Java code working with files")
+
+  @p
+    When a task needs to access (read from or write to) external files, OpenMOLE needs to know it so it can pass them around to distant computing nodes. Let's consider another "Hello World" code Hello.java. This program reads the content of a file and writes it to another file.
+
+    @hl.openmole("""
+    package hello;
+
+    import java.io.*;
+
+    public class Hello {
+
+      public static void run(int arg, File input, File output) throws IOException {
+        //Read the input file
+        String content = readFileAsString(input);
+        PrintStream myStream = new PrintStream(new FileOutputStream(output));
+        try {
+          myStream.println(content + "  " + arg);
+        } finally {
+          myStream.close();
+        }
+      }
+
+      private static String readFileAsString(File file) throws IOException {
+        byte[] buffer = new byte[(int) file.length()];
+        BufferedInputStream f = null;
+        try {
+          f = new BufferedInputStream(new FileInputStream(file));
+          f.read(buffer);
+        } finally {
+          if (f != null) try { f.close(); } catch (IOException ignored) { }
+        }
+        return new String(buffer);
+      }
+    }""")
+
+  @p
+    You can compile it and package as "Hello.jar" in the same manner as the previous example. For the program to access external files, give them to the task as @i{inputFile}.
+
+    @hl.openmole("""
+    val proto1 = Val[Int]
+    val inputFile = Val[File]
+    val outputFile = Val[File]
+
+    //Defines the scala task as a launcher of the hello executable
+    val javaTask =
+    ScalaTask("val outputFile = newFile(); hello.Hello.run(proto1, inputFile, outputFile)") set (
+      libraries += workDirectory / "Hello.jar",
+      inputs += (proto1, inputFile),
+      outputs += (proto1, outputFile),
+      inputFile := workDirectory / "input.txt"
+    )
+
+    //Save the output file locally
+    val copyHook =
+      CopyFileHook(
+        outputFile,
+        workDirectory / "out-${proto1}.txt"
+      )
+
+    DirectSampling(
+      evaluation = javaTask hook copyHook,
+      sampling = proto1 in (0 to 10)
+    )""")
+
+  @p
+    For this example to work you should create a file named "input.txt" in the work directory of your project.
+
+
 
 @h2("Building an OSGi bundle with Maven")
 
@@ -243,78 +312,4 @@ Once this code is added, you can produce the OSGi bundle by simply executing a b
     """)
 
     @p The static method @em{getClassLoader()}, is a simple code that returns the class loader of the class TiffReaderTask.
-
-    @h2("Working with files")
-
-
-  @p
-    When a task needs to access (read from or write to) external files, OpenMOLE needs to know it so it can pass them around to distant computing nodes.
-
-  @todo
-    Is there a generic section explaining the following? This seems common to all tasks and shouldn't belong to this page
-
-  @p Let's consider another "Hello World" code Hello.java. This program reads the content of a file and writes it to another file.
-
-    @hl.highlight("""
-    package hello;
-
-    import java.io.*;
-
-    public class Hello {
-
-      public static void run(int arg, File input, File output) throws IOException {
-        //Read the input file
-        String content = readFileAsString(input);
-        PrintStream myStream = new PrintStream(new FileOutputStream(output));
-        try {
-          myStream.println(content + "  " + arg);
-        } finally {
-          myStream.close();
-        }
-      }
-
-      private static String readFileAsString(File file) throws IOException {
-        byte[] buffer = new byte[(int) file.length()];
-        BufferedInputStream f = null;
-        try {
-          f = new BufferedInputStream(new FileInputStream(file));
-          f.read(buffer);
-        } finally {
-          if (f != null) try { f.close(); } catch (IOException ignored) { }
-        }
-        return new String(buffer);
-      }
-    }""", "java")
-
-  @p
-    You can compile it and package as "Hello.jar" in the same manner as the previous example. For the program to access external files, give them to the task as @i{inputFile}.
-
-    @hl.openmole("""
-    val proto1 = Val[Int]
-    val inputFile = Val[File]
-    val outputFile = Val[File]
-
-    //Defines the scala task as a launcher of the hello executable
-    val javaTask =
-    ScalaTask("val outputFile = newFile(); hello.Hello.run(proto1, inputFile, outputFile)") set (
-      libraries += workDirectory / "Hello.jar",
-      inputs += (proto1, inputFile),
-      outputs += (proto1, outputFile),
-      inputFile := workDirectory / "input.txt"
-    )
-
-    //Save the output file locally
-    val copyHook =
-      CopyFileHook(
-        outputFile,
-        workDirectory / "out-${proto1}.txt"
-      )
-
-    DirectSampling(
-      evaluation = javaTask hook copyHook,
-      sampling = proto1 in (0 to 10)
-    )""")
-
-  @p
-    For this example to work you should create a file named "input.txt" in the work directory of your project.
 
