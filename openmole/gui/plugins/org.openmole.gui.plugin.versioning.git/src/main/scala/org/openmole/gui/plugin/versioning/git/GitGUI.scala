@@ -24,9 +24,7 @@ import org.openmole.gui.ext.tool.client.OMPost
 import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
 import autowire._
-import org.openmole.gui.ext.tool.client
 import org.scalajs.dom.raw.HTMLElement
-import scaladget.bootstrapnative.SelectableButtons
 
 import scala.concurrent.Future
 import scala.scalajs.js.annotation._
@@ -49,17 +47,22 @@ class GitGUI(cloneIn: SafePath) extends VersioningGUIPlugin {
   import rx._
 
   val inputStyle: ModifierSeq = Seq(width := 150)
-  val repositoryUrlInput = inputTag("")(placeholder := "Repository URL", inputStyle).render
-  val repositoryUrlButton = button("clone", onclick := { () ⇒ clone(repositoryUrlInput.value, cloneIn).foreach { x ⇒ println(x) } }).render
+  val repositoryUrlInput = inputTag("")(placeholder := "Repository URL", inputStyle, onsubmit := {
+    () ⇒
+      cloneGIT
+      false
+  }).render
+
+  val repositoryUrlButton = button("clone", btn_default, onclick := { () ⇒
+    cloneGIT.foreach { x ⇒
+      println(x)
+    }
+  })
 
   lazy val panel: TypedTag[HTMLElement] = div(
-    hForm(Seq(paddingTop := 20, width := 500).toMS)(repositoryUrlInput, repositoryUrlButton)
+    hForm(Seq(paddingTop := 20, width := 500).toMS)(repositoryUrlInput, repositoryUrlButton.render).render
   )
 
-  def clone(
-    url:    String,
-    folder: SafePath) =
-    OMPost()[GitAPI].clone(
-      url, folder).call()
+  def cloneGIT: Future[SafePath] = OMPost()[GitAPI].cloneGIT(repositoryUrlInput.value, cloneIn).call()
 
 }

@@ -40,17 +40,21 @@ class GitApiImpl(s: Services) extends GitAPI {
 
   implicit val context = org.openmole.gui.ext.data.ServerFileSystemContext.project
 
-  def clone(url: String, folder: SafePath): SafePath = {
+  def cloneGIT(url: String, folder: SafePath): SafePath = {
 
-    println("Clone ", url, " to ", folder.toString)
+    println("cloneGIT " + url)
+    val folderF: java.io.File = folder
+    println("Clone ", url, " to ", folderF.getAbsolutePath)
 
     try {
-      val git = Git.cloneRepository().setURI(url).setDirectory(folder).call()
+      val git = Git.cloneRepository().setURI(url).setDirectory(folderF).call()
     }
     catch {
-      case gae: GitAPIException        ⇒ println("GIT api Exception")
       case ire: InvalidRemoteException ⇒ println("GIT remote Exception")
       case te: TransportException      ⇒ println("GIT transport Exception")
+      case gae: GitAPIException        ⇒ println("GIT api Exception")
+      case x: Any                      ⇒ println("Any: " + x)
+      // case x: Throwable                ⇒ println("unknown exception " + x.getMessage + ":::\n" + x.getStackTrace.mkString("\n"))
     }
 
     folder
