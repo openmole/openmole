@@ -1,11 +1,16 @@
 @import org.openmole.site.tools._
 @import org.openmole.site._
 
-OpenMOLE makes it simple to include your own Java code in a workflow. Since the Scala compiler can compile Java code, Java code can be directly fed to the ScalaTask as shown in @aa("the ScalaTask example", href := DocumentationPages.scala.file). Additionally, a compiled Java program can be encapsulated in a ScalaTask as a jar file through the @hl.openmoleNoTest("libraries") parameter as below.
+@h2("Making ScalaTask embedding Java code")
+
+
+OpenMOLE makes simple the inclusion of your own Java code in a workflow. Since the Scala compiler can compile Java code, Java code can be directly fed to the ScalaTask as shown in @aa("the ScalaTask example", href := DocumentationPages.scala.file). Additionally, a compiled Java program can be encapsulated in a ScalaTask as a jar file through the @hl.openmoleNoTest("libraries") parameter as below.
 
 @p
-  /!\: This tutorial works for simple Java programs. For more ambitious developments, you should absolutely consider embedding your code in an @a("OpenMOLE plugin", href := DocumentationPages.pluginDevelopment.file). It is pretty strait forward since they are simple OSGi bundles.
+  /!\: In this page, there are two example to use a code developed in Java from OpenMOLE. The first one works for simple Java programs and the second one for a more complex program that requires dependencies managed by Maven. In order to run more complex programs, OSGi bundles are necessary to embed all the necessary classes and functions.
+  For more ambitious developments, it is recommended to consider embedding your code in an @a("OpenMOLE plugin", href := DocumentationPages.pluginDevelopment.file). It is pretty straight forward since they are simple @a("OSGi", href:=shared.link.osgi) bundles.
 
+@h2{Simple Task for Java}
 
 @p
   Let us consider the simple code @em{Hello.java} in a directory named @i{hello} @("(to respect Java's package structure)"):
@@ -104,14 +109,151 @@ OpenMOLE makes it simple to include your own Java code in a workflow. Since the 
 @p
   This workflow will call the function @i{hello} with both arguments varying from 0 to 10 and save the results in a CSV file. Variables @i{arg1} and @i{arg2} are specified in the task output so that they are also written to the CSV file by the hook (see @aa("Hooks", href := DocumentationPages.hook.file))
 
-@sect{Working with files}
 
-  @todo
-    Is there a generic section explaining the following? This seems common to all tasks and shouldn't belong to this page]
+@h2("Building an OSGi bundle with Maven")
+
+@p
+OpenMOLE can use complex Java libraries as they are packaged as OSGi bundles. OSGi is a set of specifications whose aim is to enable the possibility to define a platform that can be managed dynamically. OSGi components are named "Bundle". Maven, that manages Java project life-cycle and dependencies, has a plugin (maven-shade) that can produce OSGi bundles. In order to allow the use of this plugin, you have to configure it in the plugin list of the maven project file. In the @em{<plugins> </plugins>} section, you have to add the following code.
+@hl.xml("""
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-shade-plugin</artifactId>
+    <version>2.4.3</version>
+    <executions>
+        <execution>
+            <goals>
+                <goal>shade</goal>
+            </goals>
+            <configuration>
+                <filters>
+                    <filter>
+                        <artifact>*:*</artifact>
+                        <excludes>
+                            <exclude>META-INF/*.SF</exclude>
+                            <exclude>META-INF/*.DSA</exclude>
+                            <exclude>META-INF/*.RSA</exclude>
+                        </excludes>
+                    </filter>
+                </filters>
+                <shadedArtifactAttached>true</shadedArtifactAttached>
+                <!-- This bit merges the various META-INF/services files. -->
+                <transformers>
+                    <transformer
+                  implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
+                </transformers>
+            </configuration>
+        </execution>
+    </executions>
+</plugin>""")
+
+
+Once this code is added, you can produce the OSGi bundle by simply executing a build command (with @em{mvn install }for example), and it will be created into the @em{target} directory. The file is named name_of_youar_artifact-version-shaded.jar. You can now upload it into the OpenMOLE client and use it as described in the tutorial for simple Java code.
+
+@h2("Troubleshooting  using raster data from GeoTools")
+
+@p
+    Several libraries, such as GeoTools, use JAI library that embeds a provider mechanism to load the different functions. In order to use it properly, notably for calculation distribution it requires (1) to declare explicitly the use of JAI in the JAva code and (2) to ensure in the OpenMOLE script that all the classes are used in the same class loader. You can refer to a simple project that includes a very simple task that handles raster data in the  @a("following GitHub repository", href := "https://github.com/mbrasebin/test_geotools_openmole")
+
+
+@h3("Declaration of JAI")
+
+@p
+    In order to declare the JAI functions, a code has to be prepared such as following em{initJai()} method that is defined for a TiffReaderTask class.
+
+
+@hl.openmole("""
+    public static void initJAI() {
+         // Disable mediaLib searching that produces unwanted errors
+         // See https://www.java.net/node/666373
+         System.setProperty("com.sun.media.jai.disableMediaLib", "true");
+
+         // As the JAI jars are bundled in the geotools plugin, JAI initialization does not work,
+         // so we need to perform the tasks described here ("Initialization and automatic loading of registry objects"):
+         // http://docs.oracle.com/cd/E17802_01/products/products/java-media/jai/forDevelopers/jai-apidocs/javax/media/jai/OperationRegistry.html
+         OperationRegistry registry = JAI.getDefaultInstance().getOperationRegistry();
+         if (registry == null) {
+             System.out.println("geotools: error in JAI initialization. Cannot access default operation registry");
+         } else {
+             // Update registry with com.sun.media.jai.imageioimpl.ImageReadWriteSpi (only class listed javax.media.jai.OperationRegistrySpi)
+             // it would be safer to parse this file instead, but a JAI update is very unlikely as it has not been modified since 2005
+             try {
+                 new ImageReadWriteSpi().updateRegistry(registry);
+             } catch (IllegalArgumentException e) {
+                 // See #10652: IAE: A descriptor is already registered against the name "ImageRead" under registry mode "rendered"
+                 System.out.println("geotools: error in JAI/ImageReadWriteSpi initialization: "+e.getMessage());
+             }
+
+             // Update registry with GeoTools registry file
+             try (InputStream in = TiffReaderTask.class.getResourceAsStream("/META-INF/registryFile.jai")) {
+                 if (in == null) {
+                     System.out.println("geotools: error in JAI initialization. Cannot access META-INF/registryFile.jai");
+                 } else {
+                     registry.updateFromStream(in);
+                 }
+             } catch (IOException | IllegalArgumentException e) {
+                 System.out.println("geotools: error in JAI/GeoTools initialization: "+e.getMessage());
+             }
+         }
+
+         // Manual registering because plugin jar is not on application classpath
+         IIORegistry ioRegistry = IIORegistry.getDefaultInstance();
+         ClassLoader loader = TiffReaderTask.class.getClassLoader();
+
+         Iterator<Class<?>> categories = ioRegistry.getCategories();
+         while (categories.hasNext()) {
+             @SuppressWarnings("unchecked")
+             Iterator<IIOServiceProvider> riter = ServiceLoader.load((Class<IIOServiceProvider>) categories.next(), loader).iterator();
+             while (riter.hasNext()) {
+                 IIOServiceProvider provider = riter.next();
+                 System.out.println("Registering " + provider.getClass());
+                 ioRegistry.registerServiceProvider(provider);
+             }
+         }
+ }
+""", "java")
+
+@p
+    This function has simply to be called at the beginning of the task code. For example for the TiffReaderTask :
+    @hl.openmole("""
+       public static double readGeoTiff(File file) throws IOException {
+
+        System.out.println("initJAI start");
+        initJAI();
+        System.out.println("initJAI end");
+        //Do something ...
+    """, "java")
+
+@h3("Handling the class loader")
+
+@p
+    When defining the task on the OpenMOLE script, you have to ensure that all JAI classes are managed by the same class loader by using the dedicated function @em{withThreadClassLoader}. When using the Java code as a library, it requires some update on the script as follow (for example, for the TiffReaderTask) :
+
+    @hl.openmole("""
+        val GeoTifWriter = ScalaTask(
+          "
+          |import fr.openmole.geotools.tiff._
+          |withThreadClassLoader(TiffReaderTask.getClassLoader())(TiffWriterTask.write(fileIn, fileOut))".stripMargin
+          ) set (
+          libraries += workDirectory / "test-mupcity-openmole-0.0.1-SNAPSHOT-shaded.jar",
+          fileIn :=  workDirectory / "data" / "test.tif",
+          fileOut :=  workDirectory / "data" / "out.tif",
+          inputs += (fileIn, fileOut),
+          outputs += (fileIn, fileOut)
+        )
+    """)
+
+    @p The static method @em{getClassLoader()}, is a simple code that returns the class loader of the class TiffReaderTask.
+
+    @h2("Working with files")
+
+
   @p
     When a task needs to access (read from or write to) external files, OpenMOLE needs to know it so it can pass them around to distant computing nodes.
 
-  @p Let's consider another "hello world" code Hello.java. This program reads the content of a file and writes it to another file.
+  @todo
+    Is there a generic section explaining the following? This seems common to all tasks and shouldn't belong to this page
+
+  @p Let's consider another "Hello World" code Hello.java. This program reads the content of a file and writes it to another file.
 
     @hl.highlight("""
     package hello;
