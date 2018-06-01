@@ -311,6 +311,7 @@ object Utils extends JavaLogger {
   val openmoleFileName = "openmole.js"
   val depsFileName = "deps.js"
   val openmoleGrammarName = "openmole_grammar_template.js"
+  val openmoleGrammarMode = "mode-openmole.js"
 
   def updateIfChanged(file: File)(update: File ⇒ Unit)(implicit fileService: FileService, newFile: NewFile) = {
     import org.openmole.core.fileservice._
