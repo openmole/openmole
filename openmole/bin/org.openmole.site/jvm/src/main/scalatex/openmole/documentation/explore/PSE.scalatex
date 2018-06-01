@@ -59,6 +59,28 @@ PSE handles stochasticity in the sense that the selected pattern are estimated b
     behaviours.
 
 
+
+@break
+
+@h3{Typed signature}
+PSE method can be typed  likewise:
+@br@br
+@div(style:="text-align:center")
+    PSE :   (X → Y) → 𝓟(X)
+    @br
+        such that : PSE(M) = M(X)
+
+@br
+With M, the model, X , the Input space, Y, the output space, 𝓟(X) the power set of X ( i.e. every subset of X , including X and ∅ )
+@br
+In other words : this function takes a model M ( whose signature is (X→Y) ) , an element @i{y} of Y (y is the list of criterion value to reach) and  find a list of elements of X (noted @i{x}) such that, M(x) are Pareto dominant compared to every image of other elements of X by M , regarding criterion @i{y})
+
+
+
+
+@break
+
+
 @p
     PSE takes the following parameters:
 @ul

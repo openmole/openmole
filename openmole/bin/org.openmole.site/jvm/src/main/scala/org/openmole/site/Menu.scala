@@ -51,7 +51,7 @@ object Menu {
                   Seq(
                     li(pageLinkButton("RUN", DocumentationPages.run, false, Seq(classIs(btn ++ btn_default))))(paddingTop := 10),
                     li(pageLinkButton("EXPLORE", DocumentationPages.explore, false, Seq(classIs(btn ++ btn_default))))(paddingTop := 10),
-                    li(pageLinkButton("SCALE", DocumentationPages.scale, false, Seq(classIs(btn ++ btn_default))))(paddingRight := 150)(paddingTop := 10)
+                    li(pageLinkButton("SCALE", DocumentationPages.scale, false, Seq(classIs(btn ++ btn_default))))(paddingRight := 80)(paddingTop := 10)
                   )
                 case _ ⇒ Seq(li)
               }),

@@ -36,6 +36,7 @@ xjt
 @h2{OpenMOLE Concepts}
 
 There are three main steps in an OpenMOLE use case
+
 @ol
     @li
         @a("1. Models", href := DocumentationPages.run.file)

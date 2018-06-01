@@ -55,6 +55,22 @@ This method is not sensitive to the dimensionality of the model output space, as
  @br
  Single criterion calibration answers the question :  For a given target value of output o1, what is(are) the
  parameter set(s) (i, j , k) that produce the closest values of o1 to the target ?
+@break
+
+@h3{Typed signature}
+The single criterion calibration of a Model can be seen as a general function, whose signature can be typed, and be noted likewise:
+@br@br
+@div(style:="text-align:center")
+    Calibration@sub{single} (X → Y) → Y → X
+
+@br
+With X , the Input space, Y, the output space.
+@br
+In other words : this function takes a model ( whose signature is (X→Y)  since it transforms inputs into outputs) , an element @i{y} of Y (y is the criterion value to reach) and  find an element of X (this element noted @i{x} happens to be such that , M(@b{x}) is the "closest" to @i{y})
+
+
+
+
 
 @h2{Multi-criteria Calibration}
 
@@ -113,6 +129,25 @@ of your model outputs, which is not bad after all !
   we cannot find another parameter set that yields smaller distances for
   all the distances considered. The set of all these parameter sets is
   called the Pareto-front.
+
+@break
+
+
+@h3{Typed signature}
+The multi-criterion calibration of a Model signature can be typed  likewise:
+@br@br
+@div(style:="text-align:center")
+    Calibration@sub{multi}   :   (X → Y) → Y → [X]
+
+@br
+With X , the Input space, Y, the output space.
+@br
+In other words : this function takes a model M ( whose signature is (X→Y) ) , an element @i{y} of Y (y is the list of criterion value to reach) and  find a list of elements of X (noted @i{x}) such that M(x) are Pareto dominant compared to every image of other elements of X by M , regarding criterion @i{y})
+
+
+
+
+
 
 @h2{Calibration with OpenMOLE}
 
