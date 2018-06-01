@@ -49,9 +49,8 @@ object GUIServer {
     from / "fonts" copy to / "fonts"
     from / "img" copy to / "img"
 
-    Utils.expandDepsFile(from / "js" / Utils.depsFileName, from / "js" / Utils.openmoleGrammarName, to /> "js" / Utils.openmoleGrammarMode)
+    Utils.expandDepsFile(from / "js" / Utils.depsFileName, from / "js" / Utils.openmoleGrammarName, to /> "js" / Utils.depsFileName)
     Utils.openmoleFile(optimizedJS) copy (to /> "js" / Utils.openmoleFileName)
-    from / "js" / Utils.depsFileName copy (to /> "js" / Utils.depsFileName)
     to
   }
 
@@ -70,6 +69,7 @@ object GUIServer {
   def urlFile(implicit workspace: Workspace) = Utils.webUIDirectory() / "GUI.url"
 
   val servletArguments = "servletArguments"
+
   case class ServletArguments(
     services:           GUIServices,
     password:           Option[String],
@@ -108,7 +108,9 @@ class GUIServer(port: Int, localhost: Boolean, http: Boolean, services: GUIServi
 
   lazy val contextFactory = {
     val contextFactory = new org.eclipse.jetty.util.ssl.SslContextFactory()
+
     def keyStorePassword = "openmole"
+
     val ks = KeyStore(services.workspace.persistentDir /> "keystoregui", keyStorePassword)
     contextFactory.setKeyStore(ks.keyStore)
     contextFactory.setKeyStorePassword(keyStorePassword)
@@ -127,7 +129,9 @@ class GUIServer(port: Int, localhost: Boolean, http: Boolean, services: GUIServi
   val context = new WebAppContext()
   val applicationControl =
     ApplicationControl(
-      () ⇒ { exitStatus = GUIServer.Restart; stop() },
+      () ⇒ {
+        exitStatus = GUIServer.Restart; stop()
+      },
       () ⇒ stop()
     )
 
