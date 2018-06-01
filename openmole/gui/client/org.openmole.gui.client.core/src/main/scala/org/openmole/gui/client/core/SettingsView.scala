@@ -49,8 +49,9 @@ object SettingsView {
   private def alertPanel(warnMessage: String, route: String) = AlertPanel.string(
     warnMessage,
     () ⇒ {
-      fileDisplayer.tabs.saveAllTabs(() ⇒
-        dom.window.location.href = route)
+      fileDisplayer.tabs.saveAllTabs(() ⇒ {
+        CoreUtils.setRoute(route)
+      })
     },
     transform = CenterPagePosition
   )

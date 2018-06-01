@@ -311,6 +311,7 @@ object Utils extends JavaLogger {
   val openmoleFileName = "openmole.js"
   val depsFileName = "deps.js"
   val openmoleGrammarName = "openmole_grammar_template.js"
+  val openmoleGrammarMode = "mode-openmole.js"
 
   def updateIfChanged(file: File)(update: File ⇒ Unit)(implicit fileService: FileService, newFile: NewFile) = {
     import org.openmole.core.fileservice._
@@ -334,7 +335,7 @@ object Utils extends JavaLogger {
     }
   }
 
-  def openmoleFile(implicit workspace: Workspace, newFile: NewFile, fileService: FileService) = {
+  def openmoleFile(optimizedJS: Boolean)(implicit workspace: Workspace, newFile: NewFile, fileService: FileService) = {
     val jsPluginDirectory = webUIDirectory / "jsplugin"
     updateJsPluginDirectory(jsPluginDirectory)
 
@@ -343,7 +344,7 @@ object Utils extends JavaLogger {
     def update = {
       logger.info("Building GUI plugins ...")
       jsFile.delete
-      JSPack.link(jsPluginDirectory, jsFile)
+      JSPack.link(jsPluginDirectory, jsFile, optimizedJS)
     }
 
     if (!jsFile.exists) update

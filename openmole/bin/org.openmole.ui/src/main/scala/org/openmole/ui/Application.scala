@@ -87,6 +87,7 @@ object Application extends JavaLogger {
       http:                 Boolean         = false,
       browse:               Boolean         = true,
       proxyURI:             Option[String]  = None,
+      httpSubDirectory:     Option[String]  = None,
       args:                 List[String]    = Nil,
       extraHeader:          Option[File]    = None
     )
@@ -119,6 +120,7 @@ object Application extends JavaLogger {
       |[--remote] enable remote connection to the web interface
       |[--http] force http connection instead of https in remote mode for the web interface
       |[--no-browser] don't automatically launch the browser in GUI mode
+      |[--unoptimizedJS] do not optimize JS (do not use Google Closure Compiler)
       |[--extra-header path] specify a file containing a piece of html code to be inserted in the GUI html header file
       |[--load-workspace-plugins] load the plugins of the OpenMOLE workspace (these plugins are always loaded in GUI mode)
       |[--console-work-directory] specify the workDirectory variable in console mode (it is set to the current directory by default)
@@ -127,6 +129,7 @@ object Application extends JavaLogger {
       |[--mem memory] allocate more memory to the JVM (not supported on windows yes), for instance --mem 2G
       |[--logger-level level] set the level of logging (OFF, SEVERE, WARNING, INFO, CONFIG, FINE, FINER, FINEST, ALL)
       |[--proxy hostname] set the proxy to use to install containers or R packages, in the form http://myproxy.org:3128
+      |[--http-sub-directory] set the subdirectory for openmole app (for non-root path). No '/' is required (Example: "user1")
       |[--] end of options the remaining arguments are provided to the console in the args array
       |[-h | --help] print help""".stripMargin
 
@@ -153,11 +156,13 @@ object Application extends JavaLogger {
         case "--remote" :: tail                 ⇒ parse(tail, c.copy(remote = true))
         case "--http" :: tail                   ⇒ parse(tail, c.copy(http = true))
         case "--no-browser" :: tail             ⇒ parse(tail, c.copy(browse = false))
+        case "--unoptimizedJS" :: tail          ⇒ parse(tail, c.copy(unoptimizedJS = true))
         case "--extra-header" :: tail           ⇒ parse(dropArg(tail), c.copy(extraHeader = Some(new File(takeArg(tail)))))
         case "--reset" :: tail                  ⇒ parse(tail, c.copy(launchMode = Reset(initialisePassword = false)))
         case "--host-name" :: tail              ⇒ parse(tail.tail, c.copy(hostName = Some(tail.head)))
         case "--reset-password" :: tail         ⇒ parse(tail, c.copy(launchMode = Reset(initialisePassword = true)))
         case "--proxy" :: tail                  ⇒ parse(tail.tail, c.copy(proxyURI = Some(tail.head)))
+        case "--http-sub-directory" :: tail     ⇒ parse(tail.tail, c.copy(httpSubDirectory = Some(tail.head)))
         case "--" :: tail                       ⇒ parse(Nil, c.copy(args = tail))
         case "-h" :: tail                       ⇒ help(tail)
         case "--help" :: tail                   ⇒ help(tail)
@@ -222,7 +227,7 @@ object Application extends JavaLogger {
         }
         else {
           Services.withServices(workspaceDirectory, passwordString, config.proxyURI) { services ⇒
-            val server = new RESTServer(config.port, config.hostName, services)
+            val server = new RESTServer(config.port, config.hostName, services, config.httpSubDirectory)
             server.run()
           }
           Console.ExitCodes.ok
@@ -274,7 +279,7 @@ object Application extends JavaLogger {
             GUIServer.urlFile.content = url
 
             GUIServices.withServices(workspace, config.proxyURI) { services ⇒
-              val server = new GUIServer(port, config.remote, useHTTP, services, config.password, extraHeader)
+              val server = new GUIServer(port, config.remote, useHTTP, services, config.password, extraHeader, !config.unoptimizedJS, config.httpSubDirectory)
               server.start()
               if (config.browse && !config.remote) browse(url)
               logger.info(s"Server listening on port $port.")

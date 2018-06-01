@@ -13,6 +13,7 @@ import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager
 import org.openmole.gui.client.core.panels.{ treeNodePanel, treeNodeTabs }
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.tool.client.OMPost
+import org.scalajs.dom
 import rx.Var
 
 import scala.util.{ Failure, Success }
@@ -157,6 +158,8 @@ object CoreUtils {
   def readableByteCountAsString(bytes: Long): String = readableByteCount(bytes).render
 
   def ifOrNothing(condition: Boolean, classString: String) = if (condition) classString else ""
+
+  def setRoute(route: String) = dom.window.location.href = route.split("/").last
 
   //  def buildModelScript[T<: WizardData](
   //    wizardPluginFactory: WizardPluginFactory,

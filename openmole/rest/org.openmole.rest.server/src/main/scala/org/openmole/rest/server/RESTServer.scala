@@ -47,7 +47,7 @@ class RESTLifeCycle extends LifeCycle {
 
 }
 
-class RESTServer(sslPort: Option[Int], hostName: Option[String], services: Services) {
+class RESTServer(sslPort: Option[Int], hostName: Option[String], services: Services, subDir: Option[String]) {
 
   private lazy val server = {
     val sslP = sslPort getOrElse 8443
@@ -71,7 +71,7 @@ class RESTServer(sslPort: Option[Int], hostName: Option[String], services: Servi
 
     val context = new WebAppContext()
 
-    context.setContextPath("/")
+    context.setContextPath(subDir.map { s ⇒ "/" + s }.getOrElse("") + "/")
     context.setBaseResource(Res.newResource(classOf[RESTServer].getClassLoader.getResource("/")))
     context.setClassLoader(classOf[RESTServer].getClassLoader)
     hostName foreach (context.setInitParameter(ScalatraBase.HostNameKey, _))

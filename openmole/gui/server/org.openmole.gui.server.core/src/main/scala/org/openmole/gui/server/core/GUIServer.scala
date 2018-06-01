@@ -41,12 +41,17 @@ import org.openmole.core.location._
 
 object GUIServer {
 
-  def webapp()(implicit newFile: NewFile, workspace: Workspace, fileService: FileService) = {
+  def webapp(optimizedJS: Boolean)(implicit newFile: NewFile, workspace: Workspace, fileService: FileService) = {
     val from = openMOLELocation / "webapp"
     val to = newFile.newDir("webapp")
-    from.copy(to)
-    Utils.expandDepsFile(from / "js" / Utils.depsFileName, from / "js" / Utils.openmoleGrammarName, to /> "js" / Utils.depsFileName)
-    Utils.openmoleFile copy (to /> "js" / Utils.openmoleFileName)
+
+    from / "css" copy to / "css"
+    from / "fonts" copy to / "fonts"
+    from / "img" copy to / "img"
+
+    Utils.expandDepsFile(from / "js" / Utils.depsFileName, from / "js" / Utils.openmoleGrammarName, to /> "js" / Utils.openmoleGrammarMode)
+    Utils.openmoleFile(optimizedJS) copy (to /> "js" / Utils.openmoleFileName)
+    from / "js" / Utils.depsFileName copy (to /> "js" / Utils.depsFileName)
     to
   }
 
@@ -70,7 +75,8 @@ object GUIServer {
     password:           Option[String],
     applicationControl: ApplicationControl,
     webapp:             File,
-    extraHeader:        String
+    extraHeader:        String,
+    subDir:             Option[String]
   )
 
   case class ApplicationControl(restart: () ⇒ Unit, stop: () ⇒ Unit)
@@ -92,7 +98,7 @@ class GUIBootstrap extends LifeCycle {
 
 import GUIServer._
 
-class GUIServer(port: Int, localhost: Boolean, http: Boolean, services: GUIServices, password: Option[String], extraHeader: String) {
+class GUIServer(port: Int, localhost: Boolean, http: Boolean, services: GUIServices, password: Option[String], extraHeader: String, optimizedJS: Boolean, subDir: Option[String]) {
 
   val server = new Server()
   var exitStatus: GUIServer.ExitStatus = GUIServer.Ok
@@ -125,10 +131,11 @@ class GUIServer(port: Int, localhost: Boolean, http: Boolean, services: GUIServi
       () ⇒ stop()
     )
 
-  val webappCache = webapp
+  val webappCache = webapp(optimizedJS)
 
-  context.setAttribute(GUIServer.servletArguments, GUIServer.ServletArguments(services, password, applicationControl, webappCache, extraHeader))
-  context.setContextPath("/")
+  context.setAttribute(GUIServer.servletArguments, GUIServer.ServletArguments(services, password, applicationControl, webappCache, extraHeader, subDir))
+
+  context.setContextPath(subDir.map { s ⇒ "/" + s }.getOrElse("") + "/")
 
   import services._
 

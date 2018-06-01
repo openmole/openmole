@@ -1,4 +1,5 @@
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
+import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport._
 import sbt.Keys._
 import sbt._
 
@@ -23,7 +24,7 @@ object Libraries {
   lazy val json4sVersion = "3.5.0"
   lazy val circeVersion = "0.9.1"
   lazy val catsVersion = "1.0.1"
-  lazy val scalajsVersion = "0.6.21"
+  lazy val scalajsVersion = "0.6.23"
   lazy val squantsVersion = "1.3.0"
   lazy val xstreamVersion = "1.4.10"
 
