@@ -180,7 +180,7 @@ object MoleExecution extends JavaLogger {
             val taskContext = TaskExecutionContext(newFile.baseDir, subMoleExecutionState.moleExecution.defaultEnvironment, preference, threadProvider, fileService, workspace, outputRedirection, subMoleExecutionState.moleExecution.taskCache, subMoleExecutionState.moleExecution.lockRepository)
             moleJob.perform(taskContext)
             subMoleExecutionState.masterCapsuleRegistry.register(c, ticket.parentOrException, c.toPersist(moleJob.context))
-            MoleExecutionMessage.send(subMoleExecutionState.moleExecution)(MoleExecutionMessage.JobFinished(subMoleExecutionState.id)(moleJob, moleJob.state))
+            MoleExecutionMessage.processJobFinished(subMoleExecutionState.moleExecution, MoleExecutionMessage.JobFinished(subMoleExecutionState.id)(moleJob, moleJob.state))
           }
         case _ ⇒
           def stateChanged(job: MoleJob, oldState: State, newState: State) = {
@@ -268,7 +268,7 @@ object MoleExecution extends JavaLogger {
     }
 
     if (state == COMPLETED) {
-      val (capsule, _) = subMoleExecutionState.jobs(job)
+      val (capsule, _) = subMoleExecutionState.jobs.getOrElse(job, throw new InternalProcessingError(s"Info for job running task ${job.task} not found, execution canceled is ${subMoleExecutionState.canceled}."))
       subMoleExecutionState.moleExecution.completed(capsule) = subMoleExecutionState.moleExecution.completed(capsule) + 1
       subMoleExecutionState.moleExecution.executionContext.services.eventDispatcher.trigger(subMoleExecutionState.moleExecution, MoleExecution.JobFinished(job, capsule))
     }
@@ -495,6 +495,12 @@ object MoleExecutionMessage {
   def send(moleExecution: MoleExecution)(moleExecutionMessage: MoleExecutionMessage) =
     moleExecution.messageQueue.enqueue(moleExecutionMessage, priority(moleExecutionMessage))
 
+  def processJobFinished(moleExecution: MoleExecution, msg: JobFinished) = {
+    val state = moleExecution.subMoleExecutions(msg.subMoleExecution)
+    MoleExecution.finalState(state, msg.job, msg.state)
+    MoleExecution.checkIfSubMoleIsFinished(state)
+  }
+
   def dispatch(moleExecution: MoleExecution, msg: MoleExecutionMessage) = moleExecution.synchronized {
     try {
       if (!moleExecution._canceled)
@@ -503,10 +509,7 @@ object MoleExecutionMessage {
             val state = moleExecution.subMoleExecutions(msg.subMoleExecution)
             if (!state.canceled) msg.operation(state)
             MoleExecution.checkIfSubMoleIsFinished(state)
-          case msg: JobFinished ⇒
-            val state = moleExecution.subMoleExecutions(msg.subMoleExecution)
-            MoleExecution.finalState(state, msg.job, msg.state)
-            MoleExecution.checkIfSubMoleIsFinished(state)
+          case msg: JobFinished           ⇒ processJobFinished(moleExecution, msg)
           case msg: WithMoleExecutionSate ⇒ msg.operation(moleExecution)
           case msg: StartMoleExecution    ⇒ MoleExecution.start(moleExecution, msg.context)
           case msg: CancelMoleExecution   ⇒ MoleExecution.cancel(moleExecution, None)
