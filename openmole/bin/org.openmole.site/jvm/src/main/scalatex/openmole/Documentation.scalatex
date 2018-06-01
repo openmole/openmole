@@ -7,16 +7,16 @@
 @p
   Welcome to the OpenMOLE documentation site map.
 
-  @h2{@a("Documentation", href := documentation.file)}
+  @h2{@a("Documentation", href := documentation.file, style := "color:#a6bf26")}
 
-  @ol
+  @ol(style := "list-style-type: upper-roman")
     @li
       @a("Language", href := language.file)
       @ol
         @sitemap.siteMapSection(languagePages.diff(developersPages))
         @li
           @a("Developers", href := developers.file)
-          @ol
+          @ol(style := "list-style-type: lower-alpha")
             @sitemap.siteMapSection(developersPages)
     @li
       @a("Run", href := run.file)
@@ -36,5 +36,5 @@
         @sitemap.siteMapSection(advancedPages.diff(gaPages))
         @li
           @a("Genetic Algorithms", href := geneticAlgorithm.file)
-          @ol
+          @ol(style := "list-style-type: lower-alpha")
             @sitemap.siteMapSection(gaPages)

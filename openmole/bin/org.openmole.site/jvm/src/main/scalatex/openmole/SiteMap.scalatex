@@ -9,16 +9,16 @@
   Welcome to the OpenMOLE site map.
   It's more a list than a map actually but hey, layout propositions for the various pages are welcome!
 
-  @h2{@a("Documentation", href := documentation.file)}
+  @h2{@a("Documentation", href := documentation.file, style := "color:#a6bf26")}
 
-  @ol
+  @ol(style := "list-style-type: upper-roman")
     @li
       @a("Language", href := language.file)
       @ol
         @sitemap.siteMapSection(languagePages.diff(developersPages))
         @li
           @a("Developers", href := developers.file)
-          @ol
+          @ol(style := "list-style-type: lower-alpha")
             @sitemap.siteMapSection(developersPages)
     @li
       @a("Run", href := run.file)
@@ -38,12 +38,12 @@
         @sitemap.siteMapSection(advancedPages.diff(gaPages))
         @li
           @a("Genetic Algorithms", href := geneticAlgorithm.file)
-          @ol
+          @ol(style := "list-style-type: lower-alpha")
             @sitemap.siteMapSection(gaPages)
 
-  @h2{@a("Tutorials", href := tutorials.file)}
+  @h2{@a("Tutorials", href := tutorials.file, style := "color:#a6bf26")}
 
-  @ol
+  @ol(style := "list-style-type: upper-roman")
     @li
       @a("Getting Started Tutorials", href := stepByStepIntro.file)
       @ol
@@ -53,12 +53,12 @@
       @ol
         @sitemap.siteMapSection(netLogoPages)
 
-  @h2{@a("Community", href := OMcommunity.file)}
+  @h2{@a("Community", href := OMcommunity.file, style := "color:#a6bf26")}
 
-  @ol
+  @ol(style := "list-style-type: upper-roman")
     @sitemap.siteMapSection(communityPages)
 
-  @h2{@a("Download", href := install.file)}
+  @h2{@a("Download", href := install.file, style := "color:#a6bf26"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             )}
 
-  @ol
+  @ol(style := "list-style-type: upper-roman")
     @sitemap.siteMapSection(downloadPages)
