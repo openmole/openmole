@@ -60,6 +60,12 @@
 
 @sect{(a selection of) Scientific papers/conference proceedings using OpenMOLE features}
     @ul
+
+        @li Juste Raimbault, «Indirect evidence of network effects in a system of cities», published in
+         @i{Environment and Planning B: Urban Analytics and City Science}, 2399808318774335, 2018.
+         @br
+              @aa("[open-access version]", href:= shared.link.paper.epb2018arxiv)   @aa("[editor version]", href:= shared.link.paper.epb2018)
+
         @li
             Clara Schmitt, Sébastien Rey-Coyrehourcq, Romain Reuillon and Denise Pumain, «Half a billion simulations:
             Evolutionary algorithms and distributed computing for calibrating the SimpopLocal geographical model» published

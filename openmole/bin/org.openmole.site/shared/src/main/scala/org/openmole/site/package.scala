@@ -144,6 +144,8 @@ package object shared {
       lazy val frontier2017 = "http://journal.frontiersin.org/article/10.3389/fninf.2017.00021/full#"
       lazy val urbanDynamics = "https://hal.archives-ouvertes.fr/view/index/docid/1583528"
       lazy val urbanDynamicsBib = "https://hal.archives-ouvertes.fr/hal-01583528v1/bibtex"
+      lazy val epb2018 = "http://journals.sagepub.com/doi/abs/10.1177/2399808318774335"
+      lazy val epb2018arxiv = "https://arxiv.org/pdf/1804.09416.pdf"
     }
 
     object partner {
