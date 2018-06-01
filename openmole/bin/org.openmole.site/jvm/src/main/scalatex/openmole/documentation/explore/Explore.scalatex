@@ -4,7 +4,7 @@
 @import org.openmole.site.stylesheet._
 
 OpenMOLE built-in methods are designed to explore your model and answer several questions regarding @b{optimization,
-sensitivity, robustnesss and diversity} of your model capabilities
+sensitivity, robustness and diversity} of your model capabilities
 
 @def model = """
   val x = Val[Double]

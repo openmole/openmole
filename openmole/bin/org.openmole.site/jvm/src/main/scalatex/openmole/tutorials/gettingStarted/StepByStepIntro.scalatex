@@ -63,7 +63,7 @@ Outputs are basically the same : Valued measures (Double, Integer, Boolean, Stri
 You can try OpenMOLE online using the @aa "OpenMOLE demonstration website", href := shared.link.demo). Notice that the service is reset every 6 hours or so, so don't be surprised if your current script vanish :-).
 
 To be installed on your own computer, OpenMOLE requires Java version 8 or above.
-Check our @a("FAQ", href := Pages.faq.file) to access your java version informations.
+Check our @a("FAQ", href := Pages.faq.file) to access your java version information.
 
 @br
 @h3{Linux installation}
