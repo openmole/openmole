@@ -69,11 +69,12 @@ public class NetLogo5 implements NetLogo {
 
     @Override
     public void setGlobal(String variable, Object value) throws Exception {
-        if(value instanceof Object[]) {
-            workspace.world().setObserverVariableByName(variable, arrayToList((Object[]) value));
-        } else {
-            workspace.world().setObserverVariableByName(variable,value);
-        }
+        workspace.world().setObserverVariableByName(variable,value);
+    }
+
+    @Override
+    public void setGlobalArray(String variable, Object[] value) throws Exception {
+        workspace.world().setObserverVariableByName(variable, arrayToList(value));
     }
 
 
@@ -127,6 +128,8 @@ public class NetLogo5 implements NetLogo {
         for(Object o:array){
             if(o instanceof Object[]){list.add(arrayToList((Object[]) o));}
             else{list.add(o);}
+            // finally do not recurse
+            //list.add(o);
         }
         //list.addAll(array);
         return(list.toLogoList());

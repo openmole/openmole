@@ -18,6 +18,7 @@
 package org.openmole.plugin.task.netlogo
 
 import java.util.AbstractCollection
+import java.lang.Class
 
 import org.openmole.core.context.{ Context, Val, Variable }
 import org.openmole.core.exception.UserBadDataError
@@ -37,6 +38,7 @@ trait NetLogoTask extends Task with ValidateTask {
   def workspace: NetLogoTask.Workspace
   def launchingCommands: Seq[FromContext[String]]
   def netLogoInputs: Seq[(Val[_], String)]
+  def netLogoArrayInputs: Seq[(Val[_], String)]
   def netLogoOutputs: Iterable[(String, Val[_])]
   def netLogoArrayOutputs: Iterable[(String, Int, Val[_])]
   def netLogoFactory: NetLogoFactory
@@ -87,7 +89,7 @@ trait NetLogoTask extends Task with ValidateTask {
             }
           }
 
-          /**
+          /*
            * def setRandomSeed(seed: Int, ignoreError: Boolean = false) = wrapError(s"Error while setting seed $seed") {
            * try netLogo.setRandomSeed(seed)
            * catch {
@@ -105,7 +107,16 @@ trait NetLogoTask extends Task with ValidateTask {
             }
           }
 
+          def setGlobalArray(variable: String, value: Array[AnyRef], ignoreError: Boolean = false) = wrapError(s"Error while setting $variable") {
+            try netLogo.setGlobalArray(variable, value)
+            catch {
+              case t: Throwable ⇒
+                if (ignoreError && netLogo.isNetLogoException(t)) {} else throw t
+            }
+          }
+
           seed.foreach { s ⇒ executeNetLogo(s"random-seed ${context(s)}") }
+          // setting the seed natively seems not to be possible
           //seed.foreach { s ⇒ setRandomSeed(context(s)) }
 
           for (inBinding ← netLogoInputs) {
@@ -126,6 +137,22 @@ trait NetLogoTask extends Task with ValidateTask {
             //setGlobal(inBinding._2, v.asInstanceOf[AnyRef])
             setGlobal(inBinding._2, v)
             netLogo
+          }
+
+          for (inBindingArrays ← netLogoArrayInputs) {
+            val prototype: Val[_] = inBindingArrays._1
+            // do something only if array
+            if (prototype.`type`.runtimeClass.isArray) {
+              //val ptype: String = prototype.`type`.runtimeClass.getComponentType
+              //Class.forName(ptype)
+              val array = preparedContext(prototype).asInstanceOf[Array[_]]
+              //java.lang.reflect.Array.newInstance(ptype, 0).asInstanceOf[Array[_]]
+              setGlobalArray(inBindingArrays._2, array.map {
+                case x: Array[_] ⇒ x.asInstanceOf[Array[_]].map { _.asInstanceOf[AnyRef] }
+                case x           ⇒ x.asInstanceOf[AnyRef]
+              })
+              netLogo
+            }
           }
 
           for (cmd ← launchingCommands.map(_.from(context))) executeNetLogo(cmd, ignoreError)

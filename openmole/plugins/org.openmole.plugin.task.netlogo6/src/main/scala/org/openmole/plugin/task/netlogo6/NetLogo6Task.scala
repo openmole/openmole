@@ -41,6 +41,7 @@ object NetLogo6Task {
 
   implicit def isBuilder = new NetLogoTaskBuilder[NetLogo6Task] {
     override def netLogoInputs = NetLogo6Task.netLogoInputs
+    override def netLogoArrayInputs = NetLogo6Task.netLogoArrayInputs
     override def netLogoArrayOutputs = NetLogo6Task.netLogoArrayOutputs
     override def netLogoOutputs = NetLogo6Task.netLogoOutputs
   }
@@ -99,6 +100,7 @@ object NetLogo6Task {
       external = External(),
       info = InfoConfig(),
       netLogoInputs = Vector.empty,
+      netLogoArrayInputs = Vector.empty,
       netLogoOutputs = Vector.empty,
       netLogoArrayOutputs = Vector.empty,
       workspace = workspace,
@@ -114,6 +116,7 @@ object NetLogo6Task {
   external:            External,
   info:                InfoConfig,
   netLogoInputs:       Vector[(Val[_], String)],
+  netLogoArrayInputs:  Vector[(Val[_], String)],
   netLogoOutputs:      Vector[(String, Val[_])],
   netLogoArrayOutputs: Vector[(String, Int, Val[_])],
   workspace:           NetLogoTask.Workspace,
