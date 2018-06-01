@@ -113,6 +113,12 @@ package object json {
       case (value: JArray, caseArrayArrayString(v))  ⇒ Variable(v, jValueToArray(value, jValueToArray(_, jValueToString)))
       case (value: JArray, caseArrayArrayBoolean(v)) ⇒ Variable(v, jValueToArray(value, jValueToArray(_, jValueToBoolean)))
 
+      case (value: JValue, caseInt(v))               ⇒ Variable(v, jValueToInt(value))
+      case (value: JValue, caseLong(v))              ⇒ Variable(v, jValueToLong(value))
+      case (value: JValue, caseDouble(v))            ⇒ Variable(v, jValueToDouble(value))
+      case (value: JValue, caseString(v))            ⇒ Variable(v, jValueToString(value))
+      case (value: JValue, caseBoolean(v))           ⇒ Variable(v, jValueToBoolean(value))
+
       case _                                         ⇒ cannotConvert
     }
 

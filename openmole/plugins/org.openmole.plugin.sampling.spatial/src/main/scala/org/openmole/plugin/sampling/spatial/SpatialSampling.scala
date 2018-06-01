@@ -136,24 +136,27 @@ object SpatialSampling {
 }
 
 object RandomSpatialSampling {
-  def apply(samples: FromContext[Int], gridSize: FromContext[Int], factors: ScalarOrSequenceOfDouble[_]*) =
-    new RandomSpatialSampling(samples, gridSize, factors: _*)
+  /*def apply(samples: FromContext[Int], gridSize: FromContext[Int], factors: ScalarOrSequenceOfDouble[_]*) =
+    new RandomSpatialSampling(samples, gridSize, factors: _*)*/
+  def apply(val samples: FromContext[Int], val gridSize: FromContext[Int], val prototype: Val[_]) =
+  new RandomSpatialSampling(samples, gridSize, prototype)
+
 }
 
-sealed class RandomSpatialSampling[D](val samples: FromContext[Int], val gridSize: FromContext[Int], val factors: ScalarOrSequenceOfDouble[_]*) extends Sampling {
+sealed class RandomSpatialSampling[D](val samples: FromContext[Int], val gridSize: FromContext[Int], val prototype: Val[_]) extends Sampling {
+//  val factors: ScalarOrSequenceOfDouble[_]*
 
-  override def inputs = factors.flatMap(_.inputs)
-  override def prototypes = factors.map { _.prototype }
+  //override def inputs = factors.flatMap(_.inputs)
+  //override def prototypes = factors.map { _.prototype }
 
   override def apply() = FromContext { p ⇒
     import p._
     val s = samples.from(context) // size of the sample
-    val vectorSize = factors.map(_.size(context)).sum // sum of sizes of factors
+    //val vectorSize = factors.map(_.size(context)).sum // sum of sizes of factors
     val size = gridSize.from(context)
     def values = SpatialSampling.randomGridSample(size, s, random())
     //values.map(v ⇒ ScalarOrSequenceOfDouble.scaled(factors, v.flatten.toSeq).from(context).toArray.sliding(size, size).toArray).toIterator
-    values.toIterator
-
+    values.map {case v => Variable(prototype,v)}.toIterator
   }
 }
 
