@@ -7,8 +7,7 @@
 OpenMOLE makes simple the inclusion of your own Java code in a workflow. Since the Scala compiler can compile Java code, Java code can be directly fed to the ScalaTask as shown in @aa("the ScalaTask example", href := DocumentationPages.scala.file). Additionally, a compiled Java program can be encapsulated in a ScalaTask as a jar file through the @hl.openmoleNoTest("libraries") parameter as below.
 
 @p
-  /!\: In this page, there are two example to use a code developed in Java from OpenMOLE. The first one works for simple Java programs and the second one for a more complex program that requires dependencies managed by Maven. In order to run more complex programs, OSGi bundles are necessary to embed all the necessary classes and functions.
-  For more ambitious developments, it is recommended to consider embedding your code in an @a("OpenMOLE plugin", href := DocumentationPages.pluginDevelopment.file). It is pretty straight forward since they are simple @a("OSGi", href:=shared.link.osgi) bundles.
+  /!\: In this page, there are two example to use a code developed in Java from OpenMOLE. The first one works for simple Java programs and the second one for a more complex program that requires dependencies managed by Maven.  For more ambitious developments, it is recommended to consider embedding your code in an @a("OpenMOLE plugin", href := DocumentationPages.pluginDevelopment.file). It is pretty straight forward since they are simple @a("OSGi", href:=shared.link.osgi) bundles.
 
 @h2{Simple Task for Java}
 
@@ -179,10 +178,10 @@ OpenMOLE makes simple the inclusion of your own Java code in a workflow. Since t
 
 
 
-@h2("Building an OSGi bundle with Maven")
+@h2("Building a bundle with Maven")
 
 @p
-OpenMOLE can use complex Java libraries as they are packaged as OSGi bundles. OSGi is a set of specifications whose aim is to enable the possibility to define a platform that can be managed dynamically. OSGi components are named "Bundle". Maven, that manages Java project life-cycle and dependencies, has a plugin (maven-shade) that can produce OSGi bundles. In order to allow the use of this plugin, you have to configure it in the plugin list of the maven project file. In the @em{<plugins> </plugins>} section, you have to add the following code.
+OpenMOLE can use complex Java libraries as they are well packaged. Maven, that manages Java project life-cycle and dependencies, has a plugin (maven-shade) that can produce such bundles. In order to allow the use of this plugin, you have to configure it in the plugin list of the maven project file. In the @em{<plugins> </plugins>} section, you have to add the following code.
 @hl.xml("""
 <plugin>
     <groupId>org.apache.maven.plugins</groupId>
@@ -216,7 +215,7 @@ OpenMOLE can use complex Java libraries as they are packaged as OSGi bundles. OS
 </plugin>""")
 
 
-Once this code is added, you can produce the OSGi bundle by simply executing a build command (with @em{mvn install }for example), and it will be created into the @em{target} directory. The file is named name_of_youar_artifact-version-shaded.jar. You can now upload it into the OpenMOLE client and use it as described in the tutorial for simple Java code.
+Once this code is added, you can produce the  bundle by simply executing a build command (with @em{mvn install }for example), and it will be created into the @em{target} directory. The file is named name_of_youar_artifact-version-shaded.jar. You can now upload it into the OpenMOLE client and use it as described in the tutorial for simple Java code.
 
 @h2("Troubleshooting  using raster data from GeoTools")
 
