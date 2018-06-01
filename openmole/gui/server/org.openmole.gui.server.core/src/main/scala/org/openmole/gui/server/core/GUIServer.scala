@@ -44,9 +44,14 @@ object GUIServer {
   def webapp(optimizedJS: Boolean)(implicit newFile: NewFile, workspace: Workspace, fileService: FileService) = {
     val from = openMOLELocation / "webapp"
     val to = newFile.newDir("webapp")
-    from.copy(to)
-    Utils.expandDepsFile(from / "js" / Utils.depsFileName, from / "js" / Utils.openmoleGrammarName, to /> "js" / Utils.depsFileName)
+
+    from / "css" copy to / "css"
+    from / "fonts" copy to / "fonts"
+    from / "img" copy to / "img"
+
+    Utils.expandDepsFile(from / "js" / Utils.depsFileName, from / "js" / Utils.openmoleGrammarName, to /> "js" / Utils.openmoleGrammarMode)
     Utils.openmoleFile(optimizedJS) copy (to /> "js" / Utils.openmoleFileName)
+    from / "js" / Utils.depsFileName copy (to /> "js" / Utils.depsFileName)
     to
   }
 
