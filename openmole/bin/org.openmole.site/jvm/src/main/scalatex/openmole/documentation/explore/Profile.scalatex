@@ -35,7 +35,7 @@ algorithm goes deeper, as it captures the full effect of a parameter variation o
 @br
 @b{Method scores:}
 @br
-The calibration profile method is perfect to reveal a model's sentitivity regarding its parameter, hence the highest score possible in sensitivity.
+The calibration profile method is perfect to reveal a model's sensitivity regarding its parameter, hence the highest score possible in sensitivity.
 However, it does not retrieve information about the input space nor the output space structures, as it focus on @b{one} parameter/input, every other input being let free.
 As the studied parameter varies, the other parameter are calibrated (see below), so this method scores very well
 regarding calibration, which is also why it can handle stochasticity since calibration does too.
@@ -66,6 +66,36 @@ values minimising the given distance with i taking values in each
 subinterval. By plotting the distance against the values of i, one
 can visually determine what values i must take for the model to be
   able to reproduce the data.
+
+
+
+
+
+@break
+
+@h3{Typed signature}
+The profile method can be typed  likewise:
+@br@br
+@div(style:="text-align:center")
+    Profile :   ((𝓧@sub{1},...,𝓧@sub{k},) → {1,...,k} → [(𝓧,Y)]
+@div(style:="text-align:center")
+    such that : Profile(M)(i) = [(𝒙@sub{i1},y@sub{1}), ... , (𝒙@sub{in}, y@sub{n})],
+@div(style:="text-align:center")
+                ∀ j ∈ [1;n], y@sub{j} =min@sub{𝒙∈X@sub{@RawFrag{-i}}}@RawFrag{(M(𝒙))}
+@div(style:="text-align:center")
+                X@sub{@RawFrag{-i}}={𝒙∈𝓧@sub{1}🞩...🞩𝓧@sub{i-1}🞩{𝒙@sub{i}}🞩𝓧@sub{i+1}🞩...🞩𝓧@sub{k}}
+@br
+With M, the model, X , the Input space, Y, the output space, 𝓟(X) the power set of X ( i.e. every subset of X , including X and ∅ )
+@br
+In other words : this function takes a model M ( whose signature is (X→Y) ) , an element @i{y} of Y (y is the list of criterion value to reach) and  find a list of elements of X (noted @i{x}) such that, M(x) are Pareto dominant compared to every image of other elements of X by M , regarding criterion @i{y})
+
+
+
+
+@break
+
+
+
 
 @p
 By defining a threshold below which the distance between the model output and the data
@@ -104,7 +134,7 @@ You will also need an evolutionary scheme and can use SteadyStateEvolution as de
 where @hl.code("param1") and @hl.code("param2") are inputs
 of the task that runs the model (and refer to the model parameters),
 and @hl.code("fitness") is an output of that
-  same task. The number of inputs are illimited. Here, @hl.code("x = 0")
+  same task. The number of inputs are unlimited. Here, @hl.code("x = param1")
 specifies that we are profiling @hl.code("param1").
 
 @break
