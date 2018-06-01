@@ -14,7 +14,11 @@
     @li
       @a("Language", href := DocumentationPages.language.file)
       @ol
-        @sitemap.siteMapSection(DocumentationPages.languagePages                                                                                                                                                                                                                                                                                                                                                                                                                                              )
+        @sitemap.siteMapSection(DocumentationPages.languagePages.take(1))
+        @a("Developers", href := DocumentationPages.developers.file)
+        @ol
+          @sitemap.siteMapSection(DocumentationPages.developersPages)
+
 
   @h2{Tutorials}
 
@@ -53,7 +57,7 @@ There are three main steps in an OpenMOLE use case
 
 @h2{Tutorials}
 
-The @a("tutorial page", href:= DocumentationPages.tutorial.file) gathers the tutorials and the Market Place with use cases.
+The @a("tutorial page", href:= DocumentationPages.tutorials.file) gathers the tutorials and the Market Place with use cases.
 Tutorials available so far:
 @ul
     @sitemap.siteMapSection(DocumentationPages.tutoPages)

@@ -112,6 +112,8 @@ package object tools {
 
   object sitemap {
 
+
+
     def siteMapSection(docSection: Seq[Page]) = for {
       page ← docSection
     } yield li(a(page.title, href := page.file))

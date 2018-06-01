@@ -56,7 +56,7 @@ object Menu {
                 case _ ⇒ Seq(li)
               }),
               li(innerLink(DocumentationPages.siteMap, "DOCUMENTATION"), liStyle),
-              li(innerLink(DocumentationPages.tutorial, "TUTORIALS"), liStyle),
+              li(innerLink(DocumentationPages.tutorials, "TUTORIALS"), liStyle),
               li(innerLink(DocumentationPages.OMcommunity, "COMMUNITY"), liStyle),
               li(divLinkButton(div(maxWidth := 140)(span("DOWNLOAD"), span(version.value, fontSize := "10px", paddingLeft := 7)), Resource.script.openmole.file, classIs(btn ++ btn_primary))),
               li(inputStyle)(img(id := shared.searchImg, src := Resource.img.menu.search.file, Seq(width := 35, paddingTop := 5, paddingLeft := 10, pointer)))(

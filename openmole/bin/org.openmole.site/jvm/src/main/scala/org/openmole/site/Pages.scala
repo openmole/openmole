@@ -151,7 +151,7 @@ object DocumentationPages {
       explorePages ++
       scalePages ++
       advancedPages ++
-      Seq(language, developers, run, explore, scale, advancedConcepts, tutorials, netLogo, community, gui, market, commandOptions)
+      Seq(language, developers, run, explore, scale, advancedConcepts, tutorials, netLogo, OMcommunity, gui, market, commandOptions)
 
   lazy val gui = DocumentationPage.fromScalatex(name = "GUI", content = scalatex.documentation.GUI)
   lazy val market = DocumentationPage.fromScalatex(name = "Market", content = scalatex.documentation.Market)
@@ -251,7 +251,7 @@ object DocumentationPages {
   // Community
   lazy val OMcommunity = DocumentationPage.fromScalatex(name = "Community", content = scalatex.community.OMCommunity)
 
-  def communityPages = Seq(communications, howToContribute, partner, training, whoWeAre, OMCommunity)
+  def communityPages = Seq(communications, howToContribute, partner, training, whoWeAre, OMcommunity)
 
   lazy val communications = DocumentationPage.fromScalatex(name = "Communications", content = scalatex.community.Communications)
   lazy val howToContribute = DocumentationPage.fromScalatex(name = "How To Contribute", content = scalatex.community.HowToContribute)
