@@ -66,7 +66,7 @@ This method is not sensitive to the dimensionality of the model output space, as
 @br
 Multi-criteria  Calibration method slightly differs from the single criterion version.
 It suffers the same limitation regarding Input and Output space limitations.
-However, since it may reveal a Pareto frontier and the underlying tradeoff, it reveals a little bit
+However, since it may reveal a Pareto frontier and the underlying trade-off, it reveals a little bit
 of the model sensitivity, showing that the model performance regarding a criterion is  impacted by its performances
 regarding the others. This is not @i{genuine sensitivity} as in sensitivity analysis, but still, it reveals a variation
 of your model outputs, which is not bad after all !

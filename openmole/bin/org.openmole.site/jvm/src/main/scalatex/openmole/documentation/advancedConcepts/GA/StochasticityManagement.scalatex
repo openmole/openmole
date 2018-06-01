@@ -23,7 +23,7 @@
     OpenMOLE Strategy to handle Stochastic Models Calibration
 
   @p Calibration of stochastic models leads to noisy fitness functions that may jeopardize Genetic Algorithm convergence.
-   An efficient strategy to deal with suchfitness functions is implemented in OpenMOLE. This strategy automatically balances the need for replications and
+   An efficient strategy to deal with such fitness functions is implemented in OpenMOLE. This strategy automatically balances the need for replications and
   the discovery of new solutions. In case you want to explore a stochastic model with a genetic algorithm you can do:
 @br
 @br
