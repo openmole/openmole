@@ -41,8 +41,10 @@ import org.openmole.core.location._
 
 object GUIServer {
 
+  def fromWebAppLocation = openMOLELocation / "webapp"
+
   def webapp(optimizedJS: Boolean)(implicit newFile: NewFile, workspace: Workspace, fileService: FileService) = {
-    val from = openMOLELocation / "webapp"
+    val from = fromWebAppLocation
     val to = newFile.newDir("webapp")
 
     from / "css" copy to / "css"
@@ -103,11 +105,17 @@ class StartingPage extends ScalatraServlet with LifeCycle {
   }
 
   get("/") {
-    ServiceUnavailable(
+    def content =
       <html>
         <meta http-equiv="refresh" content="3;url=/"/>
-        <body>OpenMOLE is loading... (the first time and afer an update it may take up to several minutes)</body>
-      </html>)
+        <link href="/css/style.css" rel="stylesheet"/>
+        <body>
+          <div>OpenMOLE is loading...<div class="loader" style="float: right"></div><br/></div>
+          (the first time and afer an update it may take several minutes)
+        </body>
+      </html>
+
+    ServiceUnavailable(content)
   }
 
 }
@@ -146,7 +154,7 @@ class GUIServer(port: Int, localhost: Boolean, http: Boolean, services: GUIServi
     val startingContext = new WebAppContext()
     startingContext.setClassLoader(classOf[StartingPage].getClassLoader)
     startingContext.setInitParameter(ScalatraListener.LifeCycleKey, classOf[StartingPage].getCanonicalName)
-    startingContext.setResourceBase("")
+    startingContext.setResourceBase(fromWebAppLocation.getAbsolutePath)
     startingContext.setContextPath("/")
     startingContext.setContextPath(subDir.map { s ⇒ "/" + s }.getOrElse("") + "/")
     startingContext.addEventListener(new ScalatraListener)
