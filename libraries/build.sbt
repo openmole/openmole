@@ -90,6 +90,7 @@ lazy val xstream = OsgiProject(
     "!org.xml.sax.*",
     "!sun.misc.*",
     "!org.joda.time.*",
+    "!javax.*",
     "*"),
   privatePackages = Seq("!scala.*", "META-INF.services.*", "*")) settings(
   libraryDependencies ++= Seq("com.thoughtworks.xstream" % "xstream" % "1.4.10", "net.sf.kxml" % "kxml2" % "2.3.0"),

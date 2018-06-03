@@ -95,7 +95,7 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
                 display(stream, s"Error of local execution", error)
             }
 
-            environment.eventDispatcherService.trigger(environment: Environment, Environment.JobCompleted(executionJob, log, service.localRuntimeInfo))
+            environment.eventDispatcherService.trigger(environment: Environment, Environment.JobCompleted(executionJob, log, service.RuntimeInfo.localRuntimeInfo))
           }
           catch {
             case e: InterruptedException ⇒ throw e
