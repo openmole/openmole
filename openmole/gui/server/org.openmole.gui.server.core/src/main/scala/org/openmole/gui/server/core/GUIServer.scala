@@ -106,51 +106,57 @@ class GUIServer(port: Int, localhost: Boolean, http: Boolean, services: GUIServi
 
   import services._
 
-  lazy val contextFactory = {
-    val contextFactory = new org.eclipse.jetty.util.ssl.SslContextFactory()
+  def init() = {
+    lazy val contextFactory = {
+      val contextFactory = new org.eclipse.jetty.util.ssl.SslContextFactory()
 
-    def keyStorePassword = "openmole"
+      def keyStorePassword = "openmole"
 
-    val ks = KeyStore(services.workspace.persistentDir /> "keystoregui", keyStorePassword)
-    contextFactory.setKeyStore(ks.keyStore)
-    contextFactory.setKeyStorePassword(keyStorePassword)
-    contextFactory.setKeyManagerPassword(keyStorePassword)
-    contextFactory.setTrustStore(ks.keyStore)
-    contextFactory.setTrustStorePassword(keyStorePassword)
-    contextFactory
+      val ks = KeyStore(services.workspace.persistentDir /> "keystoregui", keyStorePassword)
+      contextFactory.setKeyStore(ks.keyStore)
+      contextFactory.setKeyStorePassword(keyStorePassword)
+      contextFactory.setKeyManagerPassword(keyStorePassword)
+      contextFactory.setTrustStore(ks.keyStore)
+      contextFactory.setTrustStorePassword(keyStorePassword)
+      contextFactory
+    }
+
+    val connector = if (!http) new ServerConnector(server, contextFactory) else new ServerConnector(server)
+    connector.setPort(port)
+    if (!localhost) connector.setHost("localhost")
+
+    server.addConnector(connector)
+
+    val context = new WebAppContext()
+    val applicationControl =
+      ApplicationControl(
+        () ⇒ {
+          exitStatus = GUIServer.Restart;
+          stop()
+        },
+        () ⇒ stop()
+      )
+
+    val webappCache = webapp(optimizedJS)
+
+    context.setAttribute(GUIServer.servletArguments, GUIServer.ServletArguments(services, password, applicationControl, webappCache, extraHeader, subDir))
+
+    context.setContextPath(subDir.map { s ⇒ "/" + s }.getOrElse("") + "/")
+
+    import services._
+
+    context.setResourceBase(webappCache.getAbsolutePath)
+    context.setClassLoader(classOf[GUIServer].getClassLoader)
+    context.setInitParameter(ScalatraListener.LifeCycleKey, classOf[GUIBootstrap].getCanonicalName)
+    context.addEventListener(new ScalatraListener)
+
+    server.setHandler(context)
   }
 
-  val connector = if (!http) new ServerConnector(server, contextFactory) else new ServerConnector(server)
-  connector.setPort(port)
-  if (!localhost) connector.setHost("localhost")
-
-  server.addConnector(connector)
-
-  val context = new WebAppContext()
-  val applicationControl =
-    ApplicationControl(
-      () ⇒ {
-        exitStatus = GUIServer.Restart; stop()
-      },
-      () ⇒ stop()
-    )
-
-  val webappCache = webapp(optimizedJS)
-
-  context.setAttribute(GUIServer.servletArguments, GUIServer.ServletArguments(services, password, applicationControl, webappCache, extraHeader, subDir))
-
-  context.setContextPath(subDir.map { s ⇒ "/" + s }.getOrElse("") + "/")
-
-  import services._
-
-  context.setResourceBase(webappCache.getAbsolutePath)
-  context.setClassLoader(classOf[GUIServer].getClassLoader)
-  context.setInitParameter(ScalatraListener.LifeCycleKey, classOf[GUIBootstrap].getCanonicalName)
-  context.addEventListener(new ScalatraListener)
-
-  server.setHandler(context)
-
-  def start() = server.start
+  def start() = {
+    init()
+    server.start
+  }
 
   def join(): GUIServer.ExitStatus = {
     semaphore.acquire()
