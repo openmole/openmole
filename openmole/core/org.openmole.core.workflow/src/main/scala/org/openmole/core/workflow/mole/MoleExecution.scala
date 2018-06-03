@@ -180,7 +180,7 @@ object MoleExecution extends JavaLogger {
             val taskContext = TaskExecutionContext(newFile.baseDir, subMoleExecutionState.moleExecution.defaultEnvironment, preference, threadProvider, fileService, workspace, outputRedirection, subMoleExecutionState.moleExecution.taskCache, subMoleExecutionState.moleExecution.lockRepository)
             moleJob.perform(taskContext)
             subMoleExecutionState.masterCapsuleRegistry.register(c, ticket.parentOrException, c.toPersist(moleJob.context))
-            MoleExecutionMessage.processJobFinished(subMoleExecutionState.moleExecution, MoleExecutionMessage.JobFinished(subMoleExecutionState.id)(moleJob, moleJob.state))
+            MoleExecutionMessage.send(subMoleExecutionState.moleExecution)(MoleExecutionMessage.JobFinished(subMoleExecutionState.id)(moleJob, moleJob.state), priority = Some(MoleExecutionMessage.highPriority))
           }
         case _ ⇒
           def stateChanged(job: MoleJob, oldState: State, newState: State) = {
@@ -485,15 +485,17 @@ object MoleExecutionMessage {
     case _                      ⇒ false
   }
 
-  def priority(moleExcutionMessage: MoleExecutionMessage) =
+  def highPriority = 90
+
+  def messagePriority(moleExcutionMessage: MoleExecutionMessage) =
     moleExcutionMessage match {
       case _: CancelMoleExecution ⇒ 100
       case _: PerformTransition   ⇒ 10
       case _                      ⇒ 1
     }
 
-  def send(moleExecution: MoleExecution)(moleExecutionMessage: MoleExecutionMessage) =
-    moleExecution.messageQueue.enqueue(moleExecutionMessage, priority(moleExecutionMessage))
+  def send(moleExecution: MoleExecution)(moleExecutionMessage: MoleExecutionMessage, priority: Option[Int] = None) =
+    moleExecution.messageQueue.enqueue(moleExecutionMessage, priority getOrElse messagePriority(moleExecutionMessage))
 
   def processJobFinished(moleExecution: MoleExecution, msg: JobFinished) = {
     val state = moleExecution.subMoleExecutions(msg.subMoleExecution)
