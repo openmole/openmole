@@ -90,10 +90,26 @@ object GUIServer {
 }
 
 class GUIBootstrap extends LifeCycle {
-  override def init(context: ServletContext) {
+  override def init(context: ServletContext) = {
     val args = context.get(GUIServer.servletArguments).get.asInstanceOf[GUIServer.ServletArguments]
     context mount (GUIServlet(args), "/*")
   }
+}
+
+class StartingPage extends ScalatraServlet with LifeCycle {
+
+  override def init(context: ServletContext) = {
+    context mount (this, "/*")
+  }
+
+  get("/") {
+    ServiceUnavailable(
+      <html>
+        <meta http-equiv="refresh" content="3;url=/"/>
+        <body>OpenMOLE is loading... (the first time and afer an update it may take up to several minutes)</body>
+      </html>)
+  }
+
 }
 
 import GUIServer._
@@ -106,7 +122,7 @@ class GUIServer(port: Int, localhost: Boolean, http: Boolean, services: GUIServi
 
   import services._
 
-  def init() = {
+  def start() = {
     lazy val contextFactory = {
       val contextFactory = new org.eclipse.jetty.util.ssl.SslContextFactory()
 
@@ -127,11 +143,24 @@ class GUIServer(port: Int, localhost: Boolean, http: Boolean, services: GUIServi
 
     server.addConnector(connector)
 
+    val startingContext = new WebAppContext()
+    startingContext.setClassLoader(classOf[StartingPage].getClassLoader)
+    startingContext.setInitParameter(ScalatraListener.LifeCycleKey, classOf[StartingPage].getCanonicalName)
+    startingContext.setResourceBase("")
+    startingContext.setContextPath("/")
+    startingContext.setContextPath(subDir.map { s ⇒ "/" + s }.getOrElse("") + "/")
+    startingContext.addEventListener(new ScalatraListener)
+
+    server.setHandler(startingContext)
+    server.start()
+  }
+
+  def launchApplication() = {
     val context = new WebAppContext()
     val applicationControl =
       ApplicationControl(
         () ⇒ {
-          exitStatus = GUIServer.Restart;
+          exitStatus = GUIServer.Restart
           stop()
         },
         () ⇒ stop()
@@ -150,12 +179,9 @@ class GUIServer(port: Int, localhost: Boolean, http: Boolean, services: GUIServi
     context.setInitParameter(ScalatraListener.LifeCycleKey, classOf[GUIBootstrap].getCanonicalName)
     context.addEventListener(new ScalatraListener)
 
+    server.stop()
     server.setHandler(context)
-  }
-
-  def start() = {
-    init()
-    server.start
+    server.start()
   }
 
   def join(): GUIServer.ExitStatus = {
