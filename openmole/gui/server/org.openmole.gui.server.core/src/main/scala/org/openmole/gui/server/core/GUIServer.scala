@@ -111,7 +111,7 @@ class StartingPage extends ScalatraServlet with LifeCycle {
         <link href="/css/style.css" rel="stylesheet"/>
         <body>
           <div>OpenMOLE is loading...<div class="loader" style="float: right"></div><br/></div>
-          (the first time and afer an update it may take several minutes)
+          (for the first launch, and after an update, it may take several minutes)
         </body>
       </html>
 
