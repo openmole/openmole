@@ -2,14 +2,15 @@
 
 package org.openmole.plugin.sampling.spatial
 
-import org.openmole.core.context.{ Namespace, _ }
+import org.openmole.core.context.{ Val, Variable }
 import org.openmole.core.expansion._
-import org.openmole.core.tools.math._
-import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.sampling._
-import org.openmole.core.workflow.tools.{ ScalarOrSequenceOfDouble, _ }
+//import org.openmole.core.workflow.tools.{ ScalarOrSequenceOfDouble, _ }
+//import org.openmole.core.context.{ Namespace, _ }
+//import org.openmole.core.tools.math._
+//import org.openmole.core.workflow.domain._
 
-import scala.util.Random
+//import scala.util.Random
 
 object SpatialSampling {
 
@@ -133,23 +134,27 @@ object SpatialSampling {
     newVals
   }
 
+  def reactionDiffusionGridSample(samples: Int, gridSize: Int, growthRate: Double, totalPopulation: Double, alphaAtt: Double, diffusion: Double, diffusionSteps: Int, rng: scala.util.Random) = {
+    Array.fill(samples) {
+      reactionDiffusionGrid(gridSize, growthRate, totalPopulation, alphaAtt, diffusion, diffusionSteps, rng)
+    }
+  }
+
 }
 
 object RandomSpatialSampling {
-  def apply(samples: FromContext[Int], gridSize: FromContext[Int], prototypes: Val[_]*) =
-    new RandomSpatialSampling(samples, gridSize, prototypes: _*)
-  /*def apply(samples: FromContext[Int], gridSize: FromContext[Int], prototype: Val[T]) =
-    new RandomSpatialSampling(samples, gridSize, prototype)
-*/
+
+  def apply(samples: FromContext[Int], gridSize: FromContext[Int], prototype: Val[_]) =
+    new RandomSpatialSampling(samples, prototype, gridSize)
 
 }
 
-sealed class RandomSpatialSampling[D](val samples: FromContext[Int], val gridSize: FromContext[Int], val prototypes: Val[_]*) extends Sampling {
+sealed class RandomSpatialSampling[D](val samples: FromContext[Int], val prototype: Val[_], val gridSize: FromContext[Int]) extends Sampling {
   //  val factors: ScalarOrSequenceOfDouble[_]*
 
   //override def inputs = factors.flatMap(_.inputs)
   //override def prototypes = factors.map { _.prototype }
-  //override def prototypes = Seq(prototype)
+  override def prototypes = Seq(prototype)
 
   override def apply() = FromContext { p ⇒
     import p._
@@ -158,15 +163,55 @@ sealed class RandomSpatialSampling[D](val samples: FromContext[Int], val gridSiz
     val size = gridSize.from(context)
     def values = SpatialSampling.randomGridSample(size, s, random())
     //values.map(v ⇒ ScalarOrSequenceOfDouble.scaled(factors, v.flatten.toSeq).from(context).toArray.sliding(size, size).toArray).toIterator
-    values.map { case v ⇒ List(Variable(prototypes.toSeq(0).asInstanceOf[Val[Any]], v)) }.toIterator
+    //values.map { case v ⇒ List(Variable(prototypes.toSeq(0).asInstanceOf[Val[Any]], v)) }.toIterator
+    // TODO : multidimensional raster
+    values.map { case v ⇒ List(Variable(prototype.asInstanceOf[Val[Any]], v)) }.toIterator
   }
 }
 
-object ExponentialMixtureSampling {
+object ExponentialMixtureSpatialSampling {
+
+  def apply(samples: FromContext[Int], gridSize: FromContext[Int], prototype: Val[_], centersNumber: FromContext[Int] = 1, maxValue: FromContext[Double] = 1.0, kernelRadius: FromContext[Double] = 1.0) =
+    new ExponentialMixtureSpatialSampling(samples, prototype, gridSize, centersNumber, maxValue, kernelRadius)
 
 }
 
-object ReactionDiffusionSampling {
+sealed class ExponentialMixtureSpatialSampling[D](val samples: FromContext[Int], val prototype: Val[_], val gridSize: FromContext[Int],
+                                                  val centersNumber: FromContext[Int], maxValue: FromContext[Double], kernelRadius: FromContext[Double])
+  extends Sampling {
+
+  override def prototypes = Seq(prototype)
+
+  override def apply() = FromContext { p ⇒
+    import p._
+    def values = SpatialSampling.expMixtureGridSample(samples.from(context), gridSize.from(context), centersNumber.from(context),
+      maxValue.from(context), kernelRadius.from(context), random())
+    values.map { case v ⇒ List(Variable(prototype.asInstanceOf[Val[Any]], v)) }.toIterator
+  }
+}
+
+object ReactionDiffusionSpatialSampling {
+
+  def apply(samples: FromContext[Int], gridSize: FromContext[Int], prototype: Val[_],
+            alpha: FromContext[Double] = 1.0, beta: FromContext[Double] = 1.0,
+            nBeta: FromContext[Int] = 1, growthRate: FromContext[Double] = 100.0, totalPopulation: FromContext[Double] = 1000.0) = new ReactionDiffusionSpatialSampling(
+    samples, prototype, gridSize, alpha, beta, nBeta, growthRate, totalPopulation
+  )
+
+}
+
+sealed class ReactionDiffusionSpatialSampling[D](val samples: FromContext[Int], val prototype: Val[_], val gridSize: FromContext[Int],
+                                                 val alpha: FromContext[Double], val beta: FromContext[Double],
+                                                 val nBeta: FromContext[Int], val growthRate: FromContext[Double], val totalPopulation: FromContext[Double]) extends Sampling {
+
+  override def prototypes = Seq(prototype)
+
+  override def apply() = FromContext { p ⇒
+    import p._
+    def values = SpatialSampling.reactionDiffusionGridSample(samples.from(context), gridSize.from(context), growthRate.from(context), totalPopulation.from(context),
+      alpha.from(context), beta.from(context), nBeta.from(context), random())
+    values.map { case v ⇒ List(Variable(prototype.asInstanceOf[Val[Any]], v)) }.toIterator
+  }
 
 }
 
