@@ -4,3 +4,18 @@
 @import DocumentationPages._
 
 @h1{Installing OpenMOLE on your computer}
+
+  @h2{Try our demo website}
+  Before downloading OpenMOLE, you might want to get a preview of what you can do with it.
+  To do so, you can explore our @a{"demo website", href := shared.link.demo}.
+  
+  @h2{Download OpenMOLE}
+  Archive link
+  
+  @h2{Run OpenMOLE on Linux}
+  Extract the archive
+  Run openmole
+  
+  @h2{Run OpenMOLE on Windows}
+  DON'T
+  Tuto? App Ubuntu on Windows10? Disclaimer?
