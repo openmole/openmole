@@ -41,21 +41,21 @@ object RTask {
 
   sealed trait InstallCommand
   object InstallCommand {
-    case class RLibrary(name: String, version: String) extends InstallCommand
+    case class RLibrary(name: String, version: Option[String]) extends InstallCommand
 
     def toCommand(installCommands: InstallCommand) =
       installCommands match {
-        case RLibrary(name, "latest") ⇒
+        case RLibrary(name, None) ⇒
           //Vector(s"""R -e 'install.packages(c(${names.map(lib ⇒ '"' + s"$lib" + '"').mkString(",")}), dependencies = T)'""")
           s"""R --slave -e 'install.packages(c("$name"), dependencies = T); library("$name")'"""
-        case RLibrary(name, version) ⇒
+        case RLibrary(name, Some(version)) ⇒
           // need to install devtools to get older packages versions
           //apt update; apt-get -y install libssl-dev libxml2-dev libcurl4-openssl-dev libssh2-1-dev;
           s"""R --slave -e 'library(devtools); install_version("$name",version = "$version", dependencies = T); library("$name")'"""
       }
 
-    implicit def stringToRLibrary(name: String): InstallCommand = RLibrary(name, "latest")
-    implicit def stringCoupleToRLibrary(couple: (String, String)): InstallCommand = RLibrary(couple._1, couple._2)
+    implicit def stringToRLibrary(name: String): InstallCommand = RLibrary(name, None)
+    implicit def stringCoupleToRLibrary(couple: (String, Option[String])): InstallCommand = RLibrary(couple._1, couple._2)
     def installCommands(libraries: Vector[InstallCommand]): Vector[String] = libraries.map(InstallCommand.toCommand)
 
   }
@@ -74,9 +74,15 @@ object RTask {
     def version = rVersion
 
     // add additional installation of devtools only if needed
-    val installCommands = libraries.map { _ match { case RLibrary(_, v) ⇒ if (v == "latest") { 0.0 } else { 1.0 } } }.sum match {
-      case 0.0          ⇒ install ++ InstallCommand.installCommands(libraries.toVector ++ Seq(InstallCommand.RLibrary("jsonlite", "latest")))
-      case x if x > 0.0 ⇒ install ++ Seq("apt update", "apt-get -y install libssl-dev libxml2-dev libcurl4-openssl-dev libssh2-1-dev", """R --slave -e 'install.packages("devtools", dependencies = T); library(devtools);""") ++ InstallCommand.installCommands(libraries.toVector ++ Seq(InstallCommand.RLibrary("jsonlite", "latest")))
+    val installCommands = libraries.map {
+      _ match {
+        case RLibrary(_, None) ⇒ 0.0
+        case _  ⇒ 1.0
+      } }.sum match {
+      case 0.0          ⇒ install ++ InstallCommand.installCommands(libraries.toVector ++ Seq(InstallCommand.RLibrary("jsonlite", None)))
+      case x if x > 0.0 ⇒ install ++ Seq("apt update", "apt-get -y install libssl-dev libxml2-dev libcurl4-openssl-dev libssh2-1-dev",
+        """R --slave -e 'install.packages("devtools", dependencies = T); library(devtools);""") ++
+        InstallCommand.installCommands(libraries.toVector ++ Seq(InstallCommand.RLibrary("jsonlite", None)))
     }
 
     val uDockerArguments =
