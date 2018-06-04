@@ -2,7 +2,7 @@
 
 package org.openmole.plugin.sampling.spatial
 
-import org.openmole.core.context._
+import org.openmole.core.context.{ Namespace, _ }
 import org.openmole.core.expansion._
 import org.openmole.core.tools.math._
 import org.openmole.core.workflow.domain._
@@ -136,18 +136,20 @@ object SpatialSampling {
 }
 
 object RandomSpatialSampling {
-  /*def apply(samples: FromContext[Int], gridSize: FromContext[Int], factors: ScalarOrSequenceOfDouble[_]*) =
-    new RandomSpatialSampling(samples, gridSize, factors: _*)*/
-  def apply(val samples: FromContext[Int], val gridSize: FromContext[Int], val prototype: Val[_]) =
-  new RandomSpatialSampling(samples, gridSize, prototype)
+  def apply(samples: FromContext[Int], gridSize: FromContext[Int], prototypes: Val[_]*) =
+    new RandomSpatialSampling(samples, gridSize, prototypes: _*)
+  /*def apply(samples: FromContext[Int], gridSize: FromContext[Int], prototype: Val[T]) =
+    new RandomSpatialSampling(samples, gridSize, prototype)
+*/
 
 }
 
-sealed class RandomSpatialSampling[D](val samples: FromContext[Int], val gridSize: FromContext[Int], val prototype: Val[_]) extends Sampling {
-//  val factors: ScalarOrSequenceOfDouble[_]*
+sealed class RandomSpatialSampling[D](val samples: FromContext[Int], val gridSize: FromContext[Int], val prototypes: Val[_]*) extends Sampling {
+  //  val factors: ScalarOrSequenceOfDouble[_]*
 
   //override def inputs = factors.flatMap(_.inputs)
   //override def prototypes = factors.map { _.prototype }
+  //override def prototypes = Seq(prototype)
 
   override def apply() = FromContext { p ⇒
     import p._
@@ -156,7 +158,7 @@ sealed class RandomSpatialSampling[D](val samples: FromContext[Int], val gridSiz
     val size = gridSize.from(context)
     def values = SpatialSampling.randomGridSample(size, s, random())
     //values.map(v ⇒ ScalarOrSequenceOfDouble.scaled(factors, v.flatten.toSeq).from(context).toArray.sliding(size, size).toArray).toIterator
-    values.map {case v => Variable(prototype,v)}.toIterator
+    values.map { case v ⇒ List(Variable(prototypes.toSeq(0).asInstanceOf[Val[Any]], v)) }.toIterator
   }
 }
 
