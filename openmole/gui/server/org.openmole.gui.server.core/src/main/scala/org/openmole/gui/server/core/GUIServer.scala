@@ -104,7 +104,7 @@ class StartingPage extends ScalatraServlet with LifeCycle {
     context mount (this, "/*")
   }
 
-  get("/") {
+  get("/*") {
     def content =
       <html>
         <meta http-equiv="refresh" content="3;url=/"/>
