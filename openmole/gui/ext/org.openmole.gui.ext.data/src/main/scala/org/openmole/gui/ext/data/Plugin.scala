@@ -67,7 +67,7 @@ trait WizardGUIPlugin extends GUIPlugin {
     inputs:         Seq[ProtoTypePair],
     outputs:        Seq[ProtoTypePair],
     libraries:      Option[String],
-    resources:      Resources): Future[SafePath]
+    resources:      Resources): Future[WizardToTask]
 }
 
 trait WizardPluginFactory extends GUIPluginFactory {
@@ -77,6 +77,4 @@ trait WizardPluginFactory extends GUIPluginFactory {
   def fileType: FileType
 
   def parse(safePath: SafePath): Future[Option[LaunchingCommand]]
-
-  def help: String
 }

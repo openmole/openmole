@@ -33,6 +33,7 @@ import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.data.DataUtils._
+import org.openmole.gui.ext.tool.client
 import rx._
 
 @JSExportTopLevel("org.openmole.gui.plugin.wizard.jar.JarWizardFactory")
@@ -44,8 +45,6 @@ class JarWizardFactory extends WizardPluginFactory {
   def build(safePath: SafePath, onPanelFilled: (LaunchingCommand) ⇒ Unit = (LaunchingCommand) ⇒ {}): WizardGUIPlugin = new JarWizardGUI(safePath, onPanelFilled)
 
   def parse(safePath: SafePath): Future[Option[LaunchingCommand]] = OMPost()[JarWizardAPI].parse(safePath).call()
-
-  def help: String = "If your Jar sript depends on plugins, you should upload an archive (tar.gz, tgz) containing the root workspace. Then set the empeddWorkspace option to true in the oms script."
 
   def name: String = "Jar"
 }
@@ -121,31 +120,26 @@ class JarWizardGUI(safePath: SafePath, onMethodSelected: (LaunchingCommand) ⇒ 
     height := 300,
   )
 
-  lazy val columnCSS: ModifierSeq = Seq(
-    width := "50%",
-    display := "inline-block",
-    padding := 15
-  )
-
   lazy val panel: TypedTag[HTMLElement] = div(
-    div(columnCSS)(
+  div(client.columnCSS)(
       Rx{
       if(isOSGI()) hForm(
         div(embedAsPluginCheckBox.render)
           .render.withLabel("Embed jar as plugin ?"),
-        span("(Your jar is an OSGI bundle. The best way to use it is to embed it as a plugin)").render
-      ) else span("Your jar in not an OSGI bundle. An OSGI bundle is safer and more robust, so that we recomend you to render it as an OSGI bundle",
-        a(href := "http://www.openmole.org/Plugins.html", target := "_blank"))},
+        span(client.modelHelp +++ client.columnCSS, "Your jar is an OSGI bundle. The best way to use it is to embed it as a plugin.").render
+      ) else div(client.modelHelp,
+        div("Your jar in not an OSGI bundle. An OSGI bundle is safer and more robust, so that we recomend you to render it as an OSGI bundle."),
+        a(href := "http://www.openmole.org/Plugins.html", target := "_blank")("How to create an OSGI bundle ?"))},
       h3("Classes"),
       searchClassInput.tag,
-      div(tableCSS)(
+      div(tableCSS, paddingTop := 10)(
         Rx {
           classTable().map {
             _.render
           }.getOrElse(div())
         }).render
     ),
-    div(columnCSS)(
+    div(client.columnCSS)(
       h3("Methods"),
       div(tableCSS)(
         Rx {

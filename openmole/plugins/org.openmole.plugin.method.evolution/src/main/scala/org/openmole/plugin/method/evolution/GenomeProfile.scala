@@ -23,32 +23,65 @@ import cats._
 object GenomeProfile {
 
   def apply(
-    x:         Val[Double],
-    nX:        Int,
-    genome:    Genome,
-    objective: Objective
-  ) =
-    NichedNSGA2(
-      Vector(NichedNSGA2.NichedElement.Continuous(x, nX)),
-      genome,
-      objectives = Seq(objective),
-      nicheSize = 1
-    )
-
-  def apply(
     x:          Val[Double],
     nX:         Int,
     genome:     Genome,
     objective:  Objective,
-    stochastic: Stochastic,
-    nicheSize:  Int         = 20
-  ) =
-    NichedNSGA2(
-      Vector(NichedNSGA2.NichedElement.Continuous(x, nX)),
-      genome,
-      Seq(objective),
-      nicheSize,
-      stochastic = stochastic
+    stochastic: OptionalArgument[Stochastic] = None,
+    nicheSize:  Int                          = 20
+  ) = {
+    stochastic.option match {
+      case None ⇒
+        NichedNSGA2(
+          Vector(NichedNSGA2.NichedElement.Continuous(x, nX)),
+          genome,
+          objectives = Seq(objective),
+          nicheSize = 1
+        )
+      case Some(stochastic) ⇒
+        NichedNSGA2(
+          Vector(NichedNSGA2.NichedElement.Continuous(x, nX)),
+          genome,
+          Seq(objective),
+          nicheSize,
+          stochastic = stochastic
+        )
+    }
+  }
+
+}
+
+object GenomeProfileEvolution {
+
+  import org.openmole.core.dsl._
+  import org.openmole.core.workflow.puzzle._
+
+  def apply(
+    x:            Val[Double],
+    nX:           Int,
+    genome:       Genome,
+    objective:    Objective,
+    evaluation:   Puzzle,
+    termination:  OMTermination,
+    nicheSize:    Int                          = 20,
+    stochastic:   OptionalArgument[Stochastic] = None,
+    parallelism:  Int                          = 1,
+    distribution: EvolutionPattern             = SteadyState()) =
+    EvolutionPattern.build(
+      algorithm =
+        GenomeProfile(
+          x = x,
+          nX = nX,
+          genome = genome,
+          objective = objective,
+          stochastic = stochastic
+        ),
+      evaluation = evaluation,
+      termination = termination,
+      stochastic = stochastic,
+      parallelism = parallelism,
+      distribution = distribution
     )
 
 }
+

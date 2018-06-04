@@ -24,6 +24,7 @@ import org.openmole.gui.ext.tool.client.OMPost
 import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
 import autowire._
+import org.openmole.gui.ext.tool.client
 import org.scalajs.dom.raw.HTMLElement
 import scaladget.bootstrapnative.SelectableButtons
 
@@ -58,9 +59,12 @@ class NetlogoWizardGUI extends WizardGUIPlugin {
     selectableButton("No", onclick = () ⇒ println("NO"))
   )
 
-  lazy val panel: TypedTag[HTMLElement] = hForm(
-    div(embedWorkspaceCheckBox.render)
-      .render.withLabel("EmbedWorkspace")
+  lazy val panel: TypedTag[HTMLElement] = div(
+    hForm(
+      div(embedWorkspaceCheckBox.render)
+        .render.withLabel("EmbedWorkspace")
+    ),
+    div(client.modelHelp +++ client.columnCSS, "If your Jar sript depends on plugins, you should upload an archive (tar.gz, tgz) containing the root workspace. Then set the empeddWorkspace option to true in the oms script.")
   )
 
   def save(

@@ -35,7 +35,7 @@ class RWizardApiImpl(s: Services) extends RWizardAPI {
     outputs:        Seq[ProtoTypePair],
     libraries:      Option[String],
     resources:      Resources,
-    data:           RWizardData): SafePath = {
+    data:           RWizardData): WizardToTask = {
 
     val modelData = wizardModelData(inputs, outputs, resources.all.map {
       _.safePath.name
@@ -49,7 +49,7 @@ class RWizardApiImpl(s: Services) extends RWizardAPI {
       s""")\n\n$task hook ToStringHook()"""
 
     target.write(content)(context = org.openmole.gui.ext.data.ServerFileSystemContext.project, workspace = Workspace.instance)
-    target
+    WizardToTask(target)
   }
 
   def parse(safePath: SafePath): Option[LaunchingCommand] = None

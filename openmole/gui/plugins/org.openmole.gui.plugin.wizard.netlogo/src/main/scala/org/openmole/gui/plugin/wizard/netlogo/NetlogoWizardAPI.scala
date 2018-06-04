@@ -28,7 +28,7 @@ trait NetlogoWizardAPI {
     outputs:        Seq[ProtoTypePair],
     libraries:      Option[String],
     resources:      Resources,
-    data:           NetlogoWizardData): SafePath
+    data:           NetlogoWizardData): WizardToTask
 
   def parse(safePath: SafePath): Option[LaunchingCommand]
 }

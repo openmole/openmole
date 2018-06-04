@@ -45,7 +45,7 @@ class NativeWizardApiImpl(s: Services) extends NativeWizardAPI {
     outputs:        Seq[ProtoTypePair],
     libraries:      Option[String],
     resources:      Resources,
-    data:           NativeWizardData): SafePath = {
+    data:           NativeWizardData): WizardToTask = {
 
     val data = wizardModelData(inputs, outputs, resources.all.map { _.safePath.name }, Some("netLogoInputs"), Some("netLogoOutputs"))
     val task = s"${executableName.split('.').head.toLowerCase}Task"
@@ -56,7 +56,7 @@ class NativeWizardApiImpl(s: Services) extends NativeWizardAPI {
       s""")\n\n$task hook ToStringHook()"""
 
     target.write(content)(context = org.openmole.gui.ext.data.ServerFileSystemContext.project, workspace = Workspace.instance)
-    target
+    WizardToTask(target)
   }
 
   def parse(safePath: SafePath): Option[LaunchingCommand] = {

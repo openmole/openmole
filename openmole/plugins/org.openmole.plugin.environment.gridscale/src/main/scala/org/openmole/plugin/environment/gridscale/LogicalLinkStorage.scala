@@ -39,21 +39,22 @@ object LogicalLinkStorage {
 
     override def upload(t: LogicalLinkStorage, src: File, dest: String, options: TransferOptions): Unit = {
       def copy = StorageInterface.upload(false, local.writeFile(_, _))(src, dest, options)
+
       if (options.canMove) mv(t, src.getPath, dest)
-      else if (options.forceCopy) copy
+      else if (options.forceCopy || t.forceCopy) copy
       else local.link(src.getPath, dest) //new File(dest).createLinkTo(src)
     }
     override def download(t: LogicalLinkStorage, src: String, dest: File, options: TransferOptions): Unit = {
       def copy = StorageInterface.download(false, local.readFile[Unit](_, _))(src, dest, options)
 
       if (options.canMove) mv(t, src, dest.getPath)
-      else if (options.forceCopy) copy
+      else if (options.forceCopy || t.forceCopy) copy
       else local.link(src, dest.getPath) //dest.createLinkTo(src)
     }
   }
 }
 
-case class LogicalLinkStorage()
+case class LogicalLinkStorage(forceCopy: Boolean = false)
 //
 //object LogicalLinkStorage {
 //  def apply(root: String) = {

@@ -27,7 +27,7 @@ import org.openmole.core.workflow.tools.Stubs._
 
 class WorkflowSpec extends FlatSpec with Matchers {
 
-  def nsga2 = {
+  def nsga2(wrap: Boolean = true) = {
     val x = Val[Double]
     val y = Val[Double]
     val z = Val[Int]
@@ -49,7 +49,8 @@ class WorkflowSpec extends FlatSpec with Matchers {
         ),
       evaluation = puzzle,
       parallelism = 10,
-      termination = 10
+      termination = 10,
+      wrap = wrap
     )
   }
 
@@ -114,7 +115,7 @@ class WorkflowSpec extends FlatSpec with Matchers {
   }
 
   "Steady state workflow" should "have no validation error" in {
-    Validation(nsga2.head.toMole).toList match {
+    Validation(nsga2().head.toMole).toList match {
       case Nil ⇒
       case l   ⇒ sys.error("Several validation errors have been found: " + l.mkString("\n"))
     }
@@ -126,7 +127,7 @@ class WorkflowSpec extends FlatSpec with Matchers {
   }
 
   "Island workflow" should "have no validation error" in {
-    val islandEvolutionNSGA2 = IslandEvolution(nsga2, 10, 50, 100).head.toMole
+    val islandEvolutionNSGA2 = IslandEvolution(nsga2(), 10, 50, 100).head.toMole
 
     Validation(islandEvolutionNSGA2).toList match {
       case Nil ⇒
@@ -138,4 +139,12 @@ class WorkflowSpec extends FlatSpec with Matchers {
       case l   ⇒ sys.error("Several validation errors have been found: " + l.mkString("\n"))
     }
   }
+
+  "Steady state workflow with wrapping" should "have no validation error" in {
+    Validation(nsga2(wrap = false).head.toMole).toList match {
+      case Nil ⇒
+      case l   ⇒ sys.error("Several validation errors have been found: " + l.mkString("\n"))
+    }
+  }
+
 }

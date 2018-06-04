@@ -56,12 +56,63 @@ package object evolution {
   case class AfterGeneration(steps: Long) extends OMTermination
   case class AfterDuration(duration: Time) extends OMTermination
 
+  sealed trait EvolutionPattern
+
+  object EvolutionPattern {
+    def build[T](
+      algorithm:    T,
+      evaluation:   Puzzle,
+      termination:  OMTermination,
+      stochastic:   OptionalArgument[Stochastic] = None,
+      parallelism:  Int                          = 1,
+      distribution: EvolutionPattern             = SteadyState())(implicit wfi: WorkflowIntegration[T]) =
+      distribution match {
+        case s: SteadyState ⇒
+          SteadyStateEvolution(
+            algorithm = algorithm,
+            evaluation = evaluation,
+            parallelism = parallelism,
+            termination = termination,
+            wrap = s.wrap
+          )
+        case i: Island ⇒
+          val steadyState =
+            SteadyStateEvolution(
+              algorithm = algorithm,
+              evaluation = evaluation,
+              termination = i.termination,
+              wrap = i.wrap
+            )
+
+          IslandEvolution(
+            island = steadyState,
+            parallelism = parallelism,
+            termination = termination,
+            sample = i.sample
+          )
+      }
+
+  }
+
+  case class SteadyState(wrap: Boolean = true) extends EvolutionPattern
+  case class Island(termination: OMTermination, sample: OptionalArgument[Int] = None, wrap: Boolean = true) extends EvolutionPattern
+
   import shapeless._
 
-  def SteadyStateEvolution[T](algorithm: T, evaluation: Puzzle, termination: OMTermination, parallelism: Int = 1)(implicit wfi: WorkflowIntegration[T]) = {
+  def SteadyStateEvolution[T](algorithm: T, evaluation: Puzzle, termination: OMTermination, parallelism: Int = 1, wrap: Boolean = true)(implicit wfi: WorkflowIntegration[T]) = {
     val t = wfi(algorithm)
 
-    val evaluationCapsule = Slot(MoleTask(evaluation) set (inputs += (t.inputPrototypes: _*), outputs += (t.outputPrototypes: _*)))
+    val (evaluationPuzzle, delegate): (Puzzle, Vector[Capsule]) =
+      if (wrap) {
+        val moleCapsule = Capsule(MoleTask(evaluation) set (inputs += (t.inputPrototypes: _*), outputs += (t.outputPrototypes: _*)))
+        (moleCapsule, Vector(moleCapsule))
+      }
+      else {
+        val firstEvaluation = EmptyTask() set ((inputs, outputs) += (t.inputPrototypes: _*))
+        val lastEvaluation = EmptyTask() set ((inputs, outputs) += (t.outputPrototypes: _*))
+        val puzzle = firstEvaluation -- evaluation -- lastEvaluation
+        (puzzle, Puzzle.capsules(puzzle))
+      }
 
     val randomGenomes =
       BreedTask(algorithm, parallelism) set (
@@ -120,7 +171,7 @@ package object evolution {
     val masterSlave = MasterSlave(
       randomGenomes,
       masterTask,
-      scalingGenomeTask -- Strain(evaluationCapsule),
+      scalingGenomeTask -- Strain(evaluationPuzzle),
       t.populationPrototype, t.statePrototype
     )
 
@@ -135,9 +186,9 @@ package object evolution {
 
     val puzzle =
       ((firstCapsule -- masterSlave) >| (Capsule(last, strain = true) when t.terminatedPrototype)) &
-        (firstCapsule oo (evaluationCapsule, filter = Block(t.populationPrototype, t.statePrototype)))
+        (firstCapsule oo (evaluationPuzzle, filter = Block(t.populationPrototype, t.statePrototype)))
 
-    val gaPuzzle = OutputEnvironmentPuzzleContainer(puzzle, masterSlave.last, evaluationCapsule)
+    val gaPuzzle = OutputEnvironmentPuzzleContainer(puzzle, masterSlave.last, delegate)
 
     gaPuzzle :: algorithm :: HNil
   }
@@ -243,7 +294,7 @@ package object evolution {
       ((firstCapsule -- masterSlave) >| (Capsule(last, strain = true) when t.terminatedPrototype)) &
         (firstCapsule oo (islandCapsule, Block(t.populationPrototype, t.statePrototype)))
 
-    val gaPuzzle = OutputEnvironmentPuzzleContainer(puzzle, masterSlave.last, islandCapsule)
+    val gaPuzzle = OutputEnvironmentPuzzleContainer(puzzle, masterSlave.last, Vector(islandCapsule))
 
     gaPuzzle :: algorithm :: HNil
   }

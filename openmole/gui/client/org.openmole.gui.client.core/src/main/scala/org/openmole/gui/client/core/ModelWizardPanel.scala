@@ -17,7 +17,7 @@ package org.openmole.gui.client.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.client.core.alert.AlertPanel
+import org.openmole.gui.client.core.alert.{ AlertPanel, BannerAlert }
 import org.openmole.gui.client.core.files._
 import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.data.FileType._
@@ -209,10 +209,7 @@ class ModelWizardPanel {
         factory
       } match {
         case Some(f: WizardPluginFactory) ⇒
-          val help = f.help
-          div(
-            // (if (help.isEmpty) div()
-            //    else div(modelHelp)(f.help))(colMD(2)),
+          div(marginTop := 20)(
             currentPluginPanel().map {
               _.panel
             }.getOrElse(div())
@@ -321,10 +318,7 @@ class ModelWizardPanel {
     launchingCommand() = lc
     launchingCommand.now match {
       case Some(lc: LaunchingCommand) ⇒ setReactives(lc)
-      case None ⇒
-        currentReactives() = Seq()
-        dialog.hide
-        buildScript(safePath)
+      case _                          ⇒
     }
   }
 
@@ -417,10 +411,16 @@ class ModelWizardPanel {
           },
           resources.now
         ).foreach {
-            b ⇒
-              treeNodeTabs -- b
-              treeNodePanel.displayNode(FileNode(Var(b.name), 0L, 0L))
-              TreeNodePanel.refreshAndDraw
+            wtt ⇒
+              if (wtt.errors.isEmpty) {
+                treeNodeTabs -- wtt.safePath
+                treeNodePanel.displayNode(FileNode(Var(wtt.safePath.name), 0L, 0L))
+                TreeNodePanel.refreshAndDraw
+              }
+              else {
+                dialog.hide
+                BannerAlert.registerWithDetails("Plugin import failed", wtt.errors.map { _.stackTrace }.mkString("\n"))
+              }
           }
       }
   }

@@ -149,7 +149,7 @@ package object client {
     styles.left := 330,
     paddingRight := 340,
     fixedPosition,
-    top := 60,
+    top := 70,
     transition := "all 0.1 s ease - out 0 s",
     width := "99%",
     height := "calc (100 % -140 px)"
@@ -458,6 +458,7 @@ package object client {
 
   //MARKET PANEL
   lazy val docEntry: ModifierSeq = Seq(
+    pointer,
     color(WHITE),
     backgroundColor := DARK_GREY,
     borderRadius := "4px",
@@ -470,7 +471,6 @@ package object client {
   )
 
   lazy val docTitleEntry: ModifierSeq = Seq(
-    cursor := "pointer",
     paddingTop := 6
   )
 
@@ -657,6 +657,12 @@ package object client {
     color("#444")
   )
 
+  lazy val columnCSS: ModifierSeq = Seq(
+    width := "50%",
+    display := "inline-block",
+    padding := 15
+  )
+
   // PLUGIN PANEL
   lazy val uploadPlugin: ModifierSeq = Seq(
     marginRight := 50,
@@ -682,7 +688,7 @@ package object client {
     paddingTop := 6,
     floatRight,
     right := 50,
-    color("lightgrey")
+    color(WHITE)
   )
 
   lazy val dropdownError: ModifierSeq = Seq(
@@ -798,7 +804,7 @@ package object client {
   lazy val bannerAlert: ModifierSeq = Seq(
     width := "100%",
     absolutePosition,
-    height := 60,
+    height := 70,
     zIndex := 5
   )
 

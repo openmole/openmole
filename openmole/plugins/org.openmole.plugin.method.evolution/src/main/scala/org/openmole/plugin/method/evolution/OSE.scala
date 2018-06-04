@@ -193,7 +193,7 @@ object OSE {
           import p._
           import org.openmole.core.context._
 
-          val res = MGONoisyOSE.result(state, om.aggregation, Genome.continuous(om.genome).from(context))
+          val res = MGONoisyOSE.result(state, population, om.aggregation, Genome.continuous(om.genome).from(context), om.limit)
           val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false).from(context)
           val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness)).from(context)
           val samples = Variable(GAIntegration.samples.array, res.map(_.replications).toArray)
@@ -372,5 +372,38 @@ object OSE {
 
       WorkflowIntegration.StochasticGA.toEvolutionWorkflow(integration)
   }
+
+}
+
+object OSEEvolution {
+
+  import org.openmole.core.dsl._
+  import org.openmole.core.workflow.puzzle._
+
+  def apply(
+    origin:       Seq[OSE.OriginAxe],
+    objectives:   Seq[OSE.FitnessPattern],
+    evaluation:   Puzzle,
+    termination:  OMTermination,
+    mu:           Int                          = 200,
+    genome:       Genome                       = Seq(),
+    stochastic:   OptionalArgument[Stochastic] = None,
+    parallelism:  Int                          = 1,
+    distribution: EvolutionPattern             = SteadyState()) =
+    EvolutionPattern.build(
+      algorithm =
+        OSE(
+          origin = origin,
+          genome = genome,
+          objectives = objectives,
+          stochastic = stochastic,
+          mu = mu
+        ),
+      evaluation = evaluation,
+      termination = termination,
+      stochastic = stochastic,
+      parallelism = parallelism,
+      distribution = distribution
+    )
 
 }

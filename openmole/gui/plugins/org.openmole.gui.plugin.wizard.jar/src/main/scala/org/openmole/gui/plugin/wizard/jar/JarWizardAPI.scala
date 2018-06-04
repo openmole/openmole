@@ -29,7 +29,7 @@ trait JarWizardAPI {
     outputs:        Seq[ProtoTypePair],
     libraries:      Option[String],
     resources:      Resources,
-    data:           JarWizardData): SafePath
+    data:           JarWizardData): WizardToTask
 
   def parse(safePath: SafePath): Option[LaunchingCommand]
 

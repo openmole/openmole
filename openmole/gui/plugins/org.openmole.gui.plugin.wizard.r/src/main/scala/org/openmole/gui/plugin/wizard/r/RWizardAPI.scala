@@ -28,7 +28,7 @@ trait RWizardAPI {
     outputs:        Seq[ProtoTypePair],
     libraries:      Option[String],
     resources:      Resources,
-    data:           RWizardData): SafePath
+    data:           RWizardData): WizardToTask
 
   def parse(safePath: SafePath): Option[LaunchingCommand]
 }
