@@ -180,7 +180,7 @@ object MoleExecution extends JavaLogger {
             val taskContext = TaskExecutionContext(newFile.baseDir, subMoleExecutionState.moleExecution.defaultEnvironment, preference, threadProvider, fileService, workspace, outputRedirection, subMoleExecutionState.moleExecution.taskCache, subMoleExecutionState.moleExecution.lockRepository)
             moleJob.perform(taskContext)
             subMoleExecutionState.masterCapsuleRegistry.register(c, ticket.parentOrException, c.toPersist(moleJob.context))
-            MoleExecutionMessage.send(subMoleExecutionState.moleExecution)(MoleExecutionMessage.JobFinished(subMoleExecutionState.id)(moleJob, moleJob.state), priority = Some(MoleExecutionMessage.highPriority))
+            MoleExecutionMessage.send(subMoleExecutionState.moleExecution)(MoleExecutionMessage.JobFinished(subMoleExecutionState.id)(moleJob, moleJob.state))
           }
         case _ ⇒
           def stateChanged(job: MoleJob, oldState: State, newState: State) = {
@@ -547,7 +547,7 @@ class MoleExecution(
   val id:                          String
 ) {
 
-  val messageQueue = new PriorityQueue[MoleExecutionMessage]()
+  val messageQueue = PriorityQueue[MoleExecutionMessage](fifo = true)
 
   private[mole] var _started = false
   private[mole] var _canceled = false
