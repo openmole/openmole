@@ -74,15 +74,13 @@ object RTask {
     def version = rVersion
 
     // add additional installation of devtools only if needed
-    val installCommands = libraries.map {
-      _ match {
-        case RLibrary(_, None) ⇒ 0.0
-        case _  ⇒ 1.0
-      } }.sum match {
-      case 0.0          ⇒ install ++ InstallCommand.installCommands(libraries.toVector ++ Seq(InstallCommand.RLibrary("jsonlite", None)))
-      case x if x > 0.0 ⇒ install ++ Seq("apt update", "apt-get -y install libssl-dev libxml2-dev libcurl4-openssl-dev libssh2-1-dev",
+    val installCommands = if (libraries.exists { case l: InstallCommand.RLibrary ⇒ l.version.isDefined }) {
+      install ++ Seq("apt update", "apt-get -y install libssl-dev libxml2-dev libcurl4-openssl-dev libssh2-1-dev",
         """R --slave -e 'install.packages("devtools", dependencies = T); library(devtools);""") ++
         InstallCommand.installCommands(libraries.toVector ++ Seq(InstallCommand.RLibrary("jsonlite", None)))
+    }
+    else {
+      install ++ InstallCommand.installCommands(libraries.toVector ++ Seq(InstallCommand.RLibrary("jsonlite", None)))
     }
 
     val uDockerArguments =
