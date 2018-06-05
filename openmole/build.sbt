@@ -300,7 +300,7 @@ def corePlugins =
     allDomain ++
     allTools
 
-def allTools = Seq(netLogoAPI, netLogo5API, netLogo6API, csvTool, pattern)
+def allTools = Seq(netLogoAPI, netLogo5API, netLogo6API, csvTool, pattern, json)
 
 lazy val defaultActivator = OsgiKeys.bundleActivator := Some(name.value + ".Activator")
 
@@ -345,6 +345,11 @@ lazy val csvTool = OsgiProject(pluginDir, "org.openmole.plugin.tool.csv", import
 ) settings (toolsSettings: _*)
 
 lazy val pattern = OsgiProject(pluginDir, "org.openmole.plugin.tool.pattern", imports = Seq("*")) dependsOn(exception, openmoleDSL) settings (toolsSettings: _*) settings (defaultActivator)
+
+
+lazy val json = OsgiProject(pluginDir, "org.openmole.plugin.tool.json", imports = Seq("*")) dependsOn(exception, openmoleDSL) settings (toolsSettings: _*) settings (
+  libraryDependencies += Libraries.json4s,
+  libraryDependencies += Libraries.shapeless)
 
 
 /* Domain */
@@ -510,8 +515,7 @@ lazy val udocker = OsgiProject(pluginDir, "org.openmole.plugin.task.udocker", im
   libraryDependencies += Libraries.circe,
   libraryDependencies ++= Libraries.httpClient) settings (pluginSettings: _*)
 
-lazy val r = OsgiProject(pluginDir, "org.openmole.plugin.task.r", imports = Seq("*")) dependsOn (udocker) settings (pluginSettings: _*) settings (
-  libraryDependencies += Libraries.json4s)
+lazy val r = OsgiProject(pluginDir, "org.openmole.plugin.task.r", imports = Seq("*")) dependsOn (udocker, json) settings (pluginSettings: _*)
 
 /* ---------------- REST ------------------- */
 

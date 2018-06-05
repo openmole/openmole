@@ -47,7 +47,7 @@ class ThreadProvider(poolSize: Int) {
     new ThreadPoolExecutor(poolSize, poolSize, 60L, TimeUnit.SECONDS, new LinkedBlockingQueue[Runnable](), threadFactory)
 
   lazy val scheduler = Executors.newScheduledThreadPool(1, threadFactory)
-  lazy val taskQueue = PriorityQueue[ThreadProvider.Closure]
+  lazy val taskQueue = PriorityQueue[ThreadProvider.Closure](true)
 
   var stopped = false
 

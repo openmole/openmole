@@ -120,40 +120,28 @@ Single and multi-criteria calibration in OpenMOLE are both done with the NSGA2 a
 It takes the following parameters:
 
 @ul
-    @li{@hl.code("mu"): the population size,}
-    @li{@hl.code("genome"): a list of the model parameters and their respective intervals,}
-    @li{@hl.code("objectives"): a list of the distance measures (which in the single criterion case will contain only one measure)}
-
-@p
-  You will also need a evolutionary scheme to drive the evolution and can use the SteadyStateEvolution scheme.
-  it takes the following parameters:
-
-@ul
+  @li{@hl.code("mu"): the population size,}
+  @li{@hl.code("genome"): a list of the model parameters and their respective intervals,}
+  @li{@hl.code("objectives"): a list of the distance measures (which in the single criterion case will contain only one measure)}
   @li{@hl.code("algorithm"): the nsga2 algorithm defining the evolution,}
   @li{@hl.code("evaluation"): the OpenMOLE task that runs the simulation,}
   @li{@hl.code("parallelism"): the number of simulations that will be run in parallel,}
   @li{@hl.code("termination"): the total number of evaluations (execution of the task passed to the parameter "evaluation") to be executed}
 
 @p
-  In your OpenMOLE script, the NSGA2 algorithm and SteadyStateEvolution scheme are used like so:
+  In your OpenMOLE script, the NSGA2 algorithm scheme is defined like so:
 @br @hl.openmole("""
 val nsga2 =
-  NSGA2(
-    mu = 50,
+  NSGA2Evolution(
+    evaluation = modelTask,
+    parallelism = 10,
+    termination = 100,
     genome = Seq(
       param1 in (0.0, 99.0),
       param2 in (0.0, 99.0),
       param3 in (0, 5),
       param4 in List("apple", "banana", "strawberry")),
     objectives = Seq(distance1, distance2)
-  )
-
-val evolution =
-  SteadyStateEvolution(
-    algorithm = nsga2,
-    evaluation = modelTask,
-    parallelism = 10,
-    termination = 100
   )
 """, header= modelAndVariables, name = "Calibration")
 where @hl.code("param1") and @hl.code("param2") are input of the @hl.code("modelTask"), and @hl.code("distance1") and @hl.code("distance2") are its outputs.

@@ -19,9 +19,12 @@ package org.openmole.core.workflow
 
 import scala.concurrent.stm._
 import org.openmole.tool.file._
+
 import scala.ref.WeakReference
 import cats._
 import cats._
+import org.openmole.core.exception.UserBadDataError
+import org.openmole.core.expansion.{ FromContext, ToFromContext }
 
 package tools {
 
@@ -53,17 +56,8 @@ package tools {
     implicit def seqOfFunction[T](s: Seq[T ⇒ T]) = s.sequence
     implicit def arrayOfFunction[T](s: Array[T ⇒ T]) = s.toSeq.sequence
 
-    object OptionalArgument {
-      implicit def valueToOptionalOfForContext[T](v: T)(implicit toFromContext: ToFromContext[T, T]) = OptionalArgument(Some(FromContext.contextConverter(v)))
-      implicit def valueToOptionalArgument[T](v: T) = OptionalArgument(Some(v))
-      implicit def noneToOptionalArgument[T](n: None.type) = OptionalArgument[T](n)
-
-      def apply[T](t: T): OptionalArgument[T] = OptionalArgument(Some(t))
-    }
-
-    case class OptionalArgument[T](option: Option[T] = None) {
-      def mustBeDefined(name: String) = option.getOrElse(throw new UserBadDataError(s"Parameter $name has not been set."))
-    }
+    def OptionalArgument = tools.OptionalArgument
+    type OptionalArgument[T] = tools.OptionalArgument[T]
 
     implicit def optionalArgumentToOption[T](optionalArgument: OptionalArgument[T]) = optionalArgument.option
     implicit def fromStringToExpandedStringOptionalArgument(s: String) = OptionalArgument[FromContext[String]](Some(ExpandedString(s)))
@@ -75,4 +69,3 @@ package tools {
   }
 }
 
-package object tools

@@ -20,7 +20,7 @@ package org.openmole.site
 import java.io.File
 import java.nio.CharBuffer
 
-import ammonite.ops.{ Path, write }
+import ammonite.ops._
 import org.openmole.site.tools._
 import scalatags.Text.{ TypedTag, all }
 import scalatags.Text.all._
@@ -124,37 +124,17 @@ object Site extends App {
 
           val sitePage =
             page match {
-              case Pages.index ⇒ ContentPage(div(paddingTop := 50), div(page.content))
+              case Pages.index ⇒ ContentPage(div(paddingTop := 100), div(page.content))
               case _           ⇒ UserGuide.currentStep(page)
             }
 
-          val navigationStyle = Seq(
-            backgroundColor := "#4096c5",
-            color := "white",
-            borderRadius := "50%",
-            textDecoration := "none",
-            display := "inline-block",
-            padding := "2px 12px",
-            fontSize := "20px",
-            fontWeight := "bold"
-          )
-
           body(position := "relative", minHeight := "100%")(
-            Menu.build,
+            Menu.build(sitePage),
             div(id := "main-content")(
               div(`id` := "sidebar-right", paddingTop := 200)(
                 page.source.map(source ⇒ tools.linkButton("Suggest edits", tools.modificationLink(source), classIs(btn ++ btn_danger))
                 )),
               sitePage.name,
-              div(margin := "0 auto", width := 250, paddingBottom := 40)(
-                sitePage match {
-                  case s: StepPage ⇒
-                    Seq(
-                      span(tools.to(s.previous)(navigationStyle)(raw("&#8249;")), s" ${s.previous.name}", paddingRight := 30),
-                      span(s"${s.next.name} ", tools.to(s.next)(navigationStyle)(raw("&#8250;")))
-                    )
-                  case _ ⇒ Seq[Modifier]()
-                }),
               sitePage.element
             ),
             sitePage match {

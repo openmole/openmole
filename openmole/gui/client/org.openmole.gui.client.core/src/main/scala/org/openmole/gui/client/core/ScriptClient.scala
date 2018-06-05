@@ -80,7 +80,7 @@ object ScriptClient {
       timer() = Some(setInterval(5000) {
         post(3 seconds, 5 minutes)[Api].isAlive().call().foreach { x ⇒
           if (x) {
-            dom.window.location.href = routes.connectionRoute
+            CoreUtils.setRoute(routes.connectionRoute)
             timer.now.foreach {
               clearInterval
             }
