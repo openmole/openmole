@@ -1,7 +1,5 @@
 package org.openmole.site
 
-import org.openmole.core.buildinfo.version
-
 /*
  * Copyright (C) 2015 Romain Reuillon
  *
