@@ -41,16 +41,10 @@ The following commands are to be typed in your command shell (prompt $> )
         $> git lfs install
         $> git lfs clone git@github.com:openmole/openmole.git
         """, "plain")
-     @li
-        Set the git submodules inside the openmole subdirectory
-    @hl.highlight("""
-    $> cd openmole
-    $> git submodule update --init --remote
-    """, "plain")
     @li
        Publish locally the content of the  @hl.highlight("build-system", "plain") and  @hl.highlight("libraries", "plain") subdirectory
     @hl.highlight("""
-       $> cd build-system
+       $> cd openmole/build-system
        $> sbt publishLocal
        $> cd ../libraries/
        $> sbt publishLocal
@@ -126,12 +120,8 @@ buildSite --target /tmp/
 @br
 By default, pages are located in @hl.highlight("openmole/openmole/bin/org.openmole.site/jvm/target/site/","plain")
 
-Updating the git submodules is @b{mandatory the first time} you set up your OpenMOLE development environment.
-It pulls the examples from the @aa("market place", href := shared.link.repo.market) that are necessary to build the documentation website.
-
-Optionally you can use @hl.highlight("--no-test", "plain") in order to disable the tests of the scripts, which
-is (really) time-consuming. The tests concerning the examples from the OpenMOLE market can in turn be disabled
-using @hl.highlight("--no-market-test", "plain").
+Optionally you can use @hl.highlight("--test", "plain") in order to verify the syntax of the scripts extracts in the documentation is valid.
+Bear in mind this is (really) @b{time-consuming}.
 
 @h2{Edit Documentation pages}
 
