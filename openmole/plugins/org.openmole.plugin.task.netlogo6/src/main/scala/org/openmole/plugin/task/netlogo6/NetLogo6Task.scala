@@ -53,13 +53,12 @@ object NetLogo6Task {
     ignoreError:       Boolean                    = false
   )(implicit name: sourcecode.Name, definitionScope: DefinitionScope): NetLogo6Task =
     withDefaultArgs(
-      workspace = Workspace(script = script, workspace = workspace.getName),
+      workspace = Workspace.Directory(directory = workspace, script = script, name = workspace.getName),
       launchingCommands = launchingCommands,
       seed = seed,
       ignoreError = ignoreError
     ) set (
-        inputs += (seed.option.toSeq: _*),
-        resources += workspace
+        inputs += (seed.option.toSeq: _*)
       )
 
   def file(
@@ -69,13 +68,12 @@ object NetLogo6Task {
     ignoreError:       Boolean                    = false
   )(implicit name: sourcecode.Name, definitionScope: DefinitionScope): NetLogo6Task =
     withDefaultArgs(
-      workspace = Workspace(script = script.getName),
+      workspace = Workspace.Script(script = script, name = script.getName),
       launchingCommands = launchingCommands,
       seed = seed,
       ignoreError = ignoreError
     ) set (
-        inputs += (seed.option.toSeq: _*),
-        resources += script
+        inputs += (seed.option.toSeq: _*)
       )
 
   def apply(

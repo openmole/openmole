@@ -31,7 +31,14 @@ import org.openmole.plugin.tool.netlogo.NetLogo
 import org.openmole.tool.cache._
 
 object NetLogoTask {
-  case class Workspace(script: String, workspace: OptionalArgument[String] = None)
+  sealed trait Workspace
+
+  object Workspace {
+    case class Script(script: File, name: String) extends Workspace
+    case class Directory(directory: File, name: String, script: String) extends Workspace
+  }
+
+  //case class Workspace(script: String, workspace: OptionalArgument[String] = None)
   lazy val netLogoWorkspace = CacheKey[org.openmole.plugin.tool.netlogo.NetLogo]()
 }
 
@@ -71,18 +78,24 @@ trait NetLogoTask extends Task with ValidateTask {
   override protected def process(executionContext: TaskExecutionContext) = FromContext { parameters ⇒
     External.withWorkDir(executionContext) { tmpDir ⇒
       import parameters._
+      import org.openmole.tool.file._
 
-      val workDir =
-        workspace.workspace.option match {
-          case None    ⇒ tmpDir
-          case Some(d) ⇒ tmpDir / d
+      val (workDir, script) = {
+        val resolver = External.relativeResolver(tmpDir)(_)
+        workspace match {
+          case s: NetLogoTask.Workspace.Script ⇒
+            s.script.realFile.copy(resolver(s.name))
+            (tmpDir, tmpDir / s.name)
+          case w: NetLogoTask.Workspace.Directory ⇒
+            w.directory.realFile.copy(resolver(w.name))
+            (tmpDir / w.name, tmpDir / w.name / w.script)
         }
+      }
 
+      val resolver = External.relativeResolver(workDir)(_)
       val context = parameters.context + (External.PWD → workDir.getAbsolutePath)
+      val preparedContext = External.deployInputFilesAndResources(external, context, resolver)
 
-      val preparedContext = External.deployInputFilesAndResources(external, context, External.relativeResolver(tmpDir))
-
-      val script = workDir / workspace.script
       val netLogo = netLogoFactory()
 
       withThreadClassLoader(netLogo.getNetLogoClassLoader) {
