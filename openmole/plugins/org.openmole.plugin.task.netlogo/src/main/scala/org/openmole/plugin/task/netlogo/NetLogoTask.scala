@@ -74,7 +74,7 @@ trait NetLogoTask extends Task with ValidateTask {
     }
   }
 
-  def deployWorkdirectory(directory: File) = {
+  def deployWorkDirectory(directory: File) = {
     import org.openmole.tool.file._
 
     val resolver = External.relativeResolver(directory)(_)
@@ -92,7 +92,7 @@ trait NetLogoTask extends Task with ValidateTask {
     External.withWorkDir(executionContext) { tmpDir ⇒
       import parameters._
 
-      val (workDir, script) = deployWorkdirectory(tmpDir)
+      val (workDir, script) = deployWorkDirectory(tmpDir)
       val resolver = External.relativeResolver(workDir)(_)
       val context = parameters.context + (External.PWD → workDir.getAbsolutePath)
       val preparedContext = External.deployInputFilesAndResources(external, context, resolver)
