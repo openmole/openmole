@@ -284,7 +284,7 @@ object UDockerTask {
       def containerPathResolver = container.inputPathResolver(File(""), userWorkDirectoryValue) _
       def inputPathResolver = container.inputPathResolver(inputDirectory, userWorkDirectoryValue) _
 
-      val (preparedContext, preparedFilesInfo) = external.prepareAndListInputFiles(context, inputPathResolver)
+      val (preparedContext, preparedFilesInfo) = External.deployAndListInputFiles(external, context, inputPathResolver)
 
       def outputPathResolver(rootDirectory: File) = container.outputPathResolver(
         preparedFilesInfo.map { case (f, d) ⇒ f.toString → d.toString },
@@ -331,8 +331,8 @@ object UDockerTask {
             stdErr = executionContext.outputRedirection.output
           )
 
-          val retContext = external.fetchOutputFiles(outputs, preparedContext, outputPathResolver(rootDirectory), rootDirectory)
-          external.cleanWorkDirectory(outputs, retContext, taskWorkDirectory)
+          val retContext = External.fetchOutputFiles(external, outputs, preparedContext, outputPathResolver(rootDirectory), rootDirectory)
+          External.cleanWorkDirectory(outputs, retContext, taskWorkDirectory)
           (retContext, executionResult)
         }
 
