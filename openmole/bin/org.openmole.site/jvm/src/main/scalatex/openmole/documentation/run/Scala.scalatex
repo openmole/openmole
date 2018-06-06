@@ -1,0 +1,125 @@
+@import org.openmole.site.tools._
+@import org.openmole.site._
+
+
+@h2("Simple ScalaTask")
+
+You can program tasks in Scala using the @hl.openmole("ScalaTask"). For instance the following workflow sums all the elements of an array using a @hl.openmole("ScalaTask") and displays the results. Similarly, you could use such a task to generate some model parameter values or perform some data analysis. To get more details on the hook part you can check the doc on @aa("hooks", href := DocumentationPages.hook.file).
+
+@hl.openmole("""
+val array = Val[Array[Double]]
+val result = Val[Double]
+
+val sum =
+  ScalaTask("val result = array.sum") set (
+    inputs += array,
+    outputs += result,
+    array := Array(8.0, 9.0, 10.0)
+  )
+
+(sum hook ToStringHook())""")
+
+You can embed you own Scala/Java code and libraries in OpenMOLE using an OpenMOLE @a("Plugin", href := DocumentationPages.pluginDevelopment.file).
+
+@h2("Useful functions")
+
+In addition to scala code, OpenMOLE provides @a("a few useful functions to aggregate data, create files, create random number generators", href := DocumentationPages.scalaFunction.file).
+
+
+@h2("File Management")
+
+A @a("documentation on file management", href := DocumentationPages.fileManagement.file) expose how to handle the input and output files in the case of the @code{ScalaTask}.
+
+Alternatively, if your Java or Scala code requires some files, you can also add them to the resources and use the @code("workDirectory") variable to access them:
+
+@hl.openmole(s"""
+val content = Val[Double]
+
+val read =
+  ScalaTask(${tq}val content = (workDirectory / "myFile.txt").content${tq}) set (
+    resources += workDirectory / "myFile.txt",
+    outputs += content
+  )""")
+
+You can have the same behaviour for a file taken as input using the @code("inputFiles") function:
+
+@hl.openmole(s"""
+  val myFile = Val[File]
+  val content = Val[String]
+
+  val read =
+    ScalaTask(${tq}val content = (workDirectory / "myFile.txt").content${tq}) set (
+      inputFiles += (myFile, "myFile.txt"),
+      myFile := workDirectory / "myFile.txt",
+      outputs += content
+    )""")
+
+Generally it is easier to directly use the variable containing the file:
+
+@hl.openmole("""
+  val myFile = Val[File]
+  val content = Val[String]
+
+  val read =
+    ScalaTask("val content = myFile.content") set (
+      myFile := workDirectory / "myFile.txt",
+      outputs += content
+    )""")
+
+@h2("Plugins")
+
+If you use you own @a("OpenMole plugins", href := DocumentationPages.pluginDevelopment.file) and you call some code provided by the plugin in a @code{ScalaTask} you have associate the plugin with this task. Indeed OpenMOLE as no way of knowing that the task uses this plugins and the execution on a remote environment will certainly fail. To do so use the @code{plugins} keyword and the @code{pluginsOf} function. @code{pluginsOf} take an object of you plugins in parameter. It can take a class as well if you use []:
+  @ul
+    @li{for a class: @code{plugins += pluginsOf[namespace.MyClass]}},
+    @li{for an object: @code{plugins += pluginsOf(namespace.MyObject)}}.
+
+  For example, this @code{ScalaTask} uses an OpenMOLE plugin containing the namespace @code{myopenmoleplugin} that itself contains the object @code{Hello} and @code{Hello} is used by the @code{ScalaTask}:
+
+@br @hl.openmole("""
+// Declare the variable
+val i = Val[Int]
+val j = Val[Int]
+
+// Hello task
+val hello = ScalaTask("val j = myopenmoleplugin.Hello.world(i)") set (
+  inputs += i,
+  outputs += (i, j),
+  plugins += pluginsOf(myopenmoleplugin.Hello)
+)
+
+DirectSampling(
+  evaluation = hello hook ToStringHook(),
+  sampling = i in (0 to 2)
+)
+""", header = "object myopenmoleplugin { object Hello {} }")
+
+@h2("Workflow example")
+
+Multiple @i{ScalaTasks} can be joined to compose a workflow. Lets imagine that you want to perform an expensive computation on every element of an array. For the sake of simplicity, the "expensive computation" is here a multiplication by 2.
+
+@hl.openmole("""
+val element = Val[Double]
+val multiplied = Val[Double]
+val result = Val[Double]
+
+val expensive = ScalaTask("val multiplied = element * 2") set (
+  inputs += element,
+  outputs += multiplied
+)
+
+val sum = ScalaTask("val result = multiplied.sum") set (
+  inputs += multiplied.toArray,
+  outputs += result
+)
+
+DirectSampling (
+  evaluation = expensive,
+  sampling = element in List(8.0, 9.0, 10.0),
+  aggregation = sum hook ToStringHook()
+)""")
+
+@p
+  The execution of this workflow can be distributed using OpenMOLE's environments. Check the page dedicated to @a("environments", href := DocumentationPages.scale.file) to learn more on this process.
+
+
+

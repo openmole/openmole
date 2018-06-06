@@ -130,6 +130,7 @@ package object shared {
     lazy val javaString = "https://docs.oracle.com/javase/7/docs/api/java/lang/String.html"
     lazy val javaFile = "https://docs.oracle.com/javase/8/docs/api/java/io/File.html"
     lazy val npm = "https://www.npmjs.com/get-npm"
+    lazy val osgi = "https://www.osgi.org/"
 
     object paper {
       lazy val jassCP = "http://jasss.soc.surrey.ac.uk/18/1/12.html"

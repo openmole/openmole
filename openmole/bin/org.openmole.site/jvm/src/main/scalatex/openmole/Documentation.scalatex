@@ -1,0 +1,40 @@
+@import org.openmole.site.tools._
+@import org.openmole.site._
+@import DocumentationPages._
+
+@h1{Doc Site Map}
+
+@p
+  Welcome to the OpenMOLE documentation site map.
+
+  @h2{@a("Documentation", href := documentation.file, style := "color:#a6bf26")}
+
+  @ol(style := "list-style-type: upper-roman")
+    @li
+      @a("Language", href := language.file)
+      @ol
+        @sitemap.siteMapSection(languagePages.diff(developersPages))
+        @li
+          @a("Developers", href := developers.file)
+          @ol(style := "list-style-type: lower-alpha")
+            @sitemap.siteMapSection(developersPages)
+    @li
+      @a("Run", href := run.file)
+      @ol
+        @sitemap.siteMapSection(runPages)
+    @li
+      @a("Explore", href := explore.file)
+      @ol
+        @sitemap.siteMapSection(explorePages)
+    @li
+      @a("Scale", href := scale.file)
+      @ol
+        @sitemap.siteMapSection(scalePages)
+    @li
+      @a("Advanced Concepts", href := advancedConcepts.file)
+      @ol
+        @sitemap.siteMapSection(advancedPages.diff(gaPages))
+        @li
+          @a("Genetic Algorithms", href := geneticAlgorithm.file)
+          @ol(style := "list-style-type: lower-alpha")
+            @sitemap.siteMapSection(gaPages)

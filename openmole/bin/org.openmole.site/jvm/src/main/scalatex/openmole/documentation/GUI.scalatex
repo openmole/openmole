@@ -9,7 +9,7 @@
 @h2{@overview}
 
 This GUI is an advanced editor for OpenMOLE experiment description through OpenMOLE scripts. It allows editing, managing and running them.
-The way to write these experiments is fully explained in the @aa("main documentation of OpenMOLE", href := DocumentationPages.model.file).
+The way to write these experiments is fully explained in the @aa("main documentation of OpenMOLE", href := DocumentationPages.run.file).
 We focus here on the way to manage them in the application.
 
 @break
@@ -118,7 +118,7 @@ The tool area at the top concerns the current folder and provides with
         @b{deleting files}. Clicking this icon make entering in a blue multi-selection mode. Each file selected turns to green.
         The red @b{Delete} button on top permits to wipe them out.
     @li
-        checking for @aa("plugins", href := DocumentationPages.plugin.file) in the current folder.
+        checking for @aa("plugins", href := DocumentationPages.pluginDevelopment.file) in the current folder.
     @li
         @b{uploading a file} from your local machine to the current folder
     @li
@@ -154,7 +154,7 @@ The different statuses of the executions are:
 
 @h2{Authentications}
 
-In OpenMOLE, the computation load can be delegated to remote @aa("environments", href := DocumentationPages.environment.file).
+In OpenMOLE, the computation load can be delegated to remote @aa("environments", href := DocumentationPages.scale.file).
 When clicking on the @a("authentication icon", href := anchor(overview)), panel appears with the list (initially empty)
 of all the defined authentications.  To add one authentication, click on @i{New} button.
 The currently supported authentications are:
@@ -186,7 +186,7 @@ If it fails, a red label appears. When clicking on it, the error stack appears.
 
 New features can be dynamically inserted in the OpenMOLE platform through plugins.
 Advanced users build their own plugins to express concepts that might not be present (yet) in OpenMOLE. In OpenMOLE, plugins take the form of jar files.
-It can also be a JVM based model provided as a plugin. The way to build plugins in OpenMOLE is full described @aa("here", href := DocumentationPages.plugin.file)
+It can also be a JVM based model provided as a plugin. The way to build plugins in OpenMOLE is full described @aa("here", href := DocumentationPages.pluginDevelopment.file)
 
 @break
 To add a plugin, open the @a("plugin management panel", href := anchor(overview)).
