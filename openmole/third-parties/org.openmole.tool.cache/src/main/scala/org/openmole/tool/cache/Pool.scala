@@ -1,15 +1,18 @@
 package org.openmole.tool.cache
 
-import scala.collection.mutable
-import scala.collection.mutable.ListBuffer
+import collection.JavaConverters._
 
 trait WithInstance[T] {
   def apply[A](f: T ⇒ A): A
 }
 
-case class Pool[T](f: () ⇒ T) extends WithInstance[T] {
+object Pool {
+  def apply[T](f: () ⇒ T, close: T ⇒ Unit = (_: T) ⇒ {}): Pool[T] = new Pool(f, close)
+}
 
-  val instances: mutable.Stack[T] = mutable.Stack()
+class Pool[T](f: () ⇒ T, closeOp: T ⇒ Unit) extends WithInstance[T] {
+
+  val instances: java.util.Stack[T] = new java.util.Stack()
 
   def borrow: T = synchronized {
     instances.isEmpty match {
@@ -25,13 +28,16 @@ case class Pool[T](f: () ⇒ T) extends WithInstance[T] {
     try f(o)
     finally release(o)
   }
+
+  def close() = synchronized { instances.asScala.foreach(closeOp) }
+
 }
 
-case class WithNewInstance[T](o: () ⇒ T, clean: T ⇒ Unit = (_: T) ⇒ {}) extends WithInstance[T] {
+case class WithNewInstance[T](o: () ⇒ T, close: T ⇒ Unit = (_: T) ⇒ {}) extends WithInstance[T] {
   def apply[A](f: T ⇒ A): A = {
     val instance = o()
     try f(instance)
-    finally clean(instance)
+    finally close(instance)
   }
 }
 

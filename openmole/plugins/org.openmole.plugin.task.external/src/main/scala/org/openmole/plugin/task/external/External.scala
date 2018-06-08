@@ -224,7 +224,7 @@ object External {
     fetchedOutputFiles
   }
 
-  def cleanWorkDirectory(outputs: PrototypeSet, context: Context, workDirectory: File)(implicit fileService: FileService) = {
+  def cleanWorkDirectory(outputs: PrototypeSet, context: Context, workDirectory: File, blackList: Seq[File] = Seq.empty)(implicit fileService: FileService) = {
     val ctxFiles = contextFiles(outputs, context).map(_.value)
 
     for {
@@ -232,8 +232,8 @@ object External {
       if workDirectory.isAParentOf(f)
     } fileService.deleteWhenGarbageCollected(f)
 
-    workDirectory.applyRecursive(f ⇒ f.delete, ctxFiles)
-    workDirectory.applyRecursive(f ⇒ if (f.isDirectory) fileService.deleteWhenEmpty(f), ctxFiles)
+    workDirectory.applyRecursive(f ⇒ f.delete, ctxFiles ++ blackList)
+    workDirectory.applyRecursive(f ⇒ if (f.isDirectory) fileService.deleteWhenEmpty(f), ctxFiles ++ blackList)
   }
 
 }
