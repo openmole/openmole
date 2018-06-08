@@ -42,26 +42,7 @@ object NetLogoTask {
   lazy val netLogoWorkspace = CacheKey[org.openmole.plugin.tool.netlogo.NetLogo]()
 
   val caseFile = TypeCase[Val[File]]
-}
 
-trait NetLogoTask extends Task with ValidateTask {
-
-  def workspace: NetLogoTask.Workspace
-  def launchingCommands: Seq[FromContext[String]]
-  def netLogoInputs: Seq[(Val[_], String)]
-  def netLogoOutputs: Iterable[(String, Val[_])]
-  def netLogoArrayOutputs: Iterable[(String, Int, Val[_])]
-  def netLogoFactory: NetLogoFactory
-  def ignoreError: Boolean
-  def seed: Option[Val[Int]]
-  //def cached: Boolean
-  def external: External
-
-  override def validate = Validate { p ⇒
-    import p._
-    val allInputs = External.PWD :: inputs.toList
-    launchingCommands.flatMap(_.validate(allInputs)) ++ External.validate(external)(allInputs).apply
-  }
 
   def wrapError[T](msg: String)(f: ⇒ T): T =
     try f
@@ -70,7 +51,7 @@ trait NetLogoTask extends Task with ValidateTask {
         throw new UserBadDataError(s"$msg:\n" + e.stackStringWithMargin)
     }
 
-  def deployWorkspace(directory: File) = {
+  def deployWorkspace(workspace: Workspace, directory: File) = {
     import org.openmole.tool.file._
 
     val resolver = External.relativeResolver(directory)(_)
@@ -84,8 +65,8 @@ trait NetLogoTask extends Task with ValidateTask {
     }
   }
 
-  def openNetlogoWorkspace(directory: File) = {
-    val (workDir, script) = deployWorkspace(directory)
+  def openNetLogoWorkspace(netLogoFactory: NetLogoFactory, workspace: Workspace, directory: File) = {
+    val (workDir, script) = deployWorkspace(workspace, directory)
     val resolver = External.relativeResolver(workDir)(_)
     val netLogo = netLogoFactory()
 
@@ -114,18 +95,37 @@ trait NetLogoTask extends Task with ValidateTask {
 
   def dispose(netLogo: NetLogo) =
     withThreadClassLoader(netLogo.getNetLogoClassLoader) { netLogo.dispose() }
+}
+
+trait NetLogoTask extends Task with ValidateTask {
+
+  def workspace: NetLogoTask.Workspace
+  def launchingCommands: Seq[FromContext[String]]
+  def netLogoInputs: Seq[(Val[_], String)]
+  def netLogoOutputs: Iterable[(String, Val[_])]
+  def netLogoArrayOutputs: Iterable[(String, Int, Val[_])]
+  def netLogoFactory: NetLogoFactory
+  def ignoreError: Boolean
+  def seed: Option[Val[Int]]
+  def external: External
+
+  override def validate = Validate { p ⇒
+    import p._
+    val allInputs = External.PWD :: inputs.toList
+    launchingCommands.flatMap(_.validate(allInputs)) ++ External.validate(external)(allInputs).apply
+  }
 
   override protected def process(executionContext: TaskExecutionContext) = FromContext { parameters ⇒
     External.withWorkDir(executionContext) { tmpDir ⇒
       import parameters._
 
-      val (netLogo, workDir) = openNetlogoWorkspace(tmpDir)
-      val resolver = External.relativeResolver(workDir)(_)
-      val context = parameters.context + (External.PWD → workDir.getAbsolutePath)
-      val preparedContext = External.deployInputFilesAndResources(external, context, resolver)
-
+      val (netLogo, workDir) = NetLogoTask.openNetLogoWorkspace(netLogoFactory, workspace, tmpDir)
       try {
-        seed.foreach { s ⇒ executeNetLogo(netLogo, s"random-seed ${context(s)}") }
+        val resolver = External.relativeResolver(workDir)(_)
+        val context = parameters.context + (External.PWD → workDir.getAbsolutePath)
+        val preparedContext = External.deployInputFilesAndResources(external, context, resolver)
+
+        seed.foreach { s ⇒ NetLogoTask.executeNetLogo(netLogo, s"random-seed ${context(s)}") }
 
         for (inBinding ← netLogoInputs) {
           val v = preparedContext(inBinding._1) match {
@@ -133,16 +133,16 @@ trait NetLogoTask extends Task with ValidateTask {
             case x: File   ⇒ '"' + x.getAbsolutePath + '"'
             case x         ⇒ x.toString
           }
-          executeNetLogo(netLogo, "set " + inBinding._2 + " " + v)
+          NetLogoTask.executeNetLogo(netLogo, "set " + inBinding._2 + " " + v)
         }
 
-        for (cmd ← launchingCommands.map(_.from(context))) executeNetLogo(netLogo, cmd, ignoreError)
+        for (cmd ← launchingCommands.map(_.from(context))) NetLogoTask.executeNetLogo(netLogo, cmd, ignoreError)
 
         val contextResult =
           External.fetchOutputFiles(external, outputs, preparedContext, External.relativeResolver(workDir), tmpDir) ++ netLogoOutputs.map {
             case (name, prototype) ⇒
               try {
-                val outputValue = report(netLogo, name)
+                val outputValue = NetLogoTask.report(netLogo, name)
                 if (!prototype.`type`.runtimeClass.isArray) Variable(prototype.asInstanceOf[Val[Any]], outputValue)
                 else {
                   val netLogoCollection = outputValue.asInstanceOf[AbstractCollection[Any]]
@@ -158,7 +158,7 @@ trait NetLogoTask extends Task with ValidateTask {
           } ++ netLogoArrayOutputs.map {
             case (name, column, prototype) ⇒
               try {
-                val netLogoCollection = report(netLogo, name)
+                val netLogoCollection = NetLogoTask.report(netLogo, name)
                 val outputValue = netLogoCollection.asInstanceOf[AbstractCollection[Any]].toArray()(column)
                 if (!prototype.`type`.runtimeClass.isArray) Variable(prototype.asInstanceOf[Val[Any]], outputValue)
                 else netLogoArrayToVariable(outputValue.asInstanceOf[AbstractCollection[Any]], prototype)
@@ -169,11 +169,9 @@ trait NetLogoTask extends Task with ValidateTask {
           }
 
         External.cleanWorkDirectory(outputs, contextResult, tmpDir)
-        //else External.cleanWorkDirectory(outputs, contextResult, tmpDir, Seq(workDir))
-
         contextResult
       }
-      finally dispose(netLogo)
+      finally NetLogoTask.dispose(netLogo)
     }
   }
 
