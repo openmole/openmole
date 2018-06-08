@@ -42,7 +42,7 @@ class PatternCompositionSpec extends FlatSpec with Matchers {
         ExplicitSampling(l, Seq(0.1, 0.2))
       )
 
-    mole.start.waitUntilEnded
+    mole.run
 
     counter.intValue() should equal(12)
   }
@@ -72,7 +72,7 @@ class PatternCompositionSpec extends FlatSpec with Matchers {
           ExplicitSampling(i, Seq(1))
         )
 
-    mole.start.waitUntilEnded
+    mole.run
   }
 
   "Direct samplings" should "transmit explored value" in {
@@ -102,7 +102,7 @@ class PatternCompositionSpec extends FlatSpec with Matchers {
           ExplicitSampling(i, Seq(1, 2))
         )
 
-    mole.start.waitUntilEnded
+    mole.run
   }
 
 }
