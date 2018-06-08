@@ -27,9 +27,12 @@ import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.validation._
 import org.openmole.plugin.task.external._
+import org.openmole.plugin.tool.netlogo.NetLogo
+import org.openmole.tool.cache._
 
 object NetLogoTask {
   case class Workspace(script: String, workspace: OptionalArgument[String] = None)
+  lazy val netLogoWorkspace = CacheKey[org.openmole.plugin.tool.netlogo.NetLogo]()
 }
 
 trait NetLogoTask extends Task with ValidateTask {
@@ -50,12 +53,20 @@ trait NetLogoTask extends Task with ValidateTask {
     launchingCommands.flatMap(_.validate(allInputs)) ++ External.validate(external)(allInputs).apply
   }
 
-  private def wrapError[T](msg: String)(f: ⇒ T): T =
+  def wrapError[T](msg: String)(f: ⇒ T): T =
     try f
     catch {
       case e: Throwable ⇒
         throw new UserBadDataError(s"$msg:\n" + e.stackStringWithMargin)
     }
+
+  def executeNetLogo(netLogo: NetLogo, cmd: String, ignoreError: Boolean = false) = wrapError(s"Error while executing command $cmd") {
+    try netLogo.command(cmd)
+    catch {
+      case t: Throwable ⇒
+        if (ignoreError && netLogo.isNetLogoException(t)) {} else throw t
+    }
+  }
 
   override protected def process(executionContext: TaskExecutionContext) = FromContext { parameters ⇒
     External.withWorkDir(executionContext) { tmpDir ⇒
@@ -69,25 +80,18 @@ trait NetLogoTask extends Task with ValidateTask {
 
       val context = parameters.context + (External.PWD → workDir.getAbsolutePath)
 
-      val preparedContext = external.prepareInputFiles(context, external.relativeResolver(tmpDir))
+      val preparedContext = External.deployInputFilesAndResources(external, context, External.relativeResolver(tmpDir))
 
       val script = workDir / workspace.script
       val netLogo = netLogoFactory()
+
       withThreadClassLoader(netLogo.getNetLogoClassLoader) {
         try {
           wrapError(s"Error while opening the file $script") {
             netLogo.open(script.getAbsolutePath)
           }
 
-          def executeNetLogo(cmd: String, ignoreError: Boolean = false) = wrapError(s"Error while executing command $cmd") {
-            try netLogo.command(cmd)
-            catch {
-              case t: Throwable ⇒
-                if (ignoreError && netLogo.isNetLogoException(t)) {} else throw t
-            }
-          }
-
-          seed.foreach { s ⇒ executeNetLogo(s"random-seed ${context(s)}") }
+          seed.foreach { s ⇒ executeNetLogo(netLogo, s"random-seed ${context(s)}") }
 
           for (inBinding ← netLogoInputs) {
             val v = preparedContext(inBinding._1) match {
@@ -95,13 +99,13 @@ trait NetLogoTask extends Task with ValidateTask {
               case x: File   ⇒ '"' + x.getAbsolutePath + '"'
               case x         ⇒ x.toString
             }
-            executeNetLogo("set " + inBinding._2 + " " + v)
+            executeNetLogo(netLogo, "set " + inBinding._2 + " " + v)
           }
 
-          for (cmd ← launchingCommands.map(_.from(context))) executeNetLogo(cmd, ignoreError)
+          for (cmd ← launchingCommands.map(_.from(context))) executeNetLogo(netLogo, cmd, ignoreError)
 
           val contextResult =
-            external.fetchOutputFiles(outputs, preparedContext, external.relativeResolver(workDir), tmpDir) ++ netLogoOutputs.map {
+            External.fetchOutputFiles(external, outputs, preparedContext, External.relativeResolver(workDir), tmpDir) ++ netLogoOutputs.map {
               case (name, prototype) ⇒
                 try {
                   val outputValue = netLogo.report(name)
@@ -130,7 +134,7 @@ trait NetLogoTask extends Task with ValidateTask {
                 }
             }
 
-          external.cleanWorkDirectory(outputs, contextResult, tmpDir)
+          External.cleanWorkDirectory(outputs, contextResult, tmpDir)
           contextResult
         }
         finally netLogo.dispose

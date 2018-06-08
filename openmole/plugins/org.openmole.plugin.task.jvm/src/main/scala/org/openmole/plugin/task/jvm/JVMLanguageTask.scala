@@ -33,12 +33,12 @@ object JVMLanguageTask {
     import p._
 
     val pwd = executionContext.tmpDirectory.newDir("jvmtask").getCanonicalFile
-    val preparedContext = external.prepareInputFiles(p.context, external.relativeResolver(pwd)) + Variable(JVMLanguageTask.workDirectory, pwd)
+    val preparedContext = External.deployInputFilesAndResources(external, p.context, External.relativeResolver(pwd)) + Variable(JVMLanguageTask.workDirectory, pwd)
 
     val resultContext = processCode(preparedContext)
 
-    val resultContextWithFiles = external.fetchOutputFiles(outputs, resultContext, external.relativeResolver(pwd), pwd)
-    external.cleanWorkDirectory(outputs, resultContextWithFiles, pwd)
+    val resultContextWithFiles = External.fetchOutputFiles(external, outputs, resultContext, External.relativeResolver(pwd), pwd)
+    External.cleanWorkDirectory(outputs, resultContextWithFiles, pwd)
     resultContextWithFiles
   }
 

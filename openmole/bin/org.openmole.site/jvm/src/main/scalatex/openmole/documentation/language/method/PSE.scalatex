@@ -13,8 +13,6 @@ val output2 = Val[Double]
     outputs += (output1, output2)
     ) """
 
-
-
 PSE (Pattern Space Exploration) method is used to explore the output's diversity of a model.
 Input parameter values are selected to produce new output values, such that as the exploration progresses, the region of
 the output space that is covered gets bigger. PSE reveals the potential of your model: the
@@ -78,7 +76,10 @@ PSE handles stochasticity in the sense that the selected pattern are estimated b
 val myseed =Val[Int]
 
 val exploration =
-    PSE (
+    PSEEvolution(
+      evaluation = modelTask,
+      parallelism = 10,
+      termination = 100,
       genome =
         Seq(
           param1  in (0.0, 1.0),
@@ -89,14 +90,7 @@ val exploration =
           output2 in (0.0 to 4000.0 by 50.0)),
       stochastic = Stochastic(seed = myseed)
     )
-
-val evolution =
-    SteadyStateEvolution(
-      algorithm = exploration,
-      evaluation = modelTask,
-      parallelism = 10,
-      termination = 100 
-    )""",header=model, name = "PSE")
+""",header=model, name = "PSE")
 where @hl.code("param1") and @hl.code("param2") are inputs
 of the task that runs the model, and @hl.code("output1") and
 @hl.code("output2") are outputs of that same task. The number

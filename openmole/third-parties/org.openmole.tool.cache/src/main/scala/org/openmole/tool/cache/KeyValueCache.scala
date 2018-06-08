@@ -5,9 +5,26 @@ import java.util.UUID
 case class CacheKey[T](id: UUID = java.util.UUID.randomUUID())
 
 case class KeyValueCache() { self ⇒
-  private lazy val cache = collection.mutable.HashMap[CacheKey[_], Any]()
-  def apply[T](key: CacheKey[T]) = synchronized { cache(key).asInstanceOf[T] }
-  def get[T](key: CacheKey[T]) = synchronized { cache.get(key).map(_.asInstanceOf[T]) }
-  def getOrElseUpdate[T](key: CacheKey[T], fill: ⇒ T): T = synchronized { cache.getOrElseUpdate(key, fill).asInstanceOf[T] }
-  def put[T](key: CacheKey[T], t: T) = synchronized { cache.put(key, t) }
+
+  private case class Cached(t: Any, close: () ⇒ Unit)
+  private lazy val cache = collection.mutable.HashMap[CacheKey[_], Cached]()
+
+  def apply[T](key: CacheKey[T]) = synchronized { cache(key).t.asInstanceOf[T] }
+  def get[T](key: CacheKey[T]) = synchronized { cache.get(key).map(_.t.asInstanceOf[T]) }
+
+  def getOrElseUpdate[T](key: CacheKey[T], fill: ⇒ T, close: T ⇒ Unit = (_: T) ⇒ {}): T = synchronized {
+    def cached = {
+      val t = fill
+      Cached(t, () ⇒ close(t))
+    }
+
+    cache.getOrElseUpdate(key, cached).t.asInstanceOf[T]
+  }
+
+  def close() = {
+    for {
+      k ← cache.values
+    } k.close()
+    cache.clear()
+  }
 }

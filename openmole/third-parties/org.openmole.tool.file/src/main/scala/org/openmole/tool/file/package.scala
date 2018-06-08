@@ -69,6 +69,9 @@ package file {
       def accept(p1: File) = predicate(p1)
     }
 
+    def getCopyOptions(followSymlinks: Boolean) = Seq(StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING) ++
+      (if (followSymlinks) Seq.empty[CopyOption] else Seq(LinkOption.NOFOLLOW_LINKS))
+
     implicit class FileDecorator(file: File) {
 
       def realFile = file.toPath.toRealPath().toFile
@@ -104,16 +107,19 @@ package file {
         finally ic.close()
       }
 
-      private def copyFile(toF: File) = {
-        Files.copy(file, toF, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING, LinkOption.NOFOLLOW_LINKS)
+      private def copyFile(toF: File, followSymlinks: Boolean = false) = {
+
+        val copyOptions = getCopyOptions(followSymlinks)
+
+        Files.copy(file, toF, copyOptions: _*)
         toF.mode = file
       }
 
-      def copy(toF: File) = {
+      def copy(toF: File, followSymlinks: Boolean = false) = {
         // default options are NOFOLLOW_LINKS, COPY_ATTRIBUTES, REPLACE_EXISTING
         toF.getParentFileSafe.mkdirs()
-        if (Files.isDirectory(file)) DirUtils.copy(file, toF)
-        else copyFile(toF)
+        if (Files.isDirectory(file)) DirUtils.copy(file, toF, followSymlinks)
+        else copyFile(toF, followSymlinks)
       }
 
       def copy(to: OutputStream) = withClosable(bufferedInputStream) {

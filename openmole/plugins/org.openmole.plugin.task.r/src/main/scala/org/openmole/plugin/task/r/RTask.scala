@@ -21,6 +21,7 @@ import org.openmole.plugin.task.systemexec._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.validation._
 import org.openmole.plugin.task.container
+import org.openmole.plugin.tool.json._
 
 object RTask {
 
@@ -40,16 +41,21 @@ object RTask {
 
   sealed trait InstallCommand
   object InstallCommand {
-    case class RLibrary(name: String) extends InstallCommand
+    case class RLibrary(name: String, version: Option[String]) extends InstallCommand
 
     def toCommand(installCommands: InstallCommand) =
       installCommands match {
-        case RLibrary(name) ⇒
+        case RLibrary(name, None) ⇒
           //Vector(s"""R -e 'install.packages(c(${names.map(lib ⇒ '"' + s"$lib" + '"').mkString(",")}), dependencies = T)'""")
           s"""R --slave -e 'install.packages(c("$name"), dependencies = T); library("$name")'"""
+        case RLibrary(name, Some(version)) ⇒
+          // need to install devtools to get older packages versions
+          //apt update; apt-get -y install libssl-dev libxml2-dev libcurl4-openssl-dev libssh2-1-dev;
+          s"""R --slave -e 'library(devtools); install_version("$name",version = "$version", dependencies = T); library("$name")'"""
       }
 
-    implicit def stringToRLibrary(name: String): InstallCommand = RLibrary(name)
+    implicit def stringToRLibrary(name: String): InstallCommand = RLibrary(name, None)
+    implicit def stringCoupleToRLibrary(couple: (String, Option[String])): InstallCommand = RLibrary(couple._1, couple._2)
     def installCommands(libraries: Vector[InstallCommand]): Vector[String] = libraries.map(InstallCommand.toCommand)
 
   }
@@ -60,13 +66,21 @@ object RTask {
     script:      FromContext[String],
     install:     Seq[String]         = Seq.empty,
     libraries:   Seq[InstallCommand] = Seq.empty,
-    forceUpdate: Boolean             = false
+    forceUpdate: Boolean             = false,
+    rVersion:    String              = "3.3.3"
   )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService): RTask = {
 
-    def version = "3.3.3"
+    //def version = "3.3.3"
+    def version = rVersion
 
+    // add additional installation of devtools only if needed
     val installCommands =
-      install ++ InstallCommand.installCommands(libraries.toVector ++ Seq(InstallCommand.RLibrary("jsonlite")))
+      if (libraries.exists { case l: InstallCommand.RLibrary ⇒ l.version.isDefined }) {
+        install ++ Seq("apt update", "apt-get -y install libssl-dev libxml2-dev libcurl4-openssl-dev libssh2-1-dev",
+          """R --slave -e 'install.packages("devtools", dependencies = T); library(devtools);""") ++
+          InstallCommand.installCommands(libraries.toVector ++ Seq(InstallCommand.RLibrary("jsonlite", None)))
+      }
+      else install ++ InstallCommand.installCommands(libraries.toVector ++ Seq(InstallCommand.RLibrary("jsonlite", None)))
 
     val uDockerArguments =
       UDockerTask.createUDocker(
@@ -93,117 +107,6 @@ object RTask {
     )
   }
 
-  def toJSONValue(v: Any): org.json4s.JValue = {
-    import org.json4s._
-
-    v match {
-      case v: Int      ⇒ JInt(v)
-      case v: Long     ⇒ JLong(v)
-      case v: String   ⇒ JString(v)
-      case v: Float    ⇒ JDouble(v)
-      case v: Double   ⇒ JDouble(v)
-      case v: Array[_] ⇒ JArray(v.map(toJSONValue).toList)
-      case _           ⇒ throw new UserBadDataError(s"Value $v of type ${v.getClass} is not convertible to JSON")
-    }
-  }
-
-  def jValueToVariable(jValue: JValue, v: Val[_]): Variable[_] = {
-    import org.json4s._
-    import shapeless._
-
-    val caseBoolean = TypeCase[Val[Boolean]]
-    val caseInt = TypeCase[Val[Int]]
-    val caseLong = TypeCase[Val[Long]]
-    val caseDouble = TypeCase[Val[Double]]
-    val caseString = TypeCase[Val[String]]
-
-    val caseArrayBoolean = TypeCase[Val[Array[Boolean]]]
-    val caseArrayInt = TypeCase[Val[Array[Int]]]
-    val caseArrayLong = TypeCase[Val[Array[Long]]]
-    val caseArrayDouble = TypeCase[Val[Array[Double]]]
-    val caseArrayString = TypeCase[Val[Array[String]]]
-
-    val caseArrayArrayBoolean = TypeCase[Val[Array[Array[Boolean]]]]
-    val caseArrayArrayInt = TypeCase[Val[Array[Array[Int]]]]
-    val caseArrayArrayLong = TypeCase[Val[Array[Array[Long]]]]
-    val caseArrayArrayDouble = TypeCase[Val[Array[Array[Double]]]]
-    val caseArrayArrayString = TypeCase[Val[Array[Array[String]]]]
-
-    def cannotConvert = throw new UserBadDataError(s"Can not convert value of type $jValue to Int for OpenMOLE variable $v.")
-
-    def jValueToInt(jv: JValue) =
-      jv match {
-        case jv: JDouble  ⇒ jv.num.intValue
-        case jv: JInt     ⇒ jv.num.intValue
-        case jv: JLong    ⇒ jv.num.intValue
-        case jv: JDecimal ⇒ jv.num.intValue
-        case _            ⇒ cannotConvert
-      }
-
-    def jValueToLong(jv: JValue) =
-      jv match {
-        case jv: JDouble  ⇒ jv.num.longValue
-        case jv: JInt     ⇒ jv.num.longValue
-        case jv: JLong    ⇒ jv.num.longValue
-        case jv: JDecimal ⇒ jv.num.longValue
-        case _            ⇒ cannotConvert
-      }
-
-    def jValueToDouble(jv: JValue) =
-      jv match {
-        case jv: JDouble  ⇒ jv.num.doubleValue
-        case jv: JInt     ⇒ jv.num.doubleValue
-        case jv: JLong    ⇒ jv.num.doubleValue
-        case jv: JDecimal ⇒ jv.num.doubleValue
-        case _            ⇒ cannotConvert
-      }
-
-    def jValueToString(jv: JValue) =
-      jv match {
-        case jv: JDouble  ⇒ jv.num.toString
-        case jv: JInt     ⇒ jv.num.toString
-        case jv: JLong    ⇒ jv.num.toString
-        case jv: JDecimal ⇒ jv.num.toString
-        case jv: JString  ⇒ jv.s
-        case _            ⇒ cannotConvert
-      }
-
-    def jValueToBoolean(jv: JValue) =
-      jv match {
-        case jv: JBool ⇒ jv.value
-        case _         ⇒ cannotConvert
-      }
-
-    def jValueToArray[T: Manifest](jv: JValue, convert: JValue ⇒ T) =
-      jv match {
-        case jv: JArray ⇒ jv.arr.map(convert).toArray[T]
-        case _          ⇒ cannotConvert
-      }
-
-    (jValue, v) match {
-      case (value: JArray, caseInt(v))               ⇒ Variable(v, jValueToInt(value.arr.head))
-      case (value: JArray, caseLong(v))              ⇒ Variable(v, jValueToLong(value.arr.head))
-      case (value: JArray, caseDouble(v))            ⇒ Variable(v, jValueToDouble(value.arr.head))
-      case (value: JArray, caseString(v))            ⇒ Variable(v, jValueToString(value.arr.head))
-      case (value: JArray, caseBoolean(v))           ⇒ Variable(v, jValueToBoolean(value.arr.head))
-
-      case (value: JArray, caseArrayInt(v))          ⇒ Variable(v, jValueToArray(value, jValueToInt))
-      case (value: JArray, caseArrayLong(v))         ⇒ Variable(v, jValueToArray(value, jValueToLong))
-      case (value: JArray, caseArrayDouble(v))       ⇒ Variable(v, jValueToArray(value, jValueToDouble))
-      case (value: JArray, caseArrayString(v))       ⇒ Variable(v, jValueToArray(value, jValueToString))
-      case (value: JArray, caseArrayBoolean(v))      ⇒ Variable(v, jValueToArray(value, jValueToBoolean))
-
-      case (value: JArray, caseArrayArrayInt(v))     ⇒ Variable(v, jValueToArray(value, jValueToArray(_, jValueToInt)))
-      case (value: JArray, caseArrayArrayLong(v))    ⇒ Variable(v, jValueToArray(value, jValueToArray(_, jValueToLong)))
-      case (value: JArray, caseArrayArrayDouble(v))  ⇒ Variable(v, jValueToArray(value, jValueToArray(_, jValueToDouble)))
-      case (value: JArray, caseArrayArrayString(v))  ⇒ Variable(v, jValueToArray(value, jValueToArray(_, jValueToString)))
-      case (value: JArray, caseArrayArrayBoolean(v)) ⇒ Variable(v, jValueToArray(value, jValueToArray(_, jValueToBoolean)))
-
-      case _                                         ⇒ cannotConvert
-    }
-
-  }
-
 }
 
 @Lenses case class RTask(
@@ -228,7 +131,7 @@ object RTask {
 
     def writeInputsJSON(file: File) = {
       def values = rInputs.map { case (v, _) ⇒ Array(context(v)) }
-      file.content = compact(render(RTask.toJSONValue(values.toArray)))
+      file.content = compact(render(toJSONValue(values.toArray)))
     }
 
     def rInputMapping(arrayName: String) =
@@ -241,7 +144,7 @@ object RTask {
       import org.json4s._
       import org.json4s.jackson.JsonMethods._
       val outputValues = parse(file.content)
-      (outputValues.asInstanceOf[JArray].arr zip rOutputs.map(_._2)).map { case (jvalue, v) ⇒ RTask.jValueToVariable(jvalue, v) }
+      (outputValues.asInstanceOf[JArray].arr zip rOutputs.map(_._2)).map { case (jvalue, v) ⇒ jValueToVariable(jvalue, v) }
     }
 
     newFile.withTmpFile("script", ".R") { scriptFile ⇒

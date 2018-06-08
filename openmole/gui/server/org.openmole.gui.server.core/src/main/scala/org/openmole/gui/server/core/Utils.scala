@@ -40,6 +40,7 @@ import scala.io.{ BufferedSource, Codec }
 import org.openmole.core.services._
 import org.openmole.core.pluginmanager.KeyWord
 
+import scala.annotation.tailrec
 import scala.util.{ Failure, Success, Try }
 
 object Utils extends JavaLogger {
@@ -124,12 +125,13 @@ object Utils extends JavaLogger {
       val from: File = sp
       val to: File = toPath
       if (from.exists && to.exists) {
-        from.copy(new File(to, withName.getOrElse(from.getName)))
+        FileDecorator(from).copy(toF = new File(to, withName.getOrElse(from.getName)), followSymlinks = true)
       }
     }
   }
 
   def getPathArray(f: File, until: File): Seq[String] = {
+    @tailrec
     def getParentsArray0(f: File, computedParents: Seq[String]): Seq[String] = {
       val parent = f.getParentFile
       if (parent != null) {
@@ -148,6 +150,7 @@ object Utils extends JavaLogger {
   }
 
   def getFile(root: File, paths: Seq[String]): File = {
+    @tailrec
     def getFile0(paths: Seq[String], accFile: File): File = {
       if (paths.isEmpty) accFile
       else getFile0(paths.tail, new File(accFile, paths.head))
@@ -181,11 +184,11 @@ object Utils extends JavaLogger {
     val toPath = safePath.copy(path = safePath.path.dropRight(1) :+ newName)
     if (toPath.isDirectory()) toPath.mkdir
 
-    val parent = safePath.parent
-    safePath.copy(safePath.parent, Some(newName))
+    val from: File = safePath
+    val replica: File = safePath.parent ++ newName
+    replica.content = from.content
 
-    val f: File = parent ++ newName
-    f
+    replica
   }
 
   private def buildClassTrees(classes: Seq[Seq[String]]): Seq[ClassTree] = {
@@ -311,6 +314,7 @@ object Utils extends JavaLogger {
   val openmoleFileName = "openmole.js"
   val depsFileName = "deps.js"
   val openmoleGrammarName = "openmole_grammar_template.js"
+  val openmoleGrammarMode = "mode-openmole.js"
 
   def updateIfChanged(file: File)(update: File ⇒ Unit)(implicit fileService: FileService, newFile: NewFile) = {
     import org.openmole.core.fileservice._
@@ -335,7 +339,7 @@ object Utils extends JavaLogger {
     }
   }
 
-  def openmoleFile(implicit workspace: Workspace, newFile: NewFile, fileService: FileService) = {
+  def openmoleFile(optimizedJS: Boolean)(implicit workspace: Workspace, newFile: NewFile, fileService: FileService) = {
     val jsPluginDirectory = webUIDirectory / "jsplugin"
     updateJsPluginDirectory(jsPluginDirectory)
 
@@ -344,7 +348,7 @@ object Utils extends JavaLogger {
     def update = {
       logger.info("Building GUI plugins ...")
       jsFile.delete
-      JSPack.link(jsPluginDirectory, jsFile)
+      JSPack.link(jsPluginDirectory, jsFile, optimizedJS)
     }
 
     if (!jsFile.exists) update

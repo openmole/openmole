@@ -39,6 +39,7 @@ object LogicalLinkStorage {
 
     override def upload(t: LogicalLinkStorage, src: File, dest: String, options: TransferOptions): Unit = {
       def copy = StorageInterface.upload(false, local.writeFile(_, _))(src, dest, options)
+
       if (options.canMove) mv(t, src.getPath, dest)
       else if (options.forceCopy || t.forceCopy) copy
       else local.link(src.getPath, dest) //new File(dest).createLinkTo(src)

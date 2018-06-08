@@ -266,3 +266,34 @@ object NSGA2 {
 
 }
 
+object NSGA2Evolution {
+
+  import org.openmole.core.dsl._
+  import org.openmole.core.workflow.puzzle._
+
+  def apply(
+    genome:       Genome,
+    objectives:   Objectives,
+    evaluation:   Puzzle,
+    termination:  OMTermination,
+    mu:           Int                          = 200,
+    stochastic:   OptionalArgument[Stochastic] = None,
+    parallelism:  Int                          = 1,
+    distribution: EvolutionPattern             = SteadyState()) =
+    EvolutionPattern.build(
+      algorithm =
+        NSGA2(
+          mu = mu,
+          genome = genome,
+          objectives = objectives,
+          stochastic = stochastic
+        ),
+      evaluation = evaluation,
+      termination = termination,
+      stochastic = stochastic,
+      parallelism = parallelism,
+      distribution = distribution
+    )
+
+}
+

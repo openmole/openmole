@@ -27,10 +27,11 @@ import org.openmole.tool.crypto.Cypher
 import squants._
 import squants.information._
 import effectaside._
-import org.openmole.plugin.environment.batch.refresh.{ JobManager, StopEnvironment }
+import org.openmole.plugin.environment.batch.refresh.{JobManager, StopEnvironment}
 import org.openmole.plugin.environment.gridscale._
+import org.openmole.tool.logger.JavaLogger
 
-object PBSEnvironment {
+object PBSEnvironment extends JavaLogger {
 
     def apply(
       user:                 OptionalArgument[String] = None,
@@ -177,6 +178,7 @@ class PBSEnvironment[A: gridscale.ssh.SSHAuthentication](
     }
 
     val (remoteScript, result, workDirectory) = buildScript(serializedJob)
+
     val description = gridscale.pbs.PBSJobDescription(
       command = s"/bin/bash $remoteScript",
       workDirectory = workDirectory,
@@ -188,7 +190,19 @@ class PBSEnvironment[A: gridscale.ssh.SSHAuthentication](
       flavour = parameters.flavour
     )
 
+    import PBSEnvironment.Log._
+
+    log(FINE, s"""Submitting PBS job, PBS script:
+      |${gridscale.pbs.impl.toScript(description)("uniqId")}
+      |bash script:
+      |$remoteScript""".stripMargin)
+    
     val id = gridscale.pbs.submit[_root_.gridscale.ssh.SSHServer](env, description)
+
+    log(FINE, s"""Submitted PBS job with PBS script:
+      |uniqId: ${id.uniqId}
+      |job id: ${id.jobId}""".stripMargin)
+
     BatchJob(id, result)
   }
 

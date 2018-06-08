@@ -300,7 +300,7 @@ def corePlugins =
     allDomain ++
     allTools
 
-def allTools = Seq(netLogoAPI, netLogo5API, netLogo6API, csvTool, pattern)
+def allTools = Seq(netLogoAPI, netLogo5API, netLogo6API, csvTool, pattern, json)
 
 lazy val defaultActivator = OsgiKeys.bundleActivator := Some(name.value + ".Activator")
 
@@ -345,6 +345,11 @@ lazy val csvTool = OsgiProject(pluginDir, "org.openmole.plugin.tool.csv", import
 ) settings (toolsSettings: _*)
 
 lazy val pattern = OsgiProject(pluginDir, "org.openmole.plugin.tool.pattern", imports = Seq("*")) dependsOn(exception, openmoleDSL) settings (toolsSettings: _*) settings (defaultActivator)
+
+
+lazy val json = OsgiProject(pluginDir, "org.openmole.plugin.tool.json", imports = Seq("*")) dependsOn(exception, openmoleDSL) settings (toolsSettings: _*) settings (
+  libraryDependencies += Libraries.json4s,
+  libraryDependencies += Libraries.shapeless)
 
 
 /* Domain */
@@ -510,8 +515,7 @@ lazy val udocker = OsgiProject(pluginDir, "org.openmole.plugin.task.udocker", im
   libraryDependencies += Libraries.circe,
   libraryDependencies ++= Libraries.httpClient) settings (pluginSettings: _*)
 
-lazy val r = OsgiProject(pluginDir, "org.openmole.plugin.task.r", imports = Seq("*")) dependsOn (udocker) settings (pluginSettings: _*) settings (
-  libraryDependencies += Libraries.json4s)
+lazy val r = OsgiProject(pluginDir, "org.openmole.plugin.task.r", imports = Seq("*")) dependsOn (udocker, json) settings (pluginSettings: _*)
 
 /* ---------------- REST ------------------- */
 
@@ -848,12 +852,25 @@ lazy val site = crossProject.in(binDir / "org.openmole.site") settings (defaultS
 )
 
 lazy val siteJS = site.js enablePlugins (ExecNpmPlugin)
-lazy val siteJVM = site.jvm dependsOn(tools, project, serializer, marketIndex) settings (
-  libraryDependencies += Libraries.sourceCode) dependsOn (marketIndex)
+lazy val siteJVM = site.jvm dependsOn(tools, project, serializer, buildinfo, marketIndex) settings (
+  libraryDependencies += Libraries.sourceCode)
+
+lazy val cloneMarket = taskKey[Unit]("cloning market place")
+lazy val defineMarketBranch = taskKey[Option[String]]("define market place branch")
 
 lazy val marketIndex = Project("marketindex", binDir / "org.openmole.marketindex") settings (defaultSettings: _*) settings (
-  libraryDependencies += Libraries.json4s
-  ) dependsOn(buildinfo, openmoleFile, openmoleTar, market)
+  libraryDependencies += Libraries.json4s,
+  defineMarketBranch := {
+    val OMversion = version.value
+    OMversion.split('.').headOption.map(v => s"$v-dev")
+  },
+  cloneMarket := {
+    val runner = git.runner.value
+    val dir = baseDirectory.value / "src/main/resources/openmole-market"
+    val marketBranch = defineMarketBranch.value
+    runner.updated("https://github.com/openmole/openmole-market.git", marketBranch, dir, ConsoleLogger())
+  }
+) dependsOn(buildinfo, openmoleFile, openmoleTar, market)
 
 def parse(key: String, default: sbt.File, parsed: Seq[String]) = parsed.indexOf(key) match {
   case -1 => (default, parsed ++ Seq(key, default.getAbsolutePath))

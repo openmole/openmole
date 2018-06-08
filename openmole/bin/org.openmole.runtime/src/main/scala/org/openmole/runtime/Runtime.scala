@@ -206,11 +206,12 @@ class Runtime {
 
     val outputMessage = if (out.length != 0) Some(out) else None
 
-    val runtimeResult = RuntimeResult(outputMessage, result, localRuntimeInfo)
+    val runtimeResult = RuntimeResult(outputMessage, result, RuntimeInfo.localRuntimeInfo)
 
-    logger.fine("Upload the result message")
     newFile.withTmpFile("output", ".tgz") { outputLocal ⇒
+      logger.fine(s"Serializing result to $outputLocal")
       serializerService.serialiseAndArchiveFiles(runtimeResult, outputLocal)
+      logger.fine(s"Upload the serialized result to $outputMessagePath on $storage")
       retry(storage.upload(outputLocal, outputMessagePath, TransferOptions(forceCopy = true, canMove = true)))
     }
 

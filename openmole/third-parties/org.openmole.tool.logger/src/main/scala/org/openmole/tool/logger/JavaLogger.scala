@@ -30,6 +30,9 @@ trait JavaLogger { l ⇒
     def FINE = Level.FINE
     def FINER = Level.FINER
     def FINEST = Level.FINEST
+
+    def log(level: Level, message: ⇒ String) =
+      if (logger.isLoggable(level)) logger.log(level, message)
   }
 
 }
