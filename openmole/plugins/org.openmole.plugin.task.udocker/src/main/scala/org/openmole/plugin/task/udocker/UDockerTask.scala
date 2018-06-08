@@ -212,7 +212,6 @@ object UDockerTask {
   def repositoryDirectory(workspace: Workspace) = workspace.persistentDir /> "udocker" /> "repos"
   def manifestDirectory(workspace: Workspace) = workspace.persistentDir /> "udocker" /> "manifest"
 
-  lazy val containerPoolKey = CacheKey[WithInstance[ContainerID]]()
   lazy val installLockKey = LockKey()
 
   def config(
@@ -234,6 +233,8 @@ object UDockerTask {
   external:           External,
   info:               InfoConfig
 ) extends Task with ValidateTask { self ⇒
+
+  lazy val containerPoolKey = CacheKey[WithInstance[ContainerID]]()
 
   override def config = UDockerTask.config(_config, returnValue, stdOut, stdErr)
   override def validate = container.validateContainer(commands.value, uDocker.environmentVariables, external, inputs)
@@ -299,7 +300,7 @@ object UDockerTask {
       val imageId = s"${uDocker.localDockerImage.image}:${uDocker.localDockerImage.tag}"
 
       val pool =
-        if (uDocker.reuseContainer) executionContext.cache.getOrElseUpdate(UDockerTask.containerPoolKey, Pool[ContainerId](() ⇒ UDocker.createContainer(uDocker, uDockerExecutable, containersDirectory, uDockerVariables, volumes, imageId)))
+        if (uDocker.reuseContainer) executionContext.cache.getOrElseUpdate(containerPoolKey, Pool[ContainerId](() ⇒ UDocker.createContainer(uDocker, uDockerExecutable, containersDirectory, uDockerVariables, volumes, imageId)))
         else WithNewInstance[ContainerId](() ⇒ UDocker.createContainer(uDocker, uDockerExecutable, containersDirectory, uDockerVariables, volumes, imageId))
 
       pool { runId ⇒
