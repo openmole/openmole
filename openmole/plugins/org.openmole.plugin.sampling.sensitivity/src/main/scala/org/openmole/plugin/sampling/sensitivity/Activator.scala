@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2015 Romain Reuillon
+ * Copyright (C) 2018 Samuel Thiriot
+ *                    Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -32,9 +33,9 @@ class Activator extends PluginInfoActivator {
 
     val keyWords: Vector[KeyWord] =
       Vector(
-        // TODO Sampling(objectName(SaltelliSampling)),
         Sampling(objectName(MorrisSampling)),
-        Task(objectName(MorrisAggregation))
+        Task(objectName(MorrisAggregation)),
+        Pattern("SensitivityMorris")
       )
 
     PluginInfo.register(this, Vector(this.getClass.getPackage), keyWords = keyWords)

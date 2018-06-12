@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2018 Samuel Thiriot
+ *                    Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -78,8 +79,6 @@ object MorrisSampling {
    * The variable named like this contains the name of the factor which was changed
    * in a given point.
    */
-  val varIndexTrajectory = Val[Int]("trajid", namespace = namespace)
-  val varIndexPoint = Val[Int]("pointid", namespace = namespace)
   val varFactorName = Val[String]("factorname", namespace = namespace)
   val varDelta = Val[Double]("delta", namespace = namespace)
 
@@ -159,7 +158,9 @@ sealed class MorrisSampling(
   val factors:     ScalarOrSequenceOfDouble[_]*) extends Sampling {
 
   override def inputs = factors.flatMap(_.inputs)
-  override def prototypes = factors.map { _.prototype } ++ Seq(MorrisSampling.varIndexTrajectory, MorrisSampling.varIndexPoint, MorrisSampling.varDelta, MorrisSampling.varFactorName)
+  override def prototypes = factors.map { _.prototype } ++ Seq(
+    MorrisSampling.varDelta,
+    MorrisSampling.varFactorName)
 
   /**
    * Converts a raw trajectory to a list of lists of variables (points to run)
@@ -171,8 +172,6 @@ sealed class MorrisSampling(
     import p._
     // forge the list of variables for the first run (reference run)
     val variablesForRefRun: List[Variable[_]] = List(
-      Variable(MorrisSampling.varIndexTrajectory, idTraj),
-      Variable(MorrisSampling.varIndexPoint, 0),
       Variable(MorrisSampling.varFactorName, ""),
       Variable(MorrisSampling.varDelta, 0.0)
     ) ++ ScalarOrSequenceOfDouble.scaled(factors, t.seed).from(context)
@@ -185,11 +184,8 @@ sealed class MorrisSampling(
         val factoridx = order2idx._1
         val iterationId = order2idx._2 + 1
         List(
-          Variable(MorrisSampling.varIndexTrajectory, idTraj),
-          Variable(MorrisSampling.varIndexPoint, iterationId),
           Variable(MorrisSampling.varFactorName, factors(factoridx).prototype.name),
           Variable(MorrisSampling.varDelta, point(factoridx) - t.seed(factoridx))
-        //Variable(MorrisSampling.varDelta, factors(factoridx).scaled(Seq(delta)).from(context))
         ) ++ ScalarOrSequenceOfDouble.scaled(factors, point).from(context)
       })
 
@@ -210,7 +206,7 @@ sealed class MorrisSampling(
 
     trajectoriesRaw.zipWithIndex.flatMap {
       case (t, idTraj) ⇒
-        trajectoryToVariables(t, idTraj).from(context) //.toArray
+        trajectoryToVariables(t, idTraj).from(context)
     }.toIterator
   }
 

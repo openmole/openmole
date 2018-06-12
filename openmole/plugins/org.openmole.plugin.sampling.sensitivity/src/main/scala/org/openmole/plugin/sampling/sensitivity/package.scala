@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2018 Samuel Thiriot
+ *                    Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -28,37 +29,10 @@ import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.tools.ScalarOrSequenceOfDouble
 import org.openmole.core.workflow.validation.DataflowProblem._
 import org.openmole.core.workflow.validation._
-//import org.openmole.plugin.domain.distribution._
-//import org.openmole.plugin.domain.modifier._
-//import org.openmole.plugin.tool.pattern._
 
-/*
-
-SensitivityMorris(
-  evaluation=myTask,
-  inputs=Seq(
-              proportionCurious in (1,10),
-              proportionProactive in (0,1)
-              ),
-  outputs=Seq(propA, propAK),
-  repetitions=10,
-  levels=4
-)
-
- */
 package object sensitivity {
 
   implicit def scope = DefinitionScope.Internal
-
-  /*
-  def SensitivityMorris( // [T: Distribution]
-    evaluation:  Puzzle,
-    inputs:      Seq[ScalarOrSequenceOfDouble[Double]],
-    outputs:     Seq[Val[Double]],
-    repetitions: Int,
-    levels:      Int
-  ): Puzzle = SensitivityMorris(evaluation, inputs, outputs, repetitions, levels)
-*/
 
   /**
    * For a given input of the model, and a given output of a the model,
@@ -67,13 +41,10 @@ package object sensitivity {
    * mu, mu* and sigma.
    */
   def subspaceForInputOutput(input: Val[Double], output: Val[Double]): SubspaceToAnalyze = {
-    val prefix: String = input.name + "_" + output.name + "_"
     SubspaceToAnalyze(
       input,
-      output,
-      Val[Double](prefix + "_mu", namespace = MorrisAggregation.namespace),
-      Val[Double](prefix + "_muStar", namespace = MorrisAggregation.namespace),
-      Val[Double](prefix + "_sigma", namespace = MorrisAggregation.namespace))
+      output
+    )
   }
 
   /**
@@ -113,7 +84,7 @@ package object sensitivity {
     val space: Seq[SubspaceToAnalyze] = inputs.flatMap(
       input ⇒ outputs.map(
         output ⇒ subspaceForInputOutput(
-          toValDouble(input.prototype), //.unsecureType: Val[Double],
+          toValDouble(input.prototype), //TODO ??? .asInstanceOf(Val[Double]),
           output))).toSeq
 
     // the aggregation obviously is a Morris aggregation!
@@ -121,7 +92,10 @@ package object sensitivity {
     // to interpret the results
     val aggregation = MorrisAggregation(space: _*)
 
-    (exploration -< evaluation >- aggregation)
+    // TODO Strain !!!
+
+    (exploration -< evaluation >- aggregation) // &
+    // TODO !!! (exploration -- aggregation)
   }
 
 }
