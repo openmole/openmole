@@ -161,31 +161,6 @@ sealed class MorrisSampling(
   override def inputs = factors.flatMap(_.inputs)
   override def prototypes = factors.map { _.prototype } ++ Seq(MorrisSampling.varIndexTrajectory, MorrisSampling.varIndexPoint, MorrisSampling.varDelta, MorrisSampling.varFactorName)
 
-  /*
-  @annotation.tailrec
-  def truc(
-    idTraj: Int,
-    points: List[Array[Double]], deltas: List[Double], orders: List[Int], iterationIdx: Int,
-    acc: List[List[Variable[_]]] = List()): FromContext[List[List[Variable[_]]]] = FromContext { p ⇒
-    import p._
-    if (points.isEmpty) acc.reverse
-    else {
-      val point: Array[Double] = points.head
-      val delta: Double = deltas.head
-      val factoridx: Int = orders.head
-      val varsForPoint: List[Variable[_]] = List(
-        Variable(MorrisSampling.varIndexTrajectory, idTraj),
-        Variable(MorrisSampling.varIndexPoint, iterationIdx),
-        Variable(MorrisSampling.varFactorName, factors(orders.head).prototype.name),
-        Variable(MorrisSampling.varDelta, factors(factoridx).scaled(Seq(delta))(0)).from(context)
-      ) //++ ScalarOrSequenceOfDouble.scaled(factors, point).from(context)
-
-      truc(idTraj, points.tail, deltas.tail, orders.tail, iterationIdx + 1, varsForPoint :: acc)
-    }
-
-  }
-  */
-
   /**
    * Converts a raw trajectory to a list of lists of variables (points to run)
    * to execute in a given context. Replaces the index of factor by the variable name,

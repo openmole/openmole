@@ -22,6 +22,12 @@ import org.openmole.core.workflow.builder.DefinitionScope
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.task.ClosureTask
 
+/**
+ * Describes a part of the space of inputs/ouputs of a model (or actually, puzzle)
+ * on which to assess the sensitivity.
+ * Describes that we wish to analyze the impact of variations of a given input on a given output,
+ * and return it into variables indicatorMu, indicatorMu* and indicatorSigma.
+ */
 case class SubspaceToAnalyze(
   input:           Val[Double],
   output:          Val[Double],
