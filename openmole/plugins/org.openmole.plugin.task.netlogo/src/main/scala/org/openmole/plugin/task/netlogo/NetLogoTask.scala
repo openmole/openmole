@@ -43,7 +43,6 @@ object NetLogoTask {
 
   val caseFile = TypeCase[Val[File]]
 
-
   def wrapError[T](msg: String)(f: ⇒ T): T =
     try f
     catch {

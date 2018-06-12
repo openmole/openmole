@@ -86,7 +86,9 @@ object MoleTask {
         defaultEnvironment = () ⇒ executionContext.localEnvironment,
         executionContext = MoleExecutionContext(),
         cleanOnFinish = false,
-        startStopDefaultEnvironment = false
+        startStopDefaultEnvironment = false,
+        taskCache = executionContext.cache,
+        lockRepository = executionContext.lockRepository
       )
 
     @volatile var lastContext: Option[Context] = None
