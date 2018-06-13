@@ -251,8 +251,7 @@ object UDockerTask {
     val repositoryDirectory = UDockerTask.repositoryDirectory(executionContext.workspace)
     UDocker.buildRepoV2(repositoryDirectory, layersDirectory, uDocker.localDockerImage)
 
-    External.withWorkDir(executionContext) { taskWorkDirectory ⇒
-      taskWorkDirectory.mkdirs()
+    newFile.withTmpDir { taskWorkDirectory ⇒
 
       val containersDirectory =
         if (uDocker.reuseContainer) executionContext.tmpDirectory /> "containers" /> uDocker.localDockerImage.id
@@ -333,7 +332,6 @@ object UDockerTask {
           )
 
           val retContext = External.fetchOutputFiles(external, outputs, preparedContext, outputPathResolver(rootDirectory), rootDirectory)
-          External.cleanWorkDirectory(outputs, retContext, taskWorkDirectory)
           (retContext, executionResult)
         }
 
