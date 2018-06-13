@@ -121,7 +121,7 @@ object NetLogo5Task {
   external:            External,
   info:                InfoConfig,
   netLogoInputs:       Vector[(Val[_], String)],
-  netLogoArrayInputs: Vector[(Val[_], String)],
+  netLogoArrayInputs:  Vector[(Val[_], String)],
   netLogoOutputs:      Vector[(String, Val[_])],
   netLogoArrayOutputs: Vector[(String, Int, Val[_])],
   workspace:           NetLogoTask.Workspace,

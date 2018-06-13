@@ -41,6 +41,7 @@ object NetLogo6Task {
 
   implicit def isBuilder = new NetLogoTaskBuilder[NetLogo6Task] {
     override def netLogoInputs = NetLogo6Task.netLogoInputs
+    override def netLogoArrayInputs = NetLogo6Task.netLogoArrayInputs
     override def netLogoArrayOutputs = NetLogo6Task.netLogoArrayOutputs
     override def netLogoOutputs = NetLogo6Task.netLogoOutputs
   }
