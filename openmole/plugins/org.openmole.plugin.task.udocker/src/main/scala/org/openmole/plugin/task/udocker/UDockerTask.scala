@@ -76,16 +76,17 @@ object UDockerTask {
   def apply(
     image:              ContainerImage,
     run:                Commands,
-    install:            Seq[String]                   = Vector.empty,
-    user:               OptionalArgument[String]      = None,
-    mode:               OptionalArgument[String]      = None,
-    reuseContainer:     Boolean                       = true,
-    cacheInstall:       Boolean                       = true,
-    forceUpdate:        Boolean                       = false,
-    returnValue:        OptionalArgument[Val[Int]]    = None,
-    stdOut:             OptionalArgument[Val[String]] = None,
-    stdErr:             OptionalArgument[Val[String]] = None,
-    errorOnReturnValue: Boolean                       = true
+    install:            Seq[String]                         = Vector.empty,
+    user:               OptionalArgument[String]            = None,
+    mode:               OptionalArgument[String]            = None,
+    reuseContainer:     Boolean                             = true,
+    cacheInstall:       Boolean                             = true,
+    forceUpdate:        Boolean                             = false,
+    returnValue:        OptionalArgument[Val[Int]]          = None,
+    stdOut:             OptionalArgument[Val[String]]       = None,
+    stdErr:             OptionalArgument[Val[String]]       = None,
+    errorOnReturnValue: Boolean                             = true,
+    containerPoolKey:   CacheKey[WithInstance[ContainerID]] = CacheKey()
   )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: NewFile, workspace: Workspace, preference: Preference, threadProvider: ThreadProvider, fileService: FileService, outputRedirection: OutputRedirection, networkService: NetworkService): UDockerTask = {
 
     def blockChars(s: String): String = {
@@ -102,7 +103,8 @@ object UDockerTask {
       stdErr = stdErr,
       _config = InputOutputConfig(),
       external = External(),
-      info = InfoConfig()
+      info = InfoConfig(),
+      containerPoolKey = containerPoolKey
     )
   }
 
@@ -212,6 +214,8 @@ object UDockerTask {
   def repositoryDirectory(workspace: Workspace) = workspace.persistentDir /> "udocker" /> "repos"
   def manifestDirectory(workspace: Workspace) = workspace.persistentDir /> "udocker" /> "manifest"
 
+  def newCacheKey = CacheKey[WithInstance[ContainerID]]()
+
   lazy val installLockKey = LockKey()
 
   def config(
@@ -231,10 +235,8 @@ object UDockerTask {
   stdErr:             Option[Val[String]],
   _config:            InputOutputConfig,
   external:           External,
-  info:               InfoConfig
-) extends Task with ValidateTask { self ⇒
-
-  lazy val containerPoolKey = CacheKey[WithInstance[ContainerID]]()
+  info:               InfoConfig,
+  containerPoolKey:   CacheKey[WithInstance[ContainerID]]) extends Task with ValidateTask { self ⇒
 
   override def config = UDockerTask.config(_config, returnValue, stdOut, stdErr)
   override def validate = container.validateContainer(commands.value, uDocker.environmentVariables, external, inputs)

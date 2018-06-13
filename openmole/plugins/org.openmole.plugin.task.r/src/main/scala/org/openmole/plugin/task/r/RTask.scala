@@ -1,7 +1,6 @@
 package org.openmole.plugin.task.r
 
 import monocle.macros.Lenses
-import org.json4s.JsonAST.JValue
 import org.openmole.core.context.{ Namespace, Variable }
 import org.openmole.plugin.task.udocker._
 import org.openmole.core.fileservice._
@@ -121,6 +120,8 @@ object RTask {
   info:               InfoConfig,
   rInputs:            Vector[(Val[_], String)], rOutputs: Vector[(String, Val[_])]) extends Task with ValidateTask {
 
+  lazy val containerPoolKey = UDockerTask.newCacheKey
+
   override def config = UDockerTask.config(_config, returnValue, stdOut, stdErr)
   override def validate = container.validateContainer(Vector(), uDocker.environmentVariables, external, inputs)
 
@@ -168,7 +169,15 @@ object RTask {
 
         def uDockerTask =
           UDockerTask(
-            uDocker, s"R --slave -f $rScriptName", errorOnReturnValue, returnValue, stdOut, stdErr, _config, external, info) set (
+            uDocker, s"R --slave -f $rScriptName",
+            errorOnReturnValue,
+            returnValue,
+            stdOut,
+            stdErr,
+            _config,
+            external,
+            info,
+            containerPoolKey = containerPoolKey) set (
             resources += (scriptFile, rScriptName, true),
             resources += (jsonInputs, inputJSONName, true),
             outputFiles += (outputJSONName, outputFile)

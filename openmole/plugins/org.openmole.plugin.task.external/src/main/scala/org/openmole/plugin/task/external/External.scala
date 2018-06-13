@@ -234,7 +234,6 @@ object External {
     }
   }
 
-
 }
 
 import org.openmole.plugin.task.external.External._
