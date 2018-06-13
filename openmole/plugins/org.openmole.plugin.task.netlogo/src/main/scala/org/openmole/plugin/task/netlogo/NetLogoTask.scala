@@ -26,6 +26,7 @@ import org.openmole.core.tools.io.Prettifier._
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.validation._
+import org.openmole.core.workspace.NewFile
 import org.openmole.plugin.task.external._
 import org.openmole.plugin.tool.netlogo.NetLogo
 import org.openmole.tool.cache._
@@ -59,6 +60,8 @@ object NetLogoTask {
     }
   }
 
+  case class NetoLogoInstance(directory: File, workspaceDirectory: File, netLogo: NetLogo)
+
   def openNetLogoWorkspace(netLogoFactory: NetLogoFactory, workspace: Workspace, directory: File) = {
     val (workDir, script) = deployWorkspace(workspace, directory)
     val resolver = External.relativeResolver(workDir)(_)
@@ -70,7 +73,7 @@ object NetLogoTask {
       }
     }
 
-    (netLogo, workDir)
+    NetoLogoInstance(directory, workDir, netLogo)
   }
 
   def executeNetLogo(netLogo: NetLogo, cmd: String, ignoreError: Boolean = false) =
@@ -89,11 +92,29 @@ object NetLogoTask {
 
   def dispose(netLogo: NetLogo) =
     withThreadClassLoader(netLogo.getNetLogoClassLoader) { netLogo.dispose() }
+
+  def createPool(netLogoFactory: NetLogoFactory, workspace: NetLogoTask.Workspace, cached: Boolean)(implicit newFile: NewFile) = {
+    def createInstance = {
+      val workspaceDirectory = newFile.newDir("netlogoworkpsace")
+      NetLogoTask.openNetLogoWorkspace(netLogoFactory, workspace, workspaceDirectory)
+    }
+
+    def destroyInstance(instance: NetLogoTask.NetoLogoInstance) = {
+      instance.directory.recursiveDelete
+      instance.netLogo.dispose()
+    }
+
+    WithInstance[NetLogoTask.NetoLogoInstance](
+      () ⇒ createInstance,
+      close = destroyInstance,
+      pooled = cached
+    )
+  }
 }
 
 trait NetLogoTask extends Task with ValidateTask {
 
-  lazy val netLogoWorkspace = CacheKey[org.openmole.plugin.tool.netlogo.NetLogo]()
+  lazy val netLogoInstanceKey = CacheKey[WithInstance[NetLogoTask.NetoLogoInstance]]()
 
   def workspace: NetLogoTask.Workspace
   def launchingCommands: Seq[FromContext[String]]
@@ -104,6 +125,7 @@ trait NetLogoTask extends Task with ValidateTask {
   def ignoreError: Boolean
   def seed: Option[Val[Int]]
   def external: External
+  def reuseWorkspace: Boolean
 
   override def validate = Validate { p ⇒
     import p._
@@ -112,60 +134,60 @@ trait NetLogoTask extends Task with ValidateTask {
   }
 
   override protected def process(executionContext: TaskExecutionContext) = FromContext { parameters ⇒
-    parameters.newFile.withTmpDir { tmpDir ⇒
-      import parameters._
+    import parameters._
 
-      WithNewInstance[(NetLogo, File)](NetLogoTask.openNetLogoWorkspace(netLogoFactory, workspace, tmpDir), x ⇒ NetLogoTask.dispose(x._1)) {
-        case (netLogo, workDir) ⇒
-          val resolver = External.relativeResolver(workDir)(_)
-          val context = parameters.context + (External.PWD → workDir.getAbsolutePath)
-          val preparedContext = External.deployInputFilesAndResources(external, context, resolver)
+    val pool = executionContext.cache.getOrElseUpdate(netLogoInstanceKey, NetLogoTask.createPool(netLogoFactory, workspace, reuseWorkspace))
 
-          seed.foreach { s ⇒ NetLogoTask.executeNetLogo(netLogo, s"random-seed ${context(s)}") }
+    pool { instance ⇒
 
-          for (inBinding ← netLogoInputs) {
-            val v = preparedContext(inBinding._1) match {
-              case x: String ⇒ '"' + x + '"'
-              case x: File   ⇒ '"' + x.getAbsolutePath + '"'
-              case x         ⇒ x.toString
-            }
-            NetLogoTask.executeNetLogo(netLogo, "set " + inBinding._2 + " " + v)
-          }
+      val resolver = External.relativeResolver(instance.workspaceDirectory)(_)
+      val context = parameters.context + (External.PWD → instance.workspaceDirectory.getAbsolutePath)
+      val preparedContext = External.deployInputFilesAndResources(external, context, resolver)
 
-          for (cmd ← launchingCommands.map(_.from(context))) NetLogoTask.executeNetLogo(netLogo, cmd, ignoreError)
+      seed.foreach { s ⇒ NetLogoTask.executeNetLogo(instance.netLogo, s"random-seed ${context(s)}") }
 
-          val contextResult =
-            External.fetchOutputFiles(external, outputs, preparedContext, External.relativeResolver(workDir), tmpDir) ++ netLogoOutputs.map {
-              case (name, prototype) ⇒
-                try {
-                  val outputValue = NetLogoTask.report(netLogo, name)
-                  if (!prototype.`type`.runtimeClass.isArray) Variable(prototype.asInstanceOf[Val[Any]], outputValue)
-                  else {
-                    val netLogoCollection = outputValue.asInstanceOf[AbstractCollection[Any]]
-                    netLogoArrayToVariable(netLogoCollection, prototype)
-                  }
-                }
-                catch {
-                  case e: Throwable ⇒
-                    throw new UserBadDataError(
-                      s"Error when fetching netlogo output $name in variable $prototype:\n" + e.stackStringWithMargin
-                    )
-                }
-            } ++ netLogoArrayOutputs.map {
-              case (name, column, prototype) ⇒
-                try {
-                  val netLogoCollection = NetLogoTask.report(netLogo, name)
-                  val outputValue = netLogoCollection.asInstanceOf[AbstractCollection[Any]].toArray()(column)
-                  if (!prototype.`type`.runtimeClass.isArray) Variable(prototype.asInstanceOf[Val[Any]], outputValue)
-                  else netLogoArrayToVariable(outputValue.asInstanceOf[AbstractCollection[Any]], prototype)
-                }
-                catch {
-                  case e: Throwable ⇒ throw new UserBadDataError(e, s"Error when fetching column $column of netlogo output $name in variable $prototype")
-                }
-            }
-
-          contextResult
+      for (inBinding ← netLogoInputs) {
+        val v = preparedContext(inBinding._1) match {
+          case x: String ⇒ '"' + x + '"'
+          case x: File   ⇒ '"' + x.getAbsolutePath + '"'
+          case x         ⇒ x.toString
+        }
+        NetLogoTask.executeNetLogo(instance.netLogo, "set " + inBinding._2 + " " + v)
       }
+
+      for (cmd ← launchingCommands.map(_.from(context))) NetLogoTask.executeNetLogo(instance.netLogo, cmd, ignoreError)
+
+      val contextResult =
+        External.fetchOutputFiles(external, outputs, preparedContext, resolver, instance.workspaceDirectory) ++ netLogoOutputs.map {
+          case (name, prototype) ⇒
+            try {
+              val outputValue = NetLogoTask.report(instance.netLogo, name)
+              if (!prototype.`type`.runtimeClass.isArray) Variable(prototype.asInstanceOf[Val[Any]], outputValue)
+              else {
+                val netLogoCollection = outputValue.asInstanceOf[AbstractCollection[Any]]
+                netLogoArrayToVariable(netLogoCollection, prototype)
+              }
+            }
+            catch {
+              case e: Throwable ⇒
+                throw new UserBadDataError(
+                  s"Error when fetching netlogo output $name in variable $prototype:\n" + e.stackStringWithMargin
+                )
+            }
+        } ++ netLogoArrayOutputs.map {
+          case (name, column, prototype) ⇒
+            try {
+              val netLogoCollection = NetLogoTask.report(instance.netLogo, name)
+              val outputValue = netLogoCollection.asInstanceOf[AbstractCollection[Any]].toArray()(column)
+              if (!prototype.`type`.runtimeClass.isArray) Variable(prototype.asInstanceOf[Val[Any]], outputValue)
+              else netLogoArrayToVariable(outputValue.asInstanceOf[AbstractCollection[Any]], prototype)
+            }
+            catch {
+              case e: Throwable ⇒ throw new UserBadDataError(e, s"Error when fetching column $column of netlogo output $name in variable $prototype")
+            }
+        }
+
+      contextResult
     }
   }
 
