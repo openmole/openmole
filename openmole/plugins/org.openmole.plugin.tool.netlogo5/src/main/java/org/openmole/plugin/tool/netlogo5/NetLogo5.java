@@ -19,6 +19,8 @@ package org.openmole.plugin.tool.netlogo5;
 import org.nlogo.agent.Observer;
 import org.nlogo.agent.World;
 import org.nlogo.api.LogoException;
+import org.nlogo.api.LogoList;
+import org.nlogo.api.LogoListBuilder;
 import org.nlogo.headless.HeadlessWorkspace;
 import org.nlogo.nvm.Procedure;
 import org.openmole.plugin.tool.netlogo.NetLogo;
@@ -61,6 +63,20 @@ public class NetLogo5 implements NetLogo {
     }
 
     @Override
+    public void setGlobal(String variable, Object value) throws Exception {
+        if(value instanceof Object[]){workspace.world().setObserverVariableByName(variable,arrayToList((Object[]) value));}
+        else{workspace.world().setObserverVariableByName(variable,value);}
+    }
+
+    /*
+    @Override
+    public void setGlobalArray(String variable, Object[] value) throws Exception {
+        workspace.world().setObserverVariableByName(variable, arrayToList(value));
+    }
+    */
+
+
+    @Override
     public void dispose() throws Exception {
         getWorkspace().dispose();
     }
@@ -88,4 +104,19 @@ public class NetLogo5 implements NetLogo {
     public ClassLoader getNetLogoClassLoader() {
         return HeadlessWorkspace.class.getClassLoader();
     }
+
+    /**
+     * Converts an iterable to a LogoList
+     * @param array
+     * @return
+     */
+    public static LogoList arrayToList(Object[] array){
+        LogoListBuilder list = new LogoListBuilder();
+        for(Object o:array){
+            if(o instanceof Object[]){list.add(arrayToList((Object[]) o));}
+            else{list.add(o);}
+        }
+        return(list.toLogoList());
+    }
+
 }
