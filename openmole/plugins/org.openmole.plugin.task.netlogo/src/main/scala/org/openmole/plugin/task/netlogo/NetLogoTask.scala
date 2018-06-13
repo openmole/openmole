@@ -99,6 +99,7 @@ object NetLogoTask {
       }
     }
 
+  /*
   def setGlobalArray(netLogo: NetLogo, variable: String, value: Array[AnyRef], ignoreError: Boolean = false) =
     withThreadClassLoader(netLogo.getNetLogoClassLoader) {
       wrapError(s"Error while setting $variable") {
@@ -109,6 +110,7 @@ object NetLogoTask {
         }
       }
     }
+  */
 
   def report(netLogo: NetLogo, name: String) =
     withThreadClassLoader(netLogo.getNetLogoClassLoader) { netLogo.report(name) }
@@ -170,14 +172,21 @@ trait NetLogoTask extends Task with ValidateTask {
 
       seed.foreach { s ⇒ NetLogoTask.executeNetLogo(instance.netLogo, s"random-seed ${context(s)}") }
 
+      def convertArray(x: AnyRef): AnyRef = x match {
+        case a: Array[_] ⇒ a.asInstanceOf[Array[_]].map { convertArray(_) }
+        case x           ⇒ x.asInstanceOf[AnyRef]
+      }
+
       for (inBinding ← netLogoInputs) {
         val v = preparedContext(inBinding._1) match {
-          case x: File   ⇒ x.getAbsolutePath
-          case x: AnyRef ⇒ x
+          case x: Array[_] ⇒ convertArray(x) //x.asInstanceOf[Array[_]].map { _.asInstanceOf[AnyRef] }
+          case x: File     ⇒ x.getAbsolutePath
+          case x: AnyRef   ⇒ x
         }
         NetLogoTask.setGlobal(instance.netLogo, inBinding._2, v)
       }
 
+      /*
       for (inBindingArrays ← netLogoArrayInputs) {
         val prototype: Val[_] = inBindingArrays._1
         if (prototype.`type`.runtimeClass.isArray) {
@@ -188,6 +197,7 @@ trait NetLogoTask extends Task with ValidateTask {
           })
         }
       }
+    */
 
       for (cmd ← launchingCommands.map(_.from(context))) NetLogoTask.executeNetLogo(instance.netLogo, cmd, ignoreError)
 
