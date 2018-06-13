@@ -99,19 +99,6 @@ object NetLogoTask {
       }
     }
 
-  /*
-  def setGlobalArray(netLogo: NetLogo, variable: String, value: Array[AnyRef], ignoreError: Boolean = false) =
-    withThreadClassLoader(netLogo.getNetLogoClassLoader) {
-      wrapError(s"Error while setting $variable") {
-        try netLogo.setGlobalArray(variable, value)
-        catch {
-          case t: Throwable ⇒
-            if (ignoreError && netLogo.isNetLogoException(t)) {} else throw t
-        }
-      }
-    }
-  */
-
   def report(netLogo: NetLogo, name: String) =
     withThreadClassLoader(netLogo.getNetLogoClassLoader) { netLogo.report(name) }
 
@@ -144,7 +131,6 @@ trait NetLogoTask extends Task with ValidateTask {
   def workspace: NetLogoTask.Workspace
   def launchingCommands: Seq[FromContext[String]]
   def netLogoInputs: Seq[(Val[_], String)]
-  def netLogoArrayInputs: Seq[(Val[_], String)]
   def netLogoOutputs: Iterable[(String, Val[_])]
   def netLogoArrayOutputs: Iterable[(String, Int, Val[_])]
   def netLogoFactory: NetLogoFactory
@@ -172,32 +158,21 @@ trait NetLogoTask extends Task with ValidateTask {
 
       seed.foreach { s ⇒ NetLogoTask.executeNetLogo(instance.netLogo, s"random-seed ${context(s)}") }
 
+      // FIXME this could be very costly since it wraps primitives values in objects
       def convertArray(x: AnyRef): AnyRef = x match {
-        case a: Array[_] ⇒ a.asInstanceOf[Array[_]].map { convertArray(_) }
+        case a: Array[_] ⇒ a.asInstanceOf[Array[_]].map { x ⇒ convertArray(x.asInstanceOf[AnyRef]) }
         case x           ⇒ x.asInstanceOf[AnyRef]
       }
 
       for (inBinding ← netLogoInputs) {
-        val v = preparedContext(inBinding._1) match {
-          case x: Array[_] ⇒ convertArray(x) //x.asInstanceOf[Array[_]].map { _.asInstanceOf[AnyRef] }
-          case x: File     ⇒ x.getAbsolutePath
-          case x: AnyRef   ⇒ x
-        }
+        val v =
+          preparedContext(inBinding._1) match {
+            case x: Array[_] ⇒ convertArray(x)
+            case x: File     ⇒ x.getAbsolutePath
+            case x: AnyRef   ⇒ x
+          }
         NetLogoTask.setGlobal(instance.netLogo, inBinding._2, v)
       }
-
-      /*
-      for (inBindingArrays ← netLogoArrayInputs) {
-        val prototype: Val[_] = inBindingArrays._1
-        if (prototype.`type`.runtimeClass.isArray) {
-          val array = preparedContext(prototype).asInstanceOf[Array[_]]
-          NetLogoTask.setGlobalArray(instance.netLogo, inBindingArrays._2, array.map {
-            case x: Array[_] ⇒ x.asInstanceOf[Array[_]].map { _.asInstanceOf[AnyRef] }
-            case x           ⇒ x.asInstanceOf[AnyRef]
-          })
-        }
-      }
-    */
 
       for (cmd ← launchingCommands.map(_.from(context))) NetLogoTask.executeNetLogo(instance.netLogo, cmd, ignoreError)
 

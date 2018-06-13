@@ -68,14 +68,6 @@ public class NetLogo5 implements NetLogo {
         else{workspace.world().setObserverVariableByName(variable,value);}
     }
 
-    /*
-    @Override
-    public void setGlobalArray(String variable, Object[] value) throws Exception {
-        workspace.world().setObserverVariableByName(variable, arrayToList(value));
-    }
-    */
-
-
     @Override
     public void dispose() throws Exception {
         getWorkspace().dispose();
