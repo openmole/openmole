@@ -33,7 +33,7 @@ import org.openmole.core.workflow.job
 import org.openmole.core.workflow.job.State._
 import org.openmole.core.workflow.job._
 import org.openmole.core.workflow.mole.MoleExecution.{ AggregationTransitionRegistry, MoleExecutionFailed, SubMoleExecutionState }
-import org.openmole.core.workflow.task.TaskExecutionContext
+import org.openmole.core.workflow.task.{ MoleTask, TaskExecutionContext }
 import org.openmole.core.workflow.tools.{ OptionalArgument ⇒ _, _ }
 import org.openmole.core.workflow.transition.{ DataChannel, IAggregationTransition, ITransition }
 import org.openmole.core.workflow.validation._
