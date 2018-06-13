@@ -18,6 +18,7 @@
 package org.openmole.plugin.task.netlogo
 
 import java.util.AbstractCollection
+import java.lang.Class
 
 import org.openmole.core.context.{ Context, Val, Variable }
 import org.openmole.core.exception.UserBadDataError
@@ -87,6 +88,29 @@ object NetLogoTask {
       }
     }
 
+  def setGlobal(netLogo: NetLogo,variable: String, value: AnyRef, ignoreError: Boolean = false) =
+    withThreadClassLoader(netLogo.getNetLogoClassLoader) {
+      wrapError(s"Error while setting $variable") {
+        try netLogo.setGlobal(variable, value)
+        catch {
+          case t: Throwable ⇒
+            if (ignoreError && netLogo.isNetLogoException(t)) {} else throw t
+        }
+      }
+    }
+
+  def setGlobalArray(netLogo: NetLogo,variable: String, value: Array[AnyRef], ignoreError: Boolean = false) =
+    withThreadClassLoader(netLogo.getNetLogoClassLoader) {
+      wrapError(s"Error while setting $variable") {
+        try netLogo.setGlobalArray(variable, value)
+        catch {
+          case t: Throwable ⇒
+            if (ignoreError && netLogo.isNetLogoException(t)) {} else throw t
+        }
+      }
+    }
+
+
   def report(netLogo: NetLogo, name: String) =
     withThreadClassLoader(netLogo.getNetLogoClassLoader) { netLogo.report(name) }
 
@@ -119,6 +143,7 @@ trait NetLogoTask extends Task with ValidateTask {
   def workspace: NetLogoTask.Workspace
   def launchingCommands: Seq[FromContext[String]]
   def netLogoInputs: Seq[(Val[_], String)]
+  def netLogoArrayInputs: Seq[(Val[_], String)]
   def netLogoOutputs: Iterable[(String, Val[_])]
   def netLogoArrayOutputs: Iterable[(String, Int, Val[_])]
   def netLogoFactory: NetLogoFactory
@@ -146,14 +171,26 @@ trait NetLogoTask extends Task with ValidateTask {
 
       seed.foreach { s ⇒ NetLogoTask.executeNetLogo(instance.netLogo, s"random-seed ${context(s)}") }
 
+
       for (inBinding ← netLogoInputs) {
         val v = preparedContext(inBinding._1) match {
-          case x: String ⇒ '"' + x + '"'
-          case x: File   ⇒ '"' + x.getAbsolutePath + '"'
-          case x         ⇒ x.toString
+          case x: File ⇒ x.getAbsolutePath
+          case x: AnyRef ⇒ x
         }
-        NetLogoTask.executeNetLogo(instance.netLogo, "set " + inBinding._2 + " " + v)
+        NetLogoTask.setGlobal(instance.netLogo,inBinding._2, v)
       }
+
+      for (inBindingArrays ← netLogoArrayInputs) {
+        val prototype: Val[_] = inBindingArrays._1
+        if (prototype.`type`.runtimeClass.isArray) {
+          val array = preparedContext(prototype).asInstanceOf[Array[_]]
+          NetLogoTask.setGlobalArray(instance.netLogo,inBindingArrays._2, array.map {
+              case x: Array[_] ⇒ x.asInstanceOf[Array[_]].map { _.asInstanceOf[AnyRef] }
+              case x           ⇒ x.asInstanceOf[AnyRef]
+             })
+        }
+      }
+
 
       for (cmd ← launchingCommands.map(_.from(context))) NetLogoTask.executeNetLogo(instance.netLogo, cmd, ignoreError)
 
