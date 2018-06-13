@@ -76,17 +76,17 @@ object UDockerTask {
   def apply(
     image:              ContainerImage,
     run:                Commands,
-    install:            Seq[String]                         = Vector.empty,
-    user:               OptionalArgument[String]            = None,
-    mode:               OptionalArgument[String]            = None,
-    reuseContainer:     Boolean                             = true,
-    cacheInstall:       Boolean                             = true,
-    forceUpdate:        Boolean                             = false,
-    returnValue:        OptionalArgument[Val[Int]]          = None,
-    stdOut:             OptionalArgument[Val[String]]       = None,
-    stdErr:             OptionalArgument[Val[String]]       = None,
-    errorOnReturnValue: Boolean                             = true,
-    containerPoolKey:   CacheKey[WithInstance[ContainerID]] = CacheKey()
+    install:            Seq[String]                                 = Vector.empty,
+    user:               OptionalArgument[String]                    = None,
+    mode:               OptionalArgument[String]                    = None,
+    reuseContainer:     Boolean                                     = true,
+    cacheInstall:       Boolean                                     = true,
+    forceUpdate:        Boolean                                     = false,
+    returnValue:        OptionalArgument[Val[Int]]                  = None,
+    stdOut:             OptionalArgument[Val[String]]               = None,
+    stdErr:             OptionalArgument[Val[String]]               = None,
+    errorOnReturnValue: Boolean                                     = true,
+    containerPoolKey:   CacheKey[WithInstance[(File, ContainerID)]] = CacheKey()
   )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: NewFile, workspace: Workspace, preference: Preference, threadProvider: ThreadProvider, fileService: FileService, outputRedirection: OutputRedirection, networkService: NetworkService): UDockerTask = {
 
     def blockChars(s: String): String = {
@@ -214,7 +214,7 @@ object UDockerTask {
   def repositoryDirectory(workspace: Workspace) = workspace.persistentDir /> "udocker" /> "repos"
   def manifestDirectory(workspace: Workspace) = workspace.persistentDir /> "udocker" /> "manifest"
 
-  def newCacheKey = CacheKey[WithInstance[ContainerID]]()
+  def newCacheKey = CacheKey[WithInstance[(File, ContainerID)]]()
 
   lazy val installLockKey = LockKey()
 
@@ -236,7 +236,7 @@ object UDockerTask {
   _config:            InputOutputConfig,
   external:           External,
   info:               InfoConfig,
-  containerPoolKey:   CacheKey[WithInstance[ContainerID]]) extends Task with ValidateTask { self ⇒
+  containerPoolKey:   CacheKey[WithInstance[(File, ContainerID)]]) extends Task with ValidateTask { self ⇒
 
   override def config = UDockerTask.config(_config, returnValue, stdOut, stdErr)
   override def validate = container.validateContainer(commands.value, uDocker.environmentVariables, external, inputs)
@@ -254,20 +254,6 @@ object UDockerTask {
     UDocker.buildRepoV2(repositoryDirectory, layersDirectory, uDocker.localDockerImage)
 
     newFile.withTmpDir { taskWorkDirectory ⇒
-
-      val containersDirectory =
-        if (uDocker.reuseContainer) executionContext.tmpDirectory /> "containers" /> uDocker.localDockerImage.id
-        else taskWorkDirectory /> "containers" /> uDocker.localDockerImage.id
-
-      def uDockerVariables = UDocker.environmentVariables(
-        tmpDirectory = executionContext.tmpDirectory,
-        homeDirectory = taskWorkDirectory,
-        containersDirectory = containersDirectory,
-        repositoryDirectory = repositoryDirectory,
-        layersDirectory = layersDirectory,
-        installDirectory = uDockerInstallDirectory,
-        tarball = uDockerTarball
-      )
 
       def prepareVolumes(
         preparedFilesInfo:     Iterable[FileInfo],
@@ -300,51 +286,71 @@ object UDockerTask {
 
       val imageId = s"${uDocker.localDockerImage.image}:${uDocker.localDockerImage.tag}"
 
-      val pool =
-        if (uDocker.reuseContainer) executionContext.cache.getOrElseUpdate(containerPoolKey, Pool[ContainerId](() ⇒ UDocker.createContainer(uDocker, uDockerExecutable, containersDirectory, uDockerVariables, volumes, imageId)))
-        else WithNewInstance[ContainerId](() ⇒ UDocker.createContainer(uDocker, uDockerExecutable, containersDirectory, uDockerVariables, volumes, imageId))
+      def uDockerVariables(containersDirectory: File) = UDocker.environmentVariables(
+        tmpDirectory = executionContext.tmpDirectory,
+        homeDirectory = taskWorkDirectory,
+        containersDirectory = containersDirectory,
+        repositoryDirectory = repositoryDirectory,
+        layersDirectory = layersDirectory,
+        installDirectory = uDockerInstallDirectory,
+        tarball = uDockerTarball
+      )
 
-      pool { runId ⇒
+      def createPool =
+        WithInstance[(File, ContainerID)](
+          () ⇒ {
+            val containersDirectory = newFile.newDir("container")
+            val id = UDocker.createContainer(uDocker, uDockerExecutable, containersDirectory, uDockerVariables(containersDirectory), volumes, imageId)
+            (containersDirectory, id)
+          },
+          close = _._1.recursiveDelete,
+          pooled = uDocker.reuseContainer
+        )
 
-        def runContainer = {
-          val rootDirectory = containersDirectory / runId / "ROOT"
+      val pool = executionContext.cache.getOrElseUpdate(containerPoolKey, createPool)
 
-          val containerEnvironmentVariables =
-            uDocker.environmentVariables.map { case (name, variable) ⇒ name -> variable.from(preparedContext) }
+      pool {
+        case (containersDirectory, runId) ⇒
 
-          def expandCommand(command: FromContext[String]) =
-            ExecutionCommand.Raw(UDocker.uDockerRunCommand(
-              uDocker.user,
-              containerEnvironmentVariables,
-              volumes,
-              userWorkDirectory(uDocker),
-              uDockerExecutable,
-              runId,
-              command.from(preparedContext)))
+          def runContainer = {
+            val rootDirectory = containersDirectory / runId / "ROOT"
 
-          val executionResult = executeAll(
-            taskWorkDirectory,
-            uDockerVariables,
-            commands.value.map(expandCommand).toList,
-            errorOnReturnValue && !returnValue.isDefined,
-            stdOut.isDefined,
-            stdErr.isDefined,
-            stdOut = executionContext.outputRedirection.output,
-            stdErr = executionContext.outputRedirection.output
-          )
+            val containerEnvironmentVariables =
+              uDocker.environmentVariables.map { case (name, variable) ⇒ name -> variable.from(preparedContext) }
 
-          val retContext = External.fetchOutputFiles(external, outputs, preparedContext, outputPathResolver(rootDirectory), rootDirectory)
-          (retContext, executionResult)
-        }
+            def expandCommand(command: FromContext[String]) =
+              ExecutionCommand.Raw(UDocker.uDockerRunCommand(
+                uDocker.user,
+                containerEnvironmentVariables,
+                volumes,
+                userWorkDirectory(uDocker),
+                uDockerExecutable,
+                runId,
+                command.from(preparedContext)))
 
-        val (retContext, executionResult) = runContainer
+            val executionResult = executeAll(
+              taskWorkDirectory,
+              uDockerVariables(containersDirectory),
+              commands.value.map(expandCommand).toList,
+              errorOnReturnValue && !returnValue.isDefined,
+              stdOut.isDefined,
+              stdErr.isDefined,
+              stdOut = executionContext.outputRedirection.output,
+              stdErr = executionContext.outputRedirection.output
+            )
 
-        retContext ++
-          List(
-            stdOut.map { o ⇒ Variable(o, executionResult.output.get) },
-            stdErr.map { e ⇒ Variable(e, executionResult.errorOutput.get) },
-            returnValue.map { r ⇒ Variable(r, executionResult.returnCode) }
-          ).flatten
+            val retContext = External.fetchOutputFiles(external, outputs, preparedContext, outputPathResolver(rootDirectory), rootDirectory)
+            (retContext, executionResult)
+          }
+
+          val (retContext, executionResult) = runContainer
+
+          retContext ++
+            List(
+              stdOut.map { o ⇒ Variable(o, executionResult.output.get) },
+              stdErr.map { e ⇒ Variable(e, executionResult.errorOutput.get) },
+              returnValue.map { r ⇒ Variable(r, executionResult.returnCode) }
+            ).flatten
       }
     }
   }

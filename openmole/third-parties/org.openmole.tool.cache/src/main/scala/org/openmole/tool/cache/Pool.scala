@@ -2,6 +2,11 @@ package org.openmole.tool.cache
 
 import collection.JavaConverters._
 
+object WithInstance {
+  def apply[T](f: () ⇒ T, pooled: Boolean, close: T ⇒ Unit = (_: T) ⇒ {}): WithInstance[T] =
+    if (pooled) Pool(f, close) else WithNewInstance(f, close)
+}
+
 trait WithInstance[T] {
   def apply[A](f: T ⇒ A): A
 }
