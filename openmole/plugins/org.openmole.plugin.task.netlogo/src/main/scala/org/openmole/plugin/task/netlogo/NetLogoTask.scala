@@ -145,14 +145,9 @@ trait NetLogoTask extends Task with ValidateTask {
     import p._
     val allInputs = External.PWD :: inputs.toList
 
-    def acceptedType(c: Class[_]): Boolean = {
-      if (c.isArray()) {
-        acceptedType(c.getComponentType)
-      }
-      else {
-        Seq(classOf[String], classOf[Int], classOf[Double], classOf[Long], classOf[Float], classOf[File]).contains(c)
-      }
-    }
+    def acceptedType(c: Class[_]): Boolean =
+      if (c.isArray()) acceptedType(c.getComponentType)
+      else Seq(classOf[String], classOf[Int], classOf[Double], classOf[Long], classOf[Float], classOf[File]).contains(c)
 
     val testTypes = allInputs.flatMap {
       case v ⇒
@@ -161,16 +156,7 @@ trait NetLogoTask extends Task with ValidateTask {
           case _                    ⇒ Some(new UserBadDataError(s"""Error for netLogoInput "${v.name} : type "${v.`type`.runtimeClass.toString()} is not managed by NetLogo."""))
         }
     }
-    /*
-    // dirty version using Val assignement
-    val testTypes = allInputs.flatMap {
-      case v if v.isAssignableFrom(Val[String]("")) ||
-        v.isAssignableFrom(Val[Int]("")) ||
-        v.isAssignableFrom(Val[Double]("")) ||
-        v.isAssignableFrom(Val[Long]("")) ⇒ None
-      case v ⇒ Some(new UserBadDataError(s"""Error for netLogoInput "${v.name} : type "${v.`type`.runtimeClass} is not managed by NetLogo."""))
-    }
-    */
+
     launchingCommands.flatMap(_.validate(allInputs)) ++ External.validate(external)(allInputs).apply ++ testTypes
   }
 
