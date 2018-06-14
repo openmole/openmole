@@ -190,7 +190,6 @@ object MoleExecution extends JavaLogger {
                 outputRedirection,
                 subMoleExecutionState.moleExecution.taskCache,
                 subMoleExecutionState.moleExecution.lockRepository,
-                eventDispatcher,
                 moleExecution = Some(subMoleExecutionState.moleExecution)
               )
             moleJob.perform(taskContext)
@@ -389,7 +388,6 @@ object MoleExecution extends JavaLogger {
               outputRedirection,
               moleExecution.taskCache,
               moleExecution.lockRepository,
-              eventDispatcher,
               moleExecution = Some(moleExecution)
             )
           )

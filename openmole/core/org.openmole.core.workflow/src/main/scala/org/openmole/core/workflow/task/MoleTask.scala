@@ -113,7 +113,7 @@ object MoleTask {
     }
 
     executionContext.moleExecution.foreach { parentExecution ⇒
-      implicit val ev = executionContext.eventDispatcher
+      implicit val ev = parentExecution.executionContext.services.eventDispatcher
       parentExecution listen {
         case (_, ev: MoleExecution.Finished) ⇒
           MoleExecution.cancel(execution, Some(MoleExecution.MoleExecutionError(new InterruptedException("Parent execution has been canceled"))))

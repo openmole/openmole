@@ -47,7 +47,6 @@ case class TaskExecutionContext(
   implicit val outputRedirection: OutputRedirection,
   cache:                          KeyValueCache,
   lockRepository:                 LockRepository[LockKey],
-  eventDispatcher:                EventDispatcher,
   moleExecution:                  Option[MoleExecution]   = None
 )
 
